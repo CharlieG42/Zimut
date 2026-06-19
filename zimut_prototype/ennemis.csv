@@ -1,0 +1,59 @@
+Type,Niveau,PV,Attaque,Défense,PA,PM,XP,Biome,Effets spéciaux
+Gobelin,1,50,8,5,2,3,30,Forêt,-
+Gobelin,5,70,12,8,2,3,50,Forêt,-
+Gobelin,10,90,16,11,2,3,80,Forêt,-
+Gobelin,15,110,20,14,3,3,120,Forêt,-
+Gobelin,20,130,24,17,3,3,160,Forêt,-
+Gobelin,25,150,28,20,3,3,200,Forêt,-
+Gobelin,30,170,32,23,3,3,250,Forêt,-
+Gobelin,35,190,36,26,4,3,300,Forêt,-
+Gobelin,40,210,40,29,4,3,350,Forêt,-
+Gobelin,45,230,44,32,4,3,400,Forêt,-
+Gobelin,50,250,48,35,4,3,500,Forêt,-
+
+Loup,1,40,10,3,3,4,35,Forêt,-
+Loup,5,60,14,6,3,4,55,Forêt,-
+Loup,10,80,18,9,3,4,85,Forêt,-
+Loup,15,100,22,12,4,4,125,Forêt,-
+Loup,20,120,26,15,4,4,165,Forêt,-
+Loup,25,140,30,18,4,4,205,Forêt,-
+Loup,30,160,34,21,4,4,255,Forêt,-
+Loup,35,180,38,24,5,4,305,Forêt,-
+Loup,40,200,42,27,5,4,355,Forêt,-
+Loup,45,220,46,30,5,4,405,Forêt,-
+Loup,50,240,50,33,5,4,505,Forêt,-
+
+Squelette,5,60,15,10,2,3,60,Donjon,Immunité aux effets physiques
+Squelette,10,80,20,15,2,3,90,Donjon,Immunité aux effets physiques
+Squelette,15,100,25,20,3,3,130,Donjon,Immunité aux effets physiques
+Squelette,20,120,30,25,3,3,170,Donjon,Immunité aux effets physiques
+Squelette,25,140,35,30,3,3,210,Donjon,Immunité aux effets physiques
+Squelette,30,160,40,35,4,3,260,Donjon,Immunité aux effets physiques
+Squelette,35,180,45,40,4,3,310,Donjon,Immunité aux effets physiques
+Squelette,40,200,50,45,4,3,360,Donjon,Immunité aux effets physiques
+Squelette,45,220,55,50,4,3,410,Donjon,Immunité aux effets physiques
+Squelette,50,240,60,55,5,3,510,Donjon,Immunité aux effets physiques
+
+Troll,10,150,25,20,2,2,100,Montagne,Régénération (5 PV/tour)
+Troll,15,180,30,25,2,2,140,Montagne,Régénération (5 PV/tour)
+Troll,20,210,35,30,3,2,190,Montagne,Régénération (5 PV/tour)
+Troll,25,240,40,35,3,2,240,Montagne,Régénération (5 PV/tour)
+Troll,30,270,45,40,3,2,290,Montagne,Régénération (5 PV/tour)
+Troll,35,300,50,45,4,2,340,Montagne,Régénération (5 PV/tour)
+Troll,40,330,55,50,4,2,390,Montagne,Régénération (5 PV/tour)
+Troll,45,360,60,55,4,2,440,Montagne,Régénération (5 PV/tour)
+Troll,50,390,65,60,5,2,500,Montagne,Régénération (5 PV/tour)
+
+Dragonnet,20,200,30,25,4,4,200,Désert,Vol (ignore les obstacles)
+Dragonnet,25,220,35,30,4,4,250,Désert,Vol (ignore les obstacles)
+Dragonnet,30,240,40,35,5,4,300,Désert,Vol (ignore les obstacles)
+Dragonnet,35,260,45,40,5,4,350,Désert,Vol (ignore les obstacles)
+Dragonnet,40,280,50,45,5,4,400,Désert,Vol (ignore les obstacles)
+Dragonnet,45,300,55,50,6,4,450,Désert,Vol (ignore les obstacles)
+Dragonnet,50,320,60,55,6,4,550,Désert,Vol (ignore les obstacles)
+
+Boss,Gobelin Roi,30,300,40,30,4,4,500,Forêt,Appel de renforts (1 gobelin/tour)
+Boss,Loup Alpha,35,350,45,35,5,5,600,Forêt,Morsure empoisonnée (10 dégâts/tour)
+Boss,Squelette Seigneur,40,400,50,40,4,4,700,Donjon,Immunité magique + Drain de vie (5% des dégâts)
+Boss,Troll Géant,45,500,60,50,3,3,800,Montagne,Régénération (10 PV/tour)
+Boss,Dragon,50,800,70,60,6,5,1000,Désert,Souffle de feu (50 dégâts en zone 3x3)
