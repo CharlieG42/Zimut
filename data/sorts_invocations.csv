@@ -1,0 +1,30 @@
+Invocation,Nom,Coût PA,Coût PM,Portée,Effet,Type
+Tortue,Protection,1,0,1,+20% défense (1 tour),Buff
+Tortue,Charge,2,1,2,20 dégâts + étourdit 1 tour (20%),Attaque
+Tortue,Soin léger,2,0,1,Restaure 10 PV à un allié,Soin
+Tortue,Mur,3,0,1,Crée un mur bloquant (1 tour),Buff
+
+Loup,Morsure,1,0,1,15 dégâts,Attaque
+Loup,Vitesse,1,0,1,+1 PM (1 tour),Buff
+Loup,Hurlement,2,0,3,-1 PA aux ennemis (1 tour),Debuff
+Loup,Soin animal,2,0,1,Restaure 10 PV,Soin
+
+Sirène,Chant apaisant,1,0,3,+15% défense pour l'équipe (2 tours),Buff
+Sirène,Vague,2,0,4,20 dégâts en ligne,Attaque
+Sirène,Soin marin,2,0,1,Restaure 20 PV,Soin
+Sirène,Brume,3,0,2,Immobilise les ennemis (1 tour),Debuff
+
+Ange,Bénédiction,1,0,2,+20% dégâts pour l'équipe (2 tours),Buff
+Ange,Lumière divine,2,0,3,25 dégâts magiques,Attaque
+Ange,Soin céleste,2,0,1,Restaure 30 PV,Soin
+Ange,Protection divine,3,0,1,Immunité aux dégâts (1 tour),Buff
+
+Homme-Faucon,Tir précis,1,0,5,25 dégâts,Attaque
+Homme-Faucon,Œil perçant,1,0,1,+30% précision (2 tours),Buff
+Homme-Faucon,Plongeon,2,1,3,30 dégâts + étourdit 1 tour (10%),Attaque
+Homme-Faucon,Soin rapide,2,0,1,Restaure 15 PV,Soin
+
+Centaure,Charge puissante,2,1,2,30 dégâts,Attaque
+Centaure,Galop,1,0,1,+1 PM (2 tours),Buff
+Centaure,Coup de sabots,3,0,1,20 dégâts en zone (3x3),Attaque
+Centaure,Soin naturel,2,0,1,Restaure 20 PV,Soin

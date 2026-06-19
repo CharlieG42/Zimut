@@ -1,0 +1,7 @@
+Nom,Niveau requis,PV,Attaque,DÃ©fense,PA,PM,Type,Biome
+Tortue,5,150,10,30,4,3,Tank,Forêt
+Loup,10,80,20,10,4,3,DPS,Forêt
+Sirène,20,70,15,15,4,3,Support,Désert
+Ange,30,90,18,20,4,3,Heal,Montagne
+Homme-Faucon,40,75,25,12,4,3,DPS,Désert
+Centaure,50,120,22,25,4,3,Polyvalent,Plaine

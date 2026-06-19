@@ -1,0 +1,71 @@
+Type,Nom,Niveau requis,Bonus Force,Bonus Intelligence,Bonus Agilité,Bonus Sagesse,Bonus Vita,Bonus Défense,Effet spécial
+Arme (1 main),Dague en fer,5,3,0,2,1,0,0,-
+Arme (1 main),Épée du chasseur,10,5,0,4,2,0,1,-
+Arme (1 main),Lame de l'assassin,15,7,1,6,3,0,0,Critique +10%
+Arme (1 main),Massue du tank,20,10,0,1,0,5,3,-
+Arme (1 main),Bâton du mage,25,2,8,1,3,0,0,Dégâts magiques +15%
+Arme (1 main),Épée maudite,30,8,2,5,4,0,1,Vol de vie (5% des dégâts)
+Arme (1 main),Lame légendaire,35,12,3,8,5,0,2,-
+Arme (1 main),Épée de lumière,40,10,5,6,6,5,4,Bénit les alliés (+10% défense)
+Arme (1 main),Dague empoisonnée,45,9,4,7,7,0,0,Poison (10 dégâts/tour, 2 tours)
+Arme (1 main),Épée du roi,50,15,5,10,8,10,5,-
+Arme (2 mains),Grande hache,5,8,0,0,0,0,2,-
+Arme (2 mains),Bâton de l'archimage,10,2,10,2,2,0,0,Portée des sorts +1
+Arme (2 mains),Arc du chasseur,15,6,3,8,5,0,1,-
+Arme (2 mains),Massue géante,20,12,0,0,0,8,5,Étourdit 1 tour (20% chance)
+Arme (2 mains),Lance du destructeur,25,10,2,4,4,0,3,-
+Arme (2 mains),Bâton du chaos,30,4,12,3,3,0,0,Dégâts aléatoires ±20%
+Arme (2 mains),Hache maudite,35,14,1,2,2,5,4,Malédiction (réduit 1 PA ennemi)
+Arme (2 mains),Arc de l'ombre,40,7,5,10,7,0,2,Attaque à travers les obstacles
+Arme (2 mains),Bâton céleste,45,3,15,4,6,5,1,Soins +10% sur les sorts
+Arme (2 mains),Épée géante,50,18,3,5,5,10,6,-
+Bouclier,Bouclier en bois,5,0,0,0,0,0,5,-
+Bouclier,Bouclier en fer,10,0,0,0,0,0,10,-
+Bouclier,Écu du tank,15,0,0,0,0,5,15,Réduit les dégâts de 10%
+Bouclier,Bouclier magique,20,0,3,0,3,0,12,Absorbe 5% des dégâts en mana
+Bouclier,Bouclier de l'esquive,25,0,0,5,5,0,8,20% de chance d'esquiver
+Bouclier,Bouclier runique,30,2,2,2,2,0,15,Bonus +1 à toutes les stats
+Bouclier,Bouclier du roi,35,0,0,0,0,10,20,-
+Bouclier,Bouclier de lumière,40,0,5,0,5,5,18,Immunité aux malédictions
+Bouclier,Bouclier noir,45,5,0,0,0,0,25,Dégâts reflétés (10%)
+Bouclier,Bouclier légendaire,50,0,5,5,5,10,30,Réduction de dégâts 20%
+Armure,Veste en cuir,5,0,0,0,0,5,3,-
+Armure,Armure en fer,10,0,0,0,0,10,8,-
+Armure,Plastron du guerrier,15,2,0,2,0,15,12,-
+Armure,Robe du mage,20,0,5,0,5,5,5,Résistance magie +15%
+Armure,Armure de chasseur,25,3,2,3,2,10,10,-
+Armure,Armure runique,30,4,4,4,4,20,15,Bonus +1 PM
+Armure,Armure du roi,35,5,5,5,5,25,20,-
+Armure,Armure de lumière,40,0,10,0,10,15,15,Immunité aux effets négatifs
+Armure,Armure noire,45,10,0,10,0,20,25,Absorbe 10% des dégâts en PV
+Armure,Armure légendaire,50,10,10,10,10,30,30,Bonus +2 à toutes les stats
+Bottes,Bottes en cuir,5,0,0,1,0,0,0,-
+Bottes,Bottes du voyageur,10,0,0,2,1,0,1,-
+Bottes,Bottes du vent,15,0,0,3,2,0,0,+1 PM
+Bottes,Bottes de l'assassin,20,0,0,4,3,0,0,Silencieux (pas de déclenchement de pièges)
+Bottes,Bottes magiques,25,0,2,2,2,0,0,Téléportation (1x/tour)
+Bottes,Bottes du tank,30,0,0,1,1,10,5,Immunité aux ralentissements
+Bottes,Bottes du chasseur,35,0,0,5,4,0,0,+1 PA si ennemi à distance
+Bottes,Bottes de lumière,40,0,3,3,3,5,3,Éclaire les cases autour (désactive les pièges)
+Bottes,Bottes noires,45,0,0,6,5,0,0,Invisibilité (1 tour/5 tours)
+Bottes,Bottes légendaires,50,0,5,5,5,10,5,+2 PM
+Casque,Casque en cuir,5,0,0,0,1,0,2,-
+Casque,Casque en fer,10,1,0,0,2,0,4,-
+Casque,Casque du guerrier,15,2,0,1,3,0,6,-
+Casque,Chapeau du mage,20,0,3,0,4,0,2,+5% dégâts magiques
+Casque,Casque du chasseur,25,3,1,2,3,0,3,+10% précision
+Casque,Casque runique,30,2,2,2,4,0,5,Résistance aux critiques
+Casque,Casque du roi,35,4,3,3,5,0,8,-
+Casque,Casque de lumière,40,0,5,0,6,5,4,Vision étendue (2 cases)
+Casque,Casque noir,45,5,0,5,0,0,10,Immunité aux étourdissements
+Casque,Casque légendaire,50,5,5,5,5,10,10,+1 à toutes les stats
+Accessoire,Bague du serpent,5,0,0,3,0,0,0,+10% vitesse d'attaque
+Accessoire,Collier de force,10,3,0,0,0,0,0,-
+Accessoire,Bague de sagesse,15,0,0,0,4,0,0,+15% précision
+Accessoire,Collier de vie,20,0,0,0,0,15,0,-
+Accessoire,Bague de magie,25,0,4,0,0,0,0,+20% dégâts magiques
+Accessoire,Collier de défense,30,0,0,0,0,0,8,-
+Accessoire,Bague de l'assassin,35,0,0,5,0,0,0,Critique +15%
+Accessoire,Collier de mana,40,0,5,0,0,0,0,+1 PA
+Accessoire,Bague de résistance,45,0,0,0,5,10,5,Résistance à tous les effets
+Accessoire,Collier légendaire,50,2,2,2,2,10,2,+1 à toutes les stats
