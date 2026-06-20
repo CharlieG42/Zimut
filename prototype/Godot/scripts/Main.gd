@@ -47,6 +47,8 @@ func init_grid_display():
             var cell = preload("res://scripts/Cell.gd").new()
             cell.position = Vector2(x * 64 - 320, y * 64 - 320)  # Centre sur Grid (400,350)
             cell.position_in_parent = Vector2(x * 64, y * 64)
+            # IMPORTANT : Définir la position pour le damier
+            cell.position = Vector2i(x, y)
             cell.connect("cell_clicked", Callable(self, "_on_cell_clicked").bind(x, y))
             grid.add_child(cell)
             row.append(cell)
