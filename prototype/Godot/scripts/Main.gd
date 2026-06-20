@@ -18,7 +18,6 @@ var cell_nodes: Array = []
 
 
 func _ready():
-    # Forcer la taille de la vue
     get_viewport().size = Vector2(1200, 700)
     
     init_grid_display()
@@ -46,7 +45,7 @@ func init_grid_display():
         var row: Array = []
         for x in range(game_manager.GRID_SIZE):
             var cell = preload("res://scripts/Cell.gd").new()
-            cell.position = Vector2(x * 64 - 320, y * 64 - 320)  # Centre sur (0,0) de Grid
+            cell.position = Vector2(x * 64 - 320, y * 64 - 320)  # Centre sur Grid (400,350)
             cell.position_in_parent = Vector2(x * 64, y * 64)
             cell.connect("cell_clicked", Callable(self, "_on_cell_clicked").bind(x, y))
             grid.add_child(cell)
@@ -119,6 +118,7 @@ func update_ui():
         player_info_label.text = ""
 
 func update_entity_display():
+    # Réinitialiser toutes les cellules
     for y in range(game_manager.GRID_SIZE):
         for x in range(game_manager.GRID_SIZE):
             var cell = cell_nodes[y][x]
@@ -127,6 +127,7 @@ func update_entity_display():
             cell.highlighted = false
             cell.update_appearance()
     
+    # Mettre à jour les entités
     for y in range(game_manager.GRID_SIZE):
         for x in range(game_manager.GRID_SIZE):
             var entity = game_manager.grid[y][x]
