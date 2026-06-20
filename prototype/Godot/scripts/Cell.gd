@@ -1,9 +1,9 @@
 extends Node2D
 class_name Cell
-## Cell.gd - Version corrigée pour Android et GDScript 4.x
+## Cell.gd - Version corrigée pour GDScript 4.x
 
-var grid_position: Vector2i = Vector2i(0, 0)  # Renommé pour éviter conflit avec Node2D.position
-var entity: Dictionary = null
+var grid_position: Vector2i = Vector2i(0, 0)
+var entity = null  # Pas de typage Dictionary
 var selected: bool = false
 var highlighted: bool = false
 
@@ -46,10 +46,11 @@ func update_appearance():
         
         if entity_sprite:
             entity_sprite.visible = true
+            # Créer une texture de cercle coloré
             var img = Image.create(64, 64, false, Image.FORMAT_RGBA8)
             img.fill(Color(0, 0, 0, 0))
-            var center = Vector2(32, 32)
-            var radius = 20
+            var center: Vector2 = Vector2(32, 32)  # Déclaré explicitement
+            var radius: float = 20.0  # Déclaré explicitement
             var color = GameManager.COLORS.get(entity.get("classe", ""), Color(0.5, 0.5, 0.5))
             
             for x in range(64):
