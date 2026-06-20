@@ -2,7 +2,7 @@ extends Control
 ## Main.gd - Scène principale du jeu WildZimut
 
 # Références aux nœuds
-@onready var grid_container: Control = $GridContainer
+@onready var grid: Control = $Grid
 @onready var turn_label: Label = $TurnLabel
 @onready var player_info_label: Label = $PlayerInfoLabel
 @onready var message_label: Label = $MessageLabel
@@ -18,6 +18,9 @@ var cell_nodes: Array = []
 
 
 func _ready():
+    # Forcer la taille de la vue pour mobile
+    get_viewport().size = Vector2(1200, 700)
+    
     init_grid_display()
     
     # Connexion des signaux
@@ -43,10 +46,11 @@ func init_grid_display():
         var row: Array = []
         for x in range(game_manager.GRID_SIZE):
             var cell = preload("res://scripts/Cell.gd").new()
-            cell.position = Vector2(x * game_manager.CELL_SIZE, y * game_manager.CELL_SIZE)
-            cell.size = Vector2(game_manager.CELL_SIZE, game_manager.CELL_SIZE)
+            cell.position = Vector2(x * 64, y * 64)  # 64px par cellule
+            cell.size = Vector2(64, 64)
+            cell.position_in_parent = Vector2(x * 64, y * 64)
             cell.connect("cell_clicked", Callable(self, "_on_cell_clicked").bind(x, y))
-            grid_container.add_child(cell)
+            grid.add_child(cell)
             row.append(cell)
         cell_nodes.append(row)
     
