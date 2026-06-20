@@ -261,7 +261,7 @@ func enemy_turn():
         if enemy["current_pv"] > 0:
             var result = enemy_ai_turn(enemy, players, grid)
             push_message(result)
-            if not any(p["current_pv"] > 0 for p in players):
+            if not any(p["current_pv"] > 0) for p in players:
                 break
     
     current_turn = 0
