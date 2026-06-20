@@ -11,6 +11,7 @@ anchor_bottom = 1.0
 [node name="Grid" type="Control" parent="."]
 position = Vector2(50, 50)
 size = Vector2(720, 720)
+clip_children = false
 
 [node name="TurnLabel" type="Label" parent="."]
 position = Vector2(900, 30)
