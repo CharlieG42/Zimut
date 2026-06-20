@@ -69,10 +69,10 @@ func _on_turn_changed(turn: int):
 func _on_player_changed(index: int):
     update_ui()
 
-func _on_entity_selected(entity: Dictionary):
+func _on_entity_selected(entity):
     update_ui()
 
-func _on_spell_selected(spell: Dictionary):
+func _on_spell_selected(spell):
     pass
 
 func _on_game_ended(victory: bool):
@@ -82,13 +82,13 @@ func _on_game_ended(victory: bool):
     else:
         game_over_label.text = "DEFAITE..."
 
-func _on_entity_moved(entity: Dictionary, from_pos: Vector2i, to_pos: Vector2i):
+func _on_entity_moved(entity, from_pos: Vector2i, to_pos: Vector2i):
     update_entity_display()
 
-func _on_entity_attacked(attacker: Dictionary, target: Dictionary, damage: int):
+func _on_entity_attacked(attacker, target, damage: int):
     update_entity_display()
 
-func _on_spell_casted(caster: Dictionary, spell: Dictionary, target: Dictionary, result: String):
+func _on_spell_casted(caster, spell, target, result: String):
     update_entity_display()
     add_message(result)
 
