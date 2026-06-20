@@ -1,8 +1,9 @@
 extends Node2D
 class_name Cell
+## Cell.gd - Version corrigée pour Android et GDScript 4.x
 
-var position: Vector2i = Vector2i(0, 0)
-var entity: EntityData = null
+var grid_position: Vector2i = Vector2i(0, 0)  # Renommé pour éviter conflit avec Node2D.position
+var entity: Dictionary = null
 var selected: bool = false
 var highlighted: bool = false
 
@@ -10,17 +11,20 @@ signal cell_clicked(x: int, y: int)
 
 
 func _ready():
+    # Créer un fond (ColorRect)
     var bg = ColorRect.new()
     bg.name = "Background"
-    bg.color = Color.LIGHT_GRAY if (position.x + position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
+    bg.color = Color.LIGHT_GRAY if (grid_position.x + grid_position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
     bg.size = Vector2(64, 64)
     add_child(bg)
     
+    # Créer le sprite de l'entité
     var entity_sprite = Sprite2D.new()
     entity_sprite.name = "EntitySprite"
     entity_sprite.position = Vector2(32, 32)
     add_child(entity_sprite)
     
+    # Créer la bordure
     var border = Sprite2D.new()
     border.name = "Border"
     border.position = Vector2(32, 32)
@@ -30,10 +34,12 @@ func _ready():
 
 
 func update_appearance():
+    # Mettre à jour le fond
     var bg = get_node_or_null("Background")
     if bg:
-        bg.color = Color.LIGHT_GRAY if (position.x + position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
+        bg.color = Color.LIGHT_GRAY if (grid_position.x + grid_position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
     
+    # Afficher l'entité
     if entity:
         var entity_sprite = get_node_or_null("EntitySprite")
         var border = get_node_or_null("Border")
@@ -44,7 +50,7 @@ func update_appearance():
             img.fill(Color(0, 0, 0, 0))
             var center = Vector2(32, 32)
             var radius = 20
-            var color = GameManager.COLORS.get(entity.classe, Color(0.5, 0.5, 0.5))
+            var color = GameManager.COLORS.get(entity.get("classe", ""), Color(0.5, 0.5, 0.5))
             
             for x in range(64):
                 for y in range(64):
@@ -55,7 +61,7 @@ func update_appearance():
         
         if border:
             border.visible = true
-            var border_color = Color.BLUE if entity.entity_type == "Player" else Color.RED
+            var border_color = Color.BLUE if entity.get("entity_type", "") == "Player" else Color.RED
             var border_img = Image.create(64, 64, false, Image.FORMAT_RGBA8)
             border_img.fill(Color(0, 0, 0, 0))
             for x in range(64):
@@ -65,6 +71,7 @@ func update_appearance():
                         border_img.set_pixel(x, y, border_color)
             border.texture = ImageTexture.create_from_image(border_img)
         
+        # Surligner si sélectionné
         if selected:
             var select = get_node_or_null("Selection")
             if not select:
@@ -108,4 +115,4 @@ func _input(event: InputEvent) -> void:
         var mouse_pos = get_global_mouse_position()
         var local_pos = to_local(mouse_pos)
         if Rect2(-32, -32, 64, 64).has_point(local_pos):
-            cell_clicked.emit(position.x, position.y)
+            cell_clicked.emit(grid_position.x, grid_position.y)
