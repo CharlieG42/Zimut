@@ -6,10 +6,8 @@
 
 config/name="WildZimut"
 run/main_scene="res://scenes/Main.tscn"
-config/features=PackedStringArray("4.2", "Forward Plus")
+config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
-config/boot_splash/image="res://icon.svg"
-config/boot_splash/fullsize=false
 
 [autoload]
 
@@ -24,38 +22,11 @@ window/handheld/orientation="landscape"
 
 [input]
 
-move_left={
-"deadzone": 0.5,
-"events": []
-}
-move_right={
-"deadzone": 0.5,
-"events": []
-}
-move_up={
-"deadzone": 0.5,
-"events": []
-}
-move_down={
-"deadzone": 0.5,
-"events": []
-}
+move_left={"deadzone": 0.5, "events": []}
+move_right={"deadzone": 0.5, "events": []}
+move_up={"deadzone": 0.5, "events": []}
+move_down={"deadzone": 0.5, "events": []}
 
 [rendering]
 
 renderer/rendering_method="forward_plus"
-textures/canvas_textures/limit_16="16384"
-
-[android]
-
-# Configuration pour l'export Android
-modules="org.godotengine.godot.GodotGame"
-permissions/INTERNET=true
-permissions/WRITE_EXTERNAL_STORAGE=true
-permissions/READ_EXTERNAL_STORAGE=true
-
-[android.export]
-
-# Chemins pour les templates Android
-# À configurer dans l'éditeur Godot
-# ou via la ligne de commande
