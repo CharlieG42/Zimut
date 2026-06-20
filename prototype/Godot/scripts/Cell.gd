@@ -43,14 +43,14 @@ func update_appearance():
     if entity:
         var entity_sprite = get_node_or_null("EntitySprite")
         var border = get_node_or_null("Border")
+        var center: Vector2 = Vector2(32, 32)  # Déclaré explicitement
+        var radius: float = 20.0  # Déclaré explicitement
         
         if entity_sprite:
             entity_sprite.visible = true
             # Créer une texture de cercle coloré
             var img = Image.create(64, 64, false, Image.FORMAT_RGBA8)
             img.fill(Color(0, 0, 0, 0))
-            var center: Vector2 = Vector2(32, 32)  # Déclaré explicitement
-            var radius: float = 20.0  # Déclaré explicitement
             var color = GameManager.COLORS.get(entity.get("classe", ""), Color(0.5, 0.5, 0.5))
             
             for x in range(64):
