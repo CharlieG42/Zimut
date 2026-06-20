@@ -1,80 +1,154 @@
-extends Control
+extends Node2D
 class_name Cell
-## Cell.gd - Version corrigée pour affichage mobile
+## Cell.gd - Version Node2D avec Sprite2D pour Android
 
 var position: Vector2i = Vector2i(0, 0)
-var size: Vector2 = Vector2(64, 64)
 var entity: EntityData = null
 var selected: bool = false
 var highlighted: bool = false
+
+# Sprite pour afficher la cellule
+@onready var sprite: Sprite2D = $Sprite2D
+@onready var entity_sprite: Sprite2D = $EntitySprite
+@onready var pv_bar: ColorRect = $PVBar
+@onready var pv_bar_bg: ColorRect = $PVBarBG
+@onready var level_label: Label = $LevelLabel
 
 signal cell_clicked(x: int, y: int)
 
 
 func _ready():
-    # FORCER la taille pour Android
-    self.size = Vector2(64, 64)
-    self.minimum_size = Vector2(64, 64)
+    # Créer les nœuds enfants si ils n'existent pas
+    if not sprite:
+        sprite = Sprite2D.new()
+        add_child(sprite)
+        sprite.position = Vector2(32, 32)
     
-    connect("mouse_entered", _on_mouse_entered)
-    connect("mouse_exited", _on_mouse_exited)
-    connect("pressed", _on_pressed)
+    if not entity_sprite:
+        entity_sprite = Sprite2D.new()
+        add_child(entity_sprite)
+        entity_sprite.position = Vector2(32, 32)
+    
+    if not pv_bar_bg:
+        pv_bar_bg = ColorRect.new()
+        pv_bar_bg.color = Color.DARK_GRAY
+        pv_bar_bg.size = Vector2(54, 5)
+        pv_bar_bg.position = Vector2(5, 5)
+        add_child(pv_bar_bg)
+    
+    if not pv_bar:
+        pv_bar = ColorRect.new()
+        pv_bar.color = Color.GREEN
+        pv_bar.size = Vector2(54, 5)
+        pv_bar.position = Vector2(5, 5)
+        add_child(pv_bar)
+    
+    if not level_label:
+        level_label = Label.new()
+        level_label.position = Vector2(32, -15)
+        level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+        add_child(level_label)
+    
+    update_appearance()
 
 
-func _draw():
-    # Dessiner le fond de la cellule
-    var color = Color.LIGHT_GRAY if (position.x + position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
-    draw_rect(Rect2(0, 0, self.size.x, self.size.y), color, true)
-    draw_rect(Rect2(0, 0, self.size.x, self.size.y), Color.BLACK, false, 1)
+func update_appearance():
+    # Fond de la cellule (damier)
+    var bg_color = Color.LIGHT_GRAY if (position.x + position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
     
-    if entity != null:
-        draw_entity()
+    # Pour l'instant, on utilise un ColorRect pour le fond
+    if not sprite.texture:
+        # Créer un fond avec un ColorRect
+        var bg = ColorRect.new()
+        bg.color = bg_color
+        bg.size = Vector2(64, 64)
+        bg.position = Vector2(0, 0)
+        if not has_node("Background"):
+            add_child(bg)
+            bg.name = "Background"
     
-    if selected:
-        draw_rect(Rect2(2, 2, self.size.x - 4, self.size.y - 4), Color.YELLOW, false, 3)
-    
-    if highlighted:
-        draw_rect(Rect2(0, 0, self.size.x, self.size.y), Color(1, 1, 0, 0.5), true)
-        draw_rect(Rect2(0, 0, self.size.x, self.size.y), Color.YELLOW, false, 3)
+    # Afficher l'entité si elle existe
+    if entity:
+        entity_sprite.visible = true
+        var color = GameManager.COLORS.get(entity.classe, Color(0.5, 0.5, 0.5))
+        
+        # Créer une texture de cercle (simplifié)
+        var img = Image.create(64, 64, false, Image.FORMAT_RGBA8)
+        img.fill(Color(0, 0, 0, 0))  # Transparent
+        
+        # Dessiner un cercle
+        var center = Vector2(32, 32)
+        var radius = 20
+        for x in range(64):
+            for y in range(64):
+                if (Vector2(x, y) - center).length() < radius:
+                    img.set_pixel(x, y, color)
+        
+        var tex = ImageTexture.create_from_image(img)
+        entity_sprite.texture = tex
+        
+        # Bordure selon le type
+        var border_img = Image.create(64, 64, false, Image.FORMAT_RGBA8)
+        border_img.fill(Color(0, 0, 0, 0))
+        var border_color = Color.BLUE if entity.entity_type == "Player" else Color.RED
+        for x in range(64):
+            for y in range(64):
+                var dist = (Vector2(x, y) - center).length()
+                if dist > radius - 2 and dist < radius + 2:
+                    border_img.set_pixel(x, y, border_color)
+        var border_tex = ImageTexture.create_from_image(border_img)
+        sprite.texture = border_tex
+        
+        # Barre de PV
+        var pv_percentage = entity.current_pv / float(entity.max_pv)
+        pv_bar.size.x = 54 * pv_percentage
+        pv_bar.color = Color.GREEN if pv_percentage > 0.5 else Color.ORANGE if pv_percentage > 0.25 else Color.RED
+        
+        # Niveau
+        level_label.text = str(entity.level)
+        
+        # Surligner si sélectionné
+        if selected:
+            var select_img = Image.create(64, 64, false, Image.FORMAT_RGBA8)
+            select_img.fill(Color(1, 1, 0, 0.3))
+            var select_tex = ImageTexture.create_from_image(select_img)
+            var select_sprite = Sprite2D.new()
+            select_sprite.texture = select_tex
+            select_sprite.position = Vector2(0, 0)
+            if has_node("Selection"):
+                get_node("Selection").queue_free()
+            add_child(select_sprite)
+            select_sprite.name = "Selection"
+        
+        if highlighted:
+            var highlight_img = Image.create(64, 64, false, Image.FORMAT_RGBA8)
+            highlight_img.fill(Color(1, 1, 0, 0.2))
+            var highlight_tex = ImageTexture.create_from_image(highlight_img)
+            var highlight_sprite = Sprite2D.new()
+            highlight_sprite.texture = highlight_tex
+            highlight_sprite.position = Vector2(0, 0)
+            if has_node("Highlight"):
+                get_node("Highlight").queue_free()
+            add_child(highlight_sprite)
+            highlight_sprite.name = "Highlight"
+    else:
+        entity_sprite.visible = false
+        entity_sprite.texture = null
+        sprite.texture = null
+        if has_node("Selection"):
+            get_node("Selection").queue_free()
+        if has_node("Highlight"):
+            get_node("Highlight").queue_free()
 
 
-func draw_entity():
-    var center = Vector2(self.size.x / 2, self.size.y / 2)
-    var radius = self.size.x / 3
-    
-    var color = GameManager.COLORS.get(entity.classe, Color(0.5, 0.5, 0.5))
-    draw_circle(center, radius, color, true)
-    
-    var border_color = Color.BLUE if entity.entity_type == "Player" else Color.RED
-    draw_circle(center, radius, border_color, false, 2)
-    
-    var pv_percentage = entity.current_pv / float(entity.max_pv)
-    var bar_width = self.size.x - 10
-    var bar_height = 5
-    draw_rect(Rect2(5, 5, bar_width, bar_height), Color.DARK_GRAY, true)
-    
-    var bar_color = Color.GREEN if pv_percentage > 0.5 else Color.ORANGE if pv_percentage > 0.25 else Color.RED
-    draw_rect(Rect2(5, 5, bar_width * pv_percentage, bar_height), bar_color, true)
-    
-    var level_text = str(entity.level)
-    var font = get_theme_font("font", "Label")
-    draw_string(font, Vector2(center.x - 5, center.y - 10), level_text, HORIZONTAL_ALIGNMENT_CENTER)
-    
-    if (entity == GameManager.players[GameManager.current_player_index] and 
-        GameManager.current_turn == 0 and 
-        entity.entity_type == "Player"):
-        var pa_text = "PA:%d/%d" % [entity.current_pa, entity.max_pa]
-        var pm_text = "PM:%d/%d" % [entity.current_pm, entity.max_pm]
-        draw_string(font, Vector2(center.x - 25, center.y + radius + 10), pa_text, HORIZONTAL_ALIGNMENT_LEFT)
-        draw_string(font, Vector2(center.x - 25, center.y + radius + 30), pm_text, HORIZONTAL_ALIGNMENT_LEFT)
+func _input(event: InputEvent) -> void:
+    if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+        var mouse_pos = get_global_mouse_position()
+        var local_pos = to_local(mouse_pos)
+        if Rect2(0, 0, 64, 64).has_point(local_pos):
+            cell_clicked.emit(position.x, position.y)
 
 
 func _on_mouse_entered():
     if entity != null:
         get_parent().get_parent().add_message("%s - PV: %d/%d" % [entity.name, entity.current_pv, entity.max_pv])
-
-func _on_mouse_exited():
-    pass
-
-func _on_pressed():
-    cell_clicked.emit(position.x, position.y)
