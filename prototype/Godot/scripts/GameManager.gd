@@ -1,13 +1,10 @@
 extends Node
 ## GameManager - Gère la logique globale du jeu WildZimut
-## Transposition du prototype Python/Pygame en Godot
 
-# ==================== CONSTANTES ====================
 const GRID_SIZE := 10
 const CELL_SIZE := 64
 const MARGIN := 20
 
-# Couleurs (pour le débogage et les UI)
 const COLORS := {
     "Tank": Color(0, 0.4, 0.8),
     "Assassin": Color(0.8, 0, 0),
@@ -20,15 +17,10 @@ const COLORS := {
     "Loup": Color(0.6, 0.6, 0.4),
 }
 
-# ==================== DONNÉES DES ENTITÉS (comme dictionnaires) ====================
-# EntityData est maintenant un dictionnaire
-# SpellData est maintenant un dictionnaire
-
-# ==================== VARIABLES GLOBALES ====================
-var grid: Array = []  # Grille 2D d'entités (tableau de dictionnaires)
+var grid: Array = []
 var players: Array = []
 var enemies: Array = []
-var current_turn: int = 0  # 0 = tour joueurs, 1 = tour ennemis
+var current_turn: int = 0
 var current_player_index: int = 0
 var selected_entity = null
 var selected_spell = null
@@ -37,7 +29,6 @@ var show_spells: bool = false
 var game_over: bool = false
 var victory: bool = false
 
-# Signaux
 signal turn_changed(turn: int)
 signal player_changed(index: int)
 signal entity_selected(entity)
@@ -47,7 +38,6 @@ signal entity_moved(entity, from_pos: Vector2i, to_pos: Vector2i)
 signal entity_attacked(attacker, target, damage: int)
 signal spell_casted(caster, spell, target, result: String)
 
-# Données préchargées
 var classes_data: Array = []
 var spells_data: Array = []
 var enemies_data: Array = []
@@ -61,34 +51,29 @@ func _ready():
     turn_changed.emit(current_turn)
 
 
-# ==================== CHARGEMENT DES DONNÉES ====================
 func load_data():
-    # Données des classes (simplifiées pour le prototype)
     classes_data = [
         {"Classe": "Tank", "Niveau": "10", "Vita (PV)": "120", "Force (CAC)": "20", "Intelligence (Magie)": "5", "Agilité (Vit. Atk)": "5", "Sagesse (Précision)": "10", "Défense": "30", "PA": "6", "PM": "3"},
         {"Classe": "Assassin", "Niveau": "10", "Vita (PV)": "80", "Force (CAC)": "15", "Intelligence (Magie)": "10", "Agilité (Vit. Atk)": "25", "Sagesse (Précision)": "20", "Défense": "10", "PA": "7", "PM": "4"},
         {"Classe": "Mage", "Niveau": "10", "Vita (PV)": "60", "Force (CAC)": "5", "Intelligence (Magie)": "25", "Agilité (Vit. Atk)": "10", "Sagesse (Précision)": "15", "Défense": "5", "PA": "8", "PM": "3"}
     ]
     
-    # Données des sorts
     spells_data = [
         {"Nom": "Coup puissant", "Classe": "Tank", "Coût PA": "1", "Coût PM": "0", "Portée": "1", "Effet": "25 dégâts", "Niveau requis": "1", "Type": "CAC"},
         {"Nom": "Bouclier", "Classe": "Tank", "Coût PA": "2", "Coût PM": "0", "Portée": "1", "Effet": "Réduit les dégâts de 50% pour 1 tour", "Niveau requis": "5", "Type": "Défense"},
         {"Nom": "Attaque furtive", "Classe": "Assassin", "Coût PA": "1", "Coût PM": "2", "Portée": "1", "Effet": "30 dégâts + ignore 50% défense", "Niveau requis": "1", "Type": "CAC"},
-        {"Nom": "Poison", "Classe": "Assassin", "Coût PA": "2", "Coût PM": "0", "Portée": "3", "Effet": "15 dégâts + poison (5 dégâts/tour, 2 tours)", "Niveau requis": "5", "Type": "Magie"},
+        {"Nom": "Poison", "Classe": "Assassin", "Coût PA": "2", "Coût PM": "0", "Portée": "3", "Effet": "15 dégâts + poison", "Niveau requis": "5", "Type": "Magie"},
         {"Nom": "Boule de feu", "Classe": "Mage", "Coût PA": "3", "Coût PM": "0", "Portée": "5", "Effet": "40 dégâts", "Niveau requis": "1", "Type": "Magie"},
         {"Nom": "Soin", "Classe": "Mage", "Coût PA": "2", "Coût PM": "0", "Portée": "4", "Effet": "Restaure 30 PV", "Niveau requis": "3", "Type": "Soin"}
     ]
     
-    # Données des ennemis
     enemies_data = [
         {"Type": "Gobelin", "Niveau": "10", "PV": "60", "Attaque": "12", "Défense": "5", "PA": "5", "PM": "3", "Biome": "Forêt", "Effets spéciaux": ""},
         {"Type": "Squelette", "Niveau": "10", "PV": "50", "Attaque": "15", "Défense": "10", "PA": "4", "PM": "2", "Biome": "Donjon", "Effets spéciaux": ""},
-        {"Type": "Loup", "Niveau": "10", "PV": "70", "Attaque": "10", "Défense": "3", "PA": "6", "PM": "4", "Biome": "Plaine", "Effets spéciaux": "Attaque 2 fois par tour"}
+        {"Type": "Loup", "Niveau": "10", "PV": "70", "Attaque": "10", "Défense": "3", "PA": "6", "PM": "4", "Biome": "Plaine", "Effets spéciaux": ""}
     ]
 
 
-# ==================== INITIALISATION ====================
 func init_grid():
     grid = []
     for y in range(GRID_SIZE):
@@ -99,7 +84,6 @@ func init_grid():
 
 
 func init_entities():
-    # Position des joueurs
     var player_classes := ["Tank", "Assassin", "Mage"]
     var player_positions := [Vector2i(1, 1), Vector2i(1, 2), Vector2i(2, 1)]
     
@@ -109,7 +93,6 @@ func init_entities():
         var classe := player_classes[i]
         var pos := player_positions[i]
         
-        # Trouver les données de la classe
         var class_info = null
         for data in classes_data:
             if data["Classe"] == classe and data["Niveau"] == "10":
@@ -118,7 +101,7 @@ func init_entities():
         
         if class_info:
             var player = {
-                "name": "%s Lv%s" % [classe, "10"],
+                "name": "%s Lv10" % classe,
                 "entity_type": "Player",
                 "classe": classe,
                 "level": 10,
@@ -139,7 +122,6 @@ func init_entities():
                 "is_active": false
             }
             
-            # Charger les sorts pour cette classe
             for spell_info in spells_data:
                 if spell_info["Classe"] == classe and int(spell_info["Niveau requis"]) <= 10:
                     player["spells"].append({
@@ -156,31 +138,27 @@ func init_entities():
             players.append(player)
             grid[pos.y][pos.x] = player
     
-    # Position des ennemis
     var enemy_types := ["Gobelin", "Squelette", "Loup"]
-    var enemy_levels := [10, 10, 10]
     var enemy_positions := [Vector2i(8, 8), Vector2i(8, 7), Vector2i(7, 8)]
     
     enemies = []
     
     for i in range(enemy_types.size()):
         var enemy_type := enemy_types[i]
-        var level := enemy_levels[i]
         var pos := enemy_positions[i]
         
-        # Trouver les données de l'ennemi
         var enemy_info = null
         for data in enemies_data:
-            if data["Type"] == enemy_type and data["Niveau"] == str(level):
+            if data["Type"] == enemy_type and data["Niveau"] == "10":
                 enemy_info = data
                 break
         
         if enemy_info:
             var enemy = {
-                "name": "%s Lv%s" % [enemy_type, level],
+                "name": "%s Lv10" % enemy_type,
                 "entity_type": "Enemy",
                 "classe": enemy_type,
-                "level": level,
+                "level": 10,
                 "max_pv": int(enemy_info["PV"]),
                 "current_pv": int(enemy_info["PV"]),
                 "force": int(enemy_info["Attaque"]),
@@ -193,16 +171,13 @@ func init_entities():
                 "max_pm": int(enemy_info["PM"]),
                 "current_pm": int(enemy_info["PM"]),
                 "x": pos.x,
-                "y": pos.y,
-                "biome": enemy_info["Biome"],
-                "special_effects": enemy_info["Effets spéciaux"]
+                "y": pos.y
             }
             
             enemies.append(enemy)
             grid[pos.y][pos.x] = enemy
 
 
-# ==================== GESTION DU JEU ====================
 func handle_cell_selected(cell_pos: Vector2i):
     var x := cell_pos.x
     var y := cell_pos.y
@@ -213,10 +188,9 @@ func handle_cell_selected(cell_pos: Vector2i):
     selected_cell = cell_pos
     var entity := grid[y][x]
     
-    if current_turn == 0:  # Tour des joueurs
+    if current_turn == 0:
         var current_player = players[current_player_index]
         
-        # Sélection d'un joueur
         if entity and entity["entity_type"] == "Player" and entity == current_player:
             selected_entity = entity
             show_spells = true
@@ -226,16 +200,11 @@ func handle_cell_selected(cell_pos: Vector2i):
             entity_selected.emit(current_player)
             return
         
-        # Déplacement du joueur sélectionné
-        if (selected_entity == current_player and 
-            entity == null and 
-            current_player["current_pm"] > 0):
+        if selected_entity == current_player and entity == null and current_player["current_pm"] > 0:
             var dx := x - current_player["x"]
             var dy := y - current_player["y"]
-            if abs(dx) + abs(dy) == 1:  # Case adjacente
-                # Vérifier que la case est libre
+            if abs(dx) + abs(dy) == 1:
                 if grid[y][x] == null:
-                    # Déplacer
                     grid[current_player["y"]][current_player["x"]] = null
                     current_player["x"] = x
                     current_player["y"] = y
@@ -246,10 +215,8 @@ func handle_cell_selected(cell_pos: Vector2i):
                     show_spells = false
             return
         
-        # Sélection d'une cible pour un sort ou une attaque
         if selected_entity == current_player:
             if entity and entity["current_pv"] > 0:
-                # Si un sort est sélectionné, le lancer
                 if selected_spell != null:
                     var result = cast_spell(current_player, selected_spell, entity)
                     if result:
@@ -265,7 +232,7 @@ func handle_cell_selected(cell_pos: Vector2i):
                     show_spells = false
                     selected_entity = null
                 return
-        
+    
     selected_entity = null
     show_spells = false
 
@@ -283,7 +250,6 @@ func next_player():
     player_changed.emit(current_player_index)
     
     if current_player_index == 0:
-        # Fin du tour des joueurs, passer aux ennemis
         enemy_turn()
 
 
@@ -298,11 +264,9 @@ func enemy_turn():
             if not any(p["current_pv"] > 0 for p in players):
                 break
     
-    # Retour au tour des joueurs
     current_turn = 0
     turn_changed.emit(current_turn)
     
-    # Réinitialiser les PA/PM des joueurs
     for player in players:
         player["current_pa"] = player["max_pa"]
         player["current_pm"] = player["max_pm"]
@@ -347,7 +311,6 @@ func reset_game():
     turn_changed.emit(current_turn)
 
 
-# ==================== UTILITAIRES ====================
 func push_message(message: String):
     print(message)
 
@@ -388,7 +351,6 @@ func enemy_ai_turn(enemy: Dictionary, players: Array, grid: Array) -> String:
     if alive_players.is_empty():
         return "%s ne peut pas agir." % enemy["name"]
     
-    # 70% de chance d'attaquer, 30% de se déplacer
     if randf() < 0.7 and enemy["current_pa"] >= 1:
         var target = alive_players[randi() % alive_players.size()]
         var damage = enemy["force"] + randi_range(-2, 2)
