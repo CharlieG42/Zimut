@@ -46,9 +46,7 @@ func init_grid_display():
         for x in range(game_manager.GRID_SIZE):
             var cell = preload("res://scripts/Cell.gd").new()
             cell.position = Vector2(x * 64 - 320, y * 64 - 320)  # Centre sur Grid (400,350)
-            cell.position_in_parent = Vector2(x * 64, y * 64)
-            # IMPORTANT : Définir la position pour le damier
-            cell.position = Vector2i(x, y)
+            cell.grid_position = Vector2i(x, y)  # Position dans la grille
             cell.connect("cell_clicked", Callable(self, "_on_cell_clicked").bind(x, y))
             grid.add_child(cell)
             row.append(cell)
@@ -71,10 +69,10 @@ func _on_turn_changed(turn: int):
 func _on_player_changed(index: int):
     update_ui()
 
-func _on_entity_selected(entity: EntityData):
+func _on_entity_selected(entity: Dictionary):
     update_ui()
 
-func _on_spell_selected(spell: SpellData):
+func _on_spell_selected(spell: Dictionary):
     pass
 
 func _on_game_ended(victory: bool):
@@ -84,13 +82,13 @@ func _on_game_ended(victory: bool):
     else:
         game_over_label.text = "DEFAITE..."
 
-func _on_entity_moved(entity: EntityData, from_pos: Vector2i, to_pos: Vector2i):
+func _on_entity_moved(entity: Dictionary, from_pos: Vector2i, to_pos: Vector2i):
     update_entity_display()
 
-func _on_entity_attacked(attacker: EntityData, target: EntityData, damage: int):
+func _on_entity_attacked(attacker: Dictionary, target: Dictionary, damage: int):
     update_entity_display()
 
-func _on_spell_casted(caster: EntityData, spell: SpellData, target: EntityData, result: String):
+func _on_spell_casted(caster: Dictionary, spell: Dictionary, target: Dictionary, result: String):
     update_entity_display()
     add_message(result)
 
@@ -111,10 +109,10 @@ func update_ui():
     if game_manager.current_turn == 0 and game_manager.players.size() > 0:
         var current_player = game_manager.players[game_manager.current_player_index]
         player_info_label.text = "Joueur: %s | PV: %d/%d | PA: %d/%d | PM: %d/%d" % [
-            current_player.name,
-            current_player.current_pv, current_player.max_pv,
-            current_player.current_pa, current_player.max_pa,
-            current_player.current_pm, current_player.max_pm
+            current_player.get("name", "?"),
+            current_player.get("current_pv", 0), current_player.get("max_pv", 0),
+            current_player.get("current_pa", 0), current_player.get("max_pa", 0),
+            current_player.get("current_pm", 0), current_player.get("max_pm", 0)
         ]
     else:
         player_info_label.text = ""
@@ -139,7 +137,7 @@ func update_entity_display():
                 cell.selected = (game_manager.selected_entity == entity)
                 cell.highlighted = (entity == game_manager.players[game_manager.current_player_index] and 
                                    game_manager.current_turn == 0 and 
-                                   entity.entity_type == "Player")
+                                   entity.get("entity_type", "") == "Player")
                 cell.update_appearance()
 
 
