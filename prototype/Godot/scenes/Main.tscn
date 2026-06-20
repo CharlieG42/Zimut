@@ -8,7 +8,7 @@ script = ExtResource( 1 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="GridContainer" type="Control" parent="."]
+[node name="Grid" type="Control" parent="."]
 position = Vector2(50, 50)
 size = Vector2(720, 720)
 
