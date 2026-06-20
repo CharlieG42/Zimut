@@ -1,8 +1,8 @@
-extends Control
-## Main.gd - Scène principale du jeu WildZimut
+extends Node2D
+## Main.gd - Scène principale avec Node2D
 
 # Références aux nœuds
-@onready var grid: Control = $Grid
+@onready var grid: Node2D = $Grid
 @onready var turn_label: Label = $TurnLabel
 @onready var player_info_label: Label = $PlayerInfoLabel
 @onready var message_label: Label = $MessageLabel
@@ -18,7 +18,7 @@ var cell_nodes: Array = []
 
 
 func _ready():
-    # Forcer la taille de la vue pour mobile
+    # Forcer la taille de la vue
     get_viewport().size = Vector2(1200, 700)
     
     init_grid_display()
@@ -46,8 +46,7 @@ func init_grid_display():
         var row: Array = []
         for x in range(game_manager.GRID_SIZE):
             var cell = preload("res://scripts/Cell.gd").new()
-            cell.position = Vector2(x * 64, y * 64)  # 64px par cellule
-            cell.size = Vector2(64, 64)
+            cell.position = Vector2(x * 64 - 320, y * 64 - 320)  # Centre sur (0,0) de Grid
             cell.position_in_parent = Vector2(x * 64, y * 64)
             cell.connect("cell_clicked", Callable(self, "_on_cell_clicked").bind(x, y))
             grid.add_child(cell)
@@ -126,6 +125,7 @@ func update_entity_display():
             cell.entity = null
             cell.selected = false
             cell.highlighted = false
+            cell.update_appearance()
     
     for y in range(game_manager.GRID_SIZE):
         for x in range(game_manager.GRID_SIZE):
@@ -137,6 +137,7 @@ func update_entity_display():
                 cell.highlighted = (entity == game_manager.players[game_manager.current_player_index] and 
                                    game_manager.current_turn == 0 and 
                                    entity.entity_type == "Player")
+                cell.update_appearance()
 
 
 # ==================== UTILITAIRES ====================
