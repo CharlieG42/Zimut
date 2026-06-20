@@ -1,8 +1,8 @@
-extends Node2D
-## Main.gd - Scène principale du jeu WildZimut (version corrigée pour Android)
+extends Control
+## Main.gd - Scène principale du jeu WildZimut
 
-# Références aux nœuds (adaptées à la nouvelle scène)
-@onready var grid_node: Node2D = $Grid
+# Références aux nœuds
+@onready var grid_container: Control = $GridContainer
 @onready var turn_label: Label = $TurnLabel
 @onready var player_info_label: Label = $PlayerInfoLabel
 @onready var message_label: Label = $MessageLabel
@@ -18,9 +18,6 @@ var cell_nodes: Array = []
 
 
 func _ready():
-    # Forcer la taille de la vue pour Android
-    get_viewport().size = Vector2(1200, 700)
-    
     init_grid_display()
     
     # Connexion des signaux
@@ -49,7 +46,7 @@ func init_grid_display():
             cell.position = Vector2(x * game_manager.CELL_SIZE, y * game_manager.CELL_SIZE)
             cell.size = Vector2(game_manager.CELL_SIZE, game_manager.CELL_SIZE)
             cell.connect("cell_clicked", Callable(self, "_on_cell_clicked").bind(x, y))
-            grid_node.add_child(cell)
+            grid_container.add_child(cell)
             row.append(cell)
         cell_nodes.append(row)
     
