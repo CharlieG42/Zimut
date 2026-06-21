@@ -34,6 +34,7 @@ func _ready():
     game_manager.entity_attacked.connect(_on_entity_attacked)
     game_manager.spell_casted.connect(_on_spell_casted)
     restart_button.pressed.connect(_on_restart_pressed)
+    spell_panel.visible = false
     update_ui()
 
 
@@ -84,6 +85,8 @@ func show_spells_for_player(player: Dictionary):
         button.spell = spell
         button.spell_selected.connect(_on_spell_button_selected)
         button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+        button.mouse_filter = Control.MOUSE_FILTER_PASS
         spell_container.add_child(button)
         spell_buttons.append(button)
     spell_panel.visible = true
@@ -113,8 +116,6 @@ func _on_player_changed(index: int):
 
 func _on_entity_selected(entity):
     update_ui()
-    if entity != null:
-        hide_spell_panel()
 
 func _on_spell_selected(spell):
     pass
