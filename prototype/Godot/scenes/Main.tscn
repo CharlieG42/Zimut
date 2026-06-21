@@ -46,7 +46,12 @@ horizontal_alignment = 1
 [node name="SpellPanel" type="Panel" parent="."]
 position = Vector2(850, 100)
 size = Vector2(300, 500)
-visible = false
+visible = true
+
+[node name="SpellPanelBackground" type="ColorRect" parent="./SpellPanel"]
+position = Vector2(0, 0)
+size = Vector2(300, 500)
+color = Color(0, 0, 0, 0.7)
 
 [node name="SpellPanelLabel" type="Label" parent="./SpellPanel"]
 position = Vector2(150, 20)
@@ -61,6 +66,11 @@ size = Vector2(260, 420)
 [node name="TurnOrderPanel" type="Panel" parent="."]
 position = Vector2(50, 50)
 size = Vector2(200, 600)
+
+[node name="TurnOrderBackground" type="ColorRect" parent="./TurnOrderPanel"]
+position = Vector2(0, 0)
+size = Vector2(200, 600)
+color = Color(0, 0, 0, 0.7)
 
 [node name="TurnOrderLabel" type="Label" parent="./TurnOrderPanel"]
 position = Vector2(100, 20)
