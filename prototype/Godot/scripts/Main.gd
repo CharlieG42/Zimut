@@ -25,6 +25,7 @@ func _ready():
     get_viewport().size = Vector2(1200, 700)
     init_grid_display()
     init_turn_order_display()
+    
     game_manager.turn_changed.connect(_on_turn_changed)
     game_manager.player_changed.connect(_on_player_changed)
     game_manager.entity_selected.connect(_on_entity_selected)
@@ -34,8 +35,14 @@ func _ready():
     game_manager.entity_attacked.connect(_on_entity_attacked)
     game_manager.spell_casted.connect(_on_spell_casted)
     restart_button.pressed.connect(_on_restart_pressed)
+    
     spell_panel.visible = false
     update_ui()
+    
+    # Afficher les sorts du joueur initial après un petit délai
+    await get_tree().process_frame
+    if game_manager.players.size() > 0:
+        show_spells_for_player(game_manager.players[0])
 
 
 func init_grid_display():
