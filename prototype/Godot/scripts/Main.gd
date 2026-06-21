@@ -1,7 +1,6 @@
 extends Node2D
-## Main.gd - Scène principale avec Node2D
+## Main.gd - Scene principale avec Node2D
 
-# Références aux nœuds
 @onready var grid: Node2D = $Grid
 @onready var turn_label: Label = $TurnLabel
 @onready var player_info_label: Label = $PlayerInfoLabel
@@ -10,19 +9,22 @@ extends Node2D
 @onready var game_over_label: Label = $GameOverPanel/GameOverLabel
 @onready var restart_button: Button = $GameOverPanel/RestartButton
 
-# Référence au GameManager
+@onready var spell_panel: Panel = $SpellPanel
+@onready var spell_container: VBoxContainer = $SpellPanel/SpellContainer
+@onready var turn_order_panel: Panel = $TurnOrderPanel
+@onready var turn_order_container: VBoxContainer = $TurnOrderPanel/TurnOrderContainer
+
 @onready var game_manager: GameManager = GameManager
 
-# Grille visuelle
 var cell_nodes: Array = []
+var spell_buttons: Array = []
+var turn_order_labels: Array = []
 
 
 func _ready():
     get_viewport().size = Vector2(1200, 700)
-    
     init_grid_display()
-    
-    # Connexion des signaux
+    init_turn_order_display()
     game_manager.turn_changed.connect(_on_turn_changed)
     game_manager.player_changed.connect(_on_player_changed)
     game_manager.entity_selected.connect(_on_entity_selected)
@@ -31,52 +33,95 @@ func _ready():
     game_manager.entity_moved.connect(_on_entity_moved)
     game_manager.entity_attacked.connect(_on_entity_attacked)
     game_manager.spell_casted.connect(_on_spell_casted)
-    
     restart_button.pressed.connect(_on_restart_pressed)
-    
     update_ui()
 
 
-# ==================== INITIALISATION DE LA GRILLE ====================
 func init_grid_display():
     cell_nodes = []
-    
     for y in range(game_manager.GRID_SIZE):
         var row: Array = []
         for x in range(game_manager.GRID_SIZE):
             var cell = preload("res://scripts/Cell.gd").new()
-            cell.position = Vector2(x * 64 - 320, y * 64 - 320)  # Centre sur Grid (400,350)
-            cell.grid_position = Vector2i(x, y)  # Position dans la grille
+            cell.position = Vector2(x * 64 - 320, y * 64 - 320)
+            cell.grid_position = Vector2i(x, y)
             cell.connect("cell_clicked", Callable(self, "_on_cell_clicked").bind(x, y))
             grid.add_child(cell)
             row.append(cell)
         cell_nodes.append(row)
-    
     update_entity_display()
 
 
-# ==================== GESTION DES CLICS ====================
+func init_turn_order_display():
+    turn_order_labels = []
+    turn_order_container.clear()
+    for i in range(game_manager.players.size()):
+        var player = game_manager.players[i]
+        var label = Label.new()
+        label.text = "%d. %s" % [i + 1, player.get("name", "Joueur")]
+        label.label_settings.font_size = 16
+        label.add_theme_color_override("font_color", Color.WHITE)
+        turn_order_container.add_child(label)
+        turn_order_labels.append(label)
+
+
 func _on_cell_clicked(x: int, y: int):
     if game_manager.game_over:
+        return
+    if game_manager.selected_spell != null:
+        game_manager.handle_cell_selected(Vector2i(x, y))
         return
     game_manager.handle_cell_selected(Vector2i(x, y))
 
 
-# ==================== GESTION DES SIGNAUX ====================
+func show_spells_for_player(player: Dictionary):
+    for button in spell_buttons:
+        button.queue_free()
+    spell_buttons = []
+    spell_container.clear()
+    for spell in player.get("spells", []):
+        var button = preload("res://scripts/SpellButton.gd").new()
+        button.spell = spell
+        button.spell_selected.connect(_on_spell_button_selected)
+        button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        spell_container.add_child(button)
+        spell_buttons.append(button)
+    spell_panel.visible = true
+
+
+func hide_spell_panel():
+    spell_panel.visible = false
+
+
+func _on_spell_button_selected(spell: Dictionary):
+    game_manager.handle_spell_selected(spell)
+    hide_spell_panel()
+    add_message("Sort sélectionné: %s" % spell.get("name", "?"))
+
+
 func _on_turn_changed(turn: int):
     update_ui()
+    update_turn_order_display()
 
 func _on_player_changed(index: int):
     update_ui()
+    if game_manager.current_turn == 0 and game_manager.players.size() > index:
+        var current_player = game_manager.players[index]
+        show_spells_for_player(current_player)
+    else:
+        hide_spell_panel()
 
 func _on_entity_selected(entity):
     update_ui()
+    if entity != null:
+        hide_spell_panel()
 
 func _on_spell_selected(spell):
     pass
 
 func _on_game_ended(victory: bool):
     game_over_panel.visible = true
+    hide_spell_panel()
     if victory:
         game_over_label.text = "VICTOIRE !"
     else:
@@ -91,21 +136,21 @@ func _on_entity_attacked(attacker, target, damage: int):
 func _on_spell_casted(caster, spell, target, result: String):
     update_entity_display()
     add_message(result)
+    hide_spell_panel()
 
 func _on_restart_pressed():
     game_manager.reset_game()
     game_over_panel.visible = false
     update_entity_display()
     update_ui()
+    init_turn_order_display()
 
 
-# ==================== MISE À JOUR DE L'UI ====================
 func update_ui():
     if game_manager.current_turn == 0:
         turn_label.text = "Tour des joueurs"
     else:
         turn_label.text = "Tour des ennemis"
-    
     if game_manager.current_turn == 0 and game_manager.players.size() > 0:
         var current_player = game_manager.players[game_manager.current_player_index]
         player_info_label.text = "Joueur: %s | PV: %d/%d | PA: %d/%d | PM: %d/%d" % [
@@ -117,8 +162,22 @@ func update_ui():
     else:
         player_info_label.text = ""
 
+
+func update_turn_order_display():
+    for i in range(turn_order_labels.size()):
+        if i < game_manager.players.size():
+            var player = game_manager.players[i]
+            var label = turn_order_labels[i]
+            var is_current = (i == game_manager.current_player_index && game_manager.current_turn == 0)
+            if is_current:
+                label.add_theme_color_override("font_color", Color.YELLOW)
+                label.text = "%d. %s (ACTIF)" % [i + 1, player.get("name", "Joueur")]
+            else:
+                label.add_theme_color_override("font_color", Color.WHITE)
+                label.text = "%d. %s" % [i + 1, player.get("name", "Joueur")]
+
+
 func update_entity_display():
-    # Réinitialiser toutes les cellules
     for y in range(game_manager.GRID_SIZE):
         for x in range(game_manager.GRID_SIZE):
             var cell = cell_nodes[y][x]
@@ -126,8 +185,6 @@ func update_entity_display():
             cell.selected = false
             cell.highlighted = false
             cell.update_appearance()
-    
-    # Mettre à jour les entités
     for y in range(game_manager.GRID_SIZE):
         for x in range(game_manager.GRID_SIZE):
             var entity = game_manager.grid[y][x]
@@ -141,7 +198,6 @@ func update_entity_display():
                 cell.update_appearance()
 
 
-# ==================== UTILITAIRES ====================
 func add_message(message: String):
     message_label.text = message
     var timer = Timer.new()

@@ -57,7 +57,6 @@ func load_data():
         {"Classe": "Assassin", "Niveau": "10", "Vita (PV)": "80", "Force (CAC)": "15", "Intelligence (Magie)": "10", "Agilité (Vit. Atk)": "25", "Sagesse (Précision)": "20", "Défense": "10", "PA": "7", "PM": "4"},
         {"Classe": "Mage", "Niveau": "10", "Vita (PV)": "60", "Force (CAC)": "5", "Intelligence (Magie)": "25", "Agilité (Vit. Atk)": "10", "Sagesse (Précision)": "15", "Défense": "5", "PA": "8", "PM": "3"}
     ]
-    
     spells_data = [
         {"Nom": "Coup puissant", "Classe": "Tank", "Coût PA": "1", "Coût PM": "0", "Portée": "1", "Effet": "25 dégâts", "Niveau requis": "1", "Type": "CAC"},
         {"Nom": "Bouclier", "Classe": "Tank", "Coût PA": "2", "Coût PM": "0", "Portée": "1", "Effet": "Réduit les dégâts de 50% pour 1 tour", "Niveau requis": "5", "Type": "Défense"},
@@ -66,7 +65,6 @@ func load_data():
         {"Nom": "Boule de feu", "Classe": "Mage", "Coût PA": "3", "Coût PM": "0", "Portée": "5", "Effet": "40 dégâts", "Niveau requis": "1", "Type": "Magie"},
         {"Nom": "Soin", "Classe": "Mage", "Coût PA": "2", "Coût PM": "0", "Portée": "4", "Effet": "Restaure 30 PV", "Niveau requis": "3", "Type": "Soin"}
     ]
-    
     enemies_data = [
         {"Type": "Gobelin", "Niveau": "10", "PV": "60", "Attaque": "12", "Défense": "5", "PA": "5", "PM": "3", "Biome": "Forêt", "Effets spéciaux": ""},
         {"Type": "Squelette", "Niveau": "10", "PV": "50", "Attaque": "15", "Défense": "10", "PA": "4", "PM": "2", "Biome": "Donjon", "Effets spéciaux": ""},
@@ -86,19 +84,15 @@ func init_grid():
 func init_entities():
     var player_classes: Array[String] = ["Tank", "Assassin", "Mage"]
     var player_positions: Array[Vector2i] = [Vector2i(1, 1), Vector2i(1, 2), Vector2i(2, 1)]
-    
     players = []
-    
     for i in range(player_classes.size()):
         var classe := player_classes[i]
         var pos := player_positions[i]
-        
         var class_info = null
         for data in classes_data:
             if data["Classe"] == classe and data["Niveau"] == "10":
                 class_info = data
                 break
-        
         if class_info:
             var player = {
                 "name": "%s Lv10" % classe,
@@ -121,7 +115,6 @@ func init_entities():
                 "spells": [],
                 "is_active": false
             }
-            
             for spell_info in spells_data:
                 if spell_info["Classe"] == classe and int(spell_info["Niveau requis"]) <= 10:
                     player["spells"].append({
@@ -134,25 +127,19 @@ func init_entities():
                         "level_required": int(spell_info["Niveau requis"]),
                         "spell_type": spell_info["Type"]
                     })
-            
             players.append(player)
             grid[pos.y][pos.x] = player
-    
     var enemy_types: Array[String] = ["Gobelin", "Squelette", "Loup"]
     var enemy_positions: Array[Vector2i] = [Vector2i(8, 8), Vector2i(8, 7), Vector2i(7, 8)]
-    
     enemies = []
-    
     for i in range(enemy_types.size()):
         var enemy_type := enemy_types[i]
         var pos := enemy_positions[i]
-        
         var enemy_info = null
         for data in enemies_data:
             if data["Type"] == enemy_type and data["Niveau"] == "10":
                 enemy_info = data
                 break
-        
         if enemy_info:
             var enemy = {
                 "name": "%s Lv10" % enemy_type,
@@ -173,7 +160,6 @@ func init_entities():
                 "x": pos.x,
                 "y": pos.y
             }
-            
             enemies.append(enemy)
             grid[pos.y][pos.x] = enemy
 
@@ -181,16 +167,35 @@ func init_entities():
 func handle_cell_selected(cell_pos: Vector2i):
     var x := cell_pos.x
     var y := cell_pos.y
-    
     if not (x >= 0 and x < GRID_SIZE and y >= 0 and y < GRID_SIZE):
         return
-    
     selected_cell = cell_pos
     var entity = grid[y][x]
-    
     if current_turn == 0:
         var current_player = players[current_player_index]
-        
+        if selected_spell != null:
+            if entity and entity["current_pv"] > 0:
+                var dx: int = abs(x - int(current_player["x"]))
+                var dy: int = abs(y - int(current_player["y"]))
+                var distance = dx + dy
+                if distance <= selected_spell["range"]:
+                    var result = cast_spell(current_player, selected_spell, entity)
+                    if result:
+                        spell_casted.emit(current_player, selected_spell, entity, result)
+                        if entity["current_pv"] <= 0 and entity["entity_type"] == "Enemy":
+                            grid[entity["y"]][entity["x"]] = null
+                            for j in range(enemies.size()):
+                                if enemies[j] == entity:
+                                    enemies.remove_at(j)
+                                    break
+                            check_game_over()
+                    selected_spell = null
+                    entity_selected.emit(null)
+                else:
+                    push_message("Cible hors de portée ! (Portée: %d)" % selected_spell["range"])
+            else:
+                push_message("Pas de cible valide à cette position")
+            return
         if entity and entity["entity_type"] == "Player" and entity == current_player:
             selected_entity = entity
             show_spells = true
@@ -199,7 +204,6 @@ func handle_cell_selected(cell_pos: Vector2i):
             current_player["is_active"] = true
             entity_selected.emit(current_player)
             return
-        
         if selected_entity == current_player and entity == null and current_player["current_pm"] > 0:
             var dx: int = x - int(current_player["x"])
             var dy: int = y - int(current_player["y"])
@@ -214,41 +218,48 @@ func handle_cell_selected(cell_pos: Vector2i):
                     selected_entity = null
                     show_spells = false
             return
-        
-        if selected_entity == current_player:
-            if entity and entity["current_pv"] > 0:
-                if selected_spell != null:
-                    var result = cast_spell(current_player, selected_spell, entity)
-                    if result:
-                        spell_casted.emit(current_player, selected_spell, entity, result)
-                        if entity["current_pv"] <= 0 and entity["entity_type"] == "Enemy":
-                            grid[entity["y"]][entity["x"]] = null
-                            for j in range(enemies.size()):
-                                if enemies[j] == entity:
-                                    enemies.remove_at(j)
-                                    break
-                            check_game_over()
-                    selected_spell = null
-                    show_spells = false
-                    selected_entity = null
-                return
-    
+        if selected_entity == current_player and entity and entity["current_pv"] > 0:
+            var dx: int = abs(x - int(current_player["x"]))
+            var dy: int = abs(y - int(current_player["y"]))
+            var distance = dx + dy
+            if distance == 1:
+                var damage = current_player["force"] + randi_range(-2, 2)
+                var actual_damage = max(1, damage - entity["defense"] / 2)
+                entity["current_pv"] -= actual_damage
+                entity_attacked.emit(current_player, entity, actual_damage)
+                current_player["current_pa"] -= 1
+                if entity["current_pv"] <= 0 and entity["entity_type"] == "Enemy":
+                    grid[entity["y"]][entity["x"]] = null
+                    for j in range(enemies.size()):
+                        if enemies[j] == entity:
+                            enemies.remove_at(j)
+                            break
+                    check_game_over()
+                selected_entity = null
+                show_spells = false
+            return
     selected_entity = null
     show_spells = false
 
 
 func handle_spell_selected(spell: Dictionary):
-    selected_spell = spell
-    spell_selected.emit(spell)
+    var current_player = players[current_player_index]
+    if can_cast_spell(current_player, spell):
+        selected_spell = spell
+        spell_selected.emit(spell)
+        push_message("Sort sélectionné: %s" % spell["name"])
+    else:
+        push_message("Pas assez de PA/PM pour ce sort !")
+        selected_spell = null
 
 
 func next_player():
     current_player_index = (current_player_index + 1) % players.size()
     selected_entity = null
+    selected_spell = null
     show_spells = false
     selected_cell = Vector2i(0, 0)
     player_changed.emit(current_player_index)
-    
     if current_player_index == 0:
         enemy_turn()
 
@@ -256,21 +267,17 @@ func next_player():
 func enemy_turn():
     current_turn = 1
     turn_changed.emit(current_turn)
-    
     for enemy in enemies:
         if enemy["current_pv"] > 0:
             var result = enemy_ai_turn(enemy, players, grid)
             push_message(result)
             if not any_player_alive():
                 break
-    
     current_turn = 0
     turn_changed.emit(current_turn)
-    
     for player in players:
         player["current_pa"] = player["max_pa"]
         player["current_pm"] = player["max_pm"]
-    
     check_game_over()
 
 
@@ -287,13 +294,11 @@ func check_game_over():
         if enemy["current_pv"] > 0:
             all_enemies_dead = false
             break
-    
     var all_players_dead := true
     for player in players:
         if player["current_pv"] > 0:
             all_players_dead = false
             break
-    
     if all_enemies_dead:
         victory = true
         game_over = true
@@ -316,6 +321,7 @@ func reset_game():
     victory = false
     selected_cell = Vector2i(0, 0)
     turn_changed.emit(current_turn)
+    player_changed.emit(current_player_index)
 
 
 func push_message(message: String):
@@ -325,10 +331,8 @@ func push_message(message: String):
 func cast_spell(caster: Dictionary, spell: Dictionary, target: Dictionary) -> String:
     if not can_cast_spell(caster, spell):
         return ""
-    
     caster["current_pa"] -= spell["cost_pa"]
     caster["current_pm"] -= spell["cost_pm"]
-    
     if "dégâts" in spell["effect"].to_lower():
         var damage_str = spell["effect"].split(" ")[0]
         var damage = int(damage_str) if damage_str.is_valid_int() else 10
@@ -354,10 +358,8 @@ func enemy_ai_turn(enemy: Dictionary, players: Array, grid: Array) -> String:
     for p in players:
         if p["current_pv"] > 0:
             alive_players.append(p)
-    
     if alive_players.is_empty():
         return "%s ne peut pas agir." % enemy["name"]
-    
     if randf() < 0.7 and enemy["current_pa"] >= 1:
         var target = alive_players[randi() % alive_players.size()]
         var damage = enemy["force"] + randi_range(-2, 2)
