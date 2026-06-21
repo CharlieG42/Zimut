@@ -49,6 +49,7 @@ func _ready():
     init_entities()
     current_turn = 0
     turn_changed.emit(current_turn)
+    player_changed.emit(current_player_index)
 
 
 func load_data():
@@ -191,6 +192,7 @@ func handle_cell_selected(cell_pos: Vector2i):
                             check_game_over()
                     selected_spell = null
                     entity_selected.emit(null)
+                    player_changed.emit(current_player_index)
                 else:
                     push_message("Cible hors de portée ! (Portée: %d)" % selected_spell["range"])
             else:
@@ -203,6 +205,7 @@ func handle_cell_selected(cell_pos: Vector2i):
                 p["is_active"] = false
             current_player["is_active"] = true
             entity_selected.emit(current_player)
+            player_changed.emit(current_player_index)
             return
         if selected_entity == current_player and entity == null and current_player["current_pm"] > 0:
             var dx: int = x - int(current_player["x"])
@@ -217,6 +220,7 @@ func handle_cell_selected(cell_pos: Vector2i):
                     entity_moved.emit(current_player, Vector2i(current_player["x"] - dx, current_player["y"] - dy), cell_pos)
                     selected_entity = null
                     show_spells = false
+                    player_changed.emit(current_player_index)
             return
         if selected_entity == current_player and entity and entity["current_pv"] > 0:
             var dx: int = abs(x - int(current_player["x"]))
@@ -237,6 +241,7 @@ func handle_cell_selected(cell_pos: Vector2i):
                     check_game_over()
                 selected_entity = null
                 show_spells = false
+                player_changed.emit(current_player_index)
             return
     selected_entity = null
     show_spells = false
@@ -248,6 +253,7 @@ func handle_spell_selected(spell: Dictionary):
         selected_spell = spell
         spell_selected.emit(spell)
         push_message("Sort sélectionné: %s" % spell["name"])
+        player_changed.emit(current_player_index)
     else:
         push_message("Pas assez de PA/PM pour ce sort !")
         selected_spell = null
