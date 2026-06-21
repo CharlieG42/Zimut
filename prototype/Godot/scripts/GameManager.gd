@@ -84,8 +84,8 @@ func init_grid():
 
 
 func init_entities():
-    var player_classes := ["Tank", "Assassin", "Mage"]
-    var player_positions := [Vector2i(1, 1), Vector2i(1, 2), Vector2i(2, 1)]
+    var player_classes: Array[String] = ["Tank", "Assassin", "Mage"]
+    var player_positions: Array[Vector2i] = [Vector2i(1, 1), Vector2i(1, 2), Vector2i(2, 1)]
     
     players = []
     
@@ -138,8 +138,8 @@ func init_entities():
             players.append(player)
             grid[pos.y][pos.x] = player
     
-    var enemy_types := ["Gobelin", "Squelette", "Loup"]
-    var enemy_positions := [Vector2i(8, 8), Vector2i(8, 7), Vector2i(7, 8)]
+    var enemy_types: Array[String] = ["Gobelin", "Squelette", "Loup"]
+    var enemy_positions: Array[Vector2i] = [Vector2i(8, 8), Vector2i(8, 7), Vector2i(7, 8)]
     
     enemies = []
     
@@ -182,11 +182,11 @@ func handle_cell_selected(cell_pos: Vector2i):
     var x := cell_pos.x
     var y := cell_pos.y
     
-    if not (0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE):
+    if not (x >= 0 and x < GRID_SIZE and y >= 0 and y < GRID_SIZE):
         return
     
     selected_cell = cell_pos
-    var entity := grid[y][x]
+    var entity = grid[y][x]
     
     if current_turn == 0:
         var current_player = players[current_player_index]
@@ -201,8 +201,8 @@ func handle_cell_selected(cell_pos: Vector2i):
             return
         
         if selected_entity == current_player and entity == null and current_player["current_pm"] > 0:
-            var dx := x - current_player["x"]
-            var dy := y - current_player["y"]
+            var dx: int = x - int(current_player["x"])
+            var dy: int = y - int(current_player["y"])
             if abs(dx) + abs(dy) == 1:
                 if grid[y][x] == null:
                     grid[current_player["y"]][current_player["x"]] = null
@@ -225,7 +225,7 @@ func handle_cell_selected(cell_pos: Vector2i):
                             grid[entity["y"]][entity["x"]] = null
                             for j in range(enemies.size()):
                                 if enemies[j] == entity:
-                                    enemies.remove(j)
+                                    enemies.remove_at(j)
                                     break
                             check_game_over()
                     selected_spell = null
@@ -261,7 +261,7 @@ func enemy_turn():
         if enemy["current_pv"] > 0:
             var result = enemy_ai_turn(enemy, players, grid)
             push_message(result)
-            if not any(p["current_pv"] > 0) for p in players:
+            if not any_player_alive():
                 break
     
     current_turn = 0
@@ -272,6 +272,13 @@ func enemy_turn():
         player["current_pm"] = player["max_pm"]
     
     check_game_over()
+
+
+func any_player_alive() -> bool:
+    for p in players:
+        if p["current_pv"] > 0:
+            return true
+    return false
 
 
 func check_game_over():
@@ -365,7 +372,7 @@ func enemy_ai_turn(enemy: Dictionary, players: Array, grid: Array) -> String:
         if dx != 0 or dy != 0:
             var new_x = enemy["x"] + dx
             var new_y = enemy["y"] + dy
-            if 0 <= new_x < GRID_SIZE and 0 <= new_y < GRID_SIZE and grid[new_y][new_x] == null:
+            if new_x >= 0 and new_x < GRID_SIZE and new_y >= 0 and new_y < GRID_SIZE and grid[new_y][new_x] == null:
                 grid[enemy["y"]][enemy["x"]] = null
                 enemy["x"] = new_x
                 enemy["y"] = new_y
