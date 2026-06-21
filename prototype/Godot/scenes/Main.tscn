@@ -31,6 +31,7 @@ color = Color(0, 0, 0, 0.7)
 position = Vector2(0, 0)
 size = Vector2(1200, 700)
 visible = false
+z_index = 100
 
 [node name="GameOverLabel" type="Label" parent="./GameOverPanel"]
 position = Vector2(600, 300)
@@ -44,9 +45,15 @@ text = "Recommencer"
 horizontal_alignment = 1
 
 [node name="SpellPanel" type="Panel" parent="."]
-position = Vector2(850, 100)
-size = Vector2(300, 500)
+position = Vector2(700, 100)
+size = Vector2(300, 400)
 visible = false
+z_index = 50
+
+[node name="SpellPanelBackground" type="ColorRect" parent="./SpellPanel"]
+position = Vector2(0, 0)
+size = Vector2(300, 400)
+color = Color(0.1, 0.1, 0.2, 0.8)
 
 [node name="SpellPanelLabel" type="Label" parent="./SpellPanel"]
 position = Vector2(150, 20)
@@ -56,18 +63,24 @@ horizontal_alignment = 1
 
 [node name="SpellContainer" type="VBoxContainer" parent="./SpellPanel"]
 position = Vector2(20, 60)
-size = Vector2(260, 420)
+size = Vector2(260, 320)
 
 [node name="TurnOrderPanel" type="Panel" parent="."]
 position = Vector2(50, 50)
-size = Vector2(200, 600)
+size = Vector2(150, 500)
+z_index = 40
+
+[node name="TurnOrderBackground" type="ColorRect" parent="./TurnOrderPanel"]
+position = Vector2(0, 0)
+size = Vector2(150, 500)
+color = Color(0.2, 0.1, 0.1, 0.7)
 
 [node name="TurnOrderLabel" type="Label" parent="./TurnOrderPanel"]
-position = Vector2(100, 20)
+position = Vector2(75, 20)
 text = "Ordre des tours"
 label/settings/font_size = 20
 horizontal_alignment = 1
 
 [node name="TurnOrderContainer" type="VBoxContainer" parent="./TurnOrderPanel"]
 position = Vector2(20, 60)
-size = Vector2(160, 520)
+size = Vector2(110, 420)

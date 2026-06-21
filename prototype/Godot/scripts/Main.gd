@@ -25,6 +25,7 @@ func _ready():
     get_viewport().size = Vector2(1200, 700)
     init_grid_display()
     init_turn_order_display()
+    
     game_manager.turn_changed.connect(_on_turn_changed)
     game_manager.player_changed.connect(_on_player_changed)
     game_manager.entity_selected.connect(_on_entity_selected)
@@ -34,7 +35,14 @@ func _ready():
     game_manager.entity_attacked.connect(_on_entity_attacked)
     game_manager.spell_casted.connect(_on_spell_casted)
     restart_button.pressed.connect(_on_restart_pressed)
+    
+    spell_panel.visible = false
     update_ui()
+    
+    # Afficher les sorts du joueur initial après un petit délai
+    await get_tree().process_frame
+    if game_manager.players.size() > 0:
+        show_spells_for_player(game_manager.players[0])
 
 
 func init_grid_display():
@@ -84,6 +92,8 @@ func show_spells_for_player(player: Dictionary):
         button.spell = spell
         button.spell_selected.connect(_on_spell_button_selected)
         button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+        button.mouse_filter = Control.MOUSE_FILTER_PASS
         spell_container.add_child(button)
         spell_buttons.append(button)
     spell_panel.visible = true
@@ -113,8 +123,6 @@ func _on_player_changed(index: int):
 
 func _on_entity_selected(entity):
     update_ui()
-    if entity != null:
-        hide_spell_panel()
 
 func _on_spell_selected(spell):
     pass
