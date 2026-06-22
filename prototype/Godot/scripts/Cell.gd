@@ -88,13 +88,13 @@ func update_appearance():
         var color = GameManager.COLORS.get(entity.get("classe", ""), Color(0.5, 0.5, 0.5))
         if entity_sprite:
             entity_sprite.visible = true
-            entity_sprite.texture = _make_circle_texture(color)
+            entity_sprite.texture = _make_circle_texture(color, 30.0)
         if border:
             border.visible = true
             var border_color = Color.BLUE if entity.get("entity_type", "") == "Player" else Color.RED
             if entity.get("is_active", false):
                 border_color = Color.YELLOW
-            border.texture = _make_ring_texture(border_color)
+            border.texture = _make_ring_texture(border_color, 30.0)
         # selection overlay as Sprite2D
         if selected:
             var sel = get_node_or_null("Selection")
