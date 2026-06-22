@@ -21,22 +21,15 @@ label/settings/font_size = 40
 horizontal_alignment = 1
 
 [node name="PlayerInfoLabel" type="Label" parent="./UI"]
-position = Vector2(20, 1020)
+position = Vector2(20, 980)
 text = "Joueur: -"
 label/settings/font_size = 32
 
 [node name="MessageLabel" type="Label" parent="./UI"]
-position = Vector2(960, 1020)
+position = Vector2(960, 980)
 text = ""
 label/settings/font_size = 32
 horizontal_alignment = 1
-
-[node name="ActivePlayerLabel" type="Label" parent="./UI"]
-position = Vector2(960, 80)
-text = ""
-label/settings/font_size = 36
-horizontal_alignment = 1
-add_theme_color_override("font_color", Color(1, 0.5, 0))
 
 [node name="GameOverPanel" type="ColorRect" parent="./UI"]
 color = Color(0, 0, 0, 0.7)
@@ -78,19 +71,19 @@ size = Vector2(150, 700)
 
 [node name="TurnOrderPanel" type="Panel" parent="./UI"]
 position = Vector2(20, 100)
-size = Vector2(120, 800)
+size = Vector2(180, 800)
 z_index = 40
 
 [node name="TurnOrderBackground" type="ColorRect" parent="./UI/TurnOrderPanel"]
 color = Color(0.2, 0.1, 0.1, 0.7)
-size = Vector2(120, 800)
+size = Vector2(180, 800)
 
 [node name="TurnOrderLabel" type="Label" parent="./UI/TurnOrderPanel"]
-position = Vector2(60, 40)
-text = "Ordre"
+position = Vector2(90, 40)
+text = "Ordre de tour"
 label/settings/font_size = 28
 horizontal_alignment = 1
 
 [node name="TurnOrderContainer" type="VBoxContainer" parent="./UI/TurnOrderPanel"]
 position = Vector2(10, 80)
-size = Vector2(100, 700)
+size = Vector2(160, 700)
