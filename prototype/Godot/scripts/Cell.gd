@@ -78,7 +78,8 @@ func _make_ring_texture(color: Color, radius: float = 30.0, thickness: float = 2
 func update_appearance():
     var bg = get_node_or_null("Background") as Sprite2D
     if bg:
-        var bg_color = Color.LIGHT_GRAY if (grid_position.x + grid_position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
+        # Plus de contraste pour le damier
+        var bg_color = Color(0.95, 0.95, 0.95) if (grid_position.x + grid_position.y) % 2 == 0 else Color(0.65, 0.65, 0.65)
         bg.texture = _make_filled_texture(bg_color)
 
     var entity_sprite = get_node_or_null("EntitySprite") as Sprite2D
