@@ -8,21 +8,22 @@
 script = ExtResource( 1 )
 
 [node name="Grid" type="Node2D" parent="."]
-# CORRIGÉ : Centré à (600, 350) pour une grille de 640x640 dans un viewport de 1200x700
-position = Vector2(600, 350)
+# CORRIGÉ : Position à (320, 320) pour que avec offset -320, 
+# la cellule (0,0) soit à (0,0) et (9,9) à (576,576) dans un viewport 800x600
+position = Vector2(320, 320)
 
 [node name="TurnLabel" type="Label" parent="."]
-position = Vector2(1000, 20)
+position = Vector2(800, 20)
 text = "Tour des joueurs"
 label/settings/font_size = 24
 
 [node name="PlayerInfoLabel" type="Label" parent="."]
-position = Vector2(50, 650)
+position = Vector2(50, 580)
 text = "Joueur: -"
 label/settings/font_size = 18
 
 [node name="MessageLabel" type="Label" parent="."]
-position = Vector2(600, 650)
+position = Vector2(400, 580)
 text = ""
 label/settings/font_size = 18
 horizontal_alignment = 1
@@ -30,60 +31,58 @@ horizontal_alignment = 1
 [node name="GameOverPanel" type="ColorRect" parent="."]
 color = Color(0, 0, 0, 0.7)
 position = Vector2(0, 0)
-size = Vector2(1200, 700)
+size = Vector2(800, 600)
 visible = false
 z_index = 100
 
 [node name="GameOverLabel" type="Label" parent="./GameOverPanel"]
-position = Vector2(600, 300)
+position = Vector2(400, 300)
 text = "GAME OVER"
 label/settings/font_size = 48
 horizontal_alignment = 1
 
 [node name="RestartButton" type="Button" parent="./GameOverPanel"]
-position = Vector2(600, 400)
+position = Vector2(400, 350)
 text = "Recommencer"
 horizontal_alignment = 1
 
 [node name="SpellPanel" type="Panel" parent="."]
-# Positionné à droite de la grille (600+320=920, donc 940 pour marge)
-position = Vector2(940, 50)
-size = Vector2(250, 580)
+position = Vector2(650, 50)
+size = Vector2(150, 500)
 visible = false
 z_index = 50
 
 [node name="SpellPanelBackground" type="ColorRect" parent="./SpellPanel"]
 position = Vector2(0, 0)
-size = Vector2(250, 580)
+size = Vector2(150, 500)
 color = Color(0.1, 0.1, 0.2, 0.8)
 
 [node name="SpellPanelLabel" type="Label" parent="./SpellPanel"]
-position = Vector2(125, 20)
-text = "Sorts disponibles"
-label/settings/font_size = 20
+position = Vector2(75, 20)
+text = "Sorts"
+label/settings/font_size = 18
 horizontal_alignment = 1
 
 [node name="SpellContainer" type="VBoxContainer" parent="./SpellPanel"]
-position = Vector2(20, 60)
-size = Vector2(210, 500)
+position = Vector2(10, 50)
+size = Vector2(130, 440)
 
 [node name="TurnOrderPanel" type="Panel" parent="."]
-# À gauche, hors de la grille (qui commence à x=280)
 position = Vector2(10, 50)
-size = Vector2(150, 580)
+size = Vector2(100, 500)
 z_index = 40
 
 [node name="TurnOrderBackground" type="ColorRect" parent="./TurnOrderPanel"]
 position = Vector2(0, 0)
-size = Vector2(150, 580)
+size = Vector2(100, 500)
 color = Color(0.2, 0.1, 0.1, 0.7)
 
 [node name="TurnOrderLabel" type="Label" parent="./TurnOrderPanel"]
-position = Vector2(75, 20)
-text = "Ordre des tours"
-label/settings/font_size = 20
+position = Vector2(50, 20)
+text = "Ordre"
+label/settings/font_size = 18
 horizontal_alignment = 1
 
 [node name="TurnOrderContainer" type="VBoxContainer" parent="./TurnOrderPanel"]
-position = Vector2(10, 60)
-size = Vector2(130, 500)
+position = Vector2(10, 50)
+size = Vector2(80, 440)
