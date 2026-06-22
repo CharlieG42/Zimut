@@ -53,14 +53,6 @@ func init_ui_elements():
     end_turn_button.add_theme_font_size_override("font_size", 28)
     add_child(end_turn_button)
     end_turn_button.pressed.connect(_on_end_turn_pressed)
-    
-    # Set minimum width for panels
-    turn_order_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    turn_order_panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-    turn_order_panel.custom_constants["min_width"] = 300.0
-    
-    spell_panel.size_flags_horizontal = Control.SIZE_SHRINK_END
-    spell_panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 
 
 func init_grid_display():
@@ -84,11 +76,6 @@ func init_turn_order_display():
     
     for child in turn_order_container.get_children():
         child.queue_free()
-    
-    # Set container minimum width
-    turn_order_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    turn_order_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-    turn_order_container.custom_constants["min_width"] = 300.0
     
     # Ajouter les joueurs
     for i in range(game_manager.players.size()):
