@@ -1,12 +1,6 @@
 ; Engine configuration file.
 ; It's best edited using the editor UI and not directly,
-; since the parameters that go here are not all obvious.
-;
-; Format:
-;   [section] ; section goes between []
-;   param=value ; assign values to parameters
-
-config_version=5
+; but it can also be edited manually.
 
 [application]
 
@@ -21,31 +15,18 @@ GameManager="*res://scripts/GameManager.gd"
 
 [display]
 
-window/size/viewport_width=1200
-window/size/viewport_height=700
-window/size/resizable=false
-window/stretch/mode="canvas_items"
+window/size/viewport_width=800
+window/size/viewport_height=600
+window/stretch/mode="2d"
 window/handheld/orientation="landscape"
 
 [input]
 
-move_left={
-"deadzone": 0.5,
-"events": []
-}
-move_right={
-"deadzone": 0.5,
-"events": []
-}
-move_up={
-"deadzone": 0.5,
-"events": []
-}
-move_down={
-"deadzone": 0.5,
-"events": []
-}
+move_left={"deadzone": 0.5, "events": []}
+move_right={"deadzone": 0.5, "events": []}
+move_up={"deadzone": 0.5, "events": []}
+move_down={"deadzone": 0.5, "events": []}
 
 [rendering]
 
-textures/vram_compression/import_etc2_astc=true
+renderer/rendering_method="forward_plus"
