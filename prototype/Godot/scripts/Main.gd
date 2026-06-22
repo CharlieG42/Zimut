@@ -81,6 +81,12 @@ func init_turn_order_display():
     for i in range(game_manager.players.size()):
         var player = game_manager.players[i]
         
+        # Container for player info (name + health bar)
+        var player_container = HBoxContainer.new()
+        player_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        player_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+        turn_order_container.add_child(player_container)
+        
         # Label du nom
         var label = Label.new()
         label.text = "%d. %s" % [i + 1, player.get("name", "Joueur")]
@@ -88,54 +94,63 @@ func init_turn_order_display():
         settings.font_size = 22
         label.label_settings = settings
         label.add_theme_color_override("font_color", Color.WHITE)
-        turn_order_container.add_child(label)
+        label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        player_container.add_child(label)
         turn_order_labels.append(label)
         
         # Barre de vie
         var health_bar_container = HBoxContainer.new()
-        health_bar_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        health_bar_container.size_flags_horizontal = Control.SIZE_SHRINK_END
         health_bar_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-        turn_order_container.add_child(health_bar_container)
+        player_container.add_child(health_bar_container)
         
         var health_bar_bg = ColorRect.new()
         health_bar_bg.color = Color(0.3, 0.3, 0.3)
-        health_bar_bg.size = Vector2(140, 12)
+        health_bar_bg.size = Vector2(140, 16)
         health_bar_container.add_child(health_bar_bg)
         
         var health_bar_fill = ColorRect.new()
         health_bar_fill.name = "HealthBar_%d" % i
         health_bar_fill.color = Color(0, 0.8, 0)
-        health_bar_fill.size = Vector2(140, 12)
+        health_bar_fill.size = Vector2(140, 16)
         health_bar_container.add_child(health_bar_fill)
         turn_order_health_bars.append(health_bar_fill)
     
     # Ajouter les ennemis
     for i in range(game_manager.enemies.size()):
         var enemy = game_manager.enemies[i]
+        
+        # Container for enemy info (name + health bar)
+        var enemy_container = HBoxContainer.new()
+        enemy_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        enemy_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+        turn_order_container.add_child(enemy_container)
+        
         var label = Label.new()
         label.text = "%d. %s" % [i + 1 + game_manager.players.size(), enemy.get("name", "Ennemi")]
         var settings = LabelSettings.new()
         settings.font_size = 22
         label.label_settings = settings
         label.add_theme_color_override("font_color", Color(0.8, 0.4, 0.4))
-        turn_order_container.add_child(label)
+        label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        enemy_container.add_child(label)
         turn_order_labels.append(label)
         
         # Barre de vie pour les ennemis
         var health_bar_container = HBoxContainer.new()
-        health_bar_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        health_bar_container.size_flags_horizontal = Control.SIZE_SHRINK_END
         health_bar_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-        turn_order_container.add_child(health_bar_container)
+        enemy_container.add_child(health_bar_container)
         
         var health_bar_bg = ColorRect.new()
         health_bar_bg.color = Color(0.3, 0.3, 0.3)
-        health_bar_bg.size = Vector2(140, 12)
+        health_bar_bg.size = Vector2(140, 16)
         health_bar_container.add_child(health_bar_bg)
         
         var health_bar_fill = ColorRect.new()
         health_bar_fill.name = "HealthBar_%d" % (game_manager.players.size() + i)
         health_bar_fill.color = Color(0.8, 0.2, 0.2)
-        health_bar_fill.size = Vector2(140, 12)
+        health_bar_fill.size = Vector2(140, 16)
         health_bar_container.add_child(health_bar_fill)
         turn_order_health_bars.append(health_bar_fill)
 
