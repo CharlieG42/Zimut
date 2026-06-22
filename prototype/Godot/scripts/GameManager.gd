@@ -51,6 +51,12 @@ func _ready():
     init_entities()
     current_turn = 0
     turn_changed.emit(current_turn)
+    # Auto-select first player at game start
+    if players.size() > 0:
+        selected_entity = players[0]
+        players[0]["is_active"] = true
+        entity_selected.emit(selected_entity)
+    current_player_index = 0
     player_changed.emit(current_player_index)
 
 
@@ -174,8 +180,11 @@ func handle_cell_selected(cell_pos: Vector2i):
         return
     selected_cell = cell_pos
     var entity = grid[y][x]
+    
     if current_turn == 0:
         var current_player = players[current_player_index]
+        
+        # If a spell is selected, handle spell casting
         if selected_spell != null:
             if entity and entity["current_pv"] > 0:
                 var dx: int = abs(x - int(current_player["x"]))
@@ -201,6 +210,8 @@ func handle_cell_selected(cell_pos: Vector2i):
             else:
                 message_requested.emit("Pas de cible valide à cette position")
             return
+        
+        # Auto-selection: If clicking on current player, show spells
         if entity and entity["entity_type"] == "Player" and entity == current_player:
             selected_entity = current_player
             show_spells = true
@@ -210,7 +221,9 @@ func handle_cell_selected(cell_pos: Vector2i):
             entity_selected.emit(current_player)
             player_changed.emit(current_player_index)
             return
-        if selected_entity == current_player and entity == null and current_player["current_pm"] > 0:
+        
+        # One-click movement: If clicking adjacent empty cell, move current player
+        if entity == null and current_player["current_pm"] > 0:
             var dx: int = x - int(current_player["x"])
             var dy: int = y - int(current_player["y"])
             if abs(dx) + abs(dy) == 1:
@@ -221,11 +234,14 @@ func handle_cell_selected(cell_pos: Vector2i):
                     grid[y][x] = current_player
                     current_player["current_pm"] -= 1
                     entity_moved.emit(current_player, Vector2i(current_player["x"] - dx, current_player["y"] - dy), cell_pos)
-                    selected_entity = null
+                    selected_entity = current_player
                     show_spells = false
                     player_changed.emit(current_player_index)
+                    message_requested.emit("%s se déplace vers (%d,%d)" % [current_player["name"], x, y])
             return
-        if selected_entity == current_player and entity and entity["current_pv"] > 0:
+        
+        # One-click attack: If clicking adjacent enemy, attack
+        if entity and entity["current_pv"] > 0 and entity["entity_type"] == "Enemy":
             var dx: int = abs(x - int(current_player["x"]))
             var dy: int = abs(y - int(current_player["y"]))
             var distance = dx + dy
@@ -243,10 +259,11 @@ func handle_cell_selected(cell_pos: Vector2i):
                             enemies.remove_at(j)
                             break
                     check_game_over()
-                selected_entity = null
+                selected_entity = current_player
                 show_spells = false
                 player_changed.emit(current_player_index)
             return
+    
     selected_entity = null
     show_spells = false
 
@@ -265,12 +282,21 @@ func handle_spell_selected(spell: Dictionary):
 
 func next_player():
     current_player_index = (current_player_index + 1) % players.size()
-    selected_entity = null
     selected_spell = null
     show_spells = false
     selected_cell = Vector2i(0, 0)
+    
+    # Auto-select the new current player
+    var current_player = players[current_player_index]
+    selected_entity = current_player
+    for p in players:
+        p["is_active"] = false
+    current_player["is_active"] = true
+    
     player_changed.emit(current_player_index)
-    message_requested.emit("Tour de %s" % players[current_player_index].get("name", "?"))
+    entity_selected.emit(current_player)
+    message_requested.emit("Tour de %s" % current_player.get("name", "?"))
+    
     if current_player_index == 0:
         enemy_turn()
 
@@ -336,6 +362,11 @@ func reset_game():
     victory = false
     selected_cell = Vector2i(0, 0)
     turn_changed.emit(current_turn)
+    # Auto-select first player after reset
+    if players.size() > 0:
+        selected_entity = players[0]
+        players[0]["is_active"] = true
+        entity_selected.emit(selected_entity)
     player_changed.emit(current_player_index)
     message_requested.emit("Nouvelle partie !")
 
