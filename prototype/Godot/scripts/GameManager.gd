@@ -153,7 +153,7 @@ func init_entities():
                 "current_pv": int(enemy_info["PV"]),
                 "force": int(enemy_info["Attaque"]),
                 "intelligence": 0,
-                "agility": float(enemy_info["Attaque"]) / 2.0,  # Fixed: float division
+                "agility": float(enemy_info["Attaque"]) / 2.0,
                 "wisdom": 0,
                 "defense": int(enemy_info["Défense"]),
                 "max_pa": int(enemy_info["PA"]),
@@ -202,7 +202,7 @@ func handle_cell_selected(cell_pos: Vector2i):
                 message_requested.emit("Pas de cible valide à cette position")
             return
         if entity and entity["entity_type"] == "Player" and entity == current_player:
-            selected_entity = entity
+            selected_entity = current_player
             show_spells = true
             for p in players:
                 p["is_active"] = false
@@ -231,7 +231,7 @@ func handle_cell_selected(cell_pos: Vector2i):
             var distance = dx + dy
             if distance == 1:
                 var damage = current_player["force"] + ((randi() % 5) - 2)
-                var actual_damage = max(1, damage - entity["defense"] / 2.0)  # Fixed: float division
+                var actual_damage = max(1, damage - entity["defense"] / 2.0)
                 entity["current_pv"] -= actual_damage
                 entity_attacked.emit(current_player, entity, actual_damage)
                 current_player["current_pa"] -= 1
@@ -352,7 +352,7 @@ func cast_spell(caster: Dictionary, spell: Dictionary, target: Dictionary) -> St
     if "dégâts" in spell["effect"].to_lower():
         var damage_str = spell["effect"].split(" ")[0]
         var damage = int(damage_str) if damage_str.is_valid_int() else 10
-        target["current_pv"] -= max(1, damage - target["defense"] / 2.0)  # Fixed: float division
+        target["current_pv"] -= max(1, damage - target["defense"] / 2.0)
         return "%s lance %s : %d dégâts !" % [caster["name"], spell["name"], damage]
     elif "restaure" in spell["effect"].to_lower() or "soin" in spell["effect"].to_lower():
         var heal_str = spell["effect"].split(" ")[1]
@@ -379,7 +379,7 @@ func enemy_ai_turn(p_enemy: Dictionary, p_players: Array, p_grid: Array) -> Stri
     if randf() < 0.7 and p_enemy["current_pa"] >= 1:
         var target = alive_players[randi() % alive_players.size()]
         var damage = p_enemy["force"] + ((randi() % 5) - 2)
-        var actual_damage = max(1, damage - target["defense"] / 2.0)  # Fixed: float division
+        var actual_damage = max(1, damage - target["defense"] / 2.0)
         target["current_pv"] -= actual_damage
         p_enemy["current_pa"] -= 1
         return "%s attaque %s : %d dégâts !" % [p_enemy["name"], target["name"], actual_damage]
