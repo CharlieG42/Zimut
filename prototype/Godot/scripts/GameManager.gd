@@ -45,6 +45,7 @@ var enemies_data: Array = []
 
 
 func _ready():
+    randomize()
     load_data()
     init_grid()
     init_entities()
@@ -229,7 +230,7 @@ func handle_cell_selected(cell_pos: Vector2i):
             var dy: int = abs(y - int(current_player["y"]))
             var distance = dx + dy
             if distance == 1:
-                var damage = current_player["force"] + randi_range(-2, 2)
+                var damage = current_player["force"] + ((randi() % 5) - 2)
                 var actual_damage = max(1, damage - entity["defense"] / 2)
                 entity["current_pv"] -= actual_damage
                 entity_attacked.emit(current_player, entity, actual_damage)
@@ -377,7 +378,7 @@ func enemy_ai_turn(enemy: Dictionary, players: Array, grid: Array) -> String:
         return "%s ne peut pas agir." % enemy["name"]
     if randf() < 0.7 and enemy["current_pa"] >= 1:
         var target = alive_players[randi() % alive_players.size()]
-        var damage = enemy["force"] + randi_range(-2, 2)
+        var damage = enemy["force"] + ((randi() % 5) - 2)
         var actual_damage = max(1, damage - target["defense"] / 2)
         target["current_pv"] -= actual_damage
         enemy["current_pa"] -= 1
