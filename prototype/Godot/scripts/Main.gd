@@ -1,5 +1,6 @@
 extends Node2D
 ## Main.gd - Scene principale avec Node2D
+## TurnOrderContainer is now a Control (not VBoxContainer) for manual positioning
 
 @onready var grid: Node2D = $Grid
 @onready var turn_label: Label = $UI/TurnLabel
@@ -12,7 +13,7 @@ extends Node2D
 @onready var spell_panel: Panel = $UI/SpellPanel
 @onready var spell_container: VBoxContainer = $UI/SpellPanel/SpellContainer
 @onready var turn_order_panel: Panel = $UI/TurnOrderPanel
-@onready var turn_order_container: VBoxContainer = $UI/TurnOrderPanel/TurnOrderContainer
+@onready var turn_order_container: Control = $UI/TurnOrderPanel/TurnOrderContainer
 
 var game_manager
 
@@ -89,7 +90,7 @@ func init_turn_order_display():
     for i in range(game_manager.players.size()):
         var player = game_manager.players[i]
         
-        # Label du nom - absolute positioning
+        # Label du nom - absolute positioning in Control
         var label = Label.new()
         label.text = "%d. %s" % [i + 1, player.get("name", "Joueur")]
         var settings = LabelSettings.new()
@@ -97,28 +98,28 @@ func init_turn_order_display():
         label.label_settings = settings
         label.add_theme_color_override("font_color", Color.WHITE)
         label.position = Vector2(10, y_pos)
-        label.size = Vector2(160, 25)
+        label.size = Vector2(160, 30)
         turn_order_container.add_child(label)
         turn_order_labels.append(label)
         
-        # Health bar background
+        # Health bar background (black for contrast)
         var health_bar_bg = ColorRect.new()
-        health_bar_bg.color = Color(0.15, 0.15, 0.15)
+        health_bar_bg.color = Color(0, 0, 0)  # Black background
         health_bar_bg.position = Vector2(180, y_pos)
-        health_bar_bg.size = Vector2(100, 25)
+        health_bar_bg.size = Vector2(100, 30)
         turn_order_container.add_child(health_bar_bg)
         
-        # Health bar fill
+        # Health bar fill (bright green for players)
         var health_bar_fill = ColorRect.new()
         health_bar_fill.name = "HealthBar_%d" % i
-        health_bar_fill.color = Color(0, 1.0, 0)
+        health_bar_fill.color = Color(0, 1.0, 0)  # Bright green
         health_bar_fill.position = Vector2(180, y_pos)
-        health_bar_fill.size = Vector2(100, 25)
+        health_bar_fill.size = Vector2(100, 30)
         health_bar_fill.z_index = 1
         turn_order_container.add_child(health_bar_fill)
         turn_order_health_bars.append(health_bar_fill)
         
-        y_pos += 30
+        y_pos += 35  # Spacing between rows
     
     # Ajouter les ennemis
     for i in range(game_manager.enemies.size()):
@@ -131,28 +132,28 @@ func init_turn_order_display():
         label.label_settings = settings
         label.add_theme_color_override("font_color", Color(0.9, 0.4, 0.4))
         label.position = Vector2(10, y_pos)
-        label.size = Vector2(160, 25)
+        label.size = Vector2(160, 30)
         turn_order_container.add_child(label)
         turn_order_labels.append(label)
         
-        # Health bar background
+        # Health bar background (black for contrast)
         var health_bar_bg = ColorRect.new()
-        health_bar_bg.color = Color(0.15, 0.15, 0.15)
+        health_bar_bg.color = Color(0, 0, 0)  # Black background
         health_bar_bg.position = Vector2(180, y_pos)
-        health_bar_bg.size = Vector2(100, 25)
+        health_bar_bg.size = Vector2(100, 30)
         turn_order_container.add_child(health_bar_bg)
         
-        # Health bar fill
+        # Health bar fill (bright red for enemies)
         var health_bar_fill = ColorRect.new()
         health_bar_fill.name = "HealthBar_%d" % (game_manager.players.size() + i)
-        health_bar_fill.color = Color(1.0, 0.2, 0.2)
+        health_bar_fill.color = Color(1.0, 0, 0)  # Bright red
         health_bar_fill.position = Vector2(180, y_pos)
-        health_bar_fill.size = Vector2(100, 25)
+        health_bar_fill.size = Vector2(100, 30)
         health_bar_fill.z_index = 1
         turn_order_container.add_child(health_bar_fill)
         turn_order_health_bars.append(health_bar_fill)
         
-        y_pos += 30
+        y_pos += 35  # Spacing between rows
 
 
 func _on_cell_clicked(x: int, y: int):
@@ -309,7 +310,7 @@ func update_turn_order_health_bars():
             health_bar.size.x = 100.0 * health_ratio
             health_bar.position.x = 180
             health_bar.position.y = y_pos
-        y_pos += 30
+        y_pos += 35
     
     # Mettre à jour les barres de vie des ennemis
     for i in range(game_manager.enemies.size()):
@@ -321,7 +322,7 @@ func update_turn_order_health_bars():
             health_bar.size.x = 100.0 * health_ratio
             health_bar.position.x = 180
             health_bar.position.y = y_pos
-        y_pos += 30
+        y_pos += 35
 
 
 func update_entity_display():
