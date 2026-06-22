@@ -17,19 +17,26 @@ z_index = 20
 [node name="TurnLabel" type="Label" parent="./UI"]
 position = Vector2(960, 40)
 text = "Tour des joueurs"
-label/settings/font_size = 32
+label/settings/font_size = 40
 horizontal_alignment = 1
 
 [node name="PlayerInfoLabel" type="Label" parent="./UI"]
-position = Vector2(20, 1060)
+position = Vector2(20, 1020)
 text = "Joueur: -"
-label/settings/font_size = 24
+label/settings/font_size = 32
 
 [node name="MessageLabel" type="Label" parent="./UI"]
-position = Vector2(960, 1060)
+position = Vector2(960, 1020)
 text = ""
-label/settings/font_size = 24
+label/settings/font_size = 32
 horizontal_alignment = 1
+
+[node name="ActivePlayerLabel" type="Label" parent="./UI"]
+position = Vector2(960, 80)
+text = ""
+label/settings/font_size = 36
+horizontal_alignment = 1
+add_theme_color_override("font_color", Color(1, 0.5, 0))
 
 [node name="GameOverPanel" type="ColorRect" parent="./UI"]
 color = Color(0, 0, 0, 0.7)
@@ -41,7 +48,7 @@ z_index = 100
 [node name="GameOverLabel" type="Label" parent="./UI/GameOverPanel"]
 position = Vector2(960, 540)
 text = "GAME OVER"
-label/settings/font_size = 64
+label/settings/font_size = 72
 horizontal_alignment = 1
 
 [node name="RestartButton" type="Button" parent="./UI/GameOverPanel"]
@@ -62,7 +69,7 @@ size = Vector2(170, 800)
 [node name="SpellPanelLabel" type="Label" parent="./UI/SpellPanel"]
 position = Vector2(85, 40)
 text = "Sorts"
-label/settings/font_size = 24
+label/settings/font_size = 32
 horizontal_alignment = 1
 
 [node name="SpellContainer" type="VBoxContainer" parent="./UI/SpellPanel"]
@@ -81,7 +88,7 @@ size = Vector2(120, 800)
 [node name="TurnOrderLabel" type="Label" parent="./UI/TurnOrderPanel"]
 position = Vector2(60, 40)
 text = "Ordre"
-label/settings/font_size = 24
+label/settings/font_size = 28
 horizontal_alignment = 1
 
 [node name="TurnOrderContainer" type="VBoxContainer" parent="./UI/TurnOrderPanel"]

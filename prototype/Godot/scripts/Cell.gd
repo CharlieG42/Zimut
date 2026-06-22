@@ -1,6 +1,6 @@
 extends Node2D
 class_name Cell
-## Cell.gd - Version corrigée pour GDScript 4.x
+## Cell.gd - Version corrigée avec highlight plus visible
 
 var grid_position: Vector2i = Vector2i(0, 0)
 var entity = null
@@ -55,6 +55,8 @@ func update_appearance():
         if border:
             border.visible = true
             var border_color = Color.BLUE if entity.get("entity_type", "") == "Player" else Color.RED
+            if entity.get("is_active", false):
+                border_color = Color.YELLOW
             var border_img = Image.create(64, 64, false, Image.FORMAT_RGBA8)
             border_img.fill(Color(0, 0, 0, 0))
             for px in range(64):
@@ -72,7 +74,7 @@ func update_appearance():
                 select.position = Vector2(0, 0)
                 add_child(select)
             var select_img = Image.create(64, 64, false, Image.FORMAT_RGBA8)
-            select_img.fill(Color(1, 1, 0, 0.3))
+            select_img.fill(Color(1, 1, 0, 0.5))
             select.texture = ImageTexture.create_from_image(select_img)
         else:
             if has_node("Selection"):
@@ -86,7 +88,7 @@ func update_appearance():
                 highlight.position = Vector2(0, 0)
                 add_child(highlight)
             var highlight_img = Image.create(64, 64, false, Image.FORMAT_RGBA8)
-            highlight_img.fill(Color(1, 1, 0, 0.2))
+            highlight_img.fill(Color(0, 1, 0, 0.5))
             highlight.texture = ImageTexture.create_from_image(highlight_img)
         else:
             if has_node("Highlight"):
@@ -105,7 +107,5 @@ func update_appearance():
 func _input(event: InputEvent) -> void:
     if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
         var local_pos = to_local(get_global_mouse_position())
-        # CORRIGÉ : le fond de la cellule occupe (0,0)→(64,64) en espace local,
-        # l'ancien Rect2(-32,-32,64,64) ne couvrait que la moitié supérieure-gauche.
         if Rect2(0, 0, 64, 64).has_point(local_pos):
             cell_clicked.emit(grid_position.x, grid_position.y)

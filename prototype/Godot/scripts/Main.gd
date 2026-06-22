@@ -5,6 +5,7 @@ extends Node2D
 @onready var turn_label: Label = $UI/TurnLabel
 @onready var player_info_label: Label = $UI/PlayerInfoLabel
 @onready var message_label: Label = $UI/MessageLabel
+@onready var active_player_label: Label = $UI/ActivePlayerLabel
 @onready var game_over_panel: ColorRect = $UI/GameOverPanel
 @onready var game_over_label: Label = $UI/GameOverPanel/GameOverLabel
 @onready var restart_button: Button = $UI/GameOverPanel/RestartButton
@@ -14,7 +15,6 @@ extends Node2D
 @onready var turn_order_panel: Panel = $UI/TurnOrderPanel
 @onready var turn_order_container: VBoxContainer = $UI/TurnOrderPanel/TurnOrderContainer
 
-# CORRIGÉ : Pas de type hint car GameManager est un autoload
 var game_manager
 
 var cell_nodes: Array = []
@@ -24,7 +24,6 @@ var end_turn_button: Button
 
 
 func _ready():
-    # CORRIGÉ : GameManager est un autoload, accessible directement
     game_manager = GameManager
     
     init_grid_display()
@@ -54,9 +53,9 @@ func init_ui_elements():
     end_turn_button = Button.new()
     end_turn_button.name = "EndTurnButton"
     end_turn_button.text = "Passer le tour"
-    end_turn_button.position = Vector2(960, 1060)
+    end_turn_button.position = Vector2(960, 1020)
     end_turn_button.size = Vector2(250, 50)
-    end_turn_button.add_theme_font_size_override("font_size", 24)
+    end_turn_button.add_theme_font_size_override("font_size", 28)
     add_child(end_turn_button)
     end_turn_button.pressed.connect(_on_end_turn_pressed)
 
@@ -86,7 +85,7 @@ func init_turn_order_display():
         var label = Label.new()
         label.text = "%d. %s" % [i + 1, player.get("name", "Joueur")]
         var settings = LabelSettings.new()
-        settings.font_size = 16
+        settings.font_size = 20
         label.label_settings = settings
         label.add_theme_color_override("font_color", Color.WHITE)
         turn_order_container.add_child(label)
@@ -124,7 +123,6 @@ func hide_spell_panel():
 
 func _on_spell_button_selected(spell: Dictionary):
     game_manager.handle_spell_selected(spell)
-    hide_spell_panel()
 
 
 func _on_message_requested(text: String):
@@ -148,8 +146,12 @@ func _on_player_changed(index: int):
         hide_spell_panel()
 
 
-func _on_entity_selected(_entity):
+func _on_entity_selected(entity):
     update_ui()
+    if entity:
+        active_player_label.text = "JOUEUR ACTIF: %s" % entity.get("name", "?")
+    else:
+        active_player_label.text = ""
 
 
 func _on_spell_selected(_spell):
@@ -175,7 +177,6 @@ func _on_entity_attacked(_attacker, _target, _damage: int):
 
 func _on_spell_casted(_caster, _spell, _target, result: String):
     update_entity_display()
-    hide_spell_panel()
 
 
 func _on_end_turn_pressed():
@@ -196,9 +197,13 @@ func update_ui():
     if game_manager.current_turn == 0:
         turn_label.text = "Tour des joueurs"
         end_turn_button.visible = true
+        if game_manager.players.size() > 0:
+            var current_player = game_manager.players[game_manager.current_player_index]
+            active_player_label.text = "JOUEUR ACTIF: %s" % current_player.get("name", "?")
     else:
         turn_label.text = "Tour des ennemis"
         end_turn_button.visible = false
+        active_player_label.text = ""
     
     if game_manager.current_turn == 0 and game_manager.players.size() > 0:
         var current_player = game_manager.players[game_manager.current_player_index]
@@ -251,7 +256,7 @@ func update_entity_display():
 func add_message(message: String):
     message_label.text = message
     var timer = Timer.new()
-    timer.wait_time = 2.0
+    timer.wait_time = 3.0
     timer.one_shot = true
     timer.timeout.connect(func(): message_label.text = "")
     add_child(timer)
