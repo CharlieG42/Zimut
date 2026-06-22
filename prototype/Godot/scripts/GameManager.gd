@@ -1,5 +1,4 @@
 extends Node
-class_name GameManager
 ## GameManager - Gère la logique globale du jeu WildZimut
 
 const GRID_SIZE := 10
@@ -38,7 +37,6 @@ signal game_ended(victory: bool)
 signal entity_moved(entity, from_pos: Vector2i, to_pos: Vector2i)
 signal entity_attacked(attacker, target, damage: int)
 signal spell_casted(caster, spell, target, result: String)
-# NOUVEAU : Signal pour les messages
 signal message_requested(text: String)
 
 var classes_data: Array = []
@@ -195,7 +193,6 @@ func handle_cell_selected(cell_pos: Vector2i):
     if current_turn == 0:
         var current_player = players[current_player_index]
         
-        # Si un sort est sélectionné, on l'applique sur la cible
         if selected_spell != null:
             if entity and entity["current_pv"] > 0:
                 var dx: int = abs(x - int(current_player["x"]))
@@ -225,7 +222,6 @@ func handle_cell_selected(cell_pos: Vector2i):
                 message_requested.emit("Pas de cible valide à cette position")
             return
         
-        # Sélection du joueur
         if entity and entity["entity_type"] == "Player" and entity == current_player:
             selected_entity = entity
             show_spells = true
@@ -236,7 +232,6 @@ func handle_cell_selected(cell_pos: Vector2i):
             player_changed.emit(current_player_index)
             return
         
-        # Déplacement du joueur
         if selected_entity == current_player and entity == null and current_player["current_pm"] > 0:
             var dx: int = x - int(current_player["x"])
             var dy: int = y - int(current_player["y"])
@@ -253,7 +248,6 @@ func handle_cell_selected(cell_pos: Vector2i):
                     player_changed.emit(current_player_index)
             return
         
-        # Attaque de base
         if selected_entity == current_player and entity and entity["current_pv"] > 0:
             var dx: int = abs(x - int(current_player["x"]))
             var dy: int = abs(y - int(current_player["y"]))
@@ -382,7 +376,6 @@ func reset_game():
 
 
 func push_message(message: String):
-    # NOUVEAU : Émet un signal au lieu de print()
     message_requested.emit(message)
 
 
