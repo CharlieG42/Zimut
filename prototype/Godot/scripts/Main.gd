@@ -148,7 +148,7 @@ func _on_player_changed(index: int):
         hide_spell_panel()
 
 
-func _on_entity_selected(entity):
+func _on_entity_selected(_entity):
     update_ui()
 
 
@@ -173,7 +173,7 @@ func _on_entity_attacked(_attacker, _target, _damage: int):
     update_entity_display()
 
 
-func _on_spell_casted(_caster, _spell, _target, result: String):
+func _on_spell_casted(_caster, _spell, _target, _result: String):
     update_entity_display()
 
 
