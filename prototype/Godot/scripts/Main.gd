@@ -14,7 +14,8 @@ extends Node2D
 @onready var turn_order_panel: Panel = $TurnOrderPanel
 @onready var turn_order_container: VBoxContainer = $TurnOrderPanel/TurnOrderContainer
 
-var game_manager: GameManager
+# CORRIGÉ : Pas de type hint car GameManager est un autoload
+var game_manager
 
 var cell_nodes: Array = []
 var spell_buttons: Array = []
@@ -23,8 +24,8 @@ var end_turn_button: Button
 
 
 func _ready():
+    # CORRIGÉ : GameManager est un autoload, accessible directement
     game_manager = GameManager
-    # SUPPRIMÉ : get_viewport().size = Vector2(1200, 700) - utilise la résolution native
     
     init_grid_display()
     init_turn_order_display()
@@ -53,7 +54,7 @@ func init_ui_elements():
     end_turn_button = Button.new()
     end_turn_button.name = "EndTurnButton"
     end_turn_button.text = "Passer le tour"
-    end_turn_button.position = Vector2(600, 600)
+    end_turn_button.position = Vector2(400, 580)
     end_turn_button.size = Vector2(200, 40)
     add_child(end_turn_button)
     end_turn_button.pressed.connect(_on_end_turn_pressed)
