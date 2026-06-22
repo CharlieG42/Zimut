@@ -14,27 +14,22 @@ extends Node2D
 @onready var turn_order_panel: Panel = $TurnOrderPanel
 @onready var turn_order_container: VBoxContainer = $TurnOrderPanel/TurnOrderContainer
 
-# CORRIGÉ : GameManager est un autoload, pas besoin de @onready
 var game_manager: GameManager
 
 var cell_nodes: Array = []
 var spell_buttons: Array = []
 var turn_order_labels: Array = []
-
-# NOUVEAU : Bouton pour passer le tour
 var end_turn_button: Button
 
 
 func _ready():
-    # CORRIGÉ : référence directe à l'autoload
     game_manager = GameManager
-    get_viewport().size = Vector2(1200, 700)
+    # SUPPRIMÉ : get_viewport().size = Vector2(1200, 700) - utilise la résolution native
     
     init_grid_display()
     init_turn_order_display()
     init_ui_elements()
     
-    # Connexion des signaux
     game_manager.turn_changed.connect(_on_turn_changed)
     game_manager.player_changed.connect(_on_player_changed)
     game_manager.entity_selected.connect(_on_entity_selected)
@@ -50,13 +45,11 @@ func _ready():
     spell_panel.visible = false
     update_ui()
     
-    # Afficher les sorts du joueur initial
     if game_manager.players.size() > 0:
         show_spells_for_player(game_manager.players[0])
 
 
 func init_ui_elements():
-    # NOUVEAU : Créer le bouton "Passer le tour"
     end_turn_button = Button.new()
     end_turn_button.name = "EndTurnButton"
     end_turn_button.text = "Passer le tour"
@@ -72,8 +65,6 @@ func init_grid_display():
         var row: Array = []
         for x in range(game_manager.GRID_SIZE):
             var cell = preload("res://scripts/Cell.gd").new()
-            # CORRIGÉ : position relative à Grid (600,350)
-            # Avec offset -320, cellule (0,0) sera à (280,30), (9,9) à (856,606)
             cell.position = Vector2(x * 64 - 320, y * 64 - 320)
             cell.grid_position = Vector2i(x, y)
             cell.connect("cell_clicked", Callable(self, "_on_cell_clicked").bind(x, y))
@@ -85,7 +76,6 @@ func init_grid_display():
 
 func init_turn_order_display():
     turn_order_labels = []
-    # CORRIGÉ : VBoxContainer n'a pas clear(), supprimer les enfants manuellement
     for child in turn_order_container.get_children():
         child.queue_free()
     
@@ -93,7 +83,6 @@ func init_turn_order_display():
         var player = game_manager.players[i]
         var label = Label.new()
         label.text = "%d. %s" % [i + 1, player.get("name", "Joueur")]
-        # CORRIGÉ : label_settings doit être instancié
         var settings = LabelSettings.new()
         settings.font_size = 16
         label.label_settings = settings
@@ -112,7 +101,6 @@ func show_spells_for_player(player: Dictionary):
     for button in spell_buttons:
         button.queue_free()
     spell_buttons = []
-    # CORRIGÉ : VBoxContainer n'a pas clear()
     for child in spell_container.get_children():
         child.queue_free()
     
@@ -137,7 +125,6 @@ func _on_spell_button_selected(spell: Dictionary):
     hide_spell_panel()
 
 
-# NOUVEAU : Gestion du signal message_requested
 func _on_message_requested(text: String):
     add_message(text)
 
@@ -145,7 +132,6 @@ func _on_message_requested(text: String):
 func _on_turn_changed(turn: int):
     update_ui()
     update_turn_order_display()
-    # Masquer les sorts pendant le tour des ennemis
     if turn == 1:
         hide_spell_panel()
 
@@ -190,7 +176,6 @@ func _on_spell_casted(_caster, _spell, _target, result: String):
     hide_spell_panel()
 
 
-# NOUVEAU : Bouton Passer le tour
 func _on_end_turn_pressed():
     game_manager.next_player()
 
@@ -201,7 +186,6 @@ func _on_restart_pressed():
     update_entity_display()
     update_ui()
     init_turn_order_display()
-    # Réafficher les sorts du premier joueur
     if game_manager.players.size() > 0:
         show_spells_for_player(game_manager.players[0])
 
@@ -265,7 +249,6 @@ func update_entity_display():
 func add_message(message: String):
     message_label.text = message
     var timer = Timer.new()
-    # CORRIGÉ : wait_time au lieu de timeout, + one_shot
     timer.wait_time = 2.0
     timer.one_shot = true
     timer.timeout.connect(func(): message_label.text = "")
