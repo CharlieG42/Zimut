@@ -1,6 +1,6 @@
 extends Node2D
 class_name Cell
-## Cell.gd - 80px cells, fond en ColorRect pour visibilité fiable
+## Cell.gd - 80px cells, fond en Sprite2D pour compatibilité Node2D
 
 const CELL_SIZE := 80
 const HALF := CELL_SIZE / 2
@@ -14,10 +14,10 @@ signal cell_clicked(x: int, y: int)
 
 
 func _ready():
-    var bg = ColorRect.new()
+    # Background as Sprite2D with a filled texture (works reliably under Node2D)
+    var bg = Sprite2D.new()
     bg.name = "Background"
-    bg.color = Color.LIGHT_GRAY if (grid_position.x + grid_position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
-    bg.size = Vector2(CELL_SIZE, CELL_SIZE)
+    bg.centered = false
     bg.position = Vector2.ZERO
     bg.z_index = 0
     add_child(bg)
@@ -42,6 +42,13 @@ func _ready():
 
 
 # utilitaires pour générer textures
+func _make_filled_texture(color: Color) -> ImageTexture:
+    var img = Image.create(CELL_SIZE, CELL_SIZE, false, Image.FORMAT_RGBA8)
+    img.lock()
+    img.fill(color)
+    img.unlock()
+    return ImageTexture.create_from_image(img)
+
 func _make_circle_texture(color: Color, radius: float = 30.0) -> ImageTexture:
     var img = Image.create(CELL_SIZE, CELL_SIZE, false, Image.FORMAT_RGBA8)
     img.lock()
@@ -69,9 +76,10 @@ func _make_ring_texture(color: Color, radius: float = 30.0, thickness: float = 2
 
 
 func update_appearance():
-    var bg = get_node_or_null("Background") as ColorRect
+    var bg = get_node_or_null("Background") as Sprite2D
     if bg:
-        bg.color = Color.LIGHT_GRAY if (grid_position.x + grid_position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
+        var bg_color = Color.LIGHT_GRAY if (grid_position.x + grid_position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
+        bg.texture = _make_filled_texture(bg_color)
 
     var entity_sprite = get_node_or_null("EntitySprite") as Sprite2D
     var border = get_node_or_null("Border") as Sprite2D
@@ -87,17 +95,17 @@ func update_appearance():
             if entity.get("is_active", false):
                 border_color = Color.YELLOW
             border.texture = _make_ring_texture(border_color)
-        # selection overlay as ColorRect child
+        # selection overlay as Sprite2D
         if selected:
             var sel = get_node_or_null("Selection")
             if not sel:
-                sel = ColorRect.new()
+                sel = Sprite2D.new()
                 sel.name = "Selection"
-                sel.size = Vector2(CELL_SIZE, CELL_SIZE)
+                sel.centered = false
                 sel.position = Vector2.ZERO
-                sel.color = Color(1, 1, 0, 0.25)
                 sel.z_index = 3
                 add_child(sel)
+            sel.texture = _make_filled_texture(Color(1, 1, 0, 0.25))
         else:
             if has_node("Selection"):
                 get_node("Selection").queue_free()
