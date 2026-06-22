@@ -1,6 +1,6 @@
 extends Node2D
 class_name Cell
-## Cell.gd - cellule 80x80, fond et sprites générés proprement
+## Cell.gd - 80px cells, fond en ColorRect pour visibilité fiable
 
 const CELL_SIZE := 80
 const HALF := CELL_SIZE / 2
@@ -12,16 +12,16 @@ var highlighted: bool = false
 
 signal cell_clicked(x: int, y: int)
 
+
 func _ready():
-    # Background (Sprite2D avec texture pleine) - z_index 0
-    var bg = Sprite2D.new()
+    var bg = ColorRect.new()
     bg.name = "Background"
-    bg.centered = false
+    bg.color = Color.LIGHT_GRAY if (grid_position.x + grid_position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
+    bg.size = Vector2(CELL_SIZE, CELL_SIZE)
     bg.position = Vector2.ZERO
     bg.z_index = 0
     add_child(bg)
 
-    # Entity sprite - centré - z_index 1
     var entity_sprite = Sprite2D.new()
     entity_sprite.name = "EntitySprite"
     entity_sprite.centered = true
@@ -30,7 +30,6 @@ func _ready():
     entity_sprite.visible = false
     add_child(entity_sprite)
 
-    # Border sprite - centré - z_index 2
     var border = Sprite2D.new()
     border.name = "Border"
     border.centered = true
@@ -41,16 +40,8 @@ func _ready():
 
     update_appearance()
 
-# utilitaires pour générer textures
-func _make_filled_texture(color: Color) -> ImageTexture:
-    var img = Image.create(CELL_SIZE, CELL_SIZE, false, Image.FORMAT_RGBA8)
-    img.lock()
-    for x in range(CELL_SIZE):
-        for y in range(CELL_SIZE):
-            img.set_pixel(x, y, color)
-    img.unlock()
-    return ImageTexture.create_from_image(img)
 
+# utilitaires pour générer textures
 func _make_circle_texture(color: Color, radius: float = 30.0) -> ImageTexture:
     var img = Image.create(CELL_SIZE, CELL_SIZE, false, Image.FORMAT_RGBA8)
     img.lock()
@@ -76,11 +67,11 @@ func _make_ring_texture(color: Color, radius: float = 30.0, thickness: float = 2
     img.unlock()
     return ImageTexture.create_from_image(img)
 
+
 func update_appearance():
-    var bg = get_node_or_null("Background") as Sprite2D
+    var bg = get_node_or_null("Background") as ColorRect
     if bg:
-        var bg_color = Color.LIGHT_GRAY if (grid_position.x + grid_position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
-        bg.texture = _make_filled_texture(bg_color)
+        bg.color = Color.LIGHT_GRAY if (grid_position.x + grid_position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
 
     var entity_sprite = get_node_or_null("EntitySprite") as Sprite2D
     var border = get_node_or_null("Border") as Sprite2D
@@ -96,16 +87,17 @@ func update_appearance():
             if entity.get("is_active", false):
                 border_color = Color.YELLOW
             border.texture = _make_ring_texture(border_color)
-        # selection overlay as ColorRect-like sprite
+        # selection overlay as ColorRect child
         if selected:
-            if not has_node("Selection"):
-                var sel = Sprite2D.new()
+            var sel = get_node_or_null("Selection")
+            if not sel:
+                sel = ColorRect.new()
                 sel.name = "Selection"
-                sel.centered = false
+                sel.size = Vector2(CELL_SIZE, CELL_SIZE)
                 sel.position = Vector2.ZERO
+                sel.color = Color(1, 1, 0, 0.25)
                 sel.z_index = 3
                 add_child(sel)
-            get_node("Selection").texture = _make_filled_texture(Color(1, 1, 0, 0.25))
         else:
             if has_node("Selection"):
                 get_node("Selection").queue_free()
@@ -118,6 +110,7 @@ func update_appearance():
             border.texture = null
         if has_node("Selection"):
             get_node("Selection").queue_free()
+
 
 func _input(event: InputEvent) -> void:
     if event is InputEventMouseButton and event.pressed and event.button_index == MouseButton.LEFT:
