@@ -5,7 +5,6 @@ extends Node2D
 @onready var turn_label: Label = $UI/TurnLabel
 @onready var player_info_label: Label = $UI/PlayerInfoLabel
 @onready var message_label: Label = $UI/MessageLabel
-@onready var active_player_label: Label = $UI/ActivePlayerLabel
 @onready var game_over_panel: ColorRect = $UI/GameOverPanel
 @onready var game_over_label: Label = $UI/GameOverPanel/GameOverLabel
 @onready var restart_button: Button = $UI/GameOverPanel/RestartButton
@@ -25,11 +24,9 @@ var end_turn_button: Button
 
 func _ready():
     game_manager = GameManager
-    
     init_grid_display()
     init_turn_order_display()
     init_ui_elements()
-    
     game_manager.turn_changed.connect(_on_turn_changed)
     game_manager.player_changed.connect(_on_player_changed)
     game_manager.entity_selected.connect(_on_entity_selected)
@@ -39,12 +36,9 @@ func _ready():
     game_manager.entity_attacked.connect(_on_entity_attacked)
     game_manager.spell_casted.connect(_on_spell_casted)
     game_manager.message_requested.connect(_on_message_requested)
-    
     restart_button.pressed.connect(_on_restart_pressed)
-    
     spell_panel.visible = false
     update_ui()
-    
     if game_manager.players.size() > 0:
         show_spells_for_player(game_manager.players[0])
 
@@ -53,7 +47,7 @@ func init_ui_elements():
     end_turn_button = Button.new()
     end_turn_button.name = "EndTurnButton"
     end_turn_button.text = "Passer le tour"
-    end_turn_button.position = Vector2(960, 1020)
+    end_turn_button.position = Vector2(960, 1000)
     end_turn_button.size = Vector2(250, 50)
     end_turn_button.add_theme_font_size_override("font_size", 28)
     add_child(end_turn_button)
@@ -66,7 +60,7 @@ func init_grid_display():
         var row: Array = []
         for x in range(game_manager.GRID_SIZE):
             var cell = preload("res://scripts/Cell.gd").new()
-            cell.position = Vector2(x * 64 - 320, y * 64 - 320)
+            cell.position = Vector2(x * 80 - 320, y * 80 - 320)
             cell.grid_position = Vector2i(x, y)
             cell.connect("cell_clicked", Callable(self, "_on_cell_clicked").bind(x, y))
             grid.add_child(cell)
@@ -79,15 +73,24 @@ func init_turn_order_display():
     turn_order_labels = []
     for child in turn_order_container.get_children():
         child.queue_free()
-    
     for i in range(game_manager.players.size()):
         var player = game_manager.players[i]
         var label = Label.new()
         label.text = "%d. %s" % [i + 1, player.get("name", "Joueur")]
         var settings = LabelSettings.new()
-        settings.font_size = 20
+        settings.font_size = 22
         label.label_settings = settings
         label.add_theme_color_override("font_color", Color.WHITE)
+        turn_order_container.add_child(label)
+        turn_order_labels.append(label)
+    for i in range(game_manager.enemies.size()):
+        var enemy = game_manager.enemies[i]
+        var label = Label.new()
+        label.text = "%d. %s" % [i + 1 + game_manager.players.size(), enemy.get("name", "Ennemi")]
+        var settings = LabelSettings.new()
+        settings.font_size = 22
+        label.label_settings = settings
+        label.add_theme_color_override("font_color", Color(0.8, 0.4, 0.4))
         turn_order_container.add_child(label)
         turn_order_labels.append(label)
 
@@ -104,7 +107,6 @@ func show_spells_for_player(player: Dictionary):
     spell_buttons = []
     for child in spell_container.get_children():
         child.queue_free()
-    
     for spell in player.get("spells", []):
         var button = preload("res://scripts/SpellButton.gd").new()
         button.spell = spell
@@ -148,10 +150,6 @@ func _on_player_changed(index: int):
 
 func _on_entity_selected(entity):
     update_ui()
-    if entity:
-        active_player_label.text = "JOUEUR ACTIF: %s" % entity.get("name", "?")
-    else:
-        active_player_label.text = ""
 
 
 func _on_spell_selected(_spell):
@@ -197,14 +195,9 @@ func update_ui():
     if game_manager.current_turn == 0:
         turn_label.text = "Tour des joueurs"
         end_turn_button.visible = true
-        if game_manager.players.size() > 0:
-            var current_player = game_manager.players[game_manager.current_player_index]
-            active_player_label.text = "JOUEUR ACTIF: %s" % current_player.get("name", "?")
     else:
         turn_label.text = "Tour des ennemis"
         end_turn_button.visible = false
-        active_player_label.text = ""
-    
     if game_manager.current_turn == 0 and game_manager.players.size() > 0:
         var current_player = game_manager.players[game_manager.current_player_index]
         player_info_label.text = "Joueur: %s | PV: %d/%d | PA: %d/%d | PM: %d/%d" % [
@@ -229,6 +222,15 @@ func update_turn_order_display():
             else:
                 label.add_theme_color_override("font_color", Color.WHITE)
                 label.text = "%d. %s" % [i + 1, player.get("name", "Joueur")]
+        elif i < game_manager.players.size() + game_manager.enemies.size():
+            var enemy_index = i - game_manager.players.size()
+            if enemy_index < game_manager.enemies.size():
+                var enemy = game_manager.enemies[enemy_index]
+                var label = turn_order_labels[i]
+                if game_manager.current_turn == 1:
+                    label.add_theme_color_override("font_color", Color.YELLOW)
+                else:
+                    label.add_theme_color_override("font_color", Color(0.8, 0.4, 0.4))
 
 
 func update_entity_display():
@@ -239,7 +241,6 @@ func update_entity_display():
             cell.selected = false
             cell.highlighted = false
             cell.update_appearance()
-    
     for y in range(game_manager.GRID_SIZE):
         for x in range(game_manager.GRID_SIZE):
             var entity = game_manager.grid[y][x]
@@ -247,9 +248,7 @@ func update_entity_display():
                 var cell = cell_nodes[y][x]
                 cell.entity = entity
                 cell.selected = (game_manager.selected_entity == entity)
-                cell.highlighted = (entity == game_manager.players[game_manager.current_player_index] and 
-                                   game_manager.current_turn == 0 and 
-                                   entity.get("entity_type", "") == "Player")
+                cell.highlighted = (entity == game_manager.players[game_manager.current_player_index] and game_manager.current_turn == 0 and entity.get("entity_type", "") == "Player")
                 cell.update_appearance()
 
 
