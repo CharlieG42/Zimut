@@ -4,7 +4,7 @@ class_name Cell
 ## Godot 4.7 compatible - sans lock()/unlock()
 
 const CELL_SIZE := 80
-const HALF := CELL_SIZE / 2
+const HALF := CELL_SIZE / 2.0  # Fixed: float division
 
 var grid_position: Vector2i = Vector2i(0, 0)
 var entity = null
