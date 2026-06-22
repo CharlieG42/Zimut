@@ -54,7 +54,7 @@ func init_ui_elements():
     add_child(end_turn_button)
     end_turn_button.pressed.connect(_on_end_turn_pressed)
     
-    # Make player info label larger
+    # Make player info label larger (48px)
     if player_info_label:
         var settings = LabelSettings.new()
         settings.font_size = 48
@@ -87,49 +87,47 @@ func init_turn_order_display():
     for i in range(game_manager.players.size()):
         var player = game_manager.players[i]
         
-        # Main container for this row
+        # Main row container
         var row_container = HBoxContainer.new()
         row_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         row_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
         turn_order_container.add_child(row_container)
         
-        # Label du nom
+        # Label du nom - SHRINK_BEGIN so it doesn't take all space
         var label = Label.new()
         label.text = "%d. %s" % [i + 1, player.get("name", "Joueur")]
         var settings = LabelSettings.new()
         settings.font_size = 24
         label.label_settings = settings
         label.add_theme_color_override("font_color", Color.WHITE)
-        label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
         label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
         row_container.add_child(label)
         turn_order_labels.append(label)
         
-        # Health bar container (fixed width, right-aligned)
-        var health_container = HBoxContainer.new()
-        health_container.size_flags_horizontal = Control.SIZE_SHRINK_END
-        health_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-        row_container.add_child(health_container)
-        
-        # Background bar
+        # Health bar background (fixed size, right side)
         var health_bar_bg = ColorRect.new()
         health_bar_bg.color = Color(0.15, 0.15, 0.15)
         health_bar_bg.size = Vector2(200, 25)
-        health_container.add_child(health_bar_bg)
+        health_bar_bg.size_flags_horizontal = Control.SIZE_SHRINK_END
+        health_bar_bg.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+        row_container.add_child(health_bar_bg)
         
-        # Fill bar
+        # Health bar fill
         var health_bar_fill = ColorRect.new()
         health_bar_fill.name = "HealthBar_%d" % i
         health_bar_fill.color = Color(0, 1.0, 0)
         health_bar_fill.size = Vector2(200, 25)
-        health_container.add_child(health_bar_fill)
+        health_bar_fill.size_flags_horizontal = Control.SIZE_SHRINK_END
+        health_bar_fill.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+        row_container.add_child(health_bar_fill)
         turn_order_health_bars.append(health_bar_fill)
     
     # Ajouter les ennemis
     for i in range(game_manager.enemies.size()):
         var enemy = game_manager.enemies[i]
         
-        # Main container for this row
+        # Main row container
         var row_container = HBoxContainer.new()
         row_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         row_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -141,29 +139,27 @@ func init_turn_order_display():
         settings.font_size = 24
         label.label_settings = settings
         label.add_theme_color_override("font_color", Color(0.9, 0.4, 0.4))
-        label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        label.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
         label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
         row_container.add_child(label)
         turn_order_labels.append(label)
         
-        # Health bar container (fixed width, right-aligned)
-        var health_container = HBoxContainer.new()
-        health_container.size_flags_horizontal = Control.SIZE_SHRINK_END
-        health_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-        row_container.add_child(health_container)
-        
-        # Background bar
+        # Health bar background (fixed size, right side)
         var health_bar_bg = ColorRect.new()
         health_bar_bg.color = Color(0.15, 0.15, 0.15)
         health_bar_bg.size = Vector2(200, 25)
-        health_container.add_child(health_bar_bg)
+        health_bar_bg.size_flags_horizontal = Control.SIZE_SHRINK_END
+        health_bar_bg.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+        row_container.add_child(health_bar_bg)
         
-        # Fill bar
+        # Health bar fill
         var health_bar_fill = ColorRect.new()
         health_bar_fill.name = "HealthBar_%d" % (game_manager.players.size() + i)
         health_bar_fill.color = Color(1.0, 0.2, 0.2)
         health_bar_fill.size = Vector2(200, 25)
-        health_container.add_child(health_bar_fill)
+        health_bar_fill.size_flags_horizontal = Control.SIZE_SHRINK_END
+        health_bar_fill.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+        row_container.add_child(health_bar_fill)
         turn_order_health_bars.append(health_bar_fill)
 
 
