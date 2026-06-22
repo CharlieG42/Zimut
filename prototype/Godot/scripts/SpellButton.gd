@@ -1,6 +1,6 @@
 extends Button
 class_name SpellButton
-## SpellButton.gd - Bouton de sort pour l'interface mobile
+## SpellButton.gd - Bouton de sort avec police agrandie pour mobile
 
 var spell: Dictionary = {}
 
@@ -8,8 +8,9 @@ signal spell_selected(spell: Dictionary)
 
 
 func _ready():
-    # CORRIGÉ : connexion du signal pressed qui manquait
     pressed.connect(_on_pressed)
+    # Police plus grande pour mobile
+    add_theme_font_size_override("font_size", 24)
 
     if spell:
         text = spell.get("name", "Sort")
