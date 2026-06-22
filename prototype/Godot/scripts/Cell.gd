@@ -59,6 +59,37 @@ func _make_circle_texture(color: Color, radius: float = 30.0) -> ImageTexture:
                 img.set_pixel(x, y, color)
     return ImageTexture.create_from_image(img)
 
+func _make_triangle_texture(color: Color, size: float = 30.0) -> ImageTexture:
+    var img = Image.create(CELL_SIZE, CELL_SIZE, false, Image.FORMAT_RGBA8)
+    img.fill(Color(0, 0, 0, 0))
+    var center = Vector2(HALF, HALF)
+    var height = size * 0.866  # Hauteur d'un triangle équilatéral
+    var top = center - Vector2(0, height / 2)
+    var bottom_left = center + Vector2(-size / 2, height / 2)
+    var bottom_right = center + Vector2(size / 2, height / 2)
+    
+    # Dessiner le triangle
+    for x in range(CELL_SIZE):
+        for y in range(CELL_SIZE):
+            var point = Vector2(x, y)
+            if _point_in_triangle(point, top, bottom_left, bottom_right):
+                img.set_pixel(x, y, color)
+    return ImageTexture.create_from_image(img)
+
+func _point_in_triangle(p: Vector2, a: Vector2, b: Vector2, c: Vector2) -> bool:
+    var v0 = c - a
+    var v1 = b - a
+    var v2 = p - a
+    var dot00 = v0.dot(v0)
+    var dot01 = v0.dot(v1)
+    var dot02 = v0.dot(v2)
+    var dot11 = v1.dot(v1)
+    var dot12 = v1.dot(v2)
+    var inv_denom = 1.0 / (dot00 * dot11 - dot01 * dot01)
+    var u = (dot11 * dot02 - dot01 * dot12) * inv_denom
+    var v = (dot00 * dot12 - dot01 * dot02) * inv_denom
+    return (u >= 0) and (v >= 0) and (u + v < 1)
+
 func _make_ring_texture(color: Color, radius: float = 30.0, thickness: float = 2.0) -> ImageTexture:
     var img = Image.create(CELL_SIZE, CELL_SIZE, false, Image.FORMAT_RGBA8)
     img.fill(Color(0, 0, 0, 0))
@@ -85,7 +116,11 @@ func update_appearance():
         var color = GameManager.COLORS.get(entity.get("classe", ""), Color(0.5, 0.5, 0.5))
         if entity_sprite:
             entity_sprite.visible = true
-            entity_sprite.texture = _make_circle_texture(color, 30.0)
+            # Utiliser un cercle pour les joueurs, un triangle pour les ennemis
+            if entity.get("entity_type", "") == "Player":
+                entity_sprite.texture = _make_circle_texture(color, 30.0)
+            else:
+                entity_sprite.texture = _make_triangle_texture(color, 30.0)
         if border:
             border.visible = true
             var border_color = Color.BLUE if entity.get("entity_type", "") == "Player" else Color.RED
