@@ -8,22 +8,21 @@
 script = ExtResource( 1 )
 
 [node name="Grid" type="Node2D" parent="."]
-# CORRIGÉ : déplacé de (400,350) à (530,350) pour que les cellules commencent
-# à x=210 (hors du TurnOrderPanel qui finit à x=200).
-position = Vector2(530, 350)
+# CORRIGÉ : Centré à (600, 350) pour une grille de 640x640 dans un viewport de 1200x700
+position = Vector2(600, 350)
 
 [node name="TurnLabel" type="Label" parent="."]
-position = Vector2(820, 20)
+position = Vector2(1000, 20)
 text = "Tour des joueurs"
 label/settings/font_size = 24
 
 [node name="PlayerInfoLabel" type="Label" parent="."]
-position = Vector2(170, 650)
+position = Vector2(50, 650)
 text = "Joueur: -"
 label/settings/font_size = 18
 
 [node name="MessageLabel" type="Label" parent="."]
-position = Vector2(530, 650)
+position = Vector2(600, 650)
 text = ""
 label/settings/font_size = 18
 horizontal_alignment = 1
@@ -47,29 +46,29 @@ text = "Recommencer"
 horizontal_alignment = 1
 
 [node name="SpellPanel" type="Panel" parent="."]
-# CORRIGÉ : déplacé à droite de la grille (qui va jusqu'à x≈786) et agrandi
-position = Vector2(800, 50)
-size = Vector2(380, 580)
+# Positionné à droite de la grille (600+320=920, donc 940 pour marge)
+position = Vector2(940, 50)
+size = Vector2(250, 580)
 visible = false
 z_index = 50
 
 [node name="SpellPanelBackground" type="ColorRect" parent="./SpellPanel"]
 position = Vector2(0, 0)
-size = Vector2(380, 580)
+size = Vector2(250, 580)
 color = Color(0.1, 0.1, 0.2, 0.8)
 
 [node name="SpellPanelLabel" type="Label" parent="./SpellPanel"]
-position = Vector2(190, 20)
+position = Vector2(125, 20)
 text = "Sorts disponibles"
 label/settings/font_size = 20
 horizontal_alignment = 1
 
 [node name="SpellContainer" type="VBoxContainer" parent="./SpellPanel"]
 position = Vector2(20, 60)
-size = Vector2(340, 500)
+size = Vector2(210, 500)
 
 [node name="TurnOrderPanel" type="Panel" parent="."]
-# Légèrement décalé à gauche pour plus d'espace
+# À gauche, hors de la grille (qui commence à x=280)
 position = Vector2(10, 50)
 size = Vector2(150, 580)
 z_index = 40
