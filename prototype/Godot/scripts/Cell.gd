@@ -3,7 +3,7 @@ class_name Cell
 ## Cell.gd - Version corrigée pour GDScript 4.x
 
 var grid_position: Vector2i = Vector2i(0, 0)
-var entity = null  # Pas de typage Dictionary
+var entity = null
 var selected: bool = false
 var highlighted: bool = false
 
@@ -11,68 +11,59 @@ signal cell_clicked(x: int, y: int)
 
 
 func _ready():
-    # Créer un fond (ColorRect)
     var bg = ColorRect.new()
     bg.name = "Background"
     bg.color = Color.LIGHT_GRAY if (grid_position.x + grid_position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
     bg.size = Vector2(64, 64)
     add_child(bg)
-    
-    # Créer le sprite de l'entité
+
     var entity_sprite = Sprite2D.new()
     entity_sprite.name = "EntitySprite"
     entity_sprite.position = Vector2(32, 32)
     add_child(entity_sprite)
-    
-    # Créer la bordure
+
     var border = Sprite2D.new()
     border.name = "Border"
     border.position = Vector2(32, 32)
     add_child(border)
-    
+
     update_appearance()
 
 
 func update_appearance():
-    # Mettre à jour le fond
     var bg = get_node_or_null("Background")
     if bg:
         bg.color = Color.LIGHT_GRAY if (grid_position.x + grid_position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
-    
-    # Afficher l'entité
+
     if entity:
         var entity_sprite = get_node_or_null("EntitySprite")
         var border = get_node_or_null("Border")
-        var center: Vector2 = Vector2(32, 32)  # Déclaré explicitement
-        var radius: float = 20.0  # Déclaré explicitement
-        
+        var center: Vector2 = Vector2(32, 32)
+        var radius: float = 20.0
+
         if entity_sprite:
             entity_sprite.visible = true
-            # Créer une texture de cercle coloré
             var img = Image.create(64, 64, false, Image.FORMAT_RGBA8)
             img.fill(Color(0, 0, 0, 0))
             var color = GameManager.COLORS.get(entity.get("classe", ""), Color(0.5, 0.5, 0.5))
-            
-            for x in range(64):
-                for y in range(64):
-                    if (Vector2(x, y) - center).length() < radius:
-                        img.set_pixel(x, y, color)
-            
+            for px in range(64):
+                for py in range(64):
+                    if (Vector2(px, py) - center).length() < radius:
+                        img.set_pixel(px, py, color)
             entity_sprite.texture = ImageTexture.create_from_image(img)
-        
+
         if border:
             border.visible = true
             var border_color = Color.BLUE if entity.get("entity_type", "") == "Player" else Color.RED
             var border_img = Image.create(64, 64, false, Image.FORMAT_RGBA8)
             border_img.fill(Color(0, 0, 0, 0))
-            for x in range(64):
-                for y in range(64):
-                    var dist = (Vector2(x, y) - center).length()
+            for px in range(64):
+                for py in range(64):
+                    var dist = (Vector2(px, py) - center).length()
                     if dist > radius - 2 and dist < radius + 2:
-                        border_img.set_pixel(x, y, border_color)
+                        border_img.set_pixel(px, py, border_color)
             border.texture = ImageTexture.create_from_image(border_img)
-        
-        # Surligner si sélectionné
+
         if selected:
             var select = get_node_or_null("Selection")
             if not select:
@@ -86,7 +77,7 @@ func update_appearance():
         else:
             if has_node("Selection"):
                 get_node("Selection").queue_free()
-        
+
         if highlighted:
             var highlight = get_node_or_null("Highlight")
             if not highlight:
@@ -113,7 +104,8 @@ func update_appearance():
 
 func _input(event: InputEvent) -> void:
     if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-        var mouse_pos = get_global_mouse_position()
-        var local_pos = to_local(mouse_pos)
-        if Rect2(-32, -32, 64, 64).has_point(local_pos):
+        var local_pos = to_local(get_global_mouse_position())
+        # CORRIGÉ : le fond de la cellule occupe (0,0)→(64,64) en espace local,
+        # l'ancien Rect2(-32,-32,64,64) ne couvrait que la moitié supérieure-gauche.
+        if Rect2(0, 0, 64, 64).has_point(local_pos):
             cell_clicked.emit(grid_position.x, grid_position.y)

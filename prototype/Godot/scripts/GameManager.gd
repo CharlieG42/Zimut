@@ -1,4 +1,5 @@
 extends Node
+class_name GameManager
 ## GameManager - Gère la logique globale du jeu WildZimut
 
 const GRID_SIZE := 10
@@ -217,7 +218,7 @@ func handle_cell_selected(cell_pos: Vector2i):
                     current_player["y"] = y
                     grid[y][x] = current_player
                     current_player["current_pm"] -= 1
-                    entity_moved.emit(current_player, Vector2i(current_player["x"] - dx, current_player["y"] - dy), cell_pos)
+                    entity_moved.emit(current_player, Vector2i(int(current_player["x"]) - dx, int(current_player["y"]) - dy), cell_pos)
                     selected_entity = null
                     show_spells = false
                     player_changed.emit(current_player_index)
@@ -354,8 +355,8 @@ func cast_spell(caster: Dictionary, spell: Dictionary, target: Dictionary) -> St
 
 
 func can_cast_spell(entity: Dictionary, spell: Dictionary) -> bool:
-    return (entity["current_pa"] >= spell["cost_pa"] and 
-            entity["current_pm"] >= spell["cost_pm"] and 
+    return (entity["current_pa"] >= spell["cost_pa"] and
+            entity["current_pm"] >= spell["cost_pm"] and
             entity["level"] >= spell["level_required"])
 
 

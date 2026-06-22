@@ -8,6 +8,9 @@ signal spell_selected(spell: Dictionary)
 
 
 func _ready():
+    # CORRIGÉ : connexion du signal pressed qui manquait
+    pressed.connect(_on_pressed)
+
     if spell:
         text = spell.get("name", "Sort")
         var cost_text = ""

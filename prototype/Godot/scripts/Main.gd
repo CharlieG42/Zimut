@@ -14,7 +14,9 @@ extends Node2D
 @onready var turn_order_panel: Panel = $TurnOrderPanel
 @onready var turn_order_container: VBoxContainer = $TurnOrderPanel/TurnOrderContainer
 
-@onready var game_manager: GameManager = GameManager
+# CORRIGÉ : GameManager est un autoload, on y accède directement sans @onready
+# Le type hint GameManager fonctionne maintenant grâce à class_name dans GameManager.gd
+var game_manager: GameManager
 
 var cell_nodes: Array = []
 var spell_buttons: Array = []
@@ -22,10 +24,11 @@ var turn_order_labels: Array = []
 
 
 func _ready():
+    game_manager = GameManager  # référence à l'autoload
     get_viewport().size = Vector2(1200, 700)
     init_grid_display()
     init_turn_order_display()
-    
+
     game_manager.turn_changed.connect(_on_turn_changed)
     game_manager.player_changed.connect(_on_player_changed)
     game_manager.entity_selected.connect(_on_entity_selected)
@@ -35,11 +38,10 @@ func _ready():
     game_manager.entity_attacked.connect(_on_entity_attacked)
     game_manager.spell_casted.connect(_on_spell_casted)
     restart_button.pressed.connect(_on_restart_pressed)
-    
+
     spell_panel.visible = false
     update_ui()
-    
-    # Afficher les sorts du joueur initial après un petit délai
+
     await get_tree().process_frame
     if game_manager.players.size() > 0:
         show_spells_for_player(game_manager.players[0])
@@ -62,12 +64,18 @@ func init_grid_display():
 
 func init_turn_order_display():
     turn_order_labels = []
-    turn_order_container.clear()
+    # CORRIGÉ : VBoxContainer n'a pas de méthode clear() → supprimer les enfants manuellement
+    for child in turn_order_container.get_children():
+        child.queue_free()
+
     for i in range(game_manager.players.size()):
         var player = game_manager.players[i]
         var label = Label.new()
         label.text = "%d. %s" % [i + 1, player.get("name", "Joueur")]
-        label.label_settings.font_size = 16
+        # CORRIGÉ : label_settings est null par défaut, il faut créer l'objet
+        var settings = LabelSettings.new()
+        settings.font_size = 16
+        label.label_settings = settings
         label.add_theme_color_override("font_color", Color.WHITE)
         turn_order_container.add_child(label)
         turn_order_labels.append(label)
@@ -76,9 +84,6 @@ func init_turn_order_display():
 func _on_cell_clicked(x: int, y: int):
     if game_manager.game_over:
         return
-    if game_manager.selected_spell != null:
-        game_manager.handle_cell_selected(Vector2i(x, y))
-        return
     game_manager.handle_cell_selected(Vector2i(x, y))
 
 
@@ -86,7 +91,10 @@ func show_spells_for_player(player: Dictionary):
     for button in spell_buttons:
         button.queue_free()
     spell_buttons = []
-    spell_container.clear()
+    # CORRIGÉ : VBoxContainer n'a pas de méthode clear() → supprimer les enfants manuellement
+    for child in spell_container.get_children():
+        child.queue_free()
+
     for spell in player.get("spells", []):
         var button = preload("res://scripts/SpellButton.gd").new()
         button.spell = spell
@@ -115,16 +123,17 @@ func _on_turn_changed(turn: int):
 
 func _on_player_changed(index: int):
     update_ui()
+    update_entity_display()
     if game_manager.current_turn == 0 and game_manager.players.size() > index:
         var current_player = game_manager.players[index]
         show_spells_for_player(current_player)
     else:
         hide_spell_panel()
 
-func _on_entity_selected(entity):
+func _on_entity_selected(_entity):
     update_ui()
 
-func _on_spell_selected(spell):
+func _on_spell_selected(_spell):
     pass
 
 func _on_game_ended(victory: bool):
@@ -135,13 +144,13 @@ func _on_game_ended(victory: bool):
     else:
         game_over_label.text = "DEFAITE..."
 
-func _on_entity_moved(entity, from_pos: Vector2i, to_pos: Vector2i):
+func _on_entity_moved(_entity, _from_pos: Vector2i, _to_pos: Vector2i):
     update_entity_display()
 
-func _on_entity_attacked(attacker, target, damage: int):
+func _on_entity_attacked(_attacker, _target, _damage: int):
     update_entity_display()
 
-func _on_spell_casted(caster, spell, target, result: String):
+func _on_spell_casted(_caster, _spell, _target, result: String):
     update_entity_display()
     add_message(result)
     hide_spell_panel()
@@ -176,7 +185,7 @@ func update_turn_order_display():
         if i < game_manager.players.size():
             var player = game_manager.players[i]
             var label = turn_order_labels[i]
-            var is_current = (i == game_manager.current_player_index && game_manager.current_turn == 0)
+            var is_current = (i == game_manager.current_player_index and game_manager.current_turn == 0)
             if is_current:
                 label.add_theme_color_override("font_color", Color.YELLOW)
                 label.text = "%d. %s (ACTIF)" % [i + 1, player.get("name", "Joueur")]
@@ -200,8 +209,8 @@ func update_entity_display():
                 var cell = cell_nodes[y][x]
                 cell.entity = entity
                 cell.selected = (game_manager.selected_entity == entity)
-                cell.highlighted = (entity == game_manager.players[game_manager.current_player_index] and 
-                                   game_manager.current_turn == 0 and 
+                cell.highlighted = (entity == game_manager.players[game_manager.current_player_index] and
+                                   game_manager.current_turn == 0 and
                                    entity.get("entity_type", "") == "Player")
                 cell.update_appearance()
 
@@ -209,7 +218,10 @@ func update_entity_display():
 func add_message(message: String):
     message_label.text = message
     var timer = Timer.new()
-    timer.timeout = 2.0
+    # CORRIGÉ : timer.timeout est un signal, pas une propriété.
+    # La durée se définit avec wait_time, et one_shot évite la répétition.
+    timer.wait_time = 2.0
+    timer.one_shot = true
     timer.timeout.connect(func(): message_label.text = "")
     add_child(timer)
     timer.start()
