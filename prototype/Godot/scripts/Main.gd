@@ -105,9 +105,9 @@ func init_turn_order_display():
         row_container.add_child(label)
         turn_order_labels.append(label)
         
-        # Health bar container - groups bg and fill together
+        # Health bar container - holds both bg and fill
         var health_container = Control.new()
-        health_container.size = Vector2(200, 25)
+        health_container.size = Vector2(120, 25)
         health_container.size_flags_horizontal = Control.SIZE_SHRINK_END
         health_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
         row_container.add_child(health_container)
@@ -115,14 +115,15 @@ func init_turn_order_display():
         # Health bar background
         var health_bar_bg = ColorRect.new()
         health_bar_bg.color = Color(0.15, 0.15, 0.15)
-        health_bar_bg.size = Vector2(200, 25)
+        health_bar_bg.size = Vector2(120, 25)
         health_container.add_child(health_bar_bg)
         
-        # Health bar fill
+        # Health bar fill (on top of bg)
         var health_bar_fill = ColorRect.new()
         health_bar_fill.name = "HealthBar_%d" % i
         health_bar_fill.color = Color(0, 1.0, 0)
-        health_bar_fill.size = Vector2(200, 25)
+        health_bar_fill.size = Vector2(120, 25)
+        health_bar_fill.z_index = 1  # Make sure it's on top of bg
         health_container.add_child(health_bar_fill)
         turn_order_health_bars.append(health_bar_fill)
     
@@ -147,9 +148,9 @@ func init_turn_order_display():
         row_container.add_child(label)
         turn_order_labels.append(label)
         
-        # Health bar container - groups bg and fill together
+        # Health bar container - holds both bg and fill
         var health_container = Control.new()
-        health_container.size = Vector2(200, 25)
+        health_container.size = Vector2(120, 25)
         health_container.size_flags_horizontal = Control.SIZE_SHRINK_END
         health_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
         row_container.add_child(health_container)
@@ -157,14 +158,15 @@ func init_turn_order_display():
         # Health bar background
         var health_bar_bg = ColorRect.new()
         health_bar_bg.color = Color(0.15, 0.15, 0.15)
-        health_bar_bg.size = Vector2(200, 25)
+        health_bar_bg.size = Vector2(120, 25)
         health_container.add_child(health_bar_bg)
         
-        # Health bar fill
+        # Health bar fill (on top of bg)
         var health_bar_fill = ColorRect.new()
         health_bar_fill.name = "HealthBar_%d" % (game_manager.players.size() + i)
         health_bar_fill.color = Color(1.0, 0.2, 0.2)
-        health_bar_fill.size = Vector2(200, 25)
+        health_bar_fill.size = Vector2(120, 25)
+        health_bar_fill.z_index = 1
         health_container.add_child(health_bar_fill)
         turn_order_health_bars.append(health_bar_fill)
 
@@ -318,7 +320,7 @@ func update_turn_order_health_bars():
             var player = game_manager.players[i]
             var health_bar = turn_order_health_bars[i]
             var health_ratio = player.get("current_pv", 0) / max(1, player.get("max_pv", 1))
-            health_bar.size.x = 200.0 * health_ratio
+            health_bar.size.x = 120.0 * health_ratio
     
     # Mettre à jour les barres de vie des ennemis
     for i in range(game_manager.enemies.size()):
@@ -327,7 +329,7 @@ func update_turn_order_health_bars():
             var enemy = game_manager.enemies[i]
             var health_bar = turn_order_health_bars[bar_index]
             var health_ratio = enemy.get("current_pv", 0) / max(1, enemy.get("max_pv", 1))
-            health_bar.size.x = 200.0 * health_ratio
+            health_bar.size.x = 120.0 * health_ratio
 
 
 func update_entity_display():
