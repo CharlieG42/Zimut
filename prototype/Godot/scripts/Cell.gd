@@ -1,6 +1,7 @@
 extends Node2D
 class_name Cell
 ## Cell.gd - 80px cells, fond en Sprite2D pour compatibilité Node2D
+## Godot 4.7 compatible - sans lock()/unlock()
 
 const CELL_SIZE := 80
 const HALF := CELL_SIZE / 2
@@ -42,28 +43,24 @@ func _ready():
 
 
 # utilitaires pour générer textures
+# Godot 4.7: lock()/unlock() removed - use methods directly
 func _make_filled_texture(color: Color) -> ImageTexture:
     var img = Image.create(CELL_SIZE, CELL_SIZE, false, Image.FORMAT_RGBA8)
-    img.lock()
     img.fill(color)
-    img.unlock()
     return ImageTexture.create_from_image(img)
 
 func _make_circle_texture(color: Color, radius: float = 30.0) -> ImageTexture:
     var img = Image.create(CELL_SIZE, CELL_SIZE, false, Image.FORMAT_RGBA8)
-    img.lock()
     img.fill(Color(0, 0, 0, 0))
     var center = Vector2(HALF, HALF)
     for x in range(CELL_SIZE):
         for y in range(CELL_SIZE):
             if (Vector2(x, y) - center).length() < radius:
                 img.set_pixel(x, y, color)
-    img.unlock()
     return ImageTexture.create_from_image(img)
 
 func _make_ring_texture(color: Color, radius: float = 30.0, thickness: float = 2.0) -> ImageTexture:
     var img = Image.create(CELL_SIZE, CELL_SIZE, false, Image.FORMAT_RGBA8)
-    img.lock()
     img.fill(Color(0, 0, 0, 0))
     var center = Vector2(HALF, HALF)
     for x in range(CELL_SIZE):
@@ -71,7 +68,6 @@ func _make_ring_texture(color: Color, radius: float = 30.0, thickness: float = 2
             var d = (Vector2(x, y) - center).length()
             if d > radius - thickness and d < radius + thickness:
                 img.set_pixel(x, y, color)
-    img.unlock()
     return ImageTexture.create_from_image(img)
 
 
