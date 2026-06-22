@@ -54,40 +54,40 @@ text = "Recommencer"
 horizontal_alignment = 1
 
 [node name="SpellPanel" type="Panel" parent="./UI"]
-position = Vector2(1705, 100)
-size = Vector2(185, 800)
+position = Vector2(1655, 100)
+size = Vector2(250, 800)
 visible = false
 z_index = 50
 
 [node name="SpellPanelBackground" type="ColorRect" parent="./UI/SpellPanel"]
 color = Color(0.1, 0.1, 0.2, 0.8)
-size = Vector2(185, 800)
+size = Vector2(250, 800)
 
 [node name="SpellPanelLabel" type="Label" parent="./UI/SpellPanel"]
-position = Vector2(92, 40)
+position = Vector2(125, 40)
 text = "Sorts"
 label/settings/font_size = 36
 horizontal_alignment = 1
 
 [node name="SpellContainer" type="VBoxContainer" parent="./UI/SpellPanel"]
 position = Vector2(10, 80)
-size = Vector2(165, 700)
+size = Vector2(230, 700)
 
 [node name="TurnOrderPanel" type="Panel" parent="./UI"]
 position = Vector2(20, 100)
-size = Vector2(180, 800)
+size = Vector2(300, 800)
 z_index = 40
 
 [node name="TurnOrderBackground" type="ColorRect" parent="./UI/TurnOrderPanel"]
 color = Color(0.2, 0.1, 0.1, 0.7)
-size = Vector2(180, 800)
+size = Vector2(300, 800)
 
 [node name="TurnOrderLabel" type="Label" parent="./UI/TurnOrderPanel"]
-position = Vector2(90, 40)
+position = Vector2(150, 40)
 text = "Ordre de tour"
 label/settings/font_size = 28
 horizontal_alignment = 1
 
 [node name="TurnOrderContainer" type="VBoxContainer" parent="./UI/TurnOrderPanel"]
 position = Vector2(10, 80)
-size = Vector2(160, 700)
+size = Vector2(280, 700)
