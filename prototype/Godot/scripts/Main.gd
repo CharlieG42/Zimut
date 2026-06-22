@@ -62,7 +62,7 @@ func init_grid_display():
             var cell = preload("res://scripts/Cell.gd").new()
             cell.position = Vector2(x * 80 - 320, y * 80 - 320)
             cell.grid_position = Vector2i(x, y)
-            cell.connect("cell_clicked", Callable(self, "_on_cell_clicked").bind(x, y))
+            cell.connect("cell_clicked", Callable(self, "_on_cell_clicked"))
             grid.add_child(cell)
             row.append(cell)
         cell_nodes.append(row)
