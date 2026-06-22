@@ -121,7 +121,7 @@ func update_appearance():
 
 
 func _input(event: InputEvent) -> void:
-    if event is InputEventMouseButton and event.pressed and event.button_index == MouseButton.LEFT:
+    if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
         var local_pos = to_local(get_global_mouse_position())
         if Rect2(Vector2.ZERO, Vector2(CELL_SIZE, CELL_SIZE)).has_point(local_pos):
             emit_signal("cell_clicked", grid_position.x, grid_position.y)
