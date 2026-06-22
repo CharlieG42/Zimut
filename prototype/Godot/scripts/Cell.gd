@@ -1,6 +1,9 @@
 extends Node2D
 class_name Cell
-## Cell.gd - 80px cells, sans highlight bloquant
+## Cell.gd - cellule 80x80, fond et sprites générés proprement
+
+const CELL_SIZE := 80
+const HALF := CELL_SIZE / 2
 
 var grid_position: Vector2i = Vector2i(0, 0)
 var entity = null
@@ -9,102 +12,104 @@ var highlighted: bool = false
 
 signal cell_clicked(x: int, y: int)
 
-
 func _ready():
-    # Background as a Sprite2D (controls mixed with Node2D can be hidden depending on canvas)
+    # Background (Sprite2D avec texture pleine) - z_index 0
     var bg = Sprite2D.new()
     bg.name = "Background"
     bg.centered = false
     bg.position = Vector2.ZERO
+    bg.z_index = 0
     add_child(bg)
 
+    # Entity sprite - centré - z_index 1
     var entity_sprite = Sprite2D.new()
     entity_sprite.name = "EntitySprite"
-    # entity sprites are drawn centered at the cell center
-    entity_sprite.position = Vector2(40, 40)
+    entity_sprite.centered = true
+    entity_sprite.position = Vector2(HALF, HALF)
+    entity_sprite.z_index = 1
+    entity_sprite.visible = false
     add_child(entity_sprite)
 
+    # Border sprite - centré - z_index 2
     var border = Sprite2D.new()
     border.name = "Border"
-    border.position = Vector2(40, 40)
+    border.centered = true
+    border.position = Vector2(HALF, HALF)
+    border.z_index = 2
+    border.visible = false
     add_child(border)
 
     update_appearance()
 
-
-func _create_filled_texture(color: Color) -> ImageTexture:
-    var img = Image.create(80, 80, false, Image.FORMAT_RGBA8)
+# utilitaires pour générer textures
+func _make_filled_texture(color: Color) -> ImageTexture:
+    var img = Image.create(CELL_SIZE, CELL_SIZE, false, Image.FORMAT_RGBA8)
     img.lock()
-    for x in range(80):
-        for y in range(80):
+    for x in range(CELL_SIZE):
+        for y in range(CELL_SIZE):
             img.set_pixel(x, y, color)
     img.unlock()
-    var tex = ImageTexture.create_from_image(img)
-    return tex
+    return ImageTexture.create_from_image(img)
 
+func _make_circle_texture(color: Color, radius: float = 30.0) -> ImageTexture:
+    var img = Image.create(CELL_SIZE, CELL_SIZE, false, Image.FORMAT_RGBA8)
+    img.lock()
+    img.fill(Color(0, 0, 0, 0))
+    var center = Vector2(HALF, HALF)
+    for x in range(CELL_SIZE):
+        for y in range(CELL_SIZE):
+            if (Vector2(x, y) - center).length() < radius:
+                img.set_pixel(x, y, color)
+    img.unlock()
+    return ImageTexture.create_from_image(img)
+
+func _make_ring_texture(color: Color, radius: float = 30.0, thickness: float = 2.0) -> ImageTexture:
+    var img = Image.create(CELL_SIZE, CELL_SIZE, false, Image.FORMAT_RGBA8)
+    img.lock()
+    img.fill(Color(0, 0, 0, 0))
+    var center = Vector2(HALF, HALF)
+    for x in range(CELL_SIZE):
+        for y in range(CELL_SIZE):
+            var d = (Vector2(x, y) - center).length()
+            if d > radius - thickness and d < radius + thickness:
+                img.set_pixel(x, y, color)
+    img.unlock()
+    return ImageTexture.create_from_image(img)
 
 func update_appearance():
-    var bg_sprite = get_node_or_null("Background")
-    if bg_sprite:
+    var bg = get_node_or_null("Background") as Sprite2D
+    if bg:
         var bg_color = Color.LIGHT_GRAY if (grid_position.x + grid_position.y) % 2 == 0 else Color(0.8, 0.8, 0.8)
-        bg_sprite.texture = _create_filled_texture(bg_color)
+        bg.texture = _make_filled_texture(bg_color)
+
+    var entity_sprite = get_node_or_null("EntitySprite") as Sprite2D
+    var border = get_node_or_null("Border") as Sprite2D
 
     if entity:
-        var entity_sprite = get_node_or_null("EntitySprite")
-        var border = get_node_or_null("Border")
-        var center: Vector2 = Vector2(40, 40)
-        var radius: float = 30.0
-
+        var color = GameManager.COLORS.get(entity.get("classe", ""), Color(0.5, 0.5, 0.5))
         if entity_sprite:
             entity_sprite.visible = true
-            # draw a filled circle texture for the entity
-            var img = Image.create(80, 80, false, Image.FORMAT_RGBA8)
-            img.fill(Color(0, 0, 0, 0))
-            img.lock()
-            var color = GameManager.COLORS.get(entity.get("classe", ""), Color(0.5, 0.5, 0.5))
-            for px in range(80):
-                for py in range(80):
-                    if (Vector2(px, py) - center).length() < radius:
-                        img.set_pixel(px, py, color)
-            img.unlock()
-            entity_sprite.texture = ImageTexture.create_from_image(img)
-
+            entity_sprite.texture = _make_circle_texture(color)
         if border:
             border.visible = true
             var border_color = Color.BLUE if entity.get("entity_type", "") == "Player" else Color.RED
             if entity.get("is_active", false):
                 border_color = Color.YELLOW
-            var border_img = Image.create(80, 80, false, Image.FORMAT_RGBA8)
-            border_img.fill(Color(0, 0, 0, 0))
-            border_img.lock()
-            for px in range(80):
-                for py in range(80):
-                    var dist = (Vector2(px, py) - center).length()
-                    if dist > radius - 2 and dist < radius + 2:
-                        border_img.set_pixel(px, py, border_color)
-            border_img.unlock()
-            border.texture = ImageTexture.create_from_image(border_img)
-
+            border.texture = _make_ring_texture(border_color)
+        # selection overlay as ColorRect-like sprite
         if selected:
-            var select = get_node_or_null("Selection")
-            if not select:
-                select = Sprite2D.new()
-                select.name = "Selection"
-                select.position = Vector2.ZERO
-                select.centered = false
-                add_child(select)
-            var select_img = Image.create(80, 80, false, Image.FORMAT_RGBA8)
-            select_img.fill(Color(1, 1, 0, 0.3))
-            select.texture = ImageTexture.create_from_image(select_img)
+            if not has_node("Selection"):
+                var sel = Sprite2D.new()
+                sel.name = "Selection"
+                sel.centered = false
+                sel.position = Vector2.ZERO
+                sel.z_index = 3
+                add_child(sel)
+            get_node("Selection").texture = _make_filled_texture(Color(1, 1, 0, 0.25))
         else:
             if has_node("Selection"):
                 get_node("Selection").queue_free()
-
-        if has_node("Highlight"):
-            get_node("Highlight").queue_free()
     else:
-        var entity_sprite = get_node_or_null("EntitySprite")
-        var border = get_node_or_null("Border")
         if entity_sprite:
             entity_sprite.visible = false
             entity_sprite.texture = null
@@ -113,13 +118,9 @@ func update_appearance():
             border.texture = null
         if has_node("Selection"):
             get_node("Selection").queue_free()
-        if has_node("Highlight"):
-            get_node("Highlight").queue_free()
-
 
 func _input(event: InputEvent) -> void:
-    # Use the global mouse position which is the most reliable for Node2D
     if event is InputEventMouseButton and event.pressed and event.button_index == MouseButton.LEFT:
         var local_pos = to_local(get_global_mouse_position())
-        if Rect2(Vector2.ZERO, Vector2(80, 80)).has_point(local_pos):
+        if Rect2(Vector2.ZERO, Vector2(CELL_SIZE, CELL_SIZE)).has_point(local_pos):
             emit_signal("cell_clicked", grid_position.x, grid_position.y)
