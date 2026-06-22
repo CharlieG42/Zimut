@@ -8,17 +8,16 @@
 script = ExtResource( 1 )
 
 [node name="Grid" type="Node2D" parent="."]
-# CORRIGÉ : Position à (320, 320) pour que avec offset -320, 
-# la cellule (0,0) soit à (0,0) et (9,9) à (576,576) dans un viewport 800x600
 position = Vector2(320, 320)
+z_index = 20
 
 [node name="TurnLabel" type="Label" parent="."]
-position = Vector2(800, 20)
+position = Vector2(400, 20)
 text = "Tour des joueurs"
 label/settings/font_size = 24
 
 [node name="PlayerInfoLabel" type="Label" parent="."]
-position = Vector2(50, 580)
+position = Vector2(10, 580)
 text = "Joueur: -"
 label/settings/font_size = 18
 
