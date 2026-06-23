@@ -356,6 +356,16 @@ func enemy_turn():
     for player in players:
         player["current_pa"] = player["max_pa"]
         player["current_pm"] = player["max_pm"]
+    # Ensure current_player_index points to an alive player
+    if players.size() > 0:
+        var found = false
+        for i in range(players.size()):
+            if players[i]["current_pv"] > 0:
+                current_player_index = i
+                found = true
+                break
+        if not found:
+            current_player_index = 0
     check_game_over()
 
 
