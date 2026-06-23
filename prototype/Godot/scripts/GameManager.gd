@@ -443,12 +443,8 @@ func enemy_ai_turn(p_enemy: Dictionary, p_players: Array, p_grid: Array) -> Stri
         target["current_pv"] -= actual_damage
         p_enemy["current_pa"] -= 1
         if target["current_pv"] <= 0:
-            # Remove dead player from grid
-            for py in range(GRID_SIZE):
-                for px in range(GRID_SIZE):
-                    if p_grid[py][px] == target:
-                        p_grid[py][px] = null
-                        break
+            # Remove dead player from grid and arrays
+            remove_entity_from_grid(target)
         return "%s attaque %s : %d dégâts !" % [p_enemy["name"], target["name"], actual_damage]
     elif p_enemy["current_pm"] >= 1:
         var target = alive_players[randi() % alive_players.size()]
