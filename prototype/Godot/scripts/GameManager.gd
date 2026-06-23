@@ -195,16 +195,11 @@ func handle_cell_selected(cell_pos: Vector2i):
                     if spell_result:
                         spell_casted.emit(current_player, selected_spell, entity, spell_result)
                         message_requested.emit(spell_result)
-                        if entity["current_pv"] <= 0 and entity["entity_type"] == "Enemy":
-                            grid[entity["y"]][entity["x"]] = null
-                            for j in range(enemies.size()):
-                                if enemies[j] == entity:
-                                    enemies.remove_at(j)
-                                    break
-                            check_game_over()
-                    selected_spell = null
-                    entity_selected.emit(null)
-                    player_changed.emit(current_player_index)
+                        if entity["current_pv"] <= 0:
+                            remove_entity_from_grid(entity)
+                        selected_spell = null
+                        entity_selected.emit(null)
+                        player_changed.emit(current_player_index)
                 else:
                     message_requested.emit("Cible hors de portée ! (Portée: %d)" % selected_spell["range"])
             else:
@@ -252,13 +247,8 @@ func handle_cell_selected(cell_pos: Vector2i):
                 entity_attacked.emit(current_player, entity, actual_damage)
                 current_player["current_pa"] -= 1
                 message_requested.emit("%s attaque %s : %d dégâts !" % [current_player["name"], entity["name"], actual_damage])
-                if entity["current_pv"] <= 0 and entity["entity_type"] == "Enemy":
-                    grid[entity["y"]][entity["x"]] = null
-                    for j in range(enemies.size()):
-                        if enemies[j] == entity:
-                            enemies.remove_at(j)
-                            break
-                    check_game_over()
+                if entity["current_pv"] <= 0:
+                    remove_entity_from_grid(entity)
                 selected_entity = current_player
                 show_spells = false
                 player_changed.emit(current_player_index)
@@ -266,6 +256,36 @@ func handle_cell_selected(cell_pos: Vector2i):
     
     selected_entity = null
     show_spells = false
+
+
+# New function to remove dead entities from grid and arrays
+func remove_entity_from_grid(entity: Dictionary):
+    if entity["entity_type"] == "Player":
+        # Find and remove from players array
+        for i in range(players.size()):
+            if players[i] == entity:
+                players.remove_at(i)
+                break
+        # Update current_player_index if needed
+        if current_player_index >= players.size():
+            current_player_index = max(0, players.size() - 1)
+    elif entity["entity_type"] == "Enemy":
+        # Find and remove from enemies array
+        for i in range(enemies.size()):
+            if enemies[i] == entity:
+                enemies.remove_at(i)
+                break
+    
+    # Remove from grid
+    var ex = int(entity["x"])
+    var ey = int(entity["y"])
+    if ex >= 0 and ex < GRID_SIZE and ey >= 0 and ey < GRID_SIZE:
+        grid[ey][ex] = null
+    
+    # Emit update signals
+    entity_selected.emit(null)
+    player_changed.emit(current_player_index)
+    check_game_over()
 
 
 func handle_spell_selected(spell: Dictionary):
@@ -378,14 +398,23 @@ func push_message(message: String):
 func cast_spell(caster: Dictionary, spell: Dictionary, target: Dictionary) -> String:
     if not can_cast_spell(caster, spell):
         return ""
+    
+    # Deduct PA and PM costs
     caster["current_pa"] -= spell["cost_pa"]
     caster["current_pm"] -= spell["cost_pm"]
-    if "dégâts" in spell["effect"].to_lower():
+    
+    # Handle different spell effects
+    if spell["spell_type"] == "Soin" or "soin" in spell["effect"].to_lower():
+        var heal_str = spell["effect"].split(" ")[1] if spell["effect"].split(" ").size() > 1 else "30"
+        var heal = int(heal_str) if heal_str.is_valid_int() else 30
+        target["current_pv"] = min(target["max_pv"], target["current_pv"] + heal)
+        return "%s lance %s : %d PV restaurés !" % [caster["name"], spell["name"], heal]
+    elif "dégâts" in spell["effect"].to_lower():
         var damage_str = spell["effect"].split(" ")[0]
         var damage = int(damage_str) if damage_str.is_valid_int() else 10
         target["current_pv"] -= max(1, damage - target["defense"] / 2.0)
         return "%s lance %s : %d dégâts !" % [caster["name"], spell["name"], damage]
-    elif "restaure" in spell["effect"].to_lower() or "soin" in spell["effect"].to_lower():
+    elif "restaure" in spell["effect"].to_lower():
         var heal_str = spell["effect"].split(" ")[1]
         var heal = int(heal_str) if heal_str.is_valid_int() else 15
         target["current_pv"] = min(target["max_pv"], target["current_pv"] + heal)
@@ -413,6 +442,13 @@ func enemy_ai_turn(p_enemy: Dictionary, p_players: Array, p_grid: Array) -> Stri
         var actual_damage = max(1, damage - target["defense"] / 2.0)
         target["current_pv"] -= actual_damage
         p_enemy["current_pa"] -= 1
+        if target["current_pv"] <= 0:
+            # Remove dead player from grid
+            for py in range(GRID_SIZE):
+                for px in range(GRID_SIZE):
+                    if p_grid[py][px] == target:
+                        p_grid[py][px] = null
+                        break
         return "%s attaque %s : %d dégâts !" % [p_enemy["name"], target["name"], actual_damage]
     elif p_enemy["current_pm"] >= 1:
         var target = alive_players[randi() % alive_players.size()]
