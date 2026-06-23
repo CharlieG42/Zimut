@@ -1,6 +1,6 @@
 extends Node2D
 ## Main.gd - Scene principale avec Node2D
-## TurnOrderContainer is now a Control (not VBoxContainer) for manual positioning
+## TurnOrderContainer is a Control (not VBoxContainer) for manual positioning
 
 @onready var grid: Node2D = $Grid
 @onready var turn_label: Label = $UI/TurnLabel
@@ -46,19 +46,20 @@ func _ready():
 
 
 func init_ui_elements():
+    # End turn button - under spell panel
     end_turn_button = Button.new()
     end_turn_button.name = "EndTurnButton"
     end_turn_button.text = "Passer le tour"
-    end_turn_button.position = Vector2(960, 1000)
+    end_turn_button.position = Vector2(1750, 990)  # Under SpellPanel (x=1600, width=300)
     end_turn_button.size = Vector2(250, 50)
     end_turn_button.add_theme_font_size_override("font_size", 28)
     add_child(end_turn_button)
     end_turn_button.pressed.connect(_on_end_turn_pressed)
     
-    # Make player info label larger (48px)
+    # Player info label - slightly smaller font (44px)
     if player_info_label:
         var settings = LabelSettings.new()
-        settings.font_size = 48
+        settings.font_size = 44
         player_info_label.label_settings = settings
 
 
@@ -90,7 +91,7 @@ func init_turn_order_display():
     for i in range(game_manager.players.size()):
         var player = game_manager.players[i]
         
-        # Label du nom - absolute positioning in Control
+        # Label du nom
         var label = Label.new()
         label.text = "%d. %s" % [i + 1, player.get("name", "Joueur")]
         var settings = LabelSettings.new()
@@ -98,28 +99,28 @@ func init_turn_order_display():
         label.label_settings = settings
         label.add_theme_color_override("font_color", Color.WHITE)
         label.position = Vector2(10, y_pos)
-        label.size = Vector2(160, 30)
+        label.size = Vector2(260, 25)
         turn_order_container.add_child(label)
         turn_order_labels.append(label)
         
-        # Health bar background (black for contrast)
+        # Health bar background (under the name)
         var health_bar_bg = ColorRect.new()
         health_bar_bg.color = Color(0, 0, 0)  # Black background
-        health_bar_bg.position = Vector2(180, y_pos)
-        health_bar_bg.size = Vector2(100, 30)
+        health_bar_bg.position = Vector2(10, y_pos + 28)
+        health_bar_bg.size = Vector2(120, 20)
         turn_order_container.add_child(health_bar_bg)
         
-        # Health bar fill (bright green for players)
+        # Health bar fill (under the name, on top of bg)
         var health_bar_fill = ColorRect.new()
         health_bar_fill.name = "HealthBar_%d" % i
         health_bar_fill.color = Color(0, 1.0, 0)  # Bright green
-        health_bar_fill.position = Vector2(180, y_pos)
-        health_bar_fill.size = Vector2(100, 30)
+        health_bar_fill.position = Vector2(10, y_pos + 28)
+        health_bar_fill.size = Vector2(120, 20)
         health_bar_fill.z_index = 1
         turn_order_container.add_child(health_bar_fill)
         turn_order_health_bars.append(health_bar_fill)
         
-        y_pos += 35  # Spacing between rows
+        y_pos += 55  # Spacing between rows (name + bar + gap)
     
     # Ajouter les ennemis
     for i in range(game_manager.enemies.size()):
@@ -132,28 +133,28 @@ func init_turn_order_display():
         label.label_settings = settings
         label.add_theme_color_override("font_color", Color(0.9, 0.4, 0.4))
         label.position = Vector2(10, y_pos)
-        label.size = Vector2(160, 30)
+        label.size = Vector2(260, 25)
         turn_order_container.add_child(label)
         turn_order_labels.append(label)
         
-        # Health bar background (black for contrast)
+        # Health bar background (under the name)
         var health_bar_bg = ColorRect.new()
         health_bar_bg.color = Color(0, 0, 0)  # Black background
-        health_bar_bg.position = Vector2(180, y_pos)
-        health_bar_bg.size = Vector2(100, 30)
+        health_bar_bg.position = Vector2(10, y_pos + 28)
+        health_bar_bg.size = Vector2(120, 20)
         turn_order_container.add_child(health_bar_bg)
         
-        # Health bar fill (bright red for enemies)
+        # Health bar fill (under the name, on top of bg)
         var health_bar_fill = ColorRect.new()
         health_bar_fill.name = "HealthBar_%d" % (game_manager.players.size() + i)
         health_bar_fill.color = Color(1.0, 0, 0)  # Bright red
-        health_bar_fill.position = Vector2(180, y_pos)
-        health_bar_fill.size = Vector2(100, 30)
+        health_bar_fill.position = Vector2(10, y_pos + 28)
+        health_bar_fill.size = Vector2(120, 20)
         health_bar_fill.z_index = 1
         turn_order_container.add_child(health_bar_fill)
         turn_order_health_bars.append(health_bar_fill)
         
-        y_pos += 35  # Spacing between rows
+        y_pos += 55  # Spacing between rows
 
 
 func _on_cell_clicked(x: int, y: int):
@@ -175,6 +176,12 @@ func show_spells_for_player(player: Dictionary):
         button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
         button.mouse_filter = Control.MOUSE_FILTER_PASS
+        
+        # Custom styling for spell buttons
+        button.add_theme_color_override("font_color", Color.WHITE)
+        button.add_theme_color_override("font_pressed_color", Color.YELLOW)
+        button.add_theme_color_override("font_hover_color", Color(1, 1, 0.8))
+        
         spell_container.add_child(button)
         spell_buttons.append(button)
     spell_panel.visible = true
@@ -186,6 +193,14 @@ func hide_spell_panel():
 
 func _on_spell_button_selected(spell: Dictionary):
     game_manager.handle_spell_selected(spell)
+    # Highlight selected spell button
+    for button in spell_buttons:
+        if button.spell == spell:
+            button.add_theme_color_override("font_color", Color.YELLOW)
+            button.add_theme_color_override("font_pressed_color", Color.YELLOW)
+        else:
+            button.add_theme_color_override("font_color", Color.WHITE)
+            button.add_theme_color_override("font_pressed_color", Color.YELLOW)
 
 
 func _on_message_requested(text: String):
@@ -214,8 +229,13 @@ func _on_entity_selected(_entity):
     update_ui()
 
 
-func _on_spell_selected(_spell):
-    pass
+func _on_spell_selected(spell):
+    # Highlight the selected spell in the panel
+    for button in spell_buttons:
+        if button.spell == spell:
+            button.add_theme_color_override("font_color", Color.YELLOW)
+        else:
+            button.add_theme_color_override("font_color", Color.WHITE)
 
 
 func _on_game_ended(victory: bool):
@@ -307,10 +327,10 @@ func update_turn_order_health_bars():
             var player = game_manager.players[i]
             var health_bar = turn_order_health_bars[i]
             var health_ratio = player.get("current_pv", 0) / max(1, player.get("max_pv", 1))
-            health_bar.size.x = 100.0 * health_ratio
-            health_bar.position.x = 180
-            health_bar.position.y = y_pos
-        y_pos += 35
+            health_bar.size.x = 120.0 * health_ratio
+            health_bar.position.x = 10
+            health_bar.position.y = y_pos + 28
+        y_pos += 55
     
     # Mettre à jour les barres de vie des ennemis
     for i in range(game_manager.enemies.size()):
@@ -319,10 +339,10 @@ func update_turn_order_health_bars():
             var enemy = game_manager.enemies[i]
             var health_bar = turn_order_health_bars[bar_index]
             var health_ratio = enemy.get("current_pv", 0) / max(1, enemy.get("max_pv", 1))
-            health_bar.size.x = 100.0 * health_ratio
-            health_bar.position.x = 180
-            health_bar.position.y = y_pos
-        y_pos += 35
+            health_bar.size.x = 120.0 * health_ratio
+            health_bar.position.x = 10
+            health_bar.position.y = y_pos + 28
+        y_pos += 55
 
 
 func update_entity_display():
