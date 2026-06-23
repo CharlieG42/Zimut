@@ -186,6 +186,9 @@ func handle_cell_selected(cell_pos: Vector2i):
     selected_cell = cell_pos
     var entity = grid[y][x]
     
+    # Clean up any dead entities before handling selection
+    cleanup_dead_entities()
+    
     if current_turn == 0:
         var current_player = players[current_player_index]
         
