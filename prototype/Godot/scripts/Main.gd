@@ -402,13 +402,19 @@ func update_entity_display():
             var entity = game_manager.grid[y][x]
             if entity != null:
                 var cell = cell_nodes[y][x]
-                cell.entity = entity
-                cell.selected = (game_manager.selected_entity == entity)
-                # Only highlight if current_player_index is valid
-                var current_player = null
-                if game_manager.current_player_index >= 0 and game_manager.current_player_index < game_manager.players.size():
-                    current_player = game_manager.players[game_manager.current_player_index]
-                cell.highlighted = (entity == current_player and game_manager.current_turn == 0 and entity.get("entity_type", "") == "Player")
+                # Only display if entity is alive
+                if entity.get("current_pv", 0) > 0:
+                    cell.entity = entity
+                    cell.selected = (game_manager.selected_entity == entity)
+                    # Only highlight if current_player_index is valid
+                    var current_player = null
+                    if game_manager.current_player_index >= 0 and game_manager.current_player_index < game_manager.players.size():
+                        current_player = game_manager.players[game_manager.current_player_index]
+                    cell.highlighted = (entity == current_player and game_manager.current_turn == 0 and entity.get("entity_type", "") == "Player")
+                else:
+                    cell.entity = null
+                    cell.selected = false
+                    cell.highlighted = false
                 cell.update_appearance()
 
 
