@@ -85,11 +85,3 @@ func grid_to_screen(grid_pos: Vector2i) -> Vector2:
     screen_x += 960 - (game_manager.GRID_SIZE * game_manager.CELL_SIZE.x / 4)
     screen_y += 540 - (game_manager.GRID_SIZE * game_manager.CELL_SIZE.y / 4)
     return Vector2(screen_x, screen_y)
-
-
-func screen_to_grid(screen_pos: Vector2) -> Vector2i:
-    var x_screen = screen_pos.x - (960 - (game_manager.GRID_SIZE * game_manager.CELL_SIZE.x / 4))
-    var y_screen = screen_pos.y - (540 - (game_manager.GRID_SIZE * game_manager.CELL_SIZE.y / 4))
-    var grid_x = (x_screen / (game_manager.CELL_SIZE.x / 2) + y_screen / (game_manager.CELL_SIZE.y / 2)) / 2
-    var grid_y = (y_screen / (game_manager.CELL_SIZE.y / 2) - x_screen / (game_manager.CELL_SIZE.x / 2)) / 2
-    return Vector2i(round(grid_x), round(grid_y))
