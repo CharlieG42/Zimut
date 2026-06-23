@@ -74,10 +74,13 @@ position = Vector2(10, 70)
 size = Vector2(300, 780)
 
 [node name="SpellDescription" type="Label" parent="./UI/SpellPanel"]
-position = Vector2(160, 860)
+position = Vector2(10, 860)
 text = ""
-label/settings/font_size = 24
-horizontal_alignment = 1
+label/settings/font_size = 22
+label/settings/clip_text = false
+size = Vector2(300, 80)
+horizontal_alignment = 0
+autowrap = true
 
 [node name="TurnOrderPanel" type="Panel" parent="./UI"]
 position = Vector2(20, 100)
