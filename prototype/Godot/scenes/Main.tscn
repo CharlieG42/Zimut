@@ -54,24 +54,31 @@ text = "Recommencer"
 horizontal_alignment = 1
 
 [node name="SpellPanel" type="Panel" parent="./UI"]
-position = Vector2(1600, 100)
-size = Vector2(300, 880)
+position = Vector2(1580, 100)
+size = Vector2(320, 880)
 visible = false
 z_index = 50
 
 [node name="SpellPanelBackground" type="ColorRect" parent="./UI/SpellPanel"]
 color = Color(0.15, 0.15, 0.25, 0.85)
-size = Vector2(300, 880)
+size = Vector2(320, 880)
 
 [node name="SpellPanelLabel" type="Label" parent="./UI/SpellPanel"]
-position = Vector2(150, 40)
+position = Vector2(160, 30)
 text = "Sorts"
 label/settings/font_size = 36
 horizontal_alignment = 1
 
 [node name="SpellContainer" type="VBoxContainer" parent="./UI/SpellPanel"]
-position = Vector2(15, 80)
-size = Vector2(270, 780)
+position = Vector2(10, 70)
+size = Vector2(300, 750)
+
+[node name="SpellDescription" type="Label" parent="./UI/SpellPanel"]
+position = Vector2(160, 840)
+text = ""
+label/settings/font_size = 24
+horizontal_alignment = 1
+add_theme_color_override = Color(1, 1, 1, 1)
 
 [node name="TurnOrderPanel" type="Panel" parent="./UI"]
 position = Vector2(20, 100)
