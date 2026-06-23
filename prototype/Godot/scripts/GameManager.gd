@@ -335,6 +335,7 @@ func next_player():
     player_changed.emit(current_player_index)
     entity_selected.emit(current_player)
     message_requested.emit("Tour de %s" % current_player.get("name", "?"))
+    cleanup_dead_entities()
     
     if current_player_index == 0:
         enemy_turn()
@@ -374,6 +375,20 @@ func any_player_alive() -> bool:
         if p["current_pv"] > 0:
             return true
     return false
+
+
+func cleanup_dead_entities():
+    # Remove dead players from grid
+    for i in range(players.size() - 1, -1, -1):
+        var player = players[i]
+        if player["current_pv"] <= 0:
+            remove_entity_from_grid(player)
+    
+    # Remove dead enemies from grid
+    for i in range(enemies.size() - 1, -1, -1):
+        var enemy = enemies[i]
+        if enemy["current_pv"] <= 0:
+            remove_entity_from_grid(enemy)
 
 
 func check_game_over():
