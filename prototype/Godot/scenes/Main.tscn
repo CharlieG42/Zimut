@@ -78,7 +78,6 @@ position = Vector2(160, 860)
 text = ""
 label/settings/font_size = 24
 horizontal_alignment = 1
-add_theme_color_override = Color(1, 1, 1, 1)
 
 [node name="TurnOrderPanel" type="Panel" parent="./UI"]
 position = Vector2(20, 100)
