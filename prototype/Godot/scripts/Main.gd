@@ -54,6 +54,7 @@ func init_ui_elements():
     end_turn_button.position = Vector2(1660, 985)  # Centered: 1580 + 320/2 - 160/2 = 1660
     end_turn_button.size = Vector2(160, 50)  # Narrower to fit on screen
     end_turn_button.add_theme_font_size_override("font_size", 24)  # Smaller font
+    end_turn_button.z_index = 51  # Above SpellPanel (z_index=50)
     add_child(end_turn_button)
     end_turn_button.pressed.connect(_on_end_turn_pressed)
     
