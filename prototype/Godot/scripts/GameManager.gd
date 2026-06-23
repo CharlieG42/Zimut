@@ -301,10 +301,23 @@ func handle_spell_selected(spell: Dictionary):
 
 
 func next_player():
-    current_player_index = (current_player_index + 1) % players.size()
     selected_spell = null
     show_spells = false
     selected_cell = Vector2i(0, 0)
+    
+    # Find next alive player
+    var start_index = current_player_index
+    var found_alive = false
+    for i in range(players.size()):
+        current_player_index = (start_index + 1 + i) % players.size()
+        var current_player = players[current_player_index]
+        if current_player["current_pv"] > 0:
+            found_alive = true
+            break
+    
+    if not found_alive:
+        # All players are dead, game should be over
+        return
     
     # Auto-select the new current player
     var current_player = players[current_player_index]
