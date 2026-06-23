@@ -209,8 +209,8 @@ func handle_cell_selected(cell_pos: Vector2i):
                 message_requested.emit("Pas de cible valide à cette position")
             return
         
-        # Auto-selection: If clicking on current player, show spells
-        if entity and entity["entity_type"] == "Player" and entity == current_player:
+        # Auto-selection: If clicking on current player (and alive), show spells
+        if entity and entity["entity_type"] == "Player" and entity == current_player and entity["current_pv"] > 0:
             selected_entity = current_player
             show_spells = true
             for p in players:
@@ -220,8 +220,8 @@ func handle_cell_selected(cell_pos: Vector2i):
             player_changed.emit(current_player_index)
             return
         
-        # One-click movement: If clicking adjacent empty cell, move current player
-        if entity == null and current_player["current_pm"] > 0:
+        # One-click movement: If clicking adjacent empty cell, move current player (if alive)
+        if entity == null and current_player["current_pv"] > 0 and current_player["current_pm"] > 0:
             var dx: int = x - int(current_player["x"])
             var dy: int = y - int(current_player["y"])
             if abs(dx) + abs(dy) == 1:
@@ -238,8 +238,8 @@ func handle_cell_selected(cell_pos: Vector2i):
                     message_requested.emit("%s se déplace vers (%d,%d)" % [current_player["name"], x, y])
             return
         
-        # One-click attack: If clicking adjacent enemy, attack
-        if entity and entity["current_pv"] > 0 and entity["entity_type"] == "Enemy":
+        # One-click attack: If clicking adjacent enemy, attack (if current player alive)
+        if entity and entity["current_pv"] > 0 and entity["entity_type"] == "Enemy" and current_player["current_pv"] > 0:
             var dx: int = abs(x - int(current_player["x"]))
             var dy: int = abs(y - int(current_player["y"]))
             var distance = dx + dy
