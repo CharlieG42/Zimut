@@ -231,6 +231,7 @@ func _on_player_changed(index: int):
 
 func _on_entity_selected(_entity):
     update_ui()
+    update_entity_display()
 
 
 func _on_spell_selected(spell):
