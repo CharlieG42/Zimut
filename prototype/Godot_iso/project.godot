@@ -1,0 +1,63 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; but it can also be edited manually.
+
+[application]
+
+config/name="Godot_iso"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.2", "Forward Plus")
+
+[autoload]
+
+
+[color]
+
+config/color_blind_simulation=0
+
+[debug]
+
+config/profile_in_debug_builds=false
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="canvas_items"
+
+[input]
+
+
+[internationalization]
+
+
+[layer_names]
+
+2d_layer_1="Layer1"
+2d_layer_2="Layer2"
+2d_layer_3="Layer3"
+2d_layer_4="Layer4"
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+renderer/transparency/fallback_shading_mode="mix"
+
+[rendering/2d]
+
+renderer/2d/texture_filter_mode="nearest"
+
+[rendering/light2d]
+
+light2d/default_shadow_color=Color(0, 0, 0, 0.5)
+light2d/default_shadow_filter_smoothness=0.5
+light2d/default_shadow_mode="obstacle"
+light2d/default_shadow_quality="high"
+
+[rendering/occlusion_culling]
+
+config/occlusion_culling=false
+
+[ui]
+
+config/theme_override=""
