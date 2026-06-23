@@ -268,8 +268,11 @@ func remove_entity_from_grid(entity: Dictionary):
         for i in range(players.size()):
             if players[i] == entity:
                 players.remove_at(i)
+                # Update current_player_index: if we removed a player before or at current index, decrement
+                if i <= current_player_index:
+                    current_player_index = max(0, current_player_index - 1)
                 break
-        # Update current_player_index if needed
+        # Ensure index is valid
         if current_player_index >= players.size():
             current_player_index = max(0, players.size() - 1)
     elif entity["entity_type"] == "Enemy":
