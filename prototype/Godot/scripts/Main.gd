@@ -403,7 +403,11 @@ func update_entity_display():
                 var cell = cell_nodes[y][x]
                 cell.entity = entity
                 cell.selected = (game_manager.selected_entity == entity)
-                cell.highlighted = (entity == game_manager.players[game_manager.current_player_index] and game_manager.current_turn == 0 and entity.get("entity_type", "") == "Player")
+                # Only highlight if current_player_index is valid
+                var current_player = null
+                if game_manager.current_player_index >= 0 and game_manager.current_player_index < game_manager.players.size():
+                    current_player = game_manager.players[game_manager.current_player_index]
+                cell.highlighted = (entity == current_player and game_manager.current_turn == 0 and entity.get("entity_type", "") == "Player")
                 cell.update_appearance()
 
 
