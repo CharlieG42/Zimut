@@ -203,6 +203,7 @@ func handle_cell_selected(cell_pos: Vector2i):
                         selected_spell = null
                         entity_selected.emit(null)
                         player_changed.emit(current_player_index)
+                        cleanup_dead_entities()
                 else:
                     message_requested.emit("Cible hors de portée ! (Portée: %d)" % selected_spell["range"])
             else:
@@ -255,6 +256,7 @@ func handle_cell_selected(cell_pos: Vector2i):
                 selected_entity = current_player
                 show_spells = false
                 player_changed.emit(current_player_index)
+                cleanup_dead_entities()
             return
     
     selected_entity = null
