@@ -47,13 +47,13 @@ func _ready():
 
 
 func init_ui_elements():
-    # End turn button - under spell panel, centered
+    # End turn button - under spell panel, centered, narrower to fit
     end_turn_button = Button.new()
     end_turn_button.name = "EndTurnButton"
     end_turn_button.text = "Passer le tour"
-    end_turn_button.position = Vector2(1740, 985)  # Centered under SpellPanel (x=1580, width=320, y=80+900=980)
-    end_turn_button.size = Vector2(250, 50)
-    end_turn_button.add_theme_font_size_override("font_size", 28)
+    end_turn_button.position = Vector2(1660, 985)  # Centered: 1580 + 320/2 - 160/2 = 1660
+    end_turn_button.size = Vector2(160, 50)  # Narrower to fit on screen
+    end_turn_button.add_theme_font_size_override("font_size", 24)  # Smaller font
     add_child(end_turn_button)
     end_turn_button.pressed.connect(_on_end_turn_pressed)
     
@@ -88,7 +88,7 @@ func init_turn_order_display():
     
     var y_pos = 0
     
-    # Ajouter les joueurs (only alive)
+    # Alive players only
     for i in range(game_manager.players.size()):
         var player = game_manager.players[i]
         if player["current_pv"] > 0:
@@ -113,14 +113,16 @@ func init_turn_order_display():
             health_bar_fill.name = "HealthBar_%d" % i
             health_bar_fill.color = Color(0, 1.0, 0)
             health_bar_fill.position = Vector2(10, y_pos + 28)
-            health_bar_fill.size = Vector2(120, 20)
+            var health_ratio = player.get("current_pv", 0) / max(1, player.get("max_pv", 1))
+            health_bar_fill.size.x = 120.0 * health_ratio
+            health_bar_fill.size.y = 20
             health_bar_fill.z_index = 1
             turn_order_container.add_child(health_bar_fill)
             turn_order_health_bars.append(health_bar_fill)
             
             y_pos += 55
     
-    # Ajouter les ennemis (only alive)
+    # Alive enemies only
     for i in range(game_manager.enemies.size()):
         var enemy = game_manager.enemies[i]
         if enemy["current_pv"] > 0:
@@ -145,7 +147,9 @@ func init_turn_order_display():
             health_bar_fill.name = "HealthBar_%d" % (game_manager.players.size() + i)
             health_bar_fill.color = Color(1.0, 0, 0)
             health_bar_fill.position = Vector2(10, y_pos + 28)
-            health_bar_fill.size = Vector2(120, 20)
+            var health_ratio = enemy.get("current_pv", 0) / max(1, enemy.get("max_pv", 1))
+            health_bar_fill.size.x = 120.0 * health_ratio
+            health_bar_fill.size.y = 20
             health_bar_fill.z_index = 1
             turn_order_container.add_child(health_bar_fill)
             turn_order_health_bars.append(health_bar_fill)
@@ -216,7 +220,7 @@ func _on_turn_changed(turn: int):
 func _on_player_changed(index: int):
     update_ui()
     update_entity_display()
-    update_turn_order_health_bars()
+    update_turn_order_display()  # Rebuild to update health bars
     if game_manager.current_turn == 0 and game_manager.players.size() > index:
         var current_player = game_manager.players[index]
         show_spells_for_player(current_player)
@@ -251,17 +255,17 @@ func _on_game_ended(victory: bool):
 
 func _on_entity_moved(_entity, _from_pos: Vector2i, _to_pos: Vector2i):
     update_entity_display()
-    update_turn_order_health_bars()
+    update_turn_order_display()
 
 
 func _on_entity_attacked(_attacker, _target, _damage: int):
     update_entity_display()
-    update_turn_order_health_bars()
+    update_turn_order_display()
 
 
 func _on_spell_casted(_caster, _spell, _target, _result: String):
     update_entity_display()
-    update_turn_order_health_bars()
+    update_turn_order_display()
     if spell_description:
         spell_description.text = ""
     for button in spell_buttons:
@@ -381,11 +385,6 @@ func update_turn_order_display():
             turn_order_health_bars.append(health_bar_fill)
             
             y_pos += 55
-
-
-func update_turn_order_health_bars():
-    # Rebuild the display to ensure only alive entities are shown
-    update_turn_order_display()
 
 
 func update_entity_display():
