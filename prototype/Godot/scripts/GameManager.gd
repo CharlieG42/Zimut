@@ -394,6 +394,11 @@ func cleanup_dead_entities():
         var enemy = enemies[i]
         if enemy["current_pv"] <= 0:
             remove_entity_from_grid(enemy)
+    
+    # Clear selected_entity if it's dead
+    if selected_entity != null and selected_entity.get("current_pv", 0) <= 0:
+        selected_entity = null
+        entity_selected.emit(null)
 
 
 func check_game_over():
