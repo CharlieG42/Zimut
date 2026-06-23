@@ -27,7 +27,7 @@ horizontal_alignment = 1
 [node name="PlayerInfoLabel" type="Label" parent="./UI"]
 position = Vector2(20, 980)
 text = "Joueur: -"
-label/settings/font_size = 48
+label/settings/font_size = 44
 
 [node name="MessageLabel" type="Label" parent="./UI"]
 position = Vector2(960, 980)
@@ -54,24 +54,24 @@ text = "Recommencer"
 horizontal_alignment = 1
 
 [node name="SpellPanel" type="Panel" parent="./UI"]
-position = Vector2(1655, 100)
-size = Vector2(250, 800)
+position = Vector2(1600, 100)
+size = Vector2(300, 880)
 visible = false
 z_index = 50
 
 [node name="SpellPanelBackground" type="ColorRect" parent="./UI/SpellPanel"]
-color = Color(0.1, 0.1, 0.2, 0.8)
-size = Vector2(250, 800)
+color = Color(0.15, 0.15, 0.25, 0.85)
+size = Vector2(300, 880)
 
 [node name="SpellPanelLabel" type="Label" parent="./UI/SpellPanel"]
-position = Vector2(125, 40)
+position = Vector2(150, 40)
 text = "Sorts"
 label/settings/font_size = 36
 horizontal_alignment = 1
 
 [node name="SpellContainer" type="VBoxContainer" parent="./UI/SpellPanel"]
-position = Vector2(10, 80)
-size = Vector2(230, 700)
+position = Vector2(15, 80)
+size = Vector2(270, 780)
 
 [node name="TurnOrderPanel" type="Panel" parent="./UI"]
 position = Vector2(20, 100)
