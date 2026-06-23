@@ -30,3 +30,10 @@ mono_crash.*.json
 # OS specific
 .DS_Store
 Thumbs.db
+
+# SVG source files (keep in repo)
+!*.svg
+
+# Generated textures from SVG (ignore)
+*.png
+*.jpg
