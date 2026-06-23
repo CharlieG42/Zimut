@@ -22,6 +22,7 @@ var players: Array = []
 var enemies: Array = []
 var current_turn: int = 0
 var current_player_index: int = 0
+var turn_count: int = 1
 var selected_entity = null
 var selected_spell = null
 var selected_cell: Vector2i = Vector2i(0, 0)
@@ -50,6 +51,7 @@ func _ready():
     init_grid()
     init_entities()
     current_turn = 0
+    turn_count = 1
     turn_changed.emit(current_turn)
     # Auto-select first alive player at game start
     if players.size() > 0:
@@ -340,6 +342,7 @@ func next_player():
     cleanup_dead_entities()
     
     if current_player_index == 0:
+        turn_count += 1
         enemy_turn()
 
 
@@ -421,6 +424,7 @@ func reset_game():
     init_entities()
     current_turn = 0
     current_player_index = 0
+    turn_count = 1
     selected_entity = null
     selected_spell = null
     show_spells = false
