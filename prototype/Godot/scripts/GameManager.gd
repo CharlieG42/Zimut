@@ -51,11 +51,14 @@ func _ready():
     init_entities()
     current_turn = 0
     turn_changed.emit(current_turn)
-    # Auto-select first player at game start
+    # Auto-select first alive player at game start
     if players.size() > 0:
-        selected_entity = players[0]
-        players[0]["is_active"] = true
-        entity_selected.emit(selected_entity)
+        for p in players:
+            if p["current_pv"] > 0:
+                selected_entity = p
+                p["is_active"] = true
+                entity_selected.emit(p)
+                break
     current_player_index = 0
     player_changed.emit(current_player_index)
 
@@ -395,11 +398,14 @@ func reset_game():
     victory = false
     selected_cell = Vector2i(0, 0)
     turn_changed.emit(current_turn)
-    # Auto-select first player after reset
+    # Auto-select first alive player after reset
     if players.size() > 0:
-        selected_entity = players[0]
-        players[0]["is_active"] = true
-        entity_selected.emit(selected_entity)
+        for p in players:
+            if p["current_pv"] > 0:
+                selected_entity = p
+                p["is_active"] = true
+                entity_selected.emit(p)
+                break
     player_changed.emit(current_player_index)
     message_requested.emit("Nouvelle partie !")
 
