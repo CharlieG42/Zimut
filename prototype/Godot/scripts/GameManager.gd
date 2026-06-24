@@ -345,7 +345,6 @@ func next_player():
     cleanup_dead_entities()
     
     if current_player_index == 0:
-        turn_count += 1
         enemy_turn()
 
 
