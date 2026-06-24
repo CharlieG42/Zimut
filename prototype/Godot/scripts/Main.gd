@@ -42,6 +42,7 @@ func _ready():
     restart_button.pressed.connect(_on_restart_pressed)
     spell_panel.visible = false
     update_ui()
+    turn_label.text = "Tour %d" % game_manager.turn_count
     if game_manager.players.size() > 0:
         show_spells_for_player(game_manager.players[0])
 
