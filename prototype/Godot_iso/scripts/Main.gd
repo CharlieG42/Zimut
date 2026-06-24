@@ -2,7 +2,7 @@ extends Node2D
 ## Main.gd - Script principal (coordination des managers)
 ## Version isométrique - Architecture modulaire
 
-@onready var grid_manager = $Grid/GridManager
+@onready var grid_manager = $GridManager
 @onready var ui_manager = $UIManager
 @onready var turn_manager = $TurnManager
 @onready var entity_manager = $EntityManager
@@ -28,9 +28,6 @@ func _connect_signals():
 	game_manager.entity_selected.connect(ui_manager._on_entity_selected)
 	game_manager.spell_selected.connect(ui_manager._on_spell_selected)
 	game_manager.game_ended.connect(ui_manager._on_game_ended)
-	game_manager.entity_moved.connect(ui_manager._on_entity_moved)
-	game_manager.entity_attacked.connect(ui_manager._on_entity_attacked)
-	game_manager.spell_casted.connect(ui_manager._on_spell_casted)
 	game_manager.message_requested.connect(ui_manager._on_message_requested)
 	game_manager.turn_changed.connect(turn_manager._on_turn_changed)
 	game_manager.entity_moved.connect(entity_manager._on_entity_moved)
