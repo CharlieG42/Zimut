@@ -1,12 +1,15 @@
 extends Node2D
 ## GridManager.gd - Gestion de la grille isométrique
-## Version corrigée : centrage + rotation style Waven
+## Version avec vue inclinée style Waven (70°)
 
 const CELL_SIZE := Vector2i(100, 100)
 const HALF_CELL := Vector2(50, 50)
 
-# Rotation pour style Waven (en degrés)
-const GRID_ROTATION := -25.0
+# Vue inclinée : scale vertical pour effet 3D + rotation
+# scale.y = 0.4 simule une inclinaison à ~70°
+# rotation_degrees = -15 pour l'angle final
+const GRID_SCALE := Vector2(1.0, 0.4)
+const GRID_ROTATION := -15.0
 
 var game_manager
 var cell_nodes: Array = []
@@ -20,7 +23,8 @@ signal cell_clicked(x: int, y: int)
 
 
 func _ready():
-	# Appliquer la rotation pour le style Waven
+	# Appliquer la transformation pour vue inclinée
+	scale = GRID_SCALE
 	rotation_degrees = GRID_ROTATION
 
 
@@ -115,10 +119,11 @@ func grid_to_screen(grid_pos: Vector2i) -> Vector2:
 	var screen_x = float(x - y) * CELL_SIZE.x / 2.0
 	var screen_y = float(x + y) * CELL_SIZE.y / 2.0
 	# Centrage pour écran 1920x1080 avec grille 10x10
-	# Largeur totale : 10 * 100 = 1000, donc offset X = (1920 - 1000) / 2 = 460
-	# Hauteur totale : 10 * 50 = 500, donc offset Y = (1080 - 500) / 2 = 290
+	# Après scale.y = 0.4, la hauteur effective est réduite
+	# Largeur totale : 10 * 100 = 1000, offset X = (1920 - 1000) / 2 = 460
+	# Hauteur totale après scale : 10 * 100 * 0.4 = 400, offset Y = (1080 - 400) / 2 = 340
 	screen_x += 460.0
-	screen_y += 290.0
+	screen_y += 340.0
 	return Vector2(screen_x, screen_y)
 
 
@@ -126,7 +131,9 @@ func screen_to_grid(screen_pos: Vector2) -> Vector2i:
 	"""Convert screen coordinates to grid coordinates"""
 	# Inverser le centrage
 	var x_screen = screen_pos.x - 460.0
-	var y_screen = screen_pos.y - 290.0
+	var y_screen = screen_pos.y - 340.0
+	# Inverser le scale (division par scale.y)
+	y_screen /= 0.4
 	# Conversion isométrique inverse
 	var grid_x = (x_screen / (CELL_SIZE.x / 2.0) + y_screen / (CELL_SIZE.y / 2.0)) / 2.0
 	var grid_y = (y_screen / (CELL_SIZE.y / 2.0) - x_screen / (CELL_SIZE.x / 2.0)) / 2.0
