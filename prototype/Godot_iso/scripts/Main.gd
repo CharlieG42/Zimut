@@ -3,7 +3,7 @@ extends Node2D
 ## Version isométrique - Architecture modulaire
 
 @onready var grid_manager = $Grid/GridManager
-@onready var ui_manager = $UI/UIManager
+@onready var ui_manager = $UIManager
 @onready var turn_manager = $TurnManager
 @onready var entity_manager = $EntityManager
 @onready var spell_manager = $SpellManager
