@@ -375,6 +375,8 @@ func enemy_turn():
         if not found:
             current_player_index = 0
     check_game_over()
+    # Increment turn count after all enemies have played
+    turn_count += 1
 
 
 func any_player_alive() -> bool:
