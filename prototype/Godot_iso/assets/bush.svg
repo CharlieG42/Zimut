@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bush base -->
+  <ellipse cx="20" cy="25" rx="15" ry="10" fill="#228B22" opacity="0.8"/>
+  <ellipse cx="20" cy="20" rx="12" ry="8" fill="#32CD32" opacity="0.9"/>
+  <ellipse cx="20" cy="15" rx="10" ry="6" fill="#90EE90" opacity="0.7"/>
+  
+  <!-- Leaf details -->
+  <circle cx="12" cy="18" r="4" fill="#006400"/>
+  <circle cx="28" cy="22" r="3" fill="#006400"/>
+  <circle cx="15" cy="25" r="3" fill="#006400"/>
+  <circle cx="25" cy="15" r="4" fill="#006400"/>
+  <circle cx="8" cy="22" r="2.5" fill="#006400"/>
+  <circle cx="32" cy="18" r="2.5" fill="#006400"/>
+  
+  <!-- Shadow -->
+  <ellipse cx="20" cy="32" rx="10" ry="3" fill="#000000" opacity="0.2"/>
+</svg>

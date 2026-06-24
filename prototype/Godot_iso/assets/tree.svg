@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Trunk -->
+  <rect x="28" y="40" width="8" height="24" fill="#8B4513"/>
+  <rect x="26" y="45" width="12" height="10" fill="#654321"/>
+  
+  <!-- Leaves -->
+  <ellipse cx="32" cy="20" rx="20" ry="15" fill="#228B22" opacity="0.9"/>
+  <ellipse cx="32" cy="15" rx="18" ry="12" fill="#32CD32" opacity="0.8"/>
+  <ellipse cx="32" cy="10" rx="15" ry="10" fill="#90EE90" opacity="0.7"/>
+  
+  <!-- Leaf details -->
+  <path d="M15,25 Q20,15 25,20 Q30,10 35,15 Q40,10 45,20 Q50,15 55,25" stroke="#006400" stroke-width="1" fill="none"/>
+  <path d="M18,30 Q25,25 32,28 Q39,25 46,30" stroke="#006400" stroke-width="1" fill="none"/>
+  
+  <!-- Shadow -->
+  <ellipse cx="32" cy="55" rx="15" ry="5" fill="#000000" opacity="0.2"/>
+</svg>
