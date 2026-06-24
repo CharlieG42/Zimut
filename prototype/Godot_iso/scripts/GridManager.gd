@@ -1,13 +1,9 @@
 extends Node2D
 ## GridManager.gd - Gestion de la grille isométrique
-## Version avec rendu préféré (scale.y=0.6, rotation=0) et recentré
+## Version sans transformation (transformation sur Camera2D)
 
 const CELL_SIZE := Vector2i(100, 100)
 const HALF_CELL := Vector2(50, 50)
-
-# Rendu préféré par l'utilisateur : moins incliné
-const GRID_SCALE := Vector2(1.0, 0.6)
-const GRID_ROTATION := 0.0
 
 var game_manager
 var cell_nodes: Array = []
@@ -18,12 +14,6 @@ var rock_texture: ImageTexture
 var bush_texture: ImageTexture
 
 signal cell_clicked(x: int, y: int)
-
-
-func _ready():
-	# Appliquer la transformation
-	scale = GRID_SCALE
-	rotation_degrees = GRID_ROTATION
 
 
 func init(manager):
@@ -112,20 +102,18 @@ func grid_to_screen(grid_pos: Vector2i) -> Vector2:
 	var y = grid_pos.y
 	var screen_x = float(x - y) * CELL_SIZE.x / 2.0
 	var screen_y = float(x + y) * CELL_SIZE.y / 2.0
-	# Centrage pour écran 1920x1080 avec grille 10x10 et scale.y=0.6
+	# Centrage pour écran 1920x1080 avec grille 10x10
 	# Largeur totale : 10 * 100 = 1000, offset X = (1920 - 1000) / 2 = 460
-	# Hauteur totale après scale : 10 * 100 * 0.6 = 600, offset Y = (1080 - 600) / 2 = 240
+	# Hauteur totale : 10 * 50 = 500, offset Y = (1080 - 500) / 2 = 290
 	screen_x += 460.0
-	screen_y += 240.0
+	screen_y += 290.0
 	return Vector2(screen_x, screen_y)
 
 
 func screen_to_grid(screen_pos: Vector2) -> Vector2i:
 	"""Convert screen coordinates to grid coordinates"""
 	var x_screen = screen_pos.x - 460.0
-	var y_screen = screen_pos.y - 240.0
-	# Inverser le scale (division par scale.y)
-	y_screen /= 0.6
+	var y_screen = screen_pos.y - 290.0
 	var grid_x = (x_screen / (CELL_SIZE.x / 2.0) + y_screen / (CELL_SIZE.y / 2.0)) / 2.0
 	var grid_y = (y_screen / (CELL_SIZE.y / 2.0) - x_screen / (CELL_SIZE.x / 2.0)) / 2.0
 	return Vector2i(round(grid_x), round(grid_y))
