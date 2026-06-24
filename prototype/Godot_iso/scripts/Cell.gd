@@ -1,7 +1,7 @@
 extends Node2D
 class_name Cell
 ## Cell.gd - Cellule isométrique pour WildZimut
-## Version adaptée pour le rendu isométrique 2D
+## Version améliorée avec textures et effet damier
 
 const CELL_SIZE := Vector2i(64, 32)
 const HALF := Vector2(32, 16)
@@ -11,11 +11,19 @@ var entity = null
 var selected: bool = false
 var highlighted: bool = false
 
+# Textures préchargées
+var grass_texture: ImageTexture
+var dirt_texture: ImageTexture
+var stone_texture: ImageTexture
+
 signal cell_clicked(x: int, y: int)
 
 
 func _ready():
-	# Background as Sprite2D with a filled texture
+	# Charger les textures SVG
+	_load_textures()
+	
+	# Créer les nœuds visuels
 	var bg = Sprite2D.new()
 	bg.name = "Background"
 	bg.centered = false
@@ -42,7 +50,25 @@ func _ready():
 	update_appearance()
 
 
-# Utilitaires pour générer textures (compatible Godot 4.7)
+func _load_textures():
+	"""Charge les textures SVG depuis le dossier assets"""
+	# Grass texture
+	var grass_img = Image.load_from_file("res://assets/grass_tile.svg")
+	if grass_img:
+		grass_texture = ImageTexture.create_from_image(grass_img)
+	
+	# Dirt texture
+	var dirt_img = Image.load_from_file("res://assets/dirt_tile.svg")
+	if dirt_img:
+		dirt_texture = ImageTexture.create_from_image(dirt_img)
+	
+	# Stone texture
+	var stone_img = Image.load_from_file("res://assets/stone_tile.svg")
+	if stone_img:
+		stone_texture = ImageTexture.create_from_image(stone_img)
+
+
+# Utilitaires pour générer textures (fallback si SVG non disponible)
 func _make_filled_texture(color: Color) -> ImageTexture:
 	var img = Image.create(CELL_SIZE.x, CELL_SIZE.y, false, Image.FORMAT_RGBA8)
 	img.fill(color)
@@ -73,6 +99,17 @@ func _make_triangle_texture(color: Color, size: float = 25.0) -> ImageTexture:
 				img.set_pixel(x, y, color)
 	return ImageTexture.create_from_image(img)
 
+func _make_ring_texture(color: Color, radius: float = 25.0, thickness: float = 2.0) -> ImageTexture:
+	var img = Image.create(CELL_SIZE.x, CELL_SIZE.y, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var center = HALF
+	for x in range(CELL_SIZE.x):
+		for y in range(CELL_SIZE.y):
+			var d = (Vector2(x, y) - center).length()
+			if d > radius - thickness and d < radius + thickness:
+				img.set_pixel(x, y, color)
+	return ImageTexture.create_from_image(img)
+
 func _point_in_triangle(p: Vector2, a: Vector2, b: Vector2, c: Vector2) -> bool:
 	var v0 = c - a
 	var v1 = b - a
@@ -87,23 +124,35 @@ func _point_in_triangle(p: Vector2, a: Vector2, b: Vector2, c: Vector2) -> bool:
 	var v = (dot00 * dot12 - dot01 * dot02) * inv_denom
 	return (u >= 0) and (v >= 0) and (u + v < 1)
 
-func _make_ring_texture(color: Color, radius: float = 25.0, thickness: float = 2.0) -> ImageTexture:
-	var img = Image.create(CELL_SIZE.x, CELL_SIZE.y, false, Image.FORMAT_RGBA8)
-	img.fill(Color(0, 0, 0, 0))
-	var center = HALF
-	for x in range(CELL_SIZE.x):
-		for y in range(CELL_SIZE.y):
-			var d = (Vector2(x, y) - center).length()
-			if d > radius - thickness and d < radius + thickness:
-				img.set_pixel(x, y, color)
-	return ImageTexture.create_from_image(img)
-
 
 func update_appearance():
+	"""Mise à jour de l'apparence avec textures et effet damier"""
 	var bg = get_node_or_null("Background") as Sprite2D
 	if bg:
-		var bg_color = Color(0.95, 0.95, 0.95) if (grid_position.x + grid_position.y) % 2 == 0 else Color(0.65, 0.65, 0.65)
-		bg.texture = _make_filled_texture(bg_color)
+		# Alternance de textures pour effet damier
+		if (grid_position.x + grid_position.y) % 2 == 0:
+			if grass_texture:
+				bg.texture = grass_texture
+			else:
+				# Fallback si texture non chargée
+				bg.texture = _make_filled_texture(Color(0.7, 0.85, 0.3))
+		else:
+			if dirt_texture:
+				bg.texture = dirt_texture
+			else:
+				# Fallback
+				bg.texture = _make_filled_texture(Color(0.6, 0.5, 0.3))
+	
+	# Bordure subtile (optionnelle)
+	var border_bg = get_node_or_null("BorderBackground")
+	if not border_bg:
+		border_bg = Sprite2D.new()
+		border_bg.name = "BorderBackground"
+		border_bg.centered = false
+		border_bg.position = Vector2.ZERO
+		border_bg.z_index = -1
+		add_child(border_bg)
+		border_bg.texture = _make_filled_texture(Color(0, 0, 0, 0))
 
 	var entity_sprite = get_node_or_null("EntitySprite") as Sprite2D
 	var border = get_node_or_null("Border") as Sprite2D
