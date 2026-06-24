@@ -256,11 +256,11 @@ func handle_cell_selected(cell_pos: Vector2i):
                 entity_attacked.emit(current_player, entity, actual_damage)
                 current_player["current_pa"] -= 1
                 message_requested.emit("%s attaque %s : %d dégâts !" % [current_player["name"], entity["name"], actual_damage])
+                player_changed.emit(current_player_index)  # Update UI after PV change
                 if entity["current_pv"] <= 0:
                     remove_entity_from_grid(entity)
                 selected_entity = current_player
                 show_spells = false
-                player_changed.emit(current_player_index)
                 cleanup_dead_entities()
             return
     
