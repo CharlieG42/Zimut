@@ -1,23 +1,51 @@
 extends Node2D
 ## GridManager.gd - Gestion de la grille isométrique
+## Version améliorée avec décors
 
 const CELL_SIZE := Vector2i(64, 32)
 const HALF_CELL := Vector2(32, 16)
 
 var game_manager
 var cell_nodes: Array = []
+var decoration_nodes: Array = []
+
+# Textures des décors
+var tree_texture: ImageTexture
+var rock_texture: ImageTexture
+var bush_texture: ImageTexture
 
 signal cell_clicked(x: int, y: int)
 
 
 func init(manager):
 	game_manager = manager
+	_load_decoration_textures()
 	_create_grid()
+	_add_random_decorations()
+
+
+func _load_decoration_textures():
+	"""Charge les textures des décors depuis le dossier assets"""
+	# Tree texture
+	var tree_img = Image.load_from_file("res://assets/tree.svg")
+	if tree_img:
+		tree_texture = ImageTexture.create_from_image(tree_img)
+	
+	# Rock texture
+	var rock_img = Image.load_from_file("res://assets/rock.svg")
+	if rock_img:
+		rock_texture = ImageTexture.create_from_image(rock_img)
+	
+	# Bush texture
+	var bush_img = Image.load_from_file("res://assets/bush.svg")
+	if bush_img:
+		bush_texture = ImageTexture.create_from_image(bush_img)
 
 
 func _create_grid():
 	"""Create isometric grid display with Node2D cells"""
 	cell_nodes = []
+	decoration_nodes = []
 	
 	for y in range(game_manager.GRID_SIZE):
 		var row: Array = []
@@ -32,6 +60,49 @@ func _create_grid():
 		cell_nodes.append(row)
 	
 	update_entity_display()
+
+
+func _add_random_decorations():
+	"""Ajoute des décors aléatoires sur la grille"""
+	var decoration_positions = [
+		Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0),
+		Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1),
+		Vector2i(8, 8), Vector2i(9, 8), Vector2i(8, 9),
+		Vector2i(6, 6), Vector2i(7, 6), Vector2i(6, 7),
+		Vector2i(4, 4), Vector2i(5, 4), Vector2i(4, 5),
+		Vector2i(1, 8), Vector2i(2, 8), Vector2i(8, 1),
+		Vector2i(3, 7), Vector2i(7, 3), Vector2i(4, 8)
+	]
+	
+	for pos in decoration_positions:
+		if pos.x >= 0 and pos.x < game_manager.GRID_SIZE and pos.y >= 0 and pos.y < game_manager.GRID_SIZE:
+			# Vérifier qu'il n'y a pas d'entité à cette position
+			if game_manager.grid[pos.y][pos.x] == null:
+				var decoration = Sprite2D.new()
+				decoration.name = "Decoration_%d_%d" % [pos.x, pos.y]
+				decoration.centered = true
+				decoration.position = HALF_CELL
+				decoration.z_index = 5
+				
+				# Choisir un type de décor aléatoirement
+				var rand_val = randi() % 3
+				if rand_val == 0 and tree_texture:
+					decoration.texture = tree_texture
+					decoration.scale = Vector2(0.8, 0.8)
+					decoration.z_index = 6
+				elif rand_val == 1 and rock_texture:
+					decoration.texture = rock_texture
+					decoration.scale = Vector2(0.6, 0.6)
+					decoration.z_index = 5
+				elif bush_texture:
+					decoration.texture = bush_texture
+					decoration.scale = Vector2(0.5, 0.5)
+					decoration.z_index = 5
+				
+				var screen_pos = grid_to_screen(pos)
+				decoration.global_position = screen_pos + HALF_CELL
+				add_child(decoration)
+				decoration_nodes.append(decoration)
 
 
 func grid_to_screen(grid_pos: Vector2i) -> Vector2:
