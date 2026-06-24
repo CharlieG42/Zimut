@@ -470,11 +470,13 @@ func cast_spell(caster: Dictionary, spell: Dictionary, target: Dictionary) -> St
         var heal_str = spell["effect"].split(" ")[1] if spell["effect"].split(" ").size() > 1 else "30"
         var heal = int(heal_str) if heal_str.is_valid_int() else 30
         target["current_pv"] = min(target["max_pv"], target["current_pv"] + heal)
+        player_changed.emit(current_player_index)  # Update UI after healing
         return "%s lance %s : %d PV restaurés !" % [caster["name"], spell["name"], heal]
     elif "dégâts" in spell["effect"].to_lower():
         var damage_str = spell["effect"].split(" ")[0]
         var damage = int(damage_str) if damage_str.is_valid_int() else 10
         target["current_pv"] -= max(1, damage - target["defense"] / 2.0)
+        player_changed.emit(current_player_index)  # Update UI after damage
         return "%s lance %s : %d dégâts !" % [caster["name"], spell["name"], damage]
     elif "restaure" in spell["effect"].to_lower():
         var heal_str = spell["effect"].split(" ")[1]
