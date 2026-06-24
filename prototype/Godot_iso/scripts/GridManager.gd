@@ -1,9 +1,12 @@
 extends Node2D
 ## GridManager.gd - Gestion de la grille isométrique
-## Version corrigée pour Godot 4.x
+## Version corrigée : centrage + rotation style Waven
 
 const CELL_SIZE := Vector2i(100, 100)
 const HALF_CELL := Vector2(50, 50)
+
+# Rotation pour style Waven (en degrés)
+const GRID_ROTATION := -25.0
 
 var game_manager
 var cell_nodes: Array = []
@@ -15,26 +18,39 @@ var bush_texture: ImageTexture
 
 signal cell_clicked(x: int, y: int)
 
+
+func _ready():
+	# Appliquer la rotation pour le style Waven
+	rotation_degrees = GRID_ROTATION
+
+
 func init(manager):
 	game_manager = manager
 	_load_decoration_textures()
 	_create_grid()
 	_add_random_decorations()
 
+
 func _load_decoration_textures():
+	"""Charge les textures des décors depuis le dossier assets"""
 	var tree_img = Image.load_from_file("res://assets/tree.svg")
 	if tree_img:
 		tree_texture = ImageTexture.create_from_image(tree_img)
+	
 	var rock_img = Image.load_from_file("res://assets/rock.svg")
 	if rock_img:
 		rock_texture = ImageTexture.create_from_image(rock_img)
+	
 	var bush_img = Image.load_from_file("res://assets/bush.svg")
 	if bush_img:
 		bush_texture = ImageTexture.create_from_image(bush_img)
 
+
 func _create_grid():
+	"""Create isometric grid display with Node2D cells"""
 	cell_nodes = []
 	decoration_nodes = []
+	
 	for y in range(game_manager.GRID_SIZE):
 		var row: Array = []
 		for x in range(game_manager.GRID_SIZE):
@@ -46,9 +62,12 @@ func _create_grid():
 			add_child(cell)
 			row.append(cell)
 		cell_nodes.append(row)
+	
 	update_entity_display()
 
+
 func _add_random_decorations():
+	"""Ajoute des décors aléatoires sur la grille"""
 	var decoration_positions = [
 		Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0),
 		Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1),
@@ -58,6 +77,7 @@ func _add_random_decorations():
 		Vector2i(1, 8), Vector2i(2, 8), Vector2i(8, 1),
 		Vector2i(3, 7), Vector2i(7, 3), Vector2i(4, 8)
 	]
+	
 	for pos in decoration_positions:
 		if pos.x >= 0 and pos.x < game_manager.GRID_SIZE and pos.y >= 0 and pos.y < game_manager.GRID_SIZE:
 			if game_manager.grid[pos.y][pos.x] == null:
@@ -66,6 +86,7 @@ func _add_random_decorations():
 				decoration.centered = true
 				decoration.position = HALF_CELL
 				decoration.z_index = 5
+				
 				var rand_val = randi() % 3
 				if rand_val == 0 and tree_texture:
 					decoration.texture = tree_texture
@@ -79,31 +100,45 @@ func _add_random_decorations():
 					decoration.texture = bush_texture
 					decoration.scale = Vector2(0.4, 0.4)
 					decoration.z_index = 5
+				
 				var screen_pos = grid_to_screen(pos)
 				decoration.global_position = screen_pos + HALF_CELL
 				add_child(decoration)
 				decoration_nodes.append(decoration)
 
+
 func grid_to_screen(grid_pos: Vector2i) -> Vector2:
+	"""Convert grid coordinates to isometric screen coordinates"""
 	var x = grid_pos.x
 	var y = grid_pos.y
+	# Coordonnées isométriques de base
 	var screen_x = float(x - y) * CELL_SIZE.x / 2.0
 	var screen_y = float(x + y) * CELL_SIZE.y / 2.0
-	screen_x += 960.0 - (float(game_manager.GRID_SIZE) * CELL_SIZE.x / 4.0)
-	screen_y += 540.0 - (float(game_manager.GRID_SIZE) * CELL_SIZE.y / 4.0)
+	# Centrage pour écran 1920x1080 avec grille 10x10
+	# Largeur totale : 10 * 100 = 1000, donc offset X = (1920 - 1000) / 2 = 460
+	# Hauteur totale : 10 * 50 = 500, donc offset Y = (1080 - 500) / 2 = 290
+	screen_x += 460.0
+	screen_y += 290.0
 	return Vector2(screen_x, screen_y)
 
+
 func screen_to_grid(screen_pos: Vector2) -> Vector2i:
-	var x_screen = screen_pos.x - (960.0 - (float(game_manager.GRID_SIZE) * CELL_SIZE.x / 4.0))
-	var y_screen = screen_pos.y - (540.0 - (float(game_manager.GRID_SIZE) * CELL_SIZE.y / 4.0))
+	"""Convert screen coordinates to grid coordinates"""
+	# Inverser le centrage
+	var x_screen = screen_pos.x - 460.0
+	var y_screen = screen_pos.y - 290.0
+	# Conversion isométrique inverse
 	var grid_x = (x_screen / (CELL_SIZE.x / 2.0) + y_screen / (CELL_SIZE.y / 2.0)) / 2.0
 	var grid_y = (y_screen / (CELL_SIZE.y / 2.0) - x_screen / (CELL_SIZE.x / 2.0)) / 2.0
 	return Vector2i(round(grid_x), round(grid_y))
 
+
 func _on_cell_clicked(x: int, y: int):
 	emit_signal("cell_clicked", x, y)
 
+
 func update_entity_display():
+	"""Update all cell nodes to reflect current grid state"""
 	for y in range(game_manager.GRID_SIZE):
 		for x in range(game_manager.GRID_SIZE):
 			if y < cell_nodes.size() and x < cell_nodes[y].size():
@@ -119,7 +154,9 @@ func update_entity_display():
 					cell_node.highlighted = true
 				cell_node.update_appearance()
 
+
 func get_cell_node_at(grid_pos: Vector2i) -> Node2D:
+	"""Return the cell node at the given grid position"""
 	if grid_pos.y < cell_nodes.size() and grid_pos.x < cell_nodes[grid_pos.y].size():
 		return cell_nodes[grid_pos.y][grid_pos.x]
 	return null
