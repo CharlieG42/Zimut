@@ -13,8 +13,8 @@ func init(manager):
 
 func _on_entity_moved(_entity, _from_pos: Vector2i, _to_pos: Vector2i):
 	"""Update display when an entity moves"""
-	if has_node("/root/Main/Grid/GridManager"):
-		get_node("/root/Main/Grid/GridManager").update_entity_display()
+	if has_node("/root/Main/GridManager"):
+		get_node("/root/Main/GridManager").update_entity_display()
 
 
 func _on_entity_attacked(_attacker, _target, _damage: int):
