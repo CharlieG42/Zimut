@@ -16,12 +16,10 @@ script = ExtResource( 1 )
 position = Vector2(960, 540)
 current = true
 
-[node name="Grid" type="Node2D" parent="."]
+[node name="GridManager" type="Node2D" parent="."]
+script = ExtResource( 3 )
 position = Vector2(0, 0)
 z_index = 10
-
-[node name="GridManager" type="Node2D" parent="./Grid"]
-script = ExtResource( 3 )
 
 [node name="UIManager" type="CanvasLayer" parent="."]
 script = ExtResource( 4 )
