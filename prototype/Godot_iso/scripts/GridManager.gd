@@ -1,5 +1,4 @@
 extends Node2D
-class_name GridManager
 ## GridManager.gd - Gestion de la grille isométrique
 
 const CELL_SIZE := Vector2i(64, 32)
@@ -39,10 +38,8 @@ func grid_to_screen(grid_pos: Vector2i) -> Vector2:
 	"""Convert grid coordinates to isometric screen coordinates"""
 	var x = grid_pos.x
 	var y = grid_pos.y
-	# Isometric projection - using float() to avoid integer division warnings
 	var screen_x = float(x - y) * CELL_SIZE.x / 2.0
 	var screen_y = float(x + y) * CELL_SIZE.y / 2.0
-	# Center the grid on screen
 	screen_x += 960.0 - (float(game_manager.GRID_SIZE) * CELL_SIZE.x / 4.0)
 	screen_y += 540.0 - (float(game_manager.GRID_SIZE) * CELL_SIZE.y / 4.0)
 	return Vector2(screen_x, screen_y)
@@ -52,10 +49,8 @@ func screen_to_grid(screen_pos: Vector2) -> Vector2i:
 	"""Convert screen coordinates to grid coordinates"""
 	var x_screen = screen_pos.x - (960.0 - (float(game_manager.GRID_SIZE) * CELL_SIZE.x / 4.0))
 	var y_screen = screen_pos.y - (540.0 - (float(game_manager.GRID_SIZE) * CELL_SIZE.y / 4.0))
-	
 	var grid_x = (x_screen / (CELL_SIZE.x / 2.0) + y_screen / (CELL_SIZE.y / 2.0)) / 2.0
 	var grid_y = (y_screen / (CELL_SIZE.y / 2.0) - x_screen / (CELL_SIZE.x / 2.0)) / 2.0
-	
 	return Vector2i(round(grid_x), round(grid_y))
 
 
@@ -73,15 +68,11 @@ func update_entity_display():
 				cell_node.entity = entity
 				cell_node.selected = (game_manager.selected_cell == Vector2i(x, y))
 				cell_node.highlighted = false
-				
-				# Highlight current player
 				var current_player = null
 				if game_manager.current_turn == 0 and game_manager.players.size() > game_manager.current_player_index:
 					current_player = game_manager.players[game_manager.current_player_index]
-				
 				if current_player and current_player["x"] == x and current_player["y"] == y:
 					cell_node.highlighted = true
-				
 				cell_node.update_appearance()
 
 

@@ -1,5 +1,4 @@
 extends Node
-class_name EntityManager
 ## EntityManager.gd - Gestion des entités (joueurs/ennemis)
 
 var game_manager
@@ -14,7 +13,6 @@ func init(manager):
 
 func _on_entity_moved(_entity, _from_pos: Vector2i, _to_pos: Vector2i):
 	"""Update display when an entity moves"""
-	# Delegated to GridManager
 	if has_node("/root/Main/Grid/GridManager"):
 		get_node("/root/Main/Grid/GridManager").update_entity_display()
 
@@ -31,7 +29,7 @@ func _on_spell_casted(_caster, _spell, _target, _result: String):
 
 # ==================== Utility functions ====================
 
-func get_entity_at_position(pos: Vector2i) -> Dictionary | null:
+func get_entity_at_position(pos: Vector2i):
 	"""Return the entity at the given grid position"""
 	if pos.y >= 0 and pos.y < game_manager.GRID_SIZE and pos.x >= 0 and pos.x < game_manager.GRID_SIZE:
 		return game_manager.grid[pos.y][pos.x]
@@ -52,12 +50,10 @@ func can_move_to(entity: Dictionary, target_pos: Vector2i) -> bool:
 	"""Check if an entity can move to the target position"""
 	if not is_position_valid(target_pos):
 		return false
-	
 	var distance = get_distance(
 		Vector2i(int(entity["x"]), int(entity["y"])),
 		target_pos
 	)
-	
 	return distance == 1 and game_manager.grid[target_pos.y][target_pos.x] == null and entity["current_pm"] > 0
 
 
@@ -65,14 +61,11 @@ func can_attack(entity: Dictionary, target_pos: Vector2i) -> bool:
 	"""Check if an entity can attack the target position"""
 	if not is_position_valid(target_pos):
 		return false
-	
 	var target = game_manager.grid[target_pos.y][target_pos.x]
 	if target == null:
 		return false
-	
 	var distance = get_distance(
 		Vector2i(int(entity["x"]), int(entity["y"])),
 		target_pos
 	)
-	
 	return distance == 1 and target["current_pv"] > 0 and entity["current_pa"] > 0
