@@ -504,6 +504,7 @@ func enemy_ai_turn(p_enemy: Dictionary, p_players: Array, p_grid: Array) -> Stri
         var actual_damage = max(1, damage - target["defense"] / 2.0)
         target["current_pv"] -= actual_damage
         p_enemy["current_pa"] -= 1
+        player_changed.emit(current_player_index)  # Update UI after PV change
         if target["current_pv"] <= 0:
             # Remove dead player from grid and arrays
             remove_entity_from_grid(target)
