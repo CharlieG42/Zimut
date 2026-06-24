@@ -3,8 +3,8 @@ class_name Cell
 ## Cell.gd - Cellule isométrique pour WildZimut
 ## Version améliorée avec textures et effet damier
 
-const CELL_SIZE := Vector2i(64, 32)
-const HALF := Vector2(32, 16)
+const CELL_SIZE := Vector2i(80, 40)
+const HALF := Vector2(40, 20)
 
 var grid_position: Vector2i = Vector2i(0, 0)
 var entity = null
@@ -74,7 +74,7 @@ func _make_filled_texture(color: Color) -> ImageTexture:
 	img.fill(color)
 	return ImageTexture.create_from_image(img)
 
-func _make_circle_texture(color: Color, radius: float = 25.0) -> ImageTexture:
+func _make_circle_texture(color: Color, radius: float = 30.0) -> ImageTexture:
 	var img = Image.create(CELL_SIZE.x, CELL_SIZE.y, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 0))
 	var center = HALF
@@ -84,7 +84,7 @@ func _make_circle_texture(color: Color, radius: float = 25.0) -> ImageTexture:
 				img.set_pixel(x, y, color)
 	return ImageTexture.create_from_image(img)
 
-func _make_triangle_texture(color: Color, size: float = 25.0) -> ImageTexture:
+func _make_triangle_texture(color: Color, size: float = 30.0) -> ImageTexture:
 	var img = Image.create(CELL_SIZE.x, CELL_SIZE.y, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 0))
 	var center = HALF
@@ -99,7 +99,7 @@ func _make_triangle_texture(color: Color, size: float = 25.0) -> ImageTexture:
 				img.set_pixel(x, y, color)
 	return ImageTexture.create_from_image(img)
 
-func _make_ring_texture(color: Color, radius: float = 25.0, thickness: float = 2.0) -> ImageTexture:
+func _make_ring_texture(color: Color, radius: float = 30.0, thickness: float = 2.0) -> ImageTexture:
 	var img = Image.create(CELL_SIZE.x, CELL_SIZE.y, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 0))
 	var center = HALF
@@ -134,14 +134,14 @@ func update_appearance():
 			if grass_texture:
 				bg.texture = grass_texture
 			else:
-				# Fallback si texture non chargée
-				bg.texture = _make_filled_texture(Color(0.7, 0.85, 0.3))
+				# Fallback avec couleurs très contrastées
+				bg.texture = _make_filled_texture(Color(0.5, 0.9, 0.3))  # Vert vif
 		else:
 			if dirt_texture:
 				bg.texture = dirt_texture
 			else:
-				# Fallback
-				bg.texture = _make_filled_texture(Color(0.6, 0.5, 0.3))
+				# Fallback avec couleurs très contrastées
+				bg.texture = _make_filled_texture(Color(0.4, 0.25, 0.1))  # Marron foncé
 	
 	# Bordure subtile (optionnelle)
 	var border_bg = get_node_or_null("BorderBackground")
@@ -162,15 +162,15 @@ func update_appearance():
 		if entity_sprite:
 			entity_sprite.visible = true
 			if entity.get("entity_type", "") == "Player":
-				entity_sprite.texture = _make_circle_texture(color, 25.0)
+				entity_sprite.texture = _make_circle_texture(color, 30.0)
 			else:
-				entity_sprite.texture = _make_triangle_texture(color, 25.0)
+				entity_sprite.texture = _make_triangle_texture(color, 30.0)
 		if border:
 			border.visible = true
 			var border_color = Color.BLUE if entity.get("entity_type", "") == "Player" else Color.RED
 			if entity.get("is_active", false):
 				border_color = Color.YELLOW
-			border.texture = _make_ring_texture(border_color, 25.0)
+			border.texture = _make_ring_texture(border_color, 30.0)
 		
 		if selected:
 			var sel = get_node_or_null("Selection")
