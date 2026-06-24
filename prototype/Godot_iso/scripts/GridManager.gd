@@ -1,9 +1,9 @@
 extends Node2D
 ## GridManager.gd - Gestion de la grille isométrique
-## Version améliorée avec décors
+## Version améliorée avec décors et cases plus grandes
 
-const CELL_SIZE := Vector2i(64, 32)
-const HALF_CELL := Vector2(32, 16)
+const CELL_SIZE := Vector2i(80, 40)
+const HALF_CELL := Vector2(40, 20)
 
 var game_manager
 var cell_nodes: Array = []
@@ -88,15 +88,15 @@ func _add_random_decorations():
 				var rand_val = randi() % 3
 				if rand_val == 0 and tree_texture:
 					decoration.texture = tree_texture
-					decoration.scale = Vector2(0.8, 0.8)
+					decoration.scale = Vector2(0.6, 0.6)
 					decoration.z_index = 6
 				elif rand_val == 1 and rock_texture:
 					decoration.texture = rock_texture
-					decoration.scale = Vector2(0.6, 0.6)
+					decoration.scale = Vector2(0.45, 0.45)
 					decoration.z_index = 5
 				elif bush_texture:
 					decoration.texture = bush_texture
-					decoration.scale = Vector2(0.5, 0.5)
+					decoration.scale = Vector2(0.4, 0.4)
 					decoration.z_index = 5
 				
 				var screen_pos = grid_to_screen(pos)
