@@ -20,8 +20,8 @@ z_index = 20
 
 [node name="TurnLabel" type="Label" parent="./UI"]
 position = Vector2(960, 40)
-text = "Tour des joueurs"
-label/settings/font_size = 56
+text = "Tour 1"
+label/settings/font_size = 40
 horizontal_alignment = 1
 
 [node name="PlayerInfoLabel" type="Label" parent="./UI"]
