@@ -1,6 +1,7 @@
 extends Node2D
 ## Main.gd - Script principal (coordination des managers)
 ## Version isométrique - Architecture modulaire
+## FIX: Éviter les connexions multiples de signaux
 
 @onready var grid_manager = $GridManager
 @onready var ui_manager = $UIManager
@@ -9,6 +10,7 @@ extends Node2D
 @onready var spell_manager = $SpellManager
 
 var game_manager
+var signals_connected: bool = false
 
 
 func _ready():
@@ -22,6 +24,11 @@ func _ready():
 
 
 func _connect_signals():
+	# Éviter les connexions multiples
+	if signals_connected:
+		return
+	signals_connected = true
+	
 	grid_manager.connect("cell_clicked", Callable(game_manager, "handle_cell_selected"))
 	game_manager.turn_changed.connect(ui_manager._on_turn_changed)
 	game_manager.player_changed.connect(ui_manager._on_player_changed)
