@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shield base -->
+  <ellipse cx="50" cy="60" rx="35" ry="20" fill="#C0C0C0" stroke="#808080" stroke-width="2"/>
+  <ellipse cx="50" cy="60" rx="25" ry="15" fill="#E0E0E0"/>
+  
+  <!-- Shield details -->
+  <rect x="35" y="45" width="30" height="10" fill="#A0A0A0" rx="2"/>
+  <rect x="35" y="55" width="30" height="10" fill="#A0A0A0" rx="2"/>
+  <circle cx="50" cy="60" r="8" fill="#FFD700"/>
+  
+  <!-- Sword -->
+  <path d="M65,30 L75,20 L75,40 L65,50 Z" fill="#C0C0C0" stroke="#808080" stroke-width="1"/>
+  <path d="M70,25 L70,35" stroke="#808080" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Helmet -->
+  <path d="M40,25 Q50,15 60,25 L55,30 L45,30 Z" fill="#C0C0C0" stroke="#808080" stroke-width="1"/>
+  <circle cx="47" cy="27" r="2" fill="#808080"/>
+  <circle cx="53" cy="27" r="2" fill="#808080"/>
+</svg>

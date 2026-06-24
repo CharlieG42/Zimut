@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Body -->
+  <ellipse cx="50" cy="50" rx="20" ry="25" fill="#556B2F"/>
+  
+  <!-- Head -->
+  <circle cx="50" cy="30" r="12" fill="#8FBC8F"/>
+  
+  <!-- Ears -->
+  <ellipse cx="65" cy="28" rx="8" ry="5" fill="#556B2F"/>
+  <ellipse cx="35" cy="28" rx="8" ry="5" fill="#556B2F"/>
+  
+  <!-- Eyes -->
+  <circle cx="45" cy="28" r="2" fill="#FF0000"/>
+  <circle cx="55" cy="28" r="2" fill="#FF0000"/>
+  
+  <!-- Nose -->
+  <circle cx="50" cy="32" r="2" fill="#FF8C00"/>
+  
+  <!-- Mouth -->
+  <path d="M45,35 Q50,38 55,35" stroke="#FF0000" stroke-width="1.5" fill="none"/>
+  
+  <!-- Arms -->
+  <path d="M30,45 L20,35" stroke="#556B2F" stroke-width="6" stroke-linecap="round"/>
+  <path d="M70,45 L80,35" stroke="#556B2F" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- Legs -->
+  <path d="M40,65 L35,85" stroke="#556B2F" stroke-width="8" stroke-linecap="round"/>
+  <path d="M60,65 L65,85" stroke="#556B2F" stroke-width="8" stroke-linecap="round"/>
+  
+  <!-- Weapon -->
+  <path d="M20,35 L15,25 L10,40" stroke="#808080" stroke-width="2" stroke-linecap="round"/>
+</svg>

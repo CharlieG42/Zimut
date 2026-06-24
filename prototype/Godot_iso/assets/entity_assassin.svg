@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hood -->
+  <path d="M30,20 Q50,5 70,20 L65,40 L35,40 Z" fill="#202020"/>
+  
+  <!-- Mask -->
+  <ellipse cx="50" cy="35" rx="12" ry="8" fill="#404040"/>
+  <rect x="45" y="30" width="3" height="3" fill="#FF0000"/>
+  <rect x="52" y="30" width="3" height="3" fill="#FF0000"/>
+  
+  <!-- Dagger -->
+  <path d="M60,45 L75,50 L70,60 L55,55 Z" fill="#808080" stroke="#404040" stroke-width="1"/>
+  <path d="M65,50 L70,55" stroke="#404040" stroke-width="1.5"/>
+  
+  <!-- Cloak -->
+  <path d="M35,40 Q50,60 65,40 L55,80 L45,80 Z" fill="#404040"/>
+  
+  <!-- Belt -->
+  <rect x="40" y="55" width="20" height="5" fill="#808080" rx="2"/>
+</svg>
