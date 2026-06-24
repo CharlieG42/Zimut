@@ -101,13 +101,13 @@ func init_grid():
 func init_entities():
     """Initialize players and enemies on the grid"""
     # Player positions (left side of 10x10 grid)
-    var player_classes: Array[String] = ["Tank", "Assassin", "Mage"]
+    var player_classes: Array = ["Tank", "Assassin", "Mage"]
     var player_positions: Array[Vector2i] = [Vector2i(2, 2), Vector2i(2, 3), Vector2i(3, 2)]
     players = []
     
     for i in range(player_classes.size()):
-        var classe := player_classes[i]
-        var pos := player_positions[i]
+        var classe = player_classes[i]
+        var pos = player_positions[i]
         var class_info = null
         for data in classes_data:
             if data["Classe"] == classe and data["Niveau"] == "30":
@@ -152,13 +152,13 @@ func init_entities():
             grid[pos.y][pos.x] = player
     
     # Enemy positions (right side of 10x10 grid)
-    var enemy_types: Array[String] = ["Gobelin", "Squelette", "Loup"]
+    var enemy_types: Array = ["Gobelin", "Squelette", "Loup"]
     var enemy_positions: Array[Vector2i] = [Vector2i(7, 7), Vector2i(7, 6), Vector2i(6, 7)]
     enemies = []
     
     for i in range(enemy_types.size()):
-        var enemy_type := enemy_types[i]
-        var pos := enemy_positions[i]
+        var enemy_type = enemy_types[i]
+        var pos = enemy_positions[i]
         var enemy_info = null
         for data in enemies_data:
             if data["Type"] == enemy_type and data["Niveau"] == "30":
@@ -192,8 +192,8 @@ func init_entities():
 
 func handle_cell_selected(cell_pos: Vector2i):
     """Handle cell selection based on current game state"""
-    var x := cell_pos.x
-    var y := cell_pos.y
+    var x = cell_pos.x
+    var y = cell_pos.y
     if not (x >= 0 and x < GRID_SIZE and y >= 0 and y < GRID_SIZE):
         return
     selected_cell = cell_pos
@@ -202,8 +202,11 @@ func handle_cell_selected(cell_pos: Vector2i):
     # Clean up any dead entities before handling selection
     cleanup_dead_entities()
     
+    # Declare current_player before the if block to avoid "declared below" error
+    var current_player = null
+    
     if current_turn == 0:  # Players' turn
-        var current_player = players[current_player_index]
+        current_player = players[current_player_index]
         
         # If a spell is selected, handle spell casting
         if selected_spell != null:
@@ -402,9 +405,10 @@ func next_player():
     # Find next alive player
     var start_index = current_player_index
     var found_alive = false
+    var current_player = null
     for i in range(players.size()):
         current_player_index = (start_index + 1 + i) % players.size()
-        var current_player = players[current_player_index]
+        current_player = players[current_player_index]
         if current_player["current_pv"] > 0:
             found_alive = true
             break
@@ -419,7 +423,7 @@ func next_player():
         return
     
     # Auto-select the new current player
-    var current_player = players[current_player_index]
+    current_player = players[current_player_index]
     selected_entity = current_player
     for p in players:
         p["is_active"] = false
@@ -610,11 +614,13 @@ func reset_game():
     game_over = false
     victory = false
     
+    var current_player = null
     if players.size() > 0:
         for p in players:
             p["is_active"] = false
         players[0]["is_active"] = true
-        selected_entity = players[0]
+        current_player = players[0]
+        selected_entity = current_player
     
     turn_changed.emit(current_turn)
     player_changed.emit(current_player_index)

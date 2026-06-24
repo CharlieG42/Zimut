@@ -39,22 +39,22 @@ func grid_to_screen(grid_pos: Vector2i) -> Vector2:
     """Convert grid coordinates to isometric screen coordinates"""
     var x = grid_pos.x
     var y = grid_pos.y
-    # Isometric projection
-    var screen_x = (x - y) * CELL_SIZE.x / 2
-    var screen_y = (x + y) * CELL_SIZE.y / 2
+    # Isometric projection - using float() to avoid integer division warnings
+    var screen_x = float(x - y) * CELL_SIZE.x / 2.0
+    var screen_y = float(x + y) * CELL_SIZE.y / 2.0
     # Center the grid on screen
-    screen_x += 960 - (game_manager.GRID_SIZE * CELL_SIZE.x / 4)
-    screen_y += 540 - (game_manager.GRID_SIZE * CELL_SIZE.y / 4)
+    screen_x += 960.0 - (float(game_manager.GRID_SIZE) * CELL_SIZE.x / 4.0)
+    screen_y += 540.0 - (float(game_manager.GRID_SIZE) * CELL_SIZE.y / 4.0)
     return Vector2(screen_x, screen_y)
 
 
 func screen_to_grid(screen_pos: Vector2) -> Vector2i:
     """Convert screen coordinates to grid coordinates"""
-    var x_screen = screen_pos.x - (960 - (game_manager.GRID_SIZE * CELL_SIZE.x / 4))
-    var y_screen = screen_pos.y - (540 - (game_manager.GRID_SIZE * CELL_SIZE.y / 4))
+    var x_screen = screen_pos.x - (960.0 - (float(game_manager.GRID_SIZE) * CELL_SIZE.x / 4.0))
+    var y_screen = screen_pos.y - (540.0 - (float(game_manager.GRID_SIZE) * CELL_SIZE.y / 4.0))
     
-    var grid_x = (x_screen / (CELL_SIZE.x / 2) + y_screen / (CELL_SIZE.y / 2)) / 2
-    var grid_y = (y_screen / (CELL_SIZE.y / 2) - x_screen / (CELL_SIZE.x / 2)) / 2
+    var grid_x = (x_screen / (CELL_SIZE.x / 2.0) + y_screen / (CELL_SIZE.y / 2.0)) / 2.0
+    var grid_y = (y_screen / (CELL_SIZE.y / 2.0) - x_screen / (CELL_SIZE.x / 2.0)) / 2.0
     
     return Vector2i(round(grid_x), round(grid_y))
 

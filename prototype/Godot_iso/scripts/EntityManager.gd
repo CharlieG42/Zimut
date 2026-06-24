@@ -31,7 +31,7 @@ func _on_spell_casted(_caster, _spell, _target, _result: String):
 
 # ==================== Utility functions ====================
 
-func get_entity_at_position(pos: Vector2i) -> Dictionary:
+func get_entity_at_position(pos: Vector2i) -> Dictionary | null:
     """Return the entity at the given grid position"""
     if pos.y >= 0 and pos.y < game_manager.GRID_SIZE and pos.x >= 0 and pos.x < game_manager.GRID_SIZE:
         return game_manager.grid[pos.y][pos.x]
