@@ -3,8 +3,8 @@ extends Node
 ## Ce script est un autoload (configuré dans project.godot)
 
 const GRID_SIZE := 10
-const CELL_SIZE := Vector2i(64, 32)
-const CELL_HALF_OFFSET := Vector2i(32, 16)
+const CELL_SIZE := Vector2i(80, 40)
+const CELL_HALF_OFFSET := Vector2i(40, 20)
 
 const COLORS := {
 	"Tank": Color(0, 0.4, 0.8),
@@ -54,15 +54,19 @@ func _ready():
 	current_turn = 0
 	turn_count = 1
 	turn_changed.emit(current_turn)
+	
+	# FIX: S'assurer que le Tank (index 0) est bien le premier joueur sélectionné
 	if players.size() > 0:
-		for p in players:
-			if p["current_pv"] > 0:
-				selected_entity = p
-				p["is_active"] = true
-				entity_selected.emit(p)
+		var first_alive_index = 0
+		for i in range(players.size()):
+			if players[i]["current_pv"] > 0:
+				first_alive_index = i
 				break
-	current_player_index = 0
-	player_changed.emit(current_player_index)
+		current_player_index = first_alive_index
+		selected_entity = players[current_player_index]
+		players[current_player_index]["is_active"] = true
+		entity_selected.emit(selected_entity)
+		player_changed.emit(current_player_index)
 
 
 func load_data():
@@ -435,11 +439,15 @@ func _process_enemy_turn():
 			var ey = int(first_enemy["y"])
 			var px = int(closest_player["x"])
 			var py = int(closest_player["y"])
+			
+			# Find adjacent cell towards player
 			var directions = []
 			if px > ex: directions.append(Vector2i(1, 0))
 			elif px < ex: directions.append(Vector2i(-1, 0))
 			if py > ey: directions.append(Vector2i(0, 1))
 			elif py < ey: directions.append(Vector2i(0, -1))
+			
+			# Try to move in one of the directions
 			for dir in directions:
 				var new_x = ex + dir.x
 				var new_y = ey + dir.y
@@ -453,9 +461,13 @@ func _process_enemy_turn():
 						entity_moved.emit(first_enemy, Vector2i(ex, ey), Vector2i(new_x, new_y))
 						message_requested.emit("%s se déplace vers (%d,%d)" % [first_enemy["name"], new_x, new_y])
 						break
+			
+			# Update distance after potential move
 			var new_dx = abs(int(first_enemy["x"]) - int(closest_player["x"]))
 			var new_dy = abs(int(first_enemy["y"]) - int(closest_player["y"]))
 			min_distance = new_dx + new_dy
+			
+		# Attack if adjacent
 		if min_distance == 1 and first_enemy["current_pa"] > 0:
 			var damage = first_enemy["force"] + ((randi() % 5) - 2)
 			var actual_damage = max(1, damage - closest_player["defense"] / 2.0)
