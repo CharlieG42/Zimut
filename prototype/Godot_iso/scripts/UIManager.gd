@@ -203,8 +203,8 @@ func update_ui():
 
 
 func update_entity_display():
-	if has_node("/root/Main/Grid/GridManager"):
-		get_node("/root/Main/Grid/GridManager").update_entity_display()
+	if has_node("/root/Main/GridManager"):
+		get_node("/root/Main/GridManager").update_entity_display()
 
 
 func update_turn_order_display():
