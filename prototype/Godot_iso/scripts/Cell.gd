@@ -1,12 +1,11 @@
 extends Node2D
 class_name Cell
 ## Cell.gd - Cellule isométrique style Waven
-## Version finale corrigée pour Godot 4.x
+## Version finale avec compatibilité GridManager
 
 const CELL_SIZE := Vector2i(100, 100)
 const HALF := Vector2(50, 50)
 
-# Couleurs style Waven (tons chauds)
 const GRASS_COLOR := Color(0.42, 0.56, 0.14)
 const GRASS_SIDE_LEFT := Color(0.33, 0.42, 0.18)
 const GRASS_SIDE_RIGHT := Color(0.56, 0.74, 0.56)
@@ -30,112 +29,63 @@ var highlighted: bool = false
 
 signal cell_clicked(x: int, y: int)
 
-
 func _ready():
 	pass
 
-
 func _draw():
-	# Dessiner la tuile isométrique (losange)
 	var main_points = PackedVector2Array([Vector2(0, 50), Vector2(50, 0), Vector2(100, 50), Vector2(50, 100)])
-	
 	var is_grass := (grid_position.x + grid_position.y) % 2 == 0
 	
 	if is_grass:
-		# Herbe - style Waven
 		draw_polygon(main_points, make_colors([Color(0,0,0,0), GRASS_COLOR, GRASS_COLOR, GRASS_COLOR]))
-		
-		# Face latérale gauche
-		var left_points = PackedVector2Array([Vector2(0, 50), Vector2(50, 0), Vector2(50, 50)])
-		draw_polygon(left_points, make_colors([Color(0,0,0,0), GRASS_SIDE_LEFT, GRASS_SIDE_LEFT]))
-		
-		# Face latérale droite
-		var right_points = PackedVector2Array([Vector2(50, 50), Vector2(100, 50), Vector2(50, 100)])
-		draw_polygon(right_points, make_colors([Color(0,0,0,0), GRASS_SIDE_RIGHT, GRASS_SIDE_RIGHT]))
-		
-		# Highlight supérieur
-		var top_hl = PackedVector2Array([Vector2(15, 45), Vector2(50, 5), Vector2(85, 45), Vector2(50, 35)])
-		draw_polygon(top_hl, make_colors([Color(0,0,0,0), GRASS_HIGHLIGHT, GRASS_HIGHLIGHT, GRASS_HIGHLIGHT]))
-		
-		# Ombre inférieure
-		var bottom_sh = PackedVector2Array([Vector2(15, 55), Vector2(50, 95), Vector2(85, 55), Vector2(50, 65)])
-		draw_polygon(bottom_sh, make_colors([Color(0,0,0,0), GRASS_SHADOW, GRASS_SHADOW, GRASS_SHADOW]))
-		
-		# Bordure lumineuse style Waven (lignes)
+		draw_polygon(PackedVector2Array([Vector2(0, 50), Vector2(50, 0), Vector2(50, 50)]), make_colors([Color(0,0,0,0), GRASS_SIDE_LEFT, GRASS_SIDE_LEFT]))
+		draw_polygon(PackedVector2Array([Vector2(50, 50), Vector2(100, 50), Vector2(50, 100)]), make_colors([Color(0,0,0,0), GRASS_SIDE_RIGHT, GRASS_SIDE_RIGHT]))
+		draw_polygon(PackedVector2Array([Vector2(15, 45), Vector2(50, 5), Vector2(85, 45), Vector2(50, 35)]), make_colors([Color(0,0,0,0), GRASS_HIGHLIGHT, GRASS_HIGHLIGHT, GRASS_HIGHLIGHT]))
+		draw_polygon(PackedVector2Array([Vector2(15, 55), Vector2(50, 95), Vector2(85, 55), Vector2(50, 65)]), make_colors([Color(0,0,0,0), GRASS_SHADOW, GRASS_SHADOW, GRASS_SHADOW]))
 		draw_polygon_outline(main_points, BORDER_HIGHLIGHT, 1.0)
-		
-		# Texture herbe
 		draw_grass_texture()
 	else:
-		# Terre - style Waven
 		draw_polygon(main_points, make_colors([Color(0,0,0,0), DIRT_COLOR, DIRT_COLOR, DIRT_COLOR]))
-		
-		# Face latérale gauche
-		var left_points = PackedVector2Array([Vector2(0, 50), Vector2(50, 0), Vector2(50, 50)])
-		draw_polygon(left_points, make_colors([Color(0,0,0,0), DIRT_SIDE_LEFT, DIRT_SIDE_LEFT]))
-		
-		# Face latérale droite
-		var right_points = PackedVector2Array([Vector2(50, 50), Vector2(100, 50), Vector2(50, 100)])
-		draw_polygon(right_points, make_colors([Color(0,0,0,0), DIRT_SIDE_RIGHT, DIRT_SIDE_RIGHT]))
-		
-		# Highlight supérieur
-		var top_hl = PackedVector2Array([Vector2(15, 45), Vector2(50, 5), Vector2(85, 45), Vector2(50, 35)])
-		draw_polygon(top_hl, make_colors([Color(0,0,0,0), DIRT_HIGHLIGHT, DIRT_HIGHLIGHT, DIRT_HIGHLIGHT]))
-		
-		# Ombre inférieure
-		var bottom_sh = PackedVector2Array([Vector2(15, 55), Vector2(50, 95), Vector2(85, 55), Vector2(50, 65)])
-		draw_polygon(bottom_sh, make_colors([Color(0,0,0,0), DIRT_SHADOW, DIRT_SHADOW, DIRT_SHADOW]))
-		
-		# Bordure lumineuse style Waven
+		draw_polygon(PackedVector2Array([Vector2(0, 50), Vector2(50, 0), Vector2(50, 50)]), make_colors([Color(0,0,0,0), DIRT_SIDE_LEFT, DIRT_SIDE_LEFT]))
+		draw_polygon(PackedVector2Array([Vector2(50, 50), Vector2(100, 50), Vector2(50, 100)]), make_colors([Color(0,0,0,0), DIRT_SIDE_RIGHT, DIRT_SIDE_RIGHT]))
+		draw_polygon(PackedVector2Array([Vector2(15, 45), Vector2(50, 5), Vector2(85, 45), Vector2(50, 35)]), make_colors([Color(0,0,0,0), DIRT_HIGHLIGHT, DIRT_HIGHLIGHT, DIRT_HIGHLIGHT]))
+		draw_polygon(PackedVector2Array([Vector2(15, 55), Vector2(50, 95), Vector2(85, 55), Vector2(50, 65)]), make_colors([Color(0,0,0,0), DIRT_SHADOW, DIRT_SHADOW, DIRT_SHADOW]))
 		draw_polygon_outline(main_points, BORDER_HIGHLIGHT, 1.0)
-		
-		# Texture terre
 		draw_dirt_texture()
 	
-	# Sélection
 	if selected:
-		var sel_points = PackedVector2Array([Vector2(5, 50), Vector2(50, 5), Vector2(95, 50), Vector2(50, 95)])
-		draw_polygon_outline(sel_points, SELECTION_COLOR, 2.0)
+		draw_polygon_outline(PackedVector2Array([Vector2(5, 50), Vector2(50, 5), Vector2(95, 50), Vector2(50, 95)]), SELECTION_COLOR, 2.0)
 	
-	# Highlight
 	if highlighted:
-		var hl_points = PackedVector2Array([Vector2(3, 50), Vector2(50, 3), Vector2(97, 50), Vector2(50, 97)])
-		draw_polygon_outline(hl_points, HIGHLIGHT_COLOR, 2.0)
+		draw_polygon_outline(PackedVector2Array([Vector2(3, 50), Vector2(50, 3), Vector2(97, 50), Vector2(50, 97)]), HIGHLIGHT_COLOR, 2.0)
 	
-	# Entité
 	if entity:
 		draw_entity()
 
+func update_appearance():
+	queue_redraw()
 
 func make_colors(arr: Array) -> PackedColorArray:
-	"""Convertit un tableau de Color en PackedColorArray"""
 	var result = PackedColorArray()
 	for c in arr:
 		result.append(c)
 	return result
 
-
 func draw_polygon_outline(points: PackedVector2Array, color: Color, width: float):
-	"""Dessine le contour d'un polygone"""
 	for i in range(points.size()):
 		var start = points[i]
 		var end = points[(i + 1) % points.size()]
 		draw_line(start, end, color, width, true)
 
-
 func draw_grass_texture():
-	"""Dessine la texture d'herbe"""
-	var grass_color := Color(0.24, 0.70, 0.44)
+	var grass_color = Color(0.24, 0.70, 0.44)
 	draw_line(Vector2(20, 30), Vector2(30, 20), grass_color, 1.5, true)
 	draw_line(Vector2(60, 35), Vector2(70, 25), grass_color, 1.5, true)
 	draw_line(Vector2(30, 60), Vector2(40, 50), grass_color, 1.5, true)
 	draw_line(Vector2(70, 65), Vector2(80, 55), grass_color, 1.5, true)
 
-
 func draw_dirt_texture():
-	"""Dessine la texture de terre"""
-	var dirt_color := Color(0.63, 0.32, 0.18)
-	
+	var dirt_color = Color(0.63, 0.32, 0.18)
 	var ellipse_data = [
 		[Vector2(25, 35), Vector2(4, 2)],
 		[Vector2(45, 40), Vector2(3, 1.5)],
@@ -143,43 +93,32 @@ func draw_dirt_texture():
 		[Vector2(35, 65), Vector2(3.5, 2)],
 		[Vector2(65, 70), Vector2(4, 2)]
 	]
-	
 	for data in ellipse_data:
 		var center = data[0]
 		var radius = data[1]
-		var num_points := 20
-		var pts := PackedVector2Array()
-		var cols := PackedColorArray()
-		
+		var num_points = 20
+		var pts = PackedVector2Array()
+		var cols = PackedColorArray()
 		for j in range(num_points + 1):
-			var angle := j * TAU / num_points
+			var angle = j * TAU / num_points
 			pts.append(center + Vector2(cos(angle) * radius.x, sin(angle) * radius.y))
 			cols.append(dirt_color)
-		
 		draw_polygon(pts, cols)
 
-
 func draw_entity():
-	"""Dessine l'entité au centre de la cellule"""
-	var center := HALF
+	var center = HALF
 	var entity_type = entity.get("entity_type", "")
 	var classe = entity.get("classe", "")
 	var color = GameManager.COLORS.get(classe, Color(0.5, 0.5, 0.5))
-	
 	if entity_type == "Player":
-		# Cercle rempli pour les joueurs
-		var circle_points := PackedVector2Array()
-		var circle_cols := PackedColorArray()
-		var num_points := 32
-		
+		var circle_points = PackedVector2Array()
+		var circle_cols = PackedColorArray()
+		var num_points = 32
 		for i in range(num_points + 1):
-			var angle := i * TAU / num_points
+			var angle = i * TAU / num_points
 			circle_points.append(center + Vector2(cos(angle), sin(angle)) * 25.0)
 			circle_cols.append(color)
-		
 		draw_polygon(circle_points, circle_cols)
-		
-		# Bordure
 		var border_color = Color.YELLOW if entity.get("is_active", false) else Color.WHITE
 		var border_width = 2.0 if entity.get("is_active", false) else 1.5
 		for i in range(num_points):
@@ -187,27 +126,22 @@ func draw_entity():
 			var end = circle_points[i + 1]
 			draw_line(start, end, border_color, border_width, true)
 	else:
-		# Triangle pour les ennemis
 		var triangle_points = PackedVector2Array([
 			center + Vector2(-20, -15),
 			center + Vector2(20, -15),
 			center + Vector2(0, 20)
 		])
 		draw_polygon(triangle_points, make_colors([color, color, color]))
-		
-		# Bordure rouge
 		for i in range(triangle_points.size()):
 			var start = triangle_points[i]
 			var end = triangle_points[(i + 1) % triangle_points.size()]
 			draw_line(start, end, Color.RED, 1.0, true)
-
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var local_pos = to_local(get_global_mouse_position())
 		if _is_point_in_cell(local_pos):
 			emit_signal("cell_clicked", grid_position.x, grid_position.y)
-
 
 func _is_point_in_cell(point: Vector2) -> bool:
 	var dx = abs(point.x - HALF.x)
