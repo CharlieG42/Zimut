@@ -1,9 +1,9 @@
 extends Node2D
 ## GridManager.gd - Gestion de la grille isométrique
-## Version améliorée avec décors et cases plus grandes
+## Version améliorée avec décors et cases plus grandes (100x100)
 
-const CELL_SIZE := Vector2i(80, 40)
-const HALF_CELL := Vector2(40, 20)
+const CELL_SIZE := Vector2i(100, 100)
+const HALF_CELL := Vector2(50, 50)
 
 var game_manager
 var cell_nodes: Array = []
