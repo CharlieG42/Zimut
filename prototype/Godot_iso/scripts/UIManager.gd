@@ -1,6 +1,7 @@
 extends CanvasLayer
 class_name UIManager
 ## UIManager.gd - Gestion de l'interface utilisateur
+## Version corrigée : bouton end_turn + SpellPanel
 
 @onready var turn_label: Label = $TurnLabel
 @onready var player_info_label: Label = $PlayerInfoLabel
@@ -32,14 +33,15 @@ func init(manager):
 
 
 func _setup_ui_elements():
-	# End turn button
+	# End turn button - avec z_index élevé pour être cliquable
 	end_turn_button = Button.new()
 	end_turn_button.name = "EndTurnButton"
 	end_turn_button.text = "Passer le tour"
 	end_turn_button.position = Vector2(1660, 985)
 	end_turn_button.size = Vector2(160, 50)
 	end_turn_button.add_theme_font_size_override("font_size", 24)
-	end_turn_button.z_index = 51
+	end_turn_button.z_index = 100  # z_index très élevé pour être au-dessus de tout
+	end_turn_button.mouse_filter = Control.MOUSE_FILTER_STOP  # Arrête la propagation du clic
 	add_child(end_turn_button)
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	
@@ -57,7 +59,14 @@ func _setup_ui_elements():
 
 
 func _setup_connections():
-	pass
+	# Connecter les signaux de game_manager
+	if game_manager:
+		game_manager.turn_changed.connect(_on_turn_changed)
+		game_manager.player_changed.connect(_on_player_changed)
+		game_manager.entity_selected.connect(_on_entity_selected)
+		game_manager.spell_selected.connect(_on_spell_selected)
+		game_manager.game_ended.connect(_on_game_ended)
+		game_manager.message_requested.connect(_on_message_requested)
 
 
 func _on_turn_changed(turn: int):
@@ -130,6 +139,7 @@ func _on_message_requested(text: String):
 
 
 func _on_end_turn_pressed():
+	print("End turn button pressed!")  # Debug
 	end_turn_requested.emit()
 
 
@@ -155,7 +165,7 @@ func show_spells_for_player(player: Dictionary):
 		button.spell_selected.connect(_on_spell_button_selected)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		button.mouse_filter = Control.MOUSE_FILTER_PASS
+		button.mouse_filter = Control.MOUSE_FILTER_STOP
 		
 		button.add_theme_color_override("font_color", Color.WHITE)
 		button.add_theme_color_override("font_pressed_color", Color.YELLOW)
