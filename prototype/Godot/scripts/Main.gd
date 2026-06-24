@@ -212,6 +212,10 @@ func _on_message_requested(text: String):
 func _on_turn_changed(turn: int):
     update_ui()
     update_turn_order_display()
+    if turn == 0:
+        turn_label.text = "Tour %d" % game_manager.turn_count
+    else:
+        turn_label.text = "Tour %d - Ennemis" % game_manager.turn_count
     if turn == 1:
         hide_spell_panel()
         if spell_description:
