@@ -20,7 +20,7 @@ current = true
 position = Vector2(0, 0)
 z_index = 10
 
-[node name="Grid/GridManager" type="Node2D" parent="./Grid"]
+[node name="GridManager" type="Node2D" parent="./Grid"]
 script = ExtResource( 3 )
 
 [node name="UIManager" type="CanvasLayer" parent="."]
