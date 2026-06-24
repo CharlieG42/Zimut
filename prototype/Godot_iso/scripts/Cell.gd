@@ -1,7 +1,7 @@
 extends Node2D
 class_name Cell
 ## Cell.gd - Cellule isométrique style Waven
-## Version finale avec compatibilité GridManager
+## Version finale : détection de clic corrigée
 
 const CELL_SIZE := Vector2i(100, 100)
 const HALF := Vector2(50, 50)
@@ -34,7 +34,7 @@ func _ready():
 
 func _draw():
 	var main_points = PackedVector2Array([Vector2(0, 50), Vector2(50, 0), Vector2(100, 50), Vector2(50, 100)])
-	var is_grass := (grid_position.x + grid_position.y) % 2 == 0
+	var is_grass = (grid_position.x + grid_position.y) % 2 == 0
 	
 	if is_grass:
 		draw_polygon(main_points, make_colors([Color(0,0,0,0), GRASS_COLOR, GRASS_COLOR, GRASS_COLOR]))
@@ -144,6 +144,30 @@ func _input(event: InputEvent) -> void:
 			emit_signal("cell_clicked", grid_position.x, grid_position.y)
 
 func _is_point_in_cell(point: Vector2) -> bool:
-	var dx = abs(point.x - HALF.x)
-	var dy = abs(point.y - HALF.y)
-	return (dx + dy) < 50
+	# Détection précise pour un losange isométrique
+	# Le losange a 4 côtés avec les équations :
+	# Côté haut-gauche : y = -x + 50
+	# Côté haut-droit : y = x - 50
+	# Côté bas-droit : y = -x + 150
+	# Côté bas-gauche : y = x + 50
+	
+	# Le point doit être EN DESSOUS de tous les côtés supérieurs
+	# et AU-DESSUS de tous les côtés inférieurs
+	
+	# En dessous de (0,50)-(50,0) : y <= -x + 50
+	if point.y > -point.x + 50:
+		return false
+	
+	# En dessous de (50,0)-(100,50) : y <= x - 50
+	if point.y > point.x - 50:
+		return false
+	
+	# Au dessus de (100,50)-(50,100) : y >= -x + 150
+	if point.y < -point.x + 150:
+		return false
+	
+	# Au dessus de (50,100)-(0,50) : y >= x + 50
+	if point.y < point.x + 50:
+		return false
+	
+	return true
