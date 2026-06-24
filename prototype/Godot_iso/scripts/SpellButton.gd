@@ -6,8 +6,10 @@ var spell: Dictionary = {}
 
 signal spell_selected(spell: Dictionary)
 
+
 func _ready():
     pressed.connect(_on_pressed)
+    # Police plus grande pour mobile
     add_theme_font_size_override("font_size", 24)
 
     if spell:
@@ -27,13 +29,14 @@ func _ready():
                 type_color = Color(0.8, 0.2, 0.2)
             "Magie":
                 type_color = Color(0.2, 0.2, 0.8)
-            "Defense":
+            "Défense":
                 type_color = Color(0.2, 0.8, 0.2)
             "Soin":
                 type_color = Color(0.8, 0.8, 0.2)
         add_theme_color_override("font_color", type_color)
         add_theme_color_override("font_pressed_color", type_color.darkened(0.5))
         add_theme_color_override("font_hover_color", type_color.lightened(0.2))
+
 
 func _on_pressed():
     spell_selected.emit(spell)

@@ -1,5 +1,6 @@
 extends Node
 ## GameManager - Gère la logique globale du jeu WildZimut (version isométrique)
+## Ce script est un autoload (configuré dans project.godot)
 
 const GRID_SIZE := 10
 const CELL_SIZE := Vector2i(64, 32)
@@ -44,6 +45,7 @@ var classes_data: Array = []
 var spells_data: Array = []
 var enemies_data: Array = []
 
+
 func _ready():
     randomize()
     load_data()
@@ -52,6 +54,7 @@ func _ready():
     current_turn = 0
     turn_count = 1
     turn_changed.emit(current_turn)
+    # Auto-select first alive player at game start
     if players.size() > 0:
         for p in players:
             if p["current_pv"] > 0:
@@ -62,7 +65,9 @@ func _ready():
     current_player_index = 0
     player_changed.emit(current_player_index)
 
+
 func load_data():
+    """Load game data: classes, spells, enemies"""
     classes_data = [
         {"Classe": "Tank", "Niveau": "30", "Vita (PV)": "120", "Force (CAC)": "20", "Intelligence (Magie)": "5", "Agilité (Vit. Atk)": "5", "Sagesse (Précision)": "10", "Défense": "30", "PA": "6", "PM": "3"},
         {"Classe": "Assassin", "Niveau": "30", "Vita (PV)": "80", "Force (CAC)": "15", "Intelligence (Magie)": "10", "Agilité (Vit. Atk)": "25", "Sagesse (Précision)": "20", "Défense": "10", "PA": "7", "PM": "4"},
@@ -82,7 +87,9 @@ func load_data():
         {"Type": "Loup", "Niveau": "30", "PV": "70", "Attaque": "10", "Défense": "3", "PA": "6", "PM": "4", "Biome": "Plaine"}
     ]
 
+
 func init_grid():
+    """Initialize the grid"""
     grid = []
     for y in range(GRID_SIZE):
         var row: Array = []
@@ -90,10 +97,14 @@ func init_grid():
             row.append(null)
         grid.append(row)
 
+
 func init_entities():
+    """Initialize players and enemies on the grid"""
+    # Player positions (left side of 10x10 grid)
     var player_classes: Array[String] = ["Tank", "Assassin", "Mage"]
     var player_positions: Array[Vector2i] = [Vector2i(2, 2), Vector2i(2, 3), Vector2i(3, 2)]
     players = []
+    
     for i in range(player_classes.size()):
         var classe := player_classes[i]
         var pos := player_positions[i]
@@ -124,6 +135,7 @@ func init_entities():
                 "spells": [],
                 "is_active": false
             }
+            # Add spells for this class
             for spell_info in spells_data:
                 if spell_info["Classe"] == classe and int(spell_info["Niveau requis"]) <= 30:
                     player["spells"].append({
@@ -138,9 +150,12 @@ func init_entities():
                     })
             players.append(player)
             grid[pos.y][pos.x] = player
+    
+    # Enemy positions (right side of 10x10 grid)
     var enemy_types: Array[String] = ["Gobelin", "Squelette", "Loup"]
     var enemy_positions: Array[Vector2i] = [Vector2i(7, 7), Vector2i(7, 6), Vector2i(6, 7)]
     enemies = []
+    
     for i in range(enemy_types.size()):
         var enemy_type := enemy_types[i]
         var pos := enemy_positions[i]
@@ -171,3 +186,436 @@ func init_entities():
             }
             enemies.append(enemy)
             grid[pos.y][pos.x] = enemy
+
+
+# ==================== Cell Selection Handler ====================
+
+func handle_cell_selected(cell_pos: Vector2i):
+    """Handle cell selection based on current game state"""
+    var x := cell_pos.x
+    var y := cell_pos.y
+    if not (x >= 0 and x < GRID_SIZE and y >= 0 and y < GRID_SIZE):
+        return
+    selected_cell = cell_pos
+    var entity = grid[y][x]
+    
+    # Clean up any dead entities before handling selection
+    cleanup_dead_entities()
+    
+    if current_turn == 0:  # Players' turn
+        var current_player = players[current_player_index]
+        
+        # If a spell is selected, handle spell casting
+        if selected_spell != null:
+            if entity and entity["current_pv"] > 0:
+                var dx: int = abs(x - int(current_player["x"]))
+                var dy: int = abs(y - int(current_player["y"]))
+                var distance = dx + dy
+                if distance <= selected_spell["range"]:
+                    var spell_result = cast_spell(current_player, selected_spell, entity)
+                    if spell_result:
+                        spell_casted.emit(current_player, selected_spell, entity, spell_result)
+                        message_requested.emit(spell_result)
+                        if entity["current_pv"] <= 0:
+                            remove_entity_from_grid(entity)
+                        selected_spell = null
+                        entity_selected.emit(null)
+                        player_changed.emit(current_player_index)
+                        cleanup_dead_entities()
+                else:
+                    message_requested.emit("Cible hors de portée ! (Portée: %d)" % selected_spell["range"])
+            else:
+                message_requested.emit("Pas de cible valide à cette position")
+            return
+        
+        # Auto-selection: If clicking on current player (and alive), show spells
+        if entity and entity["entity_type"] == "Player" and entity == current_player and entity["current_pv"] > 0:
+            selected_entity = current_player
+            show_spells = true
+            for p in players:
+                p["is_active"] = false
+            current_player["is_active"] = true
+            entity_selected.emit(current_player)
+            player_changed.emit(current_player_index)
+            return
+        
+        # One-click movement: If clicking adjacent empty cell, move current player
+        if entity == null and current_player["current_pv"] > 0 and current_player["current_pm"] > 0:
+            var dx: int = x - int(current_player["x"])
+            var dy: int = y - int(current_player["y"])
+            if abs(dx) + abs(dy) == 1:  # Adjacent cell
+                if grid[y][x] == null:
+                    grid[current_player["y"]][current_player["x"]] = null
+                    current_player["x"] = x
+                    current_player["y"] = y
+                    grid[y][x] = current_player
+                    current_player["current_pm"] -= 1
+                    entity_moved.emit(current_player, Vector2i(current_player["x"] - dx, current_player["y"] - dy), cell_pos)
+                    selected_entity = current_player
+                    show_spells = false
+                    player_changed.emit(current_player_index)
+                    message_requested.emit("%s se déplace vers (%d,%d)" % [current_player["name"], x, y])
+            return
+        
+        # One-click attack: If clicking adjacent enemy, attack
+        if entity and entity["current_pv"] > 0 and entity["entity_type"] == "Enemy" and current_player["current_pv"] > 0:
+            var dx: int = abs(x - int(current_player["x"]))
+            var dy: int = abs(y - int(current_player["y"]))
+            var distance = dx + dy
+            if distance == 1:  # Adjacent cell
+                var damage = current_player["force"] + ((randi() % 5) - 2)
+                var actual_damage = max(1, damage - entity["defense"] / 2.0)
+                entity["current_pv"] -= actual_damage
+                entity_attacked.emit(current_player, entity, actual_damage)
+                current_player["current_pa"] -= 1
+                message_requested.emit("%s attaque %s : %d dégâts !" % [current_player["name"], entity["name"], actual_damage])
+                if entity["current_pv"] <= 0:
+                    remove_entity_from_grid(entity)
+                selected_entity = current_player
+                show_spells = false
+                player_changed.emit(current_player_index)
+                cleanup_dead_entities()
+            return
+    
+    selected_entity = null
+    show_spells = false
+
+
+# ==================== Entity Management ====================
+
+func remove_entity_from_grid(entity: Dictionary):
+    """Remove a dead entity from grid and arrays"""
+    if entity["entity_type"] == "Player":
+        for i in range(players.size()):
+            if players[i] == entity:
+                players.remove_at(i)
+                if i <= current_player_index:
+                    current_player_index = max(0, current_player_index - 1)
+                break
+        if current_player_index >= players.size():
+            current_player_index = max(0, players.size() - 1)
+    elif entity["entity_type"] == "Enemy":
+        for i in range(enemies.size()):
+            if enemies[i] == entity:
+                enemies.remove_at(i)
+                break
+    
+    var ex = int(entity["x"])
+    var ey = int(entity["y"])
+    if ex >= 0 and ex < GRID_SIZE and ey >= 0 and ey < GRID_SIZE:
+        grid[ey][ex] = null
+    
+    entity_selected.emit(null)
+    player_changed.emit(current_player_index)
+    check_game_over()
+
+
+func cleanup_dead_entities():
+    """Remove all dead entities from grid and arrays"""
+    for i in range(players.size() - 1, -1, -1):
+        if players[i]["current_pv"] <= 0:
+            var pos = Vector2i(int(players[i]["x"]), int(players[i]["y"]))
+            if pos.x >= 0 and pos.x < GRID_SIZE and pos.y >= 0 and pos.y < GRID_SIZE:
+                grid[pos.y][pos.x] = null
+            players.remove_at(i)
+            if current_player_index >= i:
+                current_player_index = max(0, current_player_index - 1)
+    
+    for i in range(enemies.size() - 1, -1, -1):
+        if enemies[i]["current_pv"] <= 0:
+            var pos = Vector2i(int(enemies[i]["x"]), int(enemies[i]["y"]))
+            if pos.x >= 0 and pos.x < GRID_SIZE and pos.y >= 0 and pos.y < GRID_SIZE:
+                grid[pos.y][pos.x] = null
+            enemies.remove_at(i)
+    
+    if current_player_index >= players.size():
+        current_player_index = max(0, players.size() - 1)
+
+
+# ==================== Spell Management ====================
+
+func handle_spell_selected(spell: Dictionary):
+    """Handle spell selection from UI"""
+    var current_player = players[current_player_index]
+    if can_cast_spell(current_player, spell):
+        selected_spell = spell
+        spell_selected.emit(spell)
+        message_requested.emit("Sort sélectionné: %s (Portée: %d)" % [spell["name"], spell["range"]])
+        player_changed.emit(current_player_index)
+    else:
+        message_requested.emit("Pas assez de PA/PM pour ce sort !")
+        selected_spell = null
+
+
+func can_cast_spell(entity: Dictionary, spell: Dictionary) -> bool:
+    """Check if an entity can cast a spell"""
+    return entity["current_pa"] >= spell["cost_pa"] and entity["current_pm"] >= spell["cost_pm"]
+
+
+func cast_spell(caster: Dictionary, spell: Dictionary, target: Dictionary) -> String:
+    """Cast a spell and return the result message"""
+    var result: String = ""
+    
+    # Consume PA/PM
+    caster["current_pa"] -= spell["cost_pa"]
+    caster["current_pm"] -= spell["cost_pm"]
+    
+    match spell["spell_type"]:
+        "CAC":
+            var damage = caster["force"] + ((randi() % 5) - 2)
+            var actual_damage = max(1, damage - target["defense"] / 2.0)
+            target["current_pv"] -= actual_damage
+            result = "%s utilise %s sur %s : %d dégâts !" % [caster["name"], spell["name"], target["name"], actual_damage]
+            entity_attacked.emit(caster, target, actual_damage)
+        "Magie":
+            if "Poison" in spell["effect"]:
+                var damage = int(spell["effect"].split(" ")[0])
+                target["current_pv"] -= damage
+                result = "%s utilise %s sur %s : %d dégâts + poison !" % [caster["name"], spell["name"], target["name"], damage]
+                entity_attacked.emit(caster, target, damage)
+            else:
+                var damage = caster["intelligence"] + ((randi() % 5) - 2)
+                var actual_damage = max(1, damage)
+                target["current_pv"] -= actual_damage
+                result = "%s utilise %s sur %s : %d dégâts !" % [caster["name"], spell["name"], target["name"], actual_damage]
+                entity_attacked.emit(caster, target, actual_damage)
+        "Défense":
+            # Bouclier: réduit les dégâts de 50% pour 1 tour
+            caster["defense"] = int(caster["defense"] * 1.5)
+            result = "%s utilise %s : défense augmentée !" % [caster["name"], spell["name"]]
+        "Soin":
+            var heal_amount = caster["intelligence"] + ((randi() % 5) - 2)
+            target["current_pv"] = min(target["max_pv"], target["current_pv"] + heal_amount)
+            result = "%s utilise %s sur %s : +%d PV !" % [caster["name"], spell["name"], target["name"], heal_amount]
+    
+    return result
+
+
+# ==================== Turn Management ====================
+
+func next_player():
+    """Move to the next player's turn"""
+    selected_spell = null
+    show_spells = false
+    selected_cell = Vector2i(0, 0)
+    
+    # Find next alive player
+    var start_index = current_player_index
+    var found_alive = false
+    for i in range(players.size()):
+        current_player_index = (start_index + 1 + i) % players.size()
+        var current_player = players[current_player_index]
+        if current_player["current_pv"] > 0:
+            found_alive = true
+            break
+    
+    if not found_alive:
+        # All players are dead, switch to enemy turn or end game
+        current_turn = 1
+        turn_changed.emit(current_turn)
+        turn_count += 1
+        message_requested.emit("Tour des ennemis")
+        _process_enemy_turn()
+        return
+    
+    # Auto-select the new current player
+    var current_player = players[current_player_index]
+    selected_entity = current_player
+    for p in players:
+        p["is_active"] = false
+    current_player["is_active"] = true
+    
+    player_changed.emit(current_player_index)
+    entity_selected.emit(current_player)
+    message_requested.emit("Tour de %s" % current_player.get("name", "?"))
+    cleanup_dead_entities()
+
+
+func _process_enemy_turn():
+    """Process all enemies' turns"""
+    if enemies.size() == 0:
+        # No enemies left, players win
+        game_over = true
+        victory = true
+        game_ended.emit(true)
+        message_requested.emit("Tous les ennemis sont vaincus ! VICTOIRE !")
+        return
+    
+    # Find first alive enemy
+    var first_enemy = null
+    for enemy in enemies:
+        if enemy["current_pv"] > 0:
+            first_enemy = enemy
+            break
+    
+    if first_enemy == null:
+        # All enemies are dead
+        current_turn = 0
+        turn_count += 1
+        turn_changed.emit(current_turn)
+        current_player_index = 0
+        if players.size() > 0:
+            for p in players:
+                p["is_active"] = false
+            players[0]["is_active"] = true
+            selected_entity = players[0]
+            entity_selected.emit(players[0])
+        player_changed.emit(current_player_index)
+        message_requested.emit("Tour des joueurs")
+        return
+    
+    # Enemy AI: Find closest player and attack
+    var closest_player = null
+    var min_distance = 999
+    for player in players:
+        if player["current_pv"] > 0:
+            var dx = abs(int(first_enemy["x"]) - int(player["x"]))
+            var dy = abs(int(first_enemy["y"]) - int(player["y"]))
+            var distance = dx + dy
+            if distance < min_distance:
+                min_distance = distance
+                closest_player = player
+    
+    if closest_player:
+        # Move towards player if not adjacent
+        if min_distance > 1 and first_enemy["current_pm"] > 0:
+            var ex = int(first_enemy["x"])
+            var ey = int(first_enemy["y"])
+            var px = int(closest_player["x"])
+            var py = int(closest_player["y"])
+            
+            # Find adjacent cell towards player
+            var directions = []
+            if px > ex: directions.append(Vector2i(1, 0))
+            elif px < ex: directions.append(Vector2i(-1, 0))
+            if py > ey: directions.append(Vector2i(0, 1))
+            elif py < ey: directions.append(Vector2i(0, -1))
+            
+            # Try to move in one of the directions
+            for dir in directions:
+                var new_x = ex + dir.x
+                var new_y = ey + dir.y
+                if new_x >= 0 and new_x < GRID_SIZE and new_y >= 0 and new_y < GRID_SIZE:
+                    if grid[new_y][new_x] == null:
+                        grid[ey][ex] = null
+                        first_enemy["x"] = new_x
+                        first_enemy["y"] = new_y
+                        grid[new_y][new_x] = first_enemy
+                        first_enemy["current_pm"] -= 1
+                        entity_moved.emit(first_enemy, Vector2i(ex, ey), Vector2i(new_x, new_y))
+                        message_requested.emit("%s se déplace vers (%d,%d)" % [first_enemy["name"], new_x, new_y])
+                        break
+            
+            # Update distance after potential move
+            var new_dx = abs(int(first_enemy["x"]) - int(closest_player["x"]))
+            var new_dy = abs(int(first_enemy["y"]) - int(closest_player["y"]))
+            min_distance = new_dx + new_dy
+        
+        # Attack if adjacent
+        if min_distance == 1 and first_enemy["current_pa"] > 0:
+            var damage = first_enemy["force"] + ((randi() % 5) - 2)
+            var actual_damage = max(1, damage - closest_player["defense"] / 2.0)
+            closest_player["current_pv"] -= actual_damage
+            entity_attacked.emit(first_enemy, closest_player, actual_damage)
+            first_enemy["current_pa"] -= 1
+            message_requested.emit("%s attaque %s : %d dégâts !" % [first_enemy["name"], closest_player["name"], actual_damage])
+            if closest_player["current_pv"] <= 0:
+                remove_entity_from_grid(closest_player)
+    
+    # Check if all enemies have finished their turn
+    var all_enemies_done = true
+    for enemy in enemies:
+        if enemy["current_pv"] > 0 and (enemy["current_pa"] > 0 or enemy["current_pm"] > 0):
+            all_enemies_done = false
+            break
+    
+    if all_enemies_done:
+        # Reset PA/PM for all enemies
+        for enemy in enemies:
+            if enemy["current_pv"] > 0:
+                enemy["current_pa"] = enemy["max_pa"]
+                enemy["current_pm"] = enemy["max_pm"]
+        # End enemy turn, go back to player turn
+        current_turn = 0
+        turn_count += 1
+        turn_changed.emit(current_turn)
+        current_player_index = 0
+        if players.size() > 0:
+            for p in players:
+                p["is_active"] = false
+            players[0]["is_active"] = true
+            selected_entity = players[0]
+            entity_selected.emit(players[0])
+        player_changed.emit(current_player_index)
+        message_requested.emit("Tour des joueurs")
+        check_game_over()
+    else:
+        # Continue enemy turn (simplified: process all enemies in sequence)
+        for enemy in enemies:
+            if enemy["current_pv"] > 0:
+                enemy["current_pa"] = enemy["max_pa"]
+                enemy["current_pm"] = enemy["max_pm"]
+        current_turn = 0
+        turn_count += 1
+        turn_changed.emit(current_turn)
+        current_player_index = 0
+        if players.size() > 0:
+            for p in players:
+                p["is_active"] = false
+            players[0]["is_active"] = true
+            selected_entity = players[0]
+            entity_selected.emit(players[0])
+        player_changed.emit(current_player_index)
+        message_requested.emit("Tour des joueurs")
+        check_game_over()
+
+
+# ==================== Game State ====================
+
+func check_game_over():
+    """Check if the game is over (all players or all enemies dead)"""
+    var alive_players = 0
+    for player in players:
+        if player["current_pv"] > 0:
+            alive_players += 1
+    
+    var alive_enemies = 0
+    for enemy in enemies:
+        if enemy["current_pv"] > 0:
+            alive_enemies += 1
+    
+    if alive_players == 0:
+        game_over = true
+        victory = false
+        game_ended.emit(false)
+        message_requested.emit("Tous les joueurs sont vaincus ! DEFAITE...")
+    elif alive_enemies == 0:
+        game_over = true
+        victory = true
+        game_ended.emit(true)
+        message_requested.emit("Tous les ennemis sont vaincus ! VICTOIRE !")
+
+
+func reset_game():
+    """Reset the game to initial state"""
+    init_grid()
+    init_entities()
+    current_turn = 0
+    turn_count = 1
+    current_player_index = 0
+    selected_entity = null
+    selected_spell = null
+    selected_cell = Vector2i(0, 0)
+    show_spells = false
+    game_over = false
+    victory = false
+    
+    if players.size() > 0:
+        for p in players:
+            p["is_active"] = false
+        players[0]["is_active"] = true
+        selected_entity = players[0]
+    
+    turn_changed.emit(current_turn)
+    player_changed.emit(current_player_index)
+    entity_selected.emit(selected_entity)
