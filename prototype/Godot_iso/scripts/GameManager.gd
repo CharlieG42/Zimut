@@ -65,12 +65,12 @@ func _ready():
 		current_player_index = first_alive_index
 		selected_entity = players[current_player_index]
 		players[current_player_index]["is_active"] = true
+		show_spells = true  # Afficher les sorts pour le joueur sélectionné
 		entity_selected.emit(selected_entity)
 		player_changed.emit(current_player_index)
 
 
 func load_data():
-	"""Load game data: classes, spells, enemies"""
 	classes_data = [
 		{"Classe": "Tank", "Niveau": "30", "Vita (PV)": "120", "Force (CAC)": "20", "Intelligence (Magie)": "5", "Agilité (Vit. Atk)": "5", "Sagesse (Précision)": "10", "Défense": "30", "PA": "6", "PM": "3"},
 		{"Classe": "Assassin", "Niveau": "30", "Vita (PV)": "80", "Force (CAC)": "15", "Intelligence (Magie)": "10", "Agilité (Vit. Atk)": "25", "Sagesse (Précision)": "20", "Défense": "10", "PA": "7", "PM": "4"},
@@ -92,7 +92,6 @@ func load_data():
 
 
 func init_grid():
-	"""Initialize the grid"""
 	grid = []
 	for y in range(GRID_SIZE):
 		var row: Array = []
@@ -102,7 +101,6 @@ func init_grid():
 
 
 func init_entities():
-	"""Initialize players and enemies on the grid"""
 	var player_classes: Array = ["Tank", "Assassin", "Mage"]
 	var player_positions: Array[Vector2i] = [Vector2i(2, 2), Vector2i(2, 3), Vector2i(3, 2)]
 	players = []
