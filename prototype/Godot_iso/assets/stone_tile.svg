@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="32" viewBox="0 0 64 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Base stone color -->
+  <rect width="64" height="32" fill="#696969"/>
+  
+  <!-- Stone texture -->
+  <polygon points="5,5 12,5 14,8 10,12 5,10" fill="#808080" opacity="0.7"/>
+  <polygon points="20,3 28,3 30,6 25,10 20,8" fill="#808080" opacity="0.7"/>
+  <polygon points="35,8 42,5 45,10 40,12 35,10" fill="#808080" opacity="0.7"/>
+  <polygon points="50,2 58,5 60,10 55,12 50,8" fill="#808080" opacity="0.7"/>
+  <polygon points="10,18 18,15 22,20 18,22 10,20" fill="#808080" opacity="0.7"/>
+  <polygon points="25,20 33,18 35,23 30,25 25,23" fill="#808080" opacity="0.7"/>
+  <polygon points="40,15 48,18 50,23 45,25 40,22" fill="#808080" opacity="0.7"/>
+  <polygon points="55,20 62,18 64,23 60,25 55,22" fill="#808080" opacity="0.7"/>
+  
+  <!-- Subtle border -->
+  <path d="M0,0 L64,0 L64,32 L0,32 Z" fill="none" stroke="#4A4A4A" stroke-width="0.5"/>
+  
+  <!-- Highlights -->
+  <path d="M0,0 L64,2 L64,0 Z" fill="#A9A9A9" fill-opacity="0.3"/>
+  <path d="M0,30 L64,32 L64,30 Z" fill="#4A4A4A" fill-opacity="0.5"/>
+</svg>

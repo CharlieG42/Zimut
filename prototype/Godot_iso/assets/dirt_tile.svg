@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="32" viewBox="0 0 64 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Base dirt color -->
+  <rect width="64" height="32" fill="#8B4513"/>
+  
+  <!-- Dirt texture pattern -->
+  <ellipse cx="10" cy="10" rx="3" ry="2" fill="#A0522D" opacity="0.6"/>
+  <ellipse cx="25" cy="8" rx="2.5" ry="1.5" fill="#A0522D" opacity="0.6"/>
+  <ellipse cx="40" cy="12" rx="3.5" ry="2" fill="#A0522D" opacity="0.6"/>
+  <ellipse cx="55" cy="5" rx="2" ry="1.5" fill="#A0522D" opacity="0.6"/>
+  <ellipse cx="15" cy="20" rx="2.5" ry="1.5" fill="#A0522D" opacity="0.6"/>
+  <ellipse cx="30" cy="25" rx="3" ry="2" fill="#A0522D" opacity="0.6"/>
+  <ellipse cx="45" cy="18" rx="2" ry="1.5" fill="#A0522D" opacity="0.6"/>
+  <ellipse cx="60" cy="22" rx="2.5" ry="1.5" fill="#A0522D" opacity="0.6"/>
+  
+  <!-- Subtle border -->
+  <path d="M0,0 L64,0 L64,32 L0,32 Z" fill="none" stroke="#654321" stroke-width="0.5"/>
+  
+  <!-- Highlights -->
+  <path d="M0,0 L64,3 L64,0 Z" fill="#CD853F" fill-opacity="0.2"/>
+  <path d="M0,29 L64,32 L64,29 Z" fill="#654321" fill-opacity="0.4"/>
+</svg>

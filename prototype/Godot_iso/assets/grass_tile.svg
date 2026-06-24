@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="32" viewBox="0 0 64 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Base grass color -->
+  <rect width="64" height="32" fill="#7CB518"/>
+  
+  <!-- Grass texture pattern -->
+  <path d="M0,0 L64,0 L64,32 L0,32 Z" fill="none" stroke="#6A9915" stroke-width="0.5"/>
+  
+  <!-- Grass blades -->
+  <path d="M5,5 Q10,0 15,5" stroke="#5D8A0F" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M20,8 Q25,3 30,8" stroke="#5D8A0F" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M35,2 Q40,7 45,2" stroke="#5D8A0F" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M50,9 Q55,4 60,9" stroke="#5D8A0F" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M10,15 Q15,10 20,15" stroke="#5D8A0F" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M25,18 Q30,13 35,18" stroke="#5D8A0F" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M40,20 Q45,15 50,20" stroke="#5D8A0F" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M55,25 Q60,20 64,25" stroke="#5D8A0F" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  
+  <!-- Subtle highlight -->
+  <path d="M0,0 L64,5 L64,0 Z" fill="#A0D82C" fill-opacity="0.3"/>
+  <path d="M0,27 L64,32 L64,27 Z" fill="#5D8A0F" fill-opacity="0.2"/>
+</svg>
