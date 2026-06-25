@@ -56,9 +56,9 @@ func _ready() -> void:
 		load_data_fallback()
 		return
 	
-	if not (data_loader as DataLoader).data_loaded:
+	if not data_loader.data_loaded:
 		# Se connecter au signal pour savoir quand les données sont prêtes
-		(data_loader as DataLoader).data_loaded_successfully.connect(_on_data_loaded)
+		data_loader.data_loaded_successfully.connect(_on_data_loaded)
 		return
 	else:
 		_on_data_loaded()
@@ -126,26 +126,26 @@ func load_data_fallback() -> void:
 
 
 ## Obtenir les données des classes depuis le DataLoader
-func get_classes_data() -> Array:
+func get_classes_data():
 	var data_loader = get_node_or_null("/root/DataLoader")
 	if data_loader:
-		return (data_loader as DataLoader).classes_data
+		return data_loader.classes_data
 	return []
 
 
 ## Obtenir les données des sorts depuis le DataLoader
-func get_spells_data() -> Array:
+func get_spells_data():
 	var data_loader = get_node_or_null("/root/DataLoader")
 	if data_loader:
-		return (data_loader as DataLoader).spells_data
+		return data_loader.spells_data
 	return []
 
 
 ## Obtenir les données des ennemis depuis le DataLoader
-func get_enemies_data() -> Array:
+func get_enemies_data():
 	var data_loader = get_node_or_null("/root/DataLoader")
 	if data_loader:
-		return (data_loader as DataLoader).enemies_data
+		return data_loader.enemies_data
 	return []
 
 

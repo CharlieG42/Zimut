@@ -258,7 +258,7 @@ func load_items_data() -> bool:
 
 
 ## Obtenir les données des classes pour un niveau spécifique
-func get_class_data(class_name: String, level: int) -> Dictionary:
+func get_class_data(class_name: String, level: int):
 	for data in classes_data:
 		if data.get("Classe", "") == class_name and int(data.get("Niveau", "0")) == level:
 			return data
@@ -266,8 +266,8 @@ func get_class_data(class_name: String, level: int) -> Dictionary:
 
 
 ## Obtenir tous les sorts pour une classe
-func get_spells_for_class(class_name: String) -> Array:
-	var result: Array = []
+func get_spells_for_class(class_name: String):
+	var result = []
 	for spell in spells_data:
 		if spell.get("Classe", "") == class_name:
 			result.append(spell)
@@ -275,8 +275,8 @@ func get_spells_for_class(class_name: String) -> Array:
 
 
 ## Obtenir les sorts pour une classe et un niveau maximum
-func get_spells_for_class_and_level(class_name: String, max_level: int) -> Array:
-	var result: Array = []
+func get_spells_for_class_and_level(class_name: String, max_level: int):
+	var result = []
 	for spell in spells_data:
 		if spell.get("Classe", "") == class_name:
 			var required_level := int(spell.get("Niveau requis", "1"))
@@ -286,7 +286,7 @@ func get_spells_for_class_and_level(class_name: String, max_level: int) -> Array
 
 
 ## Obtenir les données d'un ennemi pour un niveau spécifique
-func get_enemy_data(enemy_type: String, level: int) -> Dictionary:
+func get_enemy_data(enemy_type: String, level: int):
 	for data in enemies_data:
 		if data.get("Type", "") == enemy_type and int(data.get("Niveau", "0")) == level:
 			return data
@@ -294,20 +294,20 @@ func get_enemy_data(enemy_type: String, level: int) -> Dictionary:
 
 
 ## Obtenir tous les types d'ennemis uniques
-func get_unique_enemy_types() -> Array:
-	var types: Array = []
+func get_unique_enemy_types():
+	var types = []
 	for data in enemies_data:
-		var type_name := data.get("Type", "")
+		var type_name = data.get("Type", "")
 		if not type_name in types:
 			types.append(type_name)
 	return types
 
 
 ## Obtenir tous les noms de classes uniques
-func get_unique_class_names() -> Array:
-	var names: Array = []
+func get_unique_class_names():
+	var names = []
 	for data in classes_data:
-		var class_name := data.get("Classe", "")
+		var class_name = data.get("Classe", "")
 		if not class_name in names:
 			names.append(class_name)
 	return names
