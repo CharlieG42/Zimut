@@ -1,4 +1,3 @@
-# @strict-off
 extends Node
 ## DataLoader.gd - Chargeur de données CSV pour Zimut
 ## Charge les données des classes, sorts, ennemis et objets depuis des fichiers CSV

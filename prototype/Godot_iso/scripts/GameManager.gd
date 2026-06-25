@@ -1,4 +1,3 @@
-# @strict-off
 extends Node
 ## GameManager - Logique globale Zimut (version isométrique)
 ## Autoload configuré dans project.godot
