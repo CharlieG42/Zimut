@@ -1,10 +1,16 @@
 extends Node2D
 class_name Cell
-## Cell.gd - Cellule isométrique style Waven
+## Cell.gd - Cellule isométrique style Waven pour Zimut
 ## Corrections : détection de clic, barres de vie, entité active
+## Support des sprites pour les joueurs et ennemis
 
 const CELL_SIZE := Vector2i(100, 100)
 const HALF := Vector2(50, 50)
+
+## Chemins des sprites (relatifs au projet)
+const SPRITE_PATH_PLAYERS := "res://assets/sprites/players/"
+const SPRITE_PATH_ENEMIES := "res://assets/sprites/enemies/"
+const SPRITE_EXTENSION := ".png"
 
 const GRASS_COLOR       := Color(0.42, 0.56, 0.14)
 const GRASS_SIDE_LEFT   := Color(0.33, 0.42, 0.18)
@@ -31,11 +37,19 @@ var highlighted: bool = false
 var in_move_range: bool = false
 var in_spell_range: bool = false
 
+## Référence au sprite de l'entité (chargé dynamiquement)
+var entity_sprite: Sprite2D = null
+
 signal cell_clicked(x: int, y: int)
 
 
 func _ready() -> void:
-	pass
+	# Créer le sprite pour l'entité
+	entity_sprite = Sprite2D.new()
+	entity_sprite.position = HALF
+	entity_sprite.z_index = 10
+	entity_sprite.visible = false
+	add_child(entity_sprite)
 
 
 func _draw() -> void:
@@ -83,7 +97,14 @@ func _draw() -> void:
 
 
 func update_appearance() -> void:
+	# Mettre à jour l'affichage de l'entité
 	queue_redraw()
+	
+	# Recharger le sprite si l'entité a changé
+	if entity != null:
+		var entity_type: String = entity.get("entity_type", "")
+		var classe: String = entity.get("classe", "")
+		_try_load_sprite(classe, entity_type)
 
 
 func set_in_move_range(value: bool) -> void:
@@ -106,13 +127,54 @@ func _draw_entity() -> void:
 	var classe: String     = entity.get("classe", "")
 	var is_active: bool    = entity.get("is_active", false)
 	var color: Color       = GameManager.COLORS.get(classe, Color(0.5, 0.5, 0.5))
-	var num_pts            := 32
+	
+	# Essayer de charger et afficher le sprite
+	if _try_load_sprite(classe, entity_type):
+		# Sprite chargé avec succès, on n'affiche pas les formes géométriques
+		entity_sprite.visible = true
+		# Indicateur "actif" : chevron au-dessus
+		if highlighted or is_active:
+			var tip := center + Vector2(0, -32)
+			draw_line(tip + Vector2(-7, 8), tip, Color(1.0, 1.0, 0.3), 2.5)
+			draw_line(tip + Vector2( 7, 8), tip, Color(1.0, 1.0, 0.3), 2.5)
+	else:
+		# Pas de sprite disponible, utiliser les formes géométriques
+		entity_sprite.visible = false
+		_draw_entity_geometric(center, entity_type, classe, is_active, color)
 
+	# Barre de vie (toujours affichée)
+	_draw_health_bar(center)
+
+
+## Essayer de charger le sprite pour une entité
+func _try_load_sprite(classe: String, entity_type: String) -> bool:
+	var sprite_path: String = ""
+	
+	if entity_type == "Player":
+		# Sprites des joueurs : tank.png, assassin.png, mage.png, etc.
+		sprite_path = SPRITE_PATH_PLAYERS + classe.to_lower() + SPRITE_EXTENSION
+	elif entity_type == "Enemy":
+		# Sprites des ennemis : gobelin.png, squelette.png, loup.png, etc.
+		sprite_path = SPRITE_PATH_ENEMIES + classe.to_lower() + SPRITE_EXTENSION
+	
+	if sprite_path != "" and ResourceLoader.exists(sprite_path):
+		var texture = load(sprite_path)
+		if texture:
+			entity_sprite.texture = texture
+			entity_sprite.scale = Vector2(0.8, 0.8)  # Ajuster la taille si nécessaire
+			return true
+	
+	return false
+
+
+## Dessiner l'entité avec des formes géométriques (fallback)
+func _draw_entity_geometric(center: Vector2, entity_type: String, classe: String, is_active: bool, color: Color) -> void:
 	# Ombre portée
 	_draw_ellipse(center + Vector2(0, 8), Vector2(18, 6), Color(0, 0, 0, 0.35))
 
 	if entity_type == "Player":
 		# Cercle rempli couleur de classe
+		var num_pts: int = 32
 		var pts := PackedVector2Array()
 		var cols := PackedColorArray()
 		for i in range(num_pts + 1):
@@ -125,7 +187,7 @@ func _draw_entity() -> void:
 		var border_w     := 3.0         if is_active else 1.5
 		for i in range(num_pts):
 			draw_line(pts[i], pts[i + 1], border_color, border_w, true)
-		# Indicateur "actif" : chevron au-dessus (basé sur highlighted = joueur actif)
+		# Indicateur "actif" : chevron au-dessus
 		if highlighted or is_active:
 			var tip := center + Vector2(0, -32)
 			draw_line(tip + Vector2(-7, 8), tip, Color(1.0, 1.0, 0.3), 2.5)
@@ -140,9 +202,6 @@ func _draw_entity() -> void:
 		draw_polygon(tri, PackedColorArray([color, color, color]))
 		for i in range(tri.size()):
 			draw_line(tri[i], tri[(i + 1) % tri.size()], Color.RED, 1.5, true)
-
-	# Barre de vie
-	_draw_health_bar(center)
 
 
 func _draw_health_bar(center: Vector2) -> void:
