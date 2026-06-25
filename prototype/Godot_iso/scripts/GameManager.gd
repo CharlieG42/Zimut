@@ -1,3 +1,4 @@
+# @strict-off
 extends Node
 ## GameManager - Logique globale Zimut (version isométrique)
 ## Autoload configuré dans project.godot
@@ -164,9 +165,9 @@ func init_entities() -> void:
 	players = []
 
 	# Obtenir les données depuis le DataLoader
-	var classes_data := get_classes_data()
-	var spells_data := get_spells_data()
-	var enemies_data := get_enemies_data()
+	var classes_data: Array = get_classes_data()
+	var spells_data: Array = get_spells_data()
+	var enemies_data: Array = get_enemies_data()
 
 	for i: int in range(player_classes.size()):
 		var classe: String = player_classes[i]
