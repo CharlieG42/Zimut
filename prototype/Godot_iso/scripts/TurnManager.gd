@@ -1,160 +1,101 @@
 extends Node
 class_name TurnManager
-## TurnManager.gd - Gestion des tours (joueurs/ennemis)
+## TurnManager.gd - Gestion des tours ennemis
+## Tous les types sont explicites (mode strict GDScript 4.7)
 
-var game_manager
+var game_manager: Node
 
 
-func init(manager):
+func init(manager: Node) -> void:
 	game_manager = manager
 	game_manager.turn_changed.connect(_on_turn_changed)
 
 
-func _on_turn_changed(turn: int):
-	"""Called when the turn changes (0 = players, 1 = enemies)"""
-	if turn == 0:
-		# Players' turn - handled by GameManager
-		pass
-	else:
-		# Enemies' turn - start enemy AI
+func _on_turn_changed(turn: int) -> void:
+	if turn == 1:
 		_process_enemy_turn()
 
 
-func _process_enemy_turn():
-	"""Process enemy turn: move and attack"""
-	if game_manager.enemies.size() == 0:
-		# No enemies left, players win
-		game_manager.game_over = true
-		game_manager.victory = true
-		game_manager.game_ended.emit(true)
-		game_manager.message_requested.emit("Tous les ennemis sont vaincus ! VICTOIRE !")
+func _process_enemy_turn() -> void:
+	# Collecter les ennemis vivants
+	var alive_enemies: Array = []
+	for e: Dictionary in game_manager.enemies:
+		if int(e["current_pv"]) > 0:
+			alive_enemies.append(e)
+
+	if alive_enemies.is_empty():
+		game_manager.start_player_turn()
 		return
-	
-	# Find first alive enemy
-	var first_enemy = null
-	for enemy in game_manager.enemies:
-		if enemy["current_pv"] > 0:
-			first_enemy = enemy
-			break
-	
-	if first_enemy == null:
-		# All enemies are dead
-		game_manager.current_turn = 0
-		game_manager.turn_count += 1
-		game_manager.turn_changed.emit(game_manager.current_turn)
-		game_manager.current_player_index = 0
-		if game_manager.players.size() > 0:
-			for p in game_manager.players:
-				p["is_active"] = false
-			game_manager.players[0]["is_active"] = true
-			game_manager.selected_entity = game_manager.players[0]
-			game_manager.entity_selected.emit(game_manager.players[0])
-		game_manager.player_changed.emit(game_manager.current_player_index)
-		game_manager.message_requested.emit("Tour des joueurs")
-		game_manager.check_game_over()
+
+	for enemy: Dictionary in alive_enemies:
+		if int(enemy["current_pv"]) > 0:
+			_process_single_enemy(enemy)
+
+	# Remettre PA/PM ennemis
+	for enemy: Dictionary in alive_enemies:
+		if int(enemy["current_pv"]) > 0:
+			enemy["current_pa"] = enemy["max_pa"]
+			enemy["current_pm"] = enemy["max_pm"]
+
+	game_manager.start_player_turn()
+
+
+func _process_single_enemy(enemy: Dictionary) -> void:
+	# Trouver le joueur vivant le plus proche
+	var closest_player: Dictionary = {}
+	var min_dist: int = 9999
+	for player: Dictionary in game_manager.players:
+		if int(player["current_pv"]) > 0:
+			var d: int = abs(int(enemy["x"]) - int(player["x"])) + abs(int(enemy["y"]) - int(player["y"]))
+			if d < min_dist:
+				min_dist        = d
+				closest_player  = player
+
+	if closest_player.is_empty():
 		return
-	
-	# Enemy AI: Find closest player and attack
-	var closest_player = null
-	var min_distance = 999
-	for player in game_manager.players:
-		if player["current_pv"] > 0:
-			var dx = abs(int(first_enemy["x"]) - int(player["x"]))
-			var dy = abs(int(first_enemy["y"]) - int(player["y"]))
-			var distance = dx + dy
-			if distance < min_distance:
-				min_distance = distance
-				closest_player = player
-	
-	if closest_player:
-		# Move towards player if not adjacent
-		if min_distance > 1 and first_enemy["current_pm"] > 0:
-			var ex = int(first_enemy["x"])
-			var ey = int(first_enemy["y"])
-			var px = int(closest_player["x"])
-			var py = int(closest_player["y"])
-			
-			# Find adjacent cell towards player
-			var directions = []
-			if px > ex: directions.append(Vector2i(1, 0))
-			elif px < ex: directions.append(Vector2i(-1, 0))
-			if py > ey: directions.append(Vector2i(0, 1))
-			elif py < ey: directions.append(Vector2i(0, -1))
-			
-			# Try to move in one of the directions
-			for dir in directions:
-				var new_x = ex + dir.x
-				var new_y = ey + dir.y
-				if new_x >= 0 and new_x < game_manager.GRID_SIZE and new_y >= 0 and new_y < game_manager.GRID_SIZE:
-					if game_manager.grid[new_y][new_x] == null:
-						game_manager.grid[ey][ex] = null
-						first_enemy["x"] = new_x
-						first_enemy["y"] = new_y
-						game_manager.grid[new_y][new_x] = first_enemy
-						first_enemy["current_pm"] -= 1
-						game_manager.entity_moved.emit(first_enemy, Vector2i(ex, ey), Vector2i(new_x, new_y))
-						game_manager.message_requested.emit("%s se déplace vers (%d,%d)" % [first_enemy["name"], new_x, new_y])
-						break
-			
-			# Update distance after potential move
-			var new_dx = abs(int(first_enemy["x"]) - int(closest_player["x"]))
-			var new_dy = abs(int(first_enemy["y"]) - int(closest_player["y"]))
-			min_distance = new_dx + new_dy
-		
-		# Attack if adjacent
-		if min_distance == 1 and first_enemy["current_pa"] > 0:
-			var damage = first_enemy["force"] + ((randi() % 5) - 2)
-			var actual_damage = max(1, damage - closest_player["defense"] / 2.0)
-			closest_player["current_pv"] -= actual_damage
-			game_manager.entity_attacked.emit(first_enemy, closest_player, actual_damage)
-			first_enemy["current_pa"] -= 1
-			game_manager.message_requested.emit("%s attaque %s : %d dégâts !" % [first_enemy["name"], closest_player["name"], actual_damage])
-			if closest_player["current_pv"] <= 0:
-				game_manager.remove_entity_from_grid(closest_player)
-	
-	# Move to next enemy or end enemy turn
-	var all_enemies_done = true
-	for enemy in game_manager.enemies:
-		if enemy["current_pv"] > 0 and (enemy["current_pa"] > 0 or enemy["current_pm"] > 0):
-			all_enemies_done = false
+
+	# Déplacement pas à pas selon PM disponibles
+	var steps: int = int(enemy["current_pm"])
+	for _i: int in range(steps):
+		var ex: int = int(enemy["x"])
+		var ey: int = int(enemy["y"])
+		var px: int = int(closest_player["x"])
+		var py: int = int(closest_player["y"])
+		var dist: int = abs(ex - px) + abs(ey - py)
+		if dist <= 1:
 			break
-	
-	if all_enemies_done:
-		# Reset PA/PM for all enemies
-		for enemy in game_manager.enemies:
-			if enemy["current_pv"] > 0:
-				enemy["current_pa"] = enemy["max_pa"]
-				enemy["current_pm"] = enemy["max_pm"]
-		# End enemy turn, go back to player turn
-		game_manager.current_turn = 0
-		game_manager.turn_count += 1
-		game_manager.turn_changed.emit(game_manager.current_turn)
-		game_manager.current_player_index = 0
-		if game_manager.players.size() > 0:
-			for p in game_manager.players:
-				p["is_active"] = false
-			game_manager.players[0]["is_active"] = true
-			game_manager.selected_entity = game_manager.players[0]
-			game_manager.entity_selected.emit(game_manager.players[0])
-		game_manager.player_changed.emit(game_manager.current_player_index)
-		game_manager.message_requested.emit("Tour des joueurs")
-		game_manager.check_game_over()
-	else:
-		# Continue enemy turn (simplified: just process all enemies in sequence)
-		for enemy in game_manager.enemies:
-			if enemy["current_pv"] > 0:
-				enemy["current_pa"] = enemy["max_pa"]
-				enemy["current_pm"] = enemy["max_pm"]
-		game_manager.current_turn = 0
-		game_manager.turn_count += 1
-		game_manager.turn_changed.emit(game_manager.current_turn)
-		game_manager.current_player_index = 0
-		if game_manager.players.size() > 0:
-			for p in game_manager.players:
-				p["is_active"] = false
-			game_manager.players[0]["is_active"] = true
-			game_manager.selected_entity = game_manager.players[0]
-			game_manager.entity_selected.emit(game_manager.players[0])
-		game_manager.player_changed.emit(game_manager.current_player_index)
-		game_manager.message_requested.emit("Tour des joueurs")
-		game_manager.check_game_over()
+
+		var dirs: Array[Vector2i] = []
+		if px > ex:   dirs.append(Vector2i(1, 0))
+		elif px < ex: dirs.append(Vector2i(-1, 0))
+		if py > ey:   dirs.append(Vector2i(0, 1))
+		elif py < ey: dirs.append(Vector2i(0, -1))
+
+		var moved: bool = false
+		for dir: Vector2i in dirs:
+			var nx: int = ex + dir.x
+			var ny: int = ey + dir.y
+			if nx >= 0 and nx < game_manager.GRID_SIZE and ny >= 0 and ny < game_manager.GRID_SIZE:
+				if game_manager.grid[ny][nx] == null:
+					game_manager.grid[ey][ex] = null
+					enemy["x"] = nx
+					enemy["y"] = ny
+					game_manager.grid[ny][nx] = enemy
+					enemy["current_pm"] = int(enemy["current_pm"]) - 1
+					game_manager.entity_moved.emit(enemy, Vector2i(ex, ey), Vector2i(nx, ny))
+					moved = true
+					break
+		if not moved:
+			break
+
+	# Attaque si adjacent
+	var final_dist: int = abs(int(enemy["x"]) - int(closest_player["x"])) + abs(int(enemy["y"]) - int(closest_player["y"]))
+	if final_dist == 1 and int(enemy["current_pa"]) > 0 and int(closest_player["current_pv"]) > 0:
+		var raw_dmg: int    = int(enemy["force"]) + (randi() % 5 - 2)
+		var actual_dmg: int = maxi(1, raw_dmg - int(int(closest_player["defense"]) / 2.0))
+		closest_player["current_pv"] = int(closest_player["current_pv"]) - actual_dmg
+		enemy["current_pa"] = int(enemy["current_pa"]) - 1
+		game_manager.entity_attacked.emit(enemy, closest_player, actual_dmg)
+		game_manager.message_requested.emit("%s attaque %s : %d dégâts !" % [enemy["name"], closest_player["name"], actual_dmg])
+		if int(closest_player["current_pv"]) <= 0:
+			game_manager.remove_entity_from_grid(closest_player)
