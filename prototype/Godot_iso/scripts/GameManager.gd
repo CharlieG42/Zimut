@@ -7,6 +7,10 @@ const GRID_SIZE        := 10
 const CELL_SIZE        := Vector2i(100, 100)
 const CELL_HALF_OFFSET := Vector2i(50, 50)
 
+## Niveau par défaut pour les joueurs et ennemis
+const DEFAULT_PLAYER_LEVEL := 30
+const DEFAULT_ENEMY_LEVEL := 30
+
 const COLORS: Dictionary = {
 	"Tank":      Color(0, 0.4, 0.8),
 	"Assassin":  Color(0.8, 0, 0),
@@ -32,10 +36,6 @@ var show_spells: bool            = false
 var game_over: bool              = false
 var victory: bool                = false
 
-var classes_data: Array  = []
-var spells_data: Array   = []
-var enemies_data: Array  = []
-
 signal turn_changed(turn: int)
 signal player_changed(index: int)
 signal entity_selected(entity)
@@ -48,8 +48,26 @@ signal message_requested(text: String)
 
 
 func _ready() -> void:
-	randomize()
-	load_data()
+	# Attendre que DataLoader ait chargé les données
+	if not DataLoader.data_loaded:
+		# Se connecter au signal du singleton DataLoader
+		var data_loader_node = get_node_or_null("/root/DataLoader")
+		if data_loader_node:
+			(data_loader_node as DataLoader).data_loaded_successfully.connect(_on_data_loaded)
+		else:
+			push_error("DataLoader node not found in scene tree!")
+			# Essayer de charger les données directement
+			if DataLoader.load_all_data():
+				_on_data_loaded()
+			else:
+				push_error("Failed to load data!")
+		return
+	else:
+		_on_data_loaded()
+
+
+## Callback appelé quand les données sont chargées
+func _on_data_loaded() -> void:
 	init_grid()
 	init_entities()
 	current_turn = 0
@@ -73,25 +91,19 @@ func _ready() -> void:
 #  DONNÉES
 # ═══════════════════════════════════════════════════════
 
-func load_data() -> void:
-	classes_data = [
-		{"Classe": "Tank",    "Vita (PV)": "120", "Force (CAC)": "20", "Intelligence (Magie)": "5",  "Agilité (Vit. Atk)": "5",  "Sagesse (Précision)": "10", "Défense": "30", "PA": "6", "PM": "3"},
-		{"Classe": "Assassin","Vita (PV)": "80",  "Force (CAC)": "15", "Intelligence (Magie)": "10", "Agilité (Vit. Atk)": "25", "Sagesse (Précision)": "20", "Défense": "10", "PA": "7", "PM": "4"},
-		{"Classe": "Mage",    "Vita (PV)": "60",  "Force (CAC)": "5",  "Intelligence (Magie)": "25", "Agilité (Vit. Atk)": "10", "Sagesse (Précision)": "15", "Défense": "5",  "PA": "8", "PM": "3"},
-	]
-	spells_data = [
-		{"Nom": "Coup puissant",   "Classe": "Tank",    "Coût PA": "1", "Coût PM": "0", "Portée": "1", "Effet": "25 dégâts",                    "Niveau requis": "1", "Type": "CAC"},
-		{"Nom": "Bouclier",        "Classe": "Tank",    "Coût PA": "2", "Coût PM": "0", "Portée": "0", "Effet": "Réduit les dégâts de 50%",      "Niveau requis": "5", "Type": "Défense"},
-		{"Nom": "Attaque furtive", "Classe": "Assassin","Coût PA": "1", "Coût PM": "2", "Portée": "1", "Effet": "30 dégâts + ignore 50% défense","Niveau requis": "1", "Type": "CAC"},
-		{"Nom": "Poison",          "Classe": "Assassin","Coût PA": "2", "Coût PM": "0", "Portée": "1", "Effet": "15 dégâts + poison",            "Niveau requis": "5", "Type": "Magie"},
-		{"Nom": "Boule de feu",    "Classe": "Mage",    "Coût PA": "3", "Coût PM": "0", "Portée": "3", "Effet": "40 dégâts",                    "Niveau requis": "1", "Type": "Magie"},
-		{"Nom": "Soin",            "Classe": "Mage",    "Coût PA": "2", "Coût PM": "0", "Portée": "2", "Effet": "Restaure 30 PV",               "Niveau requis": "3", "Type": "Soin"},
-	]
-	enemies_data = [
-		{"Type": "Gobelin",   "PV": "60", "Attaque": "12", "Défense": "5",  "PA": "5", "PM": "3"},
-		{"Type": "Squelette", "PV": "50", "Attaque": "15", "Défense": "10", "PA": "4", "PM": "2"},
-		{"Type": "Loup",      "PV": "70", "Attaque": "10", "Défense": "3",  "PA": "6", "PM": "4"},
-	]
+## Obtenir les données des classes depuis le DataLoader
+func get_classes_data() -> Array:
+	return DataLoader.classes_data
+
+
+## Obtenir les données des sorts depuis le DataLoader
+func get_spells_data() -> Array:
+	return DataLoader.spells_data
+
+
+## Obtenir les données des ennemis depuis le DataLoader
+func get_enemies_data() -> Array:
+	return DataLoader.enemies_data
 
 
 func init_grid() -> void:
@@ -108,50 +120,71 @@ func init_entities() -> void:
 	var player_positions: Array[Vector2i] = [Vector2i(2, 2), Vector2i(2, 3), Vector2i(3, 2)]
 	players = []
 
+	# Obtenir les données depuis le DataLoader
+	var classes_data := get_classes_data()
+	var spells_data := get_spells_data()
+	var enemies_data := get_enemies_data()
+
 	for i: int in range(player_classes.size()):
 		var classe: String = player_classes[i]
 		var pos: Vector2i  = player_positions[i]
+		
+		# Trouver les données de la classe pour le niveau par défaut
 		var class_info: Dictionary = {}
 		for data: Dictionary in classes_data:
-			if data["Classe"] == classe:
+			if data.get("Classe", "") == classe and int(data.get("Niveau", "0")) == DEFAULT_PLAYER_LEVEL:
 				class_info = data
 				break
+		
+		# Si pas trouvé au niveau exact, prendre le niveau le plus proche inférieur
+		if class_info.is_empty():
+			for data: Dictionary in classes_data:
+				if data.get("Classe", "") == classe and int(data.get("Niveau", "0")) <= DEFAULT_PLAYER_LEVEL:
+					class_info = data
+					break
+		
 		if not class_info.is_empty():
 			var player: Dictionary = {
-				"name":         "%s Lv30" % classe,
+				"name":         "%s Lv%d" % [classe, DEFAULT_PLAYER_LEVEL],
 				"entity_type":  "Player",
 				"classe":       classe,
-				"level":        30,
-				"max_pv":       int(class_info["Vita (PV)"]),
-				"current_pv":   int(class_info["Vita (PV)"]),
-				"force":        int(class_info["Force (CAC)"]),
-				"intelligence": int(class_info["Intelligence (Magie)"]),
-				"agility":      int(class_info["Agilité (Vit. Atk)"]),
-				"wisdom":       int(class_info["Sagesse (Précision)"]),
-				"defense":      int(class_info["Défense"]),
-				"max_pa":       int(class_info["PA"]),
-				"current_pa":   int(class_info["PA"]),
-				"max_pm":       int(class_info["PM"]),
-				"current_pm":   int(class_info["PM"]),
+				"level":        DEFAULT_PLAYER_LEVEL,
+				"max_pv":       int(class_info.get("Vita (PV)", "60")),
+				"current_pv":   int(class_info.get("Vita (PV)", "60")),
+				"force":        int(class_info.get("Force (CAC)", "10")),
+				"intelligence": int(class_info.get("Intelligence (Magie)", "10")),
+				"agility":      int(class_info.get("Agilité (Vit. Atk)", "10")),
+				"wisdom":       int(class_info.get("Sagesse (Précision)", "10")),
+				"defense":      int(class_info.get("Défense", "10")),
+				"max_pa":       int(class_info.get("PA", "5")),
+				"current_pa":   int(class_info.get("PA", "5")),
+				"max_pm":       int(class_info.get("PM", "3")),
+				"current_pm":   int(class_info.get("PM", "3")),
 				"x": pos.x, "y": pos.y,
 				"spells":    [],
 				"is_active": false,
 			}
+			
+			# Ajouter les sorts pour cette classe (niveau requis <= niveau du joueur)
 			for spell_info: Dictionary in spells_data:
-				if spell_info["Classe"] == classe and int(spell_info["Niveau requis"]) <= 30:
-					player["spells"].append({
-						"name":           spell_info["Nom"],
-						"classe":         spell_info["Classe"],
-						"cost_pa":        int(spell_info["Coût PA"]),
-						"cost_pm":        int(spell_info["Coût PM"]),
-						"range":          int(spell_info["Portée"]),
-						"effect":         spell_info["Effet"],
-						"level_required": int(spell_info["Niveau requis"]),
-						"spell_type":     spell_info["Type"],
-					})
+				if spell_info.get("Classe", "") == classe:
+					var required_level := int(spell_info.get("Niveau requis", "1"))
+					if required_level <= DEFAULT_PLAYER_LEVEL:
+						player["spells"].append({
+							"name":           spell_info.get("Nom", "Sort inconnu"),
+							"classe":         spell_info.get("Classe", ""),
+							"cost_pa":        int(spell_info.get("Coût PA", "1")),
+							"cost_pm":        int(spell_info.get("Coût PM", "0")),
+							"range":          int(spell_info.get("Portée", "1")),
+							"effect":         spell_info.get("Effet", ""),
+							"level_required": required_level,
+							"spell_type":     spell_info.get("Type", "CAC"),
+						})
+			
 			players.append(player)
 			grid[pos.y][pos.x] = player
 
+	# Types d'ennemis à créer
 	var enemy_types: Array[String]      = ["Gobelin", "Squelette", "Loup"]
 	var enemy_positions: Array[Vector2i] = [Vector2i(7, 7), Vector2i(7, 6), Vector2i(6, 7)]
 	enemies = []
@@ -159,28 +192,38 @@ func init_entities() -> void:
 	for i: int in range(enemy_types.size()):
 		var enemy_type: String    = enemy_types[i]
 		var pos: Vector2i         = enemy_positions[i]
+		
+		# Trouver les données de l'ennemi pour le niveau par défaut
 		var enemy_info: Dictionary = {}
 		for data: Dictionary in enemies_data:
-			if data["Type"] == enemy_type:
+			if data.get("Type", "") == enemy_type and int(data.get("Niveau", "0")) == DEFAULT_ENEMY_LEVEL:
 				enemy_info = data
 				break
+		
+		# Si pas trouvé au niveau exact, prendre le niveau le plus proche inférieur
+		if enemy_info.is_empty():
+			for data: Dictionary in enemies_data:
+				if data.get("Type", "") == enemy_type and int(data.get("Niveau", "0")) <= DEFAULT_ENEMY_LEVEL:
+					enemy_info = data
+					break
+		
 		if not enemy_info.is_empty():
 			var enemy: Dictionary = {
-				"name":         "%s Lv30" % enemy_type,
+				"name":         "%s Lv%d" % [enemy_type, DEFAULT_ENEMY_LEVEL],
 				"entity_type":  "Enemy",
 				"classe":       enemy_type,
-				"level":        30,
-				"max_pv":       int(enemy_info["PV"]),
-				"current_pv":   int(enemy_info["PV"]),
-				"force":        int(enemy_info["Attaque"]),
+				"level":        DEFAULT_ENEMY_LEVEL,
+				"max_pv":       int(enemy_info.get("PV", "50")),
+				"current_pv":   int(enemy_info.get("PV", "50")),
+				"force":        int(enemy_info.get("Attaque", "10")),
 				"intelligence": 0,
-				"agility":      int(enemy_info["Attaque"]) / 2.0,
+				"agility":      float(int(enemy_info.get("Attaque", "10"))) / 2.0,
 				"wisdom":       0,
-				"defense":      int(enemy_info["Défense"]),
-				"max_pa":       int(enemy_info["PA"]),
-				"current_pa":   int(enemy_info["PA"]),
-				"max_pm":       int(enemy_info["PM"]),
-				"current_pm":   int(enemy_info["PM"]),
+				"defense":      int(enemy_info.get("Défense", "5")),
+				"max_pa":       int(enemy_info.get("PA", "3")),
+				"current_pa":   int(enemy_info.get("PA", "3")),
+				"max_pm":       int(enemy_info.get("PM", "2")),
+				"current_pm":   int(enemy_info.get("PM", "2")),
 				"x": pos.x, "y": pos.y,
 			}
 			enemies.append(enemy)
