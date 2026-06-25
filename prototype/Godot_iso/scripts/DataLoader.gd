@@ -9,14 +9,14 @@ const SPELL_DATA_PATH := "res://data/sorts.csv"
 const ENEMY_DATA_PATH := "res://data/ennemis.csv"
 const ITEM_DATA_PATH := "res://data/stuff.csv"
 
-## Données chargées (statiques pour accès global via autoload)
-static var classes_data: Array[Dictionary] = []
-static var spells_data: Array[Dictionary] = []
-static var enemies_data: Array[Dictionary] = []
-static var items_data: Array[Dictionary] = []
+## Données chargées
+var classes_data: Array[Dictionary] = []
+var spells_data: Array[Dictionary] = []
+var enemies_data: Array[Dictionary] = []
+var items_data: Array[Dictionary] = []
 
-## État de chargement (statique pour accès global)
-static var data_loaded: bool = false
+## État de chargement
+var data_loaded: bool = false
 
 signal data_loaded_successfully
 signal data_load_failed(error: String)
@@ -266,8 +266,8 @@ func get_class_data(class_name: String, level: int) -> Dictionary:
 
 
 ## Obtenir tous les sorts pour une classe
-func get_spells_for_class(class_name: String) -> Array[Dictionary]:
-	var result: Array[Dictionary] = []
+func get_spells_for_class(class_name: String) -> Array:
+	var result: Array = []
 	for spell in spells_data:
 		if spell.get("Classe", "") == class_name:
 			result.append(spell)
@@ -275,8 +275,8 @@ func get_spells_for_class(class_name: String) -> Array[Dictionary]:
 
 
 ## Obtenir les sorts pour une classe et un niveau maximum
-func get_spells_for_class_and_level(class_name: String, max_level: int) -> Array[Dictionary]:
-	var result: Array[Dictionary] = []
+func get_spells_for_class_and_level(class_name: String, max_level: int) -> Array:
+	var result: Array = []
 	for spell in spells_data:
 		if spell.get("Classe", "") == class_name:
 			var required_level := int(spell.get("Niveau requis", "1"))
@@ -294,8 +294,8 @@ func get_enemy_data(enemy_type: String, level: int) -> Dictionary:
 
 
 ## Obtenir tous les types d'ennemis uniques
-func get_unique_enemy_types() -> Array[String]:
-	var types: Array[String] = []
+func get_unique_enemy_types() -> Array:
+	var types: Array = []
 	for data in enemies_data:
 		var type_name := data.get("Type", "")
 		if not type_name in types:
@@ -304,8 +304,8 @@ func get_unique_enemy_types() -> Array[String]:
 
 
 ## Obtenir tous les noms de classes uniques
-func get_unique_class_names() -> Array[String]:
-	var names: Array[String] = []
+func get_unique_class_names() -> Array:
+	var names: Array = []
 	for data in classes_data:
 		var class_name := data.get("Classe", "")
 		if not class_name in names:

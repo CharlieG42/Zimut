@@ -7,20 +7,20 @@ Ce dossier contient les sprites pour les personnages du jeu Zimut.
 ```
 assets/sprites/
 ├── players/
-│   ├── tank.png         # Sprite du Tank (64x64 ou 128x128 recommandé)
-│   ├── assassin.png     # Sprite de l'Assassin
-│   ├── mage.png         # Sprite du Mage
+│   ├── tank.svg         # Sprite du Tank (format vectoriel)
+│   ├── assassin.svg     # Sprite de l'Assassin
+│   ├── mage.svg         # Sprite du Mage
 │   └── ...
 └── enemies/
-    ├── gobelin.png      # Sprite du Gobelin
-    ├── squelette.png    # Sprite du Squelette
-    ├── loup.png         # Sprite du Loup
+    ├── gobelin.svg      # Sprite du Gobelin
+    ├── squelette.svg    # Sprite du Squelette
+    ├── loup.svg         # Sprite du Loup
     └── ...
 ```
 
 ## Format des sprites
 
-- **Format** : PNG (recommandé) ou SVG
+- **Format** : SVG (vectoriel, recommandé) ou PNG
 - **Taille recommandée** : 64x64 pixels ou 128x128 pixels
 - **Transparence** : Fond transparent (alpha channel)
 - **Orientation** : Face vers le bas (pour correspondre à la vue isométrique)
@@ -28,8 +28,8 @@ assets/sprites/
 ## Nommage
 
 Les sprites doivent être nommés **exactement** comme les classes/types dans le jeu :
-- **Joueurs** : `tank.png`, `assassin.png`, `mage.png`, etc.
-- **Ennemis** : `gobelin.png`, `squelette.png`, `loup.png`, etc.
+- **Joueurs** : `tank.svg`, `assassin.svg`, `mage.svg`, etc.
+- **Ennemis** : `gobelin.svg`, `squelette.svg`, `loup.svg`, etc.
 
 > ⚠️ **Important** : Les noms doivent être en **minuscules** et correspondre exactement aux valeurs de `classe` dans les données CSV.
 

@@ -10,7 +10,7 @@ const HALF := Vector2(50, 50)
 ## Chemins des sprites (relatifs au projet)
 const SPRITE_PATH_PLAYERS := "res://assets/sprites/players/"
 const SPRITE_PATH_ENEMIES := "res://assets/sprites/enemies/"
-const SPRITE_EXTENSION := ".png"
+const SPRITE_EXTENSION := ".svg"
 
 const GRASS_COLOR       := Color(0.42, 0.56, 0.14)
 const GRASS_SIDE_LEFT   := Color(0.33, 0.42, 0.18)

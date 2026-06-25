@@ -49,18 +49,16 @@ signal message_requested(text: String)
 
 func _ready() -> void:
 	# Attendre que DataLoader ait chargé les données
-	if not DataLoader.data_loaded:
-		# Se connecter au signal du singleton DataLoader
-		var data_loader_node = get_node_or_null("/root/DataLoader")
-		if data_loader_node:
-			(data_loader_node as DataLoader).data_loaded_successfully.connect(_on_data_loaded)
-		else:
-			push_error("DataLoader node not found in scene tree!")
-			# Essayer de charger les données directement
-			if DataLoader.load_all_data():
-				_on_data_loaded()
-			else:
-				push_error("Failed to load data!")
+	var data_loader = get_node_or_null("/root/DataLoader")
+	if data_loader == null:
+		push_error("DataLoader node not found! Make sure it's configured as autoload in project.godot")
+		# Charger les données en fallback
+		load_data_fallback()
+		return
+	
+	if not (data_loader as DataLoader).data_loaded:
+		# Se connecter au signal pour savoir quand les données sont prêtes
+		(data_loader as DataLoader).data_loaded_successfully.connect(_on_data_loaded)
 		return
 	else:
 		_on_data_loaded()
@@ -91,19 +89,64 @@ func _on_data_loaded() -> void:
 #  DONNÉES
 # ═══════════════════════════════════════════════════════
 
+## Charger les données en fallback (si DataLoader n'est pas disponible)
+func load_data_fallback() -> void:
+	push_error("DataLoader not found! Using fallback data. Make sure DataLoader is configured as autoload in project.godot")
+	
+	# Données minimales pour éviter les crashes
+	var classes_data_fallback: Array = [
+		{"Classe": "Tank",    "Niveau": "30", "Vita (PV)": "120", "Force (CAC)": "20", "Intelligence (Magie)": "5",  "Agilité (Vit. Atk)": "5",  "Sagesse (Précision)": "10", "Défense": "30", "PA": "6", "PM": "3"},
+		{"Classe": "Assassin","Niveau": "30", "Vita (PV)": "80",  "Force (CAC)": "15", "Intelligence (Magie)": "10", "Agilité (Vit. Atk)": "25", "Sagesse (Précision)": "20", "Défense": "10", "PA": "7", "PM": "4"},
+		{"Classe": "Mage",    "Niveau": "30", "Vita (PV)": "60",  "Force (CAC)": "5",  "Intelligence (Magie)": "25", "Agilité (Vit. Atk)": "10", "Sagesse (Précision)": "15", "Défense": "5",  "PA": "8", "PM": "3"},
+	]
+	var spells_data_fallback: Array = [
+		{"Nom": "Coup puissant",   "Classe": "Tank",    "Coût PA": "1", "Coût PM": "0", "Portée": "1", "Effet": "25 dégâts",                    "Niveau requis": "1", "Type": "CAC"},
+		{"Nom": "Bouclier",        "Classe": "Tank",    "Coût PA": "2", "Coût PM": "0", "Portée": "0", "Effet": "Réduit les dégâts de 50%",      "Niveau requis": "5", "Type": "Défense"},
+		{"Nom": "Attaque furtive", "Classe": "Assassin","Coût PA": "1", "Coût PM": "2", "Portée": "1", "Effet": "30 dégâts + ignore 50% défense","Niveau requis": "1", "Type": "CAC"},
+		{"Nom": "Poison",          "Classe": "Assassin","Coût PA": "2", "Coût PM": "0", "Portée": "1", "Effet": "15 dégâts + poison",            "Niveau requis": "5", "Type": "Magie"},
+		{"Nom": "Boule de feu",    "Classe": "Mage",    "Coût PA": "3", "Coût PM": "0", "Portée": "3", "Effet": "40 dégâts",                    "Niveau requis": "1", "Type": "Magie"},
+		{"Nom": "Soin",            "Classe": "Mage",    "Coût PA": "2", "Coût PM": "0", "Portée": "2", "Effet": "Restaure 30 PV",               "Niveau requis": "3", "Type": "Soin"},
+	]
+	var enemies_data_fallback: Array = [
+		{"Type": "Gobelin",   "Niveau": "30", "PV": "60", "Attaque": "12", "Défense": "5",  "PA": "5", "PM": "3"},
+		{"Type": "Squelette", "Niveau": "30", "PV": "50", "Attaque": "15", "Défense": "10", "PA": "4", "PM": "2"},
+		{"Type": "Loup",      "Niveau": "30", "PV": "70", "Attaque": "10", "Défense": "3",  "PA": "6", "PM": "4"},
+	]
+	
+	# Créer un DataLoader temporaire avec les données fallback
+	var temp_loader = DataLoader.new()
+	add_child(temp_loader)
+	temp_loader.classes_data = classes_data_fallback
+	temp_loader.spells_data = spells_data_fallback
+	temp_loader.enemies_data = enemies_data_fallback
+	temp_loader.data_loaded = true
+	
+	# Continuer l'initialisation
+	_on_data_loaded()
+
+
 ## Obtenir les données des classes depuis le DataLoader
 func get_classes_data() -> Array:
-	return DataLoader.classes_data
+	var data_loader = get_node_or_null("/root/DataLoader")
+	if data_loader:
+		return (data_loader as DataLoader).classes_data
+	return []
 
 
 ## Obtenir les données des sorts depuis le DataLoader
 func get_spells_data() -> Array:
-	return DataLoader.spells_data
+	var data_loader = get_node_or_null("/root/DataLoader")
+	if data_loader:
+		return (data_loader as DataLoader).spells_data
+	return []
 
 
 ## Obtenir les données des ennemis depuis le DataLoader
 func get_enemies_data() -> Array:
-	return DataLoader.enemies_data
+	var data_loader = get_node_or_null("/root/DataLoader")
+	if data_loader:
+		return (data_loader as DataLoader).enemies_data
+	return []
 
 
 func init_grid() -> void:
@@ -548,7 +591,9 @@ func reset_game() -> void:
 	current_turn         = 0
 	current_player_index = 0
 	turn_count           = 1
-	load_data()
+	
+	# Recharger les données depuis DataLoader (déjà chargé)
+	# Pas besoin de recharger, on réinitialise juste les entités
 	init_grid()
 	init_entities()
 	turn_changed.emit(current_turn)
