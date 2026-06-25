@@ -1,0 +1,83 @@
+Classe,Niveau,Sorts débloqués (séparés par ";")
+Tank,1,Coup de bouclier;Soin de combat
+Tank,5,Protection;Frappe puissante
+Tank,10,Rugissement;Provocation
+Tank,15,Mur de pierre;Soin de guerre
+Tank,20,Tremblement de terre;Bouclier sacré
+Tank,25,Régénération;Armure renforcée
+Tank,30,Colère;Intervention divine
+Tank,35,Barrière;Soin de groupe
+Tank,40,Coup écrasant;Protection divine
+Tank,45,Renaissance;Bouclier légendaire
+Tank,50,Coup final
+
+Assassin,1,Lame fatale;Soin rapide
+Assassin,5,Poison;Ombre
+Assassin,10,Coup bas;Clignotement
+Assassin,15,Soin empoisonné;Marque de la mort
+Assassin,20,Piège empoisonné;Assassinat
+Assassin,25,Invisibilité;Éviscération
+Assassin,30,Soin de l'ombre;Malédiction
+Assassin,35,Coup final;Soin mortel
+Assassin,40,Soin critique;Empoisonnement massif
+Assassin,45,Invisibilité totale;Lame de l'ombre
+Assassin,50,Soin ultime
+
+Chasseur,1,Tir précis;Soin de chasseur
+Chasseur,5,Piège;Flèche enflammée
+Chasseur,10,Tir perçant;Appel de la meute
+Chasseur,15,Soin de la nature;Tir explosif
+Chasseur,20,Camouflage;Flèche empoisonnée
+Chasseur,25,Tir transperçant;Soin de la forêt
+Chasseur,30,Tir de glace;Tir légendaire
+Chasseur,35,Soin de groupe;Flèche sacrée
+Chasseur,40,Piège paralysant;Soin vital
+Chasseur,45,Tir perçant ultime
+Chasseur,50,Soin de la vie
+
+Mage,1,Boule de feu;Soin magique
+Mage,5,Éclair;Bouclier magique
+Mage,10,Explosion;Soin supérieur
+Mage,15,Téléportation;Météore
+Mage,20,Soin de groupe;Gel
+Mage,25,Invisibilité magique;Chaîne de foudre
+Mage,30,Soin magique supérieur;Barrière magique
+Mage,35,Désintégration;Soin de l'âme
+Mage,40,Téléportation de groupe;Pluie de métores
+Mage,45,Soin ultime
+Mage,50,Apocalypse;Soin de la vie
+
+Support,1,Bénédiction;Soin
+Support,5,Barrière;Attaque sacrée
+Support,10,Inspiration;Purification
+Support,15,Renaissance;Bouclier groupé
+Support,20,Attaque divine;Accélération
+Support,25,Soin de groupe;Protection divine
+Support,30,Résurrection;Bénédiction suprême
+Support,35,Attaque sacrée ultime;Soin suprême
+Support,40,Protection ultime;Attaque finale
+Support,45,Soin de la vie
+Support,50,Jugement
+
+Heal,1,Soin mineur;Attaque bénie
+Heal,5,Soin;Attaque sacrée
+Heal,10,Protection vitale;Purification
+Heal,15,Renaissance;Attaque divine
+Heal,20,Barrière de vie;Éclat de lumière
+Heal,25,Soin de groupe;Attaque céleste
+Heal,30,Protection divine;Soin supérieur
+Heal,35,Attaque sacrée ultime;Soin de groupe supérieur
+Heal,40,Résurrection;Attaque finale
+Heal,45,Soin ultime
+Heal,50,Jugement divin
+
+Invocateur,5,Invoquer Tortue
+Invocateur,10,Invoquer Loup;Attaque de l'invocation;Buff de l'invocation
+Invocateur,15,Débuff de l'invocation
+Invocateur,20,Invoquer Sirène;Soin de l'invocation
+Invocateur,25,Soin de l'invocation;Buff de vitesse
+Invocateur,30,Invoquer Ange;Attaque puissante;Buff de défense
+Invocateur,35,Attaque de zone;Soin de groupe
+Invocateur,40,Invoquer Homme-Faucon;Débuff de mouvement
+Invocateur,45,Buff ultime;Soin ultime
+Invocateur,50,Invoquer Centaur;Attaque ultime;Débuff ultime
