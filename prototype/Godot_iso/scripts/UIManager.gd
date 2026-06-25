@@ -1,6 +1,6 @@
 extends CanvasLayer
 class_name UIManager
-## UIManager.gd - Interface utilisateur WildZimut
+## UIManager.gd - Interface utilisateur Zimut
 ## Corrections : spell null crash, update PA/PM en temps réel,
 ##               portée du sort affichée, highlight grille sur sélection sort
 

@@ -1,5 +1,5 @@
 extends Node
-## GameManager - Logique globale WildZimut (version isométrique)
+## GameManager - Logique globale Zimut (version isométrique)
 ## Autoload configuré dans project.godot
 ## Tous les types sont explicites pour éviter les warnings/erreurs en mode strict
 
@@ -402,20 +402,39 @@ func handle_spell_selected(spell: Dictionary) -> void:
 func next_player() -> void:
 	if game_over or current_turn != 0:
 		return
+	
 	players[current_player_index]["is_active"] = false
 	selected_spell = null
 
+	# Trouver le prochain joueur vivant
 	var next_index: int = -1
+	var first_alive_index: int = -1
+	
+	# Trouver le premier joueur vivant (pour détecter quand on a fait le tour)
+	for i: int in range(players.size()):
+		if int(players[i]["current_pv"]) > 0:
+			first_alive_index = i
+			break
+	
+	# Trouver le prochain joueur vivant après l'actuel
 	for i: int in range(1, players.size() + 1):
 		var idx: int = (current_player_index + i) % players.size()
 		if int(players[idx]["current_pv"]) > 0:
 			next_index = idx
 			break
 
-	if next_index == -1 or next_index <= current_player_index:
+	if next_index == -1:
+		# Plus de joueurs vivants → fin du tour des joueurs
 		_end_player_turn()
 		return
 
+	# Si le prochain joueur est le premier joueur vivant, on a fait le tour complet
+	if next_index == first_alive_index:
+		# Tous les joueurs vivants ont joué → fin du tour des joueurs
+		_end_player_turn()
+		return
+
+	# Passer au joueur suivant
 	_set_active_player(next_index)
 	message_requested.emit("C'est au tour de %s." % players[next_index]["name"])
 
@@ -434,10 +453,13 @@ func _set_active_player(index: int) -> void:
 
 
 func _end_player_turn() -> void:
+	# Réinitialiser les PA/PM des joueurs pour le prochain tour
 	for p: Dictionary in players:
 		if int(p["current_pv"]) > 0:
 			p["current_pa"] = p["max_pa"]
 			p["current_pm"] = p["max_pm"]
+	
+	# Passer au tour des ennemis
 	current_turn = 1
 	selected_spell = null
 	turn_changed.emit(current_turn)

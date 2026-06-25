@@ -1,6 +1,6 @@
-# WildZimut_Iso - Prototype Godot Isométrique (Architecture Modulaire)
+# Zimut_Iso - Prototype Godot Isométrique (Architecture Modulaire)
 
-Prototype du jeu **WildZimut** avec un **rendu isométrique 2D** dans le style de Dofus Touch ou Waven, développé avec **Godot Engine 4.7** pour un export Android.
+Prototype du jeu **Zimut** avec un **rendu isométrique 2D** dans le style de Dofus Touch ou Waven, développé avec **Godot Engine 4.7** pour un export Android.
 
 Ce projet reprend **TOUTES les fonctionnalités** du prototype `prototype/Godot` (système de combat tour par tour, classes, sorts, ennemis) mais avec :
 - Une **vue isométrique 2D**
@@ -204,8 +204,8 @@ Les données des classes, sorts et ennemis sont définies dans `GameManager.gd`.
 Le projet est **100% compatible** avec l'export Android. Voir `prototype/Godot/README.md` pour les instructions détaillées.
 
 ### Configuration recommandée
-- **Nom du package** : `com.wildzimut.iso`
-- **Nom de l'application** : `WildZimut Iso`
+- **Nom du package** : `com.zimut.iso`
+- **Nom de l'application** : `Zimut Iso`
 - **Orientation** : **Paysage** (Landscape)
 - **Résolution** : 1920x1080 (ou adapter)
 
@@ -278,7 +278,7 @@ Pour améliorer le style :
 
 ## 📜 Licence
 
-Ce projet fait partie de **WildZimut** et est la propriété de **Charlie Gentil**.
+Ce projet fait partie de **Zimut** et est la propriété de **Charlie Gentil**.
 Toute utilisation ou distribution doit être approuvée par les auteurs.
 
 ---
@@ -302,6 +302,6 @@ Pour toute question ou problème :
 
 ## 🔗 Liens utiles
 
-- [Dépôt GitHub - WildZimut](https://github.com/CharlieG42/Zimut)
+- [Dépôt GitHub - Zimut](https://github.com/CharlieG42/Zimut)
 - [Prototype Godot (2D classique)](../Godot/README.md)
 - [Prototype Godot Iso (Isométrique)](../Godot_iso/README.md)

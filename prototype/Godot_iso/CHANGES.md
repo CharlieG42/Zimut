@@ -1,4 +1,4 @@
-# Corrections appliquées — WildZimut Godot_iso v2
+# Corrections appliquées — Zimut Godot_iso v2
 
 ## 🔴 Bugs critiques corrigés
 
