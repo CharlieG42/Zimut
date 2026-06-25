@@ -259,7 +259,7 @@ func load_items_data() -> bool:
 
 
 ## Obtenir les données des classes pour un niveau spécifique
-func get_class_data(class_name: String, level: int):
+func get_class_data(class_name: String, level: int)
 	for data in classes_data:
 		if data.get("Classe", "") == class_name and int(data.get("Niveau", "0")) == level:
 			return data
@@ -267,7 +267,7 @@ func get_class_data(class_name: String, level: int):
 
 
 ## Obtenir tous les sorts pour une classe
-func get_spells_for_class(class_name: String):
+func get_spells_for_class(class_name: String)
 	var result = []
 	for spell in spells_data:
 		if spell.get("Classe", "") == class_name:
@@ -276,7 +276,7 @@ func get_spells_for_class(class_name: String):
 
 
 ## Obtenir les sorts pour une classe et un niveau maximum
-func get_spells_for_class_and_level(class_name: String, max_level: int):
+func get_spells_for_class_and_level(class_name: String, max_level: int)
 	var result = []
 	for spell in spells_data:
 		if spell.get("Classe", "") == class_name:
@@ -287,7 +287,7 @@ func get_spells_for_class_and_level(class_name: String, max_level: int):
 
 
 ## Obtenir les données d'un ennemi pour un niveau spécifique
-func get_enemy_data(enemy_type: String, level: int):
+func get_enemy_data(enemy_type: String, level: int)
 	for data in enemies_data:
 		if data.get("Type", "") == enemy_type and int(data.get("Niveau", "0")) == level:
 			return data
@@ -295,7 +295,7 @@ func get_enemy_data(enemy_type: String, level: int):
 
 
 ## Obtenir tous les types d'ennemis uniques
-func get_unique_enemy_types():
+func get_unique_enemy_types()
 	var types = []
 	for data in enemies_data:
 		var type_name = data.get("Type", "")
@@ -305,7 +305,7 @@ func get_unique_enemy_types():
 
 
 ## Obtenir tous les noms de classes uniques
-func get_unique_class_names():
+func get_unique_class_names()
 	var names = []
 	for data in classes_data:
 		var class_name = data.get("Classe", "")

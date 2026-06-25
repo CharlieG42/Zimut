@@ -127,7 +127,7 @@ func load_data_fallback() -> void:
 
 
 ## Obtenir les données des classes depuis le DataLoader
-func get_classes_data():
+func get_classes_data()
 	var data_loader = get_node_or_null("/root/DataLoader")
 	if data_loader:
 		return data_loader.classes_data
@@ -135,7 +135,7 @@ func get_classes_data():
 
 
 ## Obtenir les données des sorts depuis le DataLoader
-func get_spells_data():
+func get_spells_data()
 	var data_loader = get_node_or_null("/root/DataLoader")
 	if data_loader:
 		return data_loader.spells_data
@@ -143,7 +143,7 @@ func get_spells_data():
 
 
 ## Obtenir les données des ennemis depuis le DataLoader
-func get_enemies_data():
+func get_enemies_data()
 	var data_loader = get_node_or_null("/root/DataLoader")
 	if data_loader:
 		return data_loader.enemies_data
