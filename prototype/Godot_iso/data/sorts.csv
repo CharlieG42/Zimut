@@ -1,128 +1,128 @@
 Classe,Nom,Coût PA,Coût PM,Portée,Effet,Niveau requis,Type
-Tank,Coup de bouclier,1,0,1,15 dégâts + étourdit 1 tour (50%),1,Attaque
-Tank,Soin de combat,2,0,1,Restaure 22 PV,1,Soin
+Tank,Coup de bouclier,1,0,1,30 dégâts + étourdit 1 tour (50%),1,Attaque
+Tank,Soin de combat,2,0,1,Restaure 44 PV,1,Soin
 Tank,Protection,2,0,1,+15% défense pour l'équipe (2 tours),5,Buff
-Tank,Frappe puissante,3,0,1,37 dégâts,5,Attaque
+Tank,Frappe puissante,3,0,1,74 dégâts,5,Attaque
 Tank,Rugissement,2,0,3,-5 PA aux ennemis (1 tour),10,Debuff
 Tank,Provocation,3,0,1,Force l'ennemi à attaquer ce perso (1 tour),10,Debuff
 Tank,Mur de pierre,4,0,1,Immunité aux dégâts physiques (1 tour),15,Buff
-Tank,Soin de guerre,3,0,1,Restaure 37 PV,15,Soin
-Tank,Tremblement de terre,4,0,2,22 dégâts à tous les ennemis adjacents,20,Attaque
+Tank,Soin de guerre,3,0,1,Restaure 74 PV,15,Soin
+Tank,Tremblement de terre,4,0,2,44 dégâts à tous les ennemis adjacents,20,Attaque
 Tank,Bouclier sacré,3,0,1,Immunité aux effets négatifs (1 tour),20,Buff
-Tank,Régénération,4,0,1,Restaure 15 PV/tour (3 tours),25,Soin
+Tank,Régénération,4,0,1,Restaure 30 PV/tour (3 tours),25,Soin
 Tank,Armure renforcée,4,0,1,+20% défense (3 tours),25,Buff
 Tank,Colère,4,0,1,+30% dégâts physiques (1 tour),30,Buff
 Tank,Intervention divine,4,0,1,Restaure 20% PV à tous les alliés,30,Soin
 Tank,Barrière,4,0,1,Crée un mur bloquant les attaques (1 tour),35,Buff
-Tank,Soin de groupe,4,0,2,Restaure 30 PV à tous les alliés,35,Soin
-Tank,Coup écrasant,4,0,1,60 dégâts + étourdit 1 tour (30%),40,Attaque
+Tank,Soin de groupe,4,0,2,Restaure 60 PV à tous les alliés,35,Soin
+Tank,Coup écrasant,4,0,1,120 dégâts + étourdit 1 tour (30%),40,Attaque
 Tank,Protection divine,4,0,1,+40% défense (1 tour),40,Buff
-Tank,Renaissance,4,0,1,Restaure 45 PV + supprime les effets négatifs,45,Soin
+Tank,Renaissance,4,0,1,Restaure 90 PV + supprime les effets négatifs,45,Soin
 Tank,Bouclier légendaire,4,0,1,Immunité à tous les dégâts (1 tour),45,Buff
-Tank,Coup final,4,0,1,75 dégâts,50,Attaque
-Assassin,Lame fatale,3,1,2,60 dégâts (critique si dos tourné),1,Attaque
-Assassin,Soin rapide,2,0,1,Restaure 15 PV,1,Soin
-Assassin,Poison,2,0,3,22 dégâts/tour (3 tours),5,Debuff
+Tank,Coup final,4,0,1,150 dégâts,50,Attaque
+Assassin,Lame fatale,3,1,2,120 dégâts (critique si dos tourné),1,Attaque
+Assassin,Soin rapide,2,0,1,Restaure 30 PV,1,Soin
+Assassin,Poison,2,0,3,88 dégâts/tour (3 tours),5,Debuff
 Assassin,Ombre,1,2,4,Téléportation derrière l'ennemi,5,Buff
-Assassin,Coup bas,2,1,1,37 dégâts + étourdit 1 tour (30%),10,Attaque
+Assassin,Coup bas,2,1,1,74 dégâts + étourdit 1 tour (30%),10,Attaque
 Assassin,Clignotement,1,3,5,Se téléporte à un allié ou ennemi,10,Buff
-Assassin,Soin empoisonné,3,0,1,Restaure 22 PV + poison (10 dégâts/tour; 1 tour),15,Soin
+Assassin,Soin empoisonné,3,0,1,Restaure 44 PV + poison (40 dégâts/tour; 1 tour),15,Soin
 Assassin,Marque de la mort,0,1,3,Prochaine attaque = critique garanti,15,Buff
-Assassin,Piège empoisonné,2,0,2,Pose un piège (30 dégâts si déclenché),20,Debuff
-Assassin,Assassinat,4,2,1,90 dégâts (ne fonctionne que sur <30% PV ennemi),20,Attaque
+Assassin,Piège empoisonné,2,0,2,Pose un piège (60 dégâts si déclenché),20,Debuff
+Assassin,Assassinat,4,2,1,180 dégâts (ne fonctionne que sur <30% PV ennemi),20,Attaque
 Assassin,Invisibilité,2,0,1,Invisible (2 tours ou jusqu'à attaque),25,Buff
-Assassin,Éviscération,4,1,1,75 dégâts + saignement (22 dégâts/tour; 2 tours),25,Attaque
-Assassin,Soin de l'ombre,4,0,1,Restaure 30 PV,30,Soin
+Assassin,Éviscération,4,1,1,150 dégâts + saignement (88 dégâts/tour; 2 tours),25,Attaque
+Assassin,Soin de l'ombre,4,0,1,Restaure 60 PV,30,Soin
 Assassin,Malédiction,3,0,3,-2 PA aux ennemis (2 tours),30,Debuff
-Assassin,Coup final,4,0,1,120 dégâts (tue si <20% PV ennemi),35,Attaque
-Assassin,Soin mortel,4,0,1,Restaure 37 PV + 15 dégâts aux ennemis adjacents,35,Soin
-Assassin,Empoisonnement massif,4,0,3,Poison (18 dégâts/tour; 2 tours) à tous les ennemis,40,Debuff
-Assassin,Soin critique,4,0,1,Restaure 45 PV,40,Soin
+Assassin,Coup final,4,0,1,240 dégâts (tue si <20% PV ennemi),35,Attaque
+Assassin,Soin mortel,4,0,1,Restaure 74 PV + 30 dégâts aux ennemis adjacents,35,Soin
+Assassin,Empoisonnement massif,4,0,3,Poison (72 dégâts/tour; 2 tours) à tous les ennemis,40,Debuff
+Assassin,Soin critique,4,0,1,Restaure 90 PV,40,Soin
 Assassin,Invisibilité totale,3,0,1,Invisible + immunité aux dégâts (1 tour),45,Buff
-Assassin,Lame de l'ombre,4,1,2,105 dégâts (ignore 20% défense),45,Attaque
-Assassin,Soin ultime,4,0,1,Restaure 60 PV,50,Attaque
-Chasseur,Tir précis,2,0,5,37 dégâts,1,Attaque
-Chasseur,Soin de chasseur,3,0,1,Restaure 18 PV,1,Soin
+Assassin,Lame de l'ombre,4,1,2,210 dégâts (ignore 20% défense),45,Attaque
+Assassin,Soin ultime,4,0,1,Restaure 120 PV,50,Attaque
+Chasseur,Tir précis,2,0,5,74 dégâts,1,Attaque
+Chasseur,Soin de chasseur,3,0,1,Restaure 36 PV,1,Soin
 Chasseur,Piège,1,0,3,Immobilise l'ennemi (1 tour),5,Debuff
-Chasseur,Fleche enflammée,3,0,5,30 dégâts + brûle (10 dégâts/tour; 2 tours),5,Attaque
-Chasseur,Tir perçant,4,0,6,45 dégâts (ignore 20% défense),10,Attaque
+Chasseur,Fleche enflammée,3,0,5,60 dégâts + brûle (40 dégâts/tour; 2 tours),5,Attaque
+Chasseur,Tir perçant,4,0,6,90 dégâts (ignore 20% défense),10,Attaque
 Chasseur,Appel de la meute,2,1,4,Invoque 1 loup allié (1 tour),10,Buff
-Chasseur,Soin de la nature,4,0,1,Restaure 30 PV,15,Soin
-Chasseur,Tir explosif,4,1,4,37 dégâts en zone (3x3),15,Attaque
+Chasseur,Soin de la nature,4,0,1,Restaure 60 PV,15,Soin
+Chasseur,Tir explosif,4,1,4,74 dégâts en zone (3x3),15,Attaque
 Chasseur,Camouflage,1,1,1,+50% esquive (2 tours),20,Buff
-Chasseur,Flèche empoisonnée,3,0,5,22 dégâts + poison (18 dégâts/tour; 2 tours),20,Debuff
-Chasseur,Tir transperçant,4,0,6,60 dégâts (ignore 50% défense),25,Attaque
-Chasseur,Soin de la forêt,4,0,1,Restaure 37 PV,25,Soin
-Chasseur,Tir de glace,4,0,5,30 dégâts + ralentit (1 PM; 2 tours),30,Debuff
-Chasseur,Tir légendaire,4,0,7,90 dégâts,30,Attaque
-Chasseur,Soin de groupe,4,0,2,Restaure 22 PV à tous les alliés,35,Soin
-Chasseur,Flèche sacrée,4,0,5,75 dégâts + bénit (10% dégâts en plus),35,Attaque
-Chasseur,Piège paralysant,3,0,3,Immobilise + 15 dégâts (2 tours),40,Debuff
-Chasseur,Soin vital,4,0,1,Restaure 45 PV,40,Soin
-Chasseur,Tir perçant ultime,4,0,6,105 dégâts (ignore 60% défense),45,Attaque
-Chasseur,Soin de la vie,4,0,1,Restaure 60 PV,50,Soin
-Mage,Boule de feu,4,0,5,45 dégâts magiques,1,Attaque
-Mage,Soin magique,3,0,1,Restaure 22 PV,1,Soin
-Mage,Éclair,3,0,6,37 dégâts magiques (2 cibles),5,Attaque
+Chasseur,Flèche empoisonnée,3,0,5,44 dégâts + poison (72 dégâts/tour; 2 tours),20,Debuff
+Chasseur,Tir transperçant,4,0,6,120 dégâts (ignore 50% défense),25,Attaque
+Chasseur,Soin de la forêt,4,0,1,Restaure 74 PV,25,Soin
+Chasseur,Tir de glace,4,0,5,60 dégâts + ralentit (1 PM; 2 tours),30,Debuff
+Chasseur,Tir légendaire,4,0,7,180 dégâts,30,Attaque
+Chasseur,Soin de groupe,4,0,2,Restaure 44 PV à tous les alliés,35,Soin
+Chasseur,Flèche sacrée,4,0,5,150 dégâts + bénit (10% dégâts en plus),35,Attaque
+Chasseur,Piège paralysant,3,0,3,Immobilise + 30 dégâts (2 tours),40,Debuff
+Chasseur,Soin vital,4,0,1,Restaure 90 PV,40,Soin
+Chasseur,Tir perçant ultime,4,0,6,210 dégâts (ignore 60% défense),45,Attaque
+Chasseur,Soin de la vie,4,0,1,Restaure 120 PV,50,Soin
+Mage,Boule de feu,4,0,5,90 dégâts magiques,1,Attaque
+Mage,Soin magique,3,0,1,Restaure 44 PV,1,Soin
+Mage,Éclair,3,0,6,74 dégâts magiques (2 cibles),5,Attaque
 Mage,Bouclier magique,2,0,1,+20% résistance magie (3 tours),5,Buff
-Mage,Explosion,4,0,4,60 dégâts en zone (3x3),10,Attaque
-Mage,Soin supérieur,4,0,1,Restaure 37 PV,10,Soin
+Mage,Explosion,4,0,4,120 dégâts en zone (3x3),10,Attaque
+Mage,Soin supérieur,4,0,1,Restaure 74 PV,10,Soin
 Mage,Téléportation,2,1,5,Téléporte à une case allié/ennemi,10,Buff
-Mage,Météore,4,0,7,75 dégâts en zone (2x2),15,Attaque
-Mage,Soin de groupe,4,0,2,Restaure 30 PV à tous les alliés,15,Soin
-Mage,Gel,3,0,4,Immobilise (1 tour) + 22 dégâts,20,Debuff
+Mage,Météore,4,0,7,150 dégâts en zone (2x2),15,Attaque
+Mage,Soin de groupe,4,0,2,Restaure 60 PV à tous les alliés,15,Soin
+Mage,Gel,3,0,4,Immobilise (1 tour) + 44 dégâts,20,Debuff
 Mage,Invisibilité magique,3,0,1,Invisible + immunité magie (2 tours),20,Buff
-Mage,Chaîne de foudre,4,1,6,52 dégâts (saute sur 3 ennemis),25,Attaque
-Mage,Soin magique supérieur,4,0,1,Restaure 45 PV,25,Soin
+Mage,Chaîne de foudre,4,1,6,104 dégâts (saute sur 3 ennemis),25,Attaque
+Mage,Soin magique supérieur,4,0,1,Restaure 90 PV,25,Soin
 Mage,Barrière magique,4,0,1,+30% résistance magie (2 tours),30,Buff
-Mage,Désintégration,4,0,5,90 dégâts magiques,30,Attaque
-Mage,Soin de l'âme,4,0,1,Restaure 52 PV + supprime les effets négatifs,35,Soin
+Mage,Désintégration,4,0,5,180 dégâts magiques,30,Attaque
+Mage,Soin de l'âme,4,0,1,Restaure 104 PV + supprime les effets négatifs,35,Soin
 Mage,Téléportation de groupe,4,1,4,Téléporte tous les alliés à une case,35,Buff
-Mage,Pluie de métores,4,0,8,105 dégâts en zone (4x4),40,Attaque
-Mage,Soin ultime,4,0,1,Restaure 67 PV,40,Soin
-Mage,Apocalypse,4,0,8,120 dégâts en zone (4x4),45,Attaque
-Mage,Soin de la vie,4,0,1,Restaure 75 PV,50,Attaque
+Mage,Pluie de métores,4,0,8,210 dégâts en zone (4x4),40,Attaque
+Mage,Soin ultime,4,0,1,Restaure 134 PV,40,Soin
+Mage,Apocalypse,4,0,8,240 dégâts en zone (4x4),45,Attaque
+Mage,Soin de la vie,4,0,1,Restaure 150 PV,50,Attaque
 Support,Bénédiction,2,0,3,+2 PA pour 2 tours (allié),1,Buff
-Support,Soin,3,0,1,Restaure 30 PV,1,Soin
+Support,Soin,3,0,1,Restaure 60 PV,1,Soin
 Support,Barrière,4,0,2,+30% défense (1 tour; allié),5,Buff
-Support,Attaque sacrée,3,0,1,37 dégâts,5,Attaque
+Support,Attaque sacrée,3,0,1,74 dégâts,5,Attaque
 Support,Inspiration,2,0,3,+20% dégâts (2 tours; allié),10,Buff
 Support,Purification,1,0,1,Supprime les effets négatifs (allié),10,Debuff
-Support,Renaissance,4,0,1,Restaure 75 PV + supprime les effets négatifs,15,Soin
+Support,Renaissance,4,0,1,Restaure 150 PV + supprime les effets négatifs,15,Soin
 Support,Bouclier groupé,3,0,2,+15% défense pour l'équipe (2 tours),15,Buff
-Support,Attaque divine,4,0,1,52 dégâts,20,Attaque
+Support,Attaque divine,4,0,1,104 dégâts,20,Attaque
 Support,Accélération,2,0,3,+1 PM pour 2 tours (allié),20,Buff
-Support,Soin de groupe,4,0,2,Restaure 30 PV à tous les alliés,20,Soin
+Support,Soin de groupe,4,0,2,Restaure 60 PV à tous les alliés,20,Soin
 Support,Protection divine,4,0,1,Immunité aux dégâts (1 tour; allié),25,Buff
-Support,Attaque bénie,4,0,1,60 dégâts + bénit (10% dégâts en plus),25,Attaque
-Support,Résurrection,4,0,1,Restaure 150 PV à un allié KO,30,Soin
+Support,Attaque bénie,4,0,1,120 dégâts + bénit (10% dégâts en plus),25,Attaque
+Support,Résurrection,4,0,1,Restaure 300 PV à un allié KO,30,Soin
 Support,Bénédiction suprême,4,0,3,+3 à toutes les stats (2 tours; allié),30,Buff
-Support,Attaque sacrée ultime,4,0,1,75 dégâts,35,Attaque
-Support,Soin suprême,4,0,2,Restaure 45 PV à tous les alliés,35,Soin
+Support,Attaque sacrée ultime,4,0,1,150 dégâts,35,Attaque
+Support,Soin suprême,4,0,2,Restaure 90 PV à tous les alliés,35,Soin
 Support,Protection ultime,4,0,1,Immunité à tous les dégâts (1 tour; allié),40,Buff
-Support,Attaque finale,4,0,1,90 dégâts,40,Attaque
-Support,Soin de la vie,4,0,1,Restaure 67 PV,45,Soin
-Support,Jugement,4,0,3,120 dégâts à tous les ennemis,50,Attaque
-Heal,Soin mineur,2,0,1,Restaure 30 PV,1,Soin
-Heal,Attaque bénie,3,0,1,30 dégâts,1,Attaque
-Heal,Soin,3,0,1,Restaure 60 PV,5,Soin
-Heal,Attaque sacrée,4,0,1,37 dégâts,5,Attaque
+Support,Attaque finale,4,0,1,180 dégâts,40,Attaque
+Support,Soin de la vie,4,0,1,Restaure 134 PV,45,Soin
+Support,Jugement,4,0,3,240 dégâts à tous les ennemis,50,Attaque
+Heal,Soin mineur,2,0,1,Restaure 60 PV,1,Soin
+Heal,Attaque bénie,3,0,1,60 dégâts,1,Attaque
+Heal,Soin,3,0,1,Restaure 120 PV,5,Soin
+Heal,Attaque sacrée,4,0,1,74 dégâts,5,Attaque
 Heal,Protection vitale,2,0,1,+25% résistance (2 tours),10,Buff
 Heal,Purification,1,0,1,Supprime les effets négatifs (allié),10,Debuff
-Heal,Renaissance,4,0,1,Restaure 90 PV + supprime les effets négatifs,15,Soin
-Heal,Attaque divine,4,0,1,45 dégâts,15,Attaque
+Heal,Renaissance,4,0,1,Restaure 180 PV + supprime les effets négatifs,15,Soin
+Heal,Attaque divine,4,0,1,90 dégâts,15,Attaque
 Heal,Barrière de vie,3,0,1,+30% défense + soigne 15 PV/tour (2 tours),20,Buff
-Heal,Éclat de lumière,4,0,3,Restaure 75 PV + 15 dégâts aux ennemis adjacents,20,Attaque
-Heal,Soin de groupe,4,0,2,Restaure 45 PV à tous les alliés,25,Soin
-Heal,Attaque céleste,4,0,1,52 dégâts,25,Attaque
+Heal,Éclat de lumière,4,0,3,Restaure 150 PV + 30 dégâts aux ennemis adjacents,20,Attaque
+Heal,Soin de groupe,4,0,2,Restaure 90 PV à tous les alliés,25,Soin
+Heal,Attaque céleste,4,0,1,104 dégâts,25,Attaque
 Heal,Protection divine,4,0,1,+40% défense (1 tour),30,Buff
-Heal,Soin supérieur,4,0,1,Restaure 105 PV,30,Soin
-Heal,Attaque sacrée ultime,4,0,1,60 dégâts,35,Attaque
-Heal,Soin de groupe supérieur,4,0,2,Restaure 60 PV à tous les alliés,35,Soin
-Heal,Résurrection,4,0,1,Restaure 150 PV à un allié KO,40,Soin
-Heal,Attaque finale,4,0,1,75 dégâts,40,Attaque
-Heal,Soin ultime,4,0,1,Restaure 127 PV,45,Soin
-Heal,Jugement divin,4,0,3,135 dégâts à tous les ennemis,50,Attaque
+Heal,Soin supérieur,4,0,1,Restaure 210 PV,30,Soin
+Heal,Attaque sacrée ultime,4,0,1,120 dégâts,35,Attaque
+Heal,Soin de groupe supérieur,4,0,2,Restaure 120 PV à tous les alliés,35,Soin
+Heal,Résurrection,4,0,1,Restaure 300 PV à un allié KO,40,Soin
+Heal,Attaque finale,4,0,1,150 dégâts,40,Attaque
+Heal,Soin ultime,4,0,1,Restaure 254 PV,45,Soin
+Heal,Jugement divin,4,0,3,270 dégâts à tous les ennemis,50,Attaque
 Invocateur,Invoquer Tortue,2,0,1,Invoque une Tortue (contrôlable; 3PM/4PA),5,Invocation
 Invocateur,Invoquer Loup,2,0,1,Invoque un Loup (contrôlable; 3PM/4PA),10,Invocation
 Invocateur,Invoquer Sirène,3,0,1,Invoque une Sirène (contrôlable; 3PM/4PA),20,Invocation
@@ -141,7 +141,7 @@ Invocateur,Attaque ultime,4,0,5,L'invocation attaque (dégâts = 40 + niveau),50
 Invocateur,Buff ultime,2,0,1,L'invocation gagne +50% dégâts (1 tour),45,Buff
 Invocateur,Débuff ultime,3,0,3,L'invocation inflige -50% dégâts à l'ennemi (1 tour),50,Debuff
 Invocateur,Soin ultime,3,0,1,L'invocation restaure 40 PV à un allié,40,Soin
-Invocateur,Attaque de zone,4,0,4,L'invocation attaque tous les ennemis adjacents (30 dégâts),35,Attaque
+Invocateur,Attaque de zone,4,0,4,L'invocation attaque tous les ennemis adjacents (60 dégâts),35,Attaque
 Invocateur,Buff de vitesse,1,0,1,L'invocation gagne +1 PM (2 tours),25,Buff
 Invocateur,Débuff de précision,2,0,3,L'invocation réduit 30% précision à l'ennemi (2 tours),30,Debuff
 Invocateur,Soin de groupe,4,0,2,L'invocation restaure 25 PV à tous les alliés,40,Soin
