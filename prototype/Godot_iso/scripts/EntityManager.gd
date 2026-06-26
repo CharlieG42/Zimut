@@ -19,12 +19,18 @@ func _on_entity_moved(_entity, _from_pos: Vector2i, _to_pos: Vector2i):
 
 func _on_entity_attacked(_attacker, _target, _damage: int):
 	"""Update display when an entity is attacked"""
-	_on_entity_moved(null, Vector2i(0, 0), Vector2i(0, 0))
+	# Rafraîchir l'affichage de la cible attaquée
+	if _target != null:
+		var target_pos = Vector2i(int(_target.get("x", 0)), int(_target.get("y", 0)))
+		_on_entity_moved(_target, target_pos, target_pos)
 
 
 func _on_spell_casted(_caster, _spell, _target, _result: String):
 	"""Update display when a spell is cast"""
-	_on_entity_moved(null, Vector2i(0, 0), Vector2i(0, 0))
+	# Rafraîchir l'affichage de la cible du sort
+	if _target != null:
+		var target_pos = Vector2i(int(_target.get("x", 0)), int(_target.get("y", 0)))
+		_on_entity_moved(_target, target_pos, target_pos)
 
 
 # ==================== Utility functions ====================

@@ -291,6 +291,7 @@ func _try_move(player, target_pos):
 	if not _is_valid(target_pos) or grid[target_pos.y][target_pos.x] != null:
 		message_requested.emit("Case inaccessible.")
 		return
+	# Mettre à jour le grid
 	grid[from_pos.y][from_pos.x] = null
 	player["x"] = target_pos.x
 	player["y"] = target_pos.y

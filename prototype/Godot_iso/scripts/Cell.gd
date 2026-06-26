@@ -103,6 +103,8 @@ func update_appearance():
 		var entity_type = entity.get("entity_type", "")
 		var classe = entity.get("classe", "")
 		_try_load_sprite(classe, entity_type)
+		# Mettre à jour la visibilité du sprite
+		entity_sprite.visible = _try_load_sprite(classe, entity_type)
 
 
 func set_in_move_range(value):
