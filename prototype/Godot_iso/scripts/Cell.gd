@@ -105,6 +105,9 @@ func update_appearance():
 		_try_load_sprite(classe, entity_type)
 		# Mettre à jour la visibilité du sprite
 		entity_sprite.visible = _try_load_sprite(classe, entity_type)
+	else:
+		# Masquer le sprite si aucune entité
+		entity_sprite.visible = false
 
 
 func set_in_move_range(value):

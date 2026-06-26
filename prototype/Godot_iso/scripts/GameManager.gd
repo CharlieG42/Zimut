@@ -322,7 +322,10 @@ func _try_basic_attack(attacker, target, target_pos):
 	if int(target["current_pv"]) <= 0:
 		remove_entity_from_grid(target)
 	player_changed.emit(current_player_index)
-	_refresh_grid()
+	# Forcer le rafraîchissement immédiat de la cellule de la cible
+	var gm = get_node_or_null("/root/Main/GridManager")
+	if gm:
+		gm.update_entity_display()
 
 
 func _try_cast_spell(caster, target_pos, target_entity):
@@ -369,7 +372,10 @@ func _try_cast_spell(caster, target_pos, target_entity):
 
 	selected_spell = null
 	player_changed.emit(current_player_index)
-	_refresh_grid()
+	# Forcer le rafraîchissement immédiat
+	var gm = get_node_or_null("/root/Main/GridManager")
+	if gm:
+		gm.update_entity_display()
 
 
 func _apply_spell(caster, spell, target):
