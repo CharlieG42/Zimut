@@ -4,10 +4,19 @@ extends Node
 ## Ce script est conçu pour être utilisé comme autoload dans project.godot
 
 ## Chemins des fichiers CSV (relatifs au projet)
-const CLASS_DATA_PATH = "res://data/classes.csv"
-const SPELL_DATA_PATH = "res://data/sorts.csv"
-const ENEMY_DATA_PATH = "res://data/ennemis.csv"
-const ITEM_DATA_PATH = "res://data/stuff.csv"
+## Sur Android, essayer plusieurs chemins car le système de fichiers peut différer
+const CLASS_DATA_PATHS = ["res://data/classes.csv", "user://data/classes.csv", "res://prototype/Godot_iso/data/classes.csv"]
+const SPELL_DATA_PATHS = ["res://data/sorts.csv", "user://data/sorts.csv", "res://prototype/Godot_iso/data/sorts.csv"]
+const ENEMY_DATA_PATHS = ["res://data/ennemis.csv", "user://data/ennemis.csv", "res://prototype/Godot_iso/data/ennemis.csv"]
+const ITEM_DATA_PATHS = ["res://data/stuff.csv", "user://data/stuff.csv", "res://prototype/Godot_iso/data/stuff.csv"]
+
+## Helper function to open file with multiple path attempts
+func _open_file(paths: Array) -> FileAccess:
+	for path in paths:
+		var file = FileAccess.open(path, FileAccess.READ)
+		if file != null:
+			return file
+	return null
 
 ## Données chargées
 var classes_data = []
@@ -49,20 +58,24 @@ func load_all_data():
 	
 	data_loaded = success
 	
-	if success:
-		data_loaded_successfully.emit()
-	else:
-		data_load_failed.emit("Failed to load one or more data files")
+	# Toujours émettre data_loaded_successfully, même avec des données par défaut
+	# Cela permet à GameManager de continuer l'initialisation
+	data_loaded_successfully.emit()
+	
+	if not success:
+		data_load_failed.emit("Failed to load one or more data files - using defaults")
 	
 	return success
 
 
 ## Charger les données des classes depuis classes.csv
 func load_classes_data():
-	var file = FileAccess.open(CLASS_DATA_PATH, FileAccess.READ)
+	var file = _open_file(CLASS_DATA_PATHS)
 	if file == null:
-		push_error("Cannot open classes.csv at: %s" % CLASS_DATA_PATH)
-		return false
+		push_error("Cannot open classes.csv in any path - using defaults")
+		# Charger des données par défaut si le fichier n'est pas trouvé
+		load_default_classes_data()
+		return true  # Retourne true car on a des données par défaut
 	
 	var content = file.get_as_text()
 	file.close()
@@ -111,10 +124,12 @@ func load_classes_data():
 
 ## Charger les données des sorts depuis sorts.csv
 func load_spells_data():
-	var file = FileAccess.open(SPELL_DATA_PATH, FileAccess.READ)
+	var file = _open_file(SPELL_DATA_PATHS)
 	if file == null:
-		push_error("Cannot open sorts.csv at: %s" % SPELL_DATA_PATH)
-		return false
+		push_error("Cannot open sorts.csv in any path - using defaults")
+		# Charger des données par défaut si le fichier n'est pas trouvé
+		load_default_spells_data()
+		return true  # Retourne true car on a des données par défaut
 	
 	var content = file.get_as_text()
 	file.close()
@@ -165,10 +180,12 @@ func load_spells_data():
 
 ## Charger les données des ennemis depuis ennemis.csv
 func load_enemies_data():
-	var file = FileAccess.open(ENEMY_DATA_PATH, FileAccess.READ)
+	var file = _open_file(ENEMY_DATA_PATHS)
 	if file == null:
-		push_error("Cannot open ennemis.csv at: %s" % ENEMY_DATA_PATH)
-		return false
+		push_error("Cannot open ennemis.csv in any path - using defaults")
+		# Charger des données par défaut si le fichier n'est pas trouvé
+		load_default_enemies_data()
+		return true  # Retourne true car on a des données par défaut
 	
 	var content = file.get_as_text()
 	file.close()
@@ -214,10 +231,12 @@ func load_enemies_data():
 
 ## Charger les données des objets depuis stuff.csv
 func load_items_data():
-	var file = FileAccess.open(ITEM_DATA_PATH, FileAccess.READ)
+	var file = _open_file(ITEM_DATA_PATHS)
 	if file == null:
-		push_error("Cannot open stuff.csv at: %s" % ITEM_DATA_PATH)
-		return false
+		push_error("Cannot open stuff.csv in any path - using defaults")
+		# Charger des données par défaut si le fichier n'est pas trouvé
+		load_default_items_data()
+		return true  # Retourne true car on a des données par défaut
 	
 	var content = file.get_as_text()
 	file.close()
@@ -311,3 +330,39 @@ func get_unique_class_names():
 		if not n in names:
 			names.append(n)
 	return names
+
+
+## Données par défaut si les fichiers CSV ne sont pas trouvés
+func load_default_classes_data():
+	classes_data = [
+		{"Classe": "Tank", "Niveau": "1", "PA": "5", "PM": "3", "Vita (PV)": "120", "Force (CAC)": "15", "Intelligence (Magie)": "5", "Agilité (Vit. Atk)": "10", "Sagesse (Précision)": "8", "Défense": "20", "XP pour atteindre ce niveau": "100"},
+		{"Classe": "Assassin", "Niveau": "1", "PA": "6", "PM": "4", "Vita (PV)": "80", "Force (CAC)": "12", "Intelligence (Magie)": "8", "Agilité (Vit. Atk)": "15", "Sagesse (Précision)": "12", "Défense": "10", "XP pour atteindre ce niveau": "100"},
+		{"Classe": "Chasseur", "Niveau": "1", "PA": "5", "PM": "4", "Vita (PV)": "90", "Force (CAC)": "10", "Intelligence (Magie)": "10", "Agilité (Vit. Atk)": "14", "Sagesse (Précision)": "15", "Défense": "12", "XP pour atteindre ce niveau": "100"},
+		{"Classe": "Mage", "Niveau": "1", "PA": "4", "PM": "3", "Vita (PV)": "70", "Force (CAC)": "5", "Intelligence (Magie)": "20", "Agilité (Vit. Atk)": "8", "Sagesse (Précision)": "10", "Défense": "8", "XP pour atteindre ce niveau": "100"},
+		{"Classe": "Support", "Niveau": "1", "PA": "5", "PM": "3", "Vita (PV)": "85", "Force (CAC)": "8", "Intelligence (Magie)": "15", "Agilité (Vit. Atk)": "10", "Sagesse (Précision)": "12", "Défense": "10", "XP pour atteindre ce niveau": "100"}
+	]
+	push_warning("Loaded default classes data - CSV files not found")
+
+
+func load_default_spells_data():
+	spells_data = [
+		{"Classe": "Tank", "Nom": "Coup de bouclier", "Cout_PA": "1", "Cout_PM": "0", "Portee": "1", "Effet": "15 dégâts + étourdit 1 tour (50%)", "Niveau_requis": "1", "Type": "Attaque", "Degats_physiques": "15", "Degats_magiques": "0", "Soins": "0", "Resistance_physique": "0", "Resistance_magique": "0", "Debuff_physique": "0", "Debuff_magique": "0", "Buff_physique": "0", "Buff_magique": "0"},
+		{"Classe": "Tank", "Nom": "Soin de combat", "Cout_PA": "2", "Cout_PM": "0", "Portee": "1", "Effet": "Restaure 20 PV", "Niveau_requis": "1", "Type": "Soin", "Degats_physiques": "0", "Degats_magiques": "0", "Soins": "20", "Resistance_physique": "0", "Resistance_magique": "0", "Debuff_physique": "0", "Debuff_magique": "0", "Buff_physique": "0", "Buff_magique": "0"},
+		{"Classe": "Assassin", "Nom": "Lame fatale", "Cout_PA": "3", "Cout_PM": "1", "Portee": "2", "Effet": "30 dégâts (critique si dos tourné)", "Niveau_requis": "1", "Type": "Attaque", "Degats_physiques": "30", "Degats_magiques": "0", "Soins": "0", "Resistance_physique": "0", "Resistance_magique": "0", "Debuff_physique": "0", "Debuff_magique": "0", "Buff_physique": "0", "Buff_magique": "0"},
+		{"Classe": "Mage", "Nom": "Boule de feu", "Cout_PA": "4", "Cout_PM": "0", "Portee": "5", "Effet": "30 dégâts magiques", "Niveau_requis": "1", "Type": "Magie", "Degats_physiques": "0", "Degats_magiques": "30", "Soins": "0", "Resistance_physique": "0", "Resistance_magique": "0", "Debuff_physique": "0", "Debuff_magique": "0", "Buff_physique": "0", "Buff_magique": "0"}
+	]
+	push_warning("Loaded default spells data - CSV files not found")
+
+
+func load_default_enemies_data():
+	enemies_data = [
+		{"Type": "Gobelin", "Niveau": "1", "PV": "40", "Attaque": "8", "Défense": "2", "PA": "3", "PM": "2", "XP": "50"},
+		{"Type": "Squelette", "Niveau": "1", "PV": "50", "Attaque": "10", "Défense": "5", "PA": "2", "PM": "2", "XP": "60"},
+		{"Type": "Loup", "Niveau": "1", "PV": "35", "Attaque": "12", "Défense": "1", "PA": "3", "PM": "3", "XP": "45"}
+	]
+	push_warning("Loaded default enemies data - CSV files not found")
+
+
+func load_default_items_data():
+	items_data = []
+	push_warning("Loaded default items data - CSV files not found")
