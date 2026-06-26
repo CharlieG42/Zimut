@@ -48,8 +48,46 @@ signal spell_casted(caster, spell, target, result: String)
 signal message_requested(text: String)
 
 
-## Helper function to extract damage value from spell effect string
-func _extract_damage_from_effect(effect: String) -> int:
+## Helper function to get numeric value from spell with fallback to effect parsing
+func _get_spell_damage(spell: Dictionary, damage_type: String) -> int:
+	# Try new numeric columns first
+	var column_name = ""
+	match damage_type:
+		"physical":
+			column_name = "Degats_physiques"
+		"magical":
+			column_name = "Degats_magiques"
+		"heal":
+			column_name = "Soins"
+		"resistance_physical":
+			column_name = "Resistance_physique"
+		"resistance_magical":
+			column_name = "Resistance_magique"
+		"debuff_physical":
+			column_name = "Debuff_physique"
+		"debuff_magical":
+			column_name = "Debuff_magique"
+		"buff_physical":
+			column_name = "Buff_physique"
+		"buff_magical":
+			column_name = "Buff_magique"
+		_:
+			return 0
+	
+	# Check new column
+	if spell.has(column_name) and spell[column_name] != "" and spell[column_name] != "0":
+		return int(spell[column_name])
+	
+	# Fallback to old columns (Coût PA, etc.)
+	if damage_type == "physical" and spell.has("Coût PA"):
+		pass  # Not applicable
+	
+	# Fallback to effect parsing for backward compatibility
+	return _extract_damage_from_effect(spell.get("Effet", spell.get("effect", "")), damage_type)
+
+
+## Helper function to extract damage value from spell effect string (fallback)
+func _extract_damage_from_effect(effect: String, damage_type: String = "") -> int:
 	var damage_patterns = [
 		"dégâts",
 		"dégâts magiques",
@@ -65,7 +103,7 @@ func _extract_damage_from_effect(effect: String) -> int:
 	return 0
 
 
-## Helper function to extract heal value from spell effect string
+## Helper function to extract heal value from spell effect string (fallback)
 func _extract_heal_from_effect(effect: String) -> int:
 	if "Restaure" in effect:
 		var parts = effect.split("Restaure")[1].split("PV")[0].split(" ")
@@ -408,53 +446,65 @@ func _try_cast_spell(caster: Dictionary, target_pos: Vector2i, target_entity) ->
 func _apply_spell(caster: Dictionary, spell: Dictionary, target: Dictionary) -> String:
 	# Accepte "spell_type" (notre format) ET "Type" (format CSV direct)
 	var spell_type: String = spell.get("spell_type", spell.get("Type", "Attaque"))
-	var effect: String = spell.get("effect", spell.get("Effet", ""))
 	
-	# Extraire les valeurs de dégâts/soin depuis l'effet du sort
-	var base_damage: int = _extract_damage_from_effect(effect)
-	var base_heal: int = _extract_heal_from_effect(effect)
+	# Utiliser les nouvelles colonnes numériques
+	var physical_damage: int = _get_spell_damage(spell, "physical")
+	var magical_damage: int = _get_spell_damage(spell, "magical")
+	var heal_amount: int = _get_spell_damage(spell, "heal")
+	var resistance_physical: int = _get_spell_damage(spell, "resistance_physical")
+	var resistance_magical: int = _get_spell_damage(spell, "resistance_magical")
+	var debuff_physical: int = _get_spell_damage(spell, "debuff_physical")
+	var debuff_magical: int = _get_spell_damage(spell, "debuff_magical")
+	var buff_physical: int = _get_spell_damage(spell, "buff_physical")
+	var buff_magical: int = _get_spell_damage(spell, "buff_magical")
 	
 	match spell_type:
 		"Attaque", "CAC":
-			# Utiliser les dégâts du CSV si disponibles, sinon calculer à partir des stats
-			var raw_dmg: int
-			if base_damage > 0:
-				raw_dmg = base_damage
-			else:
-				raw_dmg = int(caster["force"]) + (randi() % 5 - 2)
+			# Utiliser les dégâts physiques du CSV
+			var raw_dmg: int = physical_damage if physical_damage > 0 else (int(caster["force"]) + (randi() % 5 - 2))
 			var actual_dmg: int = maxi(1, raw_dmg - int(int(target["defense"]) / 2.0))
 			target["current_pv"] = int(target["current_pv"]) - actual_dmg
 			entity_attacked.emit(caster, target, actual_dmg)
-			return "%s utilise %s : %d dégâts !" % [caster["name"], spell["name"], actual_dmg]
+			return "%s utilise %s : %d dégâts physiques !" % [caster["name"], spell["name"], actual_dmg]
 		"Magie":
-			# Utiliser les dégâts du CSV si disponibles, sinon calculer à partir des stats
-			var raw_dmg: int
-			if base_damage > 0:
-				raw_dmg = base_damage
-			else:
-				raw_dmg = int(caster["intelligence"]) + (randi() % 5 - 2)
+			# Utiliser les dégâts magiques du CSV
+			var raw_dmg: int = magical_damage if magical_damage > 0 else (int(caster["intelligence"]) + (randi() % 5 - 2))
 			var actual_dmg: int = maxi(1, raw_dmg)
 			target["current_pv"] = int(target["current_pv"]) - actual_dmg
 			entity_attacked.emit(caster, target, actual_dmg)
 			return "%s utilise %s : %d dégâts magiques !" % [caster["name"], spell["name"], actual_dmg]
 		"Buff", "Défense":
-			target["defense"] = int(float(int(target["defense"]) * 3) / 2.0)
-			return "%s utilise %s : défense augmentée !" % [caster["name"], spell["name"]]
-		"Soin":
-			# Utiliser les soins du CSV si disponibles, sinon calculer à partir des stats
-			var heal: int
-			if base_heal > 0:
-				heal = base_heal
+			if resistance_physical > 0:
+				target["defense"] = int(float(int(target["defense"]) * (1 + resistance_physical / 100.0)))
+				return "%s utilise %s : +%d%% défense !" % [caster["name"], spell["name"], resistance_physical]
+			elif resistance_magical > 0:
+				# Résistance magique (à implémenter selon votre système)
+				return "%s utilise %s : +%d%% résistance magique !" % [caster["name"], spell["name"], resistance_magical]
+			elif buff_physical > 0:
+				return "%s utilise %s : +%d%% dégâts physiques !" % [caster["name"], spell["name"], buff_physical]
+			elif buff_magical > 0:
+				return "%s utilise %s : +%d%% dégâts magiques !" % [caster["name"], spell["name"], buff_magical]
 			else:
-				heal = int(caster["intelligence"]) + (randi() % 5 - 2)
+				target["defense"] = int(float(int(target["defense"]) * 3) / 2.0)
+				return "%s utilise %s : défense augmentée !" % [caster["name"], spell["name"]]
+		"Soin":
+			# Utiliser les soins du CSV
+			var heal: int = heal_amount if heal_amount > 0 else (int(caster["intelligence"]) + (randi() % 5 - 2))
 			target["current_pv"] = mini(int(target["max_pv"]), int(target["current_pv"]) + heal)
 			return "%s utilise %s sur %s : +%d PV !" % [caster["name"], spell["name"], target["name"], heal]
 		"Debuff":
-			# Pour les debuffs avec dégâts (ex: "Immobilise + 15 dégâts")
-			if base_damage > 0:
-				target["current_pv"] = int(target["current_pv"]) - base_damage
-				entity_attacked.emit(caster, target, base_damage)
-				return "%s utilise %s : %d dégâts + effet spécial !" % [caster["name"], spell["name"], base_damage]
+			# Pour les debuffs avec dégâts
+			if debuff_physical > 0:
+				target["current_pa"] = maxi(0, int(target["current_pa"]) - debuff_physical)
+				return "%s utilise %s : -%d PA !" % [caster["name"], spell["name"], debuff_physical]
+			elif debuff_magical > 0:
+				target["current_pv"] = int(target["current_pv"]) - debuff_magical
+				entity_attacked.emit(caster, target, debuff_magical)
+				return "%s utilise %s : %d dégâts magiques (DoT) !" % [caster["name"], spell["name"], debuff_magical]
+			elif magical_damage > 0:
+				target["current_pv"] = int(target["current_pv"]) - magical_damage
+				entity_attacked.emit(caster, target, magical_damage)
+				return "%s utilise %s : %d dégâts + effet spécial !" % [caster["name"], spell["name"], magical_damage]
 			else:
 				return "%s utilise %s : effet spécial appliqué !" % [caster["name"], spell["name"]]
 	return "%s utilise %s." % [caster["name"], spell["name"]]

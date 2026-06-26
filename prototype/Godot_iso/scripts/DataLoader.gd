@@ -148,7 +148,12 @@ func load_spells_data():
 			
 			# Nettoyer les valeurs numériques
 			if header == "Coût PA" or header == "Coût PM" or \
-			   header == "Portée" or header == "Niveau requis":
+			   header == "Portée" or header == "Niveau requis" or \
+			   header == "Cout_PA" or header == "Cout_PM" or \
+			   header == "Portee" or header == "Niveau_requis" or \
+			   header.begins_with("Degats_") or header.begins_with("Soins") or \
+			   header.begins_with("Resistance_") or header.begins_with("Debuff_") or \
+			   header.begins_with("Buff_"):
 				value = value.replace(" ", "")
 			
 			entry[header] = value
