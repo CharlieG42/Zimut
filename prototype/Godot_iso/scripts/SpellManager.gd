@@ -37,9 +37,14 @@ func _get_spell_damage(spell: Dictionary, damage_type: String) -> int:
 		_:
 			return 0
 	
-	# Check new column
-	if spell.has(column_name) and spell[column_name] != "" and spell[column_name] != "0":
-		return int(spell[column_name])
+	# Check new column - safely handle null/empty values
+	if spell.has(column_name):
+		var value = spell[column_name]
+		if value != null:
+			# Convert to string for comparison
+			var value_str = str(value)
+			if value_str != "" and value_str != "0":
+				return int(value_str)
 	
 	return 0
 
