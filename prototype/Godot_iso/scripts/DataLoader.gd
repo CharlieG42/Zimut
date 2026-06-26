@@ -307,7 +307,7 @@ func get_unique_enemy_types():
 func get_unique_class_names():
 	var names = []
 	for data in classes_data:
-		var class_name = data.get("Classe", "")
-		if not class_name in names:
-			names.append(class_name)
+		var classPlayer_name = data.get("Classe", "")
+		if not classPlayer_name in names:
+			names.append(classPlayer_name)
 	return names
