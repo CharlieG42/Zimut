@@ -255,16 +255,13 @@ func show_spells_for_player(player: Dictionary) -> void:
 		child.queue_free()
 
 	for spell: Dictionary in player.get("spells", []):
-		var button: Button = preload("res://scripts/SpellButton.gd").new()
-		button.spell = spell
+		var button: SpellButton = preload("res://scripts/SpellButton.gd").new()
 		button.spell_selected.connect(_on_spell_button_selected)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.size_flags_vertical   = Control.SIZE_SHRINK_CENTER
 		button.mouse_filter          = Control.MOUSE_FILTER_STOP
-		button.add_theme_color_override("font_color",         Color.WHITE)
-		button.add_theme_color_override("font_pressed_color", Color.YELLOW)
-		button.add_theme_color_override("font_hover_color",   Color(1, 1, 0.8))
 		spell_container.add_child(button)
+		button.setup_spell(spell)   # Configurer APRÈS add_child (node dans le tree)
 		spell_buttons.append(button)
 
 	spell_panel.visible = true

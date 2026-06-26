@@ -1,313 +1,138 @@
 extends Node
-## DataLoader.gd - Chargeur de données CSV pour Zimut
-## Charge les données des classes, sorts, ennemis et objets depuis des fichiers CSV
-## Ce script est conçu pour être utilisé comme autoload dans project.godot
+## DataLoader.gd - Chargeur CSV pour Zimut
+## FIX : toutes les fonctions utilitaires ont un type de retour explicite
 
-## Chemins des fichiers CSV (relatifs au projet)
-const CLASS_DATA_PATH = "res://data/classes.csv"
-const SPELL_DATA_PATH = "res://data/sorts.csv"
-const ENEMY_DATA_PATH = "res://data/ennemis.csv"
-const ITEM_DATA_PATH = "res://data/stuff.csv"
+const CLASS_DATA_PATH := "res://data/classes.csv"
+const SPELL_DATA_PATH := "res://data/sorts.csv"
+const ENEMY_DATA_PATH := "res://data/ennemis.csv"
+const ITEM_DATA_PATH  := "res://data/stuff.csv"
 
-## Données chargées
-var classes_data = []
-var spells_data = []
-var enemies_data = []
-var items_data = []
-
-## État de chargement
-var data_loaded = false
+var classes_data: Array = []
+var spells_data: Array  = []
+var enemies_data: Array = []
+var items_data: Array   = []
+var data_loaded: bool   = false
 
 signal data_loaded_successfully
-signal data_load_failed(error)
+signal data_load_failed(error: String)
 
 
-## Charger toutes les données au démarrage
-func _ready():
+func _ready() -> void:
 	load_all_data()
 
 
-## Charger toutes les données
-func load_all_data():
-	var success = true
-	
-	if not load_classes_data():
-		success = false
-		push_error("Failed to load classes data")
-	
-	if not load_spells_data():
-		success = false
-		push_error("Failed to load spells data")
-	
-	if not load_enemies_data():
-		success = false
-		push_error("Failed to load enemies data")
-	
-	if not load_items_data():
-		success = false
-		push_error("Failed to load items data")
-	
-	data_loaded = success
-	
-	if success:
+func load_all_data() -> bool:
+	var ok: bool = true
+	if not _load_csv(CLASS_DATA_PATH, classes_data, ["Niveau","PA","PM","Vita (PV)",
+		"Force (CAC)","Intelligence (Magie)","Agilité (Vit. Atk)","Sagesse (Précision)",
+		"Défense","XP pour atteindre ce niveau"]):
+		ok = false
+		push_error("Impossible de charger classes.csv")
+
+	if not _load_csv(SPELL_DATA_PATH, spells_data, ["Coût PA","Coût PM","Portée","Niveau requis"]):
+		ok = false
+		push_error("Impossible de charger sorts.csv")
+
+	if not _load_csv(ENEMY_DATA_PATH, enemies_data, ["Niveau","PV","Attaque","Défense","PA","PM","XP"]):
+		ok = false
+		push_error("Impossible de charger ennemis.csv")
+
+	# items non bloquant
+	_load_csv(ITEM_DATA_PATH, items_data, ["Niveau requis","Bonus Force","Bonus Intelligence",
+		"Bonus Agilité","Bonus Sagesse","Bonus Vita","Bonus Défense"])
+
+	data_loaded = ok
+	if ok:
 		data_loaded_successfully.emit()
 	else:
-		data_load_failed.emit("Failed to load one or more data files")
-	
-	return success
+		data_load_failed.emit("Échec chargement données")
+	return ok
 
 
-## Charger les données des classes depuis classes.csv
-func load_classes_data():
-	var file = FileAccess.open(CLASS_DATA_PATH, FileAccess.READ)
+## Charge un CSV générique dans `target_array`
+## `numeric_cols` : colonnes à nettoyer des espaces (valeurs numériques)
+func _load_csv(path: String, target_array: Array, numeric_cols: Array) -> bool:
+	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		push_error("Cannot open classes.csv at: %s" % CLASS_DATA_PATH)
 		return false
-	
-	var content = file.get_as_text()
+	var content: String = file.get_as_text()
 	file.close()
-	
-	var lines = content.split("\n")
+
+	var lines: PackedStringArray = content.split("\n")
 	if lines.size() < 2:
-		push_error("classes.csv is empty or invalid")
 		return false
-	
-	# Lire l'en-tête
-	var headers = lines[0].split(",")
-	for i in range(headers.size()):
+
+	var headers: PackedStringArray = lines[0].split(",")
+	for i: int in range(headers.size()):
 		headers[i] = headers[i].strip_edges()
-	
-	# Lire les données
-	classes_data = []
-	for i in range(1, lines.size()):
-		var line = lines[i].strip_edges()
+
+	target_array.clear()
+	for i: int in range(1, lines.size()):
+		var line: String = lines[i].strip_edges()
 		if line.is_empty():
 			continue
-		
-		var values = line.split(",")
-		for j in range(values.size()):
+		var values: PackedStringArray = line.split(",")
+		for j: int in range(values.size()):
 			values[j] = values[j].strip_edges()
-		
-		# Créer un dictionnaire pour cette ligne
-		var entry = {}
-		for j in range(min(headers.size(), values.size())):
-			var header = headers[j]
-			var value = values[j]
-			
-			# Nettoyer les valeurs numériques (enlever les espaces dans les nombres)
-			if header == "Niveau" or header == "PA" or header == "PM" or \
-			   header == "Vita (PV)" or header == "Force (CAC)" or \
-			   header == "Intelligence (Magie)" or header == "Agilité (Vit. Atk)" or \
-			   header == "Sagesse (Précision)" or header == "Défense" or \
-			   header == "XP pour atteindre ce niveau":
-				value = value.replace(" ", "")
-			
-			entry[header] = value
-		
-		classes_data.append(entry)
-	
-	return classes_data.size() > 0
+
+		var entry: Dictionary = {}
+		for j: int in range(mini(headers.size(), values.size())):
+			var h: String = headers[j]
+			var v: String = values[j]
+			if h in numeric_cols:
+				v = v.replace(" ", "")
+			entry[h] = v
+		target_array.append(entry)
+
+	return target_array.size() > 0
 
 
-## Charger les données des sorts depuis sorts.csv
-func load_spells_data():
-	var file = FileAccess.open(SPELL_DATA_PATH, FileAccess.READ)
-	if file == null:
-		push_error("Cannot open sorts.csv at: %s" % SPELL_DATA_PATH)
-		return false
-	
-	var content = file.get_as_text()
-	file.close()
-	
-	var lines = content.split("\n")
-	if lines.size() < 2:
-		push_error("sorts.csv is empty or invalid")
-		return false
-	
-	# Lire l'en-tête
-	var headers = lines[0].split(",")
-	for i in range(headers.size()):
-		headers[i] = headers[i].strip_edges()
-	
-	# Lire les données
-	spells_data = []
-	for i in range(1, lines.size()):
-		var line = lines[i].strip_edges()
-		if line.is_empty():
-			continue
-		
-		var values = line.split(",")
-		for j in range(values.size()):
-			values[j] = values[j].strip_edges()
-		
-		# Créer un dictionnaire pour cette ligne
-		var entry = {}
-		for j in range(min(headers.size(), values.size())):
-			var header = headers[j]
-			var value = values[j]
-			
-			# Nettoyer les valeurs numériques
-			if header == "Coût PA" or header == "Coût PM" or \
-			   header == "Portée" or header == "Niveau requis":
-				value = value.replace(" ", "")
-			
-			entry[header] = value
-		
-		spells_data.append(entry)
-	
-	return spells_data.size() > 0
+# ── Accesseurs utilitaires (types explicites) ───────────────────────────────
 
-
-## Charger les données des ennemis depuis ennemis.csv
-func load_enemies_data():
-	var file = FileAccess.open(ENEMY_DATA_PATH, FileAccess.READ)
-	if file == null:
-		push_error("Cannot open ennemis.csv at: %s" % ENEMY_DATA_PATH)
-		return false
-	
-	var content = file.get_as_text()
-	file.close()
-	
-	var lines = content.split("\n")
-	if lines.size() < 2:
-		push_error("ennemis.csv is empty or invalid")
-		return false
-	
-	# Lire l'en-tête
-	var headers = lines[0].split(",")
-	for i in range(headers.size()):
-		headers[i] = headers[i].strip_edges()
-	
-	# Lire les données
-	enemies_data = []
-	for i in range(1, lines.size()):
-		var line = lines[i].strip_edges()
-		if line.is_empty():
-			continue
-		
-		var values = line.split(",")
-		for j in range(values.size()):
-			values[j] = values[j].strip_edges()
-		
-		# Créer un dictionnaire pour cette ligne
-		var entry = {}
-		for j in range(min(headers.size(), values.size())):
-			var header = headers[j]
-			var value = values[j]
-			
-			# Nettoyer les valeurs numériques
-			if header == "Niveau" or header == "PV" or header == "Attaque" or \
-			   header == "Défense" or header == "PA" or header == "PM" or header == "XP":
-				value = value.replace(" ", "")
-			
-			entry[header] = value
-		
-		enemies_data.append(entry)
-	
-	return enemies_data.size() > 0
-
-
-## Charger les données des objets depuis stuff.csv
-func load_items_data():
-	var file = FileAccess.open(ITEM_DATA_PATH, FileAccess.READ)
-	if file == null:
-		push_error("Cannot open stuff.csv at: %s" % ITEM_DATA_PATH)
-		return false
-	
-	var content = file.get_as_text()
-	file.close()
-	
-	var lines = content.split("\n")
-	if lines.size() < 2:
-		push_error("stuff.csv is empty or invalid")
-		return false
-	
-	# Lire l'en-tête
-	var headers = lines[0].split(",")
-	for i in range(headers.size()):
-		headers[i] = headers[i].strip_edges()
-	
-	# Lire les données
-	items_data = []
-	for i in range(1, lines.size()):
-		var line = lines[i].strip_edges()
-		if line.is_empty():
-			continue
-		
-		var values = line.split(",")
-		for j in range(values.size()):
-			values[j] = values[j].strip_edges()
-		
-		# Créer un dictionnaire pour cette ligne
-		var entry = {}
-		for j in range(min(headers.size(), values.size())):
-			var header = headers[j]
-			var value = values[j]
-			
-			# Nettoyer les valeurs numériques
-			if header == "Niveau requis" or header == "Bonus Force" or \
-			   header == "Bonus Intelligence" or header == "Bonus Agilité" or \
-			   header == "Bonus Sagesse" or header == "Bonus Vita" or header == "Bonus Défense":
-				value = value.replace(" ", "")
-			
-			entry[header] = value
-		
-		items_data.append(entry)
-	
-	return items_data.size() > 0
-
-
-## Obtenir les données des classes pour un niveau spécifique
-func get_class_data(classPlayer_name: String, level: int):
-	for data in classes_data:
-		if data.get("Classe", "") == classPlayer_name and int(data.get("Niveau", "0")) == level:
+func get_class_data(class_name_arg: String, level: int) -> Dictionary:
+	for data: Dictionary in classes_data:
+		if data.get("Classe", "") == class_name_arg and int(data.get("Niveau", "0")) == level:
 			return data
 	return {}
 
 
-## Obtenir tous les sorts pour une classe
-func get_spells_for_class(classPlayer_name: String):
-	var result = []
-	for spell in spells_data:
-		if spell.get("Classe", "") == classPlayer_name:
+func get_spells_for_class(class_name_arg: String) -> Array:
+	var result: Array = []
+	for spell: Dictionary in spells_data:
+		if spell.get("Classe", "") == class_name_arg:
 			result.append(spell)
 	return result
 
 
-## Obtenir les sorts pour une classe et un niveau maximum
-func get_spells_for_class_and_level(classPlayer_name: String, max_level: int):
-	var result = []
-	for spell in spells_data:
-		if spell.get("Classe", "") == classPlayer_name:
-			var required_level = int(spell.get("Niveau requis", "1"))
-			if required_level <= max_level:
+func get_spells_for_class_and_level(class_name_arg: String, max_level: int) -> Array:
+	var result: Array = []
+	for spell: Dictionary in spells_data:
+		if spell.get("Classe", "") == class_name_arg:
+			if int(spell.get("Niveau requis", "1")) <= max_level:
 				result.append(spell)
 	return result
 
 
-## Obtenir les données d'un ennemi pour un niveau spécifique
-func get_enemy_data(enemy_type: String, level: int):
-	for data in enemies_data:
+func get_enemy_data(enemy_type: String, level: int) -> Dictionary:
+	for data: Dictionary in enemies_data:
 		if data.get("Type", "") == enemy_type and int(data.get("Niveau", "0")) == level:
 			return data
 	return {}
 
 
-## Obtenir tous les types d'ennemis uniques
-func get_unique_enemy_types():
-	var types = []
-	for data in enemies_data:
-		var type_name = data.get("Type", "")
-		if not type_name in types:
-			types.append(type_name)
+func get_unique_enemy_types() -> Array:
+	var types: Array = []
+	for data: Dictionary in enemies_data:
+		var t: String = data.get("Type", "")
+		if not t in types:
+			types.append(t)
 	return types
 
 
-## Obtenir tous les noms de classes uniques
-func get_unique_class_names():
-	var names = []
-	for data in classes_data:
-		var classPlayer_name = data.get("Classe", "")
-		if not classPlayer_name in names:
-			names.append(classPlayer_name)
+func get_unique_class_names() -> Array:
+	var names: Array = []
+	for data: Dictionary in classes_data:
+		var n: String = data.get("Classe", "")
+		if not n in names:
+			names.append(n)
 	return names

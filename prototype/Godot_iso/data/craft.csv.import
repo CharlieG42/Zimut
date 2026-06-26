@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://cooc2g8yrhulo"
+
+[deps]
+
+files=["res://data/craft.Nom.translation", "res://data/craft.Niveau requis.translation", "res://data/craft.Ressource 1.translation", "res://data/craft.Quantit#U00e9 1.translation", "res://data/craft.Ressource 2.translation", "res://data/craft.Quantit#U00e9 2.translation", "res://data/craft.Ressource 3.translation", "res://data/craft.Quantit#U00e9 3.translation", "res://data/craft.Co#U00fbt or.translation"]
+
+source_file="res://data/craft.csv"
+dest_files=["res://data/craft.Nom.translation", "res://data/craft.Niveau requis.translation", "res://data/craft.Ressource 1.translation", "res://data/craft.Quantit#U00e9 1.translation", "res://data/craft.Ressource 2.translation", "res://data/craft.Quantit#U00e9 2.translation", "res://data/craft.Ressource 3.translation", "res://data/craft.Quantit#U00e9 3.translation", "res://data/craft.Co#U00fbt or.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

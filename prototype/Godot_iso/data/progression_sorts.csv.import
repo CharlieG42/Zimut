@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dni8rhmrp3f47"
+
+[deps]
+
+files=["res://data/progression_sorts.Niveau.translation", "res://data/progression_sorts.Sorts d#U00e9bloqu#U00e9s (s#U00e9par#U00e9s par ;).translation"]
+
+source_file="res://data/progression_sorts.csv"
+dest_files=["res://data/progression_sorts.Niveau.translation", "res://data/progression_sorts.Sorts d#U00e9bloqu#U00e9s (s#U00e9par#U00e9s par ;).translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

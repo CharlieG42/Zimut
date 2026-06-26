@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://drgdsb80ovbod"
+
+[deps]
+
+files=["res://data/stuff.Nom.translation", "res://data/stuff.Niveau requis.translation", "res://data/stuff.Bonus Force.translation", "res://data/stuff.Bonus Intelligence.translation", "res://data/stuff.Bonus Agilit#U00e9.translation", "res://data/stuff.Bonus Sagesse.translation", "res://data/stuff.Bonus Vita.translation", "res://data/stuff.Bonus D#U00e9fense.translation", "res://data/stuff.Effet sp#U00e9cial.translation"]
+
+source_file="res://data/stuff.csv"
+dest_files=["res://data/stuff.Nom.translation", "res://data/stuff.Niveau requis.translation", "res://data/stuff.Bonus Force.translation", "res://data/stuff.Bonus Intelligence.translation", "res://data/stuff.Bonus Agilit#U00e9.translation", "res://data/stuff.Bonus Sagesse.translation", "res://data/stuff.Bonus Vita.translation", "res://data/stuff.Bonus D#U00e9fense.translation", "res://data/stuff.Effet sp#U00e9cial.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

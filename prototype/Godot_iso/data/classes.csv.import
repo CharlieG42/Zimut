@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dubepj0o8f71c"
+
+[deps]
+
+files=["res://data/classes.Niveau.translation", "res://data/classes.PA.translation", "res://data/classes.PM.translation", "res://data/classes.Vita (PV).translation", "res://data/classes.Force (CAC).translation", "res://data/classes.Intelligence (Magie).translation", "res://data/classes.Agilit#U00e9 (Vit. Atk).translation", "res://data/classes.Sagesse (Pr#U00e9cision).translation", "res://data/classes.D#U00e9fense.translation", "res://data/classes.XP pour atteindre ce niveau.translation"]
+
+source_file="res://data/classes.csv"
+dest_files=["res://data/classes.Niveau.translation", "res://data/classes.PA.translation", "res://data/classes.PM.translation", "res://data/classes.Vita (PV).translation", "res://data/classes.Force (CAC).translation", "res://data/classes.Intelligence (Magie).translation", "res://data/classes.Agilit#U00e9 (Vit. Atk).translation", "res://data/classes.Sagesse (Pr#U00e9cision).translation", "res://data/classes.D#U00e9fense.translation", "res://data/classes.XP pour atteindre ce niveau.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

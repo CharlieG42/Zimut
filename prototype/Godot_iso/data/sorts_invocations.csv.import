@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://c3d3wyfnbboh7"
+
+[deps]
+
+files=["res://data/sorts_invocations.Nom.translation", "res://data/sorts_invocations.Co#U00fbt PA.translation", "res://data/sorts_invocations.Co#U00fbt PM.translation", "res://data/sorts_invocations.Port#U00e9e.translation", "res://data/sorts_invocations.Effet.translation", "res://data/sorts_invocations.Type.translation"]
+
+source_file="res://data/sorts_invocations.csv"
+dest_files=["res://data/sorts_invocations.Nom.translation", "res://data/sorts_invocations.Co#U00fbt PA.translation", "res://data/sorts_invocations.Co#U00fbt PM.translation", "res://data/sorts_invocations.Port#U00e9e.translation", "res://data/sorts_invocations.Effet.translation", "res://data/sorts_invocations.Type.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

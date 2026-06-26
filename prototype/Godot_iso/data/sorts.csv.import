@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://0i1fggqvbj77"
+
+[deps]
+
+files=["res://data/sorts.Nom.translation", "res://data/sorts.Co#U00fbt PA.translation", "res://data/sorts.Co#U00fbt PM.translation", "res://data/sorts.Port#U00e9e.translation", "res://data/sorts.Effet.translation", "res://data/sorts.Niveau requis.translation", "res://data/sorts.Type.translation"]
+
+source_file="res://data/sorts.csv"
+dest_files=["res://data/sorts.Nom.translation", "res://data/sorts.Co#U00fbt PA.translation", "res://data/sorts.Co#U00fbt PM.translation", "res://data/sorts.Port#U00e9e.translation", "res://data/sorts.Effet.translation", "res://data/sorts.Niveau requis.translation", "res://data/sorts.Type.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true
