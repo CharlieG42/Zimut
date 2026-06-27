@@ -5,9 +5,9 @@ extends Node
 ##         load_data_fallback crée un DataLoader enfant qui écrase l'autoload ;
 ##         init_entities() cherche colonne "Classe" inexistante dans le CSV ennemis
 
-const GRID_SIZE        := 10
-const CELL_SIZE        := Vector2i(100, 100)
-const CELL_HALF_OFFSET := Vector2i(50, 50)
+const GRID_SIZE        := 8
+const CELL_SIZE        := Vector2i(140, 140)
+const CELL_HALF_OFFSET := Vector2i(70, 70)
 
 const DEFAULT_PLAYER_LEVEL := 100
 const DEFAULT_ENEMY_LEVEL  := 30
@@ -222,7 +222,7 @@ func init_grid() -> void:
 
 func init_entities() -> void:
 	var player_classes: Array[String]    = ["Tank", "Assassin", "Mage"]
-	var player_positions: Array[Vector2i] = [Vector2i(2, 2), Vector2i(2, 3), Vector2i(3, 2)]
+	var player_positions: Array[Vector2i] = [Vector2i(1, 1), Vector2i(2, 1), Vector2i(1, 2)]
 	players = []
 
 	var classes_data: Array = get_classes_data()
@@ -293,7 +293,7 @@ func init_entities() -> void:
 
 	# ── Ennemis ────────────────────────────────────────────────────────────
 	var enemy_types: Array[String]       = ["Gobelin", "Squelette", "Loup"]
-	var enemy_positions: Array[Vector2i]  = [Vector2i(7, 7), Vector2i(7, 6), Vector2i(6, 7)]
+	var enemy_positions: Array[Vector2i]  = [Vector2i(6, 6), Vector2i(6, 5), Vector2i(5, 6)]
 	enemies = []
 
 	for i: int in range(enemy_types.size()):

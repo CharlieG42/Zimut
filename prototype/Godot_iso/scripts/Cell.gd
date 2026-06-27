@@ -4,7 +4,7 @@ class_name Cell
 ## Corrections : détection de clic, barres de vie, entité active
 ## Support des sprites pour les joueurs et ennemis
 
-const CELL_SIZE = Vector2i(100, 100)
+const CELL_SIZE = Vector2i(140, 140)
 const HALF = Vector2(50, 50)
 
 ## Chemins des sprites (relatifs au projet)

@@ -1,7 +1,7 @@
 extends Node
 ## DatabaseManager.gd - Gestionnaire de base de données SQLite pour Zimut
 ## Remplace DataLoader.gd pour lire depuis zimut.db au lieu des CSV
-## Utilise le plugin SQLite de Godot 4.x
+## Utilise le module SQLite intégré de Godot 4.x
 
 ## Chemin de la base de données
 const DB_PATH = "res://database/zimut.db"
@@ -29,12 +29,21 @@ func _ready():
 
 ## Charger toutes les données depuis la base de données
 func load_all_data():
+	# Vérifier si SQLite est disponible
+	if not SQLite.is_class_available():
+		push_error("SQLite module not available - using CSV fallback")
+		load_fallback_data()
+		data_source_info.emit("Fichiers CSV chargés (module SQLite non disponible)")
+		data_loaded_successfully.emit()
+		return false
+	
 	var db = SQLite.new()
 	var err = db.open(DB_PATH)
 	
 	if err != OK:
 		push_error("Cannot open database at: %s" % DB_PATH)
 		load_fallback_data()
+		data_source_info.emit("Fichiers CSV chargés (zimut.db non trouvé)")
 		data_loaded_successfully.emit()
 		data_load_failed.emit("Database not found - using fallback data")
 		return false

@@ -2,8 +2,8 @@ extends Node2D
 ## GridManager.gd - Gestion de la grille isométrique
 ## Ajouts : highlight_spell_range, highlight_move_range, clear_all_highlights
 
-const CELL_SIZE   := Vector2i(100, 100)
-const HALF_CELL   := Vector2(50, 50)
+const CELL_SIZE   := Vector2i(140, 140)
+const HALF_CELL   := Vector2(70, 70)
 
 var game_manager
 var cell_nodes: Array        = []
