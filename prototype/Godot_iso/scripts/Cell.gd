@@ -101,7 +101,7 @@ func _draw():
 		_draw_outline(PackedVector2Array([Vector2(hw*0.03,hh), Vector2(hw,hh*0.03), Vector2(w-hw*0.03,hh), Vector2(hw,hh*1.97)]), HIGHLIGHT_COLOR, 3.0)
 
 	if entity:
-		_draw_entity()
+		_draw_entity(hw, hh)
 
 
 func update_appearance():
@@ -132,7 +132,7 @@ func set_in_spell_range(value):
 
 
 # Dessiner l'entité
-func _draw_entity():
+func _draw_entity(hw, hh):
 	var center = HALF
 	var entity_type = entity.get("entity_type", "")
 	var classe = entity.get("classe", "")
@@ -168,7 +168,7 @@ func _try_load_sprite(classe, entity_type):
 			var tex_size = entity_sprite.texture.get_size()
 			var scale_f = 0.8
 			entity_sprite.scale = Vector2(scale_f, scale_f)
-			entity_sprite.position = Vector2(HALF.x, HALF.y - tex_size.y * scale_f * 0.5 + hh * 0.11)
+			entity_sprite.position = Vector2(HALF.x, HALF.y - tex_size.y * scale_f * 0.5 + HALF.y * 0.11)
 			return true
 	
 	return false
