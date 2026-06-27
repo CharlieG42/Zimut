@@ -73,7 +73,7 @@ func _draw():
 		draw_polygon(PackedVector2Array([Vector2(hw*0.3,hh*0.9), Vector2(hw,hh*0.1), Vector2(w-hw*0.3,hh*0.9), Vector2(hw,hh*0.7)]), _colors4(GRASS_HIGHLIGHT))
 		draw_polygon(PackedVector2Array([Vector2(hw*0.3,hh*1.1), Vector2(hw,hh*1.9), Vector2(w-hw*0.3,hh*1.1), Vector2(hw,hh*1.3)]), _colors4(GRASS_SHADOW))
 		_draw_outline(main_points, BORDER_HIGHLIGHT, 1.0)
-		_draw_grass_texture()
+		_draw_grass_texture(hw, hh)
 	else:
 		draw_polygon(main_points, _colors4(DIRT_COLOR))
 		draw_polygon(PackedVector2Array([Vector2(0,hh), Vector2(hw,0), Vector2(hw,hh)]), _colors3(DIRT_SIDE_LEFT))
@@ -81,7 +81,7 @@ func _draw():
 		draw_polygon(PackedVector2Array([Vector2(hw*0.3,hh*0.9), Vector2(hw,hh*0.1), Vector2(w-hw*0.3,hh*0.9), Vector2(hw,hh*0.7)]), _colors4(DIRT_HIGHLIGHT))
 		draw_polygon(PackedVector2Array([Vector2(hw*0.15,hh*0.9), Vector2(hw*0.5,hh*1.35), Vector2(w-hw*0.15,hh*0.9), Vector2(hw,hh*0.45)]), _colors4(DIRT_SHADOW))
 		_draw_outline(main_points, BORDER_HIGHLIGHT, 1.0)
-		_draw_dirt_texture()
+		_draw_dirt_texture(hw, hh)
 
 	# Overlays d'état (ordre : portée < sélection < highlight actif)
 	if in_spell_range:
@@ -228,7 +228,7 @@ func _draw_health_bar(center):
 
 
 # Textures procédurales
-func _draw_grass_texture():
+func _draw_grass_texture(hw, hh):
 	var c = Color(0.24, 0.70, 0.44)
 	draw_line(Vector2(hw*0.28, hh*0.42), Vector2(hw*0.42, hh*0.28), c, 1.5, true)
 	draw_line(Vector2(hw*0.84, hh*0.5), Vector2(hw*1.0, hh*0.35), c, 1.5, true)
@@ -236,7 +236,7 @@ func _draw_grass_texture():
 	draw_line(Vector2(hw*1.0, hh*0.91), Vector2(hw*1.12, hh*0.77), c, 1.5, true)
 
 
-func _draw_dirt_texture():
+func _draw_dirt_texture(hw, hh):
 	var c = Color(0.63, 0.32, 0.18)
 	for data in [[Vector2(hw*0.35,hh*0.5), Vector2(hw*0.06,hh*0.03)], 
 				 [Vector2(hw*0.63,hh*0.56), Vector2(hw*0.04,hh*0.02)],
