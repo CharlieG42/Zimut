@@ -119,17 +119,22 @@ func _extract_heal_from_effect(effect: String) -> int:
 
 
 func _ready() -> void:
+	# Essayer DatabaseManager d'abord, puis DataLoader pour la rétrocompatibilité
+	var db_manager: Node = get_node_or_null("/root/DatabaseManager")
 	var data_loader: Node = get_node_or_null("/root/DataLoader")
-	if data_loader == null:
-		push_error("DataLoader autoload introuvable — vérifier project.godot")
+	
+	var manager: Node = db_manager if db_manager != null else data_loader
+	
+	if manager == null:
+		push_error("DatabaseManager/DataLoader autoload introuvable — vérifier project.godot")
 		_init_with_fallback_data()
 		return
 
-	if data_loader.data_loaded:
+	if manager.data_loaded:
 		_on_data_loaded()
 	else:
-		if not data_loader.data_loaded_successfully.is_connected(_on_data_loaded):
-			data_loader.data_loaded_successfully.connect(_on_data_loaded)
+		if not manager.data_loaded_successfully.is_connected(_on_data_loaded):
+			manager.data_loaded_successfully.connect(_on_data_loaded)
 
 
 func _on_data_loaded() -> void:
@@ -155,6 +160,11 @@ func _on_data_loaded() -> void:
 # ── Accesseurs DataLoader (retour Array explicite) ──────────────────────────
 
 func get_classes_data() -> Array:
+	# Essayer DatabaseManager d'abord, puis DataLoader pour la rétrocompatibilité
+	var db_manager: Node = get_node_or_null("/root/DatabaseManager")
+	if db_manager:
+		return db_manager.classes_data
+	
 	var dl: Node = get_node_or_null("/root/DataLoader")
 	if dl:
 		return dl.classes_data
@@ -162,6 +172,11 @@ func get_classes_data() -> Array:
 
 
 func get_spells_data() -> Array:
+	# Essayer DatabaseManager d'abord, puis DataLoader pour la rétrocompatibilité
+	var db_manager: Node = get_node_or_null("/root/DatabaseManager")
+	if db_manager:
+		return db_manager.spells_data
+	
 	var dl: Node = get_node_or_null("/root/DataLoader")
 	if dl:
 		return dl.spells_data
@@ -169,6 +184,11 @@ func get_spells_data() -> Array:
 
 
 func get_enemies_data() -> Array:
+	# Essayer DatabaseManager d'abord, puis DataLoader pour la rétrocompatibilité
+	var db_manager: Node = get_node_or_null("/root/DatabaseManager")
+	if db_manager:
+		return db_manager.enemies_data
+	
 	var dl: Node = get_node_or_null("/root/DataLoader")
 	if dl:
 		return dl.enemies_data

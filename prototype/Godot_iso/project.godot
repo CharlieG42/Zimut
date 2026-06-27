@@ -19,7 +19,7 @@ script/strict_mode=false
 [autoload]
 
 GameManager="*res://scripts/GameManager.gd"
-DataLoader="*res://scripts/DataLoader.gd"
+DatabaseManager="*res://scripts/DatabaseManager.gd"
 
 [display]
 
