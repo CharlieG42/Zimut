@@ -137,6 +137,10 @@ func _on_game_ended(victory: bool) -> void:
 	game_over_label.text = "VICTOIRE !" if victory else "DÉFAITE..."
 
 
+func hide_game_over_panel() -> void:
+	game_over_panel.visible = false
+
+
 func _on_action_done(_entity, _from: Vector2i, _to: Vector2i) -> void:
 	update_ui()
 	update_entity_display()

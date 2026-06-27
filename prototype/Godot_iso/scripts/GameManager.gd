@@ -665,6 +665,12 @@ func reset_game() -> void:
 	game_over = false; victory = false
 	selected_spell = null; selected_entity = null
 	current_turn = 0; current_player_index = 0; turn_count = 1
+	
+	# Masquer le panneau de fin de jeu
+	var ui_manager: Node = get_node_or_null("/root/Main/UIManager")
+	if ui_manager and ui_manager.has_method("hide_game_over_panel"):
+		ui_manager.hide_game_over_panel()
+	
 	init_grid()
 	init_entities()
 	turn_changed.emit(current_turn)
