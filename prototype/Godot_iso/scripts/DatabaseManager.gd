@@ -1,10 +1,7 @@
 extends Node
-## DatabaseManager.gd - Gestionnaire de base de données SQLite pour Zimut
-## Remplace DataLoader.gd pour lire depuis zimut.db au lieu des CSV
-## Utilise le module SQLite intégré de Godot 4.x
-
-## Chemin de la base de données
-const DB_PATH = "res://database/zimut.db"
+## DatabaseManager.gd - Gestionnaire de données pour Zimut
+## Pour l'instant, utilise DataLoader (CSV) car SQLite n'est pas disponible
+## Peut être migré vers SQLite plus tard
 
 ## Données chargées (même structure que DataLoader pour la compatibilité)
 var classes_data = []
@@ -15,7 +12,7 @@ var items_data = []
 ## État de chargement
 var data_loaded = false
 var using_database = false
-var using_fallback = false
+var using_fallback = true
 
 signal data_loaded_successfully
 signal data_load_failed(error)
@@ -27,198 +24,9 @@ func _ready():
 	load_all_data()
 
 
-## Charger toutes les données depuis la base de données
+## Charger toutes les données depuis DataLoader (CSV)
 func load_all_data():
-	# Vérifier si SQLite est disponible
-	if not SQLite.is_class_available():
-		push_error("SQLite module not available - using CSV fallback")
-		load_fallback_data()
-		data_source_info.emit("Fichiers CSV chargés (module SQLite non disponible)")
-		data_loaded_successfully.emit()
-		return false
-	
-	var db = SQLite.new()
-	var err = db.open(DB_PATH)
-	
-	if err != OK:
-		push_error("Cannot open database at: %s" % DB_PATH)
-		load_fallback_data()
-		data_source_info.emit("Fichiers CSV chargés (zimut.db non trouvé)")
-		data_loaded_successfully.emit()
-		data_load_failed.emit("Database not found - using fallback data")
-		return false
-	
-	var success = true
-	
-	# Charger les classes
-	if not load_classes_data(db):
-		success = false
-		push_error("Failed to load classes from database")
-	
-	# Charger les sorts
-	if not load_spells_data(db):
-		success = false
-		push_error("Failed to load spells from database")
-	
-	# Charger les ennemis
-	if not load_enemies_data(db):
-		success = false
-		push_error("Failed to load enemies from database")
-	
-	# Charger les objets
-	if not load_items_data(db):
-		success = false
-		push_error("Failed to load items from database")
-	
-	db.close()
-	
-	data_loaded = success
-	using_database = success
-	
-	if success:
-		data_source_info.emit("Base de données SQLite (zimut.db) chargée avec succès")
-		data_loaded_successfully.emit()
-	else:
-		data_source_info.emit("ERREUR: Échec du chargement de la base de données")
-		data_load_failed.emit("Failed to load one or more tables from database")
-	
-	return success
-
-
-## Charger les classes depuis la table classes
-func load_classes_data(db: SQLite) -> bool:
-	classes_data = []
-	
-	var query = "SELECT * FROM classes"
-	var err = db.execute(query)
-	
-	if err != OK:
-		push_error("Error executing query: %s" % db.get_errmsg())
-		return false
-	
-	# Récupérer les noms de colonnes
-	var column_count = db.get_column_count()
-	var columns = []
-	for i in range(column_count):
-		columns.append(db.get_column_name(i))
-	
-	# Lire les résultats
-	while db.step() == OK:
-		var entry = {}
-		for i in range(column_count):
-			var col_name = columns[i]
-			var value = db.get_column_text(i)
-			entry[col_name] = value
-		classes_data.append(entry)
-	
-	db.reset()
-	return classes_data.size() > 0
-
-
-## Charger les sorts depuis la table sorts
-func load_spells_data(db: SQLite) -> bool:
-	spells_data = []
-	
-	var query = "SELECT * FROM sorts"
-	var err = db.execute(query)
-	
-	if err != OK:
-		push_error("Error executing query: %s" % db.get_errmsg())
-		return false
-	
-	# Récupérer les noms de colonnes
-	var column_count = db.get_column_count()
-	var columns = []
-	for i in range(column_count):
-		columns.append(db.get_column_name(i))
-	
-	# Lire les résultats
-	while db.step() == OK:
-		var entry = {}
-		for i in range(column_count):
-			var col_name = columns[i]
-			var value = db.get_column_text(i)
-			# Nettoyer les valeurs numériques
-			if col_name == "Cout_PA" or col_name == "Cout_PM" or \
-			   col_name == "Portee" or col_name == "Niveau_requis" or \
-			   col_name.begins_with("Degats_") or col_name.begins_with("Soins") or \
-			   col_name.begins_with("Resistance_") or col_name.begins_with("Debuff_") or \
-			   col_name.begins_with("Buff_"):
-				value = value.replace(" ", "")
-			entry[col_name] = value
-		spells_data.append(entry)
-	
-	db.reset()
-	return spells_data.size() > 0
-
-
-## Charger les ennemis depuis la table ennemis
-func load_enemies_data(db: SQLite) -> bool:
-	enemies_data = []
-	
-	var query = "SELECT * FROM ennemis"
-	var err = db.execute(query)
-	
-	if err != OK:
-		push_error("Error executing query: %s" % db.get_errmsg())
-		return false
-	
-	# Récupérer les noms de colonnes
-	var column_count = db.get_column_count()
-	var columns = []
-	for i in range(column_count):
-		columns.append(db.get_column_name(i))
-	
-	# Lire les résultats
-	while db.step() == OK:
-		var entry = {}
-		for i in range(column_count):
-			var col_name = columns[i]
-			var value = db.get_column_text(i)
-			# Nettoyer les valeurs numériques
-			if col_name == "Niveau" or col_name == "PV" or col_name == "Attaque" or \
-			   col_name == "Défense" or col_name == "PA" or col_name == "PM" or col_name == "XP":
-				value = value.replace(" ", "")
-			entry[col_name] = value
-		enemies_data.append(entry)
-	
-	db.reset()
-	return enemies_data.size() > 0
-
-
-## Charger les objets depuis la table stuff
-func load_items_data(db: SQLite) -> bool:
-	items_data = []
-	
-	var query = "SELECT * FROM stuff"
-	var err = db.execute(query)
-	
-	if err != OK:
-		push_error("Error executing query: %s" % db.get_errmsg())
-		return false
-	
-	# Récupérer les noms de colonnes
-	var column_count = db.get_column_count()
-	var columns = []
-	for i in range(column_count):
-		columns.append(db.get_column_name(i))
-	
-	# Lire les résultats
-	while db.step() == OK:
-		var entry = {}
-		for i in range(column_count):
-			var col_name = columns[i]
-			var value = db.get_column_text(i)
-			entry[col_name] = value
-		items_data.append(entry)
-	
-	db.reset()
-	return items_data.size() > 0
-
-
-## Charger des données par défaut si la base n'est pas disponible
-func load_fallback_data():
-	# Charger les données par défaut depuis les CSV si disponibles
+	# Pour l'instant, on utilise DataLoader (CSV)
 	var data_loader = preload("res://scripts/DataLoader.gd").new()
 	add_child(data_loader)
 	
@@ -231,11 +39,14 @@ func load_fallback_data():
 	enemies_data = data_loader.enemies_data
 	items_data = data_loader.items_data
 	
-	using_fallback = true
-	using_database = false
-	data_source_info.emit("Fichiers CSV chargés (zimut.db non trouvé)")
-	
 	data_loaded = true
+	using_database = false
+	using_fallback = true
+	
+	data_source_info.emit("Fichiers CSV chargés (SQLite non activé)")
+	data_loaded_successfully.emit()
+	
+	return true
 
 
 # ── Accesseurs utilitaires (compatibilité avec DataLoader) ──────────────────

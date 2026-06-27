@@ -56,7 +56,7 @@ func _setup_ui_elements() -> void:
 		db_settings.font_size = 24
 		db_settings.font_color = Color(1, 0.5, 0)  # Orange pour visibilité
 		data_source_label.label_settings = db_settings
-		data_source_label.horizontal_alignment = ALIGN_LEFT
+		data_source_label.horizontal_alignment = Control.ALIGN_LEFT
 		data_source_label.visible = true
 		add_child(data_source_label)
 
