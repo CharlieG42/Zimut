@@ -147,9 +147,9 @@ func _draw_entity():
 			draw_line(tip + Vector2(hw*0.1, hh*0.11), tip, Color(1.0, 1.0, 0.3), 2.5)
 	else:
 		entity_sprite.visible = false
-		_draw_entity_geometric(center, entity_type, classe, is_active, color)
+		_draw_entity_geometric(center, entity_type, classe, is_active, color, hw, hh)
 
-	_draw_health_bar(center)
+	_draw_health_bar(center, hw, hh)
 
 
 func _try_load_sprite(classe, entity_type):
@@ -174,7 +174,7 @@ func _try_load_sprite(classe, entity_type):
 	return false
 
 
-func _draw_entity_geometric(center, entity_type, classe, is_active, color):
+func _draw_entity_geometric(center, entity_type, classe, is_active, color, hw, hh):
 	# Ombre portée
 	_draw_ellipse(center + Vector2(0, hh*0.11), Vector2(hw*0.25, hh*0.085), Color(0, 0, 0, 0.35))
 
@@ -206,7 +206,7 @@ func _draw_entity_geometric(center, entity_type, classe, is_active, color):
 			draw_line(tri[i], tri[(i + 1) % tri.size()], Color.RED, 1.5, true)
 
 
-func _draw_health_bar(center):
+func _draw_health_bar(center, hw, hh):
 	var max_pv = float(entity.get("max_pv", entity.get("current_pv", 1)))
 	var cur_pv = float(entity.get("current_pv", 0))
 	if max_pv <= 0:
