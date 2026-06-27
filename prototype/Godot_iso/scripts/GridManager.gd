@@ -57,10 +57,10 @@ func _add_random_decorations() -> void:
 	var decoration_positions: Array[Vector2i] = [
 		Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0),
 		Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1),
-		Vector2i(8, 8), Vector2i(9, 8), Vector2i(8, 9),
 		Vector2i(6, 6), Vector2i(7, 6), Vector2i(6, 7),
-		Vector2i(1, 8), Vector2i(2, 8), Vector2i(8, 1),
-		Vector2i(3, 7), Vector2i(7, 3), Vector2i(4, 8),
+		Vector2i(5, 5), Vector2i(7, 7), Vector2i(5, 7),
+		Vector2i(1, 6), Vector2i(2, 6), Vector2i(6, 1),
+		Vector2i(3, 5), Vector2i(5, 3), Vector2i(4, 6),
 	]
 	for pos: Vector2i in decoration_positions:
 		if pos.x < 0 or pos.x >= game_manager.GRID_SIZE:
@@ -94,14 +94,15 @@ func _add_random_decorations() -> void:
 func grid_to_screen(grid_pos: Vector2i) -> Vector2:
 	var x: float = float(grid_pos.x - grid_pos.y) * float(CELL_SIZE.x) / 2.0
 	var y: float = float(grid_pos.x + grid_pos.y) * float(CELL_SIZE.y) / 2.0
+	# Center the 8x8 grid (560, 560) on screen (960, 540)
 	x += 960.0
-	y += 90.0
+	y += 100.0
 	return Vector2(x, y)
 
 
 func screen_to_grid(screen_pos: Vector2) -> Vector2i:
 	var x_s: float = screen_pos.x - 960.0
-	var y_s: float = screen_pos.y - 90.0
+	var y_s: float = screen_pos.y - 100.0
 	var gx: float  = (x_s / (float(CELL_SIZE.x) / 2.0) + y_s / (float(CELL_SIZE.y) / 2.0)) / 2.0
 	var gy: float  = (y_s / (float(CELL_SIZE.y) / 2.0) - x_s / (float(CELL_SIZE.x) / 2.0)) / 2.0
 	return Vector2i(roundi(gx), roundi(gy))

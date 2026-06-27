@@ -5,7 +5,7 @@ class_name Cell
 ## Support des sprites pour les joueurs et ennemis
 
 const CELL_SIZE = Vector2i(140, 140)
-const HALF = Vector2(50, 50)
+const HALF = Vector2(70, 70)
 
 ## Chemins des sprites (relatifs au projet)
 const SPRITE_PATH_PLAYERS = "res://assets/sprites/players/"
@@ -55,44 +55,50 @@ func _ready():
 
 
 func _draw():
+	# Coordonnées basées sur CELL_SIZE (140x140)
+	var w = float(CELL_SIZE.x)
+	var h = float(CELL_SIZE.y)
+	var hw = w / 2.0
+	var hh = h / 2.0
+	
 	var main_points = PackedVector2Array([
-		Vector2(0, 50), Vector2(50, 0), Vector2(100, 50), Vector2(50, 100)
+		Vector2(0, hh), Vector2(hw, 0), Vector2(w, hh), Vector2(hw, h)
 	])
 	var is_grass = (grid_position.x + grid_position.y) % 2 == 0
 
 	if is_grass:
 		draw_polygon(main_points, _colors4(GRASS_COLOR))
-		draw_polygon(PackedVector2Array([Vector2(0,50), Vector2(50,0), Vector2(50,50)]), _colors3(GRASS_SIDE_LEFT))
-		draw_polygon(PackedVector2Array([Vector2(50,50), Vector2(100,50), Vector2(50,100)]), _colors3(GRASS_SIDE_RIGHT))
-		draw_polygon(PackedVector2Array([Vector2(15,45), Vector2(50,5), Vector2(85,45), Vector2(50,35)]), _colors4(GRASS_HIGHLIGHT))
-		draw_polygon(PackedVector2Array([Vector2(15,55), Vector2(50,95), Vector2(85,55), Vector2(50,65)]), _colors4(GRASS_SHADOW))
+		draw_polygon(PackedVector2Array([Vector2(0,hh), Vector2(hw,0), Vector2(hw,hh)]), _colors3(GRASS_SIDE_LEFT))
+		draw_polygon(PackedVector2Array([Vector2(hw,hh), Vector2(w,hh), Vector2(hw,h)]), _colors3(GRASS_SIDE_RIGHT))
+		draw_polygon(PackedVector2Array([Vector2(hw*0.3,hh*0.9), Vector2(hw,hh*0.1), Vector2(w-hw*0.3,hh*0.9), Vector2(hw,hh*0.7)]), _colors4(GRASS_HIGHLIGHT))
+		draw_polygon(PackedVector2Array([Vector2(hw*0.3,hh*1.1), Vector2(hw,hh*1.9), Vector2(w-hw*0.3,hh*1.1), Vector2(hw,hh*1.3)]), _colors4(GRASS_SHADOW))
 		_draw_outline(main_points, BORDER_HIGHLIGHT, 1.0)
 		_draw_grass_texture()
 	else:
 		draw_polygon(main_points, _colors4(DIRT_COLOR))
-		draw_polygon(PackedVector2Array([Vector2(0,50), Vector2(50,0), Vector2(50,50)]), _colors3(DIRT_SIDE_LEFT))
-		draw_polygon(PackedVector2Array([Vector2(50,50), Vector2(100,50), Vector2(50,100)]), _colors3(DIRT_SIDE_RIGHT))
-		draw_polygon(PackedVector2Array([Vector2(15,45), Vector2(50,5), Vector2(85,45), Vector2(50,35)]), _colors4(DIRT_HIGHLIGHT))
-		draw_polygon(PackedVector2Array([Vector2(15,55), Vector2(50,95), Vector2(85,55), Vector2(50,65)]), _colors4(DIRT_SHADOW))
+		draw_polygon(PackedVector2Array([Vector2(0,hh), Vector2(hw,0), Vector2(hw,hh)]), _colors3(DIRT_SIDE_LEFT))
+		draw_polygon(PackedVector2Array([Vector2(hw,hh), Vector2(w,hh), Vector2(hw,h)]), _colors3(DIRT_SIDE_RIGHT))
+		draw_polygon(PackedVector2Array([Vector2(hw*0.3,hh*0.9), Vector2(hw,hh*0.1), Vector2(w-hw*0.3,hh*0.9), Vector2(hw,hh*0.7)]), _colors4(DIRT_HIGHLIGHT))
+		draw_polygon(PackedVector2Array([Vector2(hw*0.15,hh*0.9), Vector2(hw*0.5,hh*1.35), Vector2(w-hw*0.15,hh*0.9), Vector2(hw,hh*0.45)]), _colors4(DIRT_SHADOW))
 		_draw_outline(main_points, BORDER_HIGHLIGHT, 1.0)
 		_draw_dirt_texture()
 
 	# Overlays d'état (ordre : portée < sélection < highlight actif)
 	if in_spell_range:
 		draw_polygon(main_points, _colors4(Color(1.0, 0.3, 0.2, 0.25)))
-		_draw_outline(PackedVector2Array([Vector2(4,50), Vector2(50,4), Vector2(96,50), Vector2(50,96)]), SPELL_RANGE_COLOR, 2.5)
+		_draw_outline(PackedVector2Array([Vector2(hw*0.04,hh), Vector2(hw,hh*0.04), Vector2(w-hw*0.04,hh), Vector2(hw,hh*1.96)]), SPELL_RANGE_COLOR, 2.5)
 	elif in_move_range:
 		draw_polygon(main_points, _colors4(Color(0.2, 0.7, 1.0, 0.22)))
-		_draw_outline(PackedVector2Array([Vector2(4,50), Vector2(50,4), Vector2(96,50), Vector2(50,96)]), MOVE_RANGE_COLOR, 2.5)
+		_draw_outline(PackedVector2Array([Vector2(hw*0.04,hh), Vector2(hw,hh*0.04), Vector2(w-hw*0.04,hh), Vector2(hw,hh*1.96)]), MOVE_RANGE_COLOR, 2.5)
 
 	if selected:
 		draw_polygon(main_points, _colors4(Color(1.0, 0.84, 0.0, 0.18)))
-		_draw_outline(PackedVector2Array([Vector2(4,50), Vector2(50,4), Vector2(96,50), Vector2(50,96)]), SELECTION_COLOR, 3.0)
+		_draw_outline(PackedVector2Array([Vector2(hw*0.04,hh), Vector2(hw,hh*0.04), Vector2(w-hw*0.04,hh), Vector2(hw,hh*1.96)]), SELECTION_COLOR, 3.0)
 		# Double contour intérieur style Waven
-		_draw_outline(PackedVector2Array([Vector2(12,50), Vector2(50,12), Vector2(88,50), Vector2(50,88)]), Color(1.0,1.0,0.6,0.5), 1.2)
+		_draw_outline(PackedVector2Array([Vector2(hw*0.12,hh), Vector2(hw,hh*0.12), Vector2(w-hw*0.12,hh), Vector2(hw,hh*1.88)]), Color(1.0,1.0,0.6,0.5), 1.2)
 
 	if highlighted:
-		_draw_outline(PackedVector2Array([Vector2(3,50), Vector2(50,3), Vector2(97,50), Vector2(50,97)]), HIGHLIGHT_COLOR, 3.0)
+		_draw_outline(PackedVector2Array([Vector2(hw*0.03,hh), Vector2(hw,hh*0.03), Vector2(w-hw*0.03,hh), Vector2(hw,hh*1.97)]), HIGHLIGHT_COLOR, 3.0)
 
 	if entity:
 		_draw_entity()
@@ -136,9 +142,9 @@ func _draw_entity():
 	if _try_load_sprite(classe, entity_type):
 		entity_sprite.visible = true
 		if highlighted or is_active:
-			var tip = center + Vector2(0, -32)
-			draw_line(tip + Vector2(-7, 8), tip, Color(1.0, 1.0, 0.3), 2.5)
-			draw_line(tip + Vector2(7, 8), tip, Color(1.0, 1.0, 0.3), 2.5)
+			var tip = center + Vector2(0, -hh * 0.45)
+			draw_line(tip + Vector2(-hw*0.1, hh*0.11), tip, Color(1.0, 1.0, 0.3), 2.5)
+			draw_line(tip + Vector2(hw*0.1, hh*0.11), tip, Color(1.0, 1.0, 0.3), 2.5)
 	else:
 		entity_sprite.visible = false
 		_draw_entity_geometric(center, entity_type, classe, is_active, color)
@@ -162,7 +168,7 @@ func _try_load_sprite(classe, entity_type):
 			var tex_size = entity_sprite.texture.get_size()
 			var scale_f = 0.8
 			entity_sprite.scale = Vector2(scale_f, scale_f)
-			entity_sprite.position = Vector2(HALF.x, HALF.y - tex_size.y * scale_f * 0.5 + 8.0)
+			entity_sprite.position = Vector2(HALF.x, HALF.y - tex_size.y * scale_f * 0.5 + hh * 0.11)
 			return true
 	
 	return false
@@ -170,7 +176,7 @@ func _try_load_sprite(classe, entity_type):
 
 func _draw_entity_geometric(center, entity_type, classe, is_active, color):
 	# Ombre portée
-	_draw_ellipse(center + Vector2(0, 8), Vector2(18, 6), Color(0, 0, 0, 0.35))
+	_draw_ellipse(center + Vector2(0, hh*0.11), Vector2(hw*0.25, hh*0.085), Color(0, 0, 0, 0.35))
 
 	if entity_type == "Player":
 		var num_pts = 32
@@ -178,7 +184,7 @@ func _draw_entity_geometric(center, entity_type, classe, is_active, color):
 		var cols = PackedColorArray()
 		for i in range(num_pts + 1):
 			var angle = i * TAU / num_pts
-			pts.append(center + Vector2(cos(angle), sin(angle)) * 25.0)
+			pts.append(center + Vector2(cos(angle), sin(angle)) * hw * 0.35)
 			cols.append(color)
 		draw_polygon(pts, cols)
 		var border_color = Color.YELLOW if is_active else Color.WHITE
@@ -186,14 +192,14 @@ func _draw_entity_geometric(center, entity_type, classe, is_active, color):
 		for i in range(num_pts):
 			draw_line(pts[i], pts[i + 1], border_color, border_w, true)
 		if highlighted or is_active:
-			var tip = center + Vector2(0, -32)
-			draw_line(tip + Vector2(-7, 8), tip, Color(1.0, 1.0, 0.3), 2.5)
-			draw_line(tip + Vector2(7, 8), tip, Color(1.0, 1.0, 0.3), 2.5)
+			var tip = center + Vector2(0, -hh * 0.45)
+			draw_line(tip + Vector2(-hw*0.1, hh*0.11), tip, Color(1.0, 1.0, 0.3), 2.5)
+			draw_line(tip + Vector2(hw*0.1, hh*0.11), tip, Color(1.0, 1.0, 0.3), 2.5)
 	else:
 		var tri = PackedVector2Array([
-			center + Vector2(-20, -15),
-			center + Vector2(20, -15),
-			center + Vector2(0, 22),
+			center + Vector2(-hw*0.28, -hh*0.21),
+			center + Vector2(hw*0.28, -hh*0.21),
+			center + Vector2(0, hh*0.31),
 		])
 		draw_polygon(tri, PackedColorArray([color, color, color]))
 		for i in range(tri.size()):
@@ -206,9 +212,10 @@ func _draw_health_bar(center):
 	if max_pv <= 0:
 		return
 	var ratio = clampf(cur_pv / max_pv, 0.0, 1.0)
-	var bar_w = 32.0
-	var bar_h = 5.0
-	var bar_pos = center + Vector2(-bar_w * 0.5, 20.0)
+	# Dynamic sizing based on cell size
+	var bar_w = hw * 0.56  # ~40% of cell width
+	var bar_h = hh * 0.1   # ~10% of cell height
+	var bar_pos = center + Vector2(-bar_w * 0.5, hh * 0.4)  # Position above center
 
 	draw_rect(Rect2(bar_pos, Vector2(bar_w, bar_h)), Color(0, 0, 0, 0.7), true)
 	var fill_color = Color(0.2, 0.9, 0.2)
@@ -223,17 +230,19 @@ func _draw_health_bar(center):
 # Textures procédurales
 func _draw_grass_texture():
 	var c = Color(0.24, 0.70, 0.44)
-	draw_line(Vector2(20, 30), Vector2(30, 20), c, 1.5, true)
-	draw_line(Vector2(60, 35), Vector2(70, 25), c, 1.5, true)
-	draw_line(Vector2(30, 60), Vector2(40, 50), c, 1.5, true)
-	draw_line(Vector2(70, 65), Vector2(80, 55), c, 1.5, true)
+	draw_line(Vector2(hw*0.28, hh*0.42), Vector2(hw*0.42, hh*0.28), c, 1.5, true)
+	draw_line(Vector2(hw*0.84, hh*0.5), Vector2(hw*1.0, hh*0.35), c, 1.5, true)
+	draw_line(Vector2(hw*0.42, hh*0.84), Vector2(hw*0.56, hh*0.7), c, 1.5, true)
+	draw_line(Vector2(hw*1.0, hh*0.91), Vector2(hw*1.12, hh*0.77), c, 1.5, true)
 
 
 func _draw_dirt_texture():
 	var c = Color(0.63, 0.32, 0.18)
-	for data in [[Vector2(25,35), Vector2(4,2)], [Vector2(45,40), Vector2(3,1.5)],
-				 [Vector2(75,30), Vector2(5,2.5)], [Vector2(35,65), Vector2(3.5,2)],
-				 [Vector2(65,70), Vector2(4,2)]]:
+	for data in [[Vector2(hw*0.35,hh*0.5), Vector2(hw*0.06,hh*0.03)], 
+				 [Vector2(hw*0.63,hh*0.56), Vector2(hw*0.04,hh*0.02)],
+				 [Vector2(hw*1.05,hh*0.42), Vector2(hw*0.07,hh*0.035)], 
+				 [Vector2(hw*0.5,hh*0.91), Vector2(hw*0.05,hh*0.03)],
+				 [Vector2(hw*0.91,hh*0.98), Vector2(hw*0.06,hh*0.03)]]:
 		_draw_ellipse(data[0], data[1], c)
 
 
@@ -270,8 +279,8 @@ func _input(event):
 
 
 func _is_point_in_diamond(point):
-	var cx = 50.0
-	var cy = 50.0
-	var hw = 50.0
-	var hh = 50.0
+	var cx = HALF.x
+	var cy = HALF.y
+	var hw = HALF.x
+	var hh = HALF.y
 	return (absf(point.x - cx) / hw) + (absf(point.y - cy) / hh) <= 1.0
