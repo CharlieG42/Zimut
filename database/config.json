@@ -1,0 +1,76 @@
+{
+  "database": {
+    "name": "zimut.db",
+    "path": "database/zimut.db",
+    "asset_path": "res://assets/zimut.db",
+    "description": "Base de données SQLite pour Zimut, contenant toutes les données des fichiers CSV."
+  },
+  "tables": {
+    "classes": {
+      "description": "Liste des classes de personnages (Tank, Assassin, etc.)",
+      "count": 7
+    },
+    "class_levels": {
+      "description": "Stats (PA, PM, Vita, etc.) pour chaque classe et niveau.",
+      "count": 350
+    },
+    "spells": {
+      "description": "Tous les sorts avec leurs coûts, effets, et niveaux requis.",
+      "count": 146
+    },
+    "class_spells": {
+      "description": "Association entre classes et sorts débloqués.",
+      "count": 141
+    },
+    "enemies": {
+      "description": "Tous les ennemis (Gobelin, Dragonnet, Troll, etc.) avec leurs stats et biomes.",
+      "count": 56
+    },
+    "item_types": {
+      "description": "Types d'items (Arme, Armure, Bouclier, etc.).",
+      "count": 7
+    },
+    "items": {
+      "description": "Tous les items avec leurs bonus et effets spéciaux.",
+      "count": 67
+    },
+    "craft_recipes": {
+      "description": "Recettes de craft pour fabriquer les items.",
+      "count": 64
+    },
+    "invocations": {
+      "description": "Invocations (Tortue, Loup, Sirène, etc.) avec leurs stats.",
+      "count": 6
+    },
+    "invocation_spells": {
+      "description": "Sorts spécifiques aux invocations.",
+      "count": 20
+    },
+    "progression_spells": {
+      "description": "Progression des sorts par classe et niveau.",
+      "count": 76
+    }
+  },
+  "integration": {
+    "godot": {
+      "script": "database/godot_integration.gd",
+      "instructions": "Copiez zimut.db dans res://assets/ et attachez godot_integration.gd à un nœud."
+    },
+    "python": {
+      "module": "database/data_manager.py",
+      "instructions": "Utilisez ZimutDataManager pour interroger la base de données."
+    },
+    "android": {
+      "instructions": "Copiez zimut.db dans assets/ et utilisez SQLiteOpenHelper pour y accéder."
+    }
+  },
+  "waven_inspiration": {
+    "description": "Ce système est inspiré de Waven, un jeu mobile avec une base de données structurée.",
+    "features": [
+      "Données modulaires et organisées",
+      "Requêtes optimisées pour le combat",
+      "Cache des données fréquemment utilisées",
+      "Index pour les performances"
+    ]
+  }
+}
