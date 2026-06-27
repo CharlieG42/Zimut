@@ -9,7 +9,7 @@ const GRID_SIZE        := 10
 const CELL_SIZE        := Vector2i(100, 100)
 const CELL_HALF_OFFSET := Vector2i(50, 50)
 
-const DEFAULT_PLAYER_LEVEL := 30
+const DEFAULT_PLAYER_LEVEL := 100
 const DEFAULT_ENEMY_LEVEL  := 30
 
 const COLORS: Dictionary = {
