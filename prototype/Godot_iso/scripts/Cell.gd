@@ -164,19 +164,19 @@ func _try_load_sprite(classe, entity_type):
 		var texture = load(sprite_path)
 		if texture:
 			entity_sprite.texture = texture
-			# Centrer et ajuster la taille du sprite
+			# Centrer et ajuster la taille du sprite - AGRANDI
 			var tex_size = entity_sprite.texture.get_size()
-			var scale_f = 0.8
+			var scale_f = 1.2
 			entity_sprite.scale = Vector2(scale_f, scale_f)
-			entity_sprite.position = Vector2(HALF.x, HALF.y - tex_size.y * scale_f * 0.5 + HALF.y * 0.11)
+			entity_sprite.position = Vector2(HALF.x, HALF.y - tex_size.y * scale_f * 0.5 + HALF.y * 0.05)
 			return true
 	
 	return false
 
 
 func _draw_entity_geometric(center, entity_type, classe, is_active, color, hw, hh):
-	# Ombre portée
-	_draw_ellipse(center + Vector2(0, hh*0.11), Vector2(hw*0.25, hh*0.085), Color(0, 0, 0, 0.35))
+	# Ombre portée - AGRANDIE
+	_draw_ellipse(center + Vector2(0, hh*0.14), Vector2(hw*0.35, hh*0.12), Color(0, 0, 0, 0.35))
 
 	if entity_type == "Player":
 		var num_pts = 32
@@ -184,26 +184,28 @@ func _draw_entity_geometric(center, entity_type, classe, is_active, color, hw, h
 		var cols = PackedColorArray()
 		for i in range(num_pts + 1):
 			var angle = i * TAU / num_pts
-			pts.append(center + Vector2(cos(angle), sin(angle)) * hw * 0.35)
+			# Cercle AGRANDI (de 0.35 à 0.5)
+			pts.append(center + Vector2(cos(angle), sin(angle)) * hw * 0.5)
 			cols.append(color)
 		draw_polygon(pts, cols)
 		var border_color = Color.YELLOW if is_active else Color.WHITE
-		var border_w = 3.0 if is_active else 1.5
+		var border_w = 3.0 if is_active else 2.0
 		for i in range(num_pts):
 			draw_line(pts[i], pts[i + 1], border_color, border_w, true)
 		if highlighted or is_active:
-			var tip = center + Vector2(0, -hh * 0.45)
-			draw_line(tip + Vector2(-hw*0.1, hh*0.11), tip, Color(1.0, 1.0, 0.3), 2.5)
-			draw_line(tip + Vector2(hw*0.1, hh*0.11), tip, Color(1.0, 1.0, 0.3), 2.5)
+			var tip = center + Vector2(0, -hh * 0.55)
+			draw_line(tip + Vector2(-hw*0.14, hh*0.14), tip, Color(1.0, 1.0, 0.3), 3.0)
+			draw_line(tip + Vector2(hw*0.14, hh*0.14), tip, Color(1.0, 1.0, 0.3), 3.0)
 	else:
+		# Triangle AGRANDI
 		var tri = PackedVector2Array([
-			center + Vector2(-hw*0.28, -hh*0.21),
-			center + Vector2(hw*0.28, -hh*0.21),
-			center + Vector2(0, hh*0.31),
+			center + Vector2(-hw*0.38, -hh*0.28),
+			center + Vector2(hw*0.38, -hh*0.28),
+			center + Vector2(0, hh*0.42),
 		])
 		draw_polygon(tri, PackedColorArray([color, color, color]))
 		for i in range(tri.size()):
-			draw_line(tri[i], tri[(i + 1) % tri.size()], Color.RED, 1.5, true)
+			draw_line(tri[i], tri[(i + 1) % tri.size()], Color.RED, 2.0, true)
 
 
 func _draw_health_bar(center, hw, hh):
@@ -212,10 +214,10 @@ func _draw_health_bar(center, hw, hh):
 	if max_pv <= 0:
 		return
 	var ratio = clampf(cur_pv / max_pv, 0.0, 1.0)
-	# Dynamic sizing based on cell size
-	var bar_w = hw * 0.56  # ~40% of cell width
-	var bar_h = hh * 0.1   # ~10% of cell height
-	var bar_pos = center + Vector2(-bar_w * 0.5, hh * 0.4)  # Position above center
+	# Dynamic sizing based on cell size - barre plus large pour personnages agrandis
+	var bar_w = hw * 0.65  # ~45% of cell width (augmenté)
+	var bar_h = hh * 0.12   # ~12% of cell height (augmenté)
+	var bar_pos = center + Vector2(-bar_w * 0.5, hh * 0.52)  # Position plus haute pour personnages plus grands
 
 	draw_rect(Rect2(bar_pos, Vector2(bar_w, bar_h)), Color(0, 0, 0, 0.7), true)
 	var fill_color = Color(0.2, 0.9, 0.2)
