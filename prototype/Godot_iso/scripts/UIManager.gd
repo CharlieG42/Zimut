@@ -15,9 +15,9 @@ class_name UIManager
 @onready var spell_description: Label   = $SpellPanel/SpellDescription
 @onready var turn_order_panel: Panel    = $TurnOrderPanel
 @onready var turn_order_container: Control = $TurnOrderPanel/TurnOrderContainer
-@onready var data_source_label: Label = $DataSourceLabel
 
 var game_manager
+var data_source_label: Label = null
 var end_turn_button: Button
 var spell_buttons: Array         = []
 var turn_order_labels: Array     = []
