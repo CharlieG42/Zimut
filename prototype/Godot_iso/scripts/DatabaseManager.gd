@@ -14,9 +14,12 @@ var items_data = []
 
 ## État de chargement
 var data_loaded = false
+var using_database = false
+var using_fallback = false
 
 signal data_loaded_successfully
 signal data_load_failed(error)
+signal data_source_info(source: String)
 
 
 ## Initialisation
@@ -61,9 +64,13 @@ func load_all_data():
 	db.close()
 	
 	data_loaded = success
-	data_loaded_successfully.emit()
+	using_database = success
 	
-	if not success:
+	if success:
+		data_source_info.emit("Base de données SQLite (zimut.db) chargée avec succès")
+		data_loaded_successfully.emit()
+	else:
+		data_source_info.emit("ERREUR: Échec du chargement de la base de données")
 		data_load_failed.emit("Failed to load one or more tables from database")
 	
 	return success
@@ -207,13 +214,17 @@ func load_fallback_data():
 	add_child(data_loader)
 	
 	# Attendre que DataLoader charge les données
-	yield(data_loader, "data_loaded_successfully")
+	await data_loader.data_loaded_successfully
 	
 	# Copier les données
 	classes_data = data_loader.classes_data
 	spells_data = data_loader.spells_data
 	enemies_data = data_loader.enemies_data
 	items_data = data_loader.items_data
+	
+	using_fallback = true
+	using_database = false
+	data_source_info.emit("Fichiers CSV chargés (zimut.db non trouvé)")
 	
 	data_loaded = true
 

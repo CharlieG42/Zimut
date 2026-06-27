@@ -15,6 +15,7 @@ class_name UIManager
 @onready var spell_description: Label   = $SpellPanel/SpellDescription
 @onready var turn_order_panel: Panel    = $TurnOrderPanel
 @onready var turn_order_container: Control = $TurnOrderPanel/TurnOrderContainer
+@onready var data_source_label: Label = $DataSourceLabel
 
 var game_manager
 var end_turn_button: Button
@@ -45,6 +46,20 @@ func _setup_ui_elements() -> void:
 	add_child(end_turn_button)
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 
+	# Créer le label pour la source des données si il n'existe pas
+	if data_source_label == null:
+		data_source_label = Label.new()
+		data_source_label.name = "DataSourceLabel"
+		data_source_label.position = Vector2(20, 20)
+		data_source_label.size = Vector2(1900, 40)
+		var db_settings := LabelSettings.new()
+		db_settings.font_size = 24
+		db_settings.font_color = Color(1, 0.5, 0)  # Orange pour visibilité
+		data_source_label.label_settings = db_settings
+		data_source_label.horizontal_alignment = Control.HORIZONTAL_ALIGNMENT_LEFT
+		data_source_label.visible = true
+		add_child(data_source_label)
+
 	if player_info_label:
 		var settings := LabelSettings.new()
 		settings.font_size = 36
@@ -65,6 +80,11 @@ func _setup_connections() -> void:
 		game_manager.entity_moved.connect(_on_action_done)
 		game_manager.entity_attacked.connect(_on_entity_attacked_handler)
 		game_manager.spell_casted.connect(_on_spell_casted)
+	
+	# Connexion au DatabaseManager pour afficher la source des données
+	var db_manager: Node = get_node_or_null("/root/DatabaseManager")
+	if db_manager and db_manager.has_signal("data_source_info"):
+		db_manager.data_source_info.connect(_on_data_source_info)
 
 
 # ─── Handlers signaux GameManager ──────────────────────────────────────────
@@ -139,6 +159,13 @@ func _on_game_ended(victory: bool) -> void:
 
 func hide_game_over_panel() -> void:
 	game_over_panel.visible = false
+
+
+func _on_data_source_info(source: String) -> void:
+	if data_source_label:
+		data_source_label.text = source
+		# Afficher temporairement dans le message label aussi
+		message_label.text = source
 
 
 func _on_action_done(_entity, _from: Vector2i, _to: Vector2i) -> void:
