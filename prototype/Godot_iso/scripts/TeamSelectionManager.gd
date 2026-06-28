@@ -404,38 +404,38 @@ PM: %d" % [
 
 # AppelÃ© pour lancer le combat
 func _on_start_combat():
-	if selected_team.size() == MAX_TEAM_SIZE:
-		# PrÃ©parer les donnÃ©es de l'Ã©quipe pour le GameManager
-		var team_data = []
-		for i in range(selected_team.size()):
-			var class_info = selected_team[i]["data"]
-			team_data.append({
-				"classe": class_info["name"],
-				"entity_type": "Player",
-				"max_pv": class_info["base_stats"]["PV"],
-				"current_pv": class_info["base_stats"]["PV"],
-				"pa": class_info["base_stats"]["PA"],
-				"current_pa": class_info["base_stats"]["PA"],
-				"pm": class_info["base_stats"]["PM"],
-				"current_pm": class_info["base_stats"]["PM"],
-				"force": class_info["base_stats"]["Force"],
-				"intelligence": class_info["base_stats"]["Intelligence"],
-				"defense": class_info["base_stats"]["DÃ©fense"],
-				"agilite": class_info["base_stats"]["AgilitÃ©"],
-				"sagesse": class_info["base_stats"]["Sagesse"],
-				"x": -1,
-				"y": -1,
-				"color": class_info["color"]
-			})
-		
-		# Passer l'Ã©quipe au GameManager (Autoload)
-		var game_manager = get_node_or_null("/root/GameManager")
-		if game_manager and game_manager.has_method("set_custom_team"):
-			game_manager.set_custom_team(team_data)
-		
-		# Charger la scÃ¨ne de combat
-		var game_scene = preload("res://scenes/Main.tscn")
-		get_tree().change_scene_to(game_scene)
+    if selected_team.size() == MAX_TEAM_SIZE:
+        # PrÃ©parer les donnÃ©es de l'Ã©quipe pour le GameManager
+        var team_data = []
+        for i in range(selected_team.size()):
+            var class_info = selected_team[i]["data"]
+            team_data.append({
+                "classe": class_info["name"],
+                "entity_type": "Player",
+                "max_pv": class_info["base_stats"]["PV"],
+                "current_pv": class_info["base_stats"]["PV"],
+                "pa": class_info["base_stats"]["PA"],
+                "current_pa": class_info["base_stats"]["PA"],
+                "pm": class_info["base_stats"]["PM"],
+                "current_pm": class_info["base_stats"]["PM"],
+                "force": class_info["base_stats"]["Force"],
+                "intelligence": class_info["base_stats"]["Intelligence"],
+                "defense": class_info["base_stats"]["DÃ©fense"],
+                "agilite": class_info["base_stats"]["AgilitÃ©"],
+                "sagesse": class_info["base_stats"]["Sagesse"],
+                "x": -1,
+                "y": -1,
+                "color": class_info["color"]
+            })
+        
+        # Passer l'Ã©quipe au GameManager (Autoload)
+        var game_manager = get_node_or_null("/root/GameManager")
+        if game_manager and game_manager.has_method("set_custom_team"):
+            game_manager.set_custom_team(team_data)
+        
+        # Charger la scÃ¨ne de combat
+        var game_scene = preload("res://scenes/Main.tscn")
+        get_tree().change_scene_to(game_scene)
 
 # Fonction pour charger les donnÃ©es depuis CSV (si disponible)
 func load_classes_from_csv():
@@ -495,7 +495,7 @@ func reset_selection():
 
 # MÃ©thode pour retourner Ã  la sÃ©lection d'Ã©quipe (appelÃ©e depuis UIManager)
 func return_to_team_selection() -> void:
-	reset_selection()
-	# Recharger la scÃ¨ne de sÃ©lection d'Ã©quipe
-	var team_scene = preload("res://scenes/TeamSelection.tscn")
-	get_tree().change_scene_to(team_scene)
+    reset_selection()
+    # Recharger la scÃ¨ne de sÃ©lection d'Ã©quipe
+    var team_scene = preload("res://scenes/TeamSelection.tscn")
+    get_tree().change_scene_to(team_scene)
