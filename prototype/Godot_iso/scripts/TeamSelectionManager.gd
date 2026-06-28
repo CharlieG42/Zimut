@@ -491,3 +491,11 @@ func reset_selection():
     var start_button = get_node("StartButton")
     if start_button:
         start_button.disabled = true
+
+
+# Méthode pour retourner à la sélection d'équipe (appelée depuis UIManager)
+func return_to_team_selection() -> void:
+	reset_selection()
+	# Recharger la scène de sélection d'équipe
+	var team_scene = preload("res://scenes/TeamSelection.tscn")
+	get_tree().change_scene_to(team_scene)
