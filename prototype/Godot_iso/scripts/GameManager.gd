@@ -347,13 +347,6 @@ func init_entities() -> void:	# Utiliser l'Ã©quipe personnalisÃ©e si elle es
 
 		players.append(player)
 		grid[pos.y][pos.x] = player
-		# Sinon, utiliser le chargement depuis CSV (ancienne mÃ©thode)
-		# Chercher les stats au niveau DEFAULT_PLAYER_LEVEL (ou le plus proche â¤)
-		class_info: Dictionary = _find_best_match(classes_data, "Classe", classe,
-			"Niveau", DEFAULT_PLAYER_LEVEL)
-		if class_info.is_empty():
-			push_error("Classe '%s' introuvable dans classes.csv" % classe)
-			continue# ââ Ennemis ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 	var enemy_types: Array[String]       = ["Gobelin", "Squelette", "Loup"]
 	var enemy_positions: Array[Vector2i]  = [Vector2i(6, 6), Vector2i(6, 5), Vector2i(5, 6)]
 	enemies = []
