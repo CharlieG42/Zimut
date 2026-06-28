@@ -196,7 +196,9 @@ func _on_end_turn_pressed() -> void:
 
 
 func _on_restart_pressed() -> void:
-	restart_requested.emit()
+	# Recharger la scène de combat avec la même équipe
+	var game_scene = preload("res://scenes/Main.tscn")
+	get_tree().change_scene_to(game_scene)
 
 
 func _on_team_selection_pressed() -> void:
