@@ -200,7 +200,14 @@ func _on_restart_pressed() -> void:
 
 
 func _on_team_selection_pressed() -> void:
-	team_selection_requested.emit()
+	# Réinitialiser l'équipe personnalisée dans GameManager
+	var game_manager = get_node_or_null("/root/GameManager")
+	if game_manager and game_manager.has_method("clear_custom_team"):
+		game_manager.clear_custom_team()
+	
+	# Charger la scène de sélection d'équipe
+	var team_scene = preload("res://scenes/TeamSelection.tscn")
+	get_tree().change_scene_to(team_scene)
 
 
 func _on_spell_button_selected(spell: Dictionary) -> void:
