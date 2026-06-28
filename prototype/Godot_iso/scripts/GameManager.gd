@@ -213,8 +213,22 @@ func init_grid() -> void:
 		grid.append(row)
 
 
-func init_entities() -> void:
-	var player_classes: Array[String]    = ["Tank", "Assassin", "Mage"]
+func init_entities() -> void:	# Utiliser l'équipe personnalisée si elle est définie, sinon utiliser les classes par défaut
+	var player_classes: Array = []
+	var player_positions: Array[Vector2i] = [Vector2i(1, 1), Vector2i(2, 1), Vector2i(1, 2)]
+	
+	if custom_team.size() == 3:
+		# Utiliser l'équipe personnalisée
+		for i: int in range(custom_team.size()):
+			player_classes.append(custom_team[i]["classe"])
+	else:
+		# Utiliser les classes par défaut
+		player_classes = ["Tank", "Assassin", "Mage"]
+	
+	players = []
+
+	var classes_data: Array = get_classes_data()
+	var spells_data: Array  = get_spells_data()	var player_classes: Array[String]    = ["Tank", "Assassin", "Mage"]
 	var player_positions: Array[Vector2i] = [Vector2i(1, 1), Vector2i(2, 1), Vector2i(1, 2)]
 	players = []
 
