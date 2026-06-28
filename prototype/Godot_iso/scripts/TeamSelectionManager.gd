@@ -1,6 +1,6 @@
 extends Node2D
 
-# Script de gestion de la sÃ©lection d'Ã©quipe
+# Script de gestion de la sélection d'Ã©quipe
 # Permet au joueur de choisir 3 personnages parmi les classes disponibles
 
 # Signaux
@@ -16,7 +16,7 @@ const CLASS_COLORS = {
     "Mage": Color(0.38, 0.0, 0.5),     # Violet
     "Support": Color(1.0, 0.5, 0.0),    # Orange
     "Heal": Color(0.0, 0.75, 0.75),    # Cyan
-    "Invocateur": Color(0.5, 0.0, 0.5)  # Violet foncÃ©
+    "Invocateur": Color(0.5, 0.0, 0.5)  # Violet foncé
 }
 
 # Variables
@@ -33,49 +33,49 @@ var class_data = {
         "description": "RÃ©sistant, haute dÃ©fense, bon en combat rapprochÃ©",
         "color": Color(0.0, 0.25, 0.5),
         "icon": "ð¡ï¸",
-        "base_stats": {"PV": 236, "PA": 6, "PM": 4, "Force": 34, "Intelligence": 13, "DÃ©fense": 39}
+        "base_stats": {"PV": 236, "PA": 6, "PM": 4, "Force": 34, "Intelligence": 13, "Défense": 39}
     },
     "Assassin": {
         "name": "Assassin",
         "description": "Rapide, dÃ©gÃ¢ts Ã©levÃ©s, spÃ©cialiste des attaques critiques",
         "color": Color(0.5, 0.0, 0.0),
         "icon": "ð¡ï¸",
-        "base_stats": {"PV": 202, "PA": 6, "PM": 4, "Force": 39, "Intelligence": 22, "DÃ©fense": 26}
+        "base_stats": {"PV": 202, "PA": 6, "PM": 4, "Force": 39, "Intelligence": 22, "Défense": 26}
     },
     "Chasseur": {
         "name": "Chasseur",
         "description": "Polyvalent, bon Ã  distance, Ã©quilibre parfait",
         "color": Color(0.0, 0.5, 0.0),
         "icon": "ð¹",
-        "base_stats": {"PV": 212, "PA": 6, "PM": 4, "Force": 42, "Intelligence": 24, "DÃ©fense": 39}
+        "base_stats": {"PV": 212, "PA": 6, "PM": 4, "Force": 42, "Intelligence": 24, "Défense": 39}
     },
     "Mage": {
         "name": "Mage",
         "description": "DÃ©gÃ¢ts magiques Ã©levÃ©s, faible dÃ©fense, sorts puissants",
         "color": Color(0.38, 0.0, 0.5),
         "icon": "ð®",
-        "base_stats": {"PV": 192, "PA": 6, "PM": 4, "Force": 28, "Intelligence": 49, "DÃ©fense": 29}
+        "base_stats": {"PV": 192, "PA": 6, "PM": 4, "Force": 28, "Intelligence": 49, "Défense": 29}
     },
     "Support": {
         "name": "Support",
-        "description": "Renforce l'Ã©quipe, buffs et soins, polyvalent",
+        "description": "Renforce l'équipe, buffs et soins, polyvalent",
         "color": Color(1.0, 0.5, 0.0),
         "icon": "ð",
-        "base_stats": {"PV": 207, "PA": 6, "PM": 4, "Force": 34, "Intelligence": 39, "DÃ©fense": 44}
+        "base_stats": {"PV": 207, "PA": 6, "PM": 4, "Force": 34, "Intelligence": 39, "Défense": 44}
     },
     "Heal": {
         "name": "Heal",
         "description": "SpÃ©cialiste des soins, restauration de PV, survie",
         "color": Color(0.0, 0.75, 0.75),
         "icon": "â¤ï¸",
-        "base_stats": {"PV": 242, "PA": 6, "PM": 4, "Force": 20, "Intelligence": 42, "DÃ©fense": 42}
+        "base_stats": {"PV": 242, "PA": 6, "PM": 4, "Force": 20, "Intelligence": 42, "Défense": 42}
     },
     "Invocateur": {
         "name": "Invocateur",
         "description": "Invoque des crÃ©atures, stratÃ©gie de groupe, contrÃ´le",
         "color": Color(0.5, 0.0, 0.5),
         "icon": "ð­",
-        "base_stats": {"PV": 202, "PA": 6, "PM": 4, "Force": 22, "Intelligence": 44, "DÃ©fense": 36}
+        "base_stats": {"PV": 202, "PA": 6, "PM": 4, "Force": 22, "Intelligence": 44, "Défense": 36}
     }
 }
 
@@ -108,7 +108,7 @@ func _setup_ui():
     description.width = 800
     add_child(description)
 
-    # CrÃ©er les boutons de sÃ©lection de classe
+    # CrÃ©er les boutons de sélection de classe
     var y_pos = -150
     var button_width = 250
     var button_height = 60
@@ -179,7 +179,7 @@ func _setup_ui():
         button.mouse_entered.connect(_on_class_hover.bind(classname, true))
         button.mouse_exited.connect(_on_class_hover.bind(classname, false))
 
-    # CrÃ©er la section de prÃ©visualisation de l'Ã©quipe
+    # CrÃ©er la section de prÃ©visualisation de l'équipe
     var preview_title = Label.new()
     preview_title.text = "Votre Ã©quipe (%d/%d)" % [selected_team.size(), MAX_TEAM_SIZE]
     preview_title.position = Vector2(0, 120)
@@ -276,15 +276,15 @@ func _setup_ui():
     # Stocker la rÃ©fÃ©rence
     start_button.name = "StartButton"
 
-# AppelÃ© lorsqu'une classe est sÃ©lectionnÃ©e
+# AppelÃ© lorsqu'une classe est sélectionnÃ©e
 func _on_class_selected(classname: String):
-    # VÃ©rifier si la classe est dÃ©jÃ  sÃ©lectionnÃ©e
+    # VÃ©rifier si la classe est dÃ©jÃ  sélectionnÃ©e
     for i in range(selected_team.size()):
         if selected_team[i]["name"] == classname:
-            # DÃ©jÃ  sÃ©lectionnÃ©e, ne rien faire ou afficher un message
+            # DÃ©jÃ  sélectionnÃ©e, ne rien faire ou afficher un message
             return
     
-    # Ajouter Ã  l'Ã©quipe si on a moins de MAX_TEAM_SIZE
+    # Ajouter Ã  l'équipe si on a moins de MAX_TEAM_SIZE
     if selected_team.size() < MAX_TEAM_SIZE:
         var class_info = class_data[classname]
         selected_team.append({
@@ -318,7 +318,7 @@ func _on_class_hover(classname: String, is_hover: bool):
     if class_info_labels.has(classname):
         class_info_labels[classname].visible = is_hover
 
-# AppelÃ© pour supprimer un personnage de l'Ã©quipe
+# AppelÃ© pour supprimer un personnage de l'équipe
 func _on_remove_from_team(index: int):
     if index < selected_team.size():
         var classname = selected_team[index]["name"]
@@ -328,7 +328,7 @@ func _on_remove_from_team(index: int):
             var button = class_buttons[classname]
             button.disabled = false
         
-        # Supprimer de l'Ã©quipe
+        # Supprimer de l'équipe
         selected_team.remove_at(index)
         _update_team_preview()
         
@@ -337,7 +337,7 @@ func _on_remove_from_team(index: int):
         if start_button:
             start_button.disabled = selected_team.size() < MAX_TEAM_SIZE
 
-# Met Ã  jour l'aperÃ§u de l'Ã©quipe
+# Met Ã  jour l'aperÃ§u de l'équipe
 func _update_team_preview():
     var preview_title = get_node("PreviewTitle")
     if preview_title:
@@ -405,7 +405,7 @@ PM: %d" % [
 # AppelÃ© pour lancer le combat
 func _on_start_combat():
     if selected_team.size() == MAX_TEAM_SIZE:
-        # PrÃ©parer les donnÃ©es de l'Ã©quipe pour le GameManager
+        # Préparer les donnÃ©es de l'équipe pour le GameManager
         var team_data = []
         for i in range(selected_team.size()):
             var class_info = selected_team[i]["data"]
@@ -420,15 +420,15 @@ func _on_start_combat():
                 "current_pm": class_info["base_stats"]["PM"],
                 "force": class_info["base_stats"]["Force"],
                 "intelligence": class_info["base_stats"]["Intelligence"],
-                "defense": class_info["base_stats"]["DÃ©fense"],
-                "agilite": class_info["base_stats"]["AgilitÃ©"],
+                "defense": class_info["base_stats"]["Défense"],
+                "agilite": class_info["base_stats"]["Agilité"],
                 "sagesse": class_info["base_stats"]["Sagesse"],
                 "x": -1,
                 "y": -1,
                 "color": class_info["color"]
             })
         
-        # Passer l'Ã©quipe au GameManager (Autoload)
+        # Passer l'équipe au GameManager (Autoload)
         var game_manager = get_node_or_null("/root/GameManager")
         if game_manager and game_manager.has_method("set_custom_team"):
             game_manager.set_custom_team(team_data)
@@ -470,14 +470,14 @@ func load_classes_from_csv():
                     class_data[classname]["base_stats"]["PM"] = int(values[2])
                     class_data[classname]["base_stats"]["Force"] = int(values[4])
                     class_data[classname]["base_stats"]["Intelligence"] = int(values[5])
-                    class_data[classname]["base_stats"]["DÃ©fense"] = int(values[8])
+                    class_data[classname]["base_stats"]["Défense"] = int(values[8])
         
         available_classes = class_data.keys()
         return true
     
     return false
 
-# Fonction pour rÃ©initialiser la sÃ©lection
+# Fonction pour rÃ©initialiser la sélection
 func reset_selection():
     selected_team.clear()
     
@@ -493,9 +493,9 @@ func reset_selection():
         start_button.disabled = true
 
 
-# MÃ©thode pour retourner Ã  la sÃ©lection d'Ã©quipe (appelÃ©e depuis UIManager)
+# MÃ©thode pour retourner Ã  la sélection d'Ã©quipe (appelÃ©e depuis UIManager)
 func return_to_team_selection() -> void:
     reset_selection()
-    # Recharger la scÃ¨ne de sÃ©lection d'Ã©quipe
+    # Recharger la scÃ¨ne de sélection d'Ã©quipe
     var team_scene = preload("res://scenes/TeamSelection.tscn")
     get_tree().change_scene_to(team_scene)
