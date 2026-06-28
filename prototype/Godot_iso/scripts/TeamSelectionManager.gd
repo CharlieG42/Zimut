@@ -1,6 +1,6 @@
 extends Node2D
 
-# Script de gestion de la sélection d'équipe
+# Script de gestion de la sÃ©lection d'Ã©quipe
 # Permet au joueur de choisir 3 personnages parmi les classes disponibles
 
 # Signaux
@@ -16,7 +16,7 @@ const CLASS_COLORS = {
     "Mage": Color(0.38, 0.0, 0.5),     # Violet
     "Support": Color(1.0, 0.5, 0.0),    # Orange
     "Heal": Color(0.0, 0.75, 0.75),    # Cyan
-    "Invocateur": Color(0.5, 0.0, 0.5)  # Violet foncé
+    "Invocateur": Color(0.5, 0.0, 0.5)  # Violet foncÃ©
 }
 
 # Variables
@@ -26,60 +26,60 @@ var class_buttons = {}
 var class_info_labels = {}
 var team_preview_nodes = []
 
-# Données des classes (chargées depuis CSV ou définies ici)
+# DonnÃ©es des classes (chargÃ©es depuis CSV ou dÃ©finies ici)
 var class_data = {
     "Tank": {
         "name": "Tank",
-        "description": "Résistant, haute défense, bon en combat rapproché",
+        "description": "RÃ©sistant, haute dÃ©fense, bon en combat rapprochÃ©",
         "color": Color(0.0, 0.25, 0.5),
-        "icon": "🛡️",
-        "base_stats": {"PV": 236, "PA": 6, "PM": 4, "Force": 34, "Intelligence": 13, "Défense": 39}
+        "icon": "ð¡ï¸",
+        "base_stats": {"PV": 236, "PA": 6, "PM": 4, "Force": 34, "Intelligence": 13, "DÃ©fense": 39}
     },
     "Assassin": {
         "name": "Assassin",
-        "description": "Rapide, dégâts élevés, spécialiste des attaques critiques",
+        "description": "Rapide, dÃ©gÃ¢ts Ã©levÃ©s, spÃ©cialiste des attaques critiques",
         "color": Color(0.5, 0.0, 0.0),
-        "icon": "🗡️",
-        "base_stats": {"PV": 202, "PA": 6, "PM": 4, "Force": 39, "Intelligence": 22, "Défense": 26}
+        "icon": "ð¡ï¸",
+        "base_stats": {"PV": 202, "PA": 6, "PM": 4, "Force": 39, "Intelligence": 22, "DÃ©fense": 26}
     },
     "Chasseur": {
         "name": "Chasseur",
-        "description": "Polyvalent, bon à distance, équilibre parfait",
+        "description": "Polyvalent, bon Ã  distance, Ã©quilibre parfait",
         "color": Color(0.0, 0.5, 0.0),
-        "icon": "🏹",
-        "base_stats": {"PV": 212, "PA": 6, "PM": 4, "Force": 42, "Intelligence": 24, "Défense": 39}
+        "icon": "ð¹",
+        "base_stats": {"PV": 212, "PA": 6, "PM": 4, "Force": 42, "Intelligence": 24, "DÃ©fense": 39}
     },
     "Mage": {
         "name": "Mage",
-        "description": "Dégâts magiques élevés, faible défense, sorts puissants",
+        "description": "DÃ©gÃ¢ts magiques Ã©levÃ©s, faible dÃ©fense, sorts puissants",
         "color": Color(0.38, 0.0, 0.5),
-        "icon": "🔮",
-        "base_stats": {"PV": 192, "PA": 6, "PM": 4, "Force": 28, "Intelligence": 49, "Défense": 29}
+        "icon": "ð®",
+        "base_stats": {"PV": 192, "PA": 6, "PM": 4, "Force": 28, "Intelligence": 49, "DÃ©fense": 29}
     },
     "Support": {
         "name": "Support",
-        "description": "Renforce l'équipe, buffs et soins, polyvalent",
+        "description": "Renforce l'Ã©quipe, buffs et soins, polyvalent",
         "color": Color(1.0, 0.5, 0.0),
-        "icon": "🌟",
-        "base_stats": {"PV": 207, "PA": 6, "PM": 4, "Force": 34, "Intelligence": 39, "Défense": 44}
+        "icon": "ð",
+        "base_stats": {"PV": 207, "PA": 6, "PM": 4, "Force": 34, "Intelligence": 39, "DÃ©fense": 44}
     },
     "Heal": {
         "name": "Heal",
-        "description": "Spécialiste des soins, restauration de PV, survie",
+        "description": "SpÃ©cialiste des soins, restauration de PV, survie",
         "color": Color(0.0, 0.75, 0.75),
-        "icon": "❤️",
-        "base_stats": {"PV": 242, "PA": 6, "PM": 4, "Force": 20, "Intelligence": 42, "Défense": 42}
+        "icon": "â¤ï¸",
+        "base_stats": {"PV": 242, "PA": 6, "PM": 4, "Force": 20, "Intelligence": 42, "DÃ©fense": 42}
     },
     "Invocateur": {
         "name": "Invocateur",
-        "description": "Invoque des créatures, stratégie de groupe, contrôle",
+        "description": "Invoque des crÃ©atures, stratÃ©gie de groupe, contrÃ´le",
         "color": Color(0.5, 0.0, 0.5),
-        "icon": "🎭",
-        "base_stats": {"PV": 202, "PA": 6, "PM": 4, "Force": 22, "Intelligence": 44, "Défense": 36}
+        "icon": "ð­",
+        "base_stats": {"PV": 202, "PA": 6, "PM": 4, "Force": 22, "Intelligence": 44, "DÃ©fense": 36}
     }
 }
 
-# Appelé lorsque le nœud est ajouté à l'arbre de scène
+# AppelÃ© lorsque le nÅud est ajoutÃ© Ã  l'arbre de scÃ¨ne
 func _ready():
     available_classes = class_data.keys()
     _setup_ui()
@@ -87,9 +87,9 @@ func _ready():
 
 # Configuration de l'interface utilisateur
 func _setup_ui():
-    # Créer le titre
+    # CrÃ©er le titre
     var title = Label.new()
-    title.text = "WILDZIMUT - Sélection d'équipe"
+    title.text = "WILDZIMUT - SÃ©lection d'Ã©quipe"
     title.position = Vector2(0, -250)
     title.add_theme_font_override("font", load("res://assets/fonts/big_font.tres") if ResourceLoader.exists("res://assets/fonts/big_font.tres") else null)
     title.add_theme_color_override("font_color", Color(1, 1, 1))
@@ -99,16 +99,16 @@ func _setup_ui():
     title.width = 1000
     add_child(title)
 
-    # Créer la description
+    # CrÃ©er la description
     var description = Label.new()
-    description.text = "Choisissez 3 personnages pour former votre équipe"
+    description.text = "Choisissez 3 personnages pour former votre Ã©quipe"
     description.position = Vector2(0, -220)
     description.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
     description.align = Label.ALIGN_CENTER
     description.width = 800
     add_child(description)
 
-    # Créer les boutons de sélection de classe
+    # CrÃ©er les boutons de sÃ©lection de classe
     var y_pos = -150
     var button_width = 250
     var button_height = 60
@@ -121,9 +121,9 @@ func _setup_ui():
         var col = i % 3
         
         var x_pos = start_x + col * (button_width + margin)
-        var y_pos = -150 + row * (button_height + margin)
+        y_pos = -150 + row * (button_height + margin)
         
-        # Créer le bouton
+        # CrÃ©er le bouton
         var button = Button.new()
         button.name = "%s_Button" % class_name
         button.position = Vector2(x_pos, y_pos)
@@ -163,7 +163,7 @@ func _setup_ui():
         add_child(button)
         class_buttons[class_name] = button
         
-        # Créer le label de description (apparaît au survol)
+        # CrÃ©er le label de description (apparaÃ®t au survol)
         var info_label = Label.new()
         info_label.name = "%s_Info" % class_name
         info_label.text = class_data[class_name]["description"]
@@ -179,18 +179,18 @@ func _setup_ui():
         button.mouse_entered.connect(_on_class_hover.bind(class_name, true))
         button.mouse_exited.connect(_on_class_hover.bind(class_name, false))
 
-    # Créer la section de prévisualisation de l'équipe
+    # CrÃ©er la section de prÃ©visualisation de l'Ã©quipe
     var preview_title = Label.new()
-    preview_title.text = "Votre équipe (%d/%d)" % [selected_team.size(), MAX_TEAM_SIZE]
+    preview_title.text = "Votre Ã©quipe (%d/%d)" % [selected_team.size(), MAX_TEAM_SIZE]
     preview_title.position = Vector2(0, 120)
     preview_title.add_theme_color_override("font_color", Color(1, 1, 0.8))
     preview_title.align = Label.ALIGN_CENTER
     add_child(preview_title)
     
-    # Stocker la référence pour mise à jour
+    # Stocker la rÃ©fÃ©rence pour mise Ã  jour
     preview_title.name = "PreviewTitle"
 
-    # Créer les emplacements de prévisualisation
+    # CrÃ©er les emplacements de prÃ©visualisation
     for i in range(MAX_TEAM_SIZE):
         var preview_frame = Panel.new()
         preview_frame.name = "TeamPreview_%d" % i
@@ -242,7 +242,7 @@ func _setup_ui():
         remove_button.add_theme_font_size_override("font_size", 12)
         preview_frame.add_child(remove_button)
 
-    # Créer le bouton "Lancer le combat"
+    # CrÃ©er le bouton "Lancer le combat"
     var start_button = Button.new()
     start_button.name = "StartButton"
     start_button.position = Vector2(0, 200)
@@ -273,18 +273,18 @@ func _setup_ui():
     
     add_child(start_button)
     
-    # Stocker la référence
+    # Stocker la rÃ©fÃ©rence
     start_button.name = "StartButton"
 
-# Appelé lorsqu'une classe est sélectionnée
+# AppelÃ© lorsqu'une classe est sÃ©lectionnÃ©e
 func _on_class_selected(class_name: String):
-    # Vérifier si la classe est déjà sélectionnée
+    # VÃ©rifier si la classe est dÃ©jÃ  sÃ©lectionnÃ©e
     for i in range(selected_team.size()):
         if selected_team[i]["name"] == class_name:
-            # Déjà sélectionnée, ne rien faire ou afficher un message
+            # DÃ©jÃ  sÃ©lectionnÃ©e, ne rien faire ou afficher un message
             return
     
-    # Ajouter à l'équipe si on a moins de MAX_TEAM_SIZE
+    # Ajouter Ã  l'Ã©quipe si on a moins de MAX_TEAM_SIZE
     if selected_team.size() < MAX_TEAM_SIZE:
         var class_info = class_data[class_name]
         selected_team.append({
@@ -293,7 +293,7 @@ func _on_class_selected(class_name: String):
         })
         _update_team_preview()
         
-        # Mettre à jour l'état du bouton
+        # Mettre Ã  jour l'Ã©tat du bouton
         var button = class_buttons[class_name]
         if button:
             button.disabled = true
@@ -305,43 +305,43 @@ func _on_class_selected(class_name: String):
             stylebox.corner_radius_bottom_left = 10
             button.add_theme_stylebox_override("disabled", stylebox)
         
-        # Vérifier si on peut lancer le combat
+        # VÃ©rifier si on peut lancer le combat
         var start_button = get_node("StartButton")
         if start_button:
             start_button.disabled = selected_team.size() < MAX_TEAM_SIZE
     else:
-        # Équipe pleine, afficher un message
-        print("L'équipe est déjà complète (3/3)")
+        # Ãquipe pleine, afficher un message
+        print("L'Ã©quipe est dÃ©jÃ  complÃ¨te (3/3)")
 
-# Appelé lorsqu'on survole une classe
+# AppelÃ© lorsqu'on survole une classe
 func _on_class_hover(class_name: String, is_hover: bool):
     if class_info_labels.has(class_name):
         class_info_labels[class_name].visible = is_hover
 
-# Appelé pour supprimer un personnage de l'équipe
+# AppelÃ© pour supprimer un personnage de l'Ã©quipe
 func _on_remove_from_team(index: int):
     if index < selected_team.size():
         var class_name = selected_team[index]["name"]
         
-        # Réactiver le bouton de la classe
+        # RÃ©activer le bouton de la classe
         if class_buttons.has(class_name):
             var button = class_buttons[class_name]
             button.disabled = false
         
-        # Supprimer de l'équipe
+        # Supprimer de l'Ã©quipe
         selected_team.remove_at(index)
         _update_team_preview()
         
-        # Vérifier si on peut lancer le combat
+        # VÃ©rifier si on peut lancer le combat
         var start_button = get_node("StartButton")
         if start_button:
             start_button.disabled = selected_team.size() < MAX_TEAM_SIZE
 
-# Met à jour l'aperçu de l'équipe
+# Met Ã  jour l'aperÃ§u de l'Ã©quipe
 func _update_team_preview():
     var preview_title = get_node("PreviewTitle")
     if preview_title:
-        preview_title.text = "Votre équipe (%d/%d)" % [selected_team.size(), MAX_TEAM_SIZE]
+        preview_title.text = "Votre Ã©quipe (%d/%d)" % [selected_team.size(), MAX_TEAM_SIZE]
     
     for i in range(MAX_TEAM_SIZE):
         var preview_frame = get_node("TeamPreview_%d" % i)
@@ -353,7 +353,7 @@ func _update_team_preview():
             if i < selected_team.size():
                 var class_info = selected_team[i]["data"]
                 
-                # Mettre à jour le style du cadre
+                # Mettre Ã  jour le style du cadre
                 var stylebox = StyleBoxFlat.new()
                 stylebox.bg_color = class_info["color"] + Color(0.1, 0.1, 0.1, 0.3)
                 stylebox.corner_radius_top_left = 15
@@ -364,7 +364,7 @@ func _update_team_preview():
                 stylebox.border_color = class_info["color"]
                 preview_frame.add_theme_stylebox_override("panel", stylebox)
                 
-                # Mettre à jour les labels
+                # Mettre Ã  jour les labels
                 if name_label:
                     name_label.text = class_info["icon"] + " %s" % class_info["name"]
                 
@@ -381,7 +381,7 @@ PM: %d" % [
                 if remove_button:
                     remove_button.visible = true
             else:
-                # Réinitialiser
+                # RÃ©initialiser
                 if preview_frame:
                     var stylebox = StyleBoxFlat.new()
                     stylebox.bg_color = Color(0.15, 0.15, 0.15, 0.8)
@@ -402,10 +402,10 @@ PM: %d" % [
                 if remove_button:
                     remove_button.visible = false
 
-# Appelé pour lancer le combat
+# AppelÃ© pour lancer le combat
 func _on_start_combat():
 	if selected_team.size() == MAX_TEAM_SIZE:
-		# Préparer les données de l'équipe pour le GameManager
+		# PrÃ©parer les donnÃ©es de l'Ã©quipe pour le GameManager
 		var team_data = []
 		for i in range(selected_team.size()):
 			var class_info = selected_team[i]["data"]
@@ -420,24 +420,24 @@ func _on_start_combat():
 				"current_pm": class_info["base_stats"]["PM"],
 				"force": class_info["base_stats"]["Force"],
 				"intelligence": class_info["base_stats"]["Intelligence"],
-				"defense": class_info["base_stats"]["Défense"],
-				"agilite": class_info["base_stats"]["Agilité"],
+				"defense": class_info["base_stats"]["DÃ©fense"],
+				"agilite": class_info["base_stats"]["AgilitÃ©"],
 				"sagesse": class_info["base_stats"]["Sagesse"],
 				"x": -1,
 				"y": -1,
 				"color": class_info["color"]
 			})
 		
-		# Passer l'équipe au GameManager (Autoload)
+		# Passer l'Ã©quipe au GameManager (Autoload)
 		var game_manager = get_node_or_null("/root/GameManager")
 		if game_manager and game_manager.has_method("set_custom_team"):
 			game_manager.set_custom_team(team_data)
 		
-		# Charger la scène de combat
+		# Charger la scÃ¨ne de combat
 		var game_scene = preload("res://scenes/Main.tscn")
 		get_tree().change_scene_to(game_scene)
 
-# Fonction pour charger les données depuis CSV (si disponible)
+# Fonction pour charger les donnÃ©es depuis CSV (si disponible)
 func load_classes_from_csv():
     var file = FileAccess.open("res://data/classes.csv", FileAccess.READ)
     if file:
@@ -454,14 +454,14 @@ func load_classes_from_csv():
                 var class_name = values[0]
                 var level = int(values[1])
                 
-                # Si c'est le niveau 30 (niveau par défaut dans le jeu)
+                # Si c'est le niveau 30 (niveau par dÃ©faut dans le jeu)
                 if level == 30:
                     if not class_data.has(class_name):
                         class_data[class_name] = {
                             "name": class_name,
                             "description": "",
                             "color": CLASS_COLORS[class_name] if CLASS_COLORS.has(class_name) else Color(0.5, 0.5, 0.5),
-                            "icon": "⚔️",
+                            "icon": "âï¸",
                             "base_stats": {}
                         }
                     
@@ -470,18 +470,18 @@ func load_classes_from_csv():
                     class_data[class_name]["base_stats"]["PM"] = int(values[2])
                     class_data[class_name]["base_stats"]["Force"] = int(values[4])
                     class_data[class_name]["base_stats"]["Intelligence"] = int(values[5])
-                    class_data[class_name]["base_stats"]["Défense"] = int(values[8])
+                    class_data[class_name]["base_stats"]["DÃ©fense"] = int(values[8])
         
         available_classes = class_data.keys()
         return true
     
     return false
 
-# Fonction pour réinitialiser la sélection
+# Fonction pour rÃ©initialiser la sÃ©lection
 func reset_selection():
     selected_team.clear()
     
-    # Réactiver tous les boutons
+    # RÃ©activer tous les boutons
     for class_name in class_buttons.keys():
         if class_buttons[class_name]:
             class_buttons[class_name].disabled = false
@@ -493,9 +493,9 @@ func reset_selection():
         start_button.disabled = true
 
 
-# Méthode pour retourner à la sélection d'équipe (appelée depuis UIManager)
+# MÃ©thode pour retourner Ã  la sÃ©lection d'Ã©quipe (appelÃ©e depuis UIManager)
 func return_to_team_selection() -> void:
 	reset_selection()
-	# Recharger la scène de sélection d'équipe
+	# Recharger la scÃ¨ne de sÃ©lection d'Ã©quipe
 	var team_scene = preload("res://scenes/TeamSelection.tscn")
 	get_tree().change_scene_to(team_scene)
