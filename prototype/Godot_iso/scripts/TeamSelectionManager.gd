@@ -121,7 +121,7 @@ func _setup_ui():
         var col = i % 3
         
         var x_pos = start_x + col * (button_width + margin)
-        y_pos = -150 + row * (button_height + margin)
+        var y_pos = -150 + row * (button_height + margin)
         
         # Créer le bouton
         var button = Button.new()
