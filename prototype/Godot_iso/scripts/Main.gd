@@ -1,70 +1,41 @@
 extends Node2D
-## Main.gd - Script principal (coordination des managers et gestion des scènes)
-## Modifié pour inclure la sélection d'équipe
+## Main.gd - Script principal pour la scène de combat
+## Gère la coordination des managers DANS la scène de combat
 
-# Scènes
-const TeamSelectionScene = preload("res://scenes/TeamSelection.tscn")
-const GameScene = preload("res://scenes/Main.tscn")
+@onready var grid_manager  = $GridManager
+@onready var ui_manager    = $UIManager
+@onready var turn_manager  = $TurnManager
+@onready var entity_manager = $EntityManager
+@onready var spell_manager = $SpellManager
 
-# Variables
-var current_scene: Node = null
-var selected_team: Array = []
-var team_selection_manager: Node = null
+var game_manager
 
-# Appelé au démarrage
 func _ready() -> void:
-	# Charger la scène de sélection d'équipe en premier
-	_load_team_selection()
+	game_manager = GameManager
+	grid_manager.init(game_manager)
+	ui_manager.init(game_manager)
+	turn_manager.init(game_manager)
+	entity_manager.init(game_manager)
+	spell_manager.init(game_manager)
+	_connect_signals()
 
-# Charge la scène de sélection d'équipe
-func _load_team_selection() -> void:
-	# Nettoyer la scène actuelle
-	if current_scene:
-		current_scene.queue_free()
-		current_scene = null
-	
-	# Charger la nouvelle scène
-	current_scene = TeamSelectionScene.instantiate()
-	add_child(current_scene)
-	
-	# Connecter les signaux
-	team_selection_manager = current_scene.get_node("TeamSelection")
-	if team_selection_manager:
-		team_selection_manager.team_selected.connect(_on_team_selected)
+func _connect_signals() -> void:
+	## Connexion simple sans disconnect() préalable
 
-# Appelé lorsqu'une équipe est sélectionnée
-func _on_team_selected(team_data: Array) -> void:
-	# Sauvegarder l'équipe sélectionnée
-	selected_team = team_data
-	
-	# Charger la scène de combat
-	_load_game_scene()
+	# GridManager → GameManager
+	if not grid_manager.cell_clicked.is_connected(game_manager.handle_cell_selected):
+		grid_manager.cell_clicked.connect(game_manager.handle_cell_selected)
 
-# Charge la scène de combat
-func _load_game_scene() -> void:
-	# Nettoyer la scène actuelle
-	if current_scene:
-		current_scene.queue_free()
-		current_scene = null
-	
-	# Charger la nouvelle scène
-	current_scene = GameScene.instantiate()
-	add_child(current_scene)
-	
-	# Passer l'équipe sélectionnée au GameManager
-	var game_manager = get_node_or_null("/root/GameManager")
-	if game_manager and game_manager.has_method("set_custom_team"):
-		game_manager.set_custom_team(selected_team)
-	
-	# Initialiser le combat
-	var main_node = current_scene.get_node("Main")
-	if main_node and main_node.has_method("_init_game_with_team"):
-		main_node._init_game_with_team(selected_team)
+	# UIManager → GameManager
+	if not ui_manager.end_turn_requested.is_connected(game_manager.next_player):
+		ui_manager.end_turn_requested.connect(game_manager.next_player)
 
-# Fonction pour revenir à la sélection d'équipe
-func return_to_team_selection() -> void:
-	_load_team_selection()
+	if not ui_manager.restart_requested.is_connected(game_manager.reset_game):
+		ui_manager.restart_requested.connect(game_manager.reset_game)
 
-# Fonction pour relancer le combat avec la même équipe
-func restart_with_same_team() -> void:
-	_load_game_scene()
+	if not ui_manager.spell_selected.is_connected(game_manager.handle_spell_selected):
+		ui_manager.spell_selected.connect(game_manager.handle_spell_selected)
+
+	# SpellManager → UIManager
+	if not spell_manager.spell_selected.is_connected(ui_manager._on_spell_button_selected):
+		spell_manager.spell_selected.connect(ui_manager._on_spell_button_selected)
