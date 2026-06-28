@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://team_selection"]
+[gd_scene format=3 uid="uid://team_selection"]
 
 [ext_resource type="Script" path="res://scripts/TeamSelectionManager.gd" id="1"]
 
