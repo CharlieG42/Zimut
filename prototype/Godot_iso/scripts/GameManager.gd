@@ -228,11 +228,7 @@ func init_entities() -> void:	# Utiliser l'équipe personnalisée si elle est d�
 	players = []
 
 	var classes_data: Array = get_classes_data()
-	var spells_data: Array  = get_spells_data()	var player_classes: Array[String]    = ["Tank", "Assassin", "Mage"]
-	var player_positions: Array[Vector2i] = [Vector2i(1, 1), Vector2i(2, 1), Vector2i(1, 2)]
-	players = []
-
-	var classes_data: Array = get_classes_data()
+	var spells_data: Array  = get_spells_data()
 	var spells_data: Array  = get_spells_data()
 	var enemies_data: Array = get_enemies_data()
 
