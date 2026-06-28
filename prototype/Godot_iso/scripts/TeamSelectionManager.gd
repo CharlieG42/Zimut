@@ -116,7 +116,7 @@ func _setup_ui():
     var start_x = -300
     
     for i in range(available_classes.size()):
-        var class_name = available_classes[i]
+        var classname = available_classes[i]
         var row = i / 3
         var col = i % 3
         
@@ -125,15 +125,15 @@ func _setup_ui():
         
         # CrÃ©er le bouton
         var button = Button.new()
-        button.name = "%s_Button" % class_name
+        button.name = "%s_Button" % classname
         button.position = Vector2(x_pos, y_pos)
         button.size = Vector2(button_width, button_height)
-        button.text = class_data[class_name]["icon"] + " %s" % class_data[class_name]["name"]
-        button.pressed.connect(_on_class_selected.bind(class_name))
+        button.text = class_data[classname]["icon"] + " %s" % class_data[classname]["name"]
+        button.pressed.connect(_on_class_selected.bind(classname))
         
         # Styliser le bouton
         var stylebox = StyleBoxFlat.new()
-        stylebox.bg_color = class_data[class_name]["color"]
+        stylebox.bg_color = class_data[classname]["color"]
         stylebox.corner_radius_top_left = 10
         stylebox.corner_radius_top_right = 10
         stylebox.corner_radius_bottom_right = 10
@@ -141,7 +141,7 @@ func _setup_ui():
         button.add_theme_stylebox_override("normal", stylebox)
         
         var stylebox_hover = StyleBoxFlat.new()
-        stylebox_hover.bg_color = class_data[class_name]["color"] + Color(0.2, 0.2, 0.2)
+        stylebox_hover.bg_color = class_data[classname]["color"] + Color(0.2, 0.2, 0.2)
         stylebox_hover.corner_radius_top_left = 10
         stylebox_hover.corner_radius_top_right = 10
         stylebox_hover.corner_radius_bottom_right = 10
@@ -149,7 +149,7 @@ func _setup_ui():
         button.add_theme_stylebox_override("hover", stylebox_hover)
         
         var stylebox_pressed = StyleBoxFlat.new()
-        stylebox_pressed.bg_color = class_data[class_name]["color"] + Color(-0.2, -0.2, -0.2)
+        stylebox_pressed.bg_color = class_data[classname]["color"] + Color(-0.2, -0.2, -0.2)
         stylebox_pressed.corner_radius_top_left = 10
         stylebox_pressed.corner_radius_top_right = 10
         stylebox_pressed.corner_radius_bottom_right = 10
@@ -161,23 +161,23 @@ func _setup_ui():
         button.add_theme_font_size_override("font_size", 16)
         
         add_child(button)
-        class_buttons[class_name] = button
+        class_buttons[classname] = button
         
         # CrÃ©er le label de description (apparaÃ®t au survol)
         var info_label = Label.new()
-        info_label.name = "%s_Info" % class_name
-        info_label.text = class_data[class_name]["description"]
+        info_label.name = "%s_Info" % classname
+        info_label.text = class_data[classname]["description"]
         info_label.position = Vector2(x_pos, y_pos + button_height + 10)
         info_label.width = button_width
         info_label.visible = false
         info_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
         info_label.align = Label.ALIGN_CENTER
         add_child(info_label)
-        class_info_labels[class_name] = info_label
+        class_info_labels[classname] = info_label
         
         # Connecter les signaux de survol
-        button.mouse_entered.connect(_on_class_hover.bind(class_name, true))
-        button.mouse_exited.connect(_on_class_hover.bind(class_name, false))
+        button.mouse_entered.connect(_on_class_hover.bind(classname, true))
+        button.mouse_exited.connect(_on_class_hover.bind(classname, false))
 
     # CrÃ©er la section de prÃ©visualisation de l'Ã©quipe
     var preview_title = Label.new()
@@ -277,24 +277,24 @@ func _setup_ui():
     start_button.name = "StartButton"
 
 # AppelÃ© lorsqu'une classe est sÃ©lectionnÃ©e
-func _on_class_selected(class_name: String):
+func _on_class_selected(classname: String):
     # VÃ©rifier si la classe est dÃ©jÃ  sÃ©lectionnÃ©e
     for i in range(selected_team.size()):
-        if selected_team[i]["name"] == class_name:
+        if selected_team[i]["name"] == classname:
             # DÃ©jÃ  sÃ©lectionnÃ©e, ne rien faire ou afficher un message
             return
     
     # Ajouter Ã  l'Ã©quipe si on a moins de MAX_TEAM_SIZE
     if selected_team.size() < MAX_TEAM_SIZE:
-        var class_info = class_data[class_name]
+        var class_info = class_data[classname]
         selected_team.append({
-            "name": class_name,
+            "name": classname,
             "data": class_info
         })
         _update_team_preview()
         
         # Mettre Ã  jour l'Ã©tat du bouton
-        var button = class_buttons[class_name]
+        var button = class_buttons[classname]
         if button:
             button.disabled = true
             var stylebox = StyleBoxFlat.new()
@@ -314,18 +314,18 @@ func _on_class_selected(class_name: String):
         print("L'Ã©quipe est dÃ©jÃ  complÃ¨te (3/3)")
 
 # AppelÃ© lorsqu'on survole une classe
-func _on_class_hover(class_name: String, is_hover: bool):
-    if class_info_labels.has(class_name):
-        class_info_labels[class_name].visible = is_hover
+func _on_class_hover(classname: String, is_hover: bool):
+    if class_info_labels.has(classname):
+        class_info_labels[classname].visible = is_hover
 
 # AppelÃ© pour supprimer un personnage de l'Ã©quipe
 func _on_remove_from_team(index: int):
     if index < selected_team.size():
-        var class_name = selected_team[index]["name"]
+        var classname = selected_team[index]["name"]
         
         # RÃ©activer le bouton de la classe
-        if class_buttons.has(class_name):
-            var button = class_buttons[class_name]
+        if class_buttons.has(classname):
+            var button = class_buttons[classname]
             button.disabled = false
         
         # Supprimer de l'Ã©quipe
@@ -451,26 +451,26 @@ func load_classes_from_csv():
                 continue
             var values = line.split(",")
             if values.size() >= 10:
-                var class_name = values[0]
+                var classname = values[0]
                 var level = int(values[1])
                 
                 # Si c'est le niveau 30 (niveau par dÃ©faut dans le jeu)
                 if level == 30:
-                    if not class_data.has(class_name):
-                        class_data[class_name] = {
-                            "name": class_name,
+                    if not class_data.has(classname):
+                        class_data[classname] = {
+                            "name": classname,
                             "description": "",
-                            "color": CLASS_COLORS[class_name] if CLASS_COLORS.has(class_name) else Color(0.5, 0.5, 0.5),
+                            "color": CLASS_COLORS[classname] if CLASS_COLORS.has(classname) else Color(0.5, 0.5, 0.5),
                             "icon": "âï¸",
                             "base_stats": {}
                         }
                     
-                    class_data[class_name]["base_stats"]["PV"] = int(values[3])
-                    class_data[class_name]["base_stats"]["PA"] = int(values[1])
-                    class_data[class_name]["base_stats"]["PM"] = int(values[2])
-                    class_data[class_name]["base_stats"]["Force"] = int(values[4])
-                    class_data[class_name]["base_stats"]["Intelligence"] = int(values[5])
-                    class_data[class_name]["base_stats"]["DÃ©fense"] = int(values[8])
+                    class_data[classname]["base_stats"]["PV"] = int(values[3])
+                    class_data[classname]["base_stats"]["PA"] = int(values[1])
+                    class_data[classname]["base_stats"]["PM"] = int(values[2])
+                    class_data[classname]["base_stats"]["Force"] = int(values[4])
+                    class_data[classname]["base_stats"]["Intelligence"] = int(values[5])
+                    class_data[classname]["base_stats"]["DÃ©fense"] = int(values[8])
         
         available_classes = class_data.keys()
         return true
@@ -482,9 +482,9 @@ func reset_selection():
     selected_team.clear()
     
     # RÃ©activer tous les boutons
-    for class_name in class_buttons.keys():
-        if class_buttons[class_name]:
-            class_buttons[class_name].disabled = false
+    for classname in class_buttons.keys():
+        if class_buttons[classname]:
+            class_buttons[classname].disabled = false
     
     _update_team_preview()
     
