@@ -19,11 +19,13 @@ class_name UIManager
 var game_manager
 var end_turn_button: Button
 var spell_buttons: Array         = []
+var team_selection_button: Button
 var turn_order_labels: Array     = []
 var turn_order_health_bars: Array = []
 
 signal end_turn_requested
 signal restart_requested
+signal team_selection_requested
 signal spell_selected(spell: Dictionary)
 
 
@@ -53,6 +55,16 @@ func _setup_ui_elements() -> void:
 	restart_button.pressed.connect(_on_restart_pressed)
 	spell_panel.visible = false
 
+
+	# Bouton Changer d'équipe
+	team_selection_button = Button.new()
+	team_selection_button.name = "TeamSelectionButton"
+	team_selection_button.text = "Changer d'équipe"
+	team_selection_button.position = Vector2(0, 100)
+	team_selection_button.size = Vector2(200, 50)
+	team_selection_button.add_theme_font_size_override("font_size", 24)
+	game_over_panel.add_child(team_selection_button)
+	team_selection_button.pressed.connect(_on_team_selection_pressed)
 
 func _setup_connections() -> void:
 	if game_manager:
@@ -185,6 +197,10 @@ func _on_end_turn_pressed() -> void:
 
 func _on_restart_pressed() -> void:
 	restart_requested.emit()
+
+
+func _on_team_selection_pressed() -> void:
+	team_selection_requested.emit()
 
 
 func _on_spell_button_selected(spell: Dictionary) -> void:
