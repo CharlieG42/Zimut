@@ -94,7 +94,7 @@ func _setup_ui():
     title.add_theme_font_override("font", load("res://assets/fonts/big_font.tres") if ResourceLoader.exists("res://assets/fonts/big_font.tres") else null)
     title.add_theme_color_override("font_color", Color(1, 1, 1))
     title.add_theme_color_override("font_outline_color", Color(0, 0, 0))
-    title.outline_thickness = 2
+    title.outline_size = 2.0
     title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     title.width = 1000
     add_child(title)
