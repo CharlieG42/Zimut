@@ -404,32 +404,38 @@ PM: %d" % [
 
 # Appelé pour lancer le combat
 func _on_start_combat():
-    if selected_team.size() == MAX_TEAM_SIZE:
-        # Préparer les données de l'équipe pour le GameManager
-        var team_data = []
-        for i in range(selected_team.size()):
-            var class_info = selected_team[i]["data"]
-            team_data.append({
-                "classe": class_info["name"],
-                "entity_type": "Player",
-                "max_pv": class_info["base_stats"]["PV"],
-                "current_pv": class_info["base_stats"]["PV"],
-                "pa": class_info["base_stats"]["PA"],
-                "current_pa": class_info["base_stats"]["PA"],
-                "pm": class_info["base_stats"]["PM"],
-                "current_pm": class_info["base_stats"]["PM"],
-                "force": class_info["base_stats"]["Force"],
-                "intelligence": class_info["base_stats"]["Intelligence"],
-                "defense": class_info["base_stats"]["Défense"],
-                "agilite": class_info["base_stats"]["Agilité"] if class_info["base_stats"].has("Agilité") else 10,
-                "sagesse": class_info["base_stats"]["Sagesse"] if class_info["base_stats"].has("Sagesse") else 10,
-                "x": -1,
-                "y": -1,
-                "color": class_info["color"]
-            })
-        
-        # Émettre le signal avec les données de l'équipe
-        emit_signal("team_selected", team_data)
+	if selected_team.size() == MAX_TEAM_SIZE:
+		# Préparer les données de l'équipe pour le GameManager
+		var team_data = []
+		for i in range(selected_team.size()):
+			var class_info = selected_team[i]["data"]
+			team_data.append({
+				"classe": class_info["name"],
+				"entity_type": "Player",
+				"max_pv": class_info["base_stats"]["PV"],
+				"current_pv": class_info["base_stats"]["PV"],
+				"pa": class_info["base_stats"]["PA"],
+				"current_pa": class_info["base_stats"]["PA"],
+				"pm": class_info["base_stats"]["PM"],
+				"current_pm": class_info["base_stats"]["PM"],
+				"force": class_info["base_stats"]["Force"],
+				"intelligence": class_info["base_stats"]["Intelligence"],
+				"defense": class_info["base_stats"]["Défense"],
+				"agilite": class_info["base_stats"]["Agilité"],
+				"sagesse": class_info["base_stats"]["Sagesse"],
+				"x": -1,
+				"y": -1,
+				"color": class_info["color"]
+			})
+		
+		# Passer l'équipe au GameManager (Autoload)
+		var game_manager = get_node_or_null("/root/GameManager")
+		if game_manager and game_manager.has_method("set_custom_team"):
+			game_manager.set_custom_team(team_data)
+		
+		# Charger la scène de combat
+		var game_scene = preload("res://scenes/Main.tscn")
+		get_tree().change_scene_to(game_scene)
 
 # Fonction pour charger les données depuis CSV (si disponible)
 func load_classes_from_csv():
