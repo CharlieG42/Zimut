@@ -95,7 +95,7 @@ func _setup_ui():
     title.add_theme_color_override("font_color", Color(1, 1, 1))
     title.add_theme_color_override("font_outline_color", Color(0, 0, 0))
     title.outline_size = 2
-    title.align = Label.ALIGN_CENTER
+    title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     title.width = 1000
     add_child(title)
 
@@ -104,7 +104,7 @@ func _setup_ui():
     description.text = "Choisissez 3 personnages pour former votre Ã©quipe"
     description.position = Vector2(0, -220)
     description.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
-    description.align = Label.ALIGN_CENTER
+    description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     description.width = 800
     add_child(description)
 
@@ -171,7 +171,7 @@ func _setup_ui():
         info_label.width = button_width
         info_label.visible = false
         info_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
-        info_label.align = Label.ALIGN_CENTER
+        info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         add_child(info_label)
         class_info_labels[classname] = info_label
         
@@ -184,7 +184,7 @@ func _setup_ui():
     preview_title.text = "Votre Ã©quipe (%d/%d)" % [selected_team.size(), MAX_TEAM_SIZE]
     preview_title.position = Vector2(0, 120)
     preview_title.add_theme_color_override("font_color", Color(1, 1, 0.8))
-    preview_title.align = Label.ALIGN_CENTER
+    preview_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     add_child(preview_title)
     
     # Stocker la rÃ©fÃ©rence pour mise Ã  jour
@@ -215,7 +215,7 @@ func _setup_ui():
         name_label.name = "NameLabel_%d" % i
         name_label.position = Vector2(0, -30)
         name_label.width = 100
-        name_label.align = Label.ALIGN_CENTER
+        name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         name_label.add_theme_color_override("font_color", Color(1, 1, 1))
         name_label.add_theme_font_size_override("font_size", 12)
         preview_frame.add_child(name_label)
@@ -225,7 +225,7 @@ func _setup_ui():
         stats_label.name = "StatsLabel_%d" % i
         stats_label.position = Vector2(0, -10)
         stats_label.width = 100
-        stats_label.align = Label.ALIGN_CENTER
+        stats_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         stats_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
         stats_label.add_theme_font_size_override("font_size", 10)
         preview_frame.add_child(stats_label)
