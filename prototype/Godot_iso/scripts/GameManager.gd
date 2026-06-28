@@ -296,6 +296,62 @@ func init_entities() -> void:	# Utiliser l'équipe personnalisée si elle est d�
 			grid[pos.y][pos.x] = player
 			continue
 
+		# Chercher les stats au niveau DEFAULT_PLAYER_LEVEL (ou le plus proche ≤)
+		var class_info: Dictionary = _find_best_match(classes_data, "Classe", classe,
+			"Niveau", DEFAULT_PLAYER_LEVEL)
+		if class_info.is_empty():
+			push_error("Classe '%s' introuvable dans classes.csv" % classe)
+			continue
+
+		var player: Dictionary = {
+			"name":         "%s Lv%d" % [classe, DEFAULT_PLAYER_LEVEL],
+			"entity_type":  "Player",
+			"classe":       classe,
+			"level":        DEFAULT_PLAYER_LEVEL,
+			"max_pv":       _csv_int(class_info, "Vita (PV)",             60),
+			"current_pv":   _csv_int(class_info, "Vita (PV)",             60),
+			"force":        _csv_int(class_info, "Force (CAC)",           10),
+			"intelligence": _csv_int(class_info, "Intelligence (Magie)",  10),
+			"agility":      _csv_int(class_info, "Agilité (Vit. Atk)",    10),
+			"wisdom":       _csv_int(class_info, "Sagesse (Précision)",   10),
+			"defense":      _csv_int(class_info, "Défense",               10),
+			"max_pa":       _csv_int(class_info, "PA",                     5),
+			"current_pa":   _csv_int(class_info, "PA",                     5),
+			"max_pm":       _csv_int(class_info, "PM",                     3),
+			"current_pm":   _csv_int(class_info, "PM",                     3),
+			"x": pos.x, "y": pos.y,
+			"spells":    [],
+			"is_active": false,
+		}
+
+		# Sorts disponibles (colonne "Classe" dans sorts.csv)
+		for spell_info: Dictionary in spells_data:
+			if spell_info.get("Classe", "") == classe:
+				var req_lvl: int = int(spell_info.get("Niveau_requis", spell_info.get("Niveau requis", "1")))
+				if req_lvl <= DEFAULT_PLAYER_LEVEL:
+					player["spells"].append({
+						"name":              spell_info.get("Nom", "Sort"),
+						"classe":            classe,
+						"cost_pa":           int(spell_info.get("Cout_PA", spell_info.get("Coût PA", "1"))),
+						"cost_pm":           int(spell_info.get("Cout_PM", spell_info.get("Coût PM", "0"))),
+						"range":             int(spell_info.get("Portee", spell_info.get("Portée", "1"))),
+						"effect":            spell_info.get("Effet", ""),
+						"level_required":    req_lvl,
+						"spell_type":        spell_info.get("Type", "Attaque"),
+						# Nouvelles colonnes numériques
+						"Degats_physiques": int(spell_info.get("Degats_physiques", "0")),
+						"Degats_magiques":  int(spell_info.get("Degats_magiques", "0")),
+						"Soins":             int(spell_info.get("Soins", "0")),
+						"Resistance_physique": int(spell_info.get("Resistance_physique", "0")),
+						"Resistance_magique": int(spell_info.get("Resistance_magique", "0")),
+						"Debuff_physique":   int(spell_info.get("Debuff_physique", "0")),
+						"Debuff_magique":    int(spell_info.get("Debuff_magique", "0")),
+						"Buff_physique":     int(spell_info.get("Buff_physique", "0")),
+						"Buff_magique":      int(spell_info.get("Buff_magique", "0")),
+					})
+
+		players.append(player)
+		grid[pos.y][pos.x] = player
 		# Sinon, utiliser le chargement depuis CSV (ancienne méthode)
 		# Chercher les stats au niveau DEFAULT_PLAYER_LEVEL (ou le plus proche ≤)
 		var class_info: Dictionary = _find_best_match(classes_data, "Classe", classe,
