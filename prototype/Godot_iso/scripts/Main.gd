@@ -38,7 +38,13 @@ func _on_team_selected(team_data: Array) -> void:
 	selected_team = team_data
 	
 	# Charger la scène de combat
-	_load_game_scene()
+	
+	# Connecter le signal team_selection_requested
+	var ui_manager_node = current_scene.get_node_or_null("Main/UIManager")
+	if ui_manager_node and ui_manager_node.has_signal("team_selection_requested"):
+		ui_manager_node.team_selection_requested.connect(return_to_team_selection)
+
+_load_game_scene()
 
 # Charge la scène de combat
 func _load_game_scene() -> void:
