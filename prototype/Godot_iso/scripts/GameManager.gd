@@ -37,6 +37,9 @@ var show_spells: bool            = false
 var game_over: bool              = false
 var victory: bool                = false
 
+# Nouvelle variable pour stocker l'équipe personnalisée
+var custom_team: Array = []
+
 signal turn_changed(turn: int)
 signal player_changed(index: int)
 signal entity_selected(entity)
@@ -118,6 +121,16 @@ func _extract_heal_from_effect(effect: String) -> int:
 	return 0
 
 
+
+
+## Nouvelle méthode pour définir une équipe personnalisée
+func set_custom_team(team_data: Array) -> void:
+	custom_team = team_data
+
+
+## Nouvelle méthode pour réinitialiser l'équipe personnalisée
+func clear_custom_team() -> void:
+	custom_team = []
 func _ready() -> void:
 	var data_loader: Node = get_node_or_null("/root/DataLoader")
 	if data_loader == null:
