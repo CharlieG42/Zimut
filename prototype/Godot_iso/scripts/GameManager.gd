@@ -1,8 +1,8 @@
 extends Node
-## GameManager - Logique globale Zimut (version isomÃ©trique)
-## Autoload configurÃ© dans project.godot
+## GameManager - Logique globale Zimut (version isométrique)
+## Autoload configuré dans project.godot
 ## FIXES : fonctions get_*_data() sans type retour â crash parse ; 
-##         load_data_fallback crÃ©e un DataLoader enfant qui Ã©crase l'autoload ;
+##         load_data_fallback crée un DataLoader enfant qui écrase l'autoload ;
 ##         init_entities() cherche colonne "Classe" inexistante dans le CSV ennemis
 
 const GRID_SIZE        := 8
@@ -37,7 +37,7 @@ var show_spells: bool            = false
 var game_over: bool              = false
 var victory: bool                = false
 
-# Nouvelle variable pour stocker l'équipe personnalisÃ©e
+# Nouvelle variable pour stocker l'équipe personnalisée
 var custom_team: Array = []
 
 signal turn_changed(turn: int)
@@ -97,10 +97,10 @@ func _get_spell_damage(spell: Dictionary, damage_type: String) -> int:
 ## Helper function to extract damage value from spell effect string (fallback)
 func _extract_damage_from_effect(effect: String, damage_type: String = "") -> int:
     var damage_patterns = [
-        "dÃ©gÃ¢ts",
-        "dÃ©gÃ¢ts magiques",
-        "dÃ©gÃ¢ts en zone",
-        "dÃ©gÃ¢ts/tour"
+        "dégÃ¢ts",
+        "dégÃ¢ts magiques",
+        "dégÃ¢ts en zone",
+        "dégÃ¢ts/tour"
     ]
     for pattern in damage_patterns:
         if pattern in effect:
@@ -123,18 +123,18 @@ func _extract_heal_from_effect(effect: String) -> int:
 
 
 
-## Nouvelle mÃ©thode pour dÃ©finir une Ã©quipe personnalisÃ©e
+## Nouvelle méthode pour définir une équipe personnalisée
 func set_custom_team(team_data: Array) -> void:
     custom_team = team_data
 
 
-## Nouvelle mÃ©thode pour rÃ©initialiser l'équipe personnalisÃ©e
+## Nouvelle méthode pour réinitialiser l'équipe personnalisée
 func clear_custom_team() -> void:
     custom_team = []
 func _ready() -> void:
     var data_loader: Node = get_node_or_null("/root/DataLoader")
     if data_loader == null:
-        push_error("DataLoader autoload introuvable â vÃ©rifier project.godot")
+        push_error("DataLoader autoload introuvable — vérifier project.godot")
         _init_with_fallback_data()
         return
 
@@ -191,7 +191,7 @@ func get_enemies_data() -> Array:
 # ââ Fallback si DataLoader absent ââââââââââââââââââââââââââââââââââââââââââ
 
 func _init_with_fallback_data() -> void:
-    ## DonnÃ©es minimales intÃ©grÃ©es (mÃªme structure que les CSV)
+    ## Données minimales intégrées (même structure que les CSV)
     var dl_node := Node.new()
     dl_node.name = "DataLoaderFallback"
     dl_node.set_script(load("res://scripts/DataLoader.gd"))
@@ -201,7 +201,7 @@ func _init_with_fallback_data() -> void:
 
 
 # âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-#  INITIALISATION GRILLE / ENTITÃS
+#  INITIALISATION GRILLE / ENTITÉS
 # âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 func init_grid() -> void:
@@ -213,16 +213,16 @@ func init_grid() -> void:
         grid.append(row)
 
 
-func init_entities() -> void:    # Utiliser l'équipe personnalisÃ©e si elle est dÃ©finie, sinon utiliser les classes par dÃ©faut
+func init_entities() -> void:    # Utiliser l'équipe personnalisée si elle est définie, sinon utiliser les classes par défaut
     var player_classes: Array = []
     var player_positions: Array[Vector2i] = [Vector2i(1, 1), Vector2i(2, 1), Vector2i(1, 2)]
     
     if custom_team.size() == 3:
-        # Utiliser l'équipe personnalisÃ©e
+        # Utiliser l'équipe personnalisée
         for i: int in range(custom_team.size()):
             player_classes.append(custom_team[i]["classe"])
     else:
-        # Utiliser les classes par dÃ©faut
+        # Utiliser les classes par défaut
         player_classes = ["Tank", "Assassin", "Mage"]
     
     players = []
@@ -236,7 +236,7 @@ func init_entities() -> void:    # Utiliser l'équipe personnalisÃ©e si elle e
         var classe: String = player_classes[i]
         var pos: Vector2i  = player_positions[i]
 
-        # Si on utilise l'équipe personnalisÃ©e, on utilise les stats fournies
+        # Si on utilise l'équipe personnalisée, on utilise les stats fournies
         if custom_team.size() == 3 and i < custom_team.size():
             var team_member = custom_team[i]
             var player: Dictionary = {
@@ -275,7 +275,7 @@ func init_entities() -> void:    # Utiliser l'équipe personnalisÃ©e si elle e
                             "effect":            spell_info.get("Effet", ""),
                             "level_required":    req_lvl,
                             "spell_type":        spell_info.get("Type", "Attaque"),
-                            # Nouvelles colonnes numÃ©riques
+                            # Nouvelles colonnes numériques
                             "Degats_physiques": int(spell_info.get("Degats_physiques", "0")),
                             "Degats_magiques":  int(spell_info.get("Degats_magiques", "0")),
                             "Soins":             int(spell_info.get("Soins", "0")),
@@ -308,7 +308,7 @@ func init_entities() -> void:    # Utiliser l'équipe personnalisÃ©e si elle e
             "force":        _csv_int(class_info, "Force (CAC)",           10),
             "intelligence": _csv_int(class_info, "Intelligence (Magie)",  10),
             "agility":      _csv_int(class_info, "Agilité (Vit. Atk)",    10),
-            "wisdom":       _csv_int(class_info, "Sagesse (PrÃ©cision)",   10),
+            "wisdom":       _csv_int(class_info, "Sagesse (Précision)",   10),
             "defense":      _csv_int(class_info, "Défense",               10),
             "max_pa":       _csv_int(class_info, "PA",                     5),
             "current_pa":   _csv_int(class_info, "PA",                     5),
@@ -333,7 +333,7 @@ func init_entities() -> void:    # Utiliser l'équipe personnalisÃ©e si elle e
                         "effect":            spell_info.get("Effet", ""),
                         "level_required":    req_lvl,
                         "spell_type":        spell_info.get("Type", "Attaque"),
-                        # Nouvelles colonnes numÃ©riques
+                        # Nouvelles colonnes numériques
                         "Degats_physiques": int(spell_info.get("Degats_physiques", "0")),
                         "Degats_magiques":  int(spell_info.get("Degats_magiques", "0")),
                         "Soins":             int(spell_info.get("Soins", "0")),
@@ -384,7 +384,7 @@ func init_entities() -> void:    # Utiliser l'équipe personnalisÃ©e si elle e
         grid[pos.y][pos.x] = enemy
 
 
-## Cherche dans `data_array` la ligne oÃ¹ `key_col`==`key_val`
+## Cherche dans `data_array` la ligne où `key_col`==`key_val`
 ## au niveau `level_col`==`target_level` (ou le plus proche â¤)
 func _find_best_match(data_array: Array, key_col: String, key_val: String,
         level_col: String, target_level: int) -> Dictionary:
@@ -417,7 +417,7 @@ func handle_cell_selected(x: int, y: int) -> void:
     var current_player: Dictionary = players[current_player_index]
     var player_pos: Vector2i       = Vector2i(int(current_player["x"]), int(current_player["y"]))
 
-    # 1. Sort sélectionnÃ© â lancer
+    # 1. Sort sélectionné â lancer
     if selected_spell != null:
         _try_cast_spell(current_player, target_pos, target_entity)
         return
@@ -426,12 +426,12 @@ func handle_cell_selected(x: int, y: int) -> void:
     if target_pos == player_pos:
         return
 
-    # 3. Clic sur un alliÃ© â ignorÃ© (pas de changement de joueur actif)
+    # 3. Clic sur un allié â ignoré (pas de changement de joueur actif)
     for p: Dictionary in players:
         if int(p["x"]) == x and int(p["y"]) == y and int(p["current_pv"]) > 0:
             return
 
-    # 4. Case vide â dÃ©placer
+    # 4. Case vide â déplacer
     if target_entity == null:
         _try_move(current_player, target_pos)
         return
@@ -457,7 +457,7 @@ func _try_move(player: Dictionary, target_pos: Vector2i) -> void:
     grid[target_pos.y][target_pos.x] = player
     selected_cell = target_pos
     entity_moved.emit(player, from_pos, target_pos)
-    message_requested.emit("%s se dÃ©place en (%d,%d)" % [player["name"], target_pos.x, target_pos.y])
+    message_requested.emit("%s se déplace en (%d,%d)" % [player["name"], target_pos.x, target_pos.y])
     player_changed.emit(current_player_index)
     _refresh_grid()
 
@@ -466,7 +466,7 @@ func _try_basic_attack(attacker: Dictionary, target: Dictionary, target_pos: Vec
     var from_pos: Vector2i = Vector2i(attacker["x"], attacker["y"])
     var dist: int = abs(target_pos.x - from_pos.x) + abs(target_pos.y - from_pos.y)
     if dist > 1:
-        message_requested.emit("Ennemi hors de portÃ©e (distance %d)." % dist)
+        message_requested.emit("Ennemi hors de portée (distance %d)." % dist)
         return
     if int(attacker["current_pa"]) <= 0:
         message_requested.emit("Plus de PA !")
@@ -476,7 +476,7 @@ func _try_basic_attack(attacker: Dictionary, target: Dictionary, target_pos: Vec
     target["current_pv"] = int(target["current_pv"]) - actual_dmg
     attacker["current_pa"] = int(attacker["current_pa"]) - 1
     entity_attacked.emit(attacker, target, actual_dmg)
-    message_requested.emit("%s attaque %s : %d dÃ©gÃ¢ts !" % [attacker["name"], target["name"], actual_dmg])
+    message_requested.emit("%s attaque %s : %d dégÃ¢ts !" % [attacker["name"], target["name"], actual_dmg])
     if int(target["current_pv"]) <= 0:
         remove_entity_from_grid(target)
     player_changed.emit(current_player_index)
@@ -490,7 +490,7 @@ func _try_cast_spell(caster: Dictionary, target_pos: Vector2i, target_entity) ->
     var dist: int          = abs(target_pos.x - from_pos.x) + abs(target_pos.y - from_pos.y)
 
     if dist > spell_range:
-        message_requested.emit("Hors de portÃ©e (portÃ©e %d, dist %d)." % [spell_range, dist])
+        message_requested.emit("Hors de portée (portée %d, dist %d)." % [spell_range, dist])
         selected_spell = null
         player_changed.emit(current_player_index)
         _refresh_grid()
@@ -502,7 +502,7 @@ func _try_cast_spell(caster: Dictionary, target_pos: Vector2i, target_entity) ->
         _refresh_grid()
         return
 
-    # DÃ©terminer la cible selon le type de sort
+    # Déterminer la cible selon le type de sort
     var actual_target: Dictionary = {}
     var spell_type: String = spell.get("spell_type", spell.get("Type", "Attaque"))
     if spell_type == "Soin":
@@ -537,7 +537,7 @@ func _apply_spell(caster: Dictionary, spell: Dictionary, target: Dictionary) -> 
     # Accepte "spell_type" (notre format) ET "Type" (format CSV direct)
     var spell_type: String = spell.get("spell_type", spell.get("Type", "Attaque"))
     
-    # Utiliser les nouvelles colonnes numÃ©riques
+    # Utiliser les nouvelles colonnes numériques
     var physical_damage: int = _get_spell_damage(spell, "physical")
     var magical_damage: int = _get_spell_damage(spell, "magical")
     var heal_amount: int = _get_spell_damage(spell, "heal")
@@ -550,53 +550,53 @@ func _apply_spell(caster: Dictionary, spell: Dictionary, target: Dictionary) -> 
     
     match spell_type:
         "Attaque", "CAC":
-            # Utiliser les dÃ©gÃ¢ts physiques du CSV
+            # Utiliser les dégÃ¢ts physiques du CSV
             var raw_dmg: int = physical_damage if physical_damage > 0 else (int(caster["force"]) + (randi() % 5 - 2))
             var actual_dmg: int = maxi(1, raw_dmg - int(int(target["defense"]) / 2.0))
             target["current_pv"] = int(target["current_pv"]) - actual_dmg
             entity_attacked.emit(caster, target, actual_dmg)
-            return "%s utilise %s : %d dÃ©gÃ¢ts physiques !" % [caster["name"], spell["name"], actual_dmg]
+            return "%s utilise %s : %d dégÃ¢ts physiques !" % [caster["name"], spell["name"], actual_dmg]
         "Magie":
-            # Utiliser les dÃ©gÃ¢ts magiques du CSV
+            # Utiliser les dégÃ¢ts magiques du CSV
             var raw_dmg: int = magical_damage if magical_damage > 0 else (int(caster["intelligence"]) + (randi() % 5 - 2))
             var actual_dmg: int = maxi(1, raw_dmg)
             target["current_pv"] = int(target["current_pv"]) - actual_dmg
             entity_attacked.emit(caster, target, actual_dmg)
-            return "%s utilise %s : %d dÃ©gÃ¢ts magiques !" % [caster["name"], spell["name"], actual_dmg]
+            return "%s utilise %s : %d dégÃ¢ts magiques !" % [caster["name"], spell["name"], actual_dmg]
         "Buff", "Défense":
             if resistance_physical > 0:
                 target["defense"] = int(float(int(target["defense"]) * (1 + resistance_physical / 100.0)))
-                return "%s utilise %s : +%d%% dÃ©fense !" % [caster["name"], spell["name"], resistance_physical]
+                return "%s utilise %s : +%d%% défense !" % [caster["name"], spell["name"], resistance_physical]
             elif resistance_magical > 0:
-                # RÃ©sistance magique (Ã  implÃ©menter selon votre systÃ¨me)
-                return "%s utilise %s : +%d%% rÃ©sistance magique !" % [caster["name"], spell["name"], resistance_magical]
+                # Résistance magique (Ã  implémenter selon votre système)
+                return "%s utilise %s : +%d%% résistance magique !" % [caster["name"], spell["name"], resistance_magical]
             elif buff_physical > 0:
-                return "%s utilise %s : +%d%% dÃ©gÃ¢ts physiques !" % [caster["name"], spell["name"], buff_physical]
+                return "%s utilise %s : +%d%% dégÃ¢ts physiques !" % [caster["name"], spell["name"], buff_physical]
             elif buff_magical > 0:
-                return "%s utilise %s : +%d%% dÃ©gÃ¢ts magiques !" % [caster["name"], spell["name"], buff_magical]
+                return "%s utilise %s : +%d%% dégÃ¢ts magiques !" % [caster["name"], spell["name"], buff_magical]
             else:
                 target["defense"] = int(float(int(target["defense"]) * 3) / 2.0)
-                return "%s utilise %s : dÃ©fense augmentÃ©e !" % [caster["name"], spell["name"]]
+                return "%s utilise %s : défense augmentée !" % [caster["name"], spell["name"]]
         "Soin":
             # Utiliser les soins du CSV
             var heal: int = heal_amount if heal_amount > 0 else (int(caster["intelligence"]) + (randi() % 5 - 2))
             target["current_pv"] = mini(int(target["max_pv"]), int(target["current_pv"]) + heal)
             return "%s utilise %s sur %s : +%d PV !" % [caster["name"], spell["name"], target["name"], heal]
         "Debuff":
-            # Pour les debuffs avec dÃ©gÃ¢ts
+            # Pour les debuffs avec dégÃ¢ts
             if debuff_physical > 0:
                 target["current_pa"] = maxi(0, int(target["current_pa"]) - debuff_physical)
                 return "%s utilise %s : -%d PA !" % [caster["name"], spell["name"], debuff_physical]
             elif debuff_magical > 0:
                 target["current_pv"] = int(target["current_pv"]) - debuff_magical
                 entity_attacked.emit(caster, target, debuff_magical)
-                return "%s utilise %s : %d dÃ©gÃ¢ts magiques (DoT) !" % [caster["name"], spell["name"], debuff_magical]
+                return "%s utilise %s : %d dégÃ¢ts magiques (DoT) !" % [caster["name"], spell["name"], debuff_magical]
             elif magical_damage > 0:
                 target["current_pv"] = int(target["current_pv"]) - magical_damage
                 entity_attacked.emit(caster, target, magical_damage)
-                return "%s utilise %s : %d dÃ©gÃ¢ts + effet spÃ©cial !" % [caster["name"], spell["name"], magical_damage]
+                return "%s utilise %s : %d dégÃ¢ts + effet spécial !" % [caster["name"], spell["name"], magical_damage]
             else:
-                return "%s utilise %s : effet spÃ©cial appliquÃ© !" % [caster["name"], spell["name"]]
+                return "%s utilise %s : effet spécial appliqué !" % [caster["name"], spell["name"]]
     return "%s utilise %s." % [caster["name"], spell["name"]]
 
 
@@ -605,10 +605,10 @@ func handle_spell_selected(spell: Dictionary) -> void:
         return
     if selected_spell != null and selected_spell == spell:
         selected_spell = null
-        message_requested.emit("Sort annulÃ©.")
+        message_requested.emit("Sort annulé.")
     else:
         selected_spell = spell
-        message_requested.emit("Sort : %s â cliquez une cible." % spell.get("name", ""))
+        message_requested.emit("Sort : %s — cliquez une cible." % spell.get("name", ""))
     spell_selected.emit(selected_spell)
 
 
@@ -683,7 +683,7 @@ func start_player_turn() -> void:
     _set_active_player(first_alive)
     turn_changed.emit(current_turn)
     player_changed.emit(current_player_index)
-    message_requested.emit("Tour %d â Ã vous !" % turn_count)
+    message_requested.emit("Tour %d — Ã vous !" % turn_count)
     check_game_over()
 
 
@@ -729,7 +729,7 @@ func check_game_over() -> void:
     if alive_p == 0:
         game_over = true; victory = false
         game_ended.emit(false)
-        message_requested.emit("Tous vos personnages sont morts. DÃFAITE !")
+        message_requested.emit("Tous vos personnages sont morts. DÉFAITE !")
     elif alive_e == 0:
         game_over = true; victory = true
         game_ended.emit(true)
