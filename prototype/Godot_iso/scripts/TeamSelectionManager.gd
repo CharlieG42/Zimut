@@ -261,35 +261,8 @@ func _setup_ui():
 		preview_frame.add_child(remove_button)
 
 	# Créer le bouton "Lancer le combat"
-	var start_button = Button.new()
-	start_button.name = "StartButton"
-	start_button.position = Vector2(0, 200)
-	start_button.size = Vector2(200, 50)
-	start_button.text = "LANCER LE COMBAT"
-	start_button.disabled = true
-	start_button.pressed.connect(_on_start_combat)
-	
-	var stylebox = StyleBoxFlat.new()
-	stylebox.bg_color = Color(0.0, 0.6, 0.0)
-	stylebox.corner_radius_top_left = 10
-	stylebox.corner_radius_top_right = 10
-	stylebox.corner_radius_bottom_right = 10
-	stylebox.corner_radius_bottom_left = 10
-	start_button.add_theme_stylebox_override("normal", stylebox)
-	
-	var stylebox_hover = StyleBoxFlat.new()
-	stylebox_hover.bg_color = Color(0.0, 0.8, 0.0)
-	stylebox_hover.corner_radius_top_left = 10
-	stylebox_hover.corner_radius_top_right = 10
-	stylebox_hover.corner_radius_bottom_right = 10
-	stylebox_hover.corner_radius_bottom_left = 10
-	start_button.add_theme_stylebox_override("hover", stylebox_hover)
-	
-	start_button.add_theme_color_override("font_color", Color(1, 1, 1))
-	start_button.add_theme_font_size_override("font_size", 16)
-	start_button
-	
-	add_child(start_button)
+# Récupérer le bouton existant de la scène
+var start_button = $StartButton
 	
 	# Stocker la référence
 	start_button.name = "StartButton"
