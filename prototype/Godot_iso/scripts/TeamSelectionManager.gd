@@ -97,3 +97,126 @@ func _ready():
 	start_button.pressed.connect(_on_start_combat)
 	_update_team_preview()
 
+
+
+# Appelé lorsqu'une classe est sélectionnée
+func _on_class_selected(classname: String):
+	for i in range(selected_team.size()):
+		if selected_team[i]["name"] == classname:
+			return
+	
+	if selected_team.size() < MAX_TEAM_SIZE:
+		var class_info = class_data[classname]
+		selected_team.append({
+			"name": classname,
+			"data": class_info
+		})
+		_update_team_preview()
+		
+		var start_button = get_node("StartButton")
+		if start_button:
+			start_button.disabled = selected_team.size() < MAX_TEAM_SIZE
+	else:
+		print("L'équipe est déjà complète (3/3)")
+
+func _on_class_hover(classname: String, is_hover: bool):
+	if class_info_labels.has(classname):
+		class_info_labels[classname].visible = is_hover
+
+func _on_remove_from_team(index: int):
+	if index < selected_team.size():
+		var classname = selected_team[index]["name"]
+		if class_buttons.has(classname):
+			class_buttons[classname].disabled = false
+		selected_team.remove_at(index)
+		_update_team_preview()
+		
+		var start_button = get_node("StartButton")
+		if start_button:
+			start_button.disabled = selected_team.size() < MAX_TEAM_SIZE
+
+func _update_team_preview():
+	var preview_title = get_node("PreviewTitle")
+	if preview_title:
+		preview_title.text = "Votre équipe (%d/%d)" % [selected_team.size(), MAX_TEAM_SIZE]
+	
+	for i in range(MAX_TEAM_SIZE):
+		var preview_frame = get_node("TeamPreview_%d" % i)
+		var name_label = get_node("TeamPreview_%d/NameLabel_%d" % [i, i])
+		var stats_label = get_node("TeamPreview_%d/StatsLabel_%d" % [i, i])
+		var remove_button = get_node("TeamPreview_%d/RemoveButton_%d" % [i, i])
+		
+		if preview_frame:
+			if i < selected_team.size():
+				var class_info = selected_team[i]["data"]
+				var stylebox = StyleBoxFlat.new()
+				stylebox.bg_color = class_info["color"] + Color(0.1, 0.1, 0.1, 0.3)
+				stylebox.corner_radius_top_left = 15
+				stylebox.corner_radius_top_right = 15
+				stylebox.corner_radius_bottom_right = 15
+				stylebox.corner_radius_bottom_left = 15
+				stylebox.border_width_left = 2
+				stylebox.border_width_right = 2
+				stylebox.border_width_top = 2
+				stylebox.border_width_bottom = 2
+				stylebox.border_color = class_info["color"]
+				preview_frame.add_theme_stylebox_override("panel", stylebox)
+				if name_label:
+					name_label.text = class_info["icon"] + " %s" % class_info["name"]
+				if stats_label:
+					var stats_text = "PV: %d
+PA: %d
+PM: %d" % [
+						class_info["base_stats"]["PV"],
+						class_info["base_stats"]["PA"],
+						class_info["base_stats"]["PM"]
+					]
+					stats_label.text = stats_text
+				if remove_button:
+					remove_button.visible = true
+			else:
+				if preview_frame:
+					var stylebox = StyleBoxFlat.new()
+					stylebox.bg_color = Color(0.15, 0.15, 0.15, 0.8)
+					stylebox.corner_radius_top_left = 15
+					stylebox.corner_radius_top_right = 15
+					stylebox.corner_radius_bottom_right = 15
+					stylebox.corner_radius_bottom_left = 15
+					stylebox.border_width_left = 2
+					stylebox.border_width_right = 2
+					stylebox.border_width_top = 2
+					stylebox.border_width_bottom = 2
+					stylebox.border_color = Color(0.5, 0.5, 0.5)
+					preview_frame.add_theme_stylebox_override("panel", stylebox)
+		if name_label:
+			name_label.text = "-"
+		if stats_label:
+			stats_label.text = ""
+		if remove_button:
+			remove_button.visible = false
+
+func _on_start_combat():
+	if selected_team.size() == MAX_TEAM_SIZE:
+		var team_data = []
+		for i in range(selected_team.size()):
+			var class_info = selected_team[i]["data"]
+			team_data.append({
+				"classe": class_info["name"],
+				"entity_type": "Player",
+				"max_pv": class_info["base_stats"]["PV"],
+				"current_pv": class_info["base_stats"]["PV"],
+				"pa": class_info["base_stats"]["PA"],
+				"current_pa": class_info["base_stats"]["PA"],
+				"pm": class_info["base_stats"]["PM"],
+				"current_pm": class_info["base_stats"]["PM"],
+				"force": class_info["base_stats"]["Force"],
+				"intelligence": class_info["base_stats"]["Intelligence"],
+				"defense": class_info["base_stats"]["Défense"],
+				"x": -1,
+				"y": -1,
+				"color": class_info["color"]
+			})
+		if GameManager and GameManager.has_method("set_custom_team"):
+			GameManager.set_custom_team(team_data)
+			team_selected.emit(team_data)
+		get_tree().change_scene_to_file("res://scenes/Main.tscn")
