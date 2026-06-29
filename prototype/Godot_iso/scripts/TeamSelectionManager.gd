@@ -82,6 +82,10 @@ var class_data = {
 # Appelé lorsque le nÅud est ajouté Ã  l'arbre de scène
 func _ready():
 	available_classes = class_data.keys()
+	
+# Récupérer le bouton existant de la scène
+	var start_button = $StartButton
+	start_button.pressed.connect(_on_start_combat)
 	_setup_ui()
 	_update_team_preview()
 
@@ -257,14 +261,6 @@ func _ready():
 		remove_button.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
 		remove_button.add_theme_font_size_override("font_size", 12)
 		preview_frame.add_child(remove_button)
-
-	# Créer le bouton "Lancer le combat"
-# Récupérer le bouton existant de la scène
-var start_button = $StartButton
-start_button.pressed.connect(_on_start_combat)
-	
-	# Stocker la référence
-	start_button.name = "StartButton"
 
 # Appelé lorsqu'une classe est sélectionnée
 func _on_class_selected(classname: String):
