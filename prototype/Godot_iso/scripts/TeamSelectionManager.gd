@@ -82,6 +82,31 @@ var class_data = {
 # Appelé lorsque le nÅud est ajouté Ã  l'arbre de scène
 func _ready():
 	
+# Initialiser les dictionnaires
+	for classname in available_classes:
+		var button = get_node("%s_Button" % classname)
+		if button:
+			class_buttons[classname] = button
+			# Créer le label d'info si nécessaire
+			var info_label_name = "%s_Info" % classname
+			var info_label = get_node_or_null(info_label_name)
+			if not info_label:
+				info_label = Label.new()
+				info_label.name = info_label_name
+				info_label.text = class_data[classname]["description"]
+				info_label.position = button.position + Vector2(0, button.rect_size.y + 10)
+				info_label.visible = false
+				info_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
+				info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				add_child(info_label)
+			class_info_labels[classname] = info_label
+	
+	# Initialiser team_preview_nodes
+	for i in range(MAX_TEAM_SIZE):
+		var preview_frame = get_node_or_null("TeamPreview_%d" % i)
+		if preview_frame:
+			team_preview_nodes.append(preview_frame)
+	
 # Connecter les boutons de classe
 	for classname in available_classes:
 		var button_name = "%s_Button" % classname
