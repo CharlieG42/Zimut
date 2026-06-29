@@ -81,6 +81,15 @@ var class_data = {
 
 # Appelé lorsque le nÅud est ajouté Ã  l'arbre de scène
 func _ready():
+	
+# Connecter les boutons de classe
+	for classname in available_classes:
+		var button_name = "%s_Button" % classname
+		var button = get_node_or_null(button_name)
+		if button:
+			button.pressed.connect(_on_class_selected.bind(classname))
+			button.mouse_entered.connect(_on_class_hover.bind(classname, true))
+			button.mouse_exited.connect(_on_class_hover.bind(classname, false))
 	available_classes = class_data.keys()
 	
 # Récupérer le bouton existant de la scène
