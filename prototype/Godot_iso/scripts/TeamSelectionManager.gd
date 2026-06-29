@@ -91,12 +91,12 @@ func _setup_ui():
     var title = Label.new()
     title.text = "WILDZIMUT - Sélection d'équipe"
     title.position = Vector2(0, -250)
-    title.add_theme_font_override("font", load("res://assets/fonts/big_font.tres") if ResourceLoader.exists("res://assets/fonts/big_font.tres") else null)
+    title
     title.add_theme_color_override("font_color", Color(1, 1, 1))
     title.add_theme_color_override("font_outline_color", Color(0, 0, 0))
 
     title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    title.width = 1000
+    title.rect_min_size.x = 1000
     add_child(title)
 
     # Créer la description
@@ -105,7 +105,7 @@ func _setup_ui():
     description.position = Vector2(0, -220)
     description.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
     description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    description.width = 800
+    description.rect_min_size.x = 800
     add_child(description)
 
     # Créer les boutons de sélection de classe
@@ -157,7 +157,7 @@ func _setup_ui():
         button.add_theme_stylebox_override("pressed", stylebox_pressed)
         
         button.add_theme_color_override("font_color", Color(1, 1, 1))
-        button.add_theme_font_override("font", load("res://assets/fonts/medium_font.tres") if ResourceLoader.exists("res://assets/fonts/medium_font.tres") else null)
+        button
         button.add_theme_font_size_override("font_size", 16)
         
         add_child(button)
@@ -168,7 +168,7 @@ func _setup_ui():
         info_label.name = "%s_Info" % classname
         info_label.text = class_data[classname]["description"]
         info_label.position = Vector2(x_pos, y_pos + button_height + 10)
-        info_label.width = button_width
+        info_label.rect_min_size.x = button_width
         info_label.visible = false
         info_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
         info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -214,7 +214,7 @@ func _setup_ui():
         var name_label = Label.new()
         name_label.name = "NameLabel_%d" % i
         name_label.position = Vector2(0, -30)
-        name_label.width = 100
+        name_label.rect_min_size.x = 100
         name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         name_label.add_theme_color_override("font_color", Color(1, 1, 1))
         name_label.add_theme_font_size_override("font_size", 12)
@@ -224,7 +224,7 @@ func _setup_ui():
         var stats_label = Label.new()
         stats_label.name = "StatsLabel_%d" % i
         stats_label.position = Vector2(0, -10)
-        stats_label.width = 100
+        stats_label.rect_min_size.x = 100
         stats_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         stats_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
         stats_label.add_theme_font_size_override("font_size", 10)
@@ -269,7 +269,7 @@ func _setup_ui():
     
     start_button.add_theme_color_override("font_color", Color(1, 1, 1))
     start_button.add_theme_font_size_override("font_size", 16)
-    start_button.add_theme_font_override("font", load("res://assets/fonts/big_font.tres") if ResourceLoader.exists("res://assets/fonts/big_font.tres") else null)
+    start_button
     
     add_child(start_button)
     
