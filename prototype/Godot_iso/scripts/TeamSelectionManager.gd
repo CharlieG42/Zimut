@@ -126,6 +126,33 @@ func _ready():
 
 # Appelé lorsqu'une classe est sélectionnée
 func _on_class_selected(classname: String):
+	print("DEBUG: _on_class_selected called with classname:", classname)
+	print("DEBUG: class_data has classname?", class_data.has(classname))
+	print("DEBUG: selected_team.size():", selected_team.size())
+	
+	for i in range(selected_team.size()):
+		if selected_team[i]["name"] == classname:
+			print("DEBUG: Class already in team")
+			return
+	
+	if selected_team.size() < MAX_TEAM_SIZE:
+		var class_info = class_data[classname]
+		if class_info == null:
+			print("DEBUG: class_info is null for classname:", classname)
+			return
+		print("DEBUG: Adding class to team:", classname)
+		selected_team.append({
+			"name": classname,
+			"data": class_info
+		})
+		print("DEBUG: Team size after append:", selected_team.size())
+		_update_team_preview()
+		
+		var start_button = get_node("StartButton")
+		if start_button:
+			start_button.disabled = selected_team.size() < MAX_TEAM_SIZE
+	else:
+		print("L'équipe est déjà complète (3/3)")
 	for i in range(selected_team.size()):
 		if selected_team[i]["name"] == classname:
 			return
