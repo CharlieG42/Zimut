@@ -203,7 +203,10 @@ func _setup_ui():
         stylebox.corner_radius_top_right = 15
         stylebox.corner_radius_bottom_right = 15
         stylebox.corner_radius_bottom_left = 15
-        stylebox.border_width_all = 2
+        stylebox.border_width_left = 2
+		stylebox.border_width_right = 2
+		stylebox.border_width_top = 2
+		stylebox.border_width_bottom = 2
         stylebox.border_color = Color(0.5, 0.5, 0.5)
         preview_frame.add_theme_stylebox_override("panel", stylebox)
         
@@ -360,7 +363,10 @@ func _update_team_preview():
                 stylebox.corner_radius_top_right = 15
                 stylebox.corner_radius_bottom_right = 15
                 stylebox.corner_radius_bottom_left = 15
-                stylebox.border_width_all = 2
+                stylebox.border_width_left = 2
+		stylebox.border_width_right = 2
+		stylebox.border_width_top = 2
+		stylebox.border_width_bottom = 2
                 stylebox.border_color = class_info["color"]
                 preview_frame.add_theme_stylebox_override("panel", stylebox)
                 
@@ -389,7 +395,10 @@ PM: %d" % [
                     stylebox.corner_radius_top_right = 15
                     stylebox.corner_radius_bottom_right = 15
                     stylebox.corner_radius_bottom_left = 15
-                    stylebox.border_width_all = 2
+                    stylebox.border_width_left = 2
+		stylebox.border_width_right = 2
+		stylebox.border_width_top = 2
+		stylebox.border_width_bottom = 2
                     stylebox.border_color = Color(0.5, 0.5, 0.5)
                     preview_frame.add_theme_stylebox_override("panel", stylebox)
                 
