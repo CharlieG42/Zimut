@@ -6,10 +6,10 @@ uid="uid://culmk3y2dg70l"
 
 [deps]
 
-files=["res://data/ennemis.Niveau.translation", "res://data/ennemis.PV.translation", "res://data/ennemis.Attaque.translation", "res://data/ennemis.D#U00e9fense.translation", "res://data/ennemis.PA.translation", "res://data/ennemis.PM.translation", "res://data/ennemis.XP.translation", "res://data/ennemis.Biome.translation", "res://data/ennemis.Effets sp#U00e9ciaux.translation"]
+files=["res://data/ennemis.Niveau.translation", "res://data/ennemis.PV.translation", "res://data/ennemis.Attaque.translation", "res://data/ennemis.Défense.translation", "res://data/ennemis.PA.translation", "res://data/ennemis.PM.translation", "res://data/ennemis.XP.translation", "res://data/ennemis.Biome.translation", "res://data/ennemis.Effets spéciaux.translation"]
 
 source_file="res://data/ennemis.csv"
-dest_files=["res://data/ennemis.Niveau.translation", "res://data/ennemis.PV.translation", "res://data/ennemis.Attaque.translation", "res://data/ennemis.D#U00e9fense.translation", "res://data/ennemis.PA.translation", "res://data/ennemis.PM.translation", "res://data/ennemis.XP.translation", "res://data/ennemis.Biome.translation", "res://data/ennemis.Effets sp#U00e9ciaux.translation"]
+dest_files=["res://data/ennemis.Niveau.translation", "res://data/ennemis.PV.translation", "res://data/ennemis.Attaque.translation", "res://data/ennemis.Défense.translation", "res://data/ennemis.PA.translation", "res://data/ennemis.PM.translation", "res://data/ennemis.XP.translation", "res://data/ennemis.Biome.translation", "res://data/ennemis.Effets spéciaux.translation"]
 
 [params]
 

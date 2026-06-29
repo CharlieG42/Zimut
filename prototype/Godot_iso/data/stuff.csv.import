@@ -6,10 +6,10 @@ uid="uid://drgdsb80ovbod"
 
 [deps]
 
-files=["res://data/stuff.Nom.translation", "res://data/stuff.Niveau requis.translation", "res://data/stuff.Bonus Force.translation", "res://data/stuff.Bonus Intelligence.translation", "res://data/stuff.Bonus Agilit#U00e9.translation", "res://data/stuff.Bonus Sagesse.translation", "res://data/stuff.Bonus Vita.translation", "res://data/stuff.Bonus D#U00e9fense.translation", "res://data/stuff.Effet sp#U00e9cial.translation"]
+files=["res://data/stuff.Nom.translation", "res://data/stuff.Niveau requis.translation", "res://data/stuff.Bonus Force.translation", "res://data/stuff.Bonus Intelligence.translation", "res://data/stuff.Bonus Agilité.translation", "res://data/stuff.Bonus Sagesse.translation", "res://data/stuff.Bonus Vita.translation", "res://data/stuff.Bonus Défense.translation", "res://data/stuff.Effet spécial.translation"]
 
 source_file="res://data/stuff.csv"
-dest_files=["res://data/stuff.Nom.translation", "res://data/stuff.Niveau requis.translation", "res://data/stuff.Bonus Force.translation", "res://data/stuff.Bonus Intelligence.translation", "res://data/stuff.Bonus Agilit#U00e9.translation", "res://data/stuff.Bonus Sagesse.translation", "res://data/stuff.Bonus Vita.translation", "res://data/stuff.Bonus D#U00e9fense.translation", "res://data/stuff.Effet sp#U00e9cial.translation"]
+dest_files=["res://data/stuff.Nom.translation", "res://data/stuff.Niveau requis.translation", "res://data/stuff.Bonus Force.translation", "res://data/stuff.Bonus Intelligence.translation", "res://data/stuff.Bonus Agilité.translation", "res://data/stuff.Bonus Sagesse.translation", "res://data/stuff.Bonus Vita.translation", "res://data/stuff.Bonus Défense.translation", "res://data/stuff.Effet spécial.translation"]
 
 [params]
 

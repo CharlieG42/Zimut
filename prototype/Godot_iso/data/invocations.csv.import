@@ -6,10 +6,10 @@ uid="uid://dgjm1ms3v50hh"
 
 [deps]
 
-files=["res://data/invocations.Niveau requis.translation", "res://data/invocations.PV.translation", "res://data/invocations.Attaque.translation", "res://data/invocations.D#U00e9fense.translation", "res://data/invocations.PA.translation", "res://data/invocations.PM.translation", "res://data/invocations.Type.translation", "res://data/invocations.Biome.translation"]
+files=["res://data/invocations.Niveau requis.translation", "res://data/invocations.PV.translation", "res://data/invocations.Attaque.translation", "res://data/invocations.Défense.translation", "res://data/invocations.PA.translation", "res://data/invocations.PM.translation", "res://data/invocations.Type.translation", "res://data/invocations.Biome.translation"]
 
 source_file="res://data/invocations.csv"
-dest_files=["res://data/invocations.Niveau requis.translation", "res://data/invocations.PV.translation", "res://data/invocations.Attaque.translation", "res://data/invocations.D#U00e9fense.translation", "res://data/invocations.PA.translation", "res://data/invocations.PM.translation", "res://data/invocations.Type.translation", "res://data/invocations.Biome.translation"]
+dest_files=["res://data/invocations.Niveau requis.translation", "res://data/invocations.PV.translation", "res://data/invocations.Attaque.translation", "res://data/invocations.Défense.translation", "res://data/invocations.PA.translation", "res://data/invocations.PM.translation", "res://data/invocations.Type.translation", "res://data/invocations.Biome.translation"]
 
 [params]
 

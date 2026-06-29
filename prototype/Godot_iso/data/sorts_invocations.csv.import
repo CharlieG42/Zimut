@@ -6,10 +6,10 @@ uid="uid://c3d3wyfnbboh7"
 
 [deps]
 
-files=["res://data/sorts_invocations.Nom.translation", "res://data/sorts_invocations.Co#U00fbt PA.translation", "res://data/sorts_invocations.Co#U00fbt PM.translation", "res://data/sorts_invocations.Port#U00e9e.translation", "res://data/sorts_invocations.Effet.translation", "res://data/sorts_invocations.Type.translation"]
+files=["res://data/sorts_invocations.Nom.translation", "res://data/sorts_invocations.Coût PA.translation", "res://data/sorts_invocations.Coût PM.translation", "res://data/sorts_invocations.Portée.translation", "res://data/sorts_invocations.Effet.translation", "res://data/sorts_invocations.Type.translation"]
 
 source_file="res://data/sorts_invocations.csv"
-dest_files=["res://data/sorts_invocations.Nom.translation", "res://data/sorts_invocations.Co#U00fbt PA.translation", "res://data/sorts_invocations.Co#U00fbt PM.translation", "res://data/sorts_invocations.Port#U00e9e.translation", "res://data/sorts_invocations.Effet.translation", "res://data/sorts_invocations.Type.translation"]
+dest_files=["res://data/sorts_invocations.Nom.translation", "res://data/sorts_invocations.Coût PA.translation", "res://data/sorts_invocations.Coût PM.translation", "res://data/sorts_invocations.Portée.translation", "res://data/sorts_invocations.Effet.translation", "res://data/sorts_invocations.Type.translation"]
 
 [params]
 

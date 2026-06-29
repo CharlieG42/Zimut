@@ -6,10 +6,10 @@ uid="uid://0i1fggqvbj77"
 
 [deps]
 
-files=["res://data/sorts.Nom.translation", "res://data/sorts.Co#U00fbt PA.translation", "res://data/sorts.Co#U00fbt PM.translation", "res://data/sorts.Port#U00e9e.translation", "res://data/sorts.Effet.translation", "res://data/sorts.Niveau requis.translation", "res://data/sorts.Type.translation"]
+files=["res://data/sorts.Nom.translation", "res://data/sorts.Cout_PA.translation", "res://data/sorts.Cout_PM.translation", "res://data/sorts.Portee.translation", "res://data/sorts.Effet.translation", "res://data/sorts.Niveau.translation", "res://data/sorts.Type.translation", "res://data/sorts.Degats.translation", "res://data/sorts.Degats.translation", "res://data/sorts.Soins.translation", "res://data/sorts.Resistance.translation", "res://data/sorts.Resistance.translation", "res://data/sorts.Debuff.translation", "res://data/sorts.Debuff.translation", "res://data/sorts.Buff.translation", "res://data/sorts.Buff.translation"]
 
 source_file="res://data/sorts.csv"
-dest_files=["res://data/sorts.Nom.translation", "res://data/sorts.Co#U00fbt PA.translation", "res://data/sorts.Co#U00fbt PM.translation", "res://data/sorts.Port#U00e9e.translation", "res://data/sorts.Effet.translation", "res://data/sorts.Niveau requis.translation", "res://data/sorts.Type.translation"]
+dest_files=["res://data/sorts.Nom.translation", "res://data/sorts.Cout_PA.translation", "res://data/sorts.Cout_PM.translation", "res://data/sorts.Portee.translation", "res://data/sorts.Effet.translation", "res://data/sorts.Niveau.translation", "res://data/sorts.Type.translation", "res://data/sorts.Degats.translation", "res://data/sorts.Degats.translation", "res://data/sorts.Soins.translation", "res://data/sorts.Resistance.translation", "res://data/sorts.Resistance.translation", "res://data/sorts.Debuff.translation", "res://data/sorts.Debuff.translation", "res://data/sorts.Buff.translation", "res://data/sorts.Buff.translation"]
 
 [params]
 
