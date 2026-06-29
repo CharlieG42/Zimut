@@ -440,6 +440,7 @@ func _on_start_combat():
 		# Passer l'équipe au GameManager (Autoload)
 		if GameManager and GameManager.has_method("set_custom_team"):
 			GameManager.set_custom_team(team_data)
+			team_selected.emit(team_data)
 		
 		# Charger la scène de combat
 		get_tree().change_scene_to_file("res://scenes/Main.tscn")
