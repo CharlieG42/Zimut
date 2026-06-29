@@ -212,18 +212,18 @@ func _setup_ui():
 		stylebox.border_color = Color(0.5, 0.5, 0.5)
 		preview_frame.add_theme_stylebox_override("panel", stylebox)
 		
-		var stylebox = StyleBoxFlat.new()
-		stylebox.bg_color = Color(0.15, 0.15, 0.15, 0.8)
-		stylebox.corner_radius_top_left = 15
-		stylebox.corner_radius_top_right = 15
-		stylebox.corner_radius_bottom_right = 15
-		stylebox.corner_radius_bottom_left = 15
-		stylebox.border_width_left = 2
-		stylebox.border_width_right = 2
-		stylebox.border_width_top = 2
-		stylebox.border_width_bottom = 2
-		stylebox.border_color = Color(0.5, 0.5, 0.5)
-		preview_frame.add_theme_stylebox_override("panel", stylebox)
+		#var stylebox = StyleBoxFlat.new()
+		#stylebox.bg_color = Color(0.15, 0.15, 0.15, 0.8)
+		#stylebox.corner_radius_top_left = 15
+		#stylebox.corner_radius_top_right = 15
+		#stylebox.corner_radius_bottom_right = 15
+		#stylebox.corner_radius_bottom_left = 15
+		#stylebox.border_width_left = 2
+		#stylebox.border_width_right = 2
+		#stylebox.border_width_top = 2
+		#stylebox.border_width_bottom = 2
+		#stylebox.border_color = Color(0.5, 0.5, 0.5)
+		#preview_frame.add_theme_stylebox_override("panel", stylebox)
 		
 		add_child(preview_frame)
 		team_preview_nodes.append(preview_frame)
