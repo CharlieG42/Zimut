@@ -263,6 +263,7 @@ func _setup_ui():
 	# Créer le bouton "Lancer le combat"
 # Récupérer le bouton existant de la scène
 var start_button = $StartButton
+start_button.pressed.connect(_on_start_combat)
 	
 	# Stocker la référence
 	start_button.name = "StartButton"
