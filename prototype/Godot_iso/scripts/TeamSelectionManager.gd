@@ -96,7 +96,7 @@ func _setup_ui():
     title.add_theme_color_override("font_outline_color", Color(0, 0, 0))
 
     title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    title.size.x = 1000
+
     add_child(title)
 
     # Créer la description
@@ -105,7 +105,7 @@ func _setup_ui():
     description.position = Vector2(0, -220)
     description.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
     description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    description.size.x = 800
+
     add_child(description)
 
     # Créer les boutons de sélection de classe
@@ -168,7 +168,7 @@ func _setup_ui():
         info_label.name = "%s_Info" % classname
         info_label.text = class_data[classname]["description"]
         info_label.position = Vector2(x_pos, y_pos + button_height + 10)
-        info_label.size.x = button_width
+
         info_label.visible = false
         info_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
         info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -214,7 +214,7 @@ func _setup_ui():
         var name_label = Label.new()
         name_label.name = "NameLabel_%d" % i
         name_label.position = Vector2(0, -30)
-        name_label.size.x = 100
+
         name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         name_label.add_theme_color_override("font_color", Color(1, 1, 1))
         name_label.add_theme_font_size_override("font_size", 12)
@@ -224,7 +224,7 @@ func _setup_ui():
         var stats_label = Label.new()
         stats_label.name = "StatsLabel_%d" % i
         stats_label.position = Vector2(0, -10)
-        stats_label.size.x = 100
+
         stats_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         stats_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
         stats_label.add_theme_font_size_override("font_size", 10)
