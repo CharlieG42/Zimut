@@ -438,13 +438,11 @@ func _on_start_combat():
 			})
 		
 		# Passer l'équipe au GameManager (Autoload)
-		var game_manager = get_node_or_null("/root/GameManager")
-		if game_manager and game_manager.has_method("set_custom_team"):
-			game_manager.set_custom_team(team_data)
+		if GameManager and GameManager.has_method("set_custom_team"):
+			GameManager.set_custom_team(team_data)
 		
 		# Charger la scène de combat
-		var game_scene = preload("res://scenes/Main.tscn")
-		get_tree().change_scene_to(game_scene)
+		get_tree().change_scene_to_file("res://scenes/Main.tscn")
 
 # Fonction pour charger les données depuis CSV (si disponible)
 func load_classes_from_csv():
