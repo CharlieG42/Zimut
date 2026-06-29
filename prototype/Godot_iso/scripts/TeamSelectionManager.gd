@@ -86,8 +86,6 @@ func _ready():
 	_update_team_preview()
 
 # Configuration de l'interface utilisateur
-func _setup_ui():
-	# Créer le titre
 	var title = Label.new()
 	title.add_theme_font_size_override("font_size", 24)
 	title.text = "WILDZIMUT - Sélection d'équipe"
