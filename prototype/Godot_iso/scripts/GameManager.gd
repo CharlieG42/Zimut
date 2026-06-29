@@ -130,6 +130,7 @@ func set_custom_team(team_data: Array) -> void:
 # Callback for team selection
 func _on_team_selected(team_data: Array) -> void:
     set_custom_team(team_data)
+		print("DEBUG: team_selected signal intercepted! Team data:", team_data)
     init_entities()
 
 
