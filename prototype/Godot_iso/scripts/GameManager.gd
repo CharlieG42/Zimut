@@ -130,7 +130,7 @@ func set_custom_team(team_data: Array) -> void:
 # Callback for team selection
 func _on_team_selected(team_data: Array) -> void:
     set_custom_team(team_data)
-		print("DEBUG: team_selected signal intercepted! Team data:", team_data)
+        print("DEBUG: team_selected signal intercepted! Team data:", team_data)
     init_entities()
 
 
@@ -145,11 +145,11 @@ func _ready() -> void:
         return
 
     if data_loader.data_loaded:
-			# Connect to TeamSelection signal
-			var team_selection = get_node_or_null("/root/TeamSelection")
-			if team_selection and team_selection.has_signal("team_selected"):
-				team_selection.team_selected.connect(_on_team_selected)
-			_on_data_loaded()
+            # Connect to TeamSelection signal
+            var team_selection = get_node_or_null("/root/TeamSelection")
+            if team_selection and team_selection.has_signal("team_selected"):
+                team_selection.team_selected.connect(_on_team_selected)
+            _on_data_loaded()
     else:
         if not data_loader.data_loaded_successfully.is_connected(_on_data_loaded):
             data_loader.data_loaded_successfully.connect(_on_data_loaded)
