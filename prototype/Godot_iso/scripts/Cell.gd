@@ -154,11 +154,18 @@ func _draw_entity(hw, hh):
 
 func _try_load_sprite(classe, entity_type):
 	var sprite_path = ""
+	var extensions = [".svg", ".png"]  # Essayer SVG d'abord, puis PNG
 	
 	if entity_type == "Player":
-		sprite_path = SPRITE_PATH_PLAYERS + classe.to_lower() + SPRITE_EXTENSION
+		for ext in extensions:
+			sprite_path = SPRITE_PATH_PLAYERS + classe.to_lower() + ext
+			if ResourceLoader.exists(sprite_path):
+				break
 	elif entity_type == "Enemy":
-		sprite_path = SPRITE_PATH_ENEMIES + classe.to_lower() + SPRITE_EXTENSION
+		for ext in extensions:
+			sprite_path = SPRITE_PATH_ENEMIES + classe.to_lower() + ext
+			if ResourceLoader.exists(sprite_path):
+				break
 	
 	if sprite_path != "" and ResourceLoader.exists(sprite_path):
 		var texture = load(sprite_path)
