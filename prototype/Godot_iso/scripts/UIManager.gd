@@ -198,18 +198,18 @@ func _on_end_turn_pressed() -> void:
 func _on_restart_pressed() -> void:
 	# Recharger la scène de combat avec la même équipe
 	var game_scene = preload("res://scenes/Main.tscn")
-	get_tree().change_scene_to(game_scene)
+	get_tree().change_scene_to_file("res://scenes/Main.tscn")
 
 
 func _on_team_selection_pressed() -> void:
 	# Réinitialiser l'équipe personnalisée dans GameManager
-	var game_manager = get_node_or_null("/root/GameManager")
-	if game_manager and game_manager.has_method("clear_custom_team"):
-		game_manager.clear_custom_team()
+	var gm = get_node_or_null("/root/GameManager")
+	if gm and gm.has_method("clear_custom_team"):
+		gm.clear_custom_team()
 	
 	# Charger la scène de sélection d'équipe
 	var team_scene = preload("res://scenes/TeamSelection.tscn")
-	get_tree().change_scene_to(team_scene)
+	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
 
 
 func _on_spell_button_selected(spell: Dictionary) -> void:
