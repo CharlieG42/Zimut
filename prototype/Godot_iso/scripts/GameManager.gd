@@ -17,7 +17,7 @@ const COLORS: Dictionary = {
 	"Assassin":  Color(0.8, 0, 0),
 	"Chasseur":  Color(0, 0.8, 0),
 	"Mage":      Color(0.6, 0, 0.8),
-	"Support":   Color(1, 0.8, 0),
+	"Druide":   Color(1, 0.8, 0),
 	"Heal":      Color(0, 0.8, 0.8),
 	"Gobelin":   Color(0.5, 0.8, 0.3),
 	"Squelette": Color(0.8, 0.8, 0.8),
