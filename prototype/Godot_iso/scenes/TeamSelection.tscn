@@ -75,12 +75,12 @@ offset_bottom = -20.0
 text = "🔮 Mage"
 metadata/_edit_use_anchors_ = true
 
-[node name="Support_Button" type="Button" parent="." unique_id=826664775]
+[node name="Druide_Button" type="Button" parent="." unique_id=826664775]
 offset_left = -50.0
 offset_top = -80.0
 offset_right = 200.0
 offset_bottom = -20.0
-text = "🌟 Support"
+text = "🌿 Druide"
 metadata/_edit_use_anchors_ = true
 
 [node name="Heal_Button" type="Button" parent="." unique_id=135485163]
