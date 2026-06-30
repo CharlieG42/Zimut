@@ -104,33 +104,33 @@ Invocateur,Attaque de zone,4,0,4,L'invocation attaque tous les ennemis adjacents
 Invocateur,Buff de vitesse,1,0,1,L'invocation gagne +1 PM (2 tours),25,Buff,0,0,0,0,0,0,0,0,0
 Invocateur,Débuff de précision,2,0,3,L'invocation réduit 30% précision à l'ennemi (2 tours),30,Debuff,0,0,0,0,0,0,0,0,0
 Invocateur,Soin de groupe,4,0,2,L'invocation restaure 25 PV à tous les alliés,40,Soin,0,0,0,0,0,0,0,0,0
-Support,Bénédiction,2,0,3,+2 PA pour 2 tours (allié),1,Buff,0,0,0,0,0,0,0,0,0
-Support,Soin,3,0,1,Restaure 60 PV,5,Soin,0,0,120,0,0,0,0,0,0
-Support,Barrière,4,0,2,+30% défense (1 tour; allié),5,Buff,0,0,0,30,0,0,0,0,0
-Support,Attaque sacrée,4,0,1,74 dégâts,5,Attaque,74,0,0,0,0,0,0,0,0
-Support,Inspiration,2,0,3,+20% dégâts (2 tours; allié),10,Buff,0,0,0,0,0,0,0,20,0
-Support,Purification,1,0,1,Supprime les effets négatifs (allié),10,Debuff,0,0,0,0,0,0,0,0,0
-Support,Renaissance,4,0,1,Restaure 150 PV + supprime les effets négatifs,15,Soin,0,0,180,0,0,0,0,0,0
-Support,Bouclier groupé,3,0,2,+15% défense pour l'équipe (2 tours),15,Buff,0,0,0,15,0,0,0,0,0
-Support,Attaque divine,4,0,1,104 dégâts,20,Attaque,104,0,0,0,0,0,0,0,0
-Support,Accélération,2,0,3,+1 PM pour 2 tours (allié),20,Buff,0,0,0,0,0,0,0,0,0
-Support,Soin de groupe,4,0,2,Restaure 60 PV à tous les alliés,25,Soin,0,0,90,0,0,0,0,0,0
-Support,Protection divine,4,0,1,Immunité aux dégâts (1 tour; allié),30,Buff,0,0,0,40,0,0,0,0,0
-Support,Attaque bénie,4,0,1,120 dégâts + bénit (10% dégâts en plus),25,Attaque,120,0,0,0,0,0,0,0,0
-Support,Résurrection,4,0,1,Restaure 300 PV à un allié KO,40,Soin,0,0,300,0,0,0,0,0,0
-Support,Bénédiction suprême,4,0,3,+3 à toutes les stats (2 tours; allié),30,Buff,0,0,0,0,0,0,0,0,0
-Support,Attaque sacrée ultime,4,0,1,150 dégâts,35,Attaque,150,0,0,0,0,0,0,0,0
-Support,Soin suprême,4,0,2,Restaure 90 PV à tous les alliés,35,Soin,0,0,90,0,0,0,0,0,0
-Support,Protection ultime,4,0,1,Immunité à tous les dégâts (1 tour; allié),40,Buff,0,0,0,0,0,0,0,0,0
-Support,Attaque finale,4,0,1,180 dégâts,40,Attaque,180,0,0,0,0,0,0,0,0
-Support,Soin de la vie,4,0,1,Restaure 134 PV,45,Soin,0,0,134,0,0,0,0,0,0
-Support,Jugement,4,0,3,240 dégâts à tous les ennemis,50,Attaque,240,0,0,0,0,0,0,0,0
-Support,Soin mineur,2,0,1,Restaure 60 PV,1,Soin,0,0,60,0,0,0,0,0,0
-Support,Protection vitale,2,0,1,+25% résistance (2 tours),10,Buff,0,0,0,0,25,0,0,0,0
-Support,Barrière de vie,3,0,1,+30% défense + soigne 15 PV/tour (2 tours),20,Buff,0,0,0,30,0,0,0,0,0
-Support,Éclat de lumière,4,0,3,Restaure 150 PV + 30 dégâts aux ennemis adjacents,20,Attaque,30,0,150,0,0,0,0,0,0
-Support,Attaque céleste,4,0,1,104 dégâts,25,Attaque,104,0,0,0,0,0,0,0,0
-Support,Soin supérieur,4,0,1,Restaure 210 PV,30,Soin,0,0,210,0,0,0,0,0,0
-Support,Soin de groupe supérieur,4,0,2,Restaure 120 PV à tous les alliés,35,Soin,0,0,120,0,0,0,0,0,0
-Support,Soin ultime,4,0,1,Restaure 254 PV,45,Soin,0,0,254,0,0,0,0,0,0
-Support,Jugement divin,4,0,3,270 dégâts à tous les ennemis,50,Attaque,270,0,0,0,0,0,0,0,0
+Druide,Bénédiction,2,0,3,+2 PA pour 2 tours (allié),1,Buff,0,0,0,0,0,0,0,0,0
+Druide,Soin,3,0,1,Restaure 60 PV,5,Soin,0,0,120,0,0,0,0,0,0
+Druide,Barrière,4,0,2,+30% défense (1 tour; allié),5,Buff,0,0,0,30,0,0,0,0,0
+Druide,Attaque sacrée,4,0,1,74 dégâts,5,Attaque,74,0,0,0,0,0,0,0,0
+Druide,Inspiration,2,0,3,+20% dégâts (2 tours; allié),10,Buff,0,0,0,0,0,0,0,20,0
+Druide,Purification,1,0,1,Supprime les effets négatifs (allié),10,Debuff,0,0,0,0,0,0,0,0,0
+Druide,Renaissance,4,0,1,Restaure 150 PV + supprime les effets négatifs,15,Soin,0,0,180,0,0,0,0,0,0
+Druide,Bouclier groupé,3,0,2,+15% défense pour l'équipe (2 tours),15,Buff,0,0,0,15,0,0,0,0,0
+Druide,Attaque divine,4,0,1,104 dégâts,20,Attaque,104,0,0,0,0,0,0,0,0
+Druide,Accélération,2,0,3,+1 PM pour 2 tours (allié),20,Buff,0,0,0,0,0,0,0,0,0
+Druide,Soin de groupe,4,0,2,Restaure 60 PV à tous les alliés,25,Soin,0,0,90,0,0,0,0,0,0
+Druide,Protection divine,4,0,1,Immunité aux dégâts (1 tour; allié),30,Buff,0,0,0,40,0,0,0,0,0
+Druide,Attaque bénie,4,0,1,120 dégâts + bénit (10% dégâts en plus),25,Attaque,120,0,0,0,0,0,0,0,0
+Druide,Résurrection,4,0,1,Restaure 300 PV à un allié KO,40,Soin,0,0,300,0,0,0,0,0,0
+Druide,Bénédiction suprême,4,0,3,+3 à toutes les stats (2 tours; allié),30,Buff,0,0,0,0,0,0,0,0,0
+Druide,Attaque sacrée ultime,4,0,1,150 dégâts,35,Attaque,150,0,0,0,0,0,0,0,0
+Druide,Soin suprême,4,0,2,Restaure 90 PV à tous les alliés,35,Soin,0,0,90,0,0,0,0,0,0
+Druide,Protection ultime,4,0,1,Immunité à tous les dégâts (1 tour; allié),40,Buff,0,0,0,0,0,0,0,0,0
+Druide,Attaque finale,4,0,1,180 dégâts,40,Attaque,180,0,0,0,0,0,0,0,0
+Druide,Soin de la vie,4,0,1,Restaure 134 PV,45,Soin,0,0,134,0,0,0,0,0,0
+Druide,Jugement,4,0,3,240 dégâts à tous les ennemis,50,Attaque,240,0,0,0,0,0,0,0,0
+Druide,Soin mineur,2,0,1,Restaure 60 PV,1,Soin,0,0,60,0,0,0,0,0,0
+Druide,Protection vitale,2,0,1,+25% résistance (2 tours),10,Buff,0,0,0,0,25,0,0,0,0
+Druide,Barrière de vie,3,0,1,+30% défense + soigne 15 PV/tour (2 tours),20,Buff,0,0,0,30,0,0,0,0,0
+Druide,Éclat de lumière,4,0,3,Restaure 150 PV + 30 dégâts aux ennemis adjacents,20,Attaque,30,0,150,0,0,0,0,0,0
+Druide,Attaque céleste,4,0,1,104 dégâts,25,Attaque,104,0,0,0,0,0,0,0,0
+Druide,Soin supérieur,4,0,1,Restaure 210 PV,30,Soin,0,0,210,0,0,0,0,0,0
+Druide,Soin de groupe supérieur,4,0,2,Restaure 120 PV à tous les alliés,35,Soin,0,0,120,0,0,0,0,0,0
+Druide,Soin ultime,4,0,1,Restaure 254 PV,45,Soin,0,0,254,0,0,0,0,0,0
+Druide,Jugement divin,4,0,3,270 dégâts à tous les ennemis,50,Attaque,270,0,0,0,0,0,0,0,0
