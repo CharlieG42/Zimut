@@ -154,7 +154,7 @@ func _draw_entity(hw, hh):
 
 func _try_load_sprite(classe, entity_type):
 	var sprite_path = ""
-	var extensions = [".svg", ".png"]  # Essayer SVG d'abord, puis PNG
+	var extensions = [".png", ".svg"]  # Essayer SVG d'abord, puis PNG
 	
 	if entity_type == "Player":
 		for ext in extensions:
