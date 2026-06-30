@@ -15,7 +15,7 @@ const CLASS_COLORS: Dictionary = {
 	"Assassin":   Color(0.8, 0.0, 0.0),
 	"Chasseur":   Color(0.0, 0.6, 0.0),
 	"Mage":       Color(0.6, 0.0, 0.8),
-	"Support":    Color(1.0, 0.6, 0.0),
+	"Druide":    Color(1.0, 0.6, 0.0),
 	"Heal":       Color(0.0, 0.75, 0.75),
 	"Invocateur": Color(0.5, 0.0, 0.5),
 }
@@ -26,7 +26,7 @@ const CLASS_META: Dictionary = {
 	"Assassin":   {"icon": "🗡️", "description": "Rapide, dégâts élevés, frappe les cibles fragiles."},
 	"Chasseur":   {"icon": "🏹", "description": "Polyvalent à distance, bon équilibre attaque/défense."},
 	"Mage":       {"icon": "🔮", "description": "Dégâts magiques élevés, faible défense."},
-	"Support":    {"icon": "🌟", "description": "Renforce l'équipe avec des buffs."},
+	"Druide":    {"icon": "🌿", "description": "Maître de la nature, soigne et renforce avec des sorts naturels."},
 	"Heal":       {"icon": "❤️", "description": "Spécialiste des soins et de la survie."},
 	"Invocateur": {"icon": "🎭", "description": "Invoque des créatures, contrôle le champ."},
 }
@@ -131,7 +131,7 @@ func _load_fallback_data() -> void:
 			"base_stats": {"PV": 212, "PA": 6, "PM": 4, "Force": 42, "Intelligence": 24, "Agilite": 20, "Sagesse": 18, "Defense": 39}},
 		"Mage":       {"name": "Mage", "description": CLASS_META["Mage"]["description"], "color": CLASS_COLORS["Mage"], "icon": CLASS_META["Mage"]["icon"],
 			"base_stats": {"PV": 192, "PA": 6, "PM": 4, "Force": 28, "Intelligence": 49, "Agilite": 12, "Sagesse": 14, "Defense": 29}},
-		"Support":    {"name": "Support", "description": CLASS_META["Support"]["description"], "color": CLASS_COLORS["Support"], "icon": CLASS_META["Support"]["icon"],
+		"Druide":    {"name": "Druide", "description": CLASS_META["Druide"]["description"], "color": CLASS_COLORS["Druide"], "icon": CLASS_META["Druide"]["icon"],
 			"base_stats": {"PV": 207, "PA": 6, "PM": 4, "Force": 34, "Intelligence": 39, "Agilite": 14, "Sagesse": 16, "Defense": 44}},
 		"Heal":       {"name": "Heal", "description": CLASS_META["Heal"]["description"], "color": CLASS_COLORS["Heal"], "icon": CLASS_META["Heal"]["icon"],
 			"base_stats": {"PV": 242, "PA": 6, "PM": 4, "Force": 20, "Intelligence": 42, "Agilite": 11, "Sagesse": 17, "Defense": 42}},
