@@ -339,7 +339,7 @@ func load_default_classes_data():
 		{"Classe": "Assassin", "Niveau": "1", "PA": "6", "PM": "4", "Vita (PV)": "80", "Force (CAC)": "12", "Intelligence (Magie)": "8", "Agilité (Vit. Atk)": "15", "Sagesse (Précision)": "12", "Défense": "10", "XP pour atteindre ce niveau": "100"},
 		{"Classe": "Chasseur", "Niveau": "1", "PA": "5", "PM": "4", "Vita (PV)": "90", "Force (CAC)": "10", "Intelligence (Magie)": "10", "Agilité (Vit. Atk)": "14", "Sagesse (Précision)": "15", "Défense": "12", "XP pour atteindre ce niveau": "100"},
 		{"Classe": "Mage", "Niveau": "1", "PA": "4", "PM": "3", "Vita (PV)": "70", "Force (CAC)": "5", "Intelligence (Magie)": "20", "Agilité (Vit. Atk)": "8", "Sagesse (Précision)": "10", "Défense": "8", "XP pour atteindre ce niveau": "100"},
-		{"Classe": "Support", "Niveau": "1", "PA": "5", "PM": "3", "Vita (PV)": "85", "Force (CAC)": "8", "Intelligence (Magie)": "15", "Agilité (Vit. Atk)": "10", "Sagesse (Précision)": "12", "Défense": "10", "XP pour atteindre ce niveau": "100"}
+		{"Classe": "Druide", "Niveau": "1", "PA": "5", "PM": "3", "Vita (PV)": "85", "Force (CAC)": "8", "Intelligence (Magie)": "15", "Agilité (Vit. Atk)": "10", "Sagesse (Précision)": "12", "Défense": "10", "XP pour atteindre ce niveau": "100"}
 	]
 	push_warning("Loaded default classes data - CSV files not found")
 
