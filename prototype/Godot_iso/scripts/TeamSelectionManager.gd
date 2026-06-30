@@ -1,534 +1,372 @@
 extends Node2D
+## TeamSelectionManager.gd - Sélection d'équipe avant combat (WildZimut)
+## Réécriture complète : s'appuie UNIQUEMENT sur les nœuds déjà présents
+## dans TeamSelection.tscn (7 boutons classe, 3 TeamPreview, StartButton).
+## Aucune création dynamique de bouton -> plus de doublon ni de double _ready().
 
-# Script de gestion de la sélection d'équipe
-# Permet au joueur de choisir 3 personnages parmi les classes disponibles
-
-# Signaux
-signal team_selected(team_data)
+signal team_selected(team_data: Array)
 signal back_to_menu
 
-# Constantes
-const MAX_TEAM_SIZE = 3
-const CLASS_COLORS = {
-	"Tank": Color(0.0, 0.25, 0.5),      # Bleu
-	"Assassin": Color(0.5, 0.0, 0.0),   # Rouge
-	"Chasseur": Color(0.0, 0.5, 0.0),   # Vert
-	"Mage": Color(0.38, 0.0, 0.5),     # Violet
-	"Support": Color(1.0, 0.5, 0.0),    # Orange
-	"Heal": Color(0.0, 0.75, 0.75),    # Cyan
-	"Invocateur": Color(0.5, 0.0, 0.5)  # Violet foncé
+const MAX_TEAM_SIZE: int = 3
+
+## Couleurs par classe (fallback si CSV absent)
+const CLASS_COLORS: Dictionary = {
+	"Tank":       Color(0.0, 0.4, 0.8),
+	"Assassin":   Color(0.8, 0.0, 0.0),
+	"Chasseur":   Color(0.0, 0.6, 0.0),
+	"Mage":       Color(0.6, 0.0, 0.8),
+	"Support":    Color(1.0, 0.6, 0.0),
+	"Heal":       Color(0.0, 0.75, 0.75),
+	"Invocateur": Color(0.5, 0.0, 0.5),
 }
 
-# Variables
-var available_classes = []
-var selected_team = []
-var class_buttons = {}
-var class_info_labels = {}
-var team_preview_nodes = []
+## Données par défaut si le CSV ne fournit pas tout (icône + description manuelles)
+const CLASS_META: Dictionary = {
+	"Tank":       {"icon": "🛡️", "description": "Résistant, haute défense, encaisse pour l'équipe."},
+	"Assassin":   {"icon": "🗡️", "description": "Rapide, dégâts élevés, frappe les cibles fragiles."},
+	"Chasseur":   {"icon": "🏹", "description": "Polyvalent à distance, bon équilibre attaque/défense."},
+	"Mage":       {"icon": "🔮", "description": "Dégâts magiques élevés, faible défense."},
+	"Support":    {"icon": "🌟", "description": "Renforce l'équipe avec des buffs."},
+	"Heal":       {"icon": "❤️", "description": "Spécialiste des soins et de la survie."},
+	"Invocateur": {"icon": "🎭", "description": "Invoque des créatures, contrôle le champ."},
+}
 
-# Données des classes (chargées depuis CSV ou définies ici)
-var class_data = {
-	"Tank": {
-		"name": "Tank",
-		"description": "Résistant, haute défense, bon en combat rapproché",
-		"color": Color(0.0, 0.25, 0.5),
-		"icon": "ð¡ï¸",
-		"base_stats": {"PV": 236, "PA": 6, "PM": 4, "Force": 34, "Intelligence": 13, "Défense": 39}
-	},
-	"Assassin": {
-		"name": "Assassin",
-		"description": "Rapide, dégâts élevés, spécialiste des attaques critiques",
-		"color": Color(0.5, 0.0, 0.0),
-		"icon": "ð¡ï¸",
-		"base_stats": {"PV": 202, "PA": 6, "PM": 4, "Force": 39, "Intelligence": 22, "Défense": 26}
-	},
-	"Chasseur": {
-		"name": "Chasseur",
-		"description": "Polyvalent, bon Ã  distance, équilibre parfait",
-		"color": Color(0.0, 0.5, 0.0),
-		"icon": "ð¹",
-		"base_stats": {"PV": 212, "PA": 6, "PM": 4, "Force": 42, "Intelligence": 24, "Défense": 39}
-	},
-	"Mage": {
-		"name": "Mage",
-		"description": "Dégâts magiques élevés, faible défense, sorts puissants",
-		"color": Color(0.38, 0.0, 0.5),
-		"icon": "ð®",
-		"base_stats": {"PV": 192, "PA": 6, "PM": 4, "Force": 28, "Intelligence": 49, "Défense": 29}
-	},
-	"Support": {
-		"name": "Support",
-		"description": "Renforce l'équipe, buffs et soins, polyvalent",
-		"color": Color(1.0, 0.5, 0.0),
-		"icon": "ð",
-		"base_stats": {"PV": 207, "PA": 6, "PM": 4, "Force": 34, "Intelligence": 39, "Défense": 44}
-	},
-	"Heal": {
-		"name": "Heal",
-		"description": "Spécialiste des soins, restauration de PV, survie",
-		"color": Color(0.0, 0.75, 0.75),
-		"icon": "â¤ï¸",
-		"base_stats": {"PV": 242, "PA": 6, "PM": 4, "Force": 20, "Intelligence": 42, "Défense": 42}
-	},
-	"Invocateur": {
-		"name": "Invocateur",
-		"description": "Invoque des créatures, stratégie de groupe, contrôle",
-		"color": Color(0.5, 0.0, 0.5),
-		"icon": "ð­",
-		"base_stats": {"PV": 202, "PA": 6, "PM": 4, "Force": 22, "Intelligence": 44, "Défense": 36}
+var available_classes: Array[String] = []
+var selected_team: Array = []                 # [{ "name": String, "data": Dictionary }, ...]
+var class_buttons: Dictionary = {}            # classname -> Button
+var class_data: Dictionary = {}               # classname -> { name, description, color, icon, base_stats }
+
+@onready var start_button: Button = $StartButton
+
+
+func _ready() -> void:
+	_load_class_data()
+	# class_data.keys() retourne un Array générique non typé ; Godot 4.7 refuse
+	# son assignation directe à une Array[String] -> conversion explicite requise.
+	available_classes.clear()
+	for k in class_data.keys():
+		available_classes.append(k as String)
+	_setup_class_buttons()
+	_setup_start_button()
+	_update_team_preview()
+
+
+# ─── Chargement des données de classe (CSV si possible, sinon fallback) ────
+
+func _load_class_data() -> void:
+	var loaded_from_csv: bool = _try_load_from_csv()
+	if not loaded_from_csv:
+		_load_fallback_data()
+
+
+func _try_load_from_csv() -> bool:
+	## Lit res://data/classes.csv et prend les stats au niveau le plus haut
+	## disponible (cohérent avec DEFAULT_PLAYER_LEVEL du GameManager).
+	var file := FileAccess.open("res://data/classes.csv", FileAccess.READ)
+	if file == null:
+		return false
+
+	var content: String = file.get_as_text()
+	file.close()
+
+	var lines: PackedStringArray = content.split("\n")
+	if lines.size() < 2:
+		return false
+
+	var headers: PackedStringArray = lines[0].split(",")
+	for i: int in range(headers.size()):
+		headers[i] = headers[i].strip_edges()
+
+	# best_level[classe] = niveau le plus élevé trouvé jusqu'ici
+	var best_level: Dictionary = {}
+
+	for i: int in range(1, lines.size()):
+		var line: String = lines[i].strip_edges()
+		if line.is_empty():
+			continue
+		var values: PackedStringArray = line.split(",")
+		if values.size() < headers.size():
+			continue
+
+		var row: Dictionary = {}
+		for j: int in range(headers.size()):
+			row[headers[j]] = values[j].strip_edges()
+
+		var classe: String = row.get("Classe", "")
+		if classe == "":
+			continue
+		var lvl: int = int(row.get("Niveau", "0"))
+
+		if not best_level.has(classe) or lvl > int(best_level[classe]):
+			best_level[classe] = lvl
+			var meta: Dictionary = CLASS_META.get(classe, {"icon": "⚔️", "description": ""})
+			class_data[classe] = {
+				"name":        classe,
+				"description": meta["description"],
+				"color":       CLASS_COLORS.get(classe, Color(0.5, 0.5, 0.5)),
+				"icon":        meta["icon"],
+				"base_stats": {
+					"PV":           int(row.get("Vita (PV)", "0")),
+					"PA":           int(row.get("PA", "0")),
+					"PM":           int(row.get("PM", "0")),
+					"Force":        int(row.get("Force (CAC)", "0")),
+					"Intelligence": int(row.get("Intelligence (Magie)", "0")),
+					"Agilite":      int(row.get("Agilité (Vit. Atk)", "0")),
+					"Sagesse":      int(row.get("Sagesse (Précision)", "0")),
+					"Defense":      int(row.get("Défense", "0")),
+				}
+			}
+
+	return class_data.size() > 0
+
+
+func _load_fallback_data() -> void:
+	## Stats de secours si classes.csv est introuvable
+	class_data = {
+		"Tank":       {"name": "Tank", "description": CLASS_META["Tank"]["description"], "color": CLASS_COLORS["Tank"], "icon": CLASS_META["Tank"]["icon"],
+			"base_stats": {"PV": 236, "PA": 6, "PM": 4, "Force": 34, "Intelligence": 13, "Agilite": 10, "Sagesse": 10, "Defense": 39}},
+		"Assassin":   {"name": "Assassin", "description": CLASS_META["Assassin"]["description"], "color": CLASS_COLORS["Assassin"], "icon": CLASS_META["Assassin"]["icon"],
+			"base_stats": {"PV": 202, "PA": 6, "PM": 4, "Force": 39, "Intelligence": 22, "Agilite": 25, "Sagesse": 15, "Defense": 26}},
+		"Chasseur":   {"name": "Chasseur", "description": CLASS_META["Chasseur"]["description"], "color": CLASS_COLORS["Chasseur"], "icon": CLASS_META["Chasseur"]["icon"],
+			"base_stats": {"PV": 212, "PA": 6, "PM": 4, "Force": 42, "Intelligence": 24, "Agilite": 20, "Sagesse": 18, "Defense": 39}},
+		"Mage":       {"name": "Mage", "description": CLASS_META["Mage"]["description"], "color": CLASS_COLORS["Mage"], "icon": CLASS_META["Mage"]["icon"],
+			"base_stats": {"PV": 192, "PA": 6, "PM": 4, "Force": 28, "Intelligence": 49, "Agilite": 12, "Sagesse": 14, "Defense": 29}},
+		"Support":    {"name": "Support", "description": CLASS_META["Support"]["description"], "color": CLASS_COLORS["Support"], "icon": CLASS_META["Support"]["icon"],
+			"base_stats": {"PV": 207, "PA": 6, "PM": 4, "Force": 34, "Intelligence": 39, "Agilite": 14, "Sagesse": 16, "Defense": 44}},
+		"Heal":       {"name": "Heal", "description": CLASS_META["Heal"]["description"], "color": CLASS_COLORS["Heal"], "icon": CLASS_META["Heal"]["icon"],
+			"base_stats": {"PV": 242, "PA": 6, "PM": 4, "Force": 20, "Intelligence": 42, "Agilite": 11, "Sagesse": 17, "Defense": 42}},
+		"Invocateur": {"name": "Invocateur", "description": CLASS_META["Invocateur"]["description"], "color": CLASS_COLORS["Invocateur"], "icon": CLASS_META["Invocateur"]["icon"],
+			"base_stats": {"PV": 202, "PA": 6, "PM": 4, "Force": 22, "Intelligence": 44, "Agilite": 13, "Sagesse": 19, "Defense": 36}},
 	}
-}
 
-# Appelé lorsque le nÅud est ajouté Ã  l'arbre de scène
-func _ready():
-	available_classes = class_data.keys()
-	_setup_ui()
-	_update_team_preview()
 
-# Configuration de l'interface utilisateur
+# ─── Connexion des boutons déjà présents dans la scène ─────────────────────
 
-# Appelé lorsque le nœud est ajouté à l'arbre de scène
-func _ready():
-	available_classes = class_data.keys()
-	
-# Récupérer le bouton existant de la scène
-	var start_button = $StartButton
-	start_button.pressed.connect(_on_start_combat)
-	
-# Connecter les boutons de classe
-	for classname in available_classes:
-		var button_name = "%s_Button" % classname
-		var button = get_node_or_null(button_name)
-		if button:
-			button.pressed.connect(_on_class_selected.bind(classname))
-			button.mouse_entered.connect(_on_class_hover.bind(classname, true))
-			button.mouse_exited.connect(_on_class_hover.bind(classname, false))
-			class_buttons[classname] = button
-			# Créer le label d'info si nécessaire
-			var info_label_name = "%s_Info" % classname
-			var info_label = get_node_or_null(info_label_name)
-			if not info_label:
-				info_label = Label.new()
-				info_label.name = info_label_name
-				info_label.text = class_data[classname]["description"]
-				info_label.position = button.position + Vector2(0, button.rect_size.y + 10)
-				info_label.visible = false
-				info_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
-				info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-				add_child(info_label)
-			class_info_labels[classname] = info_label
-	
-# Initialiser team_preview_nodes
-	for i in range(MAX_TEAM_SIZE):
-		var preview_frame = get_node_or_null("TeamPreview_%d" % i)
-		if preview_frame:
-			team_preview_nodes.append(preview_frame)
-	
-	_update_team_preview()
-	var title = Label.new()
-	title.add_theme_font_size_override("font_size", 24)
-	title.text = "WILDZIMUT - Sélection d'équipe"
-	title.position = Vector2(0, -250)
-	title
-	title.add_theme_color_override("font_color", Color(1, 1, 1))
-	title.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+func _setup_class_buttons() -> void:
+	for classe: String in available_classes:
+		var button_name: String = "%s_Button" % classe
+		var button: Button = get_node_or_null(button_name) as Button
+		if button == null:
+			push_warning("Bouton '%s' introuvable dans la scène — classe ignorée." % button_name)
+			continue
 
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		class_buttons[classe] = button
 
-	add_child(title)
+		# Texte + style à partir des données chargées
+		var info: Dictionary = class_data[classe]
+		button.text = "%s %s" % [info["icon"], info["name"]]
+		button.tooltip_text = _build_tooltip(info)
+		_style_button(button, info["color"], false)
 
-	# Créer la description
-	var description = Label.new()
-	description.add_theme_font_size_override("font_size", 18)
-	description.text = "Choisissez 3 personnages pour former votre équipe"
-	description.position = Vector2(0, -220)
-	description.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
-	description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		# (re)connecter proprement (éviter double-connexion en cas de reload de scène)
+		if button.pressed.is_connected(_on_class_selected):
+			button.pressed.disconnect(_on_class_selected)
+		button.pressed.connect(_on_class_selected.bind(classe))
 
-	add_child(description)
+		if not button.mouse_entered.is_connected(_on_class_hover):
+			button.mouse_entered.connect(_on_class_hover.bind(classe, true))
+		if not button.mouse_exited.is_connected(_on_class_hover):
+			button.mouse_exited.connect(_on_class_hover.bind(classe, false))
 
-	# Créer les boutons de sélection de classe
-	var y_pos = -150
-	var button_width = 250
-	var button_height = 60
-	var margin = 20
-	var start_x = -350
-	
-	for i in range(available_classes.size()):
-		var classname = available_classes[i]
-		var row = i / 3
-		var col = i % 3
-		
-		var x_pos = start_x + col * (button_width + margin)
-		y_pos = -150 + row * (button_height + margin)
-		
-		# Créer le bouton
-		var button = Button.new()
-		button.name = "%s_Button" % classname
-		button.position = Vector2(x_pos, y_pos)
-		button.size = Vector2(button_width, button_height)
-		button.text = class_data[classname]["icon"] + " %s" % class_data[classname]["name"]
-		button.pressed.connect(_on_class_selected.bind(classname))
-		
-		# Styliser le bouton
-		var stylebox = StyleBoxFlat.new()
-		stylebox.bg_color = class_data[classname]["color"]
-		stylebox.corner_radius_top_left = 10
-		stylebox.corner_radius_top_right = 10
-		stylebox.corner_radius_bottom_right = 10
-		stylebox.corner_radius_bottom_left = 10
-		button.add_theme_stylebox_override("normal", stylebox)
-		
-		var stylebox_hover = StyleBoxFlat.new()
-		stylebox_hover.bg_color = class_data[classname]["color"] + Color(0.2, 0.2, 0.2)
-		stylebox_hover.corner_radius_top_left = 10
-		stylebox_hover.corner_radius_top_right = 10
-		stylebox_hover.corner_radius_bottom_right = 10
-		stylebox_hover.corner_radius_bottom_left = 10
-		button.add_theme_stylebox_override("hover", stylebox_hover)
-		
-		var stylebox_pressed = StyleBoxFlat.new()
-		stylebox_pressed.bg_color = class_data[classname]["color"] + Color(-0.2, -0.2, -0.2)
-		stylebox_pressed.corner_radius_top_left = 10
-		stylebox_pressed.corner_radius_top_right = 10
-		stylebox_pressed.corner_radius_bottom_right = 10
-		stylebox_pressed.corner_radius_bottom_left = 10
-		button.add_theme_stylebox_override("pressed", stylebox_pressed)
-		
-		button.add_theme_color_override("font_color", Color(1, 1, 1))
-		button
-		button.add_theme_font_size_override("font_size", 16)
-		
-		add_child(button)
-		class_buttons[classname] = button
-		
-		# Créer le label de description (apparaÃ®t au survol)
-		var info_label = Label.new()
-		info_label.name = "%s_Info" % classname
-		info_label.text = class_data[classname]["description"]
-		info_label.position = Vector2(x_pos, y_pos + button_height + 10)
 
-		info_label.visible = false
-		info_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
-		info_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		add_child(info_label)
-		class_info_labels[classname] = info_label
-		
-		# Connecter les signaux de survol
-		button.mouse_entered.connect(_on_class_hover.bind(classname, true))
-		button.mouse_exited.connect(_on_class_hover.bind(classname, false))
+func _build_tooltip(info: Dictionary) -> String:
+	var s: Dictionary = info["base_stats"]
+	return "%s\n\nPV: %d   PA: %d   PM: %d\nForce: %d   Intel: %d\nAgilité: %d   Sagesse: %d   Défense: %d" % [
+		info["description"], s.get("PV", 0), s.get("PA", 0), s.get("PM", 0),
+		s.get("Force", 0), s.get("Intelligence", 0), s.get("Agilite", 0),
+		s.get("Sagesse", 0), s.get("Defense", 0)
+	]
 
-	# Créer la section de prévisualisation de l'équipe
-	var preview_title = Label.new()
-	preview_title.add_theme_font_size_override("font_size", 20)
-	preview_title.text = "Votre équipe (%d/%d)" % [selected_team.size(), MAX_TEAM_SIZE]
-	preview_title.position = Vector2(0, 120)
-	preview_title.add_theme_color_override("font_color", Color(1, 1, 0.8))
-	preview_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(preview_title)
-	
-	# Stocker la référence pour mise Ã  jour
-	preview_title.name = "PreviewTitle"
 
-	# Créer les emplacements de prévisualisation
-	for i in range(MAX_TEAM_SIZE):
-		var preview_frame = Panel.new()
-		preview_frame.name = "TeamPreview_%d" % i
-		preview_frame.position = Vector2(-100 + i * 120, 80)
-		preview_frame.size = Vector2(100, 100)
-		var stylebox = StyleBoxFlat.new()
-		stylebox.bg_color = Color(0.15, 0.15, 0.15, 0.8)
-		stylebox.corner_radius_top_left = 15
-		stylebox.corner_radius_top_right = 15
-		stylebox.corner_radius_bottom_right = 15
-		stylebox.corner_radius_bottom_left = 15
-		stylebox.border_width_left = 2
-		stylebox.border_width_right = 2
-		stylebox.border_width_top = 2
-		stylebox.border_width_bottom = 2
-		stylebox.border_color = Color(0.5, 0.5, 0.5)
-		preview_frame.add_theme_stylebox_override("panel", stylebox)
-		
-		#var stylebox = StyleBoxFlat.new()
-		#stylebox.bg_color = Color(0.15, 0.15, 0.15, 0.8)
-		#stylebox.corner_radius_top_left = 15
-		#stylebox.corner_radius_top_right = 15
-		#stylebox.corner_radius_bottom_right = 15
-		#stylebox.corner_radius_bottom_left = 15
-		#stylebox.border_width_left = 2
-		#stylebox.border_width_right = 2
-		#stylebox.border_width_top = 2
-		#stylebox.border_width_bottom = 2
-		#stylebox.border_color = Color(0.5, 0.5, 0.5)
-		#preview_frame.add_theme_stylebox_override("panel", stylebox)
-		
-		add_child(preview_frame)
-		team_preview_nodes.append(preview_frame)
-		
-		# Ajouter un label pour le nom
-		var name_label = Label.new()
-		name_label.name = "NameLabel_%d" % i
-		name_label.position = Vector2(0, -30)
+func _style_button(button: Button, color: Color, disabled: bool) -> void:
+	var base: StyleBoxFlat = StyleBoxFlat.new()
+	base.bg_color = color if not disabled else Color(0.25, 0.25, 0.25)
+	for c in ["corner_radius_top_left", "corner_radius_top_right",
+			  "corner_radius_bottom_left", "corner_radius_bottom_right"]:
+		base.set(c, 10)
+	button.add_theme_stylebox_override("normal", base)
 
-		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		name_label.add_theme_color_override("font_color", Color(1, 1, 1))
-		name_label.add_theme_font_size_override("font_size", 12)
-		preview_frame.add_child(name_label)
-		
-		# Ajouter un label pour les stats
-		var stats_label = Label.new()
-		stats_label.name = "StatsLabel_%d" % i
-		stats_label.position = Vector2(0, -10)
+	var hover: StyleBoxFlat = base.duplicate()
+	hover.bg_color = (color + Color(0.15, 0.15, 0.15)).clamp() if not disabled else base.bg_color
+	button.add_theme_stylebox_override("hover", hover)
 
-		stats_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		stats_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
-		stats_label.add_theme_font_size_override("font_size", 10)
-		preview_frame.add_child(stats_label)
-		
-		# Ajouter un bouton de suppression
-		var remove_button = Button.new()
-		remove_button.name = "RemoveButton_%d" % i
-		remove_button.position = Vector2(40, 35)
-		remove_button.size = Vector2(20, 20)
-		remove_button.text = "X"
-		remove_button.pressed.connect(_on_remove_from_team.bind(i))
-		remove_button.visible = false
-		remove_button.add_theme_color_override("font_color", Color(1, 0.3, 0.3))
-		remove_button.add_theme_font_size_override("font_size", 12)
-		preview_frame.add_child(remove_button)
+	var pressed: StyleBoxFlat = base.duplicate()
+	pressed.bg_color = (color - Color(0.15, 0.15, 0.15)).clamp() if not disabled else base.bg_color
+	button.add_theme_stylebox_override("pressed", pressed)
 
-	# Créer le bouton "Lancer le combat"
-# Récupérer le bouton existant de la scène
-var start_button = $StartButton
-	
-	# Stocker la référence
-	start_button.name = "StartButton"
+	var disabled_box: StyleBoxFlat = base.duplicate()
+	disabled_box.bg_color = Color(0.2, 0.2, 0.2)
+	button.add_theme_stylebox_override("disabled", disabled_box)
 
-# Appelé lorsqu'une classe est sélectionnée
-func _on_class_selected(classname: String):
-	# Vérifier si la classe est déjÃ  sélectionnée
-	for i in range(selected_team.size()):
-		if selected_team[i]["name"] == classname:
-			# DéjÃ  sélectionnée, ne rien faire ou afficher un message
-			return
-	
-	# Ajouter Ã  l'équipe si on a moins de MAX_TEAM_SIZE
-	if selected_team.size() < MAX_TEAM_SIZE:
-		var class_info = class_data[classname]
-		selected_team.append({
-			"name": classname,
-			"data": class_info
-		})
-		_update_team_preview()
-		
-		# Mettre Ã  jour l'état du bouton
-		var button = class_buttons[classname]
-		if button:
-			button.disabled = true
-			var stylebox = StyleBoxFlat.new()
-			stylebox.bg_color = Color(0.3, 0.3, 0.3)
-			stylebox.corner_radius_top_left = 10
-			stylebox.corner_radius_top_right = 10
-			stylebox.corner_radius_bottom_right = 10
-			stylebox.corner_radius_bottom_left = 10
-			button.add_theme_stylebox_override("disabled", stylebox)
-		
-		# Vérifier si on peut lancer le combat
-		var start_button = get_node("StartButton")
-		if start_button:
-			start_button.disabled = selected_team.size() < MAX_TEAM_SIZE
-	else:
-		# Ãquipe pleine, afficher un message
-		print("L'équipe est déjÃ  complète (3/3)")
+	button.add_theme_color_override("font_color", Color(1, 1, 1))
+	button.disabled = disabled
 
-# Appelé lorsqu'on survole une classe
-func _on_class_hover(classname: String, is_hover: bool):
-	if class_info_labels.has(classname):
-		class_info_labels[classname].visible = is_hover
 
-# Appelé pour supprimer un personnage de l'équipe
-func _on_remove_from_team(index: int):
-	if index < selected_team.size():
-		var classname = selected_team[index]["name"]
-		
-		# Réactiver le bouton de la classe
-		if class_buttons.has(classname):
-			var button = class_buttons[classname]
-			button.disabled = false
-		
-		# Supprimer de l'équipe
-		selected_team.remove_at(index)
-		_update_team_preview()
-		
-		# Vérifier si on peut lancer le combat
-		var start_button = get_node("StartButton")
-		if start_button:
-			start_button.disabled = selected_team.size() < MAX_TEAM_SIZE
-
-# Met Ã  jour l'aperçu de l'équipe
-func _update_team_preview():
-	var preview_title = get_node("PreviewTitle")
-	if preview_title:
-		preview_title.text = "Votre équipe (%d/%d)" % [selected_team.size(), MAX_TEAM_SIZE]
-	
-	for i in range(MAX_TEAM_SIZE):
-		var preview_frame = get_node("TeamPreview_%d" % i)
-		var name_label = get_node("TeamPreview_%d/NameLabel_%d" % [i, i])
-		var stats_label = get_node("TeamPreview_%d/StatsLabel_%d" % [i, i])
-		var remove_button = get_node("TeamPreview_%d/RemoveButton_%d" % [i, i])
-		
-		if preview_frame:
-			if i < selected_team.size():
-				var class_info = selected_team[i]["data"]
-				
-				# Mettre Ã  jour le style du cadre
-				var stylebox = StyleBoxFlat.new()
-				stylebox.bg_color = class_info["color"] + Color(0.1, 0.1, 0.1, 0.3)
-				stylebox.corner_radius_top_left = 15
-				stylebox.corner_radius_top_right = 15
-				stylebox.corner_radius_bottom_right = 15
-				stylebox.corner_radius_bottom_left = 15
-				stylebox.border_width_left = 2
-				stylebox.border_width_right = 2
-				stylebox.border_width_top = 2
-				stylebox.border_width_bottom = 2
-				stylebox.border_color = class_info["color"]
-				preview_frame.add_theme_stylebox_override("panel", stylebox)
-				
-				# Mettre Ã  jour les labels
-				if name_label:
-					name_label.text = class_info["icon"] + " %s" % class_info["name"]
-				
-				if stats_label:
-					var stats_text = "PV: %d
-PA: %d
-PM: %d" % [
-						class_info["base_stats"]["PV"],
-						class_info["base_stats"]["PA"],
-						class_info["base_stats"]["PM"]
-					]
-					stats_label.text = stats_text
-				
-				if remove_button:
-					remove_button.visible = true
-			else:
-				# Réinitialiser
-				if preview_frame:
-					var stylebox = StyleBoxFlat.new()
-					stylebox.bg_color = Color(0.15, 0.15, 0.15, 0.8)
-					stylebox.corner_radius_top_left = 15
-					stylebox.corner_radius_top_right = 15
-					stylebox.corner_radius_bottom_right = 15
-					stylebox.corner_radius_bottom_left = 15
-					stylebox.border_width_left = 2
-					stylebox.border_width_right = 2
-					stylebox.border_width_top = 2
-					stylebox.border_width_bottom = 2
-					stylebox.border_color = Color(0.5, 0.5, 0.5)
-					preview_frame.add_theme_stylebox_override("panel", stylebox)
-				
-		if name_label:
-					name_label.text = "-"
-				
-		if stats_label:
-					stats_label.text = ""
-				
-		if remove_button:
-					remove_button.visible = false
-
-# Appelé pour lancer le combat
-func _on_start_combat():
-	if selected_team.size() == MAX_TEAM_SIZE:
-		# Préparer les données de l'équipe pour le GameManager
-		var team_data = []
-		for i in range(selected_team.size()):
-			var class_info = selected_team[i]["data"]
-			team_data.append({
-				"classe": class_info["name"],
-				"entity_type": "Player",
-				"max_pv": class_info["base_stats"]["PV"],
-				"current_pv": class_info["base_stats"]["PV"],
-				"pa": class_info["base_stats"]["PA"],
-				"current_pa": class_info["base_stats"]["PA"],
-				"pm": class_info["base_stats"]["PM"],
-				"current_pm": class_info["base_stats"]["PM"],
-				"force": class_info["base_stats"]["Force"],
-				"intelligence": class_info["base_stats"]["Intelligence"],
-				"defense": class_info["base_stats"]["Défense"],
-				"agilite": class_info["base_stats"]["Agilité"],
-				"sagesse": class_info["base_stats"]["Sagesse"],
-				"x": -1,
-				"y": -1,
-				"color": class_info["color"]
-			})
-		
-		# Passer l'équipe au GameManager (Autoload)
-		if GameManager and GameManager.has_method("set_custom_team"):
-			GameManager.set_custom_team(team_data)
-			team_selected.emit(team_data)
-		
-		# Charger la scène de combat
-		get_tree().change_scene_to_file("res://scenes/Main.tscn")
-
-# Fonction pour charger les données depuis CSV (si disponible)
-func load_classes_from_csv():
-	var file = FileAccess.open("res://data/classes.csv", FileAccess.READ)
-	if file:
-		var content = file.get_as_text()
-		file.close()
-		
-		var lines = content.split("
-")
-		for line in lines:
-			if line.is_empty():
-				continue
-			var values = line.split(",")
-			if values.size() >= 10:
-				var classname = values[0]
-				var level = int(values[1])
-				
-				# Si c'est le niveau 30 (niveau par défaut dans le jeu)
-				if level == 30:
-					if not class_data.has(classname):
-						class_data[classname] = {
-							"name": classname,
-							"description": "",
-							"color": CLASS_COLORS[classname] if CLASS_COLORS.has(classname) else Color(0.5, 0.5, 0.5),
-							"icon": "âï¸",
-							"base_stats": {}
-						}
-					
-					class_data[classname]["base_stats"]["PV"] = int(values[3])
-					class_data[classname]["base_stats"]["PA"] = int(values[1])
-					class_data[classname]["base_stats"]["PM"] = int(values[2])
-					class_data[classname]["base_stats"]["Force"] = int(values[4])
-					class_data[classname]["base_stats"]["Intelligence"] = int(values[5])
-					class_data[classname]["base_stats"]["Défense"] = int(values[8])
-		
-		available_classes = class_data.keys()
-		return true
-	
-	return false
-
-# Fonction pour réinitialiser la sélection
-func reset_selection():
-	selected_team.clear()
-	
-	# Réactiver tous les boutons
-	for classname in class_buttons.keys():
-		if class_buttons[classname]:
-			class_buttons[classname].disabled = false
-	
-	_update_team_preview()
-	
-	var start_button = get_node("StartButton")
+func _setup_start_button() -> void:
 	if start_button:
+		if start_button.pressed.is_connected(_on_start_combat):
+			start_button.pressed.disconnect(_on_start_combat)
+		start_button.pressed.connect(_on_start_combat)
 		start_button.disabled = true
 
 
-# Méthode pour retourner Ã  la sélection d'équipe (appelée depuis UIManager)
-func return_to_team_selection() -> void:
-	reset_selection()
-	# Recharger la scène de sélection d'équipe
-	var team_scene = preload("res://scenes/TeamSelection.tscn")
-	get_tree().change_scene_to(team_scene)
+# ─── Survol : affiche les stats détaillées via tooltip natif (déjà câblé) ──
+
+func _on_class_hover(_classe: String, _is_hover: bool) -> void:
+	pass  # Le tooltip natif Godot (button.tooltip_text) gère déjà l'affichage au survol
+
+
+# ─── Sélection / désélection d'une classe ──────────────────────────────────
+
+func _on_class_selected(classe: String) -> void:
+	# Déjà sélectionnée ?
+	for entry: Dictionary in selected_team:
+		if entry["name"] == classe:
+			return
+
+	if selected_team.size() >= MAX_TEAM_SIZE:
+		message_full_team()
+		return
+
+	selected_team.append({"name": classe, "data": class_data[classe]})
+
+	if class_buttons.has(classe):
+		_style_button(class_buttons[classe], class_data[classe]["color"], true)
+
+	_update_team_preview()
+	_update_start_button_state()
+
+
+func message_full_team() -> void:
+	## Petit feedback visuel si on essaie d'ajouter un 4e personnage
+	if start_button:
+		var original: String = start_button.text
+		start_button.text = "Équipe déjà complète (3/3)"
+		await get_tree().create_timer(1.2).timeout
+		if is_instance_valid(start_button):
+			start_button.text = original
+
+
+func _on_remove_from_team(index: int) -> void:
+	if index < 0 or index >= selected_team.size():
+		return
+	var classe: String = selected_team[index]["name"]
+	selected_team.remove_at(index)
+
+	if class_buttons.has(classe):
+		_style_button(class_buttons[classe], class_data[classe]["color"], false)
+
+	_update_team_preview()
+	_update_start_button_state()
+
+
+func _update_start_button_state() -> void:
+	if start_button:
+		start_button.disabled = selected_team.size() < MAX_TEAM_SIZE
+
+
+# ─── Mise à jour des 3 emplacements de prévisualisation ────────────────────
+
+func _update_team_preview() -> void:
+	var preview_title: Label = get_node_or_null("PreviewTitle") as Label
+	if preview_title:
+		preview_title.text = "Votre équipe (%d/%d)" % [selected_team.size(), MAX_TEAM_SIZE]
+
+	for i: int in range(MAX_TEAM_SIZE):
+		var frame: Panel = get_node_or_null("TeamPreview_%d" % i) as Panel
+		if frame == null:
+			continue
+		var name_label: Label   = frame.get_node_or_null("NameLabel_%d" % i) as Label
+		var stats_label: Label  = frame.get_node_or_null("StatsLabel_%d" % i) as Label
+		var remove_btn: Button  = frame.get_node_or_null("RemoveButton_%d" % i) as Button
+
+		if i < selected_team.size():
+			var info: Dictionary = selected_team[i]["data"]
+			var s: Dictionary = info["base_stats"]
+
+			var box: StyleBoxFlat = StyleBoxFlat.new()
+			box.bg_color = (info["color"] as Color)
+			box.bg_color.a = 0.35
+			box.border_color = info["color"]
+			for side in ["left", "right", "top", "bottom"]:
+				box.set("border_width_%s" % side, 2)
+				box.set("corner_radius_%s_%s" % (["top","left"] if side=="top" else ["bottom","right"]), 12)
+			frame.add_theme_stylebox_override("panel", box)
+
+			if name_label:
+				name_label.text = "%s %s" % [info["icon"], info["name"]]
+			if stats_label:
+				stats_label.text = "PV:%d  PA:%d  PM:%d\nForce:%d  Int:%d\nAgi:%d  Sag:%d  Def:%d" % [
+					s.get("PV",0), s.get("PA",0), s.get("PM",0),
+					s.get("Force",0), s.get("Intelligence",0),
+					s.get("Agilite",0), s.get("Sagesse",0), s.get("Defense",0)
+				]
+			if remove_btn:
+				remove_btn.visible = true
+				if not remove_btn.pressed.is_connected(_on_remove_from_team):
+					remove_btn.pressed.connect(_on_remove_from_team.bind(i))
+		else:
+			var empty_box: StyleBoxFlat = StyleBoxFlat.new()
+			empty_box.bg_color = Color(0.15, 0.15, 0.15, 0.8)
+			empty_box.border_color = Color(0.5, 0.5, 0.5)
+			for side in ["left", "right", "top", "bottom"]:
+				empty_box.set("border_width_%s" % side, 2)
+			frame.add_theme_stylebox_override("panel", empty_box)
+
+			if name_label:
+				name_label.text = "-"
+			if stats_label:
+				stats_label.text = ""
+			if remove_btn:
+				remove_btn.visible = false
+
+
+# ─── Lancement du combat ────────────────────────────────────────────────────
+
+func _on_start_combat() -> void:
+	if selected_team.size() != MAX_TEAM_SIZE:
+		return
+
+	var team_data: Array = []
+	for entry: Dictionary in selected_team:
+		var info: Dictionary = entry["data"]
+		var s: Dictionary = info["base_stats"]
+		team_data.append({
+			"classe":       info["name"],
+			"entity_type":  "Player",
+			"max_pv":       s.get("PV", 100),
+			"current_pv":   s.get("PV", 100),
+			"force":        s.get("Force", 10),
+			"intelligence": s.get("Intelligence", 10),
+			"agilite":      s.get("Agilite", 10),
+			"sagesse":      s.get("Sagesse", 10),
+			"defense":      s.get("Defense", 10),
+			"pa":           s.get("PA", 5),
+			"max_pa":       s.get("PA", 5),
+			"pm":           s.get("PM", 3),
+			"max_pm":       s.get("PM", 3),
+			"x": -1, "y": -1,
+			"color": info["color"],
+		})
+
+	# Brancher directement sur l'autoload GameManager (set_custom_team existe déjà)
+	if GameManager and GameManager.has_method("set_custom_team"):
+		GameManager.set_custom_team(team_data)
+	else:
+		push_error("GameManager.set_custom_team() introuvable — vérifier l'autoload.")
+		return
+
+	team_selected.emit(team_data)
+
+	# Changer de scène vers le combat
+	get_tree().change_scene_to_file("res://scenes/Main.tscn")
+
+
+# ─── Réinitialisation (utile si on revient sur cette scène) ────────────────
+
+func reset_selection() -> void:
+	selected_team.clear()
+	for classe: String in class_buttons.keys():
+		_style_button(class_buttons[classe], class_data[classe]["color"], false)
+	_update_team_preview()
+	_update_start_button_state()

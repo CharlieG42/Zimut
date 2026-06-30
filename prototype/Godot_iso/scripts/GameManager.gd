@@ -1,7 +1,7 @@
 extends Node
 ## GameManager - Logique globale Zimut (version isométrique)
 ## Autoload configuré dans project.godot
-## FIXES : fonctions get_*_data() sans type retour â crash parse ; 
+## FIXES : fonctions get_*_data() sans type retour ─ crash parse ; 
 ##         load_data_fallback crée un DataLoader enfant qui écrase l'autoload ;
 ##         init_entities() cherche colonne "Classe" inexistante dans le CSV ennemis
 
@@ -95,12 +95,12 @@ func _get_spell_damage(spell: Dictionary, damage_type: String) -> int:
 
 
 ## Helper function to extract damage value from spell effect string (fallback)
-func _extract_damage_from_effect(effect: String, damage_type: String = "") -> int:
+func _extract_damage_from_effect(effect: String, _damage_type: String = "") -> int:
 	var damage_patterns = [
-		"dégÃ¢ts",
-		"dégÃ¢ts magiques",
-		"dégÃ¢ts en zone",
-		"dégÃ¢ts/tour"
+		"dégâts",
+		"dégâts magiques",
+		"dégâts en zone",
+		"dégâts/tour"
 	]
 	for pattern in damage_patterns:
 		if pattern in effect:
@@ -123,20 +123,19 @@ func _extract_heal_from_effect(effect: String) -> int:
 
 
 
-## Nouvelle méthode pour définir une équipe personnalisée
+## Définit l'équipe personnalisée choisie dans TeamSelection.
+## Appelée directement par TeamSelectionManager.gd AVANT le changement de scène
+## (et non via un signal sur un nœud /root/TeamSelection qui n'existe plus
+## une fois la scène Main.tscn chargée — c'était la cause du blocage).
 func set_custom_team(team_data: Array) -> void:
 	custom_team = team_data
 
-# Callback for team selection
-func _on_team_selected(team_data: Array) -> void:
-	set_custom_team(team_data)
-	print("DEBUG: team_selected signal intercepted! Team data:", team_data)
-	init_entities()
 
-
-## Nouvelle méthode pour réinitialiser l'équipe personnalisée
+## Réinitialise l'équipe personnalisée (retour aux classes par défaut)
 func clear_custom_team() -> void:
 	custom_team = []
+
+
 func _ready() -> void:
 	var data_loader: Node = get_node_or_null("/root/DataLoader")
 	if data_loader == null:
@@ -145,11 +144,7 @@ func _ready() -> void:
 		return
 
 	if data_loader.data_loaded:
-			# Connect to TeamSelection signal
-			var team_selection = get_node_or_null("/root/TeamSelection")
-			if team_selection and team_selection.has_signal("team_selected"):
-				team_selection.team_selected.connect(_on_team_selected)
-			_on_data_loaded()
+		_on_data_loaded()
 	else:
 		if not data_loader.data_loaded_successfully.is_connected(_on_data_loaded):
 			data_loader.data_loaded_successfully.connect(_on_data_loaded)
@@ -175,7 +170,7 @@ func _on_data_loaded() -> void:
 		player_changed.emit(current_player_index)
 
 
-# ââ Accesseurs DataLoader (retour Array explicite) ââââââââââââââââââââââââââ
+# ── Accesseurs DataLoader (retour Array explicite) ──────────────────────────
 
 func get_classes_data() -> Array:
 	var dl: Node = get_node_or_null("/root/DataLoader")
@@ -198,7 +193,7 @@ func get_enemies_data() -> Array:
 	return []
 
 
-# ââ Fallback si DataLoader absent ââââââââââââââââââââââââââââââââââââââââââ
+# ── Fallback si DataLoader absent ──────────────────────────────────────────
 
 func _init_with_fallback_data() -> void:
 	## Données minimales intégrées (même structure que les CSV)
@@ -210,9 +205,9 @@ func _init_with_fallback_data() -> void:
 	_on_data_loaded()
 
 
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ───────────────────────────────────────────────────────
 #  INITIALISATION GRILLE / ENTITÉS
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ───────────────────────────────────────────────────────
 
 func init_grid() -> void:
 	grid = []
@@ -241,7 +236,7 @@ func init_entities() -> void:    # Utiliser l'équipe personnalisée si elle est
 	var spells_data: Array  = get_spells_data()
 	var enemies_data: Array = get_enemies_data()
 
-	# ââ Joueurs ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+	# ── Joueurs ────────────────────────────────────────────────────────────
 	for i: int in range(player_classes.size()):
 		var classe: String = player_classes[i]
 		var pos: Vector2i  = player_positions[i]
@@ -301,7 +296,7 @@ func init_entities() -> void:    # Utiliser l'équipe personnalisée si elle est
 			grid[pos.y][pos.x] = player
 			continue
 
-		# Chercher les stats au niveau DEFAULT_PLAYER_LEVEL (ou le plus proche â¤)
+		# Chercher les stats au niveau DEFAULT_PLAYER_LEVEL (ou le plus proche ─¤)
 		var class_info: Dictionary = _find_best_match(classes_data, "Classe", classe,
 			"Niveau", DEFAULT_PLAYER_LEVEL)
 		if class_info.is_empty():
@@ -395,7 +390,7 @@ func init_entities() -> void:    # Utiliser l'équipe personnalisée si elle est
 
 
 ## Cherche dans `data_array` la ligne où `key_col`==`key_val`
-## au niveau `level_col`==`target_level` (ou le plus proche â¤)
+## au niveau `level_col`==`target_level` (ou le plus proche ─¤)
 func _find_best_match(data_array: Array, key_col: String, key_val: String,
 		level_col: String, target_level: int) -> Dictionary:
 	var best: Dictionary = {}
@@ -414,9 +409,9 @@ func _csv_int(row: Dictionary, col: String, default_val: int) -> int:
 	return int(row.get(col, str(default_val)))
 
 
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ───────────────────────────────────────────────────────
 #  ACTIONS JOUEUR
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ───────────────────────────────────────────────────────
 
 func handle_cell_selected(x: int, y: int) -> void:
 	if game_over or current_turn != 0:
@@ -427,26 +422,26 @@ func handle_cell_selected(x: int, y: int) -> void:
 	var current_player: Dictionary = players[current_player_index]
 	var player_pos: Vector2i       = Vector2i(int(current_player["x"]), int(current_player["y"]))
 
-	# 1. Sort sélectionné â lancer
+	# 1. Sort sélectionné ─ lancer
 	if selected_spell != null:
 		_try_cast_spell(current_player, target_pos, target_entity)
 		return
 
-	# 2. Clic sur sa propre case â rien
+	# 2. Clic sur sa propre case ─ rien
 	if target_pos == player_pos:
 		return
 
-	# 3. Clic sur un allié â ignoré (pas de changement de joueur actif)
+	# 3. Clic sur un allié ─ ignoré (pas de changement de joueur actif)
 	for p: Dictionary in players:
 		if int(p["x"]) == x and int(p["y"]) == y and int(p["current_pv"]) > 0:
 			return
 
-	# 4. Case vide â déplacer
+	# 4. Case vide ─ déplacer
 	if target_entity == null:
 		_try_move(current_player, target_pos)
 		return
 
-	# 5. Ennemi â attaque de base
+	# 5. Ennemi ─ attaque de base
 	if target_entity.get("entity_type", "") == "Enemy":
 		_try_basic_attack(current_player, target_entity, target_pos)
 
@@ -486,7 +481,7 @@ func _try_basic_attack(attacker: Dictionary, target: Dictionary, target_pos: Vec
 	target["current_pv"] = int(target["current_pv"]) - actual_dmg
 	attacker["current_pa"] = int(attacker["current_pa"]) - 1
 	entity_attacked.emit(attacker, target, actual_dmg)
-	message_requested.emit("%s attaque %s : %d dégÃ¢ts !" % [attacker["name"], target["name"], actual_dmg])
+	message_requested.emit("%s attaque %s : %d dégâts !" % [attacker["name"], target["name"], actual_dmg])
 	if int(target["current_pv"]) <= 0:
 		remove_entity_from_grid(target)
 	player_changed.emit(current_player_index)
@@ -560,19 +555,19 @@ func _apply_spell(caster: Dictionary, spell: Dictionary, target: Dictionary) -> 
 	
 	match spell_type:
 		"Attaque", "CAC":
-			# Utiliser les dégÃ¢ts physiques du CSV
+			# Utiliser les dégâts physiques du CSV
 			var raw_dmg: int = physical_damage if physical_damage > 0 else (int(caster["force"]) + (randi() % 5 - 2))
 			var actual_dmg: int = maxi(1, raw_dmg - int(int(target["defense"]) / 2.0))
 			target["current_pv"] = int(target["current_pv"]) - actual_dmg
 			entity_attacked.emit(caster, target, actual_dmg)
-			return "%s utilise %s : %d dégÃ¢ts physiques !" % [caster["name"], spell["name"], actual_dmg]
+			return "%s utilise %s : %d dégâts physiques !" % [caster["name"], spell["name"], actual_dmg]
 		"Magie":
-			# Utiliser les dégÃ¢ts magiques du CSV
+			# Utiliser les dégâts magiques du CSV
 			var raw_dmg: int = magical_damage if magical_damage > 0 else (int(caster["intelligence"]) + (randi() % 5 - 2))
 			var actual_dmg: int = maxi(1, raw_dmg)
 			target["current_pv"] = int(target["current_pv"]) - actual_dmg
 			entity_attacked.emit(caster, target, actual_dmg)
-			return "%s utilise %s : %d dégÃ¢ts magiques !" % [caster["name"], spell["name"], actual_dmg]
+			return "%s utilise %s : %d dégâts magiques !" % [caster["name"], spell["name"], actual_dmg]
 		"Buff", "Défense":
 			if resistance_physical > 0:
 				target["defense"] = int(float(int(target["defense"]) * (1 + resistance_physical / 100.0)))
@@ -581,9 +576,9 @@ func _apply_spell(caster: Dictionary, spell: Dictionary, target: Dictionary) -> 
 				# Résistance magique (Ã  implémenter selon votre système)
 				return "%s utilise %s : +%d%% résistance magique !" % [caster["name"], spell["name"], resistance_magical]
 			elif buff_physical > 0:
-				return "%s utilise %s : +%d%% dégÃ¢ts physiques !" % [caster["name"], spell["name"], buff_physical]
+				return "%s utilise %s : +%d%% dégâts physiques !" % [caster["name"], spell["name"], buff_physical]
 			elif buff_magical > 0:
-				return "%s utilise %s : +%d%% dégÃ¢ts magiques !" % [caster["name"], spell["name"], buff_magical]
+				return "%s utilise %s : +%d%% dégâts magiques !" % [caster["name"], spell["name"], buff_magical]
 			else:
 				target["defense"] = int(float(int(target["defense"]) * 3) / 2.0)
 				return "%s utilise %s : défense augmentée !" % [caster["name"], spell["name"]]
@@ -593,18 +588,18 @@ func _apply_spell(caster: Dictionary, spell: Dictionary, target: Dictionary) -> 
 			target["current_pv"] = mini(int(target["max_pv"]), int(target["current_pv"]) + heal)
 			return "%s utilise %s sur %s : +%d PV !" % [caster["name"], spell["name"], target["name"], heal]
 		"Debuff":
-			# Pour les debuffs avec dégÃ¢ts
+			# Pour les debuffs avec dégâts
 			if debuff_physical > 0:
 				target["current_pa"] = maxi(0, int(target["current_pa"]) - debuff_physical)
 				return "%s utilise %s : -%d PA !" % [caster["name"], spell["name"], debuff_physical]
 			elif debuff_magical > 0:
 				target["current_pv"] = int(target["current_pv"]) - debuff_magical
 				entity_attacked.emit(caster, target, debuff_magical)
-				return "%s utilise %s : %d dégÃ¢ts magiques (DoT) !" % [caster["name"], spell["name"], debuff_magical]
+				return "%s utilise %s : %d dégâts magiques (DoT) !" % [caster["name"], spell["name"], debuff_magical]
 			elif magical_damage > 0:
 				target["current_pv"] = int(target["current_pv"]) - magical_damage
 				entity_attacked.emit(caster, target, magical_damage)
-				return "%s utilise %s : %d dégÃ¢ts + effet spécial !" % [caster["name"], spell["name"], magical_damage]
+				return "%s utilise %s : %d dégâts + effet spécial !" % [caster["name"], spell["name"], magical_damage]
 			else:
 				return "%s utilise %s : effet spécial appliqué !" % [caster["name"], spell["name"]]
 	return "%s utilise %s." % [caster["name"], spell["name"]]
@@ -622,9 +617,9 @@ func handle_spell_selected(spell: Dictionary) -> void:
 	spell_selected.emit(selected_spell)
 
 
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ───────────────────────────────────────────────────────
 #  GESTION DES TOURS
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ───────────────────────────────────────────────────────
 
 func next_player() -> void:
 	if game_over or current_turn != 0:
@@ -674,7 +669,7 @@ func _end_player_turn() -> void:
 	current_turn = 1
 	selected_spell = null
 	turn_changed.emit(current_turn)
-	message_requested.emit("Tour des ennemisâ¦")
+	message_requested.emit("Tour des ennemis...")
 	_refresh_grid()
 
 
@@ -697,9 +692,9 @@ func start_player_turn() -> void:
 	check_game_over()
 
 
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ───────────────────────────────────────────────────────
 #  UTILITAIRES
-# âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+# ───────────────────────────────────────────────────────
 
 func remove_entity_from_grid(entity: Dictionary) -> void:
 	var ex: int = int(entity.get("x", -1))
@@ -770,5 +765,12 @@ func _is_valid(pos: Vector2i) -> bool:
 
 func _refresh_grid() -> void:
 	var gm: Node = get_node_or_null("/root/Main/GridManager")
-	if gm:
-		gm.update_entity_display()
+	if gm == null:
+		return
+	# Garde-fou : si GridManager.init() n'a pas encore tourné, sa propriété
+	# game_manager est encore null -> update_entity_display() planterait
+	# (accès à .current_turn sur Nil). On ignore simplement l'appel ;
+	# GridManager affichera l'état correct dès que son init() sera passé.
+	if not ("game_manager" in gm) or gm.game_manager == null:
+		return
+	gm.update_entity_display()
