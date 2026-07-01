@@ -1,7 +1,7 @@
 extends Node2D
 
 const GRID_SIZE := 8
-const CELL_SIZE := 130
+const CELL_SIZE := 140
 const PLAYER_START := Vector2i(0, 0)
 
 @onready var player_node: Area2D
@@ -82,6 +82,7 @@ func _setup_player():
 		PLAYER_START.y * CELL_SIZE
 	)
 	player_node.set_script(load("res://scripts/player.gd"))
+	player_node.connect("move_request", Callable(self, "_on_player_move_request"))
 	add_child(player_node)
 
 func _setup_ui():
@@ -125,6 +126,40 @@ func _setup_game_manager():
 	game_manager.name = "GameManager"
 	game_manager.set_script(load("res://scripts/game_manager.gd"))
 	add_child(game_manager)
+
+func _on_player_move_request(direction: Vector2i):
+	var new_position := player_node.position_grid + direction
+
+	# Vérifier si la case est libre (pas d'obstacle)
+	var target_tile := grid[new_position.y][new_position.x]
+	var has_obstacle := false
+	for child in target_tile.get_children():
+		if child.name == "Obstacle":
+			has_obstacle = true
+			break
+
+	if not has_obstacle:
+		# Déplacer le joueur
+		player_node.move_to_grid_position(new_position)
+		player_node.position_grid = new_position
+
+		# Mettre à jour les ressources et le tour
+		end_turn()
+
+		# Vérifier les collectibles
+		for child in target_tile.get_children():
+			if child.name.begins_with("Collectible_"):
+				var type := child.get_meta("type")
+				if type == "berries":
+					hunger = min(100, hunger + 20)
+					ui.get_node("VBoxContainer/Label").text = "Hunger: %d" % hunger
+				elif type == "water":
+					thirst = min(100, thirst + 20)
+					ui.get_node("VBoxContainer/Label2").text = "Thirst: %d" % thirst
+				child.queue_free()
+	else:
+		# Réactiver le mouvement si bloqué
+		player_node.can_move = true
 
 func _on_restart_pressed():
 	get_tree().reload_current_scene()
