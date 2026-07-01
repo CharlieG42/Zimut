@@ -1,0 +1,25 @@
+{
+"resource_local_to_scene":false,
+"resource_type":"PackedScene",
+"node_type":"Node2D",
+"nodes":[
+{
+"name":"Tile",
+"type":"Area2D",
+"script":"res://scripts/tile.gd",
+"groups":["tile"],
+"nodes":[
+{
+"name":"Sprite2D",
+"type":"Sprite2D",
+"texture":"res://assets/sprites/grass.png"
+},
+{
+"name":"CollisionShape2D",
+"type":"CollisionShape2D",
+"shape":"Rect2(0, 0, 140, 140)"
+}
+]
+}
+]
+}
