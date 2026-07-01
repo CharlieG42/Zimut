@@ -2,7 +2,7 @@ extends Node2D
 
 const GRID_SIZE := 8
 const CELL_SIZE := 140
-const PLAYER_START := Vector2i(0, 0)
+const PLAYER_START := Vector2i(4, 4)  # Centre de la grille 8x8
 
 @onready var player_node: Area2D
 @onready var ui: Control
@@ -33,23 +33,24 @@ func _create_tile(pos: Vector2i) -> Node2D:
 
 	var sprite := Sprite2D.new()
 	sprite.texture = load("res://assets/sprites/elements/grass.png")
+	sprite.position = Vector2(CELL_SIZE / 2, CELL_SIZE / 2)
 	tile.add_child(sprite)
 
-	if randf() < 0.2:
+	if randf() < 0.1:
 		_add_obstacle(tile)
-	elif randf() < 0.1:
+	elif randf() < 0.05:
 		_add_collectible(tile, "berries")
-	elif randf() < 0.1:
+	elif randf() < 0.05:
 		_add_collectible(tile, "water")
 	return tile
 
 func _add_obstacle(tile: Node2D):
 	var obstacle := Area2D.new()
 	obstacle.name = "Obstacle"
-	obstacle.position = Vector2(CELL_SIZE / 2, CELL_SIZE / 2)
 
 	var sprite := Sprite2D.new()
 	sprite.texture = load("res://assets/sprites/elements/rock.png")
+	sprite.position = Vector2(CELL_SIZE / 2, CELL_SIZE / 2)
 	obstacle.add_child(sprite)
 
 	var collision := CollisionShape2D.new()
@@ -61,11 +62,10 @@ func _add_obstacle(tile: Node2D):
 func _add_collectible(tile: Node2D, type: String):
 	var collectible := Area2D.new()
 	collectible.name = "Collectible_%s" % type
-	collectible.position = Vector2(CELL_SIZE / 2, CELL_SIZE / 2)
-	collectible.set_meta("type", type)
 
 	var sprite := Sprite2D.new()
 	sprite.texture = load("res://assets/sprites/elements/%s.png" % type)
+	sprite.position = Vector2(CELL_SIZE / 2, CELL_SIZE / 2)
 	collectible.add_child(sprite)
 
 	var collision := CollisionShape2D.new()
@@ -78,8 +78,8 @@ func _setup_player():
 	player_node = Area2D.new()
 	player_node.name = "Player"
 	player_node.position = Vector2(
-		PLAYER_START.x * CELL_SIZE,
-		PLAYER_START.y * CELL_SIZE
+		PLAYER_START.x * CELL_SIZE + CELL_SIZE / 2,
+		PLAYER_START.y * CELL_SIZE + CELL_SIZE / 2
 	)
 	player_node.set_script(load("res://scripts/player.gd"))
 	player_node.set("position_grid", PLAYER_START)
@@ -133,7 +133,7 @@ func _setup_game_manager():
 	add_child(game_manager)
 
 func _on_player_move_request(direction: Vector2i):
-	var new_position: Vector2i = player_node.position_grid + direction
+	var new_position: Vector2i = player_node.get("position_grid") + direction
 
 	# Vérifier si la case est libre (pas d'obstacle)
 	var target_tile: Node2D = grid[new_position.y][new_position.x]
@@ -146,9 +146,6 @@ func _on_player_move_request(direction: Vector2i):
 	if not has_obstacle:
 		# Déplacer le joueur
 		player_node.move_to_grid_position(new_position)
-		player_node.set("position_grid", new_position)
-
-		# Mettre à jour les ressources et le tour
 		end_turn()
 
 		# Vérifier les collectibles
