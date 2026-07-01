@@ -1,7 +1,7 @@
 extends Node2D
 
 const GRID_SIZE := 8
-const CELL_SIZE := 140
+const CELL_SIZE := 130
 const PLAYER_START := Vector2i(0, 0)
 
 @onready var player_node: Area2D
@@ -89,8 +89,8 @@ func _setup_ui():
 	ui.name = "UI"
 	ui.anchor_right = 1.0
 	ui.anchor_top = 0.0
-	ui.margin_right = -10
-	ui.margin_top = 10
+	ui.offset_right = -10.0
+	ui.offset_top = 10.0
 
 	var vbox := VBoxContainer.new()
 	vbox.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
