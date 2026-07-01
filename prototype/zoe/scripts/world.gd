@@ -32,7 +32,7 @@ func _create_tile(position: Vector2i) -> Node2D:
 	add_child(tile)
 
 	var sprite := Sprite2D.new()
-	sprite.texture = load("res://assets/sprites/grass.png")
+	sprite.texture = load("res://assets/sprites/elements/grass.png")
 	tile.add_child(sprite)
 
 	if randf() < 0.2:
@@ -49,7 +49,7 @@ func _add_obstacle(tile: Node2D):
 	obstacle.position = Vector2(CELL_SIZE / 2, CELL_SIZE / 2)
 
 	var sprite := Sprite2D.new()
-	sprite.texture = load("res://assets/sprites/rock.png")
+	sprite.texture = load("res://assets/sprites/elements/rock.png")
 	obstacle.add_child(sprite)
 
 	var collision := CollisionShape2D.new()
@@ -65,7 +65,7 @@ func _add_collectible(tile: Node2D, type: String):
 	collectible.set_meta("type", type)
 
 	var sprite := Sprite2D.new()
-	sprite.texture = load("res://assets/sprites/%s.png" % type)
+	sprite.texture = load("res://assets/sprites/elements/%s.png" % type)
 	collectible.add_child(sprite)
 
 	var collision := CollisionShape2D.new()

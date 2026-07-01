@@ -11,7 +11,7 @@ signal collect(item_type: String)
 
 func _ready():
 	var sprite := Sprite2D.new()
-	sprite.texture = load("res://assets/sprites/druid.png")
+	sprite.texture = load("res://assets/sprites/players/druide.png")
 	sprite.position = Vector2(CELL_SIZE / 2, CELL_SIZE / 2)
 	add_child(sprite)
 
