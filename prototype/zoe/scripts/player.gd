@@ -20,6 +20,9 @@ func _ready():
 	collision.shape.size = Vector2(CELL_SIZE, CELL_SIZE)
 	add_child(collision)
 
+	# Permet de capturer les inputs tactiles
+	input_priority = 1
+
 func _input(event):
 	if not can_move:
 		return
@@ -37,16 +40,17 @@ func _unhandled_input(event):
 	if not can_move:
 		return
 
-	# Touch support for Android
+	# Gestion tactile pour Android et clic souris
 	if event is InputEventScreenTouch and event.pressed:
 		var world_pos = get_global_mouse_position()
 		var target_x = floor(world_pos.x / CELL_SIZE)
 		var target_y = floor(world_pos.y / CELL_SIZE)
 		
-		# Check if touching adjacent cell
+		# Calculer la direction depuis la position actuelle
 		var dx = target_x - position_grid.x
 		var dy = target_y - position_grid.y
 		
+		# Seulement se déplacer vers les cases adjacentes
 		if abs(dx) + abs(dy) == 1:
 			_request_move(Vector2i(dx, dy))
 
@@ -58,8 +62,8 @@ func _request_move(direction: Vector2i):
 func move_to_grid_position(new_position: Vector2i):
 	position_grid = new_position
 	position = Vector2(
-		new_position.x * CELL_SIZE,
-		new_position.y * CELL_SIZE
+		new_position.x * CELL_SIZE + CELL_SIZE / 2,
+		new_position.y * CELL_SIZE + CELL_SIZE / 2
 	)
 	can_move = true
 
