@@ -133,7 +133,8 @@ func _setup_game_manager():
 	add_child(game_manager)
 
 func _on_player_move_request(direction: Vector2i):
-	var new_position: Vector2i = player_node.get("position_grid") + direction
+	var current_pos: Vector2i = player_node.get("position_grid")
+	var new_position: Vector2i = current_pos + direction
 
 	# Vérifier si la case est libre (pas d'obstacle)
 	var target_tile: Node2D = grid[new_position.y][new_position.x]
