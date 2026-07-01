@@ -81,6 +81,7 @@ func _setup_player():
 		PLAYER_START.x * CELL_SIZE,
 		PLAYER_START.y * CELL_SIZE
 	)
+	player_node.position_grid = PLAYER_START
 	player_node.set_script(load("res://scripts/player.gd"))
 	player_node.connect("move_request", Callable(self, "_on_player_move_request"))
 	add_child(player_node)
@@ -94,6 +95,7 @@ func _setup_ui():
 	ui.offset_top = 10.0
 
 	var vbox := VBoxContainer.new()
+	vbox.name = "StatsContainer"
 	vbox.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	ui.add_child(vbox)
 
@@ -155,10 +157,10 @@ func _on_player_move_request(direction: Vector2i):
 				var type: String = child.get_meta("type")
 				if type == "berries":
 					hunger = min(100, hunger + 20)
-					ui.get_node("VBoxContainer/HungerLabel").text = "Hunger: %d" % hunger
+					ui.get_node("StatsContainer/HungerLabel").text = "Hunger: %d" % hunger
 				elif type == "water":
 					thirst = min(100, thirst + 20)
-					ui.get_node("VBoxContainer/ThirstLabel").text = "Thirst: %d" % thirst
+					ui.get_node("StatsContainer/ThirstLabel").text = "Thirst: %d" % thirst
 				child.queue_free()
 	else:
 		# Réactiver le mouvement si bloqué
@@ -178,6 +180,6 @@ func end_turn():
 	if hunger <= 0 or thirst <= 0:
 		game_manager.emit_signal("defeat")
 
-	ui.get_node("VBoxContainer/HungerLabel").text = "Hunger: %d" % hunger
-	ui.get_node("VBoxContainer/ThirstLabel").text = "Thirst: %d" % thirst
-	ui.get_node("VBoxContainer/TurnLabel").text = "Turns: %d" % turn_count
+	ui.get_node("StatsContainer/HungerLabel").text = "Hunger: %d" % hunger
+	ui.get_node("StatsContainer/ThirstLabel").text = "Thirst: %d" % thirst
+	ui.get_node("StatsContainer/TurnLabel").text = "Turns: %d" % turn_count
