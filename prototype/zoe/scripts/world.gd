@@ -90,7 +90,7 @@ func create_player():
 	player_node.name = "Player"
 	player_node.position = Vector2(GRID_SIZE * CELL_SIZE / 2, GRID_SIZE * CELL_SIZE / 2)
 	var player_sprite = Sprite2D.new()
-	player_sprite.texture = load("res://assets/sprites/druid.png")
+	player_sprite.texture = load("res://assets/sprites/players/druide.png")
 	player_sprite.position = Vector2(70, 70)
 	player_node.add_child(player_sprite)
 	var player_collision = CollisionShape2D.new()
@@ -110,7 +110,7 @@ func generate_grid():
 			var current_pos = Vector2(x, y)
 			var cell_pos = Vector2(x * CELL_SIZE, y * CELL_SIZE)
 			if current_pos == stone_pos:
-				var stone = create_collectible("res://assets/sprites/stone.png", ["collectible", "stone"], {"is_goal": true})
+				var stone = create_collectible("res://assets/sprites/elements/stone.png", ["collectible", "stone"], {"is_goal": true})
 				stone.position = cell_pos
 				grid_node.add_child(stone)
 				continue
@@ -119,9 +119,9 @@ func generate_grid():
 				obstacle.name = "Obstacle_" + str(x) + "_" + str(y)
 				var sprite = Sprite2D.new()
 				if randf() < 0.5:
-					sprite.texture = load("res://assets/sprites/rock.png")
+					sprite.texture = load("res://assets/sprites/elements/rock.png")
 				else:
-					sprite.texture = load("res://assets/sprites/tree.png")
+					sprite.texture = load("res://assets/sprites/elements/tree.png")
 				var collision = CollisionShape2D.new()
 				collision.shape = Rect2(0, 0, CELL_SIZE, CELL_SIZE)
 				obstacle.add_child(sprite)
@@ -133,11 +133,11 @@ func generate_grid():
 			grid_node.add_child(tile)
 			if randf() < 0.15:
 				if randf() < 0.5:
-					var berries = create_collectible("res://assets/sprites/berries.png", ["collectible", "berries"], {"value": 10})
+					var berries = create_collectible("res://assets/sprites/elements/berries.png", ["collectible", "berries"], {"value": 10})
 					berries.position = cell_pos
 					grid_node.add_child(berries)
 				else:
-					var water = create_collectible("res://assets/sprites/water.png", ["collectible", "water"], {"value": 15})
+					var water = create_collectible("res://assets/sprites/elements/water.png", ["collectible", "water"], {"value": 15})
 					water.position = cell_pos
 					grid_node.add_child(water)
 					water_positions.append(current_pos)
@@ -146,7 +146,7 @@ func create_tile(pos: Vector2, grid_pos: Vector2) -> Node2D:
 	var tile = Node2D.new()
 	tile.name = "Tile_" + str(int(grid_pos.x)) + "_" + str(int(grid_pos.y))
 	var tile_sprite = Sprite2D.new()
-	tile_sprite.texture = load("res://assets/sprites/grass.png")
+	tile_sprite.texture = load("res://assets/sprites/elements/grass.png")
 	tile.add_child(tile_sprite)
 	var tile_collision = CollisionShape2D.new()
 	tile_collision.shape = Rect2(0, 0, CELL_SIZE, CELL_SIZE)
@@ -192,7 +192,7 @@ func _on_player_moved(new_pos: Vector2):
 				has_object = true
 				break
 		if not has_object:
-			var water = create_collectible("res://assets/sprites/water.png", ["collectible", "water"], {"value": 15})
+			var water = create_collectible("res://assets/sprites/elements/water.png", ["collectible", "water"], {"value": 15})
 			water.position = Vector2(pos.x * CELL_SIZE, pos.y * CELL_SIZE)
 			grid_node.add_child(water)
 
