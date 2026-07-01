@@ -81,8 +81,8 @@ func _setup_player():
 		PLAYER_START.x * CELL_SIZE,
 		PLAYER_START.y * CELL_SIZE
 	)
-	player_node.position_grid = PLAYER_START
 	player_node.set_script(load("res://scripts/player.gd"))
+	player_node.set("position_grid", PLAYER_START)
 	player_node.connect("move_request", Callable(self, "_on_player_move_request"))
 	add_child(player_node)
 
@@ -146,7 +146,7 @@ func _on_player_move_request(direction: Vector2i):
 	if not has_obstacle:
 		# Déplacer le joueur
 		player_node.move_to_grid_position(new_position)
-		player_node.position_grid = new_position
+		player_node.set("position_grid", new_position)
 
 		# Mettre à jour les ressources et le tour
 		end_turn()
@@ -164,7 +164,7 @@ func _on_player_move_request(direction: Vector2i):
 				child.queue_free()
 	else:
 		# Réactiver le mouvement si bloqué
-		player_node.can_move = true
+		player_node.set("can_move", true)
 
 func _on_restart_pressed():
 	get_tree().reload_current_scene()
