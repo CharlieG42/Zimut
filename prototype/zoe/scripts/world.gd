@@ -25,10 +25,10 @@ func _setup_grid():
 		for x in range(GRID_SIZE):
 			grid[y].append(_create_tile(Vector2i(x, y)))
 
-func _create_tile(position: Vector2i) -> Node2D:
+func _create_tile(pos: Vector2i) -> Node2D:
 	var tile := Node2D.new()
-	tile.name = "Tile_%d_%d" % [position.x, position.y]
-	tile.position = Vector2(position.x * CELL_SIZE, position.y * CELL_SIZE)
+	tile.name = "Tile_%d_%d" % [pos.x, pos.y]
+	tile.position = Vector2(float(pos.x) * CELL_SIZE, float(pos.y) * CELL_SIZE)
 	add_child(tile)
 
 	var sprite := Sprite2D.new()
@@ -98,14 +98,17 @@ func _setup_ui():
 	ui.add_child(vbox)
 
 	var hunger_label := Label.new()
+	hunger_label.name = "HungerLabel"
 	hunger_label.text = "Hunger: %d" % hunger
 	vbox.add_child(hunger_label)
 
 	var thirst_label := Label.new()
+	thirst_label.name = "ThirstLabel"
 	thirst_label.text = "Thirst: %d" % thirst
 	vbox.add_child(thirst_label)
 
 	var turn_label := Label.new()
+	turn_label.name = "TurnLabel"
 	turn_label.text = "Turns: %d" % turn_count
 	vbox.add_child(turn_label)
 
@@ -152,10 +155,10 @@ func _on_player_move_request(direction: Vector2i):
 				var type: String = child.get_meta("type")
 				if type == "berries":
 					hunger = min(100, hunger + 20)
-					ui.get_node("VBoxContainer/Label").text = "Hunger: %d" % hunger
+					ui.get_node("VBoxContainer/HungerLabel").text = "Hunger: %d" % hunger
 				elif type == "water":
 					thirst = min(100, thirst + 20)
-					ui.get_node("VBoxContainer/Label2").text = "Thirst: %d" % thirst
+					ui.get_node("VBoxContainer/ThirstLabel").text = "Thirst: %d" % thirst
 				child.queue_free()
 	else:
 		# Réactiver le mouvement si bloqué
@@ -175,6 +178,6 @@ func end_turn():
 	if hunger <= 0 or thirst <= 0:
 		game_manager.emit_signal("defeat")
 
-	ui.get_node("VBoxContainer/Label").text = "Hunger: %d" % hunger
-	ui.get_node("VBoxContainer/Label2").text = "Thirst: %d" % thirst
-	ui.get_node("VBoxContainer/Label3").text = "Turns: %d" % turn_count
+	ui.get_node("VBoxContainer/HungerLabel").text = "Hunger: %d" % hunger
+	ui.get_node("VBoxContainer/ThirstLabel").text = "Thirst: %d" % thirst
+	ui.get_node("VBoxContainer/TurnLabel").text = "Turns: %d" % turn_count
