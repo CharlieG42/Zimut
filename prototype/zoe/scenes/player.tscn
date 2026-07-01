@@ -1,0 +1,27 @@
+{
+"resource_local_to_scene":false,
+"resource_type":"PackedScene",
+"node_type":"Node2D",
+"nodes":[
+{
+"name":"Druid",
+"type":"Area2D",
+"script":"res://scripts/player.gd",
+"groups":["player"],
+"nodes":[
+{
+"name":"Sprite2D",
+"type":"Sprite2D",
+"position":[70,70],
+"texture":"res://assets/sprites/druid.png"
+},
+{
+"name":"CollisionShape2D",
+"type":"CollisionShape2D",
+"position":[70,70],
+"shape":"Rect2(60, 60, 70, 70)"
+}
+]
+}
+]
+}
