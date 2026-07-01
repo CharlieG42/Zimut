@@ -1,0 +1,28 @@
+{
+  "resource_local_to_scene": false,
+  "resource_type": "PackedScene",
+  "node_type": "Node2D",
+  "nodes": [
+    {
+      "name": "Berries",
+      "type": "Area2D",
+      "groups": ["collectible", "berries"],
+      "metadata": {"value": 10},
+      "nodes": [
+        {
+          "name": "Sprite2D",
+          "type": "Sprite2D",
+          "texture": "res://assets/sprites/berries.png",
+          "metadata": {}
+        },
+        {
+          "name": "CollisionShape2D",
+          "type": "CollisionShape2D",
+          "shape": "Rect2(0, 0, 140, 140)",
+          "metadata": {}
+        }
+      ],
+      "internal_paths": {}
+    }
+  ]
+}
