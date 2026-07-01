@@ -81,8 +81,7 @@ func _setup_player():
 		PLAYER_START.x * CELL_SIZE,
 		PLAYER_START.y * CELL_SIZE
 	)
-	var player_script = load("res://scripts/player.gd")
-	player_node.add_child(player_script.instantiate())
+	player_node.set_script(load("res://scripts/player.gd"))
 	add_child(player_node)
 
 func _setup_ui():
@@ -124,7 +123,7 @@ func _setup_ui():
 func _setup_game_manager():
 	game_manager = Node.new()
 	game_manager.name = "GameManager"
-	game_manager.add_child(load("res://scripts/game_manager.gd").instantiate())
+	game_manager.set_script(load("res://scripts/game_manager.gd"))
 	add_child(game_manager)
 
 func _on_restart_pressed():
