@@ -1,58 +1,55 @@
 extends Area2D
 
-# Ressources du joueur
-var faim := 100
-var soif := 100
-var position_grid := Vector2(0, 0)
+const CELL_SIZE := 140
+const GRID_SIZE := 8
 
-# Signal pour notifier le monde qu on a bouge
-signal moved(new_pos)
-signal resource_changed
+var position_grid: Vector2i = Vector2i(0, 0)
+var can_move := true
+
+signal move_request(direction: Vector2i)
+signal collect(item_type: String)
 
 func _ready():
-    # Initialiser la position centrale
-    position = Vector2(560, 448)  # Centre de la grille 8x8 (140*4 = 560)
-    position_grid = Vector2(4, 4)  # Milieu de la grille
+	var sprite := Sprite2D.new()
+	sprite.texture = load("res://assets/sprites/druid.png")
+	sprite.position = Vector2(CELL_SIZE / 2, CELL_SIZE / 2)
+	add_child(sprite)
 
-func move_to_grid_position(new_pos: Vector2):
-    # Verifier que la nouvelle position est dans la grille
-    if new_pos.x < 0 or new_pos.x >= 8 or new_pos.y < 0 or new_pos.y >= 8:
-        return false
-    
-    # Verifier s il y a un obstacle
-    var world = get_parent()
-    for child in world.get_node("Grid").get_children():
-        if child.position == Vector2(new_pos.x * 140, new_pos.y * 140) and child.is_in_group("obstacle"):
-            return false
-    
-    # Deplacer le joueur
-    position = Vector2(new_pos.x * 140, new_pos.y * 140)
-    position_grid = new_pos
-    
-    # Consommer des ressources
-    faim -= 2
-    soif -= 1
-    
-    # Emettre les signaux
-    emit_signal("moved", new_pos)
-    emit_signal("resource_changed")
-    
-    # Verifier les collisions avec les collectibles
-    for area in get_overlapping_areas():
-        if area.is_in_group("berries"):
-            faim = min(faim + area.get_meta("value", 0), 100)
-            area.queue_free()
-        elif area.is_in_group("water"):
-            soif = min(soif + area.get_meta("value", 0), 100)
-            area.queue_free()
-        elif area.is_in_group("stone") and area.get_meta("is_goal", false):
-            # Victoire !
-            GameManager.emit_signal("victory")
-    
-    return true
+	var collision := CollisionShape2D.new()
+	collision.shape = RectangleShape2D.new()
+	collision.shape.size = Vector2(CELL_SIZE, CELL_SIZE)
+	add_child(collision)
 
-func get_faim():
-    return faim
+func _input(event):
+	if not can_move:
+		return
 
-func get_soif():
-    return soif
+	if event.is_action_pressed("ui_right") and position_grid.x < GRID_SIZE - 1:
+		_request_move(Vector2i(1, 0))
+	elif event.is_action_pressed("ui_left") and position_grid.x > 0:
+		_request_move(Vector2i(-1, 0))
+	elif event.is_action_pressed("ui_down") and position_grid.y < GRID_SIZE - 1:
+		_request_move(Vector2i(0, 1))
+	elif event.is_action_pressed("ui_up") and position_grid.y > 0:
+		_request_move(Vector2i(0, -1))
+
+func _request_move(direction: Vector2i):
+	var new_position := position_grid + direction
+	emit_signal("move_request", direction)
+	can_move = false
+
+func move_to_grid_position(new_position: Vector2i):
+	position_grid = new_position
+	position = Vector2(
+		new_position.x * CELL_SIZE,
+		new_position.y * CELL_SIZE
+	)
+	can_move = true
+
+func _on_area_entered(area: Area2D):
+	if area.name == "Collectible_berries":
+		emit_signal("collect", "berries")
+		area.queue_free()
+	elif area.name == "Collectible_water":
+		emit_signal("collect", "water")
+		area.queue_free()
