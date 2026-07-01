@@ -1,0 +1,28 @@
+{
+  "resource_local_to_scene": false,
+  "resource_type": "PackedScene",
+  "node_type": "Node2D",
+  "nodes": [
+    {
+      "name": "Water",
+      "type": "Area2D",
+      "groups": ["collectible", "water"],
+      "metadata": {"value": 15, "respawn_in": 5},
+      "nodes": [
+        {
+          "name": "Sprite2D",
+          "type": "Sprite2D",
+          "texture": "res://assets/sprites/water.png",
+          "metadata": {}
+        },
+        {
+          "name": "CollisionShape2D",
+          "type": "CollisionShape2D",
+          "shape": "Rect2(0, 0, 140, 140)",
+          "metadata": {}
+        }
+      ],
+      "internal_paths": {}
+    }
+  ]
+}
