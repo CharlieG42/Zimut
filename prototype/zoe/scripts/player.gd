@@ -33,6 +33,23 @@ func _input(event):
 	elif event.is_action_pressed("ui_up") and position_grid.y > 0:
 		_request_move(Vector2i(0, -1))
 
+func _unhandled_input(event):
+	if not can_move:
+		return
+
+	# Touch support for Android
+	if event is InputEventScreenTouch and event.pressed:
+		var world_pos = get_global_mouse_position()
+		var target_x = floor(world_pos.x / CELL_SIZE)
+		var target_y = floor(world_pos.y / CELL_SIZE)
+		
+		# Check if touching adjacent cell
+		var dx = target_x - position_grid.x
+		var dy = target_y - position_grid.y
+		
+		if abs(dx) + abs(dy) == 1:
+			_request_move(Vector2i(dx, dy))
+
 func _request_move(direction: Vector2i):
 	var new_position := position_grid + direction
 	emit_signal("move_request", direction)
