@@ -1,7 +1,7 @@
 extends Area2D
 
-const CELL_SIZE := 140
 const GRID_SIZE := 8
+const CELL_SIZE := 140
 
 var position_grid: Vector2i = Vector2i(0, 0)
 var can_move := true
