@@ -34,7 +34,6 @@ func _input(event):
 		_request_move(Vector2i(0, -1))
 
 func _request_move(direction: Vector2i):
-	var new_position := position_grid + direction
 	emit_signal("move_request", direction)
 	can_move = false
 
