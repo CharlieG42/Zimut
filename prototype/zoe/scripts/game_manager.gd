@@ -25,3 +25,6 @@ func _on_defeat():
 	var label = world.get_node("UILayer/UI/MessageLabel")
 	label.text = "Game Over ! Faim ou soif a 0..."
 	label.visible = true
+	# Bloquer les déplacements après la défaite
+	if world.player_node:
+		world.player_node.can_move = false
