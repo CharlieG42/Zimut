@@ -20,7 +20,18 @@ func _ready():
 	collision.shape.size = Vector2(CELL_SIZE, CELL_SIZE)
 	add_child(collision)
 
+	# Nécessaire pour que area_entered soit émis
+	area_entered.connect(_on_area_entered)
+
+	# DEBUG : confirme que le joueur est bien pret et reçoit l'input
+	print("[Player] pret. position_grid=", position_grid, " can_move=", can_move)
+
 func _input(event):
+	# DEBUG : log de TOUT event clavier pertinent, meme si can_move est false,
+	# pour verifier que les evenements arrivent bien jusqu'ici.
+	if event is InputEventKey and event.pressed and not event.echo:
+		print("[Player] touche recue: ", event.as_text(), " | can_move=", can_move)
+
 	if not can_move:
 		return
 
@@ -34,21 +45,23 @@ func _input(event):
 		_request_move(Vector2i(0, -1))
 
 func _request_move(direction: Vector2i):
-	emit_signal("move_request", direction)
+	print("[Player] demande de mouvement: ", direction)
 	can_move = false
+	move_request.emit(direction)
 
 func move_to_grid_position(new_position: Vector2i):
 	position_grid = new_position
 	position = Vector2(
-		new_position.x * CELL_SIZE + CELL_SIZE / 2,
-		new_position.y * CELL_SIZE + CELL_SIZE / 2
+		new_position.x * CELL_SIZE,
+		new_position.y * CELL_SIZE
 	)
 	can_move = true
+	print("[Player] move_to_grid_position appele. position_grid maintenant=", position_grid, " can_move=", can_move)
 
 func _on_area_entered(area: Area2D):
 	if area.name == "Collectible_berries":
-		emit_signal("collect", "berries")
+		collect.emit("berries")
 		area.queue_free()
 	elif area.name == "Collectible_water":
-		emit_signal("collect", "water")
+		collect.emit("water")
 		area.queue_free()

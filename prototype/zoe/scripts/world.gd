@@ -18,6 +18,7 @@ func _ready():
 	_setup_player()
 	_setup_ui()
 	_setup_game_manager()
+	print("[World] pret. Node racine='", name, "' Camera scale devrait etre (1,1).")
 
 func _setup_grid():
 	for y in range(GRID_SIZE):
@@ -36,12 +37,14 @@ func _create_tile(pos: Vector2i) -> Node2D:
 	sprite.position = Vector2(CELL_SIZE / 2, CELL_SIZE / 2)
 	tile.add_child(sprite)
 
-	if randf() < 0.1:
-		_add_obstacle(tile)
-	elif randf() < 0.05:
-		_add_collectible(tile, "berries")
-	elif randf() < 0.05:
-		_add_collectible(tile, "water")
+	# La case de depart du joueur reste toujours libre
+	if pos != PLAYER_START:
+		if randf() < 0.1:
+			_add_obstacle(tile)
+		elif randf() < 0.05:
+			_add_collectible(tile, "berries")
+		elif randf() < 0.05:
+			_add_collectible(tile, "water")
 	return tile
 
 func _add_obstacle(tile: Node2D):
@@ -83,16 +86,24 @@ func _setup_player():
 		PLAYER_START.y * CELL_SIZE
 	)
 	player_node.set_script(load("res://scripts/player.gd"))
-	player_node.connect("move_request", Callable(self, "_on_player_move_request"))
 	add_child(player_node)
+	# connecte APRES add_child : garantit que le script/les signaux existent deja
+	player_node.move_request.connect(_on_player_move_request)
+	player_node.collect.connect(_on_player_collect)
 
 func _setup_ui():
+	var layer := CanvasLayer.new()
+	layer.name = "UILayer"
+	add_child(layer)
+
 	ui = Control.new()
 	ui.name = "UI"
-	ui.position = Vector2(10, get_viewport_rect().size.y - 120)
+	ui.mouse_filter = Control.MOUSE_FILTER_IGNORE  # ne doit JAMAIS intercepter les clics/tap sur la grille
+	ui.position = Vector2(10, get_viewport_rect().size.y - 150)
 
 	var vbox := VBoxContainer.new()
 	vbox.name = "StatsContainer"
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	ui.add_child(vbox)
 
@@ -111,34 +122,62 @@ func _setup_ui():
 	turn_label.text = "Turns: %d" % turn_count
 	vbox.add_child(turn_label)
 
+	var debug_label := Label.new()
+	debug_label.name = "DebugLabel"
+	debug_label.text = "Debug: -"
+	vbox.add_child(debug_label)
+
+	var message_label := Label.new()
+	message_label.name = "MessageLabel"
+	message_label.visible = false
+	ui.add_child(message_label)
+
 	var restart_button := Button.new()
 	restart_button.text = "Restart"
+	restart_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	restart_button.pressed.connect(_on_restart_pressed)
 	vbox.add_child(restart_button)
 
 	var quit_button := Button.new()
 	quit_button.text = "Quit"
+	quit_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	quit_button.pressed.connect(_on_quit_pressed)
 	vbox.add_child(quit_button)
 
-	add_child(ui)
+	layer.add_child(ui)
 
 func update_ui():
 	ui.get_node("StatsContainer/HungerLabel").text = "Hunger: %d" % hunger
 	ui.get_node("StatsContainer/ThirstLabel").text = "Thirst: %d" % thirst
 	ui.get_node("StatsContainer/TurnLabel").text = "Turns: %d" % turn_count
 
+func _set_debug(text: String):
+	if ui and ui.has_node("StatsContainer/DebugLabel"):
+		ui.get_node("StatsContainer/DebugLabel").text = "Debug: %s" % text
+
 func _setup_game_manager():
 	game_manager = Node.new()
 	game_manager.name = "GameManager"
 	game_manager.set_script(load("res://scripts/game_manager.gd"))
 	add_child(game_manager)
+	game_manager.world = self  # reference directe, plus fiable que get_node("World")
+
+func _on_player_collect(item_type: String):
+	if item_type == "berries":
+		hunger = min(100, hunger + 20)
+	elif item_type == "water":
+		thirst = min(100, thirst + 20)
+	update_ui()
 
 func _on_player_move_request(direction: Vector2i):
 	var current_pos: Vector2i = player_node.position_grid
 	var new_position: Vector2i = current_pos + direction
 
-	# Vérifier obstacle
+	if new_position.x < 0 or new_position.x >= GRID_SIZE or new_position.y < 0 or new_position.y >= GRID_SIZE:
+		_set_debug("hors grille %s" % str(new_position))
+		player_node.can_move = true
+		return
+
 	var target_tile: Node2D = grid[new_position.y][new_position.x]
 	var has_obstacle := false
 	for child in target_tile.get_children():
@@ -146,27 +185,24 @@ func _on_player_move_request(direction: Vector2i):
 			has_obstacle = true
 			break
 
-	if not has_obstacle:
-		player_node.position = Vector2(
-			new_position.x * CELL_SIZE,
-			new_position.y * CELL_SIZE
-		)
-		player_node.position_grid = new_position
-		
-		# Collectibles
-		for child in target_tile.get_children():
-			if child.name.begins_with("Collectible_") and child.has_meta("type"):
-				var type: String = child.get_meta("type") as String
-				if type == "berries":
-					hunger = min(100, hunger + 20)
-					update_ui()
-				elif type == "water":
-					thirst = min(100, thirst + 20)
-					update_ui()
-				child.queue_free()
-		end_turn()
-	else:
+	if has_obstacle:
+		print("[World] Mouvement bloque : rocher en ", new_position)
+		_set_debug("bloque par rocher en %s" % str(new_position))
 		player_node.can_move = true
+		return
+
+	player_node.move_to_grid_position(new_position)
+	_set_debug("deplace vers %s" % str(new_position))
+
+	for child in target_tile.get_children():
+		if child.name.begins_with("Collectible_") and child.has_meta("type"):
+			var type: String = child.get_meta("type") as String
+			if type == "berries":
+				hunger = min(100, hunger + 20)
+			elif type == "water":
+				thirst = min(100, thirst + 20)
+			child.queue_free()
+	end_turn()
 
 func _on_restart_pressed():
 	get_tree().reload_current_scene()
@@ -181,19 +217,48 @@ func end_turn():
 
 	if hunger <= 0 or thirst <= 0:
 		game_manager.emit_signal("defeat")
-	
+
 	player_node.can_move = true
 	update_ui()
 
-func _unhandled_input(event):
+func _input(event):
+	# DEBUG : confirme que le World recoit bien les evenements tactiles/souris
+	if event is InputEventScreenTouch or event is InputEventMouseButton:
+		print("[World] event tactile/souris recu: ", event)
+
+	if not player_node.can_move:
+		return
+
+	var pressed_pos := Vector2.ZERO
+	var is_tap := false
+
 	if event is InputEventScreenTouch and event.pressed:
-		if not player_node.can_move:
-			return
-		var world_pos = get_global_mouse_position()
-		var target_x = floor(world_pos.x / CELL_SIZE)
-		var target_y = floor(world_pos.y / CELL_SIZE)
-		var current_pos: Vector2i = player_node.position_grid
-		var dx = target_x - current_pos.x
-		var dy = target_y - current_pos.y
-		if abs(dx) + abs(dy) == 1:
-			player_node.emit_signal("move_request", Vector2i(dx, dy))
+		pressed_pos = event.position
+		is_tap = true
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		pressed_pos = event.position
+		is_tap = true
+
+	if not is_tap:
+		return
+
+	# IMPORTANT : on convertit en coordonnees LOCALES a World (to_local),
+	# sinon la position du noeud World (440,70) et l'offset de la camera
+	# faussent completement le calcul de la case.
+	var world_pos: Vector2 = to_local(get_global_mouse_position())
+	var target_x: int = int(floor(world_pos.x / CELL_SIZE))
+	var target_y: int = int(floor(world_pos.y / CELL_SIZE))
+
+	print("[World] tap ecran=", pressed_pos, " -> monde=", world_pos, " -> case=(", target_x, ",", target_y, ")")
+	_set_debug("tap case (%d,%d)" % [target_x, target_y])
+
+	if target_x < 0 or target_x >= GRID_SIZE or target_y < 0 or target_y >= GRID_SIZE:
+		return
+
+	var current_pos: Vector2i = player_node.position_grid
+	var dx: int = target_x - current_pos.x
+	var dy: int = target_y - current_pos.y
+
+	if abs(dx) + abs(dy) == 1:
+		player_node.can_move = false
+		player_node.move_request.emit(Vector2i(dx, dy))
