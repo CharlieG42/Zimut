@@ -12,6 +12,7 @@ var grid := []
 var turn_count := 0
 var hunger := 100
 var thirst := 100
+var game_over := false
 
 func _ready():
 	_setup_grid()
@@ -199,9 +200,9 @@ func _on_player_move_request(direction: Vector2i):
 			var type: String = child.get_meta("type") as String
 			if type == "berries":
 				hunger = min(100, hunger + 20)
-			elif type == "water":
-				thirst = min(100, thirst + 20)
-			child.queue_free()
+				elif type == "water":
+					thirst = min(100, thirst + 20)
+				child.queue_free()
 	end_turn()
 
 func _on_restart_pressed():
@@ -216,7 +217,9 @@ func end_turn():
 	thirst = max(0, thirst - 5)
 
 	if hunger <= 0 or thirst <= 0:
+		game_over = true
 		game_manager.emit_signal("defeat")
+		return  # Ne pas réactiver can_move si défaite
 
 	player_node.can_move = true
 	update_ui()
@@ -225,9 +228,6 @@ func _input(event):
 	# DEBUG : confirme que le World recoit bien les evenements tactiles/souris
 	if event is InputEventScreenTouch or event is InputEventMouseButton:
 		print("[World] event tactile/souris recu: ", event)
-
-	if not player_node.can_move:
-		return
 
 	var pressed_pos := Vector2.ZERO
 	var is_tap := false
@@ -255,10 +255,13 @@ func _input(event):
 	if target_x < 0 or target_x >= GRID_SIZE or target_y < 0 or target_y >= GRID_SIZE:
 		return
 
+	# Vérifier can_move ICI, après avoir calculé la case
+	if not player_node.can_move or game_over:
+		return
+
 	var current_pos: Vector2i = player_node.position_grid
 	var dx: int = target_x - current_pos.x
 	var dy: int = target_y - current_pos.y
 
 	if abs(dx) + abs(dy) == 1:
-		# can_move = false est déjà géré dans player.gd._request_move()
 		player_node.move_request.emit(Vector2i(dx, dy))
