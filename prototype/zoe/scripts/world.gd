@@ -226,9 +226,9 @@ func _on_player_move_request(direction: Vector2i):
 			var type: String = child.get_meta("type") as String
 			if type == "berries":
 				hunger = min(100, hunger + 20)
-				elif type == "water":
-					thirst = min(100, thirst + 20)
-				child.queue_free()
+			elif type == "water":
+				thirst = min(100, thirst + 20)
+			child.queue_free()
 	end_turn()
 
 func _on_restart_pressed():
