@@ -2,7 +2,7 @@ extends Node2D
 
 const GRID_SIZE := 8
 const CELL_SIZE := 140
-const PLAYER_START := Vector2i(4, 4)  # Centre de la grille 8x8
+const PLAYER_START := Vector2i(0, 0)  # Centre de la grille 8x8
 
 @onready var player_node: Area2D
 @onready var ui: Control
@@ -78,8 +78,8 @@ func _setup_player():
 	player_node = Area2D.new()
 	player_node.name = "Player"
 	player_node.position = Vector2(
-		PLAYER_START.x * CELL_SIZE + CELL_SIZE / 2,
-		PLAYER_START.y * CELL_SIZE + CELL_SIZE / 2
+		PLAYER_START.x * CELL_SIZE - CELL_SIZE / 2 + 60,
+		PLAYER_START.y * CELL_SIZE - CELL_SIZE / 2 + 30
 	)
 	player_node.set_script(load("res://scripts/player.gd"))
 	player_node.set("position_grid", PLAYER_START)

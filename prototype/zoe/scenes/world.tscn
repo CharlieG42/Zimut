@@ -3,5 +3,5 @@
 [ext_resource type="Script" uid="uid://d2j7e14ly8muv" path="res://scripts/world.gd" id="1_nnsk1"]
 
 [node name="Node2D" type="Node2D" unique_id=1645247345]
-position = Vector2(440, 160)
+position = Vector2(440, 70)
 script = ExtResource("1_nnsk1")
