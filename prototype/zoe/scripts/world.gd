@@ -83,7 +83,7 @@ func _setup_player():
 	player_node.position = Vector2(
 		PLAYER_START.x * CELL_SIZE + CELL_SIZE / 2 + OFFSET_PLAYER_X,
 		PLAYER_START.y * CELL_SIZE + CELL_SIZE / 2 + OFFSET_PLAYER_Y
-	)
+		)
 	player_node.set_script(load("res://scripts/player.gd"))
 	player_node.connect("move_request", Callable(self, "_on_player_move_request"))
 	add_child(player_node)
@@ -154,8 +154,6 @@ func _on_player_move_request(direction: Vector2i):
 			new_position.y * CELL_SIZE + CELL_SIZE / 2 + OFFSET_PLAYER_Y
 		)
 		player_node.set("position_grid", new_position)
-		player_node.set("can_move", true)
-		end_turn()
 		
 		# Collectibles
 		for child in target_tile.get_children():
@@ -168,8 +166,9 @@ func _on_player_move_request(direction: Vector2i):
 					thirst = min(100, thirst + 20)
 					update_ui()
 				child.queue_free()
+		end_turn()
 	else:
-		player_node.set("can_move", true)
+		player_node.can_move = true
 
 func _on_restart_pressed():
 	get_tree().reload_current_scene()
@@ -185,11 +184,12 @@ func end_turn():
 	if hunger <= 0 or thirst <= 0:
 		game_manager.emit_signal("defeat")
 	
+	player_node.can_move = true
 	update_ui()
 
 func _unhandled_input(event):
 	if event is InputEventScreenTouch and event.pressed:
-		if not player_node.get("can_move"):
+		if not player_node.can_move:
 			return
 		var world_pos = get_global_mouse_position()
 		var target_x = floor(world_pos.x / CELL_SIZE)
