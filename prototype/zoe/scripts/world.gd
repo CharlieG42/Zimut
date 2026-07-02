@@ -166,7 +166,7 @@ func _on_player_move_request(direction: Vector2i):
 				child.queue_free()
 		end_turn()
 	else:
-		player_node.set("can_move", true)
+		player_node.can_move = true
 
 func _on_restart_pressed():
 	get_tree().reload_current_scene()
@@ -182,12 +182,12 @@ func end_turn():
 	if hunger <= 0 or thirst <= 0:
 		game_manager.emit_signal("defeat")
 	
-	player_node.set("can_move", true)
+	player_node.can_move = true
 	update_ui()
 
 func _unhandled_input(event):
 	if event is InputEventScreenTouch and event.pressed:
-		if not player_node.get("can_move"):
+		if not player_node.can_move:
 			return
 		var world_pos = get_global_mouse_position()
 		var target_x = floor(world_pos.x / CELL_SIZE)
