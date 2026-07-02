@@ -15,13 +15,13 @@ func _ready():
 func _on_victory():
 	if world == null:
 		return
-	var label = world.get_node("UI/MessageLabel")
+	var label = world.get_node("UILayer/UI/MessageLabel")
 	label.text = "Victoire ! Pierre de la Terre trouvee !"
 	label.visible = true
 
 func _on_defeat():
 	if world == null:
 		return
-	var label = world.get_node("UI/MessageLabel")
+	var label = world.get_node("UILayer/UI/MessageLabel")
 	label.text = "Game Over ! Faim ou soif a 0..."
 	label.visible = true
