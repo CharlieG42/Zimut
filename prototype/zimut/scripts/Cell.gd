@@ -96,3 +96,6 @@ func _draw():
 	if entity:
 		_draw_entity(HALF.x, HALF.y)
 		_draw_health_bar(HALF, hw, hh)
+
+
+
