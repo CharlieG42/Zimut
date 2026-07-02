@@ -3,8 +3,6 @@ extends Node2D
 const GRID_SIZE := 8
 const CELL_SIZE := 140
 const PLAYER_START := Vector2i(0, 0)
-const OFFSET_PLAYER_X := -80
-const OFFSET_PLAYER_Y := -100 
 
 @onready var player_node: Area2D
 @onready var ui: Control
@@ -81,9 +79,9 @@ func _setup_player():
 	player_node = Area2D.new()
 	player_node.name = "Player"
 	player_node.position = Vector2(
-		PLAYER_START.x * CELL_SIZE + CELL_SIZE / 2 + OFFSET_PLAYER_X,
-		PLAYER_START.y * CELL_SIZE + CELL_SIZE / 2 + OFFSET_PLAYER_Y
-		)
+		PLAYER_START.x * CELL_SIZE,
+		PLAYER_START.y * CELL_SIZE
+	)
 	player_node.set_script(load("res://scripts/player.gd"))
 	player_node.connect("move_request", Callable(self, "_on_player_move_request"))
 	add_child(player_node)
@@ -137,7 +135,7 @@ func _setup_game_manager():
 	add_child(game_manager)
 
 func _on_player_move_request(direction: Vector2i):
-	var current_pos: Vector2i = player_node.get("position_grid")
+	var current_pos: Vector2i = player_node.position_grid
 	var new_position: Vector2i = current_pos + direction
 
 	# Vérifier obstacle
@@ -150,10 +148,10 @@ func _on_player_move_request(direction: Vector2i):
 
 	if not has_obstacle:
 		player_node.position = Vector2(
-			new_position.x * CELL_SIZE + CELL_SIZE / 2 + OFFSET_PLAYER_X,
-			new_position.y * CELL_SIZE + CELL_SIZE / 2 + OFFSET_PLAYER_Y
+			new_position.x * CELL_SIZE,
+			new_position.y * CELL_SIZE
 		)
-		player_node.set("position_grid", new_position)
+		player_node.position_grid = new_position
 		
 		# Collectibles
 		for child in target_tile.get_children():
@@ -194,7 +192,7 @@ func _unhandled_input(event):
 		var world_pos = get_global_mouse_position()
 		var target_x = floor(world_pos.x / CELL_SIZE)
 		var target_y = floor(world_pos.y / CELL_SIZE)
-		var current_pos: Vector2i = player_node.get("position_grid")
+		var current_pos: Vector2i = player_node.position_grid
 		var dx = target_x - current_pos.x
 		var dy = target_y - current_pos.y
 		if abs(dx) + abs(dy) == 1:
