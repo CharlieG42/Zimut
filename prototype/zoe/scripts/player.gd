@@ -27,8 +27,7 @@ func _ready():
 	print("[Player] pret. position_grid=", position_grid, " can_move=", can_move)
 
 func _input(event):
-	# DEBUG : log de TOUT event clavier pertinent, meme si can_move est false,
-	# pour verifier que les evenements arrivent bien jusqu'ici.
+	# DEBUG : log de TOUT event clavier pertinent, meme si can_move est false,	# pour verifier que les evenements arrivent bien jusqu'ici.
 	if event is InputEventKey and event.pressed and not event.echo:
 		print("[Player] touche recue: ", event.as_text(), " | can_move=", can_move)
 
@@ -59,9 +58,6 @@ func move_to_grid_position(new_position: Vector2i):
 	print("[Player] move_to_grid_position appele. position_grid maintenant=", position_grid, " can_move=", can_move)
 
 func _on_area_entered(area: Area2D):
-	if area.name == "Collectible_berries":
-		collect.emit("berries")
-		area.queue_free()
-	elif area.name == "Collectible_water":
-		collect.emit("water")
-		area.queue_free()
+	# Collectibles maintenant gérés dans world.gd après déplacement réussi
+	# Ne plus traiter ici pour éviter la collecte prématurée
+	pass
