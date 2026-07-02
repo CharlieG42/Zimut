@@ -147,13 +147,7 @@ func _on_player_move_request(direction: Vector2i):
 			break
 
 	if not has_obstacle:
-		player_node.position = Vector2(
-			new_position.x * CELL_SIZE + CELL_SIZE / 2,
-			new_position.y * CELL_SIZE + CELL_SIZE / 2
-		)
-		player_node.set("position_grid", new_position)
-		player_node.set("can_move", true)
-		end_turn()
+		player_node.call_deferred("move_to_grid_position", new_position)
 		
 		# Collectibles
 		for child in target_tile.get_children():
@@ -166,6 +160,7 @@ func _on_player_move_request(direction: Vector2i):
 					thirst = min(100, thirst + 20)
 					update_ui()
 				child.queue_free()
+		end_turn()
 	else:
 		player_node.set("can_move", true)
 
