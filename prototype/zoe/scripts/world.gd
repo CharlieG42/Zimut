@@ -199,9 +199,9 @@ func _on_player_move_request(direction: Vector2i):
 			var type: String = child.get_meta("type") as String
 			if type == "berries":
 				hunger = min(100, hunger + 20)
-			elif type == "water":
-				thirst = min(100, thirst + 20)
-			child.queue_free()
+				elif type == "water":
+					thirst = min(100, thirst + 20)
+				child.queue_free()
 	end_turn()
 
 func _on_restart_pressed():
@@ -260,5 +260,5 @@ func _input(event):
 	var dy: int = target_y - current_pos.y
 
 	if abs(dx) + abs(dy) == 1:
-		player_node.can_move = false
+		# can_move = false est déjà géré dans player.gd._request_move()
 		player_node.move_request.emit(Vector2i(dx, dy))
