@@ -79,8 +79,8 @@ func _setup_player():
 	player_node = Area2D.new()
 	player_node.name = "Player"
 	player_node.position = Vector2(
-		PLAYER_START.x * CELL_SIZE + CELL_SIZE / 2,
-		PLAYER_START.y * CELL_SIZE + CELL_SIZE / 2
+		PLAYER_START.x * CELL_SIZE,
+		PLAYER_START.y * CELL_SIZE
 	)
 	player_node.set_script(load("res://scripts/player.gd"))
 	player_node.connect("move_request", Callable(self, "_on_player_move_request"))
@@ -148,8 +148,8 @@ func _on_player_move_request(direction: Vector2i):
 
 	if not has_obstacle:
 		player_node.position = Vector2(
-			new_position.x * CELL_SIZE + CELL_SIZE / 2,
-			new_position.y * CELL_SIZE + CELL_SIZE / 2
+			new_position.x * CELL_SIZE,
+			new_position.y * CELL_SIZE
 		)
 		player_node.set("position_grid", new_position)
 		
