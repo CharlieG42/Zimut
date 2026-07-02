@@ -158,7 +158,7 @@ func _on_player_move_request(direction: Vector2i):
 		# Collectibles
 		for child in target_tile.get_children():
 			if child.name.begins_with("Collectible_") and child.has_meta("type"):
-				var type := child.get_meta("type")
+				var type: String = child.get_meta("type")
 				if type == "berries":
 					hunger = min(100, hunger + 20)
 					update_ui()
