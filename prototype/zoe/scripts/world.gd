@@ -264,4 +264,5 @@ func _input(event):
 	var dy: int = target_y - current_pos.y
 
 	if abs(dx) + abs(dy) == 1:
+		player_node.can_move = false  # Bloquer ICI avant l'emit
 		player_node.move_request.emit(Vector2i(dx, dy))
