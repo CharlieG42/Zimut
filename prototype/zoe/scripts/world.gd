@@ -135,11 +135,11 @@ func _setup_game_manager():
 	add_child(game_manager)
 
 func _on_player_move_request(direction: Vector2i):
-	var current_pos := player_node.get("position_grid")
-	var new_position := current_pos + direction
+	var current_pos: Vector2i = player_node.get("position_grid")
+	var new_position: Vector2i = current_pos + direction
 
 	# Vérifier obstacle
-	var target_tile := grid[new_position.y][new_position.x]
+	var target_tile: Node2D = grid[new_position.y][new_position.x]
 	var has_obstacle := false
 	for child in target_tile.get_children():
 		if child.name == "Obstacle":
@@ -158,7 +158,7 @@ func _on_player_move_request(direction: Vector2i):
 		# Collectibles
 		for child in target_tile.get_children():
 			if child.name.begins_with("Collectible_") and child.has_meta("type"):
-				var type = child.get_meta("type")
+				var type := child.get_meta("type")
 				if type == "berries":
 					hunger = min(100, hunger + 20)
 					update_ui()
@@ -192,7 +192,7 @@ func _unhandled_input(event):
 		var world_pos = get_global_mouse_position()
 		var target_x = floor(world_pos.x / CELL_SIZE)
 		var target_y = floor(world_pos.y / CELL_SIZE)
-		var current_pos := player_node.get("position_grid")
+		var current_pos: Vector2i = player_node.get("position_grid")
 		var dx = target_x - current_pos.x
 		var dy = target_y - current_pos.y
 		if abs(dx) + abs(dy) == 1:
