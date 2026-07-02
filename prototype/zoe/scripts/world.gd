@@ -3,6 +3,8 @@ extends Node2D
 const GRID_SIZE := 8
 const CELL_SIZE := 140
 const PLAYER_START := Vector2i(0, 0)
+const OFFSET_PLAYER_X := -80
+const OFFSET_PLAYER_Y := -100 
 
 @onready var player_node: Area2D
 @onready var ui: Control
@@ -79,8 +81,8 @@ func _setup_player():
 	player_node = Area2D.new()
 	player_node.name = "Player"
 	player_node.position = Vector2(
-		PLAYER_START.x * CELL_SIZE + CELL_SIZE / 2,
-		PLAYER_START.y * CELL_SIZE + CELL_SIZE / 2
+		PLAYER_START.x * CELL_SIZE + CELL_SIZE / 2 + OFFSET_PLAYER_X,
+		PLAYER_START.y * CELL_SIZE + CELL_SIZE / 2 + OFFSET_PLAYER_Y
 	)
 	player_node.set_script(load("res://scripts/player.gd"))
 	player_node.connect("move_request", Callable(self, "_on_player_move_request"))
@@ -148,8 +150,8 @@ func _on_player_move_request(direction: Vector2i):
 
 	if not has_obstacle:
 		player_node.position = Vector2(
-			new_position.x * CELL_SIZE + CELL_SIZE / 2,
-			new_position.y * CELL_SIZE + CELL_SIZE / 2
+			new_position.x * CELL_SIZE + CELL_SIZE / 2 + OFFSET_PLAYER_X,
+			new_position.y * CELL_SIZE + CELL_SIZE / 2 + OFFSET_PLAYER_Y
 		)
 		player_node.set("position_grid", new_position)
 		player_node.set("can_move", true)
