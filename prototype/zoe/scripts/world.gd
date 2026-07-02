@@ -9,7 +9,6 @@ const PLAYER_START := Vector2i(0, 0)
 @onready var game_manager: Node
 
 var grid := []
-var player_position_grid: Vector2i = PLAYER_START
 var turn_count := 0
 var hunger := 100
 var thirst := 100
@@ -73,6 +72,7 @@ func _add_collectible(tile: Node2D, type: String):
 	collision.shape = RectangleShape2D.new()
 	collision.shape.size = Vector2(CELL_SIZE, CELL_SIZE)
 	collectible.add_child(collision)
+	collectible.set_meta("type", type)
 	tile.add_child(collectible)
 
 func _setup_player():
@@ -89,11 +89,7 @@ func _setup_player():
 func _setup_ui():
 	ui = Control.new()
 	ui.name = "UI"
-	# Positionner en bas à gauche, en dehors de la grille
-	ui.anchor_left = 0.0
-	ui.anchor_bottom = 1.0
-	ui.offset_left = 10.0
-	ui.offset_bottom = -10.0
+	ui.position = Vector2(10, get_viewport_rect().size.y - 120)
 
 	var vbox := VBoxContainer.new()
 	vbox.name = "StatsContainer"
@@ -139,10 +135,11 @@ func _setup_game_manager():
 	add_child(game_manager)
 
 func _on_player_move_request(direction: Vector2i):
-	var new_position: Vector2i = player_position_grid + direction
+	var current_pos := player_node.get("position_grid")
+	var new_position := current_pos + direction
 
-	# Vérifier si la case est libre (pas d'obstacle)
-	var target_tile: Node2D = grid[new_position.y][new_position.x]
+	# Vérifier obstacle
+	var target_tile := grid[new_position.y][new_position.x]
 	var has_obstacle := false
 	for child in target_tile.get_children():
 		if child.name == "Obstacle":
@@ -150,27 +147,26 @@ func _on_player_move_request(direction: Vector2i):
 			break
 
 	if not has_obstacle:
-		# Mettre à jour la position dans world.gd
-		player_position_grid = new_position
 		player_node.position = Vector2(
 			new_position.x * CELL_SIZE + CELL_SIZE / 2,
 			new_position.y * CELL_SIZE + CELL_SIZE / 2
 		)
 		player_node.set("position_grid", new_position)
+		player_node.set("can_move", true)
 		end_turn()
-
-		# Vérifier les collectibles
+		
+		# Collectibles
 		for child in target_tile.get_children():
-			if child.name.begins_with("Collectible_"):
-				var type: String = child.get_meta("type")
+			if child.name.begins_with("Collectible_") and child.has_meta("type"):
+				var type = child.get_meta("type")
 				if type == "berries":
 					hunger = min(100, hunger + 20)
+					update_ui()
 				elif type == "water":
 					thirst = min(100, thirst + 20)
+					update_ui()
 				child.queue_free()
-				update_ui()
 	else:
-		# Réactiver le mouvement si bloqué
 		player_node.set("can_move", true)
 
 func _on_restart_pressed():
@@ -186,20 +182,18 @@ func end_turn():
 
 	if hunger <= 0 or thirst <= 0:
 		game_manager.emit_signal("defeat")
-
+	
 	update_ui()
 
 func _unhandled_input(event):
 	if event is InputEventScreenTouch and event.pressed:
 		if not player_node.get("can_move"):
 			return
-		
 		var world_pos = get_global_mouse_position()
 		var target_x = floor(world_pos.x / CELL_SIZE)
 		var target_y = floor(world_pos.y / CELL_SIZE)
-		
-		var dx = target_x - player_position_grid.x
-		var dy = target_y - player_position_grid.y
-		
+		var current_pos := player_node.get("position_grid")
+		var dx = target_x - current_pos.x
+		var dy = target_y - current_pos.y
 		if abs(dx) + abs(dy) == 1:
 			player_node.emit_signal("move_request", Vector2i(dx, dy))
