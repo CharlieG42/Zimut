@@ -20,9 +20,6 @@ func _ready():
 	collision.shape.size = Vector2(CELL_SIZE, CELL_SIZE)
 	add_child(collision)
 
-	# Permet de capturer les inputs tactiles
-	input_priority = 1
-
 func _input(event):
 	if not can_move:
 		return
@@ -35,24 +32,6 @@ func _input(event):
 		_request_move(Vector2i(0, 1))
 	elif event.is_action_pressed("ui_up") and position_grid.y > 0:
 		_request_move(Vector2i(0, -1))
-
-func _unhandled_input(event):
-	if not can_move:
-		return
-
-	# Gestion tactile pour Android et clic souris
-	if event is InputEventScreenTouch and event.pressed:
-		var world_pos = get_global_mouse_position()
-		var target_x = floor(world_pos.x / CELL_SIZE)
-		var target_y = floor(world_pos.y / CELL_SIZE)
-		
-		# Calculer la direction depuis la position actuelle
-		var dx = target_x - position_grid.x
-		var dy = target_y - position_grid.y
-		
-		# Seulement se déplacer vers les cases adjacentes
-		if abs(dx) + abs(dy) == 1:
-			_request_move(Vector2i(dx, dy))
 
 func _request_move(direction: Vector2i):
 	var new_position := position_grid + direction
