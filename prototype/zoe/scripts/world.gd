@@ -181,3 +181,19 @@ func end_turn():
 	ui.get_node("StatsContainer/HungerLabel").text = "Hunger: %d" % hunger
 	ui.get_node("StatsContainer/ThirstLabel").text = "Thirst: %d" % thirst
 	ui.get_node("StatsContainer/TurnLabel").text = "Turns: %d" % turn_count
+
+func _unhandled_input(event):
+	if event is InputEventScreenTouch and event.pressed:
+		if not player_node.get("can_move"):
+			return
+		
+		var world_pos = get_global_mouse_position()
+		var target_x = floor(world_pos.x / CELL_SIZE)
+		var target_y = floor(world_pos.y / CELL_SIZE)
+		
+		var current_pos: Vector2i = player_node.get("position_grid")
+		var dx = target_x - current_pos.x
+		var dy = target_y - current_pos.y
+		
+		if abs(dx) + abs(dy) == 1:
+			player_node.emit_signal("move_request", Vector2i(dx, dy))
