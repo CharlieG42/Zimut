@@ -2,13 +2,14 @@ extends Node2D
 
 const GRID_SIZE := 8
 const CELL_SIZE := 140
-const PLAYER_START := Vector2i(0, 0)  # Centre de la grille 8x8
+const PLAYER_START := Vector2i(0, 0)
 
 @onready var player_node: Area2D
 @onready var ui: Control
 @onready var game_manager: Node
 
 var grid := []
+var player_position_grid: Vector2i = PLAYER_START
 var turn_count := 0
 var hunger := 100
 var thirst := 100
@@ -78,21 +79,21 @@ func _setup_player():
 	player_node = Area2D.new()
 	player_node.name = "Player"
 	player_node.position = Vector2(
-		PLAYER_START.x * CELL_SIZE - CELL_SIZE / 2 + 60,
-		PLAYER_START.y * CELL_SIZE - CELL_SIZE / 2 + 30
+		PLAYER_START.x * CELL_SIZE + CELL_SIZE / 2,
+		PLAYER_START.y * CELL_SIZE + CELL_SIZE / 2
 	)
 	player_node.set_script(load("res://scripts/player.gd"))
-	player_node.set("position_grid", PLAYER_START)
 	player_node.connect("move_request", Callable(self, "_on_player_move_request"))
 	add_child(player_node)
 
 func _setup_ui():
 	ui = Control.new()
 	ui.name = "UI"
-	ui.anchor_right = 1.0
-	ui.anchor_top = 0.0
-	ui.offset_right = -10.0
-	ui.offset_top = 10.0
+	# Positionner en bas à gauche, en dehors de la grille
+	ui.anchor_left = 0.0
+	ui.anchor_bottom = 1.0
+	ui.offset_left = 10.0
+	ui.offset_bottom = -10.0
 
 	var vbox := VBoxContainer.new()
 	vbox.name = "StatsContainer"
@@ -126,6 +127,11 @@ func _setup_ui():
 
 	add_child(ui)
 
+func update_ui():
+	ui.get_node("StatsContainer/HungerLabel").text = "Hunger: %d" % hunger
+	ui.get_node("StatsContainer/ThirstLabel").text = "Thirst: %d" % thirst
+	ui.get_node("StatsContainer/TurnLabel").text = "Turns: %d" % turn_count
+
 func _setup_game_manager():
 	game_manager = Node.new()
 	game_manager.name = "GameManager"
@@ -133,8 +139,7 @@ func _setup_game_manager():
 	add_child(game_manager)
 
 func _on_player_move_request(direction: Vector2i):
-	var current_pos: Vector2i = player_node.get("position_grid")
-	var new_position: Vector2i = current_pos + direction
+	var new_position: Vector2i = player_position_grid + direction
 
 	# Vérifier si la case est libre (pas d'obstacle)
 	var target_tile: Node2D = grid[new_position.y][new_position.x]
@@ -145,8 +150,13 @@ func _on_player_move_request(direction: Vector2i):
 			break
 
 	if not has_obstacle:
-		# Déplacer le joueur
-		player_node.move_to_grid_position(new_position)
+		# Mettre à jour la position dans world.gd
+		player_position_grid = new_position
+		player_node.position = Vector2(
+			new_position.x * CELL_SIZE + CELL_SIZE / 2,
+			new_position.y * CELL_SIZE + CELL_SIZE / 2
+		)
+		player_node.set("position_grid", new_position)
 		end_turn()
 
 		# Vérifier les collectibles
@@ -155,11 +165,10 @@ func _on_player_move_request(direction: Vector2i):
 				var type: String = child.get_meta("type")
 				if type == "berries":
 					hunger = min(100, hunger + 20)
-					ui.get_node("StatsContainer/HungerLabel").text = "Hunger: %d" % hunger
 				elif type == "water":
 					thirst = min(100, thirst + 20)
-					ui.get_node("StatsContainer/ThirstLabel").text = "Thirst: %d" % thirst
 				child.queue_free()
+				update_ui()
 	else:
 		# Réactiver le mouvement si bloqué
 		player_node.set("can_move", true)
@@ -178,9 +187,7 @@ func end_turn():
 	if hunger <= 0 or thirst <= 0:
 		game_manager.emit_signal("defeat")
 
-	ui.get_node("StatsContainer/HungerLabel").text = "Hunger: %d" % hunger
-	ui.get_node("StatsContainer/ThirstLabel").text = "Thirst: %d" % thirst
-	ui.get_node("StatsContainer/TurnLabel").text = "Turns: %d" % turn_count
+	update_ui()
 
 func _unhandled_input(event):
 	if event is InputEventScreenTouch and event.pressed:
@@ -191,9 +198,8 @@ func _unhandled_input(event):
 		var target_x = floor(world_pos.x / CELL_SIZE)
 		var target_y = floor(world_pos.y / CELL_SIZE)
 		
-		var current_pos: Vector2i = player_node.get("position_grid")
-		var dx = target_x - current_pos.x
-		var dy = target_y - current_pos.y
+		var dx = target_x - player_position_grid.x
+		var dy = target_y - player_position_grid.y
 		
 		if abs(dx) + abs(dy) == 1:
 			player_node.emit_signal("move_request", Vector2i(dx, dy))
