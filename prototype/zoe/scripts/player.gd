@@ -45,7 +45,7 @@ func _input(event):
 
 func _request_move(direction: Vector2i):
 	print("[Player] demande de mouvement: ", direction)
-	can_move = false
+	# can_move is now managed in world.gd to avoid timing issues
 	move_request.emit(direction)
 
 func move_to_grid_position(new_position: Vector2i):
@@ -54,8 +54,8 @@ func move_to_grid_position(new_position: Vector2i):
 		new_position.x * CELL_SIZE,
 		new_position.y * CELL_SIZE
 	)
-	can_move = true
-	print("[Player] move_to_grid_position appele. position_grid maintenant=", position_grid, " can_move=", can_move)
+	# can_move is now managed in world.gd to avoid timing issues
+	print("[Player] move_to_grid_position appele. position_grid maintenant=", position_grid)
 
 func _on_area_entered(area: Area2D):
 	# Collectibles maintenant gérés dans world.gd après déplacement réussi
