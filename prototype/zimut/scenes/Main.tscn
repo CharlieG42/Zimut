@@ -12,8 +12,7 @@ script = ExtResource("1")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=650151548]
 position = Vector2(960, 540)
-zoom = Vector2(1, 1)
-rotation_degrees = -45.0
+zoom = Vector2(1, 0.65)
 
 [node name="GridManager" type="Node2D" parent="." unique_id=48555572]
 z_index = 10
