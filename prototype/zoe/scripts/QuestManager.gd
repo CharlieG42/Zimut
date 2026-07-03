@@ -104,17 +104,17 @@ func complete_quest(quest_id: String) -> void:
 	quest.status = 2  # COMPLETED
 	
 	# Apply rewards
-	if player_node:
+	if world_node:
 		var player_data: Dictionary = {"xp": 0, "berries": 0, "water": 0, "hunger": 0, "thirst": 0}
 		quest.apply_rewards(player_data)
 		
-		# Apply rewards to player
+		# Apply rewards to player (hunger/thirst are on world_node, not player_node)
 		if player_data.has("hunger"):
 			var hunger_value = player_data.get("hunger", 0)
-			player_node.hunger = min(100, player_node.hunger + hunger_value)
+			world_node.hunger = min(100, world_node.hunger + hunger_value)
 		if player_data.has("thirst"):
 			var thirst_value = player_data.get("thirst", 0)
-			player_node.thirst = min(100, player_node.thirst + thirst_value)
+			world_node.thirst = min(100, world_node.thirst + thirst_value)
 		# Note: berries and water rewards would need to be handled differently
 		# as they are collectible items in the world
 	
