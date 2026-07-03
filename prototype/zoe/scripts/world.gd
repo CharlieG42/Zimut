@@ -8,6 +8,7 @@ const PLAYER_START := Vector2i(0, 0)
 @onready var ui: Control
 @onready var game_manager: Node
 @onready var game_over_panel: CanvasLayer
+@onready var victory_panel: CanvasLayer
 @onready var quest_manager: QuestManager
 
 var grid := []
@@ -15,6 +16,7 @@ var turn_count := 0
 var hunger := 100
 var thirst := 100
 var game_over := false
+var all_quests_completed := false
 
 func _ready():
 	_setup_grid()
@@ -22,6 +24,7 @@ func _ready():
 	_setup_ui()
 	_setup_game_manager()
 	_setup_game_over_panel()
+	_setup_victory_panel()
 	_setup_quest_manager()
 	print("[World] pret. Node racine='", name, "'")
 
@@ -110,10 +113,14 @@ func _setup_ui():
 	turn_label.name = "TurnLabel"
 	turn_label.text = "Turns: %d" % turn_count
 	vbox.add_child(turn_label)
-	var quest_label := Label.new()
-	quest_label.name = "QuestLabel"
-	quest_label.text = "Quetes: -"
-	vbox.add_child(quest_label)
+	var quest_progress_label := Label.new()
+	quest_progress_label.name = "QuestProgressLabel"
+	quest_progress_label.text = "Quetes: -"
+	vbox.add_child(quest_progress_label)
+	var quest_objectives_label := Label.new()
+	quest_objectives_label.name = "QuestObjectivesLabel"
+	quest_objectives_label.text = "Objectifs: -"
+	vbox.add_child(quest_objectives_label)
 	var debug_label := Label.new()
 	debug_label.name = "DebugLabel"
 	debug_label.text = "Debug: -"
@@ -176,6 +183,48 @@ func _setup_game_over_panel():
 	layer.visible = false
 	game_over_panel = layer
 
+func _setup_victory_panel():
+	var layer := CanvasLayer.new()
+	layer.name = "VictoryLayer"
+	add_child(layer)
+	var background := ColorRect.new()
+	background.name = "VictoryBackground"
+	background.color = Color(0, 0, 0, 0.7)
+	background.anchor_right = 1.0
+	background.anchor_bottom = 1.0
+	background.size = get_viewport_rect().size
+	layer.add_child(background)
+	var panel := VBoxContainer.new()
+	panel.name = "VictoryPanel"
+	panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	background.add_child(panel)
+	var title_label := Label.new()
+	title_label.name = "VictoryTitle"
+	title_label.text = "Victoire !"
+	title_label.add_theme_color_override("font_color", Color.GREEN)
+	title_label.add_theme_font_size_override("font_size", 32)
+	panel.add_child(title_label)
+	var message_label_v := Label.new()
+	message_label_v.name = "VictoryMessage"
+	message_label_v.text = "Toutes les quetes sont terminees !"
+	message_label_v.add_theme_font_size_override("font_size", 24)
+	panel.add_child(message_label_v)
+	var restart_btn := Button.new()
+	restart_btn.name = "VictoryRestart"
+	restart_btn.text = "Recommencer"
+	restart_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	restart_btn.pressed.connect(_on_restart_pressed)
+	panel.add_child(restart_btn)
+	var quit_btn := Button.new()
+	quit_btn.name = "VictoryQuit"
+	quit_btn.text = "Quitter"
+	quit_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	quit_btn.pressed.connect(_on_quit_pressed)
+	panel.add_child(quit_btn)
+	layer.visible = false
+	victory_panel = layer
+
 func _setup_quest_manager():
 	var qm := Node.new()
 	qm.name = "QuestManager"
@@ -185,6 +234,7 @@ func _setup_quest_manager():
 	quest_manager.player_node = player_node
 	quest_manager.world_node = self
 	quest_manager.start_all_quests()
+	quest_manager.quest_completed.connect(_on_quest_completed)
 
 func update_ui():
 	ui.get_node("StatsContainer/HungerLabel").text = "Hunger: %d" % hunger
@@ -199,9 +249,22 @@ func update_ui():
 				if i > 0:
 					quest_text += " | "
 				quest_text += "%s: %.0f%%" % [q["title"], q["progress"] * 100]
-			ui.get_node("StatsContainer/QuestLabel").text = "Quetes: %s" % quest_text
+			ui.get_node("StatsContainer/QuestProgressLabel").text = "Quetes: %s" % quest_text
+			# Build objectives text
+			var objectives_text = "Objectifs: "
+			var first_obj = true
+			for quest_id in quest_manager.active_quests:
+				var quest = quest_manager.active_quests[quest_id]
+				var obj_text = quest.get_progress_text()
+				if not first_obj:
+					objectives_text += ", "
+				else:
+					first_obj = false
+				objectives_text += obj_text
+			ui.get_node("StatsContainer/QuestObjectivesLabel").text = objectives_text
 		else:
-			ui.get_node("StatsContainer/QuestLabel").text = "Quetes: -"
+			ui.get_node("StatsContainer/QuestProgressLabel").text = "Quetes: -"
+			ui.get_node("StatsContainer/QuestObjectivesLabel").text = "Objectifs: -"
 
 func _set_debug(text: String):
 	if ui and ui.has_node("StatsContainer/DebugLabel"):
@@ -221,6 +284,26 @@ func show_game_over():
 func hide_game_over():
 	if game_over_panel:
 		game_over_panel.visible = false
+
+func show_victory():
+	if victory_panel:
+		victory_panel.visible = true
+
+func hide_victory():
+	if victory_panel:
+		victory_panel.visible = false
+
+func _on_quest_completed(quest_id: String):
+	# Check if all quests are completed
+	if quest_manager:
+		var all_completed = true
+		for quest_id_active in quest_manager.active_quests:
+			all_completed = false
+			break
+		if all_completed and quest_manager.completed_quests.size() > 0:
+			all_quests_completed = true
+			game_over = true
+			show_victory()
 
 func _on_player_collect(item_type: String):
 	if item_type == "berries":
@@ -269,6 +352,7 @@ func _on_player_move_request(direction: Vector2i):
 
 func _on_restart_pressed():
 	hide_game_over()
+	hide_victory()
 	get_tree().reload_current_scene()
 
 func _on_quit_pressed():
