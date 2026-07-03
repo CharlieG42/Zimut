@@ -8,6 +8,7 @@ const PLAYER_START := Vector2i(0, 0)
 @onready var ui: Control
 @onready var game_manager: Node
 @onready var game_over_panel: CanvasLayer
+@onready var quest_manager: QuestManager
 
 var grid := []
 var turn_count := 0
@@ -21,6 +22,7 @@ func _ready():
 	_setup_ui()
 	_setup_game_manager()
 	_setup_game_over_panel()
+	_setup_quest_manager()
 	print("[World] pret. Node racine='", name, "'")
 
 func _setup_grid():
@@ -170,6 +172,16 @@ func _setup_game_over_panel():
 	layer.visible = false
 	game_over_panel = layer
 
+func _setup_quest_manager():
+	var qm := Node.new()
+	qm.name = "QuestManager"
+	qm.set_script(load("res://scripts/QuestManager.gd"))
+	add_child(qm)
+	quest_manager = qm
+	quest_manager.player_node = player_node
+	quest_manager.world_node = self
+	quest_manager.start_all_quests()
+
 func update_ui():
 	ui.get_node("StatsContainer/HungerLabel").text = "Hunger: %d" % hunger
 	ui.get_node("StatsContainer/ThirstLabel").text = "Thirst: %d" % thirst
@@ -197,8 +209,12 @@ func hide_game_over():
 func _on_player_collect(item_type: String):
 	if item_type == "berries":
 		hunger = min(100, hunger + 20)
+		if quest_manager:
+			quest_manager.update_quest("find_berries", "collect", 1)
 	elif item_type == "water":
 		thirst = min(100, thirst + 20)
+		if quest_manager:
+			quest_manager.update_quest("find_water", "collect", 1)
 	update_ui()
 
 func _on_player_move_request(direction: Vector2i):
@@ -226,9 +242,13 @@ func _on_player_move_request(direction: Vector2i):
 			var type: String = child.get_meta("type") as String
 			if type == "berries":
 				hunger = min(100, hunger + 20)
-			elif type == "water":
-				thirst = min(100, thirst + 20)
-			child.queue_free()
+				if quest_manager:
+					quest_manager.update_quest("find_berries", "collect", 1)
+				elif type == "water":
+					thirst = min(100, thirst + 20)
+					if quest_manager:
+						quest_manager.update_quest("find_water", "collect", 1)
+				child.queue_free()
 	end_turn()
 
 func _on_restart_pressed():
