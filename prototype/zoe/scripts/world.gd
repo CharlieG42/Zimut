@@ -342,11 +342,11 @@ func _on_player_move_request(direction: Vector2i):
 				hunger = min(100, hunger + 20)
 				if quest_manager:
 					quest_manager.update_quest("find_berries", "collect", 1)
-				elif type == "water":
-					thirst = min(100, thirst + 20)
-					if quest_manager:
-						quest_manager.update_quest("find_water", "collect", 1)
-				child.queue_free()
+			elif type == "water":
+				thirst = min(100, thirst + 20)
+				if quest_manager:
+					quest_manager.update_quest("find_water", "collect", 1)
+			child.queue_free()
 	end_turn()
 
 func _on_restart_pressed():
