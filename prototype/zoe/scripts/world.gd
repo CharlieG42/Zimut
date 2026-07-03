@@ -233,6 +233,19 @@ func _setup_quest_manager():
 	quest_manager = qm
 	quest_manager.player_node = player_node
 	quest_manager.world_node = self
+	
+	# Clamp visit objectives to grid size to prevent impossible quests
+	var max_cells = GRID_SIZE * GRID_SIZE
+	for quest_id in quest_manager.available_quests:
+		var quest_data = quest_manager.available_quests[quest_id]
+		for i in range(quest_data["objectives"].size()):
+			var obj = quest_data["objectives"][i]
+			if obj.get("type", "") == "visit":
+				var required = obj.get("required", 0)
+				if required > max_cells:
+					obj["required"] = max_cells
+					print("[World] Clamped visit objective for quest ", quest_id, " from ", required, " to ", max_cells)
+	
 	quest_manager.start_all_quests()
 	quest_manager.quest_completed.connect(_on_quest_completed)
 
