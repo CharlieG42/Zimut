@@ -16,11 +16,9 @@ var description: String = ""
 var status: QuestStatus = QuestStatus.NOT_STARTED
 
 # Objectives: Array of dictionaries with type, target, and current progress
-# Example: [{"type": "collect", "target": "berries", "required": 5, "current": 0}]
 var objectives: Array = []
 
 # Rewards: Dictionary with reward types and values
-# Example: {"xp": 100, "berries": 2, "unlock_area": "forest"}
 var rewards: Dictionary = {}
 
 # Priority (for UI sorting)
@@ -43,15 +41,13 @@ func update_progress(objective_type: String, amount: int = 1) -> bool:
 	var updated := false
 	for obj in objectives:
 		if obj.get("type", "") == objective_type:
-			var current := obj.get("current", 0)
-			var required := obj.get("required", 1)
+			var current: int = obj.get("current", 0)
+			var required: int = obj.get("required", 1)
 			obj["current"] = min(current + amount, required)
 			updated = true
 			print("[Quest] Progress updated for ", id, ": ", obj)
-			# Check if this objective is complete
 			if obj["current"] >= required:
 				print("[Quest] Objective completed: ", obj.get("type", ""))
-				# Check if all objectives are complete
 				if is_complete():
 					status = QuestStatus.COMPLETED
 					print("[Quest] Quest completed: ", title)
@@ -64,7 +60,9 @@ func is_complete() -> bool:
 		return true
 	
 	for obj in objectives:
-		if obj.get("current", 0) < obj.get("required", 1):
+		var current: int = obj.get("current", 0)
+		var required: int = obj.get("required", 1)
+		if current < required:
 			return false
 	return true
 
@@ -73,8 +71,8 @@ func get_completion_percentage() -> float:
 	if objectives.size() == 0:
 		return 100.0 if status == QuestStatus.COMPLETED else 0.0
 	
-	var total_required := 0
-	var total_current := 0
+	var total_required: int = 0
+	var total_current: int = 0
 	
 	for obj in objectives:
 		total_required += obj.get("required", 1)
@@ -90,10 +88,10 @@ func get_progress_text() -> String:
 	if objectives.size() == 0:
 		return ""
 	
-	var parts := []
+	var parts: Array = []
 	for obj in objectives:
-		var current := obj.get("current", 0)
-		var required := obj.get("required", 1)
+		var current: int = obj.get("current", 0)
+		var required: int = obj.get("required", 1)
 		parts.append("%s: %d/%d" % [obj.get("type", ""), current, required])
 	
 	return " - ".join(parts)
