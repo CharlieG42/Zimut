@@ -117,7 +117,6 @@ func _setup_ui():
 	vbox.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	ui.add_child(vbox)
 	
-	# Stats label
 	var hunger_label := Label.new()
 	hunger_label.name = "HungerLabel"
 	hunger_label.text = "Hunger: %d" % hunger
@@ -153,7 +152,6 @@ func _setup_ui():
 	message_label.visible = false
 	ui.add_child(message_label)
 	
-	# Buttons container
 	var buttons_hbox := HBoxContainer.new()
 	buttons_hbox.name = "ButtonsContainer"
 	buttons_hbox.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -278,10 +276,8 @@ func _setup_quest_manager():
 	quest_manager.player_node = player_node
 	quest_manager.world_node = self
 	
-	# Count actual collectibles on the grid
 	var collectible_counts = _count_collectibles()
 	
-	# Clamp collect objectives to actual available collectibles
 	for quest_id in quest_manager.available_quests:
 		var quest_data = quest_manager.available_quests[quest_id]
 		for i in range(quest_data["objectives"].size()):
@@ -480,7 +476,7 @@ func _input(event):
 # ===== SAVE/LOAD SYSTEM =====
 
 func save_game() -> void:
-	var save_data := {
+	var save_data: Dictionary = {
 		"player_pos": {"x": player_node.position_grid.x, "y": player_node.position_grid.y},
 		"hunger": hunger,
 		"thirst": thirst,
@@ -489,7 +485,7 @@ func save_game() -> void:
 		"quests": _serialize_quests(),
 		"stats": {"victories": victories, "defeats": defeats}
 	}
-	var file := FileAccess.open(SAVE_FILE, FileAccess.WRITE)
+	var file = FileAccess.open(SAVE_FILE, FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(save_data))
 		file.close()
@@ -499,25 +495,26 @@ func load_game() -> bool:
 	if not FileAccess.file_exists(SAVE_FILE):
 		return false
 	
-	var file := FileAccess.open(SAVE_FILE, FileAccess.READ)
+	var file = FileAccess.open(SAVE_FILE, FileAccess.READ)
 	if not file:
 		return false
 	
-	var json_content := file.get_as_text()
+	var json_content: String = file.get_as_text()
 	file.close()
 	
-	var save_data := JSON.parse_string(json_content)
+	var save_data: Dictionary = JSON.parse_string(json_content)
 	if save_data == null:
 		return false
 	
 	# Restore stats
-	victories = save_data.get("stats", {}).get("victories", 0)
-	defeats = save_data.get("stats", {}).get("defeats", 0)
+	var stats_data: Dictionary = save_data.get("stats", {})
+	victories = stats_data.get("victories", 0)
+	defeats = stats_data.get("defeats", 0)
 	
 	# Restore player position
-	var saved_pos := save_data.get("player_pos", {"x": 0, "y": 0})
+	var saved_pos: Dictionary = save_data.get("player_pos", {"x": 0, "y": 0})
 	player_node.position_grid = Vector2i(saved_pos.get("x", 0), saved_pos.get("y", 0))
-	player_node.position = Vector2(saved_pos.get("x", 0) * CELL_SIZE, saved_pos.get("y", 0) * CELL_SIZE)
+	player_node.position = Vector2(float(saved_pos.get("x", 0)) * CELL_SIZE, float(saved_pos.get("y", 0)) * CELL_SIZE)
 	
 	# Restore state
 	hunger = save_data.get("hunger", 100)
@@ -525,10 +522,12 @@ func load_game() -> bool:
 	turn_count = save_data.get("turn_count", 0)
 	
 	# Restore grid
-	_deserialize_grid(save_data.get("grid", []))
+	var grid_data: Array = save_data.get("grid", [])
+	_deserialize_grid(grid_data)
 	
 	# Restore quests
-	_deserialize_quests(save_data.get("quests", {}))
+	var quests_data: Dictionary = save_data.get("quests", {})
+	_deserialize_quests(quests_data)
 	
 	update_ui()
 	print("[Save] Game loaded from ", SAVE_FILE)
@@ -536,25 +535,21 @@ func load_game() -> bool:
 
 func delete_save() -> void:
 	if FileAccess.file_exists(SAVE_FILE):
-		var file := FileAccess.open(SAVE_FILE, FileAccess.WRITE)
-		if file:
-			file.store_string("")
-			file.close()
-		OS.remove(SAVE_FILE)
+		DirAccess.remove_file(SAVE_FILE)
 		print("[Save] Save file deleted")
 
 func _serialize_grid() -> Array:
-	var grid_data := []
+	var grid_data: Array = []
 	for y in range(GRID_SIZE):
-		var row_data := []
+		var row_data: Array = []
 		for x in range(GRID_SIZE):
-			var tile := grid[y][x]
-			var tile_data := {"has_obstacle": false, "has_berries": false, "has_water": false}
+			var tile: Node2D = grid[y][x]
+			var tile_data: Dictionary = {"has_obstacle": false, "has_berries": false, "has_water": false}
 			for child in tile.get_children():
 				if child.name == "Obstacle":
 					tile_data["has_obstacle"] = true
 				elif child.name.begins_with("Collectible_") and child.has_meta("type"):
-					var type := child.get_meta("type") as String
+					var type: String = child.get_meta("type") as String
 					if type == "berries":
 						tile_data["has_berries"] = true
 					elif type == "water":
@@ -567,7 +562,7 @@ func _deserialize_grid(grid_data: Array) -> void:
 	# Clear existing grid
 	for y in range(GRID_SIZE):
 		for x in range(GRID_SIZE):
-			var tile := grid[y][x]
+			var tile: Node2D = grid[y][x]
 			for child in tile.get_children():
 				if child.name == "Obstacle" or child.name.begins_with("Collectible_"):
 					child.queue_free()
@@ -575,8 +570,8 @@ func _deserialize_grid(grid_data: Array) -> void:
 	# Rebuild grid from save
 	for y in range(grid_data.size()):
 		for x in range(grid_data[y].size()):
-			var tile_data := grid_data[y][x]
-			var tile := grid[y][x]
+			var tile_data: Dictionary = grid_data[y][x]
+			var tile: Node2D = grid[y][x]
 			if tile_data.get("has_obstacle", false):
 				_add_obstacle(tile)
 			if tile_data.get("has_berries", false):
@@ -585,17 +580,17 @@ func _deserialize_grid(grid_data: Array) -> void:
 				_add_collectible(tile, "water")
 
 func _serialize_quests() -> Dictionary:
-	var quests_data := {}
+	var quests_data: Dictionary = {}
 	if quest_manager:
 		for quest_id in quest_manager.active_quests:
-			var quest := quest_manager.active_quests[quest_id]
-			var quest_save := {
+			var quest = quest_manager.active_quests[quest_id]
+			var quest_save: Dictionary = {
 				"id": quest.id,
 				"status": quest.status,
 				"objectives": []
 			}
 			for obj in quest.objectives:
-				var obj_save := {
+				var obj_save: Dictionary = {
 					"type": obj.get("type", ""),
 					"target": obj.get("target", ""),
 					"current": obj.get("current", 0),
@@ -611,17 +606,17 @@ func _deserialize_quests(quests_data: Dictionary) -> void:
 	
 	# Reset all quests first
 	for quest_id in quest_manager.active_quests:
-		var quest := quest_manager.active_quests[quest_id]
+		var quest = quest_manager.active_quests[quest_id]
 		quest.reset()
 	
 	# Restore quest progress
 	for quest_id in quests_data:
 		if quest_manager.active_quests.has(quest_id):
-			var quest := quest_manager.active_quests[quest_id]
-			var quest_save := quests_data[quest_id]
+			var quest = quest_manager.active_quests[quest_id]
+			var quest_save: Dictionary = quests_data[quest_id]
 			quest.status = quest_save.get("status", 0)
 			for i in range(quest.objectives.size()):
-				var obj := quest.objectives[i]
-				var obj_save := quest_save.get("objectives", [])[i]
+				var obj: Dictionary = quest.objectives[i]
+				var obj_save: Dictionary = quest_save.get("objectives", [])[i]
 				if obj_save:
 					obj["current"] = obj_save.get("current", 0)
