@@ -3,6 +3,7 @@ extends Node2D
 const GRID_SIZE := 8
 const CELL_SIZE := 140
 const PLAYER_START := Vector2i(0, 0)
+const SAVE_FILE := "user://savegame.save"
 
 @onready var player_node: Area2D
 @onready var ui: Control
@@ -17,6 +18,8 @@ var hunger := 100
 var thirst := 100
 var game_over := false
 var all_quests_completed := false
+var victories := 0
+var defeats := 0
 
 func _ready():
 	_setup_grid()
@@ -107,46 +110,79 @@ func _setup_ui():
 	ui = Control.new()
 	ui.name = "UI"
 	ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ui.position = Vector2(10, get_viewport_rect().size.y - 250)
+	ui.position = Vector2(10, get_viewport_rect().size.y - 280)
 	var vbox := VBoxContainer.new()
 	vbox.name = "StatsContainer"
 	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	ui.add_child(vbox)
+	
+	# Stats label
 	var hunger_label := Label.new()
 	hunger_label.name = "HungerLabel"
 	hunger_label.text = "Hunger: %d" % hunger
 	vbox.add_child(hunger_label)
+	
 	var thirst_label := Label.new()
 	thirst_label.name = "ThirstLabel"
 	thirst_label.text = "Thirst: %d" % thirst
 	vbox.add_child(thirst_label)
+	
 	var turn_label := Label.new()
 	turn_label.name = "TurnLabel"
 	turn_label.text = "Turns: %d" % turn_count
 	vbox.add_child(turn_label)
+	
 	var quest_objectives_label := Label.new()
 	quest_objectives_label.name = "QuestObjectivesLabel"
 	quest_objectives_label.text = "Objectifs: -"
 	vbox.add_child(quest_objectives_label)
+	
+	var stats_label := Label.new()
+	stats_label.name = "StatsLabel"
+	stats_label.text = "V: %d | D: %d" % [victories, defeats]
+	vbox.add_child(stats_label)
+	
 	var debug_label := Label.new()
 	debug_label.name = "DebugLabel"
 	debug_label.text = "Debug: -"
 	vbox.add_child(debug_label)
+	
 	var message_label := Label.new()
 	message_label.name = "MessageLabel"
 	message_label.visible = false
 	ui.add_child(message_label)
-	var restart_button := Button.new()
-	restart_button.text = "Restart"
-	restart_button.mouse_filter = Control.MOUSE_FILTER_STOP
-	restart_button.pressed.connect(_on_restart_pressed)
-	vbox.add_child(restart_button)
+	
+	# Buttons container
+	var buttons_hbox := HBoxContainer.new()
+	buttons_hbox.name = "ButtonsContainer"
+	buttons_hbox.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	vbox.add_child(buttons_hbox)
+	
+	var new_game_button := Button.new()
+	new_game_button.text = "Nouvelle partie"
+	new_game_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	new_game_button.pressed.connect(_on_new_game_pressed)
+	buttons_hbox.add_child(new_game_button)
+	
+	var save_button := Button.new()
+	save_button.text = "Sauvegarder"
+	save_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	save_button.pressed.connect(_on_save_pressed)
+	buttons_hbox.add_child(save_button)
+	
+	var load_button := Button.new()
+	load_button.text = "Charger"
+	load_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	load_button.pressed.connect(_on_load_pressed)
+	buttons_hbox.add_child(load_button)
+	
 	var quit_button := Button.new()
-	quit_button.text = "Quit"
+	quit_button.text = "Quitter"
 	quit_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	quit_button.pressed.connect(_on_quit_pressed)
-	vbox.add_child(quit_button)
+	buttons_hbox.add_child(quit_button)
+	
 	layer.add_child(ui)
 
 func _setup_game_over_panel():
@@ -180,7 +216,7 @@ func _setup_game_over_panel():
 	restart_btn.name = "GameOverRestart"
 	restart_btn.text = "Recommencer"
 	restart_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	restart_btn.pressed.connect(_on_restart_pressed)
+	restart_btn.pressed.connect(_on_new_game_pressed)
 	panel.add_child(restart_btn)
 	var quit_btn := Button.new()
 	quit_btn.name = "GameOverQuit"
@@ -222,7 +258,7 @@ func _setup_victory_panel():
 	restart_btn.name = "VictoryRestart"
 	restart_btn.text = "Recommencer"
 	restart_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	restart_btn.pressed.connect(_on_restart_pressed)
+	restart_btn.pressed.connect(_on_new_game_pressed)
 	panel.add_child(restart_btn)
 	var quit_btn := Button.new()
 	quit_btn.name = "VictoryQuit"
@@ -273,19 +309,19 @@ func update_ui():
 	ui.get_node("StatsContainer/HungerLabel").text = "Hunger: %d" % hunger
 	ui.get_node("StatsContainer/ThirstLabel").text = "Thirst: %d" % thirst
 	ui.get_node("StatsContainer/TurnLabel").text = "Turns: %d" % turn_count
+	ui.get_node("StatsContainer/StatsLabel").text = "V: %d | D: %d" % [victories, defeats]
 	if quest_manager:
-			# Build objectives text
-			var objectives_text = "Objectifs: "
-			var first_obj = true
-			for quest_id in quest_manager.active_quests:
-				var quest = quest_manager.active_quests[quest_id]
-				var obj_text = quest.get_progress_text()
-				if not first_obj:
-					objectives_text += ", "
-				else:
-					first_obj = false
-				objectives_text += obj_text
-			ui.get_node("StatsContainer/QuestObjectivesLabel").text = objectives_text
+		var objectives_text = "Objectifs: "
+		var first_obj = true
+		for quest_id in quest_manager.active_quests:
+			var quest = quest_manager.active_quests[quest_id]
+			var obj_text = quest.get_progress_text()
+			if not first_obj:
+				objectives_text += ", "
+			else:
+				first_obj = false
+			objectives_text += obj_text
+		ui.get_node("StatsContainer/QuestObjectivesLabel").text = objectives_text
 
 func _set_debug(text: String):
 	if ui and ui.has_node("StatsContainer/DebugLabel"):
@@ -314,14 +350,23 @@ func hide_victory():
 	if victory_panel:
 		victory_panel.visible = false
 
+func _on_game_victory():
+	victories += 1
+	show_victory()
+
+func _on_game_defeat():
+	defeats += 1
+	show_game_over()
+	if player_node:
+		player_node.can_move = false
+
 func _on_quest_completed(quest_id: String):
-	# Check if all quests are completed
 	if quest_manager:
 		var active_count = quest_manager.active_quests.size()
 		if active_count == 0 and quest_manager.completed_quests.size() > 0:
 			all_quests_completed = true
 			game_over = true
-			show_victory()
+			game_manager.emit_signal("victory")
 
 func _on_player_collect(item_type: String):
 	if item_type == "berries":
@@ -371,10 +416,21 @@ func _on_player_move_request(direction: Vector2i):
 			collectible.queue_free()
 	end_turn()
 
-func _on_restart_pressed():
+func _on_new_game_pressed():
+	delete_save()
 	hide_game_over()
 	hide_victory()
 	get_tree().reload_current_scene()
+
+func _on_save_pressed():
+	save_game()
+	_set_debug("Partie sauvegardee")
+
+func _on_load_pressed():
+	if load_game():
+		_set_debug("Partie chargee")
+	else:
+		_set_debug("Aucune sauvegarde")
 
 func _on_quit_pressed():
 	get_tree().quit()
@@ -420,3 +476,152 @@ func _input(event):
 		if abs(dx) + abs(dy) == 1:
 			player_node.can_move = false
 			player_node.move_request.emit(Vector2i(dx, dy))
+
+# ===== SAVE/LOAD SYSTEM =====
+
+func save_game() -> void:
+	var save_data := {
+		"player_pos": {"x": player_node.position_grid.x, "y": player_node.position_grid.y},
+		"hunger": hunger,
+		"thirst": thirst,
+		"turn_count": turn_count,
+		"grid": _serialize_grid(),
+		"quests": _serialize_quests(),
+		"stats": {"victories": victories, "defeats": defeats}
+	}
+	var file := FileAccess.open(SAVE_FILE, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(save_data))
+		file.close()
+		print("[Save] Game saved to ", SAVE_FILE)
+
+func load_game() -> bool:
+	if not FileAccess.file_exists(SAVE_FILE):
+		return false
+	
+	var file := FileAccess.open(SAVE_FILE, FileAccess.READ)
+	if not file:
+		return false
+	
+	var json_content := file.get_as_text()
+	file.close()
+	
+	var save_data := JSON.parse_string(json_content)
+	if save_data == null:
+		return false
+	
+	# Restore stats
+	victories = save_data.get("stats", {}).get("victories", 0)
+	defeats = save_data.get("stats", {}).get("defeats", 0)
+	
+	# Restore player position
+	var saved_pos := save_data.get("player_pos", {"x": 0, "y": 0})
+	player_node.position_grid = Vector2i(saved_pos.get("x", 0), saved_pos.get("y", 0))
+	player_node.position = Vector2(saved_pos.get("x", 0) * CELL_SIZE, saved_pos.get("y", 0) * CELL_SIZE)
+	
+	# Restore state
+	hunger = save_data.get("hunger", 100)
+	thirst = save_data.get("thirst", 100)
+	turn_count = save_data.get("turn_count", 0)
+	
+	# Restore grid
+	_deserialize_grid(save_data.get("grid", []))
+	
+	# Restore quests
+	_deserialize_quests(save_data.get("quests", {}))
+	
+	update_ui()
+	print("[Save] Game loaded from ", SAVE_FILE)
+	return true
+
+func delete_save() -> void:
+	if FileAccess.file_exists(SAVE_FILE):
+		var file := FileAccess.open(SAVE_FILE, FileAccess.WRITE)
+		if file:
+			file.store_string("")
+			file.close()
+		OS.remove(SAVE_FILE)
+		print("[Save] Save file deleted")
+
+func _serialize_grid() -> Array:
+	var grid_data := []
+	for y in range(GRID_SIZE):
+		var row_data := []
+		for x in range(GRID_SIZE):
+			var tile := grid[y][x]
+			var tile_data := {"has_obstacle": false, "has_berries": false, "has_water": false}
+			for child in tile.get_children():
+				if child.name == "Obstacle":
+					tile_data["has_obstacle"] = true
+				elif child.name.begins_with("Collectible_") and child.has_meta("type"):
+					var type := child.get_meta("type") as String
+					if type == "berries":
+						tile_data["has_berries"] = true
+					elif type == "water":
+						tile_data["has_water"] = true
+			row_data.append(tile_data)
+		grid_data.append(row_data)
+	return grid_data
+
+func _deserialize_grid(grid_data: Array) -> void:
+	# Clear existing grid
+	for y in range(GRID_SIZE):
+		for x in range(GRID_SIZE):
+			var tile := grid[y][x]
+			for child in tile.get_children():
+				if child.name == "Obstacle" or child.name.begins_with("Collectible_"):
+					child.queue_free()
+	
+	# Rebuild grid from save
+	for y in range(grid_data.size()):
+		for x in range(grid_data[y].size()):
+			var tile_data := grid_data[y][x]
+			var tile := grid[y][x]
+			if tile_data.get("has_obstacle", false):
+				_add_obstacle(tile)
+			if tile_data.get("has_berries", false):
+				_add_collectible(tile, "berries")
+			if tile_data.get("has_water", false):
+				_add_collectible(tile, "water")
+
+func _serialize_quests() -> Dictionary:
+	var quests_data := {}
+	if quest_manager:
+		for quest_id in quest_manager.active_quests:
+			var quest := quest_manager.active_quests[quest_id]
+			var quest_save := {
+				"id": quest.id,
+				"status": quest.status,
+				"objectives": []
+			}
+			for obj in quest.objectives:
+				var obj_save := {
+					"type": obj.get("type", ""),
+					"target": obj.get("target", ""),
+					"current": obj.get("current", 0),
+					"required": obj.get("required", 0)
+				}
+				quest_save["objectives"].append(obj_save)
+			quests_data[quest_id] = quest_save
+	return quests_data
+
+func _deserialize_quests(quests_data: Dictionary) -> void:
+	if not quest_manager:
+		return
+	
+	# Reset all quests first
+	for quest_id in quest_manager.active_quests:
+		var quest := quest_manager.active_quests[quest_id]
+		quest.reset()
+	
+	# Restore quest progress
+	for quest_id in quests_data:
+		if quest_manager.active_quests.has(quest_id):
+			var quest := quest_manager.active_quests[quest_id]
+			var quest_save := quests_data[quest_id]
+			quest.status = quest_save.get("status", 0)
+			for i in range(quest.objectives.size()):
+				var obj := quest.objectives[i]
+				var obj_save := quest_save.get("objectives", [])[i]
+				if obj_save:
+					obj["current"] = obj_save.get("current", 0)
