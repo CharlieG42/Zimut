@@ -271,6 +271,7 @@ func _setup_quest_manager():
 	
 	quest_manager.start_all_quests()
 	quest_manager.quest_completed.connect(_on_quest_completed)
+	update_ui()
 
 func update_ui():
 	ui.get_node("StatsContainer/HungerLabel").text = "Hunger: %d" % hunger
