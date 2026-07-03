@@ -71,7 +71,7 @@ func start_quest(quest_id: String) -> Quest:
 	
 	# Create quest instance
 	var quest_data: Dictionary = available_quests.get(quest_id, {})
-	var quest: Quest = Quest.new(quest_data)
+	var quest = Quest.new(quest_data)
 	
 	# Add to active quests
 	active_quests[quest_id] = quest
@@ -92,11 +92,11 @@ func update_quest(quest_id: String, objective_type: String, amount: int = 1) -> 
 	if not active_quests.has(quest_id):
 		return false
 	
-	var quest: Quest = active_quests.get(quest_id, null)
-	var was_updated := quest.update_progress(objective_type, amount)
+	var quest = active_quests.get(quest_id, null)
+	var was_updated = quest.update_progress(objective_type, amount)
 	
 	if was_updated:
-		var progress: float = quest.get_completion_percentage()
+		var progress = quest.get_completion_percentage()
 		emit_signal("quest_updated", quest_id, progress)
 		
 		if quest.is_complete():
@@ -110,7 +110,7 @@ func complete_quest(quest_id: String) -> void:
 	if not active_quests.has(quest_id):
 		return
 	
-	var quest: Quest = active_quests.get(quest_id, null)
+	var quest = active_quests.get(quest_id, null)
 	quest.status = 2  # COMPLETED
 	
 	# Apply rewards
@@ -120,10 +120,10 @@ func complete_quest(quest_id: String) -> void:
 		
 		# Apply rewards to player
 		if player_data.has("hunger"):
-			var hunger_value: int = player_data.get("hunger", 0)
+			var hunger_value = player_data.get("hunger", 0)
 			player_node.hunger = min(100, player_node.hunger + hunger_value)
 		if player_data.has("thirst"):
-			var thirst_value: int = player_data.get("thirst", 0)
+			var thirst_value = player_data.get("thirst", 0)
 			player_node.thirst = min(100, player_node.thirst + thirst_value)
 		# Note: berries and water rewards would need to be handled differently
 		# as they are collectible items in the world
@@ -162,7 +162,7 @@ func is_quest_completed(quest_id: String) -> bool:
 func get_quest_summary() -> Array:
 	var summaries: Array = []
 	for quest_id in active_quests:
-		var quest: Quest = active_quests.get(quest_id, null)
+		var quest = active_quests.get(quest_id, null)
 		summaries.append({
 			"id": quest.id,
 			"title": quest.title,
