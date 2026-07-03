@@ -338,6 +338,7 @@ func _on_player_move_request(direction: Vector2i):
 	for child in target_tile.get_children():
 		if child.name.begins_with("Collectible_") and child.has_meta("type"):
 			var type: String = child.get_meta("type") as String
+			var collectible = child
 			if type == "berries":
 				hunger = min(100, hunger + 20)
 				if quest_manager:
@@ -346,7 +347,7 @@ func _on_player_move_request(direction: Vector2i):
 				thirst = min(100, thirst + 20)
 				if quest_manager:
 					quest_manager.update_quest("find_water", "collect", 1)
-			child.queue_free()
+			collectible.queue_free()
 	end_turn()
 
 func _on_restart_pressed():
