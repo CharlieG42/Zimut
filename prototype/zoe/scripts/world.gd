@@ -125,10 +125,6 @@ func _setup_ui():
 	turn_label.name = "TurnLabel"
 	turn_label.text = "Turns: %d" % turn_count
 	vbox.add_child(turn_label)
-	var quest_progress_label := Label.new()
-	quest_progress_label.name = "QuestProgressLabel"
-	quest_progress_label.text = "Quetes: -"
-	vbox.add_child(quest_progress_label)
 	var quest_objectives_label := Label.new()
 	quest_objectives_label.name = "QuestObjectivesLabel"
 	quest_objectives_label.text = "Objectifs: -"
@@ -278,15 +274,6 @@ func update_ui():
 	ui.get_node("StatsContainer/ThirstLabel").text = "Thirst: %d" % thirst
 	ui.get_node("StatsContainer/TurnLabel").text = "Turns: %d" % turn_count
 	if quest_manager:
-		var quest_summary = quest_manager.get_quest_summary()
-		if quest_summary.size() > 0:
-			var quest_text = ""
-			for i in range(quest_summary.size()):
-				var q = quest_summary[i]
-				if i > 0:
-					quest_text += " | "
-				quest_text += "%s: %.0f%%" % [q["title"], q["progress"] * 100]
-			ui.get_node("StatsContainer/QuestProgressLabel").text = "Quetes: %s" % quest_text
 			# Build objectives text
 			var objectives_text = "Objectifs: "
 			var first_obj = true
@@ -299,9 +286,6 @@ func update_ui():
 					first_obj = false
 				objectives_text += obj_text
 			ui.get_node("StatsContainer/QuestObjectivesLabel").text = objectives_text
-		else:
-			ui.get_node("StatsContainer/QuestProgressLabel").text = "Quetes: -"
-			ui.get_node("StatsContainer/QuestObjectivesLabel").text = "Objectifs: -"
 
 func _set_debug(text: String):
 	if ui and ui.has_node("StatsContainer/DebugLabel"):
