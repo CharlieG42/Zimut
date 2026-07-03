@@ -38,11 +38,11 @@ func _init(quest_data: Dictionary):
 
 # Update progress for a specific objective type
 func update_progress(objective_type: String, amount: int = 1) -> bool:
-	var updated := false
+	var updated = false
 	for obj in objectives:
 		if obj.get("type", "") == objective_type:
-			var current: int = obj.get("current", 0)
-			var required: int = obj.get("required", 1)
+			var current = obj.get("current", 0)
+			var required = obj.get("required", 1)
 			obj["current"] = min(current + amount, required)
 			updated = true
 			print("[Quest] Progress updated for ", id, ": ", obj)
@@ -60,8 +60,8 @@ func is_complete() -> bool:
 		return true
 	
 	for obj in objectives:
-		var current: int = obj.get("current", 0)
-		var required: int = obj.get("required", 1)
+		var current = obj.get("current", 0)
+		var required = obj.get("required", 1)
 		if current < required:
 			return false
 	return true
@@ -71,8 +71,8 @@ func get_completion_percentage() -> float:
 	if objectives.size() == 0:
 		return 100.0 if status == QuestStatus.COMPLETED else 0.0
 	
-	var total_required: int = 0
-	var total_current: int = 0
+	var total_required = 0
+	var total_current = 0
 	
 	for obj in objectives:
 		total_required += obj.get("required", 1)
@@ -90,8 +90,8 @@ func get_progress_text() -> String:
 	
 	var parts: Array = []
 	for obj in objectives:
-		var current: int = obj.get("current", 0)
-		var required: int = obj.get("required", 1)
+		var current = obj.get("current", 0)
+		var required = obj.get("required", 1)
 		parts.append("%s: %d/%d" % [obj.get("type", ""), current, required])
 	
 	return " - ".join(parts)
