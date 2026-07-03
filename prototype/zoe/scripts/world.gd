@@ -296,11 +296,8 @@ func hide_victory():
 func _on_quest_completed(quest_id: String):
 	# Check if all quests are completed
 	if quest_manager:
-		var all_completed = true
-		for quest_id_active in quest_manager.active_quests:
-			all_completed = false
-			break
-		if all_completed and quest_manager.completed_quests.size() > 0:
+		var active_count = quest_manager.active_quests.size()
+		if active_count == 0 and quest_manager.completed_quests.size() > 0:
 			all_quests_completed = true
 			game_over = true
 			show_victory()
@@ -317,6 +314,8 @@ func _on_player_collect(item_type: String):
 	update_ui()
 
 func _on_player_move_request(direction: Vector2i):
+	if game_over or all_quests_completed:
+		return
 	var current_pos: Vector2i = player_node.position_grid
 	var new_position: Vector2i = current_pos + direction
 	if new_position.x < 0 or new_position.x >= GRID_SIZE or new_position.y < 0 or new_position.y >= GRID_SIZE:
@@ -370,6 +369,8 @@ func end_turn():
 	update_ui()
 
 func _input(event):
+	if game_over or all_quests_completed:
+		return
 	if event is InputEventScreenTouch or event is InputEventMouseButton:
 		print("[World] event tactile/souris recu: ", event)
 		var pressed_pos := Vector2.ZERO
@@ -389,7 +390,7 @@ func _input(event):
 		_set_debug("tap case (%d,%d)" % [target_x, target_y])
 		if target_x < 0 or target_x >= GRID_SIZE or target_y < 0 or target_y >= GRID_SIZE:
 			return
-		if not player_node.can_move or game_over:
+		if not player_node.can_move:
 			return
 		var current_pos: Vector2i = player_node.position_grid
 		var dx: int = target_x - current_pos.x
