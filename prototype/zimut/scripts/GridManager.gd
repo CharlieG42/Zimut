@@ -1,6 +1,7 @@
 extends Node2D
 ## GridManager.gd - Gestion de la grille isométrique
-## Ajouts : highlight_spell_range, highlight_move_range, clear_all_highlights
+## Correction: rotation des cellules de -45° pour perspective isométrique
+## grid_to_screen adaptée pour cellules rotées
 
 const CELL_SIZE   := Vector2i(140, 140)
 const HALF_CELL   := Vector2(70, 70)
@@ -45,6 +46,8 @@ func _create_grid() -> void:
 			var cell: Cell = preload("res://scripts/Cell.gd").new()
 			cell.position      = grid_to_screen(Vector2i(x, y))
 			cell.grid_position = Vector2i(x, y)
+			# APPLIQUER ROTATION -45° POUR PERSPECTIVE ISOMÉTRIQUE
+			cell.rotation_degrees = -45.0
 			cell.connect("cell_clicked", Callable(self, "_on_cell_clicked"))
 			add_child(cell)
 			row.append(cell)
@@ -73,6 +76,8 @@ func _add_random_decorations() -> void:
 		deco.name    = "Deco_%d_%d" % [pos.x, pos.y]
 		deco.centered = true
 		deco.z_index  = 5
+		# APPLIQUER LA MÊME ROTATION QUE LES CELLULES
+		deco.rotation_degrees = -45.0
 		var rand_val: int = randi() % 3
 		if rand_val == 0 and tree_texture:
 			deco.texture = tree_texture
@@ -92,20 +97,28 @@ func _add_random_decorations() -> void:
 # ─── Coordonnées ───────────────────────────────────────────────────────────
 
 func grid_to_screen(grid_pos: Vector2i) -> Vector2:
-	var x: float = float(grid_pos.x - grid_pos.y) * float(CELL_SIZE.x) / 2.0
-	var y: float = float(grid_pos.x + grid_pos.y) * float(CELL_SIZE.y) / 2.0
-	# Center the 8x8 grid (560, 560) on screen (960, 540)
-	x += 960.0
-	y += 100.0
+	# Formule adaptée pour cellules rotées de -45°
+	# Position isométrique standard: x = (x - y) * half_width, y = (x + y) * half_height
+	var x: float = float(grid_pos.x + grid_pos.y) * float(CELL_SIZE.x) / 2.0
+	var y: float = float(grid_pos.y - grid_pos.x) * float(CELL_SIZE.y) / 2.0
+	# Centrer la grille 8x8 (560x560) sur l'écran (960, 540)
+	x += 960.0 - (CELL_SIZE.x * 4.0)  # Ajustement pour centrer
+	y += 540.0
 	return Vector2(x, y)
 
 
 func screen_to_grid(screen_pos: Vector2) -> Vector2i:
-	var x_s: float = screen_pos.x - 960.0
-	var y_s: float = screen_pos.y - 100.0
-	var gx: float  = (x_s / (float(CELL_SIZE.x) / 2.0) + y_s / (float(CELL_SIZE.y) / 2.0)) / 2.0
-	var gy: float  = (y_s / (float(CELL_SIZE.y) / 2.0) - x_s / (float(CELL_SIZE.x) / 2.0)) / 2.0
-	return Vector2i(roundi(gx), roundi(gy))
+	# Inverse de la formule grid_to_screen pour cellules rotées
+	var x_s: float = screen_pos.x - (960.0 - (CELL_SIZE.x * 4.0))
+	var y_s: float = screen_pos.y - 540.0
+	# Résoudre: x_screen = (gx + gy) * 70, y_screen = (gy - gx) * 70
+	# gx + gy = x_screen / 70
+	# gy - gx = y_screen / 70
+	# => gy = (x_screen/70 + y_screen/70) / 2
+	# => gx = (x_screen/70 - y_screen/70) / 2
+	var sum: float = (x_s / 70.0 + y_s / 70.0) / 2.0
+	var diff: float = (x_s / 70.0 - y_s / 70.0) / 2.0
+	return Vector2i(roundi(diff), roundi(sum))
 
 
 # ─── Highlights ────────────────────────────────────────────────────────────
