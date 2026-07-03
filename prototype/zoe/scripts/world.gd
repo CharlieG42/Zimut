@@ -52,6 +52,18 @@ func _create_tile(pos: Vector2i) -> Node2D:
 			_add_collectible(tile, "water")
 	return tile
 
+func _count_collectibles() -> Dictionary:
+	var counts: Dictionary = {"berries": 0, "water": 0}
+	for y in range(GRID_SIZE):
+		for x in range(GRID_SIZE):
+			var tile: Node2D = grid[y][x]
+			for child in tile.get_children():
+				if child.name.begins_with("Collectible_") and child.has_meta("type"):
+					var type: String = child.get_meta("type") as String
+					if counts.has(type):
+						counts[type] += 1
+	return counts
+
 func _add_obstacle(tile: Node2D):
 	var obstacle := Area2D.new()
 	obstacle.name = "Obstacle"
@@ -234,17 +246,28 @@ func _setup_quest_manager():
 	quest_manager.player_node = player_node
 	quest_manager.world_node = self
 	
-	# Clamp visit objectives to grid size to prevent impossible quests
-	var max_cells = GRID_SIZE * GRID_SIZE
+	# Count actual collectibles on the grid
+	var collectible_counts = _count_collectibles()
+	
+	# Clamp collect objectives to actual available collectibles
 	for quest_id in quest_manager.available_quests:
 		var quest_data = quest_manager.available_quests[quest_id]
 		for i in range(quest_data["objectives"].size()):
 			var obj = quest_data["objectives"][i]
-			if obj.get("type", "") == "visit":
-				var required = obj.get("required", 0)
+			var obj_type = obj.get("type", "")
+			var target = obj.get("target", "")
+			var required = obj.get("required", 0)
+			
+			if obj_type == "collect" and collectible_counts.has(target):
+				var available = collectible_counts[target]
+				if required > available:
+					obj["required"] = available
+					print("[World] Clamped collect objective for ", target, " from ", required, " to ", available)
+			elif obj_type == "visit":
+				var max_cells = GRID_SIZE * GRID_SIZE
 				if required > max_cells:
 					obj["required"] = max_cells
-					print("[World] Clamped visit objective for quest ", quest_id, " from ", required, " to ", max_cells)
+					print("[World] Clamped visit objective from ", required, " to ", max_cells)
 	
 	quest_manager.start_all_quests()
 	quest_manager.quest_completed.connect(_on_quest_completed)
