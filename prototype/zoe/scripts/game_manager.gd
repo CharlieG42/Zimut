@@ -12,13 +12,9 @@ func _ready():
 func _on_victory():
 	if world == null:
 		return
-	var label = world.get_node("UILayer/UI/MessageLabel")
-	label.text = "Victoire ! Pierre de la Terre trouvee !"
-	label.visible = true
+	world._on_game_victory()
 
 func _on_defeat():
 	if world == null:
 		return
-	world.show_game_over()
-	if world.player_node:
-		world.player_node.can_move = false
+	world._on_game_defeat()
