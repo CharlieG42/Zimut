@@ -44,16 +44,6 @@ func _load_quests() -> void:
 				{"type": "collect", "target": "water", "required": 3, "current": 0}
 			],
 			"rewards": {"thirst": 50, "xp": 100}
-		},
-		"explore_grid": {
-			"id": "explore_grid",
-			"title": "Explorateur",
-			"description": "Visite toutes les cases de la grille",
-			"priority": 3,
-			"objectives": [
-				{"type": "visit", "target": "any", "required": 64, "current": 0}
-			],
-			"rewards": {"xp": 200, "berries": 5, "water": 5}
 		}
 	}
 
