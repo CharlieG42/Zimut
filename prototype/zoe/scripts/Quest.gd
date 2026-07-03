@@ -92,7 +92,14 @@ func get_progress_text() -> String:
 	for obj in objectives:
 		var current = obj.get("current", 0)
 		var required = obj.get("required", 1)
-		parts.append("%s: %d/%d" % [obj.get("type", ""), current, required])
+		var target = obj.get("target", "")
+		# Map target types to friendly names
+		var display_name = target
+		if target == "berries":
+			display_name = "Baies"
+		elif target == "water":
+			display_name = "Eau"
+		parts.append("%s: %d/%d" % [display_name, current, required])
 	
 	return " - ".join(parts)
 
