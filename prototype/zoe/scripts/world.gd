@@ -535,7 +535,10 @@ func load_game() -> bool:
 
 func delete_save() -> void:
 	if FileAccess.file_exists(SAVE_FILE):
-		DirAccess.remove_file(SAVE_FILE)
+		var dir = DirAccess.open("user://")
+		if dir:
+			dir.remove("savegame.save")
+			dir.close()
 		print("[Save] Save file deleted")
 
 func _serialize_grid() -> Array:
