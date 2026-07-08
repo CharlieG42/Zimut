@@ -210,18 +210,29 @@ func _setup_game_over_panel():
 	message_label_go.text = "Faim ou soif a 0..."
 	message_label_go.add_theme_font_size_override("font_size", 24)
 	panel.add_child(message_label_go)
+	
+	# Buttons for Game Over panel
 	var restart_btn := Button.new()
 	restart_btn.name = "GameOverRestart"
 	restart_btn.text = "Recommencer"
 	restart_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	restart_btn.pressed.connect(_on_new_game_pressed)
+	restart_btn.pressed.connect(_on_restart_level_pressed)
 	panel.add_child(restart_btn)
+	
+	var continue_btn := Button.new()
+	continue_btn.name = "GameOverContinue"
+	continue_btn.text = "Continuer"
+	continue_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	continue_btn.pressed.connect(_on_restart_level_pressed)
+	panel.add_child(continue_btn)
+	
 	var quit_btn := Button.new()
 	quit_btn.name = "GameOverQuit"
 	quit_btn.text = "Quitter"
 	quit_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	quit_btn.pressed.connect(_on_quit_pressed)
 	panel.add_child(quit_btn)
+	
 	layer.visible = false
 	game_over_panel = layer
 
@@ -252,18 +263,29 @@ func _setup_victory_panel():
 	message_label_v.text = "Toutes les quetes sont terminees !"
 	message_label_v.add_theme_font_size_override("font_size", 24)
 	panel.add_child(message_label_v)
+	
+	# Buttons for Victory panel
 	var restart_btn := Button.new()
 	restart_btn.name = "VictoryRestart"
 	restart_btn.text = "Recommencer"
 	restart_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	restart_btn.pressed.connect(_on_new_game_pressed)
+	restart_btn.pressed.connect(_on_restart_level_pressed)
 	panel.add_child(restart_btn)
+	
+	var continue_btn := Button.new()
+	continue_btn.name = "VictoryContinue"
+	continue_btn.text = "Continuer"
+	continue_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	continue_btn.pressed.connect(_on_continue_pressed)
+	panel.add_child(continue_btn)
+	
 	var quit_btn := Button.new()
 	quit_btn.name = "VictoryQuit"
 	quit_btn.text = "Quitter"
 	quit_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	quit_btn.pressed.connect(_on_quit_pressed)
 	panel.add_child(quit_btn)
+	
 	layer.visible = false
 	victory_panel = layer
 
@@ -348,10 +370,12 @@ func hide_victory():
 
 func _on_game_victory():
 	victories += 1
+	update_ui()
 	show_victory()
 
 func _on_game_defeat():
 	defeats += 1
+	update_ui()
 	show_game_over()
 	if player_node:
 		player_node.can_move = false
@@ -413,6 +437,18 @@ func _on_player_move_request(direction: Vector2i):
 	end_turn()
 
 func _on_new_game_pressed():
+	delete_save()
+	hide_game_over()
+	hide_victory()
+	get_tree().reload_current_scene()
+
+func _on_restart_level_pressed():
+	delete_save()
+	hide_game_over()
+	hide_victory()
+	get_tree().reload_current_scene()
+
+func _on_continue_pressed():
 	delete_save()
 	hide_game_over()
 	hide_victory()
@@ -538,7 +574,6 @@ func delete_save() -> void:
 		var dir = DirAccess.open("user://")
 		if dir:
 			dir.remove("savegame.save")
-			dir.close()
 		print("[Save] Save file deleted")
 
 func _serialize_grid() -> Array:
