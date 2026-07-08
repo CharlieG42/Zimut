@@ -440,6 +440,8 @@ func _on_new_game_pressed():
 	hide_game_over()
 	hide_victory()
 	level = 1
+	victories = 0
+	defeats = 0
 	get_tree().reload_current_scene()
 
 func _on_restart_level_pressed():
@@ -450,7 +452,7 @@ func _on_restart_level_pressed():
 
 func _on_continue_pressed():
 	level += 1
-	delete_save()
+	save_game()
 	hide_game_over()
 	hide_victory()
 	get_tree().reload_current_scene()
