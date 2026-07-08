@@ -20,6 +20,7 @@ var game_over := false
 var all_quests_completed := false
 var victories := 0
 var defeats := 0
+var level := 1
 
 func _ready():
 	_setup_grid()
@@ -137,10 +138,10 @@ func _setup_ui():
 	quest_objectives_label.text = "Objectifs: -"
 	vbox.add_child(quest_objectives_label)
 	
-	var stats_label := Label.new()
-	stats_label.name = "StatsLabel"
-	stats_label.text = "V: %d | D: %d" % [victories, defeats]
-	vbox.add_child(stats_label)
+	var level_stats_label := Label.new()
+	level_stats_label.name = "LevelStatsLabel"
+	level_stats_label.text = "Niveau: %d | V: %d | D: %d" % [level, victories, defeats]
+	vbox.add_child(level_stats_label)
 	
 	var debug_label := Label.new()
 	debug_label.name = "DebugLabel"
@@ -211,7 +212,6 @@ func _setup_game_over_panel():
 	message_label_go.add_theme_font_size_override("font_size", 24)
 	panel.add_child(message_label_go)
 	
-	# Buttons for Game Over panel
 	var restart_btn := Button.new()
 	restart_btn.name = "GameOverRestart"
 	restart_btn.text = "Recommencer"
@@ -264,7 +264,6 @@ func _setup_victory_panel():
 	message_label_v.add_theme_font_size_override("font_size", 24)
 	panel.add_child(message_label_v)
 	
-	# Buttons for Victory panel
 	var restart_btn := Button.new()
 	restart_btn.name = "VictoryRestart"
 	restart_btn.text = "Recommencer"
@@ -327,7 +326,7 @@ func update_ui():
 	ui.get_node("StatsContainer/HungerLabel").text = "Hunger: %d" % hunger
 	ui.get_node("StatsContainer/ThirstLabel").text = "Thirst: %d" % thirst
 	ui.get_node("StatsContainer/TurnLabel").text = "Turns: %d" % turn_count
-	ui.get_node("StatsContainer/StatsLabel").text = "V: %d | D: %d" % [victories, defeats]
+	ui.get_node("StatsContainer/LevelStatsLabel").text = "Niveau: %d | V: %d | D: %d" % [level, victories, defeats]
 	if quest_manager:
 		var objectives_text = "Objectifs: "
 		var first_obj = true
@@ -440,6 +439,7 @@ func _on_new_game_pressed():
 	delete_save()
 	hide_game_over()
 	hide_victory()
+	level = 1
 	get_tree().reload_current_scene()
 
 func _on_restart_level_pressed():
@@ -449,6 +449,7 @@ func _on_restart_level_pressed():
 	get_tree().reload_current_scene()
 
 func _on_continue_pressed():
+	level += 1
 	delete_save()
 	hide_game_over()
 	hide_victory()
@@ -517,6 +518,7 @@ func save_game() -> void:
 		"hunger": hunger,
 		"thirst": thirst,
 		"turn_count": turn_count,
+		"level": level,
 		"grid": _serialize_grid(),
 		"quests": _serialize_quests(),
 		"stats": {"victories": victories, "defeats": defeats}
@@ -546,6 +548,9 @@ func load_game() -> bool:
 	var stats_data: Dictionary = save_data.get("stats", {})
 	victories = stats_data.get("victories", 0)
 	defeats = stats_data.get("defeats", 0)
+	
+	# Restore level
+	level = save_data.get("level", 1)
 	
 	# Restore player position
 	var saved_pos: Dictionary = save_data.get("player_pos", {"x": 0, "y": 0})
