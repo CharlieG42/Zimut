@@ -15,10 +15,15 @@ class_name UIManager
 @onready var spell_description: Label   = $SpellPanel/SpellDescription
 @onready var turn_order_panel: Panel    = $TurnOrderPanel
 @onready var turn_order_container: Control = $TurnOrderPanel/TurnOrderContainer
+@onready var spells_status_label: Label = $SpellsStatusLabel
 
 var game_manager
 var end_turn_button: Button
 var spell_buttons: Array         = []
+# Boutons pour les sorts spéciaux
+var destruction_button: Button
+var teleport_button: Button
+
 var team_selection_button: Button
 var turn_order_labels: Array     = []
 var turn_order_health_bars: Array = []
@@ -26,6 +31,8 @@ var turn_order_health_bars: Array = []
 signal end_turn_requested
 signal restart_requested
 signal team_selection_requested
+signal destruction_spell_requested(caster: Dictionary)
+signal teleport_spell_requested(caster: Dictionary)
 signal spell_selected(spell: Dictionary)
 
 
@@ -66,6 +73,32 @@ func _setup_ui_elements() -> void:
 	game_over_panel.add_child(team_selection_button)
 	team_selection_button.pressed.connect(_on_team_selection_pressed)
 
+	# Créer l'UI pour les sorts spéciaux
+	spells_status_label = Label.new()
+	spells_status_label.name = "SpellsStatusLabel"
+	spells_status_label.text = "Sorts: 💥2 | 🔮1"
+	spells_status_label.position = Vector2(960, 150)
+	spells_status_label.add_theme_font_size_override("font_size", 28)
+	add_child(spells_status_label)
+
+	destruction_button = Button.new()
+	destruction_button.name = "DestructionButton"
+	destruction_button.text = "💥 Destruction"
+	destruction_button.position = Vector2(1600, 100)
+	destruction_button.size = Vector2(180, 50)
+	destruction_button.add_theme_font_size_override("font_size", 24)
+	add_child(destruction_button)
+	destruction_button.pressed.connect(_on_destruction_button_pressed)
+
+	teleport_button = Button.new()
+	teleport_button.name = "TeleportButton"
+	teleport_button.text = "🔮 Téléport"
+	teleport_button.position = Vector2(1600, 170)
+	teleport_button.size = Vector2(180, 50)
+	teleport_button.add_theme_font_size_override("font_size", 24)
+	add_child(teleport_button)
+	teleport_button.pressed.connect(_on_teleport_button_pressed)
+
 func _setup_connections() -> void:
 	if game_manager:
 		game_manager.turn_changed.connect(_on_turn_changed)
@@ -74,6 +107,12 @@ func _setup_connections() -> void:
 		game_manager.spell_selected.connect(_on_spell_selected)
 		game_manager.game_ended.connect(_on_game_ended)
 		game_manager.message_requested.connect(_on_message_requested)
+		game_manager.spells_updated.connect(_on_spells_updated)
+		# Connexion des boutons de sorts spéciaux aux fonctions du GameManager
+		if game_manager.has_method("_on_destruction_spell_pressed"):
+			destruction_spell_requested.connect(game_manager._on_destruction_spell_pressed)
+		if game_manager.has_method("_on_teleport_spell_pressed"):
+			teleport_spell_requested.connect(game_manager._on_teleport_spell_pressed)
 		game_manager.entity_moved.connect(_on_action_done)
 		game_manager.entity_attacked.connect(_on_entity_attacked_handler)
 		game_manager.spell_casted.connect(_on_spell_casted)
@@ -200,6 +239,35 @@ func _on_restart_pressed() -> void:
 	var game_scene = preload("res://scenes/Main.tscn")
 	get_tree().change_scene_to_file("res://scenes/Main.tscn")
 
+
+# Handlers pour les sorts spéciaux
+func _on_destruction_button_pressed() -> void:
+	if game_manager.current_turn != 0:
+		message_requested.emit("Ce n'est pas votre tour !")
+		return
+	var current_player = game_manager.players[game_manager.current_player_index]
+	if current_player["classe"] != "Mage":
+		message_requested.emit("Seul le Mage peut utiliser ce sort !")
+		return
+	destruction_spell_requested.emit(current_player)
+
+func _on_teleport_button_pressed() -> void:
+	if game_manager.current_turn != 0:
+		message_requested.emit("Ce n'est pas votre tour !")
+		return
+	var current_player = game_manager.players[game_manager.current_player_index]
+	if current_player["classe"] != "Mage":
+		message_requested.emit("Seul le Mage peut utiliser ce sort !")
+		return
+	teleport_spell_requested.emit(current_player)
+
+func _on_spells_updated(destruction_remaining: int, teleport_remaining: int) -> void:
+	if spells_status_label:
+		spells_status_label.text = "Sorts: 💥%d | 🔮%d" % [destruction_remaining, teleport_remaining]
+	if destruction_button:
+		destruction_button.disabled = (destruction_remaining <= 0)
+	if teleport_button:
+		teleport_button.disabled = (teleport_remaining <= 0)
 
 func _on_team_selection_pressed() -> void:
 	# Réinitialiser l'équipe personnalisée dans GameManager
