@@ -12,6 +12,9 @@ const CELL_HALF_OFFSET := Vector2i(70, 70)
 const DEFAULT_PLAYER_LEVEL := 100
 const DEFAULT_ENEMY_LEVEL  := 30
 
+const DESTRUCTION_SPELLS := 2
+const TELEPORT_SPELLS := 1
+
 const COLORS: Dictionary = {
 	"Tank":      Color(0, 0.4, 0.8),
 	"Assassin":  Color(0.8, 0, 0),
@@ -22,11 +25,13 @@ const COLORS: Dictionary = {
 	"Gobelin":   Color(0.5, 0.8, 0.3),
 	"Squelette": Color(0.8, 0.8, 0.8),
 	"Loup":      Color(0.6, 0.6, 0.4),
+	"Rock":      Color(0.5, 0.5, 0.5),
 }
 
 var grid: Array                  = []
 var players: Array               = []
 var enemies: Array               = []
+var rocks: Array                = []
 var current_turn: int            = 0
 var current_player_index: int    = 0
 var turn_count: int              = 1
@@ -37,6 +42,9 @@ var show_spells: bool            = false
 var game_over: bool              = false
 var victory: bool                = false
 
+var destruction_spells_used: int = 0
+var teleport_spells_used: int = 0
+
 # Nouvelle variable pour stocker l'équipe personnalisée
 var custom_team: Array = []
 
@@ -45,6 +53,7 @@ signal player_changed(index: int)
 signal entity_selected(entity)
 signal spell_selected(spell)
 signal game_ended(victory: bool)
+signal spells_updated(destruction_remaining: int, teleport_remaining: int)
 signal entity_moved(entity, from_pos: Vector2i, to_pos: Vector2i)
 signal entity_attacked(attacker, target, damage: int)
 signal spell_casted(caster, spell, target, result: String)
@@ -136,6 +145,60 @@ func clear_custom_team() -> void:
 	custom_team = []
 
 
+func _on_destruction_spell_pressed(caster: Dictionary) -> void:
+	if destruction_spells_used >= DESTRUCTION_SPELLS:
+		message_requested.emit("Plus de sorts de destruction !")
+		return
+	var caster_pos: Vector2i = Vector2i(int(caster["x"]), int(caster["y"]))
+	var directions: Array[Vector2i] = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
+	for dir in directions:
+		var check_pos: Vector2i = caster_pos + dir
+		if _is_valid(check_pos):
+			var entity = grid[check_pos.y][check_pos.x]
+			if entity != null and entity.get("entity_type", "") == "Rock":
+				grid[check_pos.y][check_pos.x] = null
+				rocks.erase(entity)
+				destruction_spells_used += 1
+				_update_spells_count()
+				message_requested.emit("%s détruit un rocher !" % caster["name"])
+				_refresh_grid()
+				return
+	message_requested.emit("Aucun rocher adjacent !")
+
+func _on_teleport_spell_pressed(caster: Dictionary) -> void:
+	if teleport_spells_used >= TELEPORT_SPELLS:
+		message_requested.emit("Plus de sorts de téléportation !")
+		return
+	if caster["current_pm"] < 3:
+		message_requested.emit("Pas assez de PM (3 requis) !")
+		return
+	var caster_pos: Vector2i = Vector2i(int(caster["x"]), int(caster["y"]))
+	var directions: Array[Vector2i] = [Vector2i(0, -3), Vector2i(0, 3), Vector2i(-3, 0), Vector2i(3, 0)]
+	for dir in directions:
+		var target_pos: Vector2i = caster_pos + dir
+		if _is_valid(target_pos) and grid[target_pos.y][target_pos.x] == null:
+			grid[caster_pos.y][caster_pos.x] = null
+			caster["x"] = target_pos.x
+			caster["y"] = target_pos.y
+			caster["current_pm"] -= 3
+			grid[target_pos.y][target_pos.x] = caster
+			teleport_spells_used += 1
+			_update_spells_count()
+			entity_moved.emit(caster, caster_pos, target_pos)
+			message_requested.emit("%s se téléporte !" % caster["name"])
+			_refresh_grid()
+			player_changed.emit(current_player_index)
+			return
+	message_requested.emit("Aucune position valide !")
+
+func _update_spells_count() -> void:
+	spells_updated.emit(DESTRUCTION_SPELLS - destruction_spells_used, TELEPORT_SPELLS - teleport_spells_used)
+
+func _reset_special_spells() -> void:
+	destruction_spells_used = 0
+	teleport_spells_used = 0
+	_update_spells_count()
+
 func _ready() -> void:
 	var data_loader: Node = get_node_or_null("/root/DataLoader")
 	if data_loader == null:
@@ -153,6 +216,8 @@ func _ready() -> void:
 func _on_data_loaded() -> void:
 	init_grid()
 	init_entities()
+	_init_rocks()
+	_check_and_fix_blocking()
 	current_turn = 0
 	turn_count   = 1
 	turn_changed.emit(current_turn)
@@ -166,6 +231,7 @@ func _on_data_loaded() -> void:
 		selected_entity = players[current_player_index]
 		players[current_player_index]["is_active"] = true
 		show_spells = true
+		_reset_special_spells()
 		entity_selected.emit(selected_entity)
 		player_changed.emit(current_player_index)
 
@@ -490,6 +556,18 @@ func _try_basic_attack(attacker: Dictionary, target: Dictionary, target_pos: Vec
 
 func _try_cast_spell(caster: Dictionary, target_pos: Vector2i, target_entity) -> void:
 	var spell: Dictionary  = selected_spell
+	if spell.get("name") == "Destruction":
+		_on_destruction_spell_pressed(caster)
+		selected_spell = null
+		player_changed.emit(current_player_index)
+		_refresh_grid()
+		return
+	elif spell.get("name") == "Téléportation":
+		_on_teleport_spell_pressed(caster)
+		selected_spell = null
+		player_changed.emit(current_player_index)
+		_refresh_grid()
+		return
 	var spell_range: int   = int(spell.get("range", 1))
 	var from_pos: Vector2i = Vector2i(caster["x"], caster["y"])
 	var dist: int          = abs(target_pos.x - from_pos.x) + abs(target_pos.y - from_pos.y)
@@ -658,6 +736,7 @@ func _set_active_player(index: int) -> void:
 	selected_spell  = null
 	entity_selected.emit(selected_entity)
 	player_changed.emit(current_player_index)
+	_reset_special_spells()
 	_refresh_grid()
 
 
@@ -745,6 +824,8 @@ func reset_game() -> void:
 	game_over = false; victory = false
 	selected_spell = null; selected_entity = null
 	current_turn = 0; current_player_index = 0; turn_count = 1
+	destruction_spells_used = 0
+	teleport_spells_used = 0
 	
 	# Masquer le panneau de fin de jeu
 	var ui_manager: Node = get_node_or_null("/root/Main/UIManager")
