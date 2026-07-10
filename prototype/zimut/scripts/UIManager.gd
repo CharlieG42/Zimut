@@ -108,6 +108,11 @@ func _setup_connections() -> void:
 		game_manager.game_ended.connect(_on_game_ended)
 		game_manager.message_requested.connect(_on_message_requested)
 		game_manager.spells_updated.connect(_on_spells_updated)
+		# Connexion des boutons de sorts spéciaux aux fonctions du GameManager
+		if game_manager.has_method("_on_destruction_spell_pressed"):
+			destruction_spell_requested.connect(game_manager._on_destruction_spell_pressed)
+		if game_manager.has_method("_on_teleport_spell_pressed"):
+			teleport_spell_requested.connect(game_manager._on_teleport_spell_pressed)
 		game_manager.entity_moved.connect(_on_action_done)
 		game_manager.entity_attacked.connect(_on_entity_attacked_handler)
 		game_manager.spell_casted.connect(_on_spell_casted)
