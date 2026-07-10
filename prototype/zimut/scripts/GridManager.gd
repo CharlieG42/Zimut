@@ -165,6 +165,14 @@ func _clear_all_range_flags() -> void:
 # ─── Mise à jour affichage ─────────────────────────────────────────────────
 
 func update_entity_display() -> void:
+	# Mettre à jour l'affichage de toutes les cellules
+	for y: int in range(game_manager.GRID_SIZE):
+		for x: int in range(game_manager.GRID_SIZE):
+			var cell_node: Node2D = grid_nodes[y][x]
+			var entity = game_manager.grid[y][x]
+			if cell_node.has_method("update_display"):
+				cell_node.update_display(entity)
+	
 	var current_player: Dictionary = {}
 	if game_manager.current_turn == 0 and game_manager.players.size() > game_manager.current_player_index:
 		current_player = game_manager.players[game_manager.current_player_index]
