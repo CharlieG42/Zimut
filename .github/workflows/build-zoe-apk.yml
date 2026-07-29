@@ -1,0 +1,117 @@
+name: Build ZOE APK (Debug)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'prototype/zoe/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'prototype/zoe/**'
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    container:
+      image: godotengine/godot-ci:4.3-stable
+      options: --user root
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Create Android debug preset
+        run: |
+          cd /workspace/CharlieG42__Zimut/prototype/zoe
+          
+          # Create export directory if it doesn't exist
+          mkdir -p export
+          
+          # Create Android debug preset
+          cat > export/android_debug.preset << 'EOF'
+          [preset]
+          name="Android Debug"
+          target="Android"
+          debug=true
+          
+          [platform]
+          target="Android"
+          
+          [android]
+          modules="org.godotengine.godot.GodotApp"
+          permissions/Internet=true
+          permissions/AccessNetworkState=true
+          permissions/Bluetooth=true
+          permissions/BluetoothAdmin=true
+          permissions/BluetoothConnect=true
+          permissions/Vibrate=true
+          permissions/WakeLock=true
+          
+          [android.app]
+          name="ZOE - Zimut"
+          package="com.charlieg42.zoe"
+          version_code=1
+          version_name="1.0"
+          
+          [android.export]
+          target="Android"
+          debug=true
+          
+          [android.keystore]
+          release=false
+          
+          [android.sdk]
+          api_level=34
+          min_api_level=24
+          target_api_level=34
+          
+          [android.arch]
+          arm64=true
+          armv7=true
+          x86_64=false
+          x86=false
+          
+          [android.features]
+          
+          [android.libraries]
+          
+          [android.permissions]
+          
+          [android.intent_filters]
+          
+          [android.meta_data]
+          
+          [android.services]
+          
+          [android.provider]
+          
+          [android.receivers]
+          
+          [android.activities]
+          
+          [android.application]
+          
+          [android.assets]
+          
+          [android.resources]
+          
+          [android.manifest]
+          
+          [android.gradle]
+          EOF
+
+      - name: Export ZOE APK (Debug)
+        run: |
+          cd /workspace/CharlieG42__Zimut/prototype/zoe
+          godot --headless --verbose --export debug "res://export/android_debug.preset" export/ZOE-debug.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZOE-Debug-APK
+          path: /workspace/CharlieG42__Zimut/prototype/zoe/export/ZOE-debug.apk
+          retention-days: 7
