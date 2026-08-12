@@ -1,0 +1,34 @@
+[preset]
+name="Android Release"
+target="Android"
+debug=false
+
+[platform]
+target="Android"
+
+[android]
+modules="org.godotengine.godot.GodotApp"
+
+[android.app]
+name="Zimut Iso"
+package="com.charlieg42.zimut"
+version_code=1
+version_name="1.0"
+
+[android.export]
+target="Android"
+debug=false
+
+[android.keystore]
+release=true
+
+[android.sdk]
+api_level=34
+min_api_level=24
+target_api_level=34
+
+[android.arch]
+arm64=true
+armv7=true
+x86_64=false
+x86=false
