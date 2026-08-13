@@ -5,3 +5,4 @@
 # Trigger with full config
 # Trigger with template path fix
 # Trigger with template directory fix
+# Trigger with editor settings
