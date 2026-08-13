@@ -29,10 +29,15 @@ jobs:
 
       - name: Install Godot Android export templates
         run: |
-          mkdir -p ~/.local/share/godot/export_templates/4.2.2.stable
-          cd ~/.local/share/godot/export_templates/4.2.2.stable
+          mkdir -p ~/.local/share/godot/export_templates
+          cd ~/.local/share/godot/export_templates
           wget https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz
           unzip Godot_v4.2.2-stable_export_templates.tpz
+          # The tpz extracts to a folder, move contents to 4.2.2.stable
+          if [ -d "Godot_v4.2.2-stable_export_templates" ]; then
+            mv Godot_v4.2.2-stable_export_templates/* 4.2.2.stable/ 2>/dev/null || mkdir -p 4.2.2.stable && mv Godot_v4.2.2-stable_export_templates 4.2.2.stable
+          fi
+          ls -R 4.2.2.stable/
 
       - name: Setup Android SDK and NDK
         uses: android-actions/setup-android@v3
@@ -45,29 +50,11 @@ jobs:
       - name: Setup Java and keystore
         run: |
           mkdir -p ~/.android
-          JAVA_PATH=$(dirname $(dirname $(readlink -f $(which java))))
           keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
-          echo "JAVA_PATH=$JAVA_PATH" >> $GITHUB_ENV
-
-      - name: Create editor settings for Zimut
-        run: |
-          mkdir -p prototype/zimut/.godot
-          echo '[editor_settings]' > prototype/zimut/.godot/editor_settings-4.tres
-          echo "android/editor/java/home=\"${{ env.JAVA_PATH }}\"" >> prototype/zimut/.godot/editor_settings-4.tres
-          echo 'android/editor/debug_keystore="~/.android/debug.keystore"' >> prototype/zimut/.godot/editor_settings-4.tres
-          echo 'android/editor/debug_keystore_password="android"' >> prototype/zimut/.godot/editor_settings-4.tres
-          echo 'android/editor/debug_keystore_alias="androiddebugkey"' >> prototype/zimut/.godot/editor_settings-4.tres
-          echo 'android/editor/debug_keystore_alias_password="android"' >> prototype/zimut/.godot/editor_settings-4.tres
-
-      - name: Create editor settings for ZOE
-        run: |
-          mkdir -p prototype/zoe/.godot
-          echo '[editor_settings]' > prototype/zoe/.godot/editor_settings-4.tres
-          echo "android/editor/java/home=\"${{ env.JAVA_PATH }}\"" >> prototype/zoe/.godot/editor_settings-4.tres
-          echo 'android/editor/debug_keystore="~/.android/debug.keystore"' >> prototype/zoe/.godot/editor_settings-4.tres
-          echo 'android/editor/debug_keystore_password="android"' >> prototype/zoe/.godot/editor_settings-4.tres
-          echo 'android/editor/debug_keystore_alias="androiddebugkey"' >> prototype/zoe/.godot/editor_settings-4.tres
-          echo 'android/editor/debug_keystore_alias_password="android"' >> prototype/zoe/.godot/editor_settings-4.tres
+          JAVA_PATH=$(dirname $(dirname $(readlink -f $(which java))))
+          echo "JAVA_HOME=$JAVA_PATH" >> $GITHUB_ENV
+          echo "ANDROID_DEBUG_KEYSTORE=$HOME/.android/debug.keystore" >> $GITHUB_ENV
+          echo "GODOT_EXPORT_TEMPLATES=$HOME/.local/share/godot/export_templates" >> $GITHUB_ENV
 
       - name: Export Zimut APK (Debug)
         run: cd prototype/zimut && godot --headless --verbose --export-debug "Android" export/Zimut-debug.apk
