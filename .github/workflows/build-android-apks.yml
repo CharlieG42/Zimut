@@ -24,20 +24,19 @@ jobs:
         with:
           lfs: true
 
-      - name: Install Godot 4.2.2
-        run: wget https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_linux.x86_64.zip && unzip Godot_v4.2.2-stable_linux.x86_64.zip && chmod +x Godot_v4.2.2-stable_linux.x86_64 && sudo mv Godot_v4.2.2-stable_linux.x86_64 /usr/local/bin/godot
+      - name: Install Godot 4.1.3 (LTS)
+        run: |
+          wget https://github.com/godotengine/godot/releases/download/4.1.3-stable/Godot_v4.1.3-stable_linux.x86_64.zip
+          unzip Godot_v4.1.3-stable_linux.x86_64.zip
+          chmod +x Godot_v4.1.3-stable_linux.x86_64
+          sudo mv Godot_v4.1.3-stable_linux.x86_64 /usr/local/bin/godot
 
       - name: Install Godot Android export templates
         run: |
           mkdir -p ~/.local/share/godot/export_templates
           cd ~/.local/share/godot/export_templates
-          wget https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz
-          unzip Godot_v4.2.2-stable_export_templates.tpz
-          # The tpz extracts to a version folder, find it and move to 4.2.2.stable
-          TEMPLATE_DIR=$(find . -type d -name "*4.2.2*" | head -1)
-          if [ -n "$TEMPLATE_DIR" ]; then
-            mv "$TEMPLATE_DIR"/* 4.2.2.stable/ 2>/dev/null || (rm -rf 4.2.2.stable && mv "$TEMPLATE_DIR" 4.2.2.stable)
-          fi
+          wget https://github.com/godotengine/godot/releases/download/4.1.3-stable/Godot_v4.1.3-stable_export_templates.tpz
+          unzip Godot_v4.1.3-stable_export_templates.tpz
 
       - name: Setup Android SDK and NDK
         uses: android-actions/setup-android@v3
