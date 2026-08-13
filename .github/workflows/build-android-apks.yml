@@ -43,7 +43,7 @@ jobs:
       - name: Export Zimut APK (Debug)
         run: |
           cd prototype/zimut
-          godot --headless --verbose --export debug "res://export/android_debug.preset" export/Zimut-debug.apk
+          godot --headless --verbose --export-debug "res://export/android_debug.preset" export/Zimut-debug.apk
         env:
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
           ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
@@ -52,7 +52,7 @@ jobs:
       - name: Export ZOE APK (Debug)
         run: |
           cd prototype/zoe
-          godot --headless --verbose --export debug "res://export/android_debug.preset" export/ZOE-debug.apk
+          godot --headless --verbose --export-debug "res://export/android_debug.preset" export/ZOE-debug.apk
         env:
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
           ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
@@ -71,7 +71,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
         run: |
           cd prototype/zimut
-          godot --headless --verbose --export release "res://export/android_release.preset" export/Zimut-release.apk
+          godot --headless --verbose --export-release "res://export/android_release.preset" export/Zimut-release.apk
         env:
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
           ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
@@ -81,7 +81,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
         run: |
           cd prototype/zoe
-          godot --headless --verbose --export release "res://export/android_release.preset" export/ZOE-release.apk
+          godot --headless --verbose --export-release "res://export/android_release.preset" export/ZOE-release.apk
         env:
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
           ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
