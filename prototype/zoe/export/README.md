@@ -4,3 +4,4 @@
 # Trigger with Java config
 # Trigger with full config
 # Trigger with template path fix
+# Trigger with template directory fix
