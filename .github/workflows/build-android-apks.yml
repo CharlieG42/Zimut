@@ -37,53 +37,6 @@ jobs:
           cmake-version: 3.22.1
           accept-licenses: true
 
-      - name: Create export directories
-        run: |
-          mkdir -p prototype/zimut/export
-          mkdir -p prototype/zoe/export
-
-      - name: Create Android debug preset for Zimut
-        run: |
-          cd prototype/zimut
-          if [ ! -f export/android_debug.preset ]; then
-            cat > export/android_debug.preset << 'EOF'
-[preset]
-name="Android Debug"
-target="Android"
-debug=true
-
-[platform]
-target="Android"
-
-[android]
-modules="org.godotengine.godot.GodotApp"
-
-[android.app]
-name="Zimut Iso"
-package="com.charlieg42.zimut"
-version_code=1
-version_name="1.0"
-
-[android.export]
-target="Android"
-debug=true
-
-[android.keystore]
-release=false
-
-[android.sdk]
-api_level=34
-min_api_level=24
-target_api_level=34
-
-[android.arch]
-arm64=true
-armv7=true
-x86_64=false
-x86=false
-EOF
-          fi
-
       - name: Export Zimut APK (Debug)
         run: |
           cd prototype/zimut
@@ -92,48 +45,6 @@ EOF
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
           ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
           JAVA_HOME: ${{ env.JAVA_HOME }}
-
-      - name: Create Android debug preset for ZOE
-        run: |
-          cd prototype/zoe
-          if [ ! -f export/android_debug.preset ]; then
-            cat > export/android_debug.preset << 'EOF'
-[preset]
-name="Android Debug"
-target="Android"
-debug=true
-
-[platform]
-target="Android"
-
-[android]
-modules="org.godotengine.godot.GodotApp"
-
-[android.app]
-name="ZOE - Zimut"
-package="com.charlieg42.zoe"
-version_code=1
-version_name="1.0"
-
-[android.export]
-target="Android"
-debug=true
-
-[android.keystore]
-release=false
-
-[android.sdk]
-api_level=34
-min_api_level=24
-target_api_level=34
-
-[android.arch]
-arm64=true
-armv7=true
-x86_64=false
-x86=false
-EOF
-          fi
 
       - name: Export ZOE APK (Debug)
         run: |
@@ -153,49 +64,6 @@ EOF
             prototype/zoe/export/ZOE-debug.apk
           retention-days: 7
 
-      - name: Create Android release preset for Zimut
-        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
-        run: |
-          cd prototype/zimut
-          if [ ! -f export/android_release.preset ]; then
-            cat > export/android_release.preset << 'EOF'
-[preset]
-name="Android Release"
-target="Android"
-debug=false
-
-[platform]
-target="Android"
-
-[android]
-modules="org.godotengine.godot.GodotApp"
-
-[android.app]
-name="Zimut Iso"
-package="com.charlieg42.zimut"
-version_code=1
-version_name="1.0"
-
-[android.export]
-target="Android"
-debug=false
-
-[android.keystore]
-release=true
-
-[android.sdk]
-api_level=34
-min_api_level=24
-target_api_level=34
-
-[android.arch]
-arm64=true
-armv7=true
-x86_64=false
-x86=false
-EOF
-          fi
-
       - name: Export Zimut APK (Release)
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
         run: |
@@ -205,49 +73,6 @@ EOF
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
           ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
           JAVA_HOME: ${{ env.JAVA_HOME }}
-
-      - name: Create Android release preset for ZOE
-        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
-        run: |
-          cd prototype/zoe
-          if [ ! -f export/android_release.preset ]; then
-            cat > export/android_release.preset << 'EOF'
-[preset]
-name="Android Release"
-target="Android"
-debug=false
-
-[platform]
-target="Android"
-
-[android]
-modules="org.godotengine.godot.GodotApp"
-
-[android.app]
-name="ZOE - Zimut"
-package="com.charlieg42.zoe"
-version_code=1
-version_name="1.0"
-
-[android.export]
-target="Android"
-debug=false
-
-[android.keystore]
-release=true
-
-[android.sdk]
-api_level=34
-min_api_level=24
-target_api_level=34
-
-[android.arch]
-arm64=true
-armv7=true
-x86_64=false
-x86=false
-EOF
-          fi
 
       - name: Export ZOE APK (Release)
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
