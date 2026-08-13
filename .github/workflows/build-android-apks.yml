@@ -40,6 +40,13 @@ jobs:
           cmake-version: 3.22.1
           accept-licenses: true
 
+      - name: Setup Java for Godot
+        run: |
+          mkdir -p ~/.godot
+          JAVA_PATH=$(dirname $(dirname $(readlink -f $(which java))))
+          echo "[editor_settings]" > ~/.godot/editor_settings-4.tres
+          echo "android/editor/java/home=\"$JAVA_PATH\"" >> ~/.godot/editor_settings-4.tres
+
       - name: Export Zimut APK (Debug)
         run: |
           cd prototype/zimut
