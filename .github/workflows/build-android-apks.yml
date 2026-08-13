@@ -29,14 +29,14 @@ jobs:
 
       - name: Install Godot Android export templates
         run: |
-          mkdir -p ~/.local/share/godot/export_templates/4.2.2.stable
-          cd ~/.local/share/godot/export_templates/4.2.2.stable
+          mkdir -p ~/.local/share/godot/export_templates
+          cd ~/.local/share/godot/export_templates
           wget https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_export_templates.tpz
           unzip Godot_v4.2.2-stable_export_templates.tpz
-          # Move the extracted folder to 4.2.2.stable
-          if [ -d "Godot_v4.2.2-stable_export_templates" ]; then
-            mv Godot_v4.2.2-stable_export_templates/* .
-            rmdir Godot_v4.2.2-stable_export_templates
+          # The tpz extracts to a version folder, find it and move to 4.2.2.stable
+          TEMPLATE_DIR=$(find . -type d -name "*4.2.2*" | head -1)
+          if [ -n "$TEMPLATE_DIR" ]; then
+            mv "$TEMPLATE_DIR"/* 4.2.2.stable/ 2>/dev/null || (rm -rf 4.2.2.stable && mv "$TEMPLATE_DIR" 4.2.2.stable)
           fi
 
       - name: Setup Android SDK and NDK
