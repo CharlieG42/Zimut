@@ -7,3 +7,4 @@
 # Trigger with template directory fix
 # Trigger with editor settings
 # Trigger with template move fix
+# Trigger without ls command
