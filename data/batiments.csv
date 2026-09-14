@@ -1,0 +1,9 @@
+Nom,Type,Niveau requis,Coût or,Coût fer,Coût bois,Coût magie,Production or,Production fer,Production bois,Effet,Description
+Maison du peuple,Habitat,1,50,10,5,0,2,0,0,+5 population,Bergerie augmentant la population
+Mine de fer,Production,1,80,5,20,0,0,3,0,-,Extrait le fer de la montagne
+Scierie,Production,1,60,10,0,0,0,0,3,-,Abat la forêt environnante
+Caserne,Recrutement,2,150,30,20,0,0,0,0,Débloque les unités de base,Forme les soldats
+Académie,Technologie,3,200,20,30,10,0,0,0,Débloque technologies,Recherche militaire
+Temple,Divinité,2,120,10,10,5,0,0,0,Débloque le panthéon,Vénération des divinités
+Port,Commerce,3,180,20,40,0,1,0,0,Échange de ressources,Commerce maritime
+Merveille,Objectif,5,1000,200,200,100,0,0,0,Victoire de campagne,Monument de domination
