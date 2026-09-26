@@ -53,3 +53,5 @@ move_down={
 
 2d/renderer/2d/texture_filter_mode="nearest"
 textures/vram_compression/import_etc2_astc=true
+
+environment/defaults/default_clear_color=Color(0.09, 0.13, 0.09, 1)

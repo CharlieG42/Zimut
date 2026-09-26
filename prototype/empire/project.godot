@@ -38,6 +38,7 @@ move_up={"deadzone": 0.5,"events": []}
 move_down={"deadzone": 0.5,"events": []}
 
 [rendering]
+environment/defaults/default_clear_color=Color(0.09, 0.13, 0.09, 1)
 
 2d/renderer/2d/texture_filter_mode="nearest"
 

@@ -37,3 +37,5 @@ Thumbs.db
 # Generated textures from SVG (ignore)
 *.png
 *.jpg
+# Tuiles de sol: PNG sources necessaires au rendu
+!assets/sprites/tiles/*.png

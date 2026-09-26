@@ -15,17 +15,17 @@ func init(manager: Node) -> void:
 	empire_manager = manager
 
 ## Recrute un hero (classe Zimut) pour mener les armees.
-func recruit_hero(class_name: String, level: int) -> Dictionary:
+func recruit_hero(hero_class: String, level: int) -> Dictionary:
 	var loader: Node = _data_loader()
 	if loader == null:
 		return {}
-	var class_data: Dictionary = loader.get_class_data(class_name, level)
+	var class_data: Dictionary = loader.get_class_data(hero_class, level)
 	if class_data.is_empty():
-		empire_manager.message_requested.emit("Classe %s introuvable." % class_name)
+		empire_manager.message_requested.emit("Classe %s introuvable." % hero_class)
 		return {}
 	var hero: Dictionary = {
 		"id": empire_manager.heroes.size(),
-		"classe": class_name,
+		"classe": hero_class,
 		"level": level,
 		"max_pv": int(class_data.get("Vita (PV)", "60")),
 		"force": int(class_data.get("Force (CAC)", "10")),
@@ -39,7 +39,7 @@ func recruit_hero(class_name: String, level: int) -> Dictionary:
 		"current_pv": int(class_data.get("Vita (PV)", "60")),
 	}
 	empire_manager.heroes.append(hero)
-	empire_manager.message_requested.emit("Hero %s (Lv%d) recrute." % [class_name, level])
+	empire_manager.message_requested.emit("Hero %s (Lv%d) recrute." % [hero_class, level])
 	return hero
 
 ## Recrute une unite d'armee (humaine ou mythique) si les ressources sont suffisantes.

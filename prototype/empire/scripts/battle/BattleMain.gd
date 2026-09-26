@@ -23,9 +23,8 @@ func _ready() -> void:
 	# AVANT add_child : son _ready() appelle _on_data_loaded() qui peuple
 	# directement players[]/enemies[] depuis ce contexte.
 	var bgm_script: GDScript = load("res://scripts/battle/BattleGameManager.gd")
-	battle_game_manager = Node.new()
+	battle_game_manager = bgm_script.new()
 	battle_game_manager.name = "BattleGameManager"
-	battle_game_manager.set_script(bgm_script)
 	var bridge: Node = empire_manager.battle_bridge
 	if bridge:
 		battle_game_manager.set_custom_team(bridge.get_custom_team_for_gamemanager())

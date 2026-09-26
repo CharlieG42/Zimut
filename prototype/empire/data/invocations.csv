@@ -1,4 +1,4 @@
-Nom,Niveau requis,PV,Attaque,DÃ©fense,PA,PM,Type,Biome
+Nom,Niveau requis,PV,Attaque,Défense,PA,PM,Type,Biome
 Tortue,5,150,10,30,4,3,Tank,Forêt
 Loup,10,80,20,10,4,3,DPS,Forêt
 Sirène,20,70,15,15,4,3,Support,Désert
