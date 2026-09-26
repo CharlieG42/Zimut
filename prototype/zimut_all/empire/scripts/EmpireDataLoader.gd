@@ -4,15 +4,15 @@ extends Node
 ## Suit le meme patron que DataLoader.gd du mode Zimut.
 ## Reutilise aussi les CSV existants (classes, sorts, craft, invocations, ennemis).
 
-const BUILDING_DATA_PATHS = ["res://empire/data/batiments.csv", "user://data/batiments.csv"]
-const UNIT_DATA_PATHS = ["res://empire/data/unites.csv", "user://data/unites.csv"]
-const DIVINITY_DATA_PATHS = ["res://empire/data/divinites.csv", "user://data/divinites.csv"]
-const CLASS_DATA_PATHS = ["res://empire/data/classes.csv", "user://data/classes.csv"]
-const CRAFT_DATA_PATHS = ["res://empire/data/craft.csv", "user://data/craft.csv"]
-const INVOCATION_DATA_PATHS = ["res://empire/data/invocations.csv", "user://data/invocations.csv"]
-const ENEMY_DATA_PATHS = ["res://empire/data/ennemis.csv", "user://data/ennemis.csv"]
-const SPELL_DATA_PATHS = ["res://empire/data/sorts.csv", "user://data/sorts.csv"]
-const STUFF_DATA_PATHS = ["res://empire/data/stuff.csv", "user://data/stuff.csv"]
+const BUILDING_DATA_PATHS = ["res://empire/data/batiments.txt", "user://data/batiments.txt"]
+const UNIT_DATA_PATHS = ["res://empire/data/unites.txt", "user://data/unites.txt"]
+const DIVINITY_DATA_PATHS = ["res://empire/data/divinites.txt", "user://data/divinites.txt"]
+const CLASS_DATA_PATHS = ["res://empire/data/classes.txt", "user://data/classes.txt"]
+const CRAFT_DATA_PATHS = ["res://empire/data/craft.txt", "user://data/craft.txt"]
+const INVOCATION_DATA_PATHS = ["res://empire/data/invocations.txt", "user://data/invocations.txt"]
+const ENEMY_DATA_PATHS = ["res://empire/data/ennemis.txt", "user://data/ennemis.txt"]
+const SPELL_DATA_PATHS = ["res://empire/data/sorts.txt", "user://data/sorts.txt"]
+const STUFF_DATA_PATHS = ["res://empire/data/stuff.txt", "user://data/stuff.txt"]
 
 var buildings_data: Array = []
 var units_data: Array = []
@@ -42,23 +42,23 @@ func _open_file(paths: Array) -> FileAccess:
 
 func load_all_data() -> void:
 	var success: bool = true
-	if not _load_csv(BUILDING_DATA_PATHS, "buildings_data", "batiments.csv"):
+	if not _load_csv(BUILDING_DATA_PATHS, "buildings_data", "batiments.txt"):
 		success = false
-	if not _load_csv(UNIT_DATA_PATHS, "units_data", "unites.csv"):
+	if not _load_csv(UNIT_DATA_PATHS, "units_data", "unites.txt"):
 		success = false
-	if not _load_csv(DIVINITY_DATA_PATHS, "divinities_data", "divinites.csv"):
+	if not _load_csv(DIVINITY_DATA_PATHS, "divinities_data", "divinites.txt"):
 		success = false
-	if not _load_csv(CLASS_DATA_PATHS, "classes_data", "classes.csv"):
+	if not _load_csv(CLASS_DATA_PATHS, "classes_data", "classes.txt"):
 		success = false
-	if not _load_csv(CRAFT_DATA_PATHS, "craft_data", "craft.csv"):
+	if not _load_csv(CRAFT_DATA_PATHS, "craft_data", "craft.txt"):
 		success = false
-	if not _load_csv(INVOCATION_DATA_PATHS, "invocations_data", "invocations.csv"):
+	if not _load_csv(INVOCATION_DATA_PATHS, "invocations_data", "invocations.txt"):
 		success = false
-	if not _load_csv(ENEMY_DATA_PATHS, "enemies_data", "ennemis.csv"):
+	if not _load_csv(ENEMY_DATA_PATHS, "enemies_data", "ennemis.txt"):
 		success = false
-	if not _load_csv(SPELL_DATA_PATHS, "spells_data", "sorts.csv"):
+	if not _load_csv(SPELL_DATA_PATHS, "spells_data", "sorts.txt"):
 		success = false
-	if not _load_csv(STUFF_DATA_PATHS, "items_data", "stuff.csv"):
+	if not _load_csv(STUFF_DATA_PATHS, "items_data", "stuff.txt"):
 		success = false
 	data_loaded = success
 	data_loaded_successfully.emit()

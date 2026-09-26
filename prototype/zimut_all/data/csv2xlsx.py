@@ -5,7 +5,7 @@ Prérequis :
     pip install pandas openpyxl
 
 Utilisation :
-    Placer ce script dans le même dossier que les fichiers .csv et le fichier Excel cible,
+    Placer ce script dans le même dossier que les fichiers .txt et le fichier Excel cible,
     puis lancer : python csv_vers_excel.py
 """
 
@@ -43,7 +43,7 @@ def lire_csv_avec_encodage(chemin_fichier):
 
 
 def main():
-    fichiers_csv = sorted(DOSSIER.glob("*.csv"))
+    fichiers_csv = sorted(DOSSIER.glob("*.txt"))
 
     if not fichiers_csv:
         print("Aucun fichier CSV trouvé dans ce dossier.")

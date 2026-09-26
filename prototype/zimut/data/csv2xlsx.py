@@ -43,7 +43,7 @@ def lire_csv_avec_encodage(chemin_fichier):
 
 
 def main():
-    fichiers_csv = sorted(DOSSIER.glob("*.csv"))
+    fichiers_csv = sorted(DOSSIER.glob("*.txt"))
 
     if not fichiers_csv:
         print("Aucun fichier CSV trouvé dans ce dossier.")

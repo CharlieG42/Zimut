@@ -250,7 +250,7 @@ func init_entities() -> void:
 		var class_info: Dictionary = _find_best_match(classes_data, "Classe", classe,
 			"Niveau", DEFAULT_PLAYER_LEVEL)
 		if class_info.is_empty():
-			push_error("Classe '%s' introuvable dans classes.csv" % classe)
+			push_error("Classe '%s' introuvable dans classes.txt" % classe)
 			continue
 		var player: Dictionary = {
 			"name":         "%s Lv%d" % [classe, DEFAULT_PLAYER_LEVEL],
@@ -304,7 +304,7 @@ func init_entities() -> void:
 			var enemy_info: Dictionary = _find_best_match(get_enemies_data(), "Type", etype,
 				"Niveau", DEFAULT_ENEMY_LEVEL)
 			if enemy_info.is_empty():
-				push_error("Ennemi '%s' introuvable dans ennemis.csv" % etype)
+				push_error("Ennemi '%s' introuvable dans ennemis.txt" % etype)
 				continue
 			var enemy: Dictionary = {
 				"name":         "%s Lv%d" % [etype, DEFAULT_ENEMY_LEVEL],

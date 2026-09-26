@@ -70,7 +70,7 @@ func _load_class_data() -> void:
 func _try_load_from_csv() -> bool:
 	## Lit res://data/classes.csv et prend les stats au niveau le plus haut
 	## disponible (cohérent avec DEFAULT_PLAYER_LEVEL du ZimutGameManager).
-	var file := FileAccess.open("res://data/classes.csv", FileAccess.READ)
+	var file := FileAccess.open("res://data/classes.txt", FileAccess.READ)
 	if file == null:
 		return false
 

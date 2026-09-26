@@ -5,10 +5,10 @@ extends Node
 
 ## Chemins des fichiers CSV (relatifs au projet)
 ## Sur Android, essayer plusieurs chemins car le système de fichiers peut différer
-const CLASS_DATA_PATHS = ["res://data/classes.csv", "user://data/classes.csv", "res://prototype/Godot_iso/data/classes.csv"]
-const SPELL_DATA_PATHS = ["res://data/sorts.csv", "user://data/sorts.csv", "res://prototype/Godot_iso/data/sorts.csv"]
-const ENEMY_DATA_PATHS = ["res://data/ennemis.csv", "user://data/ennemis.csv", "res://prototype/Godot_iso/data/ennemis.csv"]
-const ITEM_DATA_PATHS = ["res://data/stuff.csv", "user://data/stuff.csv", "res://prototype/Godot_iso/data/stuff.csv"]
+const CLASS_DATA_PATHS = ["res://data/classes.txt", "user://data/classes.txt", "res://prototype/Godot_iso/data/classes.txt"]
+const SPELL_DATA_PATHS = ["res://data/sorts.txt", "user://data/sorts.txt", "res://prototype/Godot_iso/data/sorts.txt"]
+const ENEMY_DATA_PATHS = ["res://data/ennemis.txt", "user://data/ennemis.txt", "res://prototype/Godot_iso/data/ennemis.txt"]
+const ITEM_DATA_PATHS = ["res://data/stuff.txt", "user://data/stuff.txt", "res://prototype/Godot_iso/data/stuff.txt"]
 
 ## Helper function to open file with multiple path attempts
 func _open_file(paths: Array) -> FileAccess:
