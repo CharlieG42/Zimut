@@ -1,0 +1,9 @@
+# Godot editor generated files
+.godot/
+*.translation
+
+# Godot import artifacts (interrupted imports leave .tmp files)
+*.tmp
+
+# Exported builds
+export/
