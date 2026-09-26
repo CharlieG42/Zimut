@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 110" width="80" height="110">
+  <defs>
+    <radialGradient id="tShadow" cx="50%" cy="100%" r="40%">
+      <stop offset="0%" stop-color="#000" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tArmor" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#5EB8FF"/>
+      <stop offset="50%"  stop-color="#2277CC"/>
+      <stop offset="100%" stop-color="#0A3A7A"/>
+    </linearGradient>
+    <linearGradient id="tHelm" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#88CCFF"/>
+      <stop offset="60%"  stop-color="#1A5FAA"/>
+      <stop offset="100%" stop-color="#0A2A5A"/>
+    </linearGradient>
+    <linearGradient id="tShield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#FFFFFF"/>
+      <stop offset="30%"  stop-color="#8EC8FF"/>
+      <stop offset="100%" stop-color="#1A4A99"/>
+    </linearGradient>
+    <linearGradient id="tGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#A0E0FF" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#2277CC" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="tBlur">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+  </defs>
+
+  <!-- Ombre sol -->
+  <ellipse cx="42" cy="107" rx="22" ry="5" fill="url(#tShadow)"/>
+
+  <!-- Halo de classe (bleu) -->
+  <ellipse cx="42" cy="95" rx="24" ry="8" fill="#1155BB" opacity="0.35" filter="url(#tBlur)"/>
+
+  <!-- Jambes / jambières -->
+  <rect x="30" y="76" width="10" height="18" rx="3" fill="#1A5FAA"/>
+  <rect x="44" y="76" width="10" height="18" rx="3" fill="#1A5FAA"/>
+  <!-- Genouillères -->
+  <ellipse cx="35" cy="83" rx="6" ry="5" fill="#5EB8FF"/>
+  <ellipse cx="49" cy="83" rx="6" ry="5" fill="#5EB8FF"/>
+  <!-- Pieds -->
+  <ellipse cx="35" cy="93" rx="7" ry="4" fill="#0A3A7A"/>
+  <ellipse cx="49" cy="93" rx="7" ry="4" fill="#0A3A7A"/>
+
+  <!-- Torse — armure lourde -->
+  <path d="M22,44 Q22,38 42,36 Q62,38 62,44 L60,76 Q42,80 24,76 Z" fill="url(#tArmor)"/>
+  <!-- Reflet armure -->
+  <path d="M28,44 Q28,40 42,38 Q52,40 52,44 L50,60 Q42,62 34,60 Z" fill="#88CCFF" opacity="0.25"/>
+  <!-- Ceinture -->
+  <rect x="25" y="70" width="34" height="7" rx="2" fill="#0A2A6A"/>
+  <rect x="38" y="70" width="8" height="7" rx="2" fill="#5EB8FF"/>
+
+  <!-- Bras gauche (bouclier) -->
+  <path d="M14,44 Q10,48 10,60 L18,72 Q22,72 26,68 L26,44 Z" fill="#1A5FAA"/>
+  <!-- Épaulière gauche -->
+  <ellipse cx="20" cy="44" rx="9" ry="7" fill="#5EB8FF"/>
+  <ellipse cx="20" cy="44" rx="5" ry="4" fill="#88CCFF" opacity="0.6"/>
+
+  <!-- Bouclier -->
+  <path d="M2,50 Q2,42 12,38 L12,70 Q2,66 2,58 Z" fill="url(#tShield)"/>
+  <path d="M3,51 Q3,44 11,40 L11,68 Q3,65 3,57 Z" fill="none" stroke="#A0D8FF" stroke-width="1"/>
+  <!-- Emblème bouclier -->
+  <path d="M7,52 L7,62 Q10,66 13,62 L13,52 Q10,49 7,52Z" fill="#FFD700" opacity="0.7"/>
+  <line x1="10" y1="49" x2="10" y2="66" stroke="#FFF" stroke-width="0.8" opacity="0.6"/>
+
+  <!-- Bras droit (épée) -->
+  <path d="M58,44 Q60,48 64,54 L70,52 L68,44 Z" fill="#1A5FAA"/>
+  <!-- Épée -->
+  <rect x="66" y="28" width="5" height="36" rx="2" fill="#C8D8E8" transform="rotate(12,68,46)"/>
+  <rect x="62" y="44" width="14" height="4" rx="1.5" fill="#88AACC" transform="rotate(12,68,46)"/>
+  <ellipse cx="68" cy="29" rx="3" ry="3" fill="#FFD700" transform="rotate(12,68,46)"/>
+  <!-- Épaulière droite -->
+  <ellipse cx="62" cy="44" rx="9" ry="7" fill="#5EB8FF"/>
+  <ellipse cx="62" cy="44" rx="5" ry="4" fill="#88CCFF" opacity="0.6"/>
+
+  <!-- Cou -->
+  <rect x="37" y="30" width="10" height="10" rx="3" fill="#C89878"/>
+
+  <!-- Casque -->
+  <path d="M20,30 Q20,10 42,8 Q64,10 64,30 L62,38 Q42,42 22,38 Z" fill="url(#tHelm)"/>
+  <!-- Visière -->
+  <path d="M28,30 Q28,22 42,20 Q56,22 56,30 L54,36 Q42,38 30,36 Z" fill="#0A2050"/>
+  <!-- Fente de visière -->
+  <rect x="30" y="28" width="24" height="4" rx="2" fill="#001030" opacity="0.8"/>
+  <!-- Yeux qui brillent derrière la visière -->
+  <ellipse cx="36" cy="30" rx="3" ry="2" fill="#4AF" opacity="0.9"/>
+  <ellipse cx="48" cy="30" rx="3" ry="2" fill="#4AF" opacity="0.9"/>
+  <!-- Crête de casque -->
+  <path d="M32,8 Q42,2 52,8" fill="none" stroke="#FFD700" stroke-width="3" stroke-linecap="round"/>
+  <!-- Reflet casque -->
+  <path d="M26,24 Q28,14 40,12" fill="none" stroke="#88CCFF" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- Effet lumineux de classe -->
+  <ellipse cx="42" cy="36" rx="30" ry="8" fill="url(#tGlow)" opacity="0.3"/>
+</svg>

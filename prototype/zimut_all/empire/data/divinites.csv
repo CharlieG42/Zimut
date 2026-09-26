@@ -1,0 +1,7 @@
+Nom,Faveur,Coût faveur,Effet,Bonus production,Bonus combat,Sort bonus
+Héra,Protection,50,Protège la capitale,+10% or,-10% dégâts reçus,Soin divin
+Athéna,Sagesse,80,Accélère la recherche,+10% magie,+15% attaque,Lance d'Athéna
+Poséidon,Marine,60,Renforce les unités navales et le port,+10% bois,+20% PM,Tsunami
+Hadès,Outre-tombe,90,Invoque des esprits,+10% fer,+20% dégâts,Ombre d'Hadès
+Artémis,Chasse,70,Renforce archers et bêtes,+10% bois,+15% précision,Flèche d'argent
+Zeus,Foudre,150,Frappe divine sur la garnison,+10% or,+25% dégâts magiques,Foudre de Zeus

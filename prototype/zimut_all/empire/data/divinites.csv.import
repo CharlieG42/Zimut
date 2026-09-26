@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://cebqjgq01fgiu"
+
+[deps]
+
+files=["res://empire/data/divinites.Faveur.translation", "res://empire/data/divinites.Coût faveur.translation", "res://empire/data/divinites.Effet.translation", "res://empire/data/divinites.Bonus production.translation", "res://empire/data/divinites.Bonus combat.translation", "res://empire/data/divinites.Sort bonus.translation"]
+
+source_file="res://empire/data/divinites.csv"
+dest_files=["res://empire/data/divinites.Faveur.translation", "res://empire/data/divinites.Coût faveur.translation", "res://empire/data/divinites.Effet.translation", "res://empire/data/divinites.Bonus production.translation", "res://empire/data/divinites.Bonus combat.translation", "res://empire/data/divinites.Sort bonus.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://0i1fggqvbj77"
+
+[deps]
+
+files=["res://data/sorts.Nom.translation", "res://data/sorts.Cout_PA.translation", "res://data/sorts.Cout_PM.translation", "res://data/sorts.Portee.translation", "res://data/sorts.Effet.translation", "res://data/sorts.Niveau.translation", "res://data/sorts.Type.translation", "res://data/sorts.Degats.translation", "res://data/sorts.Degats.translation", "res://data/sorts.Soins.translation", "res://data/sorts.Resistance.translation", "res://data/sorts.Resistance.translation", "res://data/sorts.Debuff.translation", "res://data/sorts.Debuff.translation", "res://data/sorts.Buff.translation", "res://data/sorts.Buff.translation"]
+
+source_file="res://data/sorts.csv"
+dest_files=["res://data/sorts.Nom.translation", "res://data/sorts.Cout_PA.translation", "res://data/sorts.Cout_PM.translation", "res://data/sorts.Portee.translation", "res://data/sorts.Effet.translation", "res://data/sorts.Niveau.translation", "res://data/sorts.Type.translation", "res://data/sorts.Degats.translation", "res://data/sorts.Degats.translation", "res://data/sorts.Soins.translation", "res://data/sorts.Resistance.translation", "res://data/sorts.Resistance.translation", "res://data/sorts.Debuff.translation", "res://data/sorts.Debuff.translation", "res://data/sorts.Buff.translation", "res://data/sorts.Buff.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

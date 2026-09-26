@@ -1,0 +1,45 @@
+# Godot 4+ specific ignores
+.godot/
+
+# Godot-specific ignores
+*.translation
+
+# Imported textures and samples
+.import/
+
+# Mono-specific ignores
+.mono/
+data_*/
+mono_crash.*.json
+
+# Export templates
+*.pck
+*.exe
+*.x86_64
+*.x86
+*.apk
+*.aab
+
+# IDE specific
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# SVG source files (keep in repo)
+!*.svg
+
+# Generated textures from SVG (ignore)
+*.png
+*.jpg
+# Tuiles de sol: PNG sources necessaires au rendu
+!assets/sprites/tiles/*.png
+!empire/assets/sprites/tiles/*.png
+!zoe/assets/sprites/elements/*.png
+!zoe/assets/sprites/players/*.png
+!empire/assets/sprites/players/*.png
