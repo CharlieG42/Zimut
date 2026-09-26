@@ -57,11 +57,20 @@ jobs:
           mkdir -p ~/.local/share/godot/keystores
           keytool -genkey -v -keystore ~/.local/share/godot/keystores/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
 
+      - name: Pre-import Zimut project resources
+        run: cd prototype/zimut && godot --headless --editor --quit
+
       - name: Export Zimut APK (Debug)
         run: cd prototype/zimut && godot --headless --verbose --export-debug "Android" export/Zimut-debug.apk
 
+      - name: Pre-import ZOE project resources
+        run: cd prototype/zoe && godot --headless --editor --quit
+
       - name: Export ZOE APK (Debug)
         run: cd prototype/zoe && godot --headless --verbose --export-debug "Android Debug" export/ZOE-debug.apk
+
+      - name: Pre-import Empire project resources
+        run: cd prototype/empire && godot --headless --editor --quit
 
       - name: Export Empire APK (Debug)
         run: cd prototype/empire && godot --headless --verbose --export-debug "Android" export/Empire-debug.apk
