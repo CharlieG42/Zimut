@@ -73,9 +73,9 @@ func _setup_managers() -> void:
 	ui_manager.init(self)
 
 func _add_child_script(script_path: String, node_name: String) -> Node:
-	var node: Node = Node.new()
+	var script: Script = load(script_path)
+	var node: Node = script.new()
 	node.name = node_name
-	node.set_script(load(script_path))
 	add_child(node)
 	return node
 

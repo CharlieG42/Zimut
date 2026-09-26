@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Waven style: square grass tile (rotated -45 degrees by Cell to look isometric) -->
+  <rect width="100" height="100" fill="#6B8E23"/>
+  <!-- Texture variations -->
+  <rect x="0" y="0" width="50" height="50" fill="#7BA83A" opacity="0.5"/>
+  <rect x="50" y="50" width="50" height="50" fill="#5E7F1E" opacity="0.4"/>
+  <!-- Grass blade details -->
+  <path d="M10,15 l2,-6 l2,6" stroke="#556B2F" stroke-width="1.5" fill="none"/>
+  <path d="M30,25 l2,-6 l2,6" stroke="#556B2F" stroke-width="1.5" fill="none"/>
+  <path d="M70,20 l2,-6 l2,6" stroke="#556B2F" stroke-width="1.5" fill="none"/>
+  <path d="M85,60 l2,-6 l2,6" stroke="#556B2F" stroke-width="1.5" fill="none"/>
+  <path d="M20,70 l2,-6 l2,6" stroke="#556B2F" stroke-width="1.5" fill="none"/>
+  <path d="M60,85 l2,-6 l2,6" stroke="#556B2F" stroke-width="1.5" fill="none"/>
+  <!-- Subtle speckles -->
+  <circle cx="25" cy="45" r="1.5" fill="#8FBC8F"/>
+  <circle cx="55" cy="15" r="1.5" fill="#8FBC8F"/>
+  <circle cx="75" cy="45" r="1.5" fill="#4C7A1B"/>
+  <circle cx="15" cy="90" r="1.5" fill="#8FBC8F"/>
+  <circle cx="45" cy="65" r="1.5" fill="#4C7A1B"/>
+  <circle cx="90" cy="10" r="1.5" fill="#8FBC8F"/>
+</svg>

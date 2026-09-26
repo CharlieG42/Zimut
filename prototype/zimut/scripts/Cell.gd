@@ -53,10 +53,18 @@ func _ready():
 func _load_tile_sprite():
 	# Alterner entre deux types de tuiles (herbe/dirt)
 	var is_grass = (grid_position.x + grid_position.y) % 2 == 0
-	var texture_path = SPRITE_PATH_TILES + ("grass" if is_grass else "dirt") + SPRITE_EXTENSION
+	var tile_name = "grass" if is_grass else "dirt"
+	var texture_path = SPRITE_PATH_TILES + tile_name + SPRITE_EXTENSION
+	
+	if not ResourceLoader.exists(texture_path):
+		# Fallback: tuile SVG carree (rotatee -45 degres par la cellule)
+		var svg_path = SPRITE_PATH_TILES + tile_name + ".svg"
+		if ResourceLoader.exists(svg_path):
+			texture_path = svg_path
 	
 	if ResourceLoader.exists(texture_path):
 		tile_sprite.texture = load(texture_path)
+	
 		# Ajuster la taille
 		if tile_sprite.texture:
 			var tex_size = tile_sprite.texture.get_size()
@@ -244,12 +252,18 @@ func set_in_spell_range(value):
 		in_spell_range = value
 		queue_redraw()
 
-# Détection de clic
+# Détection de clic (souris et tactile Android)
 func _input(event):
+	var is_tap: bool = false
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var local_pos = to_local(get_global_mouse_position())
-		if _is_point_in_diamond(local_pos):
-			emit_signal("cell_clicked", grid_position.x, grid_position.y)
+		is_tap = true
+	elif event is InputEventScreenTouch and event.pressed:
+		is_tap = true
+	if not is_tap:
+		return
+	var local_event: InputEvent = make_input_local(event)
+	if local_event and _is_point_in_diamond(local_event.position):
+		emit_signal("cell_clicked", grid_position.x, grid_position.y)
 
 func _is_point_in_diamond(point):
 	var cx = HALF.x

@@ -62,16 +62,13 @@ func _input(event: InputEvent) -> void:
 	# Pendant une bataille tactique, la carte monde est masquee : ignorer les clics.
 	if not visible or ("in_battle" in empire_manager and empire_manager.in_battle):
 		return
-	var tap_pos: Vector2 = Vector2.ZERO
-	var is_tap: bool = false
-	if event is InputEventScreenTouch and event.pressed:
-		tap_pos = event.position
-		is_tap = true
-	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		tap_pos = event.position
-		is_tap = true
+	var is_tap: bool = (event is InputEventScreenTouch and event.pressed) \
+		or (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT)
 	if not is_tap:
 		return
+	# Conversion en coordonnees locale de la grille (gere la camera de Main.tscn)
+	var local_event: InputEvent = make_input_local(event)
+	var tap_pos: Vector2 = local_event.position if local_event else Vector2.ZERO
 	var grid_pos: Vector2i = screen_to_grid(tap_pos)
 	if grid_pos.x < 0 or grid_pos.x >= empire_manager.GRID_SIZE \
 		or grid_pos.y < 0 or grid_pos.y >= empire_manager.GRID_SIZE:

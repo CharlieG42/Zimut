@@ -212,10 +212,13 @@ func set_in_spell_range(value):
 		queue_redraw()
 
 func _input(event):
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var local_pos = to_local(get_global_mouse_position())
-		if _is_point_in_diamond(local_pos):
-			emit_signal("cell_clicked", grid_position.x, grid_position.y)
+	var is_tap: bool = (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) \
+		or (event is InputEventScreenTouch and event.pressed)
+	if not is_tap:
+		return
+	var local_event: InputEvent = make_input_local(event)
+	if local_event and _is_point_in_diamond(local_event.position):
+		emit_signal("cell_clicked", grid_position.x, grid_position.y)
 
 func _is_point_in_diamond(point):
 	var cx = HALF.x
