@@ -40,13 +40,13 @@ jobs:
           wget https://github.com/godotengine/godot/releases/download/4.1.3-stable/Godot_v4.1.3-stable_export_templates.tpz
           unzip Godot_v4.1.3-stable_export_templates.tpz
 
-      - name: Setup Android SDK and NDK
-        uses: android-actions/setup-android@v3
-        with:
-          android-version: 34
-          ndk-version: 26.2.11394342
-          cmake-version: 3.22.1
-          accept-licenses: true
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install Android platform, NDK and CMake
+        run: |
+          yes | sdkmanager "platforms;android-34" "build-tools;34.0.0" "ndk;26.2.11394342" "cmake;3.22.1" > /dev/null
+          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/26.2.11394342" >> "$GITHUB_ENV"
 
       - name: Setup Java and keystore
         run: |
