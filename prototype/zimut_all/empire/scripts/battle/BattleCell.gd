@@ -9,9 +9,9 @@ class_name BattleCell
 const CELL_SIZE = Vector2i(140, 140)
 const HALF = Vector2(70, 70)
 
-const SPRITE_PATH_PLAYERS = "res://empire/assets/sprites/players/"
-const SPRITE_PATH_ENEMIES = "res://empire/assets/sprites/enemies/"
-const SPRITE_PATH_TILES = "res://empire/assets/sprites/tiles/"
+const SPRITE_PATH_PLAYERS = "res://assets/sprites/players/"
+const SPRITE_PATH_ENEMIES = "res://assets/sprites/enemies/"
+const SPRITE_PATH_TILES = "res://assets/sprites/tiles/"
 const SPRITE_EXTENSION = ".png"
 
 const SELECTION_COLOR = Color(1.0, 0.84, 0.0, 0.9)

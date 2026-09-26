@@ -43,6 +43,9 @@ func _setup_ui_elements() -> void:
 	end_turn_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(end_turn_button)
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
+	var menu_btn: Button = MenuReturnButton.create()
+	menu_btn.menu_requested.connect(_on_menu_pressed)
+	add_child(menu_btn)
 	if player_info_label:
 		var settings := LabelSettings.new()
 		settings.font_size = 36
@@ -128,6 +131,12 @@ func _on_game_ended(victory: bool) -> void:
 
 func _on_back_to_empire_pressed() -> void:
 	back_to_empire_requested.emit()
+
+func _on_menu_pressed() -> void:
+	var empire: Node = get_node_or_null("/root/EmpireManager")
+	if empire:
+		empire._deactivate_for_menu()
+	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
 
 func hide_game_over_panel() -> void:
 	game_over_panel.visible = false

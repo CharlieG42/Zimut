@@ -49,6 +49,14 @@ func _ready() -> void:
 	_setup_class_buttons()
 	_setup_start_button()
 	_update_team_preview()
+	_setup_menu_button()
+
+func _setup_menu_button() -> void:
+	var menu_btn: Button = MenuReturnButton.create()
+	menu_btn.menu_requested.connect(
+		func(): get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+	)
+	add_child(menu_btn)
 
 
 # ─── Chargement des données de classe (CSV si possible, sinon fallback) ────

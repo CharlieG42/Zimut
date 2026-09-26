@@ -39,7 +39,4 @@ Thumbs.db
 *.jpg
 # Tuiles de sol: PNG sources necessaires au rendu
 !assets/sprites/tiles/*.png
-!empire/assets/sprites/tiles/*.png
-!zoe/assets/sprites/elements/*.png
-!zoe/assets/sprites/players/*.png
-!empire/assets/sprites/players/*.png
+!assets/sprites/players/*.png

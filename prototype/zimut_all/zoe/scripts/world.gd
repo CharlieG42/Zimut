@@ -49,7 +49,7 @@ func _create_tile(pos: Vector2i) -> Node2D:
 	tile.position = Vector2(float(pos.x) * CELL_SIZE, float(pos.y) * CELL_SIZE)
 	add_child(tile)
 	var sprite := Sprite2D.new()
-	sprite.texture = load("res://zoe/assets/sprites/elements/grass.png")
+	sprite.texture = load("res://assets/sprites/elements/grass.png")
 	sprite.position = Vector2(CELL_SIZE / 2, CELL_SIZE / 2)
 	tile.add_child(sprite)
 	if pos != PLAYER_START:
@@ -77,7 +77,7 @@ func _add_obstacle(tile: Node2D):
 	var obstacle := Area2D.new()
 	obstacle.name = "Obstacle"
 	var sprite := Sprite2D.new()
-	sprite.texture = load("res://zoe/assets/sprites/elements/rock.png")
+	sprite.texture = load("res://assets/sprites/elements/rock.png")
 	sprite.position = Vector2(CELL_SIZE / 2, CELL_SIZE / 2)
 	obstacle.add_child(sprite)
 	var collision := CollisionShape2D.new()
@@ -90,7 +90,7 @@ func _add_collectible(tile: Node2D, type: String):
 	var collectible := Area2D.new()
 	collectible.name = "Collectible_%s" % type
 	var sprite := Sprite2D.new()
-	sprite.texture = load("res://zoe/assets/sprites/elements/%s.png" % type)
+	sprite.texture = load("res://assets/sprites/elements/%s.png" % type)
 	sprite.position = Vector2(CELL_SIZE / 2, CELL_SIZE / 2)
 	collectible.add_child(sprite)
 	var collision := CollisionShape2D.new()
@@ -113,6 +113,7 @@ func _setup_ui():
 	var layer := CanvasLayer.new()
 	layer.name = "UILayer"
 	add_child(layer)
+	_setup_menu_button(layer)
 	ui = Control.new()
 	ui.name = "UI"
 	ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -157,7 +158,7 @@ func _setup_ui():
 	message_label.name = "MessageLabel"
 	message_label.visible = false
 	ui.add_child(message_label)
-	
+
 	var buttons_hbox := HBoxContainer.new()
 	buttons_hbox.name = "ButtonsContainer"
 	buttons_hbox.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -670,3 +671,13 @@ func _deserialize_quests(quests_data: Dictionary) -> void:
 				var obj_save: Dictionary = quest_save.get("objectives", [])[i]
 				if obj_save:
 					obj["current"] = obj_save.get("current", 0)
+
+
+func _setup_menu_button(layer: CanvasLayer) -> void:
+	var menu_btn: Button = MenuReturnButton.create()
+	menu_btn.menu_requested.connect(_on_menu_pressed)
+	layer.add_child(menu_btn)
+
+func _on_menu_pressed() -> void:
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")

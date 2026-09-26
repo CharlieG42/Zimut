@@ -24,13 +24,13 @@ func init(manager) -> void:
 	_add_random_decorations()
 
 func _load_decoration_textures() -> void:
-	var tree_res: Resource = load("res://empire/assets/tree.svg")
+	var tree_res: Resource = load("res://assets/tree.svg")
 	if tree_res is Texture2D:
 		tree_texture = tree_res as ImageTexture
-	var rock_res: Resource = load("res://empire/assets/rock.svg")
+	var rock_res: Resource = load("res://assets/rock.svg")
 	if rock_res is Texture2D:
 		rock_texture = rock_res as ImageTexture
-	var bush_res: Resource = load("res://empire/assets/bush.svg")
+	var bush_res: Resource = load("res://assets/bush.svg")
 	if bush_res is Texture2D:
 		bush_texture = bush_res as ImageTexture
 

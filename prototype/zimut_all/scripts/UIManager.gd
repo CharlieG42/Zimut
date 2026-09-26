@@ -47,6 +47,10 @@ func _setup_ui_elements() -> void:
 	add_child(end_turn_button)
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 
+	var menu_btn: Button = MenuReturnButton.create()
+	menu_btn.menu_requested.connect(_on_menu_pressed)
+	add_child(menu_btn)
+
 	if player_info_label:
 		var settings := LabelSettings.new()
 		settings.font_size = 36
@@ -193,6 +197,9 @@ func _on_end_turn_pressed() -> void:
 	_clear_spell_range_display()
 	_clear_move_range_display()
 	end_turn_requested.emit()
+
+func _on_menu_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
 
 
 func _on_restart_pressed() -> void:
