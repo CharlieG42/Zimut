@@ -8,12 +8,14 @@ on:
       - 'prototype/zimut/**'
       - 'prototype/zoe/**'
       - 'prototype/empire/**'
+      - 'prototype/zimut_all/**'
   pull_request:
     branches: [ main ]
     paths:
       - 'prototype/zimut/**'
       - 'prototype/zoe/**'
       - 'prototype/empire/**'
+      - 'prototype/zimut_all/**'
 
 env:
   GODOT_VERSION: 4.7.2
@@ -75,6 +77,12 @@ jobs:
           mkdir -p export
           godot --headless --export-debug "Android" export/Empire-debug.apk \
             || godot --headless --export-debug "Android" export/Empire-debug.apk
+      - name: Export Zimut unifie APK (Debug)
+        run: |
+          cd prototype/zimut_all
+          mkdir -p export
+          godot --headless --export-debug "Android" export/Zimut-debug.apk \
+            || godot --headless --export-debug "Android" export/Zimut-debug.apk
 
       - name: Upload Debug APKs
         uses: actions/upload-artifact@v4
@@ -84,6 +92,7 @@ jobs:
             prototype/zimut/export/Zimut-debug.apk
             prototype/zoe/export/ZOE-debug.apk
             prototype/empire/export/Empire-debug.apk
+            prototype/zimut_all/export/Zimut-debug.apk
           retention-days: 7
           if-no-files-found: error
 
@@ -98,6 +107,9 @@ jobs:
       - name: Export Empire APK (Release)
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
         run: cd prototype/empire && godot --headless --verbose --export-release "Android" export/Empire-release.apk
+      - name: Export Zimut unifie APK (Release)
+        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+        run: cd prototype/zimut_all && godot --headless --verbose --export-release "Android" export/Zimut-release.apk
 
       - name: Upload Release APKs
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
@@ -108,5 +120,6 @@ jobs:
             prototype/zimut/export/Zimut-release.apk
             prototype/zoe/export/ZOE-release.apk
             prototype/empire/export/Empire-release.apk
+            prototype/zimut_all/export/Zimut-release.apk
           retention-days: 30
           if-no-files-found: error
