@@ -11,6 +11,8 @@ const CLASS_DATA_PATHS = ["res://data/classes.csv", "user://data/classes.csv"]
 const CRAFT_DATA_PATHS = ["res://data/craft.csv", "user://data/craft.csv"]
 const INVOCATION_DATA_PATHS = ["res://data/invocations.csv", "user://data/invocations.csv"]
 const ENEMY_DATA_PATHS = ["res://data/ennemis.csv", "user://data/ennemis.csv"]
+const SPELL_DATA_PATHS = ["res://data/sorts.csv", "user://data/sorts.csv"]
+const STUFF_DATA_PATHS = ["res://data/stuff.csv", "user://data/stuff.csv"]
 
 var buildings_data: Array = []
 var units_data: Array = []
@@ -19,6 +21,8 @@ var classes_data: Array = []
 var craft_data: Array = []
 var invocations_data: Array = []
 var enemies_data: Array = []
+var spells_data: Array = []
+var items_data: Array = []
 
 var data_loaded: bool = false
 
@@ -51,6 +55,10 @@ func load_all_data() -> void:
 	if not _load_csv(INVOCATION_DATA_PATHS, "invocations_data", "invocations.csv"):
 		success = false
 	if not _load_csv(ENEMY_DATA_PATHS, "enemies_data", "ennemis.csv"):
+		success = false
+	if not _load_csv(SPELL_DATA_PATHS, "spells_data", "sorts.csv"):
+		success = false
+	if not _load_csv(STUFF_DATA_PATHS, "items_data", "stuff.csv"):
 		success = false
 	data_loaded = success
 	data_loaded_successfully.emit()

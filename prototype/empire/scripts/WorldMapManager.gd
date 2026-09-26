@@ -59,6 +59,9 @@ func screen_to_grid(screen_pos: Vector2) -> Vector2i:
 func _input(event: InputEvent) -> void:
 	if empire_manager == null or empire_manager.game_over:
 		return
+	# Pendant une bataille tactique, la carte monde est masquee : ignorer les clics.
+	if not visible or ("in_battle" in empire_manager and empire_manager.in_battle):
+		return
 	var tap_pos: Vector2 = Vector2.ZERO
 	var is_tap: bool = false
 	if event is InputEventScreenTouch and event.pressed:

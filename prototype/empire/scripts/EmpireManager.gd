@@ -26,6 +26,7 @@ var player_divinity: String = ""
 var game_over: bool = false
 var victory: bool = false
 var pending_battle: Dictionary = {}  # contexte de la bataille en cours
+var in_battle: bool = false          # vrai pendant le combat tactique (suspend les ticks)
 
 # Sous-managers (noeuds enfants)
 var world_map_manager: Node
@@ -136,7 +137,7 @@ func _default_garrison(size: int) -> Array:
 	return garrison
 
 func _process(delta: float) -> void:
-	if game_over:
+	if game_over or in_battle:
 		return
 	_tick_accumulator += delta
 	if _tick_accumulator >= TICK_SECONDS:
@@ -195,6 +196,13 @@ func attack_city(target_city: Dictionary, attacking_army: Dictionary) -> void:
 		"attacking_army": attacking_army,
 	}
 	battle_started.emit(target_city, attacking_army)
+	# Le combat tactique est un aller-retour de scene : l'UI Empire (CanvasLayer
+	# enfant de l'autoload) resterait affichée par-dessus la bataille.
+	if ui_manager and ui_manager.has_method("set_ui_visible"):
+		ui_manager.set_ui_visible(false)
+	if world_map_manager:
+		world_map_manager.visible = false
+	in_battle = true
 	battle_bridge.start_battle(target_city, attacking_army)
 
 ## Rapporte l'issue d'une bataille (appele par BattleBridge quand le combat Zimut se termine).
@@ -208,9 +216,13 @@ func resolve_battle(battle_victory: bool) -> void:
 		city_changed.emit(target_city)
 		message_requested.emit("%s conquise !" % target_city["name"])
 	else:
+		# Echec : la garnison de la ville decime une partie de l'armee attaquante.
+		if army_manager != null and army_manager.has_method("apply_battle_losses"):
+			army_manager.apply_battle_losses()
 		message_requested.emit("Echec de la conquete de %s." % target_city["name"])
 	battle_resolved.emit(battle_victory, target_city)
 	pending_battle = {}
+	in_battle = false
 
 ## Action de reconnaissance (espionnage) sur une ville cible (emprunt MillionLords).
 func scout_city(target_city: Dictionary) -> Dictionary:
@@ -233,6 +245,7 @@ func save_game() -> bool:
 	file.store_var(resources)
 	file.store_var(cities)
 	file.store_var(heroes)
+	file.store_var(army_manager.army_units)
 	file.store_var(favor_points)
 	file.store_var(player_divinity)
 	file.close()
@@ -247,10 +260,15 @@ func load_game() -> bool:
 	resources = file.get_var()
 	cities = file.get_var()
 	heroes = file.get_var()
+	if army_manager:
+		army_manager.army_units = file.get_var()
+	else:
+		file.get_var()
 	favor_points = int(file.get_var())
 	player_divinity = file.get_var()
 	file.close()
 	resources_changed.emit(resources)
+	city_changed.emit({})
 	return true
 
 func delete_save() -> void:

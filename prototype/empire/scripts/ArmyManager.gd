@@ -1,10 +1,15 @@
 extends Node
+
 ## ArmyManager.gd - Gestion des heros, armees et garnisons du mode Empire.
 ## Les heros sont des classes Zimut (classes.csv) qui menent les armees en combat.
 ## Les unites proviennent de unites.csv (humaines) et invocations.csv (mythiques, Grepolis).
 ## L'equipement provient de craft.csv / stuff.csv.
+## Etape 2: l'armee recrutee (heros + unites) constitue l'equipe attaquante
+## envoyee dans le combat tactique Zimut via BattleBridge.
 
 var empire_manager: Node
+
+var army_units: Array = []  # unites d'armee recrutees (unites.csv)
 
 func init(manager: Node) -> void:
 	empire_manager = manager
@@ -38,6 +43,8 @@ func recruit_hero(class_name: String, level: int) -> Dictionary:
 	return hero
 
 ## Recrute une unite d'armee (humaine ou mythique) si les ressources sont suffisantes.
+## Etape 2: l'unite rejoint l'armee du joueur (army_units) et pourra participer
+## a l'assaut si le joueur a moins de 3 heros.
 func recruit_unit(unit_name: String) -> Dictionary:
 	var loader: Node = _data_loader()
 	if loader == null:
@@ -50,8 +57,8 @@ func recruit_unit(unit_name: String) -> Dictionary:
 	var cost_fer: int = int(unit_data.get("Coût fer", "0"))
 	var cost_bois: int = int(unit_data.get("Coût bois", "0"))
 	if empire_manager.resources["or"] < cost_or \
-		or empire_manager.resources["fer"] < cost_fer \
-		or empire_manager.resources["bois"] < cost_bois:
+	or empire_manager.resources["fer"] < cost_fer \
+	or empire_manager.resources["bois"] < cost_bois:
 		empire_manager.message_requested.emit("Ressources insuffisantes pour %s." % unit_name)
 		return {}
 	empire_manager.resources["or"] -= cost_or
@@ -64,21 +71,21 @@ func recruit_unit(unit_name: String) -> Dictionary:
 		"pv": int(unit_data.get("PV", "80")),
 		"force": int(unit_data.get("Attaque", "10")),
 		"defense": int(unit_data.get("Défense", "5")),
+		"pa": int(unit_data.get("PA", "3")),
+		"pm": int(unit_data.get("PM", "2")),
 		"type": unit_data.get("Type", "Humain"),
 	}
+	army_units.append(unit)
 	empire_manager.message_requested.emit("Unite %s recrutee." % unit_name)
 	return unit
 
-## Construit l'equipe attaquante (3 heros menant l'assaut) au format attendu par
-## GameManager.set_custom_team() du mode Zimut (cf GameManager.gd:130).
-## Les 3 premiers heros recrutes forment l'equipe; sinon on prend des heros par defaut.
+## Construit l'equipe attaquante (3 membres menant l'assaut) au format attendu
+## par BattleGameManager (prototype/empire/scripts/battle/).
+## Les 3 premiers heros recrutes forment l'equipe; a defaut, les unites d'armee
+## les plus fortes complètent, puis des heros par defaut.
 func build_attacking_team() -> Dictionary:
 	var team: Array = []
-	var chosen: Array = empire_manager.heroes.slice(0, 3)
-	if chosen.size() < 3:
-		# Heros par defaut (Tank, Assassin, Mage) si pas assez de recrues
-		chosen = _default_heroes()
-	for hero: Dictionary in chosen:
+	for hero: Dictionary in empire_manager.heroes.slice(0, 3):
 		team.append({
 			"classe": hero["classe"],
 			"max_pv": hero["max_pv"],
@@ -90,10 +97,35 @@ func build_attacking_team() -> Dictionary:
 			"pa": hero["pa"],
 			"pm": hero["pm"],
 		})
+	if team.size() < 3:
+		for unit: Dictionary in _strongest_units(3 - team.size()):
+			team.append({
+				"classe": unit["name"],
+				"max_pv": unit["pv"],
+				"force": unit["force"],
+				"intelligence": 5,
+				"agilite": 10,
+				"sagesse": 10,
+				"defense": unit["defense"],
+				"pa": unit["pa"],
+				"pm": unit["pm"],
+			})
+	if team.size() < 3:
+		for hero: Dictionary in _default_heroes().slice(0, 3 - team.size()):
+			team.append(hero)
 	return {
 		"team": team,
-		"units": [],  # unites d'armee accompagnant (etape 2)
+		"units": army_units,
 	}
+
+## Unites d'armee les plus fortes (somme pv + force + defense), pour completer l'assaut.
+func _strongest_units(count: int) -> Array:
+	var sorted: Array = army_units.duplicate()
+	sorted.sort_custom(func(a, b): return _unit_power(a) > _unit_power(b))
+	return sorted.slice(0, count)
+
+func _unit_power(unit: Dictionary) -> int:
+	return int(unit.get("pv", 0)) + int(unit.get("force", 0)) + int(unit.get("defense", 0))
 
 func _default_heroes() -> Array:
 	var loader: Node = _data_loader()
@@ -122,6 +154,16 @@ func _fallback_class(classe: String) -> Dictionary:
 		"Agilité (Vit. Atk)": "12", "Sagesse (Précision)": "10", "Défense": "12",
 		"PA": "5", "PM": "3", "Classe": classe,
 	}
+
+## Pertes retenues sur l'armee attaquante apres un echec de conquete
+## (la garnison de la ville decime les unites engagees : 1 unite perdue).
+func apply_battle_losses() -> void:
+	if army_units.size() > 0:
+		var lost: Dictionary = army_units.pop_back()
+		if empire_manager:
+			empire_manager.message_requested.emit("%s perdue au combat." % lost.get("name", "Unite"))
+	elif empire_manager and empire_manager.heroes.size() > 3:
+		empire_manager.heroes.pop_back()
 
 func _data_loader() -> Node:
 	return get_node_or_null("/root/EmpireDataLoader")

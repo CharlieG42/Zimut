@@ -1,0 +1,10 @@
+Nom,Niveau requis,Coût or,Coût fer,Coût bois,PV,Attaque,Défense,PA,PM,Type,Biome
+Soldat,1,40,15,0,80,12,8,3,2,Humain,Plaine
+Archer,2,50,10,20,60,15,4,3,3,Humain,Forêt
+Lancier,2,60,20,10,100,10,15,3,2,Humain,Plaine
+Cavalier,3,120,30,20,140,20,10,4,4,Humain,Plaine
+Loup,1,30,5,10,80,20,10,4,3,Mythique,Forêt
+Tortue,1,40,10,0,150,10,30,4,3,Mythique,Forêt
+Sirène,2,80,0,0,70,15,15,4,3,Mythique,Désert
+Ange,3,120,0,0,90,18,20,4,3,Mythique,Montagne
+Centaure,4,160,20,10,120,22,25,4,3,Mythique,Plaine

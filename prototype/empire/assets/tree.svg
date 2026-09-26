@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Waven Style: Isometric tree with warm tones -->
+  
+  <!-- Trunk (isometric) -->
+  <polygon points="45,80 50,40 55,80" fill="#654321"/>
+  <polygon points="47,80 50,40 53,80" fill="#8B4513"/>
+  
+  <!-- Canopy (isometric layers) -->
+  <polygon points="20,60 50,20 80,60 50,50" fill="#228B22" opacity="0.9"/>
+  <polygon points="25,65 50,25 75,65 50,55" fill="#32CD32" opacity="0.9"/>
+  <polygon points="30,70 50,30 70,70 50,60" fill="#90EE90" opacity="0.9"/>
+  
+  <!-- Highlights -->
+  <polygon points="35,55 50,35 65,55 50,45" fill="#ADFF2F" fill-opacity="0.5"/>
+  
+  <!-- Shadow -->
+  <polygon points="40,85 50,95 60,85 50,75" fill="#2F4F4F" fill-opacity="0.4"/>
+</svg>

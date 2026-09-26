@@ -1,40 +1,31 @@
 extends Node
+
 ## BattleBridge.gd - Pont entre le mode Empire et le combat tactique Zimut.
 ##
-## ROLE: chaque conquete declenche une instance du combat Zimut existant
-## (prototype/zimut/scripts/GameManager.gd) pour resoudre la bataille.
+## ROLE: chaque conquete declenche une instance du combat tactique Zimut
+## (portage integre dans prototype/empire/scripts/battle/, Etape 2).
 ##
-## POINT D'ANCRAGE: le combat Zimut supporte deja une equipe personnalisee via
-##   GameManager.set_custom_team(team_data: Array)
-## cf. prototype/zimut/scripts/GameManager.gd:130
-## Le tableau attendu contient 3 dicts:
-##   { "classe": "Tank", "max_pv": int, "force": int, "intelligence": int,
-##     "agilite"/"agility": int, "sagesse"/"wisdom": int, "defense": int,
-##     "pa": int, "pm": int, "color": Color (optionnel) }
-## init_entities() (GameManager.gd:221) peuple alors players[] depuis custom_team
-## et enemies[] depuis les types ennemis par defaut.
+## POINT D'ANCRAGE: le combat supporte une equipe personnalisee via
+##   BattleGameManager.set_custom_team(team_data: Array)
+## et, depuis l'Etape 2, une garnison personnalisee via
+##   BattleGameManager.set_custom_enemy_team(garrison: Array)
+## (parallele a custom_team, cf DESIGN_EMPIRE.md §7 - point d'attention resolu).
 ##
-## POUR LA GARNISON PERSONNALISEE: GameManager peuple enemies[] en dur dans
-## init_entities(). Une extension minimale (parallele a custom_team) est necessaire
-## pour injecter une garnison reelle depuis la ville ciblee. Documentee en §7 du
-#  DESIGN_EMPIRE.md (risque) et planifiee en etape 2.
-##
-## NOTE D'INTEGRATION: les modes Zimut et Empire sont des projets Godot separes
-## (prototype/zimut/project.godot, prototype/empire/project.godot). Le pont de combat
-#  reel (change_scene vers la scene de combat Zimut) suppose un partage de scripts
-#  entre les deux projets. Deux options pour l'etape 2:
-#   (a) deplacer les scripts de combat vers prototype/shared/scripts/ et les charger
-#       depuis les deux projets via un chemin commun;
-#   (b) fusionner les modes en un seul projet Godot avec selection de mode au lancement.
-## La V1 (squelette) fournit une resolution simulee pour valider la boucle Empire,
-#  plus l'API complete du pont pour l'integration reelle.
+## FLUX DE COMBAT (Etape 2):
+##   1. EmpireManager.attack_city() -> start_battle()
+##   2. start_battle() construit custom_team (armee attaquante recrutee via
+##      ArmyManager) et la garnison ennemie (unites reelles de la ville),
+##      puis change de scene vers res://scenes/Battle.tscn.
+##   3. BattleMain.gd recupere le contexte via get_custom_team_for_gamemanager()
+##      / get_enemy_garrison_for_gamemanager() et peuple le combat.
+##   4. A la fin du combat, BattleMain appelle on_zimut_battle_ended(victory),
+##      qui remonte l'issue au EmpireManager (conquete ou echec).
 
 var empire_manager: Node
 var army_manager: Node
 var current_battle_context: Dictionary = {}
 
 signal battle_ready(team: Array, enemy_garrison: Array)
-signal battle_simulated(victory: bool)
 
 func init(manager: Node) -> void:
 	empire_manager = manager
@@ -51,15 +42,16 @@ func start_battle(target_city: Dictionary, attacking_army: Dictionary) -> void:
 		"enemy_garrison": enemy_garrison,
 	}
 	battle_ready.emit(team, enemy_garrison)
-	# V1 squelette: resolution simulee (pont reel en etape 2, voir NOTE ci-dessus).
-	_simulate_battle(team, enemy_garrison)
+	# Etape 2: lancement reel de la scene de combat tactique.
+	get_tree().change_scene_to_file("res://scenes/Battle.tscn")
 
-## Construit le custom_team au format exact attendu par GameManager.set_custom_team().
+## Construit le custom_team au format attendu par BattleGameManager.
+## L'armee attaquante peut contenir des heros (classes Zimut) et des unites
+## (unites.csv) ; les 3 premiers membres forment l'equipe de combat.
 func _build_custom_team(attacking_army: Dictionary) -> Array:
 	var team: Array = attacking_army.get("team", [])
 	if team.size() == 3:
 		return team
-	# Fallback: equipe par defaut Tank/Assassin/Mage (cf ArmyManager)
 	if army_manager != null:
 		return army_manager.build_attacking_team()["team"]
 	return [
@@ -72,7 +64,7 @@ func _build_custom_team(attacking_army: Dictionary) -> Array:
 	]
 
 ## Construit la garnison ennemie depuis la ville ciblee.
-## V1: garnison composee d'unites de unites.csv / ennemis.csv basees sur le niveau de la ville.
+## La garnison est composee d'unites reelles (unites.csv / ennemis.csv).
 func _build_enemy_garrison(target_city: Dictionary) -> Array:
 	var garrison: Array = target_city.get("garrison", [])
 	if garrison.is_empty():
@@ -90,26 +82,15 @@ func _default_enemy_garrison(level: int) -> Array:
 		})
 	return garrison
 
-## Resolution simulee de la bataille (V1 squelette).
-## En etape 2, cette methode sera remplacee par le lancement reel de la scene de combat
-## Zimut et l'ecoute du signal game_ended(victory) de GameManager.
-func _simulate_battle(team: Array, enemy_garrison: Array) -> void:
-	# Heuristique simple: somme des PV de l'equipe vs somme des PV de la garnison.
-	var team_pv: int = 0
-	for member: Dictionary in team:
-		team_pv += int(member.get("max_pv", 80))
-	var enemy_pv: int = 0
-	for unit: Dictionary in enemy_garrison:
-		enemy_pv += int(unit.get("pv", 50))
-	var battle_victory: bool = team_pv >= enemy_pv
-	battle_simulated.emit(battle_victory)
-	empire_manager.resolve_battle(battle_victory)
-
-## API publique pour l'integration reelle (etape 2).
-## A appeler quand le combat Zimut se termine (signal game_ended(victory) de GameManager).
+## API publique pour l'integration reelle (appele par BattleMain.gd).
+## Remonte l'issue du combat Zimut au EmpireManager.
 func on_zimut_battle_ended(zimut_victory: bool) -> void:
 	empire_manager.resolve_battle(zimut_victory)
 
-## API publique: donnees pretes a injecter dans GameManager.set_custom_team().
+## API publique: donnees pretes a injecter dans BattleGameManager.
 func get_custom_team_for_gamemanager() -> Array:
 	return current_battle_context.get("team", [])
+
+## API publique: garnison prete a injecter dans BattleGameManager.
+func get_enemy_garrison_for_gamemanager() -> Array:
+	return current_battle_context.get("enemy_garrison", [])

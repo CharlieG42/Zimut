@@ -224,9 +224,24 @@ Zeus,Foudre,150,Frappe divine sur garnison,+10% or,+25% dégâts magiques,Foudre
 - Extension `database/data_manager.py` pour la persistance Empire.
 - Pont `BattleBridge` documenté et fonctionnel avec `set_custom_team()` existant.
 
-### Étape 2 — Démo jouable (suite)
+### Étape 2 — Démo jouable (livrée)
 - Carte monde + capitale + villages neutres, économie passive, recrutement,
   attaque d'un village neutre → combat Zimut → conquête.
+- **Combat tactique Zimut intégré** : portage du combat dans 
+  `prototype/empire/scripts/battle/` (`BattleGameManager`, `BattleGridManager`, 
+  `BattleUIManager`, `BattleTurnManager`, `BattleCell`, `BattleSpellButton`, 
+  orchestrateur `BattleMain.gd`) + scène `scenes/Battle.tscn`.
+- **Garnison personnalisée** : `BattleGameManager.set_custom_enemy_team()` 
+  (parallèle à `set_custom_team()`) peuple les ennemis depuis la garnison 
+  réelle de la ville ciblée — résout le point d'attention §7.
+- **Recrutement utile au combat** : les héros recrutés forment l'escouade ; 
+  les unités (`unites.csv`) complètent l'assaut à défaut de héros ; 
+  l'échec d'une conquête inflige des pertes à l'armée.
+- UI Empire : sélection de classe d'héros et d'unité à recruter, affichage 
+  de l'armée, masquage de l'UI stratégique pendant la bataille.
+- CI : export Android du projet Empire ajouté à la chaîne 
+  `.github/workflows/build-android-apks.yml`.
+- Preset d'export Android : `prototype/empire/export_presets.cfg`.
 
 ### Étape 3 — Profondeur
 - Seigneurs IA (expansionniste/défensif/agressif), espionnage, bâtiments,
@@ -236,10 +251,10 @@ Zeus,Foudre,150,Frappe divine sur garnison,+10% or,+25% dégâts magiques,Foudre
 
 ## 7. Risques et points d'attention
 
-- **Injection de garnison personnalisée** : `GameManager.init_entities()` peuple
-  `enemies[]` en dur. La V1 documente l'API d'extension dans `BattleBridge.gd` ;
-  une modification minimale de `GameManager` sera nécessaire en étape 2 pour
-  accepter une `custom_enemy_team` (parallèle à `custom_team`).
+- **Injection de garnison personnalisée** : résolu en étape 2 — le portage 
+  `BattleGameManager` du mode Empire accepte une `custom_enemy_team` 
+  (parallèle à `custom_team`) et `BattleBridge` y injecte la garnison réelle 
+  de la ville ciblée. Le `GameManager` du mode Zimut reste inchangé.
 - **Taille de carte vs performance Android** : garder la grille monde modeste
   (ex. 12×12 régions) sur mobile.
 - **Équilibrage économique** : sans timers, le rythme de production doit être calibré

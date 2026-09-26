@@ -1,0 +1,67 @@
+Type,Nom,Niveau requis,Ressource 1,Quantité 1,Ressource 2,Quantité 2,Ressource 3,Quantité 3,Coût or
+Arme (1 main),Dague en fer,5,Fer,10,,,,
+Arme (1 main),Épée du chasseur,10,Fer,15,Bois,5,,,50
+Arme (1 main),Lame de l'assassin,15,Fer,20,Cuir,10,,,100
+Arme (1 main),Massue du tank,20,Fer,25,Bois,15,,,150
+Arme (1 main),Bâton du mage,25,Bois,20,Magie,10,,,200
+Arme (1 main),Épée maudite,30,Fer,30,Or,5,,,250
+Arme (1 main),Lame légendaire,35,Or,20,Fer,35,Magie,15,400
+Arme (1 main),Épée de lumière,40,Or,25,Magie,20,Cuir,10,500
+Arme (1 main),Dague empoisonnée,45,Or,30,Venin,15,Bois,10,600
+Arme (1 main),Épée du roi,50,Or,40,Fer,40,Magie,25,800
+Arme (2 mains),Épée à deux mains,10,Fer,30,,,,
+Arme (2 mains),Massue géante,20,Fer,50,Bois,30,,,300
+Arme (2 mains),Lance du chevalier,25,Fer,40,Bois,20,,,400
+Arme (2 mains),Hache de guerre,30,Fer,60,,,,
+Arme (2 mains),Bâton runique,35,Or,30,Fer,20,Magie,10,500
+Arme (2 mains),Épée légendaire,45,Or,50,Fer,40,Magie,20,800
+Arme (2 mains),Marteau de tonnerre,50,Or,60,Fer,30,,,1000
+Bouclier,Bouclier en bois,5,Bois,10,,,,
+Bouclier,Bouclier en fer,10,Fer,20,,,,
+Bouclier,Bouclier du tank,15,Fer,30,Cuir,15,,,200
+Bouclier,Bouclier magique,20,Fer,25,Magie,15,,,250
+Bouclier,Bouclier de lumière,25,Fer,30,Magie,20,Cuir,5,300
+Bouclier,Bouclier runique,30,Or,20,Fer,15,Magie,10,400
+Bouclier,Bouclier du roi,35,Or,30,Fer,25,Magie,15,500
+Bouclier,Bouclier sacré,40,Or,40,Fer,30,Magie,15,600
+Bouclier,Bouclier du roi légendaire,45,Or,50,Fer,40,Magie,20,800
+Bouclier,Bouclier ultime,50,Or,60,Fer,50,Magie,25,1000
+Armure,Armure en cuir,5,Cuir,15,,,,
+Armure,Armure en fer,10,Fer,30,,,,
+Armure,Armure du tank,15,Fer,50,Cuir,20,,,300
+Armure,Armure du chasseur,20,Fer,40,Cuir,10,Bois,5,350
+Armure,Armure magique,25,Fer,30,Magie,20,Cuir,10,400
+Armure,Armure de lumière,30,Or,30,Fer,20,Magie,15,500
+Armure,Armure runique,35,Or,40,Fer,30,Magie,20,600
+Armure,Armure légendaire,40,Or,50,Fer,40,Magie,25,800
+Armure,Armure sacrée,45,Or,60,Fer,50,Magie,30,1000
+Armure,Armure ultime,50,Or,70,Fer,60,Magie,35,1200
+Bottes,Bottes en cuir,5,Cuir,10,,,,
+Bottes,Bottes du chasseur,10,Cuir,20,Bois,10,,,150
+Bottes,Bottes magiques,15,Cuir,25,Magie,10,,,200
+Bottes,Bottes de lumière,20,Or,15,Cuir,10,Magie,5,250
+Bottes,Bottes du vent,25,Cuir,30,Or,15,,,400
+Bottes,Bottes runiques,30,Or,20,Cuir,15,Magie,10,500
+Bottes,Bottes sacrées,40,Or,30,Cuir,20,Magie,15,600
+Bottes,Bottes ultimes,45,Or,40,Cuir,25,Magie,20,800
+Bottes,Bottes de vitesse,50,Or,50,Cuir,30,Magie,25,1000
+Casque,Casque en cuir,5,Cuir,10,,,,
+Casque,Casque en fer,10,Fer,20,,,,
+Casque,Casque du guerrier,15,Fer,30,Cuir,10,,,200
+Casque,Chapeau du mage,20,Magie,25,Cuir,10,,,250
+Casque,Casque du chasseur,25,Cuir,30,Bois,15,,,300
+Casque,Casque runique,30,Or,20,Fer,15,Magie,10,400
+Casque,Casque du roi,35,Or,30,Fer,25,Magie,15,500
+Casque,Casque de lumière,40,Or,40,Fer,30,Magie,20,600
+Casque,Casque noir,45,Or,50,Fer,40,Magie,25,800
+Casque,Casque légendaire,50,Or,60,Fer,50,Magie,30,1000
+Accessoire,Bague du serpent,5,Venin,5,,,,
+Accessoire,Collier de force,10,Fer,10,,,,
+Accessoire,Bague de sagesse,15,Magie,10,,,,
+Accessoire,Collier de vie,20,Magie,15,,,,
+Accessoire,Bague de magie,25,Magie,20,,,,
+Accessoire,Collier de défense,30,Fer,20,,,,
+Accessoire,Bague de l'assassin,35,Venin,15,Or,15,,,500
+Accessoire,Collier de mana,40,Magie,25,Or,15,,,600
+Accessoire,Bague de résistance,45,Or,20,Magie,15,Cuir,10,700
+Accessoire,Collier légendaire,50,Or,30,Magie,20,Fer,10,800
