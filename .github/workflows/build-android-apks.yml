@@ -73,7 +73,10 @@ jobs:
         run: cd prototype/empire && godot --headless --editor --quit
 
       - name: Export Empire APK (Debug)
-        run: cd prototype/empire && godot --headless --verbose --export-debug "Android" export/Empire-debug.apk
+        run: |
+          cd prototype/empire
+          mkdir -p export
+          godot --headless --verbose --export-debug "Android" export/Empire-debug.apk
 
       - name: Upload Debug APKs
         uses: actions/upload-artifact@v4
