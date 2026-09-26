@@ -40,3 +40,5 @@ move_down={"deadzone": 0.5,"events": []}
 [rendering]
 
 2d/renderer/2d/texture_filter_mode="nearest"
+
+textures/vram_compress/import_etc2_astc=true

@@ -52,3 +52,4 @@ move_down={
 [rendering]
 
 2d/renderer/2d/texture_filter_mode="nearest"
+textures/vram_compress/import_etc2_astc=true

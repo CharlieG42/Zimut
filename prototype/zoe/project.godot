@@ -47,3 +47,7 @@ move_down={
 "deadzone": 0.5,
 "events": []
 }
+
+[rendering]
+
+textures/vram_compress/import_etc2_astc=true
