@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bj3iww3k8tk12"
+
+[deps]
+
+files=["res://data/ennemis.Niveau.translation", "res://data/ennemis.PV.translation", "res://data/ennemis.Attaque.translation", "res://data/ennemis.Défense.translation", "res://data/ennemis.PA.translation", "res://data/ennemis.PM.translation", "res://data/ennemis.XP.translation", "res://data/ennemis.Biome.translation", "res://data/ennemis.Effets spéciaux.translation"]
+
+source_file="res://data/ennemis.csv"
+dest_files=["res://data/ennemis.Niveau.translation", "res://data/ennemis.PV.translation", "res://data/ennemis.Attaque.translation", "res://data/ennemis.Défense.translation", "res://data/ennemis.PA.translation", "res://data/ennemis.PM.translation", "res://data/ennemis.XP.translation", "res://data/ennemis.Biome.translation", "res://data/ennemis.Effets spéciaux.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

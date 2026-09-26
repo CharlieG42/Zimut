@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://dtxepllxxbfqa"
+
+[deps]
+
+files=["res://data/unites.Niveau requis.translation", "res://data/unites.Coût or.translation", "res://data/unites.Coût fer.translation", "res://data/unites.Coût bois.translation", "res://data/unites.PV.translation", "res://data/unites.Attaque.translation", "res://data/unites.Défense.translation", "res://data/unites.PA.translation", "res://data/unites.PM.translation", "res://data/unites.Type.translation", "res://data/unites.Biome.translation"]
+
+source_file="res://data/unites.csv"
+dest_files=["res://data/unites.Niveau requis.translation", "res://data/unites.Coût or.translation", "res://data/unites.Coût fer.translation", "res://data/unites.Coût bois.translation", "res://data/unites.PV.translation", "res://data/unites.Attaque.translation", "res://data/unites.Défense.translation", "res://data/unites.PA.translation", "res://data/unites.PM.translation", "res://data/unites.Type.translation", "res://data/unites.Biome.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true
