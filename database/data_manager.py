@@ -308,6 +308,172 @@ class ZimutDataManager:
 
 # ==================== Fonction utilitaire pour tester le gestionnaire ====================
 
+    # ==================== Mode Empire / Conquete ====================
+    
+    def _ensure_empire_tables(self):
+        """Cree les tables de sauvegarde Empire si elles n'existent pas (persistance solo)."""
+        self.conn.executescript("""
+            CREATE TABLE IF NOT EXISTS empire_save (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                resources_json TEXT,
+                cities_json TEXT,
+                heroes_json TEXT,
+                favor_points INTEGER DEFAULT 0,
+                player_divinity TEXT,
+                updated_at TEXT DEFAULT (datetime('now'))
+            );
+            CREATE TABLE IF NOT EXISTS empire_buildings (
+                name TEXT PRIMARY KEY,
+                type TEXT,
+                level_required INTEGER,
+                cost_gold INTEGER,
+                cost_iron INTEGER,
+                cost_wood INTEGER,
+                cost_magic INTEGER,
+                prod_gold INTEGER,
+                prod_iron INTEGER,
+                prod_wood INTEGER,
+                effect TEXT,
+                description TEXT
+            );
+            CREATE TABLE IF NOT EXISTS empire_units (
+                name TEXT PRIMARY KEY,
+                level_required INTEGER,
+                cost_gold INTEGER,
+                cost_iron INTEGER,
+                cost_wood INTEGER,
+                pv INTEGER,
+                attack INTEGER,
+                defense INTEGER,
+                pa INTEGER,
+                pm INTEGER,
+                type TEXT,
+                biome TEXT
+            );
+            CREATE TABLE IF NOT EXISTS empire_divinities (
+                name TEXT PRIMARY KEY,
+                favor TEXT,
+                cost_favor INTEGER,
+                effect TEXT,
+                bonus_production TEXT,
+                bonus_combat TEXT,
+                bonus_spell TEXT
+            );
+        """)
+        self.conn.commit()
+    
+    def save_empire_state(self, resources: Dict, cities: List[Dict],
+                          heroes: List[Dict], favor_points: int,
+                          player_divinity: str) -> bool:
+        """Sauvegarde l'etat complet du mode Empire (slot unique)."""
+        import json
+        self._ensure_empire_tables()
+        self.conn.execute("""
+            INSERT INTO empire_save (id, resources_json, cities_json, heroes_json,
+                                     favor_points, player_divinity, updated_at)
+            VALUES (1, ?, ?, ?, ?, ?, datetime('now'))
+            ON CONFLICT(id) DO UPDATE SET
+                resources_json=excluded.resources_json,
+                cities_json=excluded.cities_json,
+                heroes_json=excluded.heroes_json,
+                favor_points=excluded.favor_points,
+                player_divinity=excluded.player_divinity,
+                updated_at=datetime('now')
+        """, (
+            json.dumps(resources), json.dumps(cities), json.dumps(heroes),
+            favor_points, player_divinity
+        ))
+        self.conn.commit()
+        return True
+    
+    def load_empire_state(self) -> Optional[Dict[str, Any]]:
+        """Charge l'etat sauvegarde du mode Empire, ou None si absent."""
+        import json
+        self._ensure_empire_tables()
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM empire_save WHERE id = 1")
+        row = cursor.fetchone()
+        if not row:
+            return None
+        return {
+            "resources": json.loads(row["resources_json"]),
+            "cities": json.loads(row["cities_json"]),
+            "heroes": json.loads(row["heroes_json"]),
+            "favor_points": row["favor_points"],
+            "player_divinity": row["player_divinity"],
+        }
+    
+    def delete_empire_state(self) -> None:
+        """Supprime la sauvegarde Empire."""
+        self._ensure_empire_tables()
+        self.conn.execute("DELETE FROM empire_save WHERE id = 1")
+        self.conn.commit()
+    
+    def import_empire_csv_data(self, data_dir: str) -> bool:
+        """Importe les CSV Empire (batiments, unites, divinites) dans la base.
+
+        Les en-tetes CSV contiennent des espaces/accents non valides pour les
+        parametres nommes SQLite, on utilise donc un mapping positionnel par index.
+        """
+        import csv
+        from pathlib import Path
+        self._ensure_empire_tables()
+        d = Path(data_dir)
+        # Batiments: 12 colonnes dans l'ordre du CSV
+        bld_path = d / "batiments.csv"
+        if bld_path.exists():
+            self.conn.execute("DELETE FROM empire_buildings")
+            with open(bld_path, encoding="utf-8") as f:
+                placeholders = ",".join(["?"] * 12)
+                for row in csv.reader(f):
+                    if not row or row[0].startswith("Nom"):
+                        continue
+                    self.conn.execute(
+                        f"INSERT INTO empire_buildings VALUES ({placeholders})", row)
+        # Unites: 12 colonnes dans l'ordre du CSV
+        unit_path = d / "unites.csv"
+        if unit_path.exists():
+            self.conn.execute("DELETE FROM empire_units")
+            with open(unit_path, encoding="utf-8") as f:
+                placeholders = ",".join(["?"] * 12)
+                for row in csv.reader(f):
+                    if not row or row[0].startswith("Nom"):
+                        continue
+                    self.conn.execute(
+                        f"INSERT INTO empire_units VALUES ({placeholders})", row)
+        # Divinites: 7 colonnes dans l'ordre du CSV
+        div_path = d / "divinites.csv"
+        if div_path.exists():
+            self.conn.execute("DELETE FROM empire_divinities")
+            with open(div_path, encoding="utf-8") as f:
+                placeholders = ",".join(["?"] * 7)
+                for row in csv.reader(f):
+                    if not row or row[0].startswith("Nom"):
+                        continue
+                    self.conn.execute(
+                        f"INSERT INTO empire_divinities VALUES ({placeholders})", row)
+        self.conn.commit()
+        return True
+    
+    def get_all_empire_buildings(self) -> List[Dict[str, Any]]:
+        self._ensure_empire_tables()
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM empire_buildings")
+        return [dict(row) for row in cursor.fetchall()]
+    
+    def get_all_empire_units(self) -> List[Dict[str, Any]]:
+        self._ensure_empire_tables()
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM empire_units")
+        return [dict(row) for row in cursor.fetchall()]
+    
+    def get_all_empire_divinities(self) -> List[Dict[str, Any]]:
+        self._ensure_empire_tables()
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM empire_divinities")
+        return [dict(row) for row in cursor.fetchall()]
+
+
 def test_data_manager():
     """Teste le gestionnaire de données."""
     print("Test du gestionnaire de données Zimut...")

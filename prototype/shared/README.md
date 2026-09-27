@@ -1,8 +1,9 @@
 # Shared Resources
 
-Ce dossier contient les **assets et code partages** entre les deux modes du jeu WildZimut:
+Ce dossier contient les **assets et code partages** entre les trois modes du jeu WildZimut:
 - Zimut (Mode Combat)
 - ZOE (Mode Aventure)
+- Empire (Mode Conquete / strategie macro - solo/PvE)
 
 ---
 

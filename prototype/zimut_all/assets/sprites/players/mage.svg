@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 110" width="80" height="110">
+  <defs>
+    <radialGradient id="mShadow" cx="50%" cy="100%" r="40%">
+      <stop offset="0%" stop-color="#000" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mRobe" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#8844DD"/>
+      <stop offset="50%"  stop-color="#5522AA"/>
+      <stop offset="100%" stop-color="#220055"/>
+    </linearGradient>
+    <linearGradient id="mHat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#6633CC"/>
+      <stop offset="100%" stop-color="#110033"/>
+    </linearGradient>
+    <linearGradient id="mOrb" x1="20%" y1="20%" x2="80%" y2="80%">
+      <stop offset="0%"   stop-color="#EEDDFF"/>
+      <stop offset="40%"  stop-color="#AA66FF"/>
+      <stop offset="100%" stop-color="#4400AA"/>
+    </linearGradient>
+    <radialGradient id="mOrbGlow" cx="35%" cy="35%" r="65%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="50%"  stop-color="#CC88FF" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#6600CC" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="mEye" cx="30%" cy="30%" r="70%">
+      <stop offset="0%"   stop-color="#DDAAFF"/>
+      <stop offset="100%" stop-color="#8800FF"/>
+    </radialGradient>
+    <filter id="mBlur"><feGaussianBlur stdDeviation="2.5"/></filter>
+    <filter id="mGlow"><feGaussianBlur stdDeviation="3"/></filter>
+    <filter id="mSoftGlow"><feGaussianBlur stdDeviation="1.5"/></filter>
+  </defs>
+
+  <!-- Ombre sol -->
+  <ellipse cx="38" cy="107" rx="18" ry="4" fill="url(#mShadow)"/>
+
+  <!-- Halo de classe (violet) -->
+  <ellipse cx="38" cy="95" rx="22" ry="7" fill="#5522AA" opacity="0.45" filter="url(#mBlur)"/>
+
+  <!-- Robe — bas large -->
+  <path d="M14,52 Q12,70 14,94 Q26,98 38,97 Q50,98 62,94 Q64,70 66,52 Q52,58 38,56 Q24,58 14,52 Z"
+        fill="#220055"/>
+  <!-- Reflets robe bas -->
+  <path d="M16,54 Q14,72 16,90 Q26,94 36,94" fill="none" stroke="#5522AA" stroke-width="2" opacity="0.5"/>
+  <!-- Ornements bas de robe -->
+  <path d="M16,86 Q28,90 38,88 Q48,90 60,86" fill="none" stroke="#AA66FF" stroke-width="1.5" opacity="0.6"/>
+  <path d="M15,78 Q27,82 38,80 Q49,82 61,78" fill="none" stroke="#8844DD" stroke-width="1" opacity="0.4"/>
+
+  <!-- Torse robe -->
+  <path d="M20,38 Q20,32 38,30 Q56,32 56,38 L66,52 Q52,58 38,56 Q24,58 10,52 Z" fill="url(#mRobe)"/>
+  <!-- Col / plastron -->
+  <path d="M28,38 Q28,32 38,30 Q48,32 48,38 L46,50 Q38,52 30,50 Z" fill="#6633CC" opacity="0.7"/>
+  <!-- Ornement central -->
+  <ellipse cx="38" cy="42" rx="5" ry="6" fill="#AA66FF" opacity="0.5"/>
+  <ellipse cx="38" cy="42" rx="3" ry="4" fill="#FFFFFF" opacity="0.3"/>
+  <!-- Ceinture avec gemme -->
+  <rect x="24" y="50" width="28" height="6" rx="3" fill="#330066"/>
+  <ellipse cx="38" cy="53" rx="5" ry="3.5" fill="#AA66FF"/>
+  <ellipse cx="38" cy="52" rx="3" ry="2" fill="#EEDDFF" opacity="0.8"/>
+
+  <!-- Bras gauche (sort) -->
+  <path d="M14,38 Q8,46 8,58 L16,64 Q20,62 22,54 L22,38 Z" fill="#5522AA"/>
+  <!-- Manche gauche ornée -->
+  <path d="M10,42 Q8,50 10,58" fill="none" stroke="#AA66FF" stroke-width="1.5" opacity="0.6"/>
+  <!-- Main gauche avec éclairs -->
+  <ellipse cx="10" cy="64" rx="5" ry="4" fill="#C89878"/>
+  <!-- Éclairs magiques gauche -->
+  <path d="M4,58 L8,66 L5,64 L9,72" stroke="#CC88FF" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M2,62 L7,68" stroke="#FFFFFF" stroke-width="1" fill="none" opacity="0.7"/>
+
+  <!-- Bras droit (bâton) -->
+  <path d="M54,38 Q58,44 60,54 L56,62 Q52,62 50,56 L50,38 Z" fill="#5522AA"/>
+  <!-- Manche droite ornée -->
+  <path d="M58,42 Q60,50 58,58" fill="none" stroke="#AA66FF" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Bâton magique -->
+  <rect x="68" y="10" width="5" height="72" rx="2.5" fill="#3D2266" transform="rotate(-8,70,46)"/>
+  <!-- Bois du bâton — reflet -->
+  <rect x="69" y="12" width="2" height="68" rx="1" fill="#6644AA" opacity="0.5" transform="rotate(-8,70,46)"/>
+  <!-- Orbe en tête de bâton -->
+  <circle cx="67" cy="12" r="10" fill="url(#mOrb)" transform="rotate(-8,70,46)"/>
+  <circle cx="67" cy="12" r="10" fill="url(#mOrbGlow)" transform="rotate(-8,70,46)" opacity="0.6"/>
+  <!-- Halo orbe -->
+  <circle cx="67" cy="12" r="14" fill="#AA66FF" opacity="0.15" filter="url(#mGlow)" transform="rotate(-8,70,46)"/>
+  <!-- Reflet orbe -->
+  <ellipse cx="64" cy="9" rx="4" ry="3" fill="#FFFFFF" opacity="0.5" transform="rotate(-8,70,46)"/>
+  <!-- Anneau bâton -->
+  <ellipse cx="67" cy="22" rx="6" ry="3" fill="none" stroke="#AA66FF" stroke-width="1.5" transform="rotate(-8,70,46)"/>
+
+  <!-- Épaulières robes -->
+  <ellipse cx="18" cy="38" rx="8" ry="6" fill="#6633CC"/>
+  <ellipse cx="58" cy="38" rx="8" ry="6" fill="#6633CC"/>
+  <!-- Gemmes épaulières -->
+  <circle cx="18" cy="38" r="3" fill="#CC88FF"/>
+  <circle cx="58" cy="38" r="3" fill="#CC88FF"/>
+
+  <!-- Cou + visage -->
+  <rect x="34" y="24" width="8" height="10" rx="3" fill="#C89878"/>
+
+  <!-- Chapeau de mage (pointu, large bord) -->
+  <!-- Bord du chapeau -->
+  <ellipse cx="38" cy="22" rx="22" ry="6" fill="#4422AA"/>
+  <!-- Cone du chapeau -->
+  <path d="M20,22 Q32,4 38,2 Q44,4 56,22 Z" fill="url(#mHat)"/>
+  <!-- Reflet chapeau -->
+  <path d="M28,20 Q34,8 38,4" fill="none" stroke="#8855DD" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <!-- Étoile sur chapeau -->
+  <polygon points="38,6 39.5,10 44,10 40.5,12.5 42,16.5 38,14 34,16.5 35.5,12.5 32,10 36.5,10"
+           fill="#FFD700" opacity="0.9"/>
+  <!-- Bande du chapeau -->
+  <rect x="22" y="19" width="32" height="5" rx="2" fill="#330066" opacity="0.7"/>
+  <!-- Gemme bande -->
+  <ellipse cx="38" cy="21" rx="4" ry="2.5" fill="#CC88FF"/>
+
+  <!-- Visage sous le chapeau -->
+  <ellipse cx="38" cy="24" rx="9" ry="8" fill="#C89878"/>
+  <!-- Yeux magiques -->
+  <ellipse cx="34" cy="22" rx="3.5" ry="3" fill="url(#mEye)"/>
+  <ellipse cx="42" cy="22" rx="3.5" ry="3" fill="url(#mEye)"/>
+  <ellipse cx="34" cy="22" rx="1.5" ry="2" fill="#1A0033"/>
+  <ellipse cx="42" cy="22" rx="1.5" ry="2" fill="#1A0033"/>
+  <!-- Reflets yeux -->
+  <circle cx="33" cy="21" r="0.8" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="41" cy="21" r="0.8" fill="#FFFFFF" opacity="0.9"/>
+  <!-- Sourcils -->
+  <path d="M31,19 Q34,17.5 37,19" fill="none" stroke="#7A5A3A" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M39,19 Q42,17.5 45,19" fill="none" stroke="#7A5A3A" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Sourire -->
+  <path d="M34,27 Q38,30 42,27" fill="none" stroke="#9A6A4A" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- Particules magiques flottantes -->
+  <circle cx="12" cy="30" r="2.5" fill="#AA66FF" opacity="0.8" filter="url(#mSoftGlow)"/>
+  <circle cx="66" cy="42" r="2" fill="#CC88FF" opacity="0.7" filter="url(#mSoftGlow)"/>
+  <circle cx="8" cy="48" r="1.5" fill="#FFFFFF" opacity="0.5"/>
+  <circle cx="70" cy="28" r="1.5" fill="#EEDDFF" opacity="0.6"/>
+  <!-- Runes flottantes -->
+  <text x="5" y="44" font-size="7" fill="#AA66FF" opacity="0.5" font-family="serif">✦</text>
+  <text x="66" y="60" font-size="6" fill="#CC88FF" opacity="0.4" font-family="serif">✦</text>
+</svg>

@@ -1,0 +1,32 @@
+config_version=5
+
+[application]
+config/name="Zimut"
+run/main_scene="res://scenes/MainMenu.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
+script/strict_mode=false
+
+[autoload]
+ZimutGameManager="*res://scripts/GameManager.gd"
+ZimutDataLoader="*res://scripts/DataLoader.gd"
+EmpireManager="*res://empire/scripts/EmpireManager.gd"
+EmpireDataLoader="*res://empire/scripts/EmpireDataLoader.gd"
+
+[display]
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="viewport"
+window/handheld/orientation="landscape"
+window/fullscreen=true
+window/borderless=false
+
+[input]
+move_left={"deadzone": 0.5, "events": []}
+move_right={"deadzone": 0.5, "events": []}
+move_up={"deadzone": 0.5, "events": []}
+move_down={"deadzone": 0.5, "events": []}
+
+[rendering]
+2d/renderer/2d/texture_filter_mode="nearest"
+textures/vram_compression/import_etc2_astc=true
+environment/defaults/default_clear_color=Color(0.09, 0.13, 0.09, 1)
