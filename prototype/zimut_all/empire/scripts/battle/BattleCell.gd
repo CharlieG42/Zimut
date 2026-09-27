@@ -79,6 +79,11 @@ func _draw():
 		draw_polygon(main_points, _colors4(Color(1.0, 0.3, 0.2, 0.25)))
 	elif in_move_range:
 		draw_polygon(main_points, _colors4(Color(0.2, 0.7, 1.0, 0.22)))
+	# Teinte de ville (carte monde Empire): la tuile porte la couleur du proprietaire
+	if has_meta("city_tint"):
+		var tint: Color = get_meta("city_tint")
+		draw_polygon(main_points, _colors4(tint))
+		_draw_outline(main_points, tint * Color(1.0, 1.0, 1.0, 2.2), 5.0)
 
 	if selected:
 		draw_polygon(main_points, _colors4(Color(1.0, 0.84, 0.0, 0.18)))

@@ -66,13 +66,8 @@ func _create_grid() -> void:
 ## Pictogrammes de ville superposes aux tuiles (drapeau colore + nom).
 func _spawn_city_markers() -> void:
 	for city: Dictionary in empire_manager.cities:
-		var pos: Vector2i = Vector2i(int(city["x"]), int(city["y"]))
-		var marker: Node2D = preload("res://empire/scripts/CityMarker.gd").new()
-		marker.setup(city, empire_manager)
-		marker.position = grid_to_screen(pos) + HALF_CELL
-		marker.z_index = pos.x + pos.y + 40
-		add_child(marker)
-		city_marker_nodes[int(city["id"])] = marker
+		if not city_marker_nodes.has(int(city["id"])):
+			_make_city_marker(city)
 
 func grid_to_screen(pos: Vector2i) -> Vector2:
 	var half_w := float(TILE_SIZE.x) / 2.0
@@ -88,20 +83,26 @@ func screen_to_grid(screen_pos: Vector2) -> Vector2i:
 	var sum: float = y_s / 70.0
 	return Vector2i(roundi((sum + diff) / 2.0), roundi((sum - diff) / 2.0))
 
-## Couleur de surbrillance de la tuile selon le proprietaire de la ville.
-func _cell_color(pos: Vector2i) -> Color:
-	var base: Color = Color(0.25, 0.45, 0.25) if (pos.x + pos.y) % 2 == 0 else Color(0.2, 0.4, 0.2)
-	var city: Dictionary = empire_manager.get_city_at(pos)
-	if city.is_empty():
-		return base
-	match city["owner"]:
-		empire_manager.OWNER_PLAYER:
-			return Color(0.1, 0.5, 0.9)
-		empire_manager.OWNER_NEUTRAL:
-			return Color(0.7, 0.7, 0.7)
-		empire_manager.OWNER_AI:
-			return Color(0.85, 0.2, 0.2)
-	return base
+## Teinte la tuile sous chaque ville a la couleur du proprietaire et
+## dessine un contour: les villes restent identifiables d'un coup d'oeil.
+func _highlight_city_tiles() -> void:
+	for city: Dictionary in empire_manager.cities:
+		var pos: Vector2i = Vector2i(int(city["x"]), int(city["y"]))
+		if pos.x < 0 or pos.x >= empire_manager.GRID_SIZE \
+				or pos.y < 0 or pos.y >= empire_manager.GRID_SIZE:
+			continue
+		var cell: Node2D = cell_nodes[pos.y][pos.x]
+		var tint: Color = Color(0.85, 0.8, 0.3, 0.35)
+		match city["owner"]:
+			empire_manager.OWNER_PLAYER:
+				tint = Color(0.2, 0.55, 1.0, 0.45)
+			empire_manager.OWNER_NEUTRAL:
+				tint = Color(0.9, 0.9, 0.9, 0.4)
+			empire_manager.OWNER_AI:
+				tint = Color(1.0, 0.25, 0.2, 0.45)
+		cell.modulate = Color(1.0, 1.0, 1.0, 1.0) + tint * 0.0
+		cell.set_meta("city_tint", tint)
+		cell.queue_redraw()
 
 ## Detection losange precise via les BattleCell (la carte n'utilise plus son
 ## propre _input, ce qui evite les doublons avec la conversion ecran->grille).
@@ -115,8 +116,22 @@ func _on_cell_clicked(x: int, y: int) -> void:
 		city_clicked.emit(city)
 
 ## Rafraichit les marqueurs de ville (changement de proprietaire, conquete).
+## Cree les marqueurs manquants (la carte peut etre initiee avant les villes).
 func refresh_display() -> void:
+	_highlight_city_tiles()
 	for city: Dictionary in empire_manager.cities:
 		var marker: Node2D = city_marker_nodes.get(int(city["id"]))
-		if marker and marker.has_method("setup"):
+		if marker == null:
+			marker = _make_city_marker(city)
+		elif marker.has_method("setup"):
 			marker.setup(city, empire_manager)
+
+func _make_city_marker(city: Dictionary) -> Node2D:
+	var pos: Vector2i = Vector2i(int(city["x"]), int(city["y"]))
+	var marker: Node2D = preload("res://empire/scripts/CityMarker.gd").new()
+	marker.setup(city, empire_manager)
+	marker.position = grid_to_screen(pos) + HALF_CELL
+	marker.z_index = pos.x + pos.y + 40
+	add_child(marker)
+	city_marker_nodes[int(city["id"])] = marker
+	return marker
