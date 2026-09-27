@@ -1,12 +1,11 @@
 extends Node2D
 class_name BattleGridManager
 
-## BattleGridManager.gd - Grille isometrique du combat tactique (mode Empire).
-## Portage de prototype/zimut/scripts/GridManager.gd (rotation -45deg des cellules,
-## decorations, highlights de deplacement et de portee).
+## BattleGridManager.gd - Grille isometrique 2:1 du combat tactique (mode Empire).
+## Tuiles losange natives 280x140, tri par profondeur (x+y), pas de rotation.
 
-const CELL_SIZE := Vector2i(140, 140)
-const HALF_CELL := Vector2(70, 70)
+const TILE_SIZE := Vector2i(280, 140)
+const HALF_CELL := Vector2(140, 70)
 
 var game_manager
 var cell_nodes: Array = []
@@ -40,12 +39,12 @@ func _create_grid() -> void:
 	for y: int in range(game_manager.GRID_SIZE):
 		var row: Array = []
 		for x: int in range(game_manager.GRID_SIZE):
-			var cell: BattleCell = preload("res://scripts/battle/BattleCell.gd").new()
-			cell.position = grid_to_screen(Vector2i(x, y))
+			var cell: BattleCell = preload("res://empire/scripts/battle/BattleCell.gd").new()
 			cell.grid_position = Vector2i(x, y)
-			cell.rotation_degrees = -45.0
+			cell.z_index = x + y
 			cell.connect("cell_clicked", Callable(self, "_on_cell_clicked"))
 			add_child(cell)
+			cell.position = grid_to_screen(Vector2i(x, y))
 			row.append(cell)
 		cell_nodes.append(row)
 	update_entity_display()
@@ -67,39 +66,39 @@ func _add_random_decorations() -> void:
 			continue
 		var deco := Sprite2D.new()
 		deco.name = "Deco_%d_%d" % [pos.x, pos.y]
-		deco.centered = true
-		deco.z_index = 5
-		deco.rotation_degrees = -45.0
+		deco.centered = false
+		deco.z_index = pos.x + pos.y + 1
 		var rand_val: int = randi() % 3
 		if rand_val == 0 and tree_texture:
 			deco.texture = tree_texture
 			deco.scale = Vector2(0.6, 0.6)
-			deco.z_index = 6
 		elif rand_val == 1 and rock_texture:
 			deco.texture = rock_texture
 			deco.scale = Vector2(0.45, 0.45)
 		elif bush_texture:
 			deco.texture = bush_texture
 			deco.scale = Vector2(0.4, 0.4)
-		deco.global_position = grid_to_screen(pos) + HALF_CELL
+		deco.global_position = grid_to_screen(pos)
 		add_child(deco)
 		decoration_nodes.append(deco)
 
 ## Coordonnees
 
 func grid_to_screen(grid_pos: Vector2i) -> Vector2:
-	var x: float = float(grid_pos.x + grid_pos.y) * float(CELL_SIZE.x) / 2.0
-	var y: float = float(grid_pos.y - grid_pos.x) * float(CELL_SIZE.y) / 2.0
-	x += 960.0 - (CELL_SIZE.x * 4.0)
-	y += 540.0
+	var half_w := float(TILE_SIZE.x) / 2.0
+	var half_h := float(TILE_SIZE.y) / 2.0
+	var x: float = 960.0 + (float(grid_pos.x) - float(grid_pos.y)) * half_w
+	var y: float = 200.0 + (float(grid_pos.x) + float(grid_pos.y)) * half_h
 	return Vector2(x, y)
 
 func screen_to_grid(screen_pos: Vector2) -> Vector2i:
-	var x_s: float = screen_pos.x - (960.0 - (CELL_SIZE.x * 4.0))
-	var y_s: float = screen_pos.y - 540.0
-	var sum: float = (x_s / 70.0 + y_s / 70.0) / 2.0
-	var diff: float = (x_s / 70.0 - y_s / 70.0) / 2.0
-	return Vector2i(roundi(diff), roundi(sum))
+	var x_s: float = screen_pos.x - 960.0
+	var y_s: float = screen_pos.y - 200.0
+	var diff: float = x_s / 140.0
+	var sum: float  = y_s / 70.0
+	var gx: float = (sum + diff) / 2.0
+	var gy: float = (sum - diff) / 2.0
+	return Vector2i(roundi(gx), roundi(gy))
 
 ## Highlights
 

@@ -12,7 +12,7 @@ script = ExtResource("1")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=650151548]
 position = Vector2(960, 540)
-zoom = Vector2(1, 0.65)
+zoom = Vector2(1, 1)
 
 [node name="GridManager" type="Node2D" parent="." unique_id=48555572]
 z_index = 10
@@ -52,19 +52,29 @@ color = Color(0, 0, 0, 0.7)
 
 [node name="GameOverLabel" type="Label" parent="UIManager/GameOverPanel" unique_id=1722904737]
 layout_mode = 0
-offset_left = 960.0
-offset_top = 540.0
-offset_right = 960.0
-offset_bottom = 540.0
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -80.0
+offset_right = 400.0
+offset_bottom = 40.0
+theme_override_font_sizes/font_size = 52
 text = "GAME OVER"
 horizontal_alignment = 1
 
 [node name="RestartButton" type="Button" parent="UIManager/GameOverPanel" unique_id=1913167826]
 layout_mode = 0
-offset_left = 960.0
-offset_top = 600.0
-offset_right = 960.0
-offset_bottom = 600.0
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -210.0
+offset_top = 60.0
+offset_right = 210.0
+offset_bottom = 130.0
+theme_override_font_sizes/font_size = 32
 text = "Recommencer"
 
 [node name="SpellPanel" type="Panel" parent="UIManager" unique_id=778766071]

@@ -1,10 +1,10 @@
 extends Node2D
-## GridManager.gd - Gestion de la grille isométrique
-## Correction: rotation des cellules de -45° pour perspective isométrique
-## grid_to_screen adaptée pour cellules rotées
+## GridManager.gd - Grille isometrique 2:1 (style Dofus/Waven)
+## Tuiles losange natives 280x140, pas de rotation de cellules.
+## Ordre de dessin: tri par profondeur (y+x) pour un empilement propre.
 
-const CELL_SIZE   := Vector2i(140, 140)
-const HALF_CELL   := Vector2(70, 70)
+const TILE_SIZE  := Vector2i(280, 140)
+const HALF_CELL  := Vector2(140, 70)
 
 var game_manager
 var cell_nodes: Array        = []
@@ -44,18 +44,19 @@ func _create_grid() -> void:
 		var row: Array = []
 		for x: int in range(game_manager.GRID_SIZE):
 			var cell: Cell = preload("res://scripts/Cell.gd").new()
-			cell.position      = grid_to_screen(Vector2i(x, y))
 			cell.grid_position = Vector2i(x, y)
-			# APPLIQUER ROTATION -45° POUR PERSPECTIVE ISOMÉTRIQUE
-			cell.rotation_degrees = -45.0
+			# Profondeur iso: les cellules du fond (x+y petit) dessinees en premier
+			cell.z_index = x + y
 			cell.connect("cell_clicked", Callable(self, "_on_cell_clicked"))
 			add_child(cell)
+			cell.position = grid_to_screen(Vector2i(x, y))
 			row.append(cell)
 		cell_nodes.append(row)
 
 	update_entity_display()
 
 
+## Positions de decoration aleatoire (eviter les cellules occupees)
 func _add_random_decorations() -> void:
 	var decoration_positions: Array[Vector2i] = [
 		Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0),
@@ -74,57 +75,50 @@ func _add_random_decorations() -> void:
 			continue
 		var deco := Sprite2D.new()
 		deco.name    = "Deco_%d_%d" % [pos.x, pos.y]
-		deco.centered = true
-		deco.z_index  = 5
-		# APPLIQUER LA MÊME ROTATION QUE LES CELLULES
-		deco.rotation_degrees = -45.0
+		deco.centered = false
+		# Meme profondeur que la cellule, legerement au-dessus pour couvrir la tuile
+		deco.z_index  = pos.x + pos.y + 1
 		var rand_val: int = randi() % 3
 		if rand_val == 0 and tree_texture:
 			deco.texture = tree_texture
 			deco.scale   = Vector2(0.6, 0.6)
-			deco.z_index = 6
 		elif rand_val == 1 and rock_texture:
 			deco.texture = rock_texture
 			deco.scale   = Vector2(0.45, 0.45)
 		elif bush_texture:
 			deco.texture = bush_texture
 			deco.scale   = Vector2(0.4, 0.4)
-		deco.global_position = grid_to_screen(pos) + HALF_CELL
+		deco.global_position = grid_to_screen(pos)
 		add_child(deco)
 		decoration_nodes.append(deco)
 
 
-# ─── Coordonnées ───────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────── Coordonnees ──
 
 func grid_to_screen(grid_pos: Vector2i) -> Vector2:
-	# Formule adaptée pour cellules rotées de -45°
-	# Position isométrique standard: x = (x - y) * half_width, y = (x + y) * half_height
-	var x: float = float(grid_pos.x + grid_pos.y) * float(CELL_SIZE.x) / 2.0
-	var y: float = float(grid_pos.y - grid_pos.x) * float(CELL_SIZE.y) / 2.0
-	# Centrer la grille 8x8 (560x560) sur l'écran (960, 540)
-	x += 960.0 - (CELL_SIZE.x * 4.0)  # Ajustement pour centrer
-	y += 540.0
+	# Iso 2:1 : deplacement d'une cellule = (+140, +70) sur l'axe x,
+	# (-140, +70) sur l'axe y. Grille centree sur (960, 200).
+	var half_w := float(TILE_SIZE.x) / 2.0
+	var half_h := float(TILE_SIZE.y) / 2.0
+	var x: float = 960.0 + (float(grid_pos.x) - float(grid_pos.y)) * half_w
+	var y: float = 200.0 + (float(grid_pos.x) + float(grid_pos.y)) * half_h
 	return Vector2(x, y)
 
 
 func screen_to_grid(screen_pos: Vector2) -> Vector2i:
-	# Inverse de la formule grid_to_screen pour cellules rotées
-	var x_s: float = screen_pos.x - (960.0 - (CELL_SIZE.x * 4.0))
-	var y_s: float = screen_pos.y - 540.0
-	# Résoudre: x_screen = (gx + gy) * 70, y_screen = (gy - gx) * 70
-	# gx + gy = x_screen / 70
-	# gy - gx = y_screen / 70
-	# => gy = (x_screen/70 + y_screen/70) / 2
-	# => gx = (x_screen/70 - y_screen/70) / 2
-	var sum: float = (x_s / 70.0 + y_s / 70.0) / 2.0
-	var diff: float = (x_s / 70.0 - y_s / 70.0) / 2.0
-	return Vector2i(roundi(diff), roundi(sum))
+	var x_s: float = screen_pos.x - 960.0
+	var y_s: float = screen_pos.y - 200.0
+	# gx - gy = x_s / 140 ; gx + gy = (y_s - 70) / 70... inverser:
+	var diff: float = x_s / 140.0
+	var sum: float  = y_s / 70.0
+	var gx: float = (sum + diff) / 2.0
+	var gy: float = (sum - diff) / 2.0
+	return Vector2i(roundi(gx), roundi(gy))
 
 
-# ─── Highlights ────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────── Highlights ──
 
 func highlight_spell_range(positions: Array) -> void:
-	# Effacer uniquement les flags de sort
 	for row: Array in cell_nodes:
 		for cell: Cell in row:
 			cell.set_in_spell_range(false)
@@ -135,7 +129,6 @@ func highlight_spell_range(positions: Array) -> void:
 
 
 func highlight_move_range(positions: Array) -> void:
-	# Effacer uniquement les flags de mouvement, pas les sorts
 	for row: Array in cell_nodes:
 		for cell: Cell in row:
 			cell.set_in_move_range(false)
@@ -162,7 +155,7 @@ func _clear_all_range_flags() -> void:
 			cell.set_in_spell_range(false)
 
 
-# ─── Mise à jour affichage ─────────────────────────────────────────────────
+# ──────────────────────────────────────────────── Mise a jour affichage ──
 
 func update_entity_display() -> void:
 	var current_player: Dictionary = {}
@@ -177,7 +170,6 @@ func update_entity_display() -> void:
 			var entity         = game_manager.grid[y][x]
 			cell.entity        = entity
 			cell.selected      = (game_manager.selected_cell == Vector2i(x, y))
-			# Highlight le joueur actif (celui dont c'est le tour)
 			cell.highlighted   = (not current_player.is_empty() and
 				int(current_player.get("x", -1)) == x and
 				int(current_player.get("y", -1)) == y)
@@ -191,4 +183,4 @@ func get_cell_node_at(grid_pos: Vector2i) -> Cell:
 
 
 func _on_cell_clicked(x: int, y: int) -> void:
-	emit_signal("cell_clicked", x, y)
+	cell_clicked.emit(x, y)

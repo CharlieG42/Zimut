@@ -40,3 +40,4 @@ Thumbs.db
 # Tuiles de sol: PNG sources necessaires au rendu
 !assets/sprites/tiles/*.png
 !assets/sprites/players/*.png
+!assets/sprites/elements/*.png

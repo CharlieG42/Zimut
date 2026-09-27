@@ -64,9 +64,15 @@ func _setup_ui_elements() -> void:
 	team_selection_button = Button.new()
 	team_selection_button.name = "TeamSelectionButton"
 	team_selection_button.text = "Changer d'équipe"
-	team_selection_button.position = Vector2(0, 100)
-	team_selection_button.size = Vector2(200, 50)
-	team_selection_button.add_theme_font_size_override("font_size", 24)
+	team_selection_button.anchor_left = 0.5
+	team_selection_button.anchor_right = 0.5
+	team_selection_button.anchor_top = 0.5
+	team_selection_button.anchor_bottom = 0.5
+	team_selection_button.offset_left = -210.0
+	team_selection_button.offset_top = 150.0
+	team_selection_button.offset_right = 210.0
+	team_selection_button.offset_bottom = 220.0
+	team_selection_button.add_theme_font_size_override("font_size", 32)
 	game_over_panel.add_child(team_selection_button)
 	team_selection_button.pressed.connect(_on_team_selection_pressed)
 

@@ -26,6 +26,12 @@ var tutorial_step: int = 0
 var action_bar: HBoxContainer
 var attack_button: Button
 var build_button: Button
+var team_setup_panel: PanelContainer
+var team_setup_label: RichTextLabel
+var team_hero_buttons: Array = []
+var selected_hero_ids: Array = []
+var build_panel: PanelContainer
+var build_label: RichTextLabel
 
 func init(manager: Node) -> void:
 	empire_manager = manager
@@ -59,6 +65,8 @@ func _setup_ui() -> void:
 	_setup_army_panel(root)
 	_setup_action_bar(root)
 	_setup_message_label(root)
+	_setup_team_setup_panel(root)
+	_setup_build_panel(root)
 	_setup_tutorial(root)
 
 func _setup_top_bar(root: Control) -> void:
@@ -228,6 +236,202 @@ func _make_button(label: String, callback: Callable, color: Color) -> Button:
 	return btn
 
 # ─────────────────────────────────────────────────────────────────────────────
+func _setup_team_setup_panel(root: Control) -> void:
+	team_setup_panel = PanelContainer.new()
+	team_setup_panel.name = "TeamSetupPanel"
+	team_setup_panel.anchor_left = 0.25
+	team_setup_panel.anchor_right = 0.75
+	team_setup_panel.anchor_top = 0.12
+	team_setup_panel.anchor_bottom = 0.88
+	team_setup_panel.visible = false
+	team_setup_panel.z_index = 60
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(0.09, 0.09, 0.16, 0.96)
+	style.set_border_width_all(3)
+	style.border_color = Color(0.85, 0.55, 0.15)
+	style.set_content_margin_all(20)
+	style.set_corner_radius_all(12)
+	team_setup_panel.add_theme_stylebox_override("panel", style)
+	root.add_child(team_setup_panel)
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 14)
+	team_setup_panel.add_child(vbox)
+
+	var title: Label = Label.new()
+	title.text = "CONSTITUTION DE L'ÉQUIPE"
+	title.add_theme_font_size_override("font_size", FONT_BIG)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(title)
+
+	team_setup_label = RichTextLabel.new()
+	team_setup_label.bbcode_enabled = true
+	team_setup_label.fit_content = true
+	team_setup_label.add_theme_font_size_override("normal_font_size", FONT_BODY)
+	vbox.add_child(team_setup_label)
+
+	var hero_list: VBoxContainer = VBoxContainer.new()
+	hero_list.name = "HeroList"
+	hero_list.add_theme_constant_override("separation", 10)
+	vbox.add_child(hero_list)
+
+	var buttons_row: HBoxContainer = HBoxContainer.new()
+	buttons_row.add_theme_constant_override("separation", 24)
+	buttons_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_child(buttons_row)
+
+	var confirm_btn: Button = _make_button("⚔ LANCER L'ATTAQUE", _on_team_confirm_pressed, Color(0.75, 0.25, 0.15))
+	confirm_btn.custom_minimum_size = Vector2(420, 90)
+	buttons_row.add_child(confirm_btn)
+
+	var cancel_btn: Button = _make_button("✕ Annuler", _on_team_cancel_pressed, Color(0.35, 0.35, 0.4))
+	cancel_btn.custom_minimum_size = Vector2(300, 90)
+	buttons_row.add_child(cancel_btn)
+
+func _refresh_team_setup_list() -> void:
+	if team_setup_panel == null:
+		return
+	var hero_list: VBoxContainer = null
+	for child in team_setup_panel.get_child(0).get_children():
+		if child.name == "HeroList":
+			hero_list = child
+			break
+	if hero_list == null:
+		return
+	for child in hero_list.get_children():
+		child.queue_free()
+	team_hero_buttons = []
+	selected_hero_ids = []
+	var heroes: Array = empire_manager.heroes
+	if heroes.is_empty():
+		team_setup_label.text = "[color=gray]Aucun héros recruté.[/color] Recrutez des héros dans le panneau Armée (droite) avant d'attaquer."
+		return
+	team_setup_label.text = "[b]Cible : %s[/b]\nSélectionnez jusqu'à 3 héros pour mener l'assaut :\n" % selected_city.get("name", "?")
+	var count: int = 0
+	for i: int in range(heroes.size()):
+		var hero: Dictionary = heroes[i]
+		var btn: Button = _make_button("%s  Lv%d   (PV %d)" % [hero["classe"], hero["level"], hero["max_pv"]],
+			_on_hero_toggled.bind(i), Color(0.25, 0.45, 0.25))
+		btn.toggle_mode = true
+		btn.custom_minimum_size = Vector2(0, 70)
+		btn.add_theme_font_size_override("font_size", FONT_BODY)
+		hero_list.add_child(btn)
+		team_hero_buttons.append(btn)
+		count += 1
+
+func _on_hero_toggled(hero_index: int) -> void:
+	if hero_index in selected_hero_ids:
+		selected_hero_ids.erase(hero_index)
+	else:
+		if selected_hero_ids.size() >= 3:
+			empire_manager.message_requested.emit("3 héros maximum : désélectionnez-en un d'abord.")
+			if hero_index < team_hero_buttons.size():
+				team_hero_buttons[hero_index].set_pressed_no_signal(false)
+			return
+		selected_hero_ids.append(hero_index)
+
+func _on_team_confirm_pressed() -> void:
+	if selected_hero_ids.is_empty():
+		empire_manager.message_requested.emit("Sélectionnez au moins 1 héros.")
+		return
+	var heroes: Array = empire_manager.heroes
+	var team: Array = []
+	for id: int in selected_hero_ids:
+		if id < heroes.size():
+			team.append(heroes[id])
+	team_setup_panel.visible = false
+	var army: Dictionary = {"team": _heroes_to_team_format(team), "units": empire_manager.army_manager.army_units}
+	empire_manager.attack_city(selected_city, army)
+
+func _heroes_to_team_format(heroes: Array) -> Array:
+	var team: Array = []
+	for hero: Dictionary in heroes:
+		team.append({
+			"classe": hero["classe"],
+			"max_pv": hero["max_pv"],
+			"force": hero["force"],
+			"intelligence": hero["intelligence"],
+			"agilite": hero["agilite"],
+			"sagesse": hero["sagesse"],
+			"defense": hero["defense"],
+			"pa": hero["pa"],
+			"pm": hero["pm"],
+		})
+	return team
+
+func _on_team_cancel_pressed() -> void:
+	team_setup_panel.visible = false
+
+func _setup_build_panel(root: Control) -> void:
+	build_panel = PanelContainer.new()
+	build_panel.name = "BuildPanel"
+	build_panel.anchor_left = 0.25
+	build_panel.anchor_right = 0.75
+	build_panel.anchor_top = 0.12
+	build_panel.anchor_bottom = 0.88
+	build_panel.visible = false
+	build_panel.z_index = 60
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(0.09, 0.12, 0.09, 0.96)
+	style.set_border_width_all(3)
+	style.border_color = Color(0.3, 0.7, 0.3)
+	style.set_content_margin_all(20)
+	style.set_corner_radius_all(12)
+	build_panel.add_theme_stylebox_override("panel", style)
+	root.add_child(build_panel)
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 14)
+	build_panel.add_child(vbox)
+
+	var title: Label = Label.new()
+	title.text = "CONSTRUCTION"
+	title.add_theme_font_size_override("font_size", FONT_BIG)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(title)
+
+	build_label = RichTextLabel.new()
+	build_label.bbcode_enabled = true
+	build_label.fit_content = true
+	build_label.add_theme_font_size_override("normal_font_size", FONT_BODY)
+	vbox.add_child(build_label)
+
+	var buttons_row: HBoxContainer = HBoxContainer.new()
+	buttons_row.add_theme_constant_override("separation", 24)
+	buttons_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_child(buttons_row)
+
+	var mine_btn: Button = _make_button("⛏ Mine de fer", _on_build_mine_pressed, Color(0.2, 0.45, 0.2))
+	mine_btn.custom_minimum_size = Vector2(380, 90)
+	buttons_row.add_child(mine_btn)
+
+	var close_btn: Button = _make_button("✕ Fermer", _on_build_close_pressed, Color(0.35, 0.35, 0.4))
+	close_btn.custom_minimum_size = Vector2(300, 90)
+	buttons_row.add_child(close_btn)
+
+func _on_build_mine_pressed() -> void:
+	if selected_city.is_empty():
+		return
+	empire_manager.economy_manager.try_build(selected_city, "Mine de fer")
+	_refresh_build_panel()
+
+func _refresh_build_panel() -> void:
+	if build_label == null or selected_city.is_empty():
+		return
+	var buildings: Array = selected_city.get("buildings", [])
+	var txt: String = "[b]%s[/b] - vos terres\n\n" % selected_city["name"]
+	if buildings.is_empty():
+		txt += "[color=gray]Aucune construction.\nBâtissez pour produire plus de ressources ![/color]"
+	else:
+		txt += "[b]Bâtiments (%d) :[/b]\n" % buildings.size()
+		for b: Dictionary in buildings:
+			txt += "• %s (Niv. %d)" % [b.get("name", "?"), b.get("level", 1)]
+	build_label.text = txt
+
+func _on_build_close_pressed() -> void:
+	build_panel.visible = false
+
+
 #  Tutoriel guide
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -340,6 +544,20 @@ func _on_city_clicked(city: Dictionary) -> void:
 	selected_city = city
 	_on_city_changed(city)
 	_hide_tutorial()
+	# Fermer les panneaux ouverts
+	if team_setup_panel:
+		team_setup_panel.visible = false
+	if build_panel:
+		build_panel.visible = false
+	# Nouveau flow : ville a vous -> construction ; ville neutre/ennemie -> constitution d'equipe
+	if city["owner"] == empire_manager.OWNER_PLAYER:
+		_refresh_build_panel()
+		build_panel.visible = true
+		empire_manager.message_requested.emit("%s : vos terres. Mode construction ouvert." % city["name"])
+	else:
+		_refresh_team_setup_list()
+		team_setup_panel.visible = true
+		empire_manager.message_requested.emit("%s : constituez votre équipe d'assaut !" % city["name"])
 
 func _on_city_changed(city: Dictionary) -> void:
 	if city.is_empty():
@@ -407,8 +625,8 @@ func _on_attack_pressed() -> void:
 	if selected_city["owner"] == empire_manager.OWNER_PLAYER:
 		empire_manager.message_requested.emit("Cette ville est deja a vous. Selectionnez une cible adverse.")
 		return
-	var army: Dictionary = empire_manager.army_manager.build_attacking_team()
-	empire_manager.attack_city(selected_city, army)
+	_refresh_team_setup_list()
+	team_setup_panel.visible = true
 
 func _on_build_pressed() -> void:
 	if selected_city.is_empty():
@@ -417,7 +635,8 @@ func _on_build_pressed() -> void:
 	if selected_city["owner"] != empire_manager.OWNER_PLAYER:
 		empire_manager.message_requested.emit("Vous ne possedez pas cette ville.")
 		return
-	empire_manager.economy_manager.try_build(selected_city, "Mine de fer")
+	_refresh_build_panel()
+	build_panel.visible = true
 
 func _on_recruit_hero_pressed() -> void:
 	var idx: int = hero_class_option.selected

@@ -6,6 +6,12 @@ class_name MenuReturnButton
 signal menu_requested
 
 const BUTTON_SIZE := Vector2(220, 70)
+
+func _init() -> void:
+	pressed.connect(_on_pressed)
+
+func _on_pressed() -> void:
+	menu_requested.emit()
 const MARGIN := Vector2(24, 24)
 
 static func create() -> Button:
