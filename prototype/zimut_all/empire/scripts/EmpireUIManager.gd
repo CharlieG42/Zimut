@@ -32,6 +32,11 @@ var team_hero_buttons: Array = []
 var selected_hero_ids: Array = []
 var build_panel: PanelContainer
 var build_label: RichTextLabel
+var city_view: Node = null
+var city_panel_container: PanelContainer
+var army_panel_container: PanelContainer
+var city_panel_toggle: Button
+var army_panel_toggle: Button
 
 func init(manager: Node) -> void:
 	empire_manager = manager
@@ -93,6 +98,7 @@ func _setup_top_bar(root: Control) -> void:
 func _setup_city_panel(root: Control) -> void:
 	var panel: PanelContainer = PanelContainer.new()
 	panel.name = "CityPanel"
+	city_panel_container = panel
 	panel.anchor_left = 0.0
 	panel.anchor_top = 0.0
 	panel.anchor_bottom = 1.0
@@ -140,10 +146,12 @@ func _setup_city_panel(root: Control) -> void:
 	unit_option.custom_minimum_size = Vector2(480, 60)
 	vbox.add_child(unit_option)
 	_add_big_button(vbox, "Recruter cette unite", _on_recruit_unit_pressed, Color(0.2, 0.35, 0.45))
+	city_panel_toggle = _make_panel_toggle(root, "◂", true, Callable(self, "_on_city_panel_toggled"))
 
 func _setup_army_panel(root: Control) -> void:
 	var panel: PanelContainer = PanelContainer.new()
 	panel.name = "ArmyPanel"
+	army_panel_container = panel
 	panel.anchor_left = 1.0
 	panel.anchor_right = 1.0
 	panel.anchor_top = 0.0
@@ -176,6 +184,56 @@ func _setup_army_panel(root: Control) -> void:
 	vbox.add_child(army_label)
 	_add_big_button(vbox, "Sauvegarder", _on_save_pressed, Color(0.25, 0.25, 0.3))
 	_add_big_button(vbox, "Charger", _on_load_pressed, Color(0.25, 0.25, 0.3))
+	army_panel_toggle = _make_panel_toggle(root, "▸", false, Callable(self, "_on_army_panel_toggled"))
+
+## Petit bouton en bord d'ecran pour replier/deplier un panneau lateral.
+func _make_panel_toggle(root: Control, arrow: String, on_left: bool, callback: Callable) -> Button:
+	var btn: Button = Button.new()
+	btn.name = "PanelToggle%d" % (0 if on_left else 1)
+	btn.text = arrow
+	btn.add_theme_font_size_override("font_size", FONT_BODY)
+	btn.add_theme_color_override("font_color", Color(0.95, 0.9, 0.7))
+	btn.add_theme_color_override("font_pressed_color", Color(1.0, 1.0, 0.85))
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(0.1, 0.1, 0.16, 0.9)
+	style.set_border_width_all(2)
+	style.border_color = Color(0.4, 0.35, 0.15)
+	btn.add_theme_stylebox_override("normal", style)
+	btn.add_theme_stylebox_override("pressed", style)
+	btn.add_theme_stylebox_override("hover", style)
+	if on_left:
+		btn.anchor_left = 0.0
+		btn.anchor_right = 0.0
+		btn.anchor_top = 0.5
+		btn.anchor_bottom = 0.5
+		btn.offset_left = 0
+		btn.offset_right = 64
+		btn.offset_top = -32
+		btn.offset_bottom = 32
+	else:
+		btn.anchor_left = 1.0
+		btn.anchor_right = 1.0
+		btn.anchor_top = 0.5
+		btn.anchor_bottom = 0.5
+		btn.offset_left = -64
+		btn.offset_right = 0
+		btn.offset_top = -32
+		btn.offset_bottom = 32
+	btn.pressed.connect(callback)
+	root.add_child(btn)
+	return btn
+
+func _on_city_panel_toggled() -> void:
+	if city_panel_container == null or city_panel_toggle == null:
+		return
+	city_panel_container.visible = not city_panel_container.visible
+	city_panel_toggle.text = "▸" if city_panel_container.visible else "◂"
+
+func _on_army_panel_toggled() -> void:
+	if army_panel_container == null or army_panel_toggle == null:
+		return
+	army_panel_container.visible = not army_panel_container.visible
+	army_panel_toggle.text = "◂" if army_panel_container.visible else "▸"
 
 func _setup_action_bar(root: Control) -> void:
 	var bar: PanelContainer = PanelContainer.new()
@@ -549,11 +607,9 @@ func _on_city_clicked(city: Dictionary) -> void:
 		team_setup_panel.visible = false
 	if build_panel:
 		build_panel.visible = false
-	# Nouveau flow : ville a vous -> construction ; ville neutre/ennemie -> constitution d'equipe
+	# Nouveau flow : ville a vous -> vue ville (construction) ; neutre/ennemie -> constitution d'equipe
 	if city["owner"] == empire_manager.OWNER_PLAYER:
-		_refresh_build_panel()
-		build_panel.visible = true
-		empire_manager.message_requested.emit("%s : vos terres. Mode construction ouvert." % city["name"])
+		_enter_city_view(city)
 	else:
 		_refresh_team_setup_list()
 		team_setup_panel.visible = true
@@ -635,8 +691,33 @@ func _on_build_pressed() -> void:
 	if selected_city["owner"] != empire_manager.OWNER_PLAYER:
 		empire_manager.message_requested.emit("Vous ne possedez pas cette ville.")
 		return
-	_refresh_build_panel()
-	build_panel.visible = true
+	_enter_city_view(selected_city)
+
+## Entre dans la vue 8x8 de la ville alliee (grille de construction).
+func _enter_city_view(city: Dictionary) -> void:
+	if city_view != null:
+		return
+	set_ui_visible(false)
+	if empire_manager.world_map_manager:
+		empire_manager.world_map_manager.visible = false
+	city_view = preload("res://empire/scripts/CityViewManager.gd").new()
+	city_view.name = "CityView"
+	city_view.exit_requested.connect(_on_city_view_exit)
+	get_tree().get_current_scene().add_child(city_view)
+	city_view.setup(empire_manager, city)
+	empire_manager.message_requested.emit("Ville de %s : choisissez un bâtiment puis touchez une case." % city["name"])
+
+func _on_city_view_exit() -> void:
+	if city_view == null:
+		return
+	city_view.queue_free()
+	city_view = null
+	set_ui_visible(true)
+	if empire_manager.world_map_manager:
+		empire_manager.world_map_manager.visible = true
+		empire_manager.world_map_manager.fit_map()
+		empire_manager.world_map_manager.refresh_display()
+	_refresh()
 
 func _on_recruit_hero_pressed() -> void:
 	var idx: int = hero_class_option.selected

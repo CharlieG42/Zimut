@@ -7,6 +7,7 @@ const TILE_SIZE  := Vector2i(280, 140)
 const HALF_CELL  := Vector2(140, 70)
 
 var game_manager
+var origin := Vector2(960.0, 540.0)
 var cell_nodes: Array        = []
 var decoration_nodes: Array  = []
 
@@ -19,9 +20,42 @@ signal cell_clicked(x: int, y: int)
 
 func init(manager) -> void:
 	game_manager = manager
+	_fit_grid_to_screen()
 	_load_decoration_textures()
 	_create_grid()
 	_add_random_decorations()
+
+
+## Centre la grille sur l'ecran et ajuste le zoom de la camera pour que
+## la totalite du plateau soit visible.
+func _fit_grid_to_screen() -> void:
+	var viewport: Viewport = get_viewport()
+	if viewport == null:
+		return
+	var screen: Vector2 = viewport.get_visible_rect().size
+	var n: int = game_manager.GRID_SIZE
+	var grid_w: float = float(n) * 140.0 + float(n) * 140.0
+	var grid_h: float = float(2 * n - 2) * 70.0 + 140.0
+	origin = Vector2(screen.x * 0.5, screen.y * 0.5 - grid_h * 0.5 + 70.0)
+	var cam: Camera2D = null
+	var p: Node = get_parent()
+	while p:
+		if p is Camera2D:
+			cam = p
+			break
+		p = p.get_parent()
+	if cam == null:
+		for child in get_tree().get_current_scene().get_children():
+			if child is Camera2D:
+				cam = child
+				break
+	if cam:
+		var margin := 0.92
+		var zoom_x: float = screen.x * margin / grid_w
+		var zoom_y: float = screen.y * margin / grid_h
+		cam.zoom = Vector2(minf(zoom_x, zoom_y), minf(zoom_x, zoom_y))
+		cam.position = origin + Vector2(0.0, grid_h * 0.5 - 70.0)
+		cam.make_current()
 
 
 func _load_decoration_textures() -> void:
@@ -96,18 +130,16 @@ func _add_random_decorations() -> void:
 # ──────────────────────────────────────────────── Coordonnees ──
 
 func grid_to_screen(grid_pos: Vector2i) -> Vector2:
-	# Iso 2:1 : deplacement d'une cellule = (+140, +70) sur l'axe x,
-	# (-140, +70) sur l'axe y. Grille centree sur (960, 200).
 	var half_w := float(TILE_SIZE.x) / 2.0
 	var half_h := float(TILE_SIZE.y) / 2.0
-	var x: float = 960.0 + (float(grid_pos.x) - float(grid_pos.y)) * half_w
-	var y: float = 200.0 + (float(grid_pos.x) + float(grid_pos.y)) * half_h
+	var x: float = origin.x + (float(grid_pos.x) - float(grid_pos.y)) * half_w
+	var y: float = origin.y + (float(grid_pos.x) + float(grid_pos.y)) * half_h
 	return Vector2(x, y)
 
 
 func screen_to_grid(screen_pos: Vector2) -> Vector2i:
-	var x_s: float = screen_pos.x - 960.0
-	var y_s: float = screen_pos.y - 200.0
+	var x_s: float = screen_pos.x - origin.x
+	var y_s: float = screen_pos.y - origin.y
 	# gx - gy = x_s / 140 ; gx + gy = (y_s - 70) / 70... inverser:
 	var diff: float = x_s / 140.0
 	var sum: float  = y_s / 70.0
