@@ -44,6 +44,7 @@ jobs:
           android-version: 34
           ndk-version: 26.2.11394342
           cmake-version: 3.22.1
+          packages: 'platform-tools'
           accept-licenses: true
 
       - name: Setup Java and keystore
