@@ -7,11 +7,13 @@ on:
     paths:
       - 'prototype/zimut/**'
       - 'prototype/zoe/**'
+      - '.github/workflows/build-android-apks.yml'
   pull_request:
     branches: [ main ]
     paths:
       - 'prototype/zimut/**'
       - 'prototype/zoe/**'
+      - '.github/workflows/build-android-apks.yml'
 
 env:
   GODOT_VERSION: 4.7.2
