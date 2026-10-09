@@ -13,58 +13,59 @@ on:
       - 'prototype/zimut/**'
       - 'prototype/zoe/**'
 
+env:
+  GODOT_VERSION: 4.7.2
+
 jobs:
   build-apks:
     name: Build APKs
-    runs-on: ubuntu-latest
-    
+    runs-on: ubuntu-24.04
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           lfs: true
 
-      - name: Install Godot 4.1.3 (LTS)
+      - name: Install Godot ${{ env.GODOT_VERSION }}
         run: |
-          wget https://github.com/godotengine/godot/releases/download/4.1.3-stable/Godot_v4.1.3-stable_linux.x86_64.zip
-          unzip Godot_v4.1.3-stable_linux.x86_64.zip
-          chmod +x Godot_v4.1.3-stable_linux.x86_64
-          sudo mv Godot_v4.1.3-stable_linux.x86_64 /usr/local/bin/godot
+          wget https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
+          unzip Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
+          chmod +x Godot_v${GODOT_VERSION}-stable_linux.x86_64
+          sudo mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
 
       - name: Install Godot Android export templates
         run: |
-          mkdir -p ~/.local/share/godot/export_templates
-          cd ~/.local/share/godot/export_templates
-          wget https://github.com/godotengine/godot/releases/download/4.1.3-stable/Godot_v4.1.3-stable_export_templates.tpz
-          unzip Godot_v4.1.3-stable_export_templates.tpz
+          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          wget https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          unzip Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          mv templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
 
-      - name: Setup Android SDK and NDK
-        uses: android-actions/setup-android@v3
-        with:
-          android-version: 34
-          ndk-version: 26.2.11394342
-          cmake-version: 3.22.1
-          packages: 'platform-tools'
-          accept-licenses: true
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install Android SDK packages required by Godot
+        run: |
+          yes | sdkmanager "platform-tools" "build-tools;36.1.0" "platforms;android-36" "cmdline-tools;latest" > /dev/null
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
 
       - name: Setup Java and keystore
         run: |
-          mkdir -p ~/.android
-          keytool -genkey -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> "$GITHUB_ENV"
+          mkdir -p ~/.local/share/godot/keystores
+          keytool -genkey -v -keystore ~/.local/share/godot/keystores/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
 
       - name: Export Zimut APK (Debug)
-        run: cd prototype/zimut && godot --headless --verbose --export-debug "Android" export/Zimut-debug.apk
-        env:
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-          ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
-          JAVA_HOME: ${{ env.JAVA_HOME }}
+        run: |
+          cd prototype/zimut
+          godot --headless --export-debug "Android" export/Zimut-debug.apk \
+            || godot --headless --export-debug "Android" export/Zimut-debug.apk
 
       - name: Export ZOE APK (Debug)
-        run: cd prototype/zoe && godot --headless --verbose --export-debug "Android Debug" export/ZOE-debug.apk
-        env:
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-          ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
-          JAVA_HOME: ${{ env.JAVA_HOME }}
+        run: |
+          cd prototype/zoe
+          godot --headless --export-debug "Android Debug" export/ZOE-debug.apk \
+            || godot --headless --export-debug "Android Debug" export/ZOE-debug.apk
 
       - name: Upload Debug APKs
         uses: actions/upload-artifact@v4
@@ -74,22 +75,15 @@ jobs:
             prototype/zimut/export/Zimut-debug.apk
             prototype/zoe/export/ZOE-debug.apk
           retention-days: 7
+          if-no-files-found: error
 
       - name: Export Zimut APK (Release)
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
         run: cd prototype/zimut && godot --headless --verbose --export-release "Android" export/Zimut-release.apk
-        env:
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-          ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
-          JAVA_HOME: ${{ env.JAVA_HOME }}
 
       - name: Export ZOE APK (Release)
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
         run: cd prototype/zoe && godot --headless --verbose --export-release "Android Release" export/ZOE-release.apk
-        env:
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
-          ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_ROOT }}
-          JAVA_HOME: ${{ env.JAVA_HOME }}
 
       - name: Upload Release APKs
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
@@ -100,3 +94,4 @@ jobs:
             prototype/zimut/export/Zimut-release.apk
             prototype/zoe/export/ZOE-release.apk
           retention-days: 30
+          if-no-files-found: error
