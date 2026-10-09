@@ -134,3 +134,10 @@ Druide,Soin supérieur,4,0,1,Restaure 210 PV,30,Soin,0,0,210,0,0,0,0,0,0
 Druide,Soin de groupe supérieur,4,0,2,Restaure 120 PV à tous les alliés,35,Soin,0,0,120,0,0,0,0,0,0
 Druide,Soin ultime,4,0,1,Restaure 254 PV,45,Soin,0,0,254,0,0,0,0,0,0
 Druide,Jugement divin,4,0,3,270 dégâts à tous les ennemis,50,Attaque,270,0,0,0,0,0,0,0,0
+Invocateur,Frappe spectrale,2,0,4,30 dégâts magiques,1,Attaque,0,30,0,0,0,0,0,0,0
+Invocateur,Symbiose,2,0,1,L'invocation restaure 15 PV à tous les alliés,5,Soin,0,0,15,0,0,0,0,0
+Heal,Toucher guérisseur,3,0,1,Restaure 55 PV,1,Soin,0,0,55,0,0,0,0,0,0
+Heal,Éclair sacré,3,0,4,36 dégâts magiques,1,Attaque,0,36,0,0,0,0,0,0
+Heal,Bénédiction de vie,2,0,3,Soigne 12 PV/tour pendant 3 tours,5,Soin,0,0,0,0,0,0,0,0
+Heal,Bouclier de lumière,3,0,3,+25% défense (2 tours; allié),5,Buff,0,0,0,25,0,0,0,0,0
+Heal,Mot de restauration,4,0,2,Restaure 90 PV à tous les alliés,10,Soin,0,0,90,0,0,0,0,0,0
