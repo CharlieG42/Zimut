@@ -55,6 +55,15 @@ jobs:
           mkdir -p ~/.local/share/godot/keystores
           keytool -genkey -v -keystore ~/.local/share/godot/keystores/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
 
+      - name: Configure Godot release keystore
+        run: |
+          mkdir -p ~/.config/godot
+          cfg=~/.config/godot/editor_settings-4.7.trusted.cfg
+          touch "$cfg"
+          printf 'export/android/keystore_release="%s/.local/share/godot/keystores/debug.keystore"\n' "$HOME" >> "$cfg"
+          printf 'export/android/keystore_release_user="androiddebugkey"\n' >> "$cfg"
+          printf 'export/android/keystore_release_password="android"\n' >> "$cfg"
+
       - name: Export Zimut APK (Debug)
         run: |
           cd prototype/zimut
