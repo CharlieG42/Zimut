@@ -15,5 +15,3 @@ dest_files=["res://data/ennemis.Niveau.translation", "res://data/ennemis.PV.tran
 
 compress=1
 delimiter=0
-unescape_keys=false
-unescape_translations=true

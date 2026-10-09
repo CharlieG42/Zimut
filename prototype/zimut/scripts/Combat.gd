@@ -151,6 +151,14 @@ static func has_los(a: Vector2i, b: Vector2i, obstacles: Dictionary) -> bool:
 ## Cases touchées par une zone centrée sur `center`.
 static func zone_cells(center: Vector2i, r: int, shape: String, grid_size: int) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
+	if shape == "square_side":
+		var k: int = (r - 1) / 2
+		for dy: int in range(-k, r - k):
+			for dx: int in range(-k, r - k):
+				var cs := Vector2i(center.x + dx, center.y + dy)
+				if cs.x >= 0 and cs.y >= 0 and cs.x < grid_size and cs.y < grid_size:
+					out.append(cs)
+		return out
 	for dy: int in range(-r, r + 1):
 		for dx: int in range(-r, r + 1):
 			if shape == "diamond" and absi(dx) + absi(dy) > r:
@@ -327,16 +335,8 @@ static func parse(spell: Dictionary) -> Dictionary:
 	if zn > 0:
 		p["aoe"] = "zone"
 		p["target"] = "cell"
-		match zn:
-			2:
-				p["zone_r"] = 1
-				p["zone_shape"] = "diamond"
-			3:
-				p["zone_r"] = 1
-				p["zone_shape"] = "square"
-			_:
-				p["zone_r"] = 2
-				p["zone_shape"] = "diamond"
+		p["zone_shape"] = "square_side"
+		p["zone_r"] = zn
 
 	# ── Soins ──────────────────────────────────────────────────────────────
 	var is_heal: bool = t.contains("restaure") or t.contains("soigne")
@@ -379,7 +379,7 @@ static func parse(spell: Dictionary) -> Dictionary:
 		if direct == 0 and stype == "Attaque":
 			direct = maxi(int(spell.get("Degats_physiques", 0)), int(spell.get("Degats_magiques", 0)))
 		p["dmg"] = direct
-		if t.contains("l'invocation attaque") and t.contains("niveau"):
+		if t.contains("l'invocation attaque"):
 			p["needs_summon"] = true
 			p["summon_dmg_base"] = _num(t, "dégâts = (\\d+)", 1, 20)
 			p["summon_dmg_lvl"] = 0.5 if t.contains("niveau/2") else 1.0

@@ -15,5 +15,3 @@ dest_files=["res://data/craft.Nom.translation", "res://data/craft.Niveau requis.
 
 compress=1
 delimiter=0
-unescape_keys=false
-unescape_translations=true

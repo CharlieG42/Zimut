@@ -37,3 +37,6 @@ Thumbs.db
 # Generated textures from SVG (ignore)
 *.png
 *.jpg
+
+# Fichiers temporaires Godot
+*.tmp
