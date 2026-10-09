@@ -16,6 +16,7 @@ var game_manager
 
 func _ready() -> void:
 	game_manager = GameManager
+	_build_background()
 
 	# IMPORTANT : initialiser tous les managers AVANT reset_game().
 	# reset_game() déclenche en interne _refresh_grid(), qui appelle
@@ -23,6 +24,7 @@ func _ready() -> void:
 	# encore tourné, sa variable game_manager est encore null et l'appel
 	# plante avec "Invalid access to property on a base object of type Nil".
 	grid_manager.init(game_manager)
+	_setup_camera()
 	ui_manager.init(game_manager)
 	turn_manager.init(game_manager)
 	entity_manager.init(game_manager)
@@ -59,3 +61,54 @@ func _connect_signals() -> void:
 	# SpellManager → UIManager
 	if not spell_manager.spell_selected.is_connected(ui_manager._on_spell_button_selected):
 		spell_manager.spell_selected.connect(ui_manager._on_spell_button_selected)
+
+
+func _setup_camera() -> void:
+	## Caméra centrée sur l'île, zoom adapté au format 16:9 (le HUD occupe haut et bas).
+	var cam: Camera2D = get_node_or_null("Camera2D")
+	if cam == null:
+		return
+	cam.enabled = true
+	cam.zoom = Vector2(1.38, 1.38)
+	cam.position = grid_manager.grid_center() + Vector2(0, -8)
+	cam.position_smoothing_enabled = false
+	cam.make_current()
+
+
+func _build_background() -> void:
+	## Fond dégradé doux façon Waven (ciel pâle), derrière tout le reste.
+	var layer := CanvasLayer.new()
+	layer.layer = -10
+	add_child(layer)
+	var grad := Gradient.new()
+	grad.colors = PackedColorArray([Color(0.46, 0.62, 0.74), Color(0.72, 0.83, 0.88), Color(0.80, 0.88, 0.86)])
+	grad.offsets = PackedFloat32Array([0.0, 0.62, 1.0])
+	var tex := GradientTexture2D.new()
+	tex.gradient = grad
+	tex.fill_from = Vector2(0.5, 0.0)
+	tex.fill_to = Vector2(0.5, 1.0)
+	tex.width = 8
+	tex.height = 256
+	var rect := TextureRect.new()
+	rect.texture = tex
+	rect.stretch_mode = TextureRect.STRETCH_SCALE
+	rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(rect)
+	# Voile sombre sur les bords (vignette)
+	var vg := Gradient.new()
+	vg.colors = PackedColorArray([Color(0, 0, 0, 0.0), Color(0, 0, 0, 0.0), Color(0.05, 0.08, 0.12, 0.45)])
+	vg.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
+	var vtex := GradientTexture2D.new()
+	vtex.gradient = vg
+	vtex.fill = GradientTexture2D.FILL_RADIAL
+	vtex.fill_from = Vector2(0.5, 0.5)
+	vtex.fill_to = Vector2(1.0, 0.5)
+	vtex.width = 256
+	vtex.height = 256
+	var vrect := TextureRect.new()
+	vrect.texture = vtex
+	vrect.stretch_mode = TextureRect.STRETCH_SCALE
+	vrect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vrect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(vrect)

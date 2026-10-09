@@ -20,6 +20,7 @@ script/strict_mode=false
 
 GameManager="*res://scripts/GameManager.gd"
 DataLoader="*res://scripts/DataLoader.gd"
+Sfx="*res://scripts/Sfx.gd"
 
 [display]
 
