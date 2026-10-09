@@ -73,14 +73,20 @@ jobs:
       - name: Export Zimut APK (Debug)
         run: |
           cd prototype/zimut
+          # Godot peut planter a la fermeture (corruption heap connue en headless)
+          # alors que l'APK est deja genere et signe : on valide le fichier produit.
           godot --headless --export-debug "Android" export/Zimut-debug.apk \
-            || godot --headless --export-debug "Android" export/Zimut-debug.apk
+            || godot --headless --export-debug "Android" export/Zimut-debug.apk \
+            || true
+          test -s export/Zimut-debug.apk
 
       - name: Export ZOE APK (Debug)
         run: |
           cd prototype/zoe
           godot --headless --export-debug "Android Debug" export/ZOE-debug.apk \
-            || godot --headless --export-debug "Android Debug" export/ZOE-debug.apk
+            || godot --headless --export-debug "Android Debug" export/ZOE-debug.apk \
+            || true
+          test -s export/ZOE-debug.apk
 
       - name: Upload Debug APKs
         uses: actions/upload-artifact@v4
@@ -98,7 +104,10 @@ jobs:
           GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /home/runner/.local/share/godot/keystores/debug.keystore
           GODOT_ANDROID_KEYSTORE_RELEASE_USER: androiddebugkey
           GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: android
-        run: cd prototype/zimut && godot --headless --verbose --export-release "Android" export/Zimut-release.apk
+        run: |
+          cd prototype/zimut
+          godot --headless --verbose --export-release "Android" export/Zimut-release.apk || true
+          test -s export/Zimut-release.apk
 
       - name: Export ZOE APK (Release)
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
@@ -106,7 +115,10 @@ jobs:
           GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /home/runner/.local/share/godot/keystores/debug.keystore
           GODOT_ANDROID_KEYSTORE_RELEASE_USER: androiddebugkey
           GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: android
-        run: cd prototype/zoe && godot --headless --verbose --export-release "Android Release" export/ZOE-release.apk
+        run: |
+          cd prototype/zoe
+          godot --headless --verbose --export-release "Android Release" export/ZOE-release.apk || true
+          test -s export/ZOE-release.apk
 
       - name: Upload Release APKs
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
