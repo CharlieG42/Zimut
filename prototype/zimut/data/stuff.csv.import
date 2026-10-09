@@ -15,5 +15,3 @@ dest_files=["res://data/stuff.Nom.translation", "res://data/stuff.Niveau requis.
 
 compress=1
 delimiter=0
-unescape_keys=false
-unescape_translations=true

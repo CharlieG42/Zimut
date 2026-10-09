@@ -418,7 +418,7 @@ func start_battle() -> void:
 	active_entity = {}
 	turn_order = all_entities()
 	for e: Dictionary in turn_order:
-		e["init"] = float(e.get("agility", 0)) + _rng.randf_range(0.0, 12.0)
+		e["init"] = float(e.get("agility", 0)) + _rng.randf_range(-25.0, 25.0)
 	turn_order.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["init"] > b["init"])
 	message_requested.emit("Le combat commence !")
 	fx.emit("banner", {"text": "Combat !"})

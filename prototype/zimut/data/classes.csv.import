@@ -15,5 +15,3 @@ dest_files=["res://data/classes.Niveau.translation", "res://data/classes.PA.tran
 
 compress=1
 delimiter=0
-unescape_keys=false
-unescape_translations=true

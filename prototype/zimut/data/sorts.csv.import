@@ -15,5 +15,3 @@ dest_files=["res://data/sorts.Nom.translation", "res://data/sorts.Cout_PA.transl
 
 compress=1
 delimiter=0
-unescape_keys=false
-unescape_translations=true
