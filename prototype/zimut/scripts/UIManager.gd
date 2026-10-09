@@ -11,8 +11,8 @@ signal end_turn_requested
 signal restart_requested
 signal spell_selected(spell)
 
-const COL_PANEL := Color(0.07, 0.09, 0.15, 0.90)
-const COL_BORDER := Color(0.36, 0.52, 0.85, 1.0)
+const COL_PANEL := Color(0.94, 0.89, 0.78, 0.94)
+const COL_BORDER := Color(0.72, 0.58, 0.28, 1.0)
 const COL_PLAYER := Color(0.22, 0.45, 0.85)
 const COL_ENEMY := Color(0.80, 0.22, 0.20)
 const COL_SUMMON := Color(0.25, 0.70, 0.45)
@@ -93,14 +93,14 @@ func _kind_color(spell: Dictionary) -> Color:
 	var p: Dictionary = Combat.parse(spell)
 	match String(p["kind"]):
 		"heal":
-			return Color(0.13, 0.46, 0.24)
+			return Color(0.45, 0.75, 0.50)
 		"buff":
-			return Color(0.55, 0.45, 0.10)
+			return Color(0.90, 0.80, 0.40)
 		"summon", "teleport", "revive":
-			return Color(0.38, 0.20, 0.58)
+			return Color(0.70, 0.55, 0.85)
 		"trap":
-			return Color(0.65, 0.35, 0.10)
-	return Color(0.24, 0.30, 0.68) if String(p["dtype"]) == "mag" else Color(0.62, 0.16, 0.14)
+			return Color(0.90, 0.65, 0.35)
+	return Color(0.55, 0.65, 0.95) if String(p["dtype"]) == "mag" else Color(0.95, 0.50, 0.42)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -328,11 +328,11 @@ func _build_ui() -> void:
 	_end_btn = Button.new()
 	_end_btn.text = "FIN DU\nTOUR"
 	_end_btn.add_theme_font_size_override("font_size", 30)
-	_end_btn.add_theme_color_override("font_color", Color(0.9, 0.97, 1.0))
-	_end_btn.add_theme_color_override("font_hover_color", Color.WHITE)
-	_end_btn.add_theme_stylebox_override("normal", _flat(Color(0.08, 0.2, 0.42), Color(0.35, 0.75, 1.0), 40, 5))
-	_end_btn.add_theme_stylebox_override("hover", _flat(Color(0.12, 0.3, 0.6), Color(0.6, 0.9, 1.0), 40, 5))
-	_end_btn.add_theme_stylebox_override("pressed", _flat(Color(0.05, 0.14, 0.3), Color(1, 0.9, 0.4), 40, 5))
+	_end_btn.add_theme_color_override("font_color", Color(0.25, 0.18, 0.08))
+	_end_btn.add_theme_color_override("font_hover_color", Color(0.15, 0.1, 0.02))
+	_end_btn.add_theme_stylebox_override("normal", _flat(Color(0.98, 0.86, 0.45), Color(0.72, 0.58, 0.28), 40, 5))
+	_end_btn.add_theme_stylebox_override("hover", _flat(Color(1.0, 0.92, 0.6), Color(0.85, 0.68, 0.3), 40, 5))
+	_end_btn.add_theme_stylebox_override("pressed", _flat(Color(0.9, 0.76, 0.35), Color(0.6, 0.48, 0.2), 40, 5))
 	_end_btn.add_theme_stylebox_override("disabled", _flat(Color(0.12, 0.14, 0.2), Color(0.3, 0.35, 0.45), 40, 5))
 	_end_btn.anchor_left = 1.0
 	_end_btn.anchor_right = 1.0
@@ -524,11 +524,11 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.text = String(spell["name"])
 		card.add_theme_font_size_override("font_size", 17)
 		card.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		card.add_theme_color_override("font_color", Color(1, 0.98, 0.9))
-		card.add_theme_color_override("font_hover_color", Color.WHITE)
-		card.add_theme_color_override("font_pressed_color", Color.WHITE)
-		card.add_theme_constant_override("outline_size", 5)
-		card.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+		card.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
+		card.add_theme_color_override("font_hover_color", Color(0.1, 0.07, 0.02))
+		card.add_theme_color_override("font_pressed_color", Color(0.1, 0.07, 0.02))
+		card.add_theme_constant_override("outline_size", 0)
+		card.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0))
 		card.focus_mode = Control.FOCUS_NONE
 		_style_card(card, false)
 		card.pressed.connect(func() -> void: spell_selected.emit(spell))
@@ -540,7 +540,7 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 
 
 func _style_card(card: SpellCard, selected: bool) -> void:
-	var col: Color = card.base_col if card.usable else card.base_col.darkened(0.55).lerp(Color(0.2, 0.2, 0.24), 0.5)
+	var col: Color = card.base_col if card.usable else card.base_col.lerp(Color(0.75, 0.73, 0.70), 0.65).darkened(0.12)
 	var border: Color = Color(1.0, 0.9, 0.3) if selected else col.lightened(0.45)
 	card.add_theme_stylebox_override("normal", _flat(col.darkened(0.15), border, 16, 5 if selected else 3))
 	card.add_theme_stylebox_override("hover", _flat(col.lightened(0.1), Color(1, 1, 1, 0.9), 16, 4))

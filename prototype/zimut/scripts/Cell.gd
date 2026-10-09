@@ -34,13 +34,13 @@ func setup(gp: Vector2i) -> void:
 	rng.seed = gp.x * 7919 + gp.y * 104729 + 17
 	var checker: bool = (gp.x + gp.y) % 2 == 0
 	var tint: float = rng.randf_range(-0.025, 0.025)
-	_base = (Color(0.46, 0.71, 0.29) if checker else Color(0.40, 0.65, 0.25))
+	_base = (Color(0.62, 0.78, 0.38) if checker else Color(0.55, 0.72, 0.33))
 	_base = Color(_base.r + tint, _base.g + tint, _base.b + tint)
-	for i: int in range(rng.randi_range(4, 7)):
+	for i: int in range(rng.randi_range(7, 12)):
 		var p := Vector2(rng.randf_range(-0.8, 0.8) * HW, rng.randf_range(-0.8, 0.8) * HH)
 		if absf(p.x) / HW + absf(p.y) / HH < 0.8:
 			_tufts.append([p, rng.randf_range(3.0, 6.0), rng.randf_range(-3.0, 3.0)])
-	if rng.randf() < 0.14:
+	if rng.randf() < 0.30:
 		for i: int in range(rng.randi_range(1, 3)):
 			var fp := Vector2(rng.randf_range(-0.55, 0.55) * HW, rng.randf_range(-0.55, 0.55) * HH)
 			var palette: Array[Color] = [Color(1, 1, 1), Color(1, 0.9, 0.35), Color(1, 0.6, 0.75)]
@@ -94,6 +94,9 @@ func _draw() -> void:
 	var top: PackedVector2Array = _diamond()
 	draw_colored_polygon(top, _base)
 	draw_colored_polygon(_diamond(0.62), Color(1, 1, 1, 0.045))
+	# Fond de case plus clair au centre (bump lumineux)
+	draw_colored_polygon(_diamond(0.80), Color(1, 1, 1, 0.06))
+	draw_colored_polygon(_diamond(0.45), Color(1, 1, 1, 0.05))
 	for t: Array in _tufts:
 		var p: Vector2 = t[0]
 		var h: float = t[1]

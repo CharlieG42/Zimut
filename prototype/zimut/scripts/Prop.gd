@@ -37,7 +37,7 @@ func _draw() -> void:
 		draw_colored_polygon(PackedVector2Array([Vector2(-7, 6), Vector2(-5, -52 * s), Vector2(5, -52 * s), Vector2(8, 6)]), Color(0.38, 0.24, 0.13))
 		draw_colored_polygon(PackedVector2Array([Vector2(-7, 6), Vector2(-5, -52 * s), Vector2(-1, -52 * s), Vector2(-2, 6)]), Color(0.5, 0.33, 0.18))
 		# feuillage
-		var base_col: Color = Color(0.22, 0.52, 0.2)
+		var base_col: Color = Color(0.34, 0.62, 0.25)
 		var blobs: Array = [
 			[Vector2(-24 + sway * 0.5, -62 * s), 27.0], [Vector2(24 + sway * 0.5, -62 * s), 27.0],
 			[Vector2(0 + sway, -80 * s), 34.0], [Vector2(-12 + sway, -98 * s), 24.0], [Vector2(14 + sway, -96 * s), 22.0],
