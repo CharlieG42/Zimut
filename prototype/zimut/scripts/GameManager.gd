@@ -145,7 +145,7 @@ func _generate_obstacles() -> void:
 		forbidden[sp] = true
 		for d: Vector2i in Combat.DIRS:
 			forbidden[sp + d] = true
-	var wanted: int = _rng.randi_range(8, 11)
+	var wanted: int = _rng.randi_range(14, 18)
 	var attempts: int = 0
 	while obstacles.size() < wanted and attempts < 300:
 		attempts += 1

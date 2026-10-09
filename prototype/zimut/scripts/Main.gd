@@ -95,6 +95,12 @@ func _build_background() -> void:
 	rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(rect)
+	# Décor lointain : bandeau montagnes + mer, dessiné derrière la grille
+	var far := Node2D.new()
+	far.z_index = -5
+	add_child(far)
+	far.draw.connect(_draw_horizon.bind(far))
+
 	# Voile sombre sur les bords (vignette)
 	var vg := Gradient.new()
 	vg.colors = PackedColorArray([Color(0, 0, 0, 0.0), Color(0, 0, 0, 0.0), Color(0.05, 0.08, 0.12, 0.45)])
@@ -112,3 +118,38 @@ func _build_background() -> void:
 	vrect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	vrect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(vrect)
+
+
+## Horizon lointain façon Waven : montagnes bleutées + mer pâle sous l'île.
+func _draw_horizon(far: Node2D) -> void:
+	var c: Vector2 = grid_manager.grid_center()
+	var w: float = 2600.0
+	var sea_y: float = c.y + 120.0
+	# Mer : bandeau dégradé sous la grille
+	far.draw_rect(Rect2(c.x - w, sea_y, w * 2.0, 900.0), Color(0.55, 0.72, 0.82, 0.55))
+	far.draw_rect(Rect2(c.x - w, sea_y, w * 2.0, 14.0), Color(0.75, 0.88, 0.95, 0.6))
+	# Montagnes : silhouettes enneigées, deux plans
+	for plan: int in range(2):
+		var col: Color = Color(0.62, 0.72, 0.82, 0.85 - 0.2 * plan)
+		var base_y: float = sea_y - (18.0 if plan == 0 else 0.0)
+		var step: float = 260.0 if plan == 0 else 180.0
+		var x: float = c.x - w
+		var height_rng := RandomNumberGenerator.new()
+		height_rng.seed = 91 + plan
+		while x < c.x + w:
+			var peak: float = height_rng.randf_range(70.0, 150.0) if plan == 0 else height_rng.randf_range(50.0, 110.0)
+			var half: float = step * height_rng.randf_range(0.45, 0.62)
+			far.draw_colored_polygon(PackedVector2Array([
+				Vector2(x, base_y), Vector2(x + half, base_y - peak), Vector2(x + step, base_y)
+			]), col)
+			# Neige sur les sommets du premier plan
+			if plan == 0:
+				far.draw_colored_polygon(PackedVector2Array([
+					Vector2(x + half * 0.62, base_y - peak * 0.68),
+					Vector2(x + half, base_y - peak),
+					Vector2(x + half * 1.4, base_y - peak * 0.68),
+					Vector2(x + half * 1.12, base_y - peak * 0.55),
+					Vector2(x + half * 0.86, base_y - peak * 0.55),
+				]), Color(0.97, 0.98, 1.0, 0.9))
+			x += step
+	far.queue_redraw()
