@@ -5,10 +5,10 @@ extends Node
 
 ## Chemins des fichiers CSV (relatifs au projet)
 ## Sur Android, essayer plusieurs chemins car le système de fichiers peut différer
-const CLASS_DATA_PATHS = ["res://data/classes.csv", "user://data/classes.csv", "res://prototype/Godot_iso/data/classes.csv"]
-const SPELL_DATA_PATHS = ["res://data/sorts.csv", "user://data/sorts.csv", "res://prototype/Godot_iso/data/sorts.csv"]
-const ENEMY_DATA_PATHS = ["res://data/ennemis.csv", "user://data/ennemis.csv", "res://prototype/Godot_iso/data/ennemis.csv"]
-const ITEM_DATA_PATHS = ["res://data/stuff.csv", "user://data/stuff.csv", "res://prototype/Godot_iso/data/stuff.csv"]
+const CLASS_DATA_PATHS = ["res://data/classes.txt", "user://data/classes.txt", "res://prototype/Godot_iso/data/classes.txt"]
+const SPELL_DATA_PATHS = ["res://data/sorts.txt", "user://data/sorts.txt", "res://prototype/Godot_iso/data/sorts.txt"]
+const ENEMY_DATA_PATHS = ["res://data/ennemis.txt", "user://data/ennemis.txt", "res://prototype/Godot_iso/data/ennemis.txt"]
+const ITEM_DATA_PATHS = ["res://data/stuff.txt", "user://data/stuff.txt", "res://prototype/Godot_iso/data/stuff.txt"]
 
 ## Helper function to open file with multiple path attempts
 func _open_file(paths: Array) -> FileAccess:
@@ -68,11 +68,11 @@ func load_all_data():
 	return success
 
 
-## Charger les données des classes depuis classes.csv
+## Charger les données des classes depuis classes.txt
 func load_classes_data():
 	var file = _open_file(CLASS_DATA_PATHS)
 	if file == null:
-		push_error("Cannot open classes.csv in any path - using defaults")
+		push_error("Cannot open classes.txt in any path - using defaults")
 		# Charger des données par défaut si le fichier n'est pas trouvé
 		load_default_classes_data()
 		return true  # Retourne true car on a des données par défaut
@@ -82,7 +82,7 @@ func load_classes_data():
 	
 	var lines = content.split("\n")
 	if lines.size() < 2:
-		push_error("classes.csv is empty or invalid")
+		push_error("classes.txt is empty or invalid")
 		return false
 	
 	# Lire l'en-tête
@@ -122,11 +122,11 @@ func load_classes_data():
 	return classes_data.size() > 0
 
 
-## Charger les données des sorts depuis sorts.csv
+## Charger les données des sorts depuis sorts.txt
 func load_spells_data():
 	var file = _open_file(SPELL_DATA_PATHS)
 	if file == null:
-		push_error("Cannot open sorts.csv in any path - using defaults")
+		push_error("Cannot open sorts.txt in any path - using defaults")
 		# Charger des données par défaut si le fichier n'est pas trouvé
 		load_default_spells_data()
 		return true  # Retourne true car on a des données par défaut
@@ -136,7 +136,7 @@ func load_spells_data():
 	
 	var lines = content.split("\n")
 	if lines.size() < 2:
-		push_error("sorts.csv is empty or invalid")
+		push_error("sorts.txt is empty or invalid")
 		return false
 	
 	# Lire l'en-tête
@@ -178,11 +178,11 @@ func load_spells_data():
 	return spells_data.size() > 0
 
 
-## Charger les données des ennemis depuis ennemis.csv
+## Charger les données des ennemis depuis ennemis.txt
 func load_enemies_data():
 	var file = _open_file(ENEMY_DATA_PATHS)
 	if file == null:
-		push_error("Cannot open ennemis.csv in any path - using defaults")
+		push_error("Cannot open ennemis.txt in any path - using defaults")
 		# Charger des données par défaut si le fichier n'est pas trouvé
 		load_default_enemies_data()
 		return true  # Retourne true car on a des données par défaut
@@ -192,7 +192,7 @@ func load_enemies_data():
 	
 	var lines = content.split("\n")
 	if lines.size() < 2:
-		push_error("ennemis.csv is empty or invalid")
+		push_error("ennemis.txt is empty or invalid")
 		return false
 	
 	# Lire l'en-tête
@@ -229,11 +229,11 @@ func load_enemies_data():
 	return enemies_data.size() > 0
 
 
-## Charger les données des objets depuis stuff.csv
+## Charger les données des objets depuis stuff.txt
 func load_items_data():
 	var file = _open_file(ITEM_DATA_PATHS)
 	if file == null:
-		push_error("Cannot open stuff.csv in any path - using defaults")
+		push_error("Cannot open stuff.txt in any path - using defaults")
 		# Charger des données par défaut si le fichier n'est pas trouvé
 		load_default_items_data()
 		return true  # Retourne true car on a des données par défaut
@@ -243,7 +243,7 @@ func load_items_data():
 	
 	var lines = content.split("\n")
 	if lines.size() < 2:
-		push_error("stuff.csv is empty or invalid")
+		push_error("stuff.txt is empty or invalid")
 		return false
 	
 	# Lire l'en-tête

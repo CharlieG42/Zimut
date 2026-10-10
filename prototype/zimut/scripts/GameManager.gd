@@ -240,7 +240,7 @@ func init_entities() -> void:
 		else:
 			st = _stats_from_csv(classes_data, classe)
 			if st.is_empty():
-				push_error("Classe '%s' introuvable dans classes.csv" % classe)
+				push_error("Classe '%s' introuvable dans classes.txt" % classe)
 				continue
 		var player: Dictionary = _base_entity("%s Lv%d" % [classe, DEFAULT_PLAYER_LEVEL], "Player", "player",
 			classe, DEFAULT_PLAYER_LEVEL, pos)
@@ -263,7 +263,7 @@ func init_entities() -> void:
 		var pos: Vector2i = ENEMY_SPAWNS[i]
 		var info: Dictionary = _find_best_match(enemies_data, "Type", etype, "Niveau", DEFAULT_ENEMY_LEVEL)
 		if info.is_empty():
-			push_error("Ennemi '%s' introuvable dans ennemis.csv" % etype)
+			push_error("Ennemi '%s' introuvable dans ennemis.txt" % etype)
 			continue
 		var pv: int = int(float(_csv_int(info, "PV", 50)) * ENEMY_HP_MULT)
 		var atk: int = _csv_int(info, "Attaque", 10)
