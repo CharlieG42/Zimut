@@ -30,6 +30,7 @@ const CELL_HALF_OFFSET := Vector2i(70, 70)
 
 const DEFAULT_PLAYER_LEVEL := 10
 const DEFAULT_ENEMY_LEVEL  := 10
+## Niveau des ennemis : celui de la partie active (progression), sinon défaut.
 
 const PLAYER_SPAWNS: Array[Vector2i] = [Vector2i(1, 1), Vector2i(2, 1), Vector2i(1, 2)]
 const ENEMY_SPAWNS: Array[Vector2i]  = [Vector2i(6, 6), Vector2i(6, 5), Vector2i(5, 6), Vector2i(6, 4)]
@@ -72,6 +73,8 @@ var game_over: bool              = false
 var victory: bool                = false
 var auto_mode: bool              = false
 var custom_team: Array           = []
+var active_save: Dictionary      = {}   # sauvegarde ProgressionManager en cours
+var active_slot: int             = -1
 
 var _turn_index: int = -1
 var _uid_counter: int = 0
@@ -244,10 +247,17 @@ func init_entities() -> void:
 				continue
 		var player: Dictionary = _base_entity("%s Lv%d" % [classe, DEFAULT_PLAYER_LEVEL], "Player", "player",
 			classe, DEFAULT_PLAYER_LEVEL, pos)
+		var eq: Dictionary = {}
+		if not active_save.is_empty() and i < active_save.get("team", []).size():
+			var member: Dictionary = active_save["team"][i]
+			eq = ProgressionManager.equipment_bonuses(member)
 		player.merge({
-			"max_pv": st["max_pv"], "current_pv": st["max_pv"],
-			"force": st["force"], "intelligence": st["intelligence"],
-			"agility": st["agility"], "wisdom": st["wisdom"], "defense": st["defense"],
+			"max_pv": int(st["max_pv"]) + int(eq.get("vita", 0)), "current_pv": int(st["max_pv"]) + int(eq.get("vita", 0)),
+			"force": int(st["force"]) + int(eq.get("force", 0)),
+			"intelligence": int(st["intelligence"]) + int(eq.get("intelligence", 0)),
+			"agility": int(st["agility"]) + int(eq.get("agility", 0)),
+			"wisdom": int(st["wisdom"]) + int(eq.get("wisdom", 0)),
+			"defense": int(st["defense"]) + int(eq.get("defense", 0)),
 			"max_pa": st["pa"], "current_pa": st["pa"], "max_pm": st["pm"], "current_pm": st["pm"],
 			"color": st["color"],
 		}, true)
@@ -261,14 +271,15 @@ func init_entities() -> void:
 	for i: int in range(enemy_types.size()):
 		var etype: String = enemy_types[i]
 		var pos: Vector2i = ENEMY_SPAWNS[i]
-		var info: Dictionary = _find_best_match(enemies_data, "Type", etype, "Niveau", DEFAULT_ENEMY_LEVEL)
+		var lvl: int = int(active_save.get("level", DEFAULT_ENEMY_LEVEL)) if not active_save.is_empty() else DEFAULT_ENEMY_LEVEL
+		var info: Dictionary = _find_best_match(enemies_data, "Type", etype, "Niveau", lvl)
 		if info.is_empty():
 			push_error("Ennemi '%s' introuvable dans ennemis.txt" % etype)
 			continue
 		var pv: int = int(float(_csv_int(info, "PV", 50)) * ENEMY_HP_MULT)
 		var atk: int = _csv_int(info, "Attaque", 10)
-		var enemy: Dictionary = _base_entity("%s Lv%d" % [etype, DEFAULT_ENEMY_LEVEL], "Enemy", "enemy",
-			etype, DEFAULT_ENEMY_LEVEL, pos)
+		var enemy: Dictionary = _base_entity("%s Lv%d" % [etype, lvl], "Enemy", "enemy",
+			etype, lvl, pos)
 		enemy.merge({
 			"max_pv": pv, "current_pv": pv,
 			"force": atk, "intelligence": atk, "agility": atk / 2.0, "wisdom": 0,
@@ -1248,6 +1259,9 @@ func check_game_over() -> void:
 		victory = true
 		game_ended.emit(true)
 		message_requested.emit("Tous les ennemis sont vaincus ! VICTOIRE !")
+		if not active_save.is_empty() and active_slot >= 0:
+			ProgressionManager.register_victory(active_save)
+			ProgressionManager.write_save(active_slot, active_save)
 
 
 func _after_action() -> void:
