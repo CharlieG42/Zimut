@@ -66,3 +66,59 @@ Accessoire,Bague de l'assassin,35,5,0,5,0,0,0,-
 Accessoire,Collier de mana,40,0,5,0,0,0,0,+10% dégâts magiques
 Accessoire,Bague de résistance,45,0,0,0,0,5,5,-
 Accessoire,Collier légendaire,50,0,0,10,10,10,10,-
+Bague,Bague du apprenti,5,1,1,1,0,2,0,-
+Collier,Collier de cuir,5,0,1,0,1,3,1,-
+Boucle d'oreille,Boucle en bois,5,0,1,1,1,2,0,-
+Gants,Gants de toile,5,1,0,1,0,2,1,-
+Cape,Cape de voyage,5,0,1,0,1,3,1,-
+Casque,Chapeau de paille,5,1,0,0,1,2,2,-
+Bottes,Bottes du vagabond,5,0,0,2,0,2,0,-
+Épée (1 main),Épée de fer,5,3,0,1,0,0,1,-
+Épée (2 mains),Espadon rouille,5,5,0,0,0,0,0,-
+Bâton (1 main),Bâton de chene,5,0,3,0,1,0,1,-
+Bâton (2 mains),Grand bâton nodule,5,0,5,0,1,0,0,-
+Arc,Arc de chasse,5,2,0,3,1,0,0,-
+Bague,Bague du guerrier,10,2,2,2,1,4,1,-
+Collier,Collier de fer,10,1,2,1,2,5,2,-
+Boucle d'oreille,Boucle de garde,10,1,2,2,2,3,1,-
+Gants,Gants de mailles,10,2,1,2,1,4,2,-
+Cape,Cape de sentinelle,10,1,2,1,2,5,2,-
+Casque,Chapeau de milicien,10,2,1,1,2,4,3,-
+Bottes,Bottes du skirmisseur,10,1,1,3,1,3,1,-
+Épée (1 main),Épée d'acier,10,4,1,2,1,1,2,-
+Épée (2 mains),Espadon de garde,10,7,1,1,1,1,1,-
+Bâton (1 main),Bâton grave,10,1,4,1,2,1,2,-
+Bâton (2 mains),Grand bâton de bataille,10,1,7,1,2,1,1,-
+Arc,Arc long,10,3,1,4,2,1,1,-
+Bague,Bague du champion,15,3,3,3,2,6,2,-
+Collier,Collier d'argent,15,2,3,2,3,7,3,-
+Boucle d'oreille,Boucle de veteran,15,2,3,3,3,4,2,-
+Gants,Gants en cuir bouilli,15,3,2,3,2,6,3,-
+Cape,Cape de heros,15,2,3,2,3,7,3,-
+Casque,Chapeau de capitaine,15,3,2,2,3,6,4,-
+Bottes,Bottes du traqueur,15,2,2,4,2,4,2,-
+Épée (1 main),Épée vive,15,5,2,3,2,2,3,-
+Épée (2 mains),Espadon runique,15,9,2,2,2,2,2,-
+Bâton (1 main),Bâton sage,15,2,5,2,3,2,3,-
+Bâton (2 mains),Grand bâton des mers,15,2,9,2,3,2,2,-
+Arc,Arc composite,15,4,2,5,3,2,2,-
+Bague,Bague du seigneur,20,4,4,4,3,8,3,-
+Collier,Collier runique,20,3,4,3,4,9,4,-
+Boucle d'oreille,Boucle arc-en-ciel,20,3,4,4,4,5,3,-
+Gants,Gants en ecailles,20,4,3,4,3,8,4,-
+Cape,Cape des brumes,20,3,4,3,4,9,4,-
+Casque,Chapeau de sorcier,20,4,3,3,4,8,5,-
+Bottes,Bottes du predateur,20,3,3,5,3,5,3,-
+Épée (1 main),Épée flamboyante,20,6,3,4,3,3,4,-
+Épée (2 mains),Espadon du colosse,20,11,3,3,3,3,3,-
+Bâton (1 main),Bâton d'archimage,20,3,6,3,4,3,4,-
+Bâton (2 mains),Grand bâton astral,20,3,11,3,4,3,3,-
+Arc,Arc du vent,20,5,3,6,4,3,3,-
+Hache (1 main),Hache du bucheron,5,3,0,0,0,0,1,-
+Hache (2 mains),Hache d'armes du bucheron,5,5,0,0,0,0,0,-
+Hache (1 main),Hache de guerre,10,4,1,1,1,1,2,-
+Hache (2 mains),Hache d'armes de guerre,10,7,1,1,1,1,1,-
+Hache (1 main),Hache du berserker,15,5,2,2,2,2,3,-
+Hache (2 mains),Hache d'armes du berserker,15,9,2,2,2,2,2,-
+Hache (1 main),Hache du titan,20,6,3,3,3,3,4,-
+Hache (2 mains),Hache d'armes du titan,20,11,3,3,3,3,3,-

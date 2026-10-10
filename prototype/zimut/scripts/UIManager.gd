@@ -53,8 +53,21 @@ class SpellCard extends Button:
 	var selected: bool = false
 	var usable: bool = true
 
+	## Badge pill : pastille colorée + texte, alignée à droite à partir de x_end.
+	func _badge(x_end: float, y: float, label: String, val: String, col: Color) -> float:
+		var font: Font = ThemeDB.fallback_font
+		var txt: String = "%s %s" % [label, val]
+		var w: float = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x + 16.0
+		var rect := Rect2(x_end - w, y - 16.0, w, 20.0)
+		draw_rect(rect, Color(0.02, 0.04, 0.1, 0.92))
+		draw_rect(Rect2(rect.position, Vector2(3.0, rect.size.y)), col)
+		draw_string(font, rect.position + Vector2(8, 15), txt, HORIZONTAL_ALIGNMENT_LEFT, w, 15, col.lightened(0.35))
+		return rect.position.x - 6.0
+
 	func _draw() -> void:
 		var font: Font = ThemeDB.fallback_font
+		# Liseré gauche de la couleur du type (rouge/bleu/vert/jaune)
+		draw_rect(Rect2(0, 0, 5, size.y), base_col)
 		var cost: int = int(spell.get("cost_pa", 0))
 		var orb_c := Vector2(24, 24)
 		draw_circle(orb_c, 21.0, Color(0.02, 0.04, 0.1))
@@ -62,20 +75,31 @@ class SpellCard extends Button:
 		draw_circle(orb_c + Vector2(-3, -5), 9.0, Color(1, 1, 1, 0.2))
 		draw_string(font, orb_c + Vector2(-18, 8), str(cost), HORIZONTAL_ALIGNMENT_CENTER, 36, 24, Color.WHITE)
 		if int(spell.get("cost_pm", 0)) > 0:
-			var pc := Vector2(size.x - 22, 22)
+			var pc := Vector2(52, 24)
 			draw_circle(pc, 15.0, Color(0.1, 0.55, 0.25))
 			draw_string(font, pc + Vector2(-15, 7), str(int(spell["cost_pm"])), HORIZONTAL_ALIGNMENT_CENTER, 30, 20, Color.WHITE)
-		var rng: int = int(spell.get("range", 1))
-		draw_string_outline(font, Vector2(size.x - 56, size.y - 8), "Port. %d" % rng, HORIZONTAL_ALIGNMENT_RIGHT, 50, 14, 4, Color(0, 0, 0, 0.8))
-		draw_string(font, Vector2(size.x - 56, size.y - 8), "Port. %d" % rng, HORIZONTAL_ALIGNMENT_RIGHT, 50, 14, Color(0.9, 0.95, 1.0))
+		# Badges en haut à droite : PA, PM, Portée, Zone
+		var p: Dictionary = Combat.parse(spell)
+		var x: float = size.x - 6
+		var y: float = 20.0
+		x = _badge(x, y, "PA", str(cost), Color(0.35, 0.65, 1.0))
+		if int(spell.get("cost_pm", 0)) > 0:
+			x = _badge(x, y, "PM", str(int(spell["cost_pm"])), Color(0.4, 0.8, 0.5))
+		x = _badge(x, y, "Port", str(int(spell.get("range", 1))), Color(0.95, 0.85, 0.55))
+		if String(p["aoe"]) == "zone":
+			x = _badge(x, y, "Zone", "%dx%d" % [int(p["zone_r"]), int(p["zone_r"])], Color(1.0, 0.6, 0.3))
+		elif String(p["aoe"]) == "adjacent_enemies":
+			x = _badge(x, y, "Zone", "adj.", Color(1.0, 0.6, 0.3))
+		elif String(p["aoe"]) == "team":
+			x = _badge(x, y, "Zone", "eq.", Color(1.0, 0.6, 0.3))
 		if hotkey > 0:
 			draw_string_outline(font, Vector2(8, size.y - 8), str(hotkey % 10), HORIZONTAL_ALIGNMENT_LEFT, 20, 16, 4, Color(0, 0, 0, 0.8))
 			draw_string(font, Vector2(8, size.y - 8), str(hotkey % 10), HORIZONTAL_ALIGNMENT_LEFT, 20, 16, Color(1, 0.95, 0.6))
 		if gm != null and gm.active_entity.size() > 0:
 			var left: int = gm.casts_left(gm.active_entity, spell)
 			if left < Combat.max_casts(spell) and left >= 0:
-				draw_string_outline(font, Vector2(size.x * 0.5 - 20, size.y - 24), "x%d" % left, HORIZONTAL_ALIGNMENT_CENTER, 40, 14, 4, Color(0, 0, 0, 0.8))
-				draw_string(font, Vector2(size.x * 0.5 - 20, size.y - 24), "x%d" % left, HORIZONTAL_ALIGNMENT_CENTER, 40, 14, Color(1, 0.9, 0.5))
+				draw_string_outline(font, Vector2(size.x * 0.5 - 20, size.y - 10), "x%d" % left, HORIZONTAL_ALIGNMENT_CENTER, 40, 15, 4, Color(0, 0, 0, 0.8))
+				draw_string(font, Vector2(size.x * 0.5 - 20, size.y - 10), "x%d" % left, HORIZONTAL_ALIGNMENT_CENTER, 40, 15, Color(1, 0.9, 0.5))
 
 
 func _flat(bg: Color, border: Color, radius: int = 14, bw: int = 3) -> StyleBoxFlat:
@@ -90,17 +114,20 @@ func _flat(bg: Color, border: Color, radius: int = 14, bw: int = 3) -> StyleBoxF
 
 
 func _kind_color(spell: Dictionary) -> Color:
+	## Code couleur uniforme :
+	##   rouge = attaque, bleu = buff, vert = soin, jaune = debuff
 	var p: Dictionary = Combat.parse(spell)
-	match String(p["kind"]):
+	var kind: String = String(p["kind"])
+	if p["debuffs"].size() > 0 or spell.get("spell_type", "") == "Debuff":
+		return Color(0.98, 0.82, 0.25)
+	match kind:
 		"heal":
-			return Color(0.45, 0.75, 0.50)
+			return Color(0.36, 0.78, 0.42)
 		"buff":
-			return Color(0.90, 0.80, 0.40)
-		"summon", "teleport", "revive":
-			return Color(0.70, 0.55, 0.85)
-		"trap":
-			return Color(0.90, 0.65, 0.35)
-	return Color(0.55, 0.65, 0.95) if String(p["dtype"]) == "mag" else Color(0.95, 0.50, 0.42)
+			return Color(0.40, 0.60, 0.95)
+		"summon", "teleport", "revive", "trap":
+			return Color(0.40, 0.60, 0.95)
+	return Color(0.92, 0.30, 0.25)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -454,6 +481,11 @@ func _build_ui() -> void:
 	var other: Button = _big_button("Changer d'équipe")
 	other.pressed.connect(_on_team_selection_pressed)
 	box.add_child(other)
+	var saves_btn: Button = _big_button("Mes parties / Progression")
+	saves_btn.pressed.connect(func() -> void:
+		Sfx.play("click")
+		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn"))
+	box.add_child(saves_btn)
 
 
 func _small_button(text: String, toggle: bool) -> Button:
