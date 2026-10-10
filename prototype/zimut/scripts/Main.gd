@@ -70,7 +70,7 @@ func _setup_camera() -> void:
 		return
 	cam.enabled = true
 	cam.zoom = Vector2(1.38, 1.38)
-	cam.position = grid_manager.grid_center() + Vector2(0, -8)
+	cam.position = grid_manager.grid_center() + Vector2(0, -30)
 	cam.position_smoothing_enabled = false
 	cam.make_current()
 

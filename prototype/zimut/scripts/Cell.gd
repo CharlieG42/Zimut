@@ -5,7 +5,7 @@ extends Node2D
 
 const HW := 64.0
 const HH := 32.0
-const DEPTH := 34.0
+const DEPTH := 68.0
 
 var grid_position: Vector2i = Vector2i.ZERO
 var edge_left: bool = false     # dernière rangée (bas-gauche) : falaise visible

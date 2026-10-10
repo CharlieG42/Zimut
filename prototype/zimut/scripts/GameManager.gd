@@ -28,8 +28,8 @@ const GRID_SIZE        := 8
 const CELL_SIZE        := Vector2i(140, 140)   # conservé pour compatibilité
 const CELL_HALF_OFFSET := Vector2i(70, 70)
 
-const DEFAULT_PLAYER_LEVEL := 100
-const DEFAULT_ENEMY_LEVEL  := 50
+const DEFAULT_PLAYER_LEVEL := 10
+const DEFAULT_ENEMY_LEVEL  := 10
 
 const PLAYER_SPAWNS: Array[Vector2i] = [Vector2i(1, 1), Vector2i(2, 1), Vector2i(1, 2)]
 const ENEMY_SPAWNS: Array[Vector2i]  = [Vector2i(6, 6), Vector2i(6, 5), Vector2i(5, 6), Vector2i(6, 4)]
@@ -145,7 +145,7 @@ func _generate_obstacles() -> void:
 		forbidden[sp] = true
 		for d: Vector2i in Combat.DIRS:
 			forbidden[sp + d] = true
-	var wanted: int = _rng.randi_range(14, 18)
+	var wanted: int = _rng.randi_range(6, 9)
 	var attempts: int = 0
 	while obstacles.size() < wanted and attempts < 300:
 		attempts += 1
