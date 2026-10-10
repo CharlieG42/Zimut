@@ -24,7 +24,7 @@ var _root: Control
 var _timeline: Control
 var _stats: Control
 var _spell_scroll: ScrollContainer
-var _spell_box: HBoxContainer
+var _spell_box: VBoxContainer
 var _tip_panel: PanelContainer
 var _tip_label: Label
 var _end_btn: Button
@@ -289,19 +289,19 @@ func _build_ui() -> void:
 
 	# Barre de sorts
 	_spell_scroll = ScrollContainer.new()
-	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_spell_scroll.anchor_left = 0.5
-	_spell_scroll.anchor_right = 0.5
-	_spell_scroll.anchor_top = 1.0
+	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_spell_scroll.anchor_left = 0.0
+	_spell_scroll.anchor_right = 0.0
+	_spell_scroll.anchor_top = 0.0
 	_spell_scroll.anchor_bottom = 1.0
-	_spell_scroll.offset_left = -360.0
-	_spell_scroll.offset_right = 540.0
-	_spell_scroll.offset_top = -184.0
-	_spell_scroll.offset_bottom = -22.0
+	_spell_scroll.offset_left = 12.0
+	_spell_scroll.offset_right = 200.0
+	_spell_scroll.offset_top = 12.0
+	_spell_scroll.offset_bottom = -12.0
 	_root.add_child(_spell_scroll)
-	_spell_box = HBoxContainer.new()
-	_spell_box.add_theme_constant_override("separation", 10)
+	_spell_box = VBoxContainer.new()
+	_spell_box.add_theme_constant_override("separation", 12)
 	_spell_scroll.add_child(_spell_box)
 
 	# Infobulle de sort
@@ -318,7 +318,7 @@ func _build_ui() -> void:
 	_tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tip_panel.visible = false
 	_tip_label = Label.new()
-	_tip_label.add_theme_font_size_override("font_size", 19)
+	_tip_label.add_theme_font_size_override("font_size", 22)
 	_tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_tip_label.custom_minimum_size = Vector2(420, 0)
 	_tip_panel.add_child(_tip_label)
@@ -520,9 +520,9 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.gm = game_manager
 		card.hotkey = idx if idx <= 10 else 0
 		card.base_col = _kind_color(spell)
-		card.custom_minimum_size = Vector2(138, 150)
+		card.custom_minimum_size = Vector2(180, 84)
 		card.text = String(spell["name"])
-		card.add_theme_font_size_override("font_size", 17)
+		card.add_theme_font_size_override("font_size", 21)
 		card.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		card.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
 		card.add_theme_color_override("font_hover_color", Color(0.1, 0.07, 0.02))
@@ -606,7 +606,7 @@ func _on_message(text: String) -> void:
 		return
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", 19)
+	l.add_theme_font_size_override("font_size", 22)
 	l.add_theme_color_override("font_color", Color(1, 1, 0.92))
 	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.95))
 	l.add_theme_constant_override("outline_size", 6)
