@@ -43,6 +43,7 @@ const COLORS: Dictionary = {
 	"Druide":    Color(1, 0.8, 0),
 	"Heal":      Color(0, 0.8, 0.8),
 	"Invocateur": Color(0.9, 0.5, 0.1),
+	"Sylvain":    Color(0.35, 0.65, 0.25),
 	"Gobelin":   Color(0.5, 0.8, 0.3),
 	"Squelette": Color(0.8, 0.8, 0.8),
 	"Loup":      Color(0.6, 0.6, 0.4),

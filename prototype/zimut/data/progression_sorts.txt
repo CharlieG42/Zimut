@@ -81,3 +81,14 @@ Invocateur,35,Attaque de zone;Soin de groupe
 Invocateur,40,Invoquer Homme-Faucon;Débuff de mouvement
 Invocateur,45,Buff ultime;Soin ultime
 Invocateur,50,Invoquer Centaur;Attaque ultime;Débuff ultime
+Sylvain,1,Ronce;Sève vitale
+Sylvain,5,Invoquer Buisson;Poison de ronce
+Sylvain,10,Racine;Invoquer Champignon
+Sylvain,15,Lierre protecteur;Soin de sève
+Sylvain,20,Ronce multiple;Pose un piège de ronces
+Sylvain,25,Invoquer Tronc;Vent de feuilles
+Sylvain,30,Rugissement de la forêt;Pluie de graines
+Sylvain,35,Sève régénérante;Invoquer Sarriette
+Sylvain,40,Colère de la nature;Soin de la forêt
+Sylvain,45,Racines profondes;Régression
+Sylvain,50,Tempête de pétales

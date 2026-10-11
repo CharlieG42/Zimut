@@ -18,6 +18,7 @@ const CLASS_COLORS: Dictionary = {
 	"Druide":    Color(1.0, 0.6, 0.0),
 	"Heal":       Color(0.0, 0.75, 0.75),
 	"Invocateur": Color(0.5, 0.0, 0.5),
+	"Sylvain":    Color(0.35, 0.65, 0.25),
 }
 
 ## Données par défaut si le CSV ne fournit pas tout (icône + description manuelles)
@@ -29,6 +30,7 @@ const CLASS_META: Dictionary = {
 	"Druide":    {"icon": "🌿", "description": "Maître de la nature, soigne et renforce avec des sorts naturels."},
 	"Heal":       {"icon": "❤️", "description": "Spécialiste des soins et de la survie."},
 	"Invocateur": {"icon": "🎭", "description": "Invoque des créatures, contrôle le champ."},
+	"Sylvain":    {"icon": "🌿", "description": "Maître des plantes : invoque la forêt, empoisonne et soigne par la sève."},
 }
 
 var available_classes: Array[String] = []
@@ -137,6 +139,8 @@ func _load_fallback_data() -> void:
 			"base_stats": {"PV": 242, "PA": 6, "PM": 4, "Force": 20, "Intelligence": 42, "Agilite": 11, "Sagesse": 17, "Defense": 42}},
 		"Invocateur": {"name": "Invocateur", "description": CLASS_META["Invocateur"]["description"], "color": CLASS_COLORS["Invocateur"], "icon": CLASS_META["Invocateur"]["icon"],
 			"base_stats": {"PV": 202, "PA": 6, "PM": 4, "Force": 22, "Intelligence": 44, "Agilite": 13, "Sagesse": 19, "Defense": 36}},
+		"Sylvain": {"name": "Sylvain", "description": CLASS_META["Sylvain"]["description"], "color": CLASS_COLORS["Sylvain"], "icon": CLASS_META["Sylvain"]["icon"],
+			"base_stats": {"PV": 107, "PA": 6, "PM": 4, "Force": 14, "Intelligence": 19, "Agilite": 19, "Sagesse": 29, "Defense": 24}},
 	}
 
 

@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 110" width="80" height="110">
+  <defs>
+    <radialGradient id="sShadow" cx="50%" cy="100%" r="40%">
+      <stop offset="0%" stop-color="#000" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sRobe" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#7CC142"/>
+      <stop offset="50%"  stop-color="#3E8E2F"/>
+      <stop offset="100%" stop-color="#1B4D14"/>
+    </linearGradient>
+    <linearGradient id="sLeaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#A8E063"/>
+      <stop offset="100%" stop-color="#4C9A2A"/>
+    </linearGradient>
+    <radialGradient id="sOrb" cx="35%" cy="35%" r="65%">
+      <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="50%"  stop-color="#9FE866" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#3E8E2F" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="sBlur"><feGaussianBlur stdDeviation="2"/></filter>
+  </defs>
+
+  <ellipse cx="40" cy="105" rx="26" ry="5" fill="url(#sShadow)"/>
+
+  <!-- Cape de feuilles -->
+  <path d="M22 46 Q14 70 20 92 Q30 84 40 92 Q50 84 60 92 Q66 70 58 46 Z" fill="url(#sRobe)" stroke="#16330F" stroke-width="2"/>
+
+  <!-- Bras -->
+  <path d="M25 50 Q16 60 15 70" stroke="#2F6B22" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <path d="M55 50 Q64 60 65 70" stroke="#2F6B22" stroke-width="7" stroke-linecap="round" fill="none"/>
+
+  <!-- Orbe de sève -->
+  <circle cx="65" cy="72" r="7" fill="url(#sOrb)"/>
+  <circle cx="65" cy="72" r="3.2" fill="#D8FFB0"/>
+
+  <!-- Tête -->
+  <circle cx="40" cy="34" r="13" fill="#E8C79A" stroke="#16330F" stroke-width="2"/>
+
+  <!-- Cheveux / mousse -->
+  <path d="M27 32 Q26 20 40 19 Q54 20 53 32 Q47 26 40 27 Q33 26 27 32 Z" fill="#2F6B22"/>
+
+  <!-- Feuille sur la tête -->
+  <path d="M40 18 Q46 8 54 10 Q50 18 42 20 Z" fill="url(#sLeaf)" stroke="#1B4D14" stroke-width="1.5"/>
+
+  <!-- Yeux -->
+  <circle cx="35" cy="35" r="2.4" fill="#1B4D14"/>
+  <circle cx="45" cy="35" r="2.4" fill="#1B4D14"/>
+  <circle cx="35.8" cy="34.2" r="0.8" fill="#FFF"/>
+  <circle cx="45.8" cy="34.2" r="0.8" fill="#FFF"/>
+
+  <!-- Sourire -->
+  <path d="M35 42 Q40 45 45 42" stroke="#8A5A2B" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+
+  <!-- Collier de graines -->
+  <circle cx="34" cy="49" r="2" fill="#C9A24B"/>
+  <circle cx="40" cy="51" r="2.3" fill="#A8E063"/>
+  <circle cx="46" cy="49" r="2" fill="#C9A24B"/>
+
+  <!-- Feuilles flottantes -->
+  <path d="M12 30 Q16 24 22 27 Q18 33 12 30 Z" fill="url(#sLeaf)" opacity="0.85" filter="url(#sBlur)"/>
+  <path d="M68 40 Q72 34 78 37 Q74 43 68 40 Z" fill="url(#sLeaf)" opacity="0.7" filter="url(#sBlur)"/>
+</svg>
