@@ -266,13 +266,21 @@ func init_entities() -> void:
 		players.append(player)
 		grid[pos.y][pos.x] = player
 
-	# ── Ennemis : 3 types fixes + 1 type aléatoire ─────────────────────────
-	var enemy_types: Array[String] = ["Gobelin", "Squelette", "Loup", "Troll" if _rng.randf() < 0.5 else "Dragonnet"]
+	# ── Ennemis : boss + 3 sbires tous les 4 combats, sinon 4 ennemis ─────
+	var lvl: int = int(active_save.get("level", DEFAULT_ENEMY_LEVEL)) if not active_save.is_empty() else DEFAULT_ENEMY_LEVEL
+	var boss_fight: bool = not active_save.is_empty() and ProgressionManager.is_boss_fight(active_save)
+	var enemy_types: Array[String] = []
+	if boss_fight:
+		enemy_types = ["Gobelin", "Squelette", "Loup", "BOSS"]
+	else:
+		enemy_types = ["Gobelin", "Squelette", "Loup", "Troll" if _rng.randf() < 0.5 else "Dragonnet"]
 	var enemies_data: Array = get_enemies_data()
 	for i: int in range(enemy_types.size()):
 		var etype: String = enemy_types[i]
 		var pos: Vector2i = ENEMY_SPAWNS[i]
-		var lvl: int = int(active_save.get("level", DEFAULT_ENEMY_LEVEL)) if not active_save.is_empty() else DEFAULT_ENEMY_LEVEL
+		if etype == "BOSS":
+			_spawn_boss(pos, lvl)
+			continue
 		var info: Dictionary = _find_best_match(enemies_data, "Type", etype, "Niveau", lvl)
 		if info.is_empty():
 			push_error("Ennemi '%s' introuvable dans ennemis.txt" % etype)
@@ -294,8 +302,37 @@ func init_entities() -> void:
 			Combat.add_status(enemy, "regen", 999, 5.0)
 		if etype == "Dragonnet":
 			enemy["fly"] = true
+		if boss_fight:
+			enemy["name"] = "%s Lv%d" % [etype, maxi(1, lvl - 2)]
 		enemies.append(enemy)
 		grid[pos.y][pos.x] = enemy
+
+## Boss de fin de cycle : Dragonnet colossal, boss tous les 4 combats.
+## PV x3, attaques x1.5, +1 PA/PM, vole (comme un Dragonnet), régénère.
+func _spawn_boss(pos: Vector2i, lvl: int) -> void:
+	var enemies_data: Array = get_enemies_data()
+	var info: Dictionary = _find_best_match(enemies_data, "Type", "Dragonnet", "Niveau", lvl)
+	if info.is_empty():
+		push_error("Dragonnet introuvable dans ennemis.txt — boss remplacé par un Troll")
+		info = _find_best_match(enemies_data, "Type", "Troll", "Niveau", lvl)
+		if info.is_empty():
+			return
+	var pv: int = int(float(_csv_int(info, "PV", 120)) * ENEMY_HP_MULT * 3.0)
+	var atk: int = int(float(_csv_int(info, "Attaque", 20)) * 1.5)
+	var boss: Dictionary = _base_entity("☠ BOSS Dragonnet Lv%d" % lvl, "Enemy", "enemy", "Dragonnet", lvl, pos)
+	boss.merge({
+		"max_pv": pv, "current_pv": pv,
+		"force": atk, "intelligence": atk, "agility": atk / 2.0, "wisdom": 10,
+		"defense": int(float(_csv_int(info, "Défense", 15)) * 1.5),
+		"max_pa": _csv_int(info, "PA", 4) + 1, "current_pa": _csv_int(info, "PA", 4) + 1,
+		"max_pm": _csv_int(info, "PM", 3) + 1, "current_pm": _csv_int(info, "PM", 3) + 1,
+		"color": Color(0.9, 0.2, 0.1),
+	}, true)
+	boss["spells"] = Combat.enemy_spells("Dragonnet", atk)
+	boss["fly"] = true
+	Combat.add_status(boss, "regen", 999, 8.0)
+	enemies.append(boss)
+	grid[pos.y][pos.x] = boss
 
 
 func _stats_from_custom(m: Dictionary, classe: String) -> Dictionary:

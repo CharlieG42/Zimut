@@ -45,10 +45,23 @@ var _stats_label: Label
 var _action_btn: Button
 var _team_slots: Array = []          # [Panel, ...]
 var _title: Label
+var _fight_btn: Button
 
 func _ready() -> void:
 	_load_classes()
 	_build()
+	_restore_previous_team()
+
+## Reprise de l'équipe du combat précédent (modifiable librement ensuite).
+func _restore_previous_team() -> void:
+	team.clear()
+	if GameManager.active_slot < 0 or GameManager.active_save.is_empty():
+		return
+	for m: Dictionary in GameManager.active_save.get("team", []):
+		var classe: String = String(m.get("classe", ""))
+		if classe != "" and classes.has(classe) and not team.has(classe):
+			team.append(classe)
+	refresh()
 
 func _load_classes() -> void:
 	# Stats depuis classes.txt (meilleur niveau), fallback méta
@@ -253,8 +266,9 @@ func _build() -> void:
 		team_row.add_child(slot)
 		_team_slots.append(slot)
 
-	# Bouton COMBATTRE
+	# Bouton COMBATTRE (texte actualisé dans refresh())
 	var go := _std_btn("⚔  COMBATTRE", Color(0.35, 0.70, 0.30))
+	_fight_btn = go
 	go.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	go.offset_left = -400.0
 	go.offset_right = -60.0
@@ -421,7 +435,26 @@ func refresh() -> void:
 			Color(0.45, 0.78, 0.38) if not full else Color(0.4, 0.4, 0.42),
 			Color(0.25, 0.5, 0.2) if not full else Color(0.3, 0.3, 0.32), 14, 3))
 
-	_title.text = "CONSTITUEZ VOTRE ÉQUIPE (%d/%d)" % [team.size(), MAX_TEAM_SIZE]
+	var fight_no: int = 1
+	var boss_fight: bool = false
+	var next_lvl: int = 0
+	if GameManager.active_slot >= 0 and not GameManager.active_save.is_empty():
+		fight_no = ProgressionManager.next_fight_number(GameManager.active_save)
+		boss_fight = ProgressionManager.is_boss_fight(GameManager.active_save)
+		next_lvl = int(GameManager.active_save.get("level", 0))
+	if boss_fight:
+		_title.text = "COMBAT %d — ☠ AFFRONTEZ LE BOSS ! (%d/%d)" % [fight_no, team.size(), MAX_TEAM_SIZE]
+		_title.add_theme_color_override("font_color", Color(1.0, 0.4, 0.3))
+	else:
+		_title.text = "COMBAT %d — CONSTITUEZ VOTRE ÉQUIPE (%d/%d)" % [fight_no, team.size(), MAX_TEAM_SIZE]
+		_title.add_theme_color_override("font_color", Color(1.0, 0.86, 0.4))
+	if _fight_btn:
+		if boss_fight:
+			_fight_btn.text = "☠  COMBATTRE LE BOSS (nv%d)" % next_lvl
+		elif next_lvl > 0:
+			_fight_btn.text = "⚔  COMBATTRE — ennemis nv%d" % next_lvl
+		else:
+			_fight_btn.text = "⚔  COMBATTRE"
 
 	# Aperçu
 	for i: int in range(MAX_TEAM_SIZE):

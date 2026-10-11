@@ -473,6 +473,14 @@ func _build_ui() -> void:
 	_over_sub.add_theme_font_size_override("font_size", 28)
 	_over_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(_over_sub)
+	var cont_btn: Button = _big_button("Continuer l'aventure")
+	if game_manager.active_save.is_empty() or game_manager.active_slot < 0:
+		cont_btn.disabled = true
+		cont_btn.tooltip_text = "Nécessite une partie active."
+	cont_btn.pressed.connect(func() -> void:
+		Sfx.play("click")
+		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
+	box.add_child(cont_btn)
 	var again: Button = _big_button("Rejouer")
 	again.pressed.connect(func() -> void:
 		Sfx.play("click")
@@ -719,7 +727,11 @@ func _show_loot_window() -> void:
 	panel.add_child(box)
 
 	var title := Label.new()
-	title.text = "VICTOIRE !  Ennemis niveau %d au prochain combat" % int(save.get("level", 10))
+	var fight_no: int = ProgressionManager.next_fight_number(save)
+	if ProgressionManager.is_boss_fight(save):
+		title.text = "VICTOIRE !  Prochain combat (%d) : ☠ BOSS et ses sbires !" % fight_no
+	else:
+		title.text = "VICTOIRE !  Ennemis niveau %d au prochain combat (%d)" % [int(save.get("level", 10)), fight_no]
 	title.add_theme_font_size_override("font_size", 28)
 	title.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
 	box.add_child(title)
