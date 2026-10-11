@@ -334,14 +334,14 @@ func _build_ui() -> void:
 	# Infobulle de sort
 	_tip_panel = PanelContainer.new()
 	_tip_panel.add_theme_stylebox_override("panel", _flat(Color(0.06, 0.08, 0.14, 0.95), Color(1, 0.85, 0.35), 14, 2))
-	_tip_panel.anchor_left = 0.5
-	_tip_panel.anchor_right = 0.5
-	_tip_panel.anchor_top = 1.0
-	_tip_panel.anchor_bottom = 1.0
-	_tip_panel.offset_left = -360.0
-	_tip_panel.offset_right = 100.0
-	_tip_panel.offset_top = -330.0
-	_tip_panel.offset_bottom = -194.0
+	_tip_panel.anchor_left = 0.0
+	_tip_panel.anchor_right = 0.0
+	_tip_panel.anchor_top = 0.0
+	_tip_panel.anchor_bottom = 0.0
+	_tip_panel.offset_left = 232.0
+	_tip_panel.offset_right = 652.0
+	_tip_panel.offset_top = 14.0
+	_tip_panel.offset_bottom = 150.0
 	_tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tip_panel.visible = false
 	_tip_label = Label.new()
@@ -473,7 +473,7 @@ func _build_ui() -> void:
 	_over_sub.add_theme_font_size_override("font_size", 28)
 	_over_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(_over_sub)
-	var cont_btn: Button = _big_button("Continuer l'aventure")
+	var cont_btn: Button = _big_button("CONTINUER")
 	if game_manager.active_save.is_empty() or game_manager.active_slot < 0:
 		cont_btn.disabled = true
 		cont_btn.tooltip_text = "Nécessite une partie active."
@@ -481,11 +481,6 @@ func _build_ui() -> void:
 		Sfx.play("click")
 		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
 	box.add_child(cont_btn)
-	var again: Button = _big_button("Rejouer")
-	again.pressed.connect(func() -> void:
-		Sfx.play("click")
-		restart_requested.emit())
-	box.add_child(again)
 	var other: Button = _big_button("Changer d'équipe")
 	other.pressed.connect(_on_team_selection_pressed)
 	box.add_child(other)

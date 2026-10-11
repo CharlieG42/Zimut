@@ -46,6 +46,7 @@ var _action_btn: Button
 var _team_slots: Array = []          # [Panel, ...]
 var _title: Label
 var _fight_btn: Button
+var _equip_btn: Button
 
 func _ready() -> void:
 	_load_classes()
@@ -279,8 +280,8 @@ func _build() -> void:
 
 	# Équipement (si partie active)
 	var eq := _std_btn("🎒  ÉQUIPEMENT", Color(0.75, 0.55, 0.20))
-	eq.disabled = GameManager.active_slot < 0 or GameManager.active_save.is_empty()
-	eq.tooltip_text = "Nécessite une partie active (avec loots)."
+	_equip_btn = eq
+	eq.tooltip_text = "Équiper vos personnages avec les objets gagnés."
 	eq.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	eq.offset_left = 60.0
 	eq.offset_right = 400.0
@@ -448,6 +449,9 @@ func refresh() -> void:
 	else:
 		_title.text = "COMBAT %d — CONSTITUEZ VOTRE ÉQUIPE (%d/%d)" % [fight_no, team.size(), MAX_TEAM_SIZE]
 		_title.add_theme_color_override("font_color", Color(1.0, 0.86, 0.4))
+	if _equip_btn:
+		_equip_btn.disabled = GameManager.active_slot < 0 or GameManager.active_save.is_empty()
+		_equip_btn.text = "🎒  ÉQUIPEMENT (%d)" % GameManager.active_save.get("inventory", []).size() if not _equip_btn.disabled else "🎒  ÉQUIPEMENT"
 	if _fight_btn:
 		if boss_fight:
 			_fight_btn.text = "☠  COMBATTRE LE BOSS (nv%d)" % next_lvl
