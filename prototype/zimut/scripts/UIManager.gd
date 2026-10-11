@@ -684,6 +684,12 @@ func _on_game_ended(victory: bool) -> void:
 	await get_tree().create_timer(1.4).timeout
 	if game_manager == null or not game_manager.game_over:
 		return
+	if victory and not game_manager.active_save.is_empty():
+		_show_loot_window()
+		return
+	_show_game_over(victory)
+
+func _show_game_over(victory: bool) -> void:
 	Sfx.play("win" if victory else "lose")
 	_over_title.text = "VICTOIRE !" if victory else "DÉFAITE"
 	_over_title.add_theme_color_override("font_color", Color(1, 0.9, 0.35) if victory else Color(1, 0.35, 0.3))
@@ -691,6 +697,59 @@ func _on_game_ended(victory: bool) -> void:
 	_over.visible = true
 	_over.modulate.a = 0.0
 	create_tween().tween_property(_over, "modulate:a", 1.0, 0.5)
+
+## Fenêtre de loots après victoire, avant l'écran de fin de combat.
+func _show_loot_window() -> void:
+	var save: Dictionary = game_manager.active_save
+	var loots: Array = save.get("last_loots", [])
+	Sfx.play("win")
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _flat(Color(0.94, 0.89, 0.78, 0.97), Color(0.72, 0.58, 0.28), 16, 4))
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.position = Vector2(660, 240)
+	_root.add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 12)
+	panel.add_child(box)
+
+	var title := Label.new()
+	title.text = "VICTOIRE !  Ennemis niveau %d au prochain combat" % int(save.get("level", 10))
+	title.add_theme_font_size_override("font_size", 28)
+	title.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
+	box.add_child(title)
+
+	if loots.is_empty():
+		var none := Label.new()
+		none.text = "Aucun loot cette fois..."
+		none.add_theme_font_size_override("font_size", 20)
+		none.add_theme_color_override("font_color", Color(0.4, 0.3, 0.1))
+		box.add_child(none)
+	else:
+		var lbl := Label.new()
+		lbl.text = "Objets gagnés (%d) :" % loots.size()
+		lbl.add_theme_font_size_override("font_size", 22)
+		lbl.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
+		box.add_child(lbl)
+		for it: Dictionary in loots:
+			var row := Label.new()
+			row.text = "  ✦ [%s] %s (nv%d) — F%d I%d A%d S%d V%d D%d" % [
+				it.get("type", "?"), it.get("name", "?"), int(it.get("level", 0)),
+				int(it.get("force", 0)), int(it.get("intelligence", 0)), int(it.get("agility", 0)),
+				int(it.get("wisdom", 0)), int(it.get("vita", 0)), int(it.get("defense", 0))]
+			row.add_theme_font_size_override("font_size", 19)
+			row.add_theme_color_override("font_color", Color(0.35, 0.25, 0.08))
+			box.add_child(row)
+
+	var cont := Button.new()
+	cont.text = "CONTINUER"
+	cont.custom_minimum_size = Vector2(320, 66)
+	cont.add_theme_font_size_override("font_size", 24)
+	cont.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
+	cont.add_theme_stylebox_override("normal", _flat(Color(0.98, 0.86, 0.45), Color(0.72, 0.58, 0.28), 12, 3))
+	cont.pressed.connect(func() -> void:
+		panel.queue_free()
+		_show_game_over(true))
+	box.add_child(cont)
 
 
 func hide_game_over_panel() -> void:
