@@ -126,7 +126,21 @@ func _fresh_save() -> Dictionary:
 func load_save(slot: int) -> Dictionary:
 	if not save_exists(slot):
 		return {}
-	var file := FileAccess.open(_path(slot), FileAccess.READ)
+	var parsed = _read_json(_path(slot))
+	if parsed.is_empty():
+		# Fichier principal corrompu : tenter le backup
+		parsed = _read_json(_path(slot) + ".bak")
+		if parsed.is_empty():
+			push_error("Sauvegarde %d illisible (et son backup)" % slot)
+			return {}
+	# JSON renvoie des floats pour tous les nombres : normaliser en int
+	_normalize_ints(parsed, ["level", "victories"])
+	return parsed
+
+func _read_json(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path):
+		return {}
+	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		return {}
 	var parsed = JSON.parse_string(file.get_as_text())
@@ -135,16 +149,31 @@ func load_save(slot: int) -> Dictionary:
 		return {}
 	return parsed
 
+func _normalize_ints(d: Dictionary, keys: Array) -> void:
+	for k in keys:
+		if d.has(k):
+			d[k] = int(d[k])
+
 func write_save(slot: int, data: Dictionary) -> bool:
 	if slot < 0 or slot >= MAX_SAVES:
 		return false
 	data["timestamp"] = Time.get_datetime_string_from_system()
-	var file := FileAccess.open(_path(slot), FileAccess.WRITE)
+	var path := _path(slot)
+	var payload := JSON.stringify(data, "\t")
+	# Backup de la version précédente (limité aux 2 backups utiles)
+	if FileAccess.file_exists(path):
+		DirAccess.copy_absolute(path, path + ".bak")
+	# Écriture atomique : d'abord dans un fichier temporaire, puis remplacement
+	var tmp := path + ".tmp"
+	var file := FileAccess.open(tmp, FileAccess.WRITE)
 	if file == null:
 		push_error("Impossible d'écrire la sauvegarde %d" % slot)
 		return false
-	file.store_string(JSON.stringify(data, "\t"))
+	file.store_string(payload)
 	file.close()
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	DirAccess.rename_absolute(ProjectSettings.globalize_path(tmp), ProjectSettings.globalize_path(path))
 	return true
 
 func delete_save(slot: int) -> void:
@@ -254,3 +283,15 @@ func equipment_bonuses(member: Dictionary) -> Dictionary:
 		for k: String in out.keys():
 			out[k] = int(out[k]) + int(it.get(k, 0))
 	return out
+
+
+## Renomme une partie existante. Retourne "" si OK.
+func rename_save(slot: int, new_name: String) -> String:
+	new_name = new_name.strip_edges()
+	if new_name == "":
+		return "Nom vide."
+	var data := load_save(slot)
+	if data.is_empty():
+		return "Partie introuvable."
+	data["name"] = new_name
+	return "" if write_save(slot, data) else "Écriture impossible."
