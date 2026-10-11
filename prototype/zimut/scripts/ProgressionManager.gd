@@ -13,6 +13,7 @@ const SAVE_DIR := "user://saves"
 const MAX_SAVES := 5
 const START_LEVEL := 10
 const LEVELS_PER_VICTORY := 2
+const BOSS_EVERY := 4
 
 ## Emplacements d'équipement par personnage (clé -> type d'item accepté)
 const EQUIP_SLOTS := {
@@ -207,6 +208,13 @@ func register_victory(data: Dictionary) -> Dictionary:
 	data["loot_log"] = log_arr
 	progression_changed.emit()
 	return data
+
+## Numéro du prochain combat (1 = premier). Boss tous les BOSS_EVERY combats.
+func next_fight_number(data: Dictionary) -> int:
+	return int(data.get("victories", 0)) + 1
+
+func is_boss_fight(data: Dictionary) -> bool:
+	return next_fight_number(data) % BOSS_EVERY == 0
 
 func _roll_loots(level: int) -> Array:
 	var count: int = _rng.randi_range(1, 3)
