@@ -243,6 +243,7 @@ func _open_equipment() -> void:
 			if String(child.get_script().resource_path).contains("TeamEquipmentUI"):
 				return
 	var ui: CanvasLayer = (load("res://scripts/TeamEquipmentUI.gd") as GDScript).new()
+	ui.layer = 10
 	add_child(ui)
 	ui.closed.connect(ui.queue_free)
 	ui.open(GameManager.active_save, GameManager.active_slot)
