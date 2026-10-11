@@ -34,6 +34,19 @@ func _build() -> void:
 	title.position = Vector2(40, 18)
 	_root.add_child(title)
 
+	var back := Button.new()
+	back.text = "← MENU"
+	back.position = Vector2(40, 18)
+	back.custom_minimum_size = Vector2(160, 52)
+	back.add_theme_font_size_override("font_size", 20)
+	back.add_theme_color_override("font_color", COL_TXT)
+	back.add_theme_stylebox_override("normal", _flat())
+	back.pressed.connect(func() -> void:
+		GameManager.active_save = {}
+		GameManager.active_slot = -1
+		get_tree().change_scene_to_file("res://scenes/MainMenu.tscn"))
+	_root.add_child(back)
+
 	_slots_box = VBoxContainer.new()
 	_slots_box.position = Vector2(40, 90)
 	_slots_box.custom_minimum_size = Vector2(560, 0)
@@ -148,7 +161,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	# Inventaire
 	var inv: Array = data.get("inventory", [])
 	var inv_lbl := Label.new()
-	inv_lbl.text = "Inventaire (%d objets) :" % inv.size()
+	inv_lbl.text = "Inventaire (%d objets disponibles à équiper) :" % inv.size()
 	inv_lbl.add_theme_font_size_override("font_size", 22)
 	inv_lbl.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(inv_lbl)
@@ -168,6 +181,17 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		row2.add_theme_font_size_override("font_size", 16)
 		row2.add_theme_color_override("font_color", COL_TXT)
 		inv_box.add_child(row2)
+	# Journal des loots gagnés (historique complet de la partie)
+	var log_arr: Array = data.get("loot_log", [])
+	if log_arr.size() > 0:
+		var log_btn := Button.new()
+		log_btn.text = "Voir tous les loots gagnés (%d)" % log_arr.size()
+		log_btn.add_theme_font_size_override("font_size", 20)
+		log_btn.add_theme_color_override("font_color", COL_TXT)
+		log_btn.add_theme_stylebox_override("normal", _flat())
+		log_btn.pressed.connect(func() -> void: _show_loot_log(log_arr))
+		_detail_box.add_child(log_btn)
+
 	# Équiper : simple boucle d'équipement auto sur l'équipe en place
 	var auto_btn := Button.new()
 	auto_btn.text = "Équiper automatiquement les meilleurs objets"
@@ -206,3 +230,41 @@ func _auto_equip() -> void:
 				break
 	ProgressionManager.write_save(_current_slot, _current)
 	_show_detail(ProgressionManager.load_save(_current_slot), _current_slot)
+
+
+func _show_loot_log(log_arr: Array) -> void:
+	var dialog := PanelContainer.new()
+	dialog.add_theme_stylebox_override("panel", _flat())
+	dialog.set_anchors_preset(Control.PRESET_CENTER)
+	dialog.position = Vector2(700, 160)
+	_root.add_child(dialog)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	dialog.add_child(box)
+	var title := Label.new()
+	title.text = "LOOTS GAGNÉS DANS CETTE PARTIE (%d)" % log_arr.size()
+	title.add_theme_font_size_override("font_size", 24)
+	title.add_theme_color_override("font_color", COL_TXT)
+	box.add_child(title)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(520, 520)
+	box.add_child(scroll)
+	var rows := VBoxContainer.new()
+	rows.add_theme_constant_override("separation", 6)
+	scroll.add_child(rows)
+	for it: Dictionary in log_arr:
+		var row := Label.new()
+		row.text = "✦ [%s] %s (nv%d) F%d I%d A%d S%d V%d D%d" % [
+			it.get("type", "?"), it.get("name", "?"), int(it.get("level", 0)),
+			int(it.get("force", 0)), int(it.get("intelligence", 0)), int(it.get("agility", 0)),
+			int(it.get("wisdom", 0)), int(it.get("vita", 0)), int(it.get("defense", 0))]
+		row.add_theme_font_size_override("font_size", 17)
+		row.add_theme_color_override("font_color", COL_TXT)
+		rows.add_child(row)
+	var close := Button.new()
+	close.text = "Fermer"
+	close.add_theme_font_size_override("font_size", 20)
+	close.add_theme_color_override("font_color", COL_TXT)
+	close.add_theme_stylebox_override("normal", _flat())
+	close.pressed.connect(dialog.queue_free)
+	box.add_child(close)

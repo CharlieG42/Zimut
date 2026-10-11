@@ -166,6 +166,16 @@ func register_victory(data: Dictionary) -> Dictionary:
 	for l: Dictionary in loots:
 		data["inventory"].append(l)
 	data["last_loots"] = loots
+	# Journal cumulé des loots gagnés dans cette partie
+	var log_arr: Array = data.get("loot_log", [])
+	for l: Dictionary in loots:
+		log_arr.append({
+			"type": l.get("type", ""), "name": l.get("name", ""), "level": int(l.get("level", 0)),
+			"force": int(l.get("force", 0)), "intelligence": int(l.get("intelligence", 0)),
+			"agility": int(l.get("agility", 0)), "wisdom": int(l.get("wisdom", 0)),
+			"vita": int(l.get("vita", 0)), "defense": int(l.get("defense", 0)),
+		})
+	data["loot_log"] = log_arr
 	progression_changed.emit()
 	return data
 

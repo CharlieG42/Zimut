@@ -208,6 +208,51 @@ func _setup_start_button() -> void:
 			start_button.pressed.disconnect(_on_start_combat)
 		start_button.pressed.connect(_on_start_combat)
 		start_button.disabled = true
+	# Retour au menu
+	var back_btn := Button.new()
+	back_btn.text = "← MENU"
+	back_btn.add_theme_font_size_override("font_size", 22)
+	back_btn.add_theme_color_override("font_color", Color(1, 1, 1))
+	back_btn.position = Vector2(-300, 560)
+	back_btn.size = Vector2(200, 60)
+	back_btn.pressed.connect(func() -> void:
+		GameManager.active_save = {}
+		GameManager.active_slot = -1
+		get_tree().change_scene_to_file("res://scenes/MainMenu.tscn"))
+	add_child(back_btn)
+
+	# Bouton d'équipement (visible si une partie active avec inventaire existe)
+	var eq_btn := Button.new()
+	eq_btn.text = "ÉQUIPEMENT"
+	eq_btn.add_theme_font_size_override("font_size", 24)
+	eq_btn.add_theme_color_override("font_color", Color(1, 1, 1))
+	eq_btn.position = Vector2(70, 560)
+	eq_btn.size = Vector2(260, 70)
+	eq_btn.pressed.connect(_open_equipment)
+	add_child(eq_btn)
+
+func _open_equipment() -> void:
+	if GameManager.active_slot < 0 or GameManager.active_save.is_empty():
+		return
+	# Synchroniser l'équipe de la partie avec la sélection en cours
+	# (les membres changent librement à chaque combat)
+	var sel_classes: Array = []
+	for entry: Dictionary in selected_team:
+		sel_classes.append(entry["name"])
+	var old_team: Array = GameManager.active_save.get("team", [])
+	var new_team: Array = []
+	for classe: String in sel_classes:
+		var kept_eq: Dictionary = {}
+		for om: Dictionary in old_team:
+			if String(om.get("classe", "")) == classe:
+				kept_eq = om.get("equipment", {})
+				break
+		new_team.append({"classe": classe, "equipment": kept_eq})
+	GameManager.active_save["team"] = new_team
+	ProgressionManager.write_save(GameManager.active_slot, GameManager.active_save)
+	var ui := load("res://scripts/TeamEquipmentUI.gd").new()
+	add_child(ui)
+	ui.open(GameManager.active_save, GameManager.active_slot)
 
 
 # ─── Survol : affiche les stats détaillées via tooltip natif (déjà câblé) ──
