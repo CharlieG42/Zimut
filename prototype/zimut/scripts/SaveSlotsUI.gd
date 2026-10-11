@@ -129,6 +129,29 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
 	_detail_box.add_child(team_btn)
 
+	# Supprimer la partie (avec confirmation)
+	var del_btn := Button.new()
+	del_btn.text = "🗑  SUPPRIMER CETTE PARTIE"
+	del_btn.add_theme_font_size_override("font_size", 20)
+	del_btn.add_theme_color_override("font_color", Color(0.35, 0.08, 0.05))
+	del_btn.add_theme_stylebox_override("normal", _flat())
+	del_btn.pressed.connect(func() -> void:
+		var confirm := ConfirmationDialog.new()
+		confirm.dialog_text = "Supprimer '%s' ?\nLa progression et l'inventaire seront perdus." % String(data.get("name", ""))
+		confirm.ok_button_text = "SUPPRIMER"
+		confirm.cancel_button_text = "Annuler"
+		confirm.confirmed.connect(func() -> void:
+			ProgressionManager.delete_save(slot)
+			if GameManager.active_slot == slot:
+				GameManager.active_save = {}
+				GameManager.active_slot = -1
+			_current = {}
+			_current_slot = -1
+			refresh())
+		_root.add_child(confirm)
+		confirm.popup_centered())
+	_detail_box.add_child(del_btn)
+
 	# Combat : lance la partie active
 	var fight_btn := Button.new()
 	fight_btn.text = "COMBAT — ennemis niveau %d" % int(data.get("level", 10))
