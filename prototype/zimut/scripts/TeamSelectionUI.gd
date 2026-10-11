@@ -19,6 +19,7 @@ const CLASS_COLORS: Dictionary = {
 	"Druide":     Color(0.95, 0.60, 0.10),
 	"Heal":       Color(0.10, 0.75, 0.75),
 	"Invocateur": Color(0.55, 0.15, 0.60),
+	"Sylvain":     Color(0.35, 0.65, 0.25),
 }
 
 const CLASS_META: Dictionary = {
@@ -29,6 +30,7 @@ const CLASS_META: Dictionary = {
 	"Druide":     {"icon": "🌿", "description": "Maître de la nature, soigne et renforce avec des sorts naturels."},
 	"Heal":       {"icon": "❤️", "description": "Spécialiste des soins et de la survie."},
 	"Invocateur": {"icon": "🎭", "description": "Invoque des créatures, contrôle le champ."},
+	"Sylvain":     {"icon": "🌿", "description": "Maître des plantes : invoque la forêt, empoisonne et soigne par la sève."},
 }
 
 var classes: Array[String] = []       # classes disponibles (triées)
@@ -73,7 +75,7 @@ func _load_classes() -> void:
 						d[headers[j]] = cols[j].strip_edges()
 				stats_by_class[classe] = d
 	# Ordre d'affichage voulu
-	var order: Array[String] = ["Tank", "Assassin", "Chasseur", "Mage", "Druide", "Heal", "Invocateur"]
+	var order: Array[String] = ["Tank", "Assassin", "Chasseur", "Mage", "Druide", "Heal", "Invocateur", "Sylvain"]
 	classes.clear()
 	for c: String in order:
 		classes.append(c)
@@ -263,6 +265,8 @@ func _build() -> void:
 
 	# Équipement (si partie active)
 	var eq := _std_btn("🎒  ÉQUIPEMENT", Color(0.75, 0.55, 0.20))
+	eq.disabled = GameManager.active_slot < 0 or GameManager.active_save.is_empty()
+	eq.tooltip_text = "Nécessite une partie active (avec loots)."
 	eq.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	eq.offset_left = 60.0
 	eq.offset_right = 400.0
@@ -380,9 +384,13 @@ func _sync_save_team(classes_arr: Array) -> void:
 func _on_equipment() -> void:
 	if GameManager.active_slot < 0 or GameManager.active_save.is_empty():
 		return
-	_sync_save_team(team)
+	for child in get_children():
+		if child is CanvasLayer and child.get_script() != null:
+			if String(child.get_script().resource_path).contains("TeamEquipmentUI"):
+				return
 	var ui: CanvasLayer = (load("res://scripts/TeamEquipmentUI.gd") as GDScript).new()
 	add_child(ui)
+	ui.closed.connect(ui.queue_free)
 	ui.open(GameManager.active_save, GameManager.active_slot)
 
 # ═══════════════════════════════════════════════════════════════════════════

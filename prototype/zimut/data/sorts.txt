@@ -141,3 +141,24 @@ Heal,Éclair sacré,3,0,4,36 dégâts magiques,1,Attaque,0,36,0,0,0,0,0,0
 Heal,Bénédiction de vie,2,0,3,Soigne 12 PV/tour pendant 3 tours,5,Soin,0,0,0,0,0,0,0,0
 Heal,Bouclier de lumière,3,0,3,+25% défense (2 tours; allié),5,Buff,0,0,0,25,0,0,0,0,0
 Heal,Mot de restauration,4,0,2,Restaure 90 PV à tous les alliés,10,Soin,0,0,90,0,0,0,0,0,0
+Sylvain,Ronce,2,0,3,40 dégâts magiques,1,Attaque,0,40,0,0,0,0,0,0,0
+Sylvain,Sève vitale,2,0,1,Restaure 45 PV,1,Soin,0,0,45,0,0,0,0,0,0
+Sylvain,Invoquer Buisson,2,0,1,Invoquer un Buisson (contrôlable; 3PM/4PA),5,Invocation,0,0,0,0,0,0,0,0,0
+Sylvain,Poison de ronce,2,0,3,60 dégâts/tour (2 tours),5,Debuff,0,0,0,0,0,60,0,0,0
+Sylvain,Racine,2,0,3,Immobilise l'ennemi (1 tour),10,Debuff,0,0,0,0,0,0,0,0,0
+Sylvain,Invoquer Champignon,2,0,1,Invoquer un Champignon (contrôlable; 3PM/4PA),10,Invocation,0,0,0,0,0,0,0,0,0
+Sylvain,Lierre protecteur,2,0,1,+25% défense (2 tours; allié),15,Buff,0,0,0,25,0,0,0,0,0
+Sylvain,Soin de sève,3,0,1,Restaure 90 PV,15,Soin,0,0,90,0,0,0,0,0,0
+Sylvain,Ronce multiple,3,0,4,40 dégâts magiques à tous les ennemis adjacents,20,Attaque,0,40,0,0,0,0,0,0,0
+Sylvain,Pose un piège de ronces,3,0,1,Pose un piège (50 dégâts),20,Debuff,0,0,0,0,0,0,0,0,0
+Sylvain,Invoquer Tronc,3,0,1,Invoquer un Tronc (contrôlable; 3PM/4PA),25,Invocation,0,0,0,0,0,0,0,0,0
+Sylvain,Vent de feuilles,3,0,3,+20% dégâts magiques pour l'équipe (2 tours),25,Buff,0,0,0,0,0,0,0,0,20
+Sylvain,Rugissement de la forêt,3,0,3,-1 PA à tous les ennemis (1 tour),30,Debuff,0,0,0,0,0,5,0,0,0
+Sylvain,Pluie de graines,4,0,4,55 dégâts magiques à tous les ennemis,30,Attaque,0,55,0,0,0,0,0,0,0
+Sylvain,Sève régénérante,3,0,1,Restaure 25 PV/tour (3 tours),35,Soin,0,0,25,0,0,0,0,0,0
+Sylvain,Invoquer Sarriette,4,0,1,Invoquer une Sarriette (contrôlable; 3PM/4PA),35,Invocation,0,0,0,0,0,0,0,0,0
+Sylvain,Colère de la nature,4,0,3,120 dégâts magiques,40,Attaque,0,120,0,0,0,0,0,0,0
+Sylvain,Soin de la forêt,4,0,2,Restaure 80 PV à tous les alliés,40,Soin,0,0,80,0,0,0,0,0,0
+Sylvain,Racines profondes,4,0,1,+30% défense pour l'équipe (2 tours),45,Buff,0,0,0,30,0,0,0,0,0
+Sylvain,Régression,3,0,1,Restaure 130 PV + supprime les effets négatifs,45,Soin,0,0,130,0,0,0,0,0,0
+Sylvain,Tempête de pétales,4,0,5,150 dégâts magiques à tous les ennemis,50,Attaque,0,150,0,0,0,0,0,0,0

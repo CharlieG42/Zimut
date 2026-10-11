@@ -705,9 +705,15 @@ func _show_loot_window() -> void:
 	Sfx.play("win")
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", _flat(Color(0.94, 0.89, 0.78, 0.97), Color(0.72, 0.58, 0.28), 16, 4))
-	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.position = Vector2(660, 240)
+	var dim: ColorRect = ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.45)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	_root.add_child(dim)
 	_root.add_child(panel)
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE, 0)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 12)
 	panel.add_child(box)
@@ -747,6 +753,7 @@ func _show_loot_window() -> void:
 	cont.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
 	cont.add_theme_stylebox_override("normal", _flat(Color(0.98, 0.86, 0.45), Color(0.72, 0.58, 0.28), 12, 3))
 	cont.pressed.connect(func() -> void:
+		dim.queue_free()
 		panel.queue_free()
 		_show_game_over(true))
 	box.add_child(cont)

@@ -18,6 +18,7 @@ const CLASS_COLORS: Dictionary = {
 	"Druide":    Color(1.0, 0.6, 0.0),
 	"Heal":       Color(0.0, 0.75, 0.75),
 	"Invocateur": Color(0.5, 0.0, 0.5),
+	"Sylvain":    Color(0.35, 0.65, 0.25),
 }
 
 ## Données par défaut si le CSV ne fournit pas tout (icône + description manuelles)
@@ -29,6 +30,7 @@ const CLASS_META: Dictionary = {
 	"Druide":    {"icon": "🌿", "description": "Maître de la nature, soigne et renforce avec des sorts naturels."},
 	"Heal":       {"icon": "❤️", "description": "Spécialiste des soins et de la survie."},
 	"Invocateur": {"icon": "🎭", "description": "Invoque des créatures, contrôle le champ."},
+	"Sylvain":    {"icon": "🌿", "description": "Maître des plantes : invoque la forêt, empoisonne et soigne par la sève."},
 }
 
 var available_classes: Array[String] = []
@@ -137,6 +139,8 @@ func _load_fallback_data() -> void:
 			"base_stats": {"PV": 242, "PA": 6, "PM": 4, "Force": 20, "Intelligence": 42, "Agilite": 11, "Sagesse": 17, "Defense": 42}},
 		"Invocateur": {"name": "Invocateur", "description": CLASS_META["Invocateur"]["description"], "color": CLASS_COLORS["Invocateur"], "icon": CLASS_META["Invocateur"]["icon"],
 			"base_stats": {"PV": 202, "PA": 6, "PM": 4, "Force": 22, "Intelligence": 44, "Agilite": 13, "Sagesse": 19, "Defense": 36}},
+		"Sylvain": {"name": "Sylvain", "description": CLASS_META["Sylvain"]["description"], "color": CLASS_COLORS["Sylvain"], "icon": CLASS_META["Sylvain"]["icon"],
+			"base_stats": {"PV": 107, "PA": 6, "PM": 4, "Force": 14, "Intelligence": 19, "Agilite": 19, "Sagesse": 29, "Defense": 24}},
 	}
 
 
@@ -234,24 +238,13 @@ func _setup_start_button() -> void:
 func _open_equipment() -> void:
 	if GameManager.active_slot < 0 or GameManager.active_save.is_empty():
 		return
-	# Synchroniser l'équipe de la partie avec la sélection en cours
-	# (les membres changent librement à chaque combat)
-	var sel_classes: Array = []
-	for entry: Dictionary in selected_team:
-		sel_classes.append(entry["name"])
-	var old_team: Array = GameManager.active_save.get("team", [])
-	var new_team: Array = []
-	for classe: String in sel_classes:
-		var kept_eq: Dictionary = {}
-		for om: Dictionary in old_team:
-			if String(om.get("classe", "")) == classe:
-				kept_eq = om.get("equipment", {})
-				break
-		new_team.append({"classe": classe, "equipment": kept_eq})
-	GameManager.active_save["team"] = new_team
-	ProgressionManager.write_save(GameManager.active_slot, GameManager.active_save)
+	for child in get_children():
+		if child is CanvasLayer and child.get_script() != null:
+			if String(child.get_script().resource_path).contains("TeamEquipmentUI"):
+				return
 	var ui: CanvasLayer = (load("res://scripts/TeamEquipmentUI.gd") as GDScript).new()
 	add_child(ui)
+	ui.closed.connect(ui.queue_free)
 	ui.open(GameManager.active_save, GameManager.active_slot)
 
 
