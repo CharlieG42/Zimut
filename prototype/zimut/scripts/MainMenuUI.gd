@@ -33,7 +33,9 @@ func _ready() -> void:
 	root.add_child(sub)
 
 	var box := VBoxContainer.new()
-	box.position = Vector2(800, 340)
+	box.set_anchors_preset(Control.PRESET_CENTER)
+	box.position = Vector2(790, 330)
+	box.custom_minimum_size = Vector2(340, 0)
 	box.add_theme_constant_override("separation", 20)
 	root.add_child(box)
 
