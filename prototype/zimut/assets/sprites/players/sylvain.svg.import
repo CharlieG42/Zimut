@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c47aee8a96565"
-path="res://.godot/imported/sylvain.svg-8b3d9f2a1c4e5678901234567890abcd.ctex"
+uid="uid://c47aee8ba6565"
+path="res://.godot/imported/sylvain.svg-2639cb6b764b91cd1e7af777fcd28e07.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/players/sylvain.svg"
-dest_files=["res://.godot/imported/sylvain.svg-8b3d9f2a1c4e5678901234567890abcd.ctex"]
+dest_files=["res://.godot/imported/sylvain.svg-2639cb6b764b91cd1e7af777fcd28e07.ctex"]
 
 [params]
 

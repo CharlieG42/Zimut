@@ -265,6 +265,8 @@ func _build() -> void:
 
 	# Équipement (si partie active)
 	var eq := _std_btn("🎒  ÉQUIPEMENT", Color(0.75, 0.55, 0.20))
+	eq.disabled = GameManager.active_slot < 0 or GameManager.active_save.is_empty()
+	eq.tooltip_text = "Nécessite une partie active (avec loots)."
 	eq.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	eq.offset_left = 60.0
 	eq.offset_right = 400.0
@@ -382,9 +384,13 @@ func _sync_save_team(classes_arr: Array) -> void:
 func _on_equipment() -> void:
 	if GameManager.active_slot < 0 or GameManager.active_save.is_empty():
 		return
-	_sync_save_team(team)
+	for child in get_children():
+		if child is CanvasLayer and child.get_script() != null:
+			if String(child.get_script().resource_path).contains("TeamEquipmentUI"):
+				return
 	var ui: CanvasLayer = (load("res://scripts/TeamEquipmentUI.gd") as GDScript).new()
 	add_child(ui)
+	ui.closed.connect(ui.queue_free)
 	ui.open(GameManager.active_save, GameManager.active_slot)
 
 # ═══════════════════════════════════════════════════════════════════════════

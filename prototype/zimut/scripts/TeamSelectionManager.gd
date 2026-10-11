@@ -238,24 +238,13 @@ func _setup_start_button() -> void:
 func _open_equipment() -> void:
 	if GameManager.active_slot < 0 or GameManager.active_save.is_empty():
 		return
-	# Synchroniser l'équipe de la partie avec la sélection en cours
-	# (les membres changent librement à chaque combat)
-	var sel_classes: Array = []
-	for entry: Dictionary in selected_team:
-		sel_classes.append(entry["name"])
-	var old_team: Array = GameManager.active_save.get("team", [])
-	var new_team: Array = []
-	for classe: String in sel_classes:
-		var kept_eq: Dictionary = {}
-		for om: Dictionary in old_team:
-			if String(om.get("classe", "")) == classe:
-				kept_eq = om.get("equipment", {})
-				break
-		new_team.append({"classe": classe, "equipment": kept_eq})
-	GameManager.active_save["team"] = new_team
-	ProgressionManager.write_save(GameManager.active_slot, GameManager.active_save)
+	for child in get_children():
+		if child is CanvasLayer and child.get_script() != null:
+			if String(child.get_script().resource_path).contains("TeamEquipmentUI"):
+				return
 	var ui: CanvasLayer = (load("res://scripts/TeamEquipmentUI.gd") as GDScript).new()
 	add_child(ui)
+	ui.closed.connect(ui.queue_free)
 	ui.open(GameManager.active_save, GameManager.active_slot)
 
 
