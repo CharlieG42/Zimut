@@ -13,21 +13,21 @@ const COL_TXT := Color(0.22, 0.15, 0.05)
 const COL_SEL := Color(0.98, 0.86, 0.45)
 const COL_SLOT_EMPTY := Color(0.10, 0.13, 0.20, 0.9)
 const COL_SLOT_FILLED := Color(0.30, 0.45, 0.25, 0.95)
-const SLOT_SIZE := Vector2(64, 64)
+const SLOT_SIZE := Vector2(84, 84)
 
 ## Position de chaque case autour du portrait (offsets relatifs au centre).
 ## Ordre : même que EQUIP_SLOTS du ProgressionManager.
 const SLOT_LAYOUT := {
-	"arme":           Vector2(-170, -60),
-	"bouclier":       Vector2(170, -60),
-	"casque":         Vector2(-170, 30),
-	"armure":         Vector2(0, 110),
-	"bottes":         Vector2(170, 30),
-	"bague":          Vector2(-170, 120),
-	"collier":        Vector2(-85, 150),
-	"gants":          Vector2(85, 150),
-	"boucle_oreille": Vector2(170, 120),
-	"cape":           Vector2(0, -140),
+	"arme":           Vector2(-220, -80),
+	"bouclier":       Vector2(220, -80),
+	"casque":         Vector2(-220, 40),
+	"armure":         Vector2(0, 145),
+	"bottes":         Vector2(220, 40),
+	"bague":          Vector2(-220, 160),
+	"collier":        Vector2(-110, 205),
+	"gants":          Vector2(110, 205),
+	"boucle_oreille": Vector2(220, 160),
+	"cape":           Vector2(0, -185),
 }
 
 ## Icône (emoji) par emplacement.
@@ -90,10 +90,10 @@ func _build() -> void:
 	row.anchor_right = 0.5
 	row.anchor_top = 0.5
 	row.anchor_bottom = 0.5
-	row.offset_left = -700.0
-	row.offset_right = 700.0
-	row.offset_top = -200.0
-	row.offset_bottom = 220.0
+	row.offset_left = -850.0
+	row.offset_right = 850.0
+	row.offset_top = -280.0
+	row.offset_bottom = 280.0
 	row.add_theme_constant_override("separation", 60)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	_root.add_child(row)
@@ -135,21 +135,21 @@ func _build_member_frame(member_idx: int) -> PanelContainer:
 	var m: Dictionary = _save["team"][member_idx]
 	var classe: String = String(m.get("classe", "?"))
 	var frame := PanelContainer.new()
-	frame.custom_minimum_size = Vector2(440, 400)
+	frame.custom_minimum_size = Vector2(540, 520)
 	frame.add_theme_stylebox_override("panel", _flat(COL_PANEL, COL_BORDER, 18, 4))
 	_root_of_frame_setup(frame, classe, member_idx)
 	return frame
 
 func _root_of_frame_setup(frame: PanelContainer, classe: String, member_idx: int) -> void:
 	var holder := Control.new()
-	holder.custom_minimum_size = Vector2(420, 370)
+	holder.custom_minimum_size = Vector2(520, 490)
 	frame.add_child(holder)
 
 	var name_lbl := Label.new()
 	name_lbl.text = "%s" % classe
-	name_lbl.add_theme_font_size_override("font_size", 26)
+	name_lbl.add_theme_font_size_override("font_size", 28)
 	name_lbl.add_theme_color_override("font_color", COL_TXT)
-	name_lbl.position = Vector2(140, 14)
+	name_lbl.position = Vector2(190, 16)
 	holder.add_child(name_lbl)
 
 	# Portrait (sprite du personnage)
@@ -159,10 +159,10 @@ func _root_of_frame_setup(frame: PanelContainer, classe: String, member_idx: int
 		tex_path = "res://assets/sprites/players/%s.svg" % classe.to_lower()
 	if ResourceLoader.exists(tex_path):
 		portrait.texture = load(tex_path)
-	portrait.custom_minimum_size = Vector2(140, 170)
+	portrait.custom_minimum_size = Vector2(180, 220)
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	portrait.position = Vector2(140, 90)
+	portrait.position = Vector2(170, 100)
 	holder.add_child(portrait)
 
 	# Cases d'équipement autour du portrait
@@ -170,8 +170,8 @@ func _root_of_frame_setup(frame: PanelContainer, classe: String, member_idx: int
 		var eq: Dictionary = _save["team"][member_idx].get("equipment", {})
 		var btn := Button.new()
 		btn.custom_minimum_size = SLOT_SIZE
-		btn.position = Vector2(210, 250) + SLOT_LAYOUT[slot_name] - SLOT_SIZE * 0.5
-		btn.add_theme_font_size_override("font_size", 30)
+		btn.position = Vector2(260, 300) + SLOT_LAYOUT[slot_name] - SLOT_SIZE * 0.5
+		btn.add_theme_font_size_override("font_size", 38)
 		btn.add_theme_color_override("font_color", COL_TXT)
 		btn.tooltip_text = slot_name.capitalize()
 		btn.pressed.connect(_on_slot_pressed.bind(member_idx, slot_name))
@@ -235,7 +235,7 @@ func _on_slot_pressed(member_idx: int, slot_name: String) -> void:
 	if eq.has(slot_name):
 		var unequip := Button.new()
 		unequip.text = "✖  Déséquiper (%s)" % String(eq[slot_name].get("name", "?"))
-		unequip.add_theme_font_size_override("font_size", 18)
+		unequip.add_theme_font_size_override("font_size", 20)
 		unequip.pressed.connect(func() -> void:
 			ProgressionManager.unequip_item(_save, member_idx, slot_name)
 			ProgressionManager.write_save(_slot, _save)
@@ -254,7 +254,7 @@ func _on_slot_pressed(member_idx: int, slot_name: String) -> void:
 			String(it.get("name", "?")), int(it.get("level", 0)),
 			int(it.get("force", 0)), int(it.get("intelligence", 0)), int(it.get("agility", 0)),
 			int(it.get("wisdom", 0)), int(it.get("vita", 0)), int(it.get("defense", 0))]
-		item_btn.add_theme_font_size_override("font_size", 17)
+		item_btn.add_theme_font_size_override("font_size", 19)
 		item_btn.pressed.connect(func() -> void:
 			var err: String = ProgressionManager.equip_item(_save, member_idx, j)
 			if err != "":
@@ -273,7 +273,7 @@ func _on_slot_pressed(member_idx: int, slot_name: String) -> void:
 
 	var cancel := Button.new()
 	cancel.text = "Annuler"
-	cancel.add_theme_font_size_override("font_size", 18)
+	cancel.add_theme_font_size_override("font_size", 20)
 	cancel.pressed.connect(_close_popup)
 	box.add_child(cancel)
 
