@@ -15,32 +15,38 @@ func _ready() -> void:
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(bg)
 
+	# Titre : pleine largeur, centré
 	var title := Label.new()
 	title.text = "ZIMUT"
 	title.add_theme_font_size_override("font_size", 84)
 	title.add_theme_color_override("font_color", Color(1.0, 0.86, 0.4))
-	title.position = Vector2(760, 140)
-	title.size = Vector2(400, 100)
+	title.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	title.offset_top = 130.0
+	title.offset_bottom = 240.0
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	root.add_child(title)
+
+	# Sous-titre : pleine largeur, centré
 	var sub := Label.new()
 	sub.text = "Tactique tour par tour — affronte des ennemis de plus en plus forts"
 	sub.add_theme_font_size_override("font_size", 22)
 	sub.add_theme_color_override("font_color", COL_PANEL)
-	sub.position = Vector2(560, 240)
-	sub.size = Vector2(800, 40)
+	sub.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	sub.offset_top = 250.0
+	sub.offset_bottom = 290.0
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(sub)
 
+	# Boutons : colonne centrée horizontalement et verticalement
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	root.add_child(center)
 	var box := VBoxContainer.new()
-	box.set_anchors_preset(Control.PRESET_CENTER)
-	box.position = Vector2(790, 330)
-	box.custom_minimum_size = Vector2(340, 0)
-	box.add_theme_constant_override("separation", 20)
-	root.add_child(box)
+	box.add_theme_constant_override("separation", 22)
+	center.add_child(box)
 
 	box.add_child(_btn("⚔  NOUVELLE PARTIE", func() -> void:
-		# Réinitialiser le contexte de partie puis ouvrir la gestion des slots
 		GameManager.active_save = {}
 		GameManager.active_slot = -1
 		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")))
@@ -54,12 +60,14 @@ func _ready() -> void:
 		GameManager.clear_custom_team()
 		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")))
 
+	# Hint : pleine largeur en bas, centré
 	var hint := Label.new()
 	hint.text = "Une partie = une équipe, des loots et des ennemis qui gagnent 2 niveaux par victoire."
 	hint.add_theme_font_size_override("font_size", 17)
 	hint.add_theme_color_override("font_color", Color(0.7, 0.75, 0.85))
-	hint.position = Vector2(560, 680)
-	hint.size = Vector2(800, 40)
+	hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	hint.offset_top = -60.0
+	hint.offset_bottom = -20.0
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(hint)
 
