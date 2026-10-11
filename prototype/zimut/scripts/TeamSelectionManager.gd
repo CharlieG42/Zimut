@@ -250,7 +250,7 @@ func _open_equipment() -> void:
 		new_team.append({"classe": classe, "equipment": kept_eq})
 	GameManager.active_save["team"] = new_team
 	ProgressionManager.write_save(GameManager.active_slot, GameManager.active_save)
-	var ui := load("res://scripts/TeamEquipmentUI.gd").new()
+	var ui: CanvasLayer = (load("res://scripts/TeamEquipmentUI.gd") as GDScript).new()
 	add_child(ui)
 	ui.open(GameManager.active_save, GameManager.active_slot)
 
