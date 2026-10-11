@@ -88,7 +88,7 @@ func refresh() -> void:
 		btn.add_theme_stylebox_override("hover", _flat())
 		if used.has(slot):
 			var sv: Dictionary = used[slot]
-			btn.text = "%s — Niveau ennemis %d  (%d victoires)" % [sv["name"], sv["level"], sv["victories"]]
+			btn.text = "%s — ennemis nv %d · %d victoires" % [sv["name"], sv["level"], sv["victories"]]
 		else:
 			btn.text = "+ Nouvelle partie (slot %d)" % (slot + 1)
 		var slot_ref: int = slot
@@ -128,6 +128,31 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		_current = _current
 		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
 	_detail_box.add_child(team_btn)
+
+	# Renommer la partie
+	var name_btn := Button.new()
+	name_btn.text = "✎  RENOMMER CETTE PARTIE"
+	name_btn.add_theme_font_size_override("font_size", 20)
+	name_btn.add_theme_color_override("font_color", COL_TXT)
+	name_btn.add_theme_stylebox_override("normal", _flat())
+	name_btn.pressed.connect(func() -> void:
+		var dialog := ConfirmationDialog.new()
+		var line := LineEdit.new()
+		line.text = String(data.get("name", ""))
+		line.placeholder_text = "Nouveau nom"
+		dialog.add_child(line)
+		dialog.dialog_text = "Nouveau nom de la partie :"
+		dialog.ok_button_text = "RENOMMER"
+		dialog.cancel_button_text = "Annuler"
+		dialog.confirmed.connect(func() -> void:
+			ProgressionManager.rename_save(slot, line.text)
+			_current = ProgressionManager.load_save(slot)
+			refresh())
+		dialog.register_text_enter(line)
+		_root.add_child(dialog)
+		dialog.popup_centered()
+		line.call_deferred("grab_focus"))
+	_detail_box.add_child(name_btn)
 
 	# Supprimer la partie (avec confirmation)
 	var del_btn := Button.new()
