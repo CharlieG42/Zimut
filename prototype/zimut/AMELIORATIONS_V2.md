@@ -87,7 +87,22 @@ godot --headless --path prototype/zimut -s tests/sim_progression.gd -- Tank,Mage
 xvfb-run -a godot --rendering-method gl_compatibility --path prototype/zimut -s tests/shot_battle.gd -- /tmp/shots 5 boss
 ```
 
-## 8. Pistes suivantes
+## 8. Biomes et craft (V3)
 
-Skin Sylvain, ennemis par biome (colonne `Biome` inutilisée), recyclage d'objets (`craft.txt`), IA ennemie plus tactique,
-équilibrage fin avec de vraies parties.
+**Biomes** : le cycle des combats traverse désormais **Forêt → Montagne → Désert** (4 combats chacun,
+le 4ᵉ étant le boss). La colonne `Biome` de `ennemis.txt` est utilisée : chaque biome a ses 2 types
+d'ennemis et son **boss nommé** (Gobelin Roi, Troll Géant, Dragon — kits spéciaux : drain de vie,
+résistance magie, dégâts magiques, poison permanent). La grille change de palette selon le biome
+(cactus dans le Désert, rochers en Montagne — `Cell.gd`, `Prop.gd`), et la bannière / les titres
+annoncent la zone (sélection d'équipe, fenêtre de victoire).
+
+**Craft** : les ennemis lâchent des **ressources** (Fer, Bois, Cuir, Magie, Venin) et de l'**or**.
+La **FORGE** (bouton dans l'équipement) fabrique les 66 recettes de `craft.txt` : l'objet reprend les
+stats de `stuff.txt`, les ressources et l'or sont consommés. Le stock est visible dans la forge et la
+fenêtre de victoire.
+
+Test : `godot --headless --path prototype/zimut -s tests/test_biome_craft.gd`
+
+## 9. Pistes suivantes
+
+Skin Sylvain, IA ennemie plus tactique, équilibrage fin avec de vraies parties.

@@ -6,7 +6,7 @@ static var _cache: Dictionary = {}
 
 
 static func get_texture(entity: Dictionary) -> Texture2D:
-	var cname: String = EntityView.sprite_key(String(entity.get("classe", "")))
+	var cname: String = EntityView.sprite_key(String(entity.get("skin", entity.get("classe", ""))))
 	var folders: Array[String] = ["enemies", "players"]
 	if entity.get("team", "") == "player":
 		folders = ["players", "enemies"]

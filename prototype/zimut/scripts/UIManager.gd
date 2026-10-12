@@ -520,7 +520,7 @@ func _on_turn_started(e: Dictionary) -> void:
 	var txt: String
 	var col := Color(1, 0.93, 0.6)
 	if e["entity_type"] == "Player" and not game_manager.auto_mode:
-		txt = "À vous de jouer !"
+		txt = "%s — À vous de jouer !" % ProgressionManager.biome_label(game_manager.fight_biome)
 		col = Color(0.65, 0.9, 1.0)
 	else:
 		txt = "Tour : %s" % e["name"]
@@ -724,12 +724,13 @@ func _show_result_window(victory: bool) -> void:
 
 	var title := Label.new()
 	var fight_no: int = ProgressionManager.next_fight_number(save)
+	var next_biome: String = ProgressionManager.biome_for_fight(fight_no)
 	if not victory:
 		title.text = "DÉFAITE — un peu d'XP de consolation"
 	elif ProgressionManager.is_boss_fight(save):
-		title.text = "VICTOIRE !  Prochain combat (%d) : ☠ BOSS et ses sbires !" % fight_no
+		title.text = "VICTOIRE !  %s : ☠ BOSS %s et ses sbires au combat %d !" % [ProgressionManager.biome_label(next_biome), ProgressionManager.biome_boss(next_biome), fight_no]
 	else:
-		title.text = "VICTOIRE !  Ennemis niveau %d au prochain combat (%d)" % [int(save.get("level", 10)), fight_no]
+		title.text = "VICTOIRE !  %s : ennemis niveau %d au prochain combat (%d)" % [ProgressionManager.biome_label(next_biome), int(save.get("level", 10)), fight_no]
 	title.add_theme_font_size_override("font_size", 28)
 	title.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05) if victory else Color(0.55, 0.12, 0.08))
 	box.add_child(title)
@@ -811,6 +812,18 @@ func _show_result_window(victory: bool) -> void:
 			row.add_theme_font_size_override("font_size", 19)
 			row.add_theme_color_override("font_color", ItemRules.rarity_color(it).darkened(0.35))
 			content.add_child(row)
+		# Ressources de craft et or gagnés
+		var drops: Dictionary = save.get("last_resources", {})
+		if not drops.is_empty():
+			var res_parts: PackedStringArray = []
+			for k: String in drops.keys():
+				res_parts.append("%s +%d" % [k, int(drops[k])])
+			var res_row := Label.new()
+			res_row.text = "  ⛏ Ressources : %s   ·   🪙 Or : %d" % [" · ".join(res_parts), ProgressionManager.gold(save)]
+			res_row.add_theme_font_size_override("font_size", 19)
+			res_row.add_theme_color_override("font_color", Color(0.35, 0.30, 0.15))
+			res_row.tooltip_text = "À utiliser dans la FORGE (bouton ÉQUIPEMENT de la sélection d'équipe)."
+			content.add_child(res_row)
 
 	var cont := Button.new()
 	cont.text = "CONTINUER"

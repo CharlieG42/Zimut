@@ -493,11 +493,14 @@ func refresh() -> void:
 		fight_no = ProgressionManager.next_fight_number(GameManager.active_save)
 		boss_fight = ProgressionManager.is_boss_fight(GameManager.active_save)
 		next_lvl = int(GameManager.active_save.get("level", 0))
+	var biome: String = ProgressionManager.next_biome(GameManager.active_save) if not GameManager.active_save.is_empty() else "Forêt"
 	if boss_fight:
-		_title.text = "COMBAT %d — ☠ AFFRONTEZ LE BOSS ! (%d/%d)" % [fight_no, team.size(), MAX_TEAM_SIZE]
+		_title.text = "COMBAT %d — %s : ☠ AFFRONTEZ %s ! (%d/%d)" % [fight_no, ProgressionManager.biome_label(biome),
+			ProgressionManager.biome_boss(biome).to_upper(), team.size(), MAX_TEAM_SIZE]
 		_title.add_theme_color_override("font_color", Color(1.0, 0.4, 0.3))
 	else:
-		_title.text = "COMBAT %d — CONSTITUEZ VOTRE ÉQUIPE (%d/%d)" % [fight_no, team.size(), MAX_TEAM_SIZE]
+		_title.text = "COMBAT %d — %s : CONSTITUEZ VOTRE ÉQUIPE (%d/%d)" % [fight_no, ProgressionManager.biome_label(biome),
+			team.size(), MAX_TEAM_SIZE]
 		_title.add_theme_color_override("font_color", Color(1.0, 0.86, 0.4))
 	if _equip_btn:
 		_equip_btn.disabled = GameManager.active_slot < 0 or GameManager.active_save.is_empty()
@@ -512,9 +515,9 @@ func refresh() -> void:
 		_chars_btn.text = "📈  PERSONNAGES (+%d)" % pts if pts > 0 else "📈  PERSONNAGES"
 	if _fight_btn:
 		if boss_fight:
-			_fight_btn.text = "☠  COMBATTRE LE BOSS (nv%d)" % next_lvl
+			_fight_btn.text = "☠  COMBATTRE %s (nv%d)" % [ProgressionManager.biome_boss(biome).to_upper(), next_lvl]
 		elif next_lvl > 0:
-			_fight_btn.text = "⚔  COMBATTRE — ennemis nv%d" % next_lvl
+			_fight_btn.text = "⚔  COMBATTRE — %s nv%d" % [biome, next_lvl]
 		else:
 			_fight_btn.text = "⚔  COMBATTRE"
 

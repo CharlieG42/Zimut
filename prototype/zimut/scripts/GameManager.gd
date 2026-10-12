@@ -89,6 +89,7 @@ var active_save: Dictionary      = {}   # sauvegarde ProgressionManager en cours
 var active_slot: int             = -1
 var fight_enemies: Array         = []   # [{type, level, boss}] du combat en cours (pour l'XP)
 var fight_is_boss: bool          = false
+var fight_biome: String          = "Forêt"  # biome du combat en cours
 
 var _turn_index: int = -1
 var _uid_counter: int = 0
@@ -163,13 +164,19 @@ func _generate_obstacles() -> void:
 		for d: Vector2i in Combat.DIRS:
 			forbidden[sp + d] = true
 	var wanted: int = _rng.randi_range(6, 9)
+	var tree_chance: float = 0.55
+	match fight_biome:
+		"Montagne":
+			tree_chance = 0.25   # surtout des rochers
+		"Désert":
+			tree_chance = 0.45   # « tree » = cactus dessiné selon le biome (cf. Prop)
 	var attempts: int = 0
 	while obstacles.size() < wanted and attempts < 300:
 		attempts += 1
 		var c := Vector2i(_rng.randi_range(0, GRID_SIZE - 1), _rng.randi_range(0, GRID_SIZE - 1))
 		if forbidden.has(c) or obstacles.has(c):
 			continue
-		obstacles[c] = "tree" if _rng.randf() < 0.55 else "rock"
+		obstacles[c] = "tree" if _rng.randf() < tree_chance else "rock"
 		if not _all_free_connected():
 			obstacles.erase(c)
 
@@ -294,19 +301,22 @@ func init_entities() -> void:
 		for pl: Dictionary in players:
 			Combat.add_status(pl, "def_up", 3, float(bless))
 
-	# ── Ennemis : boss + 3 sbires tous les 4 combats, sinon 4 ennemis ─────
+	# ── Ennemis du biome : boss + 3 sbires tous les 4 combats, sinon 4 ennemis ──
 	var lvl: int = ProgressionManager.enemy_level_for(active_save) if not active_save.is_empty() else DEFAULT_ENEMY_LEVEL
 	fight_enemies = []
 	fight_is_boss = false
 	var boss_fight: bool = not active_save.is_empty() and ProgressionManager.is_boss_fight(active_save)
 	fight_is_boss = boss_fight
+	fight_biome = ProgressionManager.next_biome(active_save) if not active_save.is_empty() else "Forêt"
 	## Boss de fin de cycle : le boss est au niveau du combat, ses sbires 2 niveaux en dessous
 	var minion_lvl: int = maxi(1, lvl - 2) if boss_fight else lvl
+	var biome_types: Array[String] = ProgressionManager.biome_enemy_types(fight_biome)
 	var enemy_types: Array[String] = []
 	if boss_fight:
-		enemy_types = ["Gobelin", "Squelette", "Loup", "BOSS"]
+		enemy_types = [biome_types[0], biome_types[0], biome_types[1], "BOSS"]
 	else:
-		enemy_types = ["Gobelin", "Squelette", "Loup", "Troll" if _rng.randf() < 0.5 else "Dragonnet"]
+		enemy_types = [biome_types[0], biome_types[1], biome_types[0] if _rng.randf() < 0.5 else biome_types[1],
+			biome_types[1] if _rng.randf() < 0.5 else biome_types[0]]
 	var enemies_data: Array = get_enemies_data()
 	for i: int in range(enemy_types.size()):
 		var etype: String = enemy_types[i]
@@ -342,21 +352,40 @@ func init_entities() -> void:
 		enemies.append(enemy)
 		grid[pos.y][pos.x] = enemy
 
-## Boss de fin de cycle : Dragonnet colossal, boss tous les 4 combats.
+## Boss de fin de cycle : le boss nommé du biome (ennemies.txt, lignes « Boss »).
 ## PV x3, attaques x1.5, +1 PA/PM, vole (comme un Dragonnet), régénère.
 func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 	var enemies_data: Array = get_enemies_data()
-	var info: Dictionary = _find_best_match(enemies_data, "Type", "Dragonnet", "Niveau", lvl)
+	var boss_name: String = ProgressionManager.biome_boss(fight_biome)
+	## Type de base dont le boss reprend le kit et la skin : le nom complet est
+	## « Boss Gobelin Roi » -> type de base « Gobelin » (2e mot).
+	var parts: PackedStringArray = boss_name.split(" ")
+	var base_type: String = "Dragonnet"
+	if parts.size() >= 2:
+		base_type = parts[1]
+	var info: Dictionary = _find_best_match(enemies_data, "Type", "Boss " + boss_name, "Niveau", lvl)
 	if info.is_empty():
-		push_error("Dragonnet introuvable dans ennemis.txt — boss remplacé par un Troll")
+		# Aucune ligne boss au niveau du combat : prendre la ligne boss la plus proche
+		# (première ligne de ce boss), sinon le type de base.
+		for row: Dictionary in enemies_data:
+			if String(row.get("Type", "")) == "Boss " + boss_name:
+				info = row
+				break
+	if info.is_empty():
+		info = _find_best_match(enemies_data, "Type", base_type, "Niveau", lvl)
+	if info.is_empty():
+		info = _find_best_match(enemies_data, "Type", base_type, "Niveau", 999)
+	if info.is_empty():
+		push_error("Boss '%s' introuvable dans ennemis.txt — boss remplacé par un Troll" % boss_name)
 		info = _find_best_match(enemies_data, "Type", "Troll", "Niveau", lvl)
+		base_type = "Troll"
 		if info.is_empty():
 			return
 	var lscale: float = 1.0 + float(maxi(0, lvl - 10)) * ENEMY_LEVEL_SCALE
 	var pv: int = int(float(_csv_int(info, "PV", 120)) * ENEMY_HP_MULT * BOSS_HP_MULT * lscale)
 	var atk: int = int(float(_csv_int(info, "Attaque", 20)) * ENEMY_ATK_MULT * BOSS_ATK_MULT * lscale)
-	fight_enemies.append({"type": "Dragonnet", "level": lvl, "boss": true})
-	var boss: Dictionary = _base_entity("☠ BOSS Dragonnet Lv%d" % lvl, "Enemy", "enemy", "Dragonnet", lvl, pos)
+	fight_enemies.append({"type": boss_name, "level": lvl, "boss": true})
+	var boss: Dictionary = _base_entity("☠ BOSS %s Lv%d" % [boss_name, lvl], "Enemy", "enemy", boss_name, lvl, pos)
 	boss.merge({
 		"max_pv": pv, "current_pv": pv,
 		"force": atk, "intelligence": atk, "agility": atk / 2.0, "wisdom": 10,
@@ -366,9 +395,22 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 		"color": Color(0.9, 0.2, 0.1),
 	}, true)
 	boss["boss"] = true
-	boss["spells"] = Combat.enemy_spells("Dragonnet", atk)
-	boss["fly"] = true
+	boss["spells"] = Combat.enemy_spells(base_type, atk)
+	boss["skin"] = base_type
+	boss["fly"] = base_type == "Dragonnet"
 	Combat.add_status(boss, "regen", 999, 8.0)
+	# Kits spéciaux des boss nommés (Effets spéciaux de ennemis.txt)
+	match boss_name:
+		"Gobelin Roi":
+			boss["fx"] = {"lifesteal": 5}
+		"Loup Alpha":
+			Combat.add_status(boss, "poison", 999, 10.0)
+		"Troll Géant":
+			boss["fx"] = {"mres": 50}
+		"Dragon":
+			boss["fx"] = {"mag_pct": 30}
+		"Squelette Seigneur":
+			boss["fx"] = {"crit": 20}
 	enemies.append(boss)
 	grid[pos.y][pos.x] = boss
 
@@ -1407,6 +1449,8 @@ func _refresh_grid() -> void:
 		return
 	if not ("game_manager" in gm) or gm.game_manager == null:
 		return
+	if gm.has_method("apply_biome"):
+		gm.apply_biome(fight_biome)
 	gm.update_entity_display()
 
 
