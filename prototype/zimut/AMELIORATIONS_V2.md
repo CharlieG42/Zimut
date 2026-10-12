@@ -103,6 +103,22 @@ fenêtre de victoire.
 
 Test : `godot --headless --path prototype/zimut -s tests/test_biome_craft.gd`
 
-## 9. Pistes suivantes
+## 9. V3.1 — Correctifs et finitions
 
-Skin Sylvain, IA ennemie plus tactique, équilibrage fin avec de vraies parties.
+**Bug arbres/rochers** : une erreur d'indentation introduite dans `Prop.gd` par la V3 empêchait le
+script de compiler — `Prop` résolvait alors vers un GDScript non instanciable et `_sync_props`
+échouait silencieusement : **plus aucun arbre ni rocher ne s'affichait** (tous biomes). Corrigé et
+protégé par `tests/test_props.gd` (scripts de rendu instanciables + un prop vivant par obstacle,
+3 combats de suite).
+
+**Skin Sylvain** : personnage chibi (cape de feuillage, bâton, oreilles pointues) dans le style du
+générateur — `tools/gen_skins.py` écrit désormais dans `assets/sprites/players/`.
+
+**IA plus tactique** : les ennemis priorisent les soigneurs (Heal/Druide) et les invocations,
+chassent les cibles sous 25 % PV, et les tireurs blessés (< 40 % PV) fuient le contact au lieu de
+s'y accrocher. Simulations IA : 9-10 victoires sur 12 combats (équilibrage inchangé).
+
+## 10. Pistes suivantes
+
+Équilibrage fin avec de vraies parties, donjon final (biome Donjon + Boss Squelette Seigneur déjà
+dans `ennemis.txt`), soundscape par biome.
