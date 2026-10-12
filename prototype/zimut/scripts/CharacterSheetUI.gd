@@ -237,6 +237,45 @@ func _refresh_detail() -> void:
 	for l: String in ItemRules.fx_lines(st.get("fx", {})):
 		_detail_box.add_child(_label("✦ " + l, 17, Color(0.3, 0.3, 0.55)))
 
+	# ── Sorts : niveaux 1..10 améliorables avec l'or et la Magie ─────────────
+	var gold: int = ProgressionManager.gold(_save)
+	var magie: int = int(ProgressionManager.resources(_save).get("Magie", 0))
+	_detail_box.add_child(_label("SORTS  —  🪙 %d or  ·  Magie %d  (chaque niveau : +%d %% d'efficacité)" % [gold, magie,
+		roundi(ProgressionManager.SPELL_LEVEL_BONUS_PCT)], 22, Color(0.5, 0.3, 0.1)))
+	var spells: Array = ProgressionManager.spells_of(_classe)
+	for s: Dictionary in spells:
+		var sname: String = String(s["name"])
+		var slvl: int = ProgressionManager.spell_level(_save, _classe, sname)
+		var cost: Dictionary = ProgressionManager.spell_upgrade_cost(_save, _classe, sname)
+		var line := HBoxContainer.new()
+		line.add_theme_constant_override("separation", 12)
+		var name_l := _label(sname, 21)
+		name_l.custom_minimum_size = Vector2(300, 0)
+		line.add_child(name_l)
+		var lv_txt: String = "Nv %d / %d" % [slvl, ProgressionManager.SPELL_LEVEL_MAX]
+		var lv_l := _label(lv_txt, 20, Color(0.7, 0.5, 0.1) if slvl > 1 else COL_TXT)
+		lv_l.custom_minimum_size = Vector2(120, 0)
+		line.add_child(lv_l)
+		var bonus: int = roundi((ProgressionManager.spell_mult(_save, _classe, sname) - 1.0) * 100.0)
+		var bonus_l := _label(("+%d %%" % bonus) if bonus > 0 else "—", 19, Color(0.2, 0.55, 0.2))
+		bonus_l.custom_minimum_size = Vector2(80, 0)
+		line.add_child(bonus_l)
+		var up := _small_btn("AMÉLIORER")
+		up.disabled = cost.is_empty() or gold < int(cost["gold"]) or magie < int(cost["magie"])
+		if cost.is_empty():
+			up.text = "MAX"
+		else:
+			up.tooltip_text = "Coût : %d or + %d Magie" % [int(cost["gold"]), int(cost["magie"])]
+			up.pressed.connect(func() -> void:
+				var err: String = ProgressionManager.upgrade_spell(_save, _classe, sname)
+				if err == "":
+					_persist()
+				refresh())
+		line.add_child(up)
+		if not cost.is_empty():
+			line.add_child(_label("🪙%d + Magie %d" % [int(cost["gold"]), int(cost["magie"])], 17, Color(0.45, 0.36, 0.2)))
+		_detail_box.add_child(line)
+
 	var btns := HBoxContainer.new()
 	btns.add_theme_constant_override("separation", 20)
 	var auto_b := Button.new()

@@ -289,6 +289,13 @@ func init_entities() -> void:
 			"color": st["color"], "fx": pfx,
 		}, true)
 		player["spells"] = _build_spells(classe, plevel)
+		# Niveaux de sorts améliorés (1..10) : multiplicateur d'efficacité
+		if not active_save.is_empty():
+			for s: Dictionary in player["spells"]:
+				var slvl: int = ProgressionManager.spell_level(active_save, classe, String(s["name"]))
+				if slvl > 1:
+					s["spell_level"] = slvl
+					s["mult"] = 1.0 + (float(slvl) - 1.0) * ProgressionManager.SPELL_LEVEL_BONUS_PCT / 100.0
 		# Effets d'objets actifs dès le début du combat
 		if int(pfx.get("start_immune_neg", 0)) > 0:
 			Combat.add_status(player, "immune_neg", int(pfx["start_immune_neg"]), 0.0)
