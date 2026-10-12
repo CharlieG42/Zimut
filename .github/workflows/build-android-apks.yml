@@ -51,13 +51,24 @@ jobs:
           yes | sdkmanager "platform-tools" "build-tools;36.1.0" "platforms;android-36" "cmdline-tools;latest" > /dev/null
           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
 
-      - name: Setup Java and keystore
+      - name: Setup Java
         run: |
           echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> "$GITHUB_ENV"
+
+      - name: Decode release keystore from GitHub Secrets
+        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+        env:
+          ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+        run: |
           mkdir -p ~/.local/share/godot/keystores
-          keytool -genkey -v -keystore ~/.local/share/godot/keystores/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          printf '%s' "$ANDROID_KEYSTORE" | base64 --decode > ~/.local/share/godot/keystores/release.keystore
+          chmod 600 ~/.local/share/godot/keystores/release.keystore
 
       - name: Configure Godot release keystore
+        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+        env:
+          ANDROID_KEYSTORE_USER: ${{ secrets.ANDROID_KEYSTORE_USER }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           mkdir -p ~/.config/godot
           cfg=~/.config/godot/editor_settings-4.7.tres
@@ -65,9 +76,9 @@ jobs:
             echo '[gd_resource type="EditorSettings" format=3]'
             echo ''
             echo '[resource]'
-            printf 'export/android/keystore_release="%s/.local/share/godot/keystores/debug.keystore"\n' "$HOME"
-            echo 'export/android/keystore_release_user="androiddebugkey"'
-            echo 'export/android/keystore_release_password="android"'
+            printf 'export/android/keystore_release="%s/.local/share/godot/keystores/release.keystore"\n' "$HOME"
+            printf 'export/android/keystore_release_user="%s"\n' "$ANDROID_KEYSTORE_USER"
+            printf 'export/android/keystore_release_password="%s"\n' "$ANDROID_KEYSTORE_PASSWORD"
           } > "$cfg"
 
       - name: Export Zimut APK (Debug)
@@ -101,9 +112,9 @@ jobs:
       - name: Export Zimut APK (Release)
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
         env:
-          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /home/runner/.local/share/godot/keystores/debug.keystore
-          GODOT_ANDROID_KEYSTORE_RELEASE_USER: androiddebugkey
-          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: android
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /home/runner/.local/share/godot/keystores/release.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEYSTORE_USER }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           cd prototype/zimut
           godot --headless --verbose --export-release "Android" export/Zimut-release.apk || true
@@ -112,9 +123,9 @@ jobs:
       - name: Export ZOE APK (Release)
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
         env:
-          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /home/runner/.local/share/godot/keystores/debug.keystore
-          GODOT_ANDROID_KEYSTORE_RELEASE_USER: androiddebugkey
-          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: android
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /home/runner/.local/share/godot/keystores/release.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEYSTORE_USER }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           cd prototype/zoe
           godot --headless --verbose --export-release "Android Release" export/ZOE-release.apk || true
