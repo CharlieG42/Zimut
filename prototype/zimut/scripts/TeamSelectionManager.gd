@@ -397,16 +397,10 @@ func _on_start_combat() -> void:
 
 	# Partie active : mettre à jour l'équipe en conservant l'équipement par membre
 	if GameManager.active_slot >= 0 and not GameManager.active_save.is_empty():
-		var old_team: Array = GameManager.active_save.get("team", [])
-		var new_team: Array = []
+		var classes_arr: Array = []
 		for m: Dictionary in team_data:
-			var kept_eq: Dictionary = {}
-			for om: Dictionary in old_team:
-				if String(om.get("classe", "")) == String(m.get("classe", "")):
-					kept_eq = om.get("equipment", {})
-					break
-			new_team.append({"classe": m.get("classe", ""), "equipment": kept_eq})
-		GameManager.active_save["team"] = new_team
+			classes_arr.append(String(m.get("classe", "")))
+		ProgressionManager.rebuild_team(GameManager.active_save, classes_arr)
 		ProgressionManager.write_save(GameManager.active_slot, GameManager.active_save)
 
 	team_selected.emit(team_data)

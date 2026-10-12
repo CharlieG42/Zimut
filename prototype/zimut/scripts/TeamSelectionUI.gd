@@ -47,6 +47,7 @@ var _team_slots: Array = []          # [Panel, ...]
 var _title: Label
 var _fight_btn: Button
 var _equip_btn: Button
+var _chars_btn: Button
 
 func _ready() -> void:
 	_load_classes()
@@ -95,12 +96,36 @@ func _load_classes() -> void:
 		classes.append(c)
 
 func _stat_line(classe: String) -> String:
-	var meta: Dictionary = CLASS_META.get(classe, {})
-	var s: Dictionary = _stats_for(classe)
-	return "PV %d · PA %d · PM %d\nForce %d · Intel %d · Agi %d\nSagesse %d · Déf %d" % [
-		int(s.get("Vita (PV)", 0)), int(s.get("PA", 0)), int(s.get("PM", 0)),
-		int(s.get("Force (CAC)", 0)), int(s.get("Intelligence (Magie)", 0)), int(s.get("Agilité (Vit. Atk)", 0)),
-		int(s.get("Sagesse (Précision)", 0)), int(s.get("Défense", 0))]
+	var has_save: bool = GameManager.active_slot >= 0 and not GameManager.active_save.is_empty()
+	var level: int = ProgressionManager.START_LEVEL
+	var st: Dictionary = {}
+	var extra: String = ""
+	if has_save:
+		var save: Dictionary = GameManager.active_save
+		var member: Dictionary = {"classe": classe, "equipment": {}}
+		for m: Dictionary in save.get("team", []):
+			if String(m.get("classe", "")) == classe:
+				member = m
+		st = ProgressionManager.member_stats(save, member)
+		var ent: Dictionary = ProgressionManager.roster_entry(save, classe)
+		level = int(st.get("level", level))
+		var nxt: int = ProgressionManager.xp_for_level(mini(ClassRules.MAX_LEVEL, level + 1))
+		extra = "Niv %d  ·  XP %d / %d" % [level, int(ent.get("xp", 0)), nxt]
+		if int(ent.get("unspent", 0)) > 0:
+			extra += "\n✦ %d points de caractéristiques à répartir" % int(ent["unspent"])
+	else:
+		var row: Dictionary = ProgressionManager.class_row(classe, level)
+		if not row.is_empty():
+			st = {"max_pv": row["vita"], "pa": row["pa"], "pm": row["pm"], "force": row["force"],
+				"intelligence": row["intelligence"], "agility": row["agility"], "wisdom": row["wisdom"],
+				"defense": row["defense"]}
+		extra = "Niv %d (combat rapide)" % level
+	if st.is_empty():
+		return extra
+	return "%s\nPV %d · PA %d · PM %d\nForce %d · Intel %d · Agi %d\nSagesse %d · Déf %d" % [
+		extra, int(st["max_pv"]), int(st["pa"]), int(st["pm"]),
+		int(st["force"]), int(st["intelligence"]), int(st["agility"]),
+		int(st["wisdom"]), int(st["defense"])]
 
 func _stats_for(classe: String) -> Dictionary:
 	# Recharge rapide : classes.txt déjà parsé au _ready ; on garde un cache simple
@@ -290,6 +315,18 @@ func _build() -> void:
 	eq.pressed.connect(_on_equipment)
 	_root.add_child(eq)
 
+	# Fiche des personnages : niveaux, XP, points de caractéristiques
+	var chars := _std_btn("📈  PERSONNAGES", Color(0.40, 0.60, 0.85))
+	_chars_btn = chars
+	chars.tooltip_text = "Niveaux, XP et répartition des points de caractéristiques."
+	chars.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	chars.offset_left = 430.0
+	chars.offset_right = 770.0
+	chars.offset_top = -160.0
+	chars.offset_bottom = -80.0
+	chars.pressed.connect(_on_characters)
+	_root.add_child(chars)
+
 	# Retour
 	var back := _std_btn("←  MENU", Color(0.35, 0.40, 0.55))
 	back.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
@@ -382,19 +419,29 @@ func _build_custom_team() -> Array:
 
 func _sync_save_team(classes_arr: Array) -> void:
 	# Partie active : mettre à jour l'équipe en conservant l'équipement par classe
+	# (l'équipement des classes retirées retourne à l'inventaire)
 	if GameManager.active_slot < 0 or GameManager.active_save.is_empty():
 		return
-	var old_team: Array = GameManager.active_save.get("team", [])
-	var new_team: Array = []
-	for classe: String in classes_arr:
-		var kept_eq: Dictionary = {}
-		for om: Dictionary in old_team:
-			if String(om.get("classe", "")) == classe:
-				kept_eq = om.get("equipment", {})
-				break
-		new_team.append({"classe": classe, "equipment": kept_eq})
-	GameManager.active_save["team"] = new_team
+	ProgressionManager.rebuild_team(GameManager.active_save, classes_arr)
 	ProgressionManager.write_save(GameManager.active_slot, GameManager.active_save)
+
+func _on_characters() -> void:
+	if GameManager.active_slot < 0 or GameManager.active_save.is_empty():
+		return
+	for child in get_children():
+		if child is CanvasLayer and child.get_script() != null:
+			if String(child.get_script().resource_path).contains("CharacterSheetUI"):
+				return
+	var ui: CanvasLayer = (load("res://scripts/CharacterSheetUI.gd") as GDScript).new()
+	ui.layer = 10
+	add_child(ui)
+	ui.closed.connect(func() -> void:
+		ui.queue_free()
+		refresh())
+	ui.open(GameManager.active_save, GameManager.active_slot, _preferred_class())
+
+func _preferred_class() -> String:
+	return current_class()
 
 func _on_equipment() -> void:
 	if GameManager.active_slot < 0 or GameManager.active_save.is_empty():
@@ -455,6 +502,14 @@ func refresh() -> void:
 	if _equip_btn:
 		_equip_btn.disabled = GameManager.active_slot < 0 or GameManager.active_save.is_empty()
 		_equip_btn.text = "🎒  ÉQUIPEMENT (%d)" % GameManager.active_save.get("inventory", []).size() if not _equip_btn.disabled else "🎒  ÉQUIPEMENT"
+	if _chars_btn:
+		var has_save2: bool = GameManager.active_slot >= 0 and not GameManager.active_save.is_empty()
+		_chars_btn.disabled = not has_save2
+		var pts: int = 0
+		if has_save2:
+			for m2: Dictionary in GameManager.active_save.get("team", []):
+				pts += int(ProgressionManager.roster_entry(GameManager.active_save, String(m2.get("classe", ""))).get("unspent", 0))
+		_chars_btn.text = "📈  PERSONNAGES (+%d)" % pts if pts > 0 else "📈  PERSONNAGES"
 	if _fight_btn:
 		if boss_fight:
 			_fight_btn.text = "☠  COMBATTRE LE BOSS (nv%d)" % next_lvl
@@ -471,6 +526,8 @@ func refresh() -> void:
 			var c: String = team[i]
 			var m: Dictionary = CLASS_META.get(c, {"icon": "❔"})
 			lbl.text = "%s %s" % [m["icon"], c]
+			if GameManager.active_slot >= 0 and not GameManager.active_save.is_empty():
+				lbl.text += "\nNiv %d" % ProgressionManager.member_level(GameManager.active_save, c)
 			slot.add_theme_stylebox_override("panel", _flat(
 				CLASS_COLORS.get(c, Color(0.4, 0.4, 0.4)).lightened(0.25),
 				CLASS_COLORS.get(c, Color(0.4, 0.4, 0.4)).darkened(0.3), 14, 3))

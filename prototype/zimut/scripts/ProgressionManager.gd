@@ -1,19 +1,23 @@
 extends Node
-## ProgressionManager.gd — Progression, sauvegardes et inventaire.
+## ProgressionManager.gd — Progression, sauvegardes, XP et inventaire.
 ##
 ## - 5 parties (slots) maximum, stockées dans user://saves/
-## - Chaque partie : niveau de départ (progression +2 niveaux par victoire),
-##   équipe librement modifiable, inventaire de loots et équipement par perso
-## - Loots à chaque victoire : types d'items demandés (bague, collier, casque,
-##   gants, bottes, boucles d'oreille, capes, armes, bouclier)
+## - Chaque partie : une ÉQUIPE (3 persos + équipement), un INVENTAIRE de loots et un
+##   ROSTER : la progression de chacune des 8 classes (niveau, XP, points de
+##   caractéristiques investis / à dépenser — voir ClassRules.gd)
+## - Chaque victoire rapporte de l'XP (tous les persos, les classes hors équipe en
+##   reçoivent une part) et 1-4 loots avec rareté (voir ItemRules.gd)
+## - Le niveau des ennemis suit le niveau moyen de l'équipe (plus de mur de difficulté)
 
 signal progression_changed()
 
 const SAVE_DIR := "user://saves"
 const MAX_SAVES := 5
 const START_LEVEL := 10
-const LEVELS_PER_VICTORY := 2
 const BOSS_EVERY := 4
+## +1 niveau d'ennemi toutes les N victoires (la difficulté monte doucement)
+const DIFFICULTY_CREEP_EVERY := 10
+const CLASS_ORDER: Array[String] = ["Tank", "Assassin", "Chasseur", "Mage", "Druide", "Heal", "Invocateur", "Sylvain"]
 
 ## Emplacements d'équipement par personnage (clé -> type d'item accepté)
 const EQUIP_SLOTS := {
@@ -31,11 +35,17 @@ const EQUIP_SLOTS := {
 }
 
 var _items_catalog: Array = []   # entrées stuff.txt normalisées
+var _class_table: Dictionary = {}   # classe -> { niveau(int) -> ligne }
+var _enemy_rows: Array = []         # lignes de ennemis.txt
+var _spell_levels: Dictionary = {}  # classe -> [{ "name", "level" }]
 var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	_rng.randomize()
 	_load_items_catalog()
+	_load_class_table()
+	_load_enemy_rows()
+	_load_spell_levels()
 	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -73,8 +83,14 @@ func _load_items_catalog() -> void:
 			"wisdom": _stat(cols, 6),
 			"vita": _stat(cols, 7),
 			"defense": _stat(cols, 8),
-			"effect": String(cols[9].strip_edges()) if cols.size() > 9 else "",
+			"effect": _effect_col(cols),
 		})
+
+## L'effet est en colonne 9 ; une ligne mal formée (colonne en trop) le met en 10.
+func _effect_col(cols: PackedStringArray) -> String:
+	if cols.size() > 10:
+		return String(cols[cols.size() - 1].strip_edges())
+	return String(cols[9].strip_edges()) if cols.size() > 9 else ""
 
 func _stat(cols: PackedStringArray, idx: int) -> int:
 	if cols.size() <= idx:
@@ -111,6 +127,7 @@ func _path(slot: int) -> String:
 func new_game(slot: int, game_name: String = "") -> Dictionary:
 	var data := _fresh_save()
 	data["name"] = game_name if game_name != "" else "Partie %d" % (slot + 1)
+	ensure_roster(data)
 	write_save(slot, data)
 	return data
 
@@ -120,7 +137,8 @@ func _fresh_save() -> Dictionary:
 		"level": START_LEVEL,
 		"victories": 0,
 		"team": [],           # [{ "classe": String, "equipment": {slot -> item} }]
-		"inventory": [],      # [{ "type", "name", "level", stats... }]
+		"inventory": [],      # [{ "type", "name", "level", "rarity", stats... }]
+		"roster": {},         # { classe: { level, xp, invested{}, unspent, auto } }
 		"timestamp": Time.get_datetime_string_from_system(),
 	}
 
@@ -136,6 +154,7 @@ func load_save(slot: int) -> Dictionary:
 			return {}
 	# JSON renvoie des floats pour tous les nombres : normaliser en int
 	_normalize_ints(parsed, ["level", "victories"])
+	ensure_roster(parsed)   # migration des anciennes parties + normalisation
 	return parsed
 
 func _read_json(path: String) -> Dictionary:
@@ -182,30 +201,373 @@ func delete_save(slot: int) -> void:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(_path(slot)))
 
 # ═══════════════════════════════════════════════════════════════════════════
-#  Victoire : progression + loots
+#  Tables de données (classes.txt, ennemis.txt, sorts.txt)
 # ═══════════════════════════════════════════════════════════════════════════
 
-## À appeler après une victoire : +2 niveaux d'ennemis, 1-3 loots.
+func _read_lines(path: String) -> PackedStringArray:
+	var f := FileAccess.open(path, FileAccess.READ)
+	if f == null:
+		return PackedStringArray()
+	var txt: String = f.get_as_text()
+	f.close()
+	return txt.replace("\r", "").split("\n")
+
+func _load_class_table() -> void:
+	_class_table = {}
+	var lines: PackedStringArray = _read_lines("res://data/classes.txt")
+	for i: int in range(1, lines.size()):
+		var c: PackedStringArray = lines[i].strip_edges().split(",")
+		if c.size() < 11 or c[0].strip_edges() == "":
+			continue
+		var classe: String = c[0].strip_edges()
+		if not _class_table.has(classe):
+			_class_table[classe] = {}
+		_class_table[classe][int(c[1])] = {
+			"level": int(c[1]), "pa": int(c[2]), "pm": int(c[3]), "vita": int(c[4]),
+			"force": int(c[5]), "intelligence": int(c[6]), "agility": int(c[7]),
+			"wisdom": int(c[8]), "defense": int(c[9]), "xp": int(c[10]),
+		}
+
+func _load_enemy_rows() -> void:
+	_enemy_rows = []
+	var lines: PackedStringArray = _read_lines("res://data/ennemis.txt")
+	for i: int in range(1, lines.size()):
+		var c: PackedStringArray = lines[i].strip_edges().split(",")
+		if c.size() < 8 or c[0].strip_edges() == "":
+			continue
+		_enemy_rows.append({"type": c[0].strip_edges(), "level": int(c[1]), "xp": int(c[7])})
+
+func _load_spell_levels() -> void:
+	_spell_levels = {}
+	var lines: PackedStringArray = _read_lines("res://data/sorts.txt")
+	for i: int in range(1, lines.size()):
+		var c: PackedStringArray = lines[i].strip_edges().split(",")
+		if c.size() < 7 or c[0].strip_edges() == "":
+			continue
+		var classe: String = c[0].strip_edges()
+		if not _spell_levels.has(classe):
+			_spell_levels[classe] = []
+		_spell_levels[classe].append({"name": c[1].strip_edges(), "level": int(c[6])})
+
+## Liste des classes jouables (ordre d'affichage).
+func class_names() -> Array[String]:
+	var out: Array[String] = []
+	for c: String in CLASS_ORDER:
+		if _class_table.has(c):
+			out.append(c)
+	for c in _class_table.keys():
+		if not out.has(String(c)):
+			out.append(String(c))
+	return out
+
+## Ligne classes.txt de la classe au niveau donné (le plus proche en dessous).
+func class_row(classe: String, level: int) -> Dictionary:
+	var rows: Dictionary = _class_table.get(classe, {})
+	var best: Dictionary = {}
+	var best_lvl: int = -1
+	for lv: int in rows.keys():
+		if lv <= level and lv > best_lvl:
+			best_lvl = lv
+			best = rows[lv]
+	return best
+
+func xp_for_level(level: int) -> int:
+	if level <= 1:
+		return 0
+	var row: Dictionary = class_row("Tank", level)
+	if row.is_empty():
+		return 50 * level * (level - 1)
+	return int(row["xp"])
+
+func level_for_xp(xp: int) -> int:
+	var lvl: int = 1
+	while lvl < ClassRules.MAX_LEVEL and xp >= xp_for_level(lvl + 1):
+		lvl += 1
+	return lvl
+
+## Sorts d'une classe (ceux de « Druide » si la classe n'en a aucun, comme en combat).
+func spells_of(classe: String) -> Array:
+	var l: Array = _spell_levels.get(classe, [])
+	if l.is_empty():
+		l = _spell_levels.get("Druide", [])
+	return l
+
+func spells_unlocked_between(classe: String, from_level: int, to_level: int) -> Array[String]:
+	var out: Array[String] = []
+	for s: Dictionary in spells_of(classe):
+		var lv: int = int(s["level"])
+		if lv > from_level and lv <= to_level:
+			out.append(String(s["name"]))
+	return out
+
+## Prochain déblocage de sort : { "name", "level" } ou {}.
+func next_spell(classe: String, level: int) -> Dictionary:
+	var best: Dictionary = {}
+	for s: Dictionary in spells_of(classe):
+		var lv: int = int(s["level"])
+		if lv > level and (best.is_empty() or lv < int(best["level"])):
+			best = s
+	return best
+
+## XP rapportée par un ennemi (ennemis.txt : ligne la plus proche sous son niveau).
+func xp_for_enemy(type_name: String, level: int) -> int:
+	var best: Dictionary = {}
+	var first: Dictionary = {}
+	for r: Dictionary in _enemy_rows:
+		if r["type"] != type_name:
+			continue
+		if first.is_empty() or int(r["level"]) < int(first["level"]):
+			first = r
+		if int(r["level"]) <= level and (best.is_empty() or int(r["level"]) > int(best["level"])):
+			best = r
+	if best.is_empty():
+		best = first
+	return int(best.get("xp", 0))
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Roster : progression de chaque classe
+# ═══════════════════════════════════════════════════════════════════════════
+
+func _new_entry(level: int) -> Dictionary:
+	return {"level": level, "xp": xp_for_level(level), "invested": {},
+		"unspent": ClassRules.total_points_for_level(level), "auto": true}
+
+## Garantit que la sauvegarde contient un roster complet et cohérent (migration
+## des anciennes parties incluse). Appelé au chargement.
+func ensure_roster(data: Dictionary) -> void:
+	if data.is_empty():
+		return
+	var legacy_level: int = clampi(int(data.get("level", START_LEVEL)), START_LEVEL, ClassRules.MAX_LEVEL)
+	var fresh: bool = not data.has("roster")
+	var roster: Dictionary = data.get("roster", {})
+	var team_classes: Array[String] = []
+	for m: Dictionary in data.get("team", []):
+		team_classes.append(String(m.get("classe", "")))
+	for classe: String in class_names():
+		if not roster.has(classe):
+			var lvl: int = START_LEVEL
+			if not fresh:
+				lvl = maxi(START_LEVEL, _roster_average(roster, team_classes) - 2)
+			elif team_classes.has(classe):
+				lvl = legacy_level   # ancienne partie : l'équipe rattrape le niveau des ennemis
+			var e: Dictionary = _new_entry(lvl)
+			e["unspent"] = ClassRules.auto_allocate(classe, e["invested"], int(e["unspent"]))
+			roster[classe] = e
+		var ent: Dictionary = roster[classe]
+		ent["level"] = clampi(int(ent.get("level", START_LEVEL)), 1, ClassRules.MAX_LEVEL)
+		ent["xp"] = int(ent.get("xp", xp_for_level(int(ent["level"]))))
+		ent["unspent"] = int(ent.get("unspent", 0))
+		ent["auto"] = bool(ent.get("auto", true))
+		var inv: Dictionary = ent.get("invested", {})
+		for k in inv.keys():
+			inv[k] = int(inv[k])
+		ent["invested"] = inv
+	data["roster"] = roster
+	data["level"] = enemy_level_for(data)
+
+func _roster_average(roster: Dictionary, classes: Array[String]) -> int:
+	var tot: int = 0
+	var n: int = 0
+	for c: String in classes:
+		if roster.has(c):
+			tot += int(roster[c].get("level", START_LEVEL))
+			n += 1
+	return roundi(float(tot) / float(n)) if n > 0 else START_LEVEL
+
+func roster_entry(data: Dictionary, classe: String) -> Dictionary:
+	if not data.has("roster") or not data["roster"].has(classe):
+		ensure_roster(data)
+	return data.get("roster", {}).get(classe, {})
+
+func member_level(data: Dictionary, classe: String) -> int:
+	var e: Dictionary = roster_entry(data, classe)
+	return int(e.get("level", START_LEVEL)) if not e.is_empty() else START_LEVEL
+
+func team_average_level(data: Dictionary) -> int:
+	var classes: Array[String] = []
+	for m: Dictionary in data.get("team", []):
+		classes.append(String(m.get("classe", "")))
+	if classes.is_empty() or not data.has("roster"):
+		return START_LEVEL
+	return _roster_average(data["roster"], classes)
+
+## Niveau des ennemis du prochain combat : niveau moyen de l'équipe (+1 toutes les
+## DIFFICULTY_CREEP_EVERY victoires).
+func enemy_level_for(data: Dictionary) -> int:
+	var lvl: int = team_average_level(data) + int(data.get("victories", 0)) / DIFFICULTY_CREEP_EVERY
+	return clampi(lvl, 1, ClassRules.MAX_LEVEL)
+
+## Statistiques finales d'un membre d'équipe : base (classes.txt au niveau du perso)
+## + points investis + équipement (+ panoplies) + paliers PA/PM.
+func member_stats(data: Dictionary, member: Dictionary) -> Dictionary:
+	var classe: String = String(member.get("classe", ""))
+	var ent: Dictionary = roster_entry(data, classe)
+	var level: int = int(ent.get("level", START_LEVEL))
+	var row: Dictionary = class_row(classe, level)
+	if row.is_empty():
+		return {}
+	var inv: Dictionary = ent.get("invested", {})
+	var agg: Dictionary = ItemRules.aggregate(member.get("equipment", {}))
+	var eq: Dictionary = agg["stats"]
+	var ms: Dictionary = ClassRules.milestone_bonus(classe, level)
+	var fx: Dictionary = agg["fx"]
+	var out: Dictionary = {
+		"classe": classe, "level": level,
+		"max_pv": int(row["vita"]) + int(inv.get("vita", 0)) * int(ClassRules.STAT_GAIN["vita"]) + int(eq["vita"]),
+		"pa": int(row["pa"]) + int(ms["pa"]) + int(fx.get("pa", 0)),
+		"pm": int(row["pm"]) + int(ms["pm"]) + int(fx.get("pm", 0)),
+		"fx": fx, "sets": agg["sets"],
+	}
+	for k: String in ["force", "intelligence", "agility", "wisdom", "defense"]:
+		out[k] = int(row[k]) + int(inv.get(k, 0)) + int(eq[k])
+	return out
+
+## Investit 1 point de capital dans `stat`. Retourne "" si OK, sinon la raison.
+func invest_point(data: Dictionary, classe: String, stat: String) -> String:
+	var e: Dictionary = roster_entry(data, classe)
+	if e.is_empty() or not ClassRules.STATS.has(stat):
+		return "Statistique inconnue."
+	var cost: int = ClassRules.point_cost(classe, stat, int(e["invested"].get(stat, 0)))
+	if int(e["unspent"]) < cost:
+		return "Capital insuffisant (%d requis)." % cost
+	e["invested"][stat] = int(e["invested"].get(stat, 0)) + 1
+	e["unspent"] = int(e["unspent"]) - cost
+	e["auto"] = false
+	return ""
+
+## Retire 1 point investi et le rembourse.
+func refund_point(data: Dictionary, classe: String, stat: String) -> String:
+	var e: Dictionary = roster_entry(data, classe)
+	if e.is_empty() or int(e["invested"].get(stat, 0)) <= 0:
+		return "Rien à retirer."
+	var n: int = int(e["invested"][stat])
+	e["unspent"] = int(e["unspent"]) + ClassRules.point_cost(classe, stat, n - 1)
+	e["invested"][stat] = n - 1
+	e["auto"] = false
+	return ""
+
+## Rend tout le capital (respec gratuit) ; la classe repasse en répartition manuelle.
+func reset_points(data: Dictionary, classe: String) -> void:
+	var e: Dictionary = roster_entry(data, classe)
+	if e.is_empty():
+		return
+	e["invested"] = {}
+	e["unspent"] = ClassRules.total_points_for_level(int(e["level"]))
+	e["auto"] = false
+
+## Répartition automatique du capital restant ; les prochains niveaux seront aussi auto-répartis.
+func auto_points(data: Dictionary, classe: String) -> void:
+	var e: Dictionary = roster_entry(data, classe)
+	if e.is_empty():
+		return
+	e["unspent"] = ClassRules.auto_allocate(classe, e["invested"], int(e["unspent"]))
+	e["auto"] = true
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  XP
+# ═══════════════════════════════════════════════════════════════════════════
+
+## XP brute d'un combat à partir de la liste des ennemis [{type, level, boss}].
+func fight_xp(enemies: Array) -> int:
+	var total: float = 0.0
+	for e: Dictionary in enemies:
+		var xp: float = float(xp_for_enemy(String(e.get("type", "")), int(e.get("level", 1))))
+		if bool(e.get("boss", false)):
+			xp *= ClassRules.BOSS_XP_MULT
+		total += xp
+	return roundi(total * ClassRules.FIGHT_XP_MULT)
+
+## Distribue l'XP à toute la roster. Retourne le rapport par classe :
+## { classe: { gain, from_level, to_level, points, spells, in_team } }
+func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0) -> Dictionary:
+	ensure_roster(data)
+	var team_classes: Array[String] = []
+	for m: Dictionary in data.get("team", []):
+		team_classes.append(String(m.get("classe", "")))
+	var avg: int = team_average_level(data)
+	var report: Dictionary = {}
+	for classe: String in data["roster"].keys():
+		var e: Dictionary = data["roster"][classe]
+		var in_team: bool = team_classes.has(classe)
+		var gain: float = float(raw_xp) * ratio * ClassRules.xp_mult(classe)
+		if not in_team:
+			gain *= ClassRules.BENCH_XP_RATIO
+		if int(e["level"]) + ClassRules.CATCHUP_GAP < avg:
+			gain *= 1.5
+		var g: int = roundi(gain)
+		var from_lvl: int = int(e["level"])
+		e["xp"] = int(e["xp"]) + g
+		var to_lvl: int = mini(ClassRules.MAX_LEVEL, level_for_xp(int(e["xp"])))
+		var pts: int = 0
+		if to_lvl > from_lvl:
+			pts = (to_lvl - from_lvl) * ClassRules.POINTS_PER_LEVEL
+			e["unspent"] = int(e["unspent"]) + pts
+			e["level"] = to_lvl
+			if bool(e.get("auto", true)):
+				e["unspent"] = ClassRules.auto_allocate(classe, e["invested"], int(e["unspent"]))
+		report[classe] = {"gain": g, "from_level": from_lvl, "to_level": to_lvl, "points": pts,
+			"spells": spells_unlocked_between(classe, from_lvl, to_lvl), "in_team": in_team,
+			"xp": int(e["xp"]), "xp_next": xp_for_level(mini(ClassRules.MAX_LEVEL, to_lvl + 1)),
+			"xp_cur": xp_for_level(to_lvl)}
+	return report
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Victoire / défaite : progression + loots
+# ═══════════════════════════════════════════════════════════════════════════
+
+## À appeler après une victoire : XP pour tout le monde, 1-4 loots avec rareté.
+## info (facultatif) : { "enemies": [{type, level, boss}], "turns": int, "boss": bool }
 ## Retourne la sauvegarde mise à jour (à écrire ensuite) ou {} si pas de partie active.
-func register_victory(data: Dictionary) -> Dictionary:
+func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	if data.is_empty():
 		return {}
+	ensure_roster(data)
+	var fight_level: int = int(data.get("level", START_LEVEL))
+	var was_boss: bool = bool(info.get("boss", is_boss_fight(data)))
+	var enemies: Array = info.get("enemies", [])
+	if enemies.is_empty():
+		enemies = [{"type": "Gobelin", "level": fight_level, "boss": false},
+			{"type": "Squelette", "level": fight_level, "boss": false},
+			{"type": "Loup", "level": fight_level, "boss": false},
+			{"type": "Dragonnet", "level": fight_level, "boss": was_boss}]
+	var report: Dictionary = award_xp(data, fight_xp(enemies))
 	data["victories"] = int(data.get("victories", 0)) + 1
-	data["level"] = int(data.get("level", START_LEVEL)) + LEVELS_PER_VICTORY
-	var loots: Array = _roll_loots(int(data["level"]))
+	var loots: Array = _roll_loots(fight_level, was_boss)
 	for l: Dictionary in loots:
 		data["inventory"].append(l)
 	data["last_loots"] = loots
+	data["level"] = enemy_level_for(data)
+	data["last_result"] = {"victory": true, "xp": report, "boss": was_boss, "fight_level": fight_level,
+		"turns": int(info.get("turns", 0))}
 	# Journal cumulé des loots gagnés dans cette partie
 	var log_arr: Array = data.get("loot_log", [])
 	for l: Dictionary in loots:
 		log_arr.append({
 			"type": l.get("type", ""), "name": l.get("name", ""), "level": int(l.get("level", 0)),
+			"rarity": l.get("rarity", "commun"),
 			"force": int(l.get("force", 0)), "intelligence": int(l.get("intelligence", 0)),
 			"agility": int(l.get("agility", 0)), "wisdom": int(l.get("wisdom", 0)),
 			"vita": int(l.get("vita", 0)), "defense": int(l.get("defense", 0)),
 		})
 	data["loot_log"] = log_arr
+	progression_changed.emit()
+	return data
+
+## Défaite : un peu d'XP de consolation, pas de loot, pas de recul.
+func register_defeat(data: Dictionary, info: Dictionary = {}) -> Dictionary:
+	if data.is_empty():
+		return {}
+	ensure_roster(data)
+	var fight_level: int = int(data.get("level", START_LEVEL))
+	var enemies: Array = info.get("enemies", [])
+	var report: Dictionary = {}
+	if not enemies.is_empty():
+		report = award_xp(data, fight_xp(enemies), ClassRules.DEFEAT_XP_RATIO)
+	data["defeats"] = int(data.get("defeats", 0)) + 1
+	data["last_loots"] = []
+	data["level"] = enemy_level_for(data)
+	data["last_result"] = {"victory": false, "xp": report, "boss": bool(info.get("boss", false)),
+		"fight_level": fight_level, "turns": int(info.get("turns", 0))}
 	progression_changed.emit()
 	return data
 
@@ -216,24 +578,43 @@ func next_fight_number(data: Dictionary) -> int:
 func is_boss_fight(data: Dictionary) -> bool:
 	return next_fight_number(data) % BOSS_EVERY == 0
 
-func _roll_loots(level: int) -> Array:
+func _roll_loots(level: int, boss: bool = false) -> Array:
 	var count: int = _rng.randi_range(1, 3)
+	if boss:
+		count = _rng.randi_range(3, 4)
 	var out: Array = []
 	for i: int in range(count):
 		var item := _random_item(level)
-		if not item.is_empty():
-			out.append(item)
+		if item.is_empty():
+			continue
+		# Le boss garantit du rare+ sur son premier objet ; les autres tirages sont normaux
+		var rarity: String = ItemRules.roll_rarity(_rng, boss and i == 0)
+		out.append(ItemRules.apply_rarity(item, rarity, _rng))
 	return out
 
-## Tire un item dont le niveau requis est <= level (le plus proche possible).
+## Tire un item proche du niveau du combat : les objets obsolètes sont de plus en
+## plus rares, et un objet légèrement au-dessus du niveau peut tomber (à convoiter).
 func _random_item(level: int) -> Dictionary:
 	var candidates: Array = []
+	var weights: Array = []
+	var total: float = 0.0
 	for it: Dictionary in _items_catalog:
-		if int(it["level"]) <= level:
-			candidates.append(it)
+		var lv: int = int(it["level"])
+		if lv > level + 3:
+			continue
+		var gap: float = maxf(0.0, float(level - lv))
+		var w: float = 1.0 / pow(1.0 + gap / 5.0, 2.0)
+		candidates.append(it)
+		weights.append(w)
+		total += w
 	if candidates.is_empty():
 		return {}
-	return candidates[_rng.randi_range(0, candidates.size() - 1)].duplicate()
+	var r: float = _rng.randf() * total
+	for i: int in range(candidates.size()):
+		r -= float(weights[i])
+		if r <= 0.0:
+			return candidates[i].duplicate()
+	return candidates[candidates.size() - 1].duplicate()
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  Équipement
@@ -248,6 +629,7 @@ func slot_for_type(item_type: String) -> String:
 
 ## Équipe un item de l'inventaire sur un perso ; l'ancien item retourne
 ## à l'inventaire. Retourne "" si OK, sinon la raison.
+## Règles : niveau requis ; une arme à 2 mains libère le bouclier.
 func equip_item(data: Dictionary, member_index: int, item_index: int) -> String:
 	var inv: Array = data.get("inventory", [])
 	var team: Array = data.get("team", [])
@@ -260,12 +642,21 @@ func equip_item(data: Dictionary, member_index: int, item_index: int) -> String:
 	var slot: String = slot_for_type(String(item["type"]))
 	if slot == "":
 		return "Type d'objet inconnu : %s" % String(item["type"])
+	var lvl: int = member_level(data, String(member.get("classe", "")))
+	if int(item.get("level", 1)) > lvl:
+		return "Niveau %d requis (%s est niveau %d)." % [int(item.get("level", 1)), String(member.get("classe", "")), lvl]
 	var equipment: Dictionary = member.get("equipment", {})
+	if slot == "bouclier" and equipment.has("arme") and ItemRules.is_two_handed(equipment["arme"]):
+		return "Arme à deux mains équipée : retirez-la pour porter un bouclier."
 	# Retirer l'item de l'inventaire
 	inv.remove_at(item_index)
 	# Renvoyer l'ancien item à l'inventaire
 	if equipment.has(slot):
 		inv.append(equipment[slot])
+	# Une arme à 2 mains libère le bouclier
+	if slot == "arme" and ItemRules.is_two_handed(item) and equipment.has("bouclier"):
+		inv.append(equipment["bouclier"])
+		equipment.erase("bouclier")
 	equipment[slot] = item
 	member["equipment"] = equipment
 	return ""
@@ -282,15 +673,76 @@ func unequip_item(data: Dictionary, member_index: int, slot: String) -> String:
 	equipment.erase(slot)
 	return ""
 
-## Somme des bonus d'équipement d'un membre : { force, intelligence, agility,
-## wisdom, vita, defense }
+## Somme des bonus d'équipement d'un membre (panoplies incluses) : { force, intelligence,
+## agility, wisdom, vita, defense }
 func equipment_bonuses(member: Dictionary) -> Dictionary:
-	var out := {"force": 0, "intelligence": 0, "agility": 0, "wisdom": 0, "vita": 0, "defense": 0}
-	for slot: String in member.get("equipment", {}).keys():
-		var it: Dictionary = member["equipment"][slot]
-		for k: String in out.keys():
-			out[k] = int(out[k]) + int(it.get(k, 0))
-	return out
+	return ItemRules.aggregate(member.get("equipment", {}))["stats"]
+
+## Effets spéciaux d'équipement d'un membre (clés de ItemRules).
+func equipment_fx(member: Dictionary) -> Dictionary:
+	return ItemRules.aggregate(member.get("equipment", {}))["fx"]
+
+## Reconstruit l'équipe depuis une liste de classes en conservant l'équipement des
+## classes qui restent ; l'équipement des classes écartées retourne à l'inventaire
+## (avant : il était perdu).
+func rebuild_team(data: Dictionary, classes: Array) -> Array:
+	var old_team: Array = data.get("team", [])
+	var new_team: Array = []
+	var used: Array = []
+	for classe in classes:
+		var kept: Dictionary = {}
+		for i: int in range(old_team.size()):
+			if String(old_team[i].get("classe", "")) == String(classe) and not used.has(i):
+				kept = old_team[i].get("equipment", {})
+				used.append(i)
+				break
+		new_team.append({"classe": String(classe), "equipment": kept})
+	for i: int in range(old_team.size()):
+		if not used.has(i):
+			for slot: String in old_team[i].get("equipment", {}).keys():
+				data["inventory"].append(old_team[i]["equipment"][slot])
+	data["team"] = new_team
+	ensure_roster(data)
+	return new_team
+
+
+## Équipe automatiquement les meilleurs objets (valeur ItemRules.power) en respectant le
+## niveau requis et la règle arme à 2 mains / bouclier. Retourne le nombre de changements.
+func auto_equip(data: Dictionary) -> int:
+	var changes: int = 0
+	var team: Array = data.get("team", [])
+	var guard: int = 0
+	while guard < 80:
+		guard += 1
+		var inv: Array = data.get("inventory", [])
+		var best_gain: int = 0
+		var best_m: int = -1
+		var best_i: int = -1
+		for mi: int in range(team.size()):
+			var member: Dictionary = team[mi]
+			var lvl: int = member_level(data, String(member.get("classe", "")))
+			var eq: Dictionary = member.get("equipment", {})
+			for ii: int in range(inv.size()):
+				var it: Dictionary = inv[ii]
+				var slot: String = slot_for_type(String(it.get("type", "")))
+				if slot == "" or int(it.get("level", 1)) > lvl:
+					continue
+				if slot == "bouclier" and eq.has("arme") and ItemRules.is_two_handed(eq["arme"]):
+					continue
+				var cur: Dictionary = eq.get(slot, {})
+				var gain: int = ItemRules.power(it) - (ItemRules.power(cur) if not cur.is_empty() else 0)
+				if slot == "arme" and ItemRules.is_two_handed(it) and eq.has("bouclier"):
+					gain -= ItemRules.power(eq["bouclier"])
+				if gain > best_gain:
+					best_gain = gain
+					best_m = mi
+					best_i = ii
+		if best_m < 0:
+			break
+		if equip_item(data, best_m, best_i) != "":
+			break
+		changes += 1
+	return changes
 
 
 ## Renomme une partie existante. Retourne "" si OK.

@@ -185,7 +185,11 @@ static func calc_damage(att: Dictionary, tgt: Dictionary, base: float, dtype: St
 	if back:
 		mult *= 1.25
 
-	var crit_chance: float = clampf(0.05 + float(att.get("agility", 0)) / 400.0, 0.05, 0.35)
+	# Effets d'objets : dégâts magiques +%, critique +%
+	var afx: Dictionary = att.get("fx", {})
+	if dtype != "phys":
+		mult *= 1.0 + float(afx.get("mag_pct", 0)) / 100.0
+	var crit_chance: float = clampf(0.05 + float(att.get("agility", 0)) / 400.0 + float(afx.get("crit", 0)) / 100.0, 0.05, 0.6)
 	var crit: bool = force_crit or has_status(att, "mark")
 	if simulate:
 		if not crit:
@@ -201,7 +205,7 @@ static func calc_damage(att: Dictionary, tgt: Dictionary, base: float, dtype: St
 		res = d / (d + 100.0) + status_value(tgt, "def_up") / 100.0
 	else:
 		var d2: float = float(tgt.get("defense", 0)) * 0.5
-		res = d2 / (d2 + 100.0) + status_value(tgt, "mres_up") / 100.0
+		res = d2 / (d2 + 100.0) + status_value(tgt, "mres_up") / 100.0 + float(tgt.get("fx", {}).get("mres", 0)) / 100.0
 	res = clampf(res, 0.0, 0.85)
 
 	var dmg: float = base * mult * (1.0 - res)

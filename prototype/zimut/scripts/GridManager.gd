@@ -20,6 +20,7 @@ var hover_cell: Vector2i = Vector2i(-1, -1)
 var _cells_layer: Node2D
 var _entity_layer: Node2D
 var _fx_layer: Node2D
+var _cur_element: String = "physical"   # élément du dernier sort lancé (impacts)
 var _trap_nodes: Dictionary = {}    # Vector2i -> Node2D
 var _prop_nodes: Array = []
 var _obstacle_sig: int = -1
@@ -479,8 +480,11 @@ func _play_cast(d: Dictionary) -> void:
 	var v: EntityView = _view(caster)
 	var from: Vector2i = d["from"]
 	var to: Vector2i = d["to"]
-	var col: Color = _spell_color(d)
 	var kind: String = String(d["kind"])
+	var elem: String = SpellFx.element_for(String(d.get("spell", "")), String(d["dtype"]), kind)
+	_cur_element = elem
+	var cols: Array = SpellFx.colors(elem)
+	var col: Color = cols[0]
 	var to_pos: Vector2 = grid_to_screen(to.x, to.y) + Vector2(0, -26)
 	if v != null:
 		v.face_screen_dx(to_pos.x - v.position.x)
@@ -491,44 +495,161 @@ func _play_cast(d: Dictionary) -> void:
 			cn.flash = 1.0
 			cn.refresh()
 	if kind == "attack":
+		var phys: bool = String(d["dtype"]) == "phys"
+		if v != null and elem != "physical":
+			_rune(v.position, col)   # rune d'incantation sous le lanceur
 		if d["ranged"] and v != null:
-			Sfx.play("magic" if d["dtype"] == "mag" else "cast")
+			Sfx.play("magic" if not phys else "cast")
 			var start: Vector2 = v.position + Vector2(0, -50)
-			await _projectile(start, to_pos, col, d["dtype"] == "mag")
+			await _projectile_el(start, to_pos, elem, phys)
 		elif v != null:
 			Sfx.play("slash")
-			var tw: Tween = v.lunge(grid_to_screen(to.x, to.y))
-			await get_tree().create_timer(0.16).timeout
+			v.lunge(grid_to_screen(to.x, to.y))
+			await get_tree().create_timer(0.1).timeout
+			_slash(to_pos, col)
+			await get_tree().create_timer(0.08).timeout
 		else:
 			await _wait(0.1)
+		var n_cells: int = (d["cells"] as Array).size()
+		if n_cells > 1:
+			_ring(grid_to_screen(to.x, to.y), col, 12.0, 28.0 * sqrt(float(n_cells)), 0.6, 8.0)
 	else:
 		Sfx.play("heal" if kind == "heal" else ("buff" if kind == "buff" else "cast"))
 		if v != null:
+			_rune(v.position, col)
 			_burst(v.position + Vector2(0, -40), col, 18, 120.0, 0.7, 5.0, 180.0, Vector2.UP, Vector2(0, -60))
 			v.cast_pose()
 		await _wait(0.28)
 
 
-func _projectile(start: Vector2, end: Vector2, col: Color, magic: bool) -> void:
-	var p := Sprite2D.new()
-	p.texture = _glow_tex
-	p.position = start
-	p.modulate = col
-	p.scale = Vector2(0.9, 0.9) if magic else Vector2(0.5, 0.5)
-	var mat := CanvasItemMaterial.new()
-	mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
-	p.material = mat
-	_fx_layer.add_child(p)
-	var trail: CPUParticles2D = _make_particles(col, 18, 0.4, 20.0, 0.35)
+## Projectile propre à l'élément : flèche, éclat de glace, boule de feu, glu de poison,
+## orbe d'ombre, feuille, éclair instantané...
+func _projectile_el(start: Vector2, end: Vector2, elem: String, phys: bool) -> void:
+	var cols: Array = SpellFx.colors(elem)
+	var col: Color = cols[0]
+	var col2: Color = cols[1]
+	if elem == "lightning":
+		var bolt := SpellFx.Bolt.new()
+		bolt.setup(start, end, col)
+		_fx_layer.add_child(bolt)
+		_burst(end, col2, 10, 220.0, 0.3, 3.0)
+		await _wait(0.14)
+		return
+	var m := SpellFx.Missile.new()
+	m.col = col
+	m.col2 = col2
+	var arc_h: float = 0.0
+	match elem:
+		"ice":
+			m.kind = "shard"
+		"fire":
+			m.kind = "flame"
+		"poison", "water":
+			m.kind = "glob"
+			arc_h = 40.0
+		"shadow":
+			m.kind = "dark"
+		"nature":
+			m.kind = "leaf"
+			arc_h = 24.0
+		"physical":
+			m.kind = "arrow" if phys else "orb"
+		_:
+			m.kind = "orb"
+	m.position = start
+	m.rotation = (end - start).angle() if m.kind in ["arrow", "flame", "leaf"] else 0.0
+	_fx_layer.add_child(m)
+	var trail: CPUParticles2D = _make_particles(col, 16, 0.4, 20.0, 0.35)
 	trail.emitting = true
 	trail.one_shot = false
 	trail.explosiveness = 0.0
-	p.add_child(trail)
+	m.add_child(trail)
 	var dist: float = start.distance_to(end)
 	var tw: Tween = create_tween()
-	tw.tween_property(p, "position", end, clampf(dist / 900.0, 0.15, 0.4)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw.tween_method(func(f: float) -> void:
+		m.position = start.lerp(end, f) + Vector2(0.0, -sin(f * PI) * arc_h),
+		0.0, 1.0, clampf(dist / 900.0, 0.15, 0.42)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	await tw.finished
-	p.queue_free()
+	m.queue_free()
+
+
+func _ring(pos: Vector2, col: Color, r0: float, r1: float, life: float = 0.5, thick: float = 6.0) -> void:
+	var r := SpellFx.Ring.new()
+	r.col = col
+	r.r0 = r0
+	r.r1 = r1
+	r.life = life
+	r.thick = thick
+	r.position = pos
+	_fx_layer.add_child(r)
+
+
+func _rune(pos: Vector2, col: Color) -> void:
+	var r := SpellFx.Rune.new()
+	r.col = col
+	r.position = pos + Vector2(0, 4)
+	_fx_layer.add_child(r)
+
+
+func _slash(pos: Vector2, col: Color) -> void:
+	var sl := SpellFx.Slash.new()
+	sl.col = col
+	sl.ang = randf_range(-0.9, -0.3)
+	sl.position = pos
+	_fx_layer.add_child(sl)
+
+
+func _pillar(pos: Vector2, col: Color) -> void:
+	var p := SpellFx.Pillar.new()
+	p.col = col
+	p.position = pos
+	_fx_layer.add_child(p)
+
+
+## Impact visuel d'un sort selon son élément.
+func _impact(pos: Vector2, elem: String, crit: bool) -> void:
+	var cols: Array = SpellFx.colors(elem)
+	var col: Color = cols[0]
+	var col2: Color = cols[1]
+	var n: float = 1.6 if crit else 1.0
+	match elem:
+		"fire":
+			_burst(pos, col, int(22.0 * n), 170.0, 0.6, 5.0, 180.0, Vector2.UP, Vector2(0, -140))
+			_burst(pos, col2, int(10.0 * n), 90.0, 0.4, 8.0, 180.0, Vector2.UP, Vector2(0, -80))
+		"ice":
+			_burst(pos, col, int(18.0 * n), 230.0, 0.55, 4.0, 180.0, Vector2.UP, Vector2(0, 420))
+			_burst(pos, col2, 8, 120.0, 0.4, 3.0)
+		"lightning":
+			var b := SpellFx.Bolt.new()
+			b.setup(pos + Vector2(randf_range(-24.0, 24.0), -140.0), pos, col)
+			_fx_layer.add_child(b)
+			_burst(pos, col2, int(14.0 * n), 260.0, 0.3, 3.0, 180.0, Vector2.UP, Vector2.ZERO)
+		"poison":
+			_burst(pos, col, int(14.0 * n), 70.0, 0.9, 6.0, 180.0, Vector2.UP, Vector2(0, -90))
+			_burst(pos, col2, 6, 40.0, 0.8, 8.0, 180.0, Vector2.UP, Vector2(0, -50))
+		"shadow":
+			_burst(pos, col, int(20.0 * n), 90.0, 0.8, 9.0, 180.0, Vector2.UP, Vector2(0, -30))
+			_burst(pos, col2, 10, 60.0, 0.7, 10.0, 180.0, Vector2.UP, Vector2(0, -20))
+		"holy":
+			_pillar(pos + Vector2(0, 40), col)
+			_burst(pos, col, int(16.0 * n), 110.0, 0.9, 5.0, 180.0, Vector2.UP, Vector2(0, -110))
+		"nature":
+			_burst(pos, col, int(16.0 * n), 140.0, 0.9, 6.0, 180.0, Vector2.UP, Vector2(0, 140))
+			_burst(pos, col2, 6, 100.0, 0.9, 5.0, 180.0, Vector2.UP, Vector2(0, 100))
+		"earth":
+			_burst(pos, col, int(14.0 * n), 230.0, 0.55, 7.0, 180.0, Vector2.UP, Vector2(0, 650))
+			_burst(pos, col2, 8, 160.0, 0.5, 5.0, 180.0, Vector2.UP, Vector2(0, 650))
+			_shake(5.0)
+		"water":
+			_burst(pos, col, int(18.0 * n), 190.0, 0.6, 5.0, 180.0, Vector2.UP, Vector2(0, 320))
+			_burst(pos, col2, 8, 100.0, 0.5, 4.0)
+		"arcane":
+			_burst(pos, col, int(20.0 * n), 170.0, 0.6, 5.0)
+			_burst(pos, col2, 8, 100.0, 0.5, 4.0)
+		_:
+			_slash(pos, col)
+			_burst(pos, col2, int(12.0 * n), 200.0, 0.35, 3.0)
+	_ring(pos + Vector2(0, 38), col, 6.0, 52.0 * n, 0.38, 5.0)
 
 
 func _play_damage(d: Dictionary) -> void:
@@ -558,7 +679,8 @@ func _play_damage(d: Dictionary) -> void:
 	_float_text(v, txt, col, 40 if crit else 30)
 	if bool(d.get("back", false)):
 		_float_text(v, "Dans le dos !", Color(1.0, 0.7, 0.3), 20)
-	_burst(v.position + Vector2(0, -44), col, 14 if not crit else 26, 190.0, 0.45, 4.0)
+	var elem: String = "poison" if dtype == "dot" else ("earth" if dtype == "fall" else _cur_element)
+	_impact(v.position + Vector2(0, -44), elem, crit)
 	Sfx.play("crit" if crit else "hit")
 	_shake(7.0 if crit else 3.0)
 	await _wait(0.2)
@@ -570,6 +692,8 @@ func _play_heal(d: Dictionary) -> void:
 		return
 	v.set_hp(float(d["pv_after"]))
 	_float_text(v, "+%d" % int(d["amount"]), Color(0.4, 1.0, 0.5), 30)
+	_pillar(v.position + Vector2(0, 6), Color(0.55, 1.0, 0.65))
+	_ring(v.position + Vector2(0, 6), Color(0.55, 1.0, 0.65), 8.0, 46.0, 0.5, 5.0)
 	_burst(v.position + Vector2(0, -30), Color(0.4, 1.0, 0.55), 16, 80.0, 0.9, 5.0, 40.0, Vector2.UP, Vector2(0, -90))
 	await _wait(0.15)
 
@@ -605,6 +729,8 @@ func _play_summon(d: Dictionary) -> void:
 	v.position = grid_to_screen(int(e["x"]), int(e["y"]))
 	v.set_hp(float(e["current_pv"]))
 	Sfx.play("cast")
+	_rune(v.position, Color(0.8, 0.6, 1.0))
+	_pillar(v.position + Vector2(0, 6), Color(0.8, 0.65, 1.0))
 	_burst(v.position + Vector2(0, -20), Color(0.8, 0.6, 1.0), 22, 160.0, 0.6, 5.0)
 	await v.pop_in().finished
 

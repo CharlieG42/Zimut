@@ -57,21 +57,50 @@ func setup(e: Dictionary) -> void:
 	set_process(true)
 
 
+## Nom de fichier d'un sprite : minuscules, sans accents, « - » et espaces -> « _ »
+## (« Sirène » -> sirene, « Homme-Faucon » -> homme_faucon).
+static func sprite_key(raw: String) -> String:
+	var k: String = raw.to_lower()
+	for pair in [["é", "e"], ["è", "e"], ["ê", "e"], ["ë", "e"], ["à", "a"], ["â", "a"], ["î", "i"],
+			["ï", "i"], ["ô", "o"], ["û", "u"], ["ù", "u"], ["ç", "c"]]:
+		k = k.replace(pair[0], pair[1])
+	return k.replace("-", "_").replace(" ", "_")
+
+
 func _find_texture() -> Texture2D:
-	var cname: String = String(entity.get("classe", "")).to_lower()
+	var cname: String = sprite_key(String(entity.get("classe", "")))
 	var folders: Array[String] = ["enemies", "players"]
 	if entity["team"] == "player":
 		folders = ["players", "enemies"]
 	if entity["entity_type"] == "Summon":
-		folders = ["enemies", "players"]
+		folders = ["summons", "enemies", "players"]
+	var names: Array[String] = [cname]
+	if bool(entity.get("boss", false)):
+		names.push_front(cname + "_boss")
 	for folder: String in folders:
-		for ext: String in ["png", "svg"]:
-			var path: String = "res://assets/sprites/%s/%s.%s" % [folder, cname, ext]
-			if ResourceLoader.exists(path):
-				var res: Resource = load(path)
-				if res is Texture2D:
-					return res
+		for nm: String in names:
+			for ext: String in ["png", "svg"]:
+				var path: String = "res://assets/sprites/%s/%s.%s" % [folder, nm, ext]
+				if ResourceLoader.exists(path):
+					var res: Resource = load(path)
+					if res is Texture2D:
+						return res
 	return null
+
+
+## Hauteur d'affichage selon le type : héros > ennemis, invocations plus petites,
+## Troll/Dragonnet imposants, boss géant.
+func _target_height() -> float:
+	if bool(entity.get("boss", false)):
+		return 150.0
+	match String(entity.get("classe", "")):
+		"Troll":
+			return 118.0
+		"Dragonnet":
+			return 100.0
+	if entity["entity_type"] == "Summon":
+		return 76.0
+	return 104.0 if entity["entity_type"] == "Player" else 92.0
 
 
 func _load_texture() -> void:
@@ -83,8 +112,9 @@ func _load_texture() -> void:
 		return
 	_has_tex = true
 	sprite.texture = tex
-	var target_h: float = 104.0 if entity["entity_type"] == "Player" else 92.0
-	var sc: float = minf(target_h / float(tex.get_height()), 112.0 / float(tex.get_width()))
+	var target_h: float = _target_height()
+	var max_w: float = 112.0 * target_h / 92.0
+	var sc: float = minf(target_h / float(tex.get_height()), max_w / float(tex.get_width()))
 	sprite.scale = Vector2(sc, sc)
 	height = float(tex.get_height()) * sc
 	sprite.position = Vector2(0, -height * 0.5 + 6.0)
@@ -252,6 +282,13 @@ func _draw() -> void:
 	var ring_w: float = 4.0 + (sin(_t * 5.0) * 1.2 if active else 0.0)
 	draw_arc(Vector2.ZERO, 33.0, 0.0, TAU, 40, Color(ring_col.r, ring_col.g, ring_col.b, 0.9), ring_w, true)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+	# Boss : aura rouge pulsante au sol
+	if bool(entity.get("boss", false)):
+		var pulse: float = 0.5 + 0.5 * sin(_t * 3.0)
+		draw_set_transform(Vector2(0, 5), 0.0, Vector2(1.0, 0.42))
+		draw_arc(Vector2.ZERO, 46.0 + pulse * 6.0, 0.0, TAU, 48, Color(1.0, 0.25, 0.1, 0.35 + 0.3 * pulse), 6.0, true)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 	# Indicateur d'orientation (utile pour les attaques dans le dos)
 	var facing: Vector2i = entity.get("facing", Vector2i.ZERO)

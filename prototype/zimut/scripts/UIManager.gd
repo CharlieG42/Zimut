@@ -687,8 +687,8 @@ func _on_game_ended(victory: bool) -> void:
 	await get_tree().create_timer(1.4).timeout
 	if game_manager == null or not game_manager.game_over:
 		return
-	if victory and not game_manager.active_save.is_empty():
-		_show_loot_window()
+	if not game_manager.active_save.is_empty() and not game_manager.active_save.get("last_result", {}).is_empty():
+		_show_result_window(victory)
 		return
 	_show_game_over(victory)
 
@@ -701,11 +701,12 @@ func _show_game_over(victory: bool) -> void:
 	_over.modulate.a = 0.0
 	create_tween().tween_property(_over, "modulate:a", 1.0, 0.5)
 
-## Fenêtre de loots après victoire, avant l'écran de fin de combat.
-func _show_loot_window() -> void:
+## Fenêtre de résultat (XP, niveaux gagnés, nouveaux sorts, loots avec rareté),
+## affichée avant l'écran de fin de combat.
+func _show_result_window(victory: bool) -> void:
 	var save: Dictionary = game_manager.active_save
-	var loots: Array = save.get("last_loots", [])
-	Sfx.play("win")
+	var res: Dictionary = save.get("last_result", {})
+	var loots: Array = save.get("last_loots", []) if victory else []
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", _flat(Color(0.94, 0.89, 0.78, 0.97), Color(0.72, 0.58, 0.28), 16, 4))
 	var dim: ColorRect = ColorRect.new()
@@ -718,40 +719,98 @@ func _show_loot_window() -> void:
 	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
 	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE, 0)
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 12)
+	box.add_theme_constant_override("separation", 10)
 	panel.add_child(box)
 
 	var title := Label.new()
 	var fight_no: int = ProgressionManager.next_fight_number(save)
-	if ProgressionManager.is_boss_fight(save):
+	if not victory:
+		title.text = "DÉFAITE — un peu d'XP de consolation"
+	elif ProgressionManager.is_boss_fight(save):
 		title.text = "VICTOIRE !  Prochain combat (%d) : ☠ BOSS et ses sbires !" % fight_no
 	else:
 		title.text = "VICTOIRE !  Ennemis niveau %d au prochain combat (%d)" % [int(save.get("level", 10)), fight_no]
 	title.add_theme_font_size_override("font_size", 28)
-	title.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
+	title.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05) if victory else Color(0.55, 0.12, 0.08))
 	box.add_child(title)
 
-	if loots.is_empty():
-		var none := Label.new()
-		none.text = "Aucun loot cette fois..."
-		none.add_theme_font_size_override("font_size", 20)
-		none.add_theme_color_override("font_color", Color(0.4, 0.3, 0.1))
-		box.add_child(none)
-	else:
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(1100, 520)
+	box.add_child(scroll)
+	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation", 6)
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(content)
+
+	# ── XP par personnage ───────────────────────────────────────────────
+	var xp_rep: Dictionary = res.get("xp", {})
+	var bench: Array[String] = []
+	var total_pts: int = 0
+	for classe: String in ProgressionManager.class_names():
+		if not xp_rep.has(classe):
+			continue
+		var r: Dictionary = xp_rep[classe]
+		if not bool(r.get("in_team", false)):
+			bench.append("%s +%d" % [classe, int(r["gain"])])
+			continue
+		var line := Label.new()
+		var up: bool = int(r["to_level"]) > int(r["from_level"])
+		line.text = "  %s   +%d XP   niveau %d%s" % [classe, int(r["gain"]),
+			int(r["to_level"]), "  ▲ (était %d)" % int(r["from_level"]) if up else ""]
+		line.add_theme_font_size_override("font_size", 24 if up else 21)
+		line.add_theme_color_override("font_color", Color(0.10, 0.45, 0.12) if up else Color(0.30, 0.22, 0.08))
+		content.add_child(line)
+		var bar := ProgressBar.new()
+		bar.custom_minimum_size = Vector2(1000, 14)
+		bar.min_value = 0.0
+		bar.max_value = float(maxi(1, int(r["xp_next"]) - int(r["xp_cur"])))
+		bar.value = clampf(float(int(r["xp"]) - int(r["xp_cur"])), 0.0, bar.max_value)
+		bar.show_percentage = false
+		content.add_child(bar)
+		if int(r["points"]) > 0:
+			total_pts += int(r["points"])
+			var pl := Label.new()
+			pl.text = "      ✦ +%d points de caractéristiques" % int(r["points"])
+			pl.add_theme_font_size_override("font_size", 18)
+			pl.add_theme_color_override("font_color", Color(0.15, 0.40, 0.55))
+			content.add_child(pl)
+		var spells: Array = r.get("spells", [])
+		if not spells.is_empty():
+			var sl := Label.new()
+			sl.text = "      ★ Nouveau(x) sort(s) : %s" % ", ".join(PackedStringArray(spells))
+			sl.add_theme_font_size_override("font_size", 18)
+			sl.add_theme_color_override("font_color", Color(0.55, 0.30, 0.60))
+			content.add_child(sl)
+	if not bench.is_empty():
+		var bl := Label.new()
+		bl.text = "  Hors équipe : %s" % " · ".join(PackedStringArray(bench))
+		bl.add_theme_font_size_override("font_size", 16)
+		bl.add_theme_color_override("font_color", Color(0.45, 0.36, 0.2))
+		content.add_child(bl)
+	if total_pts > 0:
+		var hint := Label.new()
+		hint.text = "  (Les points sont répartis automatiquement ; changez cela dans « Personnages ».)"
+		hint.add_theme_font_size_override("font_size", 15)
+		hint.add_theme_color_override("font_color", Color(0.45, 0.36, 0.2))
+		content.add_child(hint)
+
+	# ── Loots ───────────────────────────────────────────────────────────
+	if victory:
 		var lbl := Label.new()
-		lbl.text = "Objets gagnés (%d) :" % loots.size()
+		lbl.text = "Objets gagnés (%d) :" % loots.size() if not loots.is_empty() else "Aucun loot cette fois..."
 		lbl.add_theme_font_size_override("font_size", 22)
 		lbl.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
-		box.add_child(lbl)
+		content.add_child(lbl)
 		for it: Dictionary in loots:
 			var row := Label.new()
-			row.text = "  ✦ [%s] %s (nv%d) — F%d I%d A%d S%d V%d D%d" % [
-				it.get("type", "?"), it.get("name", "?"), int(it.get("level", 0)),
-				int(it.get("force", 0)), int(it.get("intelligence", 0)), int(it.get("agility", 0)),
-				int(it.get("wisdom", 0)), int(it.get("vita", 0)), int(it.get("defense", 0))]
+			var fx_txt: String = " · ".join(PackedStringArray(ItemRules.fx_lines(ItemRules.parse_effect(String(it.get("effect", ""))))))
+			row.text = "  ✦ [%s] %s (nv%d) — %s%s" % [ItemRules.rarity_label(it), it.get("name", "?"), int(it.get("level", 0)),
+				ItemRules.stat_line(it), ("  ✦ " + fx_txt) if fx_txt != "" else ""]
+			row.tooltip_text = ItemRules.describe(it)
+			row.mouse_filter = Control.MOUSE_FILTER_PASS
 			row.add_theme_font_size_override("font_size", 19)
-			row.add_theme_color_override("font_color", Color(0.35, 0.25, 0.08))
-			box.add_child(row)
+			row.add_theme_color_override("font_color", ItemRules.rarity_color(it).darkened(0.35))
+			content.add_child(row)
 
 	var cont := Button.new()
 	cont.text = "CONTINUER"
@@ -762,7 +821,7 @@ func _show_loot_window() -> void:
 	cont.pressed.connect(func() -> void:
 		dim.queue_free()
 		panel.queue_free()
-		_show_game_over(true))
+		_show_game_over(victory))
 	box.add_child(cont)
 
 

@@ -30,6 +30,8 @@ const CELL_HALF_OFFSET := Vector2i(70, 70)
 
 const DEFAULT_PLAYER_LEVEL := 10
 const DEFAULT_ENEMY_LEVEL  := 10
+## Niveau des persos en « combat rapide » (sans partie sauvegardée)
+const QUICK_PLAYER_LEVEL   := 10
 ## Niveau des ennemis : celui de la partie active (progression), sinon défaut.
 
 const PLAYER_SPAWNS: Array[Vector2i] = [Vector2i(1, 1), Vector2i(2, 1), Vector2i(1, 2)]
@@ -51,8 +53,17 @@ const COLORS: Dictionary = {
 	"Dragonnet": Color(0.9, 0.35, 0.2),
 }
 
-## Multiplicateur de PV ennemis (équilibrage)
-const ENEMY_HP_MULT := 1.8
+## Équilibrage des ennemis (valeurs de ennemis.txt x multiplicateurs).
+## Le capital de caractéristiques et l'équipement rendent l'équipe plus forte que la
+## table de base : les ennemis gagnent ENEMY_LEVEL_SCALE par niveau au-dessus de 10.
+const ENEMY_HP_MULT := 3.0
+const ENEMY_ATK_MULT := 2.0
+const ENEMY_LEVEL_SCALE := 0.008
+const BOSS_HP_MULT := 1.2
+const BOSS_ATK_MULT := 0.85
+## Enrage : au-delà de ce tour, les ennemis frappent +10 % par tour supplémentaire
+## (évite les combats interminables).
+const ENRAGE_AFTER_TURN := 14
 
 var grid: Array                  = []
 var obstacles: Dictionary        = {}   # Vector2i -> "tree" | "rock"
@@ -76,6 +87,8 @@ var auto_mode: bool              = false
 var custom_team: Array           = []
 var active_save: Dictionary      = {}   # sauvegarde ProgressionManager en cours
 var active_slot: int             = -1
+var fight_enemies: Array         = []   # [{type, level, boss}] du combat en cours (pour l'XP)
+var fight_is_boss: bool          = false
 
 var _turn_index: int = -1
 var _uid_counter: int = 0
@@ -215,7 +228,7 @@ func _base_entity(ename: String, etype: String, team: String, classe: String, le
 		"classe": classe, "level": level, "x": pos.x, "y": pos.y,
 		"spells": [], "statuses": [], "casts": {}, "is_active": false, "dead": false,
 		"facing": Vector2i(1, 0) if team == "player" else Vector2i(-1, 0),
-		"lifetime": -1, "fly": false,
+		"lifetime": -1, "fly": false, "fx": {},
 	}
 
 
@@ -234,41 +247,61 @@ func init_entities() -> void:
 		player_classes = ["Tank", "Assassin", "Mage"]
 
 	var classes_data: Array = get_classes_data()
+	var use_save: bool = not active_save.is_empty() and active_save.get("team", []).size() == player_classes.size()
+	if use_save:
+		for i: int in range(player_classes.size()):
+			if String(active_save["team"][i].get("classe", "")) != String(player_classes[i]):
+				use_save = false
 
+	var bless: int = 0
 	for i: int in range(player_classes.size()):
 		var classe: String = player_classes[i]
 		var pos: Vector2i = PLAYER_SPAWNS[i]
 		var st: Dictionary = {}
-		if custom_team.size() == 3:
-			st = _stats_from_custom(custom_team[i], classe)
-		else:
-			st = _stats_from_csv(classes_data, classe)
+		var plevel: int = QUICK_PLAYER_LEVEL
+		var pfx: Dictionary = {}
+		if use_save:
+			# Stats = classes.txt au niveau du perso + points investis + équipement/panoplies
+			st = ProgressionManager.member_stats(active_save, active_save["team"][i])
+			if not st.is_empty():
+				plevel = int(st["level"])
+				pfx = st["fx"]
+				st["color"] = COLORS.get(classe, Color(1, 1, 1))
+		if st.is_empty():
+			st = _stats_from_csv(classes_data, classe, plevel)
 			if st.is_empty():
 				push_error("Classe '%s' introuvable dans classes.txt" % classe)
 				continue
-		var player: Dictionary = _base_entity("%s Lv%d" % [classe, DEFAULT_PLAYER_LEVEL], "Player", "player",
-			classe, DEFAULT_PLAYER_LEVEL, pos)
-		var eq: Dictionary = {}
-		if not active_save.is_empty() and i < active_save.get("team", []).size():
-			var member: Dictionary = active_save["team"][i]
-			eq = ProgressionManager.equipment_bonuses(member)
+		var player: Dictionary = _base_entity("%s Lv%d" % [classe, plevel], "Player", "player",
+			classe, plevel, pos)
 		player.merge({
-			"max_pv": int(st["max_pv"]) + int(eq.get("vita", 0)), "current_pv": int(st["max_pv"]) + int(eq.get("vita", 0)),
-			"force": int(st["force"]) + int(eq.get("force", 0)),
-			"intelligence": int(st["intelligence"]) + int(eq.get("intelligence", 0)),
-			"agility": int(st["agility"]) + int(eq.get("agility", 0)),
-			"wisdom": int(st["wisdom"]) + int(eq.get("wisdom", 0)),
-			"defense": int(st["defense"]) + int(eq.get("defense", 0)),
-			"max_pa": st["pa"], "current_pa": st["pa"], "max_pm": st["pm"], "current_pm": st["pm"],
-			"color": st["color"],
+			"max_pv": int(st["max_pv"]), "current_pv": int(st["max_pv"]),
+			"force": int(st["force"]), "intelligence": int(st["intelligence"]),
+			"agility": int(st["agility"]), "wisdom": int(st["wisdom"]), "defense": int(st["defense"]),
+			"max_pa": int(st["pa"]), "current_pa": int(st["pa"]), "max_pm": int(st["pm"]), "current_pm": int(st["pm"]),
+			"color": st["color"], "fx": pfx,
 		}, true)
-		player["spells"] = _build_spells(classe)
+		player["spells"] = _build_spells(classe, plevel)
+		# Effets d'objets actifs dès le début du combat
+		if int(pfx.get("start_immune_neg", 0)) > 0:
+			Combat.add_status(player, "immune_neg", int(pfx["start_immune_neg"]), 0.0)
+		if int(pfx.get("start_immune", 0)) > 0:
+			Combat.add_status(player, "immune", int(pfx["start_immune"]), 0.0)
+		bless = maxi(bless, int(pfx.get("bless_def", 0)))
 		players.append(player)
 		grid[pos.y][pos.x] = player
+	if bless > 0:
+		for pl: Dictionary in players:
+			Combat.add_status(pl, "def_up", 3, float(bless))
 
 	# ── Ennemis : boss + 3 sbires tous les 4 combats, sinon 4 ennemis ─────
-	var lvl: int = int(active_save.get("level", DEFAULT_ENEMY_LEVEL)) if not active_save.is_empty() else DEFAULT_ENEMY_LEVEL
+	var lvl: int = ProgressionManager.enemy_level_for(active_save) if not active_save.is_empty() else DEFAULT_ENEMY_LEVEL
+	fight_enemies = []
+	fight_is_boss = false
 	var boss_fight: bool = not active_save.is_empty() and ProgressionManager.is_boss_fight(active_save)
+	fight_is_boss = boss_fight
+	## Boss de fin de cycle : le boss est au niveau du combat, ses sbires 2 niveaux en dessous
+	var minion_lvl: int = maxi(1, lvl - 2) if boss_fight else lvl
 	var enemy_types: Array[String] = []
 	if boss_fight:
 		enemy_types = ["Gobelin", "Squelette", "Loup", "BOSS"]
@@ -281,14 +314,17 @@ func init_entities() -> void:
 		if etype == "BOSS":
 			_spawn_boss(pos, lvl)
 			continue
-		var info: Dictionary = _find_best_match(enemies_data, "Type", etype, "Niveau", lvl)
+		var info: Dictionary = _find_best_match(enemies_data, "Type", etype, "Niveau", minion_lvl)
+		if info.is_empty():
+			info = _find_best_match(enemies_data, "Type", etype, "Niveau", 999)   # type qui débute plus haut (Troll, Dragonnet)
 		if info.is_empty():
 			push_error("Ennemi '%s' introuvable dans ennemis.txt" % etype)
 			continue
-		var pv: int = int(float(_csv_int(info, "PV", 50)) * ENEMY_HP_MULT)
-		var atk: int = _csv_int(info, "Attaque", 10)
-		var enemy: Dictionary = _base_entity("%s Lv%d" % [etype, lvl], "Enemy", "enemy",
-			etype, lvl, pos)
+		var lscale: float = 1.0 + float(maxi(0, lvl - 10)) * ENEMY_LEVEL_SCALE
+		var pv: int = int(float(_csv_int(info, "PV", 50)) * ENEMY_HP_MULT * lscale)
+		var atk: int = int(float(_csv_int(info, "Attaque", 10)) * ENEMY_ATK_MULT * lscale)
+		var enemy: Dictionary = _base_entity("%s Lv%d" % [etype, minion_lvl], "Enemy", "enemy",
+			etype, minion_lvl, pos)
 		enemy.merge({
 			"max_pv": pv, "current_pv": pv,
 			"force": atk, "intelligence": atk, "agility": atk / 2.0, "wisdom": 0,
@@ -302,8 +338,7 @@ func init_entities() -> void:
 			Combat.add_status(enemy, "regen", 999, 5.0)
 		if etype == "Dragonnet":
 			enemy["fly"] = true
-		if boss_fight:
-			enemy["name"] = "%s Lv%d" % [etype, maxi(1, lvl - 2)]
+		fight_enemies.append({"type": etype, "level": minion_lvl, "boss": false})
 		enemies.append(enemy)
 		grid[pos.y][pos.x] = enemy
 
@@ -317,8 +352,10 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 		info = _find_best_match(enemies_data, "Type", "Troll", "Niveau", lvl)
 		if info.is_empty():
 			return
-	var pv: int = int(float(_csv_int(info, "PV", 120)) * ENEMY_HP_MULT * 3.0)
-	var atk: int = int(float(_csv_int(info, "Attaque", 20)) * 1.5)
+	var lscale: float = 1.0 + float(maxi(0, lvl - 10)) * ENEMY_LEVEL_SCALE
+	var pv: int = int(float(_csv_int(info, "PV", 120)) * ENEMY_HP_MULT * BOSS_HP_MULT * lscale)
+	var atk: int = int(float(_csv_int(info, "Attaque", 20)) * ENEMY_ATK_MULT * BOSS_ATK_MULT * lscale)
+	fight_enemies.append({"type": "Dragonnet", "level": lvl, "boss": true})
 	var boss: Dictionary = _base_entity("☠ BOSS Dragonnet Lv%d" % lvl, "Enemy", "enemy", "Dragonnet", lvl, pos)
 	boss.merge({
 		"max_pv": pv, "current_pv": pv,
@@ -328,6 +365,7 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 		"max_pm": _csv_int(info, "PM", 3) + 1, "current_pm": _csv_int(info, "PM", 3) + 1,
 		"color": Color(0.9, 0.2, 0.1),
 	}, true)
+	boss["boss"] = true
 	boss["spells"] = Combat.enemy_spells("Dragonnet", atk)
 	boss["fly"] = true
 	Combat.add_status(boss, "regen", 999, 8.0)
@@ -349,8 +387,8 @@ func _stats_from_custom(m: Dictionary, classe: String) -> Dictionary:
 	}
 
 
-func _stats_from_csv(classes_data: Array, classe: String) -> Dictionary:
-	var ci: Dictionary = _find_best_match(classes_data, "Classe", classe, "Niveau", DEFAULT_PLAYER_LEVEL)
+func _stats_from_csv(classes_data: Array, classe: String, level: int = DEFAULT_PLAYER_LEVEL) -> Dictionary:
+	var ci: Dictionary = _find_best_match(classes_data, "Classe", classe, "Niveau", level)
 	if ci.is_empty():
 		return {}
 	return {
@@ -366,7 +404,7 @@ func _stats_from_csv(classes_data: Array, classe: String) -> Dictionary:
 	}
 
 
-func _build_spells(classe: String) -> Array:
+func _build_spells(classe: String, level: int = DEFAULT_PLAYER_LEVEL) -> Array:
 	var out: Array = []
 	var spells_data: Array = get_spells_data()
 	for pass_idx: int in range(2):
@@ -375,7 +413,7 @@ func _build_spells(classe: String) -> Array:
 			if info.get("Classe", "") != wanted:
 				continue
 			var req_lvl: int = int(info.get("Niveau_requis", info.get("Niveau requis", "1")))
-			if req_lvl > DEFAULT_PLAYER_LEVEL:
+			if req_lvl > level:
 				continue
 			out.append({
 				"name": info.get("Nom", "Sort"),
@@ -497,6 +535,8 @@ func _begin_turn(e: Dictionary) -> void:
 	for x: Dictionary in all_entities():
 		x["is_active"] = (int(x["uid"]) == int(e["uid"]))
 	e["casts"] = {}
+	if String(e["team"]) == "enemy" and turn_count > ENRAGE_AFTER_TURN:
+		Combat.add_status(e, "dmg_up", 2, 10.0 * float(turn_count - ENRAGE_AFTER_TURN))
 
 	var pa: int = int(e["max_pa"]) + int(Combat.status_value(e, "pa_up")) - int(Combat.status_value(e, "curse"))
 	var pm: int = int(e["max_pm"]) + int(Combat.status_value(e, "pm_up")) - int(Combat.status_value(e, "slow"))
@@ -969,7 +1009,9 @@ func _apply_damage(attacker: Dictionary, tgt: Dictionary, dmg: int, dtype: Strin
 		fx.emit("status", {"target": tgt, "text": "Immunisé", "color": Color(1, 1, 0.7)})
 		return 0
 	if not ignore_dodge and dtype == "phys" and Combat.has_status(tgt, "dodge"):
-		if _rng.randf() * 100.0 < Combat.status_value(tgt, "dodge"):
+		# La Sagesse (précision) de l'attaquant réduit l'esquive de la cible
+		var dodge_chance: float = Combat.status_value(tgt, "dodge") - float(attacker.get("wisdom", 0)) * 0.25
+		if _rng.randf() * 100.0 < dodge_chance:
 			fx.emit("status", {"target": tgt, "text": "Esquive !", "color": Color(0.7, 0.95, 0.5)})
 			return 0
 	tgt["current_pv"] = int(tgt["current_pv"]) - dmg
@@ -979,10 +1021,25 @@ func _apply_damage(attacker: Dictionary, tgt: Dictionary, dmg: int, dtype: Strin
 	})
 	if not attacker.is_empty():
 		entity_attacked.emit(attacker, tgt, dmg)
+		if dtype != "dot":
+			_on_hit_item_effects(attacker, tgt, dmg, dtype)
 	return dmg
 
 
-func _apply_status(_src: Dictionary, tgt: Dictionary, id: String, turns: int, value: float) -> void:
+## Effets d'objets déclenchés à l'impact : vol de vie, poison de l'arme.
+func _on_hit_item_effects(attacker: Dictionary, tgt: Dictionary, dmg: int, dtype: String) -> void:
+	var afx: Dictionary = attacker.get("fx", {})
+	if afx.is_empty():
+		return
+	var ls: int = int(afx.get("lifesteal", 0))
+	if ls > 0 and dmg > 0 and is_alive(attacker):
+		_do_heal(attacker, attacker, maxi(1, roundi(float(dmg) * float(ls) / 100.0)))
+	var pd: int = int(afx.get("poison_hit_dmg", 0))
+	if pd > 0 and dtype == "phys" and is_alive(tgt) and _rng.randf() < 0.35:
+		_apply_status(attacker, tgt, "poison", int(afx.get("poison_hit_turns", 2)), float(pd))
+
+
+func _apply_status(src: Dictionary, tgt: Dictionary, id: String, turns: int, value: float) -> void:
 	if not is_alive(tgt):
 		return
 	var info: Dictionary = Combat.status_info(id)
@@ -990,6 +1047,14 @@ func _apply_status(_src: Dictionary, tgt: Dictionary, id: String, turns: int, va
 		if Combat.has_status(tgt, "immune_neg") or Combat.has_status(tgt, "immune"):
 			fx.emit("status", {"target": tgt, "text": "Résiste", "color": Color(0.8, 1.0, 0.8)})
 			return
+		# Altérations de contrôle : la Sagesse de la cible (vs celle du lanceur) peut les faire échouer
+		if not src.is_empty() and id in ["stun", "root", "slow", "curse", "weaken"]:
+			var land: float = clampf(0.9 + (float(src.get("wisdom", 0)) - float(tgt.get("wisdom", 0))) / 250.0, 0.5, 1.0)
+			if _rng.randf() > land:
+				fx.emit("status", {"target": tgt, "text": "Résiste", "color": Color(0.8, 1.0, 0.8)})
+				return
+	if id == "poison" and not src.is_empty():
+		value *= 1.0 + float(src.get("fx", {}).get("poison_pct", 0)) / 100.0
 	var t: int = turns
 	var is_active_target: bool = not active_entity.is_empty() and int(tgt["uid"]) == int(active_entity["uid"])
 	if is_active_target:
@@ -1039,7 +1104,9 @@ func _resolve_heal(caster: Dictionary, spell: Dictionary, p: Dictionary, cell: V
 	for t: Dictionary in targets:
 		var amt: int = 0
 		if int(p["heal"]) > 0:
-			amt = roundi(float(p["heal"]) * (1.0 + float(caster.get("intelligence", 0)) / 300.0))
+			amt = roundi(float(p["heal"]) * (1.0 + float(caster.get("intelligence", 0)) / 300.0)
+				* (1.0 + float(caster.get("wisdom", 0)) / 300.0)
+				* (1.0 + float(caster.get("fx", {}).get("heal_pct", 0)) / 100.0))
 		if int(p["heal_pct"]) > 0:
 			amt = roundi(float(t["max_pv"]) * float(p["heal_pct"]) / 100.0)
 		total += _do_heal(caster, t, amt)
@@ -1092,7 +1159,7 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 	var info: Dictionary = Combat.SUMMONS.get(sname, Combat.SUMMONS["Loup"])
 	var s: Dictionary = _base_entity("%s (inv.)" % sname, "Summon", String(caster["team"]), sname,
 		int(caster["level"]), cell)
-	var scale: float = 0.7 + float(caster["level"]) / 200.0
+	var scale: float = (0.7 + float(caster["level"]) / 200.0) * (1.0 + float(caster.get("intelligence", 0)) / 400.0)
 	s.merge({
 		"max_pv": int(float(info["pv"]) * scale), "current_pv": int(float(info["pv"]) * scale),
 		"force": int(float(info["force"]) * scale), "intelligence": int(float(info["force"]) * scale),
@@ -1287,19 +1354,23 @@ func check_game_over() -> void:
 	for e: Dictionary in enemies:
 		if is_alive(e):
 			alive_e += 1
+	var info: Dictionary = {"enemies": fight_enemies, "turns": turn_count, "boss": fight_is_boss}
 	if alive_p == 0:
 		game_over = true
 		victory = false
+		if not active_save.is_empty() and active_slot >= 0:
+			ProgressionManager.register_defeat(active_save, info)
+			ProgressionManager.write_save(active_slot, active_save)
 		game_ended.emit(false)
 		message_requested.emit("Tous vos personnages sont tombés. DÉFAITE !")
 	elif alive_e == 0:
 		game_over = true
 		victory = true
+		if not active_save.is_empty() and active_slot >= 0:
+			ProgressionManager.register_victory(active_save, info)
+			ProgressionManager.write_save(active_slot, active_save)
 		game_ended.emit(true)
 		message_requested.emit("Tous les ennemis sont vaincus ! VICTOIRE !")
-		if not active_save.is_empty() and active_slot >= 0:
-			ProgressionManager.register_victory(active_save)
-			ProgressionManager.write_save(active_slot, active_save)
 
 
 func _after_action() -> void:

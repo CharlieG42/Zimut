@@ -130,6 +130,25 @@ func _build() -> void:
 		closed.emit())
 	_root.add_child(close)
 
+	var auto := Button.new()
+	auto.text = "ÉQUIPER LE MEILLEUR"
+	auto.custom_minimum_size = Vector2(320, 64)
+	auto.add_theme_font_size_override("font_size", 24)
+	auto.add_theme_color_override("font_color", COL_TXT)
+	auto.add_theme_stylebox_override("normal", _flat(Color(0.62, 0.82, 0.55), Color(0.3, 0.5, 0.25), 12, 3))
+	auto.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	auto.offset_left = -600.0
+	auto.offset_right = -280.0
+	auto.offset_top = -100.0
+	auto.offset_bottom = -30.0
+	auto.tooltip_text = "Équipe automatiquement les meilleurs objets de l'inventaire (niveau requis respecté)."
+	auto.pressed.connect(func() -> void:
+		ProgressionManager.auto_equip(_save)
+		ProgressionManager.write_save(_slot, _save)
+		_close_popup()
+		refresh())
+	_root.add_child(auto)
+
 ## Panneau d'un personnage : portrait + cases d'équipement autour.
 func _build_member_frame(member_idx: int) -> PanelContainer:
 	var m: Dictionary = _save["team"][member_idx]
@@ -146,11 +165,19 @@ func _root_of_frame_setup(frame: PanelContainer, classe: String, member_idx: int
 	frame.add_child(holder)
 
 	var name_lbl := Label.new()
-	name_lbl.text = "%s" % classe
+	name_lbl.text = "%s — niv %d" % [classe, ProgressionManager.member_level(_save, classe)]
 	name_lbl.add_theme_font_size_override("font_size", 28)
 	name_lbl.add_theme_color_override("font_color", COL_TXT)
-	name_lbl.position = Vector2(190, 16)
+	name_lbl.position = Vector2(150, 16)
 	holder.add_child(name_lbl)
+
+	# Résumé des stats totales (équipement + panoplies compris)
+	var stats_lbl := Label.new()
+	stats_lbl.name = "stats_summary"
+	stats_lbl.add_theme_font_size_override("font_size", 16)
+	stats_lbl.add_theme_color_override("font_color", COL_TXT)
+	stats_lbl.position = Vector2(12, 452)
+	holder.add_child(stats_lbl)
 
 	# Portrait (sprite du personnage)
 	var portrait := TextureRect.new()
@@ -194,15 +221,25 @@ func refresh() -> void:
 			if eq.has(slot_name):
 				var it: Dictionary = eq[slot_name]
 				btn.text = SLOT_ICON.get(slot_name, "❔")
-				btn.tooltip_text = "%s\n%s (nv%d)\nF%d I%d A%d S%d V%d D%d" % [
-					slot_name.capitalize(), it.get("name", "?"), int(it.get("level", 0)),
-					int(it.get("force", 0)), int(it.get("intelligence", 0)), int(it.get("agility", 0)),
-					int(it.get("wisdom", 0)), int(it.get("vita", 0)), int(it.get("defense", 0))]
-				btn.add_theme_stylebox_override("normal", _flat(COL_SLOT_FILLED, Color(0.4, 0.6, 0.3), 10, 3))
+				btn.tooltip_text = "%s\n%s" % [slot_name.capitalize(), ItemRules.describe(it)]
+				btn.add_theme_stylebox_override("normal", _flat(COL_SLOT_FILLED, ItemRules.rarity_color(it), 10, 5))
 			else:
 				btn.text = SLOT_ICON.get(slot_name, "❔")
 				btn.tooltip_text = "%s (vide)" % slot_name.capitalize()
 				btn.add_theme_stylebox_override("normal", _flat(COL_SLOT_EMPTY, Color(0.3, 0.35, 0.45), 10, 2))
+	for i2: int in range(mini(team.size(), _member_frames.size())):
+		var holder2: Control = _member_frames[i2].get_child(0)
+		var sl: Label = holder2.get_node_or_null("stats_summary") as Label
+		if sl == null:
+			continue
+		var stt: Dictionary = ProgressionManager.member_stats(_save, team[i2])
+		if stt.is_empty():
+			continue
+		var txt: String = "PV %d · F%d I%d A%d S%d D%d · PA%d PM%d" % [int(stt["max_pv"]), int(stt["force"]),
+			int(stt["intelligence"]), int(stt["agility"]), int(stt["wisdom"]), int(stt["defense"]), int(stt["pa"]), int(stt["pm"])]
+		for sline in stt.get("sets", []):
+			txt += "\n◈ " + String(sline)
+		sl.text = txt
 	var inv_lbl: Label = _root.get_node_or_null("InvCount") as Label
 	if inv_lbl:
 		var inv: Array = _save.get("inventory", [])
@@ -243,27 +280,51 @@ func _on_slot_pressed(member_idx: int, slot_name: String) -> void:
 			refresh())
 		box.add_child(unequip)
 
-	var shown: int = 0
+	var err_lbl := Label.new()
+	err_lbl.add_theme_font_size_override("font_size", 17)
+	err_lbl.add_theme_color_override("font_color", Color(0.65, 0.12, 0.08))
+	err_lbl.visible = false
+	box.add_child(err_lbl)
+
+	var lvl: int = ProgressionManager.member_level(_save, String(m.get("classe", "")))
+	var order: Array = []
 	for j: int in range(inv.size()):
+		if accepted.has(String(inv[j].get("type", ""))):
+			order.append(j)
+	order.sort_custom(func(a: int, b: int) -> bool: return ItemRules.power(inv[a]) > ItemRules.power(inv[b]))
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(760, minf(420.0, 62.0 * float(maxi(1, order.size()))))
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 6)
+	scroll.add_child(list)
+	box.add_child(scroll)
+	var shown: int = 0
+	for j: int in order:
 		var it: Dictionary = inv[j]
-		if not accepted.has(String(it.get("type", ""))):
-			continue
 		shown += 1
 		var item_btn := Button.new()
-		item_btn.text = "%s (nv%d) — F%d I%d A%d S%d V%d D%d" % [
-			String(it.get("name", "?")), int(it.get("level", 0)),
-			int(it.get("force", 0)), int(it.get("intelligence", 0)), int(it.get("agility", 0)),
-			int(it.get("wisdom", 0)), int(it.get("vita", 0)), int(it.get("defense", 0))]
+		var fx_txt: String = " · ".join(PackedStringArray(ItemRules.fx_lines(ItemRules.parse_effect(String(it.get("effect", ""))))))
+		var too_low: bool = int(it.get("level", 0)) > lvl
+		item_btn.text = "[%s] %s (nv%d) — %s%s%s" % [ItemRules.rarity_label(it), String(it.get("name", "?")),
+			int(it.get("level", 0)), ItemRules.stat_line(it), ("  ✦ " + fx_txt) if fx_txt != "" else "",
+			"   🔒 niveau %d requis" % int(it.get("level", 0)) if too_low else ""]
+		item_btn.tooltip_text = ItemRules.describe(it)
+		item_btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		item_btn.add_theme_font_size_override("font_size", 19)
+		item_btn.add_theme_color_override("font_color", ItemRules.rarity_color(it).darkened(0.45))
+		item_btn.add_theme_color_override("font_disabled_color", Color(0.5, 0.5, 0.5))
+		item_btn.add_theme_stylebox_override("normal", _flat(Color(0.99, 0.97, 0.9), ItemRules.rarity_color(it), 8, 3))
+		item_btn.disabled = too_low
 		item_btn.pressed.connect(func() -> void:
 			var err: String = ProgressionManager.equip_item(_save, member_idx, j)
 			if err != "":
-				print("equip error: ", err)
+				err_lbl.text = err
+				err_lbl.visible = true
 				return
 			ProgressionManager.write_save(_slot, _save)
 			_close_popup()
 			refresh())
-		box.add_child(item_btn)
+		list.add_child(item_btn)
 	if shown == 0 and not eq.has(slot_name):
 		var none := Label.new()
 		none.text = "Aucun objet compatible dans l'inventaire."
