@@ -68,7 +68,7 @@ static func sprite_key(raw: String) -> String:
 
 
 func _find_texture() -> Texture2D:
-	var cname: String = sprite_key(String(entity.get("classe", "")))
+	var cname: String = sprite_key(String(entity.get("skin", entity.get("classe", ""))))
 	var folders: Array[String] = ["enemies", "players"]
 	if entity["team"] == "player":
 		folders = ["players", "enemies"]

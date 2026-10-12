@@ -129,6 +129,21 @@ func _build() -> void:
 	close.pressed.connect(func() -> void:
 		closed.emit())
 	_root.add_child(close)
+	# Forge (craft) : fabrique des objets avec les ressources butinées
+	var forge := Button.new()
+	forge.text = "⚒ FORGE"
+	forge.custom_minimum_size = Vector2(220, 64)
+	forge.add_theme_font_size_override("font_size", 24)
+	forge.add_theme_color_override("font_color", COL_TXT)
+	forge.add_theme_stylebox_override("normal", _flat(Color(0.72, 0.62, 0.82), COL_BORDER, 12, 3))
+	forge.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	forge.offset_left = 40.0
+	forge.offset_right = 260.0
+	forge.offset_top = -100.0
+	forge.offset_bottom = -30.0
+	forge.tooltip_text = "Fabriquez des objets avec les ressources butinées et de l'or."
+	forge.pressed.connect(_open_forge)
+	_root.add_child(forge)
 
 	var auto := Button.new()
 	auto.text = "ÉQUIPER LE MEILLEUR"
@@ -347,6 +362,85 @@ func _on_slot_pressed(member_idx: int, slot_name: String) -> void:
 	origin.y = clampf(origin.y, 10.0, 1080.0 - dim.y - 10.0)
 	panel.position = origin
 	_popup = {"member": member_idx, "slot": slot_name, "panel": panel}
+
+## Forge : liste des recettes de craft.txt avec ressources disponibles, or, bouton FABRIQUER.
+func _open_forge() -> void:
+	_close_popup()
+	var panel := PanelContainer.new()
+	panel.name = "ForgePanel"
+	panel.add_theme_stylebox_override("panel", _flat(Color(0.98, 0.95, 0.85, 0.99), COL_BORDER, 14, 4))
+	_root.add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	panel.add_child(box)
+	var title := Label.new()
+	title.text = "⚒ FORGE — fabriquez des objets"
+	title.add_theme_font_size_override("font_size", 26)
+	title.add_theme_color_override("font_color", COL_TXT)
+	box.add_child(title)
+	# Stock de ressources et or
+	var res: Dictionary = ProgressionManager.resources(_save)
+	var res_parts: PackedStringArray = []
+	for k: String in ProgressionManager.RESOURCE_LABEL.keys():
+		res_parts.append("%s %d" % [k, int(res.get(k, 0))])
+	var stock := Label.new()
+	stock.text = "Ressources : %s   ·   🪙 Or : %d" % [" · ".join(res_parts), ProgressionManager.gold(_save)]
+	stock.add_theme_font_size_override("font_size", 20)
+	stock.add_theme_color_override("font_color", COL_TXT)
+	box.add_child(stock)
+	var err_lbl := Label.new()
+	err_lbl.add_theme_font_size_override("font_size", 17)
+	err_lbl.add_theme_color_override("font_color", Color(0.65, 0.12, 0.08))
+	err_lbl.visible = false
+	box.add_child(err_lbl)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(820, 460)
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 6)
+	scroll.add_child(list)
+	box.add_child(scroll)
+	for r: Dictionary in ProgressionManager.craft_recipes():
+		var cost_parts: PackedStringArray = []
+		var can_afford: bool = true
+		for k: String in r["cost"].keys():
+			var have: int = int(res.get(k, 0))
+			var need: int = int(r["cost"][k])
+			if have < need:
+				can_afford = false
+			cost_parts.append("%s %d/%d%s" % [k, have, need, "" if have >= need else " ✗"])
+		var gold_need: int = int(r["gold"])
+		var gold_ok: bool = ProgressionManager.gold(_save) >= gold_need
+		if gold_need > 0:
+			cost_parts.append("🪙 %d%s" % [gold_need, "" if gold_ok else " ✗"])
+			can_afford = can_afford and gold_ok
+		var btn := Button.new()
+		btn.text = "%s — %s (nv%d)   [ %s ]" % [String(r["type"]), String(r["name"]), int(r["level"]), " · ".join(cost_parts)]
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		btn.add_theme_font_size_override("font_size", 19)
+		btn.add_theme_color_override("font_color", Color(0.2, 0.4, 0.2) if can_afford else Color(0.55, 0.5, 0.45))
+		btn.add_theme_stylebox_override("normal", _flat(Color(0.99, 0.97, 0.9), COL_BORDER, 8, 2))
+		btn.tooltip_text = "Fabriquer %s. L'objet rejoint l'inventaire." % String(r["name"])
+		btn.disabled = not can_afford
+		btn.pressed.connect(func() -> void:
+			var err: String = ProgressionManager.craft_item(_save, String(r["name"]))
+			if err != "":
+				err_lbl.text = err
+				err_lbl.visible = true
+				return
+			ProgressionManager.write_save(_slot, _save)
+			_close_popup()
+			_open_forge()
+			refresh())
+		list.add_child(btn)
+	var cancel := Button.new()
+	cancel.text = "Fermer la forge"
+	cancel.add_theme_font_size_override("font_size", 20)
+	cancel.pressed.connect(_close_popup)
+	box.add_child(cancel)
+	panel.reset_size()
+	var dim: Vector2 = panel.get_combined_minimum_size()
+	panel.position = Vector2((1920.0 - dim.x) * 0.5, (1080.0 - dim.y) * 0.5)
+	_popup = {"member": -1, "slot": "forge", "panel": panel}
 
 func _close_popup() -> void:
 	if not _popup.is_empty():

@@ -18,6 +18,7 @@ var views: Dictionary = {}          # uid -> EntityView
 var hover_cell: Vector2i = Vector2i(-1, -1)
 
 var _cells_layer: Node2D
+var _biome: String = ""
 var _entity_layer: Node2D
 var _fx_layer: Node2D
 var _cur_element: String = "physical"   # élément du dernier sort lancé (impacts)
@@ -82,6 +83,17 @@ func _build_layers() -> void:
 	add_child(_fx_layer)
 
 
+## Applique le biome courant aux cases existantes (palette/touffes/fleurs).
+func apply_biome(biome: String) -> void:
+	if biome == _biome:
+		return
+	_biome = biome
+	for y: int in range(cell_nodes.size()):
+		for x: int in range(cell_nodes[y].size()):
+			var c: Cell = cell_nodes[y][x]
+			c.biome = biome
+			c.setup(c.grid_position)
+
 func _build_cells() -> void:
 	cell_nodes = []
 	var n: int = game_manager.GRID_SIZE
@@ -90,6 +102,7 @@ func _build_cells() -> void:
 		var row: Array = []
 		for x: int in range(n):
 			var cell := Cell.new()
+			cell.biome = game_manager.fight_biome
 			cell.setup(Vector2i(x, y))
 			cell.position = grid_to_screen(x, y)
 			cell.edge_left = (y == n - 1)
@@ -194,7 +207,7 @@ func _sync_props() -> void:
 	_prop_nodes = []
 	for c: Vector2i in game_manager.obstacles.keys():
 		var prop := Prop.new()
-		prop.setup(String(game_manager.obstacles[c]), c)
+		prop.setup(String(game_manager.obstacles[c]), c, game_manager.fight_biome)
 		prop.position = grid_to_screen(c.x, c.y) + Vector2(0, 6)
 		_entity_layer.add_child(prop)
 		_prop_nodes.append(prop)

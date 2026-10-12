@@ -6,10 +6,11 @@ extends Node2D
 var kind: String = "tree"
 var seed_value: int = 0
 var _sway: float = 0.0
+var biome: String = "Forêt"
 
-
-func setup(k: String, cell: Vector2i) -> void:
+func setup(k: String, cell: Vector2i, b: String = "Forêt") -> void:
 	kind = k
+	biome = b
 	seed_value = cell.x * 31 + cell.y * 57
 	_sway = float(seed_value % 10) * 0.6
 	set_process(kind == "tree")
@@ -32,22 +33,36 @@ func _draw() -> void:
 	if kind == "tree":
 		var t: float = float(Time.get_ticks_msec()) / 1000.0
 		var sway: float = sin(t * 1.3 + _sway) * 1.6
-		_ellipse_shadow(38.0 * s, 15.0 * s, 0.32)
-		# tronc
-		draw_colored_polygon(PackedVector2Array([Vector2(-7, 6), Vector2(-5, -52 * s), Vector2(5, -52 * s), Vector2(8, 6)]), Color(0.38, 0.24, 0.13))
-		draw_colored_polygon(PackedVector2Array([Vector2(-7, 6), Vector2(-5, -52 * s), Vector2(-1, -52 * s), Vector2(-2, 6)]), Color(0.5, 0.33, 0.18))
-		# feuillage
-		var base_col: Color = Color(0.34, 0.62, 0.25)
-		var blobs: Array = [
-			[Vector2(-24 + sway * 0.5, -62 * s), 27.0], [Vector2(24 + sway * 0.5, -62 * s), 27.0],
-			[Vector2(0 + sway, -80 * s), 34.0], [Vector2(-12 + sway, -98 * s), 24.0], [Vector2(14 + sway, -96 * s), 22.0],
-		]
-		for b: Array in blobs:
-			draw_circle(b[0], b[1], base_col.darkened(0.12))
-		for b: Array in blobs:
-			draw_circle(b[0] + Vector2(-3, -4), b[1] * 0.86, base_col)
-		for b: Array in blobs:
-			draw_circle(b[0] + Vector2(-9, -11), b[1] * 0.45, base_col.lightened(0.22))
+		if biome == "Désert":
+			# Cactus du désert
+			_ellipse_shadow(34.0 * s, 13.0 * s, 0.30)
+			var cac: Color = Color(0.30, 0.55, 0.28)
+			draw_colored_polygon(PackedVector2Array([Vector2(-12, 6), Vector2(-9, -76 * s), Vector2(9, -76 * s), Vector2(12, 6)]), cac)
+			draw_colored_polygon(PackedVector2Array([Vector2(-12, 6), Vector2(-9, -76 * s), Vector2(-2, -76 * s), Vector2(-3, 6)]), cac.lightened(0.14))
+			draw_colored_polygon(PackedVector2Array([Vector2(-12, -30 * s), Vector2(-12, -48 * s), Vector2(-26, -48 * s), Vector2(-26, -38 * s), Vector2(-22, -38 * s), Vector2(-22, -30 * s)]), cac)
+			draw_colored_polygon(PackedVector2Array([Vector2(12, -22 * s), Vector2(12, -56 * s), Vector2(26, -56 * s), Vector2(26, -46 * s), Vector2(22, -46 * s), Vector2(22, -22 * s)]), cac)
+			for sp: int in range(5):
+				var sy: float = -70.0 * s + float(sp) * 14.0
+				draw_line(Vector2(0, sy), Vector2(0, sy - 6.0), cac.darkened(0.3), 1.4)
+		else:
+			_ellipse_shadow(38.0 * s, 15.0 * s, 0.32)
+			# tronc
+			draw_colored_polygon(PackedVector2Array([Vector2(-7, 6), Vector2(-5, -52 * s), Vector2(5, -52 * s), Vector2(8, 6)]), Color(0.38, 0.24, 0.13))
+			draw_colored_polygon(PackedVector2Array([Vector2(-7, 6), Vector2(-5, -52 * s), Vector2(-1, -52 * s), Vector2(-2, 6)]), Color(0.5, 0.33, 0.18))
+			# feuillage
+			var base_col: Color = Color(0.34, 0.62, 0.25)
+			if biome == "Montagne":
+				base_col = Color(0.22, 0.45, 0.30)
+				var blobs: Array = [
+				[Vector2(-24 + sway * 0.5, -62 * s), 27.0], [Vector2(24 + sway * 0.5, -62 * s), 27.0],
+				[Vector2(0 + sway, -80 * s), 34.0], [Vector2(-12 + sway, -98 * s), 24.0], [Vector2(14 + sway, -96 * s), 22.0],
+			]
+			for b: Array in blobs:
+				draw_circle(b[0], b[1], base_col.darkened(0.12))
+			for b: Array in blobs:
+				draw_circle(b[0] + Vector2(-3, -4), b[1] * 0.86, base_col)
+			for b: Array in blobs:
+				draw_circle(b[0] + Vector2(-9, -11), b[1] * 0.45, base_col.lightened(0.22))
 	else:
 		_ellipse_shadow(40.0 * s, 15.0 * s, 0.30)
 		var pts := PackedVector2Array([

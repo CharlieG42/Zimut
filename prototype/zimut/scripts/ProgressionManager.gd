@@ -15,6 +15,29 @@ const SAVE_DIR := "user://saves"
 const MAX_SAVES := 5
 const START_LEVEL := 10
 const BOSS_EVERY := 4
+
+## Biomes : cycle des combats. Chaque biome dure BOSS_EVERY combats, le dernier
+## étant le boss du biome. Les types viennent de la colonne « Biome » de ennemis.txt.
+const BIOME_ORDER: Array[String] = ["Forêt", "Montagne", "Désert"]
+const BIOME_LABEL := {"Forêt": "Forêt de Zimut", "Montagne": "Pics de Zimut", "Désert": "Dunes de Zimut", "Donjon": "Donjon de Zimut"}
+## Types d'ennemis par biome (2 par biome, tirés de ennemis.txt).
+const BIOME_ENEMIES := {
+	"Forêt": ["Gobelin", "Loup"],
+	"Montagne": ["Troll", "Squelette"],
+	"Désert": ["Squelette", "Dragonnet"],
+	"Donjon": ["Squelette", "Dragonnet"],
+}
+## Boss nommé de chaque biome (lignes « Boss ... » de ennemis.txt).
+const BIOME_BOSSES := {
+	"Forêt": "Gobelin Roi",
+	"Montagne": "Troll Géant",
+	"Désert": "Dragon",
+	"Donjon": "Squelette Seigneur",
+}
+## Ressources de craft butinables (clé -> label).
+const RESOURCE_LABEL := {"Fer": "Fer", "Bois": "Bois", "Cuir": "Cuir", "Magie": "Magie", "Venin": "Venin"}
+## Quantités de ressources lâchées par un combat (par ennemi vaincu).
+const RESOURCE_DROPS := {"Fer": 4, "Bois": 3, "Cuir": 3, "Magie": 2, "Venin": 1}
 ## +1 niveau d'ennemi toutes les N victoires (la difficulté monte doucement)
 const DIFFICULTY_CREEP_EVERY := 10
 const CLASS_ORDER: Array[String] = ["Tank", "Assassin", "Chasseur", "Mage", "Druide", "Heal", "Invocateur", "Sylvain"]
@@ -38,6 +61,7 @@ var _items_catalog: Array = []   # entrées stuff.txt normalisées
 var _class_table: Dictionary = {}   # classe -> { niveau(int) -> ligne }
 var _enemy_rows: Array = []         # lignes de ennemis.txt
 var _spell_levels: Dictionary = {}  # classe -> [{ "name", "level" }]
+var _craft_recipes: Array = []     # lignes de craft.txt normalisées
 var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
@@ -46,6 +70,7 @@ func _ready() -> void:
 	_load_class_table()
 	_load_enemy_rows()
 	_load_spell_levels()
+	_load_craft_recipes()
 	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -138,6 +163,8 @@ func _fresh_save() -> Dictionary:
 		"victories": 0,
 		"team": [],           # [{ "classe": String, "equipment": {slot -> item} }]
 		"inventory": [],      # [{ "type", "name", "level", "rarity", stats... }]
+		"resources": {},      # { "Fer": n, "Bois": n, ... } — butin de craft
+		"gold": 0,            # pièces d'or (pour le craft)
 		"roster": {},         # { classe: { level, xp, invested{}, unspent, auto } }
 		"timestamp": Time.get_datetime_string_from_system(),
 	}
@@ -153,7 +180,7 @@ func load_save(slot: int) -> Dictionary:
 			push_error("Sauvegarde %d illisible (et son backup)" % slot)
 			return {}
 	# JSON renvoie des floats pour tous les nombres : normaliser en int
-	_normalize_ints(parsed, ["level", "victories"])
+	_normalize_ints(parsed, ["level", "victories", "gold"])
 	ensure_roster(parsed)   # migration des anciennes parties + normalisation
 	return parsed
 
@@ -235,7 +262,8 @@ func _load_enemy_rows() -> void:
 		var c: PackedStringArray = lines[i].strip_edges().split(",")
 		if c.size() < 8 or c[0].strip_edges() == "":
 			continue
-		_enemy_rows.append({"type": c[0].strip_edges(), "level": int(c[1]), "xp": int(c[7])})
+		_enemy_rows.append({"type": c[0].strip_edges(), "level": int(c[1]), "xp": int(c[7]),
+			"biome": c[8].strip_edges() if c.size() > 8 else ""})
 
 func _load_spell_levels() -> void:
 	_spell_levels = {}
@@ -323,6 +351,121 @@ func xp_for_enemy(type_name: String, level: int) -> int:
 	if best.is_empty():
 		best = first
 	return int(best.get("xp", 0))
+
+## Biome du combat « numéro n » (cycle de BOSS_EVERY combats par biome).
+func biome_for_fight(n: int) -> String:
+	var idx: int = int((n - 1) / BOSS_EVERY) % BIOME_ORDER.size()
+	return BIOME_ORDER[idx]
+
+## Biome du prochain combat d'une partie.
+func next_biome(data: Dictionary) -> String:
+	return biome_for_fight(next_fight_number(data))
+
+## Nom complet du biome pour affichage.
+func biome_label(biome: String) -> String:
+	return String(BIOME_LABEL.get(biome, biome))
+
+## Types d'ennemis du biome (2 types, cf. BIOME_ENEMIES / ennemis.txt).
+func biome_enemy_types(biome: String) -> Array[String]:
+	var out: Array[String] = []
+	for t: String in BIOME_ENEMIES.get(biome, ["Gobelin", "Squelette"]):
+		out.append(t)
+	return out
+
+## Boss du biome.
+func biome_boss(biome: String) -> String:
+	return String(BIOME_BOSSES.get(biome, "Dragonnet"))
+
+## Charge les recettes de craft.txt :
+## Type, Nom, Niveau requis, R1, Q1, R2, Q2, R3, Q3, Coût or
+func _load_craft_recipes() -> void:
+	_craft_recipes = []
+	var lines: PackedStringArray = _read_lines("res://data/craft.txt")
+	for i: int in range(1, lines.size()):
+		var c: PackedStringArray = lines[i].strip_edges().split(",")
+		if c.size() < 4 or c[0].strip_edges() == "":
+			continue
+		var recipe := {
+			"type": c[0].strip_edges(),
+			"name": c[1].strip_edges(),
+			"level": int(c[2]) if c[2].strip_edges().is_valid_int() else 1,
+			"gold": int(c[9].strip_edges()) if c.size() > 9 and c[9].strip_edges().is_valid_int() else 0,
+			"cost": {},
+		}
+		for j: int in [3, 5, 7]:
+			if c.size() > j + 1:
+					var res: String = c[j].strip_edges()
+					var qty: int = int(c[j + 1].strip_edges()) if c[j + 1].strip_edges().is_valid_int() else 0
+					if res != "" and qty > 0:
+							recipe["cost"][res] = qty
+		_craft_recipes.append(recipe)
+
+## Recettes disponibles, triées par niveau puis nom.
+func craft_recipes() -> Array:
+	var out: Array = _craft_recipes.duplicate()
+	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		if int(a["level"]) != int(b["level"]):
+			return int(a["level"]) < int(b["level"])
+		return String(a["name"]) < String(b["name"])
+	)
+	return out
+
+## Stock de ressources d'une partie ({ "Fer": n, ... }).
+func resources(data: Dictionary) -> Dictionary:
+	return data.get("resources", {})
+
+## Or d'une partie (gagné avec les victoires).
+func gold(data: Dictionary) -> int:
+	return int(data.get("gold", 0))
+
+## Ajoute des ressources (cumul).
+func add_resources(data: Dictionary, drops: Dictionary) -> void:
+	var res: Dictionary = data.get("resources", {})
+	for k: String in drops.keys():
+		res[k] = int(res.get(k, 0)) + int(drops[k])
+	data["resources"] = res
+
+## Fabrique l'objet de la recette : consomme ressources et or, l'objet part
+## dans l'inventaire. Retourne "" si OK, sinon la raison.
+func craft_item(data: Dictionary, recipe_name: String) -> String:
+	var recipe: Dictionary = {}
+	for r: Dictionary in _craft_recipes:
+		if String(r["name"]) == recipe_name:
+			recipe = r
+			break
+	if recipe.is_empty():
+		return "Recette inconnue."
+	var res: Dictionary = data.get("resources", {})
+	for k: String in recipe["cost"].keys():
+		if int(res.get(k, 0)) < int(recipe["cost"][k]):
+			return "Ressource insuffisante : %s (%d/%d)." % [k, int(res.get(k, 0)), int(recipe["cost"][k])]
+	if int(data.get("gold", 0)) < int(recipe["gold"]):
+			return "Or insuffisant : %d pièces requises." % int(recipe["gold"])
+	for k: String in recipe["cost"].keys():
+		res[k] = int(res.get(k, 0)) - int(recipe["cost"][k])
+	data["resources"] = res
+	data["gold"] = int(data.get("gold", 0)) - int(recipe["gold"])
+	# L'objet fabriqué reprend les stats de stuff.txt (ligne la plus proche en dessous).
+	var item: Dictionary = {}
+	var best_lvl: int = -1
+	for it: Dictionary in _items_catalog:
+		if String(it["name"]) != String(recipe["name"]) or String(it["type"]) != String(recipe["type"]):
+			continue
+		if int(it["level"]) > int(recipe["level"]):
+			continue
+		if int(it["level"]) > best_lvl:
+			best_lvl = int(it["level"])
+			item = it
+	if item.is_empty():
+		for it: Dictionary in _items_catalog:
+			if String(it["name"]) == String(recipe["name"]):
+				item = it
+				break
+	if item.is_empty():
+		item = {"type": String(recipe["type"]), "name": String(recipe["name"]), "level": int(recipe["level"]),
+			"force": 0, "intelligence": 0, "agility": 0, "wisdom": 0, "vita": 0, "defense": 0, "effect": ""}
+	data["inventory"].append(item.duplicate())
+	return ""
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  Roster : progression de chaque classe
@@ -536,6 +679,11 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	for l: Dictionary in loots:
 		data["inventory"].append(l)
 	data["last_loots"] = loots
+	# Butin de craft : ressources selon le nombre d'ennemis vaincus, un peu d'or.
+	var drops: Dictionary = _roll_resource_drops(enemies.size(), was_boss)
+	add_resources(data, drops)
+	data["gold"] = int(data.get("gold", 0)) + (50 + 10 * fight_level) * (3 if was_boss else 1)
+	data["last_resources"] = drops
 	data["level"] = enemy_level_for(data)
 	data["last_result"] = {"victory": true, "xp": report, "boss": was_boss, "fight_level": fight_level,
 		"turns": int(info.get("turns", 0))}
@@ -565,6 +713,7 @@ func register_defeat(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 		report = award_xp(data, fight_xp(enemies), ClassRules.DEFEAT_XP_RATIO)
 	data["defeats"] = int(data.get("defeats", 0)) + 1
 	data["last_loots"] = []
+	data["last_resources"] = {}
 	data["level"] = enemy_level_for(data)
 	data["last_result"] = {"victory": false, "xp": report, "boss": bool(info.get("boss", false)),
 		"fight_level": fight_level, "turns": int(info.get("turns", 0))}
@@ -591,6 +740,32 @@ func _roll_loots(level: int, boss: bool = false) -> Array:
 		var rarity: String = ItemRules.roll_rarity(_rng, boss and i == 0)
 		out.append(ItemRules.apply_rarity(item, rarity, _rng))
 	return out
+
+## Ressources de craft lâchées par un combat : une par ennemi vaincu environ,
+## choix pondéré ; le boss en garantit deux de plus.
+func _roll_resource_drops(enemy_count: int, boss: bool = false) -> Dictionary:
+	var drops: Dictionary = {}
+	var keys: Array = RESOURCE_DROPS.keys()
+	var weights: Array = []
+	var total: int = 0
+	for k: String in keys:
+		var w: int = int(RESOURCE_DROPS[k])
+		weights.append(w)
+		total += w
+	var n: int = maxi(1, enemy_count / 2) + (2 if boss else 0)
+	for i: int in range(n):
+		var r: int = _rng.randi_range(1, total)
+		var rkey: String = keys[keys.size() - 1]
+		var j: int = 0
+		while j < keys.size() and r > 0:
+			r -= int(weights[j])
+			if r > 0:
+				j += 1
+			else:
+				rkey = keys[j]
+		var qty: int = _rng.randi_range(1, 2) + (1 if boss else 0)
+		drops[rkey] = int(drops.get(rkey, 0)) + qty
+	return drops
 
 ## Tire un item proche du niveau du combat : les objets obsolètes sont de plus en
 ## plus rares, et un objet légèrement au-dessus du niveau peut tomber (à convoiter).

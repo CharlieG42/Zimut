@@ -28,23 +28,41 @@ var _flowers: Array = []
 var _pulse_phase: float = 0.0
 
 
+## Palettes par biome : damier clair / foncé, couleurs de touffes et fleurs.
+const BIOME_PALETTES := {
+	"Forêt":    {"a": Color(0.62, 0.78, 0.38), "b": Color(0.55, 0.72, 0.33),
+		"tuft": Color(0.32, 0.60, 0.22), "flowers": [Color(1, 1, 1), Color(1, 0.9, 0.35), Color(1, 0.6, 0.75)]},
+	"Montagne": {"a": Color(0.55, 0.62, 0.52), "b": Color(0.48, 0.56, 0.47),
+		"tuft": Color(0.38, 0.48, 0.30), "flowers": [Color(0.85, 0.85, 0.9), Color(0.7, 0.8, 0.95), Color(0.95, 0.95, 1)]},
+	"Désert":   {"a": Color(0.85, 0.76, 0.48), "b": Color(0.78, 0.69, 0.42),
+		"tuft": Color(0.60, 0.55, 0.25), "flowers": [Color(1, 0.95, 0.6), Color(0.95, 0.75, 0.35), Color(0.9, 0.6, 0.3)]},
+	"Donjon":   {"a": Color(0.42, 0.40, 0.48), "b": Color(0.36, 0.34, 0.42),
+		"tuft": Color(0.30, 0.30, 0.38), "flowers": [Color(0.6, 0.55, 0.8), Color(0.5, 0.6, 0.7)]},
+}
+
+## Biome affiché par cette case (défini avant setup()).
+var biome: String = "Forêt"
+
 func setup(gp: Vector2i) -> void:
 	grid_position = gp
 	var rng := RandomNumberGenerator.new()
 	rng.seed = gp.x * 7919 + gp.y * 104729 + 17
+	var pal: Dictionary = BIOME_PALETTES.get(biome, BIOME_PALETTES["Forêt"])
 	var checker: bool = (gp.x + gp.y) % 2 == 0
 	var tint: float = rng.randf_range(-0.025, 0.025)
-	_base = (Color(0.62, 0.78, 0.38) if checker else Color(0.55, 0.72, 0.33))
+	_base = (pal["a"] if checker else pal["b"])
 	_base = Color(_base.r + tint, _base.g + tint, _base.b + tint)
+	var tuft_col: Color = pal["tuft"]
 	for i: int in range(rng.randi_range(7, 12)):
 		var p := Vector2(rng.randf_range(-0.8, 0.8) * HW, rng.randf_range(-0.8, 0.8) * HH)
 		if absf(p.x) / HW + absf(p.y) / HH < 0.8:
-			_tufts.append([p, rng.randf_range(3.0, 6.0), rng.randf_range(-3.0, 3.0)])
-	if rng.randf() < 0.30:
+			_tufts.append([p, rng.randf_range(3.0, 6.0), rng.randf_range(-3.0, 3.0), tuft_col])
+	var flower_chance: float = 0.30 if biome != "Désert" else 0.12
+	if rng.randf() < flower_chance:
 		for i: int in range(rng.randi_range(1, 3)):
 			var fp := Vector2(rng.randf_range(-0.55, 0.55) * HW, rng.randf_range(-0.55, 0.55) * HH)
-			var palette: Array[Color] = [Color(1, 1, 1), Color(1, 0.9, 0.35), Color(1, 0.6, 0.75)]
-			_flowers.append([fp, palette[rng.randi() % 3]])
+			var palette: Array = pal["flowers"]
+			_flowers.append([fp, palette[rng.randi() % palette.size()]])
 	_pulse_phase = rng.randf() * TAU
 	set_process(false)
 
@@ -101,8 +119,9 @@ func _draw() -> void:
 		var p: Vector2 = t[0]
 		var h: float = t[1]
 		var sway: float = t[2]
-		draw_line(p, p + Vector2(sway, -h), _base.darkened(0.22), 1.6)
-		draw_line(p + Vector2(2, 0), p + Vector2(2 + sway * 0.6, -h * 0.7), _base.lightened(0.12), 1.4)
+		var tc: Color = t[3] if t.size() > 3 else _base.darkened(0.22)
+		draw_line(p, p + Vector2(sway, -h), tc, 1.6)
+		draw_line(p + Vector2(2, 0), p + Vector2(2 + sway * 0.6, -h * 0.7), tc.lightened(0.25), 1.4)
 	for f: Array in _flowers:
 		var fp: Vector2 = f[0]
 		draw_circle(fp, 2.6, f[1])
