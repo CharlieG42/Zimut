@@ -303,6 +303,18 @@ func _build() -> void:
 	go.pressed.connect(_on_combat)
 	_root.add_child(go)
 
+	# Fiche des personnages : niveaux, XP, points de caractéristiques (AU-DESSUS de l'équipement)
+	var chars := _std_btn("📈  PERSONNAGES", Color(0.40, 0.60, 0.85))
+	_chars_btn = chars
+	chars.tooltip_text = "Niveaux, XP et répartition des points de caractéristiques."
+	chars.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	chars.offset_left = 60.0
+	chars.offset_right = 400.0
+	chars.offset_top = -250.0
+	chars.offset_bottom = -170.0
+	chars.pressed.connect(_on_characters)
+	_root.add_child(chars)
+
 	# Équipement (si partie active)
 	var eq := _std_btn("🎒  ÉQUIPEMENT", Color(0.75, 0.55, 0.20))
 	_equip_btn = eq
@@ -314,18 +326,6 @@ func _build() -> void:
 	eq.offset_bottom = -80.0
 	eq.pressed.connect(_on_equipment)
 	_root.add_child(eq)
-
-	# Fiche des personnages : niveaux, XP, points de caractéristiques
-	var chars := _std_btn("📈  PERSONNAGES", Color(0.40, 0.60, 0.85))
-	_chars_btn = chars
-	chars.tooltip_text = "Niveaux, XP et répartition des points de caractéristiques."
-	chars.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	chars.offset_left = 430.0
-	chars.offset_right = 770.0
-	chars.offset_top = -160.0
-	chars.offset_bottom = -80.0
-	chars.pressed.connect(_on_characters)
-	_root.add_child(chars)
 
 	# Retour
 	var back := _std_btn("←  MENU", Color(0.35, 0.40, 0.55))

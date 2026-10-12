@@ -468,12 +468,60 @@ func craft_item(data: Dictionary, recipe_name: String) -> String:
 	return ""
 
 # ═══════════════════════════════════════════════════════════════════════════
+## ── Niveaux de sorts (1..10) ─────────────────────────────────────────────
+## Chaque sort d'une classe peut être amélioré du niveau 1 au niveau 10 :
+## +SPELL_LEVEL_BONUS_PCT par niveau sur les dégâts / soins / valeurs d'effet.
+## Coût d'amélioration : (SPELL_LEVEL_GOLD_BASE × niveau) or
+## + (SPELL_LEVEL_MAGIC_BASE × niveau) unités de Magie.
+const SPELL_LEVEL_MAX := 10
+const SPELL_LEVEL_BONUS_PCT := 6.0
+const SPELL_LEVEL_GOLD_BASE := 50
+const SPELL_LEVEL_MAGIC_BASE := 2
+
+## Niveau actuel d'un sort pour une classe (1 si jamais amélioré).
+func spell_level(data: Dictionary, classe: String, spell_name: String) -> int:
+	var e: Dictionary = roster_entry(data, classe)
+	var sl: Dictionary = e.get("spell_levels", {})
+	return clampi(int(sl.get(spell_name, 1)), 1, SPELL_LEVEL_MAX)
+
+## Multiplicateur d'efficacité du sort selon son niveau (1.0 au niveau 1).
+func spell_mult(data: Dictionary, classe: String, spell_name: String) -> float:
+	return 1.0 + (float(spell_level(data, classe, spell_name)) - 1.0) * SPELL_LEVEL_BONUS_PCT / 100.0
+
+## Coût de la prochaine amélioration : { "gold": int, "magie": int } ou {} au max.
+func spell_upgrade_cost(data: Dictionary, classe: String, spell_name: String) -> Dictionary:
+	var lvl: int = spell_level(data, classe, spell_name)
+	if lvl >= SPELL_LEVEL_MAX:
+		return {}
+	return {"gold": SPELL_LEVEL_GOLD_BASE * lvl, "magie": SPELL_LEVEL_MAGIC_BASE * lvl}
+
+## Améliore un sort d'un niveau. Retourne "" si OK, sinon la raison.
+func upgrade_spell(data: Dictionary, classe: String, spell_name: String) -> String:
+	var cost: Dictionary = spell_upgrade_cost(data, classe, spell_name)
+	if cost.is_empty():
+		return "Niveau maximum atteint."
+	if int(data.get("gold", 0)) < int(cost["gold"]):
+		return "Or insuffisant : %d pièces requises." % int(cost["gold"])
+	var res: Dictionary = data.get("resources", {})
+	if int(res.get("Magie", 0)) < int(cost["magie"]):
+		return "Magie insuffisante : %d requises." % int(cost["magie"])
+	data["gold"] = int(data.get("gold", 0)) - int(cost["gold"])
+	res["Magie"] = int(res.get("Magie", 0)) - int(cost["magie"])
+	data["resources"] = res
+	var e: Dictionary = roster_entry(data, classe)
+	var sl: Dictionary = e.get("spell_levels", {})
+	sl[spell_name] = clampi(int(sl.get(spell_name, 1)) + 1, 1, SPELL_LEVEL_MAX)
+	e["spell_levels"] = sl
+	progression_changed.emit()
+	return ""
+
 #  Roster : progression de chaque classe
 # ═══════════════════════════════════════════════════════════════════════════
 
 func _new_entry(level: int) -> Dictionary:
 	return {"level": level, "xp": xp_for_level(level), "invested": {},
-		"unspent": ClassRules.total_points_for_level(level), "auto": true}
+		"unspent": ClassRules.total_points_for_level(level), "auto": true,
+		"spell_levels": {}}
 
 ## Garantit que la sauvegarde contient un roster complet et cohérent (migration
 ## des anciennes parties incluse). Appelé au chargement.

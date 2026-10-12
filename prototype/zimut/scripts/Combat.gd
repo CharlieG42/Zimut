@@ -515,6 +515,18 @@ static func parse(spell: Dictionary) -> Dictionary:
 	if p["kind"] == "attack" and bless:
 		p["buffs"] = []
 
+	# ── Niveau de sort (amélioration 1..10) : +SPELL_LEVEL_BONUS_PCT / niveau ──
+	var smult: float = float(spell.get("mult", 1.0))
+	if smult != 1.0 and smult > 0.0:
+		for key: String in ["dmg", "heal", "regen", "adj_dmg", "summon_dmg_base"]:
+			p[key] = int(roundf(float(p[key]) * smult))
+		for d: Dictionary in p["dots"]:
+			d["value"] = float(d["value"]) * smult
+		for b: Dictionary in p["buffs"]:
+			b["value"] = float(b["value"]) * smult
+		for db: Dictionary in p["debuffs"]:
+			db["value"] = float(db["value"]) * smult
+
 	spell["_p"] = p
 	return p
 

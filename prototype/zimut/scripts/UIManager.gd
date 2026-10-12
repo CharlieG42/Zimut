@@ -64,34 +64,44 @@ class SpellCard extends Button:
 		draw_string(font, rect.position + Vector2(8, 15), txt, HORIZONTAL_ALIGNMENT_LEFT, w, 15, col.lightened(0.35))
 		return rect.position.x - 6.0
 
+	## Petit cercle de coin : valeur + étiquette abrégée dessous.
+	func _orb(c: Vector2, radius: float, val: String, col: Color, label: String) -> void:
+		var font: Font = ThemeDB.fallback_font
+		draw_circle(c, radius, Color(0.02, 0.04, 0.1, 0.92))
+		draw_circle(c, radius - 3.0, col if usable else Color(0.3, 0.33, 0.4))
+		draw_circle(c + Vector2(-radius * 0.15, -radius * 0.25), radius * 0.42, Color(1, 1, 1, 0.2))
+		var fs: int = 22 if radius >= 18.0 else 18
+		draw_string(font, c + Vector2(-radius, radius * 0.45), val, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, fs, Color.WHITE)
+		draw_string(font, c + Vector2(-radius, radius + 12.0), label, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, 12, col.lightened(0.4))
+
 	func _draw() -> void:
 		var font: Font = ThemeDB.fallback_font
 		# Liseré gauche de la couleur du type (rouge/bleu/vert/jaune)
 		draw_rect(Rect2(0, 0, 5, size.y), base_col)
 		var cost: int = int(spell.get("cost_pa", 0))
-		var orb_c := Vector2(24, 24)
-		draw_circle(orb_c, 21.0, Color(0.02, 0.04, 0.1))
-		draw_circle(orb_c, 18.0, Color(0.15, 0.55, 0.95) if usable else Color(0.3, 0.33, 0.4))
-		draw_circle(orb_c + Vector2(-3, -5), 9.0, Color(1, 1, 1, 0.2))
-		draw_string(font, orb_c + Vector2(-18, 8), str(cost), HORIZONTAL_ALIGNMENT_CENTER, 36, 24, Color.WHITE)
+		# ── Orbes de coin ── PA en haut à gauche, PM en haut à droite (si coût),
+		#    Portée en bas à gauche. Zone en badge en haut au centre-droite.
+		_orb(Vector2(26, 26), 21.0, str(cost), Color(0.15, 0.55, 0.95), "PA")
 		if int(spell.get("cost_pm", 0)) > 0:
-			var pc := Vector2(52, 24)
-			draw_circle(pc, 15.0, Color(0.1, 0.55, 0.25))
-			draw_string(font, pc + Vector2(-15, 7), str(int(spell["cost_pm"])), HORIZONTAL_ALIGNMENT_CENTER, 30, 20, Color.WHITE)
-		# Badges en haut à droite : PA, PM, Portée, Zone
+			_orb(Vector2(size.x - 26, 26), 18.0, str(int(spell["cost_pm"])), Color(0.12, 0.60, 0.30), "PM")
+		var rng: int = int(spell.get("range", 1))
+		var rng_txt: String = str(rng) if rng < 99 else "∞"
+		_orb(Vector2(26, size.y - 30), 17.0, rng_txt, Color(0.85, 0.70, 0.25), "Portée")
+		# Zone d'effet en badge en haut à droite (décalé si PM présent)
 		var p: Dictionary = Combat.parse(spell)
 		var x: float = size.x - 6
-		var y: float = 20.0
-		x = _badge(x, y, "PA", str(cost), Color(0.35, 0.65, 1.0))
-		if int(spell.get("cost_pm", 0)) > 0:
-			x = _badge(x, y, "PM", str(int(spell["cost_pm"])), Color(0.4, 0.8, 0.5))
-		x = _badge(x, y, "Port", str(int(spell.get("range", 1))), Color(0.95, 0.85, 0.55))
+		if int(spell.get("cost_pm", 0)) <= 0:
+			x = _badge(x, 20.0, "PA", str(cost), Color(0.35, 0.65, 1.0))
+		# Niveau de sort amélioré (si > 1) : badge doré après la zone
+		var slvl: int = int(spell.get("spell_level", 1))
+		if slvl > 1:
+			x = _badge(x, 20.0, "Nv", str(slvl), Color(1.0, 0.72, 0.18))
 		if String(p["aoe"]) == "zone":
-			x = _badge(x, y, "Zone", "%dx%d" % [int(p["zone_r"]), int(p["zone_r"])], Color(1.0, 0.6, 0.3))
+			x = _badge(x, 20.0, "Zone", "%dx%d" % [int(p["zone_r"]), int(p["zone_r"])], Color(1.0, 0.6, 0.3))
 		elif String(p["aoe"]) == "adjacent_enemies":
-			x = _badge(x, y, "Zone", "adj.", Color(1.0, 0.6, 0.3))
+			x = _badge(x, 20.0, "Zone", "adj.", Color(1.0, 0.6, 0.3))
 		elif String(p["aoe"]) == "team":
-			x = _badge(x, y, "Zone", "eq.", Color(1.0, 0.6, 0.3))
+			x = _badge(x, 20.0, "Zone", "eq.", Color(1.0, 0.6, 0.3))
 		if hotkey > 0:
 			draw_string_outline(font, Vector2(8, size.y - 8), str(hotkey % 10), HORIZONTAL_ALIGNMENT_LEFT, 20, 16, 4, Color(0, 0, 0, 0.8))
 			draw_string(font, Vector2(8, size.y - 8), str(hotkey % 10), HORIZONTAL_ALIGNMENT_LEFT, 20, 16, Color(1, 0.95, 0.6))
@@ -627,6 +637,9 @@ func _show_tip(spell) -> void:
 		costs += " + %d PM" % int(spell["cost_pm"])
 	lines.append("%s  ·  %s  ·  %d/tour" % [costs, rng_txt, Combat.max_casts(spell)])
 	lines.append(Combat.describe(spell))
+	var tip_lvl: int = int(spell.get("spell_level", 1))
+	if tip_lvl > 1:
+		lines.append("★ Niveau %d : +%d %% d'efficacité" % [tip_lvl, int(roundf((float(spell.get("mult", 1.0)) - 1.0) * 100.0))])
 	if p["aoe"] == "zone":
 		lines.append("Zone d'effet")
 	if p["needs_los"]:
