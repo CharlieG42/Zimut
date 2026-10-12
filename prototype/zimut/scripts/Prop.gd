@@ -53,7 +53,7 @@ func _draw() -> void:
 			var base_col: Color = Color(0.34, 0.62, 0.25)
 			if biome == "Montagne":
 				base_col = Color(0.22, 0.45, 0.30)
-				var blobs: Array = [
+			var blobs: Array = [
 				[Vector2(-24 + sway * 0.5, -62 * s), 27.0], [Vector2(24 + sway * 0.5, -62 * s), 27.0],
 				[Vector2(0 + sway, -80 * s), 34.0], [Vector2(-12 + sway, -98 * s), 24.0], [Vector2(14 + sway, -96 * s), 22.0],
 			]

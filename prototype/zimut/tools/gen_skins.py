@@ -432,6 +432,41 @@ def sarriette():
     return svg(160, 200, d, b)
 
 
+
+def sylvain():
+    d = lg("sk", "#a4d65e", "#4c8a2f") + lg("be", "#d8efb0", "#9cc46e") + lg("lf", "#8fd648", "#4c9a2a") + lg("wd", "#8a5a30", "#4c3018")
+    b = shadow(80, 192, 54)
+    # jambes racines
+    b += path("M64,150 Q60,172 56,186", sw=16, stroke=OL) + path("M64,150 Q60,172 56,186", sw=10, stroke="url(#wd)")
+    b += path("M96,150 Q100,172 104,186", sw=16, stroke=OL) + path("M96,150 Q100,172 104,186", sw=10, stroke="url(#wd)")
+    b += ell(56, 188, 15, 6, "#6a4a28", 2.5) + ell(104, 188, 15, 6, "#6a4a28", 2.5)
+    # bâton de sylvain (derrière)
+    b += path("M134,70 L140,180", sw=12, stroke=OL) + path("M134,70 L140,180", sw=7, stroke="url(#wd)")
+    b += ell(136, 62, 14, 16, "url(#lf)") + ell(131, 56, 8, 9, "url(#lf)", 2, 0.95) + shine(130, 55, 5, 5, .4)
+    # cape-tunique de feuillage
+    b += path("M40,96 Q28,132 34,156 Q56,146 80,156 Q104,146 126,156 Q132,132 120,96 Q100,112 80,112 Q60,112 40,96 Z", "url(#sk)", 3.5)
+    b += poly([(46, 120), (38, 140), (56, 128)], "url(#lf)", 2) + poly([(114, 120), (122, 140), (104, 128)], "url(#lf)", 2)
+    b += shine(58, 106, 16, 9, .22)
+    # bras écorce
+    b += path("M44,102 Q28,116 26,134", sw=19, stroke=OL) + path("M44,102 Q28,116 26,134", sw=13, stroke="url(#be)")
+    b += ell(26, 136, 11, 10, "url(#be)", 2.5)
+    b += path("M116,102 Q132,112 134,124", sw=19, stroke=OL) + path("M116,102 Q132,112 134,124", sw=13, stroke="url(#be)")
+    b += ell(134, 126, 11, 10, "url(#be)", 2.5)
+    # tête
+    b += ell(80, 70, 26, 23, "url(#sk)") + shine(70, 56, 11, 7, .3)
+    # chevelure-feuillage
+    b += path("M54,68 Q48,36 68,28 Q80,14 92,28 Q112,36 106,68 Q98,50 80,50 Q62,50 54,68 Z", "url(#lf)", 3)
+    b += poly([(68, 30), (58, 12), (78, 24)], "url(#lf)", 2.5) + poly([(90, 28), (102, 10), (104, 32)], "url(#lf)", 2.5)
+    # oreilles pointues
+    b += poly([(54, 60), (40, 52), (56, 46)], "url(#sk)", 2.5) + poly([(106, 60), (120, 52), (104, 46)], "url(#sk)", 2.5)
+    b += eye(70, 72, 6, "#2a1a10", 1, "#b0f060") + eye(90, 72, 6, "#2a1a10", 1, "#b0f060")
+    b += path("M62,80 Q80,86 98,80", "url(#wd)", 2.5)
+    b += path("M73,84 Q80,90 87,84", sw=2.4, stroke="#b04060")
+    b += ell(63, 79, 3.4, 2.2, "#ff9ab0", 0, 0.7) + ell(97, 79, 3.4, 2.2, "#ff9ab0", 0, 0.7)
+    # petites feuilles sur la cape
+    b += poly([(50, 150), (44, 162), (58, 158)], "url(#lf)", 2) + poly([(110, 150), (116, 162), (102, 158)], "url(#lf)", 2)
+    return svg(160, 200, d, b)
+
 SPRITES = {
     "enemies": {
         "gobelin": gobelin, "squelette": squelette, "loup": lambda: loup(),
@@ -442,6 +477,9 @@ SPRITES = {
         "tortue": tortue, "loup": lambda: loup("#cfe8ff", "#6a8ad0", "#ffffff", "#7affff", "#8ad8ff", True),
         "sirene": sirene, "ange": ange, "homme_faucon": homme_faucon, "centaure": centaure,
         "buisson": buisson, "champignon": champignon, "tronc": tronc, "sarriette": sarriette,
+    },
+    "players": {
+        "sylvain": sylvain,
     },
 }
 

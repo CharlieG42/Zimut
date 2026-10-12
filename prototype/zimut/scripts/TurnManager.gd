@@ -225,6 +225,15 @@ func _pick_target(e: Dictionary) -> Dictionary:
 		var sc: float = -d * 3.0 + (1.0 - gm.hp_ratio(f2)) * 12.0
 		if Combat.has_status(f2, "invisible") and d > 1.0:
 			sc -= 30.0
+		# IA plus tactique : prioriser les soigneurs et les invocations gênantes
+		var classe: String = String(f2.get("classe", ""))
+		if classe == "Heal" or classe == "Druide":
+			sc += 14.0
+		if f2.get("entity_type", "") == "Summon":
+			sc += 8.0
+		# Finir les cibles quasi mortes (chasse à l'exécution)
+		if gm.hp_ratio(f2) < 0.25:
+			sc += 10.0
 		if sc > best_score:
 			best_score = sc
 			best = f2
@@ -274,8 +283,11 @@ func _cell_score(e: Dictionary, c: Vector2i, tpos: Vector2i, dmap: Dictionary, d
 	if man <= rng and man >= 1 and (man == 1 or Combat.has_los(c, tpos, gm.obstacles)):
 		sc += 28.0
 	if desired > 1:
-		# Les tireurs évitent d'être au contact d'un ennemi
+		# Les tireurs évitent d'être au contact d'un ennemi — et fuient carrément s'ils sont blessés
+		var flee: float = 14.0 if gm.hp_ratio(e) >= 0.4 else 30.0
+		var in_contact: int = 0
 		for f: Dictionary in gm.enemies_of(e):
 			if Combat.manhattan(c, gm.pos_of(f)) <= 1:
-				sc -= 14.0
+				in_contact += 1
+		sc -= flee * float(in_contact)
 	return sc
