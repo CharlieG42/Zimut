@@ -127,7 +127,7 @@ class SpellCard extends Button:
 				draw_circle(center, 3.5, Color(0.95, 0.98, 1.0))
 			_:
 				draw_line(center + Vector2(-9, 7), center + Vector2(4, -10), Color(1.0, 0.94, 0.75), 3.0, true)
-			draw_line(center + Vector2(1, -2), center + Vector2(10, -6), Color(1.0, 0.94, 0.75), 2.0, true)
+				draw_line(center + Vector2(1, -2), center + Vector2(10, -6), Color(1.0, 0.94, 0.75), 2.0, true)
 		# Nom compact en deux lignes si nécessaire.
 		var spell_name: String = String(spell.get("name", "Sort"))
 		var name_size: int = 14 if spell_name.length() <= 12 else 12
