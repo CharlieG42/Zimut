@@ -184,6 +184,9 @@ func _ensure_view(e: Dictionary) -> EntityView:
 	var v := EntityView.new()
 	v.setup(e)
 	v.position = grid_to_screen(int(e["x"]), int(e["y"]))
+	# Les unités restent lisibles même derrière le feuillage des arbres : la profondeur
+	# des décors ne doit pas masquer entièrement un combattant et ne laisser que sa barre de vie.
+	v.z_index = 1
 	_entity_layer.add_child(v)
 	views[uid] = v
 	return v
