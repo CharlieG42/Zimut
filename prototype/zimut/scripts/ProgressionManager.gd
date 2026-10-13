@@ -710,6 +710,7 @@ func xp_level_factor(fight_level: int, member_level: int) -> float:
 
 ## Statistiques finales d'un membre d'équipe : base (classes.txt au niveau du perso)
 ## + points investis + équipement (+ panoplies) + paliers PA/PM.
+## PA plafonnés à 14, PM à 6 et PO à 3, quelles que soient les sources.
 func member_stats(data: Dictionary, member: Dictionary) -> Dictionary:
 	var classe: String = String(member.get("classe", ""))
 	var ent: Dictionary = roster_entry(data, classe)
@@ -725,8 +726,9 @@ func member_stats(data: Dictionary, member: Dictionary) -> Dictionary:
 	var out: Dictionary = {
 		"classe": classe, "level": level,
 		"max_pv": int(row["vita"]) + int(inv.get("vita", 0)) * int(ClassRules.STAT_GAIN["vita"]) + int(eq["vita"]),
-		"pa": int(row["pa"]) + int(ms["pa"]) + int(fx.get("pa", 0)),
-		"pm": int(row["pm"]) + int(ms["pm"]) + int(fx.get("pm", 0)),
+		"pa": mini(ClassRules.PA_CAP, int(row["pa"]) + int(ms["pa"]) + int(inv.get("pa", 0)) + int(fx.get("pa", 0))),
+		"pm": mini(ClassRules.PM_CAP, int(row["pm"]) + int(ms["pm"]) + int(inv.get("pm", 0)) + int(fx.get("pm", 0))),
+		"po": mini(ClassRules.PO_CAP, int(inv.get("po", 0)) + int(fx.get("po", 0))),
 		"fx": fx, "sets": agg["sets"],
 	}
 	for k: String in ["force", "intelligence", "agility", "wisdom", "defense"]:
@@ -736,8 +738,10 @@ func member_stats(data: Dictionary, member: Dictionary) -> Dictionary:
 ## Investit 1 point de capital dans `stat`. Retourne "" si OK, sinon la raison.
 func invest_point(data: Dictionary, classe: String, stat: String) -> String:
 	var e: Dictionary = roster_entry(data, classe)
-	if e.is_empty() or not ClassRules.STATS.has(stat):
+	if e.is_empty() or not (ClassRules.STATS.has(stat) or ClassRules.BONUS_STATS.has(stat)):
 		return "Statistique inconnue."
+	if ClassRules.BONUS_STATS.has(stat) and int(e["invested"].get(stat, 0)) >= ClassRules.BONUS_MAX_LEVELS:
+		return "Maximum %d niveaux de %s." % [ClassRules.BONUS_MAX_LEVELS, ClassRules.BONUS_STAT_LABEL[stat]]
 	var cost: int = ClassRules.point_cost(classe, stat, int(e["invested"].get(stat, 0)))
 	if int(e["unspent"]) < cost:
 		return "Capital insuffisant (%d requis)." % cost
