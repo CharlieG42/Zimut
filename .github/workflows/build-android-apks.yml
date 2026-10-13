@@ -1,4 +1,4 @@
-name: Build Android APKs (Zimut & ZOE)
+name: Build Android APK (Zimut)
 
 on:
   workflow_dispatch:
@@ -6,13 +6,11 @@ on:
     branches: [ main ]
     paths:
       - 'prototype/zimut/**'
-      - 'prototype/zoe/**'
       - '.github/workflows/build-android-apks.yml'
   pull_request:
     branches: [ main ]
     paths:
       - 'prototype/zimut/**'
-      - 'prototype/zoe/**'
       - '.github/workflows/build-android-apks.yml'
 
 env:
@@ -20,7 +18,7 @@ env:
 
 jobs:
   build-apks:
-    name: Build APKs
+    name: Build APK
     runs-on: ubuntu-24.04
 
     steps:
@@ -96,21 +94,11 @@ jobs:
             || true
           test -s export/Zimut-debug.apk
 
-      - name: Export ZOE APK (Debug)
-        run: |
-          cd prototype/zoe
-          godot --headless --export-debug "Android Debug" export/ZOE-debug.apk \
-            || godot --headless --export-debug "Android Debug" export/ZOE-debug.apk \
-            || true
-          test -s export/ZOE-debug.apk
-
-      - name: Upload Debug APKs
+      - name: Upload Zimut Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: Debug-APKs
-          path: |
-            prototype/zimut/export/Zimut-debug.apk
-            prototype/zoe/export/ZOE-debug.apk
+          name: Zimut-debug
+          path: prototype/zimut/export/Zimut-debug.apk
           retention-days: 7
           if-no-files-found: error
 
@@ -125,25 +113,12 @@ jobs:
           godot --headless --verbose --export-release "Android" export/Zimut-release.apk || true
           test -s export/Zimut-release.apk
 
-      - name: Export ZOE APK (Release)
-        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
-        env:
-          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /home/runner/.local/share/godot/keystores/release.keystore
-          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEY_ALIAS }}
-          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          cd prototype/zoe
-          godot --headless --verbose --export-release "Android Release" export/ZOE-release.apk || true
-          test -s export/ZOE-release.apk
-
-      - name: Upload Release APKs
+      - name: Upload Zimut Release APK
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
-          name: Release-APKs
-          path: |
-            prototype/zimut/export/Zimut-release.apk
-            prototype/zoe/export/ZOE-release.apk
+          name: Zimut-release
+          path: prototype/zimut/export/Zimut-release.apk
           retention-days: 30
           if-no-files-found: error
 
