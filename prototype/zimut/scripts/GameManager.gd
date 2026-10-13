@@ -163,7 +163,8 @@ func _generate_obstacles() -> void:
 		forbidden[sp] = true
 		for d: Vector2i in Combat.DIRS:
 			forbidden[sp + d] = true
-	var wanted: int = _rng.randi_range(6, 9)
+	# La forêt garde des couloirs de déplacement plus lisibles : moins d’obstacles décoratifs.
+	var wanted: int = _rng.randi_range(5, 7) if fight_biome == "Forêt" else _rng.randi_range(6, 9)
 	var tree_chance: float = 0.55
 	match fight_biome:
 		"Montagne":
