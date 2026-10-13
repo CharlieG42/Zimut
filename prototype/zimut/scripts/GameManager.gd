@@ -1019,7 +1019,7 @@ func _resolve_attack(caster: Dictionary, spell: Dictionary, p: Dictionary, cell:
 	# Balises du Chasseur : chaque zone d'attaque touchée réplique les dégâts de
 	# zone autour des balises alliées qui couvrent une case touchée.
 	if p["aoe"] == "zone":
-		var rep: Array = _beacon_replicas(caster, spell, p, cell, base)
+		var rep: Dictionary = _beacon_replicas(caster, spell, p, cell, base)
 		if rep.size() > 0:
 			total += int(rep["dmg"])
 			names.append("balise (%d)" % int(rep["dmg"]))
