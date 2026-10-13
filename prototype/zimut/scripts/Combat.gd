@@ -14,6 +14,7 @@ const PUSH := {
 	"Coup écrasant": 2,
 	"Tremblement de terre": 1,
 	"Poing de pierre": 2,
+	"Tir de recul": 2,
 }
 
 const NEGATIVE: Array = ["poison", "bleed", "burn", "stun", "root", "slow", "curse", "weaken", "taunted"]
@@ -593,11 +594,16 @@ const SUMMONS := {
 	"Ange":         {"pv": 170, "force": 60, "defense": 30, "agility": 34, "pa": 4, "pm": 3, "color": Color(1.00, 0.95, 0.60), "spell": ["Lumière", 2, 3, 65]},
 	"Homme-Faucon": {"pv": 160, "force": 65, "defense": 30, "agility": 55, "pa": 4, "pm": 4, "color": Color(0.80, 0.55, 0.25), "spell": ["Piqué", 2, 4, 70]},
 	"Centaure":     {"pv": 260, "force": 70, "defense": 40, "agility": 45, "pa": 5, "pm": 4, "color": Color(0.65, 0.40, 0.25), "spell": ["Flèche de centaure", 2, 5, 80]},
-	"Buisson":      {"pv": 220, "force": 30, "defense": 45, "agility": 15, "pa": 3, "pm": 2, "color": Color(0.30, 0.55, 0.25), "spell": ["Épines", 2, 1, 40]},
-	"Champignon":   {"pv": 160, "force": 40, "defense": 26, "agility": 18, "pa": 3, "pm": 3, "color": Color(0.85, 0.55, 0.40), "spell": ["Spores", 2, 3, 50]},
+	"Buisson":      {"pv": 220, "force": 30, "defense": 45, "agility": 15, "pa": 3, "pm": 2, "color": Color(0.30, 0.55, 0.25), "spell": ["Sève fertilisante", 2, 2, "Restaure 40 PV + 20% défense (2 tours; allié)"]},
+	"Champignon":   {"pv": 160, "force": 40, "defense": 26, "agility": 18, "pa": 3, "pm": 3, "color": Color(0.85, 0.55, 0.40), "spell": ["Spores toxiques", 2, 3, "40 dégâts + poison (25 dégâts/tour; 2 tours)"]},
 	"Tronc":        {"pv": 320, "force": 45, "defense": 65, "agility": 10, "pa": 4, "pm": 2, "color": Color(0.45, 0.32, 0.18), "spell": ["Bras de bois", 2, 1, 60]},
-	"Sarriette":    {"pv": 200, "force": 60, "defense": 32, "agility": 40, "pa": 4, "pm": 3, "color": Color(0.55, 0.80, 0.35), "spell": ["Fouet de sarriette", 2, 4, 75]},	# Arbre du Sylvain : immobile, ne joue pas, bloque la vue, relaie les soins du Sylvain
-	"Arbre":        {"pv": 260, "force": 0, "defense": 30, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.30, 0.65, 0.30), "spell": [], "static": true},
+	"Sarriette":    {"pv": 200, "force": 60, "defense": 32, "agility": 40, "pa": 4, "pm": 3, "color": Color(0.55, 0.80, 0.35), "spell": ["Fouet de sarriette", 2, 4, 75]},
+	"Ronce agressive": {"pv": 140, "force": 55, "defense": 25, "agility": 30, "pa": 3, "pm": 3, "color": Color(0.40, 0.55, 0.25), "spell": ["Fouet de ronce", 2, 2, 45]},	# Arbre du Sylvain : immobile, ne joue pas, bloque la vue, relaie les soins du Sylvain
+	"Arbre":        {"pv": 260, "force": 0, "defense": 30, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.30, 0.65, 0.30), "spell": [], "static": true, "blocks_los": true, "relay": true, "unique": true},
+	# Racines du Sylvain : bloquent la ligne de vue, sans relais de soins
+	"Racines":      {"pv": 200, "force": 0, "defense": 50, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.45, 0.38, 0.22), "spell": [], "static": true, "blocks_los": true, "unique": true},
+	# Balise du Chasseur : immobile, réplique les dégâts de zone autour d'elle
+	"Balise":       {"pv": 90, "force": 0, "defense": 30, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.90, 0.60, 0.20), "spell": [], "static": true, "beacon": true},
 }
 
 
@@ -606,4 +612,10 @@ static func summon_spells(sname: String) -> Array:
 	var sp: Array = info["spell"]
 	if sp.is_empty():
 		return []
-	return [_mk(String(sp[0]), int(sp[1]), int(sp[2]), "%d dégâts" % int(sp[3]))]
+	var eff: String = String(sp[3])
+	var stype: String = "Attaque"
+	if eff.contains("restaure"):
+		stype = "Soin"
+	elif eff.begins_with("+"):
+		stype = "Buff"
+	return [_mk(String(sp[0]), int(sp[1]), int(sp[2]), eff, stype)]

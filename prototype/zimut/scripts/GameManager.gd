@@ -863,6 +863,8 @@ func validate_cast(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Str
 			return "Aucune invocation active."
 	if p["kind"] == "summon" and summons_of(caster).size() >= 3:
 		return "Trop d'invocations (3 max)."
+	if p["kind"] == "summon" and String(p["summon"]) == "Balise" and beacons_of(caster).size() >= 3:
+		return "Trop de balises (3 max)."
 	if p["kind"] == "revive" and graveyard.is_empty():
 		return "Aucun allié à ressusciter."
 	if p["kind"] == "teleport":
@@ -1014,6 +1016,13 @@ func _resolve_attack(caster: Dictionary, spell: Dictionary, p: Dictionary, cell:
 			continue
 		total += _hit_target(caster, spell, p, t, base)
 		names.append(String(t["name"]))
+	# Balises du Chasseur : chaque zone d'attaque touchée réplique les dégâts de
+	# zone autour des balises alliées qui couvrent une case touchée.
+	if p["aoe"] == "zone":
+		var rep: Array = _beacon_replicas(caster, spell, p, cell, base)
+		if rep.size() > 0:
+			total += int(rep["dmg"])
+			names.append("balise (%d)" % int(rep["dmg"]))
 	for b: Dictionary in p["self_buffs"]:
 		_apply_status(caster, caster, String(b["id"]), int(b["turns"]), float(b["value"]))
 	if names.is_empty():
@@ -1174,6 +1183,14 @@ func trees_of(owner: Dictionary) -> Array:
 			out.append(s)
 	return out
 
+## Balises actives d'un Chasseur (3 max).
+func beacons_of(owner: Dictionary) -> Array:
+	var out: Array = []
+	for s: Dictionary in summons:
+		if bool(s.get("beacon", false)) and int(s.get("owner", -1)) == int(owner["uid"]) and is_alive(s):
+			out.append(s)
+	return out
+
 
 func _resolve_heal(caster: Dictionary, spell: Dictionary, p: Dictionary, cell: Vector2i) -> String:
 	var targets: Array = []
@@ -1269,14 +1286,19 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 	s["spells"] = Combat.summon_spells(sname)
 	s["init"] = float(caster.get("init", 0.0)) - 0.01
 	var is_static: bool = bool(info.get("static", false))
-	if sname == "Arbre":
-		# 1 seul arbre par Sylvain : le précédent se fane
-		for old_tree: Dictionary in trees_of(caster):
-			remove_entity_from_grid(old_tree)
+	if bool(info.get("unique", false)):
+		# 1 seul exemplaire par invocateur : le précédent se fane
+		for old: Dictionary in summons_of(caster):
+			if String(old.get("classe", "")) == sname:
+				remove_entity_from_grid(old)
+	if bool(info.get("blocks_los", false)):
 		s["blocks_los"] = true
+	if bool(info.get("relay", false)):
 		s["relay"] = true
+	if bool(info.get("beacon", false)):
+		s["beacon"] = true
+	if is_static:
 		s["static"] = true
-		s["lifetime"] = -1
 	summons.append(s)
 	grid[cell.y][cell.x] = s
 	if not is_static:
@@ -1288,6 +1310,28 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 	fx.emit("summon", {"entity": s})
 	return "%s invoque %s !" % [caster["name"], sname]
 
+
+## Balises du Chasseur : une zone d'attaque qui touche une case couverte par une
+## balise alliée y réplique ses dégâts (même zone, centrée sur la balise).
+func _beacon_replicas(caster: Dictionary, spell: Dictionary, p: Dictionary, cell: Vector2i, base: float) -> Dictionary:
+	var hit_cells: Array[Vector2i] = Combat.zone_cells(cell, int(p["zone_r"]), String(p["zone_shape"]), GRID_SIZE)
+	var total: int = 0
+	var used: Array = []
+	for b: Dictionary in summons_of(caster):
+		if not bool(b.get("beacon", false)) or used.has(b) or not is_alive(b):
+			continue
+		var bpos: Vector2i = pos_of(b)
+		if not hit_cells.has(bpos):
+			continue
+		used.append(b)
+		var rep_cells: Array[Vector2i] = Combat.zone_cells(bpos, int(p["zone_r"]), String(p["zone_shape"]), GRID_SIZE)
+		for e: Dictionary in enemies_of(caster):
+			if rep_cells.has(pos_of(e)) and is_alive(e):
+				total += _hit_target(caster, spell, p, e, base)
+		fx.emit("beacon", {"from": bpos, "cells": rep_cells})
+	if total <= 0:
+		return {}
+	return {"dmg": total}
 
 func _resolve_revive(caster: Dictionary, _spell: Dictionary, p: Dictionary) -> String:
 	var dead: Dictionary = graveyard.pop_back()
