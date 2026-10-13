@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="170" viewBox="0 0 120 170">
+  <defs>
+    <linearGradient id="bw" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7a5630"/>
+      <stop offset="1" stop-color="#3a2814"/>
+    </linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f5c542"/>
+      <stop offset="1" stop-color="#c07a18"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="60" cy="164" rx="34" ry="7" fill="#000000" opacity="0.18"/>
+  <path d="M44,164 L48,120 L72,120 L76,164 Z" fill="url(#bw)" stroke="#241408" stroke-width="3"/>
+  <rect x="50" y="58" width="20" height="64" rx="4" fill="url(#bw)" stroke="#241408" stroke-width="3"/>
+  <circle cx="60" cy="40" r="24" fill="url(#bg)" stroke="#241408" stroke-width="3.5"/>
+  <circle cx="60" cy="40" r="14" fill="none" stroke="#7a4a08" stroke-width="3"/>
+  <circle cx="60" cy="40" r="5" fill="#7a4a08"/>
+  <path d="M60,16 L60,8 M84,40 L92,40 M60,64 L60,72 M36,40 L28,40" stroke="#f5c542" stroke-width="4" stroke-linecap="round"/>
+  <path d="M74,26 L80,20 M74,54 L80,60 M46,54 L40,60 M46,26 L40,20" stroke="#f5c542" stroke-width="4" stroke-linecap="round"/>
+</svg>
