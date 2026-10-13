@@ -15,3 +15,9 @@ Les SVG sont des ressources Godot standard et restent modifiables. `scripts/Fore
 Les trois variantes d'arbres et le rocher ont été redessinés avec des silhouettes plus organiques, des masses de feuillage superposées, des dégradés simples et des ombres intégrées. La palette du sol forestier est légèrement plus profonde et moins fluorescente, avec des reflets plus doux. Ces ressources conservent leurs dimensions et leur ancrage afin de limiter les changements dans le placement existant.
 
 Note : il s'agit d'une étape intermédiaire en SVG vectoriel stylisé, pas encore d'une texture peinte haute définition comme les références. Elle prépare l'intégration et la cohérence avant un éventuel lot d'illustrations raster plus détaillées.
+
+## Chargement dans le jeu
+
+- Les arbres d'obstacle et le rocher sont chargés par `scripts/Prop.gd` depuis `res://assets/sprites/objects/`.
+- Les nouvelles tuiles de sol sont chargées par `scripts/Cell.gd` depuis `res://assets/sprites/tiles/` ; voir le README du dossier `tiles`.
+- Les fichiers fougère, champignons et souche ne sont pas encore instanciés automatiquement dans le combat ; ils sont uniquement disponibles pour le futur habillage du décor.
