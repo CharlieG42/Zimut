@@ -23,6 +23,7 @@ var path_cost: int = 0
 var flash: float = 0.0
 
 var _base: Color = Color(0.43, 0.68, 0.27)
+var _forest_tile_texture: Texture2D = null
 var _tufts: Array = []
 var _flowers: Array = []
 var _pulse_phase: float = 0.0
@@ -45,6 +46,14 @@ var biome: String = "Forêt"
 
 func setup(gp: Vector2i) -> void:
 	grid_position = gp
+	_forest_tile_texture = null
+	if biome == "Forêt":
+		# Variantes déterministes : le décor reste stable entre les combats et les sessions.
+		var tile_index: int = posmod(gp.x * 3 + gp.y * 5, 4) + 1
+		var tile_path: String = "res://assets/sprites/tiles/forest_ground_%02d.svg" % tile_index
+		_forest_tile_texture = load(tile_path) as Texture2D
+		if _forest_tile_texture == null:
+			push_warning("Texture de sol forestier introuvable : %s" % tile_path)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = gp.x * 7919 + gp.y * 104729 + 17
 	var pal: Dictionary = BIOME_PALETTES.get(biome, BIOME_PALETTES["Forêt"])
@@ -110,22 +119,30 @@ func _draw() -> void:
 
 	# ── Dessus de la case ─────────────────────────────────────────────────
 	var top: PackedVector2Array = _diamond()
-	draw_colored_polygon(top, _base)
-	draw_colored_polygon(_diamond(0.62), Color(1, 0.96, 0.78, 0.025))
-	# Fond de case plus clair au centre (bump lumineux)
-	draw_colored_polygon(_diamond(0.80), Color(1, 0.96, 0.78, 0.035))
-	draw_colored_polygon(_diamond(0.45), Color(1, 0.96, 0.78, 0.025))
-	for t: Array in _tufts:
+	if biome == "Forêt" and _forest_tile_texture != null:
+		# La texture est un losange transparent 128×64, aligné sur la géométrie de Cell.
+		draw_texture_rect(_forest_tile_texture, Rect2(-HW, -HH, HW * 2.0, HH * 2.0), false)
+	else:
+		draw_colored_polygon(top, _base)
+		draw_colored_polygon(_diamond(0.62), Color(1, 0.96, 0.78, 0.025))
+		# Fond de case plus clair au centre (bump lumineux)
+		draw_colored_polygon(_diamond(0.80), Color(1, 0.96, 0.78, 0.035))
+		draw_colored_polygon(_diamond(0.45), Color(1, 0.96, 0.78, 0.025))
+	# Les motifs du sol forestier intègrent déjà mousse et brins d’herbe :
+	# ne pas les doubler par les détails procéduraux, afin de garder les unités lisibles.
+	if biome != "Forêt" or _forest_tile_texture == null:
+		for t: Array in _tufts:
 		var p: Vector2 = t[0]
 		var h: float = t[1]
 		var sway: float = t[2]
 		var tc: Color = t[3] if t.size() > 3 else _base.darkened(0.22)
 		draw_line(p, p + Vector2(sway, -h), tc, 1.6)
 		draw_line(p + Vector2(2, 0), p + Vector2(2 + sway * 0.6, -h * 0.7), tc.lightened(0.25), 1.4)
-	for f: Array in _flowers:
-		var fp: Vector2 = f[0]
-		draw_circle(fp, 2.6, f[1])
-		draw_circle(fp, 1.0, Color(0.95, 0.7, 0.1))
+	if biome != "Forêt" or _forest_tile_texture == null:
+		for f: Array in _flowers:
+			var fp: Vector2 = f[0]
+			draw_circle(fp, 2.6, f[1])
+			draw_circle(fp, 1.0, Color(0.95, 0.7, 0.1))
 	# Reflets/ombres sur les arêtes pour donner du volume
 	draw_line(Vector2(-HW, 0), Vector2(0, -HH), Color(0.93, 1.0, 0.82, 0.32), 2.0)
 	draw_line(Vector2(0, -HH), Vector2(HW, 0), Color(0.93, 1.0, 0.82, 0.24), 2.0)
