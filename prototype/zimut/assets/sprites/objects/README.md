@@ -2,6 +2,7 @@
 
 Ressources SVG vectorielles, fond transparent, dans le style cartoon coloré de Zimut.
 
+- `forest_tree.svg` : arbre forestier illustré, utilisé par `scripts/Prop.gd` en biome Forêt.
 - `forest_boulder.svg` : rocher. Il est chargé par `scripts/Prop.gd` pour le type d'obstacle `rock`.
 - `forest_fern.svg` : fougère décorative, prête pour un futur placement de décor.
 - `forest_mushrooms.svg` : groupe de champignons décoratifs.
