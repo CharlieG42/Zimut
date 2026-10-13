@@ -76,7 +76,7 @@ func _build_layers() -> void:
 	add_child(_cells_layer)
 	_forest_ambience = preload("res://scripts/ForestAmbience.gd").new()
 	_forest_ambience.name = "ForestAmbience"
-	_forest_ambience.z_index = 1
+	_forest_ambience.z_index = 0
 	_forest_ambience.configure(game_manager.GRID_SIZE, TILE_W, TILE_H, game_manager.fight_biome == "Forêt")
 	add_child(_forest_ambience)
 	_entity_layer = Node2D.new()
