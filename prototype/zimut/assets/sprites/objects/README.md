@@ -9,3 +9,9 @@ Ressources SVG vectorielles, fond transparent, dans le style cartoon coloré de 
 - `forest_stump.svg` : souche décorative.
 
 Les SVG sont des ressources Godot standard et restent modifiables. `scripts/ForestAmbience.gd` ajoute aussi des lucioles et feuilles flottantes discrètes, actives uniquement dans le biome Forêt. Les fougères, champignons et souches restent disponibles comme éléments décoratifs pour une prochaine étape de placement.
+
+## Direction artistique — forêt (lot peint)
+
+Les trois variantes d'arbres et le rocher ont été redessinés avec des silhouettes plus organiques, des masses de feuillage superposées, des dégradés simples et des ombres intégrées. La palette du sol forestier est légèrement plus profonde et moins fluorescente, avec des reflets plus doux. Ces ressources conservent leurs dimensions et leur ancrage afin de limiter les changements dans le placement existant.
+
+Note : il s'agit d'une étape intermédiaire en SVG vectoriel stylisé, pas encore d'une texture peinte haute définition comme les références. Elle prépare l'intégration et la cohérence avant un éventuel lot d'illustrations raster plus détaillées.

@@ -30,7 +30,7 @@ var _pulse_phase: float = 0.0
 
 ## Palettes par biome : damier clair / foncé, couleurs de touffes et fleurs.
 const BIOME_PALETTES := {
-	"Forêt":    {"a": Color(0.62, 0.78, 0.38), "b": Color(0.55, 0.72, 0.33),
+	"Forêt":    {"a": Color(0.56, 0.70, 0.34), "b": Color(0.49, 0.63, 0.29),
 		"tuft": Color(0.32, 0.60, 0.22), "flowers": [Color(1, 1, 1), Color(1, 0.9, 0.35), Color(1, 0.6, 0.75)]},
 	"Montagne": {"a": Color(0.55, 0.62, 0.52), "b": Color(0.48, 0.56, 0.47),
 		"tuft": Color(0.38, 0.48, 0.30), "flowers": [Color(0.85, 0.85, 0.9), Color(0.7, 0.8, 0.95), Color(0.95, 0.95, 1)]},
@@ -111,10 +111,10 @@ func _draw() -> void:
 	# ── Dessus de la case ─────────────────────────────────────────────────
 	var top: PackedVector2Array = _diamond()
 	draw_colored_polygon(top, _base)
-	draw_colored_polygon(_diamond(0.62), Color(1, 1, 1, 0.045))
+	draw_colored_polygon(_diamond(0.62), Color(1, 0.96, 0.78, 0.025))
 	# Fond de case plus clair au centre (bump lumineux)
-	draw_colored_polygon(_diamond(0.80), Color(1, 1, 1, 0.06))
-	draw_colored_polygon(_diamond(0.45), Color(1, 1, 1, 0.05))
+	draw_colored_polygon(_diamond(0.80), Color(1, 0.96, 0.78, 0.035))
+	draw_colored_polygon(_diamond(0.45), Color(1, 0.96, 0.78, 0.025))
 	for t: Array in _tufts:
 		var p: Vector2 = t[0]
 		var h: float = t[1]
