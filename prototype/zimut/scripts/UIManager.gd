@@ -257,31 +257,32 @@ class StatsView extends Control:
 		bg.shadow_color = Color(0, 0, 0, 0.5)
 		bg.shadow_size = 8
 		draw_style_box(bg, Rect2(Vector2.ZERO, size))
-		var pr := Rect2(16, 18, 140, 140)
+		# Carte compacte : portrait, identité et PV sur une ligne, PA/PM en pastilles.
+		var pr := Rect2(12, 12, 94, 104)
 		var pbg := StyleBoxFlat.new()
 		pbg.bg_color = team_col.darkened(0.6)
 		pbg.border_color = Color(1, 0.85, 0.3)
-		pbg.set_border_width_all(4)
-		pbg.set_corner_radius_all(16)
+		pbg.set_border_width_all(3)
+		pbg.set_corner_radius_all(14)
 		draw_style_box(pbg, pr)
 		var tex: Texture2D = Portraits.get_texture(e)
 		if tex != null:
-			draw_texture_rect_region(tex, pr.grow(-6.0), Portraits.head_region(tex))
+			draw_texture_rect_region(tex, pr.grow(-5.0), Portraits.head_region(tex))
 		else:
-			draw_circle(pr.get_center(), 46.0, e.get("color", Color(0.6, 0.6, 0.6)))
-		draw_string(font, Vector2(172, 40), String(e["name"]), HORIZONTAL_ALIGNMENT_LEFT, 360, 26, Color(1, 0.95, 0.8))
-		var hb := Rect2(172, 52, 350, 24)
+			draw_circle(pr.get_center(), 32.0, e.get("color", Color(0.6, 0.6, 0.6)))
+		draw_string(font, Vector2(120, 34), String(e["name"]), HORIZONTAL_ALIGNMENT_LEFT, 245, 22, Color(1, 0.95, 0.8))
+		draw_string(font, Vector2(120, 55), "Niveau %d  ·  Tour %d" % [int(e.get("level", 1)), int(gm.turn_count)], HORIZONTAL_ALIGNMENT_LEFT, 245, 14, Color(0.75, 0.83, 0.95))
+		var hb := Rect2(120, 66, 244, 19)
 		draw_rect(hb.grow(2.0), Color(0, 0, 0, 0.85))
 		var ratio: float = clampf(float(e["current_pv"]) / maxf(1.0, float(e["max_pv"])), 0.0, 1.0)
 		draw_rect(Rect2(hb.position, Vector2(hb.size.x * ratio, hb.size.y)), Color(0.3, 0.85, 0.35) if e["team"] == "player" else Color(0.9, 0.28, 0.25))
 		draw_rect(Rect2(hb.position, Vector2(hb.size.x * ratio, hb.size.y * 0.4)), Color(1, 1, 1, 0.2))
-		draw_string_outline(font, hb.position + Vector2(0, 19), "%d / %d" % [int(e["current_pv"]), int(e["max_pv"])], HORIZONTAL_ALIGNMENT_CENTER, hb.size.x, 18, 5, Color(0, 0, 0, 0.9))
-		draw_string(font, hb.position + Vector2(0, 19), "%d / %d" % [int(e["current_pv"]), int(e["max_pv"])], HORIZONTAL_ALIGNMENT_CENTER, hb.size.x, 18, Color.WHITE)
-		_orb(Vector2(232, 118), 36.0, Color(0.05, 0.25, 0.65), Color(0.2, 0.62, 1.0), "%d" % int(e["current_pa"]), "PA")
-		_orb(Vector2(328, 118), 36.0, Color(0.05, 0.4, 0.15), Color(0.25, 0.8, 0.35), "%d" % int(e["current_pm"]), "PM")
-		draw_string(font, Vector2(400, 112), "Tour %d" % int(gm.turn_count), HORIZONTAL_ALIGNMENT_LEFT, 130, 22, Color(0.8, 0.88, 1.0))
-		var rest: String = "Votre tour" if gm.current_turn == 0 else ("Auto…" if gm.auto_mode else "Tour adverse")
-		draw_string(font, Vector2(400, 140), rest, HORIZONTAL_ALIGNMENT_LEFT, 130, 16, Color(1, 0.85, 0.4) if gm.current_turn == 0 else Color(1, 0.55, 0.5))
+		draw_string_outline(font, hb.position + Vector2(0, 15), "%d / %d PV" % [int(e["current_pv"]), int(e["max_pv"])], HORIZONTAL_ALIGNMENT_CENTER, hb.size.x, 14, 4, Color(0, 0, 0, 0.9))
+		draw_string(font, hb.position + Vector2(0, 15), "%d / %d PV" % [int(e["current_pv"]), int(e["max_pv"])], HORIZONTAL_ALIGNMENT_CENTER, hb.size.x, 14, Color.WHITE)
+		_orb(Vector2(164, 119), 22.0, Color(0.05, 0.25, 0.65), Color(0.2, 0.62, 1.0), "%d" % int(e["current_pa"]), "PA")
+		_orb(Vector2(230, 119), 22.0, Color(0.05, 0.4, 0.15), Color(0.25, 0.8, 0.35), "%d" % int(e["current_pm"]), "PM")
+		var rest: String = "À vous" if gm.current_turn == 0 else ("Auto…" if gm.auto_mode else "Adverse")
+		draw_string(font, Vector2(270, 125), rest, HORIZONTAL_ALIGNMENT_LEFT, 105, 16, Color(1, 0.85, 0.4) if gm.current_turn == 0 else Color(1, 0.55, 0.5))
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -337,27 +338,28 @@ func _build_ui() -> void:
 	st.anchor_top = 1.0
 	st.anchor_bottom = 1.0
 	st.offset_left = 18.0
-	st.offset_right = 568.0
-	st.offset_top = -214.0
+	st.offset_right = 400.0
+	st.offset_top = -158.0
 	st.offset_bottom = -18.0
 	_root.add_child(st)
 	_stats = st
 
 	# Barre de sorts
 	_spell_scroll = ScrollContainer.new()
-	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	_spell_scroll.anchor_left = 0.0
-	_spell_scroll.anchor_right = 0.0
-	_spell_scroll.anchor_top = 0.0
+	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_spell_scroll.anchor_left = 0.5
+	_spell_scroll.anchor_right = 0.5
+	_spell_scroll.anchor_top = 1.0
 	_spell_scroll.anchor_bottom = 1.0
-	_spell_scroll.offset_left = 12.0
-	_spell_scroll.offset_right = 256.0
-	_spell_scroll.offset_top = 12.0
+	_spell_scroll.offset_left = -570.0
+	_spell_scroll.offset_right = 400.0
+	_spell_scroll.offset_top = -158.0
 	_spell_scroll.offset_bottom = -12.0
+	_spell_scroll.mouse_filter = Control.MOUSE_FILTER_STOP
 	_root.add_child(_spell_scroll)
-	_spell_box = VBoxContainer.new()
-	_spell_box.add_theme_constant_override("separation", 12)
+	_spell_box = HBoxContainer.new()
+	_spell_box.add_theme_constant_override("separation", 10)
 	_spell_scroll.add_child(_spell_box)
 
 	# Infobulle de sort
@@ -367,10 +369,10 @@ func _build_ui() -> void:
 	_tip_panel.anchor_right = 0.0
 	_tip_panel.anchor_top = 0.0
 	_tip_panel.anchor_bottom = 0.0
-	_tip_panel.offset_left = 276.0
-	_tip_panel.offset_right = 696.0
-	_tip_panel.offset_top = 14.0
-	_tip_panel.offset_bottom = 150.0
+	_tip_panel.offset_left = 270.0
+	_tip_panel.offset_right = 690.0
+	_tip_panel.offset_top = 148.0
+	_tip_panel.offset_bottom = 284.0
 	_tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tip_panel.visible = false
 	_tip_label = Label.new()
@@ -394,10 +396,10 @@ func _build_ui() -> void:
 	_end_btn.anchor_right = 1.0
 	_end_btn.anchor_top = 1.0
 	_end_btn.anchor_bottom = 1.0
-	_end_btn.offset_left = -330.0
+	_end_btn.offset_left = -212.0
 	_end_btn.offset_right = -22.0
-	_end_btn.offset_top = -170.0
-	_end_btn.offset_bottom = -24.0
+	_end_btn.offset_top = -132.0
+	_end_btn.offset_bottom = -18.0
 	_end_btn.pressed.connect(func() -> void:
 		Sfx.play("click")
 		end_turn_requested.emit())
@@ -410,10 +412,10 @@ func _build_ui() -> void:
 	row.anchor_right = 1.0
 	row.anchor_top = 1.0
 	row.anchor_bottom = 1.0
-	row.offset_left = -330.0
+	row.offset_left = -316.0
 	row.offset_right = -22.0
-	row.offset_top = -236.0
-	row.offset_bottom = -182.0
+	row.offset_top = -190.0
+	row.offset_bottom = -140.0
 	_root.add_child(row)
 	_auto_btn = _small_button("Auto", true)
 	_auto_btn.toggled.connect(func(on: bool) -> void:
@@ -584,7 +586,7 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.gm = game_manager
 		card.hotkey = idx if idx <= 10 else 0
 		card.base_col = _kind_color(spell)
-		card.custom_minimum_size = Vector2(232, 92)
+		card.custom_minimum_size = Vector2(154, 126)
 		card.text = String(spell["name"])
 		var nlen: int = String(spell["name"]).length()
 		card.add_theme_font_size_override("font_size", 21 if nlen <= 10 else (19 if nlen <= 15 else 17))
@@ -619,10 +621,10 @@ func _style_card(card: SpellCard, selected: bool) -> void:
 ## Fond de carte : marges internes pour que le nom reste entre les pastilles.
 func _card_box(bg: Color, border: Color, bw: int) -> StyleBoxFlat:
 	var sb: StyleBoxFlat = _flat(bg, border, 14, bw)
-	sb.content_margin_left = 50.0
-	sb.content_margin_right = 50.0
-	sb.content_margin_top = 8.0
-	sb.content_margin_bottom = 26.0
+	sb.content_margin_left = 38.0
+	sb.content_margin_right = 38.0
+	sb.content_margin_top = 30.0
+	sb.content_margin_bottom = 30.0
 	return sb
 
 
