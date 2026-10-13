@@ -137,12 +137,20 @@ func _load_texture() -> void:
 	sprite.scale = Vector2(sc, sc)
 	height = float(tex.get_height()) * sc
 	sprite.position = Vector2(0, -height * 0.5 + 6.0)
-	if _shader == null:
-		_shader = Shader.new()
-		_shader.code = FLASH_SHADER
-	_mat = ShaderMaterial.new()
-	_mat.shader = _shader
-	sprite.material = _mat
+	# Le shader de contour/flash peut échouer sur certains pilotes Android
+	# et rendre le Sprite2D entièrement invisible. Sur mobile, privilégier la
+	# texture native : le personnage reste visible même sans contour animé.
+	if not OS.has_feature("mobile"):
+		if _shader == null:
+			_shader = Shader.new()
+			_shader.code = FLASH_SHADER
+		_mat = ShaderMaterial.new()
+		_mat.shader = _shader
+		sprite.material = _mat
+	else:
+		_mat = null
+		sprite.material = null
+	sprite.visible = true
 
 
 func _process(delta: float) -> void:
