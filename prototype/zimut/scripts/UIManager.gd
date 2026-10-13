@@ -91,21 +91,18 @@ class SpellCard extends Button:
 		# Liseré gauche de la couleur du type (rouge attaque / bleu buff / vert soin / jaune debuff)
 		draw_rect(Rect2(0, 6, 5, size.y - 12), base_col if usable else base_col.darkened(0.4))
 		var p: Dictionary = Combat.parse(spell)
-		# PA en haut à gauche
-		_orb(Vector2(27, 27), 19.0, str(int(spell.get("cost_pa", 0))), Color(0.16, 0.50, 0.95))
-		_caption(Vector2(8, 58), 38.0, "PA", Color(0.16, 0.50, 0.95))
-		# PM en haut à droite (seulement si le sort en coûte)
-		if int(spell.get("cost_pm", 0)) > 0:
-			_orb(Vector2(size.x - 27, 27), 19.0, str(int(spell["cost_pm"])), Color(0.14, 0.64, 0.32))
-			_caption(Vector2(size.x - 46, 58), 38.0, "PM", Color(0.14, 0.64, 0.32))
-		# Portée en bas à droite
+		# Pastilles PA / PO dans la rangée supérieure, PM en bas à droite si nécessaire.
+		_orb(Vector2(25, 25), 17.0, str(int(spell.get("cost_pa", 0))), Color(0.16, 0.50, 0.95))
+		_caption(Vector2(7, 51), 36.0, "PA", Color(0.16, 0.50, 0.95))
 		var rng: int = int(spell.get("range", 1))
 		var rtxt: String = str(rng) if rng < 99 else "∞"
 		if String(p["target"]) == "self":
 			rtxt = "0"
-		_orb(Vector2(size.x - 27, size.y - 27), 17.0, rtxt, Color(0.86, 0.66, 0.16))
-		_caption(Vector2(size.x - 108, size.y - 20), 58.0, "Portée" if String(p["target"]) != "self" else "Sur soi",
-			Color(0.86, 0.66, 0.16), HORIZONTAL_ALIGNMENT_RIGHT)
+		_orb(Vector2(size.x - 25, 25), 17.0, rtxt, Color(0.86, 0.66, 0.16))
+		_caption(Vector2(size.x - 43, 51), 36.0, "PO", Color(0.86, 0.66, 0.16))
+		if int(spell.get("cost_pm", 0)) > 0:
+			_orb(Vector2(size.x - 25, size.y - 25), 16.0, str(int(spell["cost_pm"])), Color(0.14, 0.64, 0.32))
+			_caption(Vector2(size.x - 43, size.y - 3), 36.0, "PM", Color(0.14, 0.64, 0.32))
 		# Rangée du bas : touche, niveau de sort, zone, lancers restants
 		var x: float = 10.0
 		if hotkey > 0:
@@ -279,10 +276,10 @@ class StatsView extends Control:
 		draw_rect(Rect2(hb.position, Vector2(hb.size.x * ratio, hb.size.y * 0.4)), Color(1, 1, 1, 0.2))
 		draw_string_outline(font, hb.position + Vector2(0, 15), "%d / %d PV" % [int(e["current_pv"]), int(e["max_pv"])], HORIZONTAL_ALIGNMENT_CENTER, hb.size.x, 14, 4, Color(0, 0, 0, 0.9))
 		draw_string(font, hb.position + Vector2(0, 15), "%d / %d PV" % [int(e["current_pv"]), int(e["max_pv"])], HORIZONTAL_ALIGNMENT_CENTER, hb.size.x, 14, Color.WHITE)
-		_orb(Vector2(164, 119), 22.0, Color(0.05, 0.25, 0.65), Color(0.2, 0.62, 1.0), "%d" % int(e["current_pa"]), "PA")
-		_orb(Vector2(230, 119), 22.0, Color(0.05, 0.4, 0.15), Color(0.25, 0.8, 0.35), "%d" % int(e["current_pm"]), "PM")
+		_orb(Vector2(164, 88), 22.0, Color(0.05, 0.25, 0.65), Color(0.2, 0.62, 1.0), "%d" % int(e["current_pa"]), "PA")
+		_orb(Vector2(230, 88), 22.0, Color(0.05, 0.4, 0.15), Color(0.25, 0.8, 0.35), "%d" % int(e["current_pm"]), "PM")
 		var rest: String = "À vous" if gm.current_turn == 0 else ("Auto…" if gm.auto_mode else "Adverse")
-		draw_string(font, Vector2(270, 125), rest, HORIZONTAL_ALIGNMENT_LEFT, 105, 16, Color(1, 0.85, 0.4) if gm.current_turn == 0 else Color(1, 0.55, 0.5))
+		draw_string(font, Vector2(270, 94), rest, HORIZONTAL_ALIGNMENT_LEFT, 105, 16, Color(1, 0.85, 0.4) if gm.current_turn == 0 else Color(1, 0.55, 0.5))
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -620,10 +617,10 @@ func _style_card(card: SpellCard, selected: bool) -> void:
 
 ## Fond de carte : marges internes pour que le nom reste entre les pastilles.
 func _card_box(bg: Color, border: Color, bw: int) -> StyleBoxFlat:
-	var sb: StyleBoxFlat = _flat(bg, border, 14, bw)
-	sb.content_margin_left = 38.0
-	sb.content_margin_right = 38.0
-	sb.content_margin_top = 30.0
+	var sb: StyleBoxFlat = _flat(bg, border, 22, bw)
+	sb.content_margin_left = 34.0
+	sb.content_margin_right = 34.0
+	sb.content_margin_top = 42.0
 	sb.content_margin_bottom = 30.0
 	return sb
 
