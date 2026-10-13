@@ -289,6 +289,13 @@ func init_entities() -> void:
 			"color": st["color"], "fx": pfx,
 		}, true)
 		player["spells"] = _build_spells(classe, plevel)
+		# Portée bonus du perso (points de caractéristiques + objets, plafonnée à 3)
+		var po_bonus: int = int(st.get("po", 0))
+		if po_bonus > 0:
+			for s: Dictionary in player["spells"]:
+				var sp: Dictionary = Combat.parse(s)
+				if String(sp["target"]) != "self" and int(s["range"]) < 99:
+					s["range"] = int(s["range"]) + po_bonus
 		# Niveaux de sorts améliorés (1..10) : multiplicateur d'efficacité
 		if not active_save.is_empty():
 			for s: Dictionary in player["spells"]:

@@ -65,3 +65,9 @@ Accessoire,Bague de l'assassin,35,Venin,15,Or,15,,,500
 Accessoire,Collier de mana,40,Magie,25,Or,15,,,600
 Accessoire,Bague de résistance,45,Or,20,Magie,15,Cuir,10,700
 Accessoire,Collier légendaire,50,Or,30,Magie,20,Fer,10,800
+Accessoire,Anneau de célérité,15,Cuir,10,Magie,5,,,120
+Accessoire,Oculaire de visée,20,Fer,10,Magie,10,,,180
+Accessoire,Amulette du tempérament,25,Magie,15,Or,10,,,250
+Cape,Cape du coursier,30,Cuir,20,Magie,15,,,320
+Accessoire,Sablier de bataille,35,Magie,25,Or,15,,,450
+Accessoire,Gantelet de précision,45,Or,20,Magie,25,Fer,10,700

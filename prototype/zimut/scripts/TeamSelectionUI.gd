@@ -226,8 +226,8 @@ func _build() -> void:
 	nav.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	nav.offset_left = -330.0
 	nav.offset_right = 330.0
-	nav.offset_top = 140.0
-	nav.offset_bottom = 560.0
+	nav.offset_top = 190.0
+	nav.offset_bottom = 610.0
 	nav.add_theme_constant_override("separation", 20)
 	_root.add_child(nav)
 
@@ -281,8 +281,8 @@ func _build() -> void:
 	_action_btn.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	_action_btn.offset_left = -190.0
 	_action_btn.offset_right = 190.0
-	_action_btn.offset_top = 590.0
-	_action_btn.offset_bottom = 670.0
+	_action_btn.offset_top = 640.0
+	_action_btn.offset_bottom = 720.0
 	_action_btn.add_theme_font_size_override("font_size", 26)
 	_action_btn.pressed.connect(_on_action)
 	_root.add_child(_action_btn)
