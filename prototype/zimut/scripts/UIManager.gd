@@ -39,6 +39,21 @@ var _over_title: Label
 var _over_sub: Label
 var _cards: Array = []
 var _cards_owner: int = -1
+var _initialized: bool = false
+
+
+func _ready() -> void:
+	# Sécurité : si cette scène est lancée sans passer par Main.gd, le HUD doit
+	# quand même remplacer l'ancienne interface statique au lieu de la laisser visible.
+	call_deferred("_ensure_initialized")
+
+
+func _ensure_initialized() -> void:
+	if _initialized:
+		return
+	var manager: Node = get_node_or_null("/root/GameManager")
+	if manager != null:
+		init(manager)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -293,14 +308,22 @@ class StatsView extends Control:
 # ═══════════════════════════════════════════════════════════════════════════
 
 func init(manager: Node) -> void:
+	if _initialized or manager == null:
+		return
+	_initialized = true
 	game_manager = manager
 	_grid = get_node_or_null("../GridManager")
-	# Masque l'ancienne interface de la scène
+
+	# Supprime les anciens contrôles statiques (Tour des joueurs, Joueur : -,
+	# panneau de sorts vide, etc.). Les masquer ne suffisait pas dans toutes
+	# les scènes héritées et pouvait laisser apparaître un HUD fantôme.
 	for c: Node in get_children():
-		if c is CanvasItem:
-			(c as CanvasItem).visible = false
+		remove_child(c)
+		c.queue_free()
+
 	_build_ui()
 	_connect_signals()
+	_refresh()
 
 
 func _connect_signals() -> void:

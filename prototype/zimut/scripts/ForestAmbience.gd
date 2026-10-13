@@ -46,8 +46,8 @@ func _process(delta: float) -> void:
 ## Habillage discret du cadre : décor dans les marges, jamais sur les cases.
 ## Les formes sont dessinées dans le repère de la grille et restent non interactives.
 func _draw_forest_frame() -> void:
-	var side_x: float = _bounds.x + 72.0
-	var top_y: float = 10.0
+	var side_x: float = _bounds.x + 56.0
+	var top_y: float = 4.0
 	for side: int in [-1, 1]:
 		var anchor := Vector2(float(side) * side_x, top_y)
 		# Brume froide et douce derrière les feuilles.
@@ -108,6 +108,24 @@ func _draw_forest_frame() -> void:
 		draw_line(mush_base, mush_base + Vector2(0.0, -7.0), Color(0.82, 0.77, 0.57, 0.9), 3.0, true)
 		draw_arc(mush_base + Vector2(0.0, -7.0), 6.0, PI, TAU, 16, Color(0.76, 0.38, 0.24, 0.95), 4.0, true)
 		draw_circle(mush_base + Vector2(-2.0, -8.5), 1.0, Color(1.0, 0.88, 0.6, 0.9))
+
+		# Fougères de premier plan : silhouettes étagées pour relier les bouquets
+		# au bord de l'écran et éviter l'impression de feuilles qui flottent.
+		var fern_root := anchor + Vector2(float(side) * 18.0, 198.0)
+		draw_line(fern_root, fern_root + Vector2(-float(side) * 22.0, -54.0), Color(0.16, 0.30, 0.18, 0.9), 3.0, true)
+		for frond_i: int in range(5):
+			var t: float = float(frond_i) / 4.0
+			var stem: Vector2 = fern_root + Vector2(-float(side) * 22.0 * t, -54.0 * t)
+			var leaf_dir: float = -float(side) * (13.0 + 4.0 * sin(t * PI))
+			for branch_i: int in range(2):
+				var sign_y: float = -1.0 if branch_i == 0 else 1.0
+				var tip := stem + Vector2(leaf_dir, sign_y * (8.0 + 5.0 * sin(t * PI)))
+				draw_line(stem, tip, Color(0.18, 0.38, 0.20, 0.88), 1.8, true)
+				draw_colored_polygon(PackedVector2Array([
+					tip,
+					tip + Vector2(float(side) * 9.0, -sign_y * 2.0),
+					tip + Vector2(float(side) * 4.0, sign_y * 5.0)
+				]), Color(0.36, 0.58, 0.27, 0.92))
 
 func _draw() -> void:
 	if visible:
