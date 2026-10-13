@@ -6,22 +6,18 @@ static var _cache: Dictionary = {}
 
 
 static func get_texture(entity: Dictionary) -> Texture2D:
-	var cname: String = EntityView.sprite_key(String(entity.get("skin", entity.get("classe", ""))))
 	var folders: Array[String] = ["enemies", "players"]
 	if entity.get("team", "") == "player":
 		folders = ["players", "enemies"]
 	if entity.get("entity_type", "") == "Summon":
 		folders = ["summons", "enemies", "players"]
-	var boss: bool = bool(entity.get("boss", false))
-	var key: String = "%s|%s|%s" % [folders[0], cname, boss]
+	var names: Array[String] = EntityView.skin_names(entity)
+	var key: String = "%s|%s" % [folders[0], "/".join(PackedStringArray(names))]
 	if _cache.has(key):
 		return _cache[key]
-	var names: Array[String] = [cname]
-	if boss:
-		names.push_front(cname + "_boss")
 	var tex: Texture2D = null
-	for folder: String in folders:
-		for nm: String in names:
+	for nm: String in names:
+		for folder: String in folders:
 			for ext: String in ["png", "svg"]:
 				var path: String = "res://assets/sprites/%s/%s.%s" % [folder, nm, ext]
 				if tex == null and ResourceLoader.exists(path):

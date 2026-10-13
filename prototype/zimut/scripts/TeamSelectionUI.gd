@@ -48,6 +48,9 @@ var _title: Label
 var _fight_btn: Button
 var _equip_btn: Button
 var _chars_btn: Button
+var _fight_sel_label: Label
+var _fight_prev_btn: Button
+var _fight_next_btn: Button
 
 func _ready() -> void:
 	_load_classes()
@@ -185,6 +188,29 @@ func _build() -> void:
 	_root.add_child(bg)
 
 	# Titre
+	# Sélecteur de combat (rejouer un combat déjà gagné)
+	var sel_row := HBoxContainer.new()
+	sel_row.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	sel_row.offset_top = 108.0
+	sel_row.offset_bottom = 166.0
+	sel_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	sel_row.add_theme_constant_override("separation", 14)
+	_root.add_child(sel_row)
+	_fight_prev_btn = _std_btn("◀", Color(0.40, 0.46, 0.62))
+	_fight_prev_btn.custom_minimum_size = Vector2(70, 54)
+	_fight_prev_btn.pressed.connect(_on_fight_prev)
+	sel_row.add_child(_fight_prev_btn)
+	_fight_sel_label = Label.new()
+	_fight_sel_label.custom_minimum_size = Vector2(760, 0)
+	_fight_sel_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_fight_sel_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_fight_sel_label.add_theme_font_size_override("font_size", 22)
+	sel_row.add_child(_fight_sel_label)
+	_fight_next_btn = _std_btn("▶", Color(0.40, 0.46, 0.62))
+	_fight_next_btn.custom_minimum_size = Vector2(70, 54)
+	_fight_next_btn.pressed.connect(_on_fight_next)
+	sel_row.add_child(_fight_next_btn)
+
 	_title = Label.new()
 	_title.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	_title.offset_top = 30.0
@@ -334,9 +360,33 @@ func _build() -> void:
 	back.offset_right = 240.0
 	back.offset_top = 30.0
 	back.offset_bottom = 100.0
-	back.pressed.connect(func() -> void: back_requested.emit())
+	back.pressed.connect(_on_back)
 	_root.add_child(back)
 
+	refresh()
+
+## Retour au menu principal (sauvegarde déjà écrite à chaque modification).
+func _on_back() -> void:
+	back_requested.emit()
+	if GameManager.active_slot >= 0 and not GameManager.active_save.is_empty():
+		ProgressionManager.write_save(GameManager.active_slot, GameManager.active_save)
+	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+
+
+## Sélecteur de combat : rejouer un combat déjà gagné (XP réduite si plus bas que le niveau
+## du perso, mais loots et ressources) pour progresser si l'on bloque sur le dernier combat.
+func _on_fight_prev() -> void:
+	_shift_fight(-1)
+
+func _on_fight_next() -> void:
+	_shift_fight(1)
+
+func _shift_fight(delta: int) -> void:
+	if GameManager.active_slot < 0 or GameManager.active_save.is_empty():
+		return
+	var save: Dictionary = GameManager.active_save
+	ProgressionManager.select_fight(save, ProgressionManager.selected_fight_number(save) + delta)
+	ProgressionManager.write_save(GameManager.active_slot, save)
 	refresh()
 
 func _nav_btn(txt: String) -> Button:
@@ -492,7 +542,7 @@ func refresh() -> void:
 	if GameManager.active_slot >= 0 and not GameManager.active_save.is_empty():
 		fight_no = ProgressionManager.next_fight_number(GameManager.active_save)
 		boss_fight = ProgressionManager.is_boss_fight(GameManager.active_save)
-		next_lvl = int(GameManager.active_save.get("level", 0))
+		next_lvl = ProgressionManager.enemy_level_for(GameManager.active_save)
 	var biome: String = ProgressionManager.next_biome(GameManager.active_save) if not GameManager.active_save.is_empty() else "Forêt"
 	if boss_fight:
 		_title.text = "COMBAT %d — %s : ☠ AFFRONTEZ %s ! (%d/%d)" % [fight_no, ProgressionManager.biome_label(biome),
@@ -513,11 +563,29 @@ func refresh() -> void:
 			for m2: Dictionary in GameManager.active_save.get("team", []):
 				pts += int(ProgressionManager.roster_entry(GameManager.active_save, String(m2.get("classe", ""))).get("unspent", 0))
 		_chars_btn.text = "📈  PERSONNAGES (+%d)" % pts if pts > 0 else "📈  PERSONNAGES"
+	if _fight_sel_label:
+		var has_save3: bool = GameManager.active_slot >= 0 and not GameManager.active_save.is_empty()
+		_fight_prev_btn.visible = has_save3
+		_fight_next_btn.visible = has_save3
+		if has_save3:
+			var frontier: int = ProgressionManager.frontier_fight_number(GameManager.active_save)
+			var replay: bool = fight_no < frontier
+			_fight_prev_btn.disabled = fight_no <= 1
+			_fight_next_btn.disabled = fight_no >= frontier
+			if replay:
+				_fight_sel_label.text = "↻ Combat %d rejoué (déjà gagné) · niveau %d — moins d'XP, mais loots et ressources" % [fight_no, next_lvl]
+				_fight_sel_label.add_theme_color_override("font_color", Color(0.65, 0.85, 1.0))
+			else:
+				_fight_sel_label.text = "Combat %d (progression) · niveau %d   —   ◀ pour rejouer un combat plus facile" % [fight_no, next_lvl]
+				_fight_sel_label.add_theme_color_override("font_color", Color(0.75, 0.80, 0.90))
+		else:
+			_fight_sel_label.text = ""
 	if _fight_btn:
 		if boss_fight:
 			_fight_btn.text = "☠  COMBATTRE %s (nv%d)" % [ProgressionManager.biome_boss(biome).to_upper(), next_lvl]
 		elif next_lvl > 0:
-			_fight_btn.text = "⚔  COMBATTRE — %s nv%d" % [biome, next_lvl]
+			var rp: bool = fight_no < ProgressionManager.frontier_fight_number(GameManager.active_save)
+			_fight_btn.text = "%s — %s nv%d" % ["↻  REJOUER" if rp else "⚔  COMBATTRE", biome, next_lvl]
 		else:
 			_fight_btn.text = "⚔  COMBATTRE"
 

@@ -46,6 +46,10 @@ var _cards_owner: int = -1
 # ═══════════════════════════════════════════════════════════════════════════
 
 class SpellCard extends Button:
+	## Carte de sort lisible d'un coup d'œil :
+	##   pastille PA (bleu) en haut à gauche, PM (vert) en haut à droite si le sort en coûte,
+	##   pastille PORTÉE (or) en bas à droite ; niveau du sort, zone et lancers restants
+	##   en petites étiquettes en bas.
 	var spell: Dictionary = {}
 	var gm: Node = null
 	var hotkey: int = 0
@@ -53,63 +57,78 @@ class SpellCard extends Button:
 	var selected: bool = false
 	var usable: bool = true
 
-	## Badge pill : pastille colorée + texte, alignée à droite à partir de x_end.
-	func _badge(x_end: float, y: float, label: String, val: String, col: Color) -> float:
+	## Pastille ronde : valeur en gros, légende en petit à côté.
+	func _orb(c: Vector2, r: float, val: String, col: Color) -> void:
 		var font: Font = ThemeDB.fallback_font
-		var txt: String = "%s %s" % [label, val]
-		var w: float = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x + 16.0
-		var rect := Rect2(x_end - w, y - 16.0, w, 20.0)
-		draw_rect(rect, Color(0.02, 0.04, 0.1, 0.92))
-		draw_rect(Rect2(rect.position, Vector2(3.0, rect.size.y)), col)
-		draw_string(font, rect.position + Vector2(8, 15), txt, HORIZONTAL_ALIGNMENT_LEFT, w, 15, col.lightened(0.35))
-		return rect.position.x - 6.0
+		var base: Color = col if usable else Color(0.34, 0.37, 0.44)
+		draw_circle(c + Vector2(0, 2.5), r + 1.5, Color(0, 0, 0, 0.55))
+		draw_circle(c, r + 1.5, Color(0.02, 0.03, 0.07, 1.0))
+		draw_circle(c, r - 0.5, base.darkened(0.30))
+		draw_circle(c + Vector2(0, -r * 0.14), r - 3.0, base)
+		draw_circle(c + Vector2(-r * 0.22, -r * 0.42), r * 0.34, Color(1, 1, 1, 0.30))
+		var fs: int = 26 if val.length() <= 1 else (23 if val.length() == 2 else 15)
+		var pos := Vector2(c.x - r, c.y + float(fs) * 0.36)
+		draw_string_outline(font, pos, val, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, fs, 6, Color(0, 0, 0, 0.9))
+		draw_string(font, pos, val, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, fs, Color.WHITE)
 
-	## Petit cercle de coin : valeur + étiquette abrégée dessous.
-	func _orb(c: Vector2, radius: float, val: String, col: Color, label: String) -> void:
+	func _caption(pos: Vector2, w: float, txt: String, col: Color, align: int = HORIZONTAL_ALIGNMENT_CENTER) -> void:
 		var font: Font = ThemeDB.fallback_font
-		draw_circle(c, radius, Color(0.02, 0.04, 0.1, 0.92))
-		draw_circle(c, radius - 3.0, col if usable else Color(0.3, 0.33, 0.4))
-		draw_circle(c + Vector2(-radius * 0.15, -radius * 0.25), radius * 0.42, Color(1, 1, 1, 0.2))
-		var fs: int = 22 if radius >= 18.0 else 18
-		draw_string(font, c + Vector2(-radius, radius * 0.45), val, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, fs, Color.WHITE)
-		draw_string(font, c + Vector2(-radius, radius + 12.0), label, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, 12, col.lightened(0.4))
+		draw_string_outline(font, pos, txt, align, w, 12, 4, Color(0, 0, 0, 0.9))
+		draw_string(font, pos, txt, align, w, 12, col.lightened(0.55) if usable else Color(0.6, 0.62, 0.68))
+
+	## Étiquette arrondie ; retourne l'abscisse de fin.
+	func _pill(x: float, y: float, txt: String, col: Color) -> float:
+		var font: Font = ThemeDB.fallback_font
+		var w: float = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 12.0
+		var rc := Rect2(x, y - 14.0, w, 18.0)
+		draw_rect(rc, Color(0.02, 0.03, 0.08, 0.92))
+		draw_rect(Rect2(rc.position, Vector2(3.0, rc.size.y)), col if usable else Color(0.4, 0.42, 0.48))
+		draw_string(font, rc.position + Vector2(8, 13), txt, HORIZONTAL_ALIGNMENT_LEFT, w, 13, col.lightened(0.5) if usable else Color(0.62, 0.64, 0.7))
+		return x + w + 4.0
 
 	func _draw() -> void:
 		var font: Font = ThemeDB.fallback_font
-		# Liseré gauche de la couleur du type (rouge/bleu/vert/jaune)
-		draw_rect(Rect2(0, 0, 5, size.y), base_col)
-		var cost: int = int(spell.get("cost_pa", 0))
-		# ── Orbes de coin ── PA en haut à gauche, PM en haut à droite (si coût),
-		#    Portée en bas à gauche. Zone en badge en haut au centre-droite.
-		_orb(Vector2(26, 26), 21.0, str(cost), Color(0.15, 0.55, 0.95), "PA")
-		if int(spell.get("cost_pm", 0)) > 0:
-			_orb(Vector2(size.x - 26, 26), 18.0, str(int(spell["cost_pm"])), Color(0.12, 0.60, 0.30), "PM")
-		var rng: int = int(spell.get("range", 1))
-		var rng_txt: String = str(rng) if rng < 99 else "∞"
-		_orb(Vector2(26, size.y - 30), 17.0, rng_txt, Color(0.85, 0.70, 0.25), "Portée")
-		# Zone d'effet en badge en haut à droite (décalé si PM présent)
+		# Liseré gauche de la couleur du type (rouge attaque / bleu buff / vert soin / jaune debuff)
+		draw_rect(Rect2(0, 6, 5, size.y - 12), base_col if usable else base_col.darkened(0.4))
 		var p: Dictionary = Combat.parse(spell)
-		var x: float = size.x - 6
-		if int(spell.get("cost_pm", 0)) <= 0:
-			x = _badge(x, 20.0, "PA", str(cost), Color(0.35, 0.65, 1.0))
-		# Niveau de sort amélioré (si > 1) : badge doré après la zone
+		# PA en haut à gauche
+		_orb(Vector2(27, 27), 19.0, str(int(spell.get("cost_pa", 0))), Color(0.16, 0.50, 0.95))
+		_caption(Vector2(8, 58), 38.0, "PA", Color(0.16, 0.50, 0.95))
+		# PM en haut à droite (seulement si le sort en coûte)
+		if int(spell.get("cost_pm", 0)) > 0:
+			_orb(Vector2(size.x - 27, 27), 19.0, str(int(spell["cost_pm"])), Color(0.14, 0.64, 0.32))
+			_caption(Vector2(size.x - 46, 58), 38.0, "PM", Color(0.14, 0.64, 0.32))
+		# Portée en bas à droite
+		var rng: int = int(spell.get("range", 1))
+		var rtxt: String = str(rng) if rng < 99 else "∞"
+		if String(p["target"]) == "self":
+			rtxt = "0"
+		_orb(Vector2(size.x - 27, size.y - 27), 17.0, rtxt, Color(0.86, 0.66, 0.16))
+		_caption(Vector2(size.x - 108, size.y - 20), 58.0, "Portée" if String(p["target"]) != "self" else "Sur soi",
+			Color(0.86, 0.66, 0.16), HORIZONTAL_ALIGNMENT_RIGHT)
+		# Rangée du bas : touche, niveau de sort, zone, lancers restants
+		var x: float = 10.0
+		if hotkey > 0:
+			draw_rect(Rect2(x, size.y - 24, 18, 18), Color(0.02, 0.03, 0.08, 0.92))
+			draw_string(font, Vector2(x, size.y - 10), str(hotkey % 10), HORIZONTAL_ALIGNMENT_CENTER, 18, 14, Color(1, 0.95, 0.6))
+			x += 22.0
 		var slvl: int = int(spell.get("spell_level", 1))
 		if slvl > 1:
-			x = _badge(x, 20.0, "Nv", str(slvl), Color(1.0, 0.72, 0.18))
-		if String(p["aoe"]) == "zone":
-			x = _badge(x, 20.0, "Zone", "%dx%d" % [int(p["zone_r"]), int(p["zone_r"])], Color(1.0, 0.6, 0.3))
-		elif String(p["aoe"]) == "adjacent_enemies":
-			x = _badge(x, 20.0, "Zone", "adj.", Color(1.0, 0.6, 0.3))
-		elif String(p["aoe"]) == "team":
-			x = _badge(x, 20.0, "Zone", "eq.", Color(1.0, 0.6, 0.3))
-		if hotkey > 0:
-			draw_string_outline(font, Vector2(8, size.y - 8), str(hotkey % 10), HORIZONTAL_ALIGNMENT_LEFT, 20, 16, 4, Color(0, 0, 0, 0.8))
-			draw_string(font, Vector2(8, size.y - 8), str(hotkey % 10), HORIZONTAL_ALIGNMENT_LEFT, 20, 16, Color(1, 0.95, 0.6))
+			x = _pill(x, size.y - 10, "★%d" % slvl, Color(1.0, 0.72, 0.18))
+		var zone_txt: String = ""
+		match String(p["aoe"]):
+			"zone":
+				zone_txt = "Zone %d" % int(p["zone_r"])
+			"adjacent_enemies":
+				zone_txt = "Autour"
+			"team":
+				zone_txt = "Équipe"
+		if zone_txt != "" and x < size.x - 120.0:
+			x = _pill(x, size.y - 10, zone_txt, Color(1.0, 0.6, 0.3))
 		if gm != null and gm.active_entity.size() > 0:
 			var left: int = gm.casts_left(gm.active_entity, spell)
-			if left < Combat.max_casts(spell) and left >= 0:
-				draw_string_outline(font, Vector2(size.x * 0.5 - 20, size.y - 10), "x%d" % left, HORIZONTAL_ALIGNMENT_CENTER, 40, 15, 4, Color(0, 0, 0, 0.8))
-				draw_string(font, Vector2(size.x * 0.5 - 20, size.y - 10), "x%d" % left, HORIZONTAL_ALIGNMENT_CENTER, 40, 15, Color(1, 0.9, 0.5))
+			if left < Combat.max_casts(spell) and left >= 0 and x < size.x - 100.0:
+				x = _pill(x, size.y - 10, "×%d" % left, Color(0.9, 0.9, 0.5))
 
 
 func _flat(bg: Color, border: Color, radius: int = 14, bw: int = 3) -> StyleBoxFlat:
@@ -333,7 +352,7 @@ func _build_ui() -> void:
 	_spell_scroll.anchor_top = 0.0
 	_spell_scroll.anchor_bottom = 1.0
 	_spell_scroll.offset_left = 12.0
-	_spell_scroll.offset_right = 200.0
+	_spell_scroll.offset_right = 256.0
 	_spell_scroll.offset_top = 12.0
 	_spell_scroll.offset_bottom = -12.0
 	_root.add_child(_spell_scroll)
@@ -348,8 +367,8 @@ func _build_ui() -> void:
 	_tip_panel.anchor_right = 0.0
 	_tip_panel.anchor_top = 0.0
 	_tip_panel.anchor_bottom = 0.0
-	_tip_panel.offset_left = 232.0
-	_tip_panel.offset_right = 652.0
+	_tip_panel.offset_left = 276.0
+	_tip_panel.offset_right = 696.0
 	_tip_panel.offset_top = 14.0
 	_tip_panel.offset_bottom = 150.0
 	_tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -415,7 +434,7 @@ func _build_ui() -> void:
 	# Journal de combat
 	_log_box = VBoxContainer.new()
 	_log_box.add_theme_constant_override("separation", 2)
-	_log_box.position = Vector2(20, 160)
+	_log_box.position = Vector2(276, 160)
 	_log_box.size = Vector2(560, 300)
 	_log_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_log_box)
@@ -565,15 +584,13 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.gm = game_manager
 		card.hotkey = idx if idx <= 10 else 0
 		card.base_col = _kind_color(spell)
-		card.custom_minimum_size = Vector2(180, 84)
+		card.custom_minimum_size = Vector2(232, 92)
 		card.text = String(spell["name"])
-		card.add_theme_font_size_override("font_size", 21)
+		var nlen: int = String(spell["name"]).length()
+		card.add_theme_font_size_override("font_size", 21 if nlen <= 10 else (19 if nlen <= 15 else 17))
 		card.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		card.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
-		card.add_theme_color_override("font_hover_color", Color(0.1, 0.07, 0.02))
-		card.add_theme_color_override("font_pressed_color", Color(0.1, 0.07, 0.02))
-		card.add_theme_constant_override("outline_size", 0)
-		card.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0))
+		card.add_theme_constant_override("outline_size", 5)
+		card.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 		card.focus_mode = Control.FOCUS_NONE
 		_style_card(card, false)
 		card.pressed.connect(func() -> void: spell_selected.emit(spell))
@@ -585,13 +602,28 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 
 
 func _style_card(card: SpellCard, selected: bool) -> void:
-	var col: Color = card.base_col if card.usable else card.base_col.lerp(Color(0.75, 0.73, 0.70), 0.65).darkened(0.12)
-	var border: Color = Color(1.0, 0.9, 0.3) if selected else col.lightened(0.45)
-	card.add_theme_stylebox_override("normal", _flat(col.darkened(0.15), border, 16, 5 if selected else 3))
-	card.add_theme_stylebox_override("hover", _flat(col.lightened(0.1), Color(1, 1, 1, 0.9), 16, 4))
-	card.add_theme_stylebox_override("pressed", _flat(col.darkened(0.3), Color(1, 0.9, 0.3), 16, 5))
-	card.add_theme_stylebox_override("focus", _flat(col, border, 16, 3))
-	card.add_theme_stylebox_override("disabled", _flat(col.darkened(0.5), border, 16, 3))
+	# Fond sombre (texte blanc lisible) teinté de la couleur du type ; bordure du type, or si sélectionné
+	var tint: Color = card.base_col if card.usable else Color(0.45, 0.46, 0.50)
+	var bg: Color = Color(0.08, 0.10, 0.16, 0.96).lerp(tint, 0.20 if card.usable else 0.06)
+	var border: Color = Color(1.0, 0.9, 0.3) if selected else tint.lightened(0.15)
+	var txt: Color = Color.WHITE if card.usable else Color(0.62, 0.64, 0.70)
+	for key: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_disabled_color"]:
+		card.add_theme_color_override(key, txt)
+	card.add_theme_stylebox_override("normal", _card_box(bg, border, 5 if selected else 2))
+	card.add_theme_stylebox_override("hover", _card_box(bg.lightened(0.10), Color(1, 1, 1, 0.9), 3))
+	card.add_theme_stylebox_override("pressed", _card_box(bg.darkened(0.2), Color(1, 0.9, 0.3), 5))
+	card.add_theme_stylebox_override("focus", _card_box(bg, border, 3))
+	card.add_theme_stylebox_override("disabled", _card_box(bg.darkened(0.3), border, 2))
+
+
+## Fond de carte : marges internes pour que le nom reste entre les pastilles.
+func _card_box(bg: Color, border: Color, bw: int) -> StyleBoxFlat:
+	var sb: StyleBoxFlat = _flat(bg, border, 14, bw)
+	sb.content_margin_left = 50.0
+	sb.content_margin_right = 50.0
+	sb.content_margin_top = 8.0
+	sb.content_margin_bottom = 26.0
+	return sb
 
 
 func _refresh() -> void:
@@ -743,7 +775,7 @@ func _show_result_window(victory: bool) -> void:
 	elif ProgressionManager.is_boss_fight(save):
 		title.text = "VICTOIRE !  %s : ☠ BOSS %s et ses sbires au combat %d !" % [ProgressionManager.biome_label(next_biome), ProgressionManager.biome_boss(next_biome), fight_no]
 	else:
-		title.text = "VICTOIRE !  %s : ennemis niveau %d au prochain combat (%d)" % [ProgressionManager.biome_label(next_biome), int(save.get("level", 10)), fight_no]
+		title.text = ("VICTOIRE (combat rejoué) !  " if bool(res.get("replay", false)) else "VICTOIRE !  ") + "%s : ennemis niveau %d au prochain combat (%d)" % [ProgressionManager.biome_label(next_biome), ProgressionManager.enemy_level_for(save), fight_no]
 	title.add_theme_font_size_override("font_size", 28)
 	title.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05) if victory else Color(0.55, 0.12, 0.08))
 	box.add_child(title)

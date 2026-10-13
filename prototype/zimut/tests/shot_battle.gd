@@ -14,17 +14,17 @@ func _boot() -> void:
 	var gm: Node = root.get_node("GameManager")
 	var pm: Node = root.get_node("ProgressionManager")
 	var data: Dictionary = pm.new_game(4, "Shots")
-	pm.rebuild_team(data, ["Tank", "Mage", "Invocateur"])
+	pm.rebuild_team(data, ["Tank", "Mage", "Sylvain"])
 	if boss:
-		data["victories"] = 3
+		data["victories"] = int(args[3]) if args.size() > 3 else 3
 	for _i in range(6):
 		for it in pm._roll_loots(12, false):
 			data["inventory"].append(it)
 	pm.auto_equip(data)
 	gm.active_save = data
 	gm.active_slot = 4
-	gm.set_custom_team([{"classe": "Tank"}, {"classe": "Mage"}, {"classe": "Invocateur"}])
-	gm.auto_mode = true
+	gm.set_custom_team([{"classe": "Tank"}, {"classe": "Mage"}, {"classe": "Sylvain"}])
+	gm.auto_mode = not (args.size() > 2 and args[2] == "manual")
 	var main: Node = (load("res://scenes/Main.tscn") as PackedScene).instantiate()
 	root.add_child(main)
 	await create_timer(1.5).timeout

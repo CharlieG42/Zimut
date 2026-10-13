@@ -596,11 +596,14 @@ const SUMMONS := {
 	"Buisson":      {"pv": 220, "force": 30, "defense": 45, "agility": 15, "pa": 3, "pm": 2, "color": Color(0.30, 0.55, 0.25), "spell": ["Épines", 2, 1, 40]},
 	"Champignon":   {"pv": 160, "force": 40, "defense": 26, "agility": 18, "pa": 3, "pm": 3, "color": Color(0.85, 0.55, 0.40), "spell": ["Spores", 2, 3, 50]},
 	"Tronc":        {"pv": 320, "force": 45, "defense": 65, "agility": 10, "pa": 4, "pm": 2, "color": Color(0.45, 0.32, 0.18), "spell": ["Bras de bois", 2, 1, 60]},
-	"Sarriette":    {"pv": 200, "force": 60, "defense": 32, "agility": 40, "pa": 4, "pm": 3, "color": Color(0.55, 0.80, 0.35), "spell": ["Fouet de sarriette", 2, 4, 75]},
+	"Sarriette":    {"pv": 200, "force": 60, "defense": 32, "agility": 40, "pa": 4, "pm": 3, "color": Color(0.55, 0.80, 0.35), "spell": ["Fouet de sarriette", 2, 4, 75]},	# Arbre du Sylvain : immobile, ne joue pas, bloque la vue, relaie les soins du Sylvain
+	"Arbre":        {"pv": 260, "force": 0, "defense": 30, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.30, 0.65, 0.30), "spell": [], "static": true},
 }
 
 
 static func summon_spells(sname: String) -> Array:
 	var info: Dictionary = SUMMONS.get(sname, SUMMONS["Loup"])
 	var sp: Array = info["spell"]
+	if sp.is_empty():
+		return []
 	return [_mk(String(sp[0]), int(sp[1]), int(sp[2]), "%d dégâts" % int(sp[3]))]

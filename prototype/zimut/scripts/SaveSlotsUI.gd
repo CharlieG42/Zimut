@@ -277,11 +277,18 @@ func _auto_equip() -> void:
 
 
 func _show_loot_log(log_arr: Array) -> void:
+	# Fenêtre centrée sur l'écran, avec voile sombre cliquable (ferme la fenêtre)
+	var overlay := ColorRect.new()
+	overlay.color = Color(0, 0, 0, 0.55)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	_root.add_child(overlay)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(center)
 	var dialog := PanelContainer.new()
 	dialog.add_theme_stylebox_override("panel", _flat())
-	dialog.set_anchors_preset(Control.PRESET_CENTER)
-	dialog.position = Vector2(700, 160)
-	_root.add_child(dialog)
+	center.add_child(dialog)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
 	dialog.add_child(box)
@@ -308,5 +315,5 @@ func _show_loot_log(log_arr: Array) -> void:
 	close.add_theme_font_size_override("font_size", 20)
 	close.add_theme_color_override("font_color", COL_TXT)
 	close.add_theme_stylebox_override("normal", _flat())
-	close.pressed.connect(dialog.queue_free)
+	close.pressed.connect(overlay.queue_free)
 	box.add_child(close)

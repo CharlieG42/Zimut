@@ -144,6 +144,7 @@ Heal,Mot de restauration,4,0,2,Restaure 90 PV à tous les alliés,10,Soin,0,0,90
 Sylvain,Ronce,2,0,3,40 dégâts magiques,1,Attaque,0,40,0,0,0,0,0,0,0
 Sylvain,Sève vitale,2,0,1,Restaure 45 PV,1,Soin,0,0,45,0,0,0,0,0,0
 Sylvain,Invoquer Buisson,2,0,1,Invoquer un Buisson (contrôlable; 3PM/4PA),5,Invocation,0,0,0,0,0,0,0,0,0
+Sylvain,Invoquer Arbre,3,0,2,Plante un arbre immobile : bloque la vue et relaie les soins du Sylvain aux alliés autour de lui (1 arbre max),8,Invocation,0,0,0,0,0,0,0,0,0
 Sylvain,Poison de ronce,2,0,3,60 dégâts/tour (2 tours),5,Debuff,0,0,0,0,0,60,0,0,0
 Sylvain,Racine,2,0,3,Immobilise l'ennemi (1 tour),10,Debuff,0,0,0,0,0,0,0,0,0
 Sylvain,Invoquer Champignon,2,0,1,Invoquer un Champignon (contrôlable; 3PM/4PA),10,Invocation,0,0,0,0,0,0,0,0,0

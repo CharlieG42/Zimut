@@ -38,11 +38,9 @@ const POINTS_PER_LEVEL := 4
 const FIGHT_XP_MULT := 3.0
 const BOSS_XP_MULT := 1.5
 ## Les classes hors équipe gagnent une part de l'XP (pour tester d'autres compos)
-const BENCH_XP_RATIO := 0.35
+const BENCH_XP_RATIO := 0.10
 ## Une défaite rapporte quand même un peu d'XP
 const DEFEAT_XP_RATIO := 0.25
-## Rattrapage : une classe en retard de plus de N niveaux sur l'équipe gagne +50 % d'XP
-const CATCHUP_GAP := 4
 
 ## Coût d'un point de capital par palier d'affinité : [[investis_max, coût], ...]
 const TIER_COST := {

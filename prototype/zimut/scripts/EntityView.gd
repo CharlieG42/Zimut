@@ -67,18 +67,35 @@ static func sprite_key(raw: String) -> String:
 	return k.replace("-", "_").replace(" ", "_")
 
 
+## Skin des boss nommés (nom du boss -> fichier de sprite).
+const BOSS_SKINS := {
+	"Gobelin Roi": "gobelin_boss", "Troll Géant": "troll_boss", "Dragon": "dragonnet_boss",
+	"Squelette Seigneur": "squelette_boss", "Loup Alpha": "loup_boss",
+}
+
+## Noms de fichiers de sprite à essayer, par ordre de priorité.
+static func skin_names(ent: Dictionary) -> Array[String]:
+	var classe: String = String(ent.get("classe", ""))
+	var out: Array[String] = []
+	if bool(ent.get("boss", false)):
+		if BOSS_SKINS.has(classe):
+			out.append(String(BOSS_SKINS[classe]))
+		out.append(sprite_key(classe) + "_boss")
+	out.append(sprite_key(classe))
+	var sk: String = String(ent.get("skin", ""))
+	if sk != "":
+		out.append(sprite_key(sk))
+	return out
+
+
 func _find_texture() -> Texture2D:
-	var cname: String = sprite_key(String(entity.get("skin", entity.get("classe", ""))))
 	var folders: Array[String] = ["enemies", "players"]
 	if entity["team"] == "player":
 		folders = ["players", "enemies"]
 	if entity["entity_type"] == "Summon":
 		folders = ["summons", "enemies", "players"]
-	var names: Array[String] = [cname]
-	if bool(entity.get("boss", false)):
-		names.push_front(cname + "_boss")
-	for folder: String in folders:
-		for nm: String in names:
+	for nm: String in skin_names(entity):
+		for folder: String in folders:
 			for ext: String in ["png", "svg"]:
 				var path: String = "res://assets/sprites/%s/%s.%s" % [folder, nm, ext]
 				if ResourceLoader.exists(path):
@@ -98,6 +115,8 @@ func _target_height() -> float:
 			return 118.0
 		"Dragonnet":
 			return 100.0
+		"Arbre":
+			return 150.0
 	if entity["entity_type"] == "Summon":
 		return 76.0
 	return 104.0 if entity["entity_type"] == "Player" else 92.0
@@ -282,6 +301,16 @@ func _draw() -> void:
 	var ring_w: float = 4.0 + (sin(_t * 5.0) * 1.2 if active else 0.0)
 	draw_arc(Vector2.ZERO, 33.0, 0.0, TAU, 40, Color(ring_col.r, ring_col.g, ring_col.b, 0.9), ring_w, true)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+	# Arbre du Sylvain : zone de relais des soins (les 8 cases autour) en losange vert pulsant
+	if bool(entity.get("relay", false)):
+		var pl: float = 0.5 + 0.5 * sin(_t * 2.2)
+		var hw: float = 96.0   # 1,5 case iso en largeur
+		var hh: float = 48.0
+		var cpt := Vector2(0, 4)
+		var diamond := PackedVector2Array([cpt + Vector2(0, -hh), cpt + Vector2(hw, 0), cpt + Vector2(0, hh), cpt + Vector2(-hw, 0), cpt + Vector2(0, -hh)])
+		draw_colored_polygon(diamond.slice(0, 4), Color(0.4, 1.0, 0.5, 0.08 + 0.06 * pl))
+		draw_polyline(diamond, Color(0.5, 1.0, 0.6, 0.35 + 0.35 * pl), 3.0, true)
 
 	# Boss : aura rouge pulsante au sol
 	if bool(entity.get("boss", false)):

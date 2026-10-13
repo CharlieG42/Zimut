@@ -81,7 +81,7 @@ func _boot() -> void:
 	pm.rebuild_team(d2, ["Tank", "Assassin", "Mage"])
 	sheet.open(d2, 3, "Mage")
 	await process_frame
-	check(sheet._detail_box.get_child_count() > 10, "fiche perso construite")
+	check(sheet._content.get_child_count() > 3, "fiche perso construite")
 	pm.delete_save(3)
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
