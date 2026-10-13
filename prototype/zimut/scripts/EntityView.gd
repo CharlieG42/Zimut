@@ -165,13 +165,16 @@ func _process(delta: float) -> void:
 		sprite.scale.y = absf(sprite.scale.x) * (1.0 + sin(_t * 2.2 + _phase) * 0.012)
 		if _mat != null:
 			_mat.set_shader_parameter("flash", _flash)
-			var outline_w: float = 0.0
-			var oc := Color(1.0, 0.9, 0.3, 1.0)
+			# Contour sombre permanent pour détacher les sprites du feuillage et du sol.
+			# Le contour actif reste plus épais et coloré pour garder le repérage tactique.
+			var outline_w: float = 1.35
+			var oc := Color(0.10, 0.16, 0.12, 0.96)
 			if entity.get("is_active", false):
-				outline_w = 2.0 + sin(_t * 5.0) * 0.6
+				outline_w = 2.5 + sin(_t * 5.0) * 0.35
+				oc = Color(1.0, 0.83, 0.24, 1.0)
 			elif hovered:
-				outline_w = 2.0
-				oc = Color(1, 1, 1, 0.95) if entity["team"] == "player" else Color(1.0, 0.4, 0.3, 1.0)
+				outline_w = 2.25
+				oc = Color(1, 1, 1, 0.98) if entity["team"] == "player" else Color(1.0, 0.38, 0.28, 1.0)
 			_mat.set_shader_parameter("outline", outline_w)
 			_mat.set_shader_parameter("outline_color", oc)
 	else:

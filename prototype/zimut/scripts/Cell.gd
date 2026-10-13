@@ -53,13 +53,13 @@ func setup(gp: Vector2i) -> void:
 	_base = (pal["a"] if checker else pal["b"])
 	_base = Color(_base.r + tint, _base.g + tint, _base.b + tint)
 	var tuft_col: Color = pal["tuft"]
-	for i: int in range(rng.randi_range(7, 12)):
+	for i: int in range(rng.randi_range(3, 6)):
 		var p := Vector2(rng.randf_range(-0.8, 0.8) * HW, rng.randf_range(-0.8, 0.8) * HH)
 		if absf(p.x) / HW + absf(p.y) / HH < 0.8:
 			_tufts.append([p, rng.randf_range(3.0, 6.0), rng.randf_range(-3.0, 3.0), tuft_col])
-	var flower_chance: float = 0.30 if biome != "Désert" else 0.12
+	var flower_chance: float = 0.16 if biome != "Désert" else 0.08
 	if rng.randf() < flower_chance:
-		for i: int in range(rng.randi_range(1, 3)):
+		for i: int in range(rng.randi_range(1, 2)):
 			var fp := Vector2(rng.randf_range(-0.55, 0.55) * HW, rng.randf_range(-0.55, 0.55) * HH)
 			var palette: Array = pal["flowers"]
 			_flowers.append([fp, palette[rng.randi() % palette.size()]])
@@ -127,11 +127,11 @@ func _draw() -> void:
 		draw_circle(fp, 2.6, f[1])
 		draw_circle(fp, 1.0, Color(0.95, 0.7, 0.1))
 	# Reflets/ombres sur les arêtes pour donner du volume
-	draw_line(Vector2(-HW, 0), Vector2(0, -HH), Color(1, 1, 1, 0.14), 2.0)
-	draw_line(Vector2(0, -HH), Vector2(HW, 0), Color(1, 1, 1, 0.08), 2.0)
-	draw_line(Vector2(HW, 0), Vector2(0, HH), Color(0, 0, 0, 0.12), 2.0)
-	draw_line(Vector2(0, HH), Vector2(-HW, 0), Color(0, 0, 0, 0.12), 2.0)
-	_outline(top, Color(0, 0, 0, 0.10), 1.0)
+	draw_line(Vector2(-HW, 0), Vector2(0, -HH), Color(0.93, 1.0, 0.82, 0.32), 2.0)
+	draw_line(Vector2(0, -HH), Vector2(HW, 0), Color(0.93, 1.0, 0.82, 0.24), 2.0)
+	draw_line(Vector2(HW, 0), Vector2(0, HH), Color(0.13, 0.24, 0.12, 0.28), 2.0)
+	draw_line(Vector2(0, HH), Vector2(-HW, 0), Color(0.13, 0.24, 0.12, 0.28), 2.0)
+	_outline(top, Color(0.12, 0.22, 0.10, 0.30), 1.25)
 
 	# ── Surbrillances ─────────────────────────────────────────────────────
 	var t_ms: float = float(Time.get_ticks_msec()) / 1000.0
