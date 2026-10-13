@@ -399,10 +399,10 @@ func _build_ui() -> void:
 	_end_btn.anchor_right = 1.0
 	_end_btn.anchor_top = 1.0
 	_end_btn.anchor_bottom = 1.0
-	_end_btn.offset_left = -330.0
+	_end_btn.offset_left = -218.0
 	_end_btn.offset_right = -22.0
-	_end_btn.offset_top = -170.0
-	_end_btn.offset_bottom = -24.0
+	_end_btn.offset_top = -136.0
+	_end_btn.offset_bottom = -18.0
 	_end_btn.pressed.connect(func() -> void:
 		Sfx.play("click")
 		end_turn_requested.emit())
@@ -415,10 +415,10 @@ func _build_ui() -> void:
 	row.anchor_right = 1.0
 	row.anchor_top = 1.0
 	row.anchor_bottom = 1.0
-	row.offset_left = -330.0
+	row.offset_left = -286.0
 	row.offset_right = -22.0
-	row.offset_top = -236.0
-	row.offset_bottom = -182.0
+	row.offset_top = -190.0
+	row.offset_bottom = -142.0
 	_root.add_child(row)
 	_auto_btn = _small_button("Auto", true)
 	_auto_btn.toggled.connect(func(on: bool) -> void:
@@ -529,8 +529,8 @@ func _small_button(text: String, toggle: bool) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.toggle_mode = toggle
-	b.custom_minimum_size = Vector2(96, 54)
-	b.add_theme_font_size_override("font_size", 18)
+	b.custom_minimum_size = Vector2(86, 46)
+	b.add_theme_font_size_override("font_size", 15)
 	b.add_theme_stylebox_override("normal", _flat(Color(0.1, 0.13, 0.22, 0.92), Color(0.4, 0.5, 0.75), 12, 2))
 	b.add_theme_stylebox_override("hover", _flat(Color(0.16, 0.2, 0.32, 0.95), Color(0.6, 0.75, 1.0), 12, 2))
 	b.add_theme_stylebox_override("pressed", _flat(Color(0.5, 0.35, 0.08, 0.95), Color(1.0, 0.85, 0.3), 12, 2))
