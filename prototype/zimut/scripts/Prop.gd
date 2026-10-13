@@ -7,6 +7,7 @@ var kind: String = "tree"
 var seed_value: int = 0
 var _sway: float = 0.0
 var biome: String = "Forêt"
+var _rock_sprite: Sprite2D = null
 
 func setup(k: String, cell: Vector2i, b: String = "Forêt") -> void:
 	kind = k
@@ -14,6 +15,15 @@ func setup(k: String, cell: Vector2i, b: String = "Forêt") -> void:
 	seed_value = cell.x * 31 + cell.y * 57
 	_sway = float(seed_value % 10) * 0.6
 	set_process(kind == "tree")
+	# Le rocher illustré remplace le rendu procédural quand la ressource est disponible.
+	if kind != "tree":
+		var rock_texture := load("res://assets/sprites/objects/forest_boulder.svg") as Texture2D
+		if rock_texture != null:
+			_rock_sprite = Sprite2D.new()
+			_rock_sprite.texture = rock_texture
+			_rock_sprite.position = Vector2(0, -42)
+			_rock_sprite.z_index = -1
+			add_child(_rock_sprite)
 
 
 func _process(_delta: float) -> void:
@@ -65,12 +75,14 @@ func _draw() -> void:
 				draw_circle(b[0] + Vector2(-9, -11), b[1] * 0.45, base_col.lightened(0.22))
 	else:
 		_ellipse_shadow(40.0 * s, 15.0 * s, 0.30)
-		var pts := PackedVector2Array([
-			Vector2(-36, 6), Vector2(-30, -22), Vector2(-10, -42 * s), Vector2(16, -38 * s), Vector2(36, -14), Vector2(32, 6), Vector2(0, 12)
-		])
-		draw_colored_polygon(pts, Color(0.5, 0.51, 0.56))
-		draw_colored_polygon(PackedVector2Array([Vector2(-30, -22), Vector2(-10, -42 * s), Vector2(0, -20), Vector2(-14, 0), Vector2(-36, 6)]), Color(0.68, 0.70, 0.75))
-		draw_colored_polygon(PackedVector2Array([Vector2(16, -38 * s), Vector2(36, -14), Vector2(32, 6), Vector2(8, 4), Vector2(0, -20)]), Color(0.38, 0.39, 0.44))
-		draw_polyline(PackedVector2Array([Vector2(-10, -42 * s), Vector2(0, -20), Vector2(8, 4)]), Color(0, 0, 0, 0.25), 1.6)
-		draw_circle(Vector2(-18, -18), 7.0, Color(0.3, 0.55, 0.25, 0.9))
-		draw_circle(Vector2(-12, -22), 4.0, Color(0.38, 0.62, 0.3, 0.9))
+		if _rock_sprite == null:
+			# Fallback procédural conservé si le SVG ne peut pas être chargé.
+			var pts := PackedVector2Array([
+				Vector2(-36, 6), Vector2(-30, -22), Vector2(-10, -42 * s), Vector2(16, -38 * s), Vector2(36, -14), Vector2(32, 6), Vector2(0, 12)
+			])
+			draw_colored_polygon(pts, Color(0.5, 0.51, 0.56))
+			draw_colored_polygon(PackedVector2Array([Vector2(-30, -22), Vector2(-10, -42 * s), Vector2(0, -20), Vector2(-14, 0), Vector2(-36, 6)]), Color(0.68, 0.70, 0.75))
+			draw_colored_polygon(PackedVector2Array([Vector2(16, -38 * s), Vector2(36, -14), Vector2(32, 6), Vector2(8, 4), Vector2(0, -20)]), Color(0.38, 0.39, 0.44))
+			draw_polyline(PackedVector2Array([Vector2(-10, -42 * s), Vector2(0, -20), Vector2(8, 4)]), Color(0, 0, 0, 0.25), 1.6)
+			draw_circle(Vector2(-18, -18), 7.0, Color(0.3, 0.55, 0.25, 0.9))
+			draw_circle(Vector2(-12, -22), 4.0, Color(0.38, 0.62, 0.3, 0.9))
