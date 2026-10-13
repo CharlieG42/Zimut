@@ -88,47 +88,53 @@ class SpellCard extends Button:
 
 	func _draw() -> void:
 		var font: Font = ThemeDB.fallback_font
-		# Liseré gauche de la couleur du type (rouge attaque / bleu buff / vert soin / jaune debuff)
-		draw_rect(Rect2(0, 6, 5, size.y - 12), base_col if usable else base_col.darkened(0.4))
 		var p: Dictionary = Combat.parse(spell)
-		# PA en haut à gauche
-		_orb(Vector2(27, 27), 19.0, str(int(spell.get("cost_pa", 0))), Color(0.16, 0.50, 0.95))
-		_caption(Vector2(8, 58), 38.0, "PA", Color(0.16, 0.50, 0.95))
-		# PM en haut à droite (seulement si le sort en coûte)
+		var muted: Color = Color(0.42, 0.45, 0.52) if not usable else Color.WHITE
+		# Petites pastilles PA / PM, lisibles sans prendre trop de place.
+		_orb(Vector2(22, 22), 16.0, str(int(spell.get("cost_pa", 0))), Color(0.16, 0.50, 0.95))
+		_caption(Vector2(3, 44), 38.0, "PA", Color(0.4, 0.7, 1.0))
 		if int(spell.get("cost_pm", 0)) > 0:
-			_orb(Vector2(size.x - 27, 27), 19.0, str(int(spell["cost_pm"])), Color(0.14, 0.64, 0.32))
-			_caption(Vector2(size.x - 46, 58), 38.0, "PM", Color(0.14, 0.64, 0.32))
-		# Portée en bas à droite
+			_orb(Vector2(size.x - 22, 22), 16.0, str(int(spell["cost_pm"])), Color(0.14, 0.64, 0.32))
+			_caption(Vector2(size.x - 40, 44), 36.0, "PM", Color(0.45, 1.0, 0.58))
+		# Motif central propre à la famille de sort (pas d'icône externe requise).
+		var icon_col: Color = base_col if usable else Color(0.34, 0.36, 0.41)
+		var center := Vector2(size.x * 0.5, 61.0)
+		draw_circle(center + Vector2(0, 2), 23.0, Color(0, 0, 0, 0.45))
+		draw_circle(center, 22.0, Color(0.025, 0.04, 0.08, 0.98))
+		draw_circle(center, 18.0, icon_col.darkened(0.25))
+		draw_circle(center + Vector2(-4, -5), 7.0, icon_col.lightened(0.35))
+		match String(p["kind"]):
+			"heal":
+				draw_rect(Rect2(center.x - 3, center.y - 11, 6, 22), Color(0.92, 1.0, 0.86))
+				draw_rect(Rect2(center.x - 11, center.y - 3, 22, 6), Color(0.92, 1.0, 0.86))
+			"buff", "summon", "teleport", "revive", "trap":
+				draw_arc(center, 10.0, 0.0, TAU, 32, Color(0.85, 0.93, 1.0), 2.5, true)
+				draw_circle(center, 3.5, Color(0.95, 0.98, 1.0))
+			_:
+				draw_line(center + Vector2(-9, 7), center + Vector2(4, -10), Color(1.0, 0.94, 0.75), 3.0, true)
+			draw_line(center + Vector2(1, -2), center + Vector2(10, -6), Color(1.0, 0.94, 0.75), 2.0, true)
+		# Nom compact en deux lignes si nécessaire.
+		var spell_name: String = String(spell.get("name", "Sort"))
+		var name_size: int = 14 if spell_name.length() <= 12 else 12
+		var name_y: float = size.y - 31.0
+		var name_text: String = spell_name
+		if name_text.length() > 18:
+			name_text = name_text.substr(0, 16) + "…"
+		draw_string_outline(font, Vector2(4, name_y), name_text, HORIZONTAL_ALIGNMENT_CENTER, size.x - 8, name_size, 3, Color(0, 0, 0, 0.95))
+		draw_string(font, Vector2(4, name_y), name_text, HORIZONTAL_ALIGNMENT_CENTER, size.x - 8, name_size, muted)
+		# Portée et touche dans la bande inférieure.
 		var rng: int = int(spell.get("range", 1))
-		var rtxt: String = str(rng) if rng < 99 else "∞"
 		if String(p["target"]) == "self":
-			rtxt = "0"
-		_orb(Vector2(size.x - 27, size.y - 27), 17.0, rtxt, Color(0.86, 0.66, 0.16))
-		_caption(Vector2(size.x - 108, size.y - 20), 58.0, "Portée" if String(p["target"]) != "self" else "Sur soi",
-			Color(0.86, 0.66, 0.16), HORIZONTAL_ALIGNMENT_RIGHT)
-		# Rangée du bas : touche, niveau de sort, zone, lancers restants
-		var x: float = 10.0
+			rng = 0
+		var range_text: String = "PO %s" % (str(rng) if rng < 99 else "∞")
+		var range_w: float = font.get_string_size(range_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+		draw_string_outline(font, Vector2(size.x - range_w - 5.0, size.y - 7.0), range_text, HORIZONTAL_ALIGNMENT_LEFT, range_w + 2.0, 11, 3, Color(0, 0, 0, 0.95))
+		draw_string(font, Vector2(size.x - range_w - 5.0, size.y - 7.0), range_text, HORIZONTAL_ALIGNMENT_LEFT, range_w + 2.0, 11, Color(1.0, 0.83, 0.35) if usable else muted)
 		if hotkey > 0:
-			draw_rect(Rect2(x, size.y - 24, 18, 18), Color(0.02, 0.03, 0.08, 0.92))
-			draw_string(font, Vector2(x, size.y - 10), str(hotkey % 10), HORIZONTAL_ALIGNMENT_CENTER, 18, 14, Color(1, 0.95, 0.6))
-			x += 22.0
-		var slvl: int = int(spell.get("spell_level", 1))
-		if slvl > 1:
-			x = _pill(x, size.y - 10, "★%d" % slvl, Color(1.0, 0.72, 0.18))
-		var zone_txt: String = ""
-		match String(p["aoe"]):
-			"zone":
-				zone_txt = "Zone %d" % int(p["zone_r"])
-			"adjacent_enemies":
-				zone_txt = "Autour"
-			"team":
-				zone_txt = "Équipe"
-		if zone_txt != "" and x < size.x - 120.0:
-			x = _pill(x, size.y - 10, zone_txt, Color(1.0, 0.6, 0.3))
-		if gm != null and gm.active_entity.size() > 0:
-			var left: int = gm.casts_left(gm.active_entity, spell)
-			if left < Combat.max_casts(spell) and left >= 0 and x < size.x - 100.0:
-				x = _pill(x, size.y - 10, "×%d" % left, Color(0.9, 0.9, 0.5))
+			draw_circle(Vector2(size.x * 0.5, 17.0), 9.0, Color(0.05, 0.07, 0.12, 0.95))
+			draw_string(font, Vector2(size.x * 0.5 - 5.0, 21.0), str(hotkey % 10), HORIZONTAL_ALIGNMENT_CENTER, 10.0, 11, Color(1.0, 0.92, 0.55))
+		if selected:
+			draw_arc(Rect2(Vector2(3, 3), size - Vector2(6, 6)).get_center(), minf(size.x, size.y) * 0.47, 0.0, TAU, 48, Color(1.0, 0.86, 0.25), 2.5, true)
 
 
 func _flat(bg: Color, border: Color, radius: int = 14, bw: int = 3) -> StyleBoxFlat:
@@ -233,15 +239,14 @@ class StatsView extends Control:
 
 	func _orb(c: Vector2, r: float, dark: Color, light: Color, text: String, label: String) -> void:
 		var font: Font = ThemeDB.fallback_font
-		draw_circle(c, r + 5.0, Color(1, 1, 1, 0.85))
-		draw_circle(c, r + 2.0, Color(0.02, 0.04, 0.1))
+		draw_circle(c, r + 3.0, Color(0.02, 0.04, 0.09, 0.95))
 		draw_circle(c, r, dark)
-		draw_circle(c + Vector2(0, -r * 0.18), r * 0.8, light)
-		draw_circle(c + Vector2(-r * 0.3, -r * 0.45), r * 0.28, Color(1, 1, 1, 0.3))
-		draw_string_outline(font, c + Vector2(-r, 14.0), text, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, 40, 8, Color(0, 0, 0, 0.8))
-		draw_string(font, c + Vector2(-r, 14.0), text, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, 40, Color.WHITE)
-		draw_string_outline(font, c + Vector2(-r, r + 24.0), label, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, 16, 5, Color(0, 0, 0, 0.9))
-		draw_string(font, c + Vector2(-r, r + 24.0), label, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, 16, Color(0.85, 0.92, 1.0))
+		draw_circle(c + Vector2(0, -r * 0.16), r * 0.78, light)
+		draw_circle(c + Vector2(-r * 0.25, -r * 0.35), r * 0.25, Color(1, 1, 1, 0.32))
+		var fs: int = 27 if r < 25.0 else 30
+		draw_string_outline(font, c + Vector2(-r, 9.0), text, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, fs, 5, Color(0, 0, 0, 0.9))
+		draw_string(font, c + Vector2(-r, 9.0), text, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, fs, Color.WHITE)
+		draw_string(font, c + Vector2(-r, r + 16.0), label, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, 12, Color(0.85, 0.92, 1.0))
 
 	func _draw() -> void:
 		if gm == null or gm.active_entity.is_empty():
@@ -250,39 +255,38 @@ class StatsView extends Control:
 		var font: Font = ThemeDB.fallback_font
 		var team_col: Color = Color(0.36, 0.52, 0.85) if e["team"] == "player" else Color(0.85, 0.3, 0.28)
 		var bg := StyleBoxFlat.new()
-		bg.bg_color = Color(0.07, 0.09, 0.15, 0.90)
-		bg.border_color = team_col
-		bg.set_border_width_all(3)
-		bg.set_corner_radius_all(20)
-		bg.shadow_color = Color(0, 0, 0, 0.5)
-		bg.shadow_size = 8
+		bg.bg_color = Color(0.055, 0.075, 0.13, 0.94)
+		bg.border_color = team_col.lightened(0.15)
+		bg.set_border_width_all(2)
+		bg.set_corner_radius_all(17)
+		bg.shadow_color = Color(0, 0, 0, 0.52)
+		bg.shadow_size = 7
 		draw_style_box(bg, Rect2(Vector2.ZERO, size))
-		var pr := Rect2(16, 18, 140, 140)
+		var pr := Rect2(10, 13, 78, 78)
 		var pbg := StyleBoxFlat.new()
-		pbg.bg_color = team_col.darkened(0.6)
-		pbg.border_color = Color(1, 0.85, 0.3)
-		pbg.set_border_width_all(4)
-		pbg.set_corner_radius_all(16)
+		pbg.bg_color = team_col.darkened(0.55)
+		pbg.border_color = Color(1, 0.84, 0.3)
+		pbg.set_border_width_all(3)
+		pbg.set_corner_radius_all(12)
 		draw_style_box(pbg, pr)
 		var tex: Texture2D = Portraits.get_texture(e)
 		if tex != null:
-			draw_texture_rect_region(tex, pr.grow(-6.0), Portraits.head_region(tex))
+			draw_texture_rect_region(tex, pr.grow(-4.0), Portraits.head_region(tex))
 		else:
-			draw_circle(pr.get_center(), 46.0, e.get("color", Color(0.6, 0.6, 0.6)))
-		draw_string(font, Vector2(172, 40), String(e["name"]), HORIZONTAL_ALIGNMENT_LEFT, 360, 26, Color(1, 0.95, 0.8))
-		var hb := Rect2(172, 52, 350, 24)
-		draw_rect(hb.grow(2.0), Color(0, 0, 0, 0.85))
+			draw_circle(pr.get_center(), 27.0, e.get("color", Color(0.6, 0.6, 0.6)))
+		draw_string_outline(font, Vector2(101, 29), String(e["name"]), HORIZONTAL_ALIGNMENT_LEFT, 250, 20, 4, Color(0, 0, 0, 0.9))
+		draw_string(font, Vector2(101, 29), String(e["name"]), HORIZONTAL_ALIGNMENT_LEFT, 250, 20, Color(1, 0.95, 0.8))
+		var hb := Rect2(101, 38, size.x - 116.0, 17)
+		draw_rect(hb.grow(2.0), Color(0, 0, 0, 0.9))
 		var ratio: float = clampf(float(e["current_pv"]) / maxf(1.0, float(e["max_pv"])), 0.0, 1.0)
 		draw_rect(Rect2(hb.position, Vector2(hb.size.x * ratio, hb.size.y)), Color(0.3, 0.85, 0.35) if e["team"] == "player" else Color(0.9, 0.28, 0.25))
-		draw_rect(Rect2(hb.position, Vector2(hb.size.x * ratio, hb.size.y * 0.4)), Color(1, 1, 1, 0.2))
-		draw_string_outline(font, hb.position + Vector2(0, 19), "%d / %d" % [int(e["current_pv"]), int(e["max_pv"])], HORIZONTAL_ALIGNMENT_CENTER, hb.size.x, 18, 5, Color(0, 0, 0, 0.9))
-		draw_string(font, hb.position + Vector2(0, 19), "%d / %d" % [int(e["current_pv"]), int(e["max_pv"])], HORIZONTAL_ALIGNMENT_CENTER, hb.size.x, 18, Color.WHITE)
-		_orb(Vector2(232, 118), 36.0, Color(0.05, 0.25, 0.65), Color(0.2, 0.62, 1.0), "%d" % int(e["current_pa"]), "PA")
-		_orb(Vector2(328, 118), 36.0, Color(0.05, 0.4, 0.15), Color(0.25, 0.8, 0.35), "%d" % int(e["current_pm"]), "PM")
-		draw_string(font, Vector2(400, 112), "Tour %d" % int(gm.turn_count), HORIZONTAL_ALIGNMENT_LEFT, 130, 22, Color(0.8, 0.88, 1.0))
-		var rest: String = "Votre tour" if gm.current_turn == 0 else ("Auto…" if gm.auto_mode else "Tour adverse")
-		draw_string(font, Vector2(400, 140), rest, HORIZONTAL_ALIGNMENT_LEFT, 130, 16, Color(1, 0.85, 0.4) if gm.current_turn == 0 else Color(1, 0.55, 0.5))
-
+		draw_string_outline(font, hb.position + Vector2(0, 13), "%d / %d PV" % [int(e["current_pv"]), int(e["max_pv"])], HORIZONTAL_ALIGNMENT_CENTER, hb.size.x, 12, 3, Color(0, 0, 0, 0.9))
+		draw_string(font, hb.position + Vector2(0, 13), "%d / %d PV" % [int(e["current_pv"]), int(e["max_pv"])], HORIZONTAL_ALIGNMENT_CENTER, hb.size.x, 12, Color.WHITE)
+		_orb(Vector2(130, 94), 20.0, Color(0.05, 0.25, 0.65), Color(0.2, 0.62, 1.0), "%d" % int(e["current_pa"]), "PA")
+		_orb(Vector2(190, 94), 20.0, Color(0.05, 0.4, 0.15), Color(0.25, 0.8, 0.35), "%d" % int(e["current_pm"]), "PM")
+		draw_string(font, Vector2(232, 91), "TOUR %d" % int(gm.turn_count), HORIZONTAL_ALIGNMENT_LEFT, 100, 15, Color(0.8, 0.88, 1.0))
+		var rest: String = "À vous" if gm.current_turn == 0 else ("Auto…" if gm.auto_mode else "Adverse")
+		draw_string(font, Vector2(232, 111), rest, HORIZONTAL_ALIGNMENT_LEFT, 100, 13, Color(1, 0.85, 0.4) if gm.current_turn == 0 else Color(1, 0.55, 0.5))
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  Construction
@@ -337,27 +341,28 @@ func _build_ui() -> void:
 	st.anchor_top = 1.0
 	st.anchor_bottom = 1.0
 	st.offset_left = 18.0
-	st.offset_right = 568.0
-	st.offset_top = -214.0
-	st.offset_bottom = -18.0
+	st.offset_right = 368.0
+	st.offset_top = -148.0
+	st.offset_bottom = -14.0
 	_root.add_child(st)
 	_stats = st
 
 	# Barre de sorts
 	_spell_scroll = ScrollContainer.new()
-	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	_spell_scroll.anchor_left = 0.0
-	_spell_scroll.anchor_right = 0.0
-	_spell_scroll.anchor_top = 0.0
+	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_spell_scroll.anchor_left = 0.5
+	_spell_scroll.anchor_right = 0.5
+	_spell_scroll.anchor_top = 1.0
 	_spell_scroll.anchor_bottom = 1.0
-	_spell_scroll.offset_left = 12.0
-	_spell_scroll.offset_right = 256.0
-	_spell_scroll.offset_top = 12.0
-	_spell_scroll.offset_bottom = -12.0
+	_spell_scroll.offset_left = -520.0
+	_spell_scroll.offset_right = 520.0
+	_spell_scroll.offset_top = -154.0
+	_spell_scroll.offset_bottom = -10.0
+	_spell_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
 	_root.add_child(_spell_scroll)
-	_spell_box = VBoxContainer.new()
-	_spell_box.add_theme_constant_override("separation", 12)
+	_spell_box = HBoxContainer.new()
+	_spell_box.add_theme_constant_override("separation", 10)
 	_spell_scroll.add_child(_spell_box)
 
 	# Infobulle de sort
@@ -584,10 +589,11 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.gm = game_manager
 		card.hotkey = idx if idx <= 10 else 0
 		card.base_col = _kind_color(spell)
-		card.custom_minimum_size = Vector2(232, 92)
-		card.text = String(spell["name"])
+		card.custom_minimum_size = Vector2(126, 132)
+		card.text = ""
+		card.tooltip_text = String(spell["name"]) + " · " + str(int(spell.get("cost_pa", 0))) + " PA · Portée " + str(int(spell.get("range", 1)))
 		var nlen: int = String(spell["name"]).length()
-		card.add_theme_font_size_override("font_size", 21 if nlen <= 10 else (19 if nlen <= 15 else 17))
+		card.add_theme_font_size_override("font_size", 14 if nlen <= 10 else (12 if nlen <= 15 else 11))
 		card.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		card.add_theme_constant_override("outline_size", 5)
 		card.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
@@ -619,10 +625,10 @@ func _style_card(card: SpellCard, selected: bool) -> void:
 ## Fond de carte : marges internes pour que le nom reste entre les pastilles.
 func _card_box(bg: Color, border: Color, bw: int) -> StyleBoxFlat:
 	var sb: StyleBoxFlat = _flat(bg, border, 14, bw)
-	sb.content_margin_left = 50.0
-	sb.content_margin_right = 50.0
-	sb.content_margin_top = 8.0
-	sb.content_margin_bottom = 26.0
+	sb.content_margin_left = 4.0
+	sb.content_margin_right = 4.0
+	sb.content_margin_top = 4.0
+	sb.content_margin_bottom = 4.0
 	return sb
 
 
