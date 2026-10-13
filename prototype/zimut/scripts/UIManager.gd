@@ -235,8 +235,9 @@ class StatsView extends Control:
 		draw_circle(c, r, dark)
 		draw_circle(c + Vector2(0, -r * 0.18), r * 0.8, light)
 		draw_circle(c + Vector2(-r * 0.3, -r * 0.45), r * 0.28, Color(1, 1, 1, 0.3))
-		draw_string_outline(font, c + Vector2(-r, 14.0), text, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, 40, 8, Color(0, 0, 0, 0.8))
-		draw_string(font, c + Vector2(-r, 14.0), text, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, 40, Color.WHITE)
+		var value_size: int = 40 if r >= 30.0 else 25
+		draw_string_outline(font, c + Vector2(-r, 9.0 if r < 30.0 else 14.0), text, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, value_size, 5, Color(0, 0, 0, 0.8))
+		draw_string(font, c + Vector2(-r, 9.0 if r < 30.0 else 14.0), text, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, value_size, Color.WHITE)
 		draw_string_outline(font, c + Vector2(-r, r + 24.0), label, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, 16, 5, Color(0, 0, 0, 0.9))
 		draw_string(font, c + Vector2(-r, r + 24.0), label, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, 16, Color(0.85, 0.92, 1.0))
 
@@ -349,7 +350,7 @@ func _build_ui() -> void:
 	_spell_scroll.anchor_right = 0.5
 	_spell_scroll.anchor_top = 1.0
 	_spell_scroll.anchor_bottom = 1.0
-	_spell_scroll.offset_left = -570.0
+	_spell_scroll.offset_left = -560.0
 	_spell_scroll.offset_right = 400.0
 	_spell_scroll.offset_top = -158.0
 	_spell_scroll.offset_bottom = -12.0
