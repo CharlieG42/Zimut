@@ -152,4 +152,27 @@ func _draw_horizon(far: Node2D) -> void:
 					Vector2(x + half * 0.86, base_y - peak * 0.55),
 				]), Color(0.97, 0.98, 1.0, 0.9))
 			x += step
+
+	# Lisière forestière en arrière-plan : silhouettes en plusieurs plans,
+	# toujours derrière le plateau et uniquement pour le biome Forêt.
+	if String(GameManager.fight_biome) == "Forêt":
+		for plan: int in range(2):
+			var rng := RandomNumberGenerator.new()
+			rng.seed = 430 + plan
+			var side_signs: Array[int] = [-1, 1]
+			for side: int in side_signs:
+				for i: int in range(7):
+					var x_tree: float = c.x + float(side) * (570.0 + float(i) * 112.0 + rng.randf_range(-18.0, 18.0))
+					var base: float = sea_y - float(plan) * 48.0 + rng.randf_range(-18.0, 18.0)
+					var trunk_h: float = rng.randf_range(42.0, 78.0) * (0.78 if plan == 1 else 1.0)
+					var crown_r: float = rng.randf_range(30.0, 48.0) * (0.76 if plan == 1 else 1.0)
+					var trunk_col: Color = Color(0.24, 0.20, 0.15, 0.82) if plan == 0 else Color(0.30, 0.27, 0.20, 0.55)
+					var leaf_dark: Color = Color(0.12, 0.30, 0.23, 0.82) if plan == 0 else Color(0.19, 0.36, 0.29, 0.52)
+					var leaf_mid: Color = Color(0.22, 0.43, 0.28, 0.86) if plan == 0 else Color(0.28, 0.47, 0.32, 0.55)
+					far.draw_rect(Rect2(x_tree - 5.0, base - trunk_h, 10.0, trunk_h), trunk_col)
+					var crown := Vector2(x_tree, base - trunk_h - crown_r * 0.45)
+					far.draw_circle(crown, crown_r + 4.0, leaf_dark)
+					far.draw_circle(crown + Vector2(-crown_r * 0.22, -crown_r * 0.18), crown_r * 0.74, leaf_mid)
+					far.draw_circle(crown + Vector2(crown_r * 0.28, crown_r * 0.12), crown_r * 0.58, leaf_dark)
+					far.draw_circle(crown + Vector2(-crown_r * 0.20, -crown_r * 0.34), crown_r * 0.28, Color(0.46, 0.63, 0.34, 0.55 if plan == 1 else 0.82))
 	far.queue_redraw()
