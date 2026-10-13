@@ -17,6 +17,11 @@ const COL_PLAYER := Color(0.22, 0.45, 0.85)
 const COL_ENEMY := Color(0.80, 0.22, 0.20)
 const COL_SUMMON := Color(0.25, 0.70, 0.45)
 
+## Échelle des cartes de sorts sur téléphones : le HUD est rendu en 1920×1080
+## (stretch « viewport »), donc les cartes de 166 px paraissent minuscules sur
+## un écran de type S23+ / A55. On grossit toute la colonne sur mobile.
+const MOBILE_SPELL_SCALE := 1.6
+
 var game_manager: Node
 var _grid: Node
 
@@ -40,6 +45,11 @@ var _over_sub: Label
 var _cards: Array = []
 var _cards_owner: int = -1
 var _initialized: bool = false
+var _spell_scale: float = 1.0
+
+
+func _is_mobile() -> bool:
+	return OS.has_feature("android") or OS.has_feature("ios")
 
 
 func _ready() -> void:
@@ -71,6 +81,7 @@ class SpellCard extends Button:
 	var base_col: Color = Color(0.5, 0.2, 0.2)
 	var selected: bool = false
 	var usable: bool = true
+	var card_scale: float = 1.0
 
 	## Pastille ronde : valeur en gros, légende en petit à côté.
 	func _orb(c: Vector2, r: float, val: String, col: Color) -> void:
@@ -105,15 +116,21 @@ class SpellCard extends Button:
 		var font: Font = ThemeDB.fallback_font
 		var p: Dictionary = Combat.parse(spell)
 		var muted: Color = Color(0.42, 0.45, 0.52) if not usable else Color.WHITE
+		# Sur mobile, tout le contenu est dessiné dans un repère logique 166×92
+		# puis agrandi par cette transformation : même code, cible tactile plus grande.
+		var s: float = card_scale
+		var lw: float = size.x / s
+		var lh: float = size.y / s
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2(s, s))
 		# Petites pastilles PA / PM, lisibles sans prendre trop de place.
 		_orb(Vector2(22, 22), 16.0, str(int(spell.get("cost_pa", 0))), Color(0.16, 0.50, 0.95))
 		_caption(Vector2(3, 44), 38.0, "PA", Color(0.4, 0.7, 1.0))
 		if int(spell.get("cost_pm", 0)) > 0:
-			_orb(Vector2(size.x - 22, 22), 16.0, str(int(spell["cost_pm"])), Color(0.14, 0.64, 0.32))
-			_caption(Vector2(size.x - 40, 44), 36.0, "PM", Color(0.45, 1.0, 0.58))
+			_orb(Vector2(lw - 22, 22), 16.0, str(int(spell["cost_pm"])), Color(0.14, 0.64, 0.32))
+			_caption(Vector2(lw - 40, 44), 36.0, "PM", Color(0.45, 1.0, 0.58))
 		# Motif central propre à la famille de sort (pas d'icône externe requise).
 		var icon_col: Color = base_col if usable else Color(0.34, 0.36, 0.41)
-		var center := Vector2(size.x * 0.5, 38.0)
+		var center := Vector2(lw * 0.5, 38.0)
 		draw_circle(center + Vector2(0, 2), 23.0, Color(0, 0, 0, 0.45))
 		draw_circle(center, 22.0, Color(0.025, 0.04, 0.08, 0.98))
 		draw_circle(center, 18.0, icon_col.darkened(0.25))
@@ -131,25 +148,26 @@ class SpellCard extends Button:
 		# Nom compact en deux lignes si nécessaire.
 		var spell_name: String = String(spell.get("name", "Sort"))
 		var name_size: int = 14 if spell_name.length() <= 12 else 12
-		var name_y: float = size.y - 23.0
+		var name_y: float = lh - 23.0
 		var name_text: String = spell_name
 		if name_text.length() > 18:
 			name_text = name_text.substr(0, 16) + "…"
-		draw_string_outline(font, Vector2(4, name_y), name_text, HORIZONTAL_ALIGNMENT_CENTER, size.x - 8, name_size, 3, Color(0, 0, 0, 0.95))
-		draw_string(font, Vector2(4, name_y), name_text, HORIZONTAL_ALIGNMENT_CENTER, size.x - 8, name_size, muted)
+		draw_string_outline(font, Vector2(4, name_y), name_text, HORIZONTAL_ALIGNMENT_CENTER, lw - 8, name_size, 3, Color(0, 0, 0, 0.95))
+		draw_string(font, Vector2(4, name_y), name_text, HORIZONTAL_ALIGNMENT_CENTER, lw - 8, name_size, muted)
 		# Portée et touche dans la bande inférieure.
 		var rng: int = int(spell.get("range", 1))
 		if String(p["target"]) == "self":
 			rng = 0
 		var range_text: String = "PO %s" % (str(rng) if rng < 99 else "∞")
 		var range_w: float = font.get_string_size(range_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
-		draw_string_outline(font, Vector2(size.x - range_w - 5.0, size.y - 7.0), range_text, HORIZONTAL_ALIGNMENT_LEFT, range_w + 2.0, 11, 3, Color(0, 0, 0, 0.95))
-		draw_string(font, Vector2(size.x - range_w - 5.0, size.y - 7.0), range_text, HORIZONTAL_ALIGNMENT_LEFT, range_w + 2.0, 11, Color(1.0, 0.83, 0.35) if usable else muted)
+		draw_string_outline(font, Vector2(lw - range_w - 5.0, lh - 7.0), range_text, HORIZONTAL_ALIGNMENT_LEFT, range_w + 2.0, 11, 3, Color(0, 0, 0, 0.95))
+		draw_string(font, Vector2(lw - range_w - 5.0, lh - 7.0), range_text, HORIZONTAL_ALIGNMENT_LEFT, range_w + 2.0, 11, Color(1.0, 0.83, 0.35) if usable else muted)
 		if hotkey > 0:
-			draw_circle(Vector2(size.x * 0.5, 17.0), 9.0, Color(0.05, 0.07, 0.12, 0.95))
-			draw_string(font, Vector2(size.x * 0.5 - 5.0, 21.0), str(hotkey % 10), HORIZONTAL_ALIGNMENT_CENTER, 10.0, 11, Color(1.0, 0.92, 0.55))
+			draw_circle(Vector2(lw * 0.5, 17.0), 9.0, Color(0.05, 0.07, 0.12, 0.95))
+			draw_string(font, Vector2(lw * 0.5 - 5.0, 21.0), str(hotkey % 10), HORIZONTAL_ALIGNMENT_CENTER, 10.0, 11, Color(1.0, 0.92, 0.55))
 		if selected:
-			draw_arc(Rect2(Vector2(3, 3), size - Vector2(6, 6)).get_center(), minf(size.x, size.y) * 0.47, 0.0, TAU, 48, Color(1.0, 0.86, 0.25), 2.5, true)
+			draw_arc(Rect2(Vector2(3, 3), Vector2(lw - 6.0, lh - 6.0)).get_center(), minf(lw, lh) * 0.47, 0.0, TAU, 48, Color(1.0, 0.86, 0.25), 2.5, true)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 func _flat(bg: Color, border: Color, radius: int = 14, bw: int = 3) -> StyleBoxFlat:
@@ -312,6 +330,7 @@ func init(manager: Node) -> void:
 		return
 	_initialized = true
 	game_manager = manager
+	_spell_scale = MOBILE_SPELL_SCALE if _is_mobile() else 1.0
 	# Le HUD doit toujours passer au-dessus des Node2D du plateau, y compris
 	# après les changements de scène et sur les exports Android.
 	layer = 20
@@ -397,7 +416,8 @@ func _build_ui() -> void:
 	_root.add_child(st)
 	_stats = st
 
-	# Barre de sorts
+	# Barre de sorts — la colonne s'élargit sur mobile (cartes agrandies).
+	var col_w: float = 190.0 * _spell_scale
 	_spell_scroll = ScrollContainer.new()
 	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
@@ -406,7 +426,7 @@ func _build_ui() -> void:
 	_spell_scroll.anchor_top = 0.0
 	_spell_scroll.anchor_bottom = 1.0
 	_spell_scroll.offset_left = 12.0
-	_spell_scroll.offset_right = 198.0
+	_spell_scroll.offset_right = 12.0 + col_w
 	_spell_scroll.offset_top = 132.0
 	_spell_scroll.offset_bottom = -166.0
 	_spell_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -416,7 +436,7 @@ func _build_ui() -> void:
 	spell_panel.anchor_top = 0.0
 	spell_panel.anchor_bottom = 1.0
 	spell_panel.offset_left = 8.0
-	spell_panel.offset_right = 202.0
+	spell_panel.offset_right = 8.0 + col_w + 4.0
 	spell_panel.offset_top = 124.0
 	spell_panel.offset_bottom = -158.0
 	spell_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -424,7 +444,7 @@ func _build_ui() -> void:
 	_root.add_child(spell_panel)
 	_root.add_child(_spell_scroll)
 	_spell_box = VBoxContainer.new()
-	_spell_box.add_theme_constant_override("separation", 8)
+	_spell_box.add_theme_constant_override("separation", int(8.0 * _spell_scale))
 	_spell_scroll.add_child(_spell_box)
 
 	# Infobulle de sort
@@ -434,16 +454,16 @@ func _build_ui() -> void:
 	_tip_panel.anchor_right = 0.0
 	_tip_panel.anchor_top = 0.0
 	_tip_panel.anchor_bottom = 0.0
-	_tip_panel.offset_left = 276.0
-	_tip_panel.offset_right = 696.0
+	_tip_panel.offset_left = 24.0 + 190.0 * _spell_scale + 8.0
+	_tip_panel.offset_right = _tip_panel.offset_left + 420.0
 	_tip_panel.offset_top = 14.0
 	_tip_panel.offset_bottom = 150.0
 	_tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tip_panel.visible = false
 	_tip_label = Label.new()
-	_tip_label.add_theme_font_size_override("font_size", 22)
+	_tip_label.add_theme_font_size_override("font_size", int(22.0 * _spell_scale))
 	_tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_tip_label.custom_minimum_size = Vector2(420, 0)
+	_tip_label.custom_minimum_size = Vector2(420.0 * _spell_scale, 0)
 	_tip_panel.add_child(_tip_label)
 	_root.add_child(_tip_panel)
 
@@ -651,7 +671,8 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.gm = game_manager
 		card.hotkey = idx if idx <= 10 else 0
 		card.base_col = _kind_color(spell)
-		card.custom_minimum_size = Vector2(166, 92)
+		card.card_scale = _spell_scale
+		card.custom_minimum_size = Vector2(166.0 * _spell_scale, 92.0 * _spell_scale)
 		card.text = ""
 		card.tooltip_text = String(spell["name"]) + " · " + str(int(spell.get("cost_pa", 0))) + " PA · Portée " + str(int(spell.get("range", 1)))
 		var nlen: int = String(spell["name"]).length()
