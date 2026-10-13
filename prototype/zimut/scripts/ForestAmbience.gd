@@ -49,7 +49,7 @@ func _draw() -> void:
 		var col := Color(0.92, 0.96, 0.58, alpha) if not bool(mote["leaf"]) else Color(0.62, 0.88, 0.42, alpha)
 		if bool(mote["leaf"]):
 			draw_set_transform(p, sin(_time + phase) * 0.5, Vector2(1.0, 0.65))
-			draw_ellipse(Vector2.ZERO, Vector2(float(mote["size"]) * 1.6, float(mote["size"])), col)
+			draw_circle(Vector2.ZERO, float(mote["size"]) * 1.6, col)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		else:
 			draw_circle(p, float(mote["size"]), col)
