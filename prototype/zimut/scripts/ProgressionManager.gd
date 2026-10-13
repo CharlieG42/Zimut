@@ -275,7 +275,16 @@ func _load_spell_levels() -> void:
 		var classe: String = c[0].strip_edges()
 		if not _spell_levels.has(classe):
 			_spell_levels[classe] = []
-		_spell_levels[classe].append({"name": c[1].strip_edges(), "level": int(c[6])})
+		_spell_levels[classe].append({
+			"name": c[1].strip_edges(), "level": int(c[6]),
+			"pa": int(c[2]) if c[2].strip_edges().is_valid_int() else 1,
+			"pm": int(c[3]) if c[3].strip_edges().is_valid_int() else 0,
+			"range": int(c[4]) if c[4].strip_edges().is_valid_int() else 1,
+			"effect": c[5].strip_edges(), "type": c[7].strip_edges() if c.size() > 7 else "Attaque",
+			"phys": int(c[8]) if c.size() > 8 and c[8].strip_edges().is_valid_int() else 0,
+			"mag": int(c[9]) if c.size() > 9 and c[9].strip_edges().is_valid_int() else 0,
+			"heal": int(c[10]) if c.size() > 10 and c[10].strip_edges().is_valid_int() else 0,
+		})
 
 ## Liste des classes jouables (ordre d'affichage).
 func class_names() -> Array[String]:
@@ -425,27 +434,17 @@ func add_resources(data: Dictionary, drops: Dictionary) -> void:
 		res[k] = int(res.get(k, 0)) + int(drops[k])
 	data["resources"] = res
 
-## Fabrique l'objet de la recette : consomme ressources et or, l'objet part
-## dans l'inventaire. Retourne "" si OK, sinon la raison.
-func craft_item(data: Dictionary, recipe_name: String) -> String:
-	var recipe: Dictionary = {}
+## Recette par nom ({} si inconnue).
+func craft_recipe(recipe_name: String) -> Dictionary:
 	for r: Dictionary in _craft_recipes:
 		if String(r["name"]) == recipe_name:
-			recipe = r
-			break
-	if recipe.is_empty():
-		return "Recette inconnue."
-	var res: Dictionary = data.get("resources", {})
-	for k: String in recipe["cost"].keys():
-		if int(res.get(k, 0)) < int(recipe["cost"][k]):
-			return "Ressource insuffisante : %s (%d/%d)." % [k, int(res.get(k, 0)), int(recipe["cost"][k])]
-	if int(data.get("gold", 0)) < int(recipe["gold"]):
-			return "Or insuffisant : %d pièces requises." % int(recipe["gold"])
-	for k: String in recipe["cost"].keys():
-		res[k] = int(res.get(k, 0)) - int(recipe["cost"][k])
-	data["resources"] = res
-	data["gold"] = int(data.get("gold", 0)) - int(recipe["gold"])
-	# L'objet fabriqué reprend les stats de stuff.txt (ligne la plus proche en dessous).
+			return r
+	return {}
+
+## Objet obtenu en forgeant la recette : stats de stuff.txt (ligne la plus proche en
+## dessous du niveau de la recette), qualité RARE (+15 % de stats) — un objet forgé est
+## toujours meilleur qu'un objet commun de même niveau.
+func forged_item(recipe: Dictionary) -> Dictionary:
 	var item: Dictionary = {}
 	var best_lvl: int = -1
 	for it: Dictionary in _items_catalog:
@@ -464,7 +463,50 @@ func craft_item(data: Dictionary, recipe_name: String) -> String:
 	if item.is_empty():
 		item = {"type": String(recipe["type"]), "name": String(recipe["name"]), "level": int(recipe["level"]),
 			"force": 0, "intelligence": 0, "agility": 0, "wisdom": 0, "vita": 0, "defense": 0, "effect": ""}
-	data["inventory"].append(item.duplicate())
+	return ItemRules.apply_rarity(item.duplicate(), "rare", _rng)
+
+## État d'une recette pour l'interface : { craftable, missing: {res: n}, gold_missing }.
+func craft_status(data: Dictionary, recipe: Dictionary) -> Dictionary:
+	var res: Dictionary = data.get("resources", {})
+	var missing: Dictionary = {}
+	for k: String in recipe["cost"].keys():
+		var lack: int = int(recipe["cost"][k]) - int(res.get(k, 0))
+		if lack > 0:
+			missing[k] = lack
+	var gold_missing: int = maxi(0, int(recipe["gold"]) - int(data.get("gold", 0)))
+	return {"craftable": missing.is_empty() and gold_missing == 0, "missing": missing, "gold_missing": gold_missing}
+
+## Fabrique l'objet de la recette : consomme ressources et or, l'objet part
+## dans l'inventaire. Retourne "" si OK, sinon la raison.
+func craft_item(data: Dictionary, recipe_name: String) -> String:
+	var recipe: Dictionary = craft_recipe(recipe_name)
+	if recipe.is_empty():
+		return "Recette inconnue."
+	var res: Dictionary = data.get("resources", {})
+	for k: String in recipe["cost"].keys():
+		if int(res.get(k, 0)) < int(recipe["cost"][k]):
+			return "Ressource insuffisante : %s (%d/%d)." % [k, int(res.get(k, 0)), int(recipe["cost"][k])]
+	if int(data.get("gold", 0)) < int(recipe["gold"]):
+		return "Or insuffisant : %d pièces requises." % int(recipe["gold"])
+	for k: String in recipe["cost"].keys():
+		res[k] = int(res.get(k, 0)) - int(recipe["cost"][k])
+	data["resources"] = res
+	data["gold"] = int(data.get("gold", 0)) - int(recipe["gold"])
+	data["inventory"].append(forged_item(recipe))
+	data["crafted"] = int(data.get("crafted", 0)) + 1
+	progression_changed.emit()
+	return ""
+
+## Fabrique puis équipe directement sur un membre de l'équipe. Si l'équipement échoue
+## (niveau trop bas...), l'objet reste dans l'inventaire : retourne alors la raison.
+func craft_and_equip(data: Dictionary, recipe_name: String, member_index: int) -> String:
+	var err: String = craft_item(data, recipe_name)
+	if err != "":
+		return err
+	var idx: int = data["inventory"].size() - 1
+	var eq_err: String = equip_item(data, member_index, idx)
+	if eq_err != "":
+		return "Objet fabriqué (en inventaire) mais non équipé : %s" % eq_err
 	return ""
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -494,6 +536,45 @@ func spell_upgrade_cost(data: Dictionary, classe: String, spell_name: String) ->
 	if lvl >= SPELL_LEVEL_MAX:
 		return {}
 	return {"gold": SPELL_LEVEL_GOLD_BASE * lvl, "magie": SPELL_LEVEL_MAGIC_BASE * lvl}
+
+## Aperçu d'un sort pour la fenêtre des sorts : { pa, pm, range, kind, target, aoe, zone,
+## value (valeur principale au niveau `level`), label (Dégâts / Soin...), desc }.
+func spell_preview(classe: String, spell_name: String, level: int) -> Dictionary:
+	var row: Dictionary = {}
+	for s: Dictionary in spells_of(classe):
+		if String(s["name"]) == spell_name:
+			row = s
+			break
+	if row.is_empty():
+		return {}
+	var spell: Dictionary = {
+		"name": spell_name, "classe": classe, "cost_pa": int(row["pa"]), "cost_pm": int(row["pm"]),
+		"range": int(row["range"]), "effect": String(row["effect"]), "level_required": int(row["level"]),
+		"spell_type": String(row["type"]), "Degats_physiques": int(row["phys"]),
+		"Degats_magiques": int(row["mag"]), "Soins": int(row["heal"]),
+	}
+	var p: Dictionary = Combat.parse(spell)
+	var base: int = 0
+	var label: String = ""
+	match String(p["kind"]):
+		"attack":
+			base = maxi(int(p["dmg"]), int(p["adj_dmg"]))
+			label = "Dégâts"
+		"heal":
+			base = int(p["heal"]) if int(p["heal"]) > 0 else int(p["regen"])
+			label = "Soin"
+		"trap":
+			base = int(p["trap"])
+			label = "Dégâts du piège"
+	if base == 0:
+		for d: Dictionary in p.get("dots", []):
+			base = int(float(d["value"]))
+			label = "Dégâts par tour"
+	var mult: float = 1.0 + (float(clampi(level, 1, SPELL_LEVEL_MAX)) - 1.0) * SPELL_LEVEL_BONUS_PCT / 100.0
+	return {"pa": int(row["pa"]), "pm": int(row["pm"]), "range": int(row["range"]), "kind": String(p["kind"]),
+		"target": String(p["target"]), "aoe": String(p["aoe"]), "zone": int(p["zone_r"]),
+		"los": bool(p["needs_los"]), "value": roundi(float(base) * mult), "base_value": base, "label": label,
+		"mult": mult, "desc": String(row["effect"]), "type": String(row["type"]), "req": int(row["level"])}
 
 ## Améliore un sort d'un niveau. Retourne "" si OK, sinon la raison.
 func upgrade_spell(data: Dictionary, classe: String, spell_name: String) -> String:
@@ -554,7 +635,7 @@ func ensure_roster(data: Dictionary) -> void:
 			inv[k] = int(inv[k])
 		ent["invested"] = inv
 	data["roster"] = roster
-	data["level"] = enemy_level_for(data)
+	data["level"] = frontier_level(data)
 
 func _roster_average(roster: Dictionary, classes: Array[String]) -> int:
 	var tot: int = 0
@@ -584,9 +665,48 @@ func team_average_level(data: Dictionary) -> int:
 
 ## Niveau des ennemis du prochain combat : niveau moyen de l'équipe (+1 toutes les
 ## DIFFICULTY_CREEP_EVERY victoires).
-func enemy_level_for(data: Dictionary) -> int:
+func frontier_level(data: Dictionary) -> int:
 	var lvl: int = team_average_level(data) + int(data.get("victories", 0)) / DIFFICULTY_CREEP_EVERY
 	return clampi(lvl, 1, ClassRules.MAX_LEVEL)
+
+## Niveau des ennemis du combat SÉLECTIONNÉ : le combat de la « frontière » (premier non gagné)
+## s'adapte à l'équipe ; un combat déjà gagné rejoué garde le niveau auquel il a été gagné.
+func enemy_level_for(data: Dictionary) -> int:
+	return fight_level_of(data, selected_fight_number(data))
+
+## Premier combat non encore gagné.
+func frontier_fight_number(data: Dictionary) -> int:
+	return int(data.get("victories", 0)) + 1
+
+## Combat choisi par le joueur (0 / invalide = la frontière).
+func selected_fight_number(data: Dictionary) -> int:
+	var frontier: int = frontier_fight_number(data)
+	var sel: int = int(data.get("selected_fight", 0))
+	if sel < 1 or sel >= frontier:
+		return frontier
+	return sel
+
+## Choisit le combat à jouer (1..frontière). Retourne le numéro retenu.
+func select_fight(data: Dictionary, n: int) -> int:
+	var frontier: int = frontier_fight_number(data)
+	n = clampi(n, 1, frontier)
+	data["selected_fight"] = 0 if n == frontier else n
+	return n
+
+## Niveau des ennemis du combat n (historique des combats gagnés, sinon estimation).
+func fight_level_of(data: Dictionary, n: int) -> int:
+	var frontier: int = frontier_fight_number(data)
+	if n >= frontier:
+		return frontier_level(data)
+	var hist: Array = data.get("fight_levels", [])
+	if n >= 1 and n <= hist.size():
+		return clampi(int(hist[n - 1]), 1, ClassRules.MAX_LEVEL)
+	return clampi(frontier_level(data) - (frontier - n), 1, ClassRules.MAX_LEVEL)
+
+## Facteur d'XP selon l'écart entre le niveau du combat et celui du perso :
+## combat plus bas = moins d'XP (rejouer sert à farmer les objets), plus haut = bonus.
+func xp_level_factor(fight_level: int, member_level: int) -> float:
+	return clampf(1.0 + float(fight_level - member_level) * 0.10, 0.10, 1.5)
 
 ## Statistiques finales d'un membre d'équipe : base (classes.txt au niveau du perso)
 ## + points investis + équipement (+ panoplies) + paliers PA/PM.
@@ -670,7 +790,7 @@ func fight_xp(enemies: Array) -> int:
 
 ## Distribue l'XP à toute la roster. Retourne le rapport par classe :
 ## { classe: { gain, from_level, to_level, points, spells, in_team } }
-func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0) -> Dictionary:
+func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0, fight_level: int = 0, guarantee_level: bool = false) -> Dictionary:
 	ensure_roster(data)
 	var team_classes: Array[String] = []
 	for m: Dictionary in data.get("team", []):
@@ -681,12 +801,16 @@ func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0) -> Dictionary:
 		var e: Dictionary = data["roster"][classe]
 		var in_team: bool = team_classes.has(classe)
 		var gain: float = float(raw_xp) * ratio * ClassRules.xp_mult(classe)
+		if fight_level > 0:
+			gain *= xp_level_factor(fight_level, int(e["level"]))
 		if not in_team:
-			gain *= ClassRules.BENCH_XP_RATIO
-		if int(e["level"]) + ClassRules.CATCHUP_GAP < avg:
-			gain *= 1.5
+			gain *= ClassRules.BENCH_XP_RATIO   # classes hors équipe : 10 % de l'XP
 		var g: int = roundi(gain)
 		var from_lvl: int = int(e["level"])
+		# Victoire sur le combat de la frontière : chaque perso de l'équipe gagne AU MOINS
+		# un niveau, quel que soit le niveau de ses alliés.
+		if guarantee_level and in_team and from_lvl < ClassRules.MAX_LEVEL:
+			g = maxi(g, xp_for_level(from_lvl + 1) - int(e["xp"]))
 		e["xp"] = int(e["xp"]) + g
 		var to_lvl: int = mini(ClassRules.MAX_LEVEL, level_for_xp(int(e["xp"])))
 		var pts: int = 0
@@ -713,7 +837,9 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	if data.is_empty():
 		return {}
 	ensure_roster(data)
-	var fight_level: int = int(data.get("level", START_LEVEL))
+	var fight_no: int = selected_fight_number(data)
+	var frontier: bool = fight_no == frontier_fight_number(data)
+	var fight_level: int = enemy_level_for(data)
 	var was_boss: bool = bool(info.get("boss", is_boss_fight(data)))
 	var enemies: Array = info.get("enemies", [])
 	if enemies.is_empty():
@@ -721,8 +847,15 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 			{"type": "Squelette", "level": fight_level, "boss": false},
 			{"type": "Loup", "level": fight_level, "boss": false},
 			{"type": "Dragonnet", "level": fight_level, "boss": was_boss}]
-	var report: Dictionary = award_xp(data, fight_xp(enemies))
-	data["victories"] = int(data.get("victories", 0)) + 1
+	var report: Dictionary = award_xp(data, fight_xp(enemies), 1.0, fight_level, frontier)
+	if frontier:
+		data["victories"] = int(data.get("victories", 0)) + 1
+		var hist: Array = data.get("fight_levels", [])
+		hist.append(fight_level)
+		data["fight_levels"] = hist
+		data["selected_fight"] = 0
+	else:
+		data["replays"] = int(data.get("replays", 0)) + 1
 	var loots: Array = _roll_loots(fight_level, was_boss)
 	for l: Dictionary in loots:
 		data["inventory"].append(l)
@@ -730,11 +863,12 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	# Butin de craft : ressources selon le nombre d'ennemis vaincus, un peu d'or.
 	var drops: Dictionary = _roll_resource_drops(enemies.size(), was_boss)
 	add_resources(data, drops)
-	data["gold"] = int(data.get("gold", 0)) + (50 + 10 * fight_level) * (3 if was_boss else 1)
+	var gold_gain: int = (50 + 10 * fight_level) * (3 if was_boss else 1)
+	data["gold"] = int(data.get("gold", 0)) + (gold_gain if frontier else int(gold_gain * 0.6))
 	data["last_resources"] = drops
-	data["level"] = enemy_level_for(data)
+	data["level"] = frontier_level(data)
 	data["last_result"] = {"victory": true, "xp": report, "boss": was_boss, "fight_level": fight_level,
-		"turns": int(info.get("turns", 0))}
+		"turns": int(info.get("turns", 0)), "fight_no": fight_no, "replay": not frontier}
 	# Journal cumulé des loots gagnés dans cette partie
 	var log_arr: Array = data.get("loot_log", [])
 	for l: Dictionary in loots:
@@ -754,15 +888,15 @@ func register_defeat(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	if data.is_empty():
 		return {}
 	ensure_roster(data)
-	var fight_level: int = int(data.get("level", START_LEVEL))
+	var fight_level: int = enemy_level_for(data)
 	var enemies: Array = info.get("enemies", [])
 	var report: Dictionary = {}
 	if not enemies.is_empty():
-		report = award_xp(data, fight_xp(enemies), ClassRules.DEFEAT_XP_RATIO)
+		report = award_xp(data, fight_xp(enemies), ClassRules.DEFEAT_XP_RATIO, fight_level)
 	data["defeats"] = int(data.get("defeats", 0)) + 1
 	data["last_loots"] = []
 	data["last_resources"] = {}
-	data["level"] = enemy_level_for(data)
+	data["level"] = frontier_level(data)
 	data["last_result"] = {"victory": false, "xp": report, "boss": bool(info.get("boss", false)),
 		"fight_level": fight_level, "turns": int(info.get("turns", 0))}
 	progression_changed.emit()
@@ -770,7 +904,7 @@ func register_defeat(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 
 ## Numéro du prochain combat (1 = premier). Boss tous les BOSS_EVERY combats.
 func next_fight_number(data: Dictionary) -> int:
-	return int(data.get("victories", 0)) + 1
+	return selected_fight_number(data)
 
 func is_boss_fight(data: Dictionary) -> bool:
 	return next_fight_number(data) % BOSS_EVERY == 0

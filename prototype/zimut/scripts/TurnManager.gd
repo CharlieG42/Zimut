@@ -280,7 +280,7 @@ func _cell_score(e: Dictionary, c: Vector2i, tpos: Vector2i, dmap: Dictionary, d
 	var d: int = int(dmap.get(c, 99))
 	var man: int = Combat.manhattan(c, tpos)
 	var sc: float = -absf(float(d - desired)) * 10.0 - float(cost) * 0.4
-	if man <= rng and man >= 1 and (man == 1 or Combat.has_los(c, tpos, gm.obstacles)):
+	if man <= rng and man >= 1 and (man == 1 or Combat.has_los(c, tpos, gm.los_blockers())):
 		sc += 28.0
 	if desired > 1:
 		# Les tireurs évitent d'être au contact d'un ennemi — et fuient carrément s'ils sont blessés

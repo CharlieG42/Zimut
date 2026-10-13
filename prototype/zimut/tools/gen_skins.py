@@ -68,9 +68,12 @@ def shadow(cx, cy, rx):
 
 
 # ── ENNEMIS ─────────────────────────────────────────────────────────────────
-def gobelin():
+def gobelin(king=False):
     d = (lg("sk", "#b5e25a", "#5f9b2c") + lg("tn", "#a8703a", "#6b4220") + lg("bl", "#cfd6de", "#7d8794", 0, 0, 1, 0))
     b = shadow(80, 190, 44)
+    if king:
+        b += path("M44,104 Q14,150 24,192 L136,192 Q146,150 116,104 Z", "#b01e2e", 3.5) + path("M30,176 L36,192 M52,186 L56,192 M104,186 L108,192 M124,176 L130,192", sw=2.4, stroke=OL)
+        b += path("M44,104 Q80,126 116,104", sw=7, stroke="#f4f0e0")
     b += rect(52, 156, 22, 30, "#4a2f1a", 7) + rect(86, 156, 22, 30, "#4a2f1a", 7)
     # bras gauche + dague
     b += path("M52,112 Q30,120 26,142", sw=11, stroke=OL) + path("M52,112 Q30,120 26,142", sw=6, stroke="#7fb83a")
@@ -91,12 +94,21 @@ def gobelin():
     b += ell(80, 92, 7, 5, "#3d7a1c", 2.5)
     b += path("M62,102 Q80,116 98,102", "#5a1010", 3)
     b += poly([(68, 104), (72, 112), (76, 105)], "#fffdf0", 1.8) + poly([(84, 105), (88, 112), (92, 104)], "#fffdf0", 1.8)
+    if king:
+        b += path("M62,114 Q80,130 98,114", sw=5, stroke=OL) + path("M62,114 Q80,130 98,114", sw=2.6, stroke="#ffd24a")
+        b += ell(80, 130, 5, 5, "#e03a3a", 2)
+        b += poly([(48, 52), (52, 24), (66, 40), (80, 18), (94, 40), (108, 24), (112, 52)], "#ffd24a", 3.2)
+        b += rect(48, 46, 64, 10, "#f2b82a", 3, 3) + ell(80, 29, 4, 4, "#e03a3a", 1.6) + ell(58, 36, 3, 3, "#4ac0ff", 1.4) + ell(102, 36, 3, 3, "#4ac0ff", 1.4)
     return svg(160, 200, d, b)
 
 
-def squelette():
+def squelette(lord=False):
     d = lg("bn", "#fffbe8", "#cfc6a0") + rg("gl", "#9ff3ff", "#2aa8d8", .5, .5, .6)
     b = shadow(80, 190, 40)
+    if lord:
+        d = d.replace("#9ff3ff", "#e6a8ff").replace("#2aa8d8", "#8a30d8")
+        b += ell(80, 110, 70, 76, "#a040ff", 0, 0.12) + ell(80, 110, 52, 58, "#c070ff", 0, 0.12)
+        b += path("M52,98 Q22,150 34,194 L126,194 Q140,150 108,98 Z", "#3a1a50", 3.5) + path("M34,176 L40,194 M58,188 L62,194 M100,188 L104,194 M122,176 L128,194", sw=2.4, stroke=OL)
     # jambes
     for x in (64, 96):
         b += path(f"M{x},140 L{x},178", sw=11, stroke=OL) + path(f"M{x},140 L{x},178", sw=6, stroke="url(#bn)")
@@ -124,6 +136,12 @@ def squelette():
     b += ell(67, 72, 5, 6, "url(#gl)", 0) + ell(93, 72, 5, 6, "url(#gl)", 0)
     b += poly([(80, 80), (74, 90), (86, 90)], "#1c1426", 2)
     b += path("M52,52 L58,60 M108,52 L102,60", sw=2.4, op=0.6)
+    if lord:
+        b += path("M40,94 Q36,78 58,80 L66,100 Q50,108 40,94 Z", "#3a3050", 3.2) + path("M120,94 Q124,78 102,80 L94,100 Q110,108 120,94 Z", "#3a3050", 3.2)
+        b += path("M44,88 L50,80 M116,88 L110,80", sw=2.4, stroke="#b070ff")
+        b += poly([(50, 50), (54, 22), (66, 38), (80, 14), (94, 38), (106, 22), (110, 50)], "#2a2036", 3.2)
+        b += poly([(54, 48), (57, 30), (66, 42)], "#8a50d0", 0) + ell(80, 26, 4, 4, "#e6a8ff", 1.5) + rect(50, 44, 60, 9, "#3a3050", 3, 3)
+        b += path("M32,150 L36,96", sw=4, stroke="#c070ff", op=0.9)
     return svg(160, 200, d, b)
 
 
@@ -161,9 +179,11 @@ def loup(body_a="#9aa1ae", body_b="#515968", belly="#e4e6ea", eyes="#ffd23a", au
     return svg(170, 165, d, b)
 
 
-def troll():
+def troll(giant=False):
     d = lg("sk", "#9fc07a", "#5b7f47") + lg("be", "#c6d9a5", "#8aa86d") + lg("wd", "#9a6a3a", "#5f3d20")
     b = shadow(80, 192, 58)
+    if giant:
+        d = d.replace("#9fc07a", "#8d9889").replace("#5b7f47", "#3f4a44").replace("#c6d9a5", "#b6bfae").replace("#8aa86d", "#68745f")
     # jambes
     b += rect(42, 148, 30, 40, "url(#sk)", 12) + rect(88, 148, 30, 40, "url(#sk)", 12)
     b += ell(57, 188, 19, 7, "#6a8a52", 2.5) + ell(103, 188, 19, 7, "#6a8a52", 2.5)
@@ -189,6 +209,13 @@ def troll():
     b += path("M62,82 Q80,90 98,82", "#4a2a20", 3)
     b += poly([(66, 82), (62, 66), (72, 82)], "#fffdf0", 2) + poly([(94, 82), (98, 66), (88, 82)], "#fffdf0", 2)
     b += path("M48,60 Q38,52 40,44 Q52,50 56,56", "url(#sk)", 2.5) + path("M112,60 Q122,52 120,44 Q108,50 104,56", "url(#sk)", 2.5)
+    if giant:
+        # épaulières de pierre, fissures de lave, cornes, yeux de braise
+        b += path("M26,92 Q10,74 30,64 Q56,68 60,92 Z", "#6a7068", 3.2) + path("M134,92 Q150,74 130,64 Q104,68 100,92 Z", "#6a7068", 3.2)
+        b += path("M30,76 L40,86 M126,76 L118,86", sw=2.4, stroke="#ff7a2a")
+        b += path("M70,100 L76,116 L68,128 M90,104 L86,120 L94,134", sw=3.2, stroke="#ff7a2a") + path("M70,100 L76,116 L68,128 M90,104 L86,120 L94,134", sw=1.4, stroke="#ffd24a")
+        b += path("M58,48 Q44,30 50,14 Q62,28 68,44 Z", "#e6dcc4", 3) + path("M102,48 Q116,30 110,14 Q98,28 92,44 Z", "#e6dcc4", 3)
+        b += ell(68, 66, 6, 6, "#ff6a1a", 0, 0.95) + ell(92, 66, 6, 6, "#ff6a1a", 0, 0.95) + ell(68, 66, 2.4, 2.4, "#ffe27a", 0) + ell(92, 66, 2.4, 2.4, "#ffe27a", 0)
     return svg(170, 200, d, b)
 
 
@@ -433,50 +460,131 @@ def sarriette():
 
 
 
+
+def leaf(cx, cy, w, h, ang, fill="url(#lf)", sw=2.2, vein=True):
+    """Feuille pointue de largeur w et de longueur h, base en (cx,cy), orientée à ang degrés."""
+    d = f"M0,0 C{w*0.7:.1f},{-h*0.30:.1f} {w*0.6:.1f},{-h*0.78:.1f} 0,{-h:.1f} C{-w*0.6:.1f},{-h*0.78:.1f} {-w*0.7:.1f},{-h*0.30:.1f} 0,0 Z"
+    out = f'<g transform="translate({cx},{cy}) rotate({ang})"><path d="{d}" fill="{fill}" stroke="{OL}" stroke-width="{sw}" stroke-linejoin="round"/>'
+    if vein:
+        out += f'<path d="M0,-2 L0,{-h*0.85:.1f}" stroke="#2c6a2a" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/>'
+    return out + '</g>'
+
+
+def flower(cx, cy, r, petal="#ff8fb8", core="#ffe27a"):
+    out = ""
+    for i in range(5):
+        import math
+        a = math.radians(i * 72 - 90)
+        out += ell(cx + math.cos(a) * r * 0.85, cy + math.sin(a) * r * 0.85, r * 0.62, r * 0.62, petal, 1.8)
+    return out + ell(cx, cy, r * 0.5, r * 0.5, core, 1.8) + ell(cx - r * 0.12, cy - r * 0.14, r * 0.16, r * 0.16, "#ffffff", 0, 0.8)
+
+
 def sylvain():
-    d = lg("sk", "#a4d65e", "#4c8a2f") + lg("be", "#d8efb0", "#9cc46e") + lg("lf", "#8fd648", "#4c9a2a") + lg("wd", "#8a5a30", "#4c3018")
-    b = shadow(80, 192, 54)
-    # jambes racines
-    b += path("M64,150 Q60,172 56,186", sw=16, stroke=OL) + path("M64,150 Q60,172 56,186", sw=10, stroke="url(#wd)")
-    b += path("M96,150 Q100,172 104,186", sw=16, stroke=OL) + path("M96,150 Q100,172 104,186", sw=10, stroke="url(#wd)")
-    b += ell(56, 188, 15, 6, "#6a4a28", 2.5) + ell(104, 188, 15, 6, "#6a4a28", 2.5)
-    # bâton de sylvain (derrière)
-    b += path("M134,70 L140,180", sw=12, stroke=OL) + path("M134,70 L140,180", sw=7, stroke="url(#wd)")
-    b += ell(136, 62, 14, 16, "url(#lf)") + ell(131, 56, 8, 9, "url(#lf)", 2, 0.95) + shine(130, 55, 5, 5, .4)
-    # cape-tunique de feuillage
-    b += path("M40,96 Q28,132 34,156 Q56,146 80,156 Q104,146 126,156 Q132,132 120,96 Q100,112 80,112 Q60,112 40,96 Z", "url(#sk)", 3.5)
-    b += poly([(46, 120), (38, 140), (56, 128)], "url(#lf)", 2) + poly([(114, 120), (122, 140), (104, 128)], "url(#lf)", 2)
-    b += shine(58, 106, 16, 9, .22)
-    # bras écorce
-    b += path("M44,102 Q28,116 26,134", sw=19, stroke=OL) + path("M44,102 Q28,116 26,134", sw=13, stroke="url(#be)")
-    b += ell(26, 136, 11, 10, "url(#be)", 2.5)
-    b += path("M116,102 Q132,112 134,124", sw=19, stroke=OL) + path("M116,102 Q132,112 134,124", sw=13, stroke="url(#be)")
-    b += ell(134, 126, 11, 10, "url(#be)", 2.5)
+    """Sylvain : héros chibi inspiré des Sadida — chevelure-feuillage fleurie, collerette de
+    feuilles, jupe de feuilles, bâton noueux surmonté d'une fleur lumineuse."""
+    d = (lg("sk", "#f1c79a", "#cf9566") + lg("lf", "#92dc52", "#3f8f2d") + lg("lf2", "#b7ea6a", "#58a63a")
+         + lg("hr", "#6fd05a", "#2a7a3a") + lg("wd", "#9a6a3a", "#4c3018") + lg("br", "#a8703a", "#6a4220")
+         + rg("gw", "#ffffff", "#ff7aa8", .5, .5, .6) + rg("hl", "#eaffc0", "#6fe06a", .5, .5, .6))
+    b = shadow(80, 193, 50)
+    # bâton noueux (derrière) + fleur lumineuse
+    b += ell(139, 52, 22, 22, "url(#hl)", 0, 0.30) + ell(139, 52, 15, 15, "url(#hl)", 0, 0.30)
+    b += path("M134,168 Q144,130 134,100 Q126,76 140,58", sw=13, stroke=OL) + path("M134,168 Q144,130 134,100 Q126,76 140,58", sw=8, stroke="url(#wd)")
+    b += path("M138,120 Q150,114 152,102", sw=6, stroke=OL) + path("M138,120 Q150,114 152,102", sw=3, stroke="url(#wd)")
+    b += leaf(140, 66, 9, 22, -48) + leaf(140, 66, 9, 22, 48) + flower(139, 46, 13, "#ff8fb8", "#fff0a0")
+    b += ell(139, 46, 6, 6, "url(#gw)", 0, 0.9)
+    # jambes + souliers-feuilles
+    for x, d_ in ((66, -4), (94, 4)):
+        b += path(f"M{x},146 L{x + d_},176", sw=13, stroke=OL) + path(f"M{x},146 L{x + d_},176", sw=8, stroke="url(#sk)")
+        b += leaf(x + d_ - 2, 190, 11, 22, -75 if d_ < 0 else 75, "url(#lf)")
+        b += leaf(x + d_ + 2, 186, 9, 16, -60 if d_ < 0 else 60, "url(#lf2)", 1.8, False)
+    # jupe de feuilles (3 rangées)
+    for row, (y, n, w, hh, col) in enumerate(((140, 7, 17, 38, "url(#lf)"), (130, 6, 17, 34, "url(#lf2)"), (122, 5, 16, 28, "url(#lf)"))):
+        for i in range(n):
+            x = 80 + (i - (n - 1) / 2) * (w * 1.12)
+            ang = (i - (n - 1) / 2) * 17
+            b += leaf(x, y, w, hh, 180 + ang, col, 2.2, row == 0)
+    # corsage en écorce + ceinture de liane
+    b += path("M60,96 Q80,90 100,96 L104,130 Q80,142 56,130 Z", "url(#br)", 3.5)
+    b += path("M62,106 Q80,114 98,106 M60,118 Q80,126 100,118", sw=2, stroke="#3a2412", op=0.55)
+    b += path("M56,128 Q80,142 104,128", sw=6, stroke=OL) + path("M56,128 Q80,142 104,128", sw=3, stroke="#7fcf4a")
+    b += flower(80, 136, 7, "#ffd0e0", "#ff7aa8") + shine(66, 106, 5, 13, .25)
+    # collerette de feuilles
+    b += leaf(60, 96, 14, 30, -62) + leaf(100, 96, 14, 30, 62) + leaf(70, 92, 12, 26, -30, "url(#lf2)") + leaf(90, 92, 12, 26, 30, "url(#lf2)")
+    # bras
+    b += path("M58,100 Q42,114 44,134", sw=11, stroke=OL) + path("M58,100 Q42,114 44,134", sw=6.5, stroke="url(#sk)")
+    b += ell(44, 137, 8, 8, "url(#sk)", 2.4)
+    b += ell(30, 128, 12, 12, "url(#hl)", 0, 0.5) + ell(30, 128, 5.5, 5.5, "#eaffc0", 1.6)    # graine lumineuse
+    b += path("M102,100 Q122,106 130,118", sw=11, stroke=OL) + path("M102,100 Q122,106 130,118", sw=6.5, stroke="url(#sk)")
+    b += ell(132, 120, 8, 8, "url(#sk)", 2.4)
+    # oreilles pointues à bout de feuille
+    b += poly([(53, 70), (36, 62), (54, 58)], "url(#sk)", 2.4) + poly([(107, 70), (124, 62), (106, 58)], "url(#sk)", 2.4)
+    b += leaf(38, 62, 7, 15, -80, "url(#lf2)", 1.8, False) + leaf(122, 62, 7, 15, 80, "url(#lf2)", 1.8, False)
     # tête
-    b += ell(80, 70, 26, 23, "url(#sk)") + shine(70, 56, 11, 7, .3)
-    # chevelure-feuillage
-    b += path("M54,68 Q48,36 68,28 Q80,14 92,28 Q112,36 106,68 Q98,50 80,50 Q62,50 54,68 Z", "url(#lf)", 3)
-    b += poly([(68, 30), (58, 12), (78, 24)], "url(#lf)", 2.5) + poly([(90, 28), (102, 10), (104, 32)], "url(#lf)", 2.5)
-    # oreilles pointues
-    b += poly([(54, 60), (40, 52), (56, 46)], "url(#sk)", 2.5) + poly([(106, 60), (120, 52), (104, 46)], "url(#sk)", 2.5)
-    b += eye(70, 72, 6, "#2a1a10", 1, "#b0f060") + eye(90, 72, 6, "#2a1a10", 1, "#b0f060")
-    b += path("M62,80 Q80,86 98,80", "url(#wd)", 2.5)
-    b += path("M73,84 Q80,90 87,84", sw=2.4, stroke="#b04060")
-    b += ell(63, 79, 3.4, 2.2, "#ff9ab0", 0, 0.7) + ell(97, 79, 3.4, 2.2, "#ff9ab0", 0, 0.7)
-    # petites feuilles sur la cape
-    b += poly([(50, 150), (44, 162), (58, 158)], "url(#lf)", 2) + poly([(110, 150), (116, 162), (102, 158)], "url(#lf)", 2)
+    b += ell(80, 70, 27, 24, "url(#sk)") + shine(69, 56, 11, 6, .35)
+    # chevelure feuillue (derrière + frange)
+    b += path("M50,74 Q40,42 62,30 Q80,12 98,30 Q120,42 110,74 Q104,52 80,50 Q56,52 50,74 Z", "url(#hr)", 3.2)
+    b += leaf(56, 40, 12, 28, -38, "url(#lf)") + leaf(104, 40, 12, 28, 38, "url(#lf)") + leaf(80, 28, 12, 26, 0, "url(#lf2)")
+    b += path("M62,52 Q70,60 80,54 Q90,60 98,52", "url(#hr)", 2.4)
+    # couronne de fleurs
+    b += flower(62, 38, 8, "#ff8fb8") + flower(80, 30, 9, "#fff4d0", "#ffb347") + flower(98, 38, 8, "#ff8fb8")
+    # visage
+    b += eye(70, 74, 6.5, "#1f4a1a", 1, "#7fe06a") + eye(90, 74, 6.5, "#1f4a1a", -1, "#7fe06a")
+    b += path("M62,66 L75,70 M98,66 L85,70", sw=2.6)
+    b += path("M75,86 Q80,91 85,86", sw=2.4, stroke="#a0405a") + ell(63, 82, 4, 2.4, "#ff8fa0", 0, 0.75) + ell(97, 82, 4, 2.4, "#ff8fa0", 0, 0.75)
     return svg(160, 200, d, b)
+
+
+def arbre():
+    """Arbre de vie du Sylvain : tronc robuste, cœur lumineux, canopée fleurie, motes de soin."""
+    d = (lg("wd", "#b07a46", "#5a3a20", 0, 0, 1, 0) + lg("lf", "#8fdc52", "#2f7a2f") + lg("lf2", "#b6ee6c", "#4f9a38")
+         + rg("hl", "#f4ffd0", "#6fe06a", .5, .5, .6))
+    b = shadow(96, 226, 74)
+    # aura de soin au sol
+    b += ell(96, 224, 80, 22, "#7fff9a", 0, 0.18) + ell(96, 224, 56, 15, "#7fff9a", 0, 0.20)
+    # racines
+    for x, dx in ((52, -22), (80, -8), (112, 8), (140, 24)):
+        b += path(f"M{x},196 Q{x + dx * 0.5:.0f},214 {x + dx:.0f},226", sw=17, stroke=OL) + path(f"M{x},196 Q{x + dx * 0.5:.0f},214 {x + dx:.0f},226", sw=11, stroke="url(#wd)")
+    # tronc
+    b += path("M62,204 Q48,150 64,104 L128,104 Q146,150 130,204 Q96,218 62,204 Z", "url(#wd)", 3.5)
+    for x in (76, 96, 116):
+        b += path(f"M{x},118 Q{x - 4},160 {x + 2},198", sw=2.6, stroke="#3a2412", op=0.6)
+    # creux lumineux (cœur de vie)
+    b += path("M80,176 Q80,140 96,138 Q112,140 112,176 Q96,186 80,176 Z", "#3a2412", 3)
+    b += ell(96, 164, 14, 20, "url(#hl)", 0, 0.9) + ell(96, 164, 7, 11, "#ffffff", 0, 0.8)
+    b += path("M96,176 C84,166 86,154 96,158 C106,154 108,166 96,176 Z", "#ff8fb8", 1.6)
+    # branches
+    b += path("M70,116 Q40,96 30,64", sw=15, stroke=OL) + path("M70,116 Q40,96 30,64", sw=9.5, stroke="url(#wd)")
+    b += path("M122,116 Q152,96 162,64", sw=15, stroke=OL) + path("M122,116 Q152,96 162,64", sw=9.5, stroke="url(#wd)")
+    # canopée
+    for (x, y, rx, ry) in ((96, 56, 62, 42), (50, 70, 38, 30), (142, 70, 38, 30), (70, 34, 38, 28), (124, 34, 38, 28), (96, 26, 34, 24)):
+        b += ell(x, y, rx, ry, "url(#lf)", 3.2)
+    for (x, y, rx, ry) in ((76, 40, 22, 14), (116, 40, 22, 14), (96, 22, 18, 10), (56, 66, 14, 9), (138, 66, 14, 9)):
+        b += ell(x, y, rx, ry, "url(#lf2)", 0, 0.75)
+    b += shine(70, 30, 26, 8, .3)
+    # fleurs
+    for (x, y, c) in ((58, 50, "#ff8fb8"), (132, 44, "#fff4d0"), (96, 36, "#ff8fb8"), (150, 74, "#ffd24a"), (42, 76, "#fff4d0"), (112, 68, "#ff8fb8"), (78, 70, "#ffd24a")):
+        b += flower(x, y, 7, c, "#ffe27a")
+    # motes de soin
+    for (x, y, r) in ((26, 118, 5), (166, 108, 6), (36, 156, 4), (158, 150, 5), (96, 4, 5)):
+        b += ell(x, y, r * 2.2, r * 2.2, "url(#hl)", 0, 0.35) + ell(x, y, r, r, "#f4ffd0", 0, 0.95)
+    return svg(192, 232, d, b)
+
+
+
 
 SPRITES = {
     "enemies": {
         "gobelin": gobelin, "squelette": squelette, "loup": lambda: loup(),
         "troll": troll, "dragonnet": lambda: dragonnet(),
+        "gobelin_boss": lambda: gobelin(king=True), "troll_boss": lambda: troll(giant=True),
+        "squelette_boss": lambda: squelette(lord=True),
+        "loup_boss": lambda: loup("#4a4f5e", "#1c2030", "#8a8f9c", "#ff4a3a", "#ff3a2a"),
         "dragonnet_boss": lambda: dragonnet("#7a1426", "#2a0a14", "#d98a4a", "#4a0e22", "#ff4a2a", "#e8c860", True),
     },
     "summons": {
         "tortue": tortue, "loup": lambda: loup("#cfe8ff", "#6a8ad0", "#ffffff", "#7affff", "#8ad8ff", True),
         "sirene": sirene, "ange": ange, "homme_faucon": homme_faucon, "centaure": centaure,
-        "buisson": buisson, "champignon": champignon, "tronc": tronc, "sarriette": sarriette,
+        "buisson": buisson, "champignon": champignon, "tronc": tronc, "sarriette": sarriette, "arbre": arbre,
     },
     "players": {
         "sylvain": sylvain,

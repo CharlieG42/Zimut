@@ -366,10 +366,8 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 	var boss_name: String = ProgressionManager.biome_boss(fight_biome)
 	## Type de base dont le boss reprend le kit et la skin : le nom complet est
 	## « Boss Gobelin Roi » -> type de base « Gobelin » (2e mot).
-	var parts: PackedStringArray = boss_name.split(" ")
-	var base_type: String = "Dragonnet"
-	if parts.size() >= 2:
-		base_type = parts[1]
+	var base_type: String = String({"Gobelin Roi": "Gobelin", "Troll Géant": "Troll", "Dragon": "Dragonnet",
+		"Squelette Seigneur": "Squelette", "Loup Alpha": "Loup"}.get(boss_name, "Dragonnet"))
 	var info: Dictionary = _find_best_match(enemies_data, "Type", "Boss " + boss_name, "Niveau", lvl)
 	if info.is_empty():
 		# Aucune ligne boss au niveau du combat : prendre la ligne boss la plus proche
@@ -819,7 +817,7 @@ func spell_range_cells(caster: Dictionary, spell: Dictionary) -> Array[Vector2i]
 			var c := Vector2i(cpos.x + dx, cpos.y + dy)
 			if not _in_bounds(c):
 				continue
-			if p["needs_los"] and d > 1 and not Combat.has_los(cpos, c, obstacles):
+			if p["needs_los"] and d > 1 and not Combat.has_los(cpos, c, los_blockers()):
 				continue
 			out.append(c)
 	return out
@@ -1140,6 +1138,36 @@ func _do_heal(_caster: Dictionary, tgt: Dictionary, amount: int) -> int:
 	return real
 
 
+## Obstacles de vue : arbres/rochers du décor + arbres invoqués par les Sylvains.
+func los_blockers() -> Dictionary:
+	var out: Dictionary = obstacles.duplicate()
+	for s: Dictionary in summons:
+		if bool(s.get("blocks_los", false)) and is_alive(s):
+			out[pos_of(s)] = "tree"
+	return out
+
+
+## Montant de soin d'un sort pour une cible donnée.
+func _heal_amount(caster: Dictionary, p: Dictionary, t: Dictionary) -> int:
+	var amt: int = 0
+	if int(p["heal"]) > 0:
+		amt = roundi(float(p["heal"]) * (1.0 + float(caster.get("intelligence", 0)) / 300.0)
+			* (1.0 + float(caster.get("wisdom", 0)) / 300.0)
+			* (1.0 + float(caster.get("fx", {}).get("heal_pct", 0)) / 100.0))
+	if int(p["heal_pct"]) > 0:
+		amt = roundi(float(t["max_pv"]) * float(p["heal_pct"]) / 100.0)
+	return amt
+
+
+## Arbres de soin vivants d'un Sylvain.
+func trees_of(owner: Dictionary) -> Array:
+	var out: Array = []
+	for s: Dictionary in summons:
+		if bool(s.get("relay", false)) and int(s.get("owner", -1)) == int(owner["uid"]) and is_alive(s):
+			out.append(s)
+	return out
+
+
 func _resolve_heal(caster: Dictionary, spell: Dictionary, p: Dictionary, cell: Vector2i) -> String:
 	var targets: Array = []
 	if p["aoe"] == "team":
@@ -1151,13 +1179,7 @@ func _resolve_heal(caster: Dictionary, spell: Dictionary, p: Dictionary, cell: V
 	var total: int = 0
 	var names: Array[String] = []
 	for t: Dictionary in targets:
-		var amt: int = 0
-		if int(p["heal"]) > 0:
-			amt = roundi(float(p["heal"]) * (1.0 + float(caster.get("intelligence", 0)) / 300.0)
-				* (1.0 + float(caster.get("wisdom", 0)) / 300.0)
-				* (1.0 + float(caster.get("fx", {}).get("heal_pct", 0)) / 100.0))
-		if int(p["heal_pct"]) > 0:
-			amt = roundi(float(t["max_pv"]) * float(p["heal_pct"]) / 100.0)
+		var amt: int = _heal_amount(caster, p, t)
 		total += _do_heal(caster, t, amt)
 		names.append(String(t["name"]))
 		if p["cure"]:
@@ -1175,9 +1197,28 @@ func _resolve_heal(caster: Dictionary, spell: Dictionary, p: Dictionary, cell: V
 						_apply_status(caster, e, String(d["id"]), int(d["turns"]), float(d["value"]))
 	for b: Dictionary in p["self_buffs"]:
 		_apply_status(caster, caster, String(b["id"]), int(b["turns"]), float(b["value"]))
-	if names.is_empty():
+	# Relais de l'arbre du Sylvain : alliés ET invocations autour de l'arbre reçoivent le même soin
+	var relayed: Array[String] = []
+	if String(caster.get("classe", "")) == "Sylvain" and p["aoe"] != "team":
+		for tree: Dictionary in trees_of(caster):
+			var tp: Vector2i = pos_of(tree)
+			var shown: bool = false
+			for ally: Dictionary in entities_of_team(String(caster["team"])):
+				if ally == tree or targets.has(ally) or not is_alive(ally):
+					continue
+				var ap: Vector2i = pos_of(ally)
+				if maxi(absi(ap.x - tp.x), absi(ap.y - tp.y)) > 1:
+					continue
+				total += _do_heal(caster, ally, _heal_amount(caster, p, ally))
+				relayed.append(String(ally["name"]))
+				targets.append(ally)
+				shown = true
+			if shown:
+				fx.emit("status", {"target": tree, "text": "🌳 Relais", "color": Color(0.55, 1.0, 0.55), "good": true})
+	var relay_txt: String = ("  🌳 relais : %s" % ", ".join(relayed)) if not relayed.is_empty() else ""
+	if names.is_empty() and relayed.is_empty():
 		return "%s lance %s." % [caster["name"], spell["name"]]
-	return "%s lance %s : +%d PV (%s)" % [caster["name"], spell["name"], total, ", ".join(names)]
+	return "%s lance %s : +%d PV (%s)%s" % [caster["name"], spell["name"], total, ", ".join(names), relay_txt]
 
 
 func _resolve_buff(caster: Dictionary, spell: Dictionary, p: Dictionary, cell: Vector2i) -> String:
@@ -1220,13 +1261,23 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 	}, true)
 	s["spells"] = Combat.summon_spells(sname)
 	s["init"] = float(caster.get("init", 0.0)) - 0.01
+	var is_static: bool = bool(info.get("static", false))
+	if sname == "Arbre":
+		# 1 seul arbre par Sylvain : le précédent se fane
+		for old_tree: Dictionary in trees_of(caster):
+			remove_entity_from_grid(old_tree)
+		s["blocks_los"] = true
+		s["relay"] = true
+		s["static"] = true
+		s["lifetime"] = -1
 	summons.append(s)
 	grid[cell.y][cell.x] = s
-	var idx: int = turn_order.find(caster)
-	if idx >= 0:
-		turn_order.insert(idx + 1, s)
-	else:
-		turn_order.append(s)
+	if not is_static:
+		var idx: int = turn_order.find(caster)
+		if idx >= 0:
+			turn_order.insert(idx + 1, s)
+		else:
+			turn_order.append(s)
 	fx.emit("summon", {"entity": s})
 	return "%s invoque %s !" % [caster["name"], sname]
 
