@@ -9,7 +9,9 @@ var _motes: Array[Dictionary] = []
 var _bounds := Vector2(480.0, 300.0)
 
 func configure(grid_size: int, tile_w: float, tile_h: float, active: bool) -> void:
-	_bounds = Vector2(float(grid_size) * tile_w * 0.5, float(grid_size) * tile_h * 0.5)
+	# Demi-emprise réelle du plateau projeté (pas grid_size × une tuile) :
+	# les décors de bord restent juste à l’extérieur du losange jouable.
+	_bounds = Vector2(float(grid_size - 1) * tile_w * 0.5, float(grid_size - 1) * tile_h * 0.5)
 	visible = active
 	_motes.clear()
 	var rng := RandomNumberGenerator.new()
