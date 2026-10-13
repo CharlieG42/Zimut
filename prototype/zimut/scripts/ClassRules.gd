@@ -34,13 +34,28 @@ const MAX_LEVEL := 50
 const START_LEVEL := 10
 const POINTS_PER_LEVEL := 4
 
-## XP d'un combat = somme(XP des ennemis) x FIGHT_XP_MULT  (≈ 40 combats de niv.10 à niv.50)
-const FIGHT_XP_MULT := 3.0
+## XP d'un combat = somme(XP des ennemis) x FIGHT_XP_MULT
+const FIGHT_XP_MULT := 1.5
 const BOSS_XP_MULT := 1.5
 ## Les classes hors équipe gagnent une part de l'XP (pour tester d'autres compos)
-const BENCH_XP_RATIO := 0.10
+const BENCH_XP_RATIO := 0.05
 ## Une défaite rapporte quand même un peu d'XP
-const DEFEAT_XP_RATIO := 0.25
+const DEFEAT_XP_RATIO := 0.15
+
+## Caractéristiques bonus achetables avec du capital : PA, PM, PO (Portée).
+## Maximum 3 niveaux chacune, 4 points de capital par niveau.
+const BONUS_STATS: Array[String] = ["pa", "pm", "po"]
+const BONUS_STAT_LABEL := {"pa": "PA", "pm": "PM", "po": "Portée"}
+const BONUS_STAT_HELP := {
+	"pa": "+1 PA par niveau (14 PA maximum au total)",
+	"pm": "+1 PM par niveau (6 PM maximum au total)",
+	"po": "+1 de portée pour tous les sorts (3 maximum)",
+}
+const BONUS_MAX_LEVELS := 3
+const BONUS_POINT_COST := 4
+const PA_CAP := 14
+const PM_CAP := 6
+const PO_CAP := 3
 
 ## Coût d'un point de capital par palier d'affinité : [[investis_max, coût], ...]
 const TIER_COST := {
@@ -125,6 +140,8 @@ static func total_points_for_level(level: int) -> int:
 
 ## Coût du PROCHAIN point pour une stat déjà investie de `invested` points.
 static func point_cost(classe: String, stat: String, invested: int) -> int:
+	if BONUS_STATS.has(stat):
+		return BONUS_POINT_COST
 	for tier: Array in TIER_COST[affinity(classe, stat)]:
 		if invested < int(tier[0]):
 			return int(tier[1])

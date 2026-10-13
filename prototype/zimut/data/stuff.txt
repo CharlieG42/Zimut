@@ -122,3 +122,9 @@ Hache (1 main),Hache du berserker,15,5,2,2,2,2,3,-
 Hache (2 mains),Hache d'armes du berserker,15,9,2,2,2,2,2,-
 Hache (1 main),Hache du titan,20,6,3,3,3,3,4,-
 Hache (2 mains),Hache d'armes du titan,20,11,3,3,3,3,3,-
+Accessoire,Anneau de célérité,15,0,0,2,0,0,0,+1 PM
+Accessoire,Oculaire de visée,20,0,0,2,2,0,0,+1 Portée
+Accessoire,Amulette du tempérament,25,0,2,0,2,5,0,+1 PA
+Cape,Cape du coursier,30,0,0,3,2,5,0,+1 PM
+Accessoire,Sablier de bataille,35,0,3,0,3,5,0,+1 PA
+Accessoire,Gantelet de précision,45,0,0,4,4,0,0,+1 Portée

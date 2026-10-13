@@ -15,7 +15,7 @@ const STAT_NAME := {"vita": "Vitalité", "force": "Force", "intelligence": "Inte
 
 const FX_LABEL := {
 	"crit": "Critique +%d%%", "lifesteal": "Vol de vie %d%%", "mag_pct": "Dégâts magiques +%d%%",
-	"mres": "Résistance magie +%d%%", "heal_pct": "Soins +%d%%", "pa": "+%d PA", "pm": "+%d PM",
+	"mres": "Résistance magie +%d%%", "heal_pct": "Soins +%d%%", "pa": "+%d PA", "pm": "+%d PM", "po": "+%d Portée",
 	"poison_pct": "Poisons +%d%%", "bless_def": "Bénit l'équipe (+%d%% défense)",
 	"start_immune_neg": "Anti-altération %d t. au départ", "start_immune": "Invulnérable %d t. au départ",
 }
@@ -126,6 +126,8 @@ static func parse_effect(text: String) -> Dictionary:
 		out["pm"] = _num(t, "^\\+(\\d+)\\s*pm")
 	if _num(t, "^\\+(\\d+)\\s*pa") > 0:
 		out["pa"] = _num(t, "^\\+(\\d+)\\s*pa")
+	if _num(t, "^\\+(\\d+)\\s*(?:portée|portee|po)") > 0:
+		out["po"] = _num(t, "^\\+(\\d+)\\s*(?:portée|portee|po)")
 	if t.begins_with("bénit") or t.begins_with("benit"):
 		out["bless_def"] = maxi(1, _num(t, "\\+(\\d+)\\s*%"))
 	if t.begins_with("immunité aux effets") or t.begins_with("immunite aux effets"):

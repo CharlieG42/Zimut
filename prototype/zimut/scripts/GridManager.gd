@@ -414,6 +414,11 @@ func _play(kind: String, d: Dictionary) -> void:
 			_add_trap_node(d["cell"])
 			Sfx.play("trap", -4.0)
 			await _wait(0.15)
+		"beacon":
+			for c: Vector2i in d["cells"]:
+				_burst(grid_to_screen(c.x, c.y), Color(1.0, 0.70, 0.20), 10, 130.0, 0.4, 4.0)
+			Sfx.play("hit", -2.0)
+			await _wait(0.18)
 		"trap_trigger":
 			var c: Vector2i = d["cell"]
 			_burst(grid_to_screen(c.x, c.y), Color(1.0, 0.4, 0.2), 26, 220.0, 0.5, 5.0)

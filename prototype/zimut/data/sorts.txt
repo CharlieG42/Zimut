@@ -62,26 +62,19 @@ Chasseur,Soin vital,4,0,1,Restaure 90 PV,40,Soin,0,0,90,0,0,0,0,0,0
 Chasseur,Tir perçant ultime,4,0,6,210 dégâts (ignore 60% défense),45,Attaque,210,0,0,60,0,0,0,0,0
 Chasseur,Soin de la vie,4,0,1,Restaure 120 PV,50,Soin,0,0,120,0,0,0,0,0,0
 Mage,Boule de feu,4,0,5,90 dégâts magiques,1,Attaque,90,0,0,0,0,0,0,0,0
-Mage,Soin magique,3,0,1,Restaure 44 PV,1,Soin,0,0,44,0,0,0,0,0,0
 Mage,Éclair,3,0,6,74 dégâts magiques (2 cibles),5,Attaque,74,0,0,0,0,0,0,0,0
 Mage,Bouclier magique,2,0,1,+20% résistance magie (3 tours),5,Buff,0,0,0,0,20,0,0,0,20
 Mage,Explosion,4,0,4,120 dégâts en zone (3x3),10,Attaque,120,0,0,0,0,0,0,0,0
-Mage,Soin supérieur,4,0,1,Restaure 74 PV,10,Soin,0,0,74,0,0,0,0,0,0
 Mage,Téléportation,2,1,5,Téléporte à une case allié/ennemi,10,Buff,0,0,0,0,0,0,0,0,0
 Mage,Météore,4,0,7,150 dégâts en zone (2x2),15,Attaque,150,0,0,0,0,0,0,0,0
-Mage,Soin de groupe,4,0,2,Restaure 60 PV à tous les alliés,15,Soin,0,0,60,0,0,0,0,0,0
 Mage,Gel,3,0,4,Immobilise (1 tour) + 44 dégâts,20,Debuff,0,0,0,0,0,0,0,0,0
 Mage,Invisibilité magique,3,0,1,Invisible + immunité magie (2 tours),20,Buff,0,0,0,0,0,0,0,0,0
 Mage,Chaîne de foudre,4,1,6,104 dégâts (saute sur 3 ennemis),25,Attaque,104,0,0,0,0,0,0,0,0
-Mage,Soin magique supérieur,4,0,1,Restaure 90 PV,25,Soin,0,0,90,0,0,0,0,0,0
 Mage,Barrière magique,4,0,1,+30% résistance magie (2 tours),30,Buff,0,0,0,0,30,0,0,0,30
 Mage,Désintégration,4,0,5,180 dégâts magiques,30,Attaque,180,0,0,0,0,0,0,0,0
-Mage,Soin de l'âme,4,0,1,Restaure 104 PV + supprime les effets négatifs,35,Soin,0,0,104,0,0,0,0,0,0
 Mage,Téléportation de groupe,4,1,4,Téléporte tous les alliés à une case,35,Buff,0,0,0,0,0,0,0,0,0
 Mage,Pluie de métores,4,0,8,210 dégâts en zone (4x4),40,Attaque,210,0,0,0,0,0,0,0,0
-Mage,Soin ultime,4,0,1,Restaure 134 PV,40,Soin,0,0,134,0,0,0,0,0,0
 Mage,Apocalypse,4,0,8,240 dégâts en zone (4x4),45,Attaque,240,0,0,0,0,0,0,0,0
-Mage,Soin de la vie,4,0,1,Restaure 150 PV,50,Attaque,0,0,150,0,0,0,0,0,0
 Invocateur,Invoquer Tortue,2,0,1,Invoque une Tortue (contrôlable; 3PM/4PA),5,Invocation,0,0,0,0,0,0,0,0,0
 Invocateur,Invoquer Loup,2,0,1,Invoque un Loup (contrôlable; 3PM/4PA),10,Invocation,0,0,0,0,0,0,0,0,0
 Invocateur,Invoquer Sirène,3,0,1,Invoque une Sirène (contrôlable; 3PM/4PA),20,Invocation,0,0,0,0,0,0,0,0,0
@@ -163,3 +156,7 @@ Sylvain,Soin de la forêt,4,0,2,Restaure 80 PV à tous les alliés,40,Soin,0,0,8
 Sylvain,Racines profondes,4,0,1,+30% défense pour l'équipe (2 tours),45,Buff,0,0,0,30,0,0,0,0,0
 Sylvain,Régression,3,0,1,Restaure 130 PV + supprime les effets négatifs,45,Soin,0,0,130,0,0,0,0,0,0
 Sylvain,Tempête de pétales,4,0,5,150 dégâts magiques à tous les ennemis,50,Attaque,0,150,0,0,0,0,0,0,0
+Sylvain,Invoquer Racines,2,0,2,Enchevêtre des racines immobiles qui bloquent la ligne de vue (pas de relais de soins; 1 max),6,Invocation,0,0,0,0,0,0,0,0,0
+Sylvain,Invoquer Ronce agressive,3,0,2,Invoque une Ronce agressive orientée attaque (contrôlable),22,Invocation,0,0,0,0,0,0,0,0,0
+Chasseur,Tir de recul,3,0,5,80 dégâts + repousse de 2 cases,12,Attaque,80,0,0,0,0,0,0,0,0
+Chasseur,Balise de chasse,2,0,4,Plante une balise (3 max) : les dégâts de zone du Chasseur qui la touchent se répliquent autour d'elle,18,Invocation,0,0,0,0,0,0,0,0,0
