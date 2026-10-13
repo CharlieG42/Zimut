@@ -85,6 +85,30 @@ func _draw_forest_frame() -> void:
 				draw_circle(Vector2.ZERO, 5.0, Color(0.38, 0.61, 0.31, 0.9))
 				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
+
+		# Petits détails peints dans la bordure : nervures, baies et lueurs.
+		# Ils restent au-delà du bord du plateau et ne recouvrent aucune case.
+		for leaf_i: int in range(4):
+			var lp := anchor + Vector2(-float(side) * (24.0 + float(leaf_i) * 16.0), 118.0 + float(leaf_i % 2) * 14.0)
+			var leaf_col: Color = Color(0.35, 0.60, 0.30, 0.92) if leaf_i % 2 == 0 else Color(0.48, 0.68, 0.34, 0.92)
+			draw_colored_polygon(PackedVector2Array([
+				lp + Vector2(-float(side) * 7.0, 0.0),
+				lp + Vector2(0.0, -4.0),
+				lp + Vector2(float(side) * 9.0, 1.0),
+				lp + Vector2(0.0, 5.0)
+			]), leaf_col)
+			draw_line(lp + Vector2(-float(side) * 5.0, 0.0), lp + Vector2(float(side) * 6.0, 1.0), Color(0.72, 0.82, 0.45, 0.75), 1.2, true)
+		for berry_i: int in range(3):
+			var bp := anchor + Vector2(float(side) * (12.0 + float(berry_i) * 8.0), 142.0 + float(berry_i % 2) * 5.0)
+			draw_circle(bp + Vector2(1.0, 1.5), 3.0, Color(0.05, 0.18, 0.12, 0.6))
+			draw_circle(bp, 2.7, Color(0.72, 0.28, 0.22, 0.92))
+			draw_circle(bp + Vector2(-0.8, -0.9), 0.9, Color(1.0, 0.75, 0.55, 0.9))
+		# Deux champignons minuscules, décoratifs, sur la marge inférieure du cadre.
+		var mush_base := anchor + Vector2(-float(side) * 18.0, 164.0)
+		draw_line(mush_base, mush_base + Vector2(0.0, -7.0), Color(0.82, 0.77, 0.57, 0.9), 3.0, true)
+		draw_arc(mush_base + Vector2(0.0, -7.0), 6.0, PI, TAU, 16, Color(0.76, 0.38, 0.24, 0.95), 4.0, true)
+		draw_circle(mush_base + Vector2(-2.0, -8.5), 1.0, Color(1.0, 0.88, 0.6, 0.9))
+
 func _draw() -> void:
 	if visible:
 		_draw_forest_frame()
