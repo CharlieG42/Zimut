@@ -46,6 +46,8 @@ var biome: String = "Forêt"
 
 func setup(gp: Vector2i) -> void:
 	grid_position = gp
+	_tufts.clear()
+	_flowers.clear()
 	_forest_tile_texture = null
 	if biome == "Forêt":
 		# Variantes déterministes : le décor reste stable entre les combats et les sessions.
