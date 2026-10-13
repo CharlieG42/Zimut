@@ -21,6 +21,7 @@ var _cells_layer: Node2D
 var _biome: String = ""
 var _entity_layer: Node2D
 var _fx_layer: Node2D
+var _forest_ambience: ForestAmbience
 var _cur_element: String = "physical"   # élément du dernier sort lancé (impacts)
 var _trap_nodes: Dictionary = {}    # Vector2i -> Node2D
 var _prop_nodes: Array = []
@@ -73,6 +74,11 @@ func _build_layers() -> void:
 	_cells_layer = Node2D.new()
 	_cells_layer.name = "Cells"
 	add_child(_cells_layer)
+	_forest_ambience = preload("res://scripts/ForestAmbience.gd").new()
+	_forest_ambience.name = "ForestAmbience"
+	_forest_ambience.z_index = 1
+	_forest_ambience.configure(game_manager.GRID_SIZE, TILE_W, TILE_H, game_manager.fight_biome == "Forêt")
+	add_child(_forest_ambience)
 	_entity_layer = Node2D.new()
 	_entity_layer.name = "Entities"
 	_entity_layer.y_sort_enabled = true
@@ -88,6 +94,8 @@ func apply_biome(biome: String) -> void:
 	if biome == _biome:
 		return
 	_biome = biome
+	if _forest_ambience != null:
+		_forest_ambience.set_forest_active(biome == "Forêt")
 	for y: int in range(cell_nodes.size()):
 		for x: int in range(cell_nodes[y].size()):
 			var c: Cell = cell_nodes[y][x]
