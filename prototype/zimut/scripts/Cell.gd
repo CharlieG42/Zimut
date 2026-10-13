@@ -51,7 +51,7 @@ func setup(gp: Vector2i) -> void:
 	_forest_tile_texture = null
 	if biome == "Forêt":
 		# Variantes déterministes : le décor reste stable entre les combats et les sessions.
-		var tile_index: int = posmod(gp.x * 3 + gp.y * 5, 4) + 1
+		var tile_index: int = posmod(gp.x * 3 + gp.y * 5, 6) + 1
 		var tile_path: String = "res://assets/sprites/tiles/forest_ground_%02d.svg" % tile_index
 		_forest_tile_texture = load(tile_path) as Texture2D
 		if _forest_tile_texture == null:
