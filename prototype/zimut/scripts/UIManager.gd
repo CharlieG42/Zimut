@@ -312,6 +312,10 @@ func init(manager: Node) -> void:
 		return
 	_initialized = true
 	game_manager = manager
+	# Le HUD doit toujours passer au-dessus des Node2D du plateau, y compris
+	# après les changements de scène et sur les exports Android.
+	layer = 20
+	visible = true
 	_grid = get_node_or_null("../GridManager")
 
 	# Supprime les anciens contrôles statiques (Tour des joueurs, Joueur : -,
@@ -327,22 +331,45 @@ func init(manager: Node) -> void:
 
 
 func _connect_signals() -> void:
-	game_manager.turn_started.connect(_on_turn_started)
-	game_manager.state_changed.connect(_refresh)
-	game_manager.spell_selected.connect(_on_spell_state)
-	game_manager.message_requested.connect(_on_message)
-	game_manager.game_ended.connect(_on_game_ended)
-	game_manager.fx.connect(_on_fx)
-	if _grid != null and _grid.has_signal("hover_changed"):
+	if not game_manager.turn_started.is_connected(_on_turn_started):
+		game_manager.turn_started.connect(_on_turn_started)
+	if not game_manager.state_changed.is_connected(_refresh):
+		game_manager.state_changed.connect(_refresh)
+	if not game_manager.spell_selected.is_connected(_on_spell_state):
+		game_manager.spell_selected.connect(_on_spell_state)
+	if not game_manager.message_requested.is_connected(_on_message):
+		game_manager.message_requested.connect(_on_message)
+	if not game_manager.game_ended.is_connected(_on_game_ended):
+		game_manager.game_ended.connect(_on_game_ended)
+	if not game_manager.fx.is_connected(_on_fx):
+		game_manager.fx.connect(_on_fx)
+	if _grid != null and _grid.has_signal("hover_changed") and not _grid.hover_changed.is_connected(_on_hover):
 		_grid.hover_changed.connect(_on_hover)
+
+
+func _on_hud_resized() -> void:
+	# Relance le layout des contrôles ancrés après un changement de viewport.
+	if _root == null:
+		return
+	_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	if _timeline != null:
+		_timeline.queue_redraw()
+	if _stats != null:
+		_stats.queue_redraw()
 
 
 func _build_ui() -> void:
 	_root = Control.new()
 	_root.name = "HUD"
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_root.set_offsets_preset(Control.PRESET_FULL_RECT)
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.visible = true
+	_root.z_index = 1000
 	add_child(_root)
+	# Les contrôles de CanvasLayer n'héritent pas toujours de la taille attendue
+	# lorsque le viewport est redimensionné par le mode stretch Android.
+	_root.resized.connect(_on_hud_resized)
 
 	# Timeline
 	var tl := TimelineView.new()
