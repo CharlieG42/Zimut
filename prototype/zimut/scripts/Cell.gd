@@ -132,12 +132,12 @@ func _draw() -> void:
 	# ne pas les doubler par les détails procéduraux, afin de garder les unités lisibles.
 	if biome != "Forêt" or _forest_tile_texture == null:
 		for t: Array in _tufts:
-		var p: Vector2 = t[0]
-		var h: float = t[1]
-		var sway: float = t[2]
-		var tc: Color = t[3] if t.size() > 3 else _base.darkened(0.22)
-		draw_line(p, p + Vector2(sway, -h), tc, 1.6)
-		draw_line(p + Vector2(2, 0), p + Vector2(2 + sway * 0.6, -h * 0.7), tc.lightened(0.25), 1.4)
+			var p: Vector2 = t[0]
+			var h: float = t[1]
+			var sway: float = t[2]
+			var tc: Color = t[3] if t.size() > 3 else _base.darkened(0.22)
+			draw_line(p, p + Vector2(sway, -h), tc, 1.6)
+			draw_line(p + Vector2(2, 0), p + Vector2(2 + sway * 0.6, -h * 0.7), tc.lightened(0.25), 1.4)
 	if biome != "Forêt" or _forest_tile_texture == null:
 		for f: Array in _flowers:
 			var fp: Vector2 = f[0]
