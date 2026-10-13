@@ -16,12 +16,22 @@ func setup(k: String, cell: Vector2i, b: String = "Forêt") -> void:
 	_sway = float(seed_value % 10) * 0.6
 	set_process(kind == "tree")
 	if kind == "tree" and biome == "Forêt":
-		var tree_texture := load("res://assets/sprites/objects/forest_tree.svg") as Texture2D
+		# Trois silhouettes évitent l'effet de répétition d'un même arbre sur toute la carte.
+		var variant: int = abs(seed_value) % 3
+		var tree_path := "res://assets/sprites/objects/forest_tree.svg"
+		if variant == 1:
+			tree_path = "res://assets/sprites/objects/forest_tree_broad.svg"
+		elif variant == 2:
+			tree_path = "res://assets/sprites/objects/forest_tree_round.svg"
+		var tree_texture := load(tree_path) as Texture2D
 		if tree_texture != null:
 			_tree_sprite = Sprite2D.new()
 			_tree_sprite.texture = tree_texture
 			_tree_sprite.position = Vector2(0, -88)
 			_tree_sprite.z_index = 0
+			# Une variation de taille légère apporte du relief sans déplacer l'ancrage de la case.
+			var tree_scale: float = [0.92, 1.0, 1.06][variant]
+			_tree_sprite.scale = Vector2(tree_scale, tree_scale)
 			add_child(_tree_sprite)
 	elif kind != "tree":
 		var rock_texture := load("res://assets/sprites/objects/forest_boulder.svg") as Texture2D
