@@ -276,6 +276,21 @@ Pour améliorer le style :
 
 ---
 
+
+## 🎨 Rendu du combat — chemins des ressources
+
+Les ressources visuelles du prototype isométrique sont chargées depuis `prototype/zimut` via les chemins `res://` suivants :
+
+- **Sol de la forêt** : `assets/sprites/tiles/forest_ground_01.svg` à `forest_ground_06.svg`. `scripts/Cell.gd` sélectionne une variante déterministe par case, afin de limiter les répétitions sans modifier la grille logique.
+- **Arbres** : `assets/sprites/objects/forest_tree.svg`, `forest_tree_broad.svg` et `forest_tree_round.svg`, sélectionnés par `scripts/Prop.gd`.
+- **Rochers** : `assets/sprites/objects/forest_boulder.svg`, chargés par `scripts/Prop.gd`.
+- **Personnages et monstres** : `assets/sprites/players/`, `assets/sprites/enemies/` et `assets/sprites/summons/`, résolus par `scripts/EntityView.gd` (PNG ou SVG).
+- **Ambiance de forêt** : `scripts/ForestAmbience.gd`, instancié par `scripts/GridManager.gd`. Les branches, feuilles et particules sont dessinées par code dans les marges du plateau.
+- **Interface de combat** : générée par `scripts/UIManager.gd` ; les pastilles de sorts, les panneaux et les boutons ne sont pas des images séparées.
+
+Pour ajouter une nouvelle variante de sol, placer le SVG dans `assets/sprites/tiles/` et mettre à jour le nombre de variantes dans `Cell.gd`. Les décorations de bord sont non interactives ; elles ne changent ni les cases accessibles, ni les obstacles, ni les règles de combat.
+
+
 ## 📜 Licence
 
 Ce projet fait partie de **Zimut** et est la propriété de **Charlie Gentil**.
