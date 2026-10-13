@@ -2,7 +2,7 @@ extends CanvasLayer
 ## UIManager.gd — Interface de combat façon Waven / Dofus.
 ##   • Timeline d'initiative en portraits (haut)
 ##   • Panneau du personnage actif : PV, orbes PA / PM (bas-gauche)
-##   • Barre de sorts défilante avec coûts, raccourcis 1-9 et infobulle (bas-centre)
+##   • Colonne de sorts compacte à gauche, avec coûts, raccourcis et infobulle
 ##   • Gros bouton « FIN DU TOUR », Auto, Son, changement d'équipe (bas-droite)
 ##   • Journal de combat, bannières de tour, fiche de survol, écran de fin
 ## Toute l'interface est construite par code (les anciens nœuds de la scène sont masqués).
@@ -98,7 +98,7 @@ class SpellCard extends Button:
 			_caption(Vector2(size.x - 40, 44), 36.0, "PM", Color(0.45, 1.0, 0.58))
 		# Motif central propre à la famille de sort (pas d'icône externe requise).
 		var icon_col: Color = base_col if usable else Color(0.34, 0.36, 0.41)
-		var center := Vector2(size.x * 0.5, 61.0)
+		var center := Vector2(size.x * 0.5, 38.0)
 		draw_circle(center + Vector2(0, 2), 23.0, Color(0, 0, 0, 0.45))
 		draw_circle(center, 22.0, Color(0.025, 0.04, 0.08, 0.98))
 		draw_circle(center, 18.0, icon_col.darkened(0.25))
@@ -116,7 +116,7 @@ class SpellCard extends Button:
 		# Nom compact en deux lignes si nécessaire.
 		var spell_name: String = String(spell.get("name", "Sort"))
 		var name_size: int = 14 if spell_name.length() <= 12 else 12
-		var name_y: float = size.y - 31.0
+		var name_y: float = size.y - 23.0
 		var name_text: String = spell_name
 		if name_text.length() > 18:
 			name_text = name_text.substr(0, 16) + "…"
@@ -349,20 +349,32 @@ func _build_ui() -> void:
 
 	# Barre de sorts
 	_spell_scroll = ScrollContainer.new()
-	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_spell_scroll.anchor_left = 0.5
-	_spell_scroll.anchor_right = 0.5
-	_spell_scroll.anchor_top = 1.0
+	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_spell_scroll.anchor_left = 0.0
+	_spell_scroll.anchor_right = 0.0
+	_spell_scroll.anchor_top = 0.0
 	_spell_scroll.anchor_bottom = 1.0
-	_spell_scroll.offset_left = -520.0
-	_spell_scroll.offset_right = 520.0
-	_spell_scroll.offset_top = -154.0
-	_spell_scroll.offset_bottom = -10.0
+	_spell_scroll.offset_left = 12.0
+	_spell_scroll.offset_right = 198.0
+	_spell_scroll.offset_top = 132.0
+	_spell_scroll.offset_bottom = -166.0
 	_spell_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
+	var spell_panel := PanelContainer.new()
+	spell_panel.anchor_left = 0.0
+	spell_panel.anchor_right = 0.0
+	spell_panel.anchor_top = 0.0
+	spell_panel.anchor_bottom = 1.0
+	spell_panel.offset_left = 8.0
+	spell_panel.offset_right = 202.0
+	spell_panel.offset_top = 124.0
+	spell_panel.offset_bottom = -158.0
+	spell_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	spell_panel.add_theme_stylebox_override("panel", _flat(Color(0.035, 0.055, 0.09, 0.78), Color(0.35, 0.48, 0.65, 0.75), 18, 2))
+	_root.add_child(spell_panel)
 	_root.add_child(_spell_scroll)
-	_spell_box = HBoxContainer.new()
-	_spell_box.add_theme_constant_override("separation", 10)
+	_spell_box = VBoxContainer.new()
+	_spell_box.add_theme_constant_override("separation", 8)
 	_spell_scroll.add_child(_spell_box)
 
 	# Infobulle de sort
@@ -589,7 +601,7 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.gm = game_manager
 		card.hotkey = idx if idx <= 10 else 0
 		card.base_col = _kind_color(spell)
-		card.custom_minimum_size = Vector2(126, 132)
+		card.custom_minimum_size = Vector2(166, 92)
 		card.text = ""
 		card.tooltip_text = String(spell["name"]) + " · " + str(int(spell.get("cost_pa", 0))) + " PA · Portée " + str(int(spell.get("range", 1)))
 		var nlen: int = String(spell["name"]).length()
@@ -604,7 +616,7 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.mouse_exited.connect(func() -> void: _show_tip(game_manager.selected_spell))
 		_spell_box.add_child(card)
 		_cards.append(card)
-	_spell_scroll.scroll_horizontal = 0
+	_spell_scroll.scroll_vertical = 0
 
 
 func _style_card(card: SpellCard, selected: bool) -> void:
