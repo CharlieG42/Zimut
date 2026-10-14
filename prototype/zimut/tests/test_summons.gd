@@ -7,6 +7,10 @@ extends SceneTree
 var failures: int = 0
 
 func _init() -> void:
+	# Les autoloads (GameManager, ProgressionManager) n'existent qu'après _init : on diffère.
+	_run.call_deferred()
+
+func _run() -> void:
 	_test_summon_kits()
 	_test_push_parse()
 	_test_mage_no_heals()

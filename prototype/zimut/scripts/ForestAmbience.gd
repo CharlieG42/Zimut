@@ -127,8 +127,12 @@ func _draw_forest_frame() -> void:
 					tip + Vector2(float(side) * 4.0, sign_y * 5.0)
 				]), Color(0.36, 0.58, 0.27, 0.92))
 
+## Le cadre feuillu historique (bouquets ronds sur les marges) est remplacé par le décor de
+## contour BattleScenery ; mettre true pour le réactiver.
+const DRAW_FRAME := false
+
 func _draw() -> void:
-	if visible:
+	if visible and DRAW_FRAME:
 		_draw_forest_frame()
 	for mote in _motes:
 		var p: Vector2 = mote["pos"]

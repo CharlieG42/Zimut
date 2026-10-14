@@ -22,6 +22,9 @@ var _biome: String = ""
 var _entity_layer: Node2D
 var _fx_layer: Node2D
 var _forest_ambience: ForestAmbience
+var _scenery: BattleScenery
+var _scenery_over: SceneryOver
+var _scenery_amb: SceneryAmbient
 var _cur_element: String = "physical"   # élément du dernier sort lancé (impacts)
 var _trap_nodes: Dictionary = {}    # Vector2i -> Node2D
 var _prop_nodes: Array = []
@@ -71,9 +74,17 @@ func _make_glow_texture() -> void:
 func _build_layers() -> void:
 	for c: Node in get_children():
 		c.queue_free()
+	# Décor d'arrière-plan : rebord surélevé, prolongement de falaise, brume (derrière les cases)
+	_scenery = BattleScenery.new()
+	_scenery.name = "Scenery"
+	add_child(_scenery)
 	_cells_layer = Node2D.new()
 	_cells_layer.name = "Cells"
 	add_child(_cells_layer)
+	# Lèvre de l'île et lianes devant les falaises (devant les cases, derrière les unités)
+	_scenery_over = SceneryOver.new()
+	_scenery_over.name = "SceneryOver"
+	add_child(_scenery_over)
 	_forest_ambience = preload("res://scripts/ForestAmbience.gd").new()
 	_forest_ambience.name = "ForestAmbience"
 	_forest_ambience.z_index = 0
@@ -83,10 +94,31 @@ func _build_layers() -> void:
 	_entity_layer.name = "Entities"
 	_entity_layer.y_sort_enabled = true
 	add_child(_entity_layer)
+	_scenery_amb = SceneryAmbient.new()
+	_scenery_amb.name = "SceneryAmbient"
+	_scenery_amb.z_index = 150
+	add_child(_scenery_amb)
 	_fx_layer = Node2D.new()
 	_fx_layer.name = "FX"
 	_fx_layer.z_index = 200
 	add_child(_fx_layer)
+	_configure_scenery(game_manager.fight_biome)
+
+
+## (Re)génère le décor de contour pour un biome : graine = combat en cours (décor stable par combat).
+func _configure_scenery(biome: String) -> void:
+	var fight_no: int = 1
+	if game_manager != null and not game_manager.active_save.is_empty():
+		fight_no = ProgressionManager.selected_fight_number(game_manager.active_save)
+	var sd: int = fight_no * 37 + biome.hash() % 997
+	var n: int = game_manager.GRID_SIZE
+	if _scenery != null:
+		_scenery.configure(n, biome, sd)
+	if _scenery_over != null:
+		_scenery_over.configure(n, biome, sd)
+	if _scenery_amb != null:
+		_scenery_amb.configure(n, biome, sd)
+		_scenery_amb.visible = biome != "Forêt" or true
 
 
 ## Applique le biome courant aux cases existantes (palette/touffes/fleurs).
@@ -94,6 +126,7 @@ func apply_biome(biome: String) -> void:
 	if biome == _biome:
 		return
 	_biome = biome
+	_configure_scenery(biome)
 	if _forest_ambience != null:
 		_forest_ambience.set_forest_active(biome == "Forêt")
 	for y: int in range(cell_nodes.size()):
