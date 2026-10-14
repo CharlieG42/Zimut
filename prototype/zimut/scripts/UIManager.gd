@@ -436,6 +436,16 @@ class TimelineView extends Control:
 	func _process(_d: float) -> void:
 		queue_redraw()
 
+	func _append_timeline_branch(uid: int, current_by_uid: Dictionary, summons_by_owner: Dictionary, order: Array, seen: Dictionary) -> void:
+		if seen.has(uid):
+			return
+		seen[uid] = true
+		if current_by_uid.has(uid):
+			order.append(current_by_uid[uid])
+		# Chaque invocation est placée juste après son invocateur, avant les combattants suivants.
+		for child_uid: int in summons_by_owner.get(uid, []):
+			_append_timeline_branch(child_uid, current_by_uid, summons_by_owner, order, seen)
+
 	func _draw() -> void:
 		if gm == null:
 			return
@@ -453,20 +463,31 @@ class TimelineView extends Control:
 		# Les personnages morts disparaissent, mais les survivants gardent leur position relative.
 		if _initial_order_uids.is_empty():
 			for initial_entity: Dictionary in gm.turn_order:
-				_initial_order_uids.append(int(initial_entity.get("uid", -1)))
+				if String(initial_entity.get("entity_type", "")) != "Summon":
+					_initial_order_uids.append(int(initial_entity.get("uid", -1)))
 		var current_by_uid: Dictionary = {}
 		for current_entity: Dictionary in gm.turn_order:
 			if gm.is_alive(current_entity):
 				current_by_uid[int(current_entity.get("uid", -1))] = current_entity
+		# Index des invocations par propriétaire : fonctionne quel que soit le métier
+		# du lanceur, et permet aussi de rattacher une invocation à une autre invocation.
+		var summons_by_owner: Dictionary = {}
+		for summon: Dictionary in gm.summons:
+			if not gm.is_alive(summon):
+				continue
+			var owner_uid: int = int(summon.get("owner", -1))
+			if not summons_by_owner.has(owner_uid):
+				summons_by_owner[owner_uid] = []
+			summons_by_owner[owner_uid].append(int(summon.get("uid", -1)))
 		var order: Array = []
+		var seen: Dictionary = {}
 		for initial_uid: int in _initial_order_uids:
-			if current_by_uid.has(initial_uid):
-				order.append(current_by_uid[initial_uid])
-		# Les invocations apparues en cours de combat s'ajoutent après l'ordre initial.
+			_append_timeline_branch(initial_uid, current_by_uid, summons_by_owner, order, seen)
+		# Filet de sécurité pour toute entité créée dynamiquement sans parent connu.
 		for current_entity: Dictionary in gm.turn_order:
 			var current_uid: int = int(current_entity.get("uid", -1))
-			if gm.is_alive(current_entity) and not _initial_order_uids.has(current_uid):
-				order.append(current_entity)
+			if gm.is_alive(current_entity) and not seen.has(current_uid):
+				_append_timeline_branch(current_uid, current_by_uid, summons_by_owner, order, seen)
 		# Colonne verticale : l'ordre reste fixe ; seule la vignette active est agrandie.
 		var active_uid: int = int(gm.active_entity.get("uid", -1))
 		var total_h: float = 0.0
@@ -763,37 +784,36 @@ func _build_ui() -> void:
 	_root.add_child(st)
 	_stats = st
 
-	# Barre de sorts compacte sous le portrait actif, alignée à gauche.
-	# Les sorts supplémentaires restent accessibles par défilement horizontal.
+	# Barre de sorts verticale sous le portrait ; le défilement est vertical.
 	var badge_w: float = 86.0 * _spell_scale
 	var badge_h: float = 58.0 * _spell_scale
 	_spell_scroll = ScrollContainer.new()
-	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	_spell_scroll.anchor_left = 0.0
 	_spell_scroll.anchor_right = 0.0
 	_spell_scroll.anchor_top = 0.0
-	_spell_scroll.anchor_bottom = 0.0
+	_spell_scroll.anchor_bottom = 1.0
 	_spell_scroll.offset_left = 18.0
-	_spell_scroll.offset_right = 458.0
+	_spell_scroll.offset_right = 18.0 + badge_w + 18.0
 	_spell_scroll.offset_top = 212.0
-	_spell_scroll.offset_bottom = 212.0 + badge_h + 18.0
+	_spell_scroll.offset_bottom = -76.0
 	_spell_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
 	var spell_panel := PanelContainer.new()
 	spell_panel.anchor_left = 0.0
 	spell_panel.anchor_right = 0.0
 	spell_panel.anchor_top = 0.0
-	spell_panel.anchor_bottom = 0.0
+	spell_panel.anchor_bottom = 1.0
 	spell_panel.offset_left = 10.0
-	spell_panel.offset_right = 466.0
+	spell_panel.offset_right = 18.0 + badge_w + 26.0
 	spell_panel.offset_top = 204.0
-	spell_panel.offset_bottom = 222.0 + badge_h
+	spell_panel.offset_bottom = -68.0
 	spell_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	spell_panel.add_theme_stylebox_override("panel", _flat(Color(0.03, 0.05, 0.09, 0.30), Color(0.35, 0.48, 0.65, 0.35), 20, 1))
 	_root.add_child(spell_panel)
 	_root.add_child(_spell_scroll)
-	# Une seule rangée de badges ; le ScrollContainer gère le débordement.
-	_spell_box = HBoxContainer.new()
+	# Une seule colonne de badges ; le ScrollContainer gère le débordement vertical.
+	_spell_box = VBoxContainer.new()
 	_spell_box.add_theme_constant_override("separation", int(6.0 * _spell_scale))
 	_spell_scroll.add_child(_spell_box)
 
@@ -804,16 +824,16 @@ func _build_ui() -> void:
 	_tip_panel.anchor_right = 0.0
 	_tip_panel.anchor_top = 0.0
 	_tip_panel.anchor_bottom = 0.0
-	_tip_panel.offset_left = 18.0
-	_tip_panel.offset_right = 18.0 + 440.0 * _spell_scale
-	_tip_panel.offset_top = 212.0 + badge_h + 24.0
-	_tip_panel.offset_bottom = 212.0 + badge_h + 164.0
+	_tip_panel.offset_left = 18.0 + badge_w + 34.0
+	_tip_panel.offset_right = 18.0 + badge_w + 394.0 * _spell_scale
+	_tip_panel.offset_top = 220.0
+	_tip_panel.offset_bottom = 360.0
 	_tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tip_panel.visible = false
 	_tip_label = Label.new()
 	_tip_label.add_theme_font_size_override("font_size", int(22.0 * _spell_scale))
 	_tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_tip_label.custom_minimum_size = Vector2(420.0 * _spell_scale, 0)
+	_tip_label.custom_minimum_size = Vector2(340.0 * _spell_scale, 0)
 	_tip_panel.add_child(_tip_label)
 	_root.add_child(_tip_panel)
 
@@ -831,10 +851,10 @@ func _build_ui() -> void:
 	_end_btn.anchor_right = 1.0
 	_end_btn.anchor_top = 0.0
 	_end_btn.anchor_bottom = 0.0
-	_end_btn.offset_left = -184.0
+	_end_btn.offset_left = -194.0
 	_end_btn.offset_right = -14.0
 	_end_btn.offset_top = 12.0
-	_end_btn.offset_bottom = 66.0
+	_end_btn.offset_bottom = 72.0
 	_end_btn.pressed.connect(func() -> void:
 		Sfx.play("click")
 		end_turn_requested.emit())
@@ -842,15 +862,15 @@ func _build_ui() -> void:
 
 	# Bouton de sortie centré horizontalement en bas de l'écran.
 	_quit_btn = _small_button("Quitter le combat", false)
-	_quit_btn.custom_minimum_size = Vector2(220.0, 42.0)
+	_quit_btn.custom_minimum_size = Vector2(244.0, 48.0)
 	_quit_btn.add_theme_font_size_override("font_size", 17)
 	_quit_btn.anchor_left = 0.5
 	_quit_btn.anchor_right = 0.5
 	_quit_btn.anchor_top = 1.0
 	_quit_btn.anchor_bottom = 1.0
-	_quit_btn.offset_left = -110.0
-	_quit_btn.offset_right = 110.0
-	_quit_btn.offset_top = -58.0
+	_quit_btn.offset_left = -122.0
+	_quit_btn.offset_right = 122.0
+	_quit_btn.offset_top = -64.0
 	_quit_btn.offset_bottom = -16.0
 	_quit_btn.tooltip_text = "Quitter ce combat et revenir à la sélection d'équipe."
 	_quit_btn.pressed.connect(_on_quit_combat_pressed)
