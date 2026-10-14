@@ -1171,15 +1171,26 @@ func _show_result_window(victory: bool) -> void:
 			content.add_child(res_row)
 
 	var cont := Button.new()
-	cont.text = "CONTINUER"
-	cont.custom_minimum_size = Vector2(320, 66)
-	cont.add_theme_font_size_override("font_size", 24)
+	var campaign_mode: String = String(save.get("campaign_mode", ""))
+	if campaign_mode == "adventure":
+		cont.text = "RETOUR À L'AVENTURE"
+	elif campaign_mode == "conquest":
+		cont.text = "RETOUR À LA CARTE DE CONQUÊTE"
+	else:
+		cont.text = "CONTINUER"
+	cont.custom_minimum_size = Vector2(380, 66)
+	cont.add_theme_font_size_override("font_size", 22)
 	cont.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
 	cont.add_theme_stylebox_override("normal", _flat(Color(0.98, 0.86, 0.45), Color(0.72, 0.58, 0.28), 12, 3))
 	cont.pressed.connect(func() -> void:
 		dim.queue_free()
 		panel.queue_free()
-		_show_game_over(victory))
+		if campaign_mode == "adventure":
+			get_tree().change_scene_to_file("res://scenes/AdventureMap.tscn")
+		elif campaign_mode == "conquest":
+			get_tree().change_scene_to_file("res://scenes/ConquestMap.tscn")
+		else:
+			_show_game_over(victory))
 	box.add_child(cont)
 
 
