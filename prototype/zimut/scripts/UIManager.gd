@@ -763,7 +763,7 @@ func _build_ui() -> void:
 	_root.add_child(st)
 	_stats = st
 
-	# Barre de sorts compacte en bas, sur une seule ligne (inspiration Dofus/Wakfu).
+	# Barre de sorts compacte sous le portrait actif, alignée à gauche.
 	# Les sorts supplémentaires restent accessibles par défilement horizontal.
 	var badge_w: float = 86.0 * _spell_scale
 	var badge_h: float = 58.0 * _spell_scale
