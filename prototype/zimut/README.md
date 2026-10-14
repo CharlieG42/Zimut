@@ -328,5 +328,8 @@ L'écran d'accueil utilise maintenant une illustration vectorielle intégrée au
 - **Fond illustré du menu** : \`assets/ui/main_menu_bg.svg\` (paysage, logo et plaques de menu).
 - **Icône de l'application** : \`assets/ui/icon.svg\`, déclarée dans \`project.godot\` via \`config/icon\`.
 - **Interactions** : \`scripts/MainMenuUI.gd\` place de vraies zones cliquables sur les quatre plaques peintes : nouvelle partie, continuer, options et quitter. Les actions restent gérées par Godot, elles ne sont pas seulement dessinées dans l'image.
+- **Continuer** : recharge la sauvegarde la plus récemment modifiée et ouvre la sélection d’équipe avec l’équipe sauvegardée restaurée.
+- **Nouvelle partie** : ouvre la gestion des parties et présélectionne le premier emplacement libre ; aucune sauvegarde existante n’est écrasée si les cinq emplacements sont occupés.
+- **Intégration Android** : le fond est préchargé par `preload("res://assets/ui/main_menu_bg.svg")` et l’icône est déclarée dans `project.godot`, pour que l’exporteur puisse les inclure dans l’APK.
 
 Les fichiers sont dans \`prototype/zimut\` : Godot les importe au chargement du projet et les embarque dans les exports Android. Aucun chemin absolu du poste de développement n'est utilisé.
