@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+<defs>
+ <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#1975b4"/><stop offset=".6" stop-color="#8bd0e8"/><stop offset="1" stop-color="#eecb8b"/></linearGradient>
+ <linearGradient id="cloak" x2="1" y2="1"><stop stop-color="#4f9650"/><stop offset="1" stop-color="#173b2d"/></linearGradient>
+ <linearGradient id="hair" x2="0" y2="1"><stop stop-color="#f5d58b"/><stop offset=".55" stop-color="#e8b967"/><stop offset="1" stop-color="#bd7c3e"/></linearGradient>
+ <linearGradient id="gold" x2="0" y2="1"><stop stop-color="#fff3bf"/><stop offset="1" stop-color="#c89c42"/></linearGradient>
+ <clipPath id="round"><rect x="20" y="20" width="984" height="984" rx="190"/></clipPath>
+</defs>
+<g clip-path="url(#round)">
+ <rect width="1024" height="1024" fill="url(#sky)"/>
+ <path d="M0 390L160 180 270 320 420 130 555 330 700 160 860 340 1024 180V640H0Z" fill="#edf4e8"/>
+ <path d="M0 450L160 240 240 340 420 170 500 330 700 210 820 350 920 250 1024 330V720H0Z" fill="#4c8190"/>
+ <path d="M0 550Q200 420 370 540T700 520T1024 480V1024H0Z" fill="#538e52"/>
+ <path d="M0 680Q220 550 440 670T800 620T1024 650V1024H0Z" fill="#24543b"/>
+ <g fill="#2e6844"><circle cx="80" cy="520" r="120"/><circle cx="200" cy="470" r="95"/><circle cx="930" cy="490" r="140"/><circle cx="830" cy="550" r="90"/></g>
+ <g transform="translate(205 285)">
+  <path d="M100 690Q-20 480 60 260Q140 155 285 260Q360 400 310 690Z" fill="url(#cloak)" stroke="#153d2d" stroke-width="18"/>
+  <path d="M96 385L28 520 80 580 145 460Z" fill="#c49a63" stroke="#5e422d" stroke-width="14"/>
+  <path d="M80 230Q45 120 110 65Q195 15 260 70L302 150 275 250Z" fill="url(#hair)" stroke="#80502e" stroke-width="15"/>
+  <ellipse cx="205" cy="190" rx="115" ry="142" fill="#f2c594" stroke="#80502e" stroke-width="13"/>
+  <path d="M90 160Q50 60 130 10Q215-45 300 30L340 90 300 82 270 52 242 92 200 70 160 104 120 143Z" fill="url(#hair)" stroke="#80502e" stroke-width="16"/>
+  <path d="M130 105Q170 78 198 104M230 104Q257 82 280 105" fill="none" stroke="#9c6637" stroke-width="12" stroke-linecap="round"/>
+  <ellipse cx="170" cy="185" rx="14" ry="23" fill="#203b2b"/><circle cx="175" cy="177" r="6" fill="#fff"/>
+  <ellipse cx="255" cy="185" rx="14" ry="23" fill="#203b2b"/><circle cx="260" cy="177" r="6" fill="#fff"/>
+  <path d="M190 252q28 22 55-3" fill="none" stroke="#a35e45" stroke-width="9" stroke-linecap="round"/>
+  <path d="M130 320L210 380 285 320" fill="none" stroke="#d8b16d" stroke-width="13"/>
+  <path d="M135 420L220 450 290 410 310 690H100Z" fill="#285a3a" opacity=".8"/>
+ </g>
+ <g transform="translate(70 520)">
+  <path d="M30 95Q-8 40 38 10Q68-20 100 18Q140-5 165 35Q190 76 146 110L130 150 55 145Z" fill="#8ad04f" stroke="#315e37" stroke-width="12"/>
+  <path d="M58 25Q25-28 38-65Q75-38 83 15M118 24Q140-30 170-35Q164 2 136 32" fill="#a8e45d" stroke="#315e37" stroke-width="10"/>
+  <ellipse cx="72" cy="72" rx="15" ry="22" fill="#fff1c7"/><ellipse cx="120" cy="72" rx="15" ry="22" fill="#fff1c7"/><circle cx="76" cy="75" r="7" fill="#263d29"/><circle cx="116" cy="75" r="7" fill="#263d29"/>
+  <path d="M84 105q16 13 31-1" fill="none" stroke="#315e37" stroke-width="7" stroke-linecap="round"/>
+ </g>
+ <g transform="translate(512 785)">
+  <path d="M-260 85L-30-20 30-20 260 85 35 50-35 50Z" fill="url(#gold)" stroke="#765d2f" stroke-width="8"/>
+  <text x="0" y="165" text-anchor="middle" font-family="Georgia,serif" font-size="148" font-weight="bold" letter-spacing="5" fill="#fff0bf" stroke="#684c27" stroke-width="8" paint-order="stroke">ZIMUT</text>
+  <path d="M220 105q22-50 62-46q-8 33-62 46M220 110q-15-31-44-27q6 25 44 27" fill="#a0d951" stroke="#315e3b" stroke-width="7"/>
+ </g>
+</g>
+<rect x="20" y="20" width="984" height="984" rx="190" fill="none" stroke="#e8d8a5" stroke-width="10"/>
+</svg>
