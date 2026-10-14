@@ -49,13 +49,22 @@ func setup(gp: Vector2i) -> void:
 	_tufts.clear()
 	_flowers.clear()
 	_forest_tile_texture = null
-	if biome == "Forêt":
-		# Variantes déterministes : le décor reste stable entre les combats et les sessions.
+	# Tuiles de sol par biome (6 variantes déterministes par biome : le décor
+	# reste stable entre les combats et les sessions).
+	var tile_prefix: String = ""
+	match biome:
+		"Forêt":
+			tile_prefix = "forest_ground"
+		"Montagne":
+			tile_prefix = "mountain_ground"
+		"Désert":
+			tile_prefix = "desert_ground"
+	if tile_prefix != "":
 		var tile_index: int = posmod(gp.x * 3 + gp.y * 5, 6) + 1
-		var tile_path: String = "res://assets/sprites/tiles/forest_ground_%02d.svg" % tile_index
+		var tile_path: String = "res://assets/sprites/tiles/%s_%02d.svg" % [tile_prefix, tile_index]
 		_forest_tile_texture = load(tile_path) as Texture2D
 		if _forest_tile_texture == null:
-			push_warning("Texture de sol forestier introuvable : %s" % tile_path)
+			push_warning("Texture de sol %s introuvable : %s" % [biome, tile_path])
 	var rng := RandomNumberGenerator.new()
 	rng.seed = gp.x * 7919 + gp.y * 104729 + 17
 	var pal: Dictionary = BIOME_PALETTES.get(biome, BIOME_PALETTES["Forêt"])
@@ -121,7 +130,7 @@ func _draw() -> void:
 
 	# ── Dessus de la case ─────────────────────────────────────────────────
 	var top: PackedVector2Array = _diamond()
-	if biome == "Forêt" and _forest_tile_texture != null:
+	if _forest_tile_texture != null:
 		# La texture est un losange transparent 128×64, aligné sur la géométrie de Cell.
 		draw_texture_rect(_forest_tile_texture, Rect2(-HW, -HH, HW * 2.0, HH * 2.0), false)
 	else:

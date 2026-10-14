@@ -160,11 +160,20 @@ func _add_feature(kind: String, gx: int, gy: int, h: float, off: Vector2 = Vecto
 
 
 func _place_features() -> void:
-	if _biome != "Forêt":
-		return
-	# Arche en ruine sur la terrasse du fond (centre du bord haut)
-	_add_feature("ruin_arch", 1, -2, 68.0, Vector2(0, 0))
-	_add_feature("ruin_wall", -1, 1, 34.0, Vector2(20, 4))
+	# Chaque biome a son monument signature sur la terrasse du fond (bord haut),
+	# plus un élément secondaire sur le rebord gauche — même logique que la Forêt.
+	match _biome:
+		"Forêt":
+			_add_feature("ruin_arch", 1, -2, 68.0, Vector2(0, 0))
+			_add_feature("ruin_wall", -1, 1, 34.0, Vector2(20, 4))
+		"Montagne":
+			_add_feature("ice_portal", 1, -2, 68.0, Vector2(0, 0))
+			_add_feature("cairn", -1, 1, 34.0, Vector2(20, 4))
+		"Désert":
+			_add_feature("obelisk", 1, -2, 68.0, Vector2(0, 0))
+			_add_feature("well", -1, 1, 34.0, Vector2(20, 4))
+		_:
+			pass
 
 
 func _pick_prop(rng: RandomNumberGenerator, level: int, edge_axis: int, placed_fence: bool) -> String:
@@ -714,5 +723,60 @@ static func draw_prop(ci: CanvasItem, kind: String, p: Dictionary, biome: String
 			for vx: float in [-30.0, -20.0, 18.0, 28.0]:
 				ci.draw_line(Vector2(vx, -108.0), Vector2(vx + 2.0, -84.0 - absf(vx)), leaf.darkened(0.1), 2.6, true)
 			ci.draw_circle(Vector2(0, -50), 54.0, Color(0.95, 0.95, 0.7, 0.05))
+		"ice_portal":
+			soft_shadow(ci, 70.0, 0.34)
+			var ice := Color(0.62, 0.82, 0.94)
+			for sx: float in [-36.0, 36.0]:
+				ci.draw_polygon(PackedVector2Array([Vector2(sx - 13.0, 0), Vector2(sx - 10.0, -100), Vector2(sx + 10.0, -100), Vector2(sx + 13.0, 0)]),
+					PackedColorArray([ice.lightened(0.25), ice.lightened(0.15), ice.darkened(0.1), ice.darkened(0.25)]))
+				for k: int in range(1, 5):
+					ci.draw_line(Vector2(sx - 10.0, -float(k) * 22.0), Vector2(sx + 10.0, -float(k) * 22.0), Color(0.9, 0.97, 1.0, 0.35), 1.6)
+			ci.draw_polygon(PackedVector2Array([Vector2(-54, -100), Vector2(-36, -126), Vector2(0, -138), Vector2(36, -126), Vector2(54, -100), Vector2(34, -100), Vector2(0, -112), Vector2(-34, -100)]),
+				PackedColorArray([ice, ice.lightened(0.2), ice.lightened(0.3), ice.lightened(0.2), ice, ice.darkened(0.15), ice.darkened(0.1), ice.darkened(0.15)]))
+			ci.draw_circle(Vector2(0, -56), 46.0, Color(0.55, 0.85, 1.0, 0.16))
+			ci.draw_circle(Vector2(0, -56), 34.0, Color(0.7, 0.92, 1.0, 0.2))
+			for kx: float in [-26.0, 0.0, 26.0]:
+				ci.draw_line(Vector2(kx, -112.0 - absf(kx) * 0.2), Vector2(kx, -134.0 + absf(kx) * 0.25), Color(0.95, 0.99, 1.0, 0.6), 2.2)
+			for vx: float in [-30.0, -16.0, 20.0, 30.0]:
+				ci.draw_line(Vector2(vx, -100.0), Vector2(vx + 2.0, -80.0 - absf(vx)), Color(0.85, 0.95, 1.0, 0.5), 2.4, true)
+		"cairn":
+			soft_shadow(ci, 30.0, 0.28)
+			var rock := Color(0.58, 0.60, 0.60)
+			var rows: Array = [[-16.0, -8.0, 15.0], [-9.0, -22.0, 12.0], [1.0, -34.0, 10.0], [-3.0, -44.0, 7.0], [0.0, -52.0, 4.5]]
+			for rr: Array in rows:
+				ci.draw_circle(Vector2(float(rr[0]) + rng.randf_range(-1.5, 1.5), float(rr[1])), float(rr[2]), rock.darkened(0.18))
+				ci.draw_circle(Vector2(float(rr[0]), float(rr[1]) - 1.5), float(rr[2]) - 1.6, rock.lightened(0.08))
+			ci.draw_circle(Vector2(0, -54.0), 5.0, Color(0.5, 0.95, 0.9, 0.7))
+			ci.draw_circle(Vector2(0, -54.0), 9.0, Color(0.5, 0.95, 0.9, 0.18))
+			ci.draw_circle(Vector2(-12, -3), 4.5, Color(0.95, 0.97, 1.0, 0.85))
+			ci.draw_circle(Vector2(13, -5), 3.2, Color(0.95, 0.97, 1.0, 0.7))
+		"obelisk":
+			soft_shadow(ci, 60.0, 0.34)
+			var sand := Color(0.82, 0.68, 0.42)
+			ci.draw_polygon(PackedVector2Array([Vector2(-20, 0), Vector2(-14, -110), Vector2(0, -132), Vector2(14, -110), Vector2(20, 0)]),
+				PackedColorArray([sand.lightened(0.12), sand.lightened(0.05), sand, sand.darkened(0.12), sand.darkened(0.28)]))
+			for k: int in range(1, 6):
+				ci.draw_line(Vector2(-16.0 + float(k), -float(k) * 20.0), Vector2(16.0 - float(k), -float(k) * 20.0), Color(0, 0, 0, 0.16), 2.0)
+			ci.draw_line(Vector2(0, -36), Vector2(0, -60), Color(0.45, 0.8, 0.5, 0.8), 3.0, true)
+			ci.draw_line(Vector2(-8, -46), Vector2(8, -46), Color(0.45, 0.8, 0.5, 0.7), 3.0, true)
+			ci.draw_circle(Vector2(0, -46), 16.0, Color(0.45, 0.85, 0.5, 0.14))
+			ci.draw_rect(Rect2(-26, -10, 52, 10), sand.darkened(0.2))
+			blob(ci, Vector2(-24, -114), 7.0, leaf, leaf_hi)
+			blob(ci, Vector2(18, -108), 5.0, leaf, leaf_hi)
+		"well":
+			soft_shadow(ci, 34.0, 0.3)
+			var wstone := Color(0.78, 0.64, 0.40)
+			ci.draw_circle(Vector2(0, 0), 24.0, wstone.darkened(0.3))
+			ci.draw_circle(Vector2(0, -2), 20.0, wstone)
+			ci.draw_circle(Vector2(0, -2), 13.0, Color(0.1, 0.16, 0.2))
+			ci.draw_circle(Vector2(0, -2), 11.0, Color(0.2, 0.34, 0.42))
+			for a: float in [0.0, PI / 2.0, PI, PI * 1.5]:
+				ci.draw_circle(Vector2(cos(a), sin(a) * 0.5) * 22.0, 4.0, wstone.darkened(0.15))
+			for sx: float in [-16.0, 16.0]:
+				ci.draw_line(Vector2(sx, -2), Vector2(sx, -44), Color(0.55, 0.4, 0.26), 4.0)
+			ci.draw_line(Vector2(-22, -44), Vector2(22, -44), Color(0.62, 0.46, 0.3), 5.0)
+			var rope_len: float = 16.0 + sin(t * 1.4) * 1.5
+			ci.draw_line(Vector2(0, -44), Vector2(0, -44 + rope_len), Color(0.75, 0.68, 0.55), 1.6)
+			ci.draw_circle(Vector2(0, -44 + rope_len + 3.0), 4.0, Color(0.6, 0.5, 0.38))
 		_:
 			pass
