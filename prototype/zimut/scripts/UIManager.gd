@@ -1070,7 +1070,12 @@ func _show_result_window(victory: bool) -> void:
 	var title := Label.new()
 	var fight_no: int = ProgressionManager.next_fight_number(save)
 	var next_biome: String = ProgressionManager.biome_for_fight(fight_no)
-	if not victory:
+	var campaign_mode: String = String(save.get("campaign_mode", ""))
+	if campaign_mode == "adventure":
+		title.text = "DÉFI RÉUSSI — progression partagée !" if victory else "DÉFI ÉCHOUÉ — vous pourrez réessayer"
+	elif campaign_mode == "conquest":
+		title.text = "VILLE CONQUISE !" if victory else "ASSAUT REPOUSSÉ — la ville reste à l'ennemi"
+	elif not victory:
 		title.text = "DÉFAITE — un peu d'XP de consolation"
 	elif ProgressionManager.is_boss_fight(save):
 		title.text = "VICTOIRE !  %s : ☠ BOSS %s et ses sbires au combat %d !" % [ProgressionManager.biome_label(next_biome), ProgressionManager.biome_boss(next_biome), fight_no]
@@ -1171,15 +1176,26 @@ func _show_result_window(victory: bool) -> void:
 			content.add_child(res_row)
 
 	var cont := Button.new()
-	cont.text = "CONTINUER"
-	cont.custom_minimum_size = Vector2(320, 66)
-	cont.add_theme_font_size_override("font_size", 24)
+	var campaign_mode: String = String(save.get("campaign_mode", ""))
+	if campaign_mode == "adventure":
+		cont.text = "RETOUR À L'AVENTURE"
+	elif campaign_mode == "conquest":
+		cont.text = "RETOUR À LA CARTE DE CONQUÊTE"
+	else:
+		cont.text = "CONTINUER"
+	cont.custom_minimum_size = Vector2(380, 66)
+	cont.add_theme_font_size_override("font_size", 22)
 	cont.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
 	cont.add_theme_stylebox_override("normal", _flat(Color(0.98, 0.86, 0.45), Color(0.72, 0.58, 0.28), 12, 3))
 	cont.pressed.connect(func() -> void:
 		dim.queue_free()
 		panel.queue_free()
-		_show_game_over(victory))
+		if campaign_mode == "adventure":
+			get_tree().change_scene_to_file("res://scenes/AdventureMap.tscn")
+		elif campaign_mode == "conquest":
+			get_tree().change_scene_to_file("res://scenes/ConquestMap.tscn")
+		else:
+			_show_game_over(victory))
 	box.add_child(cont)
 
 

@@ -257,20 +257,25 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		confirm.popup_centered())
 	_detail_box.add_child(del_btn)
 
-	# Choix du mode de jeu : un seul actif pour l'instant (Combats Tactiques),
-	# Aventure et Conquête sont des modes à venir, affichés en grisé.
+	# Les trois modes utilisent la même sauvegarde : roster, XP, caractéristiques,
+	# sorts, équipement et inventaire ne sont jamais dupliqués par mode.
 	var mode_lbl := Label.new()
-	mode_lbl.text = "Mode de jeu :"
+	mode_lbl.text = "Choisir un mode de jeu :"
 	mode_lbl.add_theme_font_size_override("font_size", 21)
 	mode_lbl.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(mode_lbl)
-	_detail_box.add_child(_mode_button("Combats Tactiques", "Combat tactique au tour à tour — ennemis niveau %d" % int(data.get("level", 10)), true, func() -> void:
-		GameManager.active_save = _current
+	_detail_box.add_child(_mode_button("Combats Tactiques", "Combat au tour par tour — niveau conseillé %d" % int(data.get("level", 10)), true, func() -> void:
+		_current.erase("campaign_mode")
+		ProgressionManager.write_save(slot, _current)
+		GameManager.active_save = ProgressionManager.load_save(slot)
 		GameManager.active_slot = slot
+		GameManager.fight_biome = "Forêt"
 		battle_requested.emit(slot)
 		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")))
-	_detail_box.add_child(_mode_button("Aventure", "Aventure dans le monde de Zimut", false, Callable()))
-	_detail_box.add_child(_mode_button("Conquête", "Construisez votre empire dans le monde de Zimut", false, Callable()))
+	_detail_box.add_child(_mode_button("Aventure", "Explorez la forêt, résolvez une énigme et découvrez des coffres", true, func() -> void:
+		_launch_campaign_mode("adventure", "res://scenes/AdventureMap.tscn", slot)))
+	_detail_box.add_child(_mode_button("Conquête", "Développez votre territoire et lancez des assauts tactiques", true, func() -> void:
+		_launch_campaign_mode("conquest", "res://scenes/ConquestMap.tscn", slot)))
 
 	var team: Array = data.get("team", [])
 	var team_lbl := Label.new()
@@ -345,6 +350,21 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	auto_btn.add_theme_stylebox_override("normal", _flat())
 	auto_btn.pressed.connect(_auto_equip)
 	_detail_box.add_child(auto_btn)
+
+func _launch_campaign_mode(mode: String, scene_path: String, slot: int) -> void:
+	if _current.is_empty() or slot < 0:
+		return
+	_current["campaign_mode"] = mode
+	if mode == "adventure" and not _current.has("adventure"):
+		_current["adventure"] = {"hero_pos": [1, 2], "moves": 0, "discovered": [], "completed": []}
+	if mode == "conquest" and not _current.has("conquest"):
+		_current["conquest"] = {"owned": ["capitale"], "pending_city": ""}
+	if not ProgressionManager.write_save(slot, _current):
+		return
+	GameManager.active_slot = slot
+	GameManager.active_save = ProgressionManager.load_save(slot)
+	GameManager.clear_custom_team()
+	get_tree().change_scene_to_file(scene_path)
 
 func _equip_summary(m: Dictionary) -> Dictionary:
 	return m.get("equipment", {})
