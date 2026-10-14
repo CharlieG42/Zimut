@@ -265,7 +265,9 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	mode_lbl.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(mode_lbl)
 	_detail_box.add_child(_mode_button("Combats Tactiques", "Combat au tour par tour — niveau conseillé %d" % int(data.get("level", 10)), true, func() -> void:
-		GameManager.active_save = _current
+		_current.erase("campaign_mode")
+		ProgressionManager.write_save(slot, _current)
+		GameManager.active_save = ProgressionManager.load_save(slot)
 		GameManager.active_slot = slot
 		GameManager.fight_biome = "Forêt"
 		battle_requested.emit(slot)
