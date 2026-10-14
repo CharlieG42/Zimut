@@ -1070,7 +1070,12 @@ func _show_result_window(victory: bool) -> void:
 	var title := Label.new()
 	var fight_no: int = ProgressionManager.next_fight_number(save)
 	var next_biome: String = ProgressionManager.biome_for_fight(fight_no)
-	if not victory:
+	var campaign_mode: String = String(save.get("campaign_mode", ""))
+	if campaign_mode == "adventure":
+		title.text = "DÉFI RÉUSSI — progression partagée !" if victory else "DÉFI ÉCHOUÉ — vous pourrez réessayer"
+	elif campaign_mode == "conquest":
+		title.text = "VILLE CONQUISE !" if victory else "ASSAUT REPOUSSÉ — la ville reste à l'ennemi"
+	elif not victory:
 		title.text = "DÉFAITE — un peu d'XP de consolation"
 	elif ProgressionManager.is_boss_fight(save):
 		title.text = "VICTOIRE !  %s : ☠ BOSS %s et ses sbires au combat %d !" % [ProgressionManager.biome_label(next_biome), ProgressionManager.biome_boss(next_biome), fight_no]
