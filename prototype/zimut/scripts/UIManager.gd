@@ -431,6 +431,7 @@ func _kind_color(spell: Dictionary) -> Color:
 
 class TimelineView extends Control:
 	var gm: Node = null
+	var _initial_order_uids: Array[int] = []
 
 	func _process(_d: float) -> void:
 		queue_redraw()
@@ -448,25 +449,34 @@ class TimelineView extends Control:
 			empty_bg.set_corner_radius_all(12)
 			draw_style_box(empty_bg, Rect2(8.0, 8.0, maxf(0.0, size.x - 16.0), 48.0))
 			return
-		# Ordre à partir de l'entité active
+		# Mémoriser l'ordre d'initiative initial : il ne tourne plus autour du personnage actif.
+		# Les personnages morts disparaissent, mais les survivants gardent leur position relative.
+		if _initial_order_uids.is_empty():
+			for initial_entity: Dictionary in gm.turn_order:
+				_initial_order_uids.append(int(initial_entity.get("uid", -1)))
+		var current_by_uid: Dictionary = {}
+		for current_entity: Dictionary in gm.turn_order:
+			if gm.is_alive(current_entity):
+				current_by_uid[int(current_entity.get("uid", -1))] = current_entity
 		var order: Array = []
-		var start: int = 0
-		for i: int in range(gm.turn_order.size()):
-			if int(gm.turn_order[i]["uid"]) == int(gm.active_entity.get("uid", -1)):
-				start = i
-				break
-		for k: int in range(gm.turn_order.size()):
-			var e: Dictionary = gm.turn_order[(start + k) % gm.turn_order.size()]
-			if gm.is_alive(e):
-				order.append(e)
-		# Colonne verticale : vignettes centrées, de haut en bas
+		for initial_uid: int in _initial_order_uids:
+			if current_by_uid.has(initial_uid):
+				order.append(current_by_uid[initial_uid])
+		# Les invocations apparues en cours de combat s'ajoutent après l'ordre initial.
+		for current_entity: Dictionary in gm.turn_order:
+			var current_uid: int = int(current_entity.get("uid", -1))
+			if gm.is_alive(current_entity) and not _initial_order_uids.has(current_uid):
+				order.append(current_entity)
+		# Colonne verticale : l'ordre reste fixe ; seule la vignette active est agrandie.
+		var active_uid: int = int(gm.active_entity.get("uid", -1))
 		var total_h: float = 0.0
-		for k: int in range(order.size()):
-			total_h += (124.0 if k == 0 else 96.0) + 10.0
+		for e_for_height: Dictionary in order:
+			var active_for_height: bool = int(e_for_height.get("uid", -1)) == active_uid
+			total_h += (124.0 if active_for_height else 96.0) + 10.0
 		var y: float = maxf(4.0, (size.y - total_h) * 0.5)
 		for k: int in range(order.size()):
 			var e2: Dictionary = order[k]
-			var big: bool = (k == 0)
+			var big: bool = int(e2.get("uid", -1)) == active_uid
 			var w: float = 124.0 if big else 96.0
 			var x: float = (size.x - w) * 0.5
 			var team_col: Color = Color(0.22, 0.45, 0.85)
@@ -761,23 +771,23 @@ func _build_ui() -> void:
 	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_spell_scroll.anchor_left = 0.0
-	_spell_scroll.anchor_right = 1.0
-	_spell_scroll.anchor_top = 1.0
-	_spell_scroll.anchor_bottom = 1.0
-	_spell_scroll.offset_left = 240.0
-	_spell_scroll.offset_right = -190.0
-	_spell_scroll.offset_top = -(badge_h + 18.0)
-	_spell_scroll.offset_bottom = -14.0
+	_spell_scroll.anchor_right = 0.0
+	_spell_scroll.anchor_top = 0.0
+	_spell_scroll.anchor_bottom = 0.0
+	_spell_scroll.offset_left = 18.0
+	_spell_scroll.offset_right = 458.0
+	_spell_scroll.offset_top = 212.0
+	_spell_scroll.offset_bottom = 212.0 + badge_h + 18.0
 	_spell_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
 	var spell_panel := PanelContainer.new()
 	spell_panel.anchor_left = 0.0
-	spell_panel.anchor_right = 1.0
-	spell_panel.anchor_top = 1.0
-	spell_panel.anchor_bottom = 1.0
-	spell_panel.offset_left = 232.0
-	spell_panel.offset_right = -182.0
-	spell_panel.offset_top = -(badge_h + 26.0)
-	spell_panel.offset_bottom = -8.0
+	spell_panel.anchor_right = 0.0
+	spell_panel.anchor_top = 0.0
+	spell_panel.anchor_bottom = 0.0
+	spell_panel.offset_left = 10.0
+	spell_panel.offset_right = 466.0
+	spell_panel.offset_top = 204.0
+	spell_panel.offset_bottom = 222.0 + badge_h
 	spell_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	spell_panel.add_theme_stylebox_override("panel", _flat(Color(0.03, 0.05, 0.09, 0.30), Color(0.35, 0.48, 0.65, 0.35), 20, 1))
 	_root.add_child(spell_panel)
@@ -792,12 +802,12 @@ func _build_ui() -> void:
 	_tip_panel.add_theme_stylebox_override("panel", _flat(Color(0.06, 0.08, 0.14, 0.95), Color(1, 0.85, 0.35), 14, 2))
 	_tip_panel.anchor_left = 0.0
 	_tip_panel.anchor_right = 0.0
-	_tip_panel.anchor_top = 1.0
-	_tip_panel.anchor_bottom = 1.0
-	_tip_panel.offset_left = 240.0
-	_tip_panel.offset_right = 240.0 + 440.0 * _spell_scale
-	_tip_panel.offset_top = -(76.0 * _spell_scale * 2.0 + 24.0 + 150.0)
-	_tip_panel.offset_bottom = -(76.0 * _spell_scale * 2.0 + 24.0 + 10.0)
+	_tip_panel.anchor_top = 0.0
+	_tip_panel.anchor_bottom = 0.0
+	_tip_panel.offset_left = 18.0
+	_tip_panel.offset_right = 18.0 + 440.0 * _spell_scale
+	_tip_panel.offset_top = 212.0 + badge_h + 24.0
+	_tip_panel.offset_bottom = 212.0 + badge_h + 164.0
 	_tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tip_panel.visible = false
 	_tip_label = Label.new()
@@ -810,7 +820,7 @@ func _build_ui() -> void:
 	# Bouton fin de tour
 	_end_btn = Button.new()
 	_end_btn.text = "FIN DU TOUR"
-	_end_btn.add_theme_font_size_override("font_size", 18)
+	_end_btn.add_theme_font_size_override("font_size", 20)
 	_end_btn.add_theme_color_override("font_color", Color(0.25, 0.18, 0.08))
 	_end_btn.add_theme_color_override("font_hover_color", Color(0.15, 0.1, 0.02))
 	_end_btn.add_theme_stylebox_override("normal", _flat(Color(0.98, 0.86, 0.45), Color(0.72, 0.58, 0.28), 16, 3))
@@ -821,27 +831,27 @@ func _build_ui() -> void:
 	_end_btn.anchor_right = 1.0
 	_end_btn.anchor_top = 0.0
 	_end_btn.anchor_bottom = 0.0
-	_end_btn.offset_left = -170.0
+	_end_btn.offset_left = -184.0
 	_end_btn.offset_right = -14.0
 	_end_btn.offset_top = 12.0
-	_end_btn.offset_bottom = 60.0
+	_end_btn.offset_bottom = 66.0
 	_end_btn.pressed.connect(func() -> void:
 		Sfx.play("click")
 		end_turn_requested.emit())
 	_root.add_child(_end_btn)
 
-	# Bouton de sortie sous la vignette du personnage actif.
+	# Bouton de sortie centré horizontalement en bas de l'écran.
 	_quit_btn = _small_button("Quitter le combat", false)
 	_quit_btn.custom_minimum_size = Vector2(220.0, 42.0)
 	_quit_btn.add_theme_font_size_override("font_size", 17)
-	_quit_btn.anchor_left = 0.0
-	_quit_btn.anchor_right = 0.0
-	_quit_btn.anchor_top = 0.0
-	_quit_btn.anchor_bottom = 0.0
-	_quit_btn.offset_left = 18.0
-	_quit_btn.offset_right = 238.0
-	_quit_btn.offset_top = 208.0
-	_quit_btn.offset_bottom = 250.0
+	_quit_btn.anchor_left = 0.5
+	_quit_btn.anchor_right = 0.5
+	_quit_btn.anchor_top = 1.0
+	_quit_btn.anchor_bottom = 1.0
+	_quit_btn.offset_left = -110.0
+	_quit_btn.offset_right = 110.0
+	_quit_btn.offset_top = -58.0
+	_quit_btn.offset_bottom = -16.0
 	_quit_btn.tooltip_text = "Quitter ce combat et revenir à la sélection d'équipe."
 	_quit_btn.pressed.connect(_on_quit_combat_pressed)
 	_root.add_child(_quit_btn)
