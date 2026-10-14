@@ -71,10 +71,13 @@ func _ensure_initialized() -> void:
 # ═══════════════════════════════════════════════════════════════════════════
 
 class SpellCard extends Button:
-	## Carte de sort lisible d'un coup d'œil :
-	##   pastille PA (bleu) en haut à gauche, PM (vert) en haut à droite si le sort en coûte,
-	##   pastille PORTÉE (or) en bas à droite ; niveau du sort, zone et lancers restants
-	##   en petites étiquettes en bas.
+	## Carte de sort (refonte V5), dessinée dans un repère logique 188×88 (agrandi sur mobile) :
+	##   • médaillon d'élément à gauche (flamme, glace, éclair, feuille, soleil...) ;
+	##   • gemme hexagonale PA (bleue) en haut à gauche, PM (verte) en haut à droite si le sort en coûte ;
+	##   • pastille PORTÉE (or) en bas à droite avec sa légende ;
+	##   • nom lisible sur deux lignes max, puces ★ niveau / zone / lancers restants / touche.
+	const LW := 188.0
+	const LH := 88.0
 	var spell: Dictionary = {}
 	var gm: Node = null
 	var hotkey: int = 0
@@ -82,92 +85,210 @@ class SpellCard extends Button:
 	var selected: bool = false
 	var usable: bool = true
 	var card_scale: float = 1.0
+	var _elem: String = ""
 
-	## Pastille ronde : valeur en gros, légende en petit à côté.
-	func _orb(c: Vector2, r: float, val: String, col: Color) -> void:
+	static func hexagon(c: Vector2, r: float) -> PackedVector2Array:
+		var pts := PackedVector2Array()
+		for i: int in range(6):
+			var a: float = PI / 6.0 + float(i) * TAU / 6.0
+			pts.append(c + Vector2(cos(a), sin(a)) * r)
+		return pts
+
+	## Gemme hexagonale (style Waven) avec valeur et reflet.
+	func _gem(c: Vector2, r: float, val: String, col: Color) -> void:
 		var font: Font = ThemeDB.fallback_font
-		var base: Color = col if usable else Color(0.34, 0.37, 0.44)
-		draw_circle(c + Vector2(0, 2.5), r + 1.5, Color(0, 0, 0, 0.55))
-		draw_circle(c, r + 1.5, Color(0.02, 0.03, 0.07, 1.0))
-		draw_circle(c, r - 0.5, base.darkened(0.30))
-		draw_circle(c + Vector2(0, -r * 0.14), r - 3.0, base)
-		draw_circle(c + Vector2(-r * 0.22, -r * 0.42), r * 0.34, Color(1, 1, 1, 0.30))
-		var fs: int = 26 if val.length() <= 1 else (23 if val.length() == 2 else 15)
+		var base: Color = col if usable else Color(0.36, 0.38, 0.45)
+		var outer: PackedVector2Array = hexagon(c, r + 2.5)
+		draw_colored_polygon(hexagon(c + Vector2(0, 2.5), r + 2.5), Color(0, 0, 0, 0.5))
+		draw_colored_polygon(outer, Color(0.02, 0.03, 0.07))
+		draw_colored_polygon(hexagon(c, r), base.darkened(0.35))
+		draw_colored_polygon(hexagon(c + Vector2(0, -1.5), r * 0.84), base)
+		draw_colored_polygon(PackedVector2Array([c + Vector2(-r * 0.62, -r * 0.2), c + Vector2(-r * 0.2, -r * 0.82), c + Vector2(r * 0.3, -r * 0.82), c + Vector2(-r * 0.1, -r * 0.25)]), Color(1, 1, 1, 0.22))
+		draw_polyline(outer + PackedVector2Array([outer[0]]), base.lightened(0.45), 1.6, true)
+		var fs: int = 22 if val.length() <= 1 else (19 if val.length() == 2 else 13)
 		var pos := Vector2(c.x - r, c.y + float(fs) * 0.36)
-		draw_string_outline(font, pos, val, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, fs, 6, Color(0, 0, 0, 0.9))
+		draw_string_outline(font, pos, val, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, fs, 6, Color(0, 0, 0, 0.92))
 		draw_string(font, pos, val, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, fs, Color.WHITE)
 
-	func _caption(pos: Vector2, w: float, txt: String, col: Color, align: int = HORIZONTAL_ALIGNMENT_CENTER) -> void:
-		var font: Font = ThemeDB.fallback_font
-		draw_string_outline(font, pos, txt, align, w, 12, 4, Color(0, 0, 0, 0.9))
-		draw_string(font, pos, txt, align, w, 12, col.lightened(0.55) if usable else Color(0.6, 0.62, 0.68))
-
 	## Étiquette arrondie ; retourne l'abscisse de fin.
-	func _pill(x: float, y: float, txt: String, col: Color) -> float:
+	func _chip(x: float, y: float, txt: String, col: Color) -> float:
 		var font: Font = ThemeDB.fallback_font
-		var w: float = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 12.0
-		var rc := Rect2(x, y - 14.0, w, 18.0)
-		draw_rect(rc, Color(0.02, 0.03, 0.08, 0.92))
-		draw_rect(Rect2(rc.position, Vector2(3.0, rc.size.y)), col if usable else Color(0.4, 0.42, 0.48))
-		draw_string(font, rc.position + Vector2(8, 13), txt, HORIZONTAL_ALIGNMENT_LEFT, w, 13, col.lightened(0.5) if usable else Color(0.62, 0.64, 0.7))
+		var w: float = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 12.0
+		var rc := Rect2(x, y - 13.0, w, 17.0)
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.02, 0.03, 0.08, 0.9)
+		sb.border_color = col if usable else Color(0.4, 0.42, 0.48)
+		sb.set_border_width_all(1)
+		sb.set_corner_radius_all(8)
+		draw_style_box(sb, rc)
+		draw_string(font, rc.position + Vector2(6, 13), txt, HORIZONTAL_ALIGNMENT_LEFT, w, 12, col.lightened(0.5) if usable else Color(0.62, 0.64, 0.7))
 		return x + w + 4.0
+
+	## Icône de l'élément dans le médaillon.
+	func _icon(c: Vector2, elem: String, kind: String) -> void:
+		var ink := Color(1.0, 0.97, 0.88) if usable else Color(0.7, 0.72, 0.78)
+		match elem:
+			"fire":
+				draw_colored_polygon(PackedVector2Array([c + Vector2(0, -15), c + Vector2(9, -2), c + Vector2(10, 7), c + Vector2(0, 14), c + Vector2(-10, 7), c + Vector2(-8, -3), c + Vector2(-2, -6)]), Color(1.0, 0.62, 0.18) if usable else ink)
+				draw_colored_polygon(PackedVector2Array([c + Vector2(0, -3), c + Vector2(5, 4), c + Vector2(0, 11), c + Vector2(-5, 5)]), Color(1.0, 0.95, 0.5) if usable else ink.lightened(0.1))
+			"ice":
+				for i: int in range(3):
+					var a: float = float(i) * PI / 3.0
+					draw_line(c - Vector2(cos(a), sin(a)) * 13.0, c + Vector2(cos(a), sin(a)) * 13.0, Color(0.85, 0.97, 1.0) if usable else ink, 2.6, true)
+				draw_circle(c, 3.2, Color.WHITE)
+			"lightning":
+				draw_colored_polygon(PackedVector2Array([c + Vector2(3, -15), c + Vector2(-8, 2), c + Vector2(-1, 2), c + Vector2(-4, 15), c + Vector2(9, -3), c + Vector2(2, -3)]), Color(1.0, 0.95, 0.45) if usable else ink)
+			"poison":
+				draw_colored_polygon(PackedVector2Array([c + Vector2(0, -14), c + Vector2(9, 3), c + Vector2(0, 14), c + Vector2(-9, 3)]), Color(0.62, 0.92, 0.34) if usable else ink)
+				draw_circle(c + Vector2(-2, 3), 2.6, Color(0.18, 0.3, 0.1))
+				draw_circle(c + Vector2(3, 5), 1.8, Color(0.18, 0.3, 0.1))
+			"shadow":
+				draw_circle(c, 12.0, Color(0.82, 0.7, 1.0) if usable else ink)
+				draw_circle(c + Vector2(6, -3), 10.0, base_col.darkened(0.55))
+			"holy":
+				if kind == "heal":
+					draw_rect(Rect2(c.x - 3.5, c.y - 13, 7, 26), Color(0.92, 1.0, 0.86))
+					draw_rect(Rect2(c.x - 13, c.y - 3.5, 26, 7), Color(0.92, 1.0, 0.86))
+				else:
+					draw_circle(c, 7.0, Color(1.0, 0.95, 0.55) if usable else ink)
+					for i: int in range(8):
+						var a2: float = float(i) * TAU / 8.0
+						draw_line(c + Vector2(cos(a2), sin(a2)) * 10.0, c + Vector2(cos(a2), sin(a2)) * 15.0, Color(1.0, 0.95, 0.55) if usable else ink, 2.2, true)
+			"nature":
+				draw_colored_polygon(PackedVector2Array([c + Vector2(-12, 10), c + Vector2(-8, -6), c + Vector2(4, -14), c + Vector2(12, -12), c + Vector2(10, 2), c + Vector2(0, 11)]), Color(0.6, 0.92, 0.4) if usable else ink)
+				draw_line(c + Vector2(-11, 11), c + Vector2(8, -9), Color(0.16, 0.38, 0.14), 1.8, true)
+			"earth":
+				draw_colored_polygon(PackedVector2Array([c + Vector2(-13, 11), c + Vector2(-9, -3), c + Vector2(-2, -12), c + Vector2(8, -8), c + Vector2(13, 11)]), Color(0.78, 0.6, 0.38) if usable else ink)
+				draw_colored_polygon(PackedVector2Array([c + Vector2(-9, -3), c + Vector2(-2, -12), c + Vector2(1, 11), c + Vector2(-13, 11)]), Color(0.92, 0.76, 0.52) if usable else ink.lightened(0.1))
+			"water":
+				draw_colored_polygon(PackedVector2Array([c + Vector2(0, -14), c + Vector2(9, 2), c + Vector2(6, 11), c + Vector2(-6, 11), c + Vector2(-9, 2)]), Color(0.45, 0.8, 1.0) if usable else ink)
+				draw_circle(c + Vector2(-3, 2), 2.4, Color(1, 1, 1, 0.8))
+			"arcane":
+				draw_colored_polygon(PackedVector2Array([c + Vector2(0, -15), c + Vector2(4, -4), c + Vector2(15, 0), c + Vector2(4, 4), c + Vector2(0, 15), c + Vector2(-4, 4), c + Vector2(-15, 0), c + Vector2(-4, -4)]), Color(0.78, 0.7, 1.0) if usable else ink)
+			_:
+				draw_line(c + Vector2(-10, 10), c + Vector2(8, -12), Color(0.92, 0.94, 1.0) if usable else ink, 3.4, true)
+				draw_line(c + Vector2(-6, 2), c + Vector2(-13, -3), Color(0.78, 0.6, 0.35) if usable else ink, 3.0, true)
+				draw_line(c + Vector2(10, 10), c + Vector2(-8, -12), Color(0.82, 0.86, 0.95) if usable else ink, 2.4, true)
 
 	func _draw() -> void:
 		var font: Font = ThemeDB.fallback_font
 		var p: Dictionary = Combat.parse(spell)
-		var muted: Color = Color(0.42, 0.45, 0.52) if not usable else Color.WHITE
-		# Sur mobile, tout le contenu est dessiné dans un repère logique 166×92
-		# puis agrandi par cette transformation : même code, cible tactile plus grande.
+		var kind: String = String(p["kind"])
+		if _elem == "":
+			_elem = SpellFx.element_for(String(spell.get("name", "")), String(p.get("dtype", "phys")), kind)
 		var s: float = card_scale
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2(s, s))
 		var lw: float = size.x / s
 		var lh: float = size.y / s
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2(s, s))
-		# Petites pastilles PA / PM, lisibles sans prendre trop de place.
-		_orb(Vector2(22, 22), 16.0, str(int(spell.get("cost_pa", 0))), Color(0.16, 0.50, 0.95))
-		_caption(Vector2(3, 44), 38.0, "PA", Color(0.4, 0.7, 1.0))
+		var accent: Color = base_col if usable else Color(0.40, 0.43, 0.50)
+		var ecol: Color = SpellFx.colors(_elem)[0] if usable else Color(0.4, 0.43, 0.5)
+		# Reflet haut + liseré de couleur à gauche
+		draw_rect(Rect2(8, 3, lw - 16, 4), Color(1, 1, 1, 0.07 if usable else 0.03))
+		draw_rect(Rect2(3, 14, 3, lh - 28), accent)
+		# Médaillon d'élément
+		var mc := Vector2(36, 50)
+		draw_circle(mc + Vector2(0, 2.5), 28.0, Color(0, 0, 0, 0.5))
+		draw_circle(mc, 27.0, Color(0.02, 0.03, 0.07))
+		draw_circle(mc, 24.5, ecol.darkened(0.55))
+		draw_circle(mc + Vector2(0, -2), 21.0, ecol.darkened(0.32))
+		draw_arc(mc, 25.5, 0.0, TAU, 40, ecol.lightened(0.15) if usable else ecol, 2.0, true)
+		draw_circle(mc + Vector2(-8, -10), 7.0, Color(1, 1, 1, 0.14))
+		_icon(mc, _elem, kind)
+		# Nom (jusqu'à 2 lignes)
+		var nm: String = String(spell.get("name", "Sort"))
+		var lines: PackedStringArray = _wrap(nm, 13)
+		var fs: int = 15 if nm.length() <= 18 else 13
+		var ny: float = 48.0 if lines.size() == 1 else 40.0
+		var tx: float = 64.0
+		var tw: float = lw - tx - 8.0
+		for i: int in range(lines.size()):
+			var pos := Vector2(tx, ny + float(i) * 17.0)
+			draw_string_outline(font, pos, lines[i], HORIZONTAL_ALIGNMENT_LEFT, tw, fs, 5, Color(0, 0, 0, 0.92))
+			draw_string(font, pos, lines[i], HORIZONTAL_ALIGNMENT_LEFT, tw, fs, Color.WHITE if usable else Color(0.62, 0.64, 0.7))
+		# Rangée du bas : puces
+		var x: float = tx
+		var yb: float = lh - 10.0
+		var slvl: int = int(spell.get("spell_level", 1))
+		if slvl > 1:
+			x = _chip(x, yb, "★%d" % slvl, Color(1.0, 0.76, 0.2))
+		var zone_txt: String = ""
+		match String(p["aoe"]):
+			"zone":
+				zone_txt = "Zone %d" % int(p["zone_r"])
+			"adjacent_enemies":
+				zone_txt = "Autour"
+			"team":
+				zone_txt = "Équipe"
+		if zone_txt != "" and x < lw - 100.0:
+			x = _chip(x, yb, zone_txt, Color(1.0, 0.62, 0.3))
+		if gm != null and not gm.active_entity.is_empty():
+			var left: int = gm.casts_left(gm.active_entity, spell)
+			if left >= 0 and left < Combat.max_casts(spell) and x < lw - 90.0:
+				x = _chip(x, yb, "×%d" % left, Color(0.9, 0.9, 0.5))
+		# Gemmes PA / PM (coins hauts) — la gemme passe en rouge quand le sort n'est pas payable
+		var pa_col: Color = Color(0.16, 0.5, 0.95)
+		if not usable and gm != null and not gm.active_entity.is_empty() and not gm.can_afford(gm.active_entity, spell):
+			pa_col = Color(0.85, 0.25, 0.22)
+		_gem(Vector2(17, 17), 14.0, str(int(spell.get("cost_pa", 0))), pa_col)
 		if int(spell.get("cost_pm", 0)) > 0:
-			_orb(Vector2(lw - 22, 22), 16.0, str(int(spell["cost_pm"])), Color(0.14, 0.64, 0.32))
-			_caption(Vector2(lw - 40, 44), 36.0, "PM", Color(0.45, 1.0, 0.58))
-		# Motif central propre à la famille de sort (pas d'icône externe requise).
-		var icon_col: Color = base_col if usable else Color(0.34, 0.36, 0.41)
-		var center := Vector2(lw * 0.5, 38.0)
-		draw_circle(center + Vector2(0, 2), 23.0, Color(0, 0, 0, 0.45))
-		draw_circle(center, 22.0, Color(0.025, 0.04, 0.08, 0.98))
-		draw_circle(center, 18.0, icon_col.darkened(0.25))
-		draw_circle(center + Vector2(-4, -5), 7.0, icon_col.lightened(0.35))
-		match String(p["kind"]):
-			"heal":
-				draw_rect(Rect2(center.x - 3, center.y - 11, 6, 22), Color(0.92, 1.0, 0.86))
-				draw_rect(Rect2(center.x - 11, center.y - 3, 22, 6), Color(0.92, 1.0, 0.86))
-			"buff", "summon", "teleport", "revive", "trap":
-				draw_arc(center, 10.0, 0.0, TAU, 32, Color(0.85, 0.93, 1.0), 2.5, true)
-				draw_circle(center, 3.5, Color(0.95, 0.98, 1.0))
-			_:
-				draw_line(center + Vector2(-9, 7), center + Vector2(4, -10), Color(1.0, 0.94, 0.75), 3.0, true)
-				draw_line(center + Vector2(1, -2), center + Vector2(10, -6), Color(1.0, 0.94, 0.75), 2.0, true)
-		# Nom compact en deux lignes si nécessaire.
-		var spell_name: String = String(spell.get("name", "Sort"))
-		var name_size: int = 14 if spell_name.length() <= 12 else 12
-		var name_y: float = lh - 23.0
-		var name_text: String = spell_name
-		if name_text.length() > 18:
-			name_text = name_text.substr(0, 16) + "…"
-		draw_string_outline(font, Vector2(4, name_y), name_text, HORIZONTAL_ALIGNMENT_CENTER, lw - 8, name_size, 3, Color(0, 0, 0, 0.95))
-		draw_string(font, Vector2(4, name_y), name_text, HORIZONTAL_ALIGNMENT_CENTER, lw - 8, name_size, muted)
-		# Portée et touche dans la bande inférieure.
+			_gem(Vector2(lw - 17, 17), 14.0, str(int(spell["cost_pm"])), Color(0.14, 0.64, 0.32))
+		# Portée (bas droite) : pastille dorée + légende
 		var rng: int = int(spell.get("range", 1))
+		var rtxt: String = str(rng) if rng < 99 else "∞"
+		var cap: String = "Portée"
 		if String(p["target"]) == "self":
-			rng = 0
-		var range_text: String = "PO %s" % (str(rng) if rng < 99 else "∞")
-		var range_w: float = font.get_string_size(range_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
-		draw_string_outline(font, Vector2(lw - range_w - 5.0, lh - 7.0), range_text, HORIZONTAL_ALIGNMENT_LEFT, range_w + 2.0, 11, 3, Color(0, 0, 0, 0.95))
-		draw_string(font, Vector2(lw - range_w - 5.0, lh - 7.0), range_text, HORIZONTAL_ALIGNMENT_LEFT, range_w + 2.0, 11, Color(1.0, 0.83, 0.35) if usable else muted)
+			rtxt = "0"
+			cap = "Sur soi"
+		var rc := Vector2(lw - 19, lh - 20)
+		draw_circle(rc + Vector2(0, 2), 15.0, Color(0, 0, 0, 0.5))
+		draw_circle(rc, 15.0, Color(0.02, 0.03, 0.07))
+		draw_circle(rc, 13.0, (Color(0.62, 0.46, 0.08) if usable else Color(0.3, 0.32, 0.38)))
+		draw_circle(rc + Vector2(0, -1.5), 11.2, (Color(0.92, 0.7, 0.18) if usable else Color(0.42, 0.44, 0.5)))
+		draw_circle(rc + Vector2(-4, -6), 3.6, Color(1, 1, 1, 0.3))
+		draw_string_outline(font, Vector2(rc.x - 13, rc.y + 7), rtxt, HORIZONTAL_ALIGNMENT_CENTER, 26.0, 19, 5, Color(0, 0, 0, 0.92))
+		draw_string(font, Vector2(rc.x - 13, rc.y + 7), rtxt, HORIZONTAL_ALIGNMENT_CENTER, 26.0, 19, Color.WHITE)
+		draw_string_outline(font, Vector2(lw - 76, lh - 8), cap, HORIZONTAL_ALIGNMENT_RIGHT, 40.0, 10, 4, Color(0, 0, 0, 0.9))
+		draw_string(font, Vector2(lw - 76, lh - 8), cap, HORIZONTAL_ALIGNMENT_RIGHT, 40.0, 10, Color(1.0, 0.86, 0.4) if usable else Color(0.6, 0.62, 0.68))
+		# Touche
 		if hotkey > 0:
-			draw_circle(Vector2(lw * 0.5, 17.0), 9.0, Color(0.05, 0.07, 0.12, 0.95))
-			draw_string(font, Vector2(lw * 0.5 - 5.0, 21.0), str(hotkey % 10), HORIZONTAL_ALIGNMENT_CENTER, 10.0, 11, Color(1.0, 0.92, 0.55))
+			var hb := Rect2(6, lh - 22, 17, 17)
+			var sb := StyleBoxFlat.new()
+			sb.bg_color = Color(0.02, 0.03, 0.08, 0.92)
+			sb.set_corner_radius_all(4)
+			sb.border_color = Color(1.0, 0.9, 0.45, 0.8)
+			sb.set_border_width_all(1)
+			draw_style_box(sb, hb)
+			draw_string(font, hb.position + Vector2(0, 13), str(hotkey % 10), HORIZONTAL_ALIGNMENT_CENTER, 17.0, 12, Color(1.0, 0.92, 0.55))
+		# Sélection : halo doré + coins
 		if selected:
-			draw_arc(Rect2(Vector2(3, 3), Vector2(lw - 6.0, lh - 6.0)).get_center(), minf(lw, lh) * 0.47, 0.0, TAU, 48, Color(1.0, 0.86, 0.25), 2.5, true)
+			var glow := StyleBoxFlat.new()
+			glow.bg_color = Color(1.0, 0.85, 0.3, 0.10)
+			glow.border_color = Color(1.0, 0.86, 0.3, 0.95)
+			glow.set_border_width_all(2)
+			glow.set_corner_radius_all(14)
+			draw_style_box(glow, Rect2(1, 1, lw - 2, lh - 2))
+		# Indisponible : voile sombre
+		if not usable:
+			var veil := StyleBoxFlat.new()
+			veil.bg_color = Color(0.02, 0.03, 0.06, 0.34)
+			veil.set_corner_radius_all(14)
+			draw_style_box(veil, Rect2(0, 0, lw, lh))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+	## Coupe un nom en 2 lignes max (au plus proche du milieu).
+	func _wrap(t: String, max_chars: int) -> PackedStringArray:
+		if t.length() <= max_chars or not t.contains(" "):
+			return PackedStringArray([t])
+		var words: PackedStringArray = t.split(" ")
+		var best_i: int = 1
+		var best_diff: int = 999
+		for i: int in range(1, words.size()):
+			var l1: int = " ".join(words.slice(0, i)).length()
+			var l2: int = " ".join(words.slice(i)).length()
+			if absi(l1 - l2) < best_diff:
+				best_diff = absi(l1 - l2)
+				best_i = i
+		return PackedStringArray([" ".join(words.slice(0, best_i)), " ".join(words.slice(best_i))])
 
 
 func _flat(bg: Color, border: Color, radius: int = 14, bw: int = 3) -> StyleBoxFlat:
@@ -265,61 +386,158 @@ class TimelineView extends Control:
 
 
 class StatsView extends Control:
+	## Vignette du personnage actif (refonte V5) : grand portrait encadré, nom + classe,
+	## barre de PV épaisse (graduations, couleur selon l'état), effets en cours avec durée,
+	## gemmes hexagonales PA / PM et bandeau de tour.
 	var gm: Node = null
 
 	func _process(_d: float) -> void:
 		queue_redraw()
 
-	func _orb(c: Vector2, r: float, dark: Color, light: Color, text: String, label: String) -> void:
+	static func _hex(c: Vector2, r: float) -> PackedVector2Array:
+		var pts := PackedVector2Array()
+		for i: int in range(6):
+			var a: float = PI / 6.0 + float(i) * TAU / 6.0
+			pts.append(c + Vector2(cos(a), sin(a)) * r)
+		return pts
+
+	func _gem(c: Vector2, r: float, dark: Color, light: Color, text: String) -> void:
 		var font: Font = ThemeDB.fallback_font
-		draw_circle(c, r + 3.0, Color(0.02, 0.04, 0.09, 0.95))
-		draw_circle(c, r, dark)
-		draw_circle(c + Vector2(0, -r * 0.16), r * 0.78, light)
-		draw_circle(c + Vector2(-r * 0.25, -r * 0.35), r * 0.25, Color(1, 1, 1, 0.32))
-		var fs: int = 27 if r < 25.0 else 30
-		draw_string_outline(font, c + Vector2(-r, 9.0), text, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, fs, 5, Color(0, 0, 0, 0.9))
-		draw_string(font, c + Vector2(-r, 9.0), text, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, fs, Color.WHITE)
-		draw_string(font, c + Vector2(-r, r + 16.0), label, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, 12, Color(0.85, 0.92, 1.0))
+		draw_colored_polygon(_hex(c + Vector2(0, 3), r + 3.0), Color(0, 0, 0, 0.5))
+		draw_colored_polygon(_hex(c, r + 3.0), Color(0.02, 0.03, 0.07))
+		draw_colored_polygon(_hex(c, r), dark)
+		draw_colored_polygon(_hex(c + Vector2(0, -2), r * 0.82), light)
+		draw_colored_polygon(PackedVector2Array([c + Vector2(-r * 0.62, -r * 0.2), c + Vector2(-r * 0.2, -r * 0.8), c + Vector2(r * 0.3, -r * 0.8), c + Vector2(-r * 0.1, -r * 0.25)]), Color(1, 1, 1, 0.22))
+		var fs: int = 28 if text.length() <= 1 else 23
+		draw_string_outline(font, c + Vector2(-r, float(fs) * 0.36), text, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, fs, 6, Color(0, 0, 0, 0.92))
+		draw_string(font, c + Vector2(-r, float(fs) * 0.36), text, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, fs, Color.WHITE)
 
 	func _draw() -> void:
 		if gm == null or gm.active_entity.is_empty():
 			return
 		var e: Dictionary = gm.active_entity
 		var font: Font = ThemeDB.fallback_font
-		var team_col: Color = Color(0.36, 0.52, 0.85) if e["team"] == "player" else Color(0.85, 0.3, 0.28)
+		var is_player: bool = e["team"] == "player"
+		var team_col: Color = Color(0.36, 0.52, 0.85) if is_player else Color(0.85, 0.3, 0.28)
+		# Cadre
 		var bg := StyleBoxFlat.new()
-		bg.bg_color = Color(0.055, 0.075, 0.13, 0.94)
-		bg.border_color = team_col.lightened(0.15)
+		bg.bg_color = Color(0.05, 0.07, 0.12, 0.93)
+		bg.border_color = team_col.lightened(0.1)
 		bg.set_border_width_all(2)
-		bg.set_corner_radius_all(17)
-		bg.shadow_color = Color(0, 0, 0, 0.52)
-		bg.shadow_size = 7
+		bg.set_corner_radius_all(20)
+		bg.shadow_color = Color(0, 0, 0, 0.55)
+		bg.shadow_size = 8
 		draw_style_box(bg, Rect2(Vector2.ZERO, size))
-		var pr := Rect2(10, 13, 78, 78)
+		var tint := StyleBoxFlat.new()
+		tint.bg_color = Color(team_col.r, team_col.g, team_col.b, 0.13)
+		tint.set_corner_radius_all(18)
+		draw_style_box(tint, Rect2(3, 3, size.x - 6, 46))
+		# Portrait
+		var pr := Rect2(12, 14, 100, 100)
+		var halo := StyleBoxFlat.new()
+		halo.bg_color = Color(team_col.r, team_col.g, team_col.b, 0.35)
+		halo.set_corner_radius_all(20)
+		halo.shadow_color = Color(team_col.r, team_col.g, team_col.b, 0.45)
+		halo.shadow_size = 10
+		draw_style_box(halo, pr.grow(2.0))
 		var pbg := StyleBoxFlat.new()
-		pbg.bg_color = team_col.darkened(0.55)
+		pbg.bg_color = team_col.darkened(0.6)
 		pbg.border_color = Color(1, 0.84, 0.3)
 		pbg.set_border_width_all(3)
-		pbg.set_corner_radius_all(12)
+		pbg.set_corner_radius_all(16)
 		draw_style_box(pbg, pr)
 		var tex: Texture2D = Portraits.get_texture(e)
 		if tex != null:
-			draw_texture_rect_region(tex, pr.grow(-4.0), Portraits.head_region(tex))
+			draw_texture_rect_region(tex, pr.grow(-5.0), Portraits.head_region(tex))
 		else:
-			draw_circle(pr.get_center(), 27.0, e.get("color", Color(0.6, 0.6, 0.6)))
-		draw_string_outline(font, Vector2(101, 29), String(e["name"]), HORIZONTAL_ALIGNMENT_LEFT, 250, 20, 4, Color(0, 0, 0, 0.9))
-		draw_string(font, Vector2(101, 29), String(e["name"]), HORIZONTAL_ALIGNMENT_LEFT, 250, 20, Color(1, 0.95, 0.8))
-		var hb := Rect2(101, 38, size.x - 116.0, 17)
-		draw_rect(hb.grow(2.0), Color(0, 0, 0, 0.9))
+			draw_circle(pr.get_center(), 32.0, e.get("color", Color(0.6, 0.6, 0.6)))
+		# Badge de niveau (coin bas-droit du portrait)
+		var lvl: int = int(e.get("level", 1))
+		var bc := Vector2(pr.end.x - 6.0, pr.end.y - 6.0)
+		draw_circle(bc + Vector2(0, 2), 17.0, Color(0, 0, 0, 0.5))
+		draw_circle(bc, 17.0, Color(0.02, 0.03, 0.07))
+		draw_circle(bc, 14.5, Color(0.95, 0.72, 0.18))
+		draw_circle(bc + Vector2(0, -1.5), 12.0, Color(1.0, 0.86, 0.38))
+		draw_string(font, bc + Vector2(-15, 6), str(lvl), HORIZONTAL_ALIGNMENT_CENTER, 30.0, 17, Color(0.25, 0.14, 0.02))
+		# Nom et classe
+		var full: String = String(e["name"])
+		var short: String = full.split(" Lv")[0]
+		var sub: String = "Invocation" if e.get("entity_type", "") == "Summon" else String(e.get("classe", ""))
+		draw_string_outline(font, Vector2(128, 36), short, HORIZONTAL_ALIGNMENT_LEFT, size.x - 140.0, 24, 5, Color(0, 0, 0, 0.92))
+		draw_string(font, Vector2(128, 36), short, HORIZONTAL_ALIGNMENT_LEFT, size.x - 140.0, 24, Color(1, 0.95, 0.8))
+		draw_string(font, Vector2(128, 56), "%s · niveau %d" % [sub, lvl], HORIZONTAL_ALIGNMENT_LEFT, size.x - 140.0, 14, Color(0.7, 0.78, 0.92))
+		# Barre de PV
+		var hb := Rect2(128, 66, size.x - 144.0, 26)
+		var hpf: StyleBoxFlat = StyleBoxFlat.new()
+		hpf.bg_color = Color(0.02, 0.03, 0.06, 0.95)
+		hpf.border_color = Color(0.5, 0.6, 0.78, 0.9)
+		hpf.set_border_width_all(2)
+		hpf.set_corner_radius_all(9)
+		draw_style_box(hpf, hb.grow(2.0))
 		var ratio: float = clampf(float(e["current_pv"]) / maxf(1.0, float(e["max_pv"])), 0.0, 1.0)
-		draw_rect(Rect2(hb.position, Vector2(hb.size.x * ratio, hb.size.y)), Color(0.3, 0.85, 0.35) if e["team"] == "player" else Color(0.9, 0.28, 0.25))
-		draw_string_outline(font, hb.position + Vector2(0, 13), "%d / %d PV" % [int(e["current_pv"]), int(e["max_pv"])], HORIZONTAL_ALIGNMENT_CENTER, hb.size.x, 12, 3, Color(0, 0, 0, 0.9))
-		draw_string(font, hb.position + Vector2(0, 13), "%d / %d PV" % [int(e["current_pv"]), int(e["max_pv"])], HORIZONTAL_ALIGNMENT_CENTER, hb.size.x, 12, Color.WHITE)
-		_orb(Vector2(130, 94), 20.0, Color(0.05, 0.25, 0.65), Color(0.2, 0.62, 1.0), "%d" % int(e["current_pa"]), "PA")
-		_orb(Vector2(190, 94), 20.0, Color(0.05, 0.4, 0.15), Color(0.25, 0.8, 0.35), "%d" % int(e["current_pm"]), "PM")
-		draw_string(font, Vector2(232, 91), "TOUR %d" % int(gm.turn_count), HORIZONTAL_ALIGNMENT_LEFT, 100, 15, Color(0.8, 0.88, 1.0))
-		var rest: String = "À vous" if gm.current_turn == 0 else ("Auto…" if gm.auto_mode else "Adverse")
-		draw_string(font, Vector2(232, 111), rest, HORIZONTAL_ALIGNMENT_LEFT, 100, 13, Color(1, 0.85, 0.4) if gm.current_turn == 0 else Color(1, 0.55, 0.5))
+		var fill_col: Color
+		if not is_player:
+			fill_col = Color(0.9, 0.28, 0.25)
+		elif ratio > 0.5:
+			fill_col = Color(0.30, 0.86, 0.36)
+		elif ratio > 0.25:
+			fill_col = Color(0.95, 0.74, 0.2)
+		else:
+			fill_col = Color(0.92, 0.28, 0.24)
+		var fw: float = hb.size.x * ratio
+		if fw > 1.0:
+			var fl := StyleBoxFlat.new()
+			fl.bg_color = fill_col.darkened(0.2)
+			fl.set_corner_radius_all(7)
+			draw_style_box(fl, Rect2(hb.position, Vector2(fw, hb.size.y)))
+			var hi := StyleBoxFlat.new()
+			hi.bg_color = fill_col.lightened(0.25)
+			hi.set_corner_radius_all(6)
+			draw_style_box(hi, Rect2(hb.position + Vector2(2, 2), Vector2(maxf(0.0, fw - 4.0), hb.size.y * 0.42)))
+		for q: int in range(1, 4):
+			var qx: float = hb.position.x + hb.size.x * float(q) * 0.25
+			draw_line(Vector2(qx, hb.position.y + 3), Vector2(qx, hb.end.y - 3), Color(0, 0, 0, 0.35), 1.5)
+		var hp_txt: String = "%d / %d" % [int(e["current_pv"]), int(e["max_pv"])]
+		draw_string_outline(font, hb.position + Vector2(0, 19), hp_txt, HORIZONTAL_ALIGNMENT_CENTER, hb.size.x, 16, 4, Color(0, 0, 0, 0.92))
+		draw_string(font, hb.position + Vector2(0, 19), hp_txt, HORIZONTAL_ALIGNMENT_CENTER, hb.size.x, 16, Color.WHITE)
+		# Effets en cours
+		var cx: float = 128.0
+		var shown: int = 0
+		for st: Dictionary in e.get("statuses", []):
+			if shown >= 5:
+				break
+			var info: Dictionary = Combat.status_info(String(st["id"]))
+			var label: String = "%s %d" % [String(info["label"]), int(st["turns"])]
+			var cw: float = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 14.0
+			var ccol: Color = info["color"]
+			var chip := StyleBoxFlat.new()
+			chip.bg_color = Color(ccol.r * 0.3, ccol.g * 0.3, ccol.b * 0.3, 0.95)
+			chip.border_color = ccol
+			chip.set_border_width_all(1)
+			chip.set_corner_radius_all(9)
+			draw_style_box(chip, Rect2(cx, 100, cw, 19))
+			draw_string(font, Vector2(cx + 7, 114), label, HORIZONTAL_ALIGNMENT_LEFT, cw, 12, ccol.lightened(0.5))
+			cx += cw + 4.0
+			shown += 1
+		# Gemmes PA / PM + bandeau de tour
+		_gem(Vector2(150, 142), 21.0, Color(0.05, 0.25, 0.65), Color(0.2, 0.62, 1.0), "%d" % int(e["current_pa"]))
+		draw_string_outline(font, Vector2(176, 138), "PA", HORIZONTAL_ALIGNMENT_LEFT, 30.0, 14, 4, Color(0, 0, 0, 0.9))
+		draw_string(font, Vector2(176, 138), "PA", HORIZONTAL_ALIGNMENT_LEFT, 30.0, 14, Color(0.6, 0.8, 1.0))
+		_gem(Vector2(236, 142), 21.0, Color(0.05, 0.4, 0.15), Color(0.25, 0.8, 0.35), "%d" % int(e["current_pm"]))
+		draw_string_outline(font, Vector2(262, 138), "PM", HORIZONTAL_ALIGNMENT_LEFT, 30.0, 14, 4, Color(0, 0, 0, 0.9))
+		draw_string(font, Vector2(262, 138), "PM", HORIZONTAL_ALIGNMENT_LEFT, 30.0, 14, Color(0.6, 1.0, 0.7))
+		var mine: bool = gm.current_turn == 0
+		var rest: String = "À vous" if mine else ("Auto…" if gm.auto_mode else "Adverse")
+		var turn_box := StyleBoxFlat.new()
+		turn_box.bg_color = Color(1, 0.8, 0.2, 0.16) if mine else Color(0.9, 0.3, 0.25, 0.16)
+		turn_box.border_color = Color(1, 0.85, 0.4) if mine else Color(1, 0.55, 0.5)
+		turn_box.set_border_width_all(1)
+		turn_box.set_corner_radius_all(12)
+		draw_style_box(turn_box, Rect2(size.x - 128, 126, 116, 32))
+		draw_string(font, Vector2(size.x - 128, 139), "TOUR %d" % int(gm.turn_count), HORIZONTAL_ALIGNMENT_CENTER, 116.0, 13, Color(0.85, 0.9, 1.0))
+		draw_string(font, Vector2(size.x - 128, 153), rest, HORIZONTAL_ALIGNMENT_CENTER, 116.0, 13, Color(1, 0.88, 0.45) if mine else Color(1, 0.6, 0.55))
+		# Aide : pour les effets, un nom de classe sur la ligne du bas si l'entité n'a rien
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  Construction
@@ -410,14 +628,14 @@ func _build_ui() -> void:
 	st.anchor_top = 1.0
 	st.anchor_bottom = 1.0
 	st.offset_left = 18.0
-	st.offset_right = 368.0
-	st.offset_top = -148.0
+	st.offset_right = 458.0
+	st.offset_top = -184.0
 	st.offset_bottom = -14.0
 	_root.add_child(st)
 	_stats = st
 
 	# Barre de sorts — la colonne s'élargit sur mobile (cartes agrandies).
-	var col_w: float = 190.0 * _spell_scale
+	var col_w: float = 208.0 * _spell_scale
 	_spell_scroll = ScrollContainer.new()
 	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
@@ -428,7 +646,7 @@ func _build_ui() -> void:
 	_spell_scroll.offset_left = 12.0
 	_spell_scroll.offset_right = 12.0 + col_w
 	_spell_scroll.offset_top = 132.0
-	_spell_scroll.offset_bottom = -166.0
+	_spell_scroll.offset_bottom = -202.0
 	_spell_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
 	var spell_panel := PanelContainer.new()
 	spell_panel.anchor_left = 0.0
@@ -438,9 +656,9 @@ func _build_ui() -> void:
 	spell_panel.offset_left = 8.0
 	spell_panel.offset_right = 8.0 + col_w + 4.0
 	spell_panel.offset_top = 124.0
-	spell_panel.offset_bottom = -158.0
+	spell_panel.offset_bottom = -194.0
 	spell_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	spell_panel.add_theme_stylebox_override("panel", _flat(Color(0.035, 0.055, 0.09, 0.78), Color(0.35, 0.48, 0.65, 0.75), 18, 2))
+	spell_panel.add_theme_stylebox_override("panel", _flat(Color(0.03, 0.05, 0.09, 0.22), Color(0.35, 0.48, 0.65, 0.22), 20, 1))
 	_root.add_child(spell_panel)
 	_root.add_child(_spell_scroll)
 	_spell_box = VBoxContainer.new()
@@ -454,7 +672,7 @@ func _build_ui() -> void:
 	_tip_panel.anchor_right = 0.0
 	_tip_panel.anchor_top = 0.0
 	_tip_panel.anchor_bottom = 0.0
-	_tip_panel.offset_left = 24.0 + 190.0 * _spell_scale + 8.0
+	_tip_panel.offset_left = 24.0 + 208.0 * _spell_scale + 8.0
 	_tip_panel.offset_right = _tip_panel.offset_left + 420.0
 	_tip_panel.offset_top = 14.0
 	_tip_panel.offset_bottom = 150.0
@@ -521,7 +739,7 @@ func _build_ui() -> void:
 	# Journal de combat
 	_log_box = VBoxContainer.new()
 	_log_box.add_theme_constant_override("separation", 2)
-	_log_box.position = Vector2(276, 160)
+	_log_box.position = Vector2(300, 160)
 	_log_box.size = Vector2(560, 300)
 	_log_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_log_box)
@@ -672,7 +890,7 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.hotkey = idx if idx <= 10 else 0
 		card.base_col = _kind_color(spell)
 		card.card_scale = _spell_scale
-		card.custom_minimum_size = Vector2(166.0 * _spell_scale, 92.0 * _spell_scale)
+		card.custom_minimum_size = Vector2(188.0 * _spell_scale, 88.0 * _spell_scale)
 		card.text = ""
 		card.tooltip_text = String(spell["name"]) + " · " + str(int(spell.get("cost_pa", 0))) + " PA · Portée " + str(int(spell.get("range", 1)))
 		var nlen: int = String(spell["name"]).length()
@@ -691,27 +909,20 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 
 
 func _style_card(card: SpellCard, selected: bool) -> void:
-	# Fond sombre (texte blanc lisible) teinté de la couleur du type ; bordure du type, or si sélectionné
+	# Fond dégradé simulé (teinte du type en haut) ; la carte dessine elle-même ses détails.
 	var tint: Color = card.base_col if card.usable else Color(0.45, 0.46, 0.50)
-	var bg: Color = Color(0.08, 0.10, 0.16, 0.96).lerp(tint, 0.20 if card.usable else 0.06)
-	var border: Color = Color(1.0, 0.9, 0.3) if selected else tint.lightened(0.15)
-	var txt: Color = Color.WHITE if card.usable else Color(0.62, 0.64, 0.70)
-	for key: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_disabled_color"]:
-		card.add_theme_color_override(key, txt)
-	card.add_theme_stylebox_override("normal", _card_box(bg, border, 5 if selected else 2))
-	card.add_theme_stylebox_override("hover", _card_box(bg.lightened(0.10), Color(1, 1, 1, 0.9), 3))
-	card.add_theme_stylebox_override("pressed", _card_box(bg.darkened(0.2), Color(1, 0.9, 0.3), 5))
-	card.add_theme_stylebox_override("focus", _card_box(bg, border, 3))
+	var bg: Color = Color(0.07, 0.09, 0.15, 0.97).lerp(tint, 0.16 if card.usable else 0.05)
+	var border: Color = Color(1.0, 0.88, 0.32) if selected else tint.darkened(0.15)
+	card.add_theme_stylebox_override("normal", _card_box(bg, border, 3 if selected else 2))
+	card.add_theme_stylebox_override("hover", _card_box(bg.lightened(0.10), Color(1, 1, 1, 0.85), 3))
+	card.add_theme_stylebox_override("pressed", _card_box(bg.darkened(0.2), Color(1, 0.9, 0.3), 3))
+	card.add_theme_stylebox_override("focus", _card_box(bg, border, 2))
 	card.add_theme_stylebox_override("disabled", _card_box(bg.darkened(0.3), border, 2))
 
 
-## Fond de carte : marges internes pour que le nom reste entre les pastilles.
 func _card_box(bg: Color, border: Color, bw: int) -> StyleBoxFlat:
 	var sb: StyleBoxFlat = _flat(bg, border, 14, bw)
-	sb.content_margin_left = 4.0
-	sb.content_margin_right = 4.0
-	sb.content_margin_top = 4.0
-	sb.content_margin_bottom = 4.0
+	sb.shadow_size = 5
 	return sb
 
 

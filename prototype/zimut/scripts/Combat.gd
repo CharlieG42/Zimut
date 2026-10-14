@@ -632,10 +632,10 @@ static func summon_spells(sname: String) -> Array:
 	var sp: Array = info["spell"]
 	if sp.is_empty():
 		return []
-	var eff: String = String(sp[3])
+	var eff: String = ("%d dégâts" % int(sp[3])) if typeof(sp[3]) == TYPE_INT else str(sp[3])
 	var stype: String = "Attaque"
 	if eff.contains("restaure"):
 		stype = "Soin"
 	elif eff.begins_with("+"):
 		stype = "Buff"
-	return [_mk(String(sp[0]), int(sp[1]), int(sp[2]), eff, stype)]
+	return [_mk(str(sp[0]), int(sp[1]), int(sp[2]), eff, stype)]

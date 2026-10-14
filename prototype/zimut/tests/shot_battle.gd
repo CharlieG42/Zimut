@@ -15,8 +15,10 @@ func _boot() -> void:
 	var pm: Node = root.get_node("ProgressionManager")
 	var data: Dictionary = pm.new_game(4, "Shots")
 	pm.rebuild_team(data, ["Tank", "Mage", "Sylvain"])
-	if boss:
-		data["victories"] = int(args[3]) if args.size() > 3 else 3
+	if args.size() > 3:
+		data["victories"] = int(args[3])
+	elif boss:
+		data["victories"] = 3
 	for _i in range(6):
 		for it in pm._roll_loots(12, false):
 			data["inventory"].append(it)
