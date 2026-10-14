@@ -84,6 +84,12 @@ jobs:
             printf 'export/android/keystore_release_password="%s"\n' "$ANDROID_KEYSTORE_PASSWORD"
           } > "$cfg"
 
+      - name: Import project resources (icons, artwork)
+        run: |
+          cd prototype/zimut
+          godot --headless --import || true
+          test -d .godot/imported
+
       - name: Export Zimut APK (Debug)
         run: |
           cd prototype/zimut
