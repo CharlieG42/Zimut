@@ -279,50 +279,27 @@ class SpellCard extends Button:
 			draw_style_box(veil, Rect2(0, 0, lw, lh))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
-	## Badge compact (barre horizontale) : médaillon élément, nom court,
-	## gemme PA (PM si coût), pastille de portée. Les détails restent dans
-	## l'infobulle au survol, comme sur les grandes cartes.
+	## Badge minimaliste : icône propre au sort et coûts visibles uniquement.
+	## Le nom, la portée et les effets restent dans la description au survol.
 	func _draw_badge(font: Font, p: Dictionary, lw: float, lh: float) -> void:
 		var accent: Color = base_col if usable else Color(0.40, 0.43, 0.50)
 		var ecol: Color = SpellFx.colors(_elem)[0] if usable else Color(0.4, 0.43, 0.5)
-		# fond + liseré gauche
-		draw_rect(Rect2(6, 3, lw - 12, 3), Color(1, 1, 1, 0.07 if usable else 0.03))
-		draw_rect(Rect2(3, 10, 3, lh - 20), accent)
-		# médaillon élément (à gauche)
-		var mc := Vector2(30, lh * 0.5)
-		draw_circle(mc + Vector2(0, 2.5), 24.0, Color(0, 0, 0, 0.5))
-		draw_circle(mc, 23.0, Color(0.02, 0.03, 0.07))
-		draw_circle(mc, 20.5, ecol.darkened(0.55))
-		draw_circle(mc + Vector2(0, -2), 17.5, ecol.darkened(0.32))
-		draw_arc(mc, 21.5, 0.0, TAU, 40, ecol.lightened(0.15) if usable else ecol, 1.8, true)
-		_icon(mc, _elem, String(p["kind"]))
-		# Coûts clairement identifiés : PA en bleu en haut, PM en vert en bas.
-		# Le libellé explicite évite de demander au joueur de mémoriser les couleurs.
+		draw_rect(Rect2(4, 3, lw - 8, 3), Color(1, 1, 1, 0.07 if usable else 0.03))
+		draw_rect(Rect2(2, 8, 3, lh - 16), accent)
+		var mc := Vector2(24.0, lh * 0.5)
+		draw_circle(mc + Vector2(0, 2), 20.0, Color(0, 0, 0, 0.5))
+		draw_circle(mc, 19.0, Color(0.02, 0.03, 0.07))
+		draw_circle(mc, 16.8, ecol.darkened(0.55))
+		draw_circle(mc + Vector2(0, -1.5), 14.4, ecol.darkened(0.32))
+		draw_arc(mc, 17.5, 0.0, TAU, 36, ecol.lightened(0.15) if usable else ecol, 1.5, true)
+		_spell_badge_icon(mc, spell, p)
+		# PA bleu et PM vert : les gemmes numériques suffisent, les libellés sont retirés.
 		var pa_col: Color = Color(0.16, 0.5, 0.95)
 		if not usable and gm != null and not gm.active_entity.is_empty() and not gm.can_afford(gm.active_entity, spell):
 			pa_col = Color(0.85, 0.25, 0.22)
-		var cost_font: Font = ThemeDB.fallback_font
-		draw_string_outline(cost_font, Vector2(lw - 57.0, 14.0), "PA", HORIZONTAL_ALIGNMENT_RIGHT, 20.0, 10, 3, Color(0, 0, 0, 0.9))
-		draw_string(cost_font, Vector2(lw - 57.0, 14.0), "PA", HORIZONTAL_ALIGNMENT_RIGHT, 20.0, 10, Color(0.65, 0.82, 1.0) if usable else Color(0.58, 0.6, 0.65))
-		_gem(Vector2(lw - 20.0, 18.0), 13.0, str(int(spell.get("cost_pa", 0))), pa_col)
+		_gem(Vector2(lw - 15.0, 18.0), 11.0, str(int(spell.get("cost_pa", 0))), pa_col)
 		if int(spell.get("cost_pm", 0)) > 0:
-			draw_string_outline(cost_font, Vector2(lw - 57.0, lh - 10.0), "PM", HORIZONTAL_ALIGNMENT_RIGHT, 20.0, 10, 3, Color(0, 0, 0, 0.9))
-			draw_string(cost_font, Vector2(lw - 57.0, lh - 10.0), "PM", HORIZONTAL_ALIGNMENT_RIGHT, 20.0, 10, Color(0.58, 1.0, 0.68) if usable else Color(0.58, 0.6, 0.65))
-			_gem(Vector2(lw - 20.0, lh - 18.0), 13.0, str(int(spell.get("cost_pm", 0))), Color(0.25, 0.72, 0.4))
-		# nom compact (2 lignes max), avec une zone réservée aux coûts à droite
-		var nm: String = String(spell.get("name", "Sort"))
-		var lines: PackedStringArray = _wrap(nm, 12)
-		var fs: int = 13 if nm.length() <= 14 else 12
-		var tx: float = 58.0
-		var tw: float = lw - tx - 62.0
-		var ny: float = lh * 0.5 - 4.0 if lines.size() == 1 else lh * 0.5 - 13.0
-		for i: int in range(lines.size()):
-			var pos := Vector2(tx, ny + float(i) * 15.0)
-			draw_string_outline(font, pos, lines[i], HORIZONTAL_ALIGNMENT_LEFT, tw, fs, 4, Color(0, 0, 0, 0.92))
-			draw_string(font, pos, lines[i], HORIZONTAL_ALIGNMENT_LEFT, tw, fs, Color.WHITE if usable else Color(0.62, 0.64, 0.7))
-		# pastille de portée (bas-gauche du nom)
-		var rng_txt: String = "Sur soi" if String(p["target"]) == "self" else "P%d" % int(spell.get("range", 1))
-		draw_string(font, Vector2(tx, lh - 8.0), rng_txt, HORIZONTAL_ALIGNMENT_LEFT, tw, 11, Color(1.0, 0.86, 0.4) if usable else Color(0.55, 0.57, 0.62))
+			_gem(Vector2(lw - 15.0, lh - 18.0), 11.0, str(int(spell.get("cost_pm", 0))), Color(0.25, 0.72, 0.4))
 		if selected:
 			var glow := StyleBoxFlat.new()
 			glow.bg_color = Color(1.0, 0.85, 0.3, 0.10)
@@ -335,6 +312,74 @@ class SpellCard extends Button:
 			veil.bg_color = Color(0.02, 0.03, 0.06, 0.34)
 			veil.set_corner_radius_all(12)
 			draw_style_box(veil, Rect2(0, 0, lw, lh))
+
+	## Icônes vectorielles distinctes, sélectionnées selon le nom du sort.
+	func _spell_badge_icon(c: Vector2, s: Dictionary, p: Dictionary) -> void:
+		var nm: String = String(s.get("name", "")).to_lower()
+		var ink: Color = Color(1.0, 0.97, 0.88) if usable else Color(0.65, 0.67, 0.72)
+		var green := Color(0.65, 0.95, 0.48) if usable else ink
+		var red := Color(1.0, 0.48, 0.28) if usable else ink
+		var blue := Color(0.55, 0.82, 1.0) if usable else ink
+		if nm.contains("soin") or nm.contains("guérison") or nm.contains("restaure"):
+			draw_circle(c, 10.0, Color(0.2, 0.55, 0.28) if usable else Color(0.35, 0.38, 0.42))
+			draw_rect(Rect2(c.x - 3.0, c.y - 10.0, 6.0, 20.0), ink)
+			draw_rect(Rect2(c.x - 10.0, c.y - 3.0, 20.0, 6.0), ink)
+		elif nm.contains("piège") or nm.contains("piege") or nm.contains("entrave"):
+			draw_line(c + Vector2(-11, -9), c + Vector2(11, 9), red, 3.0, true)
+			draw_line(c + Vector2(-11, 9), c + Vector2(11, -9), red, 3.0, true)
+			draw_circle(c, 4.0, Color(0.98, 0.78, 0.35) if usable else ink)
+			draw_circle(c, 1.5, Color(0.08, 0.08, 0.1))
+		elif nm.contains("flèche") or nm.contains("fleche") or nm.contains("tir") or nm.contains("projectile"):
+			draw_line(c + Vector2(-11, 9), c + Vector2(9, -9), Color(0.8, 0.62, 0.35) if usable else ink, 3.0, true)
+			draw_colored_polygon(PackedVector2Array([c + Vector2(12, -12), c + Vector2(5, -10), c + Vector2(10, -5)]), ink)
+			if nm.contains("enflamm") or nm.contains("feu") or nm.contains("explos"):
+				draw_colored_polygon(PackedVector2Array([c + Vector2(-7, 8), c + Vector2(-8, 0), c + Vector2(-2, 3), c + Vector2(1, -3), c + Vector2(3, 6)]), red)
+			elif nm.contains("perçant") or nm.contains("percant"):
+				draw_line(c + Vector2(-8, 11), c + Vector2(7, -4), blue, 2.0, true)
+		elif nm.contains("lame") or nm.contains("épée") or nm.contains("epee") or nm.contains("coup") or nm.contains("assassin"):
+			draw_line(c + Vector2(-9, 10), c + Vector2(8, -10), ink, 4.0, true)
+			draw_line(c + Vector2(-12, 2), c + Vector2(-4, 10), Color(0.85, 0.65, 0.3) if usable else ink, 3.0, true)
+			draw_line(c + Vector2(4, -5), c + Vector2(11, 2), blue, 2.0, true)
+		elif nm.contains("appel") or nm.contains("meute") or nm.contains("invoc") or nm.contains("familier"):
+			draw_circle(c + Vector2(-5, -4), 4.0, green)
+			draw_circle(c + Vector2(5, -4), 4.0, green)
+			draw_circle(c + Vector2(-8, -9), 2.8, green)
+			draw_circle(c + Vector2(8, -9), 2.8, green)
+			draw_colored_polygon(PackedVector2Array([c + Vector2(-10, 1), c + Vector2(-5, -2), c + Vector2(0, 1), c + Vector2(5, -2), c + Vector2(10, 1), c + Vector2(7, 10), c + Vector2(-7, 10)]), green)
+		elif nm.contains("ombre") or nm.contains("invisib") or nm.contains("ténèbre") or nm.contains("tenebre"):
+			draw_circle(c + Vector2(1, 1), 10.0, Color(0.72, 0.55, 1.0) if usable else ink)
+			draw_circle(c + Vector2(6, -3), 8.0, Color(0.12, 0.12, 0.22))
+			draw_circle(c + Vector2(-7, -8), 2.0, ink)
+		elif nm.contains("bouclier") or nm.contains("protection") or nm.contains("armure"):
+			draw_colored_polygon(PackedVector2Array([c + Vector2(0, -12), c + Vector2(10, -7), c + Vector2(8, 4), c + Vector2(0, 12), c + Vector2(-8, 4), c + Vector2(-10, -7)]), blue)
+			draw_line(c + Vector2(-5, -1), c + Vector2(-1, 4), ink, 2.0, true)
+			draw_line(c + Vector2(-1, 4), c + Vector2(6, -5), ink, 2.0, true)
+		elif nm.contains("feu") or nm.contains("flamme") or nm.contains("brûl") or nm.contains("brul") or nm.contains("boule"):
+			draw_colored_polygon(PackedVector2Array([c + Vector2(0, -13), c + Vector2(8, -2), c + Vector2(8, 5), c + Vector2(0, 12), c + Vector2(-8, 5), c + Vector2(-7, -3), c + Vector2(-2, -7)]), red)
+			draw_colored_polygon(PackedVector2Array([c + Vector2(0, -3), c + Vector2(4, 4), c + Vector2(0, 9), c + Vector2(-3, 4)]), Color(1.0, 0.92, 0.5) if usable else ink)
+		elif nm.contains("nature") or nm.contains("feuille") or nm.contains("racine") or nm.contains("arbre"):
+			draw_colored_polygon(PackedVector2Array([c + Vector2(-10, 8), c + Vector2(-7, -5), c + Vector2(1, -12), c + Vector2(10, -8), c + Vector2(8, 2), c + Vector2(0, 9)]), green)
+			draw_line(c + Vector2(-9, 10), c + Vector2(8, -9), Color(0.2, 0.45, 0.18) if usable else ink, 2.0, true)
+		elif nm.contains("poison") or nm.contains("venin") or nm.contains("toxique"):
+			draw_colored_polygon(PackedVector2Array([c + Vector2(0, -12), c + Vector2(8, 2), c + Vector2(5, 10), c + Vector2(-5, 10), c + Vector2(-8, 2)]), green)
+			draw_circle(c + Vector2(-2, 2), 2.0, Color(0.15, 0.28, 0.12))
+			draw_circle(c + Vector2(3, 5), 1.7, Color(0.15, 0.28, 0.12))
+		elif nm.contains("téléport") or nm.contains("teleport") or nm.contains("transfert"):
+			draw_arc(c, 10.0, 0.2, TAU - 0.2, 28, blue, 2.5, true)
+			draw_colored_polygon(PackedVector2Array([c + Vector2(10, -8), c + Vector2(12, 0), c + Vector2(5, -2)]), blue)
+			draw_colored_polygon(PackedVector2Array([c + Vector2(-4, -7), c + Vector2(1, -10), c + Vector2(0, -3)]), ink)
+		elif nm.contains("terre") or nm.contains("pierre") or nm.contains("rocher") or nm.contains("tremblement"):
+			draw_colored_polygon(PackedVector2Array([c + Vector2(-11, 9), c + Vector2(-8, -3), c + Vector2(-2, -11), c + Vector2(7, -8), c + Vector2(11, 9)]), Color(0.75, 0.57, 0.36) if usable else ink)
+			draw_line(c + Vector2(-6, 1), c + Vector2(0, 5), Color(0.35, 0.25, 0.18) if usable else ink, 2.0, true)
+		elif nm.contains("glace") or nm.contains("givre") or nm.contains("gel"):
+			for i: int in range(3):
+				var a: float = float(i) * PI / 3.0
+				draw_line(c - Vector2(cos(a), sin(a)) * 11.0, c + Vector2(cos(a), sin(a)) * 11.0, blue, 2.2, true)
+			draw_circle(c, 2.5, ink)
+		elif nm.contains("foudre") or nm.contains("éclair") or nm.contains("eclair") or nm.contains("élect") or nm.contains("elect"):
+			draw_colored_polygon(PackedVector2Array([c + Vector2(3, -13), c + Vector2(-7, 1), c + Vector2(-1, 1), c + Vector2(-4, 12), c + Vector2(9, -3), c + Vector2(2, -3)]), Color(1.0, 0.9, 0.35) if usable else ink)
+		else:
+			_icon(c, _elem, String(p.get("kind", "attack")))
 
 	## Coupe un nom en 2 lignes max (au plus proche du milieu).
 	func _wrap(t: String, max_chars: int) -> PackedStringArray:
@@ -959,9 +1004,9 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.base_col = _kind_color(spell)
 		card.card_scale = _spell_scale
 		card.badge_mode = true
-		card.custom_minimum_size = Vector2(158.0 * _spell_scale, 58.0 * _spell_scale)
+		card.custom_minimum_size = Vector2(86.0 * _spell_scale, 58.0 * _spell_scale)
 		card.text = ""
-		card.tooltip_text = String(spell["name"]) + " · " + str(int(spell.get("cost_pa", 0))) + " PA · Portée " + str(int(spell.get("range", 1)))
+		card.tooltip_text = String(spell["name"]) + " · " + str(int(spell.get("cost_pa", 0))) + " PA" + (" · " + str(int(spell.get("cost_pm", 0))) + " PM" if int(spell.get("cost_pm", 0)) > 0 else "") + " · Portée " + str(int(spell.get("range", 1)))
 		var nlen: int = String(spell["name"]).length()
 		card.add_theme_font_size_override("font_size", 14 if nlen <= 10 else (12 if nlen <= 15 else 11))
 		card.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
