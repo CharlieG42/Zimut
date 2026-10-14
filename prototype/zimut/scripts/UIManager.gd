@@ -436,9 +436,18 @@ class TimelineView extends Control:
 		queue_redraw()
 
 	func _draw() -> void:
-		if gm == null or gm.turn_order.is_empty():
+		if gm == null:
 			return
 		var font: Font = ThemeDB.fallback_font
+		if gm.turn_order.is_empty():
+			# Un repère discret évite une timeline totalement vide pendant les transitions.
+			var empty_bg := StyleBoxFlat.new()
+			empty_bg.bg_color = Color(0.03, 0.05, 0.09, 0.45)
+			empty_bg.border_color = Color(0.4, 0.5, 0.7, 0.35)
+			empty_bg.set_border_width_all(1)
+			empty_bg.set_corner_radius_all(12)
+			draw_style_box(empty_bg, Rect2(8.0, 8.0, maxf(0.0, size.x - 16.0), 48.0))
+			return
 		# Ordre à partir de l'entité active
 		var order: Array = []
 		var start: int = 0
@@ -951,7 +960,9 @@ func _big_button(text: String) -> Button:
 # ═══════════════════════════════════════════════════════════════════════════
 
 func _on_turn_started(e: Dictionary) -> void:
-	_rebuild_spell_bar(e)
+	var spell_owner: Dictionary = _get_spell_bar_owner(e)
+	if not spell_owner.is_empty() and int(spell_owner.get("uid", -1)) != _cards_owner:
+		_rebuild_spell_bar(spell_owner)
 	var txt: String
 	var col := Color(1, 0.93, 0.6)
 	if e["entity_type"] == "Player" and not game_manager.auto_mode:
@@ -977,6 +988,17 @@ func _show_banner(text: String, col: Color) -> void:
 	tw.tween_property(_banner, "modulate:a", 0.0, 0.35)
 
 
+func _get_spell_bar_owner(active: Dictionary) -> Dictionary:
+	# La barre affiche toujours les sorts du joueur, même pendant les tours ennemis.
+	if not active.is_empty() and String(active.get("entity_type", "")) == "Player" and not active.get("spells", []).is_empty():
+		return active
+	if game_manager != null:
+		for player: Dictionary in game_manager.players:
+			if not player.get("spells", []).is_empty():
+				return player
+	return {}
+
+
 func _rebuild_spell_bar(e: Dictionary) -> void:
 	for c: Node in _spell_box.get_children():
 		c.queue_free()
@@ -997,7 +1019,7 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		var lvl_b: int = int(b.get("spell_level", 1))
 		if lvl_a != lvl_b:
 			return lvl_a < lvl_b
-		return String(a.get("name", "")) < String(b.get("name", "")))
+		return String(a.get("name", "")) < String(b.get("name", ""))
 	for spell: Dictionary in ordered_spells:
 		idx += 1
 		var card := SpellCard.new()
@@ -1062,9 +1084,10 @@ func _refresh() -> void:
 	if game_manager == null or _root == null:
 		return
 	var e: Dictionary = game_manager.active_entity
-	if not e.is_empty() and int(e["uid"]) != _cards_owner:
-		_rebuild_spell_bar(e)
-	var my_turn: bool = game_manager.current_turn == 0 and not game_manager.game_over
+	var spell_owner: Dictionary = _get_spell_bar_owner(e)
+	if not spell_owner.is_empty() and int(spell_owner.get("uid", -1)) != _cards_owner:
+		_rebuild_spell_bar(spell_owner)
+	var my_turn: bool = game_manager.current_turn == 0 and not game_manager.game_over and not e.is_empty() and String(e.get("entity_type", "")) == "Player"
 	for card: SpellCard in _cards:
 		var usable: bool = false
 		if not e.is_empty():
