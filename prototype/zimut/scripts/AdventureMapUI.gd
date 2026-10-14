@@ -180,7 +180,8 @@ func _refresh_map() -> void:
 			cell.text = "✓"
 
 	var key_here := "%d,%d" % [_hero_pos.x, _hero_pos.y]
-	_interact.disabled = not POIS.has(key_here) or (_campaign.get("completed", []) as Array).has(key_here)
+	var completed_here: Array = _campaign.get("completed", [])
+	_interact.disabled = not POIS.has(key_here) or completed_here.has(key_here)
 
 func _on_cell_pressed(p: Vector2i) -> void:
 	if absi(p.x - _hero_pos.x) + absi(p.y - _hero_pos.y) != 1:
