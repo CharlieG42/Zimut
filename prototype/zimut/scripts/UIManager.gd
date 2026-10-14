@@ -993,6 +993,10 @@ func _get_spell_bar_owner(active: Dictionary) -> Dictionary:
 	if not active.is_empty() and String(active.get("entity_type", "")) == "Player" and not active.get("spells", []).is_empty():
 		return active
 	if game_manager != null:
+		# Lors d'une transition (active_entity vide), conserver le joueur déjà affiché.
+		for player: Dictionary in game_manager.players:
+			if int(player.get("uid", -1)) == _cards_owner and not player.get("spells", []).is_empty():
+				return player
 		for player: Dictionary in game_manager.players:
 			if not player.get("spells", []).is_empty():
 				return player
