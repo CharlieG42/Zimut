@@ -355,7 +355,13 @@ func combat_xp(fight_level: int) -> int:
 	var lv: int = clampi(fight_level, 1, ClassRules.MAX_LEVEL)
 	var gain: float = ClassRules.XP_PER_COMBAT_BASE * pow(ClassRules.XP_PER_COMBAT_GROWTH, float(lv - 1))
 	gain = clampf(gain, ClassRules.XP_PER_COMBAT_FLOOR, ClassRules.XP_PER_COMBAT_CEIL)
-	return maxi(1, roundi(gain * ClassRules.FIGHT_XP_MULT))
+	var speed: float = GameSettings.xp_mult() if _has_settings() else 1.0
+	return maxi(1, roundi(gain * ClassRules.FIGHT_XP_MULT * speed))
+
+## GameSettings est un autoload du projet ; les tests headless (-s) ne le chargent
+## pas toujours : dégradation propre vers 1.0 dans ce cas.
+func _has_settings() -> bool:
+	return get_node_or_null("/root/GameSettings") != null
 
 ## Nombre de combats de la frontière estimé pour passer de `level` à `level + 1`.
 func combats_for_level(level: int) -> int:

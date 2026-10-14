@@ -58,7 +58,7 @@ func _build() -> void:
 	top.add_child(back)
 
 	var title := Label.new()
-	title.text = "MES PARTIES (max %d)" % ProgressionManager.MAX_SAVES
+	title.text = "ENTRER DANS ZIMUT — mes parties (max %d)" % ProgressionManager.MAX_SAVES
 	title.add_theme_font_size_override("font_size", 30)
 	title.add_theme_color_override("font_color", COL_TXT)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -68,10 +68,13 @@ func _build() -> void:
 
 	# Zone principale : slots + détail, côte à côte en largeur, empilés sinon
 	var main := HBoxContainer.new()
-	main.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	main.anchor_left = 0.0
+	main.anchor_right = 1.0
+	main.anchor_top = 0.0
+	main.anchor_bottom = 1.0
 	main.offset_left = 20.0
 	main.offset_right = -20.0
-	main.offset_top = 84.0
+	main.offset_top = 80.0
 	main.offset_bottom = -12.0
 	main.add_theme_constant_override("separation", 16)
 	_root.add_child(main)
@@ -121,11 +124,11 @@ func refresh() -> void:
 		var is_used: bool = used.has(slot)
 		if is_used:
 			var sv: Dictionary = used[slot]
-			btn.text = "  %s\n  ennemis nv %d · %d victoires" % [sv["name"], sv["level"], sv["victories"]]
+			btn.text = "  Continuer — %s\n  ennemis nv %d · %d victoires" % [sv["name"], sv["level"], sv["victories"]]
 			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_USED_BG, COL_BORDER, 4))
 			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_USED_BG.lightened(0.15), COL_BORDER, 5))
 		else:
-			btn.text = "  + Nouvelle partie (slot %d)" % (slot + 1)
+			btn.text = "  + Commencer une nouvelle partie (slot %d)" % (slot + 1)
 			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_EMPTY_BG, Color(0.3, 0.35, 0.45), 2))
 			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_EMPTY_BG.lightened(0.15), Color(0.3, 0.35, 0.45), 3))
 		btn.add_theme_font_size_override("font_size", 20)
@@ -175,7 +178,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	_detail_box.add_child(title)
 
 	var team_btn := Button.new()
-	team_btn.text = "Changer l'équipe (libre à chaque combat)"
+	team_btn.text = "Gérer l'équipe (libre à chaque combat)"
 	team_btn.add_theme_font_size_override("font_size", 19)
 	team_btn.add_theme_color_override("font_color", COL_TXT)
 	team_btn.add_theme_stylebox_override("normal", _flat())
@@ -229,17 +232,20 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		confirm.popup_centered())
 	_detail_box.add_child(del_btn)
 
-	var fight_btn := Button.new()
-	fight_btn.text = "COMBAT — ennemis niveau %d" % int(data.get("level", 10))
-	fight_btn.add_theme_font_size_override("font_size", 22)
-	fight_btn.add_theme_color_override("font_color", COL_TXT)
-	fight_btn.add_theme_stylebox_override("normal", _flat())
-	fight_btn.pressed.connect(func() -> void:
+	# Choix du mode de jeu : un seul actif pour l'instant (Combats Tactiques),
+	# Aventure et Conquête sont des modes à venir, affichés en grisé.
+	var mode_lbl := Label.new()
+	mode_lbl.text = "Mode de jeu :"
+	mode_lbl.add_theme_font_size_override("font_size", 21)
+	mode_lbl.add_theme_color_override("font_color", COL_TXT)
+	_detail_box.add_child(mode_lbl)
+	_detail_box.add_child(_mode_button("Combats Tactiques", "Combat tactique au tour à tour — ennemis niveau %d" % int(data.get("level", 10)), true, func() -> void:
 		GameManager.active_save = _current
 		GameManager.active_slot = slot
 		battle_requested.emit(slot)
-		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
-	_detail_box.add_child(fight_btn)
+		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")))
+	_detail_box.add_child(_mode_button("Aventure", "Aventure dans le monde de Zimut", false, Callable()))
+	_detail_box.add_child(_mode_button("Conquête", "Construisez votre empire dans le monde de Zimut", false, Callable()))
 
 	var team: Array = data.get("team", [])
 	var team_lbl := Label.new()
@@ -317,6 +323,62 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 
 func _equip_summary(m: Dictionary) -> Dictionary:
 	return m.get("equipment", {})
+
+const COL_DISABLED_BG := Color(0.14, 0.16, 0.22, 0.85)
+const COL_DISABLED_BORDER := Color(0.28, 0.31, 0.39, 1.0)
+const COL_DISABLED_TXT := Color(0.45, 0.48, 0.55)
+
+## Bouton de mode de jeu : titre + descriptif ; grisé et non cliquable si à venir.
+func _mode_button(title_txt: String, desc: String, enabled: bool, cb: Callable) -> Button:
+	var b := Button.new()
+	b.text = ""
+	b.custom_minimum_size = Vector2(0, 96)
+	b.disabled = not enabled
+	b.focus_mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE
+	var vb := VBoxContainer.new()
+	vb.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vb.alignment = BoxContainer.ALIGNMENT_CENTER
+	vb.add_theme_constant_override("separation", 2)
+	b.add_child(vb)
+	var t := Label.new()
+	t.text = title_txt
+	t.add_theme_font_size_override("font_size", 22)
+	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	t.add_theme_color_override("font_color", COL_TXT if enabled else COL_DISABLED_TXT)
+	vb.add_child(t)
+	var d := Label.new()
+	d.text = desc
+	d.add_theme_font_size_override("font_size", 16)
+	d.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	d.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12) if enabled else COL_DISABLED_TXT)
+	vb.add_child(d)
+	var normal := StyleBoxFlat.new()
+	if enabled:
+		normal.bg_color = COL_PANEL
+		normal.border_color = COL_BORDER
+	else:
+		normal.bg_color = COL_DISABLED_BG
+		normal.border_color = COL_DISABLED_BORDER
+	normal.set_border_width_all(3)
+	normal.set_corner_radius_all(12)
+	normal.content_margin_left = 12
+	normal.content_margin_right = 12
+	normal.content_margin_top = 8
+	normal.content_margin_bottom = 8
+	var hover := normal.duplicate()
+	if enabled:
+		hover.bg_color = Color(0.99, 0.95, 0.83)
+		hover.border_color = Color(0.85, 0.68, 0.3)
+	var pressed_s := normal.duplicate()
+	if enabled:
+		pressed_s.bg_color = Color(0.88, 0.82, 0.66)
+	b.add_theme_stylebox_override("normal", normal)
+	b.add_theme_stylebox_override("hover", hover)
+	b.add_theme_stylebox_override("pressed", pressed_s)
+	b.add_theme_stylebox_override("disabled", normal)
+	if enabled and cb.is_valid():
+		b.pressed.connect(cb)
+	return b
 
 func _auto_equip() -> void:
 	if _current.is_empty():
