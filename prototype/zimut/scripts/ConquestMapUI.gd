@@ -126,7 +126,7 @@ func _build() -> void:
 	note.add_theme_color_override("font_color", GOLD)
 	box.add_child(note)
 	var back := Button.new()
-	back.text = "← RETOUR AUX MODES"
+	back.text = "← MENU"
 	back.custom_minimum_size.y = 50
 	back.pressed.connect(_back_to_save)
 	box.add_child(back)

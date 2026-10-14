@@ -212,7 +212,7 @@ func _setup_start_button() -> void:
 			start_button.pressed.disconnect(_on_start_combat)
 		start_button.pressed.connect(_on_start_combat)
 		start_button.disabled = true
-	# Retour au menu
+	# Retour à la fenêtre des parties
 	var back_btn := Button.new()
 	back_btn.text = "← MENU"
 	back_btn.add_theme_font_size_override("font_size", 22)
@@ -222,7 +222,7 @@ func _setup_start_button() -> void:
 	back_btn.pressed.connect(func() -> void:
 		GameManager.active_save = {}
 		GameManager.active_slot = -1
-		get_tree().change_scene_to_file("res://scenes/MainMenu.tscn"))
+		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn"))
 	add_child(back_btn)
 
 	# Bouton d'équipement (visible si une partie active avec inventaire existe)

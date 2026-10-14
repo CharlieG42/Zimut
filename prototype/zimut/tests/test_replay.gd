@@ -44,9 +44,9 @@ func _boot() -> void:
 	check(data["inventory"].size() > inv_before, "loots en rejouant")
 	check(bool(data["last_result"]["replay"]), "résultat marqué « rejoué »")
 	check(pm.select_fight(data, 99) == 7 and pm.selected_fight_number(data) == 7, "sélection plafonnée à la frontière")
-	# Bouton MENU : le script de sélection d'équipe expose bien le retour vers le menu
+	# Bouton MENU : le script de sélection d'équipe expose bien le retour vers les parties
 	var src: String = FileAccess.get_file_as_string("res://scripts/TeamSelectionUI.gd")
-	check(src.contains("MainMenu.tscn"), "le bouton MENU change de scène")
+	check(src.contains("SaveSlots.tscn"), "le bouton MENU revient à la fenêtre des parties")
 	# Caractéristiques bonus PA / PM / PO : 3 niveaux max, 4 points par niveau, plafonds
 	var ent: Dictionary = pm.roster_entry(data, "Tank")
 	ent["unspent"] = 40

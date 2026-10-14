@@ -399,15 +399,16 @@ class TimelineView extends Control:
 			var e: Dictionary = gm.turn_order[(start + k) % gm.turn_order.size()]
 			if gm.is_alive(e):
 				order.append(e)
-		var total_w: float = 0.0
+		# Colonne verticale : vignettes centrées, de haut en bas
+		var total_h: float = 0.0
 		for k: int in range(order.size()):
-			total_w += (96.0 if k == 0 else 74.0) + 8.0
-		var x: float = (size.x - total_w) * 0.5
+			total_h += (124.0 if k == 0 else 96.0) + 10.0
+		var y: float = maxf(4.0, (size.y - total_h) * 0.5)
 		for k: int in range(order.size()):
 			var e2: Dictionary = order[k]
 			var big: bool = (k == 0)
-			var w: float = 96.0 if big else 74.0
-			var y: float = 6.0
+			var w: float = 124.0 if big else 96.0
+			var x: float = (size.x - w) * 0.5
 			var team_col: Color = Color(0.22, 0.45, 0.85)
 			if e2["entity_type"] == "Summon":
 				team_col = Color(0.25, 0.70, 0.45)
@@ -431,13 +432,13 @@ class TimelineView extends Control:
 				draw_string(font, rect.position + Vector2(0, w * 0.6), String(e2["classe"]).substr(0, 3), HORIZONTAL_ALIGNMENT_CENTER, w, 20, Color.WHITE)
 			# Barre de vie
 			var ratio: float = clampf(float(e2["current_pv"]) / maxf(1.0, float(e2["max_pv"])), 0.0, 1.0)
-			var hb := Rect2(x + 4.0, y + w - 10.0, w - 8.0, 7.0)
+			var hb := Rect2(x + 4.0, y + w - 12.0, w - 8.0, 8.0)
 			draw_rect(hb, Color(0, 0, 0, 0.8))
 			draw_rect(Rect2(hb.position, Vector2(hb.size.x * ratio, hb.size.y)), Color(0.35, 0.9, 0.4) if e2["team"] == "player" else Color(0.95, 0.3, 0.25))
 			if big:
-				draw_string_outline(font, Vector2(x, y + w + 20.0), String(e2["classe"]), HORIZONTAL_ALIGNMENT_CENTER, w, 16, 5, Color(0, 0, 0, 0.9))
-				draw_string(font, Vector2(x, y + w + 20.0), String(e2["classe"]), HORIZONTAL_ALIGNMENT_CENTER, w, 16, Color(1, 0.95, 0.75))
-			x += w + 8.0
+				draw_string_outline(font, Vector2(x, y + w + 22.0), String(e2["classe"]), HORIZONTAL_ALIGNMENT_CENTER, w, 18, 5, Color(0, 0, 0, 0.9))
+				draw_string(font, Vector2(x, y + w + 22.0), String(e2["classe"]), HORIZONTAL_ALIGNMENT_CENTER, w, 18, Color(1, 0.95, 0.75))
+			y += w + 10.0
 
 
 class StatsView extends Control:
@@ -663,16 +664,19 @@ func _build_ui() -> void:
 	# lorsque le viewport est redimensionné par le mode stretch Android.
 	_root.resized.connect(_on_hud_resized)
 
-	# Timeline : ancrée à droite du bord, la vignette occupe le haut-gauche
+	# Timeline : colonne VERTICALE sur le bord droit, de haut en bas.
+	# L'entité active est en tête (vignette agrandie), les suivantes en dessous.
 	var tl := TimelineView.new()
 	tl.gm = game_manager
 	tl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tl.anchor_left = 1.0
 	tl.anchor_right = 1.0
-	tl.offset_left = -1380.0
-	tl.offset_right = -20.0
-	tl.offset_top = 6.0
-	tl.offset_bottom = 140.0
+	tl.anchor_top = 0.0
+	tl.anchor_bottom = 1.0
+	tl.offset_left = -168.0
+	tl.offset_right = -14.0
+	tl.offset_top = 10.0
+	tl.offset_bottom = -208.0
 	_root.add_child(tl)
 	_timeline = tl
 
@@ -826,8 +830,8 @@ func _build_ui() -> void:
 	_info_panel.add_theme_stylebox_override("panel", _flat(COL_PANEL, COL_BORDER, 14, 2))
 	_info_panel.anchor_left = 1.0
 	_info_panel.anchor_right = 1.0
-	_info_panel.offset_left = -330.0
-	_info_panel.offset_right = -20.0
+	_info_panel.offset_left = -330.0 - 170.0
+	_info_panel.offset_right = -20.0 - 170.0
 	_info_panel.offset_top = 160.0
 	_info_panel.offset_bottom = 330.0
 	_info_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
