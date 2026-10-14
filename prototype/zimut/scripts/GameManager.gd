@@ -333,6 +333,15 @@ func init_entities() -> void:
 		boss_fight = false
 		fight_is_boss = false
 	fight_biome = "Forêt" if campaign_mode in ["adventure", "conquest"] else (ProgressionManager.next_biome(active_save) if not active_save.is_empty() else "Forêt")
+	# Donjon : chaque salle est un combat de boss ; la salle affiche le biome de
+	# la salle (décor du biome) mais le boss est celui de la salle de donjon.
+	var donjon_room: String = ""
+	if not active_save.is_empty() and campaign_mode == "":
+		donjon_room = ProgressionManager.donjon_room(ProgressionManager.next_fight_number(active_save))
+		if donjon_room != "":
+			fight_biome = donjon_room
+			boss_fight = true
+			fight_is_boss = true
 	## Boss de fin de cycle : le boss est au niveau du combat, ses sbires 2 niveaux en dessous
 	var minion_lvl: int = maxi(1, lvl - 2) if boss_fight else lvl
 	var biome_types: Array[String] = ProgressionManager.biome_enemy_types(fight_biome)
@@ -384,10 +393,13 @@ func init_entities() -> void:
 func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 	var enemies_data: Array = get_enemies_data()
 	var boss_name: String = ProgressionManager.biome_boss(fight_biome)
+	if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "" \
+			and ProgressionManager.donjon_room(ProgressionManager.next_fight_number(active_save)) != "":
+		boss_name = ProgressionManager.donjon_boss(active_save)
 	## Type de base dont le boss reprend le kit et la skin : le nom complet est
 	## « Boss Gobelin Roi » -> type de base « Gobelin » (2e mot).
 	var base_type: String = String({"Gobelin Roi": "Gobelin", "Troll Géant": "Troll", "Dragon": "Dragonnet",
-		"Squelette Seigneur": "Squelette", "Loup Alpha": "Loup"}.get(boss_name, "Dragonnet"))
+		"Squelette Seigneur": "Squelette", "Loup Alpha": "Loup", "Roi Squelette": "Squelette"}.get(boss_name, "Dragonnet"))
 	var info: Dictionary = _find_best_match(enemies_data, "Type", "Boss " + boss_name, "Niveau", lvl)
 	if info.is_empty():
 		# Aucune ligne boss au niveau du combat : prendre la ligne boss la plus proche
@@ -438,6 +450,9 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 			boss["fx"] = {"mag_pct": 30}
 		"Squelette Seigneur":
 			boss["fx"] = {"crit": 20}
+		"Roi Squelette":
+			boss["fx"] = {"mres": 60, "lifesteal": 10}
+			Combat.add_status(boss, "regen", 999, 15.0)
 	enemies.append(boss)
 	grid[pos.y][pos.x] = boss
 

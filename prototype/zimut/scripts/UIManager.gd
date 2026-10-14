@@ -29,7 +29,7 @@ var _root: Control
 var _timeline: Control
 var _stats: Control
 var _spell_scroll: ScrollContainer
-var _spell_box: VBoxContainer
+var _spell_box: Container
 var _tip_panel: PanelContainer
 var _tip_label: Label
 var _end_btn: Button
@@ -85,6 +85,7 @@ class SpellCard extends Button:
 	var selected: bool = false
 	var usable: bool = true
 	var card_scale: float = 1.0
+	var badge_mode: bool = false
 	var _elem: String = ""
 
 	static func hexagon(c: Vector2, r: float) -> PackedVector2Array:
@@ -180,6 +181,9 @@ class SpellCard extends Button:
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(s, s))
 		var lw: float = size.x / s
 		var lh: float = size.y / s
+		if badge_mode:
+			_draw_badge(font, p, lw, lh)
+			return
 		var accent: Color = base_col if usable else Color(0.40, 0.43, 0.50)
 		var ecol: Color = SpellFx.colors(_elem)[0] if usable else Color(0.4, 0.43, 0.5)
 		# Reflet haut + liseré de couleur à gauche
@@ -274,6 +278,57 @@ class SpellCard extends Button:
 			veil.set_corner_radius_all(14)
 			draw_style_box(veil, Rect2(0, 0, lw, lh))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+	## Badge compact (barre horizontale) : médaillon élément, nom court,
+	## gemme PA (PM si coût), pastille de portée. Les détails restent dans
+	## l'infobulle au survol, comme sur les grandes cartes.
+	func _draw_badge(font: Font, p: Dictionary, lw: float, lh: float) -> void:
+		var accent: Color = base_col if usable else Color(0.40, 0.43, 0.50)
+		var ecol: Color = SpellFx.colors(_elem)[0] if usable else Color(0.4, 0.43, 0.5)
+		# fond + liseré gauche
+		draw_rect(Rect2(6, 3, lw - 12, 3), Color(1, 1, 1, 0.07 if usable else 0.03))
+		draw_rect(Rect2(3, 10, 3, lh - 20), accent)
+		# médaillon élément (à gauche)
+		var mc := Vector2(30, lh * 0.5)
+		draw_circle(mc + Vector2(0, 2.5), 24.0, Color(0, 0, 0, 0.5))
+		draw_circle(mc, 23.0, Color(0.02, 0.03, 0.07))
+		draw_circle(mc, 20.5, ecol.darkened(0.55))
+		draw_circle(mc + Vector2(0, -2), 17.5, ecol.darkened(0.32))
+		draw_arc(mc, 21.5, 0.0, TAU, 40, ecol.lightened(0.15) if usable else ecol, 1.8, true)
+		_icon(mc, _elem, String(p["kind"]))
+		# gemme PA coin haut-droit ; PM sous elle si le sort en coûte
+		var pa_col: Color = Color(0.16, 0.5, 0.95)
+		if not usable and gm != null and not gm.active_entity.is_empty() and not gm.can_afford(gm.active_entity, spell):
+			pa_col = Color(0.85, 0.25, 0.22)
+		_gem(Vector2(lw - 20.0, 18.0), 13.0, str(int(spell.get("cost_pa", 0))), pa_col)
+		if int(spell.get("cost_pm", 0)) > 0:
+			_gem(Vector2(lw - 20.0, lh - 18.0), 13.0, str(int(spell.get("cost_pm", 0))), Color(0.25, 0.72, 0.4))
+		# nom compact (2 lignes max) centré dans l'espace restant
+		var nm: String = String(spell.get("name", "Sort"))
+		var lines: PackedStringArray = _wrap(nm, 12)
+		var fs: int = 13 if nm.length() <= 14 else 12
+		var tx: float = 58.0
+		var tw: float = lw - tx - 40.0
+		var ny: float = lh * 0.5 - 4.0 if lines.size() == 1 else lh * 0.5 - 13.0
+		for i: int in range(lines.size()):
+			var pos := Vector2(tx, ny + float(i) * 15.0)
+			draw_string_outline(font, pos, lines[i], HORIZONTAL_ALIGNMENT_LEFT, tw, fs, 4, Color(0, 0, 0, 0.92))
+			draw_string(font, pos, lines[i], HORIZONTAL_ALIGNMENT_LEFT, tw, fs, Color.WHITE if usable else Color(0.62, 0.64, 0.7))
+		# pastille de portée (bas-gauche du nom)
+		var rng_txt: String = "Sur soi" if String(p["target"]) == "self" else "P%d" % int(spell.get("range", 1))
+		draw_string(font, Vector2(tx, lh - 8.0), rng_txt, HORIZONTAL_ALIGNMENT_LEFT, tw, 11, Color(1.0, 0.86, 0.4) if usable else Color(0.55, 0.57, 0.62))
+		if selected:
+			var glow := StyleBoxFlat.new()
+			glow.bg_color = Color(1.0, 0.85, 0.3, 0.10)
+			glow.border_color = Color(1.0, 0.86, 0.3, 0.95)
+			glow.set_border_width_all(2)
+			glow.set_corner_radius_all(12)
+			draw_style_box(glow, Rect2(1, 1, lw - 2, lh - 2))
+		if not usable:
+			var veil := StyleBoxFlat.new()
+			veil.bg_color = Color(0.02, 0.03, 0.06, 0.34)
+			veil.set_corner_radius_all(12)
+			draw_style_box(veil, Rect2(0, 0, lw, lh))
 
 	## Coupe un nom en 2 lignes max (au plus proche du milieu).
 	func _wrap(t: String, max_chars: int) -> PackedStringArray:
@@ -608,61 +663,67 @@ func _build_ui() -> void:
 	# lorsque le viewport est redimensionné par le mode stretch Android.
 	_root.resized.connect(_on_hud_resized)
 
-	# Timeline
+	# Timeline : ancrée à droite du bord, la vignette occupe le haut-gauche
 	var tl := TimelineView.new()
 	tl.gm = game_manager
 	tl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tl.anchor_left = 0.5
-	tl.anchor_right = 0.5
-	tl.offset_left = -800.0
-	tl.offset_right = 800.0
+	tl.anchor_left = 1.0
+	tl.anchor_right = 1.0
+	tl.offset_left = -1380.0
+	tl.offset_right = -20.0
 	tl.offset_top = 6.0
 	tl.offset_bottom = 140.0
 	_root.add_child(tl)
 	_timeline = tl
 
-	# Panneau du personnage actif
+	# Vignette du personnage actif : en haut à gauche, au-dessus du plateau
 	var st := StatsView.new()
 	st.gm = game_manager
 	st.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	st.anchor_top = 1.0
-	st.anchor_bottom = 1.0
+	st.anchor_top = 0.0
+	st.anchor_bottom = 0.0
 	st.offset_left = 18.0
 	st.offset_right = 458.0
-	st.offset_top = -184.0
-	st.offset_bottom = -14.0
+	st.offset_top = 14.0
+	st.offset_bottom = 198.0
 	_root.add_child(st)
 	_stats = st
 
-	# Barre de sorts — la colonne s'élargit sur mobile (cartes agrandies).
-	var col_w: float = 208.0 * _spell_scale
+	# Barre de sorts horizontale en bas : badges sur 2 lignes, centrés.
+	# La vignette est en haut ; le bas-gauche est libre pour les badges.
+	var badge_w: float = 172.0 * _spell_scale
+	var badge_h: float = 76.0 * _spell_scale
+	var bar_cols: int = 6
 	_spell_scroll = ScrollContainer.new()
-	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_spell_scroll.anchor_left = 0.0
-	_spell_scroll.anchor_right = 0.0
-	_spell_scroll.anchor_top = 0.0
+	_spell_scroll.anchor_right = 1.0
+	_spell_scroll.anchor_top = 1.0
 	_spell_scroll.anchor_bottom = 1.0
-	_spell_scroll.offset_left = 12.0
-	_spell_scroll.offset_right = 12.0 + col_w
-	_spell_scroll.offset_top = 132.0
-	_spell_scroll.offset_bottom = -202.0
+	_spell_scroll.offset_left = 240.0
+	_spell_scroll.offset_right = -470.0
+	_spell_scroll.offset_top = -(badge_h * 2.0 + 24.0)
+	_spell_scroll.offset_bottom = -14.0
 	_spell_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
 	var spell_panel := PanelContainer.new()
 	spell_panel.anchor_left = 0.0
-	spell_panel.anchor_right = 0.0
-	spell_panel.anchor_top = 0.0
+	spell_panel.anchor_right = 1.0
+	spell_panel.anchor_top = 1.0
 	spell_panel.anchor_bottom = 1.0
-	spell_panel.offset_left = 8.0
-	spell_panel.offset_right = 8.0 + col_w + 4.0
-	spell_panel.offset_top = 124.0
-	spell_panel.offset_bottom = -194.0
+	spell_panel.offset_left = 232.0
+	spell_panel.offset_right = -462.0
+	spell_panel.offset_top = -(badge_h * 2.0 + 32.0)
+	spell_panel.offset_bottom = -8.0
 	spell_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	spell_panel.add_theme_stylebox_override("panel", _flat(Color(0.03, 0.05, 0.09, 0.22), Color(0.35, 0.48, 0.65, 0.22), 20, 1))
+	spell_panel.add_theme_stylebox_override("panel", _flat(Color(0.03, 0.05, 0.09, 0.30), Color(0.35, 0.48, 0.65, 0.35), 20, 1))
 	_root.add_child(spell_panel)
 	_root.add_child(_spell_scroll)
-	_spell_box = VBoxContainer.new()
-	_spell_box.add_theme_constant_override("separation", int(8.0 * _spell_scale))
+	# Conteneur à 2 lignes : les badges s'y répartissent colonne par colonne.
+	_spell_box = GridContainer.new()
+	_spell_box.columns = bar_cols
+	_spell_box.add_theme_constant_override("h_separation", int(8.0 * _spell_scale))
+	_spell_box.add_theme_constant_override("v_separation", int(8.0 * _spell_scale))
 	_spell_scroll.add_child(_spell_box)
 
 	# Infobulle de sort
@@ -670,12 +731,12 @@ func _build_ui() -> void:
 	_tip_panel.add_theme_stylebox_override("panel", _flat(Color(0.06, 0.08, 0.14, 0.95), Color(1, 0.85, 0.35), 14, 2))
 	_tip_panel.anchor_left = 0.0
 	_tip_panel.anchor_right = 0.0
-	_tip_panel.anchor_top = 0.0
-	_tip_panel.anchor_bottom = 0.0
-	_tip_panel.offset_left = 24.0 + 208.0 * _spell_scale + 8.0
-	_tip_panel.offset_right = _tip_panel.offset_left + 420.0
-	_tip_panel.offset_top = 14.0
-	_tip_panel.offset_bottom = 150.0
+	_tip_panel.anchor_top = 1.0
+	_tip_panel.anchor_bottom = 1.0
+	_tip_panel.offset_left = 240.0
+	_tip_panel.offset_right = 240.0 + 440.0 * _spell_scale
+	_tip_panel.offset_top = -(76.0 * _spell_scale * 2.0 + 24.0 + 150.0)
+	_tip_panel.offset_bottom = -(76.0 * _spell_scale * 2.0 + 24.0 + 10.0)
 	_tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tip_panel.visible = false
 	_tip_label = Label.new()
@@ -739,7 +800,7 @@ func _build_ui() -> void:
 	# Journal de combat
 	_log_box = VBoxContainer.new()
 	_log_box.add_theme_constant_override("separation", 2)
-	_log_box.position = Vector2(300, 160)
+	_log_box.position = Vector2(300, 220)
 	_log_box.size = Vector2(560, 300)
 	_log_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_log_box)
@@ -890,7 +951,8 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.hotkey = idx if idx <= 10 else 0
 		card.base_col = _kind_color(spell)
 		card.card_scale = _spell_scale
-		card.custom_minimum_size = Vector2(188.0 * _spell_scale, 88.0 * _spell_scale)
+		card.badge_mode = true
+		card.custom_minimum_size = Vector2(172.0 * _spell_scale, 76.0 * _spell_scale)
 		card.text = ""
 		card.tooltip_text = String(spell["name"]) + " · " + str(int(spell.get("cost_pa", 0))) + " PA · Portée " + str(int(spell.get("range", 1)))
 		var nlen: int = String(spell["name"]).length()
@@ -1176,10 +1238,10 @@ func _show_result_window(victory: bool) -> void:
 			content.add_child(res_row)
 
 	var cont := Button.new()
-	var campaign_mode: String = String(save.get("campaign_mode", ""))
-	if campaign_mode == "adventure":
+	var back_mode: String = String(save.get("campaign_mode", ""))
+	if back_mode == "adventure":
 		cont.text = "RETOUR À L'AVENTURE"
-	elif campaign_mode == "conquest":
+	elif back_mode == "conquest":
 		cont.text = "RETOUR À LA CARTE DE CONQUÊTE"
 	else:
 		cont.text = "CONTINUER"
@@ -1190,9 +1252,9 @@ func _show_result_window(victory: bool) -> void:
 	cont.pressed.connect(func() -> void:
 		dim.queue_free()
 		panel.queue_free()
-		if campaign_mode == "adventure":
+		if back_mode == "adventure":
 			get_tree().change_scene_to_file("res://scenes/AdventureMap.tscn")
-		elif campaign_mode == "conquest":
+		elif back_mode == "conquest":
 			get_tree().change_scene_to_file("res://scenes/ConquestMap.tscn")
 		else:
 			_show_game_over(victory))

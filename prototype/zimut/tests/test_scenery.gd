@@ -45,6 +45,20 @@ func _boot() -> void:
 	for c in a.get_children():
 		kinds.append(String(c.get("kind")))
 	check(kinds.has("ruin_arch"), "forêt : arche en ruine présente")
+	# Chaque biome a son monument signature (parité avec la forêt)
+	var feats: Dictionary = {"Forêt": "ruin_arch", "Montagne": "ice_portal", "Désert": "obelisk", "Donjon": ""}
+	for fb: String in feats.keys():
+		if String(feats[fb]) == "":
+			continue
+		var fsc := BattleScenery.new()
+		root.add_child(fsc)
+		fsc.configure(8, fb, 7)
+		await process_frame
+		var fkinds: Array = []
+		for fc in fsc.get_children():
+			fkinds.append(String(fc.get("kind")))
+		check(fkinds.has(String(feats[fb])), "%s : monument %s présent" % [fb, feats[fb]])
+		fsc.queue_free()
 	var water_cnt: int = 0
 	for c in a.get_children():
 		if c.get("water") == true:

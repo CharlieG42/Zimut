@@ -43,6 +43,13 @@ const LEVEL_COMBATS: PackedInt32Array = [
 ## Biomes : cycle des combats. Chaque biome dure BOSS_EVERY combats, le dernier
 ## étant le boss du biome. Les types viennent de la colonne « Biome » de ennemis.txt.
 const BIOME_ORDER: Array[String] = ["Forêt", "Montagne", "Désert"]
+
+## Donjon : après un cycle complet des 3 biomes (12 combats), l'équipe entre dans
+## le donjon — 4 salles thématiques : la salle de chaque biome (au niveau boss),
+## puis la salle finale avec le big boss (Roi Squelette). Le cycle recommence
+## ensuite en Forêt avec des ennemis plus forts (la difficulté suit l'équipe).
+const DONJON_EVERY := 12
+const DONJON_ORDER: Array[String] = ["Forêt", "Montagne", "Désert", "Donjon"]
 const BIOME_LABEL := {"Forêt": "Forêt de Zimut", "Montagne": "Pics de Zimut", "Désert": "Dunes de Zimut", "Donjon": "Donjon de Zimut"}
 ## Types d'ennemis par biome (2 par biome, tirés de ennemis.txt).
 const BIOME_ENEMIES := {
@@ -409,10 +416,33 @@ func xp_for_enemy(type_name: String, level: int) -> int:
 		best = first
 	return int(best.get("xp", 0))
 
-## Biome du combat « numéro n » (cycle de BOSS_EVERY combats par biome).
+## Biome du combat « numéro n » : cycle global de 16 combats — 12 combats sur les
+## 3 biomes (4 chacun), puis 4 salles de donjon : la salle de chaque biome
+## (au niveau boss) puis la salle du big boss (Donjon). Le cycle recommence
+## ensuite en Forêt avec des ennemis plus forts (la difficulté suit l'équipe).
+const CYCLE := 16   # 3 biomes x BOSS_EVERY(4) combats + 4 salles de donjon
+
 func biome_for_fight(n: int) -> String:
-	var idx: int = int((n - 1) / BOSS_EVERY) % BIOME_ORDER.size()
-	return BIOME_ORDER[idx]
+	var pos: int = (n - 1) % CYCLE
+	if pos < BIOME_ORDER.size() * BOSS_EVERY:
+		return BIOME_ORDER[int(pos / BOSS_EVERY)]
+	return DONJON_ORDER[pos - BIOME_ORDER.size() * BOSS_EVERY]
+
+## Le combat n se déroule-t-il dans le donjon ?
+func in_donjon(n: int) -> bool:
+	return biome_for_fight(n) == "Donjon"
+
+## Le combat n est-il la salle du big boss (dernière du cycle) ?
+func is_donjon_final(n: int) -> bool:
+	return in_donjon(n) and (n - 1) % CYCLE == CYCLE - 1
+
+## Salle du donjon pour le combat n : 1re = Forêt, 2e = Montagne, 3e = Désert,
+## 4e = Donjon (big boss). Retourne "" hors donjon.
+func donjon_room(n: int) -> String:
+	var pos: int = (n - 1) % CYCLE
+	if pos < 12:
+		return ""
+	return DONJON_ORDER[pos - 12]
 
 ## Biome du prochain combat d'une partie.
 func next_biome(data: Dictionary) -> String:
@@ -996,8 +1026,24 @@ func _apply_campaign_defeat(data: Dictionary) -> void:
 func next_fight_number(data: Dictionary) -> int:
 	return selected_fight_number(data)
 
+## Boss : 4e combat de chaque biome hors donjon ; dans le donjon, chaque salle
+## est un combat de boss (salle 1-3 : boss du biome, salle 4 : big boss).
 func is_boss_fight(data: Dictionary) -> bool:
-	return next_fight_number(data) % BOSS_EVERY == 0
+	var n: int = next_fight_number(data)
+	if donjon_room(n) != "":
+		return true
+	return n % BOSS_EVERY == 0
+
+## Nom du boss de la salle de donjon courante : boss du biome de la salle,
+## ou le big boss (Roi Squelette) pour la salle finale.
+func donjon_boss(data: Dictionary) -> String:
+	var n: int = next_fight_number(data)
+	var room: String = donjon_room(n)
+	if room == "":
+		return ""
+	if room == "Donjon":
+		return "Roi Squelette"
+	return biome_boss(room)
 
 func _roll_loots(level: int, boss: bool = false) -> Array:
 	var count: int = _rng.randi_range(1, 3)
