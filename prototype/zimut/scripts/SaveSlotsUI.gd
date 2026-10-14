@@ -49,7 +49,7 @@ func _build() -> void:
 	_root.add_child(top)
 
 	var back := Button.new()
-	back.text = "← MENU"
+	back.text = "← ACCUEIL"
 	back.custom_minimum_size = Vector2(150, 56)
 	back.add_theme_font_size_override("font_size", 20)
 	back.add_theme_color_override("font_color", COL_TXT)

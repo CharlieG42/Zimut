@@ -365,12 +365,12 @@ func _build() -> void:
 
 	refresh()
 
-## Retour au menu principal (sauvegarde déjà écrite à chaque modification).
+## Retour à la fenêtre des parties (sauvegarde déjà écrite à chaque modification).
 func _on_back() -> void:
 	back_requested.emit()
 	if GameManager.active_slot >= 0 and not GameManager.active_save.is_empty():
 		ProgressionManager.write_save(GameManager.active_slot, GameManager.active_save)
-	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+	get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
 
 
 ## Sélecteur de combat : rejouer un combat déjà gagné (XP réduite si plus bas que le niveau
