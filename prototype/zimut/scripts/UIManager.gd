@@ -1023,7 +1023,7 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		var lvl_b: int = int(b.get("spell_level", 1))
 		if lvl_a != lvl_b:
 			return lvl_a < lvl_b
-		return String(a.get("name", "")) < String(b.get("name", ""))
+		return String(a.get("name", "")) < String(b.get("name", "")))
 	for spell: Dictionary in ordered_spells:
 		idx += 1
 		var card := SpellCard.new()
