@@ -1,12 +1,18 @@
 extends CanvasLayer
+
 ## SaveSlotsUI.gd — Écran de gestion des parties : 5 slots, équipe modifiable,
 ## inventaire de loots et équipement par personnage.
+## Layout plein écran responsive (ancres, plus de positions fixes 1920x1080) :
+## colonne de slots à gauche, détail de la partie sélectionnée à droite, empilés
+## verticalement sur écran étroit (téléphone en paysage).
 
 signal battle_requested(slot: int)
 
 const COL_PANEL := Color(0.94, 0.89, 0.78, 0.97)
 const COL_BORDER := Color(0.72, 0.58, 0.28, 1.0)
 const COL_TXT := Color(0.22, 0.15, 0.05)
+const COL_SLOT_EMPTY_BG := Color(0.12, 0.15, 0.21, 0.95)
+const COL_SLOT_USED_BG := Color(0.20, 0.26, 0.35, 0.97)
 
 var _root: Control
 var _slots_box: VBoxContainer
@@ -22,42 +28,70 @@ func _build() -> void:
 	_root = Control.new()
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
+
 	var bg := ColorRect.new()
 	bg.color = Color(0.06, 0.09, 0.14, 0.92)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.add_child(bg)
 
-	var title := Label.new()
-	title.text = "MES PARTIES (max %d)" % ProgressionManager.MAX_SAVES
-	title.add_theme_font_size_override("font_size", 34)
-	title.add_theme_color_override("font_color", COL_TXT)
-	title.position = Vector2(40, 18)
-	_root.add_child(title)
+	# Barre de titre : bouton MENU à gauche, titre centré
+	var top := HBoxContainer.new()
+	top.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	top.offset_left = 20.0
+	top.offset_right = -20.0
+	top.offset_top = 14.0
+	top.offset_bottom = 76.0
+	top.add_theme_constant_override("separation", 16)
+	_root.add_child(top)
 
 	var back := Button.new()
 	back.text = "← MENU"
-	back.position = Vector2(40, 18)
-	back.custom_minimum_size = Vector2(160, 52)
+	back.custom_minimum_size = Vector2(150, 56)
 	back.add_theme_font_size_override("font_size", 20)
 	back.add_theme_color_override("font_color", COL_TXT)
 	back.add_theme_stylebox_override("normal", _flat())
+	back.add_theme_stylebox_override("hover", _flat())
 	back.pressed.connect(func() -> void:
 		GameManager.active_save = {}
 		GameManager.active_slot = -1
 		get_tree().change_scene_to_file("res://scenes/MainMenu.tscn"))
-	_root.add_child(back)
+	top.add_child(back)
+
+	var title := Label.new()
+	title.text = "MES PARTIES (max %d)" % ProgressionManager.MAX_SAVES
+	title.add_theme_font_size_override("font_size", 30)
+	title.add_theme_color_override("font_color", COL_TXT)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	top.add_child(title)
+
+	# Zone principale : slots + détail, côte à côte en largeur, empilés sinon
+	var main := HBoxContainer.new()
+	main.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	main.offset_left = 20.0
+	main.offset_right = -20.0
+	main.offset_top = 84.0
+	main.offset_bottom = -12.0
+	main.add_theme_constant_override("separation", 16)
+	_root.add_child(main)
+
+	var slots_scroll := ScrollContainer.new()
+	slots_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slots_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	slots_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	main.add_child(slots_scroll)
 
 	_slots_box = VBoxContainer.new()
-	_slots_box.position = Vector2(40, 90)
-	_slots_box.custom_minimum_size = Vector2(560, 0)
-	_slots_box.add_theme_constant_override("separation", 14)
-	_root.add_child(_slots_box)
+	_slots_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_slots_box.add_theme_constant_override("separation", 12)
+	slots_scroll.add_child(_slots_box)
 
 	_detail_panel = PanelContainer.new()
-	_detail_panel.position = Vector2(640, 90)
-	_detail_panel.custom_minimum_size = Vector2(600, 880)
+	_detail_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_detail_panel.add_theme_stylebox_override("panel", _flat())
-	_root.add_child(_detail_panel)
+	main.add_child(_detail_panel)
+
 	_detail_box = VBoxContainer.new()
 	_detail_box.add_theme_constant_override("separation", 10)
 	_detail_panel.add_child(_detail_box)
@@ -81,22 +115,44 @@ func refresh() -> void:
 		used[int(sv["id"])] = sv
 	for slot: int in range(ProgressionManager.MAX_SAVES):
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(560, 96)
-		btn.add_theme_font_size_override("font_size", 22)
-		btn.add_theme_color_override("font_color", COL_TXT)
-		btn.add_theme_stylebox_override("normal", _flat())
-		btn.add_theme_stylebox_override("hover", _flat())
-		if used.has(slot):
+		btn.custom_minimum_size = Vector2(0, 96)
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		var is_used: bool = used.has(slot)
+		if is_used:
 			var sv: Dictionary = used[slot]
-			btn.text = "%s — ennemis nv %d · %d victoires" % [sv["name"], sv["level"], sv["victories"]]
+			btn.text = "  %s\n  ennemis nv %d · %d victoires" % [sv["name"], sv["level"], sv["victories"]]
+			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_USED_BG, COL_BORDER, 4))
+			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_USED_BG.lightened(0.15), COL_BORDER, 5))
 		else:
-			btn.text = "+ Nouvelle partie (slot %d)" % (slot + 1)
+			btn.text = "  + Nouvelle partie (slot %d)" % (slot + 1)
+			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_EMPTY_BG, Color(0.3, 0.35, 0.45), 2))
+			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_EMPTY_BG.lightened(0.15), Color(0.3, 0.35, 0.45), 3))
+		btn.add_theme_font_size_override("font_size", 20)
+		btn.add_theme_color_override("font_color", Color(0.95, 0.94, 0.90))
+		if slot == _current_slot:
+			btn.add_theme_color_override("font_color", Color(1.0, 0.86, 0.4))
 		var slot_ref: int = slot
 		btn.pressed.connect(func() -> void: _on_slot_pressed(slot_ref))
 		_slots_box.add_child(btn)
 
 	if _current_slot >= 0 and ProgressionManager.save_exists(_current_slot):
 		_show_detail(ProgressionManager.load_save(_current_slot), _current_slot)
+	elif not _detail_box.get_children().is_empty() and _current_slot < 0:
+		for c: Node in _detail_box.get_children():
+			c.queue_free()
+
+func _flat_bg(bg: Color, border: Color, bw: int) -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = bg
+	s.border_color = border
+	s.set_border_width_all(bw)
+	s.set_corner_radius_all(12)
+	s.content_margin_left = 10
+	s.content_margin_right = 10
+	s.content_margin_top = 8
+	s.content_margin_bottom = 8
+	return s
 
 func _on_slot_pressed(slot: int) -> void:
 	var data: Dictionary
@@ -114,25 +170,22 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 
 	var title := Label.new()
 	title.text = "%s — ennemis niveau %d" % [data.get("name", ""), int(data.get("level", 10))]
-	title.add_theme_font_size_override("font_size", 26)
+	title.add_theme_font_size_override("font_size", 24)
 	title.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(title)
 
-	# Looter / recadrer l'équipe : bouton vers TeamSelection
 	var team_btn := Button.new()
 	team_btn.text = "Changer l'équipe (libre à chaque combat)"
-	team_btn.add_theme_font_size_override("font_size", 20)
+	team_btn.add_theme_font_size_override("font_size", 19)
 	team_btn.add_theme_color_override("font_color", COL_TXT)
 	team_btn.add_theme_stylebox_override("normal", _flat())
 	team_btn.pressed.connect(func() -> void:
-		_current = _current
 		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
 	_detail_box.add_child(team_btn)
 
-	# Renommer la partie
 	var name_btn := Button.new()
 	name_btn.text = "✎  RENOMMER CETTE PARTIE"
-	name_btn.add_theme_font_size_override("font_size", 20)
+	name_btn.add_theme_font_size_override("font_size", 19)
 	name_btn.add_theme_color_override("font_color", COL_TXT)
 	name_btn.add_theme_stylebox_override("normal", _flat())
 	name_btn.pressed.connect(func() -> void:
@@ -154,10 +207,9 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		line.call_deferred("grab_focus"))
 	_detail_box.add_child(name_btn)
 
-	# Supprimer la partie (avec confirmation)
 	var del_btn := Button.new()
 	del_btn.text = "🗑  SUPPRIMER CETTE PARTIE"
-	del_btn.add_theme_font_size_override("font_size", 20)
+	del_btn.add_theme_font_size_override("font_size", 19)
 	del_btn.add_theme_color_override("font_color", Color(0.35, 0.08, 0.05))
 	del_btn.add_theme_stylebox_override("normal", _flat())
 	del_btn.pressed.connect(func() -> void:
@@ -177,25 +229,22 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		confirm.popup_centered())
 	_detail_box.add_child(del_btn)
 
-	# Combat : lance la partie active
 	var fight_btn := Button.new()
 	fight_btn.text = "COMBAT — ennemis niveau %d" % int(data.get("level", 10))
-	fight_btn.add_theme_font_size_override("font_size", 24)
+	fight_btn.add_theme_font_size_override("font_size", 22)
 	fight_btn.add_theme_color_override("font_color", COL_TXT)
 	fight_btn.add_theme_stylebox_override("normal", _flat())
 	fight_btn.pressed.connect(func() -> void:
-		# Activer la partie (ennemis au niveau de la partie) et lancer le combat
 		GameManager.active_save = _current
 		GameManager.active_slot = slot
 		battle_requested.emit(slot)
 		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
 	_detail_box.add_child(fight_btn)
 
-	# Équipe et équipement
 	var team: Array = data.get("team", [])
 	var team_lbl := Label.new()
 	team_lbl.text = "Équipe :"
-	team_lbl.add_theme_font_size_override("font_size", 22)
+	team_lbl.add_theme_font_size_override("font_size", 21)
 	team_lbl.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(team_lbl)
 	for i: int in range(team.size()):
@@ -209,7 +258,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 
 	var chars_btn := Button.new()
 	chars_btn.text = "📈  PERSONNAGES — niveaux et caractéristiques"
-	chars_btn.add_theme_font_size_override("font_size", 20)
+	chars_btn.add_theme_font_size_override("font_size", 19)
 	chars_btn.add_theme_color_override("font_color", COL_TXT)
 	chars_btn.add_theme_stylebox_override("normal", _flat())
 	chars_btn.pressed.connect(func() -> void:
@@ -222,17 +271,19 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		ui.open(_current, slot))
 	_detail_box.add_child(chars_btn)
 
-	# Inventaire
 	var inv: Array = data.get("inventory", [])
 	var inv_lbl := Label.new()
 	inv_lbl.text = "Inventaire (%d objets disponibles à équiper) :" % inv.size()
-	inv_lbl.add_theme_font_size_override("font_size", 22)
+	inv_lbl.add_theme_font_size_override("font_size", 21)
 	inv_lbl.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(inv_lbl)
+
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(560, 360)
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_detail_box.add_child(scroll)
 	var inv_box := VBoxContainer.new()
+	inv_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	inv_box.add_theme_constant_override("separation", 6)
 	scroll.add_child(inv_box)
 	for j: int in range(inv.size()):
@@ -245,21 +296,20 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		row2.add_theme_font_size_override("font_size", 16)
 		row2.add_theme_color_override("font_color", ItemRules.rarity_color(it).darkened(0.4))
 		inv_box.add_child(row2)
-	# Journal des loots gagnés (historique complet de la partie)
+
 	var log_arr: Array = data.get("loot_log", [])
 	if log_arr.size() > 0:
 		var log_btn := Button.new()
 		log_btn.text = "Voir tous les loots gagnés (%d)" % log_arr.size()
-		log_btn.add_theme_font_size_override("font_size", 20)
+		log_btn.add_theme_font_size_override("font_size", 19)
 		log_btn.add_theme_color_override("font_color", COL_TXT)
 		log_btn.add_theme_stylebox_override("normal", _flat())
 		log_btn.pressed.connect(func() -> void: _show_loot_log(log_arr))
 		_detail_box.add_child(log_btn)
 
-	# Équiper : simple boucle d'équipement auto sur l'équipe en place
 	var auto_btn := Button.new()
 	auto_btn.text = "Équiper automatiquement les meilleurs objets"
-	auto_btn.add_theme_font_size_override("font_size", 20)
+	auto_btn.add_theme_font_size_override("font_size", 19)
 	auto_btn.add_theme_color_override("font_color", COL_TXT)
 	auto_btn.add_theme_stylebox_override("normal", _flat())
 	auto_btn.pressed.connect(_auto_equip)
@@ -275,9 +325,7 @@ func _auto_equip() -> void:
 	ProgressionManager.write_save(_current_slot, _current)
 	_show_detail(ProgressionManager.load_save(_current_slot), _current_slot)
 
-
 func _show_loot_log(log_arr: Array) -> void:
-	# Fenêtre centrée sur l'écran, avec voile sombre cliquable (ferme la fenêtre)
 	var overlay := ColorRect.new()
 	overlay.color = Color(0, 0, 0, 0.55)
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -305,7 +353,7 @@ func _show_loot_log(log_arr: Array) -> void:
 	scroll.add_child(rows)
 	for it: Dictionary in log_arr:
 		var row := Label.new()
-		row.text = "✦ [%s] %s (nv%d) %s" % [ItemRules.rarity_label(it), it.get("name", "?"),
+		row.text = "✨ [%s] %s (nv%d) %s" % [ItemRules.rarity_label(it), it.get("name", "?"),
 			int(it.get("level", 0)), ItemRules.stat_line(it)]
 		row.add_theme_font_size_override("font_size", 17)
 		row.add_theme_color_override("font_color", ItemRules.rarity_color(it).darkened(0.4))

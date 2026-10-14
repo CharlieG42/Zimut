@@ -16,6 +16,30 @@ const MAX_SAVES := 5
 const START_LEVEL := 10
 const BOSS_EVERY := 4
 
+## Palier XP du roster par niveau (index = niveau, 0 et 1 inutilisés).
+## Calibré pour une progression progressive et évolutive :
+## ~3 combats pour passer du niveau 10 au 11 (il faut 495 XP),
+## de plus en plus de combats par niveau ensuite, jusqu'à ~200 combats
+## pour le dernier palier (niveau 49 -> 50).
+const LEVEL_XP: PackedInt32Array = [
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 495, 990, 1503, 2211, 2947, 3902, 4892, 6128, 7626,
+	9402, 11472, 13862, 16838, 20450, 24722, 29726, 35774, 42950, 51320,
+	61302, 72992, 86872, 103072, 122146, 144262, 170054, 199732, 234018, 273255,
+	318183, 369213, 427173, 492548, 566396, 649304, 741734, 844924, 959766, 1086642,
+	1227195,
+]
+## Combats de la frontière nécessaires par niveau (calage du rythme : 3 combats
+## au niveau 10, ~200 pour le palier final).
+const LEVEL_COMBATS: PackedInt32Array = [
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	3, 3, 3, 4, 4, 5, 5, 6, 7, 8,
+	9, 10, 12, 14, 16, 18, 21, 24, 27, 31,
+	35, 40, 45, 51, 57, 64, 71, 79, 87, 96,
+	105, 115, 125, 136, 147, 158, 170, 182, 194, 207,
+	200,
+]
+
 ## Biomes : cycle des combats. Chaque biome dure BOSS_EVERY combats, le dernier
 ## étant le boss du biome. Les types viennent de la colonne « Biome » de ennemis.txt.
 const BIOME_ORDER: Array[String] = ["Forêt", "Montagne", "Désert"]
@@ -40,6 +64,9 @@ const RESOURCE_LABEL := {"Fer": "Fer", "Bois": "Bois", "Cuir": "Cuir", "Magie": 
 const RESOURCE_DROPS := {"Fer": 4, "Bois": 3, "Cuir": 3, "Magie": 2, "Venin": 1}
 ## +1 niveau d'ennemi toutes les N victoires (la difficulté monte doucement)
 const DIFFICULTY_CREEP_EVERY := 10
+
+## Niveau de combat par défaut quand aucun n'est connu (combat rapide).
+const DEFAULT_FIGHT_LEVEL := 10
 const CLASS_ORDER: Array[String] = ["Tank", "Assassin", "Chasseur", "Mage", "Druide", "Heal", "Invocateur", "Sylvain"]
 
 ## Emplacements d'équipement par personnage (clé -> type d'item accepté)
@@ -311,16 +338,35 @@ func class_row(classe: String, level: int) -> Dictionary:
 func xp_for_level(level: int) -> int:
 	if level <= 1:
 		return 0
-	var row: Dictionary = class_row("Tank", level)
-	if row.is_empty():
-		return 50 * level * (level - 1)
-	return int(row["xp"])
+	var lv: int = clampi(level, 1, ClassRules.MAX_LEVEL)
+	return int(LEVEL_XP[lv])
 
 func level_for_xp(xp: int) -> int:
 	var lvl: int = 1
 	while lvl < ClassRules.MAX_LEVEL and xp >= xp_for_level(lvl + 1):
 		lvl += 1
 	return lvl
+
+## XP rapportée par un combat gagné, calibrée sur le niveau du combat :
+## XP_PER_COMBAT_BASE × croissance exponentielle, bornée entre
+## XP_PER_COMBAT_FLOOR et XP_PER_COMBAT_CEIL pour que le rythme suivi par les
+## paliers LEVEL_XP / LEVEL_COMBATS soit respecté de bout en bout.
+func combat_xp(fight_level: int) -> int:
+	var lv: int = clampi(fight_level, 1, ClassRules.MAX_LEVEL)
+	var gain: float = ClassRules.XP_PER_COMBAT_BASE * pow(ClassRules.XP_PER_COMBAT_GROWTH, float(lv - 1))
+	gain = clampf(gain, ClassRules.XP_PER_COMBAT_FLOOR, ClassRules.XP_PER_COMBAT_CEIL)
+	return maxi(1, roundi(gain * ClassRules.FIGHT_XP_MULT))
+
+## Nombre de combats de la frontière estimé pour passer de `level` à `level + 1`.
+func combats_for_level(level: int) -> int:
+	var lv: int = clampi(level, 1, ClassRules.MAX_LEVEL)
+	var need: int = int(LEVEL_COMBATS[lv])
+	if need > 0:
+		return need
+	var step: int = xp_for_level(lv + 1) - xp_for_level(lv)
+	if step <= 0:
+		return 1
+	return maxi(1, int(round(float(step) / float(combat_xp(lv)))))
 
 ## Sorts d'une classe (ceux de « Druide » si la classe n'en a aucun, comme en combat).
 func spells_of(classe: String) -> Array:
@@ -783,18 +829,19 @@ func auto_points(data: Dictionary, classe: String) -> void:
 # ═══════════════════════════════════════════════════════════════════════════
 
 ## XP brute d'un combat à partir de la liste des ennemis [{type, level, boss}].
-func fight_xp(enemies: Array) -> int:
+func fight_xp(enemies: Array, fight_level: int = 0) -> int:
 	var total: float = 0.0
 	for e: Dictionary in enemies:
 		var xp: float = float(xp_for_enemy(String(e.get("type", "")), int(e.get("level", 1))))
 		if bool(e.get("boss", false)):
 			xp *= ClassRules.BOSS_XP_MULT
 		total += xp
-	return roundi(total * ClassRules.FIGHT_XP_MULT)
+	var xp_cap: int = combat_xp(fight_level if fight_level > 0 else DEFAULT_FIGHT_LEVEL)
+	return mini(roundi(total * ClassRules.FIGHT_XP_MULT), xp_cap)
 
 ## Distribue l'XP à toute la roster. Retourne le rapport par classe :
 ## { classe: { gain, from_level, to_level, points, spells, in_team } }
-func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0, fight_level: int = 0, guarantee_level: bool = false) -> Dictionary:
+func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0, fight_level: int = 0) -> Dictionary:
 	ensure_roster(data)
 	var team_classes: Array[String] = []
 	for m: Dictionary in data.get("team", []):
@@ -811,10 +858,6 @@ func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0, fight_level: in
 			gain *= ClassRules.BENCH_XP_RATIO   # classes hors équipe : 10 % de l'XP
 		var g: int = roundi(gain)
 		var from_lvl: int = int(e["level"])
-		# Victoire sur le combat de la frontière : chaque perso de l'équipe gagne AU MOINS
-		# un niveau, quel que soit le niveau de ses alliés.
-		if guarantee_level and in_team and from_lvl < ClassRules.MAX_LEVEL:
-			g = maxi(g, xp_for_level(from_lvl + 1) - int(e["xp"]))
 		e["xp"] = int(e["xp"]) + g
 		var to_lvl: int = mini(ClassRules.MAX_LEVEL, level_for_xp(int(e["xp"])))
 		var pts: int = 0
@@ -851,7 +894,7 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 			{"type": "Squelette", "level": fight_level, "boss": false},
 			{"type": "Loup", "level": fight_level, "boss": false},
 			{"type": "Dragonnet", "level": fight_level, "boss": was_boss}]
-	var report: Dictionary = award_xp(data, fight_xp(enemies), 1.0, fight_level, frontier)
+	var report: Dictionary = award_xp(data, fight_xp(enemies, fight_level), 1.0, fight_level)
 	if frontier:
 		data["victories"] = int(data.get("victories", 0)) + 1
 		var hist: Array = data.get("fight_levels", [])
@@ -896,7 +939,7 @@ func register_defeat(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	var enemies: Array = info.get("enemies", [])
 	var report: Dictionary = {}
 	if not enemies.is_empty():
-		report = award_xp(data, fight_xp(enemies), ClassRules.DEFEAT_XP_RATIO, fight_level)
+		report = award_xp(data, fight_xp(enemies, fight_level), ClassRules.DEFEAT_XP_RATIO, fight_level)
 	data["defeats"] = int(data.get("defeats", 0)) + 1
 	data["last_loots"] = []
 	data["last_resources"] = {}

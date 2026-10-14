@@ -266,44 +266,62 @@ func refresh() -> void:
 		else:
 			inv_lbl.text = "Inventaire : %d objet(s) disponible(s)" % inv.size()
 
-## Clic sur une case : ouvrir le pop-up de choix d'item.
+## Clic sur une case : ouvrir la fenêtre de choix d'item.
 func _on_slot_pressed(member_idx: int, slot_name: String) -> void:
 	_close_popup()
 	var accepted: Array = ProgressionManager.EQUIP_SLOTS.get(slot_name, [])
 	var m: Dictionary = _save["team"][member_idx]
 	var eq: Dictionary = m.get("equipment", {})
 	var inv: Array = _save.get("inventory", [])
-
+	var equipped: Dictionary = eq.get(slot_name, {})
+	# Voile sombre cliquable : referme la fenêtre et isole le choix
+	var overlay := ColorRect.new()
+	overlay.color = Color(0, 0, 0, 0.55)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	overlay.gui_input.connect(func(ev: InputEvent) -> void:
+		if ev is InputEventMouseButton and (ev as InputEventMouseButton).pressed:
+			_close_popup())
+	_root.add_child(overlay)
+	# Fenêtre centrée : personnage + emplacement en en-tête, liste triée, actions
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(center)
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", _flat(Color(0.98, 0.95, 0.85, 0.99), COL_BORDER, 14, 4))
-	_root.add_child(panel)
+	center.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
 	panel.add_child(box)
-
 	var title := Label.new()
 	title.text = "%s — %s" % [String(m.get("classe", "?")), slot_name.capitalize()]
 	title.add_theme_font_size_override("font_size", 22)
 	title.add_theme_color_override("font_color", COL_TXT)
 	box.add_child(title)
-
+	if not equipped.is_empty():
+		var cur_lbl := Label.new()
+		cur_lbl.text = "Porté : [%s] %s — %s" % [ItemRules.rarity_label(equipped),
+			String(equipped.get("name", "?")), ItemRules.stat_line(equipped)]
+		cur_lbl.add_theme_font_size_override("font_size", 16)
+		cur_lbl.add_theme_color_override("font_color", ItemRules.rarity_color(equipped).darkened(0.4))
+		box.add_child(cur_lbl)
 	if eq.has(slot_name):
 		var unequip := Button.new()
 		unequip.text = "✖  Déséquiper (%s)" % String(eq[slot_name].get("name", "?"))
 		unequip.add_theme_font_size_override("font_size", 20)
+		unequip.add_theme_color_override("font_color", COL_TXT)
+		unequip.add_theme_stylebox_override("normal", _flat())
 		unequip.pressed.connect(func() -> void:
 			ProgressionManager.unequip_item(_save, member_idx, slot_name)
 			ProgressionManager.write_save(_slot, _save)
 			_close_popup()
 			refresh())
 		box.add_child(unequip)
-
 	var err_lbl := Label.new()
 	err_lbl.add_theme_font_size_override("font_size", 17)
 	err_lbl.add_theme_color_override("font_color", Color(0.65, 0.12, 0.08))
 	err_lbl.visible = false
 	box.add_child(err_lbl)
-
 	var lvl: int = ProgressionManager.member_level(_save, String(m.get("classe", "")))
 	var order: Array = []
 	for j: int in range(inv.size()):
@@ -311,7 +329,8 @@ func _on_slot_pressed(member_idx: int, slot_name: String) -> void:
 			order.append(j)
 	order.sort_custom(func(a: int, b: int) -> bool: return ItemRules.power(inv[a]) > ItemRules.power(inv[b]))
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(760, minf(420.0, 62.0 * float(maxi(1, order.size()))))
+	var vw: float = get_viewport().get_visible_rect().size.x
+	scroll.custom_minimum_size = Vector2(minf(860.0, vw * 0.92), minf(430.0, 92.0 * float(maxi(1, order.size()))))
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", 6)
 	scroll.add_child(list)
@@ -321,17 +340,15 @@ func _on_slot_pressed(member_idx: int, slot_name: String) -> void:
 		var it: Dictionary = inv[j]
 		shown += 1
 		var item_btn := Button.new()
-		var fx_txt: String = " · ".join(PackedStringArray(ItemRules.fx_lines(ItemRules.parse_effect(String(it.get("effect", ""))))))
 		var too_low: bool = int(it.get("level", 0)) > lvl
-		item_btn.text = "[%s] %s (nv%d) — %s%s%s" % [ItemRules.rarity_label(it), String(it.get("name", "?")),
-			int(it.get("level", 0)), ItemRules.stat_line(it), ("  ✦ " + fx_txt) if fx_txt != "" else "",
-			"   🔒 niveau %d requis" % int(it.get("level", 0)) if too_low else ""]
+		item_btn.text = _item_button_text(it, equipped, too_low)
 		item_btn.tooltip_text = ItemRules.describe(it)
 		item_btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		item_btn.add_theme_font_size_override("font_size", 19)
+		item_btn.add_theme_font_size_override("font_size", 18)
 		item_btn.add_theme_color_override("font_color", ItemRules.rarity_color(it).darkened(0.45))
 		item_btn.add_theme_color_override("font_disabled_color", Color(0.5, 0.5, 0.5))
 		item_btn.add_theme_stylebox_override("normal", _flat(Color(0.99, 0.97, 0.9), ItemRules.rarity_color(it), 8, 3))
+		item_btn.add_theme_stylebox_override("hover", _flat(Color(1.0, 0.99, 0.94), ItemRules.rarity_color(it).lightened(0.3), 8, 4))
 		item_btn.disabled = too_low
 		item_btn.pressed.connect(func() -> void:
 			var err: String = ProgressionManager.equip_item(_save, member_idx, j)
@@ -349,22 +366,33 @@ func _on_slot_pressed(member_idx: int, slot_name: String) -> void:
 		none.add_theme_font_size_override("font_size", 17)
 		none.add_theme_color_override("font_color", COL_TXT)
 		box.add_child(none)
-
 	var cancel := Button.new()
-	cancel.text = "Annuler"
+	cancel.text = "Fermer"
 	cancel.add_theme_font_size_override("font_size", 20)
+	cancel.add_theme_color_override("font_color", COL_TXT)
+	cancel.add_theme_stylebox_override("normal", _flat())
 	cancel.pressed.connect(_close_popup)
 	box.add_child(cancel)
+	_popup = {"member": member_idx, "slot": slot_name, "panel": panel, "overlay": overlay}
 
-	# Position : près du personnage, borné à l'écran
-	panel.reset_size()
-	var dim: Vector2 = panel.get_combined_minimum_size()
-	var frame: PanelContainer = _member_frames[member_idx]
-	var origin: Vector2 = frame.global_position + Vector2(220, 380)
-	origin.x = clampf(origin.x, 10.0, 1920.0 - dim.x - 10.0)
-	origin.y = clampf(origin.y, 10.0, 1080.0 - dim.y - 10.0)
-	panel.position = origin
-	_popup = {"member": member_idx, "slot": slot_name, "panel": panel}
+## Libellé d'un objet dans la fenêtre de choix : rareté, nom, niveau, stats,
+## effets spéciaux, comparaison de puissance avec l'objet porté, verrou de niveau.
+func _item_button_text(it: Dictionary, equipped: Dictionary, too_low: bool) -> String:
+	var fx_txt: String = " · ".join(PackedStringArray(ItemRules.fx_lines(ItemRules.parse_effect(String(it.get("effect", ""))))))
+	var txt: String = "[%s] %s (nv%d) — %s" % [ItemRules.rarity_label(it), String(it.get("name", "?")),
+		int(it.get("level", 0)), ItemRules.stat_line(it)]
+	if fx_txt != "":
+		txt += "  ✦ " + fx_txt
+	if not equipped.is_empty():
+		var diff: int = int(ItemRules.power(it)) - int(ItemRules.power(equipped))
+		if diff > 0:
+			txt += "  ▲ +%d" % diff
+		elif diff < 0:
+			txt += "  ▼ %d" % diff
+	if too_low:
+		txt += "   🔒 niveau %d requis" % int(it.get("level", 0))
+	return txt
+
 
 ## Forge : fenêtre dédiée (ForgeUI).
 func _open_forge() -> void:
@@ -379,9 +407,9 @@ func _open_forge() -> void:
 
 func _close_popup() -> void:
 	if not _popup.is_empty():
-		var panel: PanelContainer = _popup.get("panel")
-		if panel != null and is_instance_valid(panel):
-			panel.queue_free()
+		var overlay: Control = _popup.get("overlay")
+		if overlay != null and is_instance_valid(overlay):
+			overlay.queue_free()
 		_popup = {}
 
 func _flat(bg: Color, border: Color, radius: int = 12, bw: int = 3) -> StyleBoxFlat:
@@ -392,9 +420,4 @@ func _flat(bg: Color, border: Color, radius: int = 12, bw: int = 3) -> StyleBoxF
 	s.set_corner_radius_all(radius)
 	return s
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and not _popup.is_empty():
-		var panel: PanelContainer = _popup.get("panel")
-		var rect: Rect2 = panel.get_global_rect() if panel else Rect2()
-		if not rect.has_point((event as InputEventMouseButton).position):
-			_close_popup()
+

@@ -577,6 +577,7 @@ static func enemy_spells(etype: String, force: int) -> Array:
 			s.append(_mk("Coup d'os", 2, 1, "%d dégâts" % int(force * 1.15)))
 		"Loup":
 			s.append(_mk("Morsure", 2, 1, "%d dégâts + saignement (%d dégâts/tour; 2 tours)" % [int(force * 1.0), int(force * 0.3)]))
+			s.append(_mk("Hurlement", 2, 4, "%d dégâts magiques + ralentit 1 pm (2 tours)" % int(force * 0.5)))
 		"Troll":
 			s.append(_mk("Poing de pierre", 3, 1, "%d dégâts" % int(force * 1.5)))
 		"Dragonnet":
@@ -584,6 +585,25 @@ static func enemy_spells(etype: String, force: int) -> Array:
 			s.append(_mk("Morsure", 2, 1, "%d dégâts" % int(force * 1.1)))
 		_:
 			s.append(_mk("Attaque", 2, 1, "%d dégâts" % force))
+	return s
+
+## Sorts des boss : le kit du type de base (CaC inclus) + une attaque puissante
+## à distance pour menacer l'équipe de loin.
+static func boss_spells(base_type: String, force: int) -> Array:
+	var s: Array = enemy_spells(base_type, force)
+	match base_type:
+		"Gobelin":
+			s.append(_mk("Pluie de dagues", 3, 6, "%d dégâts en zone (3x3)" % int(force * 0.8)))
+		"Squelette":
+			s.append(_mk("Trait spectral", 3, 6, "%d dégâts magiques + affaiblit (-%d dégâts; 2 tours)" % [int(force * 0.7), int(force * 0.15)]))
+		"Loup":
+			s.append(_mk("Rugissement terrifiant", 3, 6, "%d dégâts magiques + étourdit 1 tour (35%%)" % int(force * 0.6)))
+		"Troll":
+			s.append(_mk("Jet de rocher", 3, 6, "%d dégâts" % int(force * 0.9)))
+		"Dragonnet":
+			s.append(_mk("Boule de feu", 3, 7, "%d dégâts en zone (3x3) + brûle (%d dégâts/tour; 2 tours)" % [int(force * 0.8), int(force * 0.25)]))
+		_:
+			s.append(_mk("Frappe à distance", 3, 6, "%d dégâts" % int(force * 0.8)))
 	return s
 
 

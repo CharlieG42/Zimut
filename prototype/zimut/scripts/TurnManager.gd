@@ -92,6 +92,7 @@ func plan(e: Dictionary) -> Dictionary:
 			var sc: float = _score_cast(e, spell, p, c)
 			if sc <= 0.0:
 				continue
+			sc *= 1.0 + _score_jitter(e)
 			var eff: float = sc / (float(spell["cost_pa"]) + 1.0)
 			if eff > best_eff:
 				best_eff = eff
@@ -186,6 +187,34 @@ func _has_negative(e: Dictionary) -> bool:
 			return true
 	return false
 
+## Personnalité de combat d'une entité ennemie, stable au fil du combat (dérivée
+## de l'uid) pour varier les comportements entre ennemis et rendre les combats
+## moins monotones : choix de cible, distance de tir, repli.
+##   - agressif : fonce sur la cible la plus proche, reste au contact
+##   - prudent : garde ses distances, se replie quand il est blessé
+##   - opportuniste : chasse les lanceurs de sorts fragiles
+##   - bagarreur (boss) : reste au CaC en forme, snipe à distance quand blessé
+func _trait(e: Dictionary) -> String:
+	if bool(e.get("boss", false)):
+		return "brawler"
+	if String(e.get("team", "")) != "enemy":
+		return "balanced"
+	match absi(int(e.get("uid", 0))) % 3:
+		0:
+			return "aggressive"
+		1:
+			return "cautious"
+		_:
+			return "opportunist"
+
+## Petite variation des scores de sort selon l'entité et le tour : deux ennemis
+## du même type ne lanceront pas toujours exactement les mêmes sorts.
+func _score_jitter(e: Dictionary) -> float:
+	if String(e.get("team", "")) != "enemy":
+		return 0.0
+	var h: int = (absi(int(e.get("uid", 0))) * 131 + int(game_manager.turn_count) * 17) % 100
+	return float(h - 50) / 250.0
+
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  Déplacement
@@ -218,6 +247,7 @@ func _pick_target(e: Dictionary) -> Dictionary:
 		for f: Dictionary in foes:
 			if int(f["uid"]) == int(Combat.status_value(e, "taunted")):
 				return f
+	var trait: String = _trait(e)
 	var best: Dictionary = {}
 	var best_score: float = -1e9
 	for f2: Dictionary in foes:
@@ -234,6 +264,17 @@ func _pick_target(e: Dictionary) -> Dictionary:
 		# Finir les cibles quasi mortes (chasse à l'exécution)
 		if gm.hp_ratio(f2) < 0.25:
 			sc += 10.0
+		# Personnalités : l'agressif fonce sur le plus proche (distance dominante),
+		# l'opportuniste chasse les mages et soigneurs, le prudent reste neutre.
+		match trait:
+			"aggressive":
+				sc -= d * 4.0
+			"opportunist":
+				if classe in ["Mage", "Heal", "Invocateur", "Druide"]:
+					sc += 16.0
+			"brawler":
+				if gm.hp_ratio(e) < 0.5:
+					sc += 6.0 * (1.0 - gm.hp_ratio(f2))
 		if sc > best_score:
 			best_score = sc
 			best = f2
@@ -258,6 +299,19 @@ func _plan_move(e: Dictionary) -> Dictionary:
 			reach_rng = maxi(reach_rng, int(s["range"]))
 	var ranged: bool = reach_rng >= 3
 	var desired: int = mini(reach_rng, 4) if ranged else 1
+	# Personnalités : l'agressif colle sa cible même s'il sait tirer ; le prudent
+	# reste à distance ; le bagarreur (boss) préfère le CaC en forme et snipe
+	# à portée max quand il est blessé.
+	var trait: String = _trait(e)
+	var hp: float = gm.hp_ratio(e)
+	match trait:
+		"aggressive":
+			desired = 1
+		"cautious":
+			if ranged:
+				desired = mini(reach_rng, 5)
+		"brawler":
+			desired = maxi(1, mini(reach_rng, 4) if hp < 0.5 and ranged else 1)
 
 	var dmap: Dictionary = _dist_map(tpos, bool(e.get("fly", false)))
 	var reach: Dictionary = gm.compute_reach(e)
@@ -285,6 +339,11 @@ func _cell_score(e: Dictionary, c: Vector2i, tpos: Vector2i, dmap: Dictionary, d
 	if desired > 1:
 		# Les tireurs évitent d'être au contact d'un ennemi — et fuient carrément s'ils sont blessés
 		var flee: float = 14.0 if gm.hp_ratio(e) >= 0.4 else 30.0
+		match _trait(e):
+			"cautious":
+				flee *= 1.5
+			"brawler":
+				flee *= 0.5
 		var in_contact: int = 0
 		for f: Dictionary in gm.enemies_of(e):
 			if Combat.manhattan(c, gm.pos_of(f)) <= 1:
