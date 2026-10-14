@@ -296,19 +296,25 @@ class SpellCard extends Button:
 		draw_circle(mc + Vector2(0, -2), 17.5, ecol.darkened(0.32))
 		draw_arc(mc, 21.5, 0.0, TAU, 40, ecol.lightened(0.15) if usable else ecol, 1.8, true)
 		_icon(mc, _elem, String(p["kind"]))
-		# gemme PA coin haut-droit ; PM sous elle si le sort en coûte
+		# Coûts clairement identifiés : PA en bleu en haut, PM en vert en bas.
+		# Le libellé explicite évite de demander au joueur de mémoriser les couleurs.
 		var pa_col: Color = Color(0.16, 0.5, 0.95)
 		if not usable and gm != null and not gm.active_entity.is_empty() and not gm.can_afford(gm.active_entity, spell):
 			pa_col = Color(0.85, 0.25, 0.22)
+		var cost_font: Font = ThemeDB.fallback_font
+		draw_string_outline(cost_font, Vector2(lw - 57.0, 14.0), "PA", HORIZONTAL_ALIGNMENT_RIGHT, 20.0, 10, 3, Color(0, 0, 0, 0.9))
+		draw_string(cost_font, Vector2(lw - 57.0, 14.0), "PA", HORIZONTAL_ALIGNMENT_RIGHT, 20.0, 10, Color(0.65, 0.82, 1.0) if usable else Color(0.58, 0.6, 0.65))
 		_gem(Vector2(lw - 20.0, 18.0), 13.0, str(int(spell.get("cost_pa", 0))), pa_col)
 		if int(spell.get("cost_pm", 0)) > 0:
+			draw_string_outline(cost_font, Vector2(lw - 57.0, lh - 10.0), "PM", HORIZONTAL_ALIGNMENT_RIGHT, 20.0, 10, 3, Color(0, 0, 0, 0.9))
+			draw_string(cost_font, Vector2(lw - 57.0, lh - 10.0), "PM", HORIZONTAL_ALIGNMENT_RIGHT, 20.0, 10, Color(0.58, 1.0, 0.68) if usable else Color(0.58, 0.6, 0.65))
 			_gem(Vector2(lw - 20.0, lh - 18.0), 13.0, str(int(spell.get("cost_pm", 0))), Color(0.25, 0.72, 0.4))
-		# nom compact (2 lignes max) centré dans l'espace restant
+		# nom compact (2 lignes max), avec une zone réservée aux coûts à droite
 		var nm: String = String(spell.get("name", "Sort"))
 		var lines: PackedStringArray = _wrap(nm, 12)
 		var fs: int = 13 if nm.length() <= 14 else 12
 		var tx: float = 58.0
-		var tw: float = lw - tx - 40.0
+		var tw: float = lw - tx - 62.0
 		var ny: float = lh * 0.5 - 4.0 if lines.size() == 1 else lh * 0.5 - 13.0
 		for i: int in range(lines.size()):
 			var pos := Vector2(tx, ny + float(i) * 15.0)
