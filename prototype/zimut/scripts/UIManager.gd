@@ -833,7 +833,7 @@ func _build_ui() -> void:
 	_tip_label = Label.new()
 	_tip_label.add_theme_font_size_override("font_size", int(22.0 * _spell_scale))
 	_tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_tip_label.custom_minimum_size = Vector2(420.0 * _spell_scale, 0)
+	_tip_label.custom_minimum_size = Vector2(340.0 * _spell_scale, 0)
 	_tip_panel.add_child(_tip_label)
 	_root.add_child(_tip_panel)
 
