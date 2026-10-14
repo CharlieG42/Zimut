@@ -929,6 +929,7 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 			"vita": int(l.get("vita", 0)), "defense": int(l.get("defense", 0)),
 		})
 	data["loot_log"] = log_arr
+	_apply_campaign_victory(data)
 	progression_changed.emit()
 	return data
 
@@ -948,8 +949,48 @@ func register_defeat(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	data["level"] = frontier_level(data)
 	data["last_result"] = {"victory": false, "xp": report, "boss": bool(info.get("boss", false)),
 		"fight_level": fight_level, "turns": int(info.get("turns", 0))}
+	_apply_campaign_defeat(data)
 	progression_changed.emit()
 	return data
+
+## Applique les conséquences de campagne au même profil que le mode Tactique.
+## La ville n'est ajoutée au territoire qu'après une victoire réelle.
+func _apply_campaign_victory(data: Dictionary) -> void:
+	var mode: String = String(data.get("campaign_mode", ""))
+	if mode == "conquest":
+		var conquest: Dictionary = data.get("conquest", {})
+		var pending: String = String(conquest.get("pending_city", ""))
+		if pending != "":
+			var owned: Array = conquest.get("owned", ["capitale"])
+			if not owned.has(pending):
+				owned.append(pending)
+			conquest["owned"] = owned
+			conquest["pending_city"] = ""
+			conquest.erase("pending_level")
+			data["conquest"] = conquest
+	elif mode == "adventure":
+		var adventure: Dictionary = data.get("adventure", {})
+		var pending_challenge: String = String(adventure.get("pending_challenge", ""))
+		if pending_challenge != "":
+			var completed: Array = adventure.get("completed", [])
+			if not completed.has(pending_challenge):
+				completed.append(pending_challenge)
+			adventure["completed"] = completed
+			adventure["pending_challenge"] = ""
+			data["adventure"] = adventure
+
+## En cas de défaite, on ne valide pas la conquête/le défi : le joueur pourra retenter.
+func _apply_campaign_defeat(data: Dictionary) -> void:
+	var mode: String = String(data.get("campaign_mode", ""))
+	if mode == "conquest":
+		var conquest: Dictionary = data.get("conquest", {})
+		conquest["pending_city"] = ""
+		conquest.erase("pending_level")
+		data["conquest"] = conquest
+	elif mode == "adventure":
+		var adventure: Dictionary = data.get("adventure", {})
+		adventure["pending_challenge"] = ""
+		data["adventure"] = adventure
 
 ## Numéro du prochain combat (1 = premier). Boss tous les BOSS_EVERY combats.
 func next_fight_number(data: Dictionary) -> int:
