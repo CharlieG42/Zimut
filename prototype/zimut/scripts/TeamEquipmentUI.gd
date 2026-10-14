@@ -310,7 +310,7 @@ func _on_slot_pressed(member_idx: int, slot_name: String) -> void:
 		unequip.text = "✖  Déséquiper (%s)" % String(eq[slot_name].get("name", "?"))
 		unequip.add_theme_font_size_override("font_size", 20)
 		unequip.add_theme_color_override("font_color", COL_TXT)
-		unequip.add_theme_stylebox_override("normal", _flat())
+		unequip.add_theme_stylebox_override("normal", _flat(COL_PANEL, COL_BORDER))
 		unequip.pressed.connect(func() -> void:
 			ProgressionManager.unequip_item(_save, member_idx, slot_name)
 			ProgressionManager.write_save(_slot, _save)
@@ -370,7 +370,7 @@ func _on_slot_pressed(member_idx: int, slot_name: String) -> void:
 	cancel.text = "Fermer"
 	cancel.add_theme_font_size_override("font_size", 20)
 	cancel.add_theme_color_override("font_color", COL_TXT)
-	cancel.add_theme_stylebox_override("normal", _flat())
+	cancel.add_theme_stylebox_override("normal", _flat(COL_PANEL, COL_BORDER))
 	cancel.pressed.connect(_close_popup)
 	box.add_child(cancel)
 	_popup = {"member": member_idx, "slot": slot_name, "panel": panel, "overlay": overlay}

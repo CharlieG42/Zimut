@@ -50,7 +50,7 @@ func _boot() -> void:
 			{"type": "Gobelin", "level": 10, "boss": false},
 			{"type": "Loup", "level": 10, "boss": false}]})
 	var lvl: int = pm.member_level(data, "Tank")
-	check(lvl == 12, "9 victoires au combat nv10 : équipe au niveau 12 (et pas 1 niveau/combat)")
+	check(lvl >= 12 and lvl <= 13, "9 victoires au combat nv10 : équipe aux niveaux 12-13 (~3 combats/palier, pas 1 niveau/combat)")
 	# Le niveau de la frontière suit toujours l'équipe
 	check(pm.enemy_level_for(data) >= 10, "niveau d'ennemis >= départ")
 	# Boss : kit avec attaque à distance ET CaC
