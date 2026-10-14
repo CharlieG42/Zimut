@@ -329,6 +329,9 @@ func init_entities() -> void:
 	var boss_fight: bool = not active_save.is_empty() and ProgressionManager.is_boss_fight(active_save)
 	fight_is_boss = boss_fight
 	var campaign_mode: String = String(active_save.get("campaign_mode", "")) if not active_save.is_empty() else ""
+	if campaign_mode in ["adventure", "conquest"]:
+		boss_fight = false
+		fight_is_boss = false
 	fight_biome = "Forêt" if campaign_mode in ["adventure", "conquest"] else (ProgressionManager.next_biome(active_save) if not active_save.is_empty() else "Forêt")
 	## Boss de fin de cycle : le boss est au niveau du combat, ses sbires 2 niveaux en dessous
 	var minion_lvl: int = maxi(1, lvl - 2) if boss_fight else lvl
