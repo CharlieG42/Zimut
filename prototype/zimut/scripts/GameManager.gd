@@ -319,6 +319,11 @@ func init_entities() -> void:
 
 	# ── Ennemis du biome : boss + 3 sbires tous les 4 combats, sinon 4 ennemis ──
 	var lvl: int = ProgressionManager.enemy_level_for(active_save) if not active_save.is_empty() else DEFAULT_ENEMY_LEVEL
+	# En Conquête, la difficulté suit la ville ciblée sans créer une seconde progression.
+	if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "conquest":
+		var conquest: Dictionary = active_save.get("conquest", {})
+		if String(conquest.get("pending_city", "")) != "":
+			lvl = maxi(1, int(conquest.get("pending_level", lvl)))
 	fight_enemies = []
 	fight_is_boss = false
 	var boss_fight: bool = not active_save.is_empty() and ProgressionManager.is_boss_fight(active_save)
