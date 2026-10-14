@@ -1,10 +1,10 @@
 extends CanvasLayer
 
 ## MainMenuUI.gd — Écran d'accueil illustré de Zimut.
-## L'illustration porte les libellés visuels ; des zones interactives transparentes
-## conservent de vrais boutons Godot et restent compatibles avec les builds Android.
+## Les plaques sont dessinées dans le SVG ; les zones interactives restent de vrais
+## contrôles Godot afin de fonctionner avec la souris, le tactile et les builds Android.
 
-const BG_PATH := "res://assets/ui/main_menu_bg.svg"
+const BG_TEXTURE: Texture2D = preload("res://assets/ui/main_menu_bg.svg")
 
 func _ready() -> void:
 	layer = 10
@@ -20,28 +20,54 @@ func _ready() -> void:
 	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	bg.stretch_mode = TextureRect.STRETCH_SCALE
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var texture: Texture2D = load(BG_PATH) as Texture2D
-	if texture != null:
-		bg.texture = texture
-	else:
-		push_error("Illustration du menu introuvable : " + BG_PATH)
-		var fallback := ColorRect.new()
-		fallback.color = Color("#1c3540")
-		fallback.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		root.add_child(fallback)
+	bg.texture = BG_TEXTURE
 	root.add_child(bg)
 
-	# Les hitboxes recouvrent les quatre plaques peintes dans l'illustration.
-	_add_menu_hitbox(root, "NouvellePartie", 0.682, 0.475, 0.946, 0.566, func() -> void:
-		GameManager.active_save = {}
-		GameManager.active_slot = -1
-		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn"))
-	_add_menu_hitbox(root, "Continuer", 0.682, 0.586, 0.946, 0.677, func() -> void:
-		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn"))
+	# Les zones sont relatives à la fenêtre : elles restent alignées sur les plaques
+	# peintes même si la résolution ou le ratio de l'écran Android change.
+	_add_menu_hitbox(root, "NouvellePartie", 0.682, 0.475, 0.946, 0.566, _start_new_game)
+	_add_menu_hitbox(root, "Continuer", 0.682, 0.586, 0.946, 0.677, _continue_game)
 	_add_menu_hitbox(root, "Options", 0.682, 0.697, 0.946, 0.788, func() -> void:
 		get_tree().change_scene_to_file("res://scenes/Settings.tscn"))
 	_add_menu_hitbox(root, "Quitter", 0.682, 0.808, 0.946, 0.900, func() -> void:
 		get_tree().quit())
+
+
+func _start_new_game() -> void:
+	GameManager.active_save = {}
+	GameManager.active_slot = -1
+	GameManager.clear_custom_team()
+	GameManager.menu_intent = "new"
+	get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
+
+
+## Reprend la sauvegarde la plus récemment modifiée, puis rouvre la sélection d'équipe
+## (qui restaure l'équipe enregistrée avant le prochain combat).
+func _continue_game() -> void:
+	var saves: Array = ProgressionManager.list_saves()
+	if saves.is_empty():
+		# Première visite : le bouton Continuer propose simplement de créer la partie.
+		_start_new_game()
+		return
+
+	var latest: Dictionary = saves[0]
+	for entry: Dictionary in saves:
+		if String(entry.get("timestamp", "")) > String(latest.get("timestamp", "")):
+			latest = entry
+
+	var slot: int = int(latest.get("id", -1))
+	var data: Dictionary = ProgressionManager.load_save(slot)
+	if slot < 0 or data.is_empty():
+		# Sauvegarde devenue illisible : revenir au gestionnaire sans écraser de données.
+		GameManager.menu_intent = ""
+		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
+		return
+
+	GameManager.active_slot = slot
+	GameManager.active_save = data
+	GameManager.clear_custom_team()
+	GameManager.menu_intent = ""
+	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
 
 
 func _add_menu_hitbox(parent: Control, node_name: String, left: float, top: float, right: float, bottom: float, action: Callable) -> void:
