@@ -1,109 +1,103 @@
 extends CanvasLayer
 
-## MainMenuUI.gd — Écran d'accueil Zimut : deux options.
-##   - « Entrer dans le monde de Zimut » : accès aux parties (slot de sauvegarde),
-##     puis choix du mode de jeu (Combats Tactiques ; Aventure et Conquête à venir)
-##   - « Réglages » : difficulté des combats et rapidité de progression XP
+## MainMenuUI.gd — Écran d'accueil illustré de Zimut.
+## Les plaques sont dessinées dans le SVG ; les zones interactives restent de vrais
+## contrôles Godot afin de fonctionner avec la souris, le tactile et les builds Android.
 
-const COL_PANEL := Color(0.94, 0.89, 0.78, 0.97)
-const COL_BORDER := Color(0.72, 0.58, 0.28, 1.0)
-const COL_TXT := Color(0.22, 0.15, 0.05)
-const COL_DISABLED_BG := Color(0.14, 0.16, 0.22, 0.85)
-const COL_DISABLED_BORDER := Color(0.28, 0.31, 0.39, 1.0)
-const COL_DISABLED_TXT := Color(0.45, 0.48, 0.55)
+const BG_TEXTURE: Texture2D = preload("res://assets/ui/main_menu_bg.svg")
 
 func _ready() -> void:
+	layer = 10
 	var root := Control.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.name = "MainMenuRoot"
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 
-	var bg := ColorRect.new()
-	bg.color = Color(0.06, 0.09, 0.14, 0.95)
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var bg := TextureRect.new()
+	bg.name = "MainMenuArtwork"
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bg.stretch_mode = TextureRect.STRETCH_SCALE
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bg.texture = BG_TEXTURE
 	root.add_child(bg)
 
-	var title := Label.new()
-	title.text = "ZIMUT"
-	title.add_theme_font_size_override("font_size", 84)
-	title.add_theme_color_override("font_color", Color(1.0, 0.86, 0.4))
-	title.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	title.offset_top = 130.0
-	title.offset_bottom = 240.0
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	root.add_child(title)
+	# Les zones sont relatives à la fenêtre : elles restent alignées sur les plaques
+	# peintes même si la résolution ou le ratio de l'écran Android change.
+	_add_menu_hitbox(root, "NouvellePartie", 0.682, 0.475, 0.946, 0.566, _start_new_game)
+	_add_menu_hitbox(root, "Continuer", 0.682, 0.586, 0.946, 0.677, _continue_game)
+	_add_menu_hitbox(root, "Options", 0.682, 0.697, 0.946, 0.788, func() -> void:
+		get_tree().change_scene_to_file("res://scenes/Settings.tscn"))
+	_add_menu_hitbox(root, "Quitter", 0.682, 0.808, 0.946, 0.900, func() -> void:
+		get_tree().quit())
 
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.add_child(center)
 
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 22)
-	center.add_child(box)
+func _start_new_game() -> void:
+	GameManager.active_save = {}
+	GameManager.active_slot = -1
+	GameManager.clear_custom_team()
+	GameManager.menu_intent = "new"
+	get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
 
-	box.add_child(_mode_button("Entrer dans le monde de Zimut", "Parties, équipe et combats", true, func() -> void:
-		GameManager.active_save = {}
-		GameManager.active_slot = -1
-		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")))
 
-	box.add_child(_mode_button("Réglages", "Difficulté des combats et rapidité de l'XP", true, func() -> void:
-		get_tree().change_scene_to_file("res://scenes/Settings.tscn")))
+## Reprend la sauvegarde la plus récemment modifiée, puis rouvre la sélection d'équipe
+## (qui restaure l'équipe enregistrée avant le prochain combat).
+func _continue_game() -> void:
+	var saves: Array = ProgressionManager.list_saves()
+	if saves.is_empty():
+		# Première visite : le bouton Continuer propose simplement de créer la partie.
+		_start_new_game()
+		return
 
-func _mode_button(title_txt: String, desc: String, enabled: bool, cb: Callable) -> Button:
-	var b := Button.new()
-	b.text = ""
-	b.custom_minimum_size = Vector2(560, 110)
-	b.disabled = not enabled
-	b.focus_mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE
+	var latest: Dictionary = saves[0]
+	for entry: Dictionary in saves:
+		if String(entry.get("timestamp", "")) > String(latest.get("timestamp", "")):
+			latest = entry
 
-	var vb := VBoxContainer.new()
-	vb.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vb.add_theme_constant_override("separation", 4)
-	vb.alignment = BoxContainer.ALIGNMENT_CENTER
-	b.add_child(vb)
+	var slot: int = int(latest.get("id", -1))
+	var data: Dictionary = ProgressionManager.load_save(slot)
+	if slot < 0 or data.is_empty():
+		# Sauvegarde devenue illisible : revenir au gestionnaire sans écraser de données.
+		GameManager.menu_intent = ""
+		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
+		return
 
-	var t := Label.new()
-	t.text = title_txt
-	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	t.add_theme_font_size_override("font_size", 28)
-	t.add_theme_color_override("font_color", COL_TXT if enabled else COL_DISABLED_TXT)
-	vb.add_child(t)
+	GameManager.active_slot = slot
+	GameManager.active_save = data
+	GameManager.clear_custom_team()
+	GameManager.menu_intent = ""
+	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
 
-	var d := Label.new()
-	d.text = desc
-	d.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	d.add_theme_font_size_override("font_size", 18)
-	d.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12) if enabled else COL_DISABLED_TXT)
-	vb.add_child(d)
+
+func _add_menu_hitbox(parent: Control, node_name: String, left: float, top: float, right: float, bottom: float, action: Callable) -> void:
+	var button := Button.new()
+	button.name = node_name
+	button.text = ""
+	button.tooltip_text = node_name
+	button.anchor_left = left
+	button.anchor_top = top
+	button.anchor_right = right
+	button.anchor_bottom = bottom
+	button.offset_left = 0.0
+	button.offset_top = 0.0
+	button.offset_right = 0.0
+	button.offset_bottom = 0.0
+	button.focus_mode = Control.FOCUS_ALL
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
 
 	var normal := StyleBoxFlat.new()
-	if enabled:
-		normal.bg_color = COL_PANEL
-		normal.border_color = COL_BORDER
-	else:
-		normal.bg_color = COL_DISABLED_BG
-		normal.border_color = COL_DISABLED_BORDER
-	normal.set_border_width_all(3)
-	normal.set_corner_radius_all(12)
-	normal.content_margin_left = 16
-	normal.content_margin_right = 16
-	normal.content_margin_top = 12
-	normal.content_margin_bottom = 12
-
-	var hover := normal.duplicate()
-	if enabled:
-		hover.bg_color = Color(0.99, 0.95, 0.83)
-		hover.border_color = Color(0.85, 0.68, 0.3)
-
-	var pressed_s := normal.duplicate()
-	if enabled:
-		pressed_s.bg_color = Color(0.88, 0.82, 0.66)
-
-	b.add_theme_stylebox_override("normal", normal)
-	b.add_theme_stylebox_override("hover", hover)
-	b.add_theme_stylebox_override("pressed", pressed_s)
-	b.add_theme_stylebox_override("disabled", normal)
-
-	if enabled and cb.is_valid():
-		b.pressed.connect(cb)
-	return b
+	normal.bg_color = Color(0.15, 0.35, 0.2, 0.0)
+	normal.set_corner_radius_all(24)
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = Color(0.7, 0.9, 0.45, 0.14)
+	hover.border_color = Color(1.0, 0.86, 0.4, 0.55)
+	hover.set_border_width_all(2)
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = Color(0.05, 0.12, 0.08, 0.28)
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", hover)
+	button.add_theme_stylebox_override("pressed", pressed)
+	button.add_theme_stylebox_override("focus", hover)
+	button.pressed.connect(action)
+	parent.add_child(button)

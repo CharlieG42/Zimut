@@ -87,6 +87,7 @@ var auto_mode: bool              = false
 var custom_team: Array           = []
 var active_save: Dictionary      = {}   # sauvegarde ProgressionManager en cours
 var active_slot: int             = -1
+var menu_intent: String           = ""   # intention transmise à l’écran Parties (ex. nouvelle partie)
 var fight_enemies: Array         = []   # [{type, level, boss}] du combat en cours (pour l'XP)
 var fight_is_boss: bool          = false
 var fight_biome: String          = "Forêt"  # biome du combat en cours
