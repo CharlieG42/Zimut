@@ -23,6 +23,10 @@ var _current_slot: int = -1
 
 func _ready() -> void:
 	_build()
+	var intent: String = GameManager.menu_intent
+	GameManager.menu_intent = ""
+	if intent == "new":
+		_select_first_empty_slot()
 
 func _build() -> void:
 	_root = Control.new()
@@ -163,7 +167,28 @@ func _on_slot_pressed(slot: int) -> void:
 		data = ProgressionManager.load_save(slot)
 	else:
 		data = ProgressionManager.new_game(slot)
-	_show_detail(data, slot)
+	_current = data
+	_current_slot = slot
+	refresh()
+
+
+## Depuis « Nouvelle partie » sur l'accueil, sélectionne le premier emplacement libre.
+## La partie n'est créée qu'ici, après une action explicite du joueur.
+func _select_first_empty_slot() -> void:
+	for slot: int in range(ProgressionManager.MAX_SAVES):
+		if not ProgressionManager.save_exists(slot):
+			_on_slot_pressed(slot)
+			return
+
+	# Aucun emplacement libre : on ne remplace jamais une sauvegarde existante.
+	for child: Node in _detail_box.get_children():
+		child.queue_free()
+	var message := Label.new()
+	message.text = "Tous les emplacements sont occupés.\nSupprime une partie existante pour en commencer une nouvelle."
+	message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	message.add_theme_font_size_override("font_size", 22)
+	message.add_theme_color_override("font_color", COL_TXT)
+	_detail_box.add_child(message)
 
 func _show_detail(data: Dictionary, slot: int) -> void:
 	_current = data
