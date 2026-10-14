@@ -3,7 +3,7 @@ extends CanvasLayer
 ##   • Timeline d'initiative en portraits (haut)
 ##   • Panneau du personnage actif : PV, orbes PA / PM (bas-gauche)
 ##   • Colonne de sorts compacte à gauche, avec coûts, raccourcis et infobulle
-##   • Gros bouton « FIN DU TOUR », Auto, Son, changement d'équipe (bas-droite)
+##   • Commandes compactes : fin de tour au-dessus de la timeline, quitter sous le portrait actif
 ##   • Journal de combat, bannières de tour, fiche de survol, écran de fin
 ## Toute l'interface est construite par code (les anciens nœuds de la scène sont masqués).
 
@@ -33,8 +33,7 @@ var _spell_box: Container
 var _tip_panel: PanelContainer
 var _tip_label: Label
 var _end_btn: Button
-var _auto_btn: Button
-var _sound_btn: Button
+var _quit_btn: Button
 var _log_box: VBoxContainer
 var _banner: Label
 var _info_panel: PanelContainer
@@ -183,6 +182,7 @@ class SpellCard extends Button:
 		var lh: float = size.y / s
 		if badge_mode:
 			_draw_badge(font, p, lw, lh)
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			return
 		var accent: Color = base_col if usable else Color(0.40, 0.43, 0.50)
 		var ecol: Color = SpellFx.colors(_elem)[0] if usable else Color(0.4, 0.43, 0.5)
@@ -726,7 +726,7 @@ func _build_ui() -> void:
 	tl.anchor_bottom = 1.0
 	tl.offset_left = -168.0
 	tl.offset_right = -14.0
-	tl.offset_top = 10.0
+	tl.offset_top = 76.0
 	tl.offset_bottom = -208.0
 	_root.add_child(tl)
 	_timeline = tl
@@ -746,7 +746,7 @@ func _build_ui() -> void:
 
 	# Barre de sorts compacte en bas, sur une seule ligne (inspiration Dofus/Wakfu).
 	# Les sorts supplémentaires restent accessibles par défilement horizontal.
-	var badge_w: float = 158.0 * _spell_scale
+	var badge_w: float = 86.0 * _spell_scale
 	var badge_h: float = 58.0 * _spell_scale
 	_spell_scroll = ScrollContainer.new()
 	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
@@ -756,7 +756,7 @@ func _build_ui() -> void:
 	_spell_scroll.anchor_top = 1.0
 	_spell_scroll.anchor_bottom = 1.0
 	_spell_scroll.offset_left = 240.0
-	_spell_scroll.offset_right = -470.0
+	_spell_scroll.offset_right = -190.0
 	_spell_scroll.offset_top = -(badge_h + 18.0)
 	_spell_scroll.offset_bottom = -14.0
 	_spell_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -766,7 +766,7 @@ func _build_ui() -> void:
 	spell_panel.anchor_top = 1.0
 	spell_panel.anchor_bottom = 1.0
 	spell_panel.offset_left = 232.0
-	spell_panel.offset_right = -462.0
+	spell_panel.offset_right = -182.0
 	spell_panel.offset_top = -(badge_h + 26.0)
 	spell_panel.offset_bottom = -8.0
 	spell_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -800,54 +800,42 @@ func _build_ui() -> void:
 
 	# Bouton fin de tour
 	_end_btn = Button.new()
-	_end_btn.text = "FIN DU\nTOUR"
-	_end_btn.add_theme_font_size_override("font_size", 30)
+	_end_btn.text = "FIN DU TOUR"
+	_end_btn.add_theme_font_size_override("font_size", 18)
 	_end_btn.add_theme_color_override("font_color", Color(0.25, 0.18, 0.08))
 	_end_btn.add_theme_color_override("font_hover_color", Color(0.15, 0.1, 0.02))
-	_end_btn.add_theme_stylebox_override("normal", _flat(Color(0.98, 0.86, 0.45), Color(0.72, 0.58, 0.28), 40, 5))
-	_end_btn.add_theme_stylebox_override("hover", _flat(Color(1.0, 0.92, 0.6), Color(0.85, 0.68, 0.3), 40, 5))
-	_end_btn.add_theme_stylebox_override("pressed", _flat(Color(0.9, 0.76, 0.35), Color(0.6, 0.48, 0.2), 40, 5))
-	_end_btn.add_theme_stylebox_override("disabled", _flat(Color(0.12, 0.14, 0.2), Color(0.3, 0.35, 0.45), 40, 5))
+	_end_btn.add_theme_stylebox_override("normal", _flat(Color(0.98, 0.86, 0.45), Color(0.72, 0.58, 0.28), 16, 3))
+	_end_btn.add_theme_stylebox_override("hover", _flat(Color(1.0, 0.92, 0.6), Color(0.85, 0.68, 0.3), 16, 3))
+	_end_btn.add_theme_stylebox_override("pressed", _flat(Color(0.9, 0.76, 0.35), Color(0.6, 0.48, 0.2), 16, 3))
+	_end_btn.add_theme_stylebox_override("disabled", _flat(Color(0.12, 0.14, 0.2), Color(0.3, 0.35, 0.45), 16, 3))
 	_end_btn.anchor_left = 1.0
 	_end_btn.anchor_right = 1.0
-	_end_btn.anchor_top = 1.0
-	_end_btn.anchor_bottom = 1.0
-	_end_btn.offset_left = -218.0
-	_end_btn.offset_right = -22.0
-	_end_btn.offset_top = -136.0
-	_end_btn.offset_bottom = -18.0
+	_end_btn.anchor_top = 0.0
+	_end_btn.anchor_bottom = 0.0
+	_end_btn.offset_left = -170.0
+	_end_btn.offset_right = -14.0
+	_end_btn.offset_top = 12.0
+	_end_btn.offset_bottom = 60.0
 	_end_btn.pressed.connect(func() -> void:
 		Sfx.play("click")
 		end_turn_requested.emit())
 	_root.add_child(_end_btn)
 
-	# Boutons secondaires
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
-	row.anchor_left = 1.0
-	row.anchor_right = 1.0
-	row.anchor_top = 1.0
-	row.anchor_bottom = 1.0
-	row.offset_left = -286.0
-	row.offset_right = -22.0
-	row.offset_top = -190.0
-	row.offset_bottom = -142.0
-	_root.add_child(row)
-	_auto_btn = _small_button("Auto", true)
-	_auto_btn.toggled.connect(func(on: bool) -> void:
-		Sfx.play("click")
-		game_manager.set_auto(on))
-	row.add_child(_auto_btn)
-	_sound_btn = _small_button("Son : oui", true)
-	_sound_btn.button_pressed = Sfx.enabled
-	_sound_btn.toggled.connect(func(on: bool) -> void:
-		Sfx.enabled = on
-		_sound_btn.text = "Son : oui" if on else "Son : non"
-		Sfx.play("click"))
-	row.add_child(_sound_btn)
-	var team_btn: Button = _small_button("Équipe", false)
-	team_btn.pressed.connect(_on_team_selection_pressed)
-	row.add_child(team_btn)
+	# Bouton de sortie sous la vignette du personnage actif.
+	_quit_btn = _small_button("Quitter le combat", false)
+	_quit_btn.custom_minimum_size = Vector2(220.0, 42.0)
+	_quit_btn.add_theme_font_size_override("font_size", 17)
+	_quit_btn.anchor_left = 0.0
+	_quit_btn.anchor_right = 0.0
+	_quit_btn.anchor_top = 0.0
+	_quit_btn.anchor_bottom = 0.0
+	_quit_btn.offset_left = 18.0
+	_quit_btn.offset_right = 238.0
+	_quit_btn.offset_top = 208.0
+	_quit_btn.offset_bottom = 250.0
+	_quit_btn.tooltip_text = "Quitter ce combat et revenir à la sélection d'équipe."
+	_quit_btn.pressed.connect(_on_quit_combat_pressed)
+	_root.add_child(_quit_btn)
 
 	# Journal de combat
 	_log_box = VBoxContainer.new()
@@ -995,7 +983,22 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 	_cards = []
 	_cards_owner = int(e["uid"])
 	var idx: int = 0
-	for spell: Dictionary in e["spells"]:
+	var ordered_spells: Array = e.get("spells", []).duplicate()
+	ordered_spells.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var type_a: int = _spell_type_order(a)
+		var type_b: int = _spell_type_order(b)
+		if type_a != type_b:
+			return type_a < type_b
+		var req_a: int = int(a.get("level_required", a.get("required_level", 1)))
+		var req_b: int = int(b.get("level_required", b.get("required_level", 1)))
+		if req_a != req_b:
+			return req_a < req_b
+		var lvl_a: int = int(a.get("spell_level", 1))
+		var lvl_b: int = int(b.get("spell_level", 1))
+		if lvl_a != lvl_b:
+			return lvl_a < lvl_b
+		return String(a.get("name", "")) < String(b.get("name", "")))
+	for spell: Dictionary in ordered_spells:
 		idx += 1
 		var card := SpellCard.new()
 		card.spell = spell
@@ -1019,7 +1022,22 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.mouse_exited.connect(func() -> void: _show_tip(game_manager.selected_spell))
 		_spell_box.add_child(card)
 		_cards.append(card)
+	_spell_scroll.scroll_horizontal = 0
 	_spell_scroll.scroll_vertical = 0
+
+
+func _spell_type_order(spell: Dictionary) -> int:
+	## Ordre stable par rôle tactique, puis niveau requis croissant.
+	var kind: String = String(Combat.parse(spell).get("kind", "attack"))
+	match kind:
+		"attack": return 0
+		"heal": return 1
+		"buff": return 2
+		"trap": return 3
+		"summon": return 4
+		"teleport": return 5
+		"revive": return 6
+		_: return 7
 
 
 func _style_card(card: SpellCard, selected: bool) -> void:
@@ -1059,7 +1077,18 @@ func _refresh() -> void:
 		card.modulate = Color(1, 1, 1, 1.0 if my_turn else 0.5)
 		card.queue_redraw()
 	_end_btn.disabled = not my_turn
-	_auto_btn.set_pressed_no_signal(game_manager.auto_mode)
+	# Réaffirmer la visibilité des couches de combat après chaque changement d'état.
+	if is_instance_valid(_root):
+		_root.visible = true
+	if is_instance_valid(_timeline):
+		_timeline.visible = true
+		_timeline.queue_redraw()
+	if is_instance_valid(_spell_scroll):
+		_spell_scroll.visible = true
+		_spell_scroll.queue_redraw()
+	if is_instance_valid(_stats):
+		_stats.visible = true
+		_stats.queue_redraw()
 	if _grid != null and _info_panel.visible and "hover_cell" in _grid:
 		_on_hover(_grid.hover_cell)
 	_spell_scroll.modulate = Color(1, 1, 1, 1.0)
@@ -1320,6 +1349,11 @@ func hide_game_over_panel() -> void:
 
 func _on_spell_button_selected(spell: Dictionary) -> void:
 	spell_selected.emit(spell)
+
+
+func _on_quit_combat_pressed() -> void:
+	Sfx.play("click")
+	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
 
 
 func _on_team_selection_pressed() -> void:
