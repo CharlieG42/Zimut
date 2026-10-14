@@ -1,10 +1,11 @@
 extends CanvasLayer
 
-## MainMenuUI.gd — Écran d'accueil illustré de Zimut.
-## Les plaques sont dessinées dans le SVG ; les zones interactives restent de vrais
+## MainMenuUI.gd — Écran d'accueil illustré de Zimut (artwork assets/accueil.jpg).
+## Les plaques sont peintes dans l'image ; les zones interactives restent de vrais
 ## contrôles Godot afin de fonctionner avec la souris, le tactile et les builds Android.
+## Les fractions ci-dessous correspondent aux plaques de l'illustration (liserés dorés).
 
-const BG_TEXTURE: Texture2D = preload("res://assets/ui/main_menu_bg.svg")
+const BG_TEXTURE: Texture2D = preload("res://assets/accueil_1920.jpg")
 
 func _ready() -> void:
 	layer = 10
@@ -18,6 +19,8 @@ func _ready() -> void:
 	bg.name = "MainMenuArtwork"
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	## accueil_1920.jpg est déjà au ratio de l'écran (extension des bords par
+	## miroir flouté) : aucun recadrage ni déformation à l'affichage.
 	bg.stretch_mode = TextureRect.STRETCH_SCALE
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bg.texture = BG_TEXTURE
@@ -25,11 +28,11 @@ func _ready() -> void:
 
 	# Les zones sont relatives à la fenêtre : elles restent alignées sur les plaques
 	# peintes même si la résolution ou le ratio de l'écran Android change.
-	_add_menu_hitbox(root, "NouvellePartie", 0.682, 0.475, 0.946, 0.566, _start_new_game)
-	_add_menu_hitbox(root, "Continuer", 0.682, 0.586, 0.946, 0.677, _continue_game)
-	_add_menu_hitbox(root, "Options", 0.682, 0.697, 0.946, 0.788, func() -> void:
+	_add_menu_hitbox(root, "NouvellePartie", 0.646, 0.578, 0.828, 0.648, _start_new_game)
+	_add_menu_hitbox(root, "Continuer", 0.646, 0.666, 0.828, 0.737, _continue_game)
+	_add_menu_hitbox(root, "Options", 0.646, 0.752, 0.828, 0.824, func() -> void:
 		get_tree().change_scene_to_file("res://scenes/Settings.tscn"))
-	_add_menu_hitbox(root, "Quitter", 0.682, 0.808, 0.946, 0.900, func() -> void:
+	_add_menu_hitbox(root, "Quitter", 0.646, 0.839, 0.828, 0.911, func() -> void:
 		get_tree().quit())
 
 
