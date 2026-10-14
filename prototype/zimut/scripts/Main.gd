@@ -70,7 +70,7 @@ func _setup_camera() -> void:
 		return
 	cam.enabled = true
 	cam.zoom = Vector2(1.18, 1.18)
-	cam.position = grid_manager.grid_center() + Vector2(0, -12)
+	cam.position = grid_manager.grid_center() + Vector2(0, -30)
 	cam.position_smoothing_enabled = false
 	cam.make_current()
 	var bd: Node2D = get_node_or_null("Backdrop")
