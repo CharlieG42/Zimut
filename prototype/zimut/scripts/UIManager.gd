@@ -20,7 +20,7 @@ const COL_SUMMON := Color(0.25, 0.70, 0.45)
 ## Échelle des cartes de sorts sur téléphones : le HUD est rendu en 1920×1080
 ## (stretch « viewport »), donc les cartes de 166 px paraissent minuscules sur
 ## un écran de type S23+ / A55. On grossit toute la colonne sur mobile.
-const MOBILE_SPELL_SCALE := 1.6
+const MOBILE_SPELL_SCALE := 1.25
 
 var game_manager: Node
 var _grid: Node
@@ -693,11 +693,10 @@ func _build_ui() -> void:
 	_root.add_child(st)
 	_stats = st
 
-	# Barre de sorts horizontale en bas : badges sur 2 lignes, centrés.
-	# La vignette est en haut ; le bas-gauche est libre pour les badges.
-	var badge_w: float = 172.0 * _spell_scale
-	var badge_h: float = 76.0 * _spell_scale
-	var bar_cols: int = 6
+	# Barre de sorts compacte en bas, sur une seule ligne (inspiration Dofus/Wakfu).
+	# Les sorts supplémentaires restent accessibles par défilement horizontal.
+	var badge_w: float = 158.0 * _spell_scale
+	var badge_h: float = 58.0 * _spell_scale
 	_spell_scroll = ScrollContainer.new()
 	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -707,7 +706,7 @@ func _build_ui() -> void:
 	_spell_scroll.anchor_bottom = 1.0
 	_spell_scroll.offset_left = 240.0
 	_spell_scroll.offset_right = -470.0
-	_spell_scroll.offset_top = -(badge_h * 2.0 + 24.0)
+	_spell_scroll.offset_top = -(badge_h + 18.0)
 	_spell_scroll.offset_bottom = -14.0
 	_spell_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
 	var spell_panel := PanelContainer.new()
@@ -717,17 +716,15 @@ func _build_ui() -> void:
 	spell_panel.anchor_bottom = 1.0
 	spell_panel.offset_left = 232.0
 	spell_panel.offset_right = -462.0
-	spell_panel.offset_top = -(badge_h * 2.0 + 32.0)
+	spell_panel.offset_top = -(badge_h + 26.0)
 	spell_panel.offset_bottom = -8.0
 	spell_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	spell_panel.add_theme_stylebox_override("panel", _flat(Color(0.03, 0.05, 0.09, 0.30), Color(0.35, 0.48, 0.65, 0.35), 20, 1))
 	_root.add_child(spell_panel)
 	_root.add_child(_spell_scroll)
-	# Conteneur à 2 lignes : les badges s'y répartissent colonne par colonne.
-	_spell_box = GridContainer.new()
-	_spell_box.columns = bar_cols
-	_spell_box.add_theme_constant_override("h_separation", int(8.0 * _spell_scale))
-	_spell_box.add_theme_constant_override("v_separation", int(8.0 * _spell_scale))
+	# Une seule rangée de badges ; le ScrollContainer gère le débordement.
+	_spell_box = HBoxContainer.new()
+	_spell_box.add_theme_constant_override("separation", int(6.0 * _spell_scale))
 	_spell_scroll.add_child(_spell_box)
 
 	# Infobulle de sort
@@ -956,7 +953,7 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.base_col = _kind_color(spell)
 		card.card_scale = _spell_scale
 		card.badge_mode = true
-		card.custom_minimum_size = Vector2(172.0 * _spell_scale, 76.0 * _spell_scale)
+		card.custom_minimum_size = Vector2(158.0 * _spell_scale, 58.0 * _spell_scale)
 		card.text = ""
 		card.tooltip_text = String(spell["name"]) + " · " + str(int(spell.get("cost_pa", 0))) + " PA · Portée " + str(int(spell.get("range", 1)))
 		var nlen: int = String(spell["name"]).length()
