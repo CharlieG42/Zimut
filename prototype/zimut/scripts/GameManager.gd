@@ -408,7 +408,7 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 		"color": Color(0.9, 0.2, 0.1),
 	}, true)
 	boss["boss"] = true
-	boss["spells"] = Combat.enemy_spells(base_type, atk)
+	boss["spells"] = Combat.boss_spells(base_type, atk)
 	boss["skin"] = base_type
 	boss["fly"] = base_type == "Dragonnet"
 	Combat.add_status(boss, "regen", 999, 8.0)

@@ -37,6 +37,15 @@ const POINTS_PER_LEVEL := 4
 ## XP d'un combat = somme(XP des ennemis) x FIGHT_XP_MULT
 const FIGHT_XP_MULT := 1.5
 const BOSS_XP_MULT := 1.5
+
+## Gain d'XP par victoire sur le combat de la frontière, calibré sur le niveau du
+## combat (ProgressionManager.combat_xp) : progression progressive et évolutive —
+## environ 3 combats pour passer du niveau 10 au 11, et de plus en plus de combats
+## à mesure que le niveau monte (jusqu'à ~200 pour le palier final).
+const XP_PER_COMBAT_BASE := 75.6
+const XP_PER_COMBAT_GROWTH := 1.038
+const XP_PER_COMBAT_FLOOR := 110.0
+const XP_PER_COMBAT_CEIL := 476.0
 ## Les classes hors équipe gagnent une part de l'XP (pour tester d'autres compos)
 const BENCH_XP_RATIO := 0.05
 ## Une défaite rapporte quand même un peu d'XP

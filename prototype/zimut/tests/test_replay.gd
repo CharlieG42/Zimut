@@ -29,7 +29,7 @@ func _boot() -> void:
 	check(ok_each, "chaque victoire de progression fait monter chaque perso d'au moins 1 niveau")
 	check(int(data["victories"]) == 6 and data["fight_levels"].size() == 6, "historique des niveaux de combat (6)")
 	# XP hors équipe : <= 10 % du gain d'un membre de l'équipe (même multiplicateur de classe)
-	var rep: Dictionary = pm.award_xp(data, 10000, 1.0, 0, false)
+	var rep: Dictionary = pm.award_xp(data, 10000)
 	var team_gain: int = int(rep["Tank"]["gain"])
 	var bench_gain: int = int(rep["Assassin"]["gain"])
 	check(bench_gain <= int(ceil(team_gain * 0.05 * 1.2)), "gain hors équipe plafonné à ~5 %% (%d vs %d)" % [bench_gain, team_gain])
