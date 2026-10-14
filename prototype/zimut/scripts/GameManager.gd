@@ -346,8 +346,9 @@ func init_entities() -> void:
 			push_error("Ennemi '%s' introuvable dans ennemis.txt" % etype)
 			continue
 		var lscale: float = 1.0 + float(maxi(0, lvl - 10)) * ENEMY_LEVEL_SCALE
-		var pv: int = int(float(_csv_int(info, "PV", 50)) * ENEMY_HP_MULT * lscale)
-		var atk: int = int(float(_csv_int(info, "Attaque", 10)) * ENEMY_ATK_MULT * lscale)
+		var pow_mult: float = GameSettings.enemy_power_mult() if _has_settings() else 1.0
+		var pv: int = int(float(_csv_int(info, "PV", 50)) * ENEMY_HP_MULT * lscale * pow_mult)
+		var atk: int = int(float(_csv_int(info, "Attaque", 10)) * ENEMY_ATK_MULT * lscale * pow_mult)
 		var enemy: Dictionary = _base_entity("%s Lv%d" % [etype, minion_lvl], "Enemy", "enemy",
 			etype, minion_lvl, pos)
 		enemy.merge({
@@ -395,8 +396,9 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 		if info.is_empty():
 			return
 	var lscale: float = 1.0 + float(maxi(0, lvl - 10)) * ENEMY_LEVEL_SCALE
-	var pv: int = int(float(_csv_int(info, "PV", 120)) * ENEMY_HP_MULT * BOSS_HP_MULT * lscale)
-	var atk: int = int(float(_csv_int(info, "Attaque", 20)) * ENEMY_ATK_MULT * BOSS_ATK_MULT * lscale)
+	var pow_mult: float = GameSettings.enemy_power_mult() if _has_settings() else 1.0
+	var pv: int = int(float(_csv_int(info, "PV", 120)) * ENEMY_HP_MULT * BOSS_HP_MULT * lscale * pow_mult)
+	var atk: int = int(float(_csv_int(info, "Attaque", 20)) * ENEMY_ATK_MULT * BOSS_ATK_MULT * lscale * pow_mult)
 	fight_enemies.append({"type": boss_name, "level": lvl, "boss": true})
 	var boss: Dictionary = _base_entity("☠ BOSS %s Lv%d" % [boss_name, lvl], "Enemy", "enemy", boss_name, lvl, pos)
 	boss.merge({
@@ -427,6 +429,11 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 	enemies.append(boss)
 	grid[pos.y][pos.x] = boss
 
+
+## GameSettings est un autoload du projet ; les tests headless (-s) ne le chargent
+## pas toujours : dégradation propre vers 1.0 dans ce cas.
+func _has_settings() -> bool:
+	return get_node_or_null("/root/GameSettings") != null
 
 func _stats_from_custom(m: Dictionary, classe: String) -> Dictionary:
 	return {

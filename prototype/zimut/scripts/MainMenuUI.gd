@@ -1,8 +1,9 @@
 extends CanvasLayer
 
-## MainMenuUI.gd — Écran d'accueil Zimut : un seul mode actif pour l'instant
-## (combat tactique au tour par tour). ZOE et Conquête sont des modes à venir,
-## affichés en grisé / non cliquables.
+## MainMenuUI.gd — Écran d'accueil Zimut : deux options.
+##   - « Entrer dans le monde de Zimut » : accès aux parties (slot de sauvegarde),
+##     puis choix du mode de jeu (Combats Tactiques ; Aventure et Conquête à venir)
+##   - « Réglages » : difficulté des combats et rapidité de progression XP
 
 const COL_PANEL := Color(0.94, 0.89, 0.78, 0.97)
 const COL_BORDER := Color(0.72, 0.58, 0.28, 1.0)
@@ -32,16 +33,6 @@ func _ready() -> void:
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	root.add_child(title)
 
-	var sub := Label.new()
-	sub.text = "Choisissez votre mode de jeu"
-	sub.add_theme_font_size_override("font_size", 22)
-	sub.add_theme_color_override("font_color", COL_PANEL)
-	sub.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	sub.offset_top = 250.0
-	sub.offset_bottom = 290.0
-	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	root.add_child(sub)
-
 	var center := CenterContainer.new()
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_child(center)
@@ -50,34 +41,20 @@ func _ready() -> void:
 	box.add_theme_constant_override("separation", 22)
 	center.add_child(box)
 
-	# Mode actif : Zimut — combat tactique au tour à tour
-	box.add_child(_mode_button("Zimut", "Combat tactique au tour à tour", true, func() -> void:
+	box.add_child(_mode_button("Entrer dans le monde de Zimut", "Parties, équipe et combats", true, func() -> void:
 		GameManager.active_save = {}
 		GameManager.active_slot = -1
 		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")))
 
-	# Modes à venir : non cliquables
-	box.add_child(_mode_button("ZOE", "Aventure dans le monde de Zimut", false, Callable()))
-	box.add_child(_mode_button("Conquête", "Construisez votre empire dans le monde de Zimut", false, Callable()))
+	box.add_child(_mode_button("Réglages", "Difficulté des combats et rapidité de l'XP", true, func() -> void:
+		get_tree().change_scene_to_file("res://scenes/Settings.tscn")))
 
-	var hint := Label.new()
-	hint.text = "ZOE et Conquête arrivent bientôt."
-	hint.add_theme_font_size_override("font_size", 17)
-	hint.add_theme_color_override("font_color", Color(0.7, 0.75, 0.85))
-	hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	hint.offset_top = -60.0
-	hint.offset_bottom = -20.0
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	root.add_child(hint)
-
-## Bouton de mode : grande carte avec titre + descriptif. `enabled` à false
-## affiche le mode en grisé et non cliquable (mode à venir).
 func _mode_button(title_txt: String, desc: String, enabled: bool, cb: Callable) -> Button:
 	var b := Button.new()
 	b.text = ""
 	b.custom_minimum_size = Vector2(560, 110)
 	b.disabled = not enabled
-	b.focus_mode = Control.FOCUS_NONE if not enabled else Control.FOCUS_ALL
+	b.focus_mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE
 
 	var vb := VBoxContainer.new()
 	vb.set_anchors_preset(Control.PRESET_FULL_RECT)
