@@ -247,7 +247,7 @@ func _pick_target(e: Dictionary) -> Dictionary:
 		for f: Dictionary in foes:
 			if int(f["uid"]) == int(Combat.status_value(e, "taunted")):
 				return f
-	var trait: String = _trait(e)
+	var persona: String = _trait(e)
 	var best: Dictionary = {}
 	var best_score: float = -1e9
 	for f2: Dictionary in foes:
@@ -266,7 +266,7 @@ func _pick_target(e: Dictionary) -> Dictionary:
 			sc += 10.0
 		# Personnalités : l'agressif fonce sur le plus proche (distance dominante),
 		# l'opportuniste chasse les mages et soigneurs, le prudent reste neutre.
-		match trait:
+		match persona:
 			"aggressive":
 				sc -= d * 4.0
 			"opportunist":
@@ -302,9 +302,9 @@ func _plan_move(e: Dictionary) -> Dictionary:
 	# Personnalités : l'agressif colle sa cible même s'il sait tirer ; le prudent
 	# reste à distance ; le bagarreur (boss) préfère le CaC en forme et snipe
 	# à portée max quand il est blessé.
-	var trait: String = _trait(e)
+	var persona: String = _trait(e)
 	var hp: float = gm.hp_ratio(e)
-	match trait:
+	match persona:
 		"aggressive":
 			desired = 1
 		"cautious":

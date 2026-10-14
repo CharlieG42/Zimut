@@ -1,5 +1,5 @@
 extends SceneTree
-## Tests V4 : combats rejouables, XP hors équipe 5 %, +1 niveau garanti, bouton MENU.
+## Tests V4 : combats rejouables, XP hors équipe 5 %, XP calibrée, bouton MENU.
 var fails: int = 0
 func check(c: bool, m: String) -> void:
 	print(("  ok  " if c else "  ÉCHEC  ") + m)
@@ -15,18 +15,14 @@ func _boot() -> void:
 	var lv_start: Array = []
 	for c in ["Tank", "Mage", "Sylvain"]:
 		lv_start.append(pm.member_level(data, c))
-	# 6 victoires de la frontière : chaque perso de l'équipe gagne au moins 1 niveau à chaque combat
-	var ok_each: bool = true
+	# 6 victoires de la frontière (1 ennemi faible par combat) : l'équipe progresse
+	# au nouveau rythme calibré — ici 1 niveau sur 6 combats contre un ennemi seul,
+	# plus avec une équipe complète au niveau du combat (~3 combats/palier).
+	var lv_after6: int = 0
 	for i in range(6):
-		var before: Array = []
-		for c in ["Tank", "Mage", "Sylvain"]:
-			before.append(pm.member_level(data, c))
 		pm.register_victory(data, {"enemies": [{"type": "Gobelin", "level": 10, "boss": false}]})
-		for j in range(3):
-			var c2: String = ["Tank", "Mage", "Sylvain"][j]
-			if pm.member_level(data, c2) <= int(before[j]):
-				ok_each = false
-	check(ok_each, "chaque victoire de progression fait monter chaque perso d'au moins 1 niveau")
+		lv_after6 = pm.member_level(data, "Tank")
+	check(lv_after6 > int(lv_start[0]), "6 victoires : l'équipe progresse d'au moins 1 niveau (XP calibrée, fin du gain garanti)")
 	check(int(data["victories"]) == 6 and data["fight_levels"].size() == 6, "historique des niveaux de combat (6)")
 	# XP hors équipe : <= 10 % du gain d'un membre de l'équipe (même multiplicateur de classe)
 	var rep: Dictionary = pm.award_xp(data, 10000)
