@@ -92,6 +92,7 @@ func _build() -> void:
 	_slots_scroll = slots_scroll
 	slots_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	slots_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	slots_scroll.size_flags_stretch_ratio = 0.25
 	slots_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	main.add_child(slots_scroll)
 
@@ -147,13 +148,13 @@ func _apply_responsive_layout() -> void:
 	_detail_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_detail_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	if stacked:
-		_slots_scroll.custom_minimum_size = Vector2(0, 150)
-		_slots_scroll.size_flags_stretch_ratio = 0.36
-		_detail_panel.size_flags_stretch_ratio = 0.64
+		_slots_scroll.custom_minimum_size = Vector2(0, 112)
+		_slots_scroll.size_flags_stretch_ratio = 0.25
+		_detail_panel.size_flags_stretch_ratio = 0.75
 	else:
 		_slots_scroll.custom_minimum_size = Vector2(0, 0)
-		_slots_scroll.size_flags_stretch_ratio = 0.43
-		_detail_panel.size_flags_stretch_ratio = 0.57
+		_slots_scroll.size_flags_stretch_ratio = 0.25
+		_detail_panel.size_flags_stretch_ratio = 0.75
 
 func _flat() -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
@@ -176,7 +177,7 @@ func refresh() -> void:
 		used[int(sv["id"])] = sv
 	for slot: int in range(ProgressionManager.MAX_SAVES):
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(0, 82 if _is_compact() else 96)
+		btn.custom_minimum_size = Vector2(0, 72 if _is_compact() else 86)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		var is_used: bool = used.has(slot)
@@ -186,13 +187,15 @@ func refresh() -> void:
 			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_USED_BG, COL_BORDER, 4))
 			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_USED_BG.lightened(0.15), COL_BORDER, 5))
 		else:
-			btn.text = "  + Commencer une nouvelle partie (slot %d)" % (slot + 1)
-			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_EMPTY_BG, Color(0.3, 0.35, 0.45), 2))
-			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_EMPTY_BG.lightened(0.15), Color(0.3, 0.35, 0.45), 3))
-		btn.add_theme_font_size_override("font_size", _ui_font(20))
+			btn.text = "＋  %02d  ·  NOUVELLE PARTIE\\nEmplacement libre" % (slot + 1)
+			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_EMPTY_BG, Color(0.42, 0.45, 0.52), 1))
+			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_EMPTY_BG.lightened(0.15), COL_BORDER, 2))
+		btn.add_theme_font_size_override("font_size", _ui_font(17))
 		btn.add_theme_color_override("font_color", Color(0.95, 0.94, 0.90))
+		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		if slot == _current_slot:
 			btn.add_theme_color_override("font_color", Color(1.0, 0.86, 0.4))
+			btn.add_theme_stylebox_override("normal", _flat_bg(Color(0.25, 0.29, 0.36), Color(1.0, 0.82, 0.36), 4))
 		var slot_ref: int = slot
 		btn.pressed.connect(func() -> void: _on_slot_pressed(slot_ref))
 		_slots_box.add_child(btn)
