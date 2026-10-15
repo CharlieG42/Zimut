@@ -54,7 +54,7 @@ func _build() -> void:
 	var back := Button.new()
 	back.text = "← ACCUEIL"
 	back.custom_minimum_size = Vector2(150, 56)
-	back.add_theme_font_size_override("font_size", 20)
+	back.add_theme_font_size_override("font_size", _ui_font(20))
 	back.add_theme_color_override("font_color", COL_TXT)
 	back.add_theme_stylebox_override("normal", _flat())
 	back.add_theme_stylebox_override("hover", _flat())
@@ -157,6 +157,10 @@ func _flat() -> StyleBoxFlat:
 	s.border_color = COL_BORDER
 	s.set_border_width_all(3)
 	s.set_corner_radius_all(12)
+	s.content_margin_left = 12
+	s.content_margin_right = 12
+	s.content_margin_top = 10
+	s.content_margin_bottom = 10
 	return s
 
 func refresh() -> void:
@@ -259,7 +263,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 
 	var name_btn := Button.new()
 	name_btn.text = "✎  RENOMMER CETTE PARTIE"
-	name_btn.add_theme_font_size_override("font_size", 19)
+	name_btn.add_theme_font_size_override("font_size", _ui_font(19))
 	name_btn.add_theme_color_override("font_color", COL_TXT)
 	name_btn.add_theme_stylebox_override("normal", _flat())
 	name_btn.pressed.connect(func() -> void:
@@ -283,7 +287,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 
 	var del_btn := Button.new()
 	del_btn.text = "🗑  SUPPRIMER CETTE PARTIE"
-	del_btn.add_theme_font_size_override("font_size", 19)
+	del_btn.add_theme_font_size_override("font_size", _ui_font(19))
 	del_btn.add_theme_color_override("font_color", Color(0.35, 0.08, 0.05))
 	del_btn.add_theme_stylebox_override("normal", _flat())
 	del_btn.pressed.connect(func() -> void:
@@ -326,7 +330,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	var team: Array = data.get("team", [])
 	var team_lbl := Label.new()
 	team_lbl.text = "Équipe :"
-	team_lbl.add_theme_font_size_override("font_size", 21)
+	team_lbl.add_theme_font_size_override("font_size", _ui_font(21))
 	team_lbl.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(team_lbl)
 	for i: int in range(team.size()):
@@ -340,7 +344,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 
 	var chars_btn := Button.new()
 	chars_btn.text = "📈  PERSONNAGES — niveaux et caractéristiques"
-	chars_btn.add_theme_font_size_override("font_size", 19)
+	chars_btn.add_theme_font_size_override("font_size", _ui_font(19))
 	chars_btn.add_theme_color_override("font_color", COL_TXT)
 	chars_btn.add_theme_stylebox_override("normal", _flat())
 	chars_btn.pressed.connect(func() -> void:
@@ -356,7 +360,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	var inv: Array = data.get("inventory", [])
 	var inv_lbl := Label.new()
 	inv_lbl.text = "Inventaire (%d objets disponibles à équiper) :" % inv.size()
-	inv_lbl.add_theme_font_size_override("font_size", 21)
+	inv_lbl.add_theme_font_size_override("font_size", _ui_font(21))
 	inv_lbl.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(inv_lbl)
 
@@ -383,7 +387,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	if log_arr.size() > 0:
 		var log_btn := Button.new()
 		log_btn.text = "Voir tous les loots gagnés (%d)" % log_arr.size()
-		log_btn.add_theme_font_size_override("font_size", 19)
+		log_btn.add_theme_font_size_override("font_size", _ui_font(19))
 		log_btn.add_theme_color_override("font_color", COL_TXT)
 		log_btn.add_theme_stylebox_override("normal", _flat())
 		log_btn.pressed.connect(func() -> void: _show_loot_log(log_arr))
@@ -391,7 +395,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 
 	var auto_btn := Button.new()
 	auto_btn.text = "Équiper automatiquement les meilleurs objets"
-	auto_btn.add_theme_font_size_override("font_size", 19)
+	auto_btn.add_theme_font_size_override("font_size", _ui_font(19))
 	auto_btn.add_theme_color_override("font_color", COL_TXT)
 	auto_btn.add_theme_stylebox_override("normal", _flat())
 	auto_btn.pressed.connect(_auto_equip)
@@ -433,13 +437,13 @@ func _mode_button(title_txt: String, desc: String, enabled: bool, cb: Callable) 
 	b.add_child(vb)
 	var t := Label.new()
 	t.text = title_txt
-	t.add_theme_font_size_override("font_size", 22)
+	t.add_theme_font_size_override("font_size", _ui_font(22))
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	t.add_theme_color_override("font_color", COL_TXT if enabled else COL_DISABLED_TXT)
 	vb.add_child(t)
 	var d := Label.new()
 	d.text = desc
-	d.add_theme_font_size_override("font_size", 16)
+	d.add_theme_font_size_override("font_size", _ui_font(16))
 	d.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	d.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12) if enabled else COL_DISABLED_TXT)
 	vb.add_child(d)
@@ -495,7 +499,7 @@ func _show_loot_log(log_arr: Array) -> void:
 	dialog.add_child(box)
 	var title := Label.new()
 	title.text = "LOOTS GAGNÉS DANS CETTE PARTIE (%d)" % log_arr.size()
-	title.add_theme_font_size_override("font_size", 24)
+	title.add_theme_font_size_override("font_size", _ui_font(24))
 	title.add_theme_color_override("font_color", COL_TXT)
 	box.add_child(title)
 	var scroll := ScrollContainer.new()
@@ -513,7 +517,7 @@ func _show_loot_log(log_arr: Array) -> void:
 		rows.add_child(row)
 	var close := Button.new()
 	close.text = "Fermer"
-	close.add_theme_font_size_override("font_size", 20)
+	close.add_theme_font_size_override("font_size", _ui_font(20))
 	close.add_theme_color_override("font_color", COL_TXT)
 	close.add_theme_stylebox_override("normal", _flat())
 	close.pressed.connect(overlay.queue_free)
