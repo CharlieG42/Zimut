@@ -73,6 +73,22 @@ const BOSS_SKINS := {
 	"Squelette Seigneur": "squelette_boss", "Loup Alpha": "loup_boss",
 }
 
+## Clé de biome pour les variantes de skin ("" = forêt / sans variante).
+static func _biome_key() -> String:
+	var tree: SceneTree = Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return ""
+	var gm: Node = tree.root.get_node_or_null("GameManager")
+	if gm == null:
+		return ""
+	match String(gm.get("fight_biome")):
+		"Montagne":
+			return "montagne"
+		"Désert":
+			return "desert"
+	return ""
+
+
 ## Noms de fichiers de sprite à essayer, par ordre de priorité.
 static func skin_names(ent: Dictionary) -> Array[String]:
 	var classe: String = String(ent.get("classe", ""))
@@ -81,6 +97,11 @@ static func skin_names(ent: Dictionary) -> Array[String]:
 		if BOSS_SKINS.has(classe):
 			out.append(String(BOSS_SKINS[classe]))
 		out.append(sprite_key(classe) + "_boss")
+	# Variante de biome (loup blanc en montagne, gobelin sable dans le désert...) pour les ennemis
+	if String(ent.get("team", "")) == "enemy":
+		var bk: String = _biome_key()
+		if bk != "":
+			out.append(sprite_key(classe) + "_" + bk)
 	out.append(sprite_key(classe))
 	var sk: String = String(ent.get("skin", ""))
 	if sk != "":

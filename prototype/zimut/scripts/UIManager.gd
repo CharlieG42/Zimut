@@ -170,6 +170,15 @@ class SpellCard extends Button:
 				draw_line(c + Vector2(-6, 2), c + Vector2(-13, -3), Color(0.78, 0.6, 0.35) if usable else ink, 3.0, true)
 				draw_line(c + Vector2(10, 10), c + Vector2(-8, -12), Color(0.82, 0.86, 0.95) if usable else ink, 2.4, true)
 
+	func _draw_medallion(mc: Vector2, ecol: Color, kind: String) -> void:
+		draw_circle(mc + Vector2(0, 2.5), 28.0, Color(0, 0, 0, 0.5))
+		draw_circle(mc, 27.0, Color(0.02, 0.03, 0.07))
+		draw_circle(mc, 24.5, ecol.darkened(0.55))
+		draw_circle(mc + Vector2(0, -2), 21.0, ecol.darkened(0.32))
+		draw_arc(mc, 25.5, 0.0, TAU, 40, ecol.lightened(0.15) if usable else ecol, 2.0, true)
+		draw_circle(mc + Vector2(-8, -10), 7.0, Color(1, 1, 1, 0.14))
+		_icon(mc, _elem, kind)
+
 	func _draw() -> void:
 		var font: Font = ThemeDB.fallback_font
 		var p: Dictionary = Combat.parse(spell)
@@ -189,15 +198,15 @@ class SpellCard extends Button:
 		# Reflet haut + liseré de couleur à gauche
 		draw_rect(Rect2(8, 3, lw - 16, 4), Color(1, 1, 1, 0.07 if usable else 0.03))
 		draw_rect(Rect2(3, 14, 3, lh - 28), accent)
-		# Médaillon d'élément
+		# Icône propre au sort (SpellIcons) ; à défaut, médaillon d'élément
 		var mc := Vector2(36, 50)
-		draw_circle(mc + Vector2(0, 2.5), 28.0, Color(0, 0, 0, 0.5))
-		draw_circle(mc, 27.0, Color(0.02, 0.03, 0.07))
-		draw_circle(mc, 24.5, ecol.darkened(0.55))
-		draw_circle(mc + Vector2(0, -2), 21.0, ecol.darkened(0.32))
-		draw_arc(mc, 25.5, 0.0, TAU, 40, ecol.lightened(0.15) if usable else ecol, 2.0, true)
-		draw_circle(mc + Vector2(-8, -10), 7.0, Color(1, 1, 1, 0.14))
-		_icon(mc, _elem, kind)
+		var ico: Texture2D = SpellIcons.texture_for(String(spell.get("name", "")))
+		if ico != null:
+			var ir := Rect2(mc.x - 29.0, mc.y - 27.0, 58.0, 58.0)
+			draw_rect(Rect2(ir.position + Vector2(0, 3), ir.size), Color(0, 0, 0, 0.45))
+			draw_texture_rect(ico, ir, false, Color(1, 1, 1, 1.0) if usable else Color(0.55, 0.55, 0.62, 1.0))
+		else:
+			_draw_medallion(mc, ecol, kind)
 		# Nom (jusqu'à 2 lignes)
 		var nm: String = String(spell.get("name", "Sort"))
 		var lines: PackedStringArray = _wrap(nm, 13)
@@ -287,12 +296,19 @@ class SpellCard extends Button:
 		draw_rect(Rect2(4, 3, lw - 8, 3), Color(1, 1, 1, 0.07 if usable else 0.03))
 		draw_rect(Rect2(2, 8, 3, lh - 16), accent)
 		var mc := Vector2(24.0, lh * 0.5)
-		draw_circle(mc + Vector2(0, 2), 20.0, Color(0, 0, 0, 0.5))
-		draw_circle(mc, 19.0, Color(0.02, 0.03, 0.07))
-		draw_circle(mc, 16.8, ecol.darkened(0.55))
-		draw_circle(mc + Vector2(0, -1.5), 14.4, ecol.darkened(0.32))
-		draw_arc(mc, 17.5, 0.0, TAU, 36, ecol.lightened(0.15) if usable else ecol, 1.5, true)
-		_spell_badge_icon(mc, spell, p)
+		var ico: Texture2D = SpellIcons.texture_for(String(spell.get("name", "")))
+		if ico != null:
+			# Icône propre au sort (data/spell_icons.txt) : même icône pour un même sort d'une classe à l'autre
+			var ir := Rect2(mc.x - 21.0, mc.y - 22.0, 44.0, 44.0)
+			draw_rect(Rect2(ir.position + Vector2(0, 3), ir.size), Color(0, 0, 0, 0.45))
+			draw_texture_rect(ico, ir, false, Color(1, 1, 1, 1.0) if usable else Color(0.55, 0.55, 0.62, 1.0))
+		else:
+			draw_circle(mc + Vector2(0, 2), 20.0, Color(0, 0, 0, 0.5))
+			draw_circle(mc, 19.0, Color(0.02, 0.03, 0.07))
+			draw_circle(mc, 16.8, ecol.darkened(0.55))
+			draw_circle(mc + Vector2(0, -1.5), 14.4, ecol.darkened(0.32))
+			draw_arc(mc, 17.5, 0.0, TAU, 36, ecol.lightened(0.15) if usable else ecol, 1.5, true)
+			_spell_badge_icon(mc, spell, p)
 		# PA bleu et PM vert : les gemmes numériques suffisent, les libellés sont retirés.
 		var pa_col: Color = Color(0.16, 0.5, 0.95)
 		if not usable and gm != null and not gm.active_entity.is_empty() and not gm.can_afford(gm.active_entity, spell):

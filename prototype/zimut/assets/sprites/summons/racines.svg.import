@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://brcns01x9k1"
-path="res://.godot/imported/racines.svg-d920241e99cc82b661b2d95bd4d7a6e3.ctex"
+uid="uid://brcns01yak1"
+path="res://.godot/imported/racines.svg-9e8b24f823bc6dcf281c31f5172d04eb.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/summons/racines.svg"
-dest_files=["res://.godot/imported/racines.svg-d920241e99cc82b661b2d95bd4d7a6e3.ctex"]
+dest_files=["res://.godot/imported/racines.svg-9e8b24f823bc6dcf281c31f5172d04eb.ctex"]
 
 [params]
 

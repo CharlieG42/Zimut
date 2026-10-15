@@ -685,6 +685,17 @@ func _spell_card(parent: Control, s: Dictionary, char_level: int, gold: int, mag
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 10)
 	v.add_child(h)
+	var ico_tex: Texture2D = SpellIcons.texture_for(sname)
+	if ico_tex != null:
+		var ico := TextureRect.new()
+		ico.texture = ico_tex
+		ico.custom_minimum_size = Vector2(60, 60)
+		ico.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		ico.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ico.tooltip_text = sname
+		if locked:
+			ico.modulate = Color(0.5, 0.5, 0.56)
+		h.add_child(ico)
 	var name_box := VBoxContainer.new()
 	name_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(name_box)

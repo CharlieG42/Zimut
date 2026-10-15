@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bblise03x9k3"
-path="res://.godot/imported/balise.svg-cce0bd4edd1206fde6137cf10cd7cbe5.ctex"
+uid="uid://bblise03yak3"
+path="res://.godot/imported/balise.svg-2e4838199919753b1412dfa944daecb6.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/summons/balise.svg"
-dest_files=["res://.godot/imported/balise.svg-cce0bd4edd1206fde6137cf10cd7cbe5.ctex"]
+dest_files=["res://.godot/imported/balise.svg-2e4838199919753b1412dfa944daecb6.ctex"]
 
 [params]
 

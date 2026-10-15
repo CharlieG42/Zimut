@@ -47,6 +47,26 @@ static func pal(biome: String) -> Dictionary:
 				"leaf": Color(0.28, 0.55, 0.24), "leaf_hi": Color(0.52, 0.76, 0.34), "mist": Color(0.80, 0.90, 0.92)}
 
 
+static var _tile_cache: Dictionary = {}
+
+## Texture de sol (identique à celle des cases de l'aire de combat) pour le biome, ou null.
+static func tile_tex(biome: String, idx: int) -> Texture2D:
+	var prefix: String = ""
+	match biome:
+		"Forêt":
+			prefix = "forest_ground"
+		"Montagne":
+			prefix = "mountain_ground"
+		"Désert":
+			prefix = "desert_ground"
+	if prefix == "":
+		return null
+	var path: String = "res://assets/sprites/tiles/%s_%02d.svg" % [prefix, posmod(idx, 6) + 1]
+	if not _tile_cache.has(path):
+		_tile_cache[path] = load(path) as Texture2D
+	return _tile_cache[path]
+
+
 static func gts(gx: float, gy: float) -> Vector2:
 	return Vector2((gx - gy) * HW, (gx + gy) * HH)
 
@@ -353,12 +373,18 @@ static func draw_block(ci: CanvasItem, h: float, p: Dictionary, biome: String, r
 	# Dessus
 	var top := PackedVector2Array([Vector2(0, -HH - h), Vector2(HW, -h), Vector2(0, HH - h), Vector2(-HW, -h)])
 	var tc: Color = top_a if (int(absf(float(rng.seed))) % 2 == 0) else top_b
-	ci.draw_colored_polygon(top, tc)
+	var tile: Texture2D = tile_tex(biome, int(absi(rng.seed) % 6))
+	if tile != null:
+		# Même texture de sol que l'aire de combat : le rebord et le plateau forment un tout
+		ci.draw_colored_polygon(top, tc)
+		ci.draw_texture_rect(tile, Rect2(-HW, -HH - h, HW * 2.0, HH * 2.0), false)
+	else:
+		ci.draw_colored_polygon(top, tc)
 	ci.draw_colored_polygon(PackedVector2Array([Vector2(0, -HH * 0.62 - h), Vector2(HW * 0.62, -h), Vector2(0, HH * 0.62 - h), Vector2(-HW * 0.62, -h)]),
 		Color(1.0, 0.98, 0.8, 0.07))
 	# Touffes / détails du dessus
 	var tuft: Color = tc.darkened(0.22)
-	for i: int in range(rng.randi_range(5, 9)):
+	for i: int in range(rng.randi_range(5, 9) if tile == null else 2):
 		var pp := Vector2(rng.randf_range(-0.75, 0.75) * HW, rng.randf_range(-0.75, 0.75) * HH - h)
 		if absf(pp.x) / HW + absf(pp.y + h) / HH < 0.85:
 			if biome == "Montagne":
@@ -537,13 +563,20 @@ static func draw_prop(ci: CanvasItem, kind: String, p: Dictionary, biome: String
 				var gh: float = rng.randf_range(10.0, 22.0)
 				ci.draw_line(Vector2(gx, 0), Vector2(gx + rng.randf_range(-5.0, 5.0), -gh), leaf if i % 2 == 0 else leaf_hi, 2.4, true)
 		"tree":
-			soft_shadow(ci, 34.0, 0.3)
-			_bar(ci, Vector2(0, 0), Vector2(0, -44), 9.0, Color(0.46, 0.32, 0.20))
-			ci.draw_line(Vector2(0, -34), Vector2(-14, -50), Color(0.40, 0.28, 0.18), 5.0, true)
-			blob(ci, Vector2(-16, -56), 18.0, leaf.darkened(0.08), leaf_hi)
-			blob(ci, Vector2(16, -58), 17.0, leaf.darkened(0.06), leaf_hi)
-			blob(ci, Vector2(0, -74), 22.0, leaf, leaf_hi)
-			blob(ci, Vector2(-4, -50), 15.0, leaf.darkened(0.04), leaf_hi)
+			soft_shadow(ci, 38.0, 0.32)
+			var tr := Color(0.46, 0.32, 0.20)
+			ci.draw_polygon(PackedVector2Array([Vector2(-9, 0), Vector2(-5, -48), Vector2(5, -48), Vector2(10, 0)]), PackedColorArray([tr.lightened(0.1), tr, tr.darkened(0.1), tr.darkened(0.2)]))
+			ci.draw_line(Vector2(-2, -42), Vector2(-3, -6), Color(0, 0, 0, 0.2), 2.0)
+			ci.draw_line(Vector2(0, -34), Vector2(-14, -50), tr.darkened(0.1), 5.0, true)
+			ci.draw_set_transform(Vector2(0, -52), 0.0, Vector2(1.0, 0.5))
+			ci.draw_circle(Vector2.ZERO, 34.0, leaf.darkened(0.45))
+			ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			blob(ci, Vector2(-17, -56), 19.0, leaf.darkened(0.1), leaf_hi)
+			blob(ci, Vector2(17, -58), 18.0, leaf.darkened(0.08), leaf_hi)
+			blob(ci, Vector2(-4, -50), 16.0, leaf.darkened(0.05), leaf_hi)
+			blob(ci, Vector2(0, -76), 23.0, leaf, leaf_hi)
+			for lc: Array in [[-10.0, -84.0], [8.0, -80.0], [-22.0, -62.0], [18.0, -66.0], [0.0, -66.0]]:
+				ci.draw_circle(Vector2(float(lc[0]), float(lc[1])), 3.2, leaf_hi.lightened(0.15))
 		"palm":
 			soft_shadow(ci, 26.0, 0.24)
 			_bar(ci, Vector2(0, 0), Vector2(6, -58), 7.0, Color(0.62, 0.46, 0.28))
@@ -668,8 +701,13 @@ static func draw_prop(ci: CanvasItem, kind: String, p: Dictionary, biome: String
 			ci.draw_line(Vector2(-4, -80), Vector2(-6, -10), Color(0, 0, 0, 0.2), 2.5)
 			ci.draw_line(Vector2(-12, 0), Vector2(-26, 6), trunk.darkened(0.1), 7.0, true)
 			ci.draw_line(Vector2(12, 0), Vector2(28, 6), trunk.darkened(0.2), 7.0, true)
+			ci.draw_set_transform(Vector2(0, -104), 0.0, Vector2(1.0, 0.45))
+			ci.draw_circle(Vector2.ZERO, 54.0, leaf.darkened(0.5))
+			ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			for o: Array in [[-30.0, -100.0, 24.0], [28.0, -104.0, 23.0], [-6.0, -128.0, 28.0], [-34.0, -126.0, 20.0], [32.0, -130.0, 20.0], [0, -100.0, 24.0], [-2.0, -152.0, 22.0]]:
-				blob(ci, Vector2(float(o[0]), float(o[1])), float(o[2]), leaf.darkened(0.05), leaf_hi)
+				blob(ci, Vector2(float(o[0]), float(o[1])), float(o[2]), leaf.darkened(0.08), leaf_hi)
+			for lc2: Array in [[-14.0, -158.0], [10.0, -146.0], [-28.0, -134.0], [26.0, -138.0], [0.0, -120.0], [-12.0, -108.0], [20.0, -112.0]]:
+				ci.draw_circle(Vector2(float(lc2[0]), float(lc2[1])), 3.6, leaf_hi.lightened(0.15))
 		"stump":
 			soft_shadow(ci, 22.0, 0.26)
 			var sw := Color(0.52, 0.38, 0.24)
