@@ -116,6 +116,7 @@ func _build() -> void:
 	# villes du territoire, ternes sinon.
 	var routes := _RouteLines.new()
 	routes.conquest = _conquest
+	routes.city_pos = CITY_POS
 	routes.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	map.add_child(routes)
 
@@ -458,12 +459,13 @@ func _style(bg: Color, border: Color) -> StyleBoxFlat:
 class _RouteLines:
 	extends Control
 	var conquest: Dictionary = {}
+	var city_pos: Dictionary = {}
 	func _draw() -> void:
 		for pair: Array in ProgressionManager.CONQUEST_ROUTES:
 			var a_id: String = String(pair[0])
 			var b_id: String = String(pair[1])
-			var a: Vector2 = ConquestMapUI.CITY_POS.get(a_id, Vector2.ZERO)
-			var b: Vector2 = ConquestMapUI.CITY_POS.get(b_id, Vector2.ZERO)
+			var a: Vector2 = city_pos.get(a_id, Vector2.ZERO)
+			var b: Vector2 = city_pos.get(b_id, Vector2.ZERO)
 			var owned: Array = conquest.get("owned", [])
 			var open: bool = owned.has(a_id) and owned.has(b_id)
 			var col: Color = Color(0.96, 0.75, 0.31, 0.95) if open else Color(0.79, 0.68, 0.43, 0.45)
