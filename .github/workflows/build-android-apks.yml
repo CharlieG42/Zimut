@@ -107,13 +107,14 @@ jobs:
           # Noms uniques par build : sous Android, un APK portant le même
           # nom que le zip (ex. Zimut-release.apk dans Zimut-release.zip)
           # fait échouer l'extraction (« le fichier existe déjà »).
-          if [ -f Zimut-debug.apk ]; then
-            mv Zimut-debug.apk "Zimut-debug-${sha_short}.apk"
-          fi
-          if [ -f Zimut-release.apk ]; then
-            mv Zimut-release.apk "Zimut-release-${sha_short}.apk"
-          fi
-          sha256sum Zimut-*.apk > SHA256SUMS.txt
+          # Cette étape s'exécute APRÈS les deux exports : les deux APK
+          # existent, aucun glob d'upload ne peut être vide.
+          for kind in debug release; do
+            if [ -f "Zimut-${kind}.apk" ]; then
+              mv "Zimut-${kind}.apk" "Zimut-${kind}-${sha_short}.apk"
+            fi
+          done
+          sha256sum Zimut-*-*.apk > SHA256SUMS.txt
           cat SHA256SUMS.txt
           ls -la Zimut-*.apk
 
