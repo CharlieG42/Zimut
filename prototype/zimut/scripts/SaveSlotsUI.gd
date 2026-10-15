@@ -499,7 +499,8 @@ func _mode_button(title_txt: String, desc: String, art_path: String, accent: Col
 	b.add_child(vb)
 
 	var art := TextureRect.new()
-	art.texture = load(art_path) as Texture2D if ResourceLoader.exists(art_path) else null
+	if ResourceLoader.exists(art_path):
+		art.texture = load(art_path) as Texture2D
 	art.custom_minimum_size = Vector2(0, 88 if _is_compact() else 118)
 	art.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
