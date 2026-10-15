@@ -183,11 +183,11 @@ func refresh() -> void:
 		var is_used: bool = used.has(slot)
 		if is_used:
 			var sv: Dictionary = used[slot]
-			btn.text = "  Continuer — %s\n  ennemis nv %d · %d victoires" % [sv["name"], sv["level"], sv["victories"]]
-			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_USED_BG, COL_BORDER, 4))
-			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_USED_BG.lightened(0.15), COL_BORDER, 5))
+			btn.text = "✦  %02d  ·  %s\nNIVEAU %d  •  %d VICTOIRES" % [slot + 1, String(sv["name"]), int(sv["level"]), int(sv["victories"])]
+			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_USED_BG, COL_BORDER, 2))
+			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_USED_BG.lightened(0.15), COL_BORDER, 3))
 		else:
-			btn.text = "＋  %02d  ·  NOUVELLE PARTIE\\nEmplacement libre" % (slot + 1)
+			btn.text = "＋  %02d  ·  NOUVELLE PARTIE\nEmplacement libre" % (slot + 1)
 			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_EMPTY_BG, Color(0.42, 0.45, 0.52), 1))
 			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_EMPTY_BG.lightened(0.15), COL_BORDER, 2))
 		btn.add_theme_font_size_override("font_size", _ui_font(17))
