@@ -28,6 +28,15 @@ var _current_slot: int = -1
 
 func _ready() -> void:
 	_build()
+	# À l'ouverture : afficher directement les détails de la partie en cours
+	# (la plus récente), sans attendre un clic sur un slot.
+	var saves: Array = ProgressionManager.list_saves()
+	if not saves.is_empty():
+		var latest: Dictionary = saves[0]
+		for entry: Dictionary in saves:
+			if String(entry.get("timestamp", "")) > String(latest.get("timestamp", "")):
+				latest = entry
+		_show_detail(ProgressionManager.load_save(int(latest.get("id", 0))), int(latest.get("id", 0)))
 	var intent: String = GameManager.menu_intent
 	GameManager.menu_intent = ""
 	if intent == "new":
@@ -156,18 +165,19 @@ func _use_stacked_layout() -> bool:
 
 func _ui_font(base_size: int) -> int:
 	var width: float = get_viewport().get_visible_rect().size.x
-	var scale: float = 1.0
+	var scale: float = 1.15
 	if width <= 600.0:
-		scale = 0.72
+		scale = 0.82
 	elif width <= 1000.0:
-		scale = 0.84
+		scale = 0.95
 	return maxi(12, roundi(float(base_size) * scale))
 
 func _apply_responsive_layout() -> void:
 	if _main_layout == null or _slots_scroll == null or _detail_panel == null:
 		return
 	var stacked: bool = _use_stacked_layout()
-	_main_layout.vertical = stacked
+	if _main_layout.vertical != stacked:
+		_main_layout.vertical = stacked
 	_main_layout.add_theme_constant_override("separation", 10 if stacked else 16)
 	_slots_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_slots_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -270,7 +280,6 @@ func _on_slot_pressed(slot: int) -> void:
 	_current_slot = slot
 	refresh()
 
-
 ## Depuis « Nouvelle partie » sur l'accueil, sélectionne le premier emplacement libre.
 ## La partie n'est créée qu'ici, après une action explicite du joueur.
 func _select_first_empty_slot() -> void:
@@ -301,60 +310,12 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	title.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(title)
 
-	var team_btn := Button.new()
-	team_btn.text = "Gérer l'équipe (libre à chaque combat)"
-	team_btn.add_theme_font_size_override("font_size", _ui_font(19))
-	team_btn.add_theme_color_override("font_color", COL_TXT)
-	team_btn.add_theme_stylebox_override("normal", _flat())
+	var team_btn := _action_button("team", "Gérer l'équipe (libre à chaque combat)", COL_TXT)
 	team_btn.pressed.connect(func() -> void:
 		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
 	_detail_box.add_child(team_btn)
 
-	var name_btn := Button.new()
-	name_btn.text = "✎  RENOMMER CETTE PARTIE"
-	name_btn.add_theme_font_size_override("font_size", _ui_font(19))
-	name_btn.add_theme_color_override("font_color", COL_TXT)
-	name_btn.add_theme_stylebox_override("normal", _flat())
-	name_btn.pressed.connect(func() -> void:
-		var dialog := ConfirmationDialog.new()
-		var line := LineEdit.new()
-		line.text = String(data.get("name", ""))
-		line.placeholder_text = "Nouveau nom"
-		dialog.add_child(line)
-		dialog.dialog_text = "Nouveau nom de la partie :"
-		dialog.ok_button_text = "RENOMMER"
-		dialog.cancel_button_text = "Annuler"
-		dialog.confirmed.connect(func() -> void:
-			ProgressionManager.rename_save(slot, line.text)
-			_current = ProgressionManager.load_save(slot)
-			refresh())
-		dialog.register_text_enter(line)
-		_root.add_child(dialog)
-		dialog.popup_centered()
-		line.call_deferred("grab_focus"))
-	_detail_box.add_child(name_btn)
 
-	var del_btn := Button.new()
-	del_btn.text = "🗑  SUPPRIMER CETTE PARTIE"
-	del_btn.add_theme_font_size_override("font_size", _ui_font(19))
-	del_btn.add_theme_color_override("font_color", Color(0.35, 0.08, 0.05))
-	del_btn.add_theme_stylebox_override("normal", _flat())
-	del_btn.pressed.connect(func() -> void:
-		var confirm := ConfirmationDialog.new()
-		confirm.dialog_text = "Supprimer '%s' ?\nLa progression et l'inventaire seront perdus." % String(data.get("name", ""))
-		confirm.ok_button_text = "SUPPRIMER"
-		confirm.cancel_button_text = "Annuler"
-		confirm.confirmed.connect(func() -> void:
-			ProgressionManager.delete_save(slot)
-			if GameManager.active_slot == slot:
-				GameManager.active_save = {}
-				GameManager.active_slot = -1
-			_current = {}
-			_current_slot = -1
-			refresh())
-		_root.add_child(confirm)
-		confirm.popup_centered())
-	_detail_box.add_child(del_btn)
 
 	# Les trois modes utilisent la même sauvegarde : roster, XP, caractéristiques,
 	# sorts, équipement et inventaire ne sont jamais dupliqués par mode.
@@ -401,11 +362,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		row.add_theme_color_override("font_color", COL_TXT)
 		_detail_box.add_child(row)
 
-	var chars_btn := Button.new()
-	chars_btn.text = "📈  PERSONNAGES — niveaux et caractéristiques"
-	chars_btn.add_theme_font_size_override("font_size", _ui_font(19))
-	chars_btn.add_theme_color_override("font_color", COL_TXT)
-	chars_btn.add_theme_stylebox_override("normal", _flat())
+	var chars_btn := _action_button("chars", "PERSONNAGES — niveaux et caractéristiques", COL_TXT)
 	chars_btn.pressed.connect(func() -> void:
 		var ui: CanvasLayer = (load("res://scripts/CharacterSheetUI.gd") as GDScript).new()
 		ui.layer = 10
@@ -444,21 +401,57 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 
 	var log_arr: Array = data.get("loot_log", [])
 	if log_arr.size() > 0:
-		var log_btn := Button.new()
-		log_btn.text = "Voir tous les loots gagnés (%d)" % log_arr.size()
-		log_btn.add_theme_font_size_override("font_size", _ui_font(19))
-		log_btn.add_theme_color_override("font_color", COL_TXT)
-		log_btn.add_theme_stylebox_override("normal", _flat())
+		var log_btn := _action_button("inventory", "Voir tous les loots gagnés (%d)" % log_arr.size(), COL_TXT)
 		log_btn.pressed.connect(func() -> void: _show_loot_log(log_arr))
 		_detail_box.add_child(log_btn)
 
-	var auto_btn := Button.new()
-	auto_btn.text = "Équiper automatiquement les meilleurs objets"
-	auto_btn.add_theme_font_size_override("font_size", _ui_font(19))
-	auto_btn.add_theme_color_override("font_color", COL_TXT)
-	auto_btn.add_theme_stylebox_override("normal", _flat())
+	var auto_btn := _action_button("autoequip", "Équiper automatiquement les meilleurs objets", COL_TXT)
 	auto_btn.pressed.connect(_auto_equip)
 	_detail_box.add_child(auto_btn)
+
+	var rename_btn := _action_button("rename", "RENOMMER CETTE PARTIE", COL_TXT)
+	rename_btn.pressed.connect(func() -> void:
+		var dialog := ConfirmationDialog.new()
+		var line := LineEdit.new()
+		line.text = String(data.get("name", ""))
+		line.placeholder_text = "Nouveau nom"
+		dialog.add_child(line)
+		dialog.dialog_text = "Nouveau nom de la partie :"
+		dialog.ok_button_text = "RENOMMER"
+		dialog.cancel_button_text = "Annuler"
+		dialog.confirmed.connect(func() -> void:
+			ProgressionManager.rename_save(slot, line.text)
+			_current = ProgressionManager.load_save(slot)
+			refresh())
+		dialog.register_text_enter(line)
+		_root.add_child(dialog)
+		dialog.popup_centered()
+		line.call_deferred("grab_focus"))
+	var delete_btn := _action_button("delete", "SUPPRIMER CETTE PARTIE", Color(0.35, 0.08, 0.05))
+	delete_btn.pressed.connect(func() -> void:
+		var confirm := ConfirmationDialog.new()
+		confirm.dialog_text = "Supprimer '%s' ?\nLa progression et l'inventaire seront perdus." % String(data.get("name", ""))
+		confirm.ok_button_text = "SUPPRIMER"
+		confirm.cancel_button_text = "Annuler"
+		confirm.confirmed.connect(func() -> void:
+			ProgressionManager.delete_save(slot)
+			if GameManager.active_slot == slot:
+				GameManager.active_save = {}
+				GameManager.active_slot = -1
+			_current = {}
+			_current_slot = -1
+			refresh())
+		_root.add_child(confirm)
+		confirm.popup_centered())
+
+	# Renommer / Supprimer : en bas de la fiche, cote a cote
+	var edit_row := HBoxContainer.new()
+	edit_row.add_theme_constant_override("separation", 10)
+	edit_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for c: Node in [rename_btn, delete_btn]:
+		c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		edit_row.add_child(c)
+	_detail_box.add_child(edit_row)
 
 func _launch_campaign_mode(mode: String, scene_path: String, slot: int) -> void:
 	if _current.is_empty() or slot < 0:
@@ -475,6 +468,52 @@ func _launch_campaign_mode(mode: String, scene_path: String, slot: int) -> void:
 	GameManager.clear_custom_team()
 	get_tree().change_scene_to_file(scene_path)
 
+
+
+## Bouton d'action illustré : vignette PNG à gauche du libellé.
+## Les icônes vivent dans assets/ui/actions/action_<clé>.png — remplacez
+## ces fichiers par vos créations (128x64 recommandé, fond transparent).
+const ACTION_ICONS := {
+	"team": "res://assets/ui/actions/action_team.png",
+	"chars": "res://assets/ui/actions/action_chars.png",
+	"inventory": "res://assets/ui/actions/action_inventory.png",
+	"autoequip": "res://assets/ui/actions/action_autoequip.png",
+	"rename": "res://assets/ui/actions/action_rename.png",
+	"delete": "res://assets/ui/actions/action_delete.png",
+}
+
+func _action_button(icon_key: String, txt: String, txt_col: Color) -> Button:
+	var b := Button.new()
+	b.custom_minimum_size = Vector2(0, 56)
+	b.focus_mode = Control.FOCUS_ALL
+	var hb := HBoxContainer.new()
+	hb.set_anchors_preset(Control.PRESET_FULL_RECT)
+	hb.add_theme_constant_override("separation", 10)
+	hb.offset_left = 10.0
+	hb.offset_right = -10.0
+	hb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_child(hb)
+	var icon_path: String = String(ACTION_ICONS.get(icon_key, ""))
+	if icon_path != "" and ResourceLoader.exists(icon_path):
+		var icon := TextureRect.new()
+		icon.texture = load(icon_path) as Texture2D
+		icon.custom_minimum_size = Vector2(96, 48)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		hb.add_child(icon)
+	var lbl := Label.new()
+	lbl.text = txt
+	lbl.add_theme_font_size_override("font_size", _ui_font(19))
+	lbl.add_theme_color_override("font_color", txt_col)
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hb.add_child(lbl)
+	b.add_theme_stylebox_override("normal", _flat())
+	b.add_theme_stylebox_override("hover", _flat())
+	return b
+
 func _equip_summary(m: Dictionary) -> Dictionary:
 	return m.get("equipment", {})
 
@@ -488,7 +527,7 @@ func _mode_button(title_txt: String, desc: String, art_path: String, accent: Col
 	b.text = ""
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.size_flags_stretch_ratio = 1.0
-	b.custom_minimum_size = Vector2(0, 150 if _is_compact() else 190)
+	b.custom_minimum_size = Vector2(0, 210 if _is_compact() else 270)
 	b.disabled = not enabled
 	b.focus_mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE
 	var vb := VBoxContainer.new()
@@ -501,7 +540,7 @@ func _mode_button(title_txt: String, desc: String, art_path: String, accent: Col
 	var art := TextureRect.new()
 	if ResourceLoader.exists(art_path):
 		art.texture = load(art_path) as Texture2D
-	art.custom_minimum_size = Vector2(0, 88 if _is_compact() else 118)
+	art.custom_minimum_size = Vector2(0, 130 if _is_compact() else 175)
 	art.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED

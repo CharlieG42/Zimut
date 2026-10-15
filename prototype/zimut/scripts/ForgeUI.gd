@@ -368,13 +368,13 @@ func _on_salvage_pressed(it: Dictionary) -> void:
 		parts.append("%s +%d" % [r, int(gains[r])])
 	crafted.emit()
 	refresh()
-	_detail_box.add_child(U.lbl("⚒ Brié : %s%sGains : %s" % [String(it.get("name", "?")), chr(10), " · ".join(PackedStringArray(parts))], 18, Color(0.9, 0.75, 0.4)))
+	_detail_box.add_child(U.lbl("⚒ Brié : %s\nGains : %s" % [String(it.get("name", "?")), " · ".join(PackedStringArray(parts))], 18, Color(0.9, 0.75, 0.4)))
 
 func _refresh_detail() -> void:
 	if _salvage_mode:
 		for c in _detail_box.get_children():
 			c.queue_free()
-		_detail_box.add_child(U.lbl("Sélectionnez un objet à briser dans la liste :%s il sera détruit et rendra des ressources selon sa rareté et son niveau." % chr(10), 18, U.C_DIM))
+		_detail_box.add_child(U.lbl("Sélectionnez un objet à briser dans la liste.\nIl sera détruit et rendra des ressources selon sa rareté et son niveau.", 18, U.C_DIM))
 		return
 	for c in _detail_box.get_children():
 		c.queue_free()
