@@ -101,14 +101,14 @@ func _build() -> void:
 	var map_title := Label.new()
 	map_title.text = "LE MONDE DE ZIMUT"
 	map_title.position = Vector2(22, 14)
-	map_title.add_theme_font_size_override("font_size", 20)
+	map_title.add_theme_font_size_override("font_size", 23)
 	map_title.add_theme_color_override("font_color", TEXT)
 	map.add_child(map_title)
 
 	var legend := Label.new()
 	legend.text = "Vert = territoire  ·  Gris = neutre  ·  Rouge = adverse  ·  Épée = attaquable"
 	legend.position = Vector2(260, 16)
-	legend.add_theme_font_size_override("font_size", 14)
+	legend.add_theme_font_size_override("font_size", 16)
 	legend.add_theme_color_override("font_color", GOLD)
 	map.add_child(legend)
 
@@ -131,8 +131,8 @@ func _build() -> void:
 		btn.text = ("%s\n" % badge) + String(city["name"]) + siege_txt
 		btn.tooltip_text = "%s — %s" % [String(ProgressionManager.biome_label(String(city["biome"]))), String(city["desc"])]
 		btn.position = Vector2(CITY_POS[city_id].x * map.size.x - 88, CITY_POS[city_id].y * map.size.y - 34)
-		btn.custom_minimum_size = Vector2(176, 66)
-		btn.add_theme_font_size_override("font_size", 15)
+		btn.custom_minimum_size = Vector2(196, 76)
+		btn.add_theme_font_size_override("font_size", 18)
 		btn.add_theme_color_override("font_color", TEXT)
 		btn.add_theme_stylebox_override("normal", _style(_city_color(city_id), GOLD if city_id == _selected_id else Color(0.5, 0.64, 0.46)))
 		btn.add_theme_stylebox_override("hover", _style(_city_color(city_id).lightened(0.12), GOLD))
@@ -152,20 +152,21 @@ func _build() -> void:
 
 	var panel_title := Label.new()
 	panel_title.text = "CONSEIL DE GUERRE"
-	panel_title.add_theme_font_size_override("font_size", 22)
+	panel_title.add_theme_font_size_override("font_size", 25)
 	panel_title.add_theme_color_override("font_color", TEXT)
 	box.add_child(panel_title)
 
 	_message = Label.new()
 	_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_message.custom_minimum_size.y = 200
+	_message.custom_minimum_size.y = 180
 	_message.add_theme_color_override("font_color", TEXT)
+	_message.add_theme_font_size_override("font_size", 18)
 	box.add_child(_message)
 
 	_attack = Button.new()
 	_attack.text = "LANCER L'ASSAUT"
-	_attack.custom_minimum_size.y = 62
-	_attack.add_theme_font_size_override("font_size", 21)
+	_attack.custom_minimum_size.y = 68
+	_attack.add_theme_font_size_override("font_size", 23)
 	_attack.pressed.connect(_attack_selected_city)
 	box.add_child(_attack)
 
@@ -286,8 +287,8 @@ func _build_panel(city_id: String, conquered: bool) -> void:
 			cost_parts.append("%s %d/%d" % [r, int(res.get(r, 0)), int(info["cost"][r])])
 		cost_parts.append("%d or" % int(info.get("gold", 0)))
 		b.text = "⚒ %s — %s" % [String(info["label"]), " · ".join(PackedStringArray(cost_parts))]
-		b.custom_minimum_size.y = 46
-		b.add_theme_font_size_override("font_size", 15)
+		b.custom_minimum_size.y = 54
+		b.add_theme_font_size_override("font_size", 17)
 		b.add_theme_color_override("font_color", TEXT)
 		b.add_theme_stylebox_override("normal", _style(Color(0.13, 0.22, 0.27, 0.95), Color(0.55, 0.66, 0.5)))
 		b.add_theme_stylebox_override("hover", _style(Color(0.18, 0.30, 0.34, 0.95), GOLD))
