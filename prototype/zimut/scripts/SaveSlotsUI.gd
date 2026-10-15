@@ -310,12 +310,30 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	title.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(title)
 
+	# Actions principales sur une même ligne : les PNG sont plus lisibles et
+	# prennent moins de hauteur que deux grands boutons empilés.
+	var top_actions := HBoxContainer.new()
+	top_actions.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_actions.add_theme_constant_override("separation", 10)
+	_detail_box.add_child(top_actions)
+
 	var team_btn := _action_button("team", "Gérer l'équipe (libre à chaque combat)", COL_TXT)
 	team_btn.pressed.connect(func() -> void:
 		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
-	_detail_box.add_child(team_btn)
+	team_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_actions.add_child(team_btn)
 
-
+	var chars_btn := _action_button("chars", "PERSONNAGES — niveaux et caractéristiques", COL_TXT)
+	chars_btn.pressed.connect(func() -> void:
+		var ui: CanvasLayer = (load("res://scripts/CharacterSheetUI.gd") as GDScript).new()
+		ui.layer = 10
+		add_child(ui)
+		ui.closed.connect(func() -> void:
+			ui.queue_free()
+			_show_detail(ProgressionManager.load_save(slot), slot))
+		ui.open(_current, slot))
+	chars_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_actions.add_child(chars_btn)
 
 	# Les trois modes utilisent la même sauvegarde : roster, XP, caractéristiques,
 	# sorts, équipement et inventaire ne sont jamais dupliqués par mode.
@@ -362,17 +380,6 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		row.add_theme_color_override("font_color", COL_TXT)
 		_detail_box.add_child(row)
 
-	var chars_btn := _action_button("chars", "PERSONNAGES — niveaux et caractéristiques", COL_TXT)
-	chars_btn.pressed.connect(func() -> void:
-		var ui: CanvasLayer = (load("res://scripts/CharacterSheetUI.gd") as GDScript).new()
-		ui.layer = 10
-		add_child(ui)
-		ui.closed.connect(func() -> void:
-			ui.queue_free()
-			_show_detail(ProgressionManager.load_save(slot), slot))
-		ui.open(_current, slot))
-	_detail_box.add_child(chars_btn)
-
 	var inv: Array = data.get("inventory", [])
 	var inv_lbl := Label.new()
 	inv_lbl.text = "Inventaire (%d objets disponibles à équiper) :" % inv.size()
@@ -400,14 +407,19 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		inv_box.add_child(row2)
 
 	var log_arr: Array = data.get("loot_log", [])
+	var inventory_actions := HBoxContainer.new()
+	inventory_actions.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	inventory_actions.add_theme_constant_override("separation", 10)
+	var auto_btn := _action_button("autoequip", "Équiper automatiquement les meilleurs objets", COL_TXT)
+	auto_btn.pressed.connect(_auto_equip)
+	auto_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	inventory_actions.add_child(auto_btn)
 	if log_arr.size() > 0:
 		var log_btn := _action_button("inventory", "Voir tous les loots gagnés (%d)" % log_arr.size(), COL_TXT)
 		log_btn.pressed.connect(func() -> void: _show_loot_log(log_arr))
-		_detail_box.add_child(log_btn)
-
-	var auto_btn := _action_button("autoequip", "Équiper automatiquement les meilleurs objets", COL_TXT)
-	auto_btn.pressed.connect(_auto_equip)
-	_detail_box.add_child(auto_btn)
+		log_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		inventory_actions.add_child(log_btn)
+	_detail_box.add_child(inventory_actions)
 
 	var rename_btn := _action_button("rename", "RENOMMER CETTE PARTIE", COL_TXT)
 	rename_btn.pressed.connect(func() -> void:
@@ -488,7 +500,7 @@ const ACTION_ICONS := {
 func _action_button(icon_key: String, txt: String, txt_col: Color) -> Button:
 	var b := Button.new()
 	b.tooltip_text = txt
-	b.custom_minimum_size = Vector2(0, 84 if _is_compact() else 104)
+	b.custom_minimum_size = Vector2(0, 92 if _is_compact() else 112)
 	b.focus_mode = Control.FOCUS_ALL
 	var icon_path: String = String(ACTION_ICONS.get(icon_key, ""))
 	if icon_path != "" and ResourceLoader.exists(icon_path):
@@ -518,7 +530,7 @@ func _mode_button(title_txt: String, desc: String, art_path: String, accent: Col
 	b.tooltip_text = "%s — %s" % [title_txt, desc]
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.size_flags_stretch_ratio = 1.0
-	b.custom_minimum_size = Vector2(320, 300 if _is_compact() else 420)
+	b.custom_minimum_size = Vector2(0, 180 if _is_compact() else 240)
 	b.disabled = not enabled
 	b.focus_mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE
 
