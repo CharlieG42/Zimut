@@ -7,13 +7,16 @@ signal settings_changed
 
 const SETTINGS_PATH := "user://settings.json"
 
-## Difficulté : index dans DIFFICULTIES (0 = Facile...).
-const DIFFICULTIES: Array[String] = ["Facile", "Normal", "Difficile"]
-const DIFFICULTY_POWER := [0.85, 1.0, 1.2]   # multiplicateur PV/attaque des ennemis
+## Difficulté : index dans DIFFICULTIES (0 = Facile, 3 = Enfer).
+const DIFFICULTIES: Array[String] = ["Facile", "Normal", "Difficile", "Enfer"]
+## Enfer augmente surtout la résistance : les PV dépassent Difficile de 37,5 %.
+## Les attaques d'Enfer restent au même niveau que Difficile pour éviter un pic injuste.
+const DIFFICULTY_HP_POWER := [0.85, 1.0, 1.2, 1.65]
+const DIFFICULTY_ATK_POWER := [0.85, 1.0, 1.2, 1.2]
 
 ## Rapidité XP : index dans XP_SPEEDS.
 const XP_SPEEDS: Array[String] = ["Lente", "Normale", "Rapide"]
-const XP_SPEED_MULT := [0.6, 1.0, 1.6]      # multiplicateur du gain XP par combat
+const XP_SPEED_MULT := [0.6, 1.0, 1.6]
 
 var difficulty: int = 1
 var xp_speed: int = 1
@@ -58,9 +61,16 @@ func difficulty_label() -> String:
 func xp_speed_label() -> String:
 	return XP_SPEEDS[clampi(xp_speed, 0, XP_SPEEDS.size() - 1)]
 
-## Multiplicateur de puissance des ennemis (PV et attaque) selon la difficulté.
+## Multiplicateurs de PV et d'attaque des ennemis selon la difficulté.
+func enemy_hp_mult() -> float:
+	return float(DIFFICULTY_HP_POWER[clampi(difficulty, 0, DIFFICULTY_HP_POWER.size() - 1)])
+
+func enemy_attack_mult() -> float:
+	return float(DIFFICULTY_ATK_POWER[clampi(difficulty, 0, DIFFICULTY_ATK_POWER.size() - 1)])
+
+## Compatibilité pour les éventuels scripts externes qui utilisent l'ancien nom.
 func enemy_power_mult() -> float:
-	return float(DIFFICULTY_POWER[clampi(difficulty, 0, DIFFICULTY_POWER.size() - 1)])
+	return enemy_attack_mult()
 
 ## Multiplicateur du gain d'XP par combat selon la rapidité choisie.
 func xp_mult() -> float:

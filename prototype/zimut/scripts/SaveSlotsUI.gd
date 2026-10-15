@@ -363,18 +363,28 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	mode_lbl.add_theme_font_size_override("font_size", _ui_font(21))
 	mode_lbl.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(mode_lbl)
-	_detail_box.add_child(_mode_button("Combats Tactiques", "Combat au tour par tour — niveau conseillé %d" % int(data.get("level", 10)), true, func() -> void:
-		_current.erase("campaign_mode")
-		ProgressionManager.write_save(slot, _current)
-		GameManager.active_save = ProgressionManager.load_save(slot)
-		GameManager.active_slot = slot
-		GameManager.fight_biome = "Forêt"
-		battle_requested.emit(slot)
-		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")))
-	_detail_box.add_child(_mode_button("Aventure", "Explorez la forêt, résolvez une énigme et découvrez des coffres", true, func() -> void:
-		_launch_campaign_mode("adventure", "res://scenes/AdventureMap.tscn", slot)))
-	_detail_box.add_child(_mode_button("Conquête", "Développez votre territoire et lancez des assauts tactiques", true, func() -> void:
-		_launch_campaign_mode("conquest", "res://scenes/ConquestMap.tscn", slot)))
+	var modes_row := HBoxContainer.new()
+	modes_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	modes_row.add_theme_constant_override("separation", 10)
+	_detail_box.add_child(modes_row)
+	modes_row.add_child(_mode_button("Combats Tactiques",
+		"Combats stratégiques au tour par tour", "res://assets/ui/modes/mode_tactique.svg",
+		Color(0.22, 0.43, 0.69), true, func() -> void:
+			_current.erase("campaign_mode")
+			ProgressionManager.write_save(slot, _current)
+			GameManager.active_save = ProgressionManager.load_save(slot)
+			GameManager.active_slot = slot
+			GameManager.fight_biome = "Forêt"
+			battle_requested.emit(slot)
+			get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")))
+	modes_row.add_child(_mode_button("Aventure",
+		"Explorez, découvrez et relevez des défis", "res://assets/ui/modes/mode_aventure.svg",
+		Color(0.22, 0.48, 0.31), true, func() -> void:
+			_launch_campaign_mode("adventure", "res://scenes/AdventureMap.tscn", slot)))
+	modes_row.add_child(_mode_button("Conquête",
+		"Conquérez les cités par les armes", "res://assets/ui/modes/mode_conquete.svg",
+		Color(0.62, 0.25, 0.20), true, func() -> void:
+			_launch_campaign_mode("conquest", "res://scenes/ConquestMap.tscn", slot)))
 
 	var team: Array = data.get("team", [])
 	var team_lbl := Label.new()
@@ -472,47 +482,62 @@ const COL_DISABLED_BG := Color(0.14, 0.16, 0.22, 0.85)
 const COL_DISABLED_BORDER := Color(0.28, 0.31, 0.39, 1.0)
 const COL_DISABLED_TXT := Color(0.45, 0.48, 0.55)
 
-## Bouton de mode de jeu : titre + descriptif ; grisé et non cliquable si à venir.
-func _mode_button(title_txt: String, desc: String, enabled: bool, cb: Callable) -> Button:
+## Carte de mode : vignette illustrée, titre et court descriptif.
+func _mode_button(title_txt: String, desc: String, art_path: String, accent: Color, enabled: bool, cb: Callable) -> Button:
 	var b := Button.new()
 	b.text = ""
-	b.custom_minimum_size = Vector2(0, 76 if _is_compact() else 96)
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.size_flags_stretch_ratio = 1.0
+	b.custom_minimum_size = Vector2(0, 150 if _is_compact() else 190)
 	b.disabled = not enabled
 	b.focus_mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE
 	var vb := VBoxContainer.new()
 	vb.set_anchors_preset(Control.PRESET_FULL_RECT)
 	vb.alignment = BoxContainer.ALIGNMENT_CENTER
-	vb.add_theme_constant_override("separation", 2)
+	vb.add_theme_constant_override("separation", 3)
+	vb.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	b.add_child(vb)
+
+	var art := TextureRect.new()
+	if ResourceLoader.exists(art_path):
+		art.texture = load(art_path) as Texture2D
+	art.custom_minimum_size = Vector2(0, 88 if _is_compact() else 118)
+	art.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vb.add_child(art)
+
 	var t := Label.new()
 	t.text = title_txt
 	t.add_theme_font_size_override("font_size", _ui_font(22))
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	t.add_theme_color_override("font_color", COL_TXT if enabled else COL_DISABLED_TXT)
+	t.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vb.add_child(t)
+
 	var d := Label.new()
 	d.text = desc
-	d.add_theme_font_size_override("font_size", _ui_font(16))
+	d.add_theme_font_size_override("font_size", _ui_font(15))
 	d.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	d.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12) if enabled else COL_DISABLED_TXT)
+	d.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vb.add_child(d)
+
 	var normal := StyleBoxFlat.new()
-	if enabled:
-		normal.bg_color = COL_PANEL
-		normal.border_color = COL_BORDER
-	else:
-		normal.bg_color = COL_DISABLED_BG
-		normal.border_color = COL_DISABLED_BORDER
+	normal.bg_color = COL_PANEL if enabled else COL_DISABLED_BG
+	normal.border_color = accent if enabled else COL_DISABLED_BORDER
 	normal.set_border_width_all(3)
 	normal.set_corner_radius_all(12)
-	normal.content_margin_left = 12
-	normal.content_margin_right = 12
-	normal.content_margin_top = 8
-	normal.content_margin_bottom = 8
+	normal.content_margin_left = 7
+	normal.content_margin_right = 7
+	normal.content_margin_top = 7
+	normal.content_margin_bottom = 7
 	var hover := normal.duplicate()
 	if enabled:
 		hover.bg_color = Color(0.99, 0.95, 0.83)
-		hover.border_color = Color(0.85, 0.68, 0.3)
+		hover.border_color = accent.lightened(0.25)
 	var pressed_s := normal.duplicate()
 	if enabled:
 		pressed_s.bg_color = Color(0.88, 0.82, 0.66)
