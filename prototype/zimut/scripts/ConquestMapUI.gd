@@ -20,6 +20,7 @@ var _selected_id: String = "clairiere"
 var _message: Label
 var _attack: Button
 var _city_buttons: Dictionary = {}
+var _build_box: VBoxContainer
 
 func _ready() -> void:
 	layer = 10
@@ -35,6 +36,10 @@ func _ready() -> void:
 	_save["campaign_mode"] = "conquest"
 	_persist()
 	_build()
+	var counter: String = String(_conquest.get("last_counterattack", ""))
+	if counter != "" and _city_by_id(counter).size() > 0:
+		var cname: String = String(_city_by_id(counter).get("name", counter))
+		_message.text = "⚠ CONTRE-ATTAQUE ! L\u2019ennemi a pillé %s : production gelée %d bataille(s)." % [cname, ProgressionManager.CONQUEST_RAVAGE_BATTLES]
 
 func _build() -> void:
 	var bg := ColorRect.new()
@@ -117,6 +122,9 @@ func _build() -> void:
 	_attack.add_theme_font_size_override("font_size", 21)
 	_attack.pressed.connect(_attack_selected_city)
 	box.add_child(_attack)
+	_build_box = VBoxContainer.new()
+	_build_box.add_theme_constant_override("separation", 6)
+	box.add_child(_build_box)
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	box.add_child(spacer)
@@ -137,11 +145,31 @@ func _select_city(id: String) -> void:
 	var city: Dictionary = _city_by_id(id)
 	var owned: Array = _conquest.get("owned", ["capitale"])
 	var conquered: bool = owned.has(id)
+	var ravage: int = int(_conquest.get("ravage", {}).get(id, 0))
+	_build_panel(id, conquered)
 	if city.get("kind", "") == "capital":
-		_message.text = "%s\n\n%s\n\nVotre territoire de départ." % [city["name"], city["desc"]]
+		_message.text = "%s\n\n%s\n\nVotre territoire de départ, à l’abri des attaques." % [city["name"], city["desc"]]
 		_attack.disabled = true
 	elif conquered:
-		_message.text = "%s\n\n%s\n\nTerritoire allié : la ville est déjà sous votre bannière." % [city["name"], city["desc"]]
+		var txt: String = "%s\n\n%s\n\n⚑ Territoire allié." % [city["name"], city["desc"]]
+		if ravage > 0:
+			txt += "\n\n⚠ PILLÉE : production gelée pendant %d bataille(s)." % ravage
+		var builds: Array = _conquest.get("buildings", {}).get(id, [])
+		if builds.size() > 0:
+			var names: Array = []
+			for b: String in builds:
+				names.append(String(ProgressionManager.CONQUEST_BUILDINGS.get(b, {}).get("label", b)))
+			txt += "\n\nBâtiments : %s" % ", ".join(PackedStringArray(names))
+		var yld: Dictionary = {}
+		for b: String in builds:
+			for r: String in ProgressionManager.CONQUEST_BUILDINGS.get(b, {}).get("yield", {}).keys():
+				yld[r] = int(yld.get(r, 0)) + int(ProgressionManager.CONQUEST_BUILDINGS[b]["yield"][r])
+		if yld.size() > 0 and ravage == 0:
+			var parts: Array = []
+			for r: String in yld.keys():
+				parts.append("%s +%d" % [r, int(yld[r])])
+			txt += "\nProduction : %s" % " · ".join(PackedStringArray(parts))
+		_message.text = txt
 		_attack.disabled = true
 	else:
 		_message.text = "%s · Niveau conseillé %d\n\n%s\n\nUn assaut lance un combat du mode Tactique." % [city["name"], int(city["level"]), city["desc"]]
@@ -149,6 +177,46 @@ func _select_city(id: String) -> void:
 	for other: Dictionary in CITIES:
 		var button: Button = _city_buttons[String(other["id"])]
 		button.add_theme_stylebox_override("normal", _style(_city_color(other), GOLD if String(other["id"]) == id else Color(0.5, 0.64, 0.46)))
+
+## Panneau de construction de la ville sélectionnée : un bouton par
+## bâtiment de ressources disponible, avec coûts, s’il n’est pas déjà bâti.
+func _build_panel(city_id: String, conquered: bool) -> void:
+	if _build_box == null:
+		return
+	for c: Node in _build_box.get_children():
+		c.queue_free()
+	if not conquered:
+		return
+	var res: Dictionary = _save.get("resources", {})
+	var builds: Array = _conquest.get("buildings", {}).get(city_id, [])
+	for key: String in ProgressionManager.CONQUEST_BUILDINGS.keys():
+		var info: Dictionary = ProgressionManager.CONQUEST_BUILDINGS[key]
+		var b := Button.new()
+		var cost_parts: Array = []
+		for r: String in info.get("cost", {}).keys():
+			cost_parts.append("%s %d/%d" % [r, int(res.get(r, 0)), int(info["cost"][r])])
+		cost_parts.append("%d or" % int(info.get("gold", 0)))
+		b.text = "⚒ %s — %s" % [String(info["label"]), " · ".join(PackedStringArray(cost_parts))]
+		b.custom_minimum_size.y = 46
+		b.add_theme_font_size_override("font_size", 15)
+		b.add_theme_color_override("font_color", TEXT)
+		b.add_theme_stylebox_override("normal", _style(Color(0.13, 0.22, 0.27, 0.95), Color(0.55, 0.66, 0.5)))
+		b.add_theme_stylebox_override("hover", _style(Color(0.18, 0.30, 0.34, 0.95), GOLD))
+		if builds.has(key):
+			b.text = "✓ %s (construit)" % String(info["label"])
+			b.disabled = true
+		else:
+			b.pressed.connect(_on_build_pressed.bind(city_id, key))
+		_build_box.add_child(b)
+
+func _on_build_pressed(city_id: String, building: String) -> void:
+	var err: String = ProgressionManager.conquest_build(_save, city_id, building)
+	if err != "":
+		_message.text = err
+		return
+	ProgressionManager.write_save(_slot, _save)
+	_conquest = _save.get("conquest", {})
+	_select_city(city_id)
 
 func _attack_selected_city() -> void:
 	var city: Dictionary = _city_by_id(_selected_id)

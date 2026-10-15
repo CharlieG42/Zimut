@@ -69,6 +69,22 @@ const BIOME_BOSSES := {
 const RESOURCE_LABEL := {"Fer": "Fer", "Bois": "Bois", "Cuir": "Cuir", "Magie": "Magie", "Venin": "Venin"}
 ## Quantités de ressources lâchées par un combat (par ennemi vaincu).
 const RESOURCE_DROPS := {"Fer": 4, "Bois": 3, "Cuir": 3, "Magie": 2, "Venin": 1}
+
+## Conquête : probabilité d'une contre-attaque ennemie après une bataille
+## gagnée, et durée du pillage (en batailles) d'une ville ravagée.
+## La capitale (id "capitale") ne peut JAMAIS être attaquée.
+const CONQUEST_COUNTERATTACK_CHANCE := 0.35
+const CONQUEST_RAVAGE_BATTLES := 3
+
+## Bâtiments de ressources constructibles dans les villes conquises.
+## type -> { label, coûts (ressources), or, production par bataille gagnée }
+const CONQUEST_BUILDINGS := {
+	"scierie":  {"label": "Scierie",  "cost": {"Bois": 12},               "gold": 40,  "yield": {"Bois": 3}},
+	"mine":     {"label": "Mine",     "cost": {"Fer": 12},                "gold": 60,  "yield": {"Fer": 3}},
+	"tannerie": {"label": "Tannerie", "cost": {"Cuir": 12},               "gold": 50,  "yield": {"Cuir": 3}},
+	"cabane":   {"label": "Cabane des mages", "cost": {"Magie": 8},        "gold": 90,  "yield": {"Magie": 2}},
+	"verger":   {"label": "Verger",   "cost": {"Bois": 8, "Venin": 4},    "gold": 70,  "yield": {"Venin": 2}},
+}
 ## +1 niveau d'ennemi toutes les N victoires (la difficulté monte doucement)
 const DIFFICULTY_CREEP_EVERY := 10
 
@@ -990,14 +1006,38 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 	if mode == "conquest":
 		var conquest: Dictionary = data.get("conquest", {})
 		var pending: String = String(conquest.get("pending_city", ""))
+		var just_conquered: String = pending
 		if pending != "":
 			var owned: Array = conquest.get("owned", ["capitale"])
 			if not owned.has(pending):
 				owned.append(pending)
-			conquest["owned"] = owned
+				conquest["owned"] = owned
 			conquest["pending_city"] = ""
 			conquest.erase("pending_level")
-			data["conquest"] = conquest
+		# Production de l'empire : les bâtiments des villes possédées
+		# rapportent leurs ressources à chaque bataille gagnée.
+		var empire_yield: Dictionary = {}
+		for city_id: String in conquest.get("owned", []):
+			if _is_city_ravaged(conquest, city_id):
+				continue
+			for b: String in _city_buildings(conquest, city_id):
+				var info: Dictionary = CONQUEST_BUILDINGS.get(b, {})
+				for res: String in info.get("yield", {}).keys():
+					empire_yield[res] = int(empire_yield.get(res, 0)) + int(info["yield"][res])
+		if not empire_yield.is_empty():
+			add_resources(data, empire_yield)
+			conquest["last_yield"] = empire_yield
+		# Décrément du pillage, puis contre-attaque ennemie éventuelle
+		# (jamais la capitale, jamais la ville tout juste conquise).
+		_tick_ravage(conquest)
+		var counter: String = _roll_counterattack(conquest, just_conquered)
+		if counter != "":
+			conquest["ravage"] = _ravage_dict(conquest)
+			conquest["ravage"][counter] = CONQUEST_RAVAGE_BATTLES
+			conquest["last_counterattack"] = counter
+		else:
+			conquest["last_counterattack"] = ""
+		data["conquest"] = conquest
 	elif mode == "adventure":
 		var adventure: Dictionary = data.get("adventure", {})
 		var pending_challenge: String = String(adventure.get("pending_challenge", ""))
@@ -1008,6 +1048,112 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 			adventure["completed"] = completed
 			adventure["pending_challenge"] = ""
 			data["adventure"] = adventure
+
+## La ville est-elle pillée (production gelée) ?
+func _is_city_ravaged(conquest: Dictionary, city_id: String) -> bool:
+	return int(_ravage_dict(conquest).get(city_id, 0)) > 0
+
+func _ravage_dict(conquest: Dictionary) -> Dictionary:
+	var r: Dictionary = conquest.get("ravage", {})
+	for k: String in r.keys():
+		r[k] = int(r[k])
+	return r
+
+## Bâtiments construits dans une ville.
+func _city_buildings(conquest: Dictionary, city_id: String) -> Array:
+	var builds: Dictionary = conquest.get("buildings", {})
+	var lst: Array = builds.get(city_id, [])
+	var out: Array = []
+	for b in lst:
+		out.append(String(b))
+	return out
+
+## Un combat de moins de pillage sur toutes les villes ravagées.
+func _tick_ravage(conquest: Dictionary) -> void:
+	var r: Dictionary = _ravage_dict(conquest)
+	var cleaned: Dictionary = {}
+	for k: String in r.keys():
+		var v: int = int(r[k]) - 1
+		if v > 0:
+			cleaned[k] = v
+	conquest["ravage"] = cleaned
+
+## Contre-attaque ennemie : retourne l\'id de la ville ciblée, ou "".
+## Ne cible jamais la capitale ni la ville qui vient d\'être conquise.
+func _roll_counterattack(conquest: Dictionary, just_conquered: String) -> String:
+	if _rng.randf() > CONQUEST_COUNTERATTACK_CHANCE:
+		return ""
+	var candidates: Array = []
+	for city_id: String in conquest.get("owned", []):
+		if city_id == "capitale" or city_id == just_conquered:
+			continue
+		if _is_city_ravaged(conquest, city_id):
+			continue
+		candidates.append(city_id)
+	if candidates.is_empty():
+		return ""
+	return String(candidates[_rng.randi_range(0, candidates.size() - 1)])
+
+## Construire un bâtiment dans une ville conquise. Retourne "" si OK.
+func conquest_build(data: Dictionary, city_id: String, building: String) -> String:
+	var info: Dictionary = CONQUEST_BUILDINGS.get(building, {})
+	if info.is_empty():
+		return "Bâtiment inconnu."
+	var conquest: Dictionary = data.get("conquest", {})
+	if not conquest.get("owned", []).has(city_id):
+		return "Ville non conquise."
+	if _is_city_ravaged(conquest, city_id):
+		return "Ville pillée : impossible de construire."
+	var builds: Dictionary = conquest.get("buildings", {})
+	var lst: Array = builds.get(city_id, [])
+	if lst.has(building):
+		return "Bâtiment déjà construit."
+	var res: Dictionary = data.get("resources", {})
+	for k: String in info.get("cost", {}).keys():
+		if int(res.get(k, 0)) < int(info["cost"][k]):
+			return "Ressource insuffisante : %s (%d/%d)." % [k, int(res.get(k, 0)), int(info["cost"][k])]
+	if int(data.get("gold", 0)) < int(info.get("gold", 0)):
+		return "Or insuffisant : %d pièces requises." % int(info.get("gold", 0))
+	for k: String in info.get("cost", {}).keys():
+		res[k] = int(res.get(k, 0)) - int(info["cost"][k])
+	data["resources"] = res
+	data["gold"] = int(data.get("gold", 0)) - int(info.get("gold", 0))
+	lst.append(building)
+	builds[city_id] = lst
+	conquest["buildings"] = builds
+	data["conquest"] = conquest
+	progression_changed.emit()
+	return ""
+
+## Brisage d\'un objet de l\'inventaire : le détruit et rend des ressources
+## selon sa rareté et son niveau (matières pour la Forge).
+const SALVAGE_RARITY := {
+	"commun":     {"n": 1, "res": ["Fer", "Bois"]},
+	"rare":       {"n": 2, "res": ["Fer", "Cuir", "Bois"]},
+	"epique":     {"n": 3, "res": ["Magie", "Fer", "Cuir"]},
+	"legendaire": {"n": 5, "res": ["Magie", "Venin", "Fer"]},
+}
+
+func salvage_item(data: Dictionary, inv_index: int) -> Dictionary:
+	## Retourne { "ok": bool, "gains": {res: n}, "reason": "" }
+	var inv: Array = data.get("inventory", [])
+	if inv_index < 0 or inv_index >= inv.size():
+		return {"ok": false, "gains": {}, "reason": "Objet introuvable."}
+	var it: Dictionary = inv[inv_index]
+	var rarity: String = String(it.get("rarity", "commun"))
+	var info: Dictionary = SALVAGE_RARITY.get(rarity, SALVAGE_RARITY["commun"])
+	var lvl: int = maxi(1, int(it.get("level", 1)))
+	var n_per: int = maxi(1, int(round((1.0 + float(lvl) * 0.1) * float(info["n"] * 0.6))))
+	var gains: Dictionary = {}
+	var res_pool: Array = info["res"]
+	for i: int in range(int(info["n"])):
+		var res: String = String(res_pool[_rng.randi_range(0, res_pool.size() - 1)])
+		gains[res] = int(gains.get(res, 0)) + n_per
+	inv.remove_at(inv_index)
+	data["inventory"] = inv
+	add_resources(data, gains)
+	progression_changed.emit()
+	return {"ok": true, "gains": gains, "reason": ""}
 
 ## En cas de défaite, on ne valide pas la conquête/le défi : le joueur pourra retenter.
 func _apply_campaign_defeat(data: Dictionary) -> void:

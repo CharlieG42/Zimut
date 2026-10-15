@@ -21,6 +21,7 @@ var _save: Dictionary = {}
 var _slot: int = -1
 var _filter: String = "all"
 var _only_craftable: bool = false
+var _salvage_mode: bool = false
 var _selected: String = ""
 var _member: int = 0
 var _message: String = ""
@@ -190,6 +191,13 @@ func _refresh_filters() -> void:
 		_only_craftable = not _only_craftable
 		refresh())
 	_filters_box.add_child(t)
+	var s := U.btn("⚒  BRISAGE D’ÉQUIPEMENT" if not _salvage_mode else "←  RETOUR À LA FORGE",
+		Color(0.85, 0.45, 0.35) if _salvage_mode else U.C_BORDER, 19, Vector2(0, 52))
+	s.pressed.connect(func() -> void:
+		_salvage_mode = not _salvage_mode
+		_selected = ""
+		refresh())
+	_filters_box.add_child(s)
 	var help := U.lbl("Les ennemis lâchent des ressources à chaque victoire. Un objet forgé est de qualité RARE (+15 % de stats).", 15, U.C_DIM)
 	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	help.custom_minimum_size = Vector2(240, 0)
@@ -218,6 +226,9 @@ func _visible_recipes() -> Array:
 func _refresh_list() -> void:
 	for c in _list_box.get_children():
 		c.queue_free()
+	if _salvage_mode:
+		_refresh_salvage_list()
+		return
 	var rows: Array = _visible_recipes()
 	if rows.is_empty():
 		_list_box.add_child(U.lbl("Aucune recette ne correspond.", 22, U.C_DIM))
@@ -300,7 +311,71 @@ func _recipe_row(r: Dictionary, st: Dictionary) -> Control:
 
 
 # ── Détail ──────────────────────────────────────────────────────────────────
+# ── Brisage d’équipement ──────────────────────────────────────
+
+## Objets de l’inventaire cassables, triés par rareté puis niveau.
+func _salvage_rows() -> Array:
+	var out: Array = []
+	var inv: Array = _save.get("inventory", [])
+	for i: int in range(inv.size()):
+		out.append({"i": i, "it": inv[i]})
+	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var ra: int = ItemRules.RARITY_ORDER.find(String(a["it"].get("rarity", "commun")))
+		var rb: int = ItemRules.RARITY_ORDER.find(String(b["it"].get("rarity", "commun")))
+		if ra != rb:
+			return ra > rb
+		return int(a["it"].get("level", 0)) > int(b["it"].get("level", 0)))
+	return out
+
+func _refresh_salvage_list() -> void:
+	var rows: Array = _salvage_rows()
+	if rows.is_empty():
+		_list_box.add_child(U.lbl("Aucun objet à briser : gagnez des combats pour looter de l’équipement.", 20, U.C_DIM))
+		return
+	for row: Dictionary in rows:
+		var it: Dictionary = row["it"]
+		var b := Button.new()
+		b.custom_minimum_size = Vector2(0, 60)
+		b.focus_mode = Control.FOCUS_NONE
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.text = "  ⚒ [%s] %s (nv%d) — %s" % [ItemRules.rarity_label(it), String(it.get("name", "?")),
+			int(it.get("level", 0)), ItemRules.stat_line(it)]
+		b.tooltip_text = "Briser cet objet : détruit et rend des ressources selon la rareté (ici %s)." % ItemRules.rarity_label(it)
+		b.add_theme_font_size_override("font_size", 17)
+		b.add_theme_color_override("font_color", ItemRules.rarity_color(it).lightened(0.25))
+		b.add_theme_stylebox_override("normal", U.box(Color(0.13, 0.09, 0.08), Color(0.85, 0.45, 0.35), 12, 2, 10))
+		b.add_theme_stylebox_override("hover", U.box(Color(0.20, 0.12, 0.10), Color(1.0, 0.6, 0.45), 12, 3, 10))
+		b.pressed.connect(_on_salvage_pressed.bind(it))
+		_list_box.add_child(b)
+
+func _on_salvage_pressed(it: Dictionary) -> void:
+	## Les index bougent après chaque brisage : retrouver l’objet à l’instant du clic.
+	var inv_now: Array = _save.get("inventory", [])
+	var live_idx: int = -1
+	for k: int in range(inv_now.size()):
+		if String(inv_now[k].get("name", "")) == String(it.get("name", "")) and int(inv_now[k].get("level", -1)) == int(it.get("level", -1)) and String(inv_now[k].get("rarity", "")) == String(it.get("rarity", "")):
+			live_idx = k
+			break
+	if live_idx < 0:
+		return
+	var result: Dictionary = ProgressionManager.salvage_item(_save, live_idx)
+	if not bool(result.get("ok", false)):
+		return
+	ProgressionManager.write_save(_slot, _save)
+	var gains: Dictionary = result.get("gains", {})
+	var parts: Array = []
+	for r: String in gains.keys():
+		parts.append("%s +%d" % [r, int(gains[r])])
+	crafted.emit()
+	refresh()
+	_detail_box.add_child(U.lbl("⚒ Brié : %s%sGains : %s" % [String(it.get("name", "?")), chr(10), " · ".join(PackedStringArray(parts))], 18, Color(0.9, 0.75, 0.4)))
+
 func _refresh_detail() -> void:
+	if _salvage_mode:
+		for c in _detail_box.get_children():
+			c.queue_free()
+		_detail_box.add_child(U.lbl("Sélectionnez un objet à briser dans la liste :%s il sera détruit et rendra des ressources selon sa rareté et son niveau." % chr(10), 18, U.C_DIM))
+		return
 	for c in _detail_box.get_children():
 		c.queue_free()
 	var r: Dictionary = ProgressionManager.craft_recipe(_selected)

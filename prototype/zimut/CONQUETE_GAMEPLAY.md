@@ -148,16 +148,27 @@ suffit pour les phases 1-2. En phase 2 on peut ajouter des vignettes
 PNG par ville (comme les cartes de mode), des icônes de bâtiments, et une
 texture de fond de carte par biome — sans refonte.
 
-## 9. Questions ouvertes (arbitrage demandé)
+## 9. Décisions actées (arbitrage du 15/10)
 
-1. **Contre-attaques ennemies** : pression gameplay (oui/non ? à partir de
-   quelle phase ?).
-2. **Perte de ville** : on propose « jamais perdue, seulement pillée » —
-   confirmer cette orientation sans échec punitif.
-3. **Ampleur de la carte** : 8-10 villes fixes avec narration, ou carte
-   générée par partie (plus de rejouabilité, moins de narration) ?
-4. **Bâtiments** : valider la liste courte (Forge, Caserne, Production,
-   Temple) ou en envisionner d'autres.
-5. **Multi-équipe** : faut-il à terme des garnisons par ville avec des
-   classes affectées (plus profond), ou une seule équipe héroïque
-   (recommandé : une seule, pour rester simple) ?
+1. **Carte fixe narrative** — le monde de Zimut (Sylve-Cœur, les Pics, les
+   Dunes, le Donjon) reste identique d'une partie à l'autre ; la rejouabilité
+   vient de l'économie et des choix de bâtiments.
+2. **Contre-attaques ennemies : OUI** (35 % par bataille gagnée) — la ville
+   ciblée est **pillée** (production gelée 3 batailles), **jamais perdue**,
+   et **la capitale ne peut jamais être attaquée** (implémenté).
+3. **Une seule équipe héroïque** — pas de garnisons par ville.
+4. **Bâtiments de ressources dans les villes conquises** (implémenté) :
+   Scierie (Bois), Mine (Fer), Tannerie (Cuir), Cabane des mages (Magie),
+   Verger (Venin) ; la production est versée à chaque bataille gagnée.
+5. **Brisage d'équipement** (implémenté, voir §10) : les objets en trop
+   peuvent être détruits dans la Forge pour récupérer des ressources.
+
+## 10. Brisage d'équipement
+
+La Forge gagne un mode « BRISAGE D'ÉQUIPEMENT » : chaque objet de
+l'inventaire peut être brisé (détruit) contre des ressources utiles à
+forgé d'autres équipements. Gains selon la rareté et le niveau :
+- commun : 1 ressource (Fer/Bois) · rare : 2 (Fer/Cuir/Bois) ;
+- épique : 3 (Magie/Fer/Cuir) · légendaire : 5 (Magie/Venin/Fer) ;
+- quantité par ressource ≈ (1 + niveau × 0,1) × rareté — un légendaire
+  de haut niveau rend largement plus qu'un commun de bas niveau.
