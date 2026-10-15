@@ -226,11 +226,11 @@ func refresh() -> void:
 		var is_used: bool = used.has(slot)
 		if is_used:
 			var sv: Dictionary = used[slot]
-			btn.text = "✦  PARTIE %d\\n%s\\nNiv. ennemis %d  ·  %d victoires" % [slot + 1, sv["name"], sv["level"], sv["victories"]]
+			btn.text = "✦  PARTIE %d\n%s\nNiv. ennemis %d  ·  %d victoires" % [slot + 1, sv["name"], sv["level"], sv["victories"]]
 			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_USED_BG, COL_BORDER, 2))
 			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_USED_BG.lightened(0.12), COL_BORDER, 3))
 		else:
-			btn.text = "＋  NOUVELLE PARTIE\\nEmplacement libre %d" % (slot + 1)
+			btn.text = "＋  NOUVELLE PARTIE\nEmplacement libre %d" % (slot + 1)
 			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_EMPTY_BG, Color(0.3, 0.35, 0.45), 1))
 			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_EMPTY_BG.lightened(0.12), Color(0.58, 0.46, 0.25), 2))
 		btn.add_theme_font_size_override("font_size", _ui_font(20))
