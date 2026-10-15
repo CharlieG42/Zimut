@@ -482,34 +482,23 @@ const ACTION_ICONS := {
 	"delete": "res://assets/ui/actions/action_delete.png",
 }
 
+## Bouton d'action en image : le PNG (128x64, libellé intégré) est
+## agrandi et centré dans le bouton, sans texte superposé ; le
+## libellé reste en info-bulle.
 func _action_button(icon_key: String, txt: String, txt_col: Color) -> Button:
 	var b := Button.new()
-	b.custom_minimum_size = Vector2(0, 56)
+	b.tooltip_text = txt
+	b.custom_minimum_size = Vector2(0, 84 if _is_compact() else 104)
 	b.focus_mode = Control.FOCUS_ALL
-	var hb := HBoxContainer.new()
-	hb.set_anchors_preset(Control.PRESET_FULL_RECT)
-	hb.add_theme_constant_override("separation", 10)
-	hb.offset_left = 10.0
-	hb.offset_right = -10.0
-	hb.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	b.add_child(hb)
 	var icon_path: String = String(ACTION_ICONS.get(icon_key, ""))
 	if icon_path != "" and ResourceLoader.exists(icon_path):
-		var icon := TextureRect.new()
-		icon.texture = load(icon_path) as Texture2D
-		icon.custom_minimum_size = Vector2(96, 48)
-		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		hb.add_child(icon)
-	var lbl := Label.new()
-	lbl.text = txt
-	lbl.add_theme_font_size_override("font_size", _ui_font(19))
-	lbl.add_theme_color_override("font_color", txt_col)
-	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hb.add_child(lbl)
+		var art := TextureRect.new()
+		art.texture = load(icon_path) as Texture2D
+		art.set_anchors_preset(Control.PRESET_FULL_RECT)
+		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(art)
 	b.add_theme_stylebox_override("normal", _flat())
 	b.add_theme_stylebox_override("hover", _flat())
 	return b
