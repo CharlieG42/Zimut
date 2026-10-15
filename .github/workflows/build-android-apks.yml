@@ -100,13 +100,22 @@ jobs:
             || true
           test -s export/Zimut-debug.apk
 
+      - name: Empreintes SHA-256 des APK (vérifier le téléchargement)
+        run: |
+          cd prototype/zimut/export
+          sha256sum Zimut-debug.apk Zimut-release.apk > SHA256SUMS.txt 2>/dev/null || sha256sum Zimut-debug.apk > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
       - name: Upload Zimut Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: Zimut-debug
-          path: prototype/zimut/export/Zimut-debug.apk
+          path: |
+            prototype/zimut/export/Zimut-debug.apk
+            prototype/zimut/export/SHA256SUMS.txt
           retention-days: 7
           if-no-files-found: error
+          compression-level: 0
 
       - name: Export Zimut APK (Release)
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
@@ -124,7 +133,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Zimut-release
-          path: prototype/zimut/export/Zimut-release.apk
+          path: |
+            prototype/zimut/export/Zimut-release.apk
+            prototype/zimut/export/SHA256SUMS.txt
           retention-days: 30
           if-no-files-found: error
+          compression-level: 0
 
