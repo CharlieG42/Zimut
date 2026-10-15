@@ -208,6 +208,12 @@ func _slots_panel_style() -> StyleBoxFlat:
 	s.content_margin_bottom = 14
 	return s
 
+## Séparateur discret entre les sections de la fiche de partie.
+func _section_separator() -> HSeparator:
+	var sep := HSeparator.new()
+	sep.add_theme_color_override("color", COL_BORDER)
+	return sep
+
 func _flat() -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
 	s.bg_color = COL_PANEL
@@ -304,11 +310,19 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	for c: Node in _detail_box.get_children():
 		c.queue_free()
 
+	var compact: bool = _is_compact()
 	var title := Label.new()
-	title.text = "%s — ennemis niveau %d" % [data.get("name", ""), int(data.get("level", 10))]
-	title.add_theme_font_size_override("font_size", _ui_font(24))
+	title.text = "✦  %s" % String(data.get("name", "Partie"))
+	title.add_theme_font_size_override("font_size", _ui_font(20 if compact else 26))
 	title.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(title)
+	var summary := Label.new()
+	summary.text = "ENNEMIS NV %d     ·     %d VICTOIRE(S)     ·     EMPLACEMENT %d" % [
+		int(data.get("level", 10)), int(data.get("victories", 0)), slot + 1]
+	summary.add_theme_font_size_override("font_size", _ui_font(13 if compact else 15))
+	summary.add_theme_color_override("font_color", COL_BORDER.darkened(0.3))
+	_detail_box.add_child(summary)
+	_detail_box.add_child(_section_separator())
 
 	# Actions principales sur une même ligne : les PNG sont plus lisibles et
 	# prennent moins de hauteur que deux grands boutons empilés.
@@ -338,7 +352,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	# Les trois modes utilisent la même sauvegarde : roster, XP, caractéristiques,
 	# sorts, équipement et inventaire ne sont jamais dupliqués par mode.
 	var mode_lbl := Label.new()
-	mode_lbl.text = "Choisir un mode de jeu :"
+	mode_lbl.text = "CHOISIR UN MODE DE JEU"
 	mode_lbl.add_theme_font_size_override("font_size", _ui_font(21))
 	mode_lbl.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(mode_lbl)
@@ -367,7 +381,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 
 	var team: Array = data.get("team", [])
 	var team_lbl := Label.new()
-	team_lbl.text = "Équipe :"
+	team_lbl.text = "ÉQUIPE"
 	team_lbl.add_theme_font_size_override("font_size", _ui_font(21))
 	team_lbl.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(team_lbl)
@@ -382,7 +396,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 
 	var inv: Array = data.get("inventory", [])
 	var inv_lbl := Label.new()
-	inv_lbl.text = "Inventaire (%d objets disponibles à équiper) :" % inv.size()
+	inv_lbl.text = "INVENTAIRE — %d OBJET(S) DISPONIBLE(S) À ÉQUIPER" % inv.size()
 	inv_lbl.add_theme_font_size_override("font_size", _ui_font(21))
 	inv_lbl.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(inv_lbl)
