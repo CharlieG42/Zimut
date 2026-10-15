@@ -100,18 +100,29 @@ jobs:
             || true
           test -s export/Zimut-debug.apk
 
-      - name: Empreintes SHA-256 des APK (vérifier le téléchargement)
+      - name: Nommer les APK par build + empreintes SHA-256
         run: |
           cd prototype/zimut/export
-          sha256sum Zimut-debug.apk Zimut-release.apk > SHA256SUMS.txt 2>/dev/null || sha256sum Zimut-debug.apk > SHA256SUMS.txt
+          sha_short="${GITHUB_SHA::7}"
+          # Noms uniques par build : sous Android, un APK portant le même
+          # nom que le zip (ex. Zimut-release.apk dans Zimut-release.zip)
+          # fait échouer l'extraction (« le fichier existe déjà »).
+          if [ -f Zimut-debug.apk ]; then
+            mv Zimut-debug.apk "Zimut-debug-${sha_short}.apk"
+          fi
+          if [ -f Zimut-release.apk ]; then
+            mv Zimut-release.apk "Zimut-release-${sha_short}.apk"
+          fi
+          sha256sum Zimut-*.apk > SHA256SUMS.txt
           cat SHA256SUMS.txt
+          ls -la Zimut-*.apk
 
       - name: Upload Zimut Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: Zimut-debug
           path: |
-            prototype/zimut/export/Zimut-debug.apk
+            prototype/zimut/export/Zimut-debug-*.apk
             prototype/zimut/export/SHA256SUMS.txt
           retention-days: 7
           if-no-files-found: error
@@ -134,7 +145,7 @@ jobs:
         with:
           name: Zimut-release
           path: |
-            prototype/zimut/export/Zimut-release.apk
+            prototype/zimut/export/Zimut-release-*.apk
             prototype/zimut/export/SHA256SUMS.txt
           retention-days: 30
           if-no-files-found: error
