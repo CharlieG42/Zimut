@@ -16,6 +16,8 @@ const COL_SLOT_USED_BG := Color(0.20, 0.26, 0.35, 0.97)
 
 var _root: Control
 var _slots_box: VBoxContainer
+var _slots_content: VBoxContainer
+var _slots_panel: PanelContainer
 var _detail_panel: PanelContainer
 var _detail_box: VBoxContainer
 var _main_layout: BoxContainer
@@ -88,17 +90,42 @@ func _build() -> void:
 	main.add_theme_constant_override("separation", 16)
 	_root.add_child(main)
 
+	var slots_panel := PanelContainer.new()
+	_slots_panel = slots_panel
+	slots_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slots_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	slots_panel.add_theme_stylebox_override("panel", _slots_panel_style())
+	main.add_child(slots_panel)
+
 	var slots_scroll := ScrollContainer.new()
 	_slots_scroll = slots_scroll
 	slots_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	slots_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	slots_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	main.add_child(slots_scroll)
+	slots_panel.add_child(slots_scroll)
+
+	_slots_content = VBoxContainer.new()
+	_slots_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_slots_content.add_theme_constant_override("separation", 10)
+	slots_scroll.add_child(_slots_content)
+
+	var slots_heading := Label.new()
+	slots_heading.text = "MES PARTIES"
+	slots_heading.add_theme_font_size_override("font_size", _ui_font(22))
+	slots_heading.add_theme_color_override("font_color", Color(0.96, 0.84, 0.52))
+	_slots_content.add_child(slots_heading)
+
+	var slots_subtitle := Label.new()
+	slots_subtitle.text = "Choisis ta sauvegarde"
+	slots_subtitle.add_theme_font_size_override("font_size", _ui_font(15))
+	slots_subtitle.add_theme_color_override("font_color", Color(0.77, 0.81, 0.87))
+	slots_subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_slots_content.add_child(slots_subtitle)
 
 	_slots_box = VBoxContainer.new()
 	_slots_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_slots_box.add_theme_constant_override("separation", 12)
-	slots_scroll.add_child(_slots_box)
+	_slots_box.add_theme_constant_override("separation", 10)
+	_slots_content.add_child(_slots_box)
 
 	_detail_panel = PanelContainer.new()
 	_detail_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -142,18 +169,34 @@ func _apply_responsive_layout() -> void:
 	var stacked: bool = _use_stacked_layout()
 	_main_layout.vertical = stacked
 	_main_layout.add_theme_constant_override("separation", 10 if stacked else 16)
+	_slots_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_slots_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_slots_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_slots_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_detail_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_detail_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	if stacked:
-		_slots_scroll.custom_minimum_size = Vector2(0, 150)
-		_slots_scroll.size_flags_stretch_ratio = 0.36
-		_detail_panel.size_flags_stretch_ratio = 0.64
-	else:
+		_slots_panel.custom_minimum_size = Vector2(0, 0)
+		_slots_panel.size_flags_stretch_ratio = 0.30
+		_detail_panel.size_flags_stretch_ratio = 0.70
 		_slots_scroll.custom_minimum_size = Vector2(0, 0)
-		_slots_scroll.size_flags_stretch_ratio = 0.43
-		_detail_panel.size_flags_stretch_ratio = 0.57
+	else:
+		_slots_panel.custom_minimum_size = Vector2(260, 0)
+		_slots_panel.size_flags_stretch_ratio = 0.27
+		_detail_panel.size_flags_stretch_ratio = 0.73
+		_slots_scroll.custom_minimum_size = Vector2(0, 0)
+
+func _slots_panel_style() -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = Color(0.09, 0.12, 0.18, 0.98)
+	s.border_color = Color(0.58, 0.46, 0.25, 1.0)
+	s.set_border_width_all(2)
+	s.set_corner_radius_all(14)
+	s.content_margin_left = 12
+	s.content_margin_right = 12
+	s.content_margin_top = 14
+	s.content_margin_bottom = 14
+	return s
 
 func _flat() -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
@@ -176,23 +219,25 @@ func refresh() -> void:
 		used[int(sv["id"])] = sv
 	for slot: int in range(ProgressionManager.MAX_SAVES):
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(0, 82 if _is_compact() else 96)
+		btn.custom_minimum_size = Vector2(0, 76 if _is_compact() else 88)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		var is_used: bool = used.has(slot)
 		if is_used:
 			var sv: Dictionary = used[slot]
-			btn.text = "  Continuer — %s\n  ennemis nv %d · %d victoires" % [sv["name"], sv["level"], sv["victories"]]
-			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_USED_BG, COL_BORDER, 4))
-			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_USED_BG.lightened(0.15), COL_BORDER, 5))
+			btn.text = "✦  PARTIE %d\\n%s\\nNiv. ennemis %d  ·  %d victoires" % [slot + 1, sv["name"], sv["level"], sv["victories"]]
+			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_USED_BG, COL_BORDER, 2))
+			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_USED_BG.lightened(0.12), COL_BORDER, 3))
 		else:
-			btn.text = "  + Commencer une nouvelle partie (slot %d)" % (slot + 1)
-			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_EMPTY_BG, Color(0.3, 0.35, 0.45), 2))
-			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_EMPTY_BG.lightened(0.15), Color(0.3, 0.35, 0.45), 3))
+			btn.text = "＋  NOUVELLE PARTIE\\nEmplacement libre %d" % (slot + 1)
+			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_EMPTY_BG, Color(0.3, 0.35, 0.45), 1))
+			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_EMPTY_BG.lightened(0.12), Color(0.58, 0.46, 0.25), 2))
 		btn.add_theme_font_size_override("font_size", _ui_font(20))
 		btn.add_theme_color_override("font_color", Color(0.95, 0.94, 0.90))
 		if slot == _current_slot:
 			btn.add_theme_color_override("font_color", Color(1.0, 0.86, 0.4))
+			btn.add_theme_stylebox_override("normal", _flat_bg(Color(0.25, 0.28, 0.31), Color(1.0, 0.78, 0.28), 4))
 		var slot_ref: int = slot
 		btn.pressed.connect(func() -> void: _on_slot_pressed(slot_ref))
 		_slots_box.add_child(btn)
