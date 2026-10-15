@@ -342,7 +342,13 @@ func init_entities() -> void:
 			conquest_siege_boss = true
 			boss_fight = true
 			fight_is_boss = true
-	fight_biome = "Forêt" if campaign_mode in ["adventure", "conquest"] else (ProgressionManager.next_biome(active_save) if not active_save.is_empty() else "Forêt")
+	fight_biome = "Forêt" if campaign_mode == "adventure" else (ProgressionManager.next_biome(active_save) if not active_save.is_empty() else "Forêt")
+	# Conquête : le biome est celui de la ville ciblée (les Dunes opposent des
+	# ennemis du désert, le Donjon des squelettes).
+	if campaign_mode == "conquest" and not active_save.is_empty():
+		var cqst_city: String = String(active_save.get("conquest", {}).get("pending_city", ""))
+		if cqst_city != "":
+			fight_biome = ProgressionManager.conquest_city_biome(cqst_city)
 	# Donjon : chaque salle est un combat de boss ; la salle affiche le biome de
 	# la salle (décor du biome) mais le boss est celui de la salle de donjon.
 	var donjon_room: String = ""
@@ -407,6 +413,10 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 	if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "" \
 			and ProgressionManager.donjon_room(ProgressionManager.next_fight_number(active_save)) != "":
 		boss_name = ProgressionManager.donjon_boss(active_save)
+	# Conquête : l'assaut final du Donjon du Roi Squelette oppose le roi lui-même.
+	if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "conquest" \
+			and String(active_save.get("conquest", {}).get("pending_city", "")) == "donjon_roi":
+		boss_name = "Roi Squelette"
 	## Type de base dont le boss reprend le kit et la skin : le nom complet est
 	## « Boss Gobelin Roi » -> type de base « Gobelin » (2e mot).
 	var base_type: String = String({"Gobelin Roi": "Gobelin", "Troll Géant": "Troll", "Dragon": "Dragonnet",
