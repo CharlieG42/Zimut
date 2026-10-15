@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://brncag02x9k2"
-path="res://.godot/imported/ronce_agressive.svg-93c01e6ab309e894f5d763d48295cff3.ctex"
+uid="uid://brncag02yak2"
+path="res://.godot/imported/ronce_agressive.svg-e6de5c3a790da31dee1509d7861f82a9.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/summons/ronce_agressive.svg"
-dest_files=["res://.godot/imported/ronce_agressive.svg-93c01e6ab309e894f5d763d48295cff3.ctex"]
+dest_files=["res://.godot/imported/ronce_agressive.svg-e6de5c3a790da31dee1509d7861f82a9.ctex"]
 
 [params]
 

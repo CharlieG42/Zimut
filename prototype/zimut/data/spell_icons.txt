@@ -1,0 +1,172 @@
+Nom,Icone
+Coup de bouclier,shield_bash
+Soin de combat,tank_heal
+Protection,shield_group
+Frappe puissante,power_strike_t1
+Rugissement,roar
+Provocation,taunt
+Mur de pierre,wall
+Soin de guerre,tank_heal
+Tremblement de terre,earthquake
+Bouclier sacré,shield_holy
+Régénération,regen
+Armure renforcée,armor
+Colère,fury
+Intervention divine,divine_t2
+Barrière,wall
+Soin de groupe,heal_group
+Coup écrasant,crushing
+Protection divine,shield_holy_t2
+Renaissance,rebirth
+Bouclier légendaire,shield_holy_t3
+Coup final,final_blow_t2
+Lame fatale,dagger_fatal
+Soin rapide,heal_hand
+Poison,poison_drop
+Ombre,shadow_step
+Coup bas,low_blow
+Clignotement,blink
+Soin empoisonné,heal_poison
+Marque de la mort,death_mark
+Piège empoisonné,trap_poison
+Assassinat,assassinate
+Invisibilité,invisible
+Éviscération,eviscerate
+Soin de l'ombre,heal_shadow
+Malédiction,curse
+Soin mortel,heal_deadly_t2
+Empoisonnement massif,poison_mass_t2
+Soin critique,heal_hand_t2
+Invisibilité totale,invis_total_t2
+Lame de l'ombre,blade_shadow
+Soin ultime,heal_hand_t3
+Tir précis,arrow
+Soin de chasseur,heal_nature
+Piège,trap
+Fleche enflammée,arrow_fire
+Tir perçant,arrow_pierce
+Appel de la meute,wolf_call
+Soin de la nature,heal_nature
+Tir explosif,arrow_explosive
+Camouflage,camouflage
+Flèche empoisonnée,poison_drop
+Tir transperçant,arrow_pierce
+Soin de la forêt,heal_leaf
+Tir de glace,arrow_ice
+Tir légendaire,arrow_t3
+Flèche sacrée,arrow_holy
+Piège paralysant,trap_para
+Soin vital,heal_heart_t1
+Tir perçant ultime,arrow_pierce_t3
+Soin de la vie,heal_leaf2
+Boule de feu,fireball
+Éclair,lightning2
+Bouclier magique,arcane_shield
+Explosion,explosion
+Téléportation,teleport
+Météore,meteor
+Gel,freeze
+Invisibilité magique,invis_magic
+Chaîne de foudre,chain_lightning
+Barrière magique,barrier_magic
+Désintégration,disintegrate
+Téléportation de groupe,teleport_group
+Pluie de métores,meteor_rain
+Apocalypse,apocalypse
+Invoquer Tortue,summon_tortue
+Invoquer Loup,summon_loup
+Invoquer Sirène,summon_sirene
+Invoquer Ange,summon_ange
+Invoquer Homme-Faucon,summon_homme_faucon
+Invoquer Centaure,summon_centaure
+Attaque de l'invocation,summon_atk
+Buff de l'invocation,summon_buff
+Débuff de l'invocation,summon_debuff
+Soin de l'invocation,summon_heal
+Attaque puissante,summon_atk2_t1
+Buff de défense,shield
+Débuff de mouvement,summon_debuff
+Soin de zone,heal_group
+Attaque ultime,summon_atk2_t3
+Buff ultime,summon_buff_t3
+Débuff ultime,summon_debuff_t3
+Attaque de zone,summon_aoe
+Buff de vitesse,summon_speed
+Débuff de précision,summon_precision
+Bénédiction,bless
+Soin,heal_cross
+Attaque sacrée,holy_attack
+Inspiration,inspire
+Purification,purify
+Bouclier groupé,shield_group
+Attaque divine,holy_attack_t2
+Accélération,haste
+Attaque bénie,holy_attack
+Résurrection,resurrection
+Bénédiction suprême,supreme_bless_t3
+Attaque sacrée ultime,holy_attack_t3
+Soin suprême,heal_cross_t3
+Protection ultime,shield_holy_t3
+Attaque finale,holy_attack2_t2
+Jugement,judgment
+Soin mineur,heal_cross
+Protection vitale,protect_vital_t1
+Barrière de vie,barrier_life
+Éclat de lumière,light_burst
+Attaque céleste,holy_attack
+Soin supérieur,heal_cross_t2
+Soin de groupe supérieur,heal_group_t2
+Jugement divin,judgment_t2
+Frappe spectrale,spectral
+Symbiose,symbiosis
+Toucher guérisseur,heal_touch
+Éclair sacré,holy_attack2
+Bénédiction de vie,regen
+Bouclier de lumière,light_shield
+Mot de restauration,word_restore
+Ronce,thorn
+Sève vitale,sap_t1
+Invoquer Buisson,summon_buisson
+Invoquer Arbre,summon_arbre
+Poison de ronce,thorn
+Racine,root
+Invoquer Champignon,summon_champignon
+Lierre protecteur,ivy
+Soin de sève,sap
+Ronce multiple,thorn_multi
+Pose un piège de ronces,thorn_trap
+Invoquer Tronc,summon_tronc
+Vent de feuilles,leaf_wind
+Rugissement de la forêt,forest_roar
+Pluie de graines,seed_rain
+Sève régénérante,slash
+Invoquer Sarriette,summon_sarriette
+Colère de la nature,nature_wrath
+Racines profondes,shield_roots
+Régression,regression
+Tempête de pétales,petal_storm
+Invoquer Racines,roots_block
+Invoquer Ronce agressive,summon_ronce_agressive
+Tir de recul,recoil
+Balise de chasse,beacon
+Morsure,bite
+Coup d'os,bone
+Coup de massue,club
+Hurlement,howl
+Jet de dague,dagger_throw
+Pluie de dagues,dagger_rain
+Poing de pierre,stone_fist
+Souffle de feu,fire_breath
+Tir d'os,arrow
+Trait spectral,spectral_bolt
+Attaque,claw
+Bras de bois,wood_arm
+Carapace,shell
+Chant marin,sirene_song
+Flèche de centaure,arrow
+Fouet de ronce,thorn
+Fouet de sarriette,whip
+Lumière,light
+Piqué,dive
+Spores toxiques,spores
+Sève fertilisante,sap
