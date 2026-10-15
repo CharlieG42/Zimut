@@ -908,19 +908,21 @@ func _build_ui() -> void:
 	_info_panel.add_theme_stylebox_override("panel", _flat(COL_PANEL, COL_BORDER, 14, 2))
 	# Fiche de survol : bas-gauche, à droite de la barre de sorts pour
 	# que les informations ne masquent jamais les badges de sort.
-	# Pop-up d'info des mobs : bas-droite, juste a gauche de la timeline
+	# Pop-up d'info des mobs : tout en bas de l'ecran, a gauche de la
+	# timeline verticale (bande basse, ne couvre pas le plateau central).
 	_info_panel.anchor_left = 1.0
 	_info_panel.anchor_right = 1.0
 	_info_panel.anchor_top = 1.0
 	_info_panel.anchor_bottom = 1.0
-	_info_panel.offset_left = -520.0
+	_info_panel.offset_left = -540.0
 	_info_panel.offset_right = -180.0
-	_info_panel.offset_top = -560.0
-	_info_panel.offset_bottom = -250.0
+	_info_panel.offset_top = -190.0
+	_info_panel.offset_bottom = -14.0
 	_info_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_info_panel.visible = false
 	_info_label = Label.new()
 	_info_label.add_theme_font_size_override("font_size", 18)
+	_info_label.add_theme_color_override("font_color", Color(0.82, 0.84, 0.88))
 	_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_info_label.custom_minimum_size = Vector2(280, 0)
 	_info_panel.add_child(_info_label)
