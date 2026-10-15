@@ -324,31 +324,6 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	_detail_box.add_child(summary)
 	_detail_box.add_child(_section_separator())
 
-	# Actions principales sur une même ligne : les PNG sont plus lisibles et
-	# prennent moins de hauteur que deux grands boutons empilés.
-	var top_actions := HBoxContainer.new()
-	top_actions.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top_actions.add_theme_constant_override("separation", 10)
-	_detail_box.add_child(top_actions)
-
-	var team_btn := _action_button("team", "Gérer l'équipe (libre à chaque combat)", COL_TXT)
-	team_btn.pressed.connect(func() -> void:
-		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
-	team_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top_actions.add_child(team_btn)
-
-	var chars_btn := _action_button("chars", "PERSONNAGES — niveaux et caractéristiques", COL_TXT)
-	chars_btn.pressed.connect(func() -> void:
-		var ui: CanvasLayer = (load("res://scripts/CharacterSheetUI.gd") as GDScript).new()
-		ui.layer = 10
-		add_child(ui)
-		ui.closed.connect(func() -> void:
-			ui.queue_free()
-			_show_detail(ProgressionManager.load_save(slot), slot))
-		ui.open(_current, slot))
-	chars_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top_actions.add_child(chars_btn)
-
 	# Les trois modes utilisent la même sauvegarde : roster, XP, caractéristiques,
 	# sorts, équipement et inventaire ne sont jamais dupliqués par mode.
 	var mode_lbl := Label.new()
@@ -379,20 +354,30 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		Color(0.62, 0.25, 0.20), true, func() -> void:
 			_launch_campaign_mode("conquest", "res://scenes/ConquestMap.tscn", slot)))
 
-	var team: Array = data.get("team", [])
-	var team_lbl := Label.new()
-	team_lbl.text = "ÉQUIPE"
-	team_lbl.add_theme_font_size_override("font_size", _ui_font(21))
-	team_lbl.add_theme_color_override("font_color", COL_TXT)
-	_detail_box.add_child(team_lbl)
-	for i: int in range(team.size()):
-		var m: Dictionary = team[i]
-		var row := Label.new()
-		row.text = "  %s niv %d — %d objet(s) équipé(s)" % [m.get("classe", "?"),
-			ProgressionManager.member_level(data, String(m.get("classe", ""))), _equip_summary(m).size()]
-		row.add_theme_font_size_override("font_size", _ui_font(18))
-		row.add_theme_color_override("font_color", COL_TXT)
-		_detail_box.add_child(row)
+	# Actions principales sur une même ligne : les PNG sont plus lisibles et
+	# prennent moins de hauteur que deux grands boutons empilés.
+	var top_actions := HBoxContainer.new()
+	top_actions.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_actions.add_theme_constant_override("separation", 10)
+	_detail_box.add_child(top_actions)
+
+	var team_btn := _action_button("team", "Gérer l'équipe (libre à chaque combat)", COL_TXT)
+	team_btn.pressed.connect(func() -> void:
+		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
+	team_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_actions.add_child(team_btn)
+
+	var chars_btn := _action_button("chars", "PERSONNAGES — niveaux et caractéristiques", COL_TXT)
+	chars_btn.pressed.connect(func() -> void:
+		var ui: CanvasLayer = (load("res://scripts/CharacterSheetUI.gd") as GDScript).new()
+		ui.layer = 10
+		add_child(ui)
+		ui.closed.connect(func() -> void:
+			ui.queue_free()
+			_show_detail(ProgressionManager.load_save(slot), slot))
+		ui.open(_current, slot))
+	chars_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_actions.add_child(chars_btn)
 
 	var inv: Array = data.get("inventory", [])
 	var inv_lbl := Label.new()
@@ -542,9 +527,6 @@ func _action_button(icon_key: String, txt: String, txt_col: Color) -> Button:
 		b.mouse_entered.connect(func() -> void: art.modulate = Color(1.12, 1.12, 1.12, 1.0))
 		b.mouse_exited.connect(func() -> void: art.modulate = Color.WHITE)
 	return b
-
-func _equip_summary(m: Dictionary) -> Dictionary:
-	return m.get("equipment", {})
 
 const COL_DISABLED_BG := Color(0.14, 0.16, 0.22, 0.85)
 const COL_DISABLED_BORDER := Color(0.28, 0.31, 0.39, 1.0)
