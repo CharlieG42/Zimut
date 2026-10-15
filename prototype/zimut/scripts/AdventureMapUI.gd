@@ -27,6 +27,7 @@ const POIS := {
 }
 
 func _ready() -> void:
+	Music.play("adventure")
 	layer = 10
 	_save = GameManager.active_save
 	_slot = GameManager.active_slot

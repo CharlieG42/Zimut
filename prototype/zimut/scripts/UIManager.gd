@@ -882,8 +882,8 @@ func _build_ui() -> void:
 	# Journal de combat : colonne bas-gauche, discrete, hors du plateau central
 	_log_box = VBoxContainer.new()
 	_log_box.add_theme_constant_override("separation", 2)
-	_log_box.position = Vector2(20, 620)
-	_log_box.size = Vector2(330, 240)
+	_log_box.position = Vector2(20, 940)
+	_log_box.size = Vector2(560, 130)
 	_log_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_log_box)
 
@@ -908,14 +908,15 @@ func _build_ui() -> void:
 	_info_panel.add_theme_stylebox_override("panel", _flat(COL_PANEL, COL_BORDER, 14, 2))
 	# Fiche de survol : bas-gauche, à droite de la barre de sorts pour
 	# que les informations ne masquent jamais les badges de sort.
-	_info_panel.anchor_left = 0.0
-	_info_panel.anchor_right = 0.0
+	# Pop-up d'info des mobs : bas-droite, juste a gauche de la timeline
+	_info_panel.anchor_left = 1.0
+	_info_panel.anchor_right = 1.0
 	_info_panel.anchor_top = 1.0
 	_info_panel.anchor_bottom = 1.0
-	_info_panel.offset_left = 160.0
-	_info_panel.offset_right = 504.0
-	_info_panel.offset_top = -660.0
-	_info_panel.offset_bottom = -240.0
+	_info_panel.offset_left = -520.0
+	_info_panel.offset_right = -180.0
+	_info_panel.offset_top = -560.0
+	_info_panel.offset_bottom = -250.0
 	_info_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_info_panel.visible = false
 	_info_label = Label.new()
