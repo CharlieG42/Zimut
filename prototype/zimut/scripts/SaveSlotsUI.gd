@@ -521,48 +521,28 @@ const COL_DISABLED_BG := Color(0.14, 0.16, 0.22, 0.85)
 const COL_DISABLED_BORDER := Color(0.28, 0.31, 0.39, 1.0)
 const COL_DISABLED_TXT := Color(0.45, 0.48, 0.55)
 
-## Carte de mode : vignette illustrée, titre et court descriptif.
+## Carte de mode : l'illustration PNG occupe tout le bouton (elle est
+## explicite), sans texte superposé ; le libellé reste en info-bulle.
 func _mode_button(title_txt: String, desc: String, art_path: String, accent: Color, enabled: bool, cb: Callable) -> Button:
 	var b := Button.new()
 	b.text = ""
+	b.tooltip_text = "%s — %s" % [title_txt, desc]
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.size_flags_stretch_ratio = 1.0
-	b.custom_minimum_size = Vector2(0, 210 if _is_compact() else 270)
+	b.custom_minimum_size = Vector2(320, 300 if _is_compact() else 420)
 	b.disabled = not enabled
 	b.focus_mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE
-	var vb := VBoxContainer.new()
-	vb.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vb.alignment = BoxContainer.ALIGNMENT_CENTER
-	vb.add_theme_constant_override("separation", 3)
-	vb.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	b.add_child(vb)
 
 	var art := TextureRect.new()
 	if ResourceLoader.exists(art_path):
 		art.texture = load(art_path) as Texture2D
-	art.custom_minimum_size = Vector2(0, 130 if _is_compact() else 175)
-	art.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	art.set_anchors_preset(Control.PRESET_FULL_RECT)
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	vb.add_child(art)
-
-	var t := Label.new()
-	t.text = title_txt
-	t.add_theme_font_size_override("font_size", _ui_font(22))
-	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	t.add_theme_color_override("font_color", COL_TXT if enabled else COL_DISABLED_TXT)
-	t.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	vb.add_child(t)
-
-	var d := Label.new()
-	d.text = desc
-	d.add_theme_font_size_override("font_size", _ui_font(15))
-	d.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	d.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12) if enabled else COL_DISABLED_TXT)
-	d.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	vb.add_child(d)
+	if not enabled:
+		art.modulate = Color(0.45, 0.45, 0.5)
+	b.add_child(art)
 
 	var normal := StyleBoxFlat.new()
 	normal.bg_color = COL_PANEL if enabled else COL_DISABLED_BG
