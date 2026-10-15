@@ -508,25 +508,47 @@ const ACTION_ICONS := {
 	"delete": "res://assets/ui/actions/action_delete.png",
 }
 
-## Bouton d'action en image : le PNG (128x64, libellé intégré) est
-## agrandi et centré dans le bouton, sans texte superposé ; le
-## libellé reste en info-bulle.
+## Bouton d'action illustré : on laisse parler l'illustration.
+## La vignette est agrandie dans une zone sans cadre ni fond beige,
+## pour supprimer le double contour et gagner en lisibilité.
 func _action_button(icon_key: String, txt: String, txt_col: Color) -> Button:
 	var b := Button.new()
 	b.tooltip_text = txt
-	b.custom_minimum_size = Vector2(0, 92 if _is_compact() else 112)
+	b.custom_minimum_size = Vector2(0, 112 if _is_compact() else 136)
 	b.focus_mode = Control.FOCUS_ALL
+	b.clip_contents = false
+
 	var icon_path: String = String(ACTION_ICONS.get(icon_key, ""))
 	if icon_path != "" and ResourceLoader.exists(icon_path):
 		var art := TextureRect.new()
 		art.texture = load(icon_path) as Texture2D
 		art.set_anchors_preset(Control.PRESET_FULL_RECT)
+		# Le débordement contrôlé agrandit le dessin sans rogner le PNG.
+		art.offset_left = -14.0
+		art.offset_right = 14.0
+		art.offset_top = -6.0
+		art.offset_bottom = 6.0
 		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.add_child(art)
-	b.add_theme_stylebox_override("normal", _flat())
-	b.add_theme_stylebox_override("hover", _flat())
+
+	# Pas de bordure héritée : seul le PNG illustré dessine le bouton.
+	var clean := StyleBoxFlat.new()
+	clean.bg_color = Color(0, 0, 0, 0)
+	clean.set_border_width_all(0)
+	clean.set_corner_radius_all(0)
+	clean.content_margin_left = 0
+	clean.content_margin_right = 0
+	clean.content_margin_top = 0
+	clean.content_margin_bottom = 0
+	var hover := clean.duplicate() as StyleBoxFlat
+	hover.bg_color = Color(1.0, 0.88, 0.48, 0.10)
+	b.add_theme_stylebox_override("normal", clean)
+	b.add_theme_stylebox_override("hover", hover)
+	b.add_theme_stylebox_override("pressed", clean)
+	b.add_theme_stylebox_override("focus", clean)
+	b.add_theme_stylebox_override("disabled", clean)
 	return b
 
 func _equip_summary(m: Dictionary) -> Dictionary:
