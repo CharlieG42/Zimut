@@ -1,7 +1,6 @@
 extends CanvasLayer
 
-## SettingsUI.gd — Écran de réglages : difficulté des combats (Facile / Normal /
-## Difficile) et rapidité de progression XP (Lente / Normale / Rapide).
+## SettingsUI.gd — Réglages des combats et de la progression XP.
 ## Les choix sont persistés par l'autoload GameSettings.
 
 const COL_PANEL := Color(0.94, 0.89, 0.78, 0.97)
@@ -44,10 +43,11 @@ func _ready() -> void:
 		GameSettings.xp_speed, func(idx: int) -> void: GameSettings.set_xp_speed(idx)))
 
 	var hint := Label.new()
-	hint.text = "La difficulté agit sur la puissance des ennemis ;\nla rapidité XP sur le gain d'expérience de chaque combat."
+	hint.text = "La difficulté renforce la puissance des ennemis.\nEnfer : PV et attaques nettement supérieurs à Difficile.\nLa rapidité XP règle le gain d'expérience de chaque combat."
 	hint.add_theme_font_size_override("font_size", 15)
 	hint.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12))
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(hint)
 
 	var back := Button.new()
@@ -77,11 +77,12 @@ func _setting_row(label_txt: String, options: Array[String], current: int, on_pi
 	group.add_theme_constant_override("separation", 8)
 	row.add_child(group)
 
+	var option_width: float = 104.0 if options.size() >= 4 else 120.0
 	for i: int in range(options.size()):
 		var opt := Button.new()
 		opt.text = options[i]
-		opt.custom_minimum_size = Vector2(120, 56)
-		opt.add_theme_font_size_override("font_size", 19)
+		opt.custom_minimum_size = Vector2(option_width, 56)
+		opt.add_theme_font_size_override("font_size", 18 if options.size() >= 4 else 19)
 		opt.focus_mode = Control.FOCUS_NONE
 		_refresh_opt(opt, i == current)
 		var idx_ref: int = i
