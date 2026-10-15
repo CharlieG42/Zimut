@@ -7,13 +7,15 @@ signal settings_changed
 
 const SETTINGS_PATH := "user://settings.json"
 
-## Difficulté : index dans DIFFICULTIES (0 = Facile...).
-const DIFFICULTIES: Array[String] = ["Facile", "Normal", "Difficile"]
-const DIFFICULTY_POWER := [0.85, 1.0, 1.2]   # multiplicateur PV/attaque des ennemis
+## Difficulté : index dans DIFFICULTIES (0 = Facile, 3 = Enfer).
+const DIFFICULTIES: Array[String] = ["Facile", "Normal", "Difficile", "Enfer"]
+## Multiplicateurs de puissance des ennemis (PV et attaque).
+## Enfer dépasse nettement Difficile : 1.65 contre 1.20, soit +37,5 %.
+const DIFFICULTY_POWER := [0.85, 1.0, 1.2, 1.65]
 
 ## Rapidité XP : index dans XP_SPEEDS.
 const XP_SPEEDS: Array[String] = ["Lente", "Normale", "Rapide"]
-const XP_SPEED_MULT := [0.6, 1.0, 1.6]      # multiplicateur du gain XP par combat
+const XP_SPEED_MULT := [0.6, 1.0, 1.6]
 
 var difficulty: int = 1
 var xp_speed: int = 1
