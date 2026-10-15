@@ -1284,7 +1284,10 @@ func _show_result_window(victory: bool) -> void:
 	if campaign_mode == "adventure":
 		title.text = "DÉFI RÉUSSI — progression partagée !" if victory else "DÉFI ÉCHOUÉ — vous pourrez réessayer"
 	elif campaign_mode == "conquest":
-		title.text = "VILLE CONQUISE !" if victory else "ASSAUT REPOUSSÉ — la ville reste à l'ennemi"
+		if victory and save.get("conquest", {}).get("owned", []).has("donjon_roi"):
+			title.text = "★  EMPIRE VICTORIEUX !  Le Roi Squelette est tombé : Zimut vous appartient !"
+		else:
+			title.text = "VILLE CONQUISE !" if victory else "ASSAUT REPOUSSÉ — la ville reste à l'ennemi"
 	elif not victory:
 		title.text = "DÉFAITE — un peu d'XP de consolation"
 	elif ProgressionManager.is_boss_fight(save):
@@ -1384,6 +1387,20 @@ func _show_result_window(victory: bool) -> void:
 			res_row.add_theme_color_override("font_color", Color(0.35, 0.30, 0.15))
 			res_row.tooltip_text = "À utiliser dans la FORGE (bouton ÉQUIPEMENT de la sélection d'équipe)."
 			content.add_child(res_row)
+	# Conquête : production de l'empire versée à cette victoire
+	if victory and String(save.get("campaign_mode", "")) == "conquest":
+		var cqst: Dictionary = save.get("conquest", {})
+		var empire: Dictionary = cqst.get("last_yield", {})
+		if not empire.is_empty():
+			var emp_parts: PackedStringArray = []
+			for k: String in empire.keys():
+				emp_parts.append("%s +%d" % [k, int(empire[k])])
+			var emp_row := Label.new()
+			emp_row.text = "  ⚑ Empire : %s" % " · ".join(emp_parts)
+			emp_row.add_theme_font_size_override("font_size", 19)
+			emp_row.add_theme_color_override("font_color", Color(0.10, 0.45, 0.12))
+			emp_row.tooltip_text = "Production des bâtiments de vos villes annexées."
+			content.add_child(emp_row)
 
 	var cont := Button.new()
 	var back_mode: String = String(save.get("campaign_mode", ""))

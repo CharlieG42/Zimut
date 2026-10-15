@@ -1,17 +1,29 @@
 extends CanvasLayer
-## Première ébauche du mode Conquête : carte de villes PvE reliée au combat tactique.
+
+## Mode Conquête : carte des villes de Zimut reliée au combat tactique.
+## Les villes, routes et types viennent du catalogue officiel
+## (ProgressionManager.CONQUEST_CITIES / CONQUEST_ROUTES) : on ne peut
+## attaquer qu'une ville reliée par route à son territoire.
 ## Les héros, sorts, caractéristiques et loots restent ceux de la sauvegarde commune.
 
 const PANEL := Color(0.09, 0.15, 0.20, 0.97)
 const TEXT := Color(0.95, 0.94, 0.84)
 const GOLD := Color(0.96, 0.75, 0.31)
-const CITIES := [
-	{"id": "capitale", "name": "Sylve-Cœur", "kind": "capital", "level": 0, "pos": Vector2(0.50, 0.54), "desc": "Votre capitale de départ. Elle ne peut pas être perdue."},
-	{"id": "clairiere", "name": "Clairière d'Aube", "kind": "neutral", "level": 10, "pos": Vector2(0.25, 0.35), "desc": "Un village forestier peu défendu."},
-	{"id": "vieille_tour", "name": "Vieille Tour", "kind": "enemy", "level": 12, "pos": Vector2(0.74, 0.30), "desc": "Un avant-poste gobelin fortifié."},
-	{"id": "pont_mousse", "name": "Pont-Mousse", "kind": "neutral", "level": 11, "pos": Vector2(0.28, 0.74), "desc": "Un passage stratégique au-dessus de la rivière."},
-	{"id": "fort_racine", "name": "Fort Racine", "kind": "enemy", "level": 14, "pos": Vector2(0.76, 0.72), "desc": "La forteresse du chef de la forêt."}
-]
+
+## Positions sur la carte (fractions du panneau) — le reste (noms, types,
+## biomes, niveaux, routes) vient du catalogue de ProgressionManager.
+const CITY_POS := {
+	"capitale": Vector2(0.30, 0.50),
+	"clairiere": Vector2(0.12, 0.30),
+	"vieille_tour": Vector2(0.30, 0.16),
+	"pont_mousse": Vector2(0.12, 0.78),
+	"fort_racine": Vector2(0.32, 0.80),
+	"hameau_pin": Vector2(0.55, 0.55),
+	"garnison": Vector2(0.72, 0.40),
+	"oasis": Vector2(0.60, 0.84),
+	"tour_sable": Vector2(0.82, 0.72),
+	"donjon_roi": Vector2(0.90, 0.20),
+}
 
 var _save: Dictionary = {}
 var _slot: int = -1
@@ -21,6 +33,7 @@ var _message: Label
 var _attack: Button
 var _city_buttons: Dictionary = {}
 var _build_box: VBoxContainer
+var _header: Label
 
 func _ready() -> void:
 	Music.play("adventure")
@@ -37,17 +50,20 @@ func _ready() -> void:
 	_save["campaign_mode"] = "conquest"
 	_persist()
 	_build()
-	var counter: String = String(_conquest.get("last_counterattack", ""))
-	if counter != "" and _city_by_id(counter).size() > 0:
-		var cname: String = String(_city_by_id(counter).get("name", counter))
-		_message.text = "⚠ CONTRE-ATTAQUE ! L\u2019ennemi a pillé %s : production gelée %d bataille(s)." % [cname, ProgressionManager.CONQUEST_RAVAGE_BATTLES]
+	var annexed: String = String(_conquest.get("just_annexed", ""))
+	if annexed != "":
+		_conquest["just_annexed"] = ""
+		_save["conquest"] = _conquest
+		_persist()
+		_show_annexion_popup(annexed)
+	else:
+		_show_counterattack_message()
 
 func _build() -> void:
 	var bg := ColorRect.new()
 	bg.color = Color(0.34, 0.47, 0.49)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
-
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.offset_left = 28
@@ -62,101 +78,142 @@ func _build() -> void:
 	title.add_theme_font_size_override("font_size", 30)
 	title.add_theme_color_override("font_color", TEXT)
 	root.add_child(title)
+
 	var subtitle := Label.new()
-	subtitle.text = "Forêt de Zimut · Développez votre territoire en remportant les batailles tactiques"
+	subtitle.text = "Développez votre empire en remportant les batailles tactiques"
 	subtitle.position = Vector2(8, 42)
 	subtitle.add_theme_font_size_override("font_size", 18)
 	subtitle.add_theme_color_override("font_color", GOLD)
 	root.add_child(subtitle)
 
+	_header = Label.new()
+	_header.position = Vector2(8, 64)
+	_header.add_theme_font_size_override("font_size", 17)
+	_header.add_theme_color_override("font_color", TEXT)
+	root.add_child(_header)
+
 	var map := Panel.new()
-	map.position = Vector2(0, 82)
-	map.size = Vector2(1320, 760)
+	map.position = Vector2(0, 92)
+	map.size = Vector2(1320, 750)
 	map.add_theme_stylebox_override("panel", _style(PANEL, GOLD))
 	root.add_child(map)
+
 	var map_title := Label.new()
-	map_title.text = "CARTE DE LA SYLVE"
-	map_title.position = Vector2(22, 16)
+	map_title.text = "LE MONDE DE ZIMUT"
+	map_title.position = Vector2(22, 14)
 	map_title.add_theme_font_size_override("font_size", 20)
 	map_title.add_theme_color_override("font_color", TEXT)
 	map.add_child(map_title)
 
-	# Routes décoratives dessinées derrière les villes.
+	var legend := Label.new()
+	legend.text = "Vert = territoire  ·  Gris = neutre  ·  Rouge = adverse  ·  Épée = attaquable"
+	legend.position = Vector2(260, 16)
+	legend.add_theme_font_size_override("font_size", 14)
+	legend.add_theme_color_override("font_color", GOLD)
+	map.add_child(legend)
+
+	# Routes dessinées derrière les villes : dorées si elles relient deux
+	# villes du territoire, ternes sinon.
 	var routes := _RouteLines.new()
+	routes.conquest = _conquest
 	routes.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	map.add_child(routes)
-	for city: Dictionary in CITIES:
-		var id: String = String(city["id"])
+
+	for city_id: String in _city_ids():
+		var city: Dictionary = _city_meta(city_id)
 		var btn := Button.new()
-		var owned: bool = _conquest.get("owned", []).has(String(city["id"]))
-		var badge: String = "⚑" if owned else ("⚔" if String(city["kind"]) == "enemy" else "●")
-		var siege_p: int = ProgressionManager.conquest_siege_progress(_conquest, String(city["id"]))
+		var owned: bool = _conquest.get("owned", []).has(city_id)
+		var attackable: bool = ProgressionManager.conquest_city_attackable(_conquest, city_id)
+		var badge: String = "⚑" if owned else ("⚔" if attackable else ("⚔" if String(city["kind"]) == "enemy" else "●"))
+		var siege_p: int = ProgressionManager.conquest_siege_progress(_conquest, city_id)
 		var siege_txt: String = ("\nSiège %d/%d" % [siege_p, ProgressionManager.CONQUEST_SIEGE_BATTLES]) if siege_p > 0 else ""
 		btn.text = ("%s\n" % badge) + String(city["name"]) + siege_txt
-
-		btn.position = Vector2(float(city["pos"].x) * map.size.x - 88, float(city["pos"].y) * map.size.y - 34)
-		btn.custom_minimum_size = Vector2(176, 72)
-		btn.add_theme_font_size_override("font_size", 17)
+		btn.tooltip_text = "%s — %s" % [String(ProgressionManager.biome_label(String(city["biome"]))), String(city["desc"])]
+		btn.position = Vector2(CITY_POS[city_id].x * map.size.x - 88, CITY_POS[city_id].y * map.size.y - 34)
+		btn.custom_minimum_size = Vector2(176, 66)
+		btn.add_theme_font_size_override("font_size", 15)
 		btn.add_theme_color_override("font_color", TEXT)
-		btn.add_theme_stylebox_override("normal", _style(_city_color(city), GOLD if id == _selected_id else Color(0.5, 0.64, 0.46)))
-		btn.add_theme_stylebox_override("hover", _style(_city_color(city).lightened(0.12), GOLD))
-		btn.pressed.connect(_select_city.bind(id))
+		btn.add_theme_stylebox_override("normal", _style(_city_color(city_id), GOLD if city_id == _selected_id else Color(0.5, 0.64, 0.46)))
+		btn.add_theme_stylebox_override("hover", _style(_city_color(city_id).lightened(0.12), GOLD))
+		btn.pressed.connect(_select_city.bind(city_id))
 		map.add_child(btn)
-		_city_buttons[id] = btn
+		_city_buttons[city_id] = btn
 
 	var side := PanelContainer.new()
-	side.position = Vector2(1340, 82)
-	side.size = Vector2(430, 760)
+	side.position = Vector2(1340, 92)
+	side.size = Vector2(430, 750)
 	side.add_theme_stylebox_override("panel", _style(Color(0.10, 0.17, 0.21, 0.98), GOLD))
 	root.add_child(side)
+
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 14)
 	side.add_child(box)
+
 	var panel_title := Label.new()
 	panel_title.text = "CONSEIL DE GUERRE"
 	panel_title.add_theme_font_size_override("font_size", 22)
 	panel_title.add_theme_color_override("font_color", TEXT)
 	box.add_child(panel_title)
+
 	_message = Label.new()
 	_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_message.custom_minimum_size.y = 160
+	_message.custom_minimum_size.y = 200
 	_message.add_theme_color_override("font_color", TEXT)
 	box.add_child(_message)
+
 	_attack = Button.new()
 	_attack.text = "LANCER L'ASSAUT"
 	_attack.custom_minimum_size.y = 62
 	_attack.add_theme_font_size_override("font_size", 21)
 	_attack.pressed.connect(_attack_selected_city)
 	box.add_child(_attack)
+
 	_build_box = VBoxContainer.new()
 	_build_box.add_theme_constant_override("separation", 6)
 	box.add_child(_build_box)
+
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	box.add_child(spacer)
-	var note := Label.new()
-	note.text = "La victoire en combat tactique rapporte l'XP et les loots habituels. La conquête territoriale sera validée au retour du résultat de bataille dans la prochaine étape."
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	note.add_theme_color_override("font_color", GOLD)
-	box.add_child(note)
+
 	var back := Button.new()
 	back.text = "← MENU"
 	back.custom_minimum_size.y = 50
 	back.pressed.connect(_back_to_save)
 	box.add_child(back)
+
+	_refresh_header()
 	_select_city(_selected_id)
+
+## Compteurs d'empire : villes contrôlées, production versée à chaque
+## victoire, et objectif de campagne.
+func _refresh_header() -> void:
+	var owned: int = _conquest.get("owned", []).size()
+	var total: int = _city_ids().size()
+	var yld: Dictionary = ProgressionManager.conquest_empire_yield(_conquest)
+	var parts: PackedStringArray = []
+	for r: String in yld.keys():
+		parts.append("%s +%d" % [r, int(yld[r])])
+	var line: String = "Villes %d/%d" % [owned, total]
+	if not parts.is_empty():
+		line += "   ·   Production par victoire : " + " · ".join(parts)
+	if ProgressionManager.conquest_campaign_won(_conquest):
+		line += "   ·   ★ EMPIRE VICTORIEUX"
+	elif ProgressionManager.conquest_empire_complete(_conquest):
+		line += "   ·   ⚔ Tout Zimut est à vous : assailliez le Donjon du Roi Squelette !"
+	_header.text = line
 
 func _select_city(id: String) -> void:
 	_selected_id = id
-	var city: Dictionary = _city_by_id(id)
+	var city: Dictionary = _city_meta(id)
 	var owned: Array = _conquest.get("owned", ["capitale"])
 	var conquered: bool = owned.has(id)
 	var ravage: int = int(_conquest.get("ravage", {}).get(id, 0))
 	_build_panel(id, conquered)
-	if city.get("kind", "") == "capital":
-		_message.text = "%s\n\n%s\n\nVotre territoire de départ, à l’abri des attaques." % [city["name"], city["desc"]]
+	if String(city["kind"]) == "capital":
+		_message.text = "%s\n\n%s\n\nVotre territoire de départ, à l'abri des attaques." % [city["name"], city["desc"]]
 		_attack.disabled = true
-		_attack.text = "LANCER L’ASSAUT"
+		_attack.text = "LANCER L'ASSAUT"
 	elif conquered:
 		var txt: String = "%s\n\n%s\n\n⚑ Territoire allié." % [city["name"], city["desc"]]
 		if ravage > 0:
@@ -178,30 +235,39 @@ func _select_city(id: String) -> void:
 			txt += "\nProduction : %s" % " · ".join(PackedStringArray(parts))
 		_message.text = txt
 		_attack.disabled = true
-		_attack.text = "LANCER L’ASSAUT"
+		_attack.text = "LANCER L'ASSAUT"
 	else:
 		var kind: String = String(city["kind"])
-		var cid2: String = String(city["id"])
-		var prog: int = ProgressionManager.conquest_siege_progress(_conquest, cid2)
-		var wave: int = ProgressionManager.conquest_siege_wave(_conquest, cid2)
+		var prog: int = ProgressionManager.conquest_siege_progress(_conquest, id)
+		var wave: int = ProgressionManager.conquest_siege_wave(_conquest, id)
+		var attackable: bool = ProgressionManager.conquest_city_attackable(_conquest, id)
 		if kind == "enemy":
 			var left: int = ProgressionManager.CONQUEST_SIEGE_BATTLES - prog
 			var wave_txt: String = ("\n\nSiège en cours : %d/%d — prochaine bataille : %s." % [prog, ProgressionManager.CONQUEST_SIEGE_BATTLES, "BOSS" if wave == ProgressionManager.CONQUEST_SIEGE_BATTLES else "mobs de champs"]) if prog > 0 else ""
-			_message.text = "%s · Niveau conseillé %d\n\n%s\n\n⚔ VILLE ADVERSE — siège en %d batailles : 3 plateaux de mobs puis le BOSS du biome.%s" % [city["name"], int(city["level"]), city["desc"], ProgressionManager.CONQUEST_SIEGE_BATTLES, wave_txt]
+			_message.text = "%s · %s · Niveau conseillé %d\n\n%s\n\n⚔ VILLE ADVERSE — siège en %d batailles : %d plateaux de mobs puis le BOSS du biome.%s" % [
+				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), city["desc"],
+				ProgressionManager.CONQUEST_SIEGE_BATTLES, ProgressionManager.CONQUEST_SIEGE_BATTLES - 1, wave_txt]
 		else:
-			_message.text = "%s · Niveau conseillé %d\n\n%s\n\n● VILLE NEUTRE — 1 bataille contre des mobs de champs suffit à la conquérir." % [city["name"], int(city["level"]), city["desc"]]
-
-		_attack.disabled = false
-		if kind == "enemy":
-			_attack.text = "LANCER LA BATAILLE %d/4 — %s" % [wave, "BOSS" if wave == ProgressionManager.CONQUEST_SIEGE_BATTLES else "MOBS"]
+			_message.text = "%s · %s · Niveau conseillé %d\n\n%s\n\n● VILLE NEUTRE — 1 bataille contre des mobs de champs suffit à la conquérir." % [
+				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), city["desc"]]
+		if id == "donjon_roi" and not ProgressionManager.conquest_empire_complete(_conquest):
+			_message.text += "\n\n★ Objectif final : verrouillé tant que tout Zimut n'est pas sous votre contrôle."
+		if attackable:
+			_attack.disabled = false
+			if kind == "enemy":
+				_attack.text = "LANCER LA BATAILLE %d/4 — %s" % [wave, "BOSS" if wave == ProgressionManager.CONQUEST_SIEGE_BATTLES else "MOBS"]
+			else:
+				_attack.text = "LANCER L'ASSAUT"
 		else:
-			_attack.text = "LANCER L’ASSAUT"
-	for other: Dictionary in CITIES:
-		var button: Button = _city_buttons[String(other["id"])]
-		button.add_theme_stylebox_override("normal", _style(_city_color(other), GOLD if String(other["id"]) == id else Color(0.5, 0.64, 0.46)))
+			_attack.disabled = true
+			_attack.text = "HORS DE PORTÉE — CONQUÉREZ UNE VILLE RELIÉE"
+			_message.text += "\n\n✖ Aucune route depuis votre territoire : conquérez d'abord une ville voisine."
+	for other: String in _city_buttons.keys():
+		var button: Button = _city_buttons[other]
+		button.add_theme_stylebox_override("normal", _style(_city_color(other), GOLD if other == id else Color(0.5, 0.64, 0.46)))
 
 ## Panneau de construction de la ville sélectionnée : un bouton par
-## bâtiment de ressources disponible, avec coûts, s’il n’est pas déjà bâti.
+## bâtiment de ressources disponible, avec coûts, s'il n'est pas déjà bâti.
 func _build_panel(city_id: String, conquered: bool) -> void:
 	if _build_box == null:
 		return
@@ -238,15 +304,13 @@ func _on_build_pressed(city_id: String, building: String) -> void:
 		return
 	ProgressionManager.write_save(_slot, _save)
 	_conquest = _save.get("conquest", {})
+	_refresh_header()
 	_select_city(city_id)
 
 func _attack_selected_city() -> void:
-	var city: Dictionary = _city_by_id(_selected_id)
-	if city.is_empty() or String(city["kind"]) == "capital":
+	if not ProgressionManager.conquest_city_attackable(_conquest, _selected_id):
 		return
-	var owned: Array = _conquest.get("owned", ["capitale"])
-	if owned.has(_selected_id):
-		return
+	var city: Dictionary = _city_meta(_selected_id)
 	_conquest["pending_city"] = _selected_id
 	_conquest["pending_level"] = int(city["level"])
 	_save["conquest"] = _conquest
@@ -254,24 +318,116 @@ func _attack_selected_city() -> void:
 	_persist()
 	GameManager.active_save = _save
 	GameManager.active_slot = _slot
-	GameManager.fight_biome = "Forêt"
+	GameManager.fight_biome = String(city["biome"])
 	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
 
-func _city_by_id(id: String) -> Dictionary:
-	for city: Dictionary in CITIES:
-		if String(city["id"]) == id:
-			return city
-	return {}
+## Écran d'annexion : production versée, contre-attaque éventuelle et
+## conseil de développement après une ville nouvellement conquise.
+func _show_annexion_popup(city_id: String) -> void:
+	var cname: String = ProgressionManager.conquest_city_name(city_id)
+	var lines: Array = []
+	var yld: Dictionary = _conquest.get("last_yield", {})
+	var parts: PackedStringArray = []
+	for r: String in yld.keys():
+		parts.append("%s +%d" % [r, int(yld[r])])
+	if parts.is_empty():
+		lines.append("Aucune production pour l'instant : édifiez des bâtiments pour rapporter des ressources à chaque victoire.")
+	else:
+		lines.append("Production de votre empire versée : " + " · ".join(parts))
+	var counter: String = String(_conquest.get("last_counterattack", ""))
+	if counter != "":
+		lines.append("⚠ CONTRE-ATTAQUE ! L'ennemi a pillé %s : production gelée %d bataille(s)." % [
+			ProgressionManager.conquest_city_name(counter), ProgressionManager.CONQUEST_RAVAGE_BATTLES])
+	if city_id == "donjon_roi":
+		lines.append("★ CAMPAGNE TERMINÉE : le Roi Squelette est tombé, Zimut vous appartient ! Vous pouvez continuer en empire libre.")
+	else:
+		lines.append("Conseil : ouvrez %s sur la carte et édifiez un bâtiment de ressources." % cname)
+	var title: String = "EMPIRE VICTORIEUX !" if city_id == "donjon_roi" else "VILLE ANNEXÉE !"
+	var msg: String = "%s rejoint votre empire.\n\n%s" % [cname, "\n\n".join(PackedStringArray(lines))]
+	_show_popup(title, msg)
+	_show_counterattack_message()
 
-## Couleur d’une ville selon son ÉTAT, pas son type d’origine :
+## Popup plein écran (titre + message + bouton CONTINUER) posé sur cette
+## carte : utilisé pour l'écran d'annexion après une victoire.
+func _show_popup(title: String, message: String) -> void:
+	var dim := ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.55)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(dim)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _style(Color(0.98, 0.86, 0.45), Color(0.72, 0.58, 0.28)))
+	add_child(panel)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE, 0)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 12)
+	panel.add_child(box)
+	var t := Label.new()
+	t.text = "⚑ %s" % title
+	t.add_theme_font_size_override("font_size", 28)
+	t.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
+	box.add_child(t)
+	var m := Label.new()
+	m.text = message
+	m.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	m.custom_minimum_size.x = 900
+	m.add_theme_font_size_override("font_size", 20)
+	m.add_theme_color_override("font_color", Color(0.30, 0.22, 0.08))
+	box.add_child(m)
+	var ok := Button.new()
+	ok.text = "CONTINUER"
+	ok.custom_minimum_size = Vector2(300, 60)
+	ok.add_theme_font_size_override("font_size", 22)
+	ok.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
+	ok.add_theme_stylebox_override("normal", _style(Color(0.85, 0.72, 0.35), Color(0.72, 0.58, 0.28)))
+	ok.pressed.connect(func() -> void:
+		dim.queue_free()
+		panel.queue_free())
+	box.add_child(ok)
+
+func _show_counterattack_message() -> void:
+	var counter: String = String(_conquest.get("last_counterattack", ""))
+	if counter != "" and _message != null:
+		var cname: String = ProgressionManager.conquest_city_name(counter)
+		_message.text = "⚠ CONTRE-ATTAQUE ! L'ennemi a pillé %s : production gelée %d bataille(s)." % [cname, ProgressionManager.CONQUEST_RAVAGE_BATTLES]
+
+func _city_ids() -> Array:
+	return ProgressionManager.CONQUEST_CITIES.keys()
+
+func _city_meta(id: String) -> Dictionary:
+	var info: Dictionary = ProgressionManager.CONQUEST_CITIES.get(id, {})
+	var out: Dictionary = {
+		"name": info.get("name", id),
+		"kind": info.get("kind", "neutral"),
+		"biome": info.get("biome", "Forêt"),
+		"level": int(info.get("level", 10)),
+		"desc": _city_desc(id, String(info.get("kind", "neutral"))),
+	}
+	return out
+
+func _city_desc(id: String, kind: String) -> String:
+	var descs := {
+		"capitale": "Votre capitale de départ. Elle ne peut pas être perdue.",
+		"clairiere": "Un village forestier peu défendu.",
+		"vieille_tour": "Un avant-poste gobelin fortifié.",
+		"pont_mousse": "Un passage stratégique au-dessus de la rivière.",
+		"fort_racine": "La forteresse du chef de la forêt.",
+		"hameau_pin": "Un hameau de bûcherons niché dans les Pics.",
+		"garnison": "L'avant-poste militaire des Pics de Zimut.",
+		"oasis": "Une oasis marchande au cœur des Dunes.",
+		"tour_sable": "La place forte du désert, gardée par le Dragon.",
+		"donjon_roi": "Le repaire du Roi Squelette. Objectif final de la campagne.",
+	}
+	return String(descs.get(id, "Ville de Zimut."))
+
+## Couleur d'une ville selon son ÉTAT, pas son type d'origine :
 ##   vert  = conquise ou capitale (imprenable),
 ##   gris  = neutre (1 bataille de mobs),
 ##   rouge = adverse (siège : 3 batailles de mobs puis le boss).
-func _city_color(city: Dictionary) -> Color:
-	var cid: String = String(city["id"])
-	if _conquest.get("owned", []).has(cid):
+func _city_color(city_id: String) -> Color:
+	if _conquest.get("owned", []).has(city_id):
 		return Color(0.16, 0.42, 0.24)
-	match String(city["kind"]):
+	match String(ProgressionManager.conquest_city_kind(city_id)):
 		"capital": return Color(0.16, 0.42, 0.24)
 		"neutral": return Color(0.34, 0.36, 0.38)
 		_: return Color(0.52, 0.16, 0.14)
@@ -301,11 +457,14 @@ func _style(bg: Color, border: Color) -> StyleBoxFlat:
 
 class _RouteLines:
 	extends Control
+	var conquest: Dictionary = {}
 	func _draw() -> void:
-		var a := Vector2(size.x * 0.25, size.y * 0.35)
-		var b := Vector2(size.x * 0.50, size.y * 0.54)
-		var c := Vector2(size.x * 0.74, size.y * 0.30)
-		var d := Vector2(size.x * 0.28, size.y * 0.74)
-		var e := Vector2(size.x * 0.76, size.y * 0.72)
-		for pair: Array in [[a, b], [b, c], [b, d], [b, e], [d, e]]:
-			draw_line(pair[0], pair[1], Color(0.79, 0.68, 0.43, 0.85), 5.0, true)
+		for pair: Array in ProgressionManager.CONQUEST_ROUTES:
+			var a_id: String = String(pair[0])
+			var b_id: String = String(pair[1])
+			var a: Vector2 = ConquestMapUI.CITY_POS.get(a_id, Vector2.ZERO)
+			var b: Vector2 = ConquestMapUI.CITY_POS.get(b_id, Vector2.ZERO)
+			var owned: Array = conquest.get("owned", [])
+			var open: bool = owned.has(a_id) and owned.has(b_id)
+			var col: Color = Color(0.96, 0.75, 0.31, 0.95) if open else Color(0.79, 0.68, 0.43, 0.45)
+			draw_line(Vector2(size.x * a.x, size.y * a.y), Vector2(size.x * b.x, size.y * b.y), col, 5.0 if open else 3.0, true)

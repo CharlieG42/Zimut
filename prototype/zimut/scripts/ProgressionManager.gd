@@ -81,13 +81,36 @@ const CONQUEST_RAVAGE_BATTLES := 3
 ## en une seule bataille de mobs.
 const CONQUEST_SIEGE_BATTLES := 4
 
-## Types des villes de conquete (miroir de ConquestMapUI.CITIES) :
-## une ville adverse (enemy) exige un siege de 4 batailles,
-## une ville neutre (neutral) se prend en 1 bataille.
-const CONQUEST_CITY_KIND := {
-	"capitale": "capital", "clairiere": "neutral", "vieille_tour": "enemy",
-	"pont_mousse": "neutral", "fort_racine": "enemy",
+## Catalogue officiel des villes de Conquête (la carte de ConquestMapUI en est
+## dérivée) : id -> { name, kind, biome, level }.
+##   capital : imprenable, quartier général ;
+##   neutral : 1 bataille de mobs ;
+##   enemy   : siège en 4 batailles (3 mobs + boss du biome) ;
+##   donjon_roi : objectif final, débloqué quand tout l'empire est conquis.
+const CONQUEST_CITIES := {
+	"capitale":     {"name": "Sylve-Cœur",      "kind": "capital",    "biome": "Forêt",     "level": 0},
+	"clairiere":    {"name": "Clairière d'Aube", "kind": "neutral",   "biome": "Forêt",     "level": 10},
+	"vieille_tour": {"name": "Vieille Tour",     "kind": "enemy",     "biome": "Forêt",     "level": 12},
+	"pont_mousse":  {"name": "Pont-Mousse",      "kind": "neutral",   "biome": "Forêt",     "level": 11},
+	"fort_racine":  {"name": "Fort Racine",       "kind": "enemy",     "biome": "Forêt",     "level": 14},
+	"hameau_pin":   {"name": "Hameau du Pin",    "kind": "neutral",   "biome": "Montagne",  "level": 16},
+	"garnison":    {"name": "Garnison des Pics", "kind": "enemy",     "biome": "Montagne",  "level": 18},
+	"oasis":        {"name": "Oasis Perdue",      "kind": "neutral",   "biome": "Désert",    "level": 20},
+	"tour_sable":   {"name": "Tour des Sables",  "kind": "enemy",     "biome": "Désert",    "level": 22},
+	"donjon_roi":   {"name": "Donjon du Roi Squelette", "kind": "enemy", "biome": "Donjon", "level": 25},
 }
+
+## Routes de la carte : on ne peut attaquer qu'une ville RELIÉE par route à
+## son territoire (arbre technologique spatial). Le Donjon n'est relié qu'aux
+## trois places fortes : il exige de tenir tout le monde de Zimut.
+const CONQUEST_ROUTES: Array = [
+	["capitale", "clairiere"], ["capitale", "pont_mousse"],
+	["clairiere", "vieille_tour"], ["clairiere", "fort_racine"],
+	["vieille_tour", "fort_racine"], ["pont_mousse", "fort_racine"],
+	["fort_racine", "hameau_pin"], ["hameau_pin", "garnison"],
+	["fort_racine", "oasis"], ["garnison", "tour_sable"], ["oasis", "tour_sable"],
+	["fort_racine", "donjon_roi"], ["garnison", "donjon_roi"], ["tour_sable", "donjon_roi"],
+]
 
 ## Bâtiments de ressources constructibles dans les villes conquises.
 ## type -> { label, coûts (ressources), or, production par bataille gagnée }
@@ -1030,6 +1053,7 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 				if not owned.has(pending):
 					owned.append(pending)
 					conquest["owned"] = owned
+				conquest["just_annexed"] = pending
 				conquest["pending_city"] = ""
 				conquest.erase("pending_level")
 				sieges.erase(pending)
@@ -1040,14 +1064,7 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 				conquest["sieges"] = sieges
 		# Production de l'empire : les bâtiments des villes possédées
 		# rapportent leurs ressources à chaque bataille gagnée.
-		var empire_yield: Dictionary = {}
-		for city_id: String in conquest.get("owned", []):
-			if _is_city_ravaged(conquest, city_id):
-				continue
-			for b: String in _city_buildings(conquest, city_id):
-				var info: Dictionary = CONQUEST_BUILDINGS.get(b, {})
-				for res: String in info.get("yield", {}).keys():
-					empire_yield[res] = int(empire_yield.get(res, 0)) + int(info["yield"][res])
+		var empire_yield: Dictionary = conquest_empire_yield(conquest)
 		if not empire_yield.is_empty():
 			add_resources(data, empire_yield)
 			conquest["last_yield"] = empire_yield
@@ -1073,10 +1090,67 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 			adventure["pending_challenge"] = ""
 			data["adventure"] = adventure
 
+## Production totale de l'empire (bâtiments des villes possédées non
+## pillées), versée à chaque bataille gagnée.
+func conquest_empire_yield(conquest: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for city_id: String in conquest.get("owned", []):
+		if _is_city_ravaged(conquest, city_id):
+			continue
+		for b: String in _city_buildings(conquest, city_id):
+			for r: String in CONQUEST_BUILDINGS.get(b, {}).get("yield", {}).keys():
+				out[r] = int(out.get(r, 0)) + int(CONQUEST_BUILDINGS[b]["yield"][r])
+	return out
+
 ## Nombre de batailles necessaires pour prendre cette ville :
 ## 4 (3 mobs + boss) pour une ville adverse, 1 pour une neutre.
 func conquest_city_battles(city_id: String) -> int:
-	return CONQUEST_SIEGE_BATTLES if String(CONQUEST_CITY_KIND.get(city_id, "neutral")) == "enemy" else 1
+	return CONQUEST_SIEGE_BATTLES if String(conquest_city_kind(city_id)) == "enemy" else 1
+
+## Type (capital/neutral/enemy) d'une ville du catalogue Conquête.
+func conquest_city_kind(city_id: String) -> String:
+	return String(CONQUEST_CITIES.get(city_id, {}).get("kind", "neutral"))
+
+## Biome d'une ville (décor et bestiaire de ses batailles).
+func conquest_city_biome(city_id: String) -> String:
+	return String(CONQUEST_CITIES.get(city_id, {}).get("biome", "Forêt"))
+
+## Nom d'une ville du catalogue (retourne l'id si inconnu).
+func conquest_city_name(city_id: String) -> String:
+	return String(CONQUEST_CITIES.get(city_id, {}).get("name", city_id))
+
+## Une ville est-elle attaquable : reliée par route au territoire ET pas
+## déjà conquise. La capitale ne s'attaque jamais ; le Donjon exige de
+## contrôler toutes les autres villes (fin de campagne).
+func conquest_city_attackable(conquest: Dictionary, city_id: String) -> bool:
+	var kind: String = conquest_city_kind(city_id)
+	if kind == "capital" or kind == "":
+		return false
+	if conquest.get("owned", []).has(city_id):
+		return false
+	if city_id == "donjon_roi" and not conquest_empire_complete(conquest):
+		return false
+	for pair: Array in CONQUEST_ROUTES:
+		var a: String = String(pair[0])
+		var b: String = String(pair[1])
+		if (a == city_id and conquest.get("owned", []).has(b)) \
+			or (b == city_id and conquest.get("owned", []).has(a)):
+			return true
+	return false
+
+## Toutes les villes (hors capitale et Donjon) sont-elles conquises ?
+func conquest_empire_complete(conquest: Dictionary) -> bool:
+	var owned: Array = conquest.get("owned", [])
+	for city_id: String in CONQUEST_CITIES.keys():
+		if city_id == "capitale" or city_id == "donjon_roi":
+			continue
+		if not owned.has(city_id):
+			return false
+	return true
+
+## Victoire de campagne : le Donjon du Roi Squelette est tombé.
+func conquest_campaign_won(conquest: Dictionary) -> bool:
+	return conquest.get("owned", []).has("donjon_roi")
 
 ## Progression du siège d’une ville adverse (batailles gagnées dessus).
 func conquest_siege_progress(conquest: Dictionary, city_id: String) -> int:
