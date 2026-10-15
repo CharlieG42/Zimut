@@ -23,6 +23,7 @@ var _city_buttons: Dictionary = {}
 var _build_box: VBoxContainer
 
 func _ready() -> void:
+	Music.play("adventure")
 	layer = 10
 	_save = GameManager.active_save
 	_slot = GameManager.active_slot

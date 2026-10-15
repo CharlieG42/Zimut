@@ -24,6 +24,7 @@ func _ready() -> void:
 	# encore tourné, sa variable game_manager est encore null et l'appel
 	# plante avec "Invalid access to property on a base object of type Nil".
 	grid_manager.init(game_manager)
+	Music.play_combat(String(game_manager.fight_biome))
 	_setup_camera()
 	ui_manager.init(game_manager)
 	turn_manager.init(game_manager)

@@ -9,6 +9,7 @@ const BG_TEXTURE: Texture2D = preload("res://assets/accueil_1920.jpg")
 
 func _ready() -> void:
 	layer = 10
+	Music.play("menu")
 	var root := Control.new()
 	root.name = "MainMenuRoot"
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
