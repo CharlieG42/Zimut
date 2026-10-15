@@ -797,7 +797,7 @@ func _build_ui() -> void:
 	_spell_scroll.anchor_bottom = 1.0
 	_spell_scroll.offset_left = 18.0
 	_spell_scroll.offset_right = 18.0 + badge_w + 18.0
-	_spell_scroll.offset_top = 212.0
+	_spell_scroll.offset_top = 282.0
 	_spell_scroll.offset_bottom = -76.0
 	_spell_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
 	var spell_panel := PanelContainer.new()
@@ -807,7 +807,7 @@ func _build_ui() -> void:
 	spell_panel.anchor_bottom = 1.0
 	spell_panel.offset_left = 10.0
 	spell_panel.offset_right = 18.0 + badge_w + 26.0
-	spell_panel.offset_top = 204.0
+	spell_panel.offset_top = 274.0
 	spell_panel.offset_bottom = -68.0
 	spell_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	spell_panel.add_theme_stylebox_override("panel", _flat(Color(0.03, 0.05, 0.09, 0.30), Color(0.35, 0.48, 0.65, 0.35), 20, 1))
@@ -825,10 +825,10 @@ func _build_ui() -> void:
 	_tip_panel.anchor_right = 0.0
 	_tip_panel.anchor_top = 0.0
 	_tip_panel.anchor_bottom = 0.0
-	_tip_panel.offset_left = 18.0 + badge_w + 34.0
-	_tip_panel.offset_right = 18.0 + badge_w + 394.0 * _spell_scale
-	_tip_panel.offset_top = 220.0
-	_tip_panel.offset_bottom = 360.0
+	_tip_panel.offset_left = 18.0 + badge_w + 48.0
+	_tip_panel.offset_right = 18.0 + badge_w + 408.0 * _spell_scale
+	_tip_panel.offset_top = 290.0
+	_tip_panel.offset_bottom = 430.0
 	_tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tip_panel.visible = false
 	_tip_label = Label.new()
