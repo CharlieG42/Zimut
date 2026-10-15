@@ -18,6 +18,9 @@ var _root: Control
 var _slots_box: VBoxContainer
 var _detail_panel: PanelContainer
 var _detail_box: VBoxContainer
+var _main_layout: BoxContainer
+var _slots_scroll: ScrollContainer
+var _detail_scroll: ScrollContainer
 var _current: Dictionary = {}     # sauvegarde affichée dans le détail
 var _current_slot: int = -1
 
@@ -62,9 +65,10 @@ func _build() -> void:
 	top.add_child(back)
 
 	var title := Label.new()
-	title.text = "ENTRER DANS ZIMUT — mes parties (max %d)" % ProgressionManager.MAX_SAVES
-	title.add_theme_font_size_override("font_size", 30)
-	title.add_theme_color_override("font_color", COL_TXT)
+	title.text = "ZIMUT  ·  MES PARTIES"
+	title.add_theme_font_size_override("font_size", _ui_font(30))
+	title.add_theme_color_override("font_color", Color(0.96, 0.84, 0.52))
+	title.tooltip_text = "Jusqu’à %d sauvegardes" % ProgressionManager.MAX_SAVES
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -72,6 +76,7 @@ func _build() -> void:
 
 	# Zone principale : slots + détail, côte à côte en largeur, empilés sinon
 	var main := HBoxContainer.new()
+	_main_layout = main
 	main.anchor_left = 0.0
 	main.anchor_right = 1.0
 	main.anchor_top = 0.0
@@ -84,6 +89,7 @@ func _build() -> void:
 	_root.add_child(main)
 
 	var slots_scroll := ScrollContainer.new()
+	_slots_scroll = slots_scroll
 	slots_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	slots_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	slots_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -99,11 +105,51 @@ func _build() -> void:
 	_detail_panel.add_theme_stylebox_override("panel", _flat())
 	main.add_child(_detail_panel)
 
-	_detail_box = VBoxContainer.new()
-	_detail_box.add_theme_constant_override("separation", 10)
-	_detail_panel.add_child(_detail_box)
+	_detail_scroll = ScrollContainer.new()
+	_detail_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_detail_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_detail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_detail_panel.add_child(_detail_scroll)
 
+	_detail_box = VBoxContainer.new()
+	_detail_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_detail_box.add_theme_constant_override("separation", 8)
+	_detail_scroll.add_child(_detail_box)
+
+	get_viewport().size_changed.connect(_apply_responsive_layout)
 	refresh()
+	_apply_responsive_layout()
+
+func _is_compact() -> bool:
+	return get_viewport().get_visible_rect().size.x <= 1000.0
+
+func _ui_font(base_size: int) -> int:
+	var width: float = get_viewport().get_visible_rect().size.x
+	var scale: float = 1.0
+	if width <= 600.0:
+		scale = 0.72
+	elif width <= 1000.0:
+		scale = 0.84
+	return maxi(12, roundi(float(base_size) * scale))
+
+func _apply_responsive_layout() -> void:
+	if _main_layout == null or _slots_scroll == null or _detail_panel == null:
+		return
+	var compact: bool = _is_compact()
+	_main_layout.vertical = compact
+	_main_layout.add_theme_constant_override("separation", 10 if compact else 16)
+	_slots_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_slots_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_detail_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_detail_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	if compact:
+		_slots_scroll.custom_minimum_size = Vector2(0, 150)
+		_slots_scroll.size_flags_stretch_ratio = 0.36
+		_detail_panel.size_flags_stretch_ratio = 0.64
+	else:
+		_slots_scroll.custom_minimum_size = Vector2(0, 0)
+		_slots_scroll.size_flags_stretch_ratio = 0.43
+		_detail_panel.size_flags_stretch_ratio = 0.57
 
 func _flat() -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
@@ -122,7 +168,7 @@ func refresh() -> void:
 		used[int(sv["id"])] = sv
 	for slot: int in range(ProgressionManager.MAX_SAVES):
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(0, 96)
+		btn.custom_minimum_size = Vector2(0, 82 if _is_compact() else 96)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		var is_used: bool = used.has(slot)
@@ -135,7 +181,7 @@ func refresh() -> void:
 			btn.text = "  + Commencer une nouvelle partie (slot %d)" % (slot + 1)
 			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_EMPTY_BG, Color(0.3, 0.35, 0.45), 2))
 			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_EMPTY_BG.lightened(0.15), Color(0.3, 0.35, 0.45), 3))
-		btn.add_theme_font_size_override("font_size", 20)
+		btn.add_theme_font_size_override("font_size", _ui_font(20))
 		btn.add_theme_color_override("font_color", Color(0.95, 0.94, 0.90))
 		if slot == _current_slot:
 			btn.add_theme_color_override("font_color", Color(1.0, 0.86, 0.4))
@@ -186,7 +232,7 @@ func _select_first_empty_slot() -> void:
 	var message := Label.new()
 	message.text = "Tous les emplacements sont occupés.\nSupprime une partie existante pour en commencer une nouvelle."
 	message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	message.add_theme_font_size_override("font_size", 22)
+	message.add_theme_font_size_override("font_size", _ui_font(22))
 	message.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(message)
 
@@ -198,13 +244,13 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 
 	var title := Label.new()
 	title.text = "%s — ennemis niveau %d" % [data.get("name", ""), int(data.get("level", 10))]
-	title.add_theme_font_size_override("font_size", 24)
+	title.add_theme_font_size_override("font_size", _ui_font(24))
 	title.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(title)
 
 	var team_btn := Button.new()
 	team_btn.text = "Gérer l'équipe (libre à chaque combat)"
-	team_btn.add_theme_font_size_override("font_size", 19)
+	team_btn.add_theme_font_size_override("font_size", _ui_font(19))
 	team_btn.add_theme_color_override("font_color", COL_TXT)
 	team_btn.add_theme_stylebox_override("normal", _flat())
 	team_btn.pressed.connect(func() -> void:
@@ -261,7 +307,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	# sorts, équipement et inventaire ne sont jamais dupliqués par mode.
 	var mode_lbl := Label.new()
 	mode_lbl.text = "Choisir un mode de jeu :"
-	mode_lbl.add_theme_font_size_override("font_size", 21)
+	mode_lbl.add_theme_font_size_override("font_size", _ui_font(21))
 	mode_lbl.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(mode_lbl)
 	_detail_box.add_child(_mode_button("Combats Tactiques", "Combat au tour par tour — niveau conseillé %d" % int(data.get("level", 10)), true, func() -> void:
@@ -288,7 +334,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		var row := Label.new()
 		row.text = "  %s niv %d — %d objet(s) équipé(s)" % [m.get("classe", "?"),
 			ProgressionManager.member_level(data, String(m.get("classe", ""))), _equip_summary(m).size()]
-		row.add_theme_font_size_override("font_size", 18)
+		row.add_theme_font_size_override("font_size", _ui_font(18))
 		row.add_theme_color_override("font_color", COL_TXT)
 		_detail_box.add_child(row)
 
@@ -329,7 +375,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 			int(it.get("level", 0)), ItemRules.stat_line(it)]
 		row2.tooltip_text = ItemRules.describe(it)
 		row2.mouse_filter = Control.MOUSE_FILTER_PASS
-		row2.add_theme_font_size_override("font_size", 16)
+		row2.add_theme_font_size_override("font_size", _ui_font(16))
 		row2.add_theme_color_override("font_color", ItemRules.rarity_color(it).darkened(0.4))
 		inv_box.add_child(row2)
 
@@ -377,7 +423,7 @@ const COL_DISABLED_TXT := Color(0.45, 0.48, 0.55)
 func _mode_button(title_txt: String, desc: String, enabled: bool, cb: Callable) -> Button:
 	var b := Button.new()
 	b.text = ""
-	b.custom_minimum_size = Vector2(0, 96)
+	b.custom_minimum_size = Vector2(0, 76 if _is_compact() else 96)
 	b.disabled = not enabled
 	b.focus_mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE
 	var vb := VBoxContainer.new()
@@ -453,7 +499,7 @@ func _show_loot_log(log_arr: Array) -> void:
 	title.add_theme_color_override("font_color", COL_TXT)
 	box.add_child(title)
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(520, 520)
+	scroll.custom_minimum_size = Vector2(0, 360 if _is_compact() else 520)
 	box.add_child(scroll)
 	var rows := VBoxContainer.new()
 	rows.add_theme_constant_override("separation", 6)
@@ -462,7 +508,7 @@ func _show_loot_log(log_arr: Array) -> void:
 		var row := Label.new()
 		row.text = "✨ [%s] %s (nv%d) %s" % [ItemRules.rarity_label(it), it.get("name", "?"),
 			int(it.get("level", 0)), ItemRules.stat_line(it)]
-		row.add_theme_font_size_override("font_size", 17)
+		row.add_theme_font_size_override("font_size", _ui_font(17))
 		row.add_theme_color_override("font_color", ItemRules.rarity_color(it).darkened(0.4))
 		rows.add_child(row)
 	var close := Button.new()
