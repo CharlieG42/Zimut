@@ -100,6 +100,17 @@ jobs:
             || true
           test -s export/Zimut-debug.apk
 
+      - name: Export Zimut APK (Release)
+        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+        env:
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /home/runner/.local/share/godot/keystores/release.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEY_ALIAS }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cd prototype/zimut
+          godot --headless --verbose --export-release "Android" export/Zimut-release.apk || true
+          test -s export/Zimut-release.apk
+
       - name: Nommer les APK par build + empreintes SHA-256
         run: |
           cd prototype/zimut/export
@@ -128,17 +139,6 @@ jobs:
           retention-days: 7
           if-no-files-found: error
           compression-level: 0
-
-      - name: Export Zimut APK (Release)
-        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
-        env:
-          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /home/runner/.local/share/godot/keystores/release.keystore
-          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEY_ALIAS }}
-          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          cd prototype/zimut
-          godot --headless --verbose --export-release "Android" export/Zimut-release.apk || true
-          test -s export/Zimut-release.apk
 
       - name: Upload Zimut Release APK
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
