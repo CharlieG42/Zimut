@@ -332,6 +332,16 @@ func init_entities() -> void:
 	if campaign_mode in ["adventure", "conquest"]:
 		boss_fight = false
 		fight_is_boss = false
+	# Conquête : siège d’une ville adverse — la 4e bataille oppose le boss
+	# du biome ; les 3 premières des mobs de champs. Une ville neutre : 1 mobs.
+	var conquest_siege_boss: bool = false
+	if campaign_mode == "conquest" and not active_save.is_empty():
+		var cqst: Dictionary = active_save.get("conquest", {})
+		var target: String = String(cqst.get("pending_city", ""))
+		if target != "" and ProgressionManager.conquest_siege_is_boss(cqst, target):
+			conquest_siege_boss = true
+			boss_fight = true
+			fight_is_boss = true
 	fight_biome = "Forêt" if campaign_mode in ["adventure", "conquest"] else (ProgressionManager.next_biome(active_save) if not active_save.is_empty() else "Forêt")
 	# Donjon : chaque salle est un combat de boss ; la salle affiche le biome de
 	# la salle (décor du biome) mais le boss est celui de la salle de donjon.

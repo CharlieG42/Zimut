@@ -76,6 +76,19 @@ const RESOURCE_DROPS := {"Fer": 4, "Bois": 3, "Cuir": 3, "Magie": 2, "Venin": 1}
 const CONQUEST_COUNTERATTACK_CHANCE := 0.35
 const CONQUEST_RAVAGE_BATTLES := 3
 
+## Siège d’une ville adverse (rouge) : 4 batailles — 3 plateaux de mobs
+## de champs puis le plateau du boss. Une ville neutre (grise) se prend
+## en une seule bataille de mobs.
+const CONQUEST_SIEGE_BATTLES := 4
+
+## Types des villes de conquete (miroir de ConquestMapUI.CITIES) :
+## une ville adverse (enemy) exige un siege de 4 batailles,
+## une ville neutre (neutral) se prend en 1 bataille.
+const CONQUEST_CITY_KIND := {
+	"capitale": "capital", "clairiere": "neutral", "vieille_tour": "enemy",
+	"pont_mousse": "neutral", "fort_racine": "enemy",
+}
+
 ## Bâtiments de ressources constructibles dans les villes conquises.
 ## type -> { label, coûts (ressources), or, production par bataille gagnée }
 const CONQUEST_BUILDINGS := {
@@ -1008,12 +1021,23 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 		var pending: String = String(conquest.get("pending_city", ""))
 		var just_conquered: String = pending
 		if pending != "":
-			var owned: Array = conquest.get("owned", ["capitale"])
-			if not owned.has(pending):
-				owned.append(pending)
-				conquest["owned"] = owned
-			conquest["pending_city"] = ""
-			conquest.erase("pending_level")
+			var sieges: Dictionary = conquest.get("sieges", {})
+			var progress: int = int(sieges.get(pending, 0))
+			progress += 1
+			if progress >= conquest_city_battles(pending):
+				# Ville prise : annexion et fin du siège
+				var owned: Array = conquest.get("owned", ["capitale"])
+				if not owned.has(pending):
+					owned.append(pending)
+					conquest["owned"] = owned
+				conquest["pending_city"] = ""
+				conquest.erase("pending_level")
+				sieges.erase(pending)
+				conquest["sieges"] = sieges
+			else:
+				# Siège en cours : la ville reste la cible pour la suite
+				sieges[pending] = progress
+				conquest["sieges"] = sieges
 		# Production de l'empire : les bâtiments des villes possédées
 		# rapportent leurs ressources à chaque bataille gagnée.
 		var empire_yield: Dictionary = {}
@@ -1048,6 +1072,26 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 			adventure["completed"] = completed
 			adventure["pending_challenge"] = ""
 			data["adventure"] = adventure
+
+## Nombre de batailles necessaires pour prendre cette ville :
+## 4 (3 mobs + boss) pour une ville adverse, 1 pour une neutre.
+func conquest_city_battles(city_id: String) -> int:
+	return CONQUEST_SIEGE_BATTLES if String(CONQUEST_CITY_KIND.get(city_id, "neutral")) == "enemy" else 1
+
+## Progression du siège d’une ville adverse (batailles gagnées dessus).
+func conquest_siege_progress(conquest: Dictionary, city_id: String) -> int:
+	return int(conquest.get("sieges", {}).get(city_id, 0))
+
+## Numéro de la bataille de siège à jouer (1..CONQUEST_SIEGE_BATTLES), ou 0 hors siège.
+## Les 3 premières batailles opposent des mobs de champs ; la 4e est le boss.
+func conquest_siege_wave(conquest: Dictionary, city_id: String) -> int:
+	if not conquest.get("sieges", {}).has(city_id) and String(conquest.get("pending_city", "")) != city_id:
+		return 0
+	return clampi(conquest_siege_progress(conquest, city_id) + 1, 1, conquest_city_battles(city_id))
+
+## La bataille de siège courante est-elle celle du boss ? (dernière vague)
+func conquest_siege_is_boss(conquest: Dictionary, city_id: String) -> bool:
+	return conquest_siege_wave(conquest, city_id) == CONQUEST_SIEGE_BATTLES
 
 ## La ville est-elle pillée (production gelée) ?
 func _is_city_ravaged(conquest: Dictionary, city_id: String) -> bool:
@@ -1159,9 +1203,9 @@ func salvage_item(data: Dictionary, inv_index: int) -> Dictionary:
 func _apply_campaign_defeat(data: Dictionary) -> void:
 	var mode: String = String(data.get("campaign_mode", ""))
 	if mode == "conquest":
+		# Defaite : le siege en cours est conserve (meme cible, meme
+		# progression) : le joueur peut retenter la bataille perdue.
 		var conquest: Dictionary = data.get("conquest", {})
-		conquest["pending_city"] = ""
-		conquest.erase("pending_level")
 		data["conquest"] = conquest
 	elif mode == "adventure":
 		var adventure: Dictionary = data.get("adventure", {})

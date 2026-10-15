@@ -45,9 +45,11 @@ func _boot() -> void:
 	var res_before: int = int(data["resources"].get("Bois", 0))
 	var gold_before: int = int(data.get("gold", 0))
 	data["campaign_mode"] = "conquest"
-	pm.register_victory(data, {"enemies": [{"type": "Gobelin", "level": 12, "boss": false}]})
+	# Vieille Tour est une ville ADVERSE : siege complet de 4 batailles
+	for siege_battle: int in range(4):
+		pm.register_victory(data, {"enemies": [{"type": "Gobelin", "level": 12, "boss": false}]})
 	conquest = data.get("conquest", {})
-	check(conquest.get("owned", []).has("vieille_tour"), "Vieille Tour annexée")
+	check(conquest.get("owned", []).has("vieille_tour"), "Vieille Tour annexée après son siège de 4 batailles")
 	var yld: Dictionary = conquest.get("last_yield", {})
 	check(int(yld.get("Bois", 0)) >= 3, "production empire : scieries Bois +%d par bataille gagnée" % int(yld.get("Bois", 0)))
 	check(int(data["resources"].get("Bois", 0)) >= res_before + 3, "Bois crédité (scierie)")

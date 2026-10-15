@@ -771,7 +771,8 @@ func _build_ui() -> void:
 	_root.add_child(tl)
 	_timeline = tl
 
-	# Vignette du personnage actif : en haut à gauche, au-dessus du plateau
+	# Vignette du personnage actif : en haut à gauche, au-dessus du plateau.
+	# Le bouton FIN DU TOUR est intégré à la vignette (zone basse réservée).
 	var st := StatsView.new()
 	st.gm = game_manager
 	st.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -780,7 +781,7 @@ func _build_ui() -> void:
 	st.offset_left = 18.0
 	st.offset_right = 458.0
 	st.offset_top = 14.0
-	st.offset_bottom = 198.0
+	st.offset_bottom = 256.0
 	_root.add_child(st)
 	_stats = st
 
@@ -847,14 +848,16 @@ func _build_ui() -> void:
 	_end_btn.add_theme_stylebox_override("hover", _flat(Color(1.0, 0.92, 0.6), Color(0.85, 0.68, 0.3), 16, 3))
 	_end_btn.add_theme_stylebox_override("pressed", _flat(Color(0.9, 0.76, 0.35), Color(0.6, 0.48, 0.2), 16, 3))
 	_end_btn.add_theme_stylebox_override("disabled", _flat(Color(0.12, 0.14, 0.2), Color(0.3, 0.35, 0.45), 16, 3))
-	_end_btn.anchor_left = 1.0
-	_end_btn.anchor_right = 1.0
+	# Intégré à la vignette du personnage actif (en haut à gauche) ;
+	# _refresh() le désactive pendant le tour adverse.
+	_end_btn.anchor_left = 0.0
+	_end_btn.anchor_right = 0.0
 	_end_btn.anchor_top = 0.0
 	_end_btn.anchor_bottom = 0.0
-	_end_btn.offset_left = -194.0
-	_end_btn.offset_right = -14.0
-	_end_btn.offset_top = 12.0
-	_end_btn.offset_bottom = 72.0
+	_end_btn.offset_left = 26.0
+	_end_btn.offset_right = 450.0
+	_end_btn.offset_top = 196.0
+	_end_btn.offset_bottom = 262.0
 	_end_btn.pressed.connect(func() -> void:
 		Sfx.play("click")
 		end_turn_requested.emit())
@@ -876,11 +879,11 @@ func _build_ui() -> void:
 	_quit_btn.pressed.connect(_on_quit_combat_pressed)
 	_root.add_child(_quit_btn)
 
-	# Journal de combat
+	# Journal de combat : colonne bas-gauche, discrete, hors du plateau central
 	_log_box = VBoxContainer.new()
 	_log_box.add_theme_constant_override("separation", 2)
-	_log_box.position = Vector2(300, 220)
-	_log_box.size = Vector2(560, 300)
+	_log_box.position = Vector2(20, 620)
+	_log_box.size = Vector2(330, 240)
 	_log_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_log_box)
 
@@ -903,12 +906,16 @@ func _build_ui() -> void:
 	# Fiche de survol
 	_info_panel = PanelContainer.new()
 	_info_panel.add_theme_stylebox_override("panel", _flat(COL_PANEL, COL_BORDER, 14, 2))
-	_info_panel.anchor_left = 1.0
-	_info_panel.anchor_right = 1.0
-	_info_panel.offset_left = -330.0 - 170.0
-	_info_panel.offset_right = -20.0 - 170.0
-	_info_panel.offset_top = 160.0
-	_info_panel.offset_bottom = 330.0
+	# Fiche de survol : bas-gauche, a gauche de la barre de sorts,
+	# ne chevauche plus le plateau central ni la timeline verticale.
+	_info_panel.anchor_left = 0.0
+	_info_panel.anchor_right = 0.0
+	_info_panel.anchor_top = 1.0
+	_info_panel.anchor_bottom = 1.0
+	_info_panel.offset_left = 16.0
+	_info_panel.offset_right = 360.0
+	_info_panel.offset_top = -660.0
+	_info_panel.offset_bottom = -240.0
 	_info_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_info_panel.visible = false
 	_info_label = Label.new()
@@ -1186,7 +1193,7 @@ func _on_message(text: String) -> void:
 		return
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", 22)
+	l.add_theme_font_size_override("font_size", 18)
 	l.add_theme_color_override("font_color", Color(1, 1, 0.92))
 	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.95))
 	l.add_theme_constant_override("outline_size", 6)
