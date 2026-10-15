@@ -906,14 +906,14 @@ func _build_ui() -> void:
 	# Fiche de survol
 	_info_panel = PanelContainer.new()
 	_info_panel.add_theme_stylebox_override("panel", _flat(COL_PANEL, COL_BORDER, 14, 2))
-	# Fiche de survol : bas-gauche, a gauche de la barre de sorts,
-	# ne chevauche plus le plateau central ni la timeline verticale.
+	# Fiche de survol : bas-gauche, à droite de la barre de sorts pour
+	# que les informations ne masquent jamais les badges de sort.
 	_info_panel.anchor_left = 0.0
 	_info_panel.anchor_right = 0.0
 	_info_panel.anchor_top = 1.0
 	_info_panel.anchor_bottom = 1.0
-	_info_panel.offset_left = 16.0
-	_info_panel.offset_right = 360.0
+	_info_panel.offset_left = 160.0
+	_info_panel.offset_right = 504.0
 	_info_panel.offset_top = -660.0
 	_info_panel.offset_bottom = -240.0
 	_info_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
