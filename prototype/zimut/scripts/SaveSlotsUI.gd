@@ -368,7 +368,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	modes_row.add_theme_constant_override("separation", 10)
 	_detail_box.add_child(modes_row)
 	modes_row.add_child(_mode_button("Combats Tactiques",
-		"Combats stratégiques au tour par tour", "res://assets/ui/modes/mode_tactique.svg",
+		"Combats stratégiques au tour par tour", "res://assets/ui/modes/mode_tactique.png",
 		Color(0.22, 0.43, 0.69), true, func() -> void:
 			_current.erase("campaign_mode")
 			ProgressionManager.write_save(slot, _current)
@@ -378,11 +378,11 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 			battle_requested.emit(slot)
 			get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")))
 	modes_row.add_child(_mode_button("Aventure",
-		"Explorez, découvrez et relevez des défis", "res://assets/ui/modes/mode_aventure.svg",
+		"Explorez, découvrez et relevez des défis", "res://assets/ui/modes/mode_aventure.png",
 		Color(0.22, 0.48, 0.31), true, func() -> void:
 			_launch_campaign_mode("adventure", "res://scenes/AdventureMap.tscn", slot)))
 	modes_row.add_child(_mode_button("Conquête",
-		"Conquérez les cités par les armes", "res://assets/ui/modes/mode_conquete.svg",
+		"Conquérez les cités par les armes", "res://assets/ui/modes/mode_conquete.png",
 		Color(0.62, 0.25, 0.20), true, func() -> void:
 			_launch_campaign_mode("conquest", "res://scenes/ConquestMap.tscn", slot)))
 
