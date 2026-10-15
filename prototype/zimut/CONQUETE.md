@@ -129,6 +129,21 @@ l'état de la campagne : `owned`, `pending_city`, `sieges`, `buildings`,
 - `tests/test_conquest_roads.gd` — adjacence, verrouillage du Donjon,
   fin de campagne, `just_annexed`, biomes des nouvelles villes.
 - Lancement type : `godot --headless --path prototype/zimut -s tests/test_conquest_roads.gd`.
+- **Validé le 17/10** (Godot 4.7 headless) : les 3 tests conquête plus
+  `test_progression`, `test_progression_v2`, `test_boss_flow`,
+  `test_xp_pacing`, `test_donjon`, `test_biome_craft` passent ; les
+  scènes `ConquestMap`, `AdventureMap`, `TeamSelection`, `SaveSlots`
+  s'instancient sans erreur de script.
+
+### Correctifs du 17/10 (écran gris au lancement d'un mode)
+
+- `TeamSelectionUI.gd` : bloc `else:` vide (parse error) qui cassait le
+  chargement de la scène — cause de l'écran gris sur tous les modes.
+- `ConquestMapUI.gd` : la classe interne `_RouteLines` référençait
+  `ConquestMapUI.CITY_POS` (non résolu dans une inner class) ; la
+  position des villes est maintenant passée en variable d'instance.
+- Lesson : toujours vérifier avec `godot --headless -s tests/…` et
+  instancier les scènes avant de fusionner.
 
 ## 10. Pistes d'amélioration (non arbitré)
 

@@ -558,8 +558,8 @@ func refresh() -> void:
 			_title.text = "ASSAUT : %s — ☠ AFFRONTEZ %s ! (%d/%d)" % [city_name,
 				(ProgressionManager.biome_boss("Roi Squelette" if biome == "Donjon" else biome)).to_upper(), team.size(), MAX_TEAM_SIZE]
 		else:
-		_title.text = "COMBAT %d — %s : ☠ AFFRONTEZ %s ! (%d/%d)" % [fight_no, ProgressionManager.biome_label(biome),
-			ProgressionManager.biome_boss(biome).to_upper(), team.size(), MAX_TEAM_SIZE]
+			_title.text = "COMBAT %d — %s : ☠ AFFRONTEZ %s ! (%d/%d)" % [fight_no, ProgressionManager.biome_label(biome),
+				ProgressionManager.biome_boss(biome).to_upper(), team.size(), MAX_TEAM_SIZE]
 		_title.add_theme_color_override("font_color", Color(1.0, 0.4, 0.3))
 	else:
 		if city_name != "":
