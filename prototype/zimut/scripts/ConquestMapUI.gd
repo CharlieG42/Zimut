@@ -87,7 +87,12 @@ func _build() -> void:
 	for city: Dictionary in CITIES:
 		var id: String = String(city["id"])
 		var btn := Button.new()
-		btn.text = ("🏰\n" if city["kind"] == "capital" else ("🌿\n" if city["kind"] == "neutral" else "⚔\n")) + String(city["name"])
+		var owned: bool = _conquest.get("owned", []).has(String(city["id"]))
+		var badge: String = "⚑" if owned else ("⚔" if String(city["kind"]) == "enemy" else "●")
+		var siege_p: int = ProgressionManager.conquest_siege_progress(_conquest, String(city["id"]))
+		var siege_txt: String = ("\nSiège %d/%d" % [siege_p, ProgressionManager.CONQUEST_SIEGE_BATTLES]) if siege_p > 0 else ""
+		btn.text = ("%s\n" % badge) + String(city["name"]) + siege_txt
+
 		btn.position = Vector2(float(city["pos"].x) * map.size.x - 88, float(city["pos"].y) * map.size.y - 34)
 		btn.custom_minimum_size = Vector2(176, 72)
 		btn.add_theme_font_size_override("font_size", 17)
@@ -150,6 +155,7 @@ func _select_city(id: String) -> void:
 	if city.get("kind", "") == "capital":
 		_message.text = "%s\n\n%s\n\nVotre territoire de départ, à l’abri des attaques." % [city["name"], city["desc"]]
 		_attack.disabled = true
+		_attack.text = "LANCER L’ASSAUT"
 	elif conquered:
 		var txt: String = "%s\n\n%s\n\n⚑ Territoire allié." % [city["name"], city["desc"]]
 		if ravage > 0:
@@ -171,9 +177,24 @@ func _select_city(id: String) -> void:
 			txt += "\nProduction : %s" % " · ".join(PackedStringArray(parts))
 		_message.text = txt
 		_attack.disabled = true
+		_attack.text = "LANCER L’ASSAUT"
 	else:
-		_message.text = "%s · Niveau conseillé %d\n\n%s\n\nUn assaut lance un combat du mode Tactique." % [city["name"], int(city["level"]), city["desc"]]
+		var kind: String = String(city["kind"])
+		var cid2: String = String(city["id"])
+		var prog: int = ProgressionManager.conquest_siege_progress(_conquest, cid2)
+		var wave: int = ProgressionManager.conquest_siege_wave(_conquest, cid2)
+		if kind == "enemy":
+			var left: int = ProgressionManager.CONQUEST_SIEGE_BATTLES - prog
+			var wave_txt: String = ("\n\nSiège en cours : %d/%d — prochaine bataille : %s." % [prog, ProgressionManager.CONQUEST_SIEGE_BATTLES, "BOSS" if wave == ProgressionManager.CONQUEST_SIEGE_BATTLES else "mobs de champs"]) if prog > 0 else ""
+			_message.text = "%s · Niveau conseillé %d\n\n%s\n\n⚔ VILLE ADVERSE — siège en %d batailles : 3 plateaux de mobs puis le BOSS du biome.%s" % [city["name"], int(city["level"]), city["desc"], ProgressionManager.CONQUEST_SIEGE_BATTLES, wave_txt]
+		else:
+			_message.text = "%s · Niveau conseillé %d\n\n%s\n\n● VILLE NEUTRE — 1 bataille contre des mobs de champs suffit à la conquérir." % [city["name"], int(city["level"]), city["desc"]]
+
 		_attack.disabled = false
+		if kind == "enemy":
+			_attack.text = "LANCER LA BATAILLE %d/4 — %s" % [wave, "BOSS" if wave == ProgressionManager.CONQUEST_SIEGE_BATTLES else "MOBS"]
+		else:
+			_attack.text = "LANCER L’ASSAUT"
 	for other: Dictionary in CITIES:
 		var button: Button = _city_buttons[String(other["id"])]
 		button.add_theme_stylebox_override("normal", _style(_city_color(other), GOLD if String(other["id"]) == id else Color(0.5, 0.64, 0.46)))
@@ -241,11 +262,18 @@ func _city_by_id(id: String) -> Dictionary:
 			return city
 	return {}
 
+## Couleur d’une ville selon son ÉTAT, pas son type d’origine :
+##   vert  = conquise ou capitale (imprenable),
+##   gris  = neutre (1 bataille de mobs),
+##   rouge = adverse (siège : 3 batailles de mobs puis le boss).
 func _city_color(city: Dictionary) -> Color:
+	var cid: String = String(city["id"])
+	if _conquest.get("owned", []).has(cid):
+		return Color(0.16, 0.42, 0.24)
 	match String(city["kind"]):
-		"capital": return Color(0.43, 0.32, 0.13)
-		"neutral": return Color(0.20, 0.36, 0.25)
-		_: return Color(0.40, 0.18, 0.19)
+		"capital": return Color(0.16, 0.42, 0.24)
+		"neutral": return Color(0.34, 0.36, 0.38)
+		_: return Color(0.52, 0.16, 0.14)
 
 func _persist() -> void:
 	_save["conquest"] = _conquest
