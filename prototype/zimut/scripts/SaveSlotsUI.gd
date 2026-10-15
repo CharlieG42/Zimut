@@ -123,6 +123,10 @@ func _build() -> void:
 func _is_compact() -> bool:
 	return get_viewport().get_visible_rect().size.x <= 1000.0
 
+func _use_stacked_layout() -> bool:
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	return viewport_size.x < 650.0 or viewport_size.x / maxf(viewport_size.y, 1.0) < 1.15
+
 func _ui_font(base_size: int) -> int:
 	var width: float = get_viewport().get_visible_rect().size.x
 	var scale: float = 1.0
@@ -135,14 +139,14 @@ func _ui_font(base_size: int) -> int:
 func _apply_responsive_layout() -> void:
 	if _main_layout == null or _slots_scroll == null or _detail_panel == null:
 		return
-	var compact: bool = _is_compact()
-	_main_layout.vertical = compact
-	_main_layout.add_theme_constant_override("separation", 10 if compact else 16)
+	var stacked: bool = _use_stacked_layout()
+	_main_layout.vertical = stacked
+	_main_layout.add_theme_constant_override("separation", 10 if stacked else 16)
 	_slots_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_slots_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_detail_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_detail_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	if compact:
+	if stacked:
 		_slots_scroll.custom_minimum_size = Vector2(0, 150)
 		_slots_scroll.size_flags_stretch_ratio = 0.36
 		_detail_panel.size_flags_stretch_ratio = 0.64
