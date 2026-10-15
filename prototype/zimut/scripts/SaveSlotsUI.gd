@@ -508,25 +508,39 @@ const ACTION_ICONS := {
 	"delete": "res://assets/ui/actions/action_delete.png",
 }
 
-## Bouton d'action en image : le PNG (128x64, libellé intégré) est
-## agrandi et centré dans le bouton, sans texte superposé ; le
-## libellé reste en info-bulle.
+## Bouton d'action illustré : on laisse le PNG porter tout le décor.
+## Le contrôle Godot n'ajoute donc plus de cadre beige autour de l'image.
+## La hauteur accrue permet au visuel (128x64, texte intégré) d'être nettement
+## plus grand, tout en conservant une grille compacte de deux boutons par ligne.
 func _action_button(icon_key: String, txt: String, txt_col: Color) -> Button:
 	var b := Button.new()
 	b.tooltip_text = txt
-	b.custom_minimum_size = Vector2(0, 92 if _is_compact() else 112)
+	b.custom_minimum_size = Vector2(0, 124 if _is_compact() else 144)
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.focus_mode = Control.FOCUS_ALL
 	var icon_path: String = String(ACTION_ICONS.get(icon_key, ""))
+	var art: TextureRect
 	if icon_path != "" and ResourceLoader.exists(icon_path):
-		var art := TextureRect.new()
+		art = TextureRect.new()
 		art.texture = load(icon_path) as Texture2D
 		art.set_anchors_preset(Control.PRESET_FULL_RECT)
 		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.add_child(art)
-	b.add_theme_stylebox_override("normal", _flat())
-	b.add_theme_stylebox_override("hover", _flat())
+
+	# Les anciennes bordures beige provenaient du StyleBox du Button.
+	# StyleBoxEmpty supprime fond, contour et marge ajoutés par le thème ;
+	# seul le bouton illustré reste visible.
+	var empty := StyleBoxEmpty.new()
+	b.add_theme_stylebox_override("normal", empty)
+	b.add_theme_stylebox_override("hover", empty)
+	b.add_theme_stylebox_override("pressed", empty)
+	b.add_theme_stylebox_override("focus", empty)
+	b.add_theme_stylebox_override("disabled", empty)
+	if art != null:
+		b.mouse_entered.connect(func() -> void: art.modulate = Color(1.12, 1.12, 1.12, 1.0))
+		b.mouse_exited.connect(func() -> void: art.modulate = Color.WHITE)
 	return b
 
 func _equip_summary(m: Dictionary) -> Dictionary:
