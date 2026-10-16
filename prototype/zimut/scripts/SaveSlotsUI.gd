@@ -482,8 +482,8 @@ func _launch_campaign_mode(mode: String, scene_path: String, slot: int) -> void:
 
 
 ## Bouton d'action illustré : vignette PNG à gauche du libellé.
-## Les icônes vivent dans assets/ui/actions/action_<clé>.png — remplacez
-## ces fichiers par vos créations (128x64 recommandé, fond transparent).
+## Les icônes vivent dans assets/ui/actions/action_<clé>.png ; privilégier une
+## source haute résolution (512x256 ou plus, fond transparent) pour limiter le flou.
 const ACTION_ICONS := {
 	"team": "res://assets/ui/actions/action_team.png",
 	"chars": "res://assets/ui/actions/action_chars.png",

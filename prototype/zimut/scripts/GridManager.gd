@@ -368,6 +368,20 @@ func _set_hover(c: Vector2i) -> void:
 #  Entrées
 # ═══════════════════════════════════════════════════════════════════════════
 
+## Transmet un appui court sur la timeline comme un clic sur la cellule
+## correspondante : le ciblage du sort actif reste identique à celui du plateau.
+func select_entity_from_timeline(cell: Vector2i) -> void:
+	if game_manager == null or not _valid(cell):
+		return
+	# Reproduit la règle du plateau : sur mobile, le premier tap prévisualise
+	# et le second tap sur la même cellule confirme la cible.
+	if _confirm_tap and cell != hover_cell:
+		_set_hover(cell)
+		return
+	_set_hover(cell)
+	cell_clicked.emit(cell.x, cell.y)
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if game_manager == null or cell_nodes.is_empty():
 		return

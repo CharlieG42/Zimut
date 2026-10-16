@@ -446,8 +446,76 @@ func _kind_color(spell: Dictionary) -> Color:
 # ═══════════════════════════════════════════════════════════════════════════
 
 class TimelineView extends Control:
+	signal inspect_requested(entity: Dictionary, show: bool)
+	signal target_requested(entity: Dictionary)
 	var gm: Node = null
+	var grid: Node = null
 	var _initial_order_uids: Array[int] = []
+	var _entity_rects: Dictionary = {}
+	var _pressed_entity: Dictionary = {}
+	var _long_press_fired: bool = false
+	var _press_timer: Timer
+
+	func _ready() -> void:
+		mouse_filter = Control.MOUSE_FILTER_STOP
+		_press_timer = Timer.new()
+		_press_timer.one_shot = true
+		_press_timer.wait_time = 0.42
+		_press_timer.timeout.connect(_on_long_press_timeout)
+		add_child(_press_timer)
+
+	func _entity_at_point(point: Vector2) -> Dictionary:
+		for uid in _entity_rects.keys():
+			var hit_rect: Rect2 = _entity_rects[uid]
+			if hit_rect.has_point(point):
+				for entity: Dictionary in gm.turn_order:
+					if int(entity.get("uid", -1)) == int(uid) and gm.is_alive(entity):
+						return entity
+				for entity: Dictionary in gm.summons:
+					if int(entity.get("uid", -1)) == int(uid) and gm.is_alive(entity):
+						return entity
+		return {}
+
+	func _gui_input(event: InputEvent) -> void:
+		if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
+			var mb := event as InputEventMouseButton
+			if mb.pressed:
+				_begin_press(mb.position)
+			else:
+				_end_press()
+			accept_event()
+		elif event is InputEventScreenTouch:
+			var touch := event as InputEventScreenTouch
+			if touch.pressed:
+				_begin_press(touch.position)
+			else:
+				_end_press()
+			accept_event()
+
+	func _begin_press(point: Vector2) -> void:
+		if gm == null:
+			return
+		_pressed_entity = _entity_at_point(point)
+		_long_press_fired = false
+		_press_timer.stop()
+		if not _pressed_entity.is_empty():
+			_press_timer.start()
+
+	func _end_press() -> void:
+		_press_timer.stop()
+		if _pressed_entity.is_empty():
+			return
+		if _long_press_fired:
+			inspect_requested.emit(_pressed_entity, false)
+		else:
+			target_requested.emit(_pressed_entity)
+		_pressed_entity = {}
+
+	func _on_long_press_timeout() -> void:
+		if _pressed_entity.is_empty():
+			return
+		_long_press_fired = true
+		inspect_requested.emit(_pressed_entity, true)
 
 	func _process(_d: float) -> void:
 		queue_redraw()
@@ -465,6 +533,7 @@ class TimelineView extends Control:
 	func _draw() -> void:
 		if gm == null:
 			return
+		_entity_rects.clear()
 		var font: Font = ThemeDB.fallback_font
 		if gm.turn_order.is_empty():
 			# Un repère discret évite une timeline totalement vide pendant les transitions.
@@ -529,6 +598,7 @@ class TimelineView extends Control:
 			bg.shadow_color = Color(0, 0, 0, 0.5)
 			bg.shadow_size = 5
 			var rect := Rect2(x, y, w, w)
+			_entity_rects[int(e2.get("uid", -1))] = rect
 			draw_style_box(bg, rect)
 			var tex: Texture2D = Portraits.get_texture(e2)
 			if tex != null:
@@ -743,8 +813,7 @@ func _connect_signals() -> void:
 		game_manager.game_ended.connect(_on_game_ended)
 	if not game_manager.fx.is_connected(_on_fx):
 		game_manager.fx.connect(_on_fx)
-	if _grid != null and _grid.has_signal("hover_changed") and not _grid.hover_changed.is_connected(_on_hover):
-		_grid.hover_changed.connect(_on_hover)
+	# Les détails ne s’affichent plus au survol du plateau : ils sont réservés à l’appui long sur un avatar.
 
 
 func _on_hud_resized() -> void:
@@ -775,7 +844,10 @@ func _build_ui() -> void:
 	# L'entité active est en tête (vignette agrandie), les suivantes en dessous.
 	var tl := TimelineView.new()
 	tl.gm = game_manager
-	tl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tl.grid = _grid
+	tl.inspect_requested.connect(_on_timeline_inspect)
+	tl.target_requested.connect(_on_timeline_target)
+	tl.mouse_filter = Control.MOUSE_FILTER_STOP
 	tl.anchor_left = 1.0
 	tl.anchor_right = 1.0
 	tl.anchor_top = 0.0
@@ -1235,23 +1307,31 @@ func _on_fx(kind: String, _d: Dictionary) -> void:
 		_show_banner(String(_d.get("text", "")), Color(1, 0.9, 0.5))
 
 
-func _on_hover(cell: Vector2i) -> void:
-	if game_manager == null:
+func _show_entity_details(e: Dictionary, show: bool) -> void:
+	if _info_panel == null:
 		return
-	var e: Dictionary = game_manager.entity_at(cell)
-	if e.is_empty():
+	if not show or e.is_empty():
 		_info_panel.visible = false
 		return
-	var lines: Array[String] = [String(e["name"])]
-	lines.append("PV %d / %d" % [int(e["current_pv"]), int(e["max_pv"])])
-	lines.append("PA %d · PM %d · Déf %d" % [int(e["max_pa"]), int(e["max_pm"]), int(e["defense"])])
-	for s: Dictionary in e["statuses"]:
-		var info: Dictionary = Combat.status_info(String(s["id"]))
-		var t: String = "" if int(s["turns"]) > 90 else " (%d t.)" % int(s["turns"])
-		lines.append("• %s%s" % [info["label"], t])
+	var lines: Array[String] = [String(e.get("name", e.get("classe", "Combattant")))]
+	lines.append("PV %d / %d" % [int(e.get("current_pv", 0)), int(e.get("max_pv", 0))])
+	lines.append("PA %d · PM %d · Déf %d" % [int(e.get("max_pa", 0)), int(e.get("max_pm", 0)), int(e.get("defense", 0))])
+	for status: Dictionary in e.get("statuses", []):
+		var info: Dictionary = Combat.status_info(String(status.get("id", "")))
+		var turns: String = "" if int(status.get("turns", 0)) > 90 else " (%d t.)" % int(status.get("turns", 0))
+		lines.append("• %s%s" % [String(info.get("label", status.get("id", ""))), turns])
 	_info_label.text = "\n".join(lines)
-	_info_panel.visible = true
 	_info_panel.reset_size()
+	_info_panel.visible = true
+
+func _on_timeline_inspect(e: Dictionary, show: bool) -> void:
+	_show_entity_details(e, show)
+
+func _on_timeline_target(e: Dictionary) -> void:
+	if _grid == null or e.is_empty() or not game_manager.can_player_act():
+		return
+	if _grid.has_method("select_entity_from_timeline"):
+		_grid.call("select_entity_from_timeline", game_manager.pos_of(e))
 
 
 func _on_game_ended(victory: bool) -> void:
