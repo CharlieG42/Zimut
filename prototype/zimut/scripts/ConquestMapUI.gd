@@ -42,6 +42,7 @@ var _side_panel: PanelContainer
 var _title_label: Label
 var _subtitle_label: Label
 var _legend_label: Label
+var _map_title_label: Label
 var _side_title: Label
 var _back_button: Button
 var _side_scroll: ScrollContainer
@@ -125,11 +126,11 @@ func _build() -> void:
 	_body_content.add_child(map)
 	_map_panel = map
 
-	var map_title := Label.new()
-	map_title.text = "LE MONDE DE ZIMUT"
-	map_title.position = Vector2(22, 14)
-	map_title.add_theme_color_override("font_color", TEXT)
-	map.add_child(map_title)
+	_map_title_label = Label.new()
+	_map_title_label.text = "LE MONDE DE ZIMUT"
+	_map_title_label.position = Vector2(22, 14)
+	_map_title_label.add_theme_color_override("font_color", TEXT)
+	map.add_child(_map_title_label)
 
 	_legend_label = Label.new()
 	_legend_label.text = "Vert = territoire  ·  Gris = neutre  ·  Rouge = adverse  ·  ⚔ = attaquable"
@@ -250,6 +251,7 @@ func _layout_responsive() -> void:
 		_side_panel.size = Vector2(map_w, side_h)
 		_legend_label.text = "Vert : allié · Gris : neutre · Rouge : ennemi · ⚔ : attaquable"
 		_legend_label.position = Vector2(10, map_h - 27.0)
+		_map_title_label.add_theme_font_size_override("font_size", 17)
 		_legend_label.add_theme_font_size_override("font_size", 11)
 		_side_title.add_theme_font_size_override("font_size", 20)
 		_message.custom_minimum_size.y = 150
@@ -272,6 +274,7 @@ func _layout_responsive() -> void:
 		_side_panel.size = Vector2(side_w, map_h)
 		_legend_label.text = "Vert = territoire · Gris = neutre · Rouge = adverse · ⚔ = attaquable"
 		_legend_label.position = Vector2(minf(260.0, map_w * 0.24), 16.0)
+		_map_title_label.add_theme_font_size_override("font_size", 23)
 		_legend_label.add_theme_font_size_override("font_size", 14 if map_w < 900.0 else 16)
 		_side_title.add_theme_font_size_override("font_size", 23)
 		_message.custom_minimum_size.y = 180
@@ -328,6 +331,7 @@ func _select_city(id: String) -> void:
 	var conquered: bool = owned.has(id)
 	var ravage: int = int(_conquest.get("ravage", {}).get(id, 0))
 	_build_panel(id, conquered)
+	_layout_responsive()
 	if String(city["kind"]) == "capital":
 		_message.text = "%s\n\n%s\n\nVotre territoire de départ, à l'abri des attaques." % [city["name"], city["desc"]]
 		_attack.disabled = true
