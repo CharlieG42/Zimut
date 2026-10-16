@@ -182,6 +182,17 @@ func _build() -> void:
 	_map_scroll.add_child(map)
 	_map_panel = map
 
+	# Relief illustré sous les routes et les boutons : chaque ville est
+	# entourée d'un paysage organique lié à son biome, plutôt que d'un simple
+	# rectangle coloré. Les teintes restent discrètes pour préserver la lecture.
+	var terrain := _BiomeTerrain.new()
+	terrain.city_pos = CITY_POS
+	for terrain_city_id: String in _city_ids():
+		terrain.city_biomes[terrain_city_id] = String(_city_meta(terrain_city_id)["biome"])
+	terrain.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	terrain.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	map.add_child(terrain)
+
 	_map_title_label = Label.new()
 	_map_title_label.text = "LE MONDE DE ZIMUT"
 	_map_title_label.position = Vector2(22, 14)
@@ -951,6 +962,103 @@ func _style(bg: Color, border: Color) -> StyleBoxFlat:
 	s.content_margin_top = 6
 	s.content_margin_bottom = 6
 	return s
+
+## Paysages de biome dessinés en 2D : taches de terrain irrégulières,
+## silhouettes répétées et détails légers, tous sous les routes et les villes.
+## Les positions suivent celles du catalogue, même quand la carte est redimensionnée.
+class _BiomeTerrain:
+	extends Control
+	var city_pos: Dictionary = {}
+	var city_biomes: Dictionary = {}
+
+	func _draw() -> void:
+		var sx: float = clampf(size.x / 1320.0, 0.72, 1.15)
+		var sy: float = clampf(size.y / 1600.0, 0.72, 1.15)
+		# Texture de fond façon parchemin/cartographie, sans grille rectangulaire.
+		for i: int in range(18):
+			var y: float = 55.0 + float(i) * (size.y - 110.0) / 17.0
+			draw_line(Vector2(18, y), Vector2(size.x - 18, y + sin(float(i) * 0.8) * 10.0), Color(0.76, 0.72, 0.54, 0.055), 1.0, true)
+		for city_id: String in city_pos.keys():
+			var norm: Vector2 = city_pos[city_id]
+			var center := Vector2(size.x * norm.x, size.y * norm.y)
+			var biome: String = String(city_biomes.get(city_id, "Forêt"))
+			_draw_biome_patch(center, biome, sx, sy, city_id)
+
+	func _draw_biome_patch(center: Vector2, biome: String, sx: float, sy: float, city_id: String) -> void:
+		var base := Color(0.20, 0.35, 0.23, 0.30)
+		var edge := Color(0.38, 0.52, 0.30, 0.32)
+		match biome:
+			"Montagne":
+				base = Color(0.34, 0.46, 0.53, 0.30)
+				edge = Color(0.57, 0.67, 0.70, 0.40)
+			"Désert":
+				base = Color(0.68, 0.49, 0.25, 0.29)
+				edge = Color(0.89, 0.70, 0.39, 0.38)
+			"Donjon":
+				base = Color(0.31, 0.24, 0.38, 0.34)
+				edge = Color(0.57, 0.43, 0.67, 0.42)
+		# Contour organique en points : il ne forme jamais un cadre de ville.
+		var shape := PackedVector2Array([
+			Vector2(-122, -26), Vector2(-106, -67), Vector2(-64, -82),
+			Vector2(-25, -73), Vector2(14, -91), Vector2(63, -70),
+			Vector2(105, -51), Vector2(124, -12), Vector2(108, 31),
+			Vector2(74, 58), Vector2(31, 69), Vector2(-7, 60),
+			Vector2(-49, 75), Vector2(-91, 52), Vector2(-119, 18)
+		])
+		var scaled := PackedVector2Array()
+		for p: Vector2 in shape:
+			scaled.append(center + Vector2(p.x * sx, p.y * sy))
+		draw_colored_polygon(scaled, base)
+		for i: int in range(scaled.size()):
+			draw_line(scaled[i], scaled[(i + 1) % scaled.size()], edge, 2.0, true)
+		# Des détails de terrain restent en périphérie afin de ne pas masquer les libellés.
+		match biome:
+			"Forêt":
+				for i: int in range(7):
+					var x: float = center.x + float((i * 37) % 154 - 77) * sx
+					var y: float = center.y + float((i * 29) % 86 - 43) * sy
+					if absf(x - center.x) < 47.0 * sx and absf(y - center.y) < 28.0 * sy:
+						continue
+					_draw_tree(Vector2(x, y), sx, sy, i % 2 == 0)
+			"Montagne":
+				for i: int in range(4):
+					var x: float = center.x + float(i * 51 - 76) * sx
+					var y: float = center.y + float((i % 2) * 34 - 31) * sy
+					if absf(x - center.x) < 46.0 * sx and absf(y - center.y) < 27.0 * sy:
+						continue
+					_draw_peak(Vector2(x, y), sx, sy, i % 2 == 0)
+			"Désert":
+				for i: int in range(4):
+					var y: float = center.y + float(i * 25 - 37) * sy
+					var x: float = center.x + float((i % 2) * 58 - 29) * sx
+					draw_arc(Vector2(x, y), 34.0 * sx, 205.0 * PI / 180.0, 335.0 * PI / 180.0, 18, Color(0.96, 0.78, 0.47, 0.48), 2.0, true)
+			"Donjon":
+				for i: int in range(3):
+					var x: float = center.x + float(i * 43 - 43) * sx
+					draw_line(Vector2(x, center.y - 54.0 * sy), Vector2(x + 12.0 * sx, center.y - 35.0 * sy), Color(0.72, 0.60, 0.79, 0.55), 3.0, true)
+
+	func _draw_tree(p: Vector2, sx: float, sy: float, light: bool) -> void:
+		var green := Color(0.24, 0.43, 0.27, 0.76) if light else Color(0.13, 0.30, 0.20, 0.82)
+		draw_line(p + Vector2(0, 2 * sy), p + Vector2(0, 11 * sy), Color(0.38, 0.29, 0.18, 0.8), 2.0, true)
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(-10 * sx, 4 * sy), p + Vector2(0, -15 * sy), p + Vector2(10 * sx, 4 * sy)
+		]), green)
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(-7 * sx, -2 * sy), p + Vector2(0, -20 * sy), p + Vector2(7 * sx, -2 * sy)
+		]), green.lightened(0.12))
+
+	func _draw_peak(p: Vector2, sx: float, sy: float, snowy: bool) -> void:
+		var rock := Color(0.38, 0.48, 0.53, 0.82)
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(-24 * sx, 16 * sy), p + Vector2(-4 * sx, -24 * sy),
+			p + Vector2(8 * sx, -5 * sy), p + Vector2(18 * sx, 9 * sy),
+			p + Vector2(26 * sx, 16 * sy)
+		]), rock)
+		if snowy:
+			draw_colored_polygon(PackedVector2Array([
+				p + Vector2(-9 * sx, -14 * sy), p + Vector2(-4 * sx, -24 * sy),
+				p + Vector2(2 * sx, -15 * sy), p + Vector2(-2 * sx, -10 * sy)
+			]), Color(0.85, 0.89, 0.86, 0.88))
 
 class _RouteLines:
 	extends Control
