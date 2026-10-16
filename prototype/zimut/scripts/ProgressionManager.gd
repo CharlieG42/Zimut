@@ -1179,7 +1179,37 @@ func conquest_empire_yield(conquest: Dictionary) -> Dictionary:
 		for b: String in _city_buildings(conquest, city_id):
 			for r: String in CONQUEST_BUILDINGS.get(b, {}).get("yield", {}).keys():
 				out[r] = int(out.get(r, 0)) + int(CONQUEST_BUILDINGS[b]["yield"][r])
+	# Contrôler toutes les villes d'un biome rapporte un bonus permanent à
+	# chaque victoire, même si aucune ville ne possède encore de bâtiment.
+	for r: String in conquest_biome_control_bonus(conquest).keys():
+		out[r] = int(out.get(r, 0)) + int(conquest_biome_control_bonus(conquest)[r])
 	return out
+
+## Bonus de domination : il faut posséder toutes les villes conquérables
+## d'un biome. Le Donjon et la capitale ne comptent pas dans les biomes.
+func conquest_biome_control_bonus(conquest: Dictionary) -> Dictionary:
+	var owned: Array = conquest.get("owned", [])
+	var biome_cities: Dictionary = {}
+	var biome_owned: Dictionary = {}
+	for city_id: String in CONQUEST_CITIES.keys():
+		if city_id == "capitale" or city_id == "donjon_roi":
+			continue
+		var biome: String = String(CONQUEST_CITIES[city_id].get("biome", "Forêt"))
+		biome_cities[biome] = int(biome_cities.get(biome, 0)) + 1
+		if owned.has(city_id):
+			biome_owned[biome] = int(biome_owned.get(biome, 0)) + 1
+	var bonus: Dictionary = {}
+	for biome: String in biome_cities.keys():
+		if int(biome_owned.get(biome, 0)) < int(biome_cities[biome]):
+			continue
+		match biome:
+			"Forêt":
+				bonus["Bois"] = 5
+			"Montagne":
+				bonus["Fer"] = 5
+			"Désert":
+				bonus["Venin"] = 5
+	return bonus
 
 ## Nombre de batailles necessaires pour prendre cette ville :
 ## 4 (3 mobs + boss) pour une ville adverse, 1 pour une neutre.
