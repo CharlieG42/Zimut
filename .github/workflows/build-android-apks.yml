@@ -84,6 +84,162 @@ jobs:
             printf 'export/android/keystore_release_password="%s"\n' "$ANDROID_KEYSTORE_PASSWORD"
           } > "$cfg"
 
+      - name: Generate automatic build version suffix
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          project = Path("prototype/zimut/project.godot")
+          text = project.read_text(encoding="utf-8")
+          build = os.environ["BUILD_NUMBER"]
+          updated, count = re.subn(
+              r'(?m)^config/version="([^"#]+)(?:#[^"]*)?"        run: |
+          cd prototype/zimut
+          godot --headless --import || true
+          test -d .godot/imported
+
+      - name: Export Zimut APK (Debug)
+        run: |
+          cd prototype/zimut
+          # Godot peut planter a la fermeture (corruption heap connue en headless)
+          # alors que l'APK est deja genere et signe : on valide le fichier produit.
+          godot --headless --export-debug "Android" export/Zimut-debug.apk \
+            || godot --headless --export-debug "Android" export/Zimut-debug.apk \
+            || true
+          test -s export/Zimut-debug.apk
+
+      - name: Export Zimut APK (Release)
+        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+        env:
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /home/runner/.local/share/godot/keystores/release.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEY_ALIAS }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cd prototype/zimut
+          godot --headless --verbose --export-release "Android" export/Zimut-release.apk || true
+          test -s export/Zimut-release.apk
+
+      - name: Nommer les APK par build + empreintes SHA-256
+        run: |
+          cd prototype/zimut/export
+          sha_short="${GITHUB_SHA::7}"
+          # Noms uniques par build : sous Android, un APK portant le même
+          # nom que le zip (ex. Zimut-release.apk dans Zimut-release.zip)
+          # fait échouer l'extraction (« le fichier existe déjà »).
+          # Cette étape s'exécute APRÈS les deux exports : les deux APK
+          # existent, aucun glob d'upload ne peut être vide.
+          for kind in debug release; do
+            if [ -f "Zimut-${kind}.apk" ]; then
+              mv "Zimut-${kind}.apk" "Zimut-${kind}-${sha_short}.apk"
+            fi
+          done
+          sha256sum Zimut-*-*.apk > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          ls -la Zimut-*.apk
+
+      - name: Upload Zimut Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zimut-debug
+          path: |
+            prototype/zimut/export/Zimut-debug-*.apk
+            prototype/zimut/export/SHA256SUMS.txt
+          retention-days: 7
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Upload Zimut Release APK
+        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zimut-release
+          path: |
+            prototype/zimut/export/Zimut-release-*.apk
+            prototype/zimut/export/SHA256SUMS.txt
+          retention-days: 30
+          if-no-files-found: error
+          compression-level: 0
+
+,
+              lambda match: f'config/version="{match.group(1)}#{build}"',
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit("Impossible de générer le suffixe : config/version introuvable.")
+          project.write_text(updated, encoding="utf-8")
+          print(f"Version de compilation : {re.search(r'(?m)^config/version="([^"]+)"        run: |
+          cd prototype/zimut
+          godot --headless --import || true
+          test -d .godot/imported
+
+      - name: Export Zimut APK (Debug)
+        run: |
+          cd prototype/zimut
+          # Godot peut planter a la fermeture (corruption heap connue en headless)
+          # alors que l'APK est deja genere et signe : on valide le fichier produit.
+          godot --headless --export-debug "Android" export/Zimut-debug.apk \
+            || godot --headless --export-debug "Android" export/Zimut-debug.apk \
+            || true
+          test -s export/Zimut-debug.apk
+
+      - name: Export Zimut APK (Release)
+        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+        env:
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /home/runner/.local/share/godot/keystores/release.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEY_ALIAS }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cd prototype/zimut
+          godot --headless --verbose --export-release "Android" export/Zimut-release.apk || true
+          test -s export/Zimut-release.apk
+
+      - name: Nommer les APK par build + empreintes SHA-256
+        run: |
+          cd prototype/zimut/export
+          sha_short="${GITHUB_SHA::7}"
+          # Noms uniques par build : sous Android, un APK portant le même
+          # nom que le zip (ex. Zimut-release.apk dans Zimut-release.zip)
+          # fait échouer l'extraction (« le fichier existe déjà »).
+          # Cette étape s'exécute APRÈS les deux exports : les deux APK
+          # existent, aucun glob d'upload ne peut être vide.
+          for kind in debug release; do
+            if [ -f "Zimut-${kind}.apk" ]; then
+              mv "Zimut-${kind}.apk" "Zimut-${kind}-${sha_short}.apk"
+            fi
+          done
+          sha256sum Zimut-*-*.apk > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          ls -la Zimut-*.apk
+
+      - name: Upload Zimut Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zimut-debug
+          path: |
+            prototype/zimut/export/Zimut-debug-*.apk
+            prototype/zimut/export/SHA256SUMS.txt
+          retention-days: 7
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Upload Zimut Release APK
+        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zimut-release
+          path: |
+            prototype/zimut/export/Zimut-release-*.apk
+            prototype/zimut/export/SHA256SUMS.txt
+          retention-days: 30
+          if-no-files-found: error
+          compression-level: 0
+
+, updated).group(1)}")
+          PY
+
       - name: Import project resources (icons, artwork)
         run: |
           cd prototype/zimut
