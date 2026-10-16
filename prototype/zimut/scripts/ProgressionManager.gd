@@ -1154,6 +1154,9 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 			conquest["last_counterattack"] = counter
 		else:
 			conquest["last_counterattack"] = ""
+		# Le choix de préparation ne s'applique qu'à une seule bataille,
+		# même si le siège de cette ville nécessite plusieurs vagues.
+		conquest.erase("pending_tactic")
 		data["conquest"] = conquest
 	elif mode == "adventure":
 		var adventure: Dictionary = data.get("adventure", {})
@@ -1360,6 +1363,7 @@ func _apply_campaign_defeat(data: Dictionary) -> void:
 		# Defaite : le siege en cours est conserve (meme cible, meme
 		# progression) : le joueur peut retenter la bataille perdue.
 		var conquest: Dictionary = data.get("conquest", {})
+		conquest.erase("pending_tactic")
 		data["conquest"] = conquest
 	elif mode == "adventure":
 		var adventure: Dictionary = data.get("adventure", {})
