@@ -118,6 +118,38 @@ const CONQUEST_CITIES := {
 	"citadelle_sable": {"name": "Citadelle de Sable", "kind": "enemy", "biome": "Désert", "level": 27},
 }
 
+## Récompense de première annexion : chaque lieu offre un petit butin
+## thématique, crédité une seule fois lorsque la ville rejoint l'empire.
+const CONQUEST_CITY_REWARDS := {
+	"clairiere": {"name": "Réserve des bûcherons", "resources": {"Bois": 12}, "gold": 35},
+	"vieille_tour": {"name": "Coffre de la garnison", "resources": {"Fer": 10}, "gold": 55},
+	"pont_mousse": {"name": "Péage du vieux pont", "resources": {"Orge": 8}, "gold": 45},
+	"fort_racine": {"name": "Arsenal de Racine", "resources": {"Fer": 16}, "gold": 70},
+	"hameau_pin": {"name": "Réserve des montagnards", "resources": {"Bois": 10, "Cuir": 5}, "gold": 45},
+	"garnison": {"name": "Dépôt militaire", "resources": {"Fer": 18}, "gold": 80},
+	"oasis": {"name": "Cargaison de l'oasis", "resources": {"Venin": 5}, "gold": 90},
+	"tour_sable": {"name": "Butin du Dragon des dunes", "resources": {"Magie": 8, "Fer": 8}, "gold": 110},
+	"donjon_roi": {"name": "Trésor du Roi Squelette", "resources": {"Magie": 20, "Venin": 15, "Fer": 15}, "gold": 500},
+	"village_brume": {"name": "Herbes des brumes", "resources": {"Venin": 8}, "gold": 40},
+	"ruines_lierre": {"name": "Reliques du Lierre", "resources": {"Magie": 6}, "gold": 60},
+	"abbaye_ronce": {"name": "Offrandes de l'abbaye", "resources": {"Magie": 5, "Bois": 5}, "gold": 55},
+	"citadelle_ronce": {"name": "Trésor des Ronces", "resources": {"Fer": 12, "Cuir": 8}, "gold": 95},
+	"col_givre": {"name": "Cristaux du col", "resources": {"Magie": 7}, "gold": 65},
+	"mine_cristal": {"name": "Filon de cristal", "resources": {"Magie": 12, "Fer": 6}, "gold": 100},
+	"bastion_orage": {"name": "Réserves du bastion", "resources": {"Fer": 15, "Bois": 8}, "gold": 100},
+	"caravanserail": {"name": "Caisse des marchands", "resources": {"Cuir": 8}, "gold": 120},
+	"observatoire": {"name": "Fragments stellaires", "resources": {"Magie": 10}, "gold": 110},
+	"port_sable": {"name": "Cargaison des pirates", "resources": {"Cuir": 12, "Venin": 5}, "gold": 140},
+	"bois_lune": {"name": "Sève de lune", "resources": {"Bois": 12, "Magie": 4}, "gold": 70},
+	"sanctuaire_mousse": {"name": "Reliques du sanctuaire", "resources": {"Magie": 8, "Venin": 4}, "gold": 80},
+	"forge_givre": {"name": "Caisse de la forge", "resources": {"Fer": 18, "Magie": 5}, "gold": 130},
+	"pic_foudroyant": {"name": "Cœur de foudre", "resources": {"Magie": 12, "Fer": 10}, "gold": 150},
+	"marais_spectres": {"name": "Essences spectrales", "resources": {"Venin": 12, "Magie": 5}, "gold": 90},
+	"fort_cendre": {"name": "Réserve de cendre", "resources": {"Fer": 20, "Venin": 8}, "gold": 160},
+	"temple_soleil": {"name": "Offrande solaire", "resources": {"Magie": 15}, "gold": 150},
+	"citadelle_sable": {"name": "Trésor de la Citadelle", "resources": {"Fer": 20, "Cuir": 12, "Magie": 8}, "gold": 220},
+}
+
 ## Routes de la carte : on ne peut attaquer qu'une ville RELIÉE par route à
 ## son territoire (arbre technologique spatial). Le Donjon n'est relié qu'aux
 ## trois places fortes : il exige de tenir tout le monde de Zimut.
@@ -1086,6 +1118,18 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 					owned.append(pending)
 					conquest["owned"] = owned
 				conquest["just_annexed"] = pending
+				# Butin thématique versé uniquement à la première annexion.
+				var reward: Dictionary = CONQUEST_CITY_REWARDS.get(pending, {})
+				if not reward.is_empty():
+					var reward_resources: Dictionary = reward.get("resources", {})
+					add_resources(data, reward_resources)
+					data["gold"] = int(data.get("gold", 0)) + int(reward.get("gold", 0))
+					conquest["last_city_reward"] = {
+						"city": pending,
+						"name": String(reward.get("name", "Butin de conquête")),
+						"resources": reward_resources.duplicate(true),
+						"gold": int(reward.get("gold", 0)),
+					}
 				conquest["pending_city"] = ""
 				conquest.erase("pending_level")
 				sieges.erase(pending)
@@ -1150,6 +1194,10 @@ func conquest_city_biome(city_id: String) -> String:
 ## Nom d'une ville du catalogue (retourne l'id si inconnu).
 func conquest_city_name(city_id: String) -> String:
 	return String(CONQUEST_CITIES.get(city_id, {}).get("name", city_id))
+
+## Récompense thématique prévue pour une ville.
+func conquest_city_reward(city_id: String) -> Dictionary:
+	return CONQUEST_CITY_REWARDS.get(city_id, {}).duplicate(true)
 
 ## Une ville est-elle attaquable : reliée par route au territoire ET pas
 ## déjà conquise. La capitale ne s'attaque jamais ; le Donjon exige de
