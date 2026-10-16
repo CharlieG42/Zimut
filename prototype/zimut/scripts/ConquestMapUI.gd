@@ -217,8 +217,8 @@ func _build() -> void:
 		btn.custom_minimum_size = Vector2(196, 76)
 		btn.add_theme_font_size_override("font_size", 18)
 		btn.add_theme_color_override("font_color", TEXT)
-		btn.add_theme_stylebox_override("normal", _style(_city_color(city_id), GOLD if city_id == _selected_id else _city_border_color(city_id)))
-		btn.add_theme_stylebox_override("hover", _style(_city_color(city_id).lightened(0.12), GOLD))
+		btn.add_theme_stylebox_override("normal", _city_visual_style(city_id, city_id == _selected_id))
+		btn.add_theme_stylebox_override("hover", _city_visual_style(city_id, city_id == _selected_id, true))
 		btn.pressed.connect(_select_city.bind(city_id))
 		map.add_child(btn)
 		_city_buttons[city_id] = btn
@@ -570,7 +570,7 @@ func _select_city(id: String) -> void:
 		_message.text += "\n\n" + biome_summary
 	for other: String in _city_buttons.keys():
 		var button: Button = _city_buttons[other]
-		button.add_theme_stylebox_override("normal", _style(_city_color(other), GOLD if other == id else _city_border_color(other)))
+		button.add_theme_stylebox_override("normal", _city_visual_style(other, other == id))
 	_refresh_chronicle()
 
 ## Panneau de construction de la ville sélectionnée : un bouton par
@@ -870,6 +870,19 @@ func _city_border_color(city_id: String) -> Color:
 		"Désert": return Color(0.92, 0.66, 0.32)
 		"Donjon": return Color(0.70, 0.48, 0.82)
 		_: return Color(0.5, 0.64, 0.46)
+
+## Style des villes : le statut territorial reste lisible par le fond, tandis
+## que le biome est porté par la bordure. La cible sélectionnée ressort avec
+## un liseré doré plus épais et une ombre douce, sans masquer les routes.
+func _city_visual_style(city_id: String, selected: bool, hovered: bool = false) -> StyleBoxFlat:
+	var fill: Color = _city_color(city_id)
+	var biome: Color = _city_border_color(city_id)
+	var style := _style(fill.lightened(0.10) if hovered else fill, GOLD if selected else biome)
+	style.set_border_width_all(4 if selected else 2)
+	style.shadow_size = 10 if selected else (4 if hovered else 0)
+	style.shadow_color = Color(GOLD.r, GOLD.g, GOLD.b, 0.34) if selected else Color(biome.r, biome.g, biome.b, 0.18)
+	style.shadow_offset = Vector2(0, 2)
+	return style
 
 ## Progression de domination par biome, hors capitale et Donjon.
 ## Le bonus est versé à chaque victoire lorsque toutes les villes du biome
