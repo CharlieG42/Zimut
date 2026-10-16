@@ -35,7 +35,14 @@ func _boot() -> void:
 
 	# ── Fin de campagne : toutes les villes, puis le Donjon ──
 	var full: Dictionary = {"owned": ["capitale", "clairiere", "vieille_tour", "pont_mousse",
-		"fort_racine", "hameau_pin", "garnison", "oasis", "tour_sable"], "pending_city": ""}
+		"fort_racine", "hameau_pin", "garnison", "oasis", "tour_sable",
+		"village_brume", "ruines_lierre", "abbaye_ronce", "citadelle_ronce",
+		"col_givre", "mine_cristal", "bastion_orage", "caravanserail",
+		"observatoire", "port_sable"], "pending_city": ""}
+	check(pm.CONQUEST_CITIES.size() == 20, "campagne étendue à vingt villes")
+	check(pm.conquest_city_attackable({"owned": ["capitale", "clairiere", "village_brume"], "pending_city": ""}, "ruines_lierre"), "Ruines du Lierre accessibles depuis le Village des Brumes")
+	check(pm.conquest_city_attackable({"owned": ["capitale", "fort_racine", "hameau_pin", "col_givre"], "pending_city": ""}, "mine_cristal"), "Mine de Cristal accessible depuis le Col du Givre")
+	check(pm.conquest_city_attackable({"owned": ["capitale", "fort_racine", "oasis", "caravanserail"], "pending_city": ""}, "observatoire"), "Observatoire Solaire accessible depuis le Caravansérail")
 	check(pm.conquest_empire_complete(full), "Empire complet (toutes les villes hors capitale/donjon)")
 	check(pm.conquest_city_attackable(full, "donjon_roi"), "Donjon attaquable une fois Zimut contrôlé")
 	check(not pm.conquest_campaign_won(full), "Campagne pas encore gagnée")
