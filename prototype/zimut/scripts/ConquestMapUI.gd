@@ -12,19 +12,30 @@ const GOLD := Color(0.96, 0.75, 0.31)
 
 ## Positions sur la carte (fractions du panneau) — le reste (noms, types,
 ## biomes, niveaux, routes) vient du catalogue de ProgressionManager.
+## Carte organisée en cinq colonnes et quatre rangées : les boutons gardent
+## un espacement lisible même avec vingt villes.
 const CITY_POS := {
-	"capitale": Vector2(0.30, 0.50),
+	"citadelle_ronce": Vector2(0.12, 0.12),
+	"vieille_tour": Vector2(0.37, 0.12),
+	"mine_cristal": Vector2(0.63, 0.12),
+	"donjon_roi": Vector2(0.88, 0.12),
 	"clairiere": Vector2(0.12, 0.30),
-	"vieille_tour": Vector2(0.30, 0.16),
-	"pont_mousse": Vector2(0.12, 0.78),
-	"fort_racine": Vector2(0.32, 0.80),
-	"hameau_pin": Vector2(0.55, 0.55),
-	"garnison": Vector2(0.72, 0.40),
-	"oasis": Vector2(0.60, 0.84),
-	"tour_sable": Vector2(0.82, 0.72),
-	"donjon_roi": Vector2(0.90, 0.20),
+	"ruines_lierre": Vector2(0.37, 0.30),
+	"col_givre": Vector2(0.63, 0.30),
+	"garnison": Vector2(0.88, 0.30),
+	"village_brume": Vector2(0.12, 0.48),
+	"capitale": Vector2(0.37, 0.48),
+	"abbaye_ronce": Vector2(0.63, 0.48),
+	"bastion_orage": Vector2(0.88, 0.48),
+	"pont_mousse": Vector2(0.12, 0.66),
+	"fort_racine": Vector2(0.37, 0.66),
+	"hameau_pin": Vector2(0.63, 0.66),
+	"tour_sable": Vector2(0.88, 0.66),
+	"caravanserail": Vector2(0.12, 0.84),
+	"oasis": Vector2(0.37, 0.84),
+	"observatoire": Vector2(0.63, 0.84),
+	"port_sable": Vector2(0.88, 0.84),
 }
-
 var _save: Dictionary = {}
 var _slot: int = -1
 var _conquest: Dictionary = {}
@@ -260,8 +271,8 @@ func _layout_responsive() -> void:
 		var viewport_w: float = w
 		# Largeur minimale pour séparer les villes proches et garder des
 		# libellés lisibles sur les téléphones étroits.
-		var map_w: float = maxf(640.0, viewport_w)
-		var map_h: float = clampf(h * 0.52, 360.0, 470.0)
+		var map_w: float = maxf(1320.0, viewport_w)
+		var map_h: float = maxf(1300.0, clampf(h * 0.52, 360.0, 470.0))
 		var side_h: float = 600.0
 		_body_content.custom_minimum_size = Vector2(viewport_w, map_h + 14.0 + side_h)
 		_map_scroll.position = Vector2.ZERO
@@ -291,7 +302,7 @@ func _layout_responsive() -> void:
 	else:
 		var side_w: float = clampf(w * 0.27, 330.0, 430.0)
 		var map_w: float = maxf(420.0, w - side_w - 18.0)
-		var map_h: float = maxf(420.0, h - body_top - 8.0)
+		var map_h: float = maxf(1300.0, h - body_top - 8.0)
 		_body_content.custom_minimum_size = Vector2(map_w + 18.0 + side_w, map_h)
 		_map_scroll.position = Vector2.ZERO
 		_map_scroll.size = Vector2(map_w, map_h)
@@ -570,6 +581,16 @@ func _city_desc(id: String, kind: String) -> String:
 		"oasis": "Une oasis marchande au cœur des Dunes.",
 		"tour_sable": "La place forte du désert, gardée par le Dragon.",
 		"donjon_roi": "Le repaire du Roi Squelette. Objectif final de la campagne.",
+		"village_brume": "Un village caché dans les brumes de la forêt.",
+		"ruines_lierre": "Des ruines anciennes envahies par le lierre.",
+		"abbaye_ronce": "Une abbaye isolée gardée par ses anciens serments.",
+		"citadelle_ronce": "Une citadelle fortifiée qui contrôle les sous-bois.",
+		"col_givre": "Un col étroit battu par les vents glacés.",
+		"mine_cristal": "Une mine de cristaux précieux sous la montagne.",
+		"bastion_orage": "Un bastion militaire au sommet des Pics.",
+		"caravanserail": "Une halte marchande sur la route des dunes.",
+		"observatoire": "Un observatoire oublié tourné vers le soleil.",
+		"port_sable": "Un port fortifié qui contrôle les caravanes du désert.",
 	}
 	return String(descs.get(id, "Ville de Zimut."))
 

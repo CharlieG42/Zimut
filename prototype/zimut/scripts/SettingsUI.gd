@@ -50,6 +50,31 @@ func _ready() -> void:
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(hint)
 
+	# Informations de build : le numéro final correspond au numéro de PR.
+	var info_panel := PanelContainer.new()
+	info_panel.custom_minimum_size = Vector2(0, 96)
+	info_panel.add_theme_stylebox_override("panel", _flat(Color(0.86, 0.81, 0.68, 0.96), COL_BORDER, 12, 2))
+	box.add_child(info_panel)
+
+	var info_box := VBoxContainer.new()
+	info_box.add_theme_constant_override("separation", 6)
+	info_panel.add_child(info_box)
+
+	var info_title := Label.new()
+	info_title.text = "INFO"
+	info_title.add_theme_font_size_override("font_size", 18)
+	info_title.add_theme_color_override("font_color", COL_TXT)
+	info_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	info_box.add_child(info_title)
+
+	var version_label := Label.new()
+	var game_version: String = str(ProjectSettings.get_setting("application/config/version", "0.0.01.82"))
+	version_label.text = "Version du jeu : %s" % game_version
+	version_label.add_theme_font_size_override("font_size", 20)
+	version_label.add_theme_color_override("font_color", COL_TXT)
+	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	info_box.add_child(version_label)
+
 	var back := Button.new()
 	back.text = "← MENU"
 	back.custom_minimum_size = Vector2(0, 64)

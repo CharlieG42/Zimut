@@ -98,6 +98,16 @@ const CONQUEST_CITIES := {
 	"oasis":        {"name": "Oasis Perdue",      "kind": "neutral",   "biome": "Désert",    "level": 20},
 	"tour_sable":   {"name": "Tour des Sables",  "kind": "enemy",     "biome": "Désert",    "level": 22},
 	"donjon_roi":   {"name": "Donjon du Roi Squelette", "kind": "enemy", "biome": "Donjon", "level": 25},
+	"village_brume": {"name": "Village des Brumes", "kind": "neutral", "biome": "Forêt", "level": 11},
+	"ruines_lierre": {"name": "Ruines du Lierre", "kind": "enemy", "biome": "Forêt", "level": 13},
+	"abbaye_ronce": {"name": "Abbaye des Ronces", "kind": "neutral", "biome": "Forêt", "level": 14},
+	"citadelle_ronce": {"name": "Citadelle des Ronces", "kind": "enemy", "biome": "Forêt", "level": 15},
+	"col_givre": {"name": "Col du Givre", "kind": "neutral", "biome": "Montagne", "level": 17},
+	"mine_cristal": {"name": "Mine de Cristal", "kind": "enemy", "biome": "Montagne", "level": 19},
+	"bastion_orage": {"name": "Bastion de l'Orage", "kind": "enemy", "biome": "Montagne", "level": 21},
+	"caravanserail": {"name": "Caravansérail Rouge", "kind": "neutral", "biome": "Désert", "level": 22},
+	"observatoire": {"name": "Observatoire Solaire", "kind": "neutral", "biome": "Désert", "level": 23},
+	"port_sable": {"name": "Port des Sables", "kind": "enemy", "biome": "Désert", "level": 24},
 }
 
 ## Routes de la carte : on ne peut attaquer qu'une ville RELIÉE par route à
@@ -109,6 +119,13 @@ const CONQUEST_ROUTES: Array = [
 	["vieille_tour", "fort_racine"], ["pont_mousse", "fort_racine"],
 	["fort_racine", "hameau_pin"], ["hameau_pin", "garnison"],
 	["fort_racine", "oasis"], ["garnison", "tour_sable"], ["oasis", "tour_sable"],
+	["clairiere", "village_brume"], ["village_brume", "ruines_lierre"],
+	["village_brume", "abbaye_ronce"], ["ruines_lierre", "citadelle_ronce"],
+	["abbaye_ronce", "citadelle_ronce"], ["citadelle_ronce", "vieille_tour"],
+	["hameau_pin", "col_givre"], ["col_givre", "mine_cristal"],
+	["mine_cristal", "garnison"], ["garnison", "bastion_orage"],
+	["oasis", "caravanserail"], ["caravanserail", "observatoire"],
+	["observatoire", "port_sable"], ["port_sable", "tour_sable"],
 	["fort_racine", "donjon_roi"], ["garnison", "donjon_roi"], ["tour_sable", "donjon_roi"],
 ]
 
