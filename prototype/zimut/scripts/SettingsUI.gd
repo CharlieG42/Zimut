@@ -68,7 +68,7 @@ func _ready() -> void:
 	info_box.add_child(info_title)
 
 	var version_label := Label.new()
-	var game_version: String = str(ProjectSettings.get_setting("application/config/version", "0.0.01.82"))
+	var game_version: String = str(ProjectSettings.get_setting("application/config/version", "0.0.01.84"))
 	version_label.text = "Version du jeu : %s" % game_version
 	version_label.add_theme_font_size_override("font_size", 20)
 	version_label.add_theme_color_override("font_color", COL_TXT)
