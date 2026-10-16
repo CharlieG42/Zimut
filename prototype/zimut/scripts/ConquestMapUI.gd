@@ -34,6 +34,17 @@ var _attack: Button
 var _city_buttons: Dictionary = {}
 var _build_box: VBoxContainer
 var _header: Label
+var _root: Control
+var _body_scroll: ScrollContainer
+var _body_content: Control
+var _map_panel: Panel
+var _side_panel: PanelContainer
+var _title_label: Label
+var _subtitle_label: Label
+var _legend_label: Label
+var _side_title: Label
+var _back_button: Button
+var _side_scroll: ScrollContainer
 
 func _ready() -> void:
 	Music.play("adventure")
@@ -71,46 +82,60 @@ func _build() -> void:
 	root.offset_top = 20
 	root.offset_bottom = -20
 	add_child(root)
+	_root = root
+	_root.resized.connect(_layout_responsive)
 
-	var title := Label.new()
-	title.text = "🏰  ZIMUT — CONQUÊTE"
-	title.position = Vector2(8, 0)
-	title.add_theme_font_size_override("font_size", 30)
-	title.add_theme_color_override("font_color", TEXT)
-	root.add_child(title)
+	_title_label = Label.new()
+	_title_label.text = "🏰  ZIMUT — CONQUÊTE"
+	_title_label.position = Vector2(8, 0)
+	_title_label.add_theme_color_override("font_color", TEXT)
+	root.add_child(_title_label)
 
-	var subtitle := Label.new()
-	subtitle.text = "Développez votre empire en remportant les batailles tactiques"
-	subtitle.position = Vector2(8, 42)
-	subtitle.add_theme_font_size_override("font_size", 18)
-	subtitle.add_theme_color_override("font_color", GOLD)
-	root.add_child(subtitle)
+	_subtitle_label = Label.new()
+	_subtitle_label.text = "Développez votre empire en remportant les batailles tactiques"
+	_subtitle_label.position = Vector2(8, 42)
+	_subtitle_label.add_theme_color_override("font_color", GOLD)
+	root.add_child(_subtitle_label)
 
 	_header = Label.new()
 	_header.position = Vector2(8, 64)
-	_header.add_theme_font_size_override("font_size", 17)
 	_header.add_theme_color_override("font_color", TEXT)
+	_header.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	root.add_child(_header)
 
+	# Le corps devient scrollable en mode compact : la carte reste lisible
+	# et le conseil de guerre se retrouve sous elle, sans sortir de l'écran.
+	_body_scroll = ScrollContainer.new()
+	_body_scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_body_scroll.offset_top = 92
+	_body_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_body_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_body_scroll.follow_focus = false
+	_body_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
+	root.add_child(_body_scroll)
+	_body_content = Control.new()
+	_body_content.custom_minimum_size = Vector2(1700, 750)
+	_body_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_body_scroll.add_child(_body_content)
+
 	var map := Panel.new()
-	map.position = Vector2(0, 92)
+	map.position = Vector2.ZERO
 	map.size = Vector2(1320, 750)
 	map.add_theme_stylebox_override("panel", _style(PANEL, GOLD))
-	root.add_child(map)
+	_body_content.add_child(map)
+	_map_panel = map
 
 	var map_title := Label.new()
 	map_title.text = "LE MONDE DE ZIMUT"
 	map_title.position = Vector2(22, 14)
-	map_title.add_theme_font_size_override("font_size", 23)
 	map_title.add_theme_color_override("font_color", TEXT)
 	map.add_child(map_title)
 
-	var legend := Label.new()
-	legend.text = "Vert = territoire  ·  Gris = neutre  ·  Rouge = adverse  ·  Épée = attaquable"
-	legend.position = Vector2(260, 16)
-	legend.add_theme_font_size_override("font_size", 16)
-	legend.add_theme_color_override("font_color", GOLD)
-	map.add_child(legend)
+	_legend_label = Label.new()
+	_legend_label.text = "Vert = territoire  ·  Gris = neutre  ·  Rouge = adverse  ·  ⚔ = attaquable"
+	_legend_label.position = Vector2(260, 16)
+	_legend_label.add_theme_color_override("font_color", GOLD)
+	map.add_child(_legend_label)
 
 	# Routes dessinées derrière les villes : dorées si elles relient deux
 	# villes du territoire, ternes sinon.
@@ -144,17 +169,24 @@ func _build() -> void:
 	side.position = Vector2(1340, 92)
 	side.size = Vector2(430, 750)
 	side.add_theme_stylebox_override("panel", _style(Color(0.10, 0.17, 0.21, 0.98), GOLD))
-	root.add_child(side)
+	_body_content.add_child(side)
+	_side_panel = side
+
+	_side_scroll = ScrollContainer.new()
+	_side_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_side_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_side_scroll.follow_focus = false
+	side.add_child(_side_scroll)
 
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 14)
-	side.add_child(box)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_side_scroll.add_child(box)
 
-	var panel_title := Label.new()
-	panel_title.text = "CONSEIL DE GUERRE"
-	panel_title.add_theme_font_size_override("font_size", 25)
-	panel_title.add_theme_color_override("font_color", TEXT)
-	box.add_child(panel_title)
+	_side_title = Label.new()
+	_side_title.text = "CONSEIL DE GUERRE"
+	_side_title.add_theme_color_override("font_color", TEXT)
+	box.add_child(_side_title)
 
 	_message = Label.new()
 	_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -178,14 +210,98 @@ func _build() -> void:
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	box.add_child(spacer)
 
-	var back := Button.new()
-	back.text = "← MENU"
-	back.custom_minimum_size.y = 50
-	back.pressed.connect(_back_to_save)
-	box.add_child(back)
+	_back_button = Button.new()
+	_back_button.text = "← MENU"
+	_back_button.custom_minimum_size.y = 50
+	_back_button.pressed.connect(_back_to_save)
+	box.add_child(_back_button)
 
 	_refresh_header()
 	_select_city(_selected_id)
+	_layout_responsive()
+
+## Adapte la carte et le conseil à la taille réelle du viewport.
+## En format compact (téléphone/portrait), la carte est en premier et le
+## conseil de guerre se trouve dessous dans une zone verticalement défilante.
+func _layout_responsive() -> void:
+	if _root == null or _body_scroll == null or _body_content == null or _map_panel == null or _side_panel == null:
+		return
+	var w: float = maxf(280.0, _root.size.x)
+	var h: float = maxf(400.0, _root.size.y)
+	var compact: bool = w < 1000.0 or h < 560.0
+	var body_top: float = 108.0 if compact else 92.0
+	_body_scroll.offset_top = body_top
+	_title_label.add_theme_font_size_override("font_size", 23 if compact else 30)
+	_title_label.position = Vector2(8, 0)
+	_subtitle_label.add_theme_font_size_override("font_size", 14 if compact else 18)
+	_subtitle_label.position = Vector2(8, 32 if compact else 42)
+	_header.add_theme_font_size_override("font_size", 12 if compact else 17)
+	_header.position = Vector2(8, 55 if compact else 64)
+	_header.size = Vector2(w - 16.0, 42.0 if compact else 24.0)
+
+	if compact:
+		var map_w: float = w
+		var map_h: float = clampf(h * 0.52, 360.0, 470.0)
+		var side_h: float = 600.0
+		_body_content.custom_minimum_size = Vector2(map_w, map_h + 14.0 + side_h)
+		_map_panel.position = Vector2.ZERO
+		_map_panel.size = Vector2(map_w, map_h)
+		_side_panel.position = Vector2(0, map_h + 14.0)
+		_side_panel.size = Vector2(map_w, side_h)
+		_legend_label.text = "Vert : allié · Gris : neutre · Rouge : ennemi · ⚔ : attaquable"
+		_legend_label.position = Vector2(10, map_h - 27.0)
+		_legend_label.add_theme_font_size_override("font_size", 11)
+		_side_title.add_theme_font_size_override("font_size", 20)
+		_message.custom_minimum_size.y = 150
+		_message.add_theme_font_size_override("font_size", 15)
+		_attack.custom_minimum_size.y = 56
+		_attack.add_theme_font_size_override("font_size", 18)
+		_back_button.custom_minimum_size.y = 44
+		for child: Node in _build_box.get_children():
+			if child is Button:
+				(child as Button).custom_minimum_size.y = 44
+				(child as Button).add_theme_font_size_override("font_size", 13)
+	else:
+		var side_w: float = clampf(w * 0.27, 330.0, 430.0)
+		var map_w: float = maxf(420.0, w - side_w - 18.0)
+		var map_h: float = maxf(420.0, h - body_top - 8.0)
+		_body_content.custom_minimum_size = Vector2(map_w + 18.0 + side_w, map_h)
+		_map_panel.position = Vector2.ZERO
+		_map_panel.size = Vector2(map_w, map_h)
+		_side_panel.position = Vector2(map_w + 18.0, 0)
+		_side_panel.size = Vector2(side_w, map_h)
+		_legend_label.text = "Vert = territoire · Gris = neutre · Rouge = adverse · ⚔ = attaquable"
+		_legend_label.position = Vector2(minf(260.0, map_w * 0.24), 16.0)
+		_legend_label.add_theme_font_size_override("font_size", 14 if map_w < 900.0 else 16)
+		_side_title.add_theme_font_size_override("font_size", 23)
+		_message.custom_minimum_size.y = 180
+		_message.add_theme_font_size_override("font_size", 18)
+		_attack.custom_minimum_size.y = 68
+		_attack.add_theme_font_size_override("font_size", 23)
+		_back_button.custom_minimum_size.y = 50
+		for child: Node in _build_box.get_children():
+			if child is Button:
+				(child as Button).custom_minimum_size.y = 54
+				(child as Button).add_theme_font_size_override("font_size", 16)
+
+	var button_w: float = clampf(_map_panel.size.x * (0.23 if compact else 0.15), 70.0 if compact else 100.0, 196.0)
+	var button_h: float = clampf(_map_panel.size.y * (0.13 if compact else 0.11), 48.0 if compact else 58.0, 76.0)
+	for city_id: String in _city_buttons.keys():
+		var btn: Button = _city_buttons[city_id]
+		var p: Vector2 = CITY_POS[city_id]
+		var px: float = clampf(p.x * _map_panel.size.x - button_w * 0.5, 0.0, _map_panel.size.x - button_w)
+		var py_min: float = 34.0 if compact else 38.0
+		var py_max: float = _map_panel.size.y - button_h - (30.0 if compact else 18.0)
+		var py: float = clampf(p.y * _map_panel.size.y - button_h * 0.5, py_min, py_max)
+		btn.position = Vector2(px, py)
+		btn.size = Vector2(button_w, button_h)
+		btn.custom_minimum_size = Vector2(button_w, button_h)
+		btn.add_theme_font_size_override("font_size", 11 if compact else (14 if button_w < 140.0 else 18))
+	if _side_scroll != null:
+		_side_scroll.queue_sort()
+	if _body_scroll != null:
+		_body_scroll.queue_sort()
+
 
 ## Compteurs d'empire : villes contrôlées, production versée à chaque
 ## victoire, et objectif de campagne.
