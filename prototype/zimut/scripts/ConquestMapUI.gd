@@ -331,9 +331,9 @@ func _layout_responsive() -> void:
 		# La zone visible reste bornée à l'écran ; la carte complète, elle,
 		# est plus haute et défilante. Sur téléphone étroit, le défilement
 		# horizontal reste disponible en plus du vertical.
-		var map_w: float = maxf(1320.0, viewport_w)
+		var map_w: float = maxf(1536.0, viewport_w)
 		var map_view_h: float = clampf(h * 0.52, 360.0, 470.0)
-		var map_content_h: float = maxf(1600.0, map_view_h)
+		var map_content_h: float = maxf(1024.0, map_view_h)
 		var side_h: float = 600.0
 		_body_content.custom_minimum_size = Vector2(viewport_w, map_view_h + 14.0 + side_h)
 		_map_scroll.position = Vector2.ZERO
@@ -367,12 +367,12 @@ func _layout_responsive() -> void:
 		# Le viewport de la carte reste dans l'écran ; son contenu peut être
 		# plus haut, ce qui rend le défilement vertical réellement possible.
 		var map_view_h: float = maxf(420.0, h - body_top - 8.0)
-		var map_content_h: float = maxf(1300.0, map_view_h)
+		var map_content_h: float = maxf(1024.0, map_view_h)
 		_body_content.custom_minimum_size = Vector2(map_w + 18.0 + side_w, map_view_h)
 		_map_scroll.position = Vector2.ZERO
 		_map_scroll.size = Vector2(map_w, map_view_h)
 		_map_scroll.custom_minimum_size = Vector2(map_w, map_view_h)
-		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if map_w > _map_scroll.size.x else ScrollContainer.SCROLL_MODE_DISABLED
 		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
 		_map_panel.position = Vector2.ZERO
 		_map_panel.size = Vector2(map_w, map_content_h)
