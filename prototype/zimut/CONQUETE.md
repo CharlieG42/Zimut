@@ -92,6 +92,17 @@ tenir tout Zimut. Les routes relient deux villes du territoire en doré.
 - Le biome de la ville pilote le décor et le bestiaire
   (`GameManager.fight_biome`, `conquest_city_biome`).
 
+## Domination régionale — bonus et lisibilité
+
+- Le contrôle de toutes les villes conquérables d'un biome débloque un bonus
+  permanent versé à chaque victoire : **Forêt = +5 Bois**, **Montagne = +5 Fer**,
+  **Désert = +5 Venin**. La capitale et le Donjon ne comptent pas dans ces
+  totaux. Cette règle est implémentée dans
+  `conquest_biome_control_bonus` et intégrée à la production de l'empire.
+- Le conseil de guerre affiche maintenant la progression `villes contrôlées / total`
+  du biome de la ville sélectionnée et précise la récompense qui sera activée
+  à 100 %, ou confirme que le bonus est déjà actif.
+
 ## 4. L'économie — FAIT (base)
 
 - 5 ressources de craft existantes (Fer, Bois, Cuir, Magie, Venin), l'or,
