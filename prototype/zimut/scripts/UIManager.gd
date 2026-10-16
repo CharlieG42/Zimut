@@ -798,6 +798,20 @@ func init(manager: Node) -> void:
 	_build_ui()
 	_connect_signals()
 	_refresh()
+	# Réaffirme la visibilité après la première passe de layout du CanvasLayer.
+	call_deferred("_restore_hud_visibility")
+
+
+func _restore_hud_visibility() -> void:
+	if not is_instance_valid(_root):
+		return
+	layer = 20
+	visible = true
+	_root.visible = true
+	for control: Control in [_timeline, _stats, _spell_scroll, _end_btn, _quit_btn]:
+		if is_instance_valid(control):
+			control.visible = true
+	_root.queue_redraw()
 
 
 func _connect_signals() -> void:
@@ -1244,8 +1258,6 @@ func _refresh() -> void:
 	if is_instance_valid(_stats):
 		_stats.visible = true
 		_stats.queue_redraw()
-	if _grid != null and _info_panel.visible and "hover_cell" in _grid:
-		_on_hover(_grid.hover_cell)
 	_spell_scroll.modulate = Color(1, 1, 1, 1.0)
 
 
