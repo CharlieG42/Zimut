@@ -80,6 +80,8 @@ var _map_pointer_last: Vector2 = Vector2.ZERO
 var _map_pointer_origin: Vector2 = Vector2.ZERO
 var _map_dragged: bool = false
 var _map_zoom: float = 1.0
+var _target_map_zoom: float = 1.0
+const MAP_ZOOM_SMOOTHING: float = 12.0
 var _touch_positions: Dictionary = {}
 var _pinch_start_distance: float = 0.0
 var _pinch_start_zoom: float = 1.0
@@ -87,6 +89,7 @@ const MAP_ZOOM_MAX: float = 2.2
 
 func _ready() -> void:
 	set_process_input(true)
+	set_process(true)
 	Music.play("adventure")
 	layer = 10
 	_save = GameManager.active_save
@@ -461,6 +464,17 @@ func _layout_responsive() -> void:
 ## Le geste est suivi au niveau de la scène pour rester actif même si le
 ## doigt commence sur un bouton de ville. Le seuil filtre les micro-mouvements
 ## involontaires ; une fois dépassé, on déplace le contenu dans le sens du doigt.
+func _process(delta: float) -> void:
+	# Lisse le zoom sans reconstruire toute la disposition à chaque mouvement
+	# de doigt : le panneau complet entraîne fond, routes, sprites et libellés.
+	if not is_equal_approx(_map_zoom, _target_map_zoom):
+		var weight: float = 1.0 - exp(-MAP_ZOOM_SMOOTHING * delta)
+		_map_zoom = lerpf(_map_zoom, _target_map_zoom, weight)
+		if absf(_target_map_zoom - _map_zoom) < 0.002:
+			_map_zoom = _target_map_zoom
+		if _map_panel != null and is_instance_valid(_map_panel):
+			_map_panel.scale = Vector2(_map_zoom, _map_zoom)
+
 func _input(event: InputEvent) -> void:
 	if _map_scroll == null or not is_instance_valid(_map_scroll):
 		return
@@ -472,7 +486,7 @@ func _input(event: InputEvent) -> void:
 				_map_pointer_active = false
 				_map_dragged = true
 				_pinch_start_distance = _pinch_distance()
-				_pinch_start_zoom = _map_zoom
+				_pinch_start_zoom = _target_map_zoom
 			else:
 				_begin_map_pointer(touch.position, touch.index)
 		else:
@@ -500,9 +514,9 @@ func _input(event: InputEvent) -> void:
 			else:
 				_end_map_pointer(-2)
 		elif mouse.button_index == MOUSE_BUTTON_WHEEL_UP and mouse.pressed:
-			_set_map_zoom(_map_zoom + 0.1)
+			_set_map_zoom(_target_map_zoom + 0.12)
 		elif mouse.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse.pressed:
-			_set_map_zoom(_map_zoom - 0.1)
+			_set_map_zoom(_target_map_zoom - 0.12)
 	elif event is InputEventMouseMotion:
 		var motion := event as InputEventMouseMotion
 		if _map_pointer_active and _map_pointer_index == -2 and (motion.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
@@ -516,9 +530,12 @@ func _pinch_distance() -> float:
 
 func _set_map_zoom(value: float) -> void:
 	var next_zoom: float = clampf(value, 1.0, MAP_ZOOM_MAX)
-	if is_equal_approx(next_zoom, _map_zoom):
+	if is_equal_approx(next_zoom, _target_map_zoom):
 		return
-	_map_zoom = next_zoom
+	_target_map_zoom = next_zoom
+	# Met à jour la zone de défilement pour que les bords de la carte restent
+	# accessibles pendant et après l'animation. Le zoom visuel est interpolé
+	# dans _process et s'applique au panneau entier, enfants compris.
 	_layout_responsive()
 
 func _begin_map_pointer(position: Vector2, pointer_index: int) -> void:
