@@ -493,7 +493,7 @@ class TimelineView extends Control:
 				accept_event()
 			elif mb.button_index == MOUSE_BUTTON_LEFT:
 				if mb.pressed:
-					_begin_press(mb.position, false)
+					_begin_press(mb.position)
 				else:
 					_end_press()
 				accept_event()
@@ -502,7 +502,7 @@ class TimelineView extends Control:
 			if touch.pressed:
 				_touch_active = true
 				_last_touch_position = touch.position
-				_begin_press(touch.position, true)
+				_begin_press(touch.position)
 			else:
 				_touch_active = false
 				_end_press()
@@ -518,10 +518,10 @@ class TimelineView extends Control:
 			_last_touch_position = drag.position
 			accept_event()
 
-	func _begin_press(point: Vector2, from_touch: bool) -> void:
+	func _begin_press(point: Vector2) -> void:
 		if gm == null:
 			return
-			# Le glissement vertical doit défiler, jamais sélectionner un portrait.
+		# Le glissement vertical doit défiler, jamais sélectionner un portrait.
 		_press_origin = point
 		_last_touch_position = point
 		_dragging = false
@@ -550,7 +550,7 @@ class TimelineView extends Control:
 			_scroll_container.scroll_vertical = clampi(
 				_scroll_container.scroll_vertical + amount,
 				0,
-				maxi(0, int(_scroll_container.get_v_scroll_bar().max_value - _scroll_container.size.y)
+				maxi(0, int(_scroll_container.get_v_scroll_bar().max_value - _scroll_container.size.y))
 			)
 
 	func _on_long_press_timeout() -> void:
