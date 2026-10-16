@@ -168,7 +168,7 @@ l'état de la campagne : `owned`, `pending_city`, `sieges`, `buildings`,
 ## 10. Pistes d'amélioration (priorités proposées)
 
 ### Priorité 1 — Rendre chaque décision amusante
-1. **Préparation d'assaut (première version intégrée)** : avant chaque bataille, choisir de payer 25 or pour les éclaireurs (ennemis d'un niveau inférieur), 12 Bois + 8 Fer pour saboter (−15 % de PV et d'attaque ennemis), ou partir sans préparation. Le bonus est consommé après une seule bataille, même lors d'un siège multi-vagues.
+1. **Préparation d'assaut (première version intégrée)** : avant chaque bataille, choisir 25 or pour les éclaireurs (ennemis d'un niveau inférieur), 12 Bois + 8 Fer pour saboter (−15 % de PV et d'attaque ennemis), 15 or + 6 Cuir pour le ravitaillement (−10 % d'attaque ennemie), ou partir sans préparation. Le bonus est consommé après une seule bataille, même lors d'un siège multi-vagues.
 2. **Contre-attaques jouables** : avertissement avant le pillage, puis choix
    entre défendre la ville ou accepter une perte temporaire de production.
 3. **Récompenses uniques par ville — première version intégrée** : chaque
