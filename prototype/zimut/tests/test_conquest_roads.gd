@@ -68,10 +68,11 @@ func _boot() -> void:
 	# ── Annexion : just_annexed posé pour l'écran de victoire, puis consommé ──
 	var d: Dictionary = pm.new_game(4, "ConqRoads")
 	d["campaign_mode"] = "conquest"
-	d["conquest"] = {"owned": ["capitale"], "pending_city": "clairiere", "pending_level": 10}
+	d["conquest"] = {"owned": ["capitale"], "pending_city": "clairiere", "pending_level": 10, "pending_tactic": "scouts"}
 	pm.register_victory(d, {"enemies": [{"type": "Gobelin", "level": 10, "boss": false}]})
 	var cq: Dictionary = d.get("conquest", {})
 	check(String(cq.get("just_annexed", "")) == "clairiere", "just_annexed posé à l'annexion de Clairière")
+	check(not cq.has("pending_tactic"), "la préparation tactique est consommée après la bataille")
 	check(pm.conquest_city_attackable(cq, "vieille_tour"), "nouvelle route ouverte après annexion")
 	var reward: Dictionary = cq.get("last_city_reward", {})
 	check(String(reward.get("city", "")) == "clairiere", "récompense de première annexion enregistrée")
