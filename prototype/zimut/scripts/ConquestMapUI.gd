@@ -80,6 +80,8 @@ var _map_pointer_last: Vector2 = Vector2.ZERO
 var _map_pointer_origin: Vector2 = Vector2.ZERO
 var _map_dragged: bool = false
 var _map_zoom: float = 1.0
+var _target_map_zoom: float = 1.0
+const MAP_ZOOM_SMOOTHING: float = 7.5
 var _touch_positions: Dictionary = {}
 var _pinch_start_distance: float = 0.0
 var _pinch_start_zoom: float = 1.0
@@ -375,7 +377,7 @@ func _layout_responsive() -> void:
 		_map_panel.position = Vector2.ZERO
 		_map_panel.scale = Vector2(_map_zoom, _map_zoom)
 		_map_panel.size = Vector2(map_content_w, map_content_h)
-		_map_panel.custom_minimum_size = Vector2(map_content_w * _map_zoom, map_content_h * _map_zoom)
+		_map_panel.custom_minimum_size = Vector2(map_content_w * _target_map_zoom, map_content_h * _target_map_zoom)
 		_side_panel.position = Vector2(0, map_view_h + 14.0)
 		_side_panel.size = Vector2(viewport_w, side_h)
 		_side_panel.custom_minimum_size = Vector2(viewport_w, side_h)
@@ -400,7 +402,7 @@ func _layout_responsive() -> void:
 		# plus haut, ce qui rend le défilement vertical réellement possible.
 		var map_view_h: float = maxf(420.0, h - body_top - 8.0)
 		var map_content_h: float = maxf(1024.0, map_view_h)
-		_body_content.custom_minimum_size = Vector2(map_w * _map_zoom + 18.0 + side_w, maxf(map_view_h, map_content_h * _map_zoom))
+		_body_content.custom_minimum_size = Vector2(map_w * _target_map_zoom + 18.0 + side_w, maxf(map_view_h, map_content_h * _map_zoom))
 		_map_scroll.position = Vector2.ZERO
 		_map_scroll.size = Vector2(map_w, map_view_h)
 		_map_scroll.custom_minimum_size = Vector2(map_w, map_view_h)
@@ -409,7 +411,7 @@ func _layout_responsive() -> void:
 		_map_panel.position = Vector2.ZERO
 		_map_panel.scale = Vector2(_map_zoom, _map_zoom)
 		_map_panel.size = Vector2(map_w, map_content_h)
-		_map_panel.custom_minimum_size = Vector2(map_w * _map_zoom, map_content_h * _map_zoom)
+		_map_panel.custom_minimum_size = Vector2(map_w * _target_map_zoom, map_content_h * _target_map_zoom)
 		_side_panel.position = Vector2(map_w + 18.0, 0)
 		_side_panel.size = Vector2(side_w, map_view_h)
 		_side_panel.custom_minimum_size = Vector2(side_w, map_view_h)
@@ -461,6 +463,20 @@ func _layout_responsive() -> void:
 ## Le geste est suivi au niveau de la scène pour rester actif même si le
 ## doigt commence sur un bouton de ville. Le seuil filtre les micro-mouvements
 ## involontaires ; une fois dépassé, on déplace le contenu dans le sens du doigt.
+func _process(delta: float) -> void:
+	# Le panneau entier est animé : fond, routes, sprites, boutons et textes
+	# conservent ainsi exactement la même échelle pendant le pincement.
+	if not is_equal_approx(_map_zoom, _target_map_zoom):
+		var weight: float = 1.0 - exp(-MAP_ZOOM_SMOOTHING * delta)
+		_map_zoom = lerpf(_map_zoom, _target_map_zoom, weight)
+		if absf(_target_map_zoom - _map_zoom) < 0.001:
+			_map_zoom = _target_map_zoom
+		if _map_panel != null and is_instance_valid(_map_panel):
+			_map_panel.scale = Vector2(_map_zoom, _map_zoom)
+		if is_equal_approx(_map_zoom, _target_map_zoom):
+			# Ajuste la zone de défilement une seule fois à la fin de l'animation.
+			_layout_responsive()
+
 func _input(event: InputEvent) -> void:
 	if _map_scroll == null or not is_instance_valid(_map_scroll):
 		return
@@ -500,9 +516,9 @@ func _input(event: InputEvent) -> void:
 			else:
 				_end_map_pointer(-2)
 		elif mouse.button_index == MOUSE_BUTTON_WHEEL_UP and mouse.pressed:
-			_set_map_zoom(_map_zoom + 0.1)
+			_set_map_zoom(_target_map_zoom + 0.12)
 		elif mouse.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse.pressed:
-			_set_map_zoom(_map_zoom - 0.1)
+			_set_map_zoom(_target_map_zoom - 0.12)
 	elif event is InputEventMouseMotion:
 		var motion := event as InputEventMouseMotion
 		if _map_pointer_active and _map_pointer_index == -2 and (motion.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
@@ -516,10 +532,10 @@ func _pinch_distance() -> float:
 
 func _set_map_zoom(value: float) -> void:
 	var next_zoom: float = clampf(value, 1.0, MAP_ZOOM_MAX)
-	if is_equal_approx(next_zoom, _map_zoom):
+	if is_equal_approx(next_zoom, _target_map_zoom):
 		return
-	_map_zoom = next_zoom
-	_layout_responsive()
+	_target_map_zoom = next_zoom
+	# Pas de recalcul du layout pendant le geste : seul le panneau est animé.
 
 func _begin_map_pointer(position: Vector2, pointer_index: int) -> void:
 	# InputEventScreenTouch.position est en coordonnées viewport ; convertir
