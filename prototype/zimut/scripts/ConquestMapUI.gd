@@ -563,6 +563,11 @@ func _select_city(id: String) -> void:
 			_attack.disabled = true
 			_attack.text = "HORS DE PORTÉE — CONQUÉREZ UNE VILLE RELIÉE"
 			_message.text += "\n\n✖ Aucune route depuis votre territoire : conquérez d'abord une ville voisine."
+	# Rendre visible la progression de domination régionale au moment où
+	# le joueur compare les cibles : les bonus existent déjà dans l'économie.
+	var biome_summary: String = _biome_control_summary(String(city["biome"]))
+	if biome_summary != "":
+		_message.text += "\n\n" + biome_summary
 	for other: String in _city_buttons.keys():
 		var button: Button = _city_buttons[other]
 		button.add_theme_stylebox_override("normal", _style(_city_color(other), GOLD if other == id else _city_border_color(other)))
@@ -865,6 +870,37 @@ func _city_border_color(city_id: String) -> Color:
 		"Désert": return Color(0.92, 0.66, 0.32)
 		"Donjon": return Color(0.70, 0.48, 0.82)
 		_: return Color(0.5, 0.64, 0.46)
+
+## Progression de domination par biome, hors capitale et Donjon.
+## Le bonus est versé à chaque victoire lorsque toutes les villes du biome
+## sont contrôlées ; cette ligne rend la condition visible avant l'annexion.
+func _biome_control_summary(biome: String) -> String:
+	var reward: String = ""
+	match biome:
+		"Forêt":
+			reward = "+5 Bois par victoire"
+		"Montagne":
+			reward = "+5 Fer par victoire"
+		"Désert":
+			reward = "+5 Venin par victoire"
+		_:
+			return ""
+	var total: int = 0
+	var controlled: int = 0
+	var owned: Array = _conquest.get("owned", [])
+	for city_id: String in ProgressionManager.CONQUEST_CITIES.keys():
+		if city_id == "capitale" or city_id == "donjon_roi":
+			continue
+		if String(ProgressionManager.CONQUEST_CITIES[city_id].get("biome", "")) != biome:
+			continue
+		total += 1
+		if owned.has(city_id):
+			controlled += 1
+	if total <= 0:
+		return ""
+	if controlled == total:
+		return "★ DOMINATION %s : bonus actif — %s." % [biome.to_upper(), reward]
+	return "Domination %s : %d/%d villes — bonus à 100 %% : %s." % [biome, controlled, total, reward]
 
 func _refresh_chronicle() -> void:
 	if _chronicle_label == null:
