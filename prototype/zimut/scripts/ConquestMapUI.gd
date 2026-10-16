@@ -12,29 +12,37 @@ const GOLD := Color(0.96, 0.75, 0.31)
 
 ## Positions sur la carte (fractions du panneau) — le reste (noms, types,
 ## biomes, niveaux, routes) vient du catalogue de ProgressionManager.
-## Carte organisée en cinq colonnes et quatre rangées : les boutons gardent
-## un espacement lisible même avec vingt villes.
+## Carte organisée en quatre colonnes et sept rangées : les 28 villes
+## s'étendent verticalement et demandent un défilement pour être explorées.
 const CITY_POS := {
-	"citadelle_ronce": Vector2(0.12, 0.12),
-	"vieille_tour": Vector2(0.37, 0.12),
-	"mine_cristal": Vector2(0.63, 0.12),
-	"donjon_roi": Vector2(0.88, 0.12),
-	"clairiere": Vector2(0.12, 0.30),
-	"ruines_lierre": Vector2(0.37, 0.30),
-	"col_givre": Vector2(0.63, 0.30),
-	"garnison": Vector2(0.88, 0.30),
-	"village_brume": Vector2(0.12, 0.48),
-	"capitale": Vector2(0.37, 0.48),
-	"abbaye_ronce": Vector2(0.63, 0.48),
-	"bastion_orage": Vector2(0.88, 0.48),
-	"pont_mousse": Vector2(0.12, 0.66),
-	"fort_racine": Vector2(0.37, 0.66),
-	"hameau_pin": Vector2(0.63, 0.66),
-	"tour_sable": Vector2(0.88, 0.66),
-	"caravanserail": Vector2(0.12, 0.84),
-	"oasis": Vector2(0.37, 0.84),
-	"observatoire": Vector2(0.63, 0.84),
-	"port_sable": Vector2(0.88, 0.84),
+	"citadelle_ronce": Vector2(0.12, 0.09),
+	"vieille_tour": Vector2(0.37, 0.09),
+	"mine_cristal": Vector2(0.63, 0.09),
+	"donjon_roi": Vector2(0.88, 0.09),
+	"clairiere": Vector2(0.12, 0.22),
+	"ruines_lierre": Vector2(0.37, 0.22),
+	"col_givre": Vector2(0.63, 0.22),
+	"garnison": Vector2(0.88, 0.22),
+	"village_brume": Vector2(0.12, 0.35),
+	"capitale": Vector2(0.37, 0.35),
+	"abbaye_ronce": Vector2(0.63, 0.35),
+	"bastion_orage": Vector2(0.88, 0.35),
+	"pont_mousse": Vector2(0.12, 0.48),
+	"fort_racine": Vector2(0.37, 0.48),
+	"hameau_pin": Vector2(0.63, 0.48),
+	"tour_sable": Vector2(0.88, 0.48),
+	"caravanserail": Vector2(0.12, 0.61),
+	"oasis": Vector2(0.37, 0.61),
+	"observatoire": Vector2(0.63, 0.61),
+	"port_sable": Vector2(0.88, 0.61),
+	"bois_lune": Vector2(0.12, 0.74),
+	"sanctuaire_mousse": Vector2(0.37, 0.74),
+	"forge_givre": Vector2(0.63, 0.74),
+	"pic_foudroyant": Vector2(0.88, 0.74),
+	"marais_spectres": Vector2(0.12, 0.87),
+	"fort_cendre": Vector2(0.37, 0.87),
+	"temple_soleil": Vector2(0.63, 0.87),
+	"citadelle_sable": Vector2(0.88, 0.87),
 }
 var _save: Dictionary = {}
 var _slot: int = -1
@@ -139,6 +147,8 @@ func _build() -> void:
 	_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_map_scroll.follow_focus = false
+	_map_scroll.scroll_deadzone = 5
+	_body_scroll.scroll_deadzone = 5
 	_map_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
 	_body_content.add_child(_map_scroll)
 
@@ -274,14 +284,14 @@ func _layout_responsive() -> void:
 		# horizontal reste disponible en plus du vertical.
 		var map_w: float = maxf(1320.0, viewport_w)
 		var map_view_h: float = clampf(h * 0.52, 360.0, 470.0)
-		var map_content_h: float = maxf(1300.0, map_view_h)
+		var map_content_h: float = maxf(1600.0, map_view_h)
 		var side_h: float = 600.0
 		_body_content.custom_minimum_size = Vector2(viewport_w, map_view_h + 14.0 + side_h)
 		_map_scroll.position = Vector2.ZERO
 		_map_scroll.size = Vector2(viewport_w, map_view_h)
 		_map_scroll.custom_minimum_size = Vector2(viewport_w, map_view_h)
 		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if map_w > viewport_w else ScrollContainer.SCROLL_MODE_DISABLED
-		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
 		_map_panel.position = Vector2.ZERO
 		_map_panel.size = Vector2(map_w, map_content_h)
 		_map_panel.custom_minimum_size = Vector2(map_w, map_content_h)
