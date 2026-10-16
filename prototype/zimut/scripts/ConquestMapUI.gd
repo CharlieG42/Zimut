@@ -81,7 +81,7 @@ var _map_pointer_origin: Vector2 = Vector2.ZERO
 var _map_dragged: bool = false
 var _map_zoom: float = 1.0
 var _target_map_zoom: float = 1.0
-const MAP_ZOOM_SMOOTHING: float = 12.0
+const MAP_ZOOM_SMOOTHING: float = 7.5
 var _touch_positions: Dictionary = {}
 var _pinch_start_distance: float = 0.0
 var _pinch_start_zoom: float = 1.0
@@ -465,15 +465,20 @@ func _layout_responsive() -> void:
 ## doigt commence sur un bouton de ville. Le seuil filtre les micro-mouvements
 ## involontaires ; une fois dépassé, on déplace le contenu dans le sens du doigt.
 func _process(delta: float) -> void:
-	# Lisse le zoom sans reconstruire toute la disposition à chaque mouvement
-	# de doigt : le panneau complet entraîne fond, routes, sprites et libellés.
+	# Interpolation indépendante de la fréquence d'images : la carte entière
+	# (fond, routes, sprites, boutons et textes) suit le même facteur de zoom.
+	# On évite de relancer le layout à chaque événement de pincement, ce qui
+	# provoquait des à-coups et des redimensionnements concurrents.
 	if not is_equal_approx(_map_zoom, _target_map_zoom):
 		var weight: float = 1.0 - exp(-MAP_ZOOM_SMOOTHING * delta)
 		_map_zoom = lerpf(_map_zoom, _target_map_zoom, weight)
-		if absf(_target_map_zoom - _map_zoom) < 0.002:
+		if absf(_target_map_zoom - _map_zoom) < 0.001:
 			_map_zoom = _target_map_zoom
 		if _map_panel != null and is_instance_valid(_map_panel):
 			_map_panel.scale = Vector2(_map_zoom, _map_zoom)
+		if is_equal_approx(_map_zoom, _target_map_zoom):
+			# Recalcule la zone défilante une seule fois, une fois l'animation finie.
+			_layout_responsive()
 
 func _input(event: InputEvent) -> void:
 	if _map_scroll == null or not is_instance_valid(_map_scroll):
@@ -533,10 +538,9 @@ func _set_map_zoom(value: float) -> void:
 	if is_equal_approx(next_zoom, _target_map_zoom):
 		return
 	_target_map_zoom = next_zoom
-	# Met à jour la zone de défilement pour que les bords de la carte restent
-	# accessibles pendant et après l'animation. Le zoom visuel est interpolé
-	# dans _process et s'applique au panneau entier, enfants compris.
-	_layout_responsive()
+	# La transformation du panneau redimensionne ensemble le fond, les routes,
+	# les illustrations de villes et leurs libellés. Le layout sera recalculé
+	# une fois l'animation terminée, pas à chaque mouvement du doigt.
 
 func _begin_map_pointer(position: Vector2, pointer_index: int) -> void:
 	# InputEventScreenTouch.position est en coordonnées viewport ; convertir
