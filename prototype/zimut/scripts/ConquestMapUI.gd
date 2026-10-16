@@ -79,6 +79,11 @@ var _map_pointer_index: int = -1
 var _map_pointer_last: Vector2 = Vector2.ZERO
 var _map_pointer_origin: Vector2 = Vector2.ZERO
 var _map_dragged: bool = false
+var _map_zoom: float = 1.0
+var _touch_positions: Dictionary = {}
+var _pinch_start_distance: float = 0.0
+var _pinch_start_zoom: float = 1.0
+const MAP_ZOOM_MAX: float = 2.2
 
 func _ready() -> void:
 	set_process_input(true)
@@ -358,7 +363,8 @@ func _layout_responsive() -> void:
 		# horizontal reste disponible en plus du vertical.
 		var map_w: float = maxf(1536.0, viewport_w)
 		var map_view_h: float = clampf(h * 0.52, 360.0, 470.0)
-		var map_content_h: float = maxf(1024.0, map_view_h)
+		var map_content_h: float = maxf(1024.0, map_view_h) * _map_zoom
+		var map_content_w: float = map_w * _map_zoom
 		var side_h: float = 600.0
 		_body_content.custom_minimum_size = Vector2(viewport_w, map_view_h + 14.0 + side_h)
 		_map_scroll.position = Vector2.ZERO
@@ -367,8 +373,8 @@ func _layout_responsive() -> void:
 		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if map_w > viewport_w else ScrollContainer.SCROLL_MODE_DISABLED
 		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
 		_map_panel.position = Vector2.ZERO
-		_map_panel.size = Vector2(map_w, map_content_h)
-		_map_panel.custom_minimum_size = Vector2(map_w, map_content_h)
+		_map_panel.size = Vector2(map_content_w, map_content_h)
+		_map_panel.custom_minimum_size = Vector2(map_content_w, map_content_h)
 		_side_panel.position = Vector2(0, map_view_h + 14.0)
 		_side_panel.size = Vector2(viewport_w, side_h)
 		_side_panel.custom_minimum_size = Vector2(viewport_w, side_h)
@@ -454,12 +460,30 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var touch := event as InputEventScreenTouch
 		if touch.pressed:
-			_begin_map_pointer(touch.position, touch.index)
+			_touch_positions[touch.index] = touch.position
+			if _touch_positions.size() == 2:
+				_map_pointer_active = false
+				_map_dragged = true
+				_pinch_start_distance = _pinch_distance()
+				_pinch_start_zoom = _map_zoom
+			else:
+				_begin_map_pointer(touch.position, touch.index)
 		else:
+			_touch_positions.erase(touch.index)
 			_end_map_pointer(touch.index)
+			if _touch_positions.size() == 1:
+				var remaining_index: int = int(_touch_positions.keys()[0])
+				_begin_map_pointer(_touch_positions[remaining_index], remaining_index)
 	elif event is InputEventScreenDrag:
 		var drag := event as InputEventScreenDrag
-		if _map_pointer_active and drag.index == _map_pointer_index:
+		if _touch_positions.has(drag.index):
+			_touch_positions[drag.index] = drag.position
+		if _touch_positions.size() >= 2:
+			var distance := _pinch_distance()
+			if _pinch_start_distance > 0.0:
+				_set_map_zoom(_pinch_start_zoom * distance / _pinch_start_distance)
+			get_viewport().set_input_as_handled()
+		elif _map_pointer_active and drag.index == _map_pointer_index:
 			_update_map_pointer(drag.position)
 	elif event is InputEventMouseButton:
 		var mouse := event as InputEventMouseButton
@@ -468,10 +492,27 @@ func _input(event: InputEvent) -> void:
 				_begin_map_pointer(mouse.position, -2)
 			else:
 				_end_map_pointer(-2)
+		elif mouse.button_index == MOUSE_BUTTON_WHEEL_UP and mouse.pressed:
+			_set_map_zoom(_map_zoom + 0.1)
+		elif mouse.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse.pressed:
+			_set_map_zoom(_map_zoom - 0.1)
 	elif event is InputEventMouseMotion:
 		var motion := event as InputEventMouseMotion
 		if _map_pointer_active and _map_pointer_index == -2 and (motion.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
 			_update_map_pointer(motion.position)
+
+func _pinch_distance() -> float:
+	if _touch_positions.size() < 2:
+		return 0.0
+	var points: Array = _touch_positions.values()
+	return (points[0] as Vector2).distance_to(points[1] as Vector2)
+
+func _set_map_zoom(value: float) -> void:
+	var next_zoom: float = clampf(value, 1.0, MAP_ZOOM_MAX)
+	if is_equal_approx(next_zoom, _map_zoom):
+		return
+	_map_zoom = next_zoom
+	_layout_responsive()
 
 func _begin_map_pointer(position: Vector2, pointer_index: int) -> void:
 	# InputEventScreenTouch.position est en coordonnées viewport ; convertir
