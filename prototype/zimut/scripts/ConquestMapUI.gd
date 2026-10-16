@@ -139,8 +139,8 @@ func _build() -> void:
 	_body_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_body_scroll.add_child(_body_content)
 
-	# Sur téléphone portrait, conserver une carte assez large pour éviter
-	# que les dix villes et leurs libellés se chevauchent. Le défilement
+	# La carte de campagne comporte 28 villes sur sept rangées ; garder un
+	# viewport distinct de son contenu permet de les explorer sans débordement. Le défilement
 	# horizontal de la carte est indépendant du défilement vertical de la page.
 	_map_scroll = ScrollContainer.new()
 	_map_scroll.position = Vector2.ZERO
@@ -154,7 +154,7 @@ func _build() -> void:
 
 	var map := Panel.new()
 	map.position = Vector2.ZERO
-	map.size = Vector2(1320, 750)
+	map.size = Vector2(1320, 1600)
 	map.add_theme_stylebox_override("panel", _style(PANEL, GOLD))
 	_map_scroll.add_child(map)
 	_map_panel = map
@@ -324,7 +324,7 @@ func _layout_responsive() -> void:
 		_map_scroll.size = Vector2(map_w, map_view_h)
 		_map_scroll.custom_minimum_size = Vector2(map_w, map_view_h)
 		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
 		_map_panel.position = Vector2.ZERO
 		_map_panel.size = Vector2(map_w, map_content_h)
 		_map_panel.custom_minimum_size = Vector2(map_w, map_content_h)
