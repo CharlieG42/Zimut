@@ -115,7 +115,7 @@ Les variantes par Nation partageront une silhouette et une qualité de rendu coh
 
 1. **Fond du monde** : intégrer la carte illustrée validée comme ressource, définir ses dimensions réelles et calibrer les coordonnées des villes et routes.
 2. **Placement des villes** : placer les 28 villes existantes dans les régions correspondantes, sans modifier leurs identifiants ou leur logique de conquête.
-3. **Sprites de villes** : créer un premier lot de sprites transparents et remplacer progressivement les boutons rectangulaires.
+3. **Sprites de villes** : premier lot intégré dans la branche : quatre illustrations SVG transparentes (forêt, montagne, désert, donjon) sont affichées au-dessus de petites plaques de nom portant le statut territorial. Étape suivante : enrichir les variantes par type de cité et par Nation, puis valider le rendu sur Android.
 4. **Lisibilité** : ajuster noms, emblèmes, halos de territoire, routes, sélection et défilement sur Android paysage.
 5. **Nations** : vérifier les classes existantes, proposer une correspondance argumentée, puis concevoir les emblèmes et architectures propres à chaque Nation.
 6. **Gameplay des Nations** : à définir plus tard ; ne pas ajouter de bonus, diplomatie ou mécanique nationale sans arbitrage explicite.
