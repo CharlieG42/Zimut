@@ -402,7 +402,7 @@ func _layout_responsive() -> void:
 		# plus haut, ce qui rend le défilement vertical réellement possible.
 		var map_view_h: float = maxf(420.0, h - body_top - 8.0)
 		var map_content_h: float = maxf(1024.0, map_view_h)
-		_body_content.custom_minimum_size = Vector2(map_w * _target_map_zoom + 18.0 + side_w, maxf(map_view_h, map_content_h * _map_zoom))
+		_body_content.custom_minimum_size = Vector2(map_w * _target_map_zoom + 18.0 + side_w, maxf(map_view_h, map_content_h * _target_map_zoom))
 		_map_scroll.position = Vector2.ZERO
 		_map_scroll.size = Vector2(map_w, map_view_h)
 		_map_scroll.custom_minimum_size = Vector2(map_w, map_view_h)
