@@ -27,6 +27,7 @@ var _grid: Node
 
 var _root: Control
 var _timeline: Control
+var _timeline_scroll: ScrollContainer
 var _stats: Control
 var _spell_scroll: ScrollContainer
 var _spell_box: Container
@@ -454,6 +455,11 @@ class TimelineView extends Control:
 	var _entity_rects: Dictionary = {}
 	var _pressed_entity: Dictionary = {}
 	var _long_press_fired: bool = false
+	var _touch_active: bool = false
+	var _dragging: bool = false
+	var _press_origin: Vector2 = Vector2.ZERO
+	var _last_touch_position: Vector2 = Vector2.ZERO
+	var _scroll_container: ScrollContainer
 	var _press_timer: Timer
 
 	func _ready() -> void:
@@ -477,24 +483,48 @@ class TimelineView extends Control:
 		return {}
 
 	func _gui_input(event: InputEvent) -> void:
-		if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
+		if event is InputEventMouseButton:
 			var mb := event as InputEventMouseButton
-			if mb.pressed:
-				_begin_press(mb.position)
-			else:
-				_end_press()
-			accept_event()
+			if mb.button_index == MOUSE_BUTTON_WHEEL_UP and mb.pressed:
+				_scroll_by(-96)
+				accept_event()
+			elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN and mb.pressed:
+				_scroll_by(96)
+				accept_event()
+			elif mb.button_index == MOUSE_BUTTON_LEFT:
+				if mb.pressed:
+					_begin_press(mb.position)
+				else:
+					_end_press()
+				accept_event()
 		elif event is InputEventScreenTouch:
 			var touch := event as InputEventScreenTouch
 			if touch.pressed:
+				_touch_active = true
+				_last_touch_position = touch.position
 				_begin_press(touch.position)
 			else:
+				_touch_active = false
 				_end_press()
+			accept_event()
+		elif event is InputEventScreenDrag and _touch_active:
+			var drag := event as InputEventScreenDrag
+			if not _dragging and drag.position.distance_to(_press_origin) >= 12.0:
+				_dragging = true
+				_press_timer.stop()
+				_pressed_entity = {}
+			if _dragging:
+				_scroll_by(int(roundf(_last_touch_position.y - drag.position.y)))
+			_last_touch_position = drag.position
 			accept_event()
 
 	func _begin_press(point: Vector2) -> void:
 		if gm == null:
 			return
+		# Le glissement vertical doit défiler, jamais sélectionner un portrait.
+		_press_origin = point
+		_last_touch_position = point
+		_dragging = false
 		_pressed_entity = _entity_at_point(point)
 		_long_press_fired = false
 		_press_timer.stop()
@@ -503,6 +533,10 @@ class TimelineView extends Control:
 
 	func _end_press() -> void:
 		_press_timer.stop()
+		if _dragging:
+			_dragging = false
+			_pressed_entity = {}
+			return
 		if _pressed_entity.is_empty():
 			return
 		if _long_press_fired:
@@ -511,13 +545,38 @@ class TimelineView extends Control:
 			target_requested.emit(_pressed_entity)
 		_pressed_entity = {}
 
+	func _scroll_by(amount: int) -> void:
+		if _scroll_container != null:
+			_scroll_container.scroll_vertical = clampi(
+				_scroll_container.scroll_vertical + amount,
+				0,
+				maxi(0, int(_scroll_container.get_v_scroll_bar().max_value - _scroll_container.size.y))
+			)
+
 	func _on_long_press_timeout() -> void:
-		if _pressed_entity.is_empty():
+		if _pressed_entity.is_empty() or _dragging:
 			return
 		_long_press_fired = true
 		inspect_requested.emit(_pressed_entity, true)
 
 	func _process(_d: float) -> void:
+		if gm != null:
+			var seen: Dictionary = {}
+			var item_count: int = 0
+			for entity: Dictionary in gm.turn_order:
+				var uid: int = int(entity.get("uid", -1))
+				if gm.is_alive(entity) and not seen.has(uid):
+					seen[uid] = true
+					item_count += 1
+			for summon: Dictionary in gm.summons:
+				var uid: int = int(summon.get("uid", -1))
+				if gm.is_alive(summon) and not seen.has(uid):
+					seen[uid] = true
+					item_count += 1
+			var needed_height: float = 8.0 + float(item_count) * 106.0 + 46.0
+			if not gm.active_entity.is_empty():
+				needed_height += 28.0
+			custom_minimum_size = Vector2(154.0, maxf(needed_height, 300.0))
 		queue_redraw()
 
 	func _append_timeline_branch(uid: int, current_by_uid: Dictionary, summons_by_owner: Dictionary, order: Array, seen: Dictionary) -> void:
@@ -579,7 +638,9 @@ class TimelineView extends Control:
 		for e_for_height: Dictionary in order:
 			var active_for_height: bool = int(e_for_height.get("uid", -1)) == active_uid
 			total_h += (124.0 if active_for_height else 96.0) + 10.0
-		var y: float = maxf(4.0, (size.y - total_h) * 0.5)
+		# Le contenu est plus haut que la fenêtre lorsque la timeline déborde ;
+		# le ScrollContainer expose alors les portraits suivants au défilement.
+		var y: float = 4.0
 		for k: int in range(order.size()):
 			var e2: Dictionary = order[k]
 			var big: bool = int(e2.get("uid", -1)) == active_uid
@@ -598,7 +659,8 @@ class TimelineView extends Control:
 			bg.shadow_color = Color(0, 0, 0, 0.5)
 			bg.shadow_size = 5
 			var rect := Rect2(x, y, w, w)
-			_entity_rects[int(e2.get("uid", -1))] = rect
+			# Zone de sélection légèrement élargie pour faciliter les taps.
+			_entity_rects[int(e2.get("uid", -1))] = rect.grow(3.0)
 			draw_style_box(bg, rect)
 			var tex: Texture2D = Portraits.get_texture(e2)
 			if tex != null:
@@ -615,7 +677,7 @@ class TimelineView extends Control:
 			if big:
 				draw_string_outline(font, Vector2(x, y + w + 22.0), String(e2["classe"]), HORIZONTAL_ALIGNMENT_CENTER, w, 18, 5, Color(0, 0, 0, 0.9))
 				draw_string(font, Vector2(x, y + w + 22.0), String(e2["classe"]), HORIZONTAL_ALIGNMENT_CENTER, w, 18, Color(1, 0.95, 0.75))
-			y += w + 10.0
+			y += w + (28.0 if big else 10.0)
 
 
 class StatsView extends Control:
@@ -854,23 +916,34 @@ func _build_ui() -> void:
 	# lorsque le viewport est redimensionné par le mode stretch Android.
 	_root.resized.connect(_on_hud_resized)
 
-	# Timeline : colonne VERTICALE sur le bord droit, de haut en bas.
-	# L'entité active est en tête (vignette agrandie), les suivantes en dessous.
+	# Timeline verticale défilante : les invocations ne peuvent plus pousser
+	# les derniers portraits hors écran. Le geste tactile fait défiler le contenu.
+	var tl_scroll := ScrollContainer.new()
+	tl_scroll.name = "TimelineScroll"
+	tl_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	tl_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	tl_scroll.follow_focus = false
+	tl_scroll.mouse_filter = Control.MOUSE_FILTER_STOP
+	tl_scroll.anchor_left = 1.0
+	tl_scroll.anchor_right = 1.0
+	tl_scroll.anchor_top = 0.0
+	tl_scroll.anchor_bottom = 1.0
+	tl_scroll.offset_left = -168.0
+	tl_scroll.offset_right = -14.0
+	tl_scroll.offset_top = 76.0
+	tl_scroll.offset_bottom = -208.0
+	_root.add_child(tl_scroll)
+	_timeline_scroll = tl_scroll
 	var tl := TimelineView.new()
 	tl.gm = game_manager
 	tl.grid = _grid
+	tl._scroll_container = tl_scroll
 	tl.inspect_requested.connect(_on_timeline_inspect)
 	tl.target_requested.connect(_on_timeline_target)
 	tl.mouse_filter = Control.MOUSE_FILTER_STOP
-	tl.anchor_left = 1.0
-	tl.anchor_right = 1.0
-	tl.anchor_top = 0.0
-	tl.anchor_bottom = 1.0
-	tl.offset_left = -168.0
-	tl.offset_right = -14.0
-	tl.offset_top = 76.0
-	tl.offset_bottom = -208.0
-	_root.add_child(tl)
+	tl.custom_minimum_size = Vector2(154.0, 300.0)
+	tl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tl_scroll.add_child(tl)
 	_timeline = tl
 
 	# Vignette du personnage actif : en haut à gauche, au-dessus du plateau.
@@ -1024,7 +1097,7 @@ func _build_ui() -> void:
 	_info_panel.visible = false
 	_info_label = Label.new()
 	_info_label.add_theme_font_size_override("font_size", 18)
-	_info_label.add_theme_color_override("font_color", Color(0.82, 0.84, 0.88))
+	_info_label.add_theme_color_override("font_color", Color(0.06, 0.06, 0.07))
 	_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_info_label.custom_minimum_size = Vector2(280, 0)
 	_info_panel.add_child(_info_label)
