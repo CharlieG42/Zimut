@@ -119,6 +119,8 @@ l'état de la campagne : `owned`, `pending_city`, `sieges`, `buildings`,
   routes dorées = ouvertes.
 - Pas de temps réel, pas de timer hors combat.
 - Fiche ville en panneau latéral, boutons gros et rares (existant).
+- **Lisibilité renforcée (passe du 15/10)** : noms de villes agrandis (18 px), boutons plus hauts (76 px), titre de carte et légende plus visibles ; le panneau de conseil utilise une taille de texte plus confortable et le bouton d’assaut est plus grand.
+- **Limite responsive connue** : la carte et le panneau restent positionnés dans un canevas large fixe. Sur téléphone en portrait, le panneau peut sortir de la zone visible et les routes/villes se resserrer. La prochaine étape UX doit remplacer le placement absolu par une composition adaptative : carte dans une zone défilante ou plein écran, panneau de ville repliable sous la carte, et boutons de sélection dimensionnés selon la largeur disponible. Vérifier au minimum 360×800, 800×360 et 1280×720.
 
 ## 9. Tests
 
