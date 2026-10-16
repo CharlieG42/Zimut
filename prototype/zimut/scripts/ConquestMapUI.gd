@@ -363,8 +363,8 @@ func _layout_responsive() -> void:
 		# horizontal reste disponible en plus du vertical.
 		var map_w: float = maxf(1536.0, viewport_w)
 		var map_view_h: float = clampf(h * 0.52, 360.0, 470.0)
-		var map_content_h: float = maxf(1024.0, map_view_h) * _map_zoom
-		var map_content_w: float = map_w * _map_zoom
+		var map_content_h: float = maxf(1024.0, map_view_h)
+		var map_content_w: float = map_w
 		var side_h: float = 600.0
 		_body_content.custom_minimum_size = Vector2(viewport_w, map_view_h + 14.0 + side_h)
 		_map_scroll.position = Vector2.ZERO
@@ -373,8 +373,9 @@ func _layout_responsive() -> void:
 		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if map_w > viewport_w else ScrollContainer.SCROLL_MODE_DISABLED
 		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
 		_map_panel.position = Vector2.ZERO
+		_map_panel.scale = Vector2(_map_zoom, _map_zoom)
 		_map_panel.size = Vector2(map_content_w, map_content_h)
-		_map_panel.custom_minimum_size = Vector2(map_content_w, map_content_h)
+		_map_panel.custom_minimum_size = Vector2(map_content_w * _map_zoom, map_content_h * _map_zoom)
 		_side_panel.position = Vector2(0, map_view_h + 14.0)
 		_side_panel.size = Vector2(viewport_w, side_h)
 		_side_panel.custom_minimum_size = Vector2(viewport_w, side_h)
@@ -399,15 +400,16 @@ func _layout_responsive() -> void:
 		# plus haut, ce qui rend le défilement vertical réellement possible.
 		var map_view_h: float = maxf(420.0, h - body_top - 8.0)
 		var map_content_h: float = maxf(1024.0, map_view_h)
-		_body_content.custom_minimum_size = Vector2(map_w + 18.0 + side_w, map_view_h)
+		_body_content.custom_minimum_size = Vector2(map_w * _map_zoom + 18.0 + side_w, maxf(map_view_h, map_content_h * _map_zoom))
 		_map_scroll.position = Vector2.ZERO
 		_map_scroll.size = Vector2(map_w, map_view_h)
 		_map_scroll.custom_minimum_size = Vector2(map_w, map_view_h)
 		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if map_w > _map_scroll.size.x else ScrollContainer.SCROLL_MODE_DISABLED
 		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
 		_map_panel.position = Vector2.ZERO
+		_map_panel.scale = Vector2(_map_zoom, _map_zoom)
 		_map_panel.size = Vector2(map_w, map_content_h)
-		_map_panel.custom_minimum_size = Vector2(map_w, map_content_h)
+		_map_panel.custom_minimum_size = Vector2(map_w * _map_zoom, map_content_h * _map_zoom)
 		_side_panel.position = Vector2(map_w + 18.0, 0)
 		_side_panel.size = Vector2(side_w, map_view_h)
 		_side_panel.custom_minimum_size = Vector2(side_w, map_view_h)
@@ -426,8 +428,11 @@ func _layout_responsive() -> void:
 				(child as Button).custom_minimum_size.y = 54
 				(child as Button).add_theme_font_size_override("font_size", 16)
 
-	var button_w: float = (154.0 if compact else 166.0) * _map_zoom
-	var button_h: float = (124.0 if compact else 132.0) * _map_zoom
+	# Le panneau complet (fond, routes, sprites et libellés) porte le zoom.
+	# Les contrôles gardent donc leurs dimensions de base et suivent ensemble
+	# la transformation du panneau, sans agrandir les villes isolément.
+	var button_w: float = 154.0 if compact else 166.0
+	var button_h: float = 124.0 if compact else 132.0
 	for city_id: String in _city_buttons.keys():
 		var btn: Button = _city_buttons[city_id]
 		var p: Vector2 = CITY_POS[city_id]
@@ -441,12 +446,12 @@ func _layout_responsive() -> void:
 		var nameplate: Label = _city_labels[city_id]
 		nameplate.size.x = button_w
 		nameplate.position.x = 0.0
-		nameplate.add_theme_font_size_override("font_size", int(round((11.0 if compact else 13.0) * _map_zoom)))
+		nameplate.add_theme_font_size_override("font_size", 11 if compact else 13)
 		var sprite: TextureRect = btn.get_node("CityIllustration") as TextureRect
-		sprite.size = Vector2(button_w - 36.0 * _map_zoom, 82.0 * _map_zoom)
-		sprite.position = Vector2(18.0 * _map_zoom, 0.0)
-		nameplate.position.y = 76.0 * _map_zoom
-		nameplate.size.y = 45.0 * _map_zoom
+		sprite.size = Vector2(button_w - 36.0, 82.0)
+		sprite.position = Vector2(18.0, 0.0)
+		nameplate.position.y = 76.0
+		nameplate.size.y = 45.0
 	if _side_scroll != null:
 		_side_scroll.queue_sort()
 	if _body_scroll != null:
