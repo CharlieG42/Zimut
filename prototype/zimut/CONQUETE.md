@@ -46,7 +46,7 @@ identique d'une partie à l'autre ; la rejouabilité vient de l'économie
 et des choix de bâtiments.
 
 ### Catalogue officiel (`ProgressionManager.CONQUEST_CITIES`)
-20 villes sur les 3 biomes + le Donjon (miroir exact de la carte) :
+28 villes sur les 3 biomes + le Donjon (miroir exact de la carte) :
 
 | id | Ville | Type | Biome | Niveau |
 |---|---|---|---|---|
@@ -69,6 +69,14 @@ et des choix de bâtiments.
 | caravanserail | Caravansérail Rouge | Neutre | Désert | 22 |
 | observatoire | Observatoire Solaire | Neutre | Désert | 23 |
 | port_sable | Port des Sables | Adverse (siège ×4) | Désert | 24 |
+| bois_lune | Bois de Lune | Neutre | Forêt | 16 |
+| sanctuaire_mousse | Sanctuaire Moussu | Neutre | Forêt | 17 |
+| forge_givre | Forge du Givre | Adverse | Montagne | 23 |
+| pic_foudroyant | Pic Foudroyant | Adverse | Montagne | 24 |
+| marais_spectres | Marais des Spectres | Neutre | Forêt | 18 |
+| fort_cendre | Fort des Cendres | Adverse | Désert | 26 |
+| temple_soleil | Temple du Soleil | Neutre | Désert | 25 |
+| citadelle_sable | Citadelle de Sable | Adverse | Désert | 27 |
 | donjon_roi | Donjon du Roi Squelette | Objectif final (siège ×4, boss) | Donjon | 25 |
 
 ### Adjacence — FAIT
