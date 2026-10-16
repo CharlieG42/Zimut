@@ -177,21 +177,21 @@ func _build() -> void:
 
 	var map := Panel.new()
 	map.position = Vector2.ZERO
-	map.size = Vector2(1320, 1600)
+	map.size = Vector2(1536, 1024)
 	map.add_theme_stylebox_override("panel", _style(PANEL, GOLD))
 	_map_scroll.add_child(map)
 	_map_panel = map
 
-	# Relief illustré sous les routes et les boutons : chaque ville est
-	# entourée d'un paysage organique lié à son biome, plutôt que d'un simple
-	# rectangle coloré. Les teintes restent discrètes pour préserver la lecture.
-	var terrain := _BiomeTerrain.new()
-	terrain.city_pos = CITY_POS
-	for terrain_city_id: String in _city_ids():
-		terrain.city_biomes[terrain_city_id] = String(_city_meta(terrain_city_id)["biome"])
-	terrain.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	terrain.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	map.add_child(terrain)
+	# Fond de carte peint : les villes, routes et interactions restent des
+	# contrôles Godot superposés à cette illustration.
+	var world_art := TextureRect.new()
+	world_art.name = "ConquestWorldArtwork"
+	world_art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	world_art.texture = load("res://assets/ui/conquest/conquest_world_map.png") as Texture2D
+	world_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	world_art.stretch_mode = TextureRect.STRETCH_SCALE
+	world_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	map.add_child(world_art)
 
 	_map_title_label = Label.new()
 	_map_title_label.text = "LE MONDE DE ZIMUT"
