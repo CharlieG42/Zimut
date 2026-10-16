@@ -178,6 +178,8 @@ l'état de la campagne : `owned`, `pending_city`, `sieges`, `buildings`,
 4. **Défis optionnels** : gagner en peu de tours, sans mort ou avec une classe
    donnée pour obtenir une récompense bonus.
 
+**Bonus de contrôle de biome (première version intégrée)** : posséder toutes les villes conquérables d'un biome ajoute à chaque victoire +5 Bois (Forêt), +5 Fer (Montagne) ou +5 Venin (Désert). Le bonus est inclus dans la production de l'empire affichée sur la carte et dans l'écran d'annexion.
+
 ### Priorité 2 — Donner une vraie identité visuelle au monde
 5. **Illustrations par biome** : fond de carte forêt/montagne/désert, reliefs,
    routes dessinées et points d'intérêt.
