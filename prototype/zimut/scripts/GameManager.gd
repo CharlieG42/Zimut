@@ -160,10 +160,14 @@ func init_grid() -> void:
 func _generate_obstacles() -> void:
 	obstacles = {}
 	var forbidden: Dictionary = {}
-	for sp: Vector2i in PLAYER_SPAWNS + ENEMY_SPAWNS:
-		forbidden[sp] = true
-		for d: Vector2i in Combat.DIRS:
-			forbidden[sp + d] = true
+	# Réserver deux zones de déploiement dégagées ; les unités y apparaîtront
+	# aléatoirement à chaque combat, sans obstacle sous leurs pieds.
+	for y: int in range(0, 3):
+		for x: int in range(0, 3):
+			forbidden[Vector2i(x, y)] = true
+	for y: int in range(GRID_SIZE - 3, GRID_SIZE):
+		for x: int in range(GRID_SIZE - 3, GRID_SIZE):
+			forbidden[Vector2i(x, y)] = true
 	# La forêt garde des couloirs de déplacement plus lisibles : moins d’obstacles décoratifs.
 	var wanted: int = _rng.randi_range(5, 7) if fight_biome == "Forêt" else _rng.randi_range(6, 9)
 	var tree_chance: float = 0.55
@@ -241,6 +245,27 @@ func _base_entity(ename: String, etype: String, team: String, classe: String, le
 	}
 
 
+## Tire des positions de départ sans doublon dans la zone de chaque équipe.
+## Les alliés occupent le coin haut-gauche de la grille logique, les ennemis
+## le coin opposé : la rencontre reste lisible, mais la formation change.
+func _random_spawn_positions(team: String, count: int) -> Array[Vector2i]:
+	var candidates: Array[Vector2i] = []
+	if team == "player":
+		for y: int in range(0, 3):
+			for x: int in range(0, 3):
+				candidates.append(Vector2i(x, y))
+	else:
+		for y: int in range(GRID_SIZE - 3, GRID_SIZE):
+			for x: int in range(GRID_SIZE - 3, GRID_SIZE):
+				candidates.append(Vector2i(x, y))
+	var positions: Array[Vector2i] = []
+	while positions.size() < count and not candidates.is_empty():
+		var idx: int = _rng.randi_range(0, candidates.size() - 1)
+		positions.append(candidates[idx])
+		candidates.remove_at(idx)
+	return positions
+
+
 func init_entities() -> void:
 	players = []
 	enemies = []
@@ -263,9 +288,10 @@ func init_entities() -> void:
 				use_save = false
 
 	var bless: int = 0
+	var player_spawn_positions: Array[Vector2i] = _random_spawn_positions("player", player_classes.size())
 	for i: int in range(player_classes.size()):
 		var classe: String = player_classes[i]
-		var pos: Vector2i = PLAYER_SPAWNS[i]
+		var pos: Vector2i = player_spawn_positions[i]
 		var st: Dictionary = {}
 		var plevel: int = QUICK_PLAYER_LEVEL
 		var pfx: Dictionary = {}
@@ -368,9 +394,10 @@ func init_entities() -> void:
 		enemy_types = [biome_types[0], biome_types[1], biome_types[0] if _rng.randf() < 0.5 else biome_types[1],
 			biome_types[1] if _rng.randf() < 0.5 else biome_types[0]]
 	var enemies_data: Array = get_enemies_data()
+	var enemy_spawn_positions: Array[Vector2i] = _random_spawn_positions("enemy", enemy_types.size())
 	for i: int in range(enemy_types.size()):
 		var etype: String = enemy_types[i]
-		var pos: Vector2i = ENEMY_SPAWNS[i]
+		var pos: Vector2i = enemy_spawn_positions[i]
 		if etype == "BOSS":
 			_spawn_boss(pos, lvl)
 			continue
