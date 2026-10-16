@@ -180,24 +180,33 @@ l'état de la campagne : `owned`, `pending_city`, `sieges`, `buildings`,
 
 **Bonus de contrôle de biome (première version intégrée)** : posséder toutes les villes conquérables d'un biome ajoute à chaque victoire +5 Bois (Forêt), +5 Fer (Montagne) ou +5 Venin (Désert). Le bonus est inclus dans la production de l'empire affichée sur la carte et dans l'écran d'annexion.
 
+### Priorité 1b — Raconter la progression
+4. **Chronique de campagne (en cours)** : conserver les huit événements les plus
+   récents (annexion, butin unique, progression de siège, contre-attaque,
+   construction) et les afficher dans le conseil de guerre. La liste reste courte
+   pour préserver l'espace tactile.
+
 ### Priorité 2 — Donner une vraie identité visuelle au monde
-5. **Illustrations par biome** : fond de carte forêt/montagne/désert, reliefs,
+5. **Repères de biome (en cours)** : les villes affichent un symbole distinct
+   et une bordure colorée par région ; le fond reste réservé à l'état territorial
+   pour conserver une lecture immédiate sur téléphone.
+6. **Illustrations par biome** : fond de carte forêt/montagne/désert, reliefs,
    routes dessinées et points d'intérêt.
-6. **Vignettes et icônes cohérentes** : une silhouette distincte par ville,
+7. **Vignettes et icônes cohérentes** : une silhouette distincte par ville,
    icônes de bâtiments et états lisibles (allié, neutre, ennemi, assiégé).
-7. **Micro-animations et retours** : animation à la sélection, route qui s'allume,
+8. **Micro-animations et retours** : animation à la sélection, route qui s'allume,
    effet d'annexion, notification de production et son discret.
-8. **Carte mieux racontée** : nom de région, courte description et historique
+9. **Carte mieux racontée** : nom de région, courte description et historique
    des 2-3 derniers événements (annexion, siège, pillage).
 
 ### Priorité 3 — Équilibrer et rendre les sessions plus fluides
-9. **Bonus de contrôle de biome** : conquérir toutes les villes d'un biome
+10. **Bonus de contrôle de biome** : conquérir toutes les villes d'un biome
    donne un bonus de production et une récompense dédiée.
-10. **Sièges moins répétitifs** : payer pour affaiblir une garnison, ou choisir
+11. **Sièges moins répétitifs** : payer pour affaiblir une garnison, ou choisir
     une approche tactique qui modifie la bataille plutôt que de supprimer du contenu.
-11. **Bâtiments liés aux biomes** : des choix différents selon forêt, montagne
+12. **Bâtiments liés aux biomes** : des choix différents selon forêt, montagne
     ou désert, avec des compromis lisibles.
-12. **Équilibrage et tests sur appareil** : durée de campagne, économie, taille
+13. **Équilibrage et tests sur appareil** : durée de campagne, économie, taille
     des textes et interactions tactiles vérifiées en paysage Android.
 
 ## 11. Historique des arbitrages
