@@ -15,28 +15,27 @@ const GOLD := Color(0.96, 0.75, 0.31)
 ## Carte organisée en cinq colonnes et quatre rangées : les boutons gardent
 ## un espacement lisible même avec vingt villes.
 const CITY_POS := {
-	"citadelle_ronce": Vector2(0.10, 0.12),
-	"vieille_tour": Vector2(0.30, 0.12),
-	"mine_cristal": Vector2(0.50, 0.12),
-	"garnison": Vector2(0.70, 0.12),
-	"donjon_roi": Vector2(0.90, 0.12),
-	"clairiere": Vector2(0.10, 0.30),
-	"ruines_lierre": Vector2(0.30, 0.30),
-	"col_givre": Vector2(0.50, 0.30),
-	"bastion_orage": Vector2(0.70, 0.30),
-	"tour_sable": Vector2(0.90, 0.30),
-	"village_brume": Vector2(0.10, 0.48),
-	"capitale": Vector2(0.30, 0.48),
-	"abbaye_ronce": Vector2(0.50, 0.48),
-	"hameau_pin": Vector2(0.70, 0.48),
-	"port_sable": Vector2(0.90, 0.48),
-	"pont_mousse": Vector2(0.10, 0.66),
-	"fort_racine": Vector2(0.30, 0.66),
-	"oasis": Vector2(0.50, 0.66),
-	"caravanserail": Vector2(0.70, 0.66),
-	"observatoire": Vector2(0.90, 0.66),
+	"citadelle_ronce": Vector2(0.12, 0.12),
+	"vieille_tour": Vector2(0.37, 0.12),
+	"mine_cristal": Vector2(0.63, 0.12),
+	"donjon_roi": Vector2(0.88, 0.12),
+	"clairiere": Vector2(0.12, 0.30),
+	"ruines_lierre": Vector2(0.37, 0.30),
+	"col_givre": Vector2(0.63, 0.30),
+	"garnison": Vector2(0.88, 0.30),
+	"village_brume": Vector2(0.12, 0.48),
+	"capitale": Vector2(0.37, 0.48),
+	"abbaye_ronce": Vector2(0.63, 0.48),
+	"bastion_orage": Vector2(0.88, 0.48),
+	"pont_mousse": Vector2(0.12, 0.66),
+	"fort_racine": Vector2(0.37, 0.66),
+	"hameau_pin": Vector2(0.63, 0.66),
+	"tour_sable": Vector2(0.88, 0.66),
+	"caravanserail": Vector2(0.12, 0.84),
+	"oasis": Vector2(0.37, 0.84),
+	"observatoire": Vector2(0.63, 0.84),
+	"port_sable": Vector2(0.88, 0.84),
 }
-
 var _save: Dictionary = {}
 var _slot: int = -1
 var _conquest: Dictionary = {}
