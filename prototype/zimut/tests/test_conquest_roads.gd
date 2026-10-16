@@ -86,6 +86,15 @@ func _boot() -> void:
 	check(pm.conquest_city_reward("pont_mousse").get("name", "") != pm.conquest_city_reward("clairiere").get("name", ""), "les villes ont des récompenses distinctes")
 	check(pm.CONQUEST_CITY_REWARDS.size() == 27, "27 villes non-capitales disposent d'un butin unique")
 
+	# ── Chronique : événements de campagne bornés et persistants ──
+	check(cq.get("events", []).any(func(event: String) -> bool: return event.contains("Ville annexée") and event.contains("Clairière")), "chronique : annexion enregistrée")
+	check(cq.get("events", []).any(func(event: String) -> bool: return event.contains("Butin") and event.contains("Réserve des bûcherons")), "chronique : butin thématique enregistré")
+	var event_log: Dictionary = {}
+	for event_index: int in range(12):
+		pm.conquest_add_event(event_log, "Événement %d" % event_index)
+	check(event_log.get("events", []).size() == 8, "chronique limitée aux huit événements les plus récents")
+	check(String(event_log["events"][0]) == "Événement 4", "chronique supprime les événements les plus anciens")
+
 	# ── Sièges sur les nouvelles villes adverses des autres biomes ──
 	check(pm.conquest_city_battles("garnison") == 4, "Garnison (enemy) : siège en 4 batailles")
 	check(pm.conquest_city_battles("hameau_pin") == 1, "Hameau (neutral) : 1 bataille")
