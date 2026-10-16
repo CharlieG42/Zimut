@@ -418,9 +418,10 @@ func init_entities() -> void:
 		var settings: Node = get_node_or_null("/root/GameSettings")
 		var hp_mult: float = settings.enemy_hp_mult() if settings != null else 1.0
 		var atk_mult: float = settings.enemy_attack_mult() if settings != null else 1.0
-		var tactic_mult: float = 0.85 if conquest_tactic == "sabotage" else 1.0
-		var pv: int = maxi(1, int(float(_csv_int(info, "PV", 50)) * ENEMY_HP_MULT * lscale * hp_mult * tactic_mult))
-		var atk: int = maxi(1, int(float(_csv_int(info, "Attaque", 10)) * ENEMY_ATK_MULT * lscale * atk_mult * tactic_mult))
+		var hp_tactic_mult: float = 0.85 if conquest_tactic == "sabotage" else 1.0
+		var atk_tactic_mult: float = 0.85 if conquest_tactic == "sabotage" else (0.90 if conquest_tactic == "supply" else 1.0)
+		var pv: int = maxi(1, int(float(_csv_int(info, "PV", 50)) * ENEMY_HP_MULT * lscale * hp_mult * hp_tactic_mult))
+		var atk: int = maxi(1, int(float(_csv_int(info, "Attaque", 10)) * ENEMY_ATK_MULT * lscale * atk_mult * atk_tactic_mult))
 		var enemy: Dictionary = _base_entity("%s Lv%d" % [etype, minion_lvl], "Enemy", "enemy",
 			etype, minion_lvl, pos)
 		enemy.merge({
@@ -479,9 +480,10 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 	var hp_mult: float = settings.enemy_hp_mult() if settings != null else 1.0
 	var atk_mult: float = settings.enemy_attack_mult() if settings != null else 1.0
 	var conquest_tactic: String = String(active_save.get("conquest", {}).get("pending_tactic", "none")) if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "conquest" else "none"
-	var tactic_mult: float = 0.85 if conquest_tactic == "sabotage" else 1.0
-	var pv: int = maxi(1, int(float(_csv_int(info, "PV", 120)) * ENEMY_HP_MULT * BOSS_HP_MULT * lscale * hp_mult * tactic_mult))
-	var atk: int = maxi(1, int(float(_csv_int(info, "Attaque", 20)) * ENEMY_ATK_MULT * BOSS_ATK_MULT * lscale * atk_mult * tactic_mult))
+	var hp_tactic_mult: float = 0.85 if conquest_tactic == "sabotage" else 1.0
+	var atk_tactic_mult: float = 0.85 if conquest_tactic == "sabotage" else (0.90 if conquest_tactic == "supply" else 1.0)
+	var pv: int = maxi(1, int(float(_csv_int(info, "PV", 120)) * ENEMY_HP_MULT * BOSS_HP_MULT * lscale * hp_mult * hp_tactic_mult))
+	var atk: int = maxi(1, int(float(_csv_int(info, "Attaque", 20)) * ENEMY_ATK_MULT * BOSS_ATK_MULT * lscale * atk_mult * atk_tactic_mult))
 	fight_enemies.append({"type": boss_name, "level": lvl, "boss": true})
 	var boss: Dictionary = _base_entity("☠ BOSS %s Lv%d" % [boss_name, lvl], "Enemy", "enemy", boss_name, lvl, pos)
 	boss.merge({
