@@ -272,7 +272,7 @@ func _layout_responsive() -> void:
 		# Largeur minimale pour séparer les villes proches et garder des
 		# libellés lisibles sur les téléphones étroits.
 		var map_w: float = maxf(1320.0, viewport_w)
-		var map_h: float = maxf(1100.0, clampf(h * 0.52, 360.0, 470.0))
+		var map_h: float = maxf(1300.0, clampf(h * 0.52, 360.0, 470.0))
 		var side_h: float = 600.0
 		_body_content.custom_minimum_size = Vector2(viewport_w, map_h + 14.0 + side_h)
 		_map_scroll.position = Vector2.ZERO
@@ -302,7 +302,7 @@ func _layout_responsive() -> void:
 	else:
 		var side_w: float = clampf(w * 0.27, 330.0, 430.0)
 		var map_w: float = maxf(420.0, w - side_w - 18.0)
-		var map_h: float = maxf(1100.0, h - body_top - 8.0)
+		var map_h: float = maxf(1300.0, h - body_top - 8.0)
 		_body_content.custom_minimum_size = Vector2(map_w + 18.0 + side_w, map_h)
 		_map_scroll.position = Vector2.ZERO
 		_map_scroll.size = Vector2(map_w, map_h)
