@@ -289,7 +289,7 @@ func _layout_responsive() -> void:
 		_side_panel.size = Vector2(viewport_w, side_h)
 		_side_panel.custom_minimum_size = Vector2(viewport_w, side_h)
 		_legend_label.text = "Vert : allié · Gris : neutre · Rouge : ennemi · ⚔ : attaquable"
-		_legend_label.position = Vector2(10, map_h - 27.0)
+		_legend_label.position = Vector2(10, map_content_h - 27.0)
 		_map_title_label.add_theme_font_size_override("font_size", 17)
 		_legend_label.add_theme_font_size_override("font_size", 11)
 		_side_title.add_theme_font_size_override("font_size", 20)
