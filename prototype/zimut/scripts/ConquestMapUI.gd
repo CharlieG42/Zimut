@@ -595,9 +595,92 @@ func _on_build_pressed(city_id: String, building: String) -> void:
 func _attack_selected_city() -> void:
 	if not ProgressionManager.conquest_city_attackable(_conquest, _selected_id):
 		return
+	_show_assault_prep()
+
+## Choix tactique facultatif avant l'assaut. Le coût est payé une seule fois,
+## puis l'effet est transmis au combat et consommé à sa résolution.
+func _show_assault_prep() -> void:
+	var city: Dictionary = _city_meta(_selected_id)
+	var dim := ColorRect.new()
+	dim.name = "AssaultPrepOverlay"
+	dim.color = Color(0.015, 0.035, 0.055, 0.78)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(dim)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _style(Color(0.10, 0.17, 0.22, 0.99), GOLD))
+	panel.custom_minimum_size = Vector2(620, 0)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE, 0)
+	dim.add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 10)
+	panel.add_child(box)
+	var title := Label.new()
+	title.text = "PRÉPARER L'ASSAUT — %s" % String(city["name"]).to_upper()
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title.add_theme_font_size_override("font_size", 25)
+	title.add_theme_color_override("font_color", GOLD)
+	box.add_child(title)
+	var intro := Label.new()
+	intro.text = "Choisis une approche, ou pars sans dépenser de ressources."
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	intro.add_theme_font_size_override("font_size", 17)
+	intro.add_theme_color_override("font_color", TEXT)
+	box.add_child(intro)
+	var resources: Dictionary = _save.get("resources", {})
+	var gold: int = int(_save.get("gold", 0))
+	var wood: int = int(resources.get("Bois", 0))
+	var iron: int = int(resources.get("Fer", 0))
+	var scout := Button.new()
+	scout.text = "🔎 ÉCLAIREURS — 25 or\nRéduit le niveau des ennemis de 1"
+	scout.custom_minimum_size.y = 66
+	scout.add_theme_font_size_override("font_size", 18)
+	scout.disabled = gold < 25
+	scout.pressed.connect(func() -> void:
+		dim.queue_free()
+		_choose_assault_tactic("scouts"))
+	box.add_child(scout)
+	var sabotage := Button.new()
+	sabotage.text = "🧨 SABOTAGE — 12 Bois + 8 Fer\nRéduit les PV et l'attaque ennemis de 15 %"
+	sabotage.custom_minimum_size.y = 66
+	sabotage.add_theme_font_size_override("font_size", 18)
+	sabotage.disabled = wood < 12 or iron < 8
+	sabotage.pressed.connect(func() -> void:
+		dim.queue_free()
+		_choose_assault_tactic("sabotage"))
+	box.add_child(sabotage)
+	var none := Button.new()
+	none.text = "⚔ PARTIR SANS PRÉPARATION"
+	none.custom_minimum_size.y = 58
+	none.add_theme_font_size_override("font_size", 18)
+	none.pressed.connect(func() -> void:
+		dim.queue_free()
+		_choose_assault_tactic("none"))
+	box.add_child(none)
+	var cancel := Button.new()
+	cancel.text = "ANNULER"
+	cancel.custom_minimum_size.y = 48
+	cancel.pressed.connect(func() -> void: dim.queue_free())
+	box.add_child(cancel)
+
+func _choose_assault_tactic(tactic: String) -> void:
+	var resources: Dictionary = _save.get("resources", {})
+	match tactic:
+		"scouts":
+			if int(_save.get("gold", 0)) < 25:
+				return
+			_save["gold"] = int(_save.get("gold", 0)) - 25
+		"sabotage":
+			if int(resources.get("Bois", 0)) < 12 or int(resources.get("Fer", 0)) < 8:
+				return
+			resources["Bois"] = int(resources.get("Bois", 0)) - 12
+			resources["Fer"] = int(resources.get("Fer", 0)) - 8
+			_save["resources"] = resources
 	var city: Dictionary = _city_meta(_selected_id)
 	_conquest["pending_city"] = _selected_id
 	_conquest["pending_level"] = int(city["level"])
+	_conquest["pending_tactic"] = tactic
 	_save["conquest"] = _conquest
 	_save["campaign_mode"] = "conquest"
 	_persist()
