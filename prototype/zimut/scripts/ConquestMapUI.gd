@@ -227,6 +227,10 @@ func _build() -> void:
 func _layout_responsive() -> void:
 	if _root == null or _body_scroll == null or _body_content == null or _map_panel == null or _side_panel == null:
 		return
+	if _title_label == null or _subtitle_label == null or _header == null or _legend_label == null or _map_title_label == null:
+		return
+	if _side_title == null or _message == null or _attack == null or _back_button == null or _build_box == null:
+		return
 	var w: float = maxf(280.0, _root.size.x)
 	var h: float = maxf(400.0, _root.size.y)
 	var compact: bool = w < 1000.0 or h < 560.0
