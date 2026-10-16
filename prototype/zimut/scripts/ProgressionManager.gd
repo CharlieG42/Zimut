@@ -108,6 +108,14 @@ const CONQUEST_CITIES := {
 	"caravanserail": {"name": "Caravansérail Rouge", "kind": "neutral", "biome": "Désert", "level": 22},
 	"observatoire": {"name": "Observatoire Solaire", "kind": "neutral", "biome": "Désert", "level": 23},
 	"port_sable": {"name": "Port des Sables", "kind": "enemy", "biome": "Désert", "level": 24},
+	"bois_lune": {"name": "Bois de Lune", "kind": "neutral", "biome": "Forêt", "level": 16},
+	"sanctuaire_mousse": {"name": "Sanctuaire Moussu", "kind": "neutral", "biome": "Forêt", "level": 17},
+	"forge_givre": {"name": "Forge du Givre", "kind": "enemy", "biome": "Montagne", "level": 23},
+	"pic_foudroyant": {"name": "Pic Foudroyant", "kind": "enemy", "biome": "Montagne", "level": 24},
+	"marais_spectres": {"name": "Marais des Spectres", "kind": "neutral", "biome": "Forêt", "level": 18},
+	"fort_cendre": {"name": "Fort des Cendres", "kind": "enemy", "biome": "Désert", "level": 26},
+	"temple_soleil": {"name": "Temple du Soleil", "kind": "neutral", "biome": "Désert", "level": 25},
+	"citadelle_sable": {"name": "Citadelle de Sable", "kind": "enemy", "biome": "Désert", "level": 27},
 }
 
 ## Routes de la carte : on ne peut attaquer qu'une ville RELIÉE par route à
@@ -127,6 +135,13 @@ const CONQUEST_ROUTES: Array = [
 	["oasis", "caravanserail"], ["caravanserail", "observatoire"],
 	["observatoire", "port_sable"], ["port_sable", "tour_sable"],
 	["fort_racine", "donjon_roi"], ["garnison", "donjon_roi"], ["tour_sable", "donjon_roi"],
+	# Branches supplémentaires pour étendre la campagne au-delà du premier écran.
+	["fort_racine", "bois_lune"], ["bois_lune", "sanctuaire_mousse"],
+	["sanctuaire_mousse", "marais_spectres"], ["marais_spectres", "abbaye_ronce"],
+	["col_givre", "forge_givre"], ["forge_givre", "pic_foudroyant"],
+	["pic_foudroyant", "bastion_orage"], ["oasis", "fort_cendre"],
+	["fort_cendre", "temple_soleil"], ["temple_soleil", "citadelle_sable"],
+	["citadelle_sable", "port_sable"], ["citadelle_sable", "tour_sable"],
 ]
 
 ## Bâtiments de ressources constructibles dans les villes conquises.
