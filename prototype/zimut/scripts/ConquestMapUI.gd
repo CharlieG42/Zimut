@@ -12,29 +12,38 @@ const GOLD := Color(0.96, 0.75, 0.31)
 
 ## Positions sur la carte (fractions du panneau) — le reste (noms, types,
 ## biomes, niveaux, routes) vient du catalogue de ProgressionManager.
-## Carte organisée en cinq colonnes et quatre rangées : les boutons gardent
-## un espacement lisible même avec vingt villes.
+## Carte organisée en quatre colonnes et sept rangées : les 28 villes
+## s'étendent verticalement et demandent un défilement pour être explorées.
 const CITY_POS := {
-	"citadelle_ronce": Vector2(0.12, 0.12),
-	"vieille_tour": Vector2(0.37, 0.12),
-	"mine_cristal": Vector2(0.63, 0.12),
-	"donjon_roi": Vector2(0.88, 0.12),
-	"clairiere": Vector2(0.12, 0.30),
-	"ruines_lierre": Vector2(0.37, 0.30),
-	"col_givre": Vector2(0.63, 0.30),
-	"garnison": Vector2(0.88, 0.30),
-	"village_brume": Vector2(0.12, 0.48),
-	"capitale": Vector2(0.37, 0.48),
-	"abbaye_ronce": Vector2(0.63, 0.48),
-	"bastion_orage": Vector2(0.88, 0.48),
-	"pont_mousse": Vector2(0.12, 0.66),
-	"fort_racine": Vector2(0.37, 0.66),
-	"hameau_pin": Vector2(0.63, 0.66),
-	"tour_sable": Vector2(0.88, 0.66),
-	"caravanserail": Vector2(0.12, 0.84),
-	"oasis": Vector2(0.37, 0.84),
-	"observatoire": Vector2(0.63, 0.84),
-	"port_sable": Vector2(0.88, 0.84),
+	# Forêt à l'ouest : villages et fortifications répartis dans les clairières.
+	"citadelle_ronce": Vector2(0.23, 0.72),
+	"vieille_tour": Vector2(0.23, 0.10),
+	"mine_cristal": Vector2(0.47, 0.12),
+	"donjon_roi": Vector2(0.55, 0.84),
+	"clairiere": Vector2(0.10, 0.15),
+	"ruines_lierre": Vector2(0.27, 0.25),
+	"col_givre": Vector2(0.42, 0.28),
+	"garnison": Vector2(0.60, 0.29),
+	"village_brume": Vector2(0.11, 0.57),
+	"capitale": Vector2(0.14, 0.30),
+	"abbaye_ronce": Vector2(0.28, 0.55),
+	"bastion_orage": Vector2(0.61, 0.46),
+	"pont_mousse": Vector2(0.09, 0.43),
+	"fort_racine": Vector2(0.25, 0.42),
+	"hameau_pin": Vector2(0.45, 0.43),
+	"tour_sable": Vector2(0.82, 0.42),
+	"caravanserail": Vector2(0.73, 0.56),
+	"oasis": Vector2(0.87, 0.58),
+	"observatoire": Vector2(0.79, 0.70),
+	"port_sable": Vector2(0.90, 0.75),
+	"bois_lune": Vector2(0.10, 0.77),
+	"sanctuaire_mousse": Vector2(0.28, 0.82),
+	"forge_givre": Vector2(0.45, 0.58),
+	"pic_foudroyant": Vector2(0.60, 0.62),
+	"marais_spectres": Vector2(0.11, 0.91),
+	"fort_cendre": Vector2(0.72, 0.84),
+	"temple_soleil": Vector2(0.84, 0.88),
+	"citadelle_sable": Vector2(0.90, 0.94),
 }
 var _save: Dictionary = {}
 var _slot: int = -1
@@ -43,6 +52,8 @@ var _selected_id: String = "clairiere"
 var _message: Label
 var _attack: Button
 var _city_buttons: Dictionary = {}
+var _city_labels: Dictionary = {}
+var _city_sprite_cache: Dictionary = {}
 var _build_box: VBoxContainer
 var _header: Label
 var _root: Control
@@ -58,8 +69,24 @@ var _map_title_label: Label
 var _side_title: Label
 var _back_button: Button
 var _side_scroll: ScrollContainer
+var _chronicle_label: Label
+
+# Capture le glissement directement sur toute la zone de carte, y compris
+# au-dessus des boutons des villes. Le ScrollContainer seul ne reçoit pas
+# toujours le mouvement tactile lorsque son enfant est un Button.
+var _map_pointer_active: bool = false
+var _map_pointer_index: int = -1
+var _map_pointer_last: Vector2 = Vector2.ZERO
+var _map_pointer_origin: Vector2 = Vector2.ZERO
+var _map_dragged: bool = false
+var _map_zoom: float = 1.0
+var _touch_positions: Dictionary = {}
+var _pinch_start_distance: float = 0.0
+var _pinch_start_zoom: float = 1.0
+const MAP_ZOOM_MAX: float = 2.2
 
 func _ready() -> void:
+	set_process_input(true)
 	Music.play("adventure")
 	layer = 10
 	_save = GameManager.active_save
@@ -131,23 +158,48 @@ func _build() -> void:
 	_body_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_body_scroll.add_child(_body_content)
 
-	# Sur téléphone portrait, conserver une carte assez large pour éviter
-	# que les dix villes et leurs libellés se chevauchent. Le défilement
+	# La carte de campagne comporte 28 villes sur sept rangées ; garder un
+	# viewport distinct de son contenu permet de les explorer sans débordement. Le défilement
 	# horizontal de la carte est indépendant du défilement vertical de la page.
 	_map_scroll = ScrollContainer.new()
 	_map_scroll.position = Vector2.ZERO
 	_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_map_scroll.follow_focus = false
+	# Déclenchement du glissement presque immédiat, pour que le doigt déplace
+	# la carte plutôt que de sélectionner accidentellement une ville.
+	_map_scroll.scroll_deadzone = 2
+	_body_scroll.scroll_deadzone = 2
+	# Pas courts pour les commandes de défilement et barre plus large pour
+	# pouvoir saisir précisément le curseur sur un écran tactile.
+	var map_vbar := _map_scroll.get_v_scroll_bar()
+	map_vbar.custom_step = 18.0
+	map_vbar.custom_minimum_size.x = 20.0
+	map_vbar.add_theme_stylebox_override("scroll", _style(Color(0.12, 0.19, 0.22, 0.92), Color(0.34, 0.43, 0.43)))
+	map_vbar.add_theme_stylebox_override("grabber", _style(GOLD, Color(1.0, 0.9, 0.62)))
+	map_vbar.add_theme_stylebox_override("grabber_highlight", _style(Color(1.0, 0.86, 0.38), Color(1.0, 0.96, 0.78)))
+	map_vbar.add_theme_stylebox_override("grabber_pressed", _style(Color(0.95, 0.68, 0.22), Color(1.0, 0.96, 0.78)))
+	_body_scroll.get_v_scroll_bar().custom_step = 18.0
 	_map_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
 	_body_content.add_child(_map_scroll)
 
 	var map := Panel.new()
 	map.position = Vector2.ZERO
-	map.size = Vector2(1320, 750)
+	map.size = Vector2(1536, 1024)
 	map.add_theme_stylebox_override("panel", _style(PANEL, GOLD))
 	_map_scroll.add_child(map)
 	_map_panel = map
+
+	# Fond de carte peint : les villes, routes et interactions restent des
+	# contrôles Godot superposés à cette illustration.
+	var world_art := TextureRect.new()
+	world_art.name = "ConquestWorldArtwork"
+	world_art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	world_art.texture = load("res://assets/ui/conquest/conquest_world_map.png") as Texture2D
+	world_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	world_art.stretch_mode = TextureRect.STRETCH_SCALE
+	world_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	map.add_child(world_art)
 
 	_map_title_label = Label.new()
 	_map_title_label.text = "LE MONDE DE ZIMUT"
@@ -156,7 +208,7 @@ func _build() -> void:
 	map.add_child(_map_title_label)
 
 	_legend_label = Label.new()
-	_legend_label.text = "Vert = territoire  ·  Gris = neutre  ·  Rouge = adverse  ·  ⚔ = attaquable"
+	_legend_label.text = "🌲 Forêt  ·  ⛰ Montagne  ·  ☀ Désert  ·  Vert = allié  ·  Gris = neutre  ·  Rouge = adverse"
 	_legend_label.position = Vector2(260, 16)
 	_legend_label.add_theme_color_override("font_color", GOLD)
 	map.add_child(_legend_label)
@@ -176,18 +228,41 @@ func _build() -> void:
 		var attackable: bool = ProgressionManager.conquest_city_attackable(_conquest, city_id)
 		var badge: String = "⚑" if owned else ("⚔" if attackable else ("⚔" if String(city["kind"]) == "enemy" else "●"))
 		var siege_p: int = ProgressionManager.conquest_siege_progress(_conquest, city_id)
-		var siege_txt: String = ("\nSiège %d/%d" % [siege_p, ProgressionManager.CONQUEST_SIEGE_BATTLES]) if siege_p > 0 else ""
-		btn.text = ("%s\n" % badge) + String(city["name"]) + siege_txt
+		var siege_txt: String = "\nSiège %d/%d" % [siege_p, ProgressionManager.CONQUEST_SIEGE_BATTLES] if siege_p > 0 else ""
+		btn.text = ""
 		btn.tooltip_text = "%s — %s" % [String(ProgressionManager.biome_label(String(city["biome"]))), String(city["desc"])]
-		btn.position = Vector2(CITY_POS[city_id].x * map.size.x - 88, CITY_POS[city_id].y * map.size.y - 34)
-		btn.custom_minimum_size = Vector2(196, 76)
-		btn.add_theme_font_size_override("font_size", 18)
-		btn.add_theme_color_override("font_color", TEXT)
-		btn.add_theme_stylebox_override("normal", _style(_city_color(city_id), GOLD if city_id == _selected_id else Color(0.5, 0.64, 0.46)))
-		btn.add_theme_stylebox_override("hover", _style(_city_color(city_id).lightened(0.12), GOLD))
+		btn.custom_minimum_size = Vector2(154, 124)
+		btn.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+		btn.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
+		btn.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
+		btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+		btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		var sprite := TextureRect.new()
+		sprite.name = "CityIllustration"
+		sprite.texture = _city_sprite(city_id)
+		sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		sprite.position = Vector2(18, 0)
+		sprite.size = Vector2(118, 82)
+		sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		btn.add_child(sprite)
+		var nameplate := Label.new()
+		nameplate.name = "CityNameplate"
+		nameplate.text = "%s  %s%s" % [badge, String(city["name"]), siege_txt]
+		nameplate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		nameplate.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		nameplate.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		nameplate.position = Vector2(0, 76)
+		nameplate.size = Vector2(154, 45)
+		nameplate.add_theme_font_size_override("font_size", 13)
+		nameplate.add_theme_color_override("font_color", TEXT)
+		nameplate.add_theme_stylebox_override("normal", _city_nameplate_style(city_id, city_id == _selected_id))
+		nameplate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		btn.add_child(nameplate)
 		btn.pressed.connect(_select_city.bind(city_id))
 		map.add_child(btn)
 		_city_buttons[city_id] = btn
+		_city_labels[city_id] = nameplate
 
 	var side := PanelContainer.new()
 	side.position = Vector2(1340, 92)
@@ -229,6 +304,20 @@ func _build() -> void:
 	_build_box = VBoxContainer.new()
 	_build_box.add_theme_constant_override("separation", 6)
 	box.add_child(_build_box)
+
+	var chronicle_title := Label.new()
+	chronicle_title.text = "CHRONIQUE RÉCENTE"
+	chronicle_title.add_theme_font_size_override("font_size", 18)
+	chronicle_title.add_theme_color_override("font_color", GOLD)
+	box.add_child(chronicle_title)
+
+	_chronicle_label = Label.new()
+	_chronicle_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_chronicle_label.custom_minimum_size.y = 104
+	_chronicle_label.add_theme_font_size_override("font_size", 15)
+	_chronicle_label.add_theme_color_override("font_color", TEXT)
+	_chronicle_label.text = "Vos premières conquêtes apparaîtront ici."
+	box.add_child(_chronicle_label)
 
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -272,19 +361,21 @@ func _layout_responsive() -> void:
 		# La zone visible reste bornée à l'écran ; la carte complète, elle,
 		# est plus haute et défilante. Sur téléphone étroit, le défilement
 		# horizontal reste disponible en plus du vertical.
-		var map_w: float = maxf(1320.0, viewport_w)
+		var map_w: float = maxf(1536.0, viewport_w)
 		var map_view_h: float = clampf(h * 0.52, 360.0, 470.0)
-		var map_content_h: float = maxf(1300.0, map_view_h)
+		var map_content_h: float = maxf(1024.0, map_view_h)
+		var map_content_w: float = map_w
 		var side_h: float = 600.0
 		_body_content.custom_minimum_size = Vector2(viewport_w, map_view_h + 14.0 + side_h)
 		_map_scroll.position = Vector2.ZERO
 		_map_scroll.size = Vector2(viewport_w, map_view_h)
 		_map_scroll.custom_minimum_size = Vector2(viewport_w, map_view_h)
 		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if map_w > viewport_w else ScrollContainer.SCROLL_MODE_DISABLED
-		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
 		_map_panel.position = Vector2.ZERO
-		_map_panel.size = Vector2(map_w, map_content_h)
-		_map_panel.custom_minimum_size = Vector2(map_w, map_content_h)
+		_map_panel.scale = Vector2(_map_zoom, _map_zoom)
+		_map_panel.size = Vector2(map_content_w, map_content_h)
+		_map_panel.custom_minimum_size = Vector2(map_content_w * _map_zoom, map_content_h * _map_zoom)
 		_side_panel.position = Vector2(0, map_view_h + 14.0)
 		_side_panel.size = Vector2(viewport_w, side_h)
 		_side_panel.custom_minimum_size = Vector2(viewport_w, side_h)
@@ -308,16 +399,17 @@ func _layout_responsive() -> void:
 		# Le viewport de la carte reste dans l'écran ; son contenu peut être
 		# plus haut, ce qui rend le défilement vertical réellement possible.
 		var map_view_h: float = maxf(420.0, h - body_top - 8.0)
-		var map_content_h: float = maxf(1300.0, map_view_h)
-		_body_content.custom_minimum_size = Vector2(map_w + 18.0 + side_w, map_view_h)
+		var map_content_h: float = maxf(1024.0, map_view_h)
+		_body_content.custom_minimum_size = Vector2(map_w * _map_zoom + 18.0 + side_w, maxf(map_view_h, map_content_h * _map_zoom))
 		_map_scroll.position = Vector2.ZERO
 		_map_scroll.size = Vector2(map_w, map_view_h)
 		_map_scroll.custom_minimum_size = Vector2(map_w, map_view_h)
-		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if map_w > _map_scroll.size.x else ScrollContainer.SCROLL_MODE_DISABLED
+		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
 		_map_panel.position = Vector2.ZERO
+		_map_panel.scale = Vector2(_map_zoom, _map_zoom)
 		_map_panel.size = Vector2(map_w, map_content_h)
-		_map_panel.custom_minimum_size = Vector2(map_w, map_content_h)
+		_map_panel.custom_minimum_size = Vector2(map_w * _map_zoom, map_content_h * _map_zoom)
 		_side_panel.position = Vector2(map_w + 18.0, 0)
 		_side_panel.size = Vector2(side_w, map_view_h)
 		_side_panel.custom_minimum_size = Vector2(side_w, map_view_h)
@@ -336,8 +428,11 @@ func _layout_responsive() -> void:
 				(child as Button).custom_minimum_size.y = 54
 				(child as Button).add_theme_font_size_override("font_size", 16)
 
-	var button_w: float = clampf(_map_panel.size.x * (0.23 if compact else 0.15), 70.0 if compact else 100.0, 196.0)
-	var button_h: float = clampf(_map_panel.size.y * (0.13 if compact else 0.11), 48.0 if compact else 58.0, 76.0)
+	# Le panneau complet (fond, routes, sprites et libellés) porte le zoom.
+	# Les contrôles gardent donc leurs dimensions de base et suivent ensemble
+	# la transformation du panneau, sans agrandir les villes isolément.
+	var button_w: float = 154.0 if compact else 166.0
+	var button_h: float = 124.0 if compact else 132.0
 	for city_id: String in _city_buttons.keys():
 		var btn: Button = _city_buttons[city_id]
 		var p: Vector2 = CITY_POS[city_id]
@@ -348,12 +443,133 @@ func _layout_responsive() -> void:
 		btn.position = Vector2(px, py)
 		btn.size = Vector2(button_w, button_h)
 		btn.custom_minimum_size = Vector2(button_w, button_h)
-		btn.add_theme_font_size_override("font_size", 11 if compact else (14 if button_w < 140.0 else 18))
+		var nameplate: Label = _city_labels[city_id]
+		nameplate.size.x = button_w
+		nameplate.position.x = 0.0
+		nameplate.add_theme_font_size_override("font_size", 11 if compact else 13)
+		var sprite: TextureRect = btn.get_node("CityIllustration") as TextureRect
+		sprite.size = Vector2(button_w - 36.0, 82.0)
+		sprite.position = Vector2(18.0, 0.0)
+		nameplate.position.y = 76.0
+		nameplate.size.y = 45.0
 	if _side_scroll != null:
 		_side_scroll.queue_sort()
 	if _body_scroll != null:
 		_body_scroll.queue_sort()
 
+
+## Le geste est suivi au niveau de la scène pour rester actif même si le
+## doigt commence sur un bouton de ville. Le seuil filtre les micro-mouvements
+## involontaires ; une fois dépassé, on déplace le contenu dans le sens du doigt.
+func _input(event: InputEvent) -> void:
+	if _map_scroll == null or not is_instance_valid(_map_scroll):
+		return
+	if event is InputEventScreenTouch:
+		var touch := event as InputEventScreenTouch
+		if touch.pressed:
+			_touch_positions[touch.index] = touch.position
+			if _touch_positions.size() == 2:
+				_map_pointer_active = false
+				_map_dragged = true
+				_pinch_start_distance = _pinch_distance()
+				_pinch_start_zoom = _map_zoom
+			else:
+				_begin_map_pointer(touch.position, touch.index)
+		else:
+			_touch_positions.erase(touch.index)
+			_end_map_pointer(touch.index)
+			if _touch_positions.size() == 1:
+				var remaining_index: int = int(_touch_positions.keys()[0])
+				_begin_map_pointer(_touch_positions[remaining_index], remaining_index)
+	elif event is InputEventScreenDrag:
+		var drag := event as InputEventScreenDrag
+		if _touch_positions.has(drag.index):
+			_touch_positions[drag.index] = drag.position
+		if _touch_positions.size() >= 2:
+			var distance := _pinch_distance()
+			if _pinch_start_distance > 0.0:
+				_set_map_zoom(_pinch_start_zoom * distance / _pinch_start_distance)
+			get_viewport().set_input_as_handled()
+		elif _map_pointer_active and drag.index == _map_pointer_index:
+			_update_map_pointer(drag.position)
+	elif event is InputEventMouseButton:
+		var mouse := event as InputEventMouseButton
+		if mouse.button_index == MOUSE_BUTTON_LEFT:
+			if mouse.pressed:
+				_begin_map_pointer(mouse.position, -2)
+			else:
+				_end_map_pointer(-2)
+		elif mouse.button_index == MOUSE_BUTTON_WHEEL_UP and mouse.pressed:
+			_set_map_zoom(_map_zoom + 0.1)
+		elif mouse.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse.pressed:
+			_set_map_zoom(_map_zoom - 0.1)
+	elif event is InputEventMouseMotion:
+		var motion := event as InputEventMouseMotion
+		if _map_pointer_active and _map_pointer_index == -2 and (motion.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
+			_update_map_pointer(motion.position)
+
+func _pinch_distance() -> float:
+	if _touch_positions.size() < 2:
+		return 0.0
+	var points: Array = _touch_positions.values()
+	return Vector2(points[0]).distance_to(Vector2(points[1]))
+
+func _set_map_zoom(value: float) -> void:
+	var next_zoom: float = clampf(value, 1.0, MAP_ZOOM_MAX)
+	if is_equal_approx(next_zoom, _map_zoom):
+		return
+	_map_zoom = next_zoom
+	_layout_responsive()
+
+func _begin_map_pointer(position: Vector2, pointer_index: int) -> void:
+	# InputEventScreenTouch.position est en coordonnées viewport ; convertir
+	# vers les coordonnées locales du ScrollContainer évite les écarts liés
+	# au CanvasLayer / scaling Android.
+	var local_pos: Vector2 = _map_scroll.get_global_transform_with_canvas().affine_inverse() * position
+	if not Rect2(Vector2.ZERO, _map_scroll.size).has_point(local_pos):
+		return
+	# La barre reste manipulable directement, mais tout le reste du viewport
+	# (fond, routes et boutons de villes) sert aussi de surface de glissement.
+	var vbar: VScrollBar = _map_scroll.get_v_scroll_bar()
+	var hbar: HScrollBar = _map_scroll.get_h_scroll_bar()
+	if (vbar.visible and vbar.get_rect().has_point(local_pos)) or (hbar.visible and hbar.get_rect().has_point(local_pos)):
+		return
+	_map_pointer_active = true
+	_map_pointer_index = pointer_index
+	_map_pointer_origin = position
+	_map_pointer_last = position
+	_map_dragged = false
+
+func _update_map_pointer(position: Vector2) -> void:
+	if not _map_pointer_active:
+		return
+	# Seuil faible pour reconnaître l'intention de glisser sans rendre les
+	# clics sur les villes difficiles. Après ce seuil, la carte capte le geste.
+	if not _map_dragged and position.distance_to(_map_pointer_origin) < 4.0:
+		return
+	_map_dragged = true
+	var delta: Vector2 = position - _map_pointer_last
+	var vbar: VScrollBar = _map_scroll.get_v_scroll_bar()
+	var hbar: HScrollBar = _map_scroll.get_h_scroll_bar()
+	vbar.value = clampf(vbar.value - delta.y, vbar.min_value, vbar.max_value)
+	hbar.value = clampf(hbar.value - delta.x, hbar.min_value, hbar.max_value)
+	_map_pointer_last = position
+	# Consommer le geste une fois le glissement confirmé pour empêcher un
+	# bouton de ville de transformer le relâchement en sélection.
+	get_viewport().set_input_as_handled()
+
+func _end_map_pointer(pointer_index: int) -> void:
+	if not _map_pointer_active or pointer_index != _map_pointer_index:
+		return
+	_map_pointer_active = false
+	_map_pointer_index = -1
+	if _map_dragged:
+		# Laisser les Buttons traiter l'événement de relâchement avant de
+		# réautoriser la sélection d'une ville.
+		call_deferred("_clear_map_drag_state")
+
+func _clear_map_drag_state() -> void:
+	_map_dragged = false
 
 ## Compteurs d'empire : villes contrôlées, production versée à chaque
 ## victoire, et objectif de campagne.
@@ -374,6 +590,10 @@ func _refresh_header() -> void:
 	_header.text = line
 
 func _select_city(id: String) -> void:
+	# Un glissement de carte ne doit jamais déclencher par erreur la sélection
+	# de la ville sur laquelle le doigt a été relâché.
+	if _map_dragged:
+		return
 	_selected_id = id
 	var city: Dictionary = _city_meta(id)
 	var owned: Array = _conquest.get("owned", ["capitale"])
@@ -433,9 +653,18 @@ func _select_city(id: String) -> void:
 			_attack.disabled = true
 			_attack.text = "HORS DE PORTÉE — CONQUÉREZ UNE VILLE RELIÉE"
 			_message.text += "\n\n✖ Aucune route depuis votre territoire : conquérez d'abord une ville voisine."
+	# Rendre visible la progression de domination régionale au moment où
+	# le joueur compare les cibles : les bonus existent déjà dans l'économie.
+	var biome_summary: String = _biome_control_summary(String(city["biome"]))
+	if biome_summary != "":
+		_message.text += "\n\n" + biome_summary
 	for other: String in _city_buttons.keys():
 		var button: Button = _city_buttons[other]
-		button.add_theme_stylebox_override("normal", _style(_city_color(other), GOLD if other == id else Color(0.5, 0.64, 0.46)))
+		var nameplate: Label = _city_labels[other]
+		nameplate.add_theme_stylebox_override("normal", _city_nameplate_style(other, other == id))
+		var sprite: TextureRect = button.get_node("CityIllustration") as TextureRect
+		sprite.modulate = Color(1.08, 1.04, 0.90) if other == id else Color.WHITE
+	_refresh_chronicle()
 
 ## Panneau de construction de la ville sélectionnée : un bouton par
 ## bâtiment de ressources disponible, avec coûts, s'il n'est pas déjà bâti.
@@ -481,9 +710,96 @@ func _on_build_pressed(city_id: String, building: String) -> void:
 func _attack_selected_city() -> void:
 	if not ProgressionManager.conquest_city_attackable(_conquest, _selected_id):
 		return
+	_show_assault_prep()
+
+## Choix tactique facultatif avant l'assaut. Le coût est payé une seule fois,
+## puis l'effet est transmis au combat et consommé à sa résolution.
+func _show_assault_prep() -> void:
+	var city: Dictionary = _city_meta(_selected_id)
+	var dim := ColorRect.new()
+	dim.name = "AssaultPrepOverlay"
+	dim.color = Color(0.015, 0.035, 0.055, 0.78)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(dim)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _style(Color(0.10, 0.17, 0.22, 0.99), GOLD))
+	panel.custom_minimum_size = Vector2(620, 0)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE, 0)
+	dim.add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 10)
+	panel.add_child(box)
+	var title := Label.new()
+	title.text = "PRÉPARER L'ASSAUT — %s" % String(city["name"]).to_upper()
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title.add_theme_font_size_override("font_size", 25)
+	title.add_theme_color_override("font_color", GOLD)
+	box.add_child(title)
+	var intro := Label.new()
+	intro.text = "Choisis une approche, ou pars sans dépenser de ressources."
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	intro.add_theme_font_size_override("font_size", 17)
+	intro.add_theme_color_override("font_color", TEXT)
+	box.add_child(intro)
+	var resources: Dictionary = _save.get("resources", {})
+	var gold: int = int(_save.get("gold", 0))
+	var wood: int = int(resources.get("Bois", 0))
+	var iron: int = int(resources.get("Fer", 0))
+	var leather: int = int(resources.get("Cuir", 0))
+	var scout := Button.new()
+	scout.text = "🔎 ÉCLAIREURS — 25 or\nRéduit le niveau des ennemis de 1"
+	scout.custom_minimum_size.y = 66
+	scout.add_theme_font_size_override("font_size", 18)
+	scout.disabled = gold < 25
+	scout.pressed.connect(func() -> void:
+		dim.queue_free()
+		_choose_assault_tactic("scouts"))
+	box.add_child(scout)
+	var sabotage := Button.new()
+	sabotage.text = "🧨 SABOTAGE — 12 Bois + 8 Fer\nRéduit les PV et l'attaque ennemis de 15 %"
+	sabotage.custom_minimum_size.y = 66
+	sabotage.add_theme_font_size_override("font_size", 18)
+	sabotage.disabled = wood < 12 or iron < 8
+	sabotage.pressed.connect(func() -> void:
+		dim.queue_free()
+		_choose_assault_tactic("sabotage"))
+	box.add_child(sabotage)
+	var supply := Button.new()
+	supply.text = "📦 RAVITAILLEMENT — 15 or + 6 Cuir\nRéduit l'attaque ennemie de 10 %"
+	supply.custom_minimum_size.y = 66
+	supply.add_theme_font_size_override("font_size", 18)
+	supply.disabled = gold < 15 or leather < 6
+	supply.pressed.connect(func() -> void:
+		dim.queue_free()
+		_choose_assault_tactic("supply"))
+	box.add_child(supply)
+	var none := Button.new()
+	none.text = "⚔ PARTIR SANS PRÉPARATION"
+	none.custom_minimum_size.y = 58
+	none.add_theme_font_size_override("font_size", 18)
+	none.pressed.connect(func() -> void:
+		dim.queue_free()
+		_choose_assault_tactic("none"))
+	box.add_child(none)
+	var cancel := Button.new()
+	cancel.text = "ANNULER"
+	cancel.custom_minimum_size.y = 48
+	cancel.pressed.connect(func() -> void: dim.queue_free())
+	box.add_child(cancel)
+
+func _choose_assault_tactic(tactic: String) -> void:
+	# Les coûts sont validés et débités par ProgressionManager, également
+	# utilisé par les tests de gameplay.
+	var payment_error: String = ProgressionManager.conquest_pay_assault_tactic(_save, tactic)
+	if payment_error != "":
+		_message.text = payment_error
+		return
 	var city: Dictionary = _city_meta(_selected_id)
 	_conquest["pending_city"] = _selected_id
 	_conquest["pending_level"] = int(city["level"])
+	_conquest["pending_tactic"] = tactic
 	_save["conquest"] = _conquest
 	_save["campaign_mode"] = "conquest"
 	_persist()
@@ -492,8 +808,6 @@ func _attack_selected_city() -> void:
 	GameManager.fight_biome = String(city["biome"])
 	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
 
-## Écran d'annexion : production versée, contre-attaque éventuelle et
-## conseil de développement après une ville nouvellement conquise.
 func _show_annexion_popup(city_id: String) -> void:
 	var cname: String = ProgressionManager.conquest_city_name(city_id)
 	var lines: Array = []
@@ -505,6 +819,18 @@ func _show_annexion_popup(city_id: String) -> void:
 		lines.append("Aucune production pour l'instant : édifiez des bâtiments pour rapporter des ressources à chaque victoire.")
 	else:
 		lines.append("Production de votre empire versée : " + " · ".join(parts))
+	var city_reward: Dictionary = _conquest.get("last_city_reward", {})
+	if String(city_reward.get("city", "")) == city_id:
+		var reward_parts: PackedStringArray = []
+		var reward_resources: Dictionary = city_reward.get("resources", {})
+		for resource: String in reward_resources.keys():
+			reward_parts.append("%s +%d" % [resource, int(reward_resources[resource])])
+		var reward_gold: int = int(city_reward.get("gold", 0))
+		if reward_gold > 0:
+			reward_parts.append("%d or" % reward_gold)
+		lines.append("🎁 Récompense unique — %s : %s." % [
+			String(city_reward.get("name", "Butin de conquête")),
+			" · ".join(reward_parts)])
 	var counter: String = String(_conquest.get("last_counterattack", ""))
 	if counter != "":
 		lines.append("⚠ CONTRE-ATTAQUE ! L'ennemi a pillé %s : production gelée %d bataille(s)." % [
@@ -598,6 +924,14 @@ func _city_desc(id: String, kind: String) -> String:
 		"caravanserail": "Une halte marchande sur la route des dunes.",
 		"observatoire": "Un observatoire oublié tourné vers le soleil.",
 		"port_sable": "Un port fortifié qui contrôle les caravanes du désert.",
+		"bois_lune": "Un bois ancien où la lumière filtre à travers les arbres argentés.",
+		"sanctuaire_mousse": "Un sanctuaire oublié protégé par les esprits de la forêt.",
+		"forge_givre": "Une forge naine alimentée par les feux sous la glace.",
+		"pic_foudroyant": "Un sommet balayé par les orages et gardé par les sentinelles.",
+		"marais_spectres": "Un marais brumeux où rôdent des silhouettes spectrales.",
+		"fort_cendre": "Un fort désertique bâti dans la roche volcanique.",
+		"temple_soleil": "Un temple ancien consacré au soleil du désert.",
+		"citadelle_sable": "Une citadelle imprenable qui verrouille les routes du sud.",
 	}
 	return String(descs.get(id, "Ville de Zimut."))
 
@@ -612,6 +946,100 @@ func _city_color(city_id: String) -> Color:
 		"capital": return Color(0.16, 0.42, 0.24)
 		"neutral": return Color(0.34, 0.36, 0.38)
 		_: return Color(0.52, 0.16, 0.14)
+
+## L'icône et la bordure identifient le biome ; le fond reste réservé au statut.
+func _city_biome_icon(city_id: String) -> String:
+	match ProgressionManager.conquest_city_biome(city_id):
+		"Forêt": return "🌲"
+		"Montagne": return "⛰"
+		"Désert": return "☀"
+		"Donjon": return "☠"
+		_: return "◆"
+
+func _city_border_color(city_id: String) -> Color:
+	match ProgressionManager.conquest_city_biome(city_id):
+		"Forêt": return Color(0.43, 0.72, 0.38)
+		"Montagne": return Color(0.43, 0.70, 0.88)
+		"Désert": return Color(0.92, 0.66, 0.32)
+		"Donjon": return Color(0.70, 0.48, 0.82)
+		_: return Color(0.5, 0.64, 0.46)
+
+## Le statut du territoire est porté par une petite plaque sous le sprite,
+## tandis que l'illustration reste visible sans cadre rectangulaire massif.
+func _city_nameplate_style(city_id: String, selected: bool) -> StyleBoxFlat:
+	var fill: Color = _city_color(city_id)
+	var biome: Color = _city_border_color(city_id)
+	var style := _style(Color(fill.r, fill.g, fill.b, 0.92), GOLD if selected else biome)
+	style.set_border_width_all(3 if selected else 1)
+	style.set_corner_radius_all(12)
+	style.content_margin_left = 5.0
+	style.content_margin_right = 5.0
+	style.content_margin_top = 3.0
+	style.content_margin_bottom = 3.0
+	style.shadow_size = 8 if selected else 0
+	style.shadow_color = Color(GOLD.r, GOLD.g, GOLD.b, 0.36)
+	style.shadow_offset = Vector2(0, 2)
+	return style
+
+func _city_sprite(city_id: String) -> Texture2D:
+	var biome := String(_city_meta(city_id).get("biome", "Forêt"))
+	var asset := "forest"
+	match biome:
+		"Montagne":
+			asset = "mountain"
+		"Désert":
+			asset = "desert"
+		"Donjon":
+			asset = "dungeon"
+	var texture_path := "res://assets/ui/conquest/biome_%s_city.svg" % asset
+	if not _city_sprite_cache.has(texture_path):
+		_city_sprite_cache[texture_path] = load(texture_path) as Texture2D
+	return _city_sprite_cache[texture_path] as Texture2D
+
+## Progression de domination par biome, hors capitale et Donjon.
+## Le bonus est versé à chaque victoire lorsque toutes les villes du biome
+## sont contrôlées ; cette ligne rend la condition visible avant l'annexion.
+func _biome_control_summary(biome: String) -> String:
+	var reward: String = ""
+	match biome:
+		"Forêt":
+			reward = "+5 Bois par victoire"
+		"Montagne":
+			reward = "+5 Fer par victoire"
+		"Désert":
+			reward = "+5 Venin par victoire"
+		_:
+			return ""
+	var total: int = 0
+	var controlled: int = 0
+	var owned: Array = _conquest.get("owned", [])
+	for city_id: String in ProgressionManager.CONQUEST_CITIES.keys():
+		if city_id == "capitale" or city_id == "donjon_roi":
+			continue
+		if String(ProgressionManager.CONQUEST_CITIES[city_id].get("biome", "")) != biome:
+			continue
+		total += 1
+		if owned.has(city_id):
+			controlled += 1
+	if total <= 0:
+		return ""
+	if controlled == total:
+		return "★ DOMINATION %s : bonus actif — %s." % [biome.to_upper(), reward]
+	return "Domination %s : %d/%d villes — bonus à 100 %% : %s." % [biome, controlled, total, reward]
+
+func _refresh_chronicle() -> void:
+	if _chronicle_label == null:
+		return
+	var events: Array = _conquest.get("events", [])
+	if events.is_empty():
+		_chronicle_label.text = "Vos premières conquêtes apparaîtront ici."
+		return
+	var lines: PackedStringArray = []
+	var index: int = events.size() - 1
+	while index >= 0 and lines.size() < 4:
+		lines.append("• " + String(events[index]))
+		index -= 1
+	_chronicle_label.text = "\n".join(lines)
 
 func _persist() -> void:
 	_save["conquest"] = _conquest
@@ -636,6 +1064,148 @@ func _style(bg: Color, border: Color) -> StyleBoxFlat:
 	s.content_margin_bottom = 6
 	return s
 
+## Paysages de biome dessinés en 2D : taches de terrain irrégulières,
+## silhouettes répétées et détails légers, tous sous les routes et les villes.
+## Les positions suivent celles du catalogue, même quand la carte est redimensionnée.
+class _BiomeTerrain:
+	extends Control
+	var city_pos: Dictionary = {}
+	var city_biomes: Dictionary = {}
+
+	func _draw() -> void:
+		var sx: float = clampf(size.x / 1320.0, 0.72, 1.15)
+		var sy: float = clampf(size.y / 1600.0, 0.72, 1.15)
+		# Fond de carte peint : reliefs diffus et veines de terrain, sans grille ni cases.
+		for i: int in range(18):
+			var y: float = 55.0 + float(i) * (size.y - 110.0) / 17.0
+			draw_line(Vector2(18, y), Vector2(size.x - 18, y + sin(float(i) * 0.8) * 10.0), Color(0.76, 0.72, 0.54, 0.055), 1.0, true)
+		for city_id: String in city_pos.keys():
+			var norm: Vector2 = city_pos[city_id]
+			var center := Vector2(size.x * norm.x, size.y * norm.y)
+			var biome: String = String(city_biomes.get(city_id, "Forêt"))
+			_draw_biome_patch(center, biome, sx, sy, city_id)
+
+	func _draw_biome_patch(center: Vector2, biome: String, sx: float, sy: float, city_id: String) -> void:
+		# Chaque biome utilise maintenant une illustration vectorielle dédiée,
+		# importée comme texture par Godot. Les textures se chevauchent légèrement
+		# pour former un paysage continu au lieu d'îlots géométriques.
+		var asset := "forest"
+		match biome:
+			"Montagne":
+				asset = "mountain"
+			"Désert":
+				asset = "desert"
+			"Donjon":
+				asset = "dungeon"
+		var texture_path := "res://assets/ui/conquest/biome_%s.svg" % asset
+		var terrain_texture := load(texture_path) as Texture2D
+		if terrain_texture != null:
+			var terrain_size := Vector2(390.0 * sx, 248.0 * sy)
+			draw_texture_rect(terrain_texture, Rect2(center - terrain_size * 0.5, terrain_size), false, Color(1, 1, 1, 0.88))
+		# Un voile léger relie les bords des illustrations à la carte marine.
+		var tint := Color(0.15, 0.30, 0.21, 0.10)
+		match biome:
+			"Montagne":
+				tint = Color(0.31, 0.46, 0.54, 0.10)
+			"Désert":
+				tint = Color(0.71, 0.49, 0.23, 0.08)
+			"Donjon":
+				tint = Color(0.30, 0.22, 0.38, 0.12)
+		draw_circle(center, 78.0 * sx, tint)
+	func _draw_tree(p: Vector2, sx: float, sy: float, light: bool, alpha: float = 0.76) -> void:
+		var green := Color(0.24, 0.43, 0.27, alpha) if light else Color(0.13, 0.30, 0.20, alpha)
+		draw_line(p + Vector2(0, 2 * sy), p + Vector2(0, 11 * sy), Color(0.38, 0.29, 0.18, alpha), 2.0, true)
+		# Trois masses de feuillage superposées plutôt qu'un triangle plat.
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(-11 * sx, 5 * sy), p + Vector2(-7 * sx, -3 * sy),
+			p + Vector2(-2 * sx, -13 * sy), p + Vector2(4 * sx, -8 * sy),
+			p + Vector2(11 * sx, 5 * sy)
+		]), green.darkened(0.12))
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(-8 * sx, 0), p + Vector2(-3 * sx, -13 * sy),
+			p + Vector2(1 * sx, -20 * sy), p + Vector2(8 * sx, 1 * sy)
+		]), green.lightened(0.12))
+		draw_line(p + Vector2(-3 * sx, -7 * sy), p + Vector2(1 * sx, -15 * sy), Color(0.55, 0.68, 0.39, alpha * 0.55), 1.0, true)
+
+	func _draw_peak(p: Vector2, sx: float, sy: float, snowy: bool) -> void:
+		var rock := Color(0.38, 0.48, 0.53, 0.82)
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(-27 * sx, 17 * sy), p + Vector2(-12 * sx, -7 * sy),
+			p + Vector2(-4 * sx, -25 * sy), p + Vector2(7 * sx, -8 * sy),
+			p + Vector2(17 * sx, 6 * sy), p + Vector2(28 * sx, 17 * sy)
+		]), rock)
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(-12 * sx, -7 * sy), p + Vector2(-4 * sx, -25 * sy),
+			p + Vector2(1 * sx, -13 * sy), p + Vector2(-3 * sx, -10 * sy)
+		]), Color(0.66, 0.73, 0.75, 0.75))
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(-4 * sx, -25 * sy), p + Vector2(7 * sx, -8 * sy),
+			p + Vector2(2 * sx, -11 * sy), p + Vector2(1 * sx, -13 * sy)
+		]), Color(0.25, 0.34, 0.39, 0.65))
+		if snowy:
+			draw_colored_polygon(PackedVector2Array([
+				p + Vector2(-9 * sx, -13 * sy), p + Vector2(-4 * sx, -25 * sy),
+				p + Vector2(3 * sx, -13 * sy), p + Vector2(-2 * sx, -9 * sy)
+			]), Color(0.90, 0.93, 0.88, 0.92))
+
+	func _draw_rock(p: Vector2, sx: float, sy: float) -> void:
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(-10 * sx, 4 * sy), p + Vector2(-5 * sx, -5 * sy),
+			p + Vector2(3 * sx, -8 * sy), p + Vector2(11 * sx, 2 * sy),
+			p + Vector2(7 * sx, 6 * sy)
+		]), Color(0.55, 0.43, 0.30, 0.80))
+		draw_line(p + Vector2(-4 * sx, -3 * sy), p + Vector2(2 * sx, -5 * sy), Color(0.91, 0.74, 0.46, 0.7), 1.0, true)
+
+	func _draw_ruin(p: Vector2, sx: float, sy: float) -> void:
+		var stone := Color(0.43, 0.35, 0.49, 0.78)
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(-12 * sx, 8 * sy), p + Vector2(-10 * sx, -12 * sy),
+			p + Vector2(-4 * sx, -12 * sy), p + Vector2(-3 * sx, 8 * sy)
+		]), stone)
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(2 * sx, 8 * sy), p + Vector2(3 * sx, -7 * sy),
+			p + Vector2(9 * sx, -11 * sy), p + Vector2(12 * sx, 8 * sy)
+		]), stone.lightened(0.10))
+		draw_line(p + Vector2(-13 * sx, -13 * sy), p + Vector2(0, -18 * sy), stone.lightened(0.18), 2.0, true)
+		draw_line(p + Vector2(0, -18 * sy), p + Vector2(12 * sx, -12 * sy), stone.lightened(0.18), 2.0, true)
+
+	func _draw_landmark(p: Vector2, biome: String, sx: float, sy: float, city_id: String) -> void:
+		# Une petite silhouette de ville se devine derrière le libellé : elle donne
+		# une identité au lieu sans remplacer les informations tactiques.
+		var wall := Color(0.66, 0.59, 0.43, 0.82)
+		var roof := Color(0.35, 0.24, 0.18, 0.92)
+		if biome == "Montagne":
+			wall = Color(0.62, 0.69, 0.70, 0.84)
+			roof = Color(0.28, 0.39, 0.47, 0.94)
+		elif biome == "Désert":
+			wall = Color(0.82, 0.66, 0.40, 0.86)
+			roof = Color(0.59, 0.37, 0.20, 0.94)
+		elif biome == "Donjon":
+			wall = Color(0.46, 0.39, 0.55, 0.90)
+			roof = Color(0.22, 0.17, 0.30, 0.96)
+		var offset: float = float(abs(hash(city_id)) % 11 - 5) * sx
+		var left := p + Vector2(-26.0 * sx + offset, -14.0 * sy)
+		var right := p + Vector2(24.0 * sx + offset, -14.0 * sy)
+		draw_colored_polygon(PackedVector2Array([
+			left + Vector2(0, 16.0 * sy), left + Vector2(0, -1.0 * sy),
+			left + Vector2(8.0 * sx, -8.0 * sy), left + Vector2(16.0 * sx, -1.0 * sy),
+			left + Vector2(16.0 * sx, 16.0 * sy)
+		]), wall)
+		draw_colored_polygon(PackedVector2Array([
+			left + Vector2(-2.0 * sx, 0), left + Vector2(8.0 * sx, -11.0 * sy),
+			left + Vector2(18.0 * sx, 0)
+		]), roof)
+		draw_colored_polygon(PackedVector2Array([
+			right + Vector2(0, 16.0 * sy), right + Vector2(0, -8.0 * sy),
+			right + Vector2(9.0 * sx, -15.0 * sy), right + Vector2(18.0 * sx, -8.0 * sy),
+			right + Vector2(18.0 * sx, 16.0 * sy)
+		]), wall.darkened(0.12))
+		draw_colored_polygon(PackedVector2Array([
+			right + Vector2(-2.0 * sx, -7.0 * sy), right + Vector2(9.0 * sx, -18.0 * sy),
+			right + Vector2(20.0 * sx, -7.0 * sy)
+		]), roof)
+		draw_line(left + Vector2(5.0 * sx, 4.0 * sy), left + Vector2(5.0 * sx, 10.0 * sy), Color(0.22, 0.18, 0.13, 0.8), 2.0, true)
+		draw_line(right + Vector2(13.0 * sx, 3.0 * sy), right + Vector2(13.0 * sx, 10.0 * sy), Color(0.22, 0.18, 0.13, 0.8), 2.0, true)
 class _RouteLines:
 	extends Control
 	var conquest: Dictionary = {}

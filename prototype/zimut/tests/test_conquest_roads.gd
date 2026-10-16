@@ -38,8 +38,10 @@ func _boot() -> void:
 		"fort_racine", "hameau_pin", "garnison", "oasis", "tour_sable",
 		"village_brume", "ruines_lierre", "abbaye_ronce", "citadelle_ronce",
 		"col_givre", "mine_cristal", "bastion_orage", "caravanserail",
-		"observatoire", "port_sable"], "pending_city": ""}
-	check(pm.CONQUEST_CITIES.size() == 20, "campagne étendue à vingt villes")
+		"observatoire", "port_sable", "bois_lune", "sanctuaire_mousse",
+		"forge_givre", "pic_foudroyant", "marais_spectres", "fort_cendre",
+		"temple_soleil", "citadelle_sable"], "pending_city": ""}
+	check(pm.CONQUEST_CITIES.size() == 28, "campagne étendue à vingt-huit villes")
 	var reachable: Array[String] = ["capitale"]
 	var changed: bool = true
 	while changed:
@@ -53,11 +55,15 @@ func _boot() -> void:
 			elif reachable.has(b) and not reachable.has(a):
 				reachable.append(a)
 				changed = true
-	check(reachable.size() == pm.CONQUEST_CITIES.size(), "les vingt villes sont reliées au réseau routier")
+	check(reachable.size() == pm.CONQUEST_CITIES.size(), "les vingt-huit villes sont reliées au réseau routier")
 	check(pm.conquest_city_attackable({"owned": ["capitale", "clairiere", "village_brume"], "pending_city": ""}, "ruines_lierre"), "Ruines du Lierre accessibles depuis le Village des Brumes")
 	check(pm.conquest_city_attackable({"owned": ["capitale", "fort_racine", "hameau_pin", "col_givre"], "pending_city": ""}, "mine_cristal"), "Mine de Cristal accessible depuis le Col du Givre")
 	check(pm.conquest_city_attackable({"owned": ["capitale", "fort_racine", "oasis", "caravanserail"], "pending_city": ""}, "observatoire"), "Observatoire Solaire accessible depuis le Caravansérail")
 	check(pm.conquest_empire_complete(full), "Empire complet (toutes les villes hors capitale/donjon)")
+	var biome_bonus: Dictionary = pm.conquest_biome_control_bonus(full)
+	check(int(biome_bonus.get("Bois", 0)) == 5, "contrôle complet de la Forêt : +5 Bois par victoire")
+	check(int(biome_bonus.get("Fer", 0)) == 5, "contrôle complet de la Montagne : +5 Fer par victoire")
+	check(int(biome_bonus.get("Venin", 0)) == 5, "contrôle complet du Désert : +5 Venin par victoire")
 	check(pm.conquest_city_attackable(full, "donjon_roi"), "Donjon attaquable une fois Zimut contrôlé")
 	check(not pm.conquest_campaign_won(full), "Campagne pas encore gagnée")
 	full["owned"].append("donjon_roi")
@@ -66,11 +72,28 @@ func _boot() -> void:
 	# ── Annexion : just_annexed posé pour l'écran de victoire, puis consommé ──
 	var d: Dictionary = pm.new_game(4, "ConqRoads")
 	d["campaign_mode"] = "conquest"
-	d["conquest"] = {"owned": ["capitale"], "pending_city": "clairiere", "pending_level": 10}
+	d["conquest"] = {"owned": ["capitale"], "pending_city": "clairiere", "pending_level": 10, "pending_tactic": "scouts"}
 	pm.register_victory(d, {"enemies": [{"type": "Gobelin", "level": 10, "boss": false}]})
 	var cq: Dictionary = d.get("conquest", {})
 	check(String(cq.get("just_annexed", "")) == "clairiere", "just_annexed posé à l'annexion de Clairière")
+	check(not cq.has("pending_tactic"), "la préparation tactique est consommée après la bataille")
 	check(pm.conquest_city_attackable(cq, "vieille_tour"), "nouvelle route ouverte après annexion")
+	var reward: Dictionary = cq.get("last_city_reward", {})
+	check(String(reward.get("city", "")) == "clairiere", "récompense de première annexion enregistrée")
+	check(String(reward.get("name", "")) == "Réserve des bûcherons", "Clairière attribue son butin thématique")
+	check(int(reward.get("resources", {}).get("Bois", 0)) == 12, "récompense de Clairière crédite 12 Bois")
+	check(int(reward.get("gold", 0)) == 35, "récompense de Clairière crédite 35 or")
+	check(pm.conquest_city_reward("pont_mousse").get("name", "") != pm.conquest_city_reward("clairiere").get("name", ""), "les villes ont des récompenses distinctes")
+	check(pm.CONQUEST_CITY_REWARDS.size() == 27, "27 villes non-capitales disposent d'un butin unique")
+
+	# ── Chronique : événements de campagne bornés et persistants ──
+	check(cq.get("events", []).any(func(event: String) -> bool: return event.contains("Ville annexée") and event.contains("Clairière")), "chronique : annexion enregistrée")
+	check(cq.get("events", []).any(func(event: String) -> bool: return event.contains("Butin") and event.contains("Réserve des bûcherons")), "chronique : butin thématique enregistré")
+	var event_log: Dictionary = {}
+	for event_index: int in range(12):
+		pm.conquest_add_event(event_log, "Événement %d" % event_index)
+	check(event_log.get("events", []).size() == 8, "chronique limitée aux huit événements les plus récents")
+	check(String(event_log["events"][0]) == "Événement 4", "chronique supprime les événements les plus anciens")
 
 	# ── Sièges sur les nouvelles villes adverses des autres biomes ──
 	check(pm.conquest_city_battles("garnison") == 4, "Garnison (enemy) : siège en 4 batailles")

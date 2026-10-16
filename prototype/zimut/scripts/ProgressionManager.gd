@@ -108,6 +108,46 @@ const CONQUEST_CITIES := {
 	"caravanserail": {"name": "Caravansérail Rouge", "kind": "neutral", "biome": "Désert", "level": 22},
 	"observatoire": {"name": "Observatoire Solaire", "kind": "neutral", "biome": "Désert", "level": 23},
 	"port_sable": {"name": "Port des Sables", "kind": "enemy", "biome": "Désert", "level": 24},
+	"bois_lune": {"name": "Bois de Lune", "kind": "neutral", "biome": "Forêt", "level": 16},
+	"sanctuaire_mousse": {"name": "Sanctuaire Moussu", "kind": "neutral", "biome": "Forêt", "level": 17},
+	"forge_givre": {"name": "Forge du Givre", "kind": "enemy", "biome": "Montagne", "level": 23},
+	"pic_foudroyant": {"name": "Pic Foudroyant", "kind": "enemy", "biome": "Montagne", "level": 24},
+	"marais_spectres": {"name": "Marais des Spectres", "kind": "neutral", "biome": "Forêt", "level": 18},
+	"fort_cendre": {"name": "Fort des Cendres", "kind": "enemy", "biome": "Désert", "level": 26},
+	"temple_soleil": {"name": "Temple du Soleil", "kind": "neutral", "biome": "Désert", "level": 25},
+	"citadelle_sable": {"name": "Citadelle de Sable", "kind": "enemy", "biome": "Désert", "level": 27},
+}
+
+## Récompense de première annexion : chaque lieu offre un petit butin
+## thématique, crédité une seule fois lorsque la ville rejoint l'empire.
+const CONQUEST_CITY_REWARDS := {
+	"clairiere": {"name": "Réserve des bûcherons", "resources": {"Bois": 12}, "gold": 35},
+	"vieille_tour": {"name": "Coffre de la garnison", "resources": {"Fer": 10}, "gold": 55},
+	"pont_mousse": {"name": "Péage du vieux pont", "resources": {"Cuir": 8}, "gold": 45},
+	"fort_racine": {"name": "Arsenal de Racine", "resources": {"Fer": 16}, "gold": 70},
+	"hameau_pin": {"name": "Réserve des montagnards", "resources": {"Bois": 10, "Cuir": 5}, "gold": 45},
+	"garnison": {"name": "Dépôt militaire", "resources": {"Fer": 18}, "gold": 80},
+	"oasis": {"name": "Cargaison de l'oasis", "resources": {"Venin": 5}, "gold": 90},
+	"tour_sable": {"name": "Butin du Dragon des dunes", "resources": {"Magie": 8, "Fer": 8}, "gold": 110},
+	"donjon_roi": {"name": "Trésor du Roi Squelette", "resources": {"Magie": 20, "Venin": 15, "Fer": 15}, "gold": 500},
+	"village_brume": {"name": "Herbes des brumes", "resources": {"Venin": 8}, "gold": 40},
+	"ruines_lierre": {"name": "Reliques du Lierre", "resources": {"Magie": 6}, "gold": 60},
+	"abbaye_ronce": {"name": "Offrandes de l'abbaye", "resources": {"Magie": 5, "Bois": 5}, "gold": 55},
+	"citadelle_ronce": {"name": "Trésor des Ronces", "resources": {"Fer": 12, "Cuir": 8}, "gold": 95},
+	"col_givre": {"name": "Cristaux du col", "resources": {"Magie": 7}, "gold": 65},
+	"mine_cristal": {"name": "Filon de cristal", "resources": {"Magie": 12, "Fer": 6}, "gold": 100},
+	"bastion_orage": {"name": "Réserves du bastion", "resources": {"Fer": 15, "Bois": 8}, "gold": 100},
+	"caravanserail": {"name": "Caisse des marchands", "resources": {"Cuir": 8}, "gold": 120},
+	"observatoire": {"name": "Fragments stellaires", "resources": {"Magie": 10}, "gold": 110},
+	"port_sable": {"name": "Cargaison des pirates", "resources": {"Cuir": 12, "Venin": 5}, "gold": 140},
+	"bois_lune": {"name": "Sève de lune", "resources": {"Bois": 12, "Magie": 4}, "gold": 70},
+	"sanctuaire_mousse": {"name": "Reliques du sanctuaire", "resources": {"Magie": 8, "Venin": 4}, "gold": 80},
+	"forge_givre": {"name": "Caisse de la forge", "resources": {"Fer": 18, "Magie": 5}, "gold": 130},
+	"pic_foudroyant": {"name": "Cœur de foudre", "resources": {"Magie": 12, "Fer": 10}, "gold": 150},
+	"marais_spectres": {"name": "Essences spectrales", "resources": {"Venin": 12, "Magie": 5}, "gold": 90},
+	"fort_cendre": {"name": "Réserve de cendre", "resources": {"Fer": 20, "Venin": 8}, "gold": 160},
+	"temple_soleil": {"name": "Offrande solaire", "resources": {"Magie": 15}, "gold": 150},
+	"citadelle_sable": {"name": "Trésor de la Citadelle", "resources": {"Fer": 20, "Cuir": 12, "Magie": 8}, "gold": 220},
 }
 
 ## Routes de la carte : on ne peut attaquer qu'une ville RELIÉE par route à
@@ -127,6 +167,13 @@ const CONQUEST_ROUTES: Array = [
 	["oasis", "caravanserail"], ["caravanserail", "observatoire"],
 	["observatoire", "port_sable"], ["port_sable", "tour_sable"],
 	["fort_racine", "donjon_roi"], ["garnison", "donjon_roi"], ["tour_sable", "donjon_roi"],
+	# Branches supplémentaires pour étendre la campagne au-delà du premier écran.
+	["fort_racine", "bois_lune"], ["bois_lune", "sanctuaire_mousse"],
+	["sanctuaire_mousse", "marais_spectres"], ["marais_spectres", "abbaye_ronce"],
+	["col_givre", "forge_givre"], ["forge_givre", "pic_foudroyant"],
+	["pic_foudroyant", "bastion_orage"], ["oasis", "fort_cendre"],
+	["fort_cendre", "temple_soleil"], ["temple_soleil", "citadelle_sable"],
+	["citadelle_sable", "port_sable"], ["citadelle_sable", "tour_sable"],
 ]
 
 ## Bâtiments de ressources constructibles dans les villes conquises.
@@ -1054,6 +1101,16 @@ func register_defeat(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 
 ## Applique les conséquences de campagne au même profil que le mode Tactique.
 ## La ville n'est ajoutée au territoire qu'après une victoire réelle.
+## Journal court et persistant des événements de campagne.
+func conquest_add_event(conquest: Dictionary, event_text: String) -> void:
+	if event_text.strip_edges().is_empty():
+		return
+	var events: Array = conquest.get("events", [])
+	events.append(event_text)
+	while events.size() > 8:
+		events.pop_front()
+	conquest["events"] = events
+
 func _apply_campaign_victory(data: Dictionary) -> void:
 	var mode: String = String(data.get("campaign_mode", ""))
 	if mode == "conquest":
@@ -1070,7 +1127,26 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 				if not owned.has(pending):
 					owned.append(pending)
 					conquest["owned"] = owned
+					conquest_add_event(conquest, "Ville annexée : %s" % conquest_city_name(pending))
 				conquest["just_annexed"] = pending
+				# Butin thématique versé uniquement à la première annexion.
+				var reward: Dictionary = CONQUEST_CITY_REWARDS.get(pending, {})
+				if not reward.is_empty():
+					var reward_resources: Dictionary = reward.get("resources", {})
+					add_resources(data, reward_resources)
+					data["gold"] = int(data.get("gold", 0)) + int(reward.get("gold", 0))
+					conquest["last_city_reward"] = {
+						"city": pending,
+						"name": String(reward.get("name", "Butin de conquête")),
+						"resources": reward_resources.duplicate(true),
+						"gold": int(reward.get("gold", 0)),
+					}
+					var reward_summary: PackedStringArray = []
+					for resource: String in reward_resources.keys():
+						reward_summary.append("+%d %s" % [int(reward_resources[resource]), resource])
+					if int(reward.get("gold", 0)) > 0:
+						reward_summary.append("+%d or" % int(reward.get("gold", 0)))
+					conquest_add_event(conquest, "Butin : %s (%s)" % [String(reward.get("name", "Récompense")), ", ".join(reward_summary)])
 				conquest["pending_city"] = ""
 				conquest.erase("pending_level")
 				sieges.erase(pending)
@@ -1079,6 +1155,7 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 				# Siège en cours : la ville reste la cible pour la suite
 				sieges[pending] = progress
 				conquest["sieges"] = sieges
+				conquest_add_event(conquest, "Siège : %s — %d/%d victoires" % [conquest_city_name(pending), progress, conquest_city_battles(pending)])
 		# Production de l'empire : les bâtiments des villes possédées
 		# rapportent leurs ressources à chaque bataille gagnée.
 		var empire_yield: Dictionary = conquest_empire_yield(conquest)
@@ -1093,8 +1170,12 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 			conquest["ravage"] = _ravage_dict(conquest)
 			conquest["ravage"][counter] = CONQUEST_RAVAGE_BATTLES
 			conquest["last_counterattack"] = counter
+			conquest_add_event(conquest, "Contre-attaque : %s est pillée (%d batailles)" % [conquest_city_name(counter), CONQUEST_RAVAGE_BATTLES])
 		else:
 			conquest["last_counterattack"] = ""
+		# Le choix de préparation ne s'applique qu'à une seule bataille,
+		# même si le siège de cette ville nécessite plusieurs vagues.
+		conquest.erase("pending_tactic")
 		data["conquest"] = conquest
 	elif mode == "adventure":
 		var adventure: Dictionary = data.get("adventure", {})
@@ -1117,7 +1198,37 @@ func conquest_empire_yield(conquest: Dictionary) -> Dictionary:
 		for b: String in _city_buildings(conquest, city_id):
 			for r: String in CONQUEST_BUILDINGS.get(b, {}).get("yield", {}).keys():
 				out[r] = int(out.get(r, 0)) + int(CONQUEST_BUILDINGS[b]["yield"][r])
+	# Contrôler toutes les villes d'un biome rapporte un bonus permanent à
+	# chaque victoire, même si aucune ville ne possède encore de bâtiment.
+	for r: String in conquest_biome_control_bonus(conquest).keys():
+		out[r] = int(out.get(r, 0)) + int(conquest_biome_control_bonus(conquest)[r])
 	return out
+
+## Bonus de domination : il faut posséder toutes les villes conquérables
+## d'un biome. Le Donjon et la capitale ne comptent pas dans les biomes.
+func conquest_biome_control_bonus(conquest: Dictionary) -> Dictionary:
+	var owned: Array = conquest.get("owned", [])
+	var biome_cities: Dictionary = {}
+	var biome_owned: Dictionary = {}
+	for city_id: String in CONQUEST_CITIES.keys():
+		if city_id == "capitale" or city_id == "donjon_roi":
+			continue
+		var biome: String = String(CONQUEST_CITIES[city_id].get("biome", "Forêt"))
+		biome_cities[biome] = int(biome_cities.get(biome, 0)) + 1
+		if owned.has(city_id):
+			biome_owned[biome] = int(biome_owned.get(biome, 0)) + 1
+	var bonus: Dictionary = {}
+	for biome: String in biome_cities.keys():
+		if int(biome_owned.get(biome, 0)) < int(biome_cities[biome]):
+			continue
+		match biome:
+			"Forêt":
+				bonus["Bois"] = 5
+			"Montagne":
+				bonus["Fer"] = 5
+			"Désert":
+				bonus["Venin"] = 5
+	return bonus
 
 ## Nombre de batailles necessaires pour prendre cette ville :
 ## 4 (3 mobs + boss) pour une ville adverse, 1 pour une neutre.
@@ -1135,6 +1246,10 @@ func conquest_city_biome(city_id: String) -> String:
 ## Nom d'une ville du catalogue (retourne l'id si inconnu).
 func conquest_city_name(city_id: String) -> String:
 	return String(CONQUEST_CITIES.get(city_id, {}).get("name", city_id))
+
+## Récompense thématique prévue pour une ville.
+func conquest_city_reward(city_id: String) -> Dictionary:
+	return CONQUEST_CITY_REWARDS.get(city_id, {}).duplicate(true)
 
 ## Une ville est-elle attaquable : reliée par route au territoire ET pas
 ## déjà conquise. La capitale ne s'attaque jamais ; le Donjon exige de
@@ -1229,6 +1344,37 @@ func _roll_counterattack(conquest: Dictionary, just_conquered: String) -> String
 		return ""
 	return String(candidates[_rng.randi_range(0, candidates.size() - 1)])
 
+## Paie la préparation d'assaut. Centralisé ici pour que l'interface et les
+## tests utilisent exactement les mêmes coûts et contrôles de ressources.
+## Retourne "" si le paiement est accepté, sinon un message explicatif.
+func conquest_pay_assault_tactic(data: Dictionary, tactic: String) -> String:
+	var costs: Dictionary = {}
+	var gold_cost: int = 0
+	match tactic:
+		"none":
+			return ""
+		"scouts":
+			gold_cost = 25
+		"sabotage":
+			costs = {"Bois": 12, "Fer": 8}
+		"supply":
+			gold_cost = 15
+			costs = {"Cuir": 6}
+		_:
+			return "Préparation d'assaut inconnue."
+	var resources: Dictionary = data.get("resources", {})
+	for resource: String in costs.keys():
+		var required: int = int(costs[resource])
+		if int(resources.get(resource, 0)) < required:
+			return "Ressource insuffisante : %s (%d/%d)." % [resource, int(resources.get(resource, 0)), required]
+	if int(data.get("gold", 0)) < gold_cost:
+		return "Or insuffisant : %d pièces requises." % gold_cost
+	for resource: String in costs.keys():
+		resources[resource] = int(resources.get(resource, 0)) - int(costs[resource])
+	data["resources"] = resources
+	data["gold"] = int(data.get("gold", 0)) - gold_cost
+	return ""
+
 ## Construire un bâtiment dans une ville conquise. Retourne "" si OK.
 func conquest_build(data: Dictionary, city_id: String, building: String) -> String:
 	var info: Dictionary = CONQUEST_BUILDINGS.get(building, {})
@@ -1256,6 +1402,7 @@ func conquest_build(data: Dictionary, city_id: String, building: String) -> Stri
 	lst.append(building)
 	builds[city_id] = lst
 	conquest["buildings"] = builds
+	conquest_add_event(conquest, "Bâtiment construit : %s — %s" % [conquest_city_name(city_id), String(info["label"])])
 	data["conquest"] = conquest
 	progression_changed.emit()
 	return ""
@@ -1297,6 +1444,7 @@ func _apply_campaign_defeat(data: Dictionary) -> void:
 		# Defaite : le siege en cours est conserve (meme cible, meme
 		# progression) : le joueur peut retenter la bataille perdue.
 		var conquest: Dictionary = data.get("conquest", {})
+		conquest.erase("pending_tactic")
 		data["conquest"] = conquest
 	elif mode == "adventure":
 		var adventure: Dictionary = data.get("adventure", {})

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="128" viewBox="0 0 160 128">
+<defs><linearGradient id="stone" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d7e2e7"/><stop offset="1" stop-color="#667f94"/></linearGradient></defs>
+<ellipse cx="80" cy="112" rx="64" ry="9" fill="#263d4d" opacity=".32"/>
+<path d="M4 100L34 47 49 65 76 12 102 57 118 36 156 100Z" fill="#4d6d83" stroke="#afc8d7" stroke-width="2"/><path d="M57 47L76 12 95 48 83 42 76 31 69 43Z" fill="#f4fbff"/>
+<path d="M27 101V73L39 63 51 73V101Z" fill="url(#stone)" stroke="#e9f3f6" stroke-width="2"/><path d="M22 74L39 56 56 74Z" fill="#5f8297" stroke="#dce8ee" stroke-width="2"/>
+<path d="M48 105V53L62 39 76 53V105Z" fill="url(#stone)" stroke="#e9f3f6" stroke-width="2"/><path d="M42 54L62 28 82 54Z" fill="#7895a8" stroke="#e9f3f6" stroke-width="2"/>
+<path d="M82 105V67L98 51 114 67V105Z" fill="url(#stone)" stroke="#e9f3f6" stroke-width="2"/><path d="M75 68L98 41 121 68Z" fill="#58768b" stroke="#e9f3f6" stroke-width="2"/>
+<path d="M61 105V82Q70 70 79 82V105Z" fill="#314758" stroke="#f2e7c7" stroke-width="2"/>
+<g fill="#ffe6a3"><rect x="35" y="79" width="6" height="9" rx="1"/><rect x="56" y="60" width="6" height="10" rx="1"/><rect x="68" y="60" width="6" height="10" rx="1"/><rect x="92" y="73" width="7" height="10" rx="1"/></g>
+<path d="M14 106Q80 115 146 106" fill="none" stroke="#d7e8f0" stroke-width="2"/>
+</svg>
