@@ -173,8 +173,13 @@ func _build() -> void:
 		var city: Dictionary = _city_meta(city_id)
 		var btn := Button.new()
 		var owned: bool = _conquest.get("owned", []).has(city_id)
-		var attackable: bool = ProgressionManager.conquest_city_attackable(_conquest, city_id)
-		var badge: String = "⚑" if owned else ("⚔" if attackable else ("⚔" if String(city["kind"]) == "enemy" else "●"))
+		var attackable: bool = ProgressionManager.conquest_city_attackable(
+			_conquest, city_id, _save.get("adventure", {}))
+		# Pont Aventure : une ville non révélée par l'exploration affiche « ? »
+		var revealed_cities: Array = _save.get("adventure", {}).get("revealed_cities", [])
+		var unknown: bool = (not owned) and (not revealed_cities.is_empty()) \
+				and (not revealed_cities.has(city_id))
+		var badge: String = "⚑" if owned else ("?" if unknown else "⚔")
 		var siege_p: int = ProgressionManager.conquest_siege_progress(_conquest, city_id)
 		var siege_txt: String = ("\nSiège %d/%d" % [siege_p, ProgressionManager.CONQUEST_SIEGE_BATTLES]) if siege_p > 0 else ""
 		btn.text = ("%s\n" % badge) + String(city["name"]) + siege_txt
@@ -411,7 +416,8 @@ func _select_city(id: String) -> void:
 		var kind: String = String(city["kind"])
 		var prog: int = ProgressionManager.conquest_siege_progress(_conquest, id)
 		var wave: int = ProgressionManager.conquest_siege_wave(_conquest, id)
-		var attackable: bool = ProgressionManager.conquest_city_attackable(_conquest, id)
+		var attackable: bool = ProgressionManager.conquest_city_attackable(
+			_conquest, id, _save.get("adventure", {}))
 		if kind == "enemy":
 			var left: int = ProgressionManager.CONQUEST_SIEGE_BATTLES - prog
 			var wave_txt: String = ("\n\nSiège en cours : %d/%d — prochaine bataille : %s." % [prog, ProgressionManager.CONQUEST_SIEGE_BATTLES, "BOSS" if wave == ProgressionManager.CONQUEST_SIEGE_BATTLES else "mobs de champs"]) if prog > 0 else ""
@@ -479,7 +485,8 @@ func _on_build_pressed(city_id: String, building: String) -> void:
 	_select_city(city_id)
 
 func _attack_selected_city() -> void:
-	if not ProgressionManager.conquest_city_attackable(_conquest, _selected_id):
+	if not ProgressionManager.conquest_city_attackable(
+			_conquest, _selected_id, _save.get("adventure", {})):
 		return
 	var city: Dictionary = _city_meta(_selected_id)
 	_conquest["pending_city"] = _selected_id

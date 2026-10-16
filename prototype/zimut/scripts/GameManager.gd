@@ -353,6 +353,12 @@ func init_entities() -> void:
 		var conquest: Dictionary = active_save.get("conquest", {})
 		if String(conquest.get("pending_city", "")) != "":
 			lvl = maxi(1, int(conquest.get("pending_level", lvl)))
+	# En Aventure, le défi en cours (POI) fixe le niveau du combat : le
+	# brouillard, les POI et les zones sont dans ProgressionManager/AdventureManager.
+	if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "adventure":
+		var adv: Dictionary = active_save.get("adventure", {})
+		if String(adv.get("pending_challenge", "")) != "":
+			lvl = maxi(1, int(adv.get("pending_level", lvl)))
 	fight_enemies = []
 	fight_is_boss = false
 	var boss_fight: bool = not active_save.is_empty() and ProgressionManager.is_boss_fight(active_save)
@@ -371,7 +377,14 @@ func init_entities() -> void:
 			conquest_siege_boss = true
 			boss_fight = true
 			fight_is_boss = true
-	fight_biome = "Forêt" if campaign_mode == "adventure" else (ProgressionManager.next_biome(active_save) if not active_save.is_empty() else "Forêt")
+	# Aventure : le biome du combat est celui de la zone explorée.
+	if campaign_mode == "adventure" and not active_save.is_empty():
+		fight_biome = ProgressionManager.adventure_zone_biome(
+			String(active_save.get("adventure", {}).get("zone", "foret_sylve")))
+	elif not active_save.is_empty():
+		fight_biome = ProgressionManager.next_biome(active_save)
+	else:
+		fight_biome = "Forêt"
 	# Conquête : le biome est celui de la ville ciblée (les Dunes opposent des
 	# ennemis du désert, le Donjon des squelettes).
 	if campaign_mode == "conquest" and not active_save.is_empty():

@@ -1,30 +1,59 @@
 extends CanvasLayer
-## Première ébauche du mode Aventure.
-## La progression reste dans la sauvegarde commune utilisée par le mode Tactique.
+## Mode Aventure — carte d'exploration isométrique.
+##
+## Rendu uniquement : la logique (état, brouillard, récompenses, ponts
+## inter-modes) vit dans AdventureManager.gd ; le catalogue officiel
+## (zones, POI, énigmes) vient de ProgressionManager. Les sprites vivent
+## dans assets/adventure/ (tiles par biome, poi, hero) — remplaçables
+## sans toucher au code.
+##
+## La progression reste dans la sauvegarde commune aux trois modes.
 
 const PANEL := Color(0.10, 0.17, 0.20, 0.96)
 const PANEL_LIGHT := Color(0.18, 0.29, 0.29, 0.96)
 const GOLD := Color(0.94, 0.76, 0.34)
 const TEXT := Color(0.95, 0.94, 0.83)
-const GRID_W := 8
-const GRID_H := 5
+
+## Tuiles par biome (2 variantes par biome, en damier) + brouillard.
+## Les chemins pointent dans assets/adventure/ : les artistes peuvent
+## remplacer les SVG sans modifier ce script.
+const ZONE_TILES := {
+	"Forêt": ["res://assets/adventure/tiles/forest_grass.svg",
+		"res://assets/adventure/tiles/forest_water.svg"],
+	"Montagne": ["res://assets/adventure/tiles/mountain_stone.svg",
+		"res://assets/adventure/tiles/mountain_snow.svg"],
+	"Désert": ["res://assets/adventure/tiles/desert_sand.svg",
+		"res://assets/adventure/tiles/desert_rock.svg"],
+}
+const FOG_TILE := "res://assets/adventure/tiles/fog.svg"
+const POI_ICONS := {
+	"combat": "res://assets/adventure/poi/combat.svg",
+	"chest": "res://assets/adventure/poi/chest.svg",
+	"puzzle": "res://assets/adventure/poi/puzzle.svg",
+	"camp": "res://assets/adventure/poi/camp.svg",
+	"reveal": "res://assets/adventure/poi/reveal.svg",
+	"exit": "res://assets/adventure/poi/exit.svg",
+}
+const HERO_SPRITE := "res://assets/adventure/hero/hero.svg"
+
+## Géométrie isométrique (losanges façon Waven/Dofus).
+const TILE_W := 128
+const TILE_H := 64
+const MAP_MARGIN := 40
+
+var manager: Node = null
 
 var _save: Dictionary = {}
 var _slot: int = -1
-var _hero_pos := Vector2i(1, 2)
-var _moves: int = 0
 var _message: Label
-var _grid: GridContainer
-var _interact: Button
 var _cells: Dictionary = {}
-var _campaign: Dictionary = {}
-
-const POIS := {
-	"3,1": {"kind": "puzzle", "icon": "✦", "name": "Sanctuaire des runes"},
-	"6,2": {"kind": "combat", "icon": "⚔", "name": "Camp gobelin"},
-	"2,4": {"kind": "chest", "icon": "◇", "name": "Coffre moussu"},
-	"6,4": {"kind": "exit", "icon": "➜", "name": "Sentier du vieux chêne"},
-}
+var _poi_icons: Dictionary = {}
+var _hero_sprite: Sprite2D
+var _map_root: Node2D
+var _zone_label: Label
+var _moves_label: Label
+var _zone_buttons: Dictionary = {}
+var _map_panel: Panel
 
 func _ready() -> void:
 	Music.play("adventure")
@@ -34,235 +63,421 @@ func _ready() -> void:
 	if _save.is_empty() or _slot < 0:
 		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
 		return
-	_campaign = _save.get("adventure", {})
-	if _campaign.is_empty():
-		_campaign = {"hero_pos": [1, 2], "moves": 0, "discovered": [], "completed": []}
-	var pos_data: Array = _campaign.get("hero_pos", [1, 2])
-	if pos_data.size() >= 2:
-		_hero_pos = Vector2i(int(pos_data[0]), int(pos_data[1]))
-	_moves = int(_campaign.get("moves", 0))
-	_save["adventure"] = _campaign
-	_save["campaign_mode"] = "adventure"
-	_persist()
+	manager = Node.new()
+	manager.set_script(load("res://scripts/AdventureManager.gd"))
+	add_child(manager)
+	manager.load_state(_save, _slot)
+	manager.message.connect(func(t: String) -> void: _message.text = t)
+	manager.cities_revealed.connect(_on_cities_revealed)
 	_build()
+
+# ══════════════════════════════════════════════════════════════════
+#  Construction de l'interface
+# ══════════════════════════════════════════════════════════════════
 
 func _build() -> void:
 	var bg := ColorRect.new()
-	bg.color = Color(0.35, 0.48, 0.45)
+	bg.color = Color(0.22, 0.30, 0.28)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 
 	var root := VBoxContainer.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.add_theme_constant_override("separation", 12)
-	root.offset_left = 28
-	root.offset_right = -28
-	root.offset_top = 22
-	root.offset_bottom = -22
+	root.add_theme_constant_override("separation", 10)
+	root.offset_left = 24
+	root.offset_right = -24
+	root.offset_top = 16
+	root.offset_bottom = -16
 	add_child(root)
 
 	var top := HBoxContainer.new()
 	root.add_child(top)
+
 	var title := Label.new()
-	title.text = "🌿  ZIMUT — L'ODYSSÉE DES ÉLÉMENTS"
+	title.text = "🧭  ZIMUT — AVENTURE"
 	title.add_theme_font_size_override("font_size", 28)
 	title.add_theme_color_override("font_color", TEXT)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(title)
+
 	var back := Button.new()
 	back.text = "←  PARTIE"
 	back.pressed.connect(_back_to_save)
 	top.add_child(back)
 
-	var subtitle := Label.new()
-	subtitle.text = "AVENTURE  ·  Forêt de Zimut  ·  Explorez, découvrez, relevez des défis"
-	subtitle.add_theme_font_size_override("font_size", 18)
-	subtitle.add_theme_color_override("font_color", GOLD)
-	root.add_child(subtitle)
+	_zone_label = Label.new()
+	_zone_label.add_theme_font_size_override("font_size", 18)
+	_zone_label.add_theme_color_override("font_color", GOLD)
+	root.add_child(_zone_label)
 
 	var body := HBoxContainer.new()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation", 18)
+	body.add_theme_constant_override("separation", 16)
 	root.add_child(body)
 
+	# ── Carte isométrique ──────────────────────────────────────────
 	var map_panel := PanelContainer.new()
 	map_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	map_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	map_panel.add_theme_stylebox_override("panel", _panel_style(PANEL, GOLD))
 	body.add_child(map_panel)
+	_map_panel = map_panel
+
 	var map_box := VBoxContainer.new()
 	map_box.add_theme_constant_override("separation", 8)
 	map_panel.add_child(map_box)
+
 	var map_title := Label.new()
-	map_title.text = "SENTIERS DE LA FORÊT"
+	map_title.text = "EXPLORATION"
 	map_title.add_theme_font_size_override("font_size", 20)
 	map_title.add_theme_color_override("font_color", TEXT)
 	map_box.add_child(map_title)
-	_grid = GridContainer.new()
-	_grid.columns = GRID_W
-	_grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_grid.add_theme_constant_override("h_separation", 5)
-	_grid.add_theme_constant_override("v_separation", 5)
-	map_box.add_child(_grid)
-	for y: int in range(GRID_H):
-		for x: int in range(GRID_W):
-			var p := Vector2i(x, y)
-			var cell := Button.new()
-			cell.custom_minimum_size = Vector2(66, 62)
-			cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			cell.size_flags_vertical = Control.SIZE_EXPAND_FILL
-			cell.add_theme_font_size_override("font_size", 22)
-			cell.pressed.connect(_on_cell_pressed.bind(p))
-			_cells[p] = cell
-			_grid.add_child(cell)
 
+	var map_scroll := ScrollContainer.new()
+	map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	map_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	map_box.add_child(map_scroll)
+
+	var map_holder := Control.new()
+	map_scroll.add_child(map_holder)
+	_map_root = Node2D.new()
+	map_holder.add_child(_map_root)
+
+	# ── Panneau latéral : journal + actions ───────────────────────
 	var side := PanelContainer.new()
-	side.custom_minimum_size.x = 350
+	side.custom_minimum_size.x = 360
 	side.add_theme_stylebox_override("panel", _panel_style(PANEL_LIGHT, GOLD))
 	body.add_child(side)
+
 	var side_box := VBoxContainer.new()
 	side_box.add_theme_constant_override("separation", 12)
 	side.add_child(side_box)
-	var hero_title := Label.new()
-	hero_title.text = "JOURNAL D'EXPLORATION"
-	hero_title.add_theme_font_size_override("font_size", 20)
-	hero_title.add_theme_color_override("font_color", TEXT)
-	side_box.add_child(hero_title)
+
+	var journal_title := Label.new()
+	journal_title.text = "JOURNAL D'EXPLORATION"
+	journal_title.add_theme_font_size_override("font_size", 20)
+	journal_title.add_theme_color_override("font_color", TEXT)
+	side_box.add_child(journal_title)
+
 	_message = Label.new()
-	_message.text = "Déplacez-vous de case en case. Les lieux remarquables révèlent des interactions."
+	_message.text = "Déplacez le héros case par case. Le brouillard se lève autour de vous."
 	_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_message.custom_minimum_size.y = 120
 	_message.add_theme_color_override("font_color", TEXT)
+	_message.add_theme_font_size_override("font_size", 17)
 	side_box.add_child(_message)
-	_interact = Button.new()
-	_interact.text = "INTERAGIR"
-	_interact.custom_minimum_size.y = 54
-	_interact.pressed.connect(_interact_with_poi)
-	side_box.add_child(_interact)
+
+	var interact := Button.new()
+	interact.text = "INTERAGIR"
+	interact.custom_minimum_size.y = 54
+	interact.add_theme_font_size_override("font_size", 20)
+	interact.pressed.connect(_interact)
+	side_box.add_child(interact)
+
+	var zones_title := Label.new()
+	zones_title.text = "ZONES DU MONDE"
+	zones_title.add_theme_font_size_override("font_size", 18)
+	zones_title.add_theme_color_override("font_color", GOLD)
+	side_box.add_child(zones_title)
+
+	for zone_id: String in manager.available_zones():
+		var btn := Button.new()
+		var meta: Dictionary = ProgressionManager.adventure_zone_meta(zone_id)
+		btn.text = "%s  ·  %s" % [String(meta.get("name", zone_id)),
+			ProgressionManager.biome_label(String(meta.get("biome", "Forêt")))]
+		btn.custom_minimum_size.y = 46
+		btn.pressed.connect(_on_zone_pressed.bind(zone_id))
+		side_box.add_child(btn)
+		_zone_buttons[zone_id] = btn
+
 	var help := Label.new()
-	help.text = "Déplacement : cases adjacentes\nDéfis et coffres : récompenses partagées\nCombat : équipe, sorts et règles du mode Tactique"
+	help.text = "Clic case adjacente : déplacement\nBrouillard : révélé autour du héros\n" \
+		+ "Belvédère : villes pour la Conquête\nCombat : règles du mode Tactique"
 	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	help.add_theme_color_override("font_color", TEXT)
+	help.add_theme_font_size_override("font_size", 15)
 	side_box.add_child(help)
+
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	side_box.add_child(spacer)
-	var progress := Label.new()
-	progress.text = "Pas parcourus : %d\nPersonnages, XP et inventaire : sauvegarde commune" % _moves
-	progress.add_theme_color_override("font_color", GOLD)
-	side_box.add_child(progress)
-	_refresh_map()
 
-func _refresh_map() -> void:
-	for p: Vector2i in _cells.keys():
-		var cell: Button = _cells[p]
-		var key := "%d,%d" % [p.x, p.y]
-		var poi: Dictionary = POIS.get(key, {})
-		if p == _hero_pos:
-			cell.text = "🧭"
-			cell.tooltip_text = "Votre héros"
-			cell.add_theme_color_override("font_color", Color(1.0, 0.88, 0.36))
-			cell.add_theme_stylebox_override("normal", _panel_style(Color(0.38, 0.31, 0.12), GOLD))
-		elif not poi.is_empty():
-			cell.text = String(poi["icon"])
-			cell.tooltip_text = String(poi["name"])
-			cell.add_theme_color_override("font_color", TEXT)
-			cell.add_theme_stylebox_override("normal", _panel_style(Color(0.20, 0.34, 0.24), Color(0.58, 0.75, 0.46)))
-		else:
-			cell.text = "·" if (p.x + p.y) % 2 == 0 else "✧"
-			cell.tooltip_text = "Sentier forestier"
-			cell.add_theme_color_override("font_color", Color(0.75, 0.84, 0.66))
-			cell.add_theme_stylebox_override("normal", _panel_style(Color(0.30, 0.44, 0.34) if (p.x + p.y) % 2 == 0 else Color(0.34, 0.48, 0.36), Color(0.47, 0.61, 0.43)))
-		cell.add_theme_stylebox_override("hover", _panel_style(Color(0.43, 0.55, 0.39), GOLD))
-		cell.add_theme_color_override("font_hover_color", Color.WHITE)
-		var completed: Array = _campaign.get("completed", [])
-		if not poi.is_empty() and completed.has(key):
-			cell.text = "✓"
+	_moves_label = Label.new()
+	_moves_label.add_theme_color_override("font_color", GOLD)
+	side_box.add_child(_moves_label)
 
-	var key_here := "%d,%d" % [_hero_pos.x, _hero_pos.y]
-	var completed_here: Array = _campaign.get("completed", [])
-	_interact.disabled = not POIS.has(key_here) or completed_here.has(key_here)
+	_build_map()
+	_refresh()
 
-func _on_cell_pressed(p: Vector2i) -> void:
-	if absi(p.x - _hero_pos.x) + absi(p.y - _hero_pos.y) != 1:
-		_message.text = "Le sentier est accessible case par case. Choisissez une case adjacente."
+# ══════════════════════════════════════════════════════════════════
+#  Carte isométrique
+# ════════════════════════════════════════════════════════════════
+
+func _build_map() -> void:
+	for c: Node in _map_root.get_children():
+		c.queue_free()
+	_cells.clear()
+	_poi_icons.clear()
+
+	var size := manager.zone_size()
+	var tiles: Array = ZONE_TILES.get(manager.zone_biome(),
+		ZONE_TILES["Forêt"])
+
+	for y: int in range(size.y):
+		for x: int in range(size.x):
+			var pos := Vector2i(x, y)
+			var screen := _cell_center(x, y, size)
+			var tex: Texture2D = _tile_texture(tiles, x, y, pos)
+			var spr := Sprite2D.new()
+			spr.texture = tex
+			spr.position = screen
+			_map_root.add_child(spr)
+			_cells[pos] = {"sprite": spr, "texture": tex}
+
+			var btn := TextureButton.new()
+			btn.texture_normal = tex
+			btn.texture_hover = tex
+			btn.scale = Vector2(0.98, 0.98)
+			btn.position = screen - Vector2(TILE_W * 0.5, TILE_H * 0.5)
+			btn.pressed.connect(_on_cell_pressed.bind(pos))
+			_map_root.add_child(btn)
+			_cells[pos]["button"] = btn
+
+	var hero := Sprite2D.new()
+	hero.texture = load(HERO_SPRITE)
+	hero.scale = Vector2(0.55, 0.55)
+	_map_root.add_child(hero)
+	_hero_sprite = hero
+
+func _tile_texture(tiles: Array, x: int, y: int, pos: Vector2i) -> Texture2D:
+	if not manager.cell_discovered(pos):
+		return load(FOG_TILE) as Texture2D
+	var idx: int = (x + y) % 2
+	return load(String(tiles[idx if tiles.size() > idx else 0])) as Texture2D
+
+func _cell_center(x: int, y: int, size: Vector2i) -> Vector2:
+	return Vector2(
+		MAP_MARGIN + (size.x + x - y - 1) * TILE_W * 0.5,
+		MAP_MARGIN + (x + y) * TILE_H * 0.5 + TILE_H)
+
+func _refresh() -> void:
+	var size := manager.zone_size()
+	var tiles: Array = ZONE_TILES.get(manager.zone_biome(), ZONE_TILES["Forêt"])
+
+	for pos: Vector2i in _cells.keys():
+		var entry: Dictionary = _cells[pos]
+		var tex: Texture2D = _tile_texture(tiles, pos.x, pos.y, pos)
+		(entry["sprite"] as Sprite2D).texture = tex
+		var btn: TextureButton = entry.get("button")
+		if btn != null:
+			btn.texture_normal = tex
+
+	_refresh_pois(size)
+	if _hero_sprite != null:
+		_hero_sprite.position = _cell_center(manager.hero_pos().x,
+			manager.hero_pos().y, size) - Vector2(0, 18)
+
+	_zone_label.text = "AVENTURE  ·  %s  ·  %s" % [manager.zone_name(),
+		ProgressionManager.biome_label(manager.zone_biome())]
+	_moves_label.text = "Pas parcourus : %d\nSauvegarde commune aux trois modes" % manager.moves()
+	for zone_id: String in _zone_buttons.keys():
+		var btn: Button = _zone_buttons[zone_id]
+		btn.disabled = zone_id == manager.zone_id()
+
+func _refresh_pois(size: Vector2i) -> void:
+	for c: Node in _poi_icons.values():
+		if is_instance_valid(c):
+			c.queue_free()
+	_poi_icons.clear()
+	var pois: Dictionary = ProgressionManager.adventure_zone_pois(manager.zone_id())
+	for key: String in pois.keys():
+		var parts := key.split(",")
+		var pos := Vector2i(int(parts[0]), int(parts[1]))
+		if not manager.cell_discovered(pos):
+			continue
+		var poi: Dictionary = pois[key]
+		var kind := String(poi.get("kind", "combat"))
+		var icon := Sprite2D.new()
+		icon.texture = load(String(POI_ICONS.get(kind, POI_ICONS["combat"])))
+		icon.scale = Vector2(0.42, 0.42)
+		icon.position = _cell_center(pos.x, pos.y, size) - Vector2(0, 14)
+		_map_root.add_child(icon)
+		_poi_icons[pos] = icon
+		if manager.poi_done(pos):
+			icon.modulate = Color(1, 1, 1, 0.35)
+
+# ══════════════════════════════════════════════════════════════════
+#  Interactions
+# ══════════════════════════════════════════════════════════════════
+
+func _on_cell_pressed(pos: Vector2i) -> void:
+	if pos == manager.hero_pos():
+		_interact()
 		return
-	_hero_pos = p
-	_moves += 1
-	var key := "%d,%d" % [p.x, p.y]
-	var discovered: Array = _campaign.get("discovered", [])
-	if not discovered.has(key):
-		discovered.append(key)
-	_campaign["discovered"] = discovered
-	_campaign["hero_pos"] = [p.x, p.y]
-	_campaign["moves"] = _moves
-	var poi: Dictionary = POIS.get(key, {})
+	if not manager.cell_discovered(pos):
+		_message.text = "Le brouillard est trop dense par là. Explorez d'alentour."
+		return
+	if not manager.can_move_to(pos):
+		_message.text = "Le sentier se parcourt case par case."
+		return
+	manager.move_hero(pos)
+	var poi := manager.poi_at(pos)
 	if not poi.is_empty():
-		_message.text = "Découverte : %s. Approchez-vous et choisissez INTERAGIR." % String(poi["name"])
+		_message.text = "Découverte : %s — %s" % [String(poi.get("name", "?")),
+			String(poi.get("desc", ""))]
 	else:
-		_message.text = "Le sentier s'enfonce sous les frondaisons. Continuez à explorer."
-	_persist()
-	_refresh_map()
+		_message.text = "Le paysage s'ouvre devant vous."
+	_refresh()
 
-func _interact_with_poi() -> void:
-	var key := "%d,%d" % [_hero_pos.x, _hero_pos.y]
-	var poi: Dictionary = POIS.get(key, {})
-	if poi.is_empty():
-		return
-	var completed: Array = _campaign.get("completed", [])
-	if completed.has(key):
-		return
-	match String(poi["kind"]):
+func _interact() -> void:
+	var cmd: Dictionary = manager.interact()
+	match String(cmd.get("action", "nothing")):
 		"puzzle":
-			var dialog := ConfirmationDialog.new()
-			dialog.title = "Le sanctuaire des runes"
-			dialog.dialog_text = "Énigme : je grandis quand on me nourrit, mais je meurs si l'on me donne à boire. Qui suis-je ?\n\nDans cette première ébauche, confirmer signifie proposer le feu."
-			dialog.ok_button_text = "Le feu"
-			dialog.cancel_button_text = "Je réfléchis encore"
-			dialog.confirmed.connect(func() -> void:
-				_award_exploration_reward(120, key, "Énigme résolue : le sanctuaire vous confie une relique.")
-				dialog.queue_free())
-			dialog.canceled.connect(func() -> void: dialog.queue_free())
-			add_child(dialog)
-			dialog.popup_centered(Vector2i(560, 220))
+			_show_puzzle_dialog(cmd)
 		"chest":
-			var drops: Array = ProgressionManager._roll_loots(maxi(1, int(_save.get("level", 10))), false)
-			if not drops.is_empty():
-				_save["inventory"].append(drops[0])
-			_award_exploration_reward(60, key, "Coffre ouvert : +60 XP et un objet ajouté à l'inventaire commun.")
+			var looted: Array = cmd.get("loots", [])
+			var item_name: String = String(looted[0].get("name", "un objet")) \
+				if not looted.is_empty() else ""
+			if item_name != "":
+				_message.text = "Coffre ouvert ! +%d XP — « %s » rejoint\nl'inventaire commun." \
+					% [ProgressionManager.ADVENTURE_BASE_XP, item_name]
+			else:
+				_message.text = "Coffre ouvert ! +%d XP." % ProgressionManager.ADVENTURE_BASE_XP
+			_refresh()
+		"camp":
+			_message.text = "Vous vous reposez à la source claire. +%d XP d'exploration." \
+				% int(ProgressionManager.ADVENTURE_BASE_XP * 0.5)
+			_refresh()
+		"reveal":
+			var names: Array = cmd.get("names", [])
+			_show_reveal_popup(names)
+			_refresh()
 		"combat":
-			_campaign["pending_challenge"] = key
-			_save["adventure"] = _campaign
-			_save["campaign_mode"] = "adventure"
-			_persist()
-			GameManager.active_save = _save
-			GameManager.active_slot = _slot
-			GameManager.fight_biome = "Forêt"
-			get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
+			_start_combat(cmd.get("poi", {}))
 		"exit":
-			_message.text = "Le vieux chêne marque la limite de cette première zone. D'autres clairières viendront ensuite."
+			_show_exit_dialog(cmd.get("key", ""))
+		_:
+			_message.text = "Rien de particulier ici... pour l'instant."
 
-func _award_exploration_reward(xp: int, key: String, message: String) -> void:
-	ProgressionManager.award_xp(_save, xp)
-	var completed: Array = _campaign.get("completed", [])
-	if not completed.has(key):
-		completed.append(key)
-	_campaign["completed"] = completed
-	_save["adventure"] = _campaign
-	_persist()
-	_message.text = message
-	_refresh_map()
+func _show_puzzle_dialog(cmd: Dictionary) -> void:
+	var puzzle: Dictionary = cmd.get("puzzle", {})
+	var dialog := AcceptDialog.new()
+	dialog.title = "✦  Énigme"
+	dialog.ok_button_text = "Répondre"
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 10)
+	dialog.add_child(box)
+	var label := Label.new()
+	label.text = String(puzzle.get("text", ""))
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size.x = 520
+	box.add_child(label)
+	var input := LineEdit.new()
+	input.placeholder_text = "Votre réponse..."
+	box.add_child(input)
+	dialog.confirmed.connect(func() -> void:
+		var ok: bool = manager.solve_puzzle(String(cmd.get("key", "")),
+			input.text)
+		if ok:
+			_message.text = "Énigme résolue : +%d XP d'exploration !" \
+				% (ProgressionManager.ADVENTURE_BASE_XP * 2)
+		else:
+			_message.text = String(puzzle.get("wrong", "Les runes restent muettes."))
+		_refresh()
+		dialog.queue_free())
+	add_child(dialog)
+	dialog.popup_centered(Vector2i(620, 220))
 
-func _persist() -> void:
-	_save["adventure"] = _campaign
+func _show_reveal_popup(names: Array) -> void:
+	if names.is_empty():
+		_message.text = "Vous connaissiez déjà ces horizons."
+		return
+	var dialog := AcceptDialog.new()
+	dialog.title = "🔍  Horizons découverts !"
+	var sighted: String = "\n".join(PackedStringArray(names))
+	dialog.dialog_text = "Du haut du belvédère, vous repérez :\n\n%s" % sighted \
+		+ "\n\nCes villes sont désormais visibles en CONQUÊTE."
+	add_child(dialog)
+	dialog.popup_centered(Vector2i(560, 260))
+	_message.text = "Belvédère : villes révélées pour la Conquête !"
+
+func _show_exit_dialog(key: String) -> void:
+	var revealed: Array = manager.take_exit(key)
+	var dialog := AcceptDialog.new()
+	dialog.title = "🧭  Sentier découvert !"
+	var zone_names: Array = []
+	var new_zones: Array = []
+	for r: String in revealed:
+		if String(r).begins_with("zone:"):
+			var zid := String(r).substr(5)
+			new_zones.append(zid)
+			zone_names.append(ProgressionManager.adventure_zone_name(zid))
+	if zone_names.is_empty():
+		var familiar: String = "Ce sentier vous est déjà familier.\n"
+		dialog.dialog_text = familiar \
+			+ "Empruntez une zone du panneau pour voyager."
+	else:
+		dialog.dialog_text = "Le sentier s'ouvre vers : %s\nChoisissez la zone dans « ZONES DU MONDE »." \
+			% " · ".join(PackedStringArray(zone_names))
+	add_child(dialog)
+	dialog.popup_centered(Vector2i(560, 220))
+	_refresh()
+	_rebuild_zone_buttons()
+
+func _rebuild_zone_buttons() -> void:
+	for btn: Button in _zone_buttons.values():
+		btn.queue_free()
+	_zone_buttons.clear()
+	var side_box: Node = _moves_label.get_parent()
+	var idx: int = side_box.get_children().find(_moves_label)
+	if idx < 0:
+		idx = side_box.get_child_count()
+	for zone_id: String in manager.available_zones():
+		var btn := Button.new()
+		var meta: Dictionary = ProgressionManager.adventure_zone_meta(zone_id)
+		btn.text = "%s  ·  %s" % [String(meta.get("name", zone_id)),
+			ProgressionManager.biome_label(String(meta.get("biome", "Forêt")))]
+		btn.custom_minimum_size.y = 46
+		btn.pressed.connect(_on_zone_pressed.bind(zone_id))
+		side_box.add_child(btn)
+		side_box.move_child(btn, maxi(0, idx))
+		_zone_buttons[zone_id] = btn
+		idx += 1
+	_refresh()
+
+func _on_zone_pressed(zone_id: String) -> void:
+	if zone_id == manager.zone_id():
+		return
+	if manager.enter_zone(zone_id):
+		_message.text = "Vous arrivez : %s." % manager.zone_name()
+		_build_map()
+		_refresh()
+
+func _start_combat(poi: Dictionary) -> void:
+	var level: int = manager.challenge_level(poi)
+	_save["adventure"] = manager.state
+	_save["adventure"]["pending_level"] = level
 	_save["campaign_mode"] = "adventure"
-	ProgressionManager.write_save(_slot, _save)
-	GameManager.active_save = _save
-	GameManager.active_slot = _slot
+	manager.persist()
+	GameManager.fight_biome = manager.zone_biome()
+	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
+
+func _on_cities_revealed(city_ids: Array) -> void:
+	for city_id: String in city_ids:
+		if not _save.has("conquest") or not (_save["conquest"] is Dictionary):
+			_save["conquest"] = {"owned": ["capitale"], "pending_city": "",
+				"discovered": []}
+		var conquest: Dictionary = _save["conquest"]
+		var disc: Array = conquest.get("discovered", [])
+		if not disc.has(city_id):
+			disc.append(city_id)
+		conquest["discovered"] = disc
+		_save["conquest"] = conquest
+	manager.persist()
 
 func _back_to_save() -> void:
-	_persist()
+	manager.persist()
 	get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
 
 func _panel_style(bg: Color, border: Color) -> StyleBoxFlat:

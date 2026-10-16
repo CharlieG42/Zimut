@@ -81,6 +81,107 @@ const CONQUEST_RAVAGE_BATTLES := 3
 ## en une seule bataille de mobs.
 const CONQUEST_SIEGE_BATTLES := 4
 
+## ══════════════════════════════════════════════════════════════════════
+## MODE AVENTURE — catalogue officiel (même format que la Conquête).
+## La carte d’Aventure est LE MÊME MONDE que la carte de Conquête, vu au
+## sol : chaque zone est rattachée à un biome et peut « révéler » des
+## villes de CONQUEST_CITIES, marquées « discovered » côté Conquête
+## (condition pour les attaquer — pont inter-modes).
+##
+## Zone : id -> { name, biome, size:[w,h], start:[x,y],
+##               unlock: id de zone précédente ("" = départ),
+##               reveals: [villes CONQUEST_CITIES révélées en l’explorant] }
+## POI  : position "x,y" -> { kind, name, level, desc }
+##   kind ∈ combat | chest | puzzle | camp (repos) | reveal (belvédère) | exit
+## ADVENTURE_FOG_RADIUS : rayon de brouillard de guerre révélé autour du héros.
+## ══════════════════════════════════════════════════════════════════════
+const ADVENTURE_FOG_RADIUS := 2
+const ADVENTURE_BASE_XP := 60
+
+const ADVENTURE_ZONES := {
+	"foret_sylve": {
+		"name": "Sentiers de la Sylve", "biome": "Forêt", "size": [10, 7],
+		"start": [1, 3], "unlock": "", "reveals": ["clairiere", "village_brume"],
+	},
+	"foret_ronces": {
+		"name": "Ronces de l’Abbaye", "biome": "Forêt", "size": [10, 7],
+		"start": [1, 3], "unlock": "foret_sylve", "reveals": ["abbaye_ronce", "ruines_lierre"],
+	},
+	"montagne_pics": {
+		"name": "Pics du Givre", "biome": "Montagne", "size": [10, 7],
+		"start": [1, 3], "unlock": "foret_sylve", "reveals": ["hameau_pin", "col_givre"],
+	},
+	"desert_dunes": {
+		"name": "Dunes Perdues", "biome": "Désert", "size": [10, 7],
+		"start": [1, 3], "unlock": "montagne_pics", "reveals": ["oasis", "caravanserail"],
+	},
+}
+
+const ADVENTURE_POIS := {
+	"foret_sylve": {
+		"4,1": {"kind": "puzzle", "name": "Sanctuaire des runes", "level": 10,
+			"desc": "De vieilles runes attendent une réponse."},
+		"7,2": {"kind": "combat", "name": "Camp gobelin", "level": 10,
+			"desc": "Des gobelins ont dressé leurs tentes."},
+		"3,4": {"kind": "chest", "name": "Coffre moussu", "level": 10,
+			"desc": "Un coffre à demi enseveli sous la mousse."},
+		"5,5": {"kind": "camp", "name": "Source claire", "level": 10,
+			"desc": "Un endroit sûr pour reprendre souffle."},
+		"8,5": {"kind": "reveal", "name": "Belvédère de la Sylve", "level": 10,
+			"desc": "Du haut de l’arbre, la vallée se dévoile."},
+		"9,3": {"kind": "exit", "name": "Sentier du vieux chêne", "level": 10,
+			"desc": "Le sentier mène vers de nouveaux horizons."},
+	},
+	"foret_ronces": {
+		"5,1": {"kind": "combat", "name": "Embûche de ronces", "level": 13,
+			"desc": "Quelque chose remue sous les ronces."},
+		"2,2": {"kind": "puzzle", "name": "Autel du Lierre", "level": 13,
+			"desc": "L’autel du Lierre pose son énigme."},
+		"7,4": {"kind": "chest", "name": "Cachette du braconnier", "level": 13,
+			"desc": "Un vieux sac oublié sous une racine."},
+		"4,5": {"kind": "combat", "name": "Patrouille de la Citadelle", "level": 15,
+			"desc": "Des soldats des Ronces rôdent ici."},
+		"9,3": {"kind": "exit", "name": "Chemin des Ronces", "level": 13,
+			"desc": "Le chemin s’enfonce vers l’ouest."},
+	},
+	"montagne_pics": {
+		"5,2": {"kind": "combat", "name": "Caverne du Troll", "level": 17,
+			"desc": "Un troll garde le passage."},
+		"2,4": {"kind": "puzzle", "name": "Runes du Col", "level": 17,
+			"desc": "Des runes gelées à déchiffrer."},
+		"7,5": {"kind": "chest", "name": "Grotte au cristal", "level": 17,
+			"desc": "Un éclat de cristal brille au fond."},
+		"8,1": {"kind": "reveal", "name": "Panneau du Givre", "level": 17,
+			"desc": "Tout le massif s’étale sous vos yeux."},
+		"9,3": {"kind": "exit", "name": "Descente du Col", "level": 17,
+			"desc": "Le sentier descend vers les Dunes."},
+	},
+	"desert_dunes": {
+		"4,3": {"kind": "combat", "name": "Squelettes des sables", "level": 21,
+			"desc": "Des ossements s’animent à votre approche."},
+		"6,1": {"kind": "puzzle", "name": "Obélisque Solaire", "level": 21,
+			"desc": "L’obélisque attend sa constellation."},
+		"2,5": {"kind": "chest", "name": "Épave du convoi", "level": 21,
+			"desc": "Les restes d’un convoi ensevelis."},
+		"8,5": {"kind": "reveal", "name": "Mirador du Désert", "level": 21,
+			"desc": "Un mirador dominant les Dunes."},
+		"9,3": {"kind": "exit", "name": "Route du Caravansérail", "level": 21,
+			"desc": "La route du caravansérail s’ouvre."},
+	},
+}
+
+## Énigmes officielles des POI « puzzle » (clé = "zone,x,y").
+const ADVENTURE_PUZZLES := {
+	"foret_sylve,4,1": {"text": "Je grandis quand on me nourrit, mais je meurs si l’on me donne à boire. Qui suis-je ?",
+		"answer": "Le feu", "wrong": "Les runes restent muettes."},
+	"foret_ronces,2,2": {"text": "Plus j’ai de gardiens, moins je vaux. Moins j’en ai, plus je vaux. Qui suis-je ?",
+		"answer": "Le secret", "wrong": "L’autel garde son silence."},
+	"montagne_pics,2,4": {"text": "Je brille sans brûler, je fuis sans marcher, je reviens chaque nuit. Qui suis-je ?",
+		"answer": "La lune", "wrong": "Le givre dévore la réponse."},
+	"desert_dunes,6,1": {"text": "On me jette car je perds ma valeur ; on me ramasse car j’en gagne une autre. Qui suis-je ?",
+		"answer": "Une pièce de monnaie", "wrong": "L’obélisque reste ténébreux."},
+}
+
 ## Catalogue officiel des villes de Conquête (la carte de ConquestMapUI en est
 ## dérivée) : id -> { name, kind, biome, level }.
 ##   capital : imprenable, quartier général ;
@@ -1105,7 +1206,187 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 				completed.append(pending_challenge)
 			adventure["completed"] = completed
 			adventure["pending_challenge"] = ""
+			adventure.erase("pending_level")
 			data["adventure"] = adventure
+
+# ═══════════════════════════════════════════════════════════════════════
+#  MODE AVENTURE — état, brouillard de guerre et pont vers la Conquête
+# ═══════════════════════════════════════════════════════════════════════
+
+## Initialise (si besoin) l'état Aventure d'une sauvegarde et le retourne.
+## Structure : { zone, hero_pos:[x,y], moves, discovered:["zone,x,y"...],
+##              completed:["zone,x,y"...], pending_challenge:"",
+##              zones_unlocked:[zone...], revealed_cities:[ville...] }
+func adventure_state(data: Dictionary) -> Dictionary:
+	if not data.has("adventure") or not (data["adventure"] is Dictionary) \
+			or data["adventure"].is_empty():
+		data["adventure"] = {
+			"zone": "foret_sylve",
+			"hero_pos": ADVENTURE_ZONES["foret_sylve"]["start"].duplicate(),
+			"moves": 0, "discovered": [], "completed": [],
+			"pending_challenge": "", "zones_unlocked": ["foret_sylve"],
+			"revealed_cities": [],
+		}
+	var adv: Dictionary = data["adventure"]
+	if not adv.has("zones_unlocked") or (adv["zones_unlocked"] as Array).is_empty():
+		adv["zones_unlocked"] = ["foret_sylve"]
+	if String(adv.get("zone", "")) == "" or not ADVENTURE_ZONES.has(String(adv.get("zone", ""))):
+		adv["zone"] = "foret_sylve"
+	var zone: Dictionary = ADVENTURE_ZONES[String(adv["zone"])]
+	var pos: Array = adv.get("hero_pos", [])
+	if pos.size() != 2 or int(pos[0]) < 0 or int(pos[1]) < 0 \
+				or int(pos[0]) >= int(zone["size"][0]) or int(pos[1]) >= int(zone["size"][1]):
+		adv["hero_pos"] = zone["start"].duplicate()
+	for k: String in ["discovered", "completed", "revealed_cities"]:
+		if not adv.has(k) or not (adv[k] is Array):
+			adv[k] = []
+	if not adv.has("pending_challenge"):
+		adv["pending_challenge"] = ""
+	# Première visite : le brouillard se lève autour du point de départ.
+	if (adv["discovered"] as Array).is_empty():
+		var start: Array = adv.get("hero_pos", zone["start"])
+		adventure_move(adv, Vector2i(int(start[0]), int(start[1])))
+		adv["moves"] = 0
+	return adv
+
+## Métadonnées d'une zone du catalogue Aventure.
+func adventure_zone_meta(zone_id: String) -> Dictionary:
+	return ADVENTURE_ZONES.get(zone_id, {})
+
+## Nom affichable d'une zone (retourne l'id si inconnue).
+func adventure_zone_name(zone_id: String) -> String:
+	return String(ADVENTURE_ZONES.get(zone_id, {}).get("name", zone_id))
+
+## Biome de combat / rendu d'une zone Aventure.
+func adventure_zone_biome(zone_id: String) -> String:
+	return String(ADVENTURE_ZONES.get(zone_id, {}).get("biome", "Forêt"))
+
+## POI à une position donnée d'une zone : {} si pas de POI.
+func adventure_poi(zone_id: String, pos: Vector2i) -> Dictionary:
+	var key := "%d,%d" % [pos.x, pos.y]
+	return ADVENTURE_POIS.get(zone_id, {}).get(key, {})
+
+## Tous les POI d'une zone.
+func adventure_zone_pois(zone_id: String) -> Dictionary:
+	return ADVENTURE_POIS.get(zone_id, {})
+
+## Clé de sauvegarde d'un POI ("zone,x,y").
+func adventure_poi_key(zone_id: String, pos: Vector2i) -> String:
+	return "%s,%d,%d" % [zone_id, pos.x, pos.y]
+
+## Une zone est-elle débloquée (elle-même ou son prédécesseur complété via
+## son POI exit) ? Une zone sans prérequis est toujours débloquée.
+func adventure_zone_unlocked(adv: Dictionary, zone_id: String) -> bool:
+	var prereq: String = String(ADVENTURE_ZONES.get(zone_id, {}).get("unlock", ""))
+	if prereq == "":
+		return true
+	return (adv.get("zones_unlocked", []) as Array).has(zone_id)
+
+## Déplace le héros dans sa zone courante : révèle le brouillard de guerre
+## autour de la nouvelle position (rayon ADVENTURE_FOG_RADIUS). Retourne
+## la liste des clés nouvellement découvertes.
+func adventure_move(adv: Dictionary, pos: Vector2i) -> Array:
+	var zone_id: String = String(adv.get("zone", "foret_sylve"))
+	var zone: Dictionary = ADVENTURE_ZONES.get(zone_id, {})
+	if zone.is_empty():
+		return []
+	adv["hero_pos"] = [pos.x, pos.y]
+	adv["moves"] = int(adv.get("moves", 0)) + 1
+	var discovered: Array = adv.get("discovered", [])
+	var fresh: Array = []
+	var radius: int = ADVENTURE_FOG_RADIUS
+	var w: int = int(zone["size"][0])
+	var h: int = int(zone["size"][1])
+	for y: int in range(maxi(0, pos.y - radius), mini(h, pos.y + radius + 1)):
+		for x: int in range(maxi(0, pos.x - radius), mini(w, pos.x + radius + 1)):
+			var key := "%s,%d,%d" % [zone_id, x, y]
+			if not discovered.has(key):
+				discovered.append(key)
+				fresh.append(key)
+	adv["discovered"] = discovered
+	return fresh
+
+## Une case est-elle découverte (hors brouillard) dans la zone courante ?
+func adventure_cell_discovered(adv: Dictionary, pos: Vector2i) -> bool:
+	var key := "%s,%d,%d" % [String(adv.get("zone", "foret_sylve")), pos.x, pos.y]
+	return (adv.get("discovered", []) as Array).has(key)
+
+## Un POI est-il déjà complété (clé "zone,x,y") ?
+func adventure_poi_completed(adv: Dictionary, key: String) -> bool:
+	return (adv.get("completed", []) as Array).has(key)
+
+## Marque un POI complété. Si c'est une sortie (exit), débloque la zone
+## suivante du catalogue. Si c'est un belvédère (reveal), révèle les villes
+## de la zone côté Conquête (pont inter-modes). Retourne la liste des
+## révélations ("zone:<id>" ou id de ville).
+func adventure_complete_poi(adv: Dictionary, poi_key: String, kind: String = "") -> Array:
+	var completed: Array = adv.get("completed", [])
+	if not completed.has(poi_key):
+		completed.append(poi_key)
+	adv["completed"] = completed
+	var zone_id: String = String(adv.get("zone", "foret_sylve"))
+	var poi_kind: String = kind
+	if poi_kind == "":
+		poi_kind = "exit"
+		var pos_part := poi_key.substr(zone_id.length() + 1)
+		for k: String in ADVENTURE_POIS.get(zone_id, {}).keys():
+			if k == pos_part:
+				poi_kind = String(ADVENTURE_POIS[zone_id][k].get("kind", "exit"))
+				break
+	var revealed: Array = []
+	if poi_kind == "exit":
+		for next_id: String in ADVENTURE_ZONES.keys():
+			if String(ADVENTURE_ZONES[next_id].get("unlock", "")) == zone_id:
+				var unlocked: Array = adv.get("zones_unlocked", [])
+				if not unlocked.has(next_id):
+					unlocked.append(next_id)
+					adv["zones_unlocked"] = unlocked
+					revealed.append("zone:" + next_id)
+	elif poi_kind == "reveal":
+		var cities: Array = ADVENTURE_ZONES.get(zone_id, {}).get("reveals", [])
+		var known: Array = adv.get("revealed_cities", [])
+		for city_id: String in cities:
+			if not known.has(city_id):
+					known.append(city_id)
+					revealed.append(city_id)
+		adv["revealed_cities"] = known
+	return revealed
+
+## Débloque une zone Aventure (retour de conquête, événement…).
+func adventure_unlock_zone(adv: Dictionary, zone_id: String) -> void:
+	if not ADVENTURE_ZONES.has(zone_id):
+		return
+	var unlocked: Array = adv.get("zones_unlocked", [])
+	if not unlocked.has(zone_id):
+		unlocked.append(zone_id)
+	adv["zones_unlocked"] = unlocked
+
+## Change de zone Aventure (si débloquée) : le héros repart du point de
+## départ de la zone et son brouillard y est révélé autour de lui.
+func adventure_enter_zone(adv: Dictionary, zone_id: String) -> bool:
+	if not ADVENTURE_ZONES.has(zone_id) or not adventure_zone_unlocked(adv, zone_id):
+		return false
+	adv["zone"] = zone_id
+	adv["hero_pos"] = ADVENTURE_ZONES[zone_id]["start"].duplicate()
+	var pos := Vector2i(int(adv["hero_pos"][0]), int(adv["hero_pos"][1]))
+	adventure_move(adv, pos)
+	adv["moves"] = maxi(0, int(adv.get("moves", 1)) - 1)
+	return true
+
+## Zones débloquées d'une partie Aventure (pour le sélecteur de l'UI).
+func adventure_available_zones(adv: Dictionary) -> Array:
+	var out: Array = []
+	for zone_id: String in ADVENTURE_ZONES.keys():
+		if adventure_zone_unlocked(adv, zone_id):
+			out.append(zone_id)
+	return out
+
+## Niveau d'un défi Aventure (combat/énigme) : celui du POI si fourni,
+## sinon le niveau moyen de l'équipe (comme le mode Tactique).
+func adventure_challenge_level(data: Dictionary, poi: Dictionary = {}) -> int:
+	if not poi.is_empty() and int(poi.get("level", 0)) > 0:
+		return int(poi["level"])
+	return enemy_level_for(data)
 
 ## Production totale de l'empire (bâtiments des villes possédées non
 ## pillées), versée à chaque bataille gagnée.
@@ -1139,13 +1420,22 @@ func conquest_city_name(city_id: String) -> String:
 ## Une ville est-elle attaquable : reliée par route au territoire ET pas
 ## déjà conquise. La capitale ne s'attaque jamais ; le Donjon exige de
 ## contrôler toutes les autres villes (fin de campagne).
-func conquest_city_attackable(conquest: Dictionary, city_id: String) -> bool:
+## Pont Aventure : si l'Aventure a révélé des villes (belvédères), seules
+## les villes révélées sont attaquables ; sans révélation (parties où
+## l'Aventure n'a pas été jouée), toutes les villes reliées restent
+## attaquables — rétrocompatible avec les sauvegardes existantes.
+func conquest_city_attackable(conquest: Dictionary, city_id: String, adventure: Dictionary = {}) -> bool:
 	var kind: String = conquest_city_kind(city_id)
 	if kind == "capital" or kind == "":
 		return false
 	if conquest.get("owned", []).has(city_id):
 		return false
 	if city_id == "donjon_roi" and not conquest_empire_complete(conquest):
+		return false
+	var revealed: Array = []
+	if not adventure.is_empty():
+		revealed = adventure.get("revealed_cities", [])
+	if not revealed.is_empty() and not revealed.has(city_id):
 		return false
 	for pair: Array in CONQUEST_ROUTES:
 		var a: String = String(pair[0])

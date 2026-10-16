@@ -553,6 +553,19 @@ func refresh() -> void:
 			biome = ProgressionManager.conquest_city_biome(pending)
 			city_name = ProgressionManager.conquest_city_name(pending)
 			boss_fight = ProgressionManager.conquest_siege_is_boss(GameManager.active_save.get("conquest", {}), pending)
+	# Aventure : le défi se joue dans le biome de la zone explorée, au niveau du POI.
+	var challenge_name: String = ""
+	if not GameManager.active_save.is_empty() \
+			and String(GameManager.active_save.get("campaign_mode", "")) == "adventure":
+		var adv: Dictionary = GameManager.active_save.get("adventure", {})
+		biome = ProgressionManager.adventure_zone_biome(String(adv.get("zone", "foret_sylve")))
+		var pkey: String = String(adv.get("pending_challenge", ""))
+		if pkey != "":
+			var parts := pkey.split(",")
+			if parts.size() >= 3:
+				var poi: Dictionary = ProgressionManager.adventure_poi(String(parts[0]),
+					Vector2i(int(parts[parts.size() - 2]), int(parts[parts.size() - 1])))
+				challenge_name = String(poi.get("name", "Défi"))
 	if boss_fight:
 		if city_name != "":
 			_title.text = "ASSAUT : %s — ☠ AFFRONTEZ %s ! (%d/%d)" % [city_name,
@@ -562,7 +575,10 @@ func refresh() -> void:
 				ProgressionManager.biome_boss(biome).to_upper(), team.size(), MAX_TEAM_SIZE]
 		_title.add_theme_color_override("font_color", Color(1.0, 0.4, 0.3))
 	else:
-		if city_name != "":
+		if challenge_name != "":
+			_title.text = "DÉFI : %s · %s · CONSTITUEZ VOTRE ÉQUIPE (%d/%d)" % [challenge_name,
+				ProgressionManager.biome_label(biome), team.size(), MAX_TEAM_SIZE]
+		elif city_name != "":
 			_title.text = "ASSAUT : %s · %s · CONSTITUEZ VOTRE ÉQUIPE (%d/%d)" % [city_name,
 				ProgressionManager.biome_label(biome), team.size(), MAX_TEAM_SIZE]
 		else:

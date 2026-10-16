@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Aventure : tuile roche du désert — plateau brûlant -->
+  <polygon points="0,50 50,0 100,50 50,100" fill="#C09258"/>
+  <polygon points="0,50 50,0 50,50" fill="#9E7644"/>
+  <polygon points="50,50 100,50 50,100" fill="#D0A468"/>
+  <polygon points="25,45 50,18 75,45 50,42" fill="#8A6638" fill-opacity="0.7"/>
+  <path d="M22,60 Q34,54 46,60" stroke="#9E7644" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="64" cy="38" r="2" fill="#8A6638" fill-opacity="0.6"/>
+</svg>
