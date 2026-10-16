@@ -269,24 +269,27 @@ func _layout_responsive() -> void:
 
 	if compact:
 		var viewport_w: float = w
-		# Largeur minimale pour séparer les villes proches et garder des
-		# libellés lisibles sur les téléphones étroits.
+		# La zone visible reste bornée à l'écran ; la carte complète, elle,
+		# est plus haute et défilante. Sur téléphone étroit, le défilement
+		# horizontal reste disponible en plus du vertical.
 		var map_w: float = maxf(1320.0, viewport_w)
-		var map_h: float = maxf(1300.0, clampf(h * 0.52, 360.0, 470.0))
+		var map_view_h: float = clampf(h * 0.52, 360.0, 470.0)
+		var map_content_h: float = maxf(1300.0, map_view_h)
 		var side_h: float = 600.0
-		_body_content.custom_minimum_size = Vector2(viewport_w, map_h + 14.0 + side_h)
+		_body_content.custom_minimum_size = Vector2(viewport_w, map_view_h + 14.0 + side_h)
 		_map_scroll.position = Vector2.ZERO
-		_map_scroll.size = Vector2(viewport_w, map_h)
-		_map_scroll.custom_minimum_size = Vector2(viewport_w, map_h)
+		_map_scroll.size = Vector2(viewport_w, map_view_h)
+		_map_scroll.custom_minimum_size = Vector2(viewport_w, map_view_h)
 		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if map_w > viewport_w else ScrollContainer.SCROLL_MODE_DISABLED
+		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 		_map_panel.position = Vector2.ZERO
-		_map_panel.size = Vector2(map_w, map_h)
-		_map_panel.custom_minimum_size = Vector2(map_w, map_h)
-		_side_panel.position = Vector2(0, map_h + 14.0)
+		_map_panel.size = Vector2(map_w, map_content_h)
+		_map_panel.custom_minimum_size = Vector2(map_w, map_content_h)
+		_side_panel.position = Vector2(0, map_view_h + 14.0)
 		_side_panel.size = Vector2(viewport_w, side_h)
 		_side_panel.custom_minimum_size = Vector2(viewport_w, side_h)
 		_legend_label.text = "Vert : allié · Gris : neutre · Rouge : ennemi · ⚔ : attaquable"
-		_legend_label.position = Vector2(10, map_h - 27.0)
+		_legend_label.position = Vector2(10, map_content_h - 27.0)
 		_map_title_label.add_theme_font_size_override("font_size", 17)
 		_legend_label.add_theme_font_size_override("font_size", 11)
 		_side_title.add_theme_font_size_override("font_size", 20)
@@ -302,18 +305,22 @@ func _layout_responsive() -> void:
 	else:
 		var side_w: float = clampf(w * 0.27, 330.0, 430.0)
 		var map_w: float = maxf(420.0, w - side_w - 18.0)
-		var map_h: float = maxf(1300.0, h - body_top - 8.0)
-		_body_content.custom_minimum_size = Vector2(map_w + 18.0 + side_w, map_h)
+		# Le viewport de la carte reste dans l'écran ; son contenu peut être
+		# plus haut, ce qui rend le défilement vertical réellement possible.
+		var map_view_h: float = maxf(420.0, h - body_top - 8.0)
+		var map_content_h: float = maxf(1300.0, map_view_h)
+		_body_content.custom_minimum_size = Vector2(map_w + 18.0 + side_w, map_view_h)
 		_map_scroll.position = Vector2.ZERO
-		_map_scroll.size = Vector2(map_w, map_h)
-		_map_scroll.custom_minimum_size = Vector2(map_w, map_h)
+		_map_scroll.size = Vector2(map_w, map_view_h)
+		_map_scroll.custom_minimum_size = Vector2(map_w, map_view_h)
 		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 		_map_panel.position = Vector2.ZERO
-		_map_panel.size = Vector2(map_w, map_h)
-		_map_panel.custom_minimum_size = Vector2(map_w, map_h)
+		_map_panel.size = Vector2(map_w, map_content_h)
+		_map_panel.custom_minimum_size = Vector2(map_w, map_content_h)
 		_side_panel.position = Vector2(map_w + 18.0, 0)
-		_side_panel.size = Vector2(side_w, map_h)
-		_side_panel.custom_minimum_size = Vector2(side_w, map_h)
+		_side_panel.size = Vector2(side_w, map_view_h)
+		_side_panel.custom_minimum_size = Vector2(side_w, map_view_h)
 		_legend_label.text = "Vert = territoire · Gris = neutre · Rouge = adverse · ⚔ = attaquable"
 		_legend_label.position = Vector2(minf(260.0, map_w * 0.24), 16.0)
 		_map_title_label.add_theme_font_size_override("font_size", 23)
