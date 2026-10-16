@@ -466,7 +466,8 @@ class TimelineView extends Control:
 
 	func _entity_at_point(point: Vector2) -> Dictionary:
 		for uid in _entity_rects.keys():
-			if (_entity_rects[uid] as Rect2).has_point(point):
+			var hit_rect: Rect2 = _entity_rects[uid]
+			if hit_rect.has_point(point):
 				for entity: Dictionary in gm.turn_order:
 					if int(entity.get("uid", -1)) == int(uid) and gm.is_alive(entity):
 						return entity
@@ -1319,7 +1320,7 @@ func _show_entity_details(e: Dictionary, show: bool) -> void:
 		var info: Dictionary = Combat.status_info(String(status.get("id", "")))
 		var turns: String = "" if int(status.get("turns", 0)) > 90 else " (%d t.)" % int(status.get("turns", 0))
 		lines.append("• %s%s" % [String(info.get("label", status.get("id", ""))), turns])
-	_info_label.text = "\\n".join(lines)
+	_info_label.text = "\n".join(lines)
 	_info_panel.reset_size()
 	_info_panel.visible = true
 
