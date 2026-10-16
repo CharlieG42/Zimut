@@ -160,14 +160,8 @@ func init_grid() -> void:
 func _generate_obstacles() -> void:
 	obstacles = {}
 	var forbidden: Dictionary = {}
-	# Réserver deux zones de déploiement dégagées ; les unités y apparaîtront
-	# aléatoirement à chaque combat, sans obstacle sous leurs pieds.
-	for y: int in range(0, 3):
-		for x: int in range(0, 3):
-			forbidden[Vector2i(x, y)] = true
-	for y: int in range(GRID_SIZE - 3, GRID_SIZE):
-		for x: int in range(GRID_SIZE - 3, GRID_SIZE):
-			forbidden[Vector2i(x, y)] = true
+	# Les positions de départ seront tirées parmi toutes les cases libres :
+	# les équipes peuvent donc être mélangées sur l'ensemble du plateau.
 	# La forêt garde des couloirs de déplacement plus lisibles : moins d’obstacles décoratifs.
 	var wanted: int = _rng.randi_range(5, 7) if fight_biome == "Forêt" else _rng.randi_range(6, 9)
 	var tree_chance: float = 0.55
@@ -188,7 +182,17 @@ func _generate_obstacles() -> void:
 
 
 func _all_free_connected() -> bool:
-	var start: Vector2i = PLAYER_SPAWNS[0]
+	var start := Vector2i(-1, -1)
+	for y: int in range(GRID_SIZE):
+		for x: int in range(GRID_SIZE):
+			var candidate := Vector2i(x, y)
+			if not obstacles.has(candidate):
+				start = candidate
+				break
+		if start.x >= 0:
+			break
+	if start.x < 0:
+		return false
 	var seen: Dictionary = {start: true}
 	var queue: Array[Vector2i] = [start]
 	while not queue.is_empty():
@@ -245,19 +249,15 @@ func _base_entity(ename: String, etype: String, team: String, classe: String, le
 	}
 
 
-## Tire des positions de départ sans doublon dans la zone de chaque équipe.
-## Les alliés occupent le coin haut-gauche de la grille logique, les ennemis
-## le coin opposé : la rencontre reste lisible, mais la formation change.
-func _random_spawn_positions(team: String, count: int) -> Array[Vector2i]:
+## Tire des positions distinctes sur toutes les cases libres du plateau.
+## Alliés et ennemis partagent le même espace de déploiement et peuvent être mêlés.
+func _random_spawn_positions(count: int) -> Array[Vector2i]:
 	var candidates: Array[Vector2i] = []
-	if team == "player":
-		for y: int in range(0, 3):
-			for x: int in range(0, 3):
-				candidates.append(Vector2i(x, y))
-	else:
-		for y: int in range(GRID_SIZE - 3, GRID_SIZE):
-			for x: int in range(GRID_SIZE - 3, GRID_SIZE):
-				candidates.append(Vector2i(x, y))
+	for y: int in range(GRID_SIZE):
+		for x: int in range(GRID_SIZE):
+			var pos := Vector2i(x, y)
+			if not obstacles.has(pos):
+				candidates.append(pos)
 	var positions: Array[Vector2i] = []
 	while positions.size() < count and not candidates.is_empty():
 		var idx: int = _rng.randi_range(0, candidates.size() - 1)
@@ -288,7 +288,10 @@ func init_entities() -> void:
 				use_save = false
 
 	var bless: int = 0
-	var player_spawn_positions: Array[Vector2i] = _random_spawn_positions("player", player_classes.size())
+	# Quatre ennemis sont prévus pour chaque combat ; on tire toutes les cases
+	# en une seule fois pour garantir des positions uniques et des camps mélangés.
+	var combat_spawn_positions: Array[Vector2i] = _random_spawn_positions(player_classes.size() + 4)
+	var player_spawn_positions: Array[Vector2i] = combat_spawn_positions.slice(0, player_classes.size())
 	for i: int in range(player_classes.size()):
 		var classe: String = player_classes[i]
 		var pos: Vector2i = player_spawn_positions[i]
@@ -394,7 +397,7 @@ func init_entities() -> void:
 		enemy_types = [biome_types[0], biome_types[1], biome_types[0] if _rng.randf() < 0.5 else biome_types[1],
 			biome_types[1] if _rng.randf() < 0.5 else biome_types[0]]
 	var enemies_data: Array = get_enemies_data()
-	var enemy_spawn_positions: Array[Vector2i] = _random_spawn_positions("enemy", enemy_types.size())
+	var enemy_spawn_positions: Array[Vector2i] = combat_spawn_positions.slice(player_classes.size(), player_classes.size() + enemy_types.size())
 	for i: int in range(enemy_types.size()):
 		var etype: String = enemy_types[i]
 		var pos: Vector2i = enemy_spawn_positions[i]
