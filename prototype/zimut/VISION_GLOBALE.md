@@ -59,7 +59,22 @@ Première liste de Nations proposées :
 
 ### Règle d'extension par classe
 
-À terme, prévoir **au moins une Nation ou une identité nationale forte pour chaque classe de héros**. La liste exacte des classes du projet doit être vérifiée avant d'arbitrer l'affectation. Certaines classes pourront partager une affinité, tandis que d'autres pourront justifier une Nation, une faction ou un territoire spécifique. Ne pas inventer de correspondances définitives sans vérifier les classes existantes et valider le choix.
+Le catalogue actuel de `ProgressionManager.CLASS_ORDER` contient huit classes : **Tank, Assassin, Chasseur, Mage, Druide, Heal, Invocateur et Sylvain**. La correspondance ci-dessous est une **proposition de direction artistique**, pas encore une règle de gameplay ni une appartenance exclusive.
+
+| Classe | Nation / identité visuelle proposée | Intention |
+|---|---|---|
+| **Tank** | Nation des Cimes | Armures lourdes, remparts, bastions et citadelles de montagne |
+| **Assassin** | Nation des Ombres | Ruelles secrètes, ruines, silhouettes discrètes et forteresses nocturnes |
+| **Chasseur** | Nation Sylvestre | Avant-postes forestiers, tours de guet et villages de chasseurs |
+| **Mage** | Nation des Cristaux | Observatoires, tours arcanes et architectures cristallines |
+| **Druide** | Nation Sylvestre, avec liens possibles aux Brumes | Sanctuaires vivants, bosquets sacrés et marais enchantés |
+| **Heal** | Nation des Marées | Temples d'eau, sanctuaires côtiers et cités de guérisseurs |
+| **Invocateur** | Nation des Brumes, avec liens possibles aux Ombres | Cercles d'invocation, marais mystérieux et nécropoles |
+| **Sylvain** | Nation Sylvestre | Cités arboricoles, clairières sacrées et forteresses de bois |
+
+Les Nations des **Vents** et du **Brasier** sont également réservées comme grandes régions du monde et pourront accueillir des villes, des factions ou des quêtes liées à plusieurs classes. Une classe n'est pas obligée d'être exclusivement associée à une seule Nation.
+
+Avant d'en faire un système officiel, vérifier les mécaniques et le lore déjà associés aux classes, puis valider les correspondances avec le game design.
 
 ### Sprites de villes et de cités
 
