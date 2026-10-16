@@ -507,7 +507,7 @@ func _pinch_distance() -> float:
 	if _touch_positions.size() < 2:
 		return 0.0
 	var points: Array = _touch_positions.values()
-	return (points[0] as Vector2).distance_to(points[1] as Vector2)
+	return Vector2(points[0]).distance_to(Vector2(points[1]))
 
 func _set_map_zoom(value: float) -> void:
 	var next_zoom: float = clampf(value, 1.0, MAP_ZOOM_MAX)
