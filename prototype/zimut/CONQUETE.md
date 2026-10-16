@@ -120,7 +120,7 @@ l'état de la campagne : `owned`, `pending_city`, `sieges`, `buildings`,
 - Pas de temps réel, pas de timer hors combat.
 - Fiche ville en panneau latéral, boutons gros et rares (existant).
 - **Lisibilité renforcée (passe du 15/10)** : noms de villes agrandis (18 px), boutons plus hauts (76 px), titre de carte et légende plus visibles ; le panneau de conseil utilise une taille de texte plus confortable et le bouton d’assaut est plus grand.
-- **Mise en page responsive (PR en cours)** : le corps de la carte s'adapte désormais à la taille disponible. En paysage large, carte et conseil de guerre restent côte à côte ; en format compact/portrait, la carte passe au-dessus du conseil dans une zone verticalement défilante. Les boutons de villes, textes et commandes sont redimensionnés selon la largeur disponible ; le panneau de conseil possède son propre défilement pour que les bâtiments restent accessibles. À valider dans Godot sur 360×800, 800×360 et 1280×720 avant de marquer ce point comme terminé.
+- **Mise en page responsive** : en paysage large, carte et conseil de guerre restent côte à côte ; en format compact/portrait, le conseil passe sous la carte dans une zone verticalement défilante. Le panneau de conseil possède son propre défilement. **Correctif mobile complémentaire en cours** : la carte garde une largeur minimale de 640 px sur téléphone étroit et se fait défiler horizontalement ; cela évite de compresser les dix villes dans ~300 px, où les boutons et libellés se chevauchaient. À valider dans Godot sur 360×800, 800×360 et 1280×720.
 
 ## 9. Tests
 

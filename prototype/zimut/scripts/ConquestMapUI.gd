@@ -37,6 +37,7 @@ var _header: Label
 var _root: Control
 var _body_scroll: ScrollContainer
 var _body_content: Control
+var _map_scroll: ScrollContainer
 var _map_panel: Panel
 var _side_panel: PanelContainer
 var _title_label: Label
@@ -119,11 +120,22 @@ func _build() -> void:
 	_body_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_body_scroll.add_child(_body_content)
 
+	# Sur téléphone portrait, conserver une carte assez large pour éviter
+	# que les dix villes et leurs libellés se chevauchent. Le défilement
+	# horizontal de la carte est indépendant du défilement vertical de la page.
+	_map_scroll = ScrollContainer.new()
+	_map_scroll.position = Vector2.ZERO
+	_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_map_scroll.follow_focus = false
+	_map_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
+	_body_content.add_child(_map_scroll)
+
 	var map := Panel.new()
 	map.position = Vector2.ZERO
 	map.size = Vector2(1320, 750)
 	map.add_theme_stylebox_override("panel", _style(PANEL, GOLD))
-	_body_content.add_child(map)
+	_map_scroll.add_child(map)
 	_map_panel = map
 
 	_map_title_label = Label.new()
@@ -225,7 +237,7 @@ func _build() -> void:
 ## En format compact (téléphone/portrait), la carte est en premier et le
 ## conseil de guerre se trouve dessous dans une zone verticalement défilante.
 func _layout_responsive() -> void:
-	if _root == null or _body_scroll == null or _body_content == null or _map_panel == null or _side_panel == null:
+	if _root == null or _body_scroll == null or _body_content == null or _map_scroll == null or _map_panel == null or _side_panel == null:
 		return
 	if _title_label == null or _subtitle_label == null or _header == null or _legend_label == null or _map_title_label == null:
 		return
@@ -245,14 +257,23 @@ func _layout_responsive() -> void:
 	_header.size = Vector2(w - 16.0, 42.0 if compact else 24.0)
 
 	if compact:
-		var map_w: float = w
+		var viewport_w: float = w
+		# Largeur minimale pour séparer les villes proches et garder des
+		# libellés lisibles sur les téléphones étroits.
+		var map_w: float = maxf(640.0, viewport_w)
 		var map_h: float = clampf(h * 0.52, 360.0, 470.0)
 		var side_h: float = 600.0
-		_body_content.custom_minimum_size = Vector2(map_w, map_h + 14.0 + side_h)
+		_body_content.custom_minimum_size = Vector2(viewport_w, map_h + 14.0 + side_h)
+		_map_scroll.position = Vector2.ZERO
+		_map_scroll.size = Vector2(viewport_w, map_h)
+		_map_scroll.custom_minimum_size = Vector2(viewport_w, map_h)
+		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if map_w > viewport_w else ScrollContainer.SCROLL_MODE_DISABLED
 		_map_panel.position = Vector2.ZERO
 		_map_panel.size = Vector2(map_w, map_h)
+		_map_panel.custom_minimum_size = Vector2(map_w, map_h)
 		_side_panel.position = Vector2(0, map_h + 14.0)
-		_side_panel.size = Vector2(map_w, side_h)
+		_side_panel.size = Vector2(viewport_w, side_h)
+		_side_panel.custom_minimum_size = Vector2(viewport_w, side_h)
 		_legend_label.text = "Vert : allié · Gris : neutre · Rouge : ennemi · ⚔ : attaquable"
 		_legend_label.position = Vector2(10, map_h - 27.0)
 		_map_title_label.add_theme_font_size_override("font_size", 17)
@@ -272,10 +293,16 @@ func _layout_responsive() -> void:
 		var map_w: float = maxf(420.0, w - side_w - 18.0)
 		var map_h: float = maxf(420.0, h - body_top - 8.0)
 		_body_content.custom_minimum_size = Vector2(map_w + 18.0 + side_w, map_h)
+		_map_scroll.position = Vector2.ZERO
+		_map_scroll.size = Vector2(map_w, map_h)
+		_map_scroll.custom_minimum_size = Vector2(map_w, map_h)
+		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		_map_panel.position = Vector2.ZERO
 		_map_panel.size = Vector2(map_w, map_h)
+		_map_panel.custom_minimum_size = Vector2(map_w, map_h)
 		_side_panel.position = Vector2(map_w + 18.0, 0)
 		_side_panel.size = Vector2(side_w, map_h)
+		_side_panel.custom_minimum_size = Vector2(side_w, map_h)
 		_legend_label.text = "Vert = territoire · Gris = neutre · Rouge = adverse · ⚔ = attaquable"
 		_legend_label.position = Vector2(minf(260.0, map_w * 0.24), 16.0)
 		_map_title_label.add_theme_font_size_override("font_size", 23)
