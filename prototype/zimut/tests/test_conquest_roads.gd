@@ -73,6 +73,13 @@ func _boot() -> void:
 	var cq: Dictionary = d.get("conquest", {})
 	check(String(cq.get("just_annexed", "")) == "clairiere", "just_annexed posé à l'annexion de Clairière")
 	check(pm.conquest_city_attackable(cq, "vieille_tour"), "nouvelle route ouverte après annexion")
+	var reward: Dictionary = cq.get("last_city_reward", {})
+	check(String(reward.get("city", "")) == "clairiere", "récompense de première annexion enregistrée")
+	check(String(reward.get("name", "")) == "Réserve des bûcherons", "Clairière attribue son butin thématique")
+	check(int(reward.get("resources", {}).get("Bois", 0)) == 12, "récompense de Clairière crédite 12 Bois")
+	check(int(reward.get("gold", 0)) == 35, "récompense de Clairière crédite 35 or")
+	check(pm.conquest_city_reward("pont_mousse").get("name", "") != pm.conquest_city_reward("clairiere").get("name", ""), "les villes ont des récompenses distinctes")
+	check(pm.CONQUEST_CITY_REWARDS.size() == 27, "27 villes non-capitales disposent d'un butin unique")
 
 	# ── Sièges sur les nouvelles villes adverses des autres biomes ──
 	check(pm.conquest_city_battles("garnison") == 4, "Garnison (enemy) : siège en 4 batailles")
