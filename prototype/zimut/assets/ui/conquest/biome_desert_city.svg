@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="128" viewBox="0 0 160 128">
+<defs><linearGradient id="sandstone" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f4d28b"/><stop offset="1" stop-color="#b66c3b"/></linearGradient><linearGradient id="dome" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#4ed0c7"/><stop offset="1" stop-color="#187b86"/></linearGradient></defs>
+<ellipse cx="80" cy="111" rx="65" ry="9" fill="#774b2d" opacity=".32"/>
+<path d="M8 100Q26 80 44 93T80 91T118 91T153 97V108H8Z" fill="#dca75e"/>
+<path d="M22 103V70H52V103Z" fill="url(#sandstone)" stroke="#ffe2a0" stroke-width="2"/><path d="M18 71L37 55 56 71Z" fill="#b86f43" stroke="#f7d79a" stroke-width="2"/>
+<path d="M48 105V53H79V105Z" fill="url(#sandstone)" stroke="#ffe2a0" stroke-width="2"/><path d="M44 54L63 36 83 54Z" fill="#a95e38" stroke="#f7d79a" stroke-width="2"/>
+<path d="M87 105V68H119V105Z" fill="url(#sandstone)" stroke="#ffe2a0" stroke-width="2"/><path d="M83 69L103 51 123 69Z" fill="#b86f43" stroke="#f7d79a" stroke-width="2"/>
+<path d="M56 53A8 8 0 0 1 72 53Z" fill="url(#dome)" stroke="#c6fff0" stroke-width="2"/><path d="M96 68A8 8 0 0 1 112 68Z" fill="url(#dome)" stroke="#c6fff0" stroke-width="2"/>
+<path d="M63 105V84Q64 74 72 84V105" fill="#70432d" stroke="#f7d79a" stroke-width="2"/>
+<g fill="#fff0bd"><rect x="30" y="79" width="6" height="10" rx="2"/><rect x="67" y="63" width="6" height="9" rx="2"/><rect x="102" y="79" width="6" height="9" rx="2"/></g>
+<path d="M12 106Q80 114 148 106" fill="none" stroke="#f8d48c" stroke-width="2"/>
+</svg>
