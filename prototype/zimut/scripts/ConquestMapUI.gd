@@ -610,6 +610,18 @@ func _show_annexion_popup(city_id: String) -> void:
 		lines.append("Aucune production pour l'instant : édifiez des bâtiments pour rapporter des ressources à chaque victoire.")
 	else:
 		lines.append("Production de votre empire versée : " + " · ".join(parts))
+	var city_reward: Dictionary = _conquest.get("last_city_reward", {})
+	if String(city_reward.get("city", "")) == city_id:
+		var reward_parts: PackedStringArray = []
+		var reward_resources: Dictionary = city_reward.get("resources", {})
+		for resource: String in reward_resources.keys():
+			reward_parts.append("%s +%d" % [resource, int(reward_resources[resource])])
+		var reward_gold: int = int(city_reward.get("gold", 0))
+		if reward_gold > 0:
+			reward_parts.append("%d or" % reward_gold)
+		lines.append("🎁 Récompense unique — %s : %s." % [
+			String(city_reward.get("name", "Butin de conquête")),
+			" · ".join(reward_parts)])
 	var counter: String = String(_conquest.get("last_counterattack", ""))
 	if counter != "":
 		lines.append("⚠ CONTRE-ATTAQUE ! L'ennemi a pillé %s : production gelée %d bataille(s)." % [
