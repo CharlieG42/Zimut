@@ -890,6 +890,7 @@ func _city_visual_style(city_id: String, selected: bool, hovered: bool = false) 
 	var biome: Color = _city_border_color(city_id)
 	var style := _style(fill.lightened(0.10) if hovered else fill, GOLD if selected else biome)
 	style.set_border_width_all(4 if selected else 2)
+	style.set_corner_radius_all(26)
 	style.shadow_size = 10 if selected else (4 if hovered else 0)
 	style.shadow_color = Color(GOLD.r, GOLD.g, GOLD.b, 0.34) if selected else Color(biome.r, biome.g, biome.b, 0.18)
 	style.shadow_offset = Vector2(0, 2)
@@ -974,7 +975,7 @@ class _BiomeTerrain:
 	func _draw() -> void:
 		var sx: float = clampf(size.x / 1320.0, 0.72, 1.15)
 		var sy: float = clampf(size.y / 1600.0, 0.72, 1.15)
-		# Texture de fond façon parchemin/cartographie, sans grille rectangulaire.
+		# Fond de carte peint : reliefs diffus et veines de terrain, sans grille ni cases.
 		for i: int in range(18):
 			var y: float = 55.0 + float(i) * (size.y - 110.0) / 17.0
 			draw_line(Vector2(18, y), Vector2(size.x - 18, y + sin(float(i) * 0.8) * 10.0), Color(0.76, 0.72, 0.54, 0.055), 1.0, true)
@@ -997,7 +998,7 @@ class _BiomeTerrain:
 			"Donjon":
 				base = Color(0.31, 0.24, 0.38, 0.34)
 				edge = Color(0.57, 0.43, 0.67, 0.42)
-		# Contour organique en points : il ne forme jamais un cadre de ville.
+		# Deux couches décalées donnent un bord de terre érodé, pas un cadre.
 		var shape := PackedVector2Array([
 			Vector2(-122, -26), Vector2(-106, -67), Vector2(-64, -82),
 			Vector2(-25, -73), Vector2(14, -91), Vector2(63, -70),
@@ -1006,60 +1007,151 @@ class _BiomeTerrain:
 			Vector2(-49, 75), Vector2(-91, 52), Vector2(-119, 18)
 		])
 		var scaled := PackedVector2Array()
+		var inner := PackedVector2Array()
 		for p: Vector2 in shape:
 			scaled.append(center + Vector2(p.x * sx, p.y * sy))
-		draw_colored_polygon(scaled, base)
+			inner.append(center + Vector2(p.x * sx * 0.88, p.y * sy * 0.82) + Vector2(5.0 * sx, 3.0 * sy))
+		draw_colored_polygon(scaled, base.darkened(0.12))
+		draw_colored_polygon(inner, base)
 		for i: int in range(scaled.size()):
 			draw_line(scaled[i], scaled[(i + 1) % scaled.size()], edge, 2.0, true)
-		# Des détails de terrain restent en périphérie afin de ne pas masquer les libellés.
+		# Marques de terrain distribuées sur les côtés pour dégager le nom de la ville.
 		match biome:
 			"Forêt":
-				for i: int in range(7):
-					var x: float = center.x + float((i * 37) % 154 - 77) * sx
-					var y: float = center.y + float((i * 29) % 86 - 43) * sy
-					if absf(x - center.x) < 47.0 * sx and absf(y - center.y) < 28.0 * sy:
+				for i: int in range(11):
+					var x: float = center.x + float((i * 37 + 13) % 174 - 87) * sx
+					var y: float = center.y + float((i * 29 + 7) % 92 - 46) * sy
+					if absf(x - center.x) < 53.0 * sx and absf(y - center.y) < 31.0 * sy:
 						continue
-					_draw_tree(Vector2(x, y), sx, sy, i % 2 == 0)
+					_draw_tree(Vector2(x, y), sx, sy, i % 3 == 0, 0.82 if i % 2 == 0 else 0.65)
+				# Petites clairières et buissons, pour casser l'aspect répétitif.
+				for i: int in range(4):
+					var p := center + Vector2(float(i * 41 - 61) * sx, float((i % 2) * 43 - 21) * sy)
+					if absf(p.x - center.x) > 55.0 * sx:
+						draw_circle(p, 5.0 * sx, Color(0.55, 0.61, 0.34, 0.26))
 			"Montagne":
-				for i: int in range(4):
-					var x: float = center.x + float(i * 51 - 76) * sx
-					var y: float = center.y + float((i % 2) * 34 - 31) * sy
-					if absf(x - center.x) < 46.0 * sx and absf(y - center.y) < 27.0 * sy:
+				for i: int in range(5):
+					var p := center + Vector2(float(i * 43 - 86) * sx, float((i % 2) * 30 - 32) * sy)
+					if absf(p.x - center.x) < 52.0 * sx and absf(p.y - center.y) < 31.0 * sy:
 						continue
-					_draw_peak(Vector2(x, y), sx, sy, i % 2 == 0)
-			"Désert":
-				for i: int in range(4):
-					var y: float = center.y + float(i * 25 - 37) * sy
-					var x: float = center.x + float((i % 2) * 58 - 29) * sx
-					draw_arc(Vector2(x, y), 34.0 * sx, 205.0 * PI / 180.0, 335.0 * PI / 180.0, 18, Color(0.96, 0.78, 0.47, 0.48), 2.0, true)
-			"Donjon":
+					_draw_peak(p, sx, sy, i % 2 == 0)
+				# Strates rocheuses fines qui suivent le relief.
 				for i: int in range(3):
-					var x: float = center.x + float(i * 43 - 43) * sx
-					draw_line(Vector2(x, center.y - 54.0 * sy), Vector2(x + 12.0 * sx, center.y - 35.0 * sy), Color(0.72, 0.60, 0.79, 0.55), 3.0, true)
+					var p := center + Vector2(float(i * 48 - 48) * sx, float(i * 21 + 22) * sy)
+					draw_line(p, p + Vector2(24.0 * sx, -5.0 * sy), Color(0.74, 0.79, 0.77, 0.34), 1.4, true)
+			"Désert":
+				for i: int in range(5):
+					var p := center + Vector2(float((i % 2) * 58 - 29) * sx, float(i * 20 - 40) * sy)
+					draw_arc(p, 35.0 * sx, 198.0 * PI / 180.0, 342.0 * PI / 180.0, 24, Color(0.96, 0.78, 0.47, 0.52), 2.0, true)
+					draw_arc(p + Vector2(4.0 * sx, 4.0 * sy), 28.0 * sx, 200.0 * PI / 180.0, 330.0 * PI / 180.0, 20, Color(0.43, 0.31, 0.19, 0.25), 1.0, true)
+				# Rochers et cactus stylisés aux marges du village.
+				for i: int in range(3):
+					var p := center + Vector2(float(i * 67 - 67) * sx, float((i % 2) * 45 - 22) * sy)
+					if absf(p.x - center.x) > 54.0 * sx:
+						_draw_rock(p, sx, sy)
+			"Donjon":
+				for i: int in range(4):
+					var p := center + Vector2(float(i * 42 - 63) * sx, float((i % 2) * 28 - 34) * sy)
+					if absf(p.x - center.x) < 50.0 * sx and absf(p.y - center.y) < 30.0 * sy:
+						continue
+					_draw_ruin(p, sx, sy)
+		# Les repères de ville varient légèrement selon le lieu, sans perdre la lecture des boutons.
+		_draw_landmark(center + Vector2(0, -3.0 * sy), biome, sx, sy, city_id)
 
-	func _draw_tree(p: Vector2, sx: float, sy: float, light: bool) -> void:
-		var green := Color(0.24, 0.43, 0.27, 0.76) if light else Color(0.13, 0.30, 0.20, 0.82)
-		draw_line(p + Vector2(0, 2 * sy), p + Vector2(0, 11 * sy), Color(0.38, 0.29, 0.18, 0.8), 2.0, true)
+	func _draw_tree(p: Vector2, sx: float, sy: float, light: bool, alpha: float = 0.76) -> void:
+		var green := Color(0.24, 0.43, 0.27, alpha) if light else Color(0.13, 0.30, 0.20, alpha)
+		draw_line(p + Vector2(0, 2 * sy), p + Vector2(0, 11 * sy), Color(0.38, 0.29, 0.18, alpha), 2.0, true)
+		# Trois masses de feuillage superposées plutôt qu'un triangle plat.
 		draw_colored_polygon(PackedVector2Array([
-			p + Vector2(-10 * sx, 4 * sy), p + Vector2(0, -15 * sy), p + Vector2(10 * sx, 4 * sy)
-		]), green)
+			p + Vector2(-11 * sx, 5 * sy), p + Vector2(-7 * sx, -3 * sy),
+			p + Vector2(-2 * sx, -13 * sy), p + Vector2(4 * sx, -8 * sy),
+			p + Vector2(11 * sx, 5 * sy)
+		]), green.darkened(0.12))
 		draw_colored_polygon(PackedVector2Array([
-			p + Vector2(-7 * sx, -2 * sy), p + Vector2(0, -20 * sy), p + Vector2(7 * sx, -2 * sy)
+			p + Vector2(-8 * sx, 0), p + Vector2(-3 * sx, -13 * sy),
+			p + Vector2(1 * sx, -20 * sy), p + Vector2(8 * sx, 1 * sy)
 		]), green.lightened(0.12))
+		draw_line(p + Vector2(-3 * sx, -7 * sy), p + Vector2(1 * sx, -15 * sy), Color(0.55, 0.68, 0.39, alpha * 0.55), 1.0, true)
 
 	func _draw_peak(p: Vector2, sx: float, sy: float, snowy: bool) -> void:
 		var rock := Color(0.38, 0.48, 0.53, 0.82)
 		draw_colored_polygon(PackedVector2Array([
-			p + Vector2(-24 * sx, 16 * sy), p + Vector2(-4 * sx, -24 * sy),
-			p + Vector2(8 * sx, -5 * sy), p + Vector2(18 * sx, 9 * sy),
-			p + Vector2(26 * sx, 16 * sy)
+			p + Vector2(-27 * sx, 17 * sy), p + Vector2(-12 * sx, -7 * sy),
+			p + Vector2(-4 * sx, -25 * sy), p + Vector2(7 * sx, -8 * sy),
+			p + Vector2(17 * sx, 6 * sy), p + Vector2(28 * sx, 17 * sy)
 		]), rock)
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(-12 * sx, -7 * sy), p + Vector2(-4 * sx, -25 * sy),
+			p + Vector2(1 * sx, -13 * sy), p + Vector2(-3 * sx, -10 * sy)
+		]), Color(0.66, 0.73, 0.75, 0.75))
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(-4 * sx, -25 * sy), p + Vector2(7 * sx, -8 * sy),
+			p + Vector2(2 * sx, -11 * sy), p + Vector2(1 * sx, -13 * sy)
+		]), Color(0.25, 0.34, 0.39, 0.65))
 		if snowy:
 			draw_colored_polygon(PackedVector2Array([
-				p + Vector2(-9 * sx, -14 * sy), p + Vector2(-4 * sx, -24 * sy),
-				p + Vector2(2 * sx, -15 * sy), p + Vector2(-2 * sx, -10 * sy)
-			]), Color(0.85, 0.89, 0.86, 0.88))
+				p + Vector2(-9 * sx, -13 * sy), p + Vector2(-4 * sx, -25 * sy),
+				p + Vector2(3 * sx, -13 * sy), p + Vector2(-2 * sx, -9 * sy)
+			]), Color(0.90, 0.93, 0.88, 0.92))
 
+	func _draw_rock(p: Vector2, sx: float, sy: float) -> void:
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(-10 * sx, 4 * sy), p + Vector2(-5 * sx, -5 * sy),
+			p + Vector2(3 * sx, -8 * sy), p + Vector2(11 * sx, 2 * sy),
+			p + Vector2(7 * sx, 6 * sy)
+		]), Color(0.55, 0.43, 0.30, 0.80))
+		draw_line(p + Vector2(-4 * sx, -3 * sy), p + Vector2(2 * sx, -5 * sy), Color(0.91, 0.74, 0.46, 0.7), 1.0, true)
+
+	func _draw_ruin(p: Vector2, sx: float, sy: float) -> void:
+		var stone := Color(0.43, 0.35, 0.49, 0.78)
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(-12 * sx, 8 * sy), p + Vector2(-10 * sx, -12 * sy),
+			p + Vector2(-4 * sx, -12 * sy), p + Vector2(-3 * sx, 8 * sy)
+		]), stone)
+		draw_colored_polygon(PackedVector2Array([
+			p + Vector2(2 * sx, 8 * sy), p + Vector2(3 * sx, -7 * sy),
+			p + Vector2(9 * sx, -11 * sy), p + Vector2(12 * sx, 8 * sy)
+		]), stone.lightened(0.10))
+		draw_line(p + Vector2(-13 * sx, -13 * sy), p + Vector2(0, -18 * sy), stone.lightened(0.18), 2.0, true)
+		draw_line(p + Vector2(0, -18 * sy), p + Vector2(12 * sx, -12 * sy), stone.lightened(0.18), 2.0, true)
+
+	func _draw_landmark(p: Vector2, biome: String, sx: float, sy: float, city_id: String) -> void:
+		# Une petite silhouette de ville se devine derrière le libellé : elle donne
+		# une identité au lieu sans remplacer les informations tactiques.
+		var wall := Color(0.66, 0.59, 0.43, 0.82)
+		var roof := Color(0.35, 0.24, 0.18, 0.92)
+		if biome == "Montagne":
+			wall = Color(0.62, 0.69, 0.70, 0.84)
+			roof = Color(0.28, 0.39, 0.47, 0.94)
+		elif biome == "Désert":
+			wall = Color(0.82, 0.66, 0.40, 0.86)
+			roof = Color(0.59, 0.37, 0.20, 0.94)
+		elif biome == "Donjon":
+			wall = Color(0.46, 0.39, 0.55, 0.90)
+			roof = Color(0.22, 0.17, 0.30, 0.96)
+		var offset: float = float(abs(hash(city_id)) % 11 - 5) * sx
+		var left := p + Vector2(-26.0 * sx + offset, -14.0 * sy)
+		var right := p + Vector2(24.0 * sx + offset, -14.0 * sy)
+		draw_colored_polygon(PackedVector2Array([
+			left + Vector2(0, 16.0 * sy), left + Vector2(0, -1.0 * sy),
+			left + Vector2(8.0 * sx, -8.0 * sy), left + Vector2(16.0 * sx, -1.0 * sy),
+			left + Vector2(16.0 * sx, 16.0 * sy)
+		]), wall)
+		draw_colored_polygon(PackedVector2Array([
+			left + Vector2(-2.0 * sx, 0), left + Vector2(8.0 * sx, -11.0 * sy),
+			left + Vector2(18.0 * sx, 0)
+		]), roof)
+		draw_colored_polygon(PackedVector2Array([
+			right + Vector2(0, 16.0 * sy), right + Vector2(0, -8.0 * sy),
+			right + Vector2(9.0 * sx, -15.0 * sy), right + Vector2(18.0 * sx, -8.0 * sy),
+			right + Vector2(18.0 * sx, 16.0 * sy)
+		]), wall.darkened(0.12))
+		draw_colored_polygon(PackedVector2Array([
+			right + Vector2(-2.0 * sx, -7.0 * sy), right + Vector2(9.0 * sx, -18.0 * sy),
+			right + Vector2(20.0 * sx, -7.0 * sy)
+		]), roof)
+		draw_line(left + Vector2(5.0 * sx, 4.0 * sy), left + Vector2(5.0 * sx, 10.0 * sy), Color(0.22, 0.18, 0.13, 0.8), 2.0, true)
+		draw_line(right + Vector2(13.0 * sx, 3.0 * sy), right + Vector2(13.0 * sx, 10.0 * sy), Color(0.22, 0.18, 0.13, 0.8), 2.0, true)
 class _RouteLines:
 	extends Control
 	var conquest: Dictionary = {}
