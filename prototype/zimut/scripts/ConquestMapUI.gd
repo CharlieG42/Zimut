@@ -149,6 +149,10 @@ func _build() -> void:
 	_map_scroll.follow_focus = false
 	_map_scroll.scroll_deadzone = 5
 	_body_scroll.scroll_deadzone = 5
+	# Incréments modérés pour la molette et barre toujours visible : on peut
+	# suivre la position et s'arrêter plus précisément entre deux rangées.
+	_map_scroll.get_v_scroll_bar().custom_step = 42.0
+	_body_scroll.get_v_scroll_bar().custom_step = 42.0
 	_map_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
 	_body_content.add_child(_map_scroll)
 
@@ -608,6 +612,14 @@ func _city_desc(id: String, kind: String) -> String:
 		"caravanserail": "Une halte marchande sur la route des dunes.",
 		"observatoire": "Un observatoire oublié tourné vers le soleil.",
 		"port_sable": "Un port fortifié qui contrôle les caravanes du désert.",
+		"bois_lune": "Un bois ancien où la lumière filtre à travers les arbres argentés.",
+		"sanctuaire_mousse": "Un sanctuaire oublié protégé par les esprits de la forêt.",
+		"forge_givre": "Une forge naine alimentée par les feux sous la glace.",
+		"pic_foudroyant": "Un sommet balayé par les orages et gardé par les sentinelles.",
+		"marais_spectres": "Un marais brumeux où rôdent des silhouettes spectrales.",
+		"fort_cendre": "Un fort désertique bâti dans la roche volcanique.",
+		"temple_soleil": "Un temple ancien consacré au soleil du désert.",
+		"citadelle_sable": "Une citadelle imprenable qui verrouille les routes du sud.",
 	}
 	return String(descs.get(id, "Ville de Zimut."))
 
