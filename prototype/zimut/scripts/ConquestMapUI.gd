@@ -426,8 +426,8 @@ func _layout_responsive() -> void:
 				(child as Button).custom_minimum_size.y = 54
 				(child as Button).add_theme_font_size_override("font_size", 16)
 
-	var button_w: float = 154.0 if compact else 166.0
-	var button_h: float = 124.0 if compact else 132.0
+	var button_w: float = (154.0 if compact else 166.0) * _map_zoom
+	var button_h: float = (124.0 if compact else 132.0) * _map_zoom
 	for city_id: String in _city_buttons.keys():
 		var btn: Button = _city_buttons[city_id]
 		var p: Vector2 = CITY_POS[city_id]
@@ -441,10 +441,12 @@ func _layout_responsive() -> void:
 		var nameplate: Label = _city_labels[city_id]
 		nameplate.size.x = button_w
 		nameplate.position.x = 0.0
-		nameplate.add_theme_font_size_override("font_size", 11 if compact else 13)
+		nameplate.add_theme_font_size_override("font_size", int(round((11.0 if compact else 13.0) * _map_zoom)))
 		var sprite: TextureRect = btn.get_node("CityIllustration") as TextureRect
-		sprite.size.x = button_w - 36.0
-		sprite.position.x = 18.0
+		sprite.size = Vector2(button_w - 36.0 * _map_zoom, 82.0 * _map_zoom)
+		sprite.position = Vector2(18.0 * _map_zoom, 0.0)
+		nameplate.position.y = 76.0 * _map_zoom
+		nameplate.size.y = 45.0 * _map_zoom
 	if _side_scroll != null:
 		_side_scroll.queue_sort()
 	if _body_scroll != null:
