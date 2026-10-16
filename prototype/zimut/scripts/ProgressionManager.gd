@@ -1344,6 +1344,37 @@ func _roll_counterattack(conquest: Dictionary, just_conquered: String) -> String
 		return ""
 	return String(candidates[_rng.randi_range(0, candidates.size() - 1)])
 
+## Paie la préparation d'assaut. Centralisé ici pour que l'interface et les
+## tests utilisent exactement les mêmes coûts et contrôles de ressources.
+## Retourne "" si le paiement est accepté, sinon un message explicatif.
+func conquest_pay_assault_tactic(data: Dictionary, tactic: String) -> String:
+	var costs: Dictionary = {}
+	var gold_cost: int = 0
+	match tactic:
+		"none":
+			return ""
+		"scouts":
+			gold_cost = 25
+		"sabotage":
+			costs = {"Bois": 12, "Fer": 8}
+		"supply":
+			gold_cost = 15
+			costs = {"Cuir": 6}
+		_:
+			return "Préparation d'assaut inconnue."
+	var resources: Dictionary = data.get("resources", {})
+	for resource: String in costs.keys():
+		var required: int = int(costs[resource])
+		if int(resources.get(resource, 0)) < required:
+			return "Ressource insuffisante : %s (%d/%d)." % [resource, int(resources.get(resource, 0)), required]
+	if int(data.get("gold", 0)) < gold_cost:
+		return "Or insuffisant : %d pièces requises." % gold_cost
+	for resource: String in costs.keys():
+		resources[resource] = int(resources.get(resource, 0)) - int(costs[resource])
+	data["resources"] = resources
+	data["gold"] = int(data.get("gold", 0)) - gold_cost
+	return ""
+
 ## Construire un bâtiment dans une ville conquise. Retourne "" si OK.
 func conquest_build(data: Dictionary, city_id: String, building: String) -> String:
 	var info: Dictionary = CONQUEST_BUILDINGS.get(building, {})
