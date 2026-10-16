@@ -28,13 +28,13 @@ func _boot() -> void:
 
 	# ── Préparation d'assaut : les tests passent par la vraie fonction de paiement ──
 	var tactic_save: Dictionary = pm.new_game(5, "SupplyTest")
-	tactic_save["gold"] = 20
+	tactic_save["gold"] = 40
 	tactic_save["resources"] = {"Cuir": 8, "Bois": 20, "Fer": 10}
 	check(pm.conquest_pay_assault_tactic(tactic_save, "supply") == "", "ravitaillement accepté avec les ressources requises")
-	check(int(tactic_save["gold"]) == 5, "ravitaillement : 15 or réellement consommés")
+	check(int(tactic_save["gold"]) == 25, "ravitaillement : 15 or réellement consommés")
 	check(int(tactic_save["resources"]["Cuir"]) == 2, "ravitaillement : 6 Cuir réellement consommés")
 	check(pm.conquest_pay_assault_tactic(tactic_save, "supply") != "", "ravitaillement refusé si le Cuir manque")
-	check(int(tactic_save["gold"]) == 5, "échec de paiement : l'or n'est pas débité")
+	check(int(tactic_save["gold"]) == 25, "échec de paiement : l'or n'est pas débité")
 	check(pm.conquest_pay_assault_tactic(tactic_save, "sabotage") == "", "sabotage accepté avec Bois et Fer suffisants")
 	check(int(tactic_save["resources"]["Bois"]) == 8 and int(tactic_save["resources"]["Fer"]) == 2, "sabotage : 12 Bois et 8 Fer réellement consommés")
 	check(pm.conquest_pay_assault_tactic(tactic_save, "scouts") == "", "éclaireurs acceptés avec assez d'or")
