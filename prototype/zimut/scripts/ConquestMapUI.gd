@@ -67,7 +67,17 @@ var _side_title: Label
 var _back_button: Button
 var _side_scroll: ScrollContainer
 
+# Capture le glissement directement sur toute la zone de carte, y compris
+# au-dessus des boutons des villes. Le ScrollContainer seul ne reçoit pas
+# toujours le mouvement tactile lorsque son enfant est un Button.
+var _map_pointer_active: bool = false
+var _map_pointer_index: int = -1
+var _map_pointer_last: Vector2 = Vector2.ZERO
+var _map_pointer_origin: Vector2 = Vector2.ZERO
+var _map_dragged: bool = false
+
 func _ready() -> void:
+	set_process_input(true)
 	Music.play("adventure")
 	layer = 10
 	_save = GameManager.active_save
@@ -377,6 +387,75 @@ func _layout_responsive() -> void:
 		_body_scroll.queue_sort()
 
 
+## Le geste est suivi au niveau de la scène pour rester actif même si le
+## doigt commence sur un bouton de ville. Le seuil filtre les micro-mouvements
+## involontaires ; une fois dépassé, on déplace le contenu dans le sens du doigt.
+func _input(event: InputEvent) -> void:
+	if _map_scroll == null or not is_instance_valid(_map_scroll):
+		return
+	if event is InputEventScreenTouch:
+		var touch := event as InputEventScreenTouch
+		if touch.pressed:
+			_begin_map_pointer(touch.position, touch.index)
+		else:
+			_end_map_pointer(touch.index)
+	elif event is InputEventScreenDrag:
+		var drag := event as InputEventScreenDrag
+		if _map_pointer_active and drag.index == _map_pointer_index:
+			_update_map_pointer(drag.position)
+	elif event is InputEventMouseButton:
+		var mouse := event as InputEventMouseButton
+		if mouse.button_index == MOUSE_BUTTON_LEFT:
+			if mouse.pressed:
+				_begin_map_pointer(mouse.position, -2)
+			else:
+				_end_map_pointer(-2)
+	elif event is InputEventMouseMotion:
+		var motion := event as InputEventMouseMotion
+		if _map_pointer_active and _map_pointer_index == -2 and (motion.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
+			_update_map_pointer(motion.position)
+
+func _begin_map_pointer(position: Vector2, pointer_index: int) -> void:
+	if not _map_scroll.get_global_rect().has_point(position):
+		return
+	# Laisser la scrollbar native gérer son propre curseur.
+	var vbar: VScrollBar = _map_scroll.get_v_scroll_bar()
+	var hbar: HScrollBar = _map_scroll.get_h_scroll_bar()
+	if (vbar.visible and vbar.get_global_rect().has_point(position)) or (hbar.visible and hbar.get_global_rect().has_point(position)):
+		return
+	_map_pointer_active = true
+	_map_pointer_index = pointer_index
+	_map_pointer_origin = position
+	_map_pointer_last = position
+	_map_dragged = false
+
+func _update_map_pointer(position: Vector2) -> void:
+	if not _map_pointer_active:
+		return
+	if not _map_dragged and position.distance_to(_map_pointer_origin) < 7.0:
+		return
+	_map_dragged = true
+	var delta: Vector2 = position - _map_pointer_last
+	var vbar: VScrollBar = _map_scroll.get_v_scroll_bar()
+	var hbar: HScrollBar = _map_scroll.get_h_scroll_bar()
+	vbar.value = clampf(vbar.value - delta.y, vbar.min_value, vbar.max_value)
+	hbar.value = clampf(hbar.value - delta.x, hbar.min_value, hbar.max_value)
+	_map_pointer_last = position
+	get_viewport().set_input_as_handled()
+
+func _end_map_pointer(pointer_index: int) -> void:
+	if not _map_pointer_active or pointer_index != _map_pointer_index:
+		return
+	_map_pointer_active = false
+	_map_pointer_index = -1
+	if _map_dragged:
+		# Laisser les Buttons traiter l'événement de relâchement avant de
+		# réautoriser la sélection d'une ville.
+		call_deferred("_clear_map_drag_state")
+
+func _clear_map_drag_state() -> void:
+	_map_dragged = false
+
 ## Compteurs d'empire : villes contrôlées, production versée à chaque
 ## victoire, et objectif de campagne.
 func _refresh_header() -> void:
@@ -396,6 +475,10 @@ func _refresh_header() -> void:
 	_header.text = line
 
 func _select_city(id: String) -> void:
+	# Un glissement de carte ne doit jamais déclencher par erreur la sélection
+	# de la ville sur laquelle le doigt a été relâché.
+	if _map_dragged:
+		return
 	_selected_id = id
 	var city: Dictionary = _city_meta(id)
 	var owned: Array = _conquest.get("owned", ["capitale"])
