@@ -649,6 +649,7 @@ func _show_assault_prep() -> void:
 	var gold: int = int(_save.get("gold", 0))
 	var wood: int = int(resources.get("Bois", 0))
 	var iron: int = int(resources.get("Fer", 0))
+	var leather: int = int(resources.get("Cuir", 0))
 	var scout := Button.new()
 	scout.text = "🔎 ÉCLAIREURS — 25 or\nRéduit le niveau des ennemis de 1"
 	scout.custom_minimum_size.y = 66
@@ -667,6 +668,15 @@ func _show_assault_prep() -> void:
 		dim.queue_free()
 		_choose_assault_tactic("sabotage"))
 	box.add_child(sabotage)
+	var supply := Button.new()
+	supply.text = "📦 RAVITAILLEMENT — 15 or + 6 Cuir\nRéduit l'attaque ennemie de 10 %"
+	supply.custom_minimum_size.y = 66
+	supply.add_theme_font_size_override("font_size", 18)
+	supply.disabled = gold < 15 or leather < 6
+	supply.pressed.connect(func() -> void:
+		dim.queue_free()
+		_choose_assault_tactic("supply"))
+	box.add_child(supply)
 	var none := Button.new()
 	none.text = "⚔ PARTIR SANS PRÉPARATION"
 	none.custom_minimum_size.y = 58
@@ -693,6 +703,12 @@ func _choose_assault_tactic(tactic: String) -> void:
 				return
 			resources["Bois"] = int(resources.get("Bois", 0)) - 12
 			resources["Fer"] = int(resources.get("Fer", 0)) - 8
+			_save["resources"] = resources
+		"supply":
+			if int(_save.get("gold", 0)) < 15 or int(resources.get("Cuir", 0)) < 6:
+				return
+			_save["gold"] = int(_save.get("gold", 0)) - 15
+			resources["Cuir"] = int(resources.get("Cuir", 0)) - 6
 			_save["resources"] = resources
 	var city: Dictionary = _city_meta(_selected_id)
 	_conquest["pending_city"] = _selected_id
