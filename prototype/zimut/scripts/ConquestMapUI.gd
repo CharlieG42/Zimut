@@ -692,24 +692,12 @@ func _show_assault_prep() -> void:
 	box.add_child(cancel)
 
 func _choose_assault_tactic(tactic: String) -> void:
-	var resources: Dictionary = _save.get("resources", {})
-	match tactic:
-		"scouts":
-			if int(_save.get("gold", 0)) < 25:
-				return
-			_save["gold"] = int(_save.get("gold", 0)) - 25
-		"sabotage":
-			if int(resources.get("Bois", 0)) < 12 or int(resources.get("Fer", 0)) < 8:
-				return
-			resources["Bois"] = int(resources.get("Bois", 0)) - 12
-			resources["Fer"] = int(resources.get("Fer", 0)) - 8
-			_save["resources"] = resources
-		"supply":
-			if int(_save.get("gold", 0)) < 15 or int(resources.get("Cuir", 0)) < 6:
-				return
-			_save["gold"] = int(_save.get("gold", 0)) - 15
-			resources["Cuir"] = int(resources.get("Cuir", 0)) - 6
-			_save["resources"] = resources
+	# Les coûts sont validés et débités par ProgressionManager, également
+	# utilisé par les tests de gameplay.
+	var payment_error: String = ProgressionManager.conquest_pay_assault_tactic(_save, tactic)
+	if payment_error != "":
+		_message.text = payment_error
+		return
 	var city: Dictionary = _city_meta(_selected_id)
 	_conquest["pending_city"] = _selected_id
 	_conquest["pending_level"] = int(city["level"])
@@ -722,8 +710,6 @@ func _choose_assault_tactic(tactic: String) -> void:
 	GameManager.fight_biome = String(city["biome"])
 	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
 
-## Écran d'annexion : production versée, contre-attaque éventuelle et
-## conseil de développement après une ville nouvellement conquise.
 func _show_annexion_popup(city_id: String) -> void:
 	var cname: String = ProgressionManager.conquest_city_name(city_id)
 	var lines: Array = []
