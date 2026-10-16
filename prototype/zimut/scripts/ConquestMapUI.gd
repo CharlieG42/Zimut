@@ -66,6 +66,7 @@ var _map_title_label: Label
 var _side_title: Label
 var _back_button: Button
 var _side_scroll: ScrollContainer
+var _chronicle_label: Label
 
 # Capture le glissement directement sur toute la zone de carte, y compris
 # au-dessus des boutons des villes. Le ScrollContainer seul ne reçoit pas
@@ -188,7 +189,7 @@ func _build() -> void:
 	map.add_child(_map_title_label)
 
 	_legend_label = Label.new()
-	_legend_label.text = "Vert = territoire  ·  Gris = neutre  ·  Rouge = adverse  ·  ⚔ = attaquable"
+	_legend_label.text = "🌲 Forêt  ·  ⛰ Montagne  ·  ☀ Désert  ·  Vert = allié  ·  Gris = neutre  ·  Rouge = adverse"
 	_legend_label.position = Vector2(260, 16)
 	_legend_label.add_theme_color_override("font_color", GOLD)
 	map.add_child(_legend_label)
@@ -207,15 +208,16 @@ func _build() -> void:
 		var owned: bool = _conquest.get("owned", []).has(city_id)
 		var attackable: bool = ProgressionManager.conquest_city_attackable(_conquest, city_id)
 		var badge: String = "⚑" if owned else ("⚔" if attackable else ("⚔" if String(city["kind"]) == "enemy" else "●"))
+		var biome_icon: String = _city_biome_icon(city_id)
 		var siege_p: int = ProgressionManager.conquest_siege_progress(_conquest, city_id)
 		var siege_txt: String = ("\nSiège %d/%d" % [siege_p, ProgressionManager.CONQUEST_SIEGE_BATTLES]) if siege_p > 0 else ""
-		btn.text = ("%s\n" % badge) + String(city["name"]) + siege_txt
+		btn.text = "%s  %s\n%s%s" % [badge, biome_icon, String(city["name"]), siege_txt]
 		btn.tooltip_text = "%s — %s" % [String(ProgressionManager.biome_label(String(city["biome"]))), String(city["desc"])]
 		btn.position = Vector2(CITY_POS[city_id].x * map.size.x - 88, CITY_POS[city_id].y * map.size.y - 34)
 		btn.custom_minimum_size = Vector2(196, 76)
 		btn.add_theme_font_size_override("font_size", 18)
 		btn.add_theme_color_override("font_color", TEXT)
-		btn.add_theme_stylebox_override("normal", _style(_city_color(city_id), GOLD if city_id == _selected_id else Color(0.5, 0.64, 0.46)))
+		btn.add_theme_stylebox_override("normal", _style(_city_color(city_id), GOLD if city_id == _selected_id else _city_border_color(city_id)))
 		btn.add_theme_stylebox_override("hover", _style(_city_color(city_id).lightened(0.12), GOLD))
 		btn.pressed.connect(_select_city.bind(city_id))
 		map.add_child(btn)
@@ -261,6 +263,20 @@ func _build() -> void:
 	_build_box = VBoxContainer.new()
 	_build_box.add_theme_constant_override("separation", 6)
 	box.add_child(_build_box)
+
+	var chronicle_title := Label.new()
+	chronicle_title.text = "CHRONIQUE RÉCENTE"
+	chronicle_title.add_theme_font_size_override("font_size", 18)
+	chronicle_title.add_theme_color_override("font_color", GOLD)
+	box.add_child(chronicle_title)
+
+	_chronicle_label = Label.new()
+	_chronicle_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_chronicle_label.custom_minimum_size.y = 104
+	_chronicle_label.add_theme_font_size_override("font_size", 15)
+	_chronicle_label.add_theme_color_override("font_color", TEXT)
+	_chronicle_label.text = "Vos premières conquêtes apparaîtront ici."
+	box.add_child(_chronicle_label)
 
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -549,7 +565,8 @@ func _select_city(id: String) -> void:
 			_message.text += "\n\n✖ Aucune route depuis votre territoire : conquérez d'abord une ville voisine."
 	for other: String in _city_buttons.keys():
 		var button: Button = _city_buttons[other]
-		button.add_theme_stylebox_override("normal", _style(_city_color(other), GOLD if other == id else Color(0.5, 0.64, 0.46)))
+		button.add_theme_stylebox_override("normal", _style(_city_color(other), GOLD if other == id else _city_border_color(other)))
+	_refresh_chronicle()
 
 ## Panneau de construction de la ville sélectionnée : un bouton par
 ## bâtiment de ressources disponible, avec coûts, s'il n'est pas déjà bâti.
@@ -829,6 +846,37 @@ func _city_color(city_id: String) -> Color:
 		"capital": return Color(0.16, 0.42, 0.24)
 		"neutral": return Color(0.34, 0.36, 0.38)
 		_: return Color(0.52, 0.16, 0.14)
+
+## L'icône et la bordure identifient le biome ; le fond reste réservé au statut.
+func _city_biome_icon(city_id: String) -> String:
+	match ProgressionManager.conquest_city_biome(city_id):
+		"Forêt": return "🌲"
+		"Montagne": return "⛰"
+		"Désert": return "☀"
+		"Donjon": return "☠"
+		_: return "◆"
+
+func _city_border_color(city_id: String) -> Color:
+	match ProgressionManager.conquest_city_biome(city_id):
+		"Forêt": return Color(0.43, 0.72, 0.38)
+		"Montagne": return Color(0.43, 0.70, 0.88)
+		"Désert": return Color(0.92, 0.66, 0.32)
+		"Donjon": return Color(0.70, 0.48, 0.82)
+		_: return Color(0.5, 0.64, 0.46)
+
+func _refresh_chronicle() -> void:
+	if _chronicle_label == null:
+		return
+	var events: Array = _conquest.get("events", [])
+	if events.is_empty():
+		_chronicle_label.text = "Vos premières conquêtes apparaîtront ici."
+		return
+	var lines: PackedStringArray = []
+	var index: int = events.size() - 1
+	while index >= 0 and lines.size() < 4:
+		lines.append("• " + String(events[index]))
+		index -= 1
+	_chronicle_label.text = "\n".join(lines)
 
 func _persist() -> void:
 	_save["conquest"] = _conquest
