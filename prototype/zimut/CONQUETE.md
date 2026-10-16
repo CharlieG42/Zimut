@@ -138,7 +138,7 @@ l'état de la campagne : `owned`, `pending_city`, `sieges`, `buildings`,
 - Pas de temps réel, pas de timer hors combat.
 - Fiche ville en panneau latéral, boutons gros et rares (existant).
 - **Lisibilité renforcée (passe du 15/10)** : noms de villes agrandis (18 px), boutons plus hauts (76 px), titre de carte et légende plus visibles ; le panneau de conseil utilise une taille de texte plus confortable et le bouton d’assaut est plus grand.
-- **Mise en page responsive** : en paysage large, carte et conseil de guerre restent côte à côte ; sur les écrans compacts, le conseil passe sous la carte dans une zone verticalement défilante. Le panneau de conseil possède son propre défilement. **Carte étendue (PR en cours)** : vingt-huit villes réparties sur sept rangées verticales. La carte conserve une hauteur minimale de 1600 px, afin de créer une vraie progression à parcourir par défilement. Pour une manipulation plus précise au doigt, la barre verticale est plus large et contrastée, le seuil de glissement est réduit à 2 px et le pas de défilement à 18 px. Sur les petits écrans, la carte conserve aussi une largeur minimale de 1320 px et peut se défiler horizontalement. Le mode portrait n'est pas une cible prioritaire ; à vérifier dans Godot sur téléphone paysage et sur 1280×720.
+- **Mise en page responsive** : en paysage large, carte et conseil de guerre restent côte à côte ; sur les écrans compacts, le conseil passe sous la carte dans une zone verticalement défilante. Le panneau de conseil possède son propre défilement. **Carte étendue (PR en cours)** : vingt-huit villes réparties sur sept rangées verticales. La carte conserve une hauteur minimale de 1600 px, afin de créer une vraie progression à parcourir par défilement. Le glissement peut commencer n'importe où dans la zone de carte, même sur un bouton de ville ; un déplacement de plus de 7 px déplace la carte au lieu de sélectionner la ville. Pour une manipulation plus précise au doigt, la barre verticale est plus large et contrastée, le seuil de glissement est réduit à 2 px et le pas de défilement à 18 px. Sur les petits écrans, la carte conserve aussi une largeur minimale de 1320 px et peut se défiler horizontalement. Le mode portrait n'est pas une cible prioritaire ; à vérifier dans Godot sur téléphone paysage et sur 1280×720.
 
 ## 9. Tests
 
@@ -172,8 +172,10 @@ l'état de la campagne : `owned`, `pending_city`, `sieges`, `buildings`,
    ravitaillement, sabotage) avec un coût clair en or/ressources.
 2. **Contre-attaques jouables** : avertissement avant le pillage, puis choix
    entre défendre la ville ou accepter une perte temporaire de production.
-3. **Récompenses uniques par ville** : recettes, pièces d'équipement, sorts
-   ou trophées qui donnent envie de conquérir autre chose que la ville la plus proche.
+3. **Récompenses uniques par ville — première version intégrée** : chaque
+   annexion accorde un butin thématique (ressources et or), affiché dans la
+   fenêtre de victoire. Le butin est crédité une seule fois, à la prise finale.
+   Une prochaine itération pourra ajouter recettes, équipement ou trophées.
 4. **Défis optionnels** : gagner en peu de tours, sans mort ou avec une classe
    donnée pour obtenir une récompense bonus.
 
