@@ -40,6 +40,20 @@ func _boot() -> void:
 		"col_givre", "mine_cristal", "bastion_orage", "caravanserail",
 		"observatoire", "port_sable"], "pending_city": ""}
 	check(pm.CONQUEST_CITIES.size() == 20, "campagne étendue à vingt villes")
+	var reachable: Array[String] = ["capitale"]
+	var changed: bool = true
+	while changed:
+		changed = false
+		for route: Array in pm.CONQUEST_ROUTES:
+			var a: String = String(route[0])
+			var b: String = String(route[1])
+			if reachable.has(a) and not reachable.has(b):
+				reachable.append(b)
+				changed = true
+			elif reachable.has(b) and not reachable.has(a):
+				reachable.append(a)
+				changed = true
+	check(reachable.size() == pm.CONQUEST_CITIES.size(), "les vingt villes sont reliées au réseau routier")
 	check(pm.conquest_city_attackable({"owned": ["capitale", "clairiere", "village_brume"], "pending_city": ""}, "ruines_lierre"), "Ruines du Lierre accessibles depuis le Village des Brumes")
 	check(pm.conquest_city_attackable({"owned": ["capitale", "fort_racine", "hameau_pin", "col_givre"], "pending_city": ""}, "mine_cristal"), "Mine de Cristal accessible depuis le Col du Givre")
 	check(pm.conquest_city_attackable({"owned": ["capitale", "fort_racine", "oasis", "caravanserail"], "pending_city": ""}, "observatoire"), "Observatoire Solaire accessible depuis le Caravansérail")
