@@ -135,3 +135,11 @@ Les variantes par Nation partageront une silhouette et une qualité de rendu coh
 - `CONQUETE.md` : règles, économie, campagne et suivi du mode Conquête.
 - `README.md` : présentation technique du prototype.
 - Les futures fiches de Nations pourront détailler emblème, palette, architecture, bestiaire, villes et liens aux classes une fois les choix validés.
+
+
+## Mise à jour interface — build #304
+
+- Le champ de version de l'application affiche désormais `0.0.01.84#304`. Le suffixe `#xxx` représente l'identifiant de push/build affiché à l'utilisateur ; il devra être incrémenté pour les prochains builds publiés.
+- La fenêtre Options a été agrandie et ses titres, libellés, boutons et informations de version ont une taille de police supérieure.
+- La carte Conquête prend en charge le pincement à deux doigts sur écran tactile, avec un zoom minimal de `1.0` (le cadrage de référence actuel) et un maximum de `2.2`. La molette de souris permet également de zoomer et dézoomer en test sur ordinateur.
+- Premier lot complémentaire de sprites SVG créé pour les Nations des Vents, des Marées, du Brasier et des Cristaux. Ces variantes doivent encore être affectées aux villes dans les données et testées en jeu.
