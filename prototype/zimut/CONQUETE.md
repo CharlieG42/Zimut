@@ -46,7 +46,7 @@ identique d'une partie à l'autre ; la rejouabilité vient de l'économie
 et des choix de bâtiments.
 
 ### Catalogue officiel (`ProgressionManager.CONQUEST_CITIES`)
-10 villes sur les 3 biomes + le Donjon (miroir exact de la carte) :
+20 villes sur les 3 biomes + le Donjon (miroir exact de la carte) :
 
 | id | Ville | Type | Biome | Niveau |
 |---|---|---|---|---|
@@ -59,6 +59,16 @@ et des choix de bâtiments.
 | garnison | Garnison des Pics | Adverse | Montagne | 18 |
 | oasis | Oasis Perdue | Neutre | Désert | 20 |
 | tour_sable | Tour des Sables | Adverse | Désert | 22 |
+| village_brume | Village des Brumes | Neutre | Forêt | 11 |
+| ruines_lierre | Ruines du Lierre | Adverse (siège ×4) | Forêt | 13 |
+| abbaye_ronce | Abbaye des Ronces | Neutre | Forêt | 14 |
+| citadelle_ronce | Citadelle des Ronces | Adverse (siège ×4) | Forêt | 15 |
+| col_givre | Col du Givre | Neutre | Montagne | 17 |
+| mine_cristal | Mine de Cristal | Adverse (siège ×4) | Montagne | 19 |
+| bastion_orage | Bastion de l'Orage | Adverse (siège ×4) | Montagne | 21 |
+| caravanserail | Caravansérail Rouge | Neutre | Désert | 22 |
+| observatoire | Observatoire Solaire | Neutre | Désert | 23 |
+| port_sable | Port des Sables | Adverse (siège ×4) | Désert | 24 |
 | donjon_roi | Donjon du Roi Squelette | Objectif final (siège ×4, boss) | Donjon | 25 |
 
 ### Adjacence — FAIT
@@ -99,7 +109,7 @@ tenir tout Zimut. Les routes relient deux villes du territoire en doré.
 
 ## 6. Fin de campagne — FAIT
 
-- **Condition de victoire** : contrôler les 9 villes, puis vaincre le
+- **Condition de victoire** : contrôler les 18 villes de conquête, puis vaincre le
   **Roi Squelette** dans le Donjon (verrouillé sinon).
 - Fenêtre de résultat « ★ EMPIRE VICTORIEUX ! » + popup sur la carte ;
   possibilité de continuer en « empire libre » (fin ouverte).
@@ -120,7 +130,7 @@ l'état de la campagne : `owned`, `pending_city`, `sieges`, `buildings`,
 - Pas de temps réel, pas de timer hors combat.
 - Fiche ville en panneau latéral, boutons gros et rares (existant).
 - **Lisibilité renforcée (passe du 15/10)** : noms de villes agrandis (18 px), boutons plus hauts (76 px), titre de carte et légende plus visibles ; le panneau de conseil utilise une taille de texte plus confortable et le bouton d’assaut est plus grand.
-- **Mise en page responsive** : en paysage large, carte et conseil de guerre restent côte à côte ; en format compact/portrait, le conseil passe sous la carte dans une zone verticalement défilante. Le panneau de conseil possède son propre défilement. **Correctif mobile complémentaire en cours** : la carte garde une largeur minimale de 640 px sur téléphone étroit et se fait défiler horizontalement ; cela évite de compresser les dix villes dans ~300 px, où les boutons et libellés se chevauchaient. À valider dans Godot sur 360×800, 800×360 et 1280×720.
+- **Mise en page responsive** : en paysage large, carte et conseil de guerre restent côte à côte ; en format compact/portrait, le conseil passe sous la carte dans une zone verticalement défilante. Le panneau de conseil possède son propre défilement. **Carte étendue (PR #82)** : vingt villes réparties sur cinq rangées verticales. La carte conserve une hauteur minimale de 1100 px, afin de créer une vraie progression à parcourir par défilement en paysage ; sur les petits écrans, elle conserve aussi une largeur minimale de 1320 px et se défile horizontalement. Le mode portrait n'est pas une cible prioritaire. À vérifier dans Godot sur téléphone paysage et sur 1280×720.
 
 ## 9. Tests
 
@@ -147,35 +157,37 @@ l'état de la campagne : `owned`, `pending_city`, `sieges`, `buildings`,
 - Lesson : toujours vérifier avec `godot --headless -s tests/…` et
   instancier les scènes avant de fusionner.
 
-## 10. Pistes d'amélioration (non arbitré)
+## 10. Pistes d'amélioration (priorités proposées)
 
-Idées identifiées lors de la revue du 17/10 — à arbitrer avant
-implémentation, puis à déplacer dans les sections « FAIT » ci-dessus.
+### Priorité 1 — Rendre chaque décision amusante
+1. **Préparation d'assaut** : choisir un bonus avant le combat (éclaireurs,
+   ravitaillement, sabotage) avec un coût clair en or/ressources.
+2. **Contre-attaques jouables** : avertissement avant le pillage, puis choix
+   entre défendre la ville ou accepter une perte temporaire de production.
+3. **Récompenses uniques par ville** : recettes, pièces d'équipement, sorts
+   ou trophées qui donnent envie de conquérir autre chose que la ville la plus proche.
+4. **Défis optionnels** : gagner en peu de tours, sans mort ou avec une classe
+   donnée pour obtenir une récompense bonus.
 
-### Jeu
-1. **Poids de la décision de siège** : option « affaiblir la garnison »
-   (or / espions) pour réduire un siège de 4 à 3 batailles, vs assaut
-   direct — transformer le siège en décision, pas en grind.
-2. **Contre-attaques jouables** : avertissement 1 bataille à l'avance,
-   puis choix défendre (bataille défensive spéciale) ou subir le pillage.
-3. **Priorités ennemies lisibles** : l'ennemi cible les villes les plus
-   productives plutôt qu'un tirage aléatoire.
-4. **Bonus de contrôle de biome** : toutes les villes d'un biome → bonus
-   d'empire (+10 % production du biome, recette exclusive).
-5. **Récompenses uniques par ville** : villages → recettes exclusives ;
-   avant-postes → pièces de panoplie ; places fortes → sort signature ou
-   gemme ; Donjon → trophée cosmétique.
-6. **Défis par ville** (rejouabilité) : conditions optionnelles (victoire
-   sans mort, en ≤N tours, avec une classe) → récompense bonus, tirées
-   par partie.
+### Priorité 2 — Donner une vraie identité visuelle au monde
+5. **Illustrations par biome** : fond de carte forêt/montagne/désert, reliefs,
+   routes dessinées et points d'intérêt.
+6. **Vignettes et icônes cohérentes** : une silhouette distincte par ville,
+   icônes de bâtiments et états lisibles (allié, neutre, ennemi, assiégé).
+7. **Micro-animations et retours** : animation à la sélection, route qui s'allume,
+   effet d'annexion, notification de production et son discret.
+8. **Carte mieux racontée** : nom de région, courte description et historique
+   des 2-3 derniers événements (annexion, siège, pillage).
 
-### UX
-7. **Historique discret** : 2-3 derniers événements dans un coin de la
-   carte (« Fort Racine annexée », « Pont-Mousse pillé »).
-8. **Bâtiments filtrés par biome** : n'afficher que les bâtiments
-   cohérents avec la ville (panneau plus court, choix plus signifiants).
-9. **Vignettes PNG par ville** + icônes de bâtiments + texture de fond
-   par biome (passe graphique, sans refonte du layout).
+### Priorité 3 — Équilibrer et rendre les sessions plus fluides
+9. **Bonus de contrôle de biome** : conquérir toutes les villes d'un biome
+   donne un bonus de production et une récompense dédiée.
+10. **Sièges moins répétitifs** : payer pour affaiblir une garnison, ou choisir
+    une approche tactique qui modifie la bataille plutôt que de supprimer du contenu.
+11. **Bâtiments liés aux biomes** : des choix différents selon forêt, montagne
+    ou désert, avec des compromis lisibles.
+12. **Équilibrage et tests sur appareil** : durée de campagne, économie, taille
+    des textes et interactions tactiles vérifiées en paysage Android.
 
 ## 11. Historique des arbitrages
 
@@ -183,6 +195,6 @@ implémentation, puis à déplacer dans les sections « FAIT » ci-dessus.
   temporaire, jamais de perte de ville, capitale intouchable) ; une
   seule équipe héroïque ; bâtiments de ressources ; brisage.
 - **17/10** : adjacence obligatoire (routes) ; extension aux 3 biomes
-  (9 villes + Donjon) ; fin de campagne (Roi Squelette verrouillé tant
+  (18 villes de conquête + capitale et Donjon) ; fin de campagne (Roi Squelette verrouillé tant
   que Zimut n'est pas contrôlé) ; écran d'annexion + compteurs d'empire ;
   production de l'empire visible (carte, résultat, popup).
