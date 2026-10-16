@@ -147,12 +147,20 @@ func _build() -> void:
 	_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_map_scroll.follow_focus = false
-	_map_scroll.scroll_deadzone = 5
-	_body_scroll.scroll_deadzone = 5
-	# Incréments modérés pour la molette et barre toujours visible : on peut
-	# suivre la position et s'arrêter plus précisément entre deux rangées.
-	_map_scroll.get_v_scroll_bar().custom_step = 42.0
-	_body_scroll.get_v_scroll_bar().custom_step = 42.0
+	# Déclenchement du glissement presque immédiat, pour que le doigt déplace
+	# la carte plutôt que de sélectionner accidentellement une ville.
+	_map_scroll.scroll_deadzone = 2
+	_body_scroll.scroll_deadzone = 2
+	# Pas courts pour les commandes de défilement et barre plus large pour
+	# pouvoir saisir précisément le curseur sur un écran tactile.
+	var map_vbar := _map_scroll.get_v_scroll_bar()
+	map_vbar.custom_step = 18.0
+	map_vbar.custom_minimum_size.x = 20.0
+	map_vbar.add_theme_stylebox_override("scroll", _style(Color(0.12, 0.19, 0.22, 0.92), Color(0.34, 0.43, 0.43)))
+	map_vbar.add_theme_stylebox_override("grabber", _style(GOLD, Color(1.0, 0.9, 0.62)))
+	map_vbar.add_theme_stylebox_override("grabber_highlight", _style(Color(1.0, 0.86, 0.38), Color(1.0, 0.96, 0.78)))
+	map_vbar.add_theme_stylebox_override("grabber_pressed", _style(Color(0.95, 0.68, 0.22), Color(1.0, 0.96, 0.78)))
+	_body_scroll.get_v_scroll_bar().custom_step = 18.0
 	_map_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
 	_body_content.add_child(_map_scroll)
 
