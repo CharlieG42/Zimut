@@ -1101,6 +1101,16 @@ func register_defeat(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 
 ## Applique les conséquences de campagne au même profil que le mode Tactique.
 ## La ville n'est ajoutée au territoire qu'après une victoire réelle.
+## Journal court et persistant des événements de campagne.
+func conquest_add_event(conquest: Dictionary, event_text: String) -> void:
+	if event_text.strip_edges().is_empty():
+		return
+	var events: Array = conquest.get("events", [])
+	events.append(event_text)
+	while events.size() > 8:
+		events.pop_front()
+	conquest["events"] = events
+
 func _apply_campaign_victory(data: Dictionary) -> void:
 	var mode: String = String(data.get("campaign_mode", ""))
 	if mode == "conquest":
@@ -1117,6 +1127,7 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 				if not owned.has(pending):
 					owned.append(pending)
 					conquest["owned"] = owned
+					conquest_add_event(conquest, "Ville annexée : %s" % conquest_city_name(pending))
 				conquest["just_annexed"] = pending
 				# Butin thématique versé uniquement à la première annexion.
 				var reward: Dictionary = CONQUEST_CITY_REWARDS.get(pending, {})
@@ -1130,6 +1141,12 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 						"resources": reward_resources.duplicate(true),
 						"gold": int(reward.get("gold", 0)),
 					}
+					var reward_summary: PackedStringArray = []
+					for resource: String in reward_resources.keys():
+						reward_summary.append("+%d %s" % [int(reward_resources[resource]), resource])
+					if int(reward.get("gold", 0)) > 0:
+						reward_summary.append("+%d or" % int(reward.get("gold", 0)))
+					conquest_add_event(conquest, "Butin : %s (%s)" % [String(reward.get("name", "Récompense")), ", ".join(reward_summary)])
 				conquest["pending_city"] = ""
 				conquest.erase("pending_level")
 				sieges.erase(pending)
@@ -1138,6 +1155,7 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 				# Siège en cours : la ville reste la cible pour la suite
 				sieges[pending] = progress
 				conquest["sieges"] = sieges
+				conquest_add_event(conquest, "Siège : %s — %d/%d victoires" % [conquest_city_name(pending), progress, conquest_city_battles(pending)])
 		# Production de l'empire : les bâtiments des villes possédées
 		# rapportent leurs ressources à chaque bataille gagnée.
 		var empire_yield: Dictionary = conquest_empire_yield(conquest)
@@ -1152,6 +1170,7 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 			conquest["ravage"] = _ravage_dict(conquest)
 			conquest["ravage"][counter] = CONQUEST_RAVAGE_BATTLES
 			conquest["last_counterattack"] = counter
+			conquest_add_event(conquest, "Contre-attaque : %s est pillée (%d batailles)" % [conquest_city_name(counter), CONQUEST_RAVAGE_BATTLES])
 		else:
 			conquest["last_counterattack"] = ""
 		# Le choix de préparation ne s'applique qu'à une seule bataille,
@@ -1352,6 +1371,7 @@ func conquest_build(data: Dictionary, city_id: String, building: String) -> Stri
 	lst.append(building)
 	builds[city_id] = lst
 	conquest["buildings"] = builds
+	conquest_add_event(conquest, "Bâtiment construit : %s — %s" % [conquest_city_name(city_id), String(info["label"])])
 	data["conquest"] = conquest
 	progression_changed.emit()
 	return ""
