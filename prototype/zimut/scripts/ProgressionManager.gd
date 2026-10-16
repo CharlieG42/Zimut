@@ -123,7 +123,7 @@ const CONQUEST_CITIES := {
 const CONQUEST_CITY_REWARDS := {
 	"clairiere": {"name": "Réserve des bûcherons", "resources": {"Bois": 12}, "gold": 35},
 	"vieille_tour": {"name": "Coffre de la garnison", "resources": {"Fer": 10}, "gold": 55},
-	"pont_mousse": {"name": "Péage du vieux pont", "resources": {"Orge": 8}, "gold": 45},
+	"pont_mousse": {"name": "Péage du vieux pont", "resources": {"Cuir": 8}, "gold": 45},
 	"fort_racine": {"name": "Arsenal de Racine", "resources": {"Fer": 16}, "gold": 70},
 	"hameau_pin": {"name": "Réserve des montagnards", "resources": {"Bois": 10, "Cuir": 5}, "gold": 45},
 	"garnison": {"name": "Dépôt militaire", "resources": {"Fer": 18}, "gold": 80},
