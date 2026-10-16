@@ -38,8 +38,10 @@ func _boot() -> void:
 		"fort_racine", "hameau_pin", "garnison", "oasis", "tour_sable",
 		"village_brume", "ruines_lierre", "abbaye_ronce", "citadelle_ronce",
 		"col_givre", "mine_cristal", "bastion_orage", "caravanserail",
-		"observatoire", "port_sable"], "pending_city": ""}
-	check(pm.CONQUEST_CITIES.size() == 20, "campagne étendue à vingt villes")
+		"observatoire", "port_sable", "bois_lune", "sanctuaire_mousse",
+		"forge_givre", "pic_foudroyant", "marais_spectres", "fort_cendre",
+		"temple_soleil", "citadelle_sable"], "pending_city": ""}
+	check(pm.CONQUEST_CITIES.size() == 28, "campagne étendue à vingt-huit villes")
 	var reachable: Array[String] = ["capitale"]
 	var changed: bool = true
 	while changed:
@@ -53,7 +55,7 @@ func _boot() -> void:
 			elif reachable.has(b) and not reachable.has(a):
 				reachable.append(a)
 				changed = true
-	check(reachable.size() == pm.CONQUEST_CITIES.size(), "les vingt villes sont reliées au réseau routier")
+	check(reachable.size() == pm.CONQUEST_CITIES.size(), "les vingt-huit villes sont reliées au réseau routier")
 	check(pm.conquest_city_attackable({"owned": ["capitale", "clairiere", "village_brume"], "pending_city": ""}, "ruines_lierre"), "Ruines du Lierre accessibles depuis le Village des Brumes")
 	check(pm.conquest_city_attackable({"owned": ["capitale", "fort_racine", "hameau_pin", "col_givre"], "pending_city": ""}, "mine_cristal"), "Mine de Cristal accessible depuis le Col du Givre")
 	check(pm.conquest_city_attackable({"owned": ["capitale", "fort_racine", "oasis", "caravanserail"], "pending_city": ""}, "observatoire"), "Observatoire Solaire accessible depuis le Caravansérail")
