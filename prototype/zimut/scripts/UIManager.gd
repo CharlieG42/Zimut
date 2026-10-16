@@ -573,7 +573,7 @@ class TimelineView extends Control:
 				if gm.is_alive(summon) and not seen.has(uid):
 					seen[uid] = true
 					item_count += 1
-			var needed_height: float = 8.0 + float(item_count) * 106.0 + 28.0
+			var needed_height: float = 8.0 + float(item_count) * 106.0 + 46.0
 			if not gm.active_entity.is_empty():
 				needed_height += 28.0
 			custom_minimum_size = Vector2(154.0, maxf(needed_height, 300.0))
@@ -677,7 +677,7 @@ class TimelineView extends Control:
 			if big:
 				draw_string_outline(font, Vector2(x, y + w + 22.0), String(e2["classe"]), HORIZONTAL_ALIGNMENT_CENTER, w, 18, 5, Color(0, 0, 0, 0.9))
 				draw_string(font, Vector2(x, y + w + 22.0), String(e2["classe"]), HORIZONTAL_ALIGNMENT_CENTER, w, 18, Color(1, 0.95, 0.75))
-			y += w + 10.0
+			y += w + (28.0 if big else 10.0)
 
 
 class StatsView extends Control:
