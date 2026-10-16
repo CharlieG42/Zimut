@@ -46,7 +46,7 @@ identique d'une partie à l'autre ; la rejouabilité vient de l'économie
 et des choix de bâtiments.
 
 ### Catalogue officiel (`ProgressionManager.CONQUEST_CITIES`)
-28 villes sur les 3 biomes + le Donjon (miroir exact de la carte) :
+28 villes au total dans les trois biomes, Donjon compris (miroir exact de la carte) :
 
 | id | Ville | Type | Biome | Niveau |
 |---|---|---|---|---|
