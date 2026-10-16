@@ -986,78 +986,32 @@ class _BiomeTerrain:
 			_draw_biome_patch(center, biome, sx, sy, city_id)
 
 	func _draw_biome_patch(center: Vector2, biome: String, sx: float, sy: float, city_id: String) -> void:
-		var base := Color(0.20, 0.35, 0.23, 0.30)
-		var edge := Color(0.38, 0.52, 0.30, 0.32)
+		# Chaque biome utilise maintenant une illustration vectorielle dédiée,
+		# importée comme texture par Godot. Les textures se chevauchent légèrement
+		# pour former un paysage continu au lieu d'îlots géométriques.
+		var asset := "forest"
 		match biome:
 			"Montagne":
-				base = Color(0.34, 0.46, 0.53, 0.30)
-				edge = Color(0.57, 0.67, 0.70, 0.40)
+				asset = "mountain"
 			"Désert":
-				base = Color(0.68, 0.49, 0.25, 0.29)
-				edge = Color(0.89, 0.70, 0.39, 0.38)
+				asset = "desert"
 			"Donjon":
-				base = Color(0.31, 0.24, 0.38, 0.34)
-				edge = Color(0.57, 0.43, 0.67, 0.42)
-		# Deux couches décalées donnent un bord de terre érodé, pas un cadre.
-		var shape := PackedVector2Array([
-			Vector2(-122, -26), Vector2(-106, -67), Vector2(-64, -82),
-			Vector2(-25, -73), Vector2(14, -91), Vector2(63, -70),
-			Vector2(105, -51), Vector2(124, -12), Vector2(108, 31),
-			Vector2(74, 58), Vector2(31, 69), Vector2(-7, 60),
-			Vector2(-49, 75), Vector2(-91, 52), Vector2(-119, 18)
-		])
-		var scaled := PackedVector2Array()
-		var inner := PackedVector2Array()
-		for p: Vector2 in shape:
-			scaled.append(center + Vector2(p.x * sx, p.y * sy))
-			inner.append(center + Vector2(p.x * sx * 0.88, p.y * sy * 0.82) + Vector2(5.0 * sx, 3.0 * sy))
-		draw_colored_polygon(scaled, base.darkened(0.12))
-		draw_colored_polygon(inner, base)
-		for i: int in range(scaled.size()):
-			draw_line(scaled[i], scaled[(i + 1) % scaled.size()], edge, 2.0, true)
-		# Marques de terrain distribuées sur les côtés pour dégager le nom de la ville.
+				asset = "dungeon"
+		var texture_path := "res://assets/ui/conquest/biome_%s.svg" % asset
+		var terrain_texture := load(texture_path) as Texture2D
+		if terrain_texture != null:
+			var terrain_size := Vector2(390.0 * sx, 248.0 * sy)
+			draw_texture_rect(terrain_texture, Rect2(center - terrain_size * 0.5, terrain_size), false, Color(1, 1, 1, 0.88))
+		# Un voile léger relie les bords des illustrations à la carte marine.
+		var tint := Color(0.15, 0.30, 0.21, 0.10)
 		match biome:
-			"Forêt":
-				for i: int in range(11):
-					var x: float = center.x + float((i * 37 + 13) % 174 - 87) * sx
-					var y: float = center.y + float((i * 29 + 7) % 92 - 46) * sy
-					if absf(x - center.x) < 53.0 * sx and absf(y - center.y) < 31.0 * sy:
-						continue
-					_draw_tree(Vector2(x, y), sx, sy, i % 3 == 0, 0.82 if i % 2 == 0 else 0.65)
-				# Petites clairières et buissons, pour casser l'aspect répétitif.
-				for i: int in range(4):
-					var p := center + Vector2(float(i * 41 - 61) * sx, float((i % 2) * 43 - 21) * sy)
-					if absf(p.x - center.x) > 55.0 * sx:
-						draw_circle(p, 5.0 * sx, Color(0.55, 0.61, 0.34, 0.26))
 			"Montagne":
-				for i: int in range(5):
-					var p := center + Vector2(float(i * 43 - 86) * sx, float((i % 2) * 30 - 32) * sy)
-					if absf(p.x - center.x) < 52.0 * sx and absf(p.y - center.y) < 31.0 * sy:
-						continue
-					_draw_peak(p, sx, sy, i % 2 == 0)
-				# Strates rocheuses fines qui suivent le relief.
-				for i: int in range(3):
-					var p := center + Vector2(float(i * 48 - 48) * sx, float(i * 21 + 22) * sy)
-					draw_line(p, p + Vector2(24.0 * sx, -5.0 * sy), Color(0.74, 0.79, 0.77, 0.34), 1.4, true)
+				tint = Color(0.31, 0.46, 0.54, 0.10)
 			"Désert":
-				for i: int in range(5):
-					var p := center + Vector2(float((i % 2) * 58 - 29) * sx, float(i * 20 - 40) * sy)
-					draw_arc(p, 35.0 * sx, 198.0 * PI / 180.0, 342.0 * PI / 180.0, 24, Color(0.96, 0.78, 0.47, 0.52), 2.0, true)
-					draw_arc(p + Vector2(4.0 * sx, 4.0 * sy), 28.0 * sx, 200.0 * PI / 180.0, 330.0 * PI / 180.0, 20, Color(0.43, 0.31, 0.19, 0.25), 1.0, true)
-				# Rochers et cactus stylisés aux marges du village.
-				for i: int in range(3):
-					var p := center + Vector2(float(i * 67 - 67) * sx, float((i % 2) * 45 - 22) * sy)
-					if absf(p.x - center.x) > 54.0 * sx:
-						_draw_rock(p, sx, sy)
+				tint = Color(0.71, 0.49, 0.23, 0.08)
 			"Donjon":
-				for i: int in range(4):
-					var p := center + Vector2(float(i * 42 - 63) * sx, float((i % 2) * 28 - 34) * sy)
-					if absf(p.x - center.x) < 50.0 * sx and absf(p.y - center.y) < 30.0 * sy:
-						continue
-					_draw_ruin(p, sx, sy)
-		# Les repères de ville varient légèrement selon le lieu, sans perdre la lecture des boutons.
-		_draw_landmark(center + Vector2(0, -3.0 * sy), biome, sx, sy, city_id)
-
+				tint = Color(0.30, 0.22, 0.38, 0.12)
+		draw_circle(center, 78.0 * sx, tint)
 	func _draw_tree(p: Vector2, sx: float, sy: float, light: bool, alpha: float = 0.76) -> void:
 		var green := Color(0.24, 0.43, 0.27, alpha) if light else Color(0.13, 0.30, 0.20, alpha)
 		draw_line(p + Vector2(0, 2 * sy), p + Vector2(0, 11 * sy), Color(0.38, 0.29, 0.18, alpha), 2.0, true)
