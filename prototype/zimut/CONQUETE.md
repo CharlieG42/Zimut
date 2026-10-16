@@ -176,6 +176,22 @@ l'état de la campagne : `owned`, `pending_city`, `sieges`, `buildings`,
 - Lesson : toujours vérifier avec `godot --headless -s tests/…` et
   instancier les scènes avant de fusionner.
 
+## Direction artistique et Nations — arbitrage validé
+
+La direction globale est désormais consignée dans `VISION_GLOBALE.md`, qui fait foi pour l'identité artistique, les contraintes techniques et les piliers de gameplay.
+
+### Carte de Conquête
+- Le monde doit être représenté par un grand fond illustré, défilant horizontalement et verticalement.
+- Le fond ne contient pas de noms ni de boutons : villes, routes, états territoriaux et sélection restent des éléments dynamiques de Godot.
+- Les boutons rectangulaires seront progressivement remplacés par des sprites de villes détourés sur fond transparent, distincts selon le type de lieu et son architecture.
+- Les couleurs territoriales (allié, neutre, ennemi) doivent rester distinctes de l'identité du biome ou de la future Nation.
+- Les routes et les marqueurs doivent rester lisibles au-dessus du décor et se déplacer avec le fond.
+
+### Nations — concept validé, gameplay à définir
+Les noms et identités suivants sont validés comme direction de worldbuilding : **Nation Sylvestre** (forêt), **Nation des Cimes** (glace/montagne), **Nation des Sables** (désert), **Nation des Ombres** (ruines/ténèbres), **Nation des Vents** (air), **Nation des Marées** (eau), **Nation du Brasier** (feu), **Nation des Cristaux** (magie/cristal) et **Nation des Brumes** (marais).
+
+Objectif : prévoir au moins une Nation ou identité nationale forte pour chaque classe de héros. La liste des classes du projet doit être vérifiée avant de décider les correspondances. Aucune mécanique de bonus, diplomatie ou appartenance nationale n'est considérée comme implémentée à ce stade.
+
 ## 10. Pistes d'amélioration (priorités proposées)
 
 ### Priorité 1 — Rendre chaque décision amusante
