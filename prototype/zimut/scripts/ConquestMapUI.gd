@@ -52,6 +52,8 @@ var _selected_id: String = "clairiere"
 var _message: Label
 var _attack: Button
 var _city_buttons: Dictionary = {}
+var _city_labels: Dictionary = {}
+var _city_sprite_cache: Dictionary = {}
 var _build_box: VBoxContainer
 var _header: Label
 var _root: Control
@@ -220,20 +222,42 @@ func _build() -> void:
 		var owned: bool = _conquest.get("owned", []).has(city_id)
 		var attackable: bool = ProgressionManager.conquest_city_attackable(_conquest, city_id)
 		var badge: String = "⚑" if owned else ("⚔" if attackable else ("⚔" if String(city["kind"]) == "enemy" else "●"))
-		var biome_icon: String = _city_biome_icon(city_id)
 		var siege_p: int = ProgressionManager.conquest_siege_progress(_conquest, city_id)
-		var siege_txt: String = ("\nSiège %d/%d" % [siege_p, ProgressionManager.CONQUEST_SIEGE_BATTLES]) if siege_p > 0 else ""
-		btn.text = "%s  %s\n%s%s" % [badge, biome_icon, String(city["name"]), siege_txt]
+		var siege_txt: String = "\nSiège %d/%d" % [siege_p, ProgressionManager.CONQUEST_SIEGE_BATTLES] if siege_p > 0 else ""
+		btn.text = ""
 		btn.tooltip_text = "%s — %s" % [String(ProgressionManager.biome_label(String(city["biome"]))), String(city["desc"])]
-		btn.position = Vector2(CITY_POS[city_id].x * map.size.x - 88, CITY_POS[city_id].y * map.size.y - 34)
-		btn.custom_minimum_size = Vector2(196, 76)
-		btn.add_theme_font_size_override("font_size", 18)
-		btn.add_theme_color_override("font_color", TEXT)
-		btn.add_theme_stylebox_override("normal", _city_visual_style(city_id, city_id == _selected_id))
-		btn.add_theme_stylebox_override("hover", _city_visual_style(city_id, city_id == _selected_id, true))
+		btn.custom_minimum_size = Vector2(154, 124)
+		btn.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+		btn.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
+		btn.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
+		btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+		btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		var sprite := TextureRect.new()
+		sprite.name = "CityIllustration"
+		sprite.texture = _city_sprite(city_id)
+		sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		sprite.position = Vector2(18, 0)
+		sprite.size = Vector2(118, 82)
+		sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		btn.add_child(sprite)
+		var nameplate := Label.new()
+		nameplate.name = "CityNameplate"
+		nameplate.text = "%s  %s%s" % [badge, String(city["name"]), siege_txt]
+		nameplate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		nameplate.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		nameplate.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		nameplate.position = Vector2(0, 76)
+		nameplate.size = Vector2(154, 45)
+		nameplate.add_theme_font_size_override("font_size", 13)
+		nameplate.add_theme_color_override("font_color", TEXT)
+		nameplate.add_theme_stylebox_override("normal", _city_nameplate_style(city_id, city_id == _selected_id))
+		nameplate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		btn.add_child(nameplate)
 		btn.pressed.connect(_select_city.bind(city_id))
 		map.add_child(btn)
 		_city_buttons[city_id] = btn
+		_city_labels[city_id] = nameplate
 
 	var side := PanelContainer.new()
 	side.position = Vector2(1340, 92)
@@ -396,8 +420,8 @@ func _layout_responsive() -> void:
 				(child as Button).custom_minimum_size.y = 54
 				(child as Button).add_theme_font_size_override("font_size", 16)
 
-	var button_w: float = clampf(_map_panel.size.x * (0.23 if compact else 0.15), 70.0 if compact else 100.0, 196.0)
-	var button_h: float = clampf(_map_panel.size.y * (0.13 if compact else 0.11), 48.0 if compact else 58.0, 76.0)
+	var button_w: float = 154.0 if compact else 166.0
+	var button_h: float = 124.0 if compact else 132.0
 	for city_id: String in _city_buttons.keys():
 		var btn: Button = _city_buttons[city_id]
 		var p: Vector2 = CITY_POS[city_id]
@@ -408,7 +432,13 @@ func _layout_responsive() -> void:
 		btn.position = Vector2(px, py)
 		btn.size = Vector2(button_w, button_h)
 		btn.custom_minimum_size = Vector2(button_w, button_h)
-		btn.add_theme_font_size_override("font_size", 11 if compact else (14 if button_w < 140.0 else 18))
+		var nameplate: Label = _city_labels[city_id]
+		nameplate.size.x = button_w
+		nameplate.position.x = 0.0
+		nameplate.add_theme_font_size_override("font_size", 11 if compact else 13)
+		var sprite: TextureRect = btn.get_node("CityIllustration") as TextureRect
+		sprite.size.x = button_w - 36.0
+		sprite.position.x = 18.0
 	if _side_scroll != null:
 		_side_scroll.queue_sort()
 	if _body_scroll != null:
@@ -582,7 +612,10 @@ func _select_city(id: String) -> void:
 		_message.text += "\n\n" + biome_summary
 	for other: String in _city_buttons.keys():
 		var button: Button = _city_buttons[other]
-		button.add_theme_stylebox_override("normal", _city_visual_style(other, other == id))
+		var nameplate: Label = _city_labels[other]
+		nameplate.add_theme_stylebox_override("normal", _city_nameplate_style(other, other == id))
+		var sprite: TextureRect = button.get_node("CityIllustration") as TextureRect
+		sprite.modulate = Color(1.08, 1.04, 0.90) if other == id else Color.WHITE
 	_refresh_chronicle()
 
 ## Panneau de construction de la ville sélectionnée : un bouton par
@@ -883,19 +916,37 @@ func _city_border_color(city_id: String) -> Color:
 		"Donjon": return Color(0.70, 0.48, 0.82)
 		_: return Color(0.5, 0.64, 0.46)
 
-## Style des villes : le statut territorial reste lisible par le fond, tandis
-## que le biome est porté par la bordure. La cible sélectionnée ressort avec
-## un liseré doré plus épais et une ombre douce, sans masquer les routes.
-func _city_visual_style(city_id: String, selected: bool, hovered: bool = false) -> StyleBoxFlat:
+## Le statut du territoire est porté par une petite plaque sous le sprite,
+## tandis que l'illustration reste visible sans cadre rectangulaire massif.
+func _city_nameplate_style(city_id: String, selected: bool) -> StyleBoxFlat:
 	var fill: Color = _city_color(city_id)
 	var biome: Color = _city_border_color(city_id)
-	var style := _style(fill.lightened(0.10) if hovered else fill, GOLD if selected else biome)
-	style.set_border_width_all(4 if selected else 2)
-	style.set_corner_radius_all(26)
-	style.shadow_size = 10 if selected else (4 if hovered else 0)
-	style.shadow_color = Color(GOLD.r, GOLD.g, GOLD.b, 0.34) if selected else Color(biome.r, biome.g, biome.b, 0.18)
+	var style := _style(Color(fill.r, fill.g, fill.b, 0.92), GOLD if selected else biome)
+	style.set_border_width_all(3 if selected else 1)
+	style.set_corner_radius_all(12)
+	style.content_margin_left = 5.0
+	style.content_margin_right = 5.0
+	style.content_margin_top = 3.0
+	style.content_margin_bottom = 3.0
+	style.shadow_size = 8 if selected else 0
+	style.shadow_color = Color(GOLD.r, GOLD.g, GOLD.b, 0.36)
 	style.shadow_offset = Vector2(0, 2)
 	return style
+
+func _city_sprite(city_id: String) -> Texture2D:
+	var biome := String(_city_meta(city_id).get("biome", "Forêt"))
+	var asset := "forest"
+	match biome:
+		"Montagne":
+			asset = "mountain"
+		"Désert":
+			asset = "desert"
+		"Donjon":
+			asset = "dungeon"
+	var texture_path := "res://assets/ui/conquest/biome_%s_city.svg" % asset
+	if not _city_sprite_cache.has(texture_path):
+		_city_sprite_cache[texture_path] = load(texture_path) as Texture2D
+	return _city_sprite_cache[texture_path] as Texture2D
 
 ## Progression de domination par biome, hors capitale et Donjon.
 ## Le bonus est versé à chaque victoire lorsque toutes les villes du biome
