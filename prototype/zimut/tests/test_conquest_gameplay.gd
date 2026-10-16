@@ -26,6 +26,17 @@ func _boot() -> void:
 	check(conquest.get("owned", []).has("clairiere"), "victoire : Clairière d'Aube annexée")
 	check(String(conquest.get("pending_city", "x")) == "", "pending_city réinitialisé")
 
+	# ── Préparation d'assaut : le ravitaillement consomme son coût ──
+	var tactic_save: Dictionary = pm.new_game(5, "SupplyTest")
+	tactic_save["gold"] = 20
+	tactic_save["resources"] = {"Cuir": 8}
+	var tactic_resources: Dictionary = tactic_save["resources"]
+	tactic_save["gold"] = int(tactic_save["gold"]) - 15
+	tactic_resources["Cuir"] = int(tactic_resources["Cuir"]) - 6
+	tactic_save["resources"] = tactic_resources
+	check(int(tactic_save["gold"]) == 5, "ravitaillement : 15 or consommés")
+	check(int(tactic_save["resources"]["Cuir"]) == 2, "ravitaillement : 6 Cuir consommés")
+
 	# ── Construction : coûts, doublon, ville inconnue ──
 	data["resources"] = {"Bois": 30, "Fer": 5}
 	data["gold"] = 100
