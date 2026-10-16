@@ -416,12 +416,17 @@ func _input(event: InputEvent) -> void:
 			_update_map_pointer(motion.position)
 
 func _begin_map_pointer(position: Vector2, pointer_index: int) -> void:
-	if not _map_scroll.get_global_rect().has_point(position):
+	# InputEventScreenTouch.position est en coordonnées viewport ; convertir
+	# vers les coordonnées locales du ScrollContainer évite les écarts liés
+	# au CanvasLayer / scaling Android.
+	var local_pos: Vector2 = _map_scroll.get_global_transform_with_canvas().affine_inverse() * position
+	if not Rect2(Vector2.ZERO, _map_scroll.size).has_point(local_pos):
 		return
-	# Laisser la scrollbar native gérer son propre curseur.
+	# La barre reste manipulable directement, mais tout le reste du viewport
+	# (fond, routes et boutons de villes) sert aussi de surface de glissement.
 	var vbar: VScrollBar = _map_scroll.get_v_scroll_bar()
 	var hbar: HScrollBar = _map_scroll.get_h_scroll_bar()
-	if (vbar.visible and vbar.get_global_rect().has_point(position)) or (hbar.visible and hbar.get_global_rect().has_point(position)):
+	if (vbar.visible and vbar.get_rect().has_point(local_pos)) or (hbar.visible and hbar.get_rect().has_point(local_pos)):
 		return
 	_map_pointer_active = true
 	_map_pointer_index = pointer_index
@@ -432,7 +437,9 @@ func _begin_map_pointer(position: Vector2, pointer_index: int) -> void:
 func _update_map_pointer(position: Vector2) -> void:
 	if not _map_pointer_active:
 		return
-	if not _map_dragged and position.distance_to(_map_pointer_origin) < 7.0:
+	# Seuil faible pour reconnaître l'intention de glisser sans rendre les
+	# clics sur les villes difficiles. Après ce seuil, la carte capte le geste.
+	if not _map_dragged and position.distance_to(_map_pointer_origin) < 4.0:
 		return
 	_map_dragged = true
 	var delta: Vector2 = position - _map_pointer_last
@@ -441,6 +448,8 @@ func _update_map_pointer(position: Vector2) -> void:
 	vbar.value = clampf(vbar.value - delta.y, vbar.min_value, vbar.max_value)
 	hbar.value = clampf(hbar.value - delta.x, hbar.min_value, hbar.max_value)
 	_map_pointer_last = position
+	# Consommer le geste une fois le glissement confirmé pour empêcher un
+	# bouton de ville de transformer le relâchement en sélection.
 	get_viewport().set_input_as_handled()
 
 func _end_map_pointer(pointer_index: int) -> void:
