@@ -17,15 +17,54 @@ const TEXT := Color(0.95, 0.94, 0.83)
 ## Tuiles par biome (2 variantes par biome, en damier) + brouillard.
 ## Les chemins pointent dans assets/adventure/ : les artistes peuvent
 ## remplacer les SVG sans modifier ce script.
+## Tuiles et décors : RÉUTILISATION des assets existants du jeu.
+## Sol : tuiles isométriques 128x64 du mode Tactique (6 variantes par biome,
+## damier déterministe par position). Décors : objets du biome.
+## Fond de carte : panoramiques des biomes de la carte de Conquête.
+## Le brouillard est un voile semi-transparent par-dessus la vraie tuile.
 const ZONE_TILES := {
-	"Forêt": ["res://assets/adventure/tiles/forest_grass.svg",
-		"res://assets/adventure/tiles/forest_water.svg"],
-	"Montagne": ["res://assets/adventure/tiles/mountain_stone.svg",
-		"res://assets/adventure/tiles/mountain_snow.svg"],
-	"Désert": ["res://assets/adventure/tiles/desert_sand.svg",
-		"res://assets/adventure/tiles/desert_rock.svg"],
+	"Forêt": ["res://assets/sprites/tiles/forest_ground_01.svg",
+		"res://assets/sprites/tiles/forest_ground_02.svg",
+		"res://assets/sprites/tiles/forest_ground_03.svg",
+		"res://assets/sprites/tiles/forest_ground_04.svg",
+		"res://assets/sprites/tiles/forest_ground_05.svg",
+		"res://assets/sprites/tiles/forest_ground_06.svg"],
+	"Montagne": ["res://assets/sprites/tiles/mountain_ground_01.svg",
+		"res://assets/sprites/tiles/mountain_ground_02.svg",
+		"res://assets/sprites/tiles/mountain_ground_03.svg",
+		"res://assets/sprites/tiles/mountain_ground_04.svg",
+		"res://assets/sprites/tiles/mountain_ground_05.svg",
+		"res://assets/sprites/tiles/mountain_ground_06.svg"],
+	"Désert": ["res://assets/sprites/tiles/desert_ground_01.svg",
+		"res://assets/sprites/tiles/desert_ground_02.svg",
+		"res://assets/sprites/tiles/desert_ground_03.svg",
+		"res://assets/sprites/tiles/desert_ground_04.svg",
+		"res://assets/sprites/tiles/desert_ground_05.svg",
+		"res://assets/sprites/tiles/desert_ground_06.svg"],
+	"Donjon": ["res://assets/sprites/tiles/mountain_ground_01.svg",
+		"res://assets/sprites/tiles/mountain_ground_02.svg",
+		"res://assets/sprites/tiles/mountain_ground_03.svg",
+		"res://assets/sprites/tiles/mountain_ground_04.svg",
+		"res://assets/sprites/tiles/mountain_ground_05.svg",
+		"res://assets/sprites/tiles/mountain_ground_06.svg"],
 }
-const FOG_TILE := "res://assets/adventure/tiles/fog.svg"
+const ZONE_BACKDROP := {
+	"Forêt": "res://assets/ui/conquest/biome_forest.svg",
+	"Montagne": "res://assets/ui/conquest/biome_mountain.svg",
+	"Désert": "res://assets/ui/conquest/biome_desert.svg",
+	"Donjon": "res://assets/ui/conquest/biome_dungeon.svg",
+}
+const ZONE_PROPS := {
+	"Forêt": ["res://assets/sprites/objects/forest_tree.svg",
+		"res://assets/sprites/objects/forest_boulder.svg",
+		"res://assets/sprites/objects/forest_fern.svg",
+		"res://assets/sprites/objects/forest_mushrooms.svg",
+		"res://assets/sprites/objects/forest_stump.svg"],
+	"Montagne": ["res://assets/sprites/objects/forest_boulder.svg"],
+	"Désert": ["res://assets/sprites/objects/forest_boulder.svg"],
+	"Donjon": ["res://assets/sprites/objects/forest_boulder.svg"],
+}
+const FOG_COLOR := Color(0.07, 0.11, 0.13, 0.82)
 const POI_ICONS := {
 	"combat": "res://assets/adventure/poi/combat.svg",
 	"chest": "res://assets/adventure/poi/chest.svg",
@@ -34,7 +73,9 @@ const POI_ICONS := {
 	"reveal": "res://assets/adventure/poi/reveal.svg",
 	"exit": "res://assets/adventure/poi/exit.svg",
 }
-const HERO_SPRITE := "res://assets/adventure/hero/hero.svg"
+## Héros : sprite officiel du Mage (assets/sprites/players) — même
+## personnage que sur le plateau de combat tactique.
+const HERO_SPRITE := "res://assets/sprites/players/mage.svg"
 
 ## Géométrie isométrique (losanges façon Waven/Dofus).
 const TILE_W := 128
@@ -152,38 +193,38 @@ func _build() -> void:
 
 	# ── Panneau latéral : journal + actions ───────────────────────
 	var side := PanelContainer.new()
-	side.custom_minimum_size.x = 360
+	side.custom_minimum_size.x = 430
 	side.add_theme_stylebox_override("panel", _panel_style(PANEL_LIGHT, GOLD))
 	body.add_child(side)
 
 	var side_box := VBoxContainer.new()
-	side_box.add_theme_constant_override("separation", 12)
+	side_box.add_theme_constant_override("separation", 14)
 	side.add_child(side_box)
 
 	var journal_title := Label.new()
 	journal_title.text = "JOURNAL D'EXPLORATION"
-	journal_title.add_theme_font_size_override("font_size", 20)
+	journal_title.add_theme_font_size_override("font_size", 26)
 	journal_title.add_theme_color_override("font_color", TEXT)
 	side_box.add_child(journal_title)
 
 	_message = Label.new()
 	_message.text = "Déplacez le héros case par case. Le brouillard se lève autour de vous."
 	_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_message.custom_minimum_size.y = 120
+	_message.custom_minimum_size.y = 150
 	_message.add_theme_color_override("font_color", TEXT)
-	_message.add_theme_font_size_override("font_size", 17)
+	_message.add_theme_font_size_override("font_size", 22)
 	side_box.add_child(_message)
 
 	var interact := Button.new()
 	interact.text = "INTERAGIR"
-	interact.custom_minimum_size.y = 54
-	interact.add_theme_font_size_override("font_size", 20)
+	interact.custom_minimum_size.y = 62
+	interact.add_theme_font_size_override("font_size", 24)
 	interact.pressed.connect(_interact)
 	side_box.add_child(interact)
 
 	var zones_title := Label.new()
 	zones_title.text = "ZONES DU MONDE"
-	zones_title.add_theme_font_size_override("font_size", 18)
+	zones_title.add_theme_font_size_override("font_size", 23)
 	zones_title.add_theme_color_override("font_color", GOLD)
 	side_box.add_child(zones_title)
 
@@ -192,7 +233,8 @@ func _build() -> void:
 		var meta: Dictionary = ProgressionManager.adventure_zone_meta(zone_id)
 		btn.text = "%s  ·  %s" % [String(meta.get("name", zone_id)),
 			ProgressionManager.biome_label(String(meta.get("biome", "Forêt")))]
-		btn.custom_minimum_size.y = 46
+		btn.custom_minimum_size.y = 54
+		btn.add_theme_font_size_override("font_size", 21)
 		btn.pressed.connect(_on_zone_pressed.bind(zone_id))
 		side_box.add_child(btn)
 		_zone_buttons[zone_id] = btn
@@ -202,7 +244,7 @@ func _build() -> void:
 		+ "Belvédère : villes pour la Conquête\nCombat : règles du mode Tactique"
 	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	help.add_theme_color_override("font_color", TEXT)
-	help.add_theme_font_size_override("font_size", 15)
+	help.add_theme_font_size_override("font_size", 19)
 	side_box.add_child(help)
 
 	var spacer := Control.new()
@@ -227,19 +269,36 @@ func _build_map() -> void:
 	_poi_icons.clear()
 
 	var size: Vector2i = manager.zone_size()
-	var tiles: Array = ZONE_TILES.get(manager.zone_biome(),
-		ZONE_TILES["Forêt"])
+	var zone_id: String = manager.zone_id()
+
+	# Fond de carte : panoramique du biome (assets Conquête).
+	var backdrop_path := String(ZONE_BACKDROP.get(manager.zone_biome(), ""))
+	if backdrop_path != "" and ResourceLoader.exists(backdrop_path):
+		var backdrop := TextureRect.new()
+		backdrop.texture = load(backdrop_path)
+		backdrop.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		backdrop.z_index = -20
+		_map_root.add_child(backdrop)
 
 	for y: int in range(size.y):
 		for x: int in range(size.x):
 			var pos := Vector2i(x, y)
 			var screen := _cell_center(x, y, size)
-			var tex: Texture2D = _tile_texture(tiles, x, y, pos)
+			var tex: Texture2D = _tile_texture(x, y, zone_id)
 			var spr := Sprite2D.new()
 			spr.texture = tex
 			spr.position = screen
 			_map_root.add_child(spr)
 			_cells[pos] = {"sprite": spr, "texture": tex}
+
+			# Voile de brouillard au-dessus de la vraie tuile.
+			var fog := Sprite2D.new()
+			fog.texture = tex
+			fog.position = screen
+			fog.modulate = FOG_COLOR
+			fog.z_index = 5
+			_map_root.add_child(fog)
+			_cells[pos]["fog"] = fog
 
 			var btn := TextureButton.new()
 			btn.texture_normal = tex
@@ -250,39 +309,92 @@ func _build_map() -> void:
 			_map_root.add_child(btn)
 			_cells[pos]["button"] = btn
 
+	_refresh_props(size, zone_id)
+
 	var hero := Sprite2D.new()
 	hero.texture = load(HERO_SPRITE)
-	hero.scale = Vector2(0.55, 0.55)
+	hero.scale = Vector2(0.68, 0.68)
+	hero.z_index = 20
 	_map_root.add_child(hero)
 	_hero_sprite = hero
+	_animate_hero_idle()
 
-func _tile_texture(tiles: Array, x: int, y: int, pos: Vector2i) -> Texture2D:
-	if not manager.cell_discovered(pos):
-		return load(FOG_TILE) as Texture2D
-	var idx: int = (x + y) % 2
-	return load(String(tiles[idx if tiles.size() > idx else 0])) as Texture2D
+## Décor : quelques objets du biome posés sur des cases vides (rendu
+## déterministe — même décor à chaque visite de la zone).
+func _refresh_props(size: Vector2i, zone_id: String) -> void:
+	var props: Array = ZONE_PROPS.get(manager.zone_biome(), [])
+	if props.is_empty():
+		return
+	var pois: Dictionary = ProgressionManager.adventure_zone_pois(zone_id)
+	var occupied := {}
+	for k: String in pois.keys():
+		occupied[k] = true
+	var start: Array = ProgressionManager.adventure_zone_meta(zone_id).get(
+		"start", [0, 0])
+	occupied["%d,%d" % [int(start[0]), int(start[1])]] = true
+	for y: int in range(size.y):
+		for x: int in range(size.x):
+			if occupied.has("%d,%d" % [x, y]):
+				continue
+			var h: int = (x * 73856093) ^ (y * 19349663)
+			if h % 7 != 0:
+				continue
+			var spr := Sprite2D.new()
+			spr.texture = load(String(props[absi(h) % props.size()]))
+			spr.position = _cell_center(x, y, size) - Vector2(0, 14)
+			spr.z_index = 10 + y
+			_map_root.add_child(spr)
+
+## Petite respiration du héros à l'arrêt (montée/descente douce).
+func _animate_hero_idle() -> void:
+	if _hero_sprite == null:
+		return
+	var tween := create_tween().set_loops()
+	var base := _hero_sprite.scale
+	tween.tween_property(_hero_sprite, "scale",
+		Vector2(base.x * 1.04, base.y * 0.96), 0.9)
+	tween.tween_property(_hero_sprite, "scale", base, 0.9)
+	_hero_sprite.set_meta("idle_tween", tween)
+
+## Tuile de sol : variantes du biome en damier déterministe (6 variantes,
+## réparties par position — visuel stable d'une visite à l'autre).
+func _tile_texture(x: int, y: int, zone_id: String) -> Texture2D:
+	var tiles: Array = ZONE_TILES.get(manager.zone_biome(), ZONE_TILES["Forêt"])
+	var h: int = (x * 73856093) ^ (y * 19349663) ^ zone_id.hash()
+	return load(String(tiles[absi(h) % tiles.size()])) as Texture2D
 
 func _cell_center(x: int, y: int, size: Vector2i) -> Vector2:
 	return Vector2(
 		MAP_MARGIN + (size.x + x - y - 1) * TILE_W * 0.5,
 		MAP_MARGIN + (x + y) * TILE_H * 0.5 + TILE_H)
 
-func _refresh() -> void:
+func _refresh(animate: bool = false) -> void:
 	var size: Vector2i = manager.zone_size()
-	var tiles: Array = ZONE_TILES.get(manager.zone_biome(), ZONE_TILES["Forêt"])
 
 	for pos: Vector2i in _cells.keys():
 		var entry: Dictionary = _cells[pos]
-		var tex: Texture2D = _tile_texture(tiles, pos.x, pos.y, pos)
-		(entry["sprite"] as Sprite2D).texture = tex
-		var btn: TextureButton = entry.get("button")
-		if btn != null:
-			btn.texture_normal = tex
+		var fog: Sprite2D = entry.get("fog")
+		if fog != null:
+			# Voile : opaque au-dessus du brouillard, invisible sinon.
+			var target: float = 0.0 if manager.cell_discovered(pos) else 1.0
+			if animate:
+				var tw := create_tween()
+				tw.tween_property(fog, "modulate:a", target, 0.35)
+			else:
+				fog.modulate.a = target
 
 	_refresh_pois(size)
 	if _hero_sprite != null:
-		_hero_sprite.position = _cell_center(manager.hero_pos().x,
-			manager.hero_pos().y, size) - Vector2(0, 18)
+		var dest := _cell_center(manager.hero_pos().x,
+			manager.hero_pos().y, size) - Vector2(0, 26)
+		if animate:
+			# Saut de case : montée puis descente (petit arc).
+			var up := create_tween()
+			up.tween_property(_hero_sprite, "position",
+				Vector2(dest.x, dest.y - 22), 0.12)
+			up.tween_property(_hero_sprite, "position", dest, 0.12)
+		else:
+			_hero_sprite.position = dest
 
 	_zone_label.text = "AVENTURE  ·  %s  ·  %s" % [manager.zone_name(),
 		ProgressionManager.biome_label(manager.zone_biome())]
@@ -334,7 +446,7 @@ func _on_cell_pressed(pos: Vector2i) -> void:
 			String(poi.get("desc", ""))]
 	else:
 		_message.text = "Le paysage s'ouvre devant vous."
-	_refresh()
+	_refresh(true)
 
 func _interact() -> void:
 	var cmd: Dictionary = manager.interact()
@@ -444,7 +556,8 @@ func _rebuild_zone_buttons() -> void:
 		var meta: Dictionary = ProgressionManager.adventure_zone_meta(zone_id)
 		btn.text = "%s  ·  %s" % [String(meta.get("name", zone_id)),
 			ProgressionManager.biome_label(String(meta.get("biome", "Forêt")))]
-		btn.custom_minimum_size.y = 46
+		btn.custom_minimum_size.y = 54
+		btn.add_theme_font_size_override("font_size", 21)
 		btn.pressed.connect(_on_zone_pressed.bind(zone_id))
 		side_box.add_child(btn)
 		side_box.move_child(btn, maxi(0, idx))
