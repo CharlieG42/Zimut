@@ -84,6 +84,34 @@ jobs:
             printf 'export/android/keystore_release_password="%s"\n' "$ANDROID_KEYSTORE_PASSWORD"
           } > "$cfg"
 
+      - name: Generate automatic build version suffix
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          project = Path("prototype/zimut/project.godot")
+          content = project.read_text(encoding="utf-8")
+          build = os.environ["BUILD_NUMBER"]
+          pattern = r'(?m)^config/version="([^"#]+)(?:#[^"]*)?"$'
+          updated, count = re.subn(
+              pattern,
+              lambda match: 'config/version="' + match.group(1) + '#' + build + '"',
+              content,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit("Impossible de générer le suffixe : config/version introuvable.")
+          project.write_text(updated, encoding="utf-8")
+          print("Version de compilation :", next(
+              line.split("=", 1)[1] for line in updated.splitlines()
+              if line.startswith("config/version=")
+          ))
+          PY
+
       - name: Import project resources (icons, artwork)
         run: |
           cd prototype/zimut

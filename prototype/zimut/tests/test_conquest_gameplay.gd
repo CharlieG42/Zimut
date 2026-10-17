@@ -26,6 +26,54 @@ func _boot() -> void:
 	check(conquest.get("owned", []).has("clairiere"), "victoire : Clairière d'Aube annexée")
 	check(String(conquest.get("pending_city", "x")) == "", "pending_city réinitialisé")
 
+	# ── Préparation d'assaut : les tests passent par la vraie fonction de paiement ──
+	var tactic_save: Dictionary = pm.new_game(5, "SupplyTest")
+	tactic_save["gold"] = 40
+	tactic_save["resources"] = {"Cuir": 8, "Bois": 20, "Fer": 10}
+	check(pm.conquest_pay_assault_tactic(tactic_save, "supply") == "", "ravitaillement accepté avec les ressources requises")
+	check(int(tactic_save["gold"]) == 25, "ravitaillement : 15 or réellement consommés")
+	check(int(tactic_save["resources"]["Cuir"]) == 2, "ravitaillement : 6 Cuir réellement consommés")
+	check(pm.conquest_pay_assault_tactic(tactic_save, "supply") != "", "ravitaillement refusé si le Cuir manque")
+	check(int(tactic_save["gold"]) == 25, "échec de paiement : l'or n'est pas débité")
+	check(pm.conquest_pay_assault_tactic(tactic_save, "sabotage") == "", "sabotage accepté avec Bois et Fer suffisants")
+	check(int(tactic_save["resources"]["Bois"]) == 8 and int(tactic_save["resources"]["Fer"]) == 2, "sabotage : 12 Bois et 8 Fer réellement consommés")
+	check(pm.conquest_pay_assault_tactic(tactic_save, "scouts") == "", "éclaireurs acceptés avec assez d'or")
+	check(int(tactic_save["gold"]) == 0, "éclaireurs : 25 or débités après ravitaillement")
+	check(pm.conquest_pay_assault_tactic(tactic_save, "unknown") != "", "tactique inconnue refusée")
+	check(pm.conquest_pay_assault_tactic(tactic_save, "none") == "", "départ sans préparation gratuit")
+
+	# ── Bonus de domination des biomes ──
+	var biome_save: Dictionary = pm.new_game(6, "BiomeTest")
+	var forest_ids: Array = []
+	for city_id: String in pm.CONQUEST_CITIES.keys():
+		if city_id == "capitale" or city_id == "donjon_roi":
+			continue
+		if String(pm.CONQUEST_CITIES[city_id].get("biome", "")) == "Forêt":
+			forest_ids.append(city_id)
+	biome_save["conquest"] = {"owned": ["capitale", forest_ids[0]]}
+	check(pm.conquest_biome_control_bonus(biome_save["conquest"]).is_empty(), "bonus forêt absent tant que le biome n'est pas entièrement contrôlé")
+	biome_save["conquest"]["owned"] = ["capitale"] + forest_ids
+	var forest_bonus: Dictionary = pm.conquest_biome_control_bonus(biome_save["conquest"])
+	check(int(forest_bonus.get("Bois", 0)) == 5, "domination complète de la forêt : +5 Bois par victoire")
+	var mountain_ids: Array = []
+	for city_id: String in pm.CONQUEST_CITIES.keys():
+		if city_id == "capitale" or city_id == "donjon_roi":
+			continue
+		if String(pm.CONQUEST_CITIES[city_id].get("biome", "")) == "Montagne":
+			mountain_ids.append(city_id)
+	biome_save["conquest"]["owned"] = ["capitale"] + mountain_ids
+	var mountain_bonus: Dictionary = pm.conquest_biome_control_bonus(biome_save["conquest"])
+	check(int(mountain_bonus.get("Fer", 0)) == 5, "domination complète de la montagne : +5 Fer par victoire")
+	var desert_ids: Array = []
+	for city_id: String in pm.CONQUEST_CITIES.keys():
+		if city_id == "capitale" or city_id == "donjon_roi":
+			continue
+		if String(pm.CONQUEST_CITIES[city_id].get("biome", "")) == "Désert":
+			desert_ids.append(city_id)
+	biome_save["conquest"]["owned"] = ["capitale"] + desert_ids
+	var desert_bonus: Dictionary = pm.conquest_biome_control_bonus(biome_save["conquest"])
+	check(int(desert_bonus.get("Venin", 0)) == 5, "domination complète du désert : +5 Venin par victoire")
+
 	# ── Construction : coûts, doublon, ville inconnue ──
 	data["resources"] = {"Bois": 30, "Fer": 5}
 	data["gold"] = 100

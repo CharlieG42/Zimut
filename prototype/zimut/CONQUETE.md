@@ -46,7 +46,7 @@ identique d'une partie à l'autre ; la rejouabilité vient de l'économie
 et des choix de bâtiments.
 
 ### Catalogue officiel (`ProgressionManager.CONQUEST_CITIES`)
-20 villes sur les 3 biomes + le Donjon (miroir exact de la carte) :
+28 villes au total dans les trois biomes, Donjon compris (miroir exact de la carte) :
 
 | id | Ville | Type | Biome | Niveau |
 |---|---|---|---|---|
@@ -69,6 +69,14 @@ et des choix de bâtiments.
 | caravanserail | Caravansérail Rouge | Neutre | Désert | 22 |
 | observatoire | Observatoire Solaire | Neutre | Désert | 23 |
 | port_sable | Port des Sables | Adverse (siège ×4) | Désert | 24 |
+| bois_lune | Bois de Lune | Neutre | Forêt | 16 |
+| sanctuaire_mousse | Sanctuaire Moussu | Neutre | Forêt | 17 |
+| forge_givre | Forge du Givre | Adverse | Montagne | 23 |
+| pic_foudroyant | Pic Foudroyant | Adverse | Montagne | 24 |
+| marais_spectres | Marais des Spectres | Neutre | Forêt | 18 |
+| fort_cendre | Fort des Cendres | Adverse | Désert | 26 |
+| temple_soleil | Temple du Soleil | Neutre | Désert | 25 |
+| citadelle_sable | Citadelle de Sable | Adverse | Désert | 27 |
 | donjon_roi | Donjon du Roi Squelette | Objectif final (siège ×4, boss) | Donjon | 25 |
 
 ### Adjacence — FAIT
@@ -83,6 +91,17 @@ tenir tout Zimut. Les routes relient deux villes du territoire en doré.
   biome** ; le Donjon oppose le **Roi Squelette**).
 - Le biome de la ville pilote le décor et le bestiaire
   (`GameManager.fight_biome`, `conquest_city_biome`).
+
+## Domination régionale — bonus et lisibilité
+
+- Le contrôle de toutes les villes conquérables d'un biome débloque un bonus
+  permanent versé à chaque victoire : **Forêt = +5 Bois**, **Montagne = +5 Fer**,
+  **Désert = +5 Venin**. La capitale et le Donjon ne comptent pas dans ces
+  totaux. Cette règle est implémentée dans
+  `conquest_biome_control_bonus` et intégrée à la production de l'empire.
+- Le conseil de guerre affiche maintenant la progression `villes contrôlées / total`
+  du biome de la ville sélectionnée et précise la récompense qui sera activée
+  à 100 %, ou confirme que le bonus est déjà actif.
 
 ## 4. L'économie — FAIT (base)
 
@@ -130,7 +149,7 @@ l'état de la campagne : `owned`, `pending_city`, `sieges`, `buildings`,
 - Pas de temps réel, pas de timer hors combat.
 - Fiche ville en panneau latéral, boutons gros et rares (existant).
 - **Lisibilité renforcée (passe du 15/10)** : noms de villes agrandis (18 px), boutons plus hauts (76 px), titre de carte et légende plus visibles ; le panneau de conseil utilise une taille de texte plus confortable et le bouton d’assaut est plus grand.
-- **Mise en page responsive** : en paysage large, carte et conseil de guerre restent côte à côte ; sur les écrans compacts, le conseil passe sous la carte dans une zone verticalement défilante. Le panneau de conseil possède son propre défilement. **Carte étendue (PR #82)** : vingt villes réparties sur cinq rangées verticales. La carte conserve une hauteur minimale de 1300 px, afin de créer une vraie progression à parcourir par défilement en paysage ; sur les petits écrans, elle conserve aussi une largeur minimale de 1320 px et se défile horizontalement. Le mode portrait n'est pas une cible prioritaire. À vérifier dans Godot sur téléphone paysage et sur 1280×720.
+- **Mise en page responsive** : en paysage large, carte et conseil de guerre restent côte à côte ; sur les écrans compacts, le conseil passe sous la carte dans une zone verticalement défilante. Le panneau de conseil possède son propre défilement. **Carte étendue (PR en cours)** : vingt-huit villes réparties sur sept rangées verticales. La carte conserve une hauteur minimale de 1600 px, afin de créer une vraie progression à parcourir par défilement. Le glissement peut commencer n'importe où dans la zone de carte, même sur un bouton de ville ; un déplacement de plus de 7 px déplace la carte au lieu de sélectionner la ville. Pour une manipulation plus précise au doigt, la barre verticale est plus large et contrastée, le seuil de glissement est réduit à 2 px et le pas de défilement à 18 px. La carte capte aussi les glissements commencés sur le fond, les routes ou les boutons de villes (pas seulement sur la scrollbar), avec conversion des coordonnées viewport/locales pour Android. Sur les petits écrans, la carte conserve aussi une largeur minimale de 1320 px et peut se défiler horizontalement. Le mode portrait n'est pas une cible prioritaire ; à vérifier dans Godot sur téléphone paysage et sur 1280×720.
 
 ## 9. Tests
 
@@ -157,36 +176,64 @@ l'état de la campagne : `owned`, `pending_city`, `sieges`, `buildings`,
 - Lesson : toujours vérifier avec `godot --headless -s tests/…` et
   instancier les scènes avant de fusionner.
 
+## Direction artistique et Nations — arbitrage validé
+
+La direction globale est désormais consignée dans `VISION_GLOBALE.md`, qui fait foi pour l'identité artistique, les contraintes techniques et les piliers de gameplay.
+
+### Carte de Conquête
+- Le monde doit être représenté par un grand fond illustré, défilant horizontalement et verticalement.
+- Le fond ne contient pas de noms ni de boutons : villes, routes, états territoriaux et sélection restent des éléments dynamiques de Godot.
+- Les boutons rectangulaires seront progressivement remplacés par des sprites de villes détourés sur fond transparent, distincts selon le type de lieu et son architecture.
+- Les couleurs territoriales (allié, neutre, ennemi) doivent rester distinctes de l'identité du biome ou de la future Nation.
+- Les routes et les marqueurs doivent rester lisibles au-dessus du décor et se déplacer avec le fond.
+
+### Nations — concept validé, gameplay à définir
+Les noms et identités suivants sont validés comme direction de worldbuilding : **Nation Sylvestre** (forêt), **Nation des Cimes** (glace/montagne), **Nation des Sables** (désert), **Nation des Ombres** (ruines/ténèbres), **Nation des Vents** (air), **Nation des Marées** (eau), **Nation du Brasier** (feu), **Nation des Cristaux** (magie/cristal) et **Nation des Brumes** (marais).
+
+Objectif : prévoir au moins une Nation ou identité nationale forte pour chaque classe de héros. La liste des classes du projet doit être vérifiée avant de décider les correspondances. Aucune mécanique de bonus, diplomatie ou appartenance nationale n'est considérée comme implémentée à ce stade.
+
 ## 10. Pistes d'amélioration (priorités proposées)
 
 ### Priorité 1 — Rendre chaque décision amusante
-1. **Préparation d'assaut** : choisir un bonus avant le combat (éclaireurs,
-   ravitaillement, sabotage) avec un coût clair en or/ressources.
+1. **Préparation d'assaut (première version intégrée)** : avant chaque bataille, choisir 25 or pour les éclaireurs (ennemis d'un niveau inférieur), 12 Bois + 8 Fer pour saboter (−15 % de PV et d'attaque ennemis), 15 or + 6 Cuir pour le ravitaillement (−10 % d'attaque ennemie), ou partir sans préparation. Le bonus est consommé après une seule bataille, même lors d'un siège multi-vagues. Les coûts sont centralisés dans `ProgressionManager.conquest_pay_assault_tactic` ; l'interface et les tests utilisent cette même validation afin d'éviter les divergences de coût et les dépenses partielles.
 2. **Contre-attaques jouables** : avertissement avant le pillage, puis choix
    entre défendre la ville ou accepter une perte temporaire de production.
-3. **Récompenses uniques par ville** : recettes, pièces d'équipement, sorts
-   ou trophées qui donnent envie de conquérir autre chose que la ville la plus proche.
+3. **Récompenses uniques par ville — première version intégrée** : chaque
+   annexion accorde un butin thématique (ressources et or), affiché dans la
+   fenêtre de victoire. Le butin est crédité une seule fois, à la prise finale.
+   Une prochaine itération pourra ajouter recettes, équipement ou trophées.
 4. **Défis optionnels** : gagner en peu de tours, sans mort ou avec une classe
    donnée pour obtenir une récompense bonus.
 
+**Bonus de contrôle de biome (première version intégrée)** : posséder toutes les villes conquérables d'un biome ajoute à chaque victoire +5 Bois (Forêt), +5 Fer (Montagne) ou +5 Venin (Désert). Le bonus est inclus dans la production de l'empire affichée sur la carte et dans l'écran d'annexion.
+
+### Priorité 1b — Raconter la progression
+5. **Chronique de campagne (en cours)** : conserver les huit événements les plus
+   récents (annexion, butin unique, progression de siège, contre-attaque,
+   construction) et les afficher dans le conseil de guerre. La liste reste courte
+   pour préserver l'espace tactile.
+
 ### Priorité 2 — Donner une vraie identité visuelle au monde
-5. **Illustrations par biome** : fond de carte forêt/montagne/désert, reliefs,
+6. **Repères de biome (en cours)** : les villes affichent un symbole distinct
+   et une bordure colorée par région ; le fond reste réservé à l'état territorial
+   pour conserver une lecture immédiate sur téléphone.
+7. **Illustrations par biome** : fond de carte forêt/montagne/désert, reliefs,
    routes dessinées et points d'intérêt.
-6. **Vignettes et icônes cohérentes** : une silhouette distincte par ville,
+8. **Vignettes et icônes cohérentes** : une silhouette distincte par ville,
    icônes de bâtiments et états lisibles (allié, neutre, ennemi, assiégé).
-7. **Micro-animations et retours** : animation à la sélection, route qui s'allume,
+9. **Micro-animations et retours** : animation à la sélection, route qui s'allume,
    effet d'annexion, notification de production et son discret.
-8. **Carte mieux racontée** : nom de région, courte description et historique
+10. **Carte mieux racontée** : nom de région, courte description et historique
    des 2-3 derniers événements (annexion, siège, pillage).
 
 ### Priorité 3 — Équilibrer et rendre les sessions plus fluides
-9. **Bonus de contrôle de biome** : conquérir toutes les villes d'un biome
+11. **Bonus de contrôle de biome** : conquérir toutes les villes d'un biome
    donne un bonus de production et une récompense dédiée.
-10. **Sièges moins répétitifs** : payer pour affaiblir une garnison, ou choisir
+12. **Sièges moins répétitifs** : payer pour affaiblir une garnison, ou choisir
     une approche tactique qui modifie la bataille plutôt que de supprimer du contenu.
-11. **Bâtiments liés aux biomes** : des choix différents selon forêt, montagne
+13. **Bâtiments liés aux biomes** : des choix différents selon forêt, montagne
     ou désert, avec des compromis lisibles.
-12. **Équilibrage et tests sur appareil** : durée de campagne, économie, taille
+14. **Équilibrage et tests sur appareil** : durée de campagne, économie, taille
     des textes et interactions tactiles vérifiées en paysage Android.
 
 ## 11. Historique des arbitrages

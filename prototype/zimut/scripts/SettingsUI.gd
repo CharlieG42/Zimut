@@ -22,16 +22,21 @@ func _ready() -> void:
 	root.add_child(center)
 
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", _flat(COL_PANEL, COL_BORDER, 14, 4))
+	panel.custom_minimum_size = Vector2(1240, 760)
+	panel.add_theme_stylebox_override("panel", _flat(COL_PANEL, COL_BORDER, 18, 5))
 	center.add_child(panel)
 
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 18)
+	box.add_theme_constant_override("separation", 26)
+	box.add_theme_constant_override("margin_left", 34)
+	box.add_theme_constant_override("margin_right", 34)
+	box.add_theme_constant_override("margin_top", 28)
+	box.add_theme_constant_override("margin_bottom", 28)
 	panel.add_child(box)
 
 	var title := Label.new()
 	title.text = "RÉGLAGES"
-	title.add_theme_font_size_override("font_size", 34)
+	title.add_theme_font_size_override("font_size", 42)
 	title.add_theme_color_override("font_color", COL_TXT)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
@@ -44,7 +49,7 @@ func _ready() -> void:
 
 	var hint := Label.new()
 	hint.text = "La difficulté renforce la puissance des ennemis.\nEnfer : beaucoup plus de PV que Difficile, avec des attaques équivalentes.\nLa rapidité XP règle le gain d'expérience de chaque combat."
-	hint.add_theme_font_size_override("font_size", 15)
+	hint.add_theme_font_size_override("font_size", 19)
 	hint.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12))
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -52,7 +57,7 @@ func _ready() -> void:
 
 	# Informations de build : le numéro final correspond au numéro de PR.
 	var info_panel := PanelContainer.new()
-	info_panel.custom_minimum_size = Vector2(0, 96)
+	info_panel.custom_minimum_size = Vector2(0, 116)
 	info_panel.add_theme_stylebox_override("panel", _flat(Color(0.86, 0.81, 0.68, 0.96), COL_BORDER, 12, 2))
 	box.add_child(info_panel)
 
@@ -62,23 +67,23 @@ func _ready() -> void:
 
 	var info_title := Label.new()
 	info_title.text = "INFO"
-	info_title.add_theme_font_size_override("font_size", 18)
+	info_title.add_theme_font_size_override("font_size", 22)
 	info_title.add_theme_color_override("font_color", COL_TXT)
 	info_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	info_box.add_child(info_title)
 
 	var version_label := Label.new()
-	var game_version: String = str(ProjectSettings.get_setting("application/config/version", "0.0.01.82"))
+	var game_version: String = str(ProjectSettings.get_setting("application/config/version", "0.0.01.84"))
 	version_label.text = "Version du jeu : %s" % game_version
-	version_label.add_theme_font_size_override("font_size", 20)
+	version_label.add_theme_font_size_override("font_size", 25)
 	version_label.add_theme_color_override("font_color", COL_TXT)
 	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	info_box.add_child(version_label)
 
 	var back := Button.new()
 	back.text = "← MENU"
-	back.custom_minimum_size = Vector2(0, 64)
-	back.add_theme_font_size_override("font_size", 22)
+	back.custom_minimum_size = Vector2(0, 76)
+	back.add_theme_font_size_override("font_size", 26)
 	back.add_theme_color_override("font_color", COL_TXT)
 	back.add_theme_stylebox_override("normal", _flat(Color(0.88, 0.82, 0.66), COL_BORDER, 12, 3))
 	back.add_theme_stylebox_override("hover", _flat(Color(0.99, 0.95, 0.83), COL_BORDER, 12, 3))
@@ -93,7 +98,7 @@ func _setting_row(label_txt: String, options: Array[String], current: int, on_pi
 
 	var lbl := Label.new()
 	lbl.text = label_txt
-	lbl.add_theme_font_size_override("font_size", 21)
+	lbl.add_theme_font_size_override("font_size", 25)
 	lbl.add_theme_color_override("font_color", COL_TXT)
 	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(lbl)
@@ -106,8 +111,8 @@ func _setting_row(label_txt: String, options: Array[String], current: int, on_pi
 	for i: int in range(options.size()):
 		var opt := Button.new()
 		opt.text = options[i]
-		opt.custom_minimum_size = Vector2(option_width, 56)
-		opt.add_theme_font_size_override("font_size", 18 if options.size() >= 4 else 19)
+		opt.custom_minimum_size = Vector2(option_width + 12.0, 66)
+		opt.add_theme_font_size_override("font_size", 21 if options.size() >= 4 else 22)
 		opt.focus_mode = Control.FOCUS_NONE
 		_refresh_opt(opt, i == current)
 		var idx_ref: int = i

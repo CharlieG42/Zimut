@@ -348,11 +348,15 @@ func init_entities() -> void:
 
 	# ── Ennemis du biome : boss + 3 sbires tous les 4 combats, sinon 4 ennemis ──
 	var lvl: int = ProgressionManager.enemy_level_for(active_save) if not active_save.is_empty() else DEFAULT_ENEMY_LEVEL
+	var conquest_tactic: String = ""
 	# En Conquête, la difficulté suit la ville ciblée sans créer une seconde progression.
 	if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "conquest":
 		var conquest: Dictionary = active_save.get("conquest", {})
 		if String(conquest.get("pending_city", "")) != "":
 			lvl = maxi(1, int(conquest.get("pending_level", lvl)))
+			conquest_tactic = String(conquest.get("pending_tactic", "none"))
+			if conquest_tactic == "scouts":
+				lvl = maxi(1, lvl - 1)
 	# En Aventure, le défi en cours (POI) fixe le niveau du combat : le
 	# brouillard, les POI et les zones sont dans ProgressionManager/AdventureManager.
 	if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "adventure":
@@ -427,8 +431,10 @@ func init_entities() -> void:
 		var settings: Node = get_node_or_null("/root/GameSettings")
 		var hp_mult: float = settings.enemy_hp_mult() if settings != null else 1.0
 		var atk_mult: float = settings.enemy_attack_mult() if settings != null else 1.0
-		var pv: int = int(float(_csv_int(info, "PV", 50)) * ENEMY_HP_MULT * lscale * hp_mult)
-		var atk: int = int(float(_csv_int(info, "Attaque", 10)) * ENEMY_ATK_MULT * lscale * atk_mult)
+		var hp_tactic_mult: float = 0.85 if conquest_tactic == "sabotage" else 1.0
+		var atk_tactic_mult: float = 0.85 if conquest_tactic == "sabotage" else (0.90 if conquest_tactic == "supply" else 1.0)
+		var pv: int = maxi(1, int(float(_csv_int(info, "PV", 50)) * ENEMY_HP_MULT * lscale * hp_mult * hp_tactic_mult))
+		var atk: int = maxi(1, int(float(_csv_int(info, "Attaque", 10)) * ENEMY_ATK_MULT * lscale * atk_mult * atk_tactic_mult))
 		var enemy: Dictionary = _base_entity("%s Lv%d" % [etype, minion_lvl], "Enemy", "enemy",
 			etype, minion_lvl, pos)
 		enemy.merge({
@@ -486,8 +492,11 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 	var settings: Node = get_node_or_null("/root/GameSettings")
 	var hp_mult: float = settings.enemy_hp_mult() if settings != null else 1.0
 	var atk_mult: float = settings.enemy_attack_mult() if settings != null else 1.0
-	var pv: int = int(float(_csv_int(info, "PV", 120)) * ENEMY_HP_MULT * BOSS_HP_MULT * lscale * hp_mult)
-	var atk: int = int(float(_csv_int(info, "Attaque", 20)) * ENEMY_ATK_MULT * BOSS_ATK_MULT * lscale * atk_mult)
+	var conquest_tactic: String = String(active_save.get("conquest", {}).get("pending_tactic", "none")) if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "conquest" else "none"
+	var hp_tactic_mult: float = 0.85 if conquest_tactic == "sabotage" else 1.0
+	var atk_tactic_mult: float = 0.85 if conquest_tactic == "sabotage" else (0.90 if conquest_tactic == "supply" else 1.0)
+	var pv: int = maxi(1, int(float(_csv_int(info, "PV", 120)) * ENEMY_HP_MULT * BOSS_HP_MULT * lscale * hp_mult * hp_tactic_mult))
+	var atk: int = maxi(1, int(float(_csv_int(info, "Attaque", 20)) * ENEMY_ATK_MULT * BOSS_ATK_MULT * lscale * atk_mult * atk_tactic_mult))
 	fight_enemies.append({"type": boss_name, "level": lvl, "boss": true})
 	var boss: Dictionary = _base_entity("☠ BOSS %s Lv%d" % [boss_name, lvl], "Enemy", "enemy", boss_name, lvl, pos)
 	boss.merge({
