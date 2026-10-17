@@ -53,7 +53,7 @@ var _map_root: Node2D
 var _zone_label: Label
 var _moves_label: Label
 var _zone_buttons: Dictionary = {}
-var _map_panel: Panel
+var _map_panel: PanelContainer
 
 func _ready() -> void:
 	Music.play("adventure")
@@ -61,7 +61,9 @@ func _ready() -> void:
 	_save = GameManager.active_save
 	_slot = GameManager.active_slot
 	if _save.is_empty() or _slot < 0:
-		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
+		# Différé : on ne peut pas changer de scène pendant le _ready
+		# (le tree est occupé à monter cette scène — sinon écran gris).
+		_call_deferred_scene("res://scenes/SaveSlots.tscn")
 		return
 	manager = Node.new()
 	manager.set_script(load("res://scripts/AdventureManager.gd"))
@@ -70,6 +72,10 @@ func _ready() -> void:
 	manager.message.connect(func(t: String) -> void: _message.text = t)
 	manager.cities_revealed.connect(_on_cities_revealed)
 	_build()
+
+## Changement de scène sûr (jamais pendant un _ready).
+func _call_deferred_scene(path: String) -> void:
+	get_tree().change_scene_to_file.call_deferred(path)
 
 # ══════════════════════════════════════════════════════════════════
 #  Construction de l'interface
@@ -220,7 +226,7 @@ func _build_map() -> void:
 	_cells.clear()
 	_poi_icons.clear()
 
-	var size := manager.zone_size()
+	var size: Vector2i = manager.zone_size()
 	var tiles: Array = ZONE_TILES.get(manager.zone_biome(),
 		ZONE_TILES["Forêt"])
 
@@ -262,7 +268,7 @@ func _cell_center(x: int, y: int, size: Vector2i) -> Vector2:
 		MAP_MARGIN + (x + y) * TILE_H * 0.5 + TILE_H)
 
 func _refresh() -> void:
-	var size := manager.zone_size()
+	var size: Vector2i = manager.zone_size()
 	var tiles: Array = ZONE_TILES.get(manager.zone_biome(), ZONE_TILES["Forêt"])
 
 	for pos: Vector2i in _cells.keys():
@@ -322,7 +328,7 @@ func _on_cell_pressed(pos: Vector2i) -> void:
 		_message.text = "Le sentier se parcourt case par case."
 		return
 	manager.move_hero(pos)
-	var poi := manager.poi_at(pos)
+	var poi: Dictionary = manager.poi_at(pos)
 	if not poi.is_empty():
 		_message.text = "Découverte : %s — %s" % [String(poi.get("name", "?")),
 			String(poi.get("desc", ""))]
