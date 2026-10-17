@@ -13,7 +13,7 @@ func _boot() -> void:
 	var data: Dictionary = pm.new_game(3, "Tree")
 	pm.rebuild_team(data, ["Tank", "Mage", "Sylvain"])
 	for c in ["Tank", "Mage", "Sylvain"]:
-		pm.roster_entry(data, c)["level"] = 12
+		pm.roster_entry(data, c)["level"] = 20
 	gm.active_save = data
 	gm.active_slot = -1
 	gm.set_custom_team([{"classe": "Tank"}, {"classe": "Mage"}, {"classe": "Sylvain"}])
@@ -25,7 +25,7 @@ func _boot() -> void:
 	var names: Array = []
 	for sp in syl["spells"]:
 		names.append(sp["name"])
-	check(names.has("Invoquer Arbre"), "le Sylvain niv. 12 possède « Invoquer Arbre »")
+	check(names.has("Invoquer Arbre"), "le Sylvain niv. 20 possède « Invoquer Arbre »")
 	# Poser l'arbre sur une case libre à portée
 	var spos: Vector2i = gm.pos_of(syl)
 	var cell := Vector2i(-1, -1)

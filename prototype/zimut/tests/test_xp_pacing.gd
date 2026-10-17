@@ -20,39 +20,43 @@ func check(cond: bool, msg: String) -> void:
 		fails += 1
 
 func _boot() -> void:
-	# Paliers XP monotones croissants et calibrés
-	check(pm.xp_for_level(10) == 0, "niveau 10 : palier XP à 0 (départ)")
-	check(pm.xp_for_level(11) == 495, "niveau 11 : 495 XP requis")
-	var step10: int = pm.xp_for_level(11) - pm.xp_for_level(10)
-	var c10: float = float(step10) / float(pm.combat_xp(10))
-	check(absf(c10 - 3.0) < 0.35, "lv10 -> lv11 en ~3 combats (%.1f)" % c10)
-	var step49: int = pm.xp_for_level(50) - pm.xp_for_level(49)
-	var c49: float = float(step49) / float(pm.combat_xp(49))
-	check(absf(c49 - 200.0) < 30.0, "lv49 -> lv50 en ~200 combats (%.1f)" % c49)
+	# Paliers XP : niveau 1 = 0 XP, ~2 combats par niveau au début, ~100 à la fin
+	check(pm.xp_for_level(1) == 0, "niveau 1 : palier XP à 0 (départ)")
+	var step1: int = pm.xp_for_level(2) - pm.xp_for_level(1)
+	var c1: float = float(step1) / float(pm.combat_xp(1))
+	check(absf(c1 - 2.0) < 0.35, "lv1 -> lv2 en ~2 combats (%.1f)" % c1)
+	var step99: int = pm.xp_for_level(100) - pm.xp_for_level(99)
+	var c99: float = float(step99) / float(pm.combat_xp(99))
+	check(c99 > 60.0 and c99 < 140.0, "lv99 -> lv100 en ~100 combats (%.1f)" % c99)
+	var total_combats: int = 0
+	for lv: int in range(1, ClassRules.MAX_LEVEL):
+		total_combats += pm.combats_for_level(lv)
+	check(total_combats > 1800 and total_combats < 3200, "durée de vie : %d combats de 1 à 100" % total_combats)
 	var monotone: bool = true
-	var prev: int = 0
-	for lv: int in range(11, ClassRules.MAX_LEVEL + 1):
+	var prev: int = -1
+	for lv: int in range(1, ClassRules.MAX_LEVEL + 1):
 		var xp: int = pm.xp_for_level(lv)
 		if xp <= prev:
 			monotone = false
 		prev = xp
 	check(monotone, "paliers XP strictement croissants")
 	# Les combats rapportent de plus en plus d'XP (progression évolutive)
-	check(pm.combat_xp(50) > pm.combat_xp(30) and pm.combat_xp(30) > pm.combat_xp(10),
+	check(pm.combat_xp(100) > pm.combat_xp(60) and pm.combat_xp(60) > pm.combat_xp(30),
 		"XP par combat croissante avec le niveau")
-	# Simulated : victoires répétées, le roster monte bien les niveaux
+	# Simulé : victoires répétées, le roster monte bien les niveaux
 	var data: Dictionary = pm.new_game(4, "Pacing")
 	pm.rebuild_team(data, ["Tank", "Mage", "Heal"])
 	for i: int in range(9):
+		var el: int = pm.enemy_level_for(data)
 		pm.register_victory(data, {"enemies": [
-			{"type": "Gobelin", "level": 10, "boss": false},
-			{"type": "Loup", "level": 10, "boss": false},
-			{"type": "Gobelin", "level": 10, "boss": false},
-			{"type": "Loup", "level": 10, "boss": false}]})
+			{"type": "Gobelin", "level": el, "boss": false},
+			{"type": "Loup", "level": el, "boss": false},
+			{"type": "Gobelin", "level": el, "boss": false},
+			{"type": "Loup", "level": el, "boss": false}]})
 	var lvl: int = pm.member_level(data, "Tank")
-	check(lvl >= 12 and lvl <= 13, "9 victoires au combat nv10 : équipe aux niveaux 12-13 (~3 combats/palier, pas 1 niveau/combat)")
-	# Le niveau de la frontière suit toujours l'équipe
-	check(pm.enemy_level_for(data) >= 10, "niveau d'ennemis >= départ")
+	check(lvl >= 3 and lvl <= 8, "9 victoires au départ : équipe niveau 3-8 (obtenu %d)" % lvl)
+	check(pm.enemy_level_for(data) >= 1 and pm.enemy_level_for(data) <= ClassRules.ENEMY_MAX_LEVEL, "niveau d'ennemis dans 1..150")
+	check(pm.frontier_level({"team": [], "victories": 100000}) == ClassRules.ENEMY_MAX_LEVEL, "niveau d'ennemis plafonné à 150")
 	# Boss : kit avec attaque à distance ET CaC
 	var boss_spells: Array = Combat.boss_spells("Gobelin", 30)
 	var has_melee: bool = false

@@ -21,7 +21,7 @@ func _find_btn(node: Node, txt: String) -> Button:
 func _boot() -> void:
 	var data = pm.new_game(0, "Layer")
 	data["team"] = [{"classe": "Tank", "equipment": {}}, {"classe": "Mage", "equipment": {}}, {"classe": "Heal", "equipment": {}}]
-	data["inventory"] = [{"type": "Casque", "name": "Casque de fer", "level": 3}]
+	data["inventory"] = [{"type": "Casque", "name": "Casque de fer", "level": 1}]
 	pm.write_save(0, data)
 
 	var sc = (load("res://scenes/TeamSelection.tscn") as PackedScene).instantiate()

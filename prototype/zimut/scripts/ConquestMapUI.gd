@@ -281,7 +281,7 @@ func _build() -> void:
 		nameplate.add_theme_stylebox_override("normal", _city_nameplate_style(city_id, city_id == _selected_id))
 		nameplate.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		btn.add_child(nameplate)
-		btn.pressed.connect(_select_city.bind(city_id))
+		btn.pressed.connect(_on_city_pressed.bind(city_id))
 		map.add_child(btn)
 		_city_buttons[city_id] = btn
 		_city_labels[city_id] = nameplate
@@ -779,8 +779,8 @@ func _select_city(id: String) -> void:
 	_pulse_selected(id)
 	_refresh_chronicle()
 
-## Panneau de construction de la ville sélectionnée : un bouton par
-## bâtiment de ressources disponible, avec coûts, s'il n'est pas déjà bâti.
+## Panneau latéral d'une ville alliée : un seul bouton pour « entrer dans la ville »
+## (la gestion complète — bâtiments, garnison, gouverneur — vit dans CityScreenUI).
 func _build_panel(city_id: String, conquered: bool) -> void:
 	if _build_box == null:
 		return
@@ -788,28 +788,40 @@ func _build_panel(city_id: String, conquered: bool) -> void:
 		c.queue_free()
 	if not conquered:
 		return
-	_build_management(city_id)
-	var res: Dictionary = _save.get("resources", {})
-	var builds: Array = _conquest.get("buildings", {}).get(city_id, [])
-	for key: String in ProgressionManager.CONQUEST_BUILDINGS.keys():
-		var info: Dictionary = ProgressionManager.CONQUEST_BUILDINGS[key]
-		var b := Button.new()
-		var cost_parts: Array = []
-		for r: String in info.get("cost", {}).keys():
-			cost_parts.append("%s %d/%d" % [r, int(res.get(r, 0)), int(info["cost"][r])])
-		cost_parts.append("%d or" % int(info.get("gold", 0)))
-		b.text = "⚒ %s — %s" % [String(info["label"]), " · ".join(PackedStringArray(cost_parts))]
-		b.custom_minimum_size.y = 54
-		b.add_theme_font_size_override("font_size", 17)
-		b.add_theme_color_override("font_color", TEXT)
-		b.add_theme_stylebox_override("normal", _style(Color(0.13, 0.22, 0.27, 0.95), Color(0.55, 0.66, 0.5)))
-		b.add_theme_stylebox_override("hover", _style(Color(0.18, 0.30, 0.34, 0.95), GOLD))
-		if builds.has(key):
-			b.text = "✓ %s (construit)" % String(info["label"])
-			b.disabled = true
-		else:
-			b.pressed.connect(_on_build_pressed.bind(city_id, key))
-		_build_box.add_child(b)
+	var b := Button.new()
+	b.name = "EnterCityButton"
+	b.text = "⌂ ENTRER DANS LA VILLE"
+	b.custom_minimum_size.y = 60
+	b.add_theme_font_size_override("font_size", 20)
+	b.add_theme_color_override("font_color", TEXT)
+	b.add_theme_stylebox_override("normal", _style(Color(0.22, 0.32, 0.18, 0.97), GOLD))
+	b.add_theme_stylebox_override("hover", _style(Color(0.30, 0.42, 0.24, 0.97), GOLD))
+	b.pressed.connect(_open_city_screen.bind(city_id))
+	_build_box.add_child(b)
+
+## Clic sur une ville de la carte : sélection ; si elle nous appartient, on y entre.
+func _on_city_pressed(city_id: String) -> void:
+	if _map_dragged:
+		return
+	_select_city(city_id)
+	if (_conquest.get("owned", ["capitale"]) as Array).has(city_id):
+		_open_city_screen(city_id)
+
+## Ouvre l'écran de la ville (thème de sa nation) par-dessus la carte.
+func _open_city_screen(city_id: String) -> void:
+	if get_node_or_null("CityScreen") != null:
+		return
+	var ui := CityScreenUI.new()
+	ui.name = "CityScreen"
+	add_child(ui)
+	var kind: String = String(_city_meta(city_id).get("kind", "neutral"))
+	ui.open(_save, _slot, city_id, _city_sprite(city_id), _city_desc(city_id, kind))
+	ui.closed.connect(func() -> void:
+		ui.queue_free()
+		_conquest = _save.get("conquest", {})
+		_persist()
+		_refresh_header()
+		_select_city(city_id))
 
 func _on_build_pressed(city_id: String, building: String) -> void:
 	var err: String = ProgressionManager.conquest_build(_save, city_id, building)

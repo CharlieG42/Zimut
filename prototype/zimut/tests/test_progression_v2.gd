@@ -11,12 +11,20 @@ func _boot() -> void:
 	var pm: Node = root.get_node("ProgressionManager")
 	var data: Dictionary = pm.new_game(3, "T2")
 	pm.rebuild_team(data, ["Tank", "Assassin", "Mage"])
-	check(pm.member_level(data, "Tank") == 10, "niveau de départ 10")
+	check(pm.member_level(data, "Tank") == 1, "niveau de départ 1")
+	check(pm.spells_unlocked_between("Tank", 0, 1).size() == 3, "3 sorts au niveau 1")
+	for c: String in ["Tank", "Assassin", "Mage"]:
+		var ent: Dictionary = pm.roster_entry(data, c)
+		ent["level"] = 20
+		ent["xp"] = pm.xp_for_level(20)
+		ent["unspent"] = ClassRules.total_points_for_level(20)
+		ent["invested"] = {}
+		pm.auto_points(data, c)
 	var e: Dictionary = pm.roster_entry(data, "Tank")
 	check(int(e["unspent"]) == 0 and int(e["invested"].get("vita", 0)) > 0, "capital auto-réparti au départ")
 	var st0: Dictionary = pm.member_stats(data, data["team"][0])
 	var rep: Dictionary = pm.award_xp(data, 5000)
-	check(int(rep["Tank"]["to_level"]) > 10, "l'XP fait monter de niveau")
+	check(int(rep["Tank"]["to_level"]) > 20, "l'XP fait monter de niveau")
 	check(int(rep["Tank"]["gain"]) > int(rep["Heal"]["gain"]) * 0 and not bool(rep["Sylvain"]["in_team"]), "rapport XP complet")
 	check(int(rep["Sylvain"]["gain"]) < int(rep["Tank"]["gain"]), "classe hors équipe : moins d'XP")
 	var st1: Dictionary = pm.member_stats(data, data["team"][0])
@@ -72,7 +80,21 @@ func _boot() -> void:
 	check(back["roster"].has("Sylvain"), "roster sauvegardé")
 	var old: Dictionary = {"name": "old", "level": 22, "victories": 6, "team": [{"classe": "Tank", "equipment": {}}], "inventory": []}
 	pm.ensure_roster(old)
-	check(pm.member_level(old, "Tank") == 22, "migration d'une ancienne partie")
+	check(pm.member_level(old, "Tank") == pm.level_from_old(22), "migration d'une ancienne partie (niveau 22 -> %d)" % pm.level_from_old(22))
+	# Ancienne partie AVEC roster (équilibrage < V15) : niveaux étirés, capital conservé, sorts remis à zéro
+	var old2: Dictionary = {"name": "old2", "level": 30, "victories": 40, "team": [{"classe": "Mage", "equipment": {}}], "inventory": [],
+		"roster": {"Mage": {"level": 30, "xp": 1, "invested": {"intelligence": 20, "vita": 10}, "unspent": 4, "auto": false,
+			"spell_levels": {"Boule de feu": 4}}}}
+	pm.ensure_roster(old2)
+	var me: Dictionary = old2["roster"]["Mage"]
+	check(int(me["level"]) == pm.level_from_old(30), "ancienne partie : niveau 30 -> %d" % pm.level_from_old(30))
+	check(int(me["invested"]["intelligence"]) == 20, "points investis conservés")
+	var spent: int = ClassRules.cost_between("Mage", "intelligence", 0, 20) + ClassRules.cost_between("Mage", "vita", 0, 10)
+	check(int(me["unspent"]) == ClassRules.total_points_for_level(int(me["level"])) - spent, "capital restant recalculé")
+	check(me["spell_levels"].is_empty(), "points de sorts remis à zéro")
+	check(int(old2["balance_v"]) == pm.BALANCE_VERSION and old2.has("difficulty"), "version d'équilibrage + difficulté par partie")
+	pm.ensure_roster(old2)
+	check(int(old2["roster"]["Mage"]["level"]) == pm.level_from_old(30), "migration idempotente")
 	pm.delete_save(3)
 	# fiche perso
 	var sheet: CanvasLayer = (load("res://scripts/CharacterSheetUI.gd") as GDScript).new()
