@@ -1,105 +1,73 @@
-Classe,Niveau,Sorts débloqués (séparés par ";")
-Tank,1,Coup de bouclier;Soin de combat
-Tank,5,Protection;Frappe puissante
-Tank,10,Rugissement;Provocation
-Tank,15,Mur de pierre;Soin de guerre
-Tank,20,Tremblement de terre;Bouclier sacré
-Tank,25,Régénération;Armure renforcée
-Tank,30,Colère;Intervention divine
-Tank,35,Barrière;Soin de groupe
-Tank,40,Coup écrasant;Protection divine
-Tank,45,Renaissance;Bouclier légendaire
-Tank,50,Coup final
-
-Assassin,1,Lame fatale;Soin rapide
-Assassin,5,Poison;Ombre
-Assassin,10,Coup bas;Clignotement
-Assassin,15,Soin empoisonné;Marque de la mort
-Assassin,20,Piège empoisonné;Assassinat
-Assassin,25,Invisibilité;Éviscération
-Assassin,30,Soin de l'ombre;Malédiction
-Assassin,35,Coup final;Soin mortel
-Assassin,40,Soin critique;Empoisonnement massif
-Assassin,45,Invisibilité totale;Lame de l'ombre
-Assassin,50,Soin ultime
-
-Chasseur,1,Tir précis;Soin de chasseur
-Chasseur,5,Piège;Flèche enflammée
-Chasseur,10,Tir perçant;Appel de la meute
-Chasseur,15,Soin de la nature;Tir explosif
-Chasseur,20,Camouflage;Flèche empoisonnée
-Chasseur,25,Tir transperçant;Soin de la forêt
-Chasseur,30,Tir de glace;Tir légendaire
-Chasseur,35,Soin de groupe;Flèche sacrée
-Chasseur,40,Piège paralysant;Soin vital
-Chasseur,45,Tir perçant ultime
-Chasseur,50,Soin de la vie
-
-Mage,1,Boule de feu;Soin magique
-Mage,5,Éclair;Bouclier magique
-Mage,10,Explosion;Soin supérieur
-Mage,15,Téléportation;Météore
-Mage,20,Soin de groupe;Gel
-Mage,25,Invisibilité magique;Chaîne de foudre
-Mage,30,Soin magique supérieur;Barrière magique
-Mage,35,Désintégration;Soin de l'âme
-Mage,40,Téléportation de groupe;Pluie de métores
-Mage,45,Soin ultime
-Mage,50,Apocalypse;Soin de la vie
-
-Support,1,Bénédiction;Soin
-Support,5,Barrière;Attaque sacrée
-Support,10,Inspiration;Purification
-Support,15,Renaissance;Bouclier groupé
-Support,20,Attaque divine;Accélération
-Support,25,Soin de groupe;Protection divine
-Support,30,Résurrection;Bénédiction suprême
-Support,35,Attaque sacrée ultime;Soin suprême
-Support,40,Protection ultime;Attaque finale
-Support,45,Soin de la vie
-Support,50,Jugement
-
-Heal,1,Soin mineur;Attaque bénie
-Heal,5,Soin;Attaque sacrée
-Heal,10,Protection vitale;Purification
-Heal,15,Renaissance;Attaque divine
-Heal,20,Barrière de vie;Éclat de lumière
-Heal,25,Soin de groupe;Attaque céleste
-Heal,30,Protection divine;Soin supérieur
-Heal,35,Attaque sacrée ultime;Soin de groupe supérieur
-Heal,40,Résurrection;Attaque finale
-Heal,45,Soin ultime
-Heal,50,Jugement divin
-
-Invocateur,5,Invoquer Tortue
-Invocateur,10,Invoquer Loup;Attaque de l'invocation;Buff de l'invocation
-Invocateur,15,Débuff de l'invocation
-Invocateur,20,Invoquer Sirène;Soin de l'invocation
-Invocateur,25,Soin de l'invocation;Buff de vitesse
-Invocateur,30,Invoquer Ange;Attaque puissante;Buff de défense
-Invocateur,35,Attaque de zone;Soin de groupe
-Invocateur,40,Invoquer Homme-Faucon;Débuff de mouvement
-Invocateur,45,Buff ultime;Soin ultime
-Invocateur,50,Invoquer Centaur;Attaque ultime;Débuff ultime
-Sylvain,1,Ronce;Sève vitale
-Sylvain,5,Invoquer Buisson;Poison de ronce
-Sylvain,10,Racine;Invoquer Champignon
-Sylvain,15,Lierre protecteur;Soin de sève
-Sylvain,20,Ronce multiple;Pose un piège de ronces
-Sylvain,25,Invoquer Tronc;Vent de feuilles
-Sylvain,30,Rugissement de la forêt;Pluie de graines
-Sylvain,35,Sève régénérante;Invoquer Sarriette
-Sylvain,40,Colère de la nature;Soin de la forêt
-Sylvain,45,Racines profondes;Régression
-Sylvain,50,Tempête de pétales
-Géomancien,1,Éclat de grès;Invoquer Pilier
-Géomancien,5,Armure de grès;Lance de cristal
-Géomancien,10,Invoquer Muraille
-Géomancien,15,Éboulement;Invoquer Cristal ambré
-Géomancien,20,Invoquer Faille;Peau de pierre
-Géomancien,25,Tempête de sable
-Géomancien,30,Séisme ambré;Rempart de cristal
-Géomancien,35,Pluie de cristaux
-Géomancien,40,Fureur de la pierre
-Géomancien,45,Colosse de grès
-Géomancien,50,Cataclysme minéral
+Classe,Niveau,"Sorts débloqués (séparés par "";"")"
+Tank,1,Coup de bouclier;Protection;Soin de combat
+Tank,10,Frappe puissante
+Tank,20,Provocation
+Tank,35,Mur de pierre
+Tank,50,Tremblement de terre
+Tank,65,Colère
+Tank,80,Coup écrasant
+Tank,100,Bouclier légendaire
+Assassin,1,Lame fatale;Poison;Soin rapide
+Assassin,10,Coup bas
+Assassin,20,Ombre
+Assassin,35,Marque de la mort
+Assassin,50,Éviscération
+Assassin,65,Invisibilité
+Assassin,80,Lame de l'ombre
+Assassin,100,Coup final
+Chasseur,1,Tir précis;Piège;Soin de chasseur
+Chasseur,10,Fleche enflammée
+Chasseur,20,Tir de recul
+Chasseur,35,Tir explosif
+Chasseur,50,Balise de chasse
+Chasseur,65,Tir de glace
+Chasseur,80,Tir légendaire
+Chasseur,100,Tir perçant ultime
+Mage,1,Boule de feu;Éclair;Bouclier magique
+Mage,10,Explosion
+Mage,20,Téléportation
+Mage,35,Météore
+Mage,50,Gel
+Mage,65,Chaîne de foudre
+Mage,80,Désintégration
+Mage,100,Apocalypse
+Druide,1,Bénédiction;Soin;Attaque sacrée
+Druide,10,Barrière
+Druide,20,Inspiration
+Druide,35,Soin de groupe
+Druide,50,Renaissance
+Druide,65,Attaque divine
+Druide,80,Résurrection
+Druide,100,Jugement
+Heal,1,Toucher guérisseur;Éclair sacré;Bénédiction de vie
+Heal,10,Bouclier de lumière
+Heal,20,Mot de restauration
+Heal,35,Éclat de lumière
+Heal,50,Soin supérieur
+Heal,65,Soin de groupe supérieur
+Heal,80,Protection vitale
+Heal,100,Soin ultime
+Invocateur,1,Frappe spectrale;Symbiose;Invoquer Tortue
+Invocateur,10,Invoquer Loup
+Invocateur,20,Attaque de l'invocation
+Invocateur,35,Invoquer Sirène
+Invocateur,50,Buff de l'invocation
+Invocateur,65,Invoquer Ange
+Invocateur,80,Invoquer Homme-Faucon
+Invocateur,100,Invoquer Centaure
+Sylvain,1,Ronce;Sève vitale;Invoquer Buisson
+Sylvain,10,Poison de ronce
+Sylvain,20,Invoquer Arbre
+Sylvain,35,Racine
+Sylvain,50,Soin de sève
+Sylvain,65,Invoquer Champignon
+Sylvain,80,Pluie de graines
+Sylvain,100,Tempête de pétales
+Géomancien,1,Éclat de grès;Invoquer Pilier;Armure de grès
+Géomancien,10,Lance de cristal
+Géomancien,20,Invoquer Muraille
+Géomancien,35,Éboulement
+Géomancien,50,Invoquer Faille
+Géomancien,65,Tempête de sable
+Géomancien,80,Séisme ambré
+Géomancien,100,Cataclysme minéral

@@ -30,9 +30,16 @@ const STAT_HELP := {
 ## Gain réel par point investi
 const STAT_GAIN := {"vita": 3, "force": 1, "intelligence": 1, "agility": 1, "wisdom": 1, "defense": 1}
 
-const MAX_LEVEL := 50
-const START_LEVEL := 10
-const POINTS_PER_LEVEL := 4
+const MAX_LEVEL := 100
+const START_LEVEL := 1
+const POINTS_PER_LEVEL := 2
+## Niveau maximum des ennemis (le héros plafonne à MAX_LEVEL).
+const ENEMY_MAX_LEVEL := 150
+## Points de sort : 3 par niveau de héros (297 au niveau 100) ; améliorer un sort de n à
+## n+1 coûte n points (45 pour monter un sort de 1 à 10). Au niveau 100 : 5 sorts au maximum
+## (225) + 72 points pour les autres ; les 10 à fond (450) restent impossibles. Remise à zéro gratuite.
+const SPELL_POINTS_PER_LEVEL := 3
+const SPELL_MAX_LEVEL := 10
 
 ## XP d'un combat = somme(XP des ennemis) x FIGHT_XP_MULT
 const FIGHT_XP_MULT := 1.5
@@ -43,7 +50,7 @@ const BOSS_XP_MULT := 1.5
 ## environ 3 combats pour passer du niveau 10 au 11, et de plus en plus de combats
 ## à mesure que le niveau monte (jusqu'à ~200 pour le palier final).
 const XP_PER_COMBAT_BASE := 75.6
-const XP_PER_COMBAT_GROWTH := 1.038
+const XP_PER_COMBAT_GROWTH := 1.038   ## par niveau de l'ancienne échelle (= 2 niveaux actuels)
 const XP_PER_COMBAT_FLOOR := 110.0
 const XP_PER_COMBAT_CEIL := 476.0
 ## Les classes hors équipe gagnent une part de l'XP (pour tester d'autres compos)
@@ -75,58 +82,58 @@ const TIER_COST := {
 
 const CLASSES := {
 	"Tank": {
-		"xp": 1.10, "pa": [35], "pm": [],
+		"xp": 1.10, "pa": [70], "pm": [],
 		"aff": {"vita": "A", "defense": "A", "force": "B", "agility": "C", "wisdom": "C", "intelligence": "C"},
 		"auto": {"vita": 3, "defense": 3, "force": 2},
 		"role": "Encaisse et protège. Rythme d'XP rapide.",
 	},
 	"Assassin": {
-		"xp": 0.95, "pa": [45], "pm": [20],
+		"xp": 0.95, "pa": [90], "pm": [40],
 		"aff": {"force": "A", "agility": "A", "wisdom": "B", "vita": "B", "defense": "C", "intelligence": "C"},
 		"auto": {"force": 3, "agility": 3, "vita": 1},
-		"role": "Dégâts explosifs dans le dos. +1 PM au niv. 20.",
+		"role": "Dégâts explosifs dans le dos. +1 PM au niv. 40.",
 	},
 	"Chasseur": {
-		"xp": 1.00, "pa": [45], "pm": [30],
+		"xp": 1.00, "pa": [90], "pm": [60],
 		"aff": {"force": "A", "agility": "A", "wisdom": "B", "vita": "B", "defense": "B", "intelligence": "C"},
 		"auto": {"force": 3, "agility": 2, "vita": 1, "defense": 1},
-		"role": "Tireur polyvalent. +1 PM au niv. 30.",
+		"role": "Tireur polyvalent. +1 PM au niv. 60.",
 	},
 	"Mage": {
-		"xp": 0.95, "pa": [40], "pm": [],
+		"xp": 0.95, "pa": [80], "pm": [],
 		"aff": {"intelligence": "A", "wisdom": "A", "agility": "B", "vita": "B", "defense": "C", "force": "C"},
 		"auto": {"intelligence": 4, "wisdom": 1, "vita": 1},
-		"role": "Dégâts magiques. +1 PA au niv. 40.",
+		"role": "Dégâts magiques. +1 PA au niv. 80.",
 	},
 	"Druide": {
-		"xp": 1.00, "pa": [40], "pm": [],
+		"xp": 1.00, "pa": [80], "pm": [],
 		"aff": {"intelligence": "A", "wisdom": "A", "vita": "B", "defense": "B", "agility": "C", "force": "C"},
 		"auto": {"intelligence": 3, "wisdom": 2, "vita": 1, "defense": 1},
-		"role": "Soins et bénédictions. +1 PA au niv. 40.",
+		"role": "Soins et bénédictions. +1 PA au niv. 80.",
 	},
 	"Heal": {
-		"xp": 1.10, "pa": [40], "pm": [],
+		"xp": 1.10, "pa": [80], "pm": [],
 		"aff": {"wisdom": "A", "intelligence": "A", "vita": "A", "defense": "B", "agility": "C", "force": "C"},
 		"auto": {"wisdom": 3, "intelligence": 3, "vita": 2},
 		"role": "Soigneur pur. Rythme d'XP rapide.",
 	},
 	"Invocateur": {
-		"xp": 0.95, "pa": [40], "pm": [],
+		"xp": 0.95, "pa": [80], "pm": [],
 		"aff": {"intelligence": "A", "vita": "B", "wisdom": "B", "agility": "B", "defense": "C", "force": "C"},
 		"auto": {"intelligence": 3, "vita": 2, "wisdom": 1, "agility": 1},
-		"role": "Ses familiers héritent de son niveau. +1 PA au niv. 40.",
+		"role": "Ses familiers héritent de son niveau. +1 PA au niv. 80.",
 	},
 	"Sylvain": {
-		"xp": 0.95, "pa": [45], "pm": [35],
+		"xp": 0.95, "pa": [90], "pm": [70],
 		"aff": {"intelligence": "A", "wisdom": "A", "vita": "B", "defense": "B", "agility": "C", "force": "C"},
 		"auto": {"intelligence": 3, "wisdom": 2, "vita": 2, "defense": 1},
-		"role": "Maître de la forêt. +1 PM au niv. 35.",
+		"role": "Maître de la forêt. +1 PM au niv. 70.",
 	},
 	"Géomancien": {
-		"xp": 1.0, "pa": [45], "pm": [],
+		"xp": 1.0, "pa": [90], "pm": [],
 		"aff": {"intelligence": "A", "defense": "B", "vita": "B", "wisdom": "B", "agility": "C", "force": "C"},
 		"auto": {"intelligence": 3, "defense": 2, "vita": 2, "wisdom": 1},
-		"role": "Contrôle du terrain : piliers, murailles et failles bloquent les passages. +1 PA au niv. 45.",
+		"role": "Contrôle du terrain : piliers, murailles et failles bloquent les passages. +1 PA au niv. 90.",
 	},
 }
 
@@ -182,23 +189,29 @@ static func milestone_bonus(classe: String, level: int) -> Dictionary:
 
 
 ## Répartition automatique : dépense tout le capital selon la recette de la classe.
+## Proportionnelle : on achète toujours la stat dont le ratio investi / poids est le
+## plus faible (parmi celles que le capital restant permet d'acheter). Marche aussi
+## avec 2 points par niveau (l'ancienne boucle donnait tout à la 1re stat).
 ## invested : { stat: points investis } (modifié) ; retourne le capital restant.
 static func auto_allocate(classe: String, invested: Dictionary, unspent: int) -> int:
 	var recipe: Dictionary = rules(classe).get("auto", {})
 	if recipe.is_empty():
 		return unspent
-	var keys: Array = recipe.keys()
 	var guard: int = 0
-	while unspent > 0 and guard < 2000:
+	while unspent > 0 and guard < 5000:
 		guard += 1
-		var progressed: bool = false
-		for stat in keys:
-			for _n in range(int(recipe[stat])):
-				var cost: int = point_cost(classe, String(stat), int(invested.get(stat, 0)))
-				if cost <= unspent:
-					invested[stat] = int(invested.get(stat, 0)) + 1
-					unspent -= cost
-					progressed = true
-		if not progressed:
+		var best: String = ""
+		var best_ratio: float = 1e18
+		for stat in recipe.keys():
+			var cost: int = point_cost(classe, String(stat), int(invested.get(stat, 0)))
+			if cost > unspent:
+				continue
+			var ratio: float = float(invested.get(stat, 0) + 1) / float(maxi(1, int(recipe[stat])))
+			if ratio < best_ratio:
+				best_ratio = ratio
+				best = String(stat)
+		if best == "":
 			break
+		unspent -= point_cost(classe, best, int(invested.get(best, 0)))
+		invested[best] = int(invested.get(best, 0)) + 1
 	return unspent

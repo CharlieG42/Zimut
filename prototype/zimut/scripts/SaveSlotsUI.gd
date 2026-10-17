@@ -326,6 +326,48 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	_detail_box.add_child(summary)
 	_detail_box.add_child(_section_separator())
 
+	# Difficulté des ennemis : propre à cette partie, modifiable à tout moment.
+	var diff_lbl := Label.new()
+	diff_lbl.text = "DIFFICULTÉ DES ENNEMIS (cette partie)"
+	diff_lbl.add_theme_font_size_override("font_size", _ui_font(18))
+	diff_lbl.add_theme_color_override("font_color", COL_TXT)
+	_detail_box.add_child(diff_lbl)
+	var diff_row := HBoxContainer.new()
+	diff_row.name = "DifficultyRow"
+	diff_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	diff_row.add_theme_constant_override("separation", 8)
+	_detail_box.add_child(diff_row)
+	var diff_group := ButtonGroup.new()
+	var cur_diff: int = GameSettings.save_difficulty(data)
+	for di: int in range(GameSettings.DIFFICULTIES.size()):
+		var db := Button.new()
+		db.text = GameSettings.DIFFICULTIES[di]
+		db.toggle_mode = true
+		db.button_group = diff_group
+		db.button_pressed = di == cur_diff
+		db.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		db.custom_minimum_size = Vector2(0, 52)
+		db.add_theme_font_size_override("font_size", _ui_font(19))
+		db.add_theme_color_override("font_color", Color(0.95, 0.94, 0.90))
+		db.add_theme_color_override("font_pressed_color", Color(1.0, 0.88, 0.45))
+		db.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_USED_BG, COL_BORDER.darkened(0.2), 2))
+		db.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_USED_BG.lightened(0.12), COL_BORDER, 2))
+		db.add_theme_stylebox_override("pressed", _flat_bg(Color(0.34, 0.27, 0.12), Color(1.0, 0.78, 0.28), 4))
+		var di_ref: int = di
+		db.pressed.connect(func() -> void:
+			_current["difficulty"] = di_ref
+			ProgressionManager.write_save(slot, _current)
+			if not GameManager.active_save.is_empty() and GameManager.active_slot == slot:
+				GameManager.active_save["difficulty"] = di_ref)
+		diff_row.add_child(db)
+	var diff_hint := Label.new()
+	diff_hint.text = "Facile ×0,85 · Normal ×1 · Difficile ×1,2 · Enfer : bien plus de PV. S'applique aux prochains combats."
+	diff_hint.add_theme_font_size_override("font_size", _ui_font(13))
+	diff_hint.add_theme_color_override("font_color", COL_BORDER.darkened(0.3))
+	diff_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_detail_box.add_child(diff_hint)
+	_detail_box.add_child(_section_separator())
+
 	# Les trois modes utilisent la même sauvegarde : roster, XP, caractéristiques,
 	# sorts, équipement et inventaire ne sont jamais dupliqués par mode.
 	var mode_lbl := Label.new()

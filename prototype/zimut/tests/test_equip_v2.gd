@@ -26,8 +26,8 @@ func _boot() -> void:
 		{"classe": "Sylvain", "equipment": {}},
 	]
 	data["inventory"] = [
-		{"type": "Casque", "name": "Casque de fer", "level": 3, "force": 2, "intelligence": 0, "agility": 0, "wisdom": 1, "vita": 5, "defense": 3},
-		{"type": "Bague", "name": "Anneau de sagesse", "level": 5, "force": 0, "intelligence": 2, "agility": 0, "wisdom": 2, "vita": 0, "defense": 0},
+		{"type": "Casque", "name": "Casque de fer", "level": 1, "force": 2, "intelligence": 0, "agility": 0, "wisdom": 1, "vita": 5, "defense": 3},
+		{"type": "Bague", "name": "Anneau de sagesse", "level": 1, "force": 0, "intelligence": 2, "agility": 0, "wisdom": 2, "vita": 0, "defense": 0},
 	]
 	pm.write_save(0, data)
 

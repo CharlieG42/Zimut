@@ -199,9 +199,9 @@ func _root_of_frame_setup(frame: PanelContainer, classe: String, member_idx: int
 
 	# Portrait (sprite du personnage)
 	var portrait := TextureRect.new()
-	var tex_path := "res://assets/sprites/players/%s.png" % classe.to_lower()
+	var tex_path := "res://assets/sprites/players/%s.png" % EntityView.sprite_key(classe)
 	if not ResourceLoader.exists(tex_path):
-		tex_path = "res://assets/sprites/players/%s.svg" % classe.to_lower()
+		tex_path = "res://assets/sprites/players/%s.svg" % EntityView.sprite_key(classe)
 	if ResourceLoader.exists(tex_path):
 		portrait.texture = load(tex_path)
 	portrait.custom_minimum_size = Vector2(180, 230)

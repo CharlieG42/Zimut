@@ -640,18 +640,24 @@ func _build_stats() -> void:
 func _build_spells() -> void:
 	var ent: Dictionary = ProgressionManager.roster_entry(_save, _classe)
 	var char_level: int = int(ent["level"])
-	var gold: int = ProgressionManager.gold(_save)
-	var magie: int = int(ProgressionManager.resources(_save).get("Magie", 0))
+	var free_pts: int = ProgressionManager.spell_points_free(_save, _classe)
+	var total_pts: int = ProgressionManager.spell_points_total(char_level)
 	var info := HBoxContainer.new()
 	info.add_theme_constant_override("separation", 14)
 	_content.add_child(info)
-	var intro := _lbl("Chaque niveau de sort apporte +%d %% d'efficacité (niveau 1 à %d). Coût : or + Magie, de plus en plus élevé." % [
-		roundi(ProgressionManager.SPELL_LEVEL_BONUS_PCT), ProgressionManager.SPELL_LEVEL_MAX], 17, C_DIM)
+	var intro := _lbl("%d points de sort par niveau. Monter un sort du niveau n au niveau n+1 coûte n points (+%d %% d'efficacité par niveau, maximum %d). Impossible de tout maximiser : choisis tes sorts ! Remise à zéro gratuite." % [
+		ClassRules.SPELL_POINTS_PER_LEVEL, roundi(ProgressionManager.SPELL_LEVEL_BONUS_PCT), ProgressionManager.SPELL_LEVEL_MAX], 17, C_DIM)
 	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	intro.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info.add_child(intro)
-	info.add_child(_chip("🪙 %d" % gold, C_GOLD, 22))
-	info.add_child(_chip("✦ Magie %d" % magie, Color(0.65, 0.55, 0.95), 22))
+	info.add_child(_chip("✦ Points de sort %d / %d" % [free_pts, total_pts], Color(0.65, 0.55, 0.95) if free_pts > 0 else C_DIM, 22))
+	var rst := _btn("RÉINITIALISER", Color(0.85, 0.55, 0.35), 18, Vector2(190, 48))
+	rst.disabled = ProgressionManager.spell_points_spent(_save, _classe) == 0
+	rst.pressed.connect(func() -> void:
+		ProgressionManager.reset_spells(_save, _classe)
+		_persist()
+		refresh())
+	info.add_child(rst)
 
 	var grid := GridContainer.new()
 	grid.columns = 2
@@ -659,11 +665,13 @@ func _build_spells() -> void:
 	grid.add_theme_constant_override("v_separation", 12)
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_content.add_child(grid)
-	for s: Dictionary in ProgressionManager.spells_of(_classe):
-		_spell_card(grid, s, char_level, gold, magie)
+	var spells: Array = ProgressionManager.spells_of(_classe).duplicate()
+	spells.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a["level"]) < int(b["level"]))
+	for s: Dictionary in spells:
+		_spell_card(grid, s, char_level, free_pts)
 
 
-func _spell_card(parent: Control, s: Dictionary, char_level: int, gold: int, magie: int) -> void:
+func _spell_card(parent: Control, s: Dictionary, char_level: int, free_pts: int) -> void:
 	var sname: String = String(s["name"])
 	var slvl: int = ProgressionManager.spell_level(_save, _classe, sname)
 	var locked: bool = int(s["level"]) > char_level
@@ -759,17 +767,24 @@ func _spell_card(parent: Control, s: Dictionary, char_level: int, gold: int, mag
 		var mx := _chip("★ NIVEAU MAXIMUM", C_GOLD, 18)
 		foot.add_child(mx)
 		return
-	var ok_gold: bool = gold >= int(cost["gold"])
-	var ok_mag: bool = magie >= int(cost["magie"])
-	foot.add_child(_chip("🪙 %d" % int(cost["gold"]), C_GOOD if ok_gold else C_BAD, 18))
-	foot.add_child(_chip("✦ Magie %d" % int(cost["magie"]), C_GOOD if ok_mag else C_BAD, 18))
+	var need: int = int(cost["points"])
+	var ok_pts: bool = free_pts >= need
+	foot.add_child(_chip("✦ %d point%s" % [need, "s" if need > 1 else ""], C_GOOD if ok_pts else C_BAD, 18))
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	foot.add_child(sp)
+	if slvl > 1:
+		var dn := _btn("−", Color(0.85, 0.55, 0.35), 22, Vector2(56, 48))
+		dn.tooltip_text = "Retirer un niveau (points rendus)"
+		dn.pressed.connect(func() -> void:
+			ProgressionManager.downgrade_spell(_save, _classe, sname)
+			_persist()
+			refresh())
+		foot.add_child(dn)
 	var up := _btn("AMÉLIORER", Color(0.45, 0.80, 0.50), 20, Vector2(190, 48))
-	up.disabled = not (ok_gold and ok_mag)
-	if not ok_gold or not ok_mag:
-		up.tooltip_text = "Il manque %s" % ("de l'or" if not ok_gold else "de la Magie")
+	up.disabled = not ok_pts
+	if not ok_pts:
+		up.tooltip_text = "Il manque des points de sort"
 	up.pressed.connect(func() -> void:
 		var err: String = ProgressionManager.upgrade_spell(_save, _classe, sname)
 		if err == "":

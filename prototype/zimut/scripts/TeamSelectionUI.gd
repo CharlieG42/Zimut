@@ -527,9 +527,9 @@ func refresh() -> void:
 	var meta: Dictionary = CLASS_META.get(classe, {"icon": "❔", "description": ""})
 	var col: Color = CLASS_COLORS.get(classe, Color(0.5, 0.5, 0.5))
 
-	var tex_path := "res://assets/sprites/players/%s.png" % classe.to_lower()
-	if ResourceLoader.exists(tex_path):
-		_portrait.texture = load(tex_path)
+	var tex_path := "res://assets/sprites/players/%s.png" % EntityView.sprite_key(classe)
+	# Toujours réinitialiser : sinon une image manquante garde le héros précédent.
+	_portrait.texture = load(tex_path) if ResourceLoader.exists(tex_path) else null
 
 	_name_label.text = "%s  %s" % [meta["icon"], classe]
 	_desc_label.text = String(meta["description"])

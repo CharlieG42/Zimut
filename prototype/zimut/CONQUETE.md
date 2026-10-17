@@ -33,3 +33,15 @@ Clés ajoutées à `conquest` (toutes optionnelles) : `city_levels`, `garrisons`
 
 ## Tests
 `tests/test_conquest_system.gd` (moteur, 69 vérifications), `tests/test_conquest_team.gd` (sélection d'équipe, nécessite xvfb), `tests/shot_conquest_v14.gd` (captures).
+
+## Écran de ville (V15)
+
+Cliquer sur une ville **alliée** (capitale comprise) « entre dans la ville » : `CityScreenUI` s'ouvre par-dessus la carte, aux couleurs de la nation de la ville (fond, bordures, noms des quartiers : Hutte du Conseil / Amirauté / Sanctum de Cristal…).
+
+- **Hôtel de ville** : évolution Hameau → Bourg → Cité (coûts en or et ressources).
+- **Caserne** : recrutement (+1 ou remplir la garnison).
+- **Résidence du gouverneur** : nommer / rappeler un héros (liste des 9 héros, ceux déjà en poste sont grisés).
+- **Bâtiments de production** : scierie, mine, tannerie, cabane des mages, verger, muraille.
+- **Conseil de la ville** (colonne de droite) : niveau, garnison, défense, revenu, gouverneur, menace en cours, production.
+
+Chaque action écrit la sauvegarde ; le bouton « ← CARTE » revient à la carte. Le panneau latéral de la carte ne garde que le bouton « ⌂ ENTRER DANS LA VILLE ». Capture de test : `tests/shot_city_screen.gd`.

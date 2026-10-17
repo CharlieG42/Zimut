@@ -13,32 +13,62 @@ signal progression_changed()
 
 const SAVE_DIR := "user://saves"
 const MAX_SAVES := 5
-const START_LEVEL := 10
+const START_LEVEL := 1
 const BOSS_EVERY := 4
 
-## Palier XP du roster par niveau (index = niveau, 0 et 1 inutilisés).
-## Calibré pour une progression progressive et évolutive :
-## ~3 combats pour passer du niveau 10 au 11 (il faut 495 XP),
-## de plus en plus de combats par niveau ensuite, jusqu'à ~200 combats
-## pour le dernier palier (niveau 49 -> 50).
-const LEVEL_XP: PackedInt32Array = [
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 495, 990, 1503, 2211, 2947, 3902, 4892, 6128, 7626,
-	9402, 11472, 13862, 16838, 20450, 24722, 29726, 35774, 42950, 51320,
-	61302, 72992, 86872, 103072, 122146, 144262, 170054, 199732, 234018, 273255,
-	318183, 369213, 427173, 492548, 566396, 649304, 741734, 844924, 959766, 1086642,
-	1227195,
-]
-## Combats de la frontière nécessaires par niveau (calage du rythme : 3 combats
-## au niveau 10, ~200 pour le palier final).
-const LEVEL_COMBATS: PackedInt32Array = [
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+## Version d'équilibrage des données (classes 1..100, ennemis 1..150, points de sorts).
+## Les anciennes sauvegardes (< 15) sont converties au chargement (ensure_roster).
+const BALANCE_VERSION := 15
+
+## Combats de la frontière nécessaires par niveau sur l'ANCIENNE échelle 1..50
+## (index = ancien niveau). La table actuelle (niveaux 1..100) en est dérivée :
+## chaque niveau demande moitié moins de combats mais il y en a deux fois plus.
+const OLD_LEVEL_COMBATS: PackedInt32Array = [
+	0, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 4, 4, 5, 5, 6, 7, 8,
 	9, 10, 12, 14, 16, 18, 21, 24, 27, 31,
 	35, 40, 45, 51, 57, 64, 71, 79, 87, 96,
 	105, 115, 125, 136, 147, 158, 170, 182, 194, 207,
 	200,
 ]
+## Palier XP du roster par niveau (index = niveau) et combats par niveau :
+## construits dans _build_level_tables() (≈ 2 400 combats pour passer de 1 à 100).
+var LEVEL_XP: PackedInt32Array = PackedInt32Array()
+var LEVEL_COMBATS: PackedInt32Array = PackedInt32Array()
+
+## Ancien niveau (1..50) -> niveau actuel (1..100), pour la migration des sauvegardes
+## et les niveaux écrits « en dur » (zones d'aventure, villes de conquête).
+static func level_from_old(old_level: int) -> int:
+	return clampi(roundi(1.0 + float(old_level - 1) * 99.0 / 49.0), 1, ClassRules.MAX_LEVEL)
+
+## Niveau des zones d'aventure/conquête : les anciens niveaux 10..25 deviennent 1..100
+## (courbe douce pour garder des débuts faciles : première zone = niveau 1).
+static func zone_level(old_level: int) -> int:
+	var t: float = clampf(float(old_level - 10) / 15.0, 0.0, 1.3)
+	return clampi(roundi(1.0 + 99.0 * pow(t, 1.5)), 1, ClassRules.ENEMY_MAX_LEVEL)
+
+func _build_level_tables() -> void:
+	LEVEL_XP = PackedInt32Array()
+	LEVEL_COMBATS = PackedInt32Array()
+	LEVEL_XP.resize(ClassRules.MAX_LEVEL + 2)
+	LEVEL_COMBATS.resize(ClassRules.MAX_LEVEL + 2)
+	var acc: float = 0.0
+	for lv: int in range(1, ClassRules.MAX_LEVEL + 1):
+		var ol: float = 1.0 + float(lv - 1) * 49.0 / 99.0
+		var i0: int = clampi(int(floor(ol)), 1, 49)
+		var c_old: float = lerpf(float(OLD_LEVEL_COMBATS[i0]), float(OLD_LEVEL_COMBATS[i0 + 1]), ol - float(i0))
+		var need: int = maxi(2, roundi(c_old * 0.5))
+		LEVEL_COMBATS[lv] = need
+		LEVEL_XP[lv] = roundi(acc)
+		acc += float(need) * float(_combat_xp_raw(lv)) * ClassRules.FIGHT_XP_MULT
+	LEVEL_XP[ClassRules.MAX_LEVEL + 1] = roundi(acc)
+	LEVEL_COMBATS[ClassRules.MAX_LEVEL + 1] = LEVEL_COMBATS[ClassRules.MAX_LEVEL]
+
+## XP de base d'un combat de niveau `fight_level` (avant FIGHT_XP_MULT et réglage de vitesse).
+func _combat_xp_raw(fight_level: int) -> int:
+	var lv: int = clampi(fight_level, 1, ClassRules.ENEMY_MAX_LEVEL)
+	var gain: float = ClassRules.XP_PER_COMBAT_BASE * pow(ClassRules.XP_PER_COMBAT_GROWTH, float(lv - 1) * 0.5)
+	return roundi(clampf(gain, ClassRules.XP_PER_COMBAT_FLOOR, ClassRules.XP_PER_COMBAT_CEIL))
 
 ## Biomes : cycle des combats. Chaque biome dure BOSS_EVERY combats, le dernier
 ## étant le boss du biome. Les types viennent de la colonne « Biome » de ennemis.txt.
@@ -177,159 +207,159 @@ const ADVENTURE_ZONES := {
 
 const ADVENTURE_POIS := {
 	"foret_sylve": {
-		"4,1": {"kind": "puzzle", "name": "Sanctuaire des runes", "level": 10,
+		"4,1": {"kind": "puzzle", "name": "Sanctuaire des runes", "level": 1,
 			"desc": "De vieilles runes attendent une réponse."},
-		"7,2": {"kind": "combat", "name": "Camp gobelin", "level": 10,
+		"7,2": {"kind": "combat", "name": "Camp gobelin", "level": 1,
 			"desc": "Des gobelins ont dressé leurs tentes."},
-		"3,4": {"kind": "chest", "name": "Coffre moussu", "level": 10,
+		"3,4": {"kind": "chest", "name": "Coffre moussu", "level": 1,
 			"desc": "Un coffre à demi enseveli sous la mousse."},
-		"5,5": {"kind": "camp", "name": "Source claire", "level": 10,
+		"5,5": {"kind": "camp", "name": "Source claire", "level": 1,
 			"desc": "Un endroit sûr pour reprendre souffle."},
-		"8,5": {"kind": "reveal", "name": "Belvédère de la Sylve", "level": 10,
+		"8,5": {"kind": "reveal", "name": "Belvédère de la Sylve", "level": 1,
 			"desc": "Du haut de l’arbre, la vallée se dévoile."},
-		"2,1": {"kind": "puzzle", "name": "Cercle des pierres chantantes", "level": 10,
+		"2,1": {"kind": "puzzle", "name": "Cercle des pierres chantantes", "level": 1,
 			"desc": "Des menhirs s'illuminent puis se taisent."},
 	},
 	"foret_ronces": {
-		"5,1": {"kind": "combat", "name": "Embûche de ronces", "level": 13,
+		"5,1": {"kind": "combat", "name": "Embûche de ronces", "level": 10,
 			"desc": "Quelque chose remue sous les ronces."},
-		"2,2": {"kind": "puzzle", "name": "Autel du Lierre", "level": 13,
+		"2,2": {"kind": "puzzle", "name": "Autel du Lierre", "level": 10,
 			"desc": "L’autel du Lierre pose son énigme."},
-		"7,4": {"kind": "chest", "name": "Cachette du braconnier", "level": 13,
+		"7,4": {"kind": "chest", "name": "Cachette du braconnier", "level": 10,
 			"desc": "Un vieux sac oublié sous une racine."},
-		"4,5": {"kind": "combat", "name": "Patrouille de la Citadelle", "level": 15,
+		"4,5": {"kind": "combat", "name": "Patrouille de la Citadelle", "level": 20,
 			"desc": "Des soldats des Ronces rôdent ici."},
-		"8,1": {"kind": "puzzle", "name": "Dalles du cloître", "level": 13,
+		"8,1": {"kind": "puzzle", "name": "Dalles du cloître", "level": 10,
 			"desc": "Neuf dalles gravées, certaines éteintes."},
-		"1,5": {"kind": "camp", "name": "Feu de camp des pèlerins", "level": 13,
+		"1,5": {"kind": "camp", "name": "Feu de camp des pèlerins", "level": 10,
 			"desc": "Des braises encore tièdes sous un abri de ronces."},
 	},
 	"montagne_pics": {
-		"5,2": {"kind": "combat", "name": "Caverne du Troll", "level": 17,
+		"5,2": {"kind": "combat", "name": "Caverne du Troll", "level": 33,
 			"desc": "Un troll garde le passage."},
-		"2,4": {"kind": "puzzle", "name": "Runes du Col", "level": 17,
+		"2,4": {"kind": "puzzle", "name": "Runes du Col", "level": 33,
 			"desc": "Des runes gelées à déchiffrer."},
-		"7,5": {"kind": "chest", "name": "Grotte au cristal", "level": 17,
+		"7,5": {"kind": "chest", "name": "Grotte au cristal", "level": 33,
 			"desc": "Un éclat de cristal brille au fond."},
-		"8,1": {"kind": "reveal", "name": "Panneau du Givre", "level": 17,
+		"8,1": {"kind": "reveal", "name": "Panneau du Givre", "level": 33,
 			"desc": "Tout le massif s’étale sous vos yeux."},
-		"3,1": {"kind": "puzzle", "name": "Orgue de glace", "level": 17,
+		"3,1": {"kind": "puzzle", "name": "Orgue de glace", "level": 33,
 			"desc": "Des stalactites résonnent au gré du vent."},
-		"5,4": {"kind": "camp", "name": "Refuge du berger", "level": 17,
+		"5,4": {"kind": "camp", "name": "Refuge du berger", "level": 33,
 			"desc": "Une cabane de pierre, un poêle et du thé chaud."},
 	},
 	"lisiere_col": {
-		"6,3": {"kind": "combat", "name": "Loups de la lisière", "level": 14,
+		"6,3": {"kind": "combat", "name": "Loups de la lisière", "level": 15,
 			"desc": "Une meute garde le passage vers les hauteurs."},
-		"3,2": {"kind": "chest", "name": "Cabane du bûcheron", "level": 14,
+		"3,2": {"kind": "chest", "name": "Cabane du bûcheron", "level": 15,
 			"desc": "Une cabane abandonnée, la porte entrouverte."},
-		"2,5": {"kind": "puzzle", "name": "Totem des deux versants", "level": 14,
+		"2,5": {"kind": "puzzle", "name": "Totem des deux versants", "level": 15,
 			"desc": "Les runes du totem s'allument tour à tour."},
-		"7,1": {"kind": "reveal", "name": "Mirador de la lisière", "level": 14,
+		"7,1": {"kind": "reveal", "name": "Mirador de la lisière", "level": 15,
 			"desc": "D'ici, forêts et sommets se partagent l'horizon."},
-		"8,5": {"kind": "camp", "name": "Halte des colporteurs", "level": 14,
+		"8,5": {"kind": "camp", "name": "Halte des colporteurs", "level": 15,
 			"desc": "Un abri de toile où l'on échange les nouvelles."},
 	},
 	"cretes_givre": {
-		"5,3": {"kind": "combat", "name": "Sentinelles de glace", "level": 19,
+		"5,3": {"kind": "combat", "name": "Sentinelles de glace", "level": 47,
 			"desc": "Des silhouettes figées bougent quand on approche."},
-		"4,5": {"kind": "combat", "name": "Troll des crêtes", "level": 20,
+		"4,5": {"kind": "combat", "name": "Troll des crêtes", "level": 55,
 			"desc": "Un troll énorme réclame un droit de passage."},
-		"2,1": {"kind": "puzzle", "name": "Miroirs de givre", "level": 19,
+		"2,1": {"kind": "puzzle", "name": "Miroirs de givre", "level": 47,
 			"desc": "Seize miroirs de glace, la plupart ternis."},
-		"7,5": {"kind": "chest", "name": "Cache du contrebandier", "level": 19,
+		"7,5": {"kind": "chest", "name": "Cache du contrebandier", "level": 47,
 			"desc": "Un coffre arrimé sous un surplomb."},
-		"8,1": {"kind": "reveal", "name": "Aiguille des Crêtes", "level": 19,
+		"8,1": {"kind": "reveal", "name": "Aiguille des Crêtes", "level": 47,
 			"desc": "Le plus haut sommet de Zimut."},
-		"2,5": {"kind": "camp", "name": "Grotte tiède", "level": 19,
+		"2,5": {"kind": "camp", "name": "Grotte tiède", "level": 47,
 			"desc": "Une source chaude fume au fond de la grotte."},
 	},
 	"piemont_ocre": {
-		"4,3": {"kind": "combat", "name": "Pillards du piémont", "level": 19,
+		"4,3": {"kind": "combat", "name": "Pillards du piémont", "level": 47,
 			"desc": "Des pillards rançonnent les caravanes."},
-		"7,1": {"kind": "puzzle", "name": "Stèle des caravaniers", "level": 19,
+		"7,1": {"kind": "puzzle", "name": "Stèle des caravaniers", "level": 47,
 			"desc": "Une stèle gravée d'une question."},
-		"2,1": {"kind": "chest", "name": "Sacoche du muletier", "level": 19,
+		"2,1": {"kind": "chest", "name": "Sacoche du muletier", "level": 47,
 			"desc": "Une sacoche tombée d'un bât."},
-		"7,5": {"kind": "reveal", "name": "Promontoire ocre", "level": 19,
+		"7,5": {"kind": "reveal", "name": "Promontoire ocre", "level": 47,
 			"desc": "Les dunes s'étendent jusqu'à la mer."},
-		"2,5": {"kind": "camp", "name": "Bivouac des canyons", "level": 19,
+		"2,5": {"kind": "camp", "name": "Bivouac des canyons", "level": 47,
 			"desc": "Un feu à l'abri du vent des canyons."},
 	},
 	"portes_donjon": {
-		"5,3": {"kind": "combat", "name": "Garde des Portes", "level": 24,
+		"5,3": {"kind": "combat", "name": "Garde des Portes", "level": 90,
 			"desc": "Les squelettes de la garde royale veillent encore."},
-		"3,5": {"kind": "combat", "name": "Crypte oubliée", "level": 25,
+		"3,5": {"kind": "combat", "name": "Crypte oubliée", "level": 100,
 			"desc": "Quelque chose gratte sous la dalle."},
-		"2,2": {"kind": "puzzle", "name": "Sceau des Portes", "level": 24,
+		"2,2": {"kind": "puzzle", "name": "Sceau des Portes", "level": 90,
 			"desc": "Sept sceaux à rallumer dans le bon ordre."},
-		"8,2": {"kind": "chest", "name": "Ossuaire", "level": 24,
+		"8,2": {"kind": "chest", "name": "Ossuaire", "level": 90,
 			"desc": "Des offrandes oubliées parmi les os."},
-		"7,5": {"kind": "reveal", "name": "Tour de guet morte", "level": 24,
+		"7,5": {"kind": "reveal", "name": "Tour de guet morte", "level": 90,
 			"desc": "Du sommet, le Donjon du Roi Squelette."},
-		"1,1": {"kind": "camp", "name": "Brasero des pèlerins", "level": 24,
+		"1,1": {"kind": "camp", "name": "Brasero des pèlerins", "level": 90,
 			"desc": "Une flamme bleue qui ne s'éteint jamais."},
 	},
 	"desert_dunes": {
-		"4,3": {"kind": "combat", "name": "Squelettes des sables", "level": 21,
+		"4,3": {"kind": "combat", "name": "Squelettes des sables", "level": 63,
 			"desc": "Des ossements s’animent à votre approche."},
-		"6,1": {"kind": "puzzle", "name": "Obélisque Solaire", "level": 21,
+		"6,1": {"kind": "puzzle", "name": "Obélisque Solaire", "level": 63,
 			"desc": "L’obélisque attend sa constellation."},
-		"2,5": {"kind": "chest", "name": "Épave du convoi", "level": 21,
+		"2,5": {"kind": "chest", "name": "Épave du convoi", "level": 63,
 			"desc": "Les restes d’un convoi ensevelis."},
-		"8,5": {"kind": "reveal", "name": "Mirador du Désert", "level": 21,
+		"8,5": {"kind": "reveal", "name": "Mirador du Désert", "level": 63,
 			"desc": "Un mirador dominant les Dunes."},
-		"5,5": {"kind": "puzzle", "name": "Mosaïque du soleil", "level": 21,
+		"5,5": {"kind": "puzzle", "name": "Mosaïque du soleil", "level": 63,
 			"desc": "Seize tuiles de verre attendent la lumière."},
-		"1,1": {"kind": "camp", "name": "Puits de l'oasis", "level": 21,
+		"1,1": {"kind": "camp", "name": "Puits de l'oasis", "level": 63,
 			"desc": "Une eau fraîche au fond d'un puits de grès."},
 	},	"vents_plateau": {
-		"3,2": {"kind": "combat", "name": "Garde aérienne", "level": 17, "desc": "Des sentinelles ailées patrouillent."},
-		"6,3": {"kind": "combat", "name": "Harpies du plateau", "level": 18, "desc": "Les harpies défendent leur nid."},
-		"2,5": {"kind": "chest", "name": "Nid d'aigle", "level": 17, "desc": "Un nid garni de trouvailles."},
-		"7,1": {"kind": "puzzle", "name": "Totem du souffle", "level": 17, "desc": "Le totem murmure une énigme."},
-		"8,5": {"kind": "reveal", "name": "Tour des vents", "level": 17, "desc": "Une tour qui domine les nuages."},
-		"4,4": {"kind": "camp", "name": "Abri de plume", "level": 17, "desc": "Un abri contre les rafales."},
+		"3,2": {"kind": "combat", "name": "Garde aérienne", "level": 33, "desc": "Des sentinelles ailées patrouillent."},
+		"6,3": {"kind": "combat", "name": "Harpies du plateau", "level": 40, "desc": "Les harpies défendent leur nid."},
+		"2,5": {"kind": "chest", "name": "Nid d'aigle", "level": 33, "desc": "Un nid garni de trouvailles."},
+		"7,1": {"kind": "puzzle", "name": "Totem du souffle", "level": 33, "desc": "Le totem murmure une énigme."},
+		"8,5": {"kind": "reveal", "name": "Tour des vents", "level": 33, "desc": "Une tour qui domine les nuages."},
+		"4,4": {"kind": "camp", "name": "Abri de plume", "level": 33, "desc": "Un abri contre les rafales."},
 	},
 	"brumes_marais": {
-		"3,2": {"kind": "combat", "name": "Rôdeurs brumeux", "level": 16, "desc": "Des formes se glissent dans la brume."},
-		"6,2": {"kind": "combat", "name": "Liche du marais", "level": 17, "desc": "Un mort-vivant garde le marais."},
-		"2,5": {"kind": "chest", "name": "Coffre englouti", "level": 16, "desc": "Un coffre à moitié enfoui dans la vase."},
-		"7,1": {"kind": "puzzle", "name": "Champignon sage", "level": 16, "desc": "Un grand champignon pose une devinette."},
-		"8,5": {"kind": "reveal", "name": "Arbre des esprits", "level": 16, "desc": "On voit loin depuis ses branches."},
-		"4,4": {"kind": "camp", "name": "Cabane sur pilotis", "level": 16, "desc": "Un refuge au-dessus de l'eau."},
+		"3,2": {"kind": "combat", "name": "Rôdeurs brumeux", "level": 26, "desc": "Des formes se glissent dans la brume."},
+		"6,2": {"kind": "combat", "name": "Liche du marais", "level": 33, "desc": "Un mort-vivant garde le marais."},
+		"2,5": {"kind": "chest", "name": "Coffre englouti", "level": 26, "desc": "Un coffre à moitié enfoui dans la vase."},
+		"7,1": {"kind": "puzzle", "name": "Champignon sage", "level": 26, "desc": "Un grand champignon pose une devinette."},
+		"8,5": {"kind": "reveal", "name": "Arbre des esprits", "level": 26, "desc": "On voit loin depuis ses branches."},
+		"4,4": {"kind": "camp", "name": "Cabane sur pilotis", "level": 26, "desc": "Un refuge au-dessus de l'eau."},
 	},
 	"brasier_cendres": {
-		"3,2": {"kind": "combat", "name": "Lieutenants de braise", "level": 15, "desc": "Des soldats de feu montent la garde."},
-		"6,4": {"kind": "combat", "name": "Golem de lave", "level": 16, "desc": "Un colosse de roche en fusion."},
-		"2,5": {"kind": "chest", "name": "Forge abandonnée", "level": 15, "desc": "Une forge oubliée, encore tiède."},
-		"7,1": {"kind": "puzzle", "name": "Brasero oraculaire", "level": 15, "desc": "Les flammes posent une question."},
-		"8,5": {"kind": "reveal", "name": "Cratère-belvédère", "level": 15, "desc": "Du bord du cratère on voit loin."},
-		"4,4": {"kind": "camp", "name": "Source chaude", "level": 15, "desc": "Une source bienfaisante."},
+		"3,2": {"kind": "combat", "name": "Lieutenants de braise", "level": 20, "desc": "Des soldats de feu montent la garde."},
+		"6,4": {"kind": "combat", "name": "Golem de lave", "level": 26, "desc": "Un colosse de roche en fusion."},
+		"2,5": {"kind": "chest", "name": "Forge abandonnée", "level": 20, "desc": "Une forge oubliée, encore tiède."},
+		"7,1": {"kind": "puzzle", "name": "Brasero oraculaire", "level": 20, "desc": "Les flammes posent une question."},
+		"8,5": {"kind": "reveal", "name": "Cratère-belvédère", "level": 20, "desc": "Du bord du cratère on voit loin."},
+		"4,4": {"kind": "camp", "name": "Source chaude", "level": 20, "desc": "Une source bienfaisante."},
 	},
 	"ombres_necropole": {
-		"3,2": {"kind": "combat", "name": "Assassins des ombres", "level": 20, "desc": "Des silhouettes jaillissent des tombes."},
-		"5,3": {"kind": "combat", "name": "Spectre gardien", "level": 21, "desc": "Le gardien de la nécropole."},
-		"2,5": {"kind": "chest", "name": "Caveau scellé", "level": 20, "desc": "Un caveau dont le sceau a cédé."},
-		"7,1": {"kind": "puzzle", "name": "Obélisque fêlé", "level": 20, "desc": "L'obélisque exige une réponse."},
-		"8,5": {"kind": "reveal", "name": "Tour du corbeau", "level": 20, "desc": "Un perchoir sur la nécropole."},
-		"4,4": {"kind": "camp", "name": "Crypte tranquille", "level": 20, "desc": "Un coin de calme parmi les stèles."},
+		"3,2": {"kind": "combat", "name": "Assassins des ombres", "level": 55, "desc": "Des silhouettes jaillissent des tombes."},
+		"5,3": {"kind": "combat", "name": "Spectre gardien", "level": 63, "desc": "Le gardien de la nécropole."},
+		"2,5": {"kind": "chest", "name": "Caveau scellé", "level": 55, "desc": "Un caveau dont le sceau a cédé."},
+		"7,1": {"kind": "puzzle", "name": "Obélisque fêlé", "level": 55, "desc": "L'obélisque exige une réponse."},
+		"8,5": {"kind": "reveal", "name": "Tour du corbeau", "level": 55, "desc": "Un perchoir sur la nécropole."},
+		"4,4": {"kind": "camp", "name": "Crypte tranquille", "level": 55, "desc": "Un coin de calme parmi les stèles."},
 	},
 	"cristaux_caverne": {
-		"3,2": {"kind": "combat", "name": "Mineurs cristallins", "level": 23, "desc": "Des ouvriers de cristal veillent."},
-		"6,3": {"kind": "combat", "name": "Golem prismatique", "level": 24, "desc": "Le gardien lumineux de la caverne."},
-		"2,5": {"kind": "chest", "name": "Géode brisée", "level": 23, "desc": "Une géode pleine d'éclats précieux."},
-		"7,1": {"kind": "puzzle", "name": "Miroir d'améthyste", "level": 23, "desc": "Le cristal pose son énigme."},
-		"8,5": {"kind": "reveal", "name": "Dôme de cristal", "level": 23, "desc": "Une vue sur toute la caverne."},
-		"4,4": {"kind": "camp", "name": "Grotte tiède", "level": 23, "desc": "Un coin chaud et abrité."},
+		"3,2": {"kind": "combat", "name": "Mineurs cristallins", "level": 81, "desc": "Des ouvriers de cristal veillent."},
+		"6,3": {"kind": "combat", "name": "Golem prismatique", "level": 90, "desc": "Le gardien lumineux de la caverne."},
+		"2,5": {"kind": "chest", "name": "Géode brisée", "level": 81, "desc": "Une géode pleine d'éclats précieux."},
+		"7,1": {"kind": "puzzle", "name": "Miroir d'améthyste", "level": 81, "desc": "Le cristal pose son énigme."},
+		"8,5": {"kind": "reveal", "name": "Dôme de cristal", "level": 81, "desc": "Une vue sur toute la caverne."},
+		"4,4": {"kind": "camp", "name": "Grotte tiède", "level": 81, "desc": "Un coin chaud et abrité."},
 	},
 	"marees_cotes": {
-		"3,2": {"kind": "combat", "name": "Pirates des marées", "level": 22, "desc": "Des pirates ont jeté l'ancre."},
-		"6,2": {"kind": "combat", "name": "Crabe titan", "level": 23, "desc": "Un crabe gigantesque garde la crique."},
-		"2,5": {"kind": "chest", "name": "Épave échouée", "level": 22, "desc": "Une épave pleine de butin."},
-		"7,1": {"kind": "puzzle", "name": "Phare muet", "level": 22, "desc": "Le gardien du phare pose une devinette."},
-		"8,5": {"kind": "reveal", "name": "Grand phare", "level": 22, "desc": "Du phare, on voit tout le littoral."},
-		"4,4": {"kind": "camp", "name": "Plage abritée", "level": 22, "desc": "Une crique calme pour souffler."},
+		"3,2": {"kind": "combat", "name": "Pirates des marées", "level": 72, "desc": "Des pirates ont jeté l'ancre."},
+		"6,2": {"kind": "combat", "name": "Crabe titan", "level": 81, "desc": "Un crabe gigantesque garde la crique."},
+		"2,5": {"kind": "chest", "name": "Épave échouée", "level": 72, "desc": "Une épave pleine de butin."},
+		"7,1": {"kind": "puzzle", "name": "Phare muet", "level": 72, "desc": "Le gardien du phare pose une devinette."},
+		"8,5": {"kind": "reveal", "name": "Grand phare", "level": 72, "desc": "Du phare, on voit tout le littoral."},
+		"4,4": {"kind": "camp", "name": "Plage abritée", "level": 72, "desc": "Une crique calme pour souffler."},
 	},
 
 }
@@ -398,33 +428,33 @@ const ADVENTURE_PUZZLES := {
 ##   donjon_roi : objectif final, débloqué quand tout l'empire est conquis.
 const CONQUEST_CITIES := {
 	"capitale":     {"name": "Sylve-Cœur",      "kind": "capital",    "biome": "Forêt",     "level": 0},
-	"clairiere":    {"name": "Clairière d'Aube", "kind": "neutral",   "biome": "Forêt",     "level": 10},
-	"vieille_tour": {"name": "Vieille Tour",     "kind": "enemy",     "biome": "Forêt",     "level": 12},
-	"pont_mousse":  {"name": "Pont-Mousse",      "kind": "neutral",   "biome": "Forêt",     "level": 11},
-	"fort_racine":  {"name": "Fort Racine",       "kind": "enemy",     "biome": "Forêt",     "level": 14},
-	"hameau_pin":   {"name": "Hameau du Pin",    "kind": "neutral",   "biome": "Montagne",  "level": 16},
-	"garnison":    {"name": "Garnison des Pics", "kind": "enemy",     "biome": "Montagne",  "level": 18},
-	"oasis":        {"name": "Oasis Perdue",      "kind": "neutral",   "biome": "Désert",    "level": 20},
-	"tour_sable":   {"name": "Tour des Sables",  "kind": "enemy",     "biome": "Désert",    "level": 22},
-	"donjon_roi":   {"name": "Donjon du Roi Squelette", "kind": "enemy", "biome": "Donjon", "level": 25},
-	"village_brume": {"name": "Village des Brumes", "kind": "neutral", "biome": "Brumes", "level": 11},
-	"ruines_lierre": {"name": "Ruines du Lierre", "kind": "enemy", "biome": "Ombres", "level": 13},
-	"abbaye_ronce": {"name": "Abbaye des Ronces", "kind": "neutral", "biome": "Ombres", "level": 14},
-	"citadelle_ronce": {"name": "Citadelle des Ronces", "kind": "enemy", "biome": "Ombres", "level": 15},
-	"col_givre": {"name": "Col du Givre", "kind": "neutral", "biome": "Montagne", "level": 17},
-	"mine_cristal": {"name": "Mine de Cristal", "kind": "enemy", "biome": "Cristaux", "level": 19},
-	"bastion_orage": {"name": "Bastion de l'Orage", "kind": "enemy", "biome": "Vents", "level": 21},
-	"caravanserail": {"name": "Caravansérail Rouge", "kind": "neutral", "biome": "Marées", "level": 22},
-	"observatoire": {"name": "Observatoire Solaire", "kind": "neutral", "biome": "Désert", "level": 23},
-	"port_sable": {"name": "Port des Sables", "kind": "enemy", "biome": "Marées", "level": 24},
-	"bois_lune": {"name": "Bois de Lune", "kind": "neutral", "biome": "Brumes", "level": 16},
-	"sanctuaire_mousse": {"name": "Sanctuaire Moussu", "kind": "neutral", "biome": "Forêt", "level": 17},
-	"forge_givre": {"name": "Forge du Givre", "kind": "enemy", "biome": "Cristaux", "level": 23},
-	"pic_foudroyant": {"name": "Pic Foudroyant", "kind": "enemy", "biome": "Vents", "level": 24},
-	"marais_spectres": {"name": "Marais des Spectres", "kind": "neutral", "biome": "Brumes", "level": 18},
-	"fort_cendre": {"name": "Fort des Cendres", "kind": "enemy", "biome": "Brasier", "level": 26},
-	"temple_soleil": {"name": "Temple du Soleil", "kind": "neutral", "biome": "Désert", "level": 25},
-	"citadelle_sable": {"name": "Citadelle de Sable", "kind": "enemy", "biome": "Brasier", "level": 27},
+	"clairiere":    {"name": "Clairière d'Aube", "kind": "neutral",   "biome": "Forêt",     "level": 1},
+	"vieille_tour": {"name": "Vieille Tour",     "kind": "enemy",     "biome": "Forêt",     "level": 6},
+	"pont_mousse":  {"name": "Pont-Mousse",      "kind": "neutral",   "biome": "Forêt",     "level": 3},
+	"fort_racine":  {"name": "Fort Racine",       "kind": "enemy",     "biome": "Forêt",     "level": 15},
+	"hameau_pin":   {"name": "Hameau du Pin",    "kind": "neutral",   "biome": "Montagne",  "level": 26},
+	"garnison":    {"name": "Garnison des Pics", "kind": "enemy",     "biome": "Montagne",  "level": 40},
+	"oasis":        {"name": "Oasis Perdue",      "kind": "neutral",   "biome": "Désert",    "level": 55},
+	"tour_sable":   {"name": "Tour des Sables",  "kind": "enemy",     "biome": "Désert",    "level": 72},
+	"donjon_roi":   {"name": "Donjon du Roi Squelette", "kind": "enemy", "biome": "Donjon", "level": 100},
+	"village_brume": {"name": "Village des Brumes", "kind": "neutral", "biome": "Brumes", "level": 3},
+	"ruines_lierre": {"name": "Ruines du Lierre", "kind": "enemy", "biome": "Ombres", "level": 10},
+	"abbaye_ronce": {"name": "Abbaye des Ronces", "kind": "neutral", "biome": "Ombres", "level": 15},
+	"citadelle_ronce": {"name": "Citadelle des Ronces", "kind": "enemy", "biome": "Ombres", "level": 20},
+	"col_givre": {"name": "Col du Givre", "kind": "neutral", "biome": "Montagne", "level": 33},
+	"mine_cristal": {"name": "Mine de Cristal", "kind": "enemy", "biome": "Cristaux", "level": 47},
+	"bastion_orage": {"name": "Bastion de l'Orage", "kind": "enemy", "biome": "Vents", "level": 63},
+	"caravanserail": {"name": "Caravansérail Rouge", "kind": "neutral", "biome": "Marées", "level": 72},
+	"observatoire": {"name": "Observatoire Solaire", "kind": "neutral", "biome": "Désert", "level": 81},
+	"port_sable": {"name": "Port des Sables", "kind": "enemy", "biome": "Marées", "level": 90},
+	"bois_lune": {"name": "Bois de Lune", "kind": "neutral", "biome": "Brumes", "level": 26},
+	"sanctuaire_mousse": {"name": "Sanctuaire Moussu", "kind": "neutral", "biome": "Forêt", "level": 33},
+	"forge_givre": {"name": "Forge du Givre", "kind": "enemy", "biome": "Cristaux", "level": 81},
+	"pic_foudroyant": {"name": "Pic Foudroyant", "kind": "enemy", "biome": "Vents", "level": 90},
+	"marais_spectres": {"name": "Marais des Spectres", "kind": "neutral", "biome": "Brumes", "level": 40},
+	"fort_cendre": {"name": "Fort des Cendres", "kind": "enemy", "biome": "Brasier", "level": 110},
+	"temple_soleil": {"name": "Temple du Soleil", "kind": "neutral", "biome": "Désert", "level": 100},
+	"citadelle_sable": {"name": "Citadelle de Sable", "kind": "enemy", "biome": "Brasier", "level": 120},
 }
 
 ## Récompense de première annexion : chaque lieu offre un petit butin
@@ -496,10 +526,10 @@ const CONQUEST_BUILDINGS := {
 	"muraille": {"label": "Muraille (+6 défense)", "cost": {"Fer": 15},     "gold": 60,  "yield": {}},
 }
 ## +1 niveau d'ennemi toutes les N victoires (la difficulté monte doucement)
-const DIFFICULTY_CREEP_EVERY := 10
+const DIFFICULTY_CREEP_EVERY := 25
 
 ## Niveau de combat par défaut quand aucun n'est connu (combat rapide).
-const DEFAULT_FIGHT_LEVEL := 10
+const DEFAULT_FIGHT_LEVEL := 20
 const CLASS_ORDER: Array[String] = ["Tank", "Assassin", "Chasseur", "Mage", "Druide", "Heal", "Invocateur", "Sylvain", "Géomancien"]
 
 ## Emplacements d'équipement par personnage (clé -> type d'item accepté)
@@ -526,6 +556,7 @@ var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	_rng.randomize()
+	_build_level_tables()
 	for cid: String in CONQUEST_CITIES.keys():
 		ConquestSystem.city_names[cid] = String(CONQUEST_CITIES[cid].get("name", cid))
 	_load_items_catalog()
@@ -627,7 +658,9 @@ func _fresh_save() -> Dictionary:
 		"inventory": [],      # [{ "type", "name", "level", "rarity", stats... }]
 		"resources": {},      # { "Fer": n, "Bois": n, ... } — butin de craft
 		"gold": 0,            # pièces d'or (pour le craft)
-		"roster": {},         # { classe: { level, xp, invested{}, unspent, auto } }
+		"roster": {},         # { classe: { level, xp, invested{}, unspent, auto, spell_levels{} } }
+		"balance_v": BALANCE_VERSION,
+		"difficulty": 1,      # difficulté des mobs propre à la partie (0 Facile … 3 Enfer)
 		"timestamp": Time.get_datetime_string_from_system(),
 	}
 
@@ -773,6 +806,8 @@ func class_row(classe: String, level: int) -> Dictionary:
 func xp_for_level(level: int) -> int:
 	if level <= 1:
 		return 0
+	if LEVEL_XP.is_empty():
+		_build_level_tables()
 	var lv: int = clampi(level, 1, ClassRules.MAX_LEVEL)
 	return int(LEVEL_XP[lv])
 
@@ -787,15 +822,15 @@ func level_for_xp(xp: int) -> int:
 ## XP_PER_COMBAT_FLOOR et XP_PER_COMBAT_CEIL pour que le rythme suivi par les
 ## paliers LEVEL_XP / LEVEL_COMBATS soit respecté de bout en bout.
 func combat_xp(fight_level: int) -> int:
-	var lv: int = clampi(fight_level, 1, ClassRules.MAX_LEVEL)
-	var gain: float = ClassRules.XP_PER_COMBAT_BASE * pow(ClassRules.XP_PER_COMBAT_GROWTH, float(lv - 1))
-	gain = clampf(gain, ClassRules.XP_PER_COMBAT_FLOOR, ClassRules.XP_PER_COMBAT_CEIL)
+	var gain: float = float(_combat_xp_raw(fight_level))
 	var settings: Node = get_node_or_null("/root/GameSettings")
 	var speed: float = settings.xp_mult() if settings != null else 1.0
 	return maxi(1, roundi(gain * ClassRules.FIGHT_XP_MULT * speed))
 
 ## Nombre de combats de la frontière estimé pour passer de `level` à `level + 1`.
 func combats_for_level(level: int) -> int:
+	if LEVEL_COMBATS.is_empty():
+		_build_level_tables()
 	var lv: int = clampi(level, 1, ClassRules.MAX_LEVEL)
 	var need: int = int(LEVEL_COMBATS[lv])
 	if need > 0:
@@ -1022,15 +1057,14 @@ func craft_and_equip(data: Dictionary, recipe_name: String, member_index: int) -
 	return ""
 
 # ═══════════════════════════════════════════════════════════════════════════
-## ── Niveaux de sorts (1..10) ─────────────────────────────────────────────
-## Chaque sort d'une classe peut être amélioré du niveau 1 au niveau 10 :
-## +SPELL_LEVEL_BONUS_PCT par niveau sur les dégâts / soins / valeurs d'effet.
-## Coût d'amélioration : (SPELL_LEVEL_GOLD_BASE × niveau) or
-## + (SPELL_LEVEL_MAGIC_BASE × niveau) unités de Magie.
+## ── Niveaux de sorts (1..10) et points de sort ───────────────────────────
+## Chaque héros a 10 sorts (3 au niveau 1, les autres débloqués jusqu'au niveau 100).
+## Chaque sort peut monter du niveau 1 au niveau 10 : +SPELL_LEVEL_BONUS_PCT par niveau
+## sur les dégâts / soins / valeurs d'effet. On gagne 3 points de sort par niveau de héros (297 au niveau 100) ;
+## passer un sort du niveau n au niveau n+1 coûte n points (45 pour 1 -> 10). Au niveau 100 : 5 sorts
+## au maximum (225 points) + 72 points restants ; les 10 à fond (450) sont impossibles. Remise à zéro GRATUITE.
 const SPELL_LEVEL_MAX := 10
 const SPELL_LEVEL_BONUS_PCT := 6.0
-const SPELL_LEVEL_GOLD_BASE := 50
-const SPELL_LEVEL_MAGIC_BASE := 2
 
 ## Niveau actuel d'un sort pour une classe (1 si jamais amélioré).
 func spell_level(data: Dictionary, classe: String, spell_name: String) -> int:
@@ -1042,12 +1076,38 @@ func spell_level(data: Dictionary, classe: String, spell_name: String) -> int:
 func spell_mult(data: Dictionary, classe: String, spell_name: String) -> float:
 	return 1.0 + (float(spell_level(data, classe, spell_name)) - 1.0) * SPELL_LEVEL_BONUS_PCT / 100.0
 
-## Coût de la prochaine amélioration : { "gold": int, "magie": int } ou {} au max.
+## Points de sort gagnés au total par un héros de niveau `level`.
+func spell_points_total(level: int) -> int:
+	return maxi(0, level - 1) * ClassRules.SPELL_POINTS_PER_LEVEL
+
+## Points de sort déjà dépensés (somme des coûts de 1 -> niveau actuel de chaque sort).
+func spell_points_spent(data: Dictionary, classe: String) -> int:
+	var e: Dictionary = roster_entry(data, classe)
+	var spent: int = 0
+	for n in e.get("spell_levels", {}).values():
+		var lv: int = clampi(int(n), 1, SPELL_LEVEL_MAX)
+		spent += (lv - 1) * lv / 2
+	return spent
+
+func spell_points_free(data: Dictionary, classe: String) -> int:
+	var e: Dictionary = roster_entry(data, classe)
+	if e.is_empty():
+		return 0
+	return maxi(0, spell_points_total(int(e["level"])) - spell_points_spent(data, classe))
+
+## Coût de la prochaine amélioration : { "points": int } ou {} au niveau max.
 func spell_upgrade_cost(data: Dictionary, classe: String, spell_name: String) -> Dictionary:
 	var lvl: int = spell_level(data, classe, spell_name)
 	if lvl >= SPELL_LEVEL_MAX:
 		return {}
-	return {"gold": SPELL_LEVEL_GOLD_BASE * lvl, "magie": SPELL_LEVEL_MAGIC_BASE * lvl}
+	return {"points": lvl}
+
+## Niveau de héros requis pour un sort de la classe (0 si inconnu).
+func spell_unlock_level(classe: String, spell_name: String) -> int:
+	for s: Dictionary in spells_of(classe):
+		if String(s["name"]) == spell_name:
+			return int(s["level"])
+	return 0
 
 ## Aperçu d'un sort pour la fenêtre des sorts : { pa, pm, range, kind, target, aoe, zone,
 ## value (valeur principale au niveau `level`), label (Dégâts / Soin...), desc }.
@@ -1088,25 +1148,43 @@ func spell_preview(classe: String, spell_name: String, level: int) -> Dictionary
 		"los": bool(p["needs_los"]), "value": roundi(float(base) * mult), "base_value": base, "label": label,
 		"mult": mult, "desc": String(row["effect"]), "type": String(row["type"]), "req": int(row["level"])}
 
-## Améliore un sort d'un niveau. Retourne "" si OK, sinon la raison.
+## Améliore un sort d'un niveau (coûte `niveau actuel` points de sort). "" si OK, sinon la raison.
 func upgrade_spell(data: Dictionary, classe: String, spell_name: String) -> String:
 	var cost: Dictionary = spell_upgrade_cost(data, classe, spell_name)
 	if cost.is_empty():
 		return "Niveau maximum atteint."
-	if int(data.get("gold", 0)) < int(cost["gold"]):
-		return "Or insuffisant : %d pièces requises." % int(cost["gold"])
-	var res: Dictionary = data.get("resources", {})
-	if int(res.get("Magie", 0)) < int(cost["magie"]):
-		return "Magie insuffisante : %d requises." % int(cost["magie"])
-	data["gold"] = int(data.get("gold", 0)) - int(cost["gold"])
-	res["Magie"] = int(res.get("Magie", 0)) - int(cost["magie"])
-	data["resources"] = res
 	var e: Dictionary = roster_entry(data, classe)
+	if e.is_empty():
+		return "Héros inconnu."
+	if int(e["level"]) < spell_unlock_level(classe, spell_name):
+		return "Sort pas encore débloqué."
+	if spell_points_free(data, classe) < int(cost["points"]):
+		return "Points de sort insuffisants : %d requis." % int(cost["points"])
 	var sl: Dictionary = e.get("spell_levels", {})
 	sl[spell_name] = clampi(int(sl.get(spell_name, 1)) + 1, 1, SPELL_LEVEL_MAX)
 	e["spell_levels"] = sl
 	progression_changed.emit()
 	return ""
+
+## Retire un niveau d'un sort et rend ses points (gratuit).
+func downgrade_spell(data: Dictionary, classe: String, spell_name: String) -> String:
+	var e: Dictionary = roster_entry(data, classe)
+	var sl: Dictionary = e.get("spell_levels", {})
+	var lvl: int = clampi(int(sl.get(spell_name, 1)), 1, SPELL_LEVEL_MAX)
+	if lvl <= 1:
+		return "Rien à retirer."
+	sl[spell_name] = lvl - 1
+	e["spell_levels"] = sl
+	progression_changed.emit()
+	return ""
+
+## Remise à zéro GRATUITE de tous les points de sort d'un héros.
+func reset_spells(data: Dictionary, classe: String) -> void:
+	var e: Dictionary = roster_entry(data, classe)
+	if e.is_empty():
+		return
+	e["spell_levels"] = {}
+	progression_changed.emit()
 
 #  Roster : progression de chaque classe
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1121,9 +1199,16 @@ func _new_entry(level: int) -> Dictionary:
 func ensure_roster(data: Dictionary) -> void:
 	if data.is_empty():
 		return
-	var legacy_level: int = clampi(int(data.get("level", START_LEVEL)), START_LEVEL, ClassRules.MAX_LEVEL)
+	var migrate: bool = int(data.get("balance_v", 0)) < BALANCE_VERSION and data.has("roster")
+	var legacy_level: int = clampi(int(data.get("level", START_LEVEL)), START_LEVEL, 50)
+	if int(data.get("balance_v", 0)) >= BALANCE_VERSION:
+		legacy_level = clampi(int(data.get("level", START_LEVEL)), START_LEVEL, ClassRules.MAX_LEVEL)
+	else:
+		legacy_level = level_from_old(legacy_level)
 	var fresh: bool = not data.has("roster")
 	var roster: Dictionary = data.get("roster", {})
+	if migrate:
+		_migrate_balance(data, roster)
 	var team_classes: Array[String] = []
 	for m: Dictionary in data.get("team", []):
 		team_classes.append(String(m.get("classe", "")))
@@ -1146,8 +1231,39 @@ func ensure_roster(data: Dictionary) -> void:
 		for k in inv.keys():
 			inv[k] = int(inv[k])
 		ent["invested"] = inv
+		if not ent.has("spell_levels"):
+			ent["spell_levels"] = {}
 	data["roster"] = roster
+	data["balance_v"] = BALANCE_VERSION
+	if not data.has("difficulty"):
+		# Anciennes parties : reprend le réglage global qui existait avant (Options).
+		var gs: Node = get_node_or_null("/root/GameSettings")
+		data["difficulty"] = int(gs.difficulty) if gs != null else 1
 	data["level"] = frontier_level(data)
+
+## Conversion d'une sauvegarde d'avant l'équilibrage V15 : niveaux 1..50 -> 1..100,
+## capital de points conservé (mêmes choix du joueur), points de sorts remis à zéro
+## (les sorts ont changé), historique des niveaux de combat converti.
+func _migrate_balance(data: Dictionary, roster: Dictionary) -> void:
+	for classe in roster.keys():
+		var ent: Dictionary = roster[classe]
+		var new_lvl: int = level_from_old(clampi(int(ent.get("level", 1)), 1, 50))
+		ent["level"] = new_lvl
+		ent["xp"] = xp_for_level(new_lvl)
+		var inv: Dictionary = ent.get("invested", {})
+		var spent: int = 0
+		for stat in inv.keys():
+			spent += ClassRules.cost_between(String(classe), String(stat), 0, int(inv[stat]))
+		ent["unspent"] = maxi(0, ClassRules.total_points_for_level(new_lvl) - spent)
+		ent["spell_levels"] = {}
+		if bool(ent.get("auto", true)):
+			ent["unspent"] = ClassRules.auto_allocate(String(classe), inv, int(ent["unspent"]))
+		ent["invested"] = inv
+	var hist: Array = data.get("fight_levels", [])
+	for i: int in range(hist.size()):
+		hist[i] = level_from_old(clampi(int(hist[i]), 1, 50))
+	data["fight_levels"] = hist
+	data["balance_v"] = BALANCE_VERSION
 
 func _roster_average(roster: Dictionary, classes: Array[String]) -> int:
 	var tot: int = 0
@@ -1179,7 +1295,7 @@ func team_average_level(data: Dictionary) -> int:
 ## DIFFICULTY_CREEP_EVERY victoires).
 func frontier_level(data: Dictionary) -> int:
 	var lvl: int = team_average_level(data) + int(data.get("victories", 0)) / DIFFICULTY_CREEP_EVERY
-	return clampi(lvl, 1, ClassRules.MAX_LEVEL)
+	return clampi(lvl, 1, ClassRules.ENEMY_MAX_LEVEL)
 
 ## Niveau des ennemis du combat SÉLECTIONNÉ : le combat de la « frontière » (premier non gagné)
 ## s'adapte à l'équipe ; un combat déjà gagné rejoué garde le niveau auquel il a été gagné.
@@ -1212,8 +1328,8 @@ func fight_level_of(data: Dictionary, n: int) -> int:
 		return frontier_level(data)
 	var hist: Array = data.get("fight_levels", [])
 	if n >= 1 and n <= hist.size():
-		return clampi(int(hist[n - 1]), 1, ClassRules.MAX_LEVEL)
-	return clampi(frontier_level(data) - (frontier - n), 1, ClassRules.MAX_LEVEL)
+		return clampi(int(hist[n - 1]), 1, ClassRules.ENEMY_MAX_LEVEL)
+	return clampi(frontier_level(data) - (frontier - n) / 4, 1, ClassRules.ENEMY_MAX_LEVEL)
 
 ## Facteur d'XP selon l'écart entre le niveau du combat et celui du perso :
 ## combat plus bas = moins d'XP (rejouer sert à farmer les objets), plus haut = bonus.

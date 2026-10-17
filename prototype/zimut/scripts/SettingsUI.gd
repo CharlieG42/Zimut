@@ -41,14 +41,11 @@ func _ready() -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 
-	box.add_child(_setting_row("Difficulté des combats", GameSettings.DIFFICULTIES,
-		GameSettings.difficulty, func(idx: int) -> void: GameSettings.set_difficulty(idx)))
-
 	box.add_child(_setting_row("Rapidité de progression XP", GameSettings.XP_SPEEDS,
 		GameSettings.xp_speed, func(idx: int) -> void: GameSettings.set_xp_speed(idx)))
 
 	var hint := Label.new()
-	hint.text = "La difficulté renforce la puissance des ennemis.\nEnfer : beaucoup plus de PV que Difficile, avec des attaques équivalentes.\nLa rapidité XP règle le gain d'expérience de chaque combat."
+	hint.text = "La rapidité XP règle le gain d'expérience de chaque combat.\nLa difficulté des ennemis se règle pour chaque partie, dans « Mes Parties »."
 	hint.add_theme_font_size_override("font_size", 19)
 	hint.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12))
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
