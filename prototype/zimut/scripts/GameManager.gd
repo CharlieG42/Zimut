@@ -1610,7 +1610,11 @@ func check_game_over() -> void:
 	for e: Dictionary in enemies:
 		if is_alive(e):
 			alive_e += 1
-	var info: Dictionary = {"enemies": fight_enemies, "turns": turn_count, "boss": fight_is_boss}
+	var deaths: int = 0
+	for pl_d: Dictionary in players:
+		if not is_alive(pl_d):
+			deaths += 1
+	var info: Dictionary = {"enemies": fight_enemies, "turns": turn_count, "boss": fight_is_boss, "deaths": deaths}
 	if alive_p == 0:
 		game_over = true
 		victory = false

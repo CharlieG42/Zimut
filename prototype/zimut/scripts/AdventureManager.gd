@@ -81,13 +81,108 @@ func poi_key(pos: Vector2i) -> String:
 func poi_done(pos: Vector2i) -> bool:
 	return ProgressionManager.adventure_poi_completed(state, poi_key(pos))
 
-## Déplacement possible : case adjacente (4 directions), dans la grille.
+## Déplacement possible : case adjacente (4 directions), dans la grille, sans obstacle.
 func can_move_to(pos: Vector2i) -> bool:
 	var h := hero_pos()
 	var size := zone_size()
 	if pos.x < 0 or pos.y < 0 or pos.x >= size.x or pos.y >= size.y:
 		return false
+	if not AdventureTerrain.walkable(zone_id(), pos):
+		return false
 	return absi(pos.x - h.x) + absi(pos.y - h.y) == 1
+
+## Chemin jusqu'à une case découverte (déplacement par appui) : [] si impossible.
+## On ne traverse ni le brouillard ni un camp ennemi non vaincu (sauf s'il est la destination).
+func path_to(target: Vector2i) -> Array[Vector2i]:
+	if not cell_discovered(target):
+		return []
+	var blocked: Dictionary = {}
+	var size := zone_size()
+	for y: int in range(size.y):
+		for x: int in range(size.x):
+			var c := Vector2i(x, y)
+			if not cell_discovered(c):
+				blocked[c] = true
+	for k: String in ProgressionManager.adventure_zone_pois(zone_id()).keys():
+		var pos := AdventureTerrain.parse(k)
+		var poi: Dictionary = ProgressionManager.adventure_zone_pois(zone_id())[k]
+		if String(poi.get("kind", "")) == KIND_COMBAT and not poi_done(pos):
+			blocked[pos] = true
+	# On ne franchit une porte que si c'est la destination choisie.
+	for g: Vector2i in gates().keys():
+		blocked[g] = true
+	return AdventureTerrain.find_path(zone_id(), hero_pos(), target, blocked)
+
+
+## ── Portes vers les cartes voisines (monde en grille façon Dofus Touch) ──
+## { Vector2i case : {"dir", "to"} } pour la carte courante.
+func gates() -> Dictionary:
+	return ProgressionManager.adventure_gates(zone_id())
+
+## Porte sur cette case ({} sinon), enrichie de open / reason / name / level / biome / visited.
+func gate_at(pos: Vector2i) -> Dictionary:
+	var g: Dictionary = gates().get(pos, {})
+	if g.is_empty():
+		return {}
+	var out: Dictionary = g.duplicate()
+	var to: String = String(g["to"])
+	out["open"] = ProgressionManager.adventure_gate_open(state, zone_id(), to)
+	out["reason"] = ProgressionManager.adventure_gate_lock_reason(state, zone_id(), to)
+	out["name"] = ProgressionManager.adventure_zone_name(to)
+	out["level"] = ProgressionManager.adventure_zone_level(to)
+	out["biome"] = ProgressionManager.adventure_zone_biome(to)
+	out["visited"] = (state.get("zones_unlocked", []) as Array).has(to)
+	return out
+
+## Franchit la porte de cette case : true si le héros a changé de carte.
+func cross_gate(pos: Vector2i) -> bool:
+	var g: Dictionary = gates().get(pos, {})
+	if g.is_empty() or hero_pos() != pos:
+		return false
+	if not ProgressionManager.adventure_cross(state, String(g["dir"])):
+		return false
+	state["steps_since_event"] = 0
+	persist()
+	zone_changed.emit(zone_id())
+	return true
+
+## Cartes visitées (voyage rapide depuis la mini-carte).
+func visited_zones() -> Array:
+	return (state.get("zones_unlocked", ["foret_sylve"]) as Array).duplicate()
+
+## Classe qui incarne l'explorateur (une classe de l'équipe).
+func hero_class() -> String:
+	var team: Array[String] = []
+	for m: Dictionary in save.get("team", []):
+		team.append(String(m.get("classe", "")))
+	var c: String = String(state.get("hero_class", ""))
+	if c == "" or (not team.is_empty() and not team.has(c)):
+		c = team[0] if not team.is_empty() else "Chasseur"
+		state["hero_class"] = c
+	return c
+
+func set_hero_class(classe: String) -> void:
+	state["hero_class"] = classe
+	persist()
+
+## Avancement de la zone courante : { done, total, fog (0-1 révélé) }.
+func zone_progress() -> Dictionary:
+	var pois: Dictionary = ProgressionManager.adventure_zone_pois(zone_id())
+	var done: int = 0
+	var total: int = 0
+	for k: String in pois.keys():
+		if String(pois[k].get("kind", "")) == KIND_CAMP:
+			continue
+		total += 1
+		if poi_done(AdventureTerrain.parse(k)):
+			done += 1
+	var size := zone_size()
+	var seen: int = 0
+	for y: int in range(size.y):
+		for x: int in range(size.x):
+			if cell_discovered(Vector2i(x, y)):
+				seen += 1
+	return {"done": done, "total": total, "fog": float(seen) / float(maxi(1, size.x * size.y))}
 
 ## Déplace le héros d'une case : pas + brouillard de guerre révélé autour
 ## de la nouvelle position. Retourne les clés fraîchement découvertes.
@@ -131,6 +226,7 @@ func interact() -> Dictionary:
 			return {"action": "reveal", "cities": cities, "names": names}
 		KIND_COMBAT:
 			state["pending_challenge"] = key
+			state["pending_name"] = String(poi.get("name", "Défi"))
 			persist()
 			return {"action": "combat", "key": key, "poi": poi.duplicate(true)}
 		KIND_EXIT:
@@ -143,11 +239,24 @@ func solve_puzzle(key: String, answer: String) -> bool:
 	var puzzle: Dictionary = ProgressionManager.ADVENTURE_PUZZLES.get(key, {})
 	if puzzle.is_empty():
 		return false
-	if answer.strip_edges().to_lower() != String(puzzle.get("answer", "")).strip_edges().to_lower():
+	if not ProgressionManager.adventure_answer_matches(puzzle, answer):
 		return false
 	award_exploration_xp(int(ProgressionManager.ADVENTURE_BASE_XP * 2))
 	complete_poi(key, KIND_PUZZLE)
 	return true
+
+## Énigmes de réflexion (runes, dalles) : l'interface fait jouer la partie et
+## confirme la réussite ici. Même récompense qu'une énigme + une ressource bonus.
+func complete_puzzle(key: String) -> Dictionary:
+	var puzzle: Dictionary = ProgressionManager.ADVENTURE_PUZZLES.get(key, {})
+	if puzzle.is_empty() or ProgressionManager.adventure_poi_completed(state, key):
+		return {}
+	var xp: int = int(ProgressionManager.ADVENTURE_BASE_XP * 2)
+	award_exploration_xp(xp)
+	var res: Dictionary = {String(ProgressionManager.CONQUEST_BIOME_RESOURCE.get(zone_biome(), "Magie")): 3}
+	ProgressionManager.add_resources(save, res)
+	complete_poi(key, KIND_PUZZLE)
+	return {"xp": xp, "resources": res}
 
 ## Coffre : XP d'exploration + un objet de l'inventaire commun.
 func open_chest(key: String, level: int) -> Array:
@@ -171,6 +280,63 @@ func take_exit(key: String) -> Array:
 	var revealed: Array = complete_poi(key, KIND_EXIT)
 	persist()
 	return revealed
+
+# ── Événements de route ─────────────────────────────────────────────────
+## En se déplaçant sur une case sans lieu, le héros peut vivre un petit événement
+## (au plus un toutes les EVENT_COOLDOWN cases) : cueillette, cachette, sage
+## voyageur ou embuscade (combat facultatif au niveau de la zone).
+const EVENT_CHANCE := 0.16
+const EVENT_COOLDOWN := 3
+const SAGE_LINES: Array = [
+	"« Les belvédères ne mentent jamais : ce que vous y voyez, vos armées pourront le prendre. »",
+	"« Le Roi Squelette dort sous le Donjon. Il ne se réveille que pour ceux qui tiennent tout Zimut. »",
+	"« Une source claire guérit l'âme plus vite que la meilleure potion. »",
+	"« Les Sylvains plantent un arbre à chaque soin. Les blessés guérissent à l'ombre de leurs branches. »",
+	"« Les gobelins chassent la nuit, les loups au crépuscule, les squelettes… quand bon leur semble. »",
+	"« Dans le désert, suivez les cairns : chaque pierre posée est une promesse de retour. »",
+]
+
+func roll_event(rng: RandomNumberGenerator = null) -> Dictionary:
+	if rng == null:
+		rng = RandomNumberGenerator.new()
+		rng.randomize()
+	var since: int = int(state.get("steps_since_event", 99)) + 1
+	state["steps_since_event"] = since
+	if not poi_at(hero_pos()).is_empty() or since < EVENT_COOLDOWN or rng.randf() > EVENT_CHANCE:
+		return {}
+	state["steps_since_event"] = 0
+	state["events_seen"] = int(state.get("events_seen", 0)) + 1
+	var lvl: int = ProgressionManager.adventure_zone_level(zone_id())
+	var r: float = rng.randf()
+	var ev: Dictionary = {}
+	if r < 0.32:
+		var res_name: String = String(ProgressionManager.CONQUEST_BIOME_RESOURCE.get(zone_biome(), "Bois"))
+		var res: Dictionary = {res_name: rng.randi_range(2, 4), "Cuir": rng.randi_range(0, 2)}
+		ProgressionManager.add_resources(save, res)
+		ev = {"kind": "forage", "title": "Cueillette", "text": "Au détour du sentier, vous récoltez de quoi nourrir la forge.", "resources": res}
+	elif r < 0.55:
+		var gold: int = 15 + 2 * lvl
+		save["gold"] = int(save.get("gold", 0)) + gold
+		ev = {"kind": "cache", "title": "Cachette", "text": "Une bourse oubliée sous une pierre plate.", "gold": gold}
+	elif r < 0.72:
+		var xp: int = int(ProgressionManager.ADVENTURE_BASE_XP * 0.5)
+		award_exploration_xp(xp)
+		ev = {"kind": "sage", "title": "Sage voyageur", "text": String(SAGE_LINES[rng.randi_range(0, SAGE_LINES.size() - 1)]), "xp": xp}
+	else:
+		var names: Dictionary = {"Forêt": "Embuscade de gobelins", "Montagne": "Trolls en maraude", "Désert": "Pillards des dunes", "Donjon": "Ronde de squelettes"}
+		ev = {"kind": "ambush", "title": String(names.get(zone_biome(), "Embuscade")),
+			"text": "Des ennemis surgissent des fourrés ! Les affronter rapporte XP et butin ; vous pouvez aussi les contourner.",
+			"level": lvl + 1}
+	persist()
+	return ev
+
+## Accepte une embuscade : combat Tactique au niveau indiqué, dans le biome de la zone.
+func start_event_combat(ev: Dictionary) -> void:
+	var p := hero_pos()
+	state["pending_challenge"] = poi_key(p)
+	state["pending_level"] = int(ev.get("level", ProgressionManager.adventure_zone_level(zone_id())))
+	state["pending_name"] = String(ev.get("title", "Embuscade"))
+	persist()
 
 ## Change de zone (si débloquée). Le héros repart du départ de la zone.
 func enter_zone(next_zone: String) -> bool:

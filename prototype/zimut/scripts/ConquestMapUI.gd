@@ -65,6 +65,8 @@ var _side_panel: PanelContainer
 var _title_label: Label
 var _subtitle_label: Label
 var _legend_label: Label
+var _challenge_label: Label
+var _pulse_tween: Tween = null
 var _map_title_label: Label
 var _side_title: Label
 var _back_button: Button
@@ -206,13 +208,15 @@ func _build() -> void:
 	_map_title_label = Label.new()
 	_map_title_label.text = "LE MONDE DE ZIMUT"
 	_map_title_label.position = Vector2(22, 14)
-	_map_title_label.add_theme_color_override("font_color", TEXT)
+	_map_title_label.add_theme_color_override("font_color", GOLD)
+	_map_title_label.add_theme_stylebox_override("normal", _pill_style())
 	map.add_child(_map_title_label)
 
 	_legend_label = Label.new()
 	_legend_label.text = "🌲 Forêt  ·  ⛰ Montagne  ·  ☀ Désert  ·  Vert = allié  ·  Gris = neutre  ·  Rouge = adverse"
 	_legend_label.position = Vector2(260, 16)
-	_legend_label.add_theme_color_override("font_color", GOLD)
+	_legend_label.add_theme_color_override("font_color", TEXT)
+	_legend_label.add_theme_stylebox_override("normal", _pill_style())
 	map.add_child(_legend_label)
 
 	# Routes dessinées derrière les villes : dorées si elles relient deux
@@ -306,7 +310,16 @@ func _build() -> void:
 	_attack.custom_minimum_size.y = 68
 	_attack.add_theme_font_size_override("font_size", 23)
 	_attack.pressed.connect(_attack_selected_city)
+	_style_button(_attack, Color(0.62, 0.20, 0.16), Color(1.0, 0.72, 0.42))
 	box.add_child(_attack)
+
+	_challenge_label = Label.new()
+	_challenge_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_challenge_label.add_theme_font_size_override("font_size", 16)
+	_challenge_label.add_theme_color_override("font_color", Color(0.80, 0.72, 1.0))
+	_challenge_label.add_theme_stylebox_override("normal", _style(Color(0.13, 0.11, 0.24, 0.96), Color(0.62, 0.48, 0.95)))
+	_challenge_label.visible = false
+	box.add_child(_challenge_label)
 
 	_build_box = VBoxContainer.new()
 	_build_box.add_theme_constant_override("separation", 6)
@@ -334,6 +347,7 @@ func _build() -> void:
 	_back_button.text = "← MENU"
 	_back_button.custom_minimum_size.y = 50
 	_back_button.pressed.connect(_back_to_save)
+	_style_button(_back_button, Color(0.13, 0.22, 0.27), Color(0.55, 0.66, 0.5))
 	box.add_child(_back_button)
 
 	_refresh_header()
@@ -421,9 +435,10 @@ func _layout_responsive() -> void:
 		_side_panel.size = Vector2(side_w, map_view_h)
 		_side_panel.custom_minimum_size = Vector2(side_w, map_view_h)
 		_legend_label.text = "Vert = territoire · Gris = neutre · Rouge = adverse · ⚔ = attaquable"
-		_legend_label.position = Vector2(minf(260.0, map_w * 0.24), 16.0)
 		_map_title_label.add_theme_font_size_override("font_size", 23)
 		_legend_label.add_theme_font_size_override("font_size", 14 if map_w < 900.0 else 16)
+		# La légende suit le cartouche du titre (fond sombre) sans le chevaucher.
+		_legend_label.position = Vector2(_map_title_label.position.x + _map_title_label.get_combined_minimum_size().x + 12.0, 16.0)
 		_side_title.add_theme_font_size_override("font_size", 23)
 		_message.custom_minimum_size.y = 180
 		_message.add_theme_font_size_override("font_size", 18)
@@ -624,6 +639,7 @@ func _select_city(id: String) -> void:
 	_layout_responsive()
 	if String(city["kind"]) == "capital":
 		_message.text = "%s\n\n%s\n\nVotre territoire de départ, à l'abri des attaques." % [city["name"], city["desc"]]
+		_show_challenge("")
 		_attack.disabled = true
 		_attack.text = "LANCER L'ASSAUT"
 	elif conquered:
@@ -646,6 +662,7 @@ func _select_city(id: String) -> void:
 				parts.append("%s +%d" % [r, int(yld[r])])
 			txt += "\nProduction : %s" % " · ".join(PackedStringArray(parts))
 		_message.text = txt
+		_show_challenge("")
 		_attack.disabled = true
 		_attack.text = "LANCER L'ASSAUT"
 	else:
@@ -665,6 +682,7 @@ func _select_city(id: String) -> void:
 				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), city["desc"]]
 		if id == "donjon_roi" and not ProgressionManager.conquest_empire_complete(_conquest):
 			_message.text += "\n\n★ Objectif final : verrouillé tant que tout Zimut n'est pas sous votre contrôle."
+		_show_challenge(id if attackable else "")
 		if attackable:
 			_attack.disabled = false
 			if kind == "enemy":
@@ -686,6 +704,9 @@ func _select_city(id: String) -> void:
 		nameplate.add_theme_stylebox_override("normal", _city_nameplate_style(other, other == id))
 		var sprite: TextureRect = button.get_node("CityIllustration") as TextureRect
 		sprite.modulate = Color(1.08, 1.04, 0.90) if other == id else Color.WHITE
+		sprite.pivot_offset = sprite.size * Vector2(0.5, 0.9)
+		sprite.scale = Vector2.ONE
+	_pulse_selected(id)
 	_refresh_chronicle()
 
 ## Panneau de construction de la ville sélectionnée : un bouton par
@@ -766,6 +787,14 @@ func _show_assault_prep() -> void:
 	intro.add_theme_font_size_override("font_size", 17)
 	intro.add_theme_color_override("font_color", TEXT)
 	box.add_child(intro)
+	var ch: Dictionary = ProgressionManager.conquest_challenge_for(_save, _selected_id)
+	if not ch.is_empty():
+		var chl := Label.new()
+		chl.text = "◆ Défi facultatif : %s  →  %s" % [String(ch["label"]), _challenge_reward_text(ch)]
+		chl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		chl.add_theme_font_size_override("font_size", 16)
+		chl.add_theme_color_override("font_color", Color(0.80, 0.72, 1.0))
+		box.add_child(chl)
 	var resources: Dictionary = _save.get("resources", {})
 	var gold: int = int(_save.get("gold", 0))
 	var wood: int = int(resources.get("Bois", 0))
@@ -1074,6 +1103,54 @@ func _persist() -> void:
 func _back_to_save() -> void:
 	_persist()
 	get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
+
+## Défi facultatif de la prochaine bataille (bonus d'or et de ressource du biome).
+func _show_challenge(city_id: String) -> void:
+	if _challenge_label == null:
+		return
+	var ch: Dictionary = ProgressionManager.conquest_challenge_for(_save, city_id) if city_id != "" else {}
+	_challenge_label.visible = not ch.is_empty()
+	if ch.is_empty():
+		return
+	_challenge_label.text = "◆ DÉFI FACULTATIF\n%s\nBonus : %s" % [String(ch["label"]), _challenge_reward_text(ch)]
+
+func _challenge_reward_text(ch: Dictionary) -> String:
+	var parts: PackedStringArray = ["+%d or" % int(ch.get("gold", 0))]
+	var res: Dictionary = ch.get("resources", {})
+	for r: String in res.keys():
+		parts.append("+%d %s" % [int(res[r]), r])
+	return " · ".join(parts)
+
+## Petite respiration de la ville sélectionnée (repère visuel sur téléphone).
+func _pulse_selected(id: String) -> void:
+	if _pulse_tween != null and _pulse_tween.is_valid():
+		_pulse_tween.kill()
+	if not _city_buttons.has(id):
+		return
+	var sprite: TextureRect = (_city_buttons[id] as Button).get_node("CityIllustration") as TextureRect
+	_pulse_tween = sprite.create_tween().set_loops()
+	_pulse_tween.tween_property(sprite, "scale", Vector2(1.07, 1.07), 0.55).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_pulse_tween.tween_property(sprite, "scale", Vector2.ONE, 0.55).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+func _pill_style() -> StyleBoxFlat:
+	var s := _style(Color(0.05, 0.08, 0.11, 0.82), Color(0.82, 0.66, 0.30, 0.85))
+	s.set_corner_radius_all(16)
+	s.content_margin_left = 14
+	s.content_margin_right = 14
+	s.content_margin_top = 4
+	s.content_margin_bottom = 4
+	return s
+
+func _style_button(b: Button, base: Color, border: Color) -> void:
+	b.add_theme_stylebox_override("normal", _style(base, border))
+	b.add_theme_stylebox_override("hover", _style(base.lightened(0.12), border.lightened(0.2)))
+	b.add_theme_stylebox_override("pressed", _style(base.darkened(0.2), border))
+	b.add_theme_stylebox_override("focus", _style(base, border.lightened(0.3)))
+	var dis := _style(Color(0.16, 0.18, 0.20, 0.9), Color(0.32, 0.34, 0.36))
+	b.add_theme_stylebox_override("disabled", dis)
+	b.add_theme_color_override("font_color", Color(1.0, 0.95, 0.85))
+	b.add_theme_color_override("font_hover_color", Color.WHITE)
+	b.add_theme_color_override("font_disabled_color", Color(0.62, 0.64, 0.66))
 
 func _style(bg: Color, border: Color) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()

@@ -202,8 +202,12 @@ Objectif : prévoir au moins une Nation ou identité nationale forte pour chaque
    annexion accorde un butin thématique (ressources et or), affiché dans la
    fenêtre de victoire. Le butin est crédité une seule fois, à la prise finale.
    Une prochaine itération pourra ajouter recettes, équipement ou trophées.
-4. **Défis optionnels** : gagner en peu de tours, sans mort ou avec une classe
-   donnée pour obtenir une récompense bonus.
+4. **Défis optionnels — FAIT (V7)** : chaque bataille propose un défi
+   déterministe (`conquest_challenge_for` : ville + vague de siège) —
+   victoire en 6 tours ou moins, sans allié K.O., ou avec une classe donnée.
+   Bonus : 40 + 4 × niveau en or et la ressource du biome. Affiché dans le
+   conseil de guerre et la préparation d'assaut ; résultat (réussi/manqué)
+   dans la fenêtre de victoire et la chronique.
 
 **Bonus de contrôle de biome (première version intégrée)** : posséder toutes les villes conquérables d'un biome ajoute à chaque victoire +5 Bois (Forêt), +5 Fer (Montagne) ou +5 Venin (Désert). Le bonus est inclus dans la production de l'empire affichée sur la carte et dans l'écran d'annexion.
 
@@ -237,6 +241,11 @@ Objectif : prévoir au moins une Nation ou identité nationale forte pour chaque
     des textes et interactions tactiles vérifiées en paysage Android.
 
 ## 11. Historique des arbitrages
+
+- **V7** : lisibilité de la carte (cartouches sombres pour le titre et la
+  légende), boutons d'assaut/menu stylés, ville sélectionnée animée ; les
+  combats de Conquête n'avancent plus la campagne Tactique
+  (`CAMPAIGN_FIGHTS_ISOLATED`, réversible).
 
 - **15/10** : carte fixe narrative ; contre-attaques OUI (35 %, pillage
   temporaire, jamais de perte de ville, capitale intouchable) ; une
