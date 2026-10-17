@@ -1,28 +1,26 @@
-# Forge — notes
+# Forge — système de rangs, fusion et amélioration (implémenté)
 
-## Fenêtre (V15e)
-- Fond de forge en pierre, emblème, icônes d'équipement (tuiles) et de ressources : `assets/ui/forge/`
-  (générées par `tools/gen_forge_art.py`).
-- Mode **Briseur** (ex-« Brisage ») : détruit un objet de l'inventaire et rend des ressources selon sa rareté.
-- Accessible depuis « Mes Parties » (bouton Forge) et depuis l'écran d'équipement.
+## Principe
+- Les ressources (Fer, Bois, Cuir, Magie, Venin) existent en **rangs 1 à 10** (clé de sauvegarde : `Fer` = R1, `Fer@2` = R2, …).
+- Les équipements ont un **rang 1 à 10** : chaque rang ajoute **+12 %** aux stats de base (affiché « Nom R3 »).
 
-## Idée (non implémentée) : fusion de ressources
-Deux ressources du même type et du même niveau se fondent en une ressource du niveau supérieur ;
-une ressource de niveau N permet de forger / améliorer un équipement de niveau N (jusqu'à N = 10).
+## Onglets de la Forge
+1. **Fabriquer** : choisir la recette, le rang (1–10) puis fabriquer. Rang 1 = coût normal ; rang N>1 = ressources de rang N (quantité /5, min. 1) et or × rang.
+2. **Améliorer** : tout équipement (porté ou en inventaire) passe du rang N au rang N+1 pour 1 ressource de rang N+1 de son type principal + de l'or.
+3. **Fusion** : 2 ressources identiques de rang N + or (10 × 2^(N-1)) → 1 ressource de rang N+1.
+4. **Briseur** : détruit un objet ; rend des ressources (+ 1 ressource de rang inférieur si rang ≥ 2).
 
-Proposition de coûts (2 pour 1, plus un petit frais en or) :
+## Coûts de fusion
+| Rang visé | ≈ ressources R1 | Or |
+|---|---|---|
+| R2 | 2 | 10 |
+| R3 | 4 | 20 |
+| R4 | 8 | 40 |
+| R5 | 16 | 80 |
+| R6 | 32 | 160 |
+| R7 | 64 | 320 |
+| R8 | 128 | 640 |
+| R9 | 256 | 1280 |
+| R10 | 512 | 2560 |
 
-| Niveau visé | Ressources de niveau précédent | Équivalent en niveau 1 | Frais d'or |
-|---|---|---|---|
-| 2 | 2 | 2 | 10 |
-| 3 | 2 | 4 | 20 |
-| 4 | 2 | 8 | 40 |
-| 5 | 2 | 16 | 80 |
-| 6 | 2 | 32 | 160 |
-| 7 | 2 | 64 | 320 |
-| 8 | 2 | 128 | 640 |
-| 9 | 2 | 256 | 1 280 |
-| 10 | 2 | 512 | 2 560 |
-
-À valider : quantités de ressources lâchées par victoire (aujourd'hui quelques unités), place du niveau
-dans les recettes (`craft.txt`), migration des sauvegardes (stock par type → stock par type et niveau).
+Constantes ajustables dans `ProgressionManager.gd` (MAX_RANK, RANK_BONUS, FUSE_RATIO, UPGRADE_QTY). Tests : `tests/test_forge.gd`.

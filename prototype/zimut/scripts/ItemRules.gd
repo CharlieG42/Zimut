@@ -263,6 +263,12 @@ static func aggregate(equipment: Dictionary) -> Dictionary:
 	return {"stats": stats, "fx": fx, "sets": sb["lines"]}
 
 
+## Nom affiché : « Dague en fer R3 » pour un objet de rang 3.
+static func display_name(item: Dictionary) -> String:
+	var rank: int = int(item.get("rank", 1))
+	return "%s%s" % [String(item.get("name", "?")), (" R%d" % rank) if rank > 1 else ""]
+
+
 static func stat_line(item: Dictionary) -> String:
 	var parts: Array[String] = []
 	for k: String in STAT_KEYS:
@@ -274,7 +280,7 @@ static func stat_line(item: Dictionary) -> String:
 
 static func describe(item: Dictionary) -> String:
 	var lines: Array[String] = []
-	lines.append("%s %s  (niv. %d)" % [rarity_label(item), String(item.get("name", "?")), int(item.get("level", 0))])
+	lines.append("%s %s  (niv. %d)" % [rarity_label(item), display_name(item), int(item.get("level", 0))])
 	lines.append(String(item.get("type", "")))
 	var st: String = stat_line(item)
 	if st != "":

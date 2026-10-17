@@ -1012,48 +1012,203 @@ func forged_item(recipe: Dictionary) -> Dictionary:
 			"force": 0, "intelligence": 0, "agility": 0, "wisdom": 0, "vita": 0, "defense": 0, "effect": ""}
 	return ItemRules.apply_rarity(item.duplicate(), "rare", _rng)
 
-## État d'une recette pour l'interface : { craftable, missing: {res: n}, gold_missing }.
-func craft_status(data: Dictionary, recipe: Dictionary) -> Dictionary:
+## ── Forge : rangs (1..10), fusion de ressources, amélioration d'équipement ──────────────
+## Une ressource a un rang : « Fer » = rang 1, « Fer@2 » = rang 2, etc. Deux ressources de même type
+## et de même rang se fondent en une ressource de rang supérieur (FUSE_RATIO pour 1, + frais d'or).
+## Un équipement a un rang (1..10) : stats x (1 + RANK_BONUS x (rang - 1)). Fabriquer au rang N
+## demande des ressources de rang N ; améliorer N → N+1 demande des ressources de rang N+1.
+const MAX_RANK := 10
+const RANK_BONUS := 0.12
+const FUSE_RATIO := 2
+const UPGRADE_QTY := 1
+## Ressource principale de chaque emplacement (coût d'amélioration).
+const SLOT_MAIN_RES := {"arme": "Fer", "bouclier": "Fer", "casque": "Cuir", "armure": "Cuir", "bottes": "Cuir", "bague": "Magie"}
+const RES_TYPES: Array[String] = ["Fer", "Bois", "Cuir", "Magie", "Venin"]
+
+
+static func res_key(res_name: String, tier: int) -> String:
+	return res_name if tier <= 1 else "%s@%d" % [res_name, tier]
+
+
+func resource_count(data: Dictionary, res_name: String, tier: int = 1) -> int:
+	return int(data.get("resources", {}).get(res_key(res_name, tier), 0))
+
+
+## Or demandé pour fondre vers le rang `target_tier` (10, 20, 40 ... or).
+func fuse_gold(target_tier: int) -> int:
+	return 10 * (1 << maxi(0, target_tier - 2))
+
+
+## Fond FUSE_RATIO ressources de rang `tier` en 1 ressource de rang tier+1. Retourne "" si OK.
+func fuse_resource(data: Dictionary, res_name: String, tier: int) -> String:
+	if not RES_TYPES.has(res_name):
+		return "Ressource inconnue."
+	if tier < 1 or tier >= MAX_RANK:
+		return "Rang maximum atteint."
 	var res: Dictionary = data.get("resources", {})
-	var missing: Dictionary = {}
+	var k_from: String = res_key(res_name, tier)
+	if int(res.get(k_from, 0)) < FUSE_RATIO:
+		return "Il faut %d × %s (rang %d)." % [FUSE_RATIO, res_name, tier]
+	var gold_cost: int = fuse_gold(tier + 1)
+	if int(data.get("gold", 0)) < gold_cost:
+		return "Or insuffisant : %d pièces requises." % gold_cost
+	res[k_from] = int(res.get(k_from, 0)) - FUSE_RATIO
+	var k_to: String = res_key(res_name, tier + 1)
+	res[k_to] = int(res.get(k_to, 0)) + 1
+	data["resources"] = res
+	data["gold"] = int(data.get("gold", 0)) - gold_cost
+	progression_changed.emit()
+	return ""
+
+
+static func rank_mult(rank: int) -> float:
+	return 1.0 + RANK_BONUS * float(clampi(rank, 1, MAX_RANK) - 1)
+
+
+## Applique un rang à un objet (copie des stats de base au premier passage).
+static func apply_rank(item: Dictionary, rank: int) -> void:
+	rank = clampi(rank, 1, MAX_RANK)
+	if not item.has("base_stats"):
+		var base: Dictionary = {}
+		for k: String in ItemRules.STAT_KEYS:
+			if int(item.get(k, 0)) != 0:
+				base[k] = int(item[k])
+		item["base_stats"] = base
+	var mult: float = rank_mult(rank)
+	for k: String in item["base_stats"].keys():
+		var v: int = int(item["base_stats"][k])
+		item[k] = v if rank == 1 else maxi(v + 1, ceili(float(v) * mult - 0.001))
+	item["rank"] = rank
+
+
+## Coût (ressources) d'une recette au rang `tier` : x1 au rang 1, ~1/5 de la quantité ensuite
+## (les ressources de rang supérieur valent FUSE_RATIO fois plus).
+func craft_cost(recipe: Dictionary, tier: int = 1) -> Dictionary:
+	var out: Dictionary = {}
 	for k: String in recipe["cost"].keys():
-		var lack: int = int(recipe["cost"][k]) - int(res.get(k, 0))
+		var q: int = int(recipe["cost"][k])
+		if tier > 1:
+			q = maxi(1, ceili(float(q) / 5.0))
+		out[res_key(k, tier)] = q
+	return out
+
+
+func craft_gold(recipe: Dictionary, tier: int = 1) -> int:
+	return int(recipe["gold"]) * maxi(1, tier)
+
+
+## Objet obtenu en forgeant la recette au rang `tier` (qualité RARE).
+func forged_item_ranked(recipe: Dictionary, tier: int = 1) -> Dictionary:
+	var item: Dictionary = forged_item(recipe)
+	apply_rank(item, tier)
+	return item
+
+
+## État d'une recette pour l'interface : { craftable, missing: {res: n}, gold_missing, cost, gold }.
+func craft_status(data: Dictionary, recipe: Dictionary, tier: int = 1) -> Dictionary:
+	var res: Dictionary = data.get("resources", {})
+	var cost: Dictionary = craft_cost(recipe, tier)
+	var missing: Dictionary = {}
+	for k: String in cost.keys():
+		var lack: int = int(cost[k]) - int(res.get(k, 0))
 		if lack > 0:
 			missing[k] = lack
-	var gold_missing: int = maxi(0, int(recipe["gold"]) - int(data.get("gold", 0)))
-	return {"craftable": missing.is_empty() and gold_missing == 0, "missing": missing, "gold_missing": gold_missing}
+	var gold: int = craft_gold(recipe, tier)
+	var gold_missing: int = maxi(0, gold - int(data.get("gold", 0)))
+	return {"craftable": missing.is_empty() and gold_missing == 0, "missing": missing,
+		"gold_missing": gold_missing, "cost": cost, "gold": gold}
 
-## Fabrique l'objet de la recette : consomme ressources et or, l'objet part
+
+## Fabrique l'objet de la recette au rang `tier` : consomme ressources et or, l'objet part
 ## dans l'inventaire. Retourne "" si OK, sinon la raison.
-func craft_item(data: Dictionary, recipe_name: String) -> String:
+func craft_item(data: Dictionary, recipe_name: String, tier: int = 1) -> String:
 	var recipe: Dictionary = craft_recipe(recipe_name)
 	if recipe.is_empty():
 		return "Recette inconnue."
+	tier = clampi(tier, 1, MAX_RANK)
+	var st: Dictionary = craft_status(data, recipe, tier)
 	var res: Dictionary = data.get("resources", {})
-	for k: String in recipe["cost"].keys():
-		if int(res.get(k, 0)) < int(recipe["cost"][k]):
-			return "Ressource insuffisante : %s (%d/%d)." % [k, int(res.get(k, 0)), int(recipe["cost"][k])]
-	if int(data.get("gold", 0)) < int(recipe["gold"]):
-		return "Or insuffisant : %d pièces requises." % int(recipe["gold"])
-	for k: String in recipe["cost"].keys():
-		res[k] = int(res.get(k, 0)) - int(recipe["cost"][k])
+	for k: String in st["cost"].keys():
+		if int(res.get(k, 0)) < int(st["cost"][k]):
+			return "Ressource insuffisante : %s (%d/%d)." % [k.replace("@", " rang "), int(res.get(k, 0)), int(st["cost"][k])]
+	if int(data.get("gold", 0)) < int(st["gold"]):
+		return "Or insuffisant : %d pièces requises." % int(st["gold"])
+	for k: String in st["cost"].keys():
+		res[k] = int(res.get(k, 0)) - int(st["cost"][k])
 	data["resources"] = res
-	data["gold"] = int(data.get("gold", 0)) - int(recipe["gold"])
-	data["inventory"].append(forged_item(recipe))
+	data["gold"] = int(data.get("gold", 0)) - int(st["gold"])
+	data["inventory"].append(forged_item_ranked(recipe, tier))
 	data["crafted"] = int(data.get("crafted", 0)) + 1
 	progression_changed.emit()
 	return ""
 
 ## Fabrique puis équipe directement sur un membre de l'équipe. Si l'équipement échoue
 ## (niveau trop bas...), l'objet reste dans l'inventaire : retourne alors la raison.
-func craft_and_equip(data: Dictionary, recipe_name: String, member_index: int) -> String:
-	var err: String = craft_item(data, recipe_name)
+func craft_and_equip(data: Dictionary, recipe_name: String, member_index: int, tier: int = 1) -> String:
+	var err: String = craft_item(data, recipe_name, tier)
 	if err != "":
 		return err
 	var idx: int = data["inventory"].size() - 1
 	var eq_err: String = equip_item(data, member_index, idx)
 	if eq_err != "":
 		return "Objet fabriqué (en inventaire) mais non équipé : %s" % eq_err
+	return ""
+
+
+## Équipements améliorables : portés (équipe) puis inventaire.
+## Chaque entrée : { "src": "team"|"inv", "member": i, "slot": s, "index": j, "item": {...} }.
+func upgradable_items(data: Dictionary) -> Array:
+	var out: Array = []
+	var team: Array = data.get("team", [])
+	for i: int in range(team.size()):
+		var eq: Dictionary = team[i].get("equipment", {})
+		for slot: String in eq.keys():
+			out.append({"src": "team", "member": i, "slot": slot, "index": -1, "item": eq[slot]})
+	var inv: Array = data.get("inventory", [])
+	for j: int in range(inv.size()):
+		out.append({"src": "inv", "member": -1, "slot": "", "index": j, "item": inv[j]})
+	return out
+
+
+## Coût d'amélioration d'un objet : { "res": clé, "qty", "gold", "rank", "next" }.
+func upgrade_cost(item: Dictionary) -> Dictionary:
+	var rank: int = clampi(int(item.get("rank", 1)), 1, MAX_RANK)
+	var slot: String = slot_for_type(String(item.get("type", "")))
+	var main: String = String(SLOT_MAIN_RES.get(slot, "Magie"))
+	var nxt: int = rank + 1
+	return {"res": res_key(main, nxt), "res_name": main, "qty": UPGRADE_QTY, "gold": 30 * nxt, "rank": rank, "next": nxt}
+
+
+## Améliore un objet d'un rang. Retourne "" si OK, sinon la raison.
+func upgrade_item(data: Dictionary, entry: Dictionary) -> String:
+	var item: Dictionary = {}
+	if String(entry.get("src", "")) == "team":
+		var team: Array = data.get("team", [])
+		var mi: int = int(entry.get("member", -1))
+		if mi < 0 or mi >= team.size():
+			return "Personnage introuvable."
+		item = team[mi].get("equipment", {}).get(String(entry.get("slot", "")), {})
+	else:
+		var inv: Array = data.get("inventory", [])
+		var ij: int = int(entry.get("index", -1))
+		if ij < 0 or ij >= inv.size():
+			return "Objet introuvable."
+		item = inv[ij]
+	if item.is_empty():
+		return "Objet introuvable."
+	var c: Dictionary = upgrade_cost(item)
+	if int(c["rank"]) >= MAX_RANK:
+		return "Rang maximum atteint."
+	var res: Dictionary = data.get("resources", {})
+	if int(res.get(String(c["res"]), 0)) < int(c["qty"]):
+		return "Il faut %d × %s (rang %d)." % [int(c["qty"]), String(c["res_name"]), int(c["next"])]
+	if int(data.get("gold", 0)) < int(c["gold"]):
+		return "Or insuffisant : %d pièces requises." % int(c["gold"])
+	res[String(c["res"])] = int(res.get(String(c["res"]), 0)) - int(c["qty"])
+	data["resources"] = res
+	data["gold"] = int(data.get("gold", 0)) - int(c["gold"])
+	apply_rank(item, int(c["next"]))
+	progression_changed.emit()
 	return ""
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -2291,6 +2446,12 @@ func salvage_item(data: Dictionary, inv_index: int) -> Dictionary:
 	for i: int in range(int(info["n"])):
 		var res: String = String(res_pool[_rng.randi_range(0, res_pool.size() - 1)])
 		gains[res] = int(gains.get(res, 0)) + n_per
+	# Un objet de rang supérieur rend une ressource de rang (rang - 1)
+	var rk: int = int(it.get("rank", 1))
+	if rk >= 2:
+		var main: String = String(SLOT_MAIN_RES.get(slot_for_type(String(it.get("type", ""))), "Magie"))
+		var kk: String = res_key(main, rk - 1)
+		gains[kk] = int(gains.get(kk, 0)) + 1
 	inv.remove_at(inv_index)
 	data["inventory"] = inv
 	add_resources(data, gains)
