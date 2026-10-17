@@ -30,6 +30,7 @@ var _only_craftable: bool = false
 var _mode: String = "craft"      # craft | upgrade | fusion | salvage
 var _tier: int = 1                # rang de fabrication (1..10)
 var _up_key: String = ""
+var _fuse_max: bool = false        # Fusion : ×1 ou « tout fusionner »
 var _salv_sel: Dictionary = {}     # objet sélectionné au Briseur          # objet sélectionné en mode amélioration
 var _tabs_row: HBoxContainer
 var _selected: String = ""
@@ -959,6 +960,21 @@ func _refresh_upgrade_detail() -> void:
 func _refresh_fusion_list() -> void:
 	var res: Dictionary = ProgressionManager.resources(_save)
 	var gold: int = ProgressionManager.gold(_save)
+	# Bascule ×1 / MAX : évite de taper 20 fois sur le même bouton
+	var qrow := HBoxContainer.new()
+	qrow.add_theme_constant_override("separation", 8)
+	_list_box.add_child(qrow)
+	var ql := U.lbl("Quantité par appui :", 19, U.C_DIM)
+	ql.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ql.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	qrow.add_child(ql)
+	for opt: Array in [[false, "×1"], [true, "MAX"]]:
+		var on: bool = _fuse_max == bool(opt[0])
+		var qb := U.btn(String(opt[1]), Color(0.95, 0.65, 0.30) if on else U.C_BORDER, 20, Vector2(110, 48))
+		qb.pressed.connect(func() -> void:
+			_fuse_max = bool(opt[0])
+			refresh())
+		qrow.add_child(qb)
 	for name_r: String in ProgressionManager.RES_TYPES:
 		var col: Color = U.RES_COLOR.get(name_r, U.C_TXT)
 		var card := PanelContainer.new()
@@ -990,10 +1006,18 @@ func _refresh_fusion_list() -> void:
 				fb.disabled = not can
 				fb.tooltip_text = "%d × %s R%d + %d or → 1 × %s R%d" % [ProgressionManager.FUSE_RATIO, name_r, t, gold_cost, name_r, t + 1]
 				fb.pressed.connect(func() -> void:
-					var err: String = ProgressionManager.fuse_resource(_save, name_r, t)
-					_message_ok = err == ""
-					_message = ("%s R%d créé !" % [name_r, t + 1]) if err == "" else err
-					if err == "":
+					var made: int = 0
+					var err: String = ""
+					while true:
+						err = ProgressionManager.fuse_resource(_save, name_r, t)
+						if err != "":
+							break
+						made += 1
+						if not _fuse_max:
+							break
+					_message_ok = made > 0
+					_message = ("%d × %s R%d créé(s) !" % [made, name_r, t + 1]) if made > 0 else err
+					if made > 0:
 						ProgressionManager.write_save(_slot, _save)
 						crafted.emit()
 					refresh())

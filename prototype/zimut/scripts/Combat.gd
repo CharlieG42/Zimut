@@ -550,6 +550,12 @@ static func parse(spell: Dictionary) -> Dictionary:
 
 ## Nombre de lancers autorisés par tour (évite le spam du meilleur sort).
 static func max_casts(spell: Dictionary) -> int:
+	# Une seule invocation de créature par tour : on bâtit son armée au fil des tours
+	var nm: String = String(spell.get("name", ""))
+	if nm.begins_with("Invoquer "):
+		var info: Dictionary = SUMMONS.get(nm.substr(9), {})
+		if not bool(info.get("terrain", false)):
+			return 1
 	var pa: int = int(spell.get("cost_pa", 1))
 	if pa >= 4:
 		return 1
