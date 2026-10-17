@@ -13,6 +13,10 @@ on:
       - 'prototype/zimut/**'
       - '.github/workflows/build-android-apks.yml'
 
+permissions:
+  contents: read
+  pull-requests: read
+
 env:
   GODOT_VERSION: 4.7.2
 
@@ -84,32 +88,41 @@ jobs:
             printf 'export/android/keystore_release_password="%s"\n' "$ANDROID_KEYSTORE_PASSWORD"
           } > "$cfg"
 
-      - name: Generate automatic build version suffix
+      - name: Generate automatic build version (0.0.01.<dernière PR mergée>.<n° de push>)
         env:
-          BUILD_NUMBER: ${{ github.run_number }}
+          GH_TOKEN: ${{ github.token }}
+          PUSH_NUMBER: ${{ github.run_number }}
         run: |
+          # xxx : numéro de la dernière PR fusionnée (API REST, triée par date de fusion)
+          pr=$(gh api "repos/${GITHUB_REPOSITORY}/pulls?state=closed&sort=updated&direction=desc&per_page=50" \
+            --jq '[.[] | select(.merged_at != null)] | sort_by(.merged_at) | last | .number // 0' || echo 0)
+          # Secours : « Merge pull request #N » dans le message du commit
+          if [ -z "$pr" ] || [ "$pr" = "0" ]; then
+            pr=$(git log -1 --format=%s | sed -n 's/.*pull request #\([0-9]*\).*/\1/p')
+          fi
+          pr=${pr:-0}
+          version="0.0.01.${pr}.${PUSH_NUMBER}"
+          echo "Version de compilation : ${version}"
+          echo "GAME_VERSION=${version}" >> "$GITHUB_ENV"
+          export GAME_VERSION="${version}"
           python3 - <<'PY'
-          import os
-          import re
+          import os, re
           from pathlib import Path
-
+          version = os.environ.get("GAME_VERSION") or "0.0.01.0.0"
+          push = os.environ["PUSH_NUMBER"]
           project = Path("prototype/zimut/project.godot")
-          content = project.read_text(encoding="utf-8")
-          build = os.environ["BUILD_NUMBER"]
-          pattern = r'(?m)^config/version="([^"#]+)(?:#[^"]*)?"$'
-          updated, count = re.subn(
-              pattern,
-              lambda match: 'config/version="' + match.group(1) + '#' + build + '"',
-              content,
-              count=1,
-          )
-          if count != 1:
-              raise SystemExit("Impossible de générer le suffixe : config/version introuvable.")
-          project.write_text(updated, encoding="utf-8")
-          print("Version de compilation :", next(
-              line.split("=", 1)[1] for line in updated.splitlines()
-              if line.startswith("config/version=")
-          ))
+          text = project.read_text(encoding="utf-8")
+          text, n = re.subn(r'(?m)^config/version="[^"]*"$', 'config/version="' + version + '"', text, count=1)
+          if n != 1:
+              raise SystemExit("config/version introuvable dans project.godot")
+          project.write_text(text, encoding="utf-8")
+          # Android : nom affiché = version ; versionCode croissant = n° de push
+          presets = Path("prototype/zimut/export_presets.cfg")
+          t = presets.read_text(encoding="utf-8")
+          t = re.sub(r'(?m)^version/name="[^"]*"$', 'version/name="' + version + '"', t)
+          t = re.sub(r'(?m)^version/code=\d+$', 'version/code=' + push, t)
+          presets.write_text(t, encoding="utf-8")
+          print("project.godot et export_presets.cfg mis à jour :", version)
           PY
 
       - name: Import project resources (icons, artwork)
@@ -150,7 +163,7 @@ jobs:
           # existent, aucun glob d'upload ne peut être vide.
           for kind in debug release; do
             if [ -f "Zimut-${kind}.apk" ]; then
-              mv "Zimut-${kind}.apk" "Zimut-${kind}-${sha_short}.apk"
+              mv "Zimut-${kind}.apk" "Zimut-${kind}-v${GAME_VERSION}-${sha_short}.apk"
             fi
           done
           sha256sum Zimut-*-*.apk > SHA256SUMS.txt

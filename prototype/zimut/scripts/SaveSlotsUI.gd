@@ -423,47 +423,19 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	chars_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top_actions.add_child(chars_btn)
 
-	var inv: Array = data.get("inventory", [])
-	var inv_lbl := Label.new()
-	inv_lbl.text = "INVENTAIRE — %d OBJET(S) DISPONIBLE(S) À ÉQUIPER" % inv.size()
-	inv_lbl.add_theme_font_size_override("font_size", _ui_font(21))
-	inv_lbl.add_theme_color_override("font_color", COL_TXT)
-	_detail_box.add_child(inv_lbl)
-
-	var scroll := ScrollContainer.new()
-	TouchScroll.install(scroll)
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_detail_box.add_child(scroll)
-	var inv_box := VBoxContainer.new()
-	inv_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	inv_box.add_theme_constant_override("separation", 6)
-	scroll.add_child(inv_box)
-	for j: int in range(inv.size()):
-		var it: Dictionary = inv[j]
-		var row2 := Label.new()
-		row2.text = "  [%s] %s (nv%d) %s" % [ItemRules.rarity_label(it), it.get("name", "?"),
-			int(it.get("level", 0)), ItemRules.stat_line(it)]
-		row2.tooltip_text = ItemRules.describe(it)
-		row2.mouse_filter = Control.MOUSE_FILTER_PASS
-		row2.add_theme_font_size_override("font_size", _ui_font(16))
-		row2.add_theme_color_override("font_color", ItemRules.rarity_color(it).darkened(0.4))
-		inv_box.add_child(row2)
-
-	var log_arr: Array = data.get("loot_log", [])
-	var inventory_actions := HBoxContainer.new()
-	inventory_actions.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	inventory_actions.add_theme_constant_override("separation", 10)
-	var auto_btn := _action_button("autoequip", "Équiper automatiquement les meilleurs objets", COL_TXT)
-	auto_btn.pressed.connect(_auto_equip)
-	auto_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	inventory_actions.add_child(auto_btn)
-	if log_arr.size() > 0:
-		var log_btn := _action_button("inventory", "Voir tous les loots gagnés (%d)" % log_arr.size(), COL_TXT)
-		log_btn.pressed.connect(func() -> void: _show_loot_log(log_arr))
-		log_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		inventory_actions.add_child(log_btn)
-	_detail_box.add_child(inventory_actions)
+	# Forge (fabrication / Briseur) et vue d'ensemble des gouverneurs en place
+	var tools_row := HBoxContainer.new()
+	tools_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tools_row.add_theme_constant_override("separation", 10)
+	_detail_box.add_child(tools_row)
+	var forge_btn := _action_button("forge", "Forge : fabriquer ou briser de l'équipement", COL_TXT)
+	forge_btn.pressed.connect(func() -> void: _open_forge(slot))
+	forge_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tools_row.add_child(forge_btn)
+	var gov_btn := _action_button("governors", "Gouverneurs en place dans vos villes", COL_TXT)
+	gov_btn.pressed.connect(func() -> void: _show_governors(_current))
+	gov_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tools_row.add_child(gov_btn)
 
 	var rename_btn := _action_button("rename", "RENOMMER CETTE PARTIE", COL_TXT)
 	rename_btn.pressed.connect(func() -> void:
@@ -532,8 +504,8 @@ func _launch_campaign_mode(mode: String, scene_path: String, slot: int) -> void:
 const ACTION_ICONS := {
 	"team": "res://assets/ui/actions/action_team.png",
 	"chars": "res://assets/ui/actions/action_chars.png",
-	"inventory": "res://assets/ui/actions/action_inventory.png",
-	"autoequip": "res://assets/ui/actions/action_autoequip.png",
+	"forge": "res://assets/ui/actions/action_forge.png",
+	"governors": "res://assets/ui/actions/action_governors.png",
 	"rename": "res://assets/ui/actions/action_rename.png",
 	"delete": "res://assets/ui/actions/action_delete.png",
 }
@@ -624,14 +596,19 @@ func _mode_button(title_txt: String, desc: String, art_path: String, accent: Col
 		b.pressed.connect(cb)
 	return b
 
-func _auto_equip() -> void:
-	if _current.is_empty():
+func _open_forge(slot: int) -> void:
+	if _current.is_empty() or slot < 0:
 		return
-	ProgressionManager.auto_equip(_current)
-	ProgressionManager.write_save(_current_slot, _current)
-	_show_detail(ProgressionManager.load_save(_current_slot), _current_slot)
+	var ui: CanvasLayer = (load("res://scripts/ForgeUI.gd") as GDScript).new()
+	ui.layer = 20
+	add_child(ui)
+	ui.closed.connect(func() -> void:
+		ui.queue_free()
+		_show_detail(ProgressionManager.load_save(slot), slot))
+	ui.open(_current, slot, 0)
 
-func _show_loot_log(log_arr: Array) -> void:
+## Vue d'ensemble des gouverneurs en place (mode Conquête).
+func _show_governors(data: Dictionary) -> void:
 	var overlay := ColorRect.new()
 	overlay.color = Color(0, 0, 0, 0.55)
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -645,26 +622,54 @@ func _show_loot_log(log_arr: Array) -> void:
 	center.add_child(dialog)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
+	box.custom_minimum_size = Vector2(620 if _is_compact() else 760, 0)
 	dialog.add_child(box)
+	var conq: Dictionary = data.get("conquest", {})
+	var owned: Array = conq.get("owned", [])
 	var title := Label.new()
-	title.text = "LOOTS GAGNÉS DANS CETTE PARTIE (%d)" % log_arr.size()
+	title.text = "GOUVERNEURS EN PLACE"
 	title.add_theme_font_size_override("font_size", _ui_font(24))
 	title.add_theme_color_override("font_color", COL_TXT)
 	box.add_child(title)
-	var scroll := ScrollContainer.new()
-	TouchScroll.install(scroll)
-	scroll.custom_minimum_size = Vector2(0, 360 if _is_compact() else 520)
-	box.add_child(scroll)
-	var rows := VBoxContainer.new()
-	rows.add_theme_constant_override("separation", 6)
-	scroll.add_child(rows)
-	for it: Dictionary in log_arr:
-		var row := Label.new()
-		row.text = "✨ [%s] %s (nv%d) %s" % [ItemRules.rarity_label(it), it.get("name", "?"),
-			int(it.get("level", 0)), ItemRules.stat_line(it)]
-		row.add_theme_font_size_override("font_size", _ui_font(17))
-		row.add_theme_color_override("font_color", ItemRules.rarity_color(it).darkened(0.4))
-		rows.add_child(row)
+	if owned.is_empty():
+		var none := Label.new()
+		none.text = "Aucune ville conquise : lancez le mode Conquête pour fonder votre empire."
+		none.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		none.add_theme_font_size_override("font_size", _ui_font(18))
+		none.add_theme_color_override("font_color", COL_TXT)
+		box.add_child(none)
+	else:
+		var stationed: int = ConquestSystem.stationed_heroes(conq).size()
+		var sub := Label.new()
+		sub.text = "%d ville(s) · %d gouverneur(s) en poste (6 max)" % [owned.size(), stationed]
+		sub.add_theme_font_size_override("font_size", _ui_font(16))
+		sub.add_theme_color_override("font_color", COL_TXT.darkened(0.2))
+		box.add_child(sub)
+		var scroll := ScrollContainer.new()
+		TouchScroll.install(scroll)
+		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		scroll.custom_minimum_size = Vector2(0, 320 if _is_compact() else 480)
+		box.add_child(scroll)
+		var rows := VBoxContainer.new()
+		rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		rows.add_theme_constant_override("separation", 6)
+		scroll.add_child(rows)
+		for id: String in owned:
+			var hero: String = ConquestSystem.hero_of(conq, id)
+			var row := Label.new()
+			row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			row.custom_minimum_size = Vector2(0, 0)
+			row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_theme_font_size_override("font_size", _ui_font(17))
+			var city_name: String = ConquestSystem._name(conq, id)
+			if hero == "":
+				row.text = "⌂ %s — aucun gouverneur" % city_name
+				row.add_theme_color_override("font_color", COL_TXT.darkened(0.35))
+			else:
+				var lvl: int = int(data.get("roster", {}).get(hero, {}).get("level", 1))
+				row.text = "♞ %s — %s (niv. %d) : %s" % [city_name, hero, lvl, ConquestSystem.governor_text(hero)]
+				row.add_theme_color_override("font_color", COL_TXT)
+			rows.add_child(row)
 	var close := Button.new()
 	close.text = "Fermer"
 	close.add_theme_font_size_override("font_size", _ui_font(20))
