@@ -186,3 +186,4 @@ Lumière,light
 Piqué,dive
 Spores toxiques,spores
 Sève fertilisante,sap
+Rappel de balise,beacon

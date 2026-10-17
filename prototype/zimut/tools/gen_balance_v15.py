@@ -97,8 +97,8 @@ KITS = {
              "Mur de pierre", "Tremblement de terre", "Colère", "Coup écrasant", "Bouclier légendaire"],
     "Assassin": ["Lame fatale", "Poison", "Soin rapide", "Coup bas", "Ombre", "Marque de la mort",
                  "Éviscération", "Invisibilité", "Lame de l'ombre", "Coup final"],
-    "Chasseur": ["Tir précis", "Piège", "Soin de chasseur", "Fleche enflammée", "Tir de recul",
-                 "Tir explosif", "Balise de chasse", "Tir de glace", "Tir légendaire", "Tir perçant ultime"],
+    "Chasseur": ["Tir précis", "Piège", "Soin de chasseur", "Balise de chasse", "Tir explosif",
+                 "Rappel de balise", "Fleche enflammée", "Tir de recul", "Tir légendaire", "Tir perçant ultime"],
     "Mage": ["Boule de feu", "Éclair", "Bouclier magique", "Explosion", "Téléportation", "Météore",
              "Gel", "Chaîne de foudre", "Désintégration", "Apocalypse"],
     "Druide": ["Bénédiction", "Soin", "Attaque sacrée", "Barrière", "Inspiration", "Soin de groupe",
@@ -127,7 +127,16 @@ for r in srows[1:]:
     pool.setdefault((r[0], r[1]), r)
 
 
+CUSTOM = {
+    ("Chasseur", "Rappel de balise"): ["Chasseur", "Rappel de balise", "1", "0", "8",
+        "Rappelle une de vos balises (elle disparaît du terrain)", "1", "Invocation",
+        "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+}
+
+
 def find(classe, name):
+    if (classe, name) in CUSTOM:
+        return CUSTOM[(classe, name)]
     for key in ((classe, name), ("Druide", name), ("Heal", name)):
         if key in pool and not (classe == "Druide" and key[0] == "Heal" and False):
             return pool[key]
@@ -146,6 +155,14 @@ for classe in order:
         # pas de virgule dans les effets (parseur naïf)
         r[5] = r[5].replace(",", ";")
         r += ["0"] * (17 - len(r))
+        if name == "Éclair":  # nerf : trop puissant
+            r[4] = "5"
+            r[5] = "52 dégâts magiques (2 cibles)"
+            r[8] = "52"
+        if name == "Invoquer Pilier":
+            r[5] = "Fait surgir un pilier de grès : bloque le passage et la vue; attaque l'ennemi le plus proche dans un rayon de 4 cases (4 tours; 8 cases de terrain max)"
+        if name == "Balise de chasse":
+            r[5] = "Plante une balise (3 max; la plus ancienne disparaît) : un sort de zone du Chasseur qui touche une balise se réplique autour de toutes les autres"
         # Cristal ambré mal formé dans l'ancien fichier : jamais retenu ici
         sout.append(r)
         byl.setdefault(lvl, []).append(name)

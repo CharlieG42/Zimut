@@ -45,7 +45,7 @@ Le **Tank** reçoit +30 % de PV et +25 % de défense de base ; le Géomancien pe
 
 - **Tank** : Coup de bouclier (1) · Protection (1) · Soin de combat (1) · Frappe puissante (10) · Provocation (20) · Mur de pierre (35) · Tremblement de terre (50) · Colère (65) · Coup écrasant (80) · Bouclier légendaire (100)
 - **Assassin** : Lame fatale (1) · Poison (1) · Soin rapide (1) · Coup bas (10) · Ombre (20) · Marque de la mort (35) · Éviscération (50) · Invisibilité (65) · Lame de l'ombre (80) · Coup final (100)
-- **Chasseur** : Tir précis (1) · Piège (1) · Soin de chasseur (1) · Fleche enflammée (10) · Tir de recul (20) · Tir explosif (35) · Balise de chasse (50) · Tir de glace (65) · Tir légendaire (80) · Tir perçant ultime (100)
+- **Chasseur** : Tir précis (1) · Piège (1) · Soin de chasseur (1) · Balise de chasse (10) · Tir explosif (20) · Rappel de balise (35) · Fleche enflammée (50) · Tir de recul (65) · Tir légendaire (80) · Tir perçant ultime (100)
 - **Mage** : Boule de feu (1) · Éclair (1) · Bouclier magique (1) · Explosion (10) · Téléportation (20) · Météore (35) · Gel (50) · Chaîne de foudre (65) · Désintégration (80) · Apocalypse (100)
 - **Druide** : Bénédiction (1) · Soin (1) · Attaque sacrée (1) · Barrière (10) · Inspiration (20) · Soin de groupe (35) · Renaissance (50) · Attaque divine (65) · Résurrection (80) · Jugement (100)
 - **Heal** : Toucher guérisseur (1) · Éclair sacré (1) · Bénédiction de vie (1) · Bouclier de lumière (10) · Mot de restauration (20) · Éclat de lumière (35) · Soin supérieur (50) · Soin de groupe supérieur (65) · Protection vitale (80) · Soin ultime (100)
