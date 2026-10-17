@@ -413,7 +413,7 @@ const DIFFICULTY_CREEP_EVERY := 10
 
 ## Niveau de combat par défaut quand aucun n'est connu (combat rapide).
 const DEFAULT_FIGHT_LEVEL := 10
-const CLASS_ORDER: Array[String] = ["Tank", "Assassin", "Chasseur", "Mage", "Druide", "Heal", "Invocateur", "Sylvain"]
+const CLASS_ORDER: Array[String] = ["Tank", "Assassin", "Chasseur", "Mage", "Druide", "Heal", "Invocateur", "Sylvain", "Géomancien"]
 
 ## Emplacements d'équipement par personnage (clé -> type d'item accepté)
 const EQUIP_SLOTS := {

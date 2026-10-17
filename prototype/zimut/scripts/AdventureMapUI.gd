@@ -14,8 +14,10 @@ const U = preload("res://scripts/UiKit.gd")
 
 const TILE_W := 128.0
 const TILE_H := 64.0
-const SIDE_W := 440.0
+const SIDE_W := 520.0
 const STEP_TIME := 0.17
+const DIM := Color(0.80, 0.84, 0.92)          # texte secondaire (plus clair que UiKit.C_DIM)
+const DPAD_DIRS := {"↖": Vector2i(-1, 0), "↗": Vector2i(0, -1), "↙": Vector2i(0, 1), "↘": Vector2i(1, 0)}
 
 const POI_ICONS := {
 	"combat": "res://assets/adventure/poi/combat.svg",
@@ -69,6 +71,11 @@ var _toast: Label
 var _side_box: VBoxContainer
 var _modal_root: Control = null
 var _walking: bool = false
+var _pending: Vector2i = Vector2i(-1, -1)      # destination en attente de confirmation (appui tactile)
+var _hud_title: Label
+var _hud_sub: Label
+var _action_btn: Button
+var _dpad: Control
 var _rng := RandomNumberGenerator.new()
 
 
@@ -143,6 +150,7 @@ func _build() -> void:
 	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_toast.z_index = 21
 	_map_view.add_child(_toast)
+	_build_hud()
 
 	# Panneau latéral
 	var side := PanelContainer.new()
@@ -159,6 +167,151 @@ func _build() -> void:
 	_side_box.add_theme_constant_override("separation", 12)
 	_side_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(_side_box)
+
+
+func _build_hud() -> void:
+	# Plaque d'information en haut à gauche : carte, biome, niveau, progression
+	var plate := PanelContainer.new()
+	plate.position = Vector2(16, 16)
+	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	plate.z_index = 5
+	plate.add_theme_stylebox_override("panel", U.box(Color(0.05, 0.07, 0.12, 0.88), Color(0.86, 0.68, 0.30), 14, 2, 14))
+	_map_view.add_child(plate)
+	var pv := VBoxContainer.new()
+	pv.add_theme_constant_override("separation", 2)
+	plate.add_child(pv)
+	_hud_title = U.lbl("", 28, U.C_GOLD, true)
+	pv.add_child(_hud_title)
+	_hud_sub = U.lbl("", 19, Color(0.92, 0.94, 0.98))
+	pv.add_child(_hud_sub)
+
+	# Bouton d'action contextuel, grand et centré en bas
+	_action_btn = U.btn("", Color(0.95, 0.75, 0.30), 26, Vector2(520, 76))
+	_action_btn.anchor_left = 0.5
+	_action_btn.anchor_right = 0.5
+	_action_btn.anchor_top = 1.0
+	_action_btn.anchor_bottom = 1.0
+	_action_btn.offset_left = -260.0
+	_action_btn.offset_right = 260.0
+	_action_btn.offset_top = -100.0
+	_action_btn.offset_bottom = -24.0
+	_action_btn.z_index = 6
+	_action_btn.pressed.connect(_on_action_pressed)
+	_action_btn.hide()
+	_map_view.add_child(_action_btn)
+
+	# Croix directionnelle isométrique (pas à pas)
+	_dpad = Control.new()
+	_dpad.anchor_top = 1.0
+	_dpad.anchor_bottom = 1.0
+	_dpad.offset_left = 20.0
+	_dpad.offset_top = -216.0
+	_dpad.offset_right = 216.0
+	_dpad.offset_bottom = -20.0
+	_dpad.z_index = 6
+	_map_view.add_child(_dpad)
+	var slots := {"↖": Vector2(0, 0), "↗": Vector2(98, 0), "↙": Vector2(0, 98), "↘": Vector2(98, 98)}
+	for k: String in DPAD_DIRS.keys():
+		var b := U.btn(k, Color(0.45, 0.60, 0.85), 40, Vector2(90, 90))
+		b.position = slots[k]
+		b.size = Vector2(90, 90)
+		b.pressed.connect(_step_dir.bind(DPAD_DIRS[k]))
+		_dpad.add_child(b)
+
+	# Aide de contrôle, en bas à droite de la carte
+	var help := PanelContainer.new()
+	help.anchor_left = 1.0
+	help.anchor_right = 1.0
+	help.anchor_top = 1.0
+	help.anchor_bottom = 1.0
+	help.offset_left = -400.0
+	help.offset_right = -16.0
+	help.offset_top = -120.0
+	help.offset_bottom = -24.0
+	help.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	help.z_index = 5
+	help.add_theme_stylebox_override("panel", U.box(Color(0.05, 0.07, 0.12, 0.80), Color(0.30, 0.36, 0.50), 12, 1, 10))
+	var hl: Label = U.lbl("Touchez une case : le trajet s'affiche. Touchez-la encore pour marcher.\nFlèches ou ZQSD : un pas à la fois.", 16, Color(0.92, 0.94, 0.98))
+	hl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	help.add_child(hl)
+	_map_view.add_child(help)
+
+
+## Met à jour la plaque d'infos et le bouton d'action selon la case du héros.
+func _refresh_hud() -> void:
+	if _hud_title == null:
+		return
+	var prog: Dictionary = manager.zone_progress()
+	_hud_title.text = manager.zone_name()
+	_hud_sub.text = "%s · niveau %d · lieux %d/%d" % [ProgressionManager.biome_label(manager.zone_biome()),
+		ProgressionManager.adventure_zone_level(manager.zone_id()), int(prog["done"]), int(prog["total"])]
+	var pos: Vector2i = manager.hero_pos()
+	var gate: Dictionary = manager.gate_at(pos)
+	var poi: Dictionary = manager.poi_at(pos)
+	_action_btn.hide()
+	if poi.is_empty() and not gate.is_empty():
+		if bool(gate["open"]):
+			_action_btn.text = "➜  PASSER VERS %s" % String(gate["name"]).to_upper()
+			_action_btn.show()
+		return
+	if poi.is_empty():
+		return
+	var kind: String = String(poi.get("kind", ""))
+	if manager.poi_done(pos) and kind != "camp":
+		return
+	var act: String = String(POI_ACTION.get(kind, "INTERAGIR"))
+	if kind == "combat":
+		act += "  (niv %d)" % manager.challenge_level(poi)
+	_action_btn.text = "▶  %s" % act
+	_action_btn.show()
+
+
+func _on_action_pressed() -> void:
+	if _walking or _modal_root != null:
+		return
+	var pos: Vector2i = manager.hero_pos()
+	if not manager.gate_at(pos).is_empty() and manager.poi_at(pos).is_empty():
+		_cross_gate(pos)
+	else:
+		_interact()
+
+
+## Un pas dans une direction (croix directionnelle / clavier).
+func _step_dir(d: Vector2i) -> void:
+	if _walking or _modal_root != null:
+		return
+	var target: Vector2i = manager.hero_pos() + d
+	_pending = Vector2i(-1, -1)
+	_board.preview = []
+	if not _inside(target):
+		_say("Le bord de l'île : la route continue par les flèches.")
+		return
+	if not manager.can_move_to(target):
+		_say("Le passage est bloqué par le décor.")
+		return
+	var path: Array[Vector2i] = [target]
+	_walk(path)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not (event is InputEventKey) or not event.pressed or event.echo:
+		return
+	if _walking or _modal_root != null:
+		return
+	var d := Vector2i.ZERO
+	match event.keycode:
+		KEY_LEFT, KEY_A, KEY_Q: d = Vector2i(-1, 0)
+		KEY_UP, KEY_W, KEY_Z: d = Vector2i(0, -1)
+		KEY_RIGHT, KEY_D: d = Vector2i(1, 0)
+		KEY_DOWN, KEY_S: d = Vector2i(0, 1)
+		KEY_ENTER, KEY_KP_ENTER, KEY_SPACE, KEY_E:
+			if _action_btn.visible:
+				_on_action_pressed()
+			get_viewport().set_input_as_handled()
+			return
+		_: return
+	_step_dir(d)
+	get_viewport().set_input_as_handled()
 
 
 func _rebuild_world() -> void:
@@ -300,38 +453,85 @@ func _on_map_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		var c: Vector2i = screen_to_cell((event.position - _world.position) / _world.scale.x)
 		_board.hover = c if _inside(c) else Vector2i(-1, -1)
-		_board.preview = manager.path_to(c) if _inside(c) and c != manager.hero_pos() else []
+		if _pending.x < 0:
+			_board.preview = manager.path_to(c) if _inside(c) and c != manager.hero_pos() else []
 		_refresh_world()
-	elif (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed) \
-			or (event is InputEventScreenTouch and not event.pressed):
+	elif event is InputEventScreenTouch and not event.pressed:
+		# Tactile : un premier appui montre le trajet, le second confirme.
+		var ct: Vector2i = screen_to_cell((event.position - _world.position) / _world.scale.x)
+		if _inside(ct):
+			_on_cell_tapped(ct, true)
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+		# Les clics émulés par le tactile sont déjà traités par l'événement tactile.
+		if event.device == InputEvent.DEVICE_ID_EMULATION:
+			return
 		var c2: Vector2i = screen_to_cell((event.position - _world.position) / _world.scale.x)
 		if _inside(c2):
-			_on_cell_tapped(c2)
+			_on_cell_tapped(c2, false)
 
 
-func _on_cell_tapped(p: Vector2i) -> void:
+## Case découverte et accessible la plus proche d'une case cachée par le brouillard.
+func _nearest_reachable(target: Vector2i) -> Vector2i:
+	var best: Vector2i = Vector2i(-1, -1)
+	var best_d: int = 1 << 30
+	var size: Vector2i = manager.zone_size()
+	for y: int in range(size.y):
+		for x: int in range(size.x):
+			var c := Vector2i(x, y)
+			if c == manager.hero_pos() or not manager.cell_discovered(c):
+				continue
+			var d: int = absi(c.x - target.x) + absi(c.y - target.y)
+			if d >= best_d or not AdventureTerrain.walkable(manager.zone_id(), c):
+				continue
+			if manager.path_to(c).is_empty():
+				continue
+			best = c
+			best_d = d
+	return best
+
+
+func _on_cell_tapped(p: Vector2i, touch: bool = false) -> void:
 	if p == manager.hero_pos():
+		_pending = Vector2i(-1, -1)
 		if not manager.gate_at(p).is_empty():
 			_cross_gate(p)
 			return
 		_interact()
 		return
+	var target: Vector2i = p
 	if not manager.cell_discovered(p):
-		_say("Le brouillard est trop dense par là. Explorez les environs.")
-		return
-	if not AdventureTerrain.walkable(manager.zone_id(), p):
+		# Brouillard : on avance jusqu'à la case connue la plus proche pour l'explorer.
+		target = _nearest_reachable(p)
+		if target.x < 0:
+			_say("Le brouillard est trop dense par là. Explorez les environs.")
+			return
+	elif not AdventureTerrain.walkable(manager.zone_id(), p):
 		_say("Le passage est bloqué par le décor.")
 		return
-	var path: Array[Vector2i] = manager.path_to(p)
+	var path: Array[Vector2i] = manager.path_to(target)
 	if path.is_empty():
 		_say("Aucun sentier ne mène là pour l'instant.")
 		return
+	if touch and path.size() > 1 and _pending != target:
+		_pending = target
+		_board.preview = path
+		_board.hover = target
+		_refresh_world()
+		_toast_show("%d pas — touchez encore pour partir" % path.size(), 24)
+		return
+	_pending = Vector2i(-1, -1)
+	if not manager.cell_discovered(p):
+		_toast_show("Vous avancez au plus près…", 22)
 	_walk(path)
 
 
 func _walk(path: Array[Vector2i]) -> void:
 	_walking = true
+	_pending = Vector2i(-1, -1)
 	_board.preview = []
+	_action_btn.hide()
+	# les longs trajets sont plus rapides (jusqu'à deux fois)
+	var step_time: float = STEP_TIME * clampf(8.0 / float(maxi(1, path.size())), 0.5, 1.0)
 	for step: Vector2i in path:
 		var from: Vector2 = _hero.position
 		var to: Vector2 = cell_center(step)
@@ -340,7 +540,7 @@ func _walk(path: Array[Vector2i]) -> void:
 		var tw := create_tween()
 		tw.tween_method(func(f: float) -> void:
 			_hero.position = from.lerp(to, f)
-			_hero.hop = sin(f * PI) * 10.0, 0.0, 1.0, STEP_TIME)
+			_hero.hop = sin(f * PI) * 10.0, 0.0, 1.0, step_time)
 		await tw.finished
 		if not fresh.is_empty():
 			_refresh_world()
@@ -437,9 +637,28 @@ func _refresh_side() -> void:
 	_side_box.add_child(head)
 	head.add_child(U.lbl("🧭 AVENTURE", 28, U.C_GOLD, true))
 	head.add_child(U.spacer())
-	var back := U.btn("← PARTIE", U.C_BORDER, 17, Vector2(120, 44))
+	var back := U.btn("← PARTIE", Color(0.55, 0.62, 0.80), 20, Vector2(150, 56))
 	back.pressed.connect(_back_to_save)
 	head.add_child(back)
+
+	# Lieu courant
+	_side_box.add_child(_place_card())
+
+	# Zone
+	var zone_card := PanelContainer.new()
+	zone_card.add_theme_stylebox_override("panel", U.box(U.C_CARD, U.C_BORDER, 14, 2, 12))
+	_side_box.add_child(zone_card)
+	var zv := VBoxContainer.new()
+	zv.add_theme_constant_override("separation", 6)
+	zone_card.add_child(zv)
+	zv.add_child(U.lbl(manager.zone_name(), 24, U.C_TXT, true))
+	zv.add_child(U.lbl("%s · niveau %d" % [ProgressionManager.biome_label(manager.zone_biome()),
+		ProgressionManager.adventure_zone_level(manager.zone_id())], 18, DIM))
+	var prog: Dictionary = manager.zone_progress()
+	zv.add_child(_bar_row("Lieux explorés", float(prog["done"]), float(maxi(1, int(prog["total"]))),
+		"%d / %d" % [int(prog["done"]), int(prog["total"])], Color(0.95, 0.75, 0.30)))
+	zv.add_child(_bar_row("Carte révélée", float(prog["fog"]) * 100.0, 100.0,
+		"%d %%" % int(float(prog["fog"]) * 100.0), Color(0.45, 0.80, 1.0)))
 
 	# Explorateur
 	var hero_card := PanelContainer.new()
@@ -456,7 +675,7 @@ func _refresh_side() -> void:
 	var hinfo := VBoxContainer.new()
 	hinfo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hrow.add_child(hinfo)
-	hinfo.add_child(U.lbl("Explorateur", 15, U.C_DIM))
+	hinfo.add_child(U.lbl("Explorateur", 18, DIM))
 	hinfo.add_child(U.lbl("%s · niv %d" % [hclass, ProgressionManager.member_level(_save, hclass)], 22, U.C_TXT))
 	var team_row := HBoxContainer.new()
 	team_row.add_theme_constant_override("separation", 6)
@@ -465,9 +684,9 @@ func _refresh_side() -> void:
 		var cls: String = String(m.get("classe", ""))
 		if cls == hclass:
 			continue
-		var b := U.btn("", U.C_BORDER, 12, Vector2(44, 44))
+		var b := U.btn("", Color(0.55, 0.62, 0.80), 12, Vector2(56, 56))
 		b.tooltip_text = "Explorer avec : %s" % cls
-		var pic: Control = U.portrait(cls, 36.0)
+		var pic: Control = U.portrait(cls, 46.0)
 		pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		pic.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		b.add_child(pic)
@@ -478,25 +697,6 @@ func _refresh_side() -> void:
 			_refresh_side())
 		team_row.add_child(b)
 
-	# Zone
-	var zone_card := PanelContainer.new()
-	zone_card.add_theme_stylebox_override("panel", U.box(U.C_CARD, U.C_BORDER, 14, 2, 12))
-	_side_box.add_child(zone_card)
-	var zv := VBoxContainer.new()
-	zv.add_theme_constant_override("separation", 6)
-	zone_card.add_child(zv)
-	zv.add_child(U.lbl(manager.zone_name(), 24, U.C_TXT, true))
-	zv.add_child(U.lbl("%s · niveau %d" % [ProgressionManager.biome_label(manager.zone_biome()),
-		ProgressionManager.adventure_zone_level(manager.zone_id())], 15, U.C_DIM))
-	var prog: Dictionary = manager.zone_progress()
-	zv.add_child(_bar_row("Lieux explorés", float(prog["done"]), float(maxi(1, int(prog["total"]))),
-		"%d / %d" % [int(prog["done"]), int(prog["total"])], Color(0.95, 0.75, 0.30)))
-	zv.add_child(_bar_row("Carte révélée", float(prog["fog"]) * 100.0, 100.0,
-		"%d %%" % int(float(prog["fog"]) * 100.0), Color(0.45, 0.80, 1.0)))
-
-	# Lieu courant
-	_side_box.add_child(_place_card())
-
 	# Journal
 	var journal: Array = manager.state.get("journal", [])
 	if not journal.is_empty():
@@ -506,36 +706,37 @@ func _refresh_side() -> void:
 		var jv := VBoxContainer.new()
 		jv.add_theme_constant_override("separation", 4)
 		jc.add_child(jv)
-		jv.add_child(U.lbl("JOURNAL", 15, U.C_GOLD))
+		jv.add_child(U.lbl("JOURNAL", 18, U.C_GOLD))
 		for i: int in range(journal.size() - 1, maxi(-1, journal.size() - 5), -1):
-			var l: Label = U.lbl("• " + String(journal[i]), 15, U.C_TXT if i == journal.size() - 1 else U.C_DIM)
+			var l: Label = U.lbl("• " + String(journal[i]), 18, U.C_TXT if i == journal.size() - 1 else DIM)
 			l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			jv.add_child(l)
 
 	# Monde : mini-carte des cartes visitées (voyage rapide)
-	_side_box.add_child(U.lbl("MONDE DE ZIMUT", 15, U.C_GOLD))
+	_side_box.add_child(U.lbl("MONDE DE ZIMUT", 18, U.C_GOLD))
 	var mm := MiniMap.new()
 	mm.ui = self
-	mm.custom_minimum_size = Vector2(0, 250)
+	mm.custom_minimum_size = Vector2(0, 280)
 	_side_box.add_child(mm)
-	var hint := U.lbl("Marchez jusqu'aux flèches au bord de l'île pour passer à la carte voisine. Touchez une carte déjà visitée pour y voyager.", 13, U.C_DIM)
+	var hint := U.lbl("Marchez jusqu'aux flèches au bord de l'île pour passer à la carte voisine. Touchez une carte déjà visitée pour y voyager.", 19, DIM)
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_side_box.add_child(hint)
-	var foot := U.lbl("XP, objets, or et ressources : sauvegarde commune aux trois modes.", 13, U.C_DIM)
+	var foot := U.lbl("XP, objets, or et ressources : sauvegarde commune aux trois modes.", 19, DIM)
 	foot.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_side_box.add_child(foot)
+	_refresh_hud()
 
 
 func _bar_row(title: String, value: float, maximum: float, txt: String, col: Color) -> Control:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 2)
 	var h := HBoxContainer.new()
-	h.add_child(U.lbl(title, 14, U.C_DIM))
+	h.add_child(U.lbl(title, 17, DIM))
 	h.add_child(U.spacer())
-	h.add_child(U.lbl(txt, 14, U.C_TXT))
+	h.add_child(U.lbl(txt, 17, U.C_TXT))
 	v.add_child(h)
 	var pb := ProgressBar.new()
-	pb.custom_minimum_size = Vector2(0, 12)
+	pb.custom_minimum_size = Vector2(0, 16)
 	pb.show_percentage = false
 	pb.max_value = maximum
 	pb.value = value
@@ -558,20 +759,20 @@ func _place_card() -> Control:
 	if poi.is_empty() and not gate.is_empty():
 		var gcol: Color = Color(0.55, 1.0, 0.55) if bool(gate["open"]) else Color(1.0, 0.45, 0.40)
 		card.add_theme_stylebox_override("panel", U.box(Color(0.10, 0.12, 0.19), gcol, 14, 2, 14))
-		v.add_child(U.lbl("ROUTE DU %s" % String(ProgressionManager.ADVENTURE_DIR_LABEL[String(gate["dir"])]).to_upper(), 15, U.C_GOLD))
+		v.add_child(U.lbl("ROUTE DU %s" % String(ProgressionManager.ADVENTURE_DIR_LABEL[String(gate["dir"])]).to_upper(), 18, U.C_GOLD))
 		v.add_child(U.lbl("%s · niv %d" % [String(gate["name"]), int(gate["level"])], 21, U.C_TXT, true))
 		if bool(gate["open"]):
-			var gb := U.btn("➜  PASSER LA FRONTIÈRE", gcol, 19, Vector2(0, 56))
+			var gb := U.btn("➜  PASSER LA FRONTIÈRE", gcol, 24, Vector2(0, 72))
 			gb.pressed.connect(_cross_gate.bind(pos))
 			v.add_child(gb)
 		else:
-			var rl: Label = U.lbl("🔒 " + String(gate["reason"]), 16, U.C_BAD)
+			var rl: Label = U.lbl("🔒 " + String(gate["reason"]), 19, U.C_BAD)
 			rl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			v.add_child(rl)
 		return card
 	if poi.is_empty():
-		v.add_child(U.lbl("EN CHEMIN", 15, U.C_GOLD))
-		var t: Label = U.lbl("Touchez une case découverte pour vous y rendre, ou un lieu pour l'explorer.\nLes camps ennemis barrent la route tant qu'ils ne sont pas vaincus.", 16, U.C_TXT)
+		v.add_child(U.lbl("EN CHEMIN", 18, U.C_GOLD))
+		var t: Label = U.lbl("Touchez une case : le trajet s'affiche, touchez-la encore pour marcher. Les cases dans la brume vous amènent au plus près.\nLes camps ennemis barrent la route tant qu'ils ne sont pas vaincus.", 19, U.C_TXT)
 		t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(t)
 		return card
@@ -581,7 +782,7 @@ func _place_card() -> Control:
 	v.add_child(row)
 	var ico := TextureRect.new()
 	ico.texture = load(String(POI_ICONS.get(kind, POI_ICONS["combat"]))) as Texture2D
-	ico.custom_minimum_size = Vector2(52, 52)
+	ico.custom_minimum_size = Vector2(64, 64)
 	ico.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	ico.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	row.add_child(ico)
@@ -591,15 +792,15 @@ func _place_card() -> Control:
 	var nl: Label = U.lbl(String(poi.get("name", "?")), 21, U.C_TXT, true)
 	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	nv.add_child(nl)
-	nv.add_child(U.lbl("✓ Exploré" if done else "Niveau %d" % int(poi.get("level", 10)), 14, U.C_GOOD if done else col.lightened(0.3)))
-	var d: Label = U.lbl(String(poi.get("desc", "")), 15, U.C_DIM)
+	nv.add_child(U.lbl("✓ Exploré" if done else "Niveau %d" % int(poi.get("level", 10)), 17, U.C_GOOD if done else col.lightened(0.3)))
+	var d: Label = U.lbl(String(poi.get("desc", "")), 18, DIM)
 	d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(d)
 	if not done:
 		var act: String = String(POI_ACTION.get(kind, "INTERAGIR"))
 		if kind == "combat":
 			act += "  (niv %d)" % manager.challenge_level(poi)
-		var b := U.btn(act, col, 19, Vector2(0, 56))
+		var b := U.btn(act, col, 24, Vector2(0, 72))
 		b.pressed.connect(_interact)
 		v.add_child(b)
 	return card
@@ -1168,6 +1369,13 @@ class AdventureBoard extends Node2D:
 			draw_set_transform(pc, 0.0, Vector2(1.0, 0.5))
 			draw_circle(Vector2.ZERO, 9.0 if not last else 15.0, Color(1.0, 0.95, 0.55, 0.85))
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			if last and preview.size() > 1:
+				var tag: String = "%d pas" % preview.size()
+				var fnt: Font = ThemeDB.fallback_font
+				var tw: Vector2 = fnt.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 26)
+				var tp: Vector2 = pc + Vector2(-tw.x * 0.5, -46.0)
+				draw_rect(Rect2(tp + Vector2(-10, -tw.y + 2), tw + Vector2(20, 10)), Color(0.05, 0.07, 0.12, 0.88))
+				draw_string(fnt, tp, tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 26, Color(1.0, 0.92, 0.55))
 		# Survol
 		if hover.x >= 0:
 			var ok: bool = mgr.cell_discovered(hover) and AdventureTerrain.walkable(mgr.zone_id(), hover)

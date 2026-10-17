@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c47aee8ba6565"
-path="res://.godot/imported/sylvain.svg-2639cb6b764b91cd1e7af777fcd28e07.ctex"
+uid="uid://foraoitl8sek"
+path="res://.godot/imported/amber_rain.svg-ddf330c0db957ac80bdfe32b9b81934f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/sylvain.svg"
-dest_files=["res://.godot/imported/sylvain.svg-2639cb6b764b91cd1e7af777fcd28e07.ctex"]
+source_file="res://assets/icons/spells/amber_rain.svg"
+dest_files=["res://.godot/imported/amber_rain.svg-ddf330c0db957ac80bdfe32b9b81934f.ctex"]
 
 [params]
 

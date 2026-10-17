@@ -301,6 +301,16 @@ icon("dive", "phys", wing(WHITE, 0.8) + L(8, -20, 18, 8, STEEL, 4))
 icon("spores", "poison", cloud("#9ae05a", 0.9) + C(-8, 16, 2.6, "#e8ffd0", 0) + C(4, 18, 2.2, "#e8ffd0", 0) + C(14, 14, 2.6, "#e8ffd0", 0) + mushroom().replace("<path", "<path opacity='0.0'"))
 icon("whip", "nature", whip())
 icon("summon", "summon", star4("#d8c0ff", 1.0))
+icon("sandstone", "earth", rock("#d8b070", 1.0) + star4("#fff0c0", 0.35).replace('<g transform="translate(0,0)', '<g transform="translate(10,-12)'))
+icon("crystal_lance", "earth", crystal("#ffb830", 1.2) + L(-18, 20, 18, -20, "#ffe9a8", 2, False))
+icon("rockslide", "earth", rock("#b89a68", 0.8) + rock("#d8b070", 0.55).replace('<g transform="translate(0,0)', '<g transform="translate(-14,12)') + rock("#a88a58", 0.5).replace('<g transform="translate(0,0)', '<g transform="translate(14,14)'))
+icon("sandstorm", "earth", swirl("#f0d090", 4) + C(-14, 14, 2.4, "#fff0c0", 0) + C(16, -12, 2.4, "#fff0c0", 0) + C(14, 16, 2, "#fff0c0", 0))
+icon("quake_amber", "earth", P("M-24,2 L-8,-4 L0,4 L10,-6 L24,2", "none", 4, "#ffc050") + crystal("#ffb830", 0.8).replace('<g transform="translate(0,0)', '<g transform="translate(0,14)'))
+icon("stone_skin", "earth", shield("#c8a070", "#ffc050"))
+icon("amber_rain", "earth", crystal("#ffb830", 0.8).replace('<g transform="translate(0,0)', '<g transform="translate(-12,-4)') + crystal("#ffd870", 0.7).replace('<g transform="translate(0,0)', '<g transform="translate(12,4)') + crystal("#ff9a28", 0.6).replace('<g transform="translate(0,0)', '<g transform="translate(0,16)'))
+icon("stone_rage", "earth", fist("#d8b070") + burst("#ffc050"))
+icon("colossus", "earth", shield("#d8b070", "#ffc050") + rock("#b89a68", 0.5).replace('<g transform="translate(0,0)', '<g transform="translate(0,-4)'))
+icon("cataclysm", "earth", rock("#b89a68", 0.9) + burst("#ff9a28") + P("M-24,18 L-8,10 L0,20 L10,8 L24,18", "none", 3.5, "#3a2a12"))
 
 # ── Mapping nom de sort -> icône (règles ordonnées) + rang d'étoiles ───────
 def norm(s):
@@ -311,6 +321,9 @@ TIER_WORDS = {"superieur": 2, "supreme": 3, "ultime": 3, "legendaire": 3, "final
               "total": 2, "totale": 2, "massif": 2, "critique": 2, "mortel": 2, "vital": 1, "vitale": 1, "puissant": 1, "puissante": 1}
 
 RULES = [  # (mot-clé normalisé, icône)
+    ("eclat de gres", "sandstone"), ("lance de cristal", "crystal_lance"), ("eboulement", "rockslide"), ("tempete de sable", "sandstorm"),
+    ("seisme ambre", "quake_amber"), ("peau de pierre", "stone_skin"), ("armure de gres", "stone_skin"), ("rempart de cristal", "shield"),
+    ("pluie de cristaux", "amber_rain"), ("fureur de la pierre", "stone_rage"), ("colosse de gres", "colossus"), ("cataclysme mineral", "cataclysm"),
     ("coup de bouclier", "shield_bash"), ("coup ecrasant", "crushing"), ("coup final", "final_blow"), ("coup bas", "low_blow"),
     ("frappe puissante", "power_strike"), ("rugissement de la foret", "forest_roar"), ("rugissement", "roar"), ("provocation", "taunt"),
     ("mur de pierre", "wall"), ("tremblement", "earthquake"), ("bouclier sacre", "shield_holy"), ("bouclier legendaire", "shield_holy"),

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b4emq01sxvau7"
-path="res://.godot/imported/arbre.svg-7ea1765501d031b237ed7f9e408673ee.ctex"
+uid="uid://dqd6fgd6tqa4y"
+path="res://.godot/imported/stone_skin.svg-4c4422915dce611bb2625c439a3e46fe.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/arbre.svg"
-dest_files=["res://.godot/imported/arbre.svg-7ea1765501d031b237ed7f9e408673ee.ctex"]
+source_file="res://assets/icons/spells/stone_skin.svg"
+dest_files=["res://.godot/imported/stone_skin.svg-4c4422915dce611bb2625c439a3e46fe.ctex"]
 
 [params]
 

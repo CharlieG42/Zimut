@@ -19,6 +19,7 @@ const CLASS_COLORS: Dictionary = {
 	"Heal":       Color(0.0, 0.75, 0.75),
 	"Invocateur": Color(0.5, 0.0, 0.5),
 	"Sylvain":    Color(0.35, 0.65, 0.25),
+	"Géomancien": Color(0.85, 0.62, 0.25),
 }
 
 ## Données par défaut si le CSV ne fournit pas tout (icône + description manuelles)
@@ -31,6 +32,7 @@ const CLASS_META: Dictionary = {
 	"Heal":       {"icon": "❤️", "description": "Spécialiste des soins et de la survie."},
 	"Invocateur": {"icon": "🎭", "description": "Invoque des créatures, contrôle le champ."},
 	"Sylvain":    {"icon": "🌿", "description": "Maître des plantes : invoque la forêt, empoisonne et soigne par la sève."},
+	"Géomancien":    {"icon": "🪨", "description": "Mage de pierre et de sable : érige piliers, murs et failles pour bloquer, isoler et protéger."},
 }
 
 var available_classes: Array[String] = []
@@ -141,6 +143,8 @@ func _load_fallback_data() -> void:
 			"base_stats": {"PV": 202, "PA": 6, "PM": 4, "Force": 22, "Intelligence": 44, "Agilite": 13, "Sagesse": 19, "Defense": 36}},
 		"Sylvain": {"name": "Sylvain", "description": CLASS_META["Sylvain"]["description"], "color": CLASS_COLORS["Sylvain"], "icon": CLASS_META["Sylvain"]["icon"],
 			"base_stats": {"PV": 107, "PA": 6, "PM": 4, "Force": 14, "Intelligence": 19, "Agilite": 19, "Sagesse": 29, "Defense": 24}},
+		"Géomancien": {"name": "Géomancien", "description": CLASS_META["Géomancien"]["description"], "color": CLASS_COLORS["Géomancien"], "icon": CLASS_META["Géomancien"]["icon"],
+			"base_stats": {"PV": 105, "PA": 6, "PM": 4, "Force": 8, "Intelligence": 20, "Agilite": 10, "Sagesse": 18, "Defense": 24}},
 	}
 
 

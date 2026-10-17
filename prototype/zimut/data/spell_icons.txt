@@ -149,6 +149,22 @@ Invoquer Racines,roots_block
 Invoquer Ronce agressive,summon_ronce_agressive
 Tir de recul,recoil
 Balise de chasse,beacon
+Éclat de grès,sandstone
+Invoquer Pilier,summon_pilier
+Armure de grès,stone_skin
+Lance de cristal,crystal_lance
+Invoquer Muraille,summon_muraille
+Éboulement,rockslide
+Invoquer Cristal ambré,summon_cristal_ambre
+Invoquer Faille,summon_faille
+Peau de pierre,stone_skin
+Tempête de sable,sandstorm
+Séisme ambré,quake_amber
+Rempart de cristal,shield
+Pluie de cristaux,amber_rain
+Fureur de la pierre,stone_rage
+Colosse de grès,colossus
+Cataclysme minéral,cataclysm
 Morsure,bite
 Coup d'os,bone
 Coup de massue,club

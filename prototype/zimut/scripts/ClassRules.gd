@@ -122,6 +122,12 @@ const CLASSES := {
 		"auto": {"intelligence": 3, "wisdom": 2, "vita": 2, "defense": 1},
 		"role": "Maître de la forêt. +1 PM au niv. 35.",
 	},
+	"Géomancien": {
+		"xp": 1.0, "pa": [45], "pm": [],
+		"aff": {"intelligence": "A", "defense": "B", "vita": "B", "wisdom": "B", "agility": "C", "force": "C"},
+		"auto": {"intelligence": 3, "defense": 2, "vita": 2, "wisdom": 1},
+		"role": "Contrôle du terrain : piliers, murailles et failles bloquent les passages. +1 PA au niv. 45.",
+	},
 }
 
 const DEFAULT_RULES := {

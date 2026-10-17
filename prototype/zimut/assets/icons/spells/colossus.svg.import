@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dxfybsp1mm800"
-path="res://.godot/imported/loup.svg-8b5574970c87defe06d513e66f594824.ctex"
+uid="uid://dov0e4fdwgsv4"
+path="res://.godot/imported/colossus.svg-811ac7f0ca9430ecb40f676b354a3788.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/loup.svg"
-dest_files=["res://.godot/imported/loup.svg-8b5574970c87defe06d513e66f594824.ctex"]
+source_file="res://assets/icons/spells/colossus.svg"
+dest_files=["res://.godot/imported/colossus.svg-811ac7f0ca9430ecb40f676b354a3788.ctex"]
 
 [params]
 
