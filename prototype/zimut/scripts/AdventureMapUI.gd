@@ -17,7 +17,6 @@ const TILE_H := 64.0
 const SIDE_W := 520.0
 const STEP_TIME := 0.17
 const DIM := Color(0.80, 0.84, 0.92)          # texte secondaire (plus clair que UiKit.C_DIM)
-const DPAD_DIRS := {"↖": Vector2i(-1, 0), "↗": Vector2i(0, -1), "↙": Vector2i(0, 1), "↘": Vector2i(1, 0)}
 
 const POI_ICONS := {
 	"combat": "res://assets/adventure/poi/combat.svg",
@@ -75,7 +74,8 @@ var _pending: Vector2i = Vector2i(-1, -1)      # destination en attente de confi
 var _hud_title: Label
 var _hud_sub: Label
 var _action_btn: Button
-var _dpad: Control
+var _joystick: ZJoystick
+var _joy_flip: bool = false
 var _rng := RandomNumberGenerator.new()
 
 
@@ -161,6 +161,7 @@ func _build() -> void:
 	side.add_theme_stylebox_override("panel", U.box(Color(0.06, 0.08, 0.13, 0.97), Color(0.86, 0.68, 0.30), 0, 2, 16))
 	add_child(side)
 	var scroll := ScrollContainer.new()
+	TouchScroll.install(scroll)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	side.add_child(scroll)
 	_side_box = VBoxContainer.new()
@@ -200,23 +201,16 @@ func _build_hud() -> void:
 	_action_btn.hide()
 	_map_view.add_child(_action_btn)
 
-	# Croix directionnelle isométrique (pas à pas)
-	_dpad = Control.new()
-	_dpad.anchor_top = 1.0
-	_dpad.anchor_bottom = 1.0
-	_dpad.offset_left = 20.0
-	_dpad.offset_top = -216.0
-	_dpad.offset_right = 216.0
-	_dpad.offset_bottom = -20.0
-	_dpad.z_index = 6
-	_map_view.add_child(_dpad)
-	var slots := {"↖": Vector2(0, 0), "↗": Vector2(98, 0), "↙": Vector2(0, 98), "↘": Vector2(98, 98)}
-	for k: String in DPAD_DIRS.keys():
-		var b := U.btn(k, Color(0.45, 0.60, 0.85), 40, Vector2(90, 90))
-		b.position = slots[k]
-		b.size = Vector2(90, 90)
-		b.pressed.connect(_step_dir.bind(DPAD_DIRS[k]))
-		_dpad.add_child(b)
+	# Joystick tactile : on glisse le pouce, le héros marche case par case tant qu'on le tient.
+	_joystick = ZJoystick.new()
+	_joystick.anchor_top = 1.0
+	_joystick.anchor_bottom = 1.0
+	_joystick.offset_left = 20.0
+	_joystick.offset_top = -236.0
+	_joystick.offset_right = 232.0
+	_joystick.offset_bottom = -24.0
+	_joystick.z_index = 6
+	_map_view.add_child(_joystick)
 
 	# Aide de contrôle, en bas à droite de la carte
 	var help := PanelContainer.new()
@@ -231,7 +225,7 @@ func _build_hud() -> void:
 	help.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	help.z_index = 5
 	help.add_theme_stylebox_override("panel", U.box(Color(0.05, 0.07, 0.12, 0.80), Color(0.30, 0.36, 0.50), 12, 1, 10))
-	var hl: Label = U.lbl("Touchez une case : le trajet s'affiche. Touchez-la encore pour marcher.\nFlèches ou ZQSD : un pas à la fois.", 16, Color(0.92, 0.94, 0.98))
+	var hl: Label = U.lbl("Touchez une case : le trajet s'affiche. Touchez-la encore pour marcher.\nJoystick (ou flèches / ZQSD) : marchez en continu.", 16, Color(0.92, 0.94, 0.98))
 	hl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	help.add_child(hl)
 	_map_view.add_child(help)
@@ -276,7 +270,24 @@ func _on_action_pressed() -> void:
 		_interact()
 
 
-## Un pas dans une direction (croix directionnelle / clavier).
+func _process(_delta: float) -> void:
+	if _joystick == null or not _joystick.pushed() or _walking or _modal_root != null:
+		return
+	_joy_step(_joystick.vector)
+
+
+## Un pas dans la direction du joystick ; si l'axe de grille voulu est bloqué, essaie l'autre.
+func _joy_step(v: Vector2) -> void:
+	_joy_flip = not _joy_flip
+	var dirs: Array[Vector2i] = ZJoystick.grid_dirs(v, _joy_flip)
+	for d: Vector2i in dirs:
+		var t: Vector2i = manager.hero_pos() + d
+		if _inside(t) and manager.can_move_to(t):
+			_step_dir(d)
+			return
+
+
+## Un pas dans une direction (joystick / clavier).
 func _step_dir(d: Vector2i) -> void:
 	if _walking or _modal_root != null:
 		return

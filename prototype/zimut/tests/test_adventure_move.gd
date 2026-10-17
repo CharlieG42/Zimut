@@ -1,6 +1,6 @@
 extends SceneTree
 ## Déplacement en Aventure : double appui tactile avec aperçu, brouillard → case connue
-## la plus proche, croix directionnelle / clavier (un pas).
+## la plus proche, joystick / clavier (un pas).
 ## Lancement : xvfb-run -a godot --rendering-method gl_compatibility --path . -s tests/test_adventure_move.gd
 var fails: int = 0
 func check(c: bool, m: String) -> void:
@@ -50,17 +50,27 @@ func _boot() -> void:
 	check(fog.x >= 0, "case dans la brume trouvée")
 	var near: Vector2i = sc._nearest_reachable(fog)
 	check(near.x >= 0 and mgr.cell_discovered(near), "brume : une case connue accessible est proposée")
-	# Pas à pas : la croix directionnelle déplace d'une case
+	# Joystick : le vecteur écran donne la bonne direction de grille
+	check(ZJoystick.grid_dirs(Vector2(1, 1), false) == [Vector2i(1, 0)], "joystick ↘ -> (1,0)")
+	check(ZJoystick.grid_dirs(Vector2(-1, -1), false) == [Vector2i(-1, 0)], "joystick ↖ -> (-1,0)")
+	check(ZJoystick.grid_dirs(Vector2(1, 0), false).size() == 2, "joystick droite : deux axes en zigzag")
+	var waited: float = 0.0
+	while sc._walking and waited < 6.0:
+		await create_timer(0.2).timeout
+		waited += 0.2
+	if sc._modal_root != null:
+		sc._close_modal()
 	await create_timer(0.3).timeout
 	var here: Vector2i = mgr.hero_pos()
 	var moved: bool = false
-	for d: Vector2i in sc.DPAD_DIRS.values():
+	for v: Vector2 in [Vector2(1, 1), Vector2(-1, 1), Vector2(1, -1), Vector2(-1, -1)]:
+		var d: Vector2i = ZJoystick.grid_dirs(v, false)[0]
 		if mgr.can_move_to(here + d):
-			sc._step_dir(d)
+			sc._joy_step(v)
 			await create_timer(0.6).timeout
 			moved = mgr.hero_pos() == here + d
 			break
-	check(moved, "croix directionnelle : un pas dans la direction choisie")
+	check(moved, "joystick : un pas dans la direction poussée")
 	pm.delete_save(4)
 	print("\n%s — %d échec(s)" % ["OK" if fails == 0 else "KO", fails])
 	quit(1 if fails > 0 else 0)

@@ -321,24 +321,24 @@ const CONQUEST_CITIES := {
 	"oasis":        {"name": "Oasis Perdue",      "kind": "neutral",   "biome": "Désert",    "level": 20},
 	"tour_sable":   {"name": "Tour des Sables",  "kind": "enemy",     "biome": "Désert",    "level": 22},
 	"donjon_roi":   {"name": "Donjon du Roi Squelette", "kind": "enemy", "biome": "Donjon", "level": 25},
-	"village_brume": {"name": "Village des Brumes", "kind": "neutral", "biome": "Forêt", "level": 11},
-	"ruines_lierre": {"name": "Ruines du Lierre", "kind": "enemy", "biome": "Forêt", "level": 13},
-	"abbaye_ronce": {"name": "Abbaye des Ronces", "kind": "neutral", "biome": "Forêt", "level": 14},
-	"citadelle_ronce": {"name": "Citadelle des Ronces", "kind": "enemy", "biome": "Forêt", "level": 15},
+	"village_brume": {"name": "Village des Brumes", "kind": "neutral", "biome": "Brumes", "level": 11},
+	"ruines_lierre": {"name": "Ruines du Lierre", "kind": "enemy", "biome": "Ombres", "level": 13},
+	"abbaye_ronce": {"name": "Abbaye des Ronces", "kind": "neutral", "biome": "Ombres", "level": 14},
+	"citadelle_ronce": {"name": "Citadelle des Ronces", "kind": "enemy", "biome": "Ombres", "level": 15},
 	"col_givre": {"name": "Col du Givre", "kind": "neutral", "biome": "Montagne", "level": 17},
-	"mine_cristal": {"name": "Mine de Cristal", "kind": "enemy", "biome": "Montagne", "level": 19},
-	"bastion_orage": {"name": "Bastion de l'Orage", "kind": "enemy", "biome": "Montagne", "level": 21},
-	"caravanserail": {"name": "Caravansérail Rouge", "kind": "neutral", "biome": "Désert", "level": 22},
+	"mine_cristal": {"name": "Mine de Cristal", "kind": "enemy", "biome": "Cristaux", "level": 19},
+	"bastion_orage": {"name": "Bastion de l'Orage", "kind": "enemy", "biome": "Vents", "level": 21},
+	"caravanserail": {"name": "Caravansérail Rouge", "kind": "neutral", "biome": "Marées", "level": 22},
 	"observatoire": {"name": "Observatoire Solaire", "kind": "neutral", "biome": "Désert", "level": 23},
-	"port_sable": {"name": "Port des Sables", "kind": "enemy", "biome": "Désert", "level": 24},
-	"bois_lune": {"name": "Bois de Lune", "kind": "neutral", "biome": "Forêt", "level": 16},
+	"port_sable": {"name": "Port des Sables", "kind": "enemy", "biome": "Marées", "level": 24},
+	"bois_lune": {"name": "Bois de Lune", "kind": "neutral", "biome": "Brumes", "level": 16},
 	"sanctuaire_mousse": {"name": "Sanctuaire Moussu", "kind": "neutral", "biome": "Forêt", "level": 17},
-	"forge_givre": {"name": "Forge du Givre", "kind": "enemy", "biome": "Montagne", "level": 23},
-	"pic_foudroyant": {"name": "Pic Foudroyant", "kind": "enemy", "biome": "Montagne", "level": 24},
-	"marais_spectres": {"name": "Marais des Spectres", "kind": "neutral", "biome": "Forêt", "level": 18},
-	"fort_cendre": {"name": "Fort des Cendres", "kind": "enemy", "biome": "Désert", "level": 26},
+	"forge_givre": {"name": "Forge du Givre", "kind": "enemy", "biome": "Cristaux", "level": 23},
+	"pic_foudroyant": {"name": "Pic Foudroyant", "kind": "enemy", "biome": "Vents", "level": 24},
+	"marais_spectres": {"name": "Marais des Spectres", "kind": "neutral", "biome": "Brumes", "level": 18},
+	"fort_cendre": {"name": "Fort des Cendres", "kind": "enemy", "biome": "Brasier", "level": 26},
 	"temple_soleil": {"name": "Temple du Soleil", "kind": "neutral", "biome": "Désert", "level": 25},
-	"citadelle_sable": {"name": "Citadelle de Sable", "kind": "enemy", "biome": "Désert", "level": 27},
+	"citadelle_sable": {"name": "Citadelle de Sable", "kind": "enemy", "biome": "Brasier", "level": 27},
 }
 
 ## Récompense de première annexion : chaque lieu offre un petit butin
@@ -789,10 +789,14 @@ func next_biome(data: Dictionary) -> String:
 
 ## Nom complet du biome pour affichage.
 func biome_label(biome: String) -> String:
+	if Nations.is_new(biome):
+		return Nations.nation_name(biome)
 	return String(BIOME_LABEL.get(biome, biome))
 
 ## Types d'ennemis du biome (2 types, cf. BIOME_ENEMIES / ennemis.txt).
 func biome_enemy_types(biome: String) -> Array[String]:
+	if Nations.is_new(biome):
+		return Nations.enemy_types(biome)
 	var out: Array[String] = []
 	for t: String in BIOME_ENEMIES.get(biome, ["Gobelin", "Squelette"]):
 		out.append(t)
@@ -800,6 +804,8 @@ func biome_enemy_types(biome: String) -> Array[String]:
 
 ## Boss du biome.
 func biome_boss(biome: String) -> String:
+	if Nations.is_new(biome):
+		return String(Nations.info(biome).get("boss", "Dragonnet"))
 	return String(BIOME_BOSSES.get(biome, "Dragonnet"))
 
 ## Charge les recettes de craft.txt :
@@ -1738,6 +1744,9 @@ func conquest_biome_control_bonus(conquest: Dictionary) -> Dictionary:
 				bonus["Fer"] = 5
 			"Désert":
 				bonus["Venin"] = 5
+			_:
+				if Nations.is_new(biome):
+					bonus[Nations.resource_of(biome)] = 5
 	return bonus
 
 ## Nombre de batailles necessaires pour prendre cette ville :
@@ -1912,7 +1921,7 @@ func conquest_challenge_for(data: Dictionary, city_id: String) -> Dictionary:
 	var kinds: Array = ["swift", "flawless", "class"]
 	var kind: String = String(kinds[h % kinds.size()])
 	var level: int = int(CONQUEST_CITIES[city_id].get("level", 10))
-	var res_name: String = String(CONQUEST_BIOME_RESOURCE.get(conquest_city_biome(city_id), "Fer"))
+	var res_name: String = String(CONQUEST_BIOME_RESOURCE.get(conquest_city_biome(city_id), Nations.resource_of(conquest_city_biome(city_id))))
 	var out: Dictionary = {"kind": kind, "gold": 40 + 4 * level, "resources": {res_name: 4 + level / 6}}
 	match kind:
 		"swift":

@@ -51,7 +51,7 @@ func setup(gp: Vector2i) -> void:
 	_forest_tile_texture = null
 	# Tuiles de sol par biome (6 variantes déterministes par biome : le décor
 	# reste stable entre les combats et les sessions).
-	var tile_prefix: String = ""
+	var tile_prefix: String = Nations.tile_prefix(biome) if Nations.is_new(biome) else ""
 	match biome:
 		"Forêt":
 			tile_prefix = "forest_ground"
@@ -67,7 +67,7 @@ func setup(gp: Vector2i) -> void:
 			push_warning("Texture de sol %s introuvable : %s" % [biome, tile_path])
 	var rng := RandomNumberGenerator.new()
 	rng.seed = gp.x * 7919 + gp.y * 104729 + 17
-	var pal: Dictionary = BIOME_PALETTES.get(biome, BIOME_PALETTES["Forêt"])
+	var pal: Dictionary = Nations.cell_palette(biome) if Nations.is_new(biome) else BIOME_PALETTES.get(biome, BIOME_PALETTES["Forêt"])
 	var checker: bool = (gp.x + gp.y) % 2 == 0
 	var tint: float = rng.randf_range(-0.025, 0.025)
 	_base = (pal["a"] if checker else pal["b"])

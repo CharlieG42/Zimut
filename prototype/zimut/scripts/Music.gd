@@ -84,8 +84,12 @@ func play_combat(biome: String) -> void:
 			play("combat_mountain_2" if _rng.randf() < 0.5 else "combat_mountain")
 		"Désert":
 			play("combat_desert")
-		"Donjon":
+		"Donjon", "Ombres", "Brumes":
 			play("combat_donjon")
+		"Brasier", "Cristaux":
+			play("combat_mountain_2" if _rng.randf() < 0.5 else "combat_mountain")
+		"Vents", "Marées":
+			play("combat_desert")
 		_:
 			play("combat_forest")
 

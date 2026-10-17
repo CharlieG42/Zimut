@@ -329,6 +329,7 @@ func _on_slot_pressed(member_idx: int, slot_name: String) -> void:
 			order.append(j)
 	order.sort_custom(func(a: int, b: int) -> bool: return ItemRules.power(inv[a]) > ItemRules.power(inv[b]))
 	var scroll := ScrollContainer.new()
+	TouchScroll.install(scroll)
 	var vw: float = get_viewport().get_visible_rect().size.x
 	scroll.custom_minimum_size = Vector2(minf(860.0, vw * 0.92), minf(430.0, 92.0 * float(maxi(1, order.size()))))
 	var list := VBoxContainer.new()

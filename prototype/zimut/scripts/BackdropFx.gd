@@ -60,7 +60,7 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	var p: Dictionary = BattleScenery.pal(_biome)
 	var mist: Color = p["mist"]
-	var tint: Color = TINT.get(_biome, TINT["Forêt"])
+	var tint: Color = Nations.tint(_biome) if Nations.is_new(_biome) else TINT.get(_biome, TINT["Forêt"])
 	draw_rect(Rect2(-3200, -2200, 6400, 4400), tint)
 	# lumière douce derrière l'île
 	for i: int in range(6):
@@ -126,7 +126,10 @@ func _draw_islet(it: Dictionary, p: Dictionary, mist: Color) -> void:
 		var tx: float = c.x + (float(i) - float(it["trees"]) * 0.5 + 0.5) * w * 0.7
 		var ty: float = c.y - 4.0
 		var leaf: Color = Color(p["leaf"]).lerp(mist, far * 0.65)
-		if _biome == "Désert":
+		if Nations.is_new(_biome):
+			var ac: Color = Nations.accent(_biome).lerp(mist, far * 0.5)
+			draw_colored_polygon(PackedVector2Array([Vector2(tx - 8, ty), Vector2(tx, ty - 40), Vector2(tx + 8, ty)]), ac)
+		elif _biome == "Désert":
 			draw_rect(Rect2(tx - 3, ty - 30, 6, 30), leaf)
 			draw_rect(Rect2(tx - 11, ty - 22, 5, 12), leaf)
 		elif _biome == "Donjon":
