@@ -33,8 +33,8 @@ func _boot() -> void:
 		if String(p["classe"]) == "Géomancien":
 			geo = p
 	check(not geo.is_empty(), "le Géomancien est présent dans l'équipe")
-	geo["spells"] = gm._build_spells("Géomancien", 50)
-	check(geo["spells"].size() == 16, "16 sorts au niveau 50 (%d)" % geo["spells"].size())
+	geo["spells"] = gm._build_spells("Géomancien", 100)
+	check(geo["spells"].size() == 10, "10 sorts au niveau 100 (%d)" % geo["spells"].size())
 	geo["current_pa"] = 20
 	geo["max_pv"] = 400
 	var gp: Vector2i = gm.pos_of(geo)
@@ -108,8 +108,8 @@ func _boot() -> void:
 	check(gm.terrain_of(geo).size() == 0 or gm.terrain_of(geo).all(func(e: Dictionary) -> bool: return int(e["lifetime"]) > 0), "le pilier de 4 tours a disparu ou expire")
 	check(not gm.is_alive(pil), "le pilier est détruit après 4 tours")
 	# Sorts : cibles de buff, zone
-	var tp2: Dictionary = Combat.parse(_spell(gm, geo, "Peau de pierre"))
-	check(String(tp2["aoe"]) == "team" and tp2["buffs"].size() > 0, "Peau de pierre : buff de défense d'équipe")
+	var tp2: Dictionary = Combat.parse(_spell(gm, geo, "Armure de grès"))
+	check(tp2["buffs"].size() > 0, "Armure de grès : buff de défense")
 	var ts: Dictionary = Combat.parse(_spell(gm, geo, "Tempête de sable"))
 	check(String(ts["aoe"]) == "zone", "Tempête de sable : zone 3x3")
 	check(int(Combat.parse(_spell(gm, geo, "Séisme ambré"))["push"]) == 1, "Séisme ambré repousse d'une case")

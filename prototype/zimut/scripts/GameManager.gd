@@ -28,10 +28,10 @@ const GRID_SIZE        := 8
 const CELL_SIZE        := Vector2i(140, 140)   # conservé pour compatibilité
 const CELL_HALF_OFFSET := Vector2i(70, 70)
 
-const DEFAULT_PLAYER_LEVEL := 10
-const DEFAULT_ENEMY_LEVEL  := 10
+const DEFAULT_PLAYER_LEVEL := 20
+const DEFAULT_ENEMY_LEVEL  := 20
 ## Niveau des persos en « combat rapide » (sans partie sauvegardée)
-const QUICK_PLAYER_LEVEL   := 10
+const QUICK_PLAYER_LEVEL   := 20
 ## Niveau des ennemis : celui de la partie active (progression), sinon défaut.
 
 const PLAYER_SPAWNS: Array[Vector2i] = [Vector2i(1, 1), Vector2i(2, 1), Vector2i(1, 2)]
@@ -59,7 +59,7 @@ const COLORS: Dictionary = {
 ## table de base : les ennemis gagnent ENEMY_LEVEL_SCALE par niveau au-dessus de 10.
 const ENEMY_HP_MULT := 3.0
 const ENEMY_ATK_MULT := 2.0
-const ENEMY_LEVEL_SCALE := 0.008
+const ENEMY_LEVEL_SCALE := 0.0   ## le facteur de niveau est cuit dans ennemis.txt (V15)
 const BOSS_HP_MULT := 1.2
 const BOSS_ATK_MULT := 0.85
 ## Enrage : au-delà de ce tour, les ennemis frappent +10 % par tour supplémentaire
@@ -431,8 +431,8 @@ func init_entities() -> void:
 			continue
 		var lscale: float = 1.0 + float(maxi(0, lvl - 10)) * ENEMY_LEVEL_SCALE
 		var settings: Node = get_node_or_null("/root/GameSettings")
-		var hp_mult: float = settings.enemy_hp_mult() if settings != null else 1.0
-		var atk_mult: float = settings.enemy_attack_mult() if settings != null else 1.0
+		var hp_mult: float = settings.enemy_hp_mult(active_save) if settings != null else 1.0
+		var atk_mult: float = settings.enemy_attack_mult(active_save) if settings != null else 1.0
 		var hp_tactic_mult: float = 0.85 if conquest_tactic == "sabotage" else 1.0
 		var atk_tactic_mult: float = 0.85 if conquest_tactic == "sabotage" else (0.90 if conquest_tactic == "supply" else 1.0)
 		var pv: int = maxi(1, int(float(_csv_int(info, "PV", 50)) * ENEMY_HP_MULT * lscale * hp_mult * hp_tactic_mult))
@@ -495,8 +495,8 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 			return
 	var lscale: float = 1.0 + float(maxi(0, lvl - 10)) * ENEMY_LEVEL_SCALE
 	var settings: Node = get_node_or_null("/root/GameSettings")
-	var hp_mult: float = settings.enemy_hp_mult() if settings != null else 1.0
-	var atk_mult: float = settings.enemy_attack_mult() if settings != null else 1.0
+	var hp_mult: float = settings.enemy_hp_mult(active_save) if settings != null else 1.0
+	var atk_mult: float = settings.enemy_attack_mult(active_save) if settings != null else 1.0
 	var conquest_tactic: String = String(active_save.get("conquest", {}).get("pending_tactic", "none")) if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "conquest" else "none"
 	var hp_tactic_mult: float = 0.85 if conquest_tactic == "sabotage" else 1.0
 	var atk_tactic_mult: float = 0.85 if conquest_tactic == "sabotage" else (0.90 if conquest_tactic == "supply" else 1.0)
@@ -1058,7 +1058,7 @@ func estimate_damage(caster: Dictionary, spell: Dictionary, target: Dictionary) 
 	var p: Dictionary = Combat.parse(spell)
 	var base: float = float(p["dmg"])
 	if p["needs_summon"]:
-		base = float(p["summon_dmg_base"]) + float(caster["level"]) * float(p["summon_dmg_lvl"])
+		base = float(p["summon_dmg_base"]) + float(caster["level"]) * 0.5 * float(p["summon_dmg_lvl"])
 	if base <= 0.0:
 		return 0
 	var r: Dictionary = Combat.calc_damage(caster, target, base, String(p["dtype"]), float(p["ignore_def"]), false, true)
@@ -1165,7 +1165,7 @@ func _resolve_attack(caster: Dictionary, spell: Dictionary, p: Dictionary, cell:
 	var targets: Array = _attack_targets(caster, p, cell, spell)
 	var base: float = float(p["dmg"])
 	if p["needs_summon"]:
-		base = float(p["summon_dmg_base"]) + float(caster["level"]) * float(p["summon_dmg_lvl"])
+		base = float(p["summon_dmg_base"]) + float(caster["level"]) * 0.5 * float(p["summon_dmg_lvl"])
 	var total: int = 0
 	var names: Array[String] = []
 	for t: Dictionary in targets:
@@ -1430,7 +1430,7 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 	var info: Dictionary = Combat.SUMMONS.get(sname, Combat.SUMMONS["Loup"])
 	var s: Dictionary = _base_entity("%s (inv.)" % sname, "Summon", String(caster["team"]), sname,
 		int(caster["level"]), cell)
-	var scale: float = (0.7 + float(caster["level"]) / 200.0) * (1.0 + float(caster.get("intelligence", 0)) / 400.0)
+	var scale: float = (0.7 + float(caster["level"]) / 400.0) * (1.0 + float(caster.get("intelligence", 0)) / 400.0)
 	s.merge({
 		"max_pv": int(float(info["pv"]) * scale), "current_pv": int(float(info["pv"]) * scale),
 		"force": int(float(info["force"]) * scale), "intelligence": int(float(info["force"]) * scale),

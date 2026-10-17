@@ -1,7 +1,9 @@
 extends Node
 
-## GameSettings.gd — Réglages globaux du jeu (autoload) : difficulté des combats
-## et rapidité de progression XP. Persistés dans user://settings.json.
+## GameSettings.gd — Réglages globaux du jeu (autoload) : rapidité de progression XP
+## (persistée dans user://settings.json). La difficulté des combats est PROPRE À CHAQUE
+## PARTIE (clé « difficulty » de la sauvegarde, réglable dans « Mes Parties ») ; la
+## variable `difficulty` ci-dessous ne sert que de valeur par défaut (partie sans réglage).
 
 signal settings_changed
 
@@ -61,12 +63,20 @@ func difficulty_label() -> String:
 func xp_speed_label() -> String:
 	return XP_SPEEDS[clampi(xp_speed, 0, XP_SPEEDS.size() - 1)]
 
-## Multiplicateurs de PV et d'attaque des ennemis selon la difficulté.
-func enemy_hp_mult() -> float:
-	return float(DIFFICULTY_HP_POWER[clampi(difficulty, 0, DIFFICULTY_HP_POWER.size() - 1)])
+## Difficulté d'une partie (sauvegarde) ; à défaut, la valeur par défaut.
+func save_difficulty(save: Dictionary) -> int:
+	return clampi(int(save.get("difficulty", difficulty)), 0, DIFFICULTIES.size() - 1)
 
-func enemy_attack_mult() -> float:
-	return float(DIFFICULTY_ATK_POWER[clampi(difficulty, 0, DIFFICULTY_ATK_POWER.size() - 1)])
+func save_difficulty_label(save: Dictionary) -> String:
+	return DIFFICULTIES[save_difficulty(save)]
+
+## Multiplicateurs de PV et d'attaque des ennemis selon la difficulté de la partie
+## (`save` vide = difficulté par défaut).
+func enemy_hp_mult(save: Dictionary = {}) -> float:
+	return float(DIFFICULTY_HP_POWER[save_difficulty(save)])
+
+func enemy_attack_mult(save: Dictionary = {}) -> float:
+	return float(DIFFICULTY_ATK_POWER[save_difficulty(save)])
 
 ## Compatibilité pour les éventuels scripts externes qui utilisent l'ancien nom.
 func enemy_power_mult() -> float:
