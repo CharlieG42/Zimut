@@ -61,3 +61,9 @@ Boss Squelette Seigneur,40,400,50,40,4,4,700,Donjon,Immunité magique + Drain de
 Boss Troll Géant,45,500,60,50,3,3,800,Montagne,Régénération (10 PV/tour)
 Boss Dragon,50,800,70,60,6,5,1000,Désert,Souffle de feu (50 dégâts en zone 3x3)
 Boss Roi Squelette,60,1200,90,70,7,5,1500,Donjon,Roi du donjon : immunité magique + drain de vie (10%) + appel de serviteurs
+Boss Golem Prismatique,42,550,62,55,3,3,850,Cristaux,Carapace de cristal (50% rés. magique) + Éclat prismatique (zone 3x3)
+Boss Crabe Titan,44,600,58,60,3,3,850,Marées,Carapace des abysses + Pince océane (étourdit)
+Boss Seigneur des Tempêtes,48,700,68,45,6,5,1000,Vents,Vol + Foudre (zone 3x3, étourdit) + 25% critique
+Boss Seigneur de Lave,50,750,72,55,4,4,1050,Brasier,Peau de magma + Coulée de lave (zone 3x3, brûle)
+Boss Liche des Brumes,46,520,60,40,4,4,900,Brumes,Drain de vie 8% + Brume d'affaiblissement
+Boss Liche Éternelle,55,900,80,60,5,5,1200,Ombres,Immunité magique + drain de vie 10% + régénération 12 PV/tour

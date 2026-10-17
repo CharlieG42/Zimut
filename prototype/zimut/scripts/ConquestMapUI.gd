@@ -50,6 +50,7 @@ var _slot: int = -1
 var _conquest: Dictionary = {}
 var _selected_id: String = "clairiere"
 var _message: Label
+var _threat_banner: Label
 var _attack: Button
 var _city_buttons: Dictionary = {}
 var _city_labels: Dictionary = {}
@@ -113,13 +114,23 @@ func _ready() -> void:
 	_persist()
 	_build()
 	var annexed: String = String(_conquest.get("just_annexed", ""))
+	# L'événement à trancher est posé en premier : les nouvelles et l'annexion
+	# s'affichent par-dessus, puis le choix apparaît une fois celles-ci fermées.
+	if not ProgressionManager.conquest_pending_event(_conquest).is_empty():
+		_show_event_popup()
 	if annexed != "":
 		_conquest["just_annexed"] = ""
 		_save["conquest"] = _conquest
 		_persist()
 		_show_annexion_popup(annexed)
+	elif not (_conquest.get("news", []) as Array).is_empty():
+		_show_popup("NOUVELLES DE L'EMPIRE", "\n\n".join(PackedStringArray(_conquest["news"])))
 	else:
 		_show_counterattack_message()
+	_conquest["news"] = []
+	_conquest["last_counterattack"] = ""
+	_save["conquest"] = _conquest
+	_persist()
 
 func _build() -> void:
 	var bg := ColorRect.new()
@@ -238,9 +249,6 @@ func _build() -> void:
 		var revealed_cities: Array = _save.get("adventure", {}).get("revealed_cities", [])
 		var unknown: bool = (not owned) and (not revealed_cities.is_empty()) \
 				and (not revealed_cities.has(city_id))
-		var badge: String = "⚑" if owned else ("?" if unknown else "⚔")
-		var siege_p: int = ProgressionManager.conquest_siege_progress(_conquest, city_id)
-		var siege_txt: String = "\nSiège %d/%d" % [siege_p, ProgressionManager.CONQUEST_SIEGE_BATTLES] if siege_p > 0 else ""
 		btn.text = ""
 		btn.tooltip_text = "%s — %s" % [String(ProgressionManager.biome_label(String(city["biome"]))), String(city["desc"])]
 		btn.custom_minimum_size = Vector2(154, 124)
@@ -260,9 +268,8 @@ func _build() -> void:
 		btn.add_child(sprite)
 		var nameplate := Label.new()
 		nameplate.name = "CityNameplate"
-		nameplate.text = "%s  %s%s" % [badge, String(city["name"]), siege_txt]
+		nameplate.text = _nameplate_text(city_id)
 		if city_id == "capitale":
-			nameplate.text = "★ NOTRE CAPITALE ★\n%s" % String(city["name"])
 			nameplate.add_theme_color_override("font_color", Color(1.0, 0.93, 0.62))
 		nameplate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		nameplate.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -302,6 +309,13 @@ func _build() -> void:
 	_side_title.text = "CONSEIL DE GUERRE"
 	_side_title.add_theme_color_override("font_color", TEXT)
 	box.add_child(_side_title)
+
+	_threat_banner = Label.new()
+	_threat_banner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_threat_banner.add_theme_font_size_override("font_size", 16)
+	_threat_banner.add_theme_color_override("font_color", Color(1.0, 0.88, 0.80))
+	_threat_banner.add_theme_stylebox_override("normal", _style(Color(0.34, 0.10, 0.08, 0.96), Color(1.0, 0.45, 0.30)))
+	box.add_child(_threat_banner)
 
 	_message = Label.new()
 	_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -669,6 +683,9 @@ func _refresh_header() -> void:
 	for r: String in yld.keys():
 		parts.append("%s +%d" % [r, int(yld[r])])
 	var line: String = "Villes %d/%d" % [owned, total]
+	var income: int = ConquestSystem.total_income(_save)
+	if income > 0:
+		line += "   ·   Revenus +%d or" % income
 	if not parts.is_empty():
 		line += "   ·   Production par victoire : " + " · ".join(parts)
 	if ProgressionManager.conquest_campaign_won(_conquest):
@@ -690,12 +707,12 @@ func _select_city(id: String) -> void:
 	_build_panel(id, conquered)
 	_layout_responsive()
 	if String(city["kind"]) == "capital":
-		_message.text = "%s\n\n%s\n\nVotre territoire de départ, à l'abri des attaques." % [city["name"], city["desc"]]
+		_message.text = "%s\n\n%s\n\nVotre territoire de départ, à l'abri des attaques.\n%s" % [city["name"], city["desc"], _city_status_text(id)]
 		_show_challenge("")
 		_attack.disabled = true
 		_attack.text = "LANCER L'ASSAUT"
 	elif conquered:
-		var txt: String = "%s\n\n%s\n\n⚑ Territoire allié." % [city["name"], city["desc"]]
+		var txt: String = "%s\n\n%s\n\n⚑ Territoire allié.\n%s" % [city["name"], city["desc"], _city_status_text(id)]
 		if ravage > 0:
 			txt += "\n\n⚠ PILLÉE : production gelée pendant %d bataille(s)." % ravage
 		var builds: Array = _conquest.get("buildings", {}).get(id, [])
@@ -758,6 +775,7 @@ func _select_city(id: String) -> void:
 		sprite.modulate = Color(1.08, 1.04, 0.90) if other == id else Color.WHITE
 		sprite.pivot_offset = sprite.size * Vector2(0.5, 0.9)
 		sprite.scale = Vector2.ONE
+	_refresh_nameplates()
 	_pulse_selected(id)
 	_refresh_chronicle()
 
@@ -770,6 +788,7 @@ func _build_panel(city_id: String, conquered: bool) -> void:
 		c.queue_free()
 	if not conquered:
 		return
+	_build_management(city_id)
 	var res: Dictionary = _save.get("resources", {})
 	var builds: Array = _conquest.get("buildings", {}).get(city_id, [])
 	for key: String in ProgressionManager.CONQUEST_BUILDINGS.keys():
@@ -801,6 +820,216 @@ func _on_build_pressed(city_id: String, building: String) -> void:
 	_conquest = _save.get("conquest", {})
 	_refresh_header()
 	_select_city(city_id)
+
+## Résumé de gestion d'une ville alliée : niveau, garnison, gouverneur, défense, revenus.
+func _city_status_text(id: String) -> String:
+	var lvl: int = ConquestSystem.city_level(_conquest, id)
+	var hero: String = ConquestSystem.hero_of(_conquest, id)
+	var lines: PackedStringArray = []
+	lines.append("\n%s (niveau %d/%d)" % [ConquestSystem.level_name(lvl), lvl, ConquestSystem.MAX_LEVEL])
+	lines.append("♜ Garnison : %d/%d soldats" % [ConquestSystem.troops(_conquest, id), ConquestSystem.garrison_cap(_conquest, id)])
+	if hero != "":
+		lines.append("♞ Gouverneur : %s (niv. %d) — %s" % [hero, ConquestSystem.hero_level(_save, hero), ConquestSystem.governor_text(hero)])
+	else:
+		lines.append("♞ Aucun gouverneur")
+	lines.append("Défense : %d  ·  Revenu : +%d or par victoire" % [ConquestSystem.defense(_save, id), ConquestSystem.city_income(_save, id)])
+	var th: Dictionary = ConquestSystem.threat(_conquest)
+	if String(th.get("city", "")) == id:
+		lines.append("⚠ OFFENSIVE dans %d bataille(s) : force ennemie %d" % [int(th["eta"]), int(th["power"])])
+	return "\n".join(lines)
+
+func _mgmt_button(text: String, enabled: bool, color: Color, action: Callable) -> void:
+	var b := Button.new()
+	b.text = text
+	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	b.custom_minimum_size.y = 54
+	b.add_theme_font_size_override("font_size", 17)
+	b.add_theme_color_override("font_color", TEXT)
+	b.add_theme_stylebox_override("normal", _style(color, Color(0.75, 0.68, 0.40)))
+	b.add_theme_stylebox_override("hover", _style(color.lightened(0.12), GOLD))
+	b.disabled = not enabled
+	if enabled:
+		b.pressed.connect(action)
+	_build_box.add_child(b)
+
+## Boutons d'évolution : amélioration, recrutement, gouverneur.
+func _build_management(city_id: String) -> void:
+	var res: Dictionary = _save.get("resources", {})
+	var gold: int = int(_save.get("gold", 0))
+	var lvl: int = ConquestSystem.city_level(_conquest, city_id)
+	var ravaged: bool = ProgressionManager._is_city_ravaged(_conquest, city_id)
+	if lvl >= ConquestSystem.MAX_LEVEL:
+		_mgmt_button("★ %s — niveau maximum" % ConquestSystem.level_name(lvl), false, Color(0.2, 0.3, 0.2), Callable())
+	else:
+		var cost: Dictionary = ConquestSystem.upgrade_cost(_conquest, city_id)
+		var parts: Array = ["%d or" % int(cost["gold"])]
+		var ok: bool = gold >= int(cost["gold"]) and not ravaged
+		for r: String in cost["res"].keys():
+			parts.append("%s %d/%d" % [r, int(res.get(r, 0)), int(cost["res"][r])])
+			ok = ok and int(res.get(r, 0)) >= int(cost["res"][r])
+		_mgmt_button("⬆ %s → %s — %s" % [ConquestSystem.level_name(lvl), ConquestSystem.level_name(lvl + 1), " · ".join(PackedStringArray(parts))],
+			ok, Color(0.22, 0.30, 0.16), _on_upgrade_pressed.bind(city_id))
+	if city_id != "capitale":
+		var room: int = ConquestSystem.garrison_cap(_conquest, city_id) - ConquestSystem.troops(_conquest, city_id)
+		_mgmt_button("♜ RECRUTER +1 soldat — %d or" % ConquestSystem.TROOP_COST, room > 0 and gold >= ConquestSystem.TROOP_COST,
+			Color(0.20, 0.26, 0.34), _on_recruit_pressed.bind(city_id, 1))
+		if room > 1:
+			_mgmt_button("♜ REMPLIR LA GARNISON (+%d) — %d or" % [room, room * ConquestSystem.TROOP_COST], gold >= room * ConquestSystem.TROOP_COST,
+				Color(0.20, 0.26, 0.34), _on_recruit_pressed.bind(city_id, room))
+	var hero: String = ConquestSystem.hero_of(_conquest, city_id)
+	if hero != "":
+		_mgmt_button("♞ RAPPELER %s (gouverneur)" % hero.to_upper(), true, Color(0.32, 0.22, 0.30), _on_recall_pressed.bind(city_id))
+	else:
+		_mgmt_button("♞ NOMMER UN GOUVERNEUR", true, Color(0.30, 0.22, 0.34), _show_governor_picker.bind(city_id))
+
+func _after_management(city_id: String) -> void:
+	ProgressionManager.write_save(_slot, _save)
+	_conquest = _save.get("conquest", {})
+	_refresh_header()
+	_select_city(city_id)
+
+func _on_upgrade_pressed(city_id: String) -> void:
+	var err: String = ProgressionManager.conquest_upgrade_city(_save, city_id)
+	_after_management(city_id)
+	if err != "":
+		_message.text = err
+
+func _on_recruit_pressed(city_id: String, n: int) -> void:
+	var err: String = ProgressionManager.conquest_recruit(_save, city_id, n)
+	_after_management(city_id)
+	if err != "":
+		_message.text = err
+
+func _on_recall_pressed(city_id: String) -> void:
+	ProgressionManager.conquest_recall_hero(_save, city_id)
+	_after_management(city_id)
+
+## Choix du héros gouverneur : un héros en poste n'est plus disponible pour les assauts.
+func _show_governor_picker(city_id: String) -> void:
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	var dim := ColorRect.new()
+	dim.name = "GovernorPicker"
+	dim.color = Color(0.015, 0.035, 0.055, 0.82)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(dim)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _style(Color(0.10, 0.17, 0.22, 0.99), GOLD))
+	panel.custom_minimum_size = Vector2(minf(660.0, vp.x - 40.0), 0)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE, 0)
+	dim.add_child(panel)
+	var outer := VBoxContainer.new()
+	outer.add_theme_constant_override("separation", 8)
+	panel.add_child(outer)
+	var title := Label.new()
+	title.text = "GOUVERNEUR DE %s" % ProgressionManager.conquest_city_name(city_id).to_upper()
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title.add_theme_font_size_override("font_size", 22)
+	title.add_theme_color_override("font_color", GOLD)
+	outer.add_child(title)
+	var hint := Label.new()
+	hint.text = "Un gouverneur défend la ville et la fait prospérer, mais ne combat plus en assaut."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.add_theme_font_size_override("font_size", 14)
+	hint.add_theme_color_override("font_color", TEXT)
+	outer.add_child(hint)
+	var sc := ScrollContainer.new()
+	TouchScroll.install(sc)
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	sc.custom_minimum_size.y = minf(300.0, maxf(160.0, vp.y - 190.0))
+	outer.add_child(sc)
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 6)
+	sc.add_child(list)
+	for classe: String in ProgressionManager.CLASS_ORDER:
+		var elsewhere: String = ConquestSystem.hero_city(_conquest, classe)
+		var b := Button.new()
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		b.custom_minimum_size.y = 52
+		b.add_theme_font_size_override("font_size", 16)
+		var line: String = "%s — niv. %d · %s" % [classe, ConquestSystem.hero_level(_save, classe), ConquestSystem.governor_text(classe)]
+		if elsewhere != "":
+			line = "%s — déjà en poste à %s" % [classe, ProgressionManager.conquest_city_name(elsewhere)]
+			b.disabled = true
+		b.text = line
+		if not b.disabled:
+			b.pressed.connect(func() -> void:
+				dim.queue_free()
+				ProgressionManager.conquest_assign_hero(_save, city_id, classe)
+				_after_management(city_id))
+		list.add_child(b)
+	var cancel := Button.new()
+	cancel.text = "ANNULER"
+	cancel.custom_minimum_size.y = 46
+	cancel.pressed.connect(func() -> void: dim.queue_free())
+	outer.add_child(cancel)
+
+## Événement de campagne à trancher : un bouton par choix (grisé si l'or manque).
+func _show_event_popup() -> void:
+	var ev: Dictionary = ProgressionManager.conquest_pending_event(_conquest)
+	if ev.is_empty():
+		return
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	var dim := ColorRect.new()
+	dim.name = "EventPopup"
+	dim.color = Color(0.015, 0.035, 0.055, 0.82)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(dim)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _style(Color(0.12, 0.17, 0.24, 0.99), Color(0.62, 0.48, 0.95)))
+	panel.custom_minimum_size = Vector2(minf(680.0, vp.x - 40.0), 0)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE, 0)
+	dim.add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 10)
+	panel.add_child(box)
+	var title := Label.new()
+	title.text = "✦ %s" % String(ev.get("title", "ÉVÉNEMENT"))
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title.add_theme_font_size_override("font_size", 24)
+	title.add_theme_color_override("font_color", Color(0.85, 0.76, 1.0))
+	box.add_child(title)
+	var text := Label.new()
+	text.text = String(ev.get("text", ""))
+	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.add_theme_font_size_override("font_size", 18)
+	text.add_theme_color_override("font_color", TEXT)
+	box.add_child(text)
+	var gold: int = int(_save.get("gold", 0))
+	for o: Dictionary in ev.get("options", []):
+		var b := Button.new()
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		b.text = String(o.get("label", ""))
+		b.custom_minimum_size.y = 56
+		b.add_theme_font_size_override("font_size", 17)
+		b.disabled = gold < int(o.get("gold", 0))
+		var oid: String = String(o.get("id", ""))
+		b.pressed.connect(func() -> void: _resolve_event_choice(dim, box, oid))
+		box.add_child(b)
+
+func _resolve_event_choice(dim: Control, box: VBoxContainer, option_id: String) -> void:
+	var out: String = ProgressionManager.conquest_resolve_event(_save, option_id)
+	if out == "":
+		return
+	_persist()
+	_conquest = _save.get("conquest", {})
+	_refresh_header()
+	_select_city(_selected_id)
+	for c: Node in box.get_children():
+		c.queue_free()
+	var done := Label.new()
+	done.text = out
+	done.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	done.add_theme_font_size_override("font_size", 20)
+	done.add_theme_color_override("font_color", TEXT)
+	box.add_child(done)
+	var ok := Button.new()
+	ok.text = "CONTINUER"
+	ok.custom_minimum_size.y = 52
+	ok.pressed.connect(func() -> void: dim.queue_free())
+	box.add_child(ok)
 
 func _attack_selected_city() -> void:
 	if not ProgressionManager.conquest_city_attackable(
@@ -935,18 +1164,21 @@ func _show_annexion_popup(city_id: String) -> void:
 		lines.append("🎁 Récompense unique — %s : %s." % [
 			String(city_reward.get("name", "Butin de conquête")),
 			" · ".join(reward_parts)])
-	var counter: String = String(_conquest.get("last_counterattack", ""))
-	if counter != "":
-		lines.append("⚠ CONTRE-ATTAQUE ! L'ennemi a pillé %s : production gelée %d bataille(s)." % [
-			ProgressionManager.conquest_city_name(counter), ProgressionManager.CONQUEST_RAVAGE_BATTLES])
+	var income: int = int(_conquest.get("last_income", 0))
+	if income > 0:
+		lines.append("Revenus des villes : +%d or." % income)
+	if String(_conquest.get("retaken", "")) == city_id:
+		lines.append("⚑ Ville reprise à l'ennemi : sa garnison est à reconstituer.")
+		_conquest["retaken"] = ""
+	for n: String in _conquest.get("news", []):
+		lines.append(n)
 	if city_id == "donjon_roi":
 		lines.append("★ CAMPAGNE TERMINÉE : le Roi Squelette est tombé, Zimut vous appartient ! Vous pouvez continuer en empire libre.")
 	else:
-		lines.append("Conseil : ouvrez %s sur la carte et édifiez un bâtiment de ressources." % cname)
+		lines.append("Conseil : ouvrez %s pour y bâtir, recruter une garnison ou nommer un gouverneur." % cname)
 	var title: String = "EMPIRE VICTORIEUX !" if city_id == "donjon_roi" else "VILLE ANNEXÉE !"
 	var msg: String = "%s rejoint votre empire.\n\n%s" % [cname, "\n\n".join(PackedStringArray(lines))]
 	_show_popup(title, msg)
-	_show_counterattack_message()
 
 ## Popup plein écran (titre + message + bouton CONTINUER) posé sur cette
 ## carte : utilisé pour l'écran d'annexion après une victoire.
@@ -971,7 +1203,7 @@ func _show_popup(title: String, message: String) -> void:
 	var m := Label.new()
 	m.text = message
 	m.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	m.custom_minimum_size.x = 900
+	m.custom_minimum_size.x = minf(900.0, get_viewport().get_visible_rect().size.x - 80.0)
 	m.add_theme_font_size_override("font_size", 20)
 	m.add_theme_color_override("font_color", Color(0.30, 0.22, 0.08))
 	box.add_child(m)
@@ -991,6 +1223,52 @@ func _show_counterattack_message() -> void:
 	if counter != "" and _message != null:
 		var cname: String = ProgressionManager.conquest_city_name(counter)
 		_message.text = "⚠ CONTRE-ATTAQUE ! L'ennemi a pillé %s : production gelée %d bataille(s)." % [cname, ProgressionManager.CONQUEST_RAVAGE_BATTLES]
+
+## Texte de la plaque d'une ville : état (⚑ alliée, ⚔ cible, ? inconnue),
+## niveau et garnison pour une ville alliée, alerte d'offensive, ville perdue.
+func _nameplate_text(city_id: String) -> String:
+	var city: Dictionary = _city_meta(city_id)
+	var cname: String = String(city["name"])
+	var owned: bool = _conquest.get("owned", []).has(city_id)
+	var th: Dictionary = ConquestSystem.threat(_conquest)
+	var alert: String = "⚠ " if String(th.get("city", "")) == city_id else ""
+	if owned:
+		var lvl: int = ConquestSystem.city_level(_conquest, city_id)
+		var hero: String = ConquestSystem.hero_of(_conquest, city_id)
+		var tag: String = "%s · ♜%d%s" % [ConquestSystem.level_name(lvl), ConquestSystem.troops(_conquest, city_id), " · ♞" if hero != "" else ""]
+		if ProgressionManager._is_city_ravaged(_conquest, city_id):
+			tag = "PILLÉE"
+		if city_id == "capitale":
+			return "★ NOTRE CAPITALE ★\n%s · %s" % [cname, tag]
+		return "%s⚑ %s\n%s" % [alert, cname, tag]
+	var revealed_cities: Array = _save.get("adventure", {}).get("revealed_cities", [])
+	var unknown: bool = (not revealed_cities.is_empty()) and (not revealed_cities.has(city_id))
+	if (_conquest.get("lost", []) as Array).has(city_id):
+		return "☠ %s\nÀ reprendre" % cname
+	var siege_p: int = ProgressionManager.conquest_siege_progress(_conquest, city_id)
+	var siege_txt: String = "\nSiège %d/%d" % [siege_p, ProgressionManager.CONQUEST_SIEGE_BATTLES] if siege_p > 0 else ""
+	return "%s  %s%s" % ["?" if unknown else "⚔", cname, siege_txt]
+
+## Bandeau d'alerte du conseil : offensive annoncée et trêve en cours.
+func _refresh_threat_banner() -> void:
+	if _threat_banner == null:
+		return
+	var lines: PackedStringArray = []
+	var th: Dictionary = ConquestSystem.threat(_conquest)
+	if not th.is_empty():
+		var tid: String = String(th.get("city", ""))
+		lines.append("⚠ OFFENSIVE sur %s dans %d bataille(s)\nForce ennemie %d · défense %d%s" % [
+			ProgressionManager.conquest_city_name(tid), int(th.get("eta", 0)), int(th.get("power", 0)),
+			ConquestSystem.defense(_save, tid), " — RENFORCEZ-LA !" if ConquestSystem.defense(_save, tid) < int(th.get("power", 0)) else " — elle tiendra."])
+	if int(_conquest.get("truce", 0)) > 0:
+		lines.append("☮ Trêve : %d bataille(s) sans raid" % int(_conquest["truce"]))
+	_threat_banner.visible = not lines.is_empty()
+	_threat_banner.text = "\n".join(lines)
+
+func _refresh_nameplates() -> void:
+	_refresh_threat_banner()
+	for id: String in _city_labels.keys():
+		(_city_labels[id] as Label).text = _nameplate_text(id)
 
 func _city_ids() -> Array:
 	return ProgressionManager.CONQUEST_CITIES.keys()
@@ -1024,18 +1302,18 @@ func _city_desc(id: String, kind: String) -> String:
 		"citadelle_ronce": "Une citadelle fortifiée qui contrôle les sous-bois.",
 		"col_givre": "Un col étroit battu par les vents glacés.",
 		"mine_cristal": "Une mine de cristaux précieux sous la montagne.",
-		"bastion_orage": "Un bastion militaire au sommet des Pics.",
-		"caravanserail": "Une halte marchande sur la route des dunes.",
+		"bastion_orage": "Un bastion perché dans les courants d'air des hautes terres.",
+		"caravanserail": "Une halte marchande sur la côte, là où la marée dépose les caravanes.",
 		"observatoire": "Un observatoire oublié tourné vers le soleil.",
-		"port_sable": "Un port fortifié qui contrôle les caravanes du désert.",
-		"bois_lune": "Un bois ancien où la lumière filtre à travers les arbres argentés.",
+		"port_sable": "Un port fortifié battu par les marées, repaire de pirates.",
+		"bois_lune": "Un bois ancien où la brume s'accroche aux arbres argentés.",
 		"sanctuaire_mousse": "Un sanctuaire oublié protégé par les esprits de la forêt.",
-		"forge_givre": "Une forge naine alimentée par les feux sous la glace.",
-		"pic_foudroyant": "Un sommet balayé par les orages et gardé par les sentinelles.",
+		"forge_givre": "Une forge de cristal où l'on taille des lames qui chantent.",
+		"pic_foudroyant": "Un sommet balayé par les vents et les orages, gardé par des sentinelles.",
 		"marais_spectres": "Un marais brumeux où rôdent des silhouettes spectrales.",
-		"fort_cendre": "Un fort désertique bâti dans la roche volcanique.",
+		"fort_cendre": "Un fort bâti sur un champ de lave, sous un ciel de cendres.",
 		"temple_soleil": "Un temple ancien consacré au soleil du désert.",
-		"citadelle_sable": "Une citadelle imprenable qui verrouille les routes du sud.",
+		"citadelle_sable": "Une citadelle de lave durcie qui verrouille les routes du sud.",
 	}
 	return String(descs.get(id, "Ville de Zimut."))
 

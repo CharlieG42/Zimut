@@ -149,6 +149,30 @@ const ADVENTURE_ZONES := {
 		"start": [5, 1], "unlock": "piemont_ocre", "key_poi": "5,3",
 		"reveals": ["donjon_roi", "citadelle_sable", "port_sable"],
 	},
+	"vents_plateau": {
+		"name": "Plateau des Vents", "biome": "Vents", "size": [10, 7], "grid": [1, 0],
+		"start": [1, 3], "unlock": "foret_sylve", "key_poi": "6,3", "reveals": ["bastion_orage", "pic_foudroyant"],
+	},
+	"brumes_marais": {
+		"name": "Marais des Brumes", "biome": "Brumes", "size": [10, 7], "grid": [1, 2],
+		"start": [1, 3], "unlock": "foret_sylve", "key_poi": "6,2", "reveals": ["village_brume", "marais_spectres", "bois_lune"],
+	},
+	"brasier_cendres": {
+		"name": "Terres de Cendre", "biome": "Brasier", "size": [10, 7], "grid": [0, 2],
+		"start": [1, 3], "unlock": "foret_ronces", "key_poi": "6,4", "reveals": ["fort_cendre", "citadelle_sable"],
+	},
+	"ombres_necropole": {
+		"name": "Nécropole d'Ombre", "biome": "Ombres", "size": [10, 7], "grid": [1, 3],
+		"start": [1, 3], "unlock": "brumes_marais", "key_poi": "5,3", "reveals": ["abbaye_ronce", "citadelle_ronce", "ruines_lierre"],
+	},
+	"cristaux_caverne": {
+		"name": "Caverne de Cristal", "biome": "Cristaux", "size": [10, 7], "grid": [3, 3],
+		"start": [1, 3], "unlock": "portes_donjon", "key_poi": "6,3", "reveals": ["mine_cristal", "forge_givre"],
+	},
+	"marees_cotes": {
+		"name": "Côtes des Marées", "biome": "Marées", "size": [10, 7], "grid": [4, 2],
+		"start": [1, 3], "unlock": "desert_dunes", "key_poi": "6,2", "reveals": ["port_sable", "caravanserail"],
+	},
 }
 
 const ADVENTURE_POIS := {
@@ -259,7 +283,55 @@ const ADVENTURE_POIS := {
 			"desc": "Seize tuiles de verre attendent la lumière."},
 		"1,1": {"kind": "camp", "name": "Puits de l'oasis", "level": 21,
 			"desc": "Une eau fraîche au fond d'un puits de grès."},
+	},	"vents_plateau": {
+		"3,2": {"kind": "combat", "name": "Garde aérienne", "level": 17, "desc": "Des sentinelles ailées patrouillent."},
+		"6,3": {"kind": "combat", "name": "Harpies du plateau", "level": 18, "desc": "Les harpies défendent leur nid."},
+		"2,5": {"kind": "chest", "name": "Nid d'aigle", "level": 17, "desc": "Un nid garni de trouvailles."},
+		"7,1": {"kind": "puzzle", "name": "Totem du souffle", "level": 17, "desc": "Le totem murmure une énigme."},
+		"8,5": {"kind": "reveal", "name": "Tour des vents", "level": 17, "desc": "Une tour qui domine les nuages."},
+		"4,4": {"kind": "camp", "name": "Abri de plume", "level": 17, "desc": "Un abri contre les rafales."},
 	},
+	"brumes_marais": {
+		"3,2": {"kind": "combat", "name": "Rôdeurs brumeux", "level": 16, "desc": "Des formes se glissent dans la brume."},
+		"6,2": {"kind": "combat", "name": "Liche du marais", "level": 17, "desc": "Un mort-vivant garde le marais."},
+		"2,5": {"kind": "chest", "name": "Coffre englouti", "level": 16, "desc": "Un coffre à moitié enfoui dans la vase."},
+		"7,1": {"kind": "puzzle", "name": "Champignon sage", "level": 16, "desc": "Un grand champignon pose une devinette."},
+		"8,5": {"kind": "reveal", "name": "Arbre des esprits", "level": 16, "desc": "On voit loin depuis ses branches."},
+		"4,4": {"kind": "camp", "name": "Cabane sur pilotis", "level": 16, "desc": "Un refuge au-dessus de l'eau."},
+	},
+	"brasier_cendres": {
+		"3,2": {"kind": "combat", "name": "Lieutenants de braise", "level": 15, "desc": "Des soldats de feu montent la garde."},
+		"6,4": {"kind": "combat", "name": "Golem de lave", "level": 16, "desc": "Un colosse de roche en fusion."},
+		"2,5": {"kind": "chest", "name": "Forge abandonnée", "level": 15, "desc": "Une forge oubliée, encore tiède."},
+		"7,1": {"kind": "puzzle", "name": "Brasero oraculaire", "level": 15, "desc": "Les flammes posent une question."},
+		"8,5": {"kind": "reveal", "name": "Cratère-belvédère", "level": 15, "desc": "Du bord du cratère on voit loin."},
+		"4,4": {"kind": "camp", "name": "Source chaude", "level": 15, "desc": "Une source bienfaisante."},
+	},
+	"ombres_necropole": {
+		"3,2": {"kind": "combat", "name": "Assassins des ombres", "level": 20, "desc": "Des silhouettes jaillissent des tombes."},
+		"5,3": {"kind": "combat", "name": "Spectre gardien", "level": 21, "desc": "Le gardien de la nécropole."},
+		"2,5": {"kind": "chest", "name": "Caveau scellé", "level": 20, "desc": "Un caveau dont le sceau a cédé."},
+		"7,1": {"kind": "puzzle", "name": "Obélisque fêlé", "level": 20, "desc": "L'obélisque exige une réponse."},
+		"8,5": {"kind": "reveal", "name": "Tour du corbeau", "level": 20, "desc": "Un perchoir sur la nécropole."},
+		"4,4": {"kind": "camp", "name": "Crypte tranquille", "level": 20, "desc": "Un coin de calme parmi les stèles."},
+	},
+	"cristaux_caverne": {
+		"3,2": {"kind": "combat", "name": "Mineurs cristallins", "level": 23, "desc": "Des ouvriers de cristal veillent."},
+		"6,3": {"kind": "combat", "name": "Golem prismatique", "level": 24, "desc": "Le gardien lumineux de la caverne."},
+		"2,5": {"kind": "chest", "name": "Géode brisée", "level": 23, "desc": "Une géode pleine d'éclats précieux."},
+		"7,1": {"kind": "puzzle", "name": "Miroir d'améthyste", "level": 23, "desc": "Le cristal pose son énigme."},
+		"8,5": {"kind": "reveal", "name": "Dôme de cristal", "level": 23, "desc": "Une vue sur toute la caverne."},
+		"4,4": {"kind": "camp", "name": "Grotte tiède", "level": 23, "desc": "Un coin chaud et abrité."},
+	},
+	"marees_cotes": {
+		"3,2": {"kind": "combat", "name": "Pirates des marées", "level": 22, "desc": "Des pirates ont jeté l'ancre."},
+		"6,2": {"kind": "combat", "name": "Crabe titan", "level": 23, "desc": "Un crabe gigantesque garde la crique."},
+		"2,5": {"kind": "chest", "name": "Épave échouée", "level": 22, "desc": "Une épave pleine de butin."},
+		"7,1": {"kind": "puzzle", "name": "Phare muet", "level": 22, "desc": "Le gardien du phare pose une devinette."},
+		"8,5": {"kind": "reveal", "name": "Grand phare", "level": 22, "desc": "Du phare, on voit tout le littoral."},
+		"4,4": {"kind": "camp", "name": "Plage abritée", "level": 22, "desc": "Une crique calme pour souffler."},
+	},
+
 }
 
 ## Énigmes officielles des POI « puzzle » (clé = "zone,x,y").
@@ -301,6 +373,20 @@ const ADVENTURE_PUZZLES := {
 	"portes_donjon,2,2": {"type": "runes", "length": 7,
 		"text": "Les sept sceaux s'allument dans un ordre précis. Rallumez-les dans le même ordre.",
 		"wrong": "Les sceaux se referment avec un grondement."},
+	"vents_plateau,7,1": {"type": "riddle", "text": "Je traverse les montagnes sans bouger de ma place et je dévore la forêt sans dent. Qui suis-je ?",
+		"answer": "Le vent", "choices": ["Le vent", "Le feu", "Le torrent"], "wrong": "Le totem reste silencieux."},
+	"brumes_marais,7,1": {"type": "riddle", "text": "Plus il y a de moi, moins tu vois. Qui suis-je ?",
+		"answer": "La brume", "choices": ["La brume", "La lumière", "La nuit"], "wrong": "Le champignon vire au gris."},
+	"brasier_cendres,7,1": {"type": "riddle", "text": "Je nais du bois, je meurs de l'eau, et je laisse la cendre derrière moi. Qui suis-je ?",
+		"answer": "Le feu", "choices": ["Le feu", "La fumée", "La lave"], "wrong": "Le brasero crache des étincelles."},
+	"ombres_necropole,7,1": {"type": "runes", "length": 6,
+		"text": "Les runes de l'obélisque s'éveillent une à une. Rejouez leur ordre sans faillir.",
+		"wrong": "L'obélisque se tait, puis recommence."},
+	"cristaux_caverne,7,1": {"type": "lights", "size": 4, "scramble": 5,
+		"text": "Faites briller les seize facettes du miroir. Chaque facette touchée bascule ses voisines.",
+		"wrong": "Le miroir s'éteint dans un tintement."},
+	"marees_cotes,7,1": {"type": "riddle", "text": "Je monte et je descends sans jamais bouger d'un pas, deux fois par jour. Qui suis-je ?",
+		"answer": "La marée", "choices": ["La marée", "Le courant", "La vague"], "wrong": "Le phare reste éteint."},
 }
 
 
@@ -407,6 +493,7 @@ const CONQUEST_BUILDINGS := {
 	"tannerie": {"label": "Tannerie", "cost": {"Cuir": 12},               "gold": 50,  "yield": {"Cuir": 3}},
 	"cabane":   {"label": "Cabane des mages", "cost": {"Magie": 8},        "gold": 90,  "yield": {"Magie": 2}},
 	"verger":   {"label": "Verger",   "cost": {"Bois": 8, "Venin": 4},    "gold": 70,  "yield": {"Venin": 2}},
+	"muraille": {"label": "Muraille (+6 défense)", "cost": {"Fer": 15},     "gold": 60,  "yield": {}},
 }
 ## +1 niveau d'ennemi toutes les N victoires (la difficulté monte doucement)
 const DIFFICULTY_CREEP_EVERY := 10
@@ -439,6 +526,8 @@ var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	_rng.randomize()
+	for cid: String in CONQUEST_CITIES.keys():
+		ConquestSystem.city_names[cid] = String(CONQUEST_CITIES[cid].get("name", cid))
 	_load_items_catalog()
 	_load_class_table()
 	_load_enemy_rows()
@@ -1356,7 +1445,7 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 			var sieges: Dictionary = conquest.get("sieges", {})
 			var progress: int = int(sieges.get(pending, 0))
 			progress += 1
-			if progress >= conquest_city_battles(pending):
+			if progress >= conquest_city_battles(pending, conquest):
 				# Ville prise : annexion et fin du siège
 				var owned: Array = conquest.get("owned", ["capitale"])
 				if not owned.has(pending):
@@ -1365,7 +1454,16 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 					conquest_add_event(conquest, "Ville annexée : %s" % conquest_city_name(pending))
 				conquest["just_annexed"] = pending
 				# Butin thématique versé uniquement à la première annexion.
-				var reward: Dictionary = CONQUEST_CITY_REWARDS.get(pending, {})
+				var rewarded: Array = conquest.get("rewarded", [])
+				var reward: Dictionary = CONQUEST_CITY_REWARDS.get(pending, {}) if not rewarded.has(pending) else {}
+				if not rewarded.has(pending):
+					rewarded.append(pending)
+					conquest["rewarded"] = rewarded
+				var lost_list: Array = conquest.get("lost", [])
+				if lost_list.has(pending):
+					lost_list.erase(pending)
+					conquest["lost"] = lost_list
+					conquest["retaken"] = pending
 				if not reward.is_empty():
 					var reward_resources: Dictionary = reward.get("resources", {})
 					add_resources(data, reward_resources)
@@ -1390,24 +1488,22 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 				# Siège en cours : la ville reste la cible pour la suite
 				sieges[pending] = progress
 				conquest["sieges"] = sieges
-				conquest_add_event(conquest, "Siège : %s — %d/%d victoires" % [conquest_city_name(pending), progress, conquest_city_battles(pending)])
+				conquest_add_event(conquest, "Siège : %s — %d/%d victoires" % [conquest_city_name(pending), progress, conquest_city_battles(pending, conquest)])
 		# Production de l'empire : les bâtiments des villes possédées
 		# rapportent leurs ressources à chaque bataille gagnée.
 		var empire_yield: Dictionary = conquest_empire_yield(conquest)
 		if not empire_yield.is_empty():
 			add_resources(data, empire_yield)
 			conquest["last_yield"] = empire_yield
-		# Décrément du pillage, puis contre-attaque ennemie éventuelle
-		# (jamais la capitale, jamais la ville tout juste conquise).
+		# Décrément du pillage, puis la boucle de campagne : revenus, garnisons,
+		# raids, offensives annoncées et événements (ConquestSystem).
 		_tick_ravage(conquest)
-		var counter: String = _roll_counterattack(conquest, just_conquered)
-		if counter != "":
-			conquest["ravage"] = _ravage_dict(conquest)
-			conquest["ravage"][counter] = CONQUEST_RAVAGE_BATTLES
-			conquest["last_counterattack"] = counter
-			conquest_add_event(conquest, "Contre-attaque : %s est pillée (%d batailles)" % [conquest_city_name(counter), CONQUEST_RAVAGE_BATTLES])
-		else:
-			conquest["last_counterattack"] = ""
+		var names: Dictionary = {}
+		for cid: String in CONQUEST_CITIES.keys():
+			names[cid] = String(CONQUEST_CITIES[cid].get("name", cid))
+		data["conquest"] = conquest
+		ConquestSystem.after_victory(data, conquest, _rng, CONQUEST_ROUTES, names, just_conquered)
+		conquest = data.get("conquest", conquest)
 		# Le choix de préparation ne s'applique qu'à une seule bataille,
 		# même si le siège de cette ville nécessite plusieurs vagues.
 		conquest.erase("pending_tactic")
@@ -1453,7 +1549,7 @@ func adventure_state(data: Dictionary) -> Dictionary:
 	if pos.size() != 2 or int(pos[0]) < 0 or int(pos[1]) < 0 \
 				or int(pos[0]) >= int(zone["size"][0]) or int(pos[1]) >= int(zone["size"][1]):
 		adv["hero_pos"] = zone["start"].duplicate()
-	for k: String in ["discovered", "completed", "revealed_cities"]:
+	for k: String in ["discovered", "completed", "revealed_cities", "finds"]:
 		if not adv.has(k) or not (adv[k] is Array):
 			adv[k] = []
 	if not adv.has("pending_challenge"):
@@ -1711,9 +1807,14 @@ func conquest_empire_yield(conquest: Dictionary) -> Dictionary:
 	for city_id: String in conquest.get("owned", []):
 		if _is_city_ravaged(conquest, city_id):
 			continue
+		var mult: float = ConquestSystem.level_multiplier(conquest, city_id)
 		for b: String in _city_buildings(conquest, city_id):
 			for r: String in CONQUEST_BUILDINGS.get(b, {}).get("yield", {}).keys():
-				out[r] = int(out.get(r, 0)) + int(CONQUEST_BUILDINGS[b]["yield"][r])
+				out[r] = int(out.get(r, 0)) + int(roundf(float(CONQUEST_BUILDINGS[b]["yield"][r]) * mult))
+	# Les héros gouverneurs produisent aussi (ressources de leur classe).
+	var gy: Dictionary = ConquestSystem.governor_yield(conquest)
+	for r: String in gy.keys():
+		out[r] = int(out.get(r, 0)) + int(gy[r])
 	# Contrôler toutes les villes d'un biome rapporte un bonus permanent à
 	# chaque victoire, même si aucune ville ne possède encore de bâtiment.
 	for r: String in conquest_biome_control_bonus(conquest).keys():
@@ -1751,7 +1852,9 @@ func conquest_biome_control_bonus(conquest: Dictionary) -> Dictionary:
 
 ## Nombre de batailles necessaires pour prendre cette ville :
 ## 4 (3 mobs + boss) pour une ville adverse, 1 pour une neutre.
-func conquest_city_battles(city_id: String) -> int:
+func conquest_city_battles(city_id: String, conquest: Dictionary = {}) -> int:
+	if (conquest.get("lost", []) as Array).has(city_id):
+		return 1
 	return CONQUEST_SIEGE_BATTLES if String(conquest_city_kind(city_id)) == "enemy" else 1
 
 ## Type (capital/neutral/enemy) d'une ville du catalogue Conquête.
@@ -1821,7 +1924,7 @@ func conquest_siege_progress(conquest: Dictionary, city_id: String) -> int:
 func conquest_siege_wave(conquest: Dictionary, city_id: String) -> int:
 	if not conquest.get("sieges", {}).has(city_id) and String(conquest.get("pending_city", "")) != city_id:
 		return 0
-	return clampi(conquest_siege_progress(conquest, city_id) + 1, 1, conquest_city_battles(city_id))
+	return clampi(conquest_siege_progress(conquest, city_id) + 1, 1, conquest_city_battles(city_id, conquest))
 
 ## La bataille de siège courante est-elle celle du boss ? (dernière vague)
 func conquest_siege_is_boss(conquest: Dictionary, city_id: String) -> bool:
@@ -1871,6 +1974,56 @@ func _roll_counterattack(conquest: Dictionary, just_conquered: String) -> String
 	if candidates.is_empty():
 		return ""
 	return String(candidates[_rng.randi_range(0, candidates.size() - 1)])
+
+## ── Villes évolutives, garnisons, gouverneurs, événements (ConquestSystem) ──
+func conquest_city_level(conquest: Dictionary, city_id: String) -> int:
+	return ConquestSystem.city_level(conquest, city_id)
+
+func conquest_upgrade_city(data: Dictionary, city_id: String) -> String:
+	var err: String = ConquestSystem.upgrade_city(data, city_id, conquest_city_name(city_id))
+	if err == "":
+		progression_changed.emit()
+	return err
+
+func conquest_recruit(data: Dictionary, city_id: String, n: int) -> String:
+	var err: String = ConquestSystem.recruit(data, city_id, n)
+	if err == "":
+		progression_changed.emit()
+	return err
+
+func conquest_assign_hero(data: Dictionary, city_id: String, classe: String) -> String:
+	var err: String = ConquestSystem.assign_hero(data, city_id, classe)
+	if err == "":
+		conquest_add_event(data["conquest"], "%s devient gouverneur de %s" % [classe, conquest_city_name(city_id)])
+		progression_changed.emit()
+	return err
+
+func conquest_recall_hero(data: Dictionary, city_id: String) -> String:
+	var err: String = ConquestSystem.recall_hero(data, city_id)
+	if err == "":
+		progression_changed.emit()
+	return err
+
+func conquest_defense(data: Dictionary, city_id: String) -> int:
+	return ConquestSystem.defense(data, city_id)
+
+## Héros (classes) en poste dans une ville : indisponibles pour les assauts.
+func conquest_stationed_heroes(data: Dictionary) -> Array:
+	if String(data.get("campaign_mode", "")) != "conquest":
+		return []
+	return ConquestSystem.stationed_heroes(data.get("conquest", {}))
+
+func conquest_pending_event(conquest: Dictionary) -> Dictionary:
+	return ConquestSystem.pending_event(conquest)
+
+func conquest_resolve_event(data: Dictionary, option_id: String) -> String:
+	var names: Dictionary = {}
+	for cid: String in CONQUEST_CITIES.keys():
+		names[cid] = String(CONQUEST_CITIES[cid].get("name", cid))
+	var out: String = ConquestSystem.resolve_event(data, option_id, _rng, names)
+	if out != "":
+		progression_changed.emit()
+	return out
 
 ## Paie la préparation d'assaut. Centralisé ici pour que l'interface et les
 ## tests utilisent exactement les mêmes coûts et contrôles de ressources.

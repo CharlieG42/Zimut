@@ -91,6 +91,7 @@ var active_slot: int             = -1
 var menu_intent: String           = ""   # intention transmise à l’écran Parties (ex. nouvelle partie)
 var fight_enemies: Array         = []   # [{type, level, boss}] du combat en cours (pour l'XP)
 var fight_is_boss: bool          = false
+var _last_banner_round: int = 0
 var fight_biome: String          = "Forêt"  # biome du combat en cours
 
 var _turn_index: int = -1
@@ -512,7 +513,7 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 		"color": Color(0.9, 0.2, 0.1),
 	}, true)
 	boss["boss"] = true
-	boss["spells"] = Combat.boss_spells(base_type, atk)
+	boss["spells"] = Combat.boss_spells(base_type, atk) + Combat.nation_boss_spells(boss_name, atk)
 	boss["skin"] = base_type
 	boss["fly"] = base_type == "Dragonnet"
 	Combat.add_status(boss, "regen", 999, 8.0)
@@ -531,6 +532,21 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 		"Roi Squelette":
 			boss["fx"] = {"mres": 60, "lifesteal": 10}
 			Combat.add_status(boss, "regen", 999, 15.0)
+		"Golem Prismatique":
+			boss["fx"] = {"mres": 50}
+		"Crabe Titan":
+			boss["fx"] = {"mres": 30}
+			boss["defense"] = int(float(boss["defense"]) * 1.25)
+		"Seigneur des Tempêtes":
+			boss["fx"] = {"crit": 25}
+			boss["fly"] = true
+		"Seigneur de Lave":
+			boss["fx"] = {"mag_pct": 30}
+		"Liche des Brumes":
+			boss["fx"] = {"lifesteal": 8}
+		"Liche Éternelle":
+			boss["fx"] = {"mres": 60, "lifesteal": 10}
+			Combat.add_status(boss, "regen", 999, 12.0)
 	enemies.append(boss)
 	grid[pos.y][pos.x] = boss
 
@@ -673,6 +689,7 @@ func hp_ratio(e: Dictionary) -> float:
 func start_battle() -> void:
 	_epoch += 1
 	turn_count = 1
+	_last_banner_round = 0
 	_turn_index = -1
 	active_entity = {}
 	turn_order = all_entities()
@@ -681,6 +698,10 @@ func start_battle() -> void:
 	turn_order.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["init"] > b["init"])
 	message_requested.emit("Le combat commence !")
 	fx.emit("banner", {"text": "Combat !"})
+	BiomeEffects.setup(fight_biome, turn_order)
+	var biome_txt: String = BiomeEffects.describe(fight_biome)
+	if biome_txt != "":
+		message_requested.emit("✦ " + biome_txt)
 	advance_turn()
 
 
@@ -711,7 +732,13 @@ func _begin_turn(e: Dictionary) -> void:
 		Combat.add_status(e, "dmg_up", 2, 10.0 * float(turn_count - ENRAGE_AFTER_TURN))
 
 	var pa: int = int(e["max_pa"]) + int(Combat.status_value(e, "pa_up")) - int(Combat.status_value(e, "curse"))
-	var pm: int = int(e["max_pm"]) + int(Combat.status_value(e, "pm_up")) - int(Combat.status_value(e, "slow"))
+	var pm: int = int(e["max_pm"]) + int(Combat.status_value(e, "pm_up")) - int(Combat.status_value(e, "slow")) \
+			+ BiomeEffects.pm_bonus(fight_biome, turn_count)
+	if turn_count != _last_banner_round:
+		_last_banner_round = turn_count
+		var rb: String = BiomeEffects.round_banner(fight_biome, turn_count)
+		if rb != "":
+			message_requested.emit("🌊 " + rb)
 	if Combat.has_status(e, "root"):
 		pm = 0
 	e["current_pa"] = maxi(0, pa)
@@ -783,6 +810,10 @@ func end_current_turn() -> void:
 	if game_over or active_entity.is_empty():
 		return
 	var e: Dictionary = active_entity
+	var bdmg: int = BiomeEffects.end_turn_damage(fight_biome, e)
+	if bdmg > 0:
+		_apply_damage({}, e, bdmg, "dot", false, false, true)
+		fx.emit("status", {"target": e, "text": "Chaleur", "color": Color(1.0, 0.5, 0.2)})
 	var kept: Array = []
 	for s: Dictionary in e["statuses"]:
 		s["turns"] = int(s["turns"]) - 1

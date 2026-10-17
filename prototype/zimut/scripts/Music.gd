@@ -19,7 +19,21 @@ const TRACKS := {
 	"combat_mountain_2": "res://assets/audio/mountain_2.ogg",
 	"combat_desert": "res://assets/audio/desert_1.ogg",
 	"combat_donjon": "res://assets/audio/mountain_1.ogg",
+	# Nations : une boucle de combat (percussions) et une d'exploration (calme) chacune
+	"combat_cristaux": "res://assets/audio/nation_cristaux_combat.ogg",
+	"combat_marees": "res://assets/audio/nation_marees_combat.ogg",
+	"combat_vents": "res://assets/audio/nation_vents_combat.ogg",
+	"combat_brasier": "res://assets/audio/nation_brasier_combat.ogg",
+	"combat_brumes": "res://assets/audio/nation_brumes_combat.ogg",
+	"combat_ombres": "res://assets/audio/nation_ombres_combat.ogg",
+	"explore_cristaux": "res://assets/audio/nation_cristaux_explore.ogg",
+	"explore_marees": "res://assets/audio/nation_marees_explore.ogg",
+	"explore_vents": "res://assets/audio/nation_vents_explore.ogg",
+	"explore_brasier": "res://assets/audio/nation_brasier_explore.ogg",
+	"explore_brumes": "res://assets/audio/nation_brumes_explore.ogg",
+	"explore_ombres": "res://assets/audio/nation_ombres_explore.ogg",
 }
+const NATION_KEY := {"Cristaux": "cristaux", "Marées": "marees", "Vents": "vents", "Brasier": "brasier", "Brumes": "brumes", "Ombres": "ombres"}
 
 var enabled: bool = true
 var _current: String = ""
@@ -84,14 +98,19 @@ func play_combat(biome: String) -> void:
 			play("combat_mountain_2" if _rng.randf() < 0.5 else "combat_mountain")
 		"Désert":
 			play("combat_desert")
-		"Donjon", "Ombres", "Brumes":
+		"Donjon":
 			play("combat_donjon")
-		"Brasier", "Cristaux":
-			play("combat_mountain_2" if _rng.randf() < 0.5 else "combat_mountain")
-		"Vents", "Marées":
-			play("combat_desert")
+		"Cristaux", "Marées", "Vents", "Brasier", "Brumes", "Ombres":
+			play("combat_" + String(NATION_KEY[biome]))
 		_:
 			play("combat_forest")
+
+## Musique d'exploration de l'Aventure : calme et propre à la nation, sinon le thème commun.
+func play_adventure(biome: String) -> void:
+	if NATION_KEY.has(biome):
+		play("explore_" + String(NATION_KEY[biome]))
+	else:
+		play("adventure")
 
 func stop() -> void:
 	_fade_out_player = _a if _a.playing else _b
