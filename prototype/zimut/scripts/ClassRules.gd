@@ -35,10 +35,10 @@ const START_LEVEL := 1
 const POINTS_PER_LEVEL := 2
 ## Niveau maximum des ennemis (le héros plafonne à MAX_LEVEL).
 const ENEMY_MAX_LEVEL := 150
-## Points de sort : 1 par niveau de héros ; améliorer un sort de n à n+1 coûte n
-## points (45 pour monter un sort de 1 à 10). 10 sorts x 45 = 450 > 99 : le héros
-## ne peut pas tout maximiser, il doit choisir. Réinitialisation gratuite.
-const SPELL_POINTS_PER_LEVEL := 1
+## Points de sort : 3 par niveau de héros (297 au niveau 100) ; améliorer un sort de n à
+## n+1 coûte n points (45 pour monter un sort de 1 à 10). Au niveau 100 : 5 sorts au maximum
+## (225) + 72 points pour les autres ; les 10 à fond (450) restent impossibles. Remise à zéro gratuite.
+const SPELL_POINTS_PER_LEVEL := 3
 const SPELL_MAX_LEVEL := 10
 
 ## XP d'un combat = somme(XP des ennemis) x FIGHT_XP_MULT

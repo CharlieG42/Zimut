@@ -29,6 +29,9 @@ const DISTRICTS := {
 	"Ombres": {"hall": "Chapitre des Ombres", "barracks": "Garde des Cryptes", "residence": "Crypte du Régent"},
 	"Donjon": {"hall": "Salle du Trône", "barracks": "Geôles-Casernes", "residence": "Tour du Roi"},
 }
+## Illustration de chaque nation (assets/ui/conquest/cities/).
+const ART := {"Forêt": "sylvestre", "Montagne": "cimes", "Désert": "sables", "Cristaux": "cristaux", "Marées": "marees",
+	"Vents": "vents", "Brasier": "brasier", "Brumes": "brumes", "Ombres": "ombres", "Donjon": "donjon"}
 const RES_COLORS := {"Bois": Color(0.62, 0.78, 0.40), "Fer": Color(0.72, 0.78, 0.88), "Cuir": Color(0.82, 0.62, 0.42),
 	"Magie": Color(0.70, 0.58, 0.98), "Venin": Color(0.55, 0.85, 0.55)}
 
@@ -90,6 +93,19 @@ func _build() -> void:
 	bg.stretch_mode = TextureRect.STRETCH_SCALE
 	bg.mouse_filter = Control.MOUSE_FILTER_STOP
 	_root.add_child(bg)
+	# Illustration de la nation en fond, assombrie
+	var art_path: String = "res://assets/ui/conquest/cities/%s.jpg" % String(ART.get(_biome, "sylvestre"))
+	var art: Texture2D = load(art_path) as Texture2D if ResourceLoader.exists(art_path) else null
+	if art != null:
+		var bgi := TextureRect.new()
+		bgi.name = "CityArtBackground"
+		bgi.texture = art
+		bgi.set_anchors_preset(Control.PRESET_FULL_RECT)
+		bgi.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		bgi.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		bgi.modulate = Color(0.45, 0.45, 0.5)
+		bgi.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_root.add_child(bgi)
 	# Voile d'ambiance (brume de la nation)
 	var mist := ColorRect.new()
 	mist.color = Color(pal.get("mist", _accent.lightened(0.5)), 0.07)
@@ -153,25 +169,11 @@ func _build_top_bar() -> void:
 
 func _build_scene(parent: Control) -> void:
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(0, 250)
-	panel.add_theme_stylebox_override("panel", _box(Color(0.04, 0.06, 0.09, 0.55), _accent, 3, 18))
+	panel.add_theme_stylebox_override("panel", _box(Color(0.03, 0.05, 0.08, 0.78), _accent, 3, 18))
 	parent.add_child(panel)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 20)
-	panel.add_child(row)
-	if _sprite != null:
-		var tr := TextureRect.new()
-		tr.name = "CityIllustration"
-		tr.texture = _sprite
-		tr.custom_minimum_size = Vector2(300, 220)
-		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		row.add_child(tr)
 	var txt := VBoxContainer.new()
-	txt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	txt.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_child(txt)
-	var desc := _lbl(_desc if _desc != "" else String(Nations.DATA.get(_biome, {}).get("trait", "")), 22, TEXT)
+	panel.add_child(txt)
+	var desc := _lbl(_desc if _desc != "" else String(Nations.DATA.get(_biome, {}).get("trait", "")), 24, TEXT)
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	txt.add_child(desc)
 	var trait_txt: String = String(Nations.DATA.get(_biome, {}).get("trait", ""))
@@ -336,6 +338,16 @@ func _build_council(parent: Control) -> void:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 10)
 	p.add_child(v)
+	var art_path: String = "res://assets/ui/conquest/cities/%s.jpg" % String(ART.get(_biome, "sylvestre"))
+	if ResourceLoader.exists(art_path):
+		var art := TextureRect.new()
+		art.name = "CityIllustration"
+		art.texture = load(art_path)
+		art.custom_minimum_size = Vector2(0, 330)
+		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		art.clip_contents = true
+		v.add_child(art)
 	v.add_child(_lbl("CONSEIL DE LA VILLE", 26, GOLD))
 	var conq: Dictionary = _conq()
 	var lvl: int = ConquestSystem.city_level(conq, _city_id)

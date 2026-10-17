@@ -7,7 +7,7 @@ Les sources d'origine (V14) sont conservées dans `data/_src_v14/` ; relancer le
 
 - **Étirement ×2 de l'axe des niveaux** : le héros de niveau L vaut l'ancien héros de niveau 1 + (L−1)×49/99. Le capital total de points reste identique (2 points × 99 niveaux ≈ 4 × 49) : mêmes stats finales qu'avant, mais deux fois plus de paliers.
 - **Niveau 1 de départ, 3 sorts par héros** ; les 7 autres sorts se débloquent aux niveaux **10 · 20 · 35 · 50 · 65 · 80 · 100** (soit 4 sorts au niveau 10, 5 au 20, 6 au 35, 7 au 50, 8 au 65, 9 au 80, 10 au 100).
-- **Points de sort** : 1 par niveau de héros (99 au maximum). Passer un sort du niveau n au n+1 coûte n points → 45 points pour un sort de 1 à 10. Les 10 sorts à fond coûteraient 450 points : le joueur doit **choisir** (≈ 2 sorts maximum + quelques sorts moyens). +6 % d'efficacité par niveau de sort. Remise à zéro **gratuite** (comme les points de caractéristiques).
+- **Points de sort** : 3 par niveau de héros (297 au niveau 100). Passer un sort du niveau n au n+1 coûte n points → 45 points pour un sort de 1 à 10. Au niveau 100 : **5 sorts au niveau 10** (225 points) + 72 points pour les autres ; les 10 à fond coûteraient 450 points : le joueur doit **choisir**. +6 % d'efficacité par niveau de sort. Remise à zéro **gratuite** (comme les points de caractéristiques).
 - **Ennemis niveau 1→150** : le niveau suit la moyenne de l'équipe (+1 niveau toutes les 25 victoires, plafonné à 150). Le facteur de niveau (+0,8 %/niveau) est cuit dans `ennemis.txt` ; début de partie adouci (×0,85 au niveau 1 → ×1 au niveau 20).
 - **Durée de vie** : ≈ 2 500 combats de la frontière pour passer du niveau 1 au niveau 100 (≈ 2 combats par niveau au début, ≈ 100 pour le dernier palier).
 - **Difficulté** : réglage propre à chaque partie (Mes Parties), modifiable à tout moment.
@@ -30,16 +30,16 @@ Le **Tank** reçoit +30 % de PV et +25 % de défense de base ; le Géomancien pe
 
 ## 3. Progression par niveau (exemple Tank / Mage)
 
-| Niveau | Sorts | Points de sort | Tank PV/Déf | Mage PV/Int |
+| Niveau | Sorts | Points de sort cumulés | Tank PV/Déf | Mage PV/Int |
 |---|---|---|---|---|
 | 1 | 3 | 0 | 156 / 31 | 66 / 25 |
-| 10 | 4 | 9 | 194 / 39 | 86 / 36 |
-| 20 | 5 | 19 | 238 / 48 | 104 / 51 |
-| 35 | 6 | 34 | 304 / 61 | 136 / 71 |
-| 50 | 7 | 49 | 369 / 75 | 163 / 86 |
-| 65 | 8 | 64 | 435 / 89 | 187 / 102 |
-| 80 | 9 | 79 | 494 / 99 | 213 / 116 |
-| 100 | 10 | 99 | 567 / 113 | 248 / 135 |
+| 10 | 4 | 27 | 194 / 39 | 86 / 36 |
+| 20 | 5 | 57 | 238 / 48 | 104 / 51 |
+| 35 | 6 | 102 | 304 / 61 | 136 / 71 |
+| 50 | 7 | 147 | 369 / 75 | 163 / 86 |
+| 65 | 8 | 192 | 435 / 89 | 187 / 102 |
+| 80 | 9 | 237 | 494 / 99 | 213 / 116 |
+| 100 | 10 | 297 | 567 / 113 | 248 / 135 |
 
 ## 4. Kits de sorts (niveau de déblocage)
 

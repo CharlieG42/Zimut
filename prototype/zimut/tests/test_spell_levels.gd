@@ -23,16 +23,16 @@ func _boot() -> void:
 	# Amélioration refusée sans point de sort (niveau 1 : 0 point)
 	var err: String = pm.upgrade_spell(data, "Tank", "Coup de bouclier")
 	check(err != "", "refus sans points de sort : %s" % err)
-	check(pm.spell_points_total(100) == 99 and pm.spell_points_total(1) == 0, "1 point de sort par niveau (99 au niveau 100)")
+	check(pm.spell_points_total(100) == 297 and pm.spell_points_total(1) == 0, "3 points de sort par niveau (297 au niveau 100)")
 
-	# Amélioration avec points : niveau 30 -> 29 points
+	# Amélioration avec points : niveau 30 -> 87 points
 	pm.roster_entry(data, "Tank")["level"] = 30
-	check(pm.spell_points_free(data, "Tank") == 29, "29 points libres au niveau 30")
+	check(pm.spell_points_free(data, "Tank") == 87, "87 points libres au niveau 30")
 	err = pm.upgrade_spell(data, "Tank", "Coup de bouclier")
 	check(err == "", "première amélioration acceptée")
 	check(pm.spell_level(data, "Tank", "Coup de bouclier") == 2, "niveau 2 atteint")
 	check(absf(pm.spell_mult(data, "Tank", "Coup de bouclier") - 1.06) < 0.001, "multiplicateur 1.06 au niveau 2")
-	check(pm.spell_points_free(data, "Tank") == 28, "1 point consommé")
+	check(pm.spell_points_free(data, "Tank") == 86, "1 point consommé")
 
 	# Coût croissant : niveau 2 -> 3 coûte 2 points
 	var cost: Dictionary = pm.spell_upgrade_cost(data, "Tank", "Coup de bouclier")
@@ -50,12 +50,12 @@ func _boot() -> void:
 	check(pm.spell_upgrade_cost(data, "Tank", "Coup de bouclier").is_empty(), "plus de coût au niveau max")
 	check(pm.spell_points_spent(data, "Tank") == 45, "45 points pour 1 -> 10")
 	check(absf(pm.spell_mult(data, "Tank", "Coup de bouclier") - 1.54) < 0.001, "multiplicateur 1.54 au niveau 10")
-	check(10 * 45 > pm.spell_points_total(ClassRules.MAX_LEVEL), "impossible de maximiser les 10 sorts (450 > 99)")
+	check(5 * 45 <= pm.spell_points_total(ClassRules.MAX_LEVEL) and 10 * 45 > pm.spell_points_total(ClassRules.MAX_LEVEL), "niveau 100 : 5 sorts au maximum possibles, pas les 10 (225 <= 297 < 450)")
 
 	# Retrait d'un niveau et remise à zéro gratuite
 	check(pm.downgrade_spell(data, "Tank", "Coup de bouclier") == "" and pm.spell_level(data, "Tank", "Coup de bouclier") == 9, "retrait d'un niveau")
 	pm.reset_spells(data, "Tank")
-	check(pm.spell_points_spent(data, "Tank") == 0 and pm.spell_points_free(data, "Tank") == 49, "remise à zéro gratuite : tous les points rendus")
+	check(pm.spell_points_spent(data, "Tank") == 0 and pm.spell_points_free(data, "Tank") == 147, "remise à zéro gratuite : tous les points rendus")
 	for i: int in range(9):
 		pm.upgrade_spell(data, "Tank", "Coup de bouclier")
 	pm.roster_entry(data, "Tank")["level"] = 80
