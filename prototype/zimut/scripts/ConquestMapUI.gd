@@ -55,6 +55,7 @@ var _attack: Button
 var _city_buttons: Dictionary = {}
 var _city_labels: Dictionary = {}
 var _city_sprite_cache: Dictionary = {}
+var _side_art: TextureRect
 var _build_box: VBoxContainer
 var _header: Label
 var _root: Control
@@ -316,6 +317,14 @@ func _build() -> void:
 	_threat_banner.add_theme_color_override("font_color", Color(1.0, 0.88, 0.80))
 	_threat_banner.add_theme_stylebox_override("normal", _style(Color(0.34, 0.10, 0.08, 0.96), Color(1.0, 0.45, 0.30)))
 	box.add_child(_threat_banner)
+
+	_side_art = TextureRect.new()
+	_side_art.name = "SideCityArt"
+	_side_art.custom_minimum_size = Vector2(0, 150)
+	_side_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_side_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_side_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(_side_art)
 
 	_message = Label.new()
 	_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -705,6 +714,8 @@ func _select_city(id: String) -> void:
 	var conquered: bool = owned.has(id)
 	var ravage: int = int(_conquest.get("ravage", {}).get(id, 0))
 	_build_panel(id, conquered)
+	if _side_art != null:
+		_side_art.texture = _city_sprite(id)
 	_layout_responsive()
 	if String(city["kind"]) == "capital":
 		_message.text = "%s\n\n%s\n\nVotre territoire de départ, à l'abri des attaques.\n%s" % [city["name"], city["desc"], _city_status_text(id)]
@@ -1386,27 +1397,51 @@ func _city_nameplate_style(city_id: String, selected: bool) -> StyleBoxFlat:
 
 func _city_sprite(city_id: String) -> Texture2D:
 	var biome := String(_city_meta(city_id).get("biome", "Forêt"))
-	var texture_path: String = ""
-	if city_id == "capitale":
-		texture_path = "res://assets/ui/conquest/capital_crown.svg"
-	else:
-		var nation_files := {"Cristaux": "nation_crystals", "Marées": "nation_tides", "Vents": "nation_winds",
-			"Brasier": "nation_brasier", "Brumes": "nation_mists", "Ombres": "nation_shadows"}
-		if nation_files.has(biome):
-			texture_path = "res://assets/ui/conquest/%s_city.svg" % String(nation_files[biome])
-		else:
-			var asset := "forest"
-			match biome:
-				"Montagne":
-					asset = "mountain"
-				"Désert":
-					asset = "desert"
-				"Donjon":
-					asset = "dungeon"
-			texture_path = "res://assets/ui/conquest/biome_%s_city.svg" % asset
-	if not _city_sprite_cache.has(texture_path):
-		_city_sprite_cache[texture_path] = load(texture_path) as Texture2D
-	return _city_sprite_cache[texture_path] as Texture2D
+	var art: String = String(CityScreenUI.ART.get(biome, "sylvestre"))
+	var key: String = "%s|%s" % [art, "cap" if city_id == "capitale" else "city"]
+	if not _city_sprite_cache.has(key):
+		_city_sprite_cache[key] = _city_medallion(art, city_id == "capitale")
+	return _city_sprite_cache[key] as Texture2D
+
+## Médaillon illustré d'une ville : l'illustration de la nation (cities/*.jpg),
+## coins arrondis et liseré doré (plus épais pour la capitale).
+func _city_medallion(art: String, capital: bool) -> Texture2D:
+	var tex: Texture2D = load("res://assets/ui/conquest/cities/%s.jpg" % art) as Texture2D
+	if tex == null:
+		return null
+	var src: Image = tex.get_image()
+	if src.is_compressed():
+		src.decompress()
+	src.convert(Image.FORMAT_RGBA8)
+	var w: int = 288
+	var h: int = 200
+	# recadrage centré au format du médaillon
+	var ratio: float = float(w) / float(h)
+	var cw: int = src.get_width()
+	var ch: int = int(float(cw) / ratio)
+	if ch > src.get_height():
+		ch = src.get_height()
+		cw = int(float(ch) * ratio)
+	var crop: Image = src.get_region(Rect2i((src.get_width() - cw) / 2, (src.get_height() - ch) / 2, cw, ch))
+	crop.resize(w, h, Image.INTERPOLATE_LANCZOS)
+	var radius: float = 26.0
+	var border: float = 7.0 if capital else 4.0
+	var gold := Color(1.0, 0.82, 0.38) if capital else Color(0.86, 0.72, 0.40)
+	var out := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	for y: int in range(h):
+		for x: int in range(w):
+			# distance au rectangle arrondi
+			var dx: float = maxf(absf(x + 0.5 - w * 0.5) - (w * 0.5 - radius), 0.0)
+			var dy: float = maxf(absf(y + 0.5 - h * 0.5) - (h * 0.5 - radius), 0.0)
+			var d: float = sqrt(dx * dx + dy * dy) - radius   # <0 : dedans
+			if d > 0.5:
+				continue
+			var c: Color = crop.get_pixel(x, y)
+			if d > -border:
+				c = gold.darkened(0.25 * clampf((d + border) / border, 0.0, 1.0))
+			c.a = clampf(0.5 - d, 0.0, 1.0)
+			out.set_pixel(x, y, c)
+	return ImageTexture.create_from_image(out)
 
 ## Progression de domination par biome, hors capitale et Donjon.
 ## Le bonus est versé à chaque victoire lorsque toutes les villes du biome
