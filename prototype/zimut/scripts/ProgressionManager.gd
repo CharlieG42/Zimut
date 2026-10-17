@@ -1060,9 +1060,9 @@ func craft_and_equip(data: Dictionary, recipe_name: String, member_index: int) -
 ## ── Niveaux de sorts (1..10) et points de sort ───────────────────────────
 ## Chaque héros a 10 sorts (3 au niveau 1, les autres débloqués jusqu'au niveau 100).
 ## Chaque sort peut monter du niveau 1 au niveau 10 : +SPELL_LEVEL_BONUS_PCT par niveau
-## sur les dégâts / soins / valeurs d'effet. On gagne 1 point de sort par niveau de héros ;
-## passer un sort du niveau n au niveau n+1 coûte n points (45 pour 1 -> 10). Les 10 sorts
-## à fond coûteraient 450 points pour 99 gagnés : il faut choisir. Remise à zéro GRATUITE.
+## sur les dégâts / soins / valeurs d'effet. On gagne 3 points de sort par niveau de héros (297 au niveau 100) ;
+## passer un sort du niveau n au niveau n+1 coûte n points (45 pour 1 -> 10). Au niveau 100 : 5 sorts
+## au maximum (225 points) + 72 points restants ; les 10 à fond (450) sont impossibles. Remise à zéro GRATUITE.
 const SPELL_LEVEL_MAX := 10
 const SPELL_LEVEL_BONUS_PCT := 6.0
 

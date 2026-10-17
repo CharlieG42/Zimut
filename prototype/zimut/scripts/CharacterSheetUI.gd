@@ -645,8 +645,8 @@ func _build_spells() -> void:
 	var info := HBoxContainer.new()
 	info.add_theme_constant_override("separation", 14)
 	_content.add_child(info)
-	var intro := _lbl("1 point de sort par niveau. Monter un sort du niveau n au niveau n+1 coûte n points (+%d %% d'efficacité par niveau, maximum %d). Impossible de tout maximiser : choisis tes sorts ! Remise à zéro gratuite." % [
-		roundi(ProgressionManager.SPELL_LEVEL_BONUS_PCT), ProgressionManager.SPELL_LEVEL_MAX], 17, C_DIM)
+	var intro := _lbl("%d points de sort par niveau. Monter un sort du niveau n au niveau n+1 coûte n points (+%d %% d'efficacité par niveau, maximum %d). Impossible de tout maximiser : choisis tes sorts ! Remise à zéro gratuite." % [
+		ClassRules.SPELL_POINTS_PER_LEVEL, roundi(ProgressionManager.SPELL_LEVEL_BONUS_PCT), ProgressionManager.SPELL_LEVEL_MAX], 17, C_DIM)
 	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	intro.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info.add_child(intro)
