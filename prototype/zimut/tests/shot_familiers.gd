@@ -21,9 +21,9 @@ func _boot() -> void:
 	for p: Dictionary in gm.players:
 		var names: Array = []
 		if p["classe"] == "Invocateur":
-			names = ["Invoquer Tortue", "Invoquer Loup", "Invoquer Sirène"]
+			names = ["Invoquer Golem de Pierre", "Invoquer Loup Spectral", "Invoquer Requin des Marées"]
 		elif p["classe"] == "Sylvain":
-			names = ["Invoquer Buisson", "Invoquer Champignon"]
+			names = ["Invoquer Archer Sylvestre", "Invoquer Ent de Combat"]
 		var pos: Vector2i = gm.pos_of(p)
 		var k: int = 0
 		for nm: String in names:

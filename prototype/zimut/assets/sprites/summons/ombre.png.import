@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ct47vwl18wbt5"
-path="res://.godot/imported/buisson.png-db9ebed6bb1c482567cc1a582aaac15c.ctex"
+uid="uid://cg71yeavrg2ye"
+path="res://.godot/imported/ombre.png-7ca658401f6286ed684de71b8f863200.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/buisson.png"
-dest_files=["res://.godot/imported/buisson.png-db9ebed6bb1c482567cc1a582aaac15c.ctex"]
+source_file="res://assets/sprites/summons/ombre.png"
+dest_files=["res://.godot/imported/ombre.png-7ca658401f6286ed684de71b8f863200.ctex"]
 
 [params]
 

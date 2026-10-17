@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cwc48ro4w3t57"
-path="res://.godot/imported/homme_faucon.png-d0fefb1fef7d647a88a9889b2cadb48c.ctex"
+uid="uid://cmxjondiwya0d"
+path="res://.godot/imported/ombre.svg-b4d1f7daa7fd6ebcfa6d374299595cbc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/homme_faucon.png"
-dest_files=["res://.godot/imported/homme_faucon.png-d0fefb1fef7d647a88a9889b2cadb48c.ctex"]
+source_file="res://assets/sprites/summons/ombre.svg"
+dest_files=["res://.godot/imported/ombre.svg-b4d1f7daa7fd6ebcfa6d374299595cbc.ctex"]
 
 [params]
 
@@ -38,3 +38,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

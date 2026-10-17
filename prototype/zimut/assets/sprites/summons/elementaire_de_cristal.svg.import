@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://2rx3ecg7jm8o"
-path="res://.godot/imported/centaure.svg-dd29b463af547888dc918433501af899.ctex"
+uid="uid://bahmxnds8dcv5"
+path="res://.godot/imported/elementaire_de_cristal.svg-29ca239dc02891ae0efcd70ea3cf8914.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/centaure.svg"
-dest_files=["res://.godot/imported/centaure.svg-dd29b463af547888dc918433501af899.ctex"]
+source_file="res://assets/sprites/summons/elementaire_de_cristal.svg"
+dest_files=["res://.godot/imported/elementaire_de_cristal.svg-29ca239dc02891ae0efcd70ea3cf8914.ctex"]
 
 [params]
 

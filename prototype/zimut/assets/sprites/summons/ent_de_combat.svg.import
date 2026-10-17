@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bc6dyrybugg5p"
-path="res://.godot/imported/champignon.svg-fe871b98c756269b47aeb4cdfa06e9be.ctex"
+uid="uid://bcjoghvy8tei6"
+path="res://.godot/imported/ent_de_combat.svg-7cdf08a6b13802296dd52e78c59d9d4a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/champignon.svg"
-dest_files=["res://.godot/imported/champignon.svg-fe871b98c756269b47aeb4cdfa06e9be.ctex"]
+source_file="res://assets/sprites/summons/ent_de_combat.svg"
+dest_files=["res://.godot/imported/ent_de_combat.svg-7cdf08a6b13802296dd52e78c59d9d4a.ctex"]
 
 [params]
 

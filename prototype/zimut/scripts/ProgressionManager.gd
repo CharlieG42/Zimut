@@ -1351,9 +1351,42 @@ func _new_entry(level: int) -> Dictionary:
 
 ## Garantit que la sauvegarde contient un roster complet et cohérent (migration
 ## des anciennes parties incluse). Appelé au chargement.
+## Anciens noms d'invocations -> nouveaux (sprites V15d).
+const SPELL_RENAMES := {
+	"Invoquer Tortue": "Invoquer Golem de Pierre", "Invoquer Loup": "Invoquer Loup Spectral",
+	"Invoquer Sirène": "Invoquer Requin des Marées", "Invoquer Ange": "Invoquer Élémentaire de Cristal",
+	"Invoquer Homme-Faucon": "Invoquer Ombre", "Invoquer Centaure": "Invoquer Esprit de la Forêt",
+	"Invoquer Buisson": "Invoquer Archer Sylvestre", "Invoquer Champignon": "Invoquer Ent de Combat",
+}
+
+
+## Renomme les clés de sorts d'une sauvegarde existante (spell_levels, sorts mémorisés...).
+func _rename_spells(node: Variant) -> void:
+	if typeof(node) == TYPE_DICTIONARY:
+		var d: Dictionary = node
+		for k in d.keys():
+			if typeof(k) == TYPE_STRING and SPELL_RENAMES.has(k):
+				d[SPELL_RENAMES[k]] = d[k]
+				d.erase(k)
+		for k in d.keys():
+			var v: Variant = d[k]
+			if typeof(v) == TYPE_STRING and SPELL_RENAMES.has(v):
+				d[k] = SPELL_RENAMES[v]
+			else:
+				_rename_spells(v)
+	elif typeof(node) == TYPE_ARRAY:
+		var a: Array = node
+		for i: int in range(a.size()):
+			if typeof(a[i]) == TYPE_STRING and SPELL_RENAMES.has(a[i]):
+				a[i] = SPELL_RENAMES[a[i]]
+			else:
+				_rename_spells(a[i])
+
+
 func ensure_roster(data: Dictionary) -> void:
 	if data.is_empty():
 		return
+	_rename_spells(data)
 	var migrate: bool = int(data.get("balance_v", 0)) < BALANCE_VERSION and data.has("roster")
 	var legacy_level: int = clampi(int(data.get("level", START_LEVEL)), START_LEVEL, 50)
 	if int(data.get("balance_v", 0)) >= BALANCE_VERSION:

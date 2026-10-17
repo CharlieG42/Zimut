@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cmsr05jt3uyi6"
-path="res://.godot/imported/ange.svg-89a466b8b72ba8bbcae9d7996431fe01.ctex"
+uid="uid://c4oct05ko5hth"
+path="res://.godot/imported/esprit_de_la_foret.png-704055bcfa59cf955955122d9ddec53a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/ange.svg"
-dest_files=["res://.godot/imported/ange.svg-89a466b8b72ba8bbcae9d7996431fe01.ctex"]
+source_file="res://assets/sprites/summons/esprit_de_la_foret.png"
+dest_files=["res://.godot/imported/esprit_de_la_foret.png-704055bcfa59cf955955122d9ddec53a.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

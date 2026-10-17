@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ciqknewjxth2u"
-path="res://.godot/imported/tortue.png-a717ea14902b65c0b9d54a85af03a909.ctex"
+uid="uid://cq2563pq8m8wq"
+path="res://.godot/imported/golem_de_pierre.svg-7144fdaf41174217fef3677dd7d499b9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/tortue.png"
-dest_files=["res://.godot/imported/tortue.png-a717ea14902b65c0b9d54a85af03a909.ctex"]
+source_file="res://assets/sprites/summons/golem_de_pierre.svg"
+dest_files=["res://.godot/imported/golem_de_pierre.svg-7144fdaf41174217fef3677dd7d499b9.ctex"]
 
 [params]
 
@@ -38,3 +38,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

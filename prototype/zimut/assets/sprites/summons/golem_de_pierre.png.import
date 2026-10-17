@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://oxmgj3sski67"
-path="res://.godot/imported/sirene.png-b849b316898259d653b43839e242b8f2.ctex"
+uid="uid://co4rif6lpdseo"
+path="res://.godot/imported/golem_de_pierre.png-5e607e9c0d128b5a9052e7d24d97b5cf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/sirene.png"
-dest_files=["res://.godot/imported/sirene.png-b849b316898259d653b43839e242b8f2.ctex"]
+source_file="res://assets/sprites/summons/golem_de_pierre.png"
+dest_files=["res://.godot/imported/golem_de_pierre.png-5e607e9c0d128b5a9052e7d24d97b5cf.ctex"]
 
 [params]
 

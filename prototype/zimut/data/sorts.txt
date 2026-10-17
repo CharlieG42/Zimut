@@ -61,22 +61,22 @@ Heal,Protection vitale,2,0,1,+25% résistance (2 tours),80,Buff,0,0,0,0,25,0,0,0
 Heal,Soin ultime,4,0,1,Restaure 254 PV,100,Soin,0,0,254,0,0,0,0,0,0
 Invocateur,Frappe spectrale,2,0,4,30 dégâts magiques,1,Attaque,0,30,0,0,0,0,0,0,0
 Invocateur,Symbiose,2,0,1,L'invocation restaure 15 PV à tous les alliés,1,Soin,0,0,15,0,0,0,0,0,0
-Invocateur,Invoquer Tortue,2,0,1,Invoque une Tortue (contrôlable; 3PM/4PA),1,Invocation,0,0,0,0,0,0,0,0,0
-Invocateur,Invoquer Loup,2,0,1,Invoque un Loup (contrôlable; 3PM/4PA),10,Invocation,0,0,0,0,0,0,0,0,0
+Invocateur,Invoquer Golem de Pierre,2,0,1,Invoque un Golem de Pierre (contrôlable; 3PM/4PA),1,Invocation,0,0,0,0,0,0,0,0,0
+Invocateur,Invoquer Loup Spectral,2,0,1,Invoque un Loup Spectral (contrôlable; 3PM/4PA),10,Invocation,0,0,0,0,0,0,0,0,0
 Invocateur,Attaque de l'invocation,2,0,5,L'invocation attaque (dégâts = 15 + niveau/2),20,Attaque,0,0,0,0,0,0,0,0,0
-Invocateur,Invoquer Sirène,3,0,1,Invoque une Sirène (contrôlable; 3PM/4PA),35,Invocation,0,0,0,0,0,0,0,0,0
+Invocateur,Invoquer Requin des Marées,3,0,1,Invoque un Requin des Marées (contrôlable; 3PM/4PA),35,Invocation,0,0,0,0,0,0,0,0,0
 Invocateur,Buff de l'invocation,1,0,1,L'invocation gagne +20% dégâts (2 tours),50,Buff,0,0,0,0,0,0,0,20,0
-Invocateur,Invoquer Ange,3,0,1,Invoque un Ange (contrôlable; 3PM/4PA),65,Invocation,0,0,0,0,0,0,0,0,0
-Invocateur,Invoquer Homme-Faucon,4,0,1,Invoque un Homme-Faucon (contrôlable; 3PM/4PA),80,Invocation,0,0,0,0,0,4,0,0,0
-Invocateur,Invoquer Centaure,4,0,1,Invoque un Centaure (contrôlable; 3PM/4PA),100,Invocation,0,0,0,0,0,0,0,0,0
+Invocateur,Invoquer Élémentaire de Cristal,3,0,1,Invoque un Élémentaire de Cristal (contrôlable; 3PM/4PA),65,Invocation,0,0,0,0,0,0,0,0,0
+Invocateur,Invoquer Ombre,4,0,1,Invoque une Ombre (contrôlable; 3PM/4PA),80,Invocation,0,0,0,0,0,4,0,0,0
+Invocateur,Invoquer Esprit de la Forêt,4,0,1,Invoque un Esprit de la Forêt (contrôlable; 3PM/4PA),100,Invocation,0,0,0,0,0,0,0,0,0
 Sylvain,Ronce,2,0,3,40 dégâts magiques,1,Attaque,0,40,0,0,0,0,0,0,0
 Sylvain,Sève vitale,2,0,1,Restaure 45 PV,1,Soin,0,0,45,0,0,0,0,0,0
-Sylvain,Invoquer Buisson,2,0,1,Invoquer un Buisson (contrôlable; 3PM/4PA),1,Invocation,0,0,0,0,0,0,0,0,0
+Sylvain,Invoquer Archer Sylvestre,2,0,1,Invoquer un Archer Sylvestre (contrôlable; 3PM/4PA),1,Invocation,0,0,0,0,0,0,0,0,0
 Sylvain,Poison de ronce,2,0,3,60 dégâts/tour (2 tours),10,Debuff,0,0,0,0,0,60,0,0,0
 Sylvain,Invoquer Arbre,3,0,2,Plante un arbre immobile : bloque la vue et relaie les soins du Sylvain aux alliés autour de lui (1 arbre max),20,Invocation,0,0,0,0,0,0,0,0,0
 Sylvain,Racine,2,0,3,Immobilise l'ennemi (1 tour),35,Debuff,0,0,0,0,0,0,0,0,0
 Sylvain,Soin de sève,3,0,1,Restaure 90 PV,50,Soin,0,0,90,0,0,0,0,0,0
-Sylvain,Invoquer Champignon,2,0,1,Invoquer un Champignon (contrôlable; 3PM/4PA),65,Invocation,0,0,0,0,0,0,0,0,0
+Sylvain,Invoquer Ent de Combat,2,0,1,Invoquer un Ent de Combat (contrôlable; 3PM/4PA),65,Invocation,0,0,0,0,0,0,0,0,0
 Sylvain,Pluie de graines,4,0,4,55 dégâts magiques à tous les ennemis,80,Attaque,0,55,0,0,0,0,0,0,0
 Sylvain,Tempête de pétales,4,0,5,150 dégâts magiques à tous les ennemis,100,Attaque,0,150,0,0,0,0,0,0,0
 Géomancien,Éclat de grès,2,0,4,44 dégâts magiques,1,Attaque,44,0,0,0,0,0,0,0,0

@@ -1434,7 +1434,7 @@ func _resolve_buff(caster: Dictionary, spell: Dictionary, p: Dictionary, cell: V
 
 func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell: Vector2i) -> String:
 	var sname: String = String(p["summon"])
-	var info: Dictionary = Combat.SUMMONS.get(sname, Combat.SUMMONS["Loup"])
+	var info: Dictionary = Combat.SUMMONS.get(sname, Combat.SUMMONS["Loup Spectral"])
 	if bool(info.get("beacon", false)):
 		# 3 balises max : la plus ancienne disparaît
 		var old_b: Array = beacons_of(caster)

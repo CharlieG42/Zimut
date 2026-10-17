@@ -47,20 +47,20 @@ Heal,50,Soin supérieur
 Heal,65,Soin de groupe supérieur
 Heal,80,Protection vitale
 Heal,100,Soin ultime
-Invocateur,1,Frappe spectrale;Symbiose;Invoquer Tortue
-Invocateur,10,Invoquer Loup
+Invocateur,1,Frappe spectrale;Symbiose;Invoquer Golem de Pierre
+Invocateur,10,Invoquer Loup Spectral
 Invocateur,20,Attaque de l'invocation
-Invocateur,35,Invoquer Sirène
+Invocateur,35,Invoquer Requin des Marées
 Invocateur,50,Buff de l'invocation
-Invocateur,65,Invoquer Ange
-Invocateur,80,Invoquer Homme-Faucon
-Invocateur,100,Invoquer Centaure
-Sylvain,1,Ronce;Sève vitale;Invoquer Buisson
+Invocateur,65,Invoquer Élémentaire de Cristal
+Invocateur,80,Invoquer Ombre
+Invocateur,100,Invoquer Esprit de la Forêt
+Sylvain,1,Ronce;Sève vitale;Invoquer Archer Sylvestre
 Sylvain,10,Poison de ronce
 Sylvain,20,Invoquer Arbre
 Sylvain,35,Racine
 Sylvain,50,Soin de sève
-Sylvain,65,Invoquer Champignon
+Sylvain,65,Invoquer Ent de Combat
 Sylvain,80,Pluie de graines
 Sylvain,100,Tempête de pétales
 Géomancien,1,Éclat de grès;Invoquer Pilier;Armure de grès
