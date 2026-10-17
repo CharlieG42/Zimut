@@ -134,13 +134,51 @@ CUSTOM = {
 }
 
 
+# V15g : invocations renommées (nouveaux sprites) ; les sources gardent les anciens noms.
+RENAMED = {
+    "Invoquer Golem de Pierre": ("Invoquer Tortue", "Invoque un Golem de Pierre"),
+    "Invoquer Loup Spectral": ("Invoquer Loup", "Invoque un Loup Spectral"),
+    "Invoquer Requin des Marées": ("Invoquer Sirène", "Invoque un Requin des Marées"),
+    "Invoquer Élémentaire de Cristal": ("Invoquer Ange", "Invoque un Élémentaire de Cristal"),
+    "Invoquer Ombre": ("Invoquer Homme-Faucon", "Invoque une Ombre"),
+    "Invoquer Esprit de la Forêt": ("Invoquer Centaure", "Invoque un Esprit de la Forêt"),
+    "Invoquer Archer Sylvestre": ("Invoquer Buisson", "Invoque un Archer Sylvestre"),
+    "Invoquer Ent de Combat": ("Invoquer Champignon", "Invoque un Ent de Combat"),
+}
+
+
 def find(classe, name):
     if (classe, name) in CUSTOM:
         return CUSTOM[(classe, name)]
+    if name in RENAMED:
+        old, label = RENAMED[name]
+        r = list(find(classe, old))
+        r[1] = name
+        r[5] = re.sub(r"^Invoquer? (une?|un) [^(]+", label + " ", r[5]).replace("  ", " ")
+        return r
     for key in ((classe, name), ("Druide", name), ("Heal", name)):
         if key in pool and not (classe == "Druide" and key[0] == "Heal" and False):
             return pool[key]
     raise KeyError((classe, name))
+
+
+# V16 : sorts des héros trop forts en début de partie -> dégâts et soins / 1,5
+HERO_SPELL_DIV = 1.5
+
+
+def _div(n):
+    return str(max(1, int(round(int(n) / HERO_SPELL_DIV))))
+
+
+def hero_nerf(r):
+    e = r[5]
+    e = re.sub(r"(\d+)(?= dégâts)", lambda m: _div(m.group(1)), e)
+    e = re.sub(r"(dégâts = )(\d+)", lambda m: m.group(1) + _div(m.group(2)), e)
+    e = re.sub(r"(?i)((?:restaure|soigne)(?: de)? )(\d+)(?=%? pv)", lambda m: m.group(1) + _div(m.group(2)), e)
+    r[5] = e
+    for ci in (8, 9, 10):
+        if r[ci].strip().isdigit() and int(r[ci]) > 0:
+            r[ci] = _div(r[ci])
 
 
 sout = [shead]
@@ -164,6 +202,7 @@ for classe in order:
         if name == "Balise de chasse":
             r[5] = "Plante une balise (3 max; la plus ancienne disparaît) : un sort de zone du Chasseur qui touche une balise se réplique autour de toutes les autres"
         # Cristal ambré mal formé dans l'ancien fichier : jamais retenu ici
+        hero_nerf(r)
         sout.append(r)
         byl.setdefault(lvl, []).append(name)
     for lvl in sorted(byl):

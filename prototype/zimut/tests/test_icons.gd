@@ -19,7 +19,7 @@ func _boot() -> void:
 		var c: PackedStringArray = line.split(",")
 		if c.size() > 1 and not names.has(c[1].strip_edges()):
 			names.append(c[1].strip_edges())
-	for extra in ["Morsure", "Coup d'os", "Coup de massue", "Hurlement", "Jet de dague", "Pluie de dagues", "Poing de pierre", "Souffle de feu", "Tir d'os", "Trait spectral", "Attaque", "Bras de bois", "Carapace", "Chant marin", "Flèche de centaure", "Fouet de ronce", "Fouet de sarriette", "Lumière", "Piqué", "Spores toxiques", "Sève fertilisante"]:
+	for extra in ["Morsure", "Coup d'os", "Coup de massue", "Hurlement", "Jet de dague", "Pluie de dagues", "Poing de pierre", "Souffle de feu", "Tir d'os", "Trait spectral", "Attaque", "Bras de bois", "Carapace", "Chant marin", "Flèche de centaure", "Fouet de ronce", "Fouet de sarriette", "Lumière", "Piqué", "Spores toxiques", "Sève fertilisante", "Poing de roche", "Morsure spectrale", "Vague tranchante", "Éclat de cristal", "Lame d'ombre", "Vrilles sylvestres", "Flèche de sève", "Coup de branche"]:
 		names.append(extra)
 	var ids: Dictionary = {}
 	for n: String in names:

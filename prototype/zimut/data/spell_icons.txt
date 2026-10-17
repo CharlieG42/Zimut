@@ -187,3 +187,11 @@ Piqué,dive
 Spores toxiques,spores
 Sève fertilisante,sap
 Rappel de balise,beacon
+Poing de roche,stone_fist
+Morsure spectrale,bite
+Vague tranchante,sirene_song
+Éclat de cristal,crystal_lance
+Lame d'ombre,blade_shadow
+Vrilles sylvestres,ivy
+Flèche de sève,arrow
+Coup de branche,wood_arm
