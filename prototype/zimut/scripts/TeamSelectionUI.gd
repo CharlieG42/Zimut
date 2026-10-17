@@ -235,7 +235,7 @@ func _build() -> void:
 	nav.offset_left = -330.0
 	nav.offset_right = 330.0
 	nav.offset_top = 190.0
-	nav.offset_bottom = 610.0
+	nav.offset_bottom = 630.0
 	nav.add_theme_constant_override("separation", 20)
 	_root.add_child(nav)
 
@@ -248,14 +248,14 @@ func _build() -> void:
 	nav.add_child(card)
 	card.add_theme_stylebox_override("panel", _flat(COL_PANEL, COL_BORDER, 18, 4))
 	var card_box := VBoxContainer.new()
-	card_box.add_theme_constant_override("separation", 10)
+	card_box.add_theme_constant_override("separation", 4)
 	card.add_child(card_box)
 
 	var portrait_box := HBoxContainer.new()
 	portrait_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	card_box.add_child(portrait_box)
 	_portrait = TextureRect.new()
-	_portrait.custom_minimum_size = Vector2(180, 180)
+	_portrait.custom_minimum_size = Vector2(140, 140)
 	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	portrait_box.add_child(_portrait)
@@ -289,8 +289,8 @@ func _build() -> void:
 	_action_btn.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	_action_btn.offset_left = -190.0
 	_action_btn.offset_right = 190.0
-	_action_btn.offset_top = 640.0
-	_action_btn.offset_bottom = 720.0
+	_action_btn.offset_top = 648.0
+	_action_btn.offset_bottom = 724.0
 	_action_btn.add_theme_font_size_override("font_size", 26)
 	_action_btn.pressed.connect(_on_action)
 	_root.add_child(_action_btn)

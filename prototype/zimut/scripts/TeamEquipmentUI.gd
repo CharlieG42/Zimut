@@ -223,6 +223,12 @@ func _root_of_frame_setup(frame: PanelContainer, classe: String, member_idx: int
 		btn.name = "slot_%s" % slot_name
 		holder.add_child(btn)
 
+## Tuile illustrée de l'emplacement (mêmes visuels que la Forge).
+func _slot_tile(slot_name: String) -> Texture2D:
+	var p: String = "res://assets/ui/forge/cat_%s.png" % slot_name
+	return load(p) as Texture2D if ResourceLoader.exists(p) else null
+
+
 func refresh() -> void:
 	var team: Array = _save.get("team", [])
 	for i: int in range(team.size()):
@@ -236,13 +242,21 @@ func refresh() -> void:
 			var btn: Button = holder.get_node_or_null("slot_%s" % slot_name) as Button
 			if btn == null:
 				continue
+			var tile_tex: Texture2D = _slot_tile(slot_name)
+			btn.icon = tile_tex
+			btn.expand_icon = tile_tex != null
+			btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			if eq.has(slot_name):
 				var it: Dictionary = eq[slot_name]
-				btn.text = SLOT_ICON.get(slot_name, "❔")
+				btn.text = "" if tile_tex != null else SLOT_ICON.get(slot_name, "❔")
+				btn.remove_theme_color_override("icon_normal_color")
 				btn.tooltip_text = "%s\n%s" % [slot_name.capitalize(), ItemRules.describe(it)]
 				btn.add_theme_stylebox_override("normal", _flat(COL_SLOT_FILLED, ItemRules.rarity_color(it), 10, 5))
 			else:
-				btn.text = SLOT_ICON.get(slot_name, "❔")
+				btn.text = "" if tile_tex != null else SLOT_ICON.get(slot_name, "❔")
+				# case vide : tuile estompée
+				btn.add_theme_color_override("icon_normal_color", Color(1, 1, 1, 0.35))
+				btn.add_theme_color_override("icon_hover_color", Color(1, 1, 1, 0.7))
 				btn.tooltip_text = "%s (vide)" % slot_name.capitalize()
 				btn.add_theme_stylebox_override("normal", _flat(COL_SLOT_EMPTY, Color(0.3, 0.35, 0.45), 10, 2))
 	for i2: int in range(mini(team.size(), _member_frames.size())):
