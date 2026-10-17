@@ -15,6 +15,8 @@ const PUSH := {
 	"Tremblement de terre": 1,
 	"Poing de pierre": 2,
 	"Tir de recul": 2,
+	"Éboulement": 1,
+	"Séisme ambré": 1,
 }
 
 const NEGATIVE: Array = ["poison", "bleed", "burn", "stun", "root", "slow", "curse", "weaken", "taunted"]
@@ -248,7 +250,7 @@ static func parse(spell: Dictionary) -> Dictionary:
 	var stype: String = String(spell.get("spell_type", "Attaque"))
 	var classe: String = String(spell.get("classe", ""))
 	var rng: int = int(spell.get("range", 1))
-	var magic_class: bool = classe in ["Mage", "Druide", "Invocateur", "Heal"]
+	var magic_class: bool = classe in ["Mage", "Druide", "Invocateur", "Heal", "Géomancien"]
 
 	var p: Dictionary = {
 		"kind": "attack",       # attack | heal | buff | summon | teleport | trap | revive
@@ -623,6 +625,13 @@ const SUMMONS := {
 	# Racines du Sylvain : bloquent la ligne de vue, sans relais de soins
 	"Racines":      {"pv": 200, "force": 0, "defense": 50, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.45, 0.38, 0.22), "spell": [], "static": true, "blocks_los": true, "unique": true},
 	# Balise du Chasseur : immobile, réplique les dégâts de zone autour d'elle
+	# Terrain du Géomancien : des cases de la grille deviennent des obstacles (« terrain »).
+	# Elles ne comptent pas comme familiers, disparaissent après `turns` tours du Géomancien
+	# et peuvent être détruites. `span` = nombre de cases posées d'un coup (ligne perpendiculaire).
+	"Pilier":       {"pv": 160, "force": 0, "defense": 40, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.80, 0.62, 0.35), "spell": [], "static": true, "blocks_los": true, "terrain": true, "turns": 4, "span": 1},
+	"Muraille":     {"pv": 110, "force": 0, "defense": 35, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.72, 0.55, 0.30), "spell": [], "static": true, "blocks_los": true, "terrain": true, "turns": 3, "span": 3},
+	"Faille":       {"pv": 999, "force": 0, "defense": 0, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.35, 0.22, 0.12), "spell": [], "static": true, "terrain": true, "turns": 3, "span": 3, "indestructible": true},
+	"Cristal ambré": {"pv": 200, "force": 0, "defense": 55, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.95, 0.65, 0.15), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1},
 	"Balise":       {"pv": 90, "force": 0, "defense": 30, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.90, 0.60, 0.20), "spell": [], "static": true, "beacon": true},
 }
 

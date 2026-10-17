@@ -46,6 +46,7 @@ const COLORS: Dictionary = {
 	"Heal":      Color(0, 0.8, 0.8),
 	"Invocateur": Color(0.9, 0.5, 0.1),
 	"Sylvain":    Color(0.35, 0.65, 0.25),
+	"Géomancien": Color(0.85, 0.62, 0.25),
 	"Gobelin":   Color(0.5, 0.8, 0.3),
 	"Squelette": Color(0.8, 0.8, 0.8),
 	"Loup":      Color(0.6, 0.6, 0.4),
@@ -644,7 +645,16 @@ func enemies_of(e: Dictionary) -> Array:
 func summons_of(owner: Dictionary) -> Array:
 	var out: Array = []
 	for s: Dictionary in summons:
-		if is_alive(s) and int(s.get("owner", -1)) == int(owner["uid"]):
+		if is_alive(s) and int(s.get("owner", -1)) == int(owner["uid"]) and not bool(s.get("terrain", false)):
+			out.append(s)
+	return out
+
+
+## Cases de terrain (piliers, murailles, failles, cristaux) posées par un Géomancien.
+func terrain_of(owner: Dictionary) -> Array:
+	var out: Array = []
+	for s: Dictionary in summons:
+		if is_alive(s) and int(s.get("owner", -1)) == int(owner["uid"]) and bool(s.get("terrain", false)):
 			out.append(s)
 	return out
 
@@ -783,6 +793,11 @@ func end_current_turn() -> void:
 		if int(e["lifetime"]) == 0:
 			e["current_pv"] = 0
 			message_requested.emit("%s disparaît." % e["name"])
+	for tp: Dictionary in terrain_of(e):
+		tp["lifetime"] = int(tp["lifetime"]) - 1
+		if int(tp["lifetime"]) <= 0:
+			tp["current_pv"] = 0
+			message_requested.emit("%s s'effrite." % tp["name"])
 	active_entity = {}
 	selected_spell = null
 	spell_selected.emit(null)
@@ -966,8 +981,11 @@ func validate_cast(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Str
 	if p["needs_summon"] or p["buff_summons"]:
 		if summons_of(caster).is_empty():
 			return "Aucun familier actif."
-	if p["kind"] == "summon" and summons_of(caster).size() >= 3:
+	var terr: bool = bool(Combat.SUMMONS.get(String(p["summon"]), {}).get("terrain", false))
+	if p["kind"] == "summon" and not terr and summons_of(caster).size() >= 3:
 		return "Trop de familiers (3 max)."
+	if p["kind"] == "summon" and terr and terrain_of(caster).size() >= 8:
+		return "Trop de terrain modifié (8 cases max)."
 	if p["kind"] == "summon" and String(p["summon"]) == "Balise" and beacons_of(caster).size() >= 3:
 		return "Trop de balises (3 max)."
 	if p["kind"] == "revive" and graveyard.is_empty():
@@ -1385,9 +1403,13 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 		"agility": info["agility"], "wisdom": 20, "defense": info["defense"],
 		"max_pa": info["pa"], "current_pa": 0, "max_pm": info["pm"], "current_pm": 0,
 		"color": info["color"], "owner": caster["uid"],
-		"lifetime": int(p["summon_turns"]),
+		"lifetime": int(info.get("turns", p["summon_turns"])),
 		"facing": caster["facing"],
 	}, true)
+	if bool(info.get("terrain", false)):
+		s["terrain"] = true
+	if bool(info.get("indestructible", false)):
+		s["indestructible"] = true
 	s["spells"] = Combat.summon_spells(sname)
 	s["init"] = float(caster.get("init", 0.0)) - 0.01
 	var is_static: bool = bool(info.get("static", false))
@@ -1406,6 +1428,24 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 		s["static"] = true
 	summons.append(s)
 	grid[cell.y][cell.x] = s
+	var span: int = int(info.get("span", 1))
+	if span > 1:
+		# ligne perpendiculaire à l'axe lanceur → case visée
+		var cp: Vector2i = pos_of(caster)
+		var d: Vector2i = cell - cp
+		var perp: Vector2i = Vector2i(0, 1) if abs(d.x) >= abs(d.y) else Vector2i(1, 0)
+		for k: int in range(1, (span - 1) / 2 + 1):
+			for sign_v: int in [-1, 1]:
+				var c2: Vector2i = cell + perp * k * sign_v
+				if not is_free(c2):
+					continue
+				var s2: Dictionary = s.duplicate(true)
+				s2["uid"] = _new_uid()
+				s2["x"] = c2.x
+				s2["y"] = c2.y
+				summons.append(s2)
+				grid[c2.y][c2.x] = s2
+				fx.emit("summon", {"entity": s2})
 	if not is_static:
 		var idx: int = turn_order.find(caster)
 		if idx >= 0:

@@ -14,9 +14,9 @@ cadres de découpe dans le script ; voir son en-tête).
 | Mage | Cristaux | oui |
 | Druide | Sylvestre | oui |
 | Heal | Marées | oui |
-| Invocateur | Brumes | **non** — classe qui invoque, sprite à revoir à part |
-| Sylvain | Vents | **non** — idem (le skin Sylvain actuel est conservé) |
-| Géomancien | Sables | non — classe pas encore dans le jeu |
+| Invocateur | Brumes | oui |
+| Sylvain | Vents | oui |
+| Géomancien | Sables | oui (classe créée) |
 
 ## Familiers — `familiers/<nom>.png` (9, ex-« invocations »)
 

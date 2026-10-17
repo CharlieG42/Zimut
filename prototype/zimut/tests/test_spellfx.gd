@@ -14,6 +14,6 @@ func _init() -> void:
 	for n in ["gobelin", "squelette", "loup", "troll", "dragonnet", "dragonnet_boss"]:
 		check(ResourceLoader.exists("res://assets/sprites/enemies/%s.svg" % n), "skin ennemi " + n)
 	for n in ["tortue", "loup", "sirene", "ange", "homme_faucon", "centaure", "buisson", "champignon", "tronc", "sarriette"]:
-		check(ResourceLoader.exists("res://assets/sprites/summons/%s.svg" % n), "skin invocation " + n)
+		check(ResourceLoader.exists("res://assets/sprites/summons/%s.svg" % n) or ResourceLoader.exists("res://assets/sprites/summons/%s.png" % n), "skin invocation " + n)
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)

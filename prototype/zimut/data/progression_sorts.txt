@@ -92,3 +92,14 @@ Sylvain,35,Sève régénérante;Invoquer Sarriette
 Sylvain,40,Colère de la nature;Soin de la forêt
 Sylvain,45,Racines profondes;Régression
 Sylvain,50,Tempête de pétales
+Géomancien,1,Éclat de grès;Invoquer Pilier
+Géomancien,5,Armure de grès;Lance de cristal
+Géomancien,10,Invoquer Muraille
+Géomancien,15,Éboulement;Invoquer Cristal ambré
+Géomancien,20,Invoquer Faille;Peau de pierre
+Géomancien,25,Tempête de sable
+Géomancien,30,Séisme ambré;Rempart de cristal
+Géomancien,35,Pluie de cristaux
+Géomancien,40,Fureur de la pierre
+Géomancien,45,Colosse de grès
+Géomancien,50,Cataclysme minéral
