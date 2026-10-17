@@ -512,7 +512,7 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 		"color": Color(0.9, 0.2, 0.1),
 	}, true)
 	boss["boss"] = true
-	boss["spells"] = Combat.boss_spells(base_type, atk)
+	boss["spells"] = Combat.boss_spells(base_type, atk) + Combat.nation_boss_spells(boss_name, atk)
 	boss["skin"] = base_type
 	boss["fly"] = base_type == "Dragonnet"
 	Combat.add_status(boss, "regen", 999, 8.0)
@@ -531,6 +531,21 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 		"Roi Squelette":
 			boss["fx"] = {"mres": 60, "lifesteal": 10}
 			Combat.add_status(boss, "regen", 999, 15.0)
+		"Golem Prismatique":
+			boss["fx"] = {"mres": 50}
+		"Crabe Titan":
+			boss["fx"] = {"mres": 30}
+			boss["defense"] = int(float(boss["defense"]) * 1.25)
+		"Seigneur des Tempêtes":
+			boss["fx"] = {"crit": 25}
+			boss["fly"] = true
+		"Seigneur de Lave":
+			boss["fx"] = {"mag_pct": 30}
+		"Liche des Brumes":
+			boss["fx"] = {"lifesteal": 8}
+		"Liche Éternelle":
+			boss["fx"] = {"mres": 60, "lifesteal": 10}
+			Combat.add_status(boss, "regen", 999, 12.0)
 	enemies.append(boss)
 	grid[pos.y][pos.x] = boss
 

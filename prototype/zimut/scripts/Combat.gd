@@ -609,6 +609,25 @@ static func boss_spells(base_type: String, force: int) -> Array:
 	return s
 
 
+## Sorts signature des boss de nation (en plus du kit du type de base).
+static func nation_boss_spells(boss_name: String, force: int) -> Array:
+	var s: Array = []
+	match boss_name:
+		"Golem Prismatique":
+			s.append(_mk("Éclat prismatique", 3, 5, "%d dégâts en zone (3x3) + affaiblit (-%d dégâts; 2 tours)" % [int(force * 0.7), int(force * 0.15)]))
+		"Crabe Titan":
+			s.append(_mk("Pince océane", 2, 1, "%d dégâts + étourdit 1 tour (40%%)" % int(force * 1.0)))
+		"Seigneur des Tempêtes":
+			s.append(_mk("Foudre céleste", 3, 7, "%d dégâts magiques en zone (3x3) + étourdit 1 tour (30%%)" % int(force * 0.75)))
+		"Seigneur de Lave":
+			s.append(_mk("Coulée de lave", 3, 6, "%d dégâts en zone (3x3) + brûle (%d dégâts/tour; 3 tours)" % [int(force * 0.75), int(force * 0.3)]))
+		"Liche des Brumes":
+			s.append(_mk("Brume d'affaiblissement", 3, 6, "%d dégâts magiques + affaiblit (-%d dégâts; 3 tours)" % [int(force * 0.6), int(force * 0.2)]))
+		"Liche Éternelle":
+			s.append(_mk("Mot de l'éternité", 3, 7, "%d dégâts magiques + affaiblit (-%d dégâts; 2 tours)" % [int(force * 0.8), int(force * 0.2)]))
+	return s
+
+
 const SUMMONS := {
 	"Tortue":       {"pv": 300, "force": 25, "defense": 70, "agility": 10, "pa": 3, "pm": 2, "color": Color(0.35, 0.65, 0.35), "spell": ["Carapace", 2, 1, 45]},
 	"Loup":         {"pv": 170, "force": 50, "defense": 28, "agility": 40, "pa": 4, "pm": 4, "color": Color(0.55, 0.55, 0.60), "spell": ["Morsure", 2, 1, 60]},

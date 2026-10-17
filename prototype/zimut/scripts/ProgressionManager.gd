@@ -149,6 +149,30 @@ const ADVENTURE_ZONES := {
 		"start": [5, 1], "unlock": "piemont_ocre", "key_poi": "5,3",
 		"reveals": ["donjon_roi", "citadelle_sable", "port_sable"],
 	},
+	"vents_plateau": {
+		"name": "Plateau des Vents", "biome": "Vents", "size": [10, 7], "grid": [1, 0],
+		"start": [1, 3], "unlock": "foret_sylve", "key_poi": "6,3", "reveals": ["bastion_orage", "pic_foudroyant"],
+	},
+	"brumes_marais": {
+		"name": "Marais des Brumes", "biome": "Brumes", "size": [10, 7], "grid": [1, 2],
+		"start": [1, 3], "unlock": "foret_sylve", "key_poi": "6,2", "reveals": ["village_brume", "marais_spectres", "bois_lune"],
+	},
+	"brasier_cendres": {
+		"name": "Terres de Cendre", "biome": "Brasier", "size": [10, 7], "grid": [0, 2],
+		"start": [1, 3], "unlock": "foret_ronces", "key_poi": "6,4", "reveals": ["fort_cendre", "citadelle_sable"],
+	},
+	"ombres_necropole": {
+		"name": "Nécropole d'Ombre", "biome": "Ombres", "size": [10, 7], "grid": [1, 3],
+		"start": [1, 3], "unlock": "brumes_marais", "key_poi": "5,3", "reveals": ["abbaye_ronce", "citadelle_ronce", "ruines_lierre"],
+	},
+	"cristaux_caverne": {
+		"name": "Caverne de Cristal", "biome": "Cristaux", "size": [10, 7], "grid": [3, 3],
+		"start": [1, 3], "unlock": "portes_donjon", "key_poi": "6,3", "reveals": ["mine_cristal", "forge_givre"],
+	},
+	"marees_cotes": {
+		"name": "Côtes des Marées", "biome": "Marées", "size": [10, 7], "grid": [4, 2],
+		"start": [1, 3], "unlock": "desert_dunes", "key_poi": "6,2", "reveals": ["port_sable", "caravanserail"],
+	},
 }
 
 const ADVENTURE_POIS := {
@@ -259,7 +283,55 @@ const ADVENTURE_POIS := {
 			"desc": "Seize tuiles de verre attendent la lumière."},
 		"1,1": {"kind": "camp", "name": "Puits de l'oasis", "level": 21,
 			"desc": "Une eau fraîche au fond d'un puits de grès."},
+	},	"vents_plateau": {
+		"3,2": {"kind": "combat", "name": "Garde aérienne", "level": 17, "desc": "Des sentinelles ailées patrouillent."},
+		"6,3": {"kind": "combat", "name": "Harpies du plateau", "level": 18, "desc": "Les harpies défendent leur nid."},
+		"2,5": {"kind": "chest", "name": "Nid d'aigle", "level": 17, "desc": "Un nid garni de trouvailles."},
+		"7,1": {"kind": "puzzle", "name": "Totem du souffle", "level": 17, "desc": "Le totem murmure une énigme."},
+		"8,5": {"kind": "reveal", "name": "Tour des vents", "level": 17, "desc": "Une tour qui domine les nuages."},
+		"4,4": {"kind": "camp", "name": "Abri de plume", "level": 17, "desc": "Un abri contre les rafales."},
 	},
+	"brumes_marais": {
+		"3,2": {"kind": "combat", "name": "Rôdeurs brumeux", "level": 16, "desc": "Des formes se glissent dans la brume."},
+		"6,2": {"kind": "combat", "name": "Liche du marais", "level": 17, "desc": "Un mort-vivant garde le marais."},
+		"2,5": {"kind": "chest", "name": "Coffre englouti", "level": 16, "desc": "Un coffre à moitié enfoui dans la vase."},
+		"7,1": {"kind": "puzzle", "name": "Champignon sage", "level": 16, "desc": "Un grand champignon pose une devinette."},
+		"8,5": {"kind": "reveal", "name": "Arbre des esprits", "level": 16, "desc": "On voit loin depuis ses branches."},
+		"4,4": {"kind": "camp", "name": "Cabane sur pilotis", "level": 16, "desc": "Un refuge au-dessus de l'eau."},
+	},
+	"brasier_cendres": {
+		"3,2": {"kind": "combat", "name": "Lieutenants de braise", "level": 15, "desc": "Des soldats de feu montent la garde."},
+		"6,4": {"kind": "combat", "name": "Golem de lave", "level": 16, "desc": "Un colosse de roche en fusion."},
+		"2,5": {"kind": "chest", "name": "Forge abandonnée", "level": 15, "desc": "Une forge oubliée, encore tiède."},
+		"7,1": {"kind": "puzzle", "name": "Brasero oraculaire", "level": 15, "desc": "Les flammes posent une question."},
+		"8,5": {"kind": "reveal", "name": "Cratère-belvédère", "level": 15, "desc": "Du bord du cratère on voit loin."},
+		"4,4": {"kind": "camp", "name": "Source chaude", "level": 15, "desc": "Une source bienfaisante."},
+	},
+	"ombres_necropole": {
+		"3,2": {"kind": "combat", "name": "Assassins des ombres", "level": 20, "desc": "Des silhouettes jaillissent des tombes."},
+		"5,3": {"kind": "combat", "name": "Spectre gardien", "level": 21, "desc": "Le gardien de la nécropole."},
+		"2,5": {"kind": "chest", "name": "Caveau scellé", "level": 20, "desc": "Un caveau dont le sceau a cédé."},
+		"7,1": {"kind": "puzzle", "name": "Obélisque fêlé", "level": 20, "desc": "L'obélisque exige une réponse."},
+		"8,5": {"kind": "reveal", "name": "Tour du corbeau", "level": 20, "desc": "Un perchoir sur la nécropole."},
+		"4,4": {"kind": "camp", "name": "Crypte tranquille", "level": 20, "desc": "Un coin de calme parmi les stèles."},
+	},
+	"cristaux_caverne": {
+		"3,2": {"kind": "combat", "name": "Mineurs cristallins", "level": 23, "desc": "Des ouvriers de cristal veillent."},
+		"6,3": {"kind": "combat", "name": "Golem prismatique", "level": 24, "desc": "Le gardien lumineux de la caverne."},
+		"2,5": {"kind": "chest", "name": "Géode brisée", "level": 23, "desc": "Une géode pleine d'éclats précieux."},
+		"7,1": {"kind": "puzzle", "name": "Miroir d'améthyste", "level": 23, "desc": "Le cristal pose son énigme."},
+		"8,5": {"kind": "reveal", "name": "Dôme de cristal", "level": 23, "desc": "Une vue sur toute la caverne."},
+		"4,4": {"kind": "camp", "name": "Grotte tiède", "level": 23, "desc": "Un coin chaud et abrité."},
+	},
+	"marees_cotes": {
+		"3,2": {"kind": "combat", "name": "Pirates des marées", "level": 22, "desc": "Des pirates ont jeté l'ancre."},
+		"6,2": {"kind": "combat", "name": "Crabe titan", "level": 23, "desc": "Un crabe gigantesque garde la crique."},
+		"2,5": {"kind": "chest", "name": "Épave échouée", "level": 22, "desc": "Une épave pleine de butin."},
+		"7,1": {"kind": "puzzle", "name": "Phare muet", "level": 22, "desc": "Le gardien du phare pose une devinette."},
+		"8,5": {"kind": "reveal", "name": "Grand phare", "level": 22, "desc": "Du phare, on voit tout le littoral."},
+		"4,4": {"kind": "camp", "name": "Plage abritée", "level": 22, "desc": "Une crique calme pour souffler."},
+	},
+
 }
 
 ## Énigmes officielles des POI « puzzle » (clé = "zone,x,y").
@@ -301,6 +373,20 @@ const ADVENTURE_PUZZLES := {
 	"portes_donjon,2,2": {"type": "runes", "length": 7,
 		"text": "Les sept sceaux s'allument dans un ordre précis. Rallumez-les dans le même ordre.",
 		"wrong": "Les sceaux se referment avec un grondement."},
+	"vents_plateau,7,1": {"type": "riddle", "text": "Je traverse les montagnes sans bouger de ma place et je dévore la forêt sans dent. Qui suis-je ?",
+		"answer": "Le vent", "choices": ["Le vent", "Le feu", "Le torrent"], "wrong": "Le totem reste silencieux."},
+	"brumes_marais,7,1": {"type": "riddle", "text": "Plus il y a de moi, moins tu vois. Qui suis-je ?",
+		"answer": "La brume", "choices": ["La brume", "La lumière", "La nuit"], "wrong": "Le champignon vire au gris."},
+	"brasier_cendres,7,1": {"type": "riddle", "text": "Je nais du bois, je meurs de l'eau, et je laisse la cendre derrière moi. Qui suis-je ?",
+		"answer": "Le feu", "choices": ["Le feu", "La fumée", "La lave"], "wrong": "Le brasero crache des étincelles."},
+	"ombres_necropole,7,1": {"type": "runes", "length": 6,
+		"text": "Les runes de l'obélisque s'éveillent une à une. Rejouez leur ordre sans faillir.",
+		"wrong": "L'obélisque se tait, puis recommence."},
+	"cristaux_caverne,7,1": {"type": "lights", "size": 4, "scramble": 5,
+		"text": "Faites briller les seize facettes du miroir. Chaque facette touchée bascule ses voisines.",
+		"wrong": "Le miroir s'éteint dans un tintement."},
+	"marees_cotes,7,1": {"type": "riddle", "text": "Je monte et je descends sans jamais bouger d'un pas, deux fois par jour. Qui suis-je ?",
+		"answer": "La marée", "choices": ["La marée", "Le courant", "La vague"], "wrong": "Le phare reste éteint."},
 }
 
 
@@ -1453,7 +1539,7 @@ func adventure_state(data: Dictionary) -> Dictionary:
 	if pos.size() != 2 or int(pos[0]) < 0 or int(pos[1]) < 0 \
 				or int(pos[0]) >= int(zone["size"][0]) or int(pos[1]) >= int(zone["size"][1]):
 		adv["hero_pos"] = zone["start"].duplicate()
-	for k: String in ["discovered", "completed", "revealed_cities"]:
+	for k: String in ["discovered", "completed", "revealed_cities", "finds"]:
 		if not adv.has(k) or not (adv[k] is Array):
 			adv[k] = []
 	if not adv.has("pending_challenge"):

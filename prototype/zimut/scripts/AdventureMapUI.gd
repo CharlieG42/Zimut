@@ -48,7 +48,19 @@ const POI_PROP := {
 const GATE_VEC := {"N": Vector2(64, -32), "E": Vector2(64, 32), "S": Vector2(-64, 32), "W": Vector2(-64, -32)}
 ## Couleurs des biomes sur la mini-carte du monde.
 const BIOME_COLOR := {"Forêt": Color(0.42, 0.70, 0.36), "Montagne": Color(0.74, 0.80, 0.88),
-	"Désert": Color(0.92, 0.75, 0.42), "Donjon": Color(0.52, 0.40, 0.66)}
+	"Désert": Color(0.92, 0.75, 0.42), "Donjon": Color(0.52, 0.40, 0.66),
+	"Cristaux": Color(0.62, 0.50, 0.95), "Marées": Color(0.35, 0.78, 0.85), "Vents": Color(0.70, 0.88, 1.0),
+	"Brasier": Color(0.95, 0.45, 0.15), "Brumes": Color(0.55, 0.80, 0.68), "Ombres": Color(0.55, 0.38, 0.82)}
+## Objets au sol des lieux, pour les biomes de nation : [combat, chest, puzzle, camp, reveal, exit].
+const NATION_POI_PROP := {
+	"Cristaux": ["stalagmite", "crystal_rock", "amethyst_spire", "glow_orb", "amethyst_spire", "crystal_throne"],
+	"Marées": ["anchor", "barrel", "shell_big", "driftwood", "lighthouse", "lighthouse"],
+	"Vents": ["feather_banner", "cloud_rock", "wind_totem", "stone_ring", "windmill", "wind_arch"],
+	"Brasier": ["obsidian_spike", "lava_rock", "brazier", "lava_rock", "volcano_cone", "volcano_cone"],
+	"Brumes": ["dead_tree", "stump", "mushroom_big", "wisp_lantern", "spirit_tree", "spirit_tree"],
+	"Ombres": ["gravestone", "thorn_bush", "cracked_obelisk", "purple_torch", "raven_perch", "dark_gate"],
+}
+const POI_KIND_INDEX := {"combat": 0, "chest": 1, "puzzle": 2, "camp": 3, "reveal": 4, "exit": 5}
 const RUNE_SHAPES: Array = ["●", "▲", "■", "◆", "★", "✚"]
 const RUNE_COLORS: Array = [Color(0.95, 0.40, 0.35), Color(0.35, 0.80, 0.45), Color(0.35, 0.60, 1.0),
 	Color(0.98, 0.80, 0.25), Color(0.80, 0.50, 1.0), Color(0.40, 0.90, 0.90)]
@@ -237,8 +249,10 @@ func _refresh_hud() -> void:
 		return
 	var prog: Dictionary = manager.zone_progress()
 	_hud_title.text = manager.zone_name()
-	_hud_sub.text = "%s · niveau %d · lieux %d/%d" % [ProgressionManager.biome_label(manager.zone_biome()),
-		ProgressionManager.adventure_zone_level(manager.zone_id()), int(prog["done"]), int(prog["total"])]
+	var fprog: Dictionary = manager.finds_progress()
+	_hud_sub.text = "%s · niveau %d · lieux %d/%d · ✦ %d/%d" % [ProgressionManager.biome_label(manager.zone_biome()),
+		ProgressionManager.adventure_zone_level(manager.zone_id()), int(prog["done"]), int(prog["total"]),
+		int(fprog["found"]), int(fprog["total"])]
 	var pos: Vector2i = manager.hero_pos()
 	var gate: Dictionary = manager.gate_at(pos)
 	var poi: Dictionary = manager.poi_at(pos)
@@ -374,6 +388,8 @@ func _rebuild_world() -> void:
 		node.pal = pal
 		node.icon = load(String(POI_ICONS.get(node.kind, POI_ICONS["combat"]))) as Texture2D
 		node.prop = String(POI_PROP.get(node.kind, {}).get(biome, ""))
+		if NATION_POI_PROP.has(biome):
+			node.prop = String(NATION_POI_PROP[biome][int(POI_KIND_INDEX.get(node.kind, 0))])
 		if node.kind == "combat":
 			var etypes: Array[String] = ProgressionManager.biome_enemy_types(biome)
 			var etype: String = etypes[absi(k.hash()) % etypes.size()]
@@ -381,6 +397,21 @@ func _rebuild_world() -> void:
 		node.position = cell_center(pos)
 		_entities.add_child(node)
 		_cell_nodes[pos] = _cell_nodes.get(pos, []) + [node]
+	# Trouvailles cachées (herbes, bourses, reliques) : scintillent une fois la case découverte
+	var finds: Dictionary = AdventureTerrain.finds_of(zid)
+	for fp: Vector2i in finds.keys():
+		var fnode := FindNode.new()
+		fnode.kind = String(finds[fp])
+		fnode.position = cell_center(fp)
+		_entities.add_child(fnode)
+		_cell_nodes[fp] = _cell_nodes.get(fp, []) + [fnode]
+	# Ambiance : particules propres au biome, par-dessus la carte
+	var amb := SceneryAmbient.new()
+	amb.name = "Ambient"
+	amb.z_index = 20
+	amb.configure(maxi(zs.x, zs.y), biome, absi(zid.hash()) % 997)
+	amb.position = cell_center(Vector2i(zs.x / 2, zs.y / 2)) + Vector2(0, -150)
+	_world.add_child(amb)
 	_hero = HeroView.new()
 	_hero.tex = Portraits.get_texture({"classe": manager.hero_class(), "team": "player", "entity_type": "Player"})
 	_hero.position = cell_center(manager.hero_pos())
@@ -407,6 +438,8 @@ func _refresh_world() -> void:
 		var seen: bool = manager.cell_discovered(p)
 		for n: Node2D in _cell_nodes[p]:
 			n.visible = seen
+			if n is FindNode:
+				n.visible = seen and not manager.find_taken(p)
 			if n is PoiNode:
 				var pn: PoiNode = n
 				pn.done = manager.poi_done(p) and pn.kind != "camp"
@@ -555,6 +588,12 @@ func _walk(path: Array[Vector2i]) -> void:
 		await tw.finished
 		if not fresh.is_empty():
 			_refresh_world()
+		var got: Dictionary = manager.collect_find(step)
+		if not got.is_empty():
+			_toast_show("✦ " + String(got["text"]), 24)
+			_log(String(got["text"]) + ".")
+			_refresh_world()
+			_refresh_side()
 		var poi: Dictionary = manager.poi_at(step)
 		if not poi.is_empty() or not manager.gate_at(step).is_empty():
 			break
@@ -1336,7 +1375,9 @@ class AdventureBoard extends Node2D:
 					draw_colored_polygon(_diamond(c), p["top_a"])
 				draw_polyline(_diamond(c) + PackedVector2Array([c + Vector2(0, -32)]), Color(0.1, 0.15, 0.08, 0.18), 1.2, true)
 		# Sentiers
-		var trail: Color = {"Forêt": Color(0.78, 0.64, 0.42), "Montagne": Color(0.80, 0.82, 0.86), "Désert": Color(0.72, 0.52, 0.32), "Donjon": Color(0.52, 0.48, 0.50)}.get(biome, Color(0.7, 0.6, 0.45))
+		var trail: Color = {"Forêt": Color(0.78, 0.64, 0.42), "Montagne": Color(0.80, 0.82, 0.86), "Désert": Color(0.72, 0.52, 0.32), "Donjon": Color(0.52, 0.48, 0.50),
+			"Cristaux": Color(0.62, 0.58, 0.85), "Marées": Color(0.86, 0.80, 0.60), "Vents": Color(0.82, 0.90, 0.92),
+			"Brasier": Color(0.45, 0.32, 0.28), "Brumes": Color(0.62, 0.74, 0.66), "Ombres": Color(0.44, 0.36, 0.56)}.get(biome, Color(0.7, 0.6, 0.45))
 		var paths: Dictionary = terrain["paths"]
 		# Le sentier file vers la carte voisine, au-delà du bord de l'île.
 		var gates: Dictionary = mgr.gates()
@@ -1510,6 +1551,44 @@ class PoiNode extends Node2D:
 			sb.set_corner_radius_all(10)
 			draw_style_box(sb, r)
 			draw_string(font, r.position + Vector2(9, 18), txt, HORIZONTAL_ALIGNMENT_LEFT, tw, 15, Color(1, 0.96, 0.85))
+
+
+## Trouvaille cachée : petit scintillement au sol (herbe, bourse ou relique).
+class FindNode extends Node2D:
+	var kind: String = "herb"
+	var _t: float = 0.0
+
+	func _ready() -> void:
+		_t = float(absi(int(position.x * 7 + position.y))) * 0.013
+		set_process(true)
+
+	func _process(delta: float) -> void:
+		_t += delta
+		queue_redraw()
+
+	func _draw() -> void:
+		var pulse: float = 0.5 + 0.5 * sin(_t * 3.0)
+		var col: Color = {"herb": Color(0.55, 0.95, 0.55), "gold": Color(1.0, 0.85, 0.30), "relic": Color(0.75, 0.60, 1.0)}.get(kind, Color.WHITE)
+		draw_set_transform(Vector2(0, 4), 0.0, Vector2(1.0, 0.5))
+		draw_circle(Vector2.ZERO, 20.0 + pulse * 4.0, Color(col.r, col.g, col.b, 0.14 + 0.10 * pulse))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		match kind:
+			"herb":
+				for i: int in range(3):
+					var a: float = -PI * 0.5 + (float(i) - 1.0) * 0.5
+					draw_line(Vector2(0, 2), Vector2(cos(a), sin(a)) * 14.0 + Vector2(0, 2), Color(0.30, 0.65, 0.30), 3.0, true)
+					draw_circle(Vector2(cos(a), sin(a)) * 14.0 + Vector2(0, 2), 3.2, col)
+			"gold":
+				draw_circle(Vector2(0, -3), 9.0, Color(0.70, 0.50, 0.15))
+				draw_circle(Vector2(0, -5), 8.0, col)
+				draw_circle(Vector2(-3, -8), 2.6, Color(1, 1, 0.8, 0.9))
+			_:
+				draw_colored_polygon(PackedVector2Array([Vector2(0, -22), Vector2(8, -10), Vector2(0, 0), Vector2(-8, -10)]), col)
+				draw_colored_polygon(PackedVector2Array([Vector2(0, -22), Vector2(8, -10), Vector2(0, -10)]), col.lightened(0.35))
+		var tw: float = 0.5 + 0.5 * sin(_t * 4.0 + 1.0)
+		var sp := Vector2(10, -18 - pulse * 4.0)
+		draw_line(sp + Vector2(-5, 0), sp + Vector2(5, 0), Color(1, 1, 1, 0.4 + 0.5 * tw), 2.0, true)
+		draw_line(sp + Vector2(0, -5), sp + Vector2(0, 5), Color(1, 1, 1, 0.4 + 0.5 * tw), 2.0, true)
 
 
 ## Héros : sprite de la classe de l'explorateur, ombre, anneau doré, petit rebond.

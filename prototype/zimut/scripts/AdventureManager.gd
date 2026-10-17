@@ -193,6 +193,49 @@ func move_hero(pos: Vector2i) -> Array:
 	persist()
 	return fresh
 
+## Trouvailles cachées : herbes, bourses, reliques à ramasser en explorant.
+func find_at(pos: Vector2i) -> String:
+	return String(AdventureTerrain.finds_of(zone_id()).get(pos, ""))
+
+func find_taken(pos: Vector2i) -> bool:
+	return (state.get("finds", []) as Array).has("%s,%d,%d" % [zone_id(), pos.x, pos.y])
+
+## Ramasse la trouvaille de la case (si elle existe et n'est pas déjà prise) ; {} sinon.
+func collect_find(pos: Vector2i) -> Dictionary:
+	var kind: String = find_at(pos)
+	if kind == "" or find_taken(pos):
+		return {}
+	var taken: Array = state.get("finds", [])
+	taken.append("%s,%d,%d" % [zone_id(), pos.x, pos.y])
+	state["finds"] = taken
+	var lvl: int = ProgressionManager.adventure_zone_level(zone_id())
+	var out: Dictionary = {"kind": kind}
+	match kind:
+		"herb":
+			var res_name: String = String(ProgressionManager.CONQUEST_BIOME_RESOURCE.get(zone_biome(), Nations.resource_of(zone_biome())))
+			var res: Dictionary = {res_name: 2 + lvl / 12}
+			ProgressionManager.add_resources(save, res)
+			out["text"] = "Récolte : +%d %s" % [int(res[res_name]), res_name]
+		"gold":
+			var gold: int = 20 + 3 * lvl
+			save["gold"] = int(save.get("gold", 0)) + gold
+			out["text"] = "Bourse trouvée : +%d or" % gold
+		_:
+			var xp: int = int(ProgressionManager.ADVENTURE_BASE_XP * 0.4)
+			award_exploration_xp(xp)
+			out["text"] = "Relique ancienne : +%d XP" % xp
+	persist()
+	return out
+
+## { found, total } des trouvailles de la zone courante.
+func finds_progress() -> Dictionary:
+	var all: Dictionary = AdventureTerrain.finds_of(zone_id())
+	var n: int = 0
+	for p: Vector2i in all.keys():
+		if find_taken(p):
+			n += 1
+	return {"found": n, "total": all.size()}
+
 ## Une case est-elle hors brouillard dans la zone courante ?
 func cell_discovered(pos: Vector2i) -> bool:
 	return ProgressionManager.adventure_cell_discovered(state, pos)
@@ -253,7 +296,7 @@ func complete_puzzle(key: String) -> Dictionary:
 		return {}
 	var xp: int = int(ProgressionManager.ADVENTURE_BASE_XP * 2)
 	award_exploration_xp(xp)
-	var res: Dictionary = {String(ProgressionManager.CONQUEST_BIOME_RESOURCE.get(zone_biome(), "Magie")): 3}
+	var res: Dictionary = {String(ProgressionManager.CONQUEST_BIOME_RESOURCE.get(zone_biome(), Nations.resource_of(zone_biome()))): 3}
 	ProgressionManager.add_resources(save, res)
 	complete_poi(key, KIND_PUZZLE)
 	return {"xp": xp, "resources": res}
@@ -310,7 +353,7 @@ func roll_event(rng: RandomNumberGenerator = null) -> Dictionary:
 	var r: float = rng.randf()
 	var ev: Dictionary = {}
 	if r < 0.32:
-		var res_name: String = String(ProgressionManager.CONQUEST_BIOME_RESOURCE.get(zone_biome(), "Bois"))
+		var res_name: String = String(ProgressionManager.CONQUEST_BIOME_RESOURCE.get(zone_biome(), Nations.resource_of(zone_biome())))
 		var res: Dictionary = {res_name: rng.randi_range(2, 4), "Cuir": rng.randi_range(0, 2)}
 		ProgressionManager.add_resources(save, res)
 		ev = {"kind": "forage", "title": "Cueillette", "text": "Au détour du sentier, vous récoltez de quoi nourrir la forge.", "resources": res}
@@ -323,7 +366,7 @@ func roll_event(rng: RandomNumberGenerator = null) -> Dictionary:
 		award_exploration_xp(xp)
 		ev = {"kind": "sage", "title": "Sage voyageur", "text": String(SAGE_LINES[rng.randi_range(0, SAGE_LINES.size() - 1)]), "xp": xp}
 	else:
-		var names: Dictionary = {"Forêt": "Embuscade de gobelins", "Montagne": "Trolls en maraude", "Désert": "Pillards des dunes", "Donjon": "Ronde de squelettes"}
+		var names: Dictionary = {"Forêt": "Embuscade de gobelins", "Montagne": "Trolls en maraude", "Désert": "Pillards des dunes", "Donjon": "Ronde de squelettes", "Cristaux": "Gardes de cristal", "Marées": "Pirates en maraude", "Vents": "Harpies en piqué", "Brasier": "Salamandres en furie", "Brumes": "Rôdeurs de la brume", "Ombres": "Ombres affamées"}
 		ev = {"kind": "ambush", "title": String(names.get(zone_biome(), "Embuscade")),
 			"text": "Des ennemis surgissent des fourrés ! Les affronter rapporte XP et butin ; vous pouvez aussi les contourner.",
 			"level": lvl + 1}

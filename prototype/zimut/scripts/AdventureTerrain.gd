@@ -31,6 +31,51 @@ const GROUND_DECOR := {
 
 static var _cache: Dictionary = {}
 
+
+## Obstacles bloquants d'un biome (les nations utilisent leurs propres décors).
+static func _obstacles_for(biome: String) -> Array:
+	if Nations.is_new(biome):
+		var inf: Dictionary = Nations.info(biome)
+		return [inf["obs_tree"], inf["obs_tree"], inf["obs_rock"], inf["obs_rock"], inf["obs_tree"]]
+	return OBSTACLES.get(biome, OBSTACLES["Forêt"])
+
+
+## Décors de sol (non bloquants) d'un biome.
+static func _ground_for(biome: String) -> Array:
+	if Nations.is_new(biome):
+		var out: Array = []
+		for e: Array in Nations.info(biome).get("props", []):
+			var k: String = String(e[0])
+			if k in ["glow_orb", "fog_puff", "cloud_puff", "shell_big", "coral", "driftwood", "bones", "rubble", "smoke_vent", "thorn_bush", "stalagmite", "feather_banner", "mushroom_big"]:
+				out.append(k)
+		return out if not out.is_empty() else ["bones"]
+	return GROUND_DECOR.get(biome, GROUND_DECOR["Forêt"])
+
+
+## Trouvailles cachées d'une zone (déterministes) : { Vector2i : kind } avec kind ∈ herb | gold | relic.
+static func finds_of(zone_id: String) -> Dictionary:
+	var t: Dictionary = zone_terrain(zone_id)
+	var size: Vector2i = t["size"]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = absi(zone_id.hash()) + 777
+	var out: Dictionary = {}
+	var kinds: Array = ["herb", "gold", "herb", "relic", "gold", "herb"]
+	var guard: int = 0
+	while out.size() < kinds.size() and guard < 300:
+		guard += 1
+		var c := Vector2i(rng.randi_range(0, size.x - 1), rng.randi_range(0, size.y - 1))
+		if (t["obstacles"] as Dictionary).has(c) or (t["pois"] as Array).has(c) or (t["gates"] as Array).has(c) or c == t["start"] or out.has(c):
+			continue
+		# dispersées : pas deux trouvailles voisines
+		var near: bool = false
+		for o: Vector2i in out.keys():
+			if absi(o.x - c.x) + absi(o.y - c.y) < 3:
+				near = true
+		if near:
+			continue
+		out[c] = kinds[out.size()]
+	return out
+
 const DIRS := {"N": Vector2i(0, -1), "E": Vector2i(1, 0), "S": Vector2i(0, 1), "W": Vector2i(-1, 0)}
 
 
@@ -133,13 +178,13 @@ static func zone_terrain(zone_id: String) -> Dictionary:
 		var c := Vector2i(rng.randi_range(0, size.x - 1), rng.randi_range(0, size.y - 1))
 		if paths.has(c) or pois.has(c) or gates.has(c) or obstacles.has(c) or c.distance_to(Vector2(start)) < 1.5:
 			continue
-		var kinds: Array = OBSTACLES.get(String(cell_biome.get(c, biome)), OBSTACLES["Forêt"])
+		var kinds: Array = _obstacles_for(String(cell_biome.get(c, biome)))
 		obstacles[c] = String(kinds[rng.randi_range(0, kinds.size() - 1)])
 		# Bosquet : une case voisine de temps en temps
 		if rng.randf() < 0.45:
 			var n: Vector2i = c + [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)][rng.randi_range(0, 3)]
 			if _inside(size, n) and not paths.has(n) and not pois.has(n) and not gates.has(n) and not obstacles.has(n) and n != start:
-				var nk: Array = OBSTACLES.get(String(cell_biome.get(n, biome)), OBSTACLES["Forêt"])
+				var nk: Array = _obstacles_for(String(cell_biome.get(n, biome)))
 				obstacles[n] = String(nk[rng.randi_range(0, nk.size() - 1)])
 
 	# 3) Sécurité : chaque lieu et chaque porte reste accessible (sans traverser une
@@ -164,7 +209,7 @@ static func zone_terrain(zone_id: String) -> Dictionary:
 			var c2 := Vector2i(x, y)
 			if obstacles.has(c2) or pois.has(c2) or paths.has(c2) or gates.has(c2) or c2 == start:
 				continue
-			var gkinds: Array = GROUND_DECOR.get(String(cell_biome.get(c2, biome)), GROUND_DECOR["Forêt"])
+			var gkinds: Array = _ground_for(String(cell_biome.get(c2, biome)))
 			if rng.randf() < 0.22:
 				decor[c2] = String(gkinds[rng.randi_range(0, gkinds.size() - 1)])
 	var out: Dictionary = {"size": size, "start": start, "biome": biome, "obstacles": obstacles,
