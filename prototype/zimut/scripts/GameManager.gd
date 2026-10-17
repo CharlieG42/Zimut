@@ -664,7 +664,7 @@ func enemies_of(e: Dictionary) -> Array:
 func summons_of(owner: Dictionary) -> Array:
 	var out: Array = []
 	for s: Dictionary in summons:
-		if is_alive(s) and int(s.get("owner", -1)) == int(owner["uid"]) and not bool(s.get("terrain", false)):
+		if is_alive(s) and int(s.get("owner", -1)) == int(owner["uid"]) and not bool(s.get("terrain", false)) and not bool(s.get("beacon", false)):
 			out.append(s)
 	return out
 
@@ -827,6 +827,7 @@ func end_current_turn() -> void:
 		if int(e["lifetime"]) == 0:
 			e["current_pv"] = 0
 			message_requested.emit("%s disparaît." % e["name"])
+	_tower_attacks(e)
 	for tp: Dictionary in terrain_of(e):
 		tp["lifetime"] = int(tp["lifetime"]) - 1
 		if int(tp["lifetime"]) <= 0:
@@ -1016,12 +1017,14 @@ func validate_cast(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Str
 		if summons_of(caster).is_empty():
 			return "Aucun familier actif."
 	var terr: bool = bool(Combat.SUMMONS.get(String(p["summon"]), {}).get("terrain", false))
-	if p["kind"] == "summon" and not terr and summons_of(caster).size() >= 3:
+	var is_beacon: bool = bool(Combat.SUMMONS.get(String(p["summon"]), {}).get("beacon", false))
+	if p["kind"] == "summon" and not terr and not is_beacon and summons_of(caster).size() >= 3:
 		return "Trop de familiers (3 max)."
 	if p["kind"] == "summon" and terr and terrain_of(caster).size() >= 8:
 		return "Trop de terrain modifié (8 cases max)."
-	if p["kind"] == "summon" and String(p["summon"]) == "Balise" and beacons_of(caster).size() >= 3:
-		return "Trop de balises (3 max)."
+	if p["kind"] == "recall":
+		if t.is_empty() or not bool(t.get("beacon", false)) or int(t.get("owner", -1)) != int(caster["uid"]):
+			return "Il faut viser une de vos balises."
 	if p["kind"] == "revive" and graveyard.is_empty():
 		return "Aucun allié à ressusciter."
 	if p["kind"] == "teleport":
@@ -1111,6 +1114,10 @@ func cast_spell(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> bool:
 			summary = "%s pose un piège." % caster["name"]
 		"revive":
 			summary = _resolve_revive(caster, spell, p)
+		"recall":
+			remove_entity_from_grid(target)
+			fx.emit("beacon", {"from": cell, "cells": [cell] as Array[Vector2i]})
+			summary = "%s rappelle une balise." % caster["name"]
 
 	if Combat.has_status(caster, "invisible") and p["kind"] == "attack":
 		Combat.remove_status(caster, "invisible")
@@ -1428,6 +1435,13 @@ func _resolve_buff(caster: Dictionary, spell: Dictionary, p: Dictionary, cell: V
 func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell: Vector2i) -> String:
 	var sname: String = String(p["summon"])
 	var info: Dictionary = Combat.SUMMONS.get(sname, Combat.SUMMONS["Loup"])
+	if bool(info.get("beacon", false)):
+		# 3 balises max : la plus ancienne disparaît
+		var old_b: Array = beacons_of(caster)
+		while old_b.size() >= 3:
+			var oldest: Dictionary = old_b.pop_front()
+			message_requested.emit("La plus ancienne balise disparaît.")
+			remove_entity_from_grid(oldest)
 	var s: Dictionary = _base_entity("%s (inv.)" % sname, "Summon", String(caster["team"]), sname,
 		int(caster["level"]), cell)
 	var scale: float = (0.7 + float(caster["level"]) / 400.0) * (1.0 + float(caster.get("intelligence", 0)) / 400.0)
@@ -1444,6 +1458,8 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 		s["terrain"] = true
 	if bool(info.get("indestructible", false)):
 		s["indestructible"] = true
+	if bool(info.get("tower", false)):
+		s["tower"] = true
 	s["spells"] = Combat.summon_spells(sname)
 	s["init"] = float(caster.get("init", 0.0)) - 0.01
 	var is_static: bool = bool(info.get("static", false))
@@ -1490,27 +1506,63 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 	return "%s invoque %s !" % [caster["name"], sname]
 
 
-## Balises du Chasseur : une zone d'attaque qui touche une case couverte par une
-## balise alliée y réplique ses dégâts (même zone, centrée sur la balise).
+## Balises du Chasseur : si une zone d'attaque touche une balise alliée, elle est
+## répliquée (même zone) autour de TOUTES les autres balises alliées.
 func _beacon_replicas(caster: Dictionary, spell: Dictionary, p: Dictionary, cell: Vector2i, base: float) -> Dictionary:
 	var hit_cells: Array[Vector2i] = Combat.zone_cells(cell, int(p["zone_r"]), String(p["zone_shape"]), GRID_SIZE)
+	var beacons: Array = beacons_of(caster)
+	var triggered: bool = false
+	for b: Dictionary in beacons:
+		if hit_cells.has(pos_of(b)):
+			triggered = true
+	if not triggered:
+		return {}
+	var already: Array = []
+	for e0: Dictionary in enemies_of(caster):
+		if hit_cells.has(pos_of(e0)):
+			already.append(int(e0["uid"]))
 	var total: int = 0
-	var used: Array = []
-	for b: Dictionary in summons_of(caster):
-		if not bool(b.get("beacon", false)) or used.has(b) or not is_alive(b):
+	for b2: Dictionary in beacons:
+		var bpos: Vector2i = pos_of(b2)
+		if bpos == cell:
 			continue
-		var bpos: Vector2i = pos_of(b)
-		if not hit_cells.has(bpos):
-			continue
-		used.append(b)
 		var rep_cells: Array[Vector2i] = Combat.zone_cells(bpos, int(p["zone_r"]), String(p["zone_shape"]), GRID_SIZE)
 		for e: Dictionary in enemies_of(caster):
-			if rep_cells.has(pos_of(e)) and is_alive(e):
+			if rep_cells.has(pos_of(e)) and is_alive(e) and not bool(e.get("beacon", false)) \
+					and not already.has(int(e["uid"])):
+				already.append(int(e["uid"]))
 				total += _hit_target(caster, spell, p, e, base)
 		fx.emit("beacon", {"from": bpos, "cells": rep_cells})
 	if total <= 0:
 		return {}
 	return {"dmg": total}
+
+
+## Pilier du Géomancien : attaque l'ennemi le plus proche dans un rayon de 4 cases.
+const TOWER_RANGE: int = 4
+
+func _tower_attacks(owner: Dictionary) -> void:
+	for tw: Dictionary in terrain_of(owner):
+		if not bool(tw.get("tower", false)) or not is_alive(tw):
+			continue
+		var tpos: Vector2i = pos_of(tw)
+		var best: Dictionary = {}
+		var best_d: int = 99
+		for e: Dictionary in enemies_of(owner):
+			if not is_alive(e) or bool(e.get("terrain", false)) or Combat.has_status(e, "invisible"):
+				continue
+			var d: int = Combat.manhattan(tpos, pos_of(e))
+			if d <= TOWER_RANGE and d < best_d:
+				best = e
+				best_d = d
+		if best.is_empty():
+			continue
+		var base: float = 28.0 + float(owner["level"]) * 0.9
+		var r: Dictionary = Combat.calc_damage(owner, best, base, "mag", 0.0, false, false)
+		fx.emit("cast", {"caster": tw, "spell": "Éclat du pilier", "kind": "attack", "dtype": "mag",
+			"from": tpos, "to": pos_of(best), "ranged": true, "cells": [pos_of(best)] as Array[Vector2i]})
+		_apply_damage(owner, best, int(r["dmg"]), "mag", bool(r["crit"]), false)
+
 
 func _resolve_revive(caster: Dictionary, _spell: Dictionary, p: Dictionary) -> String:
 	var dead: Dictionary = graveyard.pop_back()
