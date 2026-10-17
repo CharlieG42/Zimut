@@ -22,15 +22,15 @@ Assassin,Coup final,4,0,1,240 dégâts (tue si <20% PV ennemi),100,Attaque,240,0
 Chasseur,Tir précis,2,0,5,74 dégâts,1,Attaque,74,0,0,0,0,0,0,0,0
 Chasseur,Piège,1,0,3,Immobilise l'ennemi (1 tour),1,Debuff,0,0,0,0,0,0,0,0,0
 Chasseur,Soin de chasseur,3,0,1,Restaure 36 PV,1,Soin,0,0,36,0,0,0,0,0,0
-Chasseur,Fleche enflammée,3,0,5,60 dégâts + brûle (40 dégâts/tour; 2 tours),10,Attaque,60,0,0,0,0,0,40,0,0
-Chasseur,Tir de recul,3,0,5,80 dégâts + repousse de 2 cases,20,Attaque,80,0,0,0,0,0,0,0,0
-Chasseur,Tir explosif,4,1,4,74 dégâts en zone (3x3),35,Attaque,74,0,0,0,0,0,0,0,0
-Chasseur,Balise de chasse,2,0,4,Plante une balise (3 max) : les dégâts de zone du Chasseur qui la touchent se répliquent autour d'elle,50,Invocation,0,0,0,0,0,0,0,0,0
-Chasseur,Tir de glace,4,0,5,60 dégâts + ralentit (1 PM; 2 tours),65,Debuff,0,0,0,0,0,0,0,0,0
+Chasseur,Balise de chasse,2,0,4,Plante une balise (3 max; la plus ancienne disparaît) : un sort de zone du Chasseur qui touche une balise se réplique autour de toutes les autres,10,Invocation,0,0,0,0,0,0,0,0,0
+Chasseur,Tir explosif,4,1,4,74 dégâts en zone (3x3),20,Attaque,74,0,0,0,0,0,0,0,0
+Chasseur,Rappel de balise,1,0,8,Rappelle une de vos balises (elle disparaît du terrain),35,Invocation,0,0,0,0,0,0,0,0,0
+Chasseur,Fleche enflammée,3,0,5,60 dégâts + brûle (40 dégâts/tour; 2 tours),50,Attaque,60,0,0,0,0,0,40,0,0
+Chasseur,Tir de recul,3,0,5,80 dégâts + repousse de 2 cases,65,Attaque,80,0,0,0,0,0,0,0,0
 Chasseur,Tir légendaire,4,0,7,180 dégâts,80,Attaque,180,0,0,0,0,0,0,0,0
 Chasseur,Tir perçant ultime,4,0,6,210 dégâts (ignore 60% défense),100,Attaque,210,0,0,60,0,0,0,0,0
 Mage,Boule de feu,4,0,5,90 dégâts magiques,1,Attaque,90,0,0,0,0,0,0,0,0
-Mage,Éclair,3,0,6,74 dégâts magiques (2 cibles),1,Attaque,74,0,0,0,0,0,0,0,0
+Mage,Éclair,3,0,5,52 dégâts magiques (2 cibles),1,Attaque,52,0,0,0,0,0,0,0,0
 Mage,Bouclier magique,2,0,1,+20% résistance magie (3 tours),1,Buff,0,0,0,0,20,0,0,0,20
 Mage,Explosion,4,0,4,120 dégâts en zone (3x3),10,Attaque,120,0,0,0,0,0,0,0,0
 Mage,Téléportation,2,1,5,Téléporte à une case allié/ennemi,20,Buff,0,0,0,0,0,0,0,0,0
@@ -80,7 +80,7 @@ Sylvain,Invoquer Champignon,2,0,1,Invoquer un Champignon (contrôlable; 3PM/4PA)
 Sylvain,Pluie de graines,4,0,4,55 dégâts magiques à tous les ennemis,80,Attaque,0,55,0,0,0,0,0,0,0
 Sylvain,Tempête de pétales,4,0,5,150 dégâts magiques à tous les ennemis,100,Attaque,0,150,0,0,0,0,0,0,0
 Géomancien,Éclat de grès,2,0,4,44 dégâts magiques,1,Attaque,44,0,0,0,0,0,0,0,0
-Géomancien,Invoquer Pilier,2,0,4,Fait surgir un pilier de grès : bloque le passage et la vue (4 tours; 8 cases de terrain max),1,Invocation,0,0,0,0,0,0,0,0,0
+Géomancien,Invoquer Pilier,2,0,4,Fait surgir un pilier de grès : bloque le passage et la vue; attaque l'ennemi le plus proche dans un rayon de 4 cases (4 tours; 8 cases de terrain max),1,Invocation,0,0,0,0,0,0,0,0,0
 Géomancien,Armure de grès,2,0,3,+25% défense (2 tours; allié),1,Buff,0,0,0,25,0,0,0,0,0
 Géomancien,Lance de cristal,3,0,5,74 dégâts magiques,10,Attaque,74,0,0,0,0,0,0,0,0
 Géomancien,Invoquer Muraille,3,0,4,Érige une muraille de 3 cases : bloque le passage et la vue (3 tours),20,Invocation,0,0,0,0,0,0,0,0,0

@@ -16,11 +16,11 @@ Assassin,65,Invisibilité
 Assassin,80,Lame de l'ombre
 Assassin,100,Coup final
 Chasseur,1,Tir précis;Piège;Soin de chasseur
-Chasseur,10,Fleche enflammée
-Chasseur,20,Tir de recul
-Chasseur,35,Tir explosif
-Chasseur,50,Balise de chasse
-Chasseur,65,Tir de glace
+Chasseur,10,Balise de chasse
+Chasseur,20,Tir explosif
+Chasseur,35,Rappel de balise
+Chasseur,50,Fleche enflammée
+Chasseur,65,Tir de recul
 Chasseur,80,Tir légendaire
 Chasseur,100,Tir perçant ultime
 Mage,1,Boule de feu;Éclair;Bouclier magique
