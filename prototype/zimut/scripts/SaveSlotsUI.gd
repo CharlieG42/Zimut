@@ -469,7 +469,7 @@ func _launch_campaign_mode(mode: String, scene_path: String, slot: int) -> void:
 		return
 	_current["campaign_mode"] = mode
 	if mode == "adventure" and not _current.has("adventure"):
-		_current["adventure"] = {"hero_pos": [1, 2], "moves": 0, "discovered": [], "completed": []}
+		_current["adventure"] = ProgressionManager.adventure_state(_current)
 	if mode == "conquest" and not _current.has("conquest"):
 		_current["conquest"] = {"owned": ["capitale"], "pending_city": ""}
 	if not ProgressionManager.write_save(slot, _current):
