@@ -296,7 +296,7 @@ static func parse(spell: Dictionary) -> Dictionary:
 	if t.begins_with("invoque 1 loup"):
 		p["kind"] = "summon"
 		p["target"] = "free_cell"
-		p["summon"] = "Loup"
+		p["summon"] = "Loup Spectral"
 		p["summon_turns"] = 3
 		p["needs_los"] = false
 		spell["_p"] = p
@@ -643,14 +643,14 @@ static func nation_boss_spells(boss_name: String, force: int) -> Array:
 
 
 const SUMMONS := {
-	"Tortue":       {"pv": 300, "force": 25, "defense": 70, "agility": 10, "pa": 3, "pm": 2, "color": Color(0.35, 0.65, 0.35), "spell": ["Carapace", 2, 1, 45]},
-	"Loup":         {"pv": 170, "force": 50, "defense": 28, "agility": 40, "pa": 4, "pm": 4, "color": Color(0.55, 0.55, 0.60), "spell": ["Morsure", 2, 1, 60]},
-	"Sirène":       {"pv": 150, "force": 55, "defense": 24, "agility": 30, "pa": 4, "pm": 3, "color": Color(0.30, 0.75, 0.90), "spell": ["Chant marin", 2, 4, 55]},
-	"Ange":         {"pv": 170, "force": 60, "defense": 30, "agility": 34, "pa": 4, "pm": 3, "color": Color(1.00, 0.95, 0.60), "spell": ["Lumière", 2, 3, 65]},
-	"Homme-Faucon": {"pv": 160, "force": 65, "defense": 30, "agility": 55, "pa": 4, "pm": 4, "color": Color(0.80, 0.55, 0.25), "spell": ["Piqué", 2, 4, 70]},
-	"Centaure":     {"pv": 260, "force": 70, "defense": 40, "agility": 45, "pa": 5, "pm": 4, "color": Color(0.65, 0.40, 0.25), "spell": ["Flèche de centaure", 2, 5, 80]},
-	"Buisson":      {"pv": 220, "force": 30, "defense": 45, "agility": 15, "pa": 3, "pm": 2, "color": Color(0.30, 0.55, 0.25), "spell": ["Sève fertilisante", 2, 2, "Restaure 40 PV + 20% défense (2 tours; allié)"]},
-	"Champignon":   {"pv": 160, "force": 40, "defense": 26, "agility": 18, "pa": 3, "pm": 3, "color": Color(0.85, 0.55, 0.40), "spell": ["Spores toxiques", 2, 3, "40 dégâts + poison (25 dégâts/tour; 2 tours)"]},
+	"Golem de Pierre": {"pv": 300, "force": 25, "defense": 70, "agility": 10, "pa": 3, "pm": 2, "color": Color(0.35, 0.65, 0.35), "spell": ["Carapace", 2, 1, 45]},
+	"Loup Spectral": {"pv": 170, "force": 50, "defense": 28, "agility": 40, "pa": 4, "pm": 4, "color": Color(0.55, 0.55, 0.60), "spell": ["Morsure", 2, 1, 60]},
+	"Requin des Marées": {"pv": 150, "force": 55, "defense": 24, "agility": 30, "pa": 4, "pm": 3, "color": Color(0.30, 0.75, 0.90), "spell": ["Chant marin", 2, 4, 55]},
+	"Élémentaire de Cristal": {"pv": 170, "force": 60, "defense": 30, "agility": 34, "pa": 4, "pm": 3, "color": Color(1.00, 0.95, 0.60), "spell": ["Lumière", 2, 3, 65]},
+	"Ombre": {"pv": 160, "force": 65, "defense": 30, "agility": 55, "pa": 4, "pm": 4, "color": Color(0.80, 0.55, 0.25), "spell": ["Piqué", 2, 4, 70]},
+	"Esprit de la Forêt": {"pv": 260, "force": 70, "defense": 40, "agility": 45, "pa": 5, "pm": 4, "color": Color(0.65, 0.40, 0.25), "spell": ["Flèche de centaure", 2, 5, 80]},
+	"Archer Sylvestre": {"pv": 220, "force": 30, "defense": 45, "agility": 15, "pa": 3, "pm": 2, "color": Color(0.30, 0.55, 0.25), "spell": ["Sève fertilisante", 2, 2, "Restaure 40 PV + 20% défense (2 tours; allié)"]},
+	"Ent de Combat": {"pv": 160, "force": 40, "defense": 26, "agility": 18, "pa": 3, "pm": 3, "color": Color(0.85, 0.55, 0.40), "spell": ["Spores toxiques", 2, 3, "40 dégâts + poison (25 dégâts/tour; 2 tours)"]},
 	"Tronc":        {"pv": 320, "force": 45, "defense": 65, "agility": 10, "pa": 4, "pm": 2, "color": Color(0.45, 0.32, 0.18), "spell": ["Bras de bois", 2, 1, 60]},
 	"Sarriette":    {"pv": 200, "force": 60, "defense": 32, "agility": 40, "pa": 4, "pm": 3, "color": Color(0.55, 0.80, 0.35), "spell": ["Fouet de sarriette", 2, 4, 75]},
 	"Ronce agressive": {"pv": 140, "force": 55, "defense": 25, "agility": 30, "pa": 3, "pm": 3, "color": Color(0.40, 0.55, 0.25), "spell": ["Fouet de ronce", 2, 2, 45]},	# Arbre du Sylvain : immobile, ne joue pas, bloque la vue, relaie les soins du Sylvain
@@ -670,7 +670,7 @@ const SUMMONS := {
 
 
 static func summon_spells(sname: String) -> Array:
-	var info: Dictionary = SUMMONS.get(sname, SUMMONS["Loup"])
+	var info: Dictionary = SUMMONS.get(sname, SUMMONS["Loup Spectral"])
 	var sp: Array = info["spell"]
 	if sp.is_empty():
 		return []

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://5qw2h01rpoa7"
-path="res://.godot/imported/buisson.svg-cddc0c7408abb00564886df3aa51035b.ctex"
+uid="uid://co4rif6lpdseo"
+path="res://.godot/imported/golem_de_pierre.png-5e607e9c0d128b5a9052e7d24d97b5cf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/buisson.svg"
-dest_files=["res://.godot/imported/buisson.svg-cddc0c7408abb00564886df3aa51035b.ctex"]
+source_file="res://assets/sprites/summons/golem_de_pierre.png"
+dest_files=["res://.godot/imported/golem_de_pierre.png-5e607e9c0d128b5a9052e7d24d97b5cf.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

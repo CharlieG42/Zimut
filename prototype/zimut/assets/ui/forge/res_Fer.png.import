@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bc6dyrybugg5p"
-path="res://.godot/imported/champignon.svg-fe871b98c756269b47aeb4cdfa06e9be.ctex"
+uid="uid://bcetgdfpqo48g"
+path="res://.godot/imported/res_Fer.png-63dd5e779a059c885ac8ef6eba9e2f6e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/champignon.svg"
-dest_files=["res://.godot/imported/champignon.svg-fe871b98c756269b47aeb4cdfa06e9be.ctex"]
+source_file="res://assets/ui/forge/res_Fer.png"
+dest_files=["res://.godot/imported/res_Fer.png-63dd5e779a059c885ac8ef6eba9e2f6e.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

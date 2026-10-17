@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cpatf74yfroof"
-path="res://.godot/imported/ange.png-6864aa0ac3f8f3159a8b514241cd7999.ctex"
+uid="uid://bgjy5km442rgl"
+path="res://.godot/imported/archer_sylvestre.png-e957a2e6d671294658c603509b394376.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/ange.png"
-dest_files=["res://.godot/imported/ange.png-6864aa0ac3f8f3159a8b514241cd7999.ctex"]
+source_file="res://assets/sprites/summons/archer_sylvestre.png"
+dest_files=["res://.godot/imported/archer_sylvestre.png-e957a2e6d671294658c603509b394376.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d384onbnmwvg4"
-path="res://.godot/imported/sirene.svg-c2ad49bed6a33aa3d93c5c7ff8c45e76.ctex"
+uid="uid://cg71yeavrg2ye"
+path="res://.godot/imported/ombre.png-7ca658401f6286ed684de71b8f863200.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/sirene.svg"
-dest_files=["res://.godot/imported/sirene.svg-c2ad49bed6a33aa3d93c5c7ff8c45e76.ctex"]
+source_file="res://assets/sprites/summons/ombre.png"
+dest_files=["res://.godot/imported/ombre.png-7ca658401f6286ed684de71b8f863200.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

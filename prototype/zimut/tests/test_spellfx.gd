@@ -9,7 +9,7 @@ func _init() -> void:
 	for k: String in cases:
 		var dt: String = "phys" if cases[k] == "physical" else "mag"
 		check(SpellFx.element_for(k, dt, "attack") == cases[k], "%s -> %s (obtenu %s)" % [k, cases[k], SpellFx.element_for(k, dt, "attack")])
-	check(SpellFx.element_for("Invoquer Loup", "mag", "summon") == "arcane", "invocation -> arcane")
+	check(SpellFx.element_for("Invoquer Loup Spectral", "mag", "summon") == "arcane", "invocation -> arcane")
 	check(EntityView.sprite_key("Sirène") == "sirene" and EntityView.sprite_key("Homme-Faucon") == "homme_faucon", "clés de sprite sans accents")
 	for n in ["gobelin", "squelette", "loup", "troll", "dragonnet", "dragonnet_boss"]:
 		check(ResourceLoader.exists("res://assets/sprites/enemies/%s.svg" % n), "skin ennemi " + n)

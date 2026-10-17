@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c0iaq36gf1qac"
-path="res://.godot/imported/homme_faucon.svg-6431cf8f0992e274ae2e0b473c7b4e84.ctex"
+uid="uid://bc45r67d0v2kb"
+path="res://.godot/imported/esprit_de_la_foret.svg-b561d123c35513ea3c83b1924876c9c6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/homme_faucon.svg"
-dest_files=["res://.godot/imported/homme_faucon.svg-6431cf8f0992e274ae2e0b473c7b4e84.ctex"]
+source_file="res://assets/sprites/summons/esprit_de_la_foret.svg"
+dest_files=["res://.godot/imported/esprit_de_la_foret.svg-b561d123c35513ea3c83b1924876c9c6.ctex"]
 
 [params]
 

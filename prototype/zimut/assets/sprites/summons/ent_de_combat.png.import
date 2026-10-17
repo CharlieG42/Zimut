@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ct47vwl18wbt5"
-path="res://.godot/imported/buisson.png-db9ebed6bb1c482567cc1a582aaac15c.ctex"
+uid="uid://cvya7xvu6pu0i"
+path="res://.godot/imported/ent_de_combat.png-c8ab91cabd8d1c6f099b6153eff54054.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/buisson.png"
-dest_files=["res://.godot/imported/buisson.png-db9ebed6bb1c482567cc1a582aaac15c.ctex"]
+source_file="res://assets/sprites/summons/ent_de_combat.png"
+dest_files=["res://.godot/imported/ent_de_combat.png-c8ab91cabd8d1c6f099b6153eff54054.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://jqgn3sutvqow"
-path="res://.godot/imported/champignon.png-b243bc33d492637b44a30fec41607c2c.ctex"
+uid="uid://ssa75osv4131"
+path="res://.godot/imported/requin_des_marees.svg-a2ea8851ddae453a77e58ce8cab755cd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/champignon.png"
-dest_files=["res://.godot/imported/champignon.png-b243bc33d492637b44a30fec41607c2c.ctex"]
+source_file="res://assets/sprites/summons/requin_des_marees.svg"
+dest_files=["res://.godot/imported/requin_des_marees.svg-a2ea8851ddae453a77e58ce8cab755cd.ctex"]
 
 [params]
 
@@ -38,3 +38,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

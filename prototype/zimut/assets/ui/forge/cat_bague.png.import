@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cxmt2kvyjcgvn"
-path="res://.godot/imported/centaure.png-8b28f22e4675cc42d04c56142062b4d7.ctex"
+uid="uid://v7evcor4edqr"
+path="res://.godot/imported/cat_bague.png-cb5661b580d5ef4446e9388b40ad7632.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/centaure.png"
-dest_files=["res://.godot/imported/centaure.png-8b28f22e4675cc42d04c56142062b4d7.ctex"]
+source_file="res://assets/ui/forge/cat_bague.png"
+dest_files=["res://.godot/imported/cat_bague.png-cb5661b580d5ef4446e9388b40ad7632.ctex"]
 
 [params]
 

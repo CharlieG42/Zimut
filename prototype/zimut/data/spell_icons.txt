@@ -73,12 +73,12 @@ Désintégration,disintegrate
 Téléportation de groupe,teleport_group
 Pluie de métores,meteor_rain
 Apocalypse,apocalypse
-Invoquer Tortue,summon_tortue
-Invoquer Loup,summon_loup
-Invoquer Sirène,summon_sirene
-Invoquer Ange,summon_ange
-Invoquer Homme-Faucon,summon_homme_faucon
-Invoquer Centaure,summon_centaure
+Invoquer Golem de Pierre,summon_tortue
+Invoquer Loup Spectral,summon_loup
+Invoquer Requin des Marées,summon_sirene
+Invoquer Élémentaire de Cristal,summon_ange
+Invoquer Ombre,summon_homme_faucon
+Invoquer Esprit de la Forêt,summon_centaure
 Attaque de l'invocation,summon_atk
 Buff de l'invocation,summon_buff
 Débuff de l'invocation,summon_debuff
@@ -126,11 +126,11 @@ Bouclier de lumière,light_shield
 Mot de restauration,word_restore
 Ronce,thorn
 Sève vitale,sap_t1
-Invoquer Buisson,summon_buisson
+Invoquer Archer Sylvestre,summon_buisson
 Invoquer Arbre,summon_arbre
 Poison de ronce,thorn
 Racine,root
-Invoquer Champignon,summon_champignon
+Invoquer Ent de Combat,summon_champignon
 Lierre protecteur,ivy
 Soin de sève,sap
 Ronce multiple,thorn_multi

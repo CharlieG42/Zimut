@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ciqknewjxth2u"
-path="res://.godot/imported/tortue.png-a717ea14902b65c0b9d54a85af03a909.ctex"
+uid="uid://d73qbfmp7fg6"
+path="res://.godot/imported/cat_all.png-99807c558737327fc77a10e5718735df.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/tortue.png"
-dest_files=["res://.godot/imported/tortue.png-a717ea14902b65c0b9d54a85af03a909.ctex"]
+source_file="res://assets/ui/forge/cat_all.png"
+dest_files=["res://.godot/imported/cat_all.png-99807c558737327fc77a10e5718735df.ctex"]
 
 [params]
 

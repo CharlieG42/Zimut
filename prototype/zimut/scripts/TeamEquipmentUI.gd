@@ -301,13 +301,13 @@ func _on_slot_pressed(member_idx: int, slot_name: String) -> void:
 	if not equipped.is_empty():
 		var cur_lbl := Label.new()
 		cur_lbl.text = "Porté : [%s] %s — %s" % [ItemRules.rarity_label(equipped),
-			String(equipped.get("name", "?")), ItemRules.stat_line(equipped)]
+			ItemRules.display_name(equipped), ItemRules.stat_line(equipped)]
 		cur_lbl.add_theme_font_size_override("font_size", 16)
 		cur_lbl.add_theme_color_override("font_color", ItemRules.rarity_color(equipped).darkened(0.4))
 		box.add_child(cur_lbl)
 	if eq.has(slot_name):
 		var unequip := Button.new()
-		unequip.text = "✖  Déséquiper (%s)" % String(eq[slot_name].get("name", "?"))
+		unequip.text = "✖  Déséquiper (%s)" % ItemRules.display_name(eq[slot_name])
 		unequip.add_theme_font_size_override("font_size", 20)
 		unequip.add_theme_color_override("font_color", COL_TXT)
 		unequip.add_theme_stylebox_override("normal", _flat(COL_PANEL, COL_BORDER))
@@ -380,7 +380,7 @@ func _on_slot_pressed(member_idx: int, slot_name: String) -> void:
 ## effets spéciaux, comparaison de puissance avec l'objet porté, verrou de niveau.
 func _item_button_text(it: Dictionary, equipped: Dictionary, too_low: bool) -> String:
 	var fx_txt: String = " · ".join(PackedStringArray(ItemRules.fx_lines(ItemRules.parse_effect(String(it.get("effect", ""))))))
-	var txt: String = "[%s] %s (nv%d) — %s" % [ItemRules.rarity_label(it), String(it.get("name", "?")),
+	var txt: String = "[%s] %s (nv%d) — %s" % [ItemRules.rarity_label(it), ItemRules.display_name(it),
 		int(it.get("level", 0)), ItemRules.stat_line(it)]
 	if fx_txt != "":
 		txt += "  ✦ " + fx_txt

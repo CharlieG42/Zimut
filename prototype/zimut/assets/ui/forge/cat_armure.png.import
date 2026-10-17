@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bdofhcwpmjq1y"
-path="res://.godot/imported/loup.png-e6101035f144daf471cf1dde7b67ae3c.ctex"
+uid="uid://c6i6nr11ej7mu"
+path="res://.godot/imported/cat_armure.png-797478bf48caf2ee16887a619055f1c0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/loup.png"
-dest_files=["res://.godot/imported/loup.png-e6101035f144daf471cf1dde7b67ae3c.ctex"]
+source_file="res://assets/ui/forge/cat_armure.png"
+dest_files=["res://.godot/imported/cat_armure.png-797478bf48caf2ee16887a619055f1c0.ctex"]
 
 [params]
 

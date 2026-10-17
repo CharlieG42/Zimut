@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://oxmgj3sski67"
-path="res://.godot/imported/sirene.png-b849b316898259d653b43839e242b8f2.ctex"
+uid="uid://dud5h57d20abn"
+path="res://.godot/imported/cat_bouclier.png-c3c2a2da25c7c34b574ead083adeaaba.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/summons/sirene.png"
-dest_files=["res://.godot/imported/sirene.png-b849b316898259d653b43839e242b8f2.ctex"]
+source_file="res://assets/ui/forge/cat_bouclier.png"
+dest_files=["res://.godot/imported/cat_bouclier.png-c3c2a2da25c7c34b574ead083adeaaba.ctex"]
 
 [params]
 

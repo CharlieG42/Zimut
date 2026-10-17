@@ -32,15 +32,15 @@ func _check(cond: bool, label: String) -> void:
 
 func _test_summon_kits() -> void:
 	print("kits d'invocation :")
-	var bush: Array = Combat.summon_spells("Buisson")
-	_check(bush.size() == 1, "le Buisson a un sort")
+	var bush: Array = Combat.summon_spells("Archer Sylvestre")
+	_check(bush.size() == 1, "l'Archer Sylvestre a un sort")
 	var bp: Dictionary = Combat.parse(bush[0])
-	_check(String(bp["kind"]) == "heal", "le Buisson soigne (kind heal)")
-	_check(bp["buffs"].size() > 0, "le Buisson buff en plus (défense)")
-	var shroom: Array = Combat.summon_spells("Champignon")
+	_check(String(bp["kind"]) == "heal", "l'Archer Sylvestre soigne (kind heal)")
+	_check(bp["buffs"].size() > 0, "l'Archer Sylvestre buff en plus (défense)")
+	var shroom: Array = Combat.summon_spells("Ent de Combat")
 	var sp: Dictionary = Combat.parse(shroom[0])
-	_check(String(sp["kind"]) == "attack", "le Champignon attaque")
-	_check(sp["dots"].size() > 0, "le Champignon empoisonne (dot)")
+	_check(String(sp["kind"]) == "attack", "l'Ent de Combat attaque")
+	_check(sp["dots"].size() > 0, "l'Ent de Combat empoisonne (dot)")
 	var roots: Dictionary = Combat.SUMMONS["Racines"]
 	_check(bool(roots["static"]) and bool(roots["blocks_los"]), "les Racines sont statiques et bloquent la ldv")
 	_check(not bool(roots.get("relay", false)), "les Racines ne relaient pas les soins")
