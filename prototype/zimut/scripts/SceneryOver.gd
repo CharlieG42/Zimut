@@ -55,7 +55,29 @@ func _draw() -> void:
 			var f: float = (float(i) + rng.randf_range(0.1, 0.9)) / float(count)
 			var pt: Vector2 = a.lerp(b, f) + Vector2(0, rng.randf_range(-1.0, 5.0))
 			var kind: float = rng.randf()
-			match _biome:
+			var ov: String = Nations.over(_biome)
+			if ov == "":
+				ov = _biome
+			match ov:
+				"crystal":
+					NationScenery._crystal(self, pt, rng.randf_range(8.0, 18.0), 3.0, Color(0.60, 0.55, 1.0) if kind < 0.6 else Color(0.5, 0.85, 1.0))
+				"foam":
+					draw_circle(pt + Vector2(0, 2), rng.randf_range(3.0, 6.0), Color(1, 1, 1, 0.85))
+					if kind > 0.8:
+						draw_circle(pt + Vector2(3, -2), 2.2, Color(0.98, 0.7, 0.65))
+				"wisp":
+					draw_circle(pt + Vector2(0, 2), rng.randf_range(3.0, 6.0), Color(0.97, 1.0, 1.0, 0.9))
+				"ember":
+					draw_circle(pt + Vector2(0, 2), rng.randf_range(2.5, 4.5), Color(0.20, 0.14, 0.14))
+					if kind > 0.6:
+						draw_circle(pt, 2.0, Color(1.0, 0.5, 0.12, 0.7 + 0.3 * sin(_t * 3.0 + float(i))))
+				"moss":
+					draw_circle(pt + Vector2(0, 2), rng.randf_range(3.0, 5.5), Color(0.55, 0.78, 0.62, 0.9))
+					if kind > 0.85:
+						draw_circle(pt + Vector2(0, -3), 2.6, Color(0.7, 1.0, 0.85))
+				"thorn":
+					var th: float = rng.randf_range(6.0, 14.0)
+					draw_colored_polygon(PackedVector2Array([pt + Vector2(-3, 0), pt + Vector2(0, -th), pt + Vector2(3, 0)]), Color(0.55, 0.32, 0.80))
 				"Montagne":
 					draw_circle(pt + Vector2(0, 2), rng.randf_range(3.0, 6.0), Color(0.93, 0.96, 1.0, 0.95))
 				"Désert":
@@ -84,7 +106,23 @@ func _draw() -> void:
 		for k: int in range(7):
 			var ff: float = float(k) / 6.0
 			pts.append(base + Vector2(sway2 * ff * ff + sin(ff * 4.0 + float(v["ph"])) * 2.0, length * ff))
-		match _biome:
+		var ov2: String = Nations.over(_biome)
+		if ov2 == "":
+			ov2 = _biome
+		match ov2:
+			"crystal", "wisp":
+				draw_colored_polygon(PackedVector2Array([base + Vector2(-4, 0), base + Vector2(4, 0), base + Vector2(0, length * 0.5)]), Color(0.7, 0.8, 1.0, 0.85) if ov2 == "crystal" else Color(1, 1, 1, 0.5))
+			"foam":
+				draw_polyline(pts, Color(0.35, 0.62, 0.55, 0.9), 3.4, true)
+				draw_circle(pts[pts.size() - 1], 3.0, Color(0.5, 0.85, 0.7))
+			"ember":
+				draw_polyline(pts, Color(0.18, 0.12, 0.12), 3.2, true)
+				draw_circle(pts[pts.size() - 1], 3.0, Color(1.0, 0.5, 0.12, 0.8))
+			"moss":
+				draw_polyline(pts, Color(0.35, 0.55, 0.45, 0.9), 3.8, true)
+			"thorn":
+				draw_polyline(pts, Color(0.30, 0.18, 0.42), 3.2, true)
+				draw_circle(pts[pts.size() - 1], 2.8, Color(0.75, 0.5, 1.0))
 			"Montagne":
 				draw_colored_polygon(PackedVector2Array([base + Vector2(-4, 0), base + Vector2(4, 0), base + Vector2(0, length * 0.55)]), Color(0.78, 0.92, 1.0, 0.9))
 			"Donjon":

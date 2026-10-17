@@ -89,6 +89,15 @@ static func _biome_key() -> String:
 	return ""
 
 
+## Biome du combat en cours ("" hors combat).
+static func _current_biome() -> String:
+	var tree: SceneTree = Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return ""
+	var gm: Node = tree.root.get_node_or_null("GameManager")
+	return String(gm.get("fight_biome")) if gm != null else ""
+
+
 ## Noms de fichiers de sprite à essayer, par ordre de priorité.
 static func skin_names(ent: Dictionary) -> Array[String]:
 	var classe: String = String(ent.get("classe", ""))
@@ -110,6 +119,11 @@ static func skin_names(ent: Dictionary) -> Array[String]:
 
 
 func _find_texture() -> Texture2D:
+	# Ennemis : sprite de la nation du biome en cours (Forêt = Sylvestre, Désert = Sables, ...)
+	if String(entity.get("team", "")) == "enemy":
+		var ntex: Texture2D = Nations.enemy_texture(entity, _current_biome())
+		if ntex != null:
+			return ntex
 	var folders: Array[String] = ["enemies", "players"]
 	if entity["team"] == "player":
 		folders = ["players", "enemies"]
@@ -153,7 +167,7 @@ func _load_texture() -> void:
 	_has_tex = true
 	sprite.texture = tex
 	var target_h: float = _target_height()
-	var max_w: float = 112.0 * target_h / 92.0
+	var max_w: float = (140.0 if String(entity.get("entity_type", "")) == "Player" else 112.0) * target_h / 92.0
 	var sc: float = minf(target_h / float(tex.get_height()), max_w / float(tex.get_width()))
 	sprite.scale = Vector2(sc, sc)
 	height = float(tex.get_height()) * sc

@@ -111,6 +111,7 @@ func _build() -> void:
 	mid.add_theme_stylebox_override("panel", U.box(Color(0.10, 0.08, 0.08), Color(0.45, 0.32, 0.20), 18, 2, 12))
 	body.add_child(mid)
 	var mscroll := ScrollContainer.new()
+	TouchScroll.install(mscroll)
 	mscroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	mid.add_child(mscroll)
 	_list_box = VBoxContainer.new()
@@ -123,6 +124,7 @@ func _build() -> void:
 	right.add_theme_stylebox_override("panel", U.box(Color(0.12, 0.09, 0.08), Color(0.85, 0.55, 0.25), 18, 3, 16))
 	body.add_child(right)
 	var rscroll := ScrollContainer.new()
+	TouchScroll.install(rscroll)
 	rscroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	right.add_child(rscroll)
 	_detail_box = VBoxContainer.new()

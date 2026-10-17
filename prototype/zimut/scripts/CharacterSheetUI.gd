@@ -250,6 +250,7 @@ func _build() -> void:
 	left.add_theme_stylebox_override("panel", _box(C_PANEL, C_BORDER, 18, 2, 12))
 	body.add_child(left)
 	var lscroll := ScrollContainer.new()
+	TouchScroll.install(lscroll)
 	lscroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	left.add_child(lscroll)
 	_list_box = VBoxContainer.new()
@@ -272,6 +273,7 @@ func _build() -> void:
 	_tabs_row.add_theme_constant_override("separation", 10)
 	rbox.add_child(_tabs_row)
 	var cscroll := ScrollContainer.new()
+	TouchScroll.install(cscroll)
 	cscroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	cscroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	rbox.add_child(cscroll)

@@ -200,7 +200,7 @@ charge les chemins constants en tête de `AdventureMapUI.gd`
 
 - **Appui tactile** : un premier appui sur une case affiche le trajet et le nombre de pas ; un second appui sur la même case lance la marche. À la souris, un clic suffit (le survol montre déjà le trajet).
 - **Brume** : toucher une case encore cachée amène le héros à la case connue la plus proche.
-- **Croix directionnelle** (bas gauche de la carte) et **flèches / ZQSD / WASD** : un pas à la fois (↖ = −x, ↗ = −y, ↘ = +x, ↙ = +y). Entrée / Espace / E déclenche l'action du lieu.
+- **Joystick tactile** (bas gauche de la carte) : on pose le pouce et on glisse, le héros marche case par case tant qu'on tient (les directions « écran » haut/bas/gauche/droite alternent entre deux axes de grille en zigzag, et glissent le long d'un obstacle). **Flèches / ZQSD / WASD** : un pas à la fois (↖ = −x, ↗ = −y, ↘ = +x, ↙ = +y). Entrée / Espace / E déclenche l'action du lieu.
 - Les longs trajets accélèrent (jusqu'à ×2).
 - **Plaque d'infos** en haut à gauche (carte, biome, niveau, lieux) et **grand bouton d'action** en bas de la carte quand le héros est sur un lieu ou une frontière.
 - Panneau latéral : l'action du lieu passe en premier, textes ≥ 17 px, boutons ≥ 56 px.

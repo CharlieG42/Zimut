@@ -53,12 +53,14 @@ func _boot() -> void:
 			count += 1
 	check(count == 36, "36 ennemis par nation")
 	# Héros utilisés en jeu : mêmes images que la planche (sauf classes qui invoquent)
-	var used: Array[String] = ["tank", "assassin", "chasseur", "mage", "druide", "heal"]
+	var used: Array[String] = ["tank", "assassin", "chasseur", "mage", "druide", "heal", "invocateur", "sylvain", "geomancien"]
 	for c2: String in used:
 		var a: Image = (load("res://assets/sprites/players/%s.png" % c2) as Texture2D).get_image()
 		var b: Image = (load("res://assets/sprites/nations/heros/%s.png" % c2) as Texture2D).get_image()
-		check(a.get_size() == b.get_size(), "%s : sprite de jeu = sprite de la planche" % c2)
+		var ra: float = float(a.get_width()) / float(a.get_height())
+		var rb: float = float(b.get_width()) / float(b.get_height())
+		check(ra > rb * 1.15, "%s : proportions chibi (largeur/hauteur %.2f contre %.2f sur la planche)" % [c2, ra, rb])
 	var tex: Texture2D = Portraits.get_texture({"classe": "Tank", "team": "player", "entity_type": "Player"})
-	check(tex != null and tex.get_height() > 250, "Portraits charge le nouveau Tank (hauteur %d)" % (tex.get_height() if tex != null else 0))
+	check(tex != null and tex.get_height() > 200, "Portraits charge le nouveau Tank (hauteur %d)" % (tex.get_height() if tex != null else 0))
 	print("\n%s — %d échec(s)" % ["OK" if fails == 0 else "KO", fails])
 	quit(1 if fails > 0 else 0)

@@ -28,6 +28,8 @@ var _t: float = 0.0
 # ═══════════════════════════════════════════════════════════════════════════
 
 static func pal(biome: String) -> Dictionary:
+	if Nations.is_new(biome):
+		return Nations.pal(biome)
 	match biome:
 		"Montagne":
 			return {"top_a": Color(0.62, 0.69, 0.62), "top_b": Color(0.55, 0.62, 0.56), "lip": Color(0.88, 0.93, 0.97),
@@ -51,7 +53,7 @@ static var _tile_cache: Dictionary = {}
 
 ## Texture de sol (identique à celle des cases de l'aire de combat) pour le biome, ou null.
 static func tile_tex(biome: String, idx: int) -> Texture2D:
-	var prefix: String = ""
+	var prefix: String = Nations.tile_prefix(biome) if Nations.is_new(biome) else ""
 	match biome:
 		"Forêt":
 			prefix = "forest_ground"
@@ -182,6 +184,12 @@ func _add_feature(kind: String, gx: int, gy: int, h: float, off: Vector2 = Vecto
 func _place_features() -> void:
 	# Chaque biome a son monument signature sur la terrasse du fond (bord haut),
 	# plus un élément secondaire sur le rebord gauche — même logique que la Forêt.
+	if Nations.is_new(_biome):
+		var feats: Array = Nations.info(_biome).get("features", [])
+		if feats.size() >= 2:
+			_add_feature(String(feats[0]), 1, -2, 68.0, Vector2(0, 0))
+			_add_feature(String(feats[1]), -1, 1, 34.0, Vector2(20, 4))
+		return
 	match _biome:
 		"Forêt":
 			_add_feature("ruin_arch", 1, -2, 68.0, Vector2(0, 0))
@@ -208,8 +216,10 @@ func _pick_prop(rng: RandomNumberGenerator, level: int, edge_axis: int, placed_f
 		_:
 			table = [["hedge", 5], ["reeds", 3], ["flowers", 4], ["tree", 3], ["big_tree", 3 if level == 2 else 1], ["rock", 2],
 				["mushrooms", 3], ["stump", 3], ["log_pile", 2], ["ruin_wall", 3], ["standing_stone", 2], ["wheat", 1], ["grass", 3]]
-			if level == 1 and edge_axis != 0 and not placed_fence and rng.randf() < 0.6:
+			if level == 1 and edge_axis != 0 and not placed_fence and rng.randf() < 0.6 and not Nations.is_new(_biome):
 				return "fence"
+	if Nations.is_new(_biome):
+		table = Nations.info(_biome).get("props", [])
 	var total: int = 0
 	for e: Array in table:
 		total += int(e[1])
@@ -477,6 +487,9 @@ static func _bar(ci: CanvasItem, a: Vector2, b: Vector2, w: float, col: Color) -
 # ═══════════════════════════════════════════════════════════════════════════
 
 static func draw_prop(ci: CanvasItem, kind: String, p: Dictionary, biome: String, rng: RandomNumberGenerator, t: float) -> void:
+	if Nations.is_new(biome) or kind in ["crystal_cluster", "mushroom_big", "dead_tree"]:
+		if NationScenery.draw(ci, kind, p, biome, rng, t):
+			return
 	var leaf: Color = p["leaf"]
 	var leaf_hi: Color = p["leaf_hi"]
 	match kind:

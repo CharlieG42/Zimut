@@ -22,6 +22,12 @@ func setup(k: String, cell: Vector2i, b: String = "Forêt") -> void:
 	seed_value = cell.x * 31 + cell.y * 57
 	_sway = float(seed_value % 10) * 0.6
 	var v: int = absi(seed_value) % 3
+	if Nations.is_new(biome):
+		var inf: Dictionary = Nations.info(biome)
+		_draw_kind = String(inf["obs_tree"]) if kind == "tree" else String(inf["obs_rock"])
+		_scale = [1.15, 1.25, 1.2][v] if kind == "tree" else [1.35, 1.5, 1.4][v]
+		set_process(true)
+		return
 	if kind == "tree":
 		match biome:
 			"Montagne":

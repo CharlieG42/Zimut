@@ -28,8 +28,35 @@ func configure(grid_size: int, biome: String, seed_value: int = 1) -> void:
 
 func _process(delta: float) -> void:
 	_t += delta
+	var st: String = Nations.ambient(_biome)
+	if st == "":
+		st = _biome
 	for pt: Dictionary in _parts:
-		match _biome:
+		match st:
+			"sparkle", "motes":
+				pt["y"] = float(pt["y"]) - delta * float(pt["v"]) * 0.3
+				pt["x"] = float(pt["x"]) + sin(_t * 0.9 + float(pt["ph"])) * delta * 8.0
+				if float(pt["y"]) < -140.0:
+					pt["y"] = _span.y
+			"bubble":
+				pt["y"] = float(pt["y"]) - delta * float(pt["v"]) * 1.1
+				pt["x"] = float(pt["x"]) + sin(_t * 1.6 + float(pt["ph"])) * delta * 14.0
+				if float(pt["y"]) < -140.0:
+					pt["y"] = _span.y
+			"wind":
+				pt["x"] = float(pt["x"]) + delta * float(pt["v"]) * 3.2
+				pt["y"] = float(pt["y"]) + sin(_t * 1.2 + float(pt["ph"])) * delta * 14.0
+				if float(pt["x"]) > _span.x:
+					pt["x"] = -_span.x
+			"ember":
+				pt["y"] = float(pt["y"]) - delta * float(pt["v"]) * 1.9
+				pt["x"] = float(pt["x"]) + sin(_t * 2.0 + float(pt["ph"])) * delta * 16.0
+				if float(pt["y"]) < -140.0:
+					pt["y"] = _span.y
+			"fog":
+				pt["x"] = float(pt["x"]) + delta * float(pt["v"]) * 0.6
+				if float(pt["x"]) > _span.x:
+					pt["x"] = -_span.x
 			"Montagne":
 				pt["y"] = float(pt["y"]) + delta * float(pt["v"]) * 1.4
 				pt["x"] = float(pt["x"]) + sin(_t * 0.7 + float(pt["ph"])) * delta * 12.0 + delta * 6.0
@@ -58,7 +85,30 @@ func _draw() -> void:
 		var c := Vector2(float(pt["x"]), float(pt["y"]))
 		var r: float = float(pt["r"])
 		var tw: float = 0.5 + 0.5 * sin(_t * 2.2 + float(pt["ph"]))
-		match _biome:
+		var st2: String = Nations.ambient(_biome)
+		if st2 == "":
+			st2 = _biome
+		match st2:
+			"sparkle":
+				var sc := Color(0.75, 0.70, 1.0, 0.25 + 0.6 * tw)
+				draw_line(c + Vector2(-r * 2.4, 0), c + Vector2(r * 2.4, 0), sc, 1.4, true)
+				draw_line(c + Vector2(0, -r * 2.4), c + Vector2(0, r * 2.4), sc, 1.4, true)
+				draw_circle(c, r * 0.8, Color(1, 1, 1, 0.5 + 0.4 * tw))
+			"bubble":
+				draw_arc(c, r * 2.2, 0.0, TAU, 14, Color(0.85, 1.0, 1.0, 0.55), 1.4, true)
+				draw_circle(c + Vector2(-r * 0.7, -r * 0.7), r * 0.5, Color(1, 1, 1, 0.7))
+			"wind":
+				draw_line(c, c + Vector2(r * 9.0, sin(_t + float(pt["ph"])) * 3.0), Color(1, 1, 1, 0.35 + 0.2 * tw), 1.6, true)
+			"ember":
+				draw_circle(c, r * 2.4, Color(1.0, 0.4, 0.1, 0.10 * tw))
+				draw_circle(c, r * 0.8, Color(1.0, 0.7, 0.25, 0.5 + 0.4 * tw))
+			"fog":
+				draw_set_transform(c, 0.0, Vector2(1.0, 0.4))
+				draw_circle(Vector2.ZERO, r * 9.0, Color(0.85, 1.0, 0.95, 0.07))
+				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			"motes":
+				draw_circle(c, r * 2.6, Color(0.6, 0.3, 1.0, 0.08 * tw))
+				draw_circle(c, r * 0.9, Color(0.82, 0.62, 1.0, 0.35 + 0.45 * tw))
 			"Montagne":
 				draw_circle(c, r, Color(1, 1, 1, 0.85))
 			"Désert":

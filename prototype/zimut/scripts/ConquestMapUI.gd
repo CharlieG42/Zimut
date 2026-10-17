@@ -59,7 +59,12 @@ var _header: Label
 var _root: Control
 var _body_scroll: ScrollContainer
 var _body_content: Control
-var _map_scroll: ScrollContainer
+var _map_scroll: Control   # fenêtre de la carte (clip) : le panneau y est déplacé/zoomé à la main
+var _pan: Vector2 = Vector2.ZERO
+var _zoom_focus: Vector2 = Vector2.ZERO
+var _zoom_inited: bool = false
+var _cap_halo: Control
+var _halo_t: float = 0.0
 var _map_panel: Panel
 var _side_panel: PanelContainer
 var _title_label: Label
@@ -87,7 +92,9 @@ const MAP_ZOOM_SMOOTHING: float = 7.5
 var _touch_positions: Dictionary = {}
 var _pinch_start_distance: float = 0.0
 var _pinch_start_zoom: float = 1.0
-const MAP_ZOOM_MAX: float = 2.2
+const MAP_ZOOM_MAX: float = 2.0
+const MAP_W: float = 1536.0
+const MAP_H: float = 1024.0
 
 func _ready() -> void:
 	set_process_input(true)
@@ -150,6 +157,7 @@ func _build() -> void:
 	# Le corps devient scrollable en mode compact : la carte reste lisible
 	# et le conseil de guerre se retrouve sous elle, sans sortir de l'écran.
 	_body_scroll = ScrollContainer.new()
+	TouchScroll.install(_body_scroll)
 	_body_scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_body_scroll.offset_top = 92
 	_body_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -165,27 +173,14 @@ func _build() -> void:
 	# La carte de campagne comporte 28 villes sur sept rangées ; garder un
 	# viewport distinct de son contenu permet de les explorer sans débordement. Le défilement
 	# horizontal de la carte est indépendant du défilement vertical de la page.
-	_map_scroll = ScrollContainer.new()
+	_map_scroll = Control.new()
+	_map_scroll.name = "MapView"
 	_map_scroll.position = Vector2.ZERO
-	_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_map_scroll.follow_focus = false
-	# Déclenchement du glissement presque immédiat, pour que le doigt déplace
-	# la carte plutôt que de sélectionner accidentellement une ville.
-	_map_scroll.scroll_deadzone = 2
-	_body_scroll.scroll_deadzone = 2
-	# Pas courts pour les commandes de défilement et barre plus large pour
-	# pouvoir saisir précisément le curseur sur un écran tactile.
-	var map_vbar := _map_scroll.get_v_scroll_bar()
-	map_vbar.custom_step = 18.0
-	map_vbar.custom_minimum_size.x = 20.0
-	map_vbar.add_theme_stylebox_override("scroll", _style(Color(0.12, 0.19, 0.22, 0.92), Color(0.34, 0.43, 0.43)))
-	map_vbar.add_theme_stylebox_override("grabber", _style(GOLD, Color(1.0, 0.9, 0.62)))
-	map_vbar.add_theme_stylebox_override("grabber_highlight", _style(Color(1.0, 0.86, 0.38), Color(1.0, 0.96, 0.78)))
-	map_vbar.add_theme_stylebox_override("grabber_pressed", _style(Color(0.95, 0.68, 0.22), Color(1.0, 0.96, 0.78)))
-	_body_scroll.get_v_scroll_bar().custom_step = 18.0
+	_map_scroll.clip_contents = true
 	_map_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
+	_body_scroll.get_v_scroll_bar().custom_step = 18.0
 	_body_content.add_child(_map_scroll)
+	(_body_scroll.get_node("TouchScroll") as TouchScroll).exclude = _map_scroll
 
 	var map := Panel.new()
 	map.position = Vector2.ZERO
@@ -213,7 +208,7 @@ func _build() -> void:
 	map.add_child(_map_title_label)
 
 	_legend_label = Label.new()
-	_legend_label.text = "🌲 Forêt  ·  ⛰ Montagne  ·  ☀ Désert  ·  Vert = allié  ·  Gris = neutre  ·  Rouge = adverse"
+	_legend_label.text = "Vert = allié  ·  Gris = neutre  ·  Rouge = adverse  ·  ★ = votre capitale"
 	_legend_label.position = Vector2(260, 16)
 	_legend_label.add_theme_color_override("font_color", TEXT)
 	_legend_label.add_theme_stylebox_override("normal", _pill_style())
@@ -226,6 +221,12 @@ func _build() -> void:
 	routes.city_pos = CITY_POS
 	routes.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	map.add_child(routes)
+
+	_cap_halo = Control.new()
+	_cap_halo.name = "CapitalHalo"
+	_cap_halo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_cap_halo.draw.connect(_draw_capital_halo)
+	map.add_child(_cap_halo)
 
 	for city_id: String in _city_ids():
 		var city: Dictionary = _city_meta(city_id)
@@ -260,6 +261,9 @@ func _build() -> void:
 		var nameplate := Label.new()
 		nameplate.name = "CityNameplate"
 		nameplate.text = "%s  %s%s" % [badge, String(city["name"]), siege_txt]
+		if city_id == "capitale":
+			nameplate.text = "★ NOTRE CAPITALE ★\n%s" % String(city["name"])
+			nameplate.add_theme_color_override("font_color", Color(1.0, 0.93, 0.62))
 		nameplate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		nameplate.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		nameplate.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -283,6 +287,7 @@ func _build() -> void:
 	_side_panel = side
 
 	_side_scroll = ScrollContainer.new()
+	TouchScroll.install(_side_scroll)
 	_side_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_side_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	_side_scroll.follow_focus = false
@@ -379,29 +384,18 @@ func _layout_responsive() -> void:
 
 	if compact:
 		var viewport_w: float = w
-		# La zone visible reste bornée à l'écran ; la carte complète, elle,
-		# est plus haute et défilante. Sur téléphone étroit, le défilement
-		# horizontal reste disponible en plus du vertical.
-		var map_w: float = maxf(1536.0, viewport_w)
 		var map_view_h: float = clampf(h * 0.52, 360.0, 470.0)
-		var map_content_h: float = maxf(1024.0, map_view_h)
-		var map_content_w: float = map_w
 		var side_h: float = 600.0
 		_body_content.custom_minimum_size = Vector2(viewport_w, map_view_h + 14.0 + side_h)
 		_map_scroll.position = Vector2.ZERO
 		_map_scroll.size = Vector2(viewport_w, map_view_h)
 		_map_scroll.custom_minimum_size = Vector2(viewport_w, map_view_h)
-		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if map_w > viewport_w else ScrollContainer.SCROLL_MODE_DISABLED
-		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
-		_map_panel.position = Vector2.ZERO
-		_map_panel.scale = Vector2(_map_zoom, _map_zoom)
-		_map_panel.size = Vector2(map_content_w, map_content_h)
-		_map_panel.custom_minimum_size = Vector2(map_content_w * _target_map_zoom, map_content_h * _target_map_zoom)
+		var map_content_h: float = MAP_H
 		_side_panel.position = Vector2(0, map_view_h + 14.0)
 		_side_panel.size = Vector2(viewport_w, side_h)
 		_side_panel.custom_minimum_size = Vector2(viewport_w, side_h)
 		_legend_label.text = "Vert : allié · Gris : neutre · Rouge : ennemi · ⚔ : attaquable"
-		_legend_label.position = Vector2(10, map_content_h - 27.0)
+		_legend_label.position = Vector2(10, MAP_H - 27.0)
 		_map_title_label.add_theme_font_size_override("font_size", 17)
 		_legend_label.add_theme_font_size_override("font_size", 11)
 		_side_title.add_theme_font_size_override("font_size", 20)
@@ -420,17 +414,10 @@ func _layout_responsive() -> void:
 		# Le viewport de la carte reste dans l'écran ; son contenu peut être
 		# plus haut, ce qui rend le défilement vertical réellement possible.
 		var map_view_h: float = maxf(420.0, h - body_top - 8.0)
-		var map_content_h: float = maxf(1024.0, map_view_h)
-		_body_content.custom_minimum_size = Vector2(map_w * _target_map_zoom + 18.0 + side_w, maxf(map_view_h, map_content_h * _target_map_zoom))
+		_body_content.custom_minimum_size = Vector2(map_w + 18.0 + side_w, map_view_h)
 		_map_scroll.position = Vector2.ZERO
 		_map_scroll.size = Vector2(map_w, map_view_h)
 		_map_scroll.custom_minimum_size = Vector2(map_w, map_view_h)
-		_map_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if map_w > _map_scroll.size.x else ScrollContainer.SCROLL_MODE_DISABLED
-		_map_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_ALWAYS
-		_map_panel.position = Vector2.ZERO
-		_map_panel.scale = Vector2(_map_zoom, _map_zoom)
-		_map_panel.size = Vector2(map_w, map_content_h)
-		_map_panel.custom_minimum_size = Vector2(map_w * _target_map_zoom, map_content_h * _target_map_zoom)
 		_side_panel.position = Vector2(map_w + 18.0, 0)
 		_side_panel.size = Vector2(side_w, map_view_h)
 		_side_panel.custom_minimum_size = Vector2(side_w, map_view_h)
@@ -453,9 +440,13 @@ func _layout_responsive() -> void:
 	# Le panneau complet (fond, routes, sprites et libellés) porte le zoom.
 	# Les contrôles gardent donc leurs dimensions de base et suivent ensemble
 	# la transformation du panneau, sans agrandir les villes isolément.
-	var button_w: float = 154.0 if compact else 166.0
-	var button_h: float = 124.0 if compact else 132.0
+	_map_panel.size = Vector2(MAP_W, MAP_H)
+	_map_panel.custom_minimum_size = Vector2.ZERO
+	_clamp_zoom_and_pan()
 	for city_id: String in _city_buttons.keys():
+		var is_cap: bool = city_id == "capitale"
+		var button_w: float = (154.0 if compact else 166.0) * (1.45 if is_cap else 1.0)
+		var button_h: float = (124.0 if compact else 132.0) * (1.45 if is_cap else 1.0)
 		var btn: Button = _city_buttons[city_id]
 		var p: Vector2 = CITY_POS[city_id]
 		var px: float = clampf(p.x * _map_panel.size.x - button_w * 0.5, 0.0, _map_panel.size.x - button_w)
@@ -463,17 +454,21 @@ func _layout_responsive() -> void:
 		var py_max: float = _map_panel.size.y - button_h - (30.0 if compact else 18.0)
 		var py: float = clampf(p.y * _map_panel.size.y - button_h * 0.5, py_min, py_max)
 		btn.position = Vector2(px, py)
+		if is_cap and _cap_halo != null:
+			_cap_halo.size = Vector2(button_w * 1.5, button_w * 1.5)
+			_cap_halo.position = Vector2(px + button_w * 0.5, py + button_h * 0.42) - _cap_halo.size * 0.5
 		btn.size = Vector2(button_w, button_h)
 		btn.custom_minimum_size = Vector2(button_w, button_h)
 		var nameplate: Label = _city_labels[city_id]
 		nameplate.size.x = button_w
 		nameplate.position.x = 0.0
-		nameplate.add_theme_font_size_override("font_size", 11 if compact else 13)
+		nameplate.add_theme_font_size_override("font_size", (11 if compact else 13) + (4 if is_cap else 0))
 		var sprite: TextureRect = btn.get_node("CityIllustration") as TextureRect
-		sprite.size = Vector2(button_w - 36.0, 82.0)
+		var sprite_h: float = 82.0 * (1.45 if is_cap else 1.0)
+		sprite.size = Vector2(button_w - 36.0, sprite_h)
 		sprite.position = Vector2(18.0, 0.0)
-		nameplate.position.y = 76.0
-		nameplate.size.y = 45.0
+		nameplate.position.y = sprite_h - 6.0
+		nameplate.size.y = 45.0 * (1.3 if is_cap else 1.0)
 	if _side_scroll != null:
 		_side_scroll.queue_sort()
 	if _body_scroll != null:
@@ -483,19 +478,71 @@ func _layout_responsive() -> void:
 ## Le geste est suivi au niveau de la scène pour rester actif même si le
 ## doigt commence sur un bouton de ville. Le seuil filtre les micro-mouvements
 ## involontaires ; une fois dépassé, on déplace le contenu dans le sens du doigt.
+func _draw_capital_halo() -> void:
+	var c: Vector2 = _cap_halo.size * 0.5
+	var pulse: float = 0.5 + 0.5 * sin(_halo_t * 2.2)
+	for i: int in range(6):
+		var r: float = _cap_halo.size.x * 0.5 * (1.0 - float(i) * 0.12)
+		_cap_halo.draw_circle(c, r, Color(1.0, 0.85, 0.35, 0.05 + 0.025 * float(i) + 0.03 * pulse))
+	_cap_halo.draw_arc(c, _cap_halo.size.x * 0.40, 0.0, TAU, 48, Color(1.0, 0.88, 0.45, 0.45 + 0.35 * pulse), 3.0, true)
+
+
 func _process(delta: float) -> void:
-	# Le panneau entier est animé : fond, routes, sprites, boutons et textes
-	# conservent ainsi exactement la même échelle pendant le pincement.
+	_halo_t += delta
+	if _cap_halo != null and is_instance_valid(_cap_halo):
+		_cap_halo.queue_redraw()
+	if _map_panel == null or not is_instance_valid(_map_panel):
+		return
 	if not is_equal_approx(_map_zoom, _target_map_zoom):
 		var weight: float = 1.0 - exp(-MAP_ZOOM_SMOOTHING * delta)
-		_map_zoom = lerpf(_map_zoom, _target_map_zoom, weight)
-		if absf(_target_map_zoom - _map_zoom) < 0.001:
-			_map_zoom = _target_map_zoom
-		if _map_panel != null and is_instance_valid(_map_panel):
-			_map_panel.scale = Vector2(_map_zoom, _map_zoom)
-		if is_equal_approx(_map_zoom, _target_map_zoom):
-			# Ajuste la zone de défilement une seule fois à la fin de l'animation.
-			_layout_responsive()
+		var next: float = lerpf(_map_zoom, _target_map_zoom, weight)
+		if absf(_target_map_zoom - next) < 0.002:
+			next = _target_map_zoom
+		# le point sous le doigt / la souris reste fixe pendant le zoom
+		_pan = _zoom_focus - (_zoom_focus - _pan) * (next / _map_zoom)
+		_map_zoom = next
+		_clamp_zoom_and_pan()
+
+
+## Zoom minimum : la carte entière couvre la fenêtre (on ne voit jamais de vide autour).
+func _min_zoom() -> float:
+	if _map_scroll == null:
+		return 1.0
+	return maxf(_map_scroll.size.x / MAP_W, _map_scroll.size.y / MAP_H)
+
+
+## Borne zoom et décalage puis applique la transformation au panneau.
+func _clamp_zoom_and_pan() -> void:
+	if _map_scroll == null or _map_panel == null:
+		return
+	var zmin: float = _min_zoom()
+	if not _zoom_inited and _map_scroll.size.x > 0.0:
+		_zoom_inited = true
+		_map_zoom = maxf(zmin * 1.12, 0.8)
+		_target_map_zoom = _map_zoom
+		_pan = _map_scroll.size * 0.5 - Vector2(0.30, 0.45) * Vector2(MAP_W, MAP_H) * _map_zoom
+	_target_map_zoom = clampf(_target_map_zoom, zmin, maxf(MAP_ZOOM_MAX, zmin))
+	_map_zoom = clampf(_map_zoom, zmin, maxf(MAP_ZOOM_MAX, zmin))
+	var cw: float = MAP_W * _map_zoom
+	var ch: float = MAP_H * _map_zoom
+	_pan.x = clampf(_pan.x, minf(0.0, _map_scroll.size.x - cw), 0.0)
+	_pan.y = clampf(_pan.y, minf(0.0, _map_scroll.size.y - ch), 0.0)
+	_map_panel.scale = Vector2(_map_zoom, _map_zoom)
+	_map_panel.position = _pan
+	# Les villes se réduisent un peu quand on zoome (et se grossissent à peine en dézoomant)
+	# pour que les plaques restent lisibles sans masquer la carte.
+	var k: float = clampf(pow(_map_zoom, -0.6), 0.6, 1.2)
+	for cid: String in _city_buttons.keys():
+		var cb: Button = _city_buttons[cid]
+		cb.pivot_offset = cb.size * 0.5
+		cb.scale = Vector2(k, k)
+
+
+## Centre la fenêtre sur un point de la carte (coordonnées normalisées).
+func _center_on(norm: Vector2) -> void:
+	_pan = _map_scroll.size * 0.5 - norm * Vector2(MAP_W, MAP_H) * _map_zoom
+	_clamp_zoom_and_pan()
+
 
 func _input(event: InputEvent) -> void:
 	if _map_scroll == null or not is_instance_valid(_map_scroll):
@@ -509,6 +556,7 @@ func _input(event: InputEvent) -> void:
 				_map_dragged = true
 				_pinch_start_distance = _pinch_distance()
 				_pinch_start_zoom = _map_zoom
+				_zoom_focus = _view_local(_pinch_center())
 			else:
 				_begin_map_pointer(touch.position, touch.index)
 		else:
@@ -524,7 +572,8 @@ func _input(event: InputEvent) -> void:
 		if _touch_positions.size() >= 2:
 			var distance := _pinch_distance()
 			if _pinch_start_distance > 0.0:
-				_set_map_zoom(_pinch_start_zoom * distance / _pinch_start_distance)
+				_zoom_focus = _view_local(_pinch_center())
+				_set_map_zoom(_pinch_start_zoom * distance / _pinch_start_distance, true)
 			get_viewport().set_input_as_handled()
 		elif _map_pointer_active and drag.index == _map_pointer_index:
 			_update_map_pointer(drag.position)
@@ -535,10 +584,12 @@ func _input(event: InputEvent) -> void:
 				_begin_map_pointer(mouse.position, -2)
 			else:
 				_end_map_pointer(-2)
-		elif mouse.button_index == MOUSE_BUTTON_WHEEL_UP and mouse.pressed:
-			_set_map_zoom(_target_map_zoom + 0.12)
-		elif mouse.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse.pressed:
-			_set_map_zoom(_target_map_zoom - 0.12)
+		elif (mouse.button_index == MOUSE_BUTTON_WHEEL_UP or mouse.button_index == MOUSE_BUTTON_WHEEL_DOWN) and mouse.pressed:
+			var lp: Vector2 = _view_local(mouse.position)
+			if Rect2(Vector2.ZERO, _map_scroll.size).has_point(lp):
+				_zoom_focus = lp
+				_set_map_zoom(_target_map_zoom * (1.15 if mouse.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / 1.15), true)
+				get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion:
 		var motion := event as InputEventMouseMotion
 		if _map_pointer_active and _map_pointer_index == -2 and (motion.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
@@ -550,12 +601,19 @@ func _pinch_distance() -> float:
 	var points: Array = _touch_positions.values()
 	return Vector2(points[0]).distance_to(Vector2(points[1]))
 
-func _set_map_zoom(value: float) -> void:
-	var next_zoom: float = clampf(value, 1.0, MAP_ZOOM_MAX)
-	if is_equal_approx(next_zoom, _target_map_zoom):
-		return
-	_target_map_zoom = next_zoom
-	# Pas de recalcul du layout pendant le geste : seul le panneau est animé.
+func _pinch_center() -> Vector2:
+	if _touch_positions.size() < 2:
+		return Vector2.ZERO
+	var points: Array = _touch_positions.values()
+	return (Vector2(points[0]) + Vector2(points[1])) * 0.5
+
+func _view_local(pos: Vector2) -> Vector2:
+	return _map_scroll.get_global_transform_with_canvas().affine_inverse() * pos
+
+func _set_map_zoom(value: float, keep_focus: bool = false) -> void:
+	if not keep_focus:
+		_zoom_focus = _map_scroll.size * 0.5
+	_target_map_zoom = clampf(value, _min_zoom(), maxf(MAP_ZOOM_MAX, _min_zoom()))
 
 func _begin_map_pointer(position: Vector2, pointer_index: int) -> void:
 	# InputEventScreenTouch.position est en coordonnées viewport ; convertir
@@ -566,10 +624,6 @@ func _begin_map_pointer(position: Vector2, pointer_index: int) -> void:
 		return
 	# La barre reste manipulable directement, mais tout le reste du viewport
 	# (fond, routes et boutons de villes) sert aussi de surface de glissement.
-	var vbar: VScrollBar = _map_scroll.get_v_scroll_bar()
-	var hbar: HScrollBar = _map_scroll.get_h_scroll_bar()
-	if (vbar.visible and vbar.get_rect().has_point(local_pos)) or (hbar.visible and hbar.get_rect().has_point(local_pos)):
-		return
 	_map_pointer_active = true
 	_map_pointer_index = pointer_index
 	_map_pointer_origin = position
@@ -585,10 +639,8 @@ func _update_map_pointer(position: Vector2) -> void:
 		return
 	_map_dragged = true
 	var delta: Vector2 = position - _map_pointer_last
-	var vbar: VScrollBar = _map_scroll.get_v_scroll_bar()
-	var hbar: HScrollBar = _map_scroll.get_h_scroll_bar()
-	vbar.value = clampf(vbar.value - delta.y, vbar.min_value, vbar.max_value)
-	hbar.value = clampf(hbar.value - delta.x, hbar.min_value, hbar.max_value)
+	_pan += delta
+	_clamp_zoom_and_pan()
 	_map_pointer_last = position
 	# Consommer le geste une fois le glissement confirmé pour empêcher un
 	# bouton de ville de transformer le relâchement en sélection.
@@ -1006,6 +1058,12 @@ func _city_biome_icon(city_id: String) -> String:
 		"Montagne": return "⛰"
 		"Désert": return "☀"
 		"Donjon": return "☠"
+		"Cristaux": return "💎"
+		"Marées": return "🌊"
+		"Vents": return "🌀"
+		"Brasier": return "🔥"
+		"Brumes": return "🌫"
+		"Ombres": return "🌙"
 		_: return "◆"
 
 func _city_border_color(city_id: String) -> Color:
@@ -1014,7 +1072,10 @@ func _city_border_color(city_id: String) -> Color:
 		"Montagne": return Color(0.43, 0.70, 0.88)
 		"Désert": return Color(0.92, 0.66, 0.32)
 		"Donjon": return Color(0.70, 0.48, 0.82)
-		_: return Color(0.5, 0.64, 0.46)
+		_:
+			if Nations.is_new(ProgressionManager.conquest_city_biome(city_id)):
+				return Nations.accent(ProgressionManager.conquest_city_biome(city_id))
+			return Color(0.5, 0.64, 0.46)
 
 ## Le statut du territoire est porté par une petite plaque sous le sprite,
 ## tandis que l'illustration reste visible sans cadre rectangulaire massif.
@@ -1035,15 +1096,24 @@ func _city_nameplate_style(city_id: String, selected: bool) -> StyleBoxFlat:
 
 func _city_sprite(city_id: String) -> Texture2D:
 	var biome := String(_city_meta(city_id).get("biome", "Forêt"))
-	var asset := "forest"
-	match biome:
-		"Montagne":
-			asset = "mountain"
-		"Désert":
-			asset = "desert"
-		"Donjon":
-			asset = "dungeon"
-	var texture_path := "res://assets/ui/conquest/biome_%s_city.svg" % asset
+	var texture_path: String = ""
+	if city_id == "capitale":
+		texture_path = "res://assets/ui/conquest/capital_crown.svg"
+	else:
+		var nation_files := {"Cristaux": "nation_crystals", "Marées": "nation_tides", "Vents": "nation_winds",
+			"Brasier": "nation_brasier", "Brumes": "nation_mists", "Ombres": "nation_shadows"}
+		if nation_files.has(biome):
+			texture_path = "res://assets/ui/conquest/%s_city.svg" % String(nation_files[biome])
+		else:
+			var asset := "forest"
+			match biome:
+				"Montagne":
+					asset = "mountain"
+				"Désert":
+					asset = "desert"
+				"Donjon":
+					asset = "dungeon"
+			texture_path = "res://assets/ui/conquest/biome_%s_city.svg" % asset
 	if not _city_sprite_cache.has(texture_path):
 		_city_sprite_cache[texture_path] = load(texture_path) as Texture2D
 	return _city_sprite_cache[texture_path] as Texture2D
@@ -1061,7 +1131,9 @@ func _biome_control_summary(biome: String) -> String:
 		"Désert":
 			reward = "+5 Venin par victoire"
 		_:
-			return ""
+			if not Nations.is_new(biome):
+				return ""
+			reward = "+5 %s par victoire" % Nations.resource_of(biome)
 	var total: int = 0
 	var controlled: int = 0
 	var owned: Array = _conquest.get("owned", [])

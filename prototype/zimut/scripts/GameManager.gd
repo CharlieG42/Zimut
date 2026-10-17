@@ -447,6 +447,9 @@ func init_entities() -> void:
 			"color": COLORS.get(etype, Color(0.8, 0.3, 0.3)),
 		}, true)
 		enemy["spells"] = Combat.enemy_spells(etype, atk)
+		var nation_label: String = Nations.enemy_label(etype, fight_biome)
+		if nation_label != "":
+			enemy["name"] = "%s Lv%d" % [nation_label, minion_lvl]
 		if etype == "Troll":
 			Combat.add_status(enemy, "regen", 999, 5.0)
 		if etype == "Dragonnet":
@@ -470,7 +473,7 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 	## Type de base dont le boss reprend le kit et la skin : le nom complet est
 	## « Boss Gobelin Roi » -> type de base « Gobelin » (2e mot).
 	var base_type: String = String({"Gobelin Roi": "Gobelin", "Troll Géant": "Troll", "Dragon": "Dragonnet",
-		"Squelette Seigneur": "Squelette", "Loup Alpha": "Loup", "Roi Squelette": "Squelette"}.get(boss_name, "Dragonnet"))
+		"Squelette Seigneur": "Squelette", "Loup Alpha": "Loup", "Roi Squelette": "Squelette"}.get(boss_name, Nations.boss_base(boss_name) if Nations.boss_base(boss_name) != "" else "Dragonnet"))
 	var info: Dictionary = _find_best_match(enemies_data, "Type", "Boss " + boss_name, "Niveau", lvl)
 	if info.is_empty():
 		# Aucune ligne boss au niveau du combat : prendre la ligne boss la plus proche

@@ -107,6 +107,7 @@ func _build() -> void:
 	main.add_child(slots_panel)
 
 	var slots_scroll := ScrollContainer.new()
+	TouchScroll.install(slots_scroll)
 	_slots_scroll = slots_scroll
 	slots_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	slots_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -142,6 +143,7 @@ func _build() -> void:
 	main.add_child(_detail_panel)
 
 	_detail_scroll = ScrollContainer.new()
+	TouchScroll.install(_detail_scroll)
 	_detail_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_detail_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_detail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -387,6 +389,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	_detail_box.add_child(inv_lbl)
 
 	var scroll := ScrollContainer.new()
+	TouchScroll.install(scroll)
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_detail_box.add_child(scroll)
@@ -607,6 +610,7 @@ func _show_loot_log(log_arr: Array) -> void:
 	title.add_theme_color_override("font_color", COL_TXT)
 	box.add_child(title)
 	var scroll := ScrollContainer.new()
+	TouchScroll.install(scroll)
 	scroll.custom_minimum_size = Vector2(0, 360 if _is_compact() else 520)
 	box.add_child(scroll)
 	var rows := VBoxContainer.new()

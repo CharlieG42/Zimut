@@ -11,6 +11,11 @@ static func get_texture(entity: Dictionary) -> Texture2D:
 		folders = ["players", "enemies"]
 	if entity.get("entity_type", "") == "Summon":
 		folders = ["summons", "enemies", "players"]
+	if entity.get("team", "") == "enemy":
+		var biome: String = EntityView._current_biome()
+		var ntex: Texture2D = Nations.enemy_texture(entity, biome)
+		if ntex != null:
+			return ntex
 	var names: Array[String] = EntityView.skin_names(entity)
 	var key: String = "%s|%s" % [folders[0], "/".join(PackedStringArray(names))]
 	if _cache.has(key):
@@ -33,6 +38,10 @@ static func head_region(tex: Texture2D) -> Rect2:
 	var w: float = float(tex.get_width())
 	var h: float = float(tex.get_height())
 	var side: float = minf(w, h * 0.8)
+	if tex.resource_path.contains("/players/"):
+		# Héros « chibi » : grosse tête centrée en haut du sprite
+		side = minf(w, h * 0.66)
+		return Rect2((w - side) * 0.5, 0.0, side, side)
 	if w > h * 1.1:
 		# Sprites larges (tortue, loup, centaure) : la tête est à droite, carré calé sur le haut/droite
 		side = minf(w, h * 0.95)
