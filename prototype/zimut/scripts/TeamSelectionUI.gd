@@ -565,7 +565,7 @@ func refresh() -> void:
 			if parts.size() >= 3:
 				var poi: Dictionary = ProgressionManager.adventure_poi(String(parts[0]),
 					Vector2i(int(parts[parts.size() - 2]), int(parts[parts.size() - 1])))
-				challenge_name = String(poi.get("name", "Défi"))
+				challenge_name = String(poi.get("name", adv.get("pending_name", "Défi")))
 	if boss_fight:
 		if city_name != "":
 			_title.text = "ASSAUT : %s — ☠ AFFRONTEZ %s ! (%d/%d)" % [city_name,

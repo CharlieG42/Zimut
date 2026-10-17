@@ -965,9 +965,9 @@ func validate_cast(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Str
 		return "L'ennemi doit avoir moins de 30 % de PV."
 	if p["needs_summon"] or p["buff_summons"]:
 		if summons_of(caster).is_empty():
-			return "Aucune invocation active."
+			return "Aucun familier actif."
 	if p["kind"] == "summon" and summons_of(caster).size() >= 3:
-		return "Trop d'invocations (3 max)."
+		return "Trop de familiers (3 max)."
 	if p["kind"] == "summon" and String(p["summon"]) == "Balise" and beacons_of(caster).size() >= 3:
 		return "Trop de balises (3 max)."
 	if p["kind"] == "revive" and graveyard.is_empty():
@@ -1610,7 +1610,11 @@ func check_game_over() -> void:
 	for e: Dictionary in enemies:
 		if is_alive(e):
 			alive_e += 1
-	var info: Dictionary = {"enemies": fight_enemies, "turns": turn_count, "boss": fight_is_boss}
+	var deaths: int = 0
+	for pl_d: Dictionary in players:
+		if not is_alive(pl_d):
+			deaths += 1
+	var info: Dictionary = {"enemies": fight_enemies, "turns": turn_count, "boss": fight_is_boss, "deaths": deaths}
 	if alive_p == 0:
 		game_over = true
 		victory = false

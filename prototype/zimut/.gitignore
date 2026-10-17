@@ -37,6 +37,10 @@ Thumbs.db
 # Generated textures from SVG (ignore)
 *.png
 *.jpg
+# …sauf les sprites et icônes générés par tools/*.py et chargés par le jeu
+# (sans eux, Godot trouve les .import mais pas les images : sprites manquants).
+!assets/sprites/**/*.png
+!assets/icons/**/*.png
 
 # Fichiers temporaires Godot
 *.tmp

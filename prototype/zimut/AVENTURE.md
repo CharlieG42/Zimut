@@ -63,8 +63,9 @@ ZONE SUIVANTE  ←  SORTIE DÉCOUVERTE  ←  RÉCOMPENSES PARTAGÉES ←─┘
 
 ```
 scripts/
-  AdventureManager.gd   # logique pure : état, brouillard, récompenses, ponts
-  AdventureMapUI.gd     # rendu uniquement (carte isométrique, dialogs)
+  AdventureTerrain.gd   # terrain déterministe : obstacles, sentiers, plus court chemin
+  AdventureManager.gd   # logique pure : état, brouillard, récompenses, événements, ponts
+  AdventureMapUI.gd     # rendu uniquement (île isométrique style combat, panneau, dialogs)
   ProgressionManager.gd # catalogue officiel + persistance + règles campagne
 assets/adventure/       # sprites organisés, remplaçables sans toucher au code
   tiles/   forest_grass.svg, forest_water.svg, mountain_stone.svg,
@@ -88,6 +89,71 @@ assets/adventure/       # sprites organisés, remplaçables sans toucher au code
   "revealed_cities": ["clairiere", ...]
 }
 ```
+
+### Refonte V7 (carte, énigmes, événements)
+
+- **Carte** : même direction artistique que les arènes Tactique — île
+  isométrique flottante (tuiles `BattleScenery.tile_tex`, falaises, ciel et
+  `BackdropFx` du biome), décors de `BattleScenery.draw_prop`, sentiers
+  dessinés entre le départ et chaque lieu, brouillard en nuages.
+- **Terrain** (`AdventureTerrain`) : généré de façon déterministe à partir du
+  catalogue (même zone = même terrain). ~16 % d'obstacles (arbres, pins,
+  cactus…), jamais sur un lieu, un sentier ou le départ ; chaque lieu reste
+  accessible (vérifié par les tests).
+- **Déplacement** : appui sur une case révélée → le héros (sprite de sa classe)
+  suit le plus court chemin case par case ; aperçu du trajet au survol. Le
+  trajet s'arrête sur un lieu ; un camp ennemi non vaincu barre la route.
+- **Énigmes — 3 types** (`ADVENTURE_PUZZLES[...]["type"]`) :
+  `riddle` (3 réponses proposées + saisie libre tolérante aux accents/articles),
+  `runes` (mémoriser et rejouer une suite de runes colorées),
+  `lights` (dalles « lights out » à allumer toutes).
+- **Événements de route** (`AdventureManager.roll_event`, 16 %, pause de 3 pas) :
+  cueillette, cache, conseil d'un sage, embuscade (combattre ou contourner).
+- **Panneau latéral** : explorateur (classe changeable parmi l'équipe), zone
+  (lieux explorés / carte révélée), lieu courant + action, journal (6 lignes),
+  liste des zones.
+- **Combats de campagne isolés** : `ProgressionManager.CAMPAIGN_FIGHTS_ISOLATED`
+  (true) — une victoire en Aventure/Conquête n'avance plus la campagne
+  Tactique ni les compteurs de rejouabilité ; XP, objets, or et ressources
+  restent partagés. Mettre `false` pour revenir à l'ancien comportement.
+
+### Monde en grille façon Dofus Touch (V8)
+
+```
+              x=0             x=1              x=2               x=3
+  y=0                                     Pics du Givre 17   Crêtes du Givre 19
+  y=1   Ronces 13  ←→  Sylve 10 (départ) ←→ Lisière du Col 14
+  y=2                                     Piémont Ocre 19 ←→ Dunes Perdues 21
+  y=3                                     Portes du Donjon 24
+```
+
+- Chaque zone est une **carte** posée sur la grille du monde (`grid` dans
+  `ADVENTURE_ZONES`). La grille suit la géographie de la Conquête : forêts à
+  l'ouest, montagnes au nord, désert à l'est, Donjon au sud.
+- **Portes** : au milieu de chaque bord qui touche une carte voisine
+  (`AdventureTerrain.gates_of`). Panonceau « ➜ Carte · niv N », chevrons animés,
+  sentier qui file hors de l'île. On marche jusqu'à la porte : le héros sort par
+  le bord, voile de nuages, il entre sur la carte voisine par la porte opposée.
+- **Routes gardées** (`adventure_gate_open`) : une carte déjà visitée ou de
+  niveau inférieur/égal est toujours ouverte ; vers une carte plus difficile, il
+  faut remporter le combat clé de la carte (`key_poi`, ex. Camp gobelin).
+- **Lisières** (`blend`) : un biome voisin déborde sur un côté de la carte
+  (tuiles, obstacles et décors du biome voisin) — Lisière du Col (forêt →
+  montagne au nord), Piémont Ocre (montagne → désert à l'est).
+- **Mini-carte du monde** dans le panneau : cartes visitées (couleur du biome,
+  niveau), voisines inexplorées en « ? », héros sur la carte courante. Toucher
+  une carte visitée = voyage rapide.
+- Les anciens lieux « sortie » (9,3) sont remplacés par les portes ; les
+  anciennes sauvegardes gardent leurs zones débloquées.
+- **Réutilisation** : tuiles, décors, fonds et sprites viennent du mode
+  Tactique (BattleScenery, BackdropFx, Portraits) ; seules les icônes de lieux
+  restent dans `assets/adventure/poi/`. Les SVG `assets/adventure/tiles/` et
+  `hero/` ne sont plus utilisés (supprimables).
+- **Conquête** : chaque ville (hors capitale) est désormais révélée par un
+  belvédère d'au moins une carte (avant, une dizaine ne l'étaient par aucune et
+  devenaient inattaquables dès qu'on avait joué l'Aventure).
+- Ajouter une carte = une entrée `ADVENTURE_ZONES` (grid, biome, key_poi,
+  reveals) + ses lieux dans `ADVENTURE_POIS` (+ énigmes) : le terrain est généré.
 
 ## 5. Ponts inter-modes — FAIT
 
@@ -114,13 +180,13 @@ assets/adventure/       # sprites organisés, remplaçables sans toucher au code
 
 ## 7. À faire (phases 3-4 de la roadmap)
 
-- [ ] Événements aléatoires en déplacement (rencontres, découvertes).
+- [x] Événements aléatoires en déplacement (rencontres, découvertes).
 - [ ] PNJ et dialogues dans les zones ; faim/soif (héritées du proto ZOE)
       à réévaluer.
 - [ ] Boss de zone par « Pierre de l'Élément » (objectif narratif).
 - [ ] Récompenses exclusives (panoplies d'exploration, sorts uniques).
-- [ ] Mini-carte de survol du monde (toutes zones, brouillard global).
-- [ ] Animations de déplacement du héros (tween case par case).
+- [x] Mini-carte de survol du monde (cartes visitées, voisines en « ? »).
+- [x] Animations de déplacement du héros (tween case par case).
 - [ ] Sons spécifiques POI (Sfx) et variantes de musique par zone.
 
 ## 8. Assets

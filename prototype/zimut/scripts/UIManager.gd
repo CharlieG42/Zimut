@@ -757,7 +757,7 @@ class StatsView extends Control:
 		# Nom et classe
 		var full: String = String(e["name"])
 		var short: String = full.split(" Lv")[0]
-		var sub: String = "Invocation" if e.get("entity_type", "") == "Summon" else String(e.get("classe", ""))
+		var sub: String = "Familier" if e.get("entity_type", "") == "Summon" else String(e.get("classe", ""))
 		draw_string_outline(font, Vector2(128, 36), short, HORIZONTAL_ALIGNMENT_LEFT, size.x - 140.0, 24, 5, Color(0, 0, 0, 0.92))
 		draw_string(font, Vector2(128, 36), short, HORIZONTAL_ALIGNMENT_LEFT, size.x - 140.0, 24, Color(1, 0.95, 0.8))
 		draw_string(font, Vector2(128, 56), "%s · niveau %d" % [sub, lvl], HORIZONTAL_ALIGNMENT_LEFT, size.x - 140.0, 14, Color(0.7, 0.78, 0.92))
@@ -1582,6 +1582,23 @@ func _show_result_window(victory: bool) -> void:
 			emp_row.add_theme_color_override("font_color", Color(0.10, 0.45, 0.12))
 			emp_row.tooltip_text = "Production des bâtiments de vos villes annexées."
 			content.add_child(emp_row)
+		# Défi facultatif de la bataille (voir ProgressionManager.conquest_challenge_for)
+		var chal: Dictionary = cqst.get("last_challenge", {})
+		if not chal.is_empty():
+			var ch_row := Label.new()
+			if bool(chal.get("success", false)):
+				var bonus: PackedStringArray = ["+%d or" % int(chal.get("gold", 0))]
+				var cres: Dictionary = chal.get("resources", {})
+				for k: String in cres.keys():
+					bonus.append("+%d %s" % [int(cres[k]), k])
+				ch_row.text = "  ◆ Défi réussi — %s : %s" % [String(chal.get("label", "")), " · ".join(bonus)]
+				ch_row.add_theme_color_override("font_color", Color(0.38, 0.20, 0.62))
+			else:
+				ch_row.text = "  ◇ Défi manqué — %s" % String(chal.get("label", ""))
+				ch_row.add_theme_color_override("font_color", Color(0.45, 0.42, 0.40))
+			ch_row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			ch_row.add_theme_font_size_override("font_size", 18)
+			content.add_child(ch_row)
 
 	var cont := Button.new()
 	var back_mode: String = String(save.get("campaign_mode", ""))

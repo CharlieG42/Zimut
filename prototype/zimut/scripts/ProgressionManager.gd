@@ -96,24 +96,58 @@ const CONQUEST_SIEGE_BATTLES := 4
 ## ADVENTURE_FOG_RADIUS : rayon de brouillard de guerre révélé autour du héros.
 ## ══════════════════════════════════════════════════════════════════════
 const ADVENTURE_FOG_RADIUS := 2
+## Les combats d'Aventure et de Conquête partagent leurs gains (XP, objets, or,
+## ressources) mais n'avancent pas la campagne du mode Tactique. false = ancien comportement.
+const CAMPAIGN_FIGHTS_ISOLATED := true
 const ADVENTURE_BASE_XP := 60
 
+## Monde d'Aventure façon Dofus Touch : chaque zone est une « carte » posée sur une
+## grille du monde (`grid` = [x, y]). Deux cartes voisines (N/E/S/O) sont reliées par
+## une porte au milieu du bord de l'île : on change de carte en y marchant.
+## La grille suit la géographie de la Conquête : forêts à l'ouest, montagnes au nord,
+## désert à l'est, Donjon au sud. `blend` = biome voisin qui déborde sur un côté de la
+## carte (lisière). `key_poi` = combat qui ouvre les routes vers les cartes plus
+## difficiles (les cartes de niveau égal ou inférieur restent toujours ouvertes).
+## `unlock` est conservé pour les anciennes sauvegardes (voyage rapide).
 const ADVENTURE_ZONES := {
 	"foret_sylve": {
-		"name": "Sentiers de la Sylve", "biome": "Forêt", "size": [10, 7],
-		"start": [1, 3], "unlock": "", "reveals": ["clairiere", "village_brume"],
+		"name": "Sentiers de la Sylve", "biome": "Forêt", "size": [10, 7], "grid": [1, 1],
+		"start": [1, 3], "unlock": "", "key_poi": "7,2", "reveals": ["clairiere", "village_brume", "pont_mousse"],
 	},
 	"foret_ronces": {
-		"name": "Ronces de l’Abbaye", "biome": "Forêt", "size": [10, 7],
-		"start": [1, 3], "unlock": "foret_sylve", "reveals": ["abbaye_ronce", "ruines_lierre"],
+		"name": "Ronces de l’Abbaye", "biome": "Forêt", "size": [10, 7], "grid": [0, 1],
+		"start": [1, 3], "unlock": "foret_sylve", "key_poi": "4,5",
+		"reveals": ["abbaye_ronce", "ruines_lierre", "citadelle_ronce", "marais_spectres"],
+	},
+	"lisiere_col": {
+		"name": "Lisière du Col", "biome": "Forêt", "size": [10, 7], "grid": [2, 1],
+		"blend": {"biome": "Montagne", "side": "N"},
+		"start": [1, 3], "unlock": "foret_sylve", "key_poi": "6,3",
+		"reveals": ["vieille_tour", "fort_racine", "bois_lune", "sanctuaire_mousse"],
 	},
 	"montagne_pics": {
-		"name": "Pics du Givre", "biome": "Montagne", "size": [10, 7],
-		"start": [1, 3], "unlock": "foret_sylve", "reveals": ["hameau_pin", "col_givre"],
+		"name": "Pics du Givre", "biome": "Montagne", "size": [10, 7], "grid": [2, 0],
+		"start": [1, 3], "unlock": "foret_sylve", "key_poi": "5,2", "reveals": ["hameau_pin", "col_givre", "garnison"],
+	},
+	"cretes_givre": {
+		"name": "Crêtes du Givre", "biome": "Montagne", "size": [10, 7], "grid": [3, 0],
+		"start": [1, 3], "unlock": "montagne_pics", "key_poi": "5,3",
+		"reveals": ["mine_cristal", "bastion_orage", "forge_givre", "pic_foudroyant"],
+	},
+	"piemont_ocre": {
+		"name": "Piémont Ocre", "biome": "Montagne", "size": [10, 7], "grid": [2, 2],
+		"blend": {"biome": "Désert", "side": "E"},
+		"start": [1, 3], "unlock": "lisiere_col", "key_poi": "4,3",
+		"reveals": ["observatoire", "temple_soleil", "fort_cendre"],
 	},
 	"desert_dunes": {
-		"name": "Dunes Perdues", "biome": "Désert", "size": [10, 7],
-		"start": [1, 3], "unlock": "montagne_pics", "reveals": ["oasis", "caravanserail"],
+		"name": "Dunes Perdues", "biome": "Désert", "size": [10, 7], "grid": [3, 2],
+		"start": [1, 3], "unlock": "montagne_pics", "key_poi": "4,3", "reveals": ["oasis", "caravanserail", "tour_sable"],
+	},
+	"portes_donjon": {
+		"name": "Portes du Donjon", "biome": "Donjon", "size": [10, 7], "grid": [2, 3],
+		"start": [5, 1], "unlock": "piemont_ocre", "key_poi": "5,3",
+		"reveals": ["donjon_roi", "citadelle_sable", "port_sable"],
 	},
 }
 
@@ -129,8 +163,8 @@ const ADVENTURE_POIS := {
 			"desc": "Un endroit sûr pour reprendre souffle."},
 		"8,5": {"kind": "reveal", "name": "Belvédère de la Sylve", "level": 10,
 			"desc": "Du haut de l’arbre, la vallée se dévoile."},
-		"9,3": {"kind": "exit", "name": "Sentier du vieux chêne", "level": 10,
-			"desc": "Le sentier mène vers de nouveaux horizons."},
+		"2,1": {"kind": "puzzle", "name": "Cercle des pierres chantantes", "level": 10,
+			"desc": "Des menhirs s'illuminent puis se taisent."},
 	},
 	"foret_ronces": {
 		"5,1": {"kind": "combat", "name": "Embûche de ronces", "level": 13,
@@ -141,8 +175,10 @@ const ADVENTURE_POIS := {
 			"desc": "Un vieux sac oublié sous une racine."},
 		"4,5": {"kind": "combat", "name": "Patrouille de la Citadelle", "level": 15,
 			"desc": "Des soldats des Ronces rôdent ici."},
-		"9,3": {"kind": "exit", "name": "Chemin des Ronces", "level": 13,
-			"desc": "Le chemin s’enfonce vers l’ouest."},
+		"8,1": {"kind": "puzzle", "name": "Dalles du cloître", "level": 13,
+			"desc": "Neuf dalles gravées, certaines éteintes."},
+		"1,5": {"kind": "camp", "name": "Feu de camp des pèlerins", "level": 13,
+			"desc": "Des braises encore tièdes sous un abri de ronces."},
 	},
 	"montagne_pics": {
 		"5,2": {"kind": "combat", "name": "Caverne du Troll", "level": 17,
@@ -153,8 +189,62 @@ const ADVENTURE_POIS := {
 			"desc": "Un éclat de cristal brille au fond."},
 		"8,1": {"kind": "reveal", "name": "Panneau du Givre", "level": 17,
 			"desc": "Tout le massif s’étale sous vos yeux."},
-		"9,3": {"kind": "exit", "name": "Descente du Col", "level": 17,
-			"desc": "Le sentier descend vers les Dunes."},
+		"3,1": {"kind": "puzzle", "name": "Orgue de glace", "level": 17,
+			"desc": "Des stalactites résonnent au gré du vent."},
+		"5,4": {"kind": "camp", "name": "Refuge du berger", "level": 17,
+			"desc": "Une cabane de pierre, un poêle et du thé chaud."},
+	},
+	"lisiere_col": {
+		"6,3": {"kind": "combat", "name": "Loups de la lisière", "level": 14,
+			"desc": "Une meute garde le passage vers les hauteurs."},
+		"3,2": {"kind": "chest", "name": "Cabane du bûcheron", "level": 14,
+			"desc": "Une cabane abandonnée, la porte entrouverte."},
+		"2,5": {"kind": "puzzle", "name": "Totem des deux versants", "level": 14,
+			"desc": "Les runes du totem s'allument tour à tour."},
+		"7,1": {"kind": "reveal", "name": "Mirador de la lisière", "level": 14,
+			"desc": "D'ici, forêts et sommets se partagent l'horizon."},
+		"8,5": {"kind": "camp", "name": "Halte des colporteurs", "level": 14,
+			"desc": "Un abri de toile où l'on échange les nouvelles."},
+	},
+	"cretes_givre": {
+		"5,3": {"kind": "combat", "name": "Sentinelles de glace", "level": 19,
+			"desc": "Des silhouettes figées bougent quand on approche."},
+		"4,5": {"kind": "combat", "name": "Troll des crêtes", "level": 20,
+			"desc": "Un troll énorme réclame un droit de passage."},
+		"2,1": {"kind": "puzzle", "name": "Miroirs de givre", "level": 19,
+			"desc": "Seize miroirs de glace, la plupart ternis."},
+		"7,5": {"kind": "chest", "name": "Cache du contrebandier", "level": 19,
+			"desc": "Un coffre arrimé sous un surplomb."},
+		"8,1": {"kind": "reveal", "name": "Aiguille des Crêtes", "level": 19,
+			"desc": "Le plus haut sommet de Zimut."},
+		"2,5": {"kind": "camp", "name": "Grotte tiède", "level": 19,
+			"desc": "Une source chaude fume au fond de la grotte."},
+	},
+	"piemont_ocre": {
+		"4,3": {"kind": "combat", "name": "Pillards du piémont", "level": 19,
+			"desc": "Des pillards rançonnent les caravanes."},
+		"7,1": {"kind": "puzzle", "name": "Stèle des caravaniers", "level": 19,
+			"desc": "Une stèle gravée d'une question."},
+		"2,1": {"kind": "chest", "name": "Sacoche du muletier", "level": 19,
+			"desc": "Une sacoche tombée d'un bât."},
+		"7,5": {"kind": "reveal", "name": "Promontoire ocre", "level": 19,
+			"desc": "Les dunes s'étendent jusqu'à la mer."},
+		"2,5": {"kind": "camp", "name": "Bivouac des canyons", "level": 19,
+			"desc": "Un feu à l'abri du vent des canyons."},
+	},
+	"portes_donjon": {
+		"5,3": {"kind": "combat", "name": "Garde des Portes", "level": 24,
+			"desc": "Les squelettes de la garde royale veillent encore."},
+		"3,5": {"kind": "combat", "name": "Crypte oubliée", "level": 25,
+			"desc": "Quelque chose gratte sous la dalle."},
+		"2,2": {"kind": "puzzle", "name": "Sceau des Portes", "level": 24,
+			"desc": "Sept sceaux à rallumer dans le bon ordre."},
+		"8,2": {"kind": "chest", "name": "Ossuaire", "level": 24,
+			"desc": "Des offrandes oubliées parmi les os."},
+		"7,5": {"kind": "reveal", "name": "Tour de guet morte", "level": 24,
+			"desc": "Du sommet, le Donjon du Roi Squelette."},
+		"1,1": {"kind": "camp", "name": "Brasero des pèlerins", "level": 24,
+			"desc": "Une flamme bleue qui ne s'éteint jamais."},
 	},
 	"desert_dunes": {
 		"4,3": {"kind": "combat", "name": "Squelettes des sables", "level": 21,
@@ -165,22 +255,54 @@ const ADVENTURE_POIS := {
 			"desc": "Les restes d’un convoi ensevelis."},
 		"8,5": {"kind": "reveal", "name": "Mirador du Désert", "level": 21,
 			"desc": "Un mirador dominant les Dunes."},
-		"9,3": {"kind": "exit", "name": "Route du Caravansérail", "level": 21,
-			"desc": "La route du caravansérail s’ouvre."},
+		"5,5": {"kind": "puzzle", "name": "Mosaïque du soleil", "level": 21,
+			"desc": "Seize tuiles de verre attendent la lumière."},
+		"1,1": {"kind": "camp", "name": "Puits de l'oasis", "level": 21,
+			"desc": "Une eau fraîche au fond d'un puits de grès."},
 	},
 }
 
 ## Énigmes officielles des POI « puzzle » (clé = "zone,x,y").
+## Énigmes officielles des POI « puzzle » (clé = "zone,x,y").
+##   type « riddle » (défaut) : question, réponse + choix (la réponse tapée est aussi
+##     acceptée, sans tenir compte des accents, majuscules ni articles) ;
+##   type « runes »  : mémoire — reproduire une suite de `length` runes ;
+##   type « lights » : dalles — allumer toutes les dalles d'une grille `size`×`size`
+##     (toucher une dalle bascule aussi ses voisines), mélangée en `scramble` coups.
 const ADVENTURE_PUZZLES := {
-	"foret_sylve,4,1": {"text": "Je grandis quand on me nourrit, mais je meurs si l’on me donne à boire. Qui suis-je ?",
-		"answer": "Le feu", "wrong": "Les runes restent muettes."},
-	"foret_ronces,2,2": {"text": "Plus j’ai de gardiens, moins je vaux. Moins j’en ai, plus je vaux. Qui suis-je ?",
-		"answer": "Le secret", "wrong": "L’autel garde son silence."},
-	"montagne_pics,2,4": {"text": "Je brille sans brûler, je fuis sans marcher, je reviens chaque nuit. Qui suis-je ?",
-		"answer": "La lune", "wrong": "Le givre dévore la réponse."},
-	"desert_dunes,6,1": {"text": "On me jette car je perds ma valeur ; on me ramasse car j’en gagne une autre. Qui suis-je ?",
-		"answer": "Une pièce de monnaie", "wrong": "L’obélisque reste ténébreux."},
+	"foret_sylve,4,1": {"type": "riddle", "text": "Je grandis quand on me nourrit, mais je meurs si l’on me donne à boire. Qui suis-je ?",
+		"answer": "Le feu", "choices": ["Le feu", "L'arbre", "Le vent"], "wrong": "Les runes restent muettes."},
+	"foret_ronces,2,2": {"type": "riddle", "text": "Plus j’ai de gardiens, moins je vaux. Moins j’en ai, plus je vaux. Qui suis-je ?",
+		"answer": "Le secret", "choices": ["Le secret", "Le trésor", "La promesse"], "wrong": "L’autel garde son silence."},
+	"montagne_pics,2,4": {"type": "riddle", "text": "Je brille sans brûler, je fuis sans marcher, je reviens chaque nuit. Qui suis-je ?",
+		"answer": "La lune", "choices": ["La lune", "L'étoile filante", "Le feu follet"], "wrong": "Le givre dévore la réponse."},
+	"desert_dunes,6,1": {"type": "riddle", "text": "On me jette car je perds ma valeur ; on me ramasse car j’en gagne une autre. Qui suis-je ?",
+		"answer": "Une pièce de monnaie", "choices": ["Une pièce de monnaie", "Une graine", "Un os"], "wrong": "L’obélisque reste ténébreux."},
+	"foret_sylve,2,1": {"type": "runes", "length": 4,
+		"text": "Les pierres du cercle s'allument une à une. Reproduisez leur chant dans le même ordre.",
+		"wrong": "Les pierres se taisent… et recommencent leur chant."},
+	"foret_ronces,8,1": {"type": "lights", "size": 3, "scramble": 3,
+		"text": "Allumez les neuf dalles. Toucher une dalle bascule aussi ses voisines (haut, bas, gauche, droite).",
+		"wrong": "Les dalles s'éteignent dans un soupir de pierre."},
+	"montagne_pics,3,1": {"type": "runes", "length": 6,
+		"text": "Le vent joue un air sur les stalactites. Rejouez la mélodie note après note.",
+		"wrong": "La glace grince : fausse note. Écoutez de nouveau."},
+	"desert_dunes,5,5": {"type": "lights", "size": 4, "scramble": 4,
+		"text": "Faites briller les seize tuiles de la mosaïque. Chaque tuile entraîne ses voisines.",
+		"wrong": "Le soleil se voile sur la mosaïque."},
+	"lisiere_col,2,5": {"type": "runes", "length": 5,
+		"text": "Le totem fait briller ses runes une à une. Rejouez la même suite.",
+		"wrong": "Le totem s'éteint. Il recommence…"},
+	"cretes_givre,2,1": {"type": "lights", "size": 4, "scramble": 5,
+		"text": "Faites briller les seize miroirs. Chaque miroir touché bascule aussi ses voisins.",
+		"wrong": "Le givre recouvre les miroirs."},
+	"piemont_ocre,7,1": {"type": "riddle", "text": "Je n'ai ni bouche ni voix, et pourtant je réponds à qui m'appelle dans la montagne. Qui suis-je ?",
+		"answer": "L'écho", "choices": ["L'écho", "Le vent", "Le torrent"], "wrong": "La stèle reste silencieuse."},
+	"portes_donjon,2,2": {"type": "runes", "length": 7,
+		"text": "Les sept sceaux s'allument dans un ordre précis. Rallumez-les dans le même ordre.",
+		"wrong": "Les sceaux se referment avec un grondement."},
 }
+
 
 ## Catalogue officiel des villes de Conquête (la carte de ConquestMapUI en est
 ## dérivée) : id -> { name, kind, biome, level }.
@@ -1134,9 +1256,14 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 		return {}
 	ensure_roster(data)
 	var fight_no: int = selected_fight_number(data)
-	var frontier: bool = fight_no == frontier_fight_number(data)
-	var fight_level: int = enemy_level_for(data)
+	# Aventure / Conquête : les gains sont partagés, mais la bataille ne compte pas
+	# comme un combat de la campagne Tactique (frontière, cycle des biomes, boss).
+	var campaign: bool = CAMPAIGN_FIGHTS_ISOLATED and String(data.get("campaign_mode", "")) in ["adventure", "conquest"]
+	var frontier: bool = fight_no == frontier_fight_number(data) and not campaign
+	var fight_level: int = campaign_fight_level(data) if campaign else enemy_level_for(data)
 	var was_boss: bool = bool(info.get("boss", is_boss_fight(data)))
+	# Défi optionnel de Conquête : évalué avant que le siège n'avance
+	_conquest_eval_challenge(data, info)
 	var enemies: Array = info.get("enemies", [])
 	if enemies.is_empty():
 		enemies = [{"type": "Gobelin", "level": fight_level, "boss": false},
@@ -1150,7 +1277,7 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 		hist.append(fight_level)
 		data["fight_levels"] = hist
 		data["selected_fight"] = 0
-	else:
+	elif not campaign:
 		data["replays"] = int(data.get("replays", 0)) + 1
 	var loots: Array = _roll_loots(fight_level, was_boss)
 	for l: Dictionary in loots:
@@ -1160,11 +1287,11 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	var drops: Dictionary = _roll_resource_drops(enemies.size(), was_boss)
 	add_resources(data, drops)
 	var gold_gain: int = (50 + 10 * fight_level) * (3 if was_boss else 1)
-	data["gold"] = int(data.get("gold", 0)) + (gold_gain if frontier else int(gold_gain * 0.6))
+	data["gold"] = int(data.get("gold", 0)) + (gold_gain if (frontier or campaign) else int(gold_gain * 0.6))
 	data["last_resources"] = drops
 	data["level"] = frontier_level(data)
 	data["last_result"] = {"victory": true, "xp": report, "boss": was_boss, "fight_level": fight_level,
-		"turns": int(info.get("turns", 0)), "fight_no": fight_no, "replay": not frontier}
+		"turns": int(info.get("turns", 0)), "fight_no": fight_no, "replay": not frontier and not campaign}
 	# Journal cumulé des loots gagnés dans cette partie
 	var log_arr: Array = data.get("loot_log", [])
 	for l: Dictionary in loots:
@@ -1185,7 +1312,8 @@ func register_defeat(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	if data.is_empty():
 		return {}
 	ensure_roster(data)
-	var fight_level: int = enemy_level_for(data)
+	var campaign: bool = CAMPAIGN_FIGHTS_ISOLATED and String(data.get("campaign_mode", "")) in ["adventure", "conquest"]
+	var fight_level: int = campaign_fight_level(data) if campaign else enemy_level_for(data)
 	var enemies: Array = info.get("enemies", [])
 	var report: Dictionary = {}
 	if not enemies.is_empty():
@@ -1288,6 +1416,7 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 			adventure["completed"] = completed
 			adventure["pending_challenge"] = ""
 			adventure.erase("pending_level")
+			adventure.erase("pending_name")
 			data["adventure"] = adventure
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -1462,12 +1591,112 @@ func adventure_available_zones(adv: Dictionary) -> Array:
 			out.append(zone_id)
 	return out
 
+# ── Monde d'Aventure : grille de cartes et portes (façon Dofus Touch) ────────
+const ADVENTURE_DIRS := {"N": Vector2i(0, -1), "E": Vector2i(1, 0), "S": Vector2i(0, 1), "W": Vector2i(-1, 0)}
+const ADVENTURE_OPPOSITE := {"N": "S", "S": "N", "E": "W", "W": "E"}
+const ADVENTURE_DIR_LABEL := {"N": "nord", "E": "est", "S": "sud", "W": "ouest"}
+
+## Position d'une carte sur la grille du monde (calculs dans AdventureTerrain).
+func adventure_zone_grid(zone_id: String) -> Vector2i:
+	return AdventureTerrain.grid_of(zone_id)
+
+## Carte voisine dans une direction ("" si le bord de l'île donne sur le vide).
+func adventure_neighbor(zone_id: String, dir: String) -> String:
+	return AdventureTerrain.neighbor(zone_id, dir)
+
+## Case de la porte d'un bord : milieu du côté (axe x de la grille = est/ouest).
+func adventure_gate_cell(zone_id: String, dir: String) -> Vector2i:
+	return AdventureTerrain.gate_cell(zone_id, dir)
+
+## Portes de la carte : { Vector2i case : {"dir", "to"} }.
+func adventure_gates(zone_id: String) -> Dictionary:
+	return AdventureTerrain.gates_of(zone_id)
+
+## La route vers une carte voisine est-elle ouverte ? Oui si la carte a déjà été
+## visitée, si elle n'est pas plus difficile, ou si le combat clé de la carte de
+## départ (`key_poi`) est remporté.
+func adventure_gate_open(adv: Dictionary, from_zone: String, to_zone: String) -> bool:
+	if (adv.get("zones_unlocked", []) as Array).has(to_zone):
+		return true
+	if adventure_zone_level(to_zone) <= adventure_zone_level(from_zone):
+		return true
+	var key_poi: String = String(ADVENTURE_ZONES.get(from_zone, {}).get("key_poi", ""))
+	return key_poi == "" or adventure_poi_completed(adv, "%s,%s" % [from_zone, key_poi])
+
+## Explication affichée quand une route est fermée ("" si ouverte).
+func adventure_gate_lock_reason(adv: Dictionary, from_zone: String, to_zone: String) -> String:
+	if adventure_gate_open(adv, from_zone, to_zone):
+		return ""
+	var key_poi: String = String(ADVENTURE_ZONES.get(from_zone, {}).get("key_poi", ""))
+	var poi_name: String = String(ADVENTURE_POIS.get(from_zone, {}).get(key_poi, {}).get("name", "le gardien"))
+	return "La route vers %s est gardée : remportez « %s » pour l'ouvrir." % [adventure_zone_name(to_zone), poi_name]
+
+## Franchit la porte `dir` de la carte courante : le héros arrive sur la carte
+## voisine, une case à l'intérieur de la porte opposée. Retourne false si fermée.
+func adventure_cross(adv: Dictionary, dir: String) -> bool:
+	var from_zone: String = String(adv.get("zone", "foret_sylve"))
+	var to_zone: String = adventure_neighbor(from_zone, dir)
+	if to_zone == "" or not adventure_gate_open(adv, from_zone, to_zone):
+		return false
+	var unlocked: Array = adv.get("zones_unlocked", [])
+	if not unlocked.has(to_zone):
+		unlocked.append(to_zone)
+	adv["zones_unlocked"] = unlocked
+	var back: String = String(ADVENTURE_OPPOSITE[dir])
+	var arrive: Vector2i = adventure_gate_cell(to_zone, back) - ADVENTURE_DIRS[back]
+	adv["zone"] = to_zone
+	adventure_move(adv, arrive)
+	return true
+
+## Niveau d'un combat de campagne : lieu d'Aventure ou ville de Conquête en cours,
+## sinon le niveau du mode Tactique.
+func campaign_fight_level(data: Dictionary) -> int:
+	match String(data.get("campaign_mode", "")):
+		"adventure":
+			var lv: int = int(data.get("adventure", {}).get("pending_level", 0))
+			if lv > 0:
+				return lv
+		"conquest":
+			var cq: Dictionary = data.get("conquest", {})
+			if String(cq.get("pending_city", "")) != "" and int(cq.get("pending_level", 0)) > 0:
+				return int(cq["pending_level"])
+	return enemy_level_for(data)
+
 ## Niveau d'un défi Aventure (combat/énigme) : celui du POI si fourni,
 ## sinon le niveau moyen de l'équipe (comme le mode Tactique).
 func adventure_challenge_level(data: Dictionary, poi: Dictionary = {}) -> int:
 	if not poi.is_empty() and int(poi.get("level", 0)) > 0:
 		return int(poi["level"])
 	return enemy_level_for(data)
+
+## Réponse d'énigme acceptée ? Comparaison sans accents, casse, ponctuation ni
+## article initial (« le feu », « Feu », « FEU ! » sont équivalents).
+func adventure_answer_matches(puzzle: Dictionary, answer: String) -> bool:
+	var expected: String = _norm_answer(String(puzzle.get("answer", "")))
+	return expected != "" and _norm_answer(answer) == expected
+
+func _norm_answer(t: String) -> String:
+	var s2: String = t.strip_edges().to_lower()
+	for pair in [["é", "e"], ["è", "e"], ["ê", "e"], ["ë", "e"], ["à", "a"], ["â", "a"], ["î", "i"], ["ï", "i"],
+			["ô", "o"], ["û", "u"], ["ù", "u"], ["ç", "c"], ["’", "'"]]:
+		s2 = s2.replace(pair[0], pair[1])
+	for ch in [".", ",", "!", "?", ";", ":", "\"", "«", "»"]:
+		s2 = s2.replace(ch, "")
+	s2 = s2.strip_edges()
+	for art in ["le ", "la ", "les ", "l'", "un ", "une ", "des "]:
+		if s2.begins_with(art):
+			s2 = s2.substr(art.length()).strip_edges()
+			break
+	return s2
+
+## Niveau de référence d'une zone (plus petit niveau de ses lieux) : rencontres de route.
+func adventure_zone_level(zone_id: String) -> int:
+	var lvl: int = 0
+	for k: String in ADVENTURE_POIS.get(zone_id, {}).keys():
+		var l: int = int(ADVENTURE_POIS[zone_id][k].get("level", 10))
+		if lvl == 0 or l < lvl:
+			lvl = l
+	return maxi(1, lvl if lvl > 0 else 10)
 
 ## Production totale de l'empire (bâtiments des villes possédées non
 ## pillées), versée à chaque bataille gagnée.
@@ -1665,6 +1894,69 @@ func conquest_pay_assault_tactic(data: Dictionary, tactic: String) -> String:
 	data["gold"] = int(data.get("gold", 0)) - gold_cost
 	return ""
 
+## ── Défis optionnels de Conquête ─────────────────────────────────────
+## Chaque bataille d'assaut propose un défi facultatif (déterministe : même ville et
+## même vague = même défi). Réussi, il rapporte de l'or et une ressource du biome.
+##   swift    : gagner en CONQUEST_SWIFT_TURNS tours ou moins ;
+##   flawless : aucun allié K.O. ;
+##   class    : gagner avec une classe donnée dans l'équipe.
+const CONQUEST_SWIFT_TURNS := 6
+const CONQUEST_BIOME_RESOURCE := {"Forêt": "Bois", "Montagne": "Fer", "Désert": "Venin", "Donjon": "Magie"}
+
+func conquest_challenge_for(data: Dictionary, city_id: String) -> Dictionary:
+	if city_id == "" or not CONQUEST_CITIES.has(city_id):
+		return {}
+	var conquest: Dictionary = data.get("conquest", {})
+	var wave: int = int(conquest.get("sieges", {}).get(city_id, 0))
+	var h: int = absi(city_id.hash() + wave * 7919)
+	var kinds: Array = ["swift", "flawless", "class"]
+	var kind: String = String(kinds[h % kinds.size()])
+	var level: int = int(CONQUEST_CITIES[city_id].get("level", 10))
+	var res_name: String = String(CONQUEST_BIOME_RESOURCE.get(conquest_city_biome(city_id), "Fer"))
+	var out: Dictionary = {"kind": kind, "gold": 40 + 4 * level, "resources": {res_name: 4 + level / 6}}
+	match kind:
+		"swift":
+			out["label"] = "Victoire éclair : gagner en %d tours ou moins" % CONQUEST_SWIFT_TURNS
+		"flawless":
+			out["label"] = "Sans pertes : aucun allié K.O."
+		"class":
+			var classes: Array = CLASS_ORDER.duplicate()
+			var cls: String = String(classes[(h / 3) % classes.size()])
+			out["class"] = cls
+			out["label"] = "Avec un %s dans l'équipe" % cls
+	return out
+
+## Le défi est-il rempli ? info : { turns, deaths } transmis par GameManager.
+func conquest_challenge_met(data: Dictionary, challenge: Dictionary, info: Dictionary) -> bool:
+	match String(challenge.get("kind", "")):
+		"swift":
+			return int(info.get("turns", 99)) > 0 and int(info.get("turns", 99)) <= CONQUEST_SWIFT_TURNS
+		"flawless":
+			return info.has("deaths") and int(info["deaths"]) == 0
+		"class":
+			for m: Dictionary in data.get("team", []):
+				if String(m.get("classe", "")) == String(challenge.get("class", "")):
+					return true
+	return false
+
+func _conquest_eval_challenge(data: Dictionary, info: Dictionary) -> void:
+	if String(data.get("campaign_mode", "")) != "conquest":
+		return
+	var conquest: Dictionary = data.get("conquest", {})
+	var city: String = String(conquest.get("pending_city", ""))
+	var ch: Dictionary = conquest_challenge_for(data, city)
+	if ch.is_empty():
+		conquest.erase("last_challenge")
+		return
+	var ok: bool = conquest_challenge_met(data, ch, info)
+	ch["success"] = ok
+	if ok:
+		data["gold"] = int(data.get("gold", 0)) + int(ch["gold"])
+		add_resources(data, ch["resources"])
+		conquest_add_event(conquest, "Défi réussi : %s (+%d or)" % [String(ch["label"]), int(ch["gold"])])
+	conquest["last_challenge"] = ch
+	data["conquest"] = conquest
+
 ## Construire un bâtiment dans une ville conquise. Retourne "" si OK.
 func conquest_build(data: Dictionary, city_id: String, building: String) -> String:
 	var info: Dictionary = CONQUEST_BUILDINGS.get(building, {})
@@ -1739,6 +2031,7 @@ func _apply_campaign_defeat(data: Dictionary) -> void:
 	elif mode == "adventure":
 		var adventure: Dictionary = data.get("adventure", {})
 		adventure["pending_challenge"] = ""
+		adventure.erase("pending_name")
 		data["adventure"] = adventure
 
 ## Numéro du prochain combat (1 = premier). Boss tous les BOSS_EVERY combats.

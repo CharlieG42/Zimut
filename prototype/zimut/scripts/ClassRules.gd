@@ -114,7 +114,7 @@ const CLASSES := {
 		"xp": 0.95, "pa": [40], "pm": [],
 		"aff": {"intelligence": "A", "vita": "B", "wisdom": "B", "agility": "B", "defense": "C", "force": "C"},
 		"auto": {"intelligence": 3, "vita": 2, "wisdom": 1, "agility": 1},
-		"role": "Ses invocations héritent de son niveau. +1 PA au niv. 40.",
+		"role": "Ses familiers héritent de son niveau. +1 PA au niv. 40.",
 	},
 	"Sylvain": {
 		"xp": 0.95, "pa": [45], "pm": [35],
