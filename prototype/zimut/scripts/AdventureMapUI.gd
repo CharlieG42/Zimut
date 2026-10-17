@@ -92,7 +92,6 @@ var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
-	Music.play("adventure")
 	layer = 10
 	_rng.randomize()
 	_save = GameManager.active_save
@@ -345,6 +344,7 @@ func _rebuild_world() -> void:
 	_cell_nodes.clear()
 	var biome: String = manager.zone_biome()
 	GameManager.fight_biome = biome
+	Music.play_adventure(biome)
 	_backdrop = BackdropFx.new()
 	_backdrop.z_index = 0
 	_world.add_child(_backdrop)
@@ -668,6 +668,9 @@ func _cross_gate(pos: Vector2i) -> void:
 	var team_lvl: int = 1
 	for m: Dictionary in _save.get("team", []):
 		team_lvl = maxi(team_lvl, ProgressionManager.member_level(_save, String(m.get("classe", ""))))
+	var trait_txt: String = BiomeEffects.title(manager.zone_biome())
+	if trait_txt != "":
+		_log("Particularité des combats ici : %s." % BiomeEffects.describe(manager.zone_biome()))
 	if lvl > team_lvl + 3:
 		_toast_show("%s · niv %d — terres dangereuses !" % [manager.zone_name(), lvl])
 	else:
