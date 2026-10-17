@@ -757,7 +757,7 @@ class StatsView extends Control:
 		# Nom et classe
 		var full: String = String(e["name"])
 		var short: String = full.split(" Lv")[0]
-		var sub: String = "Invocation" if e.get("entity_type", "") == "Summon" else String(e.get("classe", ""))
+		var sub: String = "Familier" if e.get("entity_type", "") == "Summon" else String(e.get("classe", ""))
 		draw_string_outline(font, Vector2(128, 36), short, HORIZONTAL_ALIGNMENT_LEFT, size.x - 140.0, 24, 5, Color(0, 0, 0, 0.92))
 		draw_string(font, Vector2(128, 36), short, HORIZONTAL_ALIGNMENT_LEFT, size.x - 140.0, 24, Color(1, 0.95, 0.8))
 		draw_string(font, Vector2(128, 56), "%s · niveau %d" % [sub, lvl], HORIZONTAL_ALIGNMENT_LEFT, size.x - 140.0, 14, Color(0.7, 0.78, 0.92))

@@ -965,9 +965,9 @@ func validate_cast(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Str
 		return "L'ennemi doit avoir moins de 30 % de PV."
 	if p["needs_summon"] or p["buff_summons"]:
 		if summons_of(caster).is_empty():
-			return "Aucune invocation active."
+			return "Aucun familier actif."
 	if p["kind"] == "summon" and summons_of(caster).size() >= 3:
-		return "Trop d'invocations (3 max)."
+		return "Trop de familiers (3 max)."
 	if p["kind"] == "summon" and String(p["summon"]) == "Balise" and beacons_of(caster).size() >= 3:
 		return "Trop de balises (3 max)."
 	if p["kind"] == "revive" and graveyard.is_empty():
