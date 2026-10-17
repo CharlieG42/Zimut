@@ -41,6 +41,8 @@ Thumbs.db
 # (sans eux, Godot trouve les .import mais pas les images : sprites manquants).
 !assets/sprites/**/*.png
 !assets/icons/**/*.png
+!assets/**/*.png
+!assets/**/*.jpg
 
 # Fichiers temporaires Godot
 *.tmp
