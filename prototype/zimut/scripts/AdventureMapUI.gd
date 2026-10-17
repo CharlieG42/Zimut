@@ -71,7 +71,7 @@ const POI_ICONS := {
 	"puzzle": "res://assets/adventure/poi/puzzle.svg",
 	"camp": "res://assets/adventure/poi/camp.svg",
 	"reveal": "res://assets/adventure/poi/reveal.svg",
-	"exit": "res://assets/adventure/poi/exit.svg",
+	"gate": "res://assets/adventure/poi/exit.svg",
 }
 ## Héros : sprite officiel du Mage (assets/sprites/players) — même
 ## personnage que sur le plateau de combat tactique.
@@ -241,7 +241,7 @@ func _build() -> void:
 
 	var help := Label.new()
 	help.text = "Clic case adjacente : déplacement\nBrouillard : révélé autour du héros\n" \
-		+ "Belvédère : villes pour la Conquête\nCombat : règles du mode Tactique"
+		+ "Portail : passage vers le biome voisin\nBelvédère : villes pour la Conquête"
 	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	help.add_theme_color_override("font_color", TEXT)
 	help.add_theme_font_size_override("font_size", 19)
@@ -349,8 +349,12 @@ func _refresh_props(size: Vector2i, zone_id: String) -> void:
 func _animate_hero_idle() -> void:
 	if _hero_sprite == null:
 		return
+	if _hero_sprite.has_meta("idle_tween"):
+		var old: Tween = _hero_sprite.get_meta("idle_tween")
+		if old != null and old.is_valid():
+			old.kill()
 	var tween := create_tween().set_loops()
-	var base := _hero_sprite.scale
+	var base: Vector2 = _hero_sprite.scale
 	tween.tween_property(_hero_sprite, "scale",
 		Vector2(base.x * 1.04, base.y * 0.96), 0.9)
 	tween.tween_property(_hero_sprite, "scale", base, 0.9)
@@ -424,6 +428,27 @@ func _refresh_pois(size: Vector2i) -> void:
 		_poi_icons[pos] = icon
 		if manager.poi_done(pos):
 			icon.modulate = Color(1, 1, 1, 0.35)
+	_refresh_gates(size)
+
+## Portails de passage entre biomes : dessinés sur les cases de bord,
+## avec une pulsation douce pour les signaler.
+func _refresh_gates(size: Vector2i) -> void:
+	for g: Dictionary in ProgressionManager.adventure_zone_meta(
+			manager.zone_id()).get("gates", []):
+		var gp: Array = g.get("pos", [-1, -1])
+		var pos := Vector2i(int(gp[0]), int(gp[1]))
+		if not manager.cell_discovered(pos):
+			continue
+		var icon := Sprite2D.new()
+		icon.texture = load(String(POI_ICONS["gate"]))
+		icon.scale = Vector2(0.5, 0.5)
+		icon.position = _cell_center(pos.x, pos.y, size) - Vector2(0, 14)
+		icon.z_index = 15
+		_map_root.add_child(icon)
+		_poi_icons[pos] = icon
+		var pulse := create_tween().set_loops(4)
+		pulse.tween_property(icon, "modulate:a", 0.55, 0.8)
+		pulse.tween_property(icon, "modulate:a", 1.0, 0.8)
 
 # ══════════════════════════════════════════════════════════════════
 #  Interactions
@@ -447,6 +472,10 @@ func _on_cell_pressed(pos: Vector2i) -> void:
 	else:
 		_message.text = "Le paysage s'ouvre devant vous."
 	_refresh(true)
+	# Case de passage : le héros traverse vers le biome voisin.
+	var gate: Dictionary = manager.gate_here()
+	if not gate.is_empty():
+		_take_gate(gate)
 
 func _interact() -> void:
 	var cmd: Dictionary = manager.interact()
@@ -473,39 +502,79 @@ func _interact() -> void:
 			_refresh()
 		"combat":
 			_start_combat(cmd.get("poi", {}))
-		"exit":
-			_show_exit_dialog(cmd.get("key", ""))
 		_:
 			_message.text = "Rien de particulier ici... pour l'instant."
 
 func _show_puzzle_dialog(cmd: Dictionary) -> void:
 	var puzzle: Dictionary = cmd.get("puzzle", {})
+	var poi_name: String = String(cmd.get("poi", {}).get("name", "Énigme"))
 	var dialog := AcceptDialog.new()
-	dialog.title = "✦  Énigme"
-	dialog.ok_button_text = "Répondre"
+	dialog.title = "✦  %s" % poi_name
+	dialog.ok_button_text = "Tenter ma réponse"
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 10)
+	box.add_theme_constant_override("separation", 14)
 	dialog.add_child(box)
+
 	var label := Label.new()
 	label.text = String(puzzle.get("text", ""))
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size.x = 520
+	label.custom_minimum_size = Vector2(720, 90)
+	label.add_theme_font_size_override("font_size", 23)
+	label.add_theme_color_override("font_color", Color(0.15, 0.12, 0.08))
 	box.add_child(label)
+
 	var input := LineEdit.new()
 	input.placeholder_text = "Votre réponse..."
+	input.add_theme_font_size_override("font_size", 24)
 	box.add_child(input)
+
+	# Zone de résultat : solution et récompense, révélées après réponse.
+	var result := Label.new()
+	result.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	result.custom_minimum_size = Vector2(720, 120)
+	result.add_theme_font_size_override("font_size", 21)
+	result.visible = false
+	box.add_child(result)
+
 	dialog.confirmed.connect(func() -> void:
-		var ok: bool = manager.solve_puzzle(String(cmd.get("key", "")),
-			input.text)
+		if result.visible:
+			dialog.queue_free()
+			return
+		var key := String(cmd.get("key", ""))
+		var outcome: Dictionary = manager.solve_puzzle(key, input.text)
+		var ok: bool = bool(outcome.get("solved", false))
 		if ok:
-			_message.text = "Énigme résolue : +%d XP d'exploration !" \
-				% (ProgressionManager.ADVENTURE_BASE_XP * 2)
+			var reward: Dictionary = outcome.get("reward", {})
+			var item_name: String = String(reward.get("item", {}).get("name", ""))
+			var lines: PackedStringArray = []
+			lines.append("✅ EXACT — c'était bien « %s »."
+				% String(puzzle.get("answer", "")))
+			lines.append("")
+			lines.append("🎁 RÉCOMPENSE :")
+			lines.append("   • +%d XP d'exploration" % int(reward.get("xp", 0)))
+			if item_name != "":
+				lines.append("   • « %s » rejoint l'inventaire" % item_name)
+			lines.append("   • +%d pièces d'or" % int(reward.get("gold", 0)))
+			result.text = "\n".join(lines)
+			result.add_theme_color_override("font_color",
+				Color(0.10, 0.42, 0.14))
+			_message.text = "Énigme résolue ! +%d XP." % int(reward.get("xp", 0))
 		else:
-			_message.text = String(puzzle.get("wrong", "Les runes restent muettes."))
-		_refresh()
-		dialog.queue_free())
+			# Mauvaise réponse : on révèle la solution, défi terminé.
+			var lost: String = String(puzzle.get("wrong",
+				"Les runes restent muettes."))
+			result.text = "%s\n\n💡 La solution était : « %s »\n\n" \
+				% [lost, String(puzzle.get("answer", ""))] \
+				+ "Vous pourrez retenter ce sanctuaire une autre fois."
+			result.add_theme_color_override("font_color",
+				Color(0.52, 0.14, 0.10))
+			_message.text = "Échec de l'énigme. La solution était : %s." \
+				% String(puzzle.get("answer", ""))
+		result.visible = true
+		dialog.ok_button_text = "Fermer"
+		_refresh())
 	add_child(dialog)
-	dialog.popup_centered(Vector2i(620, 220))
+	dialog.popup_centered(Vector2i(820, 520))
 
 func _show_reveal_popup(names: Array) -> void:
 	if names.is_empty():
@@ -520,28 +589,57 @@ func _show_reveal_popup(names: Array) -> void:
 	dialog.popup_centered(Vector2i(560, 260))
 	_message.text = "Belvédère : villes révélées pour la Conquête !"
 
-func _show_exit_dialog(key: String) -> void:
-	var revealed: Array = manager.take_exit(key)
+## Transition de biome : le héros marche sur une case de passage.
+func _take_gate(gate: Dictionary) -> void:
+	var to: String = String(gate.get("to", ""))
+	var to_name: String = ProgressionManager.adventure_zone_name(to)
 	var dialog := AcceptDialog.new()
-	dialog.title = "🧭  Sentier découvert !"
-	var zone_names: Array = []
-	var new_zones: Array = []
-	for r: String in revealed:
-		if String(r).begins_with("zone:"):
-			var zid := String(r).substr(5)
-			new_zones.append(zid)
-			zone_names.append(ProgressionManager.adventure_zone_name(zid))
-	if zone_names.is_empty():
-		var familiar: String = "Ce sentier vous est déjà familier.\n"
-		dialog.dialog_text = familiar \
-			+ "Empruntez une zone du panneau pour voyager."
-	else:
-		dialog.dialog_text = "Le sentier s'ouvre vers : %s\nChoisissez la zone dans « ZONES DU MONDE »." \
-			% " · ".join(PackedStringArray(zone_names))
+	dialog.title = "🧭  Passage vers %s" % to_name
+	var to_biome: String = ProgressionManager.biome_label(
+		ProgressionManager.adventure_zone_biome(to))
+	var gate_text: String = "Le sentier change de relief :\n" \
+		+ "vous entrez dans %s." % to_biome
+	dialog.dialog_text = gate_text + "\n\nVoulez-vous poursuivre ?"
+	dialog.ok_button_text = "Traverser"
+	dialog.cancel_button_text = "Rester"
+	dialog.confirmed.connect(func() -> void:
+		manager.use_gate()
+		_message.text = "Vous arrivez : %s." % manager.zone_name()
+		_build_map()
+		_refresh()
+		dialog.queue_free())
+	dialog.canceled.connect(func() -> void:
+		# Le héros recule d'une case (il reste dans son biome).
+		var back: Vector2i = _opposite_cell(hero_side(gate))
+		manager.move_hero(back)
+		_refresh(true)
+		dialog.queue_free())
 	add_child(dialog)
-	dialog.popup_centered(Vector2i(560, 220))
-	_refresh()
-	_rebuild_zone_buttons()
+	dialog.popup_centered(Vector2i(560, 240))
+
+## Côté du bord où se trouve la gate ("left", "right", "top", "bottom").
+func hero_side(gate: Dictionary) -> String:
+	var size: Vector2i = manager.zone_size()
+	var gp: Array = gate.get("pos", [0, 0])
+	if int(gp[0]) == 0:
+		return "left"
+	if int(gp[0]) == size.x - 1:
+		return "right"
+	if int(gp[1]) == 0:
+		return "top"
+	return "bottom"
+
+## Case intérieure opposée à un bord : où reculer si le héros reste.
+func _opposite_cell(side: String) -> Vector2i:
+	var h: Vector2i = manager.hero_pos()
+	match side:
+		"left":
+			return Vector2i(1, h.y)
+		"right":
+			return Vector2i(manager.zone_size().x - 2, h.y)
+		"top":
+			return Vector2i(h.x, 1)
+	return Vector2i(h.x, manager.zone_size().y - 2)
 
 func _rebuild_zone_buttons() -> void:
 	for btn: Button in _zone_buttons.values():

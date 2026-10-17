@@ -19,7 +19,6 @@ const KIND_CHEST := "chest"
 const KIND_PUZZLE := "puzzle"
 const KIND_CAMP := "camp"
 const KIND_REVEAL := "reveal"
-const KIND_EXIT := "exit"
 
 var save: Dictionary = {}
 var slot: int = -1
@@ -116,7 +115,8 @@ func interact() -> Dictionary:
 			var puzzle: Dictionary = ProgressionManager.ADVENTURE_PUZZLES.get(key, {})
 			if puzzle.is_empty():
 				return {"action": "nothing"}
-			return {"action": "puzzle", "key": key, "puzzle": puzzle.duplicate(true)}
+			return {"action": "puzzle", "key": key, "puzzle": puzzle.duplicate(true),
+				"poi": poi.duplicate(true)}
 		KIND_CHEST:
 			var looted: Array = open_chest(key, int(poi.get("level", 10)))
 			return {"action": "chest", "loots": looted}
@@ -133,21 +133,33 @@ func interact() -> Dictionary:
 			state["pending_challenge"] = key
 			persist()
 			return {"action": "combat", "key": key, "poi": poi.duplicate(true)}
-		KIND_EXIT:
-			return {"action": "exit", "key": key}
 		_:
 			return {"action": "nothing"}
 
 ## Valide la réponse d'une énigme : récompense et complétion si correcte.
-func solve_puzzle(key: String, answer: String) -> bool:
+## Valide la réponse d'une énigme. Retourne { solved, reward } :
+## en cas de succès le joueur gagne XP + un objet rare + de l'or
+## (récompense visible dans le dialog de l'UI).
+func solve_puzzle(key: String, answer: String) -> Dictionary:
 	var puzzle: Dictionary = ProgressionManager.ADVENTURE_PUZZLES.get(key, {})
 	if puzzle.is_empty():
-		return false
+		return {"solved": false, "reward": {}}
 	if answer.strip_edges().to_lower() != String(puzzle.get("answer", "")).strip_edges().to_lower():
-		return false
-	award_exploration_xp(int(ProgressionManager.ADVENTURE_BASE_XP * 2))
+		return {"solved": false, "reward": {}}
+	var xp: int = ProgressionManager.ADVENTURE_BASE_XP * 2
+	var reward: Dictionary = {"xp": xp, "gold": 40 + 5 * challenge_level(), "item": {}}
+	# Objet rare garanti : la pierre de la zone récompense la perspicacité.
+	var level: int = challenge_level()
+	var drops: Array = ProgressionManager._roll_loots(maxi(1, level), true)
+	if not drops.is_empty():
+		var item: Dictionary = drops[0]
+		save["inventory"].append(item)
+		reward["item"] = item
+	award_exploration_xp(xp)
+	save["gold"] = int(save.get("gold", 0)) + int(reward["gold"])
 	complete_poi(key, KIND_PUZZLE)
-	return true
+	persist()
+	return {"solved": true, "reward": reward}
 
 ## Coffre : XP d'exploration + un objet de l'inventaire commun.
 func open_chest(key: String, level: int) -> Array:
@@ -166,11 +178,29 @@ func rest_at_camp(_key: String) -> void:
 	award_exploration_xp(int(ProgressionManager.ADVENTURE_BASE_XP * 0.5))
 	persist()
 
-## Sortie : débloque la/les zone(s) suivante(s) et affiche le sélecteur.
-func take_exit(key: String) -> Array:
-	var revealed: Array = complete_poi(key, KIND_EXIT)
-	persist()
-	return revealed
+## Gate à la position du héros : {} si le héros n'est pas sur un passage.
+func gate_here() -> Dictionary:
+	return ProgressionManager.adventure_gate(zone_id(), hero_pos())
+
+## Emprunte la gate : place le héros sur la case d'entrée de la zone
+## cible et y révèle le brouillard. Retourne l'id de la zone cible,
+## "" si le héros n'est pas sur une gate.
+func use_gate() -> String:
+	var gate: Dictionary = gate_here()
+	if gate.is_empty():
+		return ""
+	var to: String = String(gate.get("to", ""))
+	if not ProgressionManager.adventure_zone_meta(to).is_empty():
+		state["zone"] = to
+		var entry: Array = gate.get("entry", [1, 1])
+		state["hero_pos"] = [int(entry[0]), int(entry[1])]
+		var fresh: Array = ProgressionManager.adventure_move(state,
+			Vector2i(int(entry[0]), int(entry[1])))
+		state["moves"] = maxi(0, int(state.get("moves", 1)) - 1)
+		persist()
+		zone_changed.emit(to)
+		return to
+	return ""
 
 ## Change de zone (si débloquée). Le héros repart du départ de la zone.
 func enter_zone(next_zone: String) -> bool:

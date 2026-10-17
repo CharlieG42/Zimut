@@ -100,20 +100,34 @@ const ADVENTURE_BASE_XP := 60
 
 const ADVENTURE_ZONES := {
 	"foret_sylve": {
-		"name": "Sentiers de la Sylve", "biome": "Forêt", "size": [10, 7],
-		"start": [1, 3], "unlock": "", "reveals": ["clairiere", "village_brume"],
+		"name": "Sentiers de la Sylve", "biome": "Forêt", "size": [8, 8],
+		"start": [1, 4], "reveals": ["clairiere", "village_brume"],
+		"gates": [
+			{"pos": [0, 4], "to": "foret_ronces", "entry": [7, 4]},
+			{"pos": [4, 0], "to": "montagne_pics", "entry": [4, 7]},
+		],
 	},
 	"foret_ronces": {
-		"name": "Ronces de l’Abbaye", "biome": "Forêt", "size": [10, 7],
-		"start": [1, 3], "unlock": "foret_sylve", "reveals": ["abbaye_ronce", "ruines_lierre"],
+		"name": "Ronces de l’Abbaye", "biome": "Forêt", "size": [8, 8],
+		"start": [1, 4], "reveals": ["abbaye_ronce", "ruines_lierre"],
+		"gates": [
+			{"pos": [7, 4], "to": "foret_sylve", "entry": [0, 4]},
+		],
 	},
 	"montagne_pics": {
-		"name": "Pics du Givre", "biome": "Montagne", "size": [10, 7],
-		"start": [1, 3], "unlock": "foret_sylve", "reveals": ["hameau_pin", "col_givre"],
+		"name": "Pics du Givre", "biome": "Montagne", "size": [8, 8],
+		"start": [1, 4], "reveals": ["hameau_pin", "col_givre"],
+		"gates": [
+			{"pos": [4, 7], "to": "foret_sylve", "entry": [4, 0]},
+			{"pos": [7, 4], "to": "desert_dunes", "entry": [0, 4]},
+		],
 	},
 	"desert_dunes": {
-		"name": "Dunes Perdues", "biome": "Désert", "size": [10, 7],
-		"start": [1, 3], "unlock": "montagne_pics", "reveals": ["oasis", "caravanserail"],
+		"name": "Dunes Perdues", "biome": "Désert", "size": [8, 8],
+		"start": [1, 4], "reveals": ["oasis", "caravanserail"],
+		"gates": [
+			{"pos": [0, 4], "to": "montagne_pics", "entry": [7, 4]},
+		],
 	},
 }
 
@@ -121,40 +135,34 @@ const ADVENTURE_POIS := {
 	"foret_sylve": {
 		"4,1": {"kind": "puzzle", "name": "Sanctuaire des runes", "level": 10,
 			"desc": "De vieilles runes attendent une réponse."},
-		"7,2": {"kind": "combat", "name": "Camp gobelin", "level": 10,
+		"6,2": {"kind": "combat", "name": "Camp gobelin", "level": 10,
 			"desc": "Des gobelins ont dressé leurs tentes."},
 		"3,4": {"kind": "chest", "name": "Coffre moussu", "level": 10,
 			"desc": "Un coffre à demi enseveli sous la mousse."},
-		"5,5": {"kind": "camp", "name": "Source claire", "level": 10,
+		"5,6": {"kind": "camp", "name": "Source claire", "level": 10,
 			"desc": "Un endroit sûr pour reprendre souffle."},
-		"8,5": {"kind": "reveal", "name": "Belvédère de la Sylve", "level": 10,
+		"6,5": {"kind": "reveal", "name": "Belvédère de la Sylve", "level": 10,
 			"desc": "Du haut de l’arbre, la vallée se dévoile."},
-		"9,3": {"kind": "exit", "name": "Sentier du vieux chêne", "level": 10,
-			"desc": "Le sentier mène vers de nouveaux horizons."},
 	},
 	"foret_ronces": {
 		"5,1": {"kind": "combat", "name": "Embûche de ronces", "level": 13,
 			"desc": "Quelque chose remue sous les ronces."},
 		"2,2": {"kind": "puzzle", "name": "Autel du Lierre", "level": 13,
 			"desc": "L’autel du Lierre pose son énigme."},
-		"7,4": {"kind": "chest", "name": "Cachette du braconnier", "level": 13,
+		"6,4": {"kind": "chest", "name": "Cachette du braconnier", "level": 13,
 			"desc": "Un vieux sac oublié sous une racine."},
 		"4,5": {"kind": "combat", "name": "Patrouille de la Citadelle", "level": 15,
 			"desc": "Des soldats des Ronces rôdent ici."},
-		"9,3": {"kind": "exit", "name": "Chemin des Ronces", "level": 13,
-			"desc": "Le chemin s’enfonce vers l’ouest."},
 	},
 	"montagne_pics": {
 		"5,2": {"kind": "combat", "name": "Caverne du Troll", "level": 17,
 			"desc": "Un troll garde le passage."},
 		"2,4": {"kind": "puzzle", "name": "Runes du Col", "level": 17,
 			"desc": "Des runes gelées à déchiffrer."},
-		"7,5": {"kind": "chest", "name": "Grotte au cristal", "level": 17,
+		"6,6": {"kind": "chest", "name": "Grotte au cristal", "level": 17,
 			"desc": "Un éclat de cristal brille au fond."},
-		"8,1": {"kind": "reveal", "name": "Panneau du Givre", "level": 17,
+		"6,1": {"kind": "reveal", "name": "Panneau du Givre", "level": 17,
 			"desc": "Tout le massif s’étale sous vos yeux."},
-		"9,3": {"kind": "exit", "name": "Descente du Col", "level": 17,
-			"desc": "Le sentier descend vers les Dunes."},
 	},
 	"desert_dunes": {
 		"4,3": {"kind": "combat", "name": "Squelettes des sables", "level": 21,
@@ -163,10 +171,8 @@ const ADVENTURE_POIS := {
 			"desc": "L’obélisque attend sa constellation."},
 		"2,5": {"kind": "chest", "name": "Épave du convoi", "level": 21,
 			"desc": "Les restes d’un convoi ensevelis."},
-		"8,5": {"kind": "reveal", "name": "Mirador du Désert", "level": 21,
+		"6,6": {"kind": "reveal", "name": "Mirador du Désert", "level": 21,
 			"desc": "Un mirador dominant les Dunes."},
-		"9,3": {"kind": "exit", "name": "Route du Caravansérail", "level": 21,
-			"desc": "La route du caravansérail s’ouvre."},
 	},
 }
 
@@ -1357,11 +1363,10 @@ func adventure_poi_key(zone_id: String, pos: Vector2i) -> String:
 
 ## Une zone est-elle débloquée (elle-même ou son prédécesseur complété via
 ## son POI exit) ? Une zone sans prérequis est toujours débloquée.
-func adventure_zone_unlocked(adv: Dictionary, zone_id: String) -> bool:
-	var prereq: String = String(ADVENTURE_ZONES.get(zone_id, {}).get("unlock", ""))
-	if prereq == "":
-		return true
-	return (adv.get("zones_unlocked", []) as Array).has(zone_id)
+## Monde contigu : toutes les zones sont accessibles en marchant
+## (les gates des bords relient les biomes entre eux).
+func adventure_zone_unlocked(_adv: Dictionary, _zone_id: String) -> bool:
+	return true
 
 ## Déplace le héros dans sa zone courante : révèle le brouillard de guerre
 ## autour de la nouvelle position (rayon ADVENTURE_FOG_RADIUS). Retourne
@@ -1408,22 +1413,13 @@ func adventure_complete_poi(adv: Dictionary, poi_key: String, kind: String = "")
 	var zone_id: String = String(adv.get("zone", "foret_sylve"))
 	var poi_kind: String = kind
 	if poi_kind == "":
-		poi_kind = "exit"
 		var pos_part := poi_key.substr(zone_id.length() + 1)
 		for k: String in ADVENTURE_POIS.get(zone_id, {}).keys():
 			if k == pos_part:
-				poi_kind = String(ADVENTURE_POIS[zone_id][k].get("kind", "exit"))
+				poi_kind = String(ADVENTURE_POIS[zone_id][k].get("kind", ""))
 				break
 	var revealed: Array = []
-	if poi_kind == "exit":
-		for next_id: String in ADVENTURE_ZONES.keys():
-			if String(ADVENTURE_ZONES[next_id].get("unlock", "")) == zone_id:
-				var unlocked: Array = adv.get("zones_unlocked", [])
-				if not unlocked.has(next_id):
-					unlocked.append(next_id)
-					adv["zones_unlocked"] = unlocked
-					revealed.append("zone:" + next_id)
-	elif poi_kind == "reveal":
+	if poi_kind == "reveal":
 		var cities: Array = ADVENTURE_ZONES.get(zone_id, {}).get("reveals", [])
 		var known: Array = adv.get("revealed_cities", [])
 		for city_id: String in cities:
@@ -1432,6 +1428,15 @@ func adventure_complete_poi(adv: Dictionary, poi_key: String, kind: String = "")
 					revealed.append(city_id)
 		adv["revealed_cities"] = known
 	return revealed
+
+## Gate (passage entre biomes) à une position de la zone : {} si aucune.
+## Retourne { "to": zone cible, "entry": [x,y] case d'arrivée }.
+func adventure_gate(zone_id: String, pos: Vector2i) -> Dictionary:
+	for g: Dictionary in ADVENTURE_ZONES.get(zone_id, {}).get("gates", []):
+		var gp: Array = g.get("pos", [-1, -1])
+		if int(gp[0]) == pos.x and int(gp[1]) == pos.y:
+			return g
+	return {}
 
 ## Débloque une zone Aventure (retour de conquête, événement…).
 func adventure_unlock_zone(adv: Dictionary, zone_id: String) -> void:
