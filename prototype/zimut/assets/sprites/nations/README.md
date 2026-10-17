@@ -1,4 +1,4 @@
-# Sprites « Nations » (planche du 17/10)
+# Sprites « Nations » (nouvelle planche du 17/10 — versions HD à venir)
 
 Source : `assets/sprites/_sheets/planche_nations.png` (planche d'illustration fournie par Charlie).
 Découpage reproductible : `python3 tools/extract_sheet_sprites.py` (détourage rembg + GrabCut,
@@ -22,8 +22,11 @@ cadres de découpe dans le script ; voir son en-tête).
 
 golem_de_pierre, loup_spectral, archer_sylvestre, elementaire_de_cristal, esprit_de_la_foret,
 requin_des_marees, ombre_invoquee, ent_de_combat, sentinelle_de_gres.
-Pas encore reliés au jeu : les invocations actuelles (`assets/sprites/summons/`) gardent leurs
-sprites. Ces familiers serviront à la capture en mode Aventure (idée Rappelz).
+Utilisés comme sprites des invocations des classes qui invoquent (copiés dans `assets/sprites/summons/`) :
+Tortue → golem_de_pierre · Loup → loup_spectral · Sirène → requin_des_marees ·
+Ange → elementaire_de_cristal · Homme-Faucon → ombre_invoquee · Centaure → esprit_de_la_foret ·
+Buisson → archer_sylvestre · Champignon → ent_de_combat. (sentinelle_de_gres : pas encore utilisée.)
+La capture de familiers en mode Aventure est abandonnée.
 
 ## Ennemis par nation — `nations/ennemis/<nation>/<nom>.png` (36)
 

@@ -32,16 +32,16 @@ SHEET = os.path.join(SPRITES, "_sheets", "planche_nations.png")
 
 # (nom de fichier, x0, y0, x1, y1) dans la planche 1536×1024
 HEROS = [
-    ("tank", 12, 98, 194, 390), ("assassin", 204, 98, 387, 390), ("chasseur", 396, 98, 567, 390),
-    ("mage", 577, 98, 753, 390), ("druide", 763, 98, 926, 390), ("heal", 937, 98, 1113, 390),
-    ("invocateur", 1124, 98, 1278, 390), ("sylvain", 1286, 98, 1402, 390), ("geomancien", 1410, 98, 1528, 390),
+    ("tank", 12, 98, 194, 392), ("assassin", 206, 98, 387, 392), ("chasseur", 399, 98, 571, 392),
+    ("mage", 583, 98, 757, 392), ("druide", 769, 98, 949, 392), ("heal", 960, 98, 1127, 392),
+    ("invocateur", 1138, 98, 1294, 392), ("sylvain", 1306, 98, 1414, 392), ("geomancien", 1425, 98, 1528, 392),
 ]
 FAMILIERS = [
-    ("golem_de_pierre", 14, 418, 196, 562), ("loup_spectral", 204, 418, 386, 562),
-    ("archer_sylvestre", 395, 418, 551, 562), ("elementaire_de_cristal", 561, 418, 741, 562),
-    ("esprit_de_la_foret", 750, 418, 916, 562), ("requin_des_marees", 924, 418, 1099, 562),
-    ("ombre_invoquee", 1108, 418, 1231, 562), ("ent_de_combat", 1243, 418, 1369, 562),
-    ("sentinelle_de_gres", 1378, 418, 1524, 562),
+    ("golem_de_pierre", 14, 424, 196, 564), ("loup_spectral", 206, 424, 389, 564),
+    ("archer_sylvestre", 399, 424, 571, 564), ("elementaire_de_cristal", 583, 424, 757, 564),
+    ("esprit_de_la_foret", 771, 424, 939, 564), ("requin_des_marees", 950, 424, 1117, 564),
+    ("ombre_invoquee", 1128, 424, 1259, 564), ("ent_de_combat", 1269, 424, 1394, 564),
+    ("sentinelle_de_gres", 1405, 424, 1526, 564),
 ]
 # nation -> liste (nom, x0, y0, x1, y1)
 ENNEMIS = {
@@ -67,7 +67,9 @@ ENNEMIS = {
 
 
 # Modèle rembg propre à certains sprites (le défaut convient aux autres).
-MODEL_OVERRIDE = {}
+MODEL_OVERRIDE = {"geomancien": "u2net"}
+# Sprites dont l'alpha est durci (supprime les halos fantômes du modèle)
+HARDEN = {"geomancien": 150}
 
 # Sprites détourés par GrabCut (cv2) : nom -> (rect du personnage, zone de premier plan sûr, coupe)
 # coordonnées relatives au cadre. `cut` = (x, y) : efface la zone à droite de x et au-dessus de y
@@ -75,9 +77,8 @@ MODEL_OVERRIDE = {}
 GRABCUT = {
     "druide": {"rect": (5, 8, 158, 284), "seed": None, "cut": None},
     "mage": {"rect": (6, 6, 170, 284), "seed": None, "cut": None},
-    "sylvain": {"rect": (8, 6, 110, 284), "seed": None, "cut": None},
+    "sylvain": {"rect": (3, 6, 104, 284), "seed": None, "cut": None},
     "heal": {"rect": (6, 6, 170, 284), "seed": None, "cut": None},
-    "geomancien": {"rect": (8, 8, 112, 284), "seed": (42, 30, 92, 60), "cut": (84, 50)},
 }
 
 
@@ -144,6 +145,10 @@ def cut(sheet: Image.Image, session, box, min_part: float = 0.04, name: str = ""
     out = remove(big, session=session)
     if scale > 1:
         out = out.resize(crop.size, Image.LANCZOS)
+    if name in HARDEN:
+        a = np.array(out)
+        a[:, :, 3] = np.where(a[:, :, 3] < HARDEN[name], 0, 255)
+        out = Image.fromarray(a, "RGBA")
     return tighten(out, min_part)
 
 
@@ -200,7 +205,7 @@ def main() -> None:
         if use not in sessions:
             sessions[use] = new_session(use)
         img = cut(sheet, sessions[use], tuple(box), name=name)
-        if folder == "familiers":
+        if folder == "familiers" or folder.startswith(os.path.join("nations", "ennemis")):
             img = tighten(defringe(img))
         img.save(os.path.join(d, name + ".png"))
         done.append((folder, name, img))
