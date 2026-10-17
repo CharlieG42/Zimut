@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://csffpxj1r65ro"
-path="res://.godot/imported/summon_buisson.png-a035021fb2f947ceff603f85a2171617.ctex"
+uid="uid://dsg43ebum8iik"
+path="res://.godot/imported/summon_requin_des_marees.png-c2ccfb6b7e79e97bb6f391484b79d4b0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icons/spells/summon_buisson.png"
-dest_files=["res://.godot/imported/summon_buisson.png-a035021fb2f947ceff603f85a2171617.ctex"]
+source_file="res://assets/icons/spells/summon_requin_des_marees.png"
+dest_files=["res://.godot/imported/summon_requin_des_marees.png-c2ccfb6b7e79e97bb6f391484b79d4b0.ctex"]
 
 [params]
 

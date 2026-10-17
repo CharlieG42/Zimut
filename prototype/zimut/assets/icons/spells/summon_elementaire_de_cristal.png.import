@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ccqqp4jrdjhxy"
-path="res://.godot/imported/summon_ange.png-b339472a720c802de6e1803ca9623f0b.ctex"
+uid="uid://d2uwoxbftctij"
+path="res://.godot/imported/summon_elementaire_de_cristal.png-fbdb9743900dc108866845a7c3f77388.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icons/spells/summon_ange.png"
-dest_files=["res://.godot/imported/summon_ange.png-b339472a720c802de6e1803ca9623f0b.ctex"]
+source_file="res://assets/icons/spells/summon_elementaire_de_cristal.png"
+dest_files=["res://.godot/imported/summon_elementaire_de_cristal.png-fbdb9743900dc108866845a7c3f77388.ctex"]
 
 [params]
 

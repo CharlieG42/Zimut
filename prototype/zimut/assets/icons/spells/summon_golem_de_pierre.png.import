@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://2aoblihl5485"
-path="res://.godot/imported/entity_squelette.svg-6ca9284cbc2763727ecf40cfc8ce5acc.ctex"
+uid="uid://dkwrl8da5btbi"
+path="res://.godot/imported/summon_golem_de_pierre.png-d2f0a7ca796e0a3d21bcfe7a330c3c81.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/entity_squelette.svg"
-dest_files=["res://.godot/imported/entity_squelette.svg-6ca9284cbc2763727ecf40cfc8ce5acc.ctex"]
+source_file="res://assets/icons/spells/summon_golem_de_pierre.png"
+dest_files=["res://.godot/imported/summon_golem_de_pierre.png-d2f0a7ca796e0a3d21bcfe7a330c3c81.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

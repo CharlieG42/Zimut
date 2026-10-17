@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bjpw7fhslpy03"
-path="res://.godot/imported/entity_mage.svg-9fb1cabd8418a5b1d1f1ea451b5bdf3d.ctex"
+uid="uid://dbao0ph3vi3xg"
+path="res://.godot/imported/summon_esprit_de_la_foret.png-71282fab291efa5b12e04bc8bd33e6e5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/entity_mage.svg"
-dest_files=["res://.godot/imported/entity_mage.svg-9fb1cabd8418a5b1d1f1ea451b5bdf3d.ctex"]
+source_file="res://assets/icons/spells/summon_esprit_de_la_foret.png"
+dest_files=["res://.godot/imported/summon_esprit_de_la_foret.png-71282fab291efa5b12e04bc8bd33e6e5.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

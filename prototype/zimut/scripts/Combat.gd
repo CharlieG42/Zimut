@@ -669,12 +669,28 @@ const SUMMONS := {
 }
 
 
+## V16 : comme les sorts des héros, les attaques des invocations sont divisées par 1,5.
+const SUMMON_SPELL_DIV := 1.5
+
+
+## Divise les montants « N dégâts » et « N PV » d'un texte d'effet.
+static func _scale_effect(t: String, div: float) -> String:
+	var rx := RegEx.new()
+	rx.compile("(\\d+)(?= dégâts| PV| pv)")
+	var out: String = ""
+	var last: int = 0
+	for m: RegExMatch in rx.search_all(t):
+		out += t.substr(last, m.get_start() - last) + str(maxi(1, roundi(float(m.get_string(1)) / div)))
+		last = m.get_end()
+	return out + t.substr(last)
+
+
 static func summon_spells(sname: String) -> Array:
 	var info: Dictionary = SUMMONS.get(sname, SUMMONS["Loup Spectral"])
 	var sp: Array = info["spell"]
 	if sp.is_empty():
 		return []
-	var eff: String = ("%d dégâts" % int(sp[3])) if typeof(sp[3]) == TYPE_INT else str(sp[3])
+	var eff: String = ("%d dégâts" % maxi(1, roundi(float(sp[3]) / SUMMON_SPELL_DIV))) if typeof(sp[3]) == TYPE_INT else _scale_effect(str(sp[3]), SUMMON_SPELL_DIV)
 	var stype: String = "Attaque"
 	if eff.contains("restaure"):
 		stype = "Soin"
