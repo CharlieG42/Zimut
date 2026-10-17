@@ -66,9 +66,15 @@ func _restore_previous_team() -> void:
 		return
 	for m: Dictionary in GameManager.active_save.get("team", []):
 		var classe: String = String(m.get("classe", ""))
-		if classe != "" and classes.has(classe) and not team.has(classe):
+		if classe != "" and classes.has(classe) and not team.has(classe) and not _is_stationed(classe):
 			team.append(classe)
 	refresh()
+
+## Conquête : un héros nommé gouverneur d'une ville ne part plus en assaut.
+func _is_stationed(classe: String) -> bool:
+	if GameManager.active_save.is_empty():
+		return false
+	return ProgressionManager.conquest_stationed_heroes(GameManager.active_save).has(classe)
 
 func _load_classes() -> void:
 	# Stats depuis classes.txt (meilleur niveau), fallback méta
@@ -425,6 +431,8 @@ func current_class() -> String:
 
 func _on_action() -> void:
 	var classe := current_class()
+	if _is_stationed(classe):
+		return
 	if team.has(classe):
 		team.erase(classe)
 	else:
@@ -528,7 +536,11 @@ func refresh() -> void:
 	_stats_label.text = _stat_line(classe)
 
 	var in_team: bool = team.has(classe)
-	if in_team:
+	if _is_stationed(classe):
+		var home: String = ConquestSystem.hero_city(GameManager.active_save.get("conquest", {}), classe)
+		_action_btn.text = "♞  GOUVERNEUR DE %s" % ProgressionManager.conquest_city_name(home).to_upper()
+		_action_btn.add_theme_stylebox_override("normal", _flat(Color(0.4, 0.4, 0.42), Color(0.3, 0.3, 0.32), 14, 3))
+	elif in_team:
 		_action_btn.text = "✕  RETIRER DE L'ÉQUIPE"
 		_action_btn.add_theme_stylebox_override("normal", _flat(Color(0.92, 0.35, 0.28), Color(0.6, 0.2, 0.15), 14, 3))
 	else:
