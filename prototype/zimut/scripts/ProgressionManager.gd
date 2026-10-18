@@ -1318,6 +1318,7 @@ func upgrade_spell(data: Dictionary, classe: String, spell_name: String) -> Stri
 	var sl: Dictionary = e.get("spell_levels", {})
 	sl[spell_name] = clampi(int(sl.get(spell_name, 1)) + 1, 1, SPELL_LEVEL_MAX)
 	e["spell_levels"] = sl
+	e["spell_auto"] = false
 	progression_changed.emit()
 	return ""
 
@@ -1330,6 +1331,7 @@ func downgrade_spell(data: Dictionary, classe: String, spell_name: String) -> St
 		return "Rien à retirer."
 	sl[spell_name] = lvl - 1
 	e["spell_levels"] = sl
+	e["spell_auto"] = false
 	progression_changed.emit()
 	return ""
 
@@ -1339,7 +1341,49 @@ func reset_spells(data: Dictionary, classe: String) -> void:
 	if e.is_empty():
 		return
 	e["spell_levels"] = {}
+	e["spell_auto"] = false
 	progression_changed.emit()
+
+
+## Répartition AUTOMATIQUE des points de sort : on monte d'abord les sorts de dégâts et
+## de soin (les moins avancés en premier, puis les plus récents), ensuite les autres.
+## Les points gagnés plus tard sont aussi répartis (e["spell_auto"]). Renvoie le nombre
+## de niveaux de sort achetés.
+func auto_spells(data: Dictionary, classe: String) -> int:
+	var e: Dictionary = roster_entry(data, classe)
+	if e.is_empty():
+		return 0
+	e["spell_auto"] = true
+	var lvl: int = int(e["level"])
+	var cands: Array = []
+	for row: Dictionary in spells_of(classe):
+		if int(row["level"]) > lvl:
+			continue
+		var pv: Dictionary = spell_preview(classe, String(row["name"]), 1)
+		var main: bool = String(pv.get("kind", "")) in ["attack", "heal", "trap"] and int(pv.get("base_value", 0)) > 0
+		cands.append({"name": String(row["name"]), "main": main, "req": int(row["level"])})
+	var bought: int = 0
+	while true:
+		var free: int = spell_points_free(data, classe)
+		var best: Dictionary = {}
+		var best_key: Array = []
+		for c: Dictionary in cands:
+			var cost: Dictionary = spell_upgrade_cost(data, classe, String(c["name"]))
+			if cost.is_empty() or int(cost["points"]) > free:
+				continue
+			# clé de tri : sorts principaux d'abord, puis niveau le plus bas, puis le plus récent
+			var key: Array = [0 if bool(c["main"]) else 1, spell_level(data, classe, String(c["name"])), -int(c["req"])]
+			if best.is_empty() or key < best_key:
+				best = c
+				best_key = key
+		if best.is_empty():
+			break
+		var sl: Dictionary = e.get("spell_levels", {})
+		sl[String(best["name"])] = spell_level(data, classe, String(best["name"])) + 1
+		e["spell_levels"] = sl
+		bought += 1
+	progression_changed.emit()
+	return bought
 
 #  Roster : progression de chaque classe
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1637,6 +1681,8 @@ func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0, fight_level: in
 			e["level"] = to_lvl
 			if bool(e.get("auto", true)):
 				e["unspent"] = ClassRules.auto_allocate(classe, e["invested"], int(e["unspent"]))
+			if bool(e.get("spell_auto", false)):
+				auto_spells(data, classe)
 		report[classe] = {"gain": g, "from_level": from_lvl, "to_level": to_lvl, "points": pts,
 			"spells": spells_unlocked_between(classe, from_lvl, to_lvl), "in_team": in_team,
 			"xp": int(e["xp"]), "xp_next": xp_for_level(mini(ClassRules.MAX_LEVEL, to_lvl + 1)),

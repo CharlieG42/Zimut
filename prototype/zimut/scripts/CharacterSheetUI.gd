@@ -651,6 +651,13 @@ func _build_spells() -> void:
 	intro.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info.add_child(intro)
 	info.add_child(_chip("✦ Points de sort %d / %d" % [free_pts, total_pts], Color(0.65, 0.55, 0.95) if free_pts > 0 else C_DIM, 22))
+	var auto_b := _btn("RÉPARTITION AUTO", Color(0.40, 0.75, 0.45), 18, Vector2(210, 48))
+	auto_b.tooltip_text = "Monte automatiquement les sorts de dégâts et de soin ; les points gagnés plus tard seront aussi répartis."
+	auto_b.pressed.connect(func() -> void:
+		ProgressionManager.auto_spells(_save, _classe)
+		_persist()
+		refresh())
+	info.add_child(auto_b)
 	var rst := _btn("RÉINITIALISER", Color(0.85, 0.55, 0.35), 18, Vector2(190, 48))
 	rst.disabled = ProgressionManager.spell_points_spent(_save, _classe) == 0
 	rst.pressed.connect(func() -> void:
@@ -659,6 +666,9 @@ func _build_spells() -> void:
 		refresh())
 	info.add_child(rst)
 
+	_content.add_child(_lbl("Répartition %s — %s" % [
+		"automatique" if bool(ent.get("spell_auto", false)) else "manuelle",
+		"les points de sort gagnés plus tard sont dépensés pour vous" if bool(ent.get("spell_auto", false)) else "améliorez vous-même vos sorts (ou RÉPARTITION AUTO)"], 16, C_DIM))
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 12)

@@ -1559,7 +1559,8 @@ func _tower_attacks(owner: Dictionary) -> void:
 				best_d = d
 		if best.is_empty():
 			continue
-		var base: float = 28.0 + float(owner["level"]) * 0.9
+		# V17 : aligné sur les sorts des héros (/1,5)
+		var base: float = (28.0 + float(owner["level"]) * 0.9) / 1.5
 		var r: Dictionary = Combat.calc_damage(owner, best, base, "mag", 0.0, false, false)
 		fx.emit("cast", {"caster": tw, "spell": "Éclat du pilier", "kind": "attack", "dtype": "mag",
 			"from": tpos, "to": pos_of(best), "ranged": true, "cells": [pos_of(best)] as Array[Vector2i]})
