@@ -44,6 +44,9 @@ func _ready() -> void:
 	box.add_child(_setting_row("Rapidité de progression XP", GameSettings.XP_SPEEDS,
 		GameSettings.xp_speed, func(idx: int) -> void: GameSettings.set_xp_speed(idx)))
 
+	box.add_child(_setting_row("Vitesse des tours ennemis", GameSettings.COMBAT_SPEEDS,
+		GameSettings.combat_speed, func(idx: int) -> void: GameSettings.set_combat_speed(idx)))
+
 	box.add_child(_setting_row("Taille du texte des menus", GameSettings.TEXT_SIZES,
 		GameSettings.text_size, func(idx: int) -> void: GameSettings.set_text_size(idx)))
 

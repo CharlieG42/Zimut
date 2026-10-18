@@ -9,6 +9,7 @@ func _boot() -> void:
 	var lvl: int = int(args[1]) if args.size() > 1 else 1
 	var n: int = int(args[2]) if args.size() > 2 else 3
 	Engine.time_scale = 16.0
+	root.get_node("GameSettings").speed_override = 16.0
 	var gm: Node = root.get_node("GameManager")
 	var pm: Node = root.get_node("ProgressionManager")
 	var wins: int = 0

@@ -24,7 +24,12 @@ const XP_SPEED_MULT := [0.6, 1.0, 1.6]
 const TEXT_SIZES: Array[String] = ["Normal", "Grand", "Très grand"]
 const TEXT_SIZE_MULT := [1.0, 1.15, 1.3]
 
+## Vitesse des tours joués par l'ordinateur (ennemis, invocations, mode Auto).
+const COMBAT_SPEEDS: Array[String] = ["Normale", "Rapide", "Très rapide"]
+const COMBAT_SPEED_MULT := [1.0, 2.0, 3.0]
+
 var difficulty: int = 1
+var combat_speed: int = 0
 var xp_speed: int = 1
 var text_size: int = 1
 ## Aide du premier combat déjà vue (ou passée).
@@ -47,13 +52,14 @@ func load_settings() -> void:
 	xp_speed = clampi(int(parsed.get("xp_speed", xp_speed)), 0, XP_SPEEDS.size() - 1)
 	text_size = clampi(int(parsed.get("text_size", text_size)), 0, TEXT_SIZES.size() - 1)
 	tutorial_done = bool(parsed.get("tutorial_done", tutorial_done))
+	combat_speed = clampi(int(parsed.get("combat_speed", combat_speed)), 0, COMBAT_SPEEDS.size() - 1)
 
 func save_settings() -> void:
 	var f := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
 	if f == null:
 		push_error("Impossible d'écrire les réglages")
 		return
-	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done}, "\t"))
+	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "combat_speed": combat_speed}, "\t"))
 	f.close()
 
 func set_difficulty(idx: int) -> void:
@@ -70,6 +76,19 @@ func set_text_size(idx: int) -> void:
 	text_size = clampi(idx, 0, TEXT_SIZES.size() - 1)
 	save_settings()
 	settings_changed.emit()
+
+func set_combat_speed(idx: int) -> void:
+	combat_speed = clampi(idx, 0, COMBAT_SPEEDS.size() - 1)
+	save_settings()
+	settings_changed.emit()
+
+## Forçage de la vitesse (simulations de test uniquement ; 0 = réglage du joueur).
+var speed_override: float = 0.0
+
+func combat_speed_mult() -> float:
+	if speed_override > 0.0:
+		return speed_override
+	return float(COMBAT_SPEED_MULT[clampi(combat_speed, 0, COMBAT_SPEED_MULT.size() - 1)])
 
 func set_tutorial_done(v: bool) -> void:
 	tutorial_done = v

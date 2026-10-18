@@ -770,6 +770,8 @@ func _begin_turn(e: Dictionary) -> void:
 	selected_entity = e
 	var controllable: bool = (e["entity_type"] == "Player") and not auto_mode
 	current_turn = 0 if controllable else 1
+	# Tours de l'ordinateur accélérés selon le réglage « Vitesse des tours ennemis »
+	Engine.time_scale = 1.0 if controllable else GameSettings.combat_speed_mult()
 	if e["entity_type"] == "Player":
 		current_player_index = maxi(0, players.find(e))
 
@@ -1750,6 +1752,7 @@ func check_game_over() -> void:
 		if not active_save.is_empty() and active_slot >= 0:
 			ProgressionManager.register_defeat(active_save, info)
 			ProgressionManager.write_save(active_slot, active_save)
+		Engine.time_scale = 1.0
 		game_ended.emit(false)
 		message_requested.emit("Tous vos personnages sont tombés. DÉFAITE !")
 	elif alive_e == 0:
@@ -1758,6 +1761,7 @@ func check_game_over() -> void:
 		if not active_save.is_empty() and active_slot >= 0:
 			ProgressionManager.register_victory(active_save, info)
 			ProgressionManager.write_save(active_slot, active_save)
+		Engine.time_scale = 1.0
 		game_ended.emit(true)
 		message_requested.emit("Tous les ennemis sont vaincus ! VICTOIRE !")
 
