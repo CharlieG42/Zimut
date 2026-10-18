@@ -1,0 +1,1422 @@
+# Zimut — English translation table (V18)
+# Format: French text<TAB>English text. \n = line break. %d / %s / %.2f = parameters
+# (same order in both columns). Lines starting with # are ignored.
+# Texts not listed here stay in French (proper names, rare messages).
+
+# ── Menus & navigation ─────────────────────────────────────────────────────
+Nouvelle partie	New game
+Continuer	Continue
+Options	Options
+Quitter	Quit
+MES PARTIES	MY GAMES
+ZIMUT  ·  MES PARTIES	ZIMUT  ·  MY GAMES
+Choisis ta sauvegarde	Choose your save
+Mes parties / Progression	My games / Progress
+← ACCUEIL	← HOME
+←  MENU	←  MENU
+← MENU	← MENU
+← CARTE	← MAP
+← PARTIE	← GAME
+RÉGLAGES	SETTINGS
+Rapidité de progression XP	XP progression speed
+Lente	Slow
+Normale	Normal
+Rapide	Fast
+Très rapide	Very fast
+Taille du texte des menus	Menu text size
+Normal	Normal
+Grand	Large
+Très grand	Very large
+Vitesse des tours ennemis	Enemy turn speed
+Sons et vibrations	Sounds and vibration
+Sons + vibr.	Sound + vibr.
+Sons seuls	Sound only
+Silence	Silent
+Langue	Language
+Revoir l'aide du premier combat	Replay the first-battle tips
+Aide du premier combat : active	First-battle tips: on
+La rapidité XP règle le gain d'expérience de chaque combat. La taille du texte agrandit les menus (utile sur téléphone).\nLa difficulté des ennemis se règle pour chaque partie, dans « Mes Parties ».	XP speed sets the experience gained from each battle. Text size enlarges the menus (handy on phones).\nEnemy difficulty is set per game, in “My Games”.
+INFO	INFO
+Version du jeu : %s	Game version: %s
+＋  NOUVELLE PARTIE\nEmplacement libre %d	＋  NEW GAME\nFree slot %d
+✦  PARTIE %d\n%s\nNiv. ennemis %d  ·  %d victoires	✦  GAME %d\n%s\nEnemy lv. %d  ·  %d wins
+ENNEMIS NV %d     ·     %d VICTOIRE(S)     ·     EMPLACEMENT %d	ENEMIES LV %d     ·     %d WIN(S)     ·     SLOT %d
+DIFFICULTÉ DES ENNEMIS (cette partie)	ENEMY DIFFICULTY (this game)
+Facile	Easy
+Difficile	Hard
+Enfer	Hell
+Facile ×0,85 · Normal ×1 · Difficile ×1,2 · Enfer : bien plus de PV. S'applique aux prochains combats.	Easy ×0.85 · Normal ×1 · Hard ×1.2 · Hell: much more HP. Applies to the next battles.
+CHOISIR UN MODE DE JEU	CHOOSE A GAME MODE
+Combats Tactiques	Tactical Battles
+Combats stratégiques au tour par tour	Turn-based strategic battles
+Aventure	Adventure
+Explorez, découvrez et relevez des défis	Explore, discover and take on challenges
+Conquête	Conquest
+Conquérez les cités par les armes	Conquer the cities by force of arms
+Gérer l'équipe (libre à chaque combat)	Manage the team (free before every battle)
+PERSONNAGES — niveaux et caractéristiques	CHARACTERS — levels and stats
+Forge : fabriquer ou briser de l'équipement	Forge: craft or break equipment
+Gouverneurs en place dans vos villes	Governors stationed in your cities
+RENOMMER CETTE PARTIE	RENAME THIS GAME
+SUPPRIMER CETTE PARTIE	DELETE THIS GAME
+Nouveau nom de la partie :	New name for the game:
+Nouveau nom	New name
+RENOMMER	RENAME
+SUPPRIMER	DELETE
+Annuler	Cancel
+Supprimer '%s' ?\nLa progression et l'inventaire seront perdus.	Delete '%s'?\nProgress and inventory will be lost.
+Tous les emplacements sont occupés.\nSupprime une partie existante pour en commencer une nouvelle.	All slots are taken.\nDelete an existing game to start a new one.
+📋  Exporter la partie (copier le code)	📋  Export the game (copy the code)
+✓  Code copié ! Collez-le dans une note pour le garder	✓  Code copied! Paste it into a note to keep it
+📥  Importer une partie	📥  Import a game
+Importer une partie	Import a game
+Aucun emplacement libre : supprimez d'abord une partie.	No free slot: delete a game first.
+Partie importée dans l'emplacement %d.	Game imported into slot %d.
+Code de sauvegarde invalide (il doit commencer par %s).	Invalid save code (it must start with %s).
+Copie un code contenant toute la partie : collez-le dans une note ou un message pour la garder ou la transférer sur un autre appareil (bouton « Importer une partie »).	Copies a code holding the whole game: paste it into a note or message to keep it or move it to another device (“Import a game” button).
+Copiez d'abord un code « ZIMUT1:… » (bouton Exporter), puis touchez ici : la partie va dans le premier emplacement libre.	First copy a “ZIMUT1:…” code (Export button), then tap here: the game goes into the first free slot.
+XP, objets, or et ressources : sauvegarde commune aux trois modes.	XP, items, gold and resources: one save shared by all three modes.
+Jusqu’à %d sauvegardes	Up to %d saves
+Nécessite une partie active.	Requires an active game.
+Partie	Game
+Partie %d	Game %d
+🏆  Succès  %d / %d	🏆  Achievements  %d / %d
+📖  Bestiaire  (%d)	📖  Bestiary  (%d)
+GOUVERNEURS EN PLACE	GOVERNORS IN OFFICE
+%d ville(s) · %d gouverneur(s) en poste (6 max)	%d city(ies) · %d governor(s) in office (6 max)
+Aucune ville conquise : lancez le mode Conquête pour fonder votre empire.	No city conquered yet: start Conquest mode to found your empire.
+Fermer	Close
+✕  FERMER	✕  CLOSE
+
+# ── Sélection d'équipe ─────────────────────────────────────────────────────
+COMBAT %d — %s : CONSTITUEZ VOTRE ÉQUIPE (%d/%d)	BATTLE %d — %s: BUILD YOUR TEAM (%d/%d)
+COMBAT %d — %s : ☠ AFFRONTEZ %s ! (%d/%d)	BATTLE %d — %s: ☠ FACE %s! (%d/%d)
+ASSAUT : %s · %s · CONSTITUEZ VOTRE ÉQUIPE (%d/%d)	ASSAULT: %s · %s · BUILD YOUR TEAM (%d/%d)
+ASSAUT : %s — ☠ AFFRONTEZ %s ! (%d/%d)	ASSAULT: %s — ☠ FACE %s! (%d/%d)
+DÉFI : %s · %s · CONSTITUEZ VOTRE ÉQUIPE (%d/%d)	CHALLENGE: %s · %s · BUILD YOUR TEAM (%d/%d)
+Combat %d (progression) · niveau %d   —   ◀ pour rejouer un combat plus facile	Battle %d (progress) · level %d   —   ◀ to replay an easier battle
+↻ Combat %d rejoué (déjà gagné) · niveau %d — moins d'XP, mais loots et ressources	↻ Battle %d replayed (already won) · level %d — less XP, but loot and resources
+＋  AJOUTER À L'ÉQUIPE	＋  ADD TO TEAM
+✕  RETIRER DE L'ÉQUIPE	✕  REMOVE FROM TEAM
+ÉQUIPE PLEINE	TEAM FULL
+♞  GOUVERNEUR DE %s	♞  GOVERNOR OF %s
+📈  PERSONNAGES	📈  CHARACTERS
+📈  PERSONNAGES (+%d)	📈  CHARACTERS (+%d)
+🎒  ÉQUIPEMENT	🎒  EQUIPMENT
+🎒  ÉQUIPEMENT (%d)	🎒  EQUIPMENT (%d)
+⚔  COMBATTRE	⚔  FIGHT
+☠  COMBATTRE %s (nv%d)	☠  FIGHT %s (lv%d)
+%s — %s nv%d	%s — %s lv%d
+↻  REJOUER	↻  REPLAY
+  ＋ emplacement libre	  ＋ free slot
+Niv %d	Lv %d
+Niv %d  ·  XP %d / %d	Lv %d  ·  XP %d / %d
+Niv %d (combat rapide)	Lv %d (quick battle)
+\n✦ %d points de caractéristiques à répartir	\n✦ %d stat points to spend
+✦ %d points de caractéristiques à répartir	✦ %d stat points to spend
+%s\nPV %d · PA %d · PM %d\nForce %d · Intel %d · Agi %d\nSagesse %d · Déf %d	%s\nHP %d · AP %d · MP %d\nStrength %d · Intel %d · Agi %d\nWisdom %d · Def %d
+PV %d · PA %d · PM %d	HP %d · AP %d · MP %d
+Force %d · Intel %d · Agi %d	Strength %d · Intel %d · Agi %d
+Sagesse %d · Déf %d	Wisdom %d · Def %d
+Niveaux, XP et répartition des points de caractéristiques.	Levels, XP and stat point allocation.
+Équiper vos personnages avec les objets gagnés.	Equip your characters with the items you won.
+◆ Objectif : %s (%s)	◆ Objective: %s (%s)
+✦ %s (%s) : %s	✦ %s (%s): %s
+✦ Synergie %s (%s) : %s	✦ Synergy %s (%s): %s
+Votre équipe (%d/%d)	Your team (%d/%d)
+Équipe déjà complète (3/3)	Team already full (3/3)
+
+# ── Classes ────────────────────────────────────────────────────────────────
+Tank	Tank
+Assassin	Assassin
+Chasseur	Hunter
+Mage	Mage
+Druide	Druid
+Heal	Healer
+Invocateur	Summoner
+Sylvain	Sylvan
+Géomancien	Geomancer
+Résistant, haute défense, encaisse pour l'équipe.	Sturdy, high defense, soaks damage for the team.
+Rapide, dégâts élevés, frappe les cibles fragiles.	Fast, high damage, strikes fragile targets.
+Polyvalent à distance, bon équilibre attaque/défense.	Versatile at range, good attack/defense balance.
+Dégâts magiques élevés, faible défense.	High magic damage, low defense.
+Maître de la nature, soigne et renforce avec des sorts naturels.	Master of nature, heals and empowers with natural spells.
+Spécialiste des soins et de la survie.	Specialist in healing and survival.
+Invoque des créatures, contrôle le champ.	Summons creatures, controls the field.
+Maître des plantes : invoque la forêt, empoisonne et soigne par la sève.	Master of plants: summons the forest, poisons and heals with sap.
+Mage de pierre et de sable : érige piliers, murs et failles pour bloquer, isoler et protéger.	Mage of stone and sand: raises pillars, walls and rifts to block, isolate and protect.
+Encaisse et protège. Rythme d'XP rapide.	Soaks and protects. Fast XP pace.
+Dégâts explosifs dans le dos. +1 PM au niv. 40.	Burst damage from behind. +1 MP at lv. 40.
+Tireur polyvalent. +1 PM au niv. 60.	Versatile shooter. +1 MP at lv. 60.
+Dégâts magiques. +1 PA au niv. 80.	Magic damage. +1 AP at lv. 80.
+Maître de la forêt. +1 PM au niv. 70.	Master of the forest. +1 MP at lv. 70.
+Soins et bénédictions. +1 PA au niv. 80.	Healing and blessings. +1 AP at lv. 80.
+Soigneur pur. Rythme d'XP rapide.	Pure healer. Fast XP pace.
+Ses familiers héritent de son niveau. +1 PA au niv. 80.	Their familiars inherit their level. +1 AP at lv. 80.
+Contrôle du terrain : piliers, murailles et failles bloquent les passages. +1 PA au niv. 90.	Terrain control: pillars, walls and rifts block the way. +1 AP at lv. 90.
+
+# ── Personnages (fiche) ────────────────────────────────────────────────────
+PERSONNAGES	CHARACTERS
+CARACTÉRISTIQUES	STATS
+SORTS	SPELLS
+NIVEAU %d	LEVEL %d
+★ DANS L'ÉQUIPE	★ IN THE TEAM
+★ = dans l'équipe · les autres classes gagnent %d %% de l'XP	★ = in the team · other classes earn %d %% of the XP
+XP %d / %d   ·   prochain sort : %s (niv. %d)	XP %d / %d   ·   next spell: %s (lv. %d)
+prochain sort : %s (niv. %d)	next spell: %s (lv. %d)
+Aucun point à répartir	No points to spend
+✦ %d point(s) à répartir	✦ %d point(s) to spend
+RÉPARTITION AUTO	AUTO ALLOCATE
+RÉINITIALISER	RESET
+Répartition %s — les points gagnés plus tard sont %s.	%s allocation — points earned later are %s.
+Répartition %s — %s	%s allocation — %s
+automatique	automatic
+manuelle	manual
+dépensés pour vous	spent for you
+à répartir par vous	yours to spend
+les points de sort gagnés plus tard sont dépensés pour vous	spell points earned later are spent for you
+améliorez vous-même vos sorts (ou RÉPARTITION AUTO)	upgrade your spells yourself (or AUTO ALLOCATE)
+Monte automatiquement les sorts de dégâts et de soin ; les points gagnés plus tard seront aussi répartis.	Automatically upgrades damage and healing spells; points earned later will be spent too.
+Dépense le capital selon la recette de la classe, y compris aux prochains niveaux.	Spends the points following the class recipe, including at the next levels.
+Rend tous les points investis (gratuit). Les prochains points seront à répartir à la main.	Refunds all invested points (free). The next points will be yours to spend.
+Vitalité	Vitality
+Force	Strength
+Intelligence	Intelligence
+Agilité	Agility
+Sagesse	Wisdom
+Défense	Defense
+Affinité %s	Affinity %s
+base %d  +  points %d  +  objets %d	base %d  +  points %d  +  items %d
+base %d  +  niveaux %d/%d  +  objets %d	base %d  +  levels %d/%d  +  items %d
+coût %d	cost %d
++3 PV par point	+3 HP per point
+Dégâts physiques	Physical damage
+Dégâts magiques et soins	Magic damage and healing
+Initiative et coups critiques	Initiative and critical hits
+Précision (anti-esquive), soins, altérations	Accuracy (anti-dodge), healing, status effects
+Réduit les dégâts reçus	Reduces damage taken
++1 PA par niveau (14 PA maximum au total)	+1 AP per level (14 AP max in total)
++1 PM par niveau (6 PM maximum au total)	+1 MP per level (6 MP max in total)
++1 de portée pour tous les sorts (3 maximum)	+1 range for all spells (3 max)
+Max %d niveaux	Max %d levels
+Maximum %d niveaux de %s.	Maximum %d levels of %s.
+Chaque niveau coûte %d points de capital.	Each level costs %d points.
+A : 1 point de capital par point (jusqu'à 40), puis 2, puis 3.\nB : 2 puis 3.   C : 3.	A: 1 point per point (up to 40), then 2, then 3.\nB: 2 then 3.   C: 3.
+■ base de classe	■ class base
+■ points investis	■ invested points
+■ objets et panoplies	■ items and sets
+Capital insuffisant (%d requis).	Not enough points (%d needed).
+Statistique inconnue.	Unknown stat.
+Héros inconnu.	Unknown hero.
+Personnage introuvable.	Character not found.
+%d points de sort par niveau. Monter un sort du niveau n au niveau n+1 coûte n points (+%d %% d'efficacité par niveau, maximum %d). Impossible de tout maximiser : choisis tes sorts ! Remise à zéro gratuite.	%d spell points per level. Raising a spell from level n to n+1 costs n points (+%d %% efficiency per level, max %d). You can't max everything: choose your spells! Free reset.
+✦ Points de sort %d / %d	✦ Spell points %d / %d
+AMÉLIORER	UPGRADE
+Retirer un niveau (points rendus)	Remove a level (points refunded)
+✦ %d point%s	✦ %d point%s
+Niv %d / %d	Lv %d / %d
+  Niv %d / %d	  Lv %d / %d
+   →   %d au niveau %d	   →   %d at level %d
+%s : %d   →   %d au niveau %d	%s: %d   →   %d at level %d
+   🔒 niveau %d requis	   🔒 level %d required
+🔒 Débloqué au niveau %d	🔒 Unlocked at level %d
+★ Niveau %d : +%d %% d'efficacité	★ Level %d: +%d %% efficiency
+Efficacité : +%d %%	Efficiency: +%d %%
+★ %s — niveau maximum	★ %s — max level
+★ NIVEAU MAXIMUM	★ MAX LEVEL
+Niveau maximum	Max level
+Niveau maximum atteint.	Max level reached.
+Il manque des points de sort	Not enough spell points
+Points de sort insuffisants : %d requis.	Not enough spell points: %d needed.
+Sort pas encore débloqué.	Spell not unlocked yet.
+Rien à retirer.	Nothing to remove.
+Attaque	Attack
+Soin	Heal
+Buff	Buff
+Debuff	Debuff
+Invocation	Summon
+Magie	Magic
+ligne de vue	line of sight
+  ·  ligne de vue	  ·  line of sight
+  ·  zone %d	  ·  area %d
+  ·  toute l'équipe	  ·  whole team
+  ·  ennemis adjacents	  ·  adjacent enemies
+Portée	Range
+Portée %d	Range %d
+Soi	Self
+PA	AP
+PM	MP
+PV	HP
+Dégâts	Damage
+Dégâts du piège	Trap damage
+Dégâts par tour	Damage per turn
+Zone d'effet	Area of effect
+Ligne de vue requise	Line of sight required
+Sur soi	On self
+
+# ── Ressources, objets, raretés ────────────────────────────────────────────
+Fer	Iron
+Bois	Wood
+Cuir	Leather
+Venin	Venom
+Or	Gold
+Commun	Common
+Rare	Rare
+Épique	Epic
+Légendaire	Legendary
+Arme (1 main)	Weapon (1-handed)
+Arme (2 mains)	Weapon (2-handed)
+Épée (1 main)	Sword (1-handed)
+Épée (2 mains)	Sword (2-handed)
+Hache (1 main)	Axe (1-handed)
+Hache (2 mains)	Axe (2-handed)
+Bâton (1 main)	Staff (1-handed)
+Bâton (2 mains)	Staff (2-handed)
+Arc	Bow
+Bouclier	Shield
+Casque	Helmet
+Chapeau	Hat
+Armure	Armor
+Bottes	Boots
+Bague	Ring
+Anneau	Ring
+Amulette	Amulet
+Accessoire	Accessory
+Collier	Necklace
+Gants	Gloves
+Boucle d'oreille	Earring
+Cape	Cloak
+Armes	Weapons
+Boucliers	Shields
+Casques	Helmets
+Armures	Armors
+Accessoires	Accessories
+Tout	All
+2 mains	2-handed
+Vol de vie %d%%	Life steal %d%%
+Critique +%d%%	Critical +%d%%
+Dégâts magiques +%d%%	Magic damage +%d%%
+Résistance magie +%d%%	Magic resistance +%d%%
+Soins +%d%%	Healing +%d%%
+Poisons +%d%%	Poisons +%d%%
++%d Portée	+%d Range
+Poison à l'impact (%d dég./tour, %d t.)	Poison on hit (%d dmg/turn, %d t.)
+Invulnérable %d t. au départ	Invulnerable %d t. at start
+Anti-altération %d t. au départ	Status immunity %d t. at start
+%s (%d pièce)	%s (%d piece)
+%s (%d pièces, palier %d)	%s (%d pieces, tier %d)
+Panoplie Arcanique	Arcane Set
+Panoplie Légendaire	Legendary Set
+Panoplie Runique	Runic Set
+Panoplie Sacrée	Sacred Set
+Panoplie Ultime	Ultimate Set
+Panoplie de Fer	Iron Set
+Panoplie de Lumière	Light Set
+Panoplie du Berserker	Berserker Set
+Panoplie du Chasseur	Hunter Set
+Panoplie du Rempart	Rampart Set
+Panoplie du Vagabond	Wanderer Set
++3 à toutes les stats	+3 to all stats
+
+# ── Équipement de l'équipe ─────────────────────────────────────────────────
+ÉQUIPEMENT DE L'ÉQUIPE	TEAM EQUIPMENT
+Cliquez sur une case autour d'un personnage pour l'équiper.	Tap a slot around a character to equip it.
+⚒ FORGE	⚒ FORGE
+ÉQUIPER LE MEILLEUR	EQUIP THE BEST
+Équipe automatiquement les meilleurs objets de l'inventaire (niveau requis respecté).	Automatically equips the best items from the inventory (required level respected).
+FERMER	CLOSE
+Inventaire : %d objet(s) disponible(s)	Inventory: %d item(s) available
+Inventaire vide — gagnez des combats pour looter des objets !	Empty inventory — win battles to loot items!
+%s (vide)	%s (empty)
+✖  Déséquiper (%s)	✖  Unequip (%s)
+Porté : [%s] %s — %s	Worn: [%s] %s — %s
+Aucun objet compatible dans l'inventaire.	No compatible item in the inventory.
+Arme à deux mains équipée : retirez-la pour porter un bouclier.	Two-handed weapon equipped: remove it to carry a shield.
+Niveau %d requis (%s est niveau %d).	Level %d required (%s is level %d).
+Objet introuvable.	Item not found.
+Type d'objet inconnu : %s	Unknown item type: %s
+
+# ── Forge ──────────────────────────────────────────────────────────────────
+FORGE	FORGE
+FORGE · %s	FORGE · %s
+Fabriquer	Craft
+Améliorer	Upgrade
+Fusion	Fusion
+Briseur	Breaker
+Fabriquer de l'équipement (rang 1 à 10)	Craft equipment (rank 1 to 10)
+Fabriquer de l'équipement	Craft equipment
+Monter un équipement d'un rang avec des ressources de rang supérieur	Raise an item by one rank using higher-rank resources
+Fondre 2 ressources identiques en 1 ressource de rang supérieur	Merge 2 identical resources into 1 resource of the next rank
+Briser de l'équipement pour récupérer des ressources	Break equipment to recover resources
+%s : %d fabricable(s) sur %d · rang %d	%s: %d craftable out of %d · rank %d
+%s : %d fabricables sur %d	%s: %d craftable out of %d
+☐ Fabricables	☐ Craftable
+✓ Fabricables	✓ Craftable
+✓ Fabricable	✓ Craftable
+✗ Manque des ressources	✗ Missing resources
+Aucune recette ne correspond.	No matching recipe.
+Sélectionnez une recette.	Select a recipe.
+RANG DE FABRICATION	CRAFTING RANK
+Rang %d : stats x%.2f	Rank %d: stats x%.2f
+RESSOURCES	RESOURCES
+POUR QUI ?	FOR WHOM?
+Porte actuellement : %s	Currently wearing: %s
+rien	nothing
+Il manque : %s	Missing: %s
+Il manque : 	Missing: 
+Prêt à forger !	Ready to forge!
+%s est niveau %d : niveau %d requis pour porter cet objet.	%s is level %d: level %d required to wear this item.
+⚒  FABRIQUER	⚒  CRAFT
+⚒ + ÉQUIPER (%s)	⚒ + EQUIP (%s)
+%s fabriqué (dans l'inventaire).	%s crafted (in the inventory).
+%s fabriqué et équipé sur %s !	%s crafted and equipped on %s!
+Objet fabriqué (en inventaire) mais non équipé : %s	Item crafted (in the inventory) but not equipped: %s
+Recette inconnue.	Unknown recipe.
+Ressource insuffisante : %s (%d/%d).	Not enough resources: %s (%d/%d).
+Or insuffisant : %d pièces requises.	Not enough gold: %d coins required.
+Aucun équipement : fabriquez-en ou looter-en en combat.	No equipment: craft some or loot some in battle.
+Sélectionnez un équipement.	Select an item.
+%s · %s · rang %d / %d	%s · %s · rank %d / %d
+%s%s\n%s · rang %d/%d%s	%s%s\n%s · rank %d/%d%s
+  · porté par %s	  · worn by %s
+APRÈS AMÉLIORATION (rang %d)	AFTER UPGRADE (rank %d)
+COÛT	COST
+Il vous faut %d × %s : fondez des ressources dans l'onglet Fusion.	You need %d × %s: merge resources in the Fusion tab.
+Chaque rang ajoute +12 %% de stats. Coût : 1 ressource de rang %d + or.	Each rank adds +12 %% stats. Cost: 1 resource of rank %d + gold.
+⚒  AMÉLIORER  (rang %d → %d)	⚒  UPGRADE  (rank %d → %d)
+%s amélioré au rang %d !	%s upgraded to rank %d!
+Rang maximum atteint !	Maximum rank reached!
+Rang maximum atteint.	Maximum rank reached.
+Quantité par appui :	Amount per tap:
+FUSION DE RESSOURCES	RESOURCE FUSION
+%d ressources du même type et du même rang se fondent en 1 ressource du rang suivant, contre un peu d'or. Les ressources de rang élevé servent à fabriquer (onglet Fabriquer) et à améliorer (onglet Améliorer) l'équipement jusqu'au rang 10.	%d resources of the same type and rank merge into 1 resource of the next rank, for a little gold. High-rank resources are used to craft (Craft tab) and upgrade (Upgrade tab) equipment up to rank 10.
+COÛT PAR RANG	COST PER RANK
+Rang visé	Target rank
+≈ ressources rang 1	≈ rank-1 resources
+%d × %s R%d créé(s) !	%d × %s R%d created!
+Il faut %d × %s (rang %d).	You need %d × %s (rank %d).
+Ressource inconnue.	Unknown resource.
+Briseur : sélectionnez un objet de l'inventaire pour voir ce qu'il rapporte.	Breaker: select an item from the inventory to see what it yields.
+Aucun objet à briser : gagnez des combats pour looter de l’équipement.	No item to break: win battles to loot equipment.
+RENDEMENT	YIELD
+≈ %d ressources parmi :	≈ %d resources among:
++1 %s (rang de l'objet)	+1 %s (item rank)
+L'objet sera détruit définitivement.	The item will be destroyed for good.
+🔨  BRISER	🔨  BREAK
+⚒ %s brisé : %s	⚒ %s broken: %s
+%s : %d (rang 1) + %d de rang supérieur	%s: %d (rank 1) + %d of higher rank
+🏆 Succès : %s	🏆 Achievement: %s
+
+# ── Combat ─────────────────────────────────────────────────────────────────
+FIN DU TOUR	END TURN
+Quitter le combat	Leave battle
+Quitter ce combat et revenir à la sélection d'équipe.	Leave this battle and go back to team selection.
+Combat !	Battle!
+Le combat commence !	The battle begins!
+%s — À vous de jouer !	%s — Your turn!
+Tour : %s	Turn: %s
+TOUR %d	TURN %d
+À vous	Yours
+Adverse	Enemy
+Auto…	Auto…
+%s est vaincu !	%s is defeated!
+%s est tombé !	%s has fallen!
+%s est étourdi et passe son tour !	%s is stunned and skips their turn!
+%s lance %s : %d dégâts (%s)	%s casts %s: %d damage (%s)
+%s lance %s : +%d PV (%s)%s	%s casts %s: +%d HP (%s)%s
+%s lance %s (%s)	%s casts %s (%s)
+%s lance %s sur %s.	%s casts %s on %s.
+%s lance %s.	%s casts %s.
+%s invoque %s !	%s summons %s!
+%s pose un piège.	%s sets a trap.
+%s déclenche un piège !	%s triggers a trap!
+%s est immobilisé !	%s is immobilized!
+%s se téléporte !	%s teleports!
+%s téléporte l'équipe !	%s teleports the team!
+%s ressuscite %s !	%s revives %s!
+%s rappelle une balise.	%s recalls a beacon.
+%s disparaît.	%s vanishes.
+%s s'effrite.	%s crumbles.
+%s ne peut plus être lancé ce tour.	%s can't be cast again this turn.
+Pas assez de PA pour %s.	Not enough AP for %s.
+Pas assez de PA/PM pour %s.	Not enough AP/MP for %s.
+Cible hors de portée ou sans ligne de vue.	Target out of range or out of line of sight.
+Case hors de portée de déplacement.	Cell out of movement range.
+Cible invisible.	Invisible target.
+Il faut viser un allié.	You must target an ally.
+Il faut viser un ennemi.	You must target an enemy.
+Il faut viser une créature.	You must target a creature.
+Il faut viser une de vos balises.	You must target one of your beacons.
+La case doit être libre.	The cell must be free.
+Aucune case libre pour atterrir.	No free cell to land on.
+Aucun allié à ressusciter.	No ally to revive.
+Pas de place pour ressusciter.	No room to revive.
+Trop de familiers (3 max).	Too many familiars (3 max).
+Trop de terrain modifié (8 cases max).	Too much altered terrain (8 cells max).
+L'ennemi doit avoir moins de 30 % de PV.	The enemy must be below 30 % HP.
+La plus ancienne balise disparaît.	The oldest beacon vanishes.
+Sort annulé.	Spell cancelled.
+Choisissez un sort pour agir sur %s.	Choose a spell to act on %s.
+Dans le dos !	From behind!
+Dans le dos : coup critique	From behind: critical hit
+Esquive !	Dodged!
+Immunisé	Immune
+Purifié	Cleansed
+Repousse de %d case(s)	Pushes back %d cell(s)
+Tous les ennemis sont vaincus ! VICTOIRE !	All enemies are defeated! VICTORY!
+Tous vos personnages sont tombés. DÉFAITE !	All your characters have fallen. DEFEAT!
+Combat terminé en %d tours	Battle over in %d turns
+Combat automatique : %s	Auto battle: %s
+activé	on
+désactivé	off
+%s (inv.)	%s (sum.)
+Familier	Familiar
+Familier · niveau %d	Familiar · level %d
+%s · niveau %d	%s · level %d
+① Déplacement : touchez une case en surbrillance pour avancer votre héros.\nChaque case coûte 1 PM (pastille verte).	① Movement: tap a highlighted cell to move your hero.\nEach cell costs 1 MP (green badge).
+② Attaque : touchez un sort dans la colonne de gauche, puis une cible en surbrillance.\nChaque sort coûte des PA (pastille bleue).	② Attack: tap a spell in the left column, then a highlighted target.\nEach spell costs AP (blue badge).
+③ Quand vous avez fini (plus de PA ni de PM), appuyez sur FIN DU TOUR.\nLe héros suivant joue ensuite.	③ When you are done (no AP or MP left), tap END TURN.\nThe next hero then plays.
+Passer l'aide	Skip tips
+◆ Objectif : %s (%s)	◆ Objective: %s (%s)
+Vaincre en premier le chef : %s	Defeat the chief first: %s
+Chef (objectif)	Chief (objective)
+
+# ── Statuts ────────────────────────────────────────────────────────────────
+Poison	Poison
+Saignement	Bleeding
+Brûlure	Burn
+Étourdi	Stunned
+Immobilisé	Rooted
+Ralenti	Slowed
+Maudit (-PA)	Cursed (-AP)
+Affaibli	Weakened
+Provoqué	Taunted
+Défense +	Defense +
+Rés. magie +	Magic res. +
+Dégâts +	Damage +
+PA +	AP +
+PM +	MP +
+Esquive +	Dodge +
+Invulnérable	Invulnerable
+Immunité phys.	Phys. immunity
+Immunité magie	Magic immunity
+Anti-altération	Status immunity
+Invisible	Invisible
+Régénération	Regeneration
+Critique garanti	Guaranteed critical
+
+# ── Fin de combat ──────────────────────────────────────────────────────────
+VICTOIRE !	VICTORY!
+VICTOIRE (combat rejoué) !	VICTORY (replayed battle)!
+DÉFAITE	DEFEAT
+DÉFI RÉUSSI !	CHALLENGE COMPLETE!
+DÉFI ÉCHOUÉ	CHALLENGE FAILED
+VILLE CONQUISE !	CITY CONQUERED!
+ASSAUT REPOUSSÉ	ASSAULT REPELLED
+★ EMPIRE VICTORIEUX !	★ VICTORIOUS EMPIRE!
+Le Roi Squelette est tombé : Zimut vous appartient !	The Skeleton King has fallen: Zimut is yours!
+La ville reste à l'ennemi.	The city remains in enemy hands.
+Un peu d'XP de consolation.	A little consolation XP.
+Vous pourrez réessayer.	You can try again.
+Progression partagée avec tous les modes.	Progress shared with every mode.
+Prochain combat (%d) : %s, ennemis niveau %d	Next battle (%d): %s, enemies level %d
+Prochain combat (%d) : ☠ BOSS %s — %s	Next battle (%d): ☠ BOSS %s — %s
+   ·   %d tours	   ·   %d turns
+HÉROS DU COMBAT	HEROES OF THE BATTLE
+Meilleur héros du combat	Best hero of the battle
+Niveau %d%s   +%d XP	Level %d%s   +%d XP
+Dégâts %d  ·  Soins %d  ·  K.O. %d	Damage %d  ·  Healing %d  ·  K.O. %d
+★ Nouveau sort : %s	★ New spell: %s
+Hors équipe (XP partagée) : %s	Off the team (shared XP): %s
+✦ Nouveaux points de caractéristiques — répartis automatiquement, modifiables dans « Personnages ».	✦ New stat points — spent automatically, editable in “Characters”.
+BUTIN (%d)	LOOT (%d)
+BUTIN — rien cette fois	LOOT — nothing this time
+%s · niv %d	%s · lv %d
+⚑ Empire : %s	⚑ Empire: %s
+◆ Défi réussi — %s : %s	◆ Challenge met — %s: %s
+◇ Défi manqué — %s	◇ Challenge missed — %s
+◆ Objectif réussi — %s : %s	◆ Objective met — %s: %s
+◇ Objectif manqué — %s	◇ Objective missed — %s
+🏆 Succès débloqué : %s — %s	🏆 Achievement unlocked: %s — %s
+CONTINUER	CONTINUE
+RETOUR À L'AVENTURE	BACK TO THE ADVENTURE
+RETOUR À LA CARTE DE CONQUÊTE	BACK TO THE CONQUEST MAP
+↺  RECOMMENCER	↺  RESTART
+
+# ── Objectifs et synergies ─────────────────────────────────────────────────
+Gagner en %d tours ou moins	Win in %d turns or fewer
+Gagner sans qu'aucun héros ne tombe	Win without any hero falling
+Vaincre le chef (l'ennemi le plus résistant) en premier	Defeat the chief (the toughest enemy) first
+Gagner sans aucun soin	Win without any healing
+Chaque héros inflige des dégâts	Every hero deals damage
++%d or · +%d %s R2	+%d gold · +%d %s R2
+Rempart béni	Blessed Rampart
+Arcanes telluriques	Telluric Arcana
+Traque	Hunt
+Cercle de la forêt	Forest Circle
+Pacte sauvage	Wild Pact
+Garde arcanique	Arcane Guard
++10 % de défense pour l'équipe	+10 % defense for the team
++10 % de dégâts pour l'équipe	+10 % damage for the team
++8 % de dégâts pour l'équipe	+8 % damage for the team
++12 % de résistance magique pour l'équipe	+12 % magic resistance for the team
++8 % de défense pour l'équipe	+8 % defense for the team
++10 % de résistance magique pour l'équipe	+10 % magic resistance for the team
+
+# ── Trophées : succès et bestiaire ─────────────────────────────────────────
+TROPHÉES	TROPHIES
+🏆  Succès  %d / %d	🏆  Achievements  %d / %d
+Premier sang	First Blood
+Vétéran	Veteran
+Légende	Legend
+Sans une égratignure	Without a Scratch
+Intouchables	Untouchables
+Éclair	Lightning
+Tueur de boss	Boss Slayer
+Chasseur de boss	Boss Hunter
+Apprenti forgeron	Apprentice Smith
+Maître forgeron	Master Smith
+Alchimiste	Alchemist
+Collectionneur	Collector
+Stratège	Strategist
+Conquérant	Conqueror
+Empereur	Emperor
+Aguerri	Seasoned
+Héros légendaire	Legendary Hero
+Naturaliste	Naturalist
+Gagner un combat	Win a battle
+Gagner 10 combats	Win 10 battles
+Gagner 50 combats	Win 50 battles
+Gagner un combat sans aucun héros K.O.	Win a battle without any hero K.O.
+Gagner 10 combats sans aucun héros K.O.	Win 10 battles without any hero K.O.
+Gagner un combat en 3 tours ou moins	Win a battle in 3 turns or fewer
+Vaincre un boss	Defeat a boss
+Vaincre 5 boss	Defeat 5 bosses
+Fabriquer un objet à la Forge	Craft an item at the Forge
+Posséder un objet de rang 5	Own a rank-5 item
+Réaliser 20 fusions de ressources	Perform 20 resource fusions
+Récupérer 30 objets en combat	Collect 30 items in battle
+Réussir 5 objectifs de combat	Complete 5 battle objectives
+Contrôler 5 villes	Control 5 cities
+Contrôler 15 villes	Control 15 cities
+Monter un héros au niveau 25	Raise a hero to level 25
+Monter un héros au niveau 50	Raise a hero to level 50
+Rencontrer 20 ennemis différents	Meet 20 different enemies
+✓ Obtenu le %s — Récompense : %s	✓ Earned on %s — Reward: %s
+%d / %d — Récompense : %s	%d / %d — Reward: %s
++%d or	+%d gold
++%d %s R%d	+%d %s R%d
+Aucun ennemi rencontré pour l'instant : lancez un combat !	No enemy met yet: start a battle!
+Ennemis rencontrés dans cette partie. Appui long sur un ennemi en combat : sa zone de menace.	Enemies met in this game. Long-press an enemy in battle: its threat zone.
+%s · niveau max %d	%s · max level %d
+PV %d · Attaque %d · Déf %d · PM %d	HP %d · Attack %d · Def %d · MP %d
+Sorts : %s	Spells: %s
+Rencontré %d fois · vaincu %d fois	Met %d times · defeated %d times
+
+# ── Sorts : noms ───────────────────────────────────────────────────────────
+Apocalypse	Apocalypse
+Armure de grès	Sandstone Armor
+Attaque de l'invocation	Summon Strike
+Attaque divine	Divine Strike
+Attaque sacrée	Holy Strike
+Balise de chasse	Hunting Beacon
+Barrière	Barrier
+Bouclier de lumière	Shield of Light
+Bouclier légendaire	Legendary Shield
+Bouclier magique	Magic Shield
+Boule de feu	Fireball
+Buff de l'invocation	Summon Boost
+Bénédiction de vie	Blessing of Life
+Bénédiction	Blessing
+Cataclysme minéral	Mineral Cataclysm
+Chaîne de foudre	Chain Lightning
+Colère	Wrath
+Coup bas	Low Blow
+Coup de bouclier	Shield Bash
+Coup final	Final Blow
+Coup écrasant	Crushing Blow
+Désintégration	Disintegration
+Explosion	Explosion
+Fleche enflammée	Flaming Arrow
+Frappe puissante	Power Strike
+Frappe spectrale	Spectral Strike
+Gel	Freeze
+Inspiration	Inspiration
+Invisibilité	Invisibility
+Invoquer Arbre	Summon Tree
+Invoquer Archer Sylvestre	Summon Sylvan Archer
+Invoquer Ent de Combat	Summon War Ent
+Invoquer Esprit de la Forêt	Summon Forest Spirit
+Invoquer Faille	Summon Rift
+Invoquer Golem de Pierre	Summon Stone Golem
+Invoquer Loup Spectral	Summon Spectral Wolf
+Invoquer Muraille	Summon Wall
+Invoquer Ombre	Summon Shade
+Invoquer Pilier	Summon Pillar
+Invoquer Requin des Marées	Summon Tide Shark
+Invoquer Élémentaire de Cristal	Summon Crystal Elemental
+Jugement	Judgment
+Lame de l'ombre	Shadow Blade
+Lame fatale	Fatal Blade
+Lance de cristal	Crystal Lance
+Marque de la mort	Death Mark
+Mot de restauration	Word of Restoration
+Mur de pierre	Stone Wall
+Météore	Meteor
+Ombre	Shade
+Piège	Trap
+Pluie de graines	Seed Rain
+Poison de ronce	Bramble Poison
+Protection vitale	Vital Protection
+Protection	Protection
+Provocation	Taunt
+Racine	Root
+Rappel de balise	Beacon Recall
+Renaissance	Rebirth
+Ronce	Bramble
+Résurrection	Resurrection
+Soin de chasseur	Hunter's Heal
+Soin de combat	Battle Heal
+Soin de groupe supérieur	Greater Group Heal
+Soin de groupe	Group Heal
+Soin de sève	Sap Heal
+Soin rapide	Quick Heal
+Soin supérieur	Greater Heal
+Soin ultime	Ultimate Heal
+Symbiose	Symbiosis
+Sève vitale	Vital Sap
+Séisme ambré	Amber Quake
+Tempête de pétales	Petal Storm
+Tempête de sable	Sandstorm
+Tir de recul	Recoil Shot
+Tir explosif	Explosive Shot
+Tir légendaire	Legendary Shot
+Tir perçant ultime	Ultimate Piercing Shot
+Tir précis	Precise Shot
+Toucher guérisseur	Healing Touch
+Tremblement de terre	Earthquake
+Téléportation	Teleport
+Éboulement	Rockslide
+Éclair sacré	Holy Bolt
+Éclat de grès	Sandstone Shard
+Éclat de lumière	Burst of Light
+Éviscération	Evisceration
+Poing de roche	Rock Fist
+Morsure spectrale	Spectral Bite
+Vague tranchante	Cutting Wave
+Éclat de cristal	Crystal Shard
+Lame d'ombre	Shade Blade
+Vrilles sylvestres	Sylvan Tendrils
+Flèche de sève	Sap Arrow
+Coup de branche	Branch Strike
+Morsure	Bite
+Hurlement	Howl
+Coup d'os	Bone Strike
+Coup de massue	Club Blow
+Jet de dague	Dagger Throw
+Pluie de dagues	Dagger Rain
+Poing de pierre	Stone Fist
+Souffle de feu	Fire Breath
+Tir d'os	Bone Shot
+Trait spectral	Spectral Bolt
+Bras de bois	Wooden Arm
+Fouet de ronce	Bramble Whip
+Fouet de sarriette	Savory Whip
+Rugissement terrifiant	Terrifying Roar
+Jet de rocher	Boulder Throw
+Frappe à distance	Ranged Strike
+Mot de l'éternité	Word of Eternity
+Foudre céleste	Celestial Lightning
+Éclat prismatique	Prismatic Shard
+Éclat du pilier	Pillar Shard
+
+# ── Sorts : effets (modèles) ───────────────────────────────────────────────
+%d dégâts	%d damage
+%d dégâts magiques	%d magic damage
+%d dégâts en zone (2x2)	%d area damage (2x2)
+%d dégâts en zone (3x3)	%d area damage (3x3)
+%d dégâts en zone (4x4)	%d area damage (4x4)
+%d dégâts magiques en zone (3x3)	%d magic area damage (3x3)
+%d dégâts à tous les ennemis	%d damage to all enemies
+%d dégâts magiques à tous les ennemis	%d magic damage to all enemies
+%d dégâts à tous les ennemis adjacents	%d damage to all adjacent enemies
+%d dégâts magiques (2 cibles)	%d magic damage (2 targets)
+%d dégâts (saute sur %d ennemis)	%d damage (jumps to %d enemies)
+%d dégâts (ignore %d%% défense)	%d damage (ignores %d%% defense)
+%d dégâts (critique si dos tourné)	%d damage (critical from behind)
+%d dégâts (tue si <%d%% PV ennemi)	%d damage (kills if enemy HP <%d%%)
+%d dégâts + étourdit %d tour (%d%%)	%d damage + stuns %d turn (%d%%)
+%d dégâts + repousse de %d cases	%d damage + pushes back %d cells
+%d dégâts + brûle (%d dégâts/tour; %d tours)	%d damage + burns (%d damage/turn; %d turns)
+%d dégâts + saignement (%d dégâts/tour; %d tours)	%d damage + bleeding (%d damage/turn; %d turns)
+%d dégâts + ralentit %d pm (%d tour)	%d damage + slows %d MP (%d turn)
+%d dégâts/tour (%d tours)	%d damage/turn (%d turns)
+%d dégâts en zone (3x3) + brûle (%d dégâts/tour; %d tours)	%d area damage (3x3) + burns (%d damage/turn; %d turns)
+%d dégâts en zone (3x3) + affaiblit (-%d dégâts; %d tours)	%d area damage (3x3) + weakens (-%d damage; %d turns)
+%d dégâts magiques + affaiblit (-%d dégâts; %d tours)	%d magic damage + weakens (-%d damage; %d turns)
+%d dégâts magiques + ralentit %d pm (%d tours)	%d magic damage + slows %d MP (%d turns)
+%d dégâts magiques + étourdit %d tour (%d%%)	%d magic damage + stuns %d turn (%d%%)
+%d dégâts magiques en zone (3x3) + étourdit %d tour (%d%%)	%d magic area damage (3x3) + stuns %d turn (%d%%)
+Restaure %d PV	Restores %d HP
+Restaure %d PV à tous les alliés	Restores %d HP to all allies
+Restaure %d PV à un allié KO	Restores %d HP to a K.O. ally
+Restaure %d PV + supprime les effets négatifs	Restores %d HP + removes negative effects
+Restaure %d PV + %d dégâts aux ennemis adjacents	Restores %d HP + %d damage to adjacent enemies
+Restaure %d PV + %d%% défense (%d tours; allié)	Restores %d HP + %d%% defense (%d turns; ally)
+Soigne %d PV/tour pendant %d tours	Heals %d HP/turn for %d turns
+L'invocation restaure %d PV à tous les alliés	The summon restores %d HP to all allies
+L'invocation attaque (dégâts = %d + niveau/2)	The summon attacks (damage = %d + level/2)
+L'invocation gagne +%d%% dégâts (%d tours)	The summon gains +%d%% damage (%d turns)
++%d%% défense (%d tours; allié)	+%d%% defense (%d turns; ally)
++%d%% défense (%d tour; allié)	+%d%% defense (%d turn; ally)
++%d%% défense pour l'équipe (%d tours)	+%d%% defense for the team (%d turns)
++%d%% résistance magie (%d tours)	+%d%% magic resistance (%d turns)
++%d%% résistance (%d tours)	+%d%% resistance (%d turns)
++%d%% dégâts (%d tours; allié)	+%d%% damage (%d turns; ally)
++%d%% dégâts physiques (%d tour)	+%d%% physical damage (%d turn)
++%d PA pour %d tours (allié)	+%d AP for %d turns (ally)
+Immunité à tous les dégâts (1 tour)	Immune to all damage (1 turn)
+Immunité aux dégâts physiques (1 tour)	Immune to physical damage (1 turn)
+Immobilise l'ennemi (1 tour)	Roots the enemy (1 turn)
+Immobilise (%d tour) + %d dégâts	Roots (%d turn) + %d damage
+Invisible (2 tours ou jusqu'à attaque)	Invisible (2 turns or until attacking)
+Prochaine attaque = critique garanti	Next attack = guaranteed critical
+Force l'ennemi à attaquer ce perso (1 tour)	Forces the enemy to attack this character (1 turn)
+Téléportation derrière l'ennemi	Teleports behind the enemy
+Téléporte à une case allié/ennemi	Teleports next to an ally/enemy
+Rappelle une de vos balises (elle disparaît du terrain)	Recalls one of your beacons (it leaves the field)
+Plante une balise (3 max; la plus ancienne disparaît) : un sort de zone du Chasseur qui touche une balise se réplique autour de toutes les autres	Plants a beacon (3 max; the oldest disappears): a Hunter area spell hitting a beacon is replicated around all the others
+Plante un arbre immobile : bloque la vue et relaie les soins du Sylvain aux alliés autour de lui (1 arbre max)	Plants a static tree: blocks line of sight and relays the Sylvan's heals to nearby allies (1 tree max)
+Ouvre une faille de 3 cases : infranchissable mais la vue reste dégagée (3 tours)	Opens a 3-cell rift: impassable but line of sight stays clear (3 turns)
+Érige une muraille de 3 cases : bloque le passage et la vue (3 tours)	Raises a 3-cell wall: blocks movement and line of sight (3 turns)
+Fait surgir un pilier de grès : bloque le passage et la vue; attaque l'ennemi le plus proche dans un rayon de 4 cases (4 tours; 8 cases de terrain max)	Raises a sandstone pillar: blocks movement and line of sight; attacks the nearest enemy within 4 cells (4 turns; 8 terrain cells max)
+Invoque un %s (contrôlable; 3PM/4PA)	Summons a %s (controllable; 3MP/4AP)
+Invoque une %s (contrôlable; 3PM/4PA)	Summons a %s (controllable; 3MP/4AP)
+Dégâts : %d	Damage: %d
+Soin : %d	Heal: %d
+
+# ── Invocations ────────────────────────────────────────────────────────────
+Golem de Pierre	Stone Golem
+Loup Spectral	Spectral Wolf
+Requin des Marées	Tide Shark
+Élémentaire de Cristal	Crystal Elemental
+Esprit de la Forêt	Forest Spirit
+Archer Sylvestre	Sylvan Archer
+Ent de Combat	War Ent
+Arbre	Tree
+Racines	Roots
+Pilier	Pillar
+Muraille	Wall
+Faille	Rift
+Balise	Beacon
+Cristal ambré	Amber Crystal
+
+# ── Ennemis ────────────────────────────────────────────────────────────────
+Gobelin	Goblin
+Loup	Wolf
+Squelette	Skeleton
+Troll	Troll
+Dragonnet	Drakeling
+Dragon	Dragon
+Gobelin Roi	Goblin King
+Loup Alpha	Alpha Wolf
+Troll Géant	Giant Troll
+Squelette Seigneur	Skeleton Lord
+Roi Squelette	Skeleton King
+Crabe Titan	Titan Crab
+Golem Prismatique	Prismatic Golem
+Liche des Brumes	Mist Lich
+Liche Éternelle	Eternal Lich
+Seigneur de Lave	Lava Lord
+Seigneur des Tempêtes	Storm Lord
+☠ BOSS %s Lv%d	☠ BOSS %s Lv%d
+%s Lv%d	%s Lv%d
+Loup forestier	Forest Wolf
+Araknéa	Araknea
+Dryade	Dryad
+Tréant	Treant
+Rochebrute	Rockbrute
+Guerrier des monts	Mountain Warrior
+Griffon des cimes	Peak Griffin
+Garde des pics	Peak Guard
+Assassin des ombres	Shadow Assassin
+Spectre	Specter
+Liche	Lich
+Ombre infernale	Infernal Shade
+Golem de cristal	Crystal Golem
+Mage cristallin	Crystalline Mage
+Élémentaire de cristal	Crystal Elemental
+Araignée de cristal	Crystal Spider
+Scarabée géant	Giant Scarab
+Bandit des dunes	Dune Bandit
+Génie du désert	Desert Genie
+Sphinx	Sphinx
+Harpie	Harpy
+Aigle céleste	Celestial Eagle
+Garde aérien	Sky Guard
+Élémentaire de vent	Wind Elemental
+Crabe géant	Giant Crab
+Néréide	Nereid
+Requin	Shark
+Pirate des mers	Sea Pirate
+Salamandre	Salamander
+Dévoreur de flammes	Flame Devourer
+Golem de lave	Lava Golem
+Lieutenant	Lieutenant
+Brumeux	Mistling
+Liche des brumes	Mist Lich
+Fantôme	Ghost
+Gargouille	Gargoyle
+
+# ── Biomes et nations ──────────────────────────────────────────────────────
+Forêt	Forest
+Montagne	Mountain
+Désert	Desert
+Donjon	Dungeon
+Forêt de Zimut	Zimut Forest
+Pics de Zimut	Zimut Peaks
+Dunes de Zimut	Zimut Dunes
+Donjon de Zimut	Zimut Dungeon
+Nation Sylvestre	Sylvan Nation
+Nation des Cimes	Nation of the Peaks
+Nation des Sables	Nation of the Sands
+Nation des Ombres	Nation of Shadows
+Nation des Vents	Nation of the Winds
+Nation des Marées	Nation of the Tides
+Nation du Brasier	Nation of the Blaze
+Nation des Cristaux	Nation of Crystals
+Nation des Brumes	Nation of the Mists
+Sylvestre	Sylvan
+Cimes	Peaks
+Sables	Sands
+Ombres	Shadows
+Vents	Winds
+Marées	Tides
+Brasier	Blaze
+Cristaux	Crystals
+Brumes	Mists
+
+# ── Objets (noms) ──────────────────────────────────────────────────────────
+Amulette du tempérament	Amulet of Temperance
+Anneau de célérité	Ring of Celerity
+Arc composite	Composite Bow
+Arc de chasse	Hunting Bow
+Arc du vent	Wind Bow
+Arc long	Longbow
+Armure de lumière	Armor of Light
+Armure du chasseur	Hunter's Armor
+Armure du tank	Tank Armor
+Armure en cuir	Leather Armor
+Armure en fer	Iron Armor
+Armure légendaire	Legendary Armor
+Armure magique	Magic Armor
+Armure runique	Runic Armor
+Armure sacrée	Sacred Armor
+Armure ultime	Ultimate Armor
+Bague de l'assassin	Assassin's Ring
+Bague de magie	Ring of Magic
+Bague de résistance	Ring of Resistance
+Bague de sagesse	Ring of Wisdom
+Bague du apprenti	Apprentice's Ring
+Bague du champion	Champion's Ring
+Bague du guerrier	Warrior's Ring
+Bague du seigneur	Lord's Ring
+Bague du serpent	Serpent Ring
+Bottes de lumière	Boots of Light
+Bottes de vitesse	Boots of Speed
+Bottes du chasseur	Hunter's Boots
+Bottes du predateur	Predator Boots
+Bottes du skirmisseur	Skirmisher Boots
+Bottes du traqueur	Tracker Boots
+Bottes du vagabond	Wanderer Boots
+Bottes du vent	Wind Boots
+Bottes en cuir	Leather Boots
+Bottes légendaires	Legendary Boots
+Bottes magiques	Magic Boots
+Bottes runiques	Runic Boots
+Bottes sacrées	Sacred Boots
+Bottes ultimes	Ultimate Boots
+Boucle arc-en-ciel	Rainbow Earring
+Boucle de garde	Guard Earring
+Boucle de veteran	Veteran Earring
+Boucle en bois	Wooden Earring
+Bouclier du roi	King's Shield
+Bouclier du roi légendaire	Legendary King's Shield
+Bouclier du tank	Tank Shield
+Bouclier en bois	Wooden Shield
+Bouclier en fer	Iron Shield
+Bouclier runique	Runic Shield
+Bouclier sacré	Sacred Shield
+Bouclier ultime	Ultimate Shield
+Bâton d'archimage	Archmage Staff
+Bâton de chene	Oak Staff
+Bâton du mage	Mage Staff
+Bâton grave	Engraved Staff
+Bâton runique	Runic Staff
+Bâton sage	Sage Staff
+Cape de heros	Hero's Cloak
+Cape de sentinelle	Sentinel Cloak
+Cape de voyage	Travel Cloak
+Cape des brumes	Mist Cloak
+Cape du coursier	Courier Cloak
+Casque de lumière	Helmet of Light
+Casque du chasseur	Hunter's Helmet
+Casque du guerrier	Warrior's Helmet
+Casque du roi	King's Helmet
+Casque en cuir	Leather Helmet
+Casque en fer	Iron Helmet
+Casque légendaire	Legendary Helmet
+Casque noir	Black Helmet
+Casque runique	Runic Helmet
+Chapeau de capitaine	Captain's Hat
+Chapeau de milicien	Militia Hat
+Chapeau de paille	Straw Hat
+Chapeau de sorcier	Wizard Hat
+Chapeau du mage	Mage Hat
+Collier d'argent	Silver Necklace
+Collier de cuir	Leather Necklace
+Collier de défense	Necklace of Defense
+Collier de fer	Iron Necklace
+Collier de force	Necklace of Strength
+Collier de mana	Mana Necklace
+Collier de vie	Necklace of Life
+Collier légendaire	Legendary Necklace
+Collier runique	Runic Necklace
+Dague empoisonnée	Poisoned Dagger
+Dague en fer	Iron Dagger
+Espadon de garde	Guard Greatsword
+Espadon du colosse	Colossus Greatsword
+Espadon rouille	Rusty Greatsword
+Espadon runique	Runic Greatsword
+Gantelet de précision	Precision Gauntlet
+Gants de mailles	Chainmail Gloves
+Gants de toile	Cloth Gloves
+Gants en cuir bouilli	Hardened Leather Gloves
+Gants en ecailles	Scale Gloves
+Grand bâton astral	Great Astral Staff
+Grand bâton de bataille	Great Battle Staff
+Grand bâton des mers	Great Sea Staff
+Grand bâton nodule	Great Knotted Staff
+Hache d'armes de guerre	War Battleaxe
+Hache d'armes du berserker	Berserker Battleaxe
+Hache d'armes du bucheron	Woodcutter Battleaxe
+Hache d'armes du titan	Titan Battleaxe
+Hache de guerre	War Axe
+Hache du berserker	Berserker Axe
+Hache du bucheron	Woodcutter Axe
+Hache du titan	Titan Axe
+Lame de l'assassin	Assassin's Blade
+Lame légendaire	Legendary Blade
+Lance du chevalier	Knight's Lance
+Marteau de tonnerre	Thunder Hammer
+Massue du tank	Tank Club
+Massue géante	Giant Club
+Oculaire de visée	Aiming Eyepiece
+Sablier de bataille	Battle Hourglass
+Épée d'acier	Steel Sword
+Épée de fer	Iron Sword
+Épée de lumière	Sword of Light
+Épée du chasseur	Hunter's Sword
+Épée du roi	King's Sword
+Épée flamboyante	Flaming Sword
+Épée légendaire	Legendary Sword
+Épée maudite	Cursed Sword
+Épée vive	Swift Sword
+Épée à deux mains	Two-handed Sword
+%s R%d	%s R%d
+%s · niv %d · %s	%s · lv %d · %s
+%s · niv. %d · %s	%s · lv. %d · %s
+%s · niveau %d · %s · rang %d	%s · level %d · %s · rank %d
+%s · %s · niveau %d	%s · %s · level %d
+%s · %s · niv %d	%s · %s · lv %d
+
+# ── Conquête ───────────────────────────────────────────────────────────────
+🏰  ZIMUT — CONQUÊTE	🏰  ZIMUT — CONQUEST
+Développez votre empire en remportant les batailles tactiques	Grow your empire by winning tactical battles
+Villes %d/%d	Cities %d/%d
+   ·   Revenus +%d or	   ·   Income +%d gold
+   ·   Production par victoire : 	   ·   Production per win: 
+LE MONDE DE ZIMUT	THE WORLD OF ZIMUT
+MONDE DE ZIMUT	WORLD OF ZIMUT
+Vert = territoire · Gris = neutre · Rouge = adverse · ⚔ = attaquable	Green = territory · Grey = neutral · Red = enemy · ⚔ = attackable
+Vert : allié · Gris : neutre · Rouge : ennemi · ⚔ : attaquable	Green: ally · Grey: neutral · Red: enemy · ⚔: attackable
+Vert = allié  ·  Gris = neutre  ·  Rouge = adverse  ·  ★ = votre capitale	Green = ally  ·  Grey = neutral  ·  Red = enemy  ·  ★ = your capital
+CONSEIL DE GUERRE	WAR COUNCIL
+CHRONIQUE RÉCENTE	RECENT CHRONICLE
+Vos premières conquêtes apparaîtront ici.	Your first conquests will appear here.
+LANCER L'ASSAUT	LAUNCH THE ASSAULT
+LANCER LA BATAILLE %d/4 — %s	LAUNCH BATTLE %d/4 — %s
+⌂ ENTRER DANS LA VILLE	⌂ ENTER THE CITY
+HORS DE PORTÉE — CONQUÉREZ UNE VILLE RELIÉE	OUT OF REACH — CONQUER A CONNECTED CITY
+★ NOTRE CAPITALE ★\n%s · %s	★ OUR CAPITAL ★\n%s · %s
+%s · %s · Niveau conseillé %d\n\n%s\n\n● VILLE NEUTRE — 1 bataille contre des mobs de champs suffit à la conquérir.	%s · %s · Recommended level %d\n\n%s\n\n● NEUTRAL CITY — 1 battle against field mobs is enough to conquer it.
+%s · %s · Niveau conseillé %d\n\n%s\n\n⚔ VILLE ADVERSE — siège en %d batailles : %d plateaux de mobs puis le BOSS du biome.%s	%s · %s · Recommended level %d\n\n%s\n\n⚔ ENEMY CITY — siege in %d battles: %d mob boards then the biome BOSS.%s
+%s\n\n%s\n\nVotre territoire de départ, à l'abri des attaques.\n%s	%s\n\n%s\n\nYour starting territory, safe from attacks.\n%s
+%s\n\n%s\n\n⚑ Territoire allié.\n%s	%s\n\n%s\n\n⚑ Allied territory.\n%s
+Domination %s : %d/%d villes — bonus à 100 %% : %s.	%s domination: %d/%d cities — bonus at 100 %%: %s.
+★ DOMINATION %s : bonus actif — %s.	★ %s DOMINATION: bonus active — %s.
+◆ DÉFI FACULTATIF\n%s\nBonus : %s	◆ OPTIONAL CHALLENGE\n%s\nBonus: %s
+◆ Défi facultatif : %s  →  %s	◆ Optional challenge: %s  →  %s
+Victoire éclair : gagner en %d tours ou moins	Lightning victory: win in %d turns or fewer
+Sans pertes : aucun allié K.O.	No losses: no ally K.O.
+Avec un %s dans l'équipe	With a %s in the team
+Défi réussi : %s (+%d or)	Challenge met: %s (+%d gold)
+Siège : %s — %d/%d victoires	Siege: %s — %d/%d wins
+\nSiège %d/%d	\nSiege %d/%d
+\n\nSiège en cours : %d/%d — prochaine bataille : %s.	\n\nSiege in progress: %d/%d — next battle: %s.
+\n\n★ Objectif final : verrouillé tant que tout Zimut n'est pas sous votre contrôle.	\n\n★ Final objective: locked until all of Zimut is under your control.
+\n\n✖ Aucune route depuis votre territoire : conquérez d'abord une ville voisine.	\n\n✖ No road from your territory: conquer a neighboring city first.
+\n\n⚠ PILLÉE : production gelée pendant %d bataille(s).	\n\n⚠ PILLAGED: production frozen for %d battle(s).
+\n\nBâtiments : %s	\n\nBuildings: %s
+\nProduction : %s	\nProduction: %s
+Production : 	Production: 
+Production de votre empire versée : 	Your empire's production paid out: 
+Revenus des villes : +%d or.	City income: +%d gold.
+NOUVELLES DE L'EMPIRE	EMPIRE NEWS
+VILLE ANNEXÉE !	CITY ANNEXED!
+%s rejoint votre empire.\n\n%s	%s joins your empire.\n\n%s
+Ville annexée : %s	City annexed: %s
+Conseil : ouvrez %s pour y bâtir, recruter une garnison ou nommer un gouverneur.	Tip: open %s to build, recruit a garrison or appoint a governor.
+PLUS TARD	LATER
+PRÉPARER L'ASSAUT — %s	PREPARE THE ASSAULT — %s
+Choisis une approche, ou pars sans dépenser de ressources.	Choose an approach, or set off without spending resources.
+🔎 ÉCLAIREURS — 25 or\nRéduit le niveau des ennemis de 1	🔎 SCOUTS — 25 gold\nLowers enemy level by 1
+🧨 SABOTAGE — 12 Bois + 8 Fer\nRéduit les PV et l'attaque ennemis de 15 %	🧨 SABOTAGE — 12 Wood + 8 Iron\nReduces enemy HP and attack by 15 %
+📦 RAVITAILLEMENT — 15 or + 6 Cuir\nRéduit l'attaque ennemie de 10 %	📦 SUPPLIES — 15 gold + 6 Leather\nReduces enemy attack by 10 %
+⚔ PARTIR SANS PRÉPARATION	⚔ GO WITHOUT PREPARATION
+Préparation d'assaut inconnue.	Unknown assault preparation.
+PILLÉE	PILLAGED
+⚠ Ville PILLÉE : production gelée (%d bataille(s)).	⚠ City PILLAGED: production frozen (%d battle(s)).
+⚠ CONTRE-ATTAQUE ! L'ennemi a pillé %s : production gelée %d bataille(s).	⚠ COUNTER-ATTACK! The enemy pillaged %s: production frozen %d battle(s).
+Contre-attaque : %s est pillée (%d batailles)	Counter-attack: %s is pillaged (%d battles)
+⚠ GRANDE OFFENSIVE ennemie (force %d) : %s sera attaquée dans %d batailles !	⚠ MAJOR enemy OFFENSIVE (strength %d): %s will be attacked in %d battles!
+⚠ OFFENSIVE dans %d bataille(s) : force ennemie %d	⚠ OFFENSIVE in %d battle(s): enemy strength %d
+⚠ OFFENSIVE dans %d bataille(s) — force ennemie %d. Renforcez la garnison !	⚠ OFFENSIVE in %d battle(s) — enemy strength %d. Reinforce the garrison!
+⚠ OFFENSIVE sur %s dans %d bataille(s)\nForce ennemie %d · défense %d%s	⚠ OFFENSIVE on %s in %d battle(s)\nEnemy strength %d · defense %d%s
+⚠ Offensive (force %d) sur %s : encore %d bataille(s). Défense actuelle : %d.	⚠ Offensive (strength %d) on %s: %d battle(s) left. Current defense: %d.
+ — RENFORCEZ-LA !	 — REINFORCE IT!
+ — elle tiendra.	 — it will hold.
+★ OFFENSIVE REPOUSSÉE à %s (défense %d contre force %d) ! Butin : +%d or.	★ OFFENSIVE REPELLED at %s (defense %d vs strength %d)! Loot: +%d gold.
+☠ %s EST TOMBÉE (défense %d contre force %d) ! Reprenez-la : une seule bataille suffit.	☠ %s HAS FALLEN (defense %d vs strength %d)! Take it back: a single battle is enough.
+⚔ BRÈCHE à %s (défense %d contre force %d) : la ville est pillée %d batailles.	⚔ BREACH at %s (defense %d vs strength %d): the city is pillaged for %d battles.
+☠ %s\nÀ reprendre	☠ %s\nTo retake
+⚑ Ville reprise à l'ennemi : sa garnison est à reconstituer.	⚑ City retaken from the enemy: its garrison must be rebuilt.
+♜ Raid repoussé à %s : la garnison tient bon.	♜ Raid repelled at %s: the garrison holds.
+★ Vos éclaireurs découvrent une cache : +%d or.	★ Your scouts find a cache: +%d gold.
+★ CAMPAGNE TERMINÉE : le Roi Squelette est tombé, Zimut vous appartient ! Vous pouvez continuer en empire libre.	★ CAMPAIGN COMPLETE: the Skeleton King has fallen, Zimut is yours! You can keep playing as a free empire.
+   ·   ★ EMPIRE VICTORIEUX	   ·   ★ VICTORIOUS EMPIRE
+   ·   ⚔ Tout Zimut est à vous : assailliez le Donjon du Roi Squelette !	   ·   ⚔ All of Zimut is yours: storm the Skeleton King's Dungeon!
+☮ Trêve : %d bataille(s) sans raid	☮ Truce: %d battle(s) without raids
+La route vers %s est gardée : remportez « %s » pour l'ouvrir.	The road to %s is guarded: win “%s” to open it.
+Route vers %s gardée.	Road to %s guarded.
+La capitale est à l'abri des attaques.	The capital is safe from attacks.
+Votre capitale de départ. Elle ne peut pas être perdue.	Your starting capital. It cannot be lost.
+Ville de Zimut.	A city of Zimut.
+Ville non conquise.	City not conquered.
+Les bonus du biome s'obtiennent en contrôlant toutes ses villes.	Biome bonuses are earned by controlling all of its cities.
+
+# ── Ville ──────────────────────────────────────────────────────────────────
+Hameau	Hamlet
+Bourg	Town
+Cité	City
+Nation %s  ·  niveau %d / %d	Nation %s  ·  level %d / %d
+QUARTIERS	DISTRICTS
+CONSEIL DE LA VILLE	CITY COUNCIL
+%s — niveau %d / %d	%s — level %d / %d
+♜ Garnison %d / %d	♜ Garrison %d / %d
+♜ Garnison : %d/%d soldats	♜ Garrison: %d/%d soldiers
+Garnison : %d / %d soldats	Garrison: %d / %d soldiers
+Défense : %d	Defense: %d
+Défense : %d  ·  Revenu : +%d or par victoire	Defense: %d  ·  Income: +%d gold per win
+Revenu : +%d or par victoire	Income: +%d gold per win
+♞ Gouverneur : %s	♞ Governor: %s
+♞ Gouverneur : %s (niv. %d) — %s	♞ Governor: %s (lv. %d) — %s
+♞ Aucun gouverneur	♞ No governor
+⌂ %s — aucun gouverneur	⌂ %s — no governor
+♞ %s — %s (niv. %d) : %s	♞ %s — %s (lv. %d): %s
+Hutte du Conseil	Council Hut
+Fait évoluer la ville : garnison plus grande, production et défense accrues.	Upgrades the city: larger garrison, higher production and defense.
+Chaque soldat renforce la défense contre les offensives ennemies.	Each soldier strengthens the defense against enemy offensives.
+RECRUTER +1 — %d or	RECRUIT +1 — %d gold
+REMPLIR (+%d) — %d or	FILL (+%d) — %d gold
+♜ RECRUTER +1 soldat — %d or	♜ RECRUIT +1 soldier — %d gold
+♜ REMPLIR LA GARNISON (+%d) — %d or	♜ FILL THE GARRISON (+%d) — %d gold
+RAPPELER LE GOUVERNEUR	RECALL THE GOVERNOR
+♞ RAPPELER %s (gouverneur)	♞ RECALL %s (governor)
+NOMMER UN GOUVERNEUR	APPOINT A GOVERNOR
+♞ NOMMER UN GOUVERNEUR	♞ APPOINT A GOVERNOR
+Un gouverneur défend la ville et la fait prospérer, mais ne combat plus en assaut.	A governor defends the city and makes it prosper, but no longer fights in assaults.
+Un héros gouverneur défend la ville et la fait prospérer, mais ne combat plus en assaut.	A governor hero defends the city and makes it prosper, but no longer fights in assaults.
+%s — déjà en poste à %s	%s — already stationed at %s
+%s gouverne déjà une autre ville.	%s already governs another city.
+%s devient gouverneur de %s	%s becomes governor of %s
+Cette ville a déjà un gouverneur.	This city already has a governor.
+Aucun gouverneur dans cette ville.	No governor in this city.
+Trop de gouverneurs : 3 héros doivent rester disponibles pour les assauts.	Too many governors: 3 heroes must remain available for assaults.
+GOUVERNEUR — %s	GOVERNOR — %s
+GOUVERNEUR DE %s	GOVERNOR OF %s
+♞ %s (%s) rapporte les tributs de %s : +%d or.	♞ %s (%s) brings in the tributes of %s: +%d gold.
+CONSTRUIRE	BUILD
+✓ Construit	✓ Built
+Bâtiment construit : %s — %s	Building built: %s — %s
+Bâtiment déjà construit.	Building already built.
+Bâtiment inconnu.	Unknown building.
+Ville pillée : impossible de construire.	City pillaged: cannot build.
+Ville pillée : impossible de l'améliorer.	City pillaged: cannot upgrade.
+Cette ville est déjà une Cité.	This city is already a City.
+Ville améliorée : %s devient un %s	City upgraded: %s becomes a %s
+Garnison pleine (%d/%d) : améliorez la ville pour l'agrandir.	Garrison full (%d/%d): upgrade the city to enlarge it.
+%s +%d par victoire	%s +%d per win
+Scierie	Sawmill
+Mine	Mine
+Tannerie	Tannery
+Cabane des mages	Mages' Hut
+Verger	Orchard
+Muraille (+6 défense)	Wall (+6 defense)
+Renforce les remparts (+6 défense).	Reinforces the ramparts (+6 defense).
+Rempart vivant : +8 défense	Living rampart: +8 defense
+Aucune production pour l'instant : édifiez des bâtiments pour rapporter des ressources à chaque victoire.	No production yet: build structures to bring in resources with every win.
+← CARTE	← MAP
+
+# ── Événements de Conquête ─────────────────────────────────────────────────
+ÉVÉNEMENT	EVENT
+Événement	Event
+AGITATION À %s	UNREST IN %s
+CARAVANE MARCHANDE	MERCHANT CARAVAN
+ESPION CAPTURÉ	SPY CAPTURED
+RÉFUGIÉS	REFUGEES
+ÉMISSAIRE ENNEMI	ENEMY ENVOY
+Sans garnison, %s gronde : la population réclame des vivres et de la sécurité.	Without a garrison, %s grumbles: the people demand food and safety.
+Distribuer des vivres — 40 or	Distribute food — 40 gold
+Réprimer → ville pillée 2 batailles	Crack down → city pillaged for 2 battles
+Ignorer → 50 % de révolte (3 batailles)	Ignore → 50 % chance of revolt (3 battles)
+Les vivres apaisent %s : le calme revient.	The food calms %s: peace returns.
+La révolte est écrasée, mais %s est pillée 2 batailles.	The revolt is crushed, but %s is pillaged for 2 battles.
+%s se révolte et se fait piller 3 batailles !	%s revolts and is pillaged for 3 battles!
+L'agitation retombe d'elle-même, cette fois.	The unrest dies down on its own, this time.
+Une caravane marchande demande le passage sur vos terres. Ses mules sont chargées de %s.	A merchant caravan asks to cross your lands. Its mules are loaded with %s.
+Commercer — 50 or → +12 %s, +4 Magie	Trade — 50 gold → +12 %s, +4 Magic
+Taxer le passage → +45 or	Tax the passage → +45 gold
+Les laisser passer	Let them pass
+Marché conclu : +12 %s, +4 Magie.	Deal done: +12 %s, +4 Magic.
+Les marchands paient le péage : +45 or.	The merchants pay the toll: +45 gold.
+Vos sentinelles ont capturé un espion ennemi dans vos lignes.	Your sentries captured an enemy spy behind your lines.
+Interroger → l'offensive affaiblie de 15 %, retardée d'1 bataille	Interrogate → offensive weakened by 15 %, delayed 1 battle
+Interroger → +35 or de rançon	Interrogate → +35 gold ransom
+Le retourner — 60 or → 4 batailles sans raid	Turn him — 60 gold → 4 battles without raids
+Le relâcher	Release him
+L'espion parle : l'offensive est affaiblie (force %d) et retardée d'une bataille.	The spy talks: the offensive is weakened (strength %d) and delayed by one battle.
+Sa rançon rapporte 35 or.	His ransom brings in 35 gold.
+L'espion travaille pour vous : plus de raids pendant 4 batailles.	The spy works for you: no raids for 4 battles.
+Vous relâchez l'espion. Il ne reviendra pas.	You release the spy. He won't come back.
+Des villageois fuient les terres ennemies et demandent asile à %s.	Villagers flee the enemy lands and seek refuge in %s.
+Les accueillir → +2 soldats à %s	Welcome them → +2 soldiers at %s
+Les équiper — 40 or → +4 soldats	Equip them — 40 gold → +4 soldiers
+Les renvoyer	Send them away
+Deux réfugiés rejoignent la garnison de %s.	Two refugees join the garrison of %s.
+Quatre recrues équipées renforcent %s.	Four equipped recruits reinforce %s.
+Un émissaire propose une trêve en échange d'un tribut.	An envoy offers a truce in exchange for a tribute.
+Payer le tribut — 80 or → 6 batailles de paix	Pay the tribute — 80 gold → 6 battles of peace
+Refuser	Refuse
+Le tribut est versé : paix pendant 6 batailles (pas de raid, pas de nouvelle offensive).	The tribute is paid: peace for 6 battles (no raids, no new offensive).
+Une compagnie de mercenaires offre ses lances. Ils se posteraient à %s.	A mercenary company offers its spears. They would be stationed at %s.
+Engager %d mercenaires — %d or	Hire %d mercenaries — %d gold
+%d mercenaires prennent position à %s.	%d mercenaries take position at %s.
+Décliner	Decline
+⚠ Une fièvre frappe %s : production gelée 2 batailles. (Un Bourg ou un Soigneur gouverneur l'aurait évité.)	⚠ A fever strikes %s: production frozen for 2 battles. (A Town or a Healer governor would have prevented it.)
+✦ Une fièvre menaçait %s, mais %s l'enraye.	✦ A fever threatened %s, but %s stops it.
+✦ Bonne récolte à %s : +10 %s.	✦ Good harvest at %s: +10 %s.
+
+# ── Aventure ───────────────────────────────────────────────────────────────
+🧭 AVENTURE	🧭 ADVENTURE
+EN CHEMIN	ON THE WAY
+Touchez une case : le trajet s'affiche, touchez-la encore pour marcher. Les cases dans la brume vous amènent au plus près.\nLes camps ennemis barrent la route tant qu'ils ne sont pas vaincus.	Tap a cell: the path appears, tap it again to walk. Cells in the mist take you as close as possible.\nEnemy camps block the road until they are defeated.
+Touchez une case : le trajet s'affiche. Touchez-la encore pour marcher.\nJoystick (ou flèches / ZQSD) : marchez en continu.	Tap a cell: the path appears. Tap it again to walk.\nJoystick (or arrows / WASD): walk continuously.
+Lieux explorés	Places explored
+Carte révélée	Map revealed
+Explorateur	Explorer
+JOURNAL	LOG
+%s · niveau %d · lieux %d/%d · ✦ %d/%d	%s · level %d · places %d/%d · ✦ %d/%d
+%d pas	%d steps
+%d pas — touchez encore pour partir	%d steps — tap again to go
+Vous avancez au plus près…	You move as close as you can…
+Arrivée : %s.	Arrival: %s.
+Vous arrivez : %s.	You arrive: %s.
+Le brouillard est trop dense par là. Explorez les environs.	The fog is too thick that way. Explore the surroundings.
+Aucun sentier ne mène là pour l'instant.	No trail leads there yet.
+Le passage est bloqué par le décor.	The way is blocked by the scenery.
+La route est fermée.	The road is closed.
+Carte inexplorée : rejoignez-la à pied par une route voisine.	Unexplored map: reach it on foot via a neighboring road.
+Carte inexplorée · niv %d	Unexplored map · lv %d
+Voyager : %s · %s	Travel: %s · %s
+Ce sentier vous est familier. Où voulez-vous aller ?	You know this trail. Where do you want to go?
+RESTER ICI	STAY HERE
+➜  PRENDRE LE SENTIER	➜  TAKE THE TRAIL
+➜  PASSER LA FRONTIÈRE	➜  CROSS THE BORDER
+➜  PASSER VERS %s	➜  GO TO %s
+➜  Sentier découvert !	➜  Trail discovered!
+Le sentier s'ouvre vers de nouvelles terres.	The trail opens onto new lands.
+Nouvelle zone débloquée.	New zone unlocked.
+Vous connaissiez déjà ces horizons.	You already knew these horizons.
+Le bord de l'île : la route continue par les flèches.	The edge of the island: the road continues through the arrows.
+Marchez jusqu'aux flèches au bord de l'île pour passer à la carte voisine. Touchez une carte déjà visitée pour y voyager.	Walk to the arrows at the edge of the island to reach the next map. Tap a map you've already visited to travel there.
+%s · niv %d — terres dangereuses !	%s · lv %d — dangerous lands!
+Explorer avec : %s	Exploring with: %s
+⚔  AFFRONTER	⚔  FIGHT
+Embuscade	Ambush
+Des ennemis surgissent des fourrés ! Les affronter rapporte XP et butin ; vous pouvez aussi les contourner.	Enemies leap out of the bushes! Fighting them brings XP and loot; you can also go around them.
+Vous contournez l'embuscade.	You go around the ambush.
+Vous passez votre chemin.	You go on your way.
+Combat	Battle
+%s\n\nCombat au tour par tour (règles du mode Tactique), ennemis niveau %d, décor %s.\nVictoire : XP, objets, or et ressources pour toute l'équipe.	%s\n\nTurn-based battle (Tactical mode rules), enemies level %d, %s scenery.\nVictory: XP, items, gold and resources for the whole team.
+%s\n\nEnnemis niveau %d.	%s\n\nEnemies level %d.
+Défi	Challenge
+◇  OUVRIR LE COFFRE	◇  OPEN THE CHEST
+◇  Coffre ouvert !	◇  Chest opened!
+Coffre ouvert.	Chest opened.
+Butin : %s (%s)	Loot: %s (%s)
+Bourse trouvée : +%d or	Purse found: +%d gold
+Récolte : +%d %s	Harvest: +%d %s
+Relique ancienne : +%d XP	Ancient relic: +%d XP
++%d XP d'exploration	+%d exploration XP
+🎁 Récompense unique — %s : %s.	🎁 One-time reward — %s: %s.
+☀  SE REPOSER	☀  REST
+☀  Halte	☀  Rest stop
+Repos au camp.	Rest at camp.
+Vous reprenez des forces au calme.	You regain your strength in peace.
+👁  OBSERVER L'HORIZON	👁  SURVEY THE HORIZON
+👁  Belvédère	👁  Lookout
+👁  Horizons découverts !	👁  Horizons discovered!
+Belvédère : %d ville(s) repérée(s).	Lookout: %d city(ies) spotted.
+Du haut du belvédère, vous repérez de nouvelles villes. Elles deviennent attaquables en CONQUÊTE.	From the lookout, you spot new cities. They become attackable in CONQUEST.
+✦  Énigme	✦  Riddle
+✦  RÉSOUDRE L'ÉNIGME	✦  SOLVE THE RIDDLE
+✦  Énigme résolue !	✦  Riddle solved!
+Énigme résolue.	Riddle solved.
+…ou tapez votre réponse	…or type your answer
+Ce n'est pas la bonne réponse.	That's not the right answer.
+Observez…	Watch…
+À vous : reproduisez la suite (%d runes).	Your turn: repeat the sequence (%d runes).
+Dalles allumées : %d / %d  ·  coups : %d	Tiles lit: %d / %d  ·  moves: %d
+Un déclic, puis une douce lumière : le lieu vous révèle son secret.	A click, then a soft light: the place reveals its secret.
+Les runes s'illuminent et vous livrent leur savoir.	The runes light up and share their knowledge.
+Fausse note !	Wrong note!
+Rien de particulier ici… pour l'instant.	Nothing special here… for now.
+✓ Exploré	✓ Explored
+Révélé	Revealed
+🌳 Relais	🌳 Relay
+Particularité des combats ici : %s.	Battles here have a twist: %s.
+Je brille sans brûler, je fuis sans marcher, je reviens chaque nuit. Qui suis-je ?	I shine without burning, I flee without walking, I come back every night. What am I?
+Je grandis quand on me nourrit, mais je meurs si l’on me donne à boire. Qui suis-je ?	I grow when you feed me, but I die if you give me a drink. What am I?
+Je monte et je descends sans jamais bouger d'un pas, deux fois par jour. Qui suis-je ?	I rise and fall without moving a step, twice a day. What am I?
+Je n'ai ni bouche ni voix, et pourtant je réponds à qui m'appelle dans la montagne. Qui suis-je ?	I have no mouth nor voice, yet I answer whoever calls me in the mountains. What am I?
+Je nais du bois, je meurs de l'eau, et je laisse la cendre derrière moi. Qui suis-je ?	I am born of wood, I die of water, and I leave ashes behind. What am I?
+Je traverse les montagnes sans bouger de ma place et je dévore la forêt sans dent. Qui suis-je ?	I cross the mountains without leaving my place and devour the forest without teeth. What am I?
+On me jette car je perds ma valeur ; on me ramasse car j’en gagne une autre. Qui suis-je ?	I'm thrown away when I lose my value; I'm picked up when I gain another. What am I?
+Plus il y a de moi, moins tu vois. Qui suis-je ?	The more of me there is, the less you see. What am I?
+Plus j’ai de gardiens, moins je vaux. Moins j’en ai, plus je vaux. Qui suis-je ?	The more keepers I have, the less I'm worth. The fewer, the more I'm worth. What am I?
+le vent pousse chacun : +1 PM pour tous.	the wind pushes everyone: +1 MP for all.
+la brume brouille les coups : 12 % d'esquive physique pour tous.	the mist blurs the blows: 12 % physical dodge for all.
+l'ombre guide les coups : +12 % de coups critiques pour tous.	shadow guides the blows: +12 % critical hits for all.
+les cristaux amplifient la magie : +15 % de dégâts magiques pour tous.	the crystals amplify magic: +15 % magic damage for all.
+le sol brûle : −2 % des PV max à chaque fin de tour (jamais mortel).	the ground burns: −2 % of max HP at each turn end (never lethal).
+rounds impairs : marée haute (−1 PM) ; rounds pairs : marée basse (+1 PM).	odd rounds: high tide (−1 MP); even rounds: low tide (+1 MP).
+Marée haute : −1 PM	High tide: −1 MP
+Marée basse : +1 PM	Low tide: +1 MP
+« Dans le désert, suivez les cairns : chaque pierre posée est une promesse de retour. »	“In the desert, follow the cairns: every stone laid is a promise to return.”
+« Le Roi Squelette dort sous le Donjon. Il ne se réveille que pour ceux qui tiennent tout Zimut. »	“The Skeleton King sleeps beneath the Dungeon. He only wakes for those who hold all of Zimut.”
+« Les Sylvains plantent un arbre à chaque soin. Les blessés guérissent à l'ombre de leurs branches. »	“Sylvans plant a tree with every heal. The wounded heal in the shade of their branches.”
+« Les belvédères ne mentent jamais : ce que vous y voyez, vos armées pourront le prendre. »	“Lookouts never lie: what you see from them, your armies can take.”
+« Les gobelins chassent la nuit, les loups au crépuscule, les squelettes… quand bon leur semble. »	“Goblins hunt at night, wolves at dusk, skeletons… whenever they please.”
+« Une source claire guérit l'âme plus vite que la meilleure potion. »	“A clear spring heals the soul faster than the best potion.”
+
+# ── Lieux (villes, zones) ──────────────────────────────────────────────────
+Sylve-Cœur	Heartwood
+Clairière d'Aube	Dawn Glade
+Pont-Mousse	Mossbridge
+Fort Racine	Root Fort
+Vieille Tour	Old Tower
+Ruines du Lierre	Ivy Ruins
+Abbaye des Ronces	Bramble Abbey
+Citadelle des Ronces	Bramble Citadel
+Village des Brumes	Mist Village
+Bois de Lune	Moonwood
+Sanctuaire Moussu	Mossy Sanctuary
+Col du Givre	Frost Pass
+Garnison des Pics	Peaks Garrison
+Hameau du Pin	Pine Hamlet
+Forge du Givre	Frost Forge
+Mine de Cristal	Crystal Mine
+Pic Foudroyant	Thunder Peak
+Bastion de l'Orage	Storm Bastion
+Tour des Sables	Sand Tower
+Caravansérail Rouge	Red Caravanserai
+Oasis Perdue	Lost Oasis
+Observatoire Solaire	Solar Observatory
+Fort des Cendres	Ash Fort
+Port des Sables	Sand Port
+Donjon du Roi Squelette	Skeleton King's Dungeon
+Temple du Soleil	Temple of the Sun
+Citadelle de Sable	Sand Citadel
+Plateau des Vents	Windy Plateau
+Marais des Brumes	Mist Marsh
+Marais des Spectres	Specter Marsh
+Lisière du Col	Pass Edge
+Sentiers de la Sylve	Sylvan Trails
+Ronces de l’Abbaye	Abbey Brambles
+Dunes Perdues	Lost Dunes
+Landes des Ombres	Shadow Moors
+Terres de Cendre	Ash Lands
+Terres du Brasier	Blaze Lands
+Côtes des Marées	Tide Coast
+Îles des Vents	Wind Isles
+Crêtes du Givre	Frost Ridges
+Grottes de Cristal	Crystal Caves
+Pics du Givre	Frost Peaks
+Piémont Ocre	Ochre Foothills
+Un village forestier peu défendu.	A lightly defended forest village.
+Forêts vivantes, ruines couvertes de lierre, rivière et cascade.	Living forests, ivy-covered ruins, a river and a waterfall.
+Neige, pins givrés, portail de glace et cairns.	Snow, frosted pines, an ice gate and cairns.
+Dunes, cactus, obélisque et puits de grès.	Dunes, cacti, an obelisk and sandstone wells.
+Basalte noir, fissures de lave, braseros, fumerolles et cône volcanique.	Black basalt, lava cracks, braziers, fumaroles and a volcanic cone.
+Marais embrumé, champignons phosphorescents, arbres morts et feux follets.	Misty marsh, glowing mushrooms, dead trees and will-o'-the-wisps.
+Pavés runiques, ronces violettes, torches mauves, corbeaux et porte sombre.	Runic cobbles, purple brambles, mauve torches, ravens and a dark gate.
+Sable mouillé, flaques turquoise, coraux, phare et ancre rouillée.	Wet sand, turquoise pools, corals, a lighthouse and a rusty anchor.
+Sol d'ardoise, éclats lumineux, monolithe de cristal et lueurs flottantes.	Slate ground, glowing shards, a crystal monolith and floating lights.
+Îles flottantes, rubans de vent, moulins, totems à plumes et arche céleste.	Floating islands, wind ribbons, windmills, feathered totems and a sky arch.
+Un hameau de bûcherons niché dans les Pics.	A woodcutters' hamlet nestled in the Peaks.
+Une mine de cristaux précieux sous la montagne.	A mine of precious crystals under the mountain.
+Une oasis marchande au cœur des Dunes.	A trading oasis in the heart of the Dunes.
+Un mirador dominant les Dunes.	A watchtower overlooking the Dunes.
+Le plus haut sommet de Zimut.	The highest peak in Zimut.
+Le repaire du Roi Squelette. Objectif final de la campagne.	The Skeleton King's lair. Final objective of the campaign.
+La place forte du désert, gardée par le Dragon.	The desert stronghold, guarded by the Dragon.
+La forteresse du chef de la forêt.	The fortress of the forest chief.
+L'avant-poste militaire des Pics de Zimut.	The military outpost of the Zimut Peaks.
+Un sanctuaire oublié protégé par les esprits de la forêt.	A forgotten sanctuary protected by forest spirits.
+Un village caché dans les brumes de la forêt.	A village hidden in the forest mists.
+Un col étroit battu par les vents glacés.	A narrow pass battered by icy winds.
+Un passage stratégique au-dessus de la rivière.	A strategic crossing over the river.
+Une citadelle fortifiée qui contrôle les sous-bois.	A fortified citadel controlling the undergrowth.
+Une citadelle de lave durcie qui verrouille les routes du sud.	A citadel of hardened lava locking the southern roads.
+Une abbaye isolée gardée par ses anciens serments.	An isolated abbey guarded by its ancient oaths.
+Un temple ancien consacré au soleil du désert.	An ancient temple devoted to the desert sun.
+Un observatoire oublié tourné vers le soleil.	A forgotten observatory facing the sun.
+Un port fortifié battu par les marées, repaire de pirates.	A fortified port battered by the tides, a pirates' den.
+Une halte marchande sur la côte, là où la marée dépose les caravanes.	A trading stop on the coast, where the tide drops off caravans.
+Un fort bâti sur un champ de lave, sous un ciel de cendres.	A fort built on a lava field, under an ashen sky.
+Un bastion perché dans les courants d'air des hautes terres.	A bastion perched in the highland air currents.
+Un sommet balayé par les vents et les orages, gardé par des sentinelles.	A summit swept by winds and storms, guarded by sentinels.
+Un marais brumeux où rôdent des silhouettes spectrales.	A misty marsh where spectral figures prowl.
+Une forge de cristal où l'on taille des lames qui chantent.	A crystal forge where singing blades are cut.
+Un bois ancien où la brume s'accroche aux arbres argentés.	An ancient wood where mist clings to silver trees.
+Une tour qui domine les nuages.	A tower overlooking the clouds.
+Des ruines anciennes envahies par le lierre.	Ancient ruins overrun with ivy.
+%d PM	%d MP
+Niveau %d	Level %d
+Niveau	Level
+%s niv %d	%s lv %d
+%s (niv. %d)	%s (lv. %d)
+%s — niv %d	%s — lv %d
+%s — niv. %d · %s	%s — lv. %d · %s
+%s · niv %d	%s · lv %d

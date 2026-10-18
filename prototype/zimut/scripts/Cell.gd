@@ -196,7 +196,7 @@ func _draw() -> void:
 		_outline(_diamond(0.98), Color(1, 1, 1, 0.95), 2.5)
 		if path_cost > 0:
 			var font: Font = ThemeDB.fallback_font
-			draw_string_outline(font, Vector2(-30, 8), "%d PM" % path_cost, HORIZONTAL_ALIGNMENT_CENTER, 60, 20, 6, Color(0, 0, 0, 0.9))
-			draw_string(font, Vector2(-30, 8), "%d PM" % path_cost, HORIZONTAL_ALIGNMENT_CENTER, 60, 20, Color(1, 1, 0.8))
+			draw_string_outline(font, Vector2(-30, 8), Loc.t("%d PM" % path_cost), HORIZONTAL_ALIGNMENT_CENTER, 60, 20, 6, Color(0, 0, 0, 0.9))
+			draw_string(font, Vector2(-30, 8), Loc.t("%d PM" % path_cost), HORIZONTAL_ALIGNMENT_CENTER, 60, 20, Color(1, 1, 0.8))
 	if flash > 0.0:
 		draw_colored_polygon(_diamond(1.0), Color(1, 0.95, 0.7, flash * 0.6))

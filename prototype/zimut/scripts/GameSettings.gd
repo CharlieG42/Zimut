@@ -31,6 +31,8 @@ const COMBAT_SPEED_MULT := [1.0, 2.0, 3.0]
 var difficulty: int = 1
 var combat_speed: int = 0
 ## Sons d'effets / vibrations (V18)
+## Langue : "fr" ou "en" (voir Loc.gd)
+var language: String = "fr"
 var sfx_on: bool = true
 var haptics_on: bool = true
 var xp_speed: int = 1
@@ -57,6 +59,7 @@ func load_settings() -> void:
 	tutorial_done = bool(parsed.get("tutorial_done", tutorial_done))
 	combat_speed = clampi(int(parsed.get("combat_speed", combat_speed)), 0, COMBAT_SPEEDS.size() - 1)
 	sfx_on = bool(parsed.get("sfx_on", sfx_on))
+	language = String(parsed.get("language", language))
 	haptics_on = bool(parsed.get("haptics_on", haptics_on))
 	_apply_sfx()
 
@@ -65,7 +68,7 @@ func save_settings() -> void:
 	if f == null:
 		push_error("Impossible d'écrire les réglages")
 		return
-	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "combat_speed": combat_speed, "sfx_on": sfx_on, "haptics_on": haptics_on}, "\t"))
+	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "combat_speed": combat_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "language": language}, "\t"))
 	f.close()
 
 func set_difficulty(idx: int) -> void:
@@ -81,6 +84,14 @@ func set_xp_speed(idx: int) -> void:
 func set_text_size(idx: int) -> void:
 	text_size = clampi(idx, 0, TEXT_SIZES.size() - 1)
 	save_settings()
+	settings_changed.emit()
+
+func set_language(lang: String) -> void:
+	language = lang
+	save_settings()
+	var loc: Node = get_node_or_null("/root/Loc")
+	if loc != null:
+		loc.call("apply")
 	settings_changed.emit()
 
 func set_sfx(on: bool) -> void:

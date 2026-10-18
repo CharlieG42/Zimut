@@ -215,7 +215,7 @@ class SpellCard extends Button:
 		else:
 			_draw_medallion(mc, ecol, kind)
 		# Nom (jusqu'à 2 lignes)
-		var nm: String = String(spell.get("name", "Sort"))
+		var nm: String = Loc.t(String(spell.get("name", "Sort")))
 		var lines: PackedStringArray = _wrap(nm, 13)
 		var fs: int = 15 if nm.length() <= 18 else 13
 		var ny: float = 48.0 if lines.size() == 1 else 40.0
@@ -255,7 +255,7 @@ class SpellCard extends Button:
 		# Portée (bas droite) : pastille dorée + légende
 		var rng: int = int(spell.get("range", 1))
 		var rtxt: String = str(rng) if rng < 99 else "∞"
-		var cap: String = "Portée"
+		var cap: String = Loc.t("Portée")
 		if String(p["target"]) == "self":
 			rtxt = "0"
 			cap = "Sur soi"
@@ -682,7 +682,7 @@ class TimelineView extends Control:
 			draw_rect(Rect2(hb.position, Vector2(hb.size.x * ratio, hb.size.y)), Color(0.35, 0.9, 0.4) if e2["team"] == "player" else Color(0.95, 0.3, 0.25))
 			if big:
 				# Nom entier : police réduite si besoin (« Archer Sylvestre » n'est plus coupé)
-				var nm_t: String = String(e2["classe"])
+				var nm_t: String = Loc.t(String(e2["classe"]))
 				var room: float = w + 34.0
 				var nfs: int = 18
 				while nfs > 12 and font.get_string_size(nm_t, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs).x > room:
@@ -770,11 +770,11 @@ class StatsView extends Control:
 		draw_string(font, bc + Vector2(-15, 6), str(lvl), HORIZONTAL_ALIGNMENT_CENTER, 30.0, 17, Color(0.25, 0.14, 0.02))
 		# Nom et classe
 		var full: String = String(e["name"])
-		var short: String = full.split(" Lv")[0]
-		var sub: String = "Familier" if e.get("entity_type", "") == "Summon" else String(e.get("classe", ""))
+		var short: String = Loc.t(full.split(" Lv")[0])
+		var sub: String = Loc.t("Familier" if e.get("entity_type", "") == "Summon" else String(e.get("classe", "")))
 		draw_string_outline(font, Vector2(128, 36), short, HORIZONTAL_ALIGNMENT_LEFT, size.x - 140.0, 24, 5, Color(0, 0, 0, 0.92))
 		draw_string(font, Vector2(128, 36), short, HORIZONTAL_ALIGNMENT_LEFT, size.x - 140.0, 24, Color(1, 0.95, 0.8))
-		draw_string(font, Vector2(128, 56), "%s · niveau %d" % [sub, lvl], HORIZONTAL_ALIGNMENT_LEFT, size.x - 140.0, 14, Color(0.7, 0.78, 0.92))
+		draw_string(font, Vector2(128, 56), Loc.t("%s · niveau %d" % [sub, lvl]), HORIZONTAL_ALIGNMENT_LEFT, size.x - 140.0, 14, Color(0.7, 0.78, 0.92))
 		# Barre de PV
 		var hb := Rect2(128, 66, size.x - 144.0, 26)
 		var hpf: StyleBoxFlat = StyleBoxFlat.new()
@@ -816,7 +816,7 @@ class StatsView extends Control:
 			if shown >= 5:
 				break
 			var info: Dictionary = Combat.status_info(String(st["id"]))
-			var label: String = "%s %d" % [String(info["label"]), int(st["turns"])]
+			var label: String = "%s %d" % [Loc.t(String(info["label"])), int(st["turns"])]
 			var cw: float = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x + 14.0
 			var ccol: Color = info["color"]
 			var chip := StyleBoxFlat.new()
@@ -830,20 +830,20 @@ class StatsView extends Control:
 			shown += 1
 		# Gemmes PA / PM + bandeau de tour
 		_gem(Vector2(150, 142), 21.0, Color(0.05, 0.25, 0.65), Color(0.2, 0.62, 1.0), "%d" % int(e["current_pa"]))
-		draw_string_outline(font, Vector2(176, 138), "PA", HORIZONTAL_ALIGNMENT_LEFT, 30.0, 14, 4, Color(0, 0, 0, 0.9))
-		draw_string(font, Vector2(176, 138), "PA", HORIZONTAL_ALIGNMENT_LEFT, 30.0, 14, Color(0.6, 0.8, 1.0))
+		draw_string_outline(font, Vector2(176, 138), Loc.t("PA"), HORIZONTAL_ALIGNMENT_LEFT, 30.0, 14, 4, Color(0, 0, 0, 0.9))
+		draw_string(font, Vector2(176, 138), Loc.t("PA"), HORIZONTAL_ALIGNMENT_LEFT, 30.0, 14, Color(0.6, 0.8, 1.0))
 		_gem(Vector2(236, 142), 21.0, Color(0.05, 0.4, 0.15), Color(0.25, 0.8, 0.35), "%d" % int(e["current_pm"]))
-		draw_string_outline(font, Vector2(262, 138), "PM", HORIZONTAL_ALIGNMENT_LEFT, 30.0, 14, 4, Color(0, 0, 0, 0.9))
-		draw_string(font, Vector2(262, 138), "PM", HORIZONTAL_ALIGNMENT_LEFT, 30.0, 14, Color(0.6, 1.0, 0.7))
+		draw_string_outline(font, Vector2(262, 138), Loc.t("PM"), HORIZONTAL_ALIGNMENT_LEFT, 30.0, 14, 4, Color(0, 0, 0, 0.9))
+		draw_string(font, Vector2(262, 138), Loc.t("PM"), HORIZONTAL_ALIGNMENT_LEFT, 30.0, 14, Color(0.6, 1.0, 0.7))
 		var mine: bool = gm.current_turn == 0
-		var rest: String = "À vous" if mine else ("Auto…" if gm.auto_mode else "Adverse")
+		var rest: String = Loc.t("À vous" if mine else ("Auto…" if gm.auto_mode else "Adverse"))
 		var turn_box := StyleBoxFlat.new()
 		turn_box.bg_color = Color(1, 0.8, 0.2, 0.16) if mine else Color(0.9, 0.3, 0.25, 0.16)
 		turn_box.border_color = Color(1, 0.85, 0.4) if mine else Color(1, 0.55, 0.5)
 		turn_box.set_border_width_all(1)
 		turn_box.set_corner_radius_all(12)
 		draw_style_box(turn_box, Rect2(size.x - 128, 126, 116, 32))
-		draw_string(font, Vector2(size.x - 128, 139), "TOUR %d" % int(gm.turn_count), HORIZONTAL_ALIGNMENT_CENTER, 116.0, 13, Color(0.85, 0.9, 1.0))
+		draw_string(font, Vector2(size.x - 128, 139), Loc.t("TOUR %d" % int(gm.turn_count)), HORIZONTAL_ALIGNMENT_CENTER, 116.0, 13, Color(0.85, 0.9, 1.0))
 		draw_string(font, Vector2(size.x - 128, 153), rest, HORIZONTAL_ALIGNMENT_CENTER, 116.0, 13, Color(1, 0.88, 0.45) if mine else Color(1, 0.6, 0.55))
 		# Aide : pour les effets, un nom de classe sur la ligne du bas si l'entité n'a rien
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

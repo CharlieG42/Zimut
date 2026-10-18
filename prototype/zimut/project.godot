@@ -25,6 +25,7 @@ Sfx="*res://scripts/Sfx.gd"
 Music="*res://scripts/Music.gd"
 ProgressionManager="*res://scripts/ProgressionManager.gd"
 GameSettings="*res://scripts/GameSettings.gd"
+Loc="*res://scripts/Loc.gd"
 
 [display]
 
@@ -59,3 +60,7 @@ move_down={
 2d/renderer/2d/texture_filter_mode="nearest"
 
 textures/vram_compression/import_etc2_astc=true
+
+[internationalization]
+
+locale/fallback="fr"
