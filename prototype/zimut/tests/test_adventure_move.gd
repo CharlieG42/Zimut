@@ -1,5 +1,5 @@
 extends SceneTree
-## Déplacement en Aventure : double appui tactile avec aperçu, brouillard → case connue
+## Déplacement en Aventure : appui unique (V22), brouillard → case connue
 ## la plus proche, joystick / clavier (un pas).
 ## Lancement : xvfb-run -a godot --rendering-method gl_compatibility --path . -s tests/test_adventure_move.gd
 var fails: int = 0
@@ -31,15 +31,15 @@ func _boot() -> void:
 			if far.x < 0 and mgr.cell_discovered(c) and mgr.path_to(c).size() >= 3:
 				far = c
 	check(far.x >= 0, "case de destination à ≥3 pas trouvée")
-	# 1er appui tactile : aperçu seulement
+	# V22 : un seul appui suffit, le trajet s'affiche pendant la marche
 	sc._on_cell_tapped(far, true)
-	check(mgr.hero_pos() == start, "1er appui tactile : le héros ne bouge pas")
-	check(sc._board.preview.size() >= 3 and sc._pending == far, "1er appui : trajet affiché (%d pas)" % sc._board.preview.size())
-	# 2e appui : marche
-	sc._on_cell_tapped(far, true)
+	await process_frame
+	check(sc._walking and sc._board.preview.size() >= 1, "1 appui : le héros part aussitôt, trajet affiché")
 	await create_timer(3.0).timeout
-	check(mgr.hero_pos() == far or not sc._walking, "2e appui : le héros marche vers la case")
+	check(mgr.hero_pos() == far or not sc._walking, "le héros marche vers la case")
 	check(mgr.hero_pos() != start, "le héros a quitté la case de départ")
+	if sc._modal_root != null:
+		sc._close_modal()
 	# Brouillard : case cachée → on avance au plus près
 	var fog: Vector2i = Vector2i(-1, -1)
 	for y2: int in range(mgr.zone_size().y):
@@ -71,6 +71,53 @@ func _boot() -> void:
 			moved = mgr.hero_pos() == here + d
 			break
 	check(moved, "joystick : un pas dans la direction poussée")
+	# V22 : redirection pendant la marche
+	if sc._modal_root != null:
+		sc._close_modal()
+	var cells: Array[Vector2i] = []
+	for y3: int in range(mgr.zone_size().y):
+		for x3: int in range(mgr.zone_size().x):
+			var c3 := Vector2i(x3, y3)
+			if mgr.cell_discovered(c3) and mgr.poi_at(c3).is_empty() and mgr.gate_at(c3).is_empty() and mgr.path_to(c3).size() >= 2:
+				cells.append(c3)
+	if cells.size() >= 2:
+		var a: Vector2i = cells[0]
+		var b: Vector2i = cells[cells.size() - 1]
+		sc._on_cell_tapped(a)
+		sc._redirect = b
+		var w2: float = 0.0
+		while (sc._walking or mgr.hero_pos() != b) and w2 < 8.0:
+			await create_timer(0.2).timeout
+			w2 += 0.2
+			if sc._modal_root != null:
+				break
+		check(mgr.hero_pos() == b or sc._modal_root != null, "redirection : le héros rejoint la nouvelle destination")
+	if sc._modal_root != null:
+		sc._close_modal()
+	# V22 : toucher un groupe éloigné → le héros va au contact et le combat est proposé
+	for y4: int in range(mgr.zone_size().y):
+		for x4: int in range(mgr.zone_size().x):
+			var k4: String = "%s,%d,%d" % [mgr.zone_id(), x4, y4]
+			if not (mgr.state["discovered"] as Array).has(k4):
+				mgr.state["discovered"].append(k4)
+	sc._refresh_world()
+	var target: Dictionary = {}
+	for g: Dictionary in mgr.mobs():
+		var gp: Vector2i = AdventureMobs.pos_of(g)
+		if mgr.cell_discovered(gp) and mgr.path_to(gp).size() >= 2:
+			target = g
+	if not target.is_empty():
+		sc._on_cell_tapped(AdventureMobs.pos_of(target))
+		var w3: float = 0.0
+		while sc._walking and w3 < 8.0:
+			await create_timer(0.2).timeout
+			w3 += 0.2
+		await create_timer(0.3).timeout
+		var hp: Vector2i = mgr.hero_pos()
+		var gp2: Vector2i = AdventureMobs.pos_of(target)
+		check(absi(hp.x - gp2.x) + absi(hp.y - gp2.y) == 1 and sc._modal_root != null, "toucher un groupe : marche au contact puis fenêtre de combat")
+	else:
+		print("  (aucun groupe accessible dans la zone découverte : test du contact ignoré)")
 	pm.delete_save(4)
 	print("\n%s — %d échec(s)" % ["OK" if fails == 0 else "KO", fails])
 	quit(1 if fails > 0 else 0)

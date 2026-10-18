@@ -26,6 +26,7 @@ var slot: int = -1
 var state: Dictionary = {}
 
 func _ready() -> void:
+	_mob_rng.randomize()
 	load_state(GameManager.active_save, GameManager.active_slot)
 
 ## Charge l'état Aventure depuis une sauvegarde (ou l'initialise).
@@ -89,6 +90,8 @@ func can_move_to(pos: Vector2i) -> bool:
 		return false
 	if not AdventureTerrain.walkable(zone_id(), pos):
 		return false
+	if not AdventureMobs.at(state, zone_id(), pos).is_empty():
+		return false
 	return absi(pos.x - h.x) + absi(pos.y - h.y) == 1
 
 ## Chemin jusqu'à une case découverte (déplacement par appui) : [] si impossible.
@@ -111,6 +114,9 @@ func path_to(target: Vector2i) -> Array[Vector2i]:
 	# On ne franchit une porte que si c'est la destination choisie.
 	for g: Vector2i in gates().keys():
 		blocked[g] = true
+	# Les groupes de monstres barrent le passage (on les affronte en les touchant).
+	for mp: Vector2i in AdventureMobs.occupied(state, zone_id()).keys():
+		blocked[mp] = true
 	return AdventureTerrain.find_path(zone_id(), hero_pos(), target, blocked)
 
 
@@ -259,8 +265,8 @@ func interact() -> Dictionary:
 			var looted: Array = open_chest(key, int(poi.get("level", 10)))
 			return {"action": "chest", "loots": looted}
 		KIND_CAMP:
-			rest_at_camp(key)
-			return {"action": "camp"}
+			var xp: int = rest_at_camp(key)
+			return {"action": "camp", "key": key, "xp": xp}
 		KIND_REVEAL:
 			var cities: Array = complete_poi(key, KIND_REVEAL)
 			var names: Array = []
@@ -313,10 +319,26 @@ func open_chest(key: String, level: int) -> Array:
 	persist()
 	return looted
 
-## Camp (source claire) : petit boost d'XP d'exploration, réutilisable.
-func rest_at_camp(_key: String) -> void:
-	award_exploration_xp(int(ProgressionManager.ADVENTURE_BASE_XP * 0.5))
+## Camp (source claire) : petit boost d'XP d'exploration, de nouveau disponible
+## après CAMP_REST_STEPS pas (avant : réutilisable à l'infini). Retourne l'XP gagnée (0 sinon).
+const CAMP_REST_STEPS := 25
+func rest_at_camp(key: String) -> int:
+	var rests: Dictionary = state.get("camp_rest", {})
+	if rests.has(key) and moves() < int(rests[key]) + CAMP_REST_STEPS:
+		return 0
+	rests[key] = moves()
+	state["camp_rest"] = rests
+	var xp: int = int(ProgressionManager.ADVENTURE_BASE_XP * 0.5)
+	award_exploration_xp(xp)
 	persist()
+	return xp
+
+## Pas restants avant de pouvoir se reposer de nouveau à ce camp (0 = disponible).
+func camp_rest_wait(key: String) -> int:
+	var rests: Dictionary = state.get("camp_rest", {})
+	if not rests.has(key):
+		return 0
+	return maxi(0, int(rests[key]) + CAMP_REST_STEPS - moves())
 
 ## Sortie : débloque la/les zone(s) suivante(s) et affiche le sélecteur.
 func take_exit(key: String) -> Array:
@@ -366,14 +388,15 @@ func roll_event(rng: RandomNumberGenerator = null) -> Dictionary:
 		award_exploration_xp(xp)
 		ev = {"kind": "sage", "title": "Sage voyageur", "text": String(SAGE_LINES[rng.randi_range(0, SAGE_LINES.size() - 1)]), "xp": xp}
 	else:
-		var names: Dictionary = {"Forêt": "Embuscade de gobelins", "Montagne": "Trolls en maraude", "Désert": "Pillards des dunes", "Donjon": "Ronde de squelettes", "Cristaux": "Gardes de cristal", "Marées": "Pirates en maraude", "Vents": "Harpies en piqué", "Brasier": "Salamandres en furie", "Brumes": "Rôdeurs de la brume", "Ombres": "Ombres affamées"}
-		ev = {"kind": "ambush", "title": String(names.get(zone_biome(), "Embuscade")),
-			"text": "Des ennemis surgissent des fourrés ! Les affronter rapporte XP et butin ; vous pouvez aussi les contourner.",
-			"level": lvl + 1}
+		# Les embuscades ont laissé la place aux groupes de monstres visibles sur la carte :
+		# plus d'interruption surprise, une petite trouvaille à la place.
+		var gold2: int = 8 + lvl
+		save["gold"] = int(save.get("gold", 0)) + gold2
+		ev = {"kind": "cache", "title": "Pièces éparses", "text": "Quelques pièces brillent entre deux pierres.", "gold": gold2}
 	persist()
 	return ev
 
-## Accepte une embuscade : combat Tactique au niveau indiqué, dans le biome de la zone.
+## Combat contre un événement (ancien système d'embuscade, conservé pour les sauvegardes et tests).
 func start_event_combat(ev: Dictionary) -> void:
 	var p := hero_pos()
 	state["pending_challenge"] = poi_key(p)
@@ -419,6 +442,72 @@ func award_exploration_xp(xp: int) -> void:
 ## tactique (pending_challenge) ; on expose ici le niveau/biome du défi.
 func pending_challenge() -> String:
 	return String(state.get("pending_challenge", ""))
+
+# ── Groupes de monstres errants, contrats et maîtrise (V22) ─────────────
+var _mob_rng := RandomNumberGenerator.new()
+
+func mobs() -> Array:
+	return AdventureMobs.groups(state, zone_id())
+
+func mob_at(pos: Vector2i) -> Dictionary:
+	return AdventureMobs.at(state, zone_id(), pos)
+
+## Peuple la carte / fait réapparaître un groupe si le délai est écoulé. Retourne les ajouts.
+func ensure_mobs() -> Array:
+	if state.is_empty():
+		return []
+	var added: Array = AdventureMobs.ensure(state, zone_id(), hero_pos(), _mob_rng)
+	if not added.is_empty():
+		persist()
+	return added
+
+## Les groupes flânent après un pas du héros (le groupe visé ne bouge pas).
+func wander_mobs(frozen_id: int = -1) -> Array:
+	return AdventureMobs.wander(state, zone_id(), hero_pos(), _mob_rng, frozen_id)
+
+## Prépare le combat Tactique contre un groupe (nombre d'ennemis et niveau du groupe).
+func start_mob_combat(g: Dictionary) -> void:
+	state["pending_challenge"] = AdventureMobs.challenge_key(zone_id(), int(g.get("id", -1)))
+	state["pending_level"] = int(g.get("level", 1))
+	state["pending_count"] = int(g.get("count", 3))
+	state["pending_name"] = AdventureMobs.label(g, zone_biome())
+	persist()
+
+func contract() -> Dictionary:
+	return AdventureMobs.contract(state, zone_id())
+
+func contract_offer() -> Dictionary:
+	return AdventureMobs.offer(state, zone_id())
+
+func accept_contract() -> Dictionary:
+	var c: Dictionary = AdventureMobs.accept(state, zone_id(), hero_pos(), _mob_rng)
+	persist()
+	return c
+
+## Récompense de contrat versée lors du dernier combat (une seule fois).
+func take_contract_reward() -> Dictionary:
+	var r: Dictionary = state.get("last_contract", {})
+	state.erase("last_contract")
+	if not r.is_empty():
+		persist()
+	return r
+
+func is_mastered(zone: String = "") -> bool:
+	return (state.get("mastered", []) as Array).has(zone if zone != "" else zone_id())
+
+## Maîtrise de la carte : tous les lieux explorés et toutes les trouvailles ramassées.
+## Verse la récompense unique et la retourne ({} si pas encore, ou déjà maîtrisée).
+func check_mastery() -> Dictionary:
+	if is_mastered():
+		return {}
+	var prog: Dictionary = zone_progress()
+	var fp: Dictionary = finds_progress()
+	if int(prog["done"]) < int(prog["total"]) or int(fp["found"]) < int(fp["total"]):
+		return {}
+	var r: Dictionary = ProgressionManager.adventure_mastery_reward(save, zone_id())
+	persist()
+	return r
+
 
 func persist() -> void:
 	if save.is_empty() or slot < 0:

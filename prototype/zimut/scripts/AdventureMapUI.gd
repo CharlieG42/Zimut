@@ -15,7 +15,8 @@ const U = preload("res://scripts/UiKit.gd")
 const TILE_W := 128.0
 const TILE_H := 64.0
 const SIDE_W := 520.0
-const STEP_TIME := 0.17
+const STEP_TIME := 0.15
+const HELP_STEPS := 30          # l'aide de contrôle disparaît après ces premiers pas
 const DIM := Color(0.80, 0.84, 0.92)          # texte secondaire (plus clair que UiKit.C_DIM)
 
 const POI_ICONS := {
@@ -89,6 +90,10 @@ var _action_btn: Button
 var _joystick: ZJoystick
 var _joy_flip: bool = false
 var _rng := RandomNumberGenerator.new()
+var _redirect: Vector2i = Vector2i(-1, -1)     # nouvelle destination touchée pendant la marche
+var _mob_nodes: Dictionary = {}                 # id de groupe -> MobNode
+var _target_mob: int = -1                       # groupe visé (il ne bouge plus)
+var _help_panel: Control = null
 
 
 func _ready() -> void:
@@ -107,6 +112,7 @@ func _ready() -> void:
 	_build()
 	_rebuild_world()
 	_refresh_side()
+	_show_pending_rewards.call_deferred()
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -236,10 +242,12 @@ func _build_hud() -> void:
 	help.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	help.z_index = 5
 	help.add_theme_stylebox_override("panel", U.box(Color(0.05, 0.07, 0.12, 0.80), Color(0.30, 0.36, 0.50), 12, 1, 10))
-	var hl: Label = U.lbl("Touchez une case : le trajet s'affiche. Touchez-la encore pour marcher.\nJoystick (ou flèches / ZQSD) : marchez en continu.", 16, Color(0.92, 0.94, 0.98))
+	var hl: Label = U.lbl("Touchez une case pour y marcher (touchez ailleurs pour changer de cap).\nTouchez un groupe de monstres pour le combattre. Joystick : marche continue.", 16, Color(0.92, 0.94, 0.98))
 	hl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	help.add_child(hl)
 	_map_view.add_child(help)
+	_help_panel = help
+	help.visible = manager.moves() < HELP_STEPS
 
 
 ## Met à jour la plaque d'infos et le bouton d'action selon la case du héros.
@@ -249,9 +257,12 @@ func _refresh_hud() -> void:
 	var prog: Dictionary = manager.zone_progress()
 	_hud_title.text = manager.zone_name()
 	var fprog: Dictionary = manager.finds_progress()
-	_hud_sub.text = "%s · niveau %d · lieux %d/%d · ✦ %d/%d" % [ProgressionManager.biome_label(manager.zone_biome()),
+	_hud_sub.text = "%s · niveau %d · lieux %d/%d · ✦ %d/%d%s" % [ProgressionManager.biome_label(manager.zone_biome()),
 		ProgressionManager.adventure_zone_level(manager.zone_id()), int(prog["done"]), int(prog["total"]),
-		int(fprog["found"]), int(fprog["total"])]
+		int(fprog["found"]), int(fprog["total"]), "  ★" if manager.is_mastered() else ""]
+	var c: Dictionary = manager.contract()
+	if not c.is_empty():
+		_hud_sub.text += "\n📜 " + AdventureMobs.contract_text(c)
 	var pos: Vector2i = manager.hero_pos()
 	var gate: Dictionary = manager.gate_at(pos)
 	var poi: Dictionary = manager.poi_at(pos)
@@ -309,6 +320,10 @@ func _step_dir(d: Vector2i) -> void:
 	_board.preview = []
 	if not _inside(target):
 		_say("Le bord de l'île : la route continue par les flèches.")
+		return
+	var g: Dictionary = manager.mob_at(target)
+	if not g.is_empty():
+		_confirm_mob(g)
 		return
 	if not manager.can_move_to(target):
 		_say("Le passage est bloqué par le décor.")
@@ -416,6 +431,10 @@ func _rebuild_world() -> void:
 	_hero.tex = Portraits.get_texture({"classe": manager.hero_class(), "team": "player", "entity_type": "Player"})
 	_hero.position = cell_center(manager.hero_pos())
 	_entities.add_child(_hero)
+	# Groupes de monstres errants
+	_mob_nodes.clear()
+	manager.ensure_mobs()
+	_sync_mobs(false)
 	_refresh_world()
 	_fit_world.call_deferred()
 
@@ -449,6 +468,11 @@ func _refresh_world() -> void:
 				pn.queue_redraw()
 			elif n is GateNode:
 				n.z_index = 2
+	var team_lvl: int = _team_level()
+	for id: int in _mob_nodes.keys():
+		var mn: MobNode = _mob_nodes[id]
+		mn.visible = manager.cell_discovered(mn.cell)
+		mn.danger = mn.level - team_lvl
 	_board.queue_redraw()
 
 
@@ -492,7 +516,16 @@ func _inside(p: Vector2i) -> bool:
 # ══════════════════════════════════════════════════════════════════════
 
 func _on_map_input(event: InputEvent) -> void:
-	if _walking or _modal_root != null:
+	if _modal_root != null:
+		return
+	if _walking:
+		# Pendant la marche, un nouvel appui change de destination (après le pas en cours).
+		var released: bool = (event is InputEventScreenTouch and not event.pressed) \
+			or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed and event.device != InputEvent.DEVICE_ID_EMULATION)
+		if released:
+			var cr: Vector2i = screen_to_cell((event.position - _world.position) / _world.scale.x)
+			if _inside(cr):
+				_redirect = cr
 		return
 	if event is InputEventMouseMotion:
 		var c: Vector2i = screen_to_cell((event.position - _world.position) / _world.scale.x)
@@ -534,13 +567,28 @@ func _nearest_reachable(target: Vector2i) -> Vector2i:
 	return best
 
 
-func _on_cell_tapped(p: Vector2i, touch: bool = false) -> void:
+func _on_cell_tapped(p: Vector2i, _touch: bool = false) -> void:
 	if p == manager.hero_pos():
 		_pending = Vector2i(-1, -1)
 		if not manager.gate_at(p).is_empty():
 			_cross_gate(p)
 			return
 		_interact()
+		return
+	# Groupe de monstres : on va à son contact puis on propose le combat.
+	var g: Dictionary = manager.mob_at(p) if manager.cell_discovered(p) else {}
+	if not g.is_empty():
+		var hp: Vector2i = manager.hero_pos()
+		if absi(hp.x - p.x) + absi(hp.y - p.y) == 1:
+			_confirm_mob(g)
+			return
+		var mpath: Array[Vector2i] = manager.path_to(p)
+		if mpath.size() < 2:
+			_say("Aucun sentier ne mène à ce groupe pour l'instant.")
+			return
+		mpath.remove_at(mpath.size() - 1)
+		_target_mob = int(g["id"])
+		_walk(mpath)
 		return
 	var target: Vector2i = p
 	if not manager.cell_discovered(p):
@@ -556,14 +604,9 @@ func _on_cell_tapped(p: Vector2i, touch: bool = false) -> void:
 	if path.is_empty():
 		_say("Aucun sentier ne mène là pour l'instant.")
 		return
-	if touch and path.size() > 1 and _pending != target:
-		_pending = target
-		_board.preview = path
-		_board.hover = target
-		_refresh_world()
-		_toast_show("%d pas — touchez encore pour partir" % path.size(), 24)
-		return
+	# Un seul appui suffit : le trajet s'affiche pendant la marche.
 	_pending = Vector2i(-1, -1)
+	_target_mob = -1
 	if not manager.cell_discovered(p):
 		_toast_show("Vous avancez au plus près…", 22)
 	_walk(path)
@@ -571,20 +614,29 @@ func _on_cell_tapped(p: Vector2i, touch: bool = false) -> void:
 
 func _walk(path: Array[Vector2i]) -> void:
 	_walking = true
+	_redirect = Vector2i(-1, -1)
 	_pending = Vector2i(-1, -1)
-	_board.preview = []
+	_board.preview = path.duplicate()
 	_action_btn.hide()
 	# les longs trajets sont plus rapides (jusqu'à deux fois)
 	var step_time: float = STEP_TIME * clampf(8.0 / float(maxi(1, path.size())), 0.5, 1.0)
 	for step: Vector2i in path:
+		if _redirect.x >= 0:
+			break
+		if not manager.mob_at(step).is_empty():
+			_say("Un groupe de monstres vous barre la route.")
+			break
 		var from: Vector2 = _hero.position
 		var to: Vector2 = cell_center(step)
 		_hero.face(to.x - from.x)
 		var fresh: Array = manager.move_hero(step)
+		if _board.preview.size() > 0:
+			_board.preview.remove_at(0)
 		var tw := create_tween()
 		tw.tween_method(func(f: float) -> void:
 			_hero.position = from.lerp(to, f)
 			_hero.hop = sin(f * PI) * 10.0, 0.0, 1.0, step_time)
+		_after_step()
 		await tw.finished
 		if not fresh.is_empty():
 			_refresh_world()
@@ -594,17 +646,39 @@ func _walk(path: Array[Vector2i]) -> void:
 			_log(String(got["text"]) + ".")
 			_refresh_world()
 			_refresh_side()
+			if _check_mastery():
+				_walking = false
+				_board.preview = []
+				return
 		var poi: Dictionary = manager.poi_at(step)
 		if not poi.is_empty() or not manager.gate_at(step).is_empty():
 			break
 		var ev: Dictionary = manager.roll_event(_rng)
 		if not ev.is_empty():
-			_walking = false
-			_refresh_side()
 			_show_event(ev)
-			return
 	_walking = false
+	_board.preview = []
+	if _help_panel != null and manager.moves() >= HELP_STEPS:
+		_help_panel.visible = false
 	_refresh_world()
+	# Nouvelle destination touchée en route
+	if _redirect.x >= 0:
+		var r: Vector2i = _redirect
+		_redirect = Vector2i(-1, -1)
+		_on_cell_tapped(r)
+		return
+	# Groupe visé : combat s'il est au contact
+	if _target_mob >= 0:
+		var tid: int = _target_mob
+		_target_mob = -1
+		for g: Dictionary in manager.mobs():
+			if int(g["id"]) == tid:
+				var gp: Vector2i = AdventureMobs.pos_of(g)
+				var hp: Vector2i = manager.hero_pos()
+				if absi(gp.x - hp.x) + absi(gp.y - hp.y) == 1:
+					_refresh_side()
+					_confirm_mob(g)
+					return
 	if not manager.gate_at(manager.hero_pos()).is_empty():
 		_cross_gate(manager.hero_pos())
 		return
@@ -620,8 +694,18 @@ func _walk(path: Array[Vector2i]) -> void:
 				_confirm_combat(here)
 			else:
 				_interact()
+		elif kind == "camp":
+			_interact()
 		return
 	_refresh_side()
+
+
+## Après chaque pas : les groupes flânent, un groupe réapparaît si le délai est écoulé.
+func _after_step() -> void:
+	var moved: Array = manager.wander_mobs(_target_mob)
+	var added: Array = manager.ensure_mobs()
+	if not moved.is_empty() or not added.is_empty():
+		_sync_mobs(true)
 
 
 ## Passage d'une carte à l'autre : le héros sort par le bord de l'île, un voile
@@ -824,10 +908,7 @@ func _place_card() -> Control:
 			v.add_child(rl)
 		return card
 	if poi.is_empty():
-		v.add_child(U.lbl("EN CHEMIN", 18, U.C_GOLD))
-		var t: Label = U.lbl("Touchez une case : le trajet s'affiche, touchez-la encore pour marcher. Les cases dans la brume vous amènent au plus près.\nLes camps ennemis barrent la route tant qu'ils ne sont pas vaincus.", 19, U.C_TXT)
-		t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		v.add_child(t)
+		_objectives_into(v)
 		return card
 	var done: bool = manager.poi_done(pos) and kind != "camp"
 	var row := HBoxContainer.new()
@@ -880,9 +961,7 @@ func _interact() -> void:
 			_log("Coffre ouvert.")
 			_reward_modal("◇  Coffre ouvert !", POI_COLOR["chest"], "Le couvercle cède dans un nuage de mousse.", lines)
 		"camp":
-			_log("Repos au camp.")
-			_reward_modal("☀  Halte", POI_COLOR["camp"], "Vous reprenez des forces au calme.",
-				["+%d XP d'exploration" % int(ProgressionManager.ADVENTURE_BASE_XP * 0.5)])
+			_camp_modal(String(cmd.get("key", "")), int(cmd.get("xp", 0)))
 		"reveal":
 			var names: Array = cmd.get("names", [])
 			if names.is_empty():
@@ -968,6 +1047,204 @@ func _on_zone_pressed(zone_id: String) -> void:
 		_toast_show(manager.zone_name())
 
 
+# ── Groupes de monstres, contrats, maîtrise (V22) ─────────────────────
+func _team_level() -> int:
+	var lvl: int = 1
+	for m: Dictionary in _save.get("team", []):
+		lvl = maxi(lvl, ProgressionManager.member_level(_save, String(m.get("classe", ""))))
+	return lvl
+
+
+## Crée / retire / déplace les nœuds des groupes selon l'état.
+func _sync_mobs(animate: bool) -> void:
+	var live: Dictionary = {}
+	for g: Dictionary in manager.mobs():
+		var id: int = int(g["id"])
+		live[id] = true
+		var cell: Vector2i = AdventureMobs.pos_of(g)
+		var mn: MobNode = _mob_nodes.get(id, null)
+		if mn == null or not is_instance_valid(mn):
+			mn = MobNode.new()
+			mn.level = int(g.get("level", 1))
+			mn.count = int(g.get("count", 3))
+			mn.elite = bool(g.get("elite", false))
+			var types: Array[String] = ProgressionManager.biome_enemy_types(manager.zone_biome())
+			for i: int in range(mini(3, mn.count)):
+				var et: String = types[(id + i) % types.size()] if not types.is_empty() else "Gobelin"
+				mn.texes.append(Portraits.get_texture({"classe": et, "team": "enemy", "entity_type": "Enemy"}))
+			mn.cell = cell
+			mn.position = cell_center(cell)
+			_entities.add_child(mn)
+			_mob_nodes[id] = mn
+			if animate:
+				mn.modulate.a = 0.0
+				create_tween().tween_property(mn, "modulate:a", 1.0, 0.4)
+			continue
+		if mn.cell != cell:
+			mn.cell = cell
+			var to: Vector2 = cell_center(cell)
+			mn.face(to.x - mn.position.x)
+			if animate:
+				create_tween().tween_property(mn, "position", to, STEP_TIME * 1.6).set_trans(Tween.TRANS_SINE)
+			else:
+				mn.position = to
+	for id2: int in _mob_nodes.keys():
+		if not live.has(id2):
+			var dead: Node = _mob_nodes[id2]
+			if is_instance_valid(dead):
+				dead.queue_free()
+			_mob_nodes.erase(id2)
+	if _board != null:
+		var tl: int = _team_level()
+		for id3: int in _mob_nodes.keys():
+			var n3: MobNode = _mob_nodes[id3]
+			n3.visible = manager.cell_discovered(n3.cell)
+			n3.danger = n3.level - tl
+
+
+func _confirm_mob(g: Dictionary) -> void:
+	var lvl: int = int(g.get("level", 1))
+	var elite: bool = bool(g.get("elite", false))
+	var accent: Color = Color(1.0, 0.80, 0.30) if elite else POI_COLOR["combat"]
+	var box: VBoxContainer = _modal(("★  " if elite else "⚔  ") + AdventureMobs.label(g, manager.zone_biome()), accent)
+	var diff: int = lvl - _team_level()
+	var risk: String = "Facile" if diff <= -3 else ("Équilibré" if diff <= 1 else ("Risqué" if diff <= 4 else "Très dangereux"))
+	var risk_col: Color = U.C_GOOD if diff <= 1 else (Color(1.0, 0.75, 0.35) if diff <= 4 else U.C_BAD)
+	var info := HFlowContainer.new()
+	info.add_theme_constant_override("h_separation", 8)
+	info.add_theme_constant_override("v_separation", 8)
+	info.add_child(U.chip("Niveau %d" % lvl, accent, 19))
+	info.add_child(U.chip("%d ennemis" % int(g.get("count", 3)), U.C_TXT, 19))
+	info.add_child(U.chip(risk, risk_col, 19))
+	box.add_child(info)
+	var c: Dictionary = manager.contract()
+	var txt: String = "Combat Tactique dans le décor %s. Plus le groupe est nombreux, plus il rapporte d'XP et de butin." % ProgressionManager.biome_label(manager.zone_biome())
+	if not c.is_empty():
+		txt += "\n📜 Contrat : " + AdventureMobs.contract_text(c)
+	var t: Label = U.lbl(txt, 18, U.C_TXT)
+	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(t)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	box.add_child(row)
+	var go := U.btn("⚔  COMBATTRE", accent, 22, Vector2(280, 60))
+	go.name = "MobFight"
+	go.pressed.connect(func() -> void:
+		_close_modal()
+		manager.start_mob_combat(g)
+		GameManager.fight_biome = manager.zone_biome()
+		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
+	row.add_child(go)
+	var later := U.btn("PLUS TARD", U.C_BORDER, 20, Vector2(200, 60))
+	later.pressed.connect(_close_modal)
+	row.add_child(later)
+
+
+## Camp : repos (XP, avec délai) et tableau des contrats de la carte.
+func _camp_modal(key: String, xp: int) -> void:
+	var box: VBoxContainer = _modal("☀  Halte au camp", POI_COLOR["camp"])
+	if xp > 0:
+		_log("Repos au camp (+%d XP)." % xp)
+		box.add_child(U.chip("Repos : +%d XP d'exploration" % xp, U.C_GOOD, 18))
+	else:
+		box.add_child(U.lbl("Vous vous êtes déjà reposé ici. Prochain repos dans %d pas." % manager.camp_rest_wait(key), 17, DIM))
+	box.add_child(U.lbl("📜  TABLEAU DES CONTRATS", 20, U.C_GOLD, true))
+	var c: Dictionary = manager.contract()
+	if not c.is_empty():
+		var cl: Label = U.lbl("Contrat en cours : %s" % AdventureMobs.contract_text(c), 18, U.C_TXT)
+		cl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(cl)
+	else:
+		var off: Dictionary = manager.contract_offer()
+		var elite: bool = String(off.get("kind", "")) == "elite"
+		var desc: String = AdventureMobs.contract_text(off)
+		desc += "\nRécompense : or, ressources de la carte et XP%s." % (", ressource de rang 2 et un objet rare ou mieux" if elite else "")
+		if elite:
+			desc += "\nUne bande d'élite (4 ennemis, niveau %d) apparaîtra sur la carte." % (AdventureMobs.level_range(manager.zone_id()).y + AdventureMobs.ELITE_BONUS_LEVEL / 2)
+		var dl: Label = U.lbl(desc, 18, U.C_TXT)
+		dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(dl)
+		var acc := U.btn("ACCEPTER LE CONTRAT", Color(1.0, 0.80, 0.30) if elite else POI_COLOR["camp"], 21, Vector2(0, 58))
+		acc.name = "AcceptContract"
+		acc.pressed.connect(func() -> void:
+			var got: Dictionary = manager.accept_contract()
+			_log("Contrat accepté : %s." % AdventureMobs.contract_text(got))
+			_close_modal()
+			_sync_mobs(true)
+			_refresh_world()
+			_refresh_side()
+			_toast_show("📜 Contrat accepté", 24))
+		box.add_child(acc)
+	var ok := U.btn("REPRENDRE LA ROUTE", U.C_BORDER, 19, Vector2(0, 52))
+	ok.pressed.connect(func() -> void:
+		_close_modal()
+		_refresh_side())
+	box.add_child(ok)
+
+
+## Au retour d'un combat : contrat rempli, puis maîtrise de la carte.
+func _show_pending_rewards() -> void:
+	var r: Dictionary = manager.take_contract_reward()
+	if not r.is_empty():
+		var lines: Array[String] = ["+%d or" % int(r.get("gold", 0)), "+%d XP" % int(r.get("xp", 0))]
+		for k: String in (r.get("resources", {}) as Dictionary).keys():
+			lines.append("+%d %s" % [int(r["resources"][k]), k.replace("@", " R")])
+		if r.has("item"):
+			lines.append("[%s] %s" % [ItemRules.rarity_label(r["item"]), String(r["item"].get("name", "objet"))])
+		_log(String(r.get("title", "Contrat rempli")) + ".")
+		_reward_modal("📜  " + String(r.get("title", "Contrat rempli !")), U.C_GOLD,
+			"Le tableau du camp vous réserve un nouveau contrat.", lines)
+		_refresh_side()
+		return
+	_check_mastery()
+
+
+## Verse et annonce la maîtrise de la carte si elle vient d'être atteinte.
+func _check_mastery() -> bool:
+	var m: Dictionary = manager.check_mastery()
+	if m.is_empty():
+		return false
+	var lines: Array[String] = ["+%d or" % int(m.get("gold", 0))]
+	for k: String in (m.get("resources", {}) as Dictionary).keys():
+		lines.append("+%d %s" % [int(m["resources"][k]), k.replace("@", " R")])
+	if m.has("item"):
+		lines.append("[%s] %s" % [ItemRules.rarity_label(m["item"]), String(m["item"].get("name", "objet"))])
+	_log("Carte maîtrisée : %s ★" % manager.zone_name())
+	_reward_modal("★  Carte maîtrisée !", U.C_GOLD,
+		"Tous les lieux et toutes les trouvailles de %s : la carte vous appartient." % manager.zone_name(), lines)
+	_refresh_side()
+	return true
+
+
+## Objectifs de la carte (panneau latéral, hors lieu).
+func _objectives_into(v: VBoxContainer) -> void:
+	v.add_child(U.lbl("OBJECTIFS DE LA CARTE", 18, U.C_GOLD))
+	var prog: Dictionary = manager.zone_progress()
+	var fp: Dictionary = manager.finds_progress()
+	var rows: Array = [
+		[int(prog["done"]) >= int(prog["total"]), "Lieux explorés %d/%d" % [int(prog["done"]), int(prog["total"])]],
+		[int(fp["found"]) >= int(fp["total"]), "Trouvailles ✦ %d/%d" % [int(fp["found"]), int(fp["total"])]],
+	]
+	for r: Array in rows:
+		v.add_child(U.lbl(("✓ " if bool(r[0]) else "○ ") + String(r[1]), 18, U.C_GOOD if bool(r[0]) else U.C_TXT))
+	if manager.is_mastered():
+		v.add_child(U.lbl("★ Carte maîtrisée", 18, U.C_GOLD))
+	else:
+		v.add_child(U.lbl("Tout compléter : récompense de maîtrise ★", 16, DIM))
+	var c: Dictionary = manager.contract()
+	if not c.is_empty():
+		var cl: Label = U.lbl("📜 " + AdventureMobs.contract_text(c), 18, Color(1.0, 0.85, 0.45))
+		cl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(cl)
+	else:
+		var hl: Label = U.lbl("📜 Passez au camp pour prendre un contrat de chasse.", 16, DIM)
+		hl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(hl)
+	var n: int = manager.mobs().size()
+	var kills: int = int((manager.state.get("mob_kills", {}) as Dictionary).get(manager.zone_id(), 0))
+	v.add_child(U.lbl("⚔ Groupes de monstres : %d sur la carte · %d vaincus" % [n, kills], 16, DIM))
+
+
 # ── Événements de route ─────────────────────────────────────────────────
 func _show_event(ev: Dictionary) -> void:
 	var kind: String = String(ev.get("kind", ""))
@@ -992,17 +1269,23 @@ func _show_event(ev: Dictionary) -> void:
 			_log("Vous contournez l'embuscade."))
 		row.add_child(flee)
 		return
-	var lines: Array[String] = []
+	# Petites trouvailles de route : un bandeau et une ligne de journal, sans fenêtre à fermer.
+	var parts: Array[String] = []
 	if ev.has("resources"):
 		for r: String in (ev["resources"] as Dictionary).keys():
 			if int(ev["resources"][r]) > 0:
-				lines.append("+%d %s" % [int(ev["resources"][r]), r])
+				parts.append("+%d %s" % [int(ev["resources"][r]), r])
 	if ev.has("gold"):
-		lines.append("+%d or" % int(ev["gold"]))
+		parts.append("+%d or" % int(ev["gold"]))
 	if ev.has("xp"):
-		lines.append("+%d XP d'exploration" % int(ev["xp"]))
-	_log(String(ev.get("title", "Événement")) + ".")
-	_reward_modal("✧  " + String(ev.get("title", "Événement")), U.C_GOLD, String(ev.get("text", "")), lines)
+		parts.append("+%d XP" % int(ev["xp"]))
+	var title: String = String(ev.get("title", "Événement"))
+	_toast_show("✧ %s : %s" % [title, " · ".join(parts)], 22)
+	if kind == "sage":
+		_log("%s : %s" % [title, String(ev.get("text", ""))])
+	else:
+		_log("%s (%s)." % [title, " · ".join(parts)])
+	_refresh_side()
 
 
 # ── Énigmes ─────────────────────────────────────────────────────────────
@@ -1281,7 +1564,8 @@ func _reward_modal(title: String, accent: Color, text: String, lines: Array) -> 
 	var ok := U.btn("CONTINUER", accent, 20, Vector2(0, 56))
 	ok.pressed.connect(func() -> void:
 		_close_modal()
-		_refresh_side())
+		_refresh_side()
+		_check_mastery())
 	box.add_child(ok)
 
 
@@ -1809,3 +2093,68 @@ class MiniMap extends Control:
 			ui._on_zone_pressed(z)
 		elif _known(z, _visited()):
 			ui._say("Carte inexplorée : rejoignez-la à pied par une route voisine.")
+
+
+
+## Groupe de monstres errant : jusqu'à 3 silhouettes d'ennemis, badge de niveau et
+## d'effectif. Couleur du badge selon le danger (écart avec le niveau de l'équipe) ;
+## les bandes d'élite ont un halo doré.
+class MobNode extends Node2D:
+	var texes: Array = []
+	var level: int = 1
+	var count: int = 3
+	var elite: bool = false
+	var danger: int = 0
+	var cell: Vector2i = Vector2i.ZERO
+	var _flip: bool = false
+	var _t: float = 0.0
+
+	func _ready() -> void:
+		_t = float(absi(int(position.x * 5 + position.y * 3))) * 0.01
+		set_process(true)
+
+	func _process(delta: float) -> void:
+		_t += delta
+		queue_redraw()
+
+	func face(dx: float) -> void:
+		if absf(dx) > 1.0:
+			_flip = dx < 0.0
+
+	func _draw() -> void:
+		var col: Color = Color(1.0, 0.82, 0.30) if elite else Color(1.0, 0.42, 0.36)
+		var pulse: float = 0.5 + 0.5 * sin(_t * 2.6)
+		draw_set_transform(Vector2(0, 4), 0.0, Vector2(1.0, 0.45))
+		draw_circle(Vector2.ZERO, 44.0, Color(0, 0, 0, 0.25))
+		draw_arc(Vector2.ZERO, 44.0 + pulse * 3.0, 0.0, TAU, 40, Color(col.r, col.g, col.b, 0.55 + 0.3 * pulse), 3.0 if not elite else 5.0, true)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		var offs: Array = [Vector2(0, 0), Vector2(-26, -8), Vector2(24, -10)]
+		var n: int = texes.size()
+		for i: int in range(n - 1, -1, -1):
+			var tex: Texture2D = texes[i]
+			if tex == null:
+				continue
+			var h: float = (84.0 if i == 0 else 66.0) * (1.12 if elite else 1.0)
+			var sc: float = h / float(tex.get_height())
+			var w: float = float(tex.get_width()) * sc
+			var bob: float = sin(_t * 2.0 + float(i)) * 1.5
+			var o: Vector2 = offs[i]
+			if _flip:
+				draw_set_transform(Vector2(-o.x, o.y), 0.0, Vector2(-1.0, 1.0))
+				draw_texture_rect(tex, Rect2(Vector2(-w * 0.5, -h + 4.0 - bob), Vector2(w, h)), false, Color(1, 1, 1) if i == 0 else Color(0.85, 0.85, 0.9))
+				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			else:
+				draw_texture_rect(tex, Rect2(o + Vector2(-w * 0.5, -h + 4.0 - bob), Vector2(w, h)), false, Color(1, 1, 1) if i == 0 else Color(0.85, 0.85, 0.9))
+		# Badge : niveau + effectif
+		var bcol: Color = Color(0.45, 0.88, 0.50) if danger <= 1 else (Color(1.0, 0.72, 0.30) if danger <= 4 else Color(1.0, 0.40, 0.36))
+		var font: Font = ThemeDB.fallback_font
+		var txt: String = "%sniv %d · ×%d" % ["★ " if elite else "", level, count]
+		var tw: float = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 18.0
+		var r := Rect2(Vector2(-tw * 0.5, -(94.0 if elite else 86.0) - 30.0), Vector2(tw, 26))
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.05, 0.07, 0.12, 0.90)
+		sb.border_color = bcol
+		sb.set_border_width_all(2)
+		sb.set_corner_radius_all(11)
+		draw_style_box(sb, r)
+		draw_string(font, r.position + Vector2(9, 19), txt, HORIZONTAL_ALIGNMENT_LEFT, tw, 16, bcol.lightened(0.35))

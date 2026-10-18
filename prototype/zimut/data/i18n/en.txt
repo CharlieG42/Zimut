@@ -1502,3 +1502,40 @@ ANNULER	CANCEL
 BRISER	SALVAGE
 ⚒ %d objet(s) brisé(s)	⚒ %d item(s) salvaged
 🎒  Inventaire  (%d)	🎒  Inventory  (%d)
+# V22 : Aventure (groupes, contrats, maîtrise)
+Touchez une case pour y marcher (touchez ailleurs pour changer de cap).\nTouchez un groupe de monstres pour le combattre. Joystick : marche continue.	Tap a tile to walk there (tap elsewhere to change course).\nTap a group of monsters to fight it. Joystick: continuous walking.
+OBJECTIFS DE LA CARTE	MAP OBJECTIVES
+Lieux explorés %d/%d	Places explored %d/%d
+Trouvailles ✦ %d/%d	Finds ✦ %d/%d
+✓ Lieux explorés %d/%d	✓ Places explored %d/%d
+○ Lieux explorés %d/%d	○ Places explored %d/%d
+✓ Trouvailles ✦ %d/%d	✓ Finds ✦ %d/%d
+○ Trouvailles ✦ %d/%d	○ Finds ✦ %d/%d
+★ Carte maîtrisée	★ Map mastered
+Tout compléter : récompense de maîtrise ★	Complete everything: mastery reward ★
+📜 Passez au camp pour prendre un contrat de chasse.	📜 Stop at the camp to take a hunting contract.
+⚔ Groupes de monstres : %d sur la carte · %d vaincus	⚔ Monster groups: %d on the map · %d defeated
+Vaincre %d groupes de monstres sur cette carte (%d/%d)	Defeat %d monster groups on this map (%d/%d)
+Vaincre la bande d'élite de la carte (%d/%d)	Defeat the map's elite band (%d/%d)
+📜 Vaincre %d groupes de monstres sur cette carte (%d/%d)	📜 Defeat %d monster groups on this map (%d/%d)
+📜 Vaincre la bande d'élite de la carte (%d/%d)	📜 Defeat the map's elite band (%d/%d)
+%d ennemis	%d enemies
+Équilibré	Balanced
+Risqué	Risky
+Très dangereux	Very dangerous
+☀  Halte au camp	☀  Camp rest
+Repos : +%d XP d'exploration	Rest: +%d exploration XP
+Vous vous êtes déjà reposé ici. Prochain repos dans %d pas.	You already rested here. Next rest in %d steps.
+📜  TABLEAU DES CONTRATS	📜  CONTRACT BOARD
+Contrat en cours : %s	Current contract: %s
+ACCEPTER LE CONTRAT	ACCEPT THE CONTRACT
+REPRENDRE LA ROUTE	BACK ON THE ROAD
+📜 Contrat accepté	📜 Contract accepted
+Contrat de chasse rempli !	Hunting contract fulfilled!
+Contrat d'élite rempli !	Elite contract fulfilled!
+📜  Contrat de chasse rempli !	📜  Hunting contract fulfilled!
+📜  Contrat d'élite rempli !	📜  Elite contract fulfilled!
+Le tableau du camp vous réserve un nouveau contrat.	The camp board has a new contract for you.
+★  Carte maîtrisée !	★  Map mastered!
+Un groupe de monstres vous barre la route.	A group of monsters blocks your way.
+Aucun sentier ne mène à ce groupe pour l'instant.	No path leads to this group yet.

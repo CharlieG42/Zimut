@@ -419,6 +419,12 @@ func init_entities() -> void:
 	else:
 		enemy_types = [biome_types[0], biome_types[1], biome_types[0] if _rng.randf() < 0.5 else biome_types[1],
 			biome_types[1] if _rng.randf() < 0.5 else biome_types[0]]
+	# Aventure : un groupe de monstres errant fixe le nombre d'ennemis (2 à 4).
+	if campaign_mode == "adventure" and not active_save.is_empty() and not boss_fight:
+		var adv_c: Dictionary = active_save.get("adventure", {})
+		var cnt: int = int(adv_c.get("pending_count", 0))
+		if String(adv_c.get("pending_challenge", "")) != "" and cnt >= 1 and cnt < enemy_types.size():
+			enemy_types = enemy_types.slice(0, cnt)
 	var enemies_data: Array = get_enemies_data()
 	var enemy_spawn_positions: Array[Vector2i] = combat_spawn_positions.slice(player_classes.size(), player_classes.size() + enemy_types.size())
 	for i: int in range(enemy_types.size()):
