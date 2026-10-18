@@ -724,6 +724,10 @@ func start_battle() -> void:
 	turn_order = all_entities()
 	for e: Dictionary in turn_order:
 		e["init"] = float(e.get("agility", 0)) + _rng.randf_range(-25.0, 25.0)
+	# Bestiaire (V18) : chaque ennemi présent est inscrit
+	if not active_save.is_empty():
+		for en: Dictionary in enemies:
+			Achievements.bestiary_seen(active_save, en, fight_biome)
 	turn_order.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["init"] > b["init"])
 	message_requested.emit("Le combat commence !")
 	fx.emit("banner", {"text": "Combat !"})
@@ -1281,6 +1285,8 @@ func _apply_damage(attacker: Dictionary, tgt: Dictionary, dmg: int, dtype: Strin
 			sa["dmg"] = int(sa["dmg"]) + real_dmg
 			if pv_before > 0 and int(tgt["current_pv"]) <= 0:
 				sa["kills"] = int(sa["kills"]) + 1
+				if not active_save.is_empty():
+					Achievements.bestiary_kill(active_save, tgt)
 	var st_t: Dictionary = _stat(tgt)
 	if not st_t.is_empty():
 		st_t["taken"] = int(st_t["taken"]) + real_dmg

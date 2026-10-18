@@ -1095,6 +1095,8 @@ func fuse_resource(data: Dictionary, res_name: String, tier: int) -> String:
 	data["resources"] = res
 	data["gold"] = int(data.get("gold", 0)) - gold_cost
 	progression_changed.emit()
+	Achievements.bump(data, "fusions")
+	Achievements.check(data)
 	return ""
 
 
@@ -1177,6 +1179,9 @@ func craft_item(data: Dictionary, recipe_name: String, tier: int = 1) -> String:
 	data["inventory"].append(forged_item_ranked(recipe, tier))
 	data["crafted"] = int(data.get("crafted", 0)) + 1
 	progression_changed.emit()
+	Achievements.bump(data, "crafted")
+	Achievements.set_max(data, "max_rank", tier)
+	Achievements.check(data)
 	return ""
 
 ## Fabrique puis équipe directement sur un membre de l'équipe. Si l'équipement échoue
@@ -1246,6 +1251,7 @@ func upgrade_item(data: Dictionary, entry: Dictionary) -> String:
 	data["gold"] = int(data.get("gold", 0)) - int(c["gold"])
 	apply_rank(item, int(c["next"]))
 	progression_changed.emit()
+	Achievements.check(data)
 	return ""
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1786,6 +1792,17 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 		})
 	data["loot_log"] = log_arr
 	_apply_campaign_victory(data)
+	# Succès (V18)
+	Achievements.bump(data, "wins")
+	if int(info.get("deaths", 1)) == 0 and info.has("deaths"):
+		Achievements.bump(data, "flawless")
+	if int(info.get("turns", 99)) <= 3 and info.has("turns"):
+		Achievements.bump(data, "fast")
+	if was_boss:
+		Achievements.bump(data, "bosses")
+	Achievements.bump(data, "loots", loots.size())
+	data["last_achievements"] = []
+	Achievements.check(data)
 	progression_changed.emit()
 	return data
 
@@ -1807,6 +1824,8 @@ func register_defeat(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	data["last_result"] = {"victory": false, "xp": report, "boss": bool(info.get("boss", false)),
 		"fight_level": fight_level, "turns": int(info.get("turns", 0))}
 	_apply_campaign_defeat(data)
+	data["last_achievements"] = []
+	Achievements.check(data)
 	progression_changed.emit()
 	return data
 

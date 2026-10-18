@@ -448,6 +448,25 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	gov_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tools_row.add_child(gov_btn)
 
+	# Trophées : succès et bestiaire de la partie
+	var tro_row := HBoxContainer.new()
+	tro_row.add_theme_constant_override("separation", 10)
+	_detail_box.add_child(tro_row)
+	var n_ach: int = (data.get("achievements", {}) as Dictionary).size()
+	var n_best: int = (data.get("bestiary", {}) as Dictionary).size()
+	for tb: Array in [["succes", "🏆  Succès  %d / %d" % [n_ach, Achievements.LIST.size()]], ["bestiaire", "📖  Bestiaire  (%d)" % n_best]]:
+		var tab_key: String = String(tb[0])
+		var tbtn := Button.new()
+		tbtn.text = String(tb[1])
+		tbtn.custom_minimum_size = Vector2(0, 62)
+		tbtn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tbtn.add_theme_font_size_override("font_size", _ui_font(20))
+		tbtn.add_theme_color_override("font_color", Color(0.98, 0.92, 0.75))
+		tbtn.add_theme_stylebox_override("normal", _flat_bg(Color(0.30, 0.22, 0.10), Color(0.85, 0.65, 0.28), 3))
+		tbtn.add_theme_stylebox_override("hover", _flat_bg(Color(0.40, 0.30, 0.14), Color(1.0, 0.80, 0.40), 3))
+		tbtn.pressed.connect(func() -> void: _open_trophies(slot, tab_key))
+		tro_row.add_child(tbtn)
+
 	var rename_btn := _action_button("rename", "RENOMMER CETTE PARTIE", COL_TXT)
 	rename_btn.pressed.connect(func() -> void:
 		var dialog := ConfirmationDialog.new()
@@ -648,6 +667,16 @@ func _mode_button(title_txt: String, desc: String, art_path: String, accent: Col
 	if enabled and cb.is_valid():
 		b.pressed.connect(cb)
 	return b
+
+func _open_trophies(slot: int, tab: String) -> void:
+	if _current.is_empty() or slot < 0:
+		return
+	var ui: CanvasLayer = (load("res://scripts/TrophyUI.gd") as GDScript).new()
+	ui.layer = 10
+	add_child(ui)
+	ui.closed.connect(func() -> void: ui.queue_free())
+	ui.open(_current, tab)
+
 
 func _open_forge(slot: int) -> void:
 	if _current.is_empty() or slot < 0:
