@@ -84,6 +84,42 @@ def make(src, svg, label, out):
     print(out, im.size)
 
 
+def erase_text(im, x0=190):
+    """Efface le libellé de la plaque (pixels très clairs) par inpainting."""
+    a = np.array(im.convert("RGBA"))
+    rgb = a[:, :, :3].astype(np.int32)
+    light = (rgb.min(axis=2) > 190) & (a[:, :, 3] > 200)
+    zone = np.zeros_like(light)
+    zone[40:160, x0:500] = True
+    mask = (light & zone).astype(np.uint8) * 255
+    mask = cv2.dilate(mask, np.ones((5, 5), np.uint8), iterations=2)
+    bgr = cv2.cvtColor(a[:, :, :3], cv2.COLOR_RGB2BGR)
+    bgr = cv2.inpaint(bgr, mask, 6, cv2.INPAINT_TELEA)
+    a[:, :, :3] = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
+    return Image.fromarray(a, "RGBA")
+
+
+def make_plain(src, out, svg=None):
+    """Version SANS texte (le libellé est écrit par Godot, donc traduisible)."""
+    im = Image.open(os.path.join(DIR, src)).convert("RGBA")
+    if svg is not None:      # Forge / Gouverneurs : nouvelle icône à gauche
+        px = np.array(erase_text(im, PLAQUE_X0))
+        px[:, :PLAQUE_X0 - 28, :] = 0
+        for x in range(PLAQUE_X0 - 28, PLAQUE_X0):
+            px[:, x, 3] = (px[:, x, 3] * ((x - (PLAQUE_X0 - 28)) / 28.0)).astype(np.uint8)
+        im = Image.fromarray(px, "RGBA")
+        im.alpha_composite(render(svg, 170), (10, 11))
+    else:
+        im = erase_text(im)
+    im.save(os.path.join(DIR, out))
+    print(out, im.size)
+
+
 if __name__ == "__main__":
     make("action_inventory.png", ANVIL, "Forge", "action_forge.png")
     make("action_autoequip.png", CROWN, "Gouverneurs", "action_governors.png")
+    # V20 : plaques sans texte pour les libellés traduisibles
+    make_plain("action_inventory.png", "plain_forge.png", ANVIL)
+    make_plain("action_autoequip.png", "plain_governors.png", CROWN)
+    for k in ("team", "chars", "rename", "delete"):
+        make_plain("action_%s.png" % k, "plain_%s.png" % k)
