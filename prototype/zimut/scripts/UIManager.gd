@@ -445,6 +445,8 @@ func _kind_color(spell: Dictionary) -> Color:
 			return Color(0.40, 0.60, 0.95)
 		"summon", "teleport", "revive", "trap":
 			return Color(0.40, 0.60, 0.95)
+		"glyph":
+			return Color(0.92, 0.30, 0.25) if (p["glyph_foes"] as Dictionary).size() > 0 else Color(0.40, 0.60, 0.95)
 	return Color(0.92, 0.30, 0.25)
 
 

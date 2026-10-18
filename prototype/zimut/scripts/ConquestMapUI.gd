@@ -944,7 +944,7 @@ func _show_governor_picker(city_id: String) -> void:
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", _style(Color(0.10, 0.17, 0.22, 0.99), GOLD))
 	panel.custom_minimum_size = Vector2(minf(660.0, vp.x - 40.0), 0)
-	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE, 0)
+	_center_panel(panel)
 	dim.add_child(panel)
 	var outer := VBoxContainer.new()
 	outer.add_theme_constant_override("separation", 8)
@@ -1008,7 +1008,7 @@ func _show_event_popup() -> void:
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", _style(Color(0.12, 0.17, 0.24, 0.99), Color(0.62, 0.48, 0.95)))
 	panel.custom_minimum_size = Vector2(minf(680.0, vp.x - 40.0), 0)
-	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE, 0)
+	_center_panel(panel)
 	dim.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 10)
@@ -1078,7 +1078,7 @@ func _show_assault_prep() -> void:
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", _style(Color(0.10, 0.17, 0.22, 0.99), GOLD))
 	panel.custom_minimum_size = Vector2(620, 0)
-	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE, 0)
+	_center_panel(panel)
 	dim.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 10)
@@ -1219,7 +1219,7 @@ func _show_popup(title: String, message: String) -> void:
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", _style(Color(0.98, 0.86, 0.45), Color(0.72, 0.58, 0.28)))
 	add_child(panel)
-	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE, 0)
+	_center_panel(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 12)
 	panel.add_child(box)
@@ -1722,3 +1722,11 @@ class _RouteLines:
 			var open: bool = owned.has(a_id) and owned.has(b_id)
 			var col: Color = Color(0.96, 0.75, 0.31, 0.95) if open else Color(0.79, 0.68, 0.43, 0.45)
 			draw_line(Vector2(size.x * a.x, size.y * a.y), Vector2(size.x * b.x, size.y * b.y), col, 5.0 if open else 3.0, true)
+
+
+## Centre un panneau (taille = contenu) quelle que soit sa taille finale : ancres au centre,
+## il grandit des deux côtés (un preset posé avant le calcul de la taille le décalait vers le bas/droite).
+func _center_panel(panel: Control) -> void:
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH

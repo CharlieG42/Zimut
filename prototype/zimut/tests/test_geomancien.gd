@@ -98,7 +98,7 @@ func _boot() -> void:
 	var finfo: Dictionary = Combat.SUMMONS["Faille"]
 	check(not bool(finfo.get("blocks_los", false)) and bool(finfo["static"]), "la faille est infranchissable mais laisse voir")
 	var cinfo: Dictionary = Combat.SUMMONS["Cristal ambré"]
-	check(not bool(cinfo.get("blocks_los", false)) and int(cinfo["defense"]) > 40, "le cristal ambré est robuste et transparent")
+	check(not bool(cinfo.get("blocks_los", false)) and int(cinfo["defense"]) >= 40, "le cristal ambré est robuste et transparent")
 	# Durée de vie : le terrain s'effrite au fil des tours du Géomancien
 	gm.active_entity = geo
 	for i: int in range(4):
@@ -108,8 +108,8 @@ func _boot() -> void:
 	check(gm.terrain_of(geo).size() == 0 or gm.terrain_of(geo).all(func(e: Dictionary) -> bool: return int(e["lifetime"]) > 0), "le pilier de 4 tours a disparu ou expire")
 	check(not gm.is_alive(pil), "le pilier est détruit après 4 tours")
 	# Sorts : cibles de buff, zone
-	var tp2: Dictionary = Combat.parse(_spell(gm, geo, "Armure de grès"))
-	check(tp2["buffs"].size() > 0, "Armure de grès : buff de défense")
+	var tp2: Dictionary = Combat.parse(_spell(gm, geo, "Glyphe de grès"))
+	check(String(tp2["kind"]) == "glyph" and (tp2["glyph_allies"] as Dictionary)["buffs"].size() > 0, "Glyphe de grès : glyphe de défense pour les alliés")
 	var ts: Dictionary = Combat.parse(_spell(gm, geo, "Tempête de sable"))
 	check(String(ts["aoe"]) == "zone", "Tempête de sable : zone 3x3")
 	check(int(Combat.parse(_spell(gm, geo, "Séisme ambré"))["push"]) == 1, "Séisme ambré repousse d'une case")

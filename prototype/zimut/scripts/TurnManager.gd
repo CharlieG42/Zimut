@@ -174,6 +174,30 @@ func _score_cast(e: Dictionary, spell: Dictionary, p: Dictionary, c: Vector2i) -
 				if gm.enemies_of(e).is_empty():
 					return 0.0
 			return s
+		"glyph":
+			var gcells: Array[Vector2i] = Combat.zone_cells(c, int(p["zone_r"]), String(p["zone_shape"]), gm.GRID_SIZE)
+			for og: Dictionary in gm.glyphs_of(e):
+				if og["name"] == spell["name"] and (og["cells"] as Array).has(c):
+					return 0.0   # déjà posé ici
+			var gs: float = 0.0
+			var foes_fx: Dictionary = p["glyph_foes"]
+			var allies_fx: Dictionary = p["glyph_allies"]
+			for x: Dictionary in gm.all_entities():
+				if not gm.is_alive(x) or bool(x.get("terrain", false)) or bool(x.get("beacon", false)) or not gcells.has(gm.pos_of(x)):
+					continue
+				if String(x["team"]) == String(e["team"]):
+					if not allies_fx.is_empty():
+						for b: Dictionary in allies_fx["buffs"]:
+							if not Combat.has_status(x, String(b["id"])):
+								gs += 16.0
+					else:
+						gs -= 10.0
+				elif not foes_fx.is_empty():
+					gs += float(foes_fx["dmg"]) * 1.4
+					for dt: Dictionary in foes_fx["dots"]:
+						gs += float(dt["value"]) * float(dt["turns"]) * 0.7
+					gs += 14.0 * float(foes_fx["debuffs"].size())
+			return gs if gs >= 20.0 else 0.0
 		"summon":
 			return 75.0 if gm.summons_of(e).size() < 2 else 0.0
 		"revive":

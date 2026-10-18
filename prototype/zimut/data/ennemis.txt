@@ -1,8 +1,8 @@
 Type,Niveau,PV,Attaque,Défense,PA,PM,XP,Biome,Effets spéciaux
-Gobelin,1,42,7,5,2,3,30,Forêt,-
-Gobelin,5,53,9,6,2,3,40,Forêt,-
-Gobelin,10,66,11,8,2,3,53,Forêt,-
-Gobelin,15,78,14,10,2,3,68,Forêt,-
+Gobelin,1,80,5,5,2,3,30,Forêt,-
+Gobelin,5,81,8,6,2,3,40,Forêt,-
+Gobelin,10,76,12,8,2,3,53,Forêt,-
+Gobelin,15,82,14,10,2,3,68,Forêt,-
 Gobelin,20,92,16,11,2,3,83,Forêt,-
 Gobelin,25,104,19,13,3,3,103,Forêt,-
 Gobelin,30,116,21,15,3,3,123,Forêt,-
@@ -31,10 +31,10 @@ Gobelin,140,485,94,58,4,3,892,Forêt,-
 Gobelin,145,506,98,60,4,3,941,Forêt,-
 Gobelin,150,528,102,63,4,3,990,Forêt,-
 
-Squelette,1,38,8,6,2,3,35,Désert,-
-Squelette,5,48,10,7,2,3,45,Désert,-
-Squelette,10,62,12,9,2,3,57,Désert,-
-Squelette,15,74,15,11,3,3,70,Désert,-
+Squelette,1,72,5,6,2,3,35,Désert,-
+Squelette,5,75,8,7,2,3,45,Désert,-
+Squelette,10,71,13,9,2,3,57,Désert,-
+Squelette,15,77,15,11,3,3,70,Désert,-
 Squelette,20,87,17,12,3,3,82,Désert,-
 Squelette,25,99,20,14,3,3,94,Désert,-
 Squelette,30,111,22,16,3,3,107,Désert,-
@@ -63,10 +63,10 @@ Squelette,140,478,96,59,4,3,428,Désert,-
 Squelette,145,499,100,61,4,3,442,Désert,-
 Squelette,150,520,104,64,4,3,457,Désert,-
 
-Loup,1,34,8,3,3,4,35,Forêt,-
-Loup,5,44,11,4,3,4,45,Forêt,-
-Loup,10,57,13,6,3,4,57,Forêt,-
-Loup,15,69,16,8,3,4,70,Forêt,-
+Loup,1,64,6,3,3,4,35,Forêt,-
+Loup,5,68,9,4,3,4,45,Forêt,-
+Loup,10,66,14,6,3,4,57,Forêt,-
+Loup,15,72,16,8,3,4,70,Forêt,-
 Loup,20,82,18,9,3,4,82,Forêt,-
 Loup,25,94,21,11,4,4,94,Forêt,-
 Loup,30,106,23,12,4,4,107,Forêt,-
@@ -95,10 +95,10 @@ Loup,140,470,97,55,4,4,428,Forêt,-
 Loup,145,491,101,58,4,4,442,Forêt,-
 Loup,150,512,106,60,4,4,457,Forêt,-
 
-Dragonnet,1,82,14,10,4,4,10,Désert,Vol (ignore les obstacles)
-Dragonnet,5,95,16,12,4,4,30,Désert,Vol (ignore les obstacles)
-Dragonnet,10,113,19,15,4,4,55,Désert,Vol (ignore les obstacles)
-Dragonnet,15,132,22,18,4,4,79,Désert,Vol (ignore les obstacles)
+Dragonnet,1,154,10,10,4,4,10,Désert,Vol (ignore les obstacles)
+Dragonnet,5,147,14,12,4,4,30,Désert,Vol (ignore les obstacles)
+Dragonnet,10,130,20,15,4,4,55,Désert,Vol (ignore les obstacles)
+Dragonnet,15,138,23,18,4,4,79,Désert,Vol (ignore les obstacles)
 Dragonnet,20,153,25,20,4,4,104,Désert,Vol (ignore les obstacles)
 Dragonnet,25,171,29,23,4,4,129,Désert,Vol (ignore les obstacles)
 Dragonnet,30,190,32,26,4,4,154,Désert,Vol (ignore les obstacles)
@@ -127,10 +127,10 @@ Dragonnet,140,618,125,68,6,4,746,Désert,Vol (ignore les obstacles)
 Dragonnet,145,641,130,69,6,4,770,Désert,Vol (ignore les obstacles)
 Dragonnet,150,664,136,69,6,4,795,Désert,Vol (ignore les obstacles)
 
-Troll,1,94,18,15,3,3,30,Montagne,Régénération (5 PV/tour)
-Troll,5,114,20,17,3,3,50,Montagne,Régénération (5 PV/tour)
-Troll,10,142,23,20,3,3,75,Montagne,Régénération (5 PV/tour)
-Troll,15,172,27,23,3,3,99,Montagne,Régénération (5 PV/tour)
+Troll,1,176,13,15,3,3,30,Montagne,Régénération (5 PV/tour)
+Troll,5,177,17,17,3,3,50,Montagne,Régénération (5 PV/tour)
+Troll,10,164,24,20,3,3,75,Montagne,Régénération (5 PV/tour)
+Troll,15,179,28,23,3,3,99,Montagne,Régénération (5 PV/tour)
 Troll,20,205,31,25,3,3,124,Montagne,Régénération (5 PV/tour)
 Troll,25,234,34,28,3,3,149,Montagne,Régénération (5 PV/tour)
 Troll,30,264,37,31,3,3,174,Montagne,Régénération (5 PV/tour)
@@ -159,10 +159,10 @@ Troll,140,1176,132,105,4,3,716,Montagne,Régénération (5 PV/tour)
 Troll,145,1228,138,109,4,3,740,Montagne,Régénération (5 PV/tour)
 Troll,150,1281,143,113,4,3,765,Montagne,Régénération (5 PV/tour)
 
-Boss Gobelin Roi,1,75,8,6,4,4,162,Forêt,Appel de renforts (1 gobelin/tour)
-Boss Gobelin Roi,5,93,11,8,4,4,185,Forêt,Appel de renforts (1 gobelin/tour)
-Boss Gobelin Roi,10,117,14,10,4,4,214,Forêt,Appel de renforts (1 gobelin/tour)
-Boss Gobelin Roi,15,139,17,13,4,4,243,Forêt,Appel de renforts (1 gobelin/tour)
+Boss Gobelin Roi,1,141,6,6,4,4,162,Forêt,Appel de renforts (1 gobelin/tour)
+Boss Gobelin Roi,5,144,9,8,4,4,185,Forêt,Appel de renforts (1 gobelin/tour)
+Boss Gobelin Roi,10,134,15,10,4,4,214,Forêt,Appel de renforts (1 gobelin/tour)
+Boss Gobelin Roi,15,144,18,13,4,4,243,Forêt,Appel de renforts (1 gobelin/tour)
 Boss Gobelin Roi,20,162,20,15,4,4,271,Forêt,Appel de renforts (1 gobelin/tour)
 Boss Gobelin Roi,25,183,23,17,4,4,300,Forêt,Appel de renforts (1 gobelin/tour)
 Boss Gobelin Roi,30,205,26,19,4,4,329,Forêt,Appel de renforts (1 gobelin/tour)
@@ -190,10 +190,10 @@ Boss Gobelin Roi,135,819,112,73,4,4,500,Forêt,Appel de renforts (1 gobelin/tour
 Boss Gobelin Roi,140,856,118,76,4,4,500,Forêt,Appel de renforts (1 gobelin/tour)
 Boss Gobelin Roi,145,893,123,79,4,4,500,Forêt,Appel de renforts (1 gobelin/tour)
 Boss Gobelin Roi,150,931,128,82,4,4,500,Forêt,Appel de renforts (1 gobelin/tour)
-Boss Loup Alpha,1,78,8,6,5,5,192,Forêt,Morsure empoisonnée (10 dégâts/tour)
-Boss Loup Alpha,5,97,11,8,5,5,216,Forêt,Morsure empoisonnée (10 dégâts/tour)
-Boss Loup Alpha,10,122,14,11,5,5,245,Forêt,Morsure empoisonnée (10 dégâts/tour)
-Boss Loup Alpha,15,145,17,13,5,5,275,Forêt,Morsure empoisonnée (10 dégâts/tour)
+Boss Loup Alpha,1,147,6,6,5,5,192,Forêt,Morsure empoisonnée (10 dégâts/tour)
+Boss Loup Alpha,5,150,9,8,5,5,216,Forêt,Morsure empoisonnée (10 dégâts/tour)
+Boss Loup Alpha,10,140,15,11,5,5,245,Forêt,Morsure empoisonnée (10 dégâts/tour)
+Boss Loup Alpha,15,151,18,13,5,5,275,Forêt,Morsure empoisonnée (10 dégâts/tour)
 Boss Loup Alpha,20,169,20,15,5,5,305,Forêt,Morsure empoisonnée (10 dégâts/tour)
 Boss Loup Alpha,25,191,23,17,5,5,335,Forêt,Morsure empoisonnée (10 dégâts/tour)
 Boss Loup Alpha,30,214,26,20,5,5,364,Forêt,Morsure empoisonnée (10 dégâts/tour)
@@ -221,10 +221,10 @@ Boss Loup Alpha,135,855,112,75,5,5,600,Forêt,Morsure empoisonnée (10 dégâts/
 Boss Loup Alpha,140,893,118,78,5,5,600,Forêt,Morsure empoisonnée (10 dégâts/tour)
 Boss Loup Alpha,145,932,123,81,5,5,600,Forêt,Morsure empoisonnée (10 dégâts/tour)
 Boss Loup Alpha,150,972,128,84,5,5,600,Forêt,Morsure empoisonnée (10 dégâts/tour)
-Boss Squelette Seigneur,1,81,8,6,4,4,222,Donjon,Immunité magique + Drain de vie (5% des dégâts)
-Boss Squelette Seigneur,5,101,11,9,4,4,247,Donjon,Immunité magique + Drain de vie (5% des dégâts)
-Boss Squelette Seigneur,10,126,14,11,4,4,277,Donjon,Immunité magique + Drain de vie (5% des dégâts)
-Boss Squelette Seigneur,15,150,17,13,4,4,307,Donjon,Immunité magique + Drain de vie (5% des dégâts)
+Boss Squelette Seigneur,1,152,6,6,4,4,222,Donjon,Immunité magique + Drain de vie (5% des dégâts)
+Boss Squelette Seigneur,5,155,9,9,4,4,247,Donjon,Immunité magique + Drain de vie (5% des dégâts)
+Boss Squelette Seigneur,10,145,15,11,4,4,277,Donjon,Immunité magique + Drain de vie (5% des dégâts)
+Boss Squelette Seigneur,15,156,18,13,4,4,307,Donjon,Immunité magique + Drain de vie (5% des dégâts)
 Boss Squelette Seigneur,20,175,20,16,4,4,337,Donjon,Immunité magique + Drain de vie (5% des dégâts)
 Boss Squelette Seigneur,25,198,23,18,4,4,368,Donjon,Immunité magique + Drain de vie (5% des dégâts)
 Boss Squelette Seigneur,30,221,26,20,4,4,398,Donjon,Immunité magique + Drain de vie (5% des dégâts)
@@ -252,10 +252,10 @@ Boss Squelette Seigneur,135,884,112,77,4,4,700,Donjon,Immunité magique + Drain 
 Boss Squelette Seigneur,140,924,118,80,4,4,700,Donjon,Immunité magique + Drain de vie (5% des dégâts)
 Boss Squelette Seigneur,145,964,123,83,4,4,700,Donjon,Immunité magique + Drain de vie (5% des dégâts)
 Boss Squelette Seigneur,150,1005,128,86,4,4,700,Donjon,Immunité magique + Drain de vie (5% des dégâts)
-Boss Troll Géant,1,92,9,7,3,3,252,Montagne,Régénération (10 PV/tour)
-Boss Troll Géant,5,115,12,10,3,3,277,Montagne,Régénération (10 PV/tour)
-Boss Troll Géant,10,144,16,13,3,3,308,Montagne,Régénération (10 PV/tour)
-Boss Troll Géant,15,171,19,15,3,3,339,Montagne,Régénération (10 PV/tour)
+Boss Troll Géant,1,174,7,7,3,3,252,Montagne,Régénération (10 PV/tour)
+Boss Troll Géant,5,177,10,10,3,3,277,Montagne,Régénération (10 PV/tour)
+Boss Troll Géant,10,165,16,13,3,3,308,Montagne,Régénération (10 PV/tour)
+Boss Troll Géant,15,178,20,15,3,3,339,Montagne,Régénération (10 PV/tour)
 Boss Troll Géant,20,200,22,18,3,3,369,Montagne,Régénération (10 PV/tour)
 Boss Troll Géant,25,226,26,20,3,3,400,Montagne,Régénération (10 PV/tour)
 Boss Troll Géant,30,253,29,23,3,3,431,Montagne,Régénération (10 PV/tour)
@@ -283,10 +283,10 @@ Boss Troll Géant,135,1009,123,87,3,3,800,Montagne,Régénération (10 PV/tour)
 Boss Troll Géant,140,1054,128,90,3,3,800,Montagne,Régénération (10 PV/tour)
 Boss Troll Géant,145,1100,134,94,3,3,800,Montagne,Régénération (10 PV/tour)
 Boss Troll Géant,150,1147,140,98,3,3,800,Montagne,Régénération (10 PV/tour)
-Boss Dragon,1,136,10,8,6,5,314,Désert,Souffle de feu (50 dégâts en zone 3x3)
-Boss Dragon,5,169,13,11,6,5,342,Désert,Souffle de feu (50 dégâts en zone 3x3)
-Boss Dragon,10,212,17,14,6,5,376,Désert,Souffle de feu (50 dégâts en zone 3x3)
-Boss Dragon,15,251,20,16,6,5,411,Désert,Souffle de feu (50 dégâts en zone 3x3)
+Boss Dragon,1,256,7,8,6,5,314,Désert,Souffle de feu (50 dégâts en zone 3x3)
+Boss Dragon,5,261,11,11,6,5,342,Désert,Souffle de feu (50 dégâts en zone 3x3)
+Boss Dragon,10,244,17,14,6,5,376,Désert,Souffle de feu (50 dégâts en zone 3x3)
+Boss Dragon,15,261,21,16,6,5,411,Désert,Souffle de feu (50 dégâts en zone 3x3)
 Boss Dragon,20,294,24,19,6,5,446,Désert,Souffle de feu (50 dégâts en zone 3x3)
 Boss Dragon,25,332,27,22,6,5,480,Désert,Souffle de feu (50 dégâts en zone 3x3)
 Boss Dragon,30,372,31,25,6,5,515,Désert,Souffle de feu (50 dégâts en zone 3x3)
@@ -314,10 +314,10 @@ Boss Dragon,135,1486,131,95,6,5,1000,Désert,Souffle de feu (50 dégâts en zone
 Boss Dragon,140,1552,137,99,6,5,1000,Désert,Souffle de feu (50 dégâts en zone 3x3)
 Boss Dragon,145,1619,143,103,6,5,1000,Désert,Souffle de feu (50 dégâts en zone 3x3)
 Boss Dragon,150,1688,149,107,6,5,1000,Désert,Souffle de feu (50 dégâts en zone 3x3)
-Boss Roi Squelette,1,176,11,8,7,5,467,Donjon,Roi du donjon : immunité magique + drain de vie (10%) + appel de serviteurs
-Boss Roi Squelette,5,219,14,11,7,5,502,Donjon,Roi du donjon : immunité magique + drain de vie (10%) + appel de serviteurs
-Boss Roi Squelette,10,274,18,14,7,5,545,Donjon,Roi du donjon : immunité magique + drain de vie (10%) + appel de serviteurs
-Boss Roi Squelette,15,325,22,16,7,5,589,Donjon,Roi du donjon : immunité magique + drain de vie (10%) + appel de serviteurs
+Boss Roi Squelette,1,331,8,8,7,5,467,Donjon,Roi du donjon : immunité magique + drain de vie (10%) + appel de serviteurs
+Boss Roi Squelette,5,337,12,11,7,5,502,Donjon,Roi du donjon : immunité magique + drain de vie (10%) + appel de serviteurs
+Boss Roi Squelette,10,315,19,14,7,5,545,Donjon,Roi du donjon : immunité magique + drain de vie (10%) + appel de serviteurs
+Boss Roi Squelette,15,338,23,16,7,5,589,Donjon,Roi du donjon : immunité magique + drain de vie (10%) + appel de serviteurs
 Boss Roi Squelette,20,380,26,19,7,5,632,Donjon,Roi du donjon : immunité magique + drain de vie (10%) + appel de serviteurs
 Boss Roi Squelette,25,430,30,22,7,5,675,Donjon,Roi du donjon : immunité magique + drain de vie (10%) + appel de serviteurs
 Boss Roi Squelette,30,481,34,25,7,5,719,Donjon,Roi du donjon : immunité magique + drain de vie (10%) + appel de serviteurs
@@ -345,10 +345,10 @@ Boss Roi Squelette,135,1921,145,95,7,5,1500,Donjon,Roi du donjon : immunité mag
 Boss Roi Squelette,140,2007,151,99,7,5,1500,Donjon,Roi du donjon : immunité magique + drain de vie (10%) + appel de serviteurs
 Boss Roi Squelette,145,2094,158,103,7,5,1500,Donjon,Roi du donjon : immunité magique + drain de vie (10%) + appel de serviteurs
 Boss Roi Squelette,150,2183,165,107,7,5,1500,Donjon,Roi du donjon : immunité magique + drain de vie (10%) + appel de serviteurs
-Boss Golem Prismatique,1,107,10,9,3,3,269,Cristaux,Carapace de cristal (50% rés. magique) + Éclat prismatique (zone 3x3)
-Boss Golem Prismatique,5,133,13,11,3,3,297,Cristaux,Carapace de cristal (50% rés. magique) + Éclat prismatique (zone 3x3)
-Boss Golem Prismatique,10,167,17,15,3,3,332,Cristaux,Carapace de cristal (50% rés. magique) + Éclat prismatique (zone 3x3)
-Boss Golem Prismatique,15,198,21,17,3,3,367,Cristaux,Carapace de cristal (50% rés. magique) + Éclat prismatique (zone 3x3)
+Boss Golem Prismatique,1,202,7,9,3,3,269,Cristaux,Carapace de cristal (50% rés. magique) + Éclat prismatique (zone 3x3)
+Boss Golem Prismatique,5,206,11,11,3,3,297,Cristaux,Carapace de cristal (50% rés. magique) + Éclat prismatique (zone 3x3)
+Boss Golem Prismatique,10,192,18,15,3,3,332,Cristaux,Carapace de cristal (50% rés. magique) + Éclat prismatique (zone 3x3)
+Boss Golem Prismatique,15,206,21,17,3,3,367,Cristaux,Carapace de cristal (50% rés. magique) + Éclat prismatique (zone 3x3)
 Boss Golem Prismatique,20,232,24,21,3,3,402,Cristaux,Carapace de cristal (50% rés. magique) + Éclat prismatique (zone 3x3)
 Boss Golem Prismatique,25,262,28,23,3,3,437,Cristaux,Carapace de cristal (50% rés. magique) + Éclat prismatique (zone 3x3)
 Boss Golem Prismatique,30,293,32,26,3,3,473,Cristaux,Carapace de cristal (50% rés. magique) + Éclat prismatique (zone 3x3)
@@ -376,10 +376,10 @@ Boss Golem Prismatique,135,1171,134,101,3,3,850,Cristaux,Carapace de cristal (50
 Boss Golem Prismatique,140,1224,140,105,3,3,850,Cristaux,Carapace de cristal (50% rés. magique) + Éclat prismatique (zone 3x3)
 Boss Golem Prismatique,145,1277,146,110,3,3,850,Cristaux,Carapace de cristal (50% rés. magique) + Éclat prismatique (zone 3x3)
 Boss Golem Prismatique,150,1331,153,114,3,3,850,Cristaux,Carapace de cristal (50% rés. magique) + Éclat prismatique (zone 3x3)
-Boss Crabe Titan,1,113,9,9,3,3,269,Marées,Carapace des abysses + Pince océane (étourdit)
-Boss Crabe Titan,5,140,12,12,3,3,295,Marées,Carapace des abysses + Pince océane (étourdit)
-Boss Crabe Titan,10,176,15,15,3,3,329,Marées,Carapace des abysses + Pince océane (étourdit)
-Boss Crabe Titan,15,208,18,18,3,3,362,Marées,Carapace des abysses + Pince océane (étourdit)
+Boss Crabe Titan,1,212,6,9,3,3,269,Marées,Carapace des abysses + Pince océane (étourdit)
+Boss Crabe Titan,5,216,10,12,3,3,295,Marées,Carapace des abysses + Pince océane (étourdit)
+Boss Crabe Titan,10,202,16,15,3,3,329,Marées,Carapace des abysses + Pince océane (étourdit)
+Boss Crabe Titan,15,217,19,18,3,3,362,Marées,Carapace des abysses + Pince océane (étourdit)
 Boss Crabe Titan,20,244,22,22,3,3,396,Marées,Carapace des abysses + Pince océane (étourdit)
 Boss Crabe Titan,25,276,25,25,3,3,429,Marées,Carapace des abysses + Pince océane (étourdit)
 Boss Crabe Titan,30,308,28,28,3,3,463,Marées,Carapace des abysses + Pince océane (étourdit)
@@ -407,10 +407,10 @@ Boss Crabe Titan,135,1233,121,106,3,3,850,Marées,Carapace des abysses + Pince o
 Boss Crabe Titan,140,1288,126,111,3,3,850,Marées,Carapace des abysses + Pince océane (étourdit)
 Boss Crabe Titan,145,1344,132,115,3,3,850,Marées,Carapace des abysses + Pince océane (étourdit)
 Boss Crabe Titan,150,1401,138,119,3,3,850,Marées,Carapace des abysses + Pince océane (étourdit)
-Boss Seigneur des Tempêtes,1,123,10,6,6,5,315,Vents,Vol + Foudre (zone 3x3
-Boss Seigneur des Tempêtes,5,153,13,8,6,5,343,Vents,Vol + Foudre (zone 3x3
-Boss Seigneur des Tempêtes,10,191,17,11,6,5,380,Vents,Vol + Foudre (zone 3x3
-Boss Seigneur des Tempêtes,15,227,20,13,6,5,416,Vents,Vol + Foudre (zone 3x3
+Boss Seigneur des Tempêtes,1,231,7,6,6,5,315,Vents,Vol + Foudre (zone 3x3
+Boss Seigneur des Tempêtes,5,236,11,8,6,5,343,Vents,Vol + Foudre (zone 3x3
+Boss Seigneur des Tempêtes,10,220,17,11,6,5,380,Vents,Vol + Foudre (zone 3x3
+Boss Seigneur des Tempêtes,15,236,21,13,6,5,416,Vents,Vol + Foudre (zone 3x3
 Boss Seigneur des Tempêtes,20,266,24,15,6,5,452,Vents,Vol + Foudre (zone 3x3
 Boss Seigneur des Tempêtes,25,300,27,17,6,5,488,Vents,Vol + Foudre (zone 3x3
 Boss Seigneur des Tempêtes,30,336,31,19,6,5,524,Vents,Vol + Foudre (zone 3x3
@@ -438,10 +438,10 @@ Boss Seigneur des Tempêtes,135,1343,132,74,6,5,1000,Vents,Vol + Foudre (zone 3x
 Boss Seigneur des Tempêtes,140,1403,138,77,6,5,1000,Vents,Vol + Foudre (zone 3x3
 Boss Seigneur des Tempêtes,145,1464,144,80,6,5,1000,Vents,Vol + Foudre (zone 3x3
 Boss Seigneur des Tempêtes,150,1526,150,83,6,5,1000,Vents,Vol + Foudre (zone 3x3
-Boss Seigneur de Lave,1,128,10,7,4,4,330,Brasier,Peau de magma + Coulée de lave (zone 3x3
-Boss Seigneur de Lave,5,158,13,10,4,4,359,Brasier,Peau de magma + Coulée de lave (zone 3x3
-Boss Seigneur de Lave,10,198,17,13,4,4,395,Brasier,Peau de magma + Coulée de lave (zone 3x3
-Boss Seigneur de Lave,15,235,21,15,4,4,432,Brasier,Peau de magma + Coulée de lave (zone 3x3
+Boss Seigneur de Lave,1,240,7,7,4,4,330,Brasier,Peau de magma + Coulée de lave (zone 3x3
+Boss Seigneur de Lave,5,244,11,10,4,4,359,Brasier,Peau de magma + Coulée de lave (zone 3x3
+Boss Seigneur de Lave,10,228,18,13,4,4,395,Brasier,Peau de magma + Coulée de lave (zone 3x3
+Boss Seigneur de Lave,15,245,22,15,4,4,432,Brasier,Peau de magma + Coulée de lave (zone 3x3
 Boss Seigneur de Lave,20,276,25,18,4,4,468,Brasier,Peau de magma + Coulée de lave (zone 3x3
 Boss Seigneur de Lave,25,312,28,20,4,4,504,Brasier,Peau de magma + Coulée de lave (zone 3x3
 Boss Seigneur de Lave,30,349,32,23,4,4,541,Brasier,Peau de magma + Coulée de lave (zone 3x3
@@ -469,10 +469,10 @@ Boss Seigneur de Lave,135,1393,135,87,4,4,1050,Brasier,Peau de magma + Coulée d
 Boss Seigneur de Lave,140,1455,141,91,4,4,1050,Brasier,Peau de magma + Coulée de lave (zone 3x3
 Boss Seigneur de Lave,145,1518,147,95,4,4,1050,Brasier,Peau de magma + Coulée de lave (zone 3x3
 Boss Seigneur de Lave,150,1583,154,98,4,4,1050,Brasier,Peau de magma + Coulée de lave (zone 3x3
-Boss Liche des Brumes,1,94,9,6,4,4,284,Brumes,Drain de vie 8% + Brume d'affaiblissement
-Boss Liche des Brumes,5,117,12,8,4,4,311,Brumes,Drain de vie 8% + Brume d'affaiblissement
-Boss Liche des Brumes,10,147,15,10,4,4,345,Brumes,Drain de vie 8% + Brume d'affaiblissement
-Boss Liche des Brumes,15,174,18,12,4,4,379,Brumes,Drain de vie 8% + Brume d'affaiblissement
+Boss Liche des Brumes,1,178,6,6,4,4,284,Brumes,Drain de vie 8% + Brume d'affaiblissement
+Boss Liche des Brumes,5,181,10,8,4,4,311,Brumes,Drain de vie 8% + Brume d'affaiblissement
+Boss Liche des Brumes,10,169,16,10,4,4,345,Brumes,Drain de vie 8% + Brume d'affaiblissement
+Boss Liche des Brumes,15,182,19,12,4,4,379,Brumes,Drain de vie 8% + Brume d'affaiblissement
 Boss Liche des Brumes,20,204,22,14,4,4,412,Brumes,Drain de vie 8% + Brume d'affaiblissement
 Boss Liche des Brumes,25,231,25,16,4,4,446,Brumes,Drain de vie 8% + Brume d'affaiblissement
 Boss Liche des Brumes,30,258,28,18,4,4,480,Brumes,Drain de vie 8% + Brume d'affaiblissement
@@ -500,10 +500,10 @@ Boss Liche des Brumes,135,1032,120,68,4,4,900,Brumes,Drain de vie 8% + Brume d'a
 Boss Liche des Brumes,140,1078,126,71,4,4,900,Brumes,Drain de vie 8% + Brume d'affaiblissement
 Boss Liche des Brumes,145,1125,132,74,4,4,900,Brumes,Drain de vie 8% + Brume d'affaiblissement
 Boss Liche des Brumes,150,1172,137,77,4,4,900,Brumes,Drain de vie 8% + Brume d'affaiblissement
-Boss Liche Éternelle,1,142,10,7,5,5,375,Ombres,Immunité magique + drain de vie 10% + régénération 12 PV/tour
-Boss Liche Éternelle,5,176,14,10,5,5,406,Ombres,Immunité magique + drain de vie 10% + régénération 12 PV/tour
-Boss Liche Éternelle,10,220,18,13,5,5,443,Ombres,Immunité magique + drain de vie 10% + régénération 12 PV/tour
-Boss Liche Éternelle,15,262,21,15,5,5,481,Ombres,Immunité magique + drain de vie 10% + régénération 12 PV/tour
+Boss Liche Éternelle,1,267,7,7,5,5,375,Ombres,Immunité magique + drain de vie 10% + régénération 12 PV/tour
+Boss Liche Éternelle,5,272,12,10,5,5,406,Ombres,Immunité magique + drain de vie 10% + régénération 12 PV/tour
+Boss Liche Éternelle,10,254,18,13,5,5,443,Ombres,Immunité magique + drain de vie 10% + régénération 12 PV/tour
+Boss Liche Éternelle,15,272,22,15,5,5,481,Ombres,Immunité magique + drain de vie 10% + régénération 12 PV/tour
 Boss Liche Éternelle,20,306,25,18,5,5,519,Ombres,Immunité magique + drain de vie 10% + régénération 12 PV/tour
 Boss Liche Éternelle,25,346,29,20,5,5,557,Ombres,Immunité magique + drain de vie 10% + régénération 12 PV/tour
 Boss Liche Éternelle,30,387,33,23,5,5,594,Ombres,Immunité magique + drain de vie 10% + régénération 12 PV/tour

@@ -60,7 +60,7 @@ const COLORS: Dictionary = {
 const ENEMY_HP_MULT := 3.0
 ## V16 : 2.0 -> 1.7 pour compenser les sorts des héros / 1,5 (combats plus longs, même difficulté
 ## en simulation : tests/sim_balance.gd)
-const ENEMY_ATK_MULT := 1.7
+const ENEMY_ATK_MULT := 1.5
 const ENEMY_LEVEL_SCALE := 0.0   ## le facteur de niveau est cuit dans ennemis.txt (V15)
 const BOSS_HP_MULT := 1.2
 const BOSS_ATK_MULT := 0.85
@@ -71,6 +71,7 @@ const ENRAGE_AFTER_TURN := 14
 var grid: Array                  = []
 var obstacles: Dictionary        = {}   # Vector2i -> "tree" | "rock"
 var traps: Array                 = []   # {pos, dmg, team, owner}
+var glyphs: Array                = []   # V19 : {name, cells, team, owner, turns, foes, allies, snap, last, element}
 var players: Array               = []
 var enemies: Array               = []
 var summons: Array               = []
@@ -276,6 +277,7 @@ func init_entities() -> void:
 	summons = []
 	graveyard = []
 	traps = []
+	glyphs = []
 
 	var player_classes: Array = []
 	if custom_team.size() == 3:
@@ -671,6 +673,121 @@ func summons_of(owner: Dictionary) -> Array:
 	return out
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+#  Glyphes (V19) : zones posées au sol qui agissent 2 à 4 tours
+# ═══════════════════════════════════════════════════════════════════════════
+
+const GLYPH_MAX_PER_CASTER := 2
+var _glyph_seq: int = 0
+
+
+## Glyphes actifs d'un lanceur (du plus ancien au plus récent).
+func glyphs_of(owner: Dictionary) -> Array:
+	var out: Array = []
+	for g: Dictionary in glyphs:
+		if int(g["owner"]) == int(owner["uid"]):
+			out.append(g)
+	return out
+
+
+func glyph_at(cell: Vector2i) -> Array:
+	var out: Array = []
+	for g: Dictionary in glyphs:
+		if (g["cells"] as Array).has(cell):
+			out.append(g)
+	return out
+
+
+func _resolve_glyph(caster: Dictionary, spell: Dictionary, p: Dictionary, cell: Vector2i) -> String:
+	var cells: Array[Vector2i] = []
+	for c: Vector2i in Combat.zone_cells(cell, int(p["zone_r"]), String(p["zone_shape"]), GRID_SIZE):
+		if not obstacles.has(c):
+			cells.append(c)
+	var mine: Array = glyphs_of(caster)
+	while mine.size() >= GLYPH_MAX_PER_CASTER:
+		glyphs.erase(mine[0])
+		fx.emit("glyph_end", {"glyph": mine[0]})
+		mine.remove_at(0)
+	var snap: Dictionary = caster.duplicate(true)
+	_glyph_seq += 1
+	var g: Dictionary = {
+		"id": _glyph_seq, "name": String(spell["name"]), "cells": cells, "team": String(caster["team"]), "owner": int(caster["uid"]),
+		"turns": int(p["glyph_turns"]), "foes": p["glyph_foes"], "allies": p["glyph_allies"],
+		"snap": snap, "last": {}, "center": cell,
+		"element": SpellFx.element_for(String(spell["name"]), String(p["dtype"]), "glyph"),
+	}
+	glyphs.append(g)
+	fx.emit("glyph_set", {"glyph": g, "caster": caster})
+	# effet immédiat sur ceux qui se trouvent déjà dans la zone
+	for e: Dictionary in all_entities():
+		if is_alive(e) and cells.has(pos_of(e)):
+			_glyph_apply(g, e)
+	return "%s trace %s (%d tours)." % [caster["name"], spell["name"], int(g["turns"])]
+
+
+## Applique les glyphes qui couvrent la case de `e` (une fois par créature et par tour de jeu).
+func _glyph_tick(e: Dictionary) -> void:
+	if glyphs.is_empty() or not is_alive(e) or bool(e.get("terrain", false)) or bool(e.get("beacon", false)):
+		return
+	var pos: Vector2i = pos_of(e)
+	for g: Dictionary in glyphs.duplicate():
+		if not is_alive(e):
+			return
+		if (g["cells"] as Array).has(pos):
+			_glyph_apply(g, e)
+
+
+func _glyph_apply(g: Dictionary, e: Dictionary) -> void:
+	if bool(e.get("terrain", false)) or bool(e.get("beacon", false)) or not is_alive(e):
+		return
+	var uid: int = int(e["uid"])
+	var last: Dictionary = g["last"]
+	if int(last.get(uid, -1)) == turn_count:
+		return
+	last[uid] = turn_count
+	var fx_def: Dictionary = g["allies"] if String(e["team"]) == String(g["team"]) else g["foes"]
+	if fx_def.is_empty():
+		return
+	var owner: Dictionary = _entity_by_uid(int(g["owner"]))
+	var src: Dictionary = owner if not owner.is_empty() else {}
+	if int(fx_def["dmg"]) > 0:
+		var r: Dictionary = Combat.calc_damage(g["snap"], e, float(fx_def["dmg"]), String(fx_def["dtype"]), 0.0, false, false)
+		_apply_damage(src, e, int(r["dmg"]), String(fx_def["dtype"]), bool(r["crit"]), false, true)
+	if int(fx_def.get("heal", 0)) > 0:
+		_do_heal(src, e, int(fx_def["heal"]))
+	if not is_alive(e):
+		return
+	for d: Dictionary in fx_def["dots"]:
+		_apply_status(src, e, String(d["id"]), int(d["turns"]), float(d["value"]))
+	for d2: Dictionary in fx_def["debuffs"]:
+		_apply_status(src, e, String(d2["id"]), int(d2["turns"]), float(d2["value"]))
+	for b: Dictionary in fx_def["buffs"]:
+		_apply_status(src, e, String(b["id"]), int(b["turns"]), float(b["value"]))
+	fx.emit("status", {"target": e, "text": "Glyphe", "color": SpellFx.colors(String(g["element"]))[0]})
+
+
+func _entity_by_uid(uid: int) -> Dictionary:
+	for x: Dictionary in all_entities():
+		if int(x["uid"]) == uid and is_alive(x):
+			return x
+	return {}
+
+
+## Fin du tour de `e` : ses glyphes vieillissent ; ceux dont le lanceur est mort disparaissent.
+func _glyphs_expire(e: Dictionary) -> void:
+	for g: Dictionary in glyphs.duplicate():
+		var gone: bool = false
+		if int(g["owner"]) == int(e["uid"]):
+			g["turns"] = int(g["turns"]) - 1
+			gone = int(g["turns"]) <= 0
+		elif _entity_by_uid(int(g["owner"])).is_empty():
+			gone = true
+		if gone:
+			glyphs.erase(g)
+			fx.emit("glyph_end", {"glyph": g})
+			message_requested.emit("%s s'efface." % g["name"])
+
+
 ## Cases de terrain (piliers, murailles, failles, cristaux) posées par un Géomancien.
 func terrain_of(owner: Dictionary) -> Array:
 	var out: Array = []
@@ -817,6 +934,7 @@ func _begin_turn(e: Dictionary) -> void:
 				fx.emit("status", {"target": e, "text": info["label"], "color": info["color"]})
 			"regen":
 				_do_heal({}, e, int(s["value"]))
+	_glyph_tick(e)
 	_check_deaths()
 	if not is_alive(e) or game_over:
 		active_entity = {}
@@ -899,6 +1017,7 @@ func end_current_turn() -> void:
 		if int(tp["lifetime"]) <= 0:
 			tp["current_pv"] = 0
 			message_requested.emit("%s s'effrite." % tp["name"])
+	_glyphs_expire(e)
 	active_entity = {}
 	selected_spell = null
 	spell_selected.emit(null)
@@ -1008,6 +1127,7 @@ func try_move(e: Dictionary, cell: Vector2i) -> bool:
 func _check_traps(e: Dictionary) -> void:
 	if not is_alive(e):
 		return
+	_glyph_tick(e)
 	var p: Vector2i = pos_of(e)
 	for t: Dictionary in traps.duplicate():
 		if t["pos"] == p and t["team"] != e["team"]:
@@ -1180,6 +1300,8 @@ func cast_spell(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> bool:
 			summary = "%s pose un piège." % caster["name"]
 		"revive":
 			summary = _resolve_revive(caster, spell, p)
+		"glyph":
+			summary = _resolve_glyph(caster, spell, p, cell)
 		"recall":
 			remove_entity_from_grid(target)
 			fx.emit("beacon", {"from": cell, "cells": [cell] as Array[Vector2i]})
@@ -1641,8 +1763,8 @@ func _tower_attacks(owner: Dictionary) -> void:
 				best_d = d
 		if best.is_empty():
 			continue
-		# V17 : aligné sur les sorts des héros (/1,5)
-		var base: float = (28.0 + float(owner["level"]) * 0.9) / 1.5
+		# V17/V19 : aligné sur les sorts des héros (/1,7)
+		var base: float = (28.0 + float(owner["level"]) * 0.9) / 2.0
 		var r: Dictionary = Combat.calc_damage(owner, best, base, "mag", 0.0, false, false)
 		fx.emit("cast", {"caster": tw, "spell": "Éclat du pilier", "kind": "attack", "dtype": "mag",
 			"from": tpos, "to": pos_of(best), "ranged": true, "cells": [pos_of(best)] as Array[Vector2i]})

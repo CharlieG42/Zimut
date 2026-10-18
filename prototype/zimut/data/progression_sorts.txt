@@ -10,16 +10,16 @@ Tank,100,Bouclier légendaire
 Assassin,1,Lame fatale;Poison;Soin rapide
 Assassin,10,Coup bas
 Assassin,20,Ombre
-Assassin,35,Marque de la mort
+Assassin,35,Glyphe de venin
 Assassin,50,Éviscération
-Assassin,65,Invisibilité
+Assassin,65,Glyphe d'ombre
 Assassin,80,Lame de l'ombre
 Assassin,100,Coup final
-Chasseur,1,Tir précis;Piège;Soin de chasseur
+Chasseur,1,Tir précis;Glyphe d'entrave;Soin de chasseur
 Chasseur,10,Balise de chasse
 Chasseur,20,Tir explosif
 Chasseur,35,Rappel de balise
-Chasseur,50,Fleche enflammée
+Chasseur,50,Glyphe de flammes
 Chasseur,65,Tir de recul
 Chasseur,80,Tir légendaire
 Chasseur,100,Tir perçant ultime
@@ -63,11 +63,11 @@ Sylvain,50,Soin de sève
 Sylvain,65,Invoquer Ent de Combat
 Sylvain,80,Pluie de graines
 Sylvain,100,Tempête de pétales
-Géomancien,1,Éclat de grès;Invoquer Pilier;Armure de grès
+Géomancien,1,Éclat de grès;Invoquer Pilier;Glyphe de grès
 Géomancien,10,Lance de cristal
 Géomancien,20,Invoquer Muraille
 Géomancien,35,Éboulement
-Géomancien,50,Invoquer Faille
+Géomancien,50,Glyphe sismique
 Géomancien,65,Tempête de sable
 Géomancien,80,Séisme ambré
 Géomancien,100,Cataclysme minéral

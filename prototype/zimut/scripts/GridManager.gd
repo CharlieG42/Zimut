@@ -27,6 +27,7 @@ var _scenery_over: SceneryOver
 var _scenery_amb: SceneryAmbient
 var _cur_element: String = "physical"   # élément du dernier sort lancé (impacts)
 var _trap_nodes: Dictionary = {}    # Vector2i -> Node2D
+var _glyph_nodes: Dictionary = {}   # glyphe (Dictionary, par identité) -> SpellFx.GlyphMark
 var _prop_nodes: Array = []
 var _obstacle_sig: int = -1
 var _queue: Array = []
@@ -215,6 +216,7 @@ func _sync_now() -> void:
 			views[uid].queue_free()
 			views.erase(uid)
 	_sync_traps()
+	_sync_glyphs()
 	refresh_highlights()
 
 
@@ -268,6 +270,36 @@ func _sync_traps() -> void:
 	for c: Vector2i in wanted.keys():
 		if not _trap_nodes.has(c):
 			_add_trap_node(c)
+
+
+## Runes des glyphes actifs (une marque par glyphe, retirée à l'expiration).
+func _sync_glyphs() -> void:
+	var alive: Dictionary = {}
+	for g: Dictionary in game_manager.glyphs:
+		alive[int(g["id"])] = g
+	for id in _glyph_nodes.keys():
+		if not alive.has(id):
+			if is_instance_valid(_glyph_nodes[id]):
+				_glyph_nodes[id].queue_free()
+			_glyph_nodes.erase(id)
+	for id in alive.keys():
+		if not _glyph_nodes.has(id):
+			_add_glyph_node(alive[id])
+
+
+func _add_glyph_node(g: Dictionary) -> void:
+	var id: int = int(g["id"])
+	if _glyph_nodes.has(id):
+		return
+	var center: Vector2i = g["center"]
+	var m := SpellFx.GlyphMark.new()
+	m.position = grid_to_screen(center.x, center.y)
+	m.z_index = 1
+	m.col = SpellFx.colors(String(g["element"]))[0]
+	for c: Vector2i in g["cells"]:
+		m.offsets.append(grid_to_screen(c.x, c.y) - m.position)
+	_cells_layer.add_child(m)
+	_glyph_nodes[id] = m
 
 
 func _add_trap_node(c: Vector2i) -> void:
@@ -530,6 +562,22 @@ func _play(kind: String, d: Dictionary) -> void:
 				_burst(grid_to_screen(c.x, c.y), Color(1.0, 0.70, 0.20), 10, 130.0, 0.4, 4.0)
 			Sfx.play("hit", -2.0)
 			await _wait(0.18)
+		"glyph_set":
+			var gg: Dictionary = d["glyph"]
+			_add_glyph_node(gg)
+			var gcol: Color = SpellFx.colors(String(gg["element"]))[0]
+			var gcen: Vector2i = gg["center"]
+			_ring(grid_to_screen(gcen.x, gcen.y), gcol, 12.0, 90.0, 0.7, 6.0)
+			_burst(grid_to_screen(gcen.x, gcen.y), gcol, 22, 160.0, 0.6, 4.0)
+			Sfx.play("trap", -3.0)
+			await _wait(0.25)
+		"glyph_end":
+			var ge: Dictionary = d["glyph"]
+			var gid: int = int(ge["id"])
+			if _glyph_nodes.has(gid):
+				if is_instance_valid(_glyph_nodes[gid]):
+					_glyph_nodes[gid].queue_free()
+				_glyph_nodes.erase(gid)
 		"trap_trigger":
 			var c: Vector2i = d["cell"]
 			_burst(grid_to_screen(c.x, c.y), Color(1.0, 0.4, 0.2), 26, 220.0, 0.5, 5.0)

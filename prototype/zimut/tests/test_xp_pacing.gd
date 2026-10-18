@@ -1,7 +1,7 @@
 extends SceneTree
 
 ## Tests du rythme de progression XP :
-## - passage du niveau 10 au 11 en ~3 combats de la frontière
+## - ~3 combats par niveau au début (V19, avant : ~2)
 ## - paliers de plus en plus longs, jusqu'à ~200 combats pour le dernier niveau
 ## Usage : godot --headless --path prototype/zimut -s tests/test_xp_pacing.gd
 
@@ -24,7 +24,7 @@ func _boot() -> void:
 	check(pm.xp_for_level(1) == 0, "niveau 1 : palier XP à 0 (départ)")
 	var step1: int = pm.xp_for_level(2) - pm.xp_for_level(1)
 	var c1: float = float(step1) / float(pm.combat_xp(1))
-	check(absf(c1 - 2.0) < 0.35, "lv1 -> lv2 en ~2 combats (%.1f)" % c1)
+	check(absf(c1 - 3.0) < 0.35, "lv1 -> lv2 en ~3 combats (V19 : progression plus lente au début) (%.1f)" % c1)
 	var step99: int = pm.xp_for_level(100) - pm.xp_for_level(99)
 	var c99: float = float(step99) / float(pm.combat_xp(99))
 	check(c99 > 60.0 and c99 < 140.0, "lv99 -> lv100 en ~100 combats (%.1f)" % c99)
@@ -54,7 +54,7 @@ func _boot() -> void:
 			{"type": "Gobelin", "level": el, "boss": false},
 			{"type": "Loup", "level": el, "boss": false}]})
 	var lvl: int = pm.member_level(data, "Tank")
-	check(lvl >= 3 and lvl <= 8, "9 victoires au départ : équipe niveau 3-8 (obtenu %d)" % lvl)
+	check(lvl >= 2 and lvl <= 6, "9 victoires au départ : équipe niveau 2-6 (obtenu %d)" % lvl)
 	check(pm.enemy_level_for(data) >= 1 and pm.enemy_level_for(data) <= ClassRules.ENEMY_MAX_LEVEL, "niveau d'ennemis dans 1..150")
 	check(pm.frontier_level({"team": [], "victories": 100000}) == ClassRules.ENEMY_MAX_LEVEL, "niveau d'ennemis plafonné à 150")
 	# Boss : kit avec attaque à distance ET CaC

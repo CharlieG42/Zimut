@@ -95,10 +95,10 @@ UNLOCK = [1, 1, 1, 10, 20, 35, 50, 65, 80, 100]
 KITS = {
     "Tank": ["Coup de bouclier", "Protection", "Soin de combat", "Frappe puissante", "Provocation",
              "Mur de pierre", "Tremblement de terre", "Colère", "Coup écrasant", "Bouclier légendaire"],
-    "Assassin": ["Lame fatale", "Poison", "Soin rapide", "Coup bas", "Ombre", "Marque de la mort",
-                 "Éviscération", "Invisibilité", "Lame de l'ombre", "Coup final"],
-    "Chasseur": ["Tir précis", "Piège", "Soin de chasseur", "Balise de chasse", "Tir explosif",
-                 "Rappel de balise", "Fleche enflammée", "Tir de recul", "Tir légendaire", "Tir perçant ultime"],
+    "Assassin": ["Lame fatale", "Poison", "Soin rapide", "Coup bas", "Ombre", "Glyphe de venin",
+                 "Éviscération", "Glyphe d'ombre", "Lame de l'ombre", "Coup final"],
+    "Chasseur": ["Tir précis", "Glyphe d'entrave", "Soin de chasseur", "Balise de chasse", "Tir explosif",
+                 "Rappel de balise", "Glyphe de flammes", "Tir de recul", "Tir légendaire", "Tir perçant ultime"],
     "Mage": ["Boule de feu", "Éclair", "Bouclier magique", "Explosion", "Téléportation", "Météore",
              "Gel", "Chaîne de foudre", "Désintégration", "Apocalypse"],
     "Druide": ["Bénédiction", "Soin", "Attaque sacrée", "Barrière", "Inspiration", "Soin de groupe",
@@ -111,8 +111,8 @@ KITS = {
                    "Invoquer Esprit de la Forêt"],
     "Sylvain": ["Ronce", "Sève vitale", "Invoquer Archer Sylvestre", "Poison de ronce", "Invoquer Arbre",
                 "Racine", "Soin de sève", "Invoquer Ent de Combat", "Pluie de graines", "Tempête de pétales"],
-    "Géomancien": ["Éclat de grès", "Invoquer Pilier", "Armure de grès", "Lance de cristal", "Invoquer Muraille",
-                   "Éboulement", "Invoquer Faille", "Tempête de sable", "Séisme ambré", "Cataclysme minéral"],
+    "Géomancien": ["Éclat de grès", "Invoquer Pilier", "Glyphe de grès", "Lance de cristal", "Invoquer Muraille",
+                   "Éboulement", "Glyphe sismique", "Tempête de sable", "Séisme ambré", "Cataclysme minéral"],
 }
 HEAL_SRC = {"Toucher guérisseur", "Éclair sacré", "Bénédiction de vie", "Bouclier de lumière",
             "Mot de restauration", "Éclat de lumière", "Soin supérieur", "Soin de groupe supérieur",
@@ -127,7 +127,27 @@ for r in srows[1:]:
     pool.setdefault((r[0], r[1]), r)
 
 
+def _glyph(classe, name, pa, po, effet, typ, dmg_mag="0"):
+    dmg_ph = "25" if (typ == "Attaque" and dmg_mag == "0") else "0"
+    return [classe, name, str(pa), "0", str(po), effet, "1", typ, dmg_ph, dmg_mag, "0", "0", "0", "0", "0", "0", "0"]
+
+
+# V19 : sorts « glyphe » (posés au sol, effet à chaque début de tour des créatures dans la zone).
+# Valeurs déjà finales (pas de division héros). Format de l'effet lu par Combat.parse :
+#   « Trace un glyphe (zone; N tours) : alliés <effets> | ennemis <effets> »
 CUSTOM = {
+    ("Géomancien", "Glyphe de grès"): _glyph("Géomancien", "Glyphe de grès", 2, 3,
+        "Trace un glyphe (3x3; 3 tours) : alliés +25% défense", "Buff"),
+    ("Géomancien", "Glyphe sismique"): _glyph("Géomancien", "Glyphe sismique", 3, 5,
+        "Trace un glyphe (3x3; 3 tours) : ennemis 30 dégâts magiques + ralentis 1 pm", "Attaque", "30"),
+    ("Assassin", "Glyphe de venin"): _glyph("Assassin", "Glyphe de venin", 2, 3,
+        "Trace un glyphe (croix; 3 tours) : ennemis 25 dégâts/tour (2 tours)", "Debuff"),
+    ("Assassin", "Glyphe d'ombre"): _glyph("Assassin", "Glyphe d'ombre", 2, 3,
+        "Trace un glyphe (croix; 3 tours) : alliés invisible (2 tours)", "Buff"),
+    ("Chasseur", "Glyphe d'entrave"): _glyph("Chasseur", "Glyphe d'entrave", 2, 4,
+        "Trace un glyphe (croix; 3 tours) : ennemis ralentis 2 pm (1 tour)", "Debuff"),
+    ("Chasseur", "Glyphe de flammes"): _glyph("Chasseur", "Glyphe de flammes", 3, 5,
+        "Trace un glyphe (3x3; 3 tours) : ennemis 25 dégâts + brûle 20 dégâts/tour (2 tours)", "Attaque"),
     ("Chasseur", "Rappel de balise"): ["Chasseur", "Rappel de balise", "1", "0", "8",
         "Rappelle une de vos balises (elle disparaît du terrain)", "1", "Invocation",
         "0", "0", "0", "0", "0", "0", "0", "0", "0"],
@@ -163,7 +183,8 @@ def find(classe, name):
 
 
 # V16 : sorts des héros trop forts en début de partie -> dégâts et soins / 1,5
-HERO_SPELL_DIV = 1.5
+# V19 : encore trop forts (map nettoyée en < 2 tours au niveau 2) -> / 1,8
+HERO_SPELL_DIV = float(os.environ.get('HERO_DIV', 1.8))
 
 
 def _div(n):
@@ -202,7 +223,8 @@ for classe in order:
         if name == "Balise de chasse":
             r[5] = "Plante une balise (3 max; la plus ancienne disparaît) : un sort de zone du Chasseur qui touche une balise se réplique autour de toutes les autres"
         # Cristal ambré mal formé dans l'ancien fichier : jamais retenu ici
-        hero_nerf(r)
+        if not name.startswith("Glyphe"):
+            hero_nerf(r)
         sout.append(r)
         byl.setdefault(lvl, []).append(name)
     for lvl in sorted(byl):
@@ -231,6 +253,18 @@ def ramp(L):
     return 0.85 + 0.15 * min(1.0, (L - 1) / 19.0)
 
 
+def early_hp(L):
+    """V19 : début de partie plus coriace (+60 % de PV au niveau 1, effet nul au niveau 11)."""
+    b = float(os.environ.get('EARLY_BONUS', 0.6)); sp = float(os.environ.get('EARLY_SPAN', 10))
+    return 1.0 + b * max(0.0, 1.0 - (L - 1) / sp)
+
+
+def early_atk(L):
+    """V19 : début de partie moins mortel (les combats durent plus longtemps) : x0,6 au niveau 1 -> x1 au niveau 11."""
+    b = float(os.environ.get('EARLY_ATK', 0.4)); sp = float(os.environ.get('EARLY_SPAN', 10))
+    return 1.0 - b * max(0.0, 1.0 - (L - 1) / sp)
+
+
 def stat_at(rows_, col, ol):
     return lerp_table({int(r[1]): float(r[col]) for r in rows_}, ol)
 
@@ -246,8 +280,8 @@ for tname, trs in types.items():
             # ces types existent dès le niveau 1 : on prolonge leur courbe vers le bas
             pass
         f = lscale(ol) * ramp(L)
-        pv = stat_at(trs, 2, ol) * f
-        atk = stat_at(trs, 3, ol) * f
+        pv = stat_at(trs, 2, ol) * lscale(ol) * early_hp(L)
+        atk = stat_at(trs, 3, ol) * lscale(ol) * early_atk(L)
         dfn = stat_at(trs, 4, ol) * (0.6 + 0.4 * ramp(L)) * (1.0 + max(0.0, ol - 10) * 0.004)
         pa = max(2, int(round(stat_at(trs, 5, ol))))
         pm = max(2, int(round(stat_at(trs, 6, ol))))
@@ -268,8 +302,8 @@ for bname, brs in bosses.items():
         ol = old_level(L) if L <= MAX_HERO else 50.0 + (L - MAX_HERO) * 0.49
         f = lscale(ol) * ramp(L)
         # le boss garde au moins l'allure de ses valeurs d'origine à son niveau natif
-        pv = stat_at(gob, 2, ol) * rpv * f
-        atk = stat_at(gob, 3, ol) * ratk * f
+        pv = stat_at(gob, 2, ol) * rpv * lscale(ol) * early_hp(L)
+        atk = stat_at(gob, 3, ol) * ratk * lscale(ol) * early_atk(L)
         dfn = stat_at(gob, 4, ol) * rdef * (0.6 + 0.4 * ramp(L)) * (1.0 + max(0.0, ol - 10) * 0.004)
         xp = int(round(float(b[7]) * (0.3 + 0.7 * min(1.0, ol / max(1, nat)))))
         enemy_out.append([bname, str(L), str(int(round(pv))), str(max(1, int(round(atk)))),

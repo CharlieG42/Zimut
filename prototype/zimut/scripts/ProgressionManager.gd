@@ -47,6 +47,15 @@ static func zone_level(old_level: int) -> int:
 	var t: float = clampf(float(old_level - 10) / 15.0, 0.0, 1.3)
 	return clampi(roundi(1.0 + 99.0 * pow(t, 1.5)), 1, ClassRules.ENEMY_MAX_LEVEL)
 
+## V19 : montée de niveau trop rapide au début (3 niveaux en 4 combats) : les premiers niveaux
+## demandent EARLY_XP_MULT_START fois plus de combats, effet qui s'estompe jusqu'au niveau EARLY_XP_MULT_END.
+const EARLY_XP_MULT_START := 2.0
+const EARLY_XP_MULT_END := 30
+
+static func _early_xp_mult(lv: int) -> float:
+	var t: float = clampf(float(lv - 1) / float(EARLY_XP_MULT_END - 1), 0.0, 1.0)
+	return lerpf(EARLY_XP_MULT_START, 1.0, t)
+
 func _build_level_tables() -> void:
 	LEVEL_XP = PackedInt32Array()
 	LEVEL_COMBATS = PackedInt32Array()
@@ -57,7 +66,9 @@ func _build_level_tables() -> void:
 		var ol: float = 1.0 + float(lv - 1) * 49.0 / 99.0
 		var i0: int = clampi(int(floor(ol)), 1, 49)
 		var c_old: float = lerpf(float(OLD_LEVEL_COMBATS[i0]), float(OLD_LEVEL_COMBATS[i0 + 1]), ol - float(i0))
-		var need: int = maxi(2, roundi(c_old * 0.5))
+		var need: int = maxi(2, roundi(c_old * 0.5 * _early_xp_mult(lv)))
+		if lv > 1:
+			need = maxi(need, int(LEVEL_COMBATS[lv - 1]))   # jamais moins de combats qu'au niveau précédent
 		LEVEL_COMBATS[lv] = need
 		LEVEL_XP[lv] = roundi(acc)
 		acc += float(need) * float(_combat_xp_raw(lv)) * ClassRules.FIGHT_XP_MULT
@@ -1336,6 +1347,11 @@ func spell_preview(classe: String, spell_name: String, level: int) -> Dictionary
 		"trap":
 			base = int(p["trap"])
 			label = "Dégâts du piège"
+		"glyph":
+			var gf: Dictionary = p["glyph_foes"]
+			if not gf.is_empty():
+				base = int(gf["dmg"])
+				label = "Dégâts du glyphe"
 	if base == 0:
 		for d: Dictionary in p.get("dots", []):
 			base = int(float(d["value"]))
@@ -1403,7 +1419,7 @@ func auto_spells(data: Dictionary, classe: String) -> int:
 		if int(row["level"]) > lvl:
 			continue
 		var pv: Dictionary = spell_preview(classe, String(row["name"]), 1)
-		var main: bool = String(pv.get("kind", "")) in ["attack", "heal", "trap"] and int(pv.get("base_value", 0)) > 0
+		var main: bool = String(pv.get("kind", "")) in ["attack", "heal", "trap", "glyph"] and int(pv.get("base_value", 0)) > 0
 		cands.append({"name": String(row["name"]), "main": main, "req": int(row["level"])})
 	var bought: int = 0
 	while true:
@@ -1444,6 +1460,9 @@ const SPELL_RENAMES := {
 	"Invoquer Sirène": "Invoquer Requin des Marées", "Invoquer Ange": "Invoquer Élémentaire de Cristal",
 	"Invoquer Homme-Faucon": "Invoquer Ombre", "Invoquer Centaure": "Invoquer Esprit de la Forêt",
 	"Invoquer Buisson": "Invoquer Archer Sylvestre", "Invoquer Champignon": "Invoquer Ent de Combat",
+	# V19 : sorts transformés en glyphes
+	"Armure de grès": "Glyphe de grès", "Invoquer Faille": "Glyphe sismique", "Piège": "Glyphe d'entrave",
+	"Fleche enflammée": "Glyphe de flammes", "Marque de la mort": "Glyphe de venin", "Invisibilité": "Glyphe d'ombre",
 }
 
 
@@ -1609,7 +1628,7 @@ func fight_level_of(data: Dictionary, n: int) -> int:
 ## Facteur d'XP selon l'écart entre le niveau du combat et celui du perso :
 ## combat plus bas = moins d'XP (rejouer sert à farmer les objets), plus haut = bonus.
 func xp_level_factor(fight_level: int, member_level: int) -> float:
-	return clampf(1.0 + float(fight_level - member_level) * 0.10, 0.10, 1.5)
+	return clampf(1.0 + float(fight_level - member_level) * 0.10, 0.10, 1.25)
 
 ## Statistiques finales d'un membre d'équipe : base (classes.txt au niveau du perso)
 ## + points investis + équipement (+ panoplies) + paliers PA/PM.
