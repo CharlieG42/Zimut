@@ -37,6 +37,10 @@ var _end_btn: Button
 var _quit_btn: Button
 var _log_box: VBoxContainer
 var _log_panel: PanelContainer
+# Aide du premier combat (V17) : 0 = inactif, 1 = déplacer, 2 = sort, 3 = fin du tour
+var _tuto_step: int = 0
+var _tuto_panel: PanelContainer
+var _tuto_label: Label
 const LOG_WIDTH := 660.0
 var _banner: Label
 var _info_panel: PanelContainer
@@ -899,6 +903,10 @@ func _connect_signals() -> void:
 		game_manager.game_ended.connect(_on_game_ended)
 	if not game_manager.fx.is_connected(_on_fx):
 		game_manager.fx.connect(_on_fx)
+	if not game_manager.entity_moved.is_connected(_on_tuto_moved):
+		game_manager.entity_moved.connect(_on_tuto_moved)
+	if not game_manager.spell_casted.is_connected(_on_tuto_cast):
+		game_manager.spell_casted.connect(_on_tuto_cast)
 	# Les détails ne s’affichent plus au survol du plateau : ils sont réservés à l’appui long sur un avatar.
 
 
@@ -1211,11 +1219,92 @@ func _on_turn_started(e: Dictionary) -> void:
 	if e["entity_type"] == "Player" and not game_manager.auto_mode:
 		txt = "%s — À vous de jouer !" % ProgressionManager.biome_label(game_manager.fight_biome)
 		col = Color(0.65, 0.9, 1.0)
+		_tuto_on_player_turn()
 	else:
 		txt = "Tour : %s" % e["name"]
 		col = Color(1.0, 0.65, 0.55) if e["team"] == "enemy" else Color(0.7, 1.0, 0.75)
 	_show_banner(txt, col)
 	_refresh()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Aide du premier combat : trois bulles, une seule fois (réglage mémorisé)
+# ═══════════════════════════════════════════════════════════════════════════
+
+const TUTO_TEXT := {
+	1: "① Déplacement : touchez une case en surbrillance pour avancer votre héros.\nChaque case coûte 1 PM (pastille verte).",
+	2: "② Attaque : touchez un sort dans la colonne de gauche, puis une cible en surbrillance.\nChaque sort coûte des PA (pastille bleue).",
+	3: "③ Quand vous avez fini (plus de PA ni de PM), appuyez sur FIN DU TOUR.\nLe héros suivant joue ensuite.",
+}
+
+
+func _tuto_on_player_turn() -> void:
+	if GameSettings.tutorial_done:
+		return
+	if _tuto_step == 0:
+		_tuto_show(1)
+	elif _tuto_step == 3:
+		# Un nouveau tour de héros commence : le joueur a terminé le précédent
+		_tuto_finish()
+
+
+func _on_tuto_moved(ent: Variant, _from: Vector2i, _to: Vector2i) -> void:
+	if _tuto_step == 1 and ent is Dictionary and String(ent.get("team", "")) == "player":
+		_tuto_show(2)
+
+
+func _on_tuto_cast(caster: Variant, _spell: Variant, _target: Variant, _result: String) -> void:
+	if _tuto_step in [1, 2] and caster is Dictionary and String(caster.get("team", "")) == "player":
+		_tuto_show(3)
+
+
+func _tuto_show(step: int) -> void:
+	_tuto_step = step
+	if _tuto_panel == null:
+		_tuto_panel = PanelContainer.new()
+		var st := _flat(Color(0.07, 0.08, 0.13, 0.94), Color(1.0, 0.80, 0.35), 14, 3)
+		st.content_margin_left = 18
+		st.content_margin_right = 18
+		st.content_margin_top = 10
+		st.content_margin_bottom = 10
+		_tuto_panel.add_theme_stylebox_override("panel", st)
+		_tuto_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+		_tuto_panel.offset_left = -420.0
+		_tuto_panel.offset_right = 420.0
+		_tuto_panel.offset_top = 22.0
+		_tuto_panel.offset_bottom = 22.0
+		_tuto_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 14)
+		_tuto_panel.add_child(row)
+		_tuto_label = Label.new()
+		_tuto_label.add_theme_font_size_override("font_size", roundi(21.0 * UiFit.user_mult()))
+		_tuto_label.add_theme_color_override("font_color", Color(1, 0.96, 0.85))
+		_tuto_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_tuto_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_tuto_label.custom_minimum_size = Vector2(620, 0)
+		row.add_child(_tuto_label)
+		var skip := Button.new()
+		skip.text = "Passer l'aide"
+		skip.add_theme_font_size_override("font_size", 17)
+		skip.add_theme_stylebox_override("normal", _flat(Color(0.20, 0.22, 0.30), Color(0.5, 0.55, 0.7), 10, 2))
+		skip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		skip.pressed.connect(_tuto_finish)
+		row.add_child(skip)
+		_root.add_child(_tuto_panel)
+	_tuto_label.text = String(TUTO_TEXT.get(step, ""))
+	_tuto_panel.visible = true
+	_tuto_panel.modulate.a = 0.0
+	create_tween().tween_property(_tuto_panel, "modulate:a", 1.0, 0.25)
+
+
+func _tuto_finish() -> void:
+	_tuto_step = 0
+	GameSettings.set_tutorial_done(true)
+	if _tuto_panel != null and is_instance_valid(_tuto_panel):
+		var tw: Tween = create_tween()
+		tw.tween_property(_tuto_panel, "modulate:a", 0.0, 0.3)
+		tw.tween_callback(_tuto_panel.hide)
 
 
 func _show_banner(text: String, col: Color) -> void:
