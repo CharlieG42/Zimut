@@ -46,6 +46,8 @@ static func _norm(s: String) -> String:
 ## Élément visuel d'un sort d'après son nom, son type de dégâts et sa nature.
 static func element_for(spell_name: String, dtype: String, kind: String) -> String:
 	var n: String = _norm(spell_name)
+	if kind == "summon" and n.begins_with("invoquer "):
+		return "arcane"
 	for entry: Array in KEYWORDS:
 		for kw in entry[1]:
 			if n.contains(String(kw)):

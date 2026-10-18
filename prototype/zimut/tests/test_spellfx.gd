@@ -13,7 +13,7 @@ func _init() -> void:
 	check(EntityView.sprite_key("Sirène") == "sirene" and EntityView.sprite_key("Homme-Faucon") == "homme_faucon", "clés de sprite sans accents")
 	for n in ["gobelin", "squelette", "loup", "troll", "dragonnet", "dragonnet_boss"]:
 		check(ResourceLoader.exists("res://assets/sprites/enemies/%s.svg" % n), "skin ennemi " + n)
-	for n in ["tortue", "loup", "sirene", "ange", "homme_faucon", "centaure", "buisson", "champignon", "tronc", "sarriette"]:
+	for n in ["golem_de_pierre", "loup_spectral", "requin_des_marees", "elementaire_de_cristal", "ombre", "esprit_de_la_foret", "archer_sylvestre", "ent_de_combat", "tronc", "sarriette"]:
 		check(ResourceLoader.exists("res://assets/sprites/summons/%s.svg" % n) or ResourceLoader.exists("res://assets/sprites/summons/%s.png" % n), "skin invocation " + n)
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)

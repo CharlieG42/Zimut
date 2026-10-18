@@ -24,6 +24,13 @@ func _ready() -> void:
 	apply()
 
 
+func _exit_tree() -> void:
+	# Retirer la traduction (script GDScript) avant l'arrêt du moteur, sinon plantage à la fermeture
+	if _tr != null:
+		TranslationServer.remove_translation(_tr)
+		_tr = null
+
+
 ## Applique la langue choisie dans les Réglages.
 func apply() -> void:
 	var gs: Node = get_node_or_null("/root/GameSettings")
@@ -33,7 +40,7 @@ func apply() -> void:
 
 ## Traduction explicite (pour le texte dessiné à la main, hors Label/Button).
 func t(text: String) -> String:
-	if TranslationServer.get_locale().begins_with("fr"):
+	if _tr == null or TranslationServer.get_locale().begins_with("fr"):
 		return text
 	return String(_tr._get_message(StringName(text), StringName()))
 
