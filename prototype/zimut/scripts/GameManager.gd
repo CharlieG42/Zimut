@@ -888,6 +888,16 @@ func start_battle() -> void:
 		for en: Dictionary in enemies:
 			Achievements.bestiary_seen(active_save, en, fight_biome)
 	turn_order.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["init"] > b["init"])
+	# Numéro d'ordre des adversaires (timeline + zone de combat) : repère rapide quand
+	# plusieurs ennemis partagent le même skin.
+	var enemy_no: int = 0
+	for e: Dictionary in turn_order:
+		if String(e.get("team", "")) == "enemy" and String(e.get("entity_type", "")) != "Summon":
+			enemy_no += 1
+			e["ord"] = enemy_no
+	if enemy_no < 2:
+		for e: Dictionary in turn_order:
+			e.erase("ord")
 	message_requested.emit("Le combat commence !")
 	_setup_objective_and_synergies()
 	fx.emit("banner", {"text": "Combat !"})

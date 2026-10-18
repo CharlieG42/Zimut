@@ -409,6 +409,12 @@ func _draw() -> void:
 	draw_rect(Rect2(-bw * 0.5, by2, bw * ratio, bh), hp_col)
 	draw_rect(Rect2(-bw * 0.5, by2, bw * ratio, bh * 0.4), Color(1, 1, 1, 0.22))
 	draw_rect(back, tc, false, 1.5)
+	var ord_no: int = int(entity.get("ord", 0))
+	if ord_no > 0:
+		var oc := Vector2(-bw * 0.5 - 16.0, by2 + bh * 0.5)
+		draw_circle(oc, 12.0, Color(0, 0, 0, 0.88))
+		draw_circle(oc, 10.5, Color(0.95, 0.75, 0.2))
+		draw_string(ThemeDB.fallback_font, oc + Vector2(-10.0, 6.0), str(ord_no), HORIZONTAL_ALIGNMENT_CENTER, 20.0, 17, Color(0.1, 0.05, 0.0))
 
 	# Statuts
 	var font: Font = ThemeDB.fallback_font
