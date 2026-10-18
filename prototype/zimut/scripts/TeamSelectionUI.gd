@@ -39,7 +39,11 @@ var classes: Array[String] = []       # classes disponibles (triées)
 var current: int = 0                 # index de la vignette affichée
 var team: Array[String] = []         # classes sélectionnées
 
+const U = preload("res://scripts/UiKit.gd")
+
 var _root: Control
+var _grid: GridContainer             # vignettes des 9 classes
+var _class_tiles: Dictionary = {}    # classe -> Button
 var _portrait: TextureRect
 var _name_label: Label
 var _desc_label: Label
@@ -187,191 +191,181 @@ func _parse_stats() -> void:
 # ═══════════════════════════════════════════════════════════════════════════
 
 func _build() -> void:
-	_root = Control.new()
-	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(_root)
+	# Refonte V17 : style sombre et doré (comme la Forge et Mes Parties), toutes les
+	# classes visibles d'un coup (un appui pour choisir), interface agrandie (UiFit).
 	var bg := ColorRect.new()
-	bg.color = Color(0.06, 0.09, 0.14, 0.97)
+	bg.color = Color(0.05, 0.06, 0.10, 1.0)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_root.add_child(bg)
+	add_child(bg)
+	_root = Control.new()
+	add_child(_root)
+	UiFit.apply(_root, 1.0, Vector2(1300, 760))
+	var margin := MarginContainer.new()
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	for side in ["left", "right"]:
+		margin.add_theme_constant_override("margin_" + side, 22)
+	margin.add_theme_constant_override("margin_top", 14)
+	margin.add_theme_constant_override("margin_bottom", 14)
+	_root.add_child(margin)
+	var page := VBoxContainer.new()
+	page.add_theme_constant_override("separation", 10)
+	margin.add_child(page)
 
-	# Titre
-	# Sélecteur de combat (rejouer un combat déjà gagné)
+	# ── En-tête : retour + titre du combat
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 16)
+	page.add_child(top)
+	var back := U.btn("←  MENU", Color(0.45, 0.52, 0.70), 22, Vector2(170, 58))
+	back.pressed.connect(_on_back)
+	top.add_child(back)
+	_title = U.lbl("", 30, Color(1.0, 0.86, 0.4), true)
+	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	top.add_child(_title)
+	top.add_child(Control.new())
+
+	# ── Sélecteur de combat (rejouer un combat déjà gagné)
 	var sel_row := HBoxContainer.new()
-	sel_row.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	sel_row.offset_top = 108.0
-	sel_row.offset_bottom = 166.0
 	sel_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	sel_row.add_theme_constant_override("separation", 14)
-	_root.add_child(sel_row)
-	_fight_prev_btn = _std_btn("◀", Color(0.40, 0.46, 0.62))
-	_fight_prev_btn.custom_minimum_size = Vector2(70, 54)
+	sel_row.add_theme_constant_override("separation", 12)
+	page.add_child(sel_row)
+	_fight_prev_btn = U.btn("◀", Color(0.45, 0.52, 0.70), 22, Vector2(64, 48))
 	_fight_prev_btn.pressed.connect(_on_fight_prev)
 	sel_row.add_child(_fight_prev_btn)
-	_fight_sel_label = Label.new()
-	_fight_sel_label.custom_minimum_size = Vector2(760, 0)
+	_fight_sel_label = U.lbl("", 20, U.C_DIM)
 	_fight_sel_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_fight_sel_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_fight_sel_label.add_theme_font_size_override("font_size", 22)
+	_fight_sel_label.custom_minimum_size = Vector2(700, 0)
 	sel_row.add_child(_fight_sel_label)
-	_fight_next_btn = _std_btn("▶", Color(0.40, 0.46, 0.62))
-	_fight_next_btn.custom_minimum_size = Vector2(70, 54)
+	_fight_next_btn = U.btn("▶", Color(0.45, 0.52, 0.70), 22, Vector2(64, 48))
 	_fight_next_btn.pressed.connect(_on_fight_next)
 	sel_row.add_child(_fight_next_btn)
 
-	_title = Label.new()
-	_title.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	_title.offset_top = 30.0
-	_title.offset_bottom = 110.0
-	_title.text = "CONSTITUEZ VOTRE ÉQUIPE (%d/%d)" % [team.size(), MAX_TEAM_SIZE]
-	_title.add_theme_font_size_override("font_size", 42)
-	_title.add_theme_color_override("font_color", Color(1.0, 0.86, 0.4))
-	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_root.add_child(_title)
+	# ── Corps : grille des classes | fiche de la classe choisie
+	var body := HBoxContainer.new()
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override("separation", 16)
+	page.add_child(body)
+	var left := PanelContainer.new()
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.size_flags_stretch_ratio = 1.15
+	left.add_theme_stylebox_override("panel", U.box(Color(0.08, 0.10, 0.16, 0.95), Color(0.62, 0.50, 0.26), 16, 3, 12))
+	body.add_child(left)
+	_grid = GridContainer.new()
+	_grid.columns = 3
+	_grid.add_theme_constant_override("h_separation", 10)
+	_grid.add_theme_constant_override("v_separation", 10)
+	left.add_child(_grid)
+	for c: String in classes:
+		var tile := Button.new()
+		tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tile.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		tile.custom_minimum_size = Vector2(0, 96)
+		tile.focus_mode = Control.FOCUS_NONE
+		tile.icon = _class_texture(c)
+		tile.expand_icon = true
+		tile.add_theme_constant_override("icon_max_width", 76)
+		tile.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		tile.add_theme_font_size_override("font_size", 21)
+		for st_name in ["font_color", "font_hover_color", "font_pressed_color"]:
+			tile.add_theme_color_override(st_name, U.C_TXT)
+		var cls: String = c
+		tile.pressed.connect(func() -> void:
+			current = classes.find(cls)
+			refresh())
+		_grid.add_child(tile)
+		_class_tiles[c] = tile
 
-	# Navigation : ‹  vignette  ›
-	var nav := HBoxContainer.new()
-	nav.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	nav.offset_left = -330.0
-	nav.offset_right = 330.0
-	nav.offset_top = 190.0
-	nav.offset_bottom = 630.0
-	nav.add_theme_constant_override("separation", 20)
-	_root.add_child(nav)
-
-	var prev := _nav_btn("‹")
-	prev.pressed.connect(func() -> void: _rotate(-1))
-	nav.add_child(prev)
-
-	# Vignette centrale : portrait + nom + descriptif + stats
 	var card := PanelContainer.new()
-	nav.add_child(card)
-	card.add_theme_stylebox_override("panel", _flat(COL_PANEL, COL_BORDER, 18, 4))
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.add_theme_stylebox_override("panel", U.box(Color(0.10, 0.11, 0.17, 0.97), Color(0.95, 0.70, 0.30), 18, 3, 16))
+	body.add_child(card)
 	var card_box := VBoxContainer.new()
-	card_box.add_theme_constant_override("separation", 4)
+	card_box.add_theme_constant_override("separation", 6)
 	card.add_child(card_box)
-
-	var portrait_box := HBoxContainer.new()
-	portrait_box.alignment = BoxContainer.ALIGNMENT_CENTER
-	card_box.add_child(portrait_box)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 14)
+	card_box.add_child(head)
 	_portrait = TextureRect.new()
-	_portrait.custom_minimum_size = Vector2(140, 140)
+	_portrait.custom_minimum_size = Vector2(130, 130)
 	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	portrait_box.add_child(_portrait)
-
-	_name_label = Label.new()
-	_name_label.add_theme_font_size_override("font_size", 34)
-	_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_name_label.add_theme_color_override("font_color", COL_TXT)
-	card_box.add_child(_name_label)
-
-	_desc_label = Label.new()
-	_desc_label.add_theme_font_size_override("font_size", 21)
-	_desc_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_desc_label.add_theme_color_override("font_color", COL_TXT)
+	head.add_child(_portrait)
+	var hv := VBoxContainer.new()
+	hv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hv.alignment = BoxContainer.ALIGNMENT_CENTER
+	head.add_child(hv)
+	_name_label = U.lbl("", 34, Color(1.0, 0.90, 0.6), true)
+	hv.add_child(_name_label)
+	_desc_label = U.lbl("", 19, U.C_DIM)
 	_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_desc_label.custom_minimum_size = Vector2(420, 0)
-	card_box.add_child(_desc_label)
-
-	_stats_label = Label.new()
-	_stats_label.add_theme_font_size_override("font_size", 18)
-	_stats_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_stats_label.add_theme_color_override("font_color", Color(0.35, 0.25, 0.08))
+	_desc_label.custom_minimum_size = Vector2(300, 0)
+	hv.add_child(_desc_label)
+	_stats_label = U.lbl("", 21, U.C_TXT)
+	_stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_stats_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	card_box.add_child(_stats_label)
-
-	var next := _nav_btn("›")
-	next.pressed.connect(func() -> void: _rotate(1))
-	nav.add_child(next)
-
-	# Bouton AJOUTER / RETIRER
-	_action_btn = Button.new()
-	_action_btn.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	_action_btn.offset_left = -190.0
-	_action_btn.offset_right = 190.0
-	_action_btn.offset_top = 648.0
-	_action_btn.offset_bottom = 724.0
-	_action_btn.add_theme_font_size_override("font_size", 26)
+	_action_btn = U.btn("", Color(0.45, 0.80, 0.50), 24, Vector2(0, 64))
 	_action_btn.pressed.connect(_on_action)
-	_root.add_child(_action_btn)
+	card_box.add_child(_action_btn)
 
-	# Aperçu de l'équipe (3 emplacements)
-	var preview_title := Label.new()
-	preview_title.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	preview_title.offset_top = -260.0
-	preview_title.offset_bottom = -220.0
-	preview_title.text = "VOTRE ÉQUIPE"
-	preview_title.add_theme_font_size_override("font_size", 24)
-	preview_title.add_theme_color_override("font_color", Color(1.0, 0.86, 0.4))
-	preview_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_root.add_child(preview_title)
-
-	var team_row := HBoxContainer.new()
-	team_row.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	team_row.offset_top = -210.0
-	team_row.offset_bottom = -60.0
-	team_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	team_row.add_theme_constant_override("separation", 30)
-	_root.add_child(team_row)
-	for i: int in range(MAX_TEAM_SIZE):
-		var slot := PanelContainer.new()
-		slot.custom_minimum_size = Vector2(220, 150)
-		slot.add_theme_stylebox_override("panel", _flat(Color(0.10, 0.13, 0.20, 0.9), Color(0.3, 0.35, 0.45), 14, 2))
-		var lbl := Label.new()
-		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		lbl.add_theme_font_size_override("font_size", 22)
-		lbl.text = "(vide)"
-		slot.add_child(lbl)
-		team_row.add_child(slot)
-		_team_slots.append(slot)
-
-	# Bouton COMBATTRE (texte actualisé dans refresh())
-	var go := _std_btn("⚔  COMBATTRE", Color(0.35, 0.70, 0.30))
-	_fight_btn = go
-	go.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	go.offset_left = -400.0
-	go.offset_right = -60.0
-	go.offset_top = -160.0
-	go.offset_bottom = -80.0
-	go.pressed.connect(_on_combat)
-	_root.add_child(go)
-
-	# Fiche des personnages : niveaux, XP, points de caractéristiques (AU-DESSUS de l'équipement)
-	var chars := _std_btn("📈  PERSONNAGES", Color(0.40, 0.60, 0.85))
+	# ── Bas : équipe (3 emplacements) + boutons
+	var bottom := HBoxContainer.new()
+	bottom.add_theme_constant_override("separation", 12)
+	page.add_child(bottom)
+	var tools := VBoxContainer.new()
+	tools.add_theme_constant_override("separation", 8)
+	bottom.add_child(tools)
+	var chars := U.btn("📈  PERSONNAGES", Color(0.40, 0.60, 0.90), 20, Vector2(260, 52))
 	_chars_btn = chars
 	chars.tooltip_text = "Niveaux, XP et répartition des points de caractéristiques."
-	chars.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	chars.offset_left = 60.0
-	chars.offset_right = 400.0
-	chars.offset_top = -250.0
-	chars.offset_bottom = -170.0
 	chars.pressed.connect(_on_characters)
-	_root.add_child(chars)
-
-	# Équipement (si partie active)
-	var eq := _std_btn("🎒  ÉQUIPEMENT", Color(0.75, 0.55, 0.20))
+	tools.add_child(chars)
+	var eq := U.btn("🎒  ÉQUIPEMENT", Color(0.85, 0.62, 0.25), 20, Vector2(260, 52))
 	_equip_btn = eq
 	eq.tooltip_text = "Équiper vos personnages avec les objets gagnés."
-	eq.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	eq.offset_left = 60.0
-	eq.offset_right = 400.0
-	eq.offset_top = -160.0
-	eq.offset_bottom = -80.0
 	eq.pressed.connect(_on_equipment)
-	_root.add_child(eq)
-
-	# Retour
-	var back := _std_btn("←  MENU", Color(0.35, 0.40, 0.55))
-	back.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
-	back.offset_left = 40.0
-	back.offset_right = 240.0
-	back.offset_top = 30.0
-	back.offset_bottom = 100.0
-	back.pressed.connect(_on_back)
-	_root.add_child(back)
+	tools.add_child(eq)
+	var team_row := HBoxContainer.new()
+	team_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	team_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	team_row.add_theme_constant_override("separation", 10)
+	bottom.add_child(team_row)
+	_team_slots.clear()
+	for i: int in range(MAX_TEAM_SIZE):
+		var slot := Button.new()
+		slot.custom_minimum_size = Vector2(200, 112)
+		slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		slot.focus_mode = Control.FOCUS_NONE
+		slot.expand_icon = true
+		slot.add_theme_constant_override("icon_max_width", 72)
+		slot.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		slot.add_theme_font_size_override("font_size", 20)
+		for st_name in ["font_color", "font_hover_color", "font_pressed_color"]:
+			slot.add_theme_color_override(st_name, U.C_TXT)
+		var idx: int = i
+		slot.pressed.connect(func() -> void:
+			if idx < team.size():
+				current = classes.find(team[idx])
+				refresh())
+		team_row.add_child(slot)
+		_team_slots.append(slot)
+	var go := U.btn("⚔  COMBATTRE", Color(0.40, 0.80, 0.40), 24, Vector2(330, 112))
+	go.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_fight_btn = go
+	go.pressed.connect(_on_combat)
+	bottom.add_child(go)
 
 	refresh()
+
+
+## Portrait d'une classe (sprite du héros).
+func _class_texture(classe: String) -> Texture2D:
+	var tex_path := "res://assets/sprites/players/%s.png" % EntityView.sprite_key(classe)
+	return load(tex_path) as Texture2D if ResourceLoader.exists(tex_path) else null
+
 
 ## Retour à la fenêtre des parties (sauvegarde déjà écrite à chaque modification).
 func _on_back() -> void:
@@ -527,11 +521,24 @@ func refresh() -> void:
 	var meta: Dictionary = CLASS_META.get(classe, {"icon": "❔", "description": ""})
 	var col: Color = CLASS_COLORS.get(classe, Color(0.5, 0.5, 0.5))
 
-	var tex_path := "res://assets/sprites/players/%s.png" % EntityView.sprite_key(classe)
 	# Toujours réinitialiser : sinon une image manquante garde le héros précédent.
-	_portrait.texture = load(tex_path) if ResourceLoader.exists(tex_path) else null
-
+	_portrait.texture = _class_texture(classe)
 	_name_label.text = "%s  %s" % [meta["icon"], classe]
+	_name_label.add_theme_color_override("font_color", col.lightened(0.45))
+	var has_save0: bool = GameManager.active_slot >= 0 and not GameManager.active_save.is_empty()
+	for c: String in _class_tiles.keys():
+		var tile: Button = _class_tiles[c]
+		var ccol: Color = CLASS_COLORS.get(c, Color(0.5, 0.5, 0.5))
+		var sel: bool = c == classe
+		var lvl_txt: String = ("\nNiv %d" % ProgressionManager.member_level(GameManager.active_save, c)) if has_save0 else ""
+		var mark: String = "✓ " if team.has(c) else ("♞ " if _is_stationed(c) else "")
+		tile.text = "%s%s%s" % [mark, c, lvl_txt]
+		var bgc: Color = ccol.darkened(0.55) if team.has(c) else Color(0.12, 0.14, 0.21)
+		var st_t: StyleBoxFlat = U.box(bgc, Color(1.0, 0.82, 0.35) if sel else ccol.darkened(0.1), 14, 4 if sel else 2, 8)
+		tile.add_theme_stylebox_override("normal", st_t)
+		tile.add_theme_stylebox_override("hover", st_t)
+		tile.add_theme_stylebox_override("pressed", st_t)
+		tile.modulate = Color(0.6, 0.6, 0.65) if _is_stationed(c) else Color.WHITE
 	_desc_label.text = String(meta["description"])
 	_stats_label.text = _stat_line(classe)
 
@@ -539,16 +546,16 @@ func refresh() -> void:
 	if _is_stationed(classe):
 		var home: String = ConquestSystem.hero_city(GameManager.active_save.get("conquest", {}), classe)
 		_action_btn.text = "♞  GOUVERNEUR DE %s" % ProgressionManager.conquest_city_name(home).to_upper()
-		_action_btn.add_theme_stylebox_override("normal", _flat(Color(0.4, 0.4, 0.42), Color(0.3, 0.3, 0.32), 14, 3))
+		_action_btn.add_theme_stylebox_override("normal", U.box(Color(0.22, 0.22, 0.25), Color(0.4, 0.4, 0.45), 12, 2, 12))
 	elif in_team:
 		_action_btn.text = "✕  RETIRER DE L'ÉQUIPE"
-		_action_btn.add_theme_stylebox_override("normal", _flat(Color(0.92, 0.35, 0.28), Color(0.6, 0.2, 0.15), 14, 3))
+		_action_btn.add_theme_stylebox_override("normal", U.box(Color(0.55, 0.16, 0.13), Color(1.0, 0.45, 0.35), 12, 2, 12))
 	else:
 		var full: bool = team.size() >= MAX_TEAM_SIZE
 		_action_btn.text = "＋  AJOUTER À L'ÉQUIPE" if not full else "ÉQUIPE PLEINE"
-		_action_btn.add_theme_stylebox_override("normal", _flat(
-			Color(0.45, 0.78, 0.38) if not full else Color(0.4, 0.4, 0.42),
-			Color(0.25, 0.5, 0.2) if not full else Color(0.3, 0.3, 0.32), 14, 3))
+		_action_btn.add_theme_stylebox_override("normal", U.box(
+			Color(0.18, 0.42, 0.20) if not full else Color(0.22, 0.22, 0.25),
+			Color(0.45, 0.85, 0.45) if not full else Color(0.4, 0.4, 0.45), 12, 2, 12))
 
 	var fight_no: int = 1
 	var boss_fight: bool = false
@@ -587,7 +594,7 @@ func refresh() -> void:
 		else:
 			_title.text = "COMBAT %d — %s : ☠ AFFRONTEZ %s ! (%d/%d)" % [fight_no, ProgressionManager.biome_label(biome),
 				ProgressionManager.biome_boss(biome).to_upper(), team.size(), MAX_TEAM_SIZE]
-		_title.add_theme_color_override("font_color", Color(1.0, 0.4, 0.3))
+		_title.add_theme_color_override("font_color", Color(1.0, 0.45, 0.35))
 	else:
 		if challenge_name != "":
 			_title.text = "DÉFI : %s · %s · CONSTITUEZ VOTRE ÉQUIPE (%d/%d)" % [challenge_name,
@@ -636,22 +643,29 @@ func refresh() -> void:
 		else:
 			_fight_btn.text = "⚔  COMBATTRE"
 
-	# Aperçu
+	# Aperçu de l'équipe
 	for i: int in range(MAX_TEAM_SIZE):
-		var slot: PanelContainer = _team_slots[i]
-		var lbl: Label = slot.get_child(0)
+		var slot: Button = _team_slots[i]
 		if i < team.size():
 			var c: String = team[i]
-			var m: Dictionary = CLASS_META.get(c, {"icon": "❔"})
-			lbl.text = "%s %s" % [m["icon"], c]
+			var ccol: Color = CLASS_COLORS.get(c, Color(0.4, 0.4, 0.4))
+			slot.icon = _class_texture(c)
+			slot.text = c
 			if GameManager.active_slot >= 0 and not GameManager.active_save.is_empty():
-				lbl.text += "\nNiv %d" % ProgressionManager.member_level(GameManager.active_save, c)
-			slot.add_theme_stylebox_override("panel", _flat(
-				CLASS_COLORS.get(c, Color(0.4, 0.4, 0.4)).lightened(0.25),
-				CLASS_COLORS.get(c, Color(0.4, 0.4, 0.4)).darkened(0.3), 14, 3))
+				slot.text += "\nNiv %d" % ProgressionManager.member_level(GameManager.active_save, c)
+			var st_s: StyleBoxFlat = U.box(ccol.darkened(0.5), ccol.lightened(0.2), 14, 3, 8)
+			slot.add_theme_stylebox_override("normal", st_s)
+			slot.add_theme_stylebox_override("hover", st_s)
+			slot.add_theme_stylebox_override("pressed", st_s)
 		else:
-			lbl.text = "(vide)"
-			slot.add_theme_stylebox_override("panel", _flat(Color(0.10, 0.13, 0.20, 0.9), Color(0.3, 0.35, 0.45), 14, 2))
+			slot.icon = null
+			slot.text = "  ＋ emplacement libre"
+			var st_e: StyleBoxFlat = U.box(Color(0.08, 0.10, 0.15, 0.9), Color(0.28, 0.32, 0.42), 14, 2, 8)
+			slot.add_theme_stylebox_override("normal", st_e)
+			slot.add_theme_stylebox_override("hover", st_e)
+			slot.add_theme_stylebox_override("pressed", st_e)
+	if _fight_btn:
+		_fight_btn.disabled = team.size() != MAX_TEAM_SIZE
 
 func _flat(bg: Color, border: Color, radius: int = 12, bw: int = 3) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()

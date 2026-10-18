@@ -9,8 +9,8 @@ const COL_TXT := Color(0.22, 0.15, 0.05)
 
 func _ready() -> void:
 	var root := Control.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
+	UiFit.apply(root, 1.0, Vector2(1300, 820))
 
 	var bg := ColorRect.new()
 	bg.color = Color(0.06, 0.09, 0.14, 0.95)
@@ -22,17 +22,17 @@ func _ready() -> void:
 	root.add_child(center)
 
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(1240, 760)
+	panel.custom_minimum_size = Vector2(1240, 800)
 	panel.add_theme_stylebox_override("panel", _flat(COL_PANEL, COL_BORDER, 18, 5))
 	center.add_child(panel)
 
+	var pad := MarginContainer.new()
+	for side in ["left", "right", "top", "bottom"]:
+		pad.add_theme_constant_override("margin_" + side, 34 if side in ["left", "right"] else 26)
+	panel.add_child(pad)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 26)
-	box.add_theme_constant_override("margin_left", 34)
-	box.add_theme_constant_override("margin_right", 34)
-	box.add_theme_constant_override("margin_top", 28)
-	box.add_theme_constant_override("margin_bottom", 28)
-	panel.add_child(box)
+	pad.add_child(box)
 
 	var title := Label.new()
 	title.text = "RÉGLAGES"
@@ -44,8 +44,25 @@ func _ready() -> void:
 	box.add_child(_setting_row("Rapidité de progression XP", GameSettings.XP_SPEEDS,
 		GameSettings.xp_speed, func(idx: int) -> void: GameSettings.set_xp_speed(idx)))
 
+	box.add_child(_setting_row("Taille du texte des menus", GameSettings.TEXT_SIZES,
+		GameSettings.text_size, func(idx: int) -> void: GameSettings.set_text_size(idx)))
+
+	var tuto := Button.new()
+	tuto.text = "Revoir l'aide du premier combat" if GameSettings.tutorial_done else "Aide du premier combat : active"
+	tuto.disabled = not GameSettings.tutorial_done
+	tuto.custom_minimum_size = Vector2(0, 58)
+	tuto.add_theme_font_size_override("font_size", 21)
+	tuto.add_theme_color_override("font_color", COL_TXT)
+	tuto.add_theme_stylebox_override("normal", _flat(Color(0.86, 0.80, 0.64), COL_BORDER, 12, 2))
+	tuto.add_theme_stylebox_override("hover", _flat(Color(0.99, 0.95, 0.83), COL_BORDER, 12, 3))
+	tuto.pressed.connect(func() -> void:
+		GameSettings.set_tutorial_done(false)
+		tuto.text = "Aide du premier combat : active"
+		tuto.disabled = true)
+	box.add_child(tuto)
+
 	var hint := Label.new()
-	hint.text = "La rapidité XP règle le gain d'expérience de chaque combat.\nLa difficulté des ennemis se règle pour chaque partie, dans « Mes Parties »."
+	hint.text = "La rapidité XP règle le gain d'expérience de chaque combat. La taille du texte agrandit les menus (utile sur téléphone).\nLa difficulté des ennemis se règle pour chaque partie, dans « Mes Parties »."
 	hint.add_theme_font_size_override("font_size", 19)
 	hint.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12))
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

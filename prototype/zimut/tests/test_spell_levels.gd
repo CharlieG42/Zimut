@@ -82,5 +82,14 @@ func _boot() -> void:
 	# Les sorts des autres classes ne sont pas affectés
 	check(pm.spell_level(data, "Mage", "Coup de bouclier") == 1, "les autres classes restent niveau 1")
 
+	# Répartition automatique des points de sort
+	pm.roster_entry(data, "Mage")["level"] = 20
+	var n: int = pm.auto_spells(data, "Mage")
+	check(n > 0 and pm.spell_points_free(data, "Mage") <= 2, "auto : points dépensés (%d niveaux, %d restants)" % [n, pm.spell_points_free(data, "Mage")])
+	check(pm.spell_level(data, "Mage", "Boule de feu") > 1, "auto : un sort de dégâts monté")
+	check(bool(pm.roster_entry(data, "Mage").get("spell_auto", false)), "auto : mode mémorisé")
+	pm.downgrade_spell(data, "Mage", "Boule de feu")
+	check(not bool(pm.roster_entry(data, "Mage").get("spell_auto", true)), "un réglage manuel repasse en manuel")
+
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)

@@ -44,8 +44,8 @@ func _ready() -> void:
 
 func _build() -> void:
 	_root = Control.new()
-	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
+	UiFit.apply(_root, 1.0, Vector2(1300, 760))   # réglage « Taille du texte »
 
 	var bg := ColorRect.new()
 	bg.color = Color(0.06, 0.09, 0.14, 0.92)
@@ -259,6 +259,17 @@ func refresh() -> void:
 		var slot_ref: int = slot
 		btn.pressed.connect(func() -> void: _on_slot_pressed(slot_ref))
 		_slots_box.add_child(btn)
+	# Importer une partie exportée (code copié dans le presse-papiers)
+	var imp := Button.new()
+	imp.text = "📥  Importer une partie"
+	imp.custom_minimum_size = Vector2(0, 56)
+	imp.add_theme_font_size_override("font_size", _ui_font(17))
+	imp.add_theme_color_override("font_color", Color(0.95, 0.94, 0.90))
+	imp.add_theme_stylebox_override("normal", _flat_bg(Color(0.16, 0.20, 0.27), Color(0.45, 0.52, 0.66), 2))
+	imp.add_theme_stylebox_override("hover", _flat_bg(Color(0.22, 0.27, 0.36), Color(0.75, 0.80, 0.95), 3))
+	imp.tooltip_text = "Copiez d'abord un code « ZIMUT1:… » (bouton Exporter), puis touchez ici : la partie va dans le premier emplacement libre."
+	imp.pressed.connect(_on_import_pressed)
+	_slots_box.add_child(imp)
 
 	if _current_slot >= 0 and ProgressionManager.save_exists(_current_slot):
 		_show_detail(ProgressionManager.load_save(_current_slot), _current_slot)
@@ -480,6 +491,48 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		edit_row.add_child(c)
 	_detail_box.add_child(edit_row)
+
+	# Sauvegarde exportable : code texte copié dans le presse-papiers
+	var exp_row := HBoxContainer.new()
+	exp_row.add_theme_constant_override("separation", 12)
+	_detail_box.add_child(exp_row)
+	var exp_btn := Button.new()
+	exp_btn.text = "📋  Exporter la partie (copier le code)"
+	exp_btn.custom_minimum_size = Vector2(0, 58)
+	exp_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	exp_btn.add_theme_font_size_override("font_size", _ui_font(18))
+	exp_btn.add_theme_color_override("font_color", COL_TXT)
+	exp_btn.add_theme_stylebox_override("normal", _flat_bg(Color(0.86, 0.80, 0.64), Color(0.62, 0.48, 0.22), 2))
+	exp_btn.add_theme_stylebox_override("hover", _flat_bg(Color(0.95, 0.90, 0.75), Color(0.62, 0.48, 0.22), 3))
+	exp_btn.tooltip_text = "Copie un code contenant toute la partie : collez-le dans une note ou un message pour la garder ou la transférer sur un autre appareil (bouton « Importer une partie »)."
+	exp_btn.pressed.connect(func() -> void:
+		DisplayServer.clipboard_set(ProgressionManager.export_code(_current))
+		exp_btn.text = "✓  Code copié ! Collez-le dans une note pour le garder")
+	exp_row.add_child(exp_btn)
+
+## Importe le code du presse-papiers dans le premier emplacement libre.
+func _on_import_pressed() -> void:
+	var free_slot: int = -1
+	for i: int in range(ProgressionManager.MAX_SAVES):
+		if not ProgressionManager.save_exists(i):
+			free_slot = i
+			break
+	var msg: String = ""
+	if free_slot < 0:
+		msg = "Aucun emplacement libre : supprimez d'abord une partie."
+	else:
+		var err: String = ProgressionManager.import_save(free_slot, DisplayServer.clipboard_get())
+		msg = err if err != "" else "Partie importée dans l'emplacement %d." % (free_slot + 1)
+		if err == "":
+			_current = ProgressionManager.load_save(free_slot)
+			_current_slot = free_slot
+			refresh()
+	var dlg := AcceptDialog.new()
+	dlg.dialog_text = msg
+	dlg.title = "Importer une partie"
+	_root.add_child(dlg)
+	dlg.popup_centered()
+
 
 func _launch_campaign_mode(mode: String, scene_path: String, slot: int) -> void:
 	if _current.is_empty() or slot < 0:
