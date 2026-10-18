@@ -1435,3 +1435,21 @@ Trace un glyphe (3x3; 3 tours) : ennemis 25 dégâts + brûle 20 dégâts/tour (
 Glyphe	Glyph
 %s trace %s (%d tours).	%s draws %s (%d turns).
 %s s'efface.	%s fades away.
+Gérer l'équipe	Manage team
+Personnages	Characters
+Forge	Forge
+Gouverneurs	Governors
+Renommer	Rename
+Supprimer	Delete
+📋  Exporter la partie	📋  Export game
+✓  Code copié !	✓  Code copied!
+Facile ×0,85 · Normal ×1 · Difficile ×1,2 · Enfer : bien plus de PV.	Easy ×0.85 · Normal ×1 · Hard ×1.2 · Hell: much more HP.
+Tharok le Végétal	Tharok the Verdant
+Vorkann le Givre	Vorkann the Frost
+Zahor le Sableux	Zahor the Sandborn
+Zyphéron le Cristallin	Zyphéron the Crystalline
+Néréa la Tempête	Néréa the Tempest
+Aéron le Céleste	Aéron the Celestial
+Kharaz le Flamboyant	Kharaz the Blazing
+Ombrelis le Brumeux	Ombrelis the Misty
+Nébulia l'Illusionniste	Nébulia the Illusionist

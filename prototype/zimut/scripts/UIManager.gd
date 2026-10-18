@@ -1623,7 +1623,7 @@ func _show_result_window(victory: bool) -> void:
 		sub_txt = "Un peu d'XP de consolation."
 	elif ProgressionManager.is_boss_fight(save):
 		head_txt = "VICTOIRE !"
-		sub_txt = "Prochain combat (%d) : ☠ BOSS %s — %s" % [fight_no, ProgressionManager.biome_boss(next_biome), ProgressionManager.biome_label(next_biome)]
+		sub_txt = "Prochain combat (%d) : ☠ BOSS %s — %s" % [fight_no, Nations.boss_title(next_biome) if Nations.boss_title(next_biome) != "" else ProgressionManager.biome_boss(next_biome), ProgressionManager.biome_label(next_biome)]
 	else:
 		head_txt = "VICTOIRE (combat rejoué) !" if bool(res.get("replay", false)) else "VICTOIRE !"
 		sub_txt = "Prochain combat (%d) : %s, ennemis niveau %d" % [fight_no, ProgressionManager.biome_label(next_biome), ProgressionManager.enemy_level_for(save)]

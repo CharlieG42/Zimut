@@ -130,6 +130,28 @@ static func has(biome: String) -> bool:
 
 
 ## Biome rendu par NationScenery (les trois historiques gardent leur code d'origine).
+## V20 : boss illustrés de chaque nation (planche « Boss des Nations ») : titre affiché et sprite
+## assets/sprites/nations/boss/<dossier>.png. Le kit de combat reste celui du boss d'origine.
+const BOSS_TITLE := {
+	"Forêt": "Tharok le Végétal", "Montagne": "Vorkann le Givre", "Désert": "Zahor le Sableux",
+	"Cristaux": "Zyphéron le Cristallin", "Marées": "Néréa la Tempête", "Vents": "Aéron le Céleste",
+	"Brasier": "Kharaz le Flamboyant", "Brumes": "Ombrelis le Brumeux", "Ombres": "Nébulia l'Illusionniste",
+}
+
+
+static func boss_title(biome: String) -> String:
+	return String(BOSS_TITLE.get(biome, ""))
+
+
+static func boss_texture(biome: String) -> Texture2D:
+	if not DATA.has(biome):
+		return null
+	var path: String = "res://assets/sprites/nations/boss/%s.png" % String(DATA[biome]["folder"])
+	if not _tex_cache.has(path):
+		_tex_cache[path] = load(path) as Texture2D if ResourceLoader.exists(path) else null
+	return _tex_cache[path]
+
+
 static func is_new(biome: String) -> bool:
 	return DATA.has(biome) and not bool(DATA[biome].get("legacy", false))
 
@@ -207,8 +229,14 @@ static func enemy_texture(ent: Dictionary, biome: String) -> Texture2D:
 	var d: Dictionary = DATA[biome]
 	var file: String = ""
 	if bool(ent.get("boss", false)):
-		# seuls les boss des nations « nouvelles » ont leur sprite ; Gobelin Roi, Troll Géant,
-		# Dragon, Loup Alpha et les rois squelettes gardent leurs skins de boss d'origine.
+		# V20 : boss de nation illustré (posé par GameManager sur le boss du biome)
+		var nb: String = String(ent.get("nation_boss", ""))
+		if nb != "":
+			var bt: Texture2D = boss_texture(nb)
+			if bt != null:
+				return bt
+		# sinon : boss des nations « nouvelles » ; Gobelin Roi, Troll Géant, Dragon, Loup Alpha
+		# et les rois squelettes gardent leurs skins de boss d'origine.
 		var bb: String = biome_of_boss(String(ent.get("classe", "")))
 		if bb != "":
 			file = String(DATA[bb].get("boss_skin", ""))

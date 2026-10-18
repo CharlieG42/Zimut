@@ -326,7 +326,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	var compact: bool = _is_compact()
 	var title := Label.new()
 	title.text = "✦  %s" % String(data.get("name", "Partie"))
-	title.add_theme_font_size_override("font_size", _ui_font(20 if compact else 26))
+	title.add_theme_font_size_override("font_size", _ui_font(20 if compact else 24))
 	title.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(title)
 	var summary := Label.new()
@@ -340,7 +340,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	# Difficulté des ennemis : propre à cette partie, modifiable à tout moment.
 	var diff_lbl := Label.new()
 	diff_lbl.text = "DIFFICULTÉ DES ENNEMIS (cette partie)"
-	diff_lbl.add_theme_font_size_override("font_size", _ui_font(18))
+	diff_lbl.add_theme_font_size_override("font_size", _ui_font(17))
 	diff_lbl.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(diff_lbl)
 	var diff_row := HBoxContainer.new()
@@ -357,7 +357,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		db.button_group = diff_group
 		db.button_pressed = di == cur_diff
 		db.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		db.custom_minimum_size = Vector2(0, 52)
+		db.custom_minimum_size = Vector2(0, 44)
 		db.add_theme_font_size_override("font_size", _ui_font(19))
 		db.add_theme_color_override("font_color", Color(0.95, 0.94, 0.90))
 		db.add_theme_color_override("font_pressed_color", Color(1.0, 0.88, 0.45))
@@ -372,7 +372,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 				GameManager.active_save["difficulty"] = di_ref)
 		diff_row.add_child(db)
 	var diff_hint := Label.new()
-	diff_hint.text = "Facile ×0,85 · Normal ×1 · Difficile ×1,2 · Enfer : bien plus de PV. S'applique aux prochains combats."
+	diff_hint.text = "Facile ×0,85 · Normal ×1 · Difficile ×1,2 · Enfer : bien plus de PV."
 	diff_hint.add_theme_font_size_override("font_size", _ui_font(13))
 	diff_hint.add_theme_color_override("font_color", COL_BORDER.darkened(0.3))
 	diff_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -383,7 +383,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	# sorts, équipement et inventaire ne sont jamais dupliqués par mode.
 	var mode_lbl := Label.new()
 	mode_lbl.text = "CHOISIR UN MODE DE JEU"
-	mode_lbl.add_theme_font_size_override("font_size", _ui_font(21))
+	mode_lbl.add_theme_font_size_override("font_size", _ui_font(18))
 	mode_lbl.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(mode_lbl)
 	var modes_row := HBoxContainer.new()
@@ -409,18 +409,18 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		Color(0.62, 0.25, 0.20), true, func() -> void:
 			_launch_campaign_mode("conquest", "res://scenes/ConquestMap.tscn", slot)))
 
-	# Actions principales sur une même ligne : les PNG sont plus lisibles et
-	# prennent moins de hauteur que deux grands boutons empilés.
-	var top_actions := HBoxContainer.new()
-	top_actions.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top_actions.add_theme_constant_override("separation", 10)
-	_detail_box.add_child(top_actions)
+	# Les 6 boutons illustrés tiennent sur 2 lignes de 3 (plus de défilement nécessaire).
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 6)
+	_detail_box.add_child(grid)
 
 	var team_btn := _action_button("team", "Gérer l'équipe (libre à chaque combat)", COL_TXT)
 	team_btn.pressed.connect(func() -> void:
 		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
-	team_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top_actions.add_child(team_btn)
+	grid.add_child(team_btn)
 
 	var chars_btn := _action_button("chars", "PERSONNAGES — niveaux et caractéristiques", COL_TXT)
 	chars_btn.pressed.connect(func() -> void:
@@ -431,22 +431,14 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 			ui.queue_free()
 			_show_detail(ProgressionManager.load_save(slot), slot))
 		ui.open(_current, slot))
-	chars_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top_actions.add_child(chars_btn)
+	grid.add_child(chars_btn)
 
-	# Forge (fabrication / Briseur) et vue d'ensemble des gouverneurs en place
-	var tools_row := HBoxContainer.new()
-	tools_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tools_row.add_theme_constant_override("separation", 10)
-	_detail_box.add_child(tools_row)
 	var forge_btn := _action_button("forge", "Forge : fabriquer ou briser de l'équipement", COL_TXT)
 	forge_btn.pressed.connect(func() -> void: _open_forge(slot))
-	forge_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tools_row.add_child(forge_btn)
+	grid.add_child(forge_btn)
 	var gov_btn := _action_button("governors", "Gouverneurs en place dans vos villes", COL_TXT)
 	gov_btn.pressed.connect(func() -> void: _show_governors(_current))
-	gov_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tools_row.add_child(gov_btn)
+	grid.add_child(gov_btn)
 
 	# Trophées : succès et bestiaire de la partie
 	var tro_row := HBoxContainer.new()
@@ -458,9 +450,9 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		var tab_key: String = String(tb[0])
 		var tbtn := Button.new()
 		tbtn.text = String(tb[1])
-		tbtn.custom_minimum_size = Vector2(0, 62)
+		tbtn.custom_minimum_size = Vector2(0, 50)
 		tbtn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tbtn.add_theme_font_size_override("font_size", _ui_font(20))
+		tbtn.add_theme_font_size_override("font_size", _ui_font(18))
 		tbtn.add_theme_color_override("font_color", Color(0.98, 0.92, 0.75))
 		tbtn.add_theme_stylebox_override("normal", _flat_bg(Color(0.30, 0.22, 0.10), Color(0.85, 0.65, 0.28), 3))
 		tbtn.add_theme_stylebox_override("hover", _flat_bg(Color(0.40, 0.30, 0.14), Color(1.0, 0.80, 0.40), 3))
@@ -502,32 +494,24 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		_root.add_child(confirm)
 		confirm.popup_centered())
 
-	# Renommer / Supprimer : en bas de la fiche, cote a cote
-	var edit_row := HBoxContainer.new()
-	edit_row.add_theme_constant_override("separation", 10)
-	edit_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	for c: Node in [rename_btn, delete_btn]:
-		c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		edit_row.add_child(c)
-	_detail_box.add_child(edit_row)
+	grid.add_child(rename_btn)
+	grid.add_child(delete_btn)
 
 	# Sauvegarde exportable : code texte copié dans le presse-papiers
-	var exp_row := HBoxContainer.new()
-	exp_row.add_theme_constant_override("separation", 12)
-	_detail_box.add_child(exp_row)
 	var exp_btn := Button.new()
-	exp_btn.text = "📋  Exporter la partie (copier le code)"
-	exp_btn.custom_minimum_size = Vector2(0, 58)
+	exp_btn.text = "📋  Exporter la partie"
+	exp_btn.custom_minimum_size = Vector2(0, 50)
 	exp_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	exp_btn.add_theme_font_size_override("font_size", _ui_font(18))
+	exp_btn.clip_text = true
 	exp_btn.add_theme_color_override("font_color", COL_TXT)
 	exp_btn.add_theme_stylebox_override("normal", _flat_bg(Color(0.86, 0.80, 0.64), Color(0.62, 0.48, 0.22), 2))
 	exp_btn.add_theme_stylebox_override("hover", _flat_bg(Color(0.95, 0.90, 0.75), Color(0.62, 0.48, 0.22), 3))
 	exp_btn.tooltip_text = "Copie un code contenant toute la partie : collez-le dans une note ou un message pour la garder ou la transférer sur un autre appareil (bouton « Importer une partie »)."
 	exp_btn.pressed.connect(func() -> void:
 		DisplayServer.clipboard_set(ProgressionManager.export_code(_current))
-		exp_btn.text = "✓  Code copié ! Collez-le dans une note pour le garder")
-	exp_row.add_child(exp_btn)
+		exp_btn.text = "✓  Code copié !")
+	tro_row.add_child(exp_btn)
 
 ## Importe le code du presse-papiers dans le premier emplacement libre.
 func _on_import_pressed() -> void:
@@ -574,38 +558,79 @@ func _launch_campaign_mode(mode: String, scene_path: String, slot: int) -> void:
 ## Les icônes vivent dans assets/ui/actions/action_<clé>.png ; privilégier une
 ## source haute résolution (512x256 ou plus, fond transparent) pour limiter le flou.
 const ACTION_ICONS := {
-	"team": "res://assets/ui/actions/action_team.png",
-	"chars": "res://assets/ui/actions/action_chars.png",
-	"forge": "res://assets/ui/actions/action_forge.png",
-	"governors": "res://assets/ui/actions/action_governors.png",
-	"rename": "res://assets/ui/actions/action_rename.png",
-	"delete": "res://assets/ui/actions/action_delete.png",
+	"team": "res://assets/ui/actions/plain_team.png",
+	"chars": "res://assets/ui/actions/plain_chars.png",
+	"forge": "res://assets/ui/actions/plain_forge.png",
+	"governors": "res://assets/ui/actions/plain_governors.png",
+	"rename": "res://assets/ui/actions/plain_rename.png",
+	"delete": "res://assets/ui/actions/plain_delete.png",
 }
+## Libellé écrit par Godot sur la plaque (donc traduisible, contrairement à un texte cuit dans le PNG).
+const ACTION_LABELS := {
+	"team": "Gérer l'équipe", "chars": "Personnages", "forge": "Forge",
+	"governors": "Gouverneurs", "rename": "Renommer", "delete": "Supprimer",
+}
+const ACTION_ASPECT := 512.0 / 192.0
 
-## Bouton d'action illustré : on laisse le PNG porter tout le décor.
-## Le contrôle Godot n'ajoute donc plus de cadre beige autour de l'image.
-## La hauteur accrue permet au visuel (128x64, texte intégré) d'être nettement
-## plus grand, tout en conservant une grille compacte de deux boutons par ligne.
-func _action_button(icon_key: String, txt: String, txt_col: Color) -> Button:
+## Bouton d'action illustré : plaque + icône (PNG sans texte) et libellé dessiné par Godot.
+## `txt` reste l'info-bulle.
+func _action_button(icon_key: String, txt: String, _txt_col: Color, height: float = 0.0) -> Button:
 	var b := Button.new()
 	b.tooltip_text = txt
-	b.custom_minimum_size = Vector2(0, 124 if _is_compact() else 144)
+	var h: float = height if height > 0.0 else (84.0 if _is_compact() else 96.0)
+	b.custom_minimum_size = Vector2(0, h)
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.focus_mode = Control.FOCUS_ALL
 	var icon_path: String = String(ACTION_ICONS.get(icon_key, ""))
-	var art: TextureRect
+	var art: Control = null
 	if icon_path != "" and ResourceLoader.exists(icon_path):
-		art = TextureRect.new()
-		art.texture = load(icon_path) as Texture2D
-		art.set_anchors_preset(Control.PRESET_FULL_RECT)
-		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		b.add_child(art)
+		var arc := AspectRatioContainer.new()
+		arc.ratio = ACTION_ASPECT
+		arc.set_anchors_preset(Control.PRESET_FULL_RECT)
+		arc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(arc)
+		var tr := TextureRect.new()
+		tr.texture = load(icon_path) as Texture2D
+		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tr.stretch_mode = TextureRect.STRETCH_SCALE
+		tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		arc.add_child(tr)
+		art = arc
+		var lab := Label.new()
+		lab.text = String(ACTION_LABELS.get(icon_key, txt))
+		lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lab.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		lab.anchor_left = 0.40
+		lab.anchor_right = 0.955
+		lab.anchor_top = 0.2
+		lab.anchor_bottom = 0.8
+		lab.offset_left = 0.0
+		lab.offset_right = 0.0
+		lab.offset_top = 0.0
+		lab.offset_bottom = 0.0
+		lab.clip_text = true
+		lab.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		lab.add_theme_color_override("font_color", Color(1.0, 0.96, 0.87))
+		lab.add_theme_color_override("font_outline_color", Color(0.20, 0.12, 0.06))
+		tr.add_child(lab)
+		# taille de police adaptée à la hauteur du bouton ET à la largeur du libellé (FR/EN)
+		var fit := func() -> void:
+			if not is_instance_valid(lab) or not is_instance_valid(tr):
+				return
+			var bh: float = tr.size.y
+			var avail: float = tr.size.x * (lab.anchor_right - lab.anchor_left) - 6.0
+			var fs: int = maxi(12, roundi(bh * 0.30))
+			var font: Font = lab.get_theme_font("font")
+			while fs > 12 and font.get_string_size(lab.text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > avail:
+				fs -= 1
+			lab.add_theme_font_size_override("font_size", fs)
+			lab.add_theme_constant_override("outline_size", maxi(3, roundi(float(fs) * 0.2)))
+		tr.resized.connect(fit)
+		fit.call_deferred()
+	else:
+		b.text = txt
 
-	# Les anciennes bordures beige provenaient du StyleBox du Button.
-	# StyleBoxEmpty supprime fond, contour et marge ajoutés par le thème ;
-	# seul le bouton illustré reste visible.
+	# StyleBoxEmpty : seul le visuel illustré reste visible.
 	var empty := StyleBoxEmpty.new()
 	b.add_theme_stylebox_override("normal", empty)
 	b.add_theme_stylebox_override("hover", empty)
@@ -629,7 +654,7 @@ func _mode_button(title_txt: String, desc: String, art_path: String, accent: Col
 	b.tooltip_text = "%s — %s" % [title_txt, desc]
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.size_flags_stretch_ratio = 1.0
-	b.custom_minimum_size = Vector2(0, 180 if _is_compact() else 240)
+	b.custom_minimum_size = Vector2(0, 120 if _is_compact() else 160)
 	b.disabled = not enabled
 	b.focus_mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE
 

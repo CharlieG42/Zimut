@@ -507,7 +507,13 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 	var pv: int = maxi(1, int(float(_csv_int(info, "PV", 120)) * ENEMY_HP_MULT * BOSS_HP_MULT * lscale * hp_mult * hp_tactic_mult))
 	var atk: int = maxi(1, int(float(_csv_int(info, "Attaque", 20)) * ENEMY_ATK_MULT * BOSS_ATK_MULT * lscale * atk_mult * atk_tactic_mult))
 	fight_enemies.append({"type": boss_name, "level": lvl, "boss": true})
-	var boss: Dictionary = _base_entity("☠ BOSS %s Lv%d" % [boss_name, lvl], "Enemy", "enemy", boss_name, lvl, pos)
+	# V20 : le boss attitré du biome prend le nom et le portrait de la planche « Boss des Nations »
+	var nation_boss: bool = boss_name == ProgressionManager.biome_boss(fight_biome) and Nations.boss_title(fight_biome) != ""
+	var shown: String = Nations.boss_title(fight_biome) if nation_boss else boss_name
+	var boss: Dictionary = _base_entity("☠ BOSS %s Lv%d" % [shown, lvl], "Enemy", "enemy", boss_name, lvl, pos)
+	if nation_boss:
+		boss["nation_boss"] = fight_biome
+		boss["title"] = shown
 	boss.merge({
 		"max_pv": pv, "current_pv": pv,
 		"force": atk, "intelligence": atk, "agility": atk / 2.0, "wisdom": 10,
