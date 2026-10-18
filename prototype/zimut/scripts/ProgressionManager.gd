@@ -696,6 +696,43 @@ func _normalize_ints(d: Dictionary, keys: Array) -> void:
 		if d.has(k):
 			d[k] = int(d[k])
 
+## ── Export / import d'une partie sous forme de code texte (V17) ─────────────
+## Le code se colle n'importe où (note, message, mail) pour garder ou transférer
+## sa partie : « ZIMUT1: » + base64 du JSON compressé (gzip).
+const EXPORT_PREFIX := "ZIMUT1:"
+
+func export_code(data: Dictionary) -> String:
+	var raw: PackedByteArray = JSON.stringify(data).to_utf8_buffer()
+	return EXPORT_PREFIX + Marshalls.raw_to_base64(raw.compress(FileAccess.COMPRESSION_GZIP))
+
+
+## Décode un code d'export ; {} si le texte n'est pas un code valide.
+func import_code(text: String) -> Dictionary:
+	var t: String = text.strip_edges().replace("\n", "").replace("\r", "").replace("\t", "").replace(" ", "")
+	var at: int = t.find(EXPORT_PREFIX)
+	if at < 0:
+		return {}
+	var packed: PackedByteArray = Marshalls.base64_to_raw(t.substr(at + EXPORT_PREFIX.length()))
+	if packed.is_empty():
+		return {}
+	var raw: PackedByteArray = packed.decompress_dynamic(64 * 1024 * 1024, FileAccess.COMPRESSION_GZIP)
+	var parsed: Variant = JSON.parse_string(raw.get_string_from_utf8())
+	if typeof(parsed) != TYPE_DICTIONARY or not (parsed as Dictionary).has("team"):
+		return {}
+	return parsed
+
+
+## Importe un code dans l'emplacement `slot` (écrase son contenu). "" si OK, sinon la raison.
+func import_save(slot: int, text: String) -> String:
+	var d: Dictionary = import_code(text)
+	if d.is_empty():
+		return "Code de sauvegarde invalide (il doit commencer par %s)." % EXPORT_PREFIX
+	d["slot"] = slot
+	_normalize_ints(d, ["level", "victories", "gold"])
+	ensure_roster(d)
+	return "" if write_save(slot, d) else "Écriture impossible."
+
+
 func write_save(slot: int, data: Dictionary) -> bool:
 	if slot < 0 or slot >= MAX_SAVES:
 		return false
