@@ -23,6 +23,11 @@ const MAX_LEVEL := 3
 const LEVEL_NAMES: Array[String] = ["Hameau", "Bourg", "Cité"]
 const TROOP_COST := 30
 const WALL_DEFENSE := 6
+## Équipement du gouverneur : +1 défense par 10 de puissance (max 20), +1 or par 60 (max 4).
+const GEAR_DEF_DIV := 10
+const GEAR_DEF_MAX := 20
+const GEAR_GOLD_DIV := 60
+const GEAR_GOLD_MAX := 4
 const RAID_CHANCE := 0.35
 const RAVAGE_BATTLES := 3
 const THREAT_ETA := 3
@@ -99,6 +104,29 @@ static func has_wall(conq: Dictionary, id: String) -> bool:
 static func hero_level(data: Dictionary, classe: String) -> int:
 	return int(data.get("roster", {}).get(classe, {}).get("level", 1))
 
+## Équipement du gouverneur : valeur totale de ses objets portés (ItemRules.power).
+static func governor_gear_power(data: Dictionary, classe: String) -> int:
+	var total: int = 0
+	var roster: Dictionary = data.get("roster", {})
+	var eq: Dictionary = {}
+	for m: Dictionary in data.get("team", []):
+		if String(m.get("classe", "")) == classe:
+			eq = m.get("equipment", {})
+	if eq.is_empty():
+		eq = roster.get(classe, {}).get("equipment", {})
+	for it: Variant in eq.values():
+		if it is Dictionary:
+			total += ItemRules.power(it)
+	return total
+
+## Bonus de défense apporté par l'équipement du gouverneur (plafonné).
+static func governor_gear_defense(data: Dictionary, classe: String) -> int:
+	return mini(GEAR_DEF_MAX, governor_gear_power(data, classe) / GEAR_DEF_DIV)
+
+## Bonus d'or par bataille apporté par l'équipement du gouverneur (plafonné).
+static func governor_gear_gold(data: Dictionary, classe: String) -> int:
+	return mini(GEAR_GOLD_MAX, governor_gear_power(data, classe) / GEAR_GOLD_DIV)
+
 static func governor_text(classe: String) -> String:
 	return String(GOVERNOR.get(classe, {}).get("text", "Gouverneur"))
 
@@ -110,7 +138,7 @@ static func defense(data: Dictionary, id: String) -> int:
 		d += WALL_DEFENSE
 	var h: String = hero_of(conq, id)
 	if h != "":
-		d += 6 + int(float(hero_level(data, h)) * 0.5) + int(GOVERNOR.get(h, {}).get("def", 0))
+		d += 6 + int(float(hero_level(data, h)) * 0.5) + int(GOVERNOR.get(h, {}).get("def", 0)) + governor_gear_defense(data, h)
 	return d
 
 ## Or versé par bataille gagnée par une ville (gelé si pillée).
@@ -121,7 +149,7 @@ static func city_income(data: Dictionary, id: String) -> int:
 	var base: int = (3 if id == "capitale" else 2) * city_level(conq, id)
 	var h: String = hero_of(conq, id)
 	if h != "":
-		base += 2 + int(GOVERNOR.get(h, {}).get("gold", 0))
+		base += 2 + int(GOVERNOR.get(h, {}).get("gold", 0)) + governor_gear_gold(data, h)
 	return base
 
 static func total_income(data: Dictionary) -> int:

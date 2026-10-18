@@ -1217,6 +1217,16 @@ func upgradable_items(data: Dictionary) -> Array:
 		var eq: Dictionary = team[i].get("equipment", {})
 		for slot: String in eq.keys():
 			out.append({"src": "team", "member": i, "slot": slot, "index": -1, "item": eq[slot]})
+	var in_team: Array[String] = []
+	for m: Dictionary in team:
+		in_team.append(String(m.get("classe", "")))
+	var roster: Dictionary = data.get("roster", {})
+	for cl: String in roster.keys():
+		if in_team.has(cl):
+			continue
+		var eqr: Dictionary = roster[cl].get("equipment", {})
+		for slot: String in eqr.keys():
+			out.append({"src": "hero", "member": -1, "classe": cl, "slot": slot, "index": -1, "item": eqr[slot]})
 	var inv: Array = data.get("inventory", [])
 	for j: int in range(inv.size()):
 		out.append({"src": "inv", "member": -1, "slot": "", "index": j, "item": inv[j]})
@@ -1241,6 +1251,8 @@ func upgrade_item(data: Dictionary, entry: Dictionary) -> String:
 		if mi < 0 or mi >= team.size():
 			return "Personnage introuvable."
 		item = team[mi].get("equipment", {}).get(String(entry.get("slot", "")), {})
+	elif String(entry.get("src", "")) == "hero":
+		item = hero_equipment(data, String(entry.get("classe", ""))).get(String(entry.get("slot", "")), {})
 	else:
 		var inv: Array = data.get("inventory", [])
 		var ij: int = int(entry.get("index", -1))
@@ -2704,6 +2716,39 @@ func salvage_item(data: Dictionary, inv_index: int) -> Dictionary:
 	progression_changed.emit()
 	return {"ok": true, "gains": gains, "reason": ""}
 
+## Brise plusieurs objets d'un coup. `items` : dictionnaires d'objets (libres ou portés) ;
+## un objet porté est d'abord retiré à son porteur. Retourne { "count", "gains" }.
+func salvage_many(data: Dictionary, items: Array) -> Dictionary:
+	var gains: Dictionary = {}
+	var count: int = 0
+	for it: Dictionary in items:
+		var inv: Array = data.get("inventory", [])
+		var idx: int = inv.find(it)
+		if idx < 0:
+			# objet porté : on le cherche chez les héros
+			var found: bool = false
+			for cl: String in class_names():
+				var eq: Dictionary = hero_equipment(data, cl)
+				for slot: String in eq.keys():
+					if eq[slot] == it:
+						unequip_hero_item(data, cl, slot)
+						found = true
+						break
+				if found:
+					break
+			if not found:
+				continue
+			inv = data.get("inventory", [])
+			idx = inv.rfind(it)
+			if idx < 0:
+				continue
+		var r: Dictionary = salvage_item(data, idx)
+		if bool(r.get("ok", false)):
+			count += 1
+			for k: String in (r["gains"] as Dictionary).keys():
+				gains[k] = int(gains.get(k, 0)) + int(r["gains"][k])
+	return {"count": count, "gains": gains}
+
 ## En cas de défaite, on ne valide pas la conquête/le défi : le joueur pourra retenter.
 func _apply_campaign_defeat(data: Dictionary) -> void:
 	var mode: String = String(data.get("campaign_mode", ""))
@@ -2817,51 +2862,81 @@ func slot_for_type(item_type: String) -> String:
 			return slot
 	return ""
 
-## Équipe un item de l'inventaire sur un perso ; l'ancien item retourne
+## Équipement d'un héros (référence vivante) : celui du membre d'équipe s'il en fait
+## partie, sinon celui conservé dans le roster (gouverneurs, héros au repos).
+func hero_equipment(data: Dictionary, classe: String) -> Dictionary:
+	for m: Dictionary in data.get("team", []):
+		if String(m.get("classe", "")) == classe:
+			if not m.has("equipment"):
+				m["equipment"] = {}
+			return m["equipment"]
+	var roster: Dictionary = data.get("roster", {})
+	if not roster.has(classe):
+		roster[classe] = {}
+		data["roster"] = roster
+	var entry: Dictionary = roster[classe]
+	if not entry.has("equipment"):
+		entry["equipment"] = {}
+	return entry["equipment"]
+
+
+## Équipe un item de l'inventaire sur un héros (équipe ou non) ; l'ancien item retourne
 ## à l'inventaire. Retourne "" si OK, sinon la raison.
-## Règles : niveau requis ; une arme à 2 mains libère le bouclier.
-func equip_item(data: Dictionary, member_index: int, item_index: int) -> String:
+func equip_hero_item(data: Dictionary, classe: String, item_index: int) -> String:
 	var inv: Array = data.get("inventory", [])
-	var team: Array = data.get("team", [])
-	if member_index < 0 or member_index >= team.size():
+	if not class_names().has(classe):
 		return "Personnage introuvable."
 	if item_index < 0 or item_index >= inv.size():
 		return "Objet introuvable."
 	var item: Dictionary = inv[item_index]
-	var member: Dictionary = team[member_index]
 	var slot: String = slot_for_type(String(item["type"]))
 	if slot == "":
 		return "Type d'objet inconnu : %s" % String(item["type"])
-	var lvl: int = member_level(data, String(member.get("classe", "")))
+	var lvl: int = member_level(data, classe)
 	if int(item.get("level", 1)) > lvl:
-		return "Niveau %d requis (%s est niveau %d)." % [int(item.get("level", 1)), String(member.get("classe", "")), lvl]
-	var equipment: Dictionary = member.get("equipment", {})
+		return "Niveau %d requis (%s est niveau %d)." % [int(item.get("level", 1)), classe, lvl]
+	var equipment: Dictionary = hero_equipment(data, classe)
 	if slot == "bouclier" and equipment.has("arme") and ItemRules.is_two_handed(equipment["arme"]):
 		return "Arme à deux mains équipée : retirez-la pour porter un bouclier."
-	# Retirer l'item de l'inventaire
 	inv.remove_at(item_index)
-	# Renvoyer l'ancien item à l'inventaire
 	if equipment.has(slot):
 		inv.append(equipment[slot])
-	# Une arme à 2 mains libère le bouclier
 	if slot == "arme" and ItemRules.is_two_handed(item) and equipment.has("bouclier"):
 		inv.append(equipment["bouclier"])
 		equipment.erase("bouclier")
 	equipment[slot] = item
-	member["equipment"] = equipment
 	return ""
 
-func unequip_item(data: Dictionary, member_index: int, slot: String) -> String:
-	var team: Array = data.get("team", [])
-	if member_index < 0 or member_index >= team.size():
-		return "Personnage introuvable."
-	var member: Dictionary = team[member_index]
-	var equipment: Dictionary = member.get("equipment", {})
+
+func unequip_hero_item(data: Dictionary, classe: String, slot: String) -> String:
+	var equipment: Dictionary = hero_equipment(data, classe)
 	if not equipment.has(slot):
 		return "Emplacement vide."
 	data["inventory"].append(equipment[slot])
 	equipment.erase(slot)
 	return ""
+
+
+## Équipe un item de l'inventaire sur un membre de l'équipe (par index).
+func equip_item(data: Dictionary, member_index: int, item_index: int) -> String:
+	var team: Array = data.get("team", [])
+	if member_index < 0 or member_index >= team.size():
+		return "Personnage introuvable."
+	return equip_hero_item(data, String(team[member_index].get("classe", "")), item_index)
+
+func unequip_item(data: Dictionary, member_index: int, slot: String) -> String:
+	var team: Array = data.get("team", [])
+	if member_index < 0 or member_index >= team.size():
+		return "Personnage introuvable."
+	return unequip_hero_item(data, String(team[member_index].get("classe", "")), slot)
+
+## Valeur totale (ItemRules.power) de l'équipement porté par un héros.
+func hero_gear_power(data: Dictionary, classe: String) -> int:
+	var total: int = 0
+	for it: Variant in hero_equipment(data, classe).values():
+		if it is Dictionary:
+			total += ItemRules.power(it)
+	return total
 
 ## Somme des bonus d'équipement d'un membre (panoplies incluses) : { force, intelligence,
 ## agility, wisdom, vita, defense }
@@ -2877,6 +2952,7 @@ func equipment_fx(member: Dictionary) -> Dictionary:
 ## (avant : il était perdu).
 func rebuild_team(data: Dictionary, classes: Array) -> Array:
 	var old_team: Array = data.get("team", [])
+	var roster: Dictionary = data.get("roster", {})
 	var new_team: Array = []
 	var used: Array = []
 	for classe in classes:
@@ -2886,11 +2962,36 @@ func rebuild_team(data: Dictionary, classes: Array) -> Array:
 				kept = old_team[i].get("equipment", {})
 				used.append(i)
 				break
+		# Un héros qui revient dans l'équipe retrouve l'équipement qu'il portait au repos
+		# (gouverneur, par exemple).
+		if kept.is_empty() and roster.has(String(classe)) and roster[String(classe)].has("equipment"):
+			kept = roster[String(classe)]["equipment"]
+			roster[String(classe)].erase("equipment")
 		new_team.append({"classe": String(classe), "equipment": kept})
+	# Un héros écarté rend son équipement à l'inventaire, sauf s'il est gouverneur d'une
+	# ville : il le garde alors (les gouverneurs ne combattent pas mais comptent leur stuff).
+	var conq_state: Dictionary = data.get("conquest", {})
 	for i: int in range(old_team.size()):
-		if not used.has(i):
-			for slot: String in old_team[i].get("equipment", {}).keys():
-				data["inventory"].append(old_team[i]["equipment"][slot])
+		if used.has(i):
+			continue
+		var cl: String = String(old_team[i].get("classe", ""))
+		var eq_old: Dictionary = old_team[i].get("equipment", {})
+		if eq_old.is_empty() or cl == "":
+			continue
+		if ConquestSystem.hero_city(conq_state, cl) == "":
+			for slot2: String in eq_old.keys():
+				data["inventory"].append(eq_old[slot2])
+			continue
+		if not roster.has(cl):
+			roster[cl] = {}
+		var dest: Dictionary = roster[cl].get("equipment", {})
+		for slot: String in eq_old.keys():
+			if dest.has(slot):
+				data["inventory"].append(eq_old[slot])
+			else:
+				dest[slot] = eq_old[slot]
+		roster[cl]["equipment"] = dest
+	data["roster"] = roster
 	data["team"] = new_team
 	ensure_roster(data)
 	return new_team

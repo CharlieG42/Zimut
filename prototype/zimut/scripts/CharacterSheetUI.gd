@@ -40,6 +40,8 @@ var _head_box: HBoxContainer
 var _tabs_row: HBoxContainer
 var _content: VBoxContainer
 var _res_label: Label
+var _gear_pick: String = ""     # emplacement dont on choisit l'objet ("" = vue d'ensemble)
+var _gear_msg: String = ""
 
 
 ## Barre de composition d'une caractéristique : base | points investis | objets.
@@ -292,6 +294,8 @@ func refresh() -> void:
 		c.queue_free()
 	if _tab == "stats":
 		_build_stats()
+	elif _tab == "gear":
+		_build_gear()
 	else:
 		_build_spells()
 
@@ -434,6 +438,14 @@ func _refresh_tabs() -> void:
 		_tab = "spells"
 		refresh())
 	_tabs_row.add_child(b2)
+	var b3 := _btn("ÉQUIPEMENT", C_GOLD if _tab == "gear" else C_BORDER, 22, Vector2(240, 54))
+	b3.name = "GearTab"
+	b3.pressed.connect(func() -> void:
+		_tab = "gear"
+		_gear_pick = ""
+		_gear_msg = ""
+		refresh())
+	_tabs_row.add_child(b3)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -801,3 +813,159 @@ func _spell_card(parent: Control, s: Dictionary, char_level: int, free_pts: int)
 			_persist()
 		refresh())
 	foot.add_child(up)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Onglet ÉQUIPEMENT
+# ═══════════════════════════════════════════════════════════════════════════
+
+func _gear_governor_line() -> String:
+	var conq: Dictionary = _save.get("conquest", {})
+	var id: String = ConquestSystem.hero_city(conq, _classe)
+	if id != "" and (conq.get("owned", []) as Array).has(id):
+		return "♞ Gouverneur de %s : son équipement donne +%d défense et +%d or par victoire à la ville." % [
+			ProgressionManager.conquest_city_name(id),
+			ConquestSystem.governor_gear_defense(_save, _classe), ConquestSystem.governor_gear_gold(_save, _classe)]
+	return ""
+
+
+func _build_gear() -> void:
+	if _gear_pick != "":
+		_build_gear_picker(_gear_pick)
+		return
+	var eq: Dictionary = ProgressionManager.hero_equipment(_save, _classe)
+	var agg: Dictionary = ItemRules.aggregate(eq)
+	var sum_parts: PackedStringArray = []
+	for k: String in ItemRules.STAT_KEYS:
+		var v: int = int(agg["stats"].get(k, 0))
+		if v != 0:
+			sum_parts.append("%s %+d" % [String(ItemRules.STAT_SHORT[k]), v])
+	var info := _lbl("Bonus d'équipement : %s" % (" · ".join(sum_parts) if not sum_parts.is_empty() else "aucun"), 19, C_GOOD if not sum_parts.is_empty() else C_DIM)
+	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_content.add_child(info)
+	for line: String in agg["sets"]:
+		_content.add_child(_lbl("◈ " + line, 16, C_GOLD))
+	var gov: String = _gear_governor_line()
+	if gov != "":
+		var gl := _lbl(gov, 17, Color(0.78, 0.62, 1.0))
+		gl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_content.add_child(gl)
+	elif not _team_classes().has(_classe):
+		var nl := _lbl("Ce héros n'est pas dans l'équipe : son équipement est conservé et compte s'il devient gouverneur.", 16, C_DIM)
+		nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_content.add_child(nl)
+	if _gear_msg != "":
+		_content.add_child(_lbl(_gear_msg, 18, C_BAD))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_content.add_child(grid)
+	for slot: String in GearUi.SLOT_ORDER:
+		grid.add_child(_gear_slot_card(slot, eq))
+
+
+func _gear_slot_card(slot: String, eq: Dictionary) -> Control:
+	var it: Dictionary = eq.get(slot, {})
+	var card := PanelContainer.new()
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var edge: Color = ItemRules.rarity_color(it) if not it.is_empty() else C_BORDER
+	card.add_theme_stylebox_override("panel", _box(C_CARD, edge, 14, 2, 10))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	card.add_child(row)
+	row.add_child(GearUi.tile(slot, 60.0))
+	var mid := VBoxContainer.new()
+	mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	mid.add_theme_constant_override("separation", 2)
+	row.add_child(mid)
+	mid.add_child(_lbl(GearUi.slot_label(slot).to_upper(), 14, C_DIM))
+	if it.is_empty():
+		mid.add_child(_lbl("— vide —", 19, C_DIM))
+	else:
+		var nm := _lbl(ItemRules.display_name(it), 19, ItemRules.rarity_color(it).lightened(0.3))
+		nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		mid.add_child(nm)
+		mid.add_child(_lbl("niv. %d · %s" % [int(it.get("level", 0)), ItemRules.stat_line(it)], 15, C_TXT))
+	var btns := VBoxContainer.new()
+	btns.add_theme_constant_override("separation", 6)
+	row.add_child(btns)
+	var b := _btn("CHANGER" if not it.is_empty() else "ÉQUIPER", C_GOLD, 17, Vector2(120, 44))
+	b.name = "GearPick_" + slot
+	b.pressed.connect(func() -> void:
+		_gear_pick = slot
+		_gear_msg = ""
+		refresh())
+	btns.add_child(b)
+	if not it.is_empty():
+		var r := _btn("RETIRER", C_BAD, 15, Vector2(120, 38))
+		r.name = "GearRemove_" + slot
+		r.pressed.connect(func() -> void:
+			_gear_msg = ProgressionManager.unequip_hero_item(_save, _classe, slot)
+			_persist()
+			refresh())
+		btns.add_child(r)
+	return card
+
+
+## Liste des objets libres de l'inventaire compatibles avec un emplacement.
+func _build_gear_picker(slot: String) -> void:
+	var back := _btn("←  RETOUR À L'ÉQUIPEMENT", C_BORDER, 19, Vector2(0, 48))
+	back.pressed.connect(func() -> void:
+		_gear_pick = ""
+		refresh())
+	_content.add_child(back)
+	_content.add_child(_lbl("Choisir : %s" % GearUi.slot_label(slot), 24, C_GOLD, true))
+	if _gear_msg != "":
+		_content.add_child(_lbl(_gear_msg, 18, C_BAD))
+	var level: int = ProgressionManager.member_level(_save, _classe)
+	var cur: Dictionary = ProgressionManager.hero_equipment(_save, _classe).get(slot, {})
+	var cur_power: int = ItemRules.power(cur) if not cur.is_empty() else 0
+	var rows: Array = []
+	var inv: Array = _save.get("inventory", [])
+	for i: int in range(inv.size()):
+		if GearUi.slot_of(inv[i]) == slot:
+			rows.append({"i": i, "it": inv[i]})
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return ItemRules.power(a["it"]) > ItemRules.power(b["it"]))
+	if rows.is_empty():
+		var e := _lbl("Aucun objet libre de ce type dans l'inventaire.", 19, C_DIM)
+		_content.add_child(e)
+		return
+	for row: Dictionary in rows:
+		var it: Dictionary = row["it"]
+		var too_low: bool = int(it.get("level", 1)) > level
+		var delta: int = ItemRules.power(it) - cur_power
+		var b := Button.new()
+		b.custom_minimum_size = Vector2(0, 84)
+		b.focus_mode = Control.FOCUS_NONE
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.text = "%s\n%s" % [GearUi.item_text(it).split("\n")[0], ("Niveau %d requis" % int(it.get("level", 1))) if too_low else GearUi.item_text(it).split("\n")[1]]
+		b.add_theme_font_size_override("font_size", 19)
+		var col: Color = ItemRules.rarity_color(it).lightened(0.3)
+		for st_name in ["font_color", "font_hover_color", "font_pressed_color"]:
+			b.add_theme_color_override(st_name, C_BAD if too_low else col)
+		var sbx: StyleBoxFlat = _box(C_CARD, ItemRules.rarity_color(it).darkened(0.2), 12, 2, 10)
+		sbx.content_margin_right = 130
+		b.add_theme_stylebox_override("normal", sbx)
+		b.add_theme_stylebox_override("hover", _box(C_CARD_HI, ItemRules.rarity_color(it), 12, 3, 10))
+		b.add_theme_stylebox_override("pressed", sbx)
+		var dl := _lbl(("%+d" % delta) if not too_low else "—", 24, C_GOOD if delta > 0 else (C_BAD if delta < 0 else C_DIM), true)
+		dl.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
+		dl.offset_left = -100
+		dl.offset_right = -14
+		dl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		dl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(dl)
+		var idx: int = int(row["i"])
+		b.pressed.connect(func() -> void:
+			var err: String = ProgressionManager.equip_hero_item(_save, _classe, idx)
+			if err != "":
+				_gear_msg = err
+			else:
+				_gear_msg = ""
+				_gear_pick = ""
+				_persist()
+			refresh())
+		_content.add_child(b)

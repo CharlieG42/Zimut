@@ -1218,8 +1218,13 @@ func _show_popup(title: String, message: String) -> void:
 	add_child(dim)
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", _style(Color(0.98, 0.86, 0.45), Color(0.72, 0.58, 0.28)))
-	add_child(panel)
-	_center_panel(panel)
+	# Un CenterContainer plein écran centre toujours la fenêtre, quelle que soit sa taille
+	# (posé directement sur le CanvasLayer, le panneau restait coincé en haut à gauche).
+	var centre := CenterContainer.new()
+	centre.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	centre.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	dim.add_child(centre)
+	centre.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 12)
 	panel.add_child(box)
