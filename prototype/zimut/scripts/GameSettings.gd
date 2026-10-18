@@ -20,8 +20,13 @@ const DIFFICULTY_ATK_POWER := [0.85, 1.0, 1.2, 1.2]
 const XP_SPEEDS: Array[String] = ["Lente", "Normale", "Rapide"]
 const XP_SPEED_MULT := [0.6, 1.0, 1.6]
 
+## Taille du texte des menus (agrandissement des interfaces, voir UiFit.gd).
+const TEXT_SIZES: Array[String] = ["Normal", "Grand", "Très grand"]
+const TEXT_SIZE_MULT := [1.0, 1.15, 1.3]
+
 var difficulty: int = 1
 var xp_speed: int = 1
+var text_size: int = 1
 
 func _ready() -> void:
 	load_settings()
@@ -38,13 +43,14 @@ func load_settings() -> void:
 		return
 	difficulty = clampi(int(parsed.get("difficulty", difficulty)), 0, DIFFICULTIES.size() - 1)
 	xp_speed = clampi(int(parsed.get("xp_speed", xp_speed)), 0, XP_SPEEDS.size() - 1)
+	text_size = clampi(int(parsed.get("text_size", text_size)), 0, TEXT_SIZES.size() - 1)
 
 func save_settings() -> void:
 	var f := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
 	if f == null:
 		push_error("Impossible d'écrire les réglages")
 		return
-	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed}, "\t"))
+	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size}, "\t"))
 	f.close()
 
 func set_difficulty(idx: int) -> void:
@@ -56,6 +62,15 @@ func set_xp_speed(idx: int) -> void:
 	xp_speed = clampi(idx, 0, XP_SPEEDS.size() - 1)
 	save_settings()
 	settings_changed.emit()
+
+func set_text_size(idx: int) -> void:
+	text_size = clampi(idx, 0, TEXT_SIZES.size() - 1)
+	save_settings()
+	settings_changed.emit()
+
+## Facteur d'agrandissement choisi par le joueur (1.0 = taille de base).
+func text_mult() -> float:
+	return float(TEXT_SIZE_MULT[clampi(text_size, 0, TEXT_SIZE_MULT.size() - 1)])
 
 func difficulty_label() -> String:
 	return DIFFICULTIES[clampi(difficulty, 0, DIFFICULTIES.size() - 1)]

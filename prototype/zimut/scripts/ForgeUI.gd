@@ -124,9 +124,7 @@ func _build() -> void:
 		_root.queue_free()
 	_root = Control.new()
 	add_child(_root)
-	_fit_root()
-	if not get_viewport().size_changed.is_connected(_fit_root):
-		get_viewport().size_changed.connect(_fit_root)
+	UiFit.apply(_root, 1.25, Vector2(1370, 770))
 	var bg := TextureRect.new()
 	bg.texture = _tex(ART + "bg.jpg")
 	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -227,17 +225,6 @@ func _build() -> void:
 	_detail_box.add_theme_constant_override("separation", 10)
 	_detail_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	rscroll.add_child(_detail_box)
-
-
-## Taille/échelle de la racine selon l'écran (voir UI_SCALE).
-func _fit_root() -> void:
-	if _root == null or not is_instance_valid(_root):
-		return
-	var vs: Vector2 = get_viewport().get_visible_rect().size
-	var sc: float = clampf(minf(vs.x / 1370.0, vs.y / 770.0), 1.0, UI_SCALE) if vs.x >= 1370.0 else 1.0
-	_root.scale = Vector2(sc, sc)
-	_root.position = Vector2.ZERO
-	_root.size = vs / sc
 
 
 const MODES: Array = [

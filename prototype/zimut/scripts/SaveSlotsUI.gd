@@ -44,8 +44,8 @@ func _ready() -> void:
 
 func _build() -> void:
 	_root = Control.new()
-	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
+	UiFit.apply(_root, 1.0, Vector2(1300, 760))   # réglage « Taille du texte »
 
 	var bg := ColorRect.new()
 	bg.color = Color(0.06, 0.09, 0.14, 0.92)

@@ -72,7 +72,7 @@ func _build() -> void:
 	_root = Control.new()
 	_root.name = "CityRoot"
 	add_child(_root)
-	UiFit.apply(_root, 1.2)   # lisible sur smartphone
+	UiFit.apply(_root, 1.1, Vector2(1300, 740))   # lisible sur smartphone
 
 	# Fond aux couleurs de la nation
 	var nd: Dictionary = Nations.DATA.get(_biome, {})
