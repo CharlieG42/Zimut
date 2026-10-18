@@ -14,6 +14,11 @@ extends Node2D
 var game_manager
 
 
+func _exit_tree() -> void:
+	# Quitter un combat en plein tour ennemi ne doit pas laisser le jeu accéléré
+	Engine.time_scale = 1.0
+
+
 func _ready() -> void:
 	game_manager = GameManager
 	_build_background()

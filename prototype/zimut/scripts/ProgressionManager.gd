@@ -1095,6 +1095,8 @@ func fuse_resource(data: Dictionary, res_name: String, tier: int) -> String:
 	data["resources"] = res
 	data["gold"] = int(data.get("gold", 0)) - gold_cost
 	progression_changed.emit()
+	Achievements.bump(data, "fusions")
+	Achievements.check(data)
 	return ""
 
 
@@ -1177,6 +1179,9 @@ func craft_item(data: Dictionary, recipe_name: String, tier: int = 1) -> String:
 	data["inventory"].append(forged_item_ranked(recipe, tier))
 	data["crafted"] = int(data.get("crafted", 0)) + 1
 	progression_changed.emit()
+	Achievements.bump(data, "crafted")
+	Achievements.set_max(data, "max_rank", tier)
+	Achievements.check(data)
 	return ""
 
 ## Fabrique puis équipe directement sur un membre de l'équipe. Si l'équipement échoue
@@ -1246,6 +1251,7 @@ func upgrade_item(data: Dictionary, entry: Dictionary) -> String:
 	data["gold"] = int(data.get("gold", 0)) - int(c["gold"])
 	apply_rank(item, int(c["next"]))
 	progression_changed.emit()
+	Achievements.check(data)
 	return ""
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1733,6 +1739,76 @@ func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0, fight_level: in
 ## À appeler après une victoire : XP pour tout le monde, 1-4 loots avec rareté.
 ## info (facultatif) : { "enemies": [{type, level, boss}], "turns": int, "boss": bool }
 ## Retourne la sauvegarde mise à jour (à écrire ensuite) ou {} si pas de partie active.
+# ═══════════════════════════════════════════════════════════════════════════
+#  V18 : objectifs de combat et synergies de classes
+# ═══════════════════════════════════════════════════════════════════════════
+
+## Duos de classes : bonus appliqué à toute l'équipe au début du combat.
+## [classe A, classe B, nom, statut, valeur (%), description]
+const SYNERGIES: Array = [
+	["Tank", "Heal", "Rempart béni", "def_up", 10.0, "+10 % de défense pour l'équipe"],
+	["Mage", "Géomancien", "Arcanes telluriques", "dmg_up", 10.0, "+10 % de dégâts pour l'équipe"],
+	["Chasseur", "Assassin", "Traque", "dmg_up", 8.0, "+8 % de dégâts pour l'équipe"],
+	["Druide", "Sylvain", "Cercle de la forêt", "mres_up", 12.0, "+12 % de résistance magique pour l'équipe"],
+	["Invocateur", "Druide", "Pacte sauvage", "def_up", 8.0, "+8 % de défense pour l'équipe"],
+	["Tank", "Mage", "Garde arcanique", "mres_up", 10.0, "+10 % de résistance magique pour l'équipe"],
+]
+
+
+## Synergies actives pour une liste de classes : [{name, status, value, desc, pair}]
+func active_synergies(classes: Array) -> Array:
+	var out: Array = []
+	for sy: Array in SYNERGIES:
+		if classes.has(String(sy[0])) and classes.has(String(sy[1])):
+			out.append({"name": String(sy[2]), "status": String(sy[3]), "value": float(sy[4]),
+				"desc": String(sy[5]), "pair": "%s + %s" % [sy[0], sy[1]]})
+	return out
+
+
+const OBJECTIVE_SWIFT_TURNS := 4
+
+## Objectif du prochain combat (modes Tactique et Aventure ; la Conquête a ses propres défis).
+## Déterministe : le même tant que le combat n'est pas joué.
+func combat_objective(data: Dictionary) -> Dictionary:
+	if data.is_empty() or String(data.get("campaign_mode", "")) == "conquest":
+		return {}
+	var n: int = int(data.get("victories", 0)) + int(data.get("replays", 0)) + int(data.get("defeats", 0))
+	var h: int = absi(("%d:%s" % [n, String(data.get("name", ""))]).hash())
+	var kinds: Array = ["swift", "flawless", "chief", "no_heal", "all_hit"]
+	var kind: String = String(kinds[h % kinds.size()])
+	var lvl: int = enemy_level_for(data)
+	var res_name: String = String(RES_TYPES[(h / 7) % RES_TYPES.size()])
+	var out: Dictionary = {"kind": kind, "gold": 30 + 5 * lvl, "resources": {res_key(res_name, 2): 1 + lvl / 20}}
+	match kind:
+		"swift":
+			out["label"] = "Gagner en %d tours ou moins" % OBJECTIVE_SWIFT_TURNS
+		"flawless":
+			out["label"] = "Gagner sans qu'aucun héros ne tombe"
+		"chief":
+			out["label"] = "Vaincre le chef (l'ennemi le plus résistant) en premier"
+		"no_heal":
+			out["label"] = "Gagner sans aucun soin"
+		"all_hit":
+			out["label"] = "Chaque héros inflige des dégâts"
+	out["reward_text"] = "+%d or · +%d %s R2" % [int(out["gold"]), 1 + lvl / 20, res_name]
+	return out
+
+
+func _objective_met(obj: Dictionary, info: Dictionary) -> bool:
+	match String(obj.get("kind", "")):
+		"swift":
+			return int(info.get("turns", 99)) <= OBJECTIVE_SWIFT_TURNS
+		"flawless":
+			return info.has("deaths") and int(info["deaths"]) == 0
+		"chief":
+			return bool(info.get("chief_first", false))
+		"no_heal":
+			return info.has("heal_total") and int(info["heal_total"]) == 0
+		"all_hit":
+			return bool(info.get("all_hit", false))
+	return false
+
+
 func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	if data.is_empty():
 		return {}
@@ -1785,7 +1861,28 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 			"vita": int(l.get("vita", 0)), "defense": int(l.get("defense", 0)),
 		})
 	data["loot_log"] = log_arr
+	# Objectif de combat (évalué avec l'objectif annoncé AVANT ce combat)
+	var obj: Dictionary = info.get("objective", {})
+	if not obj.is_empty():
+		var ok: bool = _objective_met(obj, info)
+		obj["success"] = ok
+		if ok:
+			data["gold"] = int(data.get("gold", 0)) + int(obj["gold"])
+			add_resources(data, obj["resources"])
+			Achievements.bump(data, "objectives")
+		data["last_result"]["objective"] = obj
 	_apply_campaign_victory(data)
+	# Succès (V18)
+	Achievements.bump(data, "wins")
+	if int(info.get("deaths", 1)) == 0 and info.has("deaths"):
+		Achievements.bump(data, "flawless")
+	if int(info.get("turns", 99)) <= 3 and info.has("turns"):
+		Achievements.bump(data, "fast")
+	if was_boss:
+		Achievements.bump(data, "bosses")
+	Achievements.bump(data, "loots", loots.size())
+	data["last_achievements"] = []
+	Achievements.check(data)
 	progression_changed.emit()
 	return data
 
@@ -1807,6 +1904,8 @@ func register_defeat(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	data["last_result"] = {"victory": false, "xp": report, "boss": bool(info.get("boss", false)),
 		"fight_level": fight_level, "turns": int(info.get("turns", 0))}
 	_apply_campaign_defeat(data)
+	data["last_achievements"] = []
+	Achievements.check(data)
 	progression_changed.emit()
 	return data
 

@@ -24,7 +24,17 @@ const XP_SPEED_MULT := [0.6, 1.0, 1.6]
 const TEXT_SIZES: Array[String] = ["Normal", "Grand", "Très grand"]
 const TEXT_SIZE_MULT := [1.0, 1.15, 1.3]
 
+## Vitesse des tours joués par l'ordinateur (ennemis, invocations, mode Auto).
+const COMBAT_SPEEDS: Array[String] = ["Normale", "Rapide", "Très rapide"]
+const COMBAT_SPEED_MULT := [1.0, 2.0, 3.0]
+
 var difficulty: int = 1
+var combat_speed: int = 0
+## Sons d'effets / vibrations (V18)
+## Langue : "fr" ou "en" (voir Loc.gd)
+var language: String = "fr"
+var sfx_on: bool = true
+var haptics_on: bool = true
 var xp_speed: int = 1
 var text_size: int = 1
 ## Aide du premier combat déjà vue (ou passée).
@@ -47,13 +57,18 @@ func load_settings() -> void:
 	xp_speed = clampi(int(parsed.get("xp_speed", xp_speed)), 0, XP_SPEEDS.size() - 1)
 	text_size = clampi(int(parsed.get("text_size", text_size)), 0, TEXT_SIZES.size() - 1)
 	tutorial_done = bool(parsed.get("tutorial_done", tutorial_done))
+	combat_speed = clampi(int(parsed.get("combat_speed", combat_speed)), 0, COMBAT_SPEEDS.size() - 1)
+	sfx_on = bool(parsed.get("sfx_on", sfx_on))
+	language = String(parsed.get("language", language))
+	haptics_on = bool(parsed.get("haptics_on", haptics_on))
+	_apply_sfx()
 
 func save_settings() -> void:
 	var f := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
 	if f == null:
 		push_error("Impossible d'écrire les réglages")
 		return
-	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done}, "\t"))
+	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "combat_speed": combat_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "language": language}, "\t"))
 	f.close()
 
 func set_difficulty(idx: int) -> void:
@@ -70,6 +85,41 @@ func set_text_size(idx: int) -> void:
 	text_size = clampi(idx, 0, TEXT_SIZES.size() - 1)
 	save_settings()
 	settings_changed.emit()
+
+func set_language(lang: String) -> void:
+	language = lang
+	save_settings()
+	var loc: Node = get_node_or_null("/root/Loc")
+	if loc != null:
+		loc.call("apply")
+	settings_changed.emit()
+
+func set_sfx(on: bool) -> void:
+	sfx_on = on
+	_apply_sfx()
+	save_settings()
+
+func set_haptics(on: bool) -> void:
+	haptics_on = on
+	save_settings()
+
+func _apply_sfx() -> void:
+	var sfx: Node = get_node_or_null("/root/Sfx")
+	if sfx != null:
+		sfx.set("enabled", sfx_on)
+
+func set_combat_speed(idx: int) -> void:
+	combat_speed = clampi(idx, 0, COMBAT_SPEEDS.size() - 1)
+	save_settings()
+	settings_changed.emit()
+
+## Forçage de la vitesse (simulations de test uniquement ; 0 = réglage du joueur).
+var speed_override: float = 0.0
+
+func combat_speed_mult() -> float:
+	if speed_override > 0.0:
+		return speed_override
+	return float(COMBAT_SPEED_MULT[clampi(combat_speed, 0, COMBAT_SPEED_MULT.size() - 1)])
 
 func set_tutorial_done(v: bool) -> void:
 	tutorial_done = v

@@ -31,7 +31,8 @@ var _mode: String = "craft"      # craft | upgrade | fusion | salvage
 var _tier: int = 1                # rang de fabrication (1..10)
 var _up_key: String = ""
 var _fuse_max: bool = false        # Fusion : ×1 ou « tout fusionner »
-var _salv_sel: Dictionary = {}     # objet sélectionné au Briseur          # objet sélectionné en mode amélioration
+var _salv_sel: Dictionary = {}
+var _ach_seen: Dictionary = {}      # succès déjà connus à l'ouverture (pour annoncer les nouveaux)     # objet sélectionné au Briseur          # objet sélectionné en mode amélioration
 var _tabs_row: HBoxContainer
 var _selected: String = ""
 var _member: int = 0
@@ -49,6 +50,7 @@ var _actions: VBoxContainer       # boutons d'action, toujours visibles en bas d
 func open(save_data: Dictionary, slot: int, member_index: int = 0) -> void:
 	_save = save_data
 	_slot = slot
+	_ach_seen = (_save.get("achievements", {}) as Dictionary).duplicate()
 	_member = clampi(member_index, 0, maxi(0, _save.get("team", []).size() - 1))
 	_build()
 	refresh()
@@ -240,6 +242,20 @@ const MODE_SUB := {
 
 
 func refresh() -> void:
+	# Succès débloqués par la dernière action (fabrication, fusion, amélioration)
+	var ach: Dictionary = _save.get("achievements", {})
+	var new_names: PackedStringArray = []
+	for id: String in ach.keys():
+		if not _ach_seen.has(id):
+			_ach_seen[id] = true
+			for a: Array in Achievements.LIST:
+				if String(a[0]) == id:
+					new_names.append("%s (%s)" % [a[1], Achievements.reward_text(a[5])])
+	if not new_names.is_empty():
+		_message = (_message + "\n" if _message != "" else "") + "🏆 Succès : " + ", ".join(new_names)
+		_message_ok = true
+		Sfx.play("achievement")
+		Sfx.buzz(60)
 	if _title_lbl != null:
 		_title_lbl.text = "FORGE" if _mode == "craft" else "FORGE · %s" % String(MODES[MODES.map(func(m: Array) -> String: return String(m[0])).find(_mode)][1]).to_upper()
 		_sub_lbl.text = String(MODE_SUB[_mode])
@@ -928,6 +944,8 @@ func _refresh_upgrade_detail() -> void:
 	ub.disabled = not can
 	ub.pressed.connect(func() -> void:
 		var err: String = ProgressionManager.upgrade_item(_save, e)
+		if err == "":
+			Sfx.play("forge")
 		_message_ok = err == ""
 		_message = ("%s amélioré au rang %d !" % [String(it.get("name", "?")), int(c["next"])]) if err == "" else err
 		if err == "":
@@ -1005,6 +1023,7 @@ func _refresh_fusion_list() -> void:
 					_message_ok = made > 0
 					_message = ("%d × %s R%d créé(s) !" % [made, name_r, t + 1]) if made > 0 else err
 					if made > 0:
+						Sfx.play("fuse")
 						ProgressionManager.write_save(_slot, _save)
 						crafted.emit()
 					refresh())
@@ -1044,6 +1063,7 @@ func _after_craft(err: String, ok_msg: String) -> void:
 	_message_ok = err == "" or err.begins_with("Objet fabriqué")
 	_message = ok_msg if err == "" else err
 	if _message_ok:
+		Sfx.play("forge")
 		ProgressionManager.write_save(_slot, _save)
 		crafted.emit()
 	refresh()

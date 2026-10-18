@@ -303,6 +303,7 @@ func _clear_highlights() -> void:
 			c.ally_target = false
 			c.path_hl = false
 			c.path_cost = 0
+			c.threat = 0
 	for v: EntityView in views.values():
 		v.preview_text = ""
 
@@ -346,12 +347,56 @@ func refresh_highlights() -> void:
 							_view(t).preview_text = "-%d" % dmg
 					elif p["kind"] == "heal" and t["team"] == e["team"] and int(p["heal"]) > 0:
 						_view(t).preview_text = "+%d" % roundi(float(p["heal"]) * (1.0 + float(e.get("intelligence", 0)) / 300.0))
+	if not _threat_of.is_empty():
+		_paint_threat(_threat_of)
 	for row: Array in cell_nodes:
 		for c: Cell in row:
 			c.hover = (c.grid_position == hover_cell)
 			c.refresh()
 	for v: EntityView in views.values():
 		v.hovered = _valid(hover_cell) and game_manager.pos_of(v.entity) == hover_cell
+
+
+# ── Menace d'un ennemi (appui long sur lui ou sur son portrait) ──────────────
+var _threat_of: Dictionary = {}
+var _press_cell: Vector2i = Vector2i(-1, -1)
+var _press_t: float = -1.0
+const THREAT_HOLD := 0.45
+
+
+## Affiche (ou masque avec {}) la zone de menace d'une entité ennemie.
+func show_threat(e: Dictionary) -> void:
+	_threat_of = e if not e.is_empty() and String(e.get("team", "")) == "enemy" else {}
+	refresh_highlights()
+
+
+## Orange : cases où l'ennemi peut se rendre ce tour-ci ; rouge : cases qu'il peut frapper en plus.
+func _paint_threat(e: Dictionary) -> void:
+	if not game_manager.is_alive(e):
+		_threat_of = {}
+		return
+	var reach: Dictionary = game_manager.compute_reach(e, int(e.get("max_pm", e.get("current_pm", 3))))
+	var hit: Dictionary = {}
+	for spell: Dictionary in e.get("spells", []):
+		var p: Dictionary = Combat.parse(spell)
+		if String(p["kind"]) != "attack":
+			continue
+		var r: int = int(spell.get("range", 1))
+		var rmin: int = int(p.get("min_range", 1))
+		for from: Vector2i in reach["cost"].keys():
+			for dy: int in range(-r, r + 1):
+				for dx: int in range(-r, r + 1):
+					var d: int = absi(dx) + absi(dy)
+					if d < rmin or d > r:
+						continue
+					var c := Vector2i(from.x + dx, from.y + dy)
+					if _valid(c):
+						hit[c] = true
+	for c: Vector2i in reach["cost"].keys():
+		_cell(c).threat = 1
+	for c: Vector2i in hit.keys():
+		if _cell(c).threat == 0:
+			_cell(c).threat = 2
 
 
 func _set_hover(c: Vector2i) -> void:
@@ -385,6 +430,11 @@ func select_entity_from_timeline(cell: Vector2i) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if game_manager == null or cell_nodes.is_empty():
 		return
+	if event is InputEventMouseButton and not event.pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
+		_press_t = -1.0
+		if not _threat_of.is_empty():
+			show_threat({})
+		return
 	if event is InputEventMouseMotion:
 		_set_hover(screen_to_grid(to_local(get_global_mouse_position())))
 	elif event is InputEventMouseButton and event.pressed:
@@ -397,6 +447,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		if mb.button_index != MOUSE_BUTTON_LEFT:
 			return
 		var c: Vector2i = screen_to_grid(to_local(get_global_mouse_position()))
+		# Début d'un éventuel appui long sur un ennemi
+		_press_cell = c
+		_press_t = 0.0
 		if not _valid(c):
 			return
 		if _confirm_tap and c != hover_cell:
@@ -758,6 +811,8 @@ func _play_damage(d: Dictionary) -> void:
 	var elem: String = "poison" if dtype == "dot" else ("earth" if dtype == "fall" else _cur_element)
 	_impact(v.position + Vector2(0, -44), elem, crit)
 	Sfx.play("crit" if crit else "hit")
+	if crit:
+		Sfx.buzz(25)
 	_shake(7.0 if crit else 3.0)
 	await _wait(0.2)
 
@@ -791,6 +846,7 @@ func _play_death(d: Dictionary) -> void:
 	if v == null:
 		return
 	Sfx.play("death")
+	Sfx.buzz(45 if String(e.get("team", "")) == "enemy" else 90)
 	v.set_hp(0.0)
 	_burst(v.position + Vector2(0, -30), Color(0.85, 0.85, 0.85, 0.9), 24, 150.0, 0.7, 6.0)
 	_shake(5.0)
@@ -876,6 +932,13 @@ func _shake(amp: float) -> void:
 
 
 func _process(delta: float) -> void:
+	if _press_t >= 0.0:
+		_press_t += delta / maxf(0.01, Engine.time_scale)
+		if _press_t >= THREAT_HOLD:
+			_press_t = -1.0
+			var t: Dictionary = game_manager.entity_at(_press_cell) if _valid(_press_cell) else {}
+			if not t.is_empty() and String(t.get("team", "")) == "enemy":
+				show_threat(t)
 	if _shake_amp > 0.0:
 		var cam: Camera2D = get_viewport().get_camera_2d()
 		if cam != null:

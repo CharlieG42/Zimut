@@ -73,7 +73,7 @@ func _boot() -> void:
 			found = true
 	check(found, "la Dague en fer est dans l'inventaire")
 	check(int(pm.resources(fresh).get("Fer", -1)) == 10, "10 unités de Fer consommées")
-	check(pm.gold(fresh) == 100, "or non consommé (coût 0)")
+	check(pm.gold(fresh) == 100 + 120, "or non consommé (coût 0) ; +120 du succès « Apprenti forgeron »")
 
 	# ── Craft : pièce d'épée avec or ──
 	pm.add_resources(fresh, {"Fer": 30, "Bois": 10})

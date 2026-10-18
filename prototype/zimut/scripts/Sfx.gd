@@ -12,6 +12,8 @@ var _next: int = 0
 
 func _ready() -> void:
 	_build()
+	# Son discret sur chaque bouton du jeu (réglage « Sons »)
+	get_tree().node_added.connect(_on_node_added)
 	for i: int in range(8):
 		var pl := AudioStreamPlayer.new()
 		pl.bus = "Master"
@@ -37,8 +39,27 @@ func _build() -> void:
 	_bank["win"]    = _concat([_tone(0.14, 523.0, 523.0, 0.0, 0.4, 1.5), _tone(0.14, 659.0, 659.0, 0.0, 0.4, 1.5), _tone(0.14, 784.0, 784.0, 0.0, 0.4, 1.5), _tone(0.5, 1046.0, 1046.0, 0.0, 0.4, 2.0)])
 	_bank["lose"]   = _concat([_tone(0.22, 392.0, 392.0, 0.0, 0.4, 1.5), _tone(0.22, 330.0, 330.0, 0.0, 0.4, 1.5), _tone(0.6, 196.0, 160.0, 0.1, 0.45, 2.0)])
 	_bank["error"]  = _tone(0.12, 180.0, 140.0, 0.1, 0.4, 1.5, true)
+	# V18 : sons d'interface
+	_bank["ui"]     = _tone(0.035, 1150.0, 900.0, 0.0, 0.22, 1.2)
+	_bank["forge"]  = _concat([_tone(0.05, 1600.0, 1500.0, 0.6, 0.6, 1.0), _tone(0.30, 820.0, 760.0, 0.08, 0.45, 3.0)])
+	_bank["fuse"]   = _concat([_tone(0.09, 660.0, 990.0, 0.0, 0.35, 1.0), _tone(0.20, 990.0, 1320.0, 0.0, 0.35, 2.0)])
+	_bank["achievement"] = _concat([_tone(0.10, 784.0, 784.0, 0.0, 0.4, 1.2), _tone(0.10, 988.0, 988.0, 0.0, 0.4, 1.2), _tone(0.10, 1175.0, 1175.0, 0.0, 0.4, 1.2), _tone(0.42, 1568.0, 1568.0, 0.0, 0.38, 2.2)])
 	for k: String in _bank.keys():
 		_bank[k] = _make_stream(_bank[k])
+
+
+func _on_node_added(n: Node) -> void:
+	if n is BaseButton and not n.has_meta("no_click_sfx"):
+		(n as BaseButton).pressed.connect(func() -> void: play("ui", -4.0))
+
+
+## Vibration courte (Android/iOS), si le réglage « Vibrations » est activé.
+func buzz(ms: int = 30) -> void:
+	var gs: Node = get_node_or_null("/root/GameSettings")
+	if gs != null and not bool(gs.get("haptics_on")):
+		return
+	if OS.has_feature("mobile"):
+		Input.vibrate_handheld(ms)
 
 
 func play(sound: String, volume_db: float = 0.0) -> void:

@@ -10,7 +10,7 @@ const COL_TXT := Color(0.22, 0.15, 0.05)
 func _ready() -> void:
 	var root := Control.new()
 	add_child(root)
-	UiFit.apply(root, 1.0, Vector2(1300, 820))
+	UiFit.apply(root, 1.0, Vector2(1300, 980))
 
 	var bg := ColorRect.new()
 	bg.color = Color(0.06, 0.09, 0.14, 0.95)
@@ -22,7 +22,7 @@ func _ready() -> void:
 	root.add_child(center)
 
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(1240, 800)
+	panel.custom_minimum_size = Vector2(1240, 0)
 	panel.add_theme_stylebox_override("panel", _flat(COL_PANEL, COL_BORDER, 18, 5))
 	center.add_child(panel)
 
@@ -31,7 +31,7 @@ func _ready() -> void:
 		pad.add_theme_constant_override("margin_" + side, 34 if side in ["left", "right"] else 26)
 	panel.add_child(pad)
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 26)
+	box.add_theme_constant_override("separation", 14)
 	pad.add_child(box)
 
 	var title := Label.new()
@@ -41,8 +41,20 @@ func _ready() -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 
+	box.add_child(_setting_row("Langue", Loc.LANG_NAMES,
+		maxi(0, Loc.LANGS.find(GameSettings.language)), func(idx: int) -> void: GameSettings.set_language(Loc.LANGS[idx])))
+
 	box.add_child(_setting_row("Rapidité de progression XP", GameSettings.XP_SPEEDS,
 		GameSettings.xp_speed, func(idx: int) -> void: GameSettings.set_xp_speed(idx)))
+
+	box.add_child(_setting_row("Vitesse des tours ennemis", GameSettings.COMBAT_SPEEDS,
+		GameSettings.combat_speed, func(idx: int) -> void: GameSettings.set_combat_speed(idx)))
+
+	box.add_child(_setting_row("Sons et vibrations", ["Sons + vibr.", "Sons seuls", "Silence"] as Array[String],
+		0 if (GameSettings.sfx_on and GameSettings.haptics_on) else (1 if GameSettings.sfx_on else 2),
+		func(idx: int) -> void:
+			GameSettings.set_sfx(idx < 2)
+			GameSettings.set_haptics(idx == 0)))
 
 	box.add_child(_setting_row("Taille du texte des menus", GameSettings.TEXT_SIZES,
 		GameSettings.text_size, func(idx: int) -> void: GameSettings.set_text_size(idx)))
@@ -71,7 +83,7 @@ func _ready() -> void:
 
 	# Informations de build : le numéro final correspond au numéro de PR.
 	var info_panel := PanelContainer.new()
-	info_panel.custom_minimum_size = Vector2(0, 116)
+	info_panel.custom_minimum_size = Vector2(0, 90)
 	info_panel.add_theme_stylebox_override("panel", _flat(Color(0.86, 0.81, 0.68, 0.96), COL_BORDER, 12, 2))
 	box.add_child(info_panel)
 
@@ -125,7 +137,7 @@ func _setting_row(label_txt: String, options: Array[String], current: int, on_pi
 	for i: int in range(options.size()):
 		var opt := Button.new()
 		opt.text = options[i]
-		opt.custom_minimum_size = Vector2(option_width + 12.0, 66)
+		opt.custom_minimum_size = Vector2(option_width + 32.0, 58)
 		opt.add_theme_font_size_override("font_size", 21 if options.size() >= 4 else 22)
 		opt.focus_mode = Control.FOCUS_NONE
 		_refresh_opt(opt, i == current)

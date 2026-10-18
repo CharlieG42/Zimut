@@ -26,7 +26,7 @@ func _boot() -> void:
 	var gm: Node = root.get_node("GameManager")
 	await process_frame
 	var rows: String = FileAccess.get_file_as_string("res://data/sorts.txt")
-	check(rows.contains("Mage,Éclair,3,0,5,52 dégâts"), "Éclair nerfé (52 dégâts)")
+	check(rows.contains("Mage,Éclair,3,0,5,35 dégâts"), "Éclair nerfé puis / 1,5 (35 dégâts)")
 	gm.set_custom_team([{"classe": "Chasseur"}, {"classe": "Géomancien"}, {"classe": "Tank"}])
 	gm.init_grid()
 	gm.init_entities()
