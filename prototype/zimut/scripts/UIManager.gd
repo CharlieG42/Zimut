@@ -1543,6 +1543,9 @@ func _show_entity_details(e: Dictionary, show: bool) -> void:
 
 func _on_timeline_inspect(e: Dictionary, show: bool) -> void:
 	_show_entity_details(e, show)
+	# Appui long sur le portrait d'un ennemi : sa zone de menace sur le plateau
+	if _grid != null and _grid.has_method("show_threat"):
+		_grid.call("show_threat", e if show else {})
 
 func _on_timeline_target(e: Dictionary) -> void:
 	if _grid == null or e.is_empty() or not game_manager.can_player_act():

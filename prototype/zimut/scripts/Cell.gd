@@ -20,6 +20,8 @@ var aoe_hl: bool = false
 var ally_target: bool = false
 var path_hl: bool = false
 var path_cost: int = 0
+## Menace d'un ennemi (appui long) : 1 = il peut y aller, 2 = il peut y frapper
+var threat: int = 0
 var flash: float = 0.0
 
 var _base: Color = Color(0.43, 0.68, 0.27)
@@ -165,6 +167,12 @@ func _draw() -> void:
 	var t_ms: float = float(Time.get_ticks_msec()) / 1000.0
 	var pulse: float = 0.5 + 0.5 * sin(t_ms * 5.0 + _pulse_phase)
 
+	if threat == 2:
+		draw_colored_polygon(_diamond(0.94), Color(0.95, 0.12, 0.12, 0.30))
+		_outline(_diamond(0.94), Color(1.0, 0.35, 0.30, 0.85), 2.0)
+	elif threat == 1:
+		draw_colored_polygon(_diamond(0.94), Color(1.0, 0.62, 0.10, 0.30))
+		_outline(_diamond(0.94), Color(1.0, 0.78, 0.30, 0.85), 2.0)
 	if in_move_range:
 		draw_colored_polygon(_diamond(0.94), Color(0.25, 0.55, 1.0, 0.30))
 		_outline(_diamond(0.94), Color(0.45, 0.75, 1.0, 0.85), 2.0)
