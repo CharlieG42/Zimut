@@ -677,6 +677,12 @@ class TimelineView extends Control:
 				var col: Color = e2.get("color", Color(0.6, 0.6, 0.6))
 				draw_circle(rect.get_center(), w * 0.32, col)
 				draw_string(font, rect.position + Vector2(0, w * 0.6), String(e2["classe"]).substr(0, 3), HORIZONTAL_ALIGNMENT_CENTER, w, 20, Color.WHITE)
+			var ord_no: int = int(e2.get("ord", 0))
+			if ord_no > 0:
+				var bc := Vector2(x + 17.0, y + 17.0)
+				draw_circle(bc, 15.0, Color(0, 0, 0, 0.85))
+				draw_circle(bc, 13.0, Color(0.95, 0.75, 0.2))
+				draw_string(font, bc + Vector2(-13.0, 7.0), str(ord_no), HORIZONTAL_ALIGNMENT_CENTER, 26.0, 20, Color(0.1, 0.05, 0.0))
 			# Barre de vie
 			var ratio: float = clampf(float(e2["current_pv"]) / maxf(1.0, float(e2["max_pv"])), 0.0, 1.0)
 			var hb := Rect2(x + 4.0, y + w - 12.0, w - 8.0, 8.0)
