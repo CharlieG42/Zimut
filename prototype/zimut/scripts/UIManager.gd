@@ -1572,58 +1572,97 @@ func _show_game_over(victory: bool) -> void:
 	_over.modulate.a = 0.0
 	create_tween().tween_property(_over, "modulate:a", 1.0, 0.5)
 
-## Fenêtre de résultat (XP, niveaux gagnés, nouveaux sorts, loots avec rareté),
-## affichée avant l'écran de fin de combat.
+## Fenêtre de résultat (V18) : titre, héros du combat (dégâts, soins, K.O., barre d'XP
+## animée, meilleur héros), butin en cartes, ressources, défis/succès, puis CONTINUER.
+const UK = preload("res://scripts/UiKit.gd")
+
 func _show_result_window(victory: bool) -> void:
 	var save: Dictionary = game_manager.active_save
 	var res: Dictionary = save.get("last_result", {})
 	var loots: Array = save.get("last_loots", []) if victory else []
-	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", _flat(Color(0.94, 0.89, 0.78, 0.97), Color(0.72, 0.58, 0.28), 16, 4))
 	var dim: ColorRect = ColorRect.new()
-	dim.color = Color(0, 0, 0, 0.45)
+	dim.color = Color(0, 0, 0, 0.62)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	_root.add_child(dim)
-	_root.add_child(panel)
-	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
-	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE, 0)
+	var holder := Control.new()
+	_root.add_child(holder)
+	UiFit.apply(holder, 1.0, Vector2(1300, 760))
+	var margin := MarginContainer.new()
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	for side in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 40 if side in ["left", "right"] else 26)
+	holder.add_child(margin)
+	var panel := PanelContainer.new()
+	var gold_c: Color = Color(1.0, 0.80, 0.35) if victory else Color(0.85, 0.40, 0.35)
+	panel.add_theme_stylebox_override("panel", UK.box(Color(0.07, 0.08, 0.13, 0.98), gold_c, 18, 3, 18))
+	margin.add_child(panel)
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 10)
+	box.add_theme_constant_override("separation", 12)
 	panel.add_child(box)
 
-	var title := Label.new()
 	var fight_no: int = ProgressionManager.next_fight_number(save)
 	var next_biome: String = ProgressionManager.biome_for_fight(fight_no)
 	var campaign_mode: String = String(save.get("campaign_mode", ""))
+	var head_txt: String
+	var sub_txt: String = ""
 	if campaign_mode == "adventure":
-		title.text = "DÉFI RÉUSSI — progression partagée !" if victory else "DÉFI ÉCHOUÉ — vous pourrez réessayer"
+		head_txt = "DÉFI RÉUSSI !" if victory else "DÉFI ÉCHOUÉ"
+		sub_txt = "Progression partagée avec tous les modes." if victory else "Vous pourrez réessayer."
 	elif campaign_mode == "conquest":
 		if victory and save.get("conquest", {}).get("owned", []).has("donjon_roi"):
-			title.text = "★  EMPIRE VICTORIEUX !  Le Roi Squelette est tombé : Zimut vous appartient !"
+			head_txt = "★ EMPIRE VICTORIEUX !"
+			sub_txt = "Le Roi Squelette est tombé : Zimut vous appartient !"
 		else:
-			title.text = "VILLE CONQUISE !" if victory else "ASSAUT REPOUSSÉ — la ville reste à l'ennemi"
+			head_txt = "VILLE CONQUISE !" if victory else "ASSAUT REPOUSSÉ"
+			sub_txt = "" if victory else "La ville reste à l'ennemi."
 	elif not victory:
-		title.text = "DÉFAITE — un peu d'XP de consolation"
+		head_txt = "DÉFAITE"
+		sub_txt = "Un peu d'XP de consolation."
 	elif ProgressionManager.is_boss_fight(save):
-		title.text = "VICTOIRE !  %s : ☠ BOSS %s et ses sbires au combat %d !" % [ProgressionManager.biome_label(next_biome), ProgressionManager.biome_boss(next_biome), fight_no]
+		head_txt = "VICTOIRE !"
+		sub_txt = "Prochain combat (%d) : ☠ BOSS %s — %s" % [fight_no, ProgressionManager.biome_boss(next_biome), ProgressionManager.biome_label(next_biome)]
 	else:
-		title.text = ("VICTOIRE (combat rejoué) !  " if bool(res.get("replay", false)) else "VICTOIRE !  ") + "%s : ennemis niveau %d au prochain combat (%d)" % [ProgressionManager.biome_label(next_biome), ProgressionManager.enemy_level_for(save), fight_no]
-	title.add_theme_font_size_override("font_size", 28)
-	title.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05) if victory else Color(0.55, 0.12, 0.08))
-	box.add_child(title)
+		head_txt = "VICTOIRE (combat rejoué) !" if bool(res.get("replay", false)) else "VICTOIRE !"
+		sub_txt = "Prochain combat (%d) : %s, ennemis niveau %d" % [fight_no, ProgressionManager.biome_label(next_biome), ProgressionManager.enemy_level_for(save)]
+	var hrow := HBoxContainer.new()
+	hrow.add_theme_constant_override("separation", 18)
+	box.add_child(hrow)
+	var ht := UK.lbl(head_txt, 46, gold_c, true)
+	hrow.add_child(ht)
+	var hs := UK.lbl(sub_txt + ("   ·   %d tours" % int(game_manager.turn_count)), 20, UK.C_DIM)
+	hs.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	hs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hs.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hrow.add_child(hs)
 
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(1100, 520)
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	TouchScroll.install(scroll)
 	box.add_child(scroll)
 	var content := VBoxContainer.new()
-	content.add_theme_constant_override("separation", 6)
+	content.add_theme_constant_override("separation", 12)
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(content)
 
-	# ── XP par personnage ───────────────────────────────────────────────
+	# ── Héros du combat ─────────────────────────────────────────────────
 	var xp_rep: Dictionary = res.get("xp", {})
+	var stats_by_class: Dictionary = {}
+	var mvp: String = ""
+	var mvp_score: float = -1.0
+	for st: Dictionary in game_manager.combat_stats.values():
+		if String(st.get("team", "")) != "player":
+			continue
+		stats_by_class[String(st["classe"])] = st
+		var score: float = float(st["dmg"]) + float(st["heal"]) * 0.8 + float(st["kills"]) * 40.0
+		if score > mvp_score:
+			mvp_score = score
+			mvp = String(st["classe"])
+	content.add_child(UK.lbl("HÉROS DU COMBAT", 18, UK.C_DIM))
+	var heroes := HBoxContainer.new()
+	heroes.add_theme_constant_override("separation", 12)
+	content.add_child(heroes)
 	var bench: Array[String] = []
 	var total_pts: int = 0
 	for classe: String in ProgressionManager.class_names():
@@ -1633,123 +1672,70 @@ func _show_result_window(victory: bool) -> void:
 		if not bool(r.get("in_team", false)):
 			bench.append("%s +%d" % [classe, int(r["gain"])])
 			continue
-		var line := Label.new()
-		var up: bool = int(r["to_level"]) > int(r["from_level"])
-		line.text = "  %s   +%d XP   niveau %d%s" % [classe, int(r["gain"]),
-			int(r["to_level"]), "  ▲ (était %d)" % int(r["from_level"]) if up else ""]
-		line.add_theme_font_size_override("font_size", 24 if up else 21)
-		line.add_theme_color_override("font_color", Color(0.10, 0.45, 0.12) if up else Color(0.30, 0.22, 0.08))
-		content.add_child(line)
-		var bar := ProgressBar.new()
-		bar.custom_minimum_size = Vector2(1000, 14)
-		bar.min_value = 0.0
-		bar.max_value = float(maxi(1, int(r["xp_next"]) - int(r["xp_cur"])))
-		bar.value = clampf(float(int(r["xp"]) - int(r["xp_cur"])), 0.0, bar.max_value)
-		bar.show_percentage = false
-		content.add_child(bar)
-		if int(r["points"]) > 0:
-			total_pts += int(r["points"])
-			var pl := Label.new()
-			pl.text = "      ✦ +%d points de caractéristiques" % int(r["points"])
-			pl.add_theme_font_size_override("font_size", 18)
-			pl.add_theme_color_override("font_color", Color(0.15, 0.40, 0.55))
-			content.add_child(pl)
-		var spells: Array = r.get("spells", [])
-		if not spells.is_empty():
-			var sl := Label.new()
-			sl.text = "      ★ Nouveau(x) sort(s) : %s" % ", ".join(PackedStringArray(spells))
-			sl.add_theme_font_size_override("font_size", 18)
-			sl.add_theme_color_override("font_color", Color(0.55, 0.30, 0.60))
-			content.add_child(sl)
+		total_pts += int(r.get("points", 0))
+		heroes.add_child(_result_hero_card(classe, r, stats_by_class.get(classe, {}), classe == mvp and victory))
 	if not bench.is_empty():
-		var bl := Label.new()
-		bl.text = "  Hors équipe : %s" % " · ".join(PackedStringArray(bench))
-		bl.add_theme_font_size_override("font_size", 16)
-		bl.add_theme_color_override("font_color", Color(0.45, 0.36, 0.2))
-		content.add_child(bl)
+		content.add_child(UK.lbl("Hors équipe (XP partagée) : %s" % " · ".join(PackedStringArray(bench)), 16, UK.C_DIM))
 	if total_pts > 0:
-		var hint := Label.new()
-		hint.text = "  (Les points sont répartis automatiquement ; changez cela dans « Personnages ».)"
-		hint.add_theme_font_size_override("font_size", 15)
-		hint.add_theme_color_override("font_color", Color(0.45, 0.36, 0.2))
-		content.add_child(hint)
+		content.add_child(UK.lbl("✦ Nouveaux points de caractéristiques — répartis automatiquement, modifiables dans « Personnages ».", 16, Color(0.55, 0.80, 1.0)))
 
-	# ── Loots ───────────────────────────────────────────────────────────
+	# ── Butin ───────────────────────────────────────────────────────────
 	if victory:
-		var lbl := Label.new()
-		lbl.text = "Objets gagnés (%d) :" % loots.size() if not loots.is_empty() else "Aucun loot cette fois..."
-		lbl.add_theme_font_size_override("font_size", 22)
-		lbl.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
-		content.add_child(lbl)
-		for it: Dictionary in loots:
-			var row := Label.new()
-			var fx_txt: String = " · ".join(PackedStringArray(ItemRules.fx_lines(ItemRules.parse_effect(String(it.get("effect", ""))))))
-			row.text = "  ✦ [%s] %s (nv%d) — %s%s" % [ItemRules.rarity_label(it), it.get("name", "?"), int(it.get("level", 0)),
-				ItemRules.stat_line(it), ("  ✦ " + fx_txt) if fx_txt != "" else ""]
-			row.tooltip_text = ItemRules.describe(it)
-			row.mouse_filter = Control.MOUSE_FILTER_PASS
-			row.add_theme_font_size_override("font_size", 19)
-			row.add_theme_color_override("font_color", ItemRules.rarity_color(it).darkened(0.35))
-			content.add_child(row)
-		# Ressources de craft et or gagnés
+		content.add_child(UK.lbl("BUTIN (%d)" % loots.size() if not loots.is_empty() else "BUTIN — rien cette fois", 18, UK.C_DIM))
+		if not loots.is_empty():
+			var flow := HFlowContainer.new()
+			flow.add_theme_constant_override("h_separation", 10)
+			flow.add_theme_constant_override("v_separation", 10)
+			content.add_child(flow)
+			var k: int = 0
+			for it: Dictionary in loots:
+				var card: Control = _loot_card(it)
+				flow.add_child(card)
+				card.modulate.a = 0.0
+				var tw: Tween = card.create_tween()
+				tw.tween_interval(0.25 + 0.12 * k)
+				tw.tween_property(card, "modulate:a", 1.0, 0.25)
+				k += 1
 		var drops: Dictionary = save.get("last_resources", {})
-		if not drops.is_empty():
-			var res_parts: PackedStringArray = []
-			for k: String in drops.keys():
-				res_parts.append("%s +%d" % [k, int(drops[k])])
-			var res_row := Label.new()
-			res_row.text = "  ⛏ Ressources : %s   ·   🪙 Or : %d" % [" · ".join(res_parts), ProgressionManager.gold(save)]
-			res_row.add_theme_font_size_override("font_size", 19)
-			res_row.add_theme_color_override("font_color", Color(0.35, 0.30, 0.15))
-			res_row.tooltip_text = "À utiliser dans la FORGE (bouton ÉQUIPEMENT de la sélection d'équipe)."
-			content.add_child(res_row)
-	# Conquête : production de l'empire versée à cette victoire
+		var chips := HFlowContainer.new()
+		chips.add_theme_constant_override("h_separation", 10)
+		chips.add_theme_constant_override("v_separation", 8)
+		content.add_child(chips)
+		for kk: String in drops.keys():
+			chips.add_child(UK.chip("%s +%d" % [kk, int(drops[kk])], UK.RES_COLOR.get(kk.split("@")[0], UK.C_TXT), 19))
+		chips.add_child(UK.chip("🪙 %d or" % ProgressionManager.gold(save), UK.C_GOLD, 19))
+	# Conquête : production de l'empire et défi facultatif
 	if victory and String(save.get("campaign_mode", "")) == "conquest":
 		var cqst: Dictionary = save.get("conquest", {})
 		var empire: Dictionary = cqst.get("last_yield", {})
 		if not empire.is_empty():
 			var emp_parts: PackedStringArray = []
-			for k: String in empire.keys():
-				emp_parts.append("%s +%d" % [k, int(empire[k])])
-			var emp_row := Label.new()
-			emp_row.text = "  ⚑ Empire : %s" % " · ".join(emp_parts)
-			emp_row.add_theme_font_size_override("font_size", 19)
-			emp_row.add_theme_color_override("font_color", Color(0.10, 0.45, 0.12))
-			emp_row.tooltip_text = "Production des bâtiments de vos villes annexées."
-			content.add_child(emp_row)
-		# Défi facultatif de la bataille (voir ProgressionManager.conquest_challenge_for)
+			for kk: String in empire.keys():
+				emp_parts.append("%s +%d" % [kk, int(empire[kk])])
+			content.add_child(UK.lbl("⚑ Empire : %s" % " · ".join(emp_parts), 18, UK.C_GOOD))
 		var chal: Dictionary = cqst.get("last_challenge", {})
 		if not chal.is_empty():
-			var ch_row := Label.new()
 			if bool(chal.get("success", false)):
 				var bonus: PackedStringArray = ["+%d or" % int(chal.get("gold", 0))]
 				var cres: Dictionary = chal.get("resources", {})
-				for k: String in cres.keys():
-					bonus.append("+%d %s" % [int(cres[k]), k])
-				ch_row.text = "  ◆ Défi réussi — %s : %s" % [String(chal.get("label", "")), " · ".join(bonus)]
-				ch_row.add_theme_color_override("font_color", Color(0.38, 0.20, 0.62))
+				for kk: String in cres.keys():
+					bonus.append("+%d %s" % [int(cres[kk]), kk])
+				content.add_child(UK.lbl("◆ Défi réussi — %s : %s" % [String(chal.get("label", "")), " · ".join(bonus)], 18, Color(0.78, 0.62, 1.0)))
 			else:
-				ch_row.text = "  ◇ Défi manqué — %s" % String(chal.get("label", ""))
-				ch_row.add_theme_color_override("font_color", Color(0.45, 0.42, 0.40))
-			ch_row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			ch_row.add_theme_font_size_override("font_size", 18)
-			content.add_child(ch_row)
+				content.add_child(UK.lbl("◇ Défi manqué — %s" % String(chal.get("label", "")), 18, UK.C_DIM))
+	_result_extras(content, save, victory)
 
-	var cont := Button.new()
 	var back_mode: String = String(save.get("campaign_mode", ""))
+	var cont_txt: String = "CONTINUER"
 	if back_mode == "adventure":
-		cont.text = "RETOUR À L'AVENTURE"
+		cont_txt = "RETOUR À L'AVENTURE"
 	elif back_mode == "conquest":
-		cont.text = "RETOUR À LA CARTE DE CONQUÊTE"
-	else:
-		cont.text = "CONTINUER"
-	cont.custom_minimum_size = Vector2(380, 66)
-	cont.add_theme_font_size_override("font_size", 22)
-	cont.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
-	cont.add_theme_stylebox_override("normal", _flat(Color(0.98, 0.86, 0.45), Color(0.72, 0.58, 0.28), 12, 3))
+		cont_txt = "RETOUR À LA CARTE DE CONQUÊTE"
+	var cont := UK.btn(cont_txt, gold_c, 24, Vector2(420, 66))
+	cont.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	cont.pressed.connect(func() -> void:
 		dim.queue_free()
-		panel.queue_free()
+		holder.queue_free()
 		if back_mode == "adventure":
 			get_tree().change_scene_to_file("res://scenes/AdventureMap.tscn")
 		elif back_mode == "conquest":
@@ -1757,6 +1743,95 @@ func _show_result_window(victory: bool) -> void:
 		else:
 			_show_game_over(victory))
 	box.add_child(cont)
+	holder.modulate.a = 0.0
+	create_tween().tween_property(holder, "modulate:a", 1.0, 0.3)
+
+
+## Sections ajoutées par les systèmes de V18 (objectif de combat, succès débloqués).
+func _result_extras(content: VBoxContainer, save: Dictionary, victory: bool) -> void:
+	var res: Dictionary = save.get("last_result", {})
+	var obj: Dictionary = res.get("objective", {})
+	if not obj.is_empty():
+		var ok: bool = bool(obj.get("success", false))
+		var txt: String = ("◆ Objectif réussi — %s : %s" % [String(obj.get("label", "")), String(obj.get("reward_text", ""))]) if ok \
+			else ("◇ Objectif manqué — %s" % String(obj.get("label", "")))
+		content.add_child(UK.lbl(txt, 19, Color(1.0, 0.80, 0.40) if ok else UK.C_DIM))
+	for a: Dictionary in save.get("last_achievements", []):
+		var row := PanelContainer.new()
+		row.add_theme_stylebox_override("panel", UK.box(Color(0.20, 0.15, 0.05, 0.95), Color(1.0, 0.82, 0.35), 12, 2, 10))
+		row.add_child(UK.lbl("🏆 Succès débloqué : %s — %s" % [String(a.get("name", "")), String(a.get("reward_text", ""))], 19, Color(1.0, 0.88, 0.5)))
+		content.add_child(row)
+
+
+## Carte d'un héros : portrait, niveau, barre d'XP animée, dégâts / soins / K.O.
+func _result_hero_card(classe: String, r: Dictionary, st: Dictionary, is_mvp: bool) -> Control:
+	var card := PanelContainer.new()
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.add_theme_stylebox_override("panel", UK.box(Color(0.11, 0.13, 0.20), Color(1.0, 0.82, 0.35) if is_mvp else UK.C_BORDER, 14, 3 if is_mvp else 2, 12))
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 6)
+	card.add_child(v)
+	var top := HBoxContainer.new()
+	top.add_theme_constant_override("separation", 10)
+	v.add_child(top)
+	var pic := TextureRect.new()
+	var tex_path := "res://assets/sprites/players/%s.png" % EntityView.sprite_key(classe)
+	pic.texture = load(tex_path) as Texture2D if ResourceLoader.exists(tex_path) else null
+	pic.custom_minimum_size = Vector2(76, 76)
+	pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	top.add_child(pic)
+	var tv := VBoxContainer.new()
+	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(tv)
+	var up: bool = int(r["to_level"]) > int(r["from_level"])
+	tv.add_child(UK.lbl(("★ " if is_mvp else "") + classe, 24, Color(1.0, 0.88, 0.5) if is_mvp else UK.C_TXT, true))
+	tv.add_child(UK.lbl("Niveau %d%s   +%d XP" % [int(r["to_level"]), "  ▲" if up else "", int(r["gain"])], 18, UK.C_GOOD if up else UK.C_DIM))
+	if is_mvp:
+		tv.add_child(UK.lbl("Meilleur héros du combat", 15, Color(1.0, 0.80, 0.35)))
+	var bar := ProgressBar.new()
+	bar.custom_minimum_size = Vector2(0, 14)
+	bar.show_percentage = false
+	bar.max_value = float(maxi(1, int(r["xp_next"]) - int(r["xp_cur"])))
+	var target: float = clampf(float(int(r["xp"]) - int(r["xp_cur"])), 0.0, bar.max_value)
+	bar.value = 0.0 if up else maxf(0.0, target - float(r["gain"]))
+	UK.style_bar(bar, Color(0.45, 0.70, 1.0))
+	v.add_child(bar)
+	bar.create_tween().tween_property(bar, "value", target, 1.1).set_delay(0.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	if not st.is_empty():
+		v.add_child(UK.lbl("Dégâts %d  ·  Soins %d  ·  K.O. %d" % [int(st["dmg"]), int(st["heal"]), int(st["kills"])], 18, UK.C_TXT))
+	var spells: Array = r.get("spells", [])
+	if not spells.is_empty():
+		var sl := UK.lbl("★ Nouveau sort : %s" % ", ".join(PackedStringArray(spells)), 16, Color(0.80, 0.62, 1.0))
+		sl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(sl)
+	return card
+
+
+## Carte d'objet gagné : tuile de la Forge, nom coloré par rareté, stats.
+func _loot_card(it: Dictionary) -> Control:
+	var card := PanelContainer.new()
+	card.custom_minimum_size = Vector2(250, 0)
+	var rc: Color = ItemRules.rarity_color(it)
+	card.add_theme_stylebox_override("panel", UK.box(Color(0.10, 0.11, 0.17), rc, 12, 3, 10))
+	card.tooltip_text = ItemRules.describe(it)
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 10)
+	card.add_child(h)
+	var sl: String = ProgressionManager.slot_for_type(String(it.get("type", "")))
+	var tp: String = "res://assets/ui/forge/cat_%s.png" % (sl if sl != "" else "bague")
+	var icon := TextureRect.new()
+	icon.texture = load(tp) as Texture2D if ResourceLoader.exists(tp) else null
+	icon.custom_minimum_size = Vector2(56, 56)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	h.add_child(icon)
+	var v := VBoxContainer.new()
+	h.add_child(v)
+	v.add_child(UK.lbl(ItemRules.display_name(it), 19, rc.lightened(0.25), true))
+	v.add_child(UK.lbl("%s · niv %d" % [ItemRules.rarity_label(it), int(it.get("level", 0))], 15, UK.C_DIM))
+	v.add_child(UK.lbl(ItemRules.stat_line(it), 15, UK.C_TXT))
+	return card
 
 
 func hide_game_over_panel() -> void:

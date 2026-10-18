@@ -688,8 +688,35 @@ func hp_ratio(e: Dictionary) -> float:
 #  Déroulement du combat (initiative)
 # ═══════════════════════════════════════════════════════════════════════════
 
+## Statistiques du combat en cours (écran de victoire) : uid -> {name, classe, dmg, heal, kills, taken}
+var combat_stats: Dictionary = {}
+
+
+## Héros (ou entité) à qui attribuer une action : une invocation compte pour son invocateur.
+func _stat_owner(e: Dictionary) -> Dictionary:
+	if e.is_empty():
+		return {}
+	if String(e.get("entity_type", "")) == "Summon" and int(e.get("owner", -1)) >= 0:
+		for p: Dictionary in players:
+			if int(p["uid"]) == int(e["owner"]):
+				return p
+	return e
+
+
+func _stat(e: Dictionary) -> Dictionary:
+	var o: Dictionary = _stat_owner(e)
+	if o.is_empty():
+		return {}
+	var uid: int = int(o.get("uid", -1))
+	if not combat_stats.has(uid):
+		combat_stats[uid] = {"name": String(o.get("name", "?")), "classe": String(o.get("classe", "")),
+			"team": String(o.get("team", "")), "dmg": 0, "heal": 0, "kills": 0, "taken": 0}
+	return combat_stats[uid]
+
+
 func start_battle() -> void:
 	_epoch += 1
+	combat_stats = {}
 	turn_count = 1
 	_last_banner_round = 0
 	_turn_index = -1
@@ -1245,7 +1272,18 @@ func _apply_damage(attacker: Dictionary, tgt: Dictionary, dmg: int, dtype: Strin
 		if _rng.randf() * 100.0 < dodge_chance:
 			fx.emit("status", {"target": tgt, "text": "Esquive !", "color": Color(0.7, 0.95, 0.5)})
 			return 0
-	tgt["current_pv"] = int(tgt["current_pv"]) - dmg
+	var pv_before: int = int(tgt["current_pv"])
+	tgt["current_pv"] = pv_before - dmg
+	var real_dmg: int = mini(dmg, maxi(0, pv_before))
+	if not attacker.is_empty():
+		var sa: Dictionary = _stat(attacker)
+		if not sa.is_empty():
+			sa["dmg"] = int(sa["dmg"]) + real_dmg
+			if pv_before > 0 and int(tgt["current_pv"]) <= 0:
+				sa["kills"] = int(sa["kills"]) + 1
+	var st_t: Dictionary = _stat(tgt)
+	if not st_t.is_empty():
+		st_t["taken"] = int(st_t["taken"]) + real_dmg
 	fx.emit("damage", {
 		"target": tgt, "attacker": attacker, "amount": dmg, "dtype": dtype, "crit": crit, "back": back,
 		"pv_after": maxi(0, int(tgt["current_pv"])),
@@ -1317,6 +1355,9 @@ func _do_heal(_caster: Dictionary, tgt: Dictionary, amount: int) -> int:
 	var real: int = mini(amount, int(tgt["max_pv"]) - int(tgt["current_pv"]))
 	if real <= 0:
 		return 0
+	var sh: Dictionary = _stat(_caster)
+	if not sh.is_empty():
+		sh["heal"] = int(sh["heal"]) + real
 	tgt["current_pv"] = int(tgt["current_pv"]) + real
 	fx.emit("heal", {"target": tgt, "amount": real, "pv_after": int(tgt["current_pv"])})
 	return real
