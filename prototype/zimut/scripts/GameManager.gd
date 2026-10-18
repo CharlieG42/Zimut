@@ -58,7 +58,9 @@ const COLORS: Dictionary = {
 ## Le capital de caractéristiques et l'équipement rendent l'équipe plus forte que la
 ## table de base : les ennemis gagnent ENEMY_LEVEL_SCALE par niveau au-dessus de 10.
 const ENEMY_HP_MULT := 3.0
-const ENEMY_ATK_MULT := 2.0
+## V16 : 2.0 -> 1.7 pour compenser les sorts des héros / 1,5 (combats plus longs, même difficulté
+## en simulation : tests/sim_balance.gd)
+const ENEMY_ATK_MULT := 1.7
 const ENEMY_LEVEL_SCALE := 0.0   ## le facteur de niveau est cuit dans ennemis.txt (V15)
 const BOSS_HP_MULT := 1.2
 const BOSS_ATK_MULT := 0.85

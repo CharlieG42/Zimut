@@ -33,10 +33,15 @@ ICONS = {
  "armure": "<path d='M30 14 L12 28 L22 48 L32 42 L32 88 L68 88 L68 42 L78 48 L88 28 L70 14 Q50 30 30 14Z' fill='url(#leather)' %s/><path d='M30 14 Q50 30 70 14 L64 22 Q50 34 36 22Z' fill='#1c1410' opacity='.35'/><path d='M50 36 V86' stroke='#1c1410' stroke-width='3' opacity='.5'/><circle cx='50' cy='52' r='5' fill='url(#gold)' %s/>" % (ST,ST),
  "bottes": "<path d='M30 10 H58 V54 Q82 56 90 70 V86 H24 Q20 86 20 80 L24 52 Z' fill='url(#leather)' %s/><path d='M24 74 H90' stroke='#1c1410' stroke-width='5'/><rect x='30' y='10' width='28' height='10' fill='url(#gold)' %s/>" % (ST,ST),
  "bague": "<circle cx='50' cy='62' r='26' fill='none' stroke='url(#gold)' stroke-width='12'/><circle cx='50' cy='62' r='26' fill='none' stroke='#1c1410' stroke-width='2' opacity='.5'/><path d='M38 30 L50 12 L62 30 L50 42 Z' fill='#7fe3ff' %s/><path d='M38 30 L62 30' stroke='#fff' stroke-width='2' opacity='.7'/>" % ST,
+ "collier": "<path d='M18 18 Q50 70 82 18' fill='none' stroke='url(#gold)' stroke-width='7' stroke-linecap='round'/><path d='M18 18 Q50 70 82 18' fill='none' stroke='#1c1410' stroke-width='2' opacity='.5'/><path d='M50 52 L64 68 L50 90 L36 68 Z' fill='#ff6b8a' %s/><path d='M50 52 L64 68 L50 68Z' fill='#fff' opacity='.45'/>" % ST,
+ "gants": "<path d='M28 92 V52 L20 34 Q18 26 26 26 L34 42 V16 Q34 10 40 10 Q46 10 46 16 V40 V12 Q46 6 52 6 Q58 6 58 12 V40 V16 Q58 10 64 10 Q70 10 70 16 V44 V26 Q70 20 76 20 Q82 20 82 26 V60 Q82 76 72 82 V92 Z' fill='url(#leather)' %s/><rect x='26' y='80' width='48' height='12' rx='3' fill='url(#gold)' %s/>" % (ST,ST),
+ "boucle_oreille": "<circle cx='50' cy='22' r='10' fill='none' stroke='url(#gold)' stroke-width='6'/><path d='M50 32 V44' stroke='url(#gold)' stroke-width='5'/><path d='M50 44 L68 66 L50 92 L32 66 Z' fill='#5fd3ff' %s/><path d='M50 44 L68 66 L50 66Z' fill='#fff' opacity='.5'/>" % ST,
+ "cape": "<path d='M30 10 H70 L74 22 Q88 60 90 90 Q70 82 50 90 Q30 82 10 90 Q12 60 26 22 Z' fill='#b8333a' %s/><path d='M50 22 Q46 60 50 90' stroke='#000' stroke-width='3' opacity='.25' fill='none'/><rect x='28' y='8' width='44' height='12' rx='5' fill='url(#gold)' %s/>" % (ST,ST),
  "all": "<path d='M50 8 L58 38 L90 40 L64 58 L74 90 L50 70 L26 90 L36 58 L10 40 L42 38 Z' fill='url(#gold)' %s/>" % ST,
 }
 TILE = {"arme": "#7a2e2a", "bouclier": "#2c4a7a", "casque": "#55606f", "armure": "#6a4a2a", "bottes": "#5a3d28",
-        "bague": "#4a3a7a", "all": "#6a5424"}
+        "bague": "#4a3a7a", "all": "#6a5424", "collier": "#6a2a4a", "gants": "#5a3d28",
+        "boucle_oreille": "#2a5a6a", "cape": "#6a2626"}
 
 def tile(key, size=128):
     base = Image.new("RGBA", (size, size), (0, 0, 0, 0))

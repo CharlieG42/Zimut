@@ -125,6 +125,11 @@ jobs:
           print("project.godot et export_presets.cfg mis à jour :", version)
           PY
 
+      - name: Vérifier que toutes les images sont dans le dépôt
+        run: |
+          cd prototype/zimut
+          python3 tools/check_assets.py
+
       - name: Import project resources (icons, artwork)
         run: |
           cd prototype/zimut

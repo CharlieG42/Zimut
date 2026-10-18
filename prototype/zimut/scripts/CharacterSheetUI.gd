@@ -202,8 +202,8 @@ func _build() -> void:
 	if _root != null and is_instance_valid(_root):
 		_root.queue_free()
 	_root = Control.new()
-	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
+	UiFit.apply(_root, 1.2)   # lisible sur smartphone
 	var bg := ColorRect.new()
 	bg.color = C_BG
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)

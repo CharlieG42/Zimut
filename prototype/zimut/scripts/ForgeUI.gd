@@ -17,6 +17,10 @@ const CATEGORIES: Array = [
 ]
 
 const ART := "res://assets/ui/forge/"
+## Agrandissement global de la Forge : l'écran de référence fait 1920x1080 et il est
+## réduit sur smartphone ; on construit l'interface sur une surface plus petite
+## (≈1370x770) puis on l'agrandit, ce qui grossit textes, icônes et zones tactiles.
+const UI_SCALE := 1.4
 
 var _root: Control
 var _save: Dictionary = {}
@@ -25,7 +29,9 @@ var _filter: String = "all"
 var _only_craftable: bool = false
 var _mode: String = "craft"      # craft | upgrade | fusion | salvage
 var _tier: int = 1                # rang de fabrication (1..10)
-var _up_key: String = ""          # objet sélectionné en mode amélioration
+var _up_key: String = ""
+var _fuse_max: bool = false        # Fusion : ×1 ou « tout fusionner »
+var _salv_sel: Dictionary = {}     # objet sélectionné au Briseur          # objet sélectionné en mode amélioration
 var _tabs_row: HBoxContainer
 var _selected: String = ""
 var _member: int = 0
@@ -34,9 +40,10 @@ var _message_ok: bool = true
 var _title_lbl: Label
 var _sub_lbl: Label
 var _res_row: HBoxContainer
-var _filters_box: VBoxContainer
+var _filters_box: VBoxContainer   # barre de filtres (au-dessus de la liste)
 var _list_box: VBoxContainer
 var _detail_box: VBoxContainer
+var _actions: VBoxContainer       # boutons d'action, toujours visibles en bas du panneau
 
 
 func open(save_data: Dictionary, slot: int, member_index: int = 0) -> void:
@@ -116,8 +123,10 @@ func _build() -> void:
 	if _root != null and is_instance_valid(_root):
 		_root.queue_free()
 	_root = Control.new()
-	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
+	_fit_root()
+	if not get_viewport().size_changed.is_connected(_fit_root):
+		get_viewport().size_changed.connect(_fit_root)
 	var bg := TextureRect.new()
 	bg.texture = _tex(ART + "bg.jpg")
 	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -132,12 +141,12 @@ func _build() -> void:
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right"]:
-		margin.add_theme_constant_override("margin_" + side, 36)
-	margin.add_theme_constant_override("margin_top", 22)
-	margin.add_theme_constant_override("margin_bottom", 26)
+		margin.add_theme_constant_override("margin_" + side, 18)
+	margin.add_theme_constant_override("margin_top", 10)
+	margin.add_theme_constant_override("margin_bottom", 12)
 	_root.add_child(margin)
 	var page := VBoxContainer.new()
-	page.add_theme_constant_override("separation", 14)
+	page.add_theme_constant_override("separation", 8)
 	margin.add_child(page)
 
 	var top := HBoxContainer.new()
@@ -145,7 +154,7 @@ func _build() -> void:
 	page.add_child(top)
 	var emblem := TextureRect.new()
 	emblem.texture = _tex(ART + "emblem.png")
-	emblem.custom_minimum_size = Vector2(84, 84)
+	emblem.custom_minimum_size = Vector2(60, 60)
 	emblem.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	emblem.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	top.add_child(emblem)
@@ -153,18 +162,18 @@ func _build() -> void:
 	titles.alignment = BoxContainer.ALIGNMENT_CENTER
 	titles.add_theme_constant_override("separation", 0)
 	top.add_child(titles)
-	_title_lbl = U.lbl("FORGE", 44, Color(1.0, 0.76, 0.38), true)
+	_title_lbl = U.lbl("FORGE", 34, Color(1.0, 0.76, 0.38), true)
 	titles.add_child(_title_lbl)
-	_sub_lbl = U.lbl("Fabriquer de l'équipement", 18, Color(0.85, 0.72, 0.55))
+	_sub_lbl = U.lbl("Fabriquer de l'équipement", 17, Color(0.85, 0.72, 0.55))
 	titles.add_child(_sub_lbl)
 	top.add_child(U.spacer())
-	var close := U.btn("✕  FERMER", Color(0.95, 0.75, 0.30), 24, Vector2(200, 56))
+	var close := U.btn("✕  FERMER", Color(0.95, 0.75, 0.30), 22, Vector2(160, 52))
 	close.pressed.connect(func() -> void: closed.emit())
 	top.add_child(close)
 
 	# Stock de ressources : toujours visible
 	var stock := PanelContainer.new()
-	stock.add_theme_stylebox_override("panel", U.box(Color(0.12, 0.09, 0.08, 0.90), Color(0.78, 0.55, 0.28), 14, 3, 10))
+	stock.add_theme_stylebox_override("panel", U.box(Color(0.12, 0.09, 0.08, 0.90), Color(0.78, 0.55, 0.28), 14, 3, 6))
 	page.add_child(stock)
 	_res_row = HBoxContainer.new()
 	_res_row.add_theme_constant_override("separation", 14)
@@ -179,39 +188,56 @@ func _build() -> void:
 	body.add_theme_constant_override("separation", 18)
 	page.add_child(body)
 
-	var left := PanelContainer.new()
-	left.custom_minimum_size = Vector2(270, 0)
-	left.add_theme_stylebox_override("panel", U.box(Color(0.09, 0.07, 0.07, 0.88), Color(0.62, 0.43, 0.24), 18, 3, 12))
-	body.add_child(left)
-	_filters_box = VBoxContainer.new()
-	_filters_box.add_theme_constant_override("separation", 8)
-	left.add_child(_filters_box)
-
 	var mid := PanelContainer.new()
 	mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	mid.add_theme_stylebox_override("panel", U.box(Color(0.09, 0.07, 0.07, 0.88), Color(0.62, 0.43, 0.24), 18, 3, 12))
+	mid.add_theme_stylebox_override("panel", U.box(Color(0.09, 0.07, 0.07, 0.88), Color(0.62, 0.43, 0.24), 18, 3, 10))
 	body.add_child(mid)
+	var midv := VBoxContainer.new()
+	midv.add_theme_constant_override("separation", 8)
+	mid.add_child(midv)
+	_filters_box = VBoxContainer.new()
+	_filters_box.add_theme_constant_override("separation", 6)
+	midv.add_child(_filters_box)
 	var mscroll := ScrollContainer.new()
 	TouchScroll.install(mscroll)
 	mscroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	mid.add_child(mscroll)
+	mscroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	midv.add_child(mscroll)
 	_list_box = VBoxContainer.new()
 	_list_box.add_theme_constant_override("separation", 8)
 	_list_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	mscroll.add_child(_list_box)
 
 	var right := PanelContainer.new()
-	right.custom_minimum_size = Vector2(560, 0)
-	right.add_theme_stylebox_override("panel", U.box(Color(0.11, 0.08, 0.07, 0.92), Color(0.95, 0.62, 0.28), 18, 4, 16))
+	right.custom_minimum_size = Vector2(530, 0)
+	right.add_theme_stylebox_override("panel", U.box(Color(0.11, 0.08, 0.07, 0.92), Color(0.95, 0.62, 0.28), 18, 4, 12))
 	body.add_child(right)
+	var rightv := VBoxContainer.new()
+	rightv.add_theme_constant_override("separation", 8)
+	right.add_child(rightv)
 	var rscroll := ScrollContainer.new()
 	TouchScroll.install(rscroll)
 	rscroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	right.add_child(rscroll)
+	rscroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	rightv.add_child(rscroll)
+	_actions = VBoxContainer.new()
+	_actions.add_theme_constant_override("separation", 6)
+	rightv.add_child(_actions)
 	_detail_box = VBoxContainer.new()
 	_detail_box.add_theme_constant_override("separation", 10)
 	_detail_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	rscroll.add_child(_detail_box)
+
+
+## Taille/échelle de la racine selon l'écran (voir UI_SCALE).
+func _fit_root() -> void:
+	if _root == null or not is_instance_valid(_root):
+		return
+	var vs: Vector2 = get_viewport().get_visible_rect().size
+	var sc: float = clampf(minf(vs.x / 1370.0, vs.y / 770.0), 1.0, UI_SCALE) if vs.x >= 1370.0 else 1.0
+	_root.scale = Vector2(sc, sc)
+	_root.position = Vector2.ZERO
+	_root.size = vs / sc
 
 
 const MODES: Array = [
@@ -242,7 +268,7 @@ func _refresh_tabs() -> void:
 		c.queue_free()
 	for m: Array in MODES:
 		var key: String = String(m[0])
-		var b := U.btn("  %s" % m[1], Color(0.95, 0.65, 0.30) if _mode == key else U.C_BORDER, 22, Vector2(0, 58))
+		var b := U.btn("  %s" % m[1], Color(0.95, 0.65, 0.30) if _mode == key else U.C_BORDER, 22, Vector2(0, 54))
 		b.icon = _tex(ART + "cat_%s.png" % m[2])
 		b.expand_icon = true
 		b.add_theme_constant_override("icon_max_width", 40)
@@ -251,6 +277,7 @@ func _refresh_tabs() -> void:
 			_mode = key
 			_selected = ""
 			_up_key = ""
+			_salv_sel = {}
 			_message = ""
 			refresh())
 		_tabs_row.add_child(b)
@@ -269,13 +296,14 @@ func _refresh_stock() -> void:
 		var hi: int = 0
 		for t: int in range(2, ProgressionManager.MAX_RANK + 1):
 			hi += int(res.get(ProgressionManager.res_key(k, t), 0))
-		var txt: String = "%s  %d" % [k, int(res.get(k, 0))]
+		var txt: String = "%d" % int(res.get(k, 0))
 		if hi > 0:
-			txt += "  (+%d rang+)" % hi
-		chip.add_child(_res_label(k, txt, col.lightened(0.15), 22, 34.0))
+			txt += "  +%d★" % hi
+			chip.tooltip_text = "%s : %d (rang 1) + %d de rang supérieur" % [k, int(res.get(k, 0)), hi]
+		chip.add_child(_res_label(k, txt, col.lightened(0.15), 24, 34.0))
 		_res_row.add_child(chip)
 	_res_row.add_child(U.spacer())
-	_res_row.add_child(U.chip("🪙  %d or" % ProgressionManager.gold(_save), U.C_GOLD, 24))
+	_res_row.add_child(U.chip("🪙  %d" % ProgressionManager.gold(_save), U.C_GOLD, 24))
 
 
 # ── Filtres ─────────────────────────────────────────────────────────────────
@@ -296,46 +324,46 @@ func _counts() -> Dictionary:
 func _refresh_filters() -> void:
 	for c in _filters_box.get_children():
 		c.queue_free()
+	_filters_box.visible = _mode == "craft"
 	if _mode != "craft":
-		var tips: Dictionary = {
-			"upgrade": "AMÉLIORER\n\nChoisissez un équipement (porté ou en inventaire). Passer du rang N au rang N+1 coûte 1 ressource de rang N+1 de son type principal et un peu d'or.\n\nChaque rang ajoute +12 % de stats.",
-			"fusion": "FUSION\n\n2 ressources du même type et du même rang donnent 1 ressource du rang suivant (jusqu'au rang 10), moyennant un peu d'or.\n\nLes ressources de rang élevé servent à fabriquer et améliorer l'équipement.",
-			"salvage": "BRISEUR\n\nDétruit un objet de l'inventaire et rend des ressources selon sa rareté et son niveau. Un objet de rang 2+ rend aussi une ressource de rang inférieur.",
-		}
-		var help0 := U.lbl(String(tips[_mode]), 17, U.C_DIM)
-		help0.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		help0.custom_minimum_size = Vector2(240, 0)
-		_filters_box.add_child(help0)
 		return
-	_filters_box.add_child(U.lbl("CATÉGORIES", 17, U.C_DIM))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	_filters_box.add_child(row)
 	var counts: Dictionary = _counts()
 	for cat: Array in CATEGORIES:
 		var key: String = String(cat[0])
 		var cnt: Array = counts.get(key, [0, 0])
 		if key != "all" and int(cnt[1]) == 0:
 			continue
-		var b := U.btn("  %s   %d/%d" % [cat[1], int(cnt[0]), int(cnt[1])],
-			Color(0.95, 0.65, 0.30) if _filter == key else U.C_BORDER, 21, Vector2(0, 58))
+		var b := U.btn("%d" % int(cnt[0]), Color(0.95, 0.65, 0.30) if _filter == key else U.C_BORDER, 20, Vector2(0, 56))
 		b.icon = _tex(ART + "cat_%s.png" % key)
 		b.expand_icon = true
-		b.add_theme_constant_override("icon_max_width", 42)
-		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		b.tooltip_text = "Fabricables / total"
+		b.add_theme_constant_override("icon_max_width", 38)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.tooltip_text = "%s : %d fabricables sur %d" % [cat[1], int(cnt[0]), int(cnt[1])]
 		b.pressed.connect(func() -> void:
 			_filter = key
 			refresh())
-		_filters_box.add_child(b)
-	_filters_box.add_child(Control.new())
-	var t := U.btn("✓  Fabricables seulement" if _only_craftable else "☐  Fabricables seulement",
-		Color(0.45, 0.80, 0.50) if _only_craftable else U.C_BORDER, 19, Vector2(0, 52))
+		row.add_child(b)
+	var row2 := HBoxContainer.new()
+	row2.add_theme_constant_override("separation", 10)
+	_filters_box.add_child(row2)
+	var cat_name: String = "Tout"
+	for cat: Array in CATEGORIES:
+		if String(cat[0]) == _filter:
+			cat_name = String(cat[1])
+	var cnt_all: Array = counts.get(_filter, [0, 0])
+	var info := U.lbl("%s : %d fabricable(s) sur %d · rang %d" % [cat_name, int(cnt_all[0]), int(cnt_all[1]), _tier], 18, U.C_DIM)
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	row2.add_child(info)
+	var t := U.btn("✓ Fabricables" if _only_craftable else "☐ Fabricables",
+		Color(0.45, 0.80, 0.50) if _only_craftable else U.C_BORDER, 18, Vector2(190, 46))
 	t.pressed.connect(func() -> void:
 		_only_craftable = not _only_craftable
 		refresh())
-	_filters_box.add_child(t)
-	var help := U.lbl("Les ennemis lâchent des ressources à chaque victoire. Un objet forgé est de qualité RARE (+15 % de stats).", 15, U.C_DIM)
-	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	help.custom_minimum_size = Vector2(240, 0)
-	_filters_box.add_child(help)
+	row2.add_child(t)
 
 
 # ── Liste des recettes ──────────────────────────────────────────────────────
@@ -416,7 +444,7 @@ func _recipe_row(r: Dictionary, st: Dictionary) -> Control:
 	var nm := U.lbl(String(r["name"]), 23, U.C_TXT)
 	nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	info.add_child(nm)
-	var sub := U.lbl("%s · niv. %d · %s" % [r["type"], int(r["level"]), ItemRules.stat_line(item)], 15, U.C_DIM)
+	var sub := U.lbl("%s · niv. %d · %s" % [r["type"], int(r["level"]), ItemRules.stat_line(item)], 17, U.C_DIM)
 	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	info.add_child(sub)
 	# Coûts
@@ -441,7 +469,7 @@ func _recipe_row(r: Dictionary, st: Dictionary) -> Control:
 		var g := U.lbl("🪙 %d" % int(st["gold"]), 19, U.C_GOOD if int(st["gold_missing"]) == 0 else U.C_BAD)
 		g.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		line1.add_child(g)
-	var state := U.lbl("✓ Fabricable" if ok else "✗ Manque des ressources", 16, U.C_GOOD if ok else U.C_BAD)
+	var state := U.lbl("✓ Fabricable" if ok else "✗ Manque des ressources", 17, U.C_GOOD if ok else U.C_BAD)
 	state.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	state.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	costs.add_child(state)
@@ -468,44 +496,102 @@ func _salvage_rows() -> Array:
 func _refresh_salvage_list() -> void:
 	var rows: Array = _salvage_rows()
 	if rows.is_empty():
-		_list_box.add_child(U.lbl("Aucun objet à briser : gagnez des combats pour looter de l’équipement.", 20, U.C_DIM))
+		var e := U.lbl("Aucun objet à briser : gagnez des combats pour looter de l’équipement.", 20, U.C_DIM)
+		e.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_list_box.add_child(e)
+		_salv_sel = {}
 		return
+	if _salv_sel.is_empty() or not rows.any(func(x: Dictionary) -> bool: return x["it"] == _salv_sel):
+		_salv_sel = rows[0]["it"]
 	for row: Dictionary in rows:
 		var it: Dictionary = row["it"]
+		var sel: bool = it == _salv_sel
 		var b := Button.new()
-		b.custom_minimum_size = Vector2(0, 66)
+		b.custom_minimum_size = Vector2(0, 84)
 		b.focus_mode = Control.FOCUS_NONE
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		b.text = "[%s] %s (nv%d) — %s" % [ItemRules.rarity_label(it), ItemRules.display_name(it),
+		b.text = "%s\n%s · niv. %d · %s" % [ItemRules.display_name(it), ItemRules.rarity_label(it),
 			int(it.get("level", 0)), ItemRules.stat_line(it)]
-		b.tooltip_text = "Briser cet objet : détruit et rend des ressources selon la rareté (ici %s)." % ItemRules.rarity_label(it)
-		b.add_theme_font_size_override("font_size", 17)
-		b.add_theme_color_override("font_color", ItemRules.rarity_color(it).lightened(0.25))
-		var st_n: StyleBoxFlat = U.box(Color(0.13, 0.09, 0.08, 0.92), Color(0.85, 0.45, 0.35), 12, 2, 10)
-		st_n.content_margin_left = 72
-		var st_h: StyleBoxFlat = U.box(Color(0.20, 0.12, 0.10, 0.95), Color(1.0, 0.6, 0.45), 12, 3, 10)
-		st_h.content_margin_left = 72
+		b.add_theme_font_size_override("font_size", 19)
+		for st_name in ["font_color", "font_hover_color", "font_pressed_color"]:
+			b.add_theme_color_override(st_name, ItemRules.rarity_color(it).lightened(0.3))
+		var st_n: StyleBoxFlat = U.box(Color(0.20, 0.12, 0.10, 0.95) if sel else Color(0.13, 0.09, 0.08, 0.92),
+			Color(1.0, 0.6, 0.45) if sel else Color(0.70, 0.40, 0.32), 12, 3 if sel else 2, 10)
+		st_n.content_margin_left = 84
 		b.add_theme_stylebox_override("normal", st_n)
-		b.add_theme_stylebox_override("hover", st_h)
-		b.pressed.connect(_on_salvage_pressed.bind(it))
+		b.add_theme_stylebox_override("hover", st_n)
+		b.add_theme_stylebox_override("pressed", st_n)
+		b.pressed.connect(func() -> void:
+			_salv_sel = it
+			_message = ""
+			refresh())
 		var sl: String = ProgressionManager.slot_for_type(String(it.get("type", "")))
-		var tile: TextureRect = _tile(sl if sl != "" else "bague", 46.0)
+		var tile: TextureRect = _tile(sl if sl != "" else "bague", 64.0)
 		tile.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT)
-		tile.offset_left = 8
-		tile.offset_right = 54
-		tile.offset_top = -23
-		tile.offset_bottom = 23
+		tile.offset_left = 10
+		tile.offset_right = 74
+		tile.offset_top = -32
+		tile.offset_bottom = 32
 		b.add_child(tile)
 		_list_box.add_child(b)
 
+
+func _refresh_salvage_detail() -> void:
+	if _salv_sel.is_empty():
+		var e := U.lbl("Briseur : sélectionnez un objet de l'inventaire pour voir ce qu'il rapporte.", 19, U.C_DIM)
+		e.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		e.custom_minimum_size = Vector2(460, 0)
+		_detail_box.add_child(e)
+		_salvage_message()
+		return
+	var it: Dictionary = _salv_sel
+	var sl: String = ProgressionManager.slot_for_type(String(it.get("type", "")))
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 12)
+	_detail_box.add_child(head)
+	head.add_child(_tile(sl if sl != "" else "bague", 92.0))
+	var hv := VBoxContainer.new()
+	hv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(hv)
+	var nm := U.lbl(ItemRules.display_name(it), 28, ItemRules.rarity_color(it).lightened(0.2), true)
+	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hv.add_child(nm)
+	hv.add_child(U.lbl("%s · %s · niveau %d" % [it.get("type", ""), ItemRules.rarity_label(it), int(it.get("level", 1))], 17, U.C_DIM))
+	_detail_box.add_child(U.lbl(ItemRules.stat_line(it), 20, U.C_TXT))
+	var pv: Dictionary = ProgressionManager.salvage_preview(it)
+	_detail_box.add_child(U.lbl("RENDEMENT", 17, U.C_DIM))
+	var names: Array[String] = []
+	for r in pv["pool"]:
+		if not names.has(String(r)):
+			names.append(String(r))
+	var g := HBoxContainer.new()
+	g.add_theme_constant_override("separation", 10)
+	_detail_box.add_child(g)
+	g.add_child(U.lbl("≈ %d ressources parmi :" % int(pv["total"]), 20, U.C_TXT))
+	for r: String in names:
+		g.add_child(_res_icon(r, 30.0))
+	if String(pv["bonus"]) != "":
+		_detail_box.add_child(_res_label(String(pv["bonus"]), "+1 %s (rang de l'objet)" % _res_text(String(pv["bonus"])), U.C_GOOD, 20, 30.0))
+	var warn := U.lbl("L'objet sera détruit définitivement.", 17, Color(1.0, 0.65, 0.45))
+	_detail_box.add_child(warn)
+	var bb := U.btn("🔨  BRISER", Color(0.90, 0.40, 0.30), 24, Vector2(0, 62))
+	bb.pressed.connect(func() -> void: _on_salvage_pressed(it))
+	_actions.add_child(bb)
+	_salvage_message()
+
+
+func _salvage_message() -> void:
+	if _message != "":
+		var ml := U.lbl(_message, 19, Color(0.95, 0.80, 0.45) if _message_ok else U.C_BAD)
+		ml.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		ml.custom_minimum_size = Vector2(460, 0)
+		_actions.add_child(ml)
+		_actions.move_child(ml, 0)
+
+
 func _on_salvage_pressed(it: Dictionary) -> void:
-	## Les index bougent après chaque brisage : retrouver l’objet à l’instant du clic.
 	var inv_now: Array = _save.get("inventory", [])
-	var live_idx: int = -1
-	for k: int in range(inv_now.size()):
-		if String(inv_now[k].get("name", "")) == String(it.get("name", "")) and int(inv_now[k].get("level", -1)) == int(it.get("level", -1)) and String(inv_now[k].get("rarity", "")) == String(it.get("rarity", "")):
-			live_idx = k
-			break
+	var live_idx: int = inv_now.find(it)
 	if live_idx < 0:
 		return
 	var result: Dictionary = ProgressionManager.salvage_item(_save, live_idx)
@@ -516,16 +602,20 @@ func _on_salvage_pressed(it: Dictionary) -> void:
 	var parts: Array = []
 	for r: String in gains.keys():
 		parts.append("%s +%d" % [_res_text(r), int(gains[r])])
+	_message_ok = true
+	_message = "⚒ %s brisé : %s" % [String(it.get("name", "?")), " · ".join(PackedStringArray(parts))]
+	_salv_sel = {}
 	crafted.emit()
 	refresh()
-	_detail_box.add_child(U.lbl("⚒ Brisé : %s\nGains : %s" % [String(it.get("name", "?")), " · ".join(PackedStringArray(parts))], 18, Color(0.9, 0.75, 0.4)))
 
 func _refresh_detail() -> void:
 	for c in _detail_box.get_children():
 		c.queue_free()
+	for c in _actions.get_children():
+		c.queue_free()
 	match _mode:
 		"salvage":
-			_detail_box.add_child(U.lbl("Briseur : touchez un objet de la liste pour le briser.\nIl est détruit et rend des ressources selon sa rareté et son niveau. Un objet de rang 2+ rend aussi une ressource de rang inférieur.", 18, U.C_DIM))
+			_refresh_salvage_detail()
 			return
 		"upgrade":
 			_refresh_upgrade_detail()
@@ -553,7 +643,7 @@ func _refresh_detail() -> void:
 	hv.add_child(U.lbl("%s · niveau %d · %s · rang %d" % [r["type"], int(r["level"]), ItemRules.rarity_label(item), _tier], 17, U.C_DIM))
 
 	# Rang de fabrication : 1..10 (ressources de ce rang)
-	_detail_box.add_child(U.lbl("RANG DE FABRICATION", 15, U.C_DIM))
+	_detail_box.add_child(U.lbl("RANG DE FABRICATION", 17, U.C_DIM))
 	var tiers := HBoxContainer.new()
 	tiers.add_theme_constant_override("separation", 4)
 	_detail_box.add_child(tiers)
@@ -568,8 +658,9 @@ func _refresh_detail() -> void:
 			refresh())
 		tiers.add_child(tb)
 
+	var tier_end: int = _detail_box.get_child_count()
 	# Choix du personnage : comparaison + équipement direct
-	_detail_box.add_child(U.lbl("POUR QUI ?", 15, U.C_DIM))
+	_detail_box.add_child(U.lbl("POUR QUI ?", 17, U.C_DIM))
 	var who := HBoxContainer.new()
 	who.add_theme_constant_override("separation", 8)
 	_detail_box.add_child(who)
@@ -588,7 +679,7 @@ func _refresh_detail() -> void:
 		pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		pic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		v.add_child(pic)
-		var cl := U.lbl("%s niv %d" % [classe, lvl], 14, U.C_TXT)
+		var cl := U.lbl("%s niv %d" % [classe, lvl], 17, U.C_TXT)
 		cl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		cl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		v.add_child(cl)
@@ -603,7 +694,7 @@ func _refresh_detail() -> void:
 	var cur: Dictionary = member.get("equipment", {}).get(slot, {})
 	var mlevel: int = ProgressionManager.member_level(_save, String(member.get("classe", "")))
 	var can_wear: bool = int(item.get("level", 1)) <= mlevel
-	_detail_box.add_child(U.lbl("Porte actuellement : %s" % (String(cur.get("name", "")) if not cur.is_empty() else "rien"), 16, U.C_DIM))
+	_detail_box.add_child(U.lbl("Porte actuellement : %s" % (String(cur.get("name", "")) if not cur.is_empty() else "rien"), 17, U.C_DIM))
 
 	# Stats avec écarts
 	var stats := GridContainer.new()
@@ -631,8 +722,9 @@ func _refresh_detail() -> void:
 	if sk != "":
 		_detail_box.add_child(U.lbl("◈ " + String(ItemRules.SETS[sk]["label"]), 17, Color(0.75, 0.65, 1.0)))
 
+	var res_start: int = _detail_box.get_child_count()
 	# Ressources nécessaires
-	_detail_box.add_child(U.lbl("RESSOURCES", 15, U.C_DIM))
+	_detail_box.add_child(U.lbl("RESSOURCES", 17, U.C_DIM))
 	var res: Dictionary = ProgressionManager.resources(_save)
 	for k: String in st["cost"].keys():
 		var have: int = int(res.get(k, 0))
@@ -681,27 +773,39 @@ func _refresh_detail() -> void:
 		status_txt = "Prêt à forger !"
 	var sl := U.lbl(status_txt, 19, status_col)
 	sl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	sl.custom_minimum_size = Vector2(500, 0)
+	sl.custom_minimum_size = Vector2(460, 0)
 	_detail_box.add_child(sl)
+	# Sur téléphone : coût et état juste sous le rang, visibles sans défiler
+	var moved: Array = []
+	for i: int in range(res_start, _detail_box.get_child_count()):
+		moved.append(_detail_box.get_child(i))
+	for k: int in range(moved.size()):
+		_detail_box.move_child(moved[k], tier_end + k)
 
-	var b1 := U.btn("⚒  FABRIQUER", Color(0.95, 0.65, 0.30), 24, Vector2(0, 60))
+	var brow := HBoxContainer.new()
+	brow.add_theme_constant_override("separation", 8)
+	_actions.add_child(brow)
+	var b1 := U.btn("⚒  FABRIQUER", Color(0.95, 0.65, 0.30), 22, Vector2(0, 62))
+	b1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b1.disabled = not craftable
 	b1.pressed.connect(func() -> void:
 		var err: String = ProgressionManager.craft_item(_save, _selected, _tier)
 		_after_craft(err, "%s fabriqué (dans l'inventaire)." % _selected))
-	_detail_box.add_child(b1)
+	brow.add_child(b1)
 	var cname: String = String(member.get("classe", "?"))
-	var b2 := U.btn("⚒  FABRIQUER ET ÉQUIPER (%s)" % cname, Color(0.45, 0.80, 0.50), 22, Vector2(0, 60))
+	var b2 := U.btn("⚒ + ÉQUIPER (%s)" % cname, Color(0.45, 0.80, 0.50), 22, Vector2(0, 62))
+	b2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b2.disabled = not craftable or not can_wear
 	b2.pressed.connect(func() -> void:
 		var err: String = ProgressionManager.craft_and_equip(_save, _selected, _member, _tier)
 		_after_craft(err, "%s fabriqué et équipé sur %s !" % [_selected, cname]))
-	_detail_box.add_child(b2)
+	brow.add_child(b2)
 	if _message != "":
 		var ml := U.lbl(_message, 20, U.C_GOOD if _message_ok else U.C_BAD)
 		ml.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		ml.custom_minimum_size = Vector2(500, 0)
-		_detail_box.add_child(ml)
+		_actions.add_child(ml)
+		_actions.move_child(ml, 0)
 
 
 # ── Mode AMÉLIORER ───────────────────────────────────────────────────────────
@@ -788,7 +892,7 @@ func _refresh_upgrade_detail() -> void:
 	# Aperçu des stats
 	var preview: Dictionary = it.duplicate(true)
 	ProgressionManager.apply_rank(preview, int(c["next"]))
-	_detail_box.add_child(U.lbl("APRÈS AMÉLIORATION (rang %d)" % int(c["next"]), 15, U.C_DIM))
+	_detail_box.add_child(U.lbl("APRÈS AMÉLIORATION (rang %d)" % int(c["next"]), 17, U.C_DIM))
 	var stats := GridContainer.new()
 	stats.columns = 2
 	stats.add_theme_constant_override("h_separation", 14)
@@ -805,7 +909,7 @@ func _refresh_upgrade_detail() -> void:
 		line.add_child(U.lbl("(%+d)" % (nv - ov), 18, U.C_GOOD))
 		stats.add_child(line)
 	# Coût
-	_detail_box.add_child(U.lbl("COÛT", 15, U.C_DIM))
+	_detail_box.add_child(U.lbl("COÛT", 17, U.C_DIM))
 	var res: Dictionary = ProgressionManager.resources(_save)
 	var have: int = int(res.get(String(c["res"]), 0))
 	var row := HBoxContainer.new()
@@ -829,6 +933,10 @@ func _refresh_upgrade_detail() -> void:
 		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		hint.custom_minimum_size = Vector2(500, 0)
 		_detail_box.add_child(hint)
+	var tip := U.lbl("Chaque rang ajoute +12 %% de stats. Coût : 1 ressource de rang %d + or." % int(c["next"]), 17, U.C_DIM)
+	tip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	tip.custom_minimum_size = Vector2(460, 0)
+	_detail_box.add_child(tip)
 	var ub := U.btn("⚒  AMÉLIORER  (rang %d → %d)" % [rank, int(c["next"])], Color(0.95, 0.65, 0.30), 24, Vector2(0, 60))
 	ub.disabled = not can
 	ub.pressed.connect(func() -> void:
@@ -839,18 +947,34 @@ func _refresh_upgrade_detail() -> void:
 			ProgressionManager.write_save(_slot, _save)
 			crafted.emit()
 		refresh())
-	_detail_box.add_child(ub)
+	_actions.add_child(ub)
 	if _message != "":
 		var ml := U.lbl(_message, 20, U.C_GOOD if _message_ok else U.C_BAD)
 		ml.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		ml.custom_minimum_size = Vector2(500, 0)
-		_detail_box.add_child(ml)
+		_actions.add_child(ml)
+		_actions.move_child(ml, 0)
 
 
 # ── Mode FUSION ─────────────────────────────────────────────────────────────
 func _refresh_fusion_list() -> void:
 	var res: Dictionary = ProgressionManager.resources(_save)
 	var gold: int = ProgressionManager.gold(_save)
+	# Bascule ×1 / MAX : évite de taper 20 fois sur le même bouton
+	var qrow := HBoxContainer.new()
+	qrow.add_theme_constant_override("separation", 8)
+	_list_box.add_child(qrow)
+	var ql := U.lbl("Quantité par appui :", 19, U.C_DIM)
+	ql.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ql.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	qrow.add_child(ql)
+	for opt: Array in [[false, "×1"], [true, "MAX"]]:
+		var on: bool = _fuse_max == bool(opt[0])
+		var qb := U.btn(String(opt[1]), Color(0.95, 0.65, 0.30) if on else U.C_BORDER, 20, Vector2(110, 48))
+		qb.pressed.connect(func() -> void:
+			_fuse_max = bool(opt[0])
+			refresh())
+		qrow.add_child(qb)
 	for name_r: String in ProgressionManager.RES_TYPES:
 		var col: Color = U.RES_COLOR.get(name_r, U.C_TXT)
 		var card := PanelContainer.new()
@@ -869,7 +993,7 @@ func _refresh_fusion_list() -> void:
 			var cell := VBoxContainer.new()
 			cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			cell.add_theme_constant_override("separation", 2)
-			var rl := U.lbl("R%d" % t, 15, U.C_DIM)
+			var rl := U.lbl("R%d" % t, 17, U.C_DIM)
 			rl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			cell.add_child(rl)
 			var cl := U.lbl(str(have), 26, col.lightened(0.2) if have > 0 else U.C_DIM, true)
@@ -878,14 +1002,22 @@ func _refresh_fusion_list() -> void:
 			if t < ProgressionManager.MAX_RANK:
 				var gold_cost: int = ProgressionManager.fuse_gold(t + 1)
 				var can: bool = have >= ProgressionManager.FUSE_RATIO and gold >= gold_cost
-				var fb := U.btn("➜ R%d" % (t + 1), Color(0.45, 0.80, 0.50) if can else U.C_BORDER, 15, Vector2(0, 40))
+				var fb := U.btn("➜R%d" % (t + 1), Color(0.45, 0.80, 0.50) if can else U.C_BORDER, 17, Vector2(0, 46))
 				fb.disabled = not can
 				fb.tooltip_text = "%d × %s R%d + %d or → 1 × %s R%d" % [ProgressionManager.FUSE_RATIO, name_r, t, gold_cost, name_r, t + 1]
 				fb.pressed.connect(func() -> void:
-					var err: String = ProgressionManager.fuse_resource(_save, name_r, t)
-					_message_ok = err == ""
-					_message = ("%s R%d créé !" % [name_r, t + 1]) if err == "" else err
-					if err == "":
+					var made: int = 0
+					var err: String = ""
+					while true:
+						err = ProgressionManager.fuse_resource(_save, name_r, t)
+						if err != "":
+							break
+						made += 1
+						if not _fuse_max:
+							break
+					_message_ok = made > 0
+					_message = ("%d × %s R%d créé(s) !" % [made, name_r, t + 1]) if made > 0 else err
+					if made > 0:
 						ProgressionManager.write_save(_slot, _save)
 						crafted.emit()
 					refresh())
@@ -901,14 +1033,14 @@ func _refresh_fusion_detail() -> void:
 	txt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	txt.custom_minimum_size = Vector2(500, 0)
 	_detail_box.add_child(txt)
-	_detail_box.add_child(U.lbl("COÛT PAR RANG", 15, U.C_DIM))
+	_detail_box.add_child(U.lbl("COÛT PAR RANG", 17, U.C_DIM))
 	var grid := GridContainer.new()
 	grid.columns = 3
 	grid.add_theme_constant_override("h_separation", 22)
 	grid.add_theme_constant_override("v_separation", 4)
 	_detail_box.add_child(grid)
 	for h: String in ["Rang visé", "≈ ressources rang 1", "Or"]:
-		grid.add_child(U.lbl(h, 15, U.C_DIM))
+		grid.add_child(U.lbl(h, 17, U.C_DIM))
 	for t: int in range(2, ProgressionManager.MAX_RANK + 1):
 		grid.add_child(U.lbl("R%d" % t, 19, U.C_TXT))
 		grid.add_child(U.lbl(str(int(pow(ProgressionManager.FUSE_RATIO, t - 1))), 19, U.C_TXT))
@@ -917,7 +1049,8 @@ func _refresh_fusion_detail() -> void:
 		var ml := U.lbl(_message, 20, U.C_GOOD if _message_ok else U.C_BAD)
 		ml.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		ml.custom_minimum_size = Vector2(500, 0)
-		_detail_box.add_child(ml)
+		_actions.add_child(ml)
+		_actions.move_child(ml, 0)
 
 
 func _after_craft(err: String, ok_msg: String) -> void:

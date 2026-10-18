@@ -73,12 +73,12 @@ Désintégration,disintegrate
 Téléportation de groupe,teleport_group
 Pluie de métores,meteor_rain
 Apocalypse,apocalypse
-Invoquer Golem de Pierre,summon_tortue
-Invoquer Loup Spectral,summon_loup
-Invoquer Requin des Marées,summon_sirene
-Invoquer Élémentaire de Cristal,summon_ange
-Invoquer Ombre,summon_homme_faucon
-Invoquer Esprit de la Forêt,summon_centaure
+Invoquer Golem de Pierre,summon_golem_de_pierre
+Invoquer Loup Spectral,summon_loup_spectral
+Invoquer Requin des Marées,summon_requin_des_marees
+Invoquer Élémentaire de Cristal,summon_elementaire_de_cristal
+Invoquer Ombre,summon_ombre
+Invoquer Esprit de la Forêt,summon_esprit_de_la_foret
 Attaque de l'invocation,summon_atk
 Buff de l'invocation,summon_buff
 Débuff de l'invocation,summon_debuff
@@ -126,11 +126,11 @@ Bouclier de lumière,light_shield
 Mot de restauration,word_restore
 Ronce,thorn
 Sève vitale,sap_t1
-Invoquer Archer Sylvestre,summon_buisson
+Invoquer Archer Sylvestre,summon_archer_sylvestre
 Invoquer Arbre,summon_arbre
 Poison de ronce,thorn
 Racine,root
-Invoquer Ent de Combat,summon_champignon
+Invoquer Ent de Combat,summon_ent_de_combat
 Lierre protecteur,ivy
 Soin de sève,sap
 Ronce multiple,thorn_multi
@@ -187,3 +187,11 @@ Piqué,dive
 Spores toxiques,spores
 Sève fertilisante,sap
 Rappel de balise,beacon
+Poing de roche,stone_fist
+Morsure spectrale,bite
+Vague tranchante,sirene_song
+Éclat de cristal,crystal_lance
+Lame d'ombre,blade_shadow
+Vrilles sylvestres,ivy
+Flèche de sève,arrow
+Coup de branche,wood_arm

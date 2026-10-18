@@ -71,8 +71,8 @@ func _build() -> void:
 		_root.queue_free()
 	_root = Control.new()
 	_root.name = "CityRoot"
-	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
+	UiFit.apply(_root, 1.2)   # lisible sur smartphone
 
 	# Fond aux couleurs de la nation
 	var nd: Dictionary = Nations.DATA.get(_biome, {})

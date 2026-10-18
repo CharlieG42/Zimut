@@ -2464,6 +2464,18 @@ const SALVAGE_RARITY := {
 	"legendaire": {"n": 5, "res": ["Magie", "Venin", "Fer"]},
 }
 
+## Aperçu de ce que rend un objet au Briseur (sans le détruire).
+func salvage_preview(it: Dictionary) -> Dictionary:
+	var info: Dictionary = SALVAGE_RARITY.get(String(it.get("rarity", "commun")), SALVAGE_RARITY["commun"])
+	var lvl: int = maxi(1, int(it.get("level", 1)))
+	var n_per: int = maxi(1, int(round((1.0 + float(lvl) * 0.1) * float(info["n"] * 0.6))))
+	var bonus: String = ""
+	var rk: int = int(it.get("rank", 1))
+	if rk >= 2:
+		bonus = res_key(String(SLOT_MAIN_RES.get(slot_for_type(String(it.get("type", ""))), "Magie")), rk - 1)
+	return {"total": int(info["n"]) * n_per, "pool": info["res"], "bonus": bonus}
+
+
 func salvage_item(data: Dictionary, inv_index: int) -> Dictionary:
 	## Retourne { "ok": bool, "gains": {res: n}, "reason": "" }
 	var inv: Array = data.get("inventory", [])
