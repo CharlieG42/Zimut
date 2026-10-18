@@ -1453,3 +1453,52 @@ Aéron le Céleste	Aéron the Celestial
 Kharaz le Flamboyant	Kharaz the Blazing
 Ombrelis le Brumeux	Ombrelis the Misty
 Nébulia l'Illusionniste	Nébulia the Illusionist
+# V21 : Équipement, Inventaire
+ÉQUIPEMENT	EQUIPMENT
+CHANGER	CHANGE
+ÉQUIPER	EQUIP
+RETIRER	REMOVE
+— vide —	— empty —
+←  RETOUR À L'ÉQUIPEMENT	←  BACK TO EQUIPMENT
+Choisir : %s	Choose: %s
+Niveau %d requis	Level %d required
+Bonus d'équipement : %s	Equipment bonus: %s
+aucun	none
+Ce héros n'est pas dans l'équipe : son équipement est conservé et compte s'il devient gouverneur.	This hero is not in the team: their gear is kept and counts if they become a governor.
+♞ Gouverneur de %s : son équipement donne +%d défense et +%d or par victoire à la ville.	♞ Governor of %s: their gear gives the city +%d defense and +%d gold per victory.
+Aucun objet libre de ce type dans l'inventaire.	No free item of this type in the inventory.
+Équipement : +%d défense · +%d or par victoire (à équiper dans Personnages › Équipement)	Gear: +%d defense · +%d gold per victory (equip it in Characters › Equipment)
+Arme	Weapon
+INVENTAIRE	INVENTORY
+%d objet(s) · %d porté(s) · %d affiché(s)	%d item(s) · %d worn · %d shown
+TYPE	TYPE
+RARETÉ	RARITY
+STATUT	STATUS
+TRI	SORT
+Tous	All
+Toutes	All
+Libres	Free
+Portés	Worn
+Rareté	Rarity
+Puissance	Power
+Type	Type
+Nom	Name
+▼ Décroissant	▼ Descending
+▲ Croissant	▲ Ascending
+☑ Tout (affichés)	☑ All (shown)
+☐ Aucun	☐ None
+%d sélectionné(s)	%d selected
+⚒  ENVOYER AU BRISEUR (%d)	⚒  SEND TO SALVAGE (%d)
+✦  BRISER PUIS FUSION (%d)	✦  SALVAGE THEN FUSE (%d)
+Libre	Free
+Porté : %s	Worn: %s
+Aucun objet ne correspond aux filtres.	No item matches the filters.
+Inventaire vide : gagnez des combats pour looter de l'équipement.	Inventory empty: win battles to loot gear.
+Briser %d objet(s) ?	Salvage %d item(s)?
+Rend environ %d matériaux (selon rareté, niveau et rang).	Yields about %d materials (depending on rarity, level and rank).
+La Forge s'ouvrira ensuite sur l'onglet Fusion pour fondre les ressources obtenues.	The Forge will then open on the Fusion tab to fuse the resources obtained.
+⚠ %d objet(s) épique(s) ou légendaire(s) dans la sélection.	⚠ %d epic or legendary item(s) in the selection.
+ANNULER	CANCEL
+BRISER	SALVAGE
+⚒ %d objet(s) brisé(s)	⚒ %d item(s) salvaged
+🎒  Inventaire  (%d)	🎒  Inventory  (%d)

@@ -56,6 +56,15 @@ func open(save_data: Dictionary, slot: int, member_index: int = 0) -> void:
 	refresh()
 
 
+## Ouvre la Forge directement sur un onglet (craft | upgrade | fusion | salvage).
+func show_mode(mode: String) -> void:
+	if not ["craft", "upgrade", "fusion", "salvage"].has(mode):
+		return
+	_mode = mode
+	_message = ""
+	refresh()
+
+
 func _tex(path: String) -> Texture2D:
 	return load(path) as Texture2D if ResourceLoader.exists(path) else null
 
@@ -849,6 +858,8 @@ func _refresh_upgrade_list() -> void:
 		var who: String = ""
 		if String(e["src"]) == "team":
 			who = "  · porté par %s" % String(team[int(e["member"])].get("classe", "?"))
+		elif String(e["src"]) == "hero":
+			who = "  · porté par %s" % String(e.get("classe", "?"))
 		b.text = "%s%s\n%s · rang %d/%d%s" % [ItemRules.display_name(it), "", ItemRules.stat_line(it), rank, ProgressionManager.MAX_RANK, who]
 		b.add_theme_font_size_override("font_size", 19)
 		b.add_theme_color_override("font_color", ItemRules.rarity_color(it).lightened(0.3))

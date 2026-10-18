@@ -51,6 +51,10 @@ static func stat(data: Dictionary, key: String) -> int:
 				for it2 in m.get("equipment", {}).values():
 					if it2 is Dictionary:
 						r = maxi(r, int(it2.get("rank", 1)))
+			for e2 in data.get("roster", {}).values():
+				for it3 in e2.get("equipment", {}).values():
+					if it3 is Dictionary:
+						r = maxi(r, int(it3.get("rank", 1)))
 			return r
 	return int(data.get("stats", {}).get(key, 0))
 

@@ -288,6 +288,9 @@ func _card_residence(grid: Control) -> void:
 		row.add_child(tv)
 		tv.add_child(_lbl("%s (niv. %d)" % [hero, ConquestSystem.hero_level(_save, hero)], 21, TEXT))
 		tv.add_child(_wrap(ConquestSystem.governor_text(hero), 16, DIM))
+		var gdef: int = ConquestSystem.governor_gear_defense(_save, hero)
+		var ggold: int = ConquestSystem.governor_gear_gold(_save, hero)
+		tv.add_child(_wrap("Équipement : +%d défense · +%d or par victoire (à équiper dans Personnages › Équipement)" % [gdef, ggold], 15, GOOD))
 		var b := _btn("RAPPELER LE GOUVERNEUR", Color(0.36, 0.24, 0.32), 18, Vector2(0, 50))
 		b.name = "RecallButton"
 		b.pressed.connect(func() -> void:

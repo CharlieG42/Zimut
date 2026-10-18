@@ -446,6 +446,17 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	_detail_box.add_child(tro_row)
 	var n_ach: int = (data.get("achievements", {}) as Dictionary).size()
 	var n_best: int = (data.get("bestiary", {}) as Dictionary).size()
+	var inv_btn := Button.new()
+	inv_btn.name = "InventoryButton"
+	inv_btn.text = "🎒  Inventaire  (%d)" % (data.get("inventory", []) as Array).size()
+	inv_btn.custom_minimum_size = Vector2(0, 50)
+	inv_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	inv_btn.add_theme_font_size_override("font_size", _ui_font(18))
+	inv_btn.add_theme_color_override("font_color", Color(0.98, 0.92, 0.75))
+	inv_btn.add_theme_stylebox_override("normal", _flat_bg(Color(0.30, 0.22, 0.10), Color(0.85, 0.65, 0.28), 3))
+	inv_btn.add_theme_stylebox_override("hover", _flat_bg(Color(0.40, 0.30, 0.14), Color(1.0, 0.80, 0.40), 3))
+	inv_btn.pressed.connect(func() -> void: _open_inventory(slot))
+	tro_row.add_child(inv_btn)
 	for tb: Array in [["succes", "🏆  Succès  %d / %d" % [n_ach, Achievements.LIST.size()]], ["bestiaire", "📖  Bestiaire  (%d)" % n_best]]:
 		var tab_key: String = String(tb[0])
 		var tbtn := Button.new()
@@ -703,7 +714,7 @@ func _open_trophies(slot: int, tab: String) -> void:
 	ui.open(_current, tab)
 
 
-func _open_forge(slot: int) -> void:
+func _open_forge(slot: int, mode: String = "") -> void:
 	if _current.is_empty() or slot < 0:
 		return
 	var ui: CanvasLayer = (load("res://scripts/ForgeUI.gd") as GDScript).new()
@@ -713,6 +724,24 @@ func _open_forge(slot: int) -> void:
 		ui.queue_free()
 		_show_detail(ProgressionManager.load_save(slot), slot))
 	ui.open(_current, slot, 0)
+	if mode != "" and ui.has_method("show_mode"):
+		ui.call("show_mode", mode)
+
+
+## Inventaire complet (objets libres et portés) avec tri, filtres et envoi groupé au Briseur / à la Fusion.
+func _open_inventory(slot: int) -> void:
+	if _current.is_empty() or slot < 0:
+		return
+	var ui: CanvasLayer = (load("res://scripts/InventoryUI.gd") as GDScript).new()
+	ui.layer = 20
+	add_child(ui)
+	ui.closed.connect(func() -> void:
+		ui.queue_free()
+		_show_detail(ProgressionManager.load_save(slot), slot))
+	ui.fusion_requested.connect(func() -> void:
+		ui.queue_free()
+		_open_forge(slot, "fusion"))
+	ui.open(_current, slot)
 
 ## Vue d'ensemble des gouverneurs en place (mode Conquête).
 func _show_governors(data: Dictionary) -> void:
