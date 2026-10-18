@@ -36,6 +36,8 @@ var _tip_label: Label
 var _end_btn: Button
 var _quit_btn: Button
 var _log_box: VBoxContainer
+var _log_panel: PanelContainer
+const LOG_WIDTH := 660.0
 var _banner: Label
 var _info_panel: PanelContainer
 var _info_label: Label
@@ -675,8 +677,16 @@ class TimelineView extends Control:
 			draw_rect(hb, Color(0, 0, 0, 0.8))
 			draw_rect(Rect2(hb.position, Vector2(hb.size.x * ratio, hb.size.y)), Color(0.35, 0.9, 0.4) if e2["team"] == "player" else Color(0.95, 0.3, 0.25))
 			if big:
-				draw_string_outline(font, Vector2(x, y + w + 22.0), String(e2["classe"]), HORIZONTAL_ALIGNMENT_CENTER, w, 18, 5, Color(0, 0, 0, 0.9))
-				draw_string(font, Vector2(x, y + w + 22.0), String(e2["classe"]), HORIZONTAL_ALIGNMENT_CENTER, w, 18, Color(1, 0.95, 0.75))
+				# Nom entier : police réduite si besoin (« Archer Sylvestre » n'est plus coupé)
+				var nm_t: String = String(e2["classe"])
+				var room: float = w + 34.0
+				var nfs: int = 18
+				while nfs > 12 and font.get_string_size(nm_t, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs).x > room:
+					nfs -= 1
+				if font.get_string_size(nm_t, HORIZONTAL_ALIGNMENT_LEFT, -1, nfs).x > room and nm_t.contains(" "):
+					nm_t = nm_t.split(" ")[0]
+				draw_string_outline(font, Vector2(x - 17.0, y + w + 22.0), nm_t, HORIZONTAL_ALIGNMENT_CENTER, room, nfs, 5, Color(0, 0, 0, 0.9))
+				draw_string(font, Vector2(x - 17.0, y + w + 22.0), nm_t, HORIZONTAL_ALIGNMENT_CENTER, room, nfs, Color(1, 0.95, 0.75))
 			y += w + (28.0 if big else 10.0)
 
 
@@ -1054,13 +1064,31 @@ func _build_ui() -> void:
 	_quit_btn.pressed.connect(_on_quit_combat_pressed)
 	_root.add_child(_quit_btn)
 
-	# Journal de combat : colonne bas-gauche, discrete, hors du plateau central
+	# Journal de combat : bas-gauche, à droite de la colonne de sorts, sur un fond
+	# sombre pour rester lisible ; les lignes s'empilent vers le haut (4 au plus).
+	_log_panel = PanelContainer.new()
+	var lst := _flat(Color(0.03, 0.04, 0.07, 0.62), Color(0.35, 0.40, 0.55, 0.55), 12, 1)
+	lst.content_margin_left = 12
+	lst.content_margin_right = 12
+	lst.content_margin_top = 6
+	lst.content_margin_bottom = 6
+	_log_panel.add_theme_stylebox_override("panel", lst)
+	_log_panel.anchor_left = 0.0
+	_log_panel.anchor_right = 0.0
+	_log_panel.anchor_top = 1.0
+	_log_panel.anchor_bottom = 1.0
+	_log_panel.offset_left = 150.0
+	_log_panel.offset_right = 150.0 + LOG_WIDTH
+	_log_panel.offset_top = -40.0
+	_log_panel.offset_bottom = -12.0
+	_log_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_log_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_log_panel.visible = false
+	_root.add_child(_log_panel)
 	_log_box = VBoxContainer.new()
 	_log_box.add_theme_constant_override("separation", 2)
-	_log_box.position = Vector2(20, 940)
-	_log_box.size = Vector2(560, 130)
 	_log_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_root.add_child(_log_box)
+	_log_panel.add_child(_log_box)
 
 	# Bannière
 	_banner = Label.new()
@@ -1369,22 +1397,37 @@ func _on_message(text: String) -> void:
 		return
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", 18)
+	l.add_theme_font_size_override("font_size", roundi(19.0 * UiFit.user_mult()))
 	l.add_theme_color_override("font_color", Color(1, 1, 0.92))
 	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.95))
-	l.add_theme_constant_override("outline_size", 6)
+	l.add_theme_constant_override("outline_size", 5)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.custom_minimum_size = Vector2(540, 0)
+	l.custom_minimum_size = Vector2(LOG_WIDTH - 24.0, 0)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_log_box.add_child(l)
-	while _log_box.get_child_count() > 6:
+	_log_panel.visible = true
+	while _log_box.get_child_count() > 3:
 		var old: Node = _log_box.get_child(0)
 		_log_box.remove_child(old)
 		old.queue_free()
-	var tw: Tween = create_tween()
-	tw.tween_interval(5.0)
+	call_deferred("_fit_log")
+	var tw: Tween = l.create_tween()
+	tw.tween_interval(6.0)
 	tw.tween_property(l, "modulate:a", 0.0, 1.2)
-	tw.tween_callback(l.queue_free)
+	tw.tween_callback(func() -> void:
+		if is_instance_valid(l):
+			l.queue_free()
+		if is_instance_valid(_log_box) and _log_box.get_child_count() <= 1:
+			_log_panel.visible = false
+		call_deferred("_fit_log"))
+
+
+## Le journal pousse vers le haut : on recale son bord supérieur sur sa hauteur réelle.
+func _fit_log() -> void:
+	if not is_instance_valid(_log_panel):
+		return
+	var h: float = _log_panel.get_combined_minimum_size().y
+	_log_panel.offset_top = _log_panel.offset_bottom - h
 
 
 func _on_fx(kind: String, _d: Dictionary) -> void:
