@@ -1539,3 +1539,7 @@ Le tableau du camp vous réserve un nouveau contrat.	The camp board has a new co
 ★  Carte maîtrisée !	★  Map mastered!
 Un groupe de monstres vous barre la route.	A group of monsters blocks your way.
 Aucun sentier ne mène à ce groupe pour l'instant.	No path leads to this group yet.
+▲ CONSEILLÉS	▲ RECOMMENDED
+AUTRES OBJETS	OTHER ITEMS
+▲ %d conseillé	▲ %d recommended
+%d autre	%d other

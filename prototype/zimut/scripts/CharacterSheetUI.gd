@@ -438,7 +438,8 @@ func _refresh_tabs() -> void:
 		_tab = "spells"
 		refresh())
 	_tabs_row.add_child(b2)
-	var b3 := _btn("ÉQUIPEMENT", C_GOLD if _tab == "gear" else C_BORDER, 22, Vector2(240, 54))
+	var rec_n: int = _gear_total_rec()
+	var b3 := _btn("ÉQUIPEMENT" + ("  ▲%d" % rec_n if rec_n > 0 else ""), C_GOLD if _tab == "gear" else C_BORDER, 22, Vector2(240, 54))
 	b3.name = "GearTab"
 	b3.pressed.connect(func() -> void:
 		_tab = "gear"
@@ -866,6 +867,30 @@ func _build_gear() -> void:
 		grid.add_child(_gear_slot_card(slot, eq))
 
 
+## Objets libres de l'inventaire pour un emplacement : "rec" = conseillés (niveau
+## suffisant et plus puissants que le porté), "other" = les autres.
+func _gear_options(slot: String) -> Dictionary:
+	var level: int = ProgressionManager.member_level(_save, _classe)
+	var cur: Dictionary = ProgressionManager.hero_equipment(_save, _classe).get(slot, {})
+	var cur_power: int = ItemRules.power(cur) if not cur.is_empty() else 0
+	var rec: int = 0
+	var other: int = 0
+	for it: Variant in _save.get("inventory", []):
+		if it is Dictionary and GearUi.slot_of(it) == slot:
+			if int(it.get("level", 1)) <= level and ItemRules.power(it) > cur_power:
+				rec += 1
+			else:
+				other += 1
+	return {"rec": rec, "other": other}
+
+
+func _gear_total_rec() -> int:
+	var n: int = 0
+	for slot: String in GearUi.SLOT_ORDER:
+		n += int(_gear_options(slot)["rec"])
+	return n
+
+
 func _gear_slot_card(slot: String, eq: Dictionary) -> Control:
 	var it: Dictionary = eq.get(slot, {})
 	var card := PanelContainer.new()
@@ -888,6 +913,16 @@ func _gear_slot_card(slot: String, eq: Dictionary) -> Control:
 		nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		mid.add_child(nm)
 		mid.add_child(_lbl("niv. %d · %s" % [int(it.get("level", 0)), ItemRules.stat_line(it)], 15, C_TXT))
+	var opt: Dictionary = _gear_options(slot)
+	if int(opt["rec"]) > 0 or int(opt["other"]) > 0:
+		var parts: PackedStringArray = []
+		if int(opt["rec"]) > 0:
+			parts.append("▲ %d conseillé%s" % [int(opt["rec"]), "s" if int(opt["rec"]) > 1 else ""])
+		if int(opt["other"]) > 0:
+			parts.append("%d autre%s" % [int(opt["other"]), "s" if int(opt["other"]) > 1 else ""])
+		var bl := _lbl(" · ".join(parts), 15, C_GOOD if int(opt["rec"]) > 0 else C_DIM, int(opt["rec"]) > 0)
+		bl.name = "GearAvail_" + slot
+		mid.add_child(bl)
 	var btns := VBoxContainer.new()
 	btns.add_theme_constant_override("separation", 6)
 	row.add_child(btns)
@@ -928,15 +963,24 @@ func _build_gear_picker(slot: String) -> void:
 		if GearUi.slot_of(inv[i]) == slot:
 			rows.append({"i": i, "it": inv[i]})
 	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var ra: bool = int(a["it"].get("level", 1)) <= level and ItemRules.power(a["it"]) > cur_power
+		var rb: bool = int(b["it"].get("level", 1)) <= level and ItemRules.power(b["it"]) > cur_power
+		if ra != rb:
+			return ra
 		return ItemRules.power(a["it"]) > ItemRules.power(b["it"]))
 	if rows.is_empty():
 		var e := _lbl("Aucun objet libre de ce type dans l'inventaire.", 19, C_DIM)
 		_content.add_child(e)
 		return
+	var last_sec: String = ""
 	for row: Dictionary in rows:
 		var it: Dictionary = row["it"]
 		var too_low: bool = int(it.get("level", 1)) > level
 		var delta: int = ItemRules.power(it) - cur_power
+		var sec: String = "rec" if (not too_low and delta > 0) else "other"
+		if sec != last_sec:
+			last_sec = sec
+			_content.add_child(_lbl("▲ CONSEILLÉS" if sec == "rec" else "AUTRES OBJETS", 17, C_GOOD if sec == "rec" else C_DIM, true))
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(0, 84)
 		b.focus_mode = Control.FOCUS_NONE
