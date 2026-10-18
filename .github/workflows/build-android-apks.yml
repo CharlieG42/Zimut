@@ -58,7 +58,8 @@ jobs:
           echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> "$GITHUB_ENV"
 
       - name: Decode release keystore from GitHub Secrets
-        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+        # Release signée aussi sur les PR de ce dépôt (les secrets ne sont pas transmis aux forks)
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         env:
           ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
@@ -72,7 +73,8 @@ jobs:
           }
 
       - name: Configure Godot release keystore
-        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+        # Release signée aussi sur les PR de ce dépôt (les secrets ne sont pas transmis aux forks)
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         env:
           ANDROID_KEYSTORE_USER: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
@@ -147,7 +149,8 @@ jobs:
           test -s export/Zimut-debug.apk
 
       - name: Export Zimut APK (Release)
-        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+        # Release signée aussi sur les PR de ce dépôt (les secrets ne sont pas transmis aux forks)
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         env:
           GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /home/runner/.local/share/godot/keystores/release.keystore
           GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -187,7 +190,8 @@ jobs:
           compression-level: 0
 
       - name: Upload Zimut Release APK
-        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+        # Release signée aussi sur les PR de ce dépôt (les secrets ne sont pas transmis aux forks)
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/upload-artifact@v4
         with:
           name: Zimut-release
