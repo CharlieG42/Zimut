@@ -138,13 +138,17 @@ func _build() -> void:
 	bg.color = Color(0.34, 0.47, 0.49)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
+	# Surface agrandie selon le réglage « Taille du texte » (UiFit)
+	var holder := Control.new()
+	add_child(holder)
+	UiFit.apply(holder, 1.0, Vector2(1300, 760))
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.offset_left = 28
 	root.offset_right = -28
 	root.offset_top = 20
 	root.offset_bottom = -20
-	add_child(root)
+	holder.add_child(root)
 	_root = root
 	_root.resized.connect(_layout_responsive)
 
@@ -661,7 +665,8 @@ func _update_map_pointer(position: Vector2) -> void:
 	if not _map_dragged and position.distance_to(_map_pointer_origin) < 4.0:
 		return
 	_map_dragged = true
-	var delta: Vector2 = position - _map_pointer_last
+	# position en pixels écran ; la carte vit dans une surface éventuellement agrandie
+	var delta: Vector2 = (position - _map_pointer_last) / maxf(0.01, _root.get_global_transform_with_canvas().get_scale().x)
 	_pan += delta
 	_clamp_zoom_and_pan()
 	_map_pointer_last = position
