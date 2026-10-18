@@ -1,6 +1,6 @@
 extends SceneTree
 ## Simulation d'équilibrage : combats automatiques (IA des deux côtés), sans équipement.
-## Usage : xvfb-run -a godot --path . -s tests/sim_balance.gd -- <victoires> <niveau héros> <n combats>
+## Usage : xvfb-run -a godot --path . -s tests/sim_balance.gd -- <victoires> <niveau héros> <n combats> [gear] [Classe,Classe,Classe]
 func _init() -> void:
 	_boot.call_deferred()
 func _boot() -> void:
@@ -12,12 +12,15 @@ func _boot() -> void:
 	root.get_node("GameSettings").speed_override = 16.0
 	var gm: Node = root.get_node("GameManager")
 	var pm: Node = root.get_node("ProgressionManager")
+	var team: Array = ["Tank", "Mage", "Heal"]
+	if args.size() > 4:
+		team = Array(args[4].split(","))
 	var wins: int = 0
 	var turns: Array = []
 	for k in range(n):
 		var data: Dictionary = pm.new_game(4, "Sim")
-		pm.rebuild_team(data, ["Tank", "Mage", "Heal"])
-		for c in ["Tank", "Mage", "Heal"]:
+		pm.rebuild_team(data, team)
+		for c in team:
 			var e: Dictionary = pm._new_entry(lvl)
 			e["unspent"] = ClassRules.auto_allocate(c, e["invested"], int(e["unspent"]))
 			data["roster"][c] = e
@@ -30,7 +33,10 @@ func _boot() -> void:
 			pm.auto_equip(data)
 		gm.active_save = data
 		gm.active_slot = 4
-		gm.set_custom_team([{"classe": "Tank"}, {"classe": "Mage"}, {"classe": "Heal"}])
+		var ct: Array = []
+		for c2 in team:
+			ct.append({"classe": c2})
+		gm.set_custom_team(ct)
 		gm.auto_mode = true
 		print("niveau ennemis : ", pm.enemy_level_for(data))
 		var main: Node = (load("res://scenes/Main.tscn") as PackedScene).instantiate()

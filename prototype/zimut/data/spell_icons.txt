@@ -195,3 +195,9 @@ Lame d'ombre,blade_shadow
 Vrilles sylvestres,ivy
 Flèche de sève,arrow
 Coup de branche,wood_arm
+Glyphe de grès,glyph_stone
+Glyphe sismique,glyph_quake
+Glyphe de venin,glyph_venom
+Glyphe d'ombre,glyph_shadow
+Glyphe d'entrave,glyph_snare
+Glyphe de flammes,glyph_flame

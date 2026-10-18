@@ -22,15 +22,15 @@ const ELEMENTS := {
 const KEYWORDS: Array = [
 	["ice", ["gel", "glace", "givre"]],
 	["lightning", ["eclair", "foudre", "tonnerre", "orage"]],
-	["fire", ["feu", "enflamme", "meteor", "explosion", "apocalypse", "brul", "desintegration", "incendi"]],
+	["fire", ["feu", "flamm", "enflamme", "meteor", "explosion", "apocalypse", "brul", "desintegration", "incendi"]],
 	["poison", ["poison", "venin", "empoison", "spore"]],
 	["shadow", ["ombre", "assassin", "fatale", "mortel", "mort", "malediction", "invisib", "camouflage",
 		"coup bas", "eviscer", "clignot", "spectral"]],
 	["holy", ["soin", "sacre", "lumiere", "benedic", "benit", "divin", "ange", "resurrection", "renaissance",
 		"purif", "jugement", "celeste", "restauration", "eclat", "guerisseur", "inspiration", "vie"]],
-	["nature", ["ronce", "seve", "racine", "lierre", "feuille", "petale", "graine", "foret", "epine", "nature",
+	["nature", ["entrave", "ronce", "seve", "racine", "lierre", "feuille", "petale", "graine", "foret", "epine", "nature",
 		"buisson", "sarriette", "pose un piege de ronces", "meute", "regression"]],
-	["earth", ["terre", "pierre", "tremblement", "ecras", "mur", "barriere", "rocher"]],
+	["earth", ["gres", "sismique", "seisme", "terre", "pierre", "tremblement", "ecras", "mur", "barriere", "rocher"]],
 	["water", ["vague", "sirene", "marin", "brume", "eau"]],
 ]
 
@@ -56,7 +56,7 @@ static func element_for(spell_name: String, dtype: String, kind: String) -> Stri
 		return "holy"
 	if kind == "summon" or kind == "teleport":
 		return "arcane"
-	if kind == "trap":
+	if kind == "trap" or kind == "glyph":
 		return "earth"
 	return "physical" if dtype == "phys" else "arcane"
 
@@ -240,3 +240,44 @@ class Missile extends Node2D:
 			_:
 				draw_circle(Vector2.ZERO, 14.0, Color(col.r, col.g, col.b, 0.9))
 				draw_circle(Vector2.ZERO, 7.0, Color(col2.r, col2.g, col2.b, 1.0))
+
+
+## Glyphe posé au sol : cases teintées + runes qui pulsent, tant que le glyphe existe.
+class GlyphMark extends Node2D:
+	var col: Color = Color.WHITE
+	var offsets: Array[Vector2] = []     # position des cases, relative au nœud
+	var center_off: Vector2 = Vector2.ZERO
+	var friendly: bool = true
+	var t: float = 0.0
+	func _process(d: float) -> void:
+		t += d
+		queue_redraw()
+	func _diamond(c: Vector2, k: float) -> PackedVector2Array:
+		return PackedVector2Array([c + Vector2(0, -32 * k), c + Vector2(64 * k, 0), c + Vector2(0, 32 * k), c + Vector2(-64 * k, 0)])
+	func _draw() -> void:
+		var pulse: float = 0.5 + 0.5 * sin(t * 3.0)
+		var fill := Color(col.r, col.g, col.b, 0.26 + 0.14 * pulse)
+		var line := Color(col.r, col.g, col.b, 0.55 + 0.35 * pulse)
+		for o: Vector2 in offsets:
+			var poly: PackedVector2Array = _diamond(o, 0.92)
+			draw_colored_polygon(poly, fill)
+			var closed := PackedVector2Array(poly)
+			closed.append(poly[0])
+			draw_polyline(closed, Color(0, 0, 0, 0.35), 4.5, true)
+			draw_polyline(closed, line, 2.6, true)
+			# petit symbole au centre de chaque case
+			draw_set_transform(o, 0.0, Vector2(1.0, 0.5))
+			draw_arc(Vector2.ZERO, 11.0, 0.0, TAU, 20, Color(line.r, line.g, line.b, 0.6), 1.5, true)
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		# grande rune tournante sur la case centrale
+		draw_set_transform(center_off, 0.0, Vector2(1.0, 0.5))
+		var r: float = 40.0
+		draw_arc(Vector2.ZERO, r, 0.0, TAU, 40, line, 2.5, true)
+		var rot: float = t * 0.9
+		var pts := PackedVector2Array()
+		for i: int in range(6):
+			var ang: float = rot + float(i) * TAU / 5.0 * 2.0
+			pts.append(Vector2(cos(ang), sin(ang)) * r * 0.85)
+		pts.append(pts[0])
+		draw_polyline(pts, line, 1.8, true)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

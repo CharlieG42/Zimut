@@ -392,11 +392,16 @@ func _show_governor_picker() -> void:
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	_root.add_child(dim)
+	# Centré par un CenterContainer (un preset CENTER posé avant le calcul de la taille
+	# faisait partir le panneau du centre vers le bas/droite, hors de l'écran).
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.add_child(center)
+	var avail: Vector2 = _root.size if _root.size.x > 0.0 else Vector2(1600, 900)
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", _box(Color(0.08, 0.12, 0.17, 0.99), GOLD, 3, 18))
-	panel.custom_minimum_size = Vector2(900, 0)
-	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE, 0)
-	dim.add_child(panel)
+	panel.custom_minimum_size = Vector2(minf(900.0, avail.x - 60.0), 0)
+	center.add_child(panel)
 	var outer := VBoxContainer.new()
 	outer.add_theme_constant_override("separation", 10)
 	panel.add_child(outer)
@@ -405,7 +410,7 @@ func _show_governor_picker() -> void:
 	var sc := ScrollContainer.new()
 	TouchScroll.install(sc)
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	sc.custom_minimum_size.y = 520
+	sc.custom_minimum_size.y = clampf(avail.y - 300.0, 240.0, 520.0)
 	outer.add_child(sc)
 	var list := VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL

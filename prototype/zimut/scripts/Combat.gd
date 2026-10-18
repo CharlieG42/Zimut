@@ -241,6 +241,37 @@ static func _turns(t: String, default: int) -> int:
 	return _num(t, "(\\d+) tours?", 1, default)
 
 
+## Effets d'un glyphe pour un camp : {dmg, dtype, dots, debuffs, buffs, heal} (valeurs x niveau de sort).
+static func _glyph_effects(txt: String, default_dtype: String, mult: float) -> Dictionary:
+	var out: Dictionary = {"dmg": 0, "dtype": "mag" if (txt.contains("magique") or default_dtype == "mag") else "phys",
+		"dots": [], "debuffs": [], "buffs": [], "heal": 0}
+	out["dmg"] = roundi(float(_num(txt, "(\\d+) dégâts(?!/)", 1, 0)) * mult)
+	var dv: int = _num(txt, "(\\d+) dégâts/tour", 1, 0)
+	if dv > 0:
+		var did: String = "poison"
+		if txt.contains("brûle"):
+			did = "burn"
+		elif txt.contains("saign"):
+			did = "bleed"
+		var after: String = txt.substr(txt.find("dégâts/tour"))
+		out["dots"].append({"id": did, "value": float(dv) * mult, "turns": _turns(after, 2)})
+	if txt.contains("ralenti"):
+		out["debuffs"].append({"id": "slow", "value": float(_num(txt, "(\\d+) pm", 1, 1)) * mult, "turns": _turns(txt, 1)})
+	if txt.contains("immobilis"):
+		out["debuffs"].append({"id": "root", "value": 1.0, "turns": 1})
+	if _has(txt, "-\\d+% dégâts"):
+		out["debuffs"].append({"id": "weaken", "value": float(_num(txt, "-(\\d+)% dégâts", 1, 20)) * mult, "turns": 1})
+	if _has(txt, "\\+\\d+% défense"):
+		out["buffs"].append({"id": "def_up", "value": float(_num(txt, "\\+(\\d+)% défense", 1, 20)) * mult, "turns": 2})
+	if _has(txt, "\\+\\d+% dégâts"):
+		out["buffs"].append({"id": "dmg_up", "value": float(_num(txt, "\\+(\\d+)% dégâts", 1, 20)) * mult, "turns": 2})
+	if txt.contains("invisible"):
+		out["buffs"].append({"id": "invisible", "value": 1.0, "turns": _turns(txt, 2)})
+	if _has(txt, "soigne \\d+"):
+		out["heal"] = roundi(float(_num(txt, "soigne (\\d+)", 1, 0)) * mult)
+	return out
+
+
 ## Transforme un sort (dictionnaire issu du CSV) en profil de règles. Mis en cache.
 static func parse(spell: Dictionary) -> Dictionary:
 	if spell.has("_p"):
@@ -268,6 +299,7 @@ static func parse(spell: Dictionary) -> Dictionary:
 		"needs_los": rng > 1, "min_range": 1,
 		"summon_dmg_base": 0, "summon_dmg_lvl": 0.0, "needs_summon": false,
 		"buff_summons": false,
+		"glyph_turns": 0, "glyph_allies": {}, "glyph_foes": {},
 	}
 	if PUSH.has(sname):
 		p["push"] = int(PUSH[sname])
@@ -300,6 +332,33 @@ static func parse(spell: Dictionary) -> Dictionary:
 		p["summon"] = "Loup Spectral"
 		p["summon_turns"] = 3
 		p["needs_los"] = false
+		spell["_p"] = p
+		return p
+
+	# ── Glyphes (V19) : zone posée au sol, effet au début du tour de ceux qui s'y trouvent ──
+	#   « Trace un glyphe (3x3|croix; N tours) : alliés <effets> | ennemis <effets> »
+	if t.begins_with("trace un glyphe"):
+		p["kind"] = "glyph"
+		p["target"] = "cell"
+		p["aoe"] = "zone"
+		p["needs_los"] = false
+		p["min_range"] = 0
+		var gz: int = _num(t, "glyphe \\((\\d)x\\d", 1, 0)
+		if gz > 0:
+			p["zone_shape"] = "square_side"
+			p["zone_r"] = gz
+		else:
+			p["zone_shape"] = "diamond"
+			p["zone_r"] = 1
+		p["glyph_turns"] = _num(t, "; (\\d+) tours?\\)", 1, 3)
+		var gmul: float = float(spell.get("mult", 1.0))
+		var body: String = t.substr(t.find(":") + 1) if t.contains(":") else ""
+		for seg: String in body.split("|"):
+			var sg: String = seg.strip_edges()
+			if sg.begins_with("alliés"):
+				p["glyph_allies"] = _glyph_effects(sg.substr("alliés".length()), p["dtype"], gmul)
+			elif sg.begins_with("ennemis"):
+				p["glyph_foes"] = _glyph_effects(sg.substr("ennemis".length()), p["dtype"], gmul)
 		spell["_p"] = p
 		return p
 
@@ -668,16 +727,16 @@ const SUMMONS := {
 	# Terrain du Géomancien : des cases de la grille deviennent des obstacles (« terrain »).
 	# Elles ne comptent pas comme familiers, disparaissent après `turns` tours du Géomancien
 	# et peuvent être détruites. `span` = nombre de cases posées d'un coup (ligne perpendiculaire).
-	"Pilier":       {"pv": 160, "force": 0, "defense": 40, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.80, 0.62, 0.35), "spell": [], "static": true, "blocks_los": true, "terrain": true, "turns": 4, "span": 1, "tower": true},
-	"Muraille":     {"pv": 110, "force": 0, "defense": 35, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.72, 0.55, 0.30), "spell": [], "static": true, "blocks_los": true, "terrain": true, "turns": 3, "span": 3},
+	"Pilier":       {"pv": 70, "force": 0, "defense": 30, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.80, 0.62, 0.35), "spell": [], "static": true, "blocks_los": true, "terrain": true, "turns": 4, "span": 1, "tower": true},
+	"Muraille":     {"pv": 70, "force": 0, "defense": 30, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.72, 0.55, 0.30), "spell": [], "static": true, "blocks_los": true, "terrain": true, "turns": 3, "span": 3},
 	"Faille":       {"pv": 999, "force": 0, "defense": 0, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.35, 0.22, 0.12), "spell": [], "static": true, "terrain": true, "turns": 3, "span": 3, "indestructible": true},
-	"Cristal ambré": {"pv": 200, "force": 0, "defense": 55, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.95, 0.65, 0.15), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1},
+	"Cristal ambré": {"pv": 90, "force": 0, "defense": 40, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.95, 0.65, 0.15), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1},
 	"Balise":       {"pv": 90, "force": 0, "defense": 30, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.90, 0.60, 0.20), "spell": [], "static": true, "beacon": true},
 }
 
 
-## V16 : comme les sorts des héros, les attaques des invocations sont divisées par 1,5.
-const SUMMON_SPELL_DIV := 1.5
+## V16 : comme les sorts des héros, les attaques des invocations sont divisées par 2 (V19).
+const SUMMON_SPELL_DIV := 2.0
 
 
 ## Divise les montants « N dégâts » et « N PV » d'un texte d'effet.

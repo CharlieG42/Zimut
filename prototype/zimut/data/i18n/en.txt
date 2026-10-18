@@ -1420,3 +1420,18 @@ Niveau	Level
 %s — niv %d	%s — lv %d
 %s — niv. %d · %s	%s — lv. %d · %s
 %s · niv %d	%s · lv %d
+Glyphe de grès	Sandstone Glyph
+Glyphe sismique	Seismic Glyph
+Glyphe de venin	Venom Glyph
+Glyphe d'ombre	Shadow Glyph
+Glyphe d'entrave	Snare Glyph
+Glyphe de flammes	Flame Glyph
+Trace un glyphe (3x3; 3 tours) : alliés +25% défense	Draws a glyph (3x3; 3 turns): allies +25% defense
+Trace un glyphe (3x3; 3 tours) : ennemis 30 dégâts magiques + ralentis 1 pm	Draws a glyph (3x3; 3 turns): enemies take 30 magic damage + slowed by 1 MP
+Trace un glyphe (croix; 3 tours) : ennemis 25 dégâts/tour (2 tours)	Draws a glyph (cross; 3 turns): enemies take 25 damage/turn (2 turns)
+Trace un glyphe (croix; 3 tours) : alliés invisible (2 tours)	Draws a glyph (cross; 3 turns): allies become invisible (2 turns)
+Trace un glyphe (croix; 3 tours) : ennemis ralentis 2 pm (1 tour)	Draws a glyph (cross; 3 turns): enemies slowed by 2 MP (1 turn)
+Trace un glyphe (3x3; 3 tours) : ennemis 25 dégâts + brûle 20 dégâts/tour (2 tours)	Draws a glyph (3x3; 3 turns): enemies take 25 damage + burn 20 damage/turn (2 turns)
+Glyphe	Glyph
+%s trace %s (%d tours).	%s draws %s (%d turns).
+%s s'efface.	%s fades away.
