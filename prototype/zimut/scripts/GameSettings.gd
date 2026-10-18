@@ -30,6 +30,9 @@ const COMBAT_SPEED_MULT := [1.0, 2.0, 3.0]
 
 var difficulty: int = 1
 var combat_speed: int = 0
+## Sons d'effets / vibrations (V18)
+var sfx_on: bool = true
+var haptics_on: bool = true
 var xp_speed: int = 1
 var text_size: int = 1
 ## Aide du premier combat déjà vue (ou passée).
@@ -53,13 +56,16 @@ func load_settings() -> void:
 	text_size = clampi(int(parsed.get("text_size", text_size)), 0, TEXT_SIZES.size() - 1)
 	tutorial_done = bool(parsed.get("tutorial_done", tutorial_done))
 	combat_speed = clampi(int(parsed.get("combat_speed", combat_speed)), 0, COMBAT_SPEEDS.size() - 1)
+	sfx_on = bool(parsed.get("sfx_on", sfx_on))
+	haptics_on = bool(parsed.get("haptics_on", haptics_on))
+	_apply_sfx()
 
 func save_settings() -> void:
 	var f := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
 	if f == null:
 		push_error("Impossible d'écrire les réglages")
 		return
-	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "combat_speed": combat_speed}, "\t"))
+	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "combat_speed": combat_speed, "sfx_on": sfx_on, "haptics_on": haptics_on}, "\t"))
 	f.close()
 
 func set_difficulty(idx: int) -> void:
@@ -76,6 +82,20 @@ func set_text_size(idx: int) -> void:
 	text_size = clampi(idx, 0, TEXT_SIZES.size() - 1)
 	save_settings()
 	settings_changed.emit()
+
+func set_sfx(on: bool) -> void:
+	sfx_on = on
+	_apply_sfx()
+	save_settings()
+
+func set_haptics(on: bool) -> void:
+	haptics_on = on
+	save_settings()
+
+func _apply_sfx() -> void:
+	var sfx: Node = get_node_or_null("/root/Sfx")
+	if sfx != null:
+		sfx.set("enabled", sfx_on)
 
 func set_combat_speed(idx: int) -> void:
 	combat_speed = clampi(idx, 0, COMBAT_SPEEDS.size() - 1)

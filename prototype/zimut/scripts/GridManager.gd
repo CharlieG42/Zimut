@@ -811,6 +811,8 @@ func _play_damage(d: Dictionary) -> void:
 	var elem: String = "poison" if dtype == "dot" else ("earth" if dtype == "fall" else _cur_element)
 	_impact(v.position + Vector2(0, -44), elem, crit)
 	Sfx.play("crit" if crit else "hit")
+	if crit:
+		Sfx.buzz(25)
 	_shake(7.0 if crit else 3.0)
 	await _wait(0.2)
 
@@ -844,6 +846,7 @@ func _play_death(d: Dictionary) -> void:
 	if v == null:
 		return
 	Sfx.play("death")
+	Sfx.buzz(45 if String(e.get("team", "")) == "enemy" else 90)
 	v.set_hp(0.0)
 	_burst(v.position + Vector2(0, -30), Color(0.85, 0.85, 0.85, 0.9), 24, 150.0, 0.7, 6.0)
 	_shake(5.0)

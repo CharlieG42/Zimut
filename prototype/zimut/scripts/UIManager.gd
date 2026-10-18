@@ -1756,6 +1756,10 @@ func _result_extras(content: VBoxContainer, save: Dictionary, victory: bool) -> 
 		var txt: String = ("◆ Objectif réussi — %s : %s" % [String(obj.get("label", "")), String(obj.get("reward_text", ""))]) if ok \
 			else ("◇ Objectif manqué — %s" % String(obj.get("label", "")))
 		content.add_child(UK.lbl(txt, 19, Color(1.0, 0.80, 0.40) if ok else UK.C_DIM))
+	if not (save.get("last_achievements", []) as Array).is_empty():
+		get_tree().create_timer(0.8).timeout.connect(func() -> void:
+			Sfx.play("achievement")
+			Sfx.buzz(60))
 	for a: Dictionary in save.get("last_achievements", []):
 		var row := PanelContainer.new()
 		row.add_theme_stylebox_override("panel", UK.box(Color(0.20, 0.15, 0.05, 0.95), Color(1.0, 0.82, 0.35), 12, 2, 10))
