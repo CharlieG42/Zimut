@@ -587,7 +587,9 @@ func refresh() -> void:
 		var adv: Dictionary = GameManager.active_save.get("adventure", {})
 		biome = ProgressionManager.adventure_zone_biome(String(adv.get("zone", "foret_sylve")))
 		var pkey: String = String(adv.get("pending_challenge", ""))
-		if pkey != "":
+		if pkey.begins_with("mob:"):
+			challenge_name = String(adv.get("pending_name", "Groupe de monstres"))
+		elif pkey != "":
 			var parts := pkey.split(",")
 			if parts.size() >= 3:
 				var poi: Dictionary = ProgressionManager.adventure_poi(String(parts[0]),

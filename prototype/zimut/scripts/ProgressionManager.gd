@@ -2028,7 +2028,22 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 	elif mode == "adventure":
 		var adventure: Dictionary = data.get("adventure", {})
 		var pending_challenge: String = String(adventure.get("pending_challenge", ""))
-		if pending_challenge != "":
+		var mob: Dictionary = AdventureMobs.parse_challenge(pending_challenge)
+		if not mob.is_empty():
+			# Groupe de monstres errant : il disparaît, le contrat de la carte avance.
+			var mz: String = String(mob["zone"])
+			var gone: Dictionary = AdventureMobs.defeat(adventure, mz, int(mob["id"]))
+			if not gone.is_empty():
+				var filled: Dictionary = AdventureMobs.progress(adventure, mz, gone)
+				if not filled.is_empty():
+					var rew: Dictionary = adventure_contract_reward(data, mz, filled)
+					adventure["last_contract"] = rew
+			adventure["pending_challenge"] = ""
+			adventure.erase("pending_level")
+			adventure.erase("pending_name")
+			adventure.erase("pending_count")
+			data["adventure"] = adventure
+		elif pending_challenge != "":
 			var completed: Array = adventure.get("completed", [])
 			if not completed.has(pending_challenge):
 				completed.append(pending_challenge)
@@ -2036,7 +2051,54 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 			adventure["pending_challenge"] = ""
 			adventure.erase("pending_level")
 			adventure.erase("pending_name")
+			adventure.erase("pending_count")
 			data["adventure"] = adventure
+
+## Récompense d'un contrat d'Aventure rempli, versée tout de suite à la sauvegarde.
+## Retourne { title, zone, gold, resources, xp, item } pour l'affichage.
+func adventure_contract_reward(data: Dictionary, zone: String, c: Dictionary) -> Dictionary:
+	var lvl: int = maxi(1, int(c.get("level", adventure_zone_level(zone))))
+	var elite: bool = String(c.get("kind", "")) == "elite"
+	var mult: float = 1.6 if elite else 1.0
+	var gold: int = roundi(float(40 + 8 * lvl) * mult)
+	var res_name: String = String(CONQUEST_BIOME_RESOURCE.get(adventure_zone_biome(zone), Nations.resource_of(adventure_zone_biome(zone))))
+	var res: Dictionary = {res_name: 3 + lvl / 8}
+	if elite:
+		res[res_key(res_name, 2)] = 1 + lvl / 25
+	add_resources(data, res)
+	data["gold"] = int(data.get("gold", 0)) + gold
+	var xp: int = roundi(float(combat_xp(lvl)) * (1.5 if elite else 0.4 * float(int(c.get("need", 2)))))
+	award_xp(data, xp, 1.0, lvl)
+	var out: Dictionary = {"title": "Contrat d'élite rempli !" if elite else "Contrat de chasse rempli !",
+		"zone": zone, "gold": gold, "resources": res, "xp": xp}
+	if elite:
+		var drops: Array = _roll_loots(lvl + 2, true)
+		if not drops.is_empty():
+			data["inventory"].append(drops[0])
+			out["item"] = drops[0]
+	return out
+
+## Récompense unique de maîtrise d'une carte (tous les lieux et trouvailles) : un objet
+## rare ou mieux du niveau de la carte, de l'or et des ressources.
+func adventure_mastery_reward(data: Dictionary, zone: String) -> Dictionary:
+	var adv: Dictionary = data.get("adventure", {})
+	var mastered: Array = adv.get("mastered", [])
+	if mastered.has(zone):
+		return {}
+	mastered.append(zone)
+	adv["mastered"] = mastered
+	var lvl: int = adventure_zone_level(zone)
+	var gold: int = 80 + 10 * lvl
+	data["gold"] = int(data.get("gold", 0)) + gold
+	var res_name: String = String(CONQUEST_BIOME_RESOURCE.get(adventure_zone_biome(zone), Nations.resource_of(adventure_zone_biome(zone))))
+	var res: Dictionary = {res_key(res_name, 2): 2 + lvl / 20}
+	add_resources(data, res)
+	var out: Dictionary = {"zone": zone, "gold": gold, "resources": res}
+	var drops: Array = _roll_loots(lvl + 3, true)
+	if not drops.is_empty():
+		data["inventory"].append(drops[0])
+		out["item"] = drops[0]
+	return out
 
 # ═══════════════════════════════════════════════════════════════════════
 #  MODE AVENTURE — état, brouillard de guerre et pont vers la Conquête
@@ -2762,6 +2824,7 @@ func _apply_campaign_defeat(data: Dictionary) -> void:
 		var adventure: Dictionary = data.get("adventure", {})
 		adventure["pending_challenge"] = ""
 		adventure.erase("pending_name")
+		adventure.erase("pending_count")
 		data["adventure"] = adventure
 
 ## Numéro du prochain combat (1 = premier). Boss tous les BOSS_EVERY combats.
