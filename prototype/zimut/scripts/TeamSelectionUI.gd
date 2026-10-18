@@ -57,6 +57,7 @@ var _chars_btn: Button
 var _fight_sel_label: Label
 var _fight_prev_btn: Button
 var _fight_next_btn: Button
+var _goal_label: Label               # objectif du combat + synergies de l'équipe
 
 func _ready() -> void:
 	_load_classes()
@@ -242,6 +243,11 @@ func _build() -> void:
 	_fight_next_btn = U.btn("▶", Color(0.45, 0.52, 0.70), 22, Vector2(64, 48))
 	_fight_next_btn.pressed.connect(_on_fight_next)
 	sel_row.add_child(_fight_next_btn)
+
+	_goal_label = U.lbl("", 19, Color(1.0, 0.80, 0.42))
+	_goal_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(_goal_label)
 
 	# ── Corps : grille des classes | fiche de la classe choisie
 	var body := HBoxContainer.new()
@@ -666,6 +672,16 @@ func refresh() -> void:
 			slot.add_theme_stylebox_override("pressed", st_e)
 	if _fight_btn:
 		_fight_btn.disabled = team.size() != MAX_TEAM_SIZE
+	if _goal_label:
+		var parts: PackedStringArray = []
+		if not GameManager.active_save.is_empty():
+			var obj: Dictionary = ProgressionManager.combat_objective(GameManager.active_save)
+			if not obj.is_empty():
+				parts.append("◆ Objectif : %s (%s)" % [obj["label"], obj["reward_text"]])
+		for sy: Dictionary in ProgressionManager.active_synergies(team):
+			parts.append("✦ %s (%s) : %s" % [sy["name"], sy["pair"], sy["desc"]])
+		_goal_label.text = "\n".join(parts)
+		_goal_label.visible = not parts.is_empty()
 
 func _flat(bg: Color, border: Color, radius: int = 12, bw: int = 3) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()

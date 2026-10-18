@@ -690,6 +690,10 @@ func hp_ratio(e: Dictionary) -> float:
 
 ## Statistiques du combat en cours (écran de victoire) : uid -> {name, classe, dmg, heal, kills, taken}
 var combat_stats: Dictionary = {}
+## Objectif annoncé pour ce combat (voir ProgressionManager.combat_objective) et suivi du chef
+var fight_objective: Dictionary = {}
+var _chief_uid: int = -1
+var _first_kill_uid: int = -1
 
 
 ## Héros (ou entité) à qui attribuer une action : une invocation compte pour son invocateur.
@@ -714,9 +718,35 @@ func _stat(e: Dictionary) -> Dictionary:
 	return combat_stats[uid]
 
 
+## V18 : objectif du combat (annoncé), chef désigné, synergies de classes appliquées.
+func _setup_objective_and_synergies() -> void:
+	fight_objective = ProgressionManager.combat_objective(active_save) if not active_save.is_empty() else {}
+	var chief: Dictionary = {}
+	for en: Dictionary in enemies:
+		if chief.is_empty() or int(en.get("max_pv", 0)) > int(chief.get("max_pv", 0)):
+			chief = en
+	if not chief.is_empty():
+		_chief_uid = int(chief["uid"])
+	if not fight_objective.is_empty():
+		var lab: String = String(fight_objective["label"])
+		if String(fight_objective["kind"]) == "chief" and not chief.is_empty():
+			lab = "Vaincre en premier le chef : %s" % String(chief.get("name", "?"))
+			Combat.add_status(chief, "chief", 99, 0.0)
+		message_requested.emit("◆ Objectif : %s (%s)" % [lab, String(fight_objective.get("reward_text", ""))])
+	var classes: Array = []
+	for p: Dictionary in players:
+		classes.append(String(p.get("classe", "")))
+	for sy: Dictionary in ProgressionManager.active_synergies(classes):
+		for p2: Dictionary in players:
+			Combat.add_status(p2, String(sy["status"]), 99, float(sy["value"]))
+		message_requested.emit("✦ Synergie %s (%s) : %s" % [sy["name"], sy["pair"], sy["desc"]])
+
+
 func start_battle() -> void:
 	_epoch += 1
 	combat_stats = {}
+	_first_kill_uid = -1
+	_chief_uid = -1
 	turn_count = 1
 	_last_banner_round = 0
 	_turn_index = -1
@@ -730,6 +760,7 @@ func start_battle() -> void:
 			Achievements.bestiary_seen(active_save, en, fight_biome)
 	turn_order.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["init"] > b["init"])
 	message_requested.emit("Le combat commence !")
+	_setup_objective_and_synergies()
 	fx.emit("banner", {"text": "Combat !"})
 	BiomeEffects.setup(fight_biome, turn_order)
 	var biome_txt: String = BiomeEffects.describe(fight_biome)
@@ -1287,6 +1318,8 @@ func _apply_damage(attacker: Dictionary, tgt: Dictionary, dmg: int, dtype: Strin
 				sa["kills"] = int(sa["kills"]) + 1
 				if not active_save.is_empty():
 					Achievements.bestiary_kill(active_save, tgt)
+				if _first_kill_uid < 0 and String(tgt.get("team", "")) == "enemy":
+					_first_kill_uid = int(tgt.get("uid", -1))
 	var st_t: Dictionary = _stat(tgt)
 	if not st_t.is_empty():
 		st_t["taken"] = int(st_t["taken"]) + real_dmg
@@ -1792,7 +1825,16 @@ func check_game_over() -> void:
 	for pl_d: Dictionary in players:
 		if not is_alive(pl_d):
 			deaths += 1
-	var info: Dictionary = {"enemies": fight_enemies, "turns": turn_count, "boss": fight_is_boss, "deaths": deaths}
+	var heal_total: int = 0
+	var all_hit: bool = true
+	for pl_s: Dictionary in players:
+		var stp: Dictionary = combat_stats.get(int(pl_s["uid"]), {})
+		heal_total += int(stp.get("heal", 0))
+		if int(stp.get("dmg", 0)) <= 0:
+			all_hit = false
+	var info: Dictionary = {"enemies": fight_enemies, "turns": turn_count, "boss": fight_is_boss, "deaths": deaths,
+		"objective": fight_objective.duplicate(), "chief_first": _first_kill_uid >= 0 and _first_kill_uid == _chief_uid,
+		"heal_total": heal_total, "all_hit": all_hit}
 	if alive_p == 0:
 		game_over = true
 		victory = false

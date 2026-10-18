@@ -44,6 +44,7 @@ const STATUS_INFO := {
 	"invisible":   {"label": "Invisible",      "color": Color(0.80, 0.80, 0.90), "icon": "Iv"},
 	"regen":       {"label": "Régénération",   "color": Color(0.40, 0.95, 0.50), "icon": "Rg"},
 	"mark":        {"label": "Critique garanti", "color": Color(1.00, 0.85, 0.20), "icon": "Cr"},
+	"chief":       {"label": "Chef (objectif)", "color": Color(1.00, 0.80, 0.30), "icon": "★"},
 }
 
 
