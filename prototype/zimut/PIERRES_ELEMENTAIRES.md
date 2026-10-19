@@ -1,4 +1,6 @@
-# Les Pierres Élémentaires — objectif final du jeu (design proposé, non implémenté)
+# Les Pierres Élémentaires — objectif final du jeu
+
+> **V27 : implémenté** — voir AMELIORATIONS_V27.md pour les règles retenues (obtention par boss de Nation, 2 par héros, éveil 1 à 5).
 
 > Statut : **idée validée dans l'intention, mécaniques à définir**. Ce document sert de base de discussion ;
 > rien ici n'est encore dans le code, à part la narration de Gultur (`scripts/Gultur.gd`).

@@ -1657,6 +1657,17 @@ func _show_result_window(victory: bool) -> void:
 	hs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hs.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hrow.add_child(hs)
+	# V27 : Pierre Élémentaire retrouvée
+	if victory and String(res.get("stone", "")) != "":
+		var sb_biome: String = String(res["stone"])
+		var sc: Color = Stones.info(sb_biome).get("color", gold_c)
+		var sp := PanelContainer.new()
+		sp.add_theme_stylebox_override("panel", UK.box(Color(sc.r * 0.25, sc.g * 0.25, sc.b * 0.25, 0.95), sc, 14, 3, 12))
+		box.add_child(sp)
+		var sl := UK.lbl("💎  %s retrouvée !  (%d / %d)   ·   %s" % [Stones.stone_name(sb_biome), Stones.count(save), Stones.ORDER.size(),
+			"  ".join(Stones.bonus_lines(sb_biome, 1))], 24, sc, true)
+		sl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		sp.add_child(sl)
 
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL

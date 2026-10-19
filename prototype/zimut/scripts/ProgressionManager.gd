@@ -216,7 +216,7 @@ const ADVENTURE_ZONES := {
 	},
 	"rouages_atelier": {
 		"name": "Ateliers des Rouages", "biome": "Rouages", "size": [10, 7], "grid": [4, 1],
-		"start": [1, 3], "unlock": "marees_cotes", "key_poi": "6,3", "reveals": [],
+		"start": [1, 3], "unlock": "marees_cotes", "key_poi": "6,3", "reveals": ["atelier_cuivre", "citadelle_engrenages"],
 	},
 }
 
@@ -236,6 +236,8 @@ const ADVENTURE_POIS := {
 			"desc": "Des menhirs s'illuminent puis se taisent."},
 	},
 	"foret_ronces": {
+		"1,1": {"kind": "combat", "guardian": "Forêt", "name": "Sanctuaire : Pierre de Sève", "level": 22,
+			"desc": "Le gardien de la Nation veille sur la Pierre de Sève."},
 		"5,1": {"kind": "combat", "name": "Embûche de ronces", "level": 10,
 			"desc": "Quelque chose remue sous les ronces."},
 		"2,2": {"kind": "puzzle", "name": "Autel du Lierre", "level": 10,
@@ -276,6 +278,8 @@ const ADVENTURE_POIS := {
 			"desc": "Un abri de toile où l'on échange les nouvelles."},
 	},
 	"cretes_givre": {
+		"1,1": {"kind": "combat", "guardian": "Montagne", "name": "Sanctuaire : Pierre de Givre", "level": 58,
+			"desc": "Le gardien de la Nation veille sur la Pierre de Givre."},
 		"5,3": {"kind": "combat", "name": "Sentinelles de glace", "level": 47,
 			"desc": "Des silhouettes figées bougent quand on approche."},
 		"4,5": {"kind": "combat", "name": "Troll des crêtes", "level": 55,
@@ -316,6 +320,8 @@ const ADVENTURE_POIS := {
 			"desc": "Une flamme bleue qui ne s'éteint jamais."},
 	},
 	"desert_dunes": {
+		"8,3": {"kind": "combat", "guardian": "Désert", "name": "Sanctuaire : Pierre d'Ocre", "level": 70,
+			"desc": "Le gardien de la Nation veille sur la Pierre d'Ocre."},
 		"4,3": {"kind": "combat", "name": "Squelettes des sables", "level": 63,
 			"desc": "Des ossements s’animent à votre approche."},
 		"6,1": {"kind": "puzzle", "name": "Obélisque Solaire", "level": 63,
@@ -328,7 +334,10 @@ const ADVENTURE_POIS := {
 			"desc": "Seize tuiles de verre attendent la lumière."},
 		"1,1": {"kind": "camp", "name": "Puits de l'oasis", "level": 63,
 			"desc": "Une eau fraîche au fond d'un puits de grès."},
-	},	"vents_plateau": {
+	},
+	"vents_plateau": {
+		"1,1": {"kind": "combat", "guardian": "Vents", "name": "Sanctuaire : Pierre d'Azur", "level": 42,
+			"desc": "Le gardien de la Nation veille sur la Pierre d'Azur."},
 		"3,2": {"kind": "combat", "name": "Garde aérienne", "level": 33, "desc": "Des sentinelles ailées patrouillent."},
 		"6,3": {"kind": "combat", "name": "Harpies du plateau", "level": 40, "desc": "Les harpies défendent leur nid."},
 		"2,5": {"kind": "chest", "name": "Nid d'aigle", "level": 33, "desc": "Un nid garni de trouvailles."},
@@ -337,6 +346,8 @@ const ADVENTURE_POIS := {
 		"4,4": {"kind": "camp", "name": "Abri de plume", "level": 33, "desc": "Un abri contre les rafales."},
 	},
 	"brumes_marais": {
+		"1,1": {"kind": "combat", "guardian": "Brumes", "name": "Sanctuaire : Pierre de Lune-des-Marais", "level": 35,
+			"desc": "Le gardien de la Nation veille sur la Pierre de Lune-des-Marais."},
 		"3,2": {"kind": "combat", "name": "Rôdeurs brumeux", "level": 26, "desc": "Des formes se glissent dans la brume."},
 		"6,2": {"kind": "combat", "name": "Liche du marais", "level": 33, "desc": "Un mort-vivant garde le marais."},
 		"2,5": {"kind": "chest", "name": "Coffre englouti", "level": 26, "desc": "Un coffre à moitié enfoui dans la vase."},
@@ -345,6 +356,8 @@ const ADVENTURE_POIS := {
 		"4,4": {"kind": "camp", "name": "Cabane sur pilotis", "level": 26, "desc": "Un refuge au-dessus de l'eau."},
 	},
 	"brasier_cendres": {
+		"1,1": {"kind": "combat", "guardian": "Brasier", "name": "Sanctuaire : Pierre de Braise", "level": 28,
+			"desc": "Le gardien de la Nation veille sur la Pierre de Braise."},
 		"3,2": {"kind": "combat", "name": "Lieutenants de braise", "level": 20, "desc": "Des soldats de feu montent la garde."},
 		"6,4": {"kind": "combat", "name": "Golem de lave", "level": 26, "desc": "Un colosse de roche en fusion."},
 		"2,5": {"kind": "chest", "name": "Forge abandonnée", "level": 20, "desc": "Une forge oubliée, encore tiède."},
@@ -353,6 +366,8 @@ const ADVENTURE_POIS := {
 		"4,4": {"kind": "camp", "name": "Source chaude", "level": 20, "desc": "Une source bienfaisante."},
 	},
 	"ombres_necropole": {
+		"1,1": {"kind": "combat", "guardian": "Ombres", "name": "Sanctuaire : Pierre d'Ébène", "level": 66,
+			"desc": "Le gardien de la Nation veille sur la Pierre d'Ébène."},
 		"3,2": {"kind": "combat", "name": "Assassins des ombres", "level": 55, "desc": "Des silhouettes jaillissent des tombes."},
 		"5,3": {"kind": "combat", "name": "Spectre gardien", "level": 63, "desc": "Le gardien de la nécropole."},
 		"2,5": {"kind": "chest", "name": "Caveau scellé", "level": 55, "desc": "Un caveau dont le sceau a cédé."},
@@ -361,6 +376,8 @@ const ADVENTURE_POIS := {
 		"4,4": {"kind": "camp", "name": "Crypte tranquille", "level": 55, "desc": "Un coin de calme parmi les stèles."},
 	},
 	"cristaux_caverne": {
+		"1,1": {"kind": "combat", "guardian": "Cristaux", "name": "Sanctuaire : Pierre de Prisme", "level": 94,
+			"desc": "Le gardien de la Nation veille sur la Pierre de Prisme."},
 		"3,2": {"kind": "combat", "name": "Mineurs cristallins", "level": 81, "desc": "Des ouvriers de cristal veillent."},
 		"6,3": {"kind": "combat", "name": "Golem prismatique", "level": 90, "desc": "Le gardien lumineux de la caverne."},
 		"2,5": {"kind": "chest", "name": "Géode brisée", "level": 81, "desc": "Une géode pleine d'éclats précieux."},
@@ -369,6 +386,8 @@ const ADVENTURE_POIS := {
 		"4,4": {"kind": "camp", "name": "Grotte tiède", "level": 81, "desc": "Un coin chaud et abrité."},
 	},
 	"marees_cotes": {
+		"1,1": {"kind": "combat", "guardian": "Marées", "name": "Sanctuaire : Pierre de Corail", "level": 84,
+			"desc": "Le gardien de la Nation veille sur la Pierre de Corail."},
 		"3,2": {"kind": "combat", "name": "Pirates des marées", "level": 72, "desc": "Des pirates ont jeté l'ancre."},
 		"6,2": {"kind": "combat", "name": "Crabe titan", "level": 81, "desc": "Un crabe gigantesque garde la crique."},
 		"2,5": {"kind": "chest", "name": "Épave échouée", "level": 72, "desc": "Une épave pleine de butin."},
@@ -377,6 +396,8 @@ const ADVENTURE_POIS := {
 		"4,4": {"kind": "camp", "name": "Plage abritée", "level": 72, "desc": "Une crique calme pour souffler."},
 	},
 	"rouages_atelier": {
+		"1,1": {"kind": "combat", "guardian": "Rouages", "name": "Sanctuaire : Pierre d'Airain", "level": 96,
+			"desc": "Le gardien de la Nation veille sur la Pierre d'Airain."},
 		"3,2": {"kind": "combat", "name": "Gobelins mécaniciens", "level": 84, "desc": "Des bricoleurs testent leurs inventions sur les visiteurs."},
 		"6,3": {"kind": "combat", "name": "Colosse d'engrenages", "level": 92, "desc": "Une machine géante garde la grande forge."},
 		"2,5": {"kind": "chest", "name": "Caisse d'outils scellée", "level": 84, "desc": "Une caisse pleine de pièces rares."},
@@ -481,6 +502,8 @@ const CONQUEST_CITIES := {
 	"fort_cendre": {"name": "Fort des Cendres", "kind": "enemy", "biome": "Brasier", "level": 110},
 	"temple_soleil": {"name": "Temple du Soleil", "kind": "neutral", "biome": "Désert", "level": 100},
 	"citadelle_sable": {"name": "Citadelle de Sable", "kind": "enemy", "biome": "Brasier", "level": 120},
+	"atelier_cuivre": {"name": "Atelier de Cuivre", "kind": "neutral", "biome": "Rouages", "level": 95},
+	"citadelle_engrenages": {"name": "Citadelle des Engrenages", "kind": "enemy", "biome": "Rouages", "level": 115},
 }
 
 ## Récompense de première annexion : chaque lieu offre un petit butin
@@ -513,6 +536,8 @@ const CONQUEST_CITY_REWARDS := {
 	"fort_cendre": {"name": "Réserve de cendre", "resources": {"Fer": 20, "Venin": 8}, "gold": 160},
 	"temple_soleil": {"name": "Offrande solaire", "resources": {"Magie": 15}, "gold": 150},
 	"citadelle_sable": {"name": "Trésor de la Citadelle", "resources": {"Fer": 20, "Cuir": 12, "Magie": 8}, "gold": 220},
+	"atelier_cuivre": {"name": "Caisse de pièces détachées", "resources": {"Fer": 14, "Cuir": 6}, "gold": 120},
+	"citadelle_engrenages": {"name": "Coffre du Grand Horloger", "resources": {"Fer": 24, "Magie": 10}, "gold": 260},
 }
 
 ## Routes de la carte : on ne peut attaquer qu'une ville RELIÉE par route à
@@ -539,6 +564,8 @@ const CONQUEST_ROUTES: Array = [
 	["pic_foudroyant", "bastion_orage"], ["oasis", "fort_cendre"],
 	["fort_cendre", "temple_soleil"], ["temple_soleil", "citadelle_sable"],
 	["citadelle_sable", "port_sable"], ["citadelle_sable", "tour_sable"],
+	# V27 : Nation Rouages, au nord-est
+	["garnison", "atelier_cuivre"], ["atelier_cuivre", "citadelle_engrenages"], ["citadelle_engrenages", "tour_sable"],
 ]
 
 ## Bâtiments de ressources constructibles dans les villes conquises.
@@ -1698,6 +1725,11 @@ func member_stats(data: Dictionary, member: Dictionary) -> Dictionary:
 	var eq: Dictionary = agg["stats"]
 	var ms: Dictionary = ClassRules.milestone_bonus(classe, level)
 	var fx: Dictionary = agg["fx"]
+	# V27 : Pierres Élémentaires portées par le héros (stats + effets)
+	var sb: Dictionary = Stones.hero_bonus(data, classe)
+	for sk: String in sb["stats"].keys():
+		eq[sk] = int(eq.get(sk, 0)) + int(sb["stats"][sk])
+	ItemRules.merge_fx(fx, sb["fx"])
 	var out: Dictionary = {
 		"classe": classe, "level": level,
 		"max_pv": int(row["vita"]) + int(inv.get("vita", 0)) * int(ClassRules.STAT_GAIN["vita"]) + int(eq["vita"]),
@@ -1945,6 +1977,11 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 			add_resources(data, obj["resources"])
 			Achievements.bump(data, "objectives")
 		data["last_result"]["objective"] = obj
+	# V27 : Pierre Élémentaire de la Nation dont le boss vient de tomber
+	var stone_biome: String = String(info.get("nation_boss", ""))
+	if stone_biome != "" and Stones.grant(data, stone_biome):
+		data["last_result"]["stone"] = stone_biome
+		Achievements.bump(data, "stones")
 	_apply_campaign_victory(data)
 	# Succès (V18)
 	Achievements.bump(data, "wins")
@@ -2196,6 +2233,13 @@ func adventure_zone_biome(zone_id: String) -> String:
 	return String(ADVENTURE_ZONES.get(zone_id, {}).get("biome", "Forêt"))
 
 ## POI à une position donnée d'une zone : {} si pas de POI.
+## POI d'après sa clé « zone,x,y » ({} si inconnu).
+func adventure_poi_by_key(key: String) -> Dictionary:
+	var parts: PackedStringArray = key.split(",")
+	if parts.size() != 3:
+		return {}
+	return ADVENTURE_POIS.get(parts[0], {}).get("%s,%s" % [parts[1], parts[2]], {})
+
 func adventure_poi(zone_id: String, pos: Vector2i) -> Dictionary:
 	var key := "%d,%d" % [pos.x, pos.y]
 	return ADVENTURE_POIS.get(zone_id, {}).get(key, {})

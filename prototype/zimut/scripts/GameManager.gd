@@ -95,6 +95,7 @@ var active_slot: int             = -1
 var menu_intent: String           = ""   # intention transmise à l’écran Parties (ex. nouvelle partie)
 var fight_enemies: Array         = []   # [{type, level, boss}] du combat en cours (pour l'XP)
 var fight_is_boss: bool          = false
+var fight_nation_boss: String     = ""  # V27 : biome du boss de Nation présent dans ce combat
 var _last_banner_round: int = 0
 var fight_biome: String          = "Forêt"  # biome du combat en cours
 
@@ -378,6 +379,13 @@ func init_entities() -> void:
 	if campaign_mode in ["adventure", "conquest"]:
 		boss_fight = false
 		fight_is_boss = false
+	fight_nation_boss = ""
+	# V27 : sanctuaire d'une Pierre Élémentaire (Aventure) : combat contre le boss de la Nation
+	if campaign_mode == "adventure":
+		var gpoi: Dictionary = ProgressionManager.adventure_poi_by_key(String(active_save.get("adventure", {}).get("pending_challenge", "")))
+		if String(gpoi.get("guardian", "")) != "":
+			boss_fight = true
+			fight_is_boss = true
 	# Conquête : siège d’une ville adverse — la 4e bataille oppose le boss
 	# du biome ; les 3 premières des mobs de champs. Une ville neutre : 1 mobs.
 	var conquest_siege_boss: bool = false
@@ -520,6 +528,7 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 	var boss: Dictionary = _base_entity("☠ BOSS %s Lv%d" % [shown, lvl], "Enemy", "enemy", boss_name, lvl, pos)
 	if nation_boss:
 		boss["nation_boss"] = fight_biome
+		fight_nation_boss = fight_biome
 		boss["title"] = shown
 	boss.merge({
 		"max_pv": pv, "current_pv": pv,
@@ -2200,7 +2209,7 @@ func check_game_over() -> void:
 			all_hit = false
 	var info: Dictionary = {"enemies": fight_enemies, "turns": turn_count, "boss": fight_is_boss, "deaths": deaths,
 		"objective": fight_objective.duplicate(), "chief_first": _first_kill_uid >= 0 and _first_kill_uid == _chief_uid,
-		"heal_total": heal_total, "all_hit": all_hit}
+		"heal_total": heal_total, "all_hit": all_hit, "nation_boss": fight_nation_boss}
 	if alive_p == 0:
 		game_over = true
 		victory = false
