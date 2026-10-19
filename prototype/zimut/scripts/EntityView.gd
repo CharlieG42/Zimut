@@ -61,7 +61,11 @@ var _poses: Dictionary = {}
 var _idle_tex: Texture2D = null
 var _cur_pose: String = ""
 var _pose_t: float = 0.0
-var _act_pose: String = ""
+var _act_tex: Texture2D = null
+var _seq: Array = []
+var _idle_alt: Texture2D = null
+var _idle_wait: float = 5.0
+var _cur_tex: Texture2D = null
 const POSES: Array[String] = ["back", "walk", "attack", "cast"]
 
 
@@ -148,42 +152,71 @@ func _load_poses() -> void:
 	var base: String = _idle_tex.resource_path.get_basename()
 	if base == "":
 		return
-	for pz: String in POSES:
-		var path: String = "%s_%s.png" % [base, pz]
-		if ResourceLoader.exists(path):
-			var t: Texture2D = load(path) as Texture2D
-			if t != null:
-				_poses[pz] = t
+	# V32 : plusieurs variantes par pose (<sprite>_attack, _attack_2, _attack_3…, _idle_2, _idle_3)
+	for pz: String in POSES + ["idle"]:
+		var list: Array = []
+		for k: int in range(1, 8):
+			if pz == "idle" and k == 1:
+				continue
+			var path: String = "%s_%s.png" % [base, pz] if k == 1 else "%s_%s_%d.png" % [base, pz, k]
+			if ResourceLoader.exists(path):
+				var t: Texture2D = load(path) as Texture2D
+				if t != null:
+					list.append(t)
+		if not list.is_empty():
+			_poses[pz] = list
+	_idle_wait = randf_range(3.0, 7.0)
 
 
 func has_pose(pz: String) -> bool:
 	return _poses.has(pz)
 
 
-## Joue une pose d'action (attaque, incantation) pendant `dur` secondes.
+## Joue une pose d'action pendant `dur` secondes. Attaque / incantation : une variante tirée
+## au hasard, ou un enchaînement de 2 variantes dans un ordre aléatoire (élan puis frappe…).
 func play_pose(pz: String, dur: float = 0.5) -> void:
-	if _poses.has(pz):
-		_act_pose = pz
-		_pose_t = dur
+	if not _poses.has(pz):
+		return
+	var list: Array = (_poses[pz] as Array).duplicate()
+	list.shuffle()
+	_seq.clear()
+	if list.size() >= 2 and randf() < 0.6:
+		_seq.append([list[0], dur * 0.45])
+		_seq.append([list[1], dur * 0.65])
+	else:
+		_seq.append([list[0], dur])
+	_next_seq()
 
 
-## Pose de base : marche, dos (orientation vers le haut de l'écran) ou repos.
-func _wanted_pose() -> String:
-	if _pose_t > 0.0 and _act_pose != "":
-		return _act_pose
+func _next_seq() -> void:
+	if _seq.is_empty():
+		_act_tex = null
+		_pose_t = 0.0
+		return
+	var step: Array = _seq.pop_front()
+	_act_tex = step[0]
+	_pose_t = float(step[1])
+
+
+## Texture voulue : action en cours, marche (foulée : marche / repos en alternance),
+## dos (orientation vers le haut de l'écran), petite variante de repos de temps en temps.
+func _wanted_tex() -> Texture2D:
+	if _act_tex != null:
+		return _act_tex
 	if _moving and _poses.has("walk"):
-		return "walk"
+		return _poses["walk"][0] if fmod(_t, 0.32) < 0.16 else _idle_tex
 	var f: Vector2i = entity.get("facing", Vector2i.ZERO)
 	if f != Vector2i.ZERO and _poses.has("back") and _grid_dir_to_screen(f).y < -0.1:
-		return "back"
-	return ""
+		return _poses["back"][0]
+	if _idle_alt != null:
+		return _idle_alt
+	return _idle_tex
 
 
-func _apply_pose(pz: String) -> void:
-	if pz == _cur_pose or _idle_tex == null:
+func _apply_tex(t: Texture2D) -> void:
+	if t == null or t == _cur_tex or _idle_tex == null:
 		return
-	_cur_pose = pz
-	var t: Texture2D = _poses.get(pz, _idle_tex) if pz != "" else _idle_tex
+	_cur_tex = t
 	sprite.texture = t
 	_rim.texture = t
 	_shadow.texture = t
@@ -382,10 +415,22 @@ func _process(delta: float) -> void:
 		_kb = _kb.move_toward(Vector2.ZERO, delta * 70.0)
 	_stretch = move_toward(_stretch, 0.0, delta * 2.5)
 	_lean = lerpf(_lean, clampf(_move_dx, -1.0, 1.0) * 0.10 if _moving else 0.0, minf(1.0, delta * 10.0))
-	if _pose_t > 0.0:
+	if _act_tex != null:
 		_pose_t -= delta
+		if _pose_t <= 0.0:
+			_next_seq()
+	if _poses.has("idle") and not _moving and _act_tex == null:
+		_idle_wait -= delta
+		if _idle_wait <= 0.0:
+			if _idle_alt == null:
+				var iv: Array = _poses["idle"]
+				_idle_alt = iv[randi() % iv.size()]
+				_idle_wait = randf_range(1.2, 2.2)
+			else:
+				_idle_alt = null
+				_idle_wait = randf_range(4.0, 8.0)
 	if _has_tex and sprite != null and not _poses.is_empty():
-		_apply_pose(_wanted_pose())
+		_apply_tex(_wanted_tex())
 	if _has_tex and sprite != null:
 		var still: bool = _is_static()
 		var bob: float = 0.0 if still else sin(_t * 2.2 + _phase) * 1.6
@@ -491,7 +536,7 @@ func lunge(toward: Vector2) -> Tween:
 	dir = dir.normalized() if dir.length() > 1.0 else Vector2.ZERO
 	face_screen_dx(dir.x)
 	var origin: Vector2 = position
-	play_pose("attack", 0.45)
+	play_pose("attack", 0.62)
 	var tw: Tween = create_tween()
 	tw.tween_callback(func() -> void: _stretch = 1.0)
 	tw.tween_property(self, "position", origin - dir * 8.0, 0.07)
@@ -501,7 +546,7 @@ func lunge(toward: Vector2) -> Tween:
 
 
 func cast_pose() -> Tween:
-	play_pose("cast", 0.6)
+	play_pose("cast", 0.8)
 	var tw: Tween = create_tween()
 	var origin: Vector2 = position
 	tw.tween_property(self, "position", origin + Vector2(0, -12), 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
