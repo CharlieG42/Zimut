@@ -1412,7 +1412,7 @@ func _city_nameplate_style(city_id: String, selected: bool) -> StyleBoxFlat:
 
 func _city_sprite(city_id: String) -> Texture2D:
 	var biome := String(_city_meta(city_id).get("biome", "Forêt"))
-	var art: String = String(CityScreenUI.ART.get(biome, "sylvestre"))
+	var art: String = CityScreenUI.art_key(biome)
 	var key: String = "%s|%s" % [art, "cap" if city_id == "capitale" else "city"]
 	if not _city_sprite_cache.has(key):
 		_city_sprite_cache[key] = _city_medallion(art, city_id == "capitale")

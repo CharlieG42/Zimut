@@ -1668,6 +1668,12 @@ func _show_result_window(victory: bool) -> void:
 			"  ".join(Stones.bonus_lines(sb_biome, 1))], 24, sc, true)
 		sl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		sp.add_child(sl)
+	# V28 : primes du jour terminées par ce combat
+	if victory and not (res.get("bounties", []) as Array).is_empty():
+		var bl := UK.lbl("📜  Prime accomplie : " + "  ·  ".join(res["bounties"]) + "   (%d / %d aujourd'hui)" % [Bounties.done_count(save), Bounties.PER_DAY],
+			20, Color(0.95, 0.85, 0.55), true)
+		bl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(bl)
 
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL

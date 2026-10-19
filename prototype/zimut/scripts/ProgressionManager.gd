@@ -1982,6 +1982,10 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	if stone_biome != "" and Stones.grant(data, stone_biome):
 		data["last_result"]["stone"] = stone_biome
 		Achievements.bump(data, "stones")
+	# V28 : tableau des primes du jour
+	var bounty_done: Array[String] = Bounties.on_victory(data, info)
+	if not bounty_done.is_empty():
+		data["last_result"]["bounties"] = bounty_done
 	_apply_campaign_victory(data)
 	# Succès (V18)
 	Achievements.bump(data, "wins")

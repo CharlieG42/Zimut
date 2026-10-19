@@ -585,7 +585,25 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	st_btn.add_theme_stylebox_override("normal", _flat_bg(Color(0.12, 0.20, 0.32), Color(0.55, 0.80, 1.0), 3))
 	st_btn.add_theme_stylebox_override("hover", _flat_bg(Color(0.16, 0.27, 0.42), Color(0.70, 0.90, 1.0), 3))
 	st_btn.pressed.connect(func() -> void: _open_stones(slot))
-	tro_row.add_child(st_btn)
+	var goal_row := HBoxContainer.new()
+	goal_row.add_theme_constant_override("separation", 10)
+	_detail_box.add_child(goal_row)
+	goal_row.add_child(st_btn)
+	# V28 : tableau des primes du jour
+	Bounties.ensure(data)
+	var bo_btn := Button.new()
+	bo_btn.name = "BountiesButton"
+	bo_btn.text = "📜  Primes du jour  %d / %d" % [Bounties.done_count(data), Bounties.PER_DAY]
+	bo_btn.custom_minimum_size = Vector2(0, 50)
+	bo_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bo_btn.add_theme_font_size_override("font_size", _ui_font(18))
+	bo_btn.add_theme_color_override("font_color", Color(1.0, 0.92, 0.70))
+	bo_btn.add_theme_stylebox_override("normal", _flat_bg(Color(0.32, 0.18, 0.10), Color(0.95, 0.60, 0.30), 3))
+	bo_btn.add_theme_stylebox_override("hover", _flat_bg(Color(0.42, 0.24, 0.12), Color(1.0, 0.75, 0.40), 3))
+	bo_btn.pressed.connect(func() -> void: _open_bounties(slot))
+	goal_row.add_child(bo_btn)
+	# Objectifs (Pierres, primes) juste sous les modes de jeu : visibles sans défiler
+	_detail_box.move_child(goal_row, grid.get_index())
 
 	var rename_btn := _action_button("rename", "RENOMMER CETTE PARTIE", COL_TXT)
 	rename_btn.pressed.connect(func() -> void:
@@ -892,6 +910,18 @@ func _open_trophies(slot: int, tab: String) -> void:
 	add_child(ui)
 	ui.closed.connect(func() -> void: ui.queue_free())
 	ui.open(_current, tab)
+
+
+func _open_bounties(slot: int) -> void:
+	if _current.is_empty() or slot < 0:
+		return
+	var ui: CanvasLayer = (load("res://scripts/BountiesUI.gd") as GDScript).new()
+	ui.layer = 20
+	add_child(ui)
+	ui.closed.connect(func() -> void:
+		ui.queue_free()
+		_show_detail(ProgressionManager.load_save(slot), slot))
+	ui.open(_current)
 
 
 func _open_stones(slot: int) -> void:

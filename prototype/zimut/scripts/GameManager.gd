@@ -2209,7 +2209,7 @@ func check_game_over() -> void:
 			all_hit = false
 	var info: Dictionary = {"enemies": fight_enemies, "turns": turn_count, "boss": fight_is_boss, "deaths": deaths,
 		"objective": fight_objective.duplicate(), "chief_first": _first_kill_uid >= 0 and _first_kill_uid == _chief_uid,
-		"heal_total": heal_total, "all_hit": all_hit, "nation_boss": fight_nation_boss}
+		"heal_total": heal_total, "all_hit": all_hit, "nation_boss": fight_nation_boss, "biome": fight_biome}
 	if alive_p == 0:
 		game_over = true
 		victory = false

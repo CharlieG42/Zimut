@@ -1683,3 +1683,9 @@ Sanctuaire : Pierre de Corail	Sanctuary: Coral Stone
 Le gardien de la Nation veille sur la Pierre de Corail.	The Nation's guardian watches over the Coral Stone.
 Sanctuaire : Pierre d'Airain	Sanctuary: Bronze Stone
 Le gardien de la Nation veille sur la Pierre d'Airain.	The Nation's guardian watches over the Bronze Stone.
+📜  PRIMES DU JOUR	📜  DAILY BOUNTIES
+Valables dans tous les modes. Nouvelles primes chaque jour.	Valid in every mode. New bounties every day.
+Gagner 2 combats sans aucun héros K.O.	Win 2 fights without any hero K.O.
+Gagner un combat en 4 tours ou moins	Win a fight in 4 turns or less
+Gagner 4 combats	Win 4 fights
+Coffre des primes	Bounty chest
