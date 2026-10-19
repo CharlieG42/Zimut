@@ -205,6 +205,9 @@ func play_pose(pz: String, dur: float = 0.5, key: String = "") -> void:
 		picks[r] = tmp
 	_seq.clear()
 	var speed: float = clampf(dur / 0.6, 0.7, 1.4)
+	var gs: Node = get_node_or_null("/root/GameSettings")
+	if gs != null and gs.has_method("anim_duration_mult"):
+		speed *= float(gs.call("anim_duration_mult"))
 	if not lead_pool.is_empty() and rng.randf() < 0.55:
 		_seq.append([lead_pool[rng.randi_range(0, lead_pool.size() - 1)], 0.09 * speed])
 	var n: int = 1 if picks.size() < 2 else (2 if rng.randf() < 0.7 else 1)

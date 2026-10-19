@@ -1694,3 +1694,5 @@ Drone aérien	Aerial Drone
 Araignée mécanique	Mechanical Spider
 Roue engrenée	Geared Wheel
 Automate de combat	Combat Automaton
+Vitesse des animations	Animation speed
+Lente	Slow

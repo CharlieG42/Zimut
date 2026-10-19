@@ -10,4 +10,6 @@
   Druide 5 incantations, Heal 3 ; boss des Cimes (dos, marche, 2 attaques, incantation), des Cristaux (2 attaques, 3 incantations)
   et du Brasier (2 attaques, incantation).
 
+**Réglage** : Options → « Vitesse des animations » (Lente ×1,5, Normale, Rapide ×0,7, Très rapide ×0,5 sur la durée des poses), mémorisé dans les réglages.
+
 Test : `tests/test_choreo.gd` (même sort = même animation, au moins 3 animations différentes par héros).

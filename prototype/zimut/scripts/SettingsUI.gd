@@ -50,6 +50,9 @@ func _ready() -> void:
 	box.add_child(_setting_row("Vitesse des tours ennemis", GameSettings.COMBAT_SPEEDS,
 		GameSettings.combat_speed, func(idx: int) -> void: GameSettings.set_combat_speed(idx)))
 
+	box.add_child(_setting_row("Vitesse des animations", GameSettings.ANIM_SPEEDS,
+		GameSettings.anim_speed, func(idx: int) -> void: GameSettings.set_anim_speed(idx)))
+
 	box.add_child(_setting_row("Sons et vibrations", ["Sons + vibr.", "Sons seuls", "Silence"] as Array[String],
 		0 if (GameSettings.sfx_on and GameSettings.haptics_on) else (1 if GameSettings.sfx_on else 2),
 		func(idx: int) -> void:

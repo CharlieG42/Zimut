@@ -26,10 +26,14 @@ const TEXT_SIZE_MULT := [1.0, 1.15, 1.3]
 
 ## Vitesse des tours joués par l'ordinateur (ennemis, invocations, mode Auto).
 const COMBAT_SPEEDS: Array[String] = ["Normale", "Rapide", "Très rapide"]
+## V34 : vitesse des animations des personnages (poses d'attaque / incantation).
+const ANIM_SPEEDS: Array[String] = ["Lente", "Normale", "Rapide", "Très rapide"]
+const ANIM_SPEED_MULT: Array[float] = [1.5, 1.0, 0.7, 0.5]
 const COMBAT_SPEED_MULT := [1.0, 2.0, 3.0]
 
 var difficulty: int = 1
 var combat_speed: int = 0
+var anim_speed: int = 1
 ## Sons d'effets / vibrations (V18)
 ## Langue : "fr" ou "en" (voir Loc.gd)
 var language: String = "fr"
@@ -65,6 +69,7 @@ func load_settings() -> void:
 	if typeof(seen_v) == TYPE_DICTIONARY:
 		tuto_seen = seen_v
 	combat_speed = clampi(int(parsed.get("combat_speed", combat_speed)), 0, COMBAT_SPEEDS.size() - 1)
+	anim_speed = clampi(int(parsed.get("anim_speed", anim_speed)), 0, ANIM_SPEEDS.size() - 1)
 	sfx_on = bool(parsed.get("sfx_on", sfx_on))
 	language = String(parsed.get("language", language))
 	haptics_on = bool(parsed.get("haptics_on", haptics_on))
@@ -75,7 +80,7 @@ func save_settings() -> void:
 	if f == null:
 		push_error("Impossible d'écrire les réglages")
 		return
-	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "language": language}, "\t"))
+	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "anim_speed": anim_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "language": language}, "\t"))
 	f.close()
 
 func set_difficulty(idx: int) -> void:
@@ -122,6 +127,16 @@ func set_combat_speed(idx: int) -> void:
 
 ## Forçage de la vitesse (simulations de test uniquement ; 0 = réglage du joueur).
 var speed_override: float = 0.0
+
+func set_anim_speed(idx: int) -> void:
+	anim_speed = clampi(idx, 0, ANIM_SPEEDS.size() - 1)
+	save_settings()
+
+
+## Facteur de durée des poses (1 = normal, < 1 = plus rapide).
+func anim_duration_mult() -> float:
+	return float(ANIM_SPEED_MULT[clampi(anim_speed, 0, ANIM_SPEED_MULT.size() - 1)])
+
 
 func combat_speed_mult() -> float:
 	if speed_override > 0.0:
