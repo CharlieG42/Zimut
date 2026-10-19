@@ -1543,3 +1543,37 @@ Aucun sentier ne mène à ce groupe pour l'instant.	No path leads to this group 
 AUTRES OBJETS	OTHER ITEMS
 ▲ %d conseillé	▲ %d recommended
 %d autre	%d other
+Bienvenue, [b]{pseudo}[/b] ! Je suis [b]Gultur[/b], gardien des Pierres, et je guide les voyageurs égarés depuis bien longtemps.	Welcome, [b]{pseudo}[/b]! I am [b]Gultur[/b], keeper of the Stones, and I have guided lost travelers for a very long time.
+Ici, c'est [b]Zimut[/b], un monde où chaque [b]Nation[/b] veille sur un élément : la forêt, la montagne, le désert, les ombres…	This is [b]Zimut[/b], a world where each [b]Nation[/b] watches over an element: forest, mountain, desert, shadows…
+Autrefois, les [b]Pierres Élémentaires[/b], une par Nation, maintenaient l'équilibre du monde. Un jour, elles ont disparu, dispersées aux quatre coins de Zimut.	Long ago, the [b]Elemental Stones[/b], one per Nation, kept the world in balance. One day they vanished, scattered across Zimut.
+Depuis, les créatures se déchaînent et les routes sont coupées. Tu es venu d'un autre monde, appelé par les Pierres : [b]toi seul[/b] peux les retrouver.	Since then, creatures run wild and the roads are cut. You came from another world, called by the Stones: [b]only you[/b] can find them.
+Pour cela, il te faut des héros forts. Commence par les [b]Combats Tactiques[/b] : c'est là que ton équipe apprendra à se battre. Touche le bouton en surbrillance !	For that, you need strong heroes. Start with [b]Tactical Battles[/b]: that is where your team will learn to fight. Touch the highlighted button!
+Voici la préparation de ton équipe. Tu emmènes [b]3 héros[/b] au combat : ils apparaissent dans le cadre doré « TON ÉQUIPE ».	This is your team setup. You take [b]3 heroes[/b] into battle: they appear in the golden "YOUR TEAM" frame.
+Touche un héros dans la liste pour voir sa fiche, puis [b]AJOUTER À L'ÉQUIPE[/b]. Un bon trio : un [b]Tank[/b] qui encaisse, un [b]soigneur[/b] et un héros de [b]dégâts[/b].	Touch a hero in the list to see their sheet, then [b]ADD TO TEAM[/b]. A good trio: a [b]Tank[/b] to soak damage, a [b]healer[/b] and a [b]damage[/b] hero.
+Quand les 3 emplacements sont remplis, appuie sur [b]COMBATTRE[/b]. Je te souffle les premiers gestes pendant le combat !	When all 3 slots are filled, press [b]FIGHT[/b]. I'll whisper the first moves during the battle!
+Tu as trouvé de l'équipement ! Le bouton [b]ÉQUIPEMENT[/b] permet de le donner à tes héros : chaque pièce les rend plus solides.	You found some gear! The [b]EQUIPMENT[/b] button lets you give it to your heroes: every piece makes them tougher.
+Dans la fiche d'un héros, un [b]▲ vert[/b] t'indique les objets conseillés (plus puissants que ceux portés).	In a hero's sheet, a [b]green ▲[/b] shows recommended items (stronger than the ones worn).
+Bravo ! Un de tes héros a atteint le [b]niveau 3[/b] : le mode [b]Aventure[/b] s'ouvre à toi.	Well done! One of your heroes reached [b]level 3[/b]: [b]Adventure[/b] mode is now open.
+Explore la carte : touche une case pour y marcher, le brouillard se lève. Des [b]groupes de monstres[/b] rôdent (vert = facile, rouge = dangereux).	Explore the map: touch a tile to walk there, the fog lifts. [b]Monster groups[/b] roam (green = easy, red = dangerous).
+Au [b]camp[/b], prends un contrat. Les énigmes et les coffres cachent de précieuses récompenses… et peut-être la trace d'une Pierre.	At the [b]camp[/b], take a contract. Puzzles and chests hide great rewards… and maybe the trace of a Stone.
+Impressionnant ! Un héros a atteint le [b]niveau 5[/b] : le mode [b]Conquête[/b] est débloqué.	Impressive! A hero reached [b]level 5[/b]: [b]Conquest[/b] mode is unlocked.
+Prends les cités une à une, nomme des [b]gouverneurs[/b], recrute des soldats et défends tes villes contre les raids.	Take the cities one by one, appoint [b]governors[/b], recruit soldiers and defend your towns against raids.
+Les Nations gardent jalousement leurs Pierres dans leurs cités. Plus ton empire grandit, plus tu t'en approches !	The Nations jealously guard their Stones in their cities. The bigger your empire, the closer you get!
+Quel est ton pseudo, voyageur ?	What is your name, traveler?
+Ton pseudo	Your name
+Le même pseudo peut être utilisé par plusieurs parties.	The same name can be used by several games.
+COMMENCER	START
+Annuler	Cancel
+Passer le tutoriel	Skip the tutorial
+SUIVANT  ▶	NEXT  ▶
+C'EST PARTI !	LET'S GO!
+Gultur · gardien des Pierres	Gultur · keeper of the Stones
+🎓  Relancer le tutoriel de Gultur	🎓  Restart Gultur's tutorial
+✓  Tutoriel relancé : retrouve Gultur dans Mes Parties	✓  Tutorial restarted: find Gultur in My Games
+🔒\nNiveau %d requis	🔒\nLevel %d required
+★ TON ÉQUIPE : %d / %d — prête au combat !	★ YOUR TEAM: %d / %d — ready for battle!
+★ TON ÉQUIPE : %d / %d — choisis %d héros dans la liste, puis touche AJOUTER	★ YOUR TEAM: %d / %d — pick %d hero(es) from the list, then touch ADD
+  ＋ Héros %d\n  (à choisir)	  ＋ Hero %d\n  (to pick)
+✓  Exporté (+ code copié)	✓  Exported (+ code copied)
+D'où importer la partie ?	Import the game from where?
+Presse-papiers	Clipboard

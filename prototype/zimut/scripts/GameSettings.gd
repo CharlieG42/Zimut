@@ -39,6 +39,9 @@ var xp_speed: int = 1
 var text_size: int = 1
 ## Aide du premier combat déjà vue (ou passée).
 var tutorial_done: bool = false
+## Tutoriel guidé par Gultur : actif ? + étapes déjà vues { id: true }.
+var tutorial_enabled: bool = true
+var tuto_seen: Dictionary = {}
 
 func _ready() -> void:
 	load_settings()
@@ -57,6 +60,10 @@ func load_settings() -> void:
 	xp_speed = clampi(int(parsed.get("xp_speed", xp_speed)), 0, XP_SPEEDS.size() - 1)
 	text_size = clampi(int(parsed.get("text_size", text_size)), 0, TEXT_SIZES.size() - 1)
 	tutorial_done = bool(parsed.get("tutorial_done", tutorial_done))
+	tutorial_enabled = bool(parsed.get("tutorial_enabled", tutorial_enabled))
+	var seen_v: Variant = parsed.get("tuto_seen", {})
+	if typeof(seen_v) == TYPE_DICTIONARY:
+		tuto_seen = seen_v
 	combat_speed = clampi(int(parsed.get("combat_speed", combat_speed)), 0, COMBAT_SPEEDS.size() - 1)
 	sfx_on = bool(parsed.get("sfx_on", sfx_on))
 	language = String(parsed.get("language", language))
@@ -68,7 +75,7 @@ func save_settings() -> void:
 	if f == null:
 		push_error("Impossible d'écrire les réglages")
 		return
-	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "combat_speed": combat_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "language": language}, "\t"))
+	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "language": language}, "\t"))
 	f.close()
 
 func set_difficulty(idx: int) -> void:
@@ -120,6 +127,24 @@ func combat_speed_mult() -> float:
 	if speed_override > 0.0:
 		return speed_override
 	return float(COMBAT_SPEED_MULT[clampi(combat_speed, 0, COMBAT_SPEED_MULT.size() - 1)])
+
+## Marque une étape du tutoriel de Gultur comme vue.
+func mark_tuto_seen(id: String) -> void:
+	tuto_seen[id] = true
+	save_settings()
+
+## « Passer le tutoriel » : désactive Gultur et l'aide du premier combat.
+func skip_tutorial() -> void:
+	tutorial_enabled = false
+	tutorial_done = true
+	save_settings()
+
+## Relance le tutoriel depuis le début (Options).
+func restart_tutorial() -> void:
+	tutorial_enabled = true
+	tutorial_done = false
+	tuto_seen = {}
+	save_settings()
 
 func set_tutorial_done(v: bool) -> void:
 	tutorial_done = v

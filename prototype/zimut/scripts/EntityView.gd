@@ -46,6 +46,15 @@ var _mat: ShaderMaterial = null
 var _phase: float = 0.0
 
 
+## Couleur de la pastille de numéro d'ordre : héros bleu, ennemi or, invocation verte.
+static func ord_color(e: Dictionary) -> Color:
+	if String(e.get("entity_type", "")) == "Summon":
+		return Color(0.40, 0.85, 0.55)
+	if String(e.get("team", "")) == "enemy":
+		return Color(0.95, 0.75, 0.20)
+	return Color(0.45, 0.70, 1.0)
+
+
 func setup(e: Dictionary) -> void:
 	entity = e
 	_phase = float(int(e["uid"]) % 7)
@@ -413,7 +422,7 @@ func _draw() -> void:
 	if ord_no > 0:
 		var oc := Vector2(-bw * 0.5 - 16.0, by2 + bh * 0.5)
 		draw_circle(oc, 12.0, Color(0, 0, 0, 0.88))
-		draw_circle(oc, 10.5, Color(0.95, 0.75, 0.2))
+		draw_circle(oc, 10.5, ord_color(entity))
 		draw_string(ThemeDB.fallback_font, oc + Vector2(-10.0, 6.0), str(ord_no), HORIZONTAL_ALIGNMENT_CENTER, 20.0, 17, Color(0.1, 0.05, 0.0))
 
 	# Statuts
