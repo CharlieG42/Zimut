@@ -21,17 +21,19 @@ Hauteur ≥ 200 px.
 
 ## 4. Ennemis des Nations — `assets/sprites/nations/ennemis/<dossier>/<fichier>.png`
 Chaque Nation associe un fichier à chaque type d'ennemi du moteur (Gobelin, Loup, Squelette, Troll, Dragonnet).
-Pour **Rouages** (dossier `rouages/`, aucun fichier pour l'instant) :
+Pour **Rouages** (dossier `rouages/`) — **V29 : provisoires, découpés automatiquement dans la planche « 10 classes »** :
 
-| Type moteur | Fichier attendu | Idée |
+| Type moteur | Fichier | Monstre |
 |---|---|---|
-| Gobelin | `gobelin_mecano.png` | gobelin bricoleur, clé à molette |
-| Loup | `automate.png` | chien mécanique |
-| Squelette | `tourelle_ambulante.png` | tourelle sur pattes |
-| Troll | `golem_a_vapeur.png` | golem à chaudière |
-| Dragonnet | `automate.png` | (même fichier que Loup) |
+| Gobelin | `drone_aerien.png` | Drone Aérien |
+| Loup | `araignee_mecanique.png` | Araignée Mécanique |
+| Squelette | `roue_engrenee.png` | Roue Engrenée |
+| Troll | `automate_de_combat.png` | Automate de Combat |
+| Dragonnet | `drone_aerien.png` | (même fichier) |
 
-En combat, Rouages n'utilise que Gobelin et Troll : `gobelin_mecano.png` et `golem_a_vapeur.png` sont prioritaires.
+Boss Rouages (Mécanoptère) : `nations/boss/rouages.png` ; héros Ingénieur : `nations/heros/artificier.png` (pleine taille)
+puis `players/artificier.png` (version « chibi » produite par `tools/chibify_heroes.py artificier`).
+
 Les autres Nations ont déjà leurs fichiers ; un nouveau PNG au même nom les remplace.
 
 ## 5. Invocations et mécanismes — `assets/sprites/summons/<nom>.png`

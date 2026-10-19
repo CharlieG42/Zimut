@@ -126,7 +126,7 @@ const DATA := {
 		"nation": "Rouages", "hero": "Artificier", "folder": "rouages", "accent": Color(0.95, 0.62, 0.22),
 		"tile": "rouages_ground", "resource": "Fer", "city": "gears", "label": "Ateliers des Rouages",
 		"enemy_types": ["Gobelin", "Troll"], "boss": "Colosse d'Engrenages", "boss_base": "Troll",
-		"skins": ["gobelin_mecano", "automate", "tourelle_ambulante", "golem_a_vapeur", "automate"], "boss_skin": "golem_a_vapeur",
+		"skins": ["drone_aerien", "araignee_mecanique", "roue_engrenee", "automate_de_combat", "drone_aerien"], "boss_skin": "automate_de_combat",
 		"pal": {"top_a": Color(0.41, 0.37, 0.34), "top_b": Color(0.35, 0.32, 0.30), "lip": Color(0.92, 0.60, 0.24),
 			"l_t": Color(0.47, 0.41, 0.35), "l_b": Color(0.22, 0.19, 0.17), "r_t": Color(0.36, 0.31, 0.28), "r_b": Color(0.16, 0.14, 0.13),
 			"leaf": Color(0.75, 0.48, 0.20), "leaf_hi": Color(0.96, 0.76, 0.36), "mist": Color(0.88, 0.78, 0.66)},
@@ -150,7 +150,7 @@ static func has(biome: String) -> bool:
 const BOSS_TITLE := {
 	"Forêt": "Tharok le Végétal", "Montagne": "Vorkann le Givre", "Désert": "Zahor le Sableux",
 	"Cristaux": "Zyphéron le Cristallin", "Marées": "Néréa la Tempête", "Vents": "Aéron le Céleste",
-	"Brasier": "Kharaz le Flamboyant", "Brumes": "Ombrelis le Brumeux", "Ombres": "Nébulia l'Illusionniste", "Rouages": "Gearhart le Mécanicien",
+	"Brasier": "Kharaz le Flamboyant", "Brumes": "Ombrelis le Brumeux", "Ombres": "Nébulia l'Illusionniste", "Rouages": "Mécanoptère",
 }
 
 
@@ -284,6 +284,7 @@ const LABEL := {
 	"lieutenant": "Lieutenant", "salamandre": "Salamandre", "devoreur_de_flammes": "Dévoreur de flammes", "golem_de_lave": "Golem de lave",
 	"brumeux": "Brumeux", "gargouille": "Gargouille", "liche_des_brumes": "Liche des brumes", "fantome": "Fantôme",
 	"assassin_des_ombres": "Assassin des ombres", "ombre_infernale": "Ombre infernale", "spectre": "Spectre", "liche": "Liche",
+	"drone_aerien": "Drone aérien", "araignee_mecanique": "Araignée mécanique", "roue_engrenee": "Roue engrenée", "automate_de_combat": "Automate de combat",
 }
 
 
