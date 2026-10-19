@@ -24,6 +24,9 @@ const LIST: Array = [
 	["empereur", "Empereur", "Contrôler 15 villes", "cities", 15, {"Magie@4": 2}],
 	["aguerri", "Aguerri", "Monter un héros au niveau 25", "max_level", 25, {"Cuir@3": 2}],
 	["heros_legendaire", "Héros légendaire", "Monter un héros au niveau 50", "max_level", 50, {"Magie@4": 1, "Fer@4": 1}],
+	["premiere_pierre", "Éveil", "Retrouver une Pierre Élémentaire", "stones", 1, {"gold": 200}],
+	["gardien_pierres", "Gardien des Pierres", "Retrouver 5 Pierres Élémentaires", "stones", 5, {"Magie@3": 3}],
+	["equilibre", "L'Équilibre retrouvé", "Retrouver toutes les Pierres Élémentaires", "stones", 10, {"Magie@4": 3, "Fer@4": 3}],
 	["naturaliste", "Naturaliste", "Rencontrer 20 ennemis différents", "bestiary", 20, {"Venin@2": 3}],
 ]
 
@@ -43,6 +46,8 @@ static func stat(data: Dictionary, key: String) -> int:
 			return best
 		"bestiary":
 			return (data.get("bestiary", {}) as Dictionary).size()
+		"stones":
+			return (data.get("stones", {}) as Dictionary).size()
 		"max_rank":
 			var r: int = int(data.get("stats", {}).get("max_rank", 1))
 			for it in data.get("inventory", []):

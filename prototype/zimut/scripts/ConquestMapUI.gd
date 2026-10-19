@@ -44,6 +44,8 @@ const CITY_POS := {
 	"fort_cendre": Vector2(0.72, 0.84),
 	"temple_soleil": Vector2(0.84, 0.88),
 	"citadelle_sable": Vector2(0.90, 0.94),
+	"atelier_cuivre": Vector2(0.78, 0.17),
+	"citadelle_engrenages": Vector2(0.93, 0.27),
 }
 var _save: Dictionary = {}
 var _slot: int = -1
@@ -1339,6 +1341,8 @@ func _city_desc(id: String, kind: String) -> String:
 		"caravanserail": "Une halte marchande sur la côte, là où la marée dépose les caravanes.",
 		"observatoire": "Un observatoire oublié tourné vers le soleil.",
 		"port_sable": "Un port fortifié battu par les marées, repaire de pirates.",
+		"atelier_cuivre": "Un atelier où les ingénieurs des Rouages testent leurs inventions.",
+		"citadelle_engrenages": "Une forteresse mécanique dont les murs tournent au rythme des engrenages.",
 		"bois_lune": "Un bois ancien où la brume s'accroche aux arbres argentés.",
 		"sanctuaire_mousse": "Un sanctuaire oublié protégé par les esprits de la forêt.",
 		"forge_givre": "Une forge de cristal où l'on taille des lames qui chantent.",

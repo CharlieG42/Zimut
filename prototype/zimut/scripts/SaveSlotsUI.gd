@@ -574,6 +574,18 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		tbtn.add_theme_stylebox_override("hover", _flat_bg(Color(0.40, 0.30, 0.14), Color(1.0, 0.80, 0.40), 3))
 		tbtn.pressed.connect(func() -> void: _open_trophies(slot, tab_key))
 		tro_row.add_child(tbtn)
+	# V27 : Pierres Élémentaires (objectif final)
+	var st_btn := Button.new()
+	st_btn.name = "StonesButton"
+	st_btn.text = "💎  Pierres  %d / %d" % [Stones.count(data), Stones.ORDER.size()]
+	st_btn.custom_minimum_size = Vector2(0, 50)
+	st_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	st_btn.add_theme_font_size_override("font_size", _ui_font(18))
+	st_btn.add_theme_color_override("font_color", Color(0.85, 0.95, 1.0))
+	st_btn.add_theme_stylebox_override("normal", _flat_bg(Color(0.12, 0.20, 0.32), Color(0.55, 0.80, 1.0), 3))
+	st_btn.add_theme_stylebox_override("hover", _flat_bg(Color(0.16, 0.27, 0.42), Color(0.70, 0.90, 1.0), 3))
+	st_btn.pressed.connect(func() -> void: _open_stones(slot))
+	tro_row.add_child(st_btn)
 
 	var rename_btn := _action_button("rename", "RENOMMER CETTE PARTIE", COL_TXT)
 	rename_btn.pressed.connect(func() -> void:
@@ -880,6 +892,18 @@ func _open_trophies(slot: int, tab: String) -> void:
 	add_child(ui)
 	ui.closed.connect(func() -> void: ui.queue_free())
 	ui.open(_current, tab)
+
+
+func _open_stones(slot: int) -> void:
+	if _current.is_empty() or slot < 0:
+		return
+	var ui: CanvasLayer = (load("res://scripts/StonesUI.gd") as GDScript).new()
+	ui.layer = 20
+	add_child(ui)
+	ui.closed.connect(func() -> void:
+		ui.queue_free()
+		_show_detail(ProgressionManager.load_save(slot), slot))
+	ui.open(_current, slot)
 
 
 func _open_forge(slot: int, mode: String = "") -> void:

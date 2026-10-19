@@ -1634,3 +1634,52 @@ Ligne fortifiée	Fortified Line
 Tir croisé	Crossfire
 Ateliers : +3 or; +1 Fer; +2 défense	Workshops: +3 gold, +1 Iron, +2 defense
 Ateliers : +3 or, +1 Fer, +2 défense	Workshops: +3 gold, +1 Iron, +2 defense
+Pierres Élémentaires	Elemental Stones
+PIERRES ÉLÉMENTAIRES	ELEMENTAL STONES
+Pierre de Sève	Sap Stone
+Pierre de Givre	Frost Stone
+Pierre d'Ocre	Ochre Stone
+Pierre de Prisme	Prism Stone
+Pierre de Corail	Coral Stone
+Pierre d'Azur	Azure Stone
+Pierre de Braise	Ember Stone
+Pierre de Lune-des-Marais	Marshmoon Stone
+Pierre d'Ébène	Ebony Stone
+Pierre d'Airain	Bronze Stone
+— Aucun porteur —	— No bearer —
+Éveil complet.	Fully awakened.
+Pierre non trouvée.	Stone not found.
+Une Pierre par Nation : battez le boss de la Nation (Tactique, sanctuaire en Aventure ou siège en Conquête). Chaque héros porte 2 Pierres au plus ; éveillez-les avec de l'or et la ressource de leur Nation.	One Stone per Nation: defeat the Nation's boss (Tactics, sanctuary in Adventure or siege in Conquest). Each hero carries up to 2 Stones; awaken them with gold and their Nation's resource.
+Éveil	Awakening
+Gardien des Pierres	Stone Keeper
+L'Équilibre retrouvé	Balance Restored
+Retrouver une Pierre Élémentaire	Find an Elemental Stone
+Retrouver 5 Pierres Élémentaires	Find 5 Elemental Stones
+Retrouver toutes les Pierres Élémentaires	Find all Elemental Stones
+Atelier de Cuivre	Copper Workshop
+Citadelle des Engrenages	Gear Citadel
+Caisse de pièces détachées	Crate of spare parts
+Coffre du Grand Horloger	Grand Clockmaker's Chest
+Un atelier où les ingénieurs des Rouages testent leurs inventions.	A workshop where the Gears engineers test their inventions.
+Une forteresse mécanique dont les murs tournent au rythme des engrenages.	A mechanical fortress whose walls turn to the rhythm of the gears.
+Dégâts physiques +%d%%	Physical damage +%d%%
+Sanctuaire : Pierre de Sève	Sanctuary: Sap Stone
+Le gardien de la Nation veille sur la Pierre de Sève.	The Nation's guardian watches over the Sap Stone.
+Sanctuaire : Pierre de Givre	Sanctuary: Frost Stone
+Le gardien de la Nation veille sur la Pierre de Givre.	The Nation's guardian watches over the Frost Stone.
+Sanctuaire : Pierre d'Ocre	Sanctuary: Ochre Stone
+Le gardien de la Nation veille sur la Pierre d'Ocre.	The Nation's guardian watches over the Ochre Stone.
+Sanctuaire : Pierre d'Azur	Sanctuary: Azure Stone
+Le gardien de la Nation veille sur la Pierre d'Azur.	The Nation's guardian watches over the Azure Stone.
+Sanctuaire : Pierre de Lune-des-Marais	Sanctuary: Marshmoon Stone
+Le gardien de la Nation veille sur la Pierre de Lune-des-Marais.	The Nation's guardian watches over the Marshmoon Stone.
+Sanctuaire : Pierre de Braise	Sanctuary: Ember Stone
+Le gardien de la Nation veille sur la Pierre de Braise.	The Nation's guardian watches over the Ember Stone.
+Sanctuaire : Pierre d'Ébène	Sanctuary: Ebony Stone
+Le gardien de la Nation veille sur la Pierre d'Ébène.	The Nation's guardian watches over the Ebony Stone.
+Sanctuaire : Pierre de Prisme	Sanctuary: Prism Stone
+Le gardien de la Nation veille sur la Pierre de Prisme.	The Nation's guardian watches over the Prism Stone.
+Sanctuaire : Pierre de Corail	Sanctuary: Coral Stone
+Le gardien de la Nation veille sur la Pierre de Corail.	The Nation's guardian watches over the Coral Stone.
+Sanctuaire : Pierre d'Airain	Sanctuary: Bronze Stone
+Le gardien de la Nation veille sur la Pierre d'Airain.	The Nation's guardian watches over the Bronze Stone.

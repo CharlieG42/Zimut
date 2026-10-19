@@ -14,7 +14,7 @@ const STAT_NAME := {"vita": "Vitalité", "force": "Force", "intelligence": "Inte
 	"agility": "Agilité", "wisdom": "Sagesse", "defense": "Défense"}
 
 const FX_LABEL := {
-	"crit": "Critique +%d%%", "lifesteal": "Vol de vie %d%%", "mag_pct": "Dégâts magiques +%d%%",
+	"crit": "Critique +%d%%", "phys_pct": "Dégâts physiques +%d%%", "lifesteal": "Vol de vie %d%%", "mag_pct": "Dégâts magiques +%d%%",
 	"mres": "Résistance magie +%d%%", "heal_pct": "Soins +%d%%", "pa": "+%d PA", "pm": "+%d PM", "po": "+%d Portée",
 	"poison_pct": "Poisons +%d%%", "bless_def": "Bénit l'équipe (+%d%% défense)",
 	"start_immune_neg": "Anti-altération %d t. au départ", "start_immune": "Invulnérable %d t. au départ",

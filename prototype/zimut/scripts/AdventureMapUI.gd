@@ -410,6 +410,14 @@ func _rebuild_world() -> void:
 			var etypes: Array[String] = ProgressionManager.biome_enemy_types(biome)
 			var etype: String = etypes[absi(k.hash()) % etypes.size()]
 			node.enemy_tex = Portraits.get_texture({"classe": etype, "team": "enemy", "entity_type": "Enemy"})
+		# V27 : sanctuaire d'une Pierre Élémentaire (boss de la Nation)
+		var gb: String = String(poi.get("guardian", ""))
+		if gb != "":
+			node.gem = Stones.info(gb).get("color", Color.WHITE)
+			node.gem_taken = Stones.has(manager.save, gb)
+			var btex: Texture2D = Nations.boss_texture(gb)
+			if btex != null:
+				node.enemy_tex = btex
 		node.position = cell_center(pos)
 		_entities.add_child(node)
 		_cell_nodes[pos] = _cell_nodes.get(pos, []) + [node]
@@ -1780,6 +1788,8 @@ class PoiNode extends Node2D:
 	var enemy_tex: Texture2D = null
 	var done: bool = false
 	var show_label: bool = false
+	var gem: Color = Color(0, 0, 0, 0)
+	var gem_taken: bool = false
 	var _t: float = 0.0
 
 	func _ready() -> void:
@@ -1810,8 +1820,16 @@ class PoiNode extends Node2D:
 			draw_circle(Vector2(18, -10), 18.0 * fl, Color(1.0, 0.55, 0.15, 0.18))
 			draw_colored_polygon(PackedVector2Array([Vector2(12, -6), Vector2(15, -22 * fl), Vector2(18, -30 * fl), Vector2(22, -20 * fl), Vector2(25, -6)]), Color(1.0, 0.6, 0.18))
 			draw_colored_polygon(PackedVector2Array([Vector2(15, -6), Vector2(18, -18 * fl), Vector2(22, -6)]), Color(1.0, 0.92, 0.5))
+		if gem.a > 0.0 and not gem_taken:
+			# Pierre Élémentaire en lévitation au-dessus du sanctuaire
+			var gc := Vector2(-30, -70 + sin(_t * 1.7) * 5.0)
+			draw_circle(gc, 20.0 + 3.0 * sin(_t * 3.0), Color(gem.r, gem.g, gem.b, 0.22))
+			var gp := PackedVector2Array([gc + Vector2(0, -15), gc + Vector2(10, -4), gc + Vector2(7, 12), gc + Vector2(-7, 12), gc + Vector2(-10, -4)])
+			draw_colored_polygon(gp, gem)
+			draw_colored_polygon(PackedVector2Array([gc + Vector2(0, -15), gc + Vector2(10, -4), gc]), gem.lightened(0.35))
+			draw_polyline(gp + PackedVector2Array([gp[0]]), gem.darkened(0.5), 1.6, true)
 		if enemy_tex != null and not done:
-			var h: float = 78.0
+			var h: float = 78.0 if gem.a <= 0.0 else 104.0
 			var sc: float = h / float(enemy_tex.get_height())
 			var w: float = float(enemy_tex.get_width()) * sc
 			draw_texture_rect(enemy_tex, Rect2(Vector2(-w * 0.5 + 14.0, -h + 6.0), Vector2(w, h)), false)
