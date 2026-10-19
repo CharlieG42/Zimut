@@ -676,13 +676,13 @@ func _play_cast(d: Dictionary) -> void:
 		if v != null and elem != "physical":
 			_rune(v.position, col)   # rune d'incantation sous le lanceur
 		if d["ranged"] and v != null:
-			v.play_pose("attack" if v.has_pose("attack") else "cast", 0.75)
+			v.play_pose("attack", 0.6, String(d.get("spell", "")))
 			Sfx.play("magic" if not phys else "cast")
 			var start: Vector2 = v.position + Vector2(0, -50)
 			await _projectile_el(start, to_pos, elem, phys)
 		elif v != null:
 			Sfx.play("slash")
-			v.lunge(grid_to_screen(to.x, to.y))
+			v.lunge(grid_to_screen(to.x, to.y), String(d.get("spell", "")))
 			await get_tree().create_timer(0.1).timeout
 			_slash(to_pos, col)
 			await get_tree().create_timer(0.08).timeout
@@ -696,7 +696,7 @@ func _play_cast(d: Dictionary) -> void:
 		if v != null:
 			_rune(v.position, col)
 			_burst(v.position + Vector2(0, -40), col, 18, 120.0, 0.7, 5.0, 180.0, Vector2.UP, Vector2(0, -60))
-			v.cast_pose()
+			v.cast_pose(String(d.get("spell", "")))
 		await _wait(0.28)
 
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cp1esduo263s7"
-path="res://.godot/imported/chasseur_cast.png-16873b7878420f825c63d8cb1ea7d43e.ctex"
+uid="uid://bgyf4nxvtet3r"
+path="res://.godot/imported/druide_cast_4.png-052f6437ce991f0bc71c40f9b2ff2c8b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/chasseur_cast.png"
-dest_files=["res://.godot/imported/chasseur_cast.png-16873b7878420f825c63d8cb1ea7d43e.ctex"]
+source_file="res://assets/sprites/nations/heros/poses/druide_cast_4.png"
+dest_files=["res://.godot/imported/druide_cast_4.png-052f6437ce991f0bc71c40f9b2ff2c8b.ctex"]
 
 [params]
 
