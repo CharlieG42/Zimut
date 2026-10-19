@@ -32,7 +32,17 @@ const DISTRICTS := {
 }
 ## Illustration de chaque nation (assets/ui/conquest/cities/).
 const ART := {"Forêt": "sylvestre", "Montagne": "cimes", "Désert": "sables", "Cristaux": "cristaux", "Marées": "marees",
-	"Vents": "vents", "Brasier": "brasier", "Brumes": "brumes", "Ombres": "ombres", "Rouages": "brasier", "Donjon": "donjon"}
+	"Vents": "vents", "Brasier": "brasier", "Brumes": "brumes", "Ombres": "ombres", "Rouages": "rouages", "Donjon": "donjon"}
+## Illustration de remplacement tant que celle de la nation manque.
+const ART_FALLBACK := {"rouages": "brasier"}
+
+
+## Clé d'illustration d'un biome (avec repli si le fichier n'existe pas encore).
+static func art_key(biome: String) -> String:
+	var k: String = String(ART.get(biome, "sylvestre"))
+	if not ResourceLoader.exists("res://assets/ui/conquest/cities/%s.jpg" % k):
+		k = String(ART_FALLBACK.get(k, "sylvestre"))
+	return k
 const RES_COLORS := {"Bois": Color(0.62, 0.78, 0.40), "Fer": Color(0.72, 0.78, 0.88), "Cuir": Color(0.82, 0.62, 0.42),
 	"Magie": Color(0.70, 0.58, 0.98), "Venin": Color(0.55, 0.85, 0.55)}
 
@@ -95,7 +105,7 @@ func _build() -> void:
 	bg.mouse_filter = Control.MOUSE_FILTER_STOP
 	_root.add_child(bg)
 	# Illustration de la nation en fond, assombrie
-	var art_path: String = "res://assets/ui/conquest/cities/%s.jpg" % String(ART.get(_biome, "sylvestre"))
+	var art_path: String = "res://assets/ui/conquest/cities/%s.jpg" % art_key(_biome)
 	var art: Texture2D = load(art_path) as Texture2D if ResourceLoader.exists(art_path) else null
 	if art != null:
 		var bgi := TextureRect.new()
@@ -342,7 +352,7 @@ func _build_council(parent: Control) -> void:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 10)
 	p.add_child(v)
-	var art_path: String = "res://assets/ui/conquest/cities/%s.jpg" % String(ART.get(_biome, "sylvestre"))
+	var art_path: String = "res://assets/ui/conquest/cities/%s.jpg" % art_key(_biome)
 	if ResourceLoader.exists(art_path):
 		var art := TextureRect.new()
 		art.name = "CityIllustration"
