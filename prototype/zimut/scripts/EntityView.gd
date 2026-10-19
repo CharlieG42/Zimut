@@ -44,6 +44,66 @@ var _float_decay: float = 0.0
 var _has_tex: bool = false
 var _mat: ShaderMaterial = null
 var _phase: float = 0.0
+# V30 : profondeur (ombre portée, contre-jour, lumière du biome, touffes devant les pieds)
+var _shadow: Sprite2D = null
+var _rim: Sprite2D = null
+var _front: FrontTufts = null
+var _base_sc: float = 1.0
+var _light: Dictionary = {}
+var _tilt: float = 0.0          # inclinaison (coup reçu), revient à 0
+var _kb: Vector2 = Vector2.ZERO # recul (coup reçu), revient à 0
+var _stretch: float = 0.0       # étirement d'élan (attaque)
+var _lean: float = 0.0          # penché pendant la marche
+var _move_dx: float = 0.0
+var _falling: bool = false
+
+
+## Lumière par biome : teinte du personnage, couleur du contre-jour, direction de la
+## lumière (écran) et opacité de l'ombre portée.
+const LIGHT := {
+	"Forêt":    {"tint": Color(1.02, 1.03, 0.96), "rim": Color(1.25, 1.20, 0.80, 0.85), "dir": Vector2(-1.0, -0.6), "shadow": 0.34},
+	"Montagne": {"tint": Color(0.96, 1.00, 1.08), "rim": Color(1.05, 1.20, 1.45, 0.85), "dir": Vector2(-1.0, -0.7), "shadow": 0.30},
+	"Désert":   {"tint": Color(1.08, 1.02, 0.90), "rim": Color(1.45, 1.20, 0.70, 0.90), "dir": Vector2(-0.6, -1.0), "shadow": 0.42},
+	"Donjon":   {"tint": Color(0.88, 0.86, 0.98), "rim": Color(0.90, 0.75, 1.30, 0.75), "dir": Vector2(1.0, -0.6), "shadow": 0.40},
+	"Cristaux": {"tint": Color(0.94, 0.92, 1.08), "rim": Color(0.95, 0.85, 1.55, 0.90), "dir": Vector2(1.0, -0.5), "shadow": 0.36},
+	"Marées":   {"tint": Color(0.98, 1.03, 1.05), "rim": Color(0.85, 1.35, 1.45, 0.85), "dir": Vector2(-1.0, -0.8), "shadow": 0.30},
+	"Vents":    {"tint": Color(1.02, 1.04, 1.06), "rim": Color(1.25, 1.30, 1.35, 0.80), "dir": Vector2(-0.8, -1.0), "shadow": 0.26},
+	"Brasier":  {"tint": Color(1.08, 0.94, 0.86), "rim": Color(1.70, 0.95, 0.45, 0.95), "dir": Vector2(1.0, 0.2), "shadow": 0.44},
+	"Brumes":   {"tint": Color(0.94, 1.00, 0.97), "rim": Color(0.90, 1.30, 1.10, 0.75), "dir": Vector2(-1.0, -0.6), "shadow": 0.26},
+	"Ombres":   {"tint": Color(0.90, 0.86, 1.00), "rim": Color(1.15, 0.80, 1.55, 0.90), "dir": Vector2(1.0, -0.4), "shadow": 0.40},
+	"Rouages":  {"tint": Color(1.04, 0.98, 0.92), "rim": Color(1.55, 1.10, 0.60, 0.90), "dir": Vector2(1.0, -0.5), "shadow": 0.40},
+}
+
+
+static func light_of(biome: String) -> Dictionary:
+	return LIGHT.get(biome, LIGHT["Forêt"])
+
+
+## Touffes d'herbe / cailloux devant les pieds : le personnage « entre » dans la case.
+class FrontTufts extends Node2D:
+	var col: Color = Color(0.32, 0.60, 0.22)
+	var pebbles: bool = false
+	var seed_v: int = 0
+	var t: float = 0.0
+	func _draw() -> void:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seed_v
+		var n: int = 5
+		for i: int in range(n):
+			var x: float = -26.0 + float(i) * 13.0 + rng.randf_range(-3.0, 3.0)
+			var y: float = 8.0 + rng.randf_range(-1.5, 2.5)
+			if pebbles:
+				var r: float = rng.randf_range(2.2, 3.6)
+				draw_circle(Vector2(x, y), r, col.darkened(0.35))
+				draw_circle(Vector2(x - r * 0.3, y - r * 0.35), r * 0.45, col.lightened(0.25))
+			else:
+				var hgt: float = rng.randf_range(7.0, 12.0)
+				var sway: float = sin(t * 1.8 + float(i) * 1.3 + float(seed_v % 5)) * 1.8
+				for k: int in range(3):
+					var bx: float = x + float(k - 1) * 2.4
+					var tip := Vector2(bx + float(k - 1) * 2.2 + sway, y - hgt + float(absi(k - 1)) * 2.5)
+					draw_colored_polygon(PackedVector2Array([Vector2(bx - 1.6, y), tip, Vector2(bx + 1.6, y)]),
+						col.lightened(0.10 * float(k)) if k != 1 else col.darkened(0.05))
 
 
 ## Couleur de la pastille de numéro d'ordre : héros bleu, ennemi or, invocation verte.
@@ -60,10 +120,57 @@ func setup(e: Dictionary) -> void:
 	_phase = float(int(e["uid"]) % 7)
 	shown_pv = float(e["current_pv"])
 	ghost_pv = shown_pv
+	_light = light_of(_current_biome())
+	_shadow = Sprite2D.new()
+	_shadow.centered = true
+	add_child(_shadow)
+	_rim = Sprite2D.new()
+	add_child(_rim)
 	sprite = Sprite2D.new()
 	add_child(sprite)
 	_load_texture()
+	_setup_depth()
 	set_process(true)
+
+
+## Entités posées (terrain, mécanismes, balises) : pas de respiration ni de touffes.
+func _is_static() -> bool:
+	return bool(entity.get("static", false)) or bool(entity.get("terrain", false)) or bool(entity.get("beacon", false))
+
+
+func _setup_depth() -> void:
+	if not _has_tex:
+		_shadow.visible = false
+		_rim.visible = false
+		return
+	var tex: Texture2D = sprite.texture
+	# Ombre portée : la silhouette, aplatie et projetée à l'opposé de la lumière
+	_shadow.texture = tex
+	_shadow.offset = Vector2(0, -float(tex.get_height()) * 0.5)
+	_shadow.self_modulate = Color(0.02, 0.02, 0.05, float(_light["shadow"]))
+	var ld: Vector2 = (_light["dir"] as Vector2).normalized()
+	_shadow.skew = clampf(ld.x * 0.75, -0.9, 0.9)
+	# Contre-jour : copie claire derrière le sprite, décalée vers la lumière
+	_rim.texture = tex
+	_rim.self_modulate = _light["rim"]
+	sprite.self_modulate = _light["tint"]
+	if not _is_static() and not bool(entity.get("fly", false)):
+		_front = FrontTufts.new()
+		_front.seed_v = int(entity.get("uid", 0)) * 31 + 7
+		var b: String = _current_biome()
+		# (couleurs des biomes historiques recopiées de Cell.gd : ne pas dépendre de Cell ici)
+		var legacy := {"Forêt": Color(0.32, 0.60, 0.22), "Montagne": Color(0.38, 0.48, 0.30), "Désert": Color(0.60, 0.55, 0.25), "Donjon": Color(0.30, 0.30, 0.38)}
+		_front.col = Nations.cell_palette(b).get("tuft", Color(0.32, 0.6, 0.22)) if Nations.is_new(b) else legacy.get(b, legacy["Forêt"])
+		_front.pebbles = b in ["Rouages", "Donjon", "Brasier", "Cristaux", "Ombres", "Désert"]
+		add_child(_front)
+
+
+## Profondeur du plateau : 0 au fond (haut de l'écran), 1 au premier plan.
+func _depth_factor() -> float:
+	var tree: SceneTree = get_tree()
+	var gm: Node = tree.root.get_node_or_null("GameManager") if tree != null else null
+	var n: int = int(gm.get("GRID_SIZE")) if gm != null else 10
+	return clampf(position.y / maxf(1.0, float(2 * (n - 1)) * 32.0), 0.0, 1.0)
 
 
 ## Nom de fichier d'un sprite : minuscules, sans accents, « - » et espaces -> « _ »
@@ -179,6 +286,7 @@ func _load_texture() -> void:
 	var max_w: float = (140.0 if String(entity.get("entity_type", "")) == "Player" else 112.0) * target_h / 92.0
 	var sc: float = minf(target_h / float(tex.get_height()), max_w / float(tex.get_width()))
 	sprite.scale = Vector2(sc, sc)
+	_base_sc = sc
 	height = float(tex.get_height()) * sc
 	sprite.position = Vector2(0, -height * 0.5 + 6.0)
 	# Le shader de contour/flash peut échouer sur certains pilotes Android
@@ -210,11 +318,52 @@ func _process(delta: float) -> void:
 	ghost_pv = move_toward(ghost_pv, shown_pv, maxf(0.0, delta * float(entity.get("max_pv", 100)) * 0.35))
 	if ghost_pv < shown_pv:
 		ghost_pv = shown_pv
+	if not _falling:
+		_tilt = move_toward(_tilt, 0.0, delta * 1.6)
+		_kb = _kb.move_toward(Vector2.ZERO, delta * 70.0)
+	_stretch = move_toward(_stretch, 0.0, delta * 2.5)
+	_lean = lerpf(_lean, clampf(_move_dx, -1.0, 1.0) * 0.10 if _moving else 0.0, minf(1.0, delta * 10.0))
 	if _has_tex and sprite != null:
-		var bob: float = sin(_t * 2.2 + _phase) * 1.6
-		var hop: float = absf(sin(_t * 13.0)) * 9.0 if _moving else 0.0
-		sprite.position = Vector2(randf_range(-1.0, 1.0) * _shake * 6.0, -height * 0.5 + 6.0 - bob - hop)
-		sprite.scale.y = absf(sprite.scale.x) * (1.0 + sin(_t * 2.2 + _phase) * 0.012)
+		var still: bool = _is_static()
+		var bob: float = 0.0 if still else sin(_t * 2.2 + _phase) * 1.6
+		var hop_n: float = absf(sin(_t * 13.0)) if _moving else 0.0
+		var hop: float = hop_n * 9.0
+		# profondeur : un peu plus petit et voilé au fond du plateau
+		var df: float = _depth_factor()
+		var dsc: float = lerpf(0.94, 1.04, df)
+		var sc: float = _base_sc * dsc
+		var breathe: float = 0.0 if still else sin(_t * 2.2 + _phase) * 0.014
+		var squash: float = (1.0 - hop_n) * 0.07 if _moving else 0.0
+		var sx: float = sc * (1.0 + _stretch * 0.10 + squash * 0.6)
+		var sy: float = sc * (1.0 + breathe - _stretch * 0.07 - squash)
+		var base_pos := Vector2(randf_range(-1.0, 1.0) * _shake * 6.0, -height * 0.5 + 6.0 - bob - hop) + _kb
+		sprite.scale = Vector2(sx, sy)
+		sprite.position = base_pos
+		sprite.rotation = _tilt + (0.0 if still else sin(_t * 1.3 + _phase) * 0.018)
+		sprite.skew = _lean
+		var haze: Color = Color(0.86, 0.90, 1.0).lerp(Color(1, 1, 1), df)
+		var tint: Color = _light.get("tint", Color.WHITE)
+		var bright: float = lerpf(0.90, 1.03, df)
+		sprite.self_modulate = Color(tint.r * haze.r * bright, tint.g * haze.g * bright, tint.b * haze.b * bright, 1.0)
+		# contre-jour : même pose, décalé de 3 px vers la lumière
+		var ld: Vector2 = (_light.get("dir", Vector2(-1, -0.6)) as Vector2).normalized()
+		_rim.scale = sprite.scale
+		_rim.rotation = sprite.rotation
+		_rim.skew = sprite.skew
+		_rim.flip_h = sprite.flip_h
+		_rim.position = sprite.position + ld * 4.0
+		_rim.visible = not _falling
+		# ombre portée au sol (ne suit pas le saut, se resserre quand il est en l'air)
+		var air: float = clampf((bob + hop) / 14.0, 0.0, 1.0)
+		_shadow.flip_h = sprite.flip_h
+		_shadow.position = Vector2(_kb.x * 0.5, 6.0)
+		# contre-jour : la lumière vient de l'arrière, l'ombre s'étire vers l'avant (vers le bas de l'écran)
+		_shadow.scale = Vector2(sc * (1.0 - air * 0.15), -sc * 0.46 * (1.0 - air * 0.2))
+		_shadow.self_modulate.a = minf(0.60, float(_light.get("shadow", 0.35)) * 1.5) * (1.0 - air * 0.35)
+		_shadow.visible = not _falling
+		if _front != null:
+			_front.t = _t
+			_front.queue_redraw()
 		if _mat != null:
 			_mat.set_shader_parameter("flash", _flash)
 			# Contour sombre permanent pour détacher les sprites du feuillage et du sol.
@@ -235,6 +384,8 @@ func _process(delta: float) -> void:
 
 
 func face_screen_dx(dx: float) -> void:
+	if absf(dx) > 0.1:
+		_move_dx = signf(dx)
 	if _has_tex and absf(dx) > 0.1:
 		sprite.flip_h = dx < 0.0
 
@@ -278,6 +429,7 @@ func lunge(toward: Vector2) -> Tween:
 	face_screen_dx(dir.x)
 	var origin: Vector2 = position
 	var tw: Tween = create_tween()
+	tw.tween_callback(func() -> void: _stretch = 1.0)
 	tw.tween_property(self, "position", origin - dir * 8.0, 0.07)
 	tw.tween_property(self, "position", origin + dir * 26.0, 0.07).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(self, "position", origin, 0.14)
@@ -292,9 +444,15 @@ func cast_pose() -> Tween:
 	return tw
 
 
-func hit_react(strength: float = 1.0) -> void:
+func hit_react(strength: float = 1.0, from: Vector2 = Vector2.INF) -> void:
 	_flash = 1.0
 	_shake = 0.35 * strength
+	# recul et bascule à l'opposé de l'attaquant
+	var dir := Vector2(1.0 if (sprite != null and sprite.flip_h) else -1.0, 0.0)
+	if from != Vector2.INF and (position - from).length() > 1.0:
+		dir = (position - from).normalized()
+	_kb = Vector2(dir.x * 10.0, dir.y * 4.0) * strength
+	_tilt = clampf(dir.x, -1.0, 1.0) * 0.16 * strength
 
 
 func pop_in() -> Tween:
@@ -325,6 +483,17 @@ func die() -> Tween:
 	dying = true
 	_flash = 1.0
 	var tw: Tween = create_tween()
+	if _has_tex and sprite != null and not _is_static():
+		# il bascule en arrière, s'affaisse, puis s'efface
+		var side: float = -1.0 if sprite.flip_h else 1.0
+		tw.tween_property(self, "scale", Vector2(1.08, 0.94), 0.10)
+		tw.tween_callback(func() -> void: _falling = true)
+		tw.tween_property(self, "_tilt", -side * 1.35, 0.32).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tw.parallel().tween_property(self, "_kb", Vector2(-side * 18.0, 16.0), 0.32).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tw.parallel().tween_property(self, "scale", Vector2.ONE, 0.2)
+		tw.tween_interval(0.12)
+		tw.tween_property(self, "modulate:a", 0.0, 0.3)
+		return tw
 	tw.tween_property(self, "scale", Vector2(1.15, 0.85), 0.12)
 	tw.tween_property(self, "scale", Vector2(0.4, 0.05), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tw.parallel().tween_property(self, "modulate:a", 0.0, 0.35)
@@ -349,7 +518,10 @@ func _draw() -> void:
 	var tc: Color = _team_color()
 	# Ombre
 	draw_set_transform(Vector2(0, 5), 0.0, Vector2(1.0, 0.42))
-	draw_circle(Vector2.ZERO, 30.0, Color(0, 0, 0, 0.34))
+	draw_circle(Vector2.ZERO, 30.0, Color(0, 0, 0, 0.26))
+	# contact au sol : petite zone très sombre juste sous les pieds
+	draw_circle(Vector2.ZERO, 17.0, Color(0, 0, 0, 0.30))
+	draw_circle(Vector2.ZERO, 9.0, Color(0, 0, 0, 0.22))
 	# Anneau d'équipe au sol
 	var active: bool = entity.get("is_active", false)
 	var ring_col: Color = Color(1.0, 0.85, 0.2) if active else tc
