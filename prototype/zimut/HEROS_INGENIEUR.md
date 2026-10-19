@@ -51,14 +51,14 @@ Le héros pose ses mécanismes (coût normal) puis choisit quand ils agissent : 
 
 ### 3 bis. Balise de transposition (échange de position)
 - **Pose** : le héros lance le sort sur une case libre à portée (≈ 5). La balise apparaît sur la case du héros et **le héros prend la place visée** : au lancement, le héros et la balise **échangent leurs positions**.
-- **Ensuite** : chaque fois que le héros lance le **Déclencheur (1 PA)** sur la balise, ils **échangent de nouveau leurs places**. L'effet est donc **répétable** : aller-retour entre deux cases, ou se replacer derrière une ligne alliée sans dépenser de PM.
-- **Garde-fous proposés** : 1 balise à la fois ; PV très faibles (un ennemi qui l'attaque la détruit) ; l'échange est impossible vers une case occupée par une autre unité ; maximum **3 déclenchements par tour** et jamais plus d'un échange tant que la balise est en dehors de la portée du Déclencheur (6).
+- **Ensuite** : lors d'un **tour suivant** (ou plus tard dans un tour sans échange), le héros peut lancer le **Déclencheur (1 PA)** sur la balise pour **échanger de nouveau leurs places**. L'effet est **répétable d'un tour à l'autre** : aller-retour entre deux cases, ou se replacer derrière une ligne alliée sans dépenser de PM.
+- **Garde-fous proposés** : 1 balise à la fois ; PV très faibles (un ennemi qui l'attaque la détruit) ; l'échange est impossible vers une case occupée par une autre unité ; **un seul échange de position par tour** (la pose compte comme un échange ; les autres usages du Déclencheur, sur bombes, mines ou tourelles, ne sont pas concernés). La balise doit être dans la portée du Déclencheur (6).
 - **Intérêt tactique** : mobilité de repli, tir de couverture (poser, se placer, revenir), échange pour sortir d'un corps à corps pour 1 PA seulement.
 - *Variante possible si cette lecture n'est pas la bonne* : la balise est posée **sans échange** (2 PA) et c'est le Déclencheur (1 PA) qui effectue chaque échange, y compris le premier.
 
 ## 4. Équilibrage et garde-fous
 - Limites : 3 mécanismes posés en même temps (bombes, mines, glyphes), 1 balise, 1 tourelle (2 après le niveau 65) ; le plus ancien disparaît.
-- Le Déclencheur coûte 1 PA et agit sur **un seul** mécanisme par lancer ; il ne peut pas viser un mécanisme ennemi. Limite de 3 lancers par tour pour éviter les boucles de PA.
+- Le Déclencheur coûte 1 PA et agit sur **un seul** mécanisme par lancer ; il ne peut pas viser un mécanisme ennemi. Limite de 3 lancers par tour pour éviter les boucles de PA ; l'échange de la balise reste limité à 1 par tour.
 - Les bombes blessent aussi les alliés (risque de « tir ami »), ce qui demande de la précision sans bloquer le jeu auto.
 - Stats cibles (niveau 100, à comparer avec `EQUILIBRAGE.md`) : PV ≈ 250, Force 75, Intelligence 60, Agilité 70, Défense ≈ 28, soit environ le profil de l'Assassin en plus technique.
 - IA des ennemis : les glyphes doivent être invisibles pour l'ennemi, mais l'IA ne les évite pas systématiquement (tests à prévoir).
