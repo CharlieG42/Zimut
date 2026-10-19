@@ -135,6 +135,12 @@ const CLASSES := {
 		"auto": {"intelligence": 3, "defense": 2, "vita": 2, "wisdom": 1},
 		"role": "Contrôle du terrain : piliers, murailles et failles bloquent les passages. +1 PA au niv. 90.",
 	},
+	"Artificier": {
+		"xp": 1.0, "pa": [85], "pm": [],
+		"aff": {"force": "A", "agility": "A", "vita": "B", "defense": "B", "intelligence": "C", "wisdom": "C"},
+		"auto": {"force": 3, "agility": 2, "vita": 1, "defense": 1},
+		"role": "Ingénieur : bombes, mines, tourelles et glyphes à déclencher. +1 PA au niv. 85.",
+	},
 }
 
 const DEFAULT_RULES := {

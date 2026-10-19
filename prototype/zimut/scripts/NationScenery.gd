@@ -27,6 +27,16 @@ static func _crystal(ci: CanvasItem, base: Vector2, h: float, w: float, col: Col
 	closed.append(body[0])
 	ci.draw_polyline(closed, col.darkened(0.6), 1.8, true)
 
+## Roue dentée (polygone à `teeth` dents) centrée sur `c`, pivotée de `rot` radians.
+static func _gear(ci: CanvasItem, c: Vector2, r: float, teeth: int, col: Color, rot: float) -> void:
+	var pts := PackedVector2Array()
+	for i: int in range(teeth * 4):
+		var a: float = rot + float(i) / float(teeth * 4) * TAU
+		var rr: float = r if (i % 4) < 2 else r * 0.76
+		pts.append(c + Vector2(cos(a), sin(a)) * rr)
+	ci.draw_colored_polygon(pts, col)
+	ci.draw_polyline(pts + PackedVector2Array([pts[0]]), col.darkened(0.45), 1.6, true)
+
 
 static func draw(ci: CanvasItem, kind: String, p: Dictionary, biome: String, rng: RandomNumberGenerator, t: float) -> bool:
 	var leaf: Color = p["leaf"]
@@ -355,6 +365,58 @@ static func draw(ci: CanvasItem, kind: String, p: Dictionary, biome: String, rng
 				ci.draw_circle(Vector2(0, -50), 46.0 - float(i) * 8.0, Color(0.55, 0.3, 0.95, 0.04 + 0.03 * float(i) + 0.02 * sin(t * 1.8)))
 			ci.draw_line(Vector2(-35, -80), Vector2(-35, -30), Color(0.75, 0.55, 1.0, 0.8), 2.0, true)
 			ci.draw_line(Vector2(35, -80), Vector2(35, -30), Color(0.75, 0.55, 1.0, 0.8), 2.0, true)
+		# ───────────────────────── Rouages ─────────────────────────
+		"cog_wheel":
+			BattleScenery.soft_shadow(ci, 24.0, 0.25)
+			_gear(ci, Vector2(0, -26), 24.0, 10, Color(0.62, 0.45, 0.26), t * 0.5)
+			_gear(ci, Vector2(0, -26), 11.0, 6, Color(0.30, 0.24, 0.20), -t * 0.5)
+			ci.draw_circle(Vector2(0, -26), 4.0, Color(0.95, 0.75, 0.35))
+		"steam_pipe":
+			BattleScenery.soft_shadow(ci, 18.0, 0.22)
+			BattleScenery._bar(ci, Vector2(0, 0), Vector2(0, -44), 11.0, Color(0.48, 0.42, 0.38))
+			BattleScenery._bar(ci, Vector2(0, -44), Vector2(16, -44), 11.0, Color(0.48, 0.42, 0.38))
+			ci.draw_rect(Rect2(-8, -20, 16, 5), Color(0.72, 0.50, 0.24))
+			for i: int in range(3):
+				var ph: float = fmod(t * 0.7 + float(i) * 0.33, 1.0)
+				ci.draw_circle(Vector2(16.0 + ph * 8.0, -50.0 - ph * 26.0), 5.0 + ph * 7.0, Color(0.92, 0.92, 0.95, 0.45 * (1.0 - ph)))
+		"gear_tower":
+			BattleScenery.soft_shadow(ci, 24.0, 0.28)
+			_poly(ci, PackedVector2Array([Vector2(-16, 0), Vector2(-11, -64), Vector2(11, -64), Vector2(16, 0)]), Color(0.38, 0.34, 0.32), Color(0.9, 0.62, 0.28, 0.5))
+			ci.draw_rect(Rect2(-14, -40, 28, 5), Color(0.72, 0.50, 0.24))
+			_gear(ci, Vector2(0, -72), 15.0, 8, Color(0.70, 0.50, 0.26), t * 0.6)
+			ci.draw_circle(Vector2(0, -72), 4.0, Color(0.20, 0.17, 0.15))
+		"anvil":
+			BattleScenery.soft_shadow(ci, 20.0, 0.25)
+			ci.draw_rect(Rect2(-9, -10, 18, 10), Color(0.30, 0.26, 0.24))
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(-22, -16), Vector2(18, -16), Vector2(26, -22), Vector2(-14, -22)]), Color(0.52, 0.52, 0.58))
+			ci.draw_rect(Rect2(-14, -16, 28, 6), Color(0.40, 0.40, 0.46))
+			ci.draw_circle(Vector2(8.0, -24.0), 2.5 + 1.2 * sin(t * 7.0), Color(1.0, 0.8, 0.3, 0.8))
+		"tesla_coil":
+			BattleScenery.soft_shadow(ci, 20.0, 0.25)
+			ci.draw_rect(Rect2(-14, -12, 28, 12), Color(0.34, 0.30, 0.28))
+			BattleScenery._bar(ci, Vector2(0, -12), Vector2(0, -56), 9.0, Color(0.72, 0.50, 0.24))
+			for k: int in range(4):
+				ci.draw_line(Vector2(-9, -20.0 - float(k) * 9.0), Vector2(9, -20.0 - float(k) * 9.0), Color(0.45, 0.30, 0.16), 2.0, true)
+			ci.draw_circle(Vector2(0, -62), 10.0, Color(0.75, 0.80, 0.90))
+			ci.draw_circle(Vector2(0, -62), 22.0 + 3.0 * sin(t * 5.0), Color(0.55, 0.75, 1.0, 0.14))
+			var arc: float = sin(t * 9.0)
+			ci.draw_polyline(PackedVector2Array([Vector2(0, -62), Vector2(10.0 + arc * 4.0, -70), Vector2(4, -78), Vector2(16.0 + arc * 5.0, -84)]), Color(0.7, 0.9, 1.0, 0.85), 2.0, true)
+		"scrap_pile":
+			BattleScenery.soft_shadow(ci, 24.0, 0.25)
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(-22, 0), Vector2(-14, -18), Vector2(-2, -26), Vector2(12, -20), Vector2(22, 0)]), Color(0.36, 0.32, 0.30))
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(-10, -8), Vector2(0, -22), Vector2(14, -6)]), Color(0.58, 0.40, 0.22))
+			_gear(ci, Vector2(8, -12), 8.0, 6, Color(0.62, 0.62, 0.68), 0.4)
+			ci.draw_line(Vector2(-18, -4), Vector2(-4, -16), Color(0.75, 0.55, 0.30), 2.2, true)
+		"workshop_crane":
+			BattleScenery.soft_shadow(ci, 44.0, 0.3)
+			var wc: Color = Color(0.36, 0.32, 0.30)
+			BattleScenery._bar(ci, Vector2(-30, 0), Vector2(-30, -110), 10.0, wc)
+			BattleScenery._bar(ci, Vector2(-30, -108), Vector2(40, -108), 8.0, Color(0.72, 0.50, 0.24))
+			ci.draw_line(Vector2(34, -108), Vector2(34, -64.0 + 4.0 * sin(t * 1.2)), Color(0.8, 0.8, 0.85), 2.0, true)
+			ci.draw_rect(Rect2(24, -64.0 + 4.0 * sin(t * 1.2), 20, 14), Color(0.55, 0.38, 0.22))
+			_gear(ci, Vector2(-30, -112), 14.0, 8, Color(0.82, 0.60, 0.30), t * 0.5)
+			ci.draw_rect(Rect2(-12, -34, 38, 34), Color(0.30, 0.27, 0.26))
+			ci.draw_rect(Rect2(-6, -26, 10, 12), Color(1.0, 0.7, 0.3, 0.8 + 0.2 * sin(t * 3.0)))
 		_:
 			return false
 	return true

@@ -201,3 +201,13 @@ Glyphe de venin,glyph_venom
 Glyphe d'ombre,glyph_shadow
 Glyphe d'entrave,glyph_snare
 Glyphe de flammes,glyph_flame
+Pistolet à ressort,arrow
+Poser Bombe,explosion
+Déclencheur,inspire
+Poser Mine,arrow_explosive
+Poser Tourelle,summon_atk
+Poser Balise de transposition,beacon
+Glyphe de surcharge,glyph_flame
+Grenade à fragmentation,fireball
+Fusil à pompe,arrow_pierce
+Arsenal total,cataclysm

@@ -193,6 +193,8 @@ static func calc_damage(att: Dictionary, tgt: Dictionary, base: float, dtype: St
 	var afx: Dictionary = att.get("fx", {})
 	if dtype != "phys":
 		mult *= 1.0 + float(afx.get("mag_pct", 0)) / 100.0
+	else:
+		mult *= 1.0 + float(afx.get("phys_pct", 0)) / 100.0
 	var crit_chance: float = clampf(0.05 + float(att.get("agility", 0)) / 400.0 + float(afx.get("crit", 0)) / 100.0, 0.05, 0.6)
 	var crit: bool = force_crit or has_status(att, "mark")
 	if simulate:
@@ -300,9 +302,33 @@ static func parse(spell: Dictionary) -> Dictionary:
 		"summon_dmg_base": 0, "summon_dmg_lvl": 0.0, "needs_summon": false,
 		"buff_summons": false,
 		"glyph_turns": 0, "glyph_allies": {}, "glyph_foes": {},
+		"mine": false,
 	}
 	if PUSH.has(sname):
 		p["push"] = int(PUSH[sname])
+
+	# ── Artificier (V26) : mécanismes posés sur le terrain et Déclencheur ───────────────
+	if sname.begins_with("Poser ") and stype == "Invocation":
+		p["kind"] = "summon"
+		p["target"] = "free_cell"
+		p["summon"] = sname.substr(6)
+		p["needs_los"] = false
+		spell["_p"] = p
+		return p
+	if sname == "Déclencheur":
+		p["kind"] = "trigger"
+		p["target"] = "cell"
+		p["needs_los"] = false
+		p["min_range"] = 0
+		spell["_p"] = p
+		return p
+	if sname == "Arsenal total":
+		p["kind"] = "trigger_all"
+		p["target"] = "self"
+		p["needs_los"] = false
+		p["min_range"] = 0
+		spell["_p"] = p
+		return p
 
 	# ── Invocations ────────────────────────────────────────────────────────
 	if stype == "Invocation" and sname.begins_with("Invoquer "):
@@ -382,6 +408,7 @@ static func parse(spell: Dictionary) -> Dictionary:
 	if t.contains("pose un piège"):
 		p["kind"] = "trap"
 		p["target"] = "free_cell"
+		p["mine"] = t.contains("(mine)")
 		p["trap"] = _num(t, "(\\d+) dégâts", 1, 50)
 		p["needs_los"] = false
 		spell["_p"] = p
@@ -703,6 +730,8 @@ static func nation_boss_spells(boss_name: String, force: int) -> Array:
 			s.append(_mk("Coulée de lave", 3, 6, "%d dégâts en zone (3x3) + brûle (%d dégâts/tour; 3 tours)" % [int(force * 0.75), int(force * 0.3)]))
 		"Liche des Brumes":
 			s.append(_mk("Brume d'affaiblissement", 3, 6, "%d dégâts magiques + affaiblit (-%d dégâts; 3 tours)" % [int(force * 0.6), int(force * 0.2)]))
+		"Colosse d'Engrenages":
+			s.append(_mk("Salve de pistons", 3, 5, "%d dégâts en zone (3x3) + étourdit 1 tour (30%%)" % int(force * 0.7)))
 		"Liche Éternelle":
 			s.append(_mk("Mot de l'éternité", 3, 7, "%d dégâts magiques + affaiblit (-%d dégâts; 2 tours)" % [int(force * 0.8), int(force * 0.2)]))
 	return s
@@ -731,6 +760,10 @@ const SUMMONS := {
 	"Muraille":     {"pv": 70, "force": 0, "defense": 30, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.72, 0.55, 0.30), "spell": [], "static": true, "blocks_los": true, "terrain": true, "turns": 3, "span": 3},
 	"Faille":       {"pv": 999, "force": 0, "defense": 0, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.35, 0.22, 0.12), "spell": [], "static": true, "terrain": true, "turns": 3, "span": 3, "indestructible": true},
 	"Cristal ambré": {"pv": 90, "force": 0, "defense": 40, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.95, 0.65, 0.15), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1},
+	# Mécanismes de l'Artificier (V26) : posés comme du terrain (ne comptent pas comme familiers).
+	"Bombe":        {"pv": 20, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.85, 0.25, 0.20), "spell": [], "static": true, "terrain": true, "turns": 2, "span": 1, "mech": "bomb"},
+	"Tourelle":     {"pv": 60, "force": 0, "defense": 20, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.55, 0.62, 0.72), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1, "mech": "turret"},
+	"Balise de transposition": {"pv": 15, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.30, 0.85, 0.90), "spell": [], "static": true, "terrain": true, "turns": 5, "span": 1, "mech": "swap"},
 	"Balise":       {"pv": 90, "force": 0, "defense": 30, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.90, 0.60, 0.20), "spell": [], "static": true, "beacon": true},
 }
 

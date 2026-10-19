@@ -1,3 +1,5 @@
+> **Statut V26 : implémenté** (voir AMELIORATIONS_V26.md). Interprétation retenue : l'inversion se fait au lancement de la balise ET à chaque Déclencheur, avec un seul déplacement par tour.
+
 # Héros « Artificier » (ingénieur, bombardier) — proposition pour une future Nation
 
 > Statut : **concept de design**, non implémenté. Nom de travail : *Artificier*. Nation suggérée : **Nation des Rouages**

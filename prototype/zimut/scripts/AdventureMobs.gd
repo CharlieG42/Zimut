@@ -87,7 +87,7 @@ static func _free(adv: Dictionary, zone: String, p: Vector2i, hero: Vector2i) ->
 const LEVEL_RANGE := {
 	"foret_sylve": [1, 7], "foret_ronces": [8, 14], "lisiere_col": [12, 19], "brasier_cendres": [18, 25],
 	"brumes_marais": [24, 31], "montagne_pics": [30, 38], "vents_plateau": [31, 40], "cretes_givre": [44, 55],
-	"piemont_ocre": [44, 52], "ombres_necropole": [54, 63], "desert_dunes": [60, 68], "marees_cotes": [70, 80],
+	"piemont_ocre": [44, 52], "ombres_necropole": [54, 63], "desert_dunes": [60, 68], "marees_cotes": [70, 80], "rouages_atelier": [82, 94],
 	"cristaux_caverne": [80, 90], "portes_donjon": [88, 100],
 }
 

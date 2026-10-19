@@ -89,3 +89,13 @@ Géomancien,Glyphe sismique,3,0,5,Trace un glyphe (3x3; 3 tours) : ennemis 30 d�
 Géomancien,Tempête de sable,4,0,5,39 dégâts en zone (3x3),65,Attaque,39,0,0,0,0,0,0,0,0
 Géomancien,Séisme ambré,4,0,4,58 dégâts magiques,80,Attaque,58,0,0,0,0,0,0,0,0
 Géomancien,Cataclysme minéral,4,0,7,122 dégâts en zone (4x4),100,Attaque,122,0,0,0,0,0,0,0,0
+Artificier,Pistolet à ressort,2,0,5,14 dégâts,1,Attaque,14,0,0,0,0,0,0,0,0
+Artificier,Poser Bombe,2,0,4,Pose une bombe : explose en croix (5 cases) à la fin du 2e tour de l'Artificier ou dès qu'on la déclenche,1,Invocation,0,0,0,0,0,0,0,0,0
+Artificier,Déclencheur,1,0,6,Déclenche l'effet d'un de vos mécanismes (bombe; mine; tourelle; glyphe; balise de transposition),1,Buff,0,0,0,0,0,0,0,0,0
+Artificier,Poser Mine,2,0,4,Pose un piège (mine) : 22 dégâts; explose en croix si on la déclenche,10,Attaque,0,0,0,0,0,0,0,0,0
+Artificier,Poser Tourelle,3,0,4,Installe une tourelle : tire sur l'ennemi le plus proche (rayon 5) à la fin de chacun de vos tours (4 tours; 1 seule),20,Invocation,0,0,0,0,0,0,0,0,0
+Artificier,Poser Balise de transposition,2,0,6,Pose une balise et échange votre place avec elle; le Déclencheur sur la balise refait l'échange (1 déplacement par tour),35,Invocation,0,0,0,0,0,0,0,0,0
+Artificier,Glyphe de surcharge,3,0,5,Trace un glyphe (croix; 3 tours) : alliés +25% dégâts | ennemis 22 dégâts,50,Attaque,25,0,0,0,0,0,0,0,0
+Artificier,Grenade à fragmentation,3,0,5,34 dégâts en zone (3x3),65,Attaque,34,0,0,0,0,0,0,0,0
+Artificier,Fusil à pompe,3,0,3,53 dégâts,80,Attaque,53,0,0,0,0,0,0,0,0
+Artificier,Arsenal total,4,0,0,Déclenche d'un coup tous vos mécanismes : bombes; mines; tourelles et glyphes,100,Buff,0,0,0,0,0,0,0,0,0

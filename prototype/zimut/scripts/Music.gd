@@ -33,7 +33,7 @@ const TRACKS := {
 	"explore_brumes": "res://assets/audio/nation_brumes_explore.ogg",
 	"explore_ombres": "res://assets/audio/nation_ombres_explore.ogg",
 }
-const NATION_KEY := {"Cristaux": "cristaux", "Marées": "marees", "Vents": "vents", "Brasier": "brasier", "Brumes": "brumes", "Ombres": "ombres"}
+const NATION_KEY := {"Cristaux": "cristaux", "Marées": "marees", "Vents": "vents", "Brasier": "brasier", "Brumes": "brumes", "Ombres": "ombres", "Rouages": "brasier"}
 
 var enabled: bool = true
 var _current: String = ""
@@ -100,7 +100,7 @@ func play_combat(biome: String) -> void:
 			play("combat_desert")
 		"Donjon":
 			play("combat_donjon")
-		"Cristaux", "Marées", "Vents", "Brasier", "Brumes", "Ombres":
+		"Cristaux", "Marées", "Vents", "Brasier", "Brumes", "Ombres", "Rouages":
 			play("combat_" + String(NATION_KEY[biome]))
 		_:
 			play("combat_forest")

@@ -26,3 +26,6 @@ props, monuments, ambiance, ennemis, boss) et dessinés par `scripts/NationScene
 ## V13 — Musiques et effets de biome
 - Musiques : 12 boucles (combat + exploration par nation) générées par `tools/gen_nation_music.py` (synthèse additive, boucles sans couture). Ce sont des ambiances procédurales : elles pourront être remplacées par de vraies compositions en gardant les mêmes noms de fichiers (`assets/audio/nation_<id>_combat|explore.ogg`).
 - Effets de biome (`scripts/BiomeEffects.gd`, symétriques alliés/ennemis) : Cristaux +15 % magie, Marées −1/+1 PM selon le round, Vents +1 PM, Brasier brûlure 2 % PV max en fin de tour (jamais mortelle), Brumes 12 % d'esquive, Ombres +12 % de critiques. Annoncés dans le journal au début du combat et à l'arrivée dans une zone d'Aventure.
+
+## Rouages (V26)
+Dixième nation : héros **Artificier**, biome Rouages (acier et cuivre, engrenages, tuyaux fumants), ressource Fer, boss Colosse d'Engrenages, effet de biome Surtension (+12 % dégâts physiques). Voir AMELIORATIONS_V26.md.

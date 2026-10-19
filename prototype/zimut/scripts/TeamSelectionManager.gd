@@ -20,6 +20,7 @@ const CLASS_COLORS: Dictionary = {
 	"Invocateur": Color(0.5, 0.0, 0.5),
 	"Sylvain":    Color(0.35, 0.65, 0.25),
 	"Géomancien": Color(0.85, 0.62, 0.25),
+	"Artificier": Color(0.90, 0.45, 0.20),
 }
 
 ## Données par défaut si le CSV ne fournit pas tout (icône + description manuelles)
@@ -33,6 +34,7 @@ const CLASS_META: Dictionary = {
 	"Invocateur": {"icon": "🎭", "description": "Invoque des créatures, contrôle le champ."},
 	"Sylvain":    {"icon": "🌿", "description": "Maître des plantes : invoque la forêt, empoisonne et soigne par la sève."},
 	"Géomancien":    {"icon": "🪨", "description": "Mage de pierre et de sable : érige piliers, murs et failles pour bloquer, isoler et protéger."},
+	"Artificier": {"icon": "💣", "description": "Ingénieur : pose bombes, mines, tourelles et glyphes, puis les déclenche au bon moment."},
 }
 
 var available_classes: Array[String] = []
