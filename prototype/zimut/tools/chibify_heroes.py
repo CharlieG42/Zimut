@@ -120,7 +120,7 @@ def process(name):
         chin, top = auto_chin(im)
         p["chin"] = chin
         p["ramp"] = max(0.05, 0.07 * (1 - top))
-    if "_" in name and name.split("_", 1)[1] in ("attack", "cast"):
+    if "_" in name and name.split("_", 1)[1].split("_")[0] in ("attack", "cast"):
         # poses d'action : déformation plus douce (armes et gestes restent lisibles)
         p["head_s"] = 1.0 + (p["head_s"] - 1.0) * 0.6
         p["body_v"] = 1.0 - (1.0 - p["body_v"]) * 0.6
@@ -143,8 +143,8 @@ if __name__ == "__main__":
         names = []
         for c in sorted(PARAMS):
             names.append(c)
-            for pose in ("back", "walk", "attack", "cast"):
-                if os.path.exists(os.path.join(SRC, "poses", "%s_%s.png" % (c, pose))):
-                    names.append("%s_%s" % (c, pose))
+            import glob
+            for f in sorted(glob.glob(os.path.join(SRC, "poses", c + "_*.png"))):
+                names.append(os.path.basename(f)[:-4])
     for n in names:
         process(n)

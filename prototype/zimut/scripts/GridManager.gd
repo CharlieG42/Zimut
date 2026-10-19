@@ -676,7 +676,7 @@ func _play_cast(d: Dictionary) -> void:
 		if v != null and elem != "physical":
 			_rune(v.position, col)   # rune d'incantation sous le lanceur
 		if d["ranged"] and v != null:
-			v.play_pose("attack" if v.has_pose("attack") else "cast", 0.55)
+			v.play_pose("attack" if v.has_pose("attack") else "cast", 0.75)
 			Sfx.play("magic" if not phys else "cast")
 			var start: Vector2 = v.position + Vector2(0, -50)
 			await _projectile_el(start, to_pos, elem, phys)
