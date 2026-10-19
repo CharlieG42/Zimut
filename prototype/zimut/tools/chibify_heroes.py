@@ -30,6 +30,7 @@ PARAMS = {
     "invocateur": {"chin": 0.18},
     "sylvain":    {"chin": 0.18},
     "geomancien": {"chin": 0.19, "body_h": 1.20},
+    "artificier": {"chin": 0.19},
 }
 OUTLINE = (26, 16, 32)
 OUT_W = 4

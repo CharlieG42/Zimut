@@ -1689,3 +1689,8 @@ Gagner 2 combats sans aucun héros K.O.	Win 2 fights without any hero K.O.
 Gagner un combat en 4 tours ou moins	Win a fight in 4 turns or less
 Gagner 4 combats	Win 4 fights
 Coffre des primes	Bounty chest
+Mécanoptère	Mechanopter
+Drone aérien	Aerial Drone
+Araignée mécanique	Mechanical Spider
+Roue engrenée	Geared Wheel
+Automate de combat	Combat Automaton
