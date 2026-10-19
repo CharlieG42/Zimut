@@ -56,6 +56,13 @@ var _stretch: float = 0.0       # étirement d'élan (attaque)
 var _lean: float = 0.0          # penché pendant la marche
 var _move_dx: float = 0.0
 var _falling: bool = false
+# V31 : poses (planches d'animation) : <sprite>_back / _walk / _attack / _cast à côté du sprite
+var _poses: Dictionary = {}
+var _idle_tex: Texture2D = null
+var _cur_pose: String = ""
+var _pose_t: float = 0.0
+var _act_pose: String = ""
+const POSES: Array[String] = ["back", "walk", "attack", "cast"]
 
 
 ## Lumière par biome : teinte du personnage, couleur du contre-jour, direction de la
@@ -130,7 +137,59 @@ func setup(e: Dictionary) -> void:
 	add_child(sprite)
 	_load_texture()
 	_setup_depth()
+	_load_poses()
 	set_process(true)
+
+
+func _load_poses() -> void:
+	if not _has_tex or sprite.texture == null:
+		return
+	_idle_tex = sprite.texture
+	var base: String = _idle_tex.resource_path.get_basename()
+	if base == "":
+		return
+	for pz: String in POSES:
+		var path: String = "%s_%s.png" % [base, pz]
+		if ResourceLoader.exists(path):
+			var t: Texture2D = load(path) as Texture2D
+			if t != null:
+				_poses[pz] = t
+
+
+func has_pose(pz: String) -> bool:
+	return _poses.has(pz)
+
+
+## Joue une pose d'action (attaque, incantation) pendant `dur` secondes.
+func play_pose(pz: String, dur: float = 0.5) -> void:
+	if _poses.has(pz):
+		_act_pose = pz
+		_pose_t = dur
+
+
+## Pose de base : marche, dos (orientation vers le haut de l'écran) ou repos.
+func _wanted_pose() -> String:
+	if _pose_t > 0.0 and _act_pose != "":
+		return _act_pose
+	if _moving and _poses.has("walk"):
+		return "walk"
+	var f: Vector2i = entity.get("facing", Vector2i.ZERO)
+	if f != Vector2i.ZERO and _poses.has("back") and _grid_dir_to_screen(f).y < -0.1:
+		return "back"
+	return ""
+
+
+func _apply_pose(pz: String) -> void:
+	if pz == _cur_pose or _idle_tex == null:
+		return
+	_cur_pose = pz
+	var t: Texture2D = _poses.get(pz, _idle_tex) if pz != "" else _idle_tex
+	sprite.texture = t
+	_rim.texture = t
+	_shadow.texture = t
+	_shadow.offset = Vector2(0, -float(t.get_height()) * 0.5)
+	# même échelle que la pose de repos : la taille du personnage ne change pas
+	height = float(t.get_height()) * _base_sc
 
 
 ## Entités posées (terrain, mécanismes, balises) : pas de respiration ni de touffes.
@@ -323,6 +382,10 @@ func _process(delta: float) -> void:
 		_kb = _kb.move_toward(Vector2.ZERO, delta * 70.0)
 	_stretch = move_toward(_stretch, 0.0, delta * 2.5)
 	_lean = lerpf(_lean, clampf(_move_dx, -1.0, 1.0) * 0.10 if _moving else 0.0, minf(1.0, delta * 10.0))
+	if _pose_t > 0.0:
+		_pose_t -= delta
+	if _has_tex and sprite != null and not _poses.is_empty():
+		_apply_pose(_wanted_pose())
 	if _has_tex and sprite != null:
 		var still: bool = _is_static()
 		var bob: float = 0.0 if still else sin(_t * 2.2 + _phase) * 1.6
@@ -428,6 +491,7 @@ func lunge(toward: Vector2) -> Tween:
 	dir = dir.normalized() if dir.length() > 1.0 else Vector2.ZERO
 	face_screen_dx(dir.x)
 	var origin: Vector2 = position
+	play_pose("attack", 0.45)
 	var tw: Tween = create_tween()
 	tw.tween_callback(func() -> void: _stretch = 1.0)
 	tw.tween_property(self, "position", origin - dir * 8.0, 0.07)
@@ -437,6 +501,7 @@ func lunge(toward: Vector2) -> Tween:
 
 
 func cast_pose() -> Tween:
+	play_pose("cast", 0.6)
 	var tw: Tween = create_tween()
 	var origin: Vector2 = position
 	tw.tween_property(self, "position", origin + Vector2(0, -12), 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)

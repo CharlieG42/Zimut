@@ -25,7 +25,7 @@ PARAMS = {
     "assassin":   {"chin": 0.18},
     "chasseur":   {"chin": 0.18},
     "mage":       {"chin": 0.17},
-    "druide":     {"chin": 0.24, "head_s": 1.35, "body_v": 0.66, "body_h": 1.02},
+    "druide":     {"head_s": 1.45, "body_v": 0.64, "body_h": 1.05},
     "heal":       {"chin": 0.17},
     "invocateur": {"chin": 0.18},
     "sylvain":    {"chin": 0.18},
@@ -96,9 +96,34 @@ def outline(im, width=OUT_W):
     bbox = canvas.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
     return canvas.crop(bbox)
 
+def auto_chin(im):
+    """V31 : position du menton estimée (les bâtons dépassent souvent au-dessus de la tête).
+    Haut de la tête = premier pixel opaque dans la bande centrale du corps (autour du centre
+    des pieds/jambes) ; la tête occupe ~17 % de la hauteur restante."""
+    a = np.array(im)[:, :, 3] > 40
+    H, W = a.shape
+    ys, xs = np.where(a[int(H * 0.45):])
+    cx = np.median(xs) if len(xs) else W / 2
+    band = a[:, max(0, int(cx - W * 0.12)):min(W, int(cx + W * 0.12))]
+    rows = np.where(band.sum(1) > max(3, band.shape[1] * 0.25))[0]
+    top = rows[0] if len(rows) else 0
+    return (top + 0.17 * (H - top)) / H, top / H
+
 def process(name):
-    p = dict(DEFAULT); p.update(PARAMS.get(name, {}))
-    im = Image.open(os.path.join(SRC, name + ".png")).convert("RGBA")
+    base = name.split("_")[0]
+    p = dict(DEFAULT); p.update(PARAMS.get(base, {}))
+    src = os.path.join(SRC, name + ".png")
+    if not os.path.exists(src):
+        src = os.path.join(SRC, "poses", name + ".png")
+    im = Image.open(src).convert("RGBA")
+    if p.get("auto", True):
+        chin, top = auto_chin(im)
+        p["chin"] = chin
+        p["ramp"] = max(0.05, 0.07 * (1 - top))
+    if "_" in name and name.split("_", 1)[1] in ("attack", "cast"):
+        # poses d'action : déformation plus douce (armes et gestes restent lisibles)
+        p["head_s"] = 1.0 + (p["head_s"] - 1.0) * 0.6
+        p["body_v"] = 1.0 - (1.0 - p["body_v"]) * 0.6
     # suréchantillonnage x2 pour garder la finesse après déformation
     big = im.resize((im.width * 2, im.height * 2), Image.LANCZOS)
     w = warp(big, p)
@@ -114,5 +139,12 @@ def process(name):
 
 if __name__ == "__main__":
     names = sys.argv[1:] or sorted(PARAMS)
+    if names == ["--all-poses"]:
+        names = []
+        for c in sorted(PARAMS):
+            names.append(c)
+            for pose in ("back", "walk", "attack", "cast"):
+                if os.path.exists(os.path.join(SRC, "poses", "%s_%s.png" % (c, pose))):
+                    names.append("%s_%s" % (c, pose))
     for n in names:
         process(n)
