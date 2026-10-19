@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://3unopk01qq5l"
-path="res://.godot/imported/chasseur_cast.png-3115c61dc5ee8291402a3f577680cde2.ctex"
+uid="uid://oiroorrwxk63"
+path="res://.godot/imported/sylvain_attack_2.png-622765f6849a88c74c7c78c2cd146851.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/nations/heros/poses/chasseur_cast.png"
-dest_files=["res://.godot/imported/chasseur_cast.png-3115c61dc5ee8291402a3f577680cde2.ctex"]
+source_file="res://assets/sprites/nations/heros/poses/sylvain_attack_2.png"
+dest_files=["res://.godot/imported/sylvain_attack_2.png-622765f6849a88c74c7c78c2cd146851.ctex"]
 
 [params]
 

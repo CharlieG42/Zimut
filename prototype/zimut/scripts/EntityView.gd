@@ -66,6 +66,8 @@ var _seq: Array = []
 var _idle_alt: Texture2D = null
 var _idle_wait: float = 5.0
 var _cur_tex: Texture2D = null
+var _ghost: Sprite2D = null
+var _ghost_fade: float = 0.0
 const POSES: Array[String] = ["back", "walk", "attack", "cast"]
 
 
@@ -142,6 +144,10 @@ func setup(e: Dictionary) -> void:
 	_load_texture()
 	_setup_depth()
 	_load_poses()
+	if not _poses.is_empty():
+		_ghost = Sprite2D.new()
+		_ghost.modulate.a = 0.0
+		add_child(_ghost)
 	set_process(true)
 
 
@@ -172,19 +178,41 @@ func has_pose(pz: String) -> bool:
 	return _poses.has(pz)
 
 
-## Joue une pose d'action pendant `dur` secondes. Attaque / incantation : une variante tirée
-## au hasard, ou un enchaînement de 2 variantes dans un ordre aléatoire (élan puis frappe…).
-func play_pose(pz: String, dur: float = 0.5) -> void:
-	if not _poses.has(pz):
+## Joue une action. Chaque sort a sa propre chorégraphie (graine = nom du sort + classe) :
+## élan éventuel (incantation, marche ou variante de repos) puis 1 à 2 frappes, enchaînées vite
+## avec un fondu très court entre les poses. Sans clé : tirage au hasard.
+func play_pose(pz: String, dur: float = 0.5, key: String = "") -> void:
+	var atk: Array = _poses.get("attack", [])
+	var cst: Array = _poses.get("cast", [])
+	if atk.is_empty() and cst.is_empty():
 		return
-	var list: Array = (_poses[pz] as Array).duplicate()
-	list.shuffle()
-	_seq.clear()
-	if list.size() >= 2 and randf() < 0.6:
-		_seq.append([list[0], dur * 0.45])
-		_seq.append([list[1], dur * 0.65])
+	var rng := RandomNumberGenerator.new()
+	if key != "":
+		rng.seed = absi(("%s|%s|%s" % [key, String(entity.get("classe", "")), pz]).hash())
 	else:
-		_seq.append([list[0], dur])
+		rng.randomize()
+	var main_pool: Array = atk if (pz == "attack" and not atk.is_empty()) or cst.is_empty() else cst
+	var lead_pool: Array = []
+	for t in cst + _poses.get("walk", []) + _poses.get("idle", []):
+		if not main_pool.has(t):
+			lead_pool.append(t)
+	var picks: Array = main_pool.duplicate()
+	# mélange déterministe
+	for k: int in range(picks.size() - 1, 0, -1):
+		var r: int = rng.randi_range(0, k)
+		var tmp = picks[k]
+		picks[k] = picks[r]
+		picks[r] = tmp
+	_seq.clear()
+	var speed: float = clampf(dur / 0.6, 0.7, 1.4)
+	var gs: Node = get_node_or_null("/root/GameSettings")
+	if gs != null and gs.has_method("anim_duration_mult"):
+		speed *= float(gs.call("anim_duration_mult"))
+	if not lead_pool.is_empty() and rng.randf() < 0.55:
+		_seq.append([lead_pool[rng.randi_range(0, lead_pool.size() - 1)], 0.09 * speed])
+	var n: int = 1 if picks.size() < 2 else (2 if rng.randf() < 0.7 else 1)
+	for k2: int in range(n):
+		_seq.append([picks[k2], (0.12 if k2 < n - 1 else 0.20) * speed])
 	_next_seq()
 
 
@@ -216,6 +244,12 @@ func _wanted_tex() -> Texture2D:
 func _apply_tex(t: Texture2D) -> void:
 	if t == null or t == _cur_tex or _idle_tex == null:
 		return
+	# fondu court : l'ancienne pose s'efface pendant que la nouvelle apparaît
+	if _ghost != null and _cur_tex != null:
+		_ghost.texture = _cur_tex
+		_ghost.modulate.a = 0.85
+		_ghost_fade = 0.85
+		_stretch = maxf(_stretch, 0.35)
 	_cur_tex = t
 	sprite.texture = t
 	_rim.texture = t
@@ -469,6 +503,17 @@ func _process(delta: float) -> void:
 		_shadow.scale = Vector2(sc * (1.0 - air * 0.15), -sc * 0.46 * (1.0 - air * 0.2))
 		_shadow.self_modulate.a = minf(0.60, float(_light.get("shadow", 0.35)) * 1.5) * (1.0 - air * 0.35)
 		_shadow.visible = not _falling
+		if _ghost != null:
+			if _ghost_fade > 0.0:
+				_ghost_fade = maxf(0.0, _ghost_fade - delta * 11.0)
+			_ghost.modulate.a = _ghost_fade
+			_ghost.visible = _ghost_fade > 0.01
+			_ghost.self_modulate = sprite.self_modulate
+			_ghost.scale = sprite.scale
+			_ghost.position = sprite.position
+			_ghost.rotation = sprite.rotation
+			_ghost.skew = sprite.skew
+			_ghost.flip_h = sprite.flip_h
 		if _front != null:
 			_front.t = _t
 			_front.queue_redraw()
@@ -531,12 +576,12 @@ func slide_to(points: Array[Vector2], step_time: float = 0.09) -> Tween:
 	return tw
 
 
-func lunge(toward: Vector2) -> Tween:
+func lunge(toward: Vector2, key: String = "") -> Tween:
 	var dir: Vector2 = (toward - position)
 	dir = dir.normalized() if dir.length() > 1.0 else Vector2.ZERO
 	face_screen_dx(dir.x)
 	var origin: Vector2 = position
-	play_pose("attack", 0.62)
+	play_pose("attack", 0.6, key)
 	var tw: Tween = create_tween()
 	tw.tween_callback(func() -> void: _stretch = 1.0)
 	tw.tween_property(self, "position", origin - dir * 8.0, 0.07)
@@ -545,8 +590,8 @@ func lunge(toward: Vector2) -> Tween:
 	return tw
 
 
-func cast_pose() -> Tween:
-	play_pose("cast", 0.8)
+func cast_pose(key: String = "") -> Tween:
+	play_pose("cast", 0.6, key)
 	var tw: Tween = create_tween()
 	var origin: Vector2 = position
 	tw.tween_property(self, "position", origin + Vector2(0, -12), 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
