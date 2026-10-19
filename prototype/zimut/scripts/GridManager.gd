@@ -838,7 +838,11 @@ func _play_damage(d: Dictionary) -> void:
 	var crit: bool = bool(d["crit"])
 	var dtype: String = String(d["dtype"])
 	v.set_hp(float(d["pv_after"]))
-	v.hit_react(1.6 if crit else 1.0)
+	var src: Vector2 = Vector2.INF
+	var att_v: EntityView = _view(d.get("attacker", {})) if not (d.get("attacker", {}) as Dictionary).is_empty() else null
+	if att_v != null and att_v != v:
+		src = att_v.position
+	v.hit_react(1.6 if crit else 1.0, src)
 	var col: Color
 	match dtype:
 		"mag":
