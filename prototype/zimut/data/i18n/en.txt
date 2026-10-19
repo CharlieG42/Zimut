@@ -1577,3 +1577,60 @@ Gultur · gardien des Pierres	Gultur · keeper of the Stones
 ✓  Exporté (+ code copié)	✓  Exported (+ code copied)
 D'où importer la partie ?	Import the game from where?
 Presse-papiers	Clipboard
+Artificier	Artificer
+Rouages	Gears
+Ateliers des Rouages	Gear Workshops
+Pistolet à ressort	Spring Pistol
+Poser Bombe	Place Bomb
+Déclencheur	Trigger
+Poser Mine	Place Mine
+Poser Tourelle	Place Turret
+Poser Balise de transposition	Place Transposition Beacon
+Glyphe de surcharge	Overload Glyph
+Grenade à fragmentation	Frag Grenade
+Fusil à pompe	Shotgun
+Arsenal total	Total Arsenal
+14 dégâts	14 damage
+34 dégâts en zone (3x3)	34 damage in area (3x3)
+53 dégâts	53 damage
+Pose une bombe : explose en croix (5 cases) à la fin du 2e tour de l'Artificier ou dès qu'on la déclenche	Places a bomb: explodes in a cross (5 tiles) at the end of the Artificer's 2nd turn or as soon as it is triggered
+Déclenche l'effet d'un de vos mécanismes (bombe; mine; tourelle; glyphe; balise de transposition)	Triggers the effect of one of your mechanisms (bomb; mine; turret; glyph; transposition beacon)
+Pose un piège (mine) : 22 dégâts; explose en croix si on la déclenche	Sets a trap (mine): 22 damage; explodes in a cross if triggered
+Installe une tourelle : tire sur l'ennemi le plus proche (rayon 5) à la fin de chacun de vos tours (4 tours; 1 seule)	Installs a turret: shoots the nearest enemy (range 5) at the end of each of your turns (4 turns; only 1)
+Pose une balise et échange votre place avec elle; le Déclencheur sur la balise refait l'échange (1 déplacement par tour)	Places a beacon and swaps places with it; Trigger on the beacon swaps again (1 move per turn)
+Trace un glyphe (croix; 3 tours) : alliés +25% dégâts | ennemis 22 dégâts	Draws a glyph (cross; 3 turns): allies +25% damage | enemies 22 damage
+Déclenche d'un coup tous vos mécanismes : bombes; mines; tourelles et glyphes	Triggers all your mechanisms at once: bombs; mines; turrets and glyphs
+Bombe	Bomb
+Tourelle	Turret
+Balise de transposition	Transposition Beacon
+Surtension	Surge
+les machines vrombissent : +12 % de dégâts physiques pour tous.	the machines roar: +12 % physical damage for everyone.
+Colosse d'Engrenages	Gear Colossus
+Salve de pistons	Piston Salvo
+Gearhart le Mécanicien	Gearhart the Mechanic
+Grand Atelier	Grand Workshop
+Corps des Ingénieurs	Engineer Corps
+Manoir de l'Horloger	Clockmaker's Manor
+Gobelins mécaniciens	Mechanic Goblins
+Colosse d'engrenages	Gear colossus
+Caisse d'outils scellée	Sealed toolbox
+Tableau de commande	Control panel
+Pont de l'horloger	Clockmaker's bridge
+Chaufferie tiède	Warm boiler room
+Ingénieur : pose bombes, mines, tourelles et glyphes, puis les déclenche au bon moment.	Engineer: places bombs, mines, turrets and glyphs, then triggers them at the right moment.
+Ingénieur : bombes, mines, tourelles et glyphes à déclencher. +1 PA au niv. 85.	Engineer: bombs, mines, turrets and glyphs to trigger. +1 AP at lvl 85.
+Un seul déplacement par tour.	Only one move per turn.
+Il faut viser un de vos mécanismes.	You must target one of your mechanisms.
+Une seule tourelle à la fois.	Only one turret at a time.
+Trop de mécanismes (3 max).	Too many mechanisms (3 max).
+Aucune cible à portée de la tourelle.	No target within the turret's range.
+Aucun mécanisme à déclencher.	No mechanism to trigger.
+La bombe explose ! (%d dégâts)	The bomb explodes! (%d damage)
+%s déclenche un mécanisme.	%s triggers a mechanism.
+%s déclenche tout son arsenal !	%s triggers their whole arsenal!
+%s pose une balise et échange sa place avec elle.	%s places a beacon and swaps places with it.
+%s pose : %s.	%s places: %s.
+Ligne fortifiée	Fortified Line
+Tir croisé	Crossfire
+Ateliers : +3 or; +1 Fer; +2 défense	Workshops: +3 gold, +1 Iron, +2 defense
+Ateliers : +3 or, +1 Fer, +2 défense	Workshops: +3 gold, +1 Iron, +2 defense

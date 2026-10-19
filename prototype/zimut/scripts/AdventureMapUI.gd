@@ -51,7 +51,7 @@ const GATE_VEC := {"N": Vector2(64, -32), "E": Vector2(64, 32), "S": Vector2(-64
 const BIOME_COLOR := {"Forêt": Color(0.42, 0.70, 0.36), "Montagne": Color(0.74, 0.80, 0.88),
 	"Désert": Color(0.92, 0.75, 0.42), "Donjon": Color(0.52, 0.40, 0.66),
 	"Cristaux": Color(0.62, 0.50, 0.95), "Marées": Color(0.35, 0.78, 0.85), "Vents": Color(0.70, 0.88, 1.0),
-	"Brasier": Color(0.95, 0.45, 0.15), "Brumes": Color(0.55, 0.80, 0.68), "Ombres": Color(0.55, 0.38, 0.82)}
+	"Brasier": Color(0.95, 0.45, 0.15), "Brumes": Color(0.55, 0.80, 0.68), "Ombres": Color(0.55, 0.38, 0.82), "Rouages": Color(0.95, 0.62, 0.22)}
 ## Objets au sol des lieux, pour les biomes de nation : [combat, chest, puzzle, camp, reveal, exit].
 const NATION_POI_PROP := {
 	"Cristaux": ["stalagmite", "crystal_rock", "amethyst_spire", "glow_orb", "amethyst_spire", "crystal_throne"],
@@ -60,6 +60,7 @@ const NATION_POI_PROP := {
 	"Brasier": ["obsidian_spike", "lava_rock", "brazier", "lava_rock", "volcano_cone", "volcano_cone"],
 	"Brumes": ["dead_tree", "stump", "mushroom_big", "wisp_lantern", "spirit_tree", "spirit_tree"],
 	"Ombres": ["gravestone", "thorn_bush", "cracked_obelisk", "purple_torch", "raven_perch", "dark_gate"],
+	"Rouages": ["gear_tower", "scrap_pile", "cog_wheel", "anvil", "tesla_coil", "workshop_crane"],
 }
 const POI_KIND_INDEX := {"combat": 0, "chest": 1, "puzzle": 2, "camp": 3, "reveal": 4, "exit": 5}
 const RUNE_SHAPES: Array = ["●", "▲", "■", "◆", "★", "✚"]
@@ -1664,7 +1665,7 @@ class AdventureBoard extends Node2D:
 		# Sentiers
 		var trail: Color = {"Forêt": Color(0.78, 0.64, 0.42), "Montagne": Color(0.80, 0.82, 0.86), "Désert": Color(0.72, 0.52, 0.32), "Donjon": Color(0.52, 0.48, 0.50),
 			"Cristaux": Color(0.62, 0.58, 0.85), "Marées": Color(0.86, 0.80, 0.60), "Vents": Color(0.82, 0.90, 0.92),
-			"Brasier": Color(0.45, 0.32, 0.28), "Brumes": Color(0.62, 0.74, 0.66), "Ombres": Color(0.44, 0.36, 0.56)}.get(biome, Color(0.7, 0.6, 0.45))
+			"Brasier": Color(0.45, 0.32, 0.28), "Brumes": Color(0.62, 0.74, 0.66), "Ombres": Color(0.44, 0.36, 0.56), "Rouages": Color(0.50, 0.42, 0.34)}.get(biome, Color(0.7, 0.6, 0.45))
 		var paths: Dictionary = terrain["paths"]
 		# Le sentier file vers la carte voisine, au-delà du bord de l'île.
 		var gates: Dictionary = mgr.gates()

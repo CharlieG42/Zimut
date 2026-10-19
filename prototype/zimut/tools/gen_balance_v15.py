@@ -65,6 +65,7 @@ IDENT = {
     "Mage": {"vita": 0.95, "defense": 0.90},
     "Heal": {"defense": 0.95},
     "Géomancien": {"defense": 0.88, "vita": 0.97},
+    "Artificier": {"vita": 0.95, "defense": 0.92, "force": 0.95, "agility": 1.02},
 }
 COLS = {4: "vita", 5: "force", 6: "intelligence", 7: "agility", 8: "wisdom", 9: "defense"}
 
@@ -73,6 +74,8 @@ head = rows[0]
 by = {}
 for r in rows[1:]:
     by.setdefault(r[0], {})[int(r[1])] = r
+# V26 : l'Artificier part des courbes du Chasseur (tireur) ; ses mécanismes font la différence.
+by["Artificier"] = dict(by["Chasseur"])
 out = [head]
 for classe, tbl in by.items():
     for L in range(1, MAX_HERO + 1):
@@ -113,6 +116,9 @@ KITS = {
                 "Racine", "Soin de sève", "Invoquer Ent de Combat", "Pluie de graines", "Tempête de pétales"],
     "Géomancien": ["Éclat de grès", "Invoquer Pilier", "Glyphe de grès", "Lance de cristal", "Invoquer Muraille",
                    "Éboulement", "Glyphe sismique", "Tempête de sable", "Séisme ambré", "Cataclysme minéral"],
+    "Artificier": ["Pistolet à ressort", "Poser Bombe", "Déclencheur", "Poser Mine", "Poser Tourelle",
+                   "Poser Balise de transposition", "Glyphe de surcharge", "Grenade à fragmentation", "Fusil à pompe",
+                   "Arsenal total"],
 }
 HEAL_SRC = {"Toucher guérisseur", "Éclair sacré", "Bénédiction de vie", "Bouclier de lumière",
             "Mot de restauration", "Éclat de lumière", "Soin supérieur", "Soin de groupe supérieur",
@@ -148,6 +154,33 @@ CUSTOM = {
         "Trace un glyphe (croix; 3 tours) : ennemis ralentis 2 pm (1 tour)", "Debuff"),
     ("Chasseur", "Glyphe de flammes"): _glyph("Chasseur", "Glyphe de flammes", 3, 5,
         "Trace un glyphe (3x3; 3 tours) : ennemis 25 dégâts + brûle 20 dégâts/tour (2 tours)", "Attaque"),
+    # V26 : Artificier. Les montants sont ceux d'un héros (divisés ensuite comme les autres sorts).
+    ("Artificier", "Pistolet à ressort"): ["Artificier", "Pistolet à ressort", "2", "0", "5", "26 dégâts", "1", "Attaque",
+        "26", "0", "0", "0", "0", "0", "0", "0", "0"],
+    ("Artificier", "Poser Bombe"): ["Artificier", "Poser Bombe", "2", "0", "4",
+        "Pose une bombe : explose en croix (5 cases) à la fin du 2e tour de l'Artificier ou dès qu'on la déclenche",
+        "1", "Invocation", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+    ("Artificier", "Déclencheur"): ["Artificier", "Déclencheur", "1", "0", "6",
+        "Déclenche l'effet d'un de vos mécanismes (bombe; mine; tourelle; glyphe; balise de transposition)",
+        "1", "Buff", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+    ("Artificier", "Poser Mine"): ["Artificier", "Poser Mine", "2", "0", "4",
+        "Pose un piège (mine) : 40 dégâts; explose en croix si on la déclenche", "10", "Attaque",
+        "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+    ("Artificier", "Poser Tourelle"): ["Artificier", "Poser Tourelle", "3", "0", "4",
+        "Installe une tourelle : tire sur l'ennemi le plus proche (rayon 5) à la fin de chacun de vos tours (4 tours; 1 seule)",
+        "20", "Invocation", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+    ("Artificier", "Poser Balise de transposition"): ["Artificier", "Poser Balise de transposition", "2", "0", "6",
+        "Pose une balise et échange votre place avec elle; le Déclencheur sur la balise refait l'échange (1 déplacement par tour)",
+        "35", "Invocation", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+    ("Artificier", "Glyphe de surcharge"): _glyph("Artificier", "Glyphe de surcharge", 3, 5,
+        "Trace un glyphe (croix; 3 tours) : alliés +25% dégâts | ennemis 22 dégâts", "Attaque"),
+    ("Artificier", "Grenade à fragmentation"): ["Artificier", "Grenade à fragmentation", "3", "0", "5",
+        "62 dégâts en zone (3x3)", "65", "Attaque", "62", "0", "0", "0", "0", "0", "0", "0", "0"],
+    ("Artificier", "Fusil à pompe"): ["Artificier", "Fusil à pompe", "3", "0", "3", "96 dégâts", "80", "Attaque",
+        "96", "0", "0", "0", "0", "0", "0", "0", "0"],
+    ("Artificier", "Arsenal total"): ["Artificier", "Arsenal total", "4", "0", "0",
+        "Déclenche d'un coup tous vos mécanismes : bombes; mines; tourelles et glyphes",
+        "100", "Buff", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
     ("Chasseur", "Rappel de balise"): ["Chasseur", "Rappel de balise", "1", "0", "8",
         "Rappelle une de vos balises (elle disparaît du terrain)", "1", "Invocation",
         "0", "0", "0", "0", "0", "0", "0", "0", "0"],
@@ -204,7 +237,7 @@ def hero_nerf(r):
 
 sout = [shead]
 prog = [["Classe", "Niveau", "Sorts débloqués (séparés par \";\")"]]
-order = ["Tank", "Assassin", "Chasseur", "Mage", "Druide", "Heal", "Invocateur", "Sylvain", "Géomancien"]
+order = ["Tank", "Assassin", "Chasseur", "Mage", "Druide", "Heal", "Invocateur", "Sylvain", "Géomancien", "Artificier"]
 for classe in order:
     byl = {}
     for name, lvl in zip(KITS[classe], UNLOCK):

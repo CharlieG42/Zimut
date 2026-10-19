@@ -15,6 +15,7 @@ const INFO := {
 	"Vents": {"name": "Vents porteurs", "text": "le vent pousse chacun : +1 PM pour tous."},
 	"Brasier": {"name": "Chaleur", "text": "le sol brûle : −2 % des PV max à chaque fin de tour (jamais mortel)."},
 	"Brumes": {"name": "Brume épaisse", "text": "la brume brouille les coups : 12 % d'esquive physique pour tous."},
+	"Rouages": {"name": "Surtension", "text": "les machines vrombissent : +12 % de dégâts physiques pour tous."},
 	"Ombres": {"name": "Ténèbres", "text": "l'ombre guide les coups : +12 % de coups critiques pour tous."},
 }
 
@@ -43,6 +44,8 @@ static func setup(biome: String, entities: Array) -> void:
 				fx["mag_pct"] = int(fx.get("mag_pct", 0)) + 15
 			"Ombres":
 				fx["crit"] = int(fx.get("crit", 0)) + 12
+			"Rouages":
+				fx["phys_pct"] = int(fx.get("phys_pct", 0)) + 12
 		e["fx"] = fx
 		if biome == "Brumes":
 			Combat.add_status(e, "dodge", 999, 12.0)

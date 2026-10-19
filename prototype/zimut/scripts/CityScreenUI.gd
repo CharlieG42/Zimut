@@ -27,11 +27,12 @@ const DISTRICTS := {
 	"Brasier": {"hall": "Forge-Hôtel", "barracks": "Caserne de Braise", "residence": "Palais de Lave"},
 	"Brumes": {"hall": "Salle des Brumes", "barracks": "Veilleurs du Marais", "residence": "Cabane du Sage"},
 	"Ombres": {"hall": "Chapitre des Ombres", "barracks": "Garde des Cryptes", "residence": "Crypte du Régent"},
+	"Rouages": {"hall": "Grand Atelier", "barracks": "Corps des Ingénieurs", "residence": "Manoir de l'Horloger"},
 	"Donjon": {"hall": "Salle du Trône", "barracks": "Geôles-Casernes", "residence": "Tour du Roi"},
 }
 ## Illustration de chaque nation (assets/ui/conquest/cities/).
 const ART := {"Forêt": "sylvestre", "Montagne": "cimes", "Désert": "sables", "Cristaux": "cristaux", "Marées": "marees",
-	"Vents": "vents", "Brasier": "brasier", "Brumes": "brumes", "Ombres": "ombres", "Donjon": "donjon"}
+	"Vents": "vents", "Brasier": "brasier", "Brumes": "brumes", "Ombres": "ombres", "Rouages": "brasier", "Donjon": "donjon"}
 const RES_COLORS := {"Bois": Color(0.62, 0.78, 0.40), "Fer": Color(0.72, 0.78, 0.88), "Cuir": Color(0.82, 0.62, 0.42),
 	"Magie": Color(0.70, 0.58, 0.98), "Venin": Color(0.55, 0.85, 0.55)}
 

@@ -214,6 +214,10 @@ const ADVENTURE_ZONES := {
 		"name": "Côtes des Marées", "biome": "Marées", "size": [10, 7], "grid": [4, 2],
 		"start": [1, 3], "unlock": "desert_dunes", "key_poi": "6,2", "reveals": ["port_sable", "caravanserail"],
 	},
+	"rouages_atelier": {
+		"name": "Ateliers des Rouages", "biome": "Rouages", "size": [10, 7], "grid": [4, 1],
+		"start": [1, 3], "unlock": "marees_cotes", "key_poi": "6,3", "reveals": [],
+	},
 }
 
 const ADVENTURE_POIS := {
@@ -372,6 +376,14 @@ const ADVENTURE_POIS := {
 		"8,5": {"kind": "reveal", "name": "Grand phare", "level": 72, "desc": "Du phare, on voit tout le littoral."},
 		"4,4": {"kind": "camp", "name": "Plage abritée", "level": 72, "desc": "Une crique calme pour souffler."},
 	},
+	"rouages_atelier": {
+		"3,2": {"kind": "combat", "name": "Gobelins mécaniciens", "level": 84, "desc": "Des bricoleurs testent leurs inventions sur les visiteurs."},
+		"6,3": {"kind": "combat", "name": "Colosse d'engrenages", "level": 92, "desc": "Une machine géante garde la grande forge."},
+		"2,5": {"kind": "chest", "name": "Caisse d'outils scellée", "level": 84, "desc": "Une caisse pleine de pièces rares."},
+		"7,1": {"kind": "puzzle", "name": "Tableau de commande", "level": 84, "desc": "Des cadrans à régler dans le bon ordre."},
+		"8,5": {"kind": "reveal", "name": "Pont de l'horloger", "level": 84, "desc": "Le toit de l'atelier domine la région."},
+		"4,4": {"kind": "camp", "name": "Chaufferie tiède", "level": 84, "desc": "Une chaudière ronronne : on s'y réchauffe."},
+	},
 
 }
 
@@ -428,6 +440,9 @@ const ADVENTURE_PUZZLES := {
 		"wrong": "Le miroir s'éteint dans un tintement."},
 	"marees_cotes,7,1": {"type": "riddle", "text": "Je monte et je descends sans jamais bouger d'un pas, deux fois par jour. Qui suis-je ?",
 		"answer": "La marée", "choices": ["La marée", "Le courant", "La vague"], "wrong": "Le phare reste éteint."},
+	"rouages_atelier,7,1": {"type": "runes", "length": 6,
+		"text": "Les voyants du tableau s'allument un à un. Rejouez la séquence sans vous tromper.",
+		"wrong": "Le tableau grésille, puis redémarre."},
 }
 
 
@@ -541,7 +556,7 @@ const DIFFICULTY_CREEP_EVERY := 25
 
 ## Niveau de combat par défaut quand aucun n'est connu (combat rapide).
 const DEFAULT_FIGHT_LEVEL := 20
-const CLASS_ORDER: Array[String] = ["Tank", "Assassin", "Chasseur", "Mage", "Druide", "Heal", "Invocateur", "Sylvain", "Géomancien"]
+const CLASS_ORDER: Array[String] = ["Tank", "Assassin", "Chasseur", "Mage", "Druide", "Heal", "Invocateur", "Sylvain", "Géomancien", "Artificier"]
 
 ## Emplacements d'équipement par personnage (clé -> type d'item accepté)
 const EQUIP_SLOTS := {
@@ -1809,6 +1824,8 @@ const SYNERGIES: Array = [
 	["Druide", "Sylvain", "Cercle de la forêt", "mres_up", 12.0, "+12 % de résistance magique pour l'équipe"],
 	["Invocateur", "Druide", "Pacte sauvage", "def_up", 8.0, "+8 % de défense pour l'équipe"],
 	["Tank", "Mage", "Garde arcanique", "mres_up", 10.0, "+10 % de résistance magique pour l'équipe"],
+	["Artificier", "Tank", "Ligne fortifiée", "def_up", 10.0, "+10 % de défense pour l'équipe"],
+	["Artificier", "Chasseur", "Tir croisé", "dmg_up", 8.0, "+8 % de dégâts pour l'équipe"],
 ]
 
 

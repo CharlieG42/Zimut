@@ -1375,6 +1375,7 @@ func _city_biome_icon(city_id: String) -> String:
 		"Brasier": return "🔥"
 		"Brumes": return "🌫"
 		"Ombres": return "🌙"
+		"Rouages": return "⚙"
 		_: return "◆"
 
 func _city_border_color(city_id: String) -> Color:

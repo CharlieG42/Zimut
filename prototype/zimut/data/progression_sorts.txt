@@ -71,3 +71,11 @@ Géomancien,50,Glyphe sismique
 Géomancien,65,Tempête de sable
 Géomancien,80,Séisme ambré
 Géomancien,100,Cataclysme minéral
+Artificier,1,Pistolet à ressort;Poser Bombe;Déclencheur
+Artificier,10,Poser Mine
+Artificier,20,Poser Tourelle
+Artificier,35,Poser Balise de transposition
+Artificier,50,Glyphe de surcharge
+Artificier,65,Grenade à fragmentation
+Artificier,80,Fusil à pompe
+Artificier,100,Arsenal total

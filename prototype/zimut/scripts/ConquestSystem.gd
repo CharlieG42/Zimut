@@ -56,6 +56,7 @@ const GOVERNOR := {
 	"Invocateur": {"def": 4, "gold": 0, "res": {}, "heal": 0, "text": "Gardiens invoqués : +4 défense"},
 	"Sylvain":    {"def": 3, "gold": 0, "res": {"Bois": 1}, "heal": 0, "text": "Sentinelles : +3 défense, +1 Bois"},
 	"Géomancien": {"def": 2, "gold": 0, "res": {"Fer": 2}, "heal": 0, "text": "Filons : +2 Fer, +2 défense"},
+	"Artificier": {"def": 2, "gold": 3, "res": {"Fer": 1}, "heal": 0, "text": "Ateliers : +3 or, +1 Fer, +2 défense"},
 }
 
 # ═══════════════════════════════════════════════════════════════════════

@@ -10,7 +10,7 @@ extends RefCounted
 ## Correspondance : Forêt = Sylvestre, Montagne = Cimes, Désert = Sables.
 
 ## Ordre d'affichage (liste des nations) — le Donjon n'en fait pas partie.
-const ORDER: Array[String] = ["Forêt", "Montagne", "Désert", "Cristaux", "Marées", "Vents", "Brasier", "Brumes", "Ombres"]
+const ORDER: Array[String] = ["Forêt", "Montagne", "Désert", "Cristaux", "Marées", "Vents", "Brasier", "Brumes", "Ombres", "Rouages"]
 
 const DATA := {
 	"Forêt": {
@@ -122,6 +122,21 @@ const DATA := {
 		"features": ["dark_gate", "gravestone"],
 		"trait": "Pavés runiques, ronces violettes, torches mauves, corbeaux et porte sombre.",
 	},
+	"Rouages": {
+		"nation": "Rouages", "hero": "Artificier", "folder": "rouages", "accent": Color(0.95, 0.62, 0.22),
+		"tile": "rouages_ground", "resource": "Fer", "city": "gears", "label": "Ateliers des Rouages",
+		"enemy_types": ["Gobelin", "Troll"], "boss": "Colosse d'Engrenages", "boss_base": "Troll",
+		"skins": ["gobelin_mecano", "automate", "tourelle_ambulante", "golem_a_vapeur", "automate"], "boss_skin": "golem_a_vapeur",
+		"pal": {"top_a": Color(0.41, 0.37, 0.34), "top_b": Color(0.35, 0.32, 0.30), "lip": Color(0.92, 0.60, 0.24),
+			"l_t": Color(0.47, 0.41, 0.35), "l_b": Color(0.22, 0.19, 0.17), "r_t": Color(0.36, 0.31, 0.28), "r_b": Color(0.16, 0.14, 0.13),
+			"leaf": Color(0.75, 0.48, 0.20), "leaf_hi": Color(0.96, 0.76, 0.36), "mist": Color(0.88, 0.78, 0.66)},
+		"cell": {"a": Color(0.41, 0.37, 0.34), "b": Color(0.35, 0.32, 0.30), "tuft": Color(0.72, 0.50, 0.24),
+			"flowers": [Color(0.95, 0.70, 0.30), Color(0.80, 0.82, 0.86)]},
+		"tint": Color(0.85, 0.55, 0.20, 0.22), "ambient": "ember", "over": "ember", "obs_tree": "gear_tower", "obs_rock": "scrap_pile",
+		"props": [["cog_wheel", 4], ["steam_pipe", 3], ["gear_tower", 3], ["anvil", 2], ["tesla_coil", 2], ["scrap_pile", 3], ["smoke_vent", 2], ["rubble", 2]],
+		"features": ["workshop_crane", "tesla_coil"],
+		"trait": "Dalles d'acier, engrenages géants, tuyaux fumants, enclumes et bobines à arcs.",
+	},
 }
 
 
@@ -135,7 +150,7 @@ static func has(biome: String) -> bool:
 const BOSS_TITLE := {
 	"Forêt": "Tharok le Végétal", "Montagne": "Vorkann le Givre", "Désert": "Zahor le Sableux",
 	"Cristaux": "Zyphéron le Cristallin", "Marées": "Néréa la Tempête", "Vents": "Aéron le Céleste",
-	"Brasier": "Kharaz le Flamboyant", "Brumes": "Ombrelis le Brumeux", "Ombres": "Nébulia l'Illusionniste",
+	"Brasier": "Kharaz le Flamboyant", "Brumes": "Ombrelis le Brumeux", "Ombres": "Nébulia l'Illusionniste", "Rouages": "Gearhart le Mécanicien",
 }
 
 

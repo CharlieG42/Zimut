@@ -21,6 +21,7 @@ const CLASS_COLORS: Dictionary = {
 	"Invocateur": Color(0.55, 0.15, 0.60),
 	"Sylvain":     Color(0.35, 0.65, 0.25),
 	"Géomancien":  Color(0.85, 0.62, 0.25),
+	"Artificier": Color(0.90, 0.45, 0.20),
 }
 
 const CLASS_META: Dictionary = {
@@ -33,6 +34,7 @@ const CLASS_META: Dictionary = {
 	"Invocateur": {"icon": "🎭", "description": "Invoque des créatures, contrôle le champ."},
 	"Sylvain":     {"icon": "🌿", "description": "Maître des plantes : invoque la forêt, empoisonne et soigne par la sève."},
 	"Géomancien":     {"icon": "🪨", "description": "Mage de pierre et de sable : érige piliers, murs et failles pour bloquer, isoler et protéger."},
+	"Artificier": {"icon": "💣", "description": "Ingénieur : pose bombes, mines, tourelles et glyphes, puis les déclenche au bon moment."},
 }
 
 var classes: Array[String] = []       # classes disponibles (triées)
@@ -108,7 +110,7 @@ func _load_classes() -> void:
 						d[headers[j]] = cols[j].strip_edges()
 				stats_by_class[classe] = d
 	# Ordre d'affichage voulu
-	var order: Array[String] = ["Tank", "Assassin", "Chasseur", "Mage", "Druide", "Heal", "Invocateur", "Sylvain", "Géomancien"]
+	var order: Array[String] = ["Tank", "Assassin", "Chasseur", "Mage", "Druide", "Heal", "Invocateur", "Sylvain", "Géomancien", "Artificier"]
 	classes.clear()
 	for c: String in order:
 		classes.append(c)

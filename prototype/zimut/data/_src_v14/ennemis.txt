@@ -65,5 +65,6 @@ Boss Golem Prismatique,42,550,62,55,3,3,850,Cristaux,Carapace de cristal (50% r�
 Boss Crabe Titan,44,600,58,60,3,3,850,Marées,Carapace des abysses + Pince océane (étourdit)
 Boss Seigneur des Tempêtes,48,700,68,45,6,5,1000,Vents,Vol + Foudre (zone 3x3, étourdit) + 25% critique
 Boss Seigneur de Lave,50,750,72,55,4,4,1050,Brasier,Peau de magma + Coulée de lave (zone 3x3, brûle)
+Boss Colosse d'Engrenages,50,780,70,60,4,4,1050,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
 Boss Liche des Brumes,46,520,60,40,4,4,900,Brumes,Drain de vie 8% + Brume d'affaiblissement
 Boss Liche Éternelle,55,900,80,60,5,5,1200,Ombres,Immunité magique + drain de vie 10% + régénération 12 PV/tour

@@ -469,6 +469,37 @@ Boss Seigneur de Lave,135,1393,135,87,4,4,1050,Brasier,Peau de magma + Coulée d
 Boss Seigneur de Lave,140,1455,141,91,4,4,1050,Brasier,Peau de magma + Coulée de lave (zone 3x3
 Boss Seigneur de Lave,145,1518,147,95,4,4,1050,Brasier,Peau de magma + Coulée de lave (zone 3x3
 Boss Seigneur de Lave,150,1583,154,98,4,4,1050,Brasier,Peau de magma + Coulée de lave (zone 3x3
+Boss Colosse d'Engrenages,1,250,7,8,4,4,330,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,5,254,11,11,4,4,359,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,10,238,17,14,4,4,395,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,15,255,21,16,4,4,432,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,20,287,24,19,4,4,468,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,25,324,27,22,4,4,504,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,30,362,31,25,4,4,541,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,35,402,34,28,4,4,577,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,40,443,38,31,4,4,613,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,45,485,42,34,4,4,650,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,50,529,46,37,4,4,686,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,55,573,50,40,4,4,723,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,60,619,54,43,4,4,759,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,65,666,59,46,4,4,795,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,70,714,63,49,4,4,832,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,75,764,68,52,4,4,868,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,80,815,73,56,4,4,904,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,85,866,77,59,4,4,941,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,90,920,82,63,4,4,977,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,95,974,87,66,4,4,1014,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,100,1030,92,70,4,4,1050,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,105,1086,98,73,4,4,1050,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,110,1143,103,77,4,4,1050,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,115,1202,108,80,4,4,1050,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,120,1262,114,84,4,4,1050,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,125,1323,120,88,4,4,1050,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,130,1385,125,92,4,4,1050,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,135,1449,131,95,4,4,1050,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,140,1513,137,99,4,4,1050,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,145,1579,143,103,4,4,1050,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
+Boss Colosse d'Engrenages,150,1646,149,107,4,4,1050,Rouages,Blindage d'acier + Salve de pistons (zone 3x3; étourdit)
 Boss Liche des Brumes,1,178,6,6,4,4,284,Brumes,Drain de vie 8% + Brume d'affaiblissement
 Boss Liche des Brumes,5,181,10,8,4,4,311,Brumes,Drain de vie 8% + Brume d'affaiblissement
 Boss Liche des Brumes,10,169,16,10,4,4,345,Brumes,Drain de vie 8% + Brume d'affaiblissement

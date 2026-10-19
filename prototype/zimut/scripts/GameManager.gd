@@ -47,6 +47,7 @@ const COLORS: Dictionary = {
 	"Invocateur": Color(0.9, 0.5, 0.1),
 	"Sylvain":    Color(0.35, 0.65, 0.25),
 	"Géomancien": Color(0.85, 0.62, 0.25),
+	"Artificier": Color(0.90, 0.45, 0.20),
 	"Gobelin":   Color(0.5, 0.8, 0.3),
 	"Squelette": Color(0.8, 0.8, 0.8),
 	"Loup":      Color(0.6, 0.6, 0.4),
@@ -560,6 +561,9 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 			boss["fx"] = {"mag_pct": 30}
 		"Liche des Brumes":
 			boss["fx"] = {"lifesteal": 8}
+		"Colosse d'Engrenages":
+			boss["fx"] = {"phys_pct": 20}
+			boss["defense"] = int(float(boss["defense"]) * 1.2)
 		"Liche Éternelle":
 			boss["fx"] = {"mres": 60, "lifesteal": 10}
 			Combat.add_status(boss, "regen", 999, 12.0)
@@ -921,6 +925,7 @@ func _begin_turn(e: Dictionary) -> void:
 	for x: Dictionary in all_entities():
 		x["is_active"] = (int(x["uid"]) == int(e["uid"]))
 	e["casts"] = {}
+	e["swapped"] = false
 	if String(e["team"]) == "enemy" and turn_count > ENRAGE_AFTER_TURN:
 		Combat.add_status(e, "dmg_up", 2, 10.0 * float(turn_count - ENRAGE_AFTER_TURN))
 
@@ -1027,8 +1032,10 @@ func end_current_turn() -> void:
 	for tp: Dictionary in terrain_of(e):
 		tp["lifetime"] = int(tp["lifetime"]) - 1
 		if int(tp["lifetime"]) <= 0:
+			if String(tp.get("mech", "")) == "bomb":
+				_mech_explode(e, tp)
 			tp["current_pv"] = 0
-			message_requested.emit("%s s'effrite." % tp["name"])
+			message_requested.emit("%s s'effrite." % tp["name"] if String(tp.get("mech", "")) == "" else "%s disparaît." % tp["name"])
 	_glyphs_expire(e)
 	active_entity = {}
 	selected_spell = null
@@ -1218,8 +1225,25 @@ func validate_cast(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Str
 	var is_beacon: bool = bool(Combat.SUMMONS.get(String(p["summon"]), {}).get("beacon", false))
 	if p["kind"] == "summon" and not terr and not is_beacon and summons_of(caster).size() >= 3:
 		return "Trop de familiers (3 max)."
-	if p["kind"] == "summon" and terr and terrain_of(caster).size() >= 8:
+	var mech: String = String(Combat.SUMMONS.get(String(p["summon"]), {}).get("mech", ""))
+	if p["kind"] == "summon" and terr and mech == "" and terrain_of(caster).size() - mechs_of(caster).size() >= 8:
 		return "Trop de terrain modifié (8 cases max)."
+	if p["kind"] == "summon" and mech != "":
+		var err: String = _validate_mech(caster, mech)
+		if err != "":
+			return err
+	if p["kind"] == "trigger":
+		var tk: String = trigger_kind(caster, cell)
+		if tk == "":
+			return "Il faut viser un de vos mécanismes."
+		if tk == "swap":
+			var err2: String = _validate_swap(caster)
+			if err2 != "":
+				return err2
+		if tk == "turret" and _turret_target(entity_at(cell)).is_empty():
+			return "Aucune cible à portée de la tourelle."
+	if p["kind"] == "trigger_all" and trigger_all_count(caster) == 0:
+		return "Aucun mécanisme à déclencher."
 	if p["kind"] == "recall":
 		if t.is_empty() or not bool(t.get("beacon", false)) or int(t.get("owner", -1)) != int(caster["uid"]):
 			return "Il faut viser une de vos balises."
@@ -1307,13 +1331,17 @@ func cast_spell(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> bool:
 		"teleport":
 			summary = _resolve_teleport(caster, spell, p, cell)
 		"trap":
-			traps.append({"pos": cell, "dmg": int(p["trap"]), "team": caster["team"], "owner": caster["uid"]})
+			traps.append({"pos": cell, "dmg": int(p["trap"]), "team": caster["team"], "owner": caster["uid"], "mine": bool(p.get("mine", false))})
 			fx.emit("trap_set", {"cell": cell})
 			summary = "%s pose un piège." % caster["name"]
 		"revive":
 			summary = _resolve_revive(caster, spell, p)
 		"glyph":
 			summary = _resolve_glyph(caster, spell, p, cell)
+		"trigger":
+			summary = _resolve_trigger(caster, cell)
+		"trigger_all":
+			summary = _resolve_trigger_all(caster)
 		"recall":
 			remove_entity_from_grid(target)
 			fx.emit("beacon", {"from": cell, "cells": [cell] as Array[Vector2i]})
@@ -1660,6 +1688,12 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 			var oldest: Dictionary = old_b.pop_front()
 			message_requested.emit("La plus ancienne balise disparaît.")
 			remove_entity_from_grid(oldest)
+	var mech_kind: String = String(info.get("mech", ""))
+	if mech_kind == "swap":
+		# une seule balise de transposition à la fois
+		for old_m: Dictionary in mechs_of(caster):
+			if String(old_m.get("mech", "")) == "swap":
+				remove_entity_from_grid(old_m)
 	var s: Dictionary = _base_entity("%s (inv.)" % sname, "Summon", String(caster["team"]), sname,
 		int(caster["level"]), cell)
 	var scale: float = (0.7 + float(caster["level"]) / 400.0) * (1.0 + float(caster.get("intelligence", 0)) / 400.0)
@@ -1674,6 +1708,8 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 	}, true)
 	if bool(info.get("terrain", false)):
 		s["terrain"] = true
+	if mech_kind != "":
+		s["mech"] = mech_kind
 	if bool(info.get("indestructible", false)):
 		s["indestructible"] = true
 	if bool(info.get("tower", false)):
@@ -1721,6 +1757,11 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 		else:
 			turn_order.append(s)
 	fx.emit("summon", {"entity": s})
+	if mech_kind == "swap":
+		_do_swap(caster, s)
+		return "%s pose une balise et échange sa place avec elle." % caster["name"]
+	if mech_kind != "":
+		return "%s pose : %s." % [caster["name"], sname]
 	return "%s invoque %s !" % [caster["name"], sname]
 
 
@@ -1761,6 +1802,9 @@ const TOWER_RANGE: int = 4
 
 func _tower_attacks(owner: Dictionary) -> void:
 	for tw: Dictionary in terrain_of(owner):
+		if String(tw.get("mech", "")) == "turret" and is_alive(tw):
+			_turret_fire(owner, tw)
+			continue
 		if not bool(tw.get("tower", false)) or not is_alive(tw):
 			continue
 		var tpos: Vector2i = pos_of(tw)
@@ -1781,6 +1825,194 @@ func _tower_attacks(owner: Dictionary) -> void:
 		fx.emit("cast", {"caster": tw, "spell": "Éclat du pilier", "kind": "attack", "dtype": "mag",
 			"from": tpos, "to": pos_of(best), "ranged": true, "cells": [pos_of(best)] as Array[Vector2i]})
 		_apply_damage(owner, best, int(r["dmg"]), "mag", bool(r["crit"]), false)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Artificier (V26) : mécanismes, Déclencheur, inversion
+# ═══════════════════════════════════════════════════════════════════════════
+
+const MECH_MAX := 3
+const TURRET_RANGE := 5
+
+
+## Mécanismes (bombes, tourelles, balise de transposition) posés par `owner`.
+func mechs_of(owner: Dictionary) -> Array:
+	var out: Array = []
+	for s: Dictionary in terrain_of(owner):
+		if String(s.get("mech", "")) != "":
+			out.append(s)
+	return out
+
+
+func _validate_mech(caster: Dictionary, mech: String) -> String:
+	if mech == "swap":
+		return _validate_swap(caster)
+	var n: int = 0
+	var turrets: int = 0
+	for m: Dictionary in mechs_of(caster):
+		if String(m["mech"]) == "swap":
+			continue
+		n += 1
+		if String(m["mech"]) == "turret":
+			turrets += 1
+	if mech == "turret" and turrets >= (2 if int(caster["level"]) >= 65 else 1):
+		return "Une seule tourelle à la fois."
+	if n >= MECH_MAX:
+		return "Trop de mécanismes (%d max)." % MECH_MAX
+	return ""
+
+
+## Garde-fou : un seul déplacement (inversion) par tour, impossible si immobilisé.
+func _validate_swap(caster: Dictionary) -> String:
+	if bool(caster.get("swapped", false)):
+		return "Un seul déplacement par tour."
+	if Combat.has_status(caster, "root"):
+		return "%s est immobilisé !" % caster["name"]
+	return ""
+
+
+## Nature de ce que le Déclencheur peut actionner sur `cell` : bomb | turret | swap | mine | glyph | "".
+func trigger_kind(caster: Dictionary, cell: Vector2i) -> String:
+	var t: Dictionary = entity_at(cell)
+	if not t.is_empty() and is_alive(t) and int(t.get("owner", -1)) == int(caster["uid"]) and String(t.get("mech", "")) != "":
+		return String(t["mech"])
+	for tr: Dictionary in traps:
+		if tr["pos"] == cell and int(tr["owner"]) == int(caster["uid"]) and bool(tr.get("mine", false)):
+			return "mine"
+	for g: Dictionary in glyphs_of(caster):
+		if (g["cells"] as Array).has(cell):
+			return "glyph"
+	return ""
+
+
+func _turret_target(tw: Dictionary) -> Dictionary:
+	if tw.is_empty():
+		return {}
+	var owner: Dictionary = _entity_by_uid(int(tw.get("owner", -1)))
+	if owner.is_empty():
+		return {}
+	var tpos: Vector2i = pos_of(tw)
+	var best: Dictionary = {}
+	var best_d: int = 99
+	for e: Dictionary in enemies_of(owner):
+		if not is_alive(e) or bool(e.get("terrain", false)) or bool(e.get("beacon", false)) or Combat.has_status(e, "invisible"):
+			continue
+		var d: int = Combat.manhattan(tpos, pos_of(e))
+		if d <= TURRET_RANGE and d < best_d:
+			best = e
+			best_d = d
+	return best
+
+
+func _turret_fire(owner: Dictionary, tw: Dictionary) -> bool:
+	var best: Dictionary = _turret_target(tw)
+	if best.is_empty():
+		return false
+	var base: float = (26.0 + float(owner["level"]) * 0.8) / 1.8
+	var r: Dictionary = Combat.calc_damage(owner, best, base, "phys", 0.0, false, false)
+	fx.emit("cast", {"caster": tw, "spell": "Tir de tourelle", "kind": "attack", "dtype": "phys",
+		"from": pos_of(tw), "to": pos_of(best), "ranged": true, "cells": [pos_of(best)] as Array[Vector2i]})
+	_apply_damage(owner, best, int(r["dmg"]), "phys", bool(r["crit"]), false)
+	return true
+
+
+## Explosion en croix (5 cases) : touche les ennemis de `owner`.
+func _blast(owner: Dictionary, center: Vector2i, base: float, label: String) -> int:
+	var cells: Array[Vector2i] = Combat.zone_cells(center, 1, "diamond", GRID_SIZE)
+	fx.emit("cast", {"caster": owner, "spell": label, "kind": "attack", "dtype": "phys",
+		"from": center, "to": center, "ranged": true, "cells": cells})
+	var total: int = 0
+	for e: Dictionary in enemies_of(owner):
+		if is_alive(e) and cells.has(pos_of(e)) and not bool(e.get("terrain", false)) and not bool(e.get("beacon", false)):
+			var r: Dictionary = Combat.calc_damage(owner, e, base, "phys", 0.0, false, false)
+			total += _apply_damage(owner, e, int(r["dmg"]), "phys", bool(r["crit"]), false)
+	return total
+
+
+func _mech_explode(owner: Dictionary, bomb: Dictionary) -> void:
+	var base: float = (34.0 + float(owner["level"]) * 1.0) / 1.8
+	var dealt: int = _blast(owner, pos_of(bomb), base, "Explosion")
+	message_requested.emit("La bombe explose ! (%d dégâts)" % dealt)
+
+
+## Inversion : l'Artificier et sa balise échangent leur place (1 fois par tour).
+func _do_swap(caster: Dictionary, m: Dictionary) -> void:
+	var a: Vector2i = pos_of(caster)
+	var b: Vector2i = pos_of(m)
+	grid[a.y][a.x] = m
+	grid[b.y][b.x] = caster
+	caster["x"] = b.x
+	caster["y"] = b.y
+	m["x"] = a.x
+	m["y"] = a.y
+	caster["swapped"] = true
+	fx.emit("teleport", {"entity": caster, "from": a, "to": b})
+	fx.emit("teleport", {"entity": m, "from": b, "to": a})
+	entity_moved.emit(caster, a, b)
+	_check_traps(caster)
+
+
+func _detonate_mine(owner: Dictionary, cell: Vector2i) -> void:
+	for tr: Dictionary in traps.duplicate():
+		if tr["pos"] == cell and int(tr["owner"]) == int(owner["uid"]) and bool(tr.get("mine", false)):
+			traps.erase(tr)
+			fx.emit("trap_trigger", {"cell": cell})
+			_blast(owner, cell, float(tr["dmg"]) * 1.4, "Mine")
+
+
+func _retrigger_glyph(owner: Dictionary, cell: Vector2i) -> void:
+	for g: Dictionary in glyphs_of(owner):
+		if (g["cells"] as Array).has(cell):
+			g["last"] = {}
+			for e: Dictionary in all_entities():
+				if is_alive(e) and (g["cells"] as Array).has(pos_of(e)):
+					_glyph_apply(g, e)
+			return
+
+
+func _resolve_trigger(caster: Dictionary, cell: Vector2i) -> String:
+	var kind: String = trigger_kind(caster, cell)
+	var t: Dictionary = entity_at(cell)
+	match kind:
+		"bomb":
+			_mech_explode(caster, t)
+			remove_entity_from_grid(t)
+		"turret":
+			_turret_fire(caster, t)
+		"swap":
+			_do_swap(caster, t)
+		"mine":
+			_detonate_mine(caster, cell)
+		"glyph":
+			_retrigger_glyph(caster, cell)
+	return "%s déclenche un mécanisme." % caster["name"]
+
+
+func trigger_all_count(caster: Dictionary) -> int:
+	var n: int = 0
+	for m: Dictionary in mechs_of(caster):
+		if String(m["mech"]) != "swap":
+			n += 1
+	for tr: Dictionary in traps:
+		if int(tr["owner"]) == int(caster["uid"]) and bool(tr.get("mine", false)):
+			n += 1
+	return n + glyphs_of(caster).size()
+
+
+func _resolve_trigger_all(caster: Dictionary) -> String:
+	for m: Dictionary in mechs_of(caster):
+		match String(m["mech"]):
+			"bomb":
+				_mech_explode(caster, m)
+				remove_entity_from_grid(m)
+			"turret":
+				_turret_fire(caster, m)
+	for tr: Dictionary in traps.duplicate():
+		if int(tr["owner"]) == int(caster["uid"]) and bool(tr.get("mine", false)):
+			_detonate_mine(caster, tr["pos"])
+	for g: Dictionary in glyphs_of(caster):
+		_retrigger_glyph(caster, g["center"])
+	return "%s déclenche tout son arsenal !" % caster["name"]
 
 
 func _resolve_revive(caster: Dictionary, _spell: Dictionary, p: Dictionary) -> String:
