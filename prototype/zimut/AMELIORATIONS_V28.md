@@ -24,3 +24,5 @@ Tests : `tests/test_bounties.gd`, capture `tests/shot_bounties.gd`.
 - Non remplacés : les 9 héros, familiers et ennemis des autres Nations (mêmes dessins que la planche précédente, déjà détourés proprement ;
   les héros en jeu restent en version chibi).
 - À refaire quand la planche détourée arrivera : relancer le script, ou déposer les PNG aux noms de `SPRITES_A_FOURNIR.md`.
+- **Gultur** : illustration fournie (déjà détourée, transparence propre) intégrée dans `assets/sprites/npc/gultur.png`, recadrée ;
+  affichée sans déformation, avec une légère respiration (plus marquée quand il parle) et une lueur pulsante sur la pierre de son bâton.

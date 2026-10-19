@@ -13,7 +13,7 @@ Conseils généraux :
 Copie facultative pour la planche des nations : `assets/sprites/nations/heros/<classe>.png`.
 
 ## 2. Gultur (tutoriel) — `assets/sprites/npc/gultur.png`
-Buste ou plein pied ; remplace automatiquement le dessin vectoriel.
+**Fait (V29)** : illustration fournie, recadrée (475×800), affichée avec respiration et lueur sur la pierre du bâton.
 
 ## 3. Boss des Nations — `assets/sprites/nations/boss/<dossier>.png`
 `sylvestre`, `cimes`, `sables`, `cristaux`, `marees`, `vents`, `brasier`, `brumes`, `ombres`, **`rouages`** (provisoire : recoloration du boss du Brasier).

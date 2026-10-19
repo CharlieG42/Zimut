@@ -265,18 +265,37 @@ func _finish(skipped: bool) -> void:
 class GulturAvatar extends Control:
 	var talking: bool = false
 	var _t: float = 0.0
+	var _tex: Texture2D = null
+	var _tex_checked: bool = false
 
 	func _process(delta: float) -> void:
 		_t += delta
 		queue_redraw()
 
 	func _draw() -> void:
-		var tex_path: String = Gultur.PORTRAIT_PATH
-		if ResourceLoader.exists(tex_path):
-			var tex: Texture2D = load(tex_path) as Texture2D
-			if tex != null:
-				draw_texture_rect(tex, Rect2(Vector2.ZERO, size), false)
-				return
+		if _tex == null and not _tex_checked:
+			_tex_checked = true
+			if ResourceLoader.exists(Gultur.PORTRAIT_PATH):
+				_tex = load(Gultur.PORTRAIT_PATH) as Texture2D
+		if _tex != null:
+			# Illustration (V30) : proportions conservées, calée en bas, légère respiration
+			# (plus marquée quand il parle) et lueur pulsante sur la pierre du bâton.
+			var tw: float = float(_tex.get_width())
+			var th: float = float(_tex.get_height())
+			var k: float = minf(size.x / tw, size.y / th)
+			var breathe: float = sin(_t * (3.2 if talking else 1.6)) * (0.012 if talking else 0.006)
+			var dw: float = tw * k
+			var dh: float = th * k * (1.0 + breathe)
+			var pos := Vector2((size.x - dw) * 0.5, size.y - dh)
+			draw_set_transform(Vector2(size.x * 0.5, size.y - 2.0), 0.0, Vector2(1.0, 0.22))
+			draw_circle(Vector2.ZERO, dw * 0.42, Color(0, 0, 0, 0.32))
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			var gem: Vector2 = pos + Vector2(dw * 0.92, dh * 0.125)
+			var glow: float = 0.5 + 0.5 * sin(_t * 3.0)
+			draw_circle(gem, dw * 0.16, Color(0.45, 1.0, 0.85, 0.10 + 0.10 * glow))
+			draw_texture_rect(_tex, Rect2(pos, Vector2(dw, dh)), false)
+			draw_circle(gem, dw * 0.07, Color(0.6, 1.0, 0.9, 0.12 + 0.18 * glow))
+			return
 		var bob: float = sin(_t * 2.0) * 3.0
 		var o := Vector2(size.x * 0.5 - 8.0, size.y - 8.0 + bob * 0.4)
 		# ombre
