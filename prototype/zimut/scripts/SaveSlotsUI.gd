@@ -294,8 +294,108 @@ func _on_slot_pressed(slot: int) -> void:
 	if ProgressionManager.save_exists(slot):
 		data = ProgressionManager.load_save(slot)
 	else:
-		data = ProgressionManager.new_game(slot)
+		_prompt_pseudo(slot)
+		return
 	_current = data
+	_current_slot = slot
+	refresh()
+
+
+var _gultur_busy: bool = false
+
+## Tutoriel de Gultur sur « Mes Parties » : accueil, puis déblocage de l'Aventure (niv 3)
+## et de la Conquête (niv 5). Chaque étape ne s'affiche qu'une fois.
+func _start_tutorial(data: Dictionary, tac_btn: Button) -> void:
+	if _gultur_busy or not GameSettings.tutorial_enabled:
+		return
+	GameManager.active_save = data
+	var steps: Array = []
+	if Gultur.should_show("intro"):
+		steps.append(["intro", Gultur.INTRO, tac_btn])
+	if Gultur.should_show("lvl3") and ProgressionManager.mode_unlocked(data, "adventure"):
+		steps.append(["lvl3", Gultur.LVL3, null])
+	if Gultur.should_show("lvl5") and ProgressionManager.mode_unlocked(data, "conquest"):
+		steps.append(["lvl5", Gultur.LVL5, null])
+	if steps.is_empty():
+		return
+	_gultur_busy = true
+	_run_tutorial_steps.call_deferred(steps)
+
+
+func _run_tutorial_steps(steps: Array) -> void:
+	if steps.is_empty():
+		_gultur_busy = false
+		return
+	var s: Array = steps.pop_front()
+	var g: Gultur = Gultur.say(self, String(s[0]), s[1], s[2] as Control, func() -> void: _run_tutorial_steps(steps))
+	if g == null:
+		_gultur_busy = false
+
+
+## Nouvelle partie : demande le pseudo du joueur (le même pseudo peut servir plusieurs fois).
+func _prompt_pseudo(slot: int) -> void:
+	var overlay := ColorRect.new()
+	overlay.name = "PseudoDialog"
+	overlay.color = Color(0, 0, 0, 0.6)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	_root.add_child(overlay)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(center)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _flat())
+	center.add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 12)
+	box.custom_minimum_size = Vector2(560, 0)
+	panel.add_child(box)
+	var t := Label.new()
+	t.text = "Quel est ton pseudo, voyageur ?"
+	t.add_theme_font_size_override("font_size", _ui_font(26))
+	t.add_theme_color_override("font_color", COL_TXT)
+	box.add_child(t)
+	var line := LineEdit.new()
+	line.name = "PseudoEdit"
+	line.placeholder_text = "Ton pseudo"
+	line.max_length = 20
+	line.custom_minimum_size = Vector2(0, 56)
+	line.add_theme_font_size_override("font_size", _ui_font(24))
+	box.add_child(line)
+	var sub := Label.new()
+	sub.text = "Le même pseudo peut être utilisé par plusieurs parties."
+	sub.add_theme_font_size_override("font_size", _ui_font(16))
+	sub.add_theme_color_override("font_color", Color(0.4, 0.3, 0.15))
+	box.add_child(sub)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	box.add_child(row)
+	var cancel := Button.new()
+	cancel.text = "Annuler"
+	cancel.custom_minimum_size = Vector2(0, 56)
+	cancel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	cancel.add_theme_font_size_override("font_size", _ui_font(22))
+	cancel.pressed.connect(func() -> void: overlay.queue_free())
+	row.add_child(cancel)
+	var ok := Button.new()
+	ok.name = "PseudoOk"
+	ok.text = "COMMENCER"
+	ok.custom_minimum_size = Vector2(0, 56)
+	ok.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ok.add_theme_font_size_override("font_size", _ui_font(22))
+	var go := func() -> void:
+		var pseudo: String = line.text.strip_edges()
+		overlay.queue_free()
+		_create_game(slot, pseudo)
+	ok.pressed.connect(go)
+	line.text_submitted.connect(func(_t: String) -> void: go.call())
+	row.add_child(ok)
+	line.grab_focus()
+
+
+func _create_game(slot: int, pseudo: String) -> void:
+	_current = ProgressionManager.new_game(slot, pseudo)
+	GameManager.active_save = _current
 	_current_slot = slot
 	refresh()
 
@@ -390,7 +490,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	modes_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	modes_row.add_theme_constant_override("separation", 10)
 	_detail_box.add_child(modes_row)
-	modes_row.add_child(_mode_button("Combats Tactiques",
+	var tac_btn: Button = _mode_button("Combats Tactiques",
 		"Combats stratégiques au tour par tour", "res://assets/ui/modes/mode_tactique.png",
 		Color(0.22, 0.43, 0.69), true, func() -> void:
 			_current.erase("campaign_mode")
@@ -399,15 +499,20 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 			GameManager.active_slot = slot
 			GameManager.fight_biome = "Forêt"
 			battle_requested.emit(slot)
-			get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")))
+			get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
+	modes_row.add_child(tac_btn)
+	var adv_ok: bool = ProgressionManager.mode_unlocked(data, "adventure")
+	var con_ok: bool = ProgressionManager.mode_unlocked(data, "conquest")
 	modes_row.add_child(_mode_button("Aventure",
 		"Explorez, découvrez et relevez des défis", "res://assets/ui/modes/mode_aventure.png",
-		Color(0.22, 0.48, 0.31), true, func() -> void:
+		Color(0.22, 0.48, 0.31), adv_ok, func() -> void:
 			_launch_campaign_mode("adventure", "res://scenes/AdventureMap.tscn", slot)))
 	modes_row.add_child(_mode_button("Conquête",
 		"Conquérez les cités par les armes", "res://assets/ui/modes/mode_conquete.png",
-		Color(0.62, 0.25, 0.20), true, func() -> void:
+		Color(0.62, 0.25, 0.20), con_ok, func() -> void:
 			_launch_campaign_mode("conquest", "res://scenes/ConquestMap.tscn", slot)))
+
+	_start_tutorial(data, tac_btn)
 
 	# Les 6 boutons illustrés tiennent sur 2 lignes de 3 (plus de défilement nécessaire).
 	var grid := GridContainer.new()
@@ -520,12 +625,58 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	exp_btn.add_theme_stylebox_override("hover", _flat_bg(Color(0.95, 0.90, 0.75), Color(0.62, 0.48, 0.22), 3))
 	exp_btn.tooltip_text = "Copie un code contenant toute la partie : collez-le dans une note ou un message pour la garder ou la transférer sur un autre appareil (bouton « Importer une partie »)."
 	exp_btn.pressed.connect(func() -> void:
-		DisplayServer.clipboard_set(ProgressionManager.export_code(_current))
-		exp_btn.text = "✓  Code copié !")
+		var res: String = _export_game()
+		exp_btn.text = res)
 	tro_row.add_child(exp_btn)
 
-## Importe le code du presse-papiers dans le premier emplacement libre.
+## Export : fichier « Zimut_<pseudo>.zimut » (texte ZIMUT1, voir ProgressionManager.EXPORT_PREFIX)
+## + copie du même code dans le presse-papiers. Retourne le libellé du bouton.
+func _export_game() -> String:
+	var code: String = ProgressionManager.export_code(_current)
+	DisplayServer.clipboard_set(code)
+	var base: String = "Zimut_%s.%s" % [ProgressionManager.safe_file_stem(String(_current.get("name", "partie"))), ProgressionManager.EXPORT_EXT]
+	if DisplayServer.has_feature(DisplayServer.FEATURE_NATIVE_DIALOG_FILE):
+		DisplayServer.file_dialog_show("Exporter la partie", "", base, false, DisplayServer.FILE_DIALOG_MODE_SAVE_FILE,
+			PackedStringArray(["*.%s ; Partie Zimut" % ProgressionManager.EXPORT_EXT]),
+			func(ok: bool, paths: PackedStringArray, _f: int) -> void:
+				if ok and paths.size() > 0:
+					var f := FileAccess.open(paths[0], FileAccess.WRITE)
+					if f != null:
+						f.store_string(code)
+						f.close())
+		return "✓  Exporté (+ code copié)"
+	# Pas de sélecteur de fichier natif : fichier dans user://exports + code copié.
+	DirAccess.make_dir_recursive_absolute("user://exports")
+	var f2 := FileAccess.open("user://exports/" + base, FileAccess.WRITE)
+	if f2 != null:
+		f2.store_string(code)
+		f2.close()
+	return "✓  Code copié !"
+
+
+## Choix de la source d'import : fichier .zimut ou presse-papiers.
 func _on_import_pressed() -> void:
+	if not DisplayServer.has_feature(DisplayServer.FEATURE_NATIVE_DIALOG_FILE):
+		_import_text(DisplayServer.clipboard_get())
+		return
+	var dlg := ConfirmationDialog.new()
+	dlg.title = "Importer une partie"
+	dlg.dialog_text = "D'où importer la partie ?"
+	dlg.ok_button_text = "Fichier .%s" % ProgressionManager.EXPORT_EXT
+	dlg.cancel_button_text = "Presse-papiers"
+	dlg.confirmed.connect(func() -> void:
+		DisplayServer.file_dialog_show("Importer une partie", "", "", false, DisplayServer.FILE_DIALOG_MODE_OPEN_FILE,
+			PackedStringArray(["*.%s ; Partie Zimut" % ProgressionManager.EXPORT_EXT, "*.txt ; Code texte"]),
+			func(ok: bool, paths: PackedStringArray, _f: int) -> void:
+				if ok and paths.size() > 0:
+					_import_text(FileAccess.get_file_as_string(paths[0]))))
+	dlg.canceled.connect(func() -> void: _import_text(DisplayServer.clipboard_get()))
+	_root.add_child(dlg)
+	dlg.popup_centered()
+
+
+## Importe un code (texte) dans le premier emplacement libre.
+func _import_text(text: String) -> void:
 	var free_slot: int = -1
 	for i: int in range(ProgressionManager.MAX_SAVES):
 		if not ProgressionManager.save_exists(i):
@@ -535,7 +686,7 @@ func _on_import_pressed() -> void:
 	if free_slot < 0:
 		msg = "Aucun emplacement libre : supprimez d'abord une partie."
 	else:
-		var err: String = ProgressionManager.import_save(free_slot, DisplayServer.clipboard_get())
+		var err: String = ProgressionManager.import_save(free_slot, text)
 		msg = err if err != "" else "Partie importée dans l'emplacement %d." % (free_slot + 1)
 		if err == "":
 			_current = ProgressionManager.load_save(free_slot)
@@ -550,6 +701,8 @@ func _on_import_pressed() -> void:
 
 func _launch_campaign_mode(mode: String, scene_path: String, slot: int) -> void:
 	if _current.is_empty() or slot < 0:
+		return
+	if not ProgressionManager.mode_unlocked(_current, mode):
 		return
 	_current["campaign_mode"] = mode
 	if mode == "adventure" and not _current.has("adventure"):
@@ -677,8 +830,23 @@ func _mode_button(title_txt: String, desc: String, art_path: String, accent: Col
 	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if not enabled:
-		art.modulate = Color(0.45, 0.45, 0.5)
+		art.modulate = Color(0.30, 0.30, 0.36)
 	b.add_child(art)
+	if not enabled:
+		var need: int = int(ProgressionManager.MODE_MIN_LEVEL.get("adventure" if title_txt == "Aventure" else "conquest", 1))
+		b.tooltip_text = "%s — verrouillé : atteignez le niveau %d avec un de vos héros." % [title_txt, need]
+		var lock := Label.new()
+		lock.name = "LockLabel"
+		lock.text = "🔒\nNiveau %d requis" % need
+		lock.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lock.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		lock.set_anchors_preset(Control.PRESET_FULL_RECT)
+		lock.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		lock.add_theme_font_size_override("font_size", _ui_font(22))
+		lock.add_theme_color_override("font_color", Color(1.0, 0.9, 0.6))
+		lock.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.95))
+		lock.add_theme_constant_override("outline_size", 8)
+		b.add_child(lock)
 
 	var normal := StyleBoxFlat.new()
 	normal.bg_color = COL_PANEL if enabled else COL_DISABLED_BG

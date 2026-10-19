@@ -460,6 +460,7 @@ class TimelineView extends Control:
 	var gm: Node = null
 	var grid: Node = null
 	var _initial_order_uids: Array[int] = []
+	var _numbered_uids: Dictionary = {}
 	var _entity_rects: Dictionary = {}
 	var _pressed_entity: Dictionary = {}
 	var _long_press_fired: bool = false
@@ -640,6 +641,19 @@ class TimelineView extends Control:
 			var current_uid: int = int(current_entity.get("uid", -1))
 			if gm.is_alive(current_entity) and not seen.has(current_uid):
 				_append_timeline_branch(current_uid, current_by_uid, summons_by_owner, order, seen)
+		# Numéros d'ordre (timeline + zone de combat), pour repérer des unités de même skin.
+		# Recalculés quand une nouvelle unité (invocation, résurrection) entre dans la
+		# timeline ; une mort ne décale pas les numéros des autres.
+		var must_renumber: bool = false
+		for oe: Dictionary in order:
+			if not _numbered_uids.has(int(oe.get("uid", -1))):
+				must_renumber = true
+				break
+		if must_renumber:
+			for oi: int in range(order.size()):
+				var ou: int = int(order[oi].get("uid", -1))
+				order[oi]["ord"] = oi + 1
+				_numbered_uids[ou] = true
 		# Colonne verticale : l'ordre reste fixe ; seule la vignette active est agrandie.
 		var active_uid: int = int(gm.active_entity.get("uid", -1))
 		var total_h: float = 0.0
@@ -681,7 +695,7 @@ class TimelineView extends Control:
 			if ord_no > 0:
 				var bc := Vector2(x + 17.0, y + 17.0)
 				draw_circle(bc, 15.0, Color(0, 0, 0, 0.85))
-				draw_circle(bc, 13.0, Color(0.95, 0.75, 0.2))
+				draw_circle(bc, 13.0, EntityView.ord_color(e2))
 				draw_string(font, bc + Vector2(-13.0, 7.0), str(ord_no), HORIZONTAL_ALIGNMENT_CENTER, 26.0, 20, Color(0.1, 0.05, 0.0))
 			# Barre de vie
 			var ratio: float = clampf(float(e2["current_pv"]) / maxf(1.0, float(e2["max_pv"])), 0.0, 1.0)

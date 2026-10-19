@@ -60,17 +60,16 @@ func _ready() -> void:
 		GameSettings.text_size, func(idx: int) -> void: GameSettings.set_text_size(idx)))
 
 	var tuto := Button.new()
-	tuto.text = "Revoir l'aide du premier combat" if GameSettings.tutorial_done else "Aide du premier combat : active"
-	tuto.disabled = not GameSettings.tutorial_done
+	tuto.name = "TutoRestart"
+	tuto.text = "🎓  Relancer le tutoriel de Gultur"
 	tuto.custom_minimum_size = Vector2(0, 58)
 	tuto.add_theme_font_size_override("font_size", 21)
 	tuto.add_theme_color_override("font_color", COL_TXT)
 	tuto.add_theme_stylebox_override("normal", _flat(Color(0.86, 0.80, 0.64), COL_BORDER, 12, 2))
 	tuto.add_theme_stylebox_override("hover", _flat(Color(0.99, 0.95, 0.83), COL_BORDER, 12, 3))
 	tuto.pressed.connect(func() -> void:
-		GameSettings.set_tutorial_done(false)
-		tuto.text = "Aide du premier combat : active"
-		tuto.disabled = true)
+		GameSettings.restart_tutorial()
+		tuto.text = "✓  Tutoriel relancé : retrouve Gultur dans Mes Parties")
 	box.add_child(tuto)
 
 	var hint := Label.new()

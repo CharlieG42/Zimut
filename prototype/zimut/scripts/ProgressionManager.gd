@@ -711,6 +711,16 @@ func _normalize_ints(d: Dictionary, keys: Array) -> void:
 ## Le code se colle n'importe où (note, message, mail) pour garder ou transférer
 ## sa partie : « ZIMUT1: » + base64 du JSON compressé (gzip).
 const EXPORT_PREFIX := "ZIMUT1:"
+## Extension des fichiers d'export : « .zimut » = fichier texte UTF-8 contenant exactement le code
+## « ZIMUT1:<base64 du JSON gzip> ». Le préfixe porte la version du format (ZIMUT2… plus tard).
+const EXPORT_EXT := "zimut"
+
+## Nom de fichier sûr à partir d'un pseudo (lettres, chiffres, _ -).
+func safe_file_stem(s: String) -> String:
+	var out: String = ""
+	for ch: String in s.strip_edges():
+		out += ch if (ch.unicode_at(0) < 128 and (ch.is_valid_identifier() or ch == "-" or ch.is_valid_int())) else "_"
+	return out if out != "" else "partie"
 
 func export_code(data: Dictionary) -> String:
 	var raw: PackedByteArray = JSON.stringify(data).to_utf8_buffer()
@@ -1588,6 +1598,22 @@ func roster_entry(data: Dictionary, classe: String) -> Dictionary:
 func member_level(data: Dictionary, classe: String) -> int:
 	var e: Dictionary = roster_entry(data, classe)
 	return int(e.get("level", START_LEVEL)) if not e.is_empty() else START_LEVEL
+
+## Niveau minimum (au moins un héros de ce niveau) pour jouer chaque mode.
+const MODE_MIN_LEVEL := {"tactique": 1, "adventure": 3, "conquest": 5}
+
+## Plus haut niveau parmi tous les héros de la partie.
+func max_hero_level(data: Dictionary) -> int:
+	var best: int = START_LEVEL
+	for e: Variant in (data.get("roster", {}) as Dictionary).values():
+		if e is Dictionary:
+			best = maxi(best, int((e as Dictionary).get("level", START_LEVEL)))
+	return best
+
+
+func mode_unlocked(data: Dictionary, mode: String) -> bool:
+	return max_hero_level(data) >= int(MODE_MIN_LEVEL.get(mode, 1))
+
 
 func team_average_level(data: Dictionary) -> int:
 	var classes: Array[String] = []

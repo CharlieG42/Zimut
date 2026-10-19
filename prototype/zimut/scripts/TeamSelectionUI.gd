@@ -50,6 +50,8 @@ var _desc_label: Label
 var _stats_label: Label
 var _action_btn: Button
 var _team_slots: Array = []          # [Panel, ...]
+var _team_title: Label
+var _team_frame: Control
 var _title: Label
 var _fight_btn: Button
 var _equip_btn: Button
@@ -334,11 +336,23 @@ func _build() -> void:
 	eq.tooltip_text = "Équiper vos personnages avec les objets gagnés."
 	eq.pressed.connect(_on_equipment)
 	tools.add_child(eq)
+	# Cadre « TON ÉQUIPE » : met bien en évidence les 3 emplacements du groupe.
+	var team_frame := PanelContainer.new()
+	_team_frame = team_frame
+	team_frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	team_frame.add_theme_stylebox_override("panel", U.box(Color(0.20, 0.15, 0.05, 0.95), Color(1.0, 0.82, 0.30), 16, 4, 10))
+	bottom.add_child(team_frame)
+	var team_box := VBoxContainer.new()
+	team_box.add_theme_constant_override("separation", 6)
+	team_frame.add_child(team_box)
+	_team_title = U.lbl("", 22, Color(1.0, 0.86, 0.4), true)
+	_team_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	team_box.add_child(_team_title)
 	var team_row := HBoxContainer.new()
 	team_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	team_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	team_row.add_theme_constant_override("separation", 10)
-	bottom.add_child(team_row)
+	team_box.add_child(team_row)
 	_team_slots.clear()
 	for i: int in range(MAX_TEAM_SIZE):
 		var slot := Button.new()
@@ -658,7 +672,7 @@ func refresh() -> void:
 			var c: String = team[i]
 			var ccol: Color = CLASS_COLORS.get(c, Color(0.4, 0.4, 0.4))
 			slot.icon = _class_texture(c)
-			slot.text = c
+			slot.text = "%d · %s" % [i + 1, c]
 			if GameManager.active_slot >= 0 and not GameManager.active_save.is_empty():
 				slot.text += "\nNiv %d" % ProgressionManager.member_level(GameManager.active_save, c)
 			var st_s: StyleBoxFlat = U.box(ccol.darkened(0.5), ccol.lightened(0.2), 14, 3, 8)
@@ -667,11 +681,16 @@ func refresh() -> void:
 			slot.add_theme_stylebox_override("pressed", st_s)
 		else:
 			slot.icon = null
-			slot.text = "  ＋ emplacement libre"
+			slot.text = "  ＋ Héros %d\n  (à choisir)" % (i + 1)
 			var st_e: StyleBoxFlat = U.box(Color(0.08, 0.10, 0.15, 0.9), Color(0.28, 0.32, 0.42), 14, 2, 8)
 			slot.add_theme_stylebox_override("normal", st_e)
 			slot.add_theme_stylebox_override("hover", st_e)
 			slot.add_theme_stylebox_override("pressed", st_e)
+	if _team_title:
+		if team.size() < MAX_TEAM_SIZE:
+			_team_title.text = "★ TON ÉQUIPE : %d / %d — choisis %d héros dans la liste, puis touche AJOUTER" % [team.size(), MAX_TEAM_SIZE, MAX_TEAM_SIZE - team.size()]
+		else:
+			_team_title.text = "★ TON ÉQUIPE : %d / %d — prête au combat !" % [team.size(), MAX_TEAM_SIZE]
 	if _fight_btn:
 		_fight_btn.disabled = team.size() != MAX_TEAM_SIZE
 	if _goal_label:
@@ -684,6 +703,7 @@ func refresh() -> void:
 			parts.append("✦ %s (%s) : %s" % [sy["name"], sy["pair"], sy["desc"]])
 		_goal_label.text = "\n".join(parts)
 		_goal_label.visible = not parts.is_empty()
+	_gultur_hint.call_deferred()
 
 func _flat(bg: Color, border: Color, radius: int = 12, bw: int = 3) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
@@ -692,3 +712,17 @@ func _flat(bg: Color, border: Color, radius: int = 12, bw: int = 3) -> StyleBoxF
 	s.set_border_width_all(bw)
 	s.set_corner_radius_all(radius)
 	return s
+
+
+var _gultur_shown: bool = false
+
+## Conseils de Gultur sur l'écran d'équipe (une seule fois chacun).
+func _gultur_hint() -> void:
+	if _gultur_shown or not GameSettings.tutorial_enabled or _team_frame == null:
+		return
+	if Gultur.should_show("team"):
+		_gultur_shown = true
+		Gultur.say(self, "team", Gultur.TEAM, _team_frame)
+	elif Gultur.should_show("equip") and not (GameManager.active_save.get("inventory", []) as Array).is_empty():
+		_gultur_shown = true
+		Gultur.say(self, "equip", Gultur.EQUIP, _equip_btn)
