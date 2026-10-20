@@ -8,6 +8,14 @@ Conseils généraux :
 - Hauteur conseillée : 256 à 512 px (le jeu redimensionne). Format portrait, marges transparentes minimales.
 - Noms en minuscules, sans accents, espaces → `_` (ex. « Élémentaire de Cristal » → `elementaire_de_cristal.png`).
 
+## 0. Poses et vues (V34)
+Chaque sprite peut avoir des poses à côté de lui, de face et de dos (3/4 arrière), jusqu'à 9 variantes par pose :
+- face : `<nom>.png` (repos), `_idle_2`, `_idle_3`, `_walk`, `_walk_2`, `_attack` … `_attack_8`, `_cast` … `_cast_3`
+- dos : `<nom>_back.png` (repos de dos), `_back_idle_2`, `_back_walk`, `_back_walk_2`, `_back_attack` … `_back_attack_8`, `_back_cast` …
+
+Le jeu choisit les poses de dos quand le personnage regarde vers le haut de l'écran (sans jamais mélanger face et dos),
+et retombe sur les poses de face si les fichiers de dos manquent. Prompts et noms par personnage : `prompts_sprites/` à la racine du dépôt.
+
 ## 1. Héros — `assets/sprites/players/<classe>.png`
 `tank`, `assassin`, `chasseur`, `mage`, `druide`, `heal`, `invocateur`, `sylvain`, `geomancien`, **`artificier`** (provisoire actuellement).
 Copie facultative pour la planche des nations : `assets/sprites/nations/heros/<classe>.png`.
