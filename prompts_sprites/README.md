@@ -15,8 +15,8 @@ Les héros, ennemis, boss et familiers viennent de `scripts/Nations.gd`, `assets
 
 1. **Planche de référence de la nation** (section 1 de chaque fichier). Elle ne sert pas en jeu : elle fixe la palette, les matières et les silhouettes de toute la nation.
 2. **Planches de poses**, une par personnage. Joins la planche de référence comme image de référence (« image reference », « character reference », « style reference » selon l'outil). Garde le même modèle et, si possible, la même graine (seed) pour toute la nation.
-3. **Atelier Sprites** : importe la planche, vérifie les cadres (« Ajuster » si deux poses ont fusionné), puis donne à chaque pose le **nom indiqué dans le tableau** sous le prompt (`assassin_attack_2`…). « Poses détourées (.zip) » exporte alors directement les bons noms de fichiers.
-4. **Dépôt** : copie les PNG dans le dossier indiqué au-dessus de chaque tableau. Le jeu les prend sans changer le code (`EntityView.gd` charge `<nom>.png`, `_idle_2`, `_idle_3`, `_back`, `_walk`, `_attack…`, `_cast…`).
+3. **Atelier Sprites** : importe la planche, vérifie les cadres (« Ajuster » si deux poses ont fusionné, « Exclure » pour un texte), choisis le personnage dans la liste puis touche « Nommer les poses ». Les noms des tableaux ci-dessous sont appliqués automatiquement dans l'ordre des cases ; les tableaux servent seulement de contrôle.
+4. **Dépôt** : « Exporter pour Zimut (.zip) » range déjà les PNG dans `prototype/zimut/assets/sprites/…` : décompresse le zip à la racine du dépôt. Le jeu les prend sans changer le code (`EntityView.gd` charge `<nom>.png`, `_idle_2`, `_idle_3`, `_back`, `_walk`, `_attack…`, `_cast…`).
 5. Ouvre une fois le projet dans Godot pour l'import.
 
 Le jeu affiche la vue 3/4 face et la **retourne horizontalement** quand le personnage va vers la gauche (`sprite.flip_h`) : une seule direction de face suffit, plus le dos. L'arme change donc de main en miroir, c'est normal.
