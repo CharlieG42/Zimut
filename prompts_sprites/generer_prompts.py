@@ -3,9 +3,11 @@
 
 Usage :  python3 prompts_sprites/generer_prompts.py
 Modifier une description : éditer les dictionnaires ci-dessous puis relancer le script.
-Les noms de fichiers suivent la convention du jeu (scripts/EntityView.gd, V31-V32) :
-  <nom>.png (repos), <nom>_idle_2/_idle_3, <nom>_back, <nom>_walk, <nom>_attack[_2.._4], <nom>_cast[_2,_3]
+Les noms de fichiers suivent la convention du jeu (scripts/EntityView.gd, V34) :
+  face : <nom>.png (repos), <nom>_idle_2/_idle_3, <nom>_walk[_2], <nom>_attack[_2.._8], <nom>_cast[_2,_3]
+  dos  : <nom>_back.png (repos), <nom>_back_idle_2/_3, <nom>_back_walk[_2], <nom>_back_attack[_2.._8], <nom>_back_cast[_2,_3]
 """
+import math
 from pathlib import Path
 
 OUT = Path(__file__).resolve().parent
@@ -34,6 +36,7 @@ BG_TAIL = (", no checkerboard pattern, no gradient, no floor, no ground shadow, 
 NEGATIVE = (
     "checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, "
     "overlapping characters, touching poses, cropped limbs, character cut by the cell edge, "
+    "effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, "
     "inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, "
     "blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, "
     "photorealistic, 3D render, pixel art"
@@ -42,22 +45,40 @@ NEGATIVE = (
 
 def grid(cols, rows):
     return (
-        f"Strict grid of {cols} columns x {rows} rows, {cols*rows} equal cells, exactly one pose per cell. "
-        "The character is centered in its cell and entirely inside it, with clear empty space all around. "
-        "Wide empty gutters between cells (at least 20% of a cell). Same scale in every cell. "
-        "Feet on the same ground line in each row. Effects stay small and inside their own cell."
+        f"Strict grid of {cols} columns x {rows} rows of equal square cells, exactly one pose per cell "
+        f"(image aspect ratio {cols//math.gcd(cols, rows)}:{rows//math.gcd(cols, rows)}, as large as possible, "
+        f"e.g. {cols*512}x{rows*512}). "
+        "Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay "
+        "entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. "
+        "Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: "
+        "no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. "
+        "Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. "
+        "Same character size in every cell, feet on the same ground line in each row."
     )
 
 
+VIEWS = {
+    "face": ("3/4 FRONT view: the character faces the viewer and turns slightly to the right "
+             "(face, chest and right side visible), facing front-right in every cell", "front-right"),
+    "dos": ("3/4 BACK view: the character is seen from behind and turns slightly to the right "
+            "(back, back of the head and right shoulder visible, face hidden), facing away from the viewer "
+            "toward the upper right in every cell", "back-right, away from the viewer"),
+}
+
+
 # --------------------------------------------------------------------------------------------
-# Archétypes de combat : décrivent les poses d'attaque et de sort
+# Archétypes de combat : 8 poses d'attaque et 3 poses de sort par archétype
 # --------------------------------------------------------------------------------------------
 ARCH = {
     "hammer_shield": dict(
         atk=["wind-up, hammer raised high behind the head, shield forward",
              "overhead strike, hammer slamming down in front, small {fx} impact at the hammer head",
              "follow-through, hammer low, body leaning forward",
-             "shield bash, shield thrust forward, hammer pulled back"],
+             "shield bash, shield thrust forward, hammer pulled back",
+             "horizontal swing, hammer sweeping at waist height, body twisted",
+             "rising uppercut with the hammer, one foot lifted",
+             "spinning attack, hammer held out to the side, small {fx} whirl",
+             "jumping slam, both feet off the ground, hammer above the head"],
         cast=["bracing, shield planted on the ground, {fx} gathering around",
               "war cry, hammer raised to the sky, {fx} swirling around the body",
               "releasing a ring of {fx} around the feet"]),
@@ -65,7 +86,11 @@ ARCH = {
         atk=["crouched wind-up, both daggers crossed in front of the chest",
              "dash slash forward, both arms extended, short {fx} slash crescents",
              "spinning follow-through, one dagger high, one low",
-             "backhand stab, one dagger thrust forward, body twisted"],
+             "backhand stab, one dagger thrust forward, body twisted",
+             "double downward stab, both daggers pointing down, knees bent",
+             "rising cross slash, both arms opening upward",
+             "low sweeping slash, crouched on one knee",
+             "leaping strike, body in the air, daggers held forward"],
         cast=["kneeling, one hand on the ground, {fx} rising from the shadow below",
               "half vanished into {fx}, only the eyes and daggers clearly visible",
               "reappearing from a burst of {fx}, daggers ready"]),
@@ -73,7 +98,11 @@ ARCH = {
         atk=["drawing the bow, arrow nocked, string pulled to the cheek",
              "release, arrow flying forward with a short {fx} trail",
              "follow-through, bow arm extended, string hand open behind",
-             "quick shot from a low crouch, bow tilted"],
+             "quick shot from a low crouch, bow tilted",
+             "drawing an arrow from the quiver, bow lowered",
+             "double shot, two arrows nocked at once",
+             "point-blank kick, bow held back, one leg raised",
+             "jumping shot, aiming downward forward, feet off the ground"],
         cast=["arrow raised to the sky, {fx} gathering on the arrowhead",
               "aiming upward, the arrow fully wrapped in {fx}",
               "releasing a volley of three {fx} arrows into the air"]),
@@ -81,7 +110,11 @@ ARCH = {
         atk=["wind-up, staff held back with both hands",
              "staff swing forward, small {fx} burst at the tip",
              "follow-through, staff low, body turned",
-             "thrust with the staff tip forward, short {fx} spark"],
+             "thrust with the staff tip forward, short {fx} spark",
+             "overhead staff strike, both hands high",
+             "spinning the staff around the body, small {fx} trail",
+             "low sweep with the staff at the feet",
+             "staff planted, kicking forward with one leg"],
         cast=["staff raised, {fx} orb forming at the top",
               "staff held high with both hands, {fx} swirling around",
               "staff pointed forward, releasing a compact {fx} blast"]),
@@ -89,7 +122,11 @@ ARCH = {
         atk=["wind-up, staff held back, grimoire floating open beside",
              "staff swing forward, small {fx} burst at the tip",
              "follow-through, staff low, coat swirling",
-             "open palm thrust, {fx} bolt leaving the hand"],
+             "open palm thrust, {fx} bolt leaving the hand",
+             "grimoire snapping shut, a small {fx} shockwave in front",
+             "staff thrust forward with both hands",
+             "two-handed overhead strike with the staff",
+             "free hand clawing forward, {fx} claws forming"],
         cast=["grimoire floating open, pages turning, {fx} rising from it",
               "staff raised, a {fx} summoning circle drawn on the ground",
               "both arms open, a {fx} creature silhouette emerging from the circle"]),
@@ -97,7 +134,11 @@ ARCH = {
         atk=["wind-up, gear hammer swung back over the shoulder",
              "smash forward, gear hammer hitting with a burst of {fx}",
              "follow-through, hammer low, goggles bouncing",
-             "throwing a small round bomb forward with the free hand"],
+             "throwing a small round bomb forward with the free hand",
+             "horizontal swing of the gear hammer at waist height",
+             "uppercut with the gear hammer, sparks flying",
+             "spinning attack, hammer held out, small {fx} ring",
+             "shoulder charge forward, hammer held back"],
         cast=["kneeling, adjusting a small device on the ground, {fx} crackling",
               "standing, raising a glowing remote control, {fx} arcing around",
               "pointing forward, a {fx} blast leaving the device"]),
@@ -105,7 +146,11 @@ ARCH = {
         atk=["crouched wind-up, ready to pounce",
              "lunge forward, jaws or claws first, small {fx} impact",
              "follow-through, landing after the lunge",
-             "second strike, swiping sideways"],
+             "second strike, swiping sideways",
+             "rearing up on the hind legs, front claws raised",
+             "biting downward, head low",
+             "tail or body slam, body twisted",
+             "charging forward, head down"],
         cast=["head raised, {fx} gathering around the body",
               "roaring, {fx} burst around the head",
               "releasing a short {fx} breath or wave forward"]),
@@ -113,7 +158,11 @@ ARCH = {
         atk=["wind-up, fist or weapon raised high",
              "heavy smash forward, ground cracking with a small {fx} burst",
              "follow-through, body leaning forward",
-             "sweeping backhand blow"],
+             "sweeping backhand blow",
+             "double-fist hammer blow from above",
+             "straight punch forward, other arm pulled back",
+             "stomp with one foot, small {fx} cracks",
+             "shoulder charge forward"],
         cast=["stomping, {fx} cracks spreading under the feet",
               "arms raised, {fx} gathering between the hands",
               "slamming both fists down, {fx} shockwave"]),
@@ -121,20 +170,15 @@ ARCH = {
         atk=["drawing back, body stretched upward",
              "lunging forward, claws of {fx} reaching out",
              "follow-through, body trailing behind",
-             "spinning strike, {fx} whirl around the body"],
+             "spinning strike, {fx} whirl around the body",
+             "diving downward, body compact",
+             "double claw swipe, arms crossing",
+             "body splitting into a fan of {fx} blades in front",
+             "rising strike from below, body stretched up"],
         cast=["hovering higher, {fx} orbs circling the body",
               "arms spread, {fx} pulsing outward",
               "releasing a compact {fx} wave forward"]),
-    "ranged_caster": dict(
-        atk=["wind-up, weapon or hand pulled back",
-             "strike forward, small {fx} burst",
-             "follow-through",
-             "second strike, aimed low"],
-        cast=["hand raised, {fx} gathering",
-              "both hands raised, {fx} swirling",
-              "releasing a {fx} projectile forward"]),
 }
-
 # --------------------------------------------------------------------------------------------
 # Nations (scripts/Nations.gd) : héros, 4 ennemis (ordre : Gobelin, Loup, Squelette, Troll), boss
 # --------------------------------------------------------------------------------------------
@@ -379,71 +423,96 @@ MECANISMES = [
                     ("balise_de_transposition", "brass teleport beacon on three legs with a spinning teal ring")]),
 ]
 
-HERO_CELLS = [  # (suffixe de fichier, description de cellule)
-    ("", "idle, 3/4 view facing front-right, relaxed ready stance"),
-    ("_idle_2", "idle variant, breathing in, shoulders slightly raised, same stance"),
-    ("_idle_3", "idle variant, alert, glancing to the side, weapon ready"),
-    ("_back", "idle seen from behind, 3/4 back-right view"),
-    ("_walk", "walking, 3/4 front-right, mid-stride, left foot forward"),
-    ("_attack", "ATK0"), ("_attack_2", "ATK1"), ("_attack_3", "ATK2"), ("_attack_4", "ATK3"),
-    ("_cast", "CAST0"), ("_cast_2", "CAST1"), ("_cast_3", "CAST2"),
+# --------------------------------------------------------------------------------------------
+# Planches : 4 x 2 cases chacune. Héros et boss : 4 planches (face/dos x repos-sorts/attaques).
+# Ennemis et familiers : 2 planches (face, dos).
+# Noms de fichiers (EntityView.gd, V34) : vue de face <nom><suffixe>, vue de dos <nom>_back<suffixe>
+# --------------------------------------------------------------------------------------------
+IDLE = ["idle, relaxed ready stance", "idle variant, breathing in, shoulders slightly raised",
+        "idle variant, alert, weapon ready"]
+WALK = ["walking, mid-stride, left foot forward", "walking, mid-stride, right foot forward"]
+SHEETS_BIG = [
+    ("repos", "Repos, marche et sorts",
+     [("", "I0"), ("_idle_2", "I1"), ("_idle_3", "I2"), ("_walk", "W0"), ("_walk_2", "W1"),
+      ("_cast", "C0"), ("_cast_2", "C1"), ("_cast_3", "C2")]),
+    ("attaques", "Attaques",
+     [("_attack" if i == 0 else f"_attack_{i+1}", f"A{i}") for i in range(8)]),
 ]
-SMALL_CELLS = [
-    ("", "idle, 3/4 view facing front-right"),
-    ("_idle_2", "idle variant, breathing, slightly different posture"),
-    ("_back", "idle seen from behind, 3/4 back-right view"),
-    ("_walk", "moving forward, 3/4 front-right"),
-    ("_attack", "ATK0"), ("_attack_2", "ATK1"), ("_cast", "CAST0"), ("_cast_2", "CAST2"),
+SHEETS_SMALL = [
+    ("toutes", "Repos, marche, attaques et sort",
+     [("", "I0"), ("_idle_2", "I1"), ("_walk", "W0"), ("_attack", "A0"), ("_attack_2", "A1"),
+      ("_attack_3", "A2"), ("_attack_4", "A3"), ("_cast", "C0")]),
 ]
 
 
-def cells(kind, arch, fx):
-    a = ARCH[arch]
-    rep = {f"ATK{i}": s.format(fx=fx) for i, s in enumerate(a["atk"])}
-    rep.update({f"CAST{i}": s.format(fx=fx) for i, s in enumerate(a["cast"])})
-    src = HERO_CELLS if kind == "big" else SMALL_CELLS
-    return [(suf, rep.get(d, d), d) for suf, d in src]
+def file_suffix(view, suf):
+    """Vue de dos : _back (repos) puis _back_idle_2, _back_walk, _back_attack_3…"""
+    if view == "face":
+        return suf
+    return "_back" + (suf if suf else "")
 
 
-LABELS = {"": "repos", "_idle_2": "repos 2", "_idle_3": "repos 3", "_back": "dos", "_walk": "marche",
-          "_attack": "attaque 1", "_attack_2": "attaque 2", "_attack_3": "attaque 3", "_attack_4": "attaque 4",
-          "_cast": "sort 1", "_cast_2": "sort 2", "_cast_3": "sort 3"}
+def cell_text(code, arch, fx):
+    k, i = code[0], int(code[1:])
+    if k == "I":
+        return IDLE[i]
+    if k == "W":
+        return WALK[i]
+    src = ARCH[arch]["atk" if k == "A" else "cast"]
+    return src[i].format(fx=fx)
 
 
-def pose_label(suf):
-    return LABELS.get(suf, suf)
+LABELS = {"I": "repos", "W": "marche", "A": "attaque", "C": "sort"}
 
 
-def prompt_sheet(who, role, nation, desc, kind, arch, fx, rim, palette, pale):
-    cs = cells(kind, arch, fx)
-    cols, rows = (4, 3) if kind == "big" else (4, 2)
+def pose_label(code):
+    return f"{LABELS[code[0]]} {int(code[1:]) + 1}"
+
+
+def prompt_sheet(who, role, nation, desc, view, cells, arch, fx, rim, palette, pale):
+    vtxt, vdir = VIEWS[view]
     lines = [
         f"Sprite sheet of ONE {role} for a chibi isometric tactical RPG.",
         f"CHARACTER: {who}, {nation}. {desc[0].upper() + desc[1:]}.",
-        "Keep exactly the same design in every cell: same outfit, colors, proportions, accessories"
-        + (", weapon always in the same hand." if kind == "big" else "."),
+        "Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, "
+        "weapon always in the same hand.",
+        f"VIEW: {vtxt}. Never a pure side profile, never facing left.",
         f"NATION PALETTE: {palette}.",
         "STYLE: " + STYLE.format(rim=rim),
-        "GRID: " + grid(cols, rows),
-        "CELLS, left to right, top to bottom:",
+        "GRID: " + grid(4, 2),
+        f"CELLS, left to right, top to bottom (all in {vdir} 3/4 view):",
     ]
-    for i, (_, d, _) in enumerate(cs):
-        lines.append(f"{i+1}. {d}.")
-    lines.append(f"EFFECTS: {fx}, stylized, opaque, with dark outlines, small and inside their cell.")
+    for i, (_, code) in enumerate(cells):
+        lines.append(f"{i+1}. {cell_text(code, arch, fx)}.")
+    lines.append(f"EFFECTS: {fx}, stylized, opaque, with dark outlines, small, kept inside their own cell.")
     lines.append("BACKGROUND: " + (BG_GRAY if pale else BG_WHITE) + BG_TAIL)
-    return "\n".join(lines), cs, (cols, rows)
+    return "\n".join(lines)
 
 
-def name_table(base, cs, cols):
-    out = ["| Case | Pose | Nom à donner dans l'Atelier | Fichier |", "|---|---|---|---|"]
-    for i, (suf, _, raw) in enumerate(cs):
-        out.append(f"| {i//cols+1}-{i%cols+1} | {pose_label(suf)} | `{base}{suf}` | `{base}{suf}.png` |")
+def name_table(base, view, cells):
+    out = ["| Case | Pose | Fichier |", "|---|---|---|"]
+    for i, (suf, code) in enumerate(cells):
+        out.append(f"| {i//4+1}-{i%4+1} | {pose_label(code)} | `{base}{file_suffix(view, suf)}.png` |")
     return "\n".join(out)
 
 
-def block(title, intro, prompt, table, path_hint):
-    return (f"### {title}\n\n{intro}\n\n```text\n{prompt}\n```\n\n"
-            f"Fichiers attendus dans `{path_hint}` :\n\n{table}\n")
+def character_md(title, ent, role, nation_txt, big, fx, rim, palette, path_hint, extra_desc=""):
+    sheets = SHEETS_BIG if big else SHEETS_SMALL
+    desc = ent["desc"] + extra_desc
+    n = len(sheets) * 2
+    parts = [f"### {title}\n\n{n} planches de 8 poses. Joins la planche de face « repos » déjà réussie "
+             f"comme référence pour les suivantes. Fichiers dans `{path_hint}`.\n"]
+    k = 0
+    for view in ("face", "dos"):
+        for sid, slabel, cells in sheets:
+            k += 1
+            vlabel = "Face (3/4 avant)" if view == "face" else "Dos (3/4 arrière)"
+            atelier = f"{vlabel} · {slabel}" if big else vlabel
+            p = prompt_sheet(ent["nom"].split(" (")[0], role, nation_txt, desc, view, cells, ent["arch"], fx, rim,
+                             palette, ent.get("pale", False))
+            parts.append(f"#### Planche {k} — {atelier}\n\nDans l'Atelier : personnage « {ent['nom'].split(' (')[0]} », "
+                         f"planche « {atelier} ».\n\n```text\n{p}\n```\n\n{name_table(ent['id'], view, cells)}\n")
+    return "\n".join(parts)
 
 
 def lineup_prompt(n):
@@ -456,9 +525,11 @@ def lineup_prompt(n):
         f"({n['biome']} biome).",
         f"NATION PALETTE: {n['palette']}. Signature effects: {n['fx']}.",
         "STYLE: " + STYLE.format(rim=n["rim"]),
-        f"LAYOUT: {len(chars)} characters standing side by side in ONE single row, all in idle pose, all in "
-        "3/4 view facing front-right, all feet on the same ground line, a wide empty gap between characters "
-        "(at least half a character width). Nobody overlaps or touches another character.",
+        f"LAYOUT: two rows with the same {len(chars)} characters in the same order, all in idle pose. "
+        "Top row: 3/4 front view, facing front-right. Bottom row: 3/4 back view, seen from behind, turned toward "
+        "the upper right. All feet of a row on the same ground line. Leave a wide empty gap (at least half a "
+        "character width) between characters and between the two rows: nobody overlaps or touches anyone, "
+        "weapons and capes included. Image aspect ratio 2:1, as large as possible.",
         "CHARACTERS, left to right:",
         *[f"{i+1}. {c}." for i, c in enumerate(chars)],
         "BACKGROUND: " + (BG_GRAY if pale else BG_WHITE) + BG_TAIL,
@@ -467,62 +538,60 @@ def lineup_prompt(n):
 
 def nation_md(n):
     h, b = n["hero"], n["boss"]
+    nt = f"of the {n['nom']} nation"
     parts = [f"# Nation {n['nom']} ({n['biome']})\n",
              f"Palette : {n['palette']}. Effets : {n['fx']}. Contre-jour : {n['rim']}.\n",
-             "Ordre conseillé : 1) planche de référence, 2) héros (en joignant la planche 1 comme image de "
-             "référence), 3) ennemis, 4) boss. Prompt négatif : voir en bas de page.\n"]
+             "Chaque personnage est dessiné en **vue 3/4 avant (face)** et en **vue 3/4 arrière (dos)**. "
+             "Le jeu retourne l'image pour les directions vers la gauche. Toutes les planches sont des grilles "
+             "4 × 2 aux cases bien séparées. Prompt négatif : voir en bas de page.\n",
+             "Ordre conseillé : 1) planche de référence, 2) héros, 3) ennemis, 4) boss.\n"]
     parts.append("## 1. Planche de référence (style de la nation)\n\nNe sert pas en jeu : elle fixe palette, "
-                 "matières et silhouettes. Joins-la comme image de référence aux planches suivantes.\n\n"
+                 "matières et silhouettes, de face et de dos. Joins-la comme image de référence à toutes les "
+                 "planches suivantes.\n\n"
                  f"```text\n{lineup_prompt(n)}\n```\n")
-    p, cs, (c, _) = prompt_sheet(h["nom"], "playable hero", f"hero of the {n['nom']} nation", h["desc"], "big",
-                                 h["arch"], n["fx"], n["rim"], n["palette"], h["pale"])
-    parts.append("## 2. Héros\n\n" + block(f"{h['nom']} — 12 poses", "Grille 4 × 3.", p,
-                                           name_table(h["id"], cs, c), f"{GAME}/players/"))
-    parts.append(f"Copie conseillée de la pose de repos vers `{GAME}/nations/heros/{h['id']}.png` "
-                 "et des poses vers `nations/heros/poses/`.\n")
+    parts.append("## 2. Héros\n\n" + character_md(f"{h['nom']} — 32 poses", h, "playable hero", "hero " + nt,
+                                                  True, n["fx"], n["rim"], n["palette"], f"{GAME}/players/"))
+    parts.append(f"L'export Zimut de l'Atelier copie aussi le repos vers `nations/heros/{h['id']}.png` et les "
+                 "autres poses vers `nations/heros/poses/`.\n")
     parts.append("## 3. Ennemis\n")
     for e in n["enemies"]:
-        p, cs, (c, _) = prompt_sheet(e["nom"], "enemy monster", f"enemy of the {n['nom']} nation", e["desc"],
-                                     "small", e["arch"], n["fx"], n["rim"], n["palette"], e.get("pale", False))
-        parts.append(block(f"{e['nom']} — 8 poses", "Grille 4 × 2.", p, name_table(e["id"], cs, c),
-                           f"{GAME}/nations/ennemis/{n['id']}/"))
-    p, cs, (c, _) = prompt_sheet(b["nom"], "final boss", f"boss of the {n['nom']} nation",
-                                 b["desc"] + ", imposing chibi with slightly longer body proportions than regular "
-                                 "characters (head about 1/4 of total height)", "big", b["arch"], n["fx"], n["rim"],
-                                 n["palette"], b["pale"])
-    parts.append("## 4. Boss\n\n" + block(f"{b['nom']} — 12 poses", "Grille 4 × 3.", p,
-                                          name_table(b["id"], cs, c), f"{GAME}/nations/boss/"))
+        parts.append(character_md(f"{e['nom']} — 16 poses", e, "enemy monster", "enemy " + nt, False, n["fx"],
+                                  n["rim"], n["palette"], f"{GAME}/nations/ennemis/{n['id']}/"))
+    parts.append("## 4. Boss\n\n" + character_md(
+        f"{b['nom']} — 32 poses", b, "final boss", "boss " + nt, True, n["fx"], n["rim"], n["palette"],
+        f"{GAME}/nations/boss/",
+        ", imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of "
+        "total height)"))
     parts.append(f"## Prompt négatif (toutes les planches de cette page)\n\n```text\n{NEGATIVE}\n```\n")
     return "\n".join(parts)
 
 
 def familiers_md():
     parts = ["# Familiers (invocations)\n",
-             "Fichiers dans `" + GAME + "/summons/`. Palette libre par familier, même style que les nations. "
-             "Les familiers d'une même classe gagnent à être générés avec la planche du héros en référence.\n"]
+             "Fichiers dans `" + GAME + "/summons/`. Deux planches par familier : vue 3/4 avant (face) et vue 3/4 "
+             "arrière (dos). Joins la planche du héros qui l'invoque comme référence de style.\n"]
     for f in FAMILIERS:
-        p, cs, (c, _) = prompt_sheet(f["nom"].split(" (")[0], "summoned familiar", "a summon", f["desc"], "small",
-                                     f["arch"], "matching magical sparks", "soft colored", "colors as described",
-                                     f.get("pale", False))
-        parts.append(block(f"{f['nom']} — 8 poses", "Grille 4 × 2.", p, name_table(f["id"], cs, c),
-                           f"{GAME}/summons/"))
+        parts.append(character_md(f"{f['nom']} — 16 poses", f, "summoned familiar", "a summon", False,
+                                  "matching magical sparks", "soft colored", "colors as described",
+                                  f"{GAME}/summons/"))
     parts.append(f"## Prompt négatif\n\n```text\n{NEGATIVE}\n```\n")
     return "\n".join(parts)
 
 
 def mecanismes_md():
     parts = ["# Mécanismes (objets fixes)\n",
-             "Une seule pose par objet : ces planches peuvent regrouper plusieurs objets. Fichiers dans `"
-             + GAME + "/summons/<id>.png`.\n"]
+             "Une seule vue par objet (ils ne se tournent pas) : ces planches peuvent regrouper plusieurs objets. "
+             "Fichiers dans `" + GAME + "/summons/<id>.png`.\n"]
     for cls, objs in MECANISMES:
         n = len(objs)
         cols = min(4, n)
         rows = (n + cols - 1) // cols
         lines = [f"Object sprite sheet for a chibi isometric tactical RPG: {n} summoned objects of the {cls} class.",
                  "STYLE: " + OBJ_STYLE,
-                 f"GRID: strict grid of {cols} columns x {rows} rows, one object per cell, each object centered "
-                 "and entirely inside its cell, wide empty gutters between cells, all objects resting on the "
-                 "same ground line, seen from a 3/4 top-front angle.",
+                 f"GRID: strict grid of {cols} columns x {rows} rows of equal square cells, one object per cell, "
+                 "each object centered and entirely inside its cell with an empty margin of at least 10% on every "
+                 "side, a wide empty gutter (at least 25% of a cell) between cells that nothing crosses, all "
+                 "objects resting on the same ground line, seen from a 3/4 top-front angle.",
                  "OBJECTS, left to right:"]
         lines += [f"{i+1}. {d}." for i, (_, d) in enumerate(objs)]
         lines.append("BACKGROUND: " + BG_WHITE + BG_TAIL)
@@ -533,14 +602,27 @@ def mecanismes_md():
     return "\n".join(parts)
 
 
+def atelier_catalog():
+    """Liste des personnages pour l'Atelier Sprites : [groupe, libellé, id, grand, dossier]."""
+    out = []
+    for n in NATIONS:
+        g = f"Nation {n['nom']}"
+        h, b = n["hero"], n["boss"]
+        out.append([g, f"{h['nom'].split(' (')[0]} (héros)", h["id"], True, "players"])
+        out += [[g, e["nom"], e["id"], False, f"nations/ennemis/{n['id']}"] for e in n["enemies"]]
+        out.append([g, f"{b['nom']} (boss)", b["id"], True, "nations/boss"])
+    out += [["Familiers", f["nom"].split(" (")[0], f["id"], False, "summons"] for f in FAMILIERS]
+    return out
+
+
 def main():
     (OUT / "nations").mkdir(exist_ok=True)
     for i, n in enumerate(NATIONS, 1):
         (OUT / "nations" / f"{i:02d}_{n['id']}.md").write_text(nation_md(n), encoding="utf-8")
     (OUT / "familiers.md").write_text(familiers_md(), encoding="utf-8")
     (OUT / "mecanismes.md").write_text(mecanismes_md(), encoding="utf-8")
-    total = len(NATIONS) * 7 + len(FAMILIERS) + len(MECANISMES)
-    print(f"{total} prompts générés dans {OUT}")
+    sheets = len(NATIONS) * (1 + 4 + 4 * 2 + 4) + len(FAMILIERS) * 2 + len(MECANISMES)
+    print(f"{sheets} prompts générés dans {OUT}")
 
 
 if __name__ == "__main__":
