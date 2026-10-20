@@ -69,6 +69,10 @@ var _cur_tex: Texture2D = null
 var _ghost: Sprite2D = null
 var _ghost_fade: float = 0.0
 const POSES: Array[String] = ["back", "walk", "attack", "cast"]
+## V34 : poses vues de dos (3/4 arrière) : <sprite>_back_idle_2, _back_walk, _back_attack_3, _back_cast…
+## (<sprite>_back reste le repos de dos). Rangées sous les clés "back_idle", "back_walk"…
+const BACK_POSES: Array[String] = ["idle", "walk", "attack", "cast"]
+const MAX_VARIANTS: int = 9
 
 
 ## Lumière par biome : teinte du personnage, couleur du contre-jour, direction de la
@@ -160,18 +164,42 @@ func _load_poses() -> void:
 		return
 	# V32 : plusieurs variantes par pose (<sprite>_attack, _attack_2, _attack_3…, _idle_2, _idle_3)
 	for pz: String in POSES + ["idle"]:
-		var list: Array = []
-		for k: int in range(1, 8):
-			if pz == "idle" and k == 1:
-				continue
-			var path: String = "%s_%s.png" % [base, pz] if k == 1 else "%s_%s_%d.png" % [base, pz, k]
-			if ResourceLoader.exists(path):
-				var t: Texture2D = load(path) as Texture2D
-				if t != null:
-					list.append(t)
+		var list: Array = _load_variants(base + "_" + pz, pz == "idle")
 		if not list.is_empty():
 			_poses[pz] = list
+	# V34 : vue de dos de chaque pose
+	for pz: String in BACK_POSES:
+		var blist: Array = _load_variants(base + "_back_" + pz, pz == "idle")
+		if not blist.is_empty():
+			_poses["back_" + pz] = blist
 	_idle_wait = randf_range(3.0, 7.0)
+
+
+## <stem>.png puis <stem>_2.png … <stem>_9.png (sans le premier si skip_first : repos de base).
+func _load_variants(stem: String, skip_first: bool) -> Array:
+	var list: Array = []
+	for k: int in range(1, MAX_VARIANTS + 1):
+		if skip_first and k == 1:
+			continue
+		var path: String = "%s.png" % stem if k == 1 else "%s_%d.png" % [stem, k]
+		if ResourceLoader.exists(path):
+			var t: Texture2D = load(path) as Texture2D
+			if t != null:
+				list.append(t)
+	return list
+
+
+## Le personnage regarde vers le haut de l'écran (on le voit de dos).
+func _facing_back() -> bool:
+	var f: Vector2i = entity.get("facing", Vector2i.ZERO)
+	return f != Vector2i.ZERO and _grid_dir_to_screen(f).y < -0.1
+
+
+## Poses d'un type selon l'orientation : la version de dos si elle existe, sinon celle de face.
+func _pool(pz: String, back: bool) -> Array:
+	if back and _poses.has("back_" + pz):
+		return _poses["back_" + pz]
+	return _poses.get(pz, [])
 
 
 func has_pose(pz: String) -> bool:
@@ -182,8 +210,23 @@ func has_pose(pz: String) -> bool:
 ## élan éventuel (incantation, marche ou variante de repos) puis 1 à 2 frappes, enchaînées vite
 ## avec un fondu très court entre les poses. Sans clé : tirage au hasard.
 func play_pose(pz: String, dur: float = 0.5, key: String = "") -> void:
-	var atk: Array = _poses.get("attack", [])
-	var cst: Array = _poses.get("cast", [])
+	# V34 : de dos avec des poses d'action de dos, on ne joue que des poses de dos (jamais de mélange
+	# face/dos) ; sans poses d'action de dos, on garde les poses de face comme avant.
+	var back: bool = _facing_back() and (_poses.has("back_attack") or _poses.has("back_cast"))
+	var atk: Array
+	var cst: Array
+	var walk: Array
+	var rest: Array
+	if back:
+		atk = _poses.get("back_attack", [])
+		cst = _poses.get("back_cast", [])
+		walk = _poses.get("back_walk", [])
+		rest = _poses.get("back_idle", []) + _poses.get("back", [])
+	else:
+		atk = _poses.get("attack", [])
+		cst = _poses.get("cast", [])
+		walk = _poses.get("walk", [])
+		rest = _poses.get("idle", [])
 	if atk.is_empty() and cst.is_empty():
 		return
 	var rng := RandomNumberGenerator.new()
@@ -193,7 +236,7 @@ func play_pose(pz: String, dur: float = 0.5, key: String = "") -> void:
 		rng.randomize()
 	var main_pool: Array = atk if (pz == "attack" and not atk.is_empty()) or cst.is_empty() else cst
 	var lead_pool: Array = []
-	for t in cst + _poses.get("walk", []) + _poses.get("idle", []):
+	for t in cst + walk + rest:
 		if not main_pool.has(t):
 			lead_pool.append(t)
 	var picks: Array = main_pool.duplicate()
@@ -231,12 +274,20 @@ func _next_seq() -> void:
 func _wanted_tex() -> Texture2D:
 	if _act_tex != null:
 		return _act_tex
-	if _moving and _poses.has("walk"):
-		return _poses["walk"][0] if fmod(_t, 0.32) < 0.16 else _idle_tex
-	var f: Vector2i = entity.get("facing", Vector2i.ZERO)
-	if f != Vector2i.ZERO and _poses.has("back") and _grid_dir_to_screen(f).y < -0.1:
-		return _poses["back"][0]
-	if _idle_alt != null:
+	var back: bool = _facing_back() and _poses.has("back")
+	var rest: Texture2D = _poses["back"][0] if back else _idle_tex
+	# V34 : foulée sur toutes les poses de marche (walk, walk_2…), de face ou de dos, entre deux repos
+	var walk: Array = _pool("walk", back) if (not back or _poses.has("back_walk")) else []
+	if _moving and not walk.is_empty():
+		var step: int = int(_t / 0.16)
+		if step % 2 == 1:
+			return rest
+		return walk[(step >> 1) % walk.size()]
+	if back:
+		if _idle_alt != null and _poses.get("back_idle", []).has(_idle_alt):
+			return _idle_alt
+		return rest
+	if _idle_alt != null and _poses.get("idle", []).has(_idle_alt):
 		return _idle_alt
 	return _idle_tex
 
@@ -453,11 +504,12 @@ func _process(delta: float) -> void:
 		_pose_t -= delta
 		if _pose_t <= 0.0:
 			_next_seq()
-	if _poses.has("idle") and not _moving and _act_tex == null:
+	var idle_key: String = "back_idle" if (_facing_back() and _poses.has("back")) else "idle"
+	if _poses.has(idle_key) and not _moving and _act_tex == null:
 		_idle_wait -= delta
 		if _idle_wait <= 0.0:
 			if _idle_alt == null:
-				var iv: Array = _poses["idle"]
+				var iv: Array = _poses[idle_key]
 				_idle_alt = iv[randi() % iv.size()]
 				_idle_wait = randf_range(1.2, 2.2)
 			else:
