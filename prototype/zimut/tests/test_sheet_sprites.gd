@@ -59,7 +59,8 @@ func _boot() -> void:
 		var b: Image = (load("res://assets/sprites/nations/heros/%s.png" % c2) as Texture2D).get_image()
 		var ra: float = float(a.get_width()) / float(a.get_height())
 		var rb: float = float(b.get_width()) / float(b.get_height())
-		check(ra > rb * 1.15, "%s : proportions chibi (largeur/hauteur %.2f contre %.2f sur la planche)" % [c2, ra, rb])
+		# V37 : une planche déjà chibi (même image des deux côtés) est acceptée telle quelle
+		check(ra > rb * 1.15 or a.get_size() == b.get_size(), "%s : proportions chibi (largeur/hauteur %.2f contre %.2f sur la planche)" % [c2, ra, rb])
 	var tex: Texture2D = Portraits.get_texture({"classe": "Tank", "team": "player", "entity_type": "Player"})
 	check(tex != null and tex.get_height() > 200, "Portraits charge le nouveau Tank (hauteur %d)" % (tex.get_height() if tex != null else 0))
 	print("\n%s — %d échec(s)" % ["OK" if fails == 0 else "KO", fails])
