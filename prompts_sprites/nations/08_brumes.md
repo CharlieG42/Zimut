@@ -278,15 +278,18 @@ Dans l'Atelier : personnage « Brumeux », planche « Référence · repos de fa
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Brumeux (enemy of the Brumes nation)
-- Look: hulking lavender mist beast with a fluffy cloud body and small glowing eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: hulking mist beast with a fluffy lavender cloud body (#B8A8E0)
+- Head: no visible neck, two small glowing mint eyes (#9FFFD8)
+- Details: two thick cloud arms with small dark claws, no legs visible
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no clothes, no teeth.
 NATION PALETTE: black, deep violet, mist mint green, silver. Signature effects (keep them small): mint mist and violet spectral wisps.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Brumeux: hulking lavender mist beast with a fluffy cloud body and small glowing eyes.
+REMINDER: this is Brumeux: hulking mist beast with a fluffy lavender cloud body (#B8A8E0); no visible neck, two small glowing mint eyes (#9FFFD8); two thick cloud arms with small dark claws, no legs visible. Forbidden: no weapon, no clothes, no teeth.
 ```
 
 | Case | Pose | Fichier |
@@ -302,8 +305,11 @@ Dans l'Atelier : personnage « Brumeux », planche « Face · marche, 2 attaques
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Brumeux (enemy of the Brumes nation)
-- Look: hulking lavender mist beast with a fluffy cloud body and small glowing eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: hulking mist beast with a fluffy lavender cloud body (#B8A8E0)
+- Head: no visible neck, two small glowing mint eyes (#9FFFD8)
+- Details: two thick cloud arms with small dark claws, no legs visible
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no clothes, no teeth.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
@@ -317,7 +323,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Brumeux: hulking lavender mist beast with a fluffy cloud body and small glowing eyes.
+REMINDER: this is Brumeux: hulking mist beast with a fluffy lavender cloud body (#B8A8E0); no visible neck, two small glowing mint eyes (#9FFFD8); two thick cloud arms with small dark claws, no legs visible. Forbidden: no weapon, no clothes, no teeth.
 ```
 
 | Case | Pose | Fichier |
@@ -335,8 +341,11 @@ Dans l'Atelier : personnage « Brumeux », planche « Dos · marche, 2 attaques,
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Brumeux (enemy of the Brumes nation)
-- Look: hulking lavender mist beast with a fluffy cloud body and small glowing eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: hulking mist beast with a fluffy lavender cloud body (#B8A8E0)
+- Head: no visible neck, two small glowing mint eyes (#9FFFD8)
+- Details: two thick cloud arms with small dark claws, no legs visible
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no clothes, no teeth.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
@@ -350,7 +359,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Brumeux: hulking lavender mist beast with a fluffy cloud body and small glowing eyes.
+REMINDER: this is Brumeux: hulking mist beast with a fluffy lavender cloud body (#B8A8E0); no visible neck, two small glowing mint eyes (#9FFFD8); two thick cloud arms with small dark claws, no legs visible. Forbidden: no weapon, no clothes, no teeth.
 ```
 
 | Case | Pose | Fichier |
@@ -372,15 +381,18 @@ Dans l'Atelier : personnage « Gargouille », planche « Référence · repos de
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Gargouille (enemy of the Brumes nation)
-- Look: grey stone gargoyle with bat wings and a long tail
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture
+- Head: small horns, pointed ears, fanged mouth, glowing mint eyes (#9FFFD8)
+- Details: stone bat wings, long tail with an arrow tip
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no color other than grey stone and mint eyes.
 NATION PALETTE: black, deep violet, mist mint green, silver. Signature effects (keep them small): mint mist and violet spectral wisps.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Gargouille: grey stone gargoyle with bat wings and a long tail.
+REMINDER: this is Gargouille: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture; small horns, pointed ears, fanged mouth, glowing mint eyes (#9FFFD8); stone bat wings, long tail with an arrow tip. Forbidden: no weapon, no color other than grey stone and mint eyes.
 ```
 
 | Case | Pose | Fichier |
@@ -396,8 +408,11 @@ Dans l'Atelier : personnage « Gargouille », planche « Face · marche, 2 attaq
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Gargouille (enemy of the Brumes nation)
-- Look: grey stone gargoyle with bat wings and a long tail
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture
+- Head: small horns, pointed ears, fanged mouth, glowing mint eyes (#9FFFD8)
+- Details: stone bat wings, long tail with an arrow tip
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no color other than grey stone and mint eyes.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
@@ -411,7 +426,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Gargouille: grey stone gargoyle with bat wings and a long tail.
+REMINDER: this is Gargouille: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture; small horns, pointed ears, fanged mouth, glowing mint eyes (#9FFFD8); stone bat wings, long tail with an arrow tip. Forbidden: no weapon, no color other than grey stone and mint eyes.
 ```
 
 | Case | Pose | Fichier |
@@ -429,8 +444,11 @@ Dans l'Atelier : personnage « Gargouille », planche « Dos · marche, 2 attaqu
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Gargouille (enemy of the Brumes nation)
-- Look: grey stone gargoyle with bat wings and a long tail
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture
+- Head: small horns, pointed ears, fanged mouth, glowing mint eyes (#9FFFD8)
+- Details: stone bat wings, long tail with an arrow tip
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no color other than grey stone and mint eyes.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
@@ -444,7 +462,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Gargouille: grey stone gargoyle with bat wings and a long tail.
+REMINDER: this is Gargouille: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture; small horns, pointed ears, fanged mouth, glowing mint eyes (#9FFFD8); stone bat wings, long tail with an arrow tip. Forbidden: no weapon, no color other than grey stone and mint eyes.
 ```
 
 | Case | Pose | Fichier |
@@ -466,15 +484,19 @@ Dans l'Atelier : personnage « Liche des brumes », planche « Référence · re
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Liche des brumes (enemy of the Brumes nation)
-- Look: thin violet lich in tattered robes holding a crooked staff
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: thin skeletal lich, bony grey hands
+- Head: skull face with glowing mint eyes (#9FFFD8) under a tattered hood
+- Top: tattered violet robes (#6A4A9A) with torn edges
+- Weapon: crooked wooden staff, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no crown, no armor, no hair.
 NATION PALETTE: black, deep violet, mist mint green, silver. Signature effects (keep them small): mint mist and violet spectral wisps.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Liche des brumes: thin violet lich in tattered robes holding a crooked staff.
+REMINDER: this is Liche des brumes: thin skeletal lich, bony grey hands; skull face with glowing mint eyes (#9FFFD8) under a tattered hood; tattered violet robes (#6A4A9A) with torn edges; crooked wooden staff, RIGHT hand. Forbidden: no crown, no armor, no hair.
 ```
 
 | Case | Pose | Fichier |
@@ -490,8 +512,12 @@ Dans l'Atelier : personnage « Liche des brumes », planche « Face · marche, 2
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Liche des brumes (enemy of the Brumes nation)
-- Look: thin violet lich in tattered robes holding a crooked staff
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: thin skeletal lich, bony grey hands
+- Head: skull face with glowing mint eyes (#9FFFD8) under a tattered hood
+- Top: tattered violet robes (#6A4A9A) with torn edges
+- Weapon: crooked wooden staff, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no crown, no armor, no hair.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
@@ -505,7 +531,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Liche des brumes: thin violet lich in tattered robes holding a crooked staff.
+REMINDER: this is Liche des brumes: thin skeletal lich, bony grey hands; skull face with glowing mint eyes (#9FFFD8) under a tattered hood; tattered violet robes (#6A4A9A) with torn edges; crooked wooden staff, RIGHT hand. Forbidden: no crown, no armor, no hair.
 ```
 
 | Case | Pose | Fichier |
@@ -523,8 +549,12 @@ Dans l'Atelier : personnage « Liche des brumes », planche « Dos · marche, 2 
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Liche des brumes (enemy of the Brumes nation)
-- Look: thin violet lich in tattered robes holding a crooked staff
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: thin skeletal lich, bony grey hands
+- Head: skull face with glowing mint eyes (#9FFFD8) under a tattered hood
+- Top: tattered violet robes (#6A4A9A) with torn edges
+- Weapon: crooked wooden staff, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no crown, no armor, no hair.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
@@ -538,7 +568,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Liche des brumes: thin violet lich in tattered robes holding a crooked staff.
+REMINDER: this is Liche des brumes: thin skeletal lich, bony grey hands; skull face with glowing mint eyes (#9FFFD8) under a tattered hood; tattered violet robes (#6A4A9A) with torn edges; crooked wooden staff, RIGHT hand. Forbidden: no crown, no armor, no hair.
 ```
 
 | Case | Pose | Fichier |
@@ -560,15 +590,18 @@ Dans l'Atelier : personnage « Fantôme », planche « Référence · repos de f
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Fantôme (enemy of the Brumes nation)
-- Look: pale blue ghost with a wavy tail and a mischievous face
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs
+- Head: mischievous face: big dark eyes, tongue out
+- Details: two small rounded arms
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no sheet with holes, no chains, no weapon.
 NATION PALETTE: black, deep violet, mist mint green, silver. Signature effects (keep them small): mint mist and violet spectral wisps.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Fantôme: pale blue ghost with a wavy tail and a mischievous face.
+REMINDER: this is Fantôme: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs; mischievous face: big dark eyes, tongue out; two small rounded arms. Forbidden: no sheet with holes, no chains, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -584,8 +617,11 @@ Dans l'Atelier : personnage « Fantôme », planche « Face · marche, 2 attaque
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Fantôme (enemy of the Brumes nation)
-- Look: pale blue ghost with a wavy tail and a mischievous face
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs
+- Head: mischievous face: big dark eyes, tongue out
+- Details: two small rounded arms
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no sheet with holes, no chains, no weapon.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
@@ -599,7 +635,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Fantôme: pale blue ghost with a wavy tail and a mischievous face.
+REMINDER: this is Fantôme: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs; mischievous face: big dark eyes, tongue out; two small rounded arms. Forbidden: no sheet with holes, no chains, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -617,8 +653,11 @@ Dans l'Atelier : personnage « Fantôme », planche « Dos · marche, 2 attaques
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Fantôme (enemy of the Brumes nation)
-- Look: pale blue ghost with a wavy tail and a mischievous face
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs
+- Head: mischievous face: big dark eyes, tongue out
+- Details: two small rounded arms
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no sheet with holes, no chains, no weapon.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
@@ -632,7 +671,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Fantôme: pale blue ghost with a wavy tail and a mischievous face.
+REMINDER: this is Fantôme: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs; mischievous face: big dark eyes, tongue out; two small rounded arms. Forbidden: no sheet with holes, no chains, no weapon.
 ```
 
 | Case | Pose | Fichier |

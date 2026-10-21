@@ -278,15 +278,20 @@ Dans l'Atelier : personnage « Lieutenant », planche « Référence · repos de
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Lieutenant (enemy of the Brasier nation)
-- Look: fire cultist lieutenant in orange and red robes holding a flaming staff
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Hair: hood up, face in shadow with two glowing orange eyes (#FF8A2A)
+- Top: orange and red layered cultist robes (#E06A1E, #B0201A) with a black belt
+- Bottom: long robe to the ankles
+- Feet: black boots
+- Weapon: black staff topped with a burning flame, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no visible face, no armor, no sword.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold. Signature effects (keep them small): flames and embers.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Lieutenant: fire cultist lieutenant in orange and red robes holding a flaming staff.
+REMINDER: this is Lieutenant: hood up, face in shadow with two glowing orange eyes (#FF8A2A); orange and red layered cultist robes (#E06A1E, #B0201A) with a black belt; long robe to the ankles; black boots. Forbidden: no visible face, no armor, no sword.
 ```
 
 | Case | Pose | Fichier |
@@ -302,8 +307,13 @@ Dans l'Atelier : personnage « Lieutenant », planche « Face · marche, 2 attaq
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Lieutenant (enemy of the Brasier nation)
-- Look: fire cultist lieutenant in orange and red robes holding a flaming staff
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Hair: hood up, face in shadow with two glowing orange eyes (#FF8A2A)
+- Top: orange and red layered cultist robes (#E06A1E, #B0201A) with a black belt
+- Bottom: long robe to the ankles
+- Feet: black boots
+- Weapon: black staff topped with a burning flame, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no visible face, no armor, no sword.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
@@ -317,7 +327,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Lieutenant: fire cultist lieutenant in orange and red robes holding a flaming staff.
+REMINDER: this is Lieutenant: hood up, face in shadow with two glowing orange eyes (#FF8A2A); orange and red layered cultist robes (#E06A1E, #B0201A) with a black belt; long robe to the ankles; black boots. Forbidden: no visible face, no armor, no sword.
 ```
 
 | Case | Pose | Fichier |
@@ -335,8 +345,13 @@ Dans l'Atelier : personnage « Lieutenant », planche « Dos · marche, 2 attaqu
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Lieutenant (enemy of the Brasier nation)
-- Look: fire cultist lieutenant in orange and red robes holding a flaming staff
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Hair: hood up, face in shadow with two glowing orange eyes (#FF8A2A)
+- Top: orange and red layered cultist robes (#E06A1E, #B0201A) with a black belt
+- Bottom: long robe to the ankles
+- Feet: black boots
+- Weapon: black staff topped with a burning flame, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no visible face, no armor, no sword.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
@@ -350,7 +365,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Lieutenant: fire cultist lieutenant in orange and red robes holding a flaming staff.
+REMINDER: this is Lieutenant: hood up, face in shadow with two glowing orange eyes (#FF8A2A); orange and red layered cultist robes (#E06A1E, #B0201A) with a black belt; long robe to the ankles; black boots. Forbidden: no visible face, no armor, no sword.
 ```
 
 | Case | Pose | Fichier |
@@ -372,15 +387,18 @@ Dans l'Atelier : personnage « Salamandre », planche « Référence · repos de
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Salamandre (enemy of the Brasier nation)
-- Look: orange lava lizard with glowing cracks on its back and a flaming tail
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: orange lava lizard (#E0701E) on four short legs, darker orange back
+- Head: round head, big yellow eyes, small smile
+- Details: glowing yellow cracks along the back, tail ending in a flame
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings, no armor, never standing on two legs.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold. Signature effects (keep them small): flames and embers.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Salamandre: orange lava lizard with glowing cracks on its back and a flaming tail.
+REMINDER: this is Salamandre: orange lava lizard (#E0701E) on four short legs, darker orange back; round head, big yellow eyes, small smile; glowing yellow cracks along the back, tail ending in a flame. Forbidden: no wings, no armor, never standing on two legs.
 ```
 
 | Case | Pose | Fichier |
@@ -396,8 +414,11 @@ Dans l'Atelier : personnage « Salamandre », planche « Face · marche, 2 attaq
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Salamandre (enemy of the Brasier nation)
-- Look: orange lava lizard with glowing cracks on its back and a flaming tail
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: orange lava lizard (#E0701E) on four short legs, darker orange back
+- Head: round head, big yellow eyes, small smile
+- Details: glowing yellow cracks along the back, tail ending in a flame
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings, no armor, never standing on two legs.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
@@ -411,7 +432,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Salamandre: orange lava lizard with glowing cracks on its back and a flaming tail.
+REMINDER: this is Salamandre: orange lava lizard (#E0701E) on four short legs, darker orange back; round head, big yellow eyes, small smile; glowing yellow cracks along the back, tail ending in a flame. Forbidden: no wings, no armor, never standing on two legs.
 ```
 
 | Case | Pose | Fichier |
@@ -429,8 +450,11 @@ Dans l'Atelier : personnage « Salamandre », planche « Dos · marche, 2 attaqu
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Salamandre (enemy of the Brasier nation)
-- Look: orange lava lizard with glowing cracks on its back and a flaming tail
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: orange lava lizard (#E0701E) on four short legs, darker orange back
+- Head: round head, big yellow eyes, small smile
+- Details: glowing yellow cracks along the back, tail ending in a flame
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings, no armor, never standing on two legs.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
@@ -444,7 +468,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Salamandre: orange lava lizard with glowing cracks on its back and a flaming tail.
+REMINDER: this is Salamandre: orange lava lizard (#E0701E) on four short legs, darker orange back; round head, big yellow eyes, small smile; glowing yellow cracks along the back, tail ending in a flame. Forbidden: no wings, no armor, never standing on two legs.
 ```
 
 | Case | Pose | Fichier |
@@ -466,15 +490,18 @@ Dans l'Atelier : personnage « Dévoreur de flammes », planche « Référence �
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Dévoreur de flammes (enemy of the Brasier nation)
-- Look: fiery orange beast with a mane of flames and big claws
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: fiery orange four-legged beast (#E05A1E) with a dark charcoal belly
+- Head: big jaw with fangs, glowing yellow eyes, mane of flames
+- Details: big black claws, flaming tail tip
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings, no armor, no rider.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold. Signature effects (keep them small): flames and embers.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Dévoreur de flammes: fiery orange beast with a mane of flames and big claws.
+REMINDER: this is Dévoreur de flammes: fiery orange four-legged beast (#E05A1E) with a dark charcoal belly; big jaw with fangs, glowing yellow eyes, mane of flames; big black claws, flaming tail tip. Forbidden: no wings, no armor, no rider.
 ```
 
 | Case | Pose | Fichier |
@@ -490,8 +517,11 @@ Dans l'Atelier : personnage « Dévoreur de flammes », planche « Face · march
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Dévoreur de flammes (enemy of the Brasier nation)
-- Look: fiery orange beast with a mane of flames and big claws
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: fiery orange four-legged beast (#E05A1E) with a dark charcoal belly
+- Head: big jaw with fangs, glowing yellow eyes, mane of flames
+- Details: big black claws, flaming tail tip
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings, no armor, no rider.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
@@ -505,7 +535,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Dévoreur de flammes: fiery orange beast with a mane of flames and big claws.
+REMINDER: this is Dévoreur de flammes: fiery orange four-legged beast (#E05A1E) with a dark charcoal belly; big jaw with fangs, glowing yellow eyes, mane of flames; big black claws, flaming tail tip. Forbidden: no wings, no armor, no rider.
 ```
 
 | Case | Pose | Fichier |
@@ -523,8 +553,11 @@ Dans l'Atelier : personnage « Dévoreur de flammes », planche « Dos · marche
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Dévoreur de flammes (enemy of the Brasier nation)
-- Look: fiery orange beast with a mane of flames and big claws
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: fiery orange four-legged beast (#E05A1E) with a dark charcoal belly
+- Head: big jaw with fangs, glowing yellow eyes, mane of flames
+- Details: big black claws, flaming tail tip
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings, no armor, no rider.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
@@ -538,7 +571,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Dévoreur de flammes: fiery orange beast with a mane of flames and big claws.
+REMINDER: this is Dévoreur de flammes: fiery orange four-legged beast (#E05A1E) with a dark charcoal belly; big jaw with fangs, glowing yellow eyes, mane of flames; big black claws, flaming tail tip. Forbidden: no wings, no armor, no rider.
 ```
 
 | Case | Pose | Fichier |
@@ -560,15 +593,18 @@ Dans l'Atelier : personnage « Golem de lave », planche « Référence · repos
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Golem de lave (enemy of the Brasier nation)
-- Look: dark basalt golem with bright orange lava cracks and a molten core
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: dark basalt golem (#2A2426) with bright orange lava cracks (#FF7A1E)
+- Head: small head with two glowing orange eyes
+- Details: molten glowing core in the chest, huge rock fists
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no crystals, no moss.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold. Signature effects (keep them small): flames and embers.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Golem de lave: dark basalt golem with bright orange lava cracks and a molten core.
+REMINDER: this is Golem de lave: dark basalt golem (#2A2426) with bright orange lava cracks (#FF7A1E); small head with two glowing orange eyes; molten glowing core in the chest, huge rock fists. Forbidden: no weapon, no crystals, no moss.
 ```
 
 | Case | Pose | Fichier |
@@ -584,8 +620,11 @@ Dans l'Atelier : personnage « Golem de lave », planche « Face · marche, 2 at
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Golem de lave (enemy of the Brasier nation)
-- Look: dark basalt golem with bright orange lava cracks and a molten core
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: dark basalt golem (#2A2426) with bright orange lava cracks (#FF7A1E)
+- Head: small head with two glowing orange eyes
+- Details: molten glowing core in the chest, huge rock fists
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no crystals, no moss.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
@@ -599,7 +638,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Golem de lave: dark basalt golem with bright orange lava cracks and a molten core.
+REMINDER: this is Golem de lave: dark basalt golem (#2A2426) with bright orange lava cracks (#FF7A1E); small head with two glowing orange eyes; molten glowing core in the chest, huge rock fists. Forbidden: no weapon, no crystals, no moss.
 ```
 
 | Case | Pose | Fichier |
@@ -617,8 +656,11 @@ Dans l'Atelier : personnage « Golem de lave », planche « Dos · marche, 2 att
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Golem de lave (enemy of the Brasier nation)
-- Look: dark basalt golem with bright orange lava cracks and a molten core
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: dark basalt golem (#2A2426) with bright orange lava cracks (#FF7A1E)
+- Head: small head with two glowing orange eyes
+- Details: molten glowing core in the chest, huge rock fists
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no crystals, no moss.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
@@ -632,7 +674,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Golem de lave: dark basalt golem with bright orange lava cracks and a molten core.
+REMINDER: this is Golem de lave: dark basalt golem (#2A2426) with bright orange lava cracks (#FF7A1E); small head with two glowing orange eyes; molten glowing core in the chest, huge rock fists. Forbidden: no weapon, no crystals, no moss.
 ```
 
 | Case | Pose | Fichier |

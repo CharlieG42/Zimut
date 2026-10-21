@@ -27,9 +27,10 @@ Chaque prompt commence donc par une **carte d'identité** recopiée mot pour mot
 S'ajoutent : yeux toujours ouverts, marche en vue 3/4 tête droite (plus de profil « nez en l'air »), et vue de dos
 qui interdit visage, yeux, masque ou visière (le chevalier « de dos » était en fait de face, visière fermée).
 
-Cartes écrites pour les 10 héros, les 10 boss et les ennemis des Vents ; les autres ennemis et les familiers utilisent
-leur description avec la règle « rien d'autre ». Quand une fiche de référence te plaît, décris-la dans sa carte
-(couleurs vues sur l'image) : c'est ce qui verrouille toutes les planches suivantes.
+Cartes écrites pour **tous les personnages** : 10 héros, 10 boss, 40 ennemis et 13 familiers (les objets de
+`mecanismes.md` n'en ont pas besoin). Les ennemis des Ombres sont décrits d'après les sprites déjà intégrés (V37).
+Les détails absents des descriptions d'origine (yeux, bottes…) ont été choisis dans la palette de la nation : quand une
+fiche de référence te plaît, recopie dans sa carte les couleurs vues sur l'image (c'est ce qui verrouille toutes les planches suivantes.
 
 ## V36 : pourquoi des planches de 4 poses
 

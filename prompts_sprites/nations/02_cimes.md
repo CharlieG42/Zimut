@@ -278,15 +278,20 @@ Dans l'Atelier : personnage « Guerrier des monts », planche « Référence · 
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Guerrier des monts (enemy of the Cimes nation)
-- Look: mountain warrior with rocky brown skin, stocky body, crude stone gauntlets
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: stocky mountain warrior with rocky brown skin (#8A6A4A) cracked like stone
+- Head: bald rocky head, small white eyes, short stone beard
+- Top: fur vest of white snow fur with a leather belt
+- Bottom: dark brown fur trousers, bare stone feet
+- Weapon: crude grey stone gauntlets on both fists, no other weapon
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no helmet, no sword, no axe, no human skin.
 NATION PALETTE: steel blue, dark iron, snow white fur, ice cyan crystals. Signature effects (keep them small): ice shards and snow bursts.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle cold icy blue rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Guerrier des monts: mountain warrior with rocky brown skin, stocky body, crude stone gauntlets.
+REMINDER: this is Guerrier des monts: stocky mountain warrior with rocky brown skin (#8A6A4A) cracked like stone; bald rocky head, small white eyes, short stone beard; fur vest of white snow fur with a leather belt; dark brown fur trousers, bare stone feet. Forbidden: no helmet, no sword, no axe, no human skin.
 ```
 
 | Case | Pose | Fichier |
@@ -302,8 +307,13 @@ Dans l'Atelier : personnage « Guerrier des monts », planche « Face · marche,
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Guerrier des monts (enemy of the Cimes nation)
-- Look: mountain warrior with rocky brown skin, stocky body, crude stone gauntlets
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: stocky mountain warrior with rocky brown skin (#8A6A4A) cracked like stone
+- Head: bald rocky head, small white eyes, short stone beard
+- Top: fur vest of white snow fur with a leather belt
+- Bottom: dark brown fur trousers, bare stone feet
+- Weapon: crude grey stone gauntlets on both fists, no other weapon
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no helmet, no sword, no axe, no human skin.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: steel blue, dark iron, snow white fur, ice cyan crystals.
@@ -317,7 +327,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: ice shards and snow bursts, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Guerrier des monts: mountain warrior with rocky brown skin, stocky body, crude stone gauntlets.
+REMINDER: this is Guerrier des monts: stocky mountain warrior with rocky brown skin (#8A6A4A) cracked like stone; bald rocky head, small white eyes, short stone beard; fur vest of white snow fur with a leather belt; dark brown fur trousers, bare stone feet. Forbidden: no helmet, no sword, no axe, no human skin.
 ```
 
 | Case | Pose | Fichier |
@@ -335,8 +345,13 @@ Dans l'Atelier : personnage « Guerrier des monts », planche « Dos · marche, 
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Guerrier des monts (enemy of the Cimes nation)
-- Look: mountain warrior with rocky brown skin, stocky body, crude stone gauntlets
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: stocky mountain warrior with rocky brown skin (#8A6A4A) cracked like stone
+- Head: bald rocky head, small white eyes, short stone beard
+- Top: fur vest of white snow fur with a leather belt
+- Bottom: dark brown fur trousers, bare stone feet
+- Weapon: crude grey stone gauntlets on both fists, no other weapon
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no helmet, no sword, no axe, no human skin.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: steel blue, dark iron, snow white fur, ice cyan crystals.
@@ -350,7 +365,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: ice shards and snow bursts, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Guerrier des monts: mountain warrior with rocky brown skin, stocky body, crude stone gauntlets.
+REMINDER: this is Guerrier des monts: stocky mountain warrior with rocky brown skin (#8A6A4A) cracked like stone; bald rocky head, small white eyes, short stone beard; fur vest of white snow fur with a leather belt; dark brown fur trousers, bare stone feet. Forbidden: no helmet, no sword, no axe, no human skin.
 ```
 
 | Case | Pose | Fichier |
@@ -372,15 +387,18 @@ Dans l'Atelier : personnage « Griffon des cimes », planche « Référence · r
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Griffon des cimes (enemy of the Cimes nation)
-- Look: griffin with a white eagle head, blue-grey feathered wings and a lion body
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: griffin with a tawny lion body (#C9A060) and four legs, front legs with eagle talons
+- Head: white eagle head, yellow hooked beak, golden eyes
+- Details: large blue-grey feathered wings (#7A8CA8), lion tail with a white tuft
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no rider, no saddle, no armor.
 NATION PALETTE: steel blue, dark iron, snow white fur, ice cyan crystals. Signature effects (keep them small): ice shards and snow bursts.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle cold icy blue rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Griffon des cimes: griffin with a white eagle head, blue-grey feathered wings and a lion body.
+REMINDER: this is Griffon des cimes: griffin with a tawny lion body (#C9A060) and four legs, front legs with eagle talons; white eagle head, yellow hooked beak, golden eyes; large blue-grey feathered wings (#7A8CA8), lion tail with a white tuft. Forbidden: no rider, no saddle, no armor.
 ```
 
 | Case | Pose | Fichier |
@@ -396,8 +414,11 @@ Dans l'Atelier : personnage « Griffon des cimes », planche « Face · marche, 
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Griffon des cimes (enemy of the Cimes nation)
-- Look: griffin with a white eagle head, blue-grey feathered wings and a lion body
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: griffin with a tawny lion body (#C9A060) and four legs, front legs with eagle talons
+- Head: white eagle head, yellow hooked beak, golden eyes
+- Details: large blue-grey feathered wings (#7A8CA8), lion tail with a white tuft
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no rider, no saddle, no armor.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: steel blue, dark iron, snow white fur, ice cyan crystals.
@@ -411,7 +432,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: ice shards and snow bursts, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Griffon des cimes: griffin with a white eagle head, blue-grey feathered wings and a lion body.
+REMINDER: this is Griffon des cimes: griffin with a tawny lion body (#C9A060) and four legs, front legs with eagle talons; white eagle head, yellow hooked beak, golden eyes; large blue-grey feathered wings (#7A8CA8), lion tail with a white tuft. Forbidden: no rider, no saddle, no armor.
 ```
 
 | Case | Pose | Fichier |
@@ -429,8 +450,11 @@ Dans l'Atelier : personnage « Griffon des cimes », planche « Dos · marche, 2
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Griffon des cimes (enemy of the Cimes nation)
-- Look: griffin with a white eagle head, blue-grey feathered wings and a lion body
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: griffin with a tawny lion body (#C9A060) and four legs, front legs with eagle talons
+- Head: white eagle head, yellow hooked beak, golden eyes
+- Details: large blue-grey feathered wings (#7A8CA8), lion tail with a white tuft
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no rider, no saddle, no armor.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: steel blue, dark iron, snow white fur, ice cyan crystals.
@@ -444,7 +468,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: ice shards and snow bursts, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Griffon des cimes: griffin with a white eagle head, blue-grey feathered wings and a lion body.
+REMINDER: this is Griffon des cimes: griffin with a tawny lion body (#C9A060) and four legs, front legs with eagle talons; white eagle head, yellow hooked beak, golden eyes; large blue-grey feathered wings (#7A8CA8), lion tail with a white tuft. Forbidden: no rider, no saddle, no armor.
 ```
 
 | Case | Pose | Fichier |
@@ -466,15 +490,18 @@ Dans l'Atelier : personnage « Garde des pics », planche « Référence · repo
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Garde des pics (enemy of the Cimes nation)
-- Look: peak guardian golem of blue-grey stone with glowing ice-blue crystals on the shoulders
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: peak guardian golem of smooth blue-grey stone blocks (#6E8296)
+- Head: small square stone head with two glowing ice-blue eyes (#9FE3FF)
+- Details: clusters of glowing ice-blue crystals (#9FE3FF) on both shoulders, big stone fists
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no moss, no brown stone.
 NATION PALETTE: steel blue, dark iron, snow white fur, ice cyan crystals. Signature effects (keep them small): ice shards and snow bursts.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle cold icy blue rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Garde des pics: peak guardian golem of blue-grey stone with glowing ice-blue crystals on the shoulders.
+REMINDER: this is Garde des pics: peak guardian golem of smooth blue-grey stone blocks (#6E8296); small square stone head with two glowing ice-blue eyes (#9FE3FF); clusters of glowing ice-blue crystals (#9FE3FF) on both shoulders, big stone fists. Forbidden: no weapon, no moss, no brown stone.
 ```
 
 | Case | Pose | Fichier |
@@ -490,8 +517,11 @@ Dans l'Atelier : personnage « Garde des pics », planche « Face · marche, 2 a
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Garde des pics (enemy of the Cimes nation)
-- Look: peak guardian golem of blue-grey stone with glowing ice-blue crystals on the shoulders
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: peak guardian golem of smooth blue-grey stone blocks (#6E8296)
+- Head: small square stone head with two glowing ice-blue eyes (#9FE3FF)
+- Details: clusters of glowing ice-blue crystals (#9FE3FF) on both shoulders, big stone fists
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no moss, no brown stone.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: steel blue, dark iron, snow white fur, ice cyan crystals.
@@ -505,7 +535,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: ice shards and snow bursts, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Garde des pics: peak guardian golem of blue-grey stone with glowing ice-blue crystals on the shoulders.
+REMINDER: this is Garde des pics: peak guardian golem of smooth blue-grey stone blocks (#6E8296); small square stone head with two glowing ice-blue eyes (#9FE3FF); clusters of glowing ice-blue crystals (#9FE3FF) on both shoulders, big stone fists. Forbidden: no weapon, no moss, no brown stone.
 ```
 
 | Case | Pose | Fichier |
@@ -523,8 +553,11 @@ Dans l'Atelier : personnage « Garde des pics », planche « Dos · marche, 2 at
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Garde des pics (enemy of the Cimes nation)
-- Look: peak guardian golem of blue-grey stone with glowing ice-blue crystals on the shoulders
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: peak guardian golem of smooth blue-grey stone blocks (#6E8296)
+- Head: small square stone head with two glowing ice-blue eyes (#9FE3FF)
+- Details: clusters of glowing ice-blue crystals (#9FE3FF) on both shoulders, big stone fists
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no moss, no brown stone.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: steel blue, dark iron, snow white fur, ice cyan crystals.
@@ -538,7 +571,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: ice shards and snow bursts, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Garde des pics: peak guardian golem of blue-grey stone with glowing ice-blue crystals on the shoulders.
+REMINDER: this is Garde des pics: peak guardian golem of smooth blue-grey stone blocks (#6E8296); small square stone head with two glowing ice-blue eyes (#9FE3FF); clusters of glowing ice-blue crystals (#9FE3FF) on both shoulders, big stone fists. Forbidden: no weapon, no moss, no brown stone.
 ```
 
 | Case | Pose | Fichier |
@@ -560,15 +593,18 @@ Dans l'Atelier : personnage « Rochebrute », planche « Référence · repos de
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Rochebrute (enemy of the Cimes nation)
-- Look: hulking brute made of brown boulders, small glowing eyes, huge fists
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: hulking brute made of round brown boulders (#7A5A3A), huge hunched shoulders
+- Head: small boulder head sunk between the shoulders, two small glowing orange eyes (#FF9A3A)
+- Details: huge boulder fists, short stumpy legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no crystals, no weapon, no grey stone.
 NATION PALETTE: steel blue, dark iron, snow white fur, ice cyan crystals. Signature effects (keep them small): ice shards and snow bursts.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle cold icy blue rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Rochebrute: hulking brute made of brown boulders, small glowing eyes, huge fists.
+REMINDER: this is Rochebrute: hulking brute made of round brown boulders (#7A5A3A), huge hunched shoulders; small boulder head sunk between the shoulders, two small glowing orange eyes (#FF9A3A); huge boulder fists, short stumpy legs. Forbidden: no crystals, no weapon, no grey stone.
 ```
 
 | Case | Pose | Fichier |
@@ -584,8 +620,11 @@ Dans l'Atelier : personnage « Rochebrute », planche « Face · marche, 2 attaq
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Rochebrute (enemy of the Cimes nation)
-- Look: hulking brute made of brown boulders, small glowing eyes, huge fists
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: hulking brute made of round brown boulders (#7A5A3A), huge hunched shoulders
+- Head: small boulder head sunk between the shoulders, two small glowing orange eyes (#FF9A3A)
+- Details: huge boulder fists, short stumpy legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no crystals, no weapon, no grey stone.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: steel blue, dark iron, snow white fur, ice cyan crystals.
@@ -599,7 +638,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: ice shards and snow bursts, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Rochebrute: hulking brute made of brown boulders, small glowing eyes, huge fists.
+REMINDER: this is Rochebrute: hulking brute made of round brown boulders (#7A5A3A), huge hunched shoulders; small boulder head sunk between the shoulders, two small glowing orange eyes (#FF9A3A); huge boulder fists, short stumpy legs. Forbidden: no crystals, no weapon, no grey stone.
 ```
 
 | Case | Pose | Fichier |
@@ -617,8 +656,11 @@ Dans l'Atelier : personnage « Rochebrute », planche « Dos · marche, 2 attaqu
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Rochebrute (enemy of the Cimes nation)
-- Look: hulking brute made of brown boulders, small glowing eyes, huge fists
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: hulking brute made of round brown boulders (#7A5A3A), huge hunched shoulders
+- Head: small boulder head sunk between the shoulders, two small glowing orange eyes (#FF9A3A)
+- Details: huge boulder fists, short stumpy legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no crystals, no weapon, no grey stone.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: steel blue, dark iron, snow white fur, ice cyan crystals.
@@ -632,7 +674,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: ice shards and snow bursts, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Rochebrute: hulking brute made of brown boulders, small glowing eyes, huge fists.
+REMINDER: this is Rochebrute: hulking brute made of round brown boulders (#7A5A3A), huge hunched shoulders; small boulder head sunk between the shoulders, two small glowing orange eyes (#FF9A3A); huge boulder fists, short stumpy legs. Forbidden: no crystals, no weapon, no grey stone.
 ```
 
 | Case | Pose | Fichier |

@@ -278,15 +278,18 @@ Dans l'Atelier : personnage « Assassin des ombres », planche « Référence ·
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Assassin des ombres (enemy of the Ombres nation)
-- Look: hunched shadow beast-assassin with a spiky purple mane and long claws
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: hunched four-legged shadow beast, black body (#141418) with charcoal armor straps and silver-teal cloth bands (#8FC9C0) on the legs
+- Head: spiky purple mane (#8A3FD8) on head and back, glowing violet eyes (#B070FF)
+- Details: long black claws, violet lightning glints
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human face, no hood, no weapon in hand.
 NATION PALETTE: black, charcoal, violet glow, silver-teal cloth accents. Signature effects (keep them small): violet shadow smoke.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Assassin des ombres: hunched shadow beast-assassin with a spiky purple mane and long claws.
+REMINDER: this is Assassin des ombres: hunched four-legged shadow beast, black body (#141418) with charcoal armor straps and silver-teal cloth bands (#8FC9C0) on the legs; spiky purple mane (#8A3FD8) on head and back, glowing violet eyes (#B070FF); long black claws, violet lightning glints. Forbidden: no human face, no hood, no weapon in hand.
 ```
 
 | Case | Pose | Fichier |
@@ -302,8 +305,11 @@ Dans l'Atelier : personnage « Assassin des ombres », planche « Face · marche
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Assassin des ombres (enemy of the Ombres nation)
-- Look: hunched shadow beast-assassin with a spiky purple mane and long claws
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: hunched four-legged shadow beast, black body (#141418) with charcoal armor straps and silver-teal cloth bands (#8FC9C0) on the legs
+- Head: spiky purple mane (#8A3FD8) on head and back, glowing violet eyes (#B070FF)
+- Details: long black claws, violet lightning glints
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human face, no hood, no weapon in hand.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, charcoal, violet glow, silver-teal cloth accents.
@@ -317,7 +323,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: violet shadow smoke, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Assassin des ombres: hunched shadow beast-assassin with a spiky purple mane and long claws.
+REMINDER: this is Assassin des ombres: hunched four-legged shadow beast, black body (#141418) with charcoal armor straps and silver-teal cloth bands (#8FC9C0) on the legs; spiky purple mane (#8A3FD8) on head and back, glowing violet eyes (#B070FF); long black claws, violet lightning glints. Forbidden: no human face, no hood, no weapon in hand.
 ```
 
 | Case | Pose | Fichier |
@@ -335,8 +341,11 @@ Dans l'Atelier : personnage « Assassin des ombres », planche « Dos · marche,
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Assassin des ombres (enemy of the Ombres nation)
-- Look: hunched shadow beast-assassin with a spiky purple mane and long claws
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: hunched four-legged shadow beast, black body (#141418) with charcoal armor straps and silver-teal cloth bands (#8FC9C0) on the legs
+- Head: spiky purple mane (#8A3FD8) on head and back, glowing violet eyes (#B070FF)
+- Details: long black claws, violet lightning glints
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human face, no hood, no weapon in hand.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, charcoal, violet glow, silver-teal cloth accents.
@@ -350,7 +359,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: violet shadow smoke, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Assassin des ombres: hunched shadow beast-assassin with a spiky purple mane and long claws.
+REMINDER: this is Assassin des ombres: hunched four-legged shadow beast, black body (#141418) with charcoal armor straps and silver-teal cloth bands (#8FC9C0) on the legs; spiky purple mane (#8A3FD8) on head and back, glowing violet eyes (#B070FF); long black claws, violet lightning glints. Forbidden: no human face, no hood, no weapon in hand.
 ```
 
 | Case | Pose | Fichier |
@@ -372,15 +381,18 @@ Dans l'Atelier : personnage « Ombre infernale », planche « Référence · rep
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ombre infernale (enemy of the Ombres nation)
-- Look: swirling mass of purple shadow with claws and glowing eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: humanoid of purple-black shadow (#1E1428) in dark armor with silver-teal cloth panels (#8FC9C0)
+- Head: round head of swirling purple shadow with ONE glowing violet eye (#C080FF), no mouth
+- Details: long black claws, small purple flame wisps around the hands
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human face, no hair, no weapon.
 NATION PALETTE: black, charcoal, violet glow, silver-teal cloth accents. Signature effects (keep them small): violet shadow smoke.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Ombre infernale: swirling mass of purple shadow with claws and glowing eyes.
+REMINDER: this is Ombre infernale: humanoid of purple-black shadow (#1E1428) in dark armor with silver-teal cloth panels (#8FC9C0); round head of swirling purple shadow with ONE glowing violet eye (#C080FF), no mouth; long black claws, small purple flame wisps around the hands. Forbidden: no human face, no hair, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -396,8 +408,11 @@ Dans l'Atelier : personnage « Ombre infernale », planche « Face · marche, 2 
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ombre infernale (enemy of the Ombres nation)
-- Look: swirling mass of purple shadow with claws and glowing eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: humanoid of purple-black shadow (#1E1428) in dark armor with silver-teal cloth panels (#8FC9C0)
+- Head: round head of swirling purple shadow with ONE glowing violet eye (#C080FF), no mouth
+- Details: long black claws, small purple flame wisps around the hands
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human face, no hair, no weapon.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, charcoal, violet glow, silver-teal cloth accents.
@@ -411,7 +426,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: violet shadow smoke, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Ombre infernale: swirling mass of purple shadow with claws and glowing eyes.
+REMINDER: this is Ombre infernale: humanoid of purple-black shadow (#1E1428) in dark armor with silver-teal cloth panels (#8FC9C0); round head of swirling purple shadow with ONE glowing violet eye (#C080FF), no mouth; long black claws, small purple flame wisps around the hands. Forbidden: no human face, no hair, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -429,8 +444,11 @@ Dans l'Atelier : personnage « Ombre infernale », planche « Dos · marche, 2 a
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ombre infernale (enemy of the Ombres nation)
-- Look: swirling mass of purple shadow with claws and glowing eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: humanoid of purple-black shadow (#1E1428) in dark armor with silver-teal cloth panels (#8FC9C0)
+- Head: round head of swirling purple shadow with ONE glowing violet eye (#C080FF), no mouth
+- Details: long black claws, small purple flame wisps around the hands
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human face, no hair, no weapon.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, charcoal, violet glow, silver-teal cloth accents.
@@ -444,7 +462,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: violet shadow smoke, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Ombre infernale: swirling mass of purple shadow with claws and glowing eyes.
+REMINDER: this is Ombre infernale: humanoid of purple-black shadow (#1E1428) in dark armor with silver-teal cloth panels (#8FC9C0); round head of swirling purple shadow with ONE glowing violet eye (#C080FF), no mouth; long black claws, small purple flame wisps around the hands. Forbidden: no human face, no hair, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -466,15 +484,19 @@ Dans l'Atelier : personnage « Spectre », planche « Référence · repos de fa
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Spectre (enemy of the Ombres nation)
-- Look: violet spectral figure wrapped in shadow curls, long claw-like hands
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: small hunched spectral figure, violet-grey skin (#5A4A78) wrapped in silver bandages
+- Head: big bald round violet head, half-closed glowing lilac eyes (#C8A8FF)
+- Bottom: silver-teal loincloth (#8FC9C0), lower body fading into dark shadow curls
+- Details: long claw-like hands
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hair, no hood, no weapon.
 NATION PALETTE: black, charcoal, violet glow, silver-teal cloth accents. Signature effects (keep them small): violet shadow smoke.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Spectre: violet spectral figure wrapped in shadow curls, long claw-like hands.
+REMINDER: this is Spectre: small hunched spectral figure, violet-grey skin (#5A4A78) wrapped in silver bandages; big bald round violet head, half-closed glowing lilac eyes (#C8A8FF); silver-teal loincloth (#8FC9C0), lower body fading into dark shadow curls; long claw-like hands. Forbidden: no hair, no hood, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -490,8 +512,12 @@ Dans l'Atelier : personnage « Spectre », planche « Face · marche, 2 attaques
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Spectre (enemy of the Ombres nation)
-- Look: violet spectral figure wrapped in shadow curls, long claw-like hands
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: small hunched spectral figure, violet-grey skin (#5A4A78) wrapped in silver bandages
+- Head: big bald round violet head, half-closed glowing lilac eyes (#C8A8FF)
+- Bottom: silver-teal loincloth (#8FC9C0), lower body fading into dark shadow curls
+- Details: long claw-like hands
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hair, no hood, no weapon.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, charcoal, violet glow, silver-teal cloth accents.
@@ -505,7 +531,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: violet shadow smoke, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Spectre: violet spectral figure wrapped in shadow curls, long claw-like hands.
+REMINDER: this is Spectre: small hunched spectral figure, violet-grey skin (#5A4A78) wrapped in silver bandages; big bald round violet head, half-closed glowing lilac eyes (#C8A8FF); silver-teal loincloth (#8FC9C0), lower body fading into dark shadow curls; long claw-like hands. Forbidden: no hair, no hood, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -523,8 +549,12 @@ Dans l'Atelier : personnage « Spectre », planche « Dos · marche, 2 attaques,
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Spectre (enemy of the Ombres nation)
-- Look: violet spectral figure wrapped in shadow curls, long claw-like hands
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: small hunched spectral figure, violet-grey skin (#5A4A78) wrapped in silver bandages
+- Head: big bald round violet head, half-closed glowing lilac eyes (#C8A8FF)
+- Bottom: silver-teal loincloth (#8FC9C0), lower body fading into dark shadow curls
+- Details: long claw-like hands
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hair, no hood, no weapon.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, charcoal, violet glow, silver-teal cloth accents.
@@ -538,7 +568,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: violet shadow smoke, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Spectre: violet spectral figure wrapped in shadow curls, long claw-like hands.
+REMINDER: this is Spectre: small hunched spectral figure, violet-grey skin (#5A4A78) wrapped in silver bandages; big bald round violet head, half-closed glowing lilac eyes (#C8A8FF); silver-teal loincloth (#8FC9C0), lower body fading into dark shadow curls; long claw-like hands. Forbidden: no hair, no hood, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -560,15 +590,18 @@ Dans l'Atelier : personnage « Liche », planche « Référence · repos de face
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Liche (enemy of the Ombres nation)
-- Look: tall dark purple lich in a spiked robe holding a staff
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: tall dark lich in a black and purple spiked robe (#1E1428, #5A2A8A) with silver-teal trims
+- Head: purple skull (#4A3460) with glowing white-violet eyes and a crown of black spikes
+- Weapon: dark staff topped with a violet crystal, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hair, no hood, no flesh face.
 NATION PALETTE: black, charcoal, violet glow, silver-teal cloth accents. Signature effects (keep them small): violet shadow smoke.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Liche: tall dark purple lich in a spiked robe holding a staff.
+REMINDER: this is Liche: tall dark lich in a black and purple spiked robe (#1E1428, #5A2A8A) with silver-teal trims; purple skull (#4A3460) with glowing white-violet eyes and a crown of black spikes; dark staff topped with a violet crystal, RIGHT hand. Forbidden: no hair, no hood, no flesh face.
 ```
 
 | Case | Pose | Fichier |
@@ -584,8 +617,11 @@ Dans l'Atelier : personnage « Liche », planche « Face · marche, 2 attaques, 
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Liche (enemy of the Ombres nation)
-- Look: tall dark purple lich in a spiked robe holding a staff
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: tall dark lich in a black and purple spiked robe (#1E1428, #5A2A8A) with silver-teal trims
+- Head: purple skull (#4A3460) with glowing white-violet eyes and a crown of black spikes
+- Weapon: dark staff topped with a violet crystal, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hair, no hood, no flesh face.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, charcoal, violet glow, silver-teal cloth accents.
@@ -599,7 +635,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: violet shadow smoke, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Liche: tall dark purple lich in a spiked robe holding a staff.
+REMINDER: this is Liche: tall dark lich in a black and purple spiked robe (#1E1428, #5A2A8A) with silver-teal trims; purple skull (#4A3460) with glowing white-violet eyes and a crown of black spikes; dark staff topped with a violet crystal, RIGHT hand. Forbidden: no hair, no hood, no flesh face.
 ```
 
 | Case | Pose | Fichier |
@@ -617,8 +653,11 @@ Dans l'Atelier : personnage « Liche », planche « Dos · marche, 2 attaques, s
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Liche (enemy of the Ombres nation)
-- Look: tall dark purple lich in a spiked robe holding a staff
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: tall dark lich in a black and purple spiked robe (#1E1428, #5A2A8A) with silver-teal trims
+- Head: purple skull (#4A3460) with glowing white-violet eyes and a crown of black spikes
+- Weapon: dark staff topped with a violet crystal, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hair, no hood, no flesh face.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, charcoal, violet glow, silver-teal cloth accents.
@@ -632,7 +671,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: violet shadow smoke, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Liche: tall dark purple lich in a spiked robe holding a staff.
+REMINDER: this is Liche: tall dark lich in a black and purple spiked robe (#1E1428, #5A2A8A) with silver-teal trims; purple skull (#4A3460) with glowing white-violet eyes and a crown of black spikes; dark staff topped with a violet crystal, RIGHT hand. Forbidden: no hair, no hood, no flesh face.
 ```
 
 | Case | Pose | Fichier |

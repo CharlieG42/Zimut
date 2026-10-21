@@ -12,6 +12,7 @@
   ne sont pas le même personnage → corrigé à la source par les cartes d'identité.
 
 ## Prompts : cartes d'identité (`prompts_sprites/identites.py`)
+Cartes pour les 73 personnages (héros, boss, ennemis de toutes les nations, familiers).
 Voir `prompts_sprites/README.md`, section V38.
 
 ## Capture

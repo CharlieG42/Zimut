@@ -278,15 +278,21 @@ Dans l'Atelier : personnage « Pirate des mers », planche « Référence · rep
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Pirate des mers (enemy of the Marées nation)
-- Look: sea pirate with a red bandana, blue coat, leather belts and a short cutlass
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Hair: red bandana (#C8281E) over messy black hair, stubble
+- Eyes: dark brown eyes, always open, one gold earring
+- Top: blue coat (#2A4E8A) with gold buttons over a white shirt, crossed brown leather belts
+- Bottom: dark brown trousers
+- Feet: black boots
+- Weapon: short cutlass in the RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hat, no eye patch, no wooden leg, no pistol, no parrot.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents. Signature effects (keep them small): water splashes and bubbles.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Pirate des mers: sea pirate with a red bandana, blue coat, leather belts and a short cutlass.
+REMINDER: this is Pirate des mers: red bandana (#C8281E) over messy black hair, stubble; dark brown eyes, always open, one gold earring; blue coat (#2A4E8A) with gold buttons over a white shirt, crossed brown leather belts; dark brown trousers. Forbidden: no hat, no eye patch, no wooden leg, no pistol, no parrot.
 ```
 
 | Case | Pose | Fichier |
@@ -302,8 +308,14 @@ Dans l'Atelier : personnage « Pirate des mers », planche « Face · marche, 2 
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Pirate des mers (enemy of the Marées nation)
-- Look: sea pirate with a red bandana, blue coat, leather belts and a short cutlass
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Hair: red bandana (#C8281E) over messy black hair, stubble
+- Eyes: dark brown eyes, always open, one gold earring
+- Top: blue coat (#2A4E8A) with gold buttons over a white shirt, crossed brown leather belts
+- Bottom: dark brown trousers
+- Feet: black boots
+- Weapon: short cutlass in the RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hat, no eye patch, no wooden leg, no pistol, no parrot.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
@@ -317,7 +329,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Pirate des mers: sea pirate with a red bandana, blue coat, leather belts and a short cutlass.
+REMINDER: this is Pirate des mers: red bandana (#C8281E) over messy black hair, stubble; dark brown eyes, always open, one gold earring; blue coat (#2A4E8A) with gold buttons over a white shirt, crossed brown leather belts; dark brown trousers. Forbidden: no hat, no eye patch, no wooden leg, no pistol, no parrot.
 ```
 
 | Case | Pose | Fichier |
@@ -335,8 +347,14 @@ Dans l'Atelier : personnage « Pirate des mers », planche « Dos · marche, 2 a
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Pirate des mers (enemy of the Marées nation)
-- Look: sea pirate with a red bandana, blue coat, leather belts and a short cutlass
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Hair: red bandana (#C8281E) over messy black hair, stubble
+- Eyes: dark brown eyes, always open, one gold earring
+- Top: blue coat (#2A4E8A) with gold buttons over a white shirt, crossed brown leather belts
+- Bottom: dark brown trousers
+- Feet: black boots
+- Weapon: short cutlass in the RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hat, no eye patch, no wooden leg, no pistol, no parrot.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
@@ -350,7 +368,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Pirate des mers: sea pirate with a red bandana, blue coat, leather belts and a short cutlass.
+REMINDER: this is Pirate des mers: red bandana (#C8281E) over messy black hair, stubble; dark brown eyes, always open, one gold earring; blue coat (#2A4E8A) with gold buttons over a white shirt, crossed brown leather belts; dark brown trousers. Forbidden: no hat, no eye patch, no wooden leg, no pistol, no parrot.
 ```
 
 | Case | Pose | Fichier |
@@ -372,15 +390,18 @@ Dans l'Atelier : personnage « Requin », planche « Référence · repos de fac
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Requin (enemy of the Marées nation)
-- Look: blue shark with a white belly swimming upright in the air, toothy grin
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail
+- Head: wide toothy grin with white teeth, small black eyes
+- Details: two pectoral fins used like small arms
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no legs, no weapon, no armor.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents. Signature effects (keep them small): water splashes and bubbles.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Requin: blue shark with a white belly swimming upright in the air, toothy grin.
+REMINDER: this is Requin: blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail; wide toothy grin with white teeth, small black eyes; two pectoral fins used like small arms. Forbidden: no legs, no weapon, no armor.
 ```
 
 | Case | Pose | Fichier |
@@ -396,8 +417,11 @@ Dans l'Atelier : personnage « Requin », planche « Face · marche, 2 attaques,
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Requin (enemy of the Marées nation)
-- Look: blue shark with a white belly swimming upright in the air, toothy grin
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail
+- Head: wide toothy grin with white teeth, small black eyes
+- Details: two pectoral fins used like small arms
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no legs, no weapon, no armor.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
@@ -411,7 +435,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Requin: blue shark with a white belly swimming upright in the air, toothy grin.
+REMINDER: this is Requin: blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail; wide toothy grin with white teeth, small black eyes; two pectoral fins used like small arms. Forbidden: no legs, no weapon, no armor.
 ```
 
 | Case | Pose | Fichier |
@@ -429,8 +453,11 @@ Dans l'Atelier : personnage « Requin », planche « Dos · marche, 2 attaques, 
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Requin (enemy of the Marées nation)
-- Look: blue shark with a white belly swimming upright in the air, toothy grin
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail
+- Head: wide toothy grin with white teeth, small black eyes
+- Details: two pectoral fins used like small arms
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no legs, no weapon, no armor.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
@@ -444,7 +471,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Requin: blue shark with a white belly swimming upright in the air, toothy grin.
+REMINDER: this is Requin: blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail; wide toothy grin with white teeth, small black eyes; two pectoral fins used like small arms. Forbidden: no legs, no weapon, no armor.
 ```
 
 | Case | Pose | Fichier |
@@ -466,15 +493,18 @@ Dans l'Atelier : personnage « Néréide », planche « Référence · repos de 
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Néréide (enemy of the Marées nation)
-- Look: water nymph made of translucent-looking turquoise water, flowing hair of waves
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights
+- Head: flowing hair of white-capped waves, glowing white eyes, small shell crown
+- Bottom: lower body ends in a swirl of water, no legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no clothes, no weapon, no fish tail with scales.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents. Signature effects (keep them small): water splashes and bubbles.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Néréide: water nymph made of translucent-looking turquoise water, flowing hair of waves.
+REMINDER: this is Néréide: water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights; flowing hair of white-capped waves, glowing white eyes, small shell crown; lower body ends in a swirl of water, no legs. Forbidden: no clothes, no weapon, no fish tail with scales.
 ```
 
 | Case | Pose | Fichier |
@@ -490,8 +520,11 @@ Dans l'Atelier : personnage « Néréide », planche « Face · marche, 2 attaqu
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Néréide (enemy of the Marées nation)
-- Look: water nymph made of translucent-looking turquoise water, flowing hair of waves
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights
+- Head: flowing hair of white-capped waves, glowing white eyes, small shell crown
+- Bottom: lower body ends in a swirl of water, no legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no clothes, no weapon, no fish tail with scales.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
@@ -505,7 +538,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Néréide: water nymph made of translucent-looking turquoise water, flowing hair of waves.
+REMINDER: this is Néréide: water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights; flowing hair of white-capped waves, glowing white eyes, small shell crown; lower body ends in a swirl of water, no legs. Forbidden: no clothes, no weapon, no fish tail with scales.
 ```
 
 | Case | Pose | Fichier |
@@ -523,8 +556,11 @@ Dans l'Atelier : personnage « Néréide », planche « Dos · marche, 2 attaque
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Néréide (enemy of the Marées nation)
-- Look: water nymph made of translucent-looking turquoise water, flowing hair of waves
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights
+- Head: flowing hair of white-capped waves, glowing white eyes, small shell crown
+- Bottom: lower body ends in a swirl of water, no legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no clothes, no weapon, no fish tail with scales.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
@@ -538,7 +574,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Néréide: water nymph made of translucent-looking turquoise water, flowing hair of waves.
+REMINDER: this is Néréide: water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights; flowing hair of white-capped waves, glowing white eyes, small shell crown; lower body ends in a swirl of water, no legs. Forbidden: no clothes, no weapon, no fish tail with scales.
 ```
 
 | Case | Pose | Fichier |
@@ -560,15 +596,18 @@ Dans l'Atelier : personnage « Crabe géant », planche « Référence · repos 
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Crabe géant (enemy of the Marées nation)
-- Look: giant crab with a blue shell striped with red, huge pincers
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs
+- Head: two eyes on short stalks, small mouth
+- Details: two huge pincers, the right one bigger
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human body, no weapon.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents. Signature effects (keep them small): water splashes and bubbles.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Crabe géant: giant crab with a blue shell striped with red, huge pincers.
+REMINDER: this is Crabe géant: giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs; two eyes on short stalks, small mouth; two huge pincers, the right one bigger. Forbidden: no human body, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -584,8 +623,11 @@ Dans l'Atelier : personnage « Crabe géant », planche « Face · marche, 2 att
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Crabe géant (enemy of the Marées nation)
-- Look: giant crab with a blue shell striped with red, huge pincers
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs
+- Head: two eyes on short stalks, small mouth
+- Details: two huge pincers, the right one bigger
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human body, no weapon.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
@@ -599,7 +641,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Crabe géant: giant crab with a blue shell striped with red, huge pincers.
+REMINDER: this is Crabe géant: giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs; two eyes on short stalks, small mouth; two huge pincers, the right one bigger. Forbidden: no human body, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -617,8 +659,11 @@ Dans l'Atelier : personnage « Crabe géant », planche « Dos · marche, 2 atta
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Crabe géant (enemy of the Marées nation)
-- Look: giant crab with a blue shell striped with red, huge pincers
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs
+- Head: two eyes on short stalks, small mouth
+- Details: two huge pincers, the right one bigger
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human body, no weapon.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
@@ -632,7 +677,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Crabe géant: giant crab with a blue shell striped with red, huge pincers.
+REMINDER: this is Crabe géant: giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs; two eyes on short stalks, small mouth; two huge pincers, the right one bigger. Forbidden: no human body, no weapon.
 ```
 
 | Case | Pose | Fichier |

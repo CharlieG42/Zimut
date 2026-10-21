@@ -179,6 +179,267 @@ IDENT = {
         ("head", "two big friendly dark eyes on the cloud, no mouth"),
         ("details", "two small arms made of wind swirls, no legs"),
     ], never="no human body, no weapon"),
+    # ---------------------------------------------------------------- ennemis des autres nations (V38)
+    # Forêt
+    "araknea": dict(parts=[
+        ("body", "forest spider-beetle with six thin dark-brown legs (#3B2A1E) and a domed emerald armored carapace (#2FA060) with lighter green edges"),
+        ("head", "two curved ivory horns, sharp brown mandibles, four small glowing amber eyes (#F2B233)"),
+    ], never="no eight legs, no wings, no human body, no weapon"),
+    "loup_forestier": dict(parts=[
+        ("body", "sturdy four-legged wolf with dark moss-green fur (#3E5E34) and a lighter sage belly"),
+        ("head", "mane of green leaves and brown twigs around the neck, amber eyes (#E0A030), black nose"),
+        ("details", "bushy tail tipped with leaves"),
+    ], never="no armor, no rider, no grey or brown fur, never standing on two legs"),
+    "dryade": dict(parts=[
+        ("body", "slim dryad woman whose body is made of light-brown branches (#8A6238) and green leaves (#5FAE48)"),
+        ("head", "long hair made of green leaves with small pink flowers, glowing green eyes (#7CFF8A)"),
+        ("weapon", "simple wooden bow in the LEFT hand, no quiver"),
+    ], never="no clothes, no metal, no human skin"),
+    "treant": dict(parts=[
+        ("body", "walking tree-trunk brute of dark brown bark (#5A3E26) covered in green moss (#4F7A32)"),
+        ("head", "no neck, a face carved in the trunk with two glowing green eyes (#7CFF8A) and a crooked mouth, leafy crown on top"),
+        ("details", "two thick branch arms, root-like legs"),
+    ], never="no weapon, no armor, no flowers"),
+    # Montagne
+    "guerrier_des_monts": dict(parts=[
+        ("body", "stocky mountain warrior with rocky brown skin (#8A6A4A) cracked like stone"),
+        ("head", "bald rocky head, small white eyes, short stone beard"),
+        ("top", "fur vest of white snow fur with a leather belt"),
+        ("bottom", "dark brown fur trousers, bare stone feet"),
+        ("weapon", "crude grey stone gauntlets on both fists, no other weapon"),
+    ], never="no helmet, no sword, no axe, no human skin"),
+    "griffon_des_cimes": dict(parts=[
+        ("body", "griffin with a tawny lion body (#C9A060) and four legs, front legs with eagle talons"),
+        ("head", "white eagle head, yellow hooked beak, golden eyes"),
+        ("details", "large blue-grey feathered wings (#7A8CA8), lion tail with a white tuft"),
+    ], never="no rider, no saddle, no armor"),
+    "garde_des_pics": dict(parts=[
+        ("body", "peak guardian golem of smooth blue-grey stone blocks (#6E8296)"),
+        ("head", "small square stone head with two glowing ice-blue eyes (#9FE3FF)"),
+        ("details", "clusters of glowing ice-blue crystals (#9FE3FF) on both shoulders, big stone fists"),
+    ], never="no weapon, no moss, no brown stone"),
+    "rochebrute": dict(parts=[
+        ("body", "hulking brute made of round brown boulders (#7A5A3A), huge hunched shoulders"),
+        ("head", "small boulder head sunk between the shoulders, two small glowing orange eyes (#FF9A3A)"),
+        ("details", "huge boulder fists, short stumpy legs"),
+    ], never="no crystals, no weapon, no grey stone"),
+    # Désert
+    "bandit_des_dunes": dict(parts=[
+        ("body", "small jackal-folk bandit standing on two legs, orange fur (#D9822B) with a cream muzzle"),
+        ("head", "tall jackal ears, yellow eyes, sand-colored scarf (#E3CF9A) over the mouth"),
+        ("top", "brown leather vest with a red sash"),
+        ("bottom", "baggy sand-colored trousers, bare paws"),
+        ("weapon", "one curved dagger in the RIGHT hand"),
+    ], never="no bow, no sword, no hood, no human face"),
+    "scarabee_geant": dict(parts=[
+        ("body", "giant scarab beetle on six legs, glossy black shell (#1A1A1E) with gold edges and patterns (#E0B040)"),
+        ("head", "big golden horn and two smaller golden horns, small red eyes"),
+    ], never="no wings spread, no rider, no human body"),
+    "genie_du_desert": dict(parts=[
+        ("body", "golden-skinned sand djinn (#E0B050) with a muscular bare chest and arms, golden bracelets"),
+        ("head", "bald head with a long black topknot, glowing amber eyes, pointed ears"),
+        ("bottom", "no legs: lower body of swirling sand (#D9C08A)"),
+    ], never="no weapon, no blue skin, no clothes on the torso"),
+    "sphinx": dict(parts=[
+        ("body", "golden lion sphinx on four legs (#D9A848) with a lion tail"),
+        ("head", "human-like calm face, striped blue-and-gold pharaoh headdress (#2E56A8, #E0B040), kohl-lined amber eyes"),
+        ("details", "small golden collar, no wings"),
+    ], never="no wings, no weapon, standing on four legs only"),
+    # Cristaux
+    "araignee_de_cristal": dict(parts=[
+        ("body", "spider with a round body made of violet amethyst crystals (#8A4FD8)"),
+        ("head", "cluster of small glowing ice-blue eyes (#9FE3FF), crystal fangs"),
+        ("details", "eight thin glowing ice-blue crystal legs (#9FE3FF)"),
+    ], never="no fur, no green, no human body"),
+    "mage_cristallin": dict(parts=[
+        ("body", "slender crystal mage with a smooth pale blue body (#BFD8FF)"),
+        ("head", "hair made of sharp violet crystal shards (#8A4FD8), glowing white eyes"),
+        ("top", "short dark violet robe with silver trims"),
+        ("weapon", "slim crystal staff with a violet crystal tip, RIGHT hand"),
+    ], never="no human skin, no hat, no hood"),
+    "golem_de_cristal": dict(parts=[
+        ("body", "heavy golem made of violet (#8A4FD8) and blue (#4F7FE0) crystal clusters on a dark grey rock core"),
+        ("head", "small head of crystal with two glowing white eyes"),
+        ("details", "huge crystal fists"),
+    ], never="no weapon, no green, no moss"),
+    "elementaire_de_cristal": dict(parts=[
+        ("body", "floating humanoid elemental made of sharp violet crystal shards (#8A4FD8), no legs, shards hovering apart at the joints"),
+        ("head", "pointed crystal head with two glowing ice-blue eyes (#9FE3FF)"),
+        ("details", "a glowing ice-blue core in the chest"),
+    ], never="no feet on the ground, no weapon, no clothes"),
+    # Marées
+    "pirate_des_mers": dict(parts=[
+        ("hair", "red bandana (#C8281E) over messy black hair, stubble"),
+        ("eyes", "dark brown eyes, always open, one gold earring"),
+        ("top", "blue coat (#2A4E8A) with gold buttons over a white shirt, crossed brown leather belts"),
+        ("bottom", "dark brown trousers"),
+        ("feet", "black boots"),
+        ("weapon", "short cutlass in the RIGHT hand"),
+    ], never="no hat, no eye patch, no wooden leg, no pistol, no parrot"),
+    "requin": dict(parts=[
+        ("body", "blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail"),
+        ("head", "wide toothy grin with white teeth, small black eyes"),
+        ("details", "two pectoral fins used like small arms"),
+    ], never="no legs, no weapon, no armor"),
+    "nereide": dict(parts=[
+        ("body", "water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights"),
+        ("head", "flowing hair of white-capped waves, glowing white eyes, small shell crown"),
+        ("bottom", "lower body ends in a swirl of water, no legs"),
+    ], never="no clothes, no weapon, no fish tail with scales"),
+    "crabe_geant": dict(parts=[
+        ("body", "giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs"),
+        ("head", "two eyes on short stalks, small mouth"),
+        ("details", "two huge pincers, the right one bigger"),
+    ], never="no human body, no weapon"),
+    # Brasier
+    "lieutenant": dict(parts=[
+        ("hair", "hood up, face in shadow with two glowing orange eyes (#FF8A2A)"),
+        ("top", "orange and red layered cultist robes (#E06A1E, #B0201A) with a black belt"),
+        ("bottom", "long robe to the ankles"),
+        ("feet", "black boots"),
+        ("weapon", "black staff topped with a burning flame, RIGHT hand"),
+    ], never="no visible face, no armor, no sword"),
+    "salamandre": dict(parts=[
+        ("body", "orange lava lizard (#E0701E) on four short legs, darker orange back"),
+        ("head", "round head, big yellow eyes, small smile"),
+        ("details", "glowing yellow cracks along the back, tail ending in a flame"),
+    ], never="no wings, no armor, never standing on two legs"),
+    "devoreur_de_flammes": dict(parts=[
+        ("body", "fiery orange four-legged beast (#E05A1E) with a dark charcoal belly"),
+        ("head", "big jaw with fangs, glowing yellow eyes, mane of flames"),
+        ("details", "big black claws, flaming tail tip"),
+    ], never="no wings, no armor, no rider"),
+    "golem_de_lave": dict(parts=[
+        ("body", "dark basalt golem (#2A2426) with bright orange lava cracks (#FF7A1E)"),
+        ("head", "small head with two glowing orange eyes"),
+        ("details", "molten glowing core in the chest, huge rock fists"),
+    ], never="no weapon, no crystals, no moss"),
+    # Brumes
+    "brumeux": dict(parts=[
+        ("body", "hulking mist beast with a fluffy lavender cloud body (#B8A8E0)"),
+        ("head", "no visible neck, two small glowing mint eyes (#9FFFD8)"),
+        ("details", "two thick cloud arms with small dark claws, no legs visible"),
+    ], never="no weapon, no clothes, no teeth"),
+    "gargouille": dict(parts=[
+        ("body", "grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture"),
+        ("head", "small horns, pointed ears, fanged mouth, glowing mint eyes (#9FFFD8)"),
+        ("details", "stone bat wings, long tail with an arrow tip"),
+    ], never="no weapon, no color other than grey stone and mint eyes"),
+    "liche_des_brumes": dict(parts=[
+        ("body", "thin skeletal lich, bony grey hands"),
+        ("head", "skull face with glowing mint eyes (#9FFFD8) under a tattered hood"),
+        ("top", "tattered violet robes (#6A4A9A) with torn edges"),
+        ("weapon", "crooked wooden staff, RIGHT hand"),
+    ], never="no crown, no armor, no hair"),
+    "fantome": dict(parts=[
+        ("body", "pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs"),
+        ("head", "mischievous face: big dark eyes, tongue out"),
+        ("details", "two small rounded arms"),
+    ], never="no sheet with holes, no chains, no weapon"),
+    # Ombres (d'après les sprites Mistral intégrés en V37)
+    "assassin_des_ombres": dict(parts=[
+        ("body", "hunched four-legged shadow beast, black body (#141418) with charcoal armor straps and silver-teal cloth bands (#8FC9C0) on the legs"),
+        ("head", "spiky purple mane (#8A3FD8) on head and back, glowing violet eyes (#B070FF)"),
+        ("details", "long black claws, violet lightning glints"),
+    ], never="no human face, no hood, no weapon in hand"),
+    "ombre_infernale": dict(parts=[
+        ("body", "humanoid of purple-black shadow (#1E1428) in dark armor with silver-teal cloth panels (#8FC9C0)"),
+        ("head", "round head of swirling purple shadow with ONE glowing violet eye (#C080FF), no mouth"),
+        ("details", "long black claws, small purple flame wisps around the hands"),
+    ], never="no human face, no hair, no weapon"),
+    "spectre": dict(parts=[
+        ("body", "small hunched spectral figure, violet-grey skin (#5A4A78) wrapped in silver bandages"),
+        ("head", "big bald round violet head, half-closed glowing lilac eyes (#C8A8FF)"),
+        ("bottom", "silver-teal loincloth (#8FC9C0), lower body fading into dark shadow curls"),
+        ("details", "long claw-like hands"),
+    ], never="no hair, no hood, no weapon"),
+    "liche": dict(parts=[
+        ("body", "tall dark lich in a black and purple spiked robe (#1E1428, #5A2A8A) with silver-teal trims"),
+        ("head", "purple skull (#4A3460) with glowing white-violet eyes and a crown of black spikes"),
+        ("weapon", "dark staff topped with a violet crystal, RIGHT hand"),
+    ], never="no hair, no hood, no flesh face"),
+    # Rouages
+    "drone_aerien": dict(parts=[
+        ("body", "round bronze flying drone (#B8873A) with riveted plates"),
+        ("head", "single glowing blue core eye (#3FC8FF) in the front"),
+        ("details", "two small propellers on top, two jointed claw arms below"),
+    ], never="no legs, no wings, no human parts"),
+    "araignee_mecanique": dict(parts=[
+        ("body", "bronze mechanical spider (#B8873A) with a riveted round body"),
+        ("head", "single blue gem eye (#3FC8FF)"),
+        ("details", "eight long jointed steel legs (#8A9098)"),
+    ], never="no fur, no organic parts"),
+    "roue_engrenee": dict(parts=[
+        ("body", "rolling bronze cog-wheel creature (#B8873A) standing upright on its edge"),
+        ("head", "single glowing blue gem eye (#3FC8FF) in the center of the wheel"),
+        ("details", "two small jointed steel arms on the sides"),
+    ], never="no legs, no face other than the gem eye"),
+    "automate_de_combat": dict(parts=[
+        ("body", "heavy combat automaton of riveted bronze (#B8873A) and grey stone plates"),
+        ("head", "small dome head with a glowing blue visor slit (#3FC8FF)"),
+        ("details", "huge fists, small smoking pipe on the back"),
+    ], never="no human face, no weapon"),
+    # ---------------------------------------------------------------- familiers / invocations (V38)
+    "golem_de_pierre": dict(parts=[
+        ("body", "grey stone golem (#7A7A82) with a broad body and big stone fists"),
+        ("head", "small head with two glowing blue eyes"),
+        ("details", "blue crystals (#5CC8FF) growing from the shoulders and back"),
+    ], never="no weapon, no moss, no brown stone"),
+    "loup_spectral": dict(parts=[
+        ("body", "spectral violet wolf (#7A4FD8) on four legs with flame-like spiky fur"),
+        ("head", "glowing white eyes, pointed ears"),
+        ("details", "fur tips turning into opaque violet flame shapes with dark outlines"),
+    ], never="no armor, no transparency, never on two legs"),
+    "requin_des_marees": dict(parts=[
+        ("body", "bright blue shark (#2E8CE0) with a white belly floating upright"),
+        ("head", "friendly grin, small black eyes"),
+        ("details", "pectoral fins like small arms"),
+    ], never="no legs, no weapon"),
+    "familier:elementaire_de_cristal": dict(parts=[
+        ("body", "small floating elemental made of violet (#8A4FD8) and blue (#4F7FE0) crystals, round and cute"),
+        ("head", "friendly glowing ice-blue eyes (#9FE3FF)"),
+        ("details", "tiny crystal arms, no legs"),
+    ], never="no weapon, no sharp menacing look"),
+    "ombre": dict(parts=[
+        ("body", "coiled purple shadow serpent (#4A2A7A) with darker stripes"),
+        ("head", "dragon-like head with small horns and glowing violet eyes (#B070FF)"),
+        ("details", "stylized opaque smoke curls with dark outlines along the body"),
+    ], never="no legs, no wings, no transparency"),
+    "esprit_de_la_foret": dict(parts=[
+        ("body", "forest stag spirit on four legs, body of green leaves (#5FAE48) and moss"),
+        ("head", "large branching wooden antlers with small leaves, glowing green eyes"),
+        ("details", "small white flowers on the back"),
+    ], never="no rider, no armor, never on two legs"),
+    "archer_sylvestre": dict(parts=[
+        ("body", "slim wooden archer made of light-brown branches (#8A6238) and green leaves"),
+        ("head", "leafy crown, two glowing green eyes, no mouth"),
+        ("weapon", "wooden bow in the LEFT hand, leaf quiver on the back"),
+    ], never="no human skin, no metal"),
+    "ent_de_combat": dict(parts=[
+        ("body", "small wooden ent warrior of brown bark (#6B4A2B) covered in green leaves"),
+        ("head", "face carved in the bark with glowing green eyes, leafy top"),
+        ("details", "stubby branch arms, root feet"),
+    ], never="no weapon, no metal"),
+    "tronc": dict(parts=[
+        ("body", "cute walking tree stump of brown bark (#7A5534)"),
+        ("head", "round leafy green crown on top (#5FAE48), big round friendly eyes on the trunk"),
+        ("details", "two small branch arms, little root feet"),
+    ], never="no weapon, no angry face"),
+    "sarriette": dict(parts=[
+        ("body", "tiny leaf sprite girl with light green skin (#BFE8A8)"),
+        ("head", "green leaf hood (#5FAE48) with two little horns, big dark eyes"),
+        ("details", "a curly vine in the hand, leaf dress"),
+    ], never="no wings, no weapon"),
+    "ronce_agressive": dict(parts=[
+        ("body", "angry dark-green bramble bulb (#3E6A2E) covered in sharp thorns"),
+        ("head", "two angry red eyes (#E02A2A), jagged mouth"),
+        ("details", "whipping thorny vines around it, rooted in the ground"),
+    ], never="no legs, no flowers"),
+    "sentinelle_de_gres": dict(parts=[
+        ("body", "sandstone sentinel statue (#D9B07A) with carved armor"),
+        ("head", "carved helmet-head with glowing amber eyes (#F2A93B)"),
+        ("weapon", "carved stone spear, RIGHT hand"),
+    ], never="no cloth, no skin"),
 }
 
 

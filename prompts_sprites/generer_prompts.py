@@ -545,6 +545,9 @@ def name_table(base, view, cells):
 def character_md(title, ent, role, nation_txt, big, fx, rim, palette, path_hint, extra_desc=""):
     sheets = SHEETS_BIG if big else SHEETS_SMALL
     desc = ent["desc"] + extra_desc
+    key = ent["id"]
+    if role == "summoned familiar" and ("familier:" + key) in IDENT:
+        key = "familier:" + key
     who = ent["nom"].split(" (")[0]
     nposes = sum(len(c) for _, _, _, c in sheets)
     parts = [f"### {title}\n\n{len(sheets)} planches, {nposes} poses. Commence par la fiche de référence. Chaque prompt "
@@ -552,10 +555,10 @@ def character_md(title, ent, role, nation_txt, big, fx, rim, palette, path_hint,
              f"images `{ent['id']}_<clé>.png` (ex. `{ent['id']}_face_2.png`) pour que l'Atelier les reconnaisse.\n"]
     for k, (cle, slabel, view, cells) in enumerate(sheets, 1):
         if view is None:
-            p = prompt_reference(who, role, nation_txt, desc, rim, palette, ent.get("pale", False), fx, ent["id"])
+            p = prompt_reference(who, role, nation_txt, desc, rim, palette, ent.get("pale", False), fx, key)
         else:
             p = prompt_sheet(who, role, nation_txt, desc, view, cells, ent["arch"], fx, rim, palette,
-                             ent.get("pale", False), ent["id"])
+                             ent.get("pale", False), key)
         parts.append(f"#### Planche {k} — {slabel} (`{cle}`)\n\nDans l'Atelier : personnage « {who} », "
                      f"planche « {slabel} ».\n\n```text\n{p}\n```\n\n{name_table(ent['id'], view, cells)}\n")
     return "\n".join(parts)

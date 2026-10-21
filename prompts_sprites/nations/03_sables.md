@@ -278,15 +278,20 @@ Dans l'Atelier : personnage « Bandit des dunes », planche « Référence · re
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Bandit des dunes (enemy of the Sables nation)
-- Look: small desert jackal-folk bandit with orange fur, a sand-colored scarf and a curved dagger
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: small jackal-folk bandit standing on two legs, orange fur (#D9822B) with a cream muzzle
+- Head: tall jackal ears, yellow eyes, sand-colored scarf (#E3CF9A) over the mouth
+- Top: brown leather vest with a red sash
+- Bottom: baggy sand-colored trousers, bare paws
+- Weapon: one curved dagger in the RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no bow, no sword, no hood, no human face.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents. Signature effects (keep them small): swirling sand and amber shards.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Bandit des dunes: small desert jackal-folk bandit with orange fur, a sand-colored scarf and a curved dagger.
+REMINDER: this is Bandit des dunes: small jackal-folk bandit standing on two legs, orange fur (#D9822B) with a cream muzzle; tall jackal ears, yellow eyes, sand-colored scarf (#E3CF9A) over the mouth; brown leather vest with a red sash; baggy sand-colored trousers, bare paws. Forbidden: no bow, no sword, no hood, no human face.
 ```
 
 | Case | Pose | Fichier |
@@ -302,8 +307,13 @@ Dans l'Atelier : personnage « Bandit des dunes », planche « Face · marche, 2
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Bandit des dunes (enemy of the Sables nation)
-- Look: small desert jackal-folk bandit with orange fur, a sand-colored scarf and a curved dagger
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: small jackal-folk bandit standing on two legs, orange fur (#D9822B) with a cream muzzle
+- Head: tall jackal ears, yellow eyes, sand-colored scarf (#E3CF9A) over the mouth
+- Top: brown leather vest with a red sash
+- Bottom: baggy sand-colored trousers, bare paws
+- Weapon: one curved dagger in the RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no bow, no sword, no hood, no human face.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
@@ -317,7 +327,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Bandit des dunes: small desert jackal-folk bandit with orange fur, a sand-colored scarf and a curved dagger.
+REMINDER: this is Bandit des dunes: small jackal-folk bandit standing on two legs, orange fur (#D9822B) with a cream muzzle; tall jackal ears, yellow eyes, sand-colored scarf (#E3CF9A) over the mouth; brown leather vest with a red sash; baggy sand-colored trousers, bare paws. Forbidden: no bow, no sword, no hood, no human face.
 ```
 
 | Case | Pose | Fichier |
@@ -335,8 +345,13 @@ Dans l'Atelier : personnage « Bandit des dunes », planche « Dos · marche, 2 
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Bandit des dunes (enemy of the Sables nation)
-- Look: small desert jackal-folk bandit with orange fur, a sand-colored scarf and a curved dagger
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: small jackal-folk bandit standing on two legs, orange fur (#D9822B) with a cream muzzle
+- Head: tall jackal ears, yellow eyes, sand-colored scarf (#E3CF9A) over the mouth
+- Top: brown leather vest with a red sash
+- Bottom: baggy sand-colored trousers, bare paws
+- Weapon: one curved dagger in the RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no bow, no sword, no hood, no human face.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
@@ -350,7 +365,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Bandit des dunes: small desert jackal-folk bandit with orange fur, a sand-colored scarf and a curved dagger.
+REMINDER: this is Bandit des dunes: small jackal-folk bandit standing on two legs, orange fur (#D9822B) with a cream muzzle; tall jackal ears, yellow eyes, sand-colored scarf (#E3CF9A) over the mouth; brown leather vest with a red sash; baggy sand-colored trousers, bare paws. Forbidden: no bow, no sword, no hood, no human face.
 ```
 
 | Case | Pose | Fichier |
@@ -372,15 +387,17 @@ Dans l'Atelier : personnage « Scarabée géant », planche « Référence · re
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Scarabée géant (enemy of the Sables nation)
-- Look: giant scarab beetle with a black and gold shell and golden horns
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: giant scarab beetle on six legs, glossy black shell (#1A1A1E) with gold edges and patterns (#E0B040)
+- Head: big golden horn and two smaller golden horns, small red eyes
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings spread, no rider, no human body.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents. Signature effects (keep them small): swirling sand and amber shards.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Scarabée géant: giant scarab beetle with a black and gold shell and golden horns.
+REMINDER: this is Scarabée géant: giant scarab beetle on six legs, glossy black shell (#1A1A1E) with gold edges and patterns (#E0B040); big golden horn and two smaller golden horns, small red eyes. Forbidden: no wings spread, no rider, no human body.
 ```
 
 | Case | Pose | Fichier |
@@ -396,8 +413,10 @@ Dans l'Atelier : personnage « Scarabée géant », planche « Face · marche, 2
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Scarabée géant (enemy of the Sables nation)
-- Look: giant scarab beetle with a black and gold shell and golden horns
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: giant scarab beetle on six legs, glossy black shell (#1A1A1E) with gold edges and patterns (#E0B040)
+- Head: big golden horn and two smaller golden horns, small red eyes
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings spread, no rider, no human body.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
@@ -411,7 +430,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Scarabée géant: giant scarab beetle with a black and gold shell and golden horns.
+REMINDER: this is Scarabée géant: giant scarab beetle on six legs, glossy black shell (#1A1A1E) with gold edges and patterns (#E0B040); big golden horn and two smaller golden horns, small red eyes. Forbidden: no wings spread, no rider, no human body.
 ```
 
 | Case | Pose | Fichier |
@@ -429,8 +448,10 @@ Dans l'Atelier : personnage « Scarabée géant », planche « Dos · marche, 2 
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Scarabée géant (enemy of the Sables nation)
-- Look: giant scarab beetle with a black and gold shell and golden horns
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: giant scarab beetle on six legs, glossy black shell (#1A1A1E) with gold edges and patterns (#E0B040)
+- Head: big golden horn and two smaller golden horns, small red eyes
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings spread, no rider, no human body.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
@@ -444,7 +465,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Scarabée géant: giant scarab beetle with a black and gold shell and golden horns.
+REMINDER: this is Scarabée géant: giant scarab beetle on six legs, glossy black shell (#1A1A1E) with gold edges and patterns (#E0B040); big golden horn and two smaller golden horns, small red eyes. Forbidden: no wings spread, no rider, no human body.
 ```
 
 | Case | Pose | Fichier |
@@ -466,15 +487,18 @@ Dans l'Atelier : personnage « Génie du désert », planche « Référence · r
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Génie du désert (enemy of the Sables nation)
-- Look: golden sand djinn with muscular arms and a lower body of swirling sand
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: golden-skinned sand djinn (#E0B050) with a muscular bare chest and arms, golden bracelets
+- Head: bald head with a long black topknot, glowing amber eyes, pointed ears
+- Bottom: no legs: lower body of swirling sand (#D9C08A)
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no blue skin, no clothes on the torso.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents. Signature effects (keep them small): swirling sand and amber shards.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Génie du désert: golden sand djinn with muscular arms and a lower body of swirling sand.
+REMINDER: this is Génie du désert: golden-skinned sand djinn (#E0B050) with a muscular bare chest and arms, golden bracelets; bald head with a long black topknot, glowing amber eyes, pointed ears; no legs: lower body of swirling sand (#D9C08A). Forbidden: no weapon, no blue skin, no clothes on the torso.
 ```
 
 | Case | Pose | Fichier |
@@ -490,8 +514,11 @@ Dans l'Atelier : personnage « Génie du désert », planche « Face · marche, 
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Génie du désert (enemy of the Sables nation)
-- Look: golden sand djinn with muscular arms and a lower body of swirling sand
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: golden-skinned sand djinn (#E0B050) with a muscular bare chest and arms, golden bracelets
+- Head: bald head with a long black topknot, glowing amber eyes, pointed ears
+- Bottom: no legs: lower body of swirling sand (#D9C08A)
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no blue skin, no clothes on the torso.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
@@ -505,7 +532,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Génie du désert: golden sand djinn with muscular arms and a lower body of swirling sand.
+REMINDER: this is Génie du désert: golden-skinned sand djinn (#E0B050) with a muscular bare chest and arms, golden bracelets; bald head with a long black topknot, glowing amber eyes, pointed ears; no legs: lower body of swirling sand (#D9C08A). Forbidden: no weapon, no blue skin, no clothes on the torso.
 ```
 
 | Case | Pose | Fichier |
@@ -523,8 +550,11 @@ Dans l'Atelier : personnage « Génie du désert », planche « Dos · marche, 2
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Génie du désert (enemy of the Sables nation)
-- Look: golden sand djinn with muscular arms and a lower body of swirling sand
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: golden-skinned sand djinn (#E0B050) with a muscular bare chest and arms, golden bracelets
+- Head: bald head with a long black topknot, glowing amber eyes, pointed ears
+- Bottom: no legs: lower body of swirling sand (#D9C08A)
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no blue skin, no clothes on the torso.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
@@ -538,7 +568,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Génie du désert: golden sand djinn with muscular arms and a lower body of swirling sand.
+REMINDER: this is Génie du désert: golden-skinned sand djinn (#E0B050) with a muscular bare chest and arms, golden bracelets; bald head with a long black topknot, glowing amber eyes, pointed ears; no legs: lower body of swirling sand (#D9C08A). Forbidden: no weapon, no blue skin, no clothes on the torso.
 ```
 
 | Case | Pose | Fichier |
@@ -560,15 +590,18 @@ Dans l'Atelier : personnage « Sphinx », planche « Référence · repos de fac
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Sphinx (enemy of the Sables nation)
-- Look: golden lion sphinx wearing a striped pharaoh headdress
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: golden lion sphinx on four legs (#D9A848) with a lion tail
+- Head: human-like calm face, striped blue-and-gold pharaoh headdress (#2E56A8, #E0B040), kohl-lined amber eyes
+- Details: small golden collar, no wings
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings, no weapon, standing on four legs only.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents. Signature effects (keep them small): swirling sand and amber shards.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Sphinx: golden lion sphinx wearing a striped pharaoh headdress.
+REMINDER: this is Sphinx: golden lion sphinx on four legs (#D9A848) with a lion tail; human-like calm face, striped blue-and-gold pharaoh headdress (#2E56A8, #E0B040), kohl-lined amber eyes; small golden collar, no wings. Forbidden: no wings, no weapon, standing on four legs only.
 ```
 
 | Case | Pose | Fichier |
@@ -584,8 +617,11 @@ Dans l'Atelier : personnage « Sphinx », planche « Face · marche, 2 attaques,
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Sphinx (enemy of the Sables nation)
-- Look: golden lion sphinx wearing a striped pharaoh headdress
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: golden lion sphinx on four legs (#D9A848) with a lion tail
+- Head: human-like calm face, striped blue-and-gold pharaoh headdress (#2E56A8, #E0B040), kohl-lined amber eyes
+- Details: small golden collar, no wings
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings, no weapon, standing on four legs only.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
@@ -599,7 +635,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Sphinx: golden lion sphinx wearing a striped pharaoh headdress.
+REMINDER: this is Sphinx: golden lion sphinx on four legs (#D9A848) with a lion tail; human-like calm face, striped blue-and-gold pharaoh headdress (#2E56A8, #E0B040), kohl-lined amber eyes; small golden collar, no wings. Forbidden: no wings, no weapon, standing on four legs only.
 ```
 
 | Case | Pose | Fichier |
@@ -617,8 +653,11 @@ Dans l'Atelier : personnage « Sphinx », planche « Dos · marche, 2 attaques, 
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Sphinx (enemy of the Sables nation)
-- Look: golden lion sphinx wearing a striped pharaoh headdress
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: golden lion sphinx on four legs (#D9A848) with a lion tail
+- Head: human-like calm face, striped blue-and-gold pharaoh headdress (#2E56A8, #E0B040), kohl-lined amber eyes
+- Details: small golden collar, no wings
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings, no weapon, standing on four legs only.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
@@ -632,7 +671,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Sphinx: golden lion sphinx wearing a striped pharaoh headdress.
+REMINDER: this is Sphinx: golden lion sphinx on four legs (#D9A848) with a lion tail; human-like calm face, striped blue-and-gold pharaoh headdress (#2E56A8, #E0B040), kohl-lined amber eyes; small golden collar, no wings. Forbidden: no wings, no weapon, standing on four legs only.
 ```
 
 | Case | Pose | Fichier |

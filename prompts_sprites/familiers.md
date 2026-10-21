@@ -14,15 +14,18 @@ Dans l'Atelier : personnage « Golem de pierre », planche « Référence · rep
 Character reference sheet of ONE summoned familiar for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Golem de pierre (a summon)
-- Look: grey stone golem with blue crystals growing from the shoulders and back
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: grey stone golem (#7A7A82) with a broad body and big stone fists
+- Head: small head with two glowing blue eyes
+- Details: blue crystals (#5CC8FF) growing from the shoulders and back
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no moss, no brown stone.
 NATION PALETTE: colors as described. Signature effects (keep them small): matching magical sparks.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle soft colored rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Golem de pierre: grey stone golem with blue crystals growing from the shoulders and back.
+REMINDER: this is Golem de pierre: grey stone golem (#7A7A82) with a broad body and big stone fists; small head with two glowing blue eyes; blue crystals (#5CC8FF) growing from the shoulders and back. Forbidden: no weapon, no moss, no brown stone.
 ```
 
 | Case | Pose | Fichier |
@@ -38,8 +41,11 @@ Dans l'Atelier : personnage « Golem de pierre », planche « Face · marche, 2 
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Golem de pierre (a summon)
-- Look: grey stone golem with blue crystals growing from the shoulders and back
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: grey stone golem (#7A7A82) with a broad body and big stone fists
+- Head: small head with two glowing blue eyes
+- Details: blue crystals (#5CC8FF) growing from the shoulders and back
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no moss, no brown stone.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -53,7 +59,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Golem de pierre: grey stone golem with blue crystals growing from the shoulders and back.
+REMINDER: this is Golem de pierre: grey stone golem (#7A7A82) with a broad body and big stone fists; small head with two glowing blue eyes; blue crystals (#5CC8FF) growing from the shoulders and back. Forbidden: no weapon, no moss, no brown stone.
 ```
 
 | Case | Pose | Fichier |
@@ -71,8 +77,11 @@ Dans l'Atelier : personnage « Golem de pierre », planche « Dos · marche, 2 a
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Golem de pierre (a summon)
-- Look: grey stone golem with blue crystals growing from the shoulders and back
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: grey stone golem (#7A7A82) with a broad body and big stone fists
+- Head: small head with two glowing blue eyes
+- Details: blue crystals (#5CC8FF) growing from the shoulders and back
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no moss, no brown stone.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -86,7 +95,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Golem de pierre: grey stone golem with blue crystals growing from the shoulders and back.
+REMINDER: this is Golem de pierre: grey stone golem (#7A7A82) with a broad body and big stone fists; small head with two glowing blue eyes; blue crystals (#5CC8FF) growing from the shoulders and back. Forbidden: no weapon, no moss, no brown stone.
 ```
 
 | Case | Pose | Fichier |
@@ -108,15 +117,18 @@ Dans l'Atelier : personnage « Loup spectral », planche « Référence · repos
 Character reference sheet of ONE summoned familiar for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Loup spectral (a summon)
-- Look: spectral violet wolf with flame-like spiky fur and glowing eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: spectral violet wolf (#7A4FD8) on four legs with flame-like spiky fur
+- Head: glowing white eyes, pointed ears
+- Details: fur tips turning into opaque violet flame shapes with dark outlines
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no armor, no transparency, never on two legs.
 NATION PALETTE: colors as described. Signature effects (keep them small): matching magical sparks.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle soft colored rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Loup spectral: spectral violet wolf with flame-like spiky fur and glowing eyes.
+REMINDER: this is Loup spectral: spectral violet wolf (#7A4FD8) on four legs with flame-like spiky fur; glowing white eyes, pointed ears; fur tips turning into opaque violet flame shapes with dark outlines. Forbidden: no armor, no transparency, never on two legs.
 ```
 
 | Case | Pose | Fichier |
@@ -132,8 +144,11 @@ Dans l'Atelier : personnage « Loup spectral », planche « Face · marche, 2 at
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Loup spectral (a summon)
-- Look: spectral violet wolf with flame-like spiky fur and glowing eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: spectral violet wolf (#7A4FD8) on four legs with flame-like spiky fur
+- Head: glowing white eyes, pointed ears
+- Details: fur tips turning into opaque violet flame shapes with dark outlines
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no armor, no transparency, never on two legs.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -147,7 +162,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Loup spectral: spectral violet wolf with flame-like spiky fur and glowing eyes.
+REMINDER: this is Loup spectral: spectral violet wolf (#7A4FD8) on four legs with flame-like spiky fur; glowing white eyes, pointed ears; fur tips turning into opaque violet flame shapes with dark outlines. Forbidden: no armor, no transparency, never on two legs.
 ```
 
 | Case | Pose | Fichier |
@@ -165,8 +180,11 @@ Dans l'Atelier : personnage « Loup spectral », planche « Dos · marche, 2 att
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Loup spectral (a summon)
-- Look: spectral violet wolf with flame-like spiky fur and glowing eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: spectral violet wolf (#7A4FD8) on four legs with flame-like spiky fur
+- Head: glowing white eyes, pointed ears
+- Details: fur tips turning into opaque violet flame shapes with dark outlines
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no armor, no transparency, never on two legs.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -180,7 +198,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Loup spectral: spectral violet wolf with flame-like spiky fur and glowing eyes.
+REMINDER: this is Loup spectral: spectral violet wolf (#7A4FD8) on four legs with flame-like spiky fur; glowing white eyes, pointed ears; fur tips turning into opaque violet flame shapes with dark outlines. Forbidden: no armor, no transparency, never on two legs.
 ```
 
 | Case | Pose | Fichier |
@@ -202,15 +220,18 @@ Dans l'Atelier : personnage « Requin des marées », planche « Référence · 
 Character reference sheet of ONE summoned familiar for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Requin des marées (a summon)
-- Look: bright blue shark with a white belly floating upright, fins like small arms
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: bright blue shark (#2E8CE0) with a white belly floating upright
+- Head: friendly grin, small black eyes
+- Details: pectoral fins like small arms
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no legs, no weapon.
 NATION PALETTE: colors as described. Signature effects (keep them small): matching magical sparks.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle soft colored rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Requin des marées: bright blue shark with a white belly floating upright, fins like small arms.
+REMINDER: this is Requin des marées: bright blue shark (#2E8CE0) with a white belly floating upright; friendly grin, small black eyes; pectoral fins like small arms. Forbidden: no legs, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -226,8 +247,11 @@ Dans l'Atelier : personnage « Requin des marées », planche « Face · marche,
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Requin des marées (a summon)
-- Look: bright blue shark with a white belly floating upright, fins like small arms
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: bright blue shark (#2E8CE0) with a white belly floating upright
+- Head: friendly grin, small black eyes
+- Details: pectoral fins like small arms
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no legs, no weapon.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -241,7 +265,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Requin des marées: bright blue shark with a white belly floating upright, fins like small arms.
+REMINDER: this is Requin des marées: bright blue shark (#2E8CE0) with a white belly floating upright; friendly grin, small black eyes; pectoral fins like small arms. Forbidden: no legs, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -259,8 +283,11 @@ Dans l'Atelier : personnage « Requin des marées », planche « Dos · marche, 
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Requin des marées (a summon)
-- Look: bright blue shark with a white belly floating upright, fins like small arms
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: bright blue shark (#2E8CE0) with a white belly floating upright
+- Head: friendly grin, small black eyes
+- Details: pectoral fins like small arms
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no legs, no weapon.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -274,7 +301,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Requin des marées: bright blue shark with a white belly floating upright, fins like small arms.
+REMINDER: this is Requin des marées: bright blue shark (#2E8CE0) with a white belly floating upright; friendly grin, small black eyes; pectoral fins like small arms. Forbidden: no legs, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -296,15 +323,18 @@ Dans l'Atelier : personnage « Élémentaire de cristal », planche « Référen
 Character reference sheet of ONE summoned familiar for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Élémentaire de cristal (a summon)
-- Look: small elemental made of violet and blue crystals, friendly glowing eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: small floating elemental made of violet (#8A4FD8) and blue (#4F7FE0) crystals, round and cute
+- Head: friendly glowing ice-blue eyes (#9FE3FF)
+- Details: tiny crystal arms, no legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no sharp menacing look.
 NATION PALETTE: colors as described. Signature effects (keep them small): matching magical sparks.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle soft colored rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Élémentaire de cristal: small elemental made of violet and blue crystals, friendly glowing eyes.
+REMINDER: this is Élémentaire de cristal: small floating elemental made of violet (#8A4FD8) and blue (#4F7FE0) crystals, round and cute; friendly glowing ice-blue eyes (#9FE3FF); tiny crystal arms, no legs. Forbidden: no weapon, no sharp menacing look.
 ```
 
 | Case | Pose | Fichier |
@@ -320,8 +350,11 @@ Dans l'Atelier : personnage « Élémentaire de cristal », planche « Face · m
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Élémentaire de cristal (a summon)
-- Look: small elemental made of violet and blue crystals, friendly glowing eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: small floating elemental made of violet (#8A4FD8) and blue (#4F7FE0) crystals, round and cute
+- Head: friendly glowing ice-blue eyes (#9FE3FF)
+- Details: tiny crystal arms, no legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no sharp menacing look.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -335,7 +368,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Élémentaire de cristal: small elemental made of violet and blue crystals, friendly glowing eyes.
+REMINDER: this is Élémentaire de cristal: small floating elemental made of violet (#8A4FD8) and blue (#4F7FE0) crystals, round and cute; friendly glowing ice-blue eyes (#9FE3FF); tiny crystal arms, no legs. Forbidden: no weapon, no sharp menacing look.
 ```
 
 | Case | Pose | Fichier |
@@ -353,8 +386,11 @@ Dans l'Atelier : personnage « Élémentaire de cristal », planche « Dos · ma
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Élémentaire de cristal (a summon)
-- Look: small elemental made of violet and blue crystals, friendly glowing eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: small floating elemental made of violet (#8A4FD8) and blue (#4F7FE0) crystals, round and cute
+- Head: friendly glowing ice-blue eyes (#9FE3FF)
+- Details: tiny crystal arms, no legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no sharp menacing look.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -368,7 +404,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Élémentaire de cristal: small elemental made of violet and blue crystals, friendly glowing eyes.
+REMINDER: this is Élémentaire de cristal: small floating elemental made of violet (#8A4FD8) and blue (#4F7FE0) crystals, round and cute; friendly glowing ice-blue eyes (#9FE3FF); tiny crystal arms, no legs. Forbidden: no weapon, no sharp menacing look.
 ```
 
 | Case | Pose | Fichier |
@@ -390,15 +426,18 @@ Dans l'Atelier : personnage « Ombre », planche « Référence · repos de face
 Character reference sheet of ONE summoned familiar for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ombre (a summon)
-- Look: coiled purple shadow serpent with a dragon-like head, stylized opaque smoke curls
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: coiled purple shadow serpent (#4A2A7A) with darker stripes
+- Head: dragon-like head with small horns and glowing violet eyes (#B070FF)
+- Details: stylized opaque smoke curls with dark outlines along the body
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no legs, no wings, no transparency.
 NATION PALETTE: colors as described. Signature effects (keep them small): matching magical sparks.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle soft colored rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Ombre: coiled purple shadow serpent with a dragon-like head, stylized opaque smoke curls.
+REMINDER: this is Ombre: coiled purple shadow serpent (#4A2A7A) with darker stripes; dragon-like head with small horns and glowing violet eyes (#B070FF); stylized opaque smoke curls with dark outlines along the body. Forbidden: no legs, no wings, no transparency.
 ```
 
 | Case | Pose | Fichier |
@@ -414,8 +453,11 @@ Dans l'Atelier : personnage « Ombre », planche « Face · marche, 2 attaques, 
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ombre (a summon)
-- Look: coiled purple shadow serpent with a dragon-like head, stylized opaque smoke curls
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: coiled purple shadow serpent (#4A2A7A) with darker stripes
+- Head: dragon-like head with small horns and glowing violet eyes (#B070FF)
+- Details: stylized opaque smoke curls with dark outlines along the body
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no legs, no wings, no transparency.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -429,7 +471,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Ombre: coiled purple shadow serpent with a dragon-like head, stylized opaque smoke curls.
+REMINDER: this is Ombre: coiled purple shadow serpent (#4A2A7A) with darker stripes; dragon-like head with small horns and glowing violet eyes (#B070FF); stylized opaque smoke curls with dark outlines along the body. Forbidden: no legs, no wings, no transparency.
 ```
 
 | Case | Pose | Fichier |
@@ -447,8 +489,11 @@ Dans l'Atelier : personnage « Ombre », planche « Dos · marche, 2 attaques, s
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ombre (a summon)
-- Look: coiled purple shadow serpent with a dragon-like head, stylized opaque smoke curls
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: coiled purple shadow serpent (#4A2A7A) with darker stripes
+- Head: dragon-like head with small horns and glowing violet eyes (#B070FF)
+- Details: stylized opaque smoke curls with dark outlines along the body
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no legs, no wings, no transparency.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -462,7 +507,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Ombre: coiled purple shadow serpent with a dragon-like head, stylized opaque smoke curls.
+REMINDER: this is Ombre: coiled purple shadow serpent (#4A2A7A) with darker stripes; dragon-like head with small horns and glowing violet eyes (#B070FF); stylized opaque smoke curls with dark outlines along the body. Forbidden: no legs, no wings, no transparency.
 ```
 
 | Case | Pose | Fichier |
@@ -484,15 +529,18 @@ Dans l'Atelier : personnage « Esprit de la forêt », planche « Référence ·
 Character reference sheet of ONE summoned familiar for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Esprit de la forêt (a summon)
-- Look: forest stag spirit with a body of leaves and moss and large branching antlers
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: forest stag spirit on four legs, body of green leaves (#5FAE48) and moss
+- Head: large branching wooden antlers with small leaves, glowing green eyes
+- Details: small white flowers on the back
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no rider, no armor, never on two legs.
 NATION PALETTE: colors as described. Signature effects (keep them small): matching magical sparks.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle soft colored rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Esprit de la forêt: forest stag spirit with a body of leaves and moss and large branching antlers.
+REMINDER: this is Esprit de la forêt: forest stag spirit on four legs, body of green leaves (#5FAE48) and moss; large branching wooden antlers with small leaves, glowing green eyes; small white flowers on the back. Forbidden: no rider, no armor, never on two legs.
 ```
 
 | Case | Pose | Fichier |
@@ -508,8 +556,11 @@ Dans l'Atelier : personnage « Esprit de la forêt », planche « Face · marche
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Esprit de la forêt (a summon)
-- Look: forest stag spirit with a body of leaves and moss and large branching antlers
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: forest stag spirit on four legs, body of green leaves (#5FAE48) and moss
+- Head: large branching wooden antlers with small leaves, glowing green eyes
+- Details: small white flowers on the back
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no rider, no armor, never on two legs.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -523,7 +574,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Esprit de la forêt: forest stag spirit with a body of leaves and moss and large branching antlers.
+REMINDER: this is Esprit de la forêt: forest stag spirit on four legs, body of green leaves (#5FAE48) and moss; large branching wooden antlers with small leaves, glowing green eyes; small white flowers on the back. Forbidden: no rider, no armor, never on two legs.
 ```
 
 | Case | Pose | Fichier |
@@ -541,8 +592,11 @@ Dans l'Atelier : personnage « Esprit de la forêt », planche « Dos · marche,
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Esprit de la forêt (a summon)
-- Look: forest stag spirit with a body of leaves and moss and large branching antlers
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: forest stag spirit on four legs, body of green leaves (#5FAE48) and moss
+- Head: large branching wooden antlers with small leaves, glowing green eyes
+- Details: small white flowers on the back
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no rider, no armor, never on two legs.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -556,7 +610,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Esprit de la forêt: forest stag spirit with a body of leaves and moss and large branching antlers.
+REMINDER: this is Esprit de la forêt: forest stag spirit on four legs, body of green leaves (#5FAE48) and moss; large branching wooden antlers with small leaves, glowing green eyes; small white flowers on the back. Forbidden: no rider, no armor, never on two legs.
 ```
 
 | Case | Pose | Fichier |
@@ -578,15 +632,18 @@ Dans l'Atelier : personnage « Archer sylvestre », planche « Référence · re
 Character reference sheet of ONE summoned familiar for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Archer sylvestre (a summon)
-- Look: slim wooden archer made of branches and leaves, carrying a wooden bow
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: slim wooden archer made of light-brown branches (#8A6238) and green leaves
+- Head: leafy crown, two glowing green eyes, no mouth
+- Weapon: wooden bow in the LEFT hand, leaf quiver on the back
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human skin, no metal.
 NATION PALETTE: colors as described. Signature effects (keep them small): matching magical sparks.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle soft colored rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Archer sylvestre: slim wooden archer made of branches and leaves, carrying a wooden bow.
+REMINDER: this is Archer sylvestre: slim wooden archer made of light-brown branches (#8A6238) and green leaves; leafy crown, two glowing green eyes, no mouth; wooden bow in the LEFT hand, leaf quiver on the back. Forbidden: no human skin, no metal.
 ```
 
 | Case | Pose | Fichier |
@@ -602,8 +659,11 @@ Dans l'Atelier : personnage « Archer sylvestre », planche « Face · marche, 2
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Archer sylvestre (a summon)
-- Look: slim wooden archer made of branches and leaves, carrying a wooden bow
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: slim wooden archer made of light-brown branches (#8A6238) and green leaves
+- Head: leafy crown, two glowing green eyes, no mouth
+- Weapon: wooden bow in the LEFT hand, leaf quiver on the back
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human skin, no metal.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -617,7 +677,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Archer sylvestre: slim wooden archer made of branches and leaves, carrying a wooden bow.
+REMINDER: this is Archer sylvestre: slim wooden archer made of light-brown branches (#8A6238) and green leaves; leafy crown, two glowing green eyes, no mouth; wooden bow in the LEFT hand, leaf quiver on the back. Forbidden: no human skin, no metal.
 ```
 
 | Case | Pose | Fichier |
@@ -635,8 +695,11 @@ Dans l'Atelier : personnage « Archer sylvestre », planche « Dos · marche, 2 
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Archer sylvestre (a summon)
-- Look: slim wooden archer made of branches and leaves, carrying a wooden bow
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: slim wooden archer made of light-brown branches (#8A6238) and green leaves
+- Head: leafy crown, two glowing green eyes, no mouth
+- Weapon: wooden bow in the LEFT hand, leaf quiver on the back
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human skin, no metal.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -650,7 +713,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Archer sylvestre: slim wooden archer made of branches and leaves, carrying a wooden bow.
+REMINDER: this is Archer sylvestre: slim wooden archer made of light-brown branches (#8A6238) and green leaves; leafy crown, two glowing green eyes, no mouth; wooden bow in the LEFT hand, leaf quiver on the back. Forbidden: no human skin, no metal.
 ```
 
 | Case | Pose | Fichier |
@@ -672,15 +735,18 @@ Dans l'Atelier : personnage « Ent de combat », planche « Référence · repos
 Character reference sheet of ONE summoned familiar for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ent de combat (a summon)
-- Look: small wooden ent warrior covered in leaves, stubby branch arms
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: small wooden ent warrior of brown bark (#6B4A2B) covered in green leaves
+- Head: face carved in the bark with glowing green eyes, leafy top
+- Details: stubby branch arms, root feet
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no metal.
 NATION PALETTE: colors as described. Signature effects (keep them small): matching magical sparks.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle soft colored rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Ent de combat: small wooden ent warrior covered in leaves, stubby branch arms.
+REMINDER: this is Ent de combat: small wooden ent warrior of brown bark (#6B4A2B) covered in green leaves; face carved in the bark with glowing green eyes, leafy top; stubby branch arms, root feet. Forbidden: no weapon, no metal.
 ```
 
 | Case | Pose | Fichier |
@@ -696,8 +762,11 @@ Dans l'Atelier : personnage « Ent de combat », planche « Face · marche, 2 at
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ent de combat (a summon)
-- Look: small wooden ent warrior covered in leaves, stubby branch arms
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: small wooden ent warrior of brown bark (#6B4A2B) covered in green leaves
+- Head: face carved in the bark with glowing green eyes, leafy top
+- Details: stubby branch arms, root feet
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no metal.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -711,7 +780,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Ent de combat: small wooden ent warrior covered in leaves, stubby branch arms.
+REMINDER: this is Ent de combat: small wooden ent warrior of brown bark (#6B4A2B) covered in green leaves; face carved in the bark with glowing green eyes, leafy top; stubby branch arms, root feet. Forbidden: no weapon, no metal.
 ```
 
 | Case | Pose | Fichier |
@@ -729,8 +798,11 @@ Dans l'Atelier : personnage « Ent de combat », planche « Dos · marche, 2 att
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ent de combat (a summon)
-- Look: small wooden ent warrior covered in leaves, stubby branch arms
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: small wooden ent warrior of brown bark (#6B4A2B) covered in green leaves
+- Head: face carved in the bark with glowing green eyes, leafy top
+- Details: stubby branch arms, root feet
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no metal.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -744,7 +816,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Ent de combat: small wooden ent warrior covered in leaves, stubby branch arms.
+REMINDER: this is Ent de combat: small wooden ent warrior of brown bark (#6B4A2B) covered in green leaves; face carved in the bark with glowing green eyes, leafy top; stubby branch arms, root feet. Forbidden: no weapon, no metal.
 ```
 
 | Case | Pose | Fichier |
@@ -766,15 +838,18 @@ Dans l'Atelier : personnage « Tronc », planche « Référence · repos de face
 Character reference sheet of ONE summoned familiar for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Tronc (a summon)
-- Look: cute walking tree stump with a round leafy crown, big eyes and branch arms
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: cute walking tree stump of brown bark (#7A5534)
+- Head: round leafy green crown on top (#5FAE48), big round friendly eyes on the trunk
+- Details: two small branch arms, little root feet
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no angry face.
 NATION PALETTE: colors as described. Signature effects (keep them small): matching magical sparks.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle soft colored rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Tronc: cute walking tree stump with a round leafy crown, big eyes and branch arms.
+REMINDER: this is Tronc: cute walking tree stump of brown bark (#7A5534); round leafy green crown on top (#5FAE48), big round friendly eyes on the trunk; two small branch arms, little root feet. Forbidden: no weapon, no angry face.
 ```
 
 | Case | Pose | Fichier |
@@ -790,8 +865,11 @@ Dans l'Atelier : personnage « Tronc », planche « Face · marche, 2 attaques, 
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Tronc (a summon)
-- Look: cute walking tree stump with a round leafy crown, big eyes and branch arms
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: cute walking tree stump of brown bark (#7A5534)
+- Head: round leafy green crown on top (#5FAE48), big round friendly eyes on the trunk
+- Details: two small branch arms, little root feet
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no angry face.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -805,7 +883,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Tronc: cute walking tree stump with a round leafy crown, big eyes and branch arms.
+REMINDER: this is Tronc: cute walking tree stump of brown bark (#7A5534); round leafy green crown on top (#5FAE48), big round friendly eyes on the trunk; two small branch arms, little root feet. Forbidden: no weapon, no angry face.
 ```
 
 | Case | Pose | Fichier |
@@ -823,8 +901,11 @@ Dans l'Atelier : personnage « Tronc », planche « Dos · marche, 2 attaques, s
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Tronc (a summon)
-- Look: cute walking tree stump with a round leafy crown, big eyes and branch arms
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: cute walking tree stump of brown bark (#7A5534)
+- Head: round leafy green crown on top (#5FAE48), big round friendly eyes on the trunk
+- Details: two small branch arms, little root feet
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no angry face.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -838,7 +919,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Tronc: cute walking tree stump with a round leafy crown, big eyes and branch arms.
+REMINDER: this is Tronc: cute walking tree stump of brown bark (#7A5534); round leafy green crown on top (#5FAE48), big round friendly eyes on the trunk; two small branch arms, little root feet. Forbidden: no weapon, no angry face.
 ```
 
 | Case | Pose | Fichier |
@@ -860,15 +941,18 @@ Dans l'Atelier : personnage « Sarriette », planche « Référence · repos de 
 Character reference sheet of ONE summoned familiar for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Sarriette (a summon)
-- Look: tiny leaf sprite girl in a green leaf hood with little horns and a curly vine
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: tiny leaf sprite girl with light green skin (#BFE8A8)
+- Head: green leaf hood (#5FAE48) with two little horns, big dark eyes
+- Details: a curly vine in the hand, leaf dress
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings, no weapon.
 NATION PALETTE: colors as described. Signature effects (keep them small): matching magical sparks.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle soft colored rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Sarriette: tiny leaf sprite girl in a green leaf hood with little horns and a curly vine.
+REMINDER: this is Sarriette: tiny leaf sprite girl with light green skin (#BFE8A8); green leaf hood (#5FAE48) with two little horns, big dark eyes; a curly vine in the hand, leaf dress. Forbidden: no wings, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -884,8 +968,11 @@ Dans l'Atelier : personnage « Sarriette », planche « Face · marche, 2 attaqu
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Sarriette (a summon)
-- Look: tiny leaf sprite girl in a green leaf hood with little horns and a curly vine
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: tiny leaf sprite girl with light green skin (#BFE8A8)
+- Head: green leaf hood (#5FAE48) with two little horns, big dark eyes
+- Details: a curly vine in the hand, leaf dress
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings, no weapon.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -899,7 +986,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Sarriette: tiny leaf sprite girl in a green leaf hood with little horns and a curly vine.
+REMINDER: this is Sarriette: tiny leaf sprite girl with light green skin (#BFE8A8); green leaf hood (#5FAE48) with two little horns, big dark eyes; a curly vine in the hand, leaf dress. Forbidden: no wings, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -917,8 +1004,11 @@ Dans l'Atelier : personnage « Sarriette », planche « Dos · marche, 2 attaque
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Sarriette (a summon)
-- Look: tiny leaf sprite girl in a green leaf hood with little horns and a curly vine
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: tiny leaf sprite girl with light green skin (#BFE8A8)
+- Head: green leaf hood (#5FAE48) with two little horns, big dark eyes
+- Details: a curly vine in the hand, leaf dress
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings, no weapon.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -932,7 +1022,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Sarriette: tiny leaf sprite girl in a green leaf hood with little horns and a curly vine.
+REMINDER: this is Sarriette: tiny leaf sprite girl with light green skin (#BFE8A8); green leaf hood (#5FAE48) with two little horns, big dark eyes; a curly vine in the hand, leaf dress. Forbidden: no wings, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -954,15 +1044,18 @@ Dans l'Atelier : personnage « Ronce agressive », planche « Référence · rep
 Character reference sheet of ONE summoned familiar for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ronce agressive (a summon)
-- Look: angry bramble bulb covered in thorns with red eyes and whipping vines
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: angry dark-green bramble bulb (#3E6A2E) covered in sharp thorns
+- Head: two angry red eyes (#E02A2A), jagged mouth
+- Details: whipping thorny vines around it, rooted in the ground
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no legs, no flowers.
 NATION PALETTE: colors as described. Signature effects (keep them small): matching magical sparks.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle soft colored rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Ronce agressive: angry bramble bulb covered in thorns with red eyes and whipping vines.
+REMINDER: this is Ronce agressive: angry dark-green bramble bulb (#3E6A2E) covered in sharp thorns; two angry red eyes (#E02A2A), jagged mouth; whipping thorny vines around it, rooted in the ground. Forbidden: no legs, no flowers.
 ```
 
 | Case | Pose | Fichier |
@@ -978,8 +1071,11 @@ Dans l'Atelier : personnage « Ronce agressive », planche « Face · marche, 2 
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ronce agressive (a summon)
-- Look: angry bramble bulb covered in thorns with red eyes and whipping vines
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: angry dark-green bramble bulb (#3E6A2E) covered in sharp thorns
+- Head: two angry red eyes (#E02A2A), jagged mouth
+- Details: whipping thorny vines around it, rooted in the ground
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no legs, no flowers.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -993,7 +1089,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Ronce agressive: angry bramble bulb covered in thorns with red eyes and whipping vines.
+REMINDER: this is Ronce agressive: angry dark-green bramble bulb (#3E6A2E) covered in sharp thorns; two angry red eyes (#E02A2A), jagged mouth; whipping thorny vines around it, rooted in the ground. Forbidden: no legs, no flowers.
 ```
 
 | Case | Pose | Fichier |
@@ -1011,8 +1107,11 @@ Dans l'Atelier : personnage « Ronce agressive », planche « Dos · marche, 2 a
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ronce agressive (a summon)
-- Look: angry bramble bulb covered in thorns with red eyes and whipping vines
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: angry dark-green bramble bulb (#3E6A2E) covered in sharp thorns
+- Head: two angry red eyes (#E02A2A), jagged mouth
+- Details: whipping thorny vines around it, rooted in the ground
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no legs, no flowers.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -1026,7 +1125,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Ronce agressive: angry bramble bulb covered in thorns with red eyes and whipping vines.
+REMINDER: this is Ronce agressive: angry dark-green bramble bulb (#3E6A2E) covered in sharp thorns; two angry red eyes (#E02A2A), jagged mouth; whipping thorny vines around it, rooted in the ground. Forbidden: no legs, no flowers.
 ```
 
 | Case | Pose | Fichier |
@@ -1048,15 +1147,18 @@ Dans l'Atelier : personnage « Sentinelle de grès », planche « Référence ·
 Character reference sheet of ONE summoned familiar for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Sentinelle de grès (a summon)
-- Look: sandstone sentinel statue with amber eyes and carved armor
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: sandstone sentinel statue (#D9B07A) with carved armor
+- Head: carved helmet-head with glowing amber eyes (#F2A93B)
+- Weapon: carved stone spear, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no cloth, no skin.
 NATION PALETTE: colors as described. Signature effects (keep them small): matching magical sparks.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle soft colored rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Sentinelle de grès: sandstone sentinel statue with amber eyes and carved armor.
+REMINDER: this is Sentinelle de grès: sandstone sentinel statue (#D9B07A) with carved armor; carved helmet-head with glowing amber eyes (#F2A93B); carved stone spear, RIGHT hand. Forbidden: no cloth, no skin.
 ```
 
 | Case | Pose | Fichier |
@@ -1072,8 +1174,11 @@ Dans l'Atelier : personnage « Sentinelle de grès », planche « Face · marche
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Sentinelle de grès (a summon)
-- Look: sandstone sentinel statue with amber eyes and carved armor
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: sandstone sentinel statue (#D9B07A) with carved armor
+- Head: carved helmet-head with glowing amber eyes (#F2A93B)
+- Weapon: carved stone spear, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no cloth, no skin.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -1087,7 +1192,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Sentinelle de grès: sandstone sentinel statue with amber eyes and carved armor.
+REMINDER: this is Sentinelle de grès: sandstone sentinel statue (#D9B07A) with carved armor; carved helmet-head with glowing amber eyes (#F2A93B); carved stone spear, RIGHT hand. Forbidden: no cloth, no skin.
 ```
 
 | Case | Pose | Fichier |
@@ -1105,8 +1210,11 @@ Dans l'Atelier : personnage « Sentinelle de grès », planche « Dos · marche,
 Sprite sheet of ONE summoned familiar for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Sentinelle de grès (a summon)
-- Look: sandstone sentinel statue with amber eyes and carved armor
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: sandstone sentinel statue (#D9B07A) with carved armor
+- Head: carved helmet-head with glowing amber eyes (#F2A93B)
+- Weapon: carved stone spear, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no cloth, no skin.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: colors as described.
@@ -1120,7 +1228,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: matching magical sparks, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Sentinelle de grès: sandstone sentinel statue with amber eyes and carved armor.
+REMINDER: this is Sentinelle de grès: sandstone sentinel statue (#D9B07A) with carved armor; carved helmet-head with glowing amber eyes (#F2A93B); carved stone spear, RIGHT hand. Forbidden: no cloth, no skin.
 ```
 
 | Case | Pose | Fichier |

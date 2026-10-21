@@ -284,15 +284,17 @@ Dans l'Atelier : personnage « Araknéa », planche « Référence · repos de f
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Araknéa (enemy of the Sylvestre nation)
-- Look: forest spider-beetle with an emerald armored carapace, curved horns, sharp mandibles and six legs
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: forest spider-beetle with six thin dark-brown legs (#3B2A1E) and a domed emerald armored carapace (#2FA060) with lighter green edges
+- Head: two curved ivory horns, sharp brown mandibles, four small glowing amber eyes (#F2B233)
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no eight legs, no wings, no human body, no weapon.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows. Signature effects (keep them small): green leaves and glowing spores.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Araknéa: forest spider-beetle with an emerald armored carapace, curved horns, sharp mandibles and six legs.
+REMINDER: this is Araknéa: forest spider-beetle with six thin dark-brown legs (#3B2A1E) and a domed emerald armored carapace (#2FA060) with lighter green edges; two curved ivory horns, sharp brown mandibles, four small glowing amber eyes (#F2B233). Forbidden: no eight legs, no wings, no human body, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -308,8 +310,10 @@ Dans l'Atelier : personnage « Araknéa », planche « Face · marche, 2 attaque
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Araknéa (enemy of the Sylvestre nation)
-- Look: forest spider-beetle with an emerald armored carapace, curved horns, sharp mandibles and six legs
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: forest spider-beetle with six thin dark-brown legs (#3B2A1E) and a domed emerald armored carapace (#2FA060) with lighter green edges
+- Head: two curved ivory horns, sharp brown mandibles, four small glowing amber eyes (#F2B233)
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no eight legs, no wings, no human body, no weapon.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
@@ -323,7 +327,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Araknéa: forest spider-beetle with an emerald armored carapace, curved horns, sharp mandibles and six legs.
+REMINDER: this is Araknéa: forest spider-beetle with six thin dark-brown legs (#3B2A1E) and a domed emerald armored carapace (#2FA060) with lighter green edges; two curved ivory horns, sharp brown mandibles, four small glowing amber eyes (#F2B233). Forbidden: no eight legs, no wings, no human body, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -341,8 +345,10 @@ Dans l'Atelier : personnage « Araknéa », planche « Dos · marche, 2 attaques
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Araknéa (enemy of the Sylvestre nation)
-- Look: forest spider-beetle with an emerald armored carapace, curved horns, sharp mandibles and six legs
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: forest spider-beetle with six thin dark-brown legs (#3B2A1E) and a domed emerald armored carapace (#2FA060) with lighter green edges
+- Head: two curved ivory horns, sharp brown mandibles, four small glowing amber eyes (#F2B233)
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no eight legs, no wings, no human body, no weapon.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
@@ -356,7 +362,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Araknéa: forest spider-beetle with an emerald armored carapace, curved horns, sharp mandibles and six legs.
+REMINDER: this is Araknéa: forest spider-beetle with six thin dark-brown legs (#3B2A1E) and a domed emerald armored carapace (#2FA060) with lighter green edges; two curved ivory horns, sharp brown mandibles, four small glowing amber eyes (#F2B233). Forbidden: no eight legs, no wings, no human body, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -378,15 +384,18 @@ Dans l'Atelier : personnage « Loup forestier », planche « Référence · repo
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Loup forestier (enemy of the Sylvestre nation)
-- Look: sturdy wolf with dark moss-green fur, a mane of leaves and twigs, amber eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: sturdy four-legged wolf with dark moss-green fur (#3E5E34) and a lighter sage belly
+- Head: mane of green leaves and brown twigs around the neck, amber eyes (#E0A030), black nose
+- Details: bushy tail tipped with leaves
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no armor, no rider, no grey or brown fur, never standing on two legs.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows. Signature effects (keep them small): green leaves and glowing spores.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Loup forestier: sturdy wolf with dark moss-green fur, a mane of leaves and twigs, amber eyes.
+REMINDER: this is Loup forestier: sturdy four-legged wolf with dark moss-green fur (#3E5E34) and a lighter sage belly; mane of green leaves and brown twigs around the neck, amber eyes (#E0A030), black nose; bushy tail tipped with leaves. Forbidden: no armor, no rider, no grey or brown fur, never standing on two legs.
 ```
 
 | Case | Pose | Fichier |
@@ -402,8 +411,11 @@ Dans l'Atelier : personnage « Loup forestier », planche « Face · marche, 2 a
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Loup forestier (enemy of the Sylvestre nation)
-- Look: sturdy wolf with dark moss-green fur, a mane of leaves and twigs, amber eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: sturdy four-legged wolf with dark moss-green fur (#3E5E34) and a lighter sage belly
+- Head: mane of green leaves and brown twigs around the neck, amber eyes (#E0A030), black nose
+- Details: bushy tail tipped with leaves
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no armor, no rider, no grey or brown fur, never standing on two legs.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
@@ -417,7 +429,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Loup forestier: sturdy wolf with dark moss-green fur, a mane of leaves and twigs, amber eyes.
+REMINDER: this is Loup forestier: sturdy four-legged wolf with dark moss-green fur (#3E5E34) and a lighter sage belly; mane of green leaves and brown twigs around the neck, amber eyes (#E0A030), black nose; bushy tail tipped with leaves. Forbidden: no armor, no rider, no grey or brown fur, never standing on two legs.
 ```
 
 | Case | Pose | Fichier |
@@ -435,8 +447,11 @@ Dans l'Atelier : personnage « Loup forestier », planche « Dos · marche, 2 at
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Loup forestier (enemy of the Sylvestre nation)
-- Look: sturdy wolf with dark moss-green fur, a mane of leaves and twigs, amber eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: sturdy four-legged wolf with dark moss-green fur (#3E5E34) and a lighter sage belly
+- Head: mane of green leaves and brown twigs around the neck, amber eyes (#E0A030), black nose
+- Details: bushy tail tipped with leaves
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no armor, no rider, no grey or brown fur, never standing on two legs.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
@@ -450,7 +465,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Loup forestier: sturdy wolf with dark moss-green fur, a mane of leaves and twigs, amber eyes.
+REMINDER: this is Loup forestier: sturdy four-legged wolf with dark moss-green fur (#3E5E34) and a lighter sage belly; mane of green leaves and brown twigs around the neck, amber eyes (#E0A030), black nose; bushy tail tipped with leaves. Forbidden: no armor, no rider, no grey or brown fur, never standing on two legs.
 ```
 
 | Case | Pose | Fichier |
@@ -472,15 +487,18 @@ Dans l'Atelier : personnage « Dryade », planche « Référence · repos de fac
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Dryade (enemy of the Sylvestre nation)
-- Look: dryad archer whose body is made of branches and leaves, wooden bow, leafy hair
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: slim dryad woman whose body is made of light-brown branches (#8A6238) and green leaves (#5FAE48)
+- Head: long hair made of green leaves with small pink flowers, glowing green eyes (#7CFF8A)
+- Weapon: simple wooden bow in the LEFT hand, no quiver
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no clothes, no metal, no human skin.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows. Signature effects (keep them small): green leaves and glowing spores.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Dryade: dryad archer whose body is made of branches and leaves, wooden bow, leafy hair.
+REMINDER: this is Dryade: slim dryad woman whose body is made of light-brown branches (#8A6238) and green leaves (#5FAE48); long hair made of green leaves with small pink flowers, glowing green eyes (#7CFF8A); simple wooden bow in the LEFT hand, no quiver. Forbidden: no clothes, no metal, no human skin.
 ```
 
 | Case | Pose | Fichier |
@@ -496,8 +514,11 @@ Dans l'Atelier : personnage « Dryade », planche « Face · marche, 2 attaques,
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Dryade (enemy of the Sylvestre nation)
-- Look: dryad archer whose body is made of branches and leaves, wooden bow, leafy hair
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: slim dryad woman whose body is made of light-brown branches (#8A6238) and green leaves (#5FAE48)
+- Head: long hair made of green leaves with small pink flowers, glowing green eyes (#7CFF8A)
+- Weapon: simple wooden bow in the LEFT hand, no quiver
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no clothes, no metal, no human skin.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
@@ -511,7 +532,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Dryade: dryad archer whose body is made of branches and leaves, wooden bow, leafy hair.
+REMINDER: this is Dryade: slim dryad woman whose body is made of light-brown branches (#8A6238) and green leaves (#5FAE48); long hair made of green leaves with small pink flowers, glowing green eyes (#7CFF8A); simple wooden bow in the LEFT hand, no quiver. Forbidden: no clothes, no metal, no human skin.
 ```
 
 | Case | Pose | Fichier |
@@ -529,8 +550,11 @@ Dans l'Atelier : personnage « Dryade », planche « Dos · marche, 2 attaques, 
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Dryade (enemy of the Sylvestre nation)
-- Look: dryad archer whose body is made of branches and leaves, wooden bow, leafy hair
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: slim dryad woman whose body is made of light-brown branches (#8A6238) and green leaves (#5FAE48)
+- Head: long hair made of green leaves with small pink flowers, glowing green eyes (#7CFF8A)
+- Weapon: simple wooden bow in the LEFT hand, no quiver
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no clothes, no metal, no human skin.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
@@ -544,7 +568,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Dryade: dryad archer whose body is made of branches and leaves, wooden bow, leafy hair.
+REMINDER: this is Dryade: slim dryad woman whose body is made of light-brown branches (#8A6238) and green leaves (#5FAE48); long hair made of green leaves with small pink flowers, glowing green eyes (#7CFF8A); simple wooden bow in the LEFT hand, no quiver. Forbidden: no clothes, no metal, no human skin.
 ```
 
 | Case | Pose | Fichier |
@@ -566,15 +590,18 @@ Dans l'Atelier : personnage « Tréant », planche « Référence · repos de fa
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Tréant (enemy of the Sylvestre nation)
-- Look: walking tree trunk brute covered in moss and leaves, root-like legs, glowing green eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: walking tree-trunk brute of dark brown bark (#5A3E26) covered in green moss (#4F7A32)
+- Head: no neck, a face carved in the trunk with two glowing green eyes (#7CFF8A) and a crooked mouth, leafy crown on top
+- Details: two thick branch arms, root-like legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no armor, no flowers.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows. Signature effects (keep them small): green leaves and glowing spores.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Tréant: walking tree trunk brute covered in moss and leaves, root-like legs, glowing green eyes.
+REMINDER: this is Tréant: walking tree-trunk brute of dark brown bark (#5A3E26) covered in green moss (#4F7A32); no neck, a face carved in the trunk with two glowing green eyes (#7CFF8A) and a crooked mouth, leafy crown on top; two thick branch arms, root-like legs. Forbidden: no weapon, no armor, no flowers.
 ```
 
 | Case | Pose | Fichier |
@@ -590,8 +617,11 @@ Dans l'Atelier : personnage « Tréant », planche « Face · marche, 2 attaques
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Tréant (enemy of the Sylvestre nation)
-- Look: walking tree trunk brute covered in moss and leaves, root-like legs, glowing green eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: walking tree-trunk brute of dark brown bark (#5A3E26) covered in green moss (#4F7A32)
+- Head: no neck, a face carved in the trunk with two glowing green eyes (#7CFF8A) and a crooked mouth, leafy crown on top
+- Details: two thick branch arms, root-like legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no armor, no flowers.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
@@ -605,7 +635,7 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Tréant: walking tree trunk brute covered in moss and leaves, root-like legs, glowing green eyes.
+REMINDER: this is Tréant: walking tree-trunk brute of dark brown bark (#5A3E26) covered in green moss (#4F7A32); no neck, a face carved in the trunk with two glowing green eyes (#7CFF8A) and a crooked mouth, leafy crown on top; two thick branch arms, root-like legs. Forbidden: no weapon, no armor, no flowers.
 ```
 
 | Case | Pose | Fichier |
@@ -623,8 +653,11 @@ Dans l'Atelier : personnage « Tréant », planche « Dos · marche, 2 attaques,
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Tréant (enemy of the Sylvestre nation)
-- Look: walking tree trunk brute covered in moss and leaves, root-like legs, glowing green eyes
-- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+- Body: walking tree-trunk brute of dark brown bark (#5A3E26) covered in green moss (#4F7A32)
+- Head: no neck, a face carved in the trunk with two glowing green eyes (#7CFF8A) and a crooked mouth, leafy crown on top
+- Details: two thick branch arms, root-like legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no armor, no flowers.
 Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
@@ -638,7 +671,7 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Tréant: walking tree trunk brute covered in moss and leaves, root-like legs, glowing green eyes.
+REMINDER: this is Tréant: walking tree-trunk brute of dark brown bark (#5A3E26) covered in green moss (#4F7A32); no neck, a face carved in the trunk with two glowing green eyes (#7CFF8A) and a crooked mouth, leafy crown on top; two thick branch arms, root-like legs. Forbidden: no weapon, no armor, no flowers.
 ```
 
 | Case | Pose | Fichier |
