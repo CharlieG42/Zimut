@@ -7,7 +7,7 @@ Une seule vue par objet (ils ne se tournent pas) : ces planches peuvent regroupe
 ```text
 Object sprite sheet for a chibi isometric tactical RPG: 2 summoned objects of the Sylvain class.
 STYLE: Polished 2D game art inspired by Dofus and Waven, matching chibi character sprites: clean bold dark outlines, 3-tone cel shading, crisp material details, saturated harmonious colors, slightly cute rounded proportions, readable at small size. Soft key light from the upper left.
-GRID: strict grid of 2 columns x 1 rows of equal square cells, one object per cell, each object centered and entirely inside its cell with an empty margin of at least 10% on every side, a wide empty gutter (at least 25% of a cell) between cells that nothing crosses, all objects resting on the same ground line, seen from a 3/4 top-front angle.
+LAYOUT: 2 columns x 1 rows, like separate stickers floating on the background: each object occupies at most 55% of its part of the image and is centered in it, with a wide empty space between objects, nothing touching; all objects on the same ground line, seen from a 3/4 top-front angle. No frames, borders, dividing lines, floor or grid on the ground.
 OBJECTS, left to right:
 1. immobile magical tree with a thick trunk, round dense foliage and roots spreading on the ground.
 2. ring of gnarled roots coming out of the ground.
@@ -24,7 +24,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 ```text
 Object sprite sheet for a chibi isometric tactical RPG: 4 summoned objects of the Géomancien class.
 STYLE: Polished 2D game art inspired by Dofus and Waven, matching chibi character sprites: clean bold dark outlines, 3-tone cel shading, crisp material details, saturated harmonious colors, slightly cute rounded proportions, readable at small size. Soft key light from the upper left.
-GRID: strict grid of 4 columns x 1 rows of equal square cells, one object per cell, each object centered and entirely inside its cell with an empty margin of at least 10% on every side, a wide empty gutter (at least 25% of a cell) between cells that nothing crosses, all objects resting on the same ground line, seen from a 3/4 top-front angle.
+LAYOUT: 4 columns x 1 rows, like separate stickers floating on the background: each object occupies at most 55% of its part of the image and is centered in it, with a wide empty space between objects, nothing touching; all objects on the same ground line, seen from a 3/4 top-front angle. No frames, borders, dividing lines, floor or grid on the ground.
 OBJECTS, left to right:
 1. tall sandstone pillar with carved runes and an amber gem.
 2. short sandstone wall section with two carved posts.
@@ -45,7 +45,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 ```text
 Object sprite sheet for a chibi isometric tactical RPG: 1 summoned objects of the Chasseur class.
 STYLE: Polished 2D game art inspired by Dofus and Waven, matching chibi character sprites: clean bold dark outlines, 3-tone cel shading, crisp material details, saturated harmonious colors, slightly cute rounded proportions, readable at small size. Soft key light from the upper left.
-GRID: strict grid of 1 columns x 1 rows of equal square cells, one object per cell, each object centered and entirely inside its cell with an empty margin of at least 10% on every side, a wide empty gutter (at least 25% of a cell) between cells that nothing crosses, all objects resting on the same ground line, seen from a 3/4 top-front angle.
+LAYOUT: 1 columns x 1 rows, like separate stickers floating on the background: each object occupies at most 55% of its part of the image and is centered in it, with a wide empty space between objects, nothing touching; all objects on the same ground line, seen from a 3/4 top-front angle. No frames, borders, dividing lines, floor or grid on the ground.
 OBJECTS, left to right:
 1. hunter's marker beacon: a wooden post topped with a golden target sigil.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
@@ -60,7 +60,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 ```text
 Object sprite sheet for a chibi isometric tactical RPG: 3 summoned objects of the Artificier class.
 STYLE: Polished 2D game art inspired by Dofus and Waven, matching chibi character sprites: clean bold dark outlines, 3-tone cel shading, crisp material details, saturated harmonious colors, slightly cute rounded proportions, readable at small size. Soft key light from the upper left.
-GRID: strict grid of 3 columns x 1 rows of equal square cells, one object per cell, each object centered and entirely inside its cell with an empty margin of at least 10% on every side, a wide empty gutter (at least 25% of a cell) between cells that nothing crosses, all objects resting on the same ground line, seen from a 3/4 top-front angle.
+LAYOUT: 3 columns x 1 rows, like separate stickers floating on the background: each object occupies at most 55% of its part of the image and is centered in it, with a wide empty space between objects, nothing touching; all objects on the same ground line, seen from a 3/4 top-front angle. No frames, borders, dividing lines, floor or grid on the ground.
 OBJECTS, left to right:
 1. round black bomb with brass bands and a lit fuse.
 2. small brass tripod turret with a teal glowing barrel.
@@ -77,5 +77,5 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 ## Prompt négatif
 
 ```text
-checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses, identical poses, repeated pose, copy of the same pose, front and back views mixed, different character between poses, realistic proportions, small head
 ```

@@ -3,6 +3,8 @@
 
 Usage :  python3 prompts_sprites/generer_prompts.py
 Modifier une description : éditer les dictionnaires ci-dessous puis relancer le script.
+V36 : une fiche de référence (repos de face + repos de dos) puis des planches de 4 poses
+(grille 2 × 2, une seule vue), poses décrites par leur silhouette pour éviter les doublons.
 Les noms de fichiers suivent la convention du jeu (scripts/EntityView.gd, V34) :
   face : <nom>.png (repos), <nom>_idle_2/_idle_3, <nom>_walk[_2], <nom>_attack[_2.._8], <nom>_cast[_2,_3]
   dos  : <nom>_back.png (repos), <nom>_back_idle_2/_3, <nom>_back_walk[_2], <nom>_back_attack[_2.._8], <nom>_back_cast[_2,_3]
@@ -17,10 +19,11 @@ GAME = "prototype/zimut/assets/sprites"
 # Blocs communs (anglais : les générateurs d'images suivent mieux l'anglais)
 # --------------------------------------------------------------------------------------------
 STYLE = (
-    "Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. "
-    "Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer "
-    "silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, "
-    "leather straps), saturated but harmonious colors, readable silhouette at small size. "
+    "Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), "
+    "short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. "
+    "Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 "
+    "tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather "
+    "straps), saturated but harmonious colors, strong readable silhouette at small size. "
     "Soft key light from the upper left, subtle {rim} rim light on the right edge."
 )
 OBJ_STYLE = (
@@ -39,11 +42,23 @@ NEGATIVE = (
     "effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, "
     "inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, "
     "blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, "
-    "photorealistic, 3D render, pixel art"
+    "photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, "
+    "isometric floor grid, tiles, duplicate poses, identical poses, repeated pose, copy of the same pose, "
+    "front and back views mixed, different character between poses, realistic proportions, small head"
 )
 
 
 def grid(cols, rows):
+    if (cols, rows) == (2, 2):
+        return (
+            "4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), "
+            "like four separate stickers floating on the background. Each pose occupies at most 55% of the width "
+            "and height of its quarter of the image and is centered in it, so that there is a wide empty space "
+            "between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its "
+            "quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn "
+            "smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in "
+            "each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground."
+        )
     return (
         f"Strict grid of {cols} columns x {rows} rows of equal square cells, exactly one pose per cell "
         f"(image aspect ratio {cols//math.gcd(cols, rows)}:{rows//math.gcd(cols, rows)}, as large as possible, "
@@ -59,10 +74,10 @@ def grid(cols, rows):
 
 VIEWS = {
     "face": ("3/4 FRONT view: the character faces the viewer and turns slightly to the right "
-             "(face, chest and right side visible), facing front-right in every cell", "front-right"),
+             "(face, chest and right side visible), facing front-right in every pose", "front-right"),
     "dos": ("3/4 BACK view: the character is seen from behind and turns slightly to the right "
             "(back, back of the head and right shoulder visible, face hidden), facing away from the viewer "
-            "toward the upper right in every cell", "back-right, away from the viewer"),
+            "toward the upper right in every pose", "back-right, away from the viewer"),
 }
 
 
@@ -70,114 +85,98 @@ VIEWS = {
 # Archétypes de combat : 8 poses d'attaque et 3 poses de sort par archétype
 # --------------------------------------------------------------------------------------------
 ARCH = {
+    # 6 attaques aux silhouettes toutes différentes (A0 coup haut, A1 poussée vers l'avant, A2 coup de côté,
+    # A3 saut, A4 coup bas, A5 coup spécial) et 3 sorts (C0 concentration, C1 bras levés, C2 projection).
     "hammer_shield": dict(
-        atk=["wind-up, hammer raised high behind the head, shield forward",
-             "overhead strike, hammer slamming down in front, small {fx} impact at the hammer head",
-             "follow-through, hammer low, body leaning forward",
-             "shield bash, shield thrust forward, hammer pulled back",
-             "horizontal swing, hammer sweeping at waist height, body twisted",
-             "rising uppercut with the hammer, one foot lifted",
-             "spinning attack, hammer held out to the side, small {fx} whirl",
-             "jumping slam, both feet off the ground, hammer above the head"],
-        cast=["bracing, shield planted on the ground, {fx} gathering around",
-              "war cry, hammer raised to the sky, {fx} swirling around the body",
-              "releasing a ring of {fx} around the feet"]),
+        atk=["OVERHEAD SMASH: hammer raised high above the head with both arms up, shield on the back arm",
+             "SHIELD CHARGE: body leaning far forward, shield thrust in front, hammer pulled back low",
+             "SIDE SWING: hammer swept horizontally to the side at full arm length, torso twisted",
+             "JUMPING SLAM: whole body in the air, knees tucked, hammer above the head",
+             "LOW SWEEP: crouched on one knee, hammer swinging just above the ground",
+             "GROUND QUAKE: hammer slammed into the ground in front, a ring of {fx} bursting around it"],
+        cast=["BRACING: shield planted on the ground in front, head down, {fx} gathering at the feet",
+              "WAR CRY: mouth open, hammer raised straight to the sky, {fx} swirling above",
+              "AURA: arms spread wide, a dome of {fx} around the body"]),
     "daggers": dict(
-        atk=["crouched wind-up, both daggers crossed in front of the chest",
-             "dash slash forward, both arms extended, short {fx} slash crescents",
-             "spinning follow-through, one dagger high, one low",
-             "backhand stab, one dagger thrust forward, body twisted",
-             "double downward stab, both daggers pointing down, knees bent",
-             "rising cross slash, both arms opening upward",
-             "low sweeping slash, crouched on one knee",
-             "leaping strike, body in the air, daggers held forward"],
-        cast=["kneeling, one hand on the ground, {fx} rising from the shadow below",
-              "half vanished into {fx}, only the eyes and daggers clearly visible",
-              "reappearing from a burst of {fx}, daggers ready"]),
+        atk=["CROSS SLASH: both daggers crossed high above the head, about to strike down",
+             "LUNGE STAB: body stretched forward almost horizontal, one dagger thrust far ahead",
+             "SPIN: body twisted, arms spread to both sides, short {fx} slash arcs",
+             "LEAP: whole body in the air, knees tucked, daggers pointed down",
+             "LOW SWEEP: crouched very low on one knee, one dagger slashing near the ground",
+             "THROW: one arm extended after throwing a dagger, the dagger flying ahead with a {fx} trail"],
+        cast=["SHADOW KNEEL: kneeling, one hand on the ground, {fx} rising around",
+              "VANISH: half the body dissolving into {fx}, only the eyes and daggers clear",
+              "MARK: one arm pointing forward, a {fx} sigil appearing in front of the hand"]),
     "bow": dict(
-        atk=["drawing the bow, arrow nocked, string pulled to the cheek",
-             "release, arrow flying forward with a short {fx} trail",
-             "follow-through, bow arm extended, string hand open behind",
-             "quick shot from a low crouch, bow tilted",
-             "drawing an arrow from the quiver, bow lowered",
-             "double shot, two arrows nocked at once",
-             "point-blank kick, bow held back, one leg raised",
-             "jumping shot, aiming downward forward, feet off the ground"],
-        cast=["arrow raised to the sky, {fx} gathering on the arrowhead",
-              "aiming upward, the arrow fully wrapped in {fx}",
-              "releasing a volley of three {fx} arrows into the air"]),
+        atk=["SKY SHOT: bow pointed almost straight up, string fully drawn",
+             "FULL DRAW: bow aimed straight forward, string pulled to the cheek, body sideways",
+             "RELEASE: string hand open behind, bow arm extended, arrow leaving with a {fx} trail",
+             "JUMPING SHOT: whole body in the air, aiming down and forward",
+             "KNEELING SHOT: on one knee, bow held low and tilted",
+             "POINT-BLANK KICK: bow held back, one leg kicking high forward"],
+        cast=["ENCHANTED ARROW: arrow held up to the face, its tip wrapped in {fx}",
+              "VOLLEY: bow raised overhead, three {fx} arrows rising into the air",
+              "TRAP: crouched, placing a {fx} trap on the ground with the free hand"]),
     "staff": dict(
-        atk=["wind-up, staff held back with both hands",
-             "staff swing forward, small {fx} burst at the tip",
-             "follow-through, staff low, body turned",
-             "thrust with the staff tip forward, short {fx} spark",
-             "overhead staff strike, both hands high",
-             "spinning the staff around the body, small {fx} trail",
-             "low sweep with the staff at the feet",
-             "staff planted, kicking forward with one leg"],
-        cast=["staff raised, {fx} orb forming at the top",
-              "staff held high with both hands, {fx} swirling around",
-              "staff pointed forward, releasing a compact {fx} blast"]),
+        atk=["OVERHEAD STRIKE: staff raised high above the head with both hands",
+             "THRUST: body leaning forward, staff tip pushed far ahead with a short {fx} spark",
+             "SIDE SWING: staff swept horizontally at shoulder height, torso twisted",
+             "JUMPING STRIKE: whole body in the air, staff held back over the shoulder",
+             "LOW SWEEP: crouched, staff swinging at ankle height",
+             "SPIN: staff whirling around the body, a {fx} trail circling it"],
+        cast=["FOCUS: eyes closed, staff held vertically in front of the face, {fx} orb at the top",
+              "INVOCATION: staff raised high with both hands, {fx} swirling above the head",
+              "BLAST: staff pointed forward, a compact {fx} blast leaving the tip"]),
     "staff_book": dict(
-        atk=["wind-up, staff held back, grimoire floating open beside",
-             "staff swing forward, small {fx} burst at the tip",
-             "follow-through, staff low, coat swirling",
-             "open palm thrust, {fx} bolt leaving the hand",
-             "grimoire snapping shut, a small {fx} shockwave in front",
-             "staff thrust forward with both hands",
-             "two-handed overhead strike with the staff",
-             "free hand clawing forward, {fx} claws forming"],
-        cast=["grimoire floating open, pages turning, {fx} rising from it",
-              "staff raised, a {fx} summoning circle drawn on the ground",
-              "both arms open, a {fx} creature silhouette emerging from the circle"]),
+        atk=["OVERHEAD STRIKE: staff raised high above the head, grimoire floating behind",
+             "PALM BOLT: free arm stretched forward, a {fx} bolt leaving the open palm",
+             "SIDE SWING: staff swept horizontally, coat swirling",
+             "GRIMOIRE SLAM: grimoire snapping shut in front, a small {fx} shockwave",
+             "LOW SWEEP: crouched, staff swinging near the ground",
+             "CLAWS: free hand raised as a claw, {fx} claws forming in front"],
+        cast=["READING: grimoire floating open in front, pages turning, {fx} rising from it",
+              "SUMMONING CIRCLE: staff raised, a {fx} circle drawn on the ground",
+              "SUMMON: both arms open wide, a {fx} creature silhouette emerging beside"]),
     "wrench": dict(
-        atk=["wind-up, gear hammer swung back over the shoulder",
-             "smash forward, gear hammer hitting with a burst of {fx}",
-             "follow-through, hammer low, goggles bouncing",
-             "throwing a small round bomb forward with the free hand",
-             "horizontal swing of the gear hammer at waist height",
-             "uppercut with the gear hammer, sparks flying",
-             "spinning attack, hammer held out, small {fx} ring",
-             "shoulder charge forward, hammer held back"],
-        cast=["kneeling, adjusting a small device on the ground, {fx} crackling",
-              "standing, raising a glowing remote control, {fx} arcing around",
-              "pointing forward, a {fx} blast leaving the device"]),
+        atk=["OVERHEAD SMASH: gear hammer raised high above the head with both hands",
+             "BOMB THROW: free arm extended forward after throwing a small round bomb",
+             "SIDE SWING: gear hammer swept horizontally, goggles bouncing",
+             "JUMPING SMASH: whole body in the air, hammer above the head",
+             "LOW SWEEP: crouched, hammer swinging near the ground with sparks",
+             "SHOULDER CHARGE: body leaning far forward, hammer held back, {fx} puffs behind"],
+        cast=["TINKERING: kneeling, adjusting a small device on the ground, {fx} crackling",
+              "REMOTE: standing, raising a glowing remote control high, {fx} arcing around",
+              "OVERLOAD: arms spread, a {fx} ring around the body"]),
     "beast": dict(
-        atk=["crouched wind-up, ready to pounce",
-             "lunge forward, jaws or claws first, small {fx} impact",
-             "follow-through, landing after the lunge",
-             "second strike, swiping sideways",
-             "rearing up on the hind legs, front claws raised",
-             "biting downward, head low",
-             "tail or body slam, body twisted",
-             "charging forward, head down"],
-        cast=["head raised, {fx} gathering around the body",
-              "roaring, {fx} burst around the head",
-              "releasing a short {fx} breath or wave forward"]),
+        atk=["REARING: standing up on the hind legs, front claws raised high",
+             "POUNCE: body stretched forward in the air, jaws open",
+             "SIDE SWIPE: head and claws swept to the side, body twisted",
+             "BITE DOWN: head low near the ground, jaws snapping",
+             "TAIL WHIP: body turned, tail lashing forward",
+             "CHARGE: head down, running forward, {fx} trail behind"],
+        cast=["HOWL: head raised to the sky, {fx} gathering around the body",
+              "ROAR: mouth wide open, {fx} burst in front of the head",
+              "BREATH: a short {fx} breath released forward"]),
     "brute": dict(
-        atk=["wind-up, fist or weapon raised high",
-             "heavy smash forward, ground cracking with a small {fx} burst",
-             "follow-through, body leaning forward",
-             "sweeping backhand blow",
-             "double-fist hammer blow from above",
-             "straight punch forward, other arm pulled back",
-             "stomp with one foot, small {fx} cracks",
-             "shoulder charge forward"],
-        cast=["stomping, {fx} cracks spreading under the feet",
-              "arms raised, {fx} gathering between the hands",
-              "slamming both fists down, {fx} shockwave"]),
+        atk=["OVERHEAD SMASH: both fists or weapon raised high above the head",
+             "PUNCH: one arm thrust far forward, the other pulled back, body leaning forward",
+             "BACKHAND: arm swept horizontally to the side, torso twisted",
+             "JUMPING SLAM: whole body in the air, fists above the head",
+             "STOMP: one foot raised then slammed down, {fx} cracks under it",
+             "CHARGE: shoulder first, body leaning far forward, running"],
+        cast=["ROOTED: stomping, {fx} cracks spreading under the feet",
+              "GATHER: arms raised, {fx} gathering between the hands",
+              "SHOCKWAVE: both fists slammed into the ground, {fx} wave"]),
     "spirit": dict(
-        atk=["drawing back, body stretched upward",
-             "lunging forward, claws of {fx} reaching out",
-             "follow-through, body trailing behind",
-             "spinning strike, {fx} whirl around the body",
-             "diving downward, body compact",
-             "double claw swipe, arms crossing",
-             "body splitting into a fan of {fx} blades in front",
-             "rising strike from below, body stretched up"],
-        cast=["hovering higher, {fx} orbs circling the body",
-              "arms spread, {fx} pulsing outward",
-              "releasing a compact {fx} wave forward"]),
+        atk=["RISE: body stretched tall upward, arms raised",
+             "LUNGE: body stretched forward, claws of {fx} reaching out",
+             "SPIN: body whirling, {fx} trail around it",
+             "DIVE: body diving down, compact",
+             "DOUBLE SWIPE: both arms crossed in front, claws out",
+             "FAN: body opening into a fan of {fx} blades in front"],
+        cast=["HOVER: floating higher, {fx} orbs circling",
+              "PULSE: arms spread, {fx} pulsing outward",
+              "WAVE: a compact {fx} wave released forward"]),
 }
 # --------------------------------------------------------------------------------------------
 # Nations (scripts/Nations.gd) : héros, 4 ennemis (ordre : Gobelin, Loup, Squelette, Troll), boss
@@ -428,26 +427,31 @@ MECANISMES = [
 # Ennemis et familiers : 2 planches (face, dos).
 # Noms de fichiers (EntityView.gd, V34) : vue de face <nom><suffixe>, vue de dos <nom>_back<suffixe>
 # --------------------------------------------------------------------------------------------
-IDLE = ["idle, relaxed ready stance", "idle variant, breathing in, shoulders slightly raised",
-        "idle variant, alert, weapon ready"]
-WALK = ["walking, mid-stride, left foot forward", "walking, mid-stride, right foot forward"]
+IDLE = ["IDLE: relaxed standing pose, weapon held calmly",
+        "GUARD: knees bent, weapon raised in front of the body, ready to fight"]
+WALK = ["WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward",
+        "WALK (passing): standing on the left leg, right knee raised high, body slightly higher"]
+# (clé, libellé Atelier, vue, cases [(suffixe, code)]) — doit rester identique à
+# SpriteBuilder/atelier_sprites/lib/data/catalog.dart.
+REF = ("ref", "Référence · repos de face + repos de dos", None, [("", "I0"), ("_back", "I0")])
 SHEETS_BIG = [
-    ("repos", "Repos, marche et sorts",
-     [("", "I0"), ("_idle_2", "I1"), ("_idle_3", "I2"), ("_walk", "W0"), ("_walk_2", "W1"),
-      ("_cast", "C0"), ("_cast_2", "C1"), ("_cast_3", "C2")]),
-    ("attaques", "Attaques",
-     [("_attack" if i == 0 else f"_attack_{i+1}", f"A{i}") for i in range(8)]),
+    REF,
+    ("face_1", "Face 1 · garde, marche, sort", "face", [("_idle_2", "I1"), ("_walk", "W0"), ("_walk_2", "W1"), ("_cast", "C0")]),
+    ("face_2", "Face 2 · attaques 1 à 4", "face", [("_attack", "A0"), ("_attack_2", "A1"), ("_attack_3", "A2"), ("_attack_4", "A3")]),
+    ("face_3", "Face 3 · attaques 5-6, sorts 2-3", "face", [("_attack_5", "A4"), ("_attack_6", "A5"), ("_cast_2", "C1"), ("_cast_3", "C2")]),
+    ("dos_1", "Dos 1 · marche, attaque, sort", "dos", [("_walk", "W0"), ("_walk_2", "W1"), ("_attack", "A0"), ("_cast", "C0")]),
+    ("dos_2", "Dos 2 · attaques 2 à 4, garde", "dos", [("_attack_2", "A1"), ("_attack_3", "A2"), ("_attack_4", "A3"), ("_idle_2", "I1")]),
 ]
 SHEETS_SMALL = [
-    ("toutes", "Repos, marche, attaques et sort",
-     [("", "I0"), ("_idle_2", "I1"), ("_walk", "W0"), ("_attack", "A0"), ("_attack_2", "A1"),
-      ("_attack_3", "A2"), ("_attack_4", "A3"), ("_cast", "C0")]),
+    REF,
+    ("face_1", "Face · marche, 2 attaques, sort", "face", [("_walk", "W0"), ("_attack", "A0"), ("_attack_2", "A1"), ("_cast", "C0")]),
+    ("dos_1", "Dos · marche, 2 attaques, sort", "dos", [("_walk", "W0"), ("_attack", "A0"), ("_attack_2", "A1"), ("_cast", "C0")]),
 ]
 
 
 def file_suffix(view, suf):
     """Vue de dos : _back (repos) puis _back_idle_2, _back_walk, _back_attack_3…"""
-    if view == "face":
+    if view != "dos":
         return suf
     return "_back" + (suf if suf else "")
 
@@ -474,44 +478,65 @@ def prompt_sheet(who, role, nation, desc, view, cells, arch, fx, rim, palette, p
     lines = [
         f"Sprite sheet of ONE {role} for a chibi isometric tactical RPG.",
         f"CHARACTER: {who}, {nation}. {desc[0].upper() + desc[1:]}.",
-        "Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, "
+        "Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, "
         "weapon always in the same hand.",
         f"VIEW: {vtxt}. Never a pure side profile, never facing left.",
         f"NATION PALETTE: {palette}.",
         "STYLE: " + STYLE.format(rim=rim),
-        "GRID: " + grid(4, 2),
-        f"CELLS, left to right, top to bottom (all in {vdir} 3/4 view):",
+        "LAYOUT: " + grid(2, 2),
+        f"POSES, left to right, top to bottom (all in {vdir} 3/4 view, never mix front and back views):",
     ]
     for i, (_, code) in enumerate(cells):
         lines.append(f"{i+1}. {cell_text(code, arch, fx)}.")
-    lines.append(f"EFFECTS: {fx}, stylized, opaque, with dark outlines, small, kept inside their own cell.")
+    lines.append("The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, "
+                 "different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.")
+    lines.append("Use the attached reference sheet (idle front + idle back) for the exact design of the character.")
+    lines.append(f"EFFECTS: {fx}, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.")
     lines.append("BACKGROUND: " + (BG_GRAY if pale else BG_WHITE) + BG_TAIL)
     return "\n".join(lines)
 
 
+def prompt_reference(who, role, nation, desc, rim, palette, pale, fx):
+    return "\n".join([
+        f"Character reference sheet of ONE {role} for a chibi isometric tactical RPG.",
+        f"CHARACTER: {who}, {nation}. {desc[0].upper() + desc[1:]}.",
+        f"NATION PALETTE: {palette}. Signature effects (keep them small): {fx}.",
+        "STYLE: " + STYLE.format(rim=rim),
+        "LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two "
+        "separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a "
+        "wide empty space between them, feet on the same ground line. No frames, borders or dividing line.",
+        "POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. "
+        "2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.",
+        "Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).",
+        "BACKGROUND: " + (BG_GRAY if pale else BG_WHITE) + BG_TAIL,
+    ])
+
+
 def name_table(base, view, cells):
     out = ["| Case | Pose | Fichier |", "|---|---|---|"]
+    cols = 2
     for i, (suf, code) in enumerate(cells):
-        out.append(f"| {i//4+1}-{i%4+1} | {pose_label(code)} | `{base}{file_suffix(view, suf)}.png` |")
+        vue = "" if view else (" (face)" if i == 0 else " (dos)")
+        out.append(f"| {i//cols+1}-{i%cols+1} | {pose_label(code)}{vue} | `{base}{file_suffix(view, suf)}.png` |")
     return "\n".join(out)
 
 
 def character_md(title, ent, role, nation_txt, big, fx, rim, palette, path_hint, extra_desc=""):
     sheets = SHEETS_BIG if big else SHEETS_SMALL
     desc = ent["desc"] + extra_desc
-    n = len(sheets) * 2
-    parts = [f"### {title}\n\n{n} planches de 8 poses. Joins la planche de face « repos » déjà réussie "
-             f"comme référence pour les suivantes. Fichiers dans `{path_hint}`.\n"]
-    k = 0
-    for view in ("face", "dos"):
-        for sid, slabel, cells in sheets:
-            k += 1
-            vlabel = "Face (3/4 avant)" if view == "face" else "Dos (3/4 arrière)"
-            atelier = f"{vlabel} · {slabel}" if big else vlabel
-            p = prompt_sheet(ent["nom"].split(" (")[0], role, nation_txt, desc, view, cells, ent["arch"], fx, rim,
-                             palette, ent.get("pale", False))
-            parts.append(f"#### Planche {k} — {atelier}\n\nDans l'Atelier : personnage « {ent['nom'].split(' (')[0]} », "
-                         f"planche « {atelier} ».\n\n```text\n{p}\n```\n\n{name_table(ent['id'], view, cells)}\n")
+    who = ent["nom"].split(" (")[0]
+    nposes = sum(len(c) for _, _, _, c in sheets)
+    parts = [f"### {title}\n\n{len(sheets)} planches, {nposes} poses. Commence par la fiche de référence, puis joins-la "
+             f"comme image de référence à chaque planche suivante. Fichiers dans `{path_hint}` ; nomme tes "
+             f"images `{ent['id']}_<clé>.png` (ex. `{ent['id']}_face_2.png`) pour que l'Atelier les reconnaisse.\n"]
+    for k, (cle, slabel, view, cells) in enumerate(sheets, 1):
+        if view is None:
+            p = prompt_reference(who, role, nation_txt, desc, rim, palette, ent.get("pale", False), fx)
+        else:
+            p = prompt_sheet(who, role, nation_txt, desc, view, cells, ent["arch"], fx, rim, palette,
+                             ent.get("pale", False))
+        parts.append(f"#### Planche {k} — {slabel} (`{cle}`)\n\nDans l'Atelier : personnage « {who} », "
+                     f"planche « {slabel} ».\n\n```text\n{p}\n```\n\n{name_table(ent['id'], view, cells)}\n")
     return "\n".join(parts)
 
 
@@ -542,23 +567,23 @@ def nation_md(n):
     parts = [f"# Nation {n['nom']} ({n['biome']})\n",
              f"Palette : {n['palette']}. Effets : {n['fx']}. Contre-jour : {n['rim']}.\n",
              "Chaque personnage est dessiné en **vue 3/4 avant (face)** et en **vue 3/4 arrière (dos)**. "
-             "Le jeu retourne l'image pour les directions vers la gauche. Toutes les planches sont des grilles "
-             "4 × 2 aux cases bien séparées. Prompt négatif : voir en bas de page.\n",
+             "Le jeu retourne l'image pour les directions vers la gauche. Une fiche de référence (repos face + dos), "
+             "puis des planches de 4 poses (2 × 2) bien séparées. Prompt négatif : voir en bas de page.\n",
              "Ordre conseillé : 1) planche de référence, 2) héros, 3) ennemis, 4) boss.\n"]
     parts.append("## 1. Planche de référence (style de la nation)\n\nNe sert pas en jeu : elle fixe palette, "
                  "matières et silhouettes, de face et de dos. Joins-la comme image de référence à toutes les "
                  "planches suivantes.\n\n"
                  f"```text\n{lineup_prompt(n)}\n```\n")
-    parts.append("## 2. Héros\n\n" + character_md(f"{h['nom']} — 32 poses", h, "playable hero", "hero " + nt,
+    parts.append("## 2. Héros\n\n" + character_md(f"{h['nom']} — 22 poses", h, "playable hero", "hero " + nt,
                                                   True, n["fx"], n["rim"], n["palette"], f"{GAME}/players/"))
     parts.append(f"L'export Zimut de l'Atelier copie aussi le repos vers `nations/heros/{h['id']}.png` et les "
                  "autres poses vers `nations/heros/poses/`.\n")
     parts.append("## 3. Ennemis\n")
     for e in n["enemies"]:
-        parts.append(character_md(f"{e['nom']} — 16 poses", e, "enemy monster", "enemy " + nt, False, n["fx"],
+        parts.append(character_md(f"{e['nom']} — 10 poses", e, "enemy monster", "enemy " + nt, False, n["fx"],
                                   n["rim"], n["palette"], f"{GAME}/nations/ennemis/{n['id']}/"))
     parts.append("## 4. Boss\n\n" + character_md(
-        f"{b['nom']} — 32 poses", b, "final boss", "boss " + nt, True, n["fx"], n["rim"], n["palette"],
+        f"{b['nom']} — 22 poses", b, "final boss", "boss " + nt, True, n["fx"], n["rim"], n["palette"],
         f"{GAME}/nations/boss/",
         ", imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of "
         "total height)"))
@@ -568,10 +593,10 @@ def nation_md(n):
 
 def familiers_md():
     parts = ["# Familiers (invocations)\n",
-             "Fichiers dans `" + GAME + "/summons/`. Deux planches par familier : vue 3/4 avant (face) et vue 3/4 "
-             "arrière (dos). Joins la planche du héros qui l'invoque comme référence de style.\n"]
+             "Fichiers dans `" + GAME + "/summons/`. Trois planches par familier : fiche de référence (face + dos), "
+             "vue 3/4 avant, vue 3/4 arrière. Joins la planche du héros qui l'invoque comme référence de style.\n"]
     for f in FAMILIERS:
-        parts.append(character_md(f"{f['nom']} — 16 poses", f, "summoned familiar", "a summon", False,
+        parts.append(character_md(f"{f['nom']} — 10 poses", f, "summoned familiar", "a summon", False,
                                   "matching magical sparks", "soft colored", "colors as described",
                                   f"{GAME}/summons/"))
     parts.append(f"## Prompt négatif\n\n```text\n{NEGATIVE}\n```\n")
@@ -588,10 +613,10 @@ def mecanismes_md():
         rows = (n + cols - 1) // cols
         lines = [f"Object sprite sheet for a chibi isometric tactical RPG: {n} summoned objects of the {cls} class.",
                  "STYLE: " + OBJ_STYLE,
-                 f"GRID: strict grid of {cols} columns x {rows} rows of equal square cells, one object per cell, "
-                 "each object centered and entirely inside its cell with an empty margin of at least 10% on every "
-                 "side, a wide empty gutter (at least 25% of a cell) between cells that nothing crosses, all "
-                 "objects resting on the same ground line, seen from a 3/4 top-front angle.",
+                 f"LAYOUT: {cols} columns x {rows} rows, like separate stickers floating on the background: each "
+                 "object occupies at most 55% of its part of the image and is centered in it, with a wide empty "
+                 "space between objects, nothing touching; all objects on the same ground line, seen from a 3/4 "
+                 "top-front angle. No frames, borders, dividing lines, floor or grid on the ground.",
                  "OBJECTS, left to right:"]
         lines += [f"{i+1}. {d}." for i, (_, d) in enumerate(objs)]
         lines.append("BACKGROUND: " + BG_WHITE + BG_TAIL)
@@ -621,7 +646,7 @@ def main():
         (OUT / "nations" / f"{i:02d}_{n['id']}.md").write_text(nation_md(n), encoding="utf-8")
     (OUT / "familiers.md").write_text(familiers_md(), encoding="utf-8")
     (OUT / "mecanismes.md").write_text(mecanismes_md(), encoding="utf-8")
-    sheets = len(NATIONS) * (1 + 4 + 4 * 2 + 4) + len(FAMILIERS) * 2 + len(MECANISMES)
+    sheets = len(NATIONS) * (1 + len(SHEETS_BIG) * 2 + 4 * len(SHEETS_SMALL)) + len(FAMILIERS) * len(SHEETS_SMALL) + len(MECANISMES)
     print(f"{sheets} prompts générés dans {OUT}")
 
 

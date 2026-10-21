@@ -2,33 +2,45 @@
 
 Prompts prêts à copier dans un générateur d'images pour refaire **tous les sprites de combat** au format chibi, avec une finition proche de Dofus / Waven.
 
-| Fichier | Contenu | Prompts |
+| Fichier | Contenu |
+|---|---|
+| `nations/01_sylvestre.md` … `10_rouages.md` | pour chaque nation : planche de style, héros (6 planches, 22 poses), 4 ennemis (3 planches, 10 poses), boss (6 planches, 22 poses) |
+| `familiers.md` | 12 familiers / invocations (3 planches, 10 poses) |
+| `mecanismes.md` | objets fixes : arbre, racines, pilier, muraille, faille, cristal d'ambre, balise, bombe, tourelle, balise de transposition |
+| `generer_prompts.py` | source de tout le reste : descriptions, palettes, poses (290 prompts) |
+
+Les héros, ennemis, boss et familiers viennent de `scripts/Nations.gd`, `assets/sprites/nations/README.md` et `SPRITES_A_FOURNIR.md`.
+
+## V36 : pourquoi des planches de 4 poses
+
+Les premières planches générées (Mistral, oct. 2026) ont montré trois défauts quand on demande 8 à 20 poses d'un coup :
+**doublons** (la même pose recopiée 4, 6 ou 20 fois), **personnage qui change** d'une planche à l'autre (coiffure, tenue, sexe)
+et **poses qui se touchent** (épées, cadres dessinés, grille au sol). D'où :
+
+1. **Une fiche de référence** par personnage : repos de face (gauche) et repos de dos (droite), image 2:1. Elle fixe l'apparence.
+2. **Des planches de 4 poses (2 × 2), une seule vue**, image carrée. Chaque pose est imposée par sa silhouette
+   (« COUP HAUT : arme levée au-dessus de la tête », « SAUT : tout le corps en l'air »…) et le prompt exige 4 poses différentes.
+3. **Espacement « autocollants »** : chaque pose occupe au plus 55 % de son quart d'image. Ni cadre, ni ligne, ni sol, ni grille.
+4. **Style Ankama** : tête ≈ 40 % de la hauteur, grandes mains, petits pieds ronds, contours brun foncé, aplats.
+
+| Personnage | Planches | Poses |
 |---|---|---|
-| `nations/01_sylvestre.md` … `10_rouages.md` | pour chaque nation : planche de référence, héros (4 planches, 32 poses), 4 ennemis (2 planches, 16 poses), boss (4 planches, 32 poses) | 170 |
-| `familiers.md` | 12 familiers / invocations (2 planches, 16 poses) | 24 |
-| `mecanismes.md` | objets fixes : arbre, racines, pilier, muraille, faille, cristal d'ambre, balise, bombe, tourelle, balise de transposition | 4 |
-| `generer_prompts.py` | source de tout le reste : descriptions, palettes, poses | — |
+| Héros, boss | `ref` · `face_1` (garde, 2 marches, sort) · `face_2` (attaques 1-4) · `face_3` (attaques 5-6, sorts 2-3) · `dos_1` (2 marches, attaque, sort) · `dos_2` (attaques 2-4, garde) | 22 |
+| Ennemis, familiers | `ref` · `face_1` (marche, 2 attaques, sort) · `dos_1` (idem de dos) | 10 |
 
-Les héros, ennemis, boss et familiers viennent de `scripts/Nations.gd`, `assets/sprites/nations/README.md` et `SPRITES_A_FOURNIR.md`. Les descriptions reprennent les dessins actuels du jeu (couleurs, armes, silhouettes) pour que chaque personnage reste reconnaissable.
-
-## Vues, poses et planches
-
-Chaque personnage est dessiné sous **deux angles** : **3/4 avant** (face) et **3/4 arrière** (dos). Le jeu retourne l'image horizontalement pour les directions vers la gauche (`sprite.flip_h`) : ces deux vues couvrent les 4 directions de la grille. L'arme change de main en miroir, c'est normal.
-
-| Personnage | Planches (toutes en grille 4 × 2) | Poses par vue |
-|---|---|---|
-| Héros, boss | face · repos et sorts, face · attaques, dos · repos et sorts, dos · attaques | 3 repos, 2 marche, 3 sorts, **8 attaques** |
-| Ennemis, familiers | face, dos | 2 repos, 1 marche, **4 attaques**, 1 sort |
-
-Noms de fichiers : vue de face `<nom>.png`, `_idle_2`, `_walk_2`, `_attack_5`, `_cast_3`… ; vue de dos `<nom>_back.png`, `_back_idle_2`, `_back_walk_2`, `_back_attack_5`, `_back_cast_3`… `EntityView.gd` (V34) les charge tous (jusqu'à 9 variantes par pose) et choisit les poses de dos quand le personnage regarde vers le haut de l'écran.
+Les 6 attaques d'un héros ont des silhouettes toutes différentes : coup haut, poussée vers l'avant, coup de côté, saut, coup bas,
+coup spécial. Les vues de dos ne reprennent que 4 attaques : en jeu, elles ne servent que quand le personnage regarde vers le haut.
 
 ## Méthode, planche par planche
 
-1. **Planche de référence de la nation** (section 1 de chaque fichier). Elle ne sert pas en jeu : elle fixe la palette, les matières et les silhouettes de toute la nation.
-2. **Planches de poses** (« Planche 1 » à « Planche 4 » sous chaque personnage). Joins la planche de référence comme image de référence (« image reference », « character reference », « style reference » selon l'outil). Garde le même modèle et, si possible, la même graine (seed) pour toute la nation.
-3. **Atelier Sprites** : importe la planche, vérifie les cadres (« Ajuster » si deux poses ont fusionné, « Exclure » pour un texte), choisis le personnage dans la liste et la planche (face ou dos, repos ou attaques), puis touche « Nommer les poses ». Si le nom du fichier contient le personnage et « dos » ou « attaques » (`assassin_dos_attaques.png`), les deux sont présélectionnés. Les noms des tableaux ci-dessous sont appliqués automatiquement dans l'ordre des cases ; les tableaux servent seulement de contrôle.
-4. **Dépôt** : « Exporter pour Zimut (.zip) » range déjà les PNG dans `prototype/zimut/assets/sprites/…` : décompresse le zip à la racine du dépôt. Le jeu les prend sans changer le code.
-5. Ouvre une fois le projet dans Godot pour l'import.
+1. **Planche de style de la nation** (section 1 de chaque fichier, facultative) : palette et matières de toute la nation.
+2. **Fiche de référence** du personnage (`ref`). Recommence jusqu'à ce qu'elle te plaise : tout le reste en découle.
+3. **Planches de poses** : joins la fiche de référence comme image de référence (« image reference », « character reference »).
+   Si une planche contient deux poses semblables, régénère-la plutôt que de la garder.
+4. **Nom du fichier** : `<id>_<clé>.png`, par exemple `chasseur_ref.png`, `chasseur_face_2.png`, `liche_dos_1.png`.
+   L'Atelier (SpriteBuilder) reconnaît alors le personnage et la planche tout seul.
+5. **Atelier Sprites** : importe, vérifie les cadres, regarde l'alerte « Poses en double » (bouton « Exclure les doublons »),
+   puis exporte le zip et décompresse-le à la racine du dépôt Zimut. Ouvre une fois le projet dans Godot pour l'import.
 
 ## Fond de la planche
 
@@ -41,15 +53,13 @@ Noms de fichiers : vue de face `<nom>.png`, `_idle_2`, `_walk_2`, `_attack_5`, `
 
 | Problème | Conséquence | Ce que le prompt impose |
 |---|---|---|
-| Poses qui se touchent (nain : Defense / Attack 1) | un seul cadre pour deux poses | grille 4 × 2 à cases carrées, marge de 10 % dans chaque case, gouttière vide de 25 % que rien ne traverse (arme, cape, effet) |
-| Étiquettes de texte (« NEUTRAL », noms de monstres) | texte collé au sprite | « no text, no labels, no numbers » |
-| Faux damier dans un JPG | détourage plus fragile | fond blanc uni |
-| Effets flous ou lueur diffuse | halo coloré autour du sprite | effets opaques et cernés, « no soft glow halo » |
-| Mélange profil / face / 3/4 | animations incohérentes | une seule vue par planche (3/4 avant ou 3/4 arrière), « never a pure side profile, never facing left » |
-| Ombre au sol | pieds mal posés sur la case | « no ground shadow » (le jeu dessine l'ombre) |
-| Personnage coupé au bord | pose inutilisable | « entirely inside its cell » |
-
-Si l'outil respecte mal la grille, demande une image plus large (format 2:1) ou coupe la planche en deux grilles 2 × 2 (cases 1 à 4, puis 5 à 8) en gardant les mêmes textes et le même ordre.
+| Même pose recopiée dans plusieurs cases | animations figées | 4 poses par image, chacune décrite par sa silhouette, « clearly different », négatif « duplicate poses » |
+| Personnage différent d'une planche à l'autre | héros méconnaissable | fiche de référence jointe à chaque planche |
+| Poses qui se touchent (épées, effets) | un seul cadre pour deux poses | pose ≤ 55 % de son quart d'image, armes et effets rentrés |
+| Cadres dessinés, grille isométrique au sol | tout est relié, découpe impossible | « no frames, no grid on the ground », négatif « frames, isometric floor grid » |
+| Face et dos mélangés | le jeu ne sait pas quelle vue utiliser | une seule vue par planche (sauf la fiche de référence) |
+| Ombre grise sous les pieds | pieds mal posés | « no ground shadow » (le jeu dessine l'ombre) |
+| Étiquettes de texte | texte collé au sprite | « no text, no labels, no numbers » |
 
 ## Prompt négatif commun
 
