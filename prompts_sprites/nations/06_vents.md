@@ -29,7 +29,7 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 
 ### Sylvain — 22 poses
 
-6 planches, 22 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `sylvain_<clé>.png` (ex. `sylvain_face_2.png`) pour que l'Atelier les reconnaisse.
+6 planches, 22 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `sylvain_<clé>.png` (ex. `sylvain_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -37,13 +37,25 @@ Dans l'Atelier : personnage « Sylvain », planche « Référence · repos de fa
 
 ```text
 Character reference sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Sylvain, hero of the Vents nation. Nature-wind guardian with silver-teal hair, robe of pale teal layered leaves and feathers, silver bracers, a staff topped with a wing-shaped mint crystal in the right hand.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Sylvain (hero of the Vents nation)
+- Hair: short messy pale mint-white hair (#DDF2EE) with long bangs over the forehead
+- Eyes: teal-green eyes (#2E9C94), always open, calm smile
+- Skin: light peach skin
+- Top: pale teal tunic (#9FE0D6) made of layered leaf-shaped feathers, white collar and a white front panel, small gold leaf brooch on the chest
+- Bottom: pale teal and white layered skirt-robe down to the knees, dark charcoal leggings (#33383F)
+- Feet: white boots with gold trims
+- Arms: silver bracers on both forearms
+- Weapon: slim brown wooden staff topped with a mint crystal (#7FF0D8) between two small white wings, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no orange or brown trousers, no brown eyes, no closed eyes, no pure white spiky hair, no long hair, no blue robe, no spear.
 NATION PALETTE: pale teal, silver, sky white, mint. Signature effects (keep them small): wind ribbons and feathers.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Sylvain: short messy pale mint-white hair (#DDF2EE) with long bangs over the forehead; teal-green eyes (#2E9C94), always open, calm smile; light peach skin; pale teal tunic (#9FE0D6) made of layered leaf-shaped feathers, white collar and a white front panel, small gold leaf brooch on the chest. Forbidden: no orange or brown trousers, no brown eyes, no closed eyes, no pure white spiky hair, no long hair, no blue robe, no spear.
 ```
 
 | Case | Pose | Fichier |
@@ -56,22 +68,33 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Sylvain », planche « Face 1 · garde, marche, sort ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Sylvain, hero of the Vents nation. Nature-wind guardian with silver-teal hair, robe of pale teal layered leaves and feathers, silver bracers, a staff topped with a wing-shaped mint crystal in the right hand.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Sylvain (hero of the Vents nation)
+- Hair: short messy pale mint-white hair (#DDF2EE) with long bangs over the forehead
+- Eyes: teal-green eyes (#2E9C94), always open, calm smile
+- Skin: light peach skin
+- Top: pale teal tunic (#9FE0D6) made of layered leaf-shaped feathers, white collar and a white front panel, small gold leaf brooch on the chest
+- Bottom: pale teal and white layered skirt-robe down to the knees, dark charcoal leggings (#33383F)
+- Feet: white boots with gold trims
+- Arms: silver bracers on both forearms
+- Weapon: slim brown wooden staff topped with a mint crystal (#7FF0D8) between two small white wings, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no orange or brown trousers, no brown eyes, no closed eyes, no pure white spiky hair, no long hair, no blue robe, no spear.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
 1. GUARD: knees bent, weapon raised in front of the body, ready to fight.
-2. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-3. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+2. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+3. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 4. FOCUS: eyes closed, staff held vertically in front of the face, wind ribbons and feathers orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Sylvain: short messy pale mint-white hair (#DDF2EE) with long bangs over the forehead; teal-green eyes (#2E9C94), always open, calm smile; light peach skin; pale teal tunic (#9FE0D6) made of layered leaf-shaped feathers, white collar and a white front panel, small gold leaf brooch on the chest. Forbidden: no orange or brown trousers, no brown eyes, no closed eyes, no pure white spiky hair, no long hair, no blue robe, no spear.
 ```
 
 | Case | Pose | Fichier |
@@ -86,9 +109,20 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Sylvain », planche « Face 2 · attaques 1 à 4 ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Sylvain, hero of the Vents nation. Nature-wind guardian with silver-teal hair, robe of pale teal layered leaves and feathers, silver bracers, a staff topped with a wing-shaped mint crystal in the right hand.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Sylvain (hero of the Vents nation)
+- Hair: short messy pale mint-white hair (#DDF2EE) with long bangs over the forehead
+- Eyes: teal-green eyes (#2E9C94), always open, calm smile
+- Skin: light peach skin
+- Top: pale teal tunic (#9FE0D6) made of layered leaf-shaped feathers, white collar and a white front panel, small gold leaf brooch on the chest
+- Bottom: pale teal and white layered skirt-robe down to the knees, dark charcoal leggings (#33383F)
+- Feet: white boots with gold trims
+- Arms: silver bracers on both forearms
+- Weapon: slim brown wooden staff topped with a mint crystal (#7FF0D8) between two small white wings, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no orange or brown trousers, no brown eyes, no closed eyes, no pure white spiky hair, no long hair, no blue robe, no spear.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
@@ -99,9 +133,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
 4. JUMPING STRIKE: whole body in the air, staff held back over the shoulder.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Sylvain: short messy pale mint-white hair (#DDF2EE) with long bangs over the forehead; teal-green eyes (#2E9C94), always open, calm smile; light peach skin; pale teal tunic (#9FE0D6) made of layered leaf-shaped feathers, white collar and a white front panel, small gold leaf brooch on the chest. Forbidden: no orange or brown trousers, no brown eyes, no closed eyes, no pure white spiky hair, no long hair, no blue robe, no spear.
 ```
 
 | Case | Pose | Fichier |
@@ -116,9 +150,20 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Sylvain », planche « Face 3 · attaques 5-6, sorts 2-3 ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Sylvain, hero of the Vents nation. Nature-wind guardian with silver-teal hair, robe of pale teal layered leaves and feathers, silver bracers, a staff topped with a wing-shaped mint crystal in the right hand.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Sylvain (hero of the Vents nation)
+- Hair: short messy pale mint-white hair (#DDF2EE) with long bangs over the forehead
+- Eyes: teal-green eyes (#2E9C94), always open, calm smile
+- Skin: light peach skin
+- Top: pale teal tunic (#9FE0D6) made of layered leaf-shaped feathers, white collar and a white front panel, small gold leaf brooch on the chest
+- Bottom: pale teal and white layered skirt-robe down to the knees, dark charcoal leggings (#33383F)
+- Feet: white boots with gold trims
+- Arms: silver bracers on both forearms
+- Weapon: slim brown wooden staff topped with a mint crystal (#7FF0D8) between two small white wings, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no orange or brown trousers, no brown eyes, no closed eyes, no pure white spiky hair, no long hair, no blue robe, no spear.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
@@ -129,9 +174,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. INVOCATION: staff raised high with both hands, wind ribbons and feathers swirling above the head.
 4. BLAST: staff pointed forward, a compact wind ribbons and feathers blast leaving the tip.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Sylvain: short messy pale mint-white hair (#DDF2EE) with long bangs over the forehead; teal-green eyes (#2E9C94), always open, calm smile; light peach skin; pale teal tunic (#9FE0D6) made of layered leaf-shaped feathers, white collar and a white front panel, small gold leaf brooch on the chest. Forbidden: no orange or brown trousers, no brown eyes, no closed eyes, no pure white spiky hair, no long hair, no blue robe, no spear.
 ```
 
 | Case | Pose | Fichier |
@@ -146,22 +191,33 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Sylvain », planche « Dos 1 · marche, attaque, sort ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Sylvain, hero of the Vents nation. Nature-wind guardian with silver-teal hair, robe of pale teal layered leaves and feathers, silver bracers, a staff topped with a wing-shaped mint crystal in the right hand.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Sylvain (hero of the Vents nation)
+- Hair: short messy pale mint-white hair (#DDF2EE) with long bangs over the forehead
+- Eyes: teal-green eyes (#2E9C94), always open, calm smile
+- Skin: light peach skin
+- Top: pale teal tunic (#9FE0D6) made of layered leaf-shaped feathers, white collar and a white front panel, small gold leaf brooch on the chest
+- Bottom: pale teal and white layered skirt-robe down to the knees, dark charcoal leggings (#33383F)
+- Feet: white boots with gold trims
+- Arms: silver bracers on both forearms
+- Weapon: slim brown wooden staff topped with a mint crystal (#7FF0D8) between two small white wings, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no orange or brown trousers, no brown eyes, no closed eyes, no pure white spiky hair, no long hair, no blue robe, no spear.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-2. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 3. OVERHEAD STRIKE: staff raised high above the head with both hands.
 4. FOCUS: eyes closed, staff held vertically in front of the face, wind ribbons and feathers orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Sylvain: short messy pale mint-white hair (#DDF2EE) with long bangs over the forehead; teal-green eyes (#2E9C94), always open, calm smile; light peach skin; pale teal tunic (#9FE0D6) made of layered leaf-shaped feathers, white collar and a white front panel, small gold leaf brooch on the chest. Forbidden: no orange or brown trousers, no brown eyes, no closed eyes, no pure white spiky hair, no long hair, no blue robe, no spear.
 ```
 
 | Case | Pose | Fichier |
@@ -176,10 +232,21 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Sylvain », planche « Dos 2 · attaques 2 à 4, garde ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Sylvain, hero of the Vents nation. Nature-wind guardian with silver-teal hair, robe of pale teal layered leaves and feathers, silver bracers, a staff topped with a wing-shaped mint crystal in the right hand.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Sylvain (hero of the Vents nation)
+- Hair: short messy pale mint-white hair (#DDF2EE) with long bangs over the forehead
+- Eyes: teal-green eyes (#2E9C94), always open, calm smile
+- Skin: light peach skin
+- Top: pale teal tunic (#9FE0D6) made of layered leaf-shaped feathers, white collar and a white front panel, small gold leaf brooch on the chest
+- Bottom: pale teal and white layered skirt-robe down to the knees, dark charcoal leggings (#33383F)
+- Feet: white boots with gold trims
+- Arms: silver bracers on both forearms
+- Weapon: slim brown wooden staff topped with a mint crystal (#7FF0D8) between two small white wings, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no orange or brown trousers, no brown eyes, no closed eyes, no pure white spiky hair, no long hair, no blue robe, no spear.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
@@ -189,9 +256,9 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 3. JUMPING STRIKE: whole body in the air, staff held back over the shoulder.
 4. GUARD: knees bent, weapon raised in front of the body, ready to fight.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Sylvain: short messy pale mint-white hair (#DDF2EE) with long bangs over the forehead; teal-green eyes (#2E9C94), always open, calm smile; light peach skin; pale teal tunic (#9FE0D6) made of layered leaf-shaped feathers, white collar and a white front panel, small gold leaf brooch on the chest. Forbidden: no orange or brown trousers, no brown eyes, no closed eyes, no pure white spiky hair, no long hair, no blue robe, no spear.
 ```
 
 | Case | Pose | Fichier |
@@ -207,7 +274,7 @@ L'export Zimut de l'Atelier copie aussi le repos vers `nations/heros/sylvain.png
 
 ### Garde aérien — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/vents/` ; nomme tes images `garde_aerien_<clé>.png` (ex. `garde_aerien_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/vents/` ; nomme tes images `garde_aerien_<clé>.png` (ex. `garde_aerien_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -215,13 +282,23 @@ Dans l'Atelier : personnage « Garde aérien », planche « Référence · repos
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Garde aérien, enemy of the Vents nation. Sky guard in blue and silver armor with small wings on the helmet, holding a halberd.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Garde aérien (enemy of the Vents nation)
+- Body: small chibi sky guard, round body
+- Head: round pale ice-blue helmet (#BFE6F0) with a short fin on top and two small white wings on the sides, a WHITE face mask with two big dark-red eyes (#8A1E1E)
+- Top: pale ice-blue armor (#BFE6F0) with silver shoulder plates and a brown leather strap across the chest
+- Bottom: pale ice-blue tabard over dark navy trousers (#2E3550)
+- Feet: dark navy armored boots
+- Weapon: halberd with a brown wooden shaft and a large silver axe blade, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no visor, no spear, no cape, no human face.
 NATION PALETTE: pale teal, silver, sky white, mint. Signature effects (keep them small): wind ribbons and feathers.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Garde aérien: small chibi sky guard, round body; round pale ice-blue helmet (#BFE6F0) with a short fin on top and two small white wings on the sides, a WHITE face mask with two big dark-red eyes (#8A1E1E); pale ice-blue armor (#BFE6F0) with silver shoulder plates and a brown leather strap across the chest; pale ice-blue tabard over dark navy trousers (#2E3550). Forbidden: no visor, no spear, no cape, no human face.
 ```
 
 | Case | Pose | Fichier |
@@ -234,22 +311,31 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Garde aérien », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Garde aérien, enemy of the Vents nation. Sky guard in blue and silver armor with small wings on the helmet, holding a halberd.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Garde aérien (enemy of the Vents nation)
+- Body: small chibi sky guard, round body
+- Head: round pale ice-blue helmet (#BFE6F0) with a short fin on top and two small white wings on the sides, a WHITE face mask with two big dark-red eyes (#8A1E1E)
+- Top: pale ice-blue armor (#BFE6F0) with silver shoulder plates and a brown leather strap across the chest
+- Bottom: pale ice-blue tabard over dark navy trousers (#2E3550)
+- Feet: dark navy armored boots
+- Weapon: halberd with a brown wooden shaft and a large silver axe blade, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no visor, no spear, no cape, no human face.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. OVERHEAD STRIKE: staff raised high above the head with both hands.
 3. THRUST: body leaning forward, staff tip pushed far ahead with a short wind ribbons and feathers spark.
 4. FOCUS: eyes closed, staff held vertically in front of the face, wind ribbons and feathers orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Garde aérien: small chibi sky guard, round body; round pale ice-blue helmet (#BFE6F0) with a short fin on top and two small white wings on the sides, a WHITE face mask with two big dark-red eyes (#8A1E1E); pale ice-blue armor (#BFE6F0) with silver shoulder plates and a brown leather strap across the chest; pale ice-blue tabard over dark navy trousers (#2E3550). Forbidden: no visor, no spear, no cape, no human face.
 ```
 
 | Case | Pose | Fichier |
@@ -264,22 +350,31 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Garde aérien », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Garde aérien, enemy of the Vents nation. Sky guard in blue and silver armor with small wings on the helmet, holding a halberd.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Garde aérien (enemy of the Vents nation)
+- Body: small chibi sky guard, round body
+- Head: round pale ice-blue helmet (#BFE6F0) with a short fin on top and two small white wings on the sides, a WHITE face mask with two big dark-red eyes (#8A1E1E)
+- Top: pale ice-blue armor (#BFE6F0) with silver shoulder plates and a brown leather strap across the chest
+- Bottom: pale ice-blue tabard over dark navy trousers (#2E3550)
+- Feet: dark navy armored boots
+- Weapon: halberd with a brown wooden shaft and a large silver axe blade, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no visor, no spear, no cape, no human face.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. OVERHEAD STRIKE: staff raised high above the head with both hands.
 3. THRUST: body leaning forward, staff tip pushed far ahead with a short wind ribbons and feathers spark.
 4. FOCUS: eyes closed, staff held vertically in front of the face, wind ribbons and feathers orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Garde aérien: small chibi sky guard, round body; round pale ice-blue helmet (#BFE6F0) with a short fin on top and two small white wings on the sides, a WHITE face mask with two big dark-red eyes (#8A1E1E); pale ice-blue armor (#BFE6F0) with silver shoulder plates and a brown leather strap across the chest; pale ice-blue tabard over dark navy trousers (#2E3550). Forbidden: no visor, no spear, no cape, no human face.
 ```
 
 | Case | Pose | Fichier |
@@ -291,7 +386,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Aigle céleste — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/vents/` ; nomme tes images `aigle_celeste_<clé>.png` (ex. `aigle_celeste_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/vents/` ; nomme tes images `aigle_celeste_<clé>.png` (ex. `aigle_celeste_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -299,13 +394,20 @@ Dans l'Atelier : personnage « Aigle céleste », planche « Référence · repo
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Aigle céleste, enemy of the Vents nation. Large deep blue eagle with golden talons and spread wings.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Aigle céleste (enemy of the Vents nation)
+- Body: large deep blue eagle (#1F4FA8) with lighter blue chest feathers
+- Head: white-blue head, golden hooked beak, sharp yellow eyes
+- Details: golden talons, wide spread wings
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no rider, no armor.
 NATION PALETTE: pale teal, silver, sky white, mint. Signature effects (keep them small): wind ribbons and feathers.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Aigle céleste: large deep blue eagle (#1F4FA8) with lighter blue chest feathers; white-blue head, golden hooked beak, sharp yellow eyes; golden talons, wide spread wings. Forbidden: no rider, no armor.
 ```
 
 | Case | Pose | Fichier |
@@ -318,22 +420,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Aigle céleste », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Aigle céleste, enemy of the Vents nation. Large deep blue eagle with golden talons and spread wings.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Aigle céleste (enemy of the Vents nation)
+- Body: large deep blue eagle (#1F4FA8) with lighter blue chest feathers
+- Head: white-blue head, golden hooked beak, sharp yellow eyes
+- Details: golden talons, wide spread wings
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no rider, no armor.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. REARING: standing up on the hind legs, front claws raised high.
 3. POUNCE: body stretched forward in the air, jaws open.
 4. HOWL: head raised to the sky, wind ribbons and feathers gathering around the body.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Aigle céleste: large deep blue eagle (#1F4FA8) with lighter blue chest feathers; white-blue head, golden hooked beak, sharp yellow eyes; golden talons, wide spread wings. Forbidden: no rider, no armor.
 ```
 
 | Case | Pose | Fichier |
@@ -348,22 +456,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Aigle céleste », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Aigle céleste, enemy of the Vents nation. Large deep blue eagle with golden talons and spread wings.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Aigle céleste (enemy of the Vents nation)
+- Body: large deep blue eagle (#1F4FA8) with lighter blue chest feathers
+- Head: white-blue head, golden hooked beak, sharp yellow eyes
+- Details: golden talons, wide spread wings
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no rider, no armor.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. REARING: standing up on the hind legs, front claws raised high.
 3. POUNCE: body stretched forward in the air, jaws open.
 4. HOWL: head raised to the sky, wind ribbons and feathers gathering around the body.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Aigle céleste: large deep blue eagle (#1F4FA8) with lighter blue chest feathers; white-blue head, golden hooked beak, sharp yellow eyes; golden talons, wide spread wings. Forbidden: no rider, no armor.
 ```
 
 | Case | Pose | Fichier |
@@ -375,7 +489,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Harpie — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/vents/` ; nomme tes images `harpie_<clé>.png` (ex. `harpie_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/vents/` ; nomme tes images `harpie_<clé>.png` (ex. `harpie_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -383,13 +497,20 @@ Dans l'Atelier : personnage « Harpie », planche « Référence · repos de fac
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Harpie, enemy of the Vents nation. Harpy with green and gold feathered wings for arms and bird legs.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Harpie (enemy of the Vents nation)
+- Body: harpy woman with green and gold feathered wings (#3E9A5A, #E0B040) instead of arms
+- Head: wild green hair, yellow eyes
+- Bottom: bird legs with yellow talons, short green feather skirt
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human arms, no weapon.
 NATION PALETTE: pale teal, silver, sky white, mint. Signature effects (keep them small): wind ribbons and feathers.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Harpie: harpy woman with green and gold feathered wings (#3E9A5A, #E0B040) instead of arms; wild green hair, yellow eyes; bird legs with yellow talons, short green feather skirt. Forbidden: no human arms, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -402,22 +523,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Harpie », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Harpie, enemy of the Vents nation. Harpy with green and gold feathered wings for arms and bird legs.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Harpie (enemy of the Vents nation)
+- Body: harpy woman with green and gold feathered wings (#3E9A5A, #E0B040) instead of arms
+- Head: wild green hair, yellow eyes
+- Bottom: bird legs with yellow talons, short green feather skirt
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human arms, no weapon.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. RISE: body stretched tall upward, arms raised.
 3. LUNGE: body stretched forward, claws of wind ribbons and feathers reaching out.
 4. HOVER: floating higher, wind ribbons and feathers orbs circling.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Harpie: harpy woman with green and gold feathered wings (#3E9A5A, #E0B040) instead of arms; wild green hair, yellow eyes; bird legs with yellow talons, short green feather skirt. Forbidden: no human arms, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -432,22 +559,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Harpie », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Harpie, enemy of the Vents nation. Harpy with green and gold feathered wings for arms and bird legs.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Harpie (enemy of the Vents nation)
+- Body: harpy woman with green and gold feathered wings (#3E9A5A, #E0B040) instead of arms
+- Head: wild green hair, yellow eyes
+- Bottom: bird legs with yellow talons, short green feather skirt
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human arms, no weapon.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. RISE: body stretched tall upward, arms raised.
 3. LUNGE: body stretched forward, claws of wind ribbons and feathers reaching out.
 4. HOVER: floating higher, wind ribbons and feathers orbs circling.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Harpie: harpy woman with green and gold feathered wings (#3E9A5A, #E0B040) instead of arms; wild green hair, yellow eyes; bird legs with yellow talons, short green feather skirt. Forbidden: no human arms, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -459,7 +592,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Élémentaire de vent — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/vents/` ; nomme tes images `elementaire_de_vent_<clé>.png` (ex. `elementaire_de_vent_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/vents/` ; nomme tes images `elementaire_de_vent_<clé>.png` (ex. `elementaire_de_vent_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -467,13 +600,20 @@ Dans l'Atelier : personnage « Élémentaire de vent », planche « Référence 
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Élémentaire de vent, enemy of the Vents nation. Swirling pale blue wind spirit with a round cloud body and small arms of wind.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Élémentaire de vent (enemy of the Vents nation)
+- Body: round pale blue cloud body (#CFEFFF) with swirling wind ribbons around it
+- Head: two big friendly dark eyes on the cloud, no mouth
+- Details: two small arms made of wind swirls, no legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human body, no weapon.
 NATION PALETTE: pale teal, silver, sky white, mint. Signature effects (keep them small): wind ribbons and feathers.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Élémentaire de vent: round pale blue cloud body (#CFEFFF) with swirling wind ribbons around it; two big friendly dark eyes on the cloud, no mouth; two small arms made of wind swirls, no legs. Forbidden: no human body, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -486,22 +626,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Élémentaire de vent », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Élémentaire de vent, enemy of the Vents nation. Swirling pale blue wind spirit with a round cloud body and small arms of wind.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Élémentaire de vent (enemy of the Vents nation)
+- Body: round pale blue cloud body (#CFEFFF) with swirling wind ribbons around it
+- Head: two big friendly dark eyes on the cloud, no mouth
+- Details: two small arms made of wind swirls, no legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human body, no weapon.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. RISE: body stretched tall upward, arms raised.
 3. LUNGE: body stretched forward, claws of wind ribbons and feathers reaching out.
 4. HOVER: floating higher, wind ribbons and feathers orbs circling.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Élémentaire de vent: round pale blue cloud body (#CFEFFF) with swirling wind ribbons around it; two big friendly dark eyes on the cloud, no mouth; two small arms made of wind swirls, no legs. Forbidden: no human body, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -516,22 +662,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Élémentaire de vent », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Élémentaire de vent, enemy of the Vents nation. Swirling pale blue wind spirit with a round cloud body and small arms of wind.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Élémentaire de vent (enemy of the Vents nation)
+- Body: round pale blue cloud body (#CFEFFF) with swirling wind ribbons around it
+- Head: two big friendly dark eyes on the cloud, no mouth
+- Details: two small arms made of wind swirls, no legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human body, no weapon.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. RISE: body stretched tall upward, arms raised.
 3. LUNGE: body stretched forward, claws of wind ribbons and feathers reaching out.
 4. HOVER: floating higher, wind ribbons and feathers orbs circling.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Élémentaire de vent: round pale blue cloud body (#CFEFFF) with swirling wind ribbons around it; two big friendly dark eyes on the cloud, no mouth; two small arms made of wind swirls, no legs. Forbidden: no human body, no weapon.
 ```
 
 | Case | Pose | Fichier |
@@ -545,7 +697,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Aéron le Céleste — 22 poses
 
-6 planches, 22 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `vents_<clé>.png` (ex. `vents_face_2.png`) pour que l'Atelier les reconnaisse.
+6 planches, 22 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `vents_<clé>.png` (ex. `vents_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -553,13 +705,20 @@ Dans l'Atelier : personnage « Aéron le Céleste », planche « Référence · 
 
 ```text
 Character reference sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Aéron le Céleste, boss of the Vents nation. Celestial lord in pale cyan feathered armor with long flowing layers, crown of silver spikes, holding a tall silver staff with a wing crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Aéron le Céleste (boss of the Vents nation)
+- Body: celestial lord in pale cyan feathered armor (#BDEFFF) with long flowing feather layers
+- Head: crown of silver spikes, long white hair, pale blue eyes
+- Weapon: tall silver staff with a wing-shaped crystal, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no helmet, no dark colors.
 NATION PALETTE: pale teal, silver, sky white, mint. Signature effects (keep them small): wind ribbons and feathers.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Aéron le Céleste: celestial lord in pale cyan feathered armor (#BDEFFF) with long flowing feather layers; crown of silver spikes, long white hair, pale blue eyes; tall silver staff with a wing-shaped crystal, RIGHT hand. Forbidden: no helmet, no dark colors.
 ```
 
 | Case | Pose | Fichier |
@@ -572,22 +731,28 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Aéron le Céleste », planche « Face 1 · garde, marche, sort ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Aéron le Céleste, boss of the Vents nation. Celestial lord in pale cyan feathered armor with long flowing layers, crown of silver spikes, holding a tall silver staff with a wing crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Aéron le Céleste (boss of the Vents nation)
+- Body: celestial lord in pale cyan feathered armor (#BDEFFF) with long flowing feather layers
+- Head: crown of silver spikes, long white hair, pale blue eyes
+- Weapon: tall silver staff with a wing-shaped crystal, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no helmet, no dark colors.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
 1. GUARD: knees bent, weapon raised in front of the body, ready to fight.
-2. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-3. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+2. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+3. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 4. FOCUS: eyes closed, staff held vertically in front of the face, wind ribbons and feathers orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Aéron le Céleste: celestial lord in pale cyan feathered armor (#BDEFFF) with long flowing feather layers; crown of silver spikes, long white hair, pale blue eyes; tall silver staff with a wing-shaped crystal, RIGHT hand. Forbidden: no helmet, no dark colors.
 ```
 
 | Case | Pose | Fichier |
@@ -602,9 +767,15 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Aéron le Céleste », planche « Face 2 · attaques 1 à 4 ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Aéron le Céleste, boss of the Vents nation. Celestial lord in pale cyan feathered armor with long flowing layers, crown of silver spikes, holding a tall silver staff with a wing crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Aéron le Céleste (boss of the Vents nation)
+- Body: celestial lord in pale cyan feathered armor (#BDEFFF) with long flowing feather layers
+- Head: crown of silver spikes, long white hair, pale blue eyes
+- Weapon: tall silver staff with a wing-shaped crystal, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no helmet, no dark colors.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
@@ -615,9 +786,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
 4. JUMPING STRIKE: whole body in the air, staff held back over the shoulder.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Aéron le Céleste: celestial lord in pale cyan feathered armor (#BDEFFF) with long flowing feather layers; crown of silver spikes, long white hair, pale blue eyes; tall silver staff with a wing-shaped crystal, RIGHT hand. Forbidden: no helmet, no dark colors.
 ```
 
 | Case | Pose | Fichier |
@@ -632,9 +803,15 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Aéron le Céleste », planche « Face 3 · attaques 5-6, sorts 2-3 ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Aéron le Céleste, boss of the Vents nation. Celestial lord in pale cyan feathered armor with long flowing layers, crown of silver spikes, holding a tall silver staff with a wing crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Aéron le Céleste (boss of the Vents nation)
+- Body: celestial lord in pale cyan feathered armor (#BDEFFF) with long flowing feather layers
+- Head: crown of silver spikes, long white hair, pale blue eyes
+- Weapon: tall silver staff with a wing-shaped crystal, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no helmet, no dark colors.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
@@ -645,9 +822,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. INVOCATION: staff raised high with both hands, wind ribbons and feathers swirling above the head.
 4. BLAST: staff pointed forward, a compact wind ribbons and feathers blast leaving the tip.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Aéron le Céleste: celestial lord in pale cyan feathered armor (#BDEFFF) with long flowing feather layers; crown of silver spikes, long white hair, pale blue eyes; tall silver staff with a wing-shaped crystal, RIGHT hand. Forbidden: no helmet, no dark colors.
 ```
 
 | Case | Pose | Fichier |
@@ -662,22 +839,28 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Aéron le Céleste », planche « Dos 1 · marche, attaque, sort ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Aéron le Céleste, boss of the Vents nation. Celestial lord in pale cyan feathered armor with long flowing layers, crown of silver spikes, holding a tall silver staff with a wing crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Aéron le Céleste (boss of the Vents nation)
+- Body: celestial lord in pale cyan feathered armor (#BDEFFF) with long flowing feather layers
+- Head: crown of silver spikes, long white hair, pale blue eyes
+- Weapon: tall silver staff with a wing-shaped crystal, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no helmet, no dark colors.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-2. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 3. OVERHEAD STRIKE: staff raised high above the head with both hands.
 4. FOCUS: eyes closed, staff held vertically in front of the face, wind ribbons and feathers orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Aéron le Céleste: celestial lord in pale cyan feathered armor (#BDEFFF) with long flowing feather layers; crown of silver spikes, long white hair, pale blue eyes; tall silver staff with a wing-shaped crystal, RIGHT hand. Forbidden: no helmet, no dark colors.
 ```
 
 | Case | Pose | Fichier |
@@ -692,10 +875,16 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Aéron le Céleste », planche « Dos 2 · attaques 2 à 4, garde ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Aéron le Céleste, boss of the Vents nation. Celestial lord in pale cyan feathered armor with long flowing layers, crown of silver spikes, holding a tall silver staff with a wing crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Aéron le Céleste (boss of the Vents nation)
+- Body: celestial lord in pale cyan feathered armor (#BDEFFF) with long flowing feather layers
+- Head: crown of silver spikes, long white hair, pale blue eyes
+- Weapon: tall silver staff with a wing-shaped crystal, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no helmet, no dark colors.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: pale teal, silver, sky white, mint.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale sky white rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
@@ -705,9 +894,9 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 3. JUMPING STRIKE: whole body in the air, staff held back over the shoulder.
 4. GUARD: knees bent, weapon raised in front of the body, ready to fight.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: wind ribbons and feathers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Aéron le Céleste: celestial lord in pale cyan feathered armor (#BDEFFF) with long flowing feather layers; crown of silver spikes, long white hair, pale blue eyes; tall silver staff with a wing-shaped crystal, RIGHT hand. Forbidden: no helmet, no dark colors.
 ```
 
 | Case | Pose | Fichier |
@@ -720,5 +909,5 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 ## Prompt négatif (toutes les planches de cette page)
 
 ```text
-checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses, identical poses, repeated pose, copy of the same pose, front and back views mixed, different character between poses, realistic proportions, small head
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses, identical poses, repeated pose, copy of the same pose, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, front and back views mixed, different character between poses, realistic proportions, small head
 ```

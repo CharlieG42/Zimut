@@ -29,7 +29,7 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 
 ### Mage — 22 poses
 
-6 planches, 22 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `mage_<clé>.png` (ex. `mage_face_2.png`) pour que l'Atelier les reconnaisse.
+6 planches, 22 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `mage_<clé>.png` (ex. `mage_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -37,13 +37,24 @@ Dans l'Atelier : personnage « Mage », planche « Référence · repos de face 
 
 ```text
 Character reference sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Mage, hero of the Cristaux nation. Young mage with dark blue hair, long silver-white robe with crystal patterns and sapphire trims, an ornate silver staff topped with a glowing blue crystal in the right hand.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Mage (hero of the Cristaux nation)
+- Hair: dark navy-blue hair (#1E2C5A), medium length, side bangs
+- Eyes: bright blue eyes (#3FA0FF), always open
+- Skin: fair skin
+- Top: long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7)
+- Bottom: the robe reaches the ankles, dark blue trousers visible below
+- Feet: dark blue boots with silver tips
+- Weapon: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wizard hat, no white or silver hair, no beard.
 NATION PALETTE: silver white, sapphire blue, amethyst violet. Signature effects (keep them small): prismatic blue and violet crystal shards.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Mage: dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; fair skin; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7). Forbidden: no wizard hat, no white or silver hair, no beard.
 ```
 
 | Case | Pose | Fichier |
@@ -56,22 +67,32 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Mage », planche « Face 1 · garde, marche, sort ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Mage, hero of the Cristaux nation. Young mage with dark blue hair, long silver-white robe with crystal patterns and sapphire trims, an ornate silver staff topped with a glowing blue crystal in the right hand.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Mage (hero of the Cristaux nation)
+- Hair: dark navy-blue hair (#1E2C5A), medium length, side bangs
+- Eyes: bright blue eyes (#3FA0FF), always open
+- Skin: fair skin
+- Top: long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7)
+- Bottom: the robe reaches the ankles, dark blue trousers visible below
+- Feet: dark blue boots with silver tips
+- Weapon: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wizard hat, no white or silver hair, no beard.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
 1. GUARD: knees bent, weapon raised in front of the body, ready to fight.
-2. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-3. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+2. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+3. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 4. FOCUS: eyes closed, staff held vertically in front of the face, prismatic blue and violet crystal shards orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Mage: dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; fair skin; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7). Forbidden: no wizard hat, no white or silver hair, no beard.
 ```
 
 | Case | Pose | Fichier |
@@ -86,9 +107,19 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Mage », planche « Face 2 · attaques 1 à 4 ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Mage, hero of the Cristaux nation. Young mage with dark blue hair, long silver-white robe with crystal patterns and sapphire trims, an ornate silver staff topped with a glowing blue crystal in the right hand.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Mage (hero of the Cristaux nation)
+- Hair: dark navy-blue hair (#1E2C5A), medium length, side bangs
+- Eyes: bright blue eyes (#3FA0FF), always open
+- Skin: fair skin
+- Top: long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7)
+- Bottom: the robe reaches the ankles, dark blue trousers visible below
+- Feet: dark blue boots with silver tips
+- Weapon: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wizard hat, no white or silver hair, no beard.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
@@ -99,9 +130,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
 4. JUMPING STRIKE: whole body in the air, staff held back over the shoulder.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Mage: dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; fair skin; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7). Forbidden: no wizard hat, no white or silver hair, no beard.
 ```
 
 | Case | Pose | Fichier |
@@ -116,9 +147,19 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Mage », planche « Face 3 · attaques 5-6, sorts 2-3 ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Mage, hero of the Cristaux nation. Young mage with dark blue hair, long silver-white robe with crystal patterns and sapphire trims, an ornate silver staff topped with a glowing blue crystal in the right hand.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Mage (hero of the Cristaux nation)
+- Hair: dark navy-blue hair (#1E2C5A), medium length, side bangs
+- Eyes: bright blue eyes (#3FA0FF), always open
+- Skin: fair skin
+- Top: long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7)
+- Bottom: the robe reaches the ankles, dark blue trousers visible below
+- Feet: dark blue boots with silver tips
+- Weapon: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wizard hat, no white or silver hair, no beard.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
@@ -129,9 +170,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. INVOCATION: staff raised high with both hands, prismatic blue and violet crystal shards swirling above the head.
 4. BLAST: staff pointed forward, a compact prismatic blue and violet crystal shards blast leaving the tip.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Mage: dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; fair skin; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7). Forbidden: no wizard hat, no white or silver hair, no beard.
 ```
 
 | Case | Pose | Fichier |
@@ -146,22 +187,32 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Mage », planche « Dos 1 · marche, attaque, sort ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Mage, hero of the Cristaux nation. Young mage with dark blue hair, long silver-white robe with crystal patterns and sapphire trims, an ornate silver staff topped with a glowing blue crystal in the right hand.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Mage (hero of the Cristaux nation)
+- Hair: dark navy-blue hair (#1E2C5A), medium length, side bangs
+- Eyes: bright blue eyes (#3FA0FF), always open
+- Skin: fair skin
+- Top: long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7)
+- Bottom: the robe reaches the ankles, dark blue trousers visible below
+- Feet: dark blue boots with silver tips
+- Weapon: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wizard hat, no white or silver hair, no beard.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-2. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 3. OVERHEAD STRIKE: staff raised high above the head with both hands.
 4. FOCUS: eyes closed, staff held vertically in front of the face, prismatic blue and violet crystal shards orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Mage: dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; fair skin; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7). Forbidden: no wizard hat, no white or silver hair, no beard.
 ```
 
 | Case | Pose | Fichier |
@@ -176,10 +227,20 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Mage », planche « Dos 2 · attaques 2 à 4, garde ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Mage, hero of the Cristaux nation. Young mage with dark blue hair, long silver-white robe with crystal patterns and sapphire trims, an ornate silver staff topped with a glowing blue crystal in the right hand.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Mage (hero of the Cristaux nation)
+- Hair: dark navy-blue hair (#1E2C5A), medium length, side bangs
+- Eyes: bright blue eyes (#3FA0FF), always open
+- Skin: fair skin
+- Top: long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7)
+- Bottom: the robe reaches the ankles, dark blue trousers visible below
+- Feet: dark blue boots with silver tips
+- Weapon: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wizard hat, no white or silver hair, no beard.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
@@ -189,9 +250,9 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 3. JUMPING STRIKE: whole body in the air, staff held back over the shoulder.
 4. GUARD: knees bent, weapon raised in front of the body, ready to fight.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Mage: dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; fair skin; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7). Forbidden: no wizard hat, no white or silver hair, no beard.
 ```
 
 | Case | Pose | Fichier |
@@ -207,7 +268,7 @@ L'export Zimut de l'Atelier copie aussi le repos vers `nations/heros/mage.png` e
 
 ### Araignée de cristal — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/cristaux/` ; nomme tes images `araignee_de_cristal_<clé>.png` (ex. `araignee_de_cristal_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/cristaux/` ; nomme tes images `araignee_de_cristal_<clé>.png` (ex. `araignee_de_cristal_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -215,13 +276,20 @@ Dans l'Atelier : personnage « Araignée de cristal », planche « Référence �
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Araignée de cristal, enemy of the Cristaux nation. Spider made of violet amethyst crystals with ice-blue glowing legs.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Araignée de cristal (enemy of the Cristaux nation)
+- Body: spider with a round body made of violet amethyst crystals (#8A4FD8)
+- Head: cluster of small glowing ice-blue eyes (#9FE3FF), crystal fangs
+- Details: eight thin glowing ice-blue crystal legs (#9FE3FF)
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no fur, no green, no human body.
 NATION PALETTE: silver white, sapphire blue, amethyst violet. Signature effects (keep them small): prismatic blue and violet crystal shards.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Araignée de cristal: spider with a round body made of violet amethyst crystals (#8A4FD8); cluster of small glowing ice-blue eyes (#9FE3FF), crystal fangs; eight thin glowing ice-blue crystal legs (#9FE3FF). Forbidden: no fur, no green, no human body.
 ```
 
 | Case | Pose | Fichier |
@@ -234,22 +302,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Araignée de cristal », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Araignée de cristal, enemy of the Cristaux nation. Spider made of violet amethyst crystals with ice-blue glowing legs.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Araignée de cristal (enemy of the Cristaux nation)
+- Body: spider with a round body made of violet amethyst crystals (#8A4FD8)
+- Head: cluster of small glowing ice-blue eyes (#9FE3FF), crystal fangs
+- Details: eight thin glowing ice-blue crystal legs (#9FE3FF)
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no fur, no green, no human body.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. REARING: standing up on the hind legs, front claws raised high.
 3. POUNCE: body stretched forward in the air, jaws open.
 4. HOWL: head raised to the sky, prismatic blue and violet crystal shards gathering around the body.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Araignée de cristal: spider with a round body made of violet amethyst crystals (#8A4FD8); cluster of small glowing ice-blue eyes (#9FE3FF), crystal fangs; eight thin glowing ice-blue crystal legs (#9FE3FF). Forbidden: no fur, no green, no human body.
 ```
 
 | Case | Pose | Fichier |
@@ -264,22 +338,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Araignée de cristal », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Araignée de cristal, enemy of the Cristaux nation. Spider made of violet amethyst crystals with ice-blue glowing legs.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Araignée de cristal (enemy of the Cristaux nation)
+- Body: spider with a round body made of violet amethyst crystals (#8A4FD8)
+- Head: cluster of small glowing ice-blue eyes (#9FE3FF), crystal fangs
+- Details: eight thin glowing ice-blue crystal legs (#9FE3FF)
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no fur, no green, no human body.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. REARING: standing up on the hind legs, front claws raised high.
 3. POUNCE: body stretched forward in the air, jaws open.
 4. HOWL: head raised to the sky, prismatic blue and violet crystal shards gathering around the body.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Araignée de cristal: spider with a round body made of violet amethyst crystals (#8A4FD8); cluster of small glowing ice-blue eyes (#9FE3FF), crystal fangs; eight thin glowing ice-blue crystal legs (#9FE3FF). Forbidden: no fur, no green, no human body.
 ```
 
 | Case | Pose | Fichier |
@@ -291,7 +371,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Mage cristallin — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/cristaux/` ; nomme tes images `mage_cristallin_<clé>.png` (ex. `mage_cristallin_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/cristaux/` ; nomme tes images `mage_cristallin_<clé>.png` (ex. `mage_cristallin_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -299,13 +379,21 @@ Dans l'Atelier : personnage « Mage cristallin », planche « Référence · rep
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Mage cristallin, enemy of the Cristaux nation. Slender crystal mage with violet crystal hair and a pale blue body, crystal staff.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Mage cristallin (enemy of the Cristaux nation)
+- Body: slender crystal mage with a smooth pale blue body (#BFD8FF)
+- Head: hair made of sharp violet crystal shards (#8A4FD8), glowing white eyes
+- Top: short dark violet robe with silver trims
+- Weapon: slim crystal staff with a violet crystal tip, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human skin, no hat, no hood.
 NATION PALETTE: silver white, sapphire blue, amethyst violet. Signature effects (keep them small): prismatic blue and violet crystal shards.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Mage cristallin: slender crystal mage with a smooth pale blue body (#BFD8FF); hair made of sharp violet crystal shards (#8A4FD8), glowing white eyes; short dark violet robe with silver trims; slim crystal staff with a violet crystal tip, RIGHT hand. Forbidden: no human skin, no hat, no hood.
 ```
 
 | Case | Pose | Fichier |
@@ -318,22 +406,29 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Mage cristallin », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Mage cristallin, enemy of the Cristaux nation. Slender crystal mage with violet crystal hair and a pale blue body, crystal staff.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Mage cristallin (enemy of the Cristaux nation)
+- Body: slender crystal mage with a smooth pale blue body (#BFD8FF)
+- Head: hair made of sharp violet crystal shards (#8A4FD8), glowing white eyes
+- Top: short dark violet robe with silver trims
+- Weapon: slim crystal staff with a violet crystal tip, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human skin, no hat, no hood.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. OVERHEAD STRIKE: staff raised high above the head with both hands.
 3. THRUST: body leaning forward, staff tip pushed far ahead with a short prismatic blue and violet crystal shards spark.
 4. FOCUS: eyes closed, staff held vertically in front of the face, prismatic blue and violet crystal shards orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Mage cristallin: slender crystal mage with a smooth pale blue body (#BFD8FF); hair made of sharp violet crystal shards (#8A4FD8), glowing white eyes; short dark violet robe with silver trims; slim crystal staff with a violet crystal tip, RIGHT hand. Forbidden: no human skin, no hat, no hood.
 ```
 
 | Case | Pose | Fichier |
@@ -348,22 +443,29 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Mage cristallin », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Mage cristallin, enemy of the Cristaux nation. Slender crystal mage with violet crystal hair and a pale blue body, crystal staff.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Mage cristallin (enemy of the Cristaux nation)
+- Body: slender crystal mage with a smooth pale blue body (#BFD8FF)
+- Head: hair made of sharp violet crystal shards (#8A4FD8), glowing white eyes
+- Top: short dark violet robe with silver trims
+- Weapon: slim crystal staff with a violet crystal tip, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human skin, no hat, no hood.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. OVERHEAD STRIKE: staff raised high above the head with both hands.
 3. THRUST: body leaning forward, staff tip pushed far ahead with a short prismatic blue and violet crystal shards spark.
 4. FOCUS: eyes closed, staff held vertically in front of the face, prismatic blue and violet crystal shards orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Mage cristallin: slender crystal mage with a smooth pale blue body (#BFD8FF); hair made of sharp violet crystal shards (#8A4FD8), glowing white eyes; short dark violet robe with silver trims; slim crystal staff with a violet crystal tip, RIGHT hand. Forbidden: no human skin, no hat, no hood.
 ```
 
 | Case | Pose | Fichier |
@@ -375,7 +477,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Golem de cristal — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/cristaux/` ; nomme tes images `golem_de_cristal_<clé>.png` (ex. `golem_de_cristal_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/cristaux/` ; nomme tes images `golem_de_cristal_<clé>.png` (ex. `golem_de_cristal_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -383,13 +485,20 @@ Dans l'Atelier : personnage « Golem de cristal », planche « Référence · re
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Golem de cristal, enemy of the Cristaux nation. Heavy golem made of violet and blue crystal clusters.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Golem de cristal (enemy of the Cristaux nation)
+- Body: heavy golem made of violet (#8A4FD8) and blue (#4F7FE0) crystal clusters on a dark grey rock core
+- Head: small head of crystal with two glowing white eyes
+- Details: huge crystal fists
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no green, no moss.
 NATION PALETTE: silver white, sapphire blue, amethyst violet. Signature effects (keep them small): prismatic blue and violet crystal shards.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Golem de cristal: heavy golem made of violet (#8A4FD8) and blue (#4F7FE0) crystal clusters on a dark grey rock core; small head of crystal with two glowing white eyes; huge crystal fists. Forbidden: no weapon, no green, no moss.
 ```
 
 | Case | Pose | Fichier |
@@ -402,22 +511,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Golem de cristal », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Golem de cristal, enemy of the Cristaux nation. Heavy golem made of violet and blue crystal clusters.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Golem de cristal (enemy of the Cristaux nation)
+- Body: heavy golem made of violet (#8A4FD8) and blue (#4F7FE0) crystal clusters on a dark grey rock core
+- Head: small head of crystal with two glowing white eyes
+- Details: huge crystal fists
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no green, no moss.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. OVERHEAD SMASH: both fists or weapon raised high above the head.
 3. PUNCH: one arm thrust far forward, the other pulled back, body leaning forward.
 4. ROOTED: stomping, prismatic blue and violet crystal shards cracks spreading under the feet.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Golem de cristal: heavy golem made of violet (#8A4FD8) and blue (#4F7FE0) crystal clusters on a dark grey rock core; small head of crystal with two glowing white eyes; huge crystal fists. Forbidden: no weapon, no green, no moss.
 ```
 
 | Case | Pose | Fichier |
@@ -432,22 +547,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Golem de cristal », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Golem de cristal, enemy of the Cristaux nation. Heavy golem made of violet and blue crystal clusters.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Golem de cristal (enemy of the Cristaux nation)
+- Body: heavy golem made of violet (#8A4FD8) and blue (#4F7FE0) crystal clusters on a dark grey rock core
+- Head: small head of crystal with two glowing white eyes
+- Details: huge crystal fists
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no green, no moss.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. OVERHEAD SMASH: both fists or weapon raised high above the head.
 3. PUNCH: one arm thrust far forward, the other pulled back, body leaning forward.
 4. ROOTED: stomping, prismatic blue and violet crystal shards cracks spreading under the feet.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Golem de cristal: heavy golem made of violet (#8A4FD8) and blue (#4F7FE0) crystal clusters on a dark grey rock core; small head of crystal with two glowing white eyes; huge crystal fists. Forbidden: no weapon, no green, no moss.
 ```
 
 | Case | Pose | Fichier |
@@ -459,7 +580,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Élémentaire de cristal — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/cristaux/` ; nomme tes images `elementaire_de_cristal_<clé>.png` (ex. `elementaire_de_cristal_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/cristaux/` ; nomme tes images `elementaire_de_cristal_<clé>.png` (ex. `elementaire_de_cristal_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -467,13 +588,20 @@ Dans l'Atelier : personnage « Élémentaire de cristal », planche « Référen
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Élémentaire de cristal, enemy of the Cristaux nation. Floating elemental made of sharp violet crystal shards in a humanoid shape.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Élémentaire de cristal (enemy of the Cristaux nation)
+- Body: floating humanoid elemental made of sharp violet crystal shards (#8A4FD8), no legs, shards hovering apart at the joints
+- Head: pointed crystal head with two glowing ice-blue eyes (#9FE3FF)
+- Details: a glowing ice-blue core in the chest
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no feet on the ground, no weapon, no clothes.
 NATION PALETTE: silver white, sapphire blue, amethyst violet. Signature effects (keep them small): prismatic blue and violet crystal shards.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Élémentaire de cristal: floating humanoid elemental made of sharp violet crystal shards (#8A4FD8), no legs, shards hovering apart at the joints; pointed crystal head with two glowing ice-blue eyes (#9FE3FF); a glowing ice-blue core in the chest. Forbidden: no feet on the ground, no weapon, no clothes.
 ```
 
 | Case | Pose | Fichier |
@@ -486,22 +614,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Élémentaire de cristal », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Élémentaire de cristal, enemy of the Cristaux nation. Floating elemental made of sharp violet crystal shards in a humanoid shape.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Élémentaire de cristal (enemy of the Cristaux nation)
+- Body: floating humanoid elemental made of sharp violet crystal shards (#8A4FD8), no legs, shards hovering apart at the joints
+- Head: pointed crystal head with two glowing ice-blue eyes (#9FE3FF)
+- Details: a glowing ice-blue core in the chest
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no feet on the ground, no weapon, no clothes.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. RISE: body stretched tall upward, arms raised.
 3. LUNGE: body stretched forward, claws of prismatic blue and violet crystal shards reaching out.
 4. HOVER: floating higher, prismatic blue and violet crystal shards orbs circling.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Élémentaire de cristal: floating humanoid elemental made of sharp violet crystal shards (#8A4FD8), no legs, shards hovering apart at the joints; pointed crystal head with two glowing ice-blue eyes (#9FE3FF); a glowing ice-blue core in the chest. Forbidden: no feet on the ground, no weapon, no clothes.
 ```
 
 | Case | Pose | Fichier |
@@ -516,22 +650,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Élémentaire de cristal », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Élémentaire de cristal, enemy of the Cristaux nation. Floating elemental made of sharp violet crystal shards in a humanoid shape.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Élémentaire de cristal (enemy of the Cristaux nation)
+- Body: floating humanoid elemental made of sharp violet crystal shards (#8A4FD8), no legs, shards hovering apart at the joints
+- Head: pointed crystal head with two glowing ice-blue eyes (#9FE3FF)
+- Details: a glowing ice-blue core in the chest
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no feet on the ground, no weapon, no clothes.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. RISE: body stretched tall upward, arms raised.
 3. LUNGE: body stretched forward, claws of prismatic blue and violet crystal shards reaching out.
 4. HOVER: floating higher, prismatic blue and violet crystal shards orbs circling.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Élémentaire de cristal: floating humanoid elemental made of sharp violet crystal shards (#8A4FD8), no legs, shards hovering apart at the joints; pointed crystal head with two glowing ice-blue eyes (#9FE3FF); a glowing ice-blue core in the chest. Forbidden: no feet on the ground, no weapon, no clothes.
 ```
 
 | Case | Pose | Fichier |
@@ -545,7 +685,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Zyphéron le Cristallin — 22 poses
 
-6 planches, 22 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `cristaux_<clé>.png` (ex. `cristaux_face_2.png`) pour que l'Atelier les reconnaisse.
+6 planches, 22 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `cristaux_<clé>.png` (ex. `cristaux_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -553,13 +693,20 @@ Dans l'Atelier : personnage « Zyphéron le Cristallin », planche « Référenc
 
 ```text
 Character reference sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Zyphéron le Cristallin, boss of the Cristaux nation. Tall crystal sorcerer with a crown of ice-blue shards, long robe of shattered pale crystal plates, holding an ornate crystal staff, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Zyphéron le Cristallin (boss of the Cristaux nation)
+- Body: tall crystal sorcerer in a long robe of shattered pale crystal plates (#CFE4FF)
+- Head: crown of ice-blue shards, pale face, glowing violet eyes
+- Weapon: ornate crystal staff, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no beard.
 NATION PALETTE: silver white, sapphire blue, amethyst violet. Signature effects (keep them small): prismatic blue and violet crystal shards.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Zyphéron le Cristallin: tall crystal sorcerer in a long robe of shattered pale crystal plates (#CFE4FF); crown of ice-blue shards, pale face, glowing violet eyes; ornate crystal staff, RIGHT hand. Forbidden: no hood, no beard.
 ```
 
 | Case | Pose | Fichier |
@@ -572,22 +719,28 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Zyphéron le Cristallin », planche « Face 1 · garde, marche, sort ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Zyphéron le Cristallin, boss of the Cristaux nation. Tall crystal sorcerer with a crown of ice-blue shards, long robe of shattered pale crystal plates, holding an ornate crystal staff, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Zyphéron le Cristallin (boss of the Cristaux nation)
+- Body: tall crystal sorcerer in a long robe of shattered pale crystal plates (#CFE4FF)
+- Head: crown of ice-blue shards, pale face, glowing violet eyes
+- Weapon: ornate crystal staff, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no beard.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
 1. GUARD: knees bent, weapon raised in front of the body, ready to fight.
-2. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-3. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+2. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+3. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 4. FOCUS: eyes closed, staff held vertically in front of the face, prismatic blue and violet crystal shards orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Zyphéron le Cristallin: tall crystal sorcerer in a long robe of shattered pale crystal plates (#CFE4FF); crown of ice-blue shards, pale face, glowing violet eyes; ornate crystal staff, RIGHT hand. Forbidden: no hood, no beard.
 ```
 
 | Case | Pose | Fichier |
@@ -602,9 +755,15 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Zyphéron le Cristallin », planche « Face 2 · attaques 1 à 4 ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Zyphéron le Cristallin, boss of the Cristaux nation. Tall crystal sorcerer with a crown of ice-blue shards, long robe of shattered pale crystal plates, holding an ornate crystal staff, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Zyphéron le Cristallin (boss of the Cristaux nation)
+- Body: tall crystal sorcerer in a long robe of shattered pale crystal plates (#CFE4FF)
+- Head: crown of ice-blue shards, pale face, glowing violet eyes
+- Weapon: ornate crystal staff, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no beard.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
@@ -615,9 +774,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
 4. JUMPING STRIKE: whole body in the air, staff held back over the shoulder.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Zyphéron le Cristallin: tall crystal sorcerer in a long robe of shattered pale crystal plates (#CFE4FF); crown of ice-blue shards, pale face, glowing violet eyes; ornate crystal staff, RIGHT hand. Forbidden: no hood, no beard.
 ```
 
 | Case | Pose | Fichier |
@@ -632,9 +791,15 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Zyphéron le Cristallin », planche « Face 3 · attaques 5-6, sorts 2-3 ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Zyphéron le Cristallin, boss of the Cristaux nation. Tall crystal sorcerer with a crown of ice-blue shards, long robe of shattered pale crystal plates, holding an ornate crystal staff, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Zyphéron le Cristallin (boss of the Cristaux nation)
+- Body: tall crystal sorcerer in a long robe of shattered pale crystal plates (#CFE4FF)
+- Head: crown of ice-blue shards, pale face, glowing violet eyes
+- Weapon: ornate crystal staff, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no beard.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
@@ -645,9 +810,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. INVOCATION: staff raised high with both hands, prismatic blue and violet crystal shards swirling above the head.
 4. BLAST: staff pointed forward, a compact prismatic blue and violet crystal shards blast leaving the tip.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Zyphéron le Cristallin: tall crystal sorcerer in a long robe of shattered pale crystal plates (#CFE4FF); crown of ice-blue shards, pale face, glowing violet eyes; ornate crystal staff, RIGHT hand. Forbidden: no hood, no beard.
 ```
 
 | Case | Pose | Fichier |
@@ -662,22 +827,28 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Zyphéron le Cristallin », planche « Dos 1 · marche, attaque, sort ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Zyphéron le Cristallin, boss of the Cristaux nation. Tall crystal sorcerer with a crown of ice-blue shards, long robe of shattered pale crystal plates, holding an ornate crystal staff, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Zyphéron le Cristallin (boss of the Cristaux nation)
+- Body: tall crystal sorcerer in a long robe of shattered pale crystal plates (#CFE4FF)
+- Head: crown of ice-blue shards, pale face, glowing violet eyes
+- Weapon: ornate crystal staff, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no beard.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-2. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 3. OVERHEAD STRIKE: staff raised high above the head with both hands.
 4. FOCUS: eyes closed, staff held vertically in front of the face, prismatic blue and violet crystal shards orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Zyphéron le Cristallin: tall crystal sorcerer in a long robe of shattered pale crystal plates (#CFE4FF); crown of ice-blue shards, pale face, glowing violet eyes; ornate crystal staff, RIGHT hand. Forbidden: no hood, no beard.
 ```
 
 | Case | Pose | Fichier |
@@ -692,10 +863,16 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Dans l'Atelier : personnage « Zyphéron le Cristallin », planche « Dos 2 · attaques 2 à 4, garde ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Zyphéron le Cristallin, boss of the Cristaux nation. Tall crystal sorcerer with a crown of ice-blue shards, long robe of shattered pale crystal plates, holding an ornate crystal staff, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Zyphéron le Cristallin (boss of the Cristaux nation)
+- Body: tall crystal sorcerer in a long robe of shattered pale crystal plates (#CFE4FF)
+- Head: crown of ice-blue shards, pale face, glowing violet eyes
+- Weapon: ornate crystal staff, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no beard.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle violet rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
@@ -705,9 +882,9 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 3. JUMPING STRIKE: whole body in the air, staff held back over the shoulder.
 4. GUARD: knees bent, weapon raised in front of the body, ready to fight.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Zyphéron le Cristallin: tall crystal sorcerer in a long robe of shattered pale crystal plates (#CFE4FF); crown of ice-blue shards, pale face, glowing violet eyes; ornate crystal staff, RIGHT hand. Forbidden: no hood, no beard.
 ```
 
 | Case | Pose | Fichier |
@@ -720,5 +897,5 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 ## Prompt négatif (toutes les planches de cette page)
 
 ```text
-checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses, identical poses, repeated pose, copy of the same pose, front and back views mixed, different character between poses, realistic proportions, small head
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses, identical poses, repeated pose, copy of the same pose, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, front and back views mixed, different character between poses, realistic proportions, small head
 ```
