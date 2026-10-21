@@ -19,7 +19,10 @@ const INTRO := [
 	"Bienvenue, [b]{pseudo}[/b] ! Je suis [b]Gultur[/b], gardien des Pierres, et je guide les voyageurs égarés depuis bien longtemps.",
 	"Ici, c'est [b]Zimut[/b], un monde où chaque [b]Nation[/b] veille sur un élément : la forêt, la montagne, le désert, les ombres…",
 	"Autrefois, les [b]Pierres Élémentaires[/b], une par Nation, maintenaient l'équilibre du monde. Un jour, elles ont disparu, dispersées aux quatre coins de Zimut.",
-	"Depuis, les créatures se déchaînent et les routes sont coupées. Tu es venu d'un autre monde, appelé par les Pierres : [b]toi seul[/b] peux les retrouver.",
+	"Depuis, les créatures se déchaînent, les routes sont coupées et l'harmonie entre les Nations se brise un peu plus chaque jour.",
+	"Retrouver les Pierres est [b]indispensable[/b] pour rétablir l'ordre : tant qu'elles seront perdues, Zimut sombrera dans le chaos.",
+	"Et prends garde : chaque Pierre confère à son possesseur des [b]pouvoirs incroyables[/b]. Entre de mauvaises mains, elle serait une arme terrible ; entre les tiennes, un espoir.",
+	"Tu es venu d'un autre monde, appelé par les Pierres elles-mêmes : [b]toi seul[/b] peux les retrouver, {pseudo}. Alors, es-tu prêt ?",
 	"Pour cela, il te faut des héros forts. Commence par les [b]Combats Tactiques[/b] : c'est là que ton équipe apprendra à se battre. Touche le bouton en surbrillance !",
 ]
 const TEAM := [
