@@ -2368,6 +2368,35 @@ const ADVENTURE_DIRS := {"N": Vector2i(0, -1), "E": Vector2i(1, 0), "S": Vector2
 const ADVENTURE_OPPOSITE := {"N": "S", "S": "N", "E": "W", "W": "E"}
 const ADVENTURE_DIR_LABEL := {"N": "nord", "E": "est", "S": "sud", "W": "ouest"}
 
+## V40 : étages du monde. Les Nations des Vents et des Brumes flottent dans le ciel, celles des
+## Ombres, des Cristaux et du Brasier sont sous terre ; les autres sont en surface.
+## 1 = ciel, 0 = surface, -1 = profondeurs.
+const ADVENTURE_LAYER := {"Vents": 1, "Brumes": 1, "Ombres": -1, "Cristaux": -1, "Brasier": -1}
+const ADVENTURE_LAYER_NAME := {1: "Ciel", 0: "Surface", -1: "Profondeurs"}
+
+func adventure_biome_layer(biome: String) -> int:
+	return int(ADVENTURE_LAYER.get(biome, 0))
+
+func adventure_zone_layer(zone_id: String) -> int:
+	return adventure_biome_layer(adventure_zone_biome(zone_id))
+
+## Passage entre deux cartes : nom et récit selon le changement d'étage (0 = même étage).
+func adventure_climb_info(from_zone: String, to_zone: String) -> Dictionary:
+	var a: int = adventure_zone_layer(from_zone)
+	var b: int = adventure_zone_layer(to_zone)
+	var d: int = b - a
+	if d == 0:
+		return {"climb": 0, "label": "", "text": ""}
+	if b == 1:
+		return {"climb": d, "label": "Courant ascendant" if a == 0 else "Colonne de brume",
+			"text": "Un courant ascendant vous emporte au-dessus des nuages…" if a == 0 else "Une colonne de brume vous hisse des profondeurs jusqu'au ciel…"}
+	if b == -1:
+		return {"climb": d, "label": "Descente" if a == 0 else "Cascade de brume",
+			"text": "Vous descendez dans les profondeurs, la lumière du jour s'éloigne…" if a == 0 else "Vous plongez dans une cascade de brume jusqu'aux profondeurs…"}
+	if a == 1:
+		return {"climb": d, "label": "Descente des nuées", "text": "Vous redescendez des nuées vers la terre ferme…"}
+	return {"climb": d, "label": "Remontée", "text": "Vous remontez vers la surface : le jour revient…"}
+
 ## Position d'une carte sur la grille du monde (calculs dans AdventureTerrain).
 func adventure_zone_grid(zone_id: String) -> Vector2i:
 	return AdventureTerrain.grid_of(zone_id)
