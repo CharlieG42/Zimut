@@ -30,7 +30,7 @@ qui interdit visage, yeux, masque ou visière (le chevalier « de dos » était 
 Cartes écrites pour **tous les personnages** : 10 héros, 10 boss, 40 ennemis et 13 familiers (les objets de
 `mecanismes.md` n'en ont pas besoin). Les ennemis des Ombres sont décrits d'après les sprites déjà intégrés (V37).
 Les détails absents des descriptions d'origine (yeux, bottes…) ont été choisis dans la palette de la nation : quand une
-fiche de référence te plaît, recopie dans sa carte les couleurs vues sur l'image (c'est ce qui verrouille toutes les planches suivantes.
+fiche de référence te plaît, recopie dans sa carte les couleurs vues sur l'image : c'est ce qui verrouille toutes les planches suivantes.
 
 ## V36 : pourquoi des planches de 4 poses
 
