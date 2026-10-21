@@ -55,7 +55,7 @@ var _spell_scale: float = 1.0
 
 
 func _is_mobile() -> bool:
-	return OS.has_feature("android") or OS.has_feature("ios")
+	return OS.has_feature("android") or OS.has_feature("ios") or has_meta("force_mobile")
 
 
 func _ready() -> void:
@@ -1035,19 +1035,27 @@ func _build_ui() -> void:
 
 	# Infobulle de sort
 	_tip_panel = PanelContainer.new()
-	_tip_panel.add_theme_stylebox_override("panel", _flat(Color(0.06, 0.08, 0.14, 0.95), Color(1, 0.85, 0.35), 14, 2))
+	var tip_st: StyleBoxFlat = _flat(Color(0.06, 0.08, 0.14, 0.93), Color(1, 0.85, 0.35), 14, 2)
+	tip_st.content_margin_left = 12
+	tip_st.content_margin_right = 12
+	tip_st.content_margin_top = 6
+	tip_st.content_margin_bottom = 8
+	_tip_panel.add_theme_stylebox_override("panel", tip_st)
+	# V39 : en bas à gauche, à droite de la barre de sorts. Le plateau isométrique laisse ce coin libre
+	# (seul le flanc de l'île y passe) : l'infobulle ne masque plus les cases ciblées.
 	_tip_panel.anchor_left = 0.0
 	_tip_panel.anchor_right = 0.0
-	_tip_panel.anchor_top = 0.0
-	_tip_panel.anchor_bottom = 0.0
-	_tip_panel.offset_left = 18.0 + badge_w + 48.0
-	_tip_panel.offset_right = 18.0 + badge_w + 408.0 * _spell_scale
-	_tip_panel.offset_top = 290.0
-	_tip_panel.offset_bottom = 430.0
+	_tip_panel.anchor_top = 1.0
+	_tip_panel.anchor_bottom = 1.0
+	_tip_panel.offset_left = 18.0 + badge_w + 40.0
+	_tip_panel.offset_right = 18.0 + badge_w + 40.0 + 372.0 * _spell_scale
+	_tip_panel.offset_top = -160.0
+	_tip_panel.offset_bottom = -12.0
+	_tip_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_tip_panel.visible = false
 	_tip_label = Label.new()
-	_tip_label.add_theme_font_size_override("font_size", int(22.0 * _spell_scale))
+	_tip_label.add_theme_font_size_override("font_size", int(21.0 * _spell_scale))
 	_tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_tip_label.custom_minimum_size = Vector2(340.0 * _spell_scale, 0)
 	_tip_panel.add_child(_tip_label)
@@ -1481,6 +1489,7 @@ func _on_spell_state(spell) -> void:
 func _show_tip(spell) -> void:
 	if spell == null:
 		_tip_panel.visible = false
+		_place_log(false)
 		return
 	var p: Dictionary = Combat.parse(spell)
 	var lines: Array[String] = []
@@ -1491,16 +1500,44 @@ func _show_tip(spell) -> void:
 		costs += " + %d PM" % int(spell["cost_pm"])
 	lines.append("%s  ·  %s  ·  %d/tour" % [costs, rng_txt, Combat.max_casts(spell)])
 	lines.append(Combat.describe(spell))
+	# V39 : niveau, zone et ligne de vue sur une seule ligne (infobulle moins haute)
+	var extra: Array[String] = []
 	var tip_lvl: int = int(spell.get("spell_level", 1))
 	if tip_lvl > 1:
-		lines.append("★ Niveau %d : +%d %% d'efficacité" % [tip_lvl, int(roundf((float(spell.get("mult", 1.0)) - 1.0) * 100.0))])
+		extra.append("★ Niv. %d : +%d %%" % [tip_lvl, int(roundf((float(spell.get("mult", 1.0)) - 1.0) * 100.0))])
 	if p["aoe"] == "zone":
-		lines.append("Zone d'effet")
+		extra.append("Zone")
 	if p["needs_los"]:
-		lines.append("Ligne de vue requise")
+		extra.append("Ligne de vue")
+	if not extra.is_empty():
+		lines.append("  ·  ".join(extra))
 	_tip_label.text = "\n".join(lines)
 	_tip_panel.visible = true
-	_tip_panel.reset_size()
+	_place_tip()
+
+
+## Infobulle ancrée en bas : elle pousse vers le haut selon la longueur du texte ; le journal
+## passe en bas à droite tant qu'elle est affichée.
+func _place_tip() -> void:
+	var h: float = _tip_panel.get_combined_minimum_size().y
+	_tip_panel.offset_top = _tip_panel.offset_bottom - h
+	_place_log(true)
+
+
+func _place_log(right: bool) -> void:
+	if not is_instance_valid(_log_panel):
+		return
+	if right:
+		_log_panel.anchor_left = 1.0
+		_log_panel.anchor_right = 1.0
+		_log_panel.offset_left = -LOG_WIDTH - 180.0
+		_log_panel.offset_right = -180.0
+	else:
+		_log_panel.anchor_left = 0.0
+		_log_panel.anchor_right = 0.0
+		_log_panel.offset_left = 150.0
+		_log_panel.offset_right = 150.0 + LOG_WIDTH
+	call_deferred("_fit_log")
 
 
 func _on_message(text: String) -> void:
