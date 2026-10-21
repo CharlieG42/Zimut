@@ -138,6 +138,7 @@ func gate_at(pos: Vector2i) -> Dictionary:
 	out["level"] = ProgressionManager.adventure_zone_level(to)
 	out["biome"] = ProgressionManager.adventure_zone_biome(to)
 	out["visited"] = (state.get("zones_unlocked", []) as Array).has(to)
+	out.merge(ProgressionManager.adventure_climb_info(zone_id(), to))
 	return out
 
 ## Franchit la porte de cette case : true si le héros a changé de carte.
