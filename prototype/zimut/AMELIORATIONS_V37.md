@@ -18,4 +18,4 @@ Limites connues (réglées par les prompts V36 + SpriteBuilder) : beaucoup de do
 entre face et dos, Liche de dos et personnage « fumée » (planches 3×2) non utilisés car trop différents.
 
 Tests : `test_back_poses` utilise désormais le Chasseur ; `test_sheet_sprites` accepte une planche déjà chibi.
-Capture : `tests/shot_ombres.gd`.
+Capture : `tests/shot_nation_sprites.gd`.

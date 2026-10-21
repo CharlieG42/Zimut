@@ -3,6 +3,8 @@
 
 Usage :  python3 prompts_sprites/generer_prompts.py
 Modifier une description : éditer les dictionnaires ci-dessous puis relancer le script.
+V38 : chaque prompt commence par la carte d'identité du personnage (identites.py), recopiée
+mot pour mot, pour que toutes les planches dessinent le même personnage sans image jointe.
 V36 : une fiche de référence (repos de face + repos de dos) puis des planches de 4 poses
 (grille 2 × 2, une seule vue), poses décrites par leur silhouette pour éviter les doublons.
 Les noms de fichiers suivent la convention du jeu (scripts/EntityView.gd, V34) :
@@ -10,7 +12,11 @@ Les noms de fichiers suivent la convention du jeu (scripts/EntityView.gd, V34) :
   dos  : <nom>_back.png (repos), <nom>_back_idle_2/_3, <nom>_back_walk[_2], <nom>_back_attack[_2.._8], <nom>_back_cast[_2,_3]
 """
 import math
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from identites import IDENT, card  # noqa: E402
 
 OUT = Path(__file__).resolve().parent
 GAME = "prototype/zimut/assets/sprites"
@@ -44,6 +50,8 @@ NEGATIVE = (
     "blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, "
     "photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, "
     "isometric floor grid, tiles, duplicate poses, identical poses, repeated pose, copy of the same pose, "
+    "closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, "
+    "new clothing pieces, weapon drawn alone without the character, extra objects, "
     "front and back views mixed, different character between poses, realistic proportions, small head"
 )
 
@@ -76,8 +84,8 @@ VIEWS = {
     "face": ("3/4 FRONT view: the character faces the viewer and turns slightly to the right "
              "(face, chest and right side visible), facing front-right in every pose", "front-right"),
     "dos": ("3/4 BACK view: the character is seen from behind and turns slightly to the right "
-            "(back, back of the head and right shoulder visible, face hidden), facing away from the viewer "
-            "toward the upper right in every pose", "back-right, away from the viewer"),
+            "(back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in "
+            "every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible", "back-right, away from the viewer"),
 }
 
 
@@ -429,8 +437,9 @@ MECANISMES = [
 # --------------------------------------------------------------------------------------------
 IDLE = ["IDLE: relaxed standing pose, weapon held calmly",
         "GUARD: knees bent, weapon raised in front of the body, ready to fight"]
-WALK = ["WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward",
-        "WALK (passing): standing on the left leg, right knee raised high, body slightly higher"]
+WALK = ["WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far "
+        "forward, right leg far back, opposite arm swinging forward",
+        "WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher"]
 # (clé, libellé Atelier, vue, cases [(suffixe, code)]) — doit rester identique à
 # SpriteBuilder/atelier_sprites/lib/data/catalog.dart.
 REF = ("ref", "Référence · repos de face + repos de dos", None, [("", "I0"), ("_back", "I0")])
@@ -473,13 +482,14 @@ def pose_label(code):
     return f"{LABELS[code[0]]} {int(code[1:]) + 1}"
 
 
-def prompt_sheet(who, role, nation, desc, view, cells, arch, fx, rim, palette, pale):
+def prompt_sheet(who, role, nation, desc, view, cells, arch, fx, rim, palette, pale, ent_id=""):
     vtxt, vdir = VIEWS[view]
+    idc, never = card(ent_id, desc, who, nation)
     lines = [
-        f"Sprite sheet of ONE {role} for a chibi isometric tactical RPG.",
-        f"CHARACTER: {who}, {nation}. {desc[0].upper() + desc[1:]}.",
+        f"Sprite sheet of ONE {role} for a chibi isometric tactical RPG. The same character appears 4 times.",
+        idc,
         "Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, "
-        "weapon always in the same hand.",
+        "weapon always in the same hand, eyes open.",
         f"VIEW: {vtxt}. Never a pure side profile, never facing left.",
         f"NATION PALETTE: {palette}.",
         "STYLE: " + STYLE.format(rim=rim),
@@ -490,16 +500,26 @@ def prompt_sheet(who, role, nation, desc, view, cells, arch, fx, rim, palette, p
         lines.append(f"{i+1}. {cell_text(code, arch, fx)}.")
     lines.append("The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, "
                  "different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.")
-    lines.append("Use the attached reference sheet (idle front + idle back) for the exact design of the character.")
     lines.append(f"EFFECTS: {fx}, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.")
     lines.append("BACKGROUND: " + (BG_GRAY if pale else BG_WHITE) + BG_TAIL)
+    lines.append(reminder(ent_id, who, desc, never))
     return "\n".join(lines)
 
 
-def prompt_reference(who, role, nation, desc, rim, palette, pale, fx):
+def reminder(ent_id, who, desc, never):
+    """Rappel final (les générateurs pèsent davantage le début et la fin du prompt)."""
+    ident = IDENT.get(ent_id)
+    if ident is None:
+        return f"REMINDER: this is {who}: {desc}."
+    key = "; ".join(t for _, t in ident["parts"][:4])
+    return f"REMINDER: this is {who}: {key}." + (f" Forbidden: {never}." if never else "")
+
+
+def prompt_reference(who, role, nation, desc, rim, palette, pale, fx, ent_id=""):
+    idc, never = card(ent_id, desc, who, nation)
     return "\n".join([
         f"Character reference sheet of ONE {role} for a chibi isometric tactical RPG.",
-        f"CHARACTER: {who}, {nation}. {desc[0].upper() + desc[1:]}.",
+        idc,
         f"NATION PALETTE: {palette}. Signature effects (keep them small): {fx}.",
         "STYLE: " + STYLE.format(rim=rim),
         "LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two "
@@ -509,6 +529,7 @@ def prompt_reference(who, role, nation, desc, rim, palette, pale, fx):
         "2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.",
         "Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).",
         "BACKGROUND: " + (BG_GRAY if pale else BG_WHITE) + BG_TAIL,
+        reminder(ent_id, who, desc, never),
     ])
 
 
@@ -526,15 +547,15 @@ def character_md(title, ent, role, nation_txt, big, fx, rim, palette, path_hint,
     desc = ent["desc"] + extra_desc
     who = ent["nom"].split(" (")[0]
     nposes = sum(len(c) for _, _, _, c in sheets)
-    parts = [f"### {title}\n\n{len(sheets)} planches, {nposes} poses. Commence par la fiche de référence, puis joins-la "
-             f"comme image de référence à chaque planche suivante. Fichiers dans `{path_hint}` ; nomme tes "
+    parts = [f"### {title}\n\n{len(sheets)} planches, {nposes} poses. Commence par la fiche de référence. Chaque prompt "
+             f"recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `{path_hint}` ; nomme tes "
              f"images `{ent['id']}_<clé>.png` (ex. `{ent['id']}_face_2.png`) pour que l'Atelier les reconnaisse.\n"]
     for k, (cle, slabel, view, cells) in enumerate(sheets, 1):
         if view is None:
-            p = prompt_reference(who, role, nation_txt, desc, rim, palette, ent.get("pale", False), fx)
+            p = prompt_reference(who, role, nation_txt, desc, rim, palette, ent.get("pale", False), fx, ent["id"])
         else:
             p = prompt_sheet(who, role, nation_txt, desc, view, cells, ent["arch"], fx, rim, palette,
-                             ent.get("pale", False))
+                             ent.get("pale", False), ent["id"])
         parts.append(f"#### Planche {k} — {slabel} (`{cle}`)\n\nDans l'Atelier : personnage « {who} », "
                      f"planche « {slabel} ».\n\n```text\n{p}\n```\n\n{name_table(ent['id'], view, cells)}\n")
     return "\n".join(parts)

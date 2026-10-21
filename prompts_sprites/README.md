@@ -8,8 +8,28 @@ Prompts prêts à copier dans un générateur d'images pour refaire **tous les s
 | `familiers.md` | 12 familiers / invocations (3 planches, 10 poses) |
 | `mecanismes.md` | objets fixes : arbre, racines, pilier, muraille, faille, cristal d'ambre, balise, bombe, tourelle, balise de transposition |
 | `generer_prompts.py` | source de tout le reste : descriptions, palettes, poses (290 prompts) |
+| `identites.py` | V38 : **cartes d'identité** des personnages (couleurs exactes de chaque partie, variations interdites) |
 
 Les héros, ennemis, boss et familiers viennent de `scripts/Nations.gd`, `assets/sprites/nations/README.md` et `SPRITES_A_FOURNIR.md`.
+
+## V38 : le même personnage d'une planche à l'autre, sans image jointe
+
+Le générateur ne voit jamais les planches précédentes : tout ce que le prompt ne précise pas, il le réinvente
+(sur l'essai du Sylvain : cheveux menthe, blancs puis lavande, yeux verts puis marron, pantalon orange sur la planche de dos).
+Chaque prompt commence donc par une **carte d'identité** recopiée mot pour mot (fichier `identites.py`) :
+
+- **chaque partie visible** est décrite : cheveux, yeux, peau, haut, bas, chaussures, bras, arme et main qui la tient ;
+- **couleurs nommées + code hexadécimal** (`pale mint-white hair (#DDF2EE)`) : bien plus stable qu'un « silver-teal » vague ;
+- **« rien d'autre »** : le générateur ne doit ajouter aucune pièce ni couleur absente de la carte ;
+- **variations interdites** : les dérives déjà vues (yeux fermés, cheveux en pointes, pantalon orange…) ;
+- **rappel en fin de prompt** des 4 traits principaux (les générateurs pèsent surtout le début et la fin).
+
+S'ajoutent : yeux toujours ouverts, marche en vue 3/4 tête droite (plus de profil « nez en l'air »), et vue de dos
+qui interdit visage, yeux, masque ou visière (le chevalier « de dos » était en fait de face, visière fermée).
+
+Cartes écrites pour les 10 héros, les 10 boss et les ennemis des Vents ; les autres ennemis et les familiers utilisent
+leur description avec la règle « rien d'autre ». Quand une fiche de référence te plaît, décris-la dans sa carte
+(couleurs vues sur l'image) : c'est ce qui verrouille toutes les planches suivantes.
 
 ## V36 : pourquoi des planches de 4 poses
 
@@ -35,7 +55,8 @@ coup spécial. Les vues de dos ne reprennent que 4 attaques : en jeu, elles ne s
 
 1. **Planche de style de la nation** (section 1 de chaque fichier, facultative) : palette et matières de toute la nation.
 2. **Fiche de référence** du personnage (`ref`). Recommence jusqu'à ce qu'elle te plaise : tout le reste en découle.
-3. **Planches de poses** : joins la fiche de référence comme image de référence (« image reference », « character reference »).
+3. **Planches de poses** : copie le prompt tel quel, carte d'identité comprise (aucune image à joindre ; si ton outil le permet,
+   joindre la fiche de référence aide encore plus).
    Si une planche contient deux poses semblables, régénère-la plutôt que de la garder.
 4. **Nom du fichier** : `<id>_<clé>.png`, par exemple `chasseur_ref.png`, `chasseur_face_2.png`, `liche_dos_1.png`.
    L'Atelier (SpriteBuilder) reconnaît alors le personnage et la planche tout seul.

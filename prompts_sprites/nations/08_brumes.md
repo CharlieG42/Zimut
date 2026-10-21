@@ -29,7 +29,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Invocateur — 22 poses
 
-6 planches, 22 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `invocateur_<clé>.png` (ex. `invocateur_face_2.png`) pour que l'Atelier les reconnaisse.
+6 planches, 22 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `invocateur_<clé>.png` (ex. `invocateur_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -37,13 +37,24 @@ Dans l'Atelier : personnage « Invocateur », planche « Référence · repos de
 
 ```text
 Character reference sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Invocateur, hero of the Brumes nation. Summoner with black hair, long black coat with violet trims and silver clasps, a spiked dark staff topped with a violet crystal in the right hand, a grimoire floating at his side.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Invocateur (hero of the Brumes nation)
+- Hair: black hair (#15151C), medium length, messy bangs
+- Eyes: violet eyes (#9B6BFF), always open
+- Skin: pale skin
+- Top: long black coat with violet trims (#7A3FD0) and silver clasps
+- Bottom: black trousers
+- Feet: black boots with silver buckles
+- Weapon: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no mask, no white hair.
 NATION PALETTE: black, deep violet, mist mint green, silver. Signature effects (keep them small): mint mist and violet spectral wisps.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Invocateur: black hair (#15151C), medium length, messy bangs; violet eyes (#9B6BFF), always open; pale skin; long black coat with violet trims (#7A3FD0) and silver clasps. Forbidden: no hood, no mask, no white hair.
 ```
 
 | Case | Pose | Fichier |
@@ -56,22 +67,32 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Invocateur », planche « Face 1 · garde, marche, sort ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Invocateur, hero of the Brumes nation. Summoner with black hair, long black coat with violet trims and silver clasps, a spiked dark staff topped with a violet crystal in the right hand, a grimoire floating at his side.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Invocateur (hero of the Brumes nation)
+- Hair: black hair (#15151C), medium length, messy bangs
+- Eyes: violet eyes (#9B6BFF), always open
+- Skin: pale skin
+- Top: long black coat with violet trims (#7A3FD0) and silver clasps
+- Bottom: black trousers
+- Feet: black boots with silver buckles
+- Weapon: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no mask, no white hair.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
 1. GUARD: knees bent, weapon raised in front of the body, ready to fight.
-2. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-3. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+2. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+3. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 4. READING: grimoire floating open in front, pages turning, mint mist and violet spectral wisps rising from it.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Invocateur: black hair (#15151C), medium length, messy bangs; violet eyes (#9B6BFF), always open; pale skin; long black coat with violet trims (#7A3FD0) and silver clasps. Forbidden: no hood, no mask, no white hair.
 ```
 
 | Case | Pose | Fichier |
@@ -86,9 +107,19 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Invocateur », planche « Face 2 · attaques 1 à 4 ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Invocateur, hero of the Brumes nation. Summoner with black hair, long black coat with violet trims and silver clasps, a spiked dark staff topped with a violet crystal in the right hand, a grimoire floating at his side.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Invocateur (hero of the Brumes nation)
+- Hair: black hair (#15151C), medium length, messy bangs
+- Eyes: violet eyes (#9B6BFF), always open
+- Skin: pale skin
+- Top: long black coat with violet trims (#7A3FD0) and silver clasps
+- Bottom: black trousers
+- Feet: black boots with silver buckles
+- Weapon: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no mask, no white hair.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
@@ -99,9 +130,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. SIDE SWING: staff swept horizontally, coat swirling.
 4. GRIMOIRE SLAM: grimoire snapping shut in front, a small mint mist and violet spectral wisps shockwave.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Invocateur: black hair (#15151C), medium length, messy bangs; violet eyes (#9B6BFF), always open; pale skin; long black coat with violet trims (#7A3FD0) and silver clasps. Forbidden: no hood, no mask, no white hair.
 ```
 
 | Case | Pose | Fichier |
@@ -116,9 +147,19 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Invocateur », planche « Face 3 · attaques 5-6, sorts 2-3 ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Invocateur, hero of the Brumes nation. Summoner with black hair, long black coat with violet trims and silver clasps, a spiked dark staff topped with a violet crystal in the right hand, a grimoire floating at his side.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Invocateur (hero of the Brumes nation)
+- Hair: black hair (#15151C), medium length, messy bangs
+- Eyes: violet eyes (#9B6BFF), always open
+- Skin: pale skin
+- Top: long black coat with violet trims (#7A3FD0) and silver clasps
+- Bottom: black trousers
+- Feet: black boots with silver buckles
+- Weapon: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no mask, no white hair.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
@@ -129,9 +170,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. SUMMONING CIRCLE: staff raised, a mint mist and violet spectral wisps circle drawn on the ground.
 4. SUMMON: both arms open wide, a mint mist and violet spectral wisps creature silhouette emerging beside.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Invocateur: black hair (#15151C), medium length, messy bangs; violet eyes (#9B6BFF), always open; pale skin; long black coat with violet trims (#7A3FD0) and silver clasps. Forbidden: no hood, no mask, no white hair.
 ```
 
 | Case | Pose | Fichier |
@@ -146,22 +187,32 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Invocateur », planche « Dos 1 · marche, attaque, sort ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Invocateur, hero of the Brumes nation. Summoner with black hair, long black coat with violet trims and silver clasps, a spiked dark staff topped with a violet crystal in the right hand, a grimoire floating at his side.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Invocateur (hero of the Brumes nation)
+- Hair: black hair (#15151C), medium length, messy bangs
+- Eyes: violet eyes (#9B6BFF), always open
+- Skin: pale skin
+- Top: long black coat with violet trims (#7A3FD0) and silver clasps
+- Bottom: black trousers
+- Feet: black boots with silver buckles
+- Weapon: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no mask, no white hair.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-2. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 3. OVERHEAD STRIKE: staff raised high above the head, grimoire floating behind.
 4. READING: grimoire floating open in front, pages turning, mint mist and violet spectral wisps rising from it.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Invocateur: black hair (#15151C), medium length, messy bangs; violet eyes (#9B6BFF), always open; pale skin; long black coat with violet trims (#7A3FD0) and silver clasps. Forbidden: no hood, no mask, no white hair.
 ```
 
 | Case | Pose | Fichier |
@@ -176,10 +227,20 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Invocateur », planche « Dos 2 · attaques 2 à 4, garde ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Invocateur, hero of the Brumes nation. Summoner with black hair, long black coat with violet trims and silver clasps, a spiked dark staff topped with a violet crystal in the right hand, a grimoire floating at his side.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Invocateur (hero of the Brumes nation)
+- Hair: black hair (#15151C), medium length, messy bangs
+- Eyes: violet eyes (#9B6BFF), always open
+- Skin: pale skin
+- Top: long black coat with violet trims (#7A3FD0) and silver clasps
+- Bottom: black trousers
+- Feet: black boots with silver buckles
+- Weapon: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no mask, no white hair.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
@@ -189,9 +250,9 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 3. GRIMOIRE SLAM: grimoire snapping shut in front, a small mint mist and violet spectral wisps shockwave.
 4. GUARD: knees bent, weapon raised in front of the body, ready to fight.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Invocateur: black hair (#15151C), medium length, messy bangs; violet eyes (#9B6BFF), always open; pale skin; long black coat with violet trims (#7A3FD0) and silver clasps. Forbidden: no hood, no mask, no white hair.
 ```
 
 | Case | Pose | Fichier |
@@ -207,7 +268,7 @@ L'export Zimut de l'Atelier copie aussi le repos vers `nations/heros/invocateur.
 
 ### Brumeux — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `brumeux_<clé>.png` (ex. `brumeux_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `brumeux_<clé>.png` (ex. `brumeux_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -215,13 +276,17 @@ Dans l'Atelier : personnage « Brumeux », planche « Référence · repos de fa
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Brumeux, enemy of the Brumes nation. Hulking lavender mist beast with a fluffy cloud body and small glowing eyes.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Brumeux (enemy of the Brumes nation)
+- Look: hulking lavender mist beast with a fluffy cloud body and small glowing eyes
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
 NATION PALETTE: black, deep violet, mist mint green, silver. Signature effects (keep them small): mint mist and violet spectral wisps.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Brumeux: hulking lavender mist beast with a fluffy cloud body and small glowing eyes.
 ```
 
 | Case | Pose | Fichier |
@@ -234,22 +299,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Brumeux », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Brumeux, enemy of the Brumes nation. Hulking lavender mist beast with a fluffy cloud body and small glowing eyes.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Brumeux (enemy of the Brumes nation)
+- Look: hulking lavender mist beast with a fluffy cloud body and small glowing eyes
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. RISE: body stretched tall upward, arms raised.
 3. LUNGE: body stretched forward, claws of mint mist and violet spectral wisps reaching out.
 4. HOVER: floating higher, mint mist and violet spectral wisps orbs circling.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Brumeux: hulking lavender mist beast with a fluffy cloud body and small glowing eyes.
 ```
 
 | Case | Pose | Fichier |
@@ -264,22 +332,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Brumeux », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Brumeux, enemy of the Brumes nation. Hulking lavender mist beast with a fluffy cloud body and small glowing eyes.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Brumeux (enemy of the Brumes nation)
+- Look: hulking lavender mist beast with a fluffy cloud body and small glowing eyes
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. RISE: body stretched tall upward, arms raised.
 3. LUNGE: body stretched forward, claws of mint mist and violet spectral wisps reaching out.
 4. HOVER: floating higher, mint mist and violet spectral wisps orbs circling.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Brumeux: hulking lavender mist beast with a fluffy cloud body and small glowing eyes.
 ```
 
 | Case | Pose | Fichier |
@@ -291,7 +362,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Gargouille — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `gargouille_<clé>.png` (ex. `gargouille_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `gargouille_<clé>.png` (ex. `gargouille_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -299,13 +370,17 @@ Dans l'Atelier : personnage « Gargouille », planche « Référence · repos de
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Gargouille, enemy of the Brumes nation. Grey stone gargoyle with bat wings and a long tail.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Gargouille (enemy of the Brumes nation)
+- Look: grey stone gargoyle with bat wings and a long tail
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
 NATION PALETTE: black, deep violet, mist mint green, silver. Signature effects (keep them small): mint mist and violet spectral wisps.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Gargouille: grey stone gargoyle with bat wings and a long tail.
 ```
 
 | Case | Pose | Fichier |
@@ -318,22 +393,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Gargouille », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Gargouille, enemy of the Brumes nation. Grey stone gargoyle with bat wings and a long tail.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Gargouille (enemy of the Brumes nation)
+- Look: grey stone gargoyle with bat wings and a long tail
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. REARING: standing up on the hind legs, front claws raised high.
 3. POUNCE: body stretched forward in the air, jaws open.
 4. HOWL: head raised to the sky, mint mist and violet spectral wisps gathering around the body.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Gargouille: grey stone gargoyle with bat wings and a long tail.
 ```
 
 | Case | Pose | Fichier |
@@ -348,22 +426,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Gargouille », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Gargouille, enemy of the Brumes nation. Grey stone gargoyle with bat wings and a long tail.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Gargouille (enemy of the Brumes nation)
+- Look: grey stone gargoyle with bat wings and a long tail
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. REARING: standing up on the hind legs, front claws raised high.
 3. POUNCE: body stretched forward in the air, jaws open.
 4. HOWL: head raised to the sky, mint mist and violet spectral wisps gathering around the body.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Gargouille: grey stone gargoyle with bat wings and a long tail.
 ```
 
 | Case | Pose | Fichier |
@@ -375,7 +456,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Liche des brumes — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `liche_des_brumes_<clé>.png` (ex. `liche_des_brumes_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `liche_des_brumes_<clé>.png` (ex. `liche_des_brumes_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -383,13 +464,17 @@ Dans l'Atelier : personnage « Liche des brumes », planche « Référence · re
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Liche des brumes, enemy of the Brumes nation. Thin violet lich in tattered robes holding a crooked staff.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Liche des brumes (enemy of the Brumes nation)
+- Look: thin violet lich in tattered robes holding a crooked staff
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
 NATION PALETTE: black, deep violet, mist mint green, silver. Signature effects (keep them small): mint mist and violet spectral wisps.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Liche des brumes: thin violet lich in tattered robes holding a crooked staff.
 ```
 
 | Case | Pose | Fichier |
@@ -402,22 +487,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Liche des brumes », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Liche des brumes, enemy of the Brumes nation. Thin violet lich in tattered robes holding a crooked staff.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Liche des brumes (enemy of the Brumes nation)
+- Look: thin violet lich in tattered robes holding a crooked staff
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. OVERHEAD STRIKE: staff raised high above the head with both hands.
 3. THRUST: body leaning forward, staff tip pushed far ahead with a short mint mist and violet spectral wisps spark.
 4. FOCUS: eyes closed, staff held vertically in front of the face, mint mist and violet spectral wisps orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Liche des brumes: thin violet lich in tattered robes holding a crooked staff.
 ```
 
 | Case | Pose | Fichier |
@@ -432,22 +520,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Liche des brumes », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Liche des brumes, enemy of the Brumes nation. Thin violet lich in tattered robes holding a crooked staff.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Liche des brumes (enemy of the Brumes nation)
+- Look: thin violet lich in tattered robes holding a crooked staff
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. OVERHEAD STRIKE: staff raised high above the head with both hands.
 3. THRUST: body leaning forward, staff tip pushed far ahead with a short mint mist and violet spectral wisps spark.
 4. FOCUS: eyes closed, staff held vertically in front of the face, mint mist and violet spectral wisps orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Liche des brumes: thin violet lich in tattered robes holding a crooked staff.
 ```
 
 | Case | Pose | Fichier |
@@ -459,7 +550,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Fantôme — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `fantome_<clé>.png` (ex. `fantome_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `fantome_<clé>.png` (ex. `fantome_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -467,13 +558,17 @@ Dans l'Atelier : personnage « Fantôme », planche « Référence · repos de f
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Fantôme, enemy of the Brumes nation. Pale blue ghost with a wavy tail and a mischievous face.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Fantôme (enemy of the Brumes nation)
+- Look: pale blue ghost with a wavy tail and a mischievous face
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
 NATION PALETTE: black, deep violet, mist mint green, silver. Signature effects (keep them small): mint mist and violet spectral wisps.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Fantôme: pale blue ghost with a wavy tail and a mischievous face.
 ```
 
 | Case | Pose | Fichier |
@@ -486,22 +581,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Fantôme », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Fantôme, enemy of the Brumes nation. Pale blue ghost with a wavy tail and a mischievous face.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Fantôme (enemy of the Brumes nation)
+- Look: pale blue ghost with a wavy tail and a mischievous face
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. RISE: body stretched tall upward, arms raised.
 3. LUNGE: body stretched forward, claws of mint mist and violet spectral wisps reaching out.
 4. HOVER: floating higher, mint mist and violet spectral wisps orbs circling.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Fantôme: pale blue ghost with a wavy tail and a mischievous face.
 ```
 
 | Case | Pose | Fichier |
@@ -516,22 +614,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Fantôme », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Fantôme, enemy of the Brumes nation. Pale blue ghost with a wavy tail and a mischievous face.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Fantôme (enemy of the Brumes nation)
+- Look: pale blue ghost with a wavy tail and a mischievous face
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. RISE: body stretched tall upward, arms raised.
 3. LUNGE: body stretched forward, claws of mint mist and violet spectral wisps reaching out.
 4. HOVER: floating higher, mint mist and violet spectral wisps orbs circling.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Fantôme: pale blue ghost with a wavy tail and a mischievous face.
 ```
 
 | Case | Pose | Fichier |
@@ -545,7 +646,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Ombrelis le Brumeux — 22 poses
 
-6 planches, 22 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `brumes_<clé>.png` (ex. `brumes_face_2.png`) pour que l'Atelier les reconnaisse.
+6 planches, 22 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `brumes_<clé>.png` (ex. `brumes_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -553,13 +654,20 @@ Dans l'Atelier : personnage « Ombrelis le Brumeux », planche « Référence ·
 
 ```text
 Character reference sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Ombrelis le Brumeux, boss of the Brumes nation. Dark necromancer in black spiked armor with a violet tattered cloak, spiked crown, holding a skull-topped staff surrounded by mist, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Ombrelis le Brumeux (boss of the Brumes nation)
+- Body: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A)
+- Head: spiked crown, gaunt pale face, glowing mint eyes
+- Weapon: skull-topped staff surrounded by mint mist, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no sword.
 NATION PALETTE: black, deep violet, mist mint green, silver. Signature effects (keep them small): mint mist and violet spectral wisps.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Ombrelis le Brumeux: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A); spiked crown, gaunt pale face, glowing mint eyes; skull-topped staff surrounded by mint mist, RIGHT hand. Forbidden: no hood, no sword.
 ```
 
 | Case | Pose | Fichier |
@@ -572,22 +680,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Ombrelis le Brumeux », planche « Face 1 · garde, marche, sort ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Ombrelis le Brumeux, boss of the Brumes nation. Dark necromancer in black spiked armor with a violet tattered cloak, spiked crown, holding a skull-topped staff surrounded by mist, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Ombrelis le Brumeux (boss of the Brumes nation)
+- Body: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A)
+- Head: spiked crown, gaunt pale face, glowing mint eyes
+- Weapon: skull-topped staff surrounded by mint mist, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no sword.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
 1. GUARD: knees bent, weapon raised in front of the body, ready to fight.
-2. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-3. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+2. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+3. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 4. READING: grimoire floating open in front, pages turning, mint mist and violet spectral wisps rising from it.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Ombrelis le Brumeux: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A); spiked crown, gaunt pale face, glowing mint eyes; skull-topped staff surrounded by mint mist, RIGHT hand. Forbidden: no hood, no sword.
 ```
 
 | Case | Pose | Fichier |
@@ -602,9 +716,15 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Ombrelis le Brumeux », planche « Face 2 · attaques 1 à 4 ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Ombrelis le Brumeux, boss of the Brumes nation. Dark necromancer in black spiked armor with a violet tattered cloak, spiked crown, holding a skull-topped staff surrounded by mist, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Ombrelis le Brumeux (boss of the Brumes nation)
+- Body: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A)
+- Head: spiked crown, gaunt pale face, glowing mint eyes
+- Weapon: skull-topped staff surrounded by mint mist, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no sword.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
@@ -615,9 +735,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. SIDE SWING: staff swept horizontally, coat swirling.
 4. GRIMOIRE SLAM: grimoire snapping shut in front, a small mint mist and violet spectral wisps shockwave.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Ombrelis le Brumeux: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A); spiked crown, gaunt pale face, glowing mint eyes; skull-topped staff surrounded by mint mist, RIGHT hand. Forbidden: no hood, no sword.
 ```
 
 | Case | Pose | Fichier |
@@ -632,9 +752,15 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Ombrelis le Brumeux », planche « Face 3 · attaques 5-6, sorts 2-3 ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Ombrelis le Brumeux, boss of the Brumes nation. Dark necromancer in black spiked armor with a violet tattered cloak, spiked crown, holding a skull-topped staff surrounded by mist, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Ombrelis le Brumeux (boss of the Brumes nation)
+- Body: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A)
+- Head: spiked crown, gaunt pale face, glowing mint eyes
+- Weapon: skull-topped staff surrounded by mint mist, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no sword.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
@@ -645,9 +771,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. SUMMONING CIRCLE: staff raised, a mint mist and violet spectral wisps circle drawn on the ground.
 4. SUMMON: both arms open wide, a mint mist and violet spectral wisps creature silhouette emerging beside.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Ombrelis le Brumeux: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A); spiked crown, gaunt pale face, glowing mint eyes; skull-topped staff surrounded by mint mist, RIGHT hand. Forbidden: no hood, no sword.
 ```
 
 | Case | Pose | Fichier |
@@ -662,22 +788,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Ombrelis le Brumeux », planche « Dos 1 · marche, attaque, sort ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Ombrelis le Brumeux, boss of the Brumes nation. Dark necromancer in black spiked armor with a violet tattered cloak, spiked crown, holding a skull-topped staff surrounded by mist, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Ombrelis le Brumeux (boss of the Brumes nation)
+- Body: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A)
+- Head: spiked crown, gaunt pale face, glowing mint eyes
+- Weapon: skull-topped staff surrounded by mint mist, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no sword.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-2. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 3. OVERHEAD STRIKE: staff raised high above the head, grimoire floating behind.
 4. READING: grimoire floating open in front, pages turning, mint mist and violet spectral wisps rising from it.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Ombrelis le Brumeux: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A); spiked crown, gaunt pale face, glowing mint eyes; skull-topped staff surrounded by mint mist, RIGHT hand. Forbidden: no hood, no sword.
 ```
 
 | Case | Pose | Fichier |
@@ -692,10 +824,16 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Ombrelis le Brumeux », planche « Dos 2 · attaques 2 à 4, garde ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Ombrelis le Brumeux, boss of the Brumes nation. Dark necromancer in black spiked armor with a violet tattered cloak, spiked crown, holding a skull-topped staff surrounded by mist, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Ombrelis le Brumeux (boss of the Brumes nation)
+- Body: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A)
+- Head: spiked crown, gaunt pale face, glowing mint eyes
+- Weapon: skull-topped staff surrounded by mint mist, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no sword.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
@@ -705,9 +843,9 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 3. GRIMOIRE SLAM: grimoire snapping shut in front, a small mint mist and violet spectral wisps shockwave.
 4. GUARD: knees bent, weapon raised in front of the body, ready to fight.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Ombrelis le Brumeux: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A); spiked crown, gaunt pale face, glowing mint eyes; skull-topped staff surrounded by mint mist, RIGHT hand. Forbidden: no hood, no sword.
 ```
 
 | Case | Pose | Fichier |
@@ -720,5 +858,5 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 ## Prompt négatif (toutes les planches de cette page)
 
 ```text
-checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses, identical poses, repeated pose, copy of the same pose, front and back views mixed, different character between poses, realistic proportions, small head
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses, identical poses, repeated pose, copy of the same pose, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, front and back views mixed, different character between poses, realistic proportions, small head
 ```

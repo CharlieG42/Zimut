@@ -29,7 +29,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Druide — 22 poses
 
-6 planches, 22 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `druide_<clé>.png` (ex. `druide_face_2.png`) pour que l'Atelier les reconnaisse.
+6 planches, 22 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `druide_<clé>.png` (ex. `druide_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -37,13 +37,25 @@ Dans l'Atelier : personnage « Druide », planche « Référence · repos de fac
 
 ```text
 Character reference sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Druide, hero of the Sylvestre nation. Young druid with messy dark green hair, layered armor-robe made of overlapping leaves and bark plates in moss green and brown, leather belts, a tall wooden staff topped with a carved leaf-shaped emerald crystal held in the right hand.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Druide (hero of the Sylvestre nation)
+- Hair: messy short dark green hair (#2E5E3A) with a few small leaves in it
+- Eyes: amber eyes (#E0A030), always open
+- Skin: light peach skin
+- Top: armor-robe of overlapping moss-green leaves (#5E8C3A) and brown bark plates (#6B4A2B)
+- Bottom: dark brown trousers (#4A3420)
+- Feet: brown leather boots wrapped with green cloth
+- Weapon: tall wooden staff topped with a leaf-shaped emerald crystal (#3FD08A), RIGHT hand
+- Details: two crossed leather belts on the chest
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no cape, no blond hair, no blue clothes.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows. Signature effects (keep them small): green leaves and glowing spores.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Druide: messy short dark green hair (#2E5E3A) with a few small leaves in it; amber eyes (#E0A030), always open; light peach skin; armor-robe of overlapping moss-green leaves (#5E8C3A) and brown bark plates (#6B4A2B). Forbidden: no hood, no cape, no blond hair, no blue clothes.
 ```
 
 | Case | Pose | Fichier |
@@ -56,22 +68,33 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Druide », planche « Face 1 · garde, marche, sort ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Druide, hero of the Sylvestre nation. Young druid with messy dark green hair, layered armor-robe made of overlapping leaves and bark plates in moss green and brown, leather belts, a tall wooden staff topped with a carved leaf-shaped emerald crystal held in the right hand.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Druide (hero of the Sylvestre nation)
+- Hair: messy short dark green hair (#2E5E3A) with a few small leaves in it
+- Eyes: amber eyes (#E0A030), always open
+- Skin: light peach skin
+- Top: armor-robe of overlapping moss-green leaves (#5E8C3A) and brown bark plates (#6B4A2B)
+- Bottom: dark brown trousers (#4A3420)
+- Feet: brown leather boots wrapped with green cloth
+- Weapon: tall wooden staff topped with a leaf-shaped emerald crystal (#3FD08A), RIGHT hand
+- Details: two crossed leather belts on the chest
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no cape, no blond hair, no blue clothes.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
 1. GUARD: knees bent, weapon raised in front of the body, ready to fight.
-2. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-3. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+2. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+3. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 4. FOCUS: eyes closed, staff held vertically in front of the face, green leaves and glowing spores orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Druide: messy short dark green hair (#2E5E3A) with a few small leaves in it; amber eyes (#E0A030), always open; light peach skin; armor-robe of overlapping moss-green leaves (#5E8C3A) and brown bark plates (#6B4A2B). Forbidden: no hood, no cape, no blond hair, no blue clothes.
 ```
 
 | Case | Pose | Fichier |
@@ -86,9 +109,20 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Druide », planche « Face 2 · attaques 1 à 4 ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Druide, hero of the Sylvestre nation. Young druid with messy dark green hair, layered armor-robe made of overlapping leaves and bark plates in moss green and brown, leather belts, a tall wooden staff topped with a carved leaf-shaped emerald crystal held in the right hand.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Druide (hero of the Sylvestre nation)
+- Hair: messy short dark green hair (#2E5E3A) with a few small leaves in it
+- Eyes: amber eyes (#E0A030), always open
+- Skin: light peach skin
+- Top: armor-robe of overlapping moss-green leaves (#5E8C3A) and brown bark plates (#6B4A2B)
+- Bottom: dark brown trousers (#4A3420)
+- Feet: brown leather boots wrapped with green cloth
+- Weapon: tall wooden staff topped with a leaf-shaped emerald crystal (#3FD08A), RIGHT hand
+- Details: two crossed leather belts on the chest
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no cape, no blond hair, no blue clothes.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
@@ -99,9 +133,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
 4. JUMPING STRIKE: whole body in the air, staff held back over the shoulder.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Druide: messy short dark green hair (#2E5E3A) with a few small leaves in it; amber eyes (#E0A030), always open; light peach skin; armor-robe of overlapping moss-green leaves (#5E8C3A) and brown bark plates (#6B4A2B). Forbidden: no hood, no cape, no blond hair, no blue clothes.
 ```
 
 | Case | Pose | Fichier |
@@ -116,9 +150,20 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Druide », planche « Face 3 · attaques 5-6, sorts 2-3 ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Druide, hero of the Sylvestre nation. Young druid with messy dark green hair, layered armor-robe made of overlapping leaves and bark plates in moss green and brown, leather belts, a tall wooden staff topped with a carved leaf-shaped emerald crystal held in the right hand.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Druide (hero of the Sylvestre nation)
+- Hair: messy short dark green hair (#2E5E3A) with a few small leaves in it
+- Eyes: amber eyes (#E0A030), always open
+- Skin: light peach skin
+- Top: armor-robe of overlapping moss-green leaves (#5E8C3A) and brown bark plates (#6B4A2B)
+- Bottom: dark brown trousers (#4A3420)
+- Feet: brown leather boots wrapped with green cloth
+- Weapon: tall wooden staff topped with a leaf-shaped emerald crystal (#3FD08A), RIGHT hand
+- Details: two crossed leather belts on the chest
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no cape, no blond hair, no blue clothes.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
@@ -129,9 +174,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. INVOCATION: staff raised high with both hands, green leaves and glowing spores swirling above the head.
 4. BLAST: staff pointed forward, a compact green leaves and glowing spores blast leaving the tip.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Druide: messy short dark green hair (#2E5E3A) with a few small leaves in it; amber eyes (#E0A030), always open; light peach skin; armor-robe of overlapping moss-green leaves (#5E8C3A) and brown bark plates (#6B4A2B). Forbidden: no hood, no cape, no blond hair, no blue clothes.
 ```
 
 | Case | Pose | Fichier |
@@ -146,22 +191,33 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Druide », planche « Dos 1 · marche, attaque, sort ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Druide, hero of the Sylvestre nation. Young druid with messy dark green hair, layered armor-robe made of overlapping leaves and bark plates in moss green and brown, leather belts, a tall wooden staff topped with a carved leaf-shaped emerald crystal held in the right hand.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Druide (hero of the Sylvestre nation)
+- Hair: messy short dark green hair (#2E5E3A) with a few small leaves in it
+- Eyes: amber eyes (#E0A030), always open
+- Skin: light peach skin
+- Top: armor-robe of overlapping moss-green leaves (#5E8C3A) and brown bark plates (#6B4A2B)
+- Bottom: dark brown trousers (#4A3420)
+- Feet: brown leather boots wrapped with green cloth
+- Weapon: tall wooden staff topped with a leaf-shaped emerald crystal (#3FD08A), RIGHT hand
+- Details: two crossed leather belts on the chest
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no cape, no blond hair, no blue clothes.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-2. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 3. OVERHEAD STRIKE: staff raised high above the head with both hands.
 4. FOCUS: eyes closed, staff held vertically in front of the face, green leaves and glowing spores orb at the top.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Druide: messy short dark green hair (#2E5E3A) with a few small leaves in it; amber eyes (#E0A030), always open; light peach skin; armor-robe of overlapping moss-green leaves (#5E8C3A) and brown bark plates (#6B4A2B). Forbidden: no hood, no cape, no blond hair, no blue clothes.
 ```
 
 | Case | Pose | Fichier |
@@ -176,10 +232,21 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Druide », planche « Dos 2 · attaques 2 à 4, garde ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
-CHARACTER: Druide, hero of the Sylvestre nation. Young druid with messy dark green hair, layered armor-robe made of overlapping leaves and bark plates in moss green and brown, leather belts, a tall wooden staff topped with a carved leaf-shaped emerald crystal held in the right hand.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Druide (hero of the Sylvestre nation)
+- Hair: messy short dark green hair (#2E5E3A) with a few small leaves in it
+- Eyes: amber eyes (#E0A030), always open
+- Skin: light peach skin
+- Top: armor-robe of overlapping moss-green leaves (#5E8C3A) and brown bark plates (#6B4A2B)
+- Bottom: dark brown trousers (#4A3420)
+- Feet: brown leather boots wrapped with green cloth
+- Weapon: tall wooden staff topped with a leaf-shaped emerald crystal (#3FD08A), RIGHT hand
+- Details: two crossed leather belts on the chest
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no cape, no blond hair, no blue clothes.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
@@ -189,9 +256,9 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 3. JUMPING STRIKE: whole body in the air, staff held back over the shoulder.
 4. GUARD: knees bent, weapon raised in front of the body, ready to fight.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Druide: messy short dark green hair (#2E5E3A) with a few small leaves in it; amber eyes (#E0A030), always open; light peach skin; armor-robe of overlapping moss-green leaves (#5E8C3A) and brown bark plates (#6B4A2B). Forbidden: no hood, no cape, no blond hair, no blue clothes.
 ```
 
 | Case | Pose | Fichier |
@@ -207,7 +274,7 @@ L'export Zimut de l'Atelier copie aussi le repos vers `nations/heros/druide.png`
 
 ### Araknéa — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sylvestre/` ; nomme tes images `araknea_<clé>.png` (ex. `araknea_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sylvestre/` ; nomme tes images `araknea_<clé>.png` (ex. `araknea_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -215,13 +282,17 @@ Dans l'Atelier : personnage « Araknéa », planche « Référence · repos de f
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Araknéa, enemy of the Sylvestre nation. Forest spider-beetle with an emerald armored carapace, curved horns, sharp mandibles and six legs.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Araknéa (enemy of the Sylvestre nation)
+- Look: forest spider-beetle with an emerald armored carapace, curved horns, sharp mandibles and six legs
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows. Signature effects (keep them small): green leaves and glowing spores.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Araknéa: forest spider-beetle with an emerald armored carapace, curved horns, sharp mandibles and six legs.
 ```
 
 | Case | Pose | Fichier |
@@ -234,22 +305,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Araknéa », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Araknéa, enemy of the Sylvestre nation. Forest spider-beetle with an emerald armored carapace, curved horns, sharp mandibles and six legs.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Araknéa (enemy of the Sylvestre nation)
+- Look: forest spider-beetle with an emerald armored carapace, curved horns, sharp mandibles and six legs
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. REARING: standing up on the hind legs, front claws raised high.
 3. POUNCE: body stretched forward in the air, jaws open.
 4. HOWL: head raised to the sky, green leaves and glowing spores gathering around the body.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Araknéa: forest spider-beetle with an emerald armored carapace, curved horns, sharp mandibles and six legs.
 ```
 
 | Case | Pose | Fichier |
@@ -264,22 +338,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Araknéa », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Araknéa, enemy of the Sylvestre nation. Forest spider-beetle with an emerald armored carapace, curved horns, sharp mandibles and six legs.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Araknéa (enemy of the Sylvestre nation)
+- Look: forest spider-beetle with an emerald armored carapace, curved horns, sharp mandibles and six legs
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. REARING: standing up on the hind legs, front claws raised high.
 3. POUNCE: body stretched forward in the air, jaws open.
 4. HOWL: head raised to the sky, green leaves and glowing spores gathering around the body.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Araknéa: forest spider-beetle with an emerald armored carapace, curved horns, sharp mandibles and six legs.
 ```
 
 | Case | Pose | Fichier |
@@ -291,7 +368,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Loup forestier — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sylvestre/` ; nomme tes images `loup_forestier_<clé>.png` (ex. `loup_forestier_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sylvestre/` ; nomme tes images `loup_forestier_<clé>.png` (ex. `loup_forestier_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -299,13 +376,17 @@ Dans l'Atelier : personnage « Loup forestier », planche « Référence · repo
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Loup forestier, enemy of the Sylvestre nation. Sturdy wolf with dark moss-green fur, a mane of leaves and twigs, amber eyes.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Loup forestier (enemy of the Sylvestre nation)
+- Look: sturdy wolf with dark moss-green fur, a mane of leaves and twigs, amber eyes
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows. Signature effects (keep them small): green leaves and glowing spores.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Loup forestier: sturdy wolf with dark moss-green fur, a mane of leaves and twigs, amber eyes.
 ```
 
 | Case | Pose | Fichier |
@@ -318,22 +399,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Loup forestier », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Loup forestier, enemy of the Sylvestre nation. Sturdy wolf with dark moss-green fur, a mane of leaves and twigs, amber eyes.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Loup forestier (enemy of the Sylvestre nation)
+- Look: sturdy wolf with dark moss-green fur, a mane of leaves and twigs, amber eyes
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. REARING: standing up on the hind legs, front claws raised high.
 3. POUNCE: body stretched forward in the air, jaws open.
 4. HOWL: head raised to the sky, green leaves and glowing spores gathering around the body.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Loup forestier: sturdy wolf with dark moss-green fur, a mane of leaves and twigs, amber eyes.
 ```
 
 | Case | Pose | Fichier |
@@ -348,22 +432,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Loup forestier », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Loup forestier, enemy of the Sylvestre nation. Sturdy wolf with dark moss-green fur, a mane of leaves and twigs, amber eyes.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Loup forestier (enemy of the Sylvestre nation)
+- Look: sturdy wolf with dark moss-green fur, a mane of leaves and twigs, amber eyes
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. REARING: standing up on the hind legs, front claws raised high.
 3. POUNCE: body stretched forward in the air, jaws open.
 4. HOWL: head raised to the sky, green leaves and glowing spores gathering around the body.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Loup forestier: sturdy wolf with dark moss-green fur, a mane of leaves and twigs, amber eyes.
 ```
 
 | Case | Pose | Fichier |
@@ -375,7 +462,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Dryade — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sylvestre/` ; nomme tes images `dryade_<clé>.png` (ex. `dryade_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sylvestre/` ; nomme tes images `dryade_<clé>.png` (ex. `dryade_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -383,13 +470,17 @@ Dans l'Atelier : personnage « Dryade », planche « Référence · repos de fac
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Dryade, enemy of the Sylvestre nation. Dryad archer whose body is made of branches and leaves, wooden bow, leafy hair.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Dryade (enemy of the Sylvestre nation)
+- Look: dryad archer whose body is made of branches and leaves, wooden bow, leafy hair
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows. Signature effects (keep them small): green leaves and glowing spores.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Dryade: dryad archer whose body is made of branches and leaves, wooden bow, leafy hair.
 ```
 
 | Case | Pose | Fichier |
@@ -402,22 +493,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Dryade », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Dryade, enemy of the Sylvestre nation. Dryad archer whose body is made of branches and leaves, wooden bow, leafy hair.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Dryade (enemy of the Sylvestre nation)
+- Look: dryad archer whose body is made of branches and leaves, wooden bow, leafy hair
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. SKY SHOT: bow pointed almost straight up, string fully drawn.
 3. FULL DRAW: bow aimed straight forward, string pulled to the cheek, body sideways.
 4. ENCHANTED ARROW: arrow held up to the face, its tip wrapped in green leaves and glowing spores.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Dryade: dryad archer whose body is made of branches and leaves, wooden bow, leafy hair.
 ```
 
 | Case | Pose | Fichier |
@@ -432,22 +526,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Dryade », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Dryade, enemy of the Sylvestre nation. Dryad archer whose body is made of branches and leaves, wooden bow, leafy hair.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Dryade (enemy of the Sylvestre nation)
+- Look: dryad archer whose body is made of branches and leaves, wooden bow, leafy hair
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. SKY SHOT: bow pointed almost straight up, string fully drawn.
 3. FULL DRAW: bow aimed straight forward, string pulled to the cheek, body sideways.
 4. ENCHANTED ARROW: arrow held up to the face, its tip wrapped in green leaves and glowing spores.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Dryade: dryad archer whose body is made of branches and leaves, wooden bow, leafy hair.
 ```
 
 | Case | Pose | Fichier |
@@ -459,7 +556,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Tréant — 10 poses
 
-3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sylvestre/` ; nomme tes images `treant_<clé>.png` (ex. `treant_face_2.png`) pour que l'Atelier les reconnaisse.
+3 planches, 10 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sylvestre/` ; nomme tes images `treant_<clé>.png` (ex. `treant_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -467,13 +564,17 @@ Dans l'Atelier : personnage « Tréant », planche « Référence · repos de fa
 
 ```text
 Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Tréant, enemy of the Sylvestre nation. Walking tree trunk brute covered in moss and leaves, root-like legs, glowing green eyes.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Tréant (enemy of the Sylvestre nation)
+- Look: walking tree trunk brute covered in moss and leaves, root-like legs, glowing green eyes
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows. Signature effects (keep them small): green leaves and glowing spores.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Tréant: walking tree trunk brute covered in moss and leaves, root-like legs, glowing green eyes.
 ```
 
 | Case | Pose | Fichier |
@@ -486,22 +587,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Tréant », planche « Face · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Tréant, enemy of the Sylvestre nation. Walking tree trunk brute covered in moss and leaves, root-like legs, glowing green eyes.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Tréant (enemy of the Sylvestre nation)
+- Look: walking tree trunk brute covered in moss and leaves, root-like legs, glowing green eyes
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. OVERHEAD SMASH: both fists or weapon raised high above the head.
 3. PUNCH: one arm thrust far forward, the other pulled back, body leaning forward.
 4. ROOTED: stomping, green leaves and glowing spores cracks spreading under the feet.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Tréant: walking tree trunk brute covered in moss and leaves, root-like legs, glowing green eyes.
 ```
 
 | Case | Pose | Fichier |
@@ -516,22 +620,25 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Tréant », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
-CHARACTER: Tréant, enemy of the Sylvestre nation. Walking tree trunk brute covered in moss and leaves, root-like legs, glowing green eyes.
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Tréant (enemy of the Sylvestre nation)
+- Look: walking tree trunk brute covered in moss and leaves, root-like legs, glowing green eyes
+- Every color, eye color, hairstyle, outfit piece and weapon named above is fixed; do not add any piece of clothing, color or accessory that is not named.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
 2. OVERHEAD SMASH: both fists or weapon raised high above the head.
 3. PUNCH: one arm thrust far forward, the other pulled back, body leaning forward.
 4. ROOTED: stomping, green leaves and glowing spores cracks spreading under the feet.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Tréant: walking tree trunk brute covered in moss and leaves, root-like legs, glowing green eyes.
 ```
 
 | Case | Pose | Fichier |
@@ -545,7 +652,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Tharok le Végétal — 22 poses
 
-6 planches, 22 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `sylvestre_<clé>.png` (ex. `sylvestre_face_2.png`) pour que l'Atelier les reconnaisse.
+6 planches, 22 poses. Commence par la fiche de référence. Chaque prompt recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `sylvestre_<clé>.png` (ex. `sylvestre_face_2.png`) pour que l'Atelier les reconnaisse.
 
 #### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
@@ -553,13 +660,20 @@ Dans l'Atelier : personnage « Tharok le Végétal », planche « Référence ·
 
 ```text
 Character reference sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Tharok le Végétal, boss of the Sylvestre nation. Towering forest giant with a body of bark and moss, great deer antlers covered in leaves, a long beard of hanging moss, wielding a thorny wooden club set with a green crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Tharok le Végétal (boss of the Sylvestre nation)
+- Body: towering forest giant with a body of brown bark (#5A3E26) and green moss (#4F7A32)
+- Head: great deer antlers covered in leaves, long beard of hanging moss, glowing green eyes
+- Weapon: thorny wooden club set with a green crystal, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no armor, no metal.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows. Signature effects (keep them small): green leaves and glowing spores.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
 POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
 Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Tharok le Végétal: towering forest giant with a body of brown bark (#5A3E26) and green moss (#4F7A32); great deer antlers covered in leaves, long beard of hanging moss, glowing green eyes; thorny wooden club set with a green crystal, RIGHT hand. Forbidden: no armor, no metal.
 ```
 
 | Case | Pose | Fichier |
@@ -572,22 +686,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Tharok le Végétal », planche « Face 1 · garde, marche, sort ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Tharok le Végétal, boss of the Sylvestre nation. Towering forest giant with a body of bark and moss, great deer antlers covered in leaves, a long beard of hanging moss, wielding a thorny wooden club set with a green crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Tharok le Végétal (boss of the Sylvestre nation)
+- Body: towering forest giant with a body of brown bark (#5A3E26) and green moss (#4F7A32)
+- Head: great deer antlers covered in leaves, long beard of hanging moss, glowing green eyes
+- Weapon: thorny wooden club set with a green crystal, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no armor, no metal.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
 1. GUARD: knees bent, weapon raised in front of the body, ready to fight.
-2. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-3. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+2. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+3. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 4. ROOTED: stomping, green leaves and glowing spores cracks spreading under the feet.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Tharok le Végétal: towering forest giant with a body of brown bark (#5A3E26) and green moss (#4F7A32); great deer antlers covered in leaves, long beard of hanging moss, glowing green eyes; thorny wooden club set with a green crystal, RIGHT hand. Forbidden: no armor, no metal.
 ```
 
 | Case | Pose | Fichier |
@@ -602,9 +722,15 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Tharok le Végétal », planche « Face 2 · attaques 1 à 4 ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Tharok le Végétal, boss of the Sylvestre nation. Towering forest giant with a body of bark and moss, great deer antlers covered in leaves, a long beard of hanging moss, wielding a thorny wooden club set with a green crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Tharok le Végétal (boss of the Sylvestre nation)
+- Body: towering forest giant with a body of brown bark (#5A3E26) and green moss (#4F7A32)
+- Head: great deer antlers covered in leaves, long beard of hanging moss, glowing green eyes
+- Weapon: thorny wooden club set with a green crystal, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no armor, no metal.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
@@ -615,9 +741,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. BACKHAND: arm swept horizontally to the side, torso twisted.
 4. JUMPING SLAM: whole body in the air, fists above the head.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Tharok le Végétal: towering forest giant with a body of brown bark (#5A3E26) and green moss (#4F7A32); great deer antlers covered in leaves, long beard of hanging moss, glowing green eyes; thorny wooden club set with a green crystal, RIGHT hand. Forbidden: no armor, no metal.
 ```
 
 | Case | Pose | Fichier |
@@ -632,9 +758,15 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Tharok le Végétal », planche « Face 3 · attaques 5-6, sorts 2-3 ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Tharok le Végétal, boss of the Sylvestre nation. Towering forest giant with a body of bark and moss, great deer antlers covered in leaves, a long beard of hanging moss, wielding a thorny wooden club set with a green crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Tharok le Végétal (boss of the Sylvestre nation)
+- Body: towering forest giant with a body of brown bark (#5A3E26) and green moss (#4F7A32)
+- Head: great deer antlers covered in leaves, long beard of hanging moss, glowing green eyes
+- Weapon: thorny wooden club set with a green crystal, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no armor, no metal.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
 VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
@@ -645,9 +777,9 @@ POSES, left to right, top to bottom (all in front-right 3/4 view, never mix fron
 3. GATHER: arms raised, green leaves and glowing spores gathering between the hands.
 4. SHOCKWAVE: both fists slammed into the ground, green leaves and glowing spores wave.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Tharok le Végétal: towering forest giant with a body of brown bark (#5A3E26) and green moss (#4F7A32); great deer antlers covered in leaves, long beard of hanging moss, glowing green eyes; thorny wooden club set with a green crystal, RIGHT hand. Forbidden: no armor, no metal.
 ```
 
 | Case | Pose | Fichier |
@@ -662,22 +794,28 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Tharok le Végétal », planche « Dos 1 · marche, attaque, sort ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Tharok le Végétal, boss of the Sylvestre nation. Towering forest giant with a body of bark and moss, great deer antlers covered in leaves, a long beard of hanging moss, wielding a thorny wooden club set with a green crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Tharok le Végétal (boss of the Sylvestre nation)
+- Body: towering forest giant with a body of brown bark (#5A3E26) and green moss (#4F7A32)
+- Head: great deer antlers covered in leaves, long beard of hanging moss, glowing green eyes
+- Weapon: thorny wooden club set with a green crystal, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no armor, no metal.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
-1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
-2. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+1. WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher.
 3. OVERHEAD SMASH: both fists or weapon raised high above the head.
 4. ROOTED: stomping, green leaves and glowing spores cracks spreading under the feet.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Tharok le Végétal: towering forest giant with a body of brown bark (#5A3E26) and green moss (#4F7A32); great deer antlers covered in leaves, long beard of hanging moss, glowing green eyes; thorny wooden club set with a green crystal, RIGHT hand. Forbidden: no armor, no metal.
 ```
 
 | Case | Pose | Fichier |
@@ -692,10 +830,16 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Dans l'Atelier : personnage « Tharok le Végétal », planche « Dos 2 · attaques 2 à 4, garde ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
-CHARACTER: Tharok le Végétal, boss of the Sylvestre nation. Towering forest giant with a body of bark and moss, great deer antlers covered in leaves, a long beard of hanging moss, wielding a thorny wooden club set with a green crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Tharok le Végétal (boss of the Sylvestre nation)
+- Body: towering forest giant with a body of brown bark (#5A3E26) and green moss (#4F7A32)
+- Head: great deer antlers covered in leaves, long beard of hanging moss, glowing green eyes
+- Weapon: thorny wooden club set with a green crystal, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no armor, no metal.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand, eyes open.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible. Never a pure side profile, never facing left.
 NATION PALETTE: moss green, bark brown, leaf gold, small emerald glows.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden sunlight rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
@@ -705,9 +849,9 @@ POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4
 3. JUMPING SLAM: whole body in the air, fists above the head.
 4. GUARD: knees bent, weapon raised in front of the body, ready to fight.
 The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
-Use the attached reference sheet (idle front + idle back) for the exact design of the character.
 EFFECTS: green leaves and glowing spores, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Tharok le Végétal: towering forest giant with a body of brown bark (#5A3E26) and green moss (#4F7A32); great deer antlers covered in leaves, long beard of hanging moss, glowing green eyes; thorny wooden club set with a green crystal, RIGHT hand. Forbidden: no armor, no metal.
 ```
 
 | Case | Pose | Fichier |
@@ -720,5 +864,5 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 ## Prompt négatif (toutes les planches de cette page)
 
 ```text
-checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses, identical poses, repeated pose, copy of the same pose, front and back views mixed, different character between poses, realistic proportions, small head
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses, identical poses, repeated pose, copy of the same pose, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, front and back views mixed, different character between poses, realistic proportions, small head
 ```
