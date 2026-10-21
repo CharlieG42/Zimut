@@ -37,6 +37,8 @@ func _run() -> void:
 	gs.restart_tutorial()
 	_ok(Gultur.should_show("intro") and gs.tuto_seen.is_empty() and not gs.tutorial_done, "relance : tout est remis à zéro")
 	gs.skip_tutorial()
+	var intro_txt: String = " ".join(PackedStringArray(Gultur.INTRO))
+	_ok(intro_txt.contains("indispensable") and intro_txt.contains("pouvoirs incroyables"), "discours : les Pierres sont indispensables et donnent des pouvoirs")
 	# Export / import (.zimut)
 	data["inventory"] = [{"type": "Casque", "name": "Test", "level": 1, "rarity": "commun", "defense": 3}]
 	var code: String = pm.export_code(data)

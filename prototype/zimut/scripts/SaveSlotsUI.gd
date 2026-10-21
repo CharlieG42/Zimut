@@ -343,6 +343,16 @@ func _prompt_pseudo(slot: int) -> void:
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	overlay.add_child(center)
+	# Clavier virtuel : la fenêtre se recale dans la zone restée visible au-dessus de lui.
+	var kb_timer := Timer.new()
+	kb_timer.wait_time = 0.1
+	kb_timer.autostart = true
+	kb_timer.timeout.connect(func() -> void:
+		var kb: int = DisplayServer.virtual_keyboard_get_height()
+		var win_h: float = float(maxi(1, DisplayServer.window_get_size().y))
+		var ratio: float = overlay.get_viewport_rect().size.y / win_h
+		center.offset_bottom = -float(kb) * ratio)
+	overlay.add_child(kb_timer)
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", _flat())
 	center.add_child(panel)
@@ -394,6 +404,8 @@ func _prompt_pseudo(slot: int) -> void:
 
 
 func _create_game(slot: int, pseudo: String) -> void:
+	# Toute nouvelle partie relance le tutoriel de Gultur, même si une autre partie existe déjà.
+	GameSettings.restart_tutorial()
 	_current = ProgressionManager.new_game(slot, pseudo)
 	GameManager.active_save = _current
 	_current_slot = slot
