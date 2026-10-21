@@ -73,6 +73,30 @@ const POSES: Array[String] = ["back", "walk", "attack", "cast"]
 ## (<sprite>_back reste le repos de dos). Rangées sous les clés "back_idle", "back_walk"…
 const BACK_POSES: Array[String] = ["idle", "walk", "attack", "cast"]
 const MAX_VARIANTS: int = 9
+## V35 : réglages de l'animation procédurale (respiration, marche, attaque, sort).
+## Valeurs par défaut = comportement historique ; un fichier <sprite>_anim.txt (JSON,
+## exporté par SpriteBuilder) à côté du sprite les surcharge pour ce personnage.
+const ANIM_DEFAUT: Dictionary = {
+	"respiration": 0.014,       # amplitude d'échelle verticale au repos
+	"flottement": 1.6,          # montée/descente au repos (px)
+	"vitesse_repos": 2.2,       # pulsation du repos (rad/s)
+	"balancement": 0.018,       # oscillation de rotation au repos (rad)
+	"rebond_marche": 9.0,       # hauteur des petits sauts de marche (px)
+	"ecrasement_marche": 0.07,  # écrasement à chaque appui
+	"penche_marche": 0.10,      # inclinaison vers l'avant en marchant
+	"elan_attaque": 26.0,       # avancée de la fente (px)
+	"recul_attaque": 8.0,       # armé avant la fente (px)
+	"etirement_attaque": 1.0,   # multiplicateur de l'étirement d'élan
+	"saut_sort": 12.0,          # saut au lancement d'un sort (px)
+}
+## Bornes de sécurité (un fichier mal réglé ne doit pas casser l'affichage).
+const ANIM_MAX: Dictionary = {
+	"respiration": 0.08, "flottement": 12.0, "vitesse_repos": 8.0, "balancement": 0.15,
+	"rebond_marche": 30.0, "ecrasement_marche": 0.3, "penche_marche": 0.4,
+	"elan_attaque": 80.0, "recul_attaque": 30.0, "etirement_attaque": 3.0, "saut_sort": 40.0,
+}
+static var _anim_cache: Dictionary = {}
+var _anim: Dictionary = ANIM_DEFAUT
 
 
 ## Lumière par biome : teinte du personnage, couleur du contre-jour, direction de la
@@ -153,6 +177,35 @@ func setup(e: Dictionary) -> void:
 		_ghost.modulate.a = 0.0
 		add_child(_ghost)
 	set_process(true)
+
+
+## Réglages d'animation du sprite [tex_path] : <base>_anim.txt (JSON) s'il existe,
+## sinon les valeurs par défaut. Mis en cache par chemin.
+static func anim_params(tex_path: String) -> Dictionary:
+	if tex_path == "":
+		return ANIM_DEFAUT
+	var base: String = tex_path.get_basename()
+	if _anim_cache.has(base):
+		return _anim_cache[base]
+	var out: Dictionary = ANIM_DEFAUT.duplicate()
+	var path: String = base + "_anim.txt"
+	if FileAccess.file_exists(path):
+		var f := FileAccess.open(path, FileAccess.READ)
+		if f != null:
+			var parsed: Variant = JSON.parse_string(f.get_as_text())
+			if parsed is Dictionary:
+				for k: String in ANIM_DEFAUT.keys():
+					var v: Variant = (parsed as Dictionary).get(k, null)
+					if v is float or v is int:
+						out[k] = clampf(float(v), 0.0, float(ANIM_MAX[k]))
+			else:
+				push_warning("Réglages d'animation illisibles : " + path)
+	_anim_cache[base] = out
+	return out
+
+
+func _a(k: String) -> float:
+	return float(_anim.get(k, ANIM_DEFAUT[k]))
 
 
 func _load_poses() -> void:
@@ -459,6 +512,7 @@ func _load_texture() -> void:
 		return
 	_has_tex = true
 	sprite.texture = tex
+	_anim = anim_params(tex.resource_path)
 	var target_h: float = _target_height()
 	var max_w: float = (140.0 if String(entity.get("entity_type", "")) == "Player" else 112.0) * target_h / 92.0
 	var sc: float = minf(target_h / float(tex.get_height()), max_w / float(tex.get_width()))
@@ -499,7 +553,7 @@ func _process(delta: float) -> void:
 		_tilt = move_toward(_tilt, 0.0, delta * 1.6)
 		_kb = _kb.move_toward(Vector2.ZERO, delta * 70.0)
 	_stretch = move_toward(_stretch, 0.0, delta * 2.5)
-	_lean = lerpf(_lean, clampf(_move_dx, -1.0, 1.0) * 0.10 if _moving else 0.0, minf(1.0, delta * 10.0))
+	_lean = lerpf(_lean, clampf(_move_dx, -1.0, 1.0) * _a("penche_marche") if _moving else 0.0, minf(1.0, delta * 10.0))
 	if _act_tex != null:
 		_pose_t -= delta
 		if _pose_t <= 0.0:
@@ -519,21 +573,23 @@ func _process(delta: float) -> void:
 		_apply_tex(_wanted_tex())
 	if _has_tex and sprite != null:
 		var still: bool = _is_static()
-		var bob: float = 0.0 if still else sin(_t * 2.2 + _phase) * 1.6
+		var vr: float = _a("vitesse_repos")
+		var bob: float = 0.0 if still else sin(_t * vr + _phase) * _a("flottement")
 		var hop_n: float = absf(sin(_t * 13.0)) if _moving else 0.0
-		var hop: float = hop_n * 9.0
+		var hop: float = hop_n * _a("rebond_marche")
 		# profondeur : un peu plus petit et voilé au fond du plateau
 		var df: float = _depth_factor()
 		var dsc: float = lerpf(0.94, 1.04, df)
 		var sc: float = _base_sc * dsc
-		var breathe: float = 0.0 if still else sin(_t * 2.2 + _phase) * 0.014
-		var squash: float = (1.0 - hop_n) * 0.07 if _moving else 0.0
-		var sx: float = sc * (1.0 + _stretch * 0.10 + squash * 0.6)
-		var sy: float = sc * (1.0 + breathe - _stretch * 0.07 - squash)
+		var breathe: float = 0.0 if still else sin(_t * vr + _phase) * _a("respiration")
+		var squash: float = (1.0 - hop_n) * _a("ecrasement_marche") if _moving else 0.0
+		var etir: float = _stretch * _a("etirement_attaque")
+		var sx: float = sc * (1.0 + etir * 0.10 + squash * 0.6)
+		var sy: float = sc * (1.0 + breathe - etir * 0.07 - squash)
 		var base_pos := Vector2(randf_range(-1.0, 1.0) * _shake * 6.0, -height * 0.5 + 6.0 - bob - hop) + _kb
 		sprite.scale = Vector2(sx, sy)
 		sprite.position = base_pos
-		sprite.rotation = _tilt + (0.0 if still else sin(_t * 1.3 + _phase) * 0.018)
+		sprite.rotation = _tilt + (0.0 if still else sin(_t * 1.3 + _phase) * _a("balancement"))
 		sprite.skew = _lean
 		var haze: Color = Color(0.86, 0.90, 1.0).lerp(Color(1, 1, 1), df)
 		var tint: Color = _light.get("tint", Color.WHITE)
@@ -584,7 +640,7 @@ func _process(delta: float) -> void:
 			_mat.set_shader_parameter("outline", outline_w)
 			_mat.set_shader_parameter("outline_color", oc)
 	else:
-		_hop = absf(sin(_t * 13.0)) * 9.0 if _moving else 0.0
+		_hop = absf(sin(_t * 13.0)) * _a("rebond_marche") if _moving else 0.0
 	queue_redraw()
 
 
@@ -636,8 +692,8 @@ func lunge(toward: Vector2, key: String = "") -> Tween:
 	play_pose("attack", 0.6, key)
 	var tw: Tween = create_tween()
 	tw.tween_callback(func() -> void: _stretch = 1.0)
-	tw.tween_property(self, "position", origin - dir * 8.0, 0.07)
-	tw.tween_property(self, "position", origin + dir * 26.0, 0.07).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(self, "position", origin - dir * _a("recul_attaque"), 0.07)
+	tw.tween_property(self, "position", origin + dir * _a("elan_attaque"), 0.07).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(self, "position", origin, 0.14)
 	return tw
 
@@ -646,7 +702,7 @@ func cast_pose(key: String = "") -> Tween:
 	play_pose("cast", 0.6, key)
 	var tw: Tween = create_tween()
 	var origin: Vector2 = position
-	tw.tween_property(self, "position", origin + Vector2(0, -12), 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(self, "position", origin + Vector2(0, -_a("saut_sort")), 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(self, "position", origin, 0.16).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 	return tw
 
