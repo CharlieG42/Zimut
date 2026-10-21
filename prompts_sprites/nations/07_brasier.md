@@ -2,7 +2,7 @@
 
 Palette : crimson red, black obsidian, ember orange, gold. Effets : flames and embers. Contre-jour : orange ember.
 
-Chaque personnage est dessiné en **vue 3/4 avant (face)** et en **vue 3/4 arrière (dos)**. Le jeu retourne l'image pour les directions vers la gauche. Toutes les planches sont des grilles 4 × 2 aux cases bien séparées. Prompt négatif : voir en bas de page.
+Chaque personnage est dessiné en **vue 3/4 avant (face)** et en **vue 3/4 arrière (dos)**. Le jeu retourne l'image pour les directions vers la gauche. Une fiche de référence (repos face + dos), puis des planches de 4 poses (2 × 2) bien séparées. Prompt négatif : voir en bas de page.
 
 Ordre conseillé : 1) planche de référence, 2) héros, 3) ennemis, 4) boss.
 
@@ -13,7 +13,7 @@ Ne sert pas en jeu : elle fixe palette, matières et silhouettes, de face et de 
 ```text
 Character lineup reference sheet for a chibi isometric tactical RPG: the Brasier nation (Brasier biome).
 NATION PALETTE: crimson red, black obsidian, ember orange, gold. Signature effects: flames and embers.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
 LAYOUT: two rows with the same 6 characters in the same order, all in idle pose. Top row: 3/4 front view, facing front-right. Bottom row: 3/4 back view, seen from behind, turned toward the upper right. All feet of a row on the same ground line. Leave a wide empty gap (at least half a character width) between characters and between the two rows: nobody overlaps or touches anyone, weapons and capes included. Image aspect ratio 2:1, as large as possible.
 CHARACTERS, left to right:
 1. the hero (Chasseur: hunter with long red hair in a high ponytail, red and black armor with flame-shaped plates and glowing ember cracks, a red scarf, quiver of arrows on the back, a curved flame-patterned bow in the left hand).
@@ -27,68 +27,80 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ## 2. Héros
 
-### Chasseur — 32 poses
+### Chasseur — 22 poses
 
-4 planches de 8 poses. Joins la planche de face « repos » déjà réussie comme référence pour les suivantes. Fichiers dans `prototype/zimut/assets/sprites/players/`.
+6 planches, 22 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `chasseur_<clé>.png` (ex. `chasseur_face_2.png`) pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Face (3/4 avant) · Repos, marche et sorts
+#### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
-Dans l'Atelier : personnage « Chasseur », planche « Face (3/4 avant) · Repos, marche et sorts ».
+Dans l'Atelier : personnage « Chasseur », planche « Référence · repos de face + repos de dos ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
+Character reference sheet of ONE playable hero for a chibi isometric tactical RPG.
 CHARACTER: Chasseur, hero of the Brasier nation. Hunter with long red hair in a high ponytail, red and black armor with flame-shaped plates and glowing ember cracks, a red scarf, quiver of arrows on the back, a curved flame-patterned bow in the left hand.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
-NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. idle variant, alert, weapon ready.
-4. walking, mid-stride, left foot forward.
-5. walking, mid-stride, right foot forward.
-6. arrow raised to the sky, flames and embers gathering on the arrowhead.
-7. aiming upward, the arrow fully wrapped in flames and embers.
-8. releasing a volley of three flames and embers arrows into the air.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+NATION PALETTE: crimson red, black obsidian, ember orange, gold. Signature effects (keep them small): flames and embers.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
+POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
+Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `chasseur.png` |
-| 1-2 | repos 2 | `chasseur_idle_2.png` |
-| 1-3 | repos 3 | `chasseur_idle_3.png` |
-| 1-4 | marche 1 | `chasseur_walk.png` |
-| 2-1 | marche 2 | `chasseur_walk_2.png` |
-| 2-2 | sort 1 | `chasseur_cast.png` |
-| 2-3 | sort 2 | `chasseur_cast_2.png` |
-| 2-4 | sort 3 | `chasseur_cast_3.png` |
+| 1-1 | repos 1 (face) | `chasseur.png` |
+| 1-2 | repos 1 (dos) | `chasseur_back.png` |
 
-#### Planche 2 — Face (3/4 avant) · Attaques
+#### Planche 2 — Face 1 · garde, marche, sort (`face_1`)
 
-Dans l'Atelier : personnage « Chasseur », planche « Face (3/4 avant) · Attaques ».
+Dans l'Atelier : personnage « Chasseur », planche « Face 1 · garde, marche, sort ».
 
 ```text
 Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
 CHARACTER: Chasseur, hero of the Brasier nation. Hunter with long red hair in a high ponytail, red and black armor with flame-shaped plates and glowing ember cracks, a red scarf, quiver of arrows on the back, a curved flame-patterned bow in the left hand.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. drawing the bow, arrow nocked, string pulled to the cheek.
-2. release, arrow flying forward with a short flames and embers trail.
-3. follow-through, bow arm extended, string hand open behind.
-4. quick shot from a low crouch, bow tilted.
-5. drawing an arrow from the quiver, bow lowered.
-6. double shot, two arrows nocked at once.
-7. point-blank kick, bow held back, one leg raised.
-8. jumping shot, aiming downward forward, feet off the ground.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. GUARD: knees bent, weapon raised in front of the body, ready to fight.
+2. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+3. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+4. ENCHANTED ARROW: arrow held up to the face, its tip wrapped in flames and embers.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | repos 2 | `chasseur_idle_2.png` |
+| 1-2 | marche 1 | `chasseur_walk.png` |
+| 2-1 | marche 2 | `chasseur_walk_2.png` |
+| 2-2 | sort 1 | `chasseur_cast.png` |
+
+#### Planche 3 — Face 2 · attaques 1 à 4 (`face_2`)
+
+Dans l'Atelier : personnage « Chasseur », planche « Face 2 · attaques 1 à 4 ».
+
+```text
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
+CHARACTER: Chasseur, hero of the Brasier nation. Hunter with long red hair in a high ponytail, red and black armor with flame-shaped plates and glowing ember cracks, a red scarf, quiver of arrows on the back, a curved flame-patterned bow in the left hand.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: crimson red, black obsidian, ember orange, gold.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. SKY SHOT: bow pointed almost straight up, string fully drawn.
+2. FULL DRAW: bow aimed straight forward, string pulled to the cheek, body sideways.
+3. RELEASE: string hand open behind, bow arm extended, arrow leaving with a flames and embers trail.
+4. JUMPING SHOT: whole body in the air, aiming down and forward.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
@@ -96,457 +108,515 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 |---|---|---|
 | 1-1 | attaque 1 | `chasseur_attack.png` |
 | 1-2 | attaque 2 | `chasseur_attack_2.png` |
-| 1-3 | attaque 3 | `chasseur_attack_3.png` |
-| 1-4 | attaque 4 | `chasseur_attack_4.png` |
-| 2-1 | attaque 5 | `chasseur_attack_5.png` |
-| 2-2 | attaque 6 | `chasseur_attack_6.png` |
-| 2-3 | attaque 7 | `chasseur_attack_7.png` |
-| 2-4 | attaque 8 | `chasseur_attack_8.png` |
+| 2-1 | attaque 3 | `chasseur_attack_3.png` |
+| 2-2 | attaque 4 | `chasseur_attack_4.png` |
 
-#### Planche 3 — Dos (3/4 arrière) · Repos, marche et sorts
+#### Planche 4 — Face 3 · attaques 5-6, sorts 2-3 (`face_3`)
 
-Dans l'Atelier : personnage « Chasseur », planche « Dos (3/4 arrière) · Repos, marche et sorts ».
+Dans l'Atelier : personnage « Chasseur », planche « Face 3 · attaques 5-6, sorts 2-3 ».
 
 ```text
 Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
 CHARACTER: Chasseur, hero of the Brasier nation. Hunter with long red hair in a high ponytail, red and black armor with flame-shaped plates and glowing ember cracks, a red scarf, quiver of arrows on the back, a curved flame-patterned bow in the left hand.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. idle variant, alert, weapon ready.
-4. walking, mid-stride, left foot forward.
-5. walking, mid-stride, right foot forward.
-6. arrow raised to the sky, flames and embers gathering on the arrowhead.
-7. aiming upward, the arrow fully wrapped in flames and embers.
-8. releasing a volley of three flames and embers arrows into the air.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. KNEELING SHOT: on one knee, bow held low and tilted.
+2. POINT-BLANK KICK: bow held back, one leg kicking high forward.
+3. VOLLEY: bow raised overhead, three flames and embers arrows rising into the air.
+4. TRAP: crouched, placing a flames and embers trap on the ground with the free hand.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `chasseur_back.png` |
-| 1-2 | repos 2 | `chasseur_back_idle_2.png` |
-| 1-3 | repos 3 | `chasseur_back_idle_3.png` |
-| 1-4 | marche 1 | `chasseur_back_walk.png` |
-| 2-1 | marche 2 | `chasseur_back_walk_2.png` |
+| 1-1 | attaque 5 | `chasseur_attack_5.png` |
+| 1-2 | attaque 6 | `chasseur_attack_6.png` |
+| 2-1 | sort 2 | `chasseur_cast_2.png` |
+| 2-2 | sort 3 | `chasseur_cast_3.png` |
+
+#### Planche 5 — Dos 1 · marche, attaque, sort (`dos_1`)
+
+Dans l'Atelier : personnage « Chasseur », planche « Dos 1 · marche, attaque, sort ».
+
+```text
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
+CHARACTER: Chasseur, hero of the Brasier nation. Hunter with long red hair in a high ponytail, red and black armor with flame-shaped plates and glowing ember cracks, a red scarf, quiver of arrows on the back, a curved flame-patterned bow in the left hand.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: crimson red, black obsidian, ember orange, gold.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+3. SKY SHOT: bow pointed almost straight up, string fully drawn.
+4. ENCHANTED ARROW: arrow held up to the face, its tip wrapped in flames and embers.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | marche 1 | `chasseur_back_walk.png` |
+| 1-2 | marche 2 | `chasseur_back_walk_2.png` |
+| 2-1 | attaque 1 | `chasseur_back_attack.png` |
 | 2-2 | sort 1 | `chasseur_back_cast.png` |
-| 2-3 | sort 2 | `chasseur_back_cast_2.png` |
-| 2-4 | sort 3 | `chasseur_back_cast_3.png` |
 
-#### Planche 4 — Dos (3/4 arrière) · Attaques
+#### Planche 6 — Dos 2 · attaques 2 à 4, garde (`dos_2`)
 
-Dans l'Atelier : personnage « Chasseur », planche « Dos (3/4 arrière) · Attaques ».
+Dans l'Atelier : personnage « Chasseur », planche « Dos 2 · attaques 2 à 4, garde ».
 
 ```text
 Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
 CHARACTER: Chasseur, hero of the Brasier nation. Hunter with long red hair in a high ponytail, red and black armor with flame-shaped plates and glowing ember cracks, a red scarf, quiver of arrows on the back, a curved flame-patterned bow in the left hand.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. drawing the bow, arrow nocked, string pulled to the cheek.
-2. release, arrow flying forward with a short flames and embers trail.
-3. follow-through, bow arm extended, string hand open behind.
-4. quick shot from a low crouch, bow tilted.
-5. drawing an arrow from the quiver, bow lowered.
-6. double shot, two arrows nocked at once.
-7. point-blank kick, bow held back, one leg raised.
-8. jumping shot, aiming downward forward, feet off the ground.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. FULL DRAW: bow aimed straight forward, string pulled to the cheek, body sideways.
+2. RELEASE: string hand open behind, bow arm extended, arrow leaving with a flames and embers trail.
+3. JUMPING SHOT: whole body in the air, aiming down and forward.
+4. GUARD: knees bent, weapon raised in front of the body, ready to fight.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 | `chasseur_back_attack.png` |
-| 1-2 | attaque 2 | `chasseur_back_attack_2.png` |
-| 1-3 | attaque 3 | `chasseur_back_attack_3.png` |
-| 1-4 | attaque 4 | `chasseur_back_attack_4.png` |
-| 2-1 | attaque 5 | `chasseur_back_attack_5.png` |
-| 2-2 | attaque 6 | `chasseur_back_attack_6.png` |
-| 2-3 | attaque 7 | `chasseur_back_attack_7.png` |
-| 2-4 | attaque 8 | `chasseur_back_attack_8.png` |
+| 1-1 | attaque 2 | `chasseur_back_attack_2.png` |
+| 1-2 | attaque 3 | `chasseur_back_attack_3.png` |
+| 2-1 | attaque 4 | `chasseur_back_attack_4.png` |
+| 2-2 | repos 2 | `chasseur_back_idle_2.png` |
 
 L'export Zimut de l'Atelier copie aussi le repos vers `nations/heros/chasseur.png` et les autres poses vers `nations/heros/poses/`.
 
 ## 3. Ennemis
 
-### Lieutenant — 16 poses
+### Lieutenant — 10 poses
 
-2 planches de 8 poses. Joins la planche de face « repos » déjà réussie comme référence pour les suivantes. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brasier/`.
+3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brasier/` ; nomme tes images `lieutenant_<clé>.png` (ex. `lieutenant_face_2.png`) pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Face (3/4 avant)
+#### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
-Dans l'Atelier : personnage « Lieutenant », planche « Face (3/4 avant) ».
+Dans l'Atelier : personnage « Lieutenant », planche « Référence · repos de face + repos de dos ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Lieutenant, enemy of the Brasier nation. Fire cultist lieutenant in orange and red robes holding a flaming staff.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
-NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. wind-up, staff held back with both hands.
-5. staff swing forward, small flames and embers burst at the tip.
-6. follow-through, staff low, body turned.
-7. thrust with the staff tip forward, short flames and embers spark.
-8. staff raised, flames and embers orb forming at the top.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+NATION PALETTE: crimson red, black obsidian, ember orange, gold. Signature effects (keep them small): flames and embers.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
+POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
+Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `lieutenant.png` |
-| 1-2 | repos 2 | `lieutenant_idle_2.png` |
-| 1-3 | marche 1 | `lieutenant_walk.png` |
-| 1-4 | attaque 1 | `lieutenant_attack.png` |
+| 1-1 | repos 1 (face) | `lieutenant.png` |
+| 1-2 | repos 1 (dos) | `lieutenant_back.png` |
+
+#### Planche 2 — Face · marche, 2 attaques, sort (`face_1`)
+
+Dans l'Atelier : personnage « Lieutenant », planche « Face · marche, 2 attaques, sort ».
+
+```text
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+CHARACTER: Lieutenant, enemy of the Brasier nation. Fire cultist lieutenant in orange and red robes holding a flaming staff.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: crimson red, black obsidian, ember orange, gold.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. OVERHEAD STRIKE: staff raised high above the head with both hands.
+3. THRUST: body leaning forward, staff tip pushed far ahead with a short flames and embers spark.
+4. FOCUS: eyes closed, staff held vertically in front of the face, flames and embers orb at the top.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | marche 1 | `lieutenant_walk.png` |
+| 1-2 | attaque 1 | `lieutenant_attack.png` |
 | 2-1 | attaque 2 | `lieutenant_attack_2.png` |
-| 2-2 | attaque 3 | `lieutenant_attack_3.png` |
-| 2-3 | attaque 4 | `lieutenant_attack_4.png` |
-| 2-4 | sort 1 | `lieutenant_cast.png` |
+| 2-2 | sort 1 | `lieutenant_cast.png` |
 
-#### Planche 2 — Dos (3/4 arrière)
+#### Planche 3 — Dos · marche, 2 attaques, sort (`dos_1`)
 
-Dans l'Atelier : personnage « Lieutenant », planche « Dos (3/4 arrière) ».
+Dans l'Atelier : personnage « Lieutenant », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Lieutenant, enemy of the Brasier nation. Fire cultist lieutenant in orange and red robes holding a flaming staff.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. wind-up, staff held back with both hands.
-5. staff swing forward, small flames and embers burst at the tip.
-6. follow-through, staff low, body turned.
-7. thrust with the staff tip forward, short flames and embers spark.
-8. staff raised, flames and embers orb forming at the top.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. OVERHEAD STRIKE: staff raised high above the head with both hands.
+3. THRUST: body leaning forward, staff tip pushed far ahead with a short flames and embers spark.
+4. FOCUS: eyes closed, staff held vertically in front of the face, flames and embers orb at the top.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `lieutenant_back.png` |
-| 1-2 | repos 2 | `lieutenant_back_idle_2.png` |
-| 1-3 | marche 1 | `lieutenant_back_walk.png` |
-| 1-4 | attaque 1 | `lieutenant_back_attack.png` |
+| 1-1 | marche 1 | `lieutenant_back_walk.png` |
+| 1-2 | attaque 1 | `lieutenant_back_attack.png` |
 | 2-1 | attaque 2 | `lieutenant_back_attack_2.png` |
-| 2-2 | attaque 3 | `lieutenant_back_attack_3.png` |
-| 2-3 | attaque 4 | `lieutenant_back_attack_4.png` |
-| 2-4 | sort 1 | `lieutenant_back_cast.png` |
+| 2-2 | sort 1 | `lieutenant_back_cast.png` |
 
-### Salamandre — 16 poses
+### Salamandre — 10 poses
 
-2 planches de 8 poses. Joins la planche de face « repos » déjà réussie comme référence pour les suivantes. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brasier/`.
+3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brasier/` ; nomme tes images `salamandre_<clé>.png` (ex. `salamandre_face_2.png`) pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Face (3/4 avant)
+#### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
-Dans l'Atelier : personnage « Salamandre », planche « Face (3/4 avant) ».
+Dans l'Atelier : personnage « Salamandre », planche « Référence · repos de face + repos de dos ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Salamandre, enemy of the Brasier nation. Orange lava lizard with glowing cracks on its back and a flaming tail.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
-NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. crouched wind-up, ready to pounce.
-5. lunge forward, jaws or claws first, small flames and embers impact.
-6. follow-through, landing after the lunge.
-7. second strike, swiping sideways.
-8. head raised, flames and embers gathering around the body.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+NATION PALETTE: crimson red, black obsidian, ember orange, gold. Signature effects (keep them small): flames and embers.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
+POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
+Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `salamandre.png` |
-| 1-2 | repos 2 | `salamandre_idle_2.png` |
-| 1-3 | marche 1 | `salamandre_walk.png` |
-| 1-4 | attaque 1 | `salamandre_attack.png` |
+| 1-1 | repos 1 (face) | `salamandre.png` |
+| 1-2 | repos 1 (dos) | `salamandre_back.png` |
+
+#### Planche 2 — Face · marche, 2 attaques, sort (`face_1`)
+
+Dans l'Atelier : personnage « Salamandre », planche « Face · marche, 2 attaques, sort ».
+
+```text
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+CHARACTER: Salamandre, enemy of the Brasier nation. Orange lava lizard with glowing cracks on its back and a flaming tail.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: crimson red, black obsidian, ember orange, gold.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. REARING: standing up on the hind legs, front claws raised high.
+3. POUNCE: body stretched forward in the air, jaws open.
+4. HOWL: head raised to the sky, flames and embers gathering around the body.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | marche 1 | `salamandre_walk.png` |
+| 1-2 | attaque 1 | `salamandre_attack.png` |
 | 2-1 | attaque 2 | `salamandre_attack_2.png` |
-| 2-2 | attaque 3 | `salamandre_attack_3.png` |
-| 2-3 | attaque 4 | `salamandre_attack_4.png` |
-| 2-4 | sort 1 | `salamandre_cast.png` |
+| 2-2 | sort 1 | `salamandre_cast.png` |
 
-#### Planche 2 — Dos (3/4 arrière)
+#### Planche 3 — Dos · marche, 2 attaques, sort (`dos_1`)
 
-Dans l'Atelier : personnage « Salamandre », planche « Dos (3/4 arrière) ».
+Dans l'Atelier : personnage « Salamandre », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Salamandre, enemy of the Brasier nation. Orange lava lizard with glowing cracks on its back and a flaming tail.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. crouched wind-up, ready to pounce.
-5. lunge forward, jaws or claws first, small flames and embers impact.
-6. follow-through, landing after the lunge.
-7. second strike, swiping sideways.
-8. head raised, flames and embers gathering around the body.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. REARING: standing up on the hind legs, front claws raised high.
+3. POUNCE: body stretched forward in the air, jaws open.
+4. HOWL: head raised to the sky, flames and embers gathering around the body.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `salamandre_back.png` |
-| 1-2 | repos 2 | `salamandre_back_idle_2.png` |
-| 1-3 | marche 1 | `salamandre_back_walk.png` |
-| 1-4 | attaque 1 | `salamandre_back_attack.png` |
+| 1-1 | marche 1 | `salamandre_back_walk.png` |
+| 1-2 | attaque 1 | `salamandre_back_attack.png` |
 | 2-1 | attaque 2 | `salamandre_back_attack_2.png` |
-| 2-2 | attaque 3 | `salamandre_back_attack_3.png` |
-| 2-3 | attaque 4 | `salamandre_back_attack_4.png` |
-| 2-4 | sort 1 | `salamandre_back_cast.png` |
+| 2-2 | sort 1 | `salamandre_back_cast.png` |
 
-### Dévoreur de flammes — 16 poses
+### Dévoreur de flammes — 10 poses
 
-2 planches de 8 poses. Joins la planche de face « repos » déjà réussie comme référence pour les suivantes. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brasier/`.
+3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brasier/` ; nomme tes images `devoreur_de_flammes_<clé>.png` (ex. `devoreur_de_flammes_face_2.png`) pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Face (3/4 avant)
+#### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
-Dans l'Atelier : personnage « Dévoreur de flammes », planche « Face (3/4 avant) ».
+Dans l'Atelier : personnage « Dévoreur de flammes », planche « Référence · repos de face + repos de dos ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Dévoreur de flammes, enemy of the Brasier nation. Fiery orange beast with a mane of flames and big claws.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
-NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. crouched wind-up, ready to pounce.
-5. lunge forward, jaws or claws first, small flames and embers impact.
-6. follow-through, landing after the lunge.
-7. second strike, swiping sideways.
-8. head raised, flames and embers gathering around the body.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+NATION PALETTE: crimson red, black obsidian, ember orange, gold. Signature effects (keep them small): flames and embers.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
+POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
+Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `devoreur_de_flammes.png` |
-| 1-2 | repos 2 | `devoreur_de_flammes_idle_2.png` |
-| 1-3 | marche 1 | `devoreur_de_flammes_walk.png` |
-| 1-4 | attaque 1 | `devoreur_de_flammes_attack.png` |
+| 1-1 | repos 1 (face) | `devoreur_de_flammes.png` |
+| 1-2 | repos 1 (dos) | `devoreur_de_flammes_back.png` |
+
+#### Planche 2 — Face · marche, 2 attaques, sort (`face_1`)
+
+Dans l'Atelier : personnage « Dévoreur de flammes », planche « Face · marche, 2 attaques, sort ».
+
+```text
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+CHARACTER: Dévoreur de flammes, enemy of the Brasier nation. Fiery orange beast with a mane of flames and big claws.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: crimson red, black obsidian, ember orange, gold.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. REARING: standing up on the hind legs, front claws raised high.
+3. POUNCE: body stretched forward in the air, jaws open.
+4. HOWL: head raised to the sky, flames and embers gathering around the body.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | marche 1 | `devoreur_de_flammes_walk.png` |
+| 1-2 | attaque 1 | `devoreur_de_flammes_attack.png` |
 | 2-1 | attaque 2 | `devoreur_de_flammes_attack_2.png` |
-| 2-2 | attaque 3 | `devoreur_de_flammes_attack_3.png` |
-| 2-3 | attaque 4 | `devoreur_de_flammes_attack_4.png` |
-| 2-4 | sort 1 | `devoreur_de_flammes_cast.png` |
+| 2-2 | sort 1 | `devoreur_de_flammes_cast.png` |
 
-#### Planche 2 — Dos (3/4 arrière)
+#### Planche 3 — Dos · marche, 2 attaques, sort (`dos_1`)
 
-Dans l'Atelier : personnage « Dévoreur de flammes », planche « Dos (3/4 arrière) ».
+Dans l'Atelier : personnage « Dévoreur de flammes », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Dévoreur de flammes, enemy of the Brasier nation. Fiery orange beast with a mane of flames and big claws.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. crouched wind-up, ready to pounce.
-5. lunge forward, jaws or claws first, small flames and embers impact.
-6. follow-through, landing after the lunge.
-7. second strike, swiping sideways.
-8. head raised, flames and embers gathering around the body.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. REARING: standing up on the hind legs, front claws raised high.
+3. POUNCE: body stretched forward in the air, jaws open.
+4. HOWL: head raised to the sky, flames and embers gathering around the body.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `devoreur_de_flammes_back.png` |
-| 1-2 | repos 2 | `devoreur_de_flammes_back_idle_2.png` |
-| 1-3 | marche 1 | `devoreur_de_flammes_back_walk.png` |
-| 1-4 | attaque 1 | `devoreur_de_flammes_back_attack.png` |
+| 1-1 | marche 1 | `devoreur_de_flammes_back_walk.png` |
+| 1-2 | attaque 1 | `devoreur_de_flammes_back_attack.png` |
 | 2-1 | attaque 2 | `devoreur_de_flammes_back_attack_2.png` |
-| 2-2 | attaque 3 | `devoreur_de_flammes_back_attack_3.png` |
-| 2-3 | attaque 4 | `devoreur_de_flammes_back_attack_4.png` |
-| 2-4 | sort 1 | `devoreur_de_flammes_back_cast.png` |
+| 2-2 | sort 1 | `devoreur_de_flammes_back_cast.png` |
 
-### Golem de lave — 16 poses
+### Golem de lave — 10 poses
 
-2 planches de 8 poses. Joins la planche de face « repos » déjà réussie comme référence pour les suivantes. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brasier/`.
+3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brasier/` ; nomme tes images `golem_de_lave_<clé>.png` (ex. `golem_de_lave_face_2.png`) pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Face (3/4 avant)
+#### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
-Dans l'Atelier : personnage « Golem de lave », planche « Face (3/4 avant) ».
+Dans l'Atelier : personnage « Golem de lave », planche « Référence · repos de face + repos de dos ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Golem de lave, enemy of the Brasier nation. Dark basalt golem with bright orange lava cracks and a molten core.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
-NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. wind-up, fist or weapon raised high.
-5. heavy smash forward, ground cracking with a small flames and embers burst.
-6. follow-through, body leaning forward.
-7. sweeping backhand blow.
-8. stomping, flames and embers cracks spreading under the feet.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+NATION PALETTE: crimson red, black obsidian, ember orange, gold. Signature effects (keep them small): flames and embers.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
+POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
+Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `golem_de_lave.png` |
-| 1-2 | repos 2 | `golem_de_lave_idle_2.png` |
-| 1-3 | marche 1 | `golem_de_lave_walk.png` |
-| 1-4 | attaque 1 | `golem_de_lave_attack.png` |
+| 1-1 | repos 1 (face) | `golem_de_lave.png` |
+| 1-2 | repos 1 (dos) | `golem_de_lave_back.png` |
+
+#### Planche 2 — Face · marche, 2 attaques, sort (`face_1`)
+
+Dans l'Atelier : personnage « Golem de lave », planche « Face · marche, 2 attaques, sort ».
+
+```text
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+CHARACTER: Golem de lave, enemy of the Brasier nation. Dark basalt golem with bright orange lava cracks and a molten core.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: crimson red, black obsidian, ember orange, gold.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. OVERHEAD SMASH: both fists or weapon raised high above the head.
+3. PUNCH: one arm thrust far forward, the other pulled back, body leaning forward.
+4. ROOTED: stomping, flames and embers cracks spreading under the feet.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | marche 1 | `golem_de_lave_walk.png` |
+| 1-2 | attaque 1 | `golem_de_lave_attack.png` |
 | 2-1 | attaque 2 | `golem_de_lave_attack_2.png` |
-| 2-2 | attaque 3 | `golem_de_lave_attack_3.png` |
-| 2-3 | attaque 4 | `golem_de_lave_attack_4.png` |
-| 2-4 | sort 1 | `golem_de_lave_cast.png` |
+| 2-2 | sort 1 | `golem_de_lave_cast.png` |
 
-#### Planche 2 — Dos (3/4 arrière)
+#### Planche 3 — Dos · marche, 2 attaques, sort (`dos_1`)
 
-Dans l'Atelier : personnage « Golem de lave », planche « Dos (3/4 arrière) ».
+Dans l'Atelier : personnage « Golem de lave », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Golem de lave, enemy of the Brasier nation. Dark basalt golem with bright orange lava cracks and a molten core.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. wind-up, fist or weapon raised high.
-5. heavy smash forward, ground cracking with a small flames and embers burst.
-6. follow-through, body leaning forward.
-7. sweeping backhand blow.
-8. stomping, flames and embers cracks spreading under the feet.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. OVERHEAD SMASH: both fists or weapon raised high above the head.
+3. PUNCH: one arm thrust far forward, the other pulled back, body leaning forward.
+4. ROOTED: stomping, flames and embers cracks spreading under the feet.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `golem_de_lave_back.png` |
-| 1-2 | repos 2 | `golem_de_lave_back_idle_2.png` |
-| 1-3 | marche 1 | `golem_de_lave_back_walk.png` |
-| 1-4 | attaque 1 | `golem_de_lave_back_attack.png` |
+| 1-1 | marche 1 | `golem_de_lave_back_walk.png` |
+| 1-2 | attaque 1 | `golem_de_lave_back_attack.png` |
 | 2-1 | attaque 2 | `golem_de_lave_back_attack_2.png` |
-| 2-2 | attaque 3 | `golem_de_lave_back_attack_3.png` |
-| 2-3 | attaque 4 | `golem_de_lave_back_attack_4.png` |
-| 2-4 | sort 1 | `golem_de_lave_back_cast.png` |
+| 2-2 | sort 1 | `golem_de_lave_back_cast.png` |
 
 ## 4. Boss
 
-### Kharaz le Flamboyant — 32 poses
+### Kharaz le Flamboyant — 22 poses
 
-4 planches de 8 poses. Joins la planche de face « repos » déjà réussie comme référence pour les suivantes. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/`.
+6 planches, 22 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `brasier_<clé>.png` (ex. `brasier_face_2.png`) pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Face (3/4 avant) · Repos, marche et sorts
+#### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
-Dans l'Atelier : personnage « Kharaz le Flamboyant », planche « Face (3/4 avant) · Repos, marche et sorts ».
+Dans l'Atelier : personnage « Kharaz le Flamboyant », planche « Référence · repos de face + repos de dos ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
+Character reference sheet of ONE final boss for a chibi isometric tactical RPG.
 CHARACTER: Kharaz le Flamboyant, boss of the Brasier nation. Flame warlord with burning hair, black and crimson ember armor with sharp plates, holding a great curved flame bow, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
-NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. idle variant, alert, weapon ready.
-4. walking, mid-stride, left foot forward.
-5. walking, mid-stride, right foot forward.
-6. arrow raised to the sky, flames and embers gathering on the arrowhead.
-7. aiming upward, the arrow fully wrapped in flames and embers.
-8. releasing a volley of three flames and embers arrows into the air.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+NATION PALETTE: crimson red, black obsidian, ember orange, gold. Signature effects (keep them small): flames and embers.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
+POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
+Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `brasier.png` |
-| 1-2 | repos 2 | `brasier_idle_2.png` |
-| 1-3 | repos 3 | `brasier_idle_3.png` |
-| 1-4 | marche 1 | `brasier_walk.png` |
-| 2-1 | marche 2 | `brasier_walk_2.png` |
-| 2-2 | sort 1 | `brasier_cast.png` |
-| 2-3 | sort 2 | `brasier_cast_2.png` |
-| 2-4 | sort 3 | `brasier_cast_3.png` |
+| 1-1 | repos 1 (face) | `brasier.png` |
+| 1-2 | repos 1 (dos) | `brasier_back.png` |
 
-#### Planche 2 — Face (3/4 avant) · Attaques
+#### Planche 2 — Face 1 · garde, marche, sort (`face_1`)
 
-Dans l'Atelier : personnage « Kharaz le Flamboyant », planche « Face (3/4 avant) · Attaques ».
+Dans l'Atelier : personnage « Kharaz le Flamboyant », planche « Face 1 · garde, marche, sort ».
 
 ```text
 Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
 CHARACTER: Kharaz le Flamboyant, boss of the Brasier nation. Flame warlord with burning hair, black and crimson ember armor with sharp plates, holding a great curved flame bow, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. drawing the bow, arrow nocked, string pulled to the cheek.
-2. release, arrow flying forward with a short flames and embers trail.
-3. follow-through, bow arm extended, string hand open behind.
-4. quick shot from a low crouch, bow tilted.
-5. drawing an arrow from the quiver, bow lowered.
-6. double shot, two arrows nocked at once.
-7. point-blank kick, bow held back, one leg raised.
-8. jumping shot, aiming downward forward, feet off the ground.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. GUARD: knees bent, weapon raised in front of the body, ready to fight.
+2. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+3. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+4. ENCHANTED ARROW: arrow held up to the face, its tip wrapped in flames and embers.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | repos 2 | `brasier_idle_2.png` |
+| 1-2 | marche 1 | `brasier_walk.png` |
+| 2-1 | marche 2 | `brasier_walk_2.png` |
+| 2-2 | sort 1 | `brasier_cast.png` |
+
+#### Planche 3 — Face 2 · attaques 1 à 4 (`face_2`)
+
+Dans l'Atelier : personnage « Kharaz le Flamboyant », planche « Face 2 · attaques 1 à 4 ».
+
+```text
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
+CHARACTER: Kharaz le Flamboyant, boss of the Brasier nation. Flame warlord with burning hair, black and crimson ember armor with sharp plates, holding a great curved flame bow, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: crimson red, black obsidian, ember orange, gold.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. SKY SHOT: bow pointed almost straight up, string fully drawn.
+2. FULL DRAW: bow aimed straight forward, string pulled to the cheek, body sideways.
+3. RELEASE: string hand open behind, bow arm extended, arrow leaving with a flames and embers trail.
+4. JUMPING SHOT: whole body in the air, aiming down and forward.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
@@ -554,87 +624,101 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 |---|---|---|
 | 1-1 | attaque 1 | `brasier_attack.png` |
 | 1-2 | attaque 2 | `brasier_attack_2.png` |
-| 1-3 | attaque 3 | `brasier_attack_3.png` |
-| 1-4 | attaque 4 | `brasier_attack_4.png` |
-| 2-1 | attaque 5 | `brasier_attack_5.png` |
-| 2-2 | attaque 6 | `brasier_attack_6.png` |
-| 2-3 | attaque 7 | `brasier_attack_7.png` |
-| 2-4 | attaque 8 | `brasier_attack_8.png` |
+| 2-1 | attaque 3 | `brasier_attack_3.png` |
+| 2-2 | attaque 4 | `brasier_attack_4.png` |
 
-#### Planche 3 — Dos (3/4 arrière) · Repos, marche et sorts
+#### Planche 4 — Face 3 · attaques 5-6, sorts 2-3 (`face_3`)
 
-Dans l'Atelier : personnage « Kharaz le Flamboyant », planche « Dos (3/4 arrière) · Repos, marche et sorts ».
+Dans l'Atelier : personnage « Kharaz le Flamboyant », planche « Face 3 · attaques 5-6, sorts 2-3 ».
 
 ```text
 Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
 CHARACTER: Kharaz le Flamboyant, boss of the Brasier nation. Flame warlord with burning hair, black and crimson ember armor with sharp plates, holding a great curved flame bow, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. idle variant, alert, weapon ready.
-4. walking, mid-stride, left foot forward.
-5. walking, mid-stride, right foot forward.
-6. arrow raised to the sky, flames and embers gathering on the arrowhead.
-7. aiming upward, the arrow fully wrapped in flames and embers.
-8. releasing a volley of three flames and embers arrows into the air.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. KNEELING SHOT: on one knee, bow held low and tilted.
+2. POINT-BLANK KICK: bow held back, one leg kicking high forward.
+3. VOLLEY: bow raised overhead, three flames and embers arrows rising into the air.
+4. TRAP: crouched, placing a flames and embers trap on the ground with the free hand.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `brasier_back.png` |
-| 1-2 | repos 2 | `brasier_back_idle_2.png` |
-| 1-3 | repos 3 | `brasier_back_idle_3.png` |
-| 1-4 | marche 1 | `brasier_back_walk.png` |
-| 2-1 | marche 2 | `brasier_back_walk_2.png` |
+| 1-1 | attaque 5 | `brasier_attack_5.png` |
+| 1-2 | attaque 6 | `brasier_attack_6.png` |
+| 2-1 | sort 2 | `brasier_cast_2.png` |
+| 2-2 | sort 3 | `brasier_cast_3.png` |
+
+#### Planche 5 — Dos 1 · marche, attaque, sort (`dos_1`)
+
+Dans l'Atelier : personnage « Kharaz le Flamboyant », planche « Dos 1 · marche, attaque, sort ».
+
+```text
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
+CHARACTER: Kharaz le Flamboyant, boss of the Brasier nation. Flame warlord with burning hair, black and crimson ember armor with sharp plates, holding a great curved flame bow, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: crimson red, black obsidian, ember orange, gold.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+3. SKY SHOT: bow pointed almost straight up, string fully drawn.
+4. ENCHANTED ARROW: arrow held up to the face, its tip wrapped in flames and embers.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | marche 1 | `brasier_back_walk.png` |
+| 1-2 | marche 2 | `brasier_back_walk_2.png` |
+| 2-1 | attaque 1 | `brasier_back_attack.png` |
 | 2-2 | sort 1 | `brasier_back_cast.png` |
-| 2-3 | sort 2 | `brasier_back_cast_2.png` |
-| 2-4 | sort 3 | `brasier_back_cast_3.png` |
 
-#### Planche 4 — Dos (3/4 arrière) · Attaques
+#### Planche 6 — Dos 2 · attaques 2 à 4, garde (`dos_2`)
 
-Dans l'Atelier : personnage « Kharaz le Flamboyant », planche « Dos (3/4 arrière) · Attaques ».
+Dans l'Atelier : personnage « Kharaz le Flamboyant », planche « Dos 2 · attaques 2 à 4, garde ».
 
 ```text
 Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
 CHARACTER: Kharaz le Flamboyant, boss of the Brasier nation. Flame warlord with burning hair, black and crimson ember armor with sharp plates, holding a great curved flame bow, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: crimson red, black obsidian, ember orange, gold.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. drawing the bow, arrow nocked, string pulled to the cheek.
-2. release, arrow flying forward with a short flames and embers trail.
-3. follow-through, bow arm extended, string hand open behind.
-4. quick shot from a low crouch, bow tilted.
-5. drawing an arrow from the quiver, bow lowered.
-6. double shot, two arrows nocked at once.
-7. point-blank kick, bow held back, one leg raised.
-8. jumping shot, aiming downward forward, feet off the ground.
-EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle orange ember rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. FULL DRAW: bow aimed straight forward, string pulled to the cheek, body sideways.
+2. RELEASE: string hand open behind, bow arm extended, arrow leaving with a flames and embers trail.
+3. JUMPING SHOT: whole body in the air, aiming down and forward.
+4. GUARD: knees bent, weapon raised in front of the body, ready to fight.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: flames and embers, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 | `brasier_back_attack.png` |
-| 1-2 | attaque 2 | `brasier_back_attack_2.png` |
-| 1-3 | attaque 3 | `brasier_back_attack_3.png` |
-| 1-4 | attaque 4 | `brasier_back_attack_4.png` |
-| 2-1 | attaque 5 | `brasier_back_attack_5.png` |
-| 2-2 | attaque 6 | `brasier_back_attack_6.png` |
-| 2-3 | attaque 7 | `brasier_back_attack_7.png` |
-| 2-4 | attaque 8 | `brasier_back_attack_8.png` |
+| 1-1 | attaque 2 | `brasier_back_attack_2.png` |
+| 1-2 | attaque 3 | `brasier_back_attack_3.png` |
+| 2-1 | attaque 4 | `brasier_back_attack_4.png` |
+| 2-2 | repos 2 | `brasier_back_idle_2.png` |
 
 ## Prompt négatif (toutes les planches de cette page)
 
 ```text
-checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses, identical poses, repeated pose, copy of the same pose, front and back views mixed, different character between poses, realistic proportions, small head
 ```

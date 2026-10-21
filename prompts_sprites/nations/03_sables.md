@@ -2,7 +2,7 @@
 
 Palette : sand gold, terracotta, amber, small turquoise accents. Effets : swirling sand and amber shards. Contre-jour : warm golden.
 
-Chaque personnage est dessiné en **vue 3/4 avant (face)** et en **vue 3/4 arrière (dos)**. Le jeu retourne l'image pour les directions vers la gauche. Toutes les planches sont des grilles 4 × 2 aux cases bien séparées. Prompt négatif : voir en bas de page.
+Chaque personnage est dessiné en **vue 3/4 avant (face)** et en **vue 3/4 arrière (dos)**. Le jeu retourne l'image pour les directions vers la gauche. Une fiche de référence (repos face + dos), puis des planches de 4 poses (2 × 2) bien séparées. Prompt négatif : voir en bas de page.
 
 Ordre conseillé : 1) planche de référence, 2) héros, 3) ennemis, 4) boss.
 
@@ -13,7 +13,7 @@ Ne sert pas en jeu : elle fixe palette, matières et silhouettes, de face et de 
 ```text
 Character lineup reference sheet for a chibi isometric tactical RPG: the Sables nation (Désert biome).
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents. Signature effects: swirling sand and amber shards.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
 LAYOUT: two rows with the same 6 characters in the same order, all in idle pose. Top row: 3/4 front view, facing front-right. Bottom row: 3/4 back view, seen from behind, turned toward the upper right. All feet of a row on the same ground line. Leave a wide empty gap (at least half a character width) between characters and between the two rows: nobody overlaps or touches anyone, weapons and capes included. Image aspect ratio 2:1, as large as possible.
 CHARACTERS, left to right:
 1. the hero (Géomancien: young geomancer with short brown hair, layered sand-gold robe with terracotta panels and amber gems, sandals and wraps, a golden staff topped with a large faceted amber crystal in the right hand).
@@ -27,68 +27,80 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ## 2. Héros
 
-### Géomancien — 32 poses
+### Géomancien — 22 poses
 
-4 planches de 8 poses. Joins la planche de face « repos » déjà réussie comme référence pour les suivantes. Fichiers dans `prototype/zimut/assets/sprites/players/`.
+6 planches, 22 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `geomancien_<clé>.png` (ex. `geomancien_face_2.png`) pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Face (3/4 avant) · Repos, marche et sorts
+#### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
-Dans l'Atelier : personnage « Géomancien », planche « Face (3/4 avant) · Repos, marche et sorts ».
+Dans l'Atelier : personnage « Géomancien », planche « Référence · repos de face + repos de dos ».
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
+Character reference sheet of ONE playable hero for a chibi isometric tactical RPG.
 CHARACTER: Géomancien, hero of the Sables nation. Young geomancer with short brown hair, layered sand-gold robe with terracotta panels and amber gems, sandals and wraps, a golden staff topped with a large faceted amber crystal in the right hand.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
-NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. idle variant, alert, weapon ready.
-4. walking, mid-stride, left foot forward.
-5. walking, mid-stride, right foot forward.
-6. staff raised, swirling sand and amber shards orb forming at the top.
-7. staff held high with both hands, swirling sand and amber shards swirling around.
-8. staff pointed forward, releasing a compact swirling sand and amber shards blast.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+NATION PALETTE: sand gold, terracotta, amber, small turquoise accents. Signature effects (keep them small): swirling sand and amber shards.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
+POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
+Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `geomancien.png` |
-| 1-2 | repos 2 | `geomancien_idle_2.png` |
-| 1-3 | repos 3 | `geomancien_idle_3.png` |
-| 1-4 | marche 1 | `geomancien_walk.png` |
-| 2-1 | marche 2 | `geomancien_walk_2.png` |
-| 2-2 | sort 1 | `geomancien_cast.png` |
-| 2-3 | sort 2 | `geomancien_cast_2.png` |
-| 2-4 | sort 3 | `geomancien_cast_3.png` |
+| 1-1 | repos 1 (face) | `geomancien.png` |
+| 1-2 | repos 1 (dos) | `geomancien_back.png` |
 
-#### Planche 2 — Face (3/4 avant) · Attaques
+#### Planche 2 — Face 1 · garde, marche, sort (`face_1`)
 
-Dans l'Atelier : personnage « Géomancien », planche « Face (3/4 avant) · Attaques ».
+Dans l'Atelier : personnage « Géomancien », planche « Face 1 · garde, marche, sort ».
 
 ```text
 Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
 CHARACTER: Géomancien, hero of the Sables nation. Young geomancer with short brown hair, layered sand-gold robe with terracotta panels and amber gems, sandals and wraps, a golden staff topped with a large faceted amber crystal in the right hand.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. wind-up, staff held back with both hands.
-2. staff swing forward, small swirling sand and amber shards burst at the tip.
-3. follow-through, staff low, body turned.
-4. thrust with the staff tip forward, short swirling sand and amber shards spark.
-5. overhead staff strike, both hands high.
-6. spinning the staff around the body, small swirling sand and amber shards trail.
-7. low sweep with the staff at the feet.
-8. staff planted, kicking forward with one leg.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. GUARD: knees bent, weapon raised in front of the body, ready to fight.
+2. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+3. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+4. FOCUS: eyes closed, staff held vertically in front of the face, swirling sand and amber shards orb at the top.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | repos 2 | `geomancien_idle_2.png` |
+| 1-2 | marche 1 | `geomancien_walk.png` |
+| 2-1 | marche 2 | `geomancien_walk_2.png` |
+| 2-2 | sort 1 | `geomancien_cast.png` |
+
+#### Planche 3 — Face 2 · attaques 1 à 4 (`face_2`)
+
+Dans l'Atelier : personnage « Géomancien », planche « Face 2 · attaques 1 à 4 ».
+
+```text
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
+CHARACTER: Géomancien, hero of the Sables nation. Young geomancer with short brown hair, layered sand-gold robe with terracotta panels and amber gems, sandals and wraps, a golden staff topped with a large faceted amber crystal in the right hand.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. OVERHEAD STRIKE: staff raised high above the head with both hands.
+2. THRUST: body leaning forward, staff tip pushed far ahead with a short swirling sand and amber shards spark.
+3. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
+4. JUMPING STRIKE: whole body in the air, staff held back over the shoulder.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
@@ -96,457 +108,515 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 |---|---|---|
 | 1-1 | attaque 1 | `geomancien_attack.png` |
 | 1-2 | attaque 2 | `geomancien_attack_2.png` |
-| 1-3 | attaque 3 | `geomancien_attack_3.png` |
-| 1-4 | attaque 4 | `geomancien_attack_4.png` |
-| 2-1 | attaque 5 | `geomancien_attack_5.png` |
-| 2-2 | attaque 6 | `geomancien_attack_6.png` |
-| 2-3 | attaque 7 | `geomancien_attack_7.png` |
-| 2-4 | attaque 8 | `geomancien_attack_8.png` |
+| 2-1 | attaque 3 | `geomancien_attack_3.png` |
+| 2-2 | attaque 4 | `geomancien_attack_4.png` |
 
-#### Planche 3 — Dos (3/4 arrière) · Repos, marche et sorts
+#### Planche 4 — Face 3 · attaques 5-6, sorts 2-3 (`face_3`)
 
-Dans l'Atelier : personnage « Géomancien », planche « Dos (3/4 arrière) · Repos, marche et sorts ».
+Dans l'Atelier : personnage « Géomancien », planche « Face 3 · attaques 5-6, sorts 2-3 ».
 
 ```text
 Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
 CHARACTER: Géomancien, hero of the Sables nation. Young geomancer with short brown hair, layered sand-gold robe with terracotta panels and amber gems, sandals and wraps, a golden staff topped with a large faceted amber crystal in the right hand.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. idle variant, alert, weapon ready.
-4. walking, mid-stride, left foot forward.
-5. walking, mid-stride, right foot forward.
-6. staff raised, swirling sand and amber shards orb forming at the top.
-7. staff held high with both hands, swirling sand and amber shards swirling around.
-8. staff pointed forward, releasing a compact swirling sand and amber shards blast.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. LOW SWEEP: crouched, staff swinging at ankle height.
+2. SPIN: staff whirling around the body, a swirling sand and amber shards trail circling it.
+3. INVOCATION: staff raised high with both hands, swirling sand and amber shards swirling above the head.
+4. BLAST: staff pointed forward, a compact swirling sand and amber shards blast leaving the tip.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `geomancien_back.png` |
-| 1-2 | repos 2 | `geomancien_back_idle_2.png` |
-| 1-3 | repos 3 | `geomancien_back_idle_3.png` |
-| 1-4 | marche 1 | `geomancien_back_walk.png` |
-| 2-1 | marche 2 | `geomancien_back_walk_2.png` |
+| 1-1 | attaque 5 | `geomancien_attack_5.png` |
+| 1-2 | attaque 6 | `geomancien_attack_6.png` |
+| 2-1 | sort 2 | `geomancien_cast_2.png` |
+| 2-2 | sort 3 | `geomancien_cast_3.png` |
+
+#### Planche 5 — Dos 1 · marche, attaque, sort (`dos_1`)
+
+Dans l'Atelier : personnage « Géomancien », planche « Dos 1 · marche, attaque, sort ».
+
+```text
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
+CHARACTER: Géomancien, hero of the Sables nation. Young geomancer with short brown hair, layered sand-gold robe with terracotta panels and amber gems, sandals and wraps, a golden staff topped with a large faceted amber crystal in the right hand.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+3. OVERHEAD STRIKE: staff raised high above the head with both hands.
+4. FOCUS: eyes closed, staff held vertically in front of the face, swirling sand and amber shards orb at the top.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | marche 1 | `geomancien_back_walk.png` |
+| 1-2 | marche 2 | `geomancien_back_walk_2.png` |
+| 2-1 | attaque 1 | `geomancien_back_attack.png` |
 | 2-2 | sort 1 | `geomancien_back_cast.png` |
-| 2-3 | sort 2 | `geomancien_back_cast_2.png` |
-| 2-4 | sort 3 | `geomancien_back_cast_3.png` |
 
-#### Planche 4 — Dos (3/4 arrière) · Attaques
+#### Planche 6 — Dos 2 · attaques 2 à 4, garde (`dos_2`)
 
-Dans l'Atelier : personnage « Géomancien », planche « Dos (3/4 arrière) · Attaques ».
+Dans l'Atelier : personnage « Géomancien », planche « Dos 2 · attaques 2 à 4, garde ».
 
 ```text
 Sprite sheet of ONE playable hero for a chibi isometric tactical RPG.
 CHARACTER: Géomancien, hero of the Sables nation. Young geomancer with short brown hair, layered sand-gold robe with terracotta panels and amber gems, sandals and wraps, a golden staff topped with a large faceted amber crystal in the right hand.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. wind-up, staff held back with both hands.
-2. staff swing forward, small swirling sand and amber shards burst at the tip.
-3. follow-through, staff low, body turned.
-4. thrust with the staff tip forward, short swirling sand and amber shards spark.
-5. overhead staff strike, both hands high.
-6. spinning the staff around the body, small swirling sand and amber shards trail.
-7. low sweep with the staff at the feet.
-8. staff planted, kicking forward with one leg.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. THRUST: body leaning forward, staff tip pushed far ahead with a short swirling sand and amber shards spark.
+2. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
+3. JUMPING STRIKE: whole body in the air, staff held back over the shoulder.
+4. GUARD: knees bent, weapon raised in front of the body, ready to fight.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 | `geomancien_back_attack.png` |
-| 1-2 | attaque 2 | `geomancien_back_attack_2.png` |
-| 1-3 | attaque 3 | `geomancien_back_attack_3.png` |
-| 1-4 | attaque 4 | `geomancien_back_attack_4.png` |
-| 2-1 | attaque 5 | `geomancien_back_attack_5.png` |
-| 2-2 | attaque 6 | `geomancien_back_attack_6.png` |
-| 2-3 | attaque 7 | `geomancien_back_attack_7.png` |
-| 2-4 | attaque 8 | `geomancien_back_attack_8.png` |
+| 1-1 | attaque 2 | `geomancien_back_attack_2.png` |
+| 1-2 | attaque 3 | `geomancien_back_attack_3.png` |
+| 2-1 | attaque 4 | `geomancien_back_attack_4.png` |
+| 2-2 | repos 2 | `geomancien_back_idle_2.png` |
 
 L'export Zimut de l'Atelier copie aussi le repos vers `nations/heros/geomancien.png` et les autres poses vers `nations/heros/poses/`.
 
 ## 3. Ennemis
 
-### Bandit des dunes — 16 poses
+### Bandit des dunes — 10 poses
 
-2 planches de 8 poses. Joins la planche de face « repos » déjà réussie comme référence pour les suivantes. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sables/`.
+3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sables/` ; nomme tes images `bandit_des_dunes_<clé>.png` (ex. `bandit_des_dunes_face_2.png`) pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Face (3/4 avant)
+#### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
-Dans l'Atelier : personnage « Bandit des dunes », planche « Face (3/4 avant) ».
+Dans l'Atelier : personnage « Bandit des dunes », planche « Référence · repos de face + repos de dos ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Bandit des dunes, enemy of the Sables nation. Small desert jackal-folk bandit with orange fur, a sand-colored scarf and a curved dagger.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
-NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. crouched wind-up, both daggers crossed in front of the chest.
-5. dash slash forward, both arms extended, short swirling sand and amber shards slash crescents.
-6. spinning follow-through, one dagger high, one low.
-7. backhand stab, one dagger thrust forward, body twisted.
-8. kneeling, one hand on the ground, swirling sand and amber shards rising from the shadow below.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+NATION PALETTE: sand gold, terracotta, amber, small turquoise accents. Signature effects (keep them small): swirling sand and amber shards.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
+POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
+Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `bandit_des_dunes.png` |
-| 1-2 | repos 2 | `bandit_des_dunes_idle_2.png` |
-| 1-3 | marche 1 | `bandit_des_dunes_walk.png` |
-| 1-4 | attaque 1 | `bandit_des_dunes_attack.png` |
+| 1-1 | repos 1 (face) | `bandit_des_dunes.png` |
+| 1-2 | repos 1 (dos) | `bandit_des_dunes_back.png` |
+
+#### Planche 2 — Face · marche, 2 attaques, sort (`face_1`)
+
+Dans l'Atelier : personnage « Bandit des dunes », planche « Face · marche, 2 attaques, sort ».
+
+```text
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+CHARACTER: Bandit des dunes, enemy of the Sables nation. Small desert jackal-folk bandit with orange fur, a sand-colored scarf and a curved dagger.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. CROSS SLASH: both daggers crossed high above the head, about to strike down.
+3. LUNGE STAB: body stretched forward almost horizontal, one dagger thrust far ahead.
+4. SHADOW KNEEL: kneeling, one hand on the ground, swirling sand and amber shards rising around.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | marche 1 | `bandit_des_dunes_walk.png` |
+| 1-2 | attaque 1 | `bandit_des_dunes_attack.png` |
 | 2-1 | attaque 2 | `bandit_des_dunes_attack_2.png` |
-| 2-2 | attaque 3 | `bandit_des_dunes_attack_3.png` |
-| 2-3 | attaque 4 | `bandit_des_dunes_attack_4.png` |
-| 2-4 | sort 1 | `bandit_des_dunes_cast.png` |
+| 2-2 | sort 1 | `bandit_des_dunes_cast.png` |
 
-#### Planche 2 — Dos (3/4 arrière)
+#### Planche 3 — Dos · marche, 2 attaques, sort (`dos_1`)
 
-Dans l'Atelier : personnage « Bandit des dunes », planche « Dos (3/4 arrière) ».
+Dans l'Atelier : personnage « Bandit des dunes », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Bandit des dunes, enemy of the Sables nation. Small desert jackal-folk bandit with orange fur, a sand-colored scarf and a curved dagger.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. crouched wind-up, both daggers crossed in front of the chest.
-5. dash slash forward, both arms extended, short swirling sand and amber shards slash crescents.
-6. spinning follow-through, one dagger high, one low.
-7. backhand stab, one dagger thrust forward, body twisted.
-8. kneeling, one hand on the ground, swirling sand and amber shards rising from the shadow below.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. CROSS SLASH: both daggers crossed high above the head, about to strike down.
+3. LUNGE STAB: body stretched forward almost horizontal, one dagger thrust far ahead.
+4. SHADOW KNEEL: kneeling, one hand on the ground, swirling sand and amber shards rising around.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `bandit_des_dunes_back.png` |
-| 1-2 | repos 2 | `bandit_des_dunes_back_idle_2.png` |
-| 1-3 | marche 1 | `bandit_des_dunes_back_walk.png` |
-| 1-4 | attaque 1 | `bandit_des_dunes_back_attack.png` |
+| 1-1 | marche 1 | `bandit_des_dunes_back_walk.png` |
+| 1-2 | attaque 1 | `bandit_des_dunes_back_attack.png` |
 | 2-1 | attaque 2 | `bandit_des_dunes_back_attack_2.png` |
-| 2-2 | attaque 3 | `bandit_des_dunes_back_attack_3.png` |
-| 2-3 | attaque 4 | `bandit_des_dunes_back_attack_4.png` |
-| 2-4 | sort 1 | `bandit_des_dunes_back_cast.png` |
+| 2-2 | sort 1 | `bandit_des_dunes_back_cast.png` |
 
-### Scarabée géant — 16 poses
+### Scarabée géant — 10 poses
 
-2 planches de 8 poses. Joins la planche de face « repos » déjà réussie comme référence pour les suivantes. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sables/`.
+3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sables/` ; nomme tes images `scarabee_geant_<clé>.png` (ex. `scarabee_geant_face_2.png`) pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Face (3/4 avant)
+#### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
-Dans l'Atelier : personnage « Scarabée géant », planche « Face (3/4 avant) ».
+Dans l'Atelier : personnage « Scarabée géant », planche « Référence · repos de face + repos de dos ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Scarabée géant, enemy of the Sables nation. Giant scarab beetle with a black and gold shell and golden horns.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
-NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. crouched wind-up, ready to pounce.
-5. lunge forward, jaws or claws first, small swirling sand and amber shards impact.
-6. follow-through, landing after the lunge.
-7. second strike, swiping sideways.
-8. head raised, swirling sand and amber shards gathering around the body.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+NATION PALETTE: sand gold, terracotta, amber, small turquoise accents. Signature effects (keep them small): swirling sand and amber shards.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
+POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
+Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `scarabee_geant.png` |
-| 1-2 | repos 2 | `scarabee_geant_idle_2.png` |
-| 1-3 | marche 1 | `scarabee_geant_walk.png` |
-| 1-4 | attaque 1 | `scarabee_geant_attack.png` |
+| 1-1 | repos 1 (face) | `scarabee_geant.png` |
+| 1-2 | repos 1 (dos) | `scarabee_geant_back.png` |
+
+#### Planche 2 — Face · marche, 2 attaques, sort (`face_1`)
+
+Dans l'Atelier : personnage « Scarabée géant », planche « Face · marche, 2 attaques, sort ».
+
+```text
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+CHARACTER: Scarabée géant, enemy of the Sables nation. Giant scarab beetle with a black and gold shell and golden horns.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. REARING: standing up on the hind legs, front claws raised high.
+3. POUNCE: body stretched forward in the air, jaws open.
+4. HOWL: head raised to the sky, swirling sand and amber shards gathering around the body.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | marche 1 | `scarabee_geant_walk.png` |
+| 1-2 | attaque 1 | `scarabee_geant_attack.png` |
 | 2-1 | attaque 2 | `scarabee_geant_attack_2.png` |
-| 2-2 | attaque 3 | `scarabee_geant_attack_3.png` |
-| 2-3 | attaque 4 | `scarabee_geant_attack_4.png` |
-| 2-4 | sort 1 | `scarabee_geant_cast.png` |
+| 2-2 | sort 1 | `scarabee_geant_cast.png` |
 
-#### Planche 2 — Dos (3/4 arrière)
+#### Planche 3 — Dos · marche, 2 attaques, sort (`dos_1`)
 
-Dans l'Atelier : personnage « Scarabée géant », planche « Dos (3/4 arrière) ».
+Dans l'Atelier : personnage « Scarabée géant », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Scarabée géant, enemy of the Sables nation. Giant scarab beetle with a black and gold shell and golden horns.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. crouched wind-up, ready to pounce.
-5. lunge forward, jaws or claws first, small swirling sand and amber shards impact.
-6. follow-through, landing after the lunge.
-7. second strike, swiping sideways.
-8. head raised, swirling sand and amber shards gathering around the body.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. REARING: standing up on the hind legs, front claws raised high.
+3. POUNCE: body stretched forward in the air, jaws open.
+4. HOWL: head raised to the sky, swirling sand and amber shards gathering around the body.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `scarabee_geant_back.png` |
-| 1-2 | repos 2 | `scarabee_geant_back_idle_2.png` |
-| 1-3 | marche 1 | `scarabee_geant_back_walk.png` |
-| 1-4 | attaque 1 | `scarabee_geant_back_attack.png` |
+| 1-1 | marche 1 | `scarabee_geant_back_walk.png` |
+| 1-2 | attaque 1 | `scarabee_geant_back_attack.png` |
 | 2-1 | attaque 2 | `scarabee_geant_back_attack_2.png` |
-| 2-2 | attaque 3 | `scarabee_geant_back_attack_3.png` |
-| 2-3 | attaque 4 | `scarabee_geant_back_attack_4.png` |
-| 2-4 | sort 1 | `scarabee_geant_back_cast.png` |
+| 2-2 | sort 1 | `scarabee_geant_back_cast.png` |
 
-### Génie du désert — 16 poses
+### Génie du désert — 10 poses
 
-2 planches de 8 poses. Joins la planche de face « repos » déjà réussie comme référence pour les suivantes. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sables/`.
+3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sables/` ; nomme tes images `genie_du_desert_<clé>.png` (ex. `genie_du_desert_face_2.png`) pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Face (3/4 avant)
+#### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
-Dans l'Atelier : personnage « Génie du désert », planche « Face (3/4 avant) ».
+Dans l'Atelier : personnage « Génie du désert », planche « Référence · repos de face + repos de dos ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Génie du désert, enemy of the Sables nation. Golden sand djinn with muscular arms and a lower body of swirling sand.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
-NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. drawing back, body stretched upward.
-5. lunging forward, claws of swirling sand and amber shards reaching out.
-6. follow-through, body trailing behind.
-7. spinning strike, swirling sand and amber shards whirl around the body.
-8. hovering higher, swirling sand and amber shards orbs circling the body.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+NATION PALETTE: sand gold, terracotta, amber, small turquoise accents. Signature effects (keep them small): swirling sand and amber shards.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
+POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
+Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `genie_du_desert.png` |
-| 1-2 | repos 2 | `genie_du_desert_idle_2.png` |
-| 1-3 | marche 1 | `genie_du_desert_walk.png` |
-| 1-4 | attaque 1 | `genie_du_desert_attack.png` |
+| 1-1 | repos 1 (face) | `genie_du_desert.png` |
+| 1-2 | repos 1 (dos) | `genie_du_desert_back.png` |
+
+#### Planche 2 — Face · marche, 2 attaques, sort (`face_1`)
+
+Dans l'Atelier : personnage « Génie du désert », planche « Face · marche, 2 attaques, sort ».
+
+```text
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+CHARACTER: Génie du désert, enemy of the Sables nation. Golden sand djinn with muscular arms and a lower body of swirling sand.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. RISE: body stretched tall upward, arms raised.
+3. LUNGE: body stretched forward, claws of swirling sand and amber shards reaching out.
+4. HOVER: floating higher, swirling sand and amber shards orbs circling.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | marche 1 | `genie_du_desert_walk.png` |
+| 1-2 | attaque 1 | `genie_du_desert_attack.png` |
 | 2-1 | attaque 2 | `genie_du_desert_attack_2.png` |
-| 2-2 | attaque 3 | `genie_du_desert_attack_3.png` |
-| 2-3 | attaque 4 | `genie_du_desert_attack_4.png` |
-| 2-4 | sort 1 | `genie_du_desert_cast.png` |
+| 2-2 | sort 1 | `genie_du_desert_cast.png` |
 
-#### Planche 2 — Dos (3/4 arrière)
+#### Planche 3 — Dos · marche, 2 attaques, sort (`dos_1`)
 
-Dans l'Atelier : personnage « Génie du désert », planche « Dos (3/4 arrière) ».
+Dans l'Atelier : personnage « Génie du désert », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Génie du désert, enemy of the Sables nation. Golden sand djinn with muscular arms and a lower body of swirling sand.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. drawing back, body stretched upward.
-5. lunging forward, claws of swirling sand and amber shards reaching out.
-6. follow-through, body trailing behind.
-7. spinning strike, swirling sand and amber shards whirl around the body.
-8. hovering higher, swirling sand and amber shards orbs circling the body.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. RISE: body stretched tall upward, arms raised.
+3. LUNGE: body stretched forward, claws of swirling sand and amber shards reaching out.
+4. HOVER: floating higher, swirling sand and amber shards orbs circling.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `genie_du_desert_back.png` |
-| 1-2 | repos 2 | `genie_du_desert_back_idle_2.png` |
-| 1-3 | marche 1 | `genie_du_desert_back_walk.png` |
-| 1-4 | attaque 1 | `genie_du_desert_back_attack.png` |
+| 1-1 | marche 1 | `genie_du_desert_back_walk.png` |
+| 1-2 | attaque 1 | `genie_du_desert_back_attack.png` |
 | 2-1 | attaque 2 | `genie_du_desert_back_attack_2.png` |
-| 2-2 | attaque 3 | `genie_du_desert_back_attack_3.png` |
-| 2-3 | attaque 4 | `genie_du_desert_back_attack_4.png` |
-| 2-4 | sort 1 | `genie_du_desert_back_cast.png` |
+| 2-2 | sort 1 | `genie_du_desert_back_cast.png` |
 
-### Sphinx — 16 poses
+### Sphinx — 10 poses
 
-2 planches de 8 poses. Joins la planche de face « repos » déjà réussie comme référence pour les suivantes. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sables/`.
+3 planches, 10 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/sables/` ; nomme tes images `sphinx_<clé>.png` (ex. `sphinx_face_2.png`) pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Face (3/4 avant)
+#### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
-Dans l'Atelier : personnage « Sphinx », planche « Face (3/4 avant) ».
+Dans l'Atelier : personnage « Sphinx », planche « Référence · repos de face + repos de dos ».
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+Character reference sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Sphinx, enemy of the Sables nation. Golden lion sphinx wearing a striped pharaoh headdress.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
-NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. crouched wind-up, ready to pounce.
-5. lunge forward, jaws or claws first, small swirling sand and amber shards impact.
-6. follow-through, landing after the lunge.
-7. second strike, swiping sideways.
-8. head raised, swirling sand and amber shards gathering around the body.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+NATION PALETTE: sand gold, terracotta, amber, small turquoise accents. Signature effects (keep them small): swirling sand and amber shards.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
+POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
+Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `sphinx.png` |
-| 1-2 | repos 2 | `sphinx_idle_2.png` |
-| 1-3 | marche 1 | `sphinx_walk.png` |
-| 1-4 | attaque 1 | `sphinx_attack.png` |
+| 1-1 | repos 1 (face) | `sphinx.png` |
+| 1-2 | repos 1 (dos) | `sphinx_back.png` |
+
+#### Planche 2 — Face · marche, 2 attaques, sort (`face_1`)
+
+Dans l'Atelier : personnage « Sphinx », planche « Face · marche, 2 attaques, sort ».
+
+```text
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
+CHARACTER: Sphinx, enemy of the Sables nation. Golden lion sphinx wearing a striped pharaoh headdress.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. REARING: standing up on the hind legs, front claws raised high.
+3. POUNCE: body stretched forward in the air, jaws open.
+4. HOWL: head raised to the sky, swirling sand and amber shards gathering around the body.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | marche 1 | `sphinx_walk.png` |
+| 1-2 | attaque 1 | `sphinx_attack.png` |
 | 2-1 | attaque 2 | `sphinx_attack_2.png` |
-| 2-2 | attaque 3 | `sphinx_attack_3.png` |
-| 2-3 | attaque 4 | `sphinx_attack_4.png` |
-| 2-4 | sort 1 | `sphinx_cast.png` |
+| 2-2 | sort 1 | `sphinx_cast.png` |
 
-#### Planche 2 — Dos (3/4 arrière)
+#### Planche 3 — Dos · marche, 2 attaques, sort (`dos_1`)
 
-Dans l'Atelier : personnage « Sphinx », planche « Dos (3/4 arrière) ».
+Dans l'Atelier : personnage « Sphinx », planche « Dos · marche, 2 attaques, sort ».
 
 ```text
 Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG.
 CHARACTER: Sphinx, enemy of the Sables nation. Golden lion sphinx wearing a striped pharaoh headdress.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. walking, mid-stride, left foot forward.
-4. crouched wind-up, ready to pounce.
-5. lunge forward, jaws or claws first, small swirling sand and amber shards impact.
-6. follow-through, landing after the lunge.
-7. second strike, swiping sideways.
-8. head raised, swirling sand and amber shards gathering around the body.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. REARING: standing up on the hind legs, front claws raised high.
+3. POUNCE: body stretched forward in the air, jaws open.
+4. HOWL: head raised to the sky, swirling sand and amber shards gathering around the body.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `sphinx_back.png` |
-| 1-2 | repos 2 | `sphinx_back_idle_2.png` |
-| 1-3 | marche 1 | `sphinx_back_walk.png` |
-| 1-4 | attaque 1 | `sphinx_back_attack.png` |
+| 1-1 | marche 1 | `sphinx_back_walk.png` |
+| 1-2 | attaque 1 | `sphinx_back_attack.png` |
 | 2-1 | attaque 2 | `sphinx_back_attack_2.png` |
-| 2-2 | attaque 3 | `sphinx_back_attack_3.png` |
-| 2-3 | attaque 4 | `sphinx_back_attack_4.png` |
-| 2-4 | sort 1 | `sphinx_back_cast.png` |
+| 2-2 | sort 1 | `sphinx_back_cast.png` |
 
 ## 4. Boss
 
-### Zahor le Sableux — 32 poses
+### Zahor le Sableux — 22 poses
 
-4 planches de 8 poses. Joins la planche de face « repos » déjà réussie comme référence pour les suivantes. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/`.
+6 planches, 22 poses. Commence par la fiche de référence, puis joins-la comme image de référence à chaque planche suivante. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `sables_<clé>.png` (ex. `sables_face_2.png`) pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Face (3/4 avant) · Repos, marche et sorts
+#### Planche 1 — Référence · repos de face + repos de dos (`ref`)
 
-Dans l'Atelier : personnage « Zahor le Sableux », planche « Face (3/4 avant) · Repos, marche et sorts ».
+Dans l'Atelier : personnage « Zahor le Sableux », planche « Référence · repos de face + repos de dos ».
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
+Character reference sheet of ONE final boss for a chibi isometric tactical RPG.
 CHARACTER: Zahor le Sableux, boss of the Sables nation. Sand sovereign in ornate golden armor with sharp layered plates, crested golden helm, holding a tall golden staff with a giant amber crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
-NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. idle variant, alert, weapon ready.
-4. walking, mid-stride, left foot forward.
-5. walking, mid-stride, right foot forward.
-6. staff raised, swirling sand and amber shards orb forming at the top.
-7. staff held high with both hands, swirling sand and amber shards swirling around.
-8. staff pointed forward, releasing a compact swirling sand and amber shards blast.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+NATION PALETTE: sand gold, terracotta, amber, small turquoise accents. Signature effects (keep them small): swirling sand and amber shards.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a wide empty space between them, feet on the same ground line. No frames, borders or dividing line.
+POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. 2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.
+Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `sables.png` |
-| 1-2 | repos 2 | `sables_idle_2.png` |
-| 1-3 | repos 3 | `sables_idle_3.png` |
-| 1-4 | marche 1 | `sables_walk.png` |
-| 2-1 | marche 2 | `sables_walk_2.png` |
-| 2-2 | sort 1 | `sables_cast.png` |
-| 2-3 | sort 2 | `sables_cast_2.png` |
-| 2-4 | sort 3 | `sables_cast_3.png` |
+| 1-1 | repos 1 (face) | `sables.png` |
+| 1-2 | repos 1 (dos) | `sables_back.png` |
 
-#### Planche 2 — Face (3/4 avant) · Attaques
+#### Planche 2 — Face 1 · garde, marche, sort (`face_1`)
 
-Dans l'Atelier : personnage « Zahor le Sableux », planche « Face (3/4 avant) · Attaques ».
+Dans l'Atelier : personnage « Zahor le Sableux », planche « Face 1 · garde, marche, sort ».
 
 ```text
 Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
 CHARACTER: Zahor le Sableux, boss of the Sables nation. Sand sovereign in ornate golden armor with sharp layered plates, crested golden helm, holding a tall golden staff with a giant amber crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in front-right 3/4 view):
-1. wind-up, staff held back with both hands.
-2. staff swing forward, small swirling sand and amber shards burst at the tip.
-3. follow-through, staff low, body turned.
-4. thrust with the staff tip forward, short swirling sand and amber shards spark.
-5. overhead staff strike, both hands high.
-6. spinning the staff around the body, small swirling sand and amber shards trail.
-7. low sweep with the staff at the feet.
-8. staff planted, kicking forward with one leg.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. GUARD: knees bent, weapon raised in front of the body, ready to fight.
+2. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+3. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+4. FOCUS: eyes closed, staff held vertically in front of the face, swirling sand and amber shards orb at the top.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | repos 2 | `sables_idle_2.png` |
+| 1-2 | marche 1 | `sables_walk.png` |
+| 2-1 | marche 2 | `sables_walk_2.png` |
+| 2-2 | sort 1 | `sables_cast.png` |
+
+#### Planche 3 — Face 2 · attaques 1 à 4 (`face_2`)
+
+Dans l'Atelier : personnage « Zahor le Sableux », planche « Face 2 · attaques 1 à 4 ».
+
+```text
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
+CHARACTER: Zahor le Sableux, boss of the Sables nation. Sand sovereign in ornate golden armor with sharp layered plates, crested golden helm, holding a tall golden staff with a giant amber crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. OVERHEAD STRIKE: staff raised high above the head with both hands.
+2. THRUST: body leaning forward, staff tip pushed far ahead with a short swirling sand and amber shards spark.
+3. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
+4. JUMPING STRIKE: whole body in the air, staff held back over the shoulder.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
@@ -554,87 +624,101 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 |---|---|---|
 | 1-1 | attaque 1 | `sables_attack.png` |
 | 1-2 | attaque 2 | `sables_attack_2.png` |
-| 1-3 | attaque 3 | `sables_attack_3.png` |
-| 1-4 | attaque 4 | `sables_attack_4.png` |
-| 2-1 | attaque 5 | `sables_attack_5.png` |
-| 2-2 | attaque 6 | `sables_attack_6.png` |
-| 2-3 | attaque 7 | `sables_attack_7.png` |
-| 2-4 | attaque 8 | `sables_attack_8.png` |
+| 2-1 | attaque 3 | `sables_attack_3.png` |
+| 2-2 | attaque 4 | `sables_attack_4.png` |
 
-#### Planche 3 — Dos (3/4 arrière) · Repos, marche et sorts
+#### Planche 4 — Face 3 · attaques 5-6, sorts 2-3 (`face_3`)
 
-Dans l'Atelier : personnage « Zahor le Sableux », planche « Dos (3/4 arrière) · Repos, marche et sorts ».
+Dans l'Atelier : personnage « Zahor le Sableux », planche « Face 3 · attaques 5-6, sorts 2-3 ».
 
 ```text
 Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
 CHARACTER: Zahor le Sableux, boss of the Sables nation. Sand sovereign in ornate golden armor with sharp layered plates, crested golden helm, holding a tall golden staff with a giant amber crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. idle, relaxed ready stance.
-2. idle variant, breathing in, shoulders slightly raised.
-3. idle variant, alert, weapon ready.
-4. walking, mid-stride, left foot forward.
-5. walking, mid-stride, right foot forward.
-6. staff raised, swirling sand and amber shards orb forming at the top.
-7. staff held high with both hands, swirling sand and amber shards swirling around.
-8. staff pointed forward, releasing a compact swirling sand and amber shards blast.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in front-right 3/4 view, never mix front and back views):
+1. LOW SWEEP: crouched, staff swinging at ankle height.
+2. SPIN: staff whirling around the body, a swirling sand and amber shards trail circling it.
+3. INVOCATION: staff raised high with both hands, swirling sand and amber shards swirling above the head.
+4. BLAST: staff pointed forward, a compact swirling sand and amber shards blast leaving the tip.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | repos 1 | `sables_back.png` |
-| 1-2 | repos 2 | `sables_back_idle_2.png` |
-| 1-3 | repos 3 | `sables_back_idle_3.png` |
-| 1-4 | marche 1 | `sables_back_walk.png` |
-| 2-1 | marche 2 | `sables_back_walk_2.png` |
+| 1-1 | attaque 5 | `sables_attack_5.png` |
+| 1-2 | attaque 6 | `sables_attack_6.png` |
+| 2-1 | sort 2 | `sables_cast_2.png` |
+| 2-2 | sort 3 | `sables_cast_3.png` |
+
+#### Planche 5 — Dos 1 · marche, attaque, sort (`dos_1`)
+
+Dans l'Atelier : personnage « Zahor le Sableux », planche « Dos 1 · marche, attaque, sort ».
+
+```text
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
+CHARACTER: Zahor le Sableux, boss of the Sables nation. Sand sovereign in ornate golden armor with sharp layered plates, crested golden helm, holding a tall golden staff with a giant amber crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
+NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. WALK (contact): long stride, left leg far forward, right leg far back, opposite arm swinging forward.
+2. WALK (passing): standing on the left leg, right knee raised high, body slightly higher.
+3. OVERHEAD STRIKE: staff raised high above the head with both hands.
+4. FOCUS: eyes closed, staff held vertically in front of the face, swirling sand and amber shards orb at the top.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
+BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | marche 1 | `sables_back_walk.png` |
+| 1-2 | marche 2 | `sables_back_walk_2.png` |
+| 2-1 | attaque 1 | `sables_back_attack.png` |
 | 2-2 | sort 1 | `sables_back_cast.png` |
-| 2-3 | sort 2 | `sables_back_cast_2.png` |
-| 2-4 | sort 3 | `sables_back_cast_3.png` |
 
-#### Planche 4 — Dos (3/4 arrière) · Attaques
+#### Planche 6 — Dos 2 · attaques 2 à 4, garde (`dos_2`)
 
-Dans l'Atelier : personnage « Zahor le Sableux », planche « Dos (3/4 arrière) · Attaques ».
+Dans l'Atelier : personnage « Zahor le Sableux », planche « Dos 2 · attaques 2 à 4, garde ».
 
 ```text
 Sprite sheet of ONE final boss for a chibi isometric tactical RPG.
 CHARACTER: Zahor le Sableux, boss of the Sables nation. Sand sovereign in ornate golden armor with sharp layered plates, crested golden helm, holding a tall golden staff with a giant amber crystal, imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of total height).
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand.
-VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every cell. Never a pure side profile, never facing left.
+Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, weapon always in the same hand.
+VIEW: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back, back of the head and right shoulder visible, face hidden), facing away from the viewer toward the upper right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: sand gold, terracotta, amber, small turquoise accents.
-STYLE: Chibi proportions: big head (about 1/3 of total height), short body, expressive large eyes. Polished 2D game art inspired by Dofus and Waven: clean bold dark outlines (thicker on the outer silhouette, thinner inside), 3-tone cel shading, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
-GRID: Strict grid of 4 columns x 2 rows of equal square cells, exactly one pose per cell (image aspect ratio 2:1, as large as possible, e.g. 2048x1024). Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every cell, feet on the same ground line in each row.
-CELLS, left to right, top to bottom (all in back-right, away from the viewer 3/4 view):
-1. wind-up, staff held back with both hands.
-2. staff swing forward, small swirling sand and amber shards burst at the tip.
-3. follow-through, staff low, body turned.
-4. thrust with the staff tip forward, short swirling sand and amber shards spark.
-5. overhead staff strike, both hands high.
-6. spinning the staff around the body, small swirling sand and amber shards trail.
-7. low sweep with the staff at the feet.
-8. staff planted, kicking forward with one leg.
-EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept inside their own cell.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm golden rim light on the right edge.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom (all in back-right, away from the viewer 3/4 view, never mix front and back views):
+1. THRUST: body leaning forward, staff tip pushed far ahead with a short swirling sand and amber shards spark.
+2. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
+3. JUMPING STRIKE: whole body in the air, staff held back over the shoulder.
+4. GUARD: knees bent, weapon raised in front of the body, ready to fight.
+The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+Use the attached reference sheet (idle front + idle back) for the exact design of the character.
+EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 | `sables_back_attack.png` |
-| 1-2 | attaque 2 | `sables_back_attack_2.png` |
-| 1-3 | attaque 3 | `sables_back_attack_3.png` |
-| 1-4 | attaque 4 | `sables_back_attack_4.png` |
-| 2-1 | attaque 5 | `sables_back_attack_5.png` |
-| 2-2 | attaque 6 | `sables_back_attack_6.png` |
-| 2-3 | attaque 7 | `sables_back_attack_7.png` |
-| 2-4 | attaque 8 | `sables_back_attack_8.png` |
+| 1-1 | attaque 2 | `sables_back_attack_2.png` |
+| 1-2 | attaque 3 | `sables_back_attack_3.png` |
+| 2-1 | attaque 4 | `sables_back_attack_4.png` |
+| 2-2 | repos 2 | `sables_back_idle_2.png` |
 
 ## Prompt négatif (toutes les planches de cette page)
 
 ```text
-checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses, identical poses, repeated pose, copy of the same pose, front and back views mixed, different character between poses, realistic proportions, small head
 ```
