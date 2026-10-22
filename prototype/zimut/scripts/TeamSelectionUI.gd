@@ -57,6 +57,7 @@ var _team_frame: Control
 var _title: Label
 var _fight_btn: Button
 var _equip_btn: Button
+var _lead_btn: Button
 var _chars_btn: Button
 var _fight_sel_label: Label
 var _fight_prev_btn: Button
@@ -338,6 +339,11 @@ func _build() -> void:
 	eq.tooltip_text = "Équiper vos personnages avec les objets gagnés."
 	eq.pressed.connect(_on_equipment)
 	tools.add_child(eq)
+	var lead := U.btn("★  EXPLORATEUR", Color(0.95, 0.78, 0.30), 20, Vector2(260, 52))
+	_lead_btn = lead
+	lead.tooltip_text = "Héros du groupe qui incarne ton personnage sur la carte d'Aventure."
+	lead.pressed.connect(_on_lead)
+	tools.add_child(lead)
 	# Cadre « TON ÉQUIPE » : met bien en évidence les 3 emplacements du groupe.
 	var team_frame := PanelContainer.new()
 	_team_frame = team_frame
@@ -455,6 +461,24 @@ func _on_action() -> void:
 		if team.size() >= MAX_TEAM_SIZE:
 			return
 		team.append(classe)
+	refresh()
+
+## Héros qui incarne l'explorateur sur la carte d'Aventure (mémorisé dans la partie).
+func lead_class() -> String:
+	if GameManager.active_save.is_empty():
+		return ""
+	var c: String = String(ProgressionManager.adventure_state(GameManager.active_save).get("hero_class", ""))
+	if team.has(c):
+		return c
+	return team[0] if not team.is_empty() else ""
+
+func _on_lead() -> void:
+	var c: String = current_class()
+	if not team.has(c) or GameManager.active_save.is_empty():
+		return
+	ProgressionManager.adventure_state(GameManager.active_save)["hero_class"] = c
+	if GameManager.active_slot >= 0:
+		ProgressionManager.write_save(GameManager.active_slot, GameManager.active_save)
 	refresh()
 
 func _on_combat() -> void:
@@ -674,7 +698,7 @@ func refresh() -> void:
 			var c: String = team[i]
 			var ccol: Color = CLASS_COLORS.get(c, Color(0.4, 0.4, 0.4))
 			slot.icon = _class_texture(c)
-			slot.text = "%d · %s" % [i + 1, c]
+			slot.text = "%d · %s%s" % [i + 1, c, "  ★" if c == lead_class() else ""]
 			if GameManager.active_slot >= 0 and not GameManager.active_save.is_empty():
 				slot.text += "\nNiv %d" % ProgressionManager.member_level(GameManager.active_save, c)
 			var st_s: StyleBoxFlat = U.box(ccol.darkened(0.5), ccol.lightened(0.2), 14, 3, 8)
@@ -688,6 +712,10 @@ func refresh() -> void:
 			slot.add_theme_stylebox_override("normal", st_e)
 			slot.add_theme_stylebox_override("hover", st_e)
 			slot.add_theme_stylebox_override("pressed", st_e)
+	if _lead_btn:
+		var cc: String = current_class()
+		_lead_btn.disabled = GameManager.active_save.is_empty() or not team.has(cc) or cc == lead_class()
+		_lead_btn.text = "★  EXPLORATEUR : %s" % lead_class() if lead_class() != "" else "★  EXPLORATEUR"
 	if _team_title:
 		if team.size() < MAX_TEAM_SIZE:
 			_team_title.text = "★ TON ÉQUIPE : %d / %d — choisis %d héros dans la liste, puis touche AJOUTER" % [team.size(), MAX_TEAM_SIZE, MAX_TEAM_SIZE - team.size()]
