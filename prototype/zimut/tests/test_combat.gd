@@ -1,8 +1,12 @@
 extends SceneTree
 ## test_combat.gd — Tests headless des règles de combat (zones d'effet, parsing).
 ## Lancement : godot --headless -s tests/test_combat.gd --path .
+##
+## NOTE : en mode `-s` (script), les class_name ne sont PAS enregistrés dans
+## le ClassDB. Il faut charger explicitement le script avec load().
 
 var failures: int = 0
+var Combat = load("res://scripts/Combat.gd")
 
 func _init() -> void:
 	_test_zone_shapes()

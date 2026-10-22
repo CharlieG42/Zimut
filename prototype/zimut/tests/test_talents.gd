@@ -1,8 +1,14 @@
 extends SceneTree
 ## test_talents.gd — Tests headless de l'arbre de talents (V42).
 ## Lancement : godot --headless -s tests/test_talents.gd --path .
+##
+## NOTE : en mode `-s` (script), les class_name ne sont PAS enregistrés dans
+## le ClassDB. Il faut charger explicitement les scripts avec load().
 
 var failures: int = 0
+var TalentTree = load("res://scripts/TalentTree.gd")
+var ProgressionManager = load("res://scripts/ProgressionManager.gd")
+var GameSettings = load("res://scripts/GameSettings.gd")
 
 func _init() -> void:
 	_test_talent_basics()
@@ -65,10 +71,10 @@ func _test_talent_bonus_aggregation() -> void:
 
 func _test_synergy_trios() -> void:
 	print("Synergies de trio (V42) :")
-	# Test via ProgressionManager (nécessite le chargement des données)
+	# Test via ProgressionManager (méthode statique, pas besoin d'instance)
 	var trio: Array = ProgressionManager.active_synergy_trios(["Tank", "Mage", "Druide"])
 	_check(trio.size() == 1, "Tank+Mage+Druide → 1 synergie de trio")
-	_check(String(trio[0]["name"]) == "Égide arcanique", "nom = Égende arcanique")
+	_check(String(trio[0]["name"]) == "Égide arcanique", "nom = Égide arcanique")
 	_check(String(trio[0]["status"]) == "def_up", "statut = def_up")
 	_check(float(trio[0]["value"]) == 15.0, "valeur = 15%")
 	# Sans le trio complet
@@ -85,10 +91,9 @@ func _test_synergy_trios() -> void:
 
 func _test_speedrun_settings() -> void:
 	print("GameSettings — contre-la-montre (V42) :")
-	var gs: Node = root.get_node_or_null("GameSettings")
-	if gs == null:
-		print("  ??  GameSettings non disponible en headless (autoload)")
-		return
+	# Créer une instance de GameSettings (extends Node)
+	var gs: Node = GameSettings.new()
+	_check(gs != null, "instance GameSettings créée")
 	_check(int(gs.speedrun_turn_limit()) == 0, "limite par défaut = 0 (désactivé)")
 	gs.set_speedrun_mode(2)
 	_check(int(gs.speedrun_turn_limit()) == 6, "mode 2 → limite 6 tours")
@@ -99,3 +104,4 @@ func _test_speedrun_settings() -> void:
 	_check(gs.speedrun_xp_bonus() == 0.50, "mode 3 → +50% XP")
 	gs.set_speedrun_mode(0)
 	_check(int(gs.speedrun_turn_limit()) == 0, "retour mode 0 → désactivé")
+	gs.free()
