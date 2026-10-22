@@ -64,6 +64,9 @@ jobs:
           godot --headless -s tests/test_combat.gd --path . 2>&1 | tail -20
           # Test de progression
           godot --headless -s tests/test_progression.gd --path . 2>&1 | tail -20 || true
+          # V42 : tests arbre de talents + timer de tour
+          godot --headless -s tests/test_talents.gd --path . 2>&1 | tail -20 || true
+          godot --headless -s tests/test_timer.gd --path . 2>&1 | tail -20 || true
           # Test d'équilibrage (simulation, peut être long — on limite)
           echo "Tests headless exécutés."
 

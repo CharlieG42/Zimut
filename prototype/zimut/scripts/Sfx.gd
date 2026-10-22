@@ -44,6 +44,8 @@ func _build() -> void:
 	_bank["forge"]  = _concat([_tone(0.05, 1600.0, 1500.0, 0.6, 0.6, 1.0), _tone(0.30, 820.0, 760.0, 0.08, 0.45, 3.0)])
 	_bank["fuse"]   = _concat([_tone(0.09, 660.0, 990.0, 0.0, 0.35, 1.0), _tone(0.20, 990.0, 1320.0, 0.0, 0.35, 2.0)])
 	_bank["achievement"] = _concat([_tone(0.10, 784.0, 784.0, 0.0, 0.4, 1.2), _tone(0.10, 988.0, 988.0, 0.0, 0.4, 1.2), _tone(0.10, 1175.0, 1175.0, 0.0, 0.4, 1.2), _tone(0.42, 1568.0, 1568.0, 0.0, 0.38, 2.2)])
+	# V42 : bip d'alerte à l'expiration du timer de tour
+	_bank["timer"]  = _concat([_tone(0.09, 660.0, 660.0, 0.0, 0.5, 1.6), _tone(0.09, 880.0, 880.0, 0.0, 0.5, 1.6), _tone(0.16, 1320.0, 440.0, 0.0, 0.45, 2.0)])
 	for k: String in _bank.keys():
 		_bank[k] = _make_stream(_bank[k])
 

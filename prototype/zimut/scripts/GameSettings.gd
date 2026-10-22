@@ -32,6 +32,12 @@ const SPEEDRUN_TURN_LIMIT := [0, 10, 6, 3]
 const SPEEDRUN_XP_BONUS := [0.0, 0.15, 0.30, 0.50]
 const SPEEDRUN_GOLD_BONUS := [0.0, 0.10, 0.25, 0.50]
 
+## V42 : Timer de tour — limite de temps pour jouer son tour (tous personnages).
+## 0 = désactivé, 1 = 5s, 2 = 10s, 3 = 20s, 4 = 30s.
+## À l'expiration, le tour se termine automatiquement.
+const TURN_TIMER_MODES: Array[String] = ["Désactivé", "5 s", "10 s", "20 s", "30 s"]
+const TURN_TIMER_SECONDS := [0.0, 5.0, 10.0, 20.0, 30.0]
+
 ## Vitesse des tours joués par l'ordinateur (ennemis, invocations, mode Auto).
 const COMBAT_SPEEDS: Array[String] = ["Normale", "Rapide", "Très rapide"]
 ## V34 : vitesse des animations des personnages (poses d'attaque / incantation).
@@ -44,6 +50,8 @@ var combat_speed: int = 0
 var anim_speed: int = 1
 ## V42 : index dans SPEEDRUN_MODES (0 = désactivé).
 var speedrun_mode: int = 0
+## V42 : index dans TURN_TIMER_MODES (0 = désactivé).
+var turn_timer_mode: int = 2
 ## Sons d'effets / vibrations (V18)
 ## Langue : "fr" ou "en" (voir Loc.gd)
 var language: String = "fr"
@@ -81,6 +89,7 @@ func load_settings() -> void:
 	combat_speed = clampi(int(parsed.get("combat_speed", combat_speed)), 0, COMBAT_SPEEDS.size() - 1)
 	anim_speed = clampi(int(parsed.get("anim_speed", anim_speed)), 0, ANIM_SPEEDS.size() - 1)
 	speedrun_mode = clampi(int(parsed.get("speedrun_mode", speedrun_mode)), 0, SPEEDRUN_MODES.size() - 1)
+	turn_timer_mode = clampi(int(parsed.get("turn_timer_mode", turn_timer_mode)), 0, TURN_TIMER_MODES.size() - 1)
 	sfx_on = bool(parsed.get("sfx_on", sfx_on))
 	language = String(parsed.get("language", language))
 	haptics_on = bool(parsed.get("haptics_on", haptics_on))
@@ -91,7 +100,7 @@ func save_settings() -> void:
 	if f == null:
 		push_error("Impossible d'écrire les réglages")
 		return
-	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "anim_speed": anim_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "language": language, "speedrun_mode": speedrun_mode}, "\t"))
+	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "anim_speed": anim_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "language": language, "speedrun_mode": speedrun_mode, "turn_timer_mode": turn_timer_mode}, "\t"))
 	f.close()
 
 func set_difficulty(idx: int) -> void:
@@ -160,6 +169,16 @@ func speedrun_xp_bonus() -> float:
 ## V42 : bonus or si contre-la-montre réussi.
 func speedrun_gold_bonus() -> float:
 	return SPEEDRUN_GOLD_BONUS[clampi(speedrun_mode, 0, SPEEDRUN_GOLD_BONUS.size() - 1)]
+
+## V42 : définit le mode timer de tour.
+func set_turn_timer_mode(idx: int) -> void:
+	turn_timer_mode = clampi(idx, 0, TURN_TIMER_MODES.size() - 1)
+	save_settings()
+	settings_changed.emit()
+
+## V42 : durée du timer de tour en secondes (0 = désactivé).
+func turn_timer_seconds() -> float:
+	return TURN_TIMER_SECONDS[clampi(turn_timer_mode, 0, TURN_TIMER_SECONDS.size() - 1)]
 
 
 ## Facteur de durée des poses (1 = normal, < 1 = plus rapide).

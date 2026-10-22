@@ -587,6 +587,13 @@ func _play(kind: String, d: Dictionary) -> void:
 			Sfx.play("hit")
 			_shake(6.0)
 			await _wait(0.2)
+		"timer_expired":
+			# V42 : anneau doré sur le personnage dont le timer de tour expire
+			var te: Dictionary = d.get("entity", {})
+			if not te.is_empty():
+				var tp2: Vector2i = game_manager.pos_of(te)
+				_ring(grid_to_screen(tp2.x, tp2.y), Color(1.0, 0.82, 0.25), 10.0, 64.0, 0.55, 7.0)
+				_burst(grid_to_screen(tp2.x, tp2.y), Color(1.0, 0.85, 0.3), 18, 150.0, 0.45, 4.0)
 
 
 func _update_outlines() -> void:

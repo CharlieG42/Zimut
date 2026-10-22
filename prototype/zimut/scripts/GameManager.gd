@@ -102,6 +102,12 @@ var fight_biome: String          = "Forêt"  # biome du combat en cours
 var speedrun_limit: int          = 0
 ## V42 : le contre-la-montre a été réussi sur ce combat.
 var speedrun_success: bool       = false
+## V42 : timer de tour — temps restant en secondes (0 = pas de timer actif).
+var turn_timer_remaining: float  = 0.0
+## V42 : timer de tour — durée totale configurée (0 = désactivé).
+var turn_timer_duration: float   = 0.0
+var _turn_timer: SceneTreeTimer   = null
+var _turn_timer_epoch: int       = -1
 
 var _turn_index: int = -1
 var _uid_counter: int = 0
@@ -951,6 +957,8 @@ func advance_turn() -> void:
 
 func _begin_turn(e: Dictionary) -> void:
 	active_entity = e
+	# V42 : démarre le timer de tour
+	_start_turn_timer()
 	for x: Dictionary in all_entities():
 		x["is_active"] = (int(x["uid"]) == int(e["uid"]))
 	e["casts"] = {}
@@ -1039,6 +1047,8 @@ func next_player() -> void:
 func end_current_turn() -> void:
 	if game_over or active_entity.is_empty():
 		return
+	# V42 : annule le timer de tour (le joueur a fini avant la limite)
+	_stop_turn_timer()
 	var e: Dictionary = active_entity
 	var bdmg: int = BiomeEffects.end_turn_damage(fight_biome, e)
 	if bdmg > 0:
@@ -1076,6 +1086,55 @@ func end_current_turn() -> void:
 	if ep != _epoch or game_over:
 		return
 	advance_turn()
+
+
+# ═══════════════════════════════════════════════════════
+#  V42 : Timer de tour (10s par défaut, configurable)
+# ═══════════════════════════════════════════════════════
+
+## Démarre le timer de tour pour l'entité active.
+func _start_turn_timer() -> void:
+	_stop_turn_timer()
+	turn_timer_duration = GameSettings.turn_timer_seconds()
+	if turn_timer_duration <= 0.0 or game_over or active_entity.is_empty():
+		turn_timer_remaining = 0.0
+		return
+	turn_timer_remaining = turn_timer_duration
+	_turn_timer_epoch = _epoch
+	# ignore_time_scale = true : le compte à rebours reste en temps réel même
+	# quand les tours ennemis sont accélérés (Engine.time_scale > 1).
+	_turn_timer = await get_tree().create_timer(turn_timer_duration, false, true).timeout
+	# Le timer a expiré : vérifier qu'on est toujours sur le même tour
+	if _turn_timer_epoch != _epoch or game_over or active_entity.is_empty():
+		return
+	Sfx.play("timer")
+	message_requested.emit("⏱ %s n'a pas joué — tour terminé !" % String(active_entity.get("name", "?")))
+	fx.emit("timer_expired", {"entity": active_entity})
+	# Fin automatique du tour
+	if current_turn == 0:
+		end_current_turn()
+	else:
+		# Tour IA : le TurnManager gère déjà, on force juste la fin
+		active_entity["current_pa"] = 0
+		active_entity["current_pm"] = 0
+		end_current_turn()
+
+
+## Annule le timer de tour en cours.
+func _stop_turn_timer() -> void:
+	_turn_timer_epoch = -1
+	_turn_timer = null
+	turn_timer_remaining = 0.0
+	# Le timer de Godot est lié au tree, pas annulable directement ;
+	# on utilise l'epoch pour invalider le callback.
+
+
+func _process(delta: float) -> void:
+	# V42 : décompte du timer de tour pour l'affichage
+	if turn_timer_duration > 0.0 and not active_entity.is_empty() and not game_over:
+		if _turn_timer != null and _turn_timer_epoch == _epoch:
+			turn_timer_remaining = maxf(0.0, turn_timer_remaining - delta)
+			state_changed.emit()
 
 
 func set_auto(value: bool) -> void:
@@ -2274,6 +2333,8 @@ func _after_action() -> void:
 
 func reset_game() -> void:
 	_epoch += 1
+	_stop_turn_timer()
+	turn_timer_duration = 0.0
 	game_over = false
 	victory = false
 	selected_spell = null
