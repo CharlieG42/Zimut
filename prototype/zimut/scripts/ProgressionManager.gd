@@ -1583,6 +1583,9 @@ func ensure_roster(data: Dictionary) -> void:
 		var ent: Dictionary = roster[classe]
 		ent["level"] = clampi(int(ent.get("level", START_LEVEL)), 1, ClassRules.MAX_LEVEL)
 		ent["xp"] = int(ent.get("xp", xp_for_level(int(ent["level"]))))
+		# V42 : entrée de l'arbre de talents par personnage (rétroactive)
+		if not ent.has("talents"):
+			ent["talents"] = {"unlocked": {}, "points": TalentTree.power_for_level(int(ent["level"]))}
 		ent["unspent"] = int(ent.get("unspent", 0))
 		ent["auto"] = bool(ent.get("auto", true))
 		var inv: Dictionary = ent.get("invested", {})
@@ -1730,8 +1733,8 @@ func member_stats(data: Dictionary, member: Dictionary) -> Dictionary:
 	for sk: String in sb["stats"].keys():
 		eq[sk] = int(eq.get(sk, 0)) + int(sb["stats"][sk])
 	ItemRules.merge_fx(fx, sb["fx"])
-	# V42 : bonus de l'arbre de talents account-wide
-	var tb: Dictionary = TalentTree.total_bonus()
+	# V42 : bonus de l'arbre de talents DU HÉROS (stocké dans le roster)
+	var tb: Dictionary = TalentTree.total_bonus(data, classe)
 	var pv_pct: float = 1.0 + float(tb.get("pv_pct", 0)) / 100.0
 	var def_pct: float = 1.0 + float(tb.get("def_pct", 0)) / 100.0
 	var dmg_pct: float = 1.0 + float(tb.get("dmg_pct", 0)) / 100.0
@@ -1836,6 +1839,8 @@ func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0, fight_level: in
 			pts = (to_lvl - from_lvl) * ClassRules.POINTS_PER_LEVEL
 			e["unspent"] = int(e["unspent"]) + pts
 			e["level"] = to_lvl
+			# V42 : paliers de l'arbre de talents (1 point de pouvoir tous les 5 niveaux à partir du niveau 15)
+			TalentTree.apply_level_up(data, classe, from_lvl, to_lvl)
 			if bool(e.get("auto", true)):
 				e["unspent"] = ClassRules.auto_allocate(classe, e["invested"], int(e["unspent"]))
 			if bool(e.get("spell_auto", false)):
@@ -1967,10 +1972,9 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 			{"type": "Squelette", "level": fight_level, "boss": false},
 			{"type": "Loup", "level": fight_level, "boss": false},
 			{"type": "Dragonnet", "level": fight_level, "boss": was_boss}]
-	# V42 : bonus d'XP de l'arbre de talents account-wide
-	var talent_bonus: Dictionary = TalentTree.total_bonus()
-	var xp_ratio: float = 1.0 + float(talent_bonus.get("xp_pct", 0)) / 100.0
-	# V42 : bonus contre-la-montre si réussi
+	# V42 : bonus d'XP contre-la-montre si réussi (l'arbre de talents est
+	# par personnage : pas de bonus d'XP account-wide)
+	var xp_ratio: float = 1.0
 	if bool(info.get("speedrun_success", false)):
 		xp_ratio += GameSettings.speedrun_xp_bonus()
 	var report: Dictionary = award_xp(data, fight_xp(enemies, fight_level), xp_ratio, fight_level)
@@ -1988,16 +1992,10 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	data["last_loots"] = loots
 	# Butin de craft : ressources selon le nombre d'ennemis vaincus, un peu d'or.
 	var drops: Dictionary = _roll_resource_drops(enemies.size(), was_boss)
-	# V42 : bonus de ressources de l'arbre de talents
-	var res_bonus: int = int(talent_bonus.get("res_bonus", 0))
-	if res_bonus > 0 and not drops.is_empty():
-		var keys: Array = drops.keys()
-		var extra_key: String = String(keys[randi() % keys.size()])
-		drops[extra_key] = int(drops[extra_key]) + res_bonus
 	add_resources(data, drops)
-	# V42 : bonus d'or de l'arbre de talents + contre-la-montre
+	# V42 : bonus d'or contre-la-montre (l'arbre de talents est par personnage :
+	# pas de bonus d'or account-wide)
 	var gold_gain: int = (50 + 10 * fight_level) * (3 if was_boss else 1)
-	gold_gain = roundi(float(gold_gain) * (1.0 + float(talent_bonus.get("gold_pct", 0)) / 100.0))
 	if bool(info.get("speedrun_success", false)):
 		gold_gain = roundi(float(gold_gain) * (1.0 + GameSettings.speedrun_gold_bonus()))
 	data["gold"] = int(data.get("gold", 0)) + (gold_gain if (frontier or campaign) else int(gold_gain * 0.6))

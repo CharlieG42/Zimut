@@ -33,10 +33,11 @@ const SPEEDRUN_XP_BONUS := [0.0, 0.15, 0.30, 0.50]
 const SPEEDRUN_GOLD_BONUS := [0.0, 0.10, 0.25, 0.50]
 
 ## V42 : Timer de tour — limite de temps pour jouer son tour (tous personnages).
-## 0 = désactivé, 1 = 5s, 2 = 10s, 3 = 20s, 4 = 30s.
+## 0 = désactivé, 1 = 10s, 2 = 20s, 3 = 30s, 4 = 60s.
 ## À l'expiration, le tour se termine automatiquement.
-const TURN_TIMER_MODES: Array[String] = ["Désactivé", "5 s", "10 s", "20 s", "30 s"]
-const TURN_TIMER_SECONDS := [0.0, 5.0, 10.0, 20.0, 30.0]
+## 30 s est le mode par défaut (demande de CharlieG42).
+const TURN_TIMER_MODES: Array[String] = ["Désactivé", "10 s", "20 s", "30 s", "60 s"]
+const TURN_TIMER_SECONDS := [0.0, 10.0, 20.0, 30.0, 60.0]
 
 ## Vitesse des tours joués par l'ordinateur (ennemis, invocations, mode Auto).
 const COMBAT_SPEEDS: Array[String] = ["Normale", "Rapide", "Très rapide"]
@@ -50,8 +51,8 @@ var combat_speed: int = 0
 var anim_speed: int = 1
 ## V42 : index dans SPEEDRUN_MODES (0 = désactivé).
 var speedrun_mode: int = 0
-## V42 : index dans TURN_TIMER_MODES (0 = désactivé).
-var turn_timer_mode: int = 2
+## V42 : index dans TURN_TIMER_MODES (0 = désactivé). Défaut = 30 s.
+var turn_timer_mode: int = 3
 ## Sons d'effets / vibrations (V18)
 ## Langue : "fr" ou "en" (voir Loc.gd)
 var language: String = "fr"
