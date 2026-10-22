@@ -38,23 +38,25 @@ func _test_timer_settings() -> void:
 	# Mode 0 = désactivé
 	gs.set_turn_timer_mode(0)
 	_check(gs.turn_timer_seconds() == 0.0, "mode 0 → 0 s (désactivé)")
-	# Modes 1 à 4
+	# Modes 1 à 4 : 10 / 20 / 30 / 60 s
 	gs.set_turn_timer_mode(1)
-	_check(gs.turn_timer_seconds() == 5.0, "mode 1 → 5 s")
+	_check(gs.turn_timer_seconds() == 10.0, "mode 1 → 10 s")
 	gs.set_turn_timer_mode(2)
-	_check(gs.turn_timer_seconds() == 10.0, "mode 2 → 10 s")
+	_check(gs.turn_timer_seconds() == 20.0, "mode 2 → 20 s")
 	gs.set_turn_timer_mode(3)
-	_check(gs.turn_timer_seconds() == 20.0, "mode 3 → 20 s")
+	_check(gs.turn_timer_seconds() == 30.0, "mode 3 → 30 s")
 	gs.set_turn_timer_mode(4)
-	_check(gs.turn_timer_seconds() == 30.0, "mode 4 → 30 s")
+	_check(gs.turn_timer_seconds() == 60.0, "mode 4 → 60 s")
 	# Clamping hors bornes
 	gs.set_turn_timer_mode(99)
-	_check(gs.turn_timer_seconds() == 30.0, "mode 99 → clampé à 30 s")
+	_check(gs.turn_timer_seconds() == 60.0, "mode 99 → clampé à 60 s")
 	_check(int(gs.turn_timer_mode) == 4, "index clampé à 4")
 	gs.set_turn_timer_mode(-3)
 	_check(gs.turn_timer_seconds() == 0.0, "mode -3 → clampé à 0 s (désactivé)")
 	_check(int(gs.turn_timer_mode) == 0, "index clampé à 0")
-	gs.free()
+	# Défaut = 30 s (mode 3) — choix de CharlieG42
+	gs.set_turn_timer_mode(3)
+	_check(gs.turn_timer_seconds() == 30.0, "défaut 30 s restauré")
 
 func _test_timer_defaults() -> void:
 	print("GameManager — état initial du timer (V42) :")

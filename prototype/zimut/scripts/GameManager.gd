@@ -330,7 +330,7 @@ func init_entities() -> void:
 				continue
 		var player: Dictionary = _base_entity("%s Lv%d" % [classe, plevel], "Player", "player",
 			classe, plevel, pos)
-		# V42 : bonus de l'arbre de talents account-wide (dégâts, soins, critique)
+		# V42 : bonus de l'arbre de talents DU HÉROS (dégâts, soins, critique)
 		var talent_dmg_pct: float = float(st.get("talent_dmg_pct", 1.0))
 		var talent_heal_pct: float = float(st.get("talent_heal_pct", 1.0))
 		var talent_crit_pct: float = float(st.get("talent_crit_pct", 0.0))
@@ -367,6 +367,7 @@ func init_entities() -> void:
 		if int(pfx.get("start_immune", 0)) > 0:
 			Combat.add_status(player, "immune", int(pfx["start_immune"]), 0.0)
 		bless = maxi(bless, int(pfx.get("bless_def", 0)))
+		player.erase("talent_revived")   # V42 : « Second souffle » — 1 fois par combat
 		players.append(player)
 		grid[pos.y][pos.x] = player
 	if bless > 0:
@@ -1664,7 +1665,7 @@ func los_blockers() -> Dictionary:
 ## Montant de soin d'un sort pour une cible donnée.
 func _heal_amount(caster: Dictionary, p: Dictionary, t: Dictionary) -> int:
 	var amt: int = 0
-	# V42 : bonus de soins de l'arbre de talents account-wide
+	# V42 : bonus de soins de l'arbre de talents du héros
 	var talent_heal: float = float(caster.get("fx", {}).get("talent_heal_pct", 1.0))
 	if int(p["heal"]) > 0:
 		amt = roundi(float(p["heal"]) * (1.0 + float(caster.get("intelligence", 0)) / 300.0)
@@ -2234,6 +2235,17 @@ func _check_deaths() -> void:
 			if int(x["current_pv"]) <= 0 and not x.get("dead", false):
 				dead.append(x)
 	for x: Dictionary in dead:
+		# V42 : talent « Second souffle » — le héros renaît avec un % de PV (1 fois/combat)
+		var revive_pct: int = int(x.get("fx", {}).get("talent_revive_pct", 0))
+		if x["entity_type"] == "Player" and revive_pct > 0 and not x.get("talent_revived", false):
+			x["talent_revived"] = true
+			x["dead"] = false
+			x["current_pv"] = maxi(1, roundi(float(x["max_pv"]) * float(revive_pct) / 100.0))
+			x["is_active"] = false
+			fx.emit("heal", {"target": x, "amount": int(x["current_pv"]), "pv_after": int(x["current_pv"]), "text": "Second souffle"})
+			message_requested.emit("★ %s renaît avec %d PV !" % [x["name"], int(x["current_pv"])])
+			_refresh_grid()
+			continue
 		x["dead"] = true
 		x["current_pv"] = 0
 		x["is_active"] = false

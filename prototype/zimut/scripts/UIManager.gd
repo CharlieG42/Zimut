@@ -759,6 +759,33 @@ class StatsView extends Control:
 		bg.shadow_color = Color(0, 0, 0, 0.55)
 		bg.shadow_size = 8
 		draw_style_box(bg, Rect2(Vector2.ZERO, size))
+		# V42 : bordure jaune-or du timer de tour autour de TOUTE la vignette
+		# rectangulaire (tête + PV + PA/PM), pulsant et s'intensifiant vers la fin.
+		var tt_dur: float = 0.0
+		var tt_rem: float = 0.0
+		if gm is GameManager:
+			tt_dur = (gm as GameManager).turn_timer_duration
+			tt_rem = (gm as GameManager).turn_timer_remaining
+		if tt_dur > 0.0:
+			var ratio_t: float = clampf(tt_rem / tt_dur, 0.0, 1.0)
+			var gold: Color = Color(1.0, 0.82, 0.25)
+			# Pulsation (plus rapide quand il reste peu de temps)
+			var pulse_t: float = 0.5 + 0.5 * sin(Time.get_ticks_msec() / (260.0 - 160.0 * ratio_t))
+			var tframe := Rect2(Vector2.ZERO, size).grow(4.0 + pulse_t * 2.0)
+			var tring := StyleBoxFlat.new()
+			tring.bg_color = Color(gold.r, gold.g, gold.b, 0.08 * ratio_t)
+			tring.border_color = Color(gold.r, gold.g, gold.b, 0.55 + 0.45 * ratio_t * (0.6 + 0.4 * pulse_t))
+			tring.set_border_width_all(4)
+			tring.set_corner_radius_all(22)
+			tring.shadow_color = Color(gold.r, gold.g, gold.b, 0.40 * (1.0 - ratio_t) * pulse_t)
+			tring.shadow_size = int(10.0 + 12.0 * (1.0 - ratio_t) * pulse_t)
+			draw_style_box(tring, tframe)
+			# Compte à rebours dans le coin haut-droit de la vignette
+			var secs: int = ceili(tt_rem)
+			var tcol: Color = gold if ratio_t > 0.3 else Color(1.0, 0.45, 0.3)
+			var tfs: int = 22 if secs >= 10 else 26
+			draw_string_outline(font, Vector2(size.x - 96, 30), "⏱ %d" % secs, HORIZONTAL_ALIGNMENT_CENTER, 90.0, tfs, 5, Color(0, 0, 0, 0.92))
+			draw_string(font, Vector2(size.x - 96, 30), "⏱ %d" % secs, HORIZONTAL_ALIGNMENT_CENTER, 90.0, tfs, tcol)
 		var tint := StyleBoxFlat.new()
 		tint.bg_color = Color(team_col.r, team_col.g, team_col.b, 0.13)
 		tint.set_corner_radius_all(18)
@@ -782,31 +809,6 @@ class StatsView extends Control:
 			draw_texture_rect_region(tex, pr.grow(-5.0), Portraits.head_region(tex))
 		else:
 			draw_circle(pr.get_center(), 32.0, e.get("color", Color(0.6, 0.6, 0.6)))
-		# V42 : contour jaune-or du timer de tour (pulsant, s'intensifie vers la fin)
-		var tt_dur: float = 0.0
-		var tt_rem: float = 0.0
-		if gm is GameManager:
-			tt_dur = (gm as GameManager).turn_timer_duration
-			tt_rem = (gm as GameManager).turn_timer_remaining
-		if tt_dur > 0.0:
-			var ratio_t: float = clampf(tt_rem / tt_dur, 0.0, 1.0)
-			var gold: Color = Color(1.0, 0.82, 0.25)
-			# Pulsation du halo (plus rapide quand il reste peu de temps)
-			var pulse_t: float = 0.5 + 0.5 * sin(Time.get_ticks_msec() / (260.0 - 160.0 * ratio_t))
-			var ring := StyleBoxFlat.new()
-			ring.bg_color = Color(gold.r, gold.g, gold.b, 0.10 * ratio_t)
-			ring.border_color = Color(gold.r, gold.g, gold.b, 0.55 + 0.45 * ratio_t * (0.6 + 0.4 * pulse_t))
-			ring.set_border_width_all(3)
-			ring.set_corner_radius_all(20)
-			ring.shadow_color = Color(gold.r, gold.g, gold.b, 0.35 * (1.0 - ratio_t) * pulse_t)
-			ring.shadow_size = int(8.0 + 10.0 * (1.0 - ratio_t) * pulse_t)
-			draw_style_box(ring, pr.grow(5.0 + pulse_t * 2.0))
-			# Compte à rebours sous le portrait
-			var secs: int = ceili(tt_rem)
-			var tcol: Color = gold if ratio_t > 0.3 else Color(1.0, 0.45, 0.3)
-			var tfs: int = 20 if secs >= 10 else 24
-			draw_string_outline(font, Vector2(pr.position.x, pr.end.y + 24), "⏱ %d" % secs, HORIZONTAL_ALIGNMENT_CENTER, pr.size.x, tfs, 5, Color(0, 0, 0, 0.92))
-			draw_string(font, Vector2(pr.position.x, pr.end.y + 24), "⏱ %d" % secs, HORIZONTAL_ALIGNMENT_CENTER, pr.size.x, tfs, tcol)
 		# Badge de niveau (coin bas-droit du portrait)
 		var lvl: int = int(e.get("level", 1))
 		var bc := Vector2(pr.end.x - 6.0, pr.end.y - 6.0)
