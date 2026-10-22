@@ -125,6 +125,18 @@ func _build_achievements() -> void:
 		v.add_child(U.lbl(("✓ Obtenu le %s — " % String(_save["achievements"][id]) if done else "%d / %d — " % [cur, int(a[4])]) + "Récompense : " + Achievements.reward_text(a[5]), 16,
 			U.C_GOOD if done else U.C_DIM))
 
+	# V42 : records de vitesse (contre-la-montre sous forme de succès)
+	var best_t: int = Achievements.stat(_save, "best_turns")
+	var best_b: int = Achievements.stat(_save, "boss_turns")
+	if best_t > 0 or best_b > 0:
+		var rec := U.lbl("⏱ Records : %s · Boss : %s" % [
+			("%d tours" % best_t) if best_t > 0 else "—",
+			("%d tours" % best_b) if best_b > 0 else "—"], 18, Color(1.0, 0.85, 0.45))
+		_body.add_child(rec)
+
+
+func _build_bestiary() -> void:
+
 
 func _build_bestiary() -> void:
 	var b: Dictionary = _save.get("bestiary", {})
