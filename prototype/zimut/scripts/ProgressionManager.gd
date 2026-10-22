@@ -1972,12 +1972,7 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 			{"type": "Squelette", "level": fight_level, "boss": false},
 			{"type": "Loup", "level": fight_level, "boss": false},
 			{"type": "Dragonnet", "level": fight_level, "boss": was_boss}]
-	# V42 : bonus d'XP contre-la-montre si réussi (l'arbre de talents est
-	# par personnage : pas de bonus d'XP account-wide)
-	var xp_ratio: float = 1.0
-	if bool(info.get("speedrun_success", false)):
-		xp_ratio += GameSettings.speedrun_xp_bonus()
-	var report: Dictionary = award_xp(data, fight_xp(enemies, fight_level), xp_ratio, fight_level)
+	var report: Dictionary = award_xp(data, fight_xp(enemies, fight_level), 1.0, fight_level)
 	if frontier:
 		data["victories"] = int(data.get("victories", 0)) + 1
 		var hist: Array = data.get("fight_levels", [])
@@ -1993,11 +1988,7 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	# Butin de craft : ressources selon le nombre d'ennemis vaincus, un peu d'or.
 	var drops: Dictionary = _roll_resource_drops(enemies.size(), was_boss)
 	add_resources(data, drops)
-	# V42 : bonus d'or contre-la-montre (l'arbre de talents est par personnage :
-	# pas de bonus d'or account-wide)
 	var gold_gain: int = (50 + 10 * fight_level) * (3 if was_boss else 1)
-	if bool(info.get("speedrun_success", false)):
-		gold_gain = roundi(float(gold_gain) * (1.0 + GameSettings.speedrun_gold_bonus()))
 	data["gold"] = int(data.get("gold", 0)) + (gold_gain if (frontier or campaign) else int(gold_gain * 0.6))
 	data["last_resources"] = drops
 	data["level"] = frontier_level(data)
@@ -2034,12 +2025,12 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	if not bounty_done.is_empty():
 		data["last_result"]["bounties"] = bounty_done
 	_apply_campaign_victory(data)
-	# Succès (V18)
+	# Succès (V18 + contre-la-montre V42 : les succès de vitesse sont des
+	# records par partie, débloqués dans l'écran Succès — plus de réglage global)
 	Achievements.bump(data, "wins")
 	if int(info.get("deaths", 1)) == 0 and info.has("deaths"):
 		Achievements.bump(data, "flawless")
-	if int(info.get("turns", 99)) <= 3 and info.has("turns"):
-		Achievements.bump(data, "fast")
+	Achievements.record_speed(data, int(info.get("turns", 0)), was_boss)
 	if was_boss:
 		Achievements.bump(data, "bosses")
 	Achievements.bump(data, "loots", loots.size())

@@ -53,10 +53,6 @@ func _ready() -> void:
 	box.add_child(_setting_row("Vitesse des animations", GameSettings.ANIM_SPEEDS,
 		GameSettings.anim_speed, func(idx: int) -> void: GameSettings.set_anim_speed(idx)))
 
-	# V42 : mode contre-la-montre
-	box.add_child(_setting_row("Contre-la-montre", GameSettings.SPEEDRUN_MODES,
-		GameSettings.speedrun_mode, func(idx: int) -> void: GameSettings.set_speedrun_mode(idx)))
-
 	# V42 : timer de tour (fin automatique du tour à l'expiration)
 	box.add_child(_setting_row("Timer de tour", GameSettings.TURN_TIMER_MODES,
 		GameSettings.turn_timer_mode, func(idx: int) -> void: GameSettings.set_turn_timer_mode(idx)))

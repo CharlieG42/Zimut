@@ -10,7 +10,7 @@ func _init() -> void:
 	_test_talent_bonus_aggregation()
 	_test_member_stats_integration()
 	_test_synergy_trios()
-	_test_speedrun_settings()
+	_test_achievements_speedrun()
 	print("")
 	if failures > 0:
 		print("ÉCHEC : %d test(s) en erreur." % failures)
@@ -147,19 +147,71 @@ func _test_synergy_trios() -> void:
 	_check(synergies.size() == 1, "Tank+Heal → synergie de duo préservée")
 	_check(String(synergies[0]["name"]) == "Rempart béni", "nom du duo = Rempart béni")
 
-func _test_speedrun_settings() -> void:
-	print("GameSettings — contre-la-montre (V42) :")
+func _test_achievements_speedrun() -> void:
+	print("Succès contre-la-montre (V42 — succès par partie, pas de réglage global) :")
+	# Le réglage global est supprimé : plus d'API speedrun dans GameSettings
 	var gs: Node = root.get_node_or_null("GameSettings")
-	if gs == null:
-		print("  ??  GameSettings non disponible en headless (autoload)")
-		return
-	_check(int(gs.speedrun_turn_limit()) == 0, "limite par défaut = 0 (désactivé)")
-	gs.set_speedrun_mode(2)
-	_check(int(gs.speedrun_turn_limit()) == 6, "mode 2 → limite 6 tours")
-	_check(gs.speedrun_xp_bonus() == 0.30, "mode 2 → +30% XP")
-	_check(gs.speedrun_gold_bonus() == 0.25, "mode 2 → +25% or")
-	gs.set_speedrun_mode(3)
-	_check(int(gs.speedrun_turn_limit()) == 3, "mode 3 → limite 3 tours")
-	_check(gs.speedrun_xp_bonus() == 0.50, "mode 3 → +50% XP")
-	gs.set_speedrun_mode(0)
-	_check(int(gs.speedrun_turn_limit()) == 0, "retour mode 0 → désactivé")
+	_check(gs == null or gs.get("speedrun_mode") == null, "plus de var speedrun_mode")
+	# set_min : records de meilleur score
+	var data: Dictionary = {"stats": {}}
+	Achievements.set_min(data, "best_turns", 7)
+	_check(int(data["stats"]["best_turns"]) == 7, "set_min : premier record = 7")
+	Achievements.set_min(data, "best_turns", 12)
+	_check(int(data["stats"]["best_turns"]) == 7, "set_min : 12 ne remplace pas 7")
+	Achievements.set_min(data, "best_turns", 4)
+	_check(int(data["stats"]["best_turns"]) == 4, "set_min : 4 remplace 7")
+	Achievements.set_min(data, "best_turns", 0)
+	_check(int(data["stats"]["best_turns"]) == 4, "set_min : 0 ignoré (pas de victoire)")
+	# stat() expose best_turns / boss_turns
+	_check(Achievements.stat(data, "best_turns") == 4, "stat best_turns = 4")
+	_check(Achievements.stat(data, "boss_turns") == 0, "stat boss_turns = 0 (aucun)")
+	# Les nouveaux succès existent dans la LIST
+	var ids: PackedStringArray = []
+	for a: Array in Achievements.LIST:
+		ids.append(String(a[0]))
+	for want: String in ["sprinter", "fulgurance", "tornade", "frappe_de_maitre"]:
+		_check(ids.has(want), "succès '%s' présent dans la LIST" % want)
+	# record_speed : victoire en 4 tours → compteurs + record
+	var rs: Dictionary = {"stats": {}}
+	Achievements.record_speed(rs, 4, false)
+	_check(int(rs["stats"]["fast5"]) == 1, "record_speed(4) → fast5 = 1")
+	_check(int(rs["stats"].get("fast", 0)) == 0, "record_speed(4) → fast = 0 (4 > 3)")
+	_check(int(rs["stats"]["best_turns"]) == 4, "record_speed(4) → best_turns = 4")
+	_check(int(rs["stats"].get("boss_turns", 0)) == 0, "record_speed(4, non-boss) → boss_turns = 0")
+	# record_speed : boss en 3 tours → tous les compteurs vitesse
+	var rb: Dictionary = {"stats": {}}
+	Achievements.record_speed(rb, 3, true)
+	_check(int(rb["stats"]["fast"]) == 1, "record_speed(3,boss) → fast = 1")
+	_check(int(rb["stats"]["fast3"]) == 1, "record_speed(3,boss) → fast3 = 1")
+	_check(int(rb["stats"]["boss_fast5"]) == 1, "record_speed(3,boss) → boss_fast5 = 1")
+	_check(int(rb["stats"]["boss_fast3"]) == 1, "record_speed(3,boss) → boss_fast3 = 1")
+	_check(int(rb["stats"]["boss_turns"]) == 3, "record_speed(3,boss) → boss_turns = 3")
+	# record_speed : 0 tour ignoré
+	var r0: Dictionary = {"stats": {}}
+	Achievements.record_speed(r0, 0, false)
+	_check(r0["stats"].is_empty(), "record_speed(0) → aucun enregistrement")
+	# Simulation de check() : stats fast5=1 → sprinter débloqué
+	var sim: Dictionary = {"stats": {"fast5": 1}, "achievements": {}, "gold": 0}
+	var news: Array = Achievements.check(sim)
+	var got_ids: PackedStringArray = []
+	for n: Dictionary in news:
+		got_ids.append(String(n["id"]))
+	_check(got_ids.has("sprinter"), "fast5=1 → Sprinter débloqué")
+	_check(not got_ids.has("eclair"), "fast5=1 → Éclair (fast≤3) NON débloqué")
+	# Boss : boss_fast5=1 + boss_fast3=1 → Tornade + Frappe de maître
+	# (record_speed incrémente les DEUX quand un boss tombe en ≤3 tours)
+	var sim2: Dictionary = {"stats": {"boss_fast5": 1, "boss_fast3": 1}, "achievements": {}, "gold": 0}
+	news = Achievements.check(sim2)
+	got_ids = []
+	for n: Dictionary in news:
+		got_ids.append(String(n["id"]))
+	_check(got_ids.has("tornade"), "boss_fast5=1 → Tornade débloqué")
+	_check(got_ids.has("frappe_de_maitre"), "boss_fast3=1 → Frappe de maître débloqué")
+	# fast=0 → aucun succès de vitesse
+	var sim3: Dictionary = {"stats": {"wins": 3}, "achievements": {}, "gold": 0}
+	news = Achievements.check(sim3)
+	got_ids = []
+	for n: Dictionary in news:
+		got_ids.append(String(n["id"]))
+	_check(not got_ids.has("sprinter"), "pas de fast5 → Sprinter NON débloqué")
+	_check(not got_ids.has("eclair"), "pas de fast → Éclair NON débloqué")

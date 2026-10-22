@@ -13,8 +13,12 @@ const LIST: Array = [
 	["sans_perte", "Sans une égratignure", "Gagner un combat sans aucun héros K.O.", "flawless", 1, {"Cuir@2": 2}],
 	["intouchables", "Intouchables", "Gagner 10 combats sans aucun héros K.O.", "flawless", 10, {"Cuir@3": 2}],
 	["eclair", "Éclair", "Gagner un combat en 3 tours ou moins", "fast", 1, {"Bois@2": 2}],
+	["sprinter", "Sprinter", "Gagner un combat en 5 tours ou moins", "fast5", 1, {"Bois@2": 2, "Cuir@2": 1}],
+	["fulgurance", "Fulgurance", "Gagner un combat en 3 tours ou moins, 3 fois", "fast3", 3, {"Bois@3": 2}],
 	["tueur_de_boss", "Tueur de boss", "Vaincre un boss", "bosses", 1, {"Magie@2": 3}],
 	["chasseur_de_boss", "Chasseur de boss", "Vaincre 5 boss", "bosses", 5, {"Fer@3": 2, "Magie@3": 1}],
+	["tornade", "Tornade", "Vaincre un boss en 5 tours ou moins", "boss_fast5", 1, {"Fer@3": 2}],
+	["frappe_de_maitre", "Frappe de maître", "Vaincre un boss en 3 tours ou moins", "boss_fast3", 1, {"Magie@3": 3, "Fer@3": 1}],
 	["forgeron", "Apprenti forgeron", "Fabriquer un objet à la Forge", "crafted", 1, {"gold": 120}],
 	["maitre_forgeron", "Maître forgeron", "Posséder un objet de rang 5", "max_rank", 5, {"Fer@4": 1, "Magie@4": 1}],
 	["alchimiste", "Alchimiste", "Réaliser 20 fusions de ressources", "fusions", 20, {"Venin@3": 2}],
@@ -48,6 +52,10 @@ static func stat(data: Dictionary, key: String) -> int:
 			return (data.get("bestiary", {}) as Dictionary).size()
 		"stones":
 			return (data.get("stones", {}) as Dictionary).size()
+		"best_turns":
+			return int(data.get("stats", {}).get("best_turns", 0))
+		"boss_turns":
+			return int(data.get("stats", {}).get("boss_turns", 0))
 		"max_rank":
 			var r: int = int(data.get("stats", {}).get("max_rank", 1))
 			for it in data.get("inventory", []):
@@ -70,6 +78,18 @@ static func bump(data: Dictionary, key: String, n: int = 1) -> void:
 	data["stats"] = st
 
 
+## Met à jour un record de « meilleur score » : la stat ne garde que le MINIMUM
+## strictement positif (ex. meilleur nombre de tours d'une victoire).
+## 0 signifie « aucune victoire enregistrée » et est ignoré.
+static func set_min(data: Dictionary, key: String, v: int) -> void:
+	if v <= 0:
+		return
+	var st: Dictionary = data.get("stats", {})
+	var cur: int = int(st.get(key, 0))
+	st[key] = v if cur <= 0 else mini(cur, v)
+	data["stats"] = st
+
+
 static func set_max(data: Dictionary, key: String, v: int) -> void:
 	var st: Dictionary = data.get("stats", {})
 	st[key] = maxi(int(st.get(key, 0)), v)
@@ -89,6 +109,28 @@ static func reward_text(rw: Dictionary) -> String:
 			var p: PackedStringArray = k.split("@")
 			parts.append("+%d %s R%s" % [int(rw[k]), p[0], p[1]] if p.size() > 1 else "+%d %s" % [int(rw[k]), k])
 	return " · ".join(parts)
+
+
+## Enregistre le nombre de tours d'une victoire dans les records de la partie
+## et incrémente les compteurs de succès de vitesse (contre-la-montre V42 :
+## les succès se gagnent en jouant vite, sans réglage global).
+## Appelé par ProgressionManager.register_victory à chaque victoire.
+static func record_speed(data: Dictionary, turns: int, boss: bool) -> void:
+	if turns <= 0:
+		return
+	if turns <= 3:
+		bump(data, "fast")
+	if turns <= 5:
+		bump(data, "fast5")
+	if turns <= 3:
+		bump(data, "fast3")
+	set_min(data, "best_turns", turns)
+	if boss:
+		set_min(data, "boss_turns", turns)
+		if turns <= 5:
+			bump(data, "boss_fast5")
+		if turns <= 3:
+			bump(data, "boss_fast3")
 
 
 ## Débloque les succès atteints, verse leurs récompenses et les ajoute à
