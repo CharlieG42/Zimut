@@ -732,6 +732,100 @@ class StatsView extends Control:
 			pts.append(c + Vector2(cos(a), sin(a)) * r)
 		return pts
 
+	## V42 : points du périmètre arrondi d'un rectangle, dans le sens horaire
+	## en partant du haut du coin haut-gauche (haut → droite → bas → gauche).
+	func _timer_rect_points(rect: Rect2, radius: float, seg: float = 6.0) -> PackedVector2Array:
+		var pts := PackedVector2Array()
+		var r: float = clampf(radius, 0.0, minf(rect.size.x, rect.size.y) * 0.5)
+		var x0: float = rect.position.x
+		var y0: float = rect.position.y
+		var x1: float = rect.end.x
+		var y1: float = rect.end.y
+		var c_tl := Vector2(x0 + r, y0 + r)
+		var c_tr := Vector2(x1 - r, y0 + r)
+		var c_br := Vector2(x1 - r, y1 - r)
+		var c_bl := Vector2(x0 + r, y1 - r)
+		# 1. Côté haut : (x0+r, y0) → (x1-r, y0)
+		pts.append(Vector2(x0 + r, y0))
+		var n: int = maxi(2, int((x1 - r - (x0 + r)) / seg))
+		for i: int in range(1, n + 1):
+			pts.append(Vector2(x0 + r + (x1 - r - (x0 + r)) * float(i) / float(n), y0))
+		# 2. Arc haut-droite : angles 3PI/2 → TAU
+		n = maxi(2, int(r * (TAU - PI * 1.5) / seg))
+		for i: int in range(1, n + 1):
+			var a: float = PI * 1.5 + (TAU - PI * 1.5) * float(i) / float(n)
+			pts.append(c_tr + Vector2(cos(a), sin(a)) * r)
+		# 3. Côté droit : (x1, y0+r) → (x1, y1-r)
+		n = maxi(2, int((y1 - r - (y0 + r)) / seg))
+		for i: int in range(1, n + 1):
+			pts.append(Vector2(x1, y0 + r + (y1 - r - (y0 + r)) * float(i) / float(n)))
+		# 4. Arc bas-droite : angles 0 → PI/2
+		n = maxi(2, int(r * (PI * 0.5) / seg))
+		for i: int in range(1, n + 1):
+			var a2: float = 0.0 + (PI * 0.5) * float(i) / float(n)
+			pts.append(c_br + Vector2(cos(a2), sin(a2)) * r)
+		# 5. Côté bas : (x1-r, y1) → (x0+r, y1)
+		n = maxi(2, int((x1 - r - (x0 + r)) / seg))
+		for i: int in range(1, n + 1):
+			pts.append(Vector2(x1 - r - (x1 - r - (x0 + r)) * float(i) / float(n), y1))
+		# 6. Arc bas-gauche : angles PI/2 → PI
+		n = maxi(2, int(r * (PI * 0.5) / seg))
+		for i: int in range(1, n + 1):
+			var a3: float = PI * 0.5 + (PI * 0.5) * float(i) / float(n)
+			pts.append(c_bl + Vector2(cos(a3), sin(a3)) * r)
+		# 7. Côté gauche : (x0, y1-r) → (x0, y0+r)
+		n = maxi(2, int((y1 - r - (y0 + r)) / seg))
+		for i: int in range(1, n + 1):
+			pts.append(Vector2(x0, y1 - r - (y1 - r - (y0 + r)) * float(i) / float(n)))
+		# 8. Arc haut-gauche : angles PI → 3PI/2 (referme sur le premier point)
+		n = maxi(2, int(r * (PI * 0.5) / seg))
+		for i: int in range(1, n + 1):
+			var a4: float = PI + (PI * 0.5) * float(i) / float(n)
+			pts.append(c_tl + Vector2(cos(a4), sin(a4)) * r)
+		return pts
+
+	## V42 : halo atténué du périmètre complet (fond de la jauge de timer).
+	func _draw_timer_track(rect: Rect2, col: Color, alpha: float) -> void:
+		var pts: PackedVector2Array = _timer_rect_points(rect, 22.0)
+		draw_polyline(pts, Color(col.r, col.g, col.b, alpha), 3.0, true)
+
+	## V42 : jauge du timer — dessine `ratio` (0..1) du périmètre rectangulaire
+	## en partant du coin haut-gauche, dans le sens horaire. Fluide (polyline).
+	func _draw_timer_gauge(rect: Rect2, ratio: float, col: Color, pulse: float) -> void:
+		if ratio <= 0.0:
+			return
+		var pts: PackedVector2Array = _timer_rect_points(rect, 22.0)
+		var total: int = pts.size()
+		# Longueur cumulée le long du périmètre
+		var cum := PackedFloat32Array()
+		cum.resize(total)
+		cum[0] = 0.0
+		for i: int in range(1, total):
+			cum[i] = cum[i - 1] + pts[i].distance_to(pts[i - 1])
+		var perim: float = cum[total - 1]
+		if perim <= 0.0:
+			return
+		var target: float = perim * clampf(ratio, 0.0, 1.0)
+		# Points à dessiner jusqu'à la longueur cible
+		var out := PackedVector2Array()
+		out.append(pts[0])
+		for i: int in range(1, total):
+			if cum[i] >= target:
+				# Interpolation pour finir exactement à la bonne longueur
+				var seg_len: float = cum[i] - cum[i - 1]
+				var t: float = 0.0 if seg_len <= 0.0 else (target - cum[i - 1]) / seg_len
+				out.append(pts[i - 1].lerp(pts[i], clampf(t, 0.0, 1.0)))
+				break
+			out.append(pts[i])
+		if out.size() < 2:
+			return
+		# Trait principal
+		draw_polyline(out, col, 4.0, true)
+		# Extrémité lumineuse (pastille) à la position courante + lueur
+		var tip: Vector2 = out[out.size() - 1]
+		draw_circle(tip, 6.0 + pulse * 1.5, Color(col.r, col.g, col.b, 0.35 * (0.5 + 0.5 * pulse)))
+		draw_circle(tip, 3.5, Color(1.0, 0.95, 0.6))
+
 	func _gem(c: Vector2, r: float, dark: Color, light: Color, text: String) -> void:
 		var font: Font = ThemeDB.fallback_font
 		draw_colored_polygon(_hex(c + Vector2(0, 3), r + 3.0), Color(0, 0, 0, 0.5))
@@ -759,8 +853,9 @@ class StatsView extends Control:
 		bg.shadow_color = Color(0, 0, 0, 0.55)
 		bg.shadow_size = 8
 		draw_style_box(bg, Rect2(Vector2.ZERO, size))
-		# V42 : bordure jaune-or du timer de tour autour de TOUTE la vignette
-		# rectangulaire (tête + PV + PA/PM), pulsant et s'intensifiant vers la fin.
+		# V42 : jauge jaune-or du timer de tour autour de TOUTE la vignette
+		# rectangulaire (tête + PV + PA/PM). Le périmètre restant est proportionnel
+		# au temps restant : 100 % au début du tour, 0 % à l'expiration.
 		var tt_dur: float = 0.0
 		var tt_rem: float = 0.0
 		if gm is GameManager:
@@ -769,17 +864,12 @@ class StatsView extends Control:
 		if tt_dur > 0.0:
 			var ratio_t: float = clampf(tt_rem / tt_dur, 0.0, 1.0)
 			var gold: Color = Color(1.0, 0.82, 0.25)
-			# Pulsation (plus rapide quand il reste peu de temps)
+			# Pulsation de l'extrémité (plus rapide quand il reste peu de temps)
 			var pulse_t: float = 0.5 + 0.5 * sin(Time.get_ticks_msec() / (260.0 - 160.0 * ratio_t))
-			var tframe := Rect2(Vector2.ZERO, size).grow(4.0 + pulse_t * 2.0)
-			var tring := StyleBoxFlat.new()
-			tring.bg_color = Color(gold.r, gold.g, gold.b, 0.08 * ratio_t)
-			tring.border_color = Color(gold.r, gold.g, gold.b, 0.55 + 0.45 * ratio_t * (0.6 + 0.4 * pulse_t))
-			tring.set_border_width_all(4)
-			tring.set_corner_radius_all(22)
-			tring.shadow_color = Color(gold.r, gold.g, gold.b, 0.40 * (1.0 - ratio_t) * pulse_t)
-			tring.shadow_size = int(10.0 + 12.0 * (1.0 - ratio_t) * pulse_t)
-			draw_style_box(tring, tframe)
+			# Halo de fond (périmètre complet, atténué)
+			_draw_timer_track(Rect2(Vector2.ZERO, size).grow(5.0), gold, 0.18)
+			# Jauge : périmètre parcouru proportionnellement au temps restant
+			_draw_timer_gauge(Rect2(Vector2.ZERO, size).grow(5.0), ratio_t, gold, pulse_t)
 			# Compte à rebours dans le coin haut-droit de la vignette
 			var secs: int = ceili(tt_rem)
 			var tcol: Color = gold if ratio_t > 0.3 else Color(1.0, 0.45, 0.3)
