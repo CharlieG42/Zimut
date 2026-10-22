@@ -298,6 +298,8 @@ func refresh() -> void:
 		_build_gear()
 	elif _tab == "talents":
 		_build_talents()
+	elif _tab == "builds":
+		_build_builds()
 	else:
 		_build_spells()
 
@@ -457,6 +459,14 @@ func _refresh_tabs() -> void:
 		_tab = "talents"
 		refresh())
 	_tabs_row.add_child(b4)
+	# V42 : onglet BUILDS (3 builds par perso : équipement + sorts actifs + talents)
+	var n_b: int = Builds.build_count(_save, _classe)
+	var b5 := _btn("BUILDS" + ("  ×%d" % n_b if n_b > 0 else ""), C_GOLD if _tab == "builds" else C_BORDER, 22, Vector2(220, 54))
+	b5.name = "BuildsTab"
+	b5.pressed.connect(func() -> void:
+		_tab = "builds"
+		refresh())
+	_tabs_row.add_child(b5)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1115,3 +1125,257 @@ func _build_gear_picker(slot: String) -> void:
 				_persist()
 			refresh())
 		_content.add_child(b)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Onglet BUILDS (V42) — 3 builds par personnage : équipement + sorts + talents
+# ═══════════════════════════════════════════════════════════════════════════
+
+func _build_builds() -> void:
+	var ent: Dictionary = ProgressionManager.roster_entry(_save, _classe)
+	var level: int = int(ent.get("level", 1))
+	var ai: int = Builds.active_index(_save, _classe)
+	# Bandeau : build actif + bouton créer
+	var bar := HBoxContainer.new()
+	bar.add_theme_constant_override("separation", 14)
+	_content.add_child(bar)
+	var active_txt: String = "Équipement libre"
+	if ai >= 0:
+		active_txt = "⭐ %s" % Builds.display_name(_save, _classe, ai)
+	bar.add_child(_chip("Build actif : %s" % active_txt, C_GOLD if ai >= 0 else C_DIM, 22))
+	var sp := Control.new()
+	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bar.add_child(sp)
+	var n_builds: int = Builds.build_count(_save, _classe)
+	if n_builds < Builds.MAX_BUILDS:
+		var mk := _btn("+ NOUVEAU BUILD", Color(0.45, 0.80, 0.50), 19, Vector2(240, 48))
+		mk.tooltip_text = "Crée un build vide (équipement, sorts et talents à définir)"
+		mk.pressed.connect(func() -> void:
+			var idx: int = Builds.create_build(_save, _classe)
+			if idx >= 0:
+				_persist()
+			refresh())
+		bar.add_child(mk)
+	_content.add_child(_lbl("%d build%s — chaque build regroupe un équipement complet, %d sorts actifs maximum et son propre arbre de talents. Les niveaux de sorts restent ceux du héros." % [
+		n_builds, "s" if n_builds > 1 else "", Builds.MAX_ACTIVE_SPELLS], 16, C_DIM))
+	# Liste des builds + état libre
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 10)
+	_content.add_child(list)
+	# Carte « équipement libre » (index -1)
+	list.add_child(_build_slot_card(-1, ai == -1, level))
+	for i: int in range(n_builds):
+		list.add_child(_build_slot_card(i, ai == i, level))
+
+
+func _build_slot_card(index: int, is_active: bool, level: int) -> PanelContainer:
+	var card := PanelContainer.new()
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var edge: Color = C_GOLD if is_active else C_BORDER
+	card.add_theme_stylebox_override("panel", _box(C_CARD_HI if is_active else C_CARD, edge, 14, 3 if is_active else 2, 12))
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 6)
+	card.add_child(v)
+	# Ligne 1 : nom + badge actif + boutons
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 10)
+	v.add_child(h)
+	var name: String = Builds.display_name(_save, _classe, index)
+	if index >= 0:
+		h.add_child(_lbl(name, 22, C_GOLD if is_active else C_TXT, true))
+	else:
+		h.add_child(_lbl("✦ %s" % name, 22, C_TXT, true))
+	if is_active:
+		h.add_child(_chip("ACTIF", C_GOOD, 16))
+	var sp := Control.new()
+	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(sp)
+	# Boutons d'action
+	var btns := HBoxContainer.new()
+	btns.add_theme_constant_override("separation", 8)
+	h.add_child(btns)
+	if index >= 0:
+		var ren := _btn("✎", C_BORDER, 18, Vector2(48, 44))
+		ren.tooltip_text = "Renommer ce build"
+		ren.pressed.connect(func() -> void: _prompt_rename(index))
+		btns.add_child(ren)
+	if not is_active:
+		var act := _btn("ACTIVER", Color(0.45, 0.80, 0.50), 17, Vector2(140, 44))
+		act.pressed.connect(func() -> void:
+			Builds.activate(_save, _classe, index, Builds.active_index(_save, _classe))
+			_persist()
+			refresh())
+		btns.add_child(act)
+	else:
+		var des := _btn("DÉSACTIVER", Color(0.85, 0.55, 0.35), 17, Vector2(150, 44))
+		des.tooltip_text = "Quitte le build actif (l'équipement reste en place)"
+		des.pressed.connect(func() -> void:
+			Builds.deactivate(_save, _classe)
+			_persist()
+			refresh())
+		btns.add_child(des)
+	if index >= 0:
+		var del := _btn("✕", C_BAD, 18, Vector2(48, 44))
+		del.tooltip_text = "Supprimer ce build"
+		del.pressed.connect(func() -> void:
+			Builds.delete_build(_save, _classe, index)
+			_persist()
+			refresh())
+		btns.add_child(del)
+	# Ligne 2 : résumé du contenu
+	if index < 0:
+		var eq: Dictionary = ProgressionManager.hero_equipment(_save, _classe)
+		var spells: Array = Builds.active_spells(_save, _classe)
+		var tpts: int = TalentTree.points(_save, _classe)
+		var tn: int = TalentTree.unlocked_count(_save, _classe)
+		v.add_child(_lbl("%d objet%s · %d/%d sorts · %d talent%s (%d pts)" % [
+			Builds.build_gear_count(eq), "s" if Builds.build_gear_count(eq) > 1 else "",
+			spells.size(), Builds.MAX_ACTIVE_SPELLS,
+			tn, "s" if tn > 1 else "", tpts], 16, C_DIM))
+		return card
+	var b: Dictionary = Builds.build_at(_save, _classe, index)
+	var eq2: Dictionary = b.get("equipment", {})
+	var spells2: Array = b.get("spells", [])
+	var tal2: Dictionary = b.get("talents", {"unlocked": {}, "points": 0})
+	v.add_child(_lbl("%d objet%s · %d/%d sorts · %d talent%s (%d pts)" % [
+		Builds.build_gear_count(eq2), "s" if Builds.build_gear_count(eq2) > 1 else "",
+		spells2.size(), Builds.MAX_ACTIVE_SPELLS,
+		Builds.build_talent_count(tal2), "s" if Builds.build_talent_count(tal2) > 1 else "", int(tal2.get("points", 0))], 16, C_DIM))
+	# Ligne 3 : édition (équipement / sorts / talents) — uniquement build actif
+	if is_active:
+		var edit := HBoxContainer.new()
+		edit.add_theme_constant_override("separation", 8)
+		v.add_child(edit)
+		var e1 := _btn("🛡 ÉQUIPEMENT", Color(0.55, 0.65, 0.95), 16, Vector2(190, 42))
+		e1.pressed.connect(func() -> void:
+			_tab = "gear"
+			_gear_pick = ""
+			_gear_msg = ""
+			refresh())
+		edit.add_child(e1)
+		var e2 := _btn("⚔ SORTS ACTIFS", Color(0.95, 0.50, 0.40), 16, Vector2(190, 42))
+		e2.pressed.connect(func() -> void: _open_spell_picker())
+		edit.add_child(e2)
+		var e3 := _btn("★ TALENTS", Color(0.85, 0.45, 0.95), 16, Vector2(170, 42))
+		e3.pressed.connect(func() -> void:
+			_tab = "talents"
+			refresh())
+		edit.add_child(e3)
+		if level >= TalentTree.UNLOCK_LEVEL:
+			var save := _btn("💾 SAUVEGARDER DANS CE BUILD", Color(0.45, 0.80, 0.50), 16, Vector2(320, 42))
+			save.tooltip_text = "Copie l'équipement, les sorts actifs et les talents actuels DANS ce build"
+			save.pressed.connect(func() -> void:
+				Builds.set_build_equipment(_save, _classe, index, ProgressionManager.hero_equipment(_save, _classe))
+				Builds.set_active_spells_in_build(_save, _classe, index, Builds.active_spells(_save, _classe))
+				Builds.set_build_talents(_save, _classe, index, _roster_talents())
+				_persist()
+				refresh())
+			edit.add_child(save)
+	return card
+
+
+## Boîte de dialogue de renommage (simple : ligne éditable + OK).
+func _prompt_rename(index: int) -> void:
+	var dlg := AcceptDialog.new()
+	dlg.title = "Renommer le build"
+	dlg.initial_position = Window.INITIAL_POSITION_CENTER_MAIN_WINDOW_SCREEN
+	var le := LineEdit.new()
+	le.text = Builds.display_name(_save, _classe, index)
+	le.custom_minimum_size = Vector2(420, 0)
+	le.select_all()
+	dlg.add_child(le)
+	dlg.confirmed.connect(func() -> void:
+		Builds.rename_build(_save, _classe, index, le.text)
+		_persist()
+		refresh())
+	add_child(dlg)
+	dlg.popup_centered()
+	le.grab_focus()
+
+
+## Talents actuels du roster (référence persistée).
+func _roster_talents() -> Dictionary:
+	var ent: Dictionary = ProgressionManager.roster_entry(_save, _classe)
+	if not ent.has("talents"):
+		ent["talents"] = {"unlocked": {}, "points": TalentTree.power_for_level(int(ent.get("level", 1)))}
+	return ent["talents"]
+
+
+## ── Sélecteur de sorts actifs (popup) ──
+
+func _open_spell_picker() -> void:
+	var dlg := Window.new()
+	dlg.title = "Sorts actifs — %s" % _classe
+	dlg.initial_position = Window.INITIAL_POSITION_CENTER_MAIN_WINDOW_SCREEN
+	dlg.size = Vector2i(760, 640)
+	dlg.close_requested.connect(func() -> void:
+		dlg.queue_free()
+		refresh())
+	add_child(dlg)
+	var pad := MarginContainer.new()
+	pad.set_anchors_preset(Control.PRESET_FULL_RECT)
+	for side in ["left", "right"]:
+		pad.add_theme_constant_override("margin_" + side, 24)
+	pad.add_theme_constant_override("margin_top", 18)
+	pad.add_theme_constant_override("margin_bottom", 18)
+	dlg.add_child(pad)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 10)
+	pad.add_child(v)
+	v.add_child(_lbl("Choisis jusqu'à %d sorts actifs. Les niveaux de sort sont ceux du héros (onglet SORTS)." % Builds.MAX_ACTIVE_SPELLS, 17, C_DIM))
+	var counter := _lbl("", 20, C_GOLD)
+	v.add_child(counter)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	TouchScroll.install(scroll)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	v.add_child(scroll)
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(grid)
+	var rebuild: Callable = func() -> void:
+		counter.text = "%d / %d sorts actifs" % [Builds.active_spell_count(_save, _classe), Builds.MAX_ACTIVE_SPELLS]
+		for c in grid.get_children():
+			c.queue_free()
+		var cur: Array = Builds.active_spells(_save, _classe)
+		for sname: String in Builds.unlocked_spell_names(_save, _classe):
+			grid.add_child(_spell_pick_card(sname, cur.has(sname), rebuild))
+	rebuild.call()
+	dlg.popup_centered()
+
+
+## Carte d'un sort dans le sélecteur de sorts actifs (clic = toggle).
+func _spell_pick_card(sname: String, on: bool, rebuild: Callable) -> PanelContainer:
+	var pv: Dictionary = ProgressionManager.spell_preview(_classe, sname, ProgressionManager.spell_level(_save, _classe, sname))
+	var card := PanelContainer.new()
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var kcol: Color = KIND_COLOR.get(String(pv.get("kind", "attack")), KIND_COLOR["attack"])
+	card.add_theme_stylebox_override("panel", _box(C_CARD_HI if on else C_CARD, C_GOOD if on else kcol.darkened(0.2), 12, 2, 10))
+	var cv := VBoxContainer.new()
+	cv.add_theme_constant_override("separation", 2)
+	card.add_child(cv)
+	var ch := HBoxContainer.new()
+	ch.add_theme_constant_override("separation", 8)
+	cv.add_child(ch)
+	ch.add_child(_lbl("✓" if on else "○", 20, C_GOOD if on else C_DIM))
+	ch.add_child(_lbl(sname, 19, C_TXT))
+	var sp2 := Control.new()
+	sp2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ch.add_child(sp2)
+	ch.add_child(_lbl("PA %d" % int(pv.get("pa", 1)), 15, C_DIM))
+	if int(pv.get("pm", 0)) > 0:
+		ch.add_child(_lbl("PM %d" % int(pv["pm"]), 15, C_DIM))
+	cv.add_child(_lbl(String(pv.get("desc", "")), 14, C_DIM))
+	var btn := Button.new()
+	btn.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.mouse_filter = Control.MOUSE_FILTER_STOP
+	btn.pressed.connect(func() -> void:
+		Builds.toggle_spell(_save, _classe, sname)
+		_persist()
+		rebuild.call())
+	card.add_child(btn)
+	return card
