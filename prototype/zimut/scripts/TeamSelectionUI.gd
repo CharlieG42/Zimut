@@ -731,6 +731,9 @@ func refresh() -> void:
 				parts.append("◆ Objectif : %s (%s)" % [obj["label"], obj["reward_text"]])
 		for sy: Dictionary in ProgressionManager.active_synergies(team):
 			parts.append("✦ %s (%s) : %s" % [sy["name"], sy["pair"], sy["desc"]])
+		# V42 : synergies de trio
+		for sy: Dictionary in ProgressionManager.active_synergy_trios(team):
+			parts.append("✦✦ %s (%s) : %s" % [sy["name"], sy["trio"], sy["desc"]])
 		_goal_label.text = "\n".join(parts)
 		_goal_label.visible = not parts.is_empty()
 	_gultur_hint.call_deferred()

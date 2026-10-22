@@ -4,8 +4,6 @@
 [ext_resource type="Script" uid="uid://dhsqpkc5f7tk7" path="res://scripts/GridManager.gd" id="3"]
 [ext_resource type="Script" uid="uid://b3313fdwxb30w" path="res://scripts/UIManager.gd" id="4"]
 [ext_resource type="Script" uid="uid://604x0a3h1u3i" path="res://scripts/TurnManager.gd" id="5"]
-[ext_resource type="Script" uid="uid://bjkupbcxbi51e" path="res://scripts/EntityManager.gd" id="6"]
-[ext_resource type="Script" uid="uid://bdm75vutb1b4h" path="res://scripts/SpellManager.gd" id="7"]
 
 [node name="Main" type="Node2D" unique_id=1448828766]
 script = ExtResource("1")
@@ -26,9 +24,3 @@ script = ExtResource("4")
 
 [node name="TurnManager" type="Node" parent="." unique_id=1333692693]
 script = ExtResource("5")
-
-[node name="EntityManager" type="Node" parent="." unique_id=996673392]
-script = ExtResource("6")
-
-[node name="SpellManager" type="Node" parent="." unique_id=71185245]
-script = ExtResource("7")

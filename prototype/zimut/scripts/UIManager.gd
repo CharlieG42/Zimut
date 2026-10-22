@@ -782,6 +782,31 @@ class StatsView extends Control:
 			draw_texture_rect_region(tex, pr.grow(-5.0), Portraits.head_region(tex))
 		else:
 			draw_circle(pr.get_center(), 32.0, e.get("color", Color(0.6, 0.6, 0.6)))
+		# V42 : contour jaune-or du timer de tour (pulsant, s'intensifie vers la fin)
+		var tt_dur: float = 0.0
+		var tt_rem: float = 0.0
+		if gm is GameManager:
+			tt_dur = (gm as GameManager).turn_timer_duration
+			tt_rem = (gm as GameManager).turn_timer_remaining
+		if tt_dur > 0.0:
+			var ratio_t: float = clampf(tt_rem / tt_dur, 0.0, 1.0)
+			var gold: Color = Color(1.0, 0.82, 0.25)
+			# Pulsation du halo (plus rapide quand il reste peu de temps)
+			var pulse_t: float = 0.5 + 0.5 * sin(Time.get_ticks_msec() / (260.0 - 160.0 * ratio_t))
+			var ring := StyleBoxFlat.new()
+			ring.bg_color = Color(gold.r, gold.g, gold.b, 0.10 * ratio_t)
+			ring.border_color = Color(gold.r, gold.g, gold.b, 0.55 + 0.45 * ratio_t * (0.6 + 0.4 * pulse_t))
+			ring.set_border_width_all(3)
+			ring.set_corner_radius_all(20)
+			ring.shadow_color = Color(gold.r, gold.g, gold.b, 0.35 * (1.0 - ratio_t) * pulse_t)
+			ring.shadow_size = int(8.0 + 10.0 * (1.0 - ratio_t) * pulse_t)
+			draw_style_box(ring, pr.grow(5.0 + pulse_t * 2.0))
+			# Compte à rebours sous le portrait
+			var secs: int = ceili(tt_rem)
+			var tcol: Color = gold if ratio_t > 0.3 else Color(1.0, 0.45, 0.3)
+			var tfs: int = 20 if secs >= 10 else 24
+			draw_string_outline(font, Vector2(pr.position.x, pr.end.y + 24), "⏱ %d" % secs, HORIZONTAL_ALIGNMENT_CENTER, pr.size.x, tfs, 5, Color(0, 0, 0, 0.92))
+			draw_string(font, Vector2(pr.position.x, pr.end.y + 24), "⏱ %d" % secs, HORIZONTAL_ALIGNMENT_CENTER, pr.size.x, tfs, tcol)
 		# Badge de niveau (coin bas-droit du portrait)
 		var lvl: int = int(e.get("level", 1))
 		var bc := Vector2(pr.end.x - 6.0, pr.end.y - 6.0)
@@ -867,6 +892,15 @@ class StatsView extends Control:
 		draw_style_box(turn_box, Rect2(size.x - 128, 126, 116, 32))
 		draw_string(font, Vector2(size.x - 128, 139), Loc.t("TOUR %d" % int(gm.turn_count)), HORIZONTAL_ALIGNMENT_CENTER, 116.0, 13, Color(0.85, 0.9, 1.0))
 		draw_string(font, Vector2(size.x - 128, 153), rest, HORIZONTAL_ALIGNMENT_CENTER, 116.0, 13, Color(1, 0.88, 0.45) if mine else Color(1, 0.6, 0.55))
+		# V42 : compteur contre-la-montre
+		var sr_limit: int = 0
+		if gm is GameManager:
+			sr_limit = (gm as GameManager).speedrun_limit
+		if sr_limit > 0:
+			var remaining: int = maxi(0, sr_limit - int(gm.turn_count) + 1)
+			var sr_col: Color = Color(0.45, 1.0, 0.55) if remaining > 2 else (Color(1.0, 0.75, 0.2) if remaining > 0 else Color(1.0, 0.35, 0.3))
+			draw_string_outline(font, Vector2(size.x - 128, 168), Loc.t("⏱ %d" % remaining), HORIZONTAL_ALIGNMENT_CENTER, 116.0, 12, 4, Color(0, 0, 0, 0.9))
+			draw_string(font, Vector2(size.x - 128, 168), Loc.t("⏱ %d" % remaining), HORIZONTAL_ALIGNMENT_CENTER, 116.0, 12, sr_col)
 		# Aide : pour les effets, un nom de classe sur la ligne du bas si l'entité n'a rien
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 

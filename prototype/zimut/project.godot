@@ -26,6 +26,7 @@ Music="*res://scripts/Music.gd"
 ProgressionManager="*res://scripts/ProgressionManager.gd"
 GameSettings="*res://scripts/GameSettings.gd"
 Loc="*res://scripts/Loc.gd"
+AssetCache="*res://scripts/AssetCache.gd"
 
 [display]
 

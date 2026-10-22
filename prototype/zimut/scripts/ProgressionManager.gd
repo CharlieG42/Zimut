@@ -1730,16 +1730,26 @@ func member_stats(data: Dictionary, member: Dictionary) -> Dictionary:
 	for sk: String in sb["stats"].keys():
 		eq[sk] = int(eq.get(sk, 0)) + int(sb["stats"][sk])
 	ItemRules.merge_fx(fx, sb["fx"])
+	# V42 : bonus de l'arbre de talents account-wide
+	var tb: Dictionary = TalentTree.total_bonus()
+	var pv_pct: float = 1.0 + float(tb.get("pv_pct", 0)) / 100.0
+	var def_pct: float = 1.0 + float(tb.get("def_pct", 0)) / 100.0
+	var dmg_pct: float = 1.0 + float(tb.get("dmg_pct", 0)) / 100.0
+	var heal_pct: float = 1.0 + float(tb.get("heal_pct", 0)) / 100.0
+	var crit_pct: float = float(tb.get("crit_pct", 0))
 	var out: Dictionary = {
 		"classe": classe, "level": level,
-		"max_pv": int(row["vita"]) + int(inv.get("vita", 0)) * int(ClassRules.STAT_GAIN["vita"]) + int(eq["vita"]),
-		"pa": mini(ClassRules.PA_CAP, int(row["pa"]) + int(ms["pa"]) + int(inv.get("pa", 0)) + int(fx.get("pa", 0))),
-		"pm": mini(ClassRules.PM_CAP, int(row["pm"]) + int(ms["pm"]) + int(inv.get("pm", 0)) + int(fx.get("pm", 0))),
+		"max_pv": roundi(float(int(row["vita"]) + int(inv.get("vita", 0)) * int(ClassRules.STAT_GAIN["vita"]) + int(eq["vita"])) * pv_pct),
+		"pa": mini(ClassRules.PA_CAP, int(row["pa"]) + int(ms["pa"]) + int(inv.get("pa", 0)) + int(fx.get("pa", 0)) + int(tb.get("pa", 0))),
+		"pm": mini(ClassRules.PM_CAP, int(row["pm"]) + int(ms["pm"]) + int(inv.get("pm", 0)) + int(fx.get("pm", 0)) + int(tb.get("pm", 0))),
 		"po": mini(ClassRules.PO_CAP, int(inv.get("po", 0)) + int(fx.get("po", 0))),
 		"fx": fx, "sets": agg["sets"],
+		"talent_dmg_pct": dmg_pct, "talent_heal_pct": heal_pct, "talent_crit_pct": crit_pct,
+		"talent_def_pct": def_pct, "talent_revive_pct": int(tb.get("revive_pct", 0)),
 	}
-	for k: String in ["force", "intelligence", "agility", "wisdom", "defense"]:
+	for k: String in ["force", "intelligence", "agility", "wisdom"]:
 		out[k] = int(row[k]) + int(inv.get(k, 0)) + int(eq[k])
+	out["defense"] = roundi(float(int(row["defense"]) + int(inv.get("defense", 0)) + int(eq["defense"])) * def_pct)
 	return out
 
 ## Investit 1 point de capital dans `stat`. Retourne "" si OK, sinon la raison.
@@ -1860,6 +1870,29 @@ const SYNERGIES: Array = [
 	["Artificier", "Chasseur", "Tir croisé", "dmg_up", 8.0, "+8 % de dégâts pour l'équipe"],
 ]
 
+## Trios de classes (V42) : bonus plus puissant quand les 3 classes sont réunies.
+## [classe A, classe B, classe C, nom, statut, valeur (%), description]
+const SYNERGY_TRIOS: Array = [
+	["Tank", "Mage", "Druide", "Égide arcanique", "def_up", 15.0, "+15 % de défense pour l'équipe"],
+	["Tank", "Heal", "Artificier", "Bastion vivant", "def_up", 12.0, "+12 % de défense pour l'équipe"],
+	["Assassin", "Chasseur", "Sylvain", "Meute", "dmg_up", 12.0, "+12 % de dégâts pour l'équipe"],
+	["Mage", "Druide", "Invocateur", "Cercle ancien", "mres_up", 15.0, "+15 % de résistance magique pour l'équipe"],
+	["Tank", "Chasseur", "Heal", "Ligne de front", "dmg_up", 10.0, "+10 % de dégâts pour l'équipe"],
+	["Artificier", "Géomancien", "Invocateur", "Forge élémentaire", "dmg_up", 12.0, "+12 % de dégâts pour l'équipe"],
+	["Assassin", "Mage", "Géomancien", "Assaut mystique", "dmg_up", 15.0, "+15 % de dégâts pour l'équipe"],
+	["Druide", "Sylvain", "Heal", "Bénédiction sylvestre", "mres_up", 12.0, "+12 % de résistance magique pour l'équipe"],
+]
+
+
+## Synergies de trio actives pour une liste de classes.
+func active_synergy_trios(classes: Array) -> Array:
+	var out: Array = []
+	for sy: Array in SYNERGY_TRIOS:
+		if classes.has(String(sy[0])) and classes.has(String(sy[1])) and classes.has(String(sy[2])):
+			out.append({"name": String(sy[3]), "status": String(sy[4]), "value": float(sy[5]),
+				"desc": String(sy[6]), "trio": "%s + %s + %s" % [sy[0], sy[1], sy[2]]})
+	return out
+
 
 ## Synergies actives pour une liste de classes : [{name, status, value, desc, pair}]
 func active_synergies(classes: Array) -> Array:
@@ -1934,7 +1967,13 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 			{"type": "Squelette", "level": fight_level, "boss": false},
 			{"type": "Loup", "level": fight_level, "boss": false},
 			{"type": "Dragonnet", "level": fight_level, "boss": was_boss}]
-	var report: Dictionary = award_xp(data, fight_xp(enemies, fight_level), 1.0, fight_level)
+	# V42 : bonus d'XP de l'arbre de talents account-wide
+	var talent_bonus: Dictionary = TalentTree.total_bonus()
+	var xp_ratio: float = 1.0 + float(talent_bonus.get("xp_pct", 0)) / 100.0
+	# V42 : bonus contre-la-montre si réussi
+	if bool(info.get("speedrun_success", false)):
+		xp_ratio += GameSettings.speedrun_xp_bonus()
+	var report: Dictionary = award_xp(data, fight_xp(enemies, fight_level), xp_ratio, fight_level)
 	if frontier:
 		data["victories"] = int(data.get("victories", 0)) + 1
 		var hist: Array = data.get("fight_levels", [])
@@ -1949,8 +1988,18 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	data["last_loots"] = loots
 	# Butin de craft : ressources selon le nombre d'ennemis vaincus, un peu d'or.
 	var drops: Dictionary = _roll_resource_drops(enemies.size(), was_boss)
+	# V42 : bonus de ressources de l'arbre de talents
+	var res_bonus: int = int(talent_bonus.get("res_bonus", 0))
+	if res_bonus > 0 and not drops.is_empty():
+		var keys: Array = drops.keys()
+		var extra_key: String = String(keys[randi() % keys.size()])
+		drops[extra_key] = int(drops[extra_key]) + res_bonus
 	add_resources(data, drops)
+	# V42 : bonus d'or de l'arbre de talents + contre-la-montre
 	var gold_gain: int = (50 + 10 * fight_level) * (3 if was_boss else 1)
+	gold_gain = roundi(float(gold_gain) * (1.0 + float(talent_bonus.get("gold_pct", 0)) / 100.0))
+	if bool(info.get("speedrun_success", false)):
+		gold_gain = roundi(float(gold_gain) * (1.0 + GameSettings.speedrun_gold_bonus()))
 	data["gold"] = int(data.get("gold", 0)) + (gold_gain if (frontier or campaign) else int(gold_gain * 0.6))
 	data["last_resources"] = drops
 	data["level"] = frontier_level(data)

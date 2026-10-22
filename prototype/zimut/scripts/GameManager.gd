@@ -98,6 +98,16 @@ var fight_is_boss: bool          = false
 var fight_nation_boss: String     = ""  # V27 : biome du boss de Nation présent dans ce combat
 var _last_banner_round: int = 0
 var fight_biome: String          = "Forêt"  # biome du combat en cours
+## V42 : limite de tours du mode contre-la-montre (0 = pas de limite).
+var speedrun_limit: int          = 0
+## V42 : le contre-la-montre a été réussi sur ce combat.
+var speedrun_success: bool       = false
+## V42 : timer de tour — temps restant en secondes (0 = pas de timer actif).
+var turn_timer_remaining: float  = 0.0
+## V42 : timer de tour — durée totale configurée (0 = désactivé).
+var turn_timer_duration: float   = 0.0
+var _turn_timer: SceneTreeTimer   = null
+var _turn_timer_epoch: int       = -1
 
 var _turn_index: int = -1
 var _uid_counter: int = 0
@@ -320,6 +330,15 @@ func init_entities() -> void:
 				continue
 		var player: Dictionary = _base_entity("%s Lv%d" % [classe, plevel], "Player", "player",
 			classe, plevel, pos)
+		# V42 : bonus de l'arbre de talents account-wide (dégâts, soins, critique)
+		var talent_dmg_pct: float = float(st.get("talent_dmg_pct", 1.0))
+		var talent_heal_pct: float = float(st.get("talent_heal_pct", 1.0))
+		var talent_crit_pct: float = float(st.get("talent_crit_pct", 0.0))
+		if not pfx.is_empty():
+			pfx["talent_dmg_pct"] = talent_dmg_pct
+			pfx["talent_heal_pct"] = talent_heal_pct
+			pfx["talent_crit_pct"] = talent_crit_pct
+			pfx["talent_revive_pct"] = int(st.get("talent_revive_pct", 0))
 		player.merge({
 			"max_pv": int(st["max_pv"]), "current_pv": int(st["max_pv"]),
 			"force": int(st["force"]), "intelligence": int(st["intelligence"]),
@@ -882,6 +901,11 @@ func _setup_objective_and_synergies() -> void:
 		for p2: Dictionary in players:
 			Combat.add_status(p2, String(sy["status"]), 99, float(sy["value"]))
 		message_requested.emit("✦ Synergie %s (%s) : %s" % [sy["name"], sy["pair"], sy["desc"]])
+	# V42 : synergies de trio (bonus plus puissant à 3 classes)
+	for sy: Dictionary in ProgressionManager.active_synergy_trios(classes):
+		for p2: Dictionary in players:
+			Combat.add_status(p2, String(sy["status"]), 99, float(sy["value"]))
+		message_requested.emit("✦✦ Synergie %s (%s) : %s" % [sy["name"], sy["trio"], sy["desc"]])
 
 
 func start_battle() -> void:
@@ -892,6 +916,8 @@ func start_battle() -> void:
 	turn_count = 1
 	_last_banner_round = 0
 	_turn_index = -1
+	speedrun_limit = GameSettings.speedrun_turn_limit()
+	speedrun_success = speedrun_limit <= 0
 	active_entity = {}
 	turn_order = all_entities()
 	for e: Dictionary in turn_order:
@@ -931,6 +957,8 @@ func advance_turn() -> void:
 
 func _begin_turn(e: Dictionary) -> void:
 	active_entity = e
+	# V42 : démarre le timer de tour
+	_start_turn_timer()
 	for x: Dictionary in all_entities():
 		x["is_active"] = (int(x["uid"]) == int(e["uid"]))
 	e["casts"] = {}
@@ -1019,6 +1047,8 @@ func next_player() -> void:
 func end_current_turn() -> void:
 	if game_over or active_entity.is_empty():
 		return
+	# V42 : annule le timer de tour (le joueur a fini avant la limite)
+	_stop_turn_timer()
 	var e: Dictionary = active_entity
 	var bdmg: int = BiomeEffects.end_turn_damage(fight_biome, e)
 	if bdmg > 0:
@@ -1056,6 +1086,55 @@ func end_current_turn() -> void:
 	if ep != _epoch or game_over:
 		return
 	advance_turn()
+
+
+# ═══════════════════════════════════════════════════════
+#  V42 : Timer de tour (10s par défaut, configurable)
+# ═══════════════════════════════════════════════════════
+
+## Démarre le timer de tour pour l'entité active.
+func _start_turn_timer() -> void:
+	_stop_turn_timer()
+	turn_timer_duration = GameSettings.turn_timer_seconds()
+	if turn_timer_duration <= 0.0 or game_over or active_entity.is_empty():
+		turn_timer_remaining = 0.0
+		return
+	turn_timer_remaining = turn_timer_duration
+	_turn_timer_epoch = _epoch
+	# ignore_time_scale = true : le compte à rebours reste en temps réel même
+	# quand les tours ennemis sont accélérés (Engine.time_scale > 1).
+	_turn_timer = await get_tree().create_timer(turn_timer_duration, false, true).timeout
+	# Le timer a expiré : vérifier qu'on est toujours sur le même tour
+	if _turn_timer_epoch != _epoch or game_over or active_entity.is_empty():
+		return
+	Sfx.play("timer")
+	message_requested.emit("⏱ %s n'a pas joué — tour terminé !" % String(active_entity.get("name", "?")))
+	fx.emit("timer_expired", {"entity": active_entity})
+	# Fin automatique du tour
+	if current_turn == 0:
+		end_current_turn()
+	else:
+		# Tour IA : le TurnManager gère déjà, on force juste la fin
+		active_entity["current_pa"] = 0
+		active_entity["current_pm"] = 0
+		end_current_turn()
+
+
+## Annule le timer de tour en cours.
+func _stop_turn_timer() -> void:
+	_turn_timer_epoch = -1
+	_turn_timer = null
+	turn_timer_remaining = 0.0
+	# Le timer de Godot est lié au tree, pas annulable directement ;
+	# on utilise l'epoch pour invalider le callback.
+
+
+func _process(delta: float) -> void:
+	# V42 : décompte du timer de tour pour l'affichage
+	if turn_timer_duration > 0.0 and not active_entity.is_empty() and not game_over:
+		if _turn_timer != null and _turn_timer_epoch == _epoch:
+			turn_timer_remaining = maxf(0.0, turn_timer_remaining - delta)
+			state_changed.emit()
 
 
 func set_auto(value: bool) -> void:
@@ -1585,12 +1664,15 @@ func los_blockers() -> Dictionary:
 ## Montant de soin d'un sort pour une cible donnée.
 func _heal_amount(caster: Dictionary, p: Dictionary, t: Dictionary) -> int:
 	var amt: int = 0
+	# V42 : bonus de soins de l'arbre de talents account-wide
+	var talent_heal: float = float(caster.get("fx", {}).get("talent_heal_pct", 1.0))
 	if int(p["heal"]) > 0:
 		amt = roundi(float(p["heal"]) * (1.0 + float(caster.get("intelligence", 0)) / 300.0)
 			* (1.0 + float(caster.get("wisdom", 0)) / 300.0)
-			* (1.0 + float(caster.get("fx", {}).get("heal_pct", 0)) / 100.0))
+			* (1.0 + float(caster.get("fx", {}).get("heal_pct", 0)) / 100.0)
+			* talent_heal)
 	if int(p["heal_pct"]) > 0:
-		amt = roundi(float(t["max_pv"]) * float(p["heal_pct"]) / 100.0)
+		amt = roundi(float(t["max_pv"]) * float(p["heal_pct"]) / 100.0 * talent_heal)
 	return amt
 
 
@@ -2207,9 +2289,13 @@ func check_game_over() -> void:
 		heal_total += int(stp.get("heal", 0))
 		if int(stp.get("dmg", 0)) <= 0:
 			all_hit = false
+	# V42 : contre-la-montre — réussi si victoire avant la limite de tours
+	if speedrun_limit > 0:
+		speedrun_success = turn_count <= speedrun_limit
 	var info: Dictionary = {"enemies": fight_enemies, "turns": turn_count, "boss": fight_is_boss, "deaths": deaths,
 		"objective": fight_objective.duplicate(), "chief_first": _first_kill_uid >= 0 and _first_kill_uid == _chief_uid,
-		"heal_total": heal_total, "all_hit": all_hit, "nation_boss": fight_nation_boss, "biome": fight_biome}
+		"heal_total": heal_total, "all_hit": all_hit, "nation_boss": fight_nation_boss, "biome": fight_biome,
+		"speedrun_turns": speedrun_limit, "speedrun_success": speedrun_success}
 	if alive_p == 0:
 		game_over = true
 		victory = false
@@ -2222,6 +2308,12 @@ func check_game_over() -> void:
 	elif alive_e == 0:
 		game_over = true
 		victory = true
+		if speedrun_limit > 0:
+			if speedrun_success:
+				message_requested.emit("⏱ Contre-la-montre réussi en %d tours ! Bonus : +%d%% XP, +%d%% or" % [
+					turn_count, roundi(GameSettings.speedrun_xp_bonus() * 100), roundi(GameSettings.speedrun_gold_bonus() * 100)])
+			else:
+				message_requested.emit("⏱ Contre-la-montre manqué (%d tours > %d). Pas de bonus." % [turn_count, speedrun_limit])
 		if not active_save.is_empty() and active_slot >= 0:
 			ProgressionManager.register_victory(active_save, info)
 			ProgressionManager.write_save(active_slot, active_save)
@@ -2241,6 +2333,8 @@ func _after_action() -> void:
 
 func reset_game() -> void:
 	_epoch += 1
+	_stop_turn_timer()
+	turn_timer_duration = 0.0
 	game_over = false
 	victory = false
 	selected_spell = null

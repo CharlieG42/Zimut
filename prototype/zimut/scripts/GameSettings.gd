@@ -24,6 +24,20 @@ const XP_SPEED_MULT := [0.6, 1.0, 1.6]
 const TEXT_SIZES: Array[String] = ["Normal", "Grand", "Très grand"]
 const TEXT_SIZE_MULT := [1.0, 1.15, 1.3]
 
+## V42 : Mode Contre-la-montre (speedrun) — limite de tours par combat.
+## 0 = désactivé, 1 = 10 tours, 2 = 6 tours, 3 = 3 tours.
+## Si le joueur gagne avant la limite : bonus XP + or. Sinon : malus.
+const SPEEDRUN_MODES: Array[String] = ["Désactivé", "10 tours", "6 tours", "3 tours"]
+const SPEEDRUN_TURN_LIMIT := [0, 10, 6, 3]
+const SPEEDRUN_XP_BONUS := [0.0, 0.15, 0.30, 0.50]
+const SPEEDRUN_GOLD_BONUS := [0.0, 0.10, 0.25, 0.50]
+
+## V42 : Timer de tour — limite de temps pour jouer son tour (tous personnages).
+## 0 = désactivé, 1 = 5s, 2 = 10s, 3 = 20s, 4 = 30s.
+## À l'expiration, le tour se termine automatiquement.
+const TURN_TIMER_MODES: Array[String] = ["Désactivé", "5 s", "10 s", "20 s", "30 s"]
+const TURN_TIMER_SECONDS := [0.0, 5.0, 10.0, 20.0, 30.0]
+
 ## Vitesse des tours joués par l'ordinateur (ennemis, invocations, mode Auto).
 const COMBAT_SPEEDS: Array[String] = ["Normale", "Rapide", "Très rapide"]
 ## V34 : vitesse des animations des personnages (poses d'attaque / incantation).
@@ -34,6 +48,10 @@ const COMBAT_SPEED_MULT := [1.0, 2.0, 3.0]
 var difficulty: int = 1
 var combat_speed: int = 0
 var anim_speed: int = 1
+## V42 : index dans SPEEDRUN_MODES (0 = désactivé).
+var speedrun_mode: int = 0
+## V42 : index dans TURN_TIMER_MODES (0 = désactivé).
+var turn_timer_mode: int = 2
 ## Sons d'effets / vibrations (V18)
 ## Langue : "fr" ou "en" (voir Loc.gd)
 var language: String = "fr"
@@ -70,6 +88,8 @@ func load_settings() -> void:
 		tuto_seen = seen_v
 	combat_speed = clampi(int(parsed.get("combat_speed", combat_speed)), 0, COMBAT_SPEEDS.size() - 1)
 	anim_speed = clampi(int(parsed.get("anim_speed", anim_speed)), 0, ANIM_SPEEDS.size() - 1)
+	speedrun_mode = clampi(int(parsed.get("speedrun_mode", speedrun_mode)), 0, SPEEDRUN_MODES.size() - 1)
+	turn_timer_mode = clampi(int(parsed.get("turn_timer_mode", turn_timer_mode)), 0, TURN_TIMER_MODES.size() - 1)
 	sfx_on = bool(parsed.get("sfx_on", sfx_on))
 	language = String(parsed.get("language", language))
 	haptics_on = bool(parsed.get("haptics_on", haptics_on))
@@ -80,7 +100,7 @@ func save_settings() -> void:
 	if f == null:
 		push_error("Impossible d'écrire les réglages")
 		return
-	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "anim_speed": anim_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "language": language}, "\t"))
+	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "anim_speed": anim_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "language": language, "speedrun_mode": speedrun_mode, "turn_timer_mode": turn_timer_mode}, "\t"))
 	f.close()
 
 func set_difficulty(idx: int) -> void:
@@ -131,6 +151,34 @@ var speed_override: float = 0.0
 func set_anim_speed(idx: int) -> void:
 	anim_speed = clampi(idx, 0, ANIM_SPEEDS.size() - 1)
 	save_settings()
+
+## V42 : définit le mode contre-la-montre.
+func set_speedrun_mode(idx: int) -> void:
+	speedrun_mode = clampi(idx, 0, SPEEDRUN_MODES.size() - 1)
+	save_settings()
+	settings_changed.emit()
+
+## V42 : limite de tours du mode contre-la-montre (0 = désactivé).
+func speedrun_turn_limit() -> int:
+	return SPEEDRUN_TURN_LIMIT[clampi(speedrun_mode, 0, SPEEDRUN_TURN_LIMIT.size() - 1)]
+
+## V42 : bonus XP si contre-la-montre réussi.
+func speedrun_xp_bonus() -> float:
+	return SPEEDRUN_XP_BONUS[clampi(speedrun_mode, 0, SPEEDRUN_XP_BONUS.size() - 1)]
+
+## V42 : bonus or si contre-la-montre réussi.
+func speedrun_gold_bonus() -> float:
+	return SPEEDRUN_GOLD_BONUS[clampi(speedrun_mode, 0, SPEEDRUN_GOLD_BONUS.size() - 1)]
+
+## V42 : définit le mode timer de tour.
+func set_turn_timer_mode(idx: int) -> void:
+	turn_timer_mode = clampi(idx, 0, TURN_TIMER_MODES.size() - 1)
+	save_settings()
+	settings_changed.emit()
+
+## V42 : durée du timer de tour en secondes (0 = désactivé).
+func turn_timer_seconds() -> float:
+	return TURN_TIMER_SECONDS[clampi(turn_timer_mode, 0, TURN_TIMER_SECONDS.size() - 1)]
 
 
 ## Facteur de durée des poses (1 = normal, < 1 = plus rapide).

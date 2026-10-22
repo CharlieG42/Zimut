@@ -53,6 +53,14 @@ func _ready() -> void:
 	box.add_child(_setting_row("Vitesse des animations", GameSettings.ANIM_SPEEDS,
 		GameSettings.anim_speed, func(idx: int) -> void: GameSettings.set_anim_speed(idx)))
 
+	# V42 : mode contre-la-montre
+	box.add_child(_setting_row("Contre-la-montre", GameSettings.SPEEDRUN_MODES,
+		GameSettings.speedrun_mode, func(idx: int) -> void: GameSettings.set_speedrun_mode(idx)))
+
+	# V42 : timer de tour (fin automatique du tour à l'expiration)
+	box.add_child(_setting_row("Timer de tour", GameSettings.TURN_TIMER_MODES,
+		GameSettings.turn_timer_mode, func(idx: int) -> void: GameSettings.set_turn_timer_mode(idx)))
+
 	box.add_child(_setting_row("Sons et vibrations", ["Sons + vibr.", "Sons seuls", "Silence"] as Array[String],
 		0 if (GameSettings.sfx_on and GameSettings.haptics_on) else (1 if GameSettings.sfx_on else 2),
 		func(idx: int) -> void:
@@ -108,6 +116,18 @@ func _ready() -> void:
 	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	info_box.add_child(version_label)
 
+	# V42 : bouton arbre de talents
+	var talents_btn := Button.new()
+	talents_btn.name = "TalentsButton"
+	talents_btn.text = "★  ARBRE DE TALENTS  (★ %d)" % TalentTree.points()
+	talents_btn.custom_minimum_size = Vector2(0, 64)
+	talents_btn.add_theme_font_size_override("font_size", 24)
+	talents_btn.add_theme_color_override("font_color", COL_TXT)
+	talents_btn.add_theme_stylebox_override("normal", _flat(Color(0.72, 0.58, 0.20), Color(1.0, 0.82, 0.35), 12, 3))
+	talents_btn.add_theme_stylebox_override("hover", _flat(Color(0.85, 0.70, 0.28), Color(1.0, 0.82, 0.35), 12, 4))
+	talents_btn.pressed.connect(_open_talents)
+	box.add_child(talents_btn)
+
 	var back := Button.new()
 	back.text = "← MENU"
 	back.custom_minimum_size = Vector2(0, 76)
@@ -158,6 +178,18 @@ func _refresh_opt(btn: Button, selected: bool) -> void:
 		Color(0.85, 0.68, 0.3) if selected else COL_BORDER, 12, 4 if selected else 2))
 	btn.add_theme_stylebox_override("hover", _flat(Color(0.99, 0.95, 0.83), COL_BORDER, 12, 3))
 	btn.add_theme_stylebox_override("pressed", _flat(Color(0.88, 0.82, 0.66), COL_BORDER, 12, 3))
+
+## Ouvre l'arbre de talents en overlay.
+func _open_talents() -> void:
+	var ui: CanvasLayer = (load("res://scripts/TalentTreeUI.gd") as GDScript).new()
+	ui.layer = 20
+	add_child(ui)
+	ui.closed.connect(func() -> void:
+		ui.queue_free()
+		# Rafraîchit le compteur de points sur le bouton
+		var btn: Button = box.find_child("TalentsButton", true, false)
+		if btn != null:
+			btn.text = "★  ARBRE DE TALENTS  (★ %d)" % TalentTree.points())
 
 func _flat(bg: Color, border: Color, radius: int = 12, bw: int = 3) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()

@@ -195,7 +195,9 @@ static func calc_damage(att: Dictionary, tgt: Dictionary, base: float, dtype: St
 		mult *= 1.0 + float(afx.get("mag_pct", 0)) / 100.0
 	else:
 		mult *= 1.0 + float(afx.get("phys_pct", 0)) / 100.0
-	var crit_chance: float = clampf(0.05 + float(att.get("agility", 0)) / 400.0 + float(afx.get("crit", 0)) / 100.0, 0.05, 0.6)
+	# V42 : bonus de l'arbre de talents account-wide
+	mult *= float(afx.get("talent_dmg_pct", 1.0))
+	var crit_chance: float = clampf(0.05 + float(att.get("agility", 0)) / 400.0 + float(afx.get("crit", 0)) / 100.0 + float(afx.get("talent_crit_pct", 0.0)) / 100.0, 0.05, 0.6)
 	var crit: bool = force_crit or has_status(att, "mark")
 	if simulate:
 		if not crit:
