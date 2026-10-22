@@ -1594,6 +1594,8 @@ func ensure_roster(data: Dictionary) -> void:
 		ent["invested"] = inv
 		if not ent.has("spell_levels"):
 			ent["spell_levels"] = {}
+		# V42 : builds par personnage (rétroactif : liste vide, sorts actifs par défaut)
+		Builds.ensure(data, classe)
 	data["roster"] = roster
 	data["balance_v"] = BALANCE_VERSION
 	if not data.has("difficulty"):
@@ -3082,6 +3084,20 @@ func slot_for_type(item_type: String) -> String:
 		if EQUIP_SLOTS[slot].has(item_type):
 			return slot
 	return ""
+
+## Remplace l'équipement d'un héros (membre d'équipe ou roster) par une copie.
+func set_hero_equipment(data: Dictionary, classe: String, eq: Dictionary) -> void:
+	for m: Dictionary in data.get("team", []):
+		if String(m.get("classe", "")) == classe:
+			m["equipment"] = eq.duplicate(true)
+			return
+	var roster: Dictionary = data.get("roster", {})
+	if not roster.has(classe):
+		roster[classe] = {}
+		data["roster"] = roster
+	var entry: Dictionary = roster[classe]
+	entry["equipment"] = eq.duplicate(true)
+
 
 ## Équipement d'un héros (référence vivante) : celui du membre d'équipe s'il en fait
 ## partie, sinon celui conservé dans le roster (gouverneurs, héros au repos).

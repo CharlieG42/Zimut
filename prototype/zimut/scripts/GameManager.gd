@@ -343,6 +343,15 @@ func init_entities() -> void:
 			"color": st["color"], "fx": pfx,
 		}, true)
 		player["spells"] = _build_spells(classe, plevel)
+		# V42 : seuls les sorts ACTIFS du build courant sont disponibles en combat
+		if use_save:
+			var active_names: Array = Builds.active_spells(active_save, classe)
+			if not active_names.is_empty():
+				var kept: Array = []
+				for s: Dictionary in player["spells"]:
+					if active_names.has(String(s["name"])):
+						kept.append(s)
+				player["spells"] = kept
 		# Portée bonus du perso (points de caractéristiques + objets, plafonnée à 3)
 		var po_bonus: int = int(st.get("po", 0))
 		if po_bonus > 0:
