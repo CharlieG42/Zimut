@@ -1,5 +1,5 @@
 extends Node
-## DataLoader.gd - Chargeur de données CSV pour Zimut
+## DataLoader.gd - Chargeur de données CSV pour Zimut (refactorisé)
 ## Charge les données des classes, sorts, ennemis et objets depuis des fichiers CSV
 ## Ce script est conçu pour être utilisé comme autoload dans project.godot
 
@@ -10,278 +10,153 @@ const SPELL_DATA_PATHS = ["res://data/sorts.txt", "user://data/sorts.txt", "res:
 const ENEMY_DATA_PATHS = ["res://data/ennemis.txt", "user://data/ennemis.txt", "res://prototype/Godot_iso/data/ennemis.txt"]
 const ITEM_DATA_PATHS = ["res://data/stuff.txt", "user://data/stuff.txt", "res://prototype/Godot_iso/data/stuff.txt"]
 
-## Helper function to open file with multiple path attempts
-func _open_file(paths: Array) -> FileAccess:
-	for path in paths:
-		var file = FileAccess.open(path, FileAccess.READ)
-		if file != null:
-			return file
-	return null
+## Colonnes numériques à nettoyer (espaces dans les nombres) par fichier CSV
+const NUMERIC_COLS: Dictionary = {
+	"classes": ["Niveau", "PA", "PM", "Vita (PV)", "Force (CAC)", "Intelligence (Magie)",
+		"Agilité (Vit. Atk)", "Sagesse (Précision)", "Défense", "XP pour atteindre ce niveau"],
+	"spells": ["Coût PA", "Coût PM", "Portée", "Niveau requis", "Cout_PA", "Cout_PM",
+		"Portee", "Niveau_requis"],
+	"enemies": ["Niveau", "PV", "Attaque", "Défense", "PA", "PM", "XP"],
+	"items": ["Niveau requis", "Bonus Force", "Bonus Intelligence", "Bonus Agilité",
+		"Bonus Sagesse", "Bonus Vita", "Bonus Défense"],
+}
 
 ## Données chargées
-var classes_data = []
-var spells_data = []
-var enemies_data = []
-var items_data = []
+var classes_data: Array = []
+var spells_data: Array = []
+var enemies_data: Array = []
+var items_data: Array = []
 
 ## État de chargement
-var data_loaded = false
+var data_loaded: bool = false
 
 signal data_loaded_successfully
 signal data_load_failed(error)
 
 
-## Charger toutes les données au démarrage
-func _ready():
+func _ready() -> void:
 	load_all_data()
 
 
-## Charger toutes les données
-func load_all_data():
-	var success = true
-	
-	if not load_classes_data():
-		success = false
+## Charger toutes les données au démarrage
+func load_all_data() -> bool:
+	var success: bool = true
+
+	classes_data = _load_csv(CLASS_DATA_PATHS, "classes", "classes.txt")
+	if classes_data.is_empty():
 		push_error("Failed to load classes data")
-	
-	if not load_spells_data():
 		success = false
+
+	spells_data = _load_csv(SPELL_DATA_PATHS, "spells", "sorts.txt")
+	if spells_data.is_empty():
 		push_error("Failed to load spells data")
-	
-	if not load_enemies_data():
 		success = false
+
+	enemies_data = _load_csv(ENEMY_DATA_PATHS, "enemies", "ennemis.txt")
+	if enemies_data.is_empty():
 		push_error("Failed to load enemies data")
-	
-	if not load_items_data():
 		success = false
+
+	items_data = _load_csv(ITEM_DATA_PATHS, "items", "stuff.txt")
+	if items_data.is_empty():
 		push_error("Failed to load items data")
-	
+		success = false
+
 	data_loaded = success
-	
-	# Toujours émettre data_loaded_successfully, même avec des données par défaut
-	# Cela permet à GameManager de continuer l'initialisation
 	data_loaded_successfully.emit()
-	
+
 	if not success:
 		data_load_failed.emit("Failed to load one or more data files - using defaults")
-	
+
 	return success
 
 
-## Charger les données des classes depuis classes.txt
-func load_classes_data():
-	var file = _open_file(CLASS_DATA_PATHS)
+# ─────────────────────────────────────────────
+#  Parsing CSV générique
+# ─────────────────────────────────────────────
+
+## Ouvre un fichier en essayant plusieurs chemins
+func _open_file(paths: Array) -> FileAccess:
+	for path: String in paths:
+		var file: FileAccess = FileAccess.open(path, FileAccess.READ)
+		if file != null:
+			return file
+	return null
+
+## Charge un CSV et retourne un tableau de dictionnaires.
+## `kind` = clé dans NUMERIC_COLS ("classes", "spells", "enemies", "items")
+## `label` = nom du fichier pour les messages d'erreur
+func _load_csv(paths: Array, kind: String, label: String) -> Array:
+	var file: FileAccess = _open_file(paths)
 	if file == null:
-		push_error("Cannot open classes.txt in any path - using defaults")
-		# Charger des données par défaut si le fichier n'est pas trouvé
-		load_default_classes_data()
-		return true  # Retourne true car on a des données par défaut
-	
-	var content = file.get_as_text()
+		push_error("Cannot open %s in any path - using defaults" % label)
+		return _load_defaults(kind)
+
+	var content: String = file.get_as_text()
 	file.close()
-	
-	var lines = content.split("\n")
+
+	var lines: PackedStringArray = content.split("\n")
 	if lines.size() < 2:
-		push_error("classes.txt is empty or invalid")
-		return false
-	
-	# Lire l'en-tête
-	var headers = lines[0].split(",")
-	for i in range(headers.size()):
+		push_error("%s is empty or invalid" % label)
+		return _load_defaults(kind)
+
+	var headers: PackedStringArray = lines[0].split(",")
+	for i: int in range(headers.size()):
 		headers[i] = headers[i].strip_edges()
-	
-	# Lire les données
-	classes_data = []
-	for i in range(1, lines.size()):
-		var line = lines[i].strip_edges()
+
+	var numeric_cols: Array = NUMERIC_COLS.get(kind, [])
+	var out: Array = []
+	for i: int in range(1, lines.size()):
+		var line: String = lines[i].strip_edges()
 		if line.is_empty():
 			continue
-		
-		var values = line.split(",")
-		for j in range(values.size()):
+		var values: PackedStringArray = line.split(",")
+		for j: int in range(values.size()):
 			values[j] = values[j].strip_edges()
-		
-		# Créer un dictionnaire pour cette ligne
-		var entry = {}
-		for j in range(min(headers.size(), values.size())):
-			var header = headers[j]
-			var value = values[j]
-			
-			# Nettoyer les valeurs numériques (enlever les espaces dans les nombres)
-			if header == "Niveau" or header == "PA" or header == "PM" or \
-			   header == "Vita (PV)" or header == "Force (CAC)" or \
-			   header == "Intelligence (Magie)" or header == "Agilité (Vit. Atk)" or \
-			   header == "Sagesse (Précision)" or header == "Défense" or \
-			   header == "XP pour atteindre ce niveau":
+		var entry: Dictionary = {}
+		for j: int in range(mini(headers.size(), values.size())):
+			var header: String = headers[j]
+			var value: String = values[j]
+			if numeric_cols.has(header) or _is_numeric_prefix(header):
 				value = value.replace(" ", "")
-			
 			entry[header] = value
-		
-		classes_data.append(entry)
-	
-	return classes_data.size() > 0
+		out.append(entry)
+
+	if out.is_empty():
+		push_error("%s: no data rows found" % label)
+		return _load_defaults(kind)
+
+	return out
 
 
-## Charger les données des sorts depuis sorts.txt
-func load_spells_data():
-	var file = _open_file(SPELL_DATA_PATHS)
-	if file == null:
-		push_error("Cannot open sorts.txt in any path - using defaults")
-		# Charger des données par défaut si le fichier n'est pas trouvé
-		load_default_spells_data()
-		return true  # Retourne true car on a des données par défaut
-	
-	var content = file.get_as_text()
-	file.close()
-	
-	var lines = content.split("\n")
-	if lines.size() < 2:
-		push_error("sorts.txt is empty or invalid")
-		return false
-	
-	# Lire l'en-tête
-	var headers = lines[0].split(",")
-	for i in range(headers.size()):
-		headers[i] = headers[i].strip_edges()
-	
-	# Lire les données
-	spells_data = []
-	for i in range(1, lines.size()):
-		var line = lines[i].strip_edges()
-		if line.is_empty():
-			continue
-		
-		var values = line.split(",")
-		for j in range(values.size()):
-			values[j] = values[j].strip_edges()
-		
-		# Créer un dictionnaire pour cette ligne
-		var entry = {}
-		for j in range(min(headers.size(), values.size())):
-			var header = headers[j]
-			var value = values[j]
-			
-			# Nettoyer les valeurs numériques
-			if header == "Coût PA" or header == "Coût PM" or \
-			   header == "Portée" or header == "Niveau requis" or \
-			   header == "Cout_PA" or header == "Cout_PM" or \
-			   header == "Portee" or header == "Niveau_requis" or \
-			   header.begins_with("Degats_") or header.begins_with("Soins") or \
-			   header.begins_with("Resistance_") or header.begins_with("Debuff_") or \
-			   header.begins_with("Buff_"):
-				value = value.replace(" ", "")
-			
-			entry[header] = value
-		
-		spells_data.append(entry)
-	
-	return spells_data.size() > 0
+## Préfixes de colonnes numériques pour les sorts (Degats_*, Soins, etc.)
+func _is_numeric_prefix(header: String) -> bool:
+	return header.begins_with("Degats_") or header.begins_with("Soins") \
+		or header.begins_with("Resistance_") or header.begins_with("Debuff_") \
+		or header.begins_with("Buff_")
 
 
-## Charger les données des ennemis depuis ennemis.txt
-func load_enemies_data():
-	var file = _open_file(ENEMY_DATA_PATHS)
-	if file == null:
-		push_error("Cannot open ennemis.txt in any path - using defaults")
-		# Charger des données par défaut si le fichier n'est pas trouvé
-		load_default_enemies_data()
-		return true  # Retourne true car on a des données par défaut
-	
-	var content = file.get_as_text()
-	file.close()
-	
-	var lines = content.split("\n")
-	if lines.size() < 2:
-		push_error("ennemis.txt is empty or invalid")
-		return false
-	
-	# Lire l'en-tête
-	var headers = lines[0].split(",")
-	for i in range(headers.size()):
-		headers[i] = headers[i].strip_edges()
-	
-	# Lire les données
-	enemies_data = []
-	for i in range(1, lines.size()):
-		var line = lines[i].strip_edges()
-		if line.is_empty():
-			continue
-		
-		var values = line.split(",")
-		for j in range(values.size()):
-			values[j] = values[j].strip_edges()
-		
-		# Créer un dictionnaire pour cette ligne
-		var entry = {}
-		for j in range(min(headers.size(), values.size())):
-			var header = headers[j]
-			var value = values[j]
-			
-			# Nettoyer les valeurs numériques
-			if header == "Niveau" or header == "PV" or header == "Attaque" or \
-			   header == "Défense" or header == "PA" or header == "PM" or header == "XP":
-				value = value.replace(" ", "")
-			
-			entry[header] = value
-		
-		enemies_data.append(entry)
-	
-	return enemies_data.size() > 0
+## Charge les données par défaut pour un kind et retourne le tableau
+func _load_defaults(kind: String) -> Array:
+	match kind:
+		"classes":
+			load_default_classes_data()
+			return classes_data
+		"spells":
+			load_default_spells_data()
+			return spells_data
+		"enemies":
+			load_default_enemies_data()
+			return enemies_data
+		"items":
+			load_default_items_data()
+			return items_data
+	return []
 
 
-## Charger les données des objets depuis stuff.txt
-func load_items_data():
-	var file = _open_file(ITEM_DATA_PATHS)
-	if file == null:
-		push_error("Cannot open stuff.txt in any path - using defaults")
-		# Charger des données par défaut si le fichier n'est pas trouvé
-		load_default_items_data()
-		return true  # Retourne true car on a des données par défaut
-	
-	var content = file.get_as_text()
-	file.close()
-	
-	var lines = content.split("\n")
-	if lines.size() < 2:
-		push_error("stuff.txt is empty or invalid")
-		return false
-	
-	# Lire l'en-tête
-	var headers = lines[0].split(",")
-	for i in range(headers.size()):
-		headers[i] = headers[i].strip_edges()
-	
-	# Lire les données
-	items_data = []
-	for i in range(1, lines.size()):
-		var line = lines[i].strip_edges()
-		if line.is_empty():
-			continue
-		
-		var values = line.split(",")
-		for j in range(values.size()):
-			values[j] = values[j].strip_edges()
-		
-		# Créer un dictionnaire pour cette ligne
-		var entry = {}
-		for j in range(min(headers.size(), values.size())):
-			var header = headers[j]
-			var value = values[j]
-			
-			# Nettoyer les valeurs numériques
-			if header == "Niveau requis" or header == "Bonus Force" or \
-			   header == "Bonus Intelligence" or header == "Bonus Agilité" or \
-			   header == "Bonus Sagesse" or header == "Bonus Vita" or header == "Bonus Défense":
-				value = value.replace(" ", "")
-			
-			entry[header] = value
-		
-		items_data.append(entry)
-	
-	return items_data.size() > 0
-
-
-# ── Accesseurs utilitaires ───────────────────────────────────────────────
+# ─────────────────────────────────────────────
+#  Accesseurs utilitaires
+# ─────────────────────────────────────────────
 
 func get_class_data(class_name_arg, level):
 	for data in classes_data:
@@ -332,7 +207,10 @@ func get_unique_class_names():
 	return names
 
 
-## Données par défaut si les fichiers CSV ne sont pas trouvés
+# ─────────────────────────────────────────────
+#  Données par défaut si les fichiers CSV ne sont pas trouvés
+# ─────────────────────────────────────────────
+
 func load_default_classes_data():
 	classes_data = [
 		{"Classe": "Tank", "Niveau": "1", "PA": "5", "PM": "3", "Vita (PV)": "120", "Force (CAC)": "15", "Intelligence (Magie)": "5", "Agilité (Vit. Atk)": "10", "Sagesse (Précision)": "8", "Défense": "20", "XP pour atteindre ce niveau": "100"},

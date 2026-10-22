@@ -8,8 +8,6 @@ extends Node2D
 @onready var grid_manager   = $GridManager
 @onready var ui_manager     = $UIManager
 @onready var turn_manager   = $TurnManager
-@onready var entity_manager = $EntityManager
-@onready var spell_manager  = $SpellManager
 
 var game_manager
 
@@ -33,8 +31,6 @@ func _ready() -> void:
 	_setup_camera()
 	ui_manager.init(game_manager)
 	turn_manager.init(game_manager)
-	entity_manager.init(game_manager)
-	spell_manager.init(game_manager)
 
 	# Reconstruit la grille et les entités à partir de l'état courant de
 	# GameManager (qui contient déjà custom_team si on vient de TeamSelection).
@@ -64,9 +60,16 @@ func _connect_signals() -> void:
 	if not ui_manager.spell_selected.is_connected(game_manager.handle_spell_selected):
 		ui_manager.spell_selected.connect(game_manager.handle_spell_selected)
 
-	# SpellManager → UIManager
-	if not spell_manager.spell_selected.is_connected(ui_manager._on_spell_button_selected):
-		spell_manager.spell_selected.connect(ui_manager._on_spell_button_selected)
+	# EntityManager supprimé : les signaux entity_moved/attacked/casted
+	# déclenchent directement GridManager.update_entity_display()
+	var refresh_display: Callable = func(_a = null, _b = null, _c = null, _d = null) -> void:
+		grid_manager.update_entity_display()
+	if not game_manager.entity_moved.is_connected(refresh_display):
+		game_manager.entity_moved.connect(refresh_display)
+	if not game_manager.entity_attacked.is_connected(refresh_display):
+		game_manager.entity_attacked.connect(refresh_display)
+	if not game_manager.spell_casted.is_connected(refresh_display):
+		game_manager.spell_casted.connect(refresh_display)
 
 
 func _setup_camera() -> void:
