@@ -296,6 +296,8 @@ func refresh() -> void:
 		_build_stats()
 	elif _tab == "gear":
 		_build_gear()
+	elif _tab == "talents":
+		_build_talents()
 	else:
 		_build_spells()
 
@@ -447,6 +449,14 @@ func _refresh_tabs() -> void:
 		_gear_msg = ""
 		refresh())
 	_tabs_row.add_child(b3)
+	# V42 : onglet TALENTS (arbre propre au héros, débloqué au niveau 15)
+	var tpts: int = TalentTree.points(_save, _classe)
+	var b4 := _btn("TALENTS" + ("  ★%d" % tpts if tpts > 0 else ""), C_GOLD if _tab == "talents" else C_BORDER, 22, Vector2(240, 54))
+	b4.name = "TalentsTab"
+	b4.pressed.connect(func() -> void:
+		_tab = "talents"
+		refresh())
+	_tabs_row.add_child(b4)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -644,6 +654,98 @@ func _build_stats() -> void:
 		for e in extras:
 			fl.add_child(_chip(e, Color(0.65, 0.55, 0.95), 16))
 		_content.add_child(fl)
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  Onglet TALENTS (V42 : arbre propre au héros, débloqué au niveau 15)
+# ══════════════════════════════════════════════════════════════════════════
+
+func _build_talents() -> void:
+	var ent: Dictionary = ProgressionManager.roster_entry(_save, _classe)
+	var level: int = int(ent.get("level", 1))
+	# Verrouillé avant le niveau 15
+	if level < TalentTree.UNLOCK_LEVEL:
+		var lock := PanelContainer.new()
+		lock.add_theme_stylebox_override("panel", _box(C_CARD, C_BORDER, 14, 2, 20))
+		_content.add_child(lock)
+		var lb := VBoxContainer.new()
+		lb.add_theme_constant_override("separation", 10)
+		lock.add_child(lb)
+		lb.add_child(_lbl("🔒  ARBRE DE TALENTS VERROUILLÉ", 26, C_DIM, true))
+		lb.add_child(_lbl("L'arbre de talents de %s se débloque au niveau %d.\nContinuez à faire progresser ce héros !" % [_classe, TalentTree.UNLOCK_LEVEL], 19, C_DIM))
+		return
+	var pts: int = TalentTree.points(_save, _classe)
+	var unlocked_n: int = TalentTree.unlocked_count(_save, _classe)
+	# Bandeau points de pouvoir
+	var bar := HBoxContainer.new()
+	bar.add_theme_constant_override("separation", 14)
+	_content.add_child(bar)
+	bar.add_child(_chip("★ %d point%s de pouvoir" % [pts, "s" if pts > 1 else ""], C_GOOD if pts > 0 else C_DIM, 24))
+	var sp := Control.new()
+	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bar.add_child(sp)
+	bar.add_child(_lbl("%d talent%s débloqué%s" % [unlocked_n, "s" if unlocked_n > 1 else "", "s" if unlocked_n > 1 else ""], 18, C_DIM))
+	_content.add_child(_lbl("1 point de pouvoir tous les %d niveaux à partir du niveau %d. Les bonus ne s'appliquent qu'à ce héros." % [TalentTree.POWER_PER_LEVEL, TalentTree.UNLOCK_LEVEL], 16, C_DIM))
+	# Grille 2x2 des branches
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 12)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_content.add_child(grid)
+	for branch: String in ["offense", "defense", "utility", "power"]:
+		grid.add_child(_build_talent_branch(branch, pts))
+
+
+func _build_talent_branch(branch: String, pts: int) -> PanelContainer:
+	var info: Dictionary = TalentTree.BRANCHES[branch]
+	var panel := PanelContainer.new()
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel.add_theme_stylebox_override("panel", _box(C_PANEL, info["color"], 14, 3, 14))
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	panel.add_child(box)
+	box.add_child(_lbl("%s %s" % [info["icon"], info["label"]], 22, info["color"], true))
+	for t: Array in TalentTree.branch_talents(branch):
+		box.add_child(_build_talent_node(String(t[0]), String(t[1]), String(t[2]), int(t[3]), info["color"], pts))
+	return panel
+
+
+func _build_talent_node(id: String, name: String, desc: String, cost: int, branch_color: Color, pts: int) -> Button:
+	var unlocked: bool = TalentTree.is_unlocked(_save, _classe, id)
+	var affordable: bool = pts >= cost and not unlocked
+	var btn := Button.new()
+	btn.custom_minimum_size = Vector2(0, 62)
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.disabled = unlocked or not affordable
+	var bg_col: Color = C_CARD_HI if unlocked else (C_CARD if affordable else Color(0.08, 0.10, 0.14))
+	var border_col: Color = C_GOOD if unlocked else (branch_color if affordable else Color(0.20, 0.22, 0.30))
+	btn.add_theme_stylebox_override("normal", _box(bg_col, border_col, 10, 2, 10))
+	btn.add_theme_stylebox_override("hover", _box(bg_col.lightened(0.08), border_col.lightened(0.2), 10, 3, 10))
+	btn.add_theme_stylebox_override("disabled", _box(bg_col, border_col, 10, 2, 10))
+	var hbox := HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 10)
+	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	btn.add_child(hbox)
+	hbox.add_child(_lbl("✓" if unlocked else ("★" if affordable else "🔒"), 20,
+		C_GOOD if unlocked else (branch_color if affordable else C_DIM)))
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 2)
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hbox.add_child(vbox)
+	vbox.add_child(_lbl(name, 18, C_TXT if unlocked or affordable else C_DIM))
+	vbox.add_child(_lbl(desc, 14, C_DIM))
+	var cost_lbl := _lbl("★ %d" % cost, 17, C_GOLD if affordable else C_DIM)
+	cost_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	hbox.add_child(cost_lbl)
+	if not unlocked and affordable:
+		btn.pressed.connect(func() -> void:
+			if TalentTree.spend_point(_save, _classe, id):
+				_persist()
+				refresh())
+	btn.tooltip_text = desc
+	return btn
 
 
 # ═══════════════════════════════════════════════════════════════════════════
