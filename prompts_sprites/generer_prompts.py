@@ -3,15 +3,23 @@
 
 Usage :  python3 prompts_sprites/generer_prompts.py
 Modifier une description : éditer les dictionnaires ci-dessous puis relancer le script.
-V38 : chaque prompt commence par la carte d'identité du personnage (identites.py), recopiée
-mot pour mot, pour que toutes les planches dessinent le même personnage sans image jointe.
-V36 : une fiche de référence (repos de face + repos de dos) puis des planches de 4 poses
-(grille 2 × 2, une seule vue), poses décrites par leur silhouette pour éviter les doublons.
-Les noms de fichiers suivent la convention du jeu (scripts/EntityView.gd, V34) :
-  face : <nom>.png (repos), <nom>_idle_2/_idle_3, <nom>_walk[_2], <nom>_attack[_2.._8], <nom>_cast[_2,_3]
-  dos  : <nom>_back.png (repos), <nom>_back_idle_2/_3, <nom>_back_walk[_2], <nom>_back_attack[_2.._8], <nom>_back_cast[_2,_3]
+
+V39 — format « 2 planches par personnage » (héros, ennemis, boss, familiers) :
+- Planche VUES : le même personnage, même pose de repos, vu sous 6 angles (face, 3/4 avant droite,
+  3/4 dos droite, dos, 3/4 dos gauche, 3/4 avant gauche), grille 3 × 2 sur image 2:1, poses
+  largement espacées. Un seul angle par case : aucun doublon possible. Génération normale.
+- Planche ACTIONS : 3 attaques + 3 sorts en vue 3/4 avant droite, à générer EN ÉDITION de la
+  planche vues (image source = planche vues) : le générateur repart du personnage réellement
+  dessiné, il ne peut pas changer d'une planche à l'autre. Repli si l'outil n'édite pas :
+  génération normale, la carte d'identité est recopiée dans chaque prompt.
+Chaque prompt commence par la carte d'identité du personnage (identites.py), recopiée mot pour
+mot, pour que toutes les planches dessinent le même personnage sans image jointe.
+Noms de fichiers (convention du jeu, scripts/EntityView.gd) :
+  vues    : <nom>.png (face), <nom>_face_right.png, <nom>_back_right.png, <nom>_back.png,
+            <nom>_back_left.png, <nom>_face_left.png
+  actions : <nom>_attack.png, <nom>_attack_2.png, <nom>_attack_3.png,
+            <nom>_cast.png, <nom>_cast_2.png, <nom>_cast_3.png
 """
-import math
 import sys
 from pathlib import Path
 
@@ -54,43 +62,66 @@ NEGATIVE = (
     "new clothing pieces, weapon drawn alone without the character, extra objects, "
     "front and back views mixed, different character between poses, realistic proportions, small head"
 )
+# Négatif pour la planche VUES uniquement : les 6 cases montrent VOLONTAIREMENT la même pose
+# sous des angles différents, y compris vers la gauche — on retire donc « facing left »,
+# « duplicate poses » et « front and back views mixed » du négatif commun.
+NEGATIVE_VUES = (
+    "checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, "
+    "overlapping characters, touching poses, cropped limbs, character cut by the cell edge, "
+    "effects crossing into another cell, weapon crossing into another cell, side profile view, "
+    "inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, "
+    "blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, "
+    "photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, "
+    "isometric floor grid, tiles, closed eyes, looking up at the sky, different hair color, different eye "
+    "color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, "
+    "different character between cells, pose changing between cells, different outfit between angles, "
+    "realistic proportions, small head"
+)
 
+# Disposition commune aux deux planches d'un personnage : 3 × 2 sur image 2:1, « autocollants »
+# largement espacés (la largeur horizontale compte surtout : elle facilite la découpe).
+VUES_LAYOUT = (
+    "6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), "
+    "like six separate stickers floating on the background. Each pose occupies at most 55% of the width and "
+    "height of its sixth of the image and is centered in it, so that there is a wide empty space, especially "
+    "horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay "
+    "inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide "
+    "effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same "
+    "ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid "
+    "on the ground."
+)
 
-def grid(cols, rows):
-    if (cols, rows) == (2, 2):
-        return (
-            "4 poses arranged as 2 columns x 2 rows on a square image (1:1, as large as possible, e.g. 2048x2048), "
-            "like four separate stickers floating on the background. Each pose occupies at most 55% of the width "
-            "and height of its quarter of the image and is centered in it, so that there is a wide empty space "
-            "between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its "
-            "quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and effects are drawn "
-            "smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in "
-            "each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground."
-        )
-    return (
-        f"Strict grid of {cols} columns x {rows} rows of equal square cells, exactly one pose per cell "
-        f"(image aspect ratio {cols//math.gcd(cols, rows)}:{rows//math.gcd(cols, rows)}, as large as possible, "
-        f"e.g. {cols*512}x{rows*512}). "
-        "Treat every cell as a separate sprite: the character AND its weapon, cape, hair, tail and effects stay "
-        "entirely inside its own cell, with an empty margin of at least 10% of the cell on every side. "
-        "Between two cells leave a wide empty gutter of at least 25% of a cell width that nothing may cross: "
-        "no limb, weapon, trail, slash, spark or smoke reaches a neighbouring cell, and no two poses touch. "
-        "Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. "
-        "Same character size in every cell, feet on the same ground line in each row."
-    )
+# Vue 3/4 avant droite (la seule vue de la planche actions ; le jeu retourne l'image pour la gauche)
+FACE_VIEW = ("3/4 FRONT view: the character faces the viewer and turns slightly to the right "
+             "(face, chest and right side visible), facing front-right in every pose")
 
-
-VIEWS = {
-    "face": ("3/4 FRONT view: the character faces the viewer and turns slightly to the right "
-             "(face, chest and right side visible), facing front-right in every pose", "front-right"),
-    "dos": ("3/4 BACK view: the character is seen from behind and turns slightly to the right "
-            "(back, back of the head and right shoulder visible), facing away from the viewer toward the upper right in "
-            "every pose. We see the BACK of the head or helmet: NO face, NO eyes, NO mask or visor visible", "back-right, away from the viewer"),
-}
+# Les 6 angles de la planche vues : (suffixe de fichier, libellé, description de l'angle)
+VIEWS6 = [
+    ("", "face (regard vers le spectateur)",
+     "FRONT view: the character stands squared to the viewer and looks straight at the camera; the full face "
+     "and both eyes are clearly visible"),
+    ("_face_right", "3/4 avant droite",
+     "3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right "
+     "side visible), facing front-right"),
+    ("_back_right", "3/4 dos droite",
+     "3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and "
+     "right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the "
+     "head: no face, no eyes"),
+    ("_back", "dos complet",
+     "FULL BACK view: the character is seen exactly from behind, back of the head and back of the outfit "
+     "visible; no face, no eyes"),
+    ("_back_left", "3/4 dos gauche",
+     "3/4 BACK view: the character is seen from behind and turns slightly to the left (back of the head and "
+     "left shoulder visible), facing away from the viewer toward the upper left; we see the BACK of the head: "
+     "no face, no eyes"),
+    ("_face_left", "3/4 avant gauche",
+     "3/4 FRONT view: the character faces the viewer and turns slightly to the left (face, chest and left "
+     "side visible), facing front-left"),
+]
 
 
 # --------------------------------------------------------------------------------------------
-# Archétypes de combat : 8 poses d'attaque et 3 poses de sort par archétype
+# Archétypes de combat : 6 attaques et 3 poses de sort par archétype
 # --------------------------------------------------------------------------------------------
 ARCH = {
     # 6 attaques aux silhouettes toutes différentes (A0 coup haut, A1 poussée vers l'avant, A2 coup de côté,
@@ -186,6 +217,17 @@ ARCH = {
               "PULSE: arms spread, {fx} pulsing outward",
               "WAVE: a compact {fx} wave released forward"]),
 }
+
+# Cases de la planche actions : (suffixe de fichier, code archétype, libellé)
+ACTION_CELLS = [
+    ("_attack", "A0", "attaque 1"),
+    ("_attack_2", "A1", "attaque 2"),
+    ("_attack_3", "A2", "attaque 3"),
+    ("_cast", "C0", "sort 1"),
+    ("_cast_2", "C1", "sort 2"),
+    ("_cast_3", "C2", "sort 3"),
+]
+
 # --------------------------------------------------------------------------------------------
 # Nations (scripts/Nations.gd) : héros, 4 ennemis (ordre : Gobelin, Loup, Squelette, Troll), boss
 # --------------------------------------------------------------------------------------------
@@ -430,80 +472,13 @@ MECANISMES = [
                     ("balise_de_transposition", "brass teleport beacon on three legs with a spinning teal ring")]),
 ]
 
+
 # --------------------------------------------------------------------------------------------
-# Planches : 4 x 2 cases chacune. Héros et boss : 4 planches (face/dos x repos-sorts/attaques).
-# Ennemis et familiers : 2 planches (face, dos).
-# Noms de fichiers (EntityView.gd, V34) : vue de face <nom><suffixe>, vue de dos <nom>_back<suffixe>
+# Prompts des 2 planches d'un personnage
 # --------------------------------------------------------------------------------------------
-IDLE = ["IDLE: relaxed standing pose, weapon held calmly",
-        "GUARD: knees bent, weapon raised in front of the body, ready to fight"]
-WALK = ["WALK (contact): walking toward the lower right in the same 3/4 view, head level, long stride, left leg far "
-        "forward, right leg far back, opposite arm swinging forward",
-        "WALK (passing): same 3/4 view, head level, standing on the left leg, right knee raised high, body slightly higher"]
-# (clé, libellé Atelier, vue, cases [(suffixe, code)]) — doit rester identique à
-# SpriteBuilder/atelier_sprites/lib/data/catalog.dart.
-REF = ("ref", "Référence · repos de face + repos de dos", None, [("", "I0"), ("_back", "I0")])
-SHEETS_BIG = [
-    REF,
-    ("face_1", "Face 1 · garde, marche, sort", "face", [("_idle_2", "I1"), ("_walk", "W0"), ("_walk_2", "W1"), ("_cast", "C0")]),
-    ("face_2", "Face 2 · attaques 1 à 4", "face", [("_attack", "A0"), ("_attack_2", "A1"), ("_attack_3", "A2"), ("_attack_4", "A3")]),
-    ("face_3", "Face 3 · attaques 5-6, sorts 2-3", "face", [("_attack_5", "A4"), ("_attack_6", "A5"), ("_cast_2", "C1"), ("_cast_3", "C2")]),
-    ("dos_1", "Dos 1 · marche, attaque, sort", "dos", [("_walk", "W0"), ("_walk_2", "W1"), ("_attack", "A0"), ("_cast", "C0")]),
-    ("dos_2", "Dos 2 · attaques 2 à 4, garde", "dos", [("_attack_2", "A1"), ("_attack_3", "A2"), ("_attack_4", "A3"), ("_idle_2", "I1")]),
-]
-SHEETS_SMALL = [
-    REF,
-    ("face_1", "Face · marche, 2 attaques, sort", "face", [("_walk", "W0"), ("_attack", "A0"), ("_attack_2", "A1"), ("_cast", "C0")]),
-    ("dos_1", "Dos · marche, 2 attaques, sort", "dos", [("_walk", "W0"), ("_attack", "A0"), ("_attack_2", "A1"), ("_cast", "C0")]),
-]
-
-
-def file_suffix(view, suf):
-    """Vue de dos : _back (repos) puis _back_idle_2, _back_walk, _back_attack_3…"""
-    if view != "dos":
-        return suf
-    return "_back" + (suf if suf else "")
-
-
 def cell_text(code, arch, fx):
-    k, i = code[0], int(code[1:])
-    if k == "I":
-        return IDLE[i]
-    if k == "W":
-        return WALK[i]
-    src = ARCH[arch]["atk" if k == "A" else "cast"]
-    return src[i].format(fx=fx)
-
-
-LABELS = {"I": "repos", "W": "marche", "A": "attaque", "C": "sort"}
-
-
-def pose_label(code):
-    return f"{LABELS[code[0]]} {int(code[1:]) + 1}"
-
-
-def prompt_sheet(who, role, nation, desc, view, cells, arch, fx, rim, palette, pale, ent_id=""):
-    vtxt, vdir = VIEWS[view]
-    idc, never = card(ent_id, desc, who, nation)
-    lines = [
-        f"Sprite sheet of ONE {role} for a chibi isometric tactical RPG. The same character appears 4 times.",
-        idc,
-        "Keep exactly the same design in every pose: same outfit, colors, proportions, accessories, "
-        "weapon always in the same hand, eyes open.",
-        f"VIEW: {vtxt}. Never a pure side profile, never facing left.",
-        f"NATION PALETTE: {palette}.",
-        "STYLE: " + STYLE.format(rim=rim),
-        "LAYOUT: " + grid(2, 2),
-        f"POSES, left to right, top to bottom (all in {vdir} 3/4 view, never mix front and back views):",
-    ]
-    for i, (_, code) in enumerate(cells):
-        lines.append(f"{i+1}. {cell_text(code, arch, fx)}.")
-    lines.append("The 4 poses MUST be clearly different from each other: different arm, leg and weapon positions, "
-                 "different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.")
-    lines.append(f"EFFECTS: {fx}, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter.")
-    lines.append("BACKGROUND: " + (BG_GRAY if pale else BG_WHITE) + BG_TAIL)
-    lines.append(reminder(ent_id, who, desc, never))
-    return "\n".join(lines)
+    src = ARCH[arch]["atk" if code[0] == "A" else "cast"]
+    return src[int(code[1:])].format(fx=fx)
 
 
 def reminder(ent_id, who, desc, never):
@@ -515,52 +490,101 @@ def reminder(ent_id, who, desc, never):
     return f"REMINDER: this is {who}: {key}." + (f" Forbidden: {never}." if never else "")
 
 
-def prompt_reference(who, role, nation, desc, rim, palette, pale, fx, ent_id=""):
+def prompt_vues(who, role, nation, desc, fx, rim, palette, pale, ent_id=""):
+    """Planche VUES : 6 angles du même personnage, même pose de repos. Génération normale."""
     idc, never = card(ent_id, desc, who, nation)
-    return "\n".join([
-        f"Character reference sheet of ONE {role} for a chibi isometric tactical RPG.",
+    lines = [
+        f"Sprite sheet of ONE {role} for a chibi isometric tactical RPG. The same character appears 6 times: "
+        "the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 6 different "
+        "viewing angles.",
         idc,
-        f"NATION PALETTE: {palette}. Signature effects (keep them small): {fx}.",
+        "Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon "
+        "always in the same hand. Only the viewing angle changes from cell to cell.",
+        f"NATION PALETTE: {palette}.",
         "STYLE: " + STYLE.format(rim=rim),
-        "LAYOUT: exactly 2 poses side by side on a 2:1 image (as large as possible, e.g. 2048x1024), like two "
-        "separate stickers: each pose occupies at most 55% of its half of the image and is centered in it, with a "
-        "wide empty space between them, feet on the same ground line. No frames, borders or dividing line.",
-        "POSES: 1. LEFT: idle pose in 3/4 FRONT view, facing the viewer and turned slightly to the right. "
-        "2. RIGHT: the same idle pose in 3/4 BACK view, seen from behind, turned toward the upper right, face hidden.",
-        "Exactly the same character, outfit, colors and weapon in both poses (weapon in the same hand).",
-        "BACKGROUND: " + (BG_GRAY if pale else BG_WHITE) + BG_TAIL,
-        reminder(ent_id, who, desc, never),
-    ])
+        "LAYOUT: " + VUES_LAYOUT,
+        "VIEWS, left to right, top to bottom (the camera turns around the character; the character's design "
+        "never changes; never a pure side profile):",
+    ]
+    for i, (_, _, vtxt) in enumerate(VIEWS6):
+        lines.append(f"{i+1}. {vtxt}.")
+    lines.append("All 6 cells show ONE character in ONE pose under 6 angles: same height, same stance, same "
+                 "weapon in the same hand everywhere. The pose does not change, only the angle.")
+    lines.append(f"EFFECTS: {fx}, stylized, opaque, with dark outlines, small, kept close to the character "
+                 "inside its own sixth of the image.")
+    lines.append("BACKGROUND: " + (BG_GRAY if pale else BG_WHITE) + BG_TAIL)
+    lines.append(reminder(ent_id, who, desc, never))
+    return "\n".join(lines)
 
 
-def name_table(base, view, cells):
-    out = ["| Case | Pose | Fichier |", "|---|---|---|"]
-    cols = 2
-    for i, (suf, code) in enumerate(cells):
-        vue = "" if view else (" (face)" if i == 0 else " (dos)")
-        out.append(f"| {i//cols+1}-{i%cols+1} | {pose_label(code)}{vue} | `{base}{file_suffix(view, suf)}.png` |")
+def prompt_actions(who, role, nation, desc, arch, fx, rim, palette, pale, ent_id=""):
+    """Planche ACTIONS : 3 attaques + 3 sorts. À générer EN ÉDITION de la planche vues ;
+    en repli, génération normale (la carte d'identité est recopiée)."""
+    idc, never = card(ent_id, desc, who, nation)
+    poses = [cell_text(code, arch, fx) for _, code, _ in ACTION_CELLS]
+    lines = [
+        "Image edit for a chibi isometric tactical RPG sprite sheet.",
+        f"SOURCE IMAGE: it shows ONE {role}, {who}, in 6 different views. Keep EXACTLY the character of the "
+        "source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the "
+        "same hand. The 6 new poses must show this SAME character, unchanged.",
+        idc,
+        "TASK: replace the 6 views with 6 ACTION poses, all in the same view: " + FACE_VIEW + ". "
+        "Never a pure side profile, never a back view.",
+        f"NATION PALETTE: {palette}.",
+        "STYLE: " + STYLE.format(rim=rim),
+        "LAYOUT: same as the source image — " + VUES_LAYOUT,
+        "POSES, left to right, top to bottom:",
+    ]
+    for i, p in enumerate(poses):
+        lines.append(f"{i+1}. {p}.")
+    lines.append("The 6 poses MUST be clearly different from each other: different arm, leg and weapon "
+                 "positions, different body angle and height. Never repeat or copy a pose; if two poses look "
+                 "alike, change one.")
+    lines.append(f"EFFECTS: {fx}, stylized, opaque, with dark outlines, small, kept close to the character "
+                 "inside its own sixth of the image.")
+    lines.append("BACKGROUND: keep the plain flat background of the source image "
+                 "(" + (BG_GRAY if pale else BG_WHITE) + ")" + BG_TAIL)
+    lines.append(reminder(ent_id, who, desc, never))
+    return "\n".join(lines)
+
+
+def name_table_vues(base):
+    out = ["| Case | Vue | Fichier |", "|---|---|---|"]
+    for i, (suf, vlabel, _) in enumerate(VIEWS6):
+        out.append(f"| {i//3+1}-{i%3+1} | {vlabel} | `{base}{suf}.png` |")
     return "\n".join(out)
 
 
-def character_md(title, ent, role, nation_txt, big, fx, rim, palette, path_hint, extra_desc=""):
-    sheets = SHEETS_BIG if big else SHEETS_SMALL
+def name_table_actions(base):
+    out = ["| Case | Pose | Fichier |", "|---|---|---|"]
+    for i, (suf, _, plabel) in enumerate(ACTION_CELLS):
+        out.append(f"| {i//3+1}-{i%3+1} | {plabel} | `{base}{suf}.png` |")
+    return "\n".join(out)
+
+
+def character_md(title, ent, role, nation_txt, fx, rim, palette, path_hint, extra_desc=""):
     desc = ent["desc"] + extra_desc
     key = ent["id"]
     if role == "summoned familiar" and ("familier:" + key) in IDENT:
         key = "familier:" + key
     who = ent["nom"].split(" (")[0]
-    nposes = sum(len(c) for _, _, _, c in sheets)
-    parts = [f"### {title}\n\n{len(sheets)} planches, {nposes} poses. Commence par la fiche de référence. Chaque prompt "
-             f"recopie la carte d'identité du personnage : aucune image à joindre. Fichiers dans `{path_hint}` ; nomme tes "
-             f"images `{ent['id']}_<clé>.png` (ex. `{ent['id']}_face_2.png`) pour que l'Atelier les reconnaisse.\n"]
-    for k, (cle, slabel, view, cells) in enumerate(sheets, 1):
-        if view is None:
-            p = prompt_reference(who, role, nation_txt, desc, rim, palette, ent.get("pale", False), fx, key)
-        else:
-            p = prompt_sheet(who, role, nation_txt, desc, view, cells, ent["arch"], fx, rim, palette,
-                             ent.get("pale", False), key)
-        parts.append(f"#### Planche {k} — {slabel} (`{cle}`)\n\nDans l'Atelier : personnage « {who} », "
-                     f"planche « {slabel} ».\n\n```text\n{p}\n```\n\n{name_table(ent['id'], view, cells)}\n")
+    pale = ent.get("pale", False)
+    parts = [
+        f"### {title}\n\n2 planches : **vues** (6 angles), puis **actions** (3 attaques + 3 sorts). La planche "
+        f"actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : "
+        f"c'est ce qui garantit le même personnage sur les deux planches. Fichiers dans `{path_hint}` ; nomme "
+        f"tes images `{ent['id']}_vues.png` et `{ent['id']}_actions.png` pour que l'Atelier les reconnaisse.\n",
+    ]
+    p = prompt_vues(who, role, nation_txt, desc, fx, rim, palette, pale, key)
+    parts.append(
+        f"#### Planche 1 — Vues · 6 angles (`vues`)\n\nGénération normale, aucune image à joindre.\n\n"
+        f"```text\n{p}\n```\n\n{name_table_vues(ent['id'])}\n")
+    p = prompt_actions(who, role, nation_txt, desc, ent["arch"], fx, rim, palette, pale, key)
+    parts.append(
+        f"#### Planche 2 — Actions · 3 attaques + 3 sorts (`actions`)\n\n**Édition d'image** : source = la "
+        f"planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas "
+        f"l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.\n\n"
+        f"```text\n{p}\n```\n\n{name_table_actions(ent['id'])}\n")
     return "\n".join(parts)
 
 
@@ -590,40 +614,50 @@ def nation_md(n):
     nt = f"of the {n['nom']} nation"
     parts = [f"# Nation {n['nom']} ({n['biome']})\n",
              f"Palette : {n['palette']}. Effets : {n['fx']}. Contre-jour : {n['rim']}.\n",
-             "Chaque personnage est dessiné en **vue 3/4 avant (face)** et en **vue 3/4 arrière (dos)**. "
-             "Le jeu retourne l'image pour les directions vers la gauche. Une fiche de référence (repos face + dos), "
-             "puis des planches de 4 poses (2 × 2) bien séparées. Prompt négatif : voir en bas de page.\n",
-             "Ordre conseillé : 1) planche de référence, 2) héros, 3) ennemis, 4) boss.\n"]
+             "Format 2 planches par personnage :\n\n"
+             "1. **Vues** — le personnage au repos vu sous 6 angles (face, 3/4 avant droite, 3/4 dos droite, dos, "
+             "3/4 dos gauche, 3/4 avant gauche), grille 3 × 2 sur image 2:1, poses largement espacées. Un seul "
+             "angle par case : aucun doublon possible.\n"
+             "2. **Actions** — 3 attaques + 3 sorts en vue 3/4 avant, générées **en édition** de la planche vues "
+             "(image source = planche vues) : le personnage réellement dessiné sert d'ancre, il ne peut pas changer "
+             "d'une planche à l'autre. Repli : génération normale (la carte d'identité est recopiée dans chaque "
+             "prompt).\n\n"
+             "Chaque prompt recopie la carte d'identité du personnage (`identites.py`) : aucune image à joindre. "
+             "Ordre conseillé : 1) planche de style, 2) héros, 3) ennemis, 4) boss ; pour chaque personnage : "
+             "vues puis actions. Prompt négatif : en bas de page.\n"]
     parts.append("## 1. Planche de référence (style de la nation)\n\nNe sert pas en jeu : elle fixe palette, "
-                 "matières et silhouettes, de face et de dos. Joins-la comme image de référence à toutes les "
-                 "planches suivantes.\n\n"
+                 "matières et silhouettes, de face et de dos.\n\n"
                  f"```text\n{lineup_prompt(n)}\n```\n")
-    parts.append("## 2. Héros\n\n" + character_md(f"{h['nom']} — 22 poses", h, "playable hero", "hero " + nt,
-                                                  True, n["fx"], n["rim"], n["palette"], f"{GAME}/players/"))
-    parts.append(f"L'export Zimut de l'Atelier copie aussi le repos vers `nations/heros/{h['id']}.png` et les "
-                 "autres poses vers `nations/heros/poses/`.\n")
+    parts.append("## 2. Héros\n\n" + character_md(f"{h['nom']} — 12 poses", h, "playable hero", "hero " + nt,
+                                                  n["fx"], n["rim"], n["palette"], f"{GAME}/players/"))
+    parts.append(f"L'export Zimut de l'Atelier copie aussi le repos (case 1 de la planche vues) vers "
+                 f"`nations/heros/{h['id']}.png`.\n")
     parts.append("## 3. Ennemis\n")
     for e in n["enemies"]:
-        parts.append(character_md(f"{e['nom']} — 10 poses", e, "enemy monster", "enemy " + nt, False, n["fx"],
-                                  n["rim"], n["palette"], f"{GAME}/nations/ennemis/{n['id']}/"))
+        parts.append(character_md(f"{e['nom']} — 12 poses", e, "enemy monster", "enemy " + nt, n["fx"], n["rim"],
+                                  n["palette"], f"{GAME}/nations/ennemis/{n['id']}/"))
     parts.append("## 4. Boss\n\n" + character_md(
-        f"{b['nom']} — 22 poses", b, "final boss", "boss " + nt, True, n["fx"], n["rim"], n["palette"],
+        f"{b['nom']} — 12 poses", b, "final boss", "boss " + nt, n["fx"], n["rim"], n["palette"],
         f"{GAME}/nations/boss/",
         ", imposing chibi with slightly longer body proportions than regular characters (head about 1/4 of "
         "total height)"))
-    parts.append(f"## Prompt négatif (toutes les planches de cette page)\n\n```text\n{NEGATIVE}\n```\n")
+    parts.append("## Prompt négatif\n\n**Planches vues** (la même pose vue sous 6 angles est voulue, les vues "
+                 "vers la gauche aussi — le négatif commun est adapté) :\n\n```text\n" + NEGATIVE_VUES +
+                 "\n```\n\n**Planches actions et planche de style** :\n\n```text\n" + NEGATIVE + "\n```\n")
     return "\n".join(parts)
 
 
 def familiers_md():
     parts = ["# Familiers (invocations)\n",
-             "Fichiers dans `" + GAME + "/summons/`. Trois planches par familier : fiche de référence (face + dos), "
-             "vue 3/4 avant, vue 3/4 arrière. Joins la planche du héros qui l'invoque comme référence de style.\n"]
+             "Fichiers dans `" + GAME + "/summons/`. Format 2 planches par familier : **vues** (6 angles) puis "
+             "**actions** (3 attaques + 3 sorts), générées en édition de la planche vues comme pour les "
+             "personnages. Joins la planche du héros qui l'invoque comme référence de style.\n"]
     for f in FAMILIERS:
-        parts.append(character_md(f"{f['nom']} — 10 poses", f, "summoned familiar", "a summon", False,
+        parts.append(character_md(f"{f['nom']} — 12 poses", f, "summoned familiar", "a summon",
                                   "matching magical sparks", "soft colored", "colors as described",
                                   f"{GAME}/summons/"))
-    parts.append(f"## Prompt négatif\n\n```text\n{NEGATIVE}\n```\n")
+    parts.append("## Prompt négatif\n\nPlanches vues : voir le négatif adapté dans chaque fichier nation. "
+                 "Planches actions :\n\n```text\n" + NEGATIVE + "\n```\n")
     return "\n".join(parts)
 
 
@@ -670,7 +704,8 @@ def main():
         (OUT / "nations" / f"{i:02d}_{n['id']}.md").write_text(nation_md(n), encoding="utf-8")
     (OUT / "familiers.md").write_text(familiers_md(), encoding="utf-8")
     (OUT / "mecanismes.md").write_text(mecanismes_md(), encoding="utf-8")
-    sheets = len(NATIONS) * (1 + len(SHEETS_BIG) * 2 + 4 * len(SHEETS_SMALL)) + len(FAMILIERS) * len(SHEETS_SMALL) + len(MECANISMES)
+    # 10 nations × (1 planche de style + 6 personnages × 2 planches) + 12 familiers × 2 + mécanismes
+    sheets = len(NATIONS) * (1 + 6 * 2) + len(FAMILIERS) * 2 + len(MECANISMES)
     print(f"{sheets} prompts générés dans {OUT}")
 
 
