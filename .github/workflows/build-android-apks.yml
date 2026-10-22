@@ -24,6 +24,7 @@ jobs:
   build-apks:
     name: Build APK
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -39,6 +40,7 @@ jobs:
           sudo mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
 
       - name: Install Godot Android export templates
+        timeout-minutes: 10
         run: |
           mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
           wget https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
@@ -58,16 +60,26 @@ jobs:
           echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> "$GITHUB_ENV"
 
       - name: Run headless tests (GDScript)
+        timeout-minutes: 5
         run: |
           cd prototype/zimut
+          set -o pipefail
+          # Timeout de sécurité : chaque test ne doit pas dépasser 60s
           # Tests de règles de combat (doivent quitter avec code 0)
-          godot --headless -s tests/test_combat.gd --path . 2>&1 | tail -20
-          # Test de progression
-          godot --headless -s tests/test_progression.gd --path . 2>&1 | tail -20 || true
+          echo "=== test_combat.gd ==="
+          timeout 60 godot --headless -s tests/test_combat.gd --path . 2>&1 | tail -30
+          echo ""
+          # Test de progression (peut bloquer sur await process_frame en headless -s)
+          echo "=== test_progression.gd ==="
+          timeout 60 godot --headless -s tests/test_progression.gd --path . 2>&1 | tail -30 || echo "(test_progression timeout ou échec - ignoré)"
+          echo ""
           # V42 : tests arbre de talents + timer de tour
-          godot --headless -s tests/test_talents.gd --path . 2>&1 | tail -20 || true
-          godot --headless -s tests/test_timer.gd --path . 2>&1 | tail -20 || true
-          # Test d'équilibrage (simulation, peut être long — on limite)
+          echo "=== test_talents.gd ==="
+          timeout 60 godot --headless -s tests/test_talents.gd --path . 2>&1 | tail -30 || echo "(test_talents timeout ou échec - ignoré)"
+          echo ""
+          echo "=== test_timer.gd ==="
+          timeout 60 godot --headless -s tests/test_timer.gd --path . 2>&1 | tail -30 || echo "(test_timer timeout ou échec - ignoré)"
+          echo ""
           echo "Tests headless exécutés."
 
       - name: Decode release keystore from GitHub Secrets
@@ -146,12 +158,14 @@ jobs:
           python3 tools/check_assets.py
 
       - name: Import project resources (icons, artwork)
+        timeout-minutes: 5
         run: |
           cd prototype/zimut
           godot --headless --import || true
           test -d .godot/imported
 
       - name: Export Zimut APK (Debug)
+        timeout-minutes: 10
         run: |
           cd prototype/zimut
           # Godot peut planter a la fermeture (corruption heap connue en headless)
@@ -162,6 +176,7 @@ jobs:
           test -s export/Zimut-debug.apk
 
       - name: Export Zimut APK (Release)
+        timeout-minutes: 10
         # Release signée aussi sur les PR de ce dépôt (les secrets ne sont pas transmis aux forks)
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         env:
