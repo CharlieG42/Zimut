@@ -31,6 +31,7 @@ var _slot: int = -1
 var _f_type: String = "all"
 var _f_rarity: String = "all"
 var _f_status: String = "tous"
+var _f_text: String = ""
 var _sort: String = "rarete"
 var _desc: bool = true
 var _sel: Dictionary = {}               # clé d'entrée -> true
@@ -80,6 +81,16 @@ func _passes(e: Dictionary) -> bool:
 		return false
 	if _f_status == "portes" and String(e["owner"]) == "":
 		return false
+	if _f_text != "":
+		var q: String = _f_text.to_lower()
+		var hay: String = "%s %s %s %s".format([
+			String(it.get("name", "")),
+			String(it.get("type", "")),
+			GearUi.slot_label(GearUi.slot_of(it)),
+			String(e["owner"]),
+		]).to_lower()
+		if not hay.contains(q):
+			return false
 	return true
 
 
@@ -227,6 +238,22 @@ func refresh() -> void:
 func _refresh_filters() -> void:
 	for c in _filters_box.get_children():
 		c.queue_free()
+	# Champ de recherche texte
+	var srow := HBoxContainer.new()
+	srow.add_theme_constant_override("separation", 8)
+	_filters_box.add_child(srow)
+	var slbl := U.lbl("RECHERCHE", 17, C_DIM)
+	slbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	srow.add_child(slbl)
+	var se := LineEdit.new()
+	se.name = "SearchBox"
+	se.custom_minimum_size = Vector2(320, 38)
+	se.placeholder_text = "Nom, type, propri\u00e9taire..."
+	se.text = _f_text
+	se.text_changed.connect(func(t: String) -> void:
+		_f_text = t
+		_refresh_list())
+	srow.add_child(se)
 	var types: Array = [["all", "Tous"]]
 	for s: String in GearUi.SLOT_ORDER:
 		types.append([s, GearUi.slot_label(s)])

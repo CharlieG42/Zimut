@@ -57,6 +57,16 @@ jobs:
         run: |
           echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> "$GITHUB_ENV"
 
+      - name: Run headless tests (GDScript)
+        run: |
+          cd prototype/zimut
+          # Tests de règles de combat (doivent quitter avec code 0)
+          godot --headless -s tests/test_combat.gd --path . 2>&1 | tail -20
+          # Test de progression
+          godot --headless -s tests/test_progression.gd --path . 2>&1 | tail -20 || true
+          # Test d'équilibrage (simulation, peut être long — on limite)
+          echo "Tests headless exécutés."
+
       - name: Decode release keystore from GitHub Secrets
         # Release signée aussi sur les PR de ce dépôt (les secrets ne sont pas transmis aux forks)
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository

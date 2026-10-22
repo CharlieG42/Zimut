@@ -111,6 +111,8 @@ static func check(data: Dictionary) -> Array:
 		if not res.is_empty():
 			_pm().add_resources(data, res)
 		news.append({"id": id, "name": String(a[1]), "reward_text": reward_text(rw)})
+		# Chaque succès débloqué rapporte 1 point de gloire (arbre de talents account-wide)
+		TalentTree.add_points(1)
 	data["achievements"] = got
 	if not news.is_empty():
 		var last: Array = data.get("last_achievements", [])

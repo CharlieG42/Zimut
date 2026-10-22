@@ -867,6 +867,15 @@ class StatsView extends Control:
 		draw_style_box(turn_box, Rect2(size.x - 128, 126, 116, 32))
 		draw_string(font, Vector2(size.x - 128, 139), Loc.t("TOUR %d" % int(gm.turn_count)), HORIZONTAL_ALIGNMENT_CENTER, 116.0, 13, Color(0.85, 0.9, 1.0))
 		draw_string(font, Vector2(size.x - 128, 153), rest, HORIZONTAL_ALIGNMENT_CENTER, 116.0, 13, Color(1, 0.88, 0.45) if mine else Color(1, 0.6, 0.55))
+		# V42 : compteur contre-la-montre
+		var sr_limit: int = 0
+		if gm is GameManager:
+			sr_limit = (gm as GameManager).speedrun_limit
+		if sr_limit > 0:
+			var remaining: int = maxi(0, sr_limit - int(gm.turn_count) + 1)
+			var sr_col: Color = Color(0.45, 1.0, 0.55) if remaining > 2 else (Color(1.0, 0.75, 0.2) if remaining > 0 else Color(1.0, 0.35, 0.3))
+			draw_string_outline(font, Vector2(size.x - 128, 168), Loc.t("⏱ %d" % remaining), HORIZONTAL_ALIGNMENT_CENTER, 116.0, 12, 4, Color(0, 0, 0, 0.9))
+			draw_string(font, Vector2(size.x - 128, 168), Loc.t("⏱ %d" % remaining), HORIZONTAL_ALIGNMENT_CENTER, 116.0, 12, sr_col)
 		# Aide : pour les effets, un nom de classe sur la ligne du bas si l'entité n'a rien
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 

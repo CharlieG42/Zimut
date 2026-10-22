@@ -399,6 +399,10 @@ func _item_button_text(it: Dictionary, equipped: Dictionary, too_low: bool) -> S
 	if fx_txt != "":
 		txt += "  ✦ " + fx_txt
 	if not equipped.is_empty():
+		# V42 : comparaison détaillée stat par stat (avant → après)
+		var delta: String = _stat_delta_line(it, equipped)
+		if delta != "":
+			txt += "  " + delta
 		var diff: int = int(ItemRules.power(it)) - int(ItemRules.power(equipped))
 		if diff > 0:
 			txt += "  ▲ +%d" % diff
@@ -407,6 +411,16 @@ func _item_button_text(it: Dictionary, equipped: Dictionary, too_low: bool) -> S
 	if too_low:
 		txt += "   🔒 niveau %d requis" % int(it.get("level", 0))
 	return txt
+
+
+## V42 : ligne de comparaison stat par stat entre deux objets (ex: "V+30 F+5").
+func _stat_delta_line(new_it: Dictionary, old_it: Dictionary) -> String:
+	var parts: Array[String] = []
+	for k: String in ItemRules.STAT_KEYS:
+		var d: int = int(new_it.get(k, 0)) - int(old_it.get(k, 0))
+		if d != 0:
+			parts.append("%s%+d" % [ItemRules.STAT_SHORT[k], d])
+	return " ".join(parts)
 
 
 ## Forge : fenêtre dédiée (ForgeUI).

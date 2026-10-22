@@ -98,6 +98,10 @@ var fight_is_boss: bool          = false
 var fight_nation_boss: String     = ""  # V27 : biome du boss de Nation présent dans ce combat
 var _last_banner_round: int = 0
 var fight_biome: String          = "Forêt"  # biome du combat en cours
+## V42 : limite de tours du mode contre-la-montre (0 = pas de limite).
+var speedrun_limit: int          = 0
+## V42 : le contre-la-montre a été réussi sur ce combat.
+var speedrun_success: bool       = false
 
 var _turn_index: int = -1
 var _uid_counter: int = 0
@@ -320,6 +324,15 @@ func init_entities() -> void:
 				continue
 		var player: Dictionary = _base_entity("%s Lv%d" % [classe, plevel], "Player", "player",
 			classe, plevel, pos)
+		# V42 : bonus de l'arbre de talents account-wide (dégâts, soins, critique)
+		var talent_dmg_pct: float = float(st.get("talent_dmg_pct", 1.0))
+		var talent_heal_pct: float = float(st.get("talent_heal_pct", 1.0))
+		var talent_crit_pct: float = float(st.get("talent_crit_pct", 0.0))
+		if not pfx.is_empty():
+			pfx["talent_dmg_pct"] = talent_dmg_pct
+			pfx["talent_heal_pct"] = talent_heal_pct
+			pfx["talent_crit_pct"] = talent_crit_pct
+			pfx["talent_revive_pct"] = int(st.get("talent_revive_pct", 0))
 		player.merge({
 			"max_pv": int(st["max_pv"]), "current_pv": int(st["max_pv"]),
 			"force": int(st["force"]), "intelligence": int(st["intelligence"]),
@@ -882,6 +895,11 @@ func _setup_objective_and_synergies() -> void:
 		for p2: Dictionary in players:
 			Combat.add_status(p2, String(sy["status"]), 99, float(sy["value"]))
 		message_requested.emit("✦ Synergie %s (%s) : %s" % [sy["name"], sy["pair"], sy["desc"]])
+	# V42 : synergies de trio (bonus plus puissant à 3 classes)
+	for sy: Dictionary in ProgressionManager.active_synergy_trios(classes):
+		for p2: Dictionary in players:
+			Combat.add_status(p2, String(sy["status"]), 99, float(sy["value"]))
+		message_requested.emit("✦✦ Synergie %s (%s) : %s" % [sy["name"], sy["trio"], sy["desc"]])
 
 
 func start_battle() -> void:
@@ -892,6 +910,8 @@ func start_battle() -> void:
 	turn_count = 1
 	_last_banner_round = 0
 	_turn_index = -1
+	speedrun_limit = GameSettings.speedrun_turn_limit()
+	speedrun_success = speedrun_limit <= 0
 	active_entity = {}
 	turn_order = all_entities()
 	for e: Dictionary in turn_order:
@@ -1585,12 +1605,15 @@ func los_blockers() -> Dictionary:
 ## Montant de soin d'un sort pour une cible donnée.
 func _heal_amount(caster: Dictionary, p: Dictionary, t: Dictionary) -> int:
 	var amt: int = 0
+	# V42 : bonus de soins de l'arbre de talents account-wide
+	var talent_heal: float = float(caster.get("fx", {}).get("talent_heal_pct", 1.0))
 	if int(p["heal"]) > 0:
 		amt = roundi(float(p["heal"]) * (1.0 + float(caster.get("intelligence", 0)) / 300.0)
 			* (1.0 + float(caster.get("wisdom", 0)) / 300.0)
-			* (1.0 + float(caster.get("fx", {}).get("heal_pct", 0)) / 100.0))
+			* (1.0 + float(caster.get("fx", {}).get("heal_pct", 0)) / 100.0)
+			* talent_heal)
 	if int(p["heal_pct"]) > 0:
-		amt = roundi(float(t["max_pv"]) * float(p["heal_pct"]) / 100.0)
+		amt = roundi(float(t["max_pv"]) * float(p["heal_pct"]) / 100.0 * talent_heal)
 	return amt
 
 
@@ -2207,9 +2230,13 @@ func check_game_over() -> void:
 		heal_total += int(stp.get("heal", 0))
 		if int(stp.get("dmg", 0)) <= 0:
 			all_hit = false
+	# V42 : contre-la-montre — réussi si victoire avant la limite de tours
+	if speedrun_limit > 0:
+		speedrun_success = turn_count <= speedrun_limit
 	var info: Dictionary = {"enemies": fight_enemies, "turns": turn_count, "boss": fight_is_boss, "deaths": deaths,
 		"objective": fight_objective.duplicate(), "chief_first": _first_kill_uid >= 0 and _first_kill_uid == _chief_uid,
-		"heal_total": heal_total, "all_hit": all_hit, "nation_boss": fight_nation_boss, "biome": fight_biome}
+		"heal_total": heal_total, "all_hit": all_hit, "nation_boss": fight_nation_boss, "biome": fight_biome,
+		"speedrun_turns": speedrun_limit, "speedrun_success": speedrun_success}
 	if alive_p == 0:
 		game_over = true
 		victory = false
@@ -2222,6 +2249,12 @@ func check_game_over() -> void:
 	elif alive_e == 0:
 		game_over = true
 		victory = true
+		if speedrun_limit > 0:
+			if speedrun_success:
+				message_requested.emit("⏱ Contre-la-montre réussi en %d tours ! Bonus : +%d%% XP, +%d%% or" % [
+					turn_count, roundi(GameSettings.speedrun_xp_bonus() * 100), roundi(GameSettings.speedrun_gold_bonus() * 100)])
+			else:
+				message_requested.emit("⏱ Contre-la-montre manqué (%d tours > %d). Pas de bonus." % [turn_count, speedrun_limit])
 		if not active_save.is_empty() and active_slot >= 0:
 			ProgressionManager.register_victory(active_save, info)
 			ProgressionManager.write_save(active_slot, active_save)
