@@ -1,8 +1,13 @@
 extends SceneTree
 ## test_timer.gd — Tests headless du timer de tour (V42).
 ## Lancement : godot --headless -s tests/test_timer.gd --path .
+##
+## NOTE : en mode `-s` (script), les class_name ne sont PAS enregistrés dans
+## le ClassDB. Il faut charger explicitement les scripts avec load().
 
 var failures: int = 0
+var GameSettings = load("res://scripts/GameSettings.gd")
+var GameManager = load("res://scripts/GameManager.gd")
 
 func _init() -> void:
 	_test_timer_settings()
@@ -24,10 +29,9 @@ func _check(cond: bool, label: String) -> void:
 
 func _test_timer_settings() -> void:
 	print("GameSettings — timer de tour (V42) :")
-	var gs: Node = root.get_node_or_null("GameSettings")
-	if gs == null:
-		print("  ??  GameSettings non disponible en headless (autoload)")
-		return
+	# Créer une instance de GameSettings (extends Node)
+	var gs: Node = GameSettings.new()
+	_check(gs != null, "instance GameSettings créée")
 	# Bornes du tableau des modes
 	_check(GameSettings.TURN_TIMER_MODES.size() == 5, "5 modes de timer")
 	_check(GameSettings.TURN_TIMER_SECONDS.size() == 5, "5 durées associées")
@@ -50,14 +54,17 @@ func _test_timer_settings() -> void:
 	gs.set_turn_timer_mode(-3)
 	_check(gs.turn_timer_seconds() == 0.0, "mode -3 → clampé à 0 s (désactivé)")
 	_check(int(gs.turn_timer_mode) == 0, "index clampé à 0")
+	gs.free()
 
 func _test_timer_defaults() -> void:
 	print("GameManager — état initial du timer (V42) :")
-	var gm: Node = root.get_node_or_null("GameManager")
-	if gm == null:
-		print("  ??  GameManager non disponible en headless (autoload)")
-		return
+	# Créer une instance de GameManager (extends Node)
+	var gm: Node = GameManager.new()
+	_check(gm != null, "instance GameManager créée")
 	_check(float(gm.turn_timer_remaining) == 0.0, "reste à 0 hors combat")
 	_check(float(gm.turn_timer_duration) == 0.0, "durée à 0 hors combat")
+	gm.free()
 	# Le timer doit reprendre la valeur du réglage au prochain _begin_turn
-	_check(GameSettings.turn_timer_seconds() >= 0.0, "durée réglée cohérente")
+	var gs: Node = GameSettings.new()
+	_check(gs.turn_timer_seconds() >= 0.0, "durée réglée cohérente")
+	gs.free()
