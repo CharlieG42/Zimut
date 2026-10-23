@@ -1424,7 +1424,7 @@ func spell_preview(classe: String, spell_name: String, level: int) -> Dictionary
 	return {"pa": int(row["pa"]), "pm": int(row["pm"]), "range": int(row["range"]), "kind": String(p["kind"]),
 		"target": String(p["target"]), "aoe": String(p["aoe"]), "zone": int(p["zone_r"]),
 		"los": bool(p["needs_los"]), "value": roundi(float(base) * mult), "base_value": base, "label": label,
-		"mult": mult, "desc": String(row["effect"]), "type": String(row["type"]), "req": int(row["level"])}
+		"mult": mult, "desc": Combat.describe(spell), "type": String(row["type"]), "req": int(row["level"])}
 
 ## Améliore un sort d'un niveau (coûte `niveau actuel` points de sort). "" si OK, sinon la raison.
 func upgrade_spell(data: Dictionary, classe: String, spell_name: String) -> String:
@@ -1843,6 +1843,8 @@ func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0, fight_level: in
 			e["level"] = to_lvl
 			# V42 : paliers de l'arbre de talents (1 point de pouvoir tous les 5 niveaux à partir du niveau 15)
 			TalentTree.apply_level_up(data, classe, from_lvl, to_lvl)
+			# V43 : les sorts qui se débloquent comblent les places libres du build actif
+			Builds.on_level_up(data, classe, from_lvl, to_lvl)
 			if bool(e.get("auto", true)):
 				e["unspent"] = ClassRules.auto_allocate(classe, e["invested"], int(e["unspent"]))
 			if bool(e.get("spell_auto", false)):

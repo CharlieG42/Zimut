@@ -1587,7 +1587,10 @@ func _hit_target(caster: Dictionary, spell: Dictionary, p: Dictionary, t: Dictio
 			dealt = _apply_damage(caster, t, int(t["current_pv"]), String(p["dtype"]), true, false, true)
 		else:
 			var forced_crit: bool = p["cond"] == "back_crit" and Combat.is_behind(cpos, tpos, t["facing"])
-			var r: Dictionary = Combat.calc_damage(caster, t, base, String(p["dtype"]),
+			var syn: int = Combat.synergy_pct(p, t, caster["casts"])
+			if syn > 0:
+				fx.emit("status", {"target": t, "text": "Combo +%d%%" % syn, "color": Color(1.0, 0.82, 0.30), "good": true})
+			var r: Dictionary = Combat.calc_damage(caster, t, base * (1.0 + float(syn) / 100.0), String(p["dtype"]),
 				float(p["ignore_def"]), forced_crit, false)
 			dealt = _apply_damage(caster, t, int(r["dmg"]), String(p["dtype"]), bool(r["crit"]), bool(r["back"]))
 		if Combat.has_status(caster, "mark"):

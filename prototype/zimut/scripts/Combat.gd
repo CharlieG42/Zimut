@@ -19,6 +19,32 @@ const PUSH := {
 	"Séisme ambré": 1,
 }
 
+## V43 : états que les sorts « Combo » reconnaissent chez la cible (mot du texte -> statut).
+const COMBO_STATES := {
+	"poison": "poison", "saignement": "bleed", "brûlure": "burn", "étourdissement": "stun",
+	"immobilisation": "root", "ralentissement": "slow", "malédiction": "curse",
+	"affaiblissement": "weaken", "provocation": "taunted",
+}
+const COMBO_LABELS := {
+	"poison": "empoisonnée", "bleed": "qui saigne", "burn": "en feu", "stun": "étourdie",
+	"root": "immobilisée", "slow": "ralentie", "curse": "maudite", "weaken": "affaiblie", "taunted": "provoquée",
+}
+
+## V43 : bonus de dégâts/soins (en %) d'un sort grâce à ses synergies.
+## `target` = cible du sort ({} pour un sort sans cible) ; `casts` = sorts déjà lancés par le lanceur ce tour.
+static func synergy_pct(p: Dictionary, target: Dictionary, casts: Dictionary) -> int:
+	var pct: int = 0
+	var cs: String = String(p.get("combo_status", ""))
+	if cs != "" and not target.is_empty() and has_status(target, cs):
+		pct += int(p.get("combo_pct", 0))
+	var ch: String = String(p.get("chain_spell", ""))
+	if ch != "":
+		for k: Variant in casts.keys():
+			if String(k).to_lower() == ch and int(casts[k]) > 0:
+				pct += int(p.get("chain_pct", 0))
+				break
+	return pct
+
 const NEGATIVE: Array = ["poison", "bleed", "burn", "stun", "root", "slow", "curse", "weaken", "taunted"]
 
 const STATUS_INFO := {
@@ -283,6 +309,27 @@ static func parse(spell: Dictionary) -> Dictionary:
 
 	var sname: String = String(spell.get("name", ""))
 	var t: String = String(spell.get("effect", "")).to_lower()
+	# V43 : clauses de synergie « [Combo poison : bonus 40%] » / « [Enchaînement après X : bonus 30%] »
+	var combo_status: String = ""
+	var combo_pct: int = 0
+	var chain_spell: String = ""
+	var chain_pct: int = 0
+	if t.contains("["):
+		var rx_c := RegEx.new()
+		rx_c.compile("\\[combo ([^ :\\]]+) : bonus (\\d+)%\\]")
+		var mc: RegExMatch = rx_c.search(t)
+		if mc != null:
+			combo_status = String(COMBO_STATES.get(mc.get_string(1), ""))
+			combo_pct = int(mc.get_string(2))
+		var rx_e := RegEx.new()
+		rx_e.compile("\\[enchaînement après ([^:\\]]+?) : bonus (\\d+)%\\]")
+		var me: RegExMatch = rx_e.search(t)
+		if me != null:
+			chain_spell = me.get_string(1).strip_edges()
+			chain_pct = int(me.get_string(2))
+		var rx_s := RegEx.new()
+		rx_s.compile("\\s*\\[(?:combo|enchaînement)[^\\]]*\\]")
+		t = rx_s.sub(t, "", true)
 	var stype: String = String(spell.get("spell_type", "Attaque"))
 	var classe: String = String(spell.get("classe", ""))
 	var rng: int = int(spell.get("range", 1))
@@ -305,6 +352,8 @@ static func parse(spell: Dictionary) -> Dictionary:
 		"buff_summons": false,
 		"glyph_turns": 0, "glyph_allies": {}, "glyph_foes": {},
 		"mine": false,
+		"combo_status": combo_status, "combo_pct": combo_pct,
+		"chain_spell": chain_spell, "chain_pct": chain_pct,
 	}
 	if PUSH.has(sname):
 		p["push"] = int(PUSH[sname])
@@ -657,9 +706,15 @@ static func max_casts(spell: Dictionary) -> int:
 static func describe(spell: Dictionary) -> String:
 	var p: Dictionary = parse(spell)
 	var parts: Array[String] = []
-	parts.append(String(spell.get("effect", "")))
+	var rx_b := RegEx.new()
+	rx_b.compile("\\s*\\[(?:Combo|Enchaînement)[^\\]]*\\]")
+	parts.append(rx_b.sub(String(spell.get("effect", "")), "", true))
 	if int(p["push"]) > 0:
 		parts.append("Repousse de %d case(s)" % int(p["push"]))
+	if String(p.get("combo_status", "")) != "":
+		parts.append("Combo : +%d %% si la cible est %s" % [int(p["combo_pct"]), String(COMBO_LABELS.get(p["combo_status"], ""))])
+	if String(p.get("chain_spell", "")) != "":
+		parts.append("Enchaînement : +%d %% après %s lancé ce tour" % [int(p["chain_pct"]), String(p["chain_spell"]).capitalize()])
 	if p["cond"] == "back_crit":
 		parts.append("Dans le dos : coup critique")
 	return "\n".join(parts)
