@@ -14,6 +14,10 @@ const U = preload("res://scripts/UiKit.gd")
 
 const TILE_W := 128.0
 const TILE_H := 64.0
+## V43 : en dessous de cette échelle, la carte entière deviendrait illisible : on passe en vue
+## défilante (glisser pour parcourir, caméra qui suit le héros) au lieu de tout rétrécir.
+const READABLE_SCALE := 0.82
+const PAN_THRESHOLD := 14.0
 const SIDE_W := 440.0
 const STEP_TIME := 0.15
 const HELP_STEPS := 30          # l'aide de contrôle disparaît après ces premiers pas
@@ -96,6 +100,12 @@ var _redirect: Vector2i = Vector2i(-1, -1)     # nouvelle destination touchée p
 var _mob_nodes: Dictionary = {}                 # id de groupe -> MobNode
 var _target_mob: int = -1                       # groupe visé (il ne bouge plus)
 var _help_panel: Control = null
+var _scroll_mode: bool = false                  # V43 : plateau plus grand que l'écran → vue défilante
+var _pan_active: bool = false
+var _pan_moved: bool = false
+var _pan_total: float = 0.0
+var _cam_tween: Tween = null
+var _recenter_btn: Button = null
 
 
 func _ready() -> void:
@@ -151,6 +161,19 @@ func _build() -> void:
 	add_child(_map_view)
 	_world = Node2D.new()
 	_map_view.add_child(_world)
+	_recenter_btn = Button.new()
+	_recenter_btn.text = "◎  Centrer"
+	_recenter_btn.focus_mode = Control.FOCUS_NONE
+	_recenter_btn.add_theme_font_size_override("font_size", 22)
+	_recenter_btn.anchor_top = 1.0
+	_recenter_btn.anchor_bottom = 1.0
+	_recenter_btn.offset_left = 14.0
+	_recenter_btn.offset_top = -74.0
+	_recenter_btn.offset_right = 190.0
+	_recenter_btn.offset_bottom = -14.0
+	_recenter_btn.pressed.connect(func() -> void: _recenter(true))
+	_recenter_btn.hide()
+	_map_view.add_child(_recenter_btn)
 
 	# Voile de transition entre deux cartes (nuages)
 	_fade = ColorRect.new()
@@ -512,6 +535,15 @@ func _refresh_world() -> void:
 	_board.queue_redraw()
 
 
+## Vue défilante nécessaire ? (plateau trop grand pour tenir lisiblement dans la vue)
+static func scroll_needed(zone_size: Vector2i, view: Vector2) -> bool:
+	if view.x < 10.0:
+		return false
+	var w: float = float(zone_size.x + zone_size.y) * TILE_W * 0.5 + 90.0
+	var h: float = float(zone_size.x + zone_size.y) * TILE_H * 0.5 + 320.0
+	return minf(view.x / w, view.y / h) < READABLE_SCALE
+
+
 func _fit_world() -> void:
 	if _map_view == null or _board == null:
 		return
@@ -521,11 +553,106 @@ func _fit_world() -> void:
 	var vs: Vector2 = _map_view.size
 	if vs.x < 10.0:
 		return
+	_scroll_mode = scroll_needed(size, vs)
+	if _recenter_btn != null:
+		_recenter_btn.visible = _scroll_mode
+	if _scroll_mode:
+		# échelle fixe et lisible ; la caméra suit le héros
+		_world.scale = Vector2(READABLE_SCALE, READABLE_SCALE)
+		_recenter(false)
+		return
 	var sc: float = clampf(minf(vs.x / w, vs.y / h), 0.55, 1.9)
 	_world.scale = Vector2(sc, sc)
 	# centre de la grille (losange) + marge pour les décors hauts et la falaise
 	var center := Vector2(float(size.x - size.y) * TILE_W * 0.25, float(size.x + size.y - 2) * TILE_H * 0.25 + 40.0)
 	_world.position = vs * 0.5 - center * sc
+
+
+## Rectangle du plateau en coordonnées du monde (avec marge pour décors hauts et falaise).
+func _world_bounds() -> Rect2:
+	var s: Vector2i = manager.zone_size()
+	var left: float = -float(s.y) * TILE_W * 0.5 - 60.0
+	var right: float = float(s.x) * TILE_W * 0.5 + 60.0
+	var top: float = -220.0
+	var bottom: float = float(s.x + s.y) * TILE_H * 0.5 + 120.0
+	return Rect2(left, top, right - left, bottom - top)
+
+
+## Position du monde qui garde la vue à l'intérieur du plateau (centré si le plateau est plus petit).
+func _clamp_cam(pos: Vector2) -> Vector2:
+	var sc: float = _world.scale.x
+	var vs: Vector2 = _map_view.size
+	var b: Rect2 = _world_bounds()
+	var out: Vector2 = pos
+	if b.size.x * sc <= vs.x:
+		out.x = (vs.x - b.size.x * sc) * 0.5 - b.position.x * sc
+	else:
+		out.x = clampf(pos.x, vs.x - (b.position.x + b.size.x) * sc, -b.position.x * sc)
+	if b.size.y * sc <= vs.y:
+		out.y = (vs.y - b.size.y * sc) * 0.5 - b.position.y * sc
+	else:
+		out.y = clampf(pos.y, vs.y - (b.position.y + b.size.y) * sc, -b.position.y * sc)
+	return out
+
+
+## Caméra centrée sur une case (vue défilante uniquement).
+func _focus_cell(c: Vector2i, animated: bool, dur: float = 0.25) -> void:
+	if not _scroll_mode or _map_view == null:
+		return
+	var target: Vector2 = _clamp_cam(_map_view.size * 0.5 - cell_center(c) * _world.scale.x)
+	if _cam_tween != null and _cam_tween.is_valid():
+		_cam_tween.kill()
+	if animated and dur > 0.0:
+		_cam_tween = create_tween()
+		_cam_tween.tween_property(_world, "position", target, dur).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	else:
+		_world.position = target
+
+
+func _recenter(animated: bool) -> void:
+	_focus_cell(manager.hero_pos(), animated, 0.3)
+
+
+## Glisser pour parcourir un grand plateau. Retourne true si l'événement est consommé
+## (un glissement n'est jamais interprété comme un appui sur une case).
+func _handle_pan(event: InputEvent) -> bool:
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			_pan_active = true
+			_pan_moved = false
+			_pan_total = 0.0
+			return false
+		var was_moved: bool = _pan_moved
+		_pan_active = false
+		_pan_moved = false
+		return was_moved
+	if event is InputEventScreenDrag and _pan_active:
+		return _pan_by(event.relative)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.device != InputEvent.DEVICE_ID_EMULATION:
+		if event.pressed:
+			_pan_active = true
+			_pan_moved = false
+			_pan_total = 0.0
+			return false
+		var was2: bool = _pan_moved
+		_pan_active = false
+		_pan_moved = false
+		return was2
+	if event is InputEventMouseMotion and _pan_active and event.device != InputEvent.DEVICE_ID_EMULATION \
+			and (event.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
+		return _pan_by(event.relative)
+	return false
+
+
+func _pan_by(rel: Vector2) -> bool:
+	_pan_total += rel.length()
+	if _pan_total < PAN_THRESHOLD and not _pan_moved:
+		return false
+	_pan_moved = true
+	if _cam_tween != null and _cam_tween.is_valid():
+		_cam_tween.kill()
+	_world.position = _clamp_cam(_world.position + rel)
+	return true
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -553,6 +680,8 @@ func _inside(p: Vector2i) -> bool:
 
 func _on_map_input(event: InputEvent) -> void:
 	if _modal_root != null:
+		return
+	if _scroll_mode and _handle_pan(event):
 		return
 	if _walking:
 		# Pendant la marche, un nouvel appui change de destination (après le pas en cours).
@@ -673,6 +802,8 @@ func _walk(path: Array[Vector2i]) -> void:
 			_hero.position = from.lerp(to, f)
 			_hero.hop = sin(f * PI) * 10.0, 0.0, 1.0, step_time)
 		_after_step()
+		if not _pan_moved:
+			_focus_cell(step, true, step_time)
 		await tw.finished
 		if not fresh.is_empty():
 			_refresh_world()

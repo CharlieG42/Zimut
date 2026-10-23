@@ -67,6 +67,8 @@ const BOSS_HP_MULT := 1.2
 const BOSS_ATK_MULT := 0.85
 ## Enrage : au-delà de ce tour, les ennemis frappent +10 % par tour supplémentaire
 ## (évite les combats interminables).
+## V43 : le chrono sonne et pulse quand il reste ce nombre de secondes.
+const TURN_TIMER_WARN := 5.0
 const ENRAGE_AFTER_TURN := 14
 
 var grid: Array                  = []
@@ -102,8 +104,8 @@ var fight_biome: String          = "Forêt"  # biome du combat en cours
 var turn_timer_remaining: float  = 0.0
 ## V42 : timer de tour — durée totale configurée (0 = désactivé).
 var turn_timer_duration: float   = 0.0
-var _turn_timer: SceneTreeTimer   = null
 var _turn_timer_epoch: int       = -1
+var _turn_timer_warned: bool     = false
 
 var _turn_index: int = -1
 var _uid_counter: int = 0
@@ -961,8 +963,8 @@ func advance_turn() -> void:
 
 func _begin_turn(e: Dictionary) -> void:
 	active_entity = e
-	# V42 : démarre le timer de tour
-	_start_turn_timer()
+	# V43 : le chrono ne concerne que les tours jouables (voir plus bas) ; on repart de zéro
+	_stop_turn_timer()
 	for x: Dictionary in all_entities():
 		x["is_active"] = (int(x["uid"]) == int(e["uid"]))
 	e["casts"] = {}
@@ -1028,6 +1030,9 @@ func _begin_turn(e: Dictionary) -> void:
 		_end_turn_later(1.1)
 	elif not controllable:
 		ai_turn_requested.emit(e)
+	else:
+		# V43 : chrono de tour, uniquement pour un héros contrôlé par le joueur
+		_start_turn_timer()
 
 
 func _end_turn_later(delay: float) -> void:
@@ -1096,49 +1101,60 @@ func end_current_turn() -> void:
 #  V42 : Timer de tour (10s par défaut, configurable)
 # ═══════════════════════════════════════════════════════
 
-## Démarre le timer de tour pour l'entité active.
+## Démarre le chrono du tour (héros contrôlé par le joueur uniquement).
+## V43 : le décompte se fait dans _process (plus de coroutine) — la jauge bouge enfin,
+## il se met en pause pendant les animations (le joueur n'est pas pénalisé par les effets)
+## et il avertit à 5 s de la fin.
 func _start_turn_timer() -> void:
 	_stop_turn_timer()
-	turn_timer_duration = GameSettings.turn_timer_seconds()
-	if turn_timer_duration <= 0.0 or game_over or active_entity.is_empty():
-		turn_timer_remaining = 0.0
+	var dur: float = GameSettings.turn_timer_seconds()
+	if dur <= 0.0 or game_over or active_entity.is_empty():
+		turn_timer_duration = 0.0
 		return
-	turn_timer_remaining = turn_timer_duration
+	turn_timer_duration = dur
+	turn_timer_remaining = dur
 	_turn_timer_epoch = _epoch
-	# ignore_time_scale = true : le compte à rebours reste en temps réel même
-	# quand les tours ennemis sont accélérés (Engine.time_scale > 1).
-	_turn_timer = await get_tree().create_timer(turn_timer_duration, false, true).timeout
-	# Le timer a expiré : vérifier qu'on est toujours sur le même tour
-	if _turn_timer_epoch != _epoch or game_over or active_entity.is_empty():
-		return
+	_turn_timer_warned = false
+
+
+## Arrête le chrono du tour en cours.
+func _stop_turn_timer() -> void:
+	_turn_timer_epoch = -1
+	_turn_timer_warned = false
+	turn_timer_remaining = 0.0
+	turn_timer_duration = 0.0
+
+
+## Avance le chrono de `delta` secondes (temps réel). Retourne true si le temps est écoulé.
+func tick_turn_timer(delta: float) -> bool:
+	if turn_timer_duration <= 0.0 or _turn_timer_epoch != _epoch or game_over or active_entity.is_empty():
+		return false
+	if current_turn != 0:
+		return false
+	turn_timer_remaining = maxf(0.0, turn_timer_remaining - delta)
+	if turn_timer_remaining <= TURN_TIMER_WARN and not _turn_timer_warned and turn_timer_remaining > 0.0:
+		_turn_timer_warned = true
+		Sfx.play("timer")
+	return turn_timer_remaining <= 0.0
+
+
+func _on_turn_timer_expired() -> void:
 	Sfx.play("timer")
 	message_requested.emit("⏱ %s n'a pas joué — tour terminé !" % String(active_entity.get("name", "?")))
 	fx.emit("timer_expired", {"entity": active_entity})
-	# Fin automatique du tour
-	if current_turn == 0:
-		end_current_turn()
-	else:
-		# Tour IA : le TurnManager gère déjà, on force juste la fin
-		active_entity["current_pa"] = 0
-		active_entity["current_pm"] = 0
-		end_current_turn()
-
-
-## Annule le timer de tour en cours.
-func _stop_turn_timer() -> void:
-	_turn_timer_epoch = -1
-	_turn_timer = null
-	turn_timer_remaining = 0.0
-	# Le timer de Godot est lié au tree, pas annulable directement ;
-	# on utilise l'epoch pour invalider le callback.
+	_stop_turn_timer()
+	end_current_turn()
 
 
 func _process(delta: float) -> void:
-	# V42 : décompte du timer de tour pour l'affichage
-	if turn_timer_duration > 0.0 and not active_entity.is_empty() and not game_over:
-		if _turn_timer != null and _turn_timer_epoch == _epoch:
-			turn_timer_remaining = maxf(0.0, turn_timer_remaining - delta)
-			state_changed.emit()
+	if turn_timer_duration <= 0.0 or active_entity.is_empty() or game_over:
+		return
+	# Pause pendant les animations de sort / déplacement ; temps réel même si time_scale != 1
+	if not _grid_busy():
+		if tick_turn_timer(delta / maxf(0.01, Engine.time_scale)):
+			_on_turn_timer_expired()
+			return
+	state_changed.emit()
 
 
 func set_auto(value: bool) -> void:

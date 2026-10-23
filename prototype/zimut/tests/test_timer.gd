@@ -7,11 +7,14 @@ extends SceneTree
 
 var failures: int = 0
 var GameSettings = load("res://scripts/GameSettings.gd")
-var GameManager = load("res://scripts/GameManager.gd")
 
 func _init() -> void:
+	_boot.call_deferred()
+
+func _boot() -> void:
 	_test_timer_settings()
 	_test_timer_defaults()
+	_test_timer_countdown()
 	print("")
 	if failures > 0:
 		print("ÉCHEC : %d test(s) en erreur." % failures)
@@ -60,13 +63,39 @@ func _test_timer_settings() -> void:
 
 func _test_timer_defaults() -> void:
 	print("GameManager — état initial du timer (V42) :")
-	# Créer une instance de GameManager (extends Node)
-	var gm: Node = GameManager.new()
-	_check(gm != null, "instance GameManager créée")
-	_check(float(gm.turn_timer_remaining) == 0.0, "reste à 0 hors combat")
-	_check(float(gm.turn_timer_duration) == 0.0, "durée à 0 hors combat")
-	gm.free()
+	var gm: Node = root.get_node("/root/GameManager")
+	_check(gm != null, "autoload GameManager présent")
+	# L'autoload peut déjà porter un combat de démonstration : on vérifie l'arrêt, pas l'état initial.
+	gm._stop_turn_timer()
+	_check(float(gm.turn_timer_remaining) == 0.0, "reste à 0 après arrêt")
+	_check(float(gm.turn_timer_duration) == 0.0, "durée à 0 après arrêt")
 	# Le timer doit reprendre la valeur du réglage au prochain _begin_turn
 	var gs: Node = GameSettings.new()
 	_check(gs.turn_timer_seconds() >= 0.0, "durée réglée cohérente")
 	gs.free()
+
+
+func _test_timer_countdown() -> void:
+	print("GameManager — décompte du chrono (V43) :")
+	var gm: Node = root.get_node("/root/GameManager")
+	gm.game_over = false
+	gm.active_entity = {"name": "Testeur", "team": "player", "uid": 1}
+	gm.current_turn = 0
+	gm.turn_timer_duration = 30.0
+	gm.turn_timer_remaining = 30.0
+	gm._turn_timer_epoch = gm._epoch
+	_check(not gm.tick_turn_timer(10.0), "10 s écoulées : pas fini")
+	_check(absf(float(gm.turn_timer_remaining) - 20.0) < 0.001, "il reste 20 s (la jauge bouge)")
+	_check(not gm.tick_turn_timer(15.0), "15 s de plus (reste 5 s) : pas fini")
+	_check(bool(gm._turn_timer_warned), "avertissement à 5 s déclenché")
+	_check(gm.tick_turn_timer(10.0), "temps écoulé → true")
+	_check(float(gm.turn_timer_remaining) == 0.0, "reste à 0, sans passer en négatif")
+	# Tour de l'ordinateur : le chrono ne décompte pas
+	gm.turn_timer_remaining = 30.0
+	gm.current_turn = 1
+	_check(not gm.tick_turn_timer(40.0), "tour ennemi : chrono ignoré")
+	_check(float(gm.turn_timer_remaining) == 30.0, "tour ennemi : temps intact")
+	# Arrêt du chrono
+	gm._stop_turn_timer()
+	_check(float(gm.turn_timer_duration) == 0.0 and float(gm.turn_timer_remaining) == 0.0, "arrêt : durée et reste à 0")
+	gm.active_entity = {}
