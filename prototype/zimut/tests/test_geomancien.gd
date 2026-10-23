@@ -34,7 +34,7 @@ func _boot() -> void:
 			geo = p
 	check(not geo.is_empty(), "le Géomancien est présent dans l'équipe")
 	geo["spells"] = gm._build_spells("Géomancien", 100)
-	check(geo["spells"].size() == 10, "10 sorts au niveau 100 (%d)" % geo["spells"].size())
+	check(geo["spells"].size() == 30, "30 sorts au niveau 100 (%d)" % geo["spells"].size())
 	geo["current_pa"] = 20
 	geo["max_pv"] = 400
 	var gp: Vector2i = gm.pos_of(geo)

@@ -46,3 +46,4 @@ Thumbs.db
 
 # Fichiers temporaires Godot
 *.tmp
+tools/__pycache__/

@@ -224,6 +224,23 @@ static func toggle_spell(data: Dictionary, classe: String, spell_name: String) -
 	set_active_spells(data, classe, cur)
 
 
+## Montée de niveau : les sorts nouvellement débloqués prennent les places LIBRES du build actif
+## (jamais à la place d'un sort déjà choisi : au-delà de 10, c'est au joueur de trancher).
+static func on_level_up(data: Dictionary, classe: String, from_level: int, to_level: int) -> void:
+	var cur: Array = active_spells(data, classe)
+	if cur.size() >= MAX_ACTIVE_SPELLS:
+		return
+	var changed: bool = false
+	for n: String in _pm().spells_unlocked_between(classe, from_level, to_level):
+		if cur.size() >= MAX_ACTIVE_SPELLS:
+			break
+		if not cur.has(n):
+			cur.append(n)
+			changed = true
+	if changed:
+		set_active_spells(data, classe, cur)
+
+
 ## ── Équipement d'un build ──
 
 ## Équipement d'un build (copie) — {} si le build est vide ou absent.
