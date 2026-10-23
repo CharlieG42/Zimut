@@ -106,6 +106,15 @@ func _lbl(text: String, size: int = 20, col: Color = C_TXT, outline: bool = fals
 	return l
 
 
+## Libellé multi-lignes : ne force jamais la largeur du panneau.
+func _note(text: String, size: int = 16, col: Color = C_DIM) -> Label:
+	var l := _lbl(text, size, col)
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.custom_minimum_size = Vector2(60, 0)
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return l
+
+
 func _chip(text: String, col: Color, size: int = 17) -> PanelContainer:
 	var p := PanelContainer.new()
 	p.add_theme_stylebox_override("panel", _box(col.darkened(0.55), col, 10, 2, 8))
@@ -248,7 +257,7 @@ func _build() -> void:
 
 	# Colonne des classes
 	var left := PanelContainer.new()
-	left.custom_minimum_size = Vector2(360, 0)
+	left.custom_minimum_size = Vector2(340, 0)
 	left.add_theme_stylebox_override("panel", _box(C_PANEL, C_BORDER, 18, 2, 12))
 	body.add_child(left)
 	var lscroll := ScrollContainer.new()
@@ -263,6 +272,8 @@ func _build() -> void:
 	# Panneau principal
 	var right := PanelContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right.custom_minimum_size = Vector2(0, 0)
+	right.clip_contents = true
 	right.add_theme_stylebox_override("panel", _box(C_PANEL, C_BORDER, 18, 2, 18))
 	body.add_child(right)
 	var rbox := VBoxContainer.new()
@@ -432,41 +443,31 @@ func _refresh_tabs() -> void:
 		c.queue_free()
 	var ent: Dictionary = ProgressionManager.roster_entry(_save, _classe)
 	var pts: int = int(ent.get("unspent", 0))
-	var b1 := _btn("CARACTÉRISTIQUES" + ("  ✦%d" % pts if pts > 0 else ""), C_GOLD if _tab == "stats" else C_BORDER, 22, Vector2(300, 54))
-	b1.pressed.connect(func() -> void:
-		_tab = "stats"
-		refresh())
-	_tabs_row.add_child(b1)
-	var b2 := _btn("SORTS", C_GOLD if _tab == "spells" else C_BORDER, 22, Vector2(200, 54))
-	b2.pressed.connect(func() -> void:
-		_tab = "spells"
-		refresh())
-	_tabs_row.add_child(b2)
 	var rec_n: int = _gear_total_rec()
-	var b3 := _btn("ÉQUIPEMENT" + ("  ▲%d" % rec_n if rec_n > 0 else ""), C_GOLD if _tab == "gear" else C_BORDER, 22, Vector2(240, 54))
-	b3.name = "GearTab"
-	b3.pressed.connect(func() -> void:
-		_tab = "gear"
-		_gear_pick = ""
-		_gear_msg = ""
-		refresh())
-	_tabs_row.add_child(b3)
-	# V42 : onglet TALENTS (arbre propre au héros, débloqué au niveau 15)
 	var tpts: int = TalentTree.points(_save, _classe)
-	var b4 := _btn("TALENTS" + ("  ★%d" % tpts if tpts > 0 else ""), C_GOLD if _tab == "talents" else C_BORDER, 22, Vector2(240, 54))
-	b4.name = "TalentsTab"
-	b4.pressed.connect(func() -> void:
-		_tab = "talents"
-		refresh())
-	_tabs_row.add_child(b4)
-	# V42 : onglet BUILDS (3 builds par perso : équipement + sorts actifs + talents)
 	var n_b: int = Builds.build_count(_save, _classe)
-	var b5 := _btn("BUILDS" + ("  ×%d" % n_b if n_b > 0 else ""), C_GOLD if _tab == "builds" else C_BORDER, 22, Vector2(220, 54))
-	b5.name = "BuildsTab"
-	b5.pressed.connect(func() -> void:
-		_tab = "builds"
-		refresh())
-	_tabs_row.add_child(b5)
+	# id, libellé, nom du nœud (tests / tutoriel), poids de largeur
+	var defs: Array = [
+		["stats", "CARACTÉRISTIQUES" + ("  ✦%d" % pts if pts > 0 else ""), "StatsTab", 3.0],
+		["spells", "SORTS", "SpellsTab", 1.6],
+		["gear", "ÉQUIPEMENT" + ("  ▲%d" % rec_n if rec_n > 0 else ""), "GearTab", 2.2],
+		["talents", "TALENTS" + ("  ★%d" % tpts if tpts > 0 else ""), "TalentsTab", 2.0],
+		["builds", "BUILDS" + ("  ×%d" % n_b if n_b > 0 else ""), "BuildsTab", 1.8],
+	]
+	for d: Array in defs:
+		var tab_id: String = String(d[0])
+		var b := _btn(String(d[1]), C_GOLD if _tab == tab_id else C_BORDER, 20, Vector2(0, 54))
+		b.name = String(d[2])
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.size_flags_stretch_ratio = float(d[3])
+		b.clip_text = true
+		b.pressed.connect(func() -> void:
+			_tab = tab_id
+			if tab_id == "gear":
+				_gear_pick = ""
+				_gear_msg = ""
+			refresh())
+		_tabs_row.add_child(b)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -695,7 +696,7 @@ func _build_talents() -> void:
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.add_child(sp)
 	bar.add_child(_lbl("%d talent%s débloqué%s" % [unlocked_n, "s" if unlocked_n > 1 else "", "s" if unlocked_n > 1 else ""], 18, C_DIM))
-	_content.add_child(_lbl("1 point de pouvoir tous les %d niveaux à partir du niveau %d. Les bonus ne s'appliquent qu'à ce héros." % [TalentTree.POWER_PER_LEVEL, TalentTree.UNLOCK_LEVEL], 16, C_DIM))
+	_content.add_child(_note("1 point de pouvoir tous les %d niveaux à partir du niveau %d. Les bonus ne s'appliquent qu'à ce héros." % [TalentTree.POWER_PER_LEVEL, TalentTree.UNLOCK_LEVEL]))
 	# Grille 2x2 des branches
 	var grid := GridContainer.new()
 	grid.columns = 2
@@ -710,6 +711,7 @@ func _build_talents() -> void:
 func _build_talent_branch(branch: String, pts: int) -> PanelContainer:
 	var info: Dictionary = TalentTree.BRANCHES[branch]
 	var panel := PanelContainer.new()
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	panel.add_theme_stylebox_override("panel", _box(C_PANEL, info["color"], 14, 3, 14))
 	var box := VBoxContainer.new()
@@ -721,41 +723,51 @@ func _build_talent_branch(branch: String, pts: int) -> PanelContainer:
 	return panel
 
 
-func _build_talent_node(id: String, name: String, desc: String, cost: int, branch_color: Color, pts: int) -> Button:
+func _build_talent_node(id: String, name: String, desc: String, cost: int, branch_color: Color, pts: int) -> Control:
 	var unlocked: bool = TalentTree.is_unlocked(_save, _classe, id)
 	var affordable: bool = pts >= cost and not unlocked
-	var btn := Button.new()
-	btn.custom_minimum_size = Vector2(0, 62)
-	btn.focus_mode = Control.FOCUS_NONE
-	btn.disabled = unlocked or not affordable
+	var card := PanelContainer.new()
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.custom_minimum_size = Vector2(0, 62)
 	var bg_col: Color = C_CARD_HI if unlocked else (C_CARD if affordable else Color(0.08, 0.10, 0.14))
 	var border_col: Color = C_GOOD if unlocked else (branch_color if affordable else Color(0.20, 0.22, 0.30))
-	btn.add_theme_stylebox_override("normal", _box(bg_col, border_col, 10, 2, 10))
-	btn.add_theme_stylebox_override("hover", _box(bg_col.lightened(0.08), border_col.lightened(0.2), 10, 3, 10))
-	btn.add_theme_stylebox_override("disabled", _box(bg_col, border_col, 10, 2, 10))
+	card.add_theme_stylebox_override("panel", _box(bg_col, border_col, 10, 2, 10))
 	var hbox := HBoxContainer.new()
 	hbox.add_theme_constant_override("separation", 10)
-	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	btn.add_child(hbox)
-	hbox.add_child(_lbl("✓" if unlocked else ("★" if affordable else "🔒"), 20,
-		C_GOOD if unlocked else (branch_color if affordable else C_DIM)))
+	card.add_child(hbox)
+	var mark := _lbl("✓" if unlocked else ("★" if affordable else "🔒"), 20,
+		C_GOOD if unlocked else (branch_color if affordable else C_DIM))
+	mark.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hbox.add_child(mark)
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 2)
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hbox.add_child(vbox)
-	vbox.add_child(_lbl(name, 18, C_TXT if unlocked or affordable else C_DIM))
-	vbox.add_child(_lbl(desc, 14, C_DIM))
+	var nl := _lbl(name, 18, C_TXT if unlocked or affordable else C_DIM)
+	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	nl.custom_minimum_size = Vector2(60, 0)
+	vbox.add_child(nl)
+	var dl := _lbl(desc, 14, C_DIM)
+	dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	dl.custom_minimum_size = Vector2(60, 0)
+	vbox.add_child(dl)
 	var cost_lbl := _lbl("★ %d" % cost, 17, C_GOLD if affordable else C_DIM)
 	cost_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	cost_lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hbox.add_child(cost_lbl)
+	var btn := Button.new()
+	btn.flat = true
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	btn.tooltip_text = desc
+	btn.disabled = unlocked or not affordable
 	if not unlocked and affordable:
 		btn.pressed.connect(func() -> void:
 			if TalentTree.spend_point(_save, _classe, id):
 				_persist()
 				refresh())
-	btn.tooltip_text = desc
-	return btn
+	card.add_child(btn)
+	return card
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1142,13 +1154,13 @@ func _build_builds() -> void:
 	var active_txt: String = "Équipement libre"
 	if ai >= 0:
 		active_txt = "⭐ %s" % Builds.display_name(_save, _classe, ai)
-	bar.add_child(_chip("Build actif : %s" % active_txt, C_GOLD if ai >= 0 else C_DIM, 22))
+	bar.add_child(_chip("Build actif : %s" % active_txt, C_GOLD if ai >= 0 else C_DIM, 20))
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.add_child(sp)
 	var n_builds: int = Builds.build_count(_save, _classe)
 	if n_builds < Builds.MAX_BUILDS:
-		var mk := _btn("+ NOUVEAU BUILD", Color(0.45, 0.80, 0.50), 19, Vector2(240, 48))
+		var mk := _btn("+ NOUVEAU BUILD", Color(0.45, 0.80, 0.50), 19, Vector2(210, 48))
 		mk.tooltip_text = "Crée un build vide (équipement, sorts et talents à définir)"
 		mk.pressed.connect(func() -> void:
 			var idx: int = Builds.create_build(_save, _classe)
@@ -1156,8 +1168,8 @@ func _build_builds() -> void:
 				_persist()
 			refresh())
 		bar.add_child(mk)
-	_content.add_child(_lbl("%d build%s — chaque build regroupe un équipement complet, %d sorts actifs maximum et son propre arbre de talents. Les niveaux de sorts restent ceux du héros." % [
-		n_builds, "s" if n_builds > 1 else "", Builds.MAX_ACTIVE_SPELLS], 16, C_DIM))
+	_content.add_child(_note("%d build%s — chaque build regroupe un équipement complet, %d sorts actifs maximum et son propre arbre de talents. Les niveaux de sorts restent ceux du héros." % [
+		n_builds, "s" if n_builds > 1 else "", Builds.MAX_ACTIVE_SPELLS]))
 	# Liste des builds + état libre
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", 10)
@@ -1228,19 +1240,19 @@ func _build_slot_card(index: int, is_active: bool, level: int) -> PanelContainer
 		var spells: Array = Builds.active_spells(_save, _classe)
 		var tpts: int = TalentTree.points(_save, _classe)
 		var tn: int = TalentTree.unlocked_count(_save, _classe)
-		v.add_child(_lbl("%d objet%s · %d/%d sorts · %d talent%s (%d pts)" % [
+		v.add_child(_note("%d objet%s · %d/%d sorts · %d talent%s (%d pts)" % [
 			Builds.build_gear_count(eq), "s" if Builds.build_gear_count(eq) > 1 else "",
 			spells.size(), Builds.MAX_ACTIVE_SPELLS,
-			tn, "s" if tn > 1 else "", tpts], 16, C_DIM))
+			tn, "s" if tn > 1 else "", tpts]))
 		return card
 	var b: Dictionary = Builds.build_at(_save, _classe, index)
 	var eq2: Dictionary = b.get("equipment", {})
 	var spells2: Array = b.get("spells", [])
 	var tal2: Dictionary = b.get("talents", {"unlocked": {}, "points": 0})
-	v.add_child(_lbl("%d objet%s · %d/%d sorts · %d talent%s (%d pts)" % [
+	v.add_child(_note("%d objet%s · %d/%d sorts · %d talent%s (%d pts)" % [
 		Builds.build_gear_count(eq2), "s" if Builds.build_gear_count(eq2) > 1 else "",
 		spells2.size(), Builds.MAX_ACTIVE_SPELLS,
-		Builds.build_talent_count(tal2), "s" if Builds.build_talent_count(tal2) > 1 else "", int(tal2.get("points", 0))], 16, C_DIM))
+		Builds.build_talent_count(tal2), "s" if Builds.build_talent_count(tal2) > 1 else "", int(tal2.get("points", 0))]))
 	# Ligne 3 : édition (équipement / sorts / talents) — uniquement build actif
 	if is_active:
 		var edit := HBoxContainer.new()
@@ -1262,7 +1274,7 @@ func _build_slot_card(index: int, is_active: bool, level: int) -> PanelContainer
 			refresh())
 		edit.add_child(e3)
 		if level >= TalentTree.UNLOCK_LEVEL:
-			var save := _btn("💾 SAUVEGARDER DANS CE BUILD", Color(0.45, 0.80, 0.50), 16, Vector2(320, 42))
+			var save := _btn("💾 ENREGISTRER DANS CE BUILD", Color(0.45, 0.80, 0.50), 16, Vector2(300, 42))
 			save.tooltip_text = "Copie l'équipement, les sorts actifs et les talents actuels DANS ce build"
 			save.pressed.connect(func() -> void:
 				Builds.set_build_equipment(_save, _classe, index, ProgressionManager.hero_equipment(_save, _classe))
