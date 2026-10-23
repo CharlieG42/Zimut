@@ -84,6 +84,10 @@ jobs:
           echo "=== test_builds.gd ==="
           timeout 60 godot --headless -s tests/test_builds.gd --path . 2>&1 | tail -30 || echo "(test_builds timeout ou échec - ignoré)"
           echo ""
+          # V42 : test de chargement CharacterSheetUI (bouton Personnages)
+          echo "=== test_sheet_load.gd ==="
+          timeout 60 godot --headless -s tests/test_sheet_load.gd --path . 2>&1 | tail -30 || echo "(test_sheet_load timeout ou échec - ignoré)"
+          echo ""
           echo "Tests headless exécutés."
 
       - name: Decode release keystore from GitHub Secrets

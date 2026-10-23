@@ -536,6 +536,10 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 
 	var team_btn := _action_button("team", "Gérer l'équipe (libre à chaque combat)", COL_TXT)
 	team_btn.pressed.connect(func() -> void:
+		# V42 fix : définit la partie active pour que les boutons PERSONNAGES /
+		# ÉQUIPEMENT de TeamSelectionUI soient actifs (active_slot >= 0)
+		GameManager.active_slot = slot
+		GameManager.active_save = ProgressionManager.load_save(slot)
 		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
 	grid.add_child(team_btn)
 
