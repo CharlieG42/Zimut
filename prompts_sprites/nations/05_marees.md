@@ -4,8 +4,8 @@ Palette : turquoise, white, gold trims, coral pink accents. Effets : water splas
 
 Format 2 planches par personnage :
 
-1. **Vues** — le personnage au repos vu sous 6 angles (face, 3/4 avant droite, 3/4 dos droite, dos, 3/4 dos gauche, 3/4 avant gauche), grille 3 × 2 sur image 2:1, poses largement espacées. Un seul angle par case : aucun doublon possible.
-2. **Actions** — 3 attaques + 3 sorts en vue 3/4 avant, générées **en édition** de la planche vues (image source = planche vues) : le personnage réellement dessiné sert d'ancre, il ne peut pas changer d'une planche à l'autre. Repli : génération normale (la carte d'identité est recopiée dans chaque prompt).
+1. **Vues** — le personnage au repos vu sous 4 angles en quarts de tour (3/4 avant droite, 3/4 dos droite, 3/4 dos gauche, 3/4 avant gauche) : la caméra ne bouge pas, le personnage tourne sur lui-même. 2 vues plutôt de face, 2 plutôt de dos ; un seul angle par case, aucun doublon possible. Grille 2 × 2 sur image 2:1, poses largement espacées.
+2. **Actions** — 2 attaques + 1 sort, chacune vue DE FACE puis DE DOS (3 colonnes × 2 rangées), générées **en édition** de la planche vues (image source = planche vues) : le personnage réellement dessiné sert d'ancre, il ne peut pas changer d'une planche à l'autre. L'arme est verrouillée d'une planche à l'autre (ligne WEAPON LOCK + rappel final). Repli : génération normale (la carte d'identité est recopiée dans chaque prompt).
 
 Chaque prompt recopie la carte d'identité du personnage (`identites.py`) : aucune image à joindre. Ordre conseillé : 1) planche de style, 2) héros, 3) ennemis, 4) boss ; pour chaque personnage : vues puis actions. Prompt négatif : en bas de page.
 
@@ -30,16 +30,16 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 
 ## 2. Héros
 
-### Heal (Soigneur) — 12 poses
+### Heal (Soigneur) — 10 poses
 
-2 planches : **vues** (6 angles), puis **actions** (3 attaques + 3 sorts). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `heal_vues.png` et `heal_actions.png` pour que l'Atelier les reconnaisse.
+2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `heal_vues.png` et `heal_actions.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 6 angles (`vues`)
+#### Planche 1 — Vues · 4 angles (`vues`)
 
-Génération normale, aucune image à joindre.
+Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 6 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 6 different viewing angles.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Heal (hero of the Marées nation)
 - Hair: long teal hair (#2BB3A8) tied low behind the back
@@ -51,39 +51,67 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: golden staff topped with a glowing water-drop crystal (#7FE8FF), RIGHT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no hood, no armor, no dark clothes.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand. Only the viewing angle changes from cell to cell.
+WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
+Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
-LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, left to right, top to bottom (the camera turns around the character; the character's design never changes; never a pure side profile):
-1. FRONT view: the character stands squared to the viewer and looks straight at the camera; the full face and both eyes are clearly visible.
-2. 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right.
-3. 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes.
-4. FULL BACK view: the character is seen exactly from behind, back of the head and back of the outfit visible; no face, no eyes.
-5. 3/4 BACK view: the character is seen from behind and turns slightly to the left (back of the head and left shoulder visible), facing away from the viewer toward the upper left; we see the BACK of the head: no face, no eyes.
-6. 3/4 FRONT view: the character faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left.
-All 6 cells show ONE character in ONE pose under 6 angles: same height, same stance, same weapon in the same hand everywhere. The pose does not change, only the angle.
-EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
+1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
+2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
+3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
+4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
+All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Heal: long teal hair (#2BB3A8) tied low behind the back; soft turquoise eyes, always open; fair skin; ornate white robe with turquoise panels (#3CC7C0), gold embroidery and wave patterns. Forbidden: no hood, no armor, no dark clothes.
+WEAPON CHECK: golden staff topped with a glowing water-drop crystal (#7FE8FF), RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
+REMINDER: this is Heal: golden staff topped with a glowing water-drop crystal (#7FE8FF), RIGHT hand; long teal hair (#2BB3A8) tied low behind the back; soft turquoise eyes, always open; ornate white robe with turquoise panels (#3CC7C0), gold embroidery and wave patterns; fair skin; long white robe skirt with turquoise hem; white and gold slippers. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no armor, no dark clothes.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | face (regard vers le spectateur) | `heal.png` |
-| 1-2 | 3/4 avant droite | `heal_face_right.png` |
-| 1-3 | 3/4 dos droite | `heal_back_right.png` |
-| 2-1 | dos complet | `heal_back.png` |
-| 2-2 | 3/4 dos gauche | `heal_back_left.png` |
-| 2-3 | 3/4 avant gauche | `heal_face_left.png` |
+| 1-1 | 3/4 avant droite | `heal.png` |
+| 1-2 | 3/4 dos droite | `heal_back.png` |
+| 2-1 | 3/4 dos gauche | `heal_back_left.png` |
+| 2-2 | 3/4 avant gauche | `heal_face_left.png` |
 
-#### Planche 2 — Actions · 3 attaques + 3 sorts (`actions`)
+##### Édition corrective (arme manquante sur des cases)
+
+Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+
+```text
+Image edit for a chibi isometric tactical RPG sprite sheet.
+SOURCE IMAGE: it shows ONE playable hero, Heal, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Heal (hero of the Marées nation)
+- Hair: long teal hair (#2BB3A8) tied low behind the back
+- Eyes: soft turquoise eyes, always open
+- Skin: fair skin
+- Top: ornate white robe with turquoise panels (#3CC7C0), gold embroidery and wave patterns
+- Bottom: long white robe skirt with turquoise hem
+- Feet: white and gold slippers
+- Weapon: golden staff topped with a glowing water-drop crystal (#7FE8FF), RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no armor, no dark clothes.
+TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
+CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
+1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
+2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
+3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
+4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
+WEAPON CHECK: golden staff topped with a glowing water-drop crystal (#7FE8FF), RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
+CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+BACKGROUND: keep the plain flat background of the source image.
+REMINDER: this is Heal: golden staff topped with a glowing water-drop crystal (#7FE8FF), RIGHT hand; long teal hair (#2BB3A8) tied low behind the back; soft turquoise eyes, always open; ornate white robe with turquoise panels (#3CC7C0), gold embroidery and wave patterns; fair skin; long white robe skirt with turquoise hem; white and gold slippers. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no armor, no dark clothes.
+```
+
+#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
 
 **Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
 Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE playable hero, Heal, in 6 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+SOURCE IMAGE: it shows ONE playable hero, Heal, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Heal (hero of the Marées nation)
 - Hair: long teal hair (#2BB3A8) tied low behind the back
@@ -95,46 +123,47 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: golden staff topped with a glowing water-drop crystal (#7FE8FF), RIGHT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no hood, no armor, no dark clothes.
-TASK: replace the 6 views with 6 ACTION poses, all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never a back view.
+WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
+TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
-LAYOUT: same as the source image — 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. OVERHEAD STRIKE: staff raised high above the head with both hands.
-2. THRUST: body leaning forward, staff tip pushed far ahead with a short water splashes and bubbles spark.
-3. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
-4. FOCUS: eyes closed, staff held vertically in front of the face, water splashes and bubbles orb at the top.
-5. INVOCATION: staff raised high with both hands, water splashes and bubbles swirling above the head.
-6. BLAST: staff pointed forward, a compact water splashes and bubbles blast leaving the tip.
-The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+2. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
+3. FOCUS: eyes closed, staff held vertically in front of the face, water splashes and bubbles orb at the top.
+4. Seen from BEHIND, the SAME action as pose 1 — OVERHEAD STRIKE: staff raised high above the head with both hands.
+5. Seen from BEHIND, the SAME action as pose 2 — SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
+6. Seen from BEHIND, the SAME action as pose 3 — FOCUS: eyes closed, staff held vertically in front of the face, water splashes and bubbles orb at the top.
+Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Heal: long teal hair (#2BB3A8) tied low behind the back; soft turquoise eyes, always open; fair skin; ornate white robe with turquoise panels (#3CC7C0), gold embroidery and wave patterns. Forbidden: no hood, no armor, no dark clothes.
+REMINDER: this is Heal: golden staff topped with a glowing water-drop crystal (#7FE8FF), RIGHT hand; long teal hair (#2BB3A8) tied low behind the back; soft turquoise eyes, always open; ornate white robe with turquoise panels (#3CC7C0), gold embroidery and wave patterns; fair skin; long white robe skirt with turquoise hem; white and gold slippers. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no armor, no dark clothes.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 | `heal_attack.png` |
-| 1-2 | attaque 2 | `heal_attack_2.png` |
-| 1-3 | attaque 3 | `heal_attack_3.png` |
-| 2-1 | sort 1 | `heal_cast.png` |
-| 2-2 | sort 2 | `heal_cast_2.png` |
-| 2-3 | sort 3 | `heal_cast_3.png` |
+| 1-1 | attaque 1 — face | `heal_attack.png` |
+| 1-2 | attaque 2 — face | `heal_attack_2.png` |
+| 1-3 | sort — face | `heal_cast.png` |
+| 2-1 | attaque 1 — dos | `heal_attack_back.png` |
+| 2-2 | attaque 2 — dos | `heal_attack_2_back.png` |
+| 2-3 | sort — dos | `heal_cast_back.png` |
 
 L'export Zimut de l'Atelier copie aussi le repos (case 1 de la planche vues) vers `nations/heros/heal.png`.
 
 ## 3. Ennemis
 
-### Pirate des mers — 12 poses
+### Pirate des mers — 10 poses
 
-2 planches : **vues** (6 angles), puis **actions** (3 attaques + 3 sorts). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/marees/` ; nomme tes images `pirate_des_mers_vues.png` et `pirate_des_mers_actions.png` pour que l'Atelier les reconnaisse.
+2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/marees/` ; nomme tes images `pirate_des_mers_vues.png` et `pirate_des_mers_actions.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 6 angles (`vues`)
+#### Planche 1 — Vues · 4 angles (`vues`)
 
-Génération normale, aucune image à joindre.
+Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 6 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 6 different viewing angles.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Pirate des mers (enemy of the Marées nation)
 - Hair: red bandana (#C8281E) over messy black hair, stubble
@@ -145,39 +174,66 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: short cutlass in the RIGHT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no hat, no eye patch, no wooden leg, no pistol, no parrot.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand. Only the viewing angle changes from cell to cell.
+WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
+Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
-LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, left to right, top to bottom (the camera turns around the character; the character's design never changes; never a pure side profile):
-1. FRONT view: the character stands squared to the viewer and looks straight at the camera; the full face and both eyes are clearly visible.
-2. 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right.
-3. 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes.
-4. FULL BACK view: the character is seen exactly from behind, back of the head and back of the outfit visible; no face, no eyes.
-5. 3/4 BACK view: the character is seen from behind and turns slightly to the left (back of the head and left shoulder visible), facing away from the viewer toward the upper left; we see the BACK of the head: no face, no eyes.
-6. 3/4 FRONT view: the character faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left.
-All 6 cells show ONE character in ONE pose under 6 angles: same height, same stance, same weapon in the same hand everywhere. The pose does not change, only the angle.
-EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
+1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
+2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
+3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
+4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
+All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Pirate des mers: red bandana (#C8281E) over messy black hair, stubble; dark brown eyes, always open, one gold earring; blue coat (#2A4E8A) with gold buttons over a white shirt, crossed brown leather belts; dark brown trousers. Forbidden: no hat, no eye patch, no wooden leg, no pistol, no parrot.
+WEAPON CHECK: short cutlass in the RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
+REMINDER: this is Pirate des mers: short cutlass in the RIGHT hand; red bandana (#C8281E) over messy black hair, stubble; dark brown eyes, always open, one gold earring; blue coat (#2A4E8A) with gold buttons over a white shirt, crossed brown leather belts; dark brown trousers; black boots. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hat, no eye patch, no wooden leg, no pistol, no parrot.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | face (regard vers le spectateur) | `pirate_des_mers.png` |
-| 1-2 | 3/4 avant droite | `pirate_des_mers_face_right.png` |
-| 1-3 | 3/4 dos droite | `pirate_des_mers_back_right.png` |
-| 2-1 | dos complet | `pirate_des_mers_back.png` |
-| 2-2 | 3/4 dos gauche | `pirate_des_mers_back_left.png` |
-| 2-3 | 3/4 avant gauche | `pirate_des_mers_face_left.png` |
+| 1-1 | 3/4 avant droite | `pirate_des_mers.png` |
+| 1-2 | 3/4 dos droite | `pirate_des_mers_back.png` |
+| 2-1 | 3/4 dos gauche | `pirate_des_mers_back_left.png` |
+| 2-2 | 3/4 avant gauche | `pirate_des_mers_face_left.png` |
 
-#### Planche 2 — Actions · 3 attaques + 3 sorts (`actions`)
+##### Édition corrective (arme manquante sur des cases)
+
+Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+
+```text
+Image edit for a chibi isometric tactical RPG sprite sheet.
+SOURCE IMAGE: it shows ONE enemy monster, Pirate des mers, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Pirate des mers (enemy of the Marées nation)
+- Hair: red bandana (#C8281E) over messy black hair, stubble
+- Eyes: dark brown eyes, always open, one gold earring
+- Top: blue coat (#2A4E8A) with gold buttons over a white shirt, crossed brown leather belts
+- Bottom: dark brown trousers
+- Feet: black boots
+- Weapon: short cutlass in the RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hat, no eye patch, no wooden leg, no pistol, no parrot.
+TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
+CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
+1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
+2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
+3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
+4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
+WEAPON CHECK: short cutlass in the RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
+CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+BACKGROUND: keep the plain flat background of the source image.
+REMINDER: this is Pirate des mers: short cutlass in the RIGHT hand; red bandana (#C8281E) over messy black hair, stubble; dark brown eyes, always open, one gold earring; blue coat (#2A4E8A) with gold buttons over a white shirt, crossed brown leather belts; dark brown trousers; black boots. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hat, no eye patch, no wooden leg, no pistol, no parrot.
+```
+
+#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
 
 **Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
 Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Pirate des mers, in 6 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+SOURCE IMAGE: it shows ONE enemy monster, Pirate des mers, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Pirate des mers (enemy of the Marées nation)
 - Hair: red bandana (#C8281E) over messy black hair, stubble
@@ -188,42 +244,43 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: short cutlass in the RIGHT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no hat, no eye patch, no wooden leg, no pistol, no parrot.
-TASK: replace the 6 views with 6 ACTION poses, all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never a back view.
+WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
+TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
-LAYOUT: same as the source image — 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. CROSS SLASH: both daggers crossed high above the head, about to strike down.
-2. LUNGE STAB: body stretched forward almost horizontal, one dagger thrust far ahead.
-3. SPIN: body twisted, arms spread to both sides, short water splashes and bubbles slash arcs.
-4. SHADOW KNEEL: kneeling, one hand on the ground, water splashes and bubbles rising around.
-5. VANISH: half the body dissolving into water splashes and bubbles, only the eyes and daggers clear.
-6. MARK: one arm pointing forward, a water splashes and bubbles sigil appearing in front of the hand.
-The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+2. SPIN: body twisted, arms spread to both sides, short water splashes and bubbles slash arcs.
+3. SHADOW KNEEL: kneeling, one hand on the ground, water splashes and bubbles rising around.
+4. Seen from BEHIND, the SAME action as pose 1 — CROSS SLASH: both daggers crossed high above the head, about to strike down.
+5. Seen from BEHIND, the SAME action as pose 2 — SPIN: body twisted, arms spread to both sides, short water splashes and bubbles slash arcs.
+6. Seen from BEHIND, the SAME action as pose 3 — SHADOW KNEEL: kneeling, one hand on the ground, water splashes and bubbles rising around.
+Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Pirate des mers: red bandana (#C8281E) over messy black hair, stubble; dark brown eyes, always open, one gold earring; blue coat (#2A4E8A) with gold buttons over a white shirt, crossed brown leather belts; dark brown trousers. Forbidden: no hat, no eye patch, no wooden leg, no pistol, no parrot.
+REMINDER: this is Pirate des mers: short cutlass in the RIGHT hand; red bandana (#C8281E) over messy black hair, stubble; dark brown eyes, always open, one gold earring; blue coat (#2A4E8A) with gold buttons over a white shirt, crossed brown leather belts; dark brown trousers; black boots. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hat, no eye patch, no wooden leg, no pistol, no parrot.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 | `pirate_des_mers_attack.png` |
-| 1-2 | attaque 2 | `pirate_des_mers_attack_2.png` |
-| 1-3 | attaque 3 | `pirate_des_mers_attack_3.png` |
-| 2-1 | sort 1 | `pirate_des_mers_cast.png` |
-| 2-2 | sort 2 | `pirate_des_mers_cast_2.png` |
-| 2-3 | sort 3 | `pirate_des_mers_cast_3.png` |
+| 1-1 | attaque 1 — face | `pirate_des_mers_attack.png` |
+| 1-2 | attaque 2 — face | `pirate_des_mers_attack_2.png` |
+| 1-3 | sort — face | `pirate_des_mers_cast.png` |
+| 2-1 | attaque 1 — dos | `pirate_des_mers_attack_back.png` |
+| 2-2 | attaque 2 — dos | `pirate_des_mers_attack_2_back.png` |
+| 2-3 | sort — dos | `pirate_des_mers_cast_back.png` |
 
-### Requin — 12 poses
+### Requin — 10 poses
 
-2 planches : **vues** (6 angles), puis **actions** (3 attaques + 3 sorts). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/marees/` ; nomme tes images `requin_vues.png` et `requin_actions.png` pour que l'Atelier les reconnaisse.
+2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/marees/` ; nomme tes images `requin_vues.png` et `requin_actions.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 6 angles (`vues`)
+#### Planche 1 — Vues · 4 angles (`vues`)
 
-Génération normale, aucune image à joindre.
+Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 6 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 6 different viewing angles.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Requin (enemy of the Marées nation)
 - Body: blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail
@@ -231,39 +288,61 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two pectoral fins used like small arms
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no legs, no weapon, no armor.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand. Only the viewing angle changes from cell to cell.
+WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
+Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
-LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, left to right, top to bottom (the camera turns around the character; the character's design never changes; never a pure side profile):
-1. FRONT view: the character stands squared to the viewer and looks straight at the camera; the full face and both eyes are clearly visible.
-2. 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right.
-3. 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes.
-4. FULL BACK view: the character is seen exactly from behind, back of the head and back of the outfit visible; no face, no eyes.
-5. 3/4 BACK view: the character is seen from behind and turns slightly to the left (back of the head and left shoulder visible), facing away from the viewer toward the upper left; we see the BACK of the head: no face, no eyes.
-6. 3/4 FRONT view: the character faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left.
-All 6 cells show ONE character in ONE pose under 6 angles: same height, same stance, same weapon in the same hand everywhere. The pose does not change, only the angle.
-EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
+1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
+2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
+3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
+4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
+All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Requin: blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail; wide toothy grin with white teeth, small black eyes; two pectoral fins used like small arms. Forbidden: no legs, no weapon, no armor.
+REMINDER: this is Requin: blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail; wide toothy grin with white teeth, small black eyes; two pectoral fins used like small arms. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no legs, no weapon, no armor.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | face (regard vers le spectateur) | `requin.png` |
-| 1-2 | 3/4 avant droite | `requin_face_right.png` |
-| 1-3 | 3/4 dos droite | `requin_back_right.png` |
-| 2-1 | dos complet | `requin_back.png` |
-| 2-2 | 3/4 dos gauche | `requin_back_left.png` |
-| 2-3 | 3/4 avant gauche | `requin_face_left.png` |
+| 1-1 | 3/4 avant droite | `requin.png` |
+| 1-2 | 3/4 dos droite | `requin_back.png` |
+| 2-1 | 3/4 dos gauche | `requin_back_left.png` |
+| 2-2 | 3/4 avant gauche | `requin_face_left.png` |
 
-#### Planche 2 — Actions · 3 attaques + 3 sorts (`actions`)
+##### Édition corrective (arme manquante sur des cases)
+
+Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+
+```text
+Image edit for a chibi isometric tactical RPG sprite sheet.
+SOURCE IMAGE: it shows ONE enemy monster, Requin, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Requin (enemy of the Marées nation)
+- Body: blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail
+- Head: wide toothy grin with white teeth, small black eyes
+- Details: two pectoral fins used like small arms
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no legs, no weapon, no armor.
+TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
+CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
+1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
+2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
+3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
+4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
+CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+BACKGROUND: keep the plain flat background of the source image.
+REMINDER: this is Requin: blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail; wide toothy grin with white teeth, small black eyes; two pectoral fins used like small arms. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no legs, no weapon, no armor.
+```
+
+#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
 
 **Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
 Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Requin, in 6 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+SOURCE IMAGE: it shows ONE enemy monster, Requin, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Requin (enemy of the Marées nation)
 - Body: blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail
@@ -271,42 +350,43 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two pectoral fins used like small arms
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no legs, no weapon, no armor.
-TASK: replace the 6 views with 6 ACTION poses, all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never a back view.
+WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
+TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
-LAYOUT: same as the source image — 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. REARING: standing up on the hind legs, front claws raised high.
-2. POUNCE: body stretched forward in the air, jaws open.
-3. SIDE SWIPE: head and claws swept to the side, body twisted.
-4. HOWL: head raised to the sky, water splashes and bubbles gathering around the body.
-5. ROAR: mouth wide open, water splashes and bubbles burst in front of the head.
-6. BREATH: a short water splashes and bubbles breath released forward.
-The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+2. SIDE SWIPE: head and claws swept to the side, body twisted.
+3. HOWL: head raised to the sky, water splashes and bubbles gathering around the body.
+4. Seen from BEHIND, the SAME action as pose 1 — REARING: standing up on the hind legs, front claws raised high.
+5. Seen from BEHIND, the SAME action as pose 2 — SIDE SWIPE: head and claws swept to the side, body twisted.
+6. Seen from BEHIND, the SAME action as pose 3 — HOWL: head raised to the sky, water splashes and bubbles gathering around the body.
+Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Requin: blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail; wide toothy grin with white teeth, small black eyes; two pectoral fins used like small arms. Forbidden: no legs, no weapon, no armor.
+REMINDER: this is Requin: blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail; wide toothy grin with white teeth, small black eyes; two pectoral fins used like small arms. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no legs, no weapon, no armor.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 | `requin_attack.png` |
-| 1-2 | attaque 2 | `requin_attack_2.png` |
-| 1-3 | attaque 3 | `requin_attack_3.png` |
-| 2-1 | sort 1 | `requin_cast.png` |
-| 2-2 | sort 2 | `requin_cast_2.png` |
-| 2-3 | sort 3 | `requin_cast_3.png` |
+| 1-1 | attaque 1 — face | `requin_attack.png` |
+| 1-2 | attaque 2 — face | `requin_attack_2.png` |
+| 1-3 | sort — face | `requin_cast.png` |
+| 2-1 | attaque 1 — dos | `requin_attack_back.png` |
+| 2-2 | attaque 2 — dos | `requin_attack_2_back.png` |
+| 2-3 | sort — dos | `requin_cast_back.png` |
 
-### Néréide — 12 poses
+### Néréide — 10 poses
 
-2 planches : **vues** (6 angles), puis **actions** (3 attaques + 3 sorts). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/marees/` ; nomme tes images `nereide_vues.png` et `nereide_actions.png` pour que l'Atelier les reconnaisse.
+2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/marees/` ; nomme tes images `nereide_vues.png` et `nereide_actions.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 6 angles (`vues`)
+#### Planche 1 — Vues · 4 angles (`vues`)
 
-Génération normale, aucune image à joindre.
+Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 6 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 6 different viewing angles.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Néréide (enemy of the Marées nation)
 - Body: water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights
@@ -314,39 +394,61 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Bottom: lower body ends in a swirl of water, no legs
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no clothes, no weapon, no fish tail with scales.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand. Only the viewing angle changes from cell to cell.
+WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
+Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
-LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, left to right, top to bottom (the camera turns around the character; the character's design never changes; never a pure side profile):
-1. FRONT view: the character stands squared to the viewer and looks straight at the camera; the full face and both eyes are clearly visible.
-2. 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right.
-3. 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes.
-4. FULL BACK view: the character is seen exactly from behind, back of the head and back of the outfit visible; no face, no eyes.
-5. 3/4 BACK view: the character is seen from behind and turns slightly to the left (back of the head and left shoulder visible), facing away from the viewer toward the upper left; we see the BACK of the head: no face, no eyes.
-6. 3/4 FRONT view: the character faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left.
-All 6 cells show ONE character in ONE pose under 6 angles: same height, same stance, same weapon in the same hand everywhere. The pose does not change, only the angle.
-EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
+1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
+2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
+3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
+4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
+All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Néréide: water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights; flowing hair of white-capped waves, glowing white eyes, small shell crown; lower body ends in a swirl of water, no legs. Forbidden: no clothes, no weapon, no fish tail with scales.
+REMINDER: this is Néréide: water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights; flowing hair of white-capped waves, glowing white eyes, small shell crown; lower body ends in a swirl of water, no legs. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no clothes, no weapon, no fish tail with scales.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | face (regard vers le spectateur) | `nereide.png` |
-| 1-2 | 3/4 avant droite | `nereide_face_right.png` |
-| 1-3 | 3/4 dos droite | `nereide_back_right.png` |
-| 2-1 | dos complet | `nereide_back.png` |
-| 2-2 | 3/4 dos gauche | `nereide_back_left.png` |
-| 2-3 | 3/4 avant gauche | `nereide_face_left.png` |
+| 1-1 | 3/4 avant droite | `nereide.png` |
+| 1-2 | 3/4 dos droite | `nereide_back.png` |
+| 2-1 | 3/4 dos gauche | `nereide_back_left.png` |
+| 2-2 | 3/4 avant gauche | `nereide_face_left.png` |
 
-#### Planche 2 — Actions · 3 attaques + 3 sorts (`actions`)
+##### Édition corrective (arme manquante sur des cases)
+
+Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+
+```text
+Image edit for a chibi isometric tactical RPG sprite sheet.
+SOURCE IMAGE: it shows ONE enemy monster, Néréide, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Néréide (enemy of the Marées nation)
+- Body: water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights
+- Head: flowing hair of white-capped waves, glowing white eyes, small shell crown
+- Bottom: lower body ends in a swirl of water, no legs
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no clothes, no weapon, no fish tail with scales.
+TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
+CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
+1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
+2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
+3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
+4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
+CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+BACKGROUND: keep the plain flat background of the source image.
+REMINDER: this is Néréide: water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights; flowing hair of white-capped waves, glowing white eyes, small shell crown; lower body ends in a swirl of water, no legs. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no clothes, no weapon, no fish tail with scales.
+```
+
+#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
 
 **Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
 Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Néréide, in 6 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+SOURCE IMAGE: it shows ONE enemy monster, Néréide, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Néréide (enemy of the Marées nation)
 - Body: water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights
@@ -354,42 +456,43 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Bottom: lower body ends in a swirl of water, no legs
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no clothes, no weapon, no fish tail with scales.
-TASK: replace the 6 views with 6 ACTION poses, all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never a back view.
+WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
+TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
-LAYOUT: same as the source image — 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. RISE: body stretched tall upward, arms raised.
-2. LUNGE: body stretched forward, claws of water splashes and bubbles reaching out.
-3. SPIN: body whirling, water splashes and bubbles trail around it.
-4. HOVER: floating higher, water splashes and bubbles orbs circling.
-5. PULSE: arms spread, water splashes and bubbles pulsing outward.
-6. WAVE: a compact water splashes and bubbles wave released forward.
-The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+2. SPIN: body whirling, water splashes and bubbles trail around it.
+3. HOVER: floating higher, water splashes and bubbles orbs circling.
+4. Seen from BEHIND, the SAME action as pose 1 — RISE: body stretched tall upward, arms raised.
+5. Seen from BEHIND, the SAME action as pose 2 — SPIN: body whirling, water splashes and bubbles trail around it.
+6. Seen from BEHIND, the SAME action as pose 3 — HOVER: floating higher, water splashes and bubbles orbs circling.
+Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Néréide: water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights; flowing hair of white-capped waves, glowing white eyes, small shell crown; lower body ends in a swirl of water, no legs. Forbidden: no clothes, no weapon, no fish tail with scales.
+REMINDER: this is Néréide: water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights; flowing hair of white-capped waves, glowing white eyes, small shell crown; lower body ends in a swirl of water, no legs. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no clothes, no weapon, no fish tail with scales.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 | `nereide_attack.png` |
-| 1-2 | attaque 2 | `nereide_attack_2.png` |
-| 1-3 | attaque 3 | `nereide_attack_3.png` |
-| 2-1 | sort 1 | `nereide_cast.png` |
-| 2-2 | sort 2 | `nereide_cast_2.png` |
-| 2-3 | sort 3 | `nereide_cast_3.png` |
+| 1-1 | attaque 1 — face | `nereide_attack.png` |
+| 1-2 | attaque 2 — face | `nereide_attack_2.png` |
+| 1-3 | sort — face | `nereide_cast.png` |
+| 2-1 | attaque 1 — dos | `nereide_attack_back.png` |
+| 2-2 | attaque 2 — dos | `nereide_attack_2_back.png` |
+| 2-3 | sort — dos | `nereide_cast_back.png` |
 
-### Crabe géant — 12 poses
+### Crabe géant — 10 poses
 
-2 planches : **vues** (6 angles), puis **actions** (3 attaques + 3 sorts). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/marees/` ; nomme tes images `crabe_geant_vues.png` et `crabe_geant_actions.png` pour que l'Atelier les reconnaisse.
+2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/marees/` ; nomme tes images `crabe_geant_vues.png` et `crabe_geant_actions.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 6 angles (`vues`)
+#### Planche 1 — Vues · 4 angles (`vues`)
 
-Génération normale, aucune image à joindre.
+Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 6 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 6 different viewing angles.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Crabe géant (enemy of the Marées nation)
 - Body: giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs
@@ -397,39 +500,61 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two huge pincers, the right one bigger
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no human body, no weapon.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand. Only the viewing angle changes from cell to cell.
+WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
+Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
-LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, left to right, top to bottom (the camera turns around the character; the character's design never changes; never a pure side profile):
-1. FRONT view: the character stands squared to the viewer and looks straight at the camera; the full face and both eyes are clearly visible.
-2. 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right.
-3. 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes.
-4. FULL BACK view: the character is seen exactly from behind, back of the head and back of the outfit visible; no face, no eyes.
-5. 3/4 BACK view: the character is seen from behind and turns slightly to the left (back of the head and left shoulder visible), facing away from the viewer toward the upper left; we see the BACK of the head: no face, no eyes.
-6. 3/4 FRONT view: the character faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left.
-All 6 cells show ONE character in ONE pose under 6 angles: same height, same stance, same weapon in the same hand everywhere. The pose does not change, only the angle.
-EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
+1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
+2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
+3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
+4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
+All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Crabe géant: giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs; two eyes on short stalks, small mouth; two huge pincers, the right one bigger. Forbidden: no human body, no weapon.
+REMINDER: this is Crabe géant: giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs; two eyes on short stalks, small mouth; two huge pincers, the right one bigger. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no human body, no weapon.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | face (regard vers le spectateur) | `crabe_geant.png` |
-| 1-2 | 3/4 avant droite | `crabe_geant_face_right.png` |
-| 1-3 | 3/4 dos droite | `crabe_geant_back_right.png` |
-| 2-1 | dos complet | `crabe_geant_back.png` |
-| 2-2 | 3/4 dos gauche | `crabe_geant_back_left.png` |
-| 2-3 | 3/4 avant gauche | `crabe_geant_face_left.png` |
+| 1-1 | 3/4 avant droite | `crabe_geant.png` |
+| 1-2 | 3/4 dos droite | `crabe_geant_back.png` |
+| 2-1 | 3/4 dos gauche | `crabe_geant_back_left.png` |
+| 2-2 | 3/4 avant gauche | `crabe_geant_face_left.png` |
 
-#### Planche 2 — Actions · 3 attaques + 3 sorts (`actions`)
+##### Édition corrective (arme manquante sur des cases)
+
+Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+
+```text
+Image edit for a chibi isometric tactical RPG sprite sheet.
+SOURCE IMAGE: it shows ONE enemy monster, Crabe géant, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Crabe géant (enemy of the Marées nation)
+- Body: giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs
+- Head: two eyes on short stalks, small mouth
+- Details: two huge pincers, the right one bigger
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human body, no weapon.
+TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
+CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
+1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
+2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
+3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
+4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
+CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+BACKGROUND: keep the plain flat background of the source image.
+REMINDER: this is Crabe géant: giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs; two eyes on short stalks, small mouth; two huge pincers, the right one bigger. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no human body, no weapon.
+```
+
+#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
 
 **Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
 Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Crabe géant, in 6 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+SOURCE IMAGE: it shows ONE enemy monster, Crabe géant, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Crabe géant (enemy of the Marées nation)
 - Body: giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs
@@ -437,44 +562,45 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two huge pincers, the right one bigger
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no human body, no weapon.
-TASK: replace the 6 views with 6 ACTION poses, all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never a back view.
+WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
+TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
-LAYOUT: same as the source image — 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. REARING: standing up on the hind legs, front claws raised high.
-2. POUNCE: body stretched forward in the air, jaws open.
-3. SIDE SWIPE: head and claws swept to the side, body twisted.
-4. HOWL: head raised to the sky, water splashes and bubbles gathering around the body.
-5. ROAR: mouth wide open, water splashes and bubbles burst in front of the head.
-6. BREATH: a short water splashes and bubbles breath released forward.
-The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+2. SIDE SWIPE: head and claws swept to the side, body twisted.
+3. HOWL: head raised to the sky, water splashes and bubbles gathering around the body.
+4. Seen from BEHIND, the SAME action as pose 1 — REARING: standing up on the hind legs, front claws raised high.
+5. Seen from BEHIND, the SAME action as pose 2 — SIDE SWIPE: head and claws swept to the side, body twisted.
+6. Seen from BEHIND, the SAME action as pose 3 — HOWL: head raised to the sky, water splashes and bubbles gathering around the body.
+Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Crabe géant: giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs; two eyes on short stalks, small mouth; two huge pincers, the right one bigger. Forbidden: no human body, no weapon.
+REMINDER: this is Crabe géant: giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs; two eyes on short stalks, small mouth; two huge pincers, the right one bigger. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no human body, no weapon.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 | `crabe_geant_attack.png` |
-| 1-2 | attaque 2 | `crabe_geant_attack_2.png` |
-| 1-3 | attaque 3 | `crabe_geant_attack_3.png` |
-| 2-1 | sort 1 | `crabe_geant_cast.png` |
-| 2-2 | sort 2 | `crabe_geant_cast_2.png` |
-| 2-3 | sort 3 | `crabe_geant_cast_3.png` |
+| 1-1 | attaque 1 — face | `crabe_geant_attack.png` |
+| 1-2 | attaque 2 — face | `crabe_geant_attack_2.png` |
+| 1-3 | sort — face | `crabe_geant_cast.png` |
+| 2-1 | attaque 1 — dos | `crabe_geant_attack_back.png` |
+| 2-2 | attaque 2 — dos | `crabe_geant_attack_2_back.png` |
+| 2-3 | sort — dos | `crabe_geant_cast_back.png` |
 
 ## 4. Boss
 
-### Néréa la Tempête — 12 poses
+### Néréa la Tempête — 10 poses
 
-2 planches : **vues** (6 angles), puis **actions** (3 attaques + 3 sorts). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `marees_vues.png` et `marees_actions.png` pour que l'Atelier les reconnaisse.
+2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `marees_vues.png` et `marees_actions.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 6 angles (`vues`)
+#### Planche 1 — Vues · 4 angles (`vues`)
 
-Génération normale, aucune image à joindre.
+Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 6 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 6 different viewing angles.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Néréa la Tempête (boss of the Marées nation)
 - Body: sea queen in turquoise coral armor (#2BB8B0) with gold edges, flowing white sea-foam cape
@@ -482,39 +608,63 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: golden trident, RIGHT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no fish tail, no sword.
-Keep exactly the same design in every cell: same outfit, colors, proportions, accessories, weapon always in the same hand. Only the viewing angle changes from cell to cell.
+WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
+Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
-LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, left to right, top to bottom (the camera turns around the character; the character's design never changes; never a pure side profile):
-1. FRONT view: the character stands squared to the viewer and looks straight at the camera; the full face and both eyes are clearly visible.
-2. 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right.
-3. 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes.
-4. FULL BACK view: the character is seen exactly from behind, back of the head and back of the outfit visible; no face, no eyes.
-5. 3/4 BACK view: the character is seen from behind and turns slightly to the left (back of the head and left shoulder visible), facing away from the viewer toward the upper left; we see the BACK of the head: no face, no eyes.
-6. 3/4 FRONT view: the character faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left.
-All 6 cells show ONE character in ONE pose under 6 angles: same height, same stance, same weapon in the same hand everywhere. The pose does not change, only the angle.
-EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
+1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
+2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
+3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
+4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
+All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Néréa la Tempête: sea queen in turquoise coral armor (#2BB8B0) with gold edges, flowing white sea-foam cape; crown of red coral branches, long deep-blue hair, blue eyes; golden trident, RIGHT hand. Forbidden: no fish tail, no sword.
+WEAPON CHECK: golden trident, RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
+REMINDER: this is Néréa la Tempête: golden trident, RIGHT hand; sea queen in turquoise coral armor (#2BB8B0) with gold edges, flowing white sea-foam cape; crown of red coral branches, long deep-blue hair, blue eyes. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no fish tail, no sword.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | face (regard vers le spectateur) | `marees.png` |
-| 1-2 | 3/4 avant droite | `marees_face_right.png` |
-| 1-3 | 3/4 dos droite | `marees_back_right.png` |
-| 2-1 | dos complet | `marees_back.png` |
-| 2-2 | 3/4 dos gauche | `marees_back_left.png` |
-| 2-3 | 3/4 avant gauche | `marees_face_left.png` |
+| 1-1 | 3/4 avant droite | `marees.png` |
+| 1-2 | 3/4 dos droite | `marees_back.png` |
+| 2-1 | 3/4 dos gauche | `marees_back_left.png` |
+| 2-2 | 3/4 avant gauche | `marees_face_left.png` |
 
-#### Planche 2 — Actions · 3 attaques + 3 sorts (`actions`)
+##### Édition corrective (arme manquante sur des cases)
+
+Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+
+```text
+Image edit for a chibi isometric tactical RPG sprite sheet.
+SOURCE IMAGE: it shows ONE final boss, Néréa la Tempête, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Néréa la Tempête (boss of the Marées nation)
+- Body: sea queen in turquoise coral armor (#2BB8B0) with gold edges, flowing white sea-foam cape
+- Head: crown of red coral branches, long deep-blue hair, blue eyes
+- Weapon: golden trident, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no fish tail, no sword.
+TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
+CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
+1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
+2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
+3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
+4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
+WEAPON CHECK: golden trident, RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
+CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+BACKGROUND: keep the plain flat background of the source image.
+REMINDER: this is Néréa la Tempête: golden trident, RIGHT hand; sea queen in turquoise coral armor (#2BB8B0) with gold edges, flowing white sea-foam cape; crown of red coral branches, long deep-blue hair, blue eyes. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no fish tail, no sword.
+```
+
+#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
 
 **Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
 Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE final boss, Néréa la Tempête, in 6 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+SOURCE IMAGE: it shows ONE final boss, Néréa la Tempête, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Néréa la Tempête (boss of the Marées nation)
 - Body: sea queen in turquoise coral armor (#2BB8B0) with gold edges, flowing white sea-foam cape
@@ -522,42 +672,43 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: golden trident, RIGHT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no fish tail, no sword.
-TASK: replace the 6 views with 6 ACTION poses, all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. Never a pure side profile, never a back view.
+WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
+TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
 NATION PALETTE: turquoise, white, gold trims, coral pink accents.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle aqua rim light on the right edge.
-LAYOUT: same as the source image — 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. OVERHEAD STRIKE: staff raised high above the head with both hands.
-2. THRUST: body leaning forward, staff tip pushed far ahead with a short water splashes and bubbles spark.
-3. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
-4. FOCUS: eyes closed, staff held vertically in front of the face, water splashes and bubbles orb at the top.
-5. INVOCATION: staff raised high with both hands, water splashes and bubbles swirling above the head.
-6. BLAST: staff pointed forward, a compact water splashes and bubbles blast leaving the tip.
-The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+2. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
+3. FOCUS: eyes closed, staff held vertically in front of the face, water splashes and bubbles orb at the top.
+4. Seen from BEHIND, the SAME action as pose 1 — OVERHEAD STRIKE: staff raised high above the head with both hands.
+5. Seen from BEHIND, the SAME action as pose 2 — SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
+6. Seen from BEHIND, the SAME action as pose 3 — FOCUS: eyes closed, staff held vertically in front of the face, water splashes and bubbles orb at the top.
+Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Néréa la Tempête: sea queen in turquoise coral armor (#2BB8B0) with gold edges, flowing white sea-foam cape; crown of red coral branches, long deep-blue hair, blue eyes; golden trident, RIGHT hand. Forbidden: no fish tail, no sword.
+REMINDER: this is Néréa la Tempête: golden trident, RIGHT hand; sea queen in turquoise coral armor (#2BB8B0) with gold edges, flowing white sea-foam cape; crown of red coral branches, long deep-blue hair, blue eyes. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no fish tail, no sword.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 | `marees_attack.png` |
-| 1-2 | attaque 2 | `marees_attack_2.png` |
-| 1-3 | attaque 3 | `marees_attack_3.png` |
-| 2-1 | sort 1 | `marees_cast.png` |
-| 2-2 | sort 2 | `marees_cast_2.png` |
-| 2-3 | sort 3 | `marees_cast_3.png` |
+| 1-1 | attaque 1 — face | `marees_attack.png` |
+| 1-2 | attaque 2 — face | `marees_attack_2.png` |
+| 1-3 | sort — face | `marees_cast.png` |
+| 2-1 | attaque 1 — dos | `marees_attack_back.png` |
+| 2-2 | attaque 2 — dos | `marees_attack_2_back.png` |
+| 2-3 | sort — dos | `marees_cast_back.png` |
 
 ## Prompt négatif
 
-**Planches vues** (la même pose vue sous 6 angles est voulue, les vues vers la gauche aussi — le négatif commun est adapté) :
+**Planches vues** (la même pose vue sous 4 angles est voulue, les vues vers la gauche aussi — le négatif commun est adapté) :
 
 ```text
-checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, different character between cells, pose changing between cells, different outfit between angles, realistic proportions, small head
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, one sprite bigger or smaller than the others, size changing between cells, more than 4 sprites, extra sprites, duplicated row of sprites, all sprites in the same viewing angle, all sprites in the same orientation, empty hands, character without its weapon in a cell, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, different character between cells, pose changing between cells, different outfit between angles, weapon changing shape, weapon changing color, weapon replaced by another weapon, missing weapon, missing accessories, realistic proportions, small head
 ```
 
-**Planches actions et planche de style** :
+**Planches actions et planche de style** (les actions répétées de dos en rangée 2 sont voulues : seules les répétitions sous le même angle sont interdites) :
 
 ```text
-checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses, identical poses, repeated pose, copy of the same pose, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, front and back views mixed, different character between poses, realistic proportions, small head
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses in the same viewing angle, identical poses side by side, the same pose copied twice in the same view, front and back mixed inside one cell, weapon changing shape, weapon changing color, weapon replaced by another weapon, missing weapon, missing accessories, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, different character between poses, realistic proportions, small head
 ```
