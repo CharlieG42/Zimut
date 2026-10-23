@@ -22,10 +22,6 @@ CHARS = {
  'golem_de_lave': (295, 'nations/ennemis/brasier', {
    '': ('go2', 'r1c2'), '_idle_2': ('go2', 'r1c3'), '_idle_3': ('go1', 'r1c2'), '_walk': ('go1', 'r1c1'),
    '_attack': ('go2', 'r1c1'), '_attack_2': ('go2', 'r2c1'), '_attack_3': ('go2', 'r2c3'), '_cast': ('go2', 'r2c2')}),
- 'lieutenant': (285, 'nations/ennemis/brasier', {
-   '': ('k1', 'r1c2'), '_idle_2': ('k1', 'r1c1'), '_idle_3': ('k1', 'r2c2'), '_walk': ('k1', 'r2c1'),
-   '_attack': ('k3', 'r1c1'), '_attack_2': ('k3', 'r1c2'), '_attack_3': ('k3', 'r2c1'), '_attack_4': ('k3', 'r2c2'),
-   '_cast': ('k3', 'r1c3'), '_cast_2': ('k3', 'r2c3'), '_back': ('k1', 'r1c3'), '_back_idle_2': ('k1', 'r2c3')}),
  'brasier': (340, 'nations/boss', {
    '': ('k2', 'r1c1'), '_idle_2': ('k2', 'r2c1'), '_back': ('k2', 'r1c2'), '_back_idle_2': ('k2', 'r2c2')}),
 }
