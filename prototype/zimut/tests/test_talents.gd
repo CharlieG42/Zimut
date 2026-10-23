@@ -1,10 +1,21 @@
 extends SceneTree
 ## test_talents.gd — Tests headless de l'arbre de talents PAR PERSONNAGE (V42 refonte).
 ## Lancement : godot --headless -s tests/test_talents.gd --path .
+##
+## NOTE : en mode `-s` (script), les class_name ne sont PAS enregistrés dans
+## le ClassDB. Il faut charger explicitement le script avec load().
+## Les autoloads n'existent qu'après le premier frame en mode -s.
 
 var failures: int = 0
+var TalentTree = load("res://scripts/TalentTree.gd")
+var Achievements = load("res://scripts/Achievements.gd")
+var ProgressionManager: Node
 
 func _init() -> void:
+	_start.call_deferred()
+
+func _start() -> void:
+	ProgressionManager = (Engine.get_main_loop() as SceneTree).root.get_node("ProgressionManager")
 	_test_talent_basics()
 	_test_talent_paliers()
 	_test_talent_bonus_aggregation()

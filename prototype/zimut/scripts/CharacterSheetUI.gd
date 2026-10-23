@@ -1278,7 +1278,7 @@ func _build_slot_card(index: int, is_active: bool, level: int) -> PanelContainer
 func _prompt_rename(index: int) -> void:
 	var dlg := AcceptDialog.new()
 	dlg.title = "Renommer le build"
-	dlg.initial_position = Window.INITIAL_POSITION_CENTER_MAIN_WINDOW_SCREEN
+	dlg.initial_position = Window.WINDOW_INITIAL_POSITION_CENTER_MAIN_WINDOW_SCREEN
 	var le := LineEdit.new()
 	le.text = Builds.display_name(_save, _classe, index)
 	le.custom_minimum_size = Vector2(420, 0)
@@ -1306,7 +1306,7 @@ func _roster_talents() -> Dictionary:
 func _open_spell_picker() -> void:
 	var dlg := Window.new()
 	dlg.title = "Sorts actifs — %s" % _classe
-	dlg.initial_position = Window.INITIAL_POSITION_CENTER_MAIN_WINDOW_SCREEN
+	dlg.initial_position = Window.WINDOW_INITIAL_POSITION_CENTER_MAIN_WINDOW_SCREEN
 	dlg.size = Vector2i(760, 640)
 	dlg.close_requested.connect(func() -> void:
 		dlg.queue_free()
@@ -1336,7 +1336,8 @@ func _open_spell_picker() -> void:
 	grid.add_theme_constant_override("v_separation", 10)
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(grid)
-	var rebuild: Callable = func() -> void:
+	var rebuild: Callable
+	rebuild = func() -> void:
 		counter.text = "%d / %d sorts actifs" % [Builds.active_spell_count(_save, _classe), Builds.MAX_ACTIVE_SPELLS]
 		for c in grid.get_children():
 			c.queue_free()
