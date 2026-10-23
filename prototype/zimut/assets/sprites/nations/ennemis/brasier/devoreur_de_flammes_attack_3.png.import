@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bhlsbxdj3xl0u"
-path="res://.godot/imported/brasier_attack_2.png-920d168241b9cf7edc28a3dae738671d.ctex"
+uid="uid://c20aev4oushqm"
+path="res://.godot/imported/devoreur_de_flammes_attack_3.png-0ce54b5e30bc6ef5340b5cc7afa17522.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/nations/boss/brasier_attack_2.png"
-dest_files=["res://.godot/imported/brasier_attack_2.png-920d168241b9cf7edc28a3dae738671d.ctex"]
+source_file="res://assets/sprites/nations/ennemis/brasier/devoreur_de_flammes_attack_3.png"
+dest_files=["res://.godot/imported/devoreur_de_flammes_attack_3.png-0ce54b5e30bc6ef5340b5cc7afa17522.ctex"]
 
 [params]
 

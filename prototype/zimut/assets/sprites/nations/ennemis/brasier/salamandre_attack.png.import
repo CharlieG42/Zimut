@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://brlmi8drydv7c"
-path="res://.godot/imported/brasier_cast.png-569b7aa8df2dc5dffcab983f1cec12d6.ctex"
+uid="uid://cpitlbavxpou7"
+path="res://.godot/imported/salamandre_attack.png-ccd74e126eccde6a270f2ccb833ed9d3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/nations/boss/brasier_cast.png"
-dest_files=["res://.godot/imported/brasier_cast.png-569b7aa8df2dc5dffcab983f1cec12d6.ctex"]
+source_file="res://assets/sprites/nations/ennemis/brasier/salamandre_attack.png"
+dest_files=["res://.godot/imported/salamandre_attack.png-ccd74e126eccde6a270f2ccb833ed9d3.ctex"]
 
 [params]
 

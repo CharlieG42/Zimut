@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://p1nenbir5e85"
-path="res://.godot/imported/chasseur_attack_4.png-e6d6ff6f7516d0b9e1b05c5570173e22.ctex"
+uid="uid://g4f3cxc8o06p"
+path="res://.godot/imported/lieutenant_attack_3.png-75cb0c8d3b85a3d686e1dca23ac316d8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/chasseur_attack_4.png"
-dest_files=["res://.godot/imported/chasseur_attack_4.png-e6d6ff6f7516d0b9e1b05c5570173e22.ctex"]
+source_file="res://assets/sprites/nations/ennemis/brasier/lieutenant_attack_3.png"
+dest_files=["res://.godot/imported/lieutenant_attack_3.png-75cb0c8d3b85a3d686e1dca23ac316d8.ctex"]
 
 [params]
 

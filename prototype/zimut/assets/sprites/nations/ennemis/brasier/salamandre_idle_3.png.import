@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://q0p34klqaowt"
-path="res://.godot/imported/brasier_walk.png-27f0b883a18fceb6db34f514f010340a.ctex"
+uid="uid://bdeecx55pse8q"
+path="res://.godot/imported/salamandre_idle_3.png-13a4e08cecbf740469b801904f3ca220.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/nations/boss/brasier_walk.png"
-dest_files=["res://.godot/imported/brasier_walk.png-27f0b883a18fceb6db34f514f010340a.ctex"]
+source_file="res://assets/sprites/nations/ennemis/brasier/salamandre_idle_3.png"
+dest_files=["res://.godot/imported/salamandre_idle_3.png-13a4e08cecbf740469b801904f3ca220.ctex"]
 
 [params]
 
