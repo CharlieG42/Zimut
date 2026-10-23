@@ -71,9 +71,9 @@ IDENT = {
         ("hair", "long bright red hair (#D6332A) in a high ponytail"),
         ("eyes", "golden eyes, always open"),
         ("skin", "fair skin"),
-        ("top", "red and black armor with flame-shaped plates (#C8281E, #1E1A1C) and glowing ember cracks, red scarf"),
+        ("top", "black armor with gold trims and red flame-shaped plates (#1E1A1C, #C8281E) and glowing ember cracks, red scarf, short red cape with a flame-patterned hem"),
         ("bottom", "black trousers with red armored thigh plates"),
-        ("feet", "black boots with red flame trims"),
+        ("feet", "brown boots with gold trims"),
         ("weapon", "curved flame-patterned bow in the LEFT hand, quiver of arrows on the back"),
     ], never="no helmet, no sword, no brown hair"),
     "invocateur": dict(parts=[
@@ -300,15 +300,15 @@ IDENT = {
         ("weapon", "black staff topped with a burning flame, RIGHT hand"),
     ], never="no visible face, no armor, no sword"),
     "salamandre": dict(parts=[
-        ("body", "orange lava lizard (#E0701E) on four short legs, darker orange back"),
+        ("body", "chubby orange lava lizard (#E0701E) standing upright on two short hind legs with small front arms, darker orange back, cream belly"),
         ("head", "round head, big yellow eyes, small smile"),
         ("details", "glowing yellow cracks along the back, tail ending in a flame"),
-    ], never="no wings, no armor, never standing on two legs"),
+    ], never="no wings, no armor, no weapon, no torch, no held object"),
     "devoreur_de_flammes": dict(parts=[
-        ("body", "fiery orange four-legged beast (#E05A1E) with a dark charcoal belly"),
+        ("body", "stocky upright fiery orange beast (#E05A1E) with a dark charcoal belly and two big curved dark horns"),
         ("head", "big jaw with fangs, glowing yellow eyes, mane of flames"),
         ("details", "big black claws, flaming tail tip"),
-    ], never="no wings, no armor, no rider"),
+    ], never="no wings, no armor, no rider, no weapon, no torch, no held object"),
     "golem_de_lave": dict(parts=[
         ("body", "dark basalt golem (#2A2426) with bright orange lava cracks (#FF7A1E)"),
         ("head", "small head with two glowing orange eyes"),
