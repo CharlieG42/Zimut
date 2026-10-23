@@ -95,6 +95,13 @@ func _boot() -> void:
 	if sc._modal_root != null:
 		sc._close_modal()
 	# V22 : toucher un groupe éloigné → le héros va au contact et le combat est proposé
+	# (une fenêtre d'événement aléatoire peut s'être ouverte en route : on referme tout avant le test)
+	for _i in range(6):
+		await create_timer(0.3).timeout
+		if sc._modal_root != null:
+			sc._close_modal()
+		elif not sc._walking:
+			break
 	for y4: int in range(mgr.zone_size().y):
 		for x4: int in range(mgr.zone_size().x):
 			var k4: String = "%s,%d,%d" % [mgr.zone_id(), x4, y4]
@@ -102,14 +109,24 @@ func _boot() -> void:
 				mgr.state["discovered"].append(k4)
 	sc._refresh_world()
 	var target: Dictionary = {}
+	var best_len: int = 9999
 	for g: Dictionary in mgr.mobs():
 		var gp: Vector2i = AdventureMobs.pos_of(g)
-		if mgr.cell_discovered(gp) and mgr.path_to(gp).size() >= 2:
+		var gpath: Array[Vector2i] = mgr.path_to(gp)
+		var plen: int = gpath.size()
+		# la route ne doit croiser ni lieu ni porte (la marche s'y arrêterait pour l'événement)
+		var clear: bool = true
+		for pc: Vector2i in gpath:
+			if pc != mgr.hero_pos() and pc != gp and (not mgr.poi_at(pc).is_empty() or not mgr.gate_at(pc).is_empty()):
+				clear = false
+		# le groupe le plus proche : moins de risque qu'un autre groupe croise la route
+		if clear and mgr.cell_discovered(gp) and plen >= 2 and plen < best_len:
+			best_len = plen
 			target = g
 	if not target.is_empty():
 		sc._on_cell_tapped(AdventureMobs.pos_of(target))
 		var w3: float = 0.0
-		while sc._walking and w3 < 8.0:
+		while sc._walking and w3 < 25.0:
 			await create_timer(0.2).timeout
 			w3 += 0.2
 		await create_timer(0.3).timeout

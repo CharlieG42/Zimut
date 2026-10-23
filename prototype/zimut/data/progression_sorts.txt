@@ -1,81 +1,279 @@
 Classe,Niveau,"Sorts débloqués (séparés par "";"")"
 Tank,1,Coup de bouclier;Protection;Soin de combat
+Tank,3,Garde haute
+Tank,5,Charge
+Tank,8,Revers de bouclier
 Tank,10,Frappe puissante
+Tank,12,Cri de guerre
+Tank,15,Entaille lourde
+Tank,18,Rempart
 Tank,20,Provocation
+Tank,24,Second souffle
+Tank,28,Balayage
+Tank,32,Coup de tête
 Tank,35,Mur de pierre
+Tank,36,Intimidation
+Tank,44,Brise-garde
+Tank,48,Mêlée furieuse
 Tank,50,Tremblement de terre
+Tank,55,Égide
+Tank,58,Marteau du colosse
+Tank,62,Volonté de fer
 Tank,65,Colère
+Tank,70,Sentence
+Tank,75,Ruée dévastatrice
 Tank,80,Coup écrasant
+Tank,85,Bastion vivant
+Tank,90,Écrasement tellurique
+Tank,95,Fureur du titan
 Tank,100,Bouclier légendaire
 Assassin,1,Lame fatale;Poison;Soin rapide
+Assassin,3,Estoc rapide
+Assassin,5,Pas de côté
+Assassin,8,Lame empoisonnée
 Assassin,10,Coup bas
+Assassin,12,Marque du prédateur
+Assassin,15,Fente
+Assassin,18,Croche-pied
 Assassin,20,Ombre
+Assassin,22,Intimidation
+Assassin,24,Disparition
+Assassin,28,Entrave
+Assassin,32,Hémorragie
 Assassin,35,Glyphe de venin
+Assassin,38,Lame jumelle
+Assassin,40,Cri de guerre
+Assassin,44,Frappe sournoise
+Assassin,48,Danse des lames
 Assassin,50,Éviscération
+Assassin,55,Exécution
+Assassin,62,Voile mortel
 Assassin,65,Glyphe d'ombre
+Assassin,70,Rafale de lames
+Assassin,75,Venin foudroyant
 Assassin,80,Lame de l'ombre
+Assassin,90,Ombre mortelle
+Assassin,95,Danse macabre
 Assassin,100,Coup final
-Chasseur,1,Tir précis;Glyphe d'entrave;Soin de chasseur
+Chasseur,1,Glyphe d'entrave;Soin de chasseur;Tir précis
+Chasseur,3,Tir rapide
+Chasseur,8,Pas de côté
 Chasseur,10,Balise de chasse
+Chasseur,12,Flèche empoisonnée
+Chasseur,15,Entrave
+Chasseur,18,Marque du prédateur
 Chasseur,20,Tir explosif
+Chasseur,22,Tir en rafale
+Chasseur,25,Piège à loup
+Chasseur,28,Cri de guerre
+Chasseur,30,Flèche de feu
 Chasseur,35,Rappel de balise
+Chasseur,38,Tir du chasseur
+Chasseur,42,Pluie de flèches
+Chasseur,45,Tir ciblé
 Chasseur,50,Glyphe de flammes
+Chasseur,55,Tir d'estoc
+Chasseur,58,Œil de faucon
+Chasseur,62,Flèche de glace
 Chasseur,65,Tir de recul
+Chasseur,70,Tir mortel
+Chasseur,75,Salve
 Chasseur,80,Tir légendaire
+Chasseur,85,Tir de grâce
+Chasseur,90,Flèche du destin
+Chasseur,95,Déluge de plomb
 Chasseur,100,Tir perçant ultime
-Mage,1,Boule de feu;Éclair;Bouclier magique
+Mage,1,Bouclier magique;Boule de feu;Éclair
+Mage,3,Étincelle
+Mage,5,Armure de givre
+Mage,8,Trait de glace
 Mage,10,Explosion
+Mage,12,Brûlure
+Mage,15,Foudre
+Mage,18,Mur de flammes
 Mage,20,Téléportation
+Mage,24,Concentration
+Mage,28,Nova de givre
+Mage,32,Purification
 Mage,35,Météore
+Mage,38,Rayon ardent
+Mage,42,Lance de glace
+Mage,45,Maléfice
 Mage,50,Gel
+Mage,55,Tempête de feu
+Mage,58,Éclair en chaîne
+Mage,62,Brise-esprit
 Mage,65,Chaîne de foudre
+Mage,70,Blizzard
+Mage,75,Colère des éléments
 Mage,80,Désintégration
+Mage,85,Foudroiement
+Mage,90,Sphère d'annihilation
+Mage,95,Maîtrise arcanique
 Mage,100,Apocalypse
-Druide,1,Bénédiction;Soin;Attaque sacrée
+Druide,1,Attaque sacrée;Bénédiction;Soin
+Druide,3,Lueur apaisante
+Druide,5,Trait de lumière
+Druide,8,Régénération
 Druide,10,Barrière
+Druide,12,Second souffle
+Druide,15,Écorce protectrice
+Druide,18,Purification
 Druide,20,Inspiration
+Druide,22,Fureur de la nature
+Druide,25,Épines
+Druide,30,Chant de vie
 Druide,35,Soin de groupe
+Druide,38,Sceau de lumière
+Druide,42,Harmonie
+Druide,45,Frappe de l'aube
 Druide,50,Renaissance
+Druide,55,Rayon solaire
+Druide,58,Étreinte de vie
+Druide,62,Bénédiction des anciens
 Druide,65,Attaque divine
+Druide,70,Colère divine
+Druide,75,Éveil de la forêt
 Druide,80,Résurrection
+Druide,85,Foudre céleste
+Druide,90,Grâce suprême
+Druide,95,Bénédiction ultime
 Druide,100,Jugement
-Heal,1,Toucher guérisseur;Éclair sacré;Bénédiction de vie
+Heal,1,Bénédiction de vie;Toucher guérisseur;Éclair sacré
+Heal,3,Trait de lumière
+Heal,5,Gouttes de rosée
+Heal,8,Second souffle
 Heal,10,Bouclier de lumière
+Heal,12,Onde apaisante
+Heal,15,Purification
+Heal,18,Lumière bénie
 Heal,20,Mot de restauration
+Heal,22,Aura de courage
+Heal,25,Châtiment sacré
+Heal,28,Prière rapide
+Heal,32,Voile de lumière
 Heal,35,Éclat de lumière
+Heal,38,Sceau d'espoir
+Heal,42,Rayon purificateur
+Heal,45,Sanctuaire
 Heal,50,Soin supérieur
+Heal,55,Intervention divine
+Heal,58,Pluie de lumière
+Heal,62,Renaissance sacrée
 Heal,65,Soin de groupe supérieur
+Heal,70,Colère céleste
 Heal,80,Protection vitale
+Heal,85,Étreinte éternelle
+Heal,90,Nova sacrée
+Heal,95,Miracle
 Heal,100,Soin ultime
-Invocateur,1,Frappe spectrale;Symbiose;Invoquer Golem de Pierre
+Invocateur,1,Frappe spectrale;Invoquer Golem de Pierre;Symbiose
+Invocateur,3,Lien d'âme
+Invocateur,5,Invoquer Archer Sylvestre
+Invocateur,8,Trait de lumière
 Invocateur,10,Invoquer Loup Spectral
+Invocateur,12,Rayon spectral
+Invocateur,15,Purification
+Invocateur,18,Frénésie du familier
 Invocateur,20,Attaque de l'invocation
+Invocateur,22,Éclat d'âme
+Invocateur,25,Offrande
+Invocateur,28,Second souffle
+Invocateur,32,Tempête spectrale
 Invocateur,35,Invoquer Requin des Marées
+Invocateur,38,Coup de l'invocation
+Invocateur,42,Pacte de sang
+Invocateur,45,Chaîne d'âmes
 Invocateur,50,Buff de l'invocation
+Invocateur,55,Appel du néant
+Invocateur,58,Explosion d'âme
+Invocateur,62,Invoquer Ent de Combat
 Invocateur,65,Invoquer Élémentaire de Cristal
+Invocateur,70,Bénédiction du lien
+Invocateur,75,Déferlement spectral
 Invocateur,80,Invoquer Ombre
+Invocateur,90,Fusion d'âmes
+Invocateur,95,Légion des ombres
 Invocateur,100,Invoquer Esprit de la Forêt
-Sylvain,1,Ronce;Sève vitale;Invoquer Archer Sylvestre
+Sylvain,1,Invoquer Archer Sylvestre;Ronce;Sève vitale
+Sylvain,3,Épine
+Sylvain,5,Écorce
+Sylvain,8,Lierre
 Sylvain,10,Poison de ronce
+Sylvain,12,Régénération
+Sylvain,15,Fouet épineux
+Sylvain,18,Second souffle
 Sylvain,20,Invoquer Arbre
+Sylvain,22,Pas de côté
+Sylvain,26,Nuée de spores
+Sylvain,30,Étreinte végétale
+Sylvain,32,Invoquer Loup Spectral
 Sylvain,35,Racine
+Sylvain,36,Sève bienfaitrice
+Sylvain,40,Purification
+Sylvain,45,Racines étrangleuses
+Sylvain,48,Invoquer Sarriette
 Sylvain,50,Soin de sève
+Sylvain,55,Floraison
+Sylvain,60,Rage de la forêt
 Sylvain,65,Invoquer Ent de Combat
+Sylvain,70,Ronces mortelles
+Sylvain,75,Tempête de feuilles
 Sylvain,80,Pluie de graines
+Sylvain,88,Invoquer Tronc
+Sylvain,95,Souffle de vie
 Sylvain,100,Tempête de pétales
-Géomancien,1,Éclat de grès;Invoquer Pilier;Glyphe de grès
+Géomancien,1,Glyphe de grès;Invoquer Pilier;Éclat de grès
+Géomancien,3,Caillou
+Géomancien,8,Entrave
 Géomancien,10,Lance de cristal
+Géomancien,12,Armure de pierre
+Géomancien,15,Pointe de roc
+Géomancien,18,Poussière aveuglante
 Géomancien,20,Invoquer Muraille
+Géomancien,22,Glyphe de roche
+Géomancien,25,Lame de grès
+Géomancien,28,Régénération
+Géomancien,30,Avalanche
+Géomancien,32,Rempart de pierre
 Géomancien,35,Éboulement
+Géomancien,36,Intimidation
+Géomancien,42,Entrave sismique
+Géomancien,45,Fracture
 Géomancien,50,Glyphe sismique
+Géomancien,55,Colonne d'ambre
+Géomancien,58,Glyphe de fer
+Géomancien,62,Éruption
 Géomancien,65,Tempête de sable
+Géomancien,70,Grondement
+Géomancien,75,Écrasement
 Géomancien,80,Séisme ambré
+Géomancien,88,Pierre vivante
+Géomancien,95,Fracas des montagnes
 Géomancien,100,Cataclysme minéral
-Artificier,1,Pistolet à ressort;Poser Bombe;Déclencheur
+Artificier,1,Déclencheur;Pistolet à ressort;Poser Bombe
+Artificier,3,Pétard
+Artificier,5,Fumigène
+Artificier,8,Tir de barrage
 Artificier,10,Poser Mine
-Artificier,20,Poser Tourelle
-Artificier,35,Poser Balise de transposition
+Artificier,12,Pas de côté
+Artificier,15,Piège à ressort
+Artificier,18,Entrave
+Artificier,20,Pistolet à silex;Poser Tourelle
+Artificier,24,Cri de guerre
+Artificier,26,Balle incendiaire
+Artificier,30,Grenade assourdissante
+Artificier,35,Marque du prédateur;Poser Balise de transposition
+Artificier,40,Tir de précision
+Artificier,44,Mine à fragmentation
+Artificier,48,Surcharge
 Artificier,50,Glyphe de surcharge
+Artificier,55,Fusil à lunette
+Artificier,60,Roquette
 Artificier,65,Grenade à fragmentation
+Artificier,70,Rafale de mitraillette
+Artificier,75,Canon à main
 Artificier,80,Fusil à pompe
+Artificier,88,Bombe à fragmentation
+Artificier,95,Tir d'artillerie
 Artificier,100,Arsenal total

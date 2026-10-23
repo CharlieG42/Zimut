@@ -1,170 +1,276 @@
 Nom,Icone
 Coup de bouclier,shield_bash
-Soin de combat,tank_heal
 Protection,shield_group
+Soin de combat,tank_heal
+Garde haute,shield
+Charge,power_strike
+Revers de bouclier,shield_bash
 Frappe puissante,power_strike_t1
-Rugissement,roar
+Cri de guerre,roar
+Entaille lourde,eviscerate
+Rempart,wall
 Provocation,taunt
+Second souffle,tank_heal
+Balayage,slash
+Coup de tête,stone_fist
 Mur de pierre,wall
-Soin de guerre,tank_heal
+Intimidation,taunt
+Brise-garde,crushing
+Mêlée furieuse,fury
 Tremblement de terre,earthquake
-Bouclier sacré,shield_holy
-Régénération,regen
-Armure renforcée,armor
+Égide,shield_holy
+Marteau du colosse,colossus
+Volonté de fer,stone_skin
 Colère,fury
-Intervention divine,divine_t2
-Barrière,wall
-Soin de groupe,heal_group
+Sentence,final_blow
+Ruée dévastatrice,power_strike
 Coup écrasant,crushing
-Protection divine,shield_holy_t2
-Renaissance,rebirth
+Bastion vivant,shield_group
+Écrasement tellurique,earthquake
+Fureur du titan,fury
 Bouclier légendaire,shield_holy_t3
-Coup final,final_blow_t2
 Lame fatale,dagger_fatal
-Soin rapide,heal_hand
 Poison,poison_drop
-Ombre,shadow_step
+Soin rapide,heal_hand
+Estoc rapide,low_blow
+Pas de côté,camouflage
+Lame empoisonnée,poison_drop
 Coup bas,low_blow
-Clignotement,blink
-Soin empoisonné,heal_poison
-Marque de la mort,death_mark
-Piège empoisonné,trap_poison
-Assassinat,assassinate
-Invisibilité,invisible
+Marque du prédateur,death_mark
+Fente,dagger_fatal
+Croche-pied,low_blow
+Ombre,shadow_step
+Disparition,invisible
+Entrave,root
+Hémorragie,eviscerate
+Glyphe de venin,slash
+Lame jumelle,dagger_rain
+Frappe sournoise,assassinate
+Danse des lames,dagger_rain
 Éviscération,eviscerate
-Soin de l'ombre,heal_shadow
-Malédiction,curse
-Soin mortel,heal_deadly_t2
-Empoisonnement massif,poison_mass_t2
-Soin critique,heal_hand_t2
-Invisibilité totale,invis_total_t2
+Exécution,final_blow
+Voile mortel,curse_t2
+Glyphe d'ombre,shadow_step
+Rafale de lames,blade_shadow
+Venin foudroyant,poison_mass
 Lame de l'ombre,blade_shadow
-Soin ultime,heal_hand_t3
-Tir précis,arrow
+Ombre mortelle,blade_shadow
+Danse macabre,dagger_rain
+Coup final,final_blow_t2
+Glyphe d'entrave,slash
 Soin de chasseur,heal_nature
-Piège,trap
-Fleche enflammée,arrow_fire
-Tir perçant,arrow_pierce
-Appel de la meute,wolf_call
-Soin de la nature,heal_nature
+Tir précis,arrow
+Tir rapide,arrow
+Balise de chasse,beacon
+Flèche empoisonnée,arrow_poison
 Tir explosif,arrow_explosive
-Camouflage,camouflage
-Flèche empoisonnée,poison_drop
-Tir transperçant,arrow_pierce
-Soin de la forêt,heal_leaf
-Tir de glace,arrow_ice
+Tir en rafale,arrow
+Piège à loup,trap
+Flèche de feu,arrow_fire
+Rappel de balise,beacon
+Tir du chasseur,arrow
+Pluie de flèches,arrow_explosive
+Tir ciblé,arrow_pierce
+Glyphe de flammes,slash
+Tir d'estoc,recoil
+Œil de faucon,haste
+Flèche de glace,arrow_ice
+Tir de recul,recoil
+Tir mortel,arrow_pierce_t2
+Salve,arrow_explosive
 Tir légendaire,arrow_t3
-Flèche sacrée,arrow_holy
-Piège paralysant,trap_para
-Soin vital,heal_heart_t1
+Tir de grâce,final_blow
+Flèche du destin,arrow_holy
+Déluge de plomb,meteor_rain
 Tir perçant ultime,arrow_pierce_t3
-Soin de la vie,heal_leaf2
+Bouclier magique,arcane_shield
 Boule de feu,fireball
 Éclair,lightning2
-Bouclier magique,arcane_shield
+Étincelle,lightning
+Armure de givre,arcane_shield
+Trait de glace,arrow_ice
 Explosion,explosion
+Brûlure,fire_breath
+Foudre,lightning2
+Mur de flammes,explosion
 Téléportation,teleport
+Concentration,inspire
+Nova de givre,freeze
+Purification,purify
 Météore,meteor
+Rayon ardent,fireball
+Lance de glace,arrow_ice
+Maléfice,curse
 Gel,freeze
-Invisibilité magique,invis_magic
+Tempête de feu,meteor
+Éclair en chaîne,chain_lightning
+Brise-esprit,disintegrate
 Chaîne de foudre,chain_lightning
-Barrière magique,barrier_magic
+Blizzard,freeze
+Colère des éléments,cataclysm
 Désintégration,disintegrate
-Téléportation de groupe,teleport_group
-Pluie de métores,meteor_rain
+Foudroiement,lightning
+Sphère d'annihilation,apocalypse
+Maîtrise arcanique,supreme_bless
 Apocalypse,apocalypse
-Invoquer Golem de Pierre,summon_golem_de_pierre
-Invoquer Loup Spectral,summon_loup_spectral
-Invoquer Requin des Marées,summon_requin_des_marees
-Invoquer Élémentaire de Cristal,summon_elementaire_de_cristal
-Invoquer Ombre,summon_ombre
-Invoquer Esprit de la Forêt,summon_esprit_de_la_foret
-Attaque de l'invocation,summon_atk
-Buff de l'invocation,summon_buff
-Débuff de l'invocation,summon_debuff
-Soin de l'invocation,summon_heal
-Attaque puissante,summon_atk2_t1
-Buff de défense,shield
-Débuff de mouvement,summon_debuff
-Soin de zone,heal_group
-Attaque ultime,summon_atk2_t3
-Buff ultime,summon_buff_t3
-Débuff ultime,summon_debuff_t3
-Attaque de zone,summon_aoe
-Buff de vitesse,summon_speed
-Débuff de précision,summon_precision
+Attaque sacrée,holy_attack
 Bénédiction,bless
 Soin,heal_cross
-Attaque sacrée,holy_attack
+Lueur apaisante,heal_touch
+Trait de lumière,light
+Régénération,regen
+Barrière,wall
+Écorce protectrice,shield_roots
 Inspiration,inspire
-Purification,purify
-Bouclier groupé,shield_group
+Fureur de la nature,nature_wrath
+Épines,thorn
+Chant de vie,heal_group
+Soin de groupe,heal_group
+Sceau de lumière,light_shield
+Harmonie,haste
+Frappe de l'aube,holy_attack
+Renaissance,rebirth
+Rayon solaire,light_burst
+Étreinte de vie,heal_leaf2
+Bénédiction des anciens,bless
 Attaque divine,holy_attack_t2
-Accélération,haste
-Attaque bénie,holy_attack
+Colère divine,judgment_t2
+Éveil de la forêt,heal_leaf
 Résurrection,resurrection
-Bénédiction suprême,supreme_bless_t3
-Attaque sacrée ultime,holy_attack_t3
-Soin suprême,heal_cross_t3
-Protection ultime,shield_holy_t3
-Attaque finale,holy_attack2_t2
+Foudre céleste,holy_attack2
+Grâce suprême,heal_hand_t3
+Bénédiction ultime,supreme_bless_t3
 Jugement,judgment
-Soin mineur,heal_cross
-Protection vitale,protect_vital_t1
-Barrière de vie,barrier_life
-Éclat de lumière,light_burst
-Attaque céleste,holy_attack
-Soin supérieur,heal_cross_t2
-Soin de groupe supérieur,heal_group_t2
-Jugement divin,judgment_t2
-Frappe spectrale,spectral
-Symbiose,symbiosis
+Bénédiction de vie,regen
 Toucher guérisseur,heal_touch
 Éclair sacré,holy_attack2
-Bénédiction de vie,regen
+Gouttes de rosée,heal_heart
 Bouclier de lumière,light_shield
+Onde apaisante,heal_group
+Lumière bénie,regen
 Mot de restauration,word_restore
+Aura de courage,inspire
+Châtiment sacré,holy_attack
+Prière rapide,heal_hand
+Voile de lumière,barrier_magic
+Éclat de lumière,light_burst
+Sceau d'espoir,heal_cross
+Rayon purificateur,purify
+Sanctuaire,light_shield
+Soin supérieur,heal_cross_t2
+Intervention divine,divine_t2
+Pluie de lumière,heal_group
+Renaissance sacrée,rebirth
+Soin de groupe supérieur,heal_group_t2
+Colère céleste,judgment
+Protection vitale,protect_vital_t1
+Étreinte éternelle,word_restore
+Nova sacrée,light_burst
+Miracle,resurrection
+Soin ultime,heal_hand_t3
+Frappe spectrale,spectral
+Invoquer Golem de Pierre,summon_golem_de_pierre
+Symbiose,symbiosis
+Lien d'âme,symbiosis
+Invoquer Archer Sylvestre,summon_archer_sylvestre
+Invoquer Loup Spectral,summon_loup_spectral
+Rayon spectral,spectral_bolt
+Frénésie du familier,summon_speed
+Attaque de l'invocation,summon_atk
+Éclat d'âme,spectral
+Offrande,summon_heal
+Tempête spectrale,summon_aoe
+Invoquer Requin des Marées,summon_requin_des_marees
+Coup de l'invocation,summon_atk
+Pacte de sang,summon_buff
+Chaîne d'âmes,chain_lightning
+Buff de l'invocation,summon_buff
+Appel du néant,summon_debuff
+Explosion d'âme,explosion
+Invoquer Ent de Combat,summon_ent_de_combat
+Invoquer Élémentaire de Cristal,summon_elementaire_de_cristal
+Bénédiction du lien,summon_heal
+Déferlement spectral,summon_atk2
+Invoquer Ombre,shadow_step
+Fusion d'âmes,disintegrate
+Légion des ombres,summon_buff
+Invoquer Esprit de la Forêt,summon_esprit_de_la_foret
 Ronce,thorn
 Sève vitale,sap_t1
-Invoquer Archer Sylvestre,summon_archer_sylvestre
-Invoquer Arbre,summon_arbre
+Épine,thorn
+Écorce,shield_roots
+Lierre,ivy
 Poison de ronce,thorn
+Fouet épineux,whip
+Invoquer Arbre,summon_arbre
+Nuée de spores,spores
+Étreinte végétale,root
 Racine,root
-Invoquer Ent de Combat,summon_ent_de_combat
-Lierre protecteur,ivy
-Soin de sève,sap
-Ronce multiple,thorn_multi
-Pose un piège de ronces,thorn_trap
-Invoquer Tronc,summon_tronc
-Vent de feuilles,leaf_wind
-Rugissement de la forêt,forest_roar
-Pluie de graines,seed_rain
-Sève régénérante,slash
+Sève bienfaitrice,sap
+Racines étrangleuses,roots_block
 Invoquer Sarriette,summon_sarriette
-Colère de la nature,nature_wrath
-Racines profondes,shield_roots
-Régression,regression
+Soin de sève,sap
+Floraison,heal_leaf
+Rage de la forêt,forest_roar
+Ronces mortelles,thorn_multi
+Tempête de feuilles,leaf_wind
+Pluie de graines,seed_rain
+Invoquer Tronc,summon_tronc
+Souffle de vie,heal_leaf2
 Tempête de pétales,petal_storm
-Invoquer Racines,roots_block
-Invoquer Ronce agressive,summon_ronce_agressive
-Tir de recul,recoil
-Balise de chasse,beacon
-Éclat de grès,sandstone
+Glyphe de grès,slash
 Invoquer Pilier,summon_pilier
-Armure de grès,stone_skin
+Éclat de grès,sandstone
+Caillou,stone_fist
 Lance de cristal,crystal_lance
+Armure de pierre,stone_skin
+Pointe de roc,rockslide
+Poussière aveuglante,sandstorm
 Invoquer Muraille,summon_muraille
+Glyphe de roche,sandstone
+Lame de grès,sandstone
+Avalanche,rockslide
+Rempart de pierre,wall
 Éboulement,rockslide
-Invoquer Cristal ambré,summon_cristal_ambre
-Invoquer Faille,summon_faille
-Peau de pierre,stone_skin
+Entrave sismique,earthquake
+Fracture,quake_amber
+Glyphe sismique,slash
+Colonne d'ambre,amber_rain
+Glyphe de fer,stone_rage
+Éruption,explosion
 Tempête de sable,sandstorm
+Grondement,earthquake
+Écrasement,crushing
 Séisme ambré,quake_amber
-Rempart de cristal,shield
-Pluie de cristaux,amber_rain
-Fureur de la pierre,stone_rage
-Colosse de grès,colossus
+Pierre vivante,stone_skin
+Fracas des montagnes,cataclysm
 Cataclysme minéral,cataclysm
+Déclencheur,slash
+Pistolet à ressort,slash
+Poser Bombe,slash
+Pétard,explosion
+Fumigène,camouflage
+Tir de barrage,arrow
+Poser Mine,slash
+Piège à ressort,trap
+Pistolet à silex,arrow
+Poser Tourelle,slash
+Balle incendiaire,arrow_fire
+Grenade assourdissante,explosion
+Poser Balise de transposition,beacon
+Tir de précision,arrow_pierce
+Mine à fragmentation,trap_para
+Surcharge,fury
+Glyphe de surcharge,slash
+Fusil à lunette,arrow_pierce
+Roquette,meteor
+Grenade à fragmentation,slash
+Rafale de mitraillette,arrow_explosive
+Canon à main,power_strike
+Fusil à pompe,slash
+Bombe à fragmentation,cataclysm
+Tir d'artillerie,meteor_rain
+Arsenal total,slash_t2
 Morsure,bite
 Coup d'os,bone
 Coup de massue,club
@@ -186,7 +292,83 @@ Lumière,light
 Piqué,dive
 Spores toxiques,spores
 Sève fertilisante,sap
-Rappel de balise,beacon
+Rugissement,roar
+Soin de guerre,tank_heal
+Bouclier sacré,shield_holy
+Armure renforcée,armor
+Protection divine,shield_holy_t2
+Clignotement,blink
+Soin empoisonné,heal_poison
+Marque de la mort,death_mark
+Piège empoisonné,trap_poison
+Assassinat,assassinate
+Invisibilité,invisible
+Soin de l'ombre,heal_shadow
+Malédiction,curse
+Soin mortel,heal_deadly_t2
+Empoisonnement massif,poison_mass_t2
+Soin critique,heal_hand_t2
+Invisibilité totale,invis_total_t2
+Piège,trap
+Fleche enflammée,arrow_fire
+Tir perçant,arrow_pierce
+Appel de la meute,wolf_call
+Soin de la nature,heal_nature
+Camouflage,camouflage
+Tir transperçant,arrow_pierce
+Soin de la forêt,heal_leaf
+Tir de glace,arrow_ice
+Flèche sacrée,arrow_holy
+Piège paralysant,trap_para
+Soin vital,heal_heart_t1
+Soin de la vie,heal_leaf2
+Invisibilité magique,invis_magic
+Barrière magique,barrier_magic
+Téléportation de groupe,teleport_group
+Pluie de métores,meteor_rain
+Débuff de l'invocation,summon_debuff
+Soin de l'invocation,summon_heal
+Attaque puissante,summon_atk2_t1
+Buff de défense,shield
+Débuff de mouvement,summon_debuff
+Soin de zone,heal_group
+Attaque ultime,summon_atk2_t3
+Buff ultime,summon_buff_t3
+Débuff ultime,summon_debuff_t3
+Attaque de zone,summon_aoe
+Buff de vitesse,summon_speed
+Débuff de précision,summon_precision
+Bouclier groupé,shield_group
+Accélération,haste
+Attaque bénie,holy_attack
+Bénédiction suprême,supreme_bless_t3
+Attaque sacrée ultime,holy_attack_t3
+Soin suprême,heal_cross_t3
+Protection ultime,shield_holy_t3
+Attaque finale,holy_attack2_t2
+Soin mineur,heal_cross
+Barrière de vie,barrier_life
+Attaque céleste,holy_attack
+Jugement divin,judgment_t2
+Lierre protecteur,ivy
+Ronce multiple,thorn_multi
+Pose un piège de ronces,thorn_trap
+Vent de feuilles,leaf_wind
+Rugissement de la forêt,forest_roar
+Sève régénérante,slash
+Colère de la nature,nature_wrath
+Racines profondes,shield_roots
+Régression,regression
+Invoquer Racines,roots_block
+Invoquer Ronce agressive,summon_ronce_agressive
+Armure de grès,stone_skin
+Invoquer Cristal ambré,summon_cristal_ambre
+Invoquer Faille,summon_faille
+Peau de pierre,stone_skin
+Rempart de cristal,shield
+Pluie de cristaux,amber_rain
+Fureur de la pierre,stone_rage
+Colosse de grès,colossus
 Poing de roche,stone_fist
 Morsure spectrale,bite
 Vague tranchante,sirene_song
@@ -195,19 +377,3 @@ Lame d'ombre,blade_shadow
 Vrilles sylvestres,ivy
 Flèche de sève,arrow
 Coup de branche,wood_arm
-Glyphe de grès,glyph_stone
-Glyphe sismique,glyph_quake
-Glyphe de venin,glyph_venom
-Glyphe d'ombre,glyph_shadow
-Glyphe d'entrave,glyph_snare
-Glyphe de flammes,glyph_flame
-Pistolet à ressort,arrow
-Poser Bombe,explosion
-Déclencheur,inspire
-Poser Mine,arrow_explosive
-Poser Tourelle,summon_atk
-Poser Balise de transposition,beacon
-Glyphe de surcharge,glyph_flame
-Grenade à fragmentation,fireball
-Fusil à pompe,arrow_pierce
-Arsenal total,cataclysm

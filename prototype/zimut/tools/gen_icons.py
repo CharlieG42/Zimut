@@ -366,6 +366,48 @@ RULES = [  # (mot-clé normalisé, icône)
     ("lumiere", "light"), ("pique", "dive"), ("spores", "spores"), ("seve fertilisante", "sap"), ("attaque", "claw"),
 ]
 
+
+# V43 : icônes des sorts ajoutés (nom exact normalisé -> motif existant)
+_V43 = """Garde haute=shield;Charge=power_strike;Revers de bouclier=shield_bash;Cri de guerre=roar;Entaille lourde=eviscerate;Rempart=wall;
+Second souffle=tank_heal;Balayage=slash;Coup de tête=stone_fist;Intimidation=taunt;Brise-garde=crushing;Mêlée furieuse=fury;Égide=shield_holy;
+Marteau du colosse=colossus;Volonté de fer=stone_skin;Sentence=final_blow;Ruée dévastatrice=power_strike;Bastion vivant=shield_group;
+Écrasement tellurique=earthquake;Fureur du titan=fury;Pas de côté=camouflage;Estoc rapide=low_blow;Lame empoisonnée=poison_drop;
+Marque du prédateur=death_mark;Fente=dagger_fatal;Croche-pied=low_blow;Disparition=invisible;Entrave=root;Hémorragie=eviscerate;
+Lame jumelle=dagger_rain;Frappe sournoise=assassinate;Danse des lames=dagger_rain;Exécution=final_blow;Voile mortel=curse;
+Rafale de lames=blade_shadow;Venin foudroyant=poison_mass;Ombre mortelle=blade_shadow;Danse macabre=dagger_rain;Tir rapide=arrow;
+Flèche empoisonnée=arrow_poison;Piège à loup=trap;Flèche de feu=arrow_fire;Tir du chasseur=arrow;Pluie de flèches=arrow_explosive;
+Tir ciblé=arrow_pierce;Tir d'estoc=recoil;Œil de faucon=haste;Flèche de glace=arrow_ice;Tir mortel=arrow_pierce;Salve=arrow_explosive;
+Tir de grâce=final_blow;Flèche du destin=arrow_holy;Déluge de plomb=meteor_rain;Tir en rafale=arrow;Étincelle=lightning;
+Armure de givre=arcane_shield;Trait de glace=arrow_ice;Brûlure=fire_breath;Foudre=lightning2;Mur de flammes=explosion;Concentration=inspire;
+Nova de givre=freeze;Purification=purify;Rayon ardent=fireball;Lance de glace=arrow_ice;Maléfice=curse;Tempête de feu=meteor;
+Éclair en chaîne=chain_lightning;Brise-esprit=disintegrate;Blizzard=freeze;Colère des éléments=cataclysm;Foudroiement=lightning;
+Sphère d'annihilation=apocalypse;Maîtrise arcanique=supreme_bless;Trait de lumière=light;Lueur apaisante=heal_touch;Régénération=regen;
+Écorce protectrice=shield_roots;Fureur de la nature=nature_wrath;Épines=thorn;Chant de vie=heal_group;Sceau de lumière=light_shield;
+Harmonie=haste;Frappe de l'aube=holy_attack;Rayon solaire=light_burst;Étreinte de vie=heal_leaf2;Bénédiction des anciens=bless;
+Colère divine=judgment;Éveil de la forêt=heal_leaf;Foudre céleste=holy_attack2;Grâce suprême=heal_hand;Bénédiction ultime=supreme_bless;
+Gouttes de rosée=heal_heart;Onde apaisante=heal_group;Lumière bénie=regen;Aura de courage=inspire;Châtiment sacré=holy_attack;
+Prière rapide=heal_hand;Voile de lumière=barrier_magic;Sceau d'espoir=heal_cross;Rayon purificateur=purify;Sanctuaire=light_shield;
+Intervention divine=divine;Pluie de lumière=heal_group;Renaissance sacrée=rebirth;Colère céleste=judgment;Étreinte éternelle=word_restore;
+Nova sacrée=light_burst;Miracle=resurrection;Lien d'âme=symbiosis;Rayon spectral=spectral_bolt;Frénésie du familier=summon_speed;
+Éclat d'âme=spectral;Offrande=summon_heal;Tempête spectrale=summon_aoe;Coup de l'invocation=summon_atk;Pacte de sang=summon_buff;
+Chaîne d'âmes=chain_lightning;Appel du néant=summon_debuff;Explosion d'âme=explosion;Bénédiction du lien=summon_heal;
+Déferlement spectral=summon_atk2;Fusion d'âmes=disintegrate;Légion des ombres=summon_buff;Épine=thorn;Écorce=shield_roots;Lierre=ivy;
+Fouet épineux=whip;Nuée de spores=spores;Étreinte végétale=root;Sève bienfaitrice=sap;Racines étrangleuses=roots_block;Floraison=heal_leaf;
+Rage de la forêt=forest_roar;Ronces mortelles=thorn_multi;Tempête de feuilles=leaf_wind;Souffle de vie=heal_leaf2;Caillou=stone_fist;
+Armure de pierre=stone_skin;Pointe de roc=rockslide;Poussière aveuglante=sandstorm;Glyphe de roche=sandstone;Lame de grès=sandstone;
+Avalanche=rockslide;Rempart de pierre=wall;Entrave sismique=earthquake;Fracture=quake_amber;Colonne d'ambre=amber_rain;
+Glyphe de fer=stone_rage;Éruption=explosion;Grondement=earthquake;Écrasement=crushing;Pierre vivante=stone_skin;
+Fracas des montagnes=cataclysm;Pétard=explosion;Fumigène=camouflage;Tir de barrage=arrow;Piège à ressort=trap;Pistolet à silex=arrow;
+Balle incendiaire=arrow_fire;Grenade assourdissante=explosion;Tir de précision=arrow_pierce;Mine à fragmentation=trap_para;Surcharge=fury;
+Fusil à lunette=arrow_pierce;Roquette=meteor;Rafale de mitraillette=arrow_explosive;Canon à main=power_strike;
+Bombe à fragmentation=cataclysm;Tir d'artillerie=meteor_rain"""
+V43_EXACT = {}
+for _kv in _V43.replace("\n", "").split(";"):
+    _kv = _kv.strip()
+    if "=" in _kv:
+        _k, _v = _kv.rsplit("=", 1)
+        V43_EXACT[norm(_k)] = _v.strip()
+
 def tier_of(name):
     n = norm(name)
     t = 0
@@ -376,6 +418,8 @@ def tier_of(name):
 
 def icon_for(name):
     n = norm(name)
+    if n in V43_EXACT:
+        return V43_EXACT[n]
     for kw, ic in RULES:
         if norm(kw) in n:
             return ic

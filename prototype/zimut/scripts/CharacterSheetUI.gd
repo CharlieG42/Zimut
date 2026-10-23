@@ -803,6 +803,17 @@ func _build_spells() -> void:
 		refresh())
 	info.add_child(rst)
 
+	var act_row := HBoxContainer.new()
+	act_row.add_theme_constant_override("separation", 12)
+	_content.add_child(act_row)
+	var act_b := _btn("⚔ CHOISIR LES SORTS ACTIFS  %d/%d" % [Builds.active_spell_count(_save, _classe), Builds.MAX_ACTIVE_SPELLS], Color(0.95, 0.50, 0.40), 18, Vector2(0, 48))
+	act_b.tooltip_text = "Choisis les %d sorts emportés en combat (un jeu de sorts par build)." % Builds.MAX_ACTIVE_SPELLS
+	act_b.pressed.connect(func() -> void: _open_spell_picker())
+	act_row.add_child(act_b)
+	var act_hint := _lbl("Tu as %d sorts mais seulement %d places : les ✔ ACTIF partent au combat." % [Builds.unlocked_spell_names(_save, _classe).size(), Builds.MAX_ACTIVE_SPELLS], 16, C_DIM)
+	act_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	act_hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	act_row.add_child(act_hint)
 	_content.add_child(_lbl("Répartition %s — %s" % [
 		"automatique" if bool(ent.get("spell_auto", false)) else "manuelle",
 		"les points de sort gagnés plus tard sont dépensés pour vous" if bool(ent.get("spell_auto", false)) else "améliorez vous-même vos sorts (ou RÉPARTITION AUTO)"], 16, C_DIM))
@@ -866,6 +877,8 @@ func _spell_card(parent: Control, s: Dictionary, char_level: int, free_pts: int)
 		sub += "  ·  ennemis adjacents"
 	if bool(pv.get("los", false)):
 		sub += "  ·  ligne de vue"
+	if not locked and Builds.active_spells(_save, _classe).has(sname):
+		sub = "✔ ACTIF  ·  " + sub
 	name_box.add_child(_lbl(sub, 15, col.lightened(0.35)))
 	h.add_child(_orb(str(int(pv.get("pa", 1))), "PA", Color(0.16, 0.50, 0.95), 44.0))
 	if int(pv.get("pm", 0)) > 0:
@@ -1244,6 +1257,10 @@ func _build_slot_card(index: int, is_active: bool, level: int) -> PanelContainer
 			Builds.build_gear_count(eq), "s" if Builds.build_gear_count(eq) > 1 else "",
 			spells.size(), Builds.MAX_ACTIVE_SPELLS,
 			tn, "s" if tn > 1 else "", tpts]))
+		var free_b := _btn("⚔ SORTS ACTIFS", Color(0.95, 0.50, 0.40), 16, Vector2(190, 42))
+		free_b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		free_b.pressed.connect(func() -> void: _open_spell_picker())
+		v.add_child(free_b)
 		return card
 	var b: Dictionary = Builds.build_at(_save, _classe, index)
 	var eq2: Dictionary = b.get("equipment", {})
@@ -1319,7 +1336,7 @@ func _open_spell_picker() -> void:
 	var dlg := Window.new()
 	dlg.title = "Sorts actifs — %s" % _classe
 	dlg.initial_position = Window.WINDOW_INITIAL_POSITION_CENTER_MAIN_WINDOW_SCREEN
-	dlg.size = Vector2i(760, 640)
+	dlg.size = Vector2i(900, 700)
 	dlg.close_requested.connect(func() -> void:
 		dlg.queue_free()
 		refresh())
@@ -1374,14 +1391,21 @@ func _spell_pick_card(sname: String, on: bool, rebuild: Callable) -> PanelContai
 	ch.add_theme_constant_override("separation", 8)
 	cv.add_child(ch)
 	ch.add_child(_lbl("✓" if on else "○", 20, C_GOOD if on else C_DIM))
-	ch.add_child(_lbl(sname, 19, C_TXT))
+	var pname := _lbl(sname, 19, C_TXT)
+	pname.clip_text = true
+	pname.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ch.add_child(pname)
 	var sp2 := Control.new()
 	sp2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	ch.add_child(sp2)
 	ch.add_child(_lbl("PA %d" % int(pv.get("pa", 1)), 15, C_DIM))
 	if int(pv.get("pm", 0)) > 0:
 		ch.add_child(_lbl("PM %d" % int(pv["pm"]), 15, C_DIM))
-	cv.add_child(_lbl(String(pv.get("desc", "")), 14, C_DIM))
+	var pdesc := _lbl(String(pv.get("desc", "")), 14, C_DIM)
+	pdesc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	pdesc.custom_minimum_size = Vector2(0, 0)
+	pdesc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	cv.add_child(pdesc)
 	var btn := Button.new()
 	btn.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	btn.focus_mode = Control.FOCUS_NONE
