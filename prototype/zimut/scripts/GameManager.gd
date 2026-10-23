@@ -98,6 +98,7 @@ var menu_intent: String           = ""   # intention transmise à l’écran Par
 var fight_enemies: Array         = []   # [{type, level, boss}] du combat en cours (pour l'XP)
 var fight_is_boss: bool          = false
 var fight_nation_boss: String     = ""  # V27 : biome du boss de Nation présent dans ce combat
+var fight_dungeon_room: int       = 0   # V43 : salle (1..4) d'un donjon de Nation en Aventure, 0 sinon
 var _last_banner_round: int = 0
 var fight_biome: String          = "Forêt"  # biome du combat en cours
 ## V42 : timer de tour — temps restant en secondes (0 = pas de timer actif).
@@ -407,12 +408,17 @@ func init_entities() -> void:
 		boss_fight = false
 		fight_is_boss = false
 	fight_nation_boss = ""
-	# V27 : sanctuaire d'une Pierre Élémentaire (Aventure) : combat contre le boss de la Nation
+	fight_dungeon_room = 0
+	# V43 : donjon de Nation (Aventure) : 4 salles ; les 3 premières opposent des groupes de plus en
+	# plus forts, la 4e le Gardien (boss de la Nation, qui peut laisser la Pierre Élémentaire).
 	if campaign_mode == "adventure":
 		var gpoi: Dictionary = ProgressionManager.adventure_poi_by_key(String(active_save.get("adventure", {}).get("pending_challenge", "")))
-		if String(gpoi.get("guardian", "")) != "":
-			boss_fight = true
-			fight_is_boss = true
+		var gbiome: String = String(gpoi.get("guardian", ""))
+		if gbiome != "":
+			fight_dungeon_room = Dungeons.current_room(active_save.get("adventure", {}), gbiome)
+			if fight_dungeon_room >= Dungeons.ROOMS:
+				boss_fight = true
+				fight_is_boss = true
 	# Conquête : siège d’une ville adverse — la 4e bataille oppose le boss
 	# du biome ; les 3 premières des mobs de champs. Une ville neutre : 1 mobs.
 	var conquest_siege_boss: bool = false
@@ -494,6 +500,8 @@ func init_entities() -> void:
 			"color": COLORS.get(etype, Color(0.8, 0.3, 0.3)),
 		}, true)
 		enemy["spells"] = Combat.enemy_spells(etype, atk)
+		if fight_dungeon_room > 0 and Dungeons.ROOM_POWER[fight_dungeon_room - 1] > 0.0:
+			Combat.add_status(enemy, "dmg_up", 999, Dungeons.ROOM_POWER[fight_dungeon_room - 1])
 		var nation_label: String = Nations.enemy_label(etype, fight_biome)
 		if nation_label != "":
 			enemy["name"] = "%s Lv%d" % [nation_label, minion_lvl]

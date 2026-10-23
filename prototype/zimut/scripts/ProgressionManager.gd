@@ -236,8 +236,8 @@ const ADVENTURE_POIS := {
 			"desc": "Des menhirs s'illuminent puis se taisent."},
 	},
 	"foret_ronces": {
-		"1,1": {"kind": "combat", "guardian": "Forêt", "name": "Sanctuaire : Pierre de Sève", "level": 17,
-			"desc": "Le gardien de la Nation veille sur la Pierre de Sève."},
+		"1,1": {"kind": "combat", "guardian": "Forêt", "name": "Donjon de la Nation Sylvestre", "level": 17,
+			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre de Sève."},
 		"5,1": {"kind": "combat", "name": "Embûche de ronces", "level": 8,
 			"desc": "Quelque chose remue sous les ronces."},
 		"2,2": {"kind": "puzzle", "name": "Autel du Lierre", "level": 8,
@@ -278,8 +278,8 @@ const ADVENTURE_POIS := {
 			"desc": "Un abri de toile où l'on échange les nouvelles."},
 	},
 	"cretes_givre": {
-		"1,1": {"kind": "combat", "guardian": "Montagne", "name": "Sanctuaire : Pierre de Givre", "level": 45,
-			"desc": "Le gardien de la Nation veille sur la Pierre de Givre."},
+		"1,1": {"kind": "combat", "guardian": "Montagne", "name": "Donjon de la Nation Cimes", "level": 45,
+			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre de Givre."},
 		"5,3": {"kind": "combat", "name": "Sentinelles de glace", "level": 42,
 			"desc": "Des silhouettes figées bougent quand on approche."},
 		"4,5": {"kind": "combat", "name": "Troll des crêtes", "level": 45,
@@ -320,8 +320,8 @@ const ADVENTURE_POIS := {
 			"desc": "Une flamme bleue qui ne s'éteint jamais."},
 	},
 	"desert_dunes": {
-		"8,3": {"kind": "combat", "guardian": "Désert", "name": "Sanctuaire : Pierre d'Ocre", "level": 70,
-			"desc": "Le gardien de la Nation veille sur la Pierre d'Ocre."},
+		"8,3": {"kind": "combat", "guardian": "Désert", "name": "Donjon de la Nation Sables", "level": 70,
+			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre d'Ocre."},
 		"4,3": {"kind": "combat", "name": "Squelettes des sables", "level": 64,
 			"desc": "Des ossements s’animent à votre approche."},
 		"6,1": {"kind": "puzzle", "name": "Obélisque Solaire", "level": 64,
@@ -336,8 +336,8 @@ const ADVENTURE_POIS := {
 			"desc": "Une eau fraîche au fond d'un puits de grès."},
 	},
 	"vents_plateau": {
-		"1,1": {"kind": "combat", "guardian": "Vents", "name": "Sanctuaire : Pierre d'Azur", "level": 54,
-			"desc": "Le gardien de la Nation veille sur la Pierre d'Azur."},
+		"1,1": {"kind": "combat", "guardian": "Vents", "name": "Donjon de la Nation Vents", "level": 54,
+			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre d'Azur."},
 		"3,2": {"kind": "combat", "name": "Garde aérienne", "level": 46, "desc": "Des sentinelles ailées patrouillent."},
 		"6,3": {"kind": "combat", "name": "Harpies du plateau", "level": 54, "desc": "Les harpies défendent leur nid."},
 		"2,5": {"kind": "chest", "name": "Nid d'aigle", "level": 46, "desc": "Un nid garni de trouvailles."},
@@ -346,8 +346,8 @@ const ADVENTURE_POIS := {
 		"4,4": {"kind": "camp", "name": "Abri de plume", "level": 46, "desc": "Un abri contre les rafales."},
 	},
 	"brumes_marais": {
-		"1,1": {"kind": "combat", "guardian": "Brumes", "name": "Sanctuaire : Pierre de Lune-des-Marais", "level": 31,
-			"desc": "Le gardien de la Nation veille sur la Pierre de Lune-des-Marais."},
+		"1,1": {"kind": "combat", "guardian": "Brumes", "name": "Donjon de la Nation Brumes", "level": 31,
+			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre de Lune-des-Marais."},
 		"3,2": {"kind": "combat", "name": "Rôdeurs brumeux", "level": 26, "desc": "Des formes se glissent dans la brume."},
 		"6,2": {"kind": "combat", "name": "Liche du marais", "level": 31, "desc": "Un mort-vivant garde le marais."},
 		"2,5": {"kind": "chest", "name": "Coffre englouti", "level": 26, "desc": "Un coffre à moitié enfoui dans la vase."},
@@ -356,8 +356,8 @@ const ADVENTURE_POIS := {
 		"4,4": {"kind": "camp", "name": "Cabane sur pilotis", "level": 26, "desc": "Un refuge au-dessus de l'eau."},
 	},
 	"brasier_cendres": {
-		"1,1": {"kind": "combat", "guardian": "Brasier", "name": "Sanctuaire : Pierre de Braise", "level": 25,
-			"desc": "Le gardien de la Nation veille sur la Pierre de Braise."},
+		"1,1": {"kind": "combat", "guardian": "Brasier", "name": "Donjon de la Nation Brasier", "level": 25,
+			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre de Braise."},
 		"3,2": {"kind": "combat", "name": "Lieutenants de braise", "level": 18, "desc": "Des soldats de feu montent la garde."},
 		"6,4": {"kind": "combat", "name": "Golem de lave", "level": 25, "desc": "Un colosse de roche en fusion."},
 		"2,5": {"kind": "chest", "name": "Forge abandonnée", "level": 18, "desc": "Une forge oubliée, encore tiède."},
@@ -366,8 +366,8 @@ const ADVENTURE_POIS := {
 		"4,4": {"kind": "camp", "name": "Source chaude", "level": 18, "desc": "Une source bienfaisante."},
 	},
 	"ombres_necropole": {
-		"1,1": {"kind": "combat", "guardian": "Ombres", "name": "Sanctuaire : Pierre d'Ébène", "level": 63,
-			"desc": "Le gardien de la Nation veille sur la Pierre d'Ébène."},
+		"1,1": {"kind": "combat", "guardian": "Ombres", "name": "Donjon de la Nation Ombres", "level": 63,
+			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre d'Ébène."},
 		"3,2": {"kind": "combat", "name": "Assassins des ombres", "level": 55, "desc": "Des silhouettes jaillissent des tombes."},
 		"5,3": {"kind": "combat", "name": "Spectre gardien", "level": 63, "desc": "Le gardien de la nécropole."},
 		"2,5": {"kind": "chest", "name": "Caveau scellé", "level": 55, "desc": "Un caveau dont le sceau a cédé."},
@@ -376,8 +376,8 @@ const ADVENTURE_POIS := {
 		"4,4": {"kind": "camp", "name": "Crypte tranquille", "level": 55, "desc": "Un coin de calme parmi les stèles."},
 	},
 	"cristaux_caverne": {
-		"1,1": {"kind": "combat", "guardian": "Cristaux", "name": "Sanctuaire : Pierre de Prisme", "level": 86,
-			"desc": "Le gardien de la Nation veille sur la Pierre de Prisme."},
+		"1,1": {"kind": "combat", "guardian": "Cristaux", "name": "Donjon de la Nation Cristaux", "level": 86,
+			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre de Prisme."},
 		"3,2": {"kind": "combat", "name": "Mineurs cristallins", "level": 79, "desc": "Des ouvriers de cristal veillent."},
 		"6,3": {"kind": "combat", "name": "Golem prismatique", "level": 86, "desc": "Le gardien lumineux de la caverne."},
 		"2,5": {"kind": "chest", "name": "Géode brisée", "level": 79, "desc": "Une géode pleine d'éclats précieux."},
@@ -386,8 +386,8 @@ const ADVENTURE_POIS := {
 		"4,4": {"kind": "camp", "name": "Grotte tiède", "level": 79, "desc": "Un coin chaud et abrité."},
 	},
 	"marees_cotes": {
-		"1,1": {"kind": "combat", "guardian": "Marées", "name": "Sanctuaire : Pierre de Corail", "level": 78,
-			"desc": "Le gardien de la Nation veille sur la Pierre de Corail."},
+		"1,1": {"kind": "combat", "guardian": "Marées", "name": "Donjon de la Nation Marées", "level": 78,
+			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre de Corail."},
 		"3,2": {"kind": "combat", "name": "Pirates des marées", "level": 71, "desc": "Des pirates ont jeté l'ancre."},
 		"6,2": {"kind": "combat", "name": "Crabe titan", "level": 78, "desc": "Un crabe gigantesque garde la crique."},
 		"2,5": {"kind": "chest", "name": "Épave échouée", "level": 71, "desc": "Une épave pleine de butin."},
@@ -396,8 +396,8 @@ const ADVENTURE_POIS := {
 		"4,4": {"kind": "camp", "name": "Plage abritée", "level": 71, "desc": "Une crique calme pour souffler."},
 	},
 	"rouages_atelier": {
-		"1,1": {"kind": "combat", "guardian": "Rouages", "name": "Sanctuaire : Pierre d'Airain", "level": 93,
-			"desc": "Le gardien de la Nation veille sur la Pierre d'Airain."},
+		"1,1": {"kind": "combat", "guardian": "Rouages", "name": "Donjon de la Nation Rouages", "level": 93,
+			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre d'Airain."},
 		"3,2": {"kind": "combat", "name": "Gobelins mécaniciens", "level": 87, "desc": "Des bricoleurs testent leurs inventions sur les visiteurs."},
 		"6,3": {"kind": "combat", "name": "Colosse d'engrenages", "level": 93, "desc": "Une machine géante garde la grande forge."},
 		"2,5": {"kind": "chest", "name": "Caisse d'outils scellée", "level": 87, "desc": "Une caisse pleine de pièces rares."},
@@ -2019,7 +2019,8 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 		data["last_result"]["objective"] = obj
 	# V27 : Pierre Élémentaire de la Nation dont le boss vient de tomber
 	var stone_biome: String = String(info.get("nation_boss", ""))
-	if stone_biome != "" and Stones.grant(data, stone_biome):
+	# V43 : en donjon d'Aventure, la Pierre se tire au sort (50 % la 1re fois, puis 5 %), voir _dungeon_victory
+	if stone_biome != "" and adventure_dungeon_biome(data) == "" and Stones.grant(data, stone_biome):
 		data["last_result"]["stone"] = stone_biome
 		Achievements.bump(data, "stones")
 	# V28 : tableau des primes du jour
@@ -2167,6 +2168,8 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 			adventure.erase("pending_name")
 			adventure.erase("pending_count")
 			data["adventure"] = adventure
+		elif adventure_dungeon_biome(data) != "":
+			_dungeon_victory(data, adventure, pending_challenge, adventure_dungeon_biome(data))
 		elif pending_challenge != "":
 			var completed: Array = adventure.get("completed", [])
 			if not completed.has(pending_challenge):
@@ -2177,6 +2180,49 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 			adventure.erase("pending_name")
 			adventure.erase("pending_count")
 			data["adventure"] = adventure
+
+## V43 : Nation du donjon dont le défi d'Aventure est en cours ("" si ce n'est pas un donjon).
+func adventure_dungeon_biome(data: Dictionary) -> String:
+	if String(data.get("campaign_mode", "")) != "adventure":
+		return ""
+	var key: String = String(data.get("adventure", {}).get("pending_challenge", ""))
+	if key == "":
+		return ""
+	return String(adventure_poi_by_key(key).get("guardian", ""))
+
+
+## V43 : une salle de donjon vient d'être gagnée. Avance l'expédition ; à la 4e salle : butin,
+## tirage de la Pierre (50 % la 1re fois, puis 5 %) et bilan du donjon.
+func _dungeon_victory(data: Dictionary, adventure: Dictionary, key: String, biome: String) -> void:
+	var res: Dictionary = Dungeons.win_room(adventure, biome, _rng.randf(), Stones.has(data, biome))
+	if bool(res["cleared"]):
+		if String(res["stone_roll"]) == "won" and Stones.grant(data, biome):
+			data["last_result"]["stone"] = biome
+			Achievements.bump(data, "stones")
+		var lvl: int = Dungeons.room_level(biome, Dungeons.ROOMS)
+		var gold: int = 100 + 15 * lvl
+		data["gold"] = int(data.get("gold", 0)) + gold
+		var res_name: String = String(CONQUEST_BIOME_RESOURCE.get(biome, Nations.resource_of(biome)))
+		var loot_res: Dictionary = {res_name: 3 + lvl / 12, res_key(res_name, 2): 1 + lvl / 30}
+		add_resources(data, loot_res)
+		res["gold"] = gold
+		res["resources"] = loot_res
+		var drops: Array = _roll_loots(lvl + 2, true)
+		if not drops.is_empty():
+			data["inventory"].append(drops[0])
+			res["item"] = drops[0]
+		if bool(res["first_clear"]):
+			var completed: Array = adventure.get("completed", [])
+			if not completed.has(key):
+				completed.append(key)
+			adventure["completed"] = completed
+	data["last_result"]["dungeon"] = res
+	adventure["pending_challenge"] = ""
+	adventure.erase("pending_level")
+	adventure.erase("pending_name")
+	adventure.erase("pending_count")
+	data["adventure"] = adventure
+
 
 ## Récompense d'un contrat d'Aventure rempli, versée tout de suite à la sauvegarde.
 ## Retourne { title, zone, gold, resources, xp, item } pour l'affichage.
@@ -2982,6 +3028,13 @@ func _apply_campaign_defeat(data: Dictionary) -> void:
 		data["conquest"] = conquest
 	elif mode == "adventure":
 		var adventure: Dictionary = data.get("adventure", {})
+		var lost_biome: String = adventure_dungeon_biome(data)
+		if lost_biome != "":
+			var room_lost: int = Dungeons.current_room(adventure, lost_biome)
+			Dungeons.lose(adventure)
+			if data.has("last_result"):
+				data["last_result"]["dungeon"] = {"lost": true, "biome": lost_biome, "room": room_lost,
+					"rooms": Dungeons.ROOMS, "reset": Dungeons.DEFEAT_RESETS}
 		adventure["pending_challenge"] = ""
 		adventure.erase("pending_name")
 		adventure.erase("pending_count")

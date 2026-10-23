@@ -45,6 +45,13 @@ const LVL5 := [
 	"Les Nations gardent jalousement leurs Pierres dans leurs cités. Plus ton empire grandit, plus tu t'en approches !",
 ]
 
+const DONJON := [
+	"Voici un [b]Donjon de Nation[/b]. Chaque Nation en cache un : [b]quatre salles[/b] de plus en plus dures, à enchaîner.",
+	"Les trois premières salles opposent des groupes de monstres ; la dernière abrite le [b]Gardien[/b], le maître de la Nation.",
+	"Le Gardien garde une [b]Pierre Élémentaire[/b]. La première fois que tu le vaincs, tu as [b]une chance sur deux[/b] de la gagner… puis seulement [b]une sur vingt[/b] à chaque victoire suivante.",
+	"Bonne nouvelle : tu peux refaire un donjon [b]autant de fois que tu veux[/b], pour le butin comme pour la Pierre. Mais attention : une défaite te renvoie à l'entrée !",
+]
+
 var _lines: Array = []
 var _idx: int = 0
 var _id: String = ""
