@@ -39,7 +39,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Tank (hero of the Cimes nation)
 - Hair: white hair combed back and a big full white beard
@@ -64,6 +64,7 @@ VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter tu
 All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
 EFFECTS: ice shards and snow bursts, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: rune-engraved war hammer in the RIGHT hand; large round steel shield with a cloud-and-mountain emblem on the LEFT arm — the character visibly HOLDS it in every cell; hands are never empty.
 REMINDER: this is Tank: rune-engraved war hammer in the RIGHT hand; large round steel shield with a cloud-and-mountain emblem on the LEFT arm; white hair combed back and a big full white beard; steel-blue eyes (#4A7FB0), thick white eyebrows, always open; heavy dark steel-blue plate armor (#3A4E6E) with white fur trim on the shoulders and small ice-blue crystal inlays (#9FE3FF); tanned skin; steel-blue armored tassets over dark grey trousers; heavy steel boots. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no helmet, no cape, no sword, no brown beard.
 ```
 
@@ -132,7 +133,7 @@ L'export Zimut de l'Atelier copie aussi le repos (case 1 de la planche vues) ver
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Guerrier des monts (enemy of the Cimes nation)
 - Body: stocky mountain warrior with rocky brown skin (#8A6A4A) cracked like stone
@@ -155,6 +156,7 @@ VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter tu
 All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
 EFFECTS: ice shards and snow bursts, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: crude grey stone gauntlets on both fists, no other weapon — the character visibly HOLDS it in every cell; hands are never empty.
 REMINDER: this is Guerrier des monts: crude grey stone gauntlets on both fists, no other weapon; fur vest of white snow fur with a leather belt; stocky mountain warrior with rocky brown skin (#8A6A4A) cracked like stone; bald rocky head, small white eyes, short stone beard; dark brown fur trousers, bare stone feet. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no helmet, no sword, no axe, no human skin.
 ```
 
@@ -217,7 +219,7 @@ REMINDER: this is Guerrier des monts: crude grey stone gauntlets on both fists, 
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Griffon des cimes (enemy of the Cimes nation)
 - Body: griffin with a tawny lion body (#C9A060) and four legs, front legs with eagle talons
@@ -298,7 +300,7 @@ REMINDER: this is Griffon des cimes: griffin with a tawny lion body (#C9A060) an
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Garde des pics (enemy of the Cimes nation)
 - Body: peak guardian golem of smooth blue-grey stone blocks (#6E8296)
@@ -379,7 +381,7 @@ REMINDER: this is Garde des pics: peak guardian golem of smooth blue-grey stone 
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Rochebrute (enemy of the Cimes nation)
 - Body: hulking brute made of round brown boulders (#7A5A3A), huge hunched shoulders
@@ -462,7 +464,7 @@ REMINDER: this is Rochebrute: hulking brute made of round brown boulders (#7A5A3
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Vorkann le Givre (boss of the Cimes nation)
 - Body: massive frost knight in dark steel armor (#2E3A4E) covered with ice crystals and white snow fur
@@ -483,6 +485,7 @@ VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter tu
 All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
 EFFECTS: ice shards and snow bursts, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: heavy rune hammer in the RIGHT hand, huge crystal-studded tower shield on the LEFT arm — the character visibly HOLDS it in every cell; hands are never empty.
 REMINDER: this is Vorkann le Givre: heavy rune hammer in the RIGHT hand, huge crystal-studded tower shield on the LEFT arm; massive frost knight in dark steel armor (#2E3A4E) covered with ice crystals and white snow fur; closed crowned helm of ice spikes, glowing ice-blue eye slit. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no visible face, no cape.
 ```
 

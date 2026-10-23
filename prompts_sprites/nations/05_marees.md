@@ -39,7 +39,7 @@ BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Heal (hero of the Marées nation)
 - Hair: long teal hair (#2BB3A8) tied low behind the back
@@ -64,6 +64,7 @@ VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter tu
 All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: golden staff topped with a glowing water-drop crystal (#7FE8FF), RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
 REMINDER: this is Heal: golden staff topped with a glowing water-drop crystal (#7FE8FF), RIGHT hand; long teal hair (#2BB3A8) tied low behind the back; soft turquoise eyes, always open; ornate white robe with turquoise panels (#3CC7C0), gold embroidery and wave patterns; fair skin; long white robe skirt with turquoise hem; white and gold slippers. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no armor, no dark clothes.
 ```
 
@@ -132,7 +133,7 @@ L'export Zimut de l'Atelier copie aussi le repos (case 1 de la planche vues) ver
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Pirate des mers (enemy of the Marées nation)
 - Hair: red bandana (#C8281E) over messy black hair, stubble
@@ -156,6 +157,7 @@ VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter tu
 All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: short cutlass in the RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
 REMINDER: this is Pirate des mers: short cutlass in the RIGHT hand; red bandana (#C8281E) over messy black hair, stubble; dark brown eyes, always open, one gold earring; blue coat (#2A4E8A) with gold buttons over a white shirt, crossed brown leather belts; dark brown trousers; black boots. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hat, no eye patch, no wooden leg, no pistol, no parrot.
 ```
 
@@ -219,7 +221,7 @@ REMINDER: this is Pirate des mers: short cutlass in the RIGHT hand; red bandana 
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Requin (enemy of the Marées nation)
 - Body: blue shark (#3A6EB8) with a white belly, standing upright in the air on its tail
@@ -300,7 +302,7 @@ REMINDER: this is Requin: blue shark (#3A6EB8) with a white belly, standing upri
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Néréide (enemy of the Marées nation)
 - Body: water nymph whose body is made of opaque turquoise water (#3CC7C0) with lighter highlights
@@ -381,7 +383,7 @@ REMINDER: this is Néréide: water nymph whose body is made of opaque turquoise 
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Crabe géant (enemy of the Marées nation)
 - Body: giant crab with a blue shell (#2E62B0) striped with red (#D23A2A), six walking legs
@@ -464,7 +466,7 @@ REMINDER: this is Crabe géant: giant crab with a blue shell (#2E62B0) striped w
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Néréa la Tempête (boss of the Marées nation)
 - Body: sea queen in turquoise coral armor (#2BB8B0) with gold edges, flowing white sea-foam cape
@@ -485,6 +487,7 @@ VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter tu
 All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
 EFFECTS: water splashes and bubbles, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: golden trident, RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
 REMINDER: this is Néréa la Tempête: golden trident, RIGHT hand; sea queen in turquoise coral armor (#2BB8B0) with gold edges, flowing white sea-foam cape; crown of red coral branches, long deep-blue hair, blue eyes. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no fish tail, no sword.
 ```
 

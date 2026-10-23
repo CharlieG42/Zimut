@@ -39,7 +39,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Assassin (hero of the Ombres nation)
 - Hair: spiky black hair (#121216)
@@ -64,6 +64,7 @@ VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter tu
 All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
 EFFECTS: violet shadow smoke, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: one curved dagger in EACH hand — the character visibly HOLDS it in every cell; hands are never empty.
 REMINDER: this is Assassin: one curved dagger in EACH hand; spiky black hair (#121216); violet glowing eyes (#B070FF), always visible above the mask; dark charcoal hooded armor (#2A2C33), hood DOWN, layered tattered silver-teal cloth panels (#8FC9C0), violet rune details; black cloth mask covering the nose and mouth; charcoal trousers with silver-teal cloth strips; black soft boots. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no horns, no helmet, no claws, no sword.
 ```
 
@@ -132,7 +133,7 @@ L'export Zimut de l'Atelier copie aussi le repos (case 1 de la planche vues) ver
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Assassin des ombres (enemy of the Ombres nation)
 - Body: hunched four-legged shadow beast, black body (#141418) with charcoal armor straps and silver-teal cloth bands (#8FC9C0) on the legs
@@ -213,7 +214,7 @@ REMINDER: this is Assassin des ombres: hunched four-legged shadow beast, black b
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ombre infernale (enemy of the Ombres nation)
 - Body: humanoid of purple-black shadow (#1E1428) in dark armor with silver-teal cloth panels (#8FC9C0)
@@ -294,7 +295,7 @@ REMINDER: this is Ombre infernale: humanoid of purple-black shadow (#1E1428) in 
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Spectre (enemy of the Ombres nation)
 - Body: small hunched spectral figure, violet-grey skin (#5A4A78) wrapped in silver bandages
@@ -377,7 +378,7 @@ REMINDER: this is Spectre: small hunched spectral figure, violet-grey skin (#5A4
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Liche (enemy of the Ombres nation)
 - Body: tall dark lich in a black and purple spiked robe (#1E1428, #5A2A8A) with silver-teal trims
@@ -398,6 +399,7 @@ VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter tu
 All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
 EFFECTS: violet shadow smoke, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: dark staff topped with a violet crystal, RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
 REMINDER: this is Liche: dark staff topped with a violet crystal, RIGHT hand; tall dark lich in a black and purple spiked robe (#1E1428, #5A2A8A) with silver-teal trims; purple skull (#4A3460) with glowing white-violet eyes and a crown of black spikes. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hair, no hood, no flesh face.
 ```
 
@@ -460,7 +462,7 @@ REMINDER: this is Liche: dark staff topped with a violet crystal, RIGHT hand; ta
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Nébulia l'Illusionniste (boss of the Ombres nation)
 - Body: tall illusionist in black armor (#18181E) with spiky layers of silver-teal tattered cloth (#8FC9C0)
@@ -481,6 +483,7 @@ VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter tu
 All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
 EFFECTS: violet shadow smoke, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: two long thin blades, one in each hand, violet mirror-like glints — the character visibly HOLDS it in every cell; hands are never empty.
 REMINDER: this is Nébulia l'Illusionniste: two long thin blades, one in each hand, violet mirror-like glints; tall illusionist in black armor (#18181E) with spiky layers of silver-teal tattered cloth (#8FC9C0); horned black mask-helm with a silver face plate, long white hair, glowing violet eyes. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no shield, no staff.
 ```
 

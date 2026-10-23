@@ -39,7 +39,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Géomancien (hero of the Sables nation)
 - Hair: short brown hair (#7A4A28)
@@ -64,6 +64,7 @@ VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter tu
 All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
 EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: golden staff topped with a large faceted amber crystal (#F2A93B), RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
 REMINDER: this is Géomancien: golden staff topped with a large faceted amber crystal (#F2A93B), RIGHT hand; short brown hair (#7A4A28); amber-brown eyes, always open; layered sand-gold robe (#D9B26A) with terracotta panels (#B8562E) and small amber gems; light tan skin; sand-colored wrapped trousers; brown sandals with cloth wraps. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no turban, no blue or green clothes.
 ```
 
@@ -132,7 +133,7 @@ L'export Zimut de l'Atelier copie aussi le repos (case 1 de la planche vues) ver
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Bandit des dunes (enemy of the Sables nation)
 - Body: small jackal-folk bandit standing on two legs, orange fur (#D9822B) with a cream muzzle
@@ -155,6 +156,7 @@ VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter tu
 All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
 EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: one curved dagger in the RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
 REMINDER: this is Bandit des dunes: one curved dagger in the RIGHT hand; brown leather vest with a red sash; small jackal-folk bandit standing on two legs, orange fur (#D9822B) with a cream muzzle; tall jackal ears, yellow eyes, sand-colored scarf (#E3CF9A) over the mouth; baggy sand-colored trousers, bare paws. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no bow, no sword, no hood, no human face.
 ```
 
@@ -217,7 +219,7 @@ REMINDER: this is Bandit des dunes: one curved dagger in the RIGHT hand; brown l
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Scarabée géant (enemy of the Sables nation)
 - Body: giant scarab beetle on six legs, glossy black shell (#1A1A1E) with gold edges and patterns (#E0B040)
@@ -296,7 +298,7 @@ REMINDER: this is Scarabée géant: giant scarab beetle on six legs, glossy blac
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Génie du désert (enemy of the Sables nation)
 - Body: golden-skinned sand djinn (#E0B050) with a muscular bare chest and arms, golden bracelets
@@ -377,7 +379,7 @@ REMINDER: this is Génie du désert: golden-skinned sand djinn (#E0B050) with a 
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Sphinx (enemy of the Sables nation)
 - Body: golden lion sphinx on four legs (#D9A848) with a lion tail
@@ -460,7 +462,7 @@ REMINDER: this is Sphinx: golden lion sphinx on four legs (#D9A848) with a lion 
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Zahor le Sableux (boss of the Sables nation)
 - Body: sand sovereign in ornate golden armor (#D4A63A) with sharp layered plates
@@ -481,6 +483,7 @@ VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter tu
 All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
 EFFECTS: swirling sand and amber shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: tall golden staff with a giant amber crystal, RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
 REMINDER: this is Zahor le Sableux: tall golden staff with a giant amber crystal, RIGHT hand; sand sovereign in ornate golden armor (#D4A63A) with sharp layered plates; crested golden helm, dark face shadow with glowing amber eyes. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no cape, no sword.
 ```
 

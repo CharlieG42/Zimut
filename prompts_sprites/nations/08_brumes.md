@@ -39,7 +39,7 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Invocateur (hero of the Brumes nation)
 - Hair: black hair (#15151C), medium length, messy bangs
@@ -64,6 +64,7 @@ VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter tu
 All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side — the character visibly HOLDS it in every cell; hands are never empty.
 REMINDER: this is Invocateur: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side; black hair (#15151C), medium length, messy bangs; violet eyes (#9B6BFF), always open; long black coat with violet trims (#7A3FD0) and silver clasps; pale skin; black trousers; black boots with silver buckles. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no mask, no white hair.
 ```
 
@@ -132,7 +133,7 @@ L'export Zimut de l'Atelier copie aussi le repos (case 1 de la planche vues) ver
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Brumeux (enemy of the Brumes nation)
 - Body: hulking mist beast with a fluffy lavender cloud body (#B8A8E0)
@@ -213,7 +214,7 @@ REMINDER: this is Brumeux: hulking mist beast with a fluffy lavender cloud body 
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Gargouille (enemy of the Brumes nation)
 - Body: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture
@@ -294,7 +295,7 @@ REMINDER: this is Gargouille: grey stone gargoyle (#7A7A82) crouching on two leg
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Liche des brumes (enemy of the Brumes nation)
 - Body: thin skeletal lich, bony grey hands
@@ -316,6 +317,7 @@ VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter tu
 All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: crooked wooden staff, RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
 REMINDER: this is Liche des brumes: crooked wooden staff, RIGHT hand; tattered violet robes (#6A4A9A) with torn edges; thin skeletal lich, bony grey hands; skull face with glowing mint eyes (#9FFFD8) under a tattered hood. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no crown, no armor, no hair.
 ```
 
@@ -377,7 +379,7 @@ REMINDER: this is Liche des brumes: crooked wooden staff, RIGHT hand; tattered v
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Fantôme (enemy of the Brumes nation)
 - Body: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs
@@ -460,7 +462,7 @@ REMINDER: this is Fantôme: pale blue ghost (#BFE3FF) with a round head-body and
 Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ombrelis le Brumeux (boss of the Brumes nation)
 - Body: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A)
@@ -481,6 +483,7 @@ VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter tu
 All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: skull-topped staff surrounded by mint mist, RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
 REMINDER: this is Ombrelis le Brumeux: skull-topped staff surrounded by mint mist, RIGHT hand; dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A); spiked crown, gaunt pale face, glowing mint eyes. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no sword.
 ```
 
