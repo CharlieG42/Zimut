@@ -81,14 +81,16 @@ static func _free(adv: Dictionary, zone: String, p: Vector2i, hero: Vector2i) ->
 	return at(adv, zone, p).is_empty()
 
 
-## Fourchette de niveaux des groupes par carte : elle comble l'écart avec les cartes
-## voisines (la Sylve, niveau 1, prépare aux Ronces niveau 10…). Hors liste : niveau de
-## la carte à +2.
+## Fourchette de niveaux des groupes par carte, DANS la tranche de sa nation
+## (voir Nations.LEVEL_BANDS) : chaque nation occupe une tranche de niveaux distincte, les
+## cartes d'une même nation se partagent la sienne. Hors liste : niveau de la carte à +2.
 const LEVEL_RANGE := {
-	"foret_sylve": [1, 7], "foret_ronces": [8, 14], "lisiere_col": [12, 19], "brasier_cendres": [18, 25],
-	"brumes_marais": [24, 31], "montagne_pics": [30, 38], "vents_plateau": [31, 40], "cretes_givre": [44, 55],
-	"piemont_ocre": [44, 52], "ombres_necropole": [54, 63], "desert_dunes": [60, 68], "marees_cotes": [70, 80], "rouages_atelier": [82, 94],
-	"cristaux_caverne": [80, 90], "portes_donjon": [88, 100],
+	"foret_sylve": [1, 7], "foret_ronces": [8, 14], "lisiere_col": [12, 17],
+	"brasier_cendres": [18, 25], "brumes_marais": [26, 31],
+	"montagne_pics": [32, 37], "piemont_ocre": [38, 41], "cretes_givre": [42, 45],
+	"vents_plateau": [46, 54], "ombres_necropole": [55, 63], "desert_dunes": [64, 70],
+	"marees_cotes": [71, 78], "cristaux_caverne": [79, 86], "rouages_atelier": [87, 93],
+	"portes_donjon": [94, 100],
 }
 
 static func level_range(zone: String) -> Vector2i:
