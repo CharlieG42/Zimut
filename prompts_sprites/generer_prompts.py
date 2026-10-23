@@ -4,7 +4,7 @@
 Usage :  python3 prompts_sprites/generer_prompts.py
 Modifier une description : éditer les dictionnaires ci-dessous puis relancer le script.
 
-V42 — format « 2 planches par personnage » (héros, ennemis, boss, familiers), arme verrouillée :
+V43 — format « 2 planches par personnage » (héros, ennemis, boss, familiers), arme verrouillée :
 - Planche VUES : le même personnage, même pose de repos, la caméra ne bouge pas et le personnage
   tourne sur lui-même par quarts de tour : 4 angles (3/4 avant droite, 3/4 dos droite, 3/4 dos
   gauche, 3/4 avant gauche), grille 2 × 2 sur image 2:1, poses largement espacées. Deux vues
@@ -16,6 +16,11 @@ V42 — format « 2 planches par personnage » (héros, ennemis, boss, familiers
   Retour V41 corrigé : ligne « WEAPON CHECK » recopiant l'arme EXACTE de la carte d'identité
   juste avant le rappel final (zone la plus pondérée du prompt) — l'arc manquait encore sur la
   plupart des cases malgré le WEAPON LOCK générique.
+  Retour V42 corrigé : l'édition corrective « ajoute l'arc » avait APLATI toutes les vues dans
+  le même angle car son prompt ne répétait pas la liste des angles. Chaque planche vues est
+  désormais accompagnée d'un prompt d'ÉDITION CORRECTIVE qui RÉPÈTE la liste complète des
+  angles + « never redraw the whole sheet from a single angle ». La planche contient par
+  ailleurs EXACTEMENT 4 sprites (négatif dédié : l'éditeur en rendait 10 en rangées dupliquées).
 - Planche ACTIONS : 2 attaques + 1 sort, chacune vue DE FACE puis DE DOS (3 colonnes × 2
   rangées), à générer EN ÉDITION de la planche vues (image source = planche vues) : le
   générateur repart du personnage réellement dessiné, il ne peut pas changer d'une planche à
@@ -88,7 +93,9 @@ NEGATIVE_VUES = (
     "blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, "
     "photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, "
     "isometric floor grid, tiles, one sprite bigger or smaller than the others, size changing between cells, "
-    "empty hands, character without its weapon in a cell, closed eyes, looking up at the sky, different hair "
+    "more than 4 sprites, extra sprites, duplicated row of sprites, all sprites in the same viewing angle, "
+    "all sprites in the same orientation, empty hands, character without its weapon in a cell, closed eyes, "
+    "looking up at the sky, different hair "
     "color, different eye "
     "color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, "
     "different character between cells, pose changing between cells, different outfit between angles, "
@@ -104,10 +111,11 @@ VUES_LAYOUT = (
     "height of its quarter of the image and is centered in it, so that there is a wide empty space, especially "
     "horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay "
     "inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide "
-    "effects are drawn smaller or tucked in so they fit. The 4 sprites have EXACTLY the same size: same scale, "
-    "same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is "
-    "wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between "
-    "poses, no floor, no grid on the ground."
+    "effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per "
+    "cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same "
+    "size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than "
+    "the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing "
+    "lines between poses, no floor, no grid on the ground."
 )
 
 # Planche ACTIONS : 6 poses en 3 colonnes × 2 rangées sur image 2:1.
@@ -620,6 +628,36 @@ def prompt_actions(who, role, nation, desc, arch, fx, rim, palette, pale, ent_id
     return "\n".join(lines)
 
 
+def prompt_vues_fix(who, role, nation, desc, fx, rim, palette, pale, ent_id=""):
+    """Édition CORRECTIVE de la planche vues (ex. arme manquante sur des cases).
+    RÉPÈTE la liste complète des angles : une édition corrective qui ne la répète pas
+    aplatit toutes les vues dans le même angle (constat V42 sur le Chasseur)."""
+    idc, never = card(ent_id, desc, who, nation)
+    ident_parts = dict(IDENT[ent_id]["parts"]) if IDENT.get(ent_id) else {}
+    wtxt = ident_parts.get("weapon")
+    lines = [
+        "Image edit for a chibi isometric tactical RPG sprite sheet.",
+        f"SOURCE IMAGE: it shows ONE {role}, {who}, several times, in the SAME relaxed idle pose seen "
+        "from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).",
+        idc,
+        "TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the "
+        "weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.",
+        "CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the "
+        "angles must NOT become identical. Never redraw the whole sheet from a single angle. The "
+        "character turns in place by exact quarter turns between sprites:",
+    ]
+    for i, ((_, _, vtxt), pos) in enumerate(zip(VIEWS4, VIEWS4_POS)):
+        lines.append(f"{i+1}. {pos} cell: {vtxt}.")
+    if wtxt:
+        lines.append(f"WEAPON CHECK: {wtxt} — the character visibly HOLDS it in every cell; hands are "
+                     "never empty.")
+    lines.append("CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, "
+                 "background and layout. Only add the missing weapon in the correct hand.")
+    lines.append("BACKGROUND: keep the plain flat background of the source image.")
+    lines.append(reminder(ent_id, who, desc, never))
+    return "\n".join(lines)
+
+
 def name_table_vues(base):
     out = ["| Case | Vue | Fichier |", "|---|---|---|"]
     for i, (suf, vlabel, _) in enumerate(VIEWS4):
@@ -656,6 +694,12 @@ def character_md(title, ent, role, nation_txt, fx, rim, palette, path_hint, extr
         f"ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, "
         f"2 plutôt de dos.\n\n"
         f"```text\n{p}\n```\n\n{name_table_vues(ent['id'])}\n")
+    p = prompt_vues_fix(who, role, nation_txt, desc, fx, rim, palette, pale, key)
+    parts.append(
+        "##### Édition corrective (arme manquante sur des cases)\n\nSi l'arme manque sur certaines cases de "
+        "la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des "
+        "angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.\n\n"
+        f"```text\n{p}\n```\n")
     p = prompt_actions(who, role, nation_txt, desc, ent["arch"], fx, rim, palette, pale, key)
     parts.append(
         f"#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)\n\n**Édition d'image** : "
