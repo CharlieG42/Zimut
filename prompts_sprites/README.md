@@ -12,13 +12,16 @@ Prompts prêts à copier dans un générateur d'images pour refaire **tous les s
 
 Les héros, ennemis, boss et familiers viennent de `scripts/Nations.gd`, `assets/sprites/nations/README.md` et `SPRITES_A_FOURNIR.md`.
 
-## V41 : 2 planches par personnage, 4 vues en quarts de tour, arme verrouillée
+## V42 : 2 planches par personnage, 4 vues en quarts de tour, arme verrouillée
 
 Les planches V39 (6 angles + 6 actions) ont donné une vraie cohérence de design entre les deux planches d'un
 personnage, mais deux défauts restaient : **doublons** (les vues « face » et « 3/4 avant » sortaient trop
 proches) et **arme/accessoires qui changent** d'une planche à l'autre (le chasseur perdait son arc). Le
-format V40 corrige, et la V41 ajoute trois verrous après le premier test visuel (chasseur : 1 sprite démesuré,
-arc absent de 3 cases sur 4, un angle surviré en vue de côté, angles mélangés entre cases) :
+format V40 corrige, la V41 ajoute trois verrous après le premier test visuel (chasseur : 1 sprite démesuré,
+arc absent de 3 cases sur 4, un angle surviré en vue de côté, angles mélangés entre cases), et la **V42**
+ajoute la ligne **« WEAPON CHECK »** après le second test (l'arc manquait encore sur la plupart des cases
+malgré le WEAPON LOCK générique) : l'arme EXACTE de la carte d'identité est recopiée en toute fin de prompt,
+zone la plus pondérée par les générateurs.
 
 1. **Planche `vues`** — un seul personnage, la même pose de repos, la **caméra ne bouge pas** : le
    personnage tourne sur lui-même par **quarts de tour**, d'où 4 angles bien distincts : 3/4 avant droite,
@@ -33,6 +36,7 @@ arc absent de 3 cases sur 4, un angle surviré en vue de côté, angles mélang�
    est recopiée dans chaque prompt.
 3. **Arme verrouillée** — ligne « WEAPON LOCK » dans les deux prompts : jamais remplacer l'arme (un arc
    reste un arc) et **V41 : l'arme est TENUE EN MAIN dans chaque case, les mains ne sont jamais vides**.
+   **V42 : ligne « WEAPON CHECK »** recopiant l'arme exacte de la carte d'identité en toute fin de prompt.
    Négatifs dédiés (« weapon replaced by another weapon, missing weapon, empty hands… ») et rappel final
    qui commence par l'arme.
 4. **Taille verrouillée (V41)** — « The 4 sprites have EXACTLY the same size: same scale, same height in
@@ -86,7 +90,7 @@ toutes les planches suivantes — et la planche `actions` éditée depuis la pla
 
 ## Pièges observés sur les planches précédentes
 
-| Problème | Conséquence | Ce que le format V41 impose |
+| Problème | Conséquence | Ce que le format V42 impose |
 |---|---|---|
 | Même pose recopiée dans plusieurs cases | animations figées | 4 angles en quarts de tour par planche (un seul angle par case) ; actions aux silhouettes décrites une par une |
 | Personnage différent d'une planche à l'autre | héros méconnaissable | planche `actions` **éditée depuis** la planche `vues` + carte d'identité recopiée partout |

@@ -4,7 +4,7 @@
 Usage :  python3 prompts_sprites/generer_prompts.py
 Modifier une description : éditer les dictionnaires ci-dessous puis relancer le script.
 
-V41 — format « 2 planches par personnage » (héros, ennemis, boss, familiers), arme verrouillée :
+V42 — format « 2 planches par personnage » (héros, ennemis, boss, familiers), arme verrouillée :
 - Planche VUES : le même personnage, même pose de repos, la caméra ne bouge pas et le personnage
   tourne sur lui-même par quarts de tour : 4 angles (3/4 avant droite, 3/4 dos droite, 3/4 dos
   gauche, 3/4 avant gauche), grille 2 × 2 sur image 2:1, poses largement espacées. Deux vues
@@ -13,6 +13,9 @@ V41 — format « 2 planches par personnage » (héros, ennemis, boss, familiers
   Retours V40 corrigés : chaque angle est ancré à sa POSITION de case (TOP-LEFT, TOP-RIGHT,
   BOTTOM-LEFT, BOTTOM-RIGHT) avec le décompte des quarts de tour, l'arme est TENUE EN MAIN dans
   chaque case (mains jamais vides) et les 4 sprites ont EXACTEMENT la même taille.
+  Retour V41 corrigé : ligne « WEAPON CHECK » recopiant l'arme EXACTE de la carte d'identité
+  juste avant le rappel final (zone la plus pondérée du prompt) — l'arc manquait encore sur la
+  plupart des cases malgré le WEAPON LOCK générique.
 - Planche ACTIONS : 2 attaques + 1 sort, chacune vue DE FACE puis DE DOS (3 colonnes × 2
   rangées), à générer EN ÉDITION de la planche vues (image source = planche vues) : le
   générateur repart du personnage réellement dessiné, il ne peut pas changer d'une planche à
@@ -536,7 +539,8 @@ def prompt_vues(who, role, nation, desc, fx, rim, palette, pale, ent_id=""):
     idc, never = card(ent_id, desc, who, nation)
     lines = [
         f"Sprite sheet of ONE {role} for a chibi isometric tactical RPG. The same character appears 4 times: "
-        "the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. "
+        "the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 "
+        "viewing angles. "
         "The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE "
         "by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only "
         "the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same "
@@ -565,6 +569,13 @@ def prompt_vues(who, role, nation, desc, fx, rim, palette, pale, ent_id=""):
     lines.append(f"EFFECTS: {fx}, stylized, opaque, with dark outlines, small, kept close to the character "
                  "inside its own quarter of the image.")
     lines.append("BACKGROUND: " + (BG_GRAY if pale else BG_WHITE) + BG_TAIL)
+    # Retour V41 : le WEAPON LOCK générique ne suffisait pas — l'arme EXACTE de la carte est
+    # recopiée en toute fin de prompt (zone la plus pondérée par les générateurs).
+    ident_parts = dict(IDENT[ent_id]["parts"]) if IDENT.get(ent_id) else {}
+    wtxt = ident_parts.get("weapon")
+    if wtxt:
+        lines.append(f"WEAPON CHECK: {wtxt} — the character visibly HOLDS it in every cell; hands are never "
+                     "empty.")
     lines.append(reminder(ent_id, who, desc, never))
     return "\n".join(lines)
 
