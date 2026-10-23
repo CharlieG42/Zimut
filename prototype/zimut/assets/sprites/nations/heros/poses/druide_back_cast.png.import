@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bgyf4nxvtet3r"
-path="res://.godot/imported/druide_cast_4.png-052f6437ce991f0bc71c40f9b2ff2c8b.ctex"
+uid="uid://605x3jnvky7w"
+path="res://.godot/imported/druide_back_cast.png-475a8bf17f648e30674658ef10aac104.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/nations/heros/poses/druide_cast_4.png"
-dest_files=["res://.godot/imported/druide_cast_4.png-052f6437ce991f0bc71c40f9b2ff2c8b.ctex"]
+source_file="res://assets/sprites/nations/heros/poses/druide_back_cast.png"
+dest_files=["res://.godot/imported/druide_back_cast.png-475a8bf17f648e30674658ef10aac104.ctex"]
 
 [params]
 

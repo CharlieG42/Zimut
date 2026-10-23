@@ -43,14 +43,14 @@ STYLE = (
     "Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 "
     "tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather "
     "straps), saturated but harmonious colors, strong readable silhouette at small size. "
-    "Soft key light from the upper left, subtle {rim} rim light on the right edge."
+    "Soft key light from the upper left, with only a thin subtle {rim} highlight along the right edge (a clean edge highlight, NOT a glow, haze, flare or color tint over the sprite; identical lighting in every cell)."
 )
 OBJ_STYLE = (
     "Polished 2D game art inspired by Dofus and Waven, matching chibi character sprites: clean bold dark "
     "outlines, 3-tone cel shading, crisp material details, saturated harmonious colors, slightly cute "
     "rounded proportions, readable at small size. Soft key light from the upper left."
 )
-BG_WHITE = "Pure flat white background (#FFFFFF)"
+BG_WHITE = "Pure flat white background (#FFFFFF) — not cream, not beige, not ivory"
 BG_GRAY = "Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it)"
 BG_TAIL = (", no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, "
            "no numbers, no arrows, no frame or border lines."
@@ -62,6 +62,8 @@ NEGATIVE = (
     "effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, "
     "inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, "
     "blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, "
+    "golden glow, light flare, sun rays, color tint over the sprite, glowing aura on one side, cream background, "
+    "beige background, colored background, ground shadow ellipse, "
     "photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, "
     "isometric floor grid, tiles, duplicate poses in the same viewing angle, identical poses side by side, "
     "the same pose copied twice in the same view, front and back mixed inside one cell, "
@@ -134,16 +136,16 @@ VIEWS4 = [
      "FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest "
      "and right side visible), facing front-right; both eyes visible; standing calm"),
     ("_idle_2", "repos de face, variante",
-     "FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance "
-     "— weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a "
-     "copy of cell 1"),
+     "FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT pose — the free "
+     "hand rests on the hip, the head is turned slightly toward the right, the weight is on the other leg (the "
+     "weapon stays in its hand); the face is visible and the drawing must not be a copy of cell 1"),
     ("_back", "repos de dos",
      "BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right "
      "shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile"),
     ("_back_idle_2", "repos de dos, variante",
-     "BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed "
-     "stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must "
-     "not be a copy of cell 3; no face, no eyes"),
+     "BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT pose — the free "
+     "hand rests on the hip, the head is turned slightly to the left, the weight is on the other leg (the weapon "
+     "stays in its hand); no face, no eyes; the drawing must not be a copy of cell 3"),
 ]
 # Position de chaque angle dans la grille 2 × 2 (l'ordre des cases n'était pas respecté en V40).
 VIEWS4_POS = ["TOP-LEFT", "TOP-RIGHT", "BOTTOM-LEFT", "BOTTOM-RIGHT"]  # haut = de face, bas = de dos
