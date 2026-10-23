@@ -40,6 +40,11 @@ INFO	INFO
 Version du jeu : %s	Game version: %s
 ＋  NOUVELLE PARTIE\nEmplacement libre %d	＋  NEW GAME\nFree slot %d
 ✦  PARTIE %d\n%s\nNiv. ennemis %d  ·  %d victoires	✦  GAME %d\n%s\nEnemy lv. %d  ·  %d wins
+⚔  PARTIE %d\n%s\nNiv. ennemis %d  ·  %d victoires\n⏱ %s	⚔  GAME %d\n%s\nEnemy lv. %d  ·  %d wins\n⏱ %s
+# V46 : temps de jeu (total dans la vignette, par mode sous les cartes)
+%d s	%d sec
+%d min	%d min
+%d h %02d	%d h %02d
 ENNEMIS NV %d     ·     %d VICTOIRE(S)     ·     EMPLACEMENT %d	ENEMIES LV %d     ·     %d WIN(S)     ·     SLOT %d
 DIFFICULTÉ DES ENNEMIS (cette partie)	ENEMY DIFFICULTY (this game)
 Facile	Easy

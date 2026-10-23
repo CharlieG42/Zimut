@@ -8,6 +8,8 @@ extends CanvasLayer
 const BG_TEXTURE: Texture2D = preload("res://assets/accueil_1920.jpg")
 
 func _ready() -> void:
+	# V46 : écran d'accueil — le temps de jeu de la partie active est en pause.
+	PlayTimer.flush()
 	layer = 10
 	Music.play("menu")
 	var root := Control.new()
@@ -38,6 +40,7 @@ func _ready() -> void:
 
 
 func _start_new_game() -> void:
+	PlayTimer.flush()
 	GameManager.active_save = {}
 	GameManager.active_slot = -1
 	GameManager.clear_custom_team()
@@ -69,6 +72,9 @@ func _continue_game() -> void:
 
 	GameManager.active_slot = slot
 	GameManager.active_save = data
+	# V46 : le temps de jeu reprend dès la reprise de la partie (sélection d'équipe = mode tactique).
+	PlayTimer.flush()
+	PlayTimer.resume_tactique()
 	GameManager.clear_custom_team()
 	GameManager.menu_intent = ""
 	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")

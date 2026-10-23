@@ -226,6 +226,7 @@ func _setup_start_button() -> void:
 	back_btn.position = Vector2(-300, 560)
 	back_btn.size = Vector2(200, 60)
 	back_btn.pressed.connect(func() -> void:
+		PlayTimer.flush()
 		GameManager.active_save = {}
 		GameManager.active_slot = -1
 		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn"))

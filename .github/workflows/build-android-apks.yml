@@ -84,6 +84,10 @@ jobs:
           echo "=== test_builds.gd ==="
           timeout 60 godot --headless -s tests/test_builds.gd --path . 2>&1 | tail -30 || echo "(test_builds timeout ou échec - ignoré)"
           echo ""
+          # V46 : tests compteur de temps de jeu
+          echo "=== test_playtime.gd ==="
+          timeout 60 godot --headless -s tests/test_playtime.gd --path . 2>&1 | tail -30 || echo "(test_playtime timeout ou échec - ignoré)"
+          echo ""
           echo "Tests headless exécutés."
 
       - name: Decode release keystore from GitHub Secrets

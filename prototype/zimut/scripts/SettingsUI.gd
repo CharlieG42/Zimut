@@ -119,6 +119,7 @@ func _ready() -> void:
 	back.add_theme_stylebox_override("normal", _flat(Color(0.88, 0.82, 0.66), COL_BORDER, 12, 3))
 	back.add_theme_stylebox_override("hover", _flat(Color(0.99, 0.95, 0.83), COL_BORDER, 12, 3))
 	back.pressed.connect(func() -> void:
+		PlayTimer.flush()
 		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn"))
 	box.add_child(back)
 

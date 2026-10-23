@@ -1329,6 +1329,7 @@ func _build_ui() -> void:
 	var saves_btn: Button = _big_button("Mes parties / Progression")
 	saves_btn.pressed.connect(func() -> void:
 		Sfx.play("click")
+		PlayTimer.flush()
 		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn"))
 	box.add_child(saves_btn)
 
@@ -1953,6 +1954,7 @@ func _show_result_window(victory: bool) -> void:
 	cont.pressed.connect(func() -> void:
 		dim.queue_free()
 		holder.queue_free()
+		PlayTimer.flush()
 		if back_mode == "adventure":
 			get_tree().change_scene_to_file("res://scenes/AdventureMap.tscn")
 		elif back_mode == "conquest":
@@ -2066,6 +2068,7 @@ func _on_spell_button_selected(spell: Dictionary) -> void:
 
 func _on_quit_combat_pressed() -> void:
 	Sfx.play("click")
+	PlayTimer.flush()
 	# V43 : abandonner un combat de donjon = échec de l'expédition (retour à la salle 1)
 	var gm: Node = get_node_or_null("/root/GameManager")
 	if gm != null and not gm.game_over and gm.active_slot >= 0 and gm.active_save.get("campaign_mode", "") == "adventure":
@@ -2082,6 +2085,7 @@ func _on_team_selection_pressed() -> void:
 	var gm: Node = get_node_or_null("/root/GameManager")
 	if gm and gm.has_method("clear_custom_team"):
 		gm.clear_custom_team()
+	PlayTimer.flush()
 	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
 
 

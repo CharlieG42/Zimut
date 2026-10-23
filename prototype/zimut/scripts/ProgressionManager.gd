@@ -685,6 +685,7 @@ func list_saves() -> Array:
 				"name": String(data.get("name", "Partie %d" % (i + 1))),
 				"level": int(data.get("level", START_LEVEL)),
 				"victories": int(data.get("victories", 0)),
+				"playtime": playtime_total(data),
 				"timestamp": String(data.get("timestamp", "")),
 			})
 	return out
@@ -714,6 +715,8 @@ func _fresh_save() -> Dictionary:
 		"roster": {},         # { classe: { level, xp, invested{}, unspent, auto, spell_levels{} } }
 		"balance_v": BALANCE_VERSION,
 		"difficulty": 1,      # difficulté des mobs propre à la partie (0 Facile … 3 Enfer)
+		"playtime": 0,        # V46 : temps de jeu total en secondes
+		"playtime_modes": {}, # V46 : temps de jeu par mode {"tactique": s, "adventure": s, "conquest": s}
 		"timestamp": Time.get_datetime_string_from_system(),
 	}
 
@@ -728,8 +731,9 @@ func load_save(slot: int) -> Dictionary:
 			push_error("Sauvegarde %d illisible (et son backup)" % slot)
 			return {}
 	# JSON renvoie des floats pour tous les nombres : normaliser en int
-	_normalize_ints(parsed, ["level", "victories", "gold"])
+	_normalize_ints(parsed, ["level", "victories", "gold", "playtime"])
 	ensure_roster(parsed)   # migration des anciennes parties + normalisation
+	ensure_playtime(parsed) # V46 : migration du temps de jeu
 	return parsed
 
 func _read_json(path: String) -> Dictionary:
@@ -791,8 +795,9 @@ func import_save(slot: int, text: String) -> String:
 	if d.is_empty():
 		return "Code de sauvegarde invalide (il doit commencer par %s)." % EXPORT_PREFIX
 	d["slot"] = slot
-	_normalize_ints(d, ["level", "victories", "gold"])
+	_normalize_ints(d, ["level", "victories", "gold", "playtime"])
 	ensure_roster(d)
+	ensure_playtime(d)   # V46 : migration du temps de jeu
 	return "" if write_save(slot, d) else "Écriture impossible."
 
 
@@ -1660,6 +1665,60 @@ func max_hero_level(data: Dictionary) -> int:
 
 func mode_unlocked(data: Dictionary, mode: String) -> bool:
 	return max_hero_level(data) >= int(MODE_MIN_LEVEL.get(mode, 1))
+
+## ── Temps de jeu (V46) ───────────────────────────────────────────────
+## Stocké dans la sauvegarde : "playtime" (total, secondes) et
+## "playtime_modes" ({mode -> secondes}). Les anciennes parties sans ces
+## champs sont migrées au chargement (ensure_playtime, appelé par ensure_roster).
+
+## Migration rétroactive : ajoute les champs de temps de jeu s'ils manquent.
+func ensure_playtime(data: Dictionary) -> void:
+	if data.is_empty():
+		return
+	_normalize_ints(data, ["playtime"])
+	if not data.has("playtime") or typeof(data["playtime"]) != TYPE_INT:
+		data["playtime"] = 0
+	if not data.has("playtime_modes") or typeof(data["playtime_modes"]) != TYPE_DICTIONARY:
+		data["playtime_modes"] = {}
+
+## Temps de jeu total en secondes (migré si absent).
+func playtime_total(data: Dictionary) -> int:
+	if data.is_empty():
+		return 0
+	if not data.has("playtime"):
+		return 0
+	return maxi(0, int(data["playtime"]))
+
+## Temps de jeu d'un mode ("tactique", "adventure" ou "conquest") en secondes.
+func playtime_mode(data: Dictionary, mode: String) -> int:
+	if data.is_empty() or not data.has("playtime_modes"):
+		return 0
+	var modes: Dictionary = data["playtime_modes"]
+	if not modes.has(mode):
+		return 0
+	return maxi(0, int(modes[mode]))
+
+## Ajoute `seconds` au total et au compteur du mode, en écrivant la sauvegarde.
+func add_playtime(slot: int, data: Dictionary, mode: String, seconds: float) -> void:
+	if slot < 0 or data.is_empty() or seconds <= 0.0:
+		return
+	ensure_playtime(data)
+	data["playtime"] = playtime_total(data) + int(round(seconds))
+	var modes: Dictionary = data["playtime_modes"]
+	modes[mode] = playtime_mode(data, mode) + int(round(seconds))
+	data["playtime_modes"] = modes
+	write_save(slot, data)
+
+## Formate un temps en secondes : "45 s", "12 min", "3 h 05". Toujours en
+## français dans le code ; la traduction passe par en.txt (mot "min"/"h").
+static func format_playtime(seconds: int) -> String:
+	var s: int = maxi(0, seconds)
+	if s < 60:
+		return "%d s" % s
+	var mins: int = s / 60
+	if mins < 60:
+		return "%d min" % mins
+	return "%d h %02d" % [mins / 60, mins % 60]
 
 
 func team_average_level(data: Dictionary) -> int:
