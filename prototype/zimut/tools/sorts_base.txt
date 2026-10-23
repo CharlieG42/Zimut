@@ -1,0 +1,101 @@
+Classe,Nom,Cout_PA,Cout_PM,Portee,Effet,Niveau_requis,Type,Degats_physiques,Degats_magiques,Soins,Resistance_physique,Resistance_magique,Debuff_physique,Debuff_magique,Buff_physique,Buff_magique
+Tank,Coup de bouclier,1,0,1,17 dégâts + étourdit 1 tour (50%),1,Attaque,17,0,0,0,0,0,0,0,0
+Tank,Protection,2,0,1,+15% défense pour l'équipe (2 tours),1,Buff,0,0,0,15,0,0,0,0,0
+Tank,Soin de combat,2,0,1,Restaure 24 PV,1,Soin,0,0,24,0,0,0,0,0,0
+Tank,Frappe puissante,3,0,1,41 dégâts,10,Attaque,41,0,0,0,0,0,0,0,0
+Tank,Provocation,3,0,1,Force l'ennemi à attaquer ce perso (1 tour),20,Debuff,0,0,0,0,0,0,0,0,0
+Tank,Mur de pierre,4,0,1,Immunité aux dégâts physiques (1 tour),35,Buff,0,0,0,0,0,0,0,0,0
+Tank,Tremblement de terre,4,0,2,24 dégâts à tous les ennemis adjacents,50,Attaque,24,0,0,0,0,0,0,0,0
+Tank,Colère,4,0,1,+30% dégâts physiques (1 tour),65,Buff,0,0,0,0,0,0,0,30,0
+Tank,Coup écrasant,4,0,1,67 dégâts + étourdit 1 tour (30%),80,Attaque,67,0,0,0,0,0,0,0,0
+Tank,Bouclier légendaire,4,0,1,Immunité à tous les dégâts (1 tour),100,Buff,0,0,0,0,0,0,0,0,0
+Assassin,Lame fatale,3,1,2,67 dégâts (critique si dos tourné),1,Attaque,67,0,0,0,0,0,0,0,0
+Assassin,Poison,2,0,3,49 dégâts/tour (3 tours),1,Debuff,0,0,0,0,0,0,88,0,0
+Assassin,Soin rapide,2,0,1,Restaure 17 PV,1,Soin,0,0,17,0,0,0,0,0,0
+Assassin,Coup bas,2,1,1,41 dégâts + étourdit 1 tour (30%),10,Attaque,41,0,0,0,0,0,0,0,0
+Assassin,Ombre,1,2,4,Téléportation derrière l'ennemi,20,Buff,0,0,0,0,0,0,0,0,0
+Assassin,Glyphe de venin,2,0,3,Trace un glyphe (croix; 3 tours) : ennemis 25 dégâts/tour (2 tours),35,Debuff,0,0,0,0,0,0,0,0,0
+Assassin,Éviscération,4,1,1,83 dégâts + saignement (49 dégâts/tour; 2 tours),50,Attaque,83,0,0,0,0,0,88,0,0
+Assassin,Glyphe d'ombre,2,0,3,Trace un glyphe (croix; 3 tours) : alliés invisible (2 tours),65,Buff,0,0,0,0,0,0,0,0,0
+Assassin,Lame de l'ombre,4,1,2,117 dégâts (ignore 20% défense),80,Attaque,117,0,0,20,0,0,0,0,0
+Assassin,Coup final,4,0,1,133 dégâts (tue si <20% PV ennemi),100,Attaque,133,0,0,0,0,0,0,0,0
+Chasseur,Tir précis,2,0,5,41 dégâts,1,Attaque,41,0,0,0,0,0,0,0,0
+Chasseur,Glyphe d'entrave,2,0,4,Trace un glyphe (croix; 3 tours) : ennemis ralentis 2 pm (1 tour),1,Debuff,0,0,0,0,0,0,0,0,0
+Chasseur,Soin de chasseur,3,0,1,Restaure 20 PV,1,Soin,0,0,20,0,0,0,0,0,0
+Chasseur,Balise de chasse,2,0,4,Plante une balise (3 max; la plus ancienne disparaît) : un sort de zone du Chasseur qui touche une balise se réplique autour de toutes les autres,10,Invocation,0,0,0,0,0,0,0,0,0
+Chasseur,Tir explosif,4,1,4,41 dégâts en zone (3x3),20,Attaque,41,0,0,0,0,0,0,0,0
+Chasseur,Rappel de balise,1,0,8,Rappelle une de vos balises (elle disparaît du terrain),35,Invocation,0,0,0,0,0,0,0,0,0
+Chasseur,Glyphe de flammes,3,0,5,Trace un glyphe (3x3; 3 tours) : ennemis 25 dégâts + brûle 20 dégâts/tour (2 tours),50,Attaque,25,0,0,0,0,0,0,0,0
+Chasseur,Tir de recul,3,0,5,44 dégâts + repousse de 2 cases,65,Attaque,44,0,0,0,0,0,0,0,0
+Chasseur,Tir légendaire,4,0,7,100 dégâts,80,Attaque,100,0,0,0,0,0,0,0,0
+Chasseur,Tir perçant ultime,4,0,6,117 dégâts (ignore 60% défense),100,Attaque,117,0,0,60,0,0,0,0,0
+Mage,Boule de feu,4,0,5,50 dégâts magiques,1,Attaque,50,0,0,0,0,0,0,0,0
+Mage,Éclair,3,0,5,29 dégâts magiques (2 cibles),1,Attaque,29,0,0,0,0,0,0,0,0
+Mage,Bouclier magique,2,0,1,+20% résistance magie (3 tours),1,Buff,0,0,0,0,20,0,0,0,20
+Mage,Explosion,4,0,4,67 dégâts en zone (3x3),10,Attaque,67,0,0,0,0,0,0,0,0
+Mage,Téléportation,2,1,5,Téléporte à une case allié/ennemi,20,Buff,0,0,0,0,0,0,0,0,0
+Mage,Météore,4,0,7,83 dégâts en zone (2x2),35,Attaque,83,0,0,0,0,0,0,0,0
+Mage,Gel,3,0,4,Immobilise (1 tour) + 24 dégâts,50,Debuff,0,0,0,0,0,0,0,0,0
+Mage,Chaîne de foudre,4,1,6,58 dégâts (saute sur 3 ennemis),65,Attaque,58,0,0,0,0,0,0,0,0
+Mage,Désintégration,4,0,5,100 dégâts magiques,80,Attaque,100,0,0,0,0,0,0,0,0
+Mage,Apocalypse,4,0,8,133 dégâts en zone (4x4),100,Attaque,133,0,0,0,0,0,0,0,0
+Druide,Bénédiction,2,0,3,+2 PA pour 2 tours (allié),1,Buff,0,0,0,0,0,0,0,0,0
+Druide,Soin,3,0,1,Restaure 33 PV,1,Soin,0,0,67,0,0,0,0,0,0
+Druide,Attaque sacrée,4,0,1,41 dégâts,1,Attaque,41,0,0,0,0,0,0,0,0
+Druide,Barrière,4,0,2,+30% défense (1 tour; allié),10,Buff,0,0,0,30,0,0,0,0,0
+Druide,Inspiration,2,0,3,+20% dégâts (2 tours; allié),20,Buff,0,0,0,0,0,0,0,20,0
+Druide,Soin de groupe,4,0,2,Restaure 33 PV à tous les alliés,35,Soin,0,0,50,0,0,0,0,0,0
+Druide,Renaissance,4,0,1,Restaure 83 PV + supprime les effets négatifs,50,Soin,0,0,100,0,0,0,0,0,0
+Druide,Attaque divine,4,0,1,58 dégâts,65,Attaque,58,0,0,0,0,0,0,0,0
+Druide,Résurrection,4,0,1,Restaure 167 PV à un allié KO,80,Soin,0,0,167,0,0,0,0,0,0
+Druide,Jugement,4,0,3,133 dégâts à tous les ennemis,100,Attaque,133,0,0,0,0,0,0,0,0
+Heal,Toucher guérisseur,3,0,1,Restaure 31 PV,1,Soin,0,0,31,0,0,0,0,0,0
+Heal,Éclair sacré,3,0,4,20 dégâts magiques,1,Attaque,0,20,0,0,0,0,0,0,0
+Heal,Bénédiction de vie,2,0,3,Soigne 7 PV/tour pendant 3 tours,1,Soin,0,0,0,0,0,0,0,0,0
+Heal,Bouclier de lumière,3,0,3,+25% défense (2 tours; allié),10,Buff,0,0,0,25,0,0,0,0,0
+Heal,Mot de restauration,4,0,2,Restaure 50 PV à tous les alliés,20,Soin,0,0,50,0,0,0,0,0,0
+Heal,Éclat de lumière,4,0,3,Restaure 83 PV + 17 dégâts aux ennemis adjacents,35,Attaque,17,0,83,0,0,0,0,0,0
+Heal,Soin supérieur,4,0,1,Restaure 117 PV,50,Soin,0,0,117,0,0,0,0,0,0
+Heal,Soin de groupe supérieur,4,0,2,Restaure 67 PV à tous les alliés,65,Soin,0,0,67,0,0,0,0,0,0
+Heal,Protection vitale,2,0,1,+25% résistance (2 tours),80,Buff,0,0,0,0,25,0,0,0,0
+Heal,Soin ultime,4,0,1,Restaure 141 PV,100,Soin,0,0,141,0,0,0,0,0,0
+Invocateur,Frappe spectrale,2,0,4,17 dégâts magiques,1,Attaque,0,17,0,0,0,0,0,0,0
+Invocateur,Symbiose,2,0,1,L'invocation restaure 8 PV à tous les alliés,1,Soin,0,0,8,0,0,0,0,0,0
+Invocateur,Invoquer Golem de Pierre,2,0,1,Invoque un Golem de Pierre (contrôlable; 3PM/4PA),1,Invocation,0,0,0,0,0,0,0,0,0
+Invocateur,Invoquer Loup Spectral,2,0,1,Invoque un Loup Spectral (contrôlable; 3PM/4PA),10,Invocation,0,0,0,0,0,0,0,0,0
+Invocateur,Attaque de l'invocation,2,0,5,L'invocation attaque (dégâts = 8 + niveau/2),20,Attaque,0,0,0,0,0,0,0,0,0
+Invocateur,Invoquer Requin des Marées,3,0,1,Invoque un Requin des Marées (contrôlable; 3PM/4PA),35,Invocation,0,0,0,0,0,0,0,0,0
+Invocateur,Buff de l'invocation,1,0,1,L'invocation gagne +20% dégâts (2 tours),50,Buff,0,0,0,0,0,0,0,20,0
+Invocateur,Invoquer Élémentaire de Cristal,3,0,1,Invoque un Élémentaire de Cristal (contrôlable; 3PM/4PA),65,Invocation,0,0,0,0,0,0,0,0,0
+Invocateur,Invoquer Ombre,4,0,1,Invoque une Ombre (contrôlable; 3PM/4PA),80,Invocation,0,0,0,0,0,4,0,0,0
+Invocateur,Invoquer Esprit de la Forêt,4,0,1,Invoque un Esprit de la Forêt (contrôlable; 3PM/4PA),100,Invocation,0,0,0,0,0,0,0,0,0
+Sylvain,Ronce,2,0,3,22 dégâts magiques,1,Attaque,0,22,0,0,0,0,0,0,0
+Sylvain,Sève vitale,2,0,1,Restaure 25 PV,1,Soin,0,0,25,0,0,0,0,0,0
+Sylvain,Invoquer Archer Sylvestre,2,0,1,Invoque un Archer Sylvestre (contrôlable; 3PM/4PA),1,Invocation,0,0,0,0,0,0,0,0,0
+Sylvain,Poison de ronce,2,0,3,33 dégâts/tour (2 tours),10,Debuff,0,0,0,0,0,60,0,0,0
+Sylvain,Invoquer Arbre,3,0,2,Plante un arbre immobile : bloque la vue et relaie les soins du Sylvain aux alliés autour de lui (1 arbre max),20,Invocation,0,0,0,0,0,0,0,0,0
+Sylvain,Racine,2,0,3,Immobilise l'ennemi (1 tour),35,Debuff,0,0,0,0,0,0,0,0,0
+Sylvain,Soin de sève,3,0,1,Restaure 50 PV,50,Soin,0,0,50,0,0,0,0,0,0
+Sylvain,Invoquer Ent de Combat,2,0,1,Invoque un Ent de Combat (contrôlable; 3PM/4PA),65,Invocation,0,0,0,0,0,0,0,0,0
+Sylvain,Pluie de graines,4,0,4,31 dégâts magiques à tous les ennemis,80,Attaque,0,31,0,0,0,0,0,0,0
+Sylvain,Tempête de pétales,4,0,5,83 dégâts magiques à tous les ennemis,100,Attaque,0,83,0,0,0,0,0,0,0
+Géomancien,Éclat de grès,2,0,4,24 dégâts magiques,1,Attaque,24,0,0,0,0,0,0,0,0
+Géomancien,Invoquer Pilier,2,0,4,Fait surgir un pilier de grès : bloque le passage et la vue; attaque l'ennemi le plus proche dans un rayon de 4 cases (4 tours; 8 cases de terrain max),1,Invocation,0,0,0,0,0,0,0,0,0
+Géomancien,Glyphe de grès,2,0,3,Trace un glyphe (3x3; 3 tours) : alliés +25% défense,1,Buff,0,0,0,0,0,0,0,0,0
+Géomancien,Lance de cristal,3,0,5,41 dégâts magiques,10,Attaque,41,0,0,0,0,0,0,0,0
+Géomancien,Invoquer Muraille,3,0,4,Érige une muraille de 3 cases : bloque le passage et la vue (3 tours),20,Invocation,0,0,0,0,0,0,0,0,0
+Géomancien,Éboulement,3,0,5,33 dégâts magiques,35,Attaque,33,0,0,0,0,0,0,0,0
+Géomancien,Glyphe sismique,3,0,5,Trace un glyphe (3x3; 3 tours) : ennemis 30 dégâts magiques + ralentis 1 pm,50,Attaque,0,30,0,0,0,0,0,0,0
+Géomancien,Tempête de sable,4,0,5,39 dégâts en zone (3x3),65,Attaque,39,0,0,0,0,0,0,0,0
+Géomancien,Séisme ambré,4,0,4,58 dégâts magiques,80,Attaque,58,0,0,0,0,0,0,0,0
+Géomancien,Cataclysme minéral,4,0,7,122 dégâts en zone (4x4),100,Attaque,122,0,0,0,0,0,0,0,0
+Artificier,Pistolet à ressort,2,0,5,14 dégâts,1,Attaque,14,0,0,0,0,0,0,0,0
+Artificier,Poser Bombe,2,0,4,Pose une bombe : explose en croix (5 cases) à la fin du 2e tour de l'Artificier ou dès qu'on la déclenche,1,Invocation,0,0,0,0,0,0,0,0,0
+Artificier,Déclencheur,1,0,6,Déclenche l'effet d'un de vos mécanismes (bombe; mine; tourelle; glyphe; balise de transposition),1,Buff,0,0,0,0,0,0,0,0,0
+Artificier,Poser Mine,2,0,4,Pose un piège (mine) : 22 dégâts; explose en croix si on la déclenche,10,Attaque,0,0,0,0,0,0,0,0,0
+Artificier,Poser Tourelle,3,0,4,Installe une tourelle : tire sur l'ennemi le plus proche (rayon 5) à la fin de chacun de vos tours (4 tours; 1 seule),20,Invocation,0,0,0,0,0,0,0,0,0
+Artificier,Poser Balise de transposition,2,0,6,Pose une balise et échange votre place avec elle; le Déclencheur sur la balise refait l'échange (1 déplacement par tour),35,Invocation,0,0,0,0,0,0,0,0,0
+Artificier,Glyphe de surcharge,3,0,5,Trace un glyphe (croix; 3 tours) : alliés +25% dégâts | ennemis 22 dégâts,50,Attaque,25,0,0,0,0,0,0,0,0
+Artificier,Grenade à fragmentation,3,0,5,34 dégâts en zone (3x3),65,Attaque,34,0,0,0,0,0,0,0,0
+Artificier,Fusil à pompe,3,0,3,53 dégâts,80,Attaque,53,0,0,0,0,0,0,0,0
+Artificier,Arsenal total,4,0,0,Déclenche d'un coup tous vos mécanismes : bombes; mines; tourelles et glyphes,100,Buff,0,0,0,0,0,0,0,0,0

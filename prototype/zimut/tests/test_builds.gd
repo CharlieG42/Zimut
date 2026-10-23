@@ -111,7 +111,8 @@ func _test_active_spells() -> void:
 	# Limite 10 : sélectionne tous les sorts débloqués, puis tente un 11e s'il existe
 	var all: Array[String] = Builds.unlocked_spell_names(data, "Mage")
 	Builds.set_active_spells(data, "Mage", all)
-	_check(Builds.active_spell_count(data, "Mage") == all.size(), "%d sorts actifs (tous les sorts débloqués)" % all.size())
+	_check(all.size() > Builds.MAX_ACTIVE_SPELLS, "V43 : plus de sorts débloqués (%d) que de places en build" % all.size())
+	_check(Builds.active_spell_count(data, "Mage") == Builds.MAX_ACTIVE_SPELLS, "la sélection est plafonnée à %d sorts actifs" % Builds.MAX_ACTIVE_SPELLS)
 	if all.size() > Builds.MAX_ACTIVE_SPELLS:
 		Builds.toggle_spell(data, "Mage", String(all[Builds.MAX_ACTIVE_SPELLS]))
 		_check(Builds.active_spell_count(data, "Mage") == Builds.MAX_ACTIVE_SPELLS, "11e sort refusé (limite 10)")
