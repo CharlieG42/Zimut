@@ -4,14 +4,14 @@ extends Node
 ## Évite les appels répétés à load() dans les boucles d'UI.
 ## Précharge les textures fréquentes au démarrage et fournit un accès O(1).
 ##
-## Usage : AssetCache.get("res://assets/sprites/players/tank.png")
+## Usage : AssetCache.texture("res://assets/sprites/players/tank.png")
 
 var _cache: Dictionary = {}
 var _missing: Dictionary = {}  # chemins notés comme absents (évite les re-tests)
 
 
 ## Retourne la texture (Texture2D) ou null si introuvable.
-func get(path: String) -> Texture2D:
+func texture(path: String) -> Texture2D:
 	if _cache.has(path):
 		return _cache[path]
 	if _missing.has(path):
@@ -30,7 +30,7 @@ func get(path: String) -> Texture2D:
 ## Précharge une liste de chemins (utile au démarrage).
 func preload_paths(paths: Array) -> void:
 	for p: String in paths:
-		get(p)
+		texture(p)
 
 
 ## Vide le cache (utile en debug).

@@ -97,13 +97,15 @@ static func spend_point(data: Dictionary, classe: String, id: String) -> bool:
 	var t: Dictionary = _talents(data, classe)
 	if t.is_empty():
 		return false
-	var unlocked: Dictionary = t["unlocked"]
-	if bool(unlocked.get(id, false)) or int(t.get("points", 0)) <= 0:
+	var info: Dictionary = talent_info(id)
+	if info.is_empty():
 		return false
-	if talent_info(id).is_empty():
+	var cost: int = int(info["cost"])
+	var unlocked: Dictionary = t["unlocked"]
+	if bool(unlocked.get(id, false)) or int(t.get("points", 0)) < cost:
 		return false
 	unlocked[id] = true
-	t["points"] = int(t.get("points", 0)) - 1
+	t["points"] = int(t.get("points", 0)) - cost
 	return true
 
 

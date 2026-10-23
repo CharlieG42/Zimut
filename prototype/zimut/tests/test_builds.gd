@@ -1,9 +1,21 @@
+extends SceneTree
 ## test_builds.gd — Tests headless du système de BUILDS par personnage (V42).
 ## Lancement : godot --headless -s tests/test_builds.gd --path .
+##
+## NOTE : en mode `-s` (script), les class_name ne sont PAS enregistrés dans
+## le ClassDB. Il faut charger explicitement le script avec load().
 
 var failures: int = 0
+var Builds = load("res://scripts/Builds.gd")
+var TalentTree = load("res://scripts/TalentTree.gd")
+var ProgressionManager: Node
 
 func _init() -> void:
+	# Les autoloads n'existent qu'après le premier frame en mode -s.
+	_start.call_deferred()
+
+func _start() -> void:
+	ProgressionManager = (Engine.get_main_loop() as SceneTree).root.get_node("ProgressionManager")
 	_test_build_crud()
 	_test_active_spells()
 	_test_activate_deactivate()
@@ -96,11 +108,10 @@ func _test_active_spells() -> void:
 	# toggle : remet
 	Builds.toggle_spell(data, "Mage", "Éclair")
 	_check(Builds.active_spells(data, "Mage").has("Éclair"), "toggle remet Éclair")
-	# Limite 10 : remplir puis tenter un 11e
+	# Limite 10 : sélectionne tous les sorts débloqués, puis tente un 11e s'il existe
 	var all: Array[String] = Builds.unlocked_spell_names(data, "Mage")
-	var ten: Array = all.slice(0, Builds.MAX_ACTIVE_SPELLS)
-	Builds.set_active_spells(data, "Mage", ten)
-	_check(Builds.active_spell_count(data, "Mage") == Builds.MAX_ACTIVE_SPELLS, "10 sorts actifs")
+	Builds.set_active_spells(data, "Mage", all)
+	_check(Builds.active_spell_count(data, "Mage") == all.size(), "%d sorts actifs (tous les sorts débloqués)" % all.size())
 	if all.size() > Builds.MAX_ACTIVE_SPELLS:
 		Builds.toggle_spell(data, "Mage", String(all[Builds.MAX_ACTIVE_SPELLS]))
 		_check(Builds.active_spell_count(data, "Mage") == Builds.MAX_ACTIVE_SPELLS, "11e sort refusé (limite 10)")
@@ -126,8 +137,11 @@ func _test_activate_deactivate() -> void:
 	_check(ProgressionManager.hero_equipment(data, "Tank").has("arme"), "arme toujours équipée après activation")
 	# Change l'équipement (libre) puis active le build 1 (vide) : l'ancien part dans le build 0
 	ProgressionManager.unequip_hero_item(data, "Tank", "arme")
-	data["inventory"].append({"type": "Bouclier", "level": 1, "rank": 1, "rarity": "commun", "defense": 3, "name": "Bouclier test"})
-	ProgressionManager.equip_hero_item(data, "Tank", 0)
+	var shield: Dictionary = {"type": "Bouclier", "level": 1, "rank": 1, "rarity": "commun",
+		"defense": 3, "name": "Bouclier test"}
+	data["inventory"].append(shield)
+	var shield_idx: int = (data["inventory"] as Array).rfind(shield)
+	ProgressionManager.equip_hero_item(data, "Tank", shield_idx)
 	_check(ProgressionManager.hero_equipment(data, "Tank").has("bouclier"), "bouclier équipé")
 	Builds.activate(data, "Tank", b1, b0)
 	_check(Builds.active_index(data, "Tank") == b1, "build 1 activé")

@@ -134,17 +134,22 @@ static func _roster_spells(data: Dictionary, classe: String) -> Array:
 	return ent["active_spells"]
 
 
+static func _pm() -> Node:
+	return (Engine.get_main_loop() as SceneTree).root.get_node("ProgressionManager")
+
+
 ## Premier choix par défaut : les 10 premiers sorts débloqués par niveau.
 static func _default_active_spells(data: Dictionary, classe: String) -> Array:
 	var ent: Dictionary = _entry(data, classe)
 	var lvl: int = int(ent.get("level", 1))
 	var out: Array = []
 	var unlocked: Array = []
-	for s: Dictionary in ProgressionManager.spells_of(classe):
+	var pm: Node = _pm()
+	for s: Dictionary in pm.spells_of(classe):
 		if int(s["level"]) <= lvl:
 			unlocked.append(String(s["name"]))
 	unlocked.sort_custom(func(a: String, b: String) -> bool:
-		return ProgressionManager.spell_unlock_level(classe, a) < ProgressionManager.spell_unlock_level(classe, b))
+		return pm.spell_unlock_level(classe, a) < pm.spell_unlock_level(classe, b))
 	for n: String in unlocked:
 		if out.size() >= MAX_ACTIVE_SPELLS:
 			break
@@ -162,11 +167,12 @@ static func unlocked_spell_names(data: Dictionary, classe: String) -> Array[Stri
 	var ent: Dictionary = _entry(data, classe)
 	var lvl: int = int(ent.get("level", 1))
 	var out: Array[String] = []
-	for s: Dictionary in ProgressionManager.spells_of(classe):
+	var pm: Node = _pm()
+	for s: Dictionary in pm.spells_of(classe):
 		if int(s["level"]) <= lvl:
 			out.append(String(s["name"]))
 	out.sort_custom(func(a: String, b: String) -> bool:
-		return ProgressionManager.spell_unlock_level(classe, a) < ProgressionManager.spell_unlock_level(classe, b))
+		return pm.spell_unlock_level(classe, a) < pm.spell_unlock_level(classe, b))
 	return out
 
 
@@ -268,12 +274,12 @@ static func activate(data: Dictionary, classe: String, index: int, from_index: i
 	if from_index >= 0 and from_index != index:
 		var src: Dictionary = build_at(data, classe, from_index)
 		if not src.is_empty():
-			src["equipment"] = ProgressionManager.hero_equipment(data, classe).duplicate(true)
+			src["equipment"] = _pm().hero_equipment(data, classe).duplicate(true)
 			src["spells"] = _roster_spells(data, classe).duplicate()
 			src["talents"] = _current_talents(data, classe).duplicate(true)
 	# Applique le build cible
 	var b: Dictionary = build_at(data, classe, index)
-	ProgressionManager.set_hero_equipment(data, classe, (b.get("equipment", {}) as Dictionary).duplicate(true))
+	_pm().set_hero_equipment(data, classe, (b.get("equipment", {}) as Dictionary).duplicate(true))
 	ent["active_spells"] = (b.get("spells", []) as Array).duplicate()
 	ent["talents"] = (b.get("talents", {"unlocked": {}, "points": 0}) as Dictionary).duplicate(true)
 	ent["build_index"] = index
