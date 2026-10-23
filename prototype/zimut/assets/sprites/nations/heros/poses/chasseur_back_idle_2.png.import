@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bhlsbxdj3xl0u"
-path="res://.godot/imported/brasier_attack_2.png-920d168241b9cf7edc28a3dae738671d.ctex"
+uid="uid://dvdm310a5rvb7"
+path="res://.godot/imported/chasseur_back_idle_2.png-1f4b3957cf3b0ef7fe521cf096ec0451.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/nations/boss/brasier_attack_2.png"
-dest_files=["res://.godot/imported/brasier_attack_2.png-920d168241b9cf7edc28a3dae738671d.ctex"]
+source_file="res://assets/sprites/nations/heros/poses/chasseur_back_idle_2.png"
+dest_files=["res://.godot/imported/chasseur_back_idle_2.png-1f4b3957cf3b0ef7fe521cf096ec0451.ctex"]
 
 [params]
 

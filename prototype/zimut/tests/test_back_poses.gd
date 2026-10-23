@@ -17,7 +17,7 @@ func _boot() -> void:
 	var v := EntityView.new()
 	root.add_child(v)
 	v.setup({"uid": 3, "classe": "Chasseur", "team": "player", "entity_type": "Player", "current_pv": 10, "max_pv": 10, "x": 2, "y": 3})
-	check((v._poses.get("attack", []) as Array).size() >= 4, "poses d'attaque de face chargées (%d)" % (v._poses.get("attack", []) as Array).size())
+	check((v._poses.get("attack", []) as Array).size() >= 3, "poses d'attaque de face chargées (%d)" % (v._poses.get("attack", []) as Array).size())
 	check(v._load_variants("res://assets/sprites/players/chasseur_attack", false).size() == (v._poses["attack"] as Array).size(), "_load_variants lit les mêmes fichiers")
 	# orientation : trouver une direction de grille vue de dos et une vue de face
 	var up := Vector2i.ZERO

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://p1nenbir5e85"
-path="res://.godot/imported/chasseur_attack_4.png-e6d6ff6f7516d0b9e1b05c5570173e22.ctex"
+uid="uid://cpitlbavxpou7"
+path="res://.godot/imported/salamandre_attack.png-ccd74e126eccde6a270f2ccb833ed9d3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/chasseur_attack_4.png"
-dest_files=["res://.godot/imported/chasseur_attack_4.png-e6d6ff6f7516d0b9e1b05c5570173e22.ctex"]
+source_file="res://assets/sprites/nations/ennemis/brasier/salamandre_attack.png"
+dest_files=["res://.godot/imported/salamandre_attack.png-ccd74e126eccde6a270f2ccb833ed9d3.ctex"]
 
 [params]
 
