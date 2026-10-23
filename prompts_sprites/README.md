@@ -12,25 +12,32 @@ Prompts prêts à copier dans un générateur d'images pour refaire **tous les s
 
 Les héros, ennemis, boss et familiers viennent de `scripts/Nations.gd`, `assets/sprites/nations/README.md` et `SPRITES_A_FOURNIR.md`.
 
-## V40 : 2 planches par personnage, 4 vues en quarts de tour, arme verrouillée
+## V41 : 2 planches par personnage, 4 vues en quarts de tour, arme verrouillée
 
 Les planches V39 (6 angles + 6 actions) ont donné une vraie cohérence de design entre les deux planches d'un
 personnage, mais deux défauts restaient : **doublons** (les vues « face » et « 3/4 avant » sortaient trop
 proches) et **arme/accessoires qui changent** d'une planche à l'autre (le chasseur perdait son arc). Le
-format V40 corrige :
+format V40 corrige, et la V41 ajoute trois verrous après le premier test visuel (chasseur : 1 sprite démesuré,
+arc absent de 3 cases sur 4, un angle surviré en vue de côté, angles mélangés entre cases) :
 
 1. **Planche `vues`** — un seul personnage, la même pose de repos, la **caméra ne bouge pas** : le
    personnage tourne sur lui-même par **quarts de tour**, d'où 4 angles bien distincts : 3/4 avant droite,
    3/4 dos droite, 3/4 dos gauche, 3/4 avant gauche — 2 vues plutôt de face, 2 plutôt de dos. Grille 2 × 2
-   sur image 2:1, poses largement espacées. **Génération normale.**
+   sur image 2:1, poses largement espacées. **Génération normale.** V41 : chaque angle est **ancré à sa
+   position de case** (TOP-LEFT, TOP-RIGHT, BOTTOM-LEFT, BOTTOM-RIGHT) avec le **décompte des quarts de
+   tour** (« ONE exact quarter turn », « NOT a pure side profile »).
 2. **Planche `actions`** — 2 attaques + 1 sort, chacune vue **de face puis de dos** (3 colonnes × 2
    rangées) : les vues de dos libérées par la disparition des doublons servent aux actions.
    **Générée en édition** de la planche vues (image source = la planche `vues`) : le générateur repart du
    personnage réellement dessiné, il ne peut plus dériver. Repli : génération normale, la carte d'identité
    est recopiée dans chaque prompt.
-3. **Arme verrouillée** — ligne « WEAPON LOCK » dans les deux prompts (jamais remplacer l'arme : un arc
-   reste un arc), négatifs dédiés (« weapon replaced by another weapon, missing weapon… ») et rappel
-   final qui commence désormais par l'arme. L'arme de la classe ne doit jamais changer (chasseur = arc).
+3. **Arme verrouillée** — ligne « WEAPON LOCK » dans les deux prompts : jamais remplacer l'arme (un arc
+   reste un arc) et **V41 : l'arme est TENUE EN MAIN dans chaque case, les mains ne sont jamais vides**.
+   Négatifs dédiés (« weapon replaced by another weapon, missing weapon, empty hands… ») et rappel final
+   qui commence par l'arme.
+4. **Taille verrouillée (V41)** — « The 4 sprites have EXACTLY the same size: same scale, same height in
+   pixels, same proportions » + négatif « one sprite bigger or smaller than the others ». L'arme de la
+   classe ne doit jamais changer (chasseur = arc).
 
 | Personnage | Planches | Poses |
 |---|---|---|
@@ -79,11 +86,14 @@ toutes les planches suivantes — et la planche `actions` éditée depuis la pla
 
 ## Pièges observés sur les planches précédentes
 
-| Problème | Conséquence | Ce que le format V40 impose |
+| Problème | Conséquence | Ce que le format V41 impose |
 |---|---|---|
 | Même pose recopiée dans plusieurs cases | animations figées | 4 angles en quarts de tour par planche (un seul angle par case) ; actions aux silhouettes décrites une par une |
 | Personnage différent d'une planche à l'autre | héros méconnaissable | planche `actions` **éditée depuis** la planche `vues` + carte d'identité recopiée partout |
 | Arme ou accessoire différent d'une planche à l'autre | le chasseur perd son arc | ligne « WEAPON LOCK » dans les deux prompts, rappel final qui commence par l'arme, négatif « weapon replaced by another weapon, missing weapon » |
+| Arme absente d'une case (mains vides) | le chasseur combat à mains nues | « the character HOLDS its weapon in EVERY cell — hands are NEVER empty » + négatif « empty hands, character without its weapon » |
+| Un sprite plus grand ou plus petit que les autres | échelle cassée à la découpe | « The 4 sprites have EXACTLY the same size: same scale, same height in pixels » + négatif « one sprite bigger or smaller than the others » |
+| Angles mélangés entre les cases, vue de côté | le jeu reçoit la mauvaise vue | position de case écrite dans la liste (TOP-LEFT, TOP-RIGHT…) + décompte « ONE/TWO/THREE exact quarter turns » + « NOT a pure side profile » |
 | Poses qui se touchent (épées, effets) | un seul cadre pour deux poses | autocollants ≤ 55 % de leur sixième d'image, larges vides, **surtout horizontaux** |
 | Cadres dessinés, grille isométrique au sol | tout est relié, découpe impossible | « no frames, no grid on the ground », négatif « frames, isometric floor grid » |
 | Face et dos mélangés dans une case | le jeu ne sait pas quelle vue utiliser | un seul angle par case, listé explicitement |
@@ -102,7 +112,7 @@ checkerboard, transparency grid, text, letters, labels, numbers, watermark, sign
 commun est adapté en bas de chaque fichier nation) :
 
 ```text
-checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, different character between cells, pose changing between cells, different outfit between angles, weapon changing shape, weapon changing color, weapon replaced by another weapon, missing weapon, missing accessories, realistic proportions, small head
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, one sprite bigger or smaller than the others, size changing between cells, empty hands, character without its weapon in a cell, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, different character between cells, pose changing between cells, different outfit between angles, weapon changing shape, weapon changing color, weapon replaced by another weapon, missing weapon, missing accessories, realistic proportions, small head
 ```
 
 ## Modifier ou régénérer

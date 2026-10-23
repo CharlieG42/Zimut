@@ -4,20 +4,23 @@
 Usage :  python3 prompts_sprites/generer_prompts.py
 Modifier une description : éditer les dictionnaires ci-dessous puis relancer le script.
 
-V40 — format « 2 planches par personnage » (héros, ennemis, boss, familiers), arme verrouillée :
+V41 — format « 2 planches par personnage » (héros, ennemis, boss, familiers), arme verrouillée :
 - Planche VUES : le même personnage, même pose de repos, la caméra ne bouge pas et le personnage
   tourne sur lui-même par quarts de tour : 4 angles (3/4 avant droite, 3/4 dos droite, 3/4 dos
   gauche, 3/4 avant gauche), grille 2 × 2 sur image 2:1, poses largement espacées. Deux vues
   plutôt de face, deux plutôt de dos ; un seul angle par case, aucun doublon possible.
   Génération normale.
+  Retours V40 corrigés : chaque angle est ancré à sa POSITION de case (TOP-LEFT, TOP-RIGHT,
+  BOTTOM-LEFT, BOTTOM-RIGHT) avec le décompte des quarts de tour, l'arme est TENUE EN MAIN dans
+  chaque case (mains jamais vides) et les 4 sprites ont EXACTEMENT la même taille.
 - Planche ACTIONS : 2 attaques + 1 sort, chacune vue DE FACE puis DE DOS (3 colonnes × 2
   rangées), à générer EN ÉDITION de la planche vues (image source = planche vues) : le
   générateur repart du personnage réellement dessiné, il ne peut pas changer d'une planche à
   l'autre. Repli si l'outil n'édite pas : génération normale, la carte d'identité est recopiée
   dans chaque prompt.
 - Arme verrouillée : ligne « WEAPON LOCK » dans les deux prompts (un arc reste un arc, jamais
-  remplacé, jamais disparu), négatifs dédiés et rappel final qui commence par l'arme — l'arme
-  de la classe ne doit jamais changer (chasseur = arc).
+  remplacé, jamais disparu, jamais de mains vides), négatifs dédiés et rappel final qui
+  commence par l'arme — l'arme de la classe ne doit jamais changer (chasseur = arc).
 Chaque prompt commence par la carte d'identité du personnage (identites.py), recopiée mot pour
 mot, pour que toutes les planches dessinent le même personnage sans image jointe.
 Noms de fichiers (convention du jeu, scripts/EntityView.gd) :
@@ -81,7 +84,9 @@ NEGATIVE_VUES = (
     "inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, "
     "blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, "
     "photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, "
-    "isometric floor grid, tiles, closed eyes, looking up at the sky, different hair color, different eye "
+    "isometric floor grid, tiles, one sprite bigger or smaller than the others, size changing between cells, "
+    "empty hands, character without its weapon in a cell, closed eyes, looking up at the sky, different hair "
+    "color, different eye "
     "color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, "
     "different character between cells, pose changing between cells, different outfit between angles, "
     "weapon changing shape, weapon changing color, weapon replaced by another weapon, missing weapon, "
@@ -96,9 +101,10 @@ VUES_LAYOUT = (
     "height of its quarter of the image and is centered in it, so that there is a wide empty space, especially "
     "horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay "
     "inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide "
-    "effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same "
-    "ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid "
-    "on the ground."
+    "effects are drawn smaller or tucked in so they fit. The 4 sprites have EXACTLY the same size: same scale, "
+    "same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is "
+    "wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between "
+    "poses, no floor, no grid on the ground."
 )
 
 # Planche ACTIONS : 6 poses en 3 colonnes × 2 rangées sur image 2:1.
@@ -108,9 +114,10 @@ ACTIONS_LAYOUT = (
     "height of its sixth of the image and is centered in it, so that there is a wide empty space, especially "
     "horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay "
     "inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide "
-    "effects are drawn smaller or tucked in so they fit. Same character size in every pose, feet on the same "
-    "ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid "
-    "on the ground."
+    "effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, "
+    "same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is "
+    "wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between "
+    "poses, no floor, no grid on the ground."
 )
 
 # Vue 3/4 avant droite (rangée du haut de la planche actions ; le jeu retourne l'image pour la gauche)
@@ -123,23 +130,26 @@ BACK_VIEW = ("3/4 BACK view: the character is seen from behind and turns slightl
 
 # Les 4 angles de la planche vues : (suffixe de fichier, libellé, description de l'angle).
 # La caméra ne bouge pas : le personnage fait des quarts de tour (90°) entre les cases —
-# d'où 2 vues plutôt de face (1, 4) et 2 plutôt de dos (2, 3).
+# d'où 2 vues plutôt de face (1, 4) et 2 plutôt de dos (2, 3). Le décompte des quarts de
+# tour et la position de case sont écrits dans la description : le générateur a montré
+# (retour V40) qu'il mélangeait les angles et survirait l'un d'eux sans ça.
 VIEWS4 = [
     ("", "3/4 avant droite",
      "3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right "
-     "side visible), facing front-right"),
+     "side visible), facing front-right; both eyes visible"),
     ("_back", "3/4 dos droite",
-     "3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and "
-     "right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the "
-     "head: no face, no eyes"),
+     "3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of "
+     "the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure "
+     "side profile (a side profile means the turn went too far)"),
     ("_back_left", "3/4 dos gauche",
-     "3/4 BACK view: the character is seen from behind and turns slightly to the left (back of the head and "
-     "left shoulder visible), facing away from the viewer toward the upper left; we see the BACK of the head: "
-     "no face, no eyes"),
+     "3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and "
+     "left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile"),
     ("_face_left", "3/4 avant gauche",
-     "3/4 FRONT view: the character faces the viewer and turns slightly to the left (face, chest and left "
-     "side visible), facing front-left"),
+     "3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly "
+     "to the left (face, chest and left side visible), facing front-left; both eyes visible"),
 ]
+# Position de chaque angle dans la grille 2 × 2 (l'ordre des cases n'était pas respecté en V40).
+VIEWS4_POS = ["TOP-LEFT", "TOP-RIGHT", "BOTTOM-LEFT", "BOTTOM-RIGHT"]
 
 
 # --------------------------------------------------------------------------------------------
@@ -528,26 +538,30 @@ def prompt_vues(who, role, nation, desc, fx, rim, palette, pale, ent_id=""):
         f"Sprite sheet of ONE {role} for a chibi isometric tactical RPG. The same character appears 4 times: "
         "the SAME relaxed idle pose (standing calm, weapon held calmly, eyes open) seen from 4 viewing angles. "
         "The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE "
-        "by exact quarter turns (90 degrees) between cells — same distance, same height, only the character "
-        "rotates.",
+        "by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only "
+        "the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same "
+        "proportions in every cell.",
         idc,
-        "WEAPON LOCK: the weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in "
-        "all 4 cells: same shape, same color, same details, same hand. Never replace the weapon with another "
-        "weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or "
-        "hide it. The weapon matches the character's class.",
+        "WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, "
+        "the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, "
+        "floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as "
+        "written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff "
+        "stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches "
+        "the character's class.",
         "Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle "
         "changes from cell to cell.",
         f"NATION PALETTE: {palette}.",
         "STYLE: " + STYLE.format(rim=rim),
         "LAYOUT: " + VUES_LAYOUT,
-        "VIEWS, left to right, top to bottom (successive quarter turns of the character, the camera stays "
-        "fixed; the character's design never changes; never a pure side profile):",
+        "VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, "
+        "the camera stays fixed; the character's design and weapon never change; never a pure side profile):",
     ]
-    for i, (_, _, vtxt) in enumerate(VIEWS4):
-        lines.append(f"{i+1}. {vtxt}.")
-    lines.append("All 4 cells show ONE character in ONE pose under 4 angles: two of them rather from the "
-                 "front, two of them rather from the back. Same height, same stance, same weapon in the same "
-                 "hand everywhere. The pose does not change, only the angle.")
+    for i, ((_, _, vtxt), pos) in enumerate(zip(VIEWS4, VIEWS4_POS)):
+        lines.append(f"{i+1}. {pos} cell: {vtxt}.")
+    lines.append("All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather "
+                 "from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, "
+                 "same weapon held in the same hand everywhere. The pose does not change, only the angle — "
+                 "each turn is exactly a quarter turn, no more, no less.")
     lines.append(f"EFFECTS: {fx}, stylized, opaque, with dark outlines, small, kept close to the character "
                  "inside its own quarter of the image.")
     lines.append("BACKGROUND: " + (BG_GRAY if pale else BG_WHITE) + BG_TAIL)
@@ -568,8 +582,9 @@ def prompt_actions(who, role, nation, desc, arch, fx, rim, palette, pale, ent_id
         "same hand. The 6 new poses must show this SAME character, unchanged.",
         idc,
         "WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same "
-        "shape, same color, same details, same hand. Never replace the weapon with another weapon (a bow "
-        "stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.",
+        "shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell "
+        "without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a "
+        "staff stays a staff), never change its color or shape, never drop or hide it.",
         "TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen "
         "from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: " + FACE_VIEW +
         ". BOTTOM ROW (poses 4-6), all in the same view: " + BACK_VIEW + ". Never a pure side profile.",
