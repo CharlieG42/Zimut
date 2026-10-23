@@ -2,12 +2,13 @@
 
 Palette : brass, copper, dark steel, teal glowing lights. Effets : sparks, steam puffs and teal electric arcs. Contre-jour : warm brass.
 
-Format 2 planches par personnage :
+Format 3 planches par personnage (V44) :
 
-1. **Vues** — le personnage au repos vu sous 4 angles en quarts de tour (3/4 avant droite, 3/4 dos droite, 3/4 dos gauche, 3/4 avant gauche) : la caméra ne bouge pas, le personnage tourne sur lui-même. 2 vues plutôt de face, 2 plutôt de dos ; un seul angle par case, aucun doublon possible. Grille 2 × 2 sur image 2:1, poses largement espacées.
-2. **Actions** — 2 attaques + 1 sort, chacune vue DE FACE puis DE DOS (3 colonnes × 2 rangées), générées **en édition** de la planche vues (image source = planche vues) : le personnage réellement dessiné sert d'ancre, il ne peut pas changer d'une planche à l'autre. L'arme est verrouillée d'une planche à l'autre (ligne WEAPON LOCK + rappel final). Repli : génération normale (la carte d'identité est recopiée dans chaque prompt).
+1. **Vues** — 4 cases : repos de FACE ×2 (deux attitudes différentes) puis repos de DOS ×2, tout orienté vers la droite (le jeu retourne l'image pour la gauche). Grille 2 × 2 sur image 2:1, poses largement espacées. Génération normale.
+2. **Actions de face** — 3 attaques + 2 sorts + 1 marche (3 colonnes × 2 rangées), en **édition** de la planche vues : le personnage réellement dessiné sert d'ancre.
+3. **Actions de dos** — les mêmes 6 poses vues de dos, en édition de la planche vues. Une planche = un seul sens de vue (face et dos mélangés sur une même planche étaient dessinés de face). Facultative pour les monstres.
 
-Chaque prompt recopie la carte d'identité du personnage (`identites.py`) : aucune image à joindre. Ordre conseillé : 1) planche de style, 2) héros, 3) ennemis, 4) boss ; pour chaque personnage : vues puis actions. Prompt négatif : en bas de page.
+Les personnages **armés** ont l'arme écrite dans la première phrase, dans la carte d'identité, en fin de prompt et dans chaque pose ; les **créatures** reçoivent « UNARMED » (plus de torche inventée). Chaque prompt recopie la carte d'identité (`identites.py`) : aucune image à joindre. Ordre conseillé : 1) planche de style, 2) héros, 3) ennemis, 4) boss ; pour chaque personnage : vues, actions de face, actions de dos. Prompt négatif : en bas de page.
 
 ## 1. Planche de référence (style de la nation)
 
@@ -32,14 +33,15 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Artificier — 10 poses
 
-2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `artificier_vues.png` et `artificier_actions.png` pour que l'Atelier les reconnaisse.
+3 planches : **vues** (génération normale), puis **actions de face** et **actions de dos** en **édition** de la planche vues (image source = planche vues de ce personnage : c'est ce qui garantit le même personnage). Personnage armé : l'arme est verrouillée dans chaque prompt. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `artificier_vues.png`, `artificier_actions.png` et `artificier_actions_dos.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 4 angles (`vues`)
+#### Planche 1 — Vues · 2 repos de face + 2 repos de dos (`vues`)
 
-Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
+Génération normale, aucune image à joindre. Tout est orienté vers la droite ; deux attitudes différentes par rangée.
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE playable hero: Artificier, armed with: big gear-headed hammer, RIGHT hand.
+The sheet contains EXACTLY 4 sprites of the SAME character: the top row shows it from the FRONT twice (two different relaxed stances), the bottom row shows it from BEHIND twice (two different relaxed stances). Same design, same outfit, same colors, same size in all 4 cells.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Artificier (hero of the Rouages nation)
 - Hair: spiky brown hair (#6B3E1E)
@@ -51,37 +53,36 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: big gear-headed hammer, RIGHT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no top hat, no gun, no cape.
-WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
-Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
+WEAPON: big gear-headed hammer, RIGHT hand. It is held in the SAME hand and is clearly visible in all 4 cells: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
 NATION PALETTE: brass, copper, dark steel, teal glowing lights.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+CELLS — follow the grid positions EXACTLY:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+Every sprite faces RIGHT (front-right on the top row, away toward the upper right on the bottom row): never facing left, never a pure side profile. The two sprites of a row are clearly different stances, never the same drawing twice.
 EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-WEAPON CHECK: big gear-headed hammer, RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
-REMINDER: this is Artificier: big gear-headed hammer, RIGHT hand; spiky brown hair (#6B3E1E); green eyes, always open; bronze and steel steampunk armor with small teal glowing gems (#2FE0C8); brass goggles pushed up on the forehead; brown trousers, tool belt with pouches; heavy brown boots with brass caps. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no top hat, no gun, no cape.
+WEAPON CHECK: big gear-headed hammer, RIGHT hand. It is held in the SAME hand and is clearly visible in every cell: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+REMINDER: this is Artificier: big gear-headed hammer, RIGHT hand; spiky brown hair (#6B3E1E); green eyes, always open; bronze and steel steampunk armor with small teal glowing gems (#2FE0C8); brass goggles pushed up on the forehead; brown trousers, tool belt with pouches; heavy brown boots with brass caps. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no top hat, no gun, no cape. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | 3/4 avant droite | `artificier.png` |
-| 1-2 | 3/4 dos droite | `artificier_back.png` |
-| 2-1 | 3/4 dos gauche | `artificier_back_left.png` |
-| 2-2 | 3/4 avant gauche | `artificier_face_left.png` |
+| 1-1 | repos de face | `artificier.png` |
+| 1-2 | repos de face, variante | `artificier_idle_2.png` |
+| 2-1 | repos de dos | `artificier_back.png` |
+| 2-2 | repos de dos, variante | `artificier_back_idle_2.png` |
 
-##### Édition corrective (arme manquante sur des cases)
+##### Édition corrective (arme manquante)
 
-Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+Si une case est fausse : édition avec la planche `vues` en image source. Ce prompt répète la structure des cases (haut = face, bas = dos) pour que l'éditeur n'aplatisse pas toutes les vues dans le même angle.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE playable hero, Artificier, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+Image edit of a sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE playable hero: Artificier, armed with: big gear-headed hammer, RIGHT hand.
+SOURCE IMAGE: it shows this playable hero, Artificier, 4 times: top row from the FRONT twice, bottom row from BEHIND twice, all facing right.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Artificier (hero of the Rouages nation)
 - Hair: spiky brown hair (#6B3E1E)
@@ -94,24 +95,24 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no top hat, no gun, no cape.
 TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
-CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-WEAPON CHECK: big gear-headed hammer, RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
-CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+CRITICAL — KEEP THE VIEWS: the top row stays FRONT views and the bottom row stays BACK views; the two sprites of a row stay two different stances. Never redraw the whole sheet from a single angle:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+WEAPON: big gear-headed hammer, RIGHT hand. It is held in the SAME hand and is clearly visible in every cell: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+CHANGE NOTHING ELSE: keep the exact same character, poses, sizes, outfit, hair, background and layout.
 BACKGROUND: keep the plain flat background of the source image.
-REMINDER: this is Artificier: big gear-headed hammer, RIGHT hand; spiky brown hair (#6B3E1E); green eyes, always open; bronze and steel steampunk armor with small teal glowing gems (#2FE0C8); brass goggles pushed up on the forehead; brown trousers, tool belt with pouches; heavy brown boots with brass caps. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no top hat, no gun, no cape.
+REMINDER: this is Artificier: big gear-headed hammer, RIGHT hand; spiky brown hair (#6B3E1E); green eyes, always open; bronze and steel steampunk armor with small teal glowing gems (#2FE0C8); brass goggles pushed up on the forehead; brown trousers, tool belt with pouches; heavy brown boots with brass caps. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no top hat, no gun, no cape. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
-#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
+#### Planche 2 — Actions de face · 3 attaques, 2 sorts, 1 marche (`actions`)
 
-**Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
+**Édition d'image** : source = la planche `vues` (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE playable hero, Artificier, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from the FRONT of ONE playable hero: Artificier, armed with: big gear-headed hammer, RIGHT hand.
+SOURCE IMAGE: it shows this playable hero, Artificier, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Artificier (hero of the Rouages nation)
 - Hair: spiky brown hair (#6B3E1E)
@@ -123,32 +124,79 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: big gear-headed hammer, RIGHT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no top hat, no gun, no cape.
-WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
-TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
+WEAPON: big gear-headed hammer, RIGHT hand. It is held in the SAME hand and is clearly visible in all 6 poses: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose, facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: brass, copper, dark steel, teal glowing lights.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
 LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. OVERHEAD SMASH: gear hammer raised high above the head with both hands.
-2. SIDE SWING: gear hammer swept horizontally, goggles bouncing.
-3. TINKERING: kneeling, adjusting a small device on the ground, sparks, steam puffs and teal electric arcs crackling.
-4. Seen from BEHIND, the SAME action as pose 1 — OVERHEAD SMASH: gear hammer raised high above the head with both hands.
-5. Seen from BEHIND, the SAME action as pose 2 — SIDE SWING: gear hammer swept horizontally, goggles bouncing.
-6. Seen from BEHIND, the SAME action as pose 3 — TINKERING: kneeling, adjusting a small device on the ground, sparks, steam puffs and teal electric arcs crackling.
-Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
+2. BOMB THROW: free arm extended forward after throwing a small round bomb.
+3. SIDE SWING: gear hammer swept horizontally, goggles bouncing.
+4. TINKERING: kneeling, adjusting a small device on the ground, sparks, steam puffs and teal electric arcs crackling.
+5. REMOTE: standing, raising a glowing remote control high, sparks, steam puffs and teal electric arcs arcing around.
+6. WALK: mid-stride, one foot raised, arms swinging naturally, weapon held.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Artificier: big gear-headed hammer, RIGHT hand; spiky brown hair (#6B3E1E); green eyes, always open; bronze and steel steampunk armor with small teal glowing gems (#2FE0C8); brass goggles pushed up on the forehead; brown trousers, tool belt with pouches; heavy brown boots with brass caps. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no top hat, no gun, no cape.
+WEAPON CHECK: big gear-headed hammer, RIGHT hand — visible in EVERY one of the 6 poses (held or used).
+REMINDER: this is Artificier: big gear-headed hammer, RIGHT hand; spiky brown hair (#6B3E1E); green eyes, always open; bronze and steel steampunk armor with small teal glowing gems (#2FE0C8); brass goggles pushed up on the forehead; brown trousers, tool belt with pouches; heavy brown boots with brass caps. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no top hat, no gun, no cape. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 — face | `artificier_attack.png` |
-| 1-2 | attaque 2 — face | `artificier_attack_2.png` |
-| 1-3 | sort — face | `artificier_cast.png` |
-| 2-1 | attaque 1 — dos | `artificier_attack_back.png` |
-| 2-2 | attaque 2 — dos | `artificier_attack_2_back.png` |
-| 2-3 | sort — dos | `artificier_cast_back.png` |
+| 1-1 | attaque 1 | `artificier_attack.png` |
+| 1-2 | attaque 2 | `artificier_attack_2.png` |
+| 1-3 | attaque 3 | `artificier_attack_3.png` |
+| 2-1 | sort 1 | `artificier_cast.png` |
+| 2-2 | sort 2 | `artificier_cast_2.png` |
+| 2-3 | marche | `artificier_walk.png` |
+
+#### Planche 3 — Actions de dos · mêmes 6 poses vues de dos (`actions_dos`)
+
+**Édition d'image**, source = la planche `vues`. 
+
+```text
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from BEHIND of ONE playable hero: Artificier, armed with: big gear-headed hammer, RIGHT hand.
+SOURCE IMAGE: it shows this playable hero, Artificier, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged. Use the BACK views of the source as the reference for the back of the outfit.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Artificier (hero of the Rouages nation)
+- Hair: spiky brown hair (#6B3E1E)
+- Eyes: green eyes, always open
+- Head: brass goggles pushed up on the forehead
+- Top: bronze and steel steampunk armor with small teal glowing gems (#2FE0C8)
+- Bottom: brown trousers, tool belt with pouches
+- Feet: heavy brown boots with brass caps
+- Weapon: big gear-headed hammer, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no top hat, no gun, no cape.
+WEAPON: big gear-headed hammer, RIGHT hand. It is held in the SAME hand and is clearly visible in all 6 poses: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile, never facing left; no face and no eyes visible in any pose.
+NATION PALETTE: brass, copper, dark steel, teal glowing lights.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom:
+1. OVERHEAD SMASH: gear hammer raised high above the head with both hands.
+2. BOMB THROW: free arm extended forward after throwing a small round bomb.
+3. SIDE SWING: gear hammer swept horizontally, goggles bouncing.
+4. TINKERING: kneeling, adjusting a small device on the ground, sparks, steam puffs and teal electric arcs crackling.
+5. REMOTE: standing, raising a glowing remote control high, sparks, steam puffs and teal electric arcs arcing around.
+6. WALK: mid-stride, one foot raised, arms swinging naturally, weapon held.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: big gear-headed hammer, RIGHT hand — visible in EVERY one of the 6 poses (held or used).
+REMINDER: this is Artificier: big gear-headed hammer, RIGHT hand; spiky brown hair (#6B3E1E); green eyes, always open; bronze and steel steampunk armor with small teal glowing gems (#2FE0C8); brass goggles pushed up on the forehead; brown trousers, tool belt with pouches; heavy brown boots with brass caps. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no top hat, no gun, no cape. Every sprite faces RIGHT (front or back 3/4), never left.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | attaque 1 — dos | `artificier_back_attack.png` |
+| 1-2 | attaque 2 — dos | `artificier_back_attack_2.png` |
+| 1-3 | attaque 3 — dos | `artificier_back_attack_3.png` |
+| 2-1 | sort 1 — dos | `artificier_back_cast.png` |
+| 2-2 | sort 2 — dos | `artificier_back_cast_2.png` |
+| 2-3 | marche — dos | `artificier_back_walk.png` |
 
 L'export Zimut de l'Atelier copie aussi le repos (case 1 de la planche vues) vers `nations/heros/artificier.png`.
 
@@ -156,14 +204,15 @@ L'export Zimut de l'Atelier copie aussi le repos (case 1 de la planche vues) ver
 
 ### Drone aérien — 10 poses
 
-2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/rouages/` ; nomme tes images `drone_aerien_vues.png` et `drone_aerien_actions.png` pour que l'Atelier les reconnaisse.
+3 planches : **vues** (génération normale), puis **actions de face** et **actions de dos** en **édition** de la planche vues (image source = planche vues de ce personnage : c'est ce qui garantit le même personnage). Créature **sans arme** : chaque prompt interdit tout objet tenu. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/rouages/` ; nomme tes images `drone_aerien_vues.png`, `drone_aerien_actions.png` et `drone_aerien_actions_dos.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 4 angles (`vues`)
+#### Planche 1 — Vues · 2 repos de face + 2 repos de dos (`vues`)
 
-Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
+Génération normale, aucune image à joindre. Tout est orienté vers la droite ; deux attitudes différentes par rangée.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Drone aérien — an UNARMED creature (no weapon of any kind).
+The sheet contains EXACTLY 4 sprites of the SAME character: the top row shows it from the FRONT twice (two different relaxed stances), the bottom row shows it from BEHIND twice (two different relaxed stances). Same design, same outfit, same colors, same size in all 4 cells.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Drone aérien (enemy of the Rouages nation)
 - Body: round bronze flying drone (#B8873A) with riveted plates
@@ -171,36 +220,36 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two small propellers on top, two jointed claw arms below
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no legs, no wings, no human parts.
-WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
-Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 4 cells; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
 NATION PALETTE: brass, copper, dark steel, teal glowing lights.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+CELLS — follow the grid positions EXACTLY:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+Every sprite faces RIGHT (front-right on the top row, away toward the upper right on the bottom row): never facing left, never a pure side profile. The two sprites of a row are clearly different stances, never the same drawing twice.
 EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Drone aérien: round bronze flying drone (#B8873A) with riveted plates; single glowing blue core eye (#3FC8FF) in the front; two small propellers on top, two jointed claw arms below. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no legs, no wings, no human parts.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in every cell; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+REMINDER: this is Drone aérien: round bronze flying drone (#B8873A) with riveted plates; single glowing blue core eye (#3FC8FF) in the front; two small propellers on top, two jointed claw arms below. NO weapon and no held object, ever. Forbidden: no legs, no wings, no human parts. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | 3/4 avant droite | `drone_aerien.png` |
-| 1-2 | 3/4 dos droite | `drone_aerien_back.png` |
-| 2-1 | 3/4 dos gauche | `drone_aerien_back_left.png` |
-| 2-2 | 3/4 avant gauche | `drone_aerien_face_left.png` |
+| 1-1 | repos de face | `drone_aerien.png` |
+| 1-2 | repos de face, variante | `drone_aerien_idle_2.png` |
+| 2-1 | repos de dos | `drone_aerien_back.png` |
+| 2-2 | repos de dos, variante | `drone_aerien_back_idle_2.png` |
 
-##### Édition corrective (arme manquante sur des cases)
+##### Édition corrective (objet inventé dans les mains)
 
-Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+Si une case est fausse : édition avec la planche `vues` en image source. Ce prompt répète la structure des cases (haut = face, bas = dos) pour que l'éditeur n'aplatisse pas toutes les vues dans le même angle.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Drone aérien, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+Image edit of a sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Drone aérien — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Drone aérien, 4 times: top row from the FRONT twice, bottom row from BEHIND twice, all facing right.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Drone aérien (enemy of the Rouages nation)
 - Body: round bronze flying drone (#B8873A) with riveted plates
@@ -208,24 +257,25 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two small propellers on top, two jointed claw arms below
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no legs, no wings, no human parts.
-TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
-CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+TASK: REMOVE every weapon, torch, tool or held object from the hands, claws or tail — this creature is unarmed. Nothing else changes.
+CRITICAL — KEEP THE VIEWS: the top row stays FRONT views and the bottom row stays BACK views; the two sprites of a row stay two different stances. Never redraw the whole sheet from a single angle:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in every cell; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+CHANGE NOTHING ELSE: keep the exact same character, poses, sizes, outfit, hair, background and layout.
 BACKGROUND: keep the plain flat background of the source image.
-REMINDER: this is Drone aérien: round bronze flying drone (#B8873A) with riveted plates; single glowing blue core eye (#3FC8FF) in the front; two small propellers on top, two jointed claw arms below. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no legs, no wings, no human parts.
+REMINDER: this is Drone aérien: round bronze flying drone (#B8873A) with riveted plates; single glowing blue core eye (#3FC8FF) in the front; two small propellers on top, two jointed claw arms below. NO weapon and no held object, ever. Forbidden: no legs, no wings, no human parts. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
-#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
+#### Planche 2 — Actions de face · 3 attaques, 2 sorts, 1 marche (`actions`)
 
-**Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
+**Édition d'image** : source = la planche `vues` (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Drone aérien, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from the FRONT of ONE enemy monster: Drone aérien — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Drone aérien, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Drone aérien (enemy of the Rouages nation)
 - Body: round bronze flying drone (#B8873A) with riveted plates
@@ -233,43 +283,85 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two small propellers on top, two jointed claw arms below
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no legs, no wings, no human parts.
-WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
-TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 6 poses; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose, facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: brass, copper, dark steel, teal glowing lights.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
 LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. RISE: body stretched tall upward, arms raised.
-2. SPIN: body whirling, sparks, steam puffs and teal electric arcs trail around it.
-3. HOVER: floating higher, sparks, steam puffs and teal electric arcs orbs circling.
-4. Seen from BEHIND, the SAME action as pose 1 — RISE: body stretched tall upward, arms raised.
-5. Seen from BEHIND, the SAME action as pose 2 — SPIN: body whirling, sparks, steam puffs and teal electric arcs trail around it.
-6. Seen from BEHIND, the SAME action as pose 3 — HOVER: floating higher, sparks, steam puffs and teal electric arcs orbs circling.
-Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
+2. LUNGE: body stretched forward, claws of sparks, steam puffs and teal electric arcs reaching out.
+3. SPIN: body whirling, sparks, steam puffs and teal electric arcs trail around it.
+4. HOVER: floating higher, sparks, steam puffs and teal electric arcs orbs circling.
+5. PULSE: arms spread, sparks, steam puffs and teal electric arcs pulsing outward.
+6. DRIFT: floating forward with the body tilted slightly ahead, a short trail behind.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Drone aérien: round bronze flying drone (#B8873A) with riveted plates; single glowing blue core eye (#3FC8FF) in the front; two small propellers on top, two jointed claw arms below. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no legs, no wings, no human parts.
+REMINDER: this is Drone aérien: round bronze flying drone (#B8873A) with riveted plates; single glowing blue core eye (#3FC8FF) in the front; two small propellers on top, two jointed claw arms below. NO weapon and no held object, ever. Forbidden: no legs, no wings, no human parts. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 — face | `drone_aerien_attack.png` |
-| 1-2 | attaque 2 — face | `drone_aerien_attack_2.png` |
-| 1-3 | sort — face | `drone_aerien_cast.png` |
-| 2-1 | attaque 1 — dos | `drone_aerien_attack_back.png` |
-| 2-2 | attaque 2 — dos | `drone_aerien_attack_2_back.png` |
-| 2-3 | sort — dos | `drone_aerien_cast_back.png` |
+| 1-1 | attaque 1 | `drone_aerien_attack.png` |
+| 1-2 | attaque 2 | `drone_aerien_attack_2.png` |
+| 1-3 | attaque 3 | `drone_aerien_attack_3.png` |
+| 2-1 | sort 1 | `drone_aerien_cast.png` |
+| 2-2 | sort 2 | `drone_aerien_cast_2.png` |
+| 2-3 | marche | `drone_aerien_walk.png` |
+
+#### Planche 3 — Actions de dos · mêmes 6 poses vues de dos (`actions_dos`)
+
+**Édition d'image**, source = la planche `vues`. **Facultative pour un monstre** : sans elle, le jeu utilise les poses de face. 
+
+```text
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from BEHIND of ONE enemy monster: Drone aérien — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Drone aérien, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories. The 6 new poses must show this SAME character, unchanged. Use the BACK views of the source as the reference for the back of the outfit.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Drone aérien (enemy of the Rouages nation)
+- Body: round bronze flying drone (#B8873A) with riveted plates
+- Head: single glowing blue core eye (#3FC8FF) in the front
+- Details: two small propellers on top, two jointed claw arms below
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no legs, no wings, no human parts.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 6 poses; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile, never facing left; no face and no eyes visible in any pose.
+NATION PALETTE: brass, copper, dark steel, teal glowing lights.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom:
+1. RISE: body stretched tall upward, arms raised.
+2. LUNGE: body stretched forward, claws of sparks, steam puffs and teal electric arcs reaching out.
+3. SPIN: body whirling, sparks, steam puffs and teal electric arcs trail around it.
+4. HOVER: floating higher, sparks, steam puffs and teal electric arcs orbs circling.
+5. PULSE: arms spread, sparks, steam puffs and teal electric arcs pulsing outward.
+6. DRIFT: floating forward with the body tilted slightly ahead, a short trail behind.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Drone aérien: round bronze flying drone (#B8873A) with riveted plates; single glowing blue core eye (#3FC8FF) in the front; two small propellers on top, two jointed claw arms below. NO weapon and no held object, ever. Forbidden: no legs, no wings, no human parts. Every sprite faces RIGHT (front or back 3/4), never left.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | attaque 1 — dos | `drone_aerien_back_attack.png` |
+| 1-2 | attaque 2 — dos | `drone_aerien_back_attack_2.png` |
+| 1-3 | attaque 3 — dos | `drone_aerien_back_attack_3.png` |
+| 2-1 | sort 1 — dos | `drone_aerien_back_cast.png` |
+| 2-2 | sort 2 — dos | `drone_aerien_back_cast_2.png` |
+| 2-3 | marche — dos | `drone_aerien_back_walk.png` |
 
 ### Araignée mécanique — 10 poses
 
-2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/rouages/` ; nomme tes images `araignee_mecanique_vues.png` et `araignee_mecanique_actions.png` pour que l'Atelier les reconnaisse.
+3 planches : **vues** (génération normale), puis **actions de face** et **actions de dos** en **édition** de la planche vues (image source = planche vues de ce personnage : c'est ce qui garantit le même personnage). Créature **sans arme** : chaque prompt interdit tout objet tenu. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/rouages/` ; nomme tes images `araignee_mecanique_vues.png`, `araignee_mecanique_actions.png` et `araignee_mecanique_actions_dos.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 4 angles (`vues`)
+#### Planche 1 — Vues · 2 repos de face + 2 repos de dos (`vues`)
 
-Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
+Génération normale, aucune image à joindre. Tout est orienté vers la droite ; deux attitudes différentes par rangée.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Araignée mécanique — an UNARMED creature (no weapon of any kind).
+The sheet contains EXACTLY 4 sprites of the SAME character: the top row shows it from the FRONT twice (two different relaxed stances), the bottom row shows it from BEHIND twice (two different relaxed stances). Same design, same outfit, same colors, same size in all 4 cells.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Araignée mécanique (enemy of the Rouages nation)
 - Body: bronze mechanical spider (#B8873A) with a riveted round body
@@ -277,36 +369,36 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: eight long jointed steel legs (#8A9098)
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no fur, no organic parts.
-WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
-Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 4 cells; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
 NATION PALETTE: brass, copper, dark steel, teal glowing lights.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+CELLS — follow the grid positions EXACTLY:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+Every sprite faces RIGHT (front-right on the top row, away toward the upper right on the bottom row): never facing left, never a pure side profile. The two sprites of a row are clearly different stances, never the same drawing twice.
 EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Araignée mécanique: bronze mechanical spider (#B8873A) with a riveted round body; single blue gem eye (#3FC8FF); eight long jointed steel legs (#8A9098). The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no fur, no organic parts.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in every cell; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+REMINDER: this is Araignée mécanique: bronze mechanical spider (#B8873A) with a riveted round body; single blue gem eye (#3FC8FF); eight long jointed steel legs (#8A9098). NO weapon and no held object, ever. Forbidden: no fur, no organic parts. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | 3/4 avant droite | `araignee_mecanique.png` |
-| 1-2 | 3/4 dos droite | `araignee_mecanique_back.png` |
-| 2-1 | 3/4 dos gauche | `araignee_mecanique_back_left.png` |
-| 2-2 | 3/4 avant gauche | `araignee_mecanique_face_left.png` |
+| 1-1 | repos de face | `araignee_mecanique.png` |
+| 1-2 | repos de face, variante | `araignee_mecanique_idle_2.png` |
+| 2-1 | repos de dos | `araignee_mecanique_back.png` |
+| 2-2 | repos de dos, variante | `araignee_mecanique_back_idle_2.png` |
 
-##### Édition corrective (arme manquante sur des cases)
+##### Édition corrective (objet inventé dans les mains)
 
-Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+Si une case est fausse : édition avec la planche `vues` en image source. Ce prompt répète la structure des cases (haut = face, bas = dos) pour que l'éditeur n'aplatisse pas toutes les vues dans le même angle.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Araignée mécanique, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+Image edit of a sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Araignée mécanique — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Araignée mécanique, 4 times: top row from the FRONT twice, bottom row from BEHIND twice, all facing right.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Araignée mécanique (enemy of the Rouages nation)
 - Body: bronze mechanical spider (#B8873A) with a riveted round body
@@ -314,24 +406,25 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: eight long jointed steel legs (#8A9098)
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no fur, no organic parts.
-TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
-CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+TASK: REMOVE every weapon, torch, tool or held object from the hands, claws or tail — this creature is unarmed. Nothing else changes.
+CRITICAL — KEEP THE VIEWS: the top row stays FRONT views and the bottom row stays BACK views; the two sprites of a row stay two different stances. Never redraw the whole sheet from a single angle:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in every cell; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+CHANGE NOTHING ELSE: keep the exact same character, poses, sizes, outfit, hair, background and layout.
 BACKGROUND: keep the plain flat background of the source image.
-REMINDER: this is Araignée mécanique: bronze mechanical spider (#B8873A) with a riveted round body; single blue gem eye (#3FC8FF); eight long jointed steel legs (#8A9098). The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no fur, no organic parts.
+REMINDER: this is Araignée mécanique: bronze mechanical spider (#B8873A) with a riveted round body; single blue gem eye (#3FC8FF); eight long jointed steel legs (#8A9098). NO weapon and no held object, ever. Forbidden: no fur, no organic parts. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
-#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
+#### Planche 2 — Actions de face · 3 attaques, 2 sorts, 1 marche (`actions`)
 
-**Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
+**Édition d'image** : source = la planche `vues` (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Araignée mécanique, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from the FRONT of ONE enemy monster: Araignée mécanique — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Araignée mécanique, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Araignée mécanique (enemy of the Rouages nation)
 - Body: bronze mechanical spider (#B8873A) with a riveted round body
@@ -339,43 +432,85 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: eight long jointed steel legs (#8A9098)
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no fur, no organic parts.
-WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
-TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 6 poses; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose, facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: brass, copper, dark steel, teal glowing lights.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
 LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. REARING: standing up on the hind legs, front claws raised high.
-2. SIDE SWIPE: head and claws swept to the side, body twisted.
-3. HOWL: head raised to the sky, sparks, steam puffs and teal electric arcs gathering around the body.
-4. Seen from BEHIND, the SAME action as pose 1 — REARING: standing up on the hind legs, front claws raised high.
-5. Seen from BEHIND, the SAME action as pose 2 — SIDE SWIPE: head and claws swept to the side, body twisted.
-6. Seen from BEHIND, the SAME action as pose 3 — HOWL: head raised to the sky, sparks, steam puffs and teal electric arcs gathering around the body.
-Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
+2. POUNCE: body stretched forward in the air, jaws open.
+3. SIDE SWIPE: head and claws swept to the side, body twisted.
+4. HOWL: head raised to the sky, sparks, steam puffs and teal electric arcs gathering around the body.
+5. ROAR: mouth wide open, sparks, steam puffs and teal electric arcs burst in front of the head.
+6. WALK: mid-stride, one front paw raised, body moving forward.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Araignée mécanique: bronze mechanical spider (#B8873A) with a riveted round body; single blue gem eye (#3FC8FF); eight long jointed steel legs (#8A9098). The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no fur, no organic parts.
+REMINDER: this is Araignée mécanique: bronze mechanical spider (#B8873A) with a riveted round body; single blue gem eye (#3FC8FF); eight long jointed steel legs (#8A9098). NO weapon and no held object, ever. Forbidden: no fur, no organic parts. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 — face | `araignee_mecanique_attack.png` |
-| 1-2 | attaque 2 — face | `araignee_mecanique_attack_2.png` |
-| 1-3 | sort — face | `araignee_mecanique_cast.png` |
-| 2-1 | attaque 1 — dos | `araignee_mecanique_attack_back.png` |
-| 2-2 | attaque 2 — dos | `araignee_mecanique_attack_2_back.png` |
-| 2-3 | sort — dos | `araignee_mecanique_cast_back.png` |
+| 1-1 | attaque 1 | `araignee_mecanique_attack.png` |
+| 1-2 | attaque 2 | `araignee_mecanique_attack_2.png` |
+| 1-3 | attaque 3 | `araignee_mecanique_attack_3.png` |
+| 2-1 | sort 1 | `araignee_mecanique_cast.png` |
+| 2-2 | sort 2 | `araignee_mecanique_cast_2.png` |
+| 2-3 | marche | `araignee_mecanique_walk.png` |
+
+#### Planche 3 — Actions de dos · mêmes 6 poses vues de dos (`actions_dos`)
+
+**Édition d'image**, source = la planche `vues`. **Facultative pour un monstre** : sans elle, le jeu utilise les poses de face. 
+
+```text
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from BEHIND of ONE enemy monster: Araignée mécanique — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Araignée mécanique, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories. The 6 new poses must show this SAME character, unchanged. Use the BACK views of the source as the reference for the back of the outfit.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Araignée mécanique (enemy of the Rouages nation)
+- Body: bronze mechanical spider (#B8873A) with a riveted round body
+- Head: single blue gem eye (#3FC8FF)
+- Details: eight long jointed steel legs (#8A9098)
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no fur, no organic parts.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 6 poses; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile, never facing left; no face and no eyes visible in any pose.
+NATION PALETTE: brass, copper, dark steel, teal glowing lights.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom:
+1. REARING: standing up on the hind legs, front claws raised high.
+2. POUNCE: body stretched forward in the air, jaws open.
+3. SIDE SWIPE: head and claws swept to the side, body twisted.
+4. HOWL: head raised to the sky, sparks, steam puffs and teal electric arcs gathering around the body.
+5. ROAR: mouth wide open, sparks, steam puffs and teal electric arcs burst in front of the head.
+6. WALK: mid-stride, one front paw raised, body moving forward.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Araignée mécanique: bronze mechanical spider (#B8873A) with a riveted round body; single blue gem eye (#3FC8FF); eight long jointed steel legs (#8A9098). NO weapon and no held object, ever. Forbidden: no fur, no organic parts. Every sprite faces RIGHT (front or back 3/4), never left.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | attaque 1 — dos | `araignee_mecanique_back_attack.png` |
+| 1-2 | attaque 2 — dos | `araignee_mecanique_back_attack_2.png` |
+| 1-3 | attaque 3 — dos | `araignee_mecanique_back_attack_3.png` |
+| 2-1 | sort 1 — dos | `araignee_mecanique_back_cast.png` |
+| 2-2 | sort 2 — dos | `araignee_mecanique_back_cast_2.png` |
+| 2-3 | marche — dos | `araignee_mecanique_back_walk.png` |
 
 ### Roue engrenée — 10 poses
 
-2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/rouages/` ; nomme tes images `roue_engrenee_vues.png` et `roue_engrenee_actions.png` pour que l'Atelier les reconnaisse.
+3 planches : **vues** (génération normale), puis **actions de face** et **actions de dos** en **édition** de la planche vues (image source = planche vues de ce personnage : c'est ce qui garantit le même personnage). Créature **sans arme** : chaque prompt interdit tout objet tenu. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/rouages/` ; nomme tes images `roue_engrenee_vues.png`, `roue_engrenee_actions.png` et `roue_engrenee_actions_dos.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 4 angles (`vues`)
+#### Planche 1 — Vues · 2 repos de face + 2 repos de dos (`vues`)
 
-Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
+Génération normale, aucune image à joindre. Tout est orienté vers la droite ; deux attitudes différentes par rangée.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Roue engrenée — an UNARMED creature (no weapon of any kind).
+The sheet contains EXACTLY 4 sprites of the SAME character: the top row shows it from the FRONT twice (two different relaxed stances), the bottom row shows it from BEHIND twice (two different relaxed stances). Same design, same outfit, same colors, same size in all 4 cells.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Roue engrenée (enemy of the Rouages nation)
 - Body: rolling bronze cog-wheel creature (#B8873A) standing upright on its edge
@@ -383,36 +518,36 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two small jointed steel arms on the sides
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no legs, no face other than the gem eye.
-WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
-Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 4 cells; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
 NATION PALETTE: brass, copper, dark steel, teal glowing lights.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+CELLS — follow the grid positions EXACTLY:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+Every sprite faces RIGHT (front-right on the top row, away toward the upper right on the bottom row): never facing left, never a pure side profile. The two sprites of a row are clearly different stances, never the same drawing twice.
 EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Roue engrenée: rolling bronze cog-wheel creature (#B8873A) standing upright on its edge; single glowing blue gem eye (#3FC8FF) in the center of the wheel; two small jointed steel arms on the sides. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no legs, no face other than the gem eye.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in every cell; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+REMINDER: this is Roue engrenée: rolling bronze cog-wheel creature (#B8873A) standing upright on its edge; single glowing blue gem eye (#3FC8FF) in the center of the wheel; two small jointed steel arms on the sides. NO weapon and no held object, ever. Forbidden: no legs, no face other than the gem eye. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | 3/4 avant droite | `roue_engrenee.png` |
-| 1-2 | 3/4 dos droite | `roue_engrenee_back.png` |
-| 2-1 | 3/4 dos gauche | `roue_engrenee_back_left.png` |
-| 2-2 | 3/4 avant gauche | `roue_engrenee_face_left.png` |
+| 1-1 | repos de face | `roue_engrenee.png` |
+| 1-2 | repos de face, variante | `roue_engrenee_idle_2.png` |
+| 2-1 | repos de dos | `roue_engrenee_back.png` |
+| 2-2 | repos de dos, variante | `roue_engrenee_back_idle_2.png` |
 
-##### Édition corrective (arme manquante sur des cases)
+##### Édition corrective (objet inventé dans les mains)
 
-Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+Si une case est fausse : édition avec la planche `vues` en image source. Ce prompt répète la structure des cases (haut = face, bas = dos) pour que l'éditeur n'aplatisse pas toutes les vues dans le même angle.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Roue engrenée, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+Image edit of a sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Roue engrenée — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Roue engrenée, 4 times: top row from the FRONT twice, bottom row from BEHIND twice, all facing right.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Roue engrenée (enemy of the Rouages nation)
 - Body: rolling bronze cog-wheel creature (#B8873A) standing upright on its edge
@@ -420,24 +555,25 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two small jointed steel arms on the sides
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no legs, no face other than the gem eye.
-TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
-CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+TASK: REMOVE every weapon, torch, tool or held object from the hands, claws or tail — this creature is unarmed. Nothing else changes.
+CRITICAL — KEEP THE VIEWS: the top row stays FRONT views and the bottom row stays BACK views; the two sprites of a row stay two different stances. Never redraw the whole sheet from a single angle:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in every cell; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+CHANGE NOTHING ELSE: keep the exact same character, poses, sizes, outfit, hair, background and layout.
 BACKGROUND: keep the plain flat background of the source image.
-REMINDER: this is Roue engrenée: rolling bronze cog-wheel creature (#B8873A) standing upright on its edge; single glowing blue gem eye (#3FC8FF) in the center of the wheel; two small jointed steel arms on the sides. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no legs, no face other than the gem eye.
+REMINDER: this is Roue engrenée: rolling bronze cog-wheel creature (#B8873A) standing upright on its edge; single glowing blue gem eye (#3FC8FF) in the center of the wheel; two small jointed steel arms on the sides. NO weapon and no held object, ever. Forbidden: no legs, no face other than the gem eye. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
-#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
+#### Planche 2 — Actions de face · 3 attaques, 2 sorts, 1 marche (`actions`)
 
-**Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
+**Édition d'image** : source = la planche `vues` (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Roue engrenée, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from the FRONT of ONE enemy monster: Roue engrenée — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Roue engrenée, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Roue engrenée (enemy of the Rouages nation)
 - Body: rolling bronze cog-wheel creature (#B8873A) standing upright on its edge
@@ -445,43 +581,85 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two small jointed steel arms on the sides
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no legs, no face other than the gem eye.
-WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
-TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 6 poses; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose, facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: brass, copper, dark steel, teal glowing lights.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
 LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. OVERHEAD SMASH: both fists or weapon raised high above the head.
-2. BACKHAND: arm swept horizontally to the side, torso twisted.
-3. ROOTED: stomping, sparks, steam puffs and teal electric arcs cracks spreading under the feet.
-4. Seen from BEHIND, the SAME action as pose 1 — OVERHEAD SMASH: both fists or weapon raised high above the head.
-5. Seen from BEHIND, the SAME action as pose 2 — BACKHAND: arm swept horizontally to the side, torso twisted.
-6. Seen from BEHIND, the SAME action as pose 3 — ROOTED: stomping, sparks, steam puffs and teal electric arcs cracks spreading under the feet.
-Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
+2. PUNCH: one arm thrust far forward, the other pulled back, body leaning forward.
+3. BACKHAND: arm swept horizontally to the side, torso twisted.
+4. ROOTED: stomping, sparks, steam puffs and teal electric arcs cracks spreading under the feet.
+5. GATHER: arms raised, sparks, steam puffs and teal electric arcs gathering between the hands.
+6. WALK: heavy mid-stride, one foot raised, arms swinging.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Roue engrenée: rolling bronze cog-wheel creature (#B8873A) standing upright on its edge; single glowing blue gem eye (#3FC8FF) in the center of the wheel; two small jointed steel arms on the sides. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no legs, no face other than the gem eye.
+REMINDER: this is Roue engrenée: rolling bronze cog-wheel creature (#B8873A) standing upright on its edge; single glowing blue gem eye (#3FC8FF) in the center of the wheel; two small jointed steel arms on the sides. NO weapon and no held object, ever. Forbidden: no legs, no face other than the gem eye. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 — face | `roue_engrenee_attack.png` |
-| 1-2 | attaque 2 — face | `roue_engrenee_attack_2.png` |
-| 1-3 | sort — face | `roue_engrenee_cast.png` |
-| 2-1 | attaque 1 — dos | `roue_engrenee_attack_back.png` |
-| 2-2 | attaque 2 — dos | `roue_engrenee_attack_2_back.png` |
-| 2-3 | sort — dos | `roue_engrenee_cast_back.png` |
+| 1-1 | attaque 1 | `roue_engrenee_attack.png` |
+| 1-2 | attaque 2 | `roue_engrenee_attack_2.png` |
+| 1-3 | attaque 3 | `roue_engrenee_attack_3.png` |
+| 2-1 | sort 1 | `roue_engrenee_cast.png` |
+| 2-2 | sort 2 | `roue_engrenee_cast_2.png` |
+| 2-3 | marche | `roue_engrenee_walk.png` |
+
+#### Planche 3 — Actions de dos · mêmes 6 poses vues de dos (`actions_dos`)
+
+**Édition d'image**, source = la planche `vues`. **Facultative pour un monstre** : sans elle, le jeu utilise les poses de face. 
+
+```text
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from BEHIND of ONE enemy monster: Roue engrenée — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Roue engrenée, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories. The 6 new poses must show this SAME character, unchanged. Use the BACK views of the source as the reference for the back of the outfit.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Roue engrenée (enemy of the Rouages nation)
+- Body: rolling bronze cog-wheel creature (#B8873A) standing upright on its edge
+- Head: single glowing blue gem eye (#3FC8FF) in the center of the wheel
+- Details: two small jointed steel arms on the sides
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no legs, no face other than the gem eye.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 6 poses; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile, never facing left; no face and no eyes visible in any pose.
+NATION PALETTE: brass, copper, dark steel, teal glowing lights.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom:
+1. OVERHEAD SMASH: both fists or weapon raised high above the head.
+2. PUNCH: one arm thrust far forward, the other pulled back, body leaning forward.
+3. BACKHAND: arm swept horizontally to the side, torso twisted.
+4. ROOTED: stomping, sparks, steam puffs and teal electric arcs cracks spreading under the feet.
+5. GATHER: arms raised, sparks, steam puffs and teal electric arcs gathering between the hands.
+6. WALK: heavy mid-stride, one foot raised, arms swinging.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Roue engrenée: rolling bronze cog-wheel creature (#B8873A) standing upright on its edge; single glowing blue gem eye (#3FC8FF) in the center of the wheel; two small jointed steel arms on the sides. NO weapon and no held object, ever. Forbidden: no legs, no face other than the gem eye. Every sprite faces RIGHT (front or back 3/4), never left.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | attaque 1 — dos | `roue_engrenee_back_attack.png` |
+| 1-2 | attaque 2 — dos | `roue_engrenee_back_attack_2.png` |
+| 1-3 | attaque 3 — dos | `roue_engrenee_back_attack_3.png` |
+| 2-1 | sort 1 — dos | `roue_engrenee_back_cast.png` |
+| 2-2 | sort 2 — dos | `roue_engrenee_back_cast_2.png` |
+| 2-3 | marche — dos | `roue_engrenee_back_walk.png` |
 
 ### Automate de combat — 10 poses
 
-2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/rouages/` ; nomme tes images `automate_de_combat_vues.png` et `automate_de_combat_actions.png` pour que l'Atelier les reconnaisse.
+3 planches : **vues** (génération normale), puis **actions de face** et **actions de dos** en **édition** de la planche vues (image source = planche vues de ce personnage : c'est ce qui garantit le même personnage). Créature **sans arme** : chaque prompt interdit tout objet tenu. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/rouages/` ; nomme tes images `automate_de_combat_vues.png`, `automate_de_combat_actions.png` et `automate_de_combat_actions_dos.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 4 angles (`vues`)
+#### Planche 1 — Vues · 2 repos de face + 2 repos de dos (`vues`)
 
-Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
+Génération normale, aucune image à joindre. Tout est orienté vers la droite ; deux attitudes différentes par rangée.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Automate de combat — an UNARMED creature (no weapon of any kind).
+The sheet contains EXACTLY 4 sprites of the SAME character: the top row shows it from the FRONT twice (two different relaxed stances), the bottom row shows it from BEHIND twice (two different relaxed stances). Same design, same outfit, same colors, same size in all 4 cells.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Automate de combat (enemy of the Rouages nation)
 - Body: heavy combat automaton of riveted bronze (#B8873A) and grey stone plates
@@ -489,36 +667,36 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: huge fists, small smoking pipe on the back
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no human face, no weapon.
-WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
-Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 4 cells; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
 NATION PALETTE: brass, copper, dark steel, teal glowing lights.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+CELLS — follow the grid positions EXACTLY:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+Every sprite faces RIGHT (front-right on the top row, away toward the upper right on the bottom row): never facing left, never a pure side profile. The two sprites of a row are clearly different stances, never the same drawing twice.
 EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Automate de combat: heavy combat automaton of riveted bronze (#B8873A) and grey stone plates; small dome head with a glowing blue visor slit (#3FC8FF); huge fists, small smoking pipe on the back. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no human face, no weapon.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in every cell; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+REMINDER: this is Automate de combat: heavy combat automaton of riveted bronze (#B8873A) and grey stone plates; small dome head with a glowing blue visor slit (#3FC8FF); huge fists, small smoking pipe on the back. NO weapon and no held object, ever. Forbidden: no human face, no weapon. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | 3/4 avant droite | `automate_de_combat.png` |
-| 1-2 | 3/4 dos droite | `automate_de_combat_back.png` |
-| 2-1 | 3/4 dos gauche | `automate_de_combat_back_left.png` |
-| 2-2 | 3/4 avant gauche | `automate_de_combat_face_left.png` |
+| 1-1 | repos de face | `automate_de_combat.png` |
+| 1-2 | repos de face, variante | `automate_de_combat_idle_2.png` |
+| 2-1 | repos de dos | `automate_de_combat_back.png` |
+| 2-2 | repos de dos, variante | `automate_de_combat_back_idle_2.png` |
 
-##### Édition corrective (arme manquante sur des cases)
+##### Édition corrective (objet inventé dans les mains)
 
-Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+Si une case est fausse : édition avec la planche `vues` en image source. Ce prompt répète la structure des cases (haut = face, bas = dos) pour que l'éditeur n'aplatisse pas toutes les vues dans le même angle.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Automate de combat, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+Image edit of a sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Automate de combat — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Automate de combat, 4 times: top row from the FRONT twice, bottom row from BEHIND twice, all facing right.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Automate de combat (enemy of the Rouages nation)
 - Body: heavy combat automaton of riveted bronze (#B8873A) and grey stone plates
@@ -526,24 +704,25 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: huge fists, small smoking pipe on the back
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no human face, no weapon.
-TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
-CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+TASK: REMOVE every weapon, torch, tool or held object from the hands, claws or tail — this creature is unarmed. Nothing else changes.
+CRITICAL — KEEP THE VIEWS: the top row stays FRONT views and the bottom row stays BACK views; the two sprites of a row stay two different stances. Never redraw the whole sheet from a single angle:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in every cell; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+CHANGE NOTHING ELSE: keep the exact same character, poses, sizes, outfit, hair, background and layout.
 BACKGROUND: keep the plain flat background of the source image.
-REMINDER: this is Automate de combat: heavy combat automaton of riveted bronze (#B8873A) and grey stone plates; small dome head with a glowing blue visor slit (#3FC8FF); huge fists, small smoking pipe on the back. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no human face, no weapon.
+REMINDER: this is Automate de combat: heavy combat automaton of riveted bronze (#B8873A) and grey stone plates; small dome head with a glowing blue visor slit (#3FC8FF); huge fists, small smoking pipe on the back. NO weapon and no held object, ever. Forbidden: no human face, no weapon. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
-#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
+#### Planche 2 — Actions de face · 3 attaques, 2 sorts, 1 marche (`actions`)
 
-**Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
+**Édition d'image** : source = la planche `vues` (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Automate de combat, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from the FRONT of ONE enemy monster: Automate de combat — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Automate de combat, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Automate de combat (enemy of the Rouages nation)
 - Body: heavy combat automaton of riveted bronze (#B8873A) and grey stone plates
@@ -551,45 +730,87 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: huge fists, small smoking pipe on the back
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no human face, no weapon.
-WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
-TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 6 poses; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose, facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: brass, copper, dark steel, teal glowing lights.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
 LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. OVERHEAD SMASH: both fists or weapon raised high above the head.
-2. BACKHAND: arm swept horizontally to the side, torso twisted.
-3. ROOTED: stomping, sparks, steam puffs and teal electric arcs cracks spreading under the feet.
-4. Seen from BEHIND, the SAME action as pose 1 — OVERHEAD SMASH: both fists or weapon raised high above the head.
-5. Seen from BEHIND, the SAME action as pose 2 — BACKHAND: arm swept horizontally to the side, torso twisted.
-6. Seen from BEHIND, the SAME action as pose 3 — ROOTED: stomping, sparks, steam puffs and teal electric arcs cracks spreading under the feet.
-Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
+2. PUNCH: one arm thrust far forward, the other pulled back, body leaning forward.
+3. BACKHAND: arm swept horizontally to the side, torso twisted.
+4. ROOTED: stomping, sparks, steam puffs and teal electric arcs cracks spreading under the feet.
+5. GATHER: arms raised, sparks, steam puffs and teal electric arcs gathering between the hands.
+6. WALK: heavy mid-stride, one foot raised, arms swinging.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Automate de combat: heavy combat automaton of riveted bronze (#B8873A) and grey stone plates; small dome head with a glowing blue visor slit (#3FC8FF); huge fists, small smoking pipe on the back. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no human face, no weapon.
+REMINDER: this is Automate de combat: heavy combat automaton of riveted bronze (#B8873A) and grey stone plates; small dome head with a glowing blue visor slit (#3FC8FF); huge fists, small smoking pipe on the back. NO weapon and no held object, ever. Forbidden: no human face, no weapon. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 — face | `automate_de_combat_attack.png` |
-| 1-2 | attaque 2 — face | `automate_de_combat_attack_2.png` |
-| 1-3 | sort — face | `automate_de_combat_cast.png` |
-| 2-1 | attaque 1 — dos | `automate_de_combat_attack_back.png` |
-| 2-2 | attaque 2 — dos | `automate_de_combat_attack_2_back.png` |
-| 2-3 | sort — dos | `automate_de_combat_cast_back.png` |
+| 1-1 | attaque 1 | `automate_de_combat_attack.png` |
+| 1-2 | attaque 2 | `automate_de_combat_attack_2.png` |
+| 1-3 | attaque 3 | `automate_de_combat_attack_3.png` |
+| 2-1 | sort 1 | `automate_de_combat_cast.png` |
+| 2-2 | sort 2 | `automate_de_combat_cast_2.png` |
+| 2-3 | marche | `automate_de_combat_walk.png` |
+
+#### Planche 3 — Actions de dos · mêmes 6 poses vues de dos (`actions_dos`)
+
+**Édition d'image**, source = la planche `vues`. **Facultative pour un monstre** : sans elle, le jeu utilise les poses de face. 
+
+```text
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from BEHIND of ONE enemy monster: Automate de combat — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Automate de combat, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories. The 6 new poses must show this SAME character, unchanged. Use the BACK views of the source as the reference for the back of the outfit.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Automate de combat (enemy of the Rouages nation)
+- Body: heavy combat automaton of riveted bronze (#B8873A) and grey stone plates
+- Head: small dome head with a glowing blue visor slit (#3FC8FF)
+- Details: huge fists, small smoking pipe on the back
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no human face, no weapon.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 6 poses; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile, never facing left; no face and no eyes visible in any pose.
+NATION PALETTE: brass, copper, dark steel, teal glowing lights.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom:
+1. OVERHEAD SMASH: both fists or weapon raised high above the head.
+2. PUNCH: one arm thrust far forward, the other pulled back, body leaning forward.
+3. BACKHAND: arm swept horizontally to the side, torso twisted.
+4. ROOTED: stomping, sparks, steam puffs and teal electric arcs cracks spreading under the feet.
+5. GATHER: arms raised, sparks, steam puffs and teal electric arcs gathering between the hands.
+6. WALK: heavy mid-stride, one foot raised, arms swinging.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Automate de combat: heavy combat automaton of riveted bronze (#B8873A) and grey stone plates; small dome head with a glowing blue visor slit (#3FC8FF); huge fists, small smoking pipe on the back. NO weapon and no held object, ever. Forbidden: no human face, no weapon. Every sprite faces RIGHT (front or back 3/4), never left.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | attaque 1 — dos | `automate_de_combat_back_attack.png` |
+| 1-2 | attaque 2 — dos | `automate_de_combat_back_attack_2.png` |
+| 1-3 | attaque 3 — dos | `automate_de_combat_back_attack_3.png` |
+| 2-1 | sort 1 — dos | `automate_de_combat_back_cast.png` |
+| 2-2 | sort 2 — dos | `automate_de_combat_back_cast_2.png` |
+| 2-3 | marche — dos | `automate_de_combat_back_walk.png` |
 
 ## 4. Boss
 
 ### Mécanoptère, Colosse d'Engrenages — 10 poses
 
-2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `rouages_vues.png` et `rouages_actions.png` pour que l'Atelier les reconnaisse.
+3 planches : **vues** (génération normale), puis **actions de face** et **actions de dos** en **édition** de la planche vues (image source = planche vues de ce personnage : c'est ce qui garantit le même personnage). Personnage armé : l'arme est verrouillée dans chaque prompt. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `rouages_vues.png`, `rouages_actions.png` et `rouages_actions_dos.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 4 angles (`vues`)
+#### Planche 1 — Vues · 2 repos de face + 2 repos de dos (`vues`)
 
-Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
+Génération normale, aucune image à joindre. Tout est orienté vers la droite ; deux attitudes différentes par rangée.
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE final boss: Mécanoptère, Colosse d'Engrenages, armed with: huge gear hammer, RIGHT hand.
+The sheet contains EXACTLY 4 sprites of the SAME character: the top row shows it from the FRONT twice (two different relaxed stances), the bottom row shows it from BEHIND twice (two different relaxed stances). Same design, same outfit, same colors, same size in all 4 cells.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Mécanoptère, Colosse d'Engrenages (boss of the Rouages nation)
 - Body: giant steam colossus of steel and brass (#B8873A) with two smoking chimneys on the back
@@ -598,37 +819,36 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: huge gear hammer, RIGHT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no wings, no human face.
-WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
-Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
+WEAPON: huge gear hammer, RIGHT hand. It is held in the SAME hand and is clearly visible in all 4 cells: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
 NATION PALETTE: brass, copper, dark steel, teal glowing lights.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+CELLS — follow the grid positions EXACTLY:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+Every sprite faces RIGHT (front-right on the top row, away toward the upper right on the bottom row): never facing left, never a pure side profile. The two sprites of a row are clearly different stances, never the same drawing twice.
 EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-WEAPON CHECK: huge gear hammer, RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
-REMINDER: this is Mécanoptère, Colosse d'Engrenages: huge gear hammer, RIGHT hand; giant steam colossus of steel and brass (#B8873A) with two smoking chimneys on the back; riveted steel head with two glowing blue eyes; glowing blue core in the chest. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no wings, no human face.
+WEAPON CHECK: huge gear hammer, RIGHT hand. It is held in the SAME hand and is clearly visible in every cell: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+REMINDER: this is Mécanoptère, Colosse d'Engrenages: huge gear hammer, RIGHT hand; giant steam colossus of steel and brass (#B8873A) with two smoking chimneys on the back; riveted steel head with two glowing blue eyes; glowing blue core in the chest. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no wings, no human face. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | 3/4 avant droite | `rouages.png` |
-| 1-2 | 3/4 dos droite | `rouages_back.png` |
-| 2-1 | 3/4 dos gauche | `rouages_back_left.png` |
-| 2-2 | 3/4 avant gauche | `rouages_face_left.png` |
+| 1-1 | repos de face | `rouages.png` |
+| 1-2 | repos de face, variante | `rouages_idle_2.png` |
+| 2-1 | repos de dos | `rouages_back.png` |
+| 2-2 | repos de dos, variante | `rouages_back_idle_2.png` |
 
-##### Édition corrective (arme manquante sur des cases)
+##### Édition corrective (arme manquante)
 
-Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+Si une case est fausse : édition avec la planche `vues` en image source. Ce prompt répète la structure des cases (haut = face, bas = dos) pour que l'éditeur n'aplatisse pas toutes les vues dans le même angle.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE final boss, Mécanoptère, Colosse d'Engrenages, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+Image edit of a sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE final boss: Mécanoptère, Colosse d'Engrenages, armed with: huge gear hammer, RIGHT hand.
+SOURCE IMAGE: it shows this final boss, Mécanoptère, Colosse d'Engrenages, 4 times: top row from the FRONT twice, bottom row from BEHIND twice, all facing right.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Mécanoptère, Colosse d'Engrenages (boss of the Rouages nation)
 - Body: giant steam colossus of steel and brass (#B8873A) with two smoking chimneys on the back
@@ -638,24 +858,24 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no wings, no human face.
 TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
-CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-WEAPON CHECK: huge gear hammer, RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
-CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+CRITICAL — KEEP THE VIEWS: the top row stays FRONT views and the bottom row stays BACK views; the two sprites of a row stay two different stances. Never redraw the whole sheet from a single angle:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+WEAPON: huge gear hammer, RIGHT hand. It is held in the SAME hand and is clearly visible in every cell: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+CHANGE NOTHING ELSE: keep the exact same character, poses, sizes, outfit, hair, background and layout.
 BACKGROUND: keep the plain flat background of the source image.
-REMINDER: this is Mécanoptère, Colosse d'Engrenages: huge gear hammer, RIGHT hand; giant steam colossus of steel and brass (#B8873A) with two smoking chimneys on the back; riveted steel head with two glowing blue eyes; glowing blue core in the chest. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no wings, no human face.
+REMINDER: this is Mécanoptère, Colosse d'Engrenages: huge gear hammer, RIGHT hand; giant steam colossus of steel and brass (#B8873A) with two smoking chimneys on the back; riveted steel head with two glowing blue eyes; glowing blue core in the chest. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no wings, no human face. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
-#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
+#### Planche 2 — Actions de face · 3 attaques, 2 sorts, 1 marche (`actions`)
 
-**Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
+**Édition d'image** : source = la planche `vues` (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE final boss, Mécanoptère, Colosse d'Engrenages, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from the FRONT of ONE final boss: Mécanoptère, Colosse d'Engrenages, armed with: huge gear hammer, RIGHT hand.
+SOURCE IMAGE: it shows this final boss, Mécanoptère, Colosse d'Engrenages, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Mécanoptère, Colosse d'Engrenages (boss of the Rouages nation)
 - Body: giant steam colossus of steel and brass (#B8873A) with two smoking chimneys on the back
@@ -664,43 +884,99 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: huge gear hammer, RIGHT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no wings, no human face.
-WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
-TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
+WEAPON: huge gear hammer, RIGHT hand. It is held in the SAME hand and is clearly visible in all 6 poses: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose, facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: brass, copper, dark steel, teal glowing lights.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
 LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. OVERHEAD SMASH: both fists or weapon raised high above the head.
-2. BACKHAND: arm swept horizontally to the side, torso twisted.
-3. ROOTED: stomping, sparks, steam puffs and teal electric arcs cracks spreading under the feet.
-4. Seen from BEHIND, the SAME action as pose 1 — OVERHEAD SMASH: both fists or weapon raised high above the head.
-5. Seen from BEHIND, the SAME action as pose 2 — BACKHAND: arm swept horizontally to the side, torso twisted.
-6. Seen from BEHIND, the SAME action as pose 3 — ROOTED: stomping, sparks, steam puffs and teal electric arcs cracks spreading under the feet.
-Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
+2. PUNCH: one arm thrust far forward, the other pulled back, body leaning forward.
+3. BACKHAND: arm swept horizontally to the side, torso twisted.
+4. ROOTED: stomping, sparks, steam puffs and teal electric arcs cracks spreading under the feet.
+5. GATHER: arms raised, sparks, steam puffs and teal electric arcs gathering between the hands.
+6. WALK: heavy mid-stride, one foot raised, arms swinging.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Mécanoptère, Colosse d'Engrenages: huge gear hammer, RIGHT hand; giant steam colossus of steel and brass (#B8873A) with two smoking chimneys on the back; riveted steel head with two glowing blue eyes; glowing blue core in the chest. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no wings, no human face.
+WEAPON CHECK: huge gear hammer, RIGHT hand — visible in EVERY one of the 6 poses (held or used).
+REMINDER: this is Mécanoptère, Colosse d'Engrenages: huge gear hammer, RIGHT hand; giant steam colossus of steel and brass (#B8873A) with two smoking chimneys on the back; riveted steel head with two glowing blue eyes; glowing blue core in the chest. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no wings, no human face. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 — face | `rouages_attack.png` |
-| 1-2 | attaque 2 — face | `rouages_attack_2.png` |
-| 1-3 | sort — face | `rouages_cast.png` |
-| 2-1 | attaque 1 — dos | `rouages_attack_back.png` |
-| 2-2 | attaque 2 — dos | `rouages_attack_2_back.png` |
-| 2-3 | sort — dos | `rouages_cast_back.png` |
+| 1-1 | attaque 1 | `rouages_attack.png` |
+| 1-2 | attaque 2 | `rouages_attack_2.png` |
+| 1-3 | attaque 3 | `rouages_attack_3.png` |
+| 2-1 | sort 1 | `rouages_cast.png` |
+| 2-2 | sort 2 | `rouages_cast_2.png` |
+| 2-3 | marche | `rouages_walk.png` |
+
+#### Planche 3 — Actions de dos · mêmes 6 poses vues de dos (`actions_dos`)
+
+**Édition d'image**, source = la planche `vues`. 
+
+```text
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from BEHIND of ONE final boss: Mécanoptère, Colosse d'Engrenages, armed with: huge gear hammer, RIGHT hand.
+SOURCE IMAGE: it shows this final boss, Mécanoptère, Colosse d'Engrenages, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged. Use the BACK views of the source as the reference for the back of the outfit.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Mécanoptère, Colosse d'Engrenages (boss of the Rouages nation)
+- Body: giant steam colossus of steel and brass (#B8873A) with two smoking chimneys on the back
+- Head: riveted steel head with two glowing blue eyes
+- Details: glowing blue core in the chest
+- Weapon: huge gear hammer, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no wings, no human face.
+WEAPON: huge gear hammer, RIGHT hand. It is held in the SAME hand and is clearly visible in all 6 poses: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile, never facing left; no face and no eyes visible in any pose.
+NATION PALETTE: brass, copper, dark steel, teal glowing lights.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle warm brass rim light on the right edge.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom:
+1. OVERHEAD SMASH: both fists or weapon raised high above the head.
+2. PUNCH: one arm thrust far forward, the other pulled back, body leaning forward.
+3. BACKHAND: arm swept horizontally to the side, torso twisted.
+4. ROOTED: stomping, sparks, steam puffs and teal electric arcs cracks spreading under the feet.
+5. GATHER: arms raised, sparks, steam puffs and teal electric arcs gathering between the hands.
+6. WALK: heavy mid-stride, one foot raised, arms swinging.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+EFFECTS: sparks, steam puffs and teal electric arcs, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: huge gear hammer, RIGHT hand — visible in EVERY one of the 6 poses (held or used).
+REMINDER: this is Mécanoptère, Colosse d'Engrenages: huge gear hammer, RIGHT hand; giant steam colossus of steel and brass (#B8873A) with two smoking chimneys on the back; riveted steel head with two glowing blue eyes; glowing blue core in the chest. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no wings, no human face. Every sprite faces RIGHT (front or back 3/4), never left.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | attaque 1 — dos | `rouages_back_attack.png` |
+| 1-2 | attaque 2 — dos | `rouages_back_attack_2.png` |
+| 1-3 | attaque 3 — dos | `rouages_back_attack_3.png` |
+| 2-1 | sort 1 — dos | `rouages_back_cast.png` |
+| 2-2 | sort 2 — dos | `rouages_back_cast_2.png` |
+| 2-3 | marche — dos | `rouages_back_walk.png` |
 
 ## Prompt négatif
 
-**Planches vues** (la même pose vue sous 4 angles est voulue, les vues vers la gauche aussi — le négatif commun est adapté) :
+**Personnages armés — planches vues** :
 
 ```text
-checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, one sprite bigger or smaller than the others, size changing between cells, more than 4 sprites, extra sprites, duplicated row of sprites, all sprites in the same viewing angle, all sprites in the same orientation, empty hands, character without its weapon in a cell, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, different character between cells, pose changing between cells, different outfit between angles, weapon changing shape, weapon changing color, weapon replaced by another weapon, missing weapon, missing accessories, realistic proportions, small head
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses in the same viewing angle, identical poses side by side, the same pose copied twice in the same view, front and back mixed inside one cell, weapon changing shape, weapon changing color, weapon replaced by another weapon, missing weapon, missing accessories, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, different character between poses, realistic proportions, small head, more than 4 sprites, extra sprites, duplicated row of sprites, one sprite bigger or smaller than the others, size changing between cells
 ```
 
-**Planches actions et planche de style** (les actions répétées de dos en rangée 2 sont voulues : seules les répétitions sous le même angle sont interdites) :
+**Personnages armés — planches actions et planche de style** :
 
 ```text
 checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses in the same viewing angle, identical poses side by side, the same pose copied twice in the same view, front and back mixed inside one cell, weapon changing shape, weapon changing color, weapon replaced by another weapon, missing weapon, missing accessories, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, different character between poses, realistic proportions, small head
+```
+
+**Créatures sans arme (Salamandre, golems, bêtes…) — planches vues** :
+
+```text
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses in the same viewing angle, identical poses side by side, the same pose copied twice in the same view, front and back mixed inside one cell, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, extra objects, different character between poses, realistic proportions, small head, more than 4 sprites, extra sprites, duplicated row of sprites, one sprite bigger or smaller than the others, size changing between cells, weapon, torch, staff, sword, bow, held object, tool, item in the hands or claws
+```
+
+**Créatures sans arme — planches actions** :
+
+```text
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses in the same viewing angle, identical poses side by side, the same pose copied twice in the same view, front and back mixed inside one cell, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, extra objects, different character between poses, realistic proportions, small head, weapon, torch, staff, sword, bow, held object, tool, item in the hands or claws
 ```
