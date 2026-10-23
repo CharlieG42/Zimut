@@ -2,12 +2,13 @@
 
 Palette : black, deep violet, mist mint green, silver. Effets : mint mist and violet spectral wisps. Contre-jour : pale mint.
 
-Format 2 planches par personnage :
+Format 3 planches par personnage (V44) :
 
-1. **Vues** — le personnage au repos vu sous 4 angles en quarts de tour (3/4 avant droite, 3/4 dos droite, 3/4 dos gauche, 3/4 avant gauche) : la caméra ne bouge pas, le personnage tourne sur lui-même. 2 vues plutôt de face, 2 plutôt de dos ; un seul angle par case, aucun doublon possible. Grille 2 × 2 sur image 2:1, poses largement espacées.
-2. **Actions** — 2 attaques + 1 sort, chacune vue DE FACE puis DE DOS (3 colonnes × 2 rangées), générées **en édition** de la planche vues (image source = planche vues) : le personnage réellement dessiné sert d'ancre, il ne peut pas changer d'une planche à l'autre. L'arme est verrouillée d'une planche à l'autre (ligne WEAPON LOCK + rappel final). Repli : génération normale (la carte d'identité est recopiée dans chaque prompt).
+1. **Vues** — 4 cases : repos de FACE ×2 (deux attitudes différentes) puis repos de DOS ×2, tout orienté vers la droite (le jeu retourne l'image pour la gauche). Grille 2 × 2 sur image 2:1, poses largement espacées. Génération normale.
+2. **Actions de face** — 3 attaques + 2 sorts + 1 marche (3 colonnes × 2 rangées), en **édition** de la planche vues : le personnage réellement dessiné sert d'ancre.
+3. **Actions de dos** — les mêmes 6 poses vues de dos, en édition de la planche vues. Une planche = un seul sens de vue (face et dos mélangés sur une même planche étaient dessinés de face). Facultative pour les monstres.
 
-Chaque prompt recopie la carte d'identité du personnage (`identites.py`) : aucune image à joindre. Ordre conseillé : 1) planche de style, 2) héros, 3) ennemis, 4) boss ; pour chaque personnage : vues puis actions. Prompt négatif : en bas de page.
+Les personnages **armés** ont l'arme écrite dans la première phrase, dans la carte d'identité, en fin de prompt et dans chaque pose ; les **créatures** reçoivent « UNARMED » (plus de torche inventée). Chaque prompt recopie la carte d'identité (`identites.py`) : aucune image à joindre. Ordre conseillé : 1) planche de style, 2) héros, 3) ennemis, 4) boss ; pour chaque personnage : vues, actions de face, actions de dos. Prompt négatif : en bas de page.
 
 ## 1. Planche de référence (style de la nation)
 
@@ -32,14 +33,15 @@ BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gr
 
 ### Invocateur — 10 poses
 
-2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `invocateur_vues.png` et `invocateur_actions.png` pour que l'Atelier les reconnaisse.
+3 planches : **vues** (génération normale), puis **actions de face** et **actions de dos** en **édition** de la planche vues (image source = planche vues de ce personnage : c'est ce qui garantit le même personnage). Personnage armé : l'arme est verrouillée dans chaque prompt. Fichiers dans `prototype/zimut/assets/sprites/players/` ; nomme tes images `invocateur_vues.png`, `invocateur_actions.png` et `invocateur_actions_dos.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 4 angles (`vues`)
+#### Planche 1 — Vues · 2 repos de face + 2 repos de dos (`vues`)
 
-Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
+Génération normale, aucune image à joindre. Tout est orienté vers la droite ; deux attitudes différentes par rangée.
 
 ```text
-Sprite sheet of ONE playable hero for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE playable hero: Invocateur, armed with: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side.
+The sheet contains EXACTLY 4 sprites of the SAME character: the top row shows it from the FRONT twice (two different relaxed stances), the bottom row shows it from BEHIND twice (two different relaxed stances). Same design, same outfit, same colors, same size in all 4 cells.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Invocateur (hero of the Brumes nation)
 - Hair: black hair (#15151C), medium length, messy bangs
@@ -51,37 +53,36 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no hood, no mask, no white hair.
-WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
-Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
+WEAPON: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side. It is held in the SAME hand and is clearly visible in all 4 cells: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+CELLS — follow the grid positions EXACTLY:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+Every sprite faces RIGHT (front-right on the top row, away toward the upper right on the bottom row): never facing left, never a pure side profile. The two sprites of a row are clearly different stances, never the same drawing twice.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-WEAPON CHECK: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side — the character visibly HOLDS it in every cell; hands are never empty.
-REMINDER: this is Invocateur: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side; black hair (#15151C), medium length, messy bangs; violet eyes (#9B6BFF), always open; long black coat with violet trims (#7A3FD0) and silver clasps; pale skin; black trousers; black boots with silver buckles. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no mask, no white hair.
+WEAPON CHECK: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side. It is held in the SAME hand and is clearly visible in every cell: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+REMINDER: this is Invocateur: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side; black hair (#15151C), medium length, messy bangs; violet eyes (#9B6BFF), always open; long black coat with violet trims (#7A3FD0) and silver clasps; pale skin; black trousers; black boots with silver buckles. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no mask, no white hair. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | 3/4 avant droite | `invocateur.png` |
-| 1-2 | 3/4 dos droite | `invocateur_back.png` |
-| 2-1 | 3/4 dos gauche | `invocateur_back_left.png` |
-| 2-2 | 3/4 avant gauche | `invocateur_face_left.png` |
+| 1-1 | repos de face | `invocateur.png` |
+| 1-2 | repos de face, variante | `invocateur_idle_2.png` |
+| 2-1 | repos de dos | `invocateur_back.png` |
+| 2-2 | repos de dos, variante | `invocateur_back_idle_2.png` |
 
-##### Édition corrective (arme manquante sur des cases)
+##### Édition corrective (arme manquante)
 
-Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+Si une case est fausse : édition avec la planche `vues` en image source. Ce prompt répète la structure des cases (haut = face, bas = dos) pour que l'éditeur n'aplatisse pas toutes les vues dans le même angle.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE playable hero, Invocateur, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+Image edit of a sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE playable hero: Invocateur, armed with: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side.
+SOURCE IMAGE: it shows this playable hero, Invocateur, 4 times: top row from the FRONT twice, bottom row from BEHIND twice, all facing right.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Invocateur (hero of the Brumes nation)
 - Hair: black hair (#15151C), medium length, messy bangs
@@ -94,24 +95,24 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no hood, no mask, no white hair.
 TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
-CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-WEAPON CHECK: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side — the character visibly HOLDS it in every cell; hands are never empty.
-CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+CRITICAL — KEEP THE VIEWS: the top row stays FRONT views and the bottom row stays BACK views; the two sprites of a row stay two different stances. Never redraw the whole sheet from a single angle:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+WEAPON: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side. It is held in the SAME hand and is clearly visible in every cell: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+CHANGE NOTHING ELSE: keep the exact same character, poses, sizes, outfit, hair, background and layout.
 BACKGROUND: keep the plain flat background of the source image.
-REMINDER: this is Invocateur: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side; black hair (#15151C), medium length, messy bangs; violet eyes (#9B6BFF), always open; long black coat with violet trims (#7A3FD0) and silver clasps; pale skin; black trousers; black boots with silver buckles. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no mask, no white hair.
+REMINDER: this is Invocateur: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side; black hair (#15151C), medium length, messy bangs; violet eyes (#9B6BFF), always open; long black coat with violet trims (#7A3FD0) and silver clasps; pale skin; black trousers; black boots with silver buckles. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no mask, no white hair. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
-#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
+#### Planche 2 — Actions de face · 3 attaques, 2 sorts, 1 marche (`actions`)
 
-**Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
+**Édition d'image** : source = la planche `vues` (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE playable hero, Invocateur, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from the FRONT of ONE playable hero: Invocateur, armed with: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side.
+SOURCE IMAGE: it shows this playable hero, Invocateur, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Invocateur (hero of the Brumes nation)
 - Hair: black hair (#15151C), medium length, messy bangs
@@ -123,32 +124,79 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no hood, no mask, no white hair.
-WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
-TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
+WEAPON: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side. It is held in the SAME hand and is clearly visible in all 6 poses: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose, facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. OVERHEAD STRIKE: staff raised high above the head, grimoire floating behind.
-2. SIDE SWING: staff swept horizontally, coat swirling.
-3. READING: grimoire floating open in front, pages turning, mint mist and violet spectral wisps rising from it.
-4. Seen from BEHIND, the SAME action as pose 1 — OVERHEAD STRIKE: staff raised high above the head, grimoire floating behind.
-5. Seen from BEHIND, the SAME action as pose 2 — SIDE SWING: staff swept horizontally, coat swirling.
-6. Seen from BEHIND, the SAME action as pose 3 — READING: grimoire floating open in front, pages turning, mint mist and violet spectral wisps rising from it.
-Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
+2. PALM BOLT: free arm stretched forward, a mint mist and violet spectral wisps bolt leaving the open palm.
+3. SIDE SWING: staff swept horizontally, coat swirling.
+4. READING: grimoire floating open in front, pages turning, mint mist and violet spectral wisps rising from it.
+5. SUMMONING CIRCLE: staff raised, a mint mist and violet spectral wisps circle drawn on the ground.
+6. WALK: mid-stride, one foot raised, arms swinging naturally, weapon held.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Invocateur: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side; black hair (#15151C), medium length, messy bangs; violet eyes (#9B6BFF), always open; long black coat with violet trims (#7A3FD0) and silver clasps; pale skin; black trousers; black boots with silver buckles. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no mask, no white hair.
+WEAPON CHECK: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side — visible in EVERY one of the 6 poses (held or used).
+REMINDER: this is Invocateur: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side; black hair (#15151C), medium length, messy bangs; violet eyes (#9B6BFF), always open; long black coat with violet trims (#7A3FD0) and silver clasps; pale skin; black trousers; black boots with silver buckles. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no mask, no white hair. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 — face | `invocateur_attack.png` |
-| 1-2 | attaque 2 — face | `invocateur_attack_2.png` |
-| 1-3 | sort — face | `invocateur_cast.png` |
-| 2-1 | attaque 1 — dos | `invocateur_attack_back.png` |
-| 2-2 | attaque 2 — dos | `invocateur_attack_2_back.png` |
-| 2-3 | sort — dos | `invocateur_cast_back.png` |
+| 1-1 | attaque 1 | `invocateur_attack.png` |
+| 1-2 | attaque 2 | `invocateur_attack_2.png` |
+| 1-3 | attaque 3 | `invocateur_attack_3.png` |
+| 2-1 | sort 1 | `invocateur_cast.png` |
+| 2-2 | sort 2 | `invocateur_cast_2.png` |
+| 2-3 | marche | `invocateur_walk.png` |
+
+#### Planche 3 — Actions de dos · mêmes 6 poses vues de dos (`actions_dos`)
+
+**Édition d'image**, source = la planche `vues`. 
+
+```text
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from BEHIND of ONE playable hero: Invocateur, armed with: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side.
+SOURCE IMAGE: it shows this playable hero, Invocateur, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged. Use the BACK views of the source as the reference for the back of the outfit.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Invocateur (hero of the Brumes nation)
+- Hair: black hair (#15151C), medium length, messy bangs
+- Eyes: violet eyes (#9B6BFF), always open
+- Skin: pale skin
+- Top: long black coat with violet trims (#7A3FD0) and silver clasps
+- Bottom: black trousers
+- Feet: black boots with silver buckles
+- Weapon: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no mask, no white hair.
+WEAPON: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side. It is held in the SAME hand and is clearly visible in all 6 poses: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile, never facing left; no face and no eyes visible in any pose.
+NATION PALETTE: black, deep violet, mist mint green, silver.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom:
+1. OVERHEAD STRIKE: staff raised high above the head, grimoire floating behind.
+2. PALM BOLT: free arm stretched forward, a mint mist and violet spectral wisps bolt leaving the open palm.
+3. SIDE SWING: staff swept horizontally, coat swirling.
+4. READING: grimoire floating open in front, pages turning, mint mist and violet spectral wisps rising from it.
+5. SUMMONING CIRCLE: staff raised, a mint mist and violet spectral wisps circle drawn on the ground.
+6. WALK: mid-stride, one foot raised, arms swinging naturally, weapon held.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side — visible in EVERY one of the 6 poses (held or used).
+REMINDER: this is Invocateur: spiked dark staff topped with a violet crystal, RIGHT hand; a dark grimoire floating at his left side; black hair (#15151C), medium length, messy bangs; violet eyes (#9B6BFF), always open; long black coat with violet trims (#7A3FD0) and silver clasps; pale skin; black trousers; black boots with silver buckles. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no mask, no white hair. Every sprite faces RIGHT (front or back 3/4), never left.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | attaque 1 — dos | `invocateur_back_attack.png` |
+| 1-2 | attaque 2 — dos | `invocateur_back_attack_2.png` |
+| 1-3 | attaque 3 — dos | `invocateur_back_attack_3.png` |
+| 2-1 | sort 1 — dos | `invocateur_back_cast.png` |
+| 2-2 | sort 2 — dos | `invocateur_back_cast_2.png` |
+| 2-3 | marche — dos | `invocateur_back_walk.png` |
 
 L'export Zimut de l'Atelier copie aussi le repos (case 1 de la planche vues) vers `nations/heros/invocateur.png`.
 
@@ -156,14 +204,15 @@ L'export Zimut de l'Atelier copie aussi le repos (case 1 de la planche vues) ver
 
 ### Brumeux — 10 poses
 
-2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `brumeux_vues.png` et `brumeux_actions.png` pour que l'Atelier les reconnaisse.
+3 planches : **vues** (génération normale), puis **actions de face** et **actions de dos** en **édition** de la planche vues (image source = planche vues de ce personnage : c'est ce qui garantit le même personnage). Créature **sans arme** : chaque prompt interdit tout objet tenu. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `brumeux_vues.png`, `brumeux_actions.png` et `brumeux_actions_dos.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 4 angles (`vues`)
+#### Planche 1 — Vues · 2 repos de face + 2 repos de dos (`vues`)
 
-Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
+Génération normale, aucune image à joindre. Tout est orienté vers la droite ; deux attitudes différentes par rangée.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Brumeux — an UNARMED creature (no weapon of any kind).
+The sheet contains EXACTLY 4 sprites of the SAME character: the top row shows it from the FRONT twice (two different relaxed stances), the bottom row shows it from BEHIND twice (two different relaxed stances). Same design, same outfit, same colors, same size in all 4 cells.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Brumeux (enemy of the Brumes nation)
 - Body: hulking mist beast with a fluffy lavender cloud body (#B8A8E0)
@@ -171,36 +220,36 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two thick cloud arms with small dark claws, no legs visible
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no weapon, no clothes, no teeth.
-WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
-Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 4 cells; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+CELLS — follow the grid positions EXACTLY:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+Every sprite faces RIGHT (front-right on the top row, away toward the upper right on the bottom row): never facing left, never a pure side profile. The two sprites of a row are clearly different stances, never the same drawing twice.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Brumeux: hulking mist beast with a fluffy lavender cloud body (#B8A8E0); no visible neck, two small glowing mint eyes (#9FFFD8); two thick cloud arms with small dark claws, no legs visible. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no weapon, no clothes, no teeth.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in every cell; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+REMINDER: this is Brumeux: hulking mist beast with a fluffy lavender cloud body (#B8A8E0); no visible neck, two small glowing mint eyes (#9FFFD8); two thick cloud arms with small dark claws, no legs visible. NO weapon and no held object, ever. Forbidden: no weapon, no clothes, no teeth. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | 3/4 avant droite | `brumeux.png` |
-| 1-2 | 3/4 dos droite | `brumeux_back.png` |
-| 2-1 | 3/4 dos gauche | `brumeux_back_left.png` |
-| 2-2 | 3/4 avant gauche | `brumeux_face_left.png` |
+| 1-1 | repos de face | `brumeux.png` |
+| 1-2 | repos de face, variante | `brumeux_idle_2.png` |
+| 2-1 | repos de dos | `brumeux_back.png` |
+| 2-2 | repos de dos, variante | `brumeux_back_idle_2.png` |
 
-##### Édition corrective (arme manquante sur des cases)
+##### Édition corrective (objet inventé dans les mains)
 
-Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+Si une case est fausse : édition avec la planche `vues` en image source. Ce prompt répète la structure des cases (haut = face, bas = dos) pour que l'éditeur n'aplatisse pas toutes les vues dans le même angle.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Brumeux, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+Image edit of a sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Brumeux — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Brumeux, 4 times: top row from the FRONT twice, bottom row from BEHIND twice, all facing right.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Brumeux (enemy of the Brumes nation)
 - Body: hulking mist beast with a fluffy lavender cloud body (#B8A8E0)
@@ -208,24 +257,25 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two thick cloud arms with small dark claws, no legs visible
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no weapon, no clothes, no teeth.
-TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
-CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+TASK: REMOVE every weapon, torch, tool or held object from the hands, claws or tail — this creature is unarmed. Nothing else changes.
+CRITICAL — KEEP THE VIEWS: the top row stays FRONT views and the bottom row stays BACK views; the two sprites of a row stay two different stances. Never redraw the whole sheet from a single angle:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in every cell; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+CHANGE NOTHING ELSE: keep the exact same character, poses, sizes, outfit, hair, background and layout.
 BACKGROUND: keep the plain flat background of the source image.
-REMINDER: this is Brumeux: hulking mist beast with a fluffy lavender cloud body (#B8A8E0); no visible neck, two small glowing mint eyes (#9FFFD8); two thick cloud arms with small dark claws, no legs visible. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no weapon, no clothes, no teeth.
+REMINDER: this is Brumeux: hulking mist beast with a fluffy lavender cloud body (#B8A8E0); no visible neck, two small glowing mint eyes (#9FFFD8); two thick cloud arms with small dark claws, no legs visible. NO weapon and no held object, ever. Forbidden: no weapon, no clothes, no teeth. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
-#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
+#### Planche 2 — Actions de face · 3 attaques, 2 sorts, 1 marche (`actions`)
 
-**Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
+**Édition d'image** : source = la planche `vues` (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Brumeux, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from the FRONT of ONE enemy monster: Brumeux — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Brumeux, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Brumeux (enemy of the Brumes nation)
 - Body: hulking mist beast with a fluffy lavender cloud body (#B8A8E0)
@@ -233,43 +283,85 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two thick cloud arms with small dark claws, no legs visible
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no weapon, no clothes, no teeth.
-WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
-TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 6 poses; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose, facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. RISE: body stretched tall upward, arms raised.
-2. SPIN: body whirling, mint mist and violet spectral wisps trail around it.
-3. HOVER: floating higher, mint mist and violet spectral wisps orbs circling.
-4. Seen from BEHIND, the SAME action as pose 1 — RISE: body stretched tall upward, arms raised.
-5. Seen from BEHIND, the SAME action as pose 2 — SPIN: body whirling, mint mist and violet spectral wisps trail around it.
-6. Seen from BEHIND, the SAME action as pose 3 — HOVER: floating higher, mint mist and violet spectral wisps orbs circling.
-Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
+2. LUNGE: body stretched forward, claws of mint mist and violet spectral wisps reaching out.
+3. SPIN: body whirling, mint mist and violet spectral wisps trail around it.
+4. HOVER: floating higher, mint mist and violet spectral wisps orbs circling.
+5. PULSE: arms spread, mint mist and violet spectral wisps pulsing outward.
+6. DRIFT: floating forward with the body tilted slightly ahead, a short trail behind.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Brumeux: hulking mist beast with a fluffy lavender cloud body (#B8A8E0); no visible neck, two small glowing mint eyes (#9FFFD8); two thick cloud arms with small dark claws, no legs visible. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no weapon, no clothes, no teeth.
+REMINDER: this is Brumeux: hulking mist beast with a fluffy lavender cloud body (#B8A8E0); no visible neck, two small glowing mint eyes (#9FFFD8); two thick cloud arms with small dark claws, no legs visible. NO weapon and no held object, ever. Forbidden: no weapon, no clothes, no teeth. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 — face | `brumeux_attack.png` |
-| 1-2 | attaque 2 — face | `brumeux_attack_2.png` |
-| 1-3 | sort — face | `brumeux_cast.png` |
-| 2-1 | attaque 1 — dos | `brumeux_attack_back.png` |
-| 2-2 | attaque 2 — dos | `brumeux_attack_2_back.png` |
-| 2-3 | sort — dos | `brumeux_cast_back.png` |
+| 1-1 | attaque 1 | `brumeux_attack.png` |
+| 1-2 | attaque 2 | `brumeux_attack_2.png` |
+| 1-3 | attaque 3 | `brumeux_attack_3.png` |
+| 2-1 | sort 1 | `brumeux_cast.png` |
+| 2-2 | sort 2 | `brumeux_cast_2.png` |
+| 2-3 | marche | `brumeux_walk.png` |
+
+#### Planche 3 — Actions de dos · mêmes 6 poses vues de dos (`actions_dos`)
+
+**Édition d'image**, source = la planche `vues`. **Facultative pour un monstre** : sans elle, le jeu utilise les poses de face. 
+
+```text
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from BEHIND of ONE enemy monster: Brumeux — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Brumeux, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories. The 6 new poses must show this SAME character, unchanged. Use the BACK views of the source as the reference for the back of the outfit.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Brumeux (enemy of the Brumes nation)
+- Body: hulking mist beast with a fluffy lavender cloud body (#B8A8E0)
+- Head: no visible neck, two small glowing mint eyes (#9FFFD8)
+- Details: two thick cloud arms with small dark claws, no legs visible
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no clothes, no teeth.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 6 poses; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile, never facing left; no face and no eyes visible in any pose.
+NATION PALETTE: black, deep violet, mist mint green, silver.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom:
+1. RISE: body stretched tall upward, arms raised.
+2. LUNGE: body stretched forward, claws of mint mist and violet spectral wisps reaching out.
+3. SPIN: body whirling, mint mist and violet spectral wisps trail around it.
+4. HOVER: floating higher, mint mist and violet spectral wisps orbs circling.
+5. PULSE: arms spread, mint mist and violet spectral wisps pulsing outward.
+6. DRIFT: floating forward with the body tilted slightly ahead, a short trail behind.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Brumeux: hulking mist beast with a fluffy lavender cloud body (#B8A8E0); no visible neck, two small glowing mint eyes (#9FFFD8); two thick cloud arms with small dark claws, no legs visible. NO weapon and no held object, ever. Forbidden: no weapon, no clothes, no teeth. Every sprite faces RIGHT (front or back 3/4), never left.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | attaque 1 — dos | `brumeux_back_attack.png` |
+| 1-2 | attaque 2 — dos | `brumeux_back_attack_2.png` |
+| 1-3 | attaque 3 — dos | `brumeux_back_attack_3.png` |
+| 2-1 | sort 1 — dos | `brumeux_back_cast.png` |
+| 2-2 | sort 2 — dos | `brumeux_back_cast_2.png` |
+| 2-3 | marche — dos | `brumeux_back_walk.png` |
 
 ### Gargouille — 10 poses
 
-2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `gargouille_vues.png` et `gargouille_actions.png` pour que l'Atelier les reconnaisse.
+3 planches : **vues** (génération normale), puis **actions de face** et **actions de dos** en **édition** de la planche vues (image source = planche vues de ce personnage : c'est ce qui garantit le même personnage). Créature **sans arme** : chaque prompt interdit tout objet tenu. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `gargouille_vues.png`, `gargouille_actions.png` et `gargouille_actions_dos.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 4 angles (`vues`)
+#### Planche 1 — Vues · 2 repos de face + 2 repos de dos (`vues`)
 
-Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
+Génération normale, aucune image à joindre. Tout est orienté vers la droite ; deux attitudes différentes par rangée.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Gargouille — an UNARMED creature (no weapon of any kind).
+The sheet contains EXACTLY 4 sprites of the SAME character: the top row shows it from the FRONT twice (two different relaxed stances), the bottom row shows it from BEHIND twice (two different relaxed stances). Same design, same outfit, same colors, same size in all 4 cells.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Gargouille (enemy of the Brumes nation)
 - Body: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture
@@ -277,36 +369,36 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: stone bat wings, long tail with an arrow tip
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no weapon, no color other than grey stone and mint eyes.
-WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
-Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 4 cells; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+CELLS — follow the grid positions EXACTLY:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+Every sprite faces RIGHT (front-right on the top row, away toward the upper right on the bottom row): never facing left, never a pure side profile. The two sprites of a row are clearly different stances, never the same drawing twice.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Gargouille: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture; small horns, pointed ears, fanged mouth, glowing mint eyes (#9FFFD8); stone bat wings, long tail with an arrow tip. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no weapon, no color other than grey stone and mint eyes.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in every cell; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+REMINDER: this is Gargouille: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture; small horns, pointed ears, fanged mouth, glowing mint eyes (#9FFFD8); stone bat wings, long tail with an arrow tip. NO weapon and no held object, ever. Forbidden: no weapon, no color other than grey stone and mint eyes. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | 3/4 avant droite | `gargouille.png` |
-| 1-2 | 3/4 dos droite | `gargouille_back.png` |
-| 2-1 | 3/4 dos gauche | `gargouille_back_left.png` |
-| 2-2 | 3/4 avant gauche | `gargouille_face_left.png` |
+| 1-1 | repos de face | `gargouille.png` |
+| 1-2 | repos de face, variante | `gargouille_idle_2.png` |
+| 2-1 | repos de dos | `gargouille_back.png` |
+| 2-2 | repos de dos, variante | `gargouille_back_idle_2.png` |
 
-##### Édition corrective (arme manquante sur des cases)
+##### Édition corrective (objet inventé dans les mains)
 
-Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+Si une case est fausse : édition avec la planche `vues` en image source. Ce prompt répète la structure des cases (haut = face, bas = dos) pour que l'éditeur n'aplatisse pas toutes les vues dans le même angle.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Gargouille, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+Image edit of a sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Gargouille — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Gargouille, 4 times: top row from the FRONT twice, bottom row from BEHIND twice, all facing right.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Gargouille (enemy of the Brumes nation)
 - Body: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture
@@ -314,24 +406,25 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: stone bat wings, long tail with an arrow tip
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no weapon, no color other than grey stone and mint eyes.
-TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
-CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+TASK: REMOVE every weapon, torch, tool or held object from the hands, claws or tail — this creature is unarmed. Nothing else changes.
+CRITICAL — KEEP THE VIEWS: the top row stays FRONT views and the bottom row stays BACK views; the two sprites of a row stay two different stances. Never redraw the whole sheet from a single angle:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in every cell; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+CHANGE NOTHING ELSE: keep the exact same character, poses, sizes, outfit, hair, background and layout.
 BACKGROUND: keep the plain flat background of the source image.
-REMINDER: this is Gargouille: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture; small horns, pointed ears, fanged mouth, glowing mint eyes (#9FFFD8); stone bat wings, long tail with an arrow tip. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no weapon, no color other than grey stone and mint eyes.
+REMINDER: this is Gargouille: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture; small horns, pointed ears, fanged mouth, glowing mint eyes (#9FFFD8); stone bat wings, long tail with an arrow tip. NO weapon and no held object, ever. Forbidden: no weapon, no color other than grey stone and mint eyes. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
-#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
+#### Planche 2 — Actions de face · 3 attaques, 2 sorts, 1 marche (`actions`)
 
-**Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
+**Édition d'image** : source = la planche `vues` (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Gargouille, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from the FRONT of ONE enemy monster: Gargouille — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Gargouille, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Gargouille (enemy of the Brumes nation)
 - Body: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture
@@ -339,43 +432,85 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: stone bat wings, long tail with an arrow tip
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no weapon, no color other than grey stone and mint eyes.
-WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
-TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 6 poses; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose, facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. REARING: standing up on the hind legs, front claws raised high.
-2. SIDE SWIPE: head and claws swept to the side, body twisted.
-3. HOWL: head raised to the sky, mint mist and violet spectral wisps gathering around the body.
-4. Seen from BEHIND, the SAME action as pose 1 — REARING: standing up on the hind legs, front claws raised high.
-5. Seen from BEHIND, the SAME action as pose 2 — SIDE SWIPE: head and claws swept to the side, body twisted.
-6. Seen from BEHIND, the SAME action as pose 3 — HOWL: head raised to the sky, mint mist and violet spectral wisps gathering around the body.
-Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
+2. POUNCE: body stretched forward in the air, jaws open.
+3. SIDE SWIPE: head and claws swept to the side, body twisted.
+4. HOWL: head raised to the sky, mint mist and violet spectral wisps gathering around the body.
+5. ROAR: mouth wide open, mint mist and violet spectral wisps burst in front of the head.
+6. WALK: mid-stride, one front paw raised, body moving forward.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Gargouille: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture; small horns, pointed ears, fanged mouth, glowing mint eyes (#9FFFD8); stone bat wings, long tail with an arrow tip. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no weapon, no color other than grey stone and mint eyes.
+REMINDER: this is Gargouille: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture; small horns, pointed ears, fanged mouth, glowing mint eyes (#9FFFD8); stone bat wings, long tail with an arrow tip. NO weapon and no held object, ever. Forbidden: no weapon, no color other than grey stone and mint eyes. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 — face | `gargouille_attack.png` |
-| 1-2 | attaque 2 — face | `gargouille_attack_2.png` |
-| 1-3 | sort — face | `gargouille_cast.png` |
-| 2-1 | attaque 1 — dos | `gargouille_attack_back.png` |
-| 2-2 | attaque 2 — dos | `gargouille_attack_2_back.png` |
-| 2-3 | sort — dos | `gargouille_cast_back.png` |
+| 1-1 | attaque 1 | `gargouille_attack.png` |
+| 1-2 | attaque 2 | `gargouille_attack_2.png` |
+| 1-3 | attaque 3 | `gargouille_attack_3.png` |
+| 2-1 | sort 1 | `gargouille_cast.png` |
+| 2-2 | sort 2 | `gargouille_cast_2.png` |
+| 2-3 | marche | `gargouille_walk.png` |
+
+#### Planche 3 — Actions de dos · mêmes 6 poses vues de dos (`actions_dos`)
+
+**Édition d'image**, source = la planche `vues`. **Facultative pour un monstre** : sans elle, le jeu utilise les poses de face. 
+
+```text
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from BEHIND of ONE enemy monster: Gargouille — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Gargouille, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories. The 6 new poses must show this SAME character, unchanged. Use the BACK views of the source as the reference for the back of the outfit.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Gargouille (enemy of the Brumes nation)
+- Body: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture
+- Head: small horns, pointed ears, fanged mouth, glowing mint eyes (#9FFFD8)
+- Details: stone bat wings, long tail with an arrow tip
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no weapon, no color other than grey stone and mint eyes.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 6 poses; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile, never facing left; no face and no eyes visible in any pose.
+NATION PALETTE: black, deep violet, mist mint green, silver.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom:
+1. REARING: standing up on the hind legs, front claws raised high.
+2. POUNCE: body stretched forward in the air, jaws open.
+3. SIDE SWIPE: head and claws swept to the side, body twisted.
+4. HOWL: head raised to the sky, mint mist and violet spectral wisps gathering around the body.
+5. ROAR: mouth wide open, mint mist and violet spectral wisps burst in front of the head.
+6. WALK: mid-stride, one front paw raised, body moving forward.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Gargouille: grey stone gargoyle (#7A7A82) crouching on two legs, cracked stone texture; small horns, pointed ears, fanged mouth, glowing mint eyes (#9FFFD8); stone bat wings, long tail with an arrow tip. NO weapon and no held object, ever. Forbidden: no weapon, no color other than grey stone and mint eyes. Every sprite faces RIGHT (front or back 3/4), never left.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | attaque 1 — dos | `gargouille_back_attack.png` |
+| 1-2 | attaque 2 — dos | `gargouille_back_attack_2.png` |
+| 1-3 | attaque 3 — dos | `gargouille_back_attack_3.png` |
+| 2-1 | sort 1 — dos | `gargouille_back_cast.png` |
+| 2-2 | sort 2 — dos | `gargouille_back_cast_2.png` |
+| 2-3 | marche — dos | `gargouille_back_walk.png` |
 
 ### Liche des brumes — 10 poses
 
-2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `liche_des_brumes_vues.png` et `liche_des_brumes_actions.png` pour que l'Atelier les reconnaisse.
+3 planches : **vues** (génération normale), puis **actions de face** et **actions de dos** en **édition** de la planche vues (image source = planche vues de ce personnage : c'est ce qui garantit le même personnage). Personnage armé : l'arme est verrouillée dans chaque prompt. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `liche_des_brumes_vues.png`, `liche_des_brumes_actions.png` et `liche_des_brumes_actions_dos.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 4 angles (`vues`)
+#### Planche 1 — Vues · 2 repos de face + 2 repos de dos (`vues`)
 
-Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
+Génération normale, aucune image à joindre. Tout est orienté vers la droite ; deux attitudes différentes par rangée.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Liche des brumes, armed with: crooked wooden staff, RIGHT hand.
+The sheet contains EXACTLY 4 sprites of the SAME character: the top row shows it from the FRONT twice (two different relaxed stances), the bottom row shows it from BEHIND twice (two different relaxed stances). Same design, same outfit, same colors, same size in all 4 cells.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Liche des brumes (enemy of the Brumes nation)
 - Body: thin skeletal lich, bony grey hands
@@ -384,37 +519,36 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: crooked wooden staff, RIGHT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no crown, no armor, no hair.
-WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
-Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
+WEAPON: crooked wooden staff, RIGHT hand. It is held in the SAME hand and is clearly visible in all 4 cells: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+CELLS — follow the grid positions EXACTLY:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+Every sprite faces RIGHT (front-right on the top row, away toward the upper right on the bottom row): never facing left, never a pure side profile. The two sprites of a row are clearly different stances, never the same drawing twice.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-WEAPON CHECK: crooked wooden staff, RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
-REMINDER: this is Liche des brumes: crooked wooden staff, RIGHT hand; tattered violet robes (#6A4A9A) with torn edges; thin skeletal lich, bony grey hands; skull face with glowing mint eyes (#9FFFD8) under a tattered hood. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no crown, no armor, no hair.
+WEAPON CHECK: crooked wooden staff, RIGHT hand. It is held in the SAME hand and is clearly visible in every cell: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+REMINDER: this is Liche des brumes: crooked wooden staff, RIGHT hand; tattered violet robes (#6A4A9A) with torn edges; thin skeletal lich, bony grey hands; skull face with glowing mint eyes (#9FFFD8) under a tattered hood. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no crown, no armor, no hair. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | 3/4 avant droite | `liche_des_brumes.png` |
-| 1-2 | 3/4 dos droite | `liche_des_brumes_back.png` |
-| 2-1 | 3/4 dos gauche | `liche_des_brumes_back_left.png` |
-| 2-2 | 3/4 avant gauche | `liche_des_brumes_face_left.png` |
+| 1-1 | repos de face | `liche_des_brumes.png` |
+| 1-2 | repos de face, variante | `liche_des_brumes_idle_2.png` |
+| 2-1 | repos de dos | `liche_des_brumes_back.png` |
+| 2-2 | repos de dos, variante | `liche_des_brumes_back_idle_2.png` |
 
-##### Édition corrective (arme manquante sur des cases)
+##### Édition corrective (arme manquante)
 
-Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+Si une case est fausse : édition avec la planche `vues` en image source. Ce prompt répète la structure des cases (haut = face, bas = dos) pour que l'éditeur n'aplatisse pas toutes les vues dans le même angle.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Liche des brumes, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+Image edit of a sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Liche des brumes, armed with: crooked wooden staff, RIGHT hand.
+SOURCE IMAGE: it shows this enemy monster, Liche des brumes, 4 times: top row from the FRONT twice, bottom row from BEHIND twice, all facing right.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Liche des brumes (enemy of the Brumes nation)
 - Body: thin skeletal lich, bony grey hands
@@ -424,24 +558,24 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no crown, no armor, no hair.
 TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
-CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-WEAPON CHECK: crooked wooden staff, RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
-CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+CRITICAL — KEEP THE VIEWS: the top row stays FRONT views and the bottom row stays BACK views; the two sprites of a row stay two different stances. Never redraw the whole sheet from a single angle:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+WEAPON: crooked wooden staff, RIGHT hand. It is held in the SAME hand and is clearly visible in every cell: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+CHANGE NOTHING ELSE: keep the exact same character, poses, sizes, outfit, hair, background and layout.
 BACKGROUND: keep the plain flat background of the source image.
-REMINDER: this is Liche des brumes: crooked wooden staff, RIGHT hand; tattered violet robes (#6A4A9A) with torn edges; thin skeletal lich, bony grey hands; skull face with glowing mint eyes (#9FFFD8) under a tattered hood. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no crown, no armor, no hair.
+REMINDER: this is Liche des brumes: crooked wooden staff, RIGHT hand; tattered violet robes (#6A4A9A) with torn edges; thin skeletal lich, bony grey hands; skull face with glowing mint eyes (#9FFFD8) under a tattered hood. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no crown, no armor, no hair. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
-#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
+#### Planche 2 — Actions de face · 3 attaques, 2 sorts, 1 marche (`actions`)
 
-**Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
+**Édition d'image** : source = la planche `vues` (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Liche des brumes, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from the FRONT of ONE enemy monster: Liche des brumes, armed with: crooked wooden staff, RIGHT hand.
+SOURCE IMAGE: it shows this enemy monster, Liche des brumes, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Liche des brumes (enemy of the Brumes nation)
 - Body: thin skeletal lich, bony grey hands
@@ -450,43 +584,88 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: crooked wooden staff, RIGHT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no crown, no armor, no hair.
-WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
-TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
+WEAPON: crooked wooden staff, RIGHT hand. It is held in the SAME hand and is clearly visible in all 6 poses: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose, facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. OVERHEAD STRIKE: staff raised high above the head with both hands.
-2. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
-3. FOCUS: eyes closed, staff held vertically in front of the face, mint mist and violet spectral wisps orb at the top.
-4. Seen from BEHIND, the SAME action as pose 1 — OVERHEAD STRIKE: staff raised high above the head with both hands.
-5. Seen from BEHIND, the SAME action as pose 2 — SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
-6. Seen from BEHIND, the SAME action as pose 3 — FOCUS: eyes closed, staff held vertically in front of the face, mint mist and violet spectral wisps orb at the top.
-Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
+2. THRUST: body leaning forward, staff tip pushed far ahead with a short mint mist and violet spectral wisps spark.
+3. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
+4. FOCUS: eyes closed, staff held vertically in front of the face, mint mist and violet spectral wisps orb at the top.
+5. INVOCATION: staff raised high with both hands, mint mist and violet spectral wisps swirling above the head.
+6. WALK: mid-stride, one foot raised, arms swinging naturally, weapon held.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Liche des brumes: crooked wooden staff, RIGHT hand; tattered violet robes (#6A4A9A) with torn edges; thin skeletal lich, bony grey hands; skull face with glowing mint eyes (#9FFFD8) under a tattered hood. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no crown, no armor, no hair.
+WEAPON CHECK: crooked wooden staff, RIGHT hand — visible in EVERY one of the 6 poses (held or used).
+REMINDER: this is Liche des brumes: crooked wooden staff, RIGHT hand; tattered violet robes (#6A4A9A) with torn edges; thin skeletal lich, bony grey hands; skull face with glowing mint eyes (#9FFFD8) under a tattered hood. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no crown, no armor, no hair. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 — face | `liche_des_brumes_attack.png` |
-| 1-2 | attaque 2 — face | `liche_des_brumes_attack_2.png` |
-| 1-3 | sort — face | `liche_des_brumes_cast.png` |
-| 2-1 | attaque 1 — dos | `liche_des_brumes_attack_back.png` |
-| 2-2 | attaque 2 — dos | `liche_des_brumes_attack_2_back.png` |
-| 2-3 | sort — dos | `liche_des_brumes_cast_back.png` |
+| 1-1 | attaque 1 | `liche_des_brumes_attack.png` |
+| 1-2 | attaque 2 | `liche_des_brumes_attack_2.png` |
+| 1-3 | attaque 3 | `liche_des_brumes_attack_3.png` |
+| 2-1 | sort 1 | `liche_des_brumes_cast.png` |
+| 2-2 | sort 2 | `liche_des_brumes_cast_2.png` |
+| 2-3 | marche | `liche_des_brumes_walk.png` |
+
+#### Planche 3 — Actions de dos · mêmes 6 poses vues de dos (`actions_dos`)
+
+**Édition d'image**, source = la planche `vues`. **Facultative pour un monstre** : sans elle, le jeu utilise les poses de face. 
+
+```text
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from BEHIND of ONE enemy monster: Liche des brumes, armed with: crooked wooden staff, RIGHT hand.
+SOURCE IMAGE: it shows this enemy monster, Liche des brumes, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged. Use the BACK views of the source as the reference for the back of the outfit.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Liche des brumes (enemy of the Brumes nation)
+- Body: thin skeletal lich, bony grey hands
+- Head: skull face with glowing mint eyes (#9FFFD8) under a tattered hood
+- Top: tattered violet robes (#6A4A9A) with torn edges
+- Weapon: crooked wooden staff, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no crown, no armor, no hair.
+WEAPON: crooked wooden staff, RIGHT hand. It is held in the SAME hand and is clearly visible in all 6 poses: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile, never facing left; no face and no eyes visible in any pose.
+NATION PALETTE: black, deep violet, mist mint green, silver.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom:
+1. OVERHEAD STRIKE: staff raised high above the head with both hands.
+2. THRUST: body leaning forward, staff tip pushed far ahead with a short mint mist and violet spectral wisps spark.
+3. SIDE SWING: staff swept horizontally at shoulder height, torso twisted.
+4. FOCUS: eyes closed, staff held vertically in front of the face, mint mist and violet spectral wisps orb at the top.
+5. INVOCATION: staff raised high with both hands, mint mist and violet spectral wisps swirling above the head.
+6. WALK: mid-stride, one foot raised, arms swinging naturally, weapon held.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: crooked wooden staff, RIGHT hand — visible in EVERY one of the 6 poses (held or used).
+REMINDER: this is Liche des brumes: crooked wooden staff, RIGHT hand; tattered violet robes (#6A4A9A) with torn edges; thin skeletal lich, bony grey hands; skull face with glowing mint eyes (#9FFFD8) under a tattered hood. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no crown, no armor, no hair. Every sprite faces RIGHT (front or back 3/4), never left.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | attaque 1 — dos | `liche_des_brumes_back_attack.png` |
+| 1-2 | attaque 2 — dos | `liche_des_brumes_back_attack_2.png` |
+| 1-3 | attaque 3 — dos | `liche_des_brumes_back_attack_3.png` |
+| 2-1 | sort 1 — dos | `liche_des_brumes_back_cast.png` |
+| 2-2 | sort 2 — dos | `liche_des_brumes_back_cast_2.png` |
+| 2-3 | marche — dos | `liche_des_brumes_back_walk.png` |
 
 ### Fantôme — 10 poses
 
-2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `fantome_vues.png` et `fantome_actions.png` pour que l'Atelier les reconnaisse.
+3 planches : **vues** (génération normale), puis **actions de face** et **actions de dos** en **édition** de la planche vues (image source = planche vues de ce personnage : c'est ce qui garantit le même personnage). Créature **sans arme** : chaque prompt interdit tout objet tenu. Fichiers dans `prototype/zimut/assets/sprites/nations/ennemis/brumes/` ; nomme tes images `fantome_vues.png`, `fantome_actions.png` et `fantome_actions_dos.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 4 angles (`vues`)
+#### Planche 1 — Vues · 2 repos de face + 2 repos de dos (`vues`)
 
-Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
+Génération normale, aucune image à joindre. Tout est orienté vers la droite ; deux attitudes différentes par rangée.
 
 ```text
-Sprite sheet of ONE enemy monster for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Fantôme — an UNARMED creature (no weapon of any kind).
+The sheet contains EXACTLY 4 sprites of the SAME character: the top row shows it from the FRONT twice (two different relaxed stances), the bottom row shows it from BEHIND twice (two different relaxed stances). Same design, same outfit, same colors, same size in all 4 cells.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Fantôme (enemy of the Brumes nation)
 - Body: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs
@@ -494,36 +673,36 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two small rounded arms
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no sheet with holes, no chains, no weapon.
-WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
-Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 4 cells; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+CELLS — follow the grid positions EXACTLY:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+Every sprite faces RIGHT (front-right on the top row, away toward the upper right on the bottom row): never facing left, never a pure side profile. The two sprites of a row are clearly different stances, never the same drawing twice.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Fantôme: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs; mischievous face: big dark eyes, tongue out; two small rounded arms. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no sheet with holes, no chains, no weapon.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in every cell; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+REMINDER: this is Fantôme: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs; mischievous face: big dark eyes, tongue out; two small rounded arms. NO weapon and no held object, ever. Forbidden: no sheet with holes, no chains, no weapon. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | 3/4 avant droite | `fantome.png` |
-| 1-2 | 3/4 dos droite | `fantome_back.png` |
-| 2-1 | 3/4 dos gauche | `fantome_back_left.png` |
-| 2-2 | 3/4 avant gauche | `fantome_face_left.png` |
+| 1-1 | repos de face | `fantome.png` |
+| 1-2 | repos de face, variante | `fantome_idle_2.png` |
+| 2-1 | repos de dos | `fantome_back.png` |
+| 2-2 | repos de dos, variante | `fantome_back_idle_2.png` |
 
-##### Édition corrective (arme manquante sur des cases)
+##### Édition corrective (objet inventé dans les mains)
 
-Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+Si une case est fausse : édition avec la planche `vues` en image source. Ce prompt répète la structure des cases (haut = face, bas = dos) pour que l'éditeur n'aplatisse pas toutes les vues dans le même angle.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Fantôme, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+Image edit of a sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE enemy monster: Fantôme — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Fantôme, 4 times: top row from the FRONT twice, bottom row from BEHIND twice, all facing right.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Fantôme (enemy of the Brumes nation)
 - Body: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs
@@ -531,24 +710,25 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two small rounded arms
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no sheet with holes, no chains, no weapon.
-TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
-CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+TASK: REMOVE every weapon, torch, tool or held object from the hands, claws or tail — this creature is unarmed. Nothing else changes.
+CRITICAL — KEEP THE VIEWS: the top row stays FRONT views and the bottom row stays BACK views; the two sprites of a row stay two different stances. Never redraw the whole sheet from a single angle:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in every cell; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+CHANGE NOTHING ELSE: keep the exact same character, poses, sizes, outfit, hair, background and layout.
 BACKGROUND: keep the plain flat background of the source image.
-REMINDER: this is Fantôme: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs; mischievous face: big dark eyes, tongue out; two small rounded arms. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no sheet with holes, no chains, no weapon.
+REMINDER: this is Fantôme: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs; mischievous face: big dark eyes, tongue out; two small rounded arms. NO weapon and no held object, ever. Forbidden: no sheet with holes, no chains, no weapon. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
-#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
+#### Planche 2 — Actions de face · 3 attaques, 2 sorts, 1 marche (`actions`)
 
-**Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
+**Édition d'image** : source = la planche `vues` (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE enemy monster, Fantôme, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from the FRONT of ONE enemy monster: Fantôme — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Fantôme, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Fantôme (enemy of the Brumes nation)
 - Body: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs
@@ -556,45 +736,87 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Details: two small rounded arms
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no sheet with holes, no chains, no weapon.
-WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
-TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 6 poses; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose, facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. RISE: body stretched tall upward, arms raised.
-2. SPIN: body whirling, mint mist and violet spectral wisps trail around it.
-3. HOVER: floating higher, mint mist and violet spectral wisps orbs circling.
-4. Seen from BEHIND, the SAME action as pose 1 — RISE: body stretched tall upward, arms raised.
-5. Seen from BEHIND, the SAME action as pose 2 — SPIN: body whirling, mint mist and violet spectral wisps trail around it.
-6. Seen from BEHIND, the SAME action as pose 3 — HOVER: floating higher, mint mist and violet spectral wisps orbs circling.
-Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
+2. LUNGE: body stretched forward, claws of mint mist and violet spectral wisps reaching out.
+3. SPIN: body whirling, mint mist and violet spectral wisps trail around it.
+4. HOVER: floating higher, mint mist and violet spectral wisps orbs circling.
+5. PULSE: arms spread, mint mist and violet spectral wisps pulsing outward.
+6. DRIFT: floating forward with the body tilted slightly ahead, a short trail behind.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Fantôme: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs; mischievous face: big dark eyes, tongue out; two small rounded arms. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no sheet with holes, no chains, no weapon.
+REMINDER: this is Fantôme: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs; mischievous face: big dark eyes, tongue out; two small rounded arms. NO weapon and no held object, ever. Forbidden: no sheet with holes, no chains, no weapon. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 — face | `fantome_attack.png` |
-| 1-2 | attaque 2 — face | `fantome_attack_2.png` |
-| 1-3 | sort — face | `fantome_cast.png` |
-| 2-1 | attaque 1 — dos | `fantome_attack_back.png` |
-| 2-2 | attaque 2 — dos | `fantome_attack_2_back.png` |
-| 2-3 | sort — dos | `fantome_cast_back.png` |
+| 1-1 | attaque 1 | `fantome_attack.png` |
+| 1-2 | attaque 2 | `fantome_attack_2.png` |
+| 1-3 | attaque 3 | `fantome_attack_3.png` |
+| 2-1 | sort 1 | `fantome_cast.png` |
+| 2-2 | sort 2 | `fantome_cast_2.png` |
+| 2-3 | marche | `fantome_walk.png` |
+
+#### Planche 3 — Actions de dos · mêmes 6 poses vues de dos (`actions_dos`)
+
+**Édition d'image**, source = la planche `vues`. **Facultative pour un monstre** : sans elle, le jeu utilise les poses de face. 
+
+```text
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from BEHIND of ONE enemy monster: Fantôme — an UNARMED creature (no weapon of any kind).
+SOURCE IMAGE: it shows this enemy monster, Fantôme, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories. The 6 new poses must show this SAME character, unchanged. Use the BACK views of the source as the reference for the back of the outfit.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Fantôme (enemy of the Brumes nation)
+- Body: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs
+- Head: mischievous face: big dark eyes, tongue out
+- Details: two small rounded arms
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no sheet with holes, no chains, no weapon.
+UNARMED: this creature has NO weapon, tool, torch, staff or held object of any kind in all 6 poses; it fights only with its own body (claws, teeth, fists, tail, magic). Never add an item.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile, never facing left; no face and no eyes visible in any pose.
+NATION PALETTE: black, deep violet, mist mint green, silver.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom:
+1. RISE: body stretched tall upward, arms raised.
+2. LUNGE: body stretched forward, claws of mint mist and violet spectral wisps reaching out.
+3. SPIN: body whirling, mint mist and violet spectral wisps trail around it.
+4. HOVER: floating higher, mint mist and violet spectral wisps orbs circling.
+5. PULSE: arms spread, mint mist and violet spectral wisps pulsing outward.
+6. DRIFT: floating forward with the body tilted slightly ahead, a short trail behind.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+REMINDER: this is Fantôme: pale blue ghost (#BFE3FF) with a round head-body and a wavy tail, no legs; mischievous face: big dark eyes, tongue out; two small rounded arms. NO weapon and no held object, ever. Forbidden: no sheet with holes, no chains, no weapon. Every sprite faces RIGHT (front or back 3/4), never left.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | attaque 1 — dos | `fantome_back_attack.png` |
+| 1-2 | attaque 2 — dos | `fantome_back_attack_2.png` |
+| 1-3 | attaque 3 — dos | `fantome_back_attack_3.png` |
+| 2-1 | sort 1 — dos | `fantome_back_cast.png` |
+| 2-2 | sort 2 — dos | `fantome_back_cast_2.png` |
+| 2-3 | marche — dos | `fantome_back_walk.png` |
 
 ## 4. Boss
 
 ### Ombrelis le Brumeux — 10 poses
 
-2 planches : **vues** (4 angles en quarts de tour), puis **actions** (2 attaques + 1 sort, chacune vue de face puis de dos). La planche actions se génère **en édition** de la planche vues (image source = planche vues de ce personnage) : c'est ce qui garantit le même personnage et la même arme sur les deux planches. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `brumes_vues.png` et `brumes_actions.png` pour que l'Atelier les reconnaisse.
+3 planches : **vues** (génération normale), puis **actions de face** et **actions de dos** en **édition** de la planche vues (image source = planche vues de ce personnage : c'est ce qui garantit le même personnage). Personnage armé : l'arme est verrouillée dans chaque prompt. Fichiers dans `prototype/zimut/assets/sprites/nations/boss/` ; nomme tes images `brumes_vues.png`, `brumes_actions.png` et `brumes_actions_dos.png` pour que l'Atelier les reconnaisse.
 
-#### Planche 1 — Vues · 4 angles (`vues`)
+#### Planche 1 — Vues · 2 repos de face + 2 repos de dos (`vues`)
 
-Génération normale, aucune image à joindre. La caméra ne bouge pas : le personnage tourne sur lui-même par quarts de tour — 2 vues plutôt de face, 2 plutôt de dos.
+Génération normale, aucune image à joindre. Tout est orienté vers la droite ; deux attitudes différentes par rangée.
 
 ```text
-Sprite sheet of ONE final boss for a chibi isometric tactical RPG. The same character appears 4 times: the SAME relaxed idle pose (standing calm, weapon held in hand in every cell, eyes open) seen from 4 viewing angles. The CAMERA never moves: it stays fixed in front of the character while the character TURNS IN PLACE by exact quarter turns (90 degrees) between cells — same distance, same height, same framing, only the character rotates. The 4 sprites have EXACTLY the same size: same scale, same height, same proportions in every cell.
+Sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE final boss: Ombrelis le Brumeux, armed with: skull-topped staff surrounded by mint mist, RIGHT hand.
+The sheet contains EXACTLY 4 sprites of the SAME character: the top row shows it from the FRONT twice (two different relaxed stances), the bottom row shows it from BEHIND twice (two different relaxed stances). Same design, same outfit, same colors, same size in all 4 cells.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ombrelis le Brumeux (boss of the Brumes nation)
 - Body: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A)
@@ -602,37 +824,36 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: skull-topped staff surrounded by mint mist, RIGHT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no hood, no sword.
-WEAPON LOCK: the character HOLDS its weapon in its hand in EVERY cell — the hands are NEVER empty, the weapon is always visible on the drawing. The weapon and every accessory (quiver, scarf, cape, floating items) are IDENTICAL in all 4 cells: same shape, same color, same details, same hand as written in the ID card. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop, hide or omit it. The weapon matches the character's class.
-Keep exactly the same design in every cell: same outfit, colors, proportions. Only the viewing angle changes from cell to cell.
+WEAPON: skull-topped staff surrounded by mint mist, RIGHT hand. It is held in the SAME hand and is clearly visible in all 4 cells: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 4 poses arranged as 2 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like four separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its quarter of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own quarter, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The sheet contains EXACTLY 4 sprites — one per cell of the 2 x 2 grid, never more, no extra or duplicated row. The 4 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
-VIEWS, one per cell — follow the grid positions EXACTLY (successive quarter turns of the character, the camera stays fixed; the character's design and weapon never change; never a pure side profile):
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-All 4 cells show ONE character in ONE pose under 4 angles: TOP-LEFT and BOTTOM-RIGHT rather from the front, TOP-RIGHT and BOTTOM-LEFT rather from the back. Same height, same stance, same weapon held in the same hand everywhere. The pose does not change, only the angle — each turn is exactly a quarter turn, no more, no less.
+CELLS — follow the grid positions EXACTLY:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+Every sprite faces RIGHT (front-right on the top row, away toward the upper right on the bottom row): never facing left, never a pure side profile. The two sprites of a row are clearly different stances, never the same drawing twice.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat white background (#FFFFFF), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-WEAPON CHECK: skull-topped staff surrounded by mint mist, RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
-REMINDER: this is Ombrelis le Brumeux: skull-topped staff surrounded by mint mist, RIGHT hand; dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A); spiked crown, gaunt pale face, glowing mint eyes. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no sword.
+WEAPON CHECK: skull-topped staff surrounded by mint mist, RIGHT hand. It is held in the SAME hand and is clearly visible in every cell: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+REMINDER: this is Ombrelis le Brumeux: skull-topped staff surrounded by mint mist, RIGHT hand; dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A); spiked crown, gaunt pale face, glowing mint eyes. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no sword. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Vue | Fichier |
 |---|---|---|
-| 1-1 | 3/4 avant droite | `brumes.png` |
-| 1-2 | 3/4 dos droite | `brumes_back.png` |
-| 2-1 | 3/4 dos gauche | `brumes_back_left.png` |
-| 2-2 | 3/4 avant gauche | `brumes_face_left.png` |
+| 1-1 | repos de face | `brumes.png` |
+| 1-2 | repos de face, variante | `brumes_idle_2.png` |
+| 2-1 | repos de dos | `brumes_back.png` |
+| 2-2 | repos de dos, variante | `brumes_back_idle_2.png` |
 
-##### Édition corrective (arme manquante sur des cases)
+##### Édition corrective (arme manquante)
 
-Si l'arme manque sur certaines cases de la planche générée : édition avec la planche `vues` en image source. Ce prompt RÉPÈTE la liste des angles — une édition corrective qui ne la répète pas aplatit toutes les vues dans le même angle.
+Si une case est fausse : édition avec la planche `vues` en image source. Ce prompt répète la structure des cases (haut = face, bas = dos) pour que l'éditeur n'aplatisse pas toutes les vues dans le même angle.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE final boss, Ombrelis le Brumeux, several times, in the SAME relaxed idle pose seen from DIFFERENT viewing angles (successive quarter turns of the character, the camera fixed).
+Image edit of a sprite sheet for a chibi isometric tactical RPG showing 4 idle poses of ONE final boss: Ombrelis le Brumeux, armed with: skull-topped staff surrounded by mint mist, RIGHT hand.
+SOURCE IMAGE: it shows this final boss, Ombrelis le Brumeux, 4 times: top row from the FRONT twice, bottom row from BEHIND twice, all facing right.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ombrelis le Brumeux (boss of the Brumes nation)
 - Body: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A)
@@ -641,24 +862,24 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no hood, no sword.
 TASK: fix the sprites so that EVERY sprite visibly HOLDS its weapon in the correct hand — add the weapon where it is missing, correct the hand if it is held wrong. Nothing else changes.
-CRITICAL — KEEP THE VIEWING ANGLES: every sprite keeps its own DIFFERENT viewing angle; the angles must NOT become identical. Never redraw the whole sheet from a single angle. The character turns in place by exact quarter turns between sprites:
-1. TOP-LEFT cell: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible.
-2. TOP-RIGHT cell: 3/4 BACK view: the character has made ONE exact quarter turn to the right — seen from behind, back of the head and right shoulder visible, facing away toward the upper right; no face, no eyes; NOT a pure side profile (a side profile means the turn went too far).
-3. BOTTOM-LEFT cell: 3/4 BACK view: the character has made TWO exact quarter turns — seen from behind, back of the head and left shoulder visible, facing away toward the upper left; no face, no eyes; NOT a pure side profile.
-4. BOTTOM-RIGHT cell: 3/4 FRONT view: the character has made THREE exact quarter turns — faces the viewer and turns slightly to the left (face, chest and left side visible), facing front-left; both eyes visible.
-WEAPON CHECK: skull-topped staff surrounded by mint mist, RIGHT hand — the character visibly HOLDS it in every cell; hands are never empty.
-CHANGE NOTHING ELSE: keep the exact same characters, poses, sizes, outfits, hair, background and layout. Only add the missing weapon in the correct hand.
+CRITICAL — KEEP THE VIEWS: the top row stays FRONT views and the bottom row stays BACK views; the two sprites of a row stay two different stances. Never redraw the whole sheet from a single angle:
+1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm.
+2. TOP-RIGHT cell: FRONT idle, VARIANT: the same 3/4 front view facing front-right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly tilted, free hand or weapon moved a little — it must not be a copy of cell 1.
+3. BOTTOM-LEFT cell: BACK idle: 3/4 BACK view, seen from behind, turned toward the upper right (back of the head and right shoulder visible); we see the BACK of the head: no face, no eyes; not a pure side profile.
+4. BOTTOM-RIGHT cell: BACK idle, VARIANT: the same 3/4 back view toward the upper right, but a clearly DIFFERENT relaxed stance — weight on the other leg, head slightly turned, free hand or weapon moved a little — it must not be a copy of cell 3; no face, no eyes.
+WEAPON: skull-topped staff surrounded by mint mist, RIGHT hand. It is held in the SAME hand and is clearly visible in every cell: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+CHANGE NOTHING ELSE: keep the exact same character, poses, sizes, outfit, hair, background and layout.
 BACKGROUND: keep the plain flat background of the source image.
-REMINDER: this is Ombrelis le Brumeux: skull-topped staff surrounded by mint mist, RIGHT hand; dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A); spiked crown, gaunt pale face, glowing mint eyes. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no sword.
+REMINDER: this is Ombrelis le Brumeux: skull-topped staff surrounded by mint mist, RIGHT hand; dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A); spiked crown, gaunt pale face, glowing mint eyes. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no sword. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
-#### Planche 2 — Actions · 2 attaques + 1 sort, face et dos (`actions`)
+#### Planche 2 — Actions de face · 3 attaques, 2 sorts, 1 marche (`actions`)
 
-**Édition d'image** : source = la planche `vues` ci-dessus (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
+**Édition d'image** : source = la planche `vues` (l'image générée à l'étape précédente). Si ton outil ne permet pas l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.
 
 ```text
-Image edit for a chibi isometric tactical RPG sprite sheet.
-SOURCE IMAGE: it shows ONE final boss, Ombrelis le Brumeux, in 4 different views. Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from the FRONT of ONE final boss: Ombrelis le Brumeux, armed with: skull-topped staff surrounded by mint mist, RIGHT hand.
+SOURCE IMAGE: it shows this final boss, Ombrelis le Brumeux, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged.
 CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
 - Name: Ombrelis le Brumeux (boss of the Brumes nation)
 - Body: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A)
@@ -666,43 +887,98 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Weapon: skull-topped staff surrounded by mint mist, RIGHT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
 - FORBIDDEN variations: no hood, no sword.
-WEAPON LOCK: the weapon and every accessory stay EXACTLY as in the source image in all 6 poses: same shape, same color, same details, same hand. The weapon is held or used in EVERY pose — a cell without the weapon is wrong. Never replace the weapon with another weapon (a bow stays a bow, a staff stays a staff), never change its color or shape, never drop or hide it.
-TASK: replace the 4 views with 6 ACTION poses: 3 different actions, each shown TWICE — once seen from the front, once seen from behind. TOP ROW (poses 1-3), all in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose. BOTTOM ROW (poses 4-6), all in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile.
+WEAPON: skull-topped staff surrounded by mint mist, RIGHT hand. It is held in the SAME hand and is clearly visible in all 6 poses: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose, facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: black, deep violet, mist mint green, silver.
 STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
 LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
 POSES, left to right, top to bottom:
 1. OVERHEAD STRIKE: staff raised high above the head, grimoire floating behind.
-2. SIDE SWING: staff swept horizontally, coat swirling.
-3. READING: grimoire floating open in front, pages turning, mint mist and violet spectral wisps rising from it.
-4. Seen from BEHIND, the SAME action as pose 1 — OVERHEAD STRIKE: staff raised high above the head, grimoire floating behind.
-5. Seen from BEHIND, the SAME action as pose 2 — SIDE SWING: staff swept horizontally, coat swirling.
-6. Seen from BEHIND, the SAME action as pose 3 — READING: grimoire floating open in front, pages turning, mint mist and violet spectral wisps rising from it.
-Poses 4-6 repeat poses 1-3 from behind: same action, same energy, same weapon, only the viewing angle changes. The 3 actions MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose in the same viewing angle; if two poses look alike, change one.
+2. PALM BOLT: free arm stretched forward, a mint mist and violet spectral wisps bolt leaving the open palm.
+3. SIDE SWING: staff swept horizontally, coat swirling.
+4. READING: grimoire floating open in front, pages turning, mint mist and violet spectral wisps rising from it.
+5. SUMMONING CIRCLE: staff raised, a mint mist and violet spectral wisps circle drawn on the ground.
+6. WALK: mid-stride, one foot raised, arms swinging naturally, weapon held.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
 EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
-REMINDER: this is Ombrelis le Brumeux: skull-topped staff surrounded by mint mist, RIGHT hand; dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A); spiked crown, gaunt pale face, glowing mint eyes. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no sword.
+WEAPON CHECK: skull-topped staff surrounded by mint mist, RIGHT hand — visible in EVERY one of the 6 poses (held or used).
+REMINDER: this is Ombrelis le Brumeux: skull-topped staff surrounded by mint mist, RIGHT hand; dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A); spiked crown, gaunt pale face, glowing mint eyes. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no sword. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Pose | Fichier |
 |---|---|---|
-| 1-1 | attaque 1 — face | `brumes_attack.png` |
-| 1-2 | attaque 2 — face | `brumes_attack_2.png` |
-| 1-3 | sort — face | `brumes_cast.png` |
-| 2-1 | attaque 1 — dos | `brumes_attack_back.png` |
-| 2-2 | attaque 2 — dos | `brumes_attack_2_back.png` |
-| 2-3 | sort — dos | `brumes_cast_back.png` |
+| 1-1 | attaque 1 | `brumes_attack.png` |
+| 1-2 | attaque 2 | `brumes_attack_2.png` |
+| 1-3 | attaque 3 | `brumes_attack_3.png` |
+| 2-1 | sort 1 | `brumes_cast.png` |
+| 2-2 | sort 2 | `brumes_cast_2.png` |
+| 2-3 | marche | `brumes_walk.png` |
+
+#### Planche 3 — Actions de dos · mêmes 6 poses vues de dos (`actions_dos`)
+
+**Édition d'image**, source = la planche `vues`. 
+
+```text
+Image edit — sprite sheet for a chibi isometric tactical RPG showing 6 action poses seen from BEHIND of ONE final boss: Ombrelis le Brumeux, armed with: skull-topped staff surrounded by mint mist, RIGHT hand.
+SOURCE IMAGE: it shows this final boss, Ombrelis le Brumeux, in 4 idle views (top row from the front, bottom row from behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, proportions, accessories, weapon in the same hand. The 6 new poses must show this SAME character, unchanged. Use the BACK views of the source as the reference for the back of the outfit.
+CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER change between images:
+- Name: Ombrelis le Brumeux (boss of the Brumes nation)
+- Body: dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A)
+- Head: spiked crown, gaunt pale face, glowing mint eyes
+- Weapon: skull-topped staff surrounded by mint mist, RIGHT hand
+- Nothing else: do not add clothing, colors or accessories that are not listed.
+- FORBIDDEN variations: no hood, no sword.
+WEAPON: skull-topped staff surrounded by mint mist, RIGHT hand. It is held in the SAME hand and is clearly visible in all 6 poses: never missing, never swapped for another weapon (a bow stays a bow, a staff stays a staff), never a different shape or color.
+TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile, never facing left; no face and no eyes visible in any pose.
+NATION PALETTE: black, deep violet, mist mint green, silver.
+STYLE: Ankama style (Dofus, Waven, Wakfu): chibi proportions with a very big head (about 40% of total height), short round body, big hands, small rounded feet, large expressive eyes, soft rounded shapes everywhere. Clean bold dark-brown outlines (thicker on the outer silhouette, thinner inside), flat colors with 2-3 tone cel shading and very few gradients, crisp material details (metal shine, fabric folds, leather straps), saturated but harmonious colors, strong readable silhouette at small size. Soft key light from the upper left, subtle pale mint rim light on the right edge.
+LAYOUT: 6 poses arranged as 3 columns x 2 rows on a wide 2:1 image (as large as possible, e.g. 2048x1024), like six separate stickers floating on the background. Each pose occupies at most 55% of the width and height of its sixth of the image and is centered in it, so that there is a wide empty space, especially horizontally, between any two poses; the character AND its weapon, cape, hair, tail and effects stay inside its own sixth, nothing touches or overlaps a neighbouring pose. Long weapons, capes and wide effects are drawn smaller or tucked in so they fit. The 6 sprites have EXACTLY the same size: same scale, same height in pixels, same proportions — if one sprite looks bigger or smaller than the others it is wrong. Feet on the same ground line in each row. No frames, boxes, borders or dividing lines between poses, no floor, no grid on the ground.
+POSES, left to right, top to bottom:
+1. OVERHEAD STRIKE: staff raised high above the head, grimoire floating behind.
+2. PALM BOLT: free arm stretched forward, a mint mist and violet spectral wisps bolt leaving the open palm.
+3. SIDE SWING: staff swept horizontally, coat swirling.
+4. READING: grimoire floating open in front, pages turning, mint mist and violet spectral wisps rising from it.
+5. SUMMONING CIRCLE: staff raised, a mint mist and violet spectral wisps circle drawn on the ground.
+6. WALK: mid-stride, one foot raised, arms swinging naturally, weapon held.
+The 6 poses MUST be clearly different from each other: different arm, leg and weapon positions, different body angle and height. Never repeat or copy a pose; if two poses look alike, change one.
+EFFECTS: mint mist and violet spectral wisps, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
+BACKGROUND: keep the plain flat background of the source image (Pure flat white background (#FFFFFF)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
+WEAPON CHECK: skull-topped staff surrounded by mint mist, RIGHT hand — visible in EVERY one of the 6 poses (held or used).
+REMINDER: this is Ombrelis le Brumeux: skull-topped staff surrounded by mint mist, RIGHT hand; dark necromancer in black spiked armor with a violet tattered cloak (#5E3A8A); spiked crown, gaunt pale face, glowing mint eyes. The WEAPON never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no hood, no sword. Every sprite faces RIGHT (front or back 3/4), never left.
+```
+
+| Case | Pose | Fichier |
+|---|---|---|
+| 1-1 | attaque 1 — dos | `brumes_back_attack.png` |
+| 1-2 | attaque 2 — dos | `brumes_back_attack_2.png` |
+| 1-3 | attaque 3 — dos | `brumes_back_attack_3.png` |
+| 2-1 | sort 1 — dos | `brumes_back_cast.png` |
+| 2-2 | sort 2 — dos | `brumes_back_cast_2.png` |
+| 2-3 | marche — dos | `brumes_back_walk.png` |
 
 ## Prompt négatif
 
-**Planches vues** (la même pose vue sous 4 angles est voulue, les vues vers la gauche aussi — le négatif commun est adapté) :
+**Personnages armés — planches vues** :
 
 ```text
-checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, one sprite bigger or smaller than the others, size changing between cells, more than 4 sprites, extra sprites, duplicated row of sprites, all sprites in the same viewing angle, all sprites in the same orientation, empty hands, character without its weapon in a cell, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, different character between cells, pose changing between cells, different outfit between angles, weapon changing shape, weapon changing color, weapon replaced by another weapon, missing weapon, missing accessories, realistic proportions, small head
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses in the same viewing angle, identical poses side by side, the same pose copied twice in the same view, front and back mixed inside one cell, weapon changing shape, weapon changing color, weapon replaced by another weapon, missing weapon, missing accessories, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, different character between poses, realistic proportions, small head, more than 4 sprites, extra sprites, duplicated row of sprites, one sprite bigger or smaller than the others, size changing between cells
 ```
 
-**Planches actions et planche de style** (les actions répétées de dos en rangée 2 sont voulues : seules les répétitions sous le même angle sont interdites) :
+**Personnages armés — planches actions et planche de style** :
 
 ```text
 checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses in the same viewing angle, identical poses side by side, the same pose copied twice in the same view, front and back mixed inside one cell, weapon changing shape, weapon changing color, weapon replaced by another weapon, missing weapon, missing accessories, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, different character between poses, realistic proportions, small head
+```
+
+**Créatures sans arme (Salamandre, golems, bêtes…) — planches vues** :
+
+```text
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses in the same viewing angle, identical poses side by side, the same pose copied twice in the same view, front and back mixed inside one cell, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, extra objects, different character between poses, realistic proportions, small head, more than 4 sprites, extra sprites, duplicated row of sprites, one sprite bigger or smaller than the others, size changing between cells, weapon, torch, staff, sword, bow, held object, tool, item in the hands or claws
+```
+
+**Créatures sans arme — planches actions** :
+
+```text
+checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses in the same viewing angle, identical poses side by side, the same pose copied twice in the same view, front and back mixed inside one cell, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, extra objects, different character between poses, realistic proportions, small head, weapon, torch, staff, sword, bow, held object, tool, item in the hands or claws
 ```

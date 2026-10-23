@@ -4,56 +4,45 @@ Prompts prêts à copier dans un générateur d'images pour refaire **tous les s
 
 | Fichier | Contenu |
 |---|---|
-| `nations/01_sylvestre.md` … `10_rouages.md` | pour chaque nation : planche de style + 2 planches par personnage (vues, actions) — héros, 4 ennemis, boss, 10 poses chacun |
-| `familiers.md` | 12 familiers / invocations, même format (2 planches, 10 poses) |
+| `nations/01_sylvestre.md` … `10_rouages.md` | pour chaque nation : planche de style + 3 planches par personnage (vues, actions de face, actions de dos) — héros, 4 ennemis, boss |
+| `familiers.md` | 12 familiers / invocations, même format (3 planches) |
 | `mecanismes.md` | objets fixes : arbre, racines, pilier, muraille, faille, cristal d'ambre, balise, bombe, tourelle, balise de transposition |
-| `generer_prompts.py` | source de tout le reste : descriptions, palettes, poses (158 prompts) |
+| `generer_prompts.py` | source de tout le reste : descriptions, palettes, poses (230 prompts) |
 | `identites.py` | **cartes d'identité** des personnages (couleurs exactes de chaque partie, variations interdites) |
 
 Les héros, ennemis, boss et familiers viennent de `scripts/Nations.gd`, `assets/sprites/nations/README.md` et `SPRITES_A_FOURNIR.md`.
 
-## V43 : 2 planches par personnage, 4 vues en quarts de tour, arme verrouillée
+## V44 : 3 planches par personnage, une seule direction de vue par planche, armes réservées aux armés
 
-Les planches V39 (6 angles + 6 actions) ont donné une vraie cohérence de design entre les deux planches d'un
-personnage, mais deux défauts restaient : **doublons** (les vues « face » et « 3/4 avant » sortaient trop
-proches) et **arme/accessoires qui changent** d'une planche à l'autre (le chasseur perdait son arc). Le
-format V40 corrige, la V41 ajoute trois verrous après le premier test visuel (chasseur : 1 sprite démesuré,
-arc absent de 3 cases sur 4, un angle surviré en vue de côté, angles mélangés entre cases), la **V42**
-ajoute la ligne **« WEAPON CHECK »** après le second test (l'arc manquait encore sur la plupart des cases
-malgré le WEAPON LOCK générique) : l'arme EXACTE de la carte d'identité est recopiée en toute fin de prompt,
-zone la plus pondérée par les générateurs. La **V43** corrige le troisième test : l'édition corrective
-« ajoute l'arc » avait **aplati toutes les vues dans le même angle** (les 10 sprites alignés en 3/4 face
-droite) — chaque fiche personnage inclut désormais un **prompt d'édition corrective qui RÉPÈTE la liste
-complète des angles** (« CRITICAL — KEEP THE VIEWING ANGLES… never redraw the whole sheet from a single
-angle »), et la planche exige **EXACTEMENT 4 sprites** (négatif « more than 4 sprites, all sprites in the
-same viewing angle » : l'éditeur rendait 10 sprites en rangées dupliquées).
+Retour de l'essai Brasier (héros, 3 monstres, boss) : ce qui allait de travers vient des prompts, pas du hasard.
 
-1. **Planche `vues`** — un seul personnage, la même pose de repos, la **caméra ne bouge pas** : le
-   personnage tourne sur lui-même par **quarts de tour**, d'où 4 angles bien distincts : 3/4 avant droite,
-   3/4 dos droite, 3/4 dos gauche, 3/4 avant gauche — 2 vues plutôt de face, 2 plutôt de dos. Grille 2 × 2
-   sur image 2:1, poses largement espacées. **Génération normale.** V41 : chaque angle est **ancré à sa
-   position de case** (TOP-LEFT, TOP-RIGHT, BOTTOM-LEFT, BOTTOM-RIGHT) avec le **décompte des quarts de
-   tour** (« ONE exact quarter turn », « NOT a pure side profile »).
-2. **Planche `actions`** — 2 attaques + 1 sort, chacune vue **de face puis de dos** (3 colonnes × 2
-   rangées) : les vues de dos libérées par la disparition des doublons servent aux actions.
-   **Générée en édition** de la planche vues (image source = la planche `vues`) : le générateur repart du
-   personnage réellement dessiné, il ne peut plus dériver. Repli : génération normale, la carte d'identité
-   est recopiée dans chaque prompt.
-3. **Arme verrouillée** — ligne « WEAPON LOCK » dans les deux prompts : jamais remplacer l'arme (un arc
-   reste un arc) et **V41 : l'arme est TENUE EN MAIN dans chaque case, les mains ne sont jamais vides**.
-   **V42 : ligne « WEAPON CHECK »** recopiant l'arme exacte de la carte d'identité en toute fin de prompt.
-   Négatifs dédiés (« weapon replaced by another weapon, missing weapon, empty hands… ») et rappel final
-   qui commence par l'arme.
-4. **Taille verrouillée (V41)** — « The 4 sprites have EXACTLY the same size: same scale, same height in
-   pixels, same proportions » + négatif « one sprite bigger or smaller than the others ». L'arme de la
-   classe ne doit jamais changer (chasseur = arc).
-
-| Personnage | Planches | Poses |
+| Constat sur les planches | Cause dans les prompts V40-V43 | Correction V44 |
 |---|---|---|
-| Héros, ennemis, boss, familiers | `vues` (4 angles) · `actions` (2 attaques + 1 sort, face et dos) | 10 |
+| **Torches inventées** pour la Salamandre et le Dévoreur ; le Chasseur attaque avec un bâton | l'ordre générique « WEAPON LOCK : mains jamais vides, l'arme de la classe » s'appliquait aussi aux **créatures sans arme** | l'arme n'existe que si la carte d'identité en a une : elle ouvre le prompt (« armed with… »), est reprise dans chaque pose et en fin de prompt. Les 31 créatures reçoivent **UNARMED** (+ négatif sans mot « weapon ») |
+| **Doublons** : vues de face et de dos répétées 2 fois, poses identiques | 4 « quarts de tour » : le générateur ne sait pas tourner un personnage et retombe sur face/dos/face/dos | on le demande tel quel : **2 repos de face (deux attitudes) + 2 repos de dos**, tout orienté à droite |
+| **Orientation** : vues de profil, personnages tournés vers la gauche | angles « dos gauche » / « avant gauche », que le jeu n'utilise de toute façon pas (il retourne l'image) | plus aucune vue vers la gauche ; « every sprite faces RIGHT » dans le prompt et le rappel final |
+| **Actions de dos jamais obtenues** (6 cases toutes de face) | face et dos sur la même planche : le générateur choisit un seul sens | **2 planches d'actions** : de face, puis de dos (mêmes 6 poses). Facultative pour les monstres |
+| Noms de fichiers inutilisables | `_attack_back`, `_back_left`, `_face_left` : le jeu lit `_back_attack`, `_idle_2`, `_walk`… | noms alignés sur `EntityView.gd` ; `_attack_3`, `_cast_2`, `_walk` et `_idle_2` ajoutés (le jeu les anime) |
+| Cartes d'identité en désaccord avec les dessins retenus | Salamandre « jamais sur deux pattes », Dévoreur « quatre pattes » alors que les planches validées sont debout | cartes du Chasseur, de la Salamandre et du Dévoreur mises à jour d'après les dessins intégrés |
 
-Les poses d'action viennent des archétypes de `generer_prompts.py` ; les vues de gauche existent en
-propre, le jeu n'a plus besoin de retourner l'image pour elles.
+Format V44 :
+
+1. **Planche `vues`** (génération normale, 2 × 2) : haut = repos de face ×2, bas = repos de dos ×2 →
+   `<id>.png`, `<id>_idle_2.png`, `<id>_back.png`, `<id>_back_idle_2.png`.
+2. **Planche `actions` de face** (en édition de la planche vues, 3 × 2) : 3 attaques, 2 sorts, 1 marche →
+   `_attack`, `_attack_2`, `_attack_3`, `_cast`, `_cast_2`, `_walk`.
+3. **Planche `actions_dos`** (en édition, 3 × 2) : les mêmes 6 poses vues de dos → `_back_attack`…`_back_walk`.
+4. **Édition corrective** (si une case est fausse) : répète la structure des cases ; pour une créature,
+   elle **retire** l'objet inventé au lieu d'ajouter une arme.
+
+Découpe : `tools/couper_planche.py` (fond blanc, gris ou rose, ombres, zones enfermées, doublons) puis
+`tools/integrer_brasier.py` donne un exemple de table case → pose. `python3 prompts_sprites/verifier_prompts.py`
+contrôle les 230 prompts (arme en première phrase, UNARMED, noms de fichiers, pas de vue vers la gauche).
+
+## V43 (historique) : 4 vues en quarts de tour, arme verrouillée
+
+Format abandonné en V44 (voir ci-dessus) ; les verrous d'arme V41-V42 (WEAPON CHECK, mains jamais vides) sont conservés
+pour les personnages armés, la taille verrouillée aussi (« EXACTLY the same size »).
 
 ## V38 : le même personnage, sans image jointe — les cartes d'identité
 
@@ -78,10 +67,10 @@ toutes les planches suivantes — et la planche `actions` éditée depuis la pla
 1. **Planche de style de la nation** (section 1 de chaque fichier, facultative) : palette et matières de toute la nation.
 2. **Planche `vues`** : copie le prompt tel quel, carte d'identité comprise. Recommence jusqu'à ce qu'elle te
    plaise : la planche `actions` en découle.
-3. **Planche `actions`** : donne à l'outil d'édition la planche `vues` comme image source, avec le prompt
-   `actions`. Si l'outil n'édite pas, génère-la normalement.
-4. **Nom du fichier** : `<id>_vues.png` et `<id>_actions.png`, par exemple `chasseur_vues.png`,
-   `chasseur_actions.png`. L'Atelier (SpriteBuilder) reconnaît alors le personnage et la planche tout seul.
+3. **Planches `actions` (face puis dos)** : donne à l'outil d'édition la planche `vues` comme image source, avec
+   chaque prompt. Si l'outil n'édite pas, génère-les normalement. Dos facultatif pour les monstres.
+4. **Nom du fichier** : `<id>_vues.png`, `<id>_actions.png` et `<id>_actions_dos.png`, par exemple
+   `chasseur_vues.png`, `chasseur_actions.png`. L'Atelier (SpriteBuilder) reconnaît alors le personnage et la planche tout seul.
 5. **Atelier Sprites** : importe, vérifie les cadres, regarde l'alerte « Poses en double » (bouton « Exclure
    les doublons »), puis exporte le zip et décompresse-le à la racine du dépôt Zimut. Ouvre une fois le
    projet dans Godot pour l'import.
@@ -95,16 +84,16 @@ toutes les planches suivantes — et la planche `actions` éditée depuis la pla
 
 ## Pièges observés sur les planches précédentes
 
-| Problème | Conséquence | Ce que le format V43 impose |
+| Problème | Conséquence | Ce que le format V44 impose |
 |---|---|---|
-| Même pose recopiée dans plusieurs cases | animations figées | 4 angles en quarts de tour par planche (un seul angle par case) ; actions aux silhouettes décrites une par une |
+| Même pose recopiée dans plusieurs cases | animations figées | 2 repos de face + 2 repos de dos, deux attitudes différentes par rangée ; actions aux silhouettes décrites une par une |
 | Personnage différent d'une planche à l'autre | héros méconnaissable | planche `actions` **éditée depuis** la planche `vues` + carte d'identité recopiée partout |
 | Arme ou accessoire différent d'une planche à l'autre | le chasseur perd son arc | ligne « WEAPON LOCK » dans les deux prompts, rappel final qui commence par l'arme, négatif « weapon replaced by another weapon, missing weapon » |
 | Arme absente d'une case (mains vides) | le chasseur combat à mains nues | « the character HOLDS its weapon in EVERY cell — hands are NEVER empty » + ligne « WEAPON CHECK » avec l'arme exacte en fin de prompt + négatif « empty hands » |
 | Un sprite plus grand ou plus petit que les autres | échelle cassée à la découpe | « The 4 sprites have EXACTLY the same size: same scale, same height in pixels » + négatif « one sprite bigger or smaller than the others » |
-| Angles mélangés entre les cases, vue de côté | le jeu reçoit la mauvaise vue | position de case écrite dans la liste (TOP-LEFT, TOP-RIGHT…) + décompte « ONE/TWO/THREE exact quarter turns » + « NOT a pure side profile » |
+| Angles mélangés entre les cases, vue de côté | le jeu reçoit la mauvaise vue | position de case écrite dans la liste (TOP-LEFT…) + « every sprite faces RIGHT » + « NOT a pure side profile » (plus de quarts de tour) |
 | Plus de sprites que prévu (10 au lieu de 4, rangées dupliquées) | découpe désalignée | « The sheet contains EXACTLY 4 sprites » + négatif « more than 4 sprites, duplicated row of sprites » |
-| Édition corrective qui aplatit toutes les vues dans le même angle | plus d'angles du tout sur la planche | le prompt d'édition corrective **RÉPÈTE la liste complète des angles** + « CRITICAL — KEEP THE VIEWING ANGLES… never redraw the whole sheet from a single angle » |
+| Édition corrective qui aplatit toutes les vues dans le même angle | plus d'angles du tout sur la planche | le prompt d'édition corrective **répète la structure des cases** (haut = face, bas = dos) + « never redraw the whole sheet from a single angle » |
 | Poses qui se touchent (épées, effets) | un seul cadre pour deux poses | autocollants ≤ 55 % de leur sixième d'image, larges vides, **surtout horizontaux** |
 | Cadres dessinés, grille isométrique au sol | tout est relié, découpe impossible | « no frames, no grid on the ground », négatif « frames, isometric floor grid » |
 | Face et dos mélangés dans une case | le jeu ne sait pas quelle vue utiliser | un seul angle par case, listé explicitement |
@@ -113,18 +102,9 @@ toutes les planches suivantes — et la planche `actions` éditée depuis la pla
 
 ## Prompt négatif
 
-**Planches `actions` et planches de style** :
-
-```text
-checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, facing left, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, duplicate poses in the same viewing angle, identical poses side by side, the same pose copied twice in the same view, front and back mixed inside one cell, weapon changing shape, weapon changing color, weapon replaced by another weapon, missing weapon, missing accessories, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, different character between poses, realistic proportions, small head
-```
-
-**Planches `vues`** (la même pose vue sous 4 angles est voulue, vues vers la gauche comprises — le négatif
-commun est adapté en bas de chaque fichier nation) :
-
-```text
-checkerboard, transparency grid, text, letters, labels, numbers, watermark, signature, overlapping characters, touching poses, cropped limbs, character cut by the cell edge, effects crossing into another cell, weapon crossing into another cell, side profile view, inconsistent scale, different outfit between cells, weapon switching hands, extra arms, extra fingers, blurry smoke, semi-transparent effects, soft glow halo, floor, cast shadow, gradient background, photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, isometric floor grid, tiles, one sprite bigger or smaller than the others, size changing between cells, more than 4 sprites, extra sprites, duplicated row of sprites, all sprites in the same viewing angle, all sprites in the same orientation, empty hands, character without its weapon in a cell, closed eyes, looking up at the sky, different hair color, different eye color, different hairstyle, new clothing pieces, weapon drawn alone without the character, extra objects, different character between cells, pose changing between cells, different outfit between angles, weapon changing shape, weapon changing color, weapon replaced by another weapon, missing weapon, missing accessories, realistic proportions, small head
-```
+Trois jeux de négatifs sont générés **en bas de chaque fichier nation** : personnages armés (vues / actions) et
+**créatures sans arme** (vues / actions, sans aucun mot « weapon » : un négatif qui nomme une arme peut la faire
+apparaître).
 
 ## Modifier ou régénérer
 
