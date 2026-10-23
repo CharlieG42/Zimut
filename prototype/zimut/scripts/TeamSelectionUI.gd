@@ -398,6 +398,7 @@ func _class_texture(classe: String) -> Texture2D:
 ## Retour à la fenêtre des parties (sauvegarde déjà écrite à chaque modification).
 func _on_back() -> void:
 	back_requested.emit()
+	PlayTimer.flush()
 	if GameManager.active_slot >= 0 and not GameManager.active_save.is_empty():
 		ProgressionManager.write_save(GameManager.active_slot, GameManager.active_save)
 	get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")

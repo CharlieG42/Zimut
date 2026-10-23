@@ -1513,6 +1513,7 @@ func _persist() -> void:
 	GameManager.active_slot = _slot
 
 func _back_to_save() -> void:
+	PlayTimer.flush()
 	_persist()
 	get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
 

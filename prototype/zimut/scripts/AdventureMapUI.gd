@@ -1842,6 +1842,7 @@ func _on_cities_revealed(city_ids: Array) -> void:
 
 
 func _back_to_save() -> void:
+	PlayTimer.flush()
 	manager.persist()
 	get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
 

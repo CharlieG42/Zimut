@@ -27,6 +27,8 @@ var _current: Dictionary = {}     # sauvegarde affichée dans le détail
 var _current_slot: int = -1
 
 func _ready() -> void:
+	# V46 : écran de menu — le temps de jeu de la partie active est en pause.
+	PlayTimer.flush()
 	_build()
 	# À l'ouverture : afficher directement les détails de la partie en cours
 	# (la plus récente), sans attendre un clic sur un slot.
@@ -70,6 +72,7 @@ func _build() -> void:
 	back.add_theme_stylebox_override("normal", _flat())
 	back.add_theme_stylebox_override("hover", _flat())
 	back.pressed.connect(func() -> void:
+		PlayTimer.flush()
 		GameManager.active_save = {}
 		GameManager.active_slot = -1
 		get_tree().change_scene_to_file("res://scenes/MainMenu.tscn"))
@@ -237,14 +240,17 @@ func refresh() -> void:
 		used[int(sv["id"])] = sv
 	for slot: int in range(ProgressionManager.MAX_SAVES):
 		var btn := Button.new()
-		btn.custom_minimum_size = Vector2(0, 76 if _is_compact() else 88)
+		btn.custom_minimum_size = Vector2(0, 100 if _is_compact() else 116)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		var is_used: bool = used.has(slot)
 		if is_used:
 			var sv: Dictionary = used[slot]
-			btn.text = "✦  PARTIE %d\n%s\nNiv. ennemis %d  ·  %d victoires" % [slot + 1, sv["name"], sv["level"], sv["victories"]]
+			# V46 : temps de jeu total affiché dans la vignette de la partie.
+			btn.text = "⚔  PARTIE %d\n%s\nNiv. ennemis %d  ·  %d victoires\n⏱ %s" % [
+				slot + 1, sv["name"], sv["level"], sv["victories"],
+				ProgressionManager.format_playtime(int(sv.get("playtime", 0)))]
 			btn.add_theme_stylebox_override("normal", _flat_bg(COL_SLOT_USED_BG, COL_BORDER, 2))
 			btn.add_theme_stylebox_override("hover", _flat_bg(COL_SLOT_USED_BG.lightened(0.12), COL_BORDER, 3))
 		else:
@@ -523,6 +529,21 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		"Conquérez les cités par les armes", "res://assets/ui/modes/mode_conquete.png",
 		Color(0.62, 0.25, 0.20), con_ok, func() -> void:
 			_launch_campaign_mode("conquest", "res://scenes/ConquestMap.tscn", slot)))
+
+	# V46 : temps de jeu propre à chaque mode, sous les cartes de mode.
+	var times_row := HBoxContainer.new()
+	times_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	times_row.add_theme_constant_override("separation", 10)
+	_detail_box.add_child(times_row)
+	for mode: String in ["tactique", "adventure", "conquest"]:
+		var t := Label.new()
+		t.name = "Playtime_%s" % mode
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		t.add_theme_font_size_override("font_size", _ui_font(14))
+		t.add_theme_color_override("font_color", COL_BORDER.darkened(0.3))
+		t.text = "⏱ %s" % ProgressionManager.format_playtime(ProgressionManager.playtime_mode(data, mode))
+		times_row.add_child(t)
 
 	_start_tutorial(data, tac_btn)
 
