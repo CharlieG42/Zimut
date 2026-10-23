@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bkqt4ggtl6yy0"
-path="res://.godot/imported/druide_attack_2.png-772332b5f597b6071e0823ba87a89874.ctex"
+uid="uid://dc423xq0ik5wt"
+path="res://.godot/imported/druide_back_walk.png-ea66f8a4c7377ed1a0ad334b2462f88e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/nations/heros/poses/druide_attack_2.png"
-dest_files=["res://.godot/imported/druide_attack_2.png-772332b5f597b6071e0823ba87a89874.ctex"]
+source_file="res://assets/sprites/nations/heros/poses/druide_back_walk.png"
+dest_files=["res://.godot/imported/druide_back_walk.png-ea66f8a4c7377ed1a0ad334b2462f88e.ctex"]
 
 [params]
 

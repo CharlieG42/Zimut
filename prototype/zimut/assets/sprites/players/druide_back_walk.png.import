@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d36jwq7oi5qtw"
-path="res://.godot/imported/druide_cast.png-4febb29e13d31e2613cdc688b1876c1a.ctex"
+uid="uid://df5xro2x5evho"
+path="res://.godot/imported/druide_back_walk.png-595adaa9066c0b2d4dc26119e079735e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/druide_cast.png"
-dest_files=["res://.godot/imported/druide_cast.png-4febb29e13d31e2613cdc688b1876c1a.ctex"]
+source_file="res://assets/sprites/players/druide_back_walk.png"
+dest_files=["res://.godot/imported/druide_back_walk.png-595adaa9066c0b2d4dc26119e079735e.ctex"]
 
 [params]
 
