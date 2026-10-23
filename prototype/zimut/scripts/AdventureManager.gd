@@ -58,7 +58,7 @@ func zone_biome() -> String:
 
 ## Dimensions de la grille de la zone courante.
 func zone_size() -> Vector2i:
-	var s: Array = zone_meta().get("size", [10, 7])
+	var s: Array = zone_meta().get("size", [14, 10])
 	return Vector2i(int(s[0]), int(s[1]))
 
 ## Position du héros sur la grille.
@@ -80,6 +80,9 @@ func poi_key(pos: Vector2i) -> String:
 
 ## Le POI à cette position est-il déjà complété ?
 func poi_done(pos: Vector2i) -> bool:
+	# V43 : un donjon de Nation se refait autant de fois qu'on veut : jamais « terminé »
+	if Dungeons.is_dungeon(poi_at(pos)):
+		return false
 	return ProgressionManager.adventure_poi_completed(state, poi_key(pos))
 
 ## Déplacement possible : case adjacente (4 directions), dans la grille, sans obstacle.
@@ -181,7 +184,11 @@ func zone_progress() -> Dictionary:
 		if String(pois[k].get("kind", "")) == KIND_CAMP:
 			continue
 		total += 1
-		if poi_done(AdventureTerrain.parse(k)):
+		if Dungeons.is_dungeon(pois[k]):
+			# maîtrise : un donjon compte comme fait dès qu'il a été terminé une fois
+			if Dungeons.clears(state, String(pois[k]["guardian"])) > 0:
+				done += 1
+		elif poi_done(AdventureTerrain.parse(k)):
 			done += 1
 	var size := zone_size()
 	var seen: int = 0

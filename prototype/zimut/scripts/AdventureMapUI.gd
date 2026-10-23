@@ -304,7 +304,11 @@ func _refresh_hud() -> void:
 	if manager.poi_done(pos) and kind != "camp":
 		return
 	var act: String = String(POI_ACTION.get(kind, "INTERAGIR"))
-	if kind == "combat":
+	if kind == "combat" and Dungeons.is_dungeon(poi):
+		var gb: String = String(poi["guardian"])
+		var rm: int = Dungeons.current_room(manager.state, gb)
+		act = "🏰  %s  (salle %d/%d · niv %d)" % ["ENTRER" if rm == 1 else "POURSUIVRE", rm, Dungeons.ROOMS, Dungeons.room_level(gb, rm)]
+	elif kind == "combat":
 		act += "  (niv %d)" % manager.challenge_level(poi)
 	_action_btn.text = "▶  %s" % act
 	_action_btn.show()
@@ -1118,7 +1122,11 @@ func _place_card() -> Control:
 	v.add_child(d)
 	if not done:
 		var act: String = String(POI_ACTION.get(kind, "INTERAGIR"))
-		if kind == "combat":
+		if kind == "combat" and Dungeons.is_dungeon(poi):
+			var gb2: String = String(poi["guardian"])
+			var rm2: int = Dungeons.current_room(manager.state, gb2)
+			act = "🏰  %s  (salle %d/%d)" % ["ENTRER" if rm2 == 1 else "POURSUIVRE", rm2, Dungeons.ROOMS]
+		elif kind == "combat":
 			act += "  (niv %d)" % manager.challenge_level(poi)
 		var b := U.btn(act, col, 24, Vector2(0, 72))
 		b.pressed.connect(_interact)
@@ -1167,7 +1175,46 @@ func _interact() -> void:
 	_refresh_side()
 
 
+## V43 : porte d'un donjon de Nation — 4 salles, la dernière abrite le Gardien et la Pierre.
+func _confirm_dungeon(poi: Dictionary) -> void:
+	var biome: String = String(poi["guardian"])
+	var room: int = Dungeons.current_room(manager.state, biome)
+	var box: VBoxContainer = _modal("🏰  " + String(poi.get("name", "Donjon")), POI_COLOR["combat"])
+	var lines: PackedStringArray = []
+	lines.append(String(poi.get("desc", "")))
+	lines.append("")
+	for r: int in range(1, Dungeons.ROOMS + 1):
+		var mark: String = "✔" if r < room else ("▶" if r == room else "○")
+		var who: String = "  —  le Gardien : %s" % Nations.boss_title(biome) if r == Dungeons.ROOMS and Nations.boss_title(biome) != "" else ""
+		lines.append("%s  Salle %d · %s · niv %d%s" % [mark, r, Dungeons.room_name(r), Dungeons.room_level(biome, r), who])
+	lines.append("")
+	if Stones.has(manager.save, biome):
+		lines.append("💎  %s déjà retrouvée : le donjon reste ouvert pour le butin." % Stones.stone_name(biome))
+	else:
+		lines.append("💎  %s : %d %% de chances au prochain Gardien vaincu." % [Stones.stone_name(biome), roundi(Dungeons.stone_chance(manager.state, biome) * 100.0)])
+	lines.append("Défaite, combat abandonné ou arrêt du jeu : retour à l'entrée.")
+	var t: Label = U.lbl("\n".join(lines), 18, U.C_TXT)
+	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(t)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	box.add_child(row)
+	var go := U.btn("⚔  %s" % ("ENTRER" if room == 1 else "POURSUIVRE"), POI_COLOR["combat"], 22, Vector2(280, 60))
+	go.pressed.connect(func() -> void:
+		_close_modal()
+		manager.interact()
+		_start_combat(poi))
+	row.add_child(go)
+	var later := U.btn("PLUS TARD", U.C_BORDER, 20, Vector2(200, 60))
+	later.pressed.connect(_close_modal)
+	row.add_child(later)
+	Gultur.say(self, "donjon", Gultur.DONJON, null)
+
+
 func _confirm_combat(poi: Dictionary) -> void:
+	if Dungeons.is_dungeon(poi):
+		_confirm_dungeon(poi)
+		return
 	var lvl: int = manager.challenge_level(poi)
 	var box: VBoxContainer = _modal("⚔  " + String(poi.get("name", "Combat")), POI_COLOR["combat"])
 	var t: Label = U.lbl("%s\n\nCombat au tour par tour (règles du mode Tactique), ennemis niveau %d, décor %s.\nVictoire : XP, objets, or et ressources pour toute l'équipe." % [
@@ -1189,8 +1236,10 @@ func _confirm_combat(poi: Dictionary) -> void:
 
 
 func _start_combat(poi: Dictionary) -> void:
-	var level: int = manager.challenge_level(poi)
-	manager.state["pending_level"] = level
+	if Dungeons.is_dungeon(poi):
+		Dungeons.begin(manager.state, String(poi["guardian"]))   # niveau et effectif de la salle
+	else:
+		manager.state["pending_level"] = manager.challenge_level(poi)
 	manager.persist()
 	GameManager.fight_biome = manager.zone_biome()
 	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")

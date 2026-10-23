@@ -96,7 +96,7 @@ static func neighbor(zone_id: String, dir: String) -> String:
 
 ## Case de la porte d'un bord : milieu du côté (axe x de la grille = est/ouest).
 static func gate_cell(zone_id: String, dir: String) -> Vector2i:
-	var sz: Array = ProgressionManager.ADVENTURE_ZONES.get(zone_id, {}).get("size", [10, 7])
+	var sz: Array = ProgressionManager.ADVENTURE_ZONES.get(zone_id, {}).get("size", [14, 10])
 	var w: int = int(sz[0])
 	var h: int = int(sz[1])
 	match dir:
@@ -134,7 +134,7 @@ static func zone_terrain(zone_id: String) -> Dictionary:
 	if _cache.has(zone_id):
 		return _cache[zone_id]
 	var meta: Dictionary = ProgressionManager.ADVENTURE_ZONES.get(zone_id, {})
-	var sz: Array = meta.get("size", [10, 7])
+	var sz: Array = meta.get("size", [14, 10])
 	var size := Vector2i(int(sz[0]), int(sz[1]))
 	var st: Array = meta.get("start", [1, 3])
 	var start := Vector2i(int(st[0]), int(st[1]))
@@ -169,21 +169,25 @@ static func zone_terrain(zone_id: String) -> Dictionary:
 			paths[c] = true
 	paths[start] = true
 
-	# 2) Obstacles : bosquets aléatoires hors sentiers / lieux / départ.
+	# 2) Obstacles : bosquets aléatoires hors sentiers / lieux / départ / abords des portes.
 	var obstacles: Dictionary = {}
+	var gate_mouth: Dictionary = {}
+	for g: Vector2i in gates:
+		for d: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			gate_mouth[g + d] = true
 	var wanted: int = int(float(size.x * size.y) * OBSTACLE_RATIO)
 	var guard: int = 0
 	while obstacles.size() < wanted and guard < 400:
 		guard += 1
 		var c := Vector2i(rng.randi_range(0, size.x - 1), rng.randi_range(0, size.y - 1))
-		if paths.has(c) or pois.has(c) or gates.has(c) or obstacles.has(c) or c.distance_to(Vector2(start)) < 1.5:
+		if paths.has(c) or gate_mouth.has(c) or pois.has(c) or gates.has(c) or obstacles.has(c) or c.distance_to(Vector2(start)) < 1.5:
 			continue
 		var kinds: Array = _obstacles_for(String(cell_biome.get(c, biome)))
 		obstacles[c] = String(kinds[rng.randi_range(0, kinds.size() - 1)])
 		# Bosquet : une case voisine de temps en temps
 		if rng.randf() < 0.45:
 			var n: Vector2i = c + [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)][rng.randi_range(0, 3)]
-			if _inside(size, n) and not paths.has(n) and not pois.has(n) and not gates.has(n) and not obstacles.has(n) and n != start:
+			if _inside(size, n) and not paths.has(n) and not gate_mouth.has(n) and not pois.has(n) and not gates.has(n) and not obstacles.has(n) and n != start:
 				var nk: Array = _obstacles_for(String(cell_biome.get(n, biome)))
 				obstacles[n] = String(nk[rng.randi_range(0, nk.size() - 1)])
 

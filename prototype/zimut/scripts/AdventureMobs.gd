@@ -14,7 +14,7 @@ class_name AdventureMobs
 ## Un groupe vaincu réapparaît ailleurs après RESPAWN_STEPS pas : la carte reste un terrain
 ## de chasse pour monter de niveau avant la carte suivante.
 
-const PER_ZONE := 3
+const PER_ZONE := 5
 const RESPAWN_STEPS := 12
 const WANDER_CHANCE := 0.35
 const MIN_SPAWN_DIST := 3

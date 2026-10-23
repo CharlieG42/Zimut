@@ -254,7 +254,7 @@ func _dist_map(from_pos: Vector2i, flies: bool) -> Dictionary:
 			var n: Vector2i = cur + d
 			if dist.has(n) or n.x < 0 or n.y < 0 or n.x >= gm.GRID_SIZE or n.y >= gm.GRID_SIZE:
 				continue
-			if gm.obstacles.has(n) and not flies:
+			if gm.obstacles.has(n) and (not flies or String(gm.obstacles[n]) == "void"):
 				continue
 			dist[n] = int(dist[cur]) + 1
 			queue.append(n)

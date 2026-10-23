@@ -46,7 +46,7 @@ func _boot() -> void:
 	for b: String in (lis["cell_biome"] as Dictionary).values():
 		if b == "Montagne":
 			other += 1
-	check(other >= 10 and other <= 50, "Lisière du Col : %d cases de montagne au nord" % other)
+	check(other >= 20 and other <= 100, "Lisière du Col : %d cases de montagne au nord" % other)
 	check(AdventureTerrain.cell_biome("lisiere_col", Vector2i(5, 6)) == "Forêt", "Lisière du Col : le sud reste forestier")
 	check(AdventureTerrain.cell_biome("piemont_ocre", Vector2i(9, 3)) == "Désert", "Piémont Ocre : l'est est désertique")
 
@@ -82,7 +82,7 @@ func _boot() -> void:
 	check(mgr.gate_at(east)["open"], "Camp gobelin vaincu : la route s'ouvre")
 	check(mgr.cross_gate(east), "passage de la frontière est")
 	check(mgr.zone_id() == "lisiere_col", "arrivée dans la Lisière du Col")
-	check(mgr.hero_pos() == Vector2i(1, 3), "le héros entre par l'ouest (case 1,3)")
+	check(mgr.hero_pos() == pm.adventure_gate_cell("lisiere_col", "W") + Vector2i(1, 0), "le héros entre par l'ouest, à côté de la porte")
 	check(mgr.cell_discovered(Vector2i(1, 3)) and mgr.cell_discovered(Vector2i(0, 3)), "le brouillard se lève à l'arrivée")
 	check(mgr.visited_zones().has("lisiere_col"), "la Lisière rejoint les cartes visitées")
 	var west: Vector2i = pm.adventure_gate_cell("lisiere_col", "W")

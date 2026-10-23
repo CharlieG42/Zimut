@@ -1822,6 +1822,30 @@ func _show_result_window(victory: bool) -> void:
 			"  ".join(Stones.bonus_lines(sb_biome, 1))], 24, sc, true)
 		sl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		sp.add_child(sl)
+	# V43 : donjon de Nation (Aventure) — progression, butin et tirage de la Pierre
+	var dg: Dictionary = res.get("dungeon", {})
+	if not dg.is_empty():
+		var dtxt: String = ""
+		var dcol: Color = Color(0.95, 0.75, 0.40)
+		if bool(dg.get("lost", false)):
+			dtxt = "🏰  Défaite en salle %d / %d du donjon : tu retournes à l'entrée." % [int(dg.get("room", 1)), int(dg.get("rooms", Dungeons.ROOMS))] \
+				if bool(dg.get("reset", true)) else "🏰  Défaite en salle %d / %d du donjon : ta progression est gardée." % [int(dg.get("room", 1)), int(dg.get("rooms", Dungeons.ROOMS))]
+			dcol = Color(1.0, 0.55, 0.45)
+		elif bool(dg.get("cleared", false)):
+			dtxt = "🏰  Donjon terminé !  +%d or" % int(dg.get("gold", 0))
+			match String(dg.get("stone_roll", "")):
+				"won":
+					dtxt += "   ·   le Gardien laisse tomber la Pierre !"
+				"missed":
+					dtxt += "   ·   la Pierre n'est pas tombée (%d %%) — le donjon se refait à volonté." % roundi(float(dg.get("chance", 0.0)) * 100.0)
+				"owned":
+					dtxt += "   ·   Pierre déjà en ta possession."
+			dcol = Color(0.55, 0.95, 0.60)
+		else:
+			dtxt = "🏰  Salle %d / %d vaincue — la suivante t'attend." % [int(dg.get("room", 1)), int(dg.get("rooms", Dungeons.ROOMS))]
+		var dl := UK.lbl(dtxt, 22, dcol, true)
+		dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(dl)
 	# V28 : primes du jour terminées par ce combat
 	if victory and not (res.get("bounties", []) as Array).is_empty():
 		var bl := UK.lbl("📜  Prime accomplie : " + "  ·  ".join(res["bounties"]) + "   (%d / %d aujourd'hui)" % [Bounties.done_count(save), Bounties.PER_DAY],
@@ -2042,6 +2066,15 @@ func _on_spell_button_selected(spell: Dictionary) -> void:
 
 func _on_quit_combat_pressed() -> void:
 	Sfx.play("click")
+	# V43 : abandonner un combat de donjon = échec de l'expédition (retour à la salle 1)
+	var gm: Node = get_node_or_null("/root/GameManager")
+	if gm != null and not gm.game_over and gm.active_slot >= 0 and gm.active_save.get("campaign_mode", "") == "adventure":
+		var adv: Dictionary = gm.active_save.get("adventure", {})
+		if ProgressionManager.adventure_dungeon_biome(gm.active_save) != "":
+			Dungeons.lose(adv)
+			adv["pending_challenge"] = ""
+			gm.active_save["adventure"] = adv
+			ProgressionManager.write_save(gm.active_slot, gm.active_save)
 	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
 
 

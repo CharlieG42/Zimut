@@ -251,7 +251,12 @@ func _sync_props() -> void:
 		if is_instance_valid(p):
 			p.queue_free()
 	_prop_nodes = []
+	for y: int in range(cell_nodes.size()):
+		for x: int in range(cell_nodes[y].size()):
+			(cell_nodes[y][x] as Node2D).visible = String(game_manager.obstacles.get(Vector2i(x, y), "")) != "void"
 	for c: Vector2i in game_manager.obstacles.keys():
+		if String(game_manager.obstacles[c]) == "void":
+			continue
 		var prop := Prop.new()
 		prop.setup(String(game_manager.obstacles[c]), c, game_manager.fight_biome)
 		prop.position = grid_to_screen(c.x, c.y) + Vector2(0, 6)
