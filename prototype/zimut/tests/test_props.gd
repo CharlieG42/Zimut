@@ -45,7 +45,10 @@ func _boot() -> void:
 		# Vérification déterministe : _sync_now doit afficher exactement
 		# un prop vivant par obstacle du combat courant.
 		grid._sync_now()
-		var obstacles: int = gm.obstacles.size()
+		var obstacles: int = 0
+		for oc: Vector2i in gm.obstacles.keys():
+			if String(gm.obstacles[oc]) != "void":
+				obstacles += 1
 		# les props de la génération précédente (queue_free) disparaissent à la fin de frame
 		await process_frame
 		await process_frame

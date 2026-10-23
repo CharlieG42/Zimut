@@ -152,70 +152,70 @@ const ADVENTURE_BASE_XP := 60
 ## `unlock` est conservé pour les anciennes sauvegardes (voyage rapide).
 const ADVENTURE_ZONES := {
 	"foret_sylve": {
-		"name": "Sentiers de la Sylve", "biome": "Forêt", "size": [10, 7], "grid": [1, 1],
+		"name": "Sentiers de la Sylve", "biome": "Forêt", "size": [14, 10], "grid": [1, 1],
 		"start": [1, 3], "unlock": "", "key_poi": "7,2", "reveals": ["clairiere", "village_brume", "pont_mousse"],
 	},
 	"foret_ronces": {
-		"name": "Ronces de l’Abbaye", "biome": "Forêt", "size": [10, 7], "grid": [0, 1],
+		"name": "Ronces de l’Abbaye", "biome": "Forêt", "size": [14, 10], "grid": [0, 1],
 		"start": [1, 3], "unlock": "foret_sylve", "key_poi": "4,5",
 		"reveals": ["abbaye_ronce", "ruines_lierre", "citadelle_ronce", "marais_spectres"],
 	},
 	"lisiere_col": {
-		"name": "Lisière du Col", "biome": "Forêt", "size": [10, 7], "grid": [2, 1],
+		"name": "Lisière du Col", "biome": "Forêt", "size": [14, 10], "grid": [2, 1],
 		"blend": {"biome": "Montagne", "side": "N"},
 		"start": [1, 3], "unlock": "foret_sylve", "key_poi": "6,3",
 		"reveals": ["vieille_tour", "fort_racine", "bois_lune", "sanctuaire_mousse"],
 	},
 	"montagne_pics": {
-		"name": "Pics du Givre", "biome": "Montagne", "size": [10, 7], "grid": [2, 0],
+		"name": "Pics du Givre", "biome": "Montagne", "size": [14, 10], "grid": [2, 0],
 		"start": [1, 3], "unlock": "foret_sylve", "key_poi": "5,2", "reveals": ["hameau_pin", "col_givre", "garnison"],
 	},
 	"cretes_givre": {
-		"name": "Crêtes du Givre", "biome": "Montagne", "size": [10, 7], "grid": [3, 0],
+		"name": "Crêtes du Givre", "biome": "Montagne", "size": [14, 10], "grid": [3, 0],
 		"start": [1, 3], "unlock": "montagne_pics", "key_poi": "5,3",
 		"reveals": ["mine_cristal", "bastion_orage", "forge_givre", "pic_foudroyant"],
 	},
 	"piemont_ocre": {
-		"name": "Piémont Ocre", "biome": "Montagne", "size": [10, 7], "grid": [2, 2],
+		"name": "Piémont Ocre", "biome": "Montagne", "size": [14, 10], "grid": [2, 2],
 		"blend": {"biome": "Désert", "side": "E"},
 		"start": [1, 3], "unlock": "lisiere_col", "key_poi": "4,3",
 		"reveals": ["observatoire", "temple_soleil", "fort_cendre"],
 	},
 	"desert_dunes": {
-		"name": "Dunes Perdues", "biome": "Désert", "size": [10, 7], "grid": [3, 2],
+		"name": "Dunes Perdues", "biome": "Désert", "size": [14, 10], "grid": [3, 2],
 		"start": [1, 3], "unlock": "montagne_pics", "key_poi": "4,3", "reveals": ["oasis", "caravanserail", "tour_sable"],
 	},
 	"portes_donjon": {
-		"name": "Portes du Donjon", "biome": "Donjon", "size": [10, 7], "grid": [2, 3],
+		"name": "Portes du Donjon", "biome": "Donjon", "size": [14, 10], "grid": [2, 3],
 		"start": [5, 1], "unlock": "piemont_ocre", "key_poi": "5,3",
 		"reveals": ["donjon_roi", "citadelle_sable", "port_sable"],
 	},
 	"vents_plateau": {
-		"name": "Plateau des Vents", "biome": "Vents", "size": [10, 7], "grid": [1, 0],
+		"name": "Plateau des Vents", "biome": "Vents", "size": [14, 10], "grid": [1, 0],
 		"start": [1, 3], "unlock": "foret_sylve", "key_poi": "6,3", "reveals": ["bastion_orage", "pic_foudroyant"],
 	},
 	"brumes_marais": {
-		"name": "Marais des Brumes", "biome": "Brumes", "size": [10, 7], "grid": [1, 2],
+		"name": "Marais des Brumes", "biome": "Brumes", "size": [14, 10], "grid": [1, 2],
 		"start": [1, 3], "unlock": "foret_sylve", "key_poi": "6,2", "reveals": ["village_brume", "marais_spectres", "bois_lune"],
 	},
 	"brasier_cendres": {
-		"name": "Terres de Cendre", "biome": "Brasier", "size": [10, 7], "grid": [0, 2],
+		"name": "Terres de Cendre", "biome": "Brasier", "size": [14, 10], "grid": [0, 2],
 		"start": [1, 3], "unlock": "foret_ronces", "key_poi": "6,4", "reveals": ["fort_cendre", "citadelle_sable"],
 	},
 	"ombres_necropole": {
-		"name": "Nécropole d'Ombre", "biome": "Ombres", "size": [10, 7], "grid": [1, 3],
+		"name": "Nécropole d'Ombre", "biome": "Ombres", "size": [14, 10], "grid": [1, 3],
 		"start": [1, 3], "unlock": "brumes_marais", "key_poi": "5,3", "reveals": ["abbaye_ronce", "citadelle_ronce", "ruines_lierre"],
 	},
 	"cristaux_caverne": {
-		"name": "Caverne de Cristal", "biome": "Cristaux", "size": [10, 7], "grid": [3, 3],
+		"name": "Caverne de Cristal", "biome": "Cristaux", "size": [14, 10], "grid": [3, 3],
 		"start": [1, 3], "unlock": "portes_donjon", "key_poi": "6,3", "reveals": ["mine_cristal", "forge_givre"],
 	},
 	"marees_cotes": {
-		"name": "Côtes des Marées", "biome": "Marées", "size": [10, 7], "grid": [4, 2],
+		"name": "Côtes des Marées", "biome": "Marées", "size": [14, 10], "grid": [4, 2],
 		"start": [1, 3], "unlock": "desert_dunes", "key_poi": "6,2", "reveals": ["port_sable", "caravanserail"],
 	},
 	"rouages_atelier": {
-		"name": "Ateliers des Rouages", "biome": "Rouages", "size": [10, 7], "grid": [4, 1],
+		"name": "Ateliers des Rouages", "biome": "Rouages", "size": [14, 10], "grid": [4, 1],
 		"start": [1, 3], "unlock": "marees_cotes", "key_poi": "6,3", "reveals": ["atelier_cuivre", "citadelle_engrenages"],
 	},
 }
@@ -2017,12 +2017,7 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 			add_resources(data, obj["resources"])
 			Achievements.bump(data, "objectives")
 		data["last_result"]["objective"] = obj
-	# V27 : Pierre Élémentaire de la Nation dont le boss vient de tomber
-	var stone_biome: String = String(info.get("nation_boss", ""))
-	# V43 : en donjon d'Aventure, la Pierre se tire au sort (50 % la 1re fois, puis 5 %), voir _dungeon_victory
-	if stone_biome != "" and adventure_dungeon_biome(data) == "" and Stones.grant(data, stone_biome):
-		data["last_result"]["stone"] = stone_biome
-		Achievements.bump(data, "stones")
+	# V43 : la Pierre Élémentaire ne tombe plus en Tactique ni en Conquête : seuls les Donjons d'Aventure la donnent (_dungeon_victory)
 	# V28 : tableau des primes du jour
 	var bounty_done: Array[String] = Bounties.on_victory(data, info)
 	if not bounty_done.is_empty():

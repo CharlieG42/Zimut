@@ -72,7 +72,8 @@ const TURN_TIMER_WARN := 5.0
 const ENRAGE_AFTER_TURN := 14
 
 var grid: Array                  = []
-var obstacles: Dictionary        = {}   # Vector2i -> "tree" | "rock"
+var obstacles: Dictionary        = {}   # Vector2i -> "tree" | "rock" | "void" (hors plateau, V43)
+var board_shape: String          = "square"
 var traps: Array                 = []   # {pos, dmg, team, owner}
 var glyphs: Array                = []   # V19 : {name, cells, team, owner, turns, foes, allies, snap, last, element}
 var players: Array               = []
@@ -173,8 +174,45 @@ func init_grid() -> void:
 	_generate_obstacles()
 
 
+## V43 : formes de plateau. Les cases « hors plateau » sont des obstacles de type "void" :
+## infranchissables, sans décor, invisibles, et sans effet sur la ligne de vue.
+const BOARD_SHAPES: Array[String] = ["square", "square", "octagon", "round", "ravine", "cross", "wings"]
+
+## Cases hors plateau pour une forme donnée (grille n × n).
+static func shape_void_cells(shape: String, n: int) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	var mid: float = float(n - 1) * 0.5
+	for y: int in range(n):
+		for x: int in range(n):
+			var dx: float = absf(float(x) - mid)
+			var dy: float = absf(float(y) - mid)
+			var cut: bool = false
+			match shape:
+				"octagon":   # coins taillés
+					cut = dx + dy > float(n) * 0.5 + 1.0
+				"round":     # plateau arrondi
+					cut = dx * dx + dy * dy > mid * mid * 1.9
+				"ravine":    # ravin central (trou allongé)
+					cut = dx < 1.0 and dy < 2.0
+				"cross":     # croix : les 4 coins vides
+					cut = dx > mid - 1.5 and dy > mid - 1.5
+				"wings":     # deux ailes reliées par un pont central
+					cut = dy < 1.0 and dx > 1.5
+			if cut:
+				out.append(Vector2i(x, y))
+	return out
+
+
 func _generate_obstacles() -> void:
 	obstacles = {}
+	board_shape = BOARD_SHAPES[_rng.randi_range(0, BOARD_SHAPES.size() - 1)]
+	if board_shape != "square":
+		for vc: Vector2i in shape_void_cells(board_shape, GRID_SIZE):
+			obstacles[vc] = "void"
+		if not _all_free_connected() or GRID_SIZE * GRID_SIZE - obstacles.size() < 36:
+			obstacles = {}
+			board_shape = "square"
+	var void_count: int = obstacles.size()
 	var forbidden: Dictionary = {}
 	# Les positions de départ seront tirées parmi toutes les cases libres :
 	# les équipes peuvent donc être mélangées sur l'ensemble du plateau.
@@ -187,7 +225,7 @@ func _generate_obstacles() -> void:
 		"Désert":
 			tree_chance = 0.45   # « tree » = cactus dessiné selon le biome (cf. Prop)
 	var attempts: int = 0
-	while obstacles.size() < wanted and attempts < 300:
+	while obstacles.size() - void_count < wanted and attempts < 300:
 		attempts += 1
 		var c := Vector2i(_rng.randi_range(0, GRID_SIZE - 1), _rng.randi_range(0, GRID_SIZE - 1))
 		if forbidden.has(c) or obstacles.has(c):
@@ -1204,7 +1242,7 @@ func compute_reach(e: Dictionary, max_cost: int = -1) -> Dictionary:
 			var n: Vector2i = cur + d
 			if cost.has(n) or not _in_bounds(n) or grid[n.y][n.x] != null:
 				continue
-			if obstacles.has(n) and not flies:
+			if obstacles.has(n) and (not flies or String(obstacles[n]) == "void"):
 				continue
 			cost[n] = int(cost[cur]) + 1
 			prev[n] = cur
@@ -1683,6 +1721,9 @@ func _do_heal(_caster: Dictionary, tgt: Dictionary, amount: int) -> int:
 ## Obstacles de vue : arbres/rochers du décor + arbres invoqués par les Sylvains.
 func los_blockers() -> Dictionary:
 	var out: Dictionary = obstacles.duplicate()
+	for vc: Vector2i in out.keys():
+		if String(out[vc]) == "void":
+			out.erase(vc)
 	for s: Dictionary in summons:
 		if bool(s.get("blocks_los", false)) and is_alive(s):
 			out[pos_of(s)] = "tree"

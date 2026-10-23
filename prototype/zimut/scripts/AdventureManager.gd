@@ -58,7 +58,7 @@ func zone_biome() -> String:
 
 ## Dimensions de la grille de la zone courante.
 func zone_size() -> Vector2i:
-	var s: Array = zone_meta().get("size", [10, 7])
+	var s: Array = zone_meta().get("size", [14, 10])
 	return Vector2i(int(s[0]), int(s[1]))
 
 ## Position du héros sur la grille.

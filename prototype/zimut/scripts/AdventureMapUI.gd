@@ -1192,7 +1192,7 @@ func _confirm_dungeon(poi: Dictionary) -> void:
 		lines.append("💎  %s déjà retrouvée : le donjon reste ouvert pour le butin." % Stones.stone_name(biome))
 	else:
 		lines.append("💎  %s : %d %% de chances au prochain Gardien vaincu." % [Stones.stone_name(biome), roundi(Dungeons.stone_chance(manager.state, biome) * 100.0)])
-	lines.append("Une défaite renvoie à l'entrée." if Dungeons.DEFEAT_RESETS else "Une défaite garde ta progression.")
+	lines.append("Défaite, combat abandonné ou arrêt du jeu : retour à l'entrée.")
 	var t: Label = U.lbl("\n".join(lines), 18, U.C_TXT)
 	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(t)

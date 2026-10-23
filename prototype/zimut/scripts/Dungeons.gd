@@ -6,8 +6,9 @@ extends RefCounted
 ## Gardien (le boss de la Nation). On y accède par le lieu « Donjon » de la carte de la Nation
 ## (ancien « Sanctuaire »). Un donjon se refait autant de fois qu'on veut.
 ##
-## Une expédition = les 4 salles à la suite : la progression est mémorisée si l'on quitte la carte,
-## mais une DÉFAITE renvoie à l'entrée (DEFEAT_RESETS).
+## Une expédition = les 4 salles à la suite : la progression tient tant que l'on reste dans la partie
+## (on peut quitter la carte entre deux salles). Une DÉFAITE, un combat abandonné ou l'arrêt du jeu
+## renvoient à l'entrée (la sauvegarde mémorise le numéro de session ; une autre session = salle 1).
 ##
 ## Pierre Élémentaire : le Gardien la laisse tomber avec 50 % de chances la 1re fois qu'on le bat,
 ## puis 5 % à chaque victoire suivante, tant que la Pierre n'est pas trouvée.
@@ -21,6 +22,9 @@ const STONE_FIRST := 0.50
 const STONE_LATER := 0.05
 ## Une défaite ramène-t-elle à la salle 1 ?
 const DEFEAT_RESETS := true
+
+## Identifiant de la session de jeu en cours (change à chaque lancement du jeu).
+static var session: int = randi()
 
 const ROOM_NAMES: Array[String] = ["Vestibule", "Galerie", "Sanctuaire intérieur", "Salle du Gardien"]
 ## Ennemis par salle (la salle 4 : le boss + 3 sbires).
@@ -46,7 +50,7 @@ static func room_name(room: int) -> String:
 ## Salle à jouer : celle de l'expédition en cours dans cette Nation, sinon la 1re.
 static func current_room(adv: Dictionary, biome: String) -> int:
 	var d: Dictionary = adv.get("dungeon", {})
-	if String(d.get("biome", "")) == biome:
+	if String(d.get("biome", "")) == biome and int(d.get("session", -1)) == session:
 		return clampi(int(d.get("room", 1)), 1, ROOMS)
 	return 1
 
@@ -67,7 +71,7 @@ static func stone_chance(adv: Dictionary, biome: String) -> float:
 ## Prépare le combat de la salle courante (niveau et nombre d'ennemis). Retourne le numéro de salle.
 static func begin(adv: Dictionary, biome: String) -> int:
 	var room: int = current_room(adv, biome)
-	adv["dungeon"] = {"biome": biome, "room": room}
+	adv["dungeon"] = {"biome": biome, "room": room, "session": session}
 	adv["pending_level"] = room_level(biome, room)
 	adv["pending_count"] = ROOM_COUNT[room - 1]
 	return room
@@ -87,7 +91,7 @@ static func win_room(adv: Dictionary, biome: String, roll: float, stone_owned: b
 	var out: Dictionary = {"biome": biome, "room": room, "rooms": ROOMS, "cleared": false,
 		"first_clear": false, "chance": 0.0, "stone_roll": ""}
 	if room < ROOMS:
-		adv["dungeon"] = {"biome": biome, "room": room + 1}
+		adv["dungeon"] = {"biome": biome, "room": room + 1, "session": session}
 		return out
 	# Salle du Gardien vaincue : expédition terminée
 	var all: Dictionary = adv.get("dungeons", {})

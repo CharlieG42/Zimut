@@ -30,8 +30,10 @@ func _boot() -> void:
 	# Obtention par victoire sur un boss de Nation
 	var mage_before: Dictionary = pm.member_stats(data, data["team"][1])
 	pm.register_victory(data, {"enemies": [{"type": "Troll", "level": 5, "boss": true}], "turns": 5, "boss": true, "nation_boss": "Cristaux"})
-	check(Stones.has(data, "Cristaux"), "Pierre de Prisme gagnée")
-	check(String(data["last_result"].get("stone", "")) == "Cristaux", "annoncée dans le résultat")
+	check(not Stones.has(data, "Cristaux"), "V43 : plus de Pierre en Tactique/Conquête")
+	Stones.grant(data, "Cristaux")
+	data["last_result"]["stone"] = "Cristaux"
+	Achievements.bump(data, "stones")
 	pm.register_victory(data, {"enemies": [{"type": "Troll", "level": 5, "boss": true}], "turns": 5, "boss": true, "nation_boss": "Cristaux"})
 	check(not data["last_result"].has("stone"), "pas de doublon")
 	check(Achievements.stat(data, "stones") == 1, "compteur de succès")

@@ -103,11 +103,16 @@ func _boot() -> void:
 	pm.register_defeat(data, {"enemies": [{"type": "Gobelin", "level": 15, "boss": false}], "turns": 4})
 	a = data["adventure"]
 	check(D.current_room(a, "Forêt") == 1 and bool(data["last_result"]["dungeon"]["lost"]), "défaite : retour à la salle 1, résultat signalé")
+	# Arrêt du jeu : une autre session de jeu repart de la salle 1
+	a["dungeon"] = {"biome": "Forêt", "room": 3, "session": D.session}
+	check(D.current_room(a, "Forêt") == 3, "même session : salle 3 conservée")
+	a["dungeon"]["session"] = D.session + 1
+	check(D.current_room(a, "Forêt") == 1, "jeu relancé : retour à la salle 1")
 	print("Combat (salles 1 et 4) :")
 	a["zone"] = gz
 	for room2: int in [1, 4]:
 		a["pending_challenge"] = key
-		a["dungeon"] = {"biome": "Forêt", "room": room2}
+		a["dungeon"] = {"biome": "Forêt", "room": room2, "session": D.session}
 		D.begin(a, "Forêt")
 		gm.active_slot = 4
 		gm.active_save = data

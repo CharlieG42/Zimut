@@ -2066,6 +2066,15 @@ func _on_spell_button_selected(spell: Dictionary) -> void:
 
 func _on_quit_combat_pressed() -> void:
 	Sfx.play("click")
+	# V43 : abandonner un combat de donjon = échec de l'expédition (retour à la salle 1)
+	var gm: Node = get_node_or_null("/root/GameManager")
+	if gm != null and not gm.game_over and gm.active_slot >= 0 and gm.active_save.get("campaign_mode", "") == "adventure":
+		var adv: Dictionary = gm.active_save.get("adventure", {})
+		if ProgressionManager.adventure_dungeon_biome(gm.active_save) != "":
+			Dungeons.lose(adv)
+			adv["pending_challenge"] = ""
+			gm.active_save["adventure"] = adv
+			ProgressionManager.write_save(gm.active_slot, gm.active_save)
 	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
 
 
