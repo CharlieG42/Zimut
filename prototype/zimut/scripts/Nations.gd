@@ -12,6 +12,33 @@ extends RefCounted
 ## Ordre d'affichage (liste des nations) — le Donjon n'en fait pas partie.
 const ORDER: Array[String] = ["Forêt", "Montagne", "Désert", "Cristaux", "Marées", "Vents", "Brasier", "Brumes", "Ombres", "Rouages"]
 
+## V43 : tranches de niveaux des monstres PAR NATION (1..100, contiguës, sans chevauchement).
+## Source unique pour les cartes d'Aventure (AdventureMobs.LEVEL_RANGE, niveaux des lieux)
+## et les donjons de nation. Ordre de progression : Forêt → Brasier → Brumes → Montagne →
+## Vents → Ombres → Désert → Marées → Cristaux → Rouages → Donjon final.
+const LEVEL_BANDS := {
+	"Forêt": [1, 17], "Brasier": [18, 25], "Brumes": [26, 31], "Montagne": [32, 45], "Vents": [46, 54],
+	"Ombres": [55, 63], "Désert": [64, 70], "Marées": [71, 78], "Cristaux": [79, 86], "Rouages": [87, 93],
+	"Donjon": [94, 100],
+}
+
+## Tranche [min, max] d'une nation (Vector2i) ; (1, 100) si inconnue.
+static func level_band(biome: String) -> Vector2i:
+	if LEVEL_BANDS.has(biome):
+		var r: Array = LEVEL_BANDS[biome]
+		return Vector2i(int(r[0]), int(r[1]))
+	return Vector2i(1, 100)
+
+
+## Nation dont la tranche contient ce niveau ("" si hors tranche).
+static func biome_for_level(level: int) -> String:
+	for b: String in LEVEL_BANDS.keys():
+		var r: Array = LEVEL_BANDS[b]
+		if level >= int(r[0]) and level <= int(r[1]):
+			return b
+	return ""
+
+
 const DATA := {
 	"Forêt": {
 		"nation": "Sylvestre", "hero": "Druide", "folder": "sylvestre", "legacy": true, "accent": Color(0.40, 0.75, 0.35),
