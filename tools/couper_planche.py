@@ -22,7 +22,7 @@ def bg_mask(rgb: np.ndarray, tol: float = 26.0) -> np.ndarray:
     edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
     return np.isin(lab, list(edge))
 
-def shadow_like(rgb: np.ndarray, bg_lum: float) -> np.ndarray:
+def shadow_like(rgb: np.ndarray, bg_lum: float, delta: float = 6.0) -> np.ndarray:
     f = rgb.astype(float) / 255.0
     mx, mn = f.max(-1), f.min(-1)
     sat = np.where(mx > 0, (mx - mn) / np.maximum(mx, 1e-6), 0)
@@ -31,15 +31,15 @@ def shadow_like(rgb: np.ndarray, bg_lum: float) -> np.ndarray:
     # teinte approchée : rose/mauve = r et b > g
     pinkish = (r > g + 0.03) & (b > g + 0.03)
     neutral = sat < 0.13
-    return (lum > 105) & (lum < bg_lum - 6) & ((neutral) | (pinkish & (sat < 0.35) & (lum > 150)))
+    return (lum > 105) & (lum < bg_lum - delta) & ((neutral) | (pinkish & (sat < 0.35) & (lum > 150)))
 
-def cut(path: str, outdir: str, cols: int, rows: int, prefix: str, min_area: int, holes: int = 120):
+def cut(path: str, outdir: str, cols: int, rows: int, prefix: str, min_area: int, holes: int = 120, delta: float = 6.0):
     im = Image.open(path).convert("RGB")
     rgb = np.array(im)
     h, w, _ = rgb.shape
     bg = bg_mask(rgb)
     bg_lum = float(np.median(rgb[bg].mean(-1))) if bg.any() else 255.0
-    sh = shadow_like(rgb, bg_lum)
+    sh = shadow_like(rgb, bg_lum, delta)
     # remplissage des ombres depuis le fond, à travers les pixels « ombre » uniquement
     grow = ndi.binary_dilation(bg, iterations=1) & sh & ~bg
     cur = bg | grow
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("planche"); ap.add_argument("sortie")
     ap.add_argument("--grid", default="3x2"); ap.add_argument("--prefix", default="p")
-    ap.add_argument("--min-area", type=int, default=400); ap.add_argument("--holes", type=int, default=120)
+    ap.add_argument("--min-area", type=int, default=400); ap.add_argument("--holes", type=int, default=120); ap.add_argument("--shadow-delta", type=float, default=6.0)
     a = ap.parse_args()
     cols, rows = (int(x) for x in a.grid.lower().split("x"))
-    cut(a.planche, a.sortie, cols, rows, a.prefix, a.min_area, a.holes)
+    cut(a.planche, a.sortie, cols, rows, a.prefix, a.min_area, a.holes, a.shadow_delta)
