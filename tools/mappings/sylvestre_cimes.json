@@ -1,0 +1,383 @@
+{
+ "chars": {
+  "araknea": {
+   "folder": "nations/ennemis/sylvestre",
+   "height": 240,
+   "dedupe": 0.03,
+   "poses": {
+    "": [
+     "ar1",
+     "r1c1",
+     310.5,
+     false
+    ],
+    "_back": [
+     "ar1",
+     "r1c2",
+     310.5,
+     false
+    ],
+    "_back_idle_2": [
+     "ar1",
+     "r2c3",
+     310.5,
+     false
+    ],
+    "_attack": [
+     "ar2",
+     "r1c1",
+     320.5,
+     false
+    ],
+    "_cast": [
+     "ar2",
+     "r1c2",
+     320.5,
+     false
+    ],
+    "_walk": [
+     "ar2",
+     "r1c3",
+     320.5,
+     false
+    ],
+    "_attack_2": [
+     "ar2",
+     "r2c1",
+     320.5,
+     false
+    ]
+   }
+  },
+  "loup_forestier": {
+   "folder": "nations/ennemis/sylvestre",
+   "height": 240,
+   "poses": {
+    "": [
+     "lf",
+     "r1c1",
+     357.0,
+     false
+    ],
+    "_idle_2": [
+     "lf",
+     "r1c3",
+     357.0,
+     false
+    ],
+    "_attack": [
+     "lf",
+     "r1c2",
+     357.0,
+     false
+    ],
+    "_attack_2": [
+     "lf",
+     "r2c1",
+     357.0,
+     true
+    ],
+    "_cast": [
+     "lf",
+     "r2c3",
+     357.0,
+     false
+    ],
+    "_walk": [
+     "lf",
+     "r2c2",
+     357.0,
+     true
+    ],
+    "_back": [
+     "lb",
+     "r2c1",
+     349.0,
+     false
+    ],
+    "_back_idle_2": [
+     "lb",
+     "r1c2",
+     349.0,
+     false
+    ],
+    "_back_walk": [
+     "lb",
+     "r1c3",
+     349.0,
+     true
+    ],
+    "_back_attack": [
+     "lb",
+     "r1c1",
+     349.0,
+     true
+    ],
+    "_back_cast": [
+     "lb",
+     "r2c3",
+     349.0,
+     true
+    ]
+   }
+  },
+  "dryade": {
+   "folder": "nations/ennemis/sylvestre",
+   "height": 240,
+   "poses": {
+    "": [
+     "dv",
+     "r1c1",
+     263.5,
+     false
+    ],
+    "_attack": [
+     "df",
+     "r1c3",
+     327.0,
+     false
+    ],
+    "_attack_2": [
+     "df",
+     "r2c1",
+     327.0,
+     true
+    ],
+    "_cast": [
+     "df",
+     "r1c1",
+     327.0,
+     false
+    ],
+    "_walk": [
+     "df",
+     "r2c3",
+     327.0,
+     false
+    ],
+    "_back": [
+     "db",
+     "r1c3",
+     310.0,
+     false
+    ],
+    "_back_walk": [
+     "db",
+     "r1c1",
+     310.0,
+     true
+    ],
+    "_back_attack": [
+     "db",
+     "r1c2",
+     310.0,
+     false
+    ],
+    "_back_cast": [
+     "db",
+     "r2c1",
+     310.0,
+     true
+    ],
+    "_back_idle_2": [
+     "db",
+     "r2c2",
+     310.0,
+     false
+    ]
+   }
+  },
+  "treant": {
+   "folder": "nations/ennemis/sylvestre",
+   "height": 240,
+   "poses": {
+    "": [
+     "tv",
+     "r1c1",
+     341.5,
+     false
+    ],
+    "_idle_2": [
+     "tv",
+     "r1c2",
+     341.5,
+     false
+    ],
+    "_attack": [
+     "tf",
+     "r1c1",
+     358.0,
+     false
+    ],
+    "_attack_2": [
+     "tf",
+     "r1c2",
+     358.0,
+     false
+    ],
+    "_cast": [
+     "tf",
+     "r2c2",
+     358.0,
+     false
+    ],
+    "_walk": [
+     "tf",
+     "r1c3",
+     358.0,
+     false
+    ],
+    "_back": [
+     "tb",
+     "r1c2",
+     342.5,
+     false
+    ],
+    "_back_idle_2": [
+     "tb",
+     "r1c1",
+     342.5,
+     false
+    ],
+    "_back_walk": [
+     "tb",
+     "r2c1",
+     342.5,
+     false
+    ],
+    "_back_attack": [
+     "tb",
+     "r1c3",
+     342.5,
+     false
+    ],
+    "_back_cast": [
+     "tb",
+     "r2c3",
+     342.5,
+     false
+    ]
+   }
+  },
+  "sylvestre": {
+   "folder": "nations/boss",
+   "height": 300,
+   "poses": {
+    "": [
+     "bv",
+     "r1c1",
+     382.0,
+     false
+    ],
+    "_idle_2": [
+     "bv",
+     "r1c2",
+     382.0,
+     false
+    ],
+    "_back": [
+     "bv",
+     "r1c3",
+     382.0,
+     false
+    ],
+    "_back_idle_2": [
+     "bv",
+     "r2c3",
+     382.0,
+     false
+    ],
+    "_back_attack": [
+     "bb",
+     "r1c1",
+     383.5,
+     false
+    ],
+    "_back_cast": [
+     "bb",
+     "r2c1",
+     383.5,
+     false
+    ],
+    "_back_walk": [
+     "bb",
+     "r2c2",
+     383.5,
+     false
+    ]
+   }
+  },
+  "tank": {
+   "folder": "players",
+   "height": 340,
+   "poses": {
+    "": [
+     "nf",
+     "r1c1",
+     312.0,
+     true
+    ],
+    "_idle_2": [
+     "nf",
+     "r2c2",
+     312.0,
+     true
+    ],
+    "_attack": [
+     "nf",
+     "r1c2",
+     312.0,
+     true
+    ],
+    "_attack_2": [
+     "nf",
+     "r1c3",
+     312.0,
+     true
+    ],
+    "_cast": [
+     "nf",
+     "r2c3",
+     312.0,
+     true
+    ],
+    "_walk": [
+     "nf",
+     "r2c1",
+     312.0,
+     true
+    ],
+    "_back": [
+     "nb",
+     "r1c2",
+     293.0,
+     true
+    ],
+    "_back_idle_2": [
+     "nb",
+     "r2c1",
+     293.0,
+     true
+    ],
+    "_back_walk": [
+     "nb",
+     "r1c3",
+     293.0,
+     true
+    ],
+    "_back_attack": [
+     "nb",
+     "r2c2",
+     293.0,
+     true
+    ],
+    "_back_cast": [
+     "nb",
+     "r2c3",
+     293.0,
+     true
+    ]
+   }
+  }
+ }
+}
