@@ -176,12 +176,24 @@ func init_grid() -> void:
 
 ## V43 : formes de plateau. Les cases « hors plateau » sont des obstacles de type "void" :
 ## infranchissables, sans décor, invisibles, et sans effet sur la ligne de vue.
-const BOARD_SHAPES: Array[String] = ["square", "square", "octagon", "round", "ravine", "cross", "wings"]
+## V47 : formes asymétriques (L, S, diagonale, îlots + pont, rectangle), orientées au hasard,
+## et formes propres à chaque biome (cf. BIOME_SHAPES).
+const BOARD_SHAPES: Array[String] = ["square", "octagon", "round", "ravine", "cross", "wings",
+		"l_shape", "s_shape", "diagonal", "islands", "rect"]
+## Formes favorisées par biome (tirées en plus du tirage général : elles reviennent plus souvent).
+const BIOME_SHAPES := {
+	"Forêt": ["ring", "ravine", "ring"],
+	"Montagne": ["ridge", "diagonal", "ridge"],
+	"Désert": ["dunes", "islands", "dunes"],
+}
 
 ## Cases hors plateau pour une forme donnée (grille n × n).
-static func shape_void_cells(shape: String, n: int) -> Array[Vector2i]:
+## `variant` : bit 1 = miroir horizontal, bit 2 = miroir vertical, bit 4 = transposition
+## (donne jusqu'à 8 orientations des formes asymétriques).
+static func shape_void_cells(shape: String, n: int, variant: int = 0) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
 	var mid: float = float(n - 1) * 0.5
+	var q: int = n / 2   # moitié de la grille (4 pour n = 8)
 	for y: int in range(n):
 		for x: int in range(n):
 			var dx: float = absf(float(x) - mid)
@@ -198,16 +210,48 @@ static func shape_void_cells(shape: String, n: int) -> Array[Vector2i]:
 					cut = dx > mid - 1.5 and dy > mid - 1.5
 				"wings":     # deux ailes reliées par un pont central
 					cut = dy < 1.0 and dx > 1.5
+				"l_shape":   # en L : un quadrant retiré
+					cut = x >= q and y < q
+				"s_shape":   # en S : deux coins opposés retirés
+					cut = (x >= n - 3 and y < 3) or (x < 3 and y >= n - 3)
+				"diagonal":  # bande en diagonale
+					cut = absi(x - y) > 3
+				"islands":   # deux îlots reliés par un pont étroit
+					var sm: int = x + y
+					cut = absi(sm - (n - 1)) <= 1 and absi(x - y) > 1
+				"rect":      # rectangle 8 × 6 (ou 6 × 8 transposé)
+					cut = y < 1 or y > n - 2
+				"ring":      # anneau : grand trou central
+					cut = dx < 2.0 and dy < 2.0
+				"ridge":     # crête sinueuse
+					cut = absf(float(y) - (mid + 1.6 * sin(float(x) * 0.85))) > 2.6
+				"dunes":     # deux cuvettes vides
+					cut = (float(x) - 1.5) * (float(x) - 1.5) + (float(y) - 5.5) * (float(y) - 5.5) <= 1.7 \
+						or (float(x) - 5.5) * (float(x) - 5.5) + (float(y) - 2.5) * (float(y) - 2.5) <= 1.7
 			if cut:
-				out.append(Vector2i(x, y))
+				var cx: int = x
+				var cy: int = y
+				if variant & 4 != 0:
+					var t: int = cx
+					cx = cy
+					cy = t
+				if variant & 1 != 0:
+					cx = n - 1 - cx
+				if variant & 2 != 0:
+					cy = n - 1 - cy
+				out.append(Vector2i(cx, cy))
 	return out
 
 
 func _generate_obstacles() -> void:
 	obstacles = {}
-	board_shape = BOARD_SHAPES[_rng.randi_range(0, BOARD_SHAPES.size() - 1)]
+	var shape_pool: Array[String] = []
+	shape_pool.append_array(BOARD_SHAPES)
+	for bs: String in (BIOME_SHAPES.get(fight_biome, []) as Array):
+		shape_pool.append(bs)
+	board_shape = shape_pool[_rng.randi_range(0, shape_pool.size() - 1)]
 	if board_shape != "square":
-		for vc: Vector2i in shape_void_cells(board_shape, GRID_SIZE):
+		for vc: Vector2i in shape_void_cells(board_shape, GRID_SIZE, _rng.randi_range(0, 7)):
 			obstacles[vc] = "void"
 		if not _all_free_connected() or GRID_SIZE * GRID_SIZE - obstacles.size() < 36:
 			obstacles = {}
