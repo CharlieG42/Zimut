@@ -136,9 +136,6 @@ func _build_achievements() -> void:
 
 
 func _build_bestiary() -> void:
-
-
-func _build_bestiary() -> void:
 	var b: Dictionary = _save.get("bestiary", {})
 	if b.is_empty():
 		var e := U.lbl("Aucun ennemi rencontré pour l'instant : lancez un combat !", 22, U.C_DIM)
