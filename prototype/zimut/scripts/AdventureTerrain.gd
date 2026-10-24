@@ -158,18 +158,27 @@ static func voids_of(zone_id: String) -> Dictionary:
 	cuts.append_array([Vector2i(nx, 0), Vector2i(nx + 1, 0), Vector2i(nx + 1, 1)])
 	var wy: int = rng.randi_range(h / 2 + 3, maxi(h / 2 + 3, h - 4))
 	cuts.append_array([Vector2i(0, wy), Vector2i(0, wy + 1), Vector2i(1, wy)])
-	# Ravin intérieur : une faille de 7 cases traversée par un pont de 2 cases au milieu.
-	var rx: int = w * 2 / 3
-	var ry: int = h / 3
-	for dy: int in range(-3, 4):
-		cuts.append(Vector2i(rx, ry + dy))
-		cuts.append(Vector2i(rx + 1, ry + dy))
-	cuts.erase(Vector2i(rx, ry))
-	cuts.erase(Vector2i(rx + 1, ry))
-	cuts.erase(Vector2i(rx, ry + 1))
-	cuts.erase(Vector2i(rx + 1, ry + 1))
-	# Petit étang au sud-ouest.
-	cuts.append_array([Vector2i(2, h - 4), Vector2i(3, h - 4), Vector2i(2, h - 3), Vector2i(3, h - 3)])
+	# Ravin intérieur : une faille de 7 cases traversée par un pont de 2 cases au milieu,
+	# plus un étang. "ile" : faille verticale à l'est + étang sud-ouest ;
+	# "ile_b" : faille horizontale au sud-ouest + étang nord-est.
+	if shape == "ile_b":
+		var bx: int = w / 3
+		var by: int = h * 2 / 3
+		for dx: int in range(-3, 4):
+			cuts.append(Vector2i(bx + dx, by))
+			cuts.append(Vector2i(bx + dx, by + 1))
+		for bc: Vector2i in [Vector2i(bx, by), Vector2i(bx + 1, by), Vector2i(bx, by + 1), Vector2i(bx + 1, by + 1)]:
+			cuts.erase(bc)
+		cuts.append_array([Vector2i(w - 5, 3), Vector2i(w - 4, 3), Vector2i(w - 5, 4), Vector2i(w - 4, 4)])
+	else:
+		var rx: int = w * 2 / 3
+		var ry: int = h / 3
+		for dy: int in range(-3, 4):
+			cuts.append(Vector2i(rx, ry + dy))
+			cuts.append(Vector2i(rx + 1, ry + dy))
+		for rc: Vector2i in [Vector2i(rx, ry), Vector2i(rx + 1, ry), Vector2i(rx, ry + 1), Vector2i(rx + 1, ry + 1)]:
+			cuts.erase(rc)
+		cuts.append_array([Vector2i(2, h - 4), Vector2i(3, h - 4), Vector2i(2, h - 3), Vector2i(3, h - 3)])
 	for c: Vector2i in cuts:
 		if c.x < 0 or c.y < 0 or c.x >= w - 1 or c.y >= h - 1:
 			continue
