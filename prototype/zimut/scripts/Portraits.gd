@@ -41,8 +41,10 @@ static func head_region(tex: Texture2D) -> Rect2:
 	if tex.resource_path.contains("/players/"):
 		# V31 : la tête est cherchée au-dessus du corps (les bâtons dépassent souvent au-dessus)
 		var hb: Vector3 = _head_box(tex)
-		side = minf(w, maxf(h * 0.36, hb.z))
-		return Rect2(clampf(hb.x - side * 0.5, 0.0, w - side), clampf(hb.y - side * 0.08, 0.0, h - side), side, side)
+		# Têtes chibi (dont les nouveaux sprites Mistral) : zone plus large pour ne pas couper le menton,
+		# et marge au-dessus pour les cheveux / casques.
+		side = minf(minf(w, h), maxf(h * 0.40, hb.z * 1.3))
+		return Rect2(clampf(hb.x - side * 0.5, 0.0, w - side), clampf(hb.y - side * 0.10, 0.0, h - side), side, side)
 	if w > h * 1.1:
 		# Sprites larges (tortue, loup, centaure) : la tête est à droite, carré calé sur le haut/droite
 		side = minf(w, h * 0.95)

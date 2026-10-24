@@ -824,7 +824,7 @@ class StatsView extends Control:
 		# Extrémité lumineuse (pastille) à la position courante + lueur
 		var tip: Vector2 = out[out.size() - 1]
 		draw_circle(tip, 6.0 + pulse * 1.5, Color(col.r, col.g, col.b, 0.35 * (0.5 + 0.5 * pulse)))
-		draw_circle(tip, 3.5, Color(1.0, 0.95, 0.6))
+		draw_circle(tip, 3.5, Color(0.9, 0.98, 1.0))
 
 	func _gem(c: Vector2, r: float, dark: Color, light: Color, text: String) -> void:
 		var font: Font = ThemeDB.fallback_font
@@ -863,7 +863,8 @@ class StatsView extends Control:
 			tt_rem = (gm as GameManager).turn_timer_remaining
 		if tt_dur > 0.0:
 			var ratio_t: float = clampf(tt_rem / tt_dur, 0.0, 1.0)
-			var gold: Color = Color(1.0, 0.82, 0.25)
+			# Cyan clair : se distingue du bouton FIN DU TOUR (jaune) et de la barre de PV (verte)
+			var gold: Color = Color(0.35, 0.85, 1.0)
 			# Pulsation de l'extrémité (plus rapide quand il reste peu de temps)
 			var pulse_t: float = 0.5 + 0.5 * sin(Time.get_ticks_msec() / (260.0 - 160.0 * ratio_t))
 			# Halo de fond (périmètre complet, atténué)
@@ -1113,7 +1114,7 @@ func _build_ui() -> void:
 	st.offset_left = 18.0
 	st.offset_right = 458.0
 	st.offset_top = 14.0
-	st.offset_bottom = 256.0
+	st.offset_bottom = 250.0
 	_root.add_child(st)
 	_stats = st
 
@@ -1194,10 +1195,11 @@ func _build_ui() -> void:
 	_end_btn.anchor_right = 0.0
 	_end_btn.anchor_top = 0.0
 	_end_btn.anchor_bottom = 0.0
-	_end_btn.offset_left = 26.0
-	_end_btn.offset_right = 450.0
-	_end_btn.offset_top = 196.0
-	_end_btn.offset_bottom = 262.0
+	# Bouton rentré dans la vignette (marge ≥ 14 px) pour ne plus chevaucher la jauge de temps.
+	_end_btn.offset_left = 34.0
+	_end_btn.offset_right = 442.0
+	_end_btn.offset_top = 182.0
+	_end_btn.offset_bottom = 234.0
 	_end_btn.pressed.connect(func() -> void:
 		Sfx.play("click")
 		end_turn_requested.emit())
