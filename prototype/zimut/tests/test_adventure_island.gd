@@ -70,5 +70,23 @@ func _boot() -> void:
 	# Plateau assez grand pour la vue défilante sur téléphone.
 	var ui_script: GDScript = load("res://scripts/AdventureMapUI.gd")
 	check(ui_script.scroll_needed(size, Vector2(1100, 850)), "22 × 16 : défilement activé")
+	# Toutes les zones : grandes cartes à contour irrégulier, lieux et portes accessibles.
+	var sizes := {}
+	for z: String in pm.ADVENTURE_ZONES.keys():
+		var tz: Dictionary = AdventureTerrain.zone_terrain(z)
+		var sz: Vector2i = tz["size"]
+		sizes[str(sz)] = true
+		var bad_z := 0
+		for k2: String in pm.ADVENTURE_POIS[z].keys():
+			var pz: Vector2i = AdventureTerrain.parse(k2)
+			if (tz["voids"] as Dictionary).has(pz) or (tz["obstacles"] as Dictionary).has(pz) \
+					or (pz != tz["start"] and AdventureTerrain.find_path(z, tz["start"], pz).is_empty()):
+				bad_z += 1
+		for g2: Vector2i in tz["gates"]:
+			if (tz["voids"] as Dictionary).has(g2) or AdventureTerrain.find_path(z, tz["start"], g2).is_empty():
+				bad_z += 1
+		check(sz.x * sz.y >= 190 and (tz["voids"] as Dictionary).size() >= 15 and bad_z == 0,
+			"%s : %s, %d cases hors île, lieux et portes accessibles" % [z, str(sz), (tz["voids"] as Dictionary).size()])
+	check(sizes.size() >= 5, "tailles de cartes variées (%s)" % str(sizes.keys()))
 	print("OK" if fails == 0 else "ÉCHEC")
 	quit(fails)
