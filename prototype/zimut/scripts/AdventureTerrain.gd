@@ -64,7 +64,7 @@ static func finds_of(zone_id: String) -> Dictionary:
 	while out.size() < kinds.size() and guard < 300:
 		guard += 1
 		var c := Vector2i(rng.randi_range(0, size.x - 1), rng.randi_range(0, size.y - 1))
-		if (t["obstacles"] as Dictionary).has(c) or (t["pois"] as Array).has(c) or (t["gates"] as Array).has(c) or c == t["start"] or out.has(c):
+		if (t["voids"] as Dictionary).has(c) or (t["obstacles"] as Dictionary).has(c) or (t["pois"] as Array).has(c) or (t["gates"] as Array).has(c) or c == t["start"] or out.has(c):
 			continue
 		# dispersées : pas deux trouvailles voisines
 		var near: bool = false
@@ -116,6 +116,100 @@ static func gates_of(zone_id: String) -> Dictionary:
 	return out
 
 
+## V47 : contour irrégulier. Cases « hors île » d'une zone (méta "shape" de ADVENTURE_ZONES).
+## Elles sont infranchissables et non dessinées. Les deux bords de façade (dernière ligne
+## et dernière colonne, où est dessinée la falaise) restent pleins ; les portes, le départ,
+## les lieux et leurs abords ne sont jamais coupés. Déterministe (même zone = même contour).
+static func voids_of(zone_id: String) -> Dictionary:
+	var meta: Dictionary = ProgressionManager.ADVENTURE_ZONES.get(zone_id, {})
+	var out: Dictionary = {}
+	var shape: String = String(meta.get("shape", ""))
+	if shape == "":
+		return out
+	var sz: Array = meta.get("size", [14, 10])
+	var w: int = int(sz[0])
+	var h: int = int(sz[1])
+	var st: Array = meta.get("start", [1, 3])
+	var keep: Array[Vector2i] = [Vector2i(int(st[0]), int(st[1]))]
+	for k: String in ProgressionManager.ADVENTURE_POIS.get(zone_id, {}).keys():
+		keep.append(parse(k))
+	for g: Vector2i in gates_of(zone_id).keys():
+		keep.append(g)
+	# Portes possibles (même sans voisin) : on garde leurs abords libres par prudence.
+	for dir: String in DIRS.keys():
+		keep.append(gate_cell(zone_id, dir))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = absi(zone_id.hash()) + 2026
+	var cuts: Array[Vector2i] = []
+	# Coin nord (0,0) : morsure en escalier.
+	var depth_n: int = rng.randi_range(4, 6)
+	for y: int in range(h):
+		for x: int in range(w):
+			if x + y < depth_n - 1:
+				cuts.append(Vector2i(x, y))
+	# Coins ouest-sud et nord-est : morsures plus courtes, bords du fond uniquement.
+	var depth_w: int = rng.randi_range(3, 4)
+	for i: int in range(depth_w):
+		for j: int in range(depth_w - i):
+			cuts.append(Vector2i(j, h - 2 - i))      # coin sud-ouest (hors dernière ligne)
+			cuts.append(Vector2i(w - 2 - i, j))      # coin nord-est (hors dernière colonne)
+	# Anse sur le bord nord et sur le bord ouest (loin des portes).
+	var nx: int = rng.randi_range(3, maxi(3, w / 2 - 4))
+	cuts.append_array([Vector2i(nx, 0), Vector2i(nx + 1, 0), Vector2i(nx + 1, 1)])
+	var wy: int = rng.randi_range(h / 2 + 3, maxi(h / 2 + 3, h - 4))
+	cuts.append_array([Vector2i(0, wy), Vector2i(0, wy + 1), Vector2i(1, wy)])
+	# Ravin intérieur : une faille de 7 cases traversée par un pont de 2 cases au milieu.
+	var rx: int = w * 2 / 3
+	var ry: int = h / 3
+	for dy: int in range(-3, 4):
+		cuts.append(Vector2i(rx, ry + dy))
+		cuts.append(Vector2i(rx + 1, ry + dy))
+	cuts.erase(Vector2i(rx, ry))
+	cuts.erase(Vector2i(rx + 1, ry))
+	cuts.erase(Vector2i(rx, ry + 1))
+	cuts.erase(Vector2i(rx + 1, ry + 1))
+	# Petit étang au sud-ouest.
+	cuts.append_array([Vector2i(2, h - 4), Vector2i(3, h - 4), Vector2i(2, h - 3), Vector2i(3, h - 3)])
+	for c: Vector2i in cuts:
+		if c.x < 0 or c.y < 0 or c.x >= w - 1 or c.y >= h - 1:
+			continue
+		var protected_cell: bool = false
+		for kp: Vector2i in keep:
+			if absi(kp.x - c.x) + absi(kp.y - c.y) <= 2:
+				protected_cell = true
+				break
+		if not protected_cell:
+			out[c] = true
+	# Sécurité : seules les cases reliées au départ restent jouables ; une poche isolée par les
+	# coupes devient « hors île ». Si un lieu ou une porte était isolé, on renonce au contour.
+	var reach: Dictionary = _reachable(Vector2i(w, h), out, keep[0])
+	for y: int in range(h):
+		for x: int in range(w):
+			var c2 := Vector2i(x, y)
+			if not out.has(c2) and not reach.has(c2):
+				out[c2] = true
+	for kp2: Vector2i in keep:
+		if out.has(kp2):
+			return {}
+	return out
+
+
+## Cases atteignables depuis `from` sans traverser `voids` : { Vector2i: true }.
+static func _reachable(size: Vector2i, voids: Dictionary, from: Vector2i) -> Dictionary:
+	var seen: Dictionary = {from: true}
+	var queue: Array[Vector2i] = [from]
+	var head: int = 0
+	while head < queue.size():
+		var cur: Vector2i = queue[head]
+		head += 1
+		for d: Vector2i in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)]:
+			var n: Vector2i = cur + d
+			if _inside(size, n) and not voids.has(n) and not seen.has(n):
+				seen[n] = true
+				queue.append(n)
+	return seen
+
+
 static func key(p: Vector2i) -> String:
 	return "%d,%d" % [p.x, p.y]
 
@@ -129,6 +223,7 @@ static func parse(k: String) -> Vector2i:
 
 ## Données de terrain d'une zone : { size, start, biome, obstacles {Vector2i: kind},
 ##   paths {Vector2i: true}, decor {Vector2i: kind}, pois [Vector2i], gates [Vector2i],
+##   voids {Vector2i: true} (cases hors île, V47),
 ##   cell_biome {Vector2i: biome} (uniquement les cases d'un autre biome que la carte) }
 static func zone_terrain(zone_id: String) -> Dictionary:
 	if _cache.has(zone_id):
@@ -147,6 +242,7 @@ static func zone_terrain(zone_id: String) -> Dictionary:
 		gates.append(g)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = absi(zone_id.hash()) + 4099
+	var voids: Dictionary = voids_of(zone_id)
 
 	# 0) Lisière : un biome voisin gagne un côté de la carte (bord irrégulier).
 	var cell_biome: Dictionary = {}
@@ -165,7 +261,7 @@ static func zone_terrain(zone_id: String) -> Dictionary:
 	# 1) Sentiers : chemin le plus court départ → chaque lieu, sur grille vide.
 	var paths: Dictionary = {}
 	for p: Vector2i in pois + gates:
-		for c: Vector2i in _bfs_path(size, {}, start, p):
+		for c: Vector2i in _bfs_path(size, voids, start, p):
 			paths[c] = true
 	paths[start] = true
 
@@ -180,14 +276,14 @@ static func zone_terrain(zone_id: String) -> Dictionary:
 	while obstacles.size() < wanted and guard < 400:
 		guard += 1
 		var c := Vector2i(rng.randi_range(0, size.x - 1), rng.randi_range(0, size.y - 1))
-		if paths.has(c) or gate_mouth.has(c) or pois.has(c) or gates.has(c) or obstacles.has(c) or c.distance_to(Vector2(start)) < 1.5:
+		if voids.has(c) or paths.has(c) or gate_mouth.has(c) or pois.has(c) or gates.has(c) or obstacles.has(c) or c.distance_to(Vector2(start)) < 1.5:
 			continue
 		var kinds: Array = _obstacles_for(String(cell_biome.get(c, biome)))
 		obstacles[c] = String(kinds[rng.randi_range(0, kinds.size() - 1)])
 		# Bosquet : une case voisine de temps en temps
 		if rng.randf() < 0.45:
 			var n: Vector2i = c + [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)][rng.randi_range(0, 3)]
-			if _inside(size, n) and not paths.has(n) and not gate_mouth.has(n) and not pois.has(n) and not gates.has(n) and not obstacles.has(n) and n != start:
+			if _inside(size, n) and not voids.has(n) and not paths.has(n) and not gate_mouth.has(n) and not pois.has(n) and not gates.has(n) and not obstacles.has(n) and n != start:
 				var nk: Array = _obstacles_for(String(cell_biome.get(n, biome)))
 				obstacles[n] = String(nk[rng.randi_range(0, nk.size() - 1)])
 
@@ -195,7 +291,7 @@ static func zone_terrain(zone_id: String) -> Dictionary:
 	#    autre porte, que le héros franchirait) ; sinon on retire les obstacles fautifs.
 	for p: Vector2i in pois + gates:
 		var tries: int = 0
-		while _bfs_path(size, _with_gates(obstacles, gates, p), start, p).is_empty() and tries < 40 and not obstacles.is_empty():
+		while _bfs_path(size, _with_gates(_merge(obstacles, voids), gates, p), start, p).is_empty() and tries < 40 and not obstacles.is_empty():
 			tries += 1
 			var best: Vector2i = obstacles.keys()[0]
 			var best_d: float = INF
@@ -211,14 +307,21 @@ static func zone_terrain(zone_id: String) -> Dictionary:
 	for y: int in range(size.y):
 		for x: int in range(size.x):
 			var c2 := Vector2i(x, y)
-			if obstacles.has(c2) or pois.has(c2) or paths.has(c2) or gates.has(c2) or c2 == start:
+			if voids.has(c2) or obstacles.has(c2) or pois.has(c2) or paths.has(c2) or gates.has(c2) or c2 == start:
 				continue
 			var gkinds: Array = _ground_for(String(cell_biome.get(c2, biome)))
 			if rng.randf() < 0.22:
 				decor[c2] = String(gkinds[rng.randi_range(0, gkinds.size() - 1)])
 	var out: Dictionary = {"size": size, "start": start, "biome": biome, "obstacles": obstacles,
-		"paths": paths, "decor": decor, "pois": pois, "gates": gates, "cell_biome": cell_biome}
+		"paths": paths, "decor": decor, "pois": pois, "gates": gates, "cell_biome": cell_biome, "voids": voids}
 	_cache[zone_id] = out
+	return out
+
+
+static func _merge(a: Dictionary, b: Dictionary) -> Dictionary:
+	var out: Dictionary = a.duplicate()
+	for k: Vector2i in b.keys():
+		out[k] = true
 	return out
 
 
@@ -243,14 +346,14 @@ static func _inside(size: Vector2i, p: Vector2i) -> bool:
 ## Case franchissable (dans la zone et sans obstacle).
 static func walkable(zone_id: String, p: Vector2i) -> bool:
 	var t: Dictionary = zone_terrain(zone_id)
-	return _inside(t["size"], p) and not (t["obstacles"] as Dictionary).has(p)
+	return _inside(t["size"], p) and not (t["obstacles"] as Dictionary).has(p) and not (t["voids"] as Dictionary).has(p)
 
 
 ## Plus court chemin (4 directions), départ exclu ; [] si inaccessible.
 ## `blocked` : cases interdites en plus des obstacles (sauf la destination).
 static func find_path(zone_id: String, from: Vector2i, to: Vector2i, blocked: Dictionary = {}) -> Array[Vector2i]:
 	var t: Dictionary = zone_terrain(zone_id)
-	var walls: Dictionary = (t["obstacles"] as Dictionary).duplicate()
+	var walls: Dictionary = _merge(t["obstacles"], t["voids"])
 	for b: Vector2i in blocked.keys():
 		if b != to:
 			walls[b] = true

@@ -152,7 +152,7 @@ const ADVENTURE_BASE_XP := 60
 ## `unlock` est conservé pour les anciennes sauvegardes (voyage rapide).
 const ADVENTURE_ZONES := {
 	"foret_sylve": {
-		"name": "Sentiers de la Sylve", "biome": "Forêt", "size": [14, 10], "grid": [1, 1],
+		"name": "Sentiers de la Sylve", "biome": "Forêt", "size": [22, 16], "shape": "ile", "grid": [1, 1],
 		"start": [1, 3], "unlock": "", "key_poi": "7,2", "reveals": ["clairiere", "village_brume", "pont_mousse"],
 	},
 	"foret_ronces": {
@@ -234,6 +234,19 @@ const ADVENTURE_POIS := {
 			"desc": "Du haut de l’arbre, la vallée se dévoile."},
 		"2,1": {"kind": "puzzle", "name": "Cercle des pierres chantantes", "level": 1,
 			"desc": "Des menhirs s'illuminent puis se taisent."},
+		# V47 : la Sylve s'agrandit (22 × 16) ; ces lieux occupent les nouvelles terres.
+		"5,10": {"kind": "combat", "name": "Tanière du sanglier", "level": 2,
+			"desc": "Un grand sanglier défend sa bauge."},
+		"11,7": {"kind": "combat", "name": "Embuscade sous les pins", "level": 3,
+			"desc": "Des brigands guettent le sentier."},
+		"14,11": {"kind": "combat", "name": "Meute de loups gris", "level": 4,
+			"desc": "Des hurlements montent des fourrés."},
+		"10,12": {"kind": "camp", "name": "Clairière des lucioles", "level": 1,
+			"desc": "Des lucioles dansent autour d'un feu tranquille."},
+		"19,4": {"kind": "chest", "name": "Souche creuse", "level": 2,
+			"desc": "Quelque chose brille au fond de la souche."},
+		"18,12": {"kind": "chest", "name": "Cache du bûcheron", "level": 3,
+			"desc": "Un coffre dissimulé sous des fagots."},
 	},
 	"foret_ronces": {
 		"1,1": {"kind": "combat", "guardian": "Forêt", "name": "Donjon de la Nation Sylvestre", "level": 17,

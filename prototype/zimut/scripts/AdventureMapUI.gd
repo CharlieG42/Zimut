@@ -1874,6 +1874,7 @@ class AdventureBoard extends Node2D:
 		var biome: String = mgr.zone_biome()
 		var p: Dictionary = BattleScenery.pal(biome)
 		var terrain: Dictionary = AdventureTerrain.zone_terrain(mgr.zone_id())
+		var voids: Dictionary = terrain["voids"]   # V47 : cases hors île (contour irrégulier)
 		# Falaise sous l'île (faces avant + bas déchiqueté)
 		var lv: Vector2 = ui.cell_center(Vector2i(0, size.y - 1)) + Vector2(-64, 0)
 		var bv: Vector2 = ui.cell_center(Vector2i(size.x - 1, size.y - 1)) + Vector2(0, 32)
@@ -1889,7 +1890,7 @@ class AdventureBoard extends Node2D:
 			for x: int in range(size.x):
 				var cell := Vector2i(x, y)
 				var c: Vector2 = ui.cell_center(cell)
-				if not mgr.cell_discovered(cell):
+				if voids.has(cell) or not mgr.cell_discovered(cell):
 					continue
 				var tex: Texture2D = BattleScenery.tile_tex(AdventureTerrain.cell_biome(mgr.zone_id(), cell), posmod(x * 3 + y * 5, 6))
 				if tex != null:
@@ -1960,7 +1961,7 @@ class AdventureBoard extends Node2D:
 		for y2: int in range(size.y):
 			for x2: int in range(size.x):
 				var fc := Vector2i(x2, y2)
-				if mgr.cell_discovered(fc):
+				if voids.has(fc) or mgr.cell_discovered(fc):
 					continue
 				var c4: Vector2 = ui.cell_center(fc)
 				var deep: bool = ProgressionManager.adventure_biome_layer(biome) < 0

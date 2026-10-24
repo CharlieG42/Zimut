@@ -38,7 +38,20 @@ func load_state(data: Dictionary, slot_no: int) -> void:
 		return
 	state = ProgressionManager.adventure_state(save)
 	save["campaign_mode"] = "adventure"
+	_repair_after_resize()
 	persist()
+
+## V47 : une carte agrandie (ou au contour modifié) peut avoir déplacé des obstacles / cases vides ;
+## un héros ou un groupe d'une ancienne sauvegarde ne doit pas se retrouver coincé sur l'une d'elles.
+func _repair_after_resize() -> void:
+	var zid: String = zone_id()
+	if not AdventureTerrain.walkable(zid, hero_pos()):
+		var st: Vector2i = AdventureTerrain.zone_terrain(zid)["start"]
+		state["hero_pos"] = [st.x, st.y]
+	var list: Array = AdventureMobs.groups(state, zid)
+	for i: int in range(list.size() - 1, -1, -1):
+		if not AdventureTerrain.walkable(zid, AdventureMobs.pos_of(list[i])):
+			list.remove_at(i)
 
 ## Zone courante du héros.
 func zone_id() -> String:
@@ -252,7 +265,21 @@ func finds_progress() -> Dictionary:
 
 ## Une case est-elle hors brouillard dans la zone courante ?
 func cell_discovered(pos: Vector2i) -> bool:
-	return ProgressionManager.adventure_cell_discovered(state, pos)
+	# V47 : appelée pour chaque case à chaque image (cartes jusqu'à 22 × 16) : on indexe la liste
+	# des cases découvertes dans un Dictionary (recalculé seulement quand la liste change).
+	var arr: Array = state.get("discovered", [])
+	var last: String = String(arr.back()) if not arr.is_empty() else ""
+	if arr.size() != _disc_count or last != _disc_last:
+		_disc_set = {}
+		for k: Variant in arr:
+			_disc_set[String(k)] = true
+		_disc_count = arr.size()
+		_disc_last = last
+	return _disc_set.has("%s,%d,%d" % [String(state.get("zone", "foret_sylve")), pos.x, pos.y])
+
+var _disc_set: Dictionary = {}
+var _disc_count: int = -1
+var _disc_last: String = ""
 
 ## Interaction avec le POI sous le héros. Retourne une commande décrivant
 ## ce que l'UI doit faire : { "action": ... } — la logique de récompense
