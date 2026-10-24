@@ -21,7 +21,7 @@ func _boot() -> void:
 		var unreachable: int = 0
 		for k: String in pm.ADVENTURE_POIS[zone_id].keys():
 			var p: Vector2i = AdventureTerrain.parse(k)
-			if p.x < 0 or p.y < 0 or p.x >= size.x or p.y >= size.y or t["obstacles"].has(p):
+			if p.x < 0 or p.y < 0 or p.x >= size.x or p.y >= size.y or t["obstacles"].has(p) or t["voids"].has(p):
 				bad += 1
 			if p != t["start"] and AdventureTerrain.find_path(zone_id, t["start"], p).is_empty():
 				unreachable += 1
