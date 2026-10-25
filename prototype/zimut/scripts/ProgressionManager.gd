@@ -726,6 +726,8 @@ func _fresh_save() -> Dictionary:
 		"resources": {},      # { "Fer": n, "Bois": n, ... } — butin de craft
 		"gold": 0,            # pièces d'or (pour le craft)
 		"roster": {},         # { classe: { level, xp, invested{}, unspent, auto, spell_levels{} } }
+		"player": {"level": 1, "xp": 0},   # V47 : niveau du joueur (plafond du niveau des héros)
+		"heroes_unlocked": [],             # V47 : héros disponibles (3 choisis en fin de tutoriel, puis déblocages)
 		"balance_v": BALANCE_VERSION,
 		"difficulty": 1,      # difficulté des mobs propre à la partie (0 Facile … 3 Enfer)
 		"playtime": 0,        # V46 : temps de jeu total en secondes
@@ -900,6 +902,14 @@ func _load_spell_levels() -> void:
 		})
 
 ## Liste des classes jouables (ordre d'affichage).
+## V47 : classes disponibles pour la partie (les autres sont à débloquer).
+func unlocked_class_names(data: Dictionary) -> Array[String]:
+	var out: Array[String] = []
+	for c: String in class_names():
+		if HeroUnlock.is_unlocked(data, c):
+			out.append(c)
+	return out
+
 func class_names() -> Array[String]:
 	var out: Array[String] = []
 	for c: String in CLASS_ORDER:
@@ -1616,6 +1626,7 @@ func ensure_roster(data: Dictionary) -> void:
 		Builds.ensure(data, classe)
 	data["roster"] = roster
 	data["balance_v"] = BALANCE_VERSION
+	HeroUnlock.ensure(data, xp_for_level)   # V47 : niveau du joueur + héros débloqués (migration)
 	if not data.has("difficulty"):
 		# Anciennes parties : reprend le réglage global qui existait avant (Options).
 		var gs: Node = get_node_or_null("/root/GameSettings")
@@ -1896,6 +1907,13 @@ func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0, fight_level: in
 		team_classes.append(String(m.get("classe", "")))
 	var avg: int = team_average_level(data)
 	var report: Dictionary = {}
+	# V47 : le joueur gagne l'XP du combat à 100 % ; aucun héros ne peut dépasser son niveau.
+	var p_gain: float = float(raw_xp) * ratio
+	if fight_level > 0:
+		p_gain *= xp_level_factor(fight_level, HeroUnlock.player_level(data))
+	var player_rep: Dictionary = HeroUnlock.add_xp(data, roundi(p_gain), xp_for_level, level_for_xp)
+	data["last_player"] = player_rep
+	var player_cap: int = HeroUnlock.player_level(data)
 	for classe: String in data["roster"].keys():
 		var e: Dictionary = data["roster"][classe]
 		var in_team: bool = team_classes.has(classe)
@@ -1907,7 +1925,8 @@ func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0, fight_level: in
 		var g: int = roundi(gain)
 		var from_lvl: int = int(e["level"])
 		e["xp"] = int(e["xp"]) + g
-		var to_lvl: int = mini(ClassRules.MAX_LEVEL, level_for_xp(int(e["xp"])))
+		var to_lvl: int = mini(mini(ClassRules.MAX_LEVEL, player_cap), level_for_xp(int(e["xp"])))
+		to_lvl = maxi(to_lvl, from_lvl)
 		var pts: int = 0
 		if to_lvl > from_lvl:
 			pts = (to_lvl - from_lvl) * ClassRules.POINTS_PER_LEVEL

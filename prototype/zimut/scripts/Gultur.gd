@@ -23,7 +23,15 @@ const INTRO := [
 	"Retrouver les Pierres est [b]indispensable[/b] pour rétablir l'ordre : tant qu'elles seront perdues, Zimut sombrera dans le chaos.",
 	"Et prends garde : chaque Pierre confère à son possesseur des [b]pouvoirs incroyables[/b]. Entre de mauvaises mains, elle serait une arme terrible ; entre les tiennes, un espoir.",
 	"Tu es venu d'un autre monde, appelé par les Pierres elles-mêmes : [b]toi seul[/b] peux les retrouver, {pseudo}. Alors, es-tu prêt ?",
-	"Pour cela, il te faut des héros forts. Commence par les [b]Combats Tactiques[/b] : c'est là que ton équipe apprendra à se battre. Touche le bouton en surbrillance !",
+]
+## Fin du tutoriel : choix des 3 héros de départ (V47), puis premier combat.
+const PICK := [
+	"Pour cela, il te faut des [b]héros forts[/b]. Dix héros t'attendent, mais tu n'en emmèneras d'abord que [b]trois[/b].",
+	"Choisis-les avec soin : ce seront les seuls disponibles au début. Pas de panique, en gagnant des [b]niveaux de joueur[/b] tu en débloqueras d'autres, et [b]c'est toi qui choisiras[/b] lesquels.",
+	"Regarde bien la fiche de chacun : son rôle, ses points forts et ses points faibles. Un bon trio mêle un [b]protecteur[/b], un [b]soutien[/b] et un [b]héros de dégâts[/b].",
+]
+const AFTER_PICK := [
+	"Excellent choix ! Maintenant, lance-toi dans les [b]Combats Tactiques[/b] : c'est là que ton équipe apprendra à se battre. Touche le bouton en surbrillance !",
 ]
 const TEAM := [
 	"Voici la préparation de ton équipe. Tu emmènes [b]3 héros[/b] au combat : ils apparaissent dans le cadre doré « TON ÉQUIPE ».",

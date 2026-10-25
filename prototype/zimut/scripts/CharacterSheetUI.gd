@@ -69,7 +69,7 @@ class StatBar extends Control:
 func open(save_data: Dictionary, slot: int, start_class: String = "") -> void:
 	_save = save_data
 	_slot = slot
-	var names: Array[String] = ProgressionManager.class_names()
+	var names: Array[String] = ProgressionManager.unlocked_class_names(_save)
 	if start_class != "" and names.has(start_class):
 		_classe = start_class
 	elif not names.is_empty():
@@ -324,7 +324,7 @@ func _refresh_list() -> void:
 	for c in _list_box.get_children():
 		c.queue_free()
 	var team: Array[String] = _team_classes()
-	for classe: String in ProgressionManager.class_names():
+	for classe: String in ProgressionManager.unlocked_class_names(_save):
 		var ent: Dictionary = ProgressionManager.roster_entry(_save, classe)
 		var level: int = int(ent.get("level", 1))
 		var selected: bool = classe == _classe

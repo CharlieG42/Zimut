@@ -312,30 +312,52 @@ var _gultur_busy: bool = false
 ## Tutoriel de Gultur sur « Mes Parties » : accueil, puis déblocage de l'Aventure (niv 3)
 ## et de la Conquête (niv 5). Chaque étape ne s'affiche qu'une fois.
 func _start_tutorial(data: Dictionary, tac_btn: Button) -> void:
-	if _gultur_busy or not GameSettings.tutorial_enabled:
+	if _gultur_busy:
 		return
 	GameManager.active_save = data
+	_tac_btn_ref = tac_btn
 	var steps: Array = []
-	if Gultur.should_show("intro"):
-		steps.append(["intro", Gultur.INTRO, tac_btn])
-	if Gultur.should_show("lvl3") and ProgressionManager.mode_unlocked(data, "adventure"):
-		steps.append(["lvl3", Gultur.LVL3, null])
-	if Gultur.should_show("lvl5") and ProgressionManager.mode_unlocked(data, "conquest"):
-		steps.append(["lvl5", Gultur.LVL5, null])
-	if steps.is_empty():
-		return
+	if GameSettings.tutorial_enabled:
+		if Gultur.should_show("intro"):
+			steps.append(["intro", Gultur.INTRO, null])
+		# V47 : fin du tutoriel = choix des 3 héros de départ.
+		if HeroUnlock.needs_initial_picks(data) and Gultur.should_show("pick"):
+			steps.append(["pick", Gultur.PICK, null])
+		if Gultur.should_show("lvl3") and ProgressionManager.mode_unlocked(data, "adventure"):
+			steps.append(["lvl3", Gultur.LVL3, null])
+		if Gultur.should_show("lvl5") and ProgressionManager.mode_unlocked(data, "conquest"):
+			steps.append(["lvl5", Gultur.LVL5, null])
 	_gultur_busy = true
 	_run_tutorial_steps.call_deferred(steps)
+
+
+var _tac_btn_ref: Button = null
 
 
 func _run_tutorial_steps(steps: Array) -> void:
 	if steps.is_empty():
 		_gultur_busy = false
+		_maybe_pick_heroes()
 		return
 	var s: Array = steps.pop_front()
 	var g: Gultur = Gultur.say(self, String(s[0]), s[1], s[2] as Control, func() -> void: _run_tutorial_steps(steps))
 	if g == null:
-		_gultur_busy = false
+		_run_tutorial_steps(steps)
+
+
+## Choix des héros de départ (nouvelle partie). Les déblocages suivants se font depuis
+## l'écran d'équipe et l'écran de victoire.
+func _maybe_pick_heroes() -> void:
+	var data: Dictionary = _current
+	if data.is_empty() or get_node_or_null("HeroPickUI") != null:
+		return
+	if HeroUnlock.needs_initial_picks(data):
+		HeroPickUI.open(self, data, true, func(_p: Array) -> void:
+			ProgressionManager.write_save(_current_slot, _current)
+			GameManager.active_save = _current
+			if GameSettings.tutorial_enabled and Gultur.should_show("afterpick"):
+				Gultur.say(self, "afterpick", Gultur.AFTER_PICK, _tac_btn_ref)
+			refresh())
 
 
 ## Nouvelle partie : demande le pseudo du joueur (le même pseudo peut servir plusieurs fois).
