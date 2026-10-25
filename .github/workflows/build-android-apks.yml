@@ -147,8 +147,14 @@ jobs:
           GDRIVE_SECRET: ${{ secrets.ZIMUT_GDRIVE_CLIENT_SECRET }}
         run: |
           if [ -n "$GDRIVE_ID" ]; then
-            python3 -c "import json,os; json.dump({'client_id': os.environ['GDRIVE_ID'], 'client_secret': os.environ.get('GDRIVE_SECRET','')}, open('prototype/zimut/cloud_oauth.json','w'))"
-            echo "Sauvegarde Cloud : identifiants Google présents."
+            python3 - <<'PY'
+          import json, os
+          cid = os.environ["GDRIVE_ID"].strip()
+          sec = os.environ.get("GDRIVE_SECRET", "").strip()
+          json.dump({"client_id": cid, "client_secret": sec}, open("prototype/zimut/cloud_oauth.json", "w"))
+          ok = cid.endswith(".apps.googleusercontent.com")
+          print("Sauvegarde Cloud : ID client %s (%d car.), secret %s" % ("au bon format" if ok else "INATTENDU (doit finir par .apps.googleusercontent.com)", len(cid), "présent" if sec else "ABSENT"))
+          PY
           else
             echo "::notice::Secrets ZIMUT_GDRIVE_CLIENT_ID absents : les boutons Cloud indiqueront « non configuré »."
           fi

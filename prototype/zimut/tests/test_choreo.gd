@@ -30,7 +30,10 @@ func _boot() -> void:
 			sigs[_sig(v, "attack", nm)] = true
 		check(_sig(v, "attack", spells[0]) == _sig(v, "attack", spells[0]), "%s : même sort = même animation" % c)
 		print("   %s : %d animations différentes pour %d sorts (%d poses d'attaque)" % [c, sigs.size(), spells.size(), (v._poses.get("attack", []) as Array).size()])
-		check(sigs.size() >= 3, "%s : au moins 3 animations différentes" % c)
+		# Au moins 3 animations… dans la limite des poses dessinées (Druide V45 : 1 attaque + 1 sort de face).
+		var avail: int = (v._poses.get("attack", []) as Array).size() + (v._poses.get("cast", []) as Array).size()
+		var need: int = mini(3, maxi(1, avail))
+		check(sigs.size() >= need, "%s : au moins %d animations différentes (%d poses d'action de face)" % [c, need, avail])
 		v.queue_free()
 	print("ÉCHECS : ", fails)
 	quit(0 if fails == 0 else 1)
