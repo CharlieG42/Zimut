@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://fgvig6nip62r"
-path="res://.godot/imported/cimes_back.png-6c99c8b21e5a5e3970a949c45e7d5880.ctex"
+uid="uid://diqwj65ib34wn"
+path="res://.godot/imported/guerrier_des_monts_back_idle_2.png-1787ee3a04a449950a3bbd70883939e4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/nations/boss/cimes_back.png"
-dest_files=["res://.godot/imported/cimes_back.png-6c99c8b21e5a5e3970a949c45e7d5880.ctex"]
+source_file="res://assets/sprites/nations/ennemis/cimes/guerrier_des_monts_back_idle_2.png"
+dest_files=["res://.godot/imported/guerrier_des_monts_back_idle_2.png-1787ee3a04a449950a3bbd70883939e4.ctex"]
 
 [params]
 

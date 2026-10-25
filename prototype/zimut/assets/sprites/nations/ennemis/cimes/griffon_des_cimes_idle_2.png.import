@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://jsjgpqlsftqo"
-path="res://.godot/imported/guerrier_des_monts_back_cast.png-9d4142b77c08a45300de1f38fdd59385.ctex"
+uid="uid://d7p1a3srjg82"
+path="res://.godot/imported/griffon_des_cimes_idle_2.png-2f376b0f3f6be76827a0dd3ba9b898a7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/nations/ennemis/cimes/guerrier_des_monts_back_cast.png"
-dest_files=["res://.godot/imported/guerrier_des_monts_back_cast.png-9d4142b77c08a45300de1f38fdd59385.ctex"]
+source_file="res://assets/sprites/nations/ennemis/cimes/griffon_des_cimes_idle_2.png"
+dest_files=["res://.godot/imported/griffon_des_cimes_idle_2.png-2f376b0f3f6be76827a0dd3ba9b898a7.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://xi0c0m1iieg"
-path="res://.godot/imported/guerrier_des_monts_back_attack_3.png-c89dedc88c262279592fdd7226a4a0e1.ctex"
+uid="uid://rcn4nu152scs"
+path="res://.godot/imported/guerrier_des_monts_attack_3.png-b66fd86da43d2f477103094d43ac3a73.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/nations/ennemis/cimes/guerrier_des_monts_back_attack_3.png"
-dest_files=["res://.godot/imported/guerrier_des_monts_back_attack_3.png-c89dedc88c262279592fdd7226a4a0e1.ctex"]
+source_file="res://assets/sprites/nations/ennemis/cimes/guerrier_des_monts_attack_3.png"
+dest_files=["res://.godot/imported/guerrier_des_monts_attack_3.png-b66fd86da43d2f477103094d43ac3a73.ctex"]
 
 [params]
 

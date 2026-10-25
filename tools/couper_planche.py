@@ -5,6 +5,7 @@ Usage : couper_planche.py planche.jpg dossier_sortie --grid COLSxROWS [--prefix 
 - fond retiré par remplissage depuis les bords (bloqué par les contours sombres) ;
 - ombres au sol (gris ou rose clair) retirées par un second remplissage ;
 - chaque composant est rattaché à la case de grille de son centre (les flammes détachées suivent leur personnage) ;
+- sprites clairs (fourrure/tête blanche) : `--holes 60000 --shadow-delta 300 --ombre-sol` (ombre au sol retirée par sa couleur) ;
 - une pose par case, recadrée ; sortie : <prefix>_<ligne><colonne>.png (r1c1, r1c2…) + contact.png.
 """
 import argparse, os, sys
@@ -33,7 +34,47 @@ def shadow_like(rgb: np.ndarray, bg_lum: float, delta: float = 6.0) -> np.ndarra
     neutral = sat < 0.13
     return (lum > 105) & (lum < bg_lum - delta) & ((neutral) | (pinkish & (sat < 0.35) & (lum > 150)))
 
-def cut(path: str, outdir: str, cols: int, rows: int, prefix: str, min_area: int, holes: int = 120, delta: float = 6.0):
+def strip_ground_shadow(rgba: np.ndarray, bgc=None) -> np.ndarray:
+    """Retire l'ombre portée au sol d'un sprite déjà détouré : pixels peu saturés, de la couleur dominante
+    des gris du bas de l'image (rangées basses), dans le quart inférieur. Préserve fourrure blanche et pierres sombres."""
+    h, w, _ = rgba.shape
+    rgb = rgba[..., :3].astype(float)
+    a = rgba[..., 3] > 0
+    f = rgb / 255.0
+    mx, mn = f.max(-1), f.min(-1)
+    sat = np.where(mx > 0, (mx - mn) / np.maximum(mx, 1e-6), 0)
+    lum = (0.299 * rgb[..., 0] + 0.587 * rgb[..., 1] + 0.114 * rgb[..., 2])
+    low = np.zeros((h, w), bool)
+    low[int(h * 0.76):] = True
+    cand = a & low & (sat < 0.26) & (lum > 95) & (lum < 248)
+    if cand.sum() < 80:
+        return rgba
+    bottom = np.zeros((h, w), bool)
+    bottom[int(h * 0.90):] = True
+    est = cand & bottom
+    col = np.median(rgb[est if est.sum() >= 40 else cand], axis=0)
+    near = np.sqrt(((rgb - col) ** 2).sum(-1)) < 34.0
+    rm = cand & near
+    if bgc is not None:
+        # fond enclavé entre les jambes / sous le personnage : retiré dans la bande basse (hors fourrure, plus haute)
+        low2 = np.zeros((h, w), bool)
+        low2[int(h * (0.78 if float(np.mean(bgc)) < 235 else 0.88)):] = True
+        rm |= a & low2 & (np.sqrt(((rgb - np.asarray(bgc, float)) ** 2).sum(-1)) < 22.0)
+    out = rgba.copy()
+    out[..., 3] = np.where(rm, 0, out[..., 3])
+    lab, n = ndi.label(out[..., 3] > 0, structure=np.ones((3, 3)))
+    if n > 1:
+        sizes = ndi.sum(np.ones_like(lab), lab, range(1, n + 1))
+        keep = 1 + int(np.argmax(sizes))
+        small = (lab > 0) & (lab != keep)
+        # on garde les gros composants (effets détachés) ; seuls les petits résidus de l'ombre sont retirés
+        for i in range(1, n + 1):
+            if i != keep and sizes[i - 1] < 150:
+                out[..., 3][lab == i] = 0
+    return out
+
+
+def cut(path: str, outdir: str, cols: int, rows: int, prefix: str, min_area: int, holes: int = 120, delta: float = 6.0, ombre: bool = False):
     im = Image.open(path).convert("RGB")
     rgb = np.array(im)
     h, w, _ = rgb.shape
@@ -75,6 +116,10 @@ def cut(path: str, outdir: str, cols: int, rows: int, prefix: str, min_area: int
         ys, xs = np.nonzero(m)
         y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
         rgba = np.dstack([rgb, (m * 255).astype(np.uint8)])[y0:y1, x0:x1]
+        if ombre:
+            rgba = strip_ground_shadow(rgba, bgc)
+            ys2, xs2 = np.nonzero(rgba[..., 3] > 0)
+            rgba = rgba[ys2.min():ys2.max() + 1, xs2.min():xs2.max() + 1]
         img = Image.fromarray(rgba, "RGBA")
         name = f"{prefix}_r{r+1}c{c+1}.png"
         img.save(os.path.join(outdir, name))
@@ -95,6 +140,7 @@ if __name__ == "__main__":
     ap.add_argument("planche"); ap.add_argument("sortie")
     ap.add_argument("--grid", default="3x2"); ap.add_argument("--prefix", default="p")
     ap.add_argument("--min-area", type=int, default=400); ap.add_argument("--holes", type=int, default=120); ap.add_argument("--shadow-delta", type=float, default=6.0)
+    ap.add_argument("--ombre-sol", action="store_true", help="retire l'ombre portée au sol après détourage (sprites clairs : fourrure blanche…)")
     a = ap.parse_args()
     cols, rows = (int(x) for x in a.grid.lower().split("x"))
-    cut(a.planche, a.sortie, cols, rows, a.prefix, a.min_area, a.holes, a.shadow_delta)
+    cut(a.planche, a.sortie, cols, rows, a.prefix, a.min_area, a.holes, a.shadow_delta, a.ombre_sol)
