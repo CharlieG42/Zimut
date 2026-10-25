@@ -358,6 +358,7 @@ func _build() -> void:
 	info_sc.custom_minimum_size = Vector2(0, 100)
 	info_sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	info_sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	info_sc.scroll_deadzone = 8
 	card_box.add_child(info_sc)
 	_info_rich = RichTextLabel.new()
 	_info_rich.bbcode_enabled = true
@@ -365,7 +366,8 @@ func _build() -> void:
 	_info_rich.scroll_active = false
 	_info_rich.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for fs in ["normal_font_size", "bold_font_size"]:
-		_info_rich.add_theme_font_size_override(fs, 17)
+		_info_rich.add_theme_font_size_override(fs, 20)
+	_info_rich.mouse_filter = Control.MOUSE_FILTER_PASS   # glisser n'importe où dans la fiche fait défiler
 	_info_rich.add_theme_color_override("default_color", Color(0.82, 0.85, 0.92))
 	info_sc.add_child(_info_rich)
 	_stats_label = U.lbl("", 21, U.C_TXT)
