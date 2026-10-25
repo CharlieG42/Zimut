@@ -123,6 +123,43 @@ func _chip(text: String, col: Color, size: int = 17) -> PanelContainer:
 	return p
 
 
+## Pastille « à faire » : nombre de points disponibles, couleur vive, légère pulsation.
+func _badge(text: String, col: Color, size: int = 20, pulse: bool = true) -> PanelContainer:
+	var p := PanelContainer.new()
+	p.name = "Badge"
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sb: StyleBoxFlat = _box(col.darkened(0.15), Color(1, 1, 1, 0.9), 20, 2, 7)
+	sb.content_margin_top = 1
+	sb.content_margin_bottom = 1
+	sb.shadow_color = Color(col.r, col.g, col.b, 0.7)
+	sb.shadow_size = 6
+	p.add_theme_stylebox_override("panel", sb)
+	var l := _lbl(text, size, Color(0.08, 0.08, 0.1))
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	p.add_child(l)
+	if pulse:
+		var tw: Tween = p.create_tween().set_loops()
+		tw.tween_property(p, "modulate:a", 0.6, 0.7).set_trans(Tween.TRANS_SINE)
+		tw.tween_property(p, "modulate:a", 1.0, 0.7).set_trans(Tween.TRANS_SINE)
+	return p
+
+
+## Couleurs des trois types de points à dépenser.
+const C_PT_STAT := Color(0.45, 0.90, 0.50)
+const C_PT_SPELL := Color(1.00, 0.62, 0.35)
+const C_PT_TALENT := Color(0.85, 0.50, 1.00)
+
+
+## Points à dépenser d'un héros : { stats, spells, talents }.
+func _pending_points(classe: String) -> Dictionary:
+	var ent: Dictionary = ProgressionManager.roster_entry(_save, classe)
+	return {
+		"stats": int(ent.get("unspent", 0)),
+		"spells": ProgressionManager.spell_points_free(_save, classe),
+		"talents": TalentTree.points(_save, classe),
+	}
+
+
 ## Pastille ronde (PA / PM / Portée) : valeur en gros + légende dessous.
 func _orb(val: String, caption: String, col: Color, d: float = 46.0) -> Control:
 	var box := VBoxContainer.new()
@@ -377,11 +414,16 @@ func _refresh_list() -> void:
 		lv.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		lv.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		right_col.add_child(lv)
-		if int(ent.get("unspent", 0)) > 0:
-			var pts := _lbl("✦ +%d" % int(ent["unspent"]), 18, C_GOOD)
-			pts.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			pts.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-			right_col.add_child(pts)
+		var pend: Dictionary = _pending_points(classe)
+		var badges := HBoxContainer.new()
+		badges.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		badges.add_theme_constant_override("separation", 4)
+		badges.alignment = BoxContainer.ALIGNMENT_BEGIN
+		for k: Array in [["stats", "✦", C_PT_STAT], ["spells", "⚔", C_PT_SPELL], ["talents", "★", C_PT_TALENT]]:
+			if int(pend[k[0]]) > 0:
+				badges.add_child(_badge("%s%d" % [k[1], int(pend[k[0]])], k[2], 15))
+		if badges.get_child_count() > 0:
+			col.add_child(badges)
 	var note := _lbl("★ = dans l'équipe · les autres classes gagnent %d %% de l'XP" % roundi(ClassRules.BENCH_XP_RATIO * 100.0), 15, C_DIM)
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	note.custom_minimum_size = Vector2(320, 0)
@@ -441,17 +483,18 @@ func _refresh_head() -> void:
 func _refresh_tabs() -> void:
 	for c in _tabs_row.get_children():
 		c.queue_free()
-	var ent: Dictionary = ProgressionManager.roster_entry(_save, _classe)
-	var pts: int = int(ent.get("unspent", 0))
+	var pend: Dictionary = _pending_points(_classe)
+	var pts: int = int(pend["stats"])
+	var spts: int = int(pend["spells"])
 	var rec_n: int = _gear_total_rec()
-	var tpts: int = TalentTree.points(_save, _classe)
+	var tpts: int = int(pend["talents"])
 	var n_b: int = Builds.build_count(_save, _classe)
 	# id, libellé, nom du nœud (tests / tutoriel), poids de largeur
 	var defs: Array = [
-		["stats", "CARACTÉRISTIQUES" + ("  ✦%d" % pts if pts > 0 else ""), "StatsTab", 3.0],
+		["stats", "CARACTÉRISTIQUES", "StatsTab", 3.0],
 		["spells", "SORTS", "SpellsTab", 1.6],
 		["gear", "ÉQUIPEMENT" + ("  ▲%d" % rec_n if rec_n > 0 else ""), "GearTab", 2.2],
-		["talents", "TALENTS" + ("  ★%d" % tpts if tpts > 0 else ""), "TalentsTab", 2.0],
+		["talents", "TALENTS", "TalentsTab", 2.0],
 		["builds", "BUILDS" + ("  ×%d" % n_b if n_b > 0 else ""), "BuildsTab", 1.8],
 	]
 	for d: Array in defs:
@@ -468,6 +511,38 @@ func _refresh_tabs() -> void:
 				_gear_msg = ""
 			refresh())
 		_tabs_row.add_child(b)
+		var todo: int = 0
+		var todo_col: Color = C_PT_STAT
+		var todo_txt: String = ""
+		match tab_id:
+			"stats":
+				todo = pts
+				todo_col = C_PT_STAT
+				todo_txt = "✦%d" % pts
+			"spells":
+				todo = spts
+				todo_col = C_PT_SPELL
+				todo_txt = "⚔%d" % spts
+			"talents":
+				todo = tpts
+				todo_col = C_PT_TALENT
+				todo_txt = "★%d" % tpts
+		if todo > 0:
+			# Bordure vive + pastille pulsante en haut à droite de l'onglet.
+			if _tab != tab_id:
+				for st: String in ["normal", "hover", "pressed"]:
+					var base: StyleBox = b.get_theme_stylebox(st)
+					if base is StyleBoxFlat:
+						var sbf: StyleBoxFlat = (base as StyleBoxFlat).duplicate()
+						sbf.border_color = todo_col
+						sbf.set_border_width_all(4)
+						b.add_theme_stylebox_override(st, sbf)
+			var bd: PanelContainer = _badge(todo_txt, todo_col, 20)
+			bd.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+			bd.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+			bd.offset_top = -8.0
+			bd.offset_right = -6.0
+			b.add_child(bd)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
