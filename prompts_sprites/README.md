@@ -12,6 +12,24 @@ Prompts prêts à copier dans un générateur d'images pour refaire **tous les s
 
 Les héros, ennemis, boss et familiers viennent de `scripts/Nations.gd`, `assets/sprites/nations/README.md` et `SPRITES_A_FOURNIR.md`.
 
+## V55 : défauts des planches Cimes → corrections dans les prompts
+
+Retour des planches Guerrier des monts, Garde des pics, Vorkann et Griffon des cimes :
+
+| Constat | Correction dans les prompts |
+|---|---|
+| **Actions** : les 6 cases recopient la pose de la planche source (Guerrier des monts) | la source n'est plus qu'une « référence de personnage » (« do NOT reuse, copy, trace… ANY of its poses ») ; chaque pose reçoit une **silhouette** attendue (haute, large, basse, compacte…) et une auto-vérification « remplis les 6 poses en noir : les silhouettes doivent se distinguer » ; si ça recopie encore : **2 demi-planches de 3 poses** (`--grid 3x1`), rappel en tête de chaque planche actions |
+| **Vues** : 3 cases au lieu de 4 (griffon), 4 poses de face identiques sans dos (boss, Garde des pics) | bloc « COUNT AND VIEWS » : exactement 4 sprites, rangée du bas **vue de dos réelle** (« no face, no eyes, no beak or snout visible »), négatifs « only 3 sprites », « back row drawn from the front », « four identical front views » |
+| **Miroir** : colonne de droite = copie retournée de celle de gauche (griffon) | « NOT a mirrored pair and NOT a copy » + négatifs « mirror image of another sprite, flipped copy » |
+| **Style** : un griffon en pixel art entre des planches en dessin vectoriel | ligne **STYLE LOCK** (vectoriel à contours épais, jamais pixel art) dans les planches vues et actions ; « pixel grid / low-resolution pixels » ajoutés aux négatifs |
+| **Découpe** : fourrure et têtes blanches mangées sur fond blanc | fond **gris** automatique dès que la description contient white / snow / pale / silver… (`PALE_WORDS`) ; côté découpe : `couper_planche.py --holes 60000 --shadow-delta 300` pour les sprites clairs |
+| Créatures : « la main sur la hanche », « l'arme reste dans sa main » | ces consignes sont retirées pour les créatures sans arme (`view_text`) |
+
+**Check-list avant d'envoyer une planche à découper** : (1) bon nombre de cases (4 ou 6, 3 pour une demi-planche) ;
+(2) poses vraiment différentes, aucune en miroir ; (3) rangée du bas bien de dos ; (4) même personnage que la planche
+vues (tête, oreilles, barbe, tenue) ; (5) même style (contours noirs épais, pas de pixel art) ; (6) fond uni.
+`python3 prompts_sprites/verifier_prompts.py` contrôle désormais le verrou de style, l'anti-copie, l'anti-miroir.
+
 ## V44 : 3 planches par personnage, une seule direction de vue par planche, armes réservées aux armés
 
 Retour de l'essai Brasier (héros, 3 monstres, boss) : ce qui allait de travers vient des prompts, pas du hasard.
