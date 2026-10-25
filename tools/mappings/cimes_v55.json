@@ -1,0 +1,39 @@
+{
+ "chars": {
+  "guerrier_des_monts": {
+   "folder": "nations/ennemis/cimes",
+   "height": 240,
+   "dedupe": 0.03,
+   "poses": {
+    "": ["gv", "r1c1", 350.0, false],
+    "_idle_2": ["gv", "r2c2", 350.0, false],
+    "_back": ["gd", "r1c3", 290.0, false],
+    "_back_attack": ["gd", "r1c2", 290.0, false],
+    "_back_attack_2": ["gd", "r2c2", 290.0, false],
+    "_back_attack_3": ["gd", "r2c1", 290.0, false],
+    "_back_cast": ["gd", "r1c1", 290.0, false],
+    "_back_walk": ["gd", "r2c3", 290.0, false]
+   }
+  },
+  "garde_des_pics": {
+   "folder": "nations/ennemis/cimes",
+   "height": 240,
+   "dedupe": 0.03,
+   "poses": {
+    "": ["ga", "r1c1", 314.0, false],
+    "_idle_2": ["ga", "r2c1", 314.0, false],
+    "_cast": ["ga", "r2c2", 314.0, false]
+   }
+  },
+  "griffon_des_cimes": {
+   "folder": "nations/ennemis/cimes",
+   "height": 240,
+   "dedupe": 0.03,
+   "poses": {
+    "": ["gt", "r1c1", 336.0, false],
+    "_back": ["gt", "r1c2", 336.0, false],
+    "_back_idle_2": ["gt", "r1c3", 336.0, true]
+   }
+  }
+ }
+}
