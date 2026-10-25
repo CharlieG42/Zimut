@@ -7,8 +7,9 @@ extends Node
 ## google.com/device ; le joueur valide avec son compte Google, puis le jeton de
 ## rafraîchissement est gardé (user://cloud_token.json) et les sauvegardes suivantes sont directes.
 ##
-## Stockage : dossier caché de l'application sur Drive (appDataFolder, portée drive.appdata) :
-## l'app ne voit que ses propres fichiers et le joueur ne les voit pas dans son Drive.
+## Stockage (V51) : portée drive.file — Google refuse drive.appdata pour la connexion par code
+## (« Invalid device flow scope »). L'app ne voit QUE les fichiers qu'elle a créés ; la sauvegarde
+## est un fichier visible dans « Mon Drive » (zimut_backup.json), que le joueur ne doit pas supprimer.
 ## Un seul fichier « zimut_backup.json » : toutes les parties + les réglages.
 ##
 ## Identifiants OAuth (client « TV et appareils à saisie limitée ») : res://cloud_oauth.json,
@@ -19,7 +20,7 @@ signal status(text: String)
 ## Code à saisir sur verification_url (premier branchement uniquement).
 signal user_code(code: String, url: String)
 
-const SCOPE := "https://www.googleapis.com/auth/drive.appdata"
+const SCOPE := "https://www.googleapis.com/auth/drive.file"
 const DEVICE_URL := "https://oauth2.googleapis.com/device/code"
 const TOKEN_URL := "https://oauth2.googleapis.com/token"
 const FILES_URL := "https://www.googleapis.com/drive/v3/files"
@@ -202,7 +203,7 @@ static func _google_error(r: Dictionary) -> String:
 		"invalid_client", "unauthorized_client":
 			hint = " — vérifie que l'ID client est de type « TV et appareils à entrée limitée » et que les secrets GitHub sont exacts"
 		"invalid_scope":
-			hint = " — ajoute la portée drive.appdata dans « Accès aux données »"
+			hint = " — ajoute la portée drive.file dans « Accès aux données »"
 		"access_denied":
 			hint = " — ton compte doit figurer dans les utilisateurs test"
 	return "erreur %d%s%s%s" % [int(r["code"]), (" : " + e) if e != "" else "", (" (" + d + ")") if d != "" else "", hint]
@@ -316,8 +317,8 @@ static func apply_bundle(bundle: Dictionary) -> int:
 # ═══════════════════════════════════════════════════════════════════════════
 
 func _find_file(token: String) -> Dictionary:
-	var q: String = ("name='%s'" % BACKUP_NAME).uri_encode()
-	var r: Dictionary = await _http("%s?spaces=appDataFolder&q=%s&fields=files(id,modifiedTime,appProperties)" % [FILES_URL, q],
+	var q: String = ("name='%s' and trashed=false" % BACKUP_NAME).uri_encode()
+	var r: Dictionary = await _http("%s?spaces=drive&orderBy=modifiedTime%%20desc&q=%s&fields=files(id,modifiedTime,appProperties)" % [FILES_URL, q],
 		PackedStringArray(["Authorization: Bearer " + token]), HTTPClient.METHOD_GET)
 	if not r["ok"]:
 		return {"error": int(r["code"])}
@@ -354,7 +355,7 @@ func backup(force: bool = false, interactive: bool = true) -> String:
 		url = "%s/%s?uploadType=multipart" % [UPLOAD_URL, String(found["id"])]
 		method = HTTPClient.METHOD_PATCH
 	else:
-		meta_d["parents"] = ["appDataFolder"]
+		meta_d["description"] = "Sauvegarde du jeu Zimut (ne pas supprimer : sert à la restauration Cloud)."
 		url = "%s?uploadType=multipart" % UPLOAD_URL
 		method = HTTPClient.METHOD_POST
 	var boundary: String = "zimut_%d" % (Time.get_ticks_usec() % 1000000007)

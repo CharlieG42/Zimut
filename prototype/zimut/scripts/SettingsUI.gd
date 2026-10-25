@@ -184,7 +184,7 @@ func _build_cloud(box: VBoxContainer) -> void:
 	if not CloudSave.is_configured():
 		_cloud_status.text = "Google Drive n'est pas encore configuré dans cette version du jeu."
 	elif CloudSave.is_linked():
-		_cloud_status.text = "Compte Google relié · tes parties sont dans l'espace privé du jeu sur ton Drive (toucher ici pour changer de compte)."
+		_cloud_status.text = "Compte Google relié · tes parties sont dans « zimut_backup.json » sur ton Drive (toucher ici pour changer de compte)."
 	else:
 		_cloud_status.text = "Google Drive : à la première sauvegarde, tu relieras ton compte avec un code."
 	box.add_child(_cloud_status)
