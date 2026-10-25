@@ -74,7 +74,7 @@ const INFO := {
 		"description": "Un ingénieur qui pose bombes, mines, tourelles et glyphes, puis les déclenche au bon moment pour des explosions en chaîne. Il joue sur l'anticipation : le piège posé aujourd'hui fait mal demain.",
 		"strengths": ["Dégâts massifs en zone avec les mécanismes", "Tirs de précision à longue portée", "Marque du prédateur : critique garanti"],
 		"weaknesses": ["Style exigeant (poser puis déclencher)", "Fragile en mêlée"],
-		"tips": "Pose tes mines sur le chemin des ennemis, puis Déclencheur les fait exploser en croix. Combine avec un Tank qui les retient dessus.",
+		"tips": "Pose tes mines sur le chemin des ennemis, puis Déclencheur les fait exploser. Combine avec un Tank qui les retient dessus.",
 	},
 }
 

@@ -51,6 +51,11 @@ var _over_sub: Label
 var _cards: Array = []
 var _cards_owner: int = -1
 var _initialized: bool = false
+## V53 : mise en page « de référence » des blocs fixes du HUD (barre de sorts, timeline, portrait),
+## réappliquée si le conteneur du HUD se retrouve avec une taille aberrante (Android : reprise
+## d'appli, barre système, rotation) — cause de la disparition aléatoire de la barre et de la timeline.
+var _hud_layout: Dictionary = {}
+var _hud_guard: Timer
 var _spell_scale: float = 1.0
 
 
@@ -1050,6 +1055,75 @@ func _connect_signals() -> void:
 	# Les détails ne s’affichent plus au survol du plateau : ils sont réservés à l’appui long sur un avatar.
 
 
+func _start_hud_guard() -> void:
+	if _hud_guard != null:
+		return
+	_hud_guard = Timer.new()
+	_hud_guard.wait_time = 0.3
+	_hud_guard.one_shot = false
+	_hud_guard.autostart = true
+	_hud_guard.timeout.connect(ensure_hud_layout)
+	add_child(_hud_guard)
+	var vp: Viewport = get_viewport()
+	if vp != null and not vp.size_changed.is_connected(ensure_hud_layout):
+		vp.size_changed.connect(ensure_hud_layout)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_RESUMED or what == NOTIFICATION_APPLICATION_FOCUS_IN \
+			or what == NOTIFICATION_WM_SIZE_CHANGED:
+		if _initialized:
+			ensure_hud_layout.call_deferred()
+
+
+## Vérifie que le HUD occupe bien tout l'écran et que la barre de sorts / la timeline ont une taille
+## valide ; sinon réapplique la mise en page de référence. Renvoie true si une correction a eu lieu.
+func ensure_hud_layout() -> bool:
+	if not _initialized or not is_instance_valid(_root) or _hud_layout.is_empty():
+		return false
+	var fixed: bool = false
+	var vs: Vector2 = _root.get_viewport().get_visible_rect().size
+	if vs.x < 100.0 or vs.y < 100.0:
+		return false
+	if _root.position.length() > 0.5 or _root.size.distance_to(vs) > 1.0:
+		_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_root.position = Vector2.ZERO
+		_root.size = vs
+		fixed = true
+	for ctl: Variant in _hud_layout.keys():
+		var c := ctl as Control
+		if not is_instance_valid(c):
+			continue
+		var l: Array = _hud_layout[ctl]
+		var bad: bool = c.size.x < 20.0 or c.size.y < 20.0 \
+				or absf(c.anchor_bottom - float(l[3])) > 0.01 or absf(c.offset_top - float(l[5])) > 0.5
+		if bad or fixed:
+			c.anchor_left = l[0]
+			c.anchor_top = l[1]
+			c.anchor_right = l[2]
+			c.anchor_bottom = l[3]
+			c.offset_left = l[4]
+			c.offset_top = l[5]
+			c.offset_right = l[6]
+			c.offset_bottom = l[7]
+			fixed = true
+	# Barre de sorts vide alors qu'un héros a des sorts : on la reconstruit.
+	if _spell_box != null and _spell_box.get_child_count() == 0:
+		var owner_e: Dictionary = _get_spell_bar_owner(game_manager.active_entity)
+		if not owner_e.is_empty():
+			_rebuild_spell_bar(owner_e)
+			fixed = true
+	_root.visible = true
+	visible = true
+	for ctl2: Control in [_timeline_scroll, _timeline, _stats, _spell_scroll]:
+		if is_instance_valid(ctl2):
+			ctl2.visible = true
+			ctl2.modulate.a = 1.0
+	if fixed:
+		_root.queue_redraw()
+	return fixed
+
+
 func _on_hud_resized() -> void:
 	# Relance le layout des contrôles ancrés après un changement de viewport.
 	if _root == null:
@@ -1146,6 +1220,11 @@ func _build_ui() -> void:
 	spell_panel.add_theme_stylebox_override("panel", _flat(Color(0.03, 0.05, 0.09, 0.30), Color(0.35, 0.48, 0.65, 0.35), 20, 1))
 	_root.add_child(spell_panel)
 	_root.add_child(_spell_scroll)
+	_hud_layout = {}
+	for ctl: Control in [tl_scroll, st, spell_panel, _spell_scroll]:
+		_hud_layout[ctl] = [ctl.anchor_left, ctl.anchor_top, ctl.anchor_right, ctl.anchor_bottom,
+			ctl.offset_left, ctl.offset_top, ctl.offset_right, ctl.offset_bottom]
+	_start_hud_guard()
 	# Une seule colonne de badges ; le ScrollContainer gère le débordement vertical.
 	_spell_box = VBoxContainer.new()
 	_spell_box.add_theme_constant_override("separation", int(6.0 * _spell_scale))

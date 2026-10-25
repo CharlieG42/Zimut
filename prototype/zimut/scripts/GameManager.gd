@@ -2136,10 +2136,71 @@ func _blast(owner: Dictionary, center: Vector2i, base: float, label: String) -> 
 	return total
 
 
+## Rayon d'une explosion de bombe (cases autour, en losange).
+const BOMB_RADIUS := 2
+
+
+## Propriétaire d'une bombe, même s'il est tombé entre-temps (cimetière compris).
+func _bomb_owner(bomb: Dictionary) -> Dictionary:
+	var uid: int = int(bomb.get("owner", -1))
+	var o: Dictionary = _entity_by_uid(uid)
+	if not o.is_empty():
+		return o
+	for d: Dictionary in graveyard:
+		if int(d.get("uid", -2)) == uid:
+			return d
+	return {}
+
+
+## Explosion d'une bombe (rayon 2) : ennemis = dégâts pleins, autres bombes = dégâts pleins
+## (réaction en chaîne si elles sont détruites), alliés (lanceur compris) = moitié.
 func _mech_explode(owner: Dictionary, bomb: Dictionary) -> void:
+	if bool(bomb.get("exploded", false)):
+		return
+	bomb["exploded"] = true
+	if owner.is_empty():
+		owner = _bomb_owner(bomb)
+	if owner.is_empty():
+		bomb["current_pv"] = 0
+		return
+	var center: Vector2i = pos_of(bomb)
 	var base: float = (34.0 + float(owner["level"]) * 1.0) / 1.8
-	var dealt: int = _blast(owner, pos_of(bomb), base, "Explosion")
+	var cells: Array[Vector2i] = Combat.zone_cells(center, BOMB_RADIUS, "diamond", GRID_SIZE)
+	fx.emit("cast", {"caster": owner, "spell": "Explosion", "kind": "attack", "dtype": "phys",
+		"from": center, "to": center, "ranged": true, "cells": cells})
+	var dealt: int = 0
+	var chain: Array = []
+	for e: Dictionary in all_entities():
+		if e == bomb or not is_alive(e) or not cells.has(pos_of(e)) or bool(e.get("beacon", false)):
+			continue
+		var is_bomb: bool = String(e.get("mech", "")) == "bomb"
+		if bool(e.get("terrain", false)) and not is_bomb:
+			continue
+		var r: Dictionary = Combat.calc_damage(owner, e, base, "phys", 0.0, false, false)
+		var dmg: int = int(r["dmg"])
+		if not is_bomb and String(e.get("team", "")) == String(owner.get("team", "")):
+			dmg = maxi(1, dmg / 2)
+		dealt += _apply_damage(owner, e, dmg, "phys", bool(r["crit"]), false)
+		if is_bomb and int(e["current_pv"]) <= 0:
+			chain.append(e)
 	message_requested.emit("La bombe explose ! (%d dégâts)" % dealt)
+	bomb["current_pv"] = 0
+	for b: Dictionary in chain:
+		message_requested.emit("Réaction en chaîne !")
+		_mech_explode({}, b)
+
+
+## Une bombe détruite (par une attaque, ou une autre explosion) explose à son tour.
+func _explode_destroyed_bombs() -> void:
+	var again: bool = true
+	while again:
+		again = false
+		for arr: Array in [players, enemies, summons]:
+			for x: Dictionary in arr.duplicate():
+				if String(x.get("mech", "")) == "bomb" and int(x["current_pv"]) <= 0 \
+						and not bool(x.get("exploded", false)) and not bool(x.get("dead", false)):
+					_mech_explode({}, x)
+					again = true
 
 
 ## Inversion : l'Artificier et sa balise échangent leur place (1 fois par tour).
@@ -2344,6 +2405,7 @@ func _push(caster: Dictionary, tgt: Dictionary, n: int) -> void:
 # ═══════════════════════════════════════════════════════════════════════════
 
 func _check_deaths() -> void:
+	_explode_destroyed_bombs()
 	var dead: Array = []
 	for arr: Array in [players, enemies, summons]:
 		for x: Dictionary in arr:

@@ -465,7 +465,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 
 	var compact: bool = _is_compact()
 	var title := Label.new()
-	title.text = "✦  %s" % String(data.get("name", "Partie"))
+	title.text = "✦  %s   ·   Niv. %d" % [String(data.get("name", "Partie")), HeroUnlock.player_level(data)]
 	title.add_theme_font_size_override("font_size", _ui_font(20 if compact else 24))
 	title.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(title)

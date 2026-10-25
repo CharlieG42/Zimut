@@ -271,7 +271,7 @@ Géomancien,Fracas des montagnes,4,0,7,129 dégâts en zone (4x4) + immobilise (
 Géomancien,Cataclysme minéral,4,0,7,122 dégâts en zone (4x4),100,Attaque,122,0,0,0,0,0,0,0,0
 Artificier,Déclencheur,1,0,6,Déclenche l'effet d'un de vos mécanismes (bombe; mine; tourelle; glyphe; balise de transposition),1,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Pistolet à ressort,2,0,5,14 dégâts,1,Attaque,14,0,0,0,0,0,0,0,0
-Artificier,Poser Bombe,2,0,4,Pose une bombe : explose en croix (5 cases) à la fin du 2e tour de l'Artificier ou dès qu'on la déclenche,1,Invocation,0,0,0,0,0,0,0,0,0
+Artificier,Poser Bombe,2,0,4,Pose une bombe : explose (2 cases autour) à la fin du 2e tour de l'Artificier ou dès qu'on la déclenche ou la détruit; touche ennemis et autres bombes; alliés moitié moins,1,Invocation,0,0,0,0,0,0,0,0,0
 Artificier,Pétard,1,0,4,14 dégâts,3,Attaque,14,0,0,0,0,0,0,0,0
 Artificier,Fumigène,2,0,0,Invisible (2 tours),5,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Tir de barrage,2,0,5,29 dégâts [Enchaînement après Pistolet à ressort : bonus 35%],8,Attaque,29,0,0,0,0,0,0,0,0
