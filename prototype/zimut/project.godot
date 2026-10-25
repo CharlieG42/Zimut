@@ -12,7 +12,9 @@ config_version=5
 
 config/name="Zimut"
 config/version="0.0.01.94.0"
-run/main_scene="res://scenes/MainMenu.tscn"
+run/main_scene="res://scenes/Intro.tscn"
+boot_splash/show_image=false
+boot_splash/bg_color=Color(0.05, 0.06, 0.1, 1)
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://assets/ui/icon_192.png"
 script/strict_mode=false
