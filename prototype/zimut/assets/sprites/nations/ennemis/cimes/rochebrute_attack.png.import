@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://fgvig6nip62r"
-path="res://.godot/imported/cimes_back.png-6c99c8b21e5a5e3970a949c45e7d5880.ctex"
+uid="uid://brcpo4yl3gxc1"
+path="res://.godot/imported/rochebrute_attack.png-6154be1f1d9312c3cb18c97f3abc548b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/nations/boss/cimes_back.png"
-dest_files=["res://.godot/imported/cimes_back.png-6c99c8b21e5a5e3970a949c45e7d5880.ctex"]
+source_file="res://assets/sprites/nations/ennemis/cimes/rochebrute_attack.png"
+dest_files=["res://.godot/imported/rochebrute_attack.png-6154be1f1d9312c3cb18c97f3abc548b.ctex"]
 
 [params]
 

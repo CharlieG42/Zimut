@@ -1,0 +1,82 @@
+{
+ "chars": {
+  "guerrier_des_monts": {
+   "folder": "nations/ennemis/cimes", "height": 240, "dedupe": 0.03,
+   "poses": {
+    "": ["gm4", "r1c1", 308, false],
+    "_idle_2": ["gm4", "r2c1", 308, false],
+    "_attack": ["gm5", "r1c1", 350, false],
+    "_attack_2": ["gm5", "r2c2", 350, false],
+    "_attack_3": ["gm5", "r2c3", 350, false],
+    "_walk": ["gm5", "r1c2", 350, false],
+    "_cast": ["gm6", "r1c1", 345, false],
+    "_back": ["gm4", "r2c3", 308, false],
+    "_back_idle_2": ["gm6", "r1c2", 345, false],
+    "_back_attack": ["gm6", "r2c1", 345, false],
+    "_back_attack_2": ["gm6", "r2c3", 345, false],
+    "_back_walk": ["gm6", "r2c2", 345, false]
+   }
+  },
+  "rochebrute": {
+   "folder": "nations/ennemis/cimes", "height": 240, "dedupe": 0.03,
+   "poses": {
+    "": ["rb3", "r1c1", 280, false],
+    "_idle_2": ["rb3", "r2c1", 280, false],
+    "_attack": ["rb2", "r1c2", 296, false],
+    "_attack_2": ["rb2", "r1c3", 296, false],
+    "_attack_3": ["rb2", "r2c2", 296, false],
+    "_cast": ["rb2", "r2c1", 296, false],
+    "_walk": ["rb2", "r1c1", 296, false],
+    "_back": ["rb3", "r2c2", 280, false],
+    "_back_idle_2": ["rb1", "r1c2", 303, false],
+    "_back_attack": ["rb1", "r1c1", 303, false],
+    "_back_attack_2": ["rb1", "r2c1", 303, false],
+    "_back_attack_3": ["rb1", "r2c3", 303, false],
+    "_back_walk": ["rb1", "r2c2", 303, false]
+   }
+  },
+  "griffon_des_cimes": {
+   "folder": "nations/ennemis/cimes", "height": 240, "dedupe": 0.03,
+   "poses": {
+    "": ["gf7", "r1c1", 330, false],
+    "_idle_2": ["gf7", "r1c3", 330, true],
+    "_attack": ["gf7", "r1c2", 330, true],
+    "_attack_2": ["gf7", "r2c3", 330, true],
+    "_cast": ["gf7", "r2c2", 330, true],
+    "_walk": ["gf7", "r2c1", 330, false],
+    "_back": ["gf8", "r1c1", 340, false],
+    "_back_idle_2": ["gf8", "r2c1", 340, false],
+    "_back_attack": ["gf8", "r1c3", 340, true],
+    "_back_attack_2": ["gf8", "r2c3", 340, true],
+    "_back_cast": ["gf8", "r2c2", 340, false],
+    "_back_walk": ["gf8", "r1c2", 340, true]
+   }
+  },
+  "garde_des_pics": {
+   "folder": "nations/ennemis/cimes", "height": 240, "dedupe": 0.03,
+   "poses": {
+    "": ["ga9", "r1c1", 328, false],
+    "_idle_2": ["ga9", "r2c1", 328, false],
+    "_cast": ["gaold", "r2c2", 314, false],
+    "_back": ["ga9", "r2c2", 328, false],
+    "_back_idle_2": ["ga9", "r2c3", 328, false],
+    "_back_attack": ["ga10", "r1c2", 322, false],
+    "_back_attack_2": ["ga10", "r2c1", 322, false],
+    "_back_walk": ["ga10", "r1c1", 322, false],
+    "_back_cast": ["ga10", "r2c3", 322, false],
+    "_back_cast_2": ["ga10", "r2c2", 322, false]
+   }
+  },
+  "cimes": {
+   "folder": "nations/boss", "height": 300, "dedupe": 0.03,
+   "poses": {
+    "": ["vk11", "r2c3", 348, false],
+    "_idle_2": ["vk11", "r1c2", 348, false],
+    "_attack": ["vk11", "r1c1", 348, false],
+    "_attack_2": ["vk11", "r2c1", 348, false],
+    "_cast": ["vk11", "r1c3", 348, false],
+    "_walk": ["vk11", "r2c2", 348, false]
+   }
+  }
+ }
+}
