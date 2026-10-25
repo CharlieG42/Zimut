@@ -60,7 +60,7 @@ jobs:
           echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> "$GITHUB_ENV"
 
       - name: Run headless tests (GDScript)
-        timeout-minutes: 5
+        timeout-minutes: 10
         run: |
           cd prototype/zimut
           set -o pipefail
@@ -88,6 +88,12 @@ jobs:
           echo "=== test_playtime.gd ==="
           timeout 60 godot --headless -s tests/test_playtime.gd --path . 2>&1 | tail -30 || echo "(test_playtime timeout ou échec - ignoré)"
           echo ""
+          # V48-V50 : niveau du joueur, sauvegarde Cloud, gouffres, arbre du Sylvain
+          for t in test_hero_unlock test_cloud_save test_void_pits test_tree; do
+            echo "=== $t.gd ==="
+            timeout 60 godot --headless -s tests/$t.gd --path . 2>&1 | tail -30 || echo "($t timeout ou échec - ignoré)"
+            echo ""
+          done
           echo "Tests headless exécutés."
 
       - name: Decode release keystore from GitHub Secrets

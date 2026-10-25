@@ -179,7 +179,10 @@ func access_token(interactive: bool = true) -> String:
 		if int(r["code"]) == 0:
 			status.emit("Pas de connexion Internet.")
 			return ""
-		# Jeton révoqué ou expiré : on refait le branchement
+		if int(r["code"]) >= 500:
+			status.emit("Google Drive ne répond pas (erreur %d) : réessaie plus tard." % int(r["code"]))
+			return ""
+		# Jeton révoqué ou expiré (400 invalid_grant / 401) : on refait le branchement
 		unlink()
 		_token = {}
 	if not interactive:

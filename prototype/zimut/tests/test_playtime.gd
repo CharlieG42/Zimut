@@ -69,10 +69,10 @@ func _run() -> void:
 	ck(pm.playtime_total(r3) == 3783, "sans partie active : le temps n'est pas écrit")
 
 	# Formatage des durées
-	ck(ProgressionManager.format_playtime(0) == "0 s", "format 0 s")
-	ck(ProgressionManager.format_playtime(45) == "45 s", "format 45 s")
-	ck(ProgressionManager.format_playtime(120) == "2 min", "format 2 min")
-	ck(ProgressionManager.format_playtime(3661) == "1 h 01", "format 1 h 01")
+	ck(pm.format_playtime(0) == "0 s", "format 0 s")
+	ck(pm.format_playtime(45) == "45 s", "format 45 s")
+	ck(pm.format_playtime(120) == "2 min", "format 2 min")
+	ck(pm.format_playtime(3661) == "1 h 01", "format 1 h 01")
 
 	pm.delete_save(3)
 	pm.delete_save(4)

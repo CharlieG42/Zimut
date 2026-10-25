@@ -184,10 +184,19 @@ func _build_cloud(box: VBoxContainer) -> void:
 	if not CloudSave.is_configured():
 		_cloud_status.text = "Google Drive n'est pas encore configuré dans cette version du jeu."
 	elif CloudSave.is_linked():
-		_cloud_status.text = "Compte Google relié · tes parties sont stockées dans l'espace privé du jeu sur ton Drive."
+		_cloud_status.text = "Compte Google relié · tes parties sont dans l'espace privé du jeu sur ton Drive (toucher ici pour changer de compte)."
 	else:
 		_cloud_status.text = "Google Drive : à la première sauvegarde, tu relieras ton compte avec un code."
 	box.add_child(_cloud_status)
+	# Toucher la ligne d'état (compte relié) : proposer de délier le compte Google.
+	_cloud_status.mouse_filter = Control.MOUSE_FILTER_STOP
+	_cloud_status.gui_input.connect(func(ev: InputEvent) -> void:
+		var tap: bool = (ev is InputEventMouseButton and (ev as InputEventMouseButton).pressed) or (ev is InputEventScreenTouch and (ev as InputEventScreenTouch).pressed)
+		if tap and CloudSave.is_linked():
+			_confirm("Changer de compte Google ?", "Le jeu oubliera le compte Google relié sur cet appareil. Tes sauvegardes restent sur ton Drive ; la prochaine sauvegarde te demandera un nouveau code.",
+				"DÉLIER LE COMPTE", func() -> void:
+					CloudSave.unlink()
+					_cloud_status.text = "Compte Google délié : la prochaine sauvegarde te demandera un code."))
 
 
 func _cloud_button(txt: String, col: Color) -> Button:

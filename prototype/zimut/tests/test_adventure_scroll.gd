@@ -25,7 +25,10 @@ func _boot() -> void:
 	var sc: Node = (load("res://scenes/AdventureMap.tscn") as PackedScene).instantiate()
 	root.add_child(sc)
 	await create_timer(0.6).timeout
-	check(not sc._scroll_mode, "carte actuelle (10×7) : vue fixe")
+	# Depuis la Sylve agrandie (#147), le défilement dépend de la taille réelle de la zone.
+	var zs: Vector2i = sc.manager.zone_size()
+	check(sc._scroll_mode == sc.scroll_needed(zs, sc._map_view.size),
+		"carte actuelle (%d×%d) : défilement cohérent avec la taille du plateau" % [zs.x, zs.y])
 	# On force une petite fenêtre de vue pour simuler un plateau plus grand que l'écran
 	var v: Control = sc._map_view
 	v.anchor_right = 0.0
