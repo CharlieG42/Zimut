@@ -2018,9 +2018,15 @@ func _result_player_card(content: VBoxContainer, save: Dictionary) -> void:
 		var b := UK.btn("🔓  CHOISIR UN NOUVEAU HÉROS  (%d)" % pend, Color(0.95, 0.78, 0.30), 22, Vector2(0, 58))
 		b.name = "UnlockHeroBtn"
 		b.pressed.connect(func() -> void:
-			HeroPickUI.open(_root, save, false, func(_p: Array) -> void:
+			HeroPickUI.open(_root, save, false, func(picked: Array) -> void:
+				if picked.is_empty():
+					return   # « Plus tard » : le bouton reste disponible
 				ProgressionManager.write_save(game_manager.active_slot, save)
-				b.queue_free()))
+				var left: int = HeroUnlock.pending_unlocks(save)
+				if left > 0:
+					b.text = "🔓  CHOISIR UN NOUVEAU HÉROS  (%d)" % left
+				else:
+					b.queue_free()))
 		v.add_child(b)
 	else:
 		var nxt: int = HeroUnlock.next_unlock_level(save)

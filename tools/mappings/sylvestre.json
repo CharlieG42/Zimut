@@ -1,14 +1,52 @@
-{"chars": {
-  "druide": {"folder": "players", "height": 300, "poses": {
-    "": ["v3", "r1c1", 348, false],
-    "_idle_2": ["v3", "r2c1", 348, false],
-    "_attack": ["a2", "r1c1", 348, false],
-    "_back": ["a2", "r2c1", 387, false],
-    "_back_cast": ["a2", "r2c2", 387, false],
-    "_back_walk": ["a2", "r2c3", 387, false]}},
-  "araknea": {"dedupe": 0.03, "folder": "nations/ennemis/sylvestre", "height": 240, "poses": {
-    "": ["ar", "r2c1", 306, false],
-    "_idle_2": ["ar", "r1c2", 306, false],
-    "_attack": ["ar", "r1c1", 306, false],
-    "_cast": ["ar", "r2c2", 306, false]}}
-}}
+{
+ "chars": {
+  "druide": {
+   "folder": "players",
+   "height": 300,
+   "poses": {
+    "": [
+     "v3",
+     "r1c1",
+     348,
+     false
+    ],
+    "_idle_2": [
+     "v3",
+     "r2c1",
+     348,
+     false
+    ],
+    "_attack": [
+     "a2",
+     "r1c1",
+     348,
+     false
+    ],
+    "_back": [
+     "a2",
+     "r2c1",
+     387,
+     false
+    ],
+    "_back_cast": [
+     "a2",
+     "r2c2",
+     387,
+     false
+    ],
+    "_back_walk": [
+     "a2",
+     "r2c3",
+     387,
+     false
+    ],
+    "_cast": [
+     "a2",
+     "r1c2",
+     345,
+     false
+    ]
+   }
+  }
+ }
+}

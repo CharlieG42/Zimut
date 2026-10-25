@@ -88,8 +88,10 @@ static func oauth_config() -> Dictionary:
 	for path: String in ["user://cloud_oauth.json", "res://cloud_oauth.json"]:
 		if FileAccess.file_exists(path):
 			var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-			if d is Dictionary and String((d as Dictionary).get("client_id", "")) != "":
-				return d
+			if d is Dictionary and String((d as Dictionary).get("client_id", "")).strip_edges() != "":
+				# Espaces / retours à la ligne collés avec les secrets : Google répondrait 400.
+				return {"client_id": String(d["client_id"]).strip_edges(),
+					"client_secret": String((d as Dictionary).get("client_secret", "")).strip_edges()}
 	return {}
 
 
@@ -179,12 +181,31 @@ func access_token(interactive: bool = true) -> String:
 		if int(r["code"]) == 0:
 			status.emit("Pas de connexion Internet.")
 			return ""
-		# Jeton révoqué ou expiré : on refait le branchement
+		if int(r["code"]) >= 500:
+			status.emit("Google Drive ne répond pas (erreur %d) : réessaie plus tard." % int(r["code"]))
+			return ""
+		# Jeton révoqué ou expiré (400 invalid_grant / 401) : on refait le branchement
 		unlink()
 		_token = {}
 	if not interactive:
 		return ""
 	return await _device_login(cfg)
+
+
+## Erreur Google lisible : code HTTP + raison (« invalid_client », « invalid_scope »…) et aide.
+static func _google_error(r: Dictionary) -> String:
+	var j: Dictionary = r.get("json", {})
+	var e: String = String(j.get("error", ""))
+	var d: String = String(j.get("error_description", ""))
+	var hint: String = ""
+	match e:
+		"invalid_client", "unauthorized_client":
+			hint = " — vérifie que l'ID client est de type « TV et appareils à entrée limitée » et que les secrets GitHub sont exacts"
+		"invalid_scope":
+			hint = " — ajoute la portée drive.appdata dans « Accès aux données »"
+		"access_denied":
+			hint = " — ton compte doit figurer dans les utilisateurs test"
+	return "erreur %d%s%s%s" % [int(r["code"]), (" : " + e) if e != "" else "", (" (" + d + ")") if d != "" else "", hint]
 
 
 func _device_login(cfg: Dictionary) -> String:
@@ -193,7 +214,7 @@ func _device_login(cfg: Dictionary) -> String:
 	var r: Dictionary = await _http(DEVICE_URL, PackedStringArray(["Content-Type: application/x-www-form-urlencoded"]),
 		HTTPClient.METHOD_POST, _form({"client_id": cfg["client_id"], "scope": SCOPE}))
 	if not r["ok"]:
-		status.emit("Impossible de joindre Google (%s)." % ("hors ligne" if int(r["code"]) == 0 else "erreur %d" % int(r["code"])))
+		status.emit("Impossible de joindre Google (%s)." % ("hors ligne" if int(r["code"]) == 0 else _google_error(r)))
 		return ""
 	var j: Dictionary = r["json"]
 	var device_code: String = String(j.get("device_code", ""))
@@ -224,7 +245,7 @@ func _device_login(cfg: Dictionary) -> String:
 		if e == "slow_down":
 			interval += 5.0
 			continue
-		status.emit("Connexion refusée." if e == "access_denied" else "Connexion impossible (%s)." % (e if e != "" else str(p["code"])))
+		status.emit("Connexion refusée." if e == "access_denied" else "Connexion impossible (%s)." % _google_error(p))
 		return ""
 	status.emit("Le code a expiré : réessaie.")
 	return ""

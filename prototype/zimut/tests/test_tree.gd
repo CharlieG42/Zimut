@@ -14,6 +14,10 @@ func _boot() -> void:
 	pm.rebuild_team(data, ["Tank", "Mage", "Sylvain"])
 	for c in ["Tank", "Mage", "Sylvain"]:
 		pm.roster_entry(data, c)["level"] = 20
+		# V43 : les sorts débloqués entrent dans le build actif comme lors d'une vraie montée de niveau
+		Builds.on_level_up(data, c, 1, 20)
+	# Sorts actifs du Sylvain : l'arbre et le soin relayé doivent être dans le build
+	Builds.set_active_spells(data, "Sylvain", ["Invoquer Arbre", "Sève vitale"])
 	gm.active_save = data
 	gm.active_slot = -1
 	gm.set_custom_team([{"classe": "Tank"}, {"classe": "Mage"}, {"classe": "Sylvain"}])
@@ -42,6 +46,10 @@ func _boot() -> void:
 	var msg: String = gm._resolve_summon(syl, spell, p, cell)
 	var trees: Array = gm.trees_of(syl)
 	check(trees.size() == 1, "un arbre est invoqué")
+	if trees.is_empty():
+		print("ÉCHECS : %d" % fails)
+		quit(1)
+		return
 	check(not gm.turn_order.has(trees[0]), "l'arbre ne joue pas (pas dans l'ordre des tours)")
 	check(int(trees[0]["max_pm"]) == 0, "l'arbre est immobile (0 PM)")
 	check(gm.los_blockers().has(cell), "l'arbre bloque la ligne de vue")

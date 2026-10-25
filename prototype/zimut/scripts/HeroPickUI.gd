@@ -153,6 +153,14 @@ func _ready() -> void:
 	_toggle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_toggle.pressed.connect(_on_toggle)
 	foot.add_child(_toggle)
+	if not _initial:
+		# Déblocage : le joueur peut choisir plus tard (le bouton reste dans l'écran d'équipe).
+		var later := U.btn("PLUS TARD", Color(0.45, 0.48, 0.58), 22, Vector2(220, 62))
+		later.name = "LaterBtn"
+		later.pressed.connect(func() -> void:
+			done.emit([])
+			queue_free())
+		foot.add_child(later)
 	_confirm = U.btn("", GOLD, 24, Vector2(0, 62))
 	_confirm.name = "ConfirmBtn"
 	_confirm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
