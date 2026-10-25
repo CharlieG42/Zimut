@@ -27,3 +27,12 @@ Inutile d'en régénérer un : le keystore de release est déjà dans les secret
 ### Divers
 - Permission Android **INTERNET** activée dans l'export.
 - Test : `tests/test_cloud_save.gd` (paquet, restauration, écran) ; captures : `tests/shot_cloud.gd`.
+
+### Sécurités (V49b)
+- **Restauration d'une sauvegarde plus ancienne** que les parties de l'appareil : avertissement « ⚠ Sauvegarde Cloud plus ancienne » avec la date de la dernière partie locale, bouton « RESTAURER QUAND MÊME ».
+- **Envoi alors qu'une sauvegarde plus récente existe, faite sur un autre appareil** : rien n'est envoyé, fenêtre « ⚠ Sauvegarde Cloud plus récente » (date + appareil), au choix « ÉCRASER QUAND MÊME » ou utiliser la restauration.
+- **Sauvegarde Cloud automatique** (bouton « ⟳ Auto : Oui/Non » dans Options) : après chaque combat, si un compte Google est relié. Silencieuse : elle ne demande jamais de code et n'écrase jamais une sauvegarde plus récente d'un autre appareil.
+- Chaque sauvegarde Cloud porte sa date et le nom de l'appareil (propriétés du fichier Drive).
+
+### Aussi dans cette PR
+- Rattrapage des retours de test V48b (Chasseur dans le discours de Gultur, textes agrandis, fiches défilables au doigt, grandes fenêtres Supprimer/Renommer/Importer), poussés après la fusion de #151.

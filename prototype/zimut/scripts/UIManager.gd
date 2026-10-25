@@ -1757,6 +1757,7 @@ const UK = preload("res://scripts/UiKit.gd")
 
 func _show_result_window(victory: bool) -> void:
 	var save: Dictionary = game_manager.active_save
+	CloudSave.auto_backup(get_tree())   # V49 : sauvegarde Cloud automatique (option)
 	var res: Dictionary = save.get("last_result", {})
 	var loots: Array = save.get("last_loots", []) if victory else []
 	var dim: ColorRect = ColorRect.new()

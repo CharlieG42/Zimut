@@ -30,6 +30,54 @@ const FORMAT := "zimut-cloud-1"
 
 var _cancel: bool = false
 var _token: Dictionary = {}
+## Dernier conflit détecté par backup() : {unix, device} de la sauvegarde Cloud plus récente.
+var last_conflict: Dictionary = {}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Appareil / dates (sécurités V49)
+# ═══════════════════════════════════════════════════════════════════════════
+
+static func device_id() -> String:
+	var id: String = OS.get_unique_id()
+	return id if id != "" else OS.get_model_name()
+
+
+static func device_name() -> String:
+	var n: String = OS.get_model_name()
+	return n if n != "" and n != "GenericDevice" else OS.get_name()
+
+
+## Date (heure Unix) de la partie la plus récemment enregistrée sur cet appareil (0 si aucune).
+static func local_newest_unix() -> int:
+	var best: int = 0
+	for slot: int in range(ProgressionManager.MAX_SAVES):
+		var path: String = "%s/partie_%d.json" % [ProgressionManager.SAVE_DIR, slot]
+		if FileAccess.file_exists(path):
+			best = maxi(best, int(FileAccess.get_modified_time(path)))
+	return best
+
+
+## « 24/10/2026 à 22:53 » en heure locale.
+static func fmt_unix(unix: int) -> String:
+	if unix <= 0:
+		return "?"
+	var bias: int = int(Time.get_time_zone_from_system().get("bias", 0))
+	var d: Dictionary = Time.get_datetime_dict_from_unix_time(unix + bias * 60)
+	return "%02d/%02d/%04d à %02d:%02d" % [d["day"], d["month"], d["year"], d["hour"], d["minute"]]
+
+
+## Sauvegarde Cloud automatique (fin de combat) : silencieuse, jamais de demande de code,
+## et jamais d'écrasement d'une sauvegarde plus récente faite sur un autre appareil.
+static func auto_backup(tree: SceneTree) -> void:
+	var gs: Node = tree.root.get_node_or_null("GameSettings")
+	if gs == null or not bool(gs.get("cloud_auto")) or not is_configured() or not is_linked():
+		return
+	var node := CloudSave.new()
+	node.name = "CloudAutoBackup"
+	tree.root.add_child(node)
+	await node.backup(false, false)
+	node.queue_free()
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -109,7 +157,7 @@ func _http(url: String, headers: PackedStringArray, method: int, body: Variant =
 
 
 ## Jeton d'accès valide ("" si échec). Lance la connexion par code au premier usage.
-func access_token() -> String:
+func access_token(interactive: bool = true) -> String:
 	var cfg: Dictionary = oauth_config()
 	if cfg.is_empty():
 		status.emit("Cloud non configuré : identifiants Google absents de cette version du jeu.")
@@ -134,6 +182,8 @@ func access_token() -> String:
 		# Jeton révoqué ou expiré : on refait le branchement
 		unlink()
 		_token = {}
+	if not interactive:
+		return ""
 	return await _device_login(cfg)
 
 
@@ -196,6 +246,7 @@ static func build_bundle() -> Dictionary:
 	if FileAccess.file_exists(GameSettings.SETTINGS_PATH):
 		settings = JSON.parse_string(FileAccess.get_file_as_string(GameSettings.SETTINGS_PATH))
 	return {"format": FORMAT, "date": Time.get_datetime_string_from_system(),
+		"unix": int(Time.get_unix_time_from_system()), "device_id": device_id(), "device": device_name(),
 		"version": str(ProjectSettings.get_setting("application/config/version", "")),
 		"saves": saves, "settings": settings}
 
@@ -205,7 +256,9 @@ static func describe(bundle: Dictionary) -> String:
 	var names: PackedStringArray = []
 	for k in (bundle.get("saves", {}) as Dictionary).keys():
 		names.append(String(bundle["saves"][k].get("name", "Partie %d" % (int(k) + 1))))
-	var date: String = String(bundle.get("date", "?")).replace("T", " à ")
+	var date: String = fmt_unix(int(bundle["unix"])) if bundle.has("unix") else String(bundle.get("date", "?")).replace("T", " à ")
+	if String(bundle.get("device", "")) != "":
+		date += " (%s)" % String(bundle["device"])
 	return "Sauvegarde du %s : %d partie(s)%s" % [date, names.size(), (" — " + ", ".join(names)) if not names.is_empty() else ""]
 
 
@@ -243,7 +296,7 @@ static func apply_bundle(bundle: Dictionary) -> int:
 
 func _find_file(token: String) -> Dictionary:
 	var q: String = ("name='%s'" % BACKUP_NAME).uri_encode()
-	var r: Dictionary = await _http("%s?spaces=appDataFolder&q=%s&fields=files(id,modifiedTime)" % [FILES_URL, q],
+	var r: Dictionary = await _http("%s?spaces=appDataFolder&q=%s&fields=files(id,modifiedTime,appProperties)" % [FILES_URL, q],
 		PackedStringArray(["Authorization: Bearer " + token]), HTTPClient.METHOD_GET)
 	if not r["ok"]:
 		return {"error": int(r["code"])}
@@ -251,34 +304,47 @@ func _find_file(token: String) -> Dictionary:
 	return files[0] if not files.is_empty() else {}
 
 
-## Envoie toutes les parties sur Drive. Retourne true si réussi.
-func backup() -> bool:
-	var token: String = await access_token()
+## Envoie toutes les parties sur Drive. Retourne "ok", "conflict" (une sauvegarde plus récente
+## faite sur un autre appareil existe : voir last_conflict, relancer avec force = true) ou "fail".
+func backup(force: bool = false, interactive: bool = true) -> String:
+	var token: String = await access_token(interactive)
 	if token == "":
-		return false
+		return "fail"
 	status.emit("Envoi des parties sur Google Drive…")
-	var content: String = JSON.stringify(build_bundle())
 	var found: Dictionary = await _find_file(token)
 	if found.has("error"):
 		status.emit("Drive inaccessible (erreur %d)." % int(found["error"]))
-		return false
-	var r: Dictionary
+		return "fail"
+	var props: Dictionary = found.get("appProperties", {})
+	var cloud_unix: int = int(props.get("unix", "0"))
+	last_conflict = {}
+	if not force and String(props.get("device_id", "")) != "" and String(props.get("device_id", "")) != device_id() \
+			and cloud_unix > local_newest_unix() + 60:
+		last_conflict = {"unix": cloud_unix, "device": String(props.get("device", "un autre appareil"))}
+		status.emit("La sauvegarde Cloud est plus récente que tes parties sur cet appareil : rien n'a été envoyé.")
+		return "conflict"
+	var bundle: Dictionary = build_bundle()
+	var content: String = JSON.stringify(bundle)
+	var meta_d: Dictionary = {"name": BACKUP_NAME, "mimeType": "application/json",
+		"appProperties": {"unix": str(bundle["unix"]), "device_id": device_id(), "device": device_name()}}
+	var url: String
+	var method: int
 	if found.has("id"):
-		r = await _http("%s/%s?uploadType=media" % [UPLOAD_URL, String(found["id"])],
-			PackedStringArray(["Authorization: Bearer " + token, "Content-Type: application/json"]),
-			HTTPClient.METHOD_PATCH, content.to_utf8_buffer())
+		url = "%s/%s?uploadType=multipart" % [UPLOAD_URL, String(found["id"])]
+		method = HTTPClient.METHOD_PATCH
 	else:
-		var boundary: String = "zimut_%d" % (Time.get_ticks_usec() % 1000000007)
-		var meta: String = JSON.stringify({"name": BACKUP_NAME, "parents": ["appDataFolder"], "mimeType": "application/json"})
-		var body: String = "--%s\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n%s\r\n--%s\r\nContent-Type: application/json\r\n\r\n%s\r\n--%s--\r\n" % [boundary, meta, boundary, content, boundary]
-		r = await _http("%s?uploadType=multipart" % UPLOAD_URL,
-			PackedStringArray(["Authorization: Bearer " + token, "Content-Type: multipart/related; boundary=" + boundary]),
-			HTTPClient.METHOD_POST, body.to_utf8_buffer())
+		meta_d["parents"] = ["appDataFolder"]
+		url = "%s?uploadType=multipart" % UPLOAD_URL
+		method = HTTPClient.METHOD_POST
+	var boundary: String = "zimut_%d" % (Time.get_ticks_usec() % 1000000007)
+	var body: String = "--%s\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n%s\r\n--%s\r\nContent-Type: application/json\r\n\r\n%s\r\n--%s--\r\n" % [boundary, JSON.stringify(meta_d), boundary, content, boundary]
+	var r: Dictionary = await _http(url, PackedStringArray(["Authorization: Bearer " + token,
+		"Content-Type: multipart/related; boundary=" + boundary]), method, body.to_utf8_buffer())
 	if r["ok"]:
-		status.emit("✓ Parties sauvegardées sur Google Drive.")
-		return true
+		status.emit("✓ Parties sauvegardées sur Google Drive (%s)." % fmt_unix(int(bundle["unix"])))
+		return "ok"
 	status.emit("Échec de l'envoi (erreur %d)." % int(r["code"]))
-	return false
+	return "fail"
 
 
 ## Télécharge la sauvegarde Cloud (sans l'appliquer). {} si absente ou erreur.

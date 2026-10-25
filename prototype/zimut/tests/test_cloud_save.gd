@@ -17,6 +17,9 @@ func _boot() -> void:
 	var bundle: Dictionary = CS.build_bundle()
 	check(String(bundle["format"]) == "zimut-cloud-1" and (bundle["saves"] as Dictionary).has("4"), "le paquet contient la partie de l'emplacement 5")
 	check(CS.describe(bundle).contains("Nuage"), "résumé lisible : " + CS.describe(bundle))
+	check(int(bundle["unix"]) > 0 and String(bundle["device_id"]) != "", "paquet daté et signé par l'appareil")
+	check(CS.local_newest_unix() > 0, "date de la partie locale la plus récente")
+	check(CS.fmt_unix(1761400000).contains("/2025 à "), "date lisible : " + CS.fmt_unix(1761400000))
 	# aller-retour JSON (comme sur Drive)
 	var back: Dictionary = JSON.parse_string(JSON.stringify(bundle))
 	pm.delete_save(4)
@@ -45,6 +48,18 @@ func _boot() -> void:
 		await process_frame
 		check(String(sc._code_label.text) == "ABCD-EFGH", "fenêtre du code Google affichée")
 		sc._hide_code()
+		var auto: Button = sc.find_child("CloudAuto", true, false)
+		var gs: Node = root.get_node("GameSettings")
+		var before: bool = gs.cloud_auto
+		auto.pressed.emit()
+		check(gs.cloud_auto != before and auto.text.contains("Oui" if gs.cloud_auto else "Non"), "bouton Auto : bascule l'option (%s)" % auto.text)
+		auto.pressed.emit()
+		check(gs.cloud_auto == before, "bouton Auto : retour à l'état initial")
+		# sans compte relié, la sauvegarde automatique ne fait rien (pas de demande de code)
+		var cs: Node = CS.new()
+		root.add_child(cs)
+		check(await cs.access_token(false) == "", "mode silencieux : aucun branchement de compte lancé")
+		cs.queue_free()
 	else:
 		check(false, "scène Settings introuvable")
 	pm.delete_save(4)

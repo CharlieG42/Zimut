@@ -77,7 +77,7 @@ func _ready() -> void:
 	tuto.pressed.connect(func() -> void:
 		GameSettings.restart_tutorial()
 		tuto.text = "✓  Tutoriel relancé")
-	tuto.text = "🎓  Relancer le tutoriel"
+	tuto.text = "🎓  Tutoriel"
 	tuto.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tuto.custom_minimum_size = Vector2(0, 64)
 	_tuto_btn = tuto
@@ -160,6 +160,21 @@ func _build_cloud(box: VBoxContainer) -> void:
 	down.name = "CloudRestore"
 	down.pressed.connect(_on_cloud_restore)
 	row.add_child(down)
+	var auto := _cloud_button("", Color(0.86, 0.80, 0.64))
+	auto.name = "CloudAuto"
+	auto.size_flags_horizontal = Control.SIZE_FILL
+	auto.custom_minimum_size = Vector2(190, 64)
+	auto.tooltip_text = "Sauvegarde Cloud automatique après chaque combat (compte Google relié)."
+	var paint_auto := func() -> void:
+		auto.text = "⟳ Auto : %s" % ("Oui" if GameSettings.cloud_auto else "Non")
+	paint_auto.call()
+	auto.pressed.connect(func() -> void:
+		GameSettings.set_cloud_auto(not GameSettings.cloud_auto)
+		paint_auto.call()
+		if GameSettings.cloud_auto and not CloudSave.is_linked():
+			_cloud_status.text = "Auto activé : il démarrera après ta première « Sauvegarde sur Cloud » (pour relier ton compte).")
+	_cloud_btns.erase(auto)
+	row.add_child(auto)
 	_cloud_status = Label.new()
 	_cloud_status.name = "CloudStatus"
 	_cloud_status.add_theme_font_size_override("font_size", 19)
@@ -180,7 +195,7 @@ func _cloud_button(txt: String, col: Color) -> Button:
 	b.text = txt
 	b.custom_minimum_size = Vector2(0, 64)
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	b.add_theme_font_size_override("font_size", 22)
+	b.add_theme_font_size_override("font_size", 20)
 	b.add_theme_color_override("font_color", COL_TXT)
 	b.add_theme_stylebox_override("normal", _flat(col, COL_BORDER, 12, 2))
 	b.add_theme_stylebox_override("hover", _flat(col.lightened(0.2), COL_BORDER, 12, 3))
@@ -194,12 +209,18 @@ func _cloud_busy(on: bool) -> void:
 		b.disabled = on
 
 
-func _on_cloud_backup() -> void:
+func _on_cloud_backup(force: bool = false) -> void:
 	PlayTimer.flush()
 	_cloud_busy(true)
-	await _cloud.backup()
+	var res: String = await _cloud.backup(force)
 	_hide_code()
 	_cloud_busy(false)
+	if res == "conflict":
+		var c: Dictionary = _cloud.last_conflict
+		_confirm("⚠ Sauvegarde Cloud plus récente",
+			"La sauvegarde Cloud a été faite le %s sur %s.\nTes parties sur cet appareil datent du %s.\n\nSi tu envoies maintenant, la progression faite sur l'autre appareil sera perdue. Pour la récupérer ici, utilise plutôt « Restauration depuis Cloud »." % [
+				CloudSave.fmt_unix(int(c.get("unix", 0))), String(c.get("device", "un autre appareil")), CloudSave.fmt_unix(CloudSave.local_newest_unix())],
+			"ÉCRASER QUAND MÊME", func() -> void: _on_cloud_backup(true))
 
 
 func _on_cloud_restore() -> void:
@@ -209,8 +230,13 @@ func _on_cloud_restore() -> void:
 	_cloud_busy(false)
 	if bundle.is_empty():
 		return
-	_confirm("Restaurer depuis le Cloud ?", CloudSave.describe(bundle) + "\n\nLes parties de cet appareil seront remplacées par celles de la sauvegarde.",
-		"RESTAURER", func() -> void:
+	var local_unix: int = CloudSave.local_newest_unix()
+	var older: bool = int(bundle.get("unix", 0)) > 0 and int(bundle.get("unix", 0)) < local_unix - 60
+	var msg: String = CloudSave.describe(bundle) + "\n\nLes parties de cet appareil seront remplacées par celles de la sauvegarde."
+	if older:
+		msg = "⚠ Attention : cette sauvegarde est PLUS ANCIENNE que tes parties sur cet appareil (dernière partie enregistrée le %s). Restaurer effacerait ta progression récente.\n\n" % CloudSave.fmt_unix(local_unix) + msg
+	_confirm("⚠ Sauvegarde Cloud plus ancienne" if older else "Restaurer depuis le Cloud ?", msg,
+		"RESTAURER QUAND MÊME" if older else "RESTAURER", func() -> void:
 			var n: int = CloudSave.apply_bundle(bundle)
 			GameManager.active_save = {}
 			GameManager.active_slot = -1

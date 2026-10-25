@@ -11,4 +11,8 @@ func _boot() -> void:
 	sc._show_code("KQBX-RTWM", "https://www.google.com/device")
 	await create_timer(0.4).timeout
 	root.get_viewport().get_texture().get_image().save_png(dir + "/options_code.png")
+	sc._hide_code()
+	sc._confirm("⚠ Sauvegarde Cloud plus récente", "La sauvegarde Cloud a été faite le 24/10/2026 à 21:40 sur Pixel 8.\nTes parties sur cet appareil datent du 22/10/2026 à 18:05.\n\nSi tu envoies maintenant, la progression faite sur l'autre appareil sera perdue. Pour la récupérer ici, utilise plutôt « Restauration depuis Cloud ».", "ÉCRASER QUAND MÊME", func() -> void: pass)
+	await create_timer(0.4).timeout
+	root.get_viewport().get_texture().get_image().save_png(dir + "/options_conflit.png")
 	quit()
