@@ -683,16 +683,20 @@ func _play_cast(d: Dictionary) -> void:
 		if cn != null:
 			cn.flash = 1.0
 			cn.refresh()
+	var multi: bool = (d["cells"] as Array).size() > 1
 	if kind == "attack":
 		var phys: bool = String(d["dtype"]) == "phys"
-		if v != null and elem != "physical":
-			_rune(v.position, col)   # rune d'incantation sous le lanceur
 		if d["ranged"] and v != null:
+			_charge(v, elem, phys)   # V47 : charge d'incantation / élan côté lanceur
+			v.tint_flash(col, 0.3, 0.35)
+			await _wait(0.12)
 			v.play_pose("attack", 0.6, String(d.get("spell", "")))
 			Sfx.play("magic" if not phys else "cast")
 			var start: Vector2 = v.position + Vector2(0, -50)
 			await _projectile_el(start, to_pos, elem, phys)
 		elif v != null:
+			if elem != "physical":
+				_charge(v, elem, false)
 			Sfx.play("slash")
 			v.lunge(grid_to_screen(to.x, to.y), String(d.get("spell", "")))
 			await get_tree().create_timer(0.1).timeout
@@ -700,16 +704,114 @@ func _play_cast(d: Dictionary) -> void:
 			await get_tree().create_timer(0.08).timeout
 		else:
 			await _wait(0.1)
-		var n_cells: int = (d["cells"] as Array).size()
-		if n_cells > 1:
-			_ring(grid_to_screen(to.x, to.y), col, 12.0, 28.0 * sqrt(float(n_cells)), 0.6, 8.0)
+		if multi:
+			_aoe_ripple(d["cells"], to, col, elem)
 	else:
 		Sfx.play("heal" if kind == "heal" else ("buff" if kind == "buff" else "cast"))
 		if v != null:
+			_charge(v, elem, false)
 			_rune(v.position, col)
 			_burst(v.position + Vector2(0, -40), col, 18, 120.0, 0.7, 5.0, 180.0, Vector2.UP, Vector2(0, -60))
 			v.cast_pose(String(d.get("spell", "")))
-		await _wait(0.28)
+			v.tint_flash(col, 0.35, 0.4)
+			# V47 : étincelle de soutien qui rejoint un allié à distance
+			if (kind == "heal" or kind == "buff") and from != to and v.position.distance_to(to_pos) > 90.0:
+				await _wait(0.12)
+				await _support_wisp(v.position + Vector2(0, -50), to_pos, col, cols[1])
+		if multi:
+			_aoe_ripple(d["cells"], to, col, elem)
+		await _wait(0.2)
+
+
+## V47 : nombre d'effets à l'écran borné (lisibilité + perfs mobile).
+func _fx_ok(limit: int = 70) -> bool:
+	return _fx_layer != null and _fx_layer.get_child_count() < limit
+
+
+## Charge d'incantation autour du lanceur (étincelles qui convergent / traits d'élan).
+func _charge(v: EntityView, elem: String, phys: bool) -> void:
+	if not _fx_ok():
+		return
+	var cols: Array = SpellFx.colors(elem)
+	var c := SpellFx.Charge.new()
+	c.col = cols[0]
+	c.col2 = cols[1]
+	c.physical = phys
+	c.position = v.position + Vector2(0, -48)
+	_fx_layer.add_child(c)
+
+
+## V47 : onde de choc d'une zone d'effet — un anneau par case, retardé selon la distance au centre.
+func _aoe_ripple(cells: Array, center: Vector2i, col: Color, elem: String) -> void:
+	var shown: int = 0
+	for c: Vector2i in cells:
+		if shown >= 12 or not _fx_ok(90):
+			return
+		var dist: float = float(absi(c.x - center.x) + absi(c.y - center.y))
+		var pos: Vector2 = grid_to_screen(c.x, c.y)
+		var r := SpellFx.Ring.new()
+		r.col = col
+		r.r0 = 4.0
+		r.r1 = 40.0
+		r.life = 0.45
+		r.thick = 4.0
+		r.t = -0.07 * dist
+		r.position = pos
+		_fx_layer.add_child(r)
+		if c != center:
+			get_tree().create_timer(0.07 * dist).timeout.connect(func() -> void:
+				if is_inside_tree() and _fx_ok(90):
+					_burst(pos, col, 6, 80.0, 0.4, 4.0))
+		shown += 1
+	if elem in SpellFx.IMPACT_SPIKES:
+		_spikes(grid_to_screen(center.x, center.y), elem, 1.2)
+
+
+## V47 : pointes radiales à l'impact (glace, pierre, épines, rayons...).
+func _spikes(pos: Vector2, elem: String, scale_: float = 1.0) -> void:
+	if not SpellFx.IMPACT_SPIKES.has(elem) or not _fx_ok():
+		return
+	var info: Array = SpellFx.IMPACT_SPIKES[elem]
+	var sp := SpellFx.Spikes.new()
+	sp.col = SpellFx.colors(elem)[0]
+	sp.n = int(info[0])
+	sp.length = float(info[1]) * scale_
+	sp.rot = float(info[2])
+	sp.position = pos
+	_fx_layer.add_child(sp)
+
+
+## V47 : étincelle de soutien (soin, buff) du lanceur vers un allié, avec traînée.
+func _support_wisp(start: Vector2, end: Vector2, col: Color, col2: Color) -> void:
+	var m := SpellFx.Missile.new()
+	m.kind = "wisp"
+	m.col = col
+	m.col2 = col2
+	m.position = start
+	_fx_layer.add_child(m)
+	var trail: CPUParticles2D = _make_particles(col, 14, 0.4, 16.0, 0.3)
+	trail.emitting = true
+	trail.one_shot = false
+	trail.explosiveness = 0.0
+	m.add_child(trail)
+	var tw: Tween = create_tween()
+	tw.tween_method(func(f: float) -> void:
+		m.position = start.lerp(end, f) + Vector2(0.0, -sin(f * PI) * 46.0),
+		0.0, 1.0, clampf(start.distance_to(end) / 800.0, 0.2, 0.45)).set_trans(Tween.TRANS_SINE)
+	await tw.finished
+	m.queue_free()
+
+
+## V47 : marque de statut (bouclier, chevrons, étoiles, racines, gouttes...) sur la cible.
+func _status_mark(v: EntityView, id: String, col: Color, good: bool) -> void:
+	if not _fx_ok(90):
+		return
+	var m := SpellFx.StatusMark.new()
+	m.style = SpellFx.status_style(id, good)
+	m.col = col
+	m.h = clampf(float(v.height), 60.0, 160.0)
+	m.position = v.position
+	_fx_layer.add_child(m)
 
 
 ## Projectile propre à l'élément : flèche, éclat de glace, boule de feu, glu de poison,
@@ -839,6 +941,7 @@ func _impact(pos: Vector2, elem: String, crit: bool) -> void:
 		_:
 			_slash(pos, col)
 			_burst(pos, col2, int(12.0 * n), 200.0, 0.35, 3.0)
+	_spikes(pos + Vector2(0, 38), elem, n)
 	_ring(pos + Vector2(0, 38), col, 6.0, 52.0 * n, 0.38, 5.0)
 
 
@@ -875,6 +978,7 @@ func _play_damage(d: Dictionary) -> void:
 		_float_text(v, "Dans le dos !", Color(1.0, 0.7, 0.3), 20)
 	var elem: String = "poison" if dtype == "dot" else ("earth" if dtype == "fall" else _cur_element)
 	_impact(v.position + Vector2(0, -44), elem, crit)
+	v.tint_flash(SpellFx.colors(elem)[0], 0.28, 0.75 if crit else 0.55)   # V47 : le sprite touché prend la teinte de l'élément
 	Sfx.play("crit" if crit else "hit")
 	if crit:
 		Sfx.buzz(25)
@@ -889,6 +993,8 @@ func _play_heal(d: Dictionary) -> void:
 	v.set_hp(float(d["pv_after"]))
 	_float_text(v, "+%d" % int(d["amount"]), Color(0.4, 1.0, 0.5), 30)
 	_pillar(v.position + Vector2(0, 6), Color(0.55, 1.0, 0.65))
+	v.tint_flash(Color(0.5, 1.0, 0.6), 0.45, 0.5)
+	_status_mark(v, "regen", Color(0.55, 1.0, 0.65), true)
 	_ring(v.position + Vector2(0, 6), Color(0.55, 1.0, 0.65), 8.0, 46.0, 0.5, 5.0)
 	_burst(v.position + Vector2(0, -30), Color(0.4, 1.0, 0.55), 16, 80.0, 0.9, 5.0, 40.0, Vector2.UP, Vector2(0, -90))
 	await _wait(0.15)
@@ -902,6 +1008,8 @@ func _play_status(d: Dictionary) -> void:
 	var good: bool = bool(d.get("good", false))
 	_float_text(v, String(d["text"]), col, 22)
 	_burst(v.position + Vector2(0, -40), col, 8, 70.0, 0.6, 4.0, 60.0, Vector2.UP, Vector2(0, -60 if good else 40))
+	_status_mark(v, String(d.get("id", "")), col, good)
+	v.tint_flash(col, 0.4, 0.4)
 	v.queue_redraw()
 
 
