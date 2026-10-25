@@ -27,7 +27,7 @@ const INTRO := [
 ## Fin du tutoriel : choix des 3 héros de départ (V48), puis premier combat.
 const PICK := [
 	"Avant de partir, {pseudo}, il te faut une [b]compagnie[/b]. Dix héros t'attendent à Zimut… mais au début, tu n'en emmèneras que [b]trois[/b].",
-	"Chacun a son style : le [b]Tank[/b] encaisse, le [b]Heal[/b] et le [b]Druide[/b] soignent, le [b]Mage[/b] et l'[b]Artificier[/b] font pleuvoir les dégâts, l'[b]Assassin[/b] frappe dans le dos, l'[b]Invocateur[/b] et le [b]Sylvain[/b] appellent des alliés, le [b]Géomancien[/b] façonne le terrain…",
+	"Chacun a son style : le [b]Tank[/b] encaisse, le [b]Chasseur[/b] tire de loin, le [b]Heal[/b] et le [b]Druide[/b] soignent, le [b]Mage[/b] et l'[b]Artificier[/b] font pleuvoir les dégâts, l'[b]Assassin[/b] frappe dans le dos, l'[b]Invocateur[/b] et le [b]Sylvain[/b] appellent des alliés, le [b]Géomancien[/b] façonne le terrain…",
 	"Touche un héros pour lire sa [b]fiche[/b] : son rôle, ses points forts, ses points faibles et un conseil. Les étoiles ★ indiquent la [b]difficulté[/b] : une étoile, c'est facile à prendre en main ; trois, c'est pour les stratèges.",
 	"Un bon trio mêle un [b]protecteur[/b], un [b]soutien[/b] et un [b]héros de dégâts[/b]. Mais tu fais comme tu veux : il n'y a pas de mauvais choix, seulement des styles différents !",
 	"Les héros que tu ne choisis pas ne sont pas perdus : en gagnant des [b]niveaux de joueur[/b], tu en débloqueras d'autres, [b]un à la fois, et c'est toi qui décides[/b] lequel rejoint ta compagnie.",
@@ -155,13 +155,13 @@ func _ready() -> void:
 		box.offset_left = 190.0
 		box.offset_right = -24.0
 		box.offset_top = 20.0
-		box.offset_bottom = 230.0
+		box.offset_bottom = 270.0
 	else:
 		box.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 		box.offset_left = 190.0
 		box.offset_right = -24.0
 		box.offset_bottom = -20.0
-		box.offset_top = -230.0
+		box.offset_top = -270.0
 		box.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	var st := StyleBoxFlat.new()
 	st.bg_color = C_PANEL
@@ -188,8 +188,8 @@ func _ready() -> void:
 	_text.scroll_active = false
 	_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_text.custom_minimum_size = Vector2(0, 100)
-	_text.add_theme_font_size_override("normal_font_size", 23)
-	_text.add_theme_font_size_override("bold_font_size", 23)
+	_text.add_theme_font_size_override("normal_font_size", 26)
+	_text.add_theme_font_size_override("bold_font_size", 26)
 	_text.add_theme_color_override("default_color", Color(1, 0.96, 0.86))
 	_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	v.add_child(_text)

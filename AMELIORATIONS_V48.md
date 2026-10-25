@@ -25,3 +25,8 @@ Tout est débloqué ; niveau du joueur = niveau du meilleur héros (aucun héros
 ## Dialogues de Gultur (enrichis)
 - **Choix des héros** (`PICK`, 6 répliques) : présentation des 10 héros et de leurs rôles, lecture des fiches et des étoiles de difficulté, trio conseillé, déblocage futur « c'est toi qui décides », puis `AFTER_PICK` avant le premier combat.
 - **Écran d'équipe** : `TEAM` mentionne les cadenas 🔒 et le bouton ★ Explorateur ; `PLAYER` explique le niveau du joueur (plafond des héros, déblocages) ; `UNLOCK` apparaît la première fois qu'un héros est à débloquer ; `ALL_UNLOCKED` félicite quand les dix héros sont à soi. Chaque dialogue ne s'affiche qu'une fois et respecte « Passer le tutoriel ».
+
+## Retours de test (V48b)
+- Gultur cite aussi le **Chasseur** dans la présentation des héros ; texte de Gultur agrandi (26 px, bandeau plus haut).
+- Fiches des héros (choix et écran d'équipe) : texte agrandi, et **glisser n'importe où dans la fiche** fait défiler (plus seulement la barre).
+- Mes Parties : fenêtres **Supprimer**, **Renommer** et **Importer** remplacées par de grandes fenêtres lisibles sur téléphone (gros boutons, texte 24 px).
