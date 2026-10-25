@@ -35,6 +35,30 @@ const KEYWORDS: Array = [
 ]
 
 
+## V47 — Retour visuel côté CIBLE d'un statut : style dessiné par code. La teinte est celle du
+## statut (Combat.STATUS_INFO). Pilotée par données : un nouveau statut = une ligne ici.
+const STATUS_VFX := {
+	"poison": "drip", "bleed": "drip", "burn": "embers",
+	"stun": "stars", "root": "roots", "slow": "down", "curse": "swirl", "weaken": "down", "taunted": "target",
+	"def_up": "dome", "mres_up": "dome", "immune": "dome", "immune_phys": "dome", "immune_mag": "dome", "immune_neg": "dome",
+	"dmg_up": "up", "pa_up": "up", "pm_up": "up", "dodge": "ghost", "invisible": "ghost",
+	"regen": "cross", "mark": "target", "chief": "crown",
+}
+
+## Pointes d'impact par élément : [nombre, longueur, rotation du motif].
+const IMPACT_SPIKES := {
+	"ice": [7, 62.0, 0.0], "earth": [6, 54.0, 0.4], "nature": [8, 50.0, 0.2], "holy": [8, 74.0, 0.0],
+	"arcane": [5, 58.0, 0.3], "lightning": [6, 66.0, 0.1],
+}
+
+
+## Style d'effet d'un statut ; repli sur « up » (positif) ou « down » (négatif).
+static func status_style(id: String, good: bool) -> String:
+	if STATUS_VFX.has(id):
+		return String(STATUS_VFX[id])
+	return "up" if good else "down"
+
+
 static func _norm(s: String) -> String:
 	var t: String = s.to_lower()
 	for pair in [["é", "e"], ["è", "e"], ["ê", "e"], ["ë", "e"], ["à", "a"], ["â", "a"], ["î", "i"], ["ï", "i"],
@@ -86,6 +110,8 @@ class Ring extends Node2D:
 			return
 		queue_redraw()
 	func _draw() -> void:
+		if t < 0.0:
+			return   # V47 : départ différé (ondulation d'une zone d'effet)
 		var k: float = clampf(t / life, 0.0, 1.0)
 		var e: float = 1.0 - pow(1.0 - k, 3.0)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, squash))
@@ -237,6 +263,15 @@ class Missile extends Node2D:
 			"leaf":
 				draw_colored_polygon(PackedVector2Array([Vector2(-14, 0), Vector2(0, -8), Vector2(14, 0), Vector2(0, 8)]), col)
 				draw_line(Vector2(-14, 0), Vector2(14, 0), col2, 1.6, true)
+			"wisp":
+				# V47 : étincelle de soutien (soin/buff lancé à distance), scintille en tournant
+				var pulse: float = 1.0 + 0.2 * sin(t * 24.0)
+				draw_circle(Vector2.ZERO, 16.0 * pulse, Color(col.r, col.g, col.b, 0.35))
+				draw_circle(Vector2.ZERO, 9.0 * pulse, Color(col.r, col.g, col.b, 0.9))
+				draw_circle(Vector2.ZERO, 4.5, Color(1, 1, 1, 0.95))
+				for i: int in range(4):
+					var a: float = t * 6.0 + float(i) * PI * 0.5
+					draw_line(Vector2.ZERO, Vector2(cos(a), sin(a)) * 20.0 * pulse, Color(col2.r, col2.g, col2.b, 0.8), 2.0, true)
 			_:
 				draw_circle(Vector2.ZERO, 14.0, Color(col.r, col.g, col.b, 0.9))
 				draw_circle(Vector2.ZERO, 7.0, Color(col2.r, col2.g, col2.b, 1.0))
@@ -281,3 +316,165 @@ class GlyphMark extends Node2D:
 		pts.append(pts[0])
 		draw_polyline(pts, line, 1.8, true)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  V47 — Effets de lanceur et de cible
+# ═══════════════════════════════════════════════════════════════════════════
+
+## Charge d'incantation autour du lanceur : étincelles qui convergent + halo qui gonfle.
+## Pour une attaque physique : traits de vitesse (élan) au lieu d'étincelles.
+class Charge extends Node2D:
+	var col: Color = Color.WHITE
+	var col2: Color = Color.WHITE
+	var physical: bool = false
+	var life: float = 0.34
+	var t: float = 0.0
+	func _process(d: float) -> void:
+		t += d
+		if t >= life:
+			queue_free()
+			return
+		queue_redraw()
+	func _draw() -> void:
+		var k: float = clampf(t / life, 0.0, 1.0)
+		var a: float = sin(k * PI)
+		if physical:
+			for i: int in range(4):
+				var y: float = -18.0 + float(i) * 12.0
+				var x0: float = -52.0 + 30.0 * k
+				draw_line(Vector2(x0 - 24.0, y), Vector2(x0, y), Color(col.r, col.g, col.b, a * 0.8), 3.0, true)
+			return
+		draw_circle(Vector2.ZERO, lerpf(8.0, 30.0, k), Color(col.r, col.g, col.b, a * 0.30))
+		draw_circle(Vector2.ZERO, lerpf(4.0, 14.0, k), Color(col2.r, col2.g, col2.b, a * 0.55))
+		for i: int in range(8):
+			var ang: float = float(i) * TAU / 8.0 + k * 2.2
+			var rad: float = lerpf(74.0, 6.0, k * k)
+			var p := Vector2(cos(ang), sin(ang) * 0.75) * rad
+			draw_circle(p, 3.2 * (1.0 - k * 0.4), Color(col2.r, col2.g, col2.b, a))
+			draw_line(p, p * 1.18, Color(col.r, col.g, col.b, a * 0.6), 2.0, true)
+
+
+## Pointes radiales (cristaux de glace, pierres, épines, rayons sacrés...) à l'impact.
+class Spikes extends Node2D:
+	var col: Color = Color.WHITE
+	var n: int = 6
+	var length: float = 56.0
+	var rot: float = 0.0
+	var life: float = 0.42
+	var squash: float = 0.6
+	var t: float = 0.0
+	func _process(d: float) -> void:
+		t += d
+		if t >= life:
+			queue_free()
+			return
+		queue_redraw()
+	func _draw() -> void:
+		var k: float = clampf(t / life, 0.0, 1.0)
+		var grow: float = 1.0 - pow(1.0 - minf(1.0, k * 2.5), 3.0)
+		var a: float = 1.0 - pow(k, 2.0)
+		for i: int in range(n):
+			var ang: float = rot + float(i) * TAU / float(n)
+			var dir := Vector2(cos(ang), sin(ang) * squash)
+			var base: Vector2 = dir * 10.0
+			var tip: Vector2 = dir * (10.0 + length * grow)
+			var perp := Vector2(-dir.y, dir.x).normalized() * 6.0 * (1.0 - k * 0.5)
+			draw_colored_polygon(PackedVector2Array([base + perp, tip, base - perp]), Color(col.r, col.g, col.b, a * 0.9))
+			draw_line(base, tip, Color(1, 1, 1, a * 0.6), 1.5, true)
+
+
+## Marque de statut sur la cible. `style` : up, down, dome, stars, roots, drip, embers, swirl,
+## target, ghost, cross, crown. Dessinée au-dessus des pieds de la cible (hauteur `h`).
+class StatusMark extends Node2D:
+	var col: Color = Color.WHITE
+	var style: String = "up"
+	var h: float = 90.0
+	var life: float = 0.95
+	var t: float = 0.0
+	func _process(d: float) -> void:
+		t += d
+		if t >= life:
+			queue_free()
+			return
+		queue_redraw()
+	func _chevron(c: Vector2, w: float, up: bool, a: float) -> void:
+		var s: float = -1.0 if up else 1.0
+		var pts := PackedVector2Array([c + Vector2(-w, -s * w * 0.5), c + Vector2(0, s * w * 0.5), c + Vector2(w, -s * w * 0.5)])
+		draw_polyline(pts, Color(0, 0, 0, a * 0.5), 7.0, true)
+		draw_polyline(pts, Color(col.r, col.g, col.b, a), 4.0, true)
+	func _star4(c: Vector2, r: float, a: float) -> void:
+		draw_colored_polygon(PackedVector2Array([c + Vector2(0, -r), c + Vector2(r * 0.3, -r * 0.3), c + Vector2(r, 0), c + Vector2(r * 0.3, r * 0.3),
+			c + Vector2(0, r), c + Vector2(-r * 0.3, r * 0.3), c + Vector2(-r, 0), c + Vector2(-r * 0.3, -r * 0.3)]), Color(col.r, col.g, col.b, a))
+	func _draw() -> void:
+		var k: float = clampf(t / life, 0.0, 1.0)
+		var fade: float = minf(1.0, k * 6.0) * (1.0 - maxf(0.0, (k - 0.6) / 0.4))
+		match style:
+			"up", "down":
+				var up: bool = style == "up"
+				for i: int in range(3):
+					var f: float = fposmod(k * 1.4 - float(i) * 0.22, 1.0)
+					var y: float = lerpf(-8.0, -h, f) if up else lerpf(-h, -8.0, f)
+					_chevron(Vector2(0, y), 18.0, up, fade * sin(f * PI))
+			"dome":
+				draw_set_transform(Vector2(0, -h * 0.45), 0.0, Vector2.ONE)
+				var r: float = 50.0 + 6.0 * sin(t * 10.0)
+				draw_circle(Vector2.ZERO, r, Color(col.r, col.g, col.b, 0.16 * fade))
+				draw_arc(Vector2.ZERO, r, 0.0, TAU, 40, Color(col.r, col.g, col.b, 0.9 * fade), 3.5, true)
+				for i: int in range(6):
+					var ang: float = t * 1.5 + float(i) * TAU / 6.0
+					draw_line(Vector2(cos(ang), sin(ang)) * r * 0.55, Vector2(cos(ang), sin(ang)) * r, Color(1, 1, 1, 0.5 * fade), 1.5, true)
+			"stars":
+				for i: int in range(3):
+					var ang: float = t * 7.0 + float(i) * TAU / 3.0
+					_star4(Vector2(cos(ang) * 34.0, -h - 6.0 + sin(ang) * 10.0), 9.0, fade)
+			"roots":
+				for i: int in range(5):
+					var x: float = -30.0 + float(i) * 15.0
+					var hh: float = (24.0 + float(i % 3) * 14.0) * minf(1.0, k * 4.0)
+					var pts := PackedVector2Array()
+					for j: int in range(6):
+						var f: float = float(j) / 5.0
+						pts.append(Vector2(x + sin(f * 5.0 + float(i)) * 6.0, -f * hh))
+					draw_polyline(pts, Color(0.30, 0.20, 0.10, fade), 6.0, true)
+					draw_polyline(pts, Color(col.r, col.g, col.b, fade), 3.0, true)
+			"drip":
+				for i: int in range(5):
+					var f: float = fposmod(k * 1.5 + float(i) * 0.2, 1.0)
+					var x: float = -26.0 + float(i) * 13.0
+					var y: float = lerpf(-h, -6.0, f * f)
+					draw_circle(Vector2(x, y), 4.5, Color(col.r, col.g, col.b, fade))
+					draw_colored_polygon(PackedVector2Array([Vector2(x - 3.5, y - 1.0), Vector2(x, y - 12.0), Vector2(x + 3.5, y - 1.0)]), Color(col.r, col.g, col.b, fade))
+			"embers":
+				for i: int in range(6):
+					var f: float = fposmod(k * 1.6 + float(i) * 0.17, 1.0)
+					var x: float = -28.0 + float(i) * 11.0 + sin(f * 9.0 + float(i)) * 5.0
+					var y: float = lerpf(-6.0, -h, f)
+					draw_circle(Vector2(x, y), 6.0 * (1.0 - f * 0.6), Color(col.r, col.g, col.b, fade * (1.0 - f)))
+					draw_circle(Vector2(x, y), 3.0 * (1.0 - f * 0.6), Color(1.0, 0.9, 0.5, fade * (1.0 - f)))
+			"swirl":
+				draw_set_transform(Vector2(0, -h * 0.5), 0.0, Vector2(1.0, 0.7))
+				for i: int in range(3):
+					var ang0: float = -t * 5.0 + float(i) * TAU / 3.0
+					draw_arc(Vector2.ZERO, lerpf(52.0, 14.0, k), ang0, ang0 + 1.4, 14, Color(col.r, col.g, col.b, fade * 0.9), 5.0, true)
+			"target":
+				var r: float = lerpf(64.0, 22.0, minf(1.0, k * 2.0))
+				var c := Vector2(0, -h * 0.5)
+				draw_arc(c, r, 0.0, TAU, 32, Color(col.r, col.g, col.b, fade), 3.0, true)
+				for i: int in range(4):
+					var ang: float = float(i) * PI * 0.5
+					draw_line(c + Vector2(cos(ang), sin(ang)) * (r - 12.0), c + Vector2(cos(ang), sin(ang)) * (r + 10.0), Color(col.r, col.g, col.b, fade), 3.0, true)
+			"ghost":
+				for i: int in range(4):
+					var y: float = -h * (0.2 + 0.22 * float(i)) - 10.0 * sin(t * 8.0 + float(i))
+					draw_line(Vector2(-36, y), Vector2(36, y), Color(col.r, col.g, col.b, fade * 0.7), 2.5, true)
+			"cross":
+				for i: int in range(4):
+					var f: float = fposmod(k * 1.3 + float(i) * 0.25, 1.0)
+					var c := Vector2(-24.0 + float(i) * 16.0, lerpf(-6.0, -h, f))
+					var a: float = fade * sin(f * PI)
+					draw_line(c + Vector2(-7, 0), c + Vector2(7, 0), Color(col.r, col.g, col.b, a), 4.0, true)
+					draw_line(c + Vector2(0, -7), c + Vector2(0, 7), Color(col.r, col.g, col.b, a), 4.0, true)
+			"crown":
+				for i: int in range(3):
+					_star4(Vector2(-22.0 + float(i) * 22.0, -h - 8.0 - 6.0 * sin(t * 9.0 + float(i) * 2.0)), 7.0 + 3.0 * sin(t * 12.0 + float(i)), fade)

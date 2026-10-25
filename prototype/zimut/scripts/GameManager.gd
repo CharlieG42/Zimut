@@ -1748,7 +1748,7 @@ func _apply_status(src: Dictionary, tgt: Dictionary, id: String, turns: int, val
 	var text: String = String(info["label"])
 	if id in ["def_up", "mres_up", "dmg_up"]:
 		text = "%s %d%%" % [text, int(value)]
-	fx.emit("status", {"target": tgt, "text": text, "color": info["color"], "good": not Combat.NEGATIVE.has(id)})
+	fx.emit("status", {"target": tgt, "id": id, "text": text, "color": info["color"], "good": not Combat.NEGATIVE.has(id)})
 
 
 func _do_heal(_caster: Dictionary, tgt: Dictionary, amount: int) -> int:

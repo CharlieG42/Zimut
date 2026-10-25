@@ -718,6 +718,15 @@ func hit_react(strength: float = 1.0, from: Vector2 = Vector2.INF) -> void:
 	_tilt = clampf(dir.x, -1.0, 1.0) * 0.16 * strength
 
 
+## V47 : teinte brève du sprite (impact reçu, lueur de lanceur) qui revient à la normale.
+func tint_flash(col: Color, dur: float = 0.25, amount: float = 0.65) -> void:
+	if sprite == null or not is_inside_tree():
+		return
+	sprite.modulate = Color.WHITE.lerp(col, amount)
+	var tw: Tween = create_tween()
+	tw.tween_property(sprite, "modulate", Color.WHITE, dur).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+
 func pop_in() -> Tween:
 	scale = Vector2(0.1, 0.1)
 	modulate.a = 0.0
