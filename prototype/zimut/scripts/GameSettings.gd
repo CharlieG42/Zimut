@@ -55,6 +55,8 @@ var tutorial_done: bool = false
 ## Tutoriel guidé par Gultur : actif ? + étapes déjà vues { id: true }.
 var tutorial_enabled: bool = true
 var tuto_seen: Dictionary = {}
+## V49 : sauvegarde Cloud automatique après chaque combat (si un compte Google est relié).
+var cloud_auto: bool = false
 
 func _ready() -> void:
 	load_settings()
@@ -85,6 +87,7 @@ func load_settings() -> void:
 	sfx_on = bool(parsed.get("sfx_on", sfx_on))
 	language = String(parsed.get("language", language))
 	haptics_on = bool(parsed.get("haptics_on", haptics_on))
+	cloud_auto = bool(parsed.get("cloud_auto", cloud_auto))
 	_apply_sfx()
 
 func save_settings() -> void:
@@ -92,7 +95,7 @@ func save_settings() -> void:
 	if f == null:
 		push_error("Impossible d'écrire les réglages")
 		return
-	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "anim_speed": anim_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "language": language, "turn_timer_mode": turn_timer_mode}, "\t"))
+	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "anim_speed": anim_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "language": language, "turn_timer_mode": turn_timer_mode, "cloud_auto": cloud_auto}, "\t"))
 	f.close()
 
 func set_difficulty(idx: int) -> void:
@@ -121,6 +124,10 @@ func set_language(lang: String) -> void:
 func set_sfx(on: bool) -> void:
 	sfx_on = on
 	_apply_sfx()
+	save_settings()
+
+func set_cloud_auto(on: bool) -> void:
+	cloud_auto = on
 	save_settings()
 
 func set_haptics(on: bool) -> void:

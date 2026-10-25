@@ -662,38 +662,33 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 
 	var rename_btn := _action_button("rename", "RENOMMER CETTE PARTIE", COL_TXT)
 	rename_btn.pressed.connect(func() -> void:
-		var dialog := ConfirmationDialog.new()
 		var line := LineEdit.new()
 		line.text = String(data.get("name", ""))
 		line.placeholder_text = "Nouveau nom"
-		dialog.add_child(line)
-		dialog.dialog_text = "Nouveau nom de la partie :"
-		dialog.ok_button_text = "RENOMMER"
-		dialog.cancel_button_text = "Annuler"
-		dialog.confirmed.connect(func() -> void:
-			ProgressionManager.rename_save(slot, line.text)
-			_current = ProgressionManager.load_save(slot)
-			refresh())
-		dialog.register_text_enter(line)
-		_root.add_child(dialog)
-		dialog.popup_centered()
+		line.max_length = 30
+		line.custom_minimum_size = Vector2(0, 64)
+		line.add_theme_font_size_override("font_size", _ui_font(26))
+		_modal("Renommer la partie", "Nouveau nom de la partie :", [
+			["Annuler", Color(0.45, 0.40, 0.32), Callable()],
+			["RENOMMER", Color(0.30, 0.55, 0.30), func() -> void:
+				ProgressionManager.rename_save(slot, line.text)
+				_current = ProgressionManager.load_save(slot)
+				refresh()],
+		], line)
 		line.call_deferred("grab_focus"))
 	var delete_btn := _action_button("delete", "SUPPRIMER CETTE PARTIE", Color(0.35, 0.08, 0.05))
 	delete_btn.pressed.connect(func() -> void:
-		var confirm := ConfirmationDialog.new()
-		confirm.dialog_text = "Supprimer '%s' ?\nLa progression et l'inventaire seront perdus." % String(data.get("name", ""))
-		confirm.ok_button_text = "SUPPRIMER"
-		confirm.cancel_button_text = "Annuler"
-		confirm.confirmed.connect(func() -> void:
-			ProgressionManager.delete_save(slot)
-			if GameManager.active_slot == slot:
-				GameManager.active_save = {}
-				GameManager.active_slot = -1
-			_current = {}
-			_current_slot = -1
-			refresh())
-		_root.add_child(confirm)
-		confirm.popup_centered())
+		_modal("Supprimer la partie", "Supprimer « %s » ?\nLa progression et l'inventaire seront définitivement perdus." % String(data.get("name", "")), [
+			["Annuler", Color(0.45, 0.40, 0.32), Callable()],
+			["SUPPRIMER", Color(0.70, 0.18, 0.12), func() -> void:
+				ProgressionManager.delete_save(slot)
+				if GameManager.active_slot == slot:
+					GameManager.active_save = {}
+					GameManager.active_slot = -1
+				_current = {}
+				_current_slot = -1
+				refresh()],
+		]))
 
 	grid.add_child(rename_btn)
 	grid.add_child(delete_btn)
@@ -744,20 +739,15 @@ func _on_import_pressed() -> void:
 	if not DisplayServer.has_feature(DisplayServer.FEATURE_NATIVE_DIALOG_FILE):
 		_import_text(DisplayServer.clipboard_get())
 		return
-	var dlg := ConfirmationDialog.new()
-	dlg.title = "Importer une partie"
-	dlg.dialog_text = "D'où importer la partie ?"
-	dlg.ok_button_text = "Fichier .%s" % ProgressionManager.EXPORT_EXT
-	dlg.cancel_button_text = "Presse-papiers"
-	dlg.confirmed.connect(func() -> void:
-		DisplayServer.file_dialog_show("Importer une partie", "", "", false, DisplayServer.FILE_DIALOG_MODE_OPEN_FILE,
-			PackedStringArray(["*.%s ; Partie Zimut" % ProgressionManager.EXPORT_EXT, "*.txt ; Code texte"]),
-			func(ok: bool, paths: PackedStringArray, _f: int) -> void:
-				if ok and paths.size() > 0:
-					_import_text(FileAccess.get_file_as_string(paths[0]))))
-	dlg.canceled.connect(func() -> void: _import_text(DisplayServer.clipboard_get()))
-	_root.add_child(dlg)
-	dlg.popup_centered()
+	_modal("Importer une partie", "D'où importer la partie ?", [
+		["Presse-papiers", Color(0.35, 0.45, 0.65), func() -> void: _import_text(DisplayServer.clipboard_get())],
+		["Fichier .%s" % ProgressionManager.EXPORT_EXT, Color(0.30, 0.55, 0.30), func() -> void:
+			DisplayServer.file_dialog_show("Importer une partie", "", "", false, DisplayServer.FILE_DIALOG_MODE_OPEN_FILE,
+				PackedStringArray(["*.%s ; Partie Zimut" % ProgressionManager.EXPORT_EXT, "*.txt ; Code texte"]),
+				func(ok: bool, paths: PackedStringArray, _f: int) -> void:
+					if ok and paths.size() > 0:
+						_import_text(FileAccess.get_file_as_string(paths[0])))],
+	])
 
 
 ## Importe un code (texte) dans le premier emplacement libre.
@@ -777,11 +767,77 @@ func _import_text(text: String) -> void:
 			_current = ProgressionManager.load_save(free_slot)
 			_current_slot = free_slot
 			refresh()
-	var dlg := AcceptDialog.new()
-	dlg.dialog_text = msg
-	dlg.title = "Importer une partie"
-	_root.add_child(dlg)
-	dlg.popup_centered()
+	_modal("Importer une partie", msg, [["OK", Color(0.30, 0.55, 0.30), Callable()]])
+
+
+## Fenêtre modale lisible sur téléphone (remplace les petites boîtes système).
+## buttons : [[libellé, couleur, Callable (peut être vide)], ...] — chaque bouton ferme la fenêtre.
+func _modal(title: String, text: String, buttons: Array, extra: Control = null) -> Control:
+	var overlay := ColorRect.new()
+	overlay.name = "Modal"
+	overlay.color = Color(0, 0, 0, 0.6)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	_root.add_child(overlay)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(center)
+	if extra is LineEdit:
+		# Clavier virtuel : la fenêtre se recale au-dessus de lui.
+		var kb_timer := Timer.new()
+		kb_timer.wait_time = 0.1
+		kb_timer.autostart = true
+		kb_timer.timeout.connect(func() -> void:
+			var kb: int = DisplayServer.virtual_keyboard_get_height()
+			var win_h: float = float(maxi(1, DisplayServer.window_get_size().y))
+			center.offset_bottom = -float(kb) * overlay.get_viewport_rect().size.y / win_h)
+		overlay.add_child(kb_timer)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _flat())
+	center.add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 16)
+	box.custom_minimum_size = Vector2(minf(760.0, get_viewport().get_visible_rect().size.x * 0.9), 0)
+	panel.add_child(box)
+	var t := Label.new()
+	t.text = title
+	t.add_theme_font_size_override("font_size", _ui_font(30))
+	t.add_theme_color_override("font_color", COL_TXT)
+	box.add_child(t)
+	var body := Label.new()
+	body.text = text
+	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body.add_theme_font_size_override("font_size", _ui_font(24))
+	body.add_theme_color_override("font_color", COL_TXT)
+	box.add_child(body)
+	if extra != null:
+		box.add_child(extra)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	box.add_child(row)
+	for b: Array in buttons:
+		var btn := Button.new()
+		btn.text = String(b[0])
+		btn.custom_minimum_size = Vector2(0, 72)
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.add_theme_font_size_override("font_size", _ui_font(24))
+		btn.add_theme_color_override("font_color", Color.WHITE)
+		btn.add_theme_stylebox_override("normal", _flat_bg(b[1] as Color, (b[1] as Color).lightened(0.3), 2))
+		btn.add_theme_stylebox_override("hover", _flat_bg((b[1] as Color).lightened(0.1), (b[1] as Color).lightened(0.4), 3))
+		btn.add_theme_stylebox_override("pressed", _flat_bg((b[1] as Color).darkened(0.2), (b[1] as Color).lightened(0.4), 3))
+		var cb: Callable = b[2]
+		btn.pressed.connect(func() -> void:
+			overlay.queue_free()
+			if cb.is_valid():
+				cb.call())
+		row.add_child(btn)
+	if extra is LineEdit and buttons.size() > 0:
+		var last_cb: Callable = buttons[buttons.size() - 1][2]
+		(extra as LineEdit).text_submitted.connect(func(_t: String) -> void:
+			overlay.queue_free()
+			if last_cb.is_valid():
+				last_cb.call())
+	return overlay
 
 
 func _launch_campaign_mode(mode: String, scene_path: String, slot: int) -> void:

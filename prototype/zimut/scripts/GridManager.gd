@@ -30,6 +30,7 @@ var _trap_nodes: Dictionary = {}    # Vector2i -> Node2D
 var _glyph_nodes: Dictionary = {}   # glyphe (Dictionary, par identité) -> SpellFx.GlyphMark
 var _prop_nodes: Array = []
 var _obstacle_sig: int = -1
+var _void_layer: Node2D
 var _queue: Array = []
 var _pumping: bool = false
 var _dirty: bool = false
@@ -79,6 +80,10 @@ func _build_layers() -> void:
 	_scenery = BattleScenery.new()
 	_scenery.name = "Scenery"
 	add_child(_scenery)
+	# V49 : gouffres des cases hors plateau (sous les cases, dont les faces forment les parois)
+	_void_layer = Node2D.new()
+	_void_layer.name = "VoidPits"
+	add_child(_void_layer)
 	_cells_layer = Node2D.new()
 	_cells_layer.name = "Cells"
 	add_child(_cells_layer)
@@ -135,6 +140,7 @@ func apply_biome(biome: String) -> void:
 			var c: Cell = cell_nodes[y][x]
 			c.biome = biome
 			c.setup(c.grid_position)
+	_obstacle_sig = -1
 
 func _build_cells() -> void:
 	cell_nodes = []
@@ -251,9 +257,7 @@ func _sync_props() -> void:
 		if is_instance_valid(p):
 			p.queue_free()
 	_prop_nodes = []
-	for y: int in range(cell_nodes.size()):
-		for x: int in range(cell_nodes[y].size()):
-			(cell_nodes[y][x] as Node2D).visible = String(game_manager.obstacles.get(Vector2i(x, y), "")) != "void"
+	_sync_void_pits()
 	for c: Vector2i in game_manager.obstacles.keys():
 		if String(game_manager.obstacles[c]) == "void":
 			continue
@@ -262,6 +266,43 @@ func _sync_props() -> void:
 		prop.position = grid_to_screen(c.x, c.y) + Vector2(0, 6)
 		_entity_layer.add_child(prop)
 		_prop_nodes.append(prop)
+
+
+## V49 : cases hors plateau rendues en gouffres ; les faces des cases voisines deviennent
+## les parois (pit_left / pit_right).
+func _sync_void_pits() -> void:
+	var obs: Dictionary = game_manager.obstacles
+	var n: int = cell_nodes.size()
+	if _void_layer != null:
+		for c: Node in _void_layer.get_children():
+			c.queue_free()
+	# Cases vides reliées au bord de l'île (replats) vs. intérieures (gouffres)
+	var outer: Dictionary = {}
+	var stack: Array[Vector2i] = []
+	for vc in obs.keys():
+		if String(obs[vc]) == "void" and (vc.x == 0 or vc.y == 0 or vc.x == n - 1 or vc.y == n - 1):
+			outer[vc] = true
+			stack.append(vc)
+	while not stack.is_empty():
+		var cur: Vector2i = stack.pop_back()
+		for d: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var nb: Vector2i = cur + d
+			if not outer.has(nb) and String(obs.get(nb, "")) == "void":
+				outer[nb] = true
+				stack.append(nb)
+	for y: int in range(n):
+		for x: int in range(cell_nodes[y].size()):
+			var cell: Cell = cell_nodes[y][x]
+			var is_void: bool = String(obs.get(Vector2i(x, y), "")) == "void"
+			cell.visible = not is_void
+			cell.pit_left = not is_void and String(obs.get(Vector2i(x, y + 1), "")) == "void"
+			cell.pit_right = not is_void and String(obs.get(Vector2i(x + 1, y), "")) == "void"
+			cell.queue_redraw()
+			if is_void and _void_layer != null:
+				var pit := VoidPit.new()
+				pit.position = grid_to_screen(x, y)
+				pit.setup(Vector2i(x, y), game_manager.fight_biome, n, outer.has(Vector2i(x, y)))
+				_void_layer.add_child(pit)
 
 
 func _sync_traps() -> void:

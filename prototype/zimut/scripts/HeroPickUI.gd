@@ -133,14 +133,16 @@ func _ready() -> void:
 	var sc := ScrollContainer.new()
 	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	sc.scroll_deadzone = 8
 	pv.add_child(sc)
 	_text = RichTextLabel.new()
 	_text.bbcode_enabled = true
 	_text.fit_content = true
 	_text.scroll_active = false
 	_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_text.add_theme_font_size_override("normal_font_size", 19)
-	_text.add_theme_font_size_override("bold_font_size", 19)
+	_text.add_theme_font_size_override("normal_font_size", 22)
+	_text.add_theme_font_size_override("bold_font_size", 22)
+	_text.mouse_filter = Control.MOUSE_FILTER_PASS   # glisser n'importe où dans la fiche fait défiler
 	_text.add_theme_color_override("default_color", Color(0.86, 0.88, 0.94))
 	sc.add_child(_text)
 

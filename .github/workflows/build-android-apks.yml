@@ -123,6 +123,30 @@ jobs:
             printf 'export/android/keystore_release_password="%s"\n' "$ANDROID_KEYSTORE_PASSWORD"
           } > "$cfg"
 
+      - name: Afficher les empreintes du keystore de release (SHA-1 / SHA-256)
+        # Les empreintes sont publiques (elles servent à déclarer l'app chez Google) : on les affiche.
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          ANDROID_KEYSTORE_USER: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          keytool -list -v -keystore ~/.local/share/godot/keystores/release.keystore \
+            -alias "$ANDROID_KEYSTORE_USER" -storepass "$ANDROID_KEYSTORE_PASSWORD" 2>/dev/null \
+            | grep -E "Alias name|Nom d'alias|SHA1|SHA-1|SHA256|SHA-256" || echo "::warning::Empreintes illisibles (alias ou mot de passe ?)"
+
+      - name: Identifiants Google Drive (sauvegarde Cloud)
+        # Client OAuth « TV et appareils à saisie limitée » : secrets ZIMUT_GDRIVE_CLIENT_ID / ZIMUT_GDRIVE_CLIENT_SECRET.
+        env:
+          GDRIVE_ID: ${{ secrets.ZIMUT_GDRIVE_CLIENT_ID }}
+          GDRIVE_SECRET: ${{ secrets.ZIMUT_GDRIVE_CLIENT_SECRET }}
+        run: |
+          if [ -n "$GDRIVE_ID" ]; then
+            python3 -c "import json,os; json.dump({'client_id': os.environ['GDRIVE_ID'], 'client_secret': os.environ.get('GDRIVE_SECRET','')}, open('prototype/zimut/cloud_oauth.json','w'))"
+            echo "Sauvegarde Cloud : identifiants Google présents."
+          else
+            echo "::notice::Secrets ZIMUT_GDRIVE_CLIENT_ID absents : les boutons Cloud indiqueront « non configuré »."
+          fi
+
       - name: Generate automatic build version (0.0.01.<dernière PR mergée>.<n° de push>)
         env:
           GH_TOKEN: ${{ github.token }}
