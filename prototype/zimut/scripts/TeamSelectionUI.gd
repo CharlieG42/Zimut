@@ -63,6 +63,9 @@ var _fight_sel_label: Label
 var _fight_prev_btn: Button
 var _fight_next_btn: Button
 var _goal_label: Label               # objectif du combat + synergies de l'équipe
+var _player_label: Label             # V47 : niveau du joueur + prochain déblocage
+var _unlock_btn: Button              # V47 : choisir un héros à débloquer
+var _info_rich: RichTextLabel        # V47 : points forts / faibles / conseil
 
 func _ready() -> void:
 	_load_classes()
@@ -76,11 +79,16 @@ func _restore_previous_team() -> void:
 		return
 	for m: Dictionary in GameManager.active_save.get("team", []):
 		var classe: String = String(m.get("classe", ""))
-		if classe != "" and classes.has(classe) and not team.has(classe) and not _is_stationed(classe):
+		if classe != "" and classes.has(classe) and not team.has(classe) and not _is_stationed(classe) and not _is_locked(classe):
 			team.append(classe)
 	refresh()
 
 ## Conquête : un héros nommé gouverneur d'une ville ne part plus en assaut.
+func _is_locked(classe: String) -> bool:
+	if GameManager.active_save.is_empty():
+		return false
+	return not HeroUnlock.is_unlocked(GameManager.active_save, classe)
+
 func _is_stationed(classe: String) -> bool:
 	if GameManager.active_save.is_empty():
 		return false
@@ -115,6 +123,26 @@ func _load_classes() -> void:
 	classes.clear()
 	for c: String in order:
 		classes.append(c)
+
+func _refresh_player_row() -> void:
+	if _player_label == null:
+		return
+	var save: Dictionary = GameManager.active_save
+	var show: bool = not save.is_empty() and save.has("heroes_unlocked")
+	_player_label.visible = show
+	_unlock_btn.visible = false
+	if not show:
+		return
+	var pend: int = HeroUnlock.pending_unlocks(save)
+	var nxt: int = HeroUnlock.next_unlock_level(save)
+	var txt: String = "👤 Niveau du joueur %d" % HeroUnlock.player_level(save)
+	if pend == 0 and nxt > 0:
+		txt += "\nprochain héros : niveau %d" % nxt
+	elif pend == 0:
+		txt += "\ntous les héros débloqués"
+	_player_label.text = txt
+	_unlock_btn.visible = pend > 0
+	_unlock_btn.text = "🔓  DÉBLOQUER UN HÉROS  (%d)" % pend
 
 func _stat_line(classe: String) -> String:
 	var has_save: bool = GameManager.active_slot >= 0 and not GameManager.active_save.is_empty()
@@ -230,7 +258,19 @@ func _build() -> void:
 	_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	top.add_child(_title)
-	top.add_child(Control.new())
+	# V48 : niveau du joueur + déblocage de héros (colonne de droite de l'en-tête)
+	var pcol := VBoxContainer.new()
+	pcol.custom_minimum_size = Vector2(250, 0)
+	pcol.add_theme_constant_override("separation", 4)
+	top.add_child(pcol)
+	_player_label = U.lbl("", 18, Color(0.70, 0.85, 1.0))
+	_player_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_player_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	pcol.add_child(_player_label)
+	_unlock_btn = U.btn("🔓  DÉBLOQUER UN HÉROS", Color(0.95, 0.78, 0.30), 18, Vector2(250, 40))
+	_unlock_btn.name = "UnlockHeroBtn"
+	_unlock_btn.pressed.connect(_on_unlock_hero)
+	pcol.add_child(_unlock_btn)
 
 	# ── Sélecteur de combat (rejouer un combat déjà gagné)
 	var sel_row := HBoxContainer.new()
@@ -314,9 +354,22 @@ func _build() -> void:
 	_desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_desc_label.custom_minimum_size = Vector2(300, 0)
 	hv.add_child(_desc_label)
+	var info_sc := ScrollContainer.new()
+	info_sc.custom_minimum_size = Vector2(0, 100)
+	info_sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	info_sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	card_box.add_child(info_sc)
+	_info_rich = RichTextLabel.new()
+	_info_rich.bbcode_enabled = true
+	_info_rich.fit_content = true
+	_info_rich.scroll_active = false
+	_info_rich.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for fs in ["normal_font_size", "bold_font_size"]:
+		_info_rich.add_theme_font_size_override(fs, 17)
+	_info_rich.add_theme_color_override("default_color", Color(0.82, 0.85, 0.92))
+	info_sc.add_child(_info_rich)
 	_stats_label = U.lbl("", 21, U.C_TXT)
 	_stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_stats_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	card_box.add_child(_stats_label)
 	_action_btn = U.btn("", Color(0.45, 0.80, 0.50), 24, Vector2(0, 64))
 	_action_btn.pressed.connect(_on_action)
@@ -454,7 +507,7 @@ func current_class() -> String:
 
 func _on_action() -> void:
 	var classe := current_class()
-	if _is_stationed(classe):
+	if _is_stationed(classe) or _is_locked(classe):
 		return
 	if team.has(classe):
 		team.erase(classe)
@@ -481,6 +534,15 @@ func _on_lead() -> void:
 	if GameManager.active_slot >= 0:
 		ProgressionManager.write_save(GameManager.active_slot, GameManager.active_save)
 	refresh()
+
+func _on_unlock_hero() -> void:
+	if GameManager.active_save.is_empty() or get_node_or_null("HeroPickUI") != null:
+		return
+	var root_node: Node = _root if _root != null else self
+	HeroPickUI.open(root_node, GameManager.active_save, false, func(_p: Array) -> void:
+		if GameManager.active_slot >= 0:
+			ProgressionManager.write_save(GameManager.active_slot, GameManager.active_save)
+		refresh())
 
 func _on_combat() -> void:
 	if team.size() != MAX_TEAM_SIZE:
@@ -565,7 +627,7 @@ func _on_equipment() -> void:
 
 func refresh() -> void:
 	var classe := current_class()
-	var meta: Dictionary = CLASS_META.get(classe, {"icon": "❔", "description": ""})
+	var meta: Dictionary = ClassInfo.get_info(classe)
 	var col: Color = CLASS_COLORS.get(classe, Color(0.5, 0.5, 0.5))
 
 	# Toujours réinitialiser : sinon une image manquante garde le héros précédent.
@@ -578,19 +640,25 @@ func refresh() -> void:
 		var ccol: Color = CLASS_COLORS.get(c, Color(0.5, 0.5, 0.5))
 		var sel: bool = c == classe
 		var lvl_txt: String = ("\nNiv %d" % ProgressionManager.member_level(GameManager.active_save, c)) if has_save0 else ""
-		var mark: String = "✓ " if team.has(c) else ("♞ " if _is_stationed(c) else "")
+		var mark: String = "✓ " if team.has(c) else ("♞ " if _is_stationed(c) else ("🔒 " if _is_locked(c) else ""))
 		tile.text = "%s%s%s" % [mark, c, lvl_txt]
 		var bgc: Color = ccol.darkened(0.55) if team.has(c) else Color(0.12, 0.14, 0.21)
 		var st_t: StyleBoxFlat = U.box(bgc, Color(1.0, 0.82, 0.35) if sel else ccol.darkened(0.1), 14, 4 if sel else 2, 8)
 		tile.add_theme_stylebox_override("normal", st_t)
 		tile.add_theme_stylebox_override("hover", st_t)
 		tile.add_theme_stylebox_override("pressed", st_t)
-		tile.modulate = Color(0.6, 0.6, 0.65) if _is_stationed(c) else Color.WHITE
-	_desc_label.text = String(meta["description"])
+		tile.modulate = Color(0.6, 0.6, 0.65) if _is_stationed(c) else (Color(0.45, 0.45, 0.5) if _is_locked(c) else Color.WHITE)
+	_desc_label.text = "%s\ndifficulté %s" % [meta["role"], ClassInfo.stars(classe)]
+	_info_rich.text = "%s\n\n%s" % [meta["description"], ClassInfo.details_text(classe)]
 	_stats_label.text = _stat_line(classe)
+	_refresh_player_row()
 
 	var in_team: bool = team.has(classe)
-	if _is_stationed(classe):
+	if _is_locked(classe):
+		var need: int = HeroUnlock.next_unlock_level(GameManager.active_save)
+		_action_btn.text = "🔒  HÉROS VERROUILLÉ" + (("  (niv. joueur %d)" % need) if need > 0 else "")
+		_action_btn.add_theme_stylebox_override("normal", U.box(Color(0.22, 0.22, 0.25), Color(0.4, 0.4, 0.45), 12, 2, 12))
+	elif _is_stationed(classe):
 		var home: String = ConquestSystem.hero_city(GameManager.active_save.get("conquest", {}), classe)
 		_action_btn.text = "♞  GOUVERNEUR DE %s" % ProgressionManager.conquest_city_name(home).to_upper()
 		_action_btn.add_theme_stylebox_override("normal", U.box(Color(0.22, 0.22, 0.25), Color(0.4, 0.4, 0.45), 12, 2, 12))
@@ -754,9 +822,22 @@ var _gultur_shown: bool = false
 func _gultur_hint() -> void:
 	if _gultur_shown or not GameSettings.tutorial_enabled or _team_frame == null:
 		return
-	if Gultur.should_show("team"):
+	var save: Dictionary = GameManager.active_save
+	var has_player: bool = not save.is_empty() and save.has("heroes_unlocked")
+	if has_player and HeroUnlock.pending_unlocks(save) > 0 and Gultur.should_show("unlock"):
 		_gultur_shown = true
-		Gultur.say(self, "team", Gultur.TEAM, _team_frame)
-	elif Gultur.should_show("equip") and not (GameManager.active_save.get("inventory", []) as Array).is_empty():
+		Gultur.say(self, "unlock", Gultur.UNLOCK, _unlock_btn)
+	elif Gultur.should_show("team"):
+		_gultur_shown = true
+		Gultur.say(self, "team", Gultur.TEAM, _team_frame, func() -> void:
+			if has_player:
+				Gultur.say(self, "player", Gultur.PLAYER, _player_label))
+	elif has_player and Gultur.should_show("player"):
+		_gultur_shown = true
+		Gultur.say(self, "player", Gultur.PLAYER, _player_label)
+	elif Gultur.should_show("equip") and not (save.get("inventory", []) as Array).is_empty():
 		_gultur_shown = true
 		Gultur.say(self, "equip", Gultur.EQUIP, _equip_btn)
+	elif has_player and HeroUnlock.locked(save).is_empty() and Gultur.should_show("all_unlocked"):
+		_gultur_shown = true
+		Gultur.say(self, "all_unlocked", Gultur.ALL_UNLOCKED, null)

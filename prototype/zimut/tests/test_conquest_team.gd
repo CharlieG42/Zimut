@@ -12,6 +12,7 @@ func _boot() -> void:
 	var pm: Node = root.get_node("ProgressionManager")
 	var gm: Node = root.get_node("GameManager")
 	var d: Dictionary = pm.new_game(4, "TeamGov")
+	HeroUnlock.pick_initial(d, ["Tank", "Mage", "Heal"])
 	pm.rebuild_team(d, ["Tank", "Mage", "Heal"])
 	d["campaign_mode"] = "conquest"
 	d["conquest"] = {"owned": ["capitale", "clairiere"], "garrisons": {"clairiere": {"troops": 0, "hero": "Tank"}}}

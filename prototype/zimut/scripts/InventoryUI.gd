@@ -63,7 +63,7 @@ func _collect() -> Array:
 	var inv: Array = _save.get("inventory", [])
 	for i: int in range(inv.size()):
 		out.append({"key": "i:%d" % i, "it": inv[i], "owner": "", "slot": ""})
-	for classe: String in ProgressionManager.class_names():
+	for classe: String in ProgressionManager.class_names():   # tous : l'équipement d'un héros verrouillé reste visible
 		var eq: Dictionary = ProgressionManager.hero_equipment(_save, classe)
 		for slot: String in eq.keys():
 			if eq[slot] is Dictionary:

@@ -1971,6 +1971,7 @@ func _show_result_window(victory: bool) -> void:
 ## Sections ajoutées par les systèmes de V18 (objectif de combat, succès débloqués).
 func _result_extras(content: VBoxContainer, save: Dictionary, victory: bool) -> void:
 	var res: Dictionary = save.get("last_result", {})
+	_result_player_card(content, save)
 	var obj: Dictionary = res.get("objective", {})
 	if not obj.is_empty():
 		var ok: bool = bool(obj.get("success", false))
@@ -1986,6 +1987,45 @@ func _result_extras(content: VBoxContainer, save: Dictionary, victory: bool) -> 
 		row.add_theme_stylebox_override("panel", UK.box(Color(0.20, 0.15, 0.05, 0.95), Color(1.0, 0.82, 0.35), 12, 2, 10))
 		row.add_child(UK.lbl("🏆 Succès débloqué : %s — %s" % [String(a.get("name", "")), String(a.get("reward_text", ""))], 19, Color(1.0, 0.88, 0.5)))
 		content.add_child(row)
+
+
+## V47 : niveau du joueur (barre d'XP) et déblocage de héros.
+func _result_player_card(content: VBoxContainer, save: Dictionary) -> void:
+	var rep: Dictionary = save.get("last_player", {})
+	if rep.is_empty() or not save.has("heroes_unlocked"):
+		return
+	var card := PanelContainer.new()
+	card.name = "PlayerCard"
+	card.add_theme_stylebox_override("panel", UK.box(Color(0.10, 0.13, 0.20), Color(0.55, 0.78, 1.0), 14, 2, 12))
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 6)
+	card.add_child(v)
+	var up: bool = int(rep["to"]) > int(rep["from"])
+	v.add_child(UK.lbl("👤 NIVEAU DU JOUEUR %d%s   +%d XP" % [int(rep["to"]), "  ▲" if up else "", int(rep["gain"])], 21,
+		UK.C_GOOD if up else Color(0.7, 0.85, 1.0), true))
+	var bar := ProgressBar.new()
+	bar.custom_minimum_size = Vector2(0, 14)
+	bar.show_percentage = false
+	bar.max_value = float(maxi(1, int(rep["xp_next"]) - int(rep["xp_cur"])))
+	var target: float = clampf(float(int(rep["xp"]) - int(rep["xp_cur"])), 0.0, bar.max_value)
+	bar.value = 0.0 if up else maxf(0.0, target - float(rep["gain"]))
+	UK.style_bar(bar, Color(0.55, 0.78, 1.0))
+	v.add_child(bar)
+	bar.create_tween().tween_property(bar, "value", target, 1.1).set_delay(0.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	var pend: int = HeroUnlock.pending_unlocks(save)
+	if pend > 0:
+		var b := UK.btn("🔓  CHOISIR UN NOUVEAU HÉROS  (%d)" % pend, Color(0.95, 0.78, 0.30), 22, Vector2(0, 58))
+		b.name = "UnlockHeroBtn"
+		b.pressed.connect(func() -> void:
+			HeroPickUI.open(_root, save, false, func(_p: Array) -> void:
+				ProgressionManager.write_save(game_manager.active_slot, save)
+				b.queue_free()))
+		v.add_child(b)
+	else:
+		var nxt: int = HeroUnlock.next_unlock_level(save)
+		if nxt > 0:
+			v.add_child(UK.lbl("Prochain héros à débloquer au niveau %d du joueur." % nxt, 16, UK.C_DIM))
+	content.add_child(card)
 
 
 ## Carte d'un héros : portrait, niveau, barre d'XP animée, dégâts / soins / K.O.
