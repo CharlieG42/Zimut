@@ -24,18 +24,41 @@ const INTRO := [
 	"Et prends garde : chaque Pierre confère à son possesseur des [b]pouvoirs incroyables[/b]. Entre de mauvaises mains, elle serait une arme terrible ; entre les tiennes, un espoir.",
 	"Tu es venu d'un autre monde, appelé par les Pierres elles-mêmes : [b]toi seul[/b] peux les retrouver, {pseudo}. Alors, es-tu prêt ?",
 ]
-## Fin du tutoriel : choix des 3 héros de départ (V47), puis premier combat.
+## Fin du tutoriel : choix des 3 héros de départ (V48), puis premier combat.
 const PICK := [
-	"Pour cela, il te faut des [b]héros forts[/b]. Dix héros t'attendent, mais tu n'en emmèneras d'abord que [b]trois[/b].",
-	"Choisis-les avec soin : ce seront les seuls disponibles au début. Pas de panique, en gagnant des [b]niveaux de joueur[/b] tu en débloqueras d'autres, et [b]c'est toi qui choisiras[/b] lesquels.",
-	"Regarde bien la fiche de chacun : son rôle, ses points forts et ses points faibles. Un bon trio mêle un [b]protecteur[/b], un [b]soutien[/b] et un [b]héros de dégâts[/b].",
+	"Avant de partir, {pseudo}, il te faut une [b]compagnie[/b]. Dix héros t'attendent à Zimut… mais au début, tu n'en emmèneras que [b]trois[/b].",
+	"Chacun a son style : le [b]Tank[/b] encaisse, le [b]Heal[/b] et le [b]Druide[/b] soignent, le [b]Mage[/b] et l'[b]Artificier[/b] font pleuvoir les dégâts, l'[b]Assassin[/b] frappe dans le dos, l'[b]Invocateur[/b] et le [b]Sylvain[/b] appellent des alliés, le [b]Géomancien[/b] façonne le terrain…",
+	"Touche un héros pour lire sa [b]fiche[/b] : son rôle, ses points forts, ses points faibles et un conseil. Les étoiles ★ indiquent la [b]difficulté[/b] : une étoile, c'est facile à prendre en main ; trois, c'est pour les stratèges.",
+	"Un bon trio mêle un [b]protecteur[/b], un [b]soutien[/b] et un [b]héros de dégâts[/b]. Mais tu fais comme tu veux : il n'y a pas de mauvais choix, seulement des styles différents !",
+	"Les héros que tu ne choisis pas ne sont pas perdus : en gagnant des [b]niveaux de joueur[/b], tu en débloqueras d'autres, [b]un à la fois, et c'est toi qui décides[/b] lequel rejoint ta compagnie.",
+	"À toi de jouer, {pseudo}. Choisis [b]trois héros[/b], puis valide.",
 ]
 const AFTER_PICK := [
-	"Excellent choix ! Maintenant, lance-toi dans les [b]Combats Tactiques[/b] : c'est là que ton équipe apprendra à se battre. Touche le bouton en surbrillance !",
+	"Excellent choix ! Voilà une compagnie qui a de l'allure.",
+	"Maintenant, direction les [b]Combats Tactiques[/b] : c'est là que ton équipe apprendra à se battre et gagnera ses premiers niveaux. Touche le bouton en surbrillance !",
+]
+## Premier déblocage de héros disponible (écran d'équipe).
+const UNLOCK := [
+	"Regarde, {pseudo} : ton niveau de [b]joueur[/b] a grimpé, et un nouveau héros peut rejoindre ta compagnie !",
+	"Touche [b]DÉBLOQUER UN HÉROS[/b] : tu verras tous ceux qui restent, avec leur fiche. [b]Tu choisis celui que tu veux.[/b]",
+	"Ensuite, un nouveau héros t'attendra tous les [b]3 niveaux de joueur[/b]. Avec de la persévérance, ils seront tous à toi !",
+]
+## Explication du niveau du joueur (écran d'équipe, une fois).
+const PLAYER := [
+	"Ici, c'est ton [b]niveau de joueur[/b]. Il monte à chaque combat, et il compte double.",
+	"D'abord, [b]aucun héros ne peut dépasser ton niveau[/b] : tu es le chef de la compagnie. Ensuite, c'est lui qui [b]débloque de nouveaux héros[/b].",
+	"Garde les mêmes héros, et ton niveau restera proche du leur. Change d'équipe, et les nouveaux venus rattraperont vite leur retard.",
+]
+## Tous les héros sont débloqués.
+const ALL_UNLOCKED := [
+	"Incroyable, {pseudo} : [b]les dix héros[/b] sont à toi !",
+	"À toi d'essayer toutes les combinaisons : certaines équipes forment des [b]synergies[/b] puissantes. Les Pierres Élémentaires n'ont qu'à bien se tenir !",
 ]
 const TEAM := [
 	"Voici la préparation de ton équipe. Tu emmènes [b]3 héros[/b] au combat : ils apparaissent dans le cadre doré « TON ÉQUIPE ».",
 	"Touche un héros dans la liste pour voir sa fiche, puis [b]AJOUTER À L'ÉQUIPE[/b]. Un bon trio : un [b]Tank[/b] qui encaisse, un [b]soigneur[/b] et un héros de [b]dégâts[/b].",
+	"Les héros marqués d'un [b]cadenas 🔒[/b] ne sont pas encore débloqués : tu pourras les consulter, mais pas les emmener au combat.",
+	"Le bouton [b]★ EXPLORATEUR[/b] choisit le héros qui te représente sur la carte d'Aventure.",
 	"Quand les 3 emplacements sont remplis, appuie sur [b]COMBATTRE[/b]. Je te souffle les premiers gestes pendant le combat !",
 ]
 const EQUIP := [

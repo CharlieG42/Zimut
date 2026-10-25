@@ -39,6 +39,15 @@ func _run() -> void:
 	gs.skip_tutorial()
 	var intro_txt: String = " ".join(PackedStringArray(Gultur.INTRO))
 	_ok(intro_txt.contains("indispensable") and intro_txt.contains("pouvoirs incroyables"), "discours : les Pierres sont indispensables et donnent des pouvoirs")
+	# V48 : dialogues du choix de héros et du niveau du joueur
+	var pick_txt: String = " ".join(PackedStringArray(Gultur.PICK))
+	_ok(Gultur.PICK.size() >= 5 and pick_txt.contains("trois") and pick_txt.contains("c'est toi qui décides"), "discours : choix des 3 héros, déblocage au choix du joueur")
+	_ok(" ".join(PackedStringArray(Gultur.PLAYER)).contains("aucun héros ne peut dépasser"), "discours : niveau du joueur, plafond des héros")
+	_ok(Gultur.UNLOCK.size() >= 3 and Gultur.ALL_UNLOCKED.size() >= 2 and Gultur.AFTER_PICK.size() >= 2, "dialogues de déblocage présents")
+	for id in ["pick", "afterpick", "unlock", "player", "all_unlocked"]:
+		gs.restart_tutorial()
+		_ok(Gultur.should_show(id), "dialogue « %s » à montrer après relance" % id)
+	gs.skip_tutorial()
 	# Export / import (.zimut)
 	data["inventory"] = [{"type": "Casque", "name": "Test", "level": 1, "rarity": "commun", "defense": 3}]
 	var code: String = pm.export_code(data)

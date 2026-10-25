@@ -822,9 +822,22 @@ var _gultur_shown: bool = false
 func _gultur_hint() -> void:
 	if _gultur_shown or not GameSettings.tutorial_enabled or _team_frame == null:
 		return
-	if Gultur.should_show("team"):
+	var save: Dictionary = GameManager.active_save
+	var has_player: bool = not save.is_empty() and save.has("heroes_unlocked")
+	if has_player and HeroUnlock.pending_unlocks(save) > 0 and Gultur.should_show("unlock"):
 		_gultur_shown = true
-		Gultur.say(self, "team", Gultur.TEAM, _team_frame)
-	elif Gultur.should_show("equip") and not (GameManager.active_save.get("inventory", []) as Array).is_empty():
+		Gultur.say(self, "unlock", Gultur.UNLOCK, _unlock_btn)
+	elif Gultur.should_show("team"):
+		_gultur_shown = true
+		Gultur.say(self, "team", Gultur.TEAM, _team_frame, func() -> void:
+			if has_player:
+				Gultur.say(self, "player", Gultur.PLAYER, _player_label))
+	elif has_player and Gultur.should_show("player"):
+		_gultur_shown = true
+		Gultur.say(self, "player", Gultur.PLAYER, _player_label)
+	elif Gultur.should_show("equip") and not (save.get("inventory", []) as Array).is_empty():
 		_gultur_shown = true
 		Gultur.say(self, "equip", Gultur.EQUIP, _equip_btn)
+	elif has_player and HeroUnlock.locked(save).is_empty() and Gultur.should_show("all_unlocked"):
+		_gultur_shown = true
+		Gultur.say(self, "all_unlocked", Gultur.ALL_UNLOCKED, null)

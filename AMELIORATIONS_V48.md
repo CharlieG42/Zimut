@@ -21,3 +21,7 @@ Tout est débloqué ; niveau du joueur = niveau du meilleur héros (aucun héros
 
 ## Tests
 `tests/test_hero_unlock.gd` : courbe de déblocage, choix initial, plafond de niveau, persistance, migration, fiches, écrans.
+
+## Dialogues de Gultur (enrichis)
+- **Choix des héros** (`PICK`, 6 répliques) : présentation des 10 héros et de leurs rôles, lecture des fiches et des étoiles de difficulté, trio conseillé, déblocage futur « c'est toi qui décides », puis `AFTER_PICK` avant le premier combat.
+- **Écran d'équipe** : `TEAM` mentionne les cadenas 🔒 et le bouton ★ Explorateur ; `PLAYER` explique le niveau du joueur (plafond des héros, déblocages) ; `UNLOCK` apparaît la première fois qu'un héros est à débloquer ; `ALL_UNLOCKED` félicite quand les dix héros sont à soi. Chaque dialogue ne s'affiche qu'une fois et respecte « Passer le tutoriel ».
