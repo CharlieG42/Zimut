@@ -40,6 +40,12 @@ for e, kind in ents:
         chk("facing left" not in p.replace("never facing left", "").replace("never left", ""), f"{key}/{name}: orientation gauche demandée")
         if name == "dos":
             chk("no face" in p, f"{key}/{name}: dos sans « no face »")
+        if name != "fix":
+            chk("STYLE LOCK" in p, f"{key}/{name}: pas de verrou de style")
+        if name in ("face", "dos"):
+            chk("silhouette:" in p and "do NOT reuse" in p, f"{key}/{name}: pas de consigne anti-copie de la pose source")
+        if name == "vues":
+            chk("NOT a mirrored pair" in p and "no face, no eyes" in p, f"{key}/{name}: pas de consigne anti-miroir / dos réel")
     # chaque case d'action distincte
     texts = [G.cell_text(c, e["arch"], "fx") for _, c, _ in G.ACTION_POSES]
     chk(len(set(texts)) == 6, f"{key}: poses d'action identiques")

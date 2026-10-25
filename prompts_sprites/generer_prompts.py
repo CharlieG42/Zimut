@@ -50,6 +50,14 @@ OBJ_STYLE = (
     "outlines, 3-tone cel shading, crisp material details, saturated harmonious colors, slightly cute "
     "rounded proportions, readable at small size. Soft key light from the upper left."
 )
+# Verrou de style : une planche est sortie en pixel art (griffon) au milieu de planches en dessin vectoriel.
+STYLE_LOCK = (
+    "STYLE LOCK: smooth hand-drawn vector cartoon with THICK DARK OUTLINES, exactly like Dofus / Waven / Wakfu "
+    "character art and like the other sheets of this game — NEVER pixel art, never low-resolution, never a "
+    "painterly or soft-edged style, never a thin or white outline."
+)
+# Mots de description qui imposent le fond gris (blanc sur blanc : le découpage mange la fourrure, la tête…).
+PALE_WORDS = ("white", "snow", "pale", "silver", "ivory", "bone", "cream", "frost", "ice ")
 BG_WHITE = "Pure flat white background (#FFFFFF) — not cream, not beige, not ivory"
 BG_GRAY = "Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it)"
 BG_TAIL = (", no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, "
@@ -65,6 +73,8 @@ NEGATIVE = (
     "golden glow, light flare, sun rays, color tint over the sprite, glowing aura on one side, cream background, "
     "beige background, colored background, ground shadow ellipse, "
     "photorealistic, 3D render, pixel art, frames around poses, boxes, borders, dividing lines, grid lines, "
+    "pixel grid, low-resolution pixels, painterly soft brush style, mirror image of another sprite, flipped copy, "
+    "copy of the source pose, "
     "isometric floor grid, tiles, duplicate poses in the same viewing angle, identical poses side by side, "
     "the same pose copied twice in the same view, front and back mixed inside one cell, "
     "weapon changing shape, weapon changing color, weapon replaced by another weapon, missing weapon, "
@@ -74,8 +84,10 @@ NEGATIVE = (
 )
 # Planche VUES : le négatif commun + les erreurs de comptage observées (10 sprites au lieu de 4).
 NEGATIVE_VUES = (
-    NEGATIVE + ", more than 4 sprites, extra sprites, duplicated row of sprites, one sprite bigger or "
-    "smaller than the others, size changing between cells"
+    NEGATIVE + ", more than 4 sprites, extra sprites, only 3 sprites, empty cell, duplicated row of sprites, "
+    "one sprite bigger or smaller than the others, size changing between cells, mirror image of another "
+    "sprite, flipped copy, left-right mirrored pair, four identical front views, back row drawn from the front, "
+    "low-resolution pixels, pixel grid"
 )
 # Créatures sans arme : jamais d'objet tenu (les torches inventées de la Salamandre et du Dévoreur).
 # Le négatif commun parle d'« arme manquante » : pour une créature on retire ces termes (un négatif qui
@@ -255,6 +267,15 @@ ACTION_POSES = [("_attack", "A0", "attaque 1"), ("_attack_2", "A1", "attaque 2")
                 ("_cast", "C0", "sort 1"), ("_cast_2", "C1", "sort 2"), ("_walk", "W", "marche")]
 ACTIONS_FACE = ACTION_POSES
 ACTIONS_BACK = [("_back" + suf, code, lab) for suf, code, lab in ACTION_POSES]
+# Silhouette attendue par case : même si deux textes de pose se ressemblent, la forme d'ensemble diffère.
+SILHOUETTE = {
+    "A0": "tall and vertical, limbs raised above the head",
+    "A1": "wide and horizontal, body stretched far forward",
+    "A2": "low and wide, crouched or twisted with a long side reach",
+    "C0": "compact and rounded, hands gathered near the chest",
+    "C1": "tall, both arms thrown up or spread wide",
+    "W": "mid-stride with legs clearly apart, moving forward",
+}
 WALK = {
     "beast": "WALK: mid-stride, one front paw raised, body moving forward",
     "spirit": "DRIFT: floating forward with the body tilted slightly ahead, a short trail behind",
@@ -557,6 +578,14 @@ def reminder(ent_id, who, desc, never):
             + " Every sprite faces RIGHT (front or back 3/4), never left.")
 
 
+def view_text(vtxt, ent_id):
+    """Texte d'une case de vue : pour une créature sans arme, on retire « l'arme reste dans sa main » et la main sur la hanche."""
+    if weapon_of(ent_id):
+        return vtxt
+    return (vtxt.replace(" (the weapon stays in its hand)", "")
+            .replace("the free hand rests on the hip", "one limb (paw, claw or hand) is lifted or resting in a different position"))
+
+
 def prompt_vues(who, role, nation, desc, fx, rim, palette, pale, ent_id=""):
     """Planche VUES : 2 repos de face + 2 repos de dos, tous orientés vers la droite. Génération normale."""
     idc, never = card(ent_id, desc, who, nation)
@@ -568,15 +597,21 @@ def prompt_vues(who, role, nation, desc, fx, rim, palette, pale, ent_id=""):
         idc,
         weapon_block(ent_id, "all 4 cells"),
         f"NATION PALETTE: {palette}.",
+        STYLE_LOCK,
         "STYLE: " + STYLE.format(rim=rim),
         "LAYOUT: " + VUES_LAYOUT,
         "CELLS — follow the grid positions EXACTLY:",
     ]
     for i, ((_, _, vtxt), pos) in enumerate(zip(VIEWS4, VIEWS4_POS)):
-        lines.append(f"{i+1}. {pos} cell: {vtxt}.")
+        lines.append(f"{i+1}. {pos} cell: {view_text(vtxt, ent_id)}.")
     lines.append("Every sprite faces RIGHT (front-right on the top row, away toward the upper right on the "
                  "bottom row): never facing left, never a pure side profile. The two sprites of a row are "
                  "clearly different stances, never the same drawing twice.")
+    lines.append("COUNT AND VIEWS: exactly FOUR sprites, two per row, no empty cell. The two sprites of the SAME "
+                 "row are NOT a mirrored pair and NOT a copy: change the head tilt, the arm and hand positions "
+                 "and which leg carries the weight. The BOTTOM row is drawn from BEHIND: we see the back of the "
+                 "head, the back of the outfit and the tail or cape from behind — no face, no eyes, no beak or "
+                 "snout visible. A bottom-row sprite that shows a face is wrong.")
     lines.append(f"EFFECTS: {fx}, stylized, opaque, with dark outlines, small, kept close to the character "
                  "inside its own quarter of the image.")
     lines.append("BACKGROUND: " + (BG_GRAY if pale else BG_WHITE) + BG_TAIL)
@@ -599,7 +634,9 @@ def prompt_actions(who, role, nation, desc, arch, fx, rim, palette, pale, ent_id
         f"SOURCE IMAGE: it shows this {role}, {who}, in 4 idle views (top row from the front, bottom row from "
         "behind). Keep EXACTLY the character of the source image: same face, hair color, eyes, outfit, colors, "
         "proportions, accessories" + (", weapon in the same hand" if weapon_of(ent_id) else "") +
-        ". The 6 new poses must show this SAME character, unchanged."
+        ". The 6 new poses must show this SAME character, unchanged. The source is ONLY a CHARACTER "
+        "REFERENCE (design, colors, proportions): do NOT reuse, copy, trace or lightly modify ANY of its "
+        "poses — every one of the 6 poses below is a brand-NEW drawing with its own silhouette."
         + ("" if face else " Use the BACK views of the source as the reference for the back of the outfit."),
         idc,
         weapon_block(ent_id, "all 6 poses"),
@@ -607,15 +644,17 @@ def prompt_actions(who, role, nation, desc, arch, fx, rim, palette, pale, ent_id
         ". Never a pure side profile, never facing left" +
         ("" if face else "; no face and no eyes visible in any pose") + ".",
         f"NATION PALETTE: {palette}.",
+        STYLE_LOCK,
         "STYLE: " + STYLE.format(rim=rim),
         "LAYOUT: " + ACTIONS_LAYOUT,
         "POSES, left to right, top to bottom:",
     ]
-    for i, p in enumerate(poses):
-        lines.append(f"{i+1}. {p}.")
+    for i, ((_, code, _), p) in enumerate(zip(ACTION_POSES, poses)):
+        lines.append(f"{i+1}. {p} — silhouette: {SILHOUETTE[code]}.")
     lines.append("The 6 poses MUST be clearly different from each other: different arm, leg and weapon "
                  "positions, different body angle and height. Never repeat or copy a pose; if two poses look "
-                 "alike, change one.")
+                 "alike, change one. SELF-CHECK before answering: fill every pose in solid black — the 6 "
+                 "black silhouettes must be easy to tell apart, and none may be the standing idle pose.")
     lines.append(f"EFFECTS: {fx}, stylized, opaque, with dark outlines, small, kept close to the character "
                  "inside its own sixth of the image.")
     lines.append("BACKGROUND: keep the plain flat background of the source image "
@@ -647,7 +686,7 @@ def prompt_vues_fix(who, role, nation, desc, fx, rim, palette, pale, ent_id=""):
         "two sprites of a row stay two different stances. Never redraw the whole sheet from a single angle:",
     ]
     for i, ((_, _, vtxt), pos) in enumerate(zip(VIEWS4, VIEWS4_POS)):
-        lines.append(f"{i+1}. {pos} cell: {vtxt}.")
+        lines.append(f"{i+1}. {pos} cell: {view_text(vtxt, ent_id)}.")
     lines.append(weapon_block(ent_id, "every cell"))
     lines.append("CHANGE NOTHING ELSE: keep the exact same character, poses, sizes, outfit, hair, background "
                  "and layout.")
@@ -676,7 +715,7 @@ def character_md(title, ent, role, nation_txt, fx, rim, palette, path_hint, extr
     if role == "summoned familiar" and ("familier:" + key) in IDENT:
         key = "familier:" + key
     who = ent["nom"].split(" (")[0]
-    pale = ent.get("pale", False)
+    pale = ent.get("pale", False) or any(w in desc.lower() for w in PALE_WORDS)
     armed = weapon_of(key) is not None
     parts = [
         f"### {title}\n\n3 planches : **vues** (génération normale), puis **actions de face** et **actions "
@@ -703,6 +742,9 @@ def character_md(title, ent, role, nation_txt, fx, rim, palette, path_hint, extr
         "#### Planche 2 — Actions de face · 3 attaques, 2 sorts, 1 marche (`actions`)\n\n**Édition d'image** : "
         "source = la planche `vues` (l'image générée à l'étape précédente). Si ton outil ne permet pas "
         "l'édition, repli : génération normale avec ce prompt tel quel, la carte d'identité reste recopiée.\n\n"
+        "**Si les 6 poses sortent identiques** (V55) : relance deux fois avec le même prompt en ne gardant que "
+        "les poses 1 à 3 (« draw ONLY poses 1, 2 and 3, 3 columns x 1 row »), puis que les poses 4 à 6 : "
+        "le générateur recopie beaucoup moins la pose source avec 3 cases qu'avec 6. Découpe en `--grid 3x1`.\n\n"
         f"```text\n{p}\n```\n\n{name_table_actions(ent['id'])}\n")
     p = prompt_actions(who, role, nation_txt, desc, ent["arch"], fx, rim, palette, pale, key, "dos")
     parts.append(
