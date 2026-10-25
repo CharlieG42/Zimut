@@ -47,3 +47,4 @@ Thumbs.db
 # Fichiers temporaires Godot
 *.tmp
 tools/__pycache__/
+cloud_oauth.json

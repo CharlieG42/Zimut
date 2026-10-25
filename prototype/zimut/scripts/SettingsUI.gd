@@ -76,8 +76,13 @@ func _ready() -> void:
 	tuto.add_theme_stylebox_override("hover", _flat(Color(0.99, 0.95, 0.83), COL_BORDER, 12, 3))
 	tuto.pressed.connect(func() -> void:
 		GameSettings.restart_tutorial()
-		tuto.text = "✓  Tutoriel relancé : retrouve Gultur dans Mes Parties")
-	box.add_child(tuto)
+		tuto.text = "✓  Tutoriel relancé")
+	tuto.text = "🎓  Relancer le tutoriel"
+	tuto.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tuto.custom_minimum_size = Vector2(0, 64)
+	_tuto_btn = tuto
+
+	_build_cloud(box)
 
 	var hint := Label.new()
 	hint.text = "La rapidité XP règle le gain d'expérience de chaque combat. La taille du texte agrandit les menus (utile sur téléphone).\nLa difficulté des ennemis se règle pour chaque partie, dans « Mes Parties »."
@@ -122,6 +127,211 @@ func _ready() -> void:
 		PlayTimer.flush()
 		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn"))
 	box.add_child(back)
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  V49 : sauvegarde Cloud (Google Drive)
+# ═══════════════════════════════════════════════════════════════════════════
+
+var _cloud: CloudSave
+var _tuto_btn: Button
+var _cloud_status: Label
+var _cloud_btns: Array[Button] = []
+var _code_panel: PanelContainer
+var _code_label: Label
+var _code_url: String = ""
+
+
+func _build_cloud(box: VBoxContainer) -> void:
+	_cloud = CloudSave.new()
+	_cloud.name = "CloudSave"
+	add_child(_cloud)
+	_cloud.status.connect(func(t: String) -> void: _cloud_status.text = t)
+	_cloud.user_code.connect(_show_code)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	box.add_child(row)
+	if _tuto_btn != null:
+		row.add_child(_tuto_btn)
+	var up := _cloud_button("☁  Sauvegarde sur Cloud", Color(0.70, 0.84, 0.98))
+	up.name = "CloudBackup"
+	up.pressed.connect(_on_cloud_backup)
+	row.add_child(up)
+	var down := _cloud_button("☁  Restauration depuis Cloud", Color(0.80, 0.92, 0.78))
+	down.name = "CloudRestore"
+	down.pressed.connect(_on_cloud_restore)
+	row.add_child(down)
+	_cloud_status = Label.new()
+	_cloud_status.name = "CloudStatus"
+	_cloud_status.add_theme_font_size_override("font_size", 19)
+	_cloud_status.add_theme_color_override("font_color", Color(0.20, 0.30, 0.45))
+	_cloud_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_cloud_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	if not CloudSave.is_configured():
+		_cloud_status.text = "Google Drive n'est pas encore configuré dans cette version du jeu."
+	elif CloudSave.is_linked():
+		_cloud_status.text = "Compte Google relié · tes parties sont stockées dans l'espace privé du jeu sur ton Drive."
+	else:
+		_cloud_status.text = "Google Drive : à la première sauvegarde, tu relieras ton compte avec un code."
+	box.add_child(_cloud_status)
+
+
+func _cloud_button(txt: String, col: Color) -> Button:
+	var b := Button.new()
+	b.text = txt
+	b.custom_minimum_size = Vector2(0, 64)
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.add_theme_font_size_override("font_size", 22)
+	b.add_theme_color_override("font_color", COL_TXT)
+	b.add_theme_stylebox_override("normal", _flat(col, COL_BORDER, 12, 2))
+	b.add_theme_stylebox_override("hover", _flat(col.lightened(0.2), COL_BORDER, 12, 3))
+	b.add_theme_stylebox_override("disabled", _flat(col.darkened(0.25), COL_BORDER, 12, 2))
+	_cloud_btns.append(b)
+	return b
+
+
+func _cloud_busy(on: bool) -> void:
+	for b: Button in _cloud_btns:
+		b.disabled = on
+
+
+func _on_cloud_backup() -> void:
+	PlayTimer.flush()
+	_cloud_busy(true)
+	await _cloud.backup()
+	_hide_code()
+	_cloud_busy(false)
+
+
+func _on_cloud_restore() -> void:
+	_cloud_busy(true)
+	var bundle: Dictionary = await _cloud.fetch()
+	_hide_code()
+	_cloud_busy(false)
+	if bundle.is_empty():
+		return
+	_confirm("Restaurer depuis le Cloud ?", CloudSave.describe(bundle) + "\n\nLes parties de cet appareil seront remplacées par celles de la sauvegarde.",
+		"RESTAURER", func() -> void:
+			var n: int = CloudSave.apply_bundle(bundle)
+			GameManager.active_save = {}
+			GameManager.active_slot = -1
+			_cloud_status.text = ("✓ %d partie(s) restaurée(s) depuis Google Drive." % n) if n >= 0 else "Sauvegarde Cloud illisible.")
+
+
+## Fenêtre du code Google (premier branchement).
+func _show_code(code: String, url: String) -> void:
+	_code_url = url
+	DisplayServer.clipboard_set(code)
+	if _code_panel != null and is_instance_valid(_code_panel):
+		_code_label.text = code
+		_code_panel.visible = true
+		return
+	var overlay := ColorRect.new()
+	overlay.color = Color(0, 0, 0, 0.6)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	get_child(0).add_child(overlay)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(center)
+	_code_panel = PanelContainer.new()
+	_code_panel.add_theme_stylebox_override("panel", _flat(COL_PANEL, COL_BORDER, 18, 4))
+	center.add_child(_code_panel)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 16)
+	v.custom_minimum_size = Vector2(820, 0)
+	_code_panel.add_child(_pad(v))
+	var t := Label.new()
+	t.text = "Relier ton compte Google"
+	t.add_theme_font_size_override("font_size", 32)
+	t.add_theme_color_override("font_color", COL_TXT)
+	v.add_child(t)
+	var info := Label.new()
+	info.text = "1. Touche « Ouvrir Google » (le code est déjà copié).\n2. Saisis ce code, choisis ton compte et accepte.\n3. Reviens dans le jeu : la sauvegarde continue toute seule."
+	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	info.add_theme_font_size_override("font_size", 22)
+	info.add_theme_color_override("font_color", COL_TXT)
+	v.add_child(info)
+	_code_label = Label.new()
+	_code_label.name = "CloudCode"
+	_code_label.text = code
+	_code_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_code_label.add_theme_font_size_override("font_size", 54)
+	_code_label.add_theme_color_override("font_color", Color(0.10, 0.25, 0.55))
+	v.add_child(_code_label)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	v.add_child(row)
+	var cancel := _cloud_button("Annuler", Color(0.86, 0.80, 0.64))
+	cancel.pressed.connect(func() -> void:
+		_cloud.cancel()
+		_hide_code())
+	row.add_child(cancel)
+	var copy := _cloud_button("Copier le code", Color(0.86, 0.80, 0.64))
+	copy.pressed.connect(func() -> void: DisplayServer.clipboard_set(_code_label.text))
+	row.add_child(copy)
+	var open := _cloud_button("Ouvrir Google", Color(0.70, 0.84, 0.98))
+	open.pressed.connect(func() -> void: OS.shell_open(_code_url))
+	row.add_child(open)
+	# ces trois boutons ne doivent pas être désactivés pendant l'attente
+	for b: Button in [cancel, copy, open]:
+		_cloud_btns.erase(b)
+
+
+func _pad(c: Control) -> MarginContainer:
+	var m := MarginContainer.new()
+	for side in ["left", "right", "top", "bottom"]:
+		m.add_theme_constant_override("margin_" + side, 28 if side in ["left", "right"] else 22)
+	m.add_child(c)
+	return m
+
+
+func _hide_code() -> void:
+	if _code_panel != null and is_instance_valid(_code_panel):
+		_code_panel.get_parent().get_parent().queue_free()   # overlay
+		_code_panel = null
+
+
+func _confirm(title: String, text: String, ok_txt: String, on_ok: Callable) -> void:
+	var overlay := ColorRect.new()
+	overlay.color = Color(0, 0, 0, 0.6)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	get_child(0).add_child(overlay)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(center)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _flat(COL_PANEL, COL_BORDER, 18, 4))
+	center.add_child(panel)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 16)
+	v.custom_minimum_size = Vector2(820, 0)
+	panel.add_child(_pad(v))
+	var t := Label.new()
+	t.text = title
+	t.add_theme_font_size_override("font_size", 32)
+	t.add_theme_color_override("font_color", COL_TXT)
+	v.add_child(t)
+	var l := Label.new()
+	l.text = text
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.add_theme_font_size_override("font_size", 23)
+	l.add_theme_color_override("font_color", COL_TXT)
+	v.add_child(l)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	v.add_child(row)
+	var no := _cloud_button("Annuler", Color(0.86, 0.80, 0.64))
+	_cloud_btns.erase(no)
+	no.pressed.connect(func() -> void: overlay.queue_free())
+	row.add_child(no)
+	var yes := _cloud_button(ok_txt, Color(0.95, 0.70, 0.55))
+	_cloud_btns.erase(yes)
+	yes.pressed.connect(func() -> void:
+		overlay.queue_free()
+		on_ok.call())
+	row.add_child(yes)
+
 
 ## Une ligne de réglage : libellé à gauche, groupe d'options à droite.
 func _setting_row(label_txt: String, options: Array[String], current: int, on_pick: Callable) -> Control:
