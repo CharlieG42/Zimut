@@ -137,9 +137,9 @@ func _refresh_player_row() -> void:
 	var nxt: int = HeroUnlock.next_unlock_level(save)
 	var txt: String = "👤 Niveau du joueur %d" % HeroUnlock.player_level(save)
 	if pend == 0 and nxt > 0:
-		txt += "  ·  prochain héros au niveau %d" % nxt
+		txt += "\nprochain héros : niveau %d" % nxt
 	elif pend == 0:
-		txt += "  ·  tous les héros sont débloqués"
+		txt += "\ntous les héros débloqués"
 	_player_label.text = txt
 	_unlock_btn.visible = pend > 0
 	_unlock_btn.text = "🔓  DÉBLOQUER UN HÉROS  (%d)" % pend
@@ -258,7 +258,19 @@ func _build() -> void:
 	_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	top.add_child(_title)
-	top.add_child(Control.new())
+	# V48 : niveau du joueur + déblocage de héros (colonne de droite de l'en-tête)
+	var pcol := VBoxContainer.new()
+	pcol.custom_minimum_size = Vector2(250, 0)
+	pcol.add_theme_constant_override("separation", 4)
+	top.add_child(pcol)
+	_player_label = U.lbl("", 18, Color(0.70, 0.85, 1.0))
+	_player_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_player_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	pcol.add_child(_player_label)
+	_unlock_btn = U.btn("🔓  DÉBLOQUER UN HÉROS", Color(0.95, 0.78, 0.30), 18, Vector2(250, 40))
+	_unlock_btn.name = "UnlockHeroBtn"
+	_unlock_btn.pressed.connect(_on_unlock_hero)
+	pcol.add_child(_unlock_btn)
 
 	# ── Sélecteur de combat (rejouer un combat déjà gagné)
 	var sel_row := HBoxContainer.new()
@@ -281,19 +293,6 @@ func _build() -> void:
 	_goal_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	page.add_child(_goal_label)
-
-	# ── V47 : niveau du joueur + déblocage de héros
-	var prow := HBoxContainer.new()
-	prow.alignment = BoxContainer.ALIGNMENT_CENTER
-	prow.add_theme_constant_override("separation", 14)
-	page.add_child(prow)
-	_player_label = U.lbl("", 19, Color(0.70, 0.85, 1.0))
-	_player_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	prow.add_child(_player_label)
-	_unlock_btn = U.btn("🔓  DÉBLOQUER UN HÉROS", Color(0.95, 0.78, 0.30), 20, Vector2(300, 46))
-	_unlock_btn.name = "UnlockHeroBtn"
-	_unlock_btn.pressed.connect(_on_unlock_hero)
-	prow.add_child(_unlock_btn)
 
 	# ── Corps : grille des classes | fiche de la classe choisie
 	var body := HBoxContainer.new()
@@ -356,7 +355,7 @@ func _build() -> void:
 	_desc_label.custom_minimum_size = Vector2(300, 0)
 	hv.add_child(_desc_label)
 	var info_sc := ScrollContainer.new()
-	info_sc.custom_minimum_size = Vector2(0, 150)
+	info_sc.custom_minimum_size = Vector2(0, 100)
 	info_sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	info_sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	card_box.add_child(info_sc)
@@ -649,8 +648,8 @@ func refresh() -> void:
 		tile.add_theme_stylebox_override("hover", st_t)
 		tile.add_theme_stylebox_override("pressed", st_t)
 		tile.modulate = Color(0.6, 0.6, 0.65) if _is_stationed(c) else (Color(0.45, 0.45, 0.5) if _is_locked(c) else Color.WHITE)
-	_desc_label.text = "%s · difficulté %s\n%s" % [meta["role"], ClassInfo.stars(classe), meta["description"]]
-	_info_rich.text = ClassInfo.details_text(classe)
+	_desc_label.text = "%s\ndifficulté %s" % [meta["role"], ClassInfo.stars(classe)]
+	_info_rich.text = "%s\n\n%s" % [meta["description"], ClassInfo.details_text(classe)]
 	_stats_label.text = _stat_line(classe)
 	_refresh_player_row()
 

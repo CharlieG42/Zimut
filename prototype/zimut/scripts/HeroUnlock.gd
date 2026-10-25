@@ -18,6 +18,9 @@ extends RefCounted
 const START_PICKS := 3
 const FIRST_UNLOCK_LEVEL := 4
 const UNLOCK_EVERY := 3
+## Le joueur gagne l'XP du combat au meilleur multiplicateur de classe (1,10) : il n'est jamais
+## en retard sur un héros d'équipe, le plafond ne gêne donc que les héros qui rattrapent leur retard.
+const PLAYER_XP_MULT := 1.10
 
 
 static func _all_classes() -> Array[String]:
@@ -41,6 +44,13 @@ static func ensure(data: Dictionary, xp_for_level: Callable) -> void:
 	var p: Dictionary = data.get("player", {})
 	p["level"] = clampi(int(p.get("level", 1)), 1, ClassRules.MAX_LEVEL)
 	p["xp"] = int(p.get("xp", 0))
+	# Invariant : aucun héros au-dessus du joueur (niveaux fixés à la main, anciens outils…).
+	var top: int = 1
+	for c in (data.get("roster", {}) as Dictionary).keys():
+		top = maxi(top, int(data["roster"][c].get("level", 1)))
+	if top > int(p["level"]):
+		p["level"] = top
+	p["xp"] = maxi(int(p["xp"]), int(xp_for_level.call(int(p["level"]))))
 	data["player"] = p
 	var clean: Array = []
 	for c in data["heroes_unlocked"]:

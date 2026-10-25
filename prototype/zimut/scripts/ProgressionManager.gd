@@ -1908,7 +1908,7 @@ func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0, fight_level: in
 	var avg: int = team_average_level(data)
 	var report: Dictionary = {}
 	# V47 : le joueur gagne l'XP du combat à 100 % ; aucun héros ne peut dépasser son niveau.
-	var p_gain: float = float(raw_xp) * ratio
+	var p_gain: float = float(raw_xp) * ratio * HeroUnlock.PLAYER_XP_MULT
 	if fight_level > 0:
 		p_gain *= xp_level_factor(fight_level, HeroUnlock.player_level(data))
 	var player_rep: Dictionary = HeroUnlock.add_xp(data, roundi(p_gain), xp_for_level, level_for_xp)

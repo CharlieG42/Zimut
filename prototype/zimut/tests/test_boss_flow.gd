@@ -11,6 +11,7 @@ func _init() -> void:
 
 func _boot() -> void:
 	var data = pm.new_game(0, "TestBoss")
+	HeroUnlock.pick_initial(data, ["Tank", "Mage", "Heal"])
 	data["team"] = [{"classe": "Tank", "equipment": {}}, {"classe": "Mage", "equipment": {}}, {"classe": "Heal", "equipment": {}}]
 	pm.write_save(0, data)
 

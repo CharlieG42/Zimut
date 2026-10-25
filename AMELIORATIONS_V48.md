@@ -5,7 +5,7 @@
 - Le joueur a un **niveau propre** (`data["player"]`). D'autres héros se débloquent **au choix du joueur** : au niveau 4, puis tous les 3 niveaux (4, 7, 10, 13, 16, 19, 22). Un joueur qui garde la même équipe a donc tous les héros vers le niveau 22 (réglable : `HeroUnlock.FIRST_UNLOCK_LEVEL` / `UNLOCK_EVERY`).
 
 ## Niveau du joueur
-- Il gagne **100 % de l'XP de chaque combat** (sans multiplicateur de classe, avec le même facteur de niveau de combat que les héros). Il suit donc de près un héros que l'on emmène toujours, sans être forcément égal au plus haut niveau.
+- Il gagne l'XP de chaque combat au **multiplicateur de classe maximal (×1,10)**, avec le même facteur de niveau de combat que les héros. Il suit donc de près un héros que l'on emmène toujours, sans être forcément égal au plus haut niveau.
 - **Aucun héros ne peut dépasser le niveau du joueur** : l'XP en excès est conservée et se convertit en niveaux dès que le joueur monte. Les héros d'équipe gagnent un peu plus ou moins vite (Tank/Heal ×1,10, Assassin/Mage ×0,95…) : le plafond ne gêne qu'à la marge.
 - Les héros au banc restent à 5 % d'XP : ils rattrapent grâce au facteur de niveau de combat.
 

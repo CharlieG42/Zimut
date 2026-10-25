@@ -12,6 +12,7 @@ func _boot() -> void:
 	var gm: Node = root.get_node("GameManager")
 	root.get_node("GameSettings").tutorial_done = true
 	var data: Dictionary = pm.new_game(4, "Lead")
+	HeroUnlock.pick_initial(data, ["Chasseur", "Mage", "Sylvain"])
 	pm.rebuild_team(data, ["Chasseur", "Mage", "Sylvain"])
 	gm.active_save = data
 	gm.active_slot = 4
