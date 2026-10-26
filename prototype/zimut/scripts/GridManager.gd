@@ -22,7 +22,7 @@ var _biome: String = ""
 var _entity_layer: Node2D
 var _fx_layer: Node2D
 var _forest_ambience: ForestAmbience
-var _scenery: BattleScenery
+var _scenery: SceneryBake
 var _scenery_over: SceneryOver
 var _scenery_amb: SceneryAmbient
 var _cur_element: String = "physical"   # élément du dernier sort lancé (impacts)
@@ -77,7 +77,7 @@ func _build_layers() -> void:
 	for c: Node in get_children():
 		c.queue_free()
 	# Décor d'arrière-plan : rebord surélevé, prolongement de falaise, brume (derrière les cases)
-	_scenery = BattleScenery.new()
+	_scenery = SceneryBake.new()
 	_scenery.name = "Scenery"
 	add_child(_scenery)
 	# V49 : gouffres des cases hors plateau (sous les cases, dont les faces forment les parois)
