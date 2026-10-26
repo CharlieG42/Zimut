@@ -49,12 +49,12 @@ for e, kind in ents:
     # chaque case d'action distincte
     texts = [G.cell_text(c, e["arch"], "fx") for _, c, _ in G.ACTION_POSES]
     chk(len(set(texts)) == 6, f"{key}: poses d'action identiques")
-for f in list((Path(__file__).parent / "nations").glob("*.md")):
+for f in list((Path(__file__).parent / "nations").glob("**/*.md")):
     t = f.read_text(encoding="utf-8")
     chk("_attack_back" not in t and "_back_left" not in t and "_face_left" not in t, f"{f.name}: anciens noms de fichiers")
 # V57 : aucun mot « modération » dans les prompts publiés (blocs ```text``` des .md)
 BAN = re.compile(r"\b(weapons?|armed|unarmed|dagger|kill\w*|smash|slam\w*|stab|kick\w*|bombs?|fights?|blood|death|blast|slash)\b", re.I)
-for f in list((Path(__file__).parent / "nations").glob("*.md")) + [Path(__file__).parent / "familiers.md", Path(__file__).parent / "mecanismes.md"]:
+for f in list((Path(__file__).parent / "nations").glob("**/*.md")) + [Path(__file__).parent / "familiers.md", Path(__file__).parent / "mecanismes.md"]:
     for blk in re.findall(r"```text\n(.*?)```", f.read_text(encoding="utf-8"), flags=re.S):
         m = BAN.search(blk)
         chk(m is None, f"{f.name}: mot de modération « {m.group(0) if m else ''} » dans un prompt publié")

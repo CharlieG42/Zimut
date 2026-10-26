@@ -50,7 +50,8 @@ IDENT = {
         ("bottom", "the robe reaches the ankles, dark blue trousers visible below"),
         ("feet", "dark blue boots with silver tips"),
         ("weapon", "ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand"),
-    ], never="no wizard hat, no white or silver hair, no beard"),
+        ("held item", "an ornate brown leather spellbook with golden corners and a sapphire gem on the cover, held open in the LEFT hand"),
+    ], never="no wizard hat, no white or silver hair, no beard, no missing spellbook"),
     "heal": dict(parts=[
         ("hair", "long teal hair (#2BB3A8) tied low behind the back"),
         ("eyes", "soft turquoise eyes, always open"),

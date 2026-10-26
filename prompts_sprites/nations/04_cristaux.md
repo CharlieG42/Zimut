@@ -51,8 +51,9 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Bottom: the robe reaches the ankles, dark blue trousers visible below
 - Feet: dark blue boots with silver tips
 - Held item: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand
+- Held item: an ornate brown leather spellbook with golden corners and a sapphire gem on the cover, held open in the LEFT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
-- FORBIDDEN variations: no wizard hat, no white or silver hair, no beard.
+- FORBIDDEN variations: no wizard hat, no white or silver hair, no beard, no missing spellbook.
 HELD ITEM: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand. It is held in the SAME hand and is clearly visible in all 4 cells: never missing, never swapped for another held item (a bow stays a bow, a staff stays a staff), never a different shape or color.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
 STYLE LOCK: smooth hand-drawn vector cartoon with THICK DARK OUTLINES, exactly like Dofus / Waven / Wakfu character art and like the other sheets of this game — NEVER pixel art, never low-resolution, never a painterly or soft-edged style, never a thin or white outline.
@@ -68,7 +69,7 @@ COUNT AND VIEWS: exactly FOUR sprites, two per row, no empty cell. The two sprit
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own quarter of the image.
 BACKGROUND: Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ITEM CHECK: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand. It is held in the SAME hand and is clearly visible in every cell: never missing, never swapped for another held item (a bow stays a bow, a staff stays a staff), never a different shape or color.
-REMINDER: this is Mage: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand; dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7); fair skin; the robe reaches the ankles, dark blue trousers visible below; dark blue boots with silver tips. The HELD ITEM never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no wizard hat, no white or silver hair, no beard. Every sprite faces RIGHT (front or back 3/4), never left.
+REMINDER: this is Mage: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand; dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7); fair skin; the robe reaches the ankles, dark blue trousers visible below; dark blue boots with silver tips; an ornate brown leather spellbook with golden corners and a sapphire gem on the cover, held open in the LEFT hand. The HELD ITEM never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no wizard hat, no white or silver hair, no beard, no missing spellbook. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Vue | Fichier |
@@ -83,7 +84,7 @@ REMINDER: this is Mage: ornate silver staff topped with a glowing blue crystal (
 À utiliser si le générateur reformule le prompt, bloque sur un mot ou ne respecte pas le nombre de cases : mêmes consignes, 1 000 caractères.
 
 ```text
-Character sheet, exactly 4 sprites in a 2x2 grid, plain flat medium gray background, wide empty gaps, no overlap, no text, no frame. ONE playable hero: Mage. dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; fair skin; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7); the robe reaches the ankles, dark blue trousers visible below; dark blue boots with silver tips; ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand. It always holds the ornate silver staff topped with a glowing blue crystal in the right hand, clearly visible in all 4 sprites. Top row: two front 3/4 views facing right, two slightly different relaxed stances (not mirrored). Bottom row: two views from behind, facing away toward the upper right, no face visible, two different stances. Same outfit, colors and size in all 4, feet on one line. Style: smooth hand-drawn vector cartoon, thick dark outlines, Dofus / Waven look, NOT pixel art. Never facing left. Forbidden: no wizard hat, no white or silver hair, no beard.
+Character sheet, exactly 4 sprites in a 2x2 grid, plain flat medium gray background, wide empty gaps, no overlap, no text, no frame. ONE playable hero: Mage. dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; fair skin; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7); the robe reaches the ankles, dark blue trousers visible below; dark blue boots with silver tips; ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand; an ornate brown leather spellbook with golden corners and a sapphire gem on the cover, held open in the LEFT hand. It always holds the ornate silver staff topped with a glowing blue crystal in the right hand, clearly visible in all 4 sprites. Top row: two front 3/4 views facing right, two slightly different relaxed stances (not mirrored). Bottom row: two views from behind, facing away toward the upper right, no face visible, two different stances. Same outfit, colors and size in all 4, feet on one line. Style: smooth hand-drawn vector cartoon, thick dark outlines, Dofus / Waven look, NOT pixel art. Never facing left. Forbidden: no wizard hat, no white or silver hair, no beard, no missing spellbook.
 ```
 
 ##### Édition corrective (arme manquante)
@@ -102,8 +103,9 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Bottom: the robe reaches the ankles, dark blue trousers visible below
 - Feet: dark blue boots with silver tips
 - Held item: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand
+- Held item: an ornate brown leather spellbook with golden corners and a sapphire gem on the cover, held open in the LEFT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
-- FORBIDDEN variations: no wizard hat, no white or silver hair, no beard.
+- FORBIDDEN variations: no wizard hat, no white or silver hair, no beard, no missing spellbook.
 TASK: fix the sprites so that EVERY sprite visibly HOLDS its held item in the correct hand — add the held item where it is missing, correct the hand if it is held wrong. Nothing else changes.
 CRITICAL — KEEP THE VIEWS: the top row stays FRONT views and the bottom row stays BACK views; the two sprites of a row stay two different stances. Never redraw the whole sheet from a single angle:
 1. TOP-LEFT cell: FRONT idle: 3/4 FRONT view, the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right; both eyes visible; standing calm. The ornate silver staff topped with a glowing blue crystal is held in the right hand and fully visible in this cell.
@@ -113,7 +115,7 @@ CRITICAL — KEEP THE VIEWS: the top row stays FRONT views and the bottom row st
 HELD ITEM: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand. It is held in the SAME hand and is clearly visible in every cell: never missing, never swapped for another held item (a bow stays a bow, a staff stays a staff), never a different shape or color.
 CHANGE NOTHING ELSE: keep the exact same character, poses, sizes, outfit, hair, background and layout.
 BACKGROUND: keep the plain flat background of the source image.
-REMINDER: this is Mage: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand; dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7); fair skin; the robe reaches the ankles, dark blue trousers visible below; dark blue boots with silver tips. The HELD ITEM never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no wizard hat, no white or silver hair, no beard. Every sprite faces RIGHT (front or back 3/4), never left.
+REMINDER: this is Mage: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand; dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7); fair skin; the robe reaches the ankles, dark blue trousers visible below; dark blue boots with silver tips; an ornate brown leather spellbook with golden corners and a sapphire gem on the cover, held open in the LEFT hand. The HELD ITEM never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no wizard hat, no white or silver hair, no beard, no missing spellbook. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 #### Planche 2 — Actions de face · 3 attaques, 2 sorts, 1 marche (`actions`)
@@ -134,8 +136,9 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Bottom: the robe reaches the ankles, dark blue trousers visible below
 - Feet: dark blue boots with silver tips
 - Held item: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand
+- Held item: an ornate brown leather spellbook with golden corners and a sapphire gem on the cover, held open in the LEFT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
-- FORBIDDEN variations: no wizard hat, no white or silver hair, no beard.
+- FORBIDDEN variations: no wizard hat, no white or silver hair, no beard, no missing spellbook.
 HELD ITEM: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand. It is held in the SAME hand and is clearly visible in all 6 poses: never missing, never swapped for another held item (a bow stays a bow, a staff stays a staff), never a different shape or color.
 TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 FRONT view: the character faces the viewer and turns slightly to the right (face, chest and right side visible), facing front-right in every pose, facing front-right in every pose. Never a pure side profile, never facing left.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
@@ -153,7 +156,7 @@ The 6 poses MUST be clearly different from each other: different arm, leg and he
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ITEM CHECK: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand — visible in EVERY one of the 6 poses (held or used).
-REMINDER: this is Mage: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand; dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7); fair skin; the robe reaches the ankles, dark blue trousers visible below; dark blue boots with silver tips. The HELD ITEM never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no wizard hat, no white or silver hair, no beard. Every sprite faces RIGHT (front or back 3/4), never left.
+REMINDER: this is Mage: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand; dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7); fair skin; the robe reaches the ankles, dark blue trousers visible below; dark blue boots with silver tips; an ornate brown leather spellbook with golden corners and a sapphire gem on the cover, held open in the LEFT hand. The HELD ITEM never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no wizard hat, no white or silver hair, no beard, no missing spellbook. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Pose | Fichier |
@@ -181,8 +184,9 @@ CHARACTER ID CARD — copy these features EXACTLY in every pose; they NEVER chan
 - Bottom: the robe reaches the ankles, dark blue trousers visible below
 - Feet: dark blue boots with silver tips
 - Held item: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand
+- Held item: an ornate brown leather spellbook with golden corners and a sapphire gem on the cover, held open in the LEFT hand
 - Nothing else: do not add clothing, colors or accessories that are not listed.
-- FORBIDDEN variations: no wizard hat, no white or silver hair, no beard.
+- FORBIDDEN variations: no wizard hat, no white or silver hair, no beard, no missing spellbook.
 HELD ITEM: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand. It is held in the SAME hand and is clearly visible in all 6 poses: never missing, never swapped for another held item (a bow stays a bow, a staff stays a staff), never a different shape or color.
 TASK: replace the 4 idle views with 6 ACTION poses, ALL in the same view: 3/4 BACK view: the character is seen from behind and turns slightly to the right (back of the head and right shoulder visible), facing away from the viewer toward the upper right; we see the BACK of the head: no face, no eyes. Never a pure side profile, never facing left; no face and no eyes visible in any pose.
 NATION PALETTE: silver white, sapphire blue, amethyst violet.
@@ -200,7 +204,7 @@ The 6 poses MUST be clearly different from each other: different arm, leg and he
 EFFECTS: prismatic blue and violet crystal shards, stylized, opaque, with dark outlines, small, kept close to the character inside its own sixth of the image.
 BACKGROUND: keep the plain flat background of the source image (Pure flat medium gray background (#808080) (the character is pale, a white background would merge with it)), no checkerboard pattern, no gradient, no floor, no ground shadow, no text, no labels, no numbers, no arrows, no frame or border lines.
 ITEM CHECK: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand — visible in EVERY one of the 6 poses (held or used).
-REMINDER: this is Mage: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand; dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7); fair skin; the robe reaches the ankles, dark blue trousers visible below; dark blue boots with silver tips. The HELD ITEM never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no wizard hat, no white or silver hair, no beard. Every sprite faces RIGHT (front or back 3/4), never left.
+REMINDER: this is Mage: ornate silver staff topped with a glowing blue crystal (#5CC8FF), RIGHT hand; dark navy-blue hair (#1E2C5A), medium length, side bangs; bright blue eyes (#3FA0FF), always open; long silver-white robe (#E8ECF4) with light-blue crystal patterns and sapphire trims (#2A5BD7); fair skin; the robe reaches the ankles, dark blue trousers visible below; dark blue boots with silver tips; an ornate brown leather spellbook with golden corners and a sapphire gem on the cover, held open in the LEFT hand. The HELD ITEM never changes and is never replaced (a bow stays a bow, a staff stays a staff). Forbidden: no wizard hat, no white or silver hair, no beard, no missing spellbook. Every sprite faces RIGHT (front or back 3/4), never left.
 ```
 
 | Case | Pose | Fichier |
