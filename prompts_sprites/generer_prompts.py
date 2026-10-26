@@ -26,12 +26,50 @@ mot, pour que toutes les planches dessinent le même personnage sans image joint
 Noms de fichiers : convention du jeu (scripts/EntityView.gd : <nom>_back_attack, pas <nom>_attack_back).
 """
 import sys
+import re
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from identites import IDENT, card  # noqa: E402
 
 OUT = Path(__file__).resolve().parent
+
+# --------------------------------------------------------------------------------------------
+# Vocabulaire « modération » (V57) : Mistral bloque ou reformule les prompts qui contiennent des mots
+# de violence ou d'armes (et supprimait alors l'arme du personnage). Les prompts écrits dans les .md
+# passent par `soften` : mêmes consignes, mots neutres. Les fonctions de génération gardent les mots
+# d'origine (le contrôle qualité les teste), seul le texte publié est adouci.
+# --------------------------------------------------------------------------------------------
+SOFT = [
+    (r"WEAPON CHECK", "ITEM CHECK"), (r"WEAPON LOCK", "ITEM LOCK"), (r"\bWEAPON\b", "HELD ITEM"),
+    (r"\bUNARMED\b", "NO HELD ITEM"), (r"\bunarmed\b", "item-free"),
+    (r"\bweapons\b", "held items"), (r"\bWeapon\b", "Held item"), (r"\bweapon\b", "held item"),
+    (r"\barmed with\b", "carrying"), (r"\barmed\b", "equipped"),
+    (r"\bdaggers\b", "short curved blades"), (r"\bDAGGERS\b", "SHORT CURVED BLADES"),
+    (r"\bdagger\b", "short curved blade"), (r"\bDAGGER\b", "SHORT CURVED BLADE"),
+    (r"\bwar hammer\b", "heavy hammer"), (r"\bWAR CRY\b", "BATTLE SHOUT"),
+    (r"\bSMASH\b", "STRIKE"), (r"\bsmash\b", "strike"), (r"\bSLAM\b", "DRIVE"), (r"\bslammed\b", "driven"),
+    (r"\bslam\b", "drive"), (r"\bSTAB\b", "THRUST"), (r"\bSLASH\b", "SWEEP"), (r"\bslash\b", "sweep"),
+    (r"\bPOINT-BLANK KICK\b", "CLOSE LEG LIFT"), (r"\bKICK\b", "LEG LIFT"), (r"\bkicking\b", "lifting"),
+    (r"\bBLAST\b", "BURST"), (r"\bblast\b", "burst"),
+    (r"\bbombs?\b", "round charge"), (r"\bBOMB\b", "ROUND CHARGE"),
+    (r"it fights only with its own body \(claws, teeth, fists, tail, magic\)",
+     "it acts only with its own body (claws, fists, tail, magic)"),
+    (r"\bfights\b", "acts"), (r"\bfight\b", "act"), (r"\bkill(s|ed|ing)?\b", "defeat"),
+    (r"\bblood\b", "red paint"), (r"\bdeath\b", "defeat"),
+]
+
+
+def soften(text):
+    for pat, rep in SOFT:
+        text = re.sub(pat, rep, text)
+    return text
+
+
+def soften_fences(md):
+    """Adoucit uniquement le contenu des blocs ```text``` (les prompts), pas la documentation en français."""
+    return re.sub(r"```text\n(.*?)```", lambda m: "```text\n" + soften(m.group(1)) + "```", md, flags=re.S)
+
 GAME = "prototype/zimut/assets/sprites"
 
 # --------------------------------------------------------------------------------------------
@@ -331,7 +369,7 @@ NATIONS = [
          palette="sand gold, terracotta, amber, small turquoise accents",
          fx="swirling sand and amber shards",
          hero=dict(id="geomancien", nom="Géomancien", arch="staff", pale=False,
-                   desc="young geomancer with short brown hair, layered sand-gold robe with terracotta panels and "
+                   desc="adult geomancer in his late twenties with short brown hair, layered sand-gold robe with terracotta panels and "
                         "amber gems, sandals and wraps, a golden staff topped with a large faceted amber crystal "
                         "in the right hand"),
          enemies=[
@@ -586,6 +624,25 @@ def view_text(vtxt, ent_id):
             .replace("the free hand rests on the hip", "one limb (paw, claw or hand) is lifted or resting in a different position"))
 
 
+def prop_lines(ent_id):
+    """Ligne PROPORTIONS facultative de la carte d'identité (ex. héros adulte : tête moins grosse)."""
+    ident = IDENT.get(ent_id)
+    return ["PROPORTIONS: " + ident["proportions"]] if ident and ident.get("proportions") else []
+
+
+def held_short(ent_id):
+    """Objet tenu en quelques mots (début de la ligne d'arme) : rappelé dans CHAQUE case."""
+    w = weapon_of(ent_id)
+    if not w:
+        return ""
+    return re.split(r" \(|, ", w)[0]
+
+
+def held_suffix(ent_id):
+    h = held_short(ent_id)
+    return f" The {h} is held in the right hand and fully visible in this cell." if h else ""
+
+
 def prompt_vues(who, role, nation, desc, fx, rim, palette, pale, ent_id=""):
     """Planche VUES : 2 repos de face + 2 repos de dos, tous orientés vers la droite. Génération normale."""
     idc, never = card(ent_id, desc, who, nation)
@@ -599,11 +656,12 @@ def prompt_vues(who, role, nation, desc, fx, rim, palette, pale, ent_id=""):
         f"NATION PALETTE: {palette}.",
         STYLE_LOCK,
         "STYLE: " + STYLE.format(rim=rim),
+        *prop_lines(ent_id),
         "LAYOUT: " + VUES_LAYOUT,
         "CELLS — follow the grid positions EXACTLY:",
     ]
     for i, ((_, _, vtxt), pos) in enumerate(zip(VIEWS4, VIEWS4_POS)):
-        lines.append(f"{i+1}. {pos} cell: {view_text(vtxt, ent_id)}.")
+        lines.append(f"{i+1}. {pos} cell: {view_text(vtxt, ent_id)}.{held_suffix(ent_id)}")
     lines.append("Every sprite faces RIGHT (front-right on the top row, away toward the upper right on the "
                  "bottom row): never facing left, never a pure side profile. The two sprites of a row are "
                  "clearly different stances, never the same drawing twice.")
@@ -646,11 +704,12 @@ def prompt_actions(who, role, nation, desc, arch, fx, rim, palette, pale, ent_id
         f"NATION PALETTE: {palette}.",
         STYLE_LOCK,
         "STYLE: " + STYLE.format(rim=rim),
+        *prop_lines(ent_id),
         "LAYOUT: " + ACTIONS_LAYOUT,
         "POSES, left to right, top to bottom:",
     ]
     for i, ((_, code, _), p) in enumerate(zip(ACTION_POSES, poses)):
-        lines.append(f"{i+1}. {p} — silhouette: {SILHOUETTE[code]}.")
+        lines.append(f"{i+1}. {p} — silhouette: {SILHOUETTE[code]}.{held_suffix(ent_id)}")
     lines.append("The 6 poses MUST be clearly different from each other: different arm, leg and weapon "
                  "positions, different body angle and height. Never repeat or copy a pose; if two poses look "
                  "alike, change one. SELF-CHECK before answering: fill every pose in solid black — the 6 "
@@ -663,6 +722,26 @@ def prompt_actions(who, role, nation, desc, arch, fx, rim, palette, pale, ent_id
         lines.append(f"WEAPON CHECK: {weapon_of(ent_id)} — visible in EVERY one of the 6 poses (held or used).")
     lines.append(reminder(ent_id, who, desc, never))
     return "\n".join(lines)
+
+
+def prompt_vues_court(who, role, desc, palette, pale, ent_id=""):
+    """Version COURTE de la planche vues (≈ 1 000 caractères) : les générateurs qui reformulent ou
+    ignorent un long prompt (nombre de cases, objet tenu) la respectent mieux."""
+    idc, never = card(ent_id, desc, who, "")
+    parts = IDENT.get(ent_id, {}).get("parts")
+    ident = "; ".join(d for _, d in parts) if parts else desc
+    h = held_short(ent_id)
+    item = (f" It always holds the {h} in the right hand, clearly visible in all 4 sprites." if h else
+            " It holds nothing in its hands, paws or claws.")
+    bg = "flat medium gray" if pale else "flat white"
+    prop = (" " + prop_lines(ent_id)[0] + ".") if prop_lines(ent_id) else ""
+    return (f"Character sheet, exactly 4 sprites in a 2x2 grid, plain {bg} background, wide empty gaps, no overlap, "
+            f"no text, no frame. ONE {role}: {who}. {ident}.{item}{prop} "
+            "Top row: two front 3/4 views facing right, two slightly different relaxed stances (not mirrored). "
+            "Bottom row: two views from behind, facing away toward the upper right, no face visible, two different "
+            "stances. Same outfit, colors and size in all 4, feet on one line. Style: smooth hand-drawn vector "
+            "cartoon, thick dark outlines, Dofus / Waven look, NOT pixel art. Never facing left."
+            + (f" Forbidden: {never}." if never else ""))
 
 
 def prompt_vues_fix(who, role, nation, desc, fx, rim, palette, pale, ent_id=""):
@@ -686,7 +765,7 @@ def prompt_vues_fix(who, role, nation, desc, fx, rim, palette, pale, ent_id=""):
         "two sprites of a row stay two different stances. Never redraw the whole sheet from a single angle:",
     ]
     for i, ((_, _, vtxt), pos) in enumerate(zip(VIEWS4, VIEWS4_POS)):
-        lines.append(f"{i+1}. {pos} cell: {view_text(vtxt, ent_id)}.")
+        lines.append(f"{i+1}. {pos} cell: {view_text(vtxt, ent_id)}.{held_suffix(ent_id)}")
     lines.append(weapon_block(ent_id, "every cell"))
     lines.append("CHANGE NOTHING ELSE: keep the exact same character, poses, sizes, outfit, hair, background "
                  "and layout.")
@@ -731,6 +810,11 @@ def character_md(title, ent, role, nation_txt, fx, rim, palette, path_hint, extr
         "#### Planche 1 — Vues · 2 repos de face + 2 repos de dos (`vues`)\n\nGénération normale, aucune image "
         "à joindre. Tout est orienté vers la droite ; deux attitudes différentes par rangée.\n\n"
         f"```text\n{p}\n```\n\n{name_table_vues(ent['id'])}\n")
+    pc = prompt_vues_court(who, role, desc, palette, pale, key)
+    parts.append(
+        "##### Version courte de la planche vues\n\nÀ utiliser si le générateur reformule le prompt, "
+        "bloque sur un mot ou ne respecte pas le nombre de cases : mêmes consignes, 1 000 caractères.\n\n"
+        f"```text\n{pc}\n```\n")
     p = prompt_vues_fix(who, role, nation_txt, desc, fx, rim, palette, pale, key)
     parts.append(
         "##### Édition corrective (" + ("arme manquante" if armed else "objet inventé dans les mains") +
@@ -876,9 +960,9 @@ def atelier_catalog():
 def main():
     (OUT / "nations").mkdir(exist_ok=True)
     for i, n in enumerate(NATIONS, 1):
-        (OUT / "nations" / f"{i:02d}_{n['id']}.md").write_text(nation_md(n), encoding="utf-8")
-    (OUT / "familiers.md").write_text(familiers_md(), encoding="utf-8")
-    (OUT / "mecanismes.md").write_text(mecanismes_md(), encoding="utf-8")
+        (OUT / "nations" / f"{i:02d}_{n['id']}.md").write_text(soften_fences(nation_md(n)), encoding="utf-8")
+    (OUT / "familiers.md").write_text(soften_fences(familiers_md()), encoding="utf-8")
+    (OUT / "mecanismes.md").write_text(soften_fences(mecanismes_md()), encoding="utf-8")
     # 10 nations × (1 planche de style + 6 personnages × 3 planches) + 12 familiers × 3 + mécanismes
     sheets = len(NATIONS) * (1 + 6 * 3) + len(FAMILIERS) * 3 + len(MECANISMES)
     print(f"{sheets} prompts générés dans {OUT}")

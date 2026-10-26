@@ -31,6 +31,7 @@ IDENT = {
         ("weapon", "rune-engraved war hammer in the RIGHT hand; large round steel shield with a cloud-and-mountain emblem on the LEFT arm"),
     ], never="no helmet, no cape, no sword, no brown beard"),
     "geomancien": dict(parts=[
+        ("age", "ADULT man in his late twenties (not a boy, not a teenager): mature square face with a defined jaw and light stubble, broad shoulders, sturdy athletic build"),
         ("hair", "short brown hair (#7A4A28)"),
         ("eyes", "amber-brown eyes, always open"),
         ("skin", "light tan skin"),
@@ -38,7 +39,9 @@ IDENT = {
         ("bottom", "sand-colored wrapped trousers"),
         ("feet", "brown sandals with cloth wraps"),
         ("weapon", "golden staff topped with a large faceted amber crystal (#F2A93B), RIGHT hand"),
-    ], never="no hood, no turban, no blue or green clothes"),
+    ], never="no hood, no turban, no hat, no headband, no scarf over the head, no blue or green clothes, no child proportions, no round baby face, no missing staff",
+       proportions="adult chibi: head about one third of the total height (NOT 40%), adult body proportions, broad shoulders, "
+                   "defined jaw and brows, serious calm expression — clearly a grown man like the adult heroes of Dofus, never a child"),
     "mage": dict(parts=[
         ("hair", "dark navy-blue hair (#1E2C5A), medium length, side bangs"),
         ("eyes", "bright blue eyes (#3FA0FF), always open"),
