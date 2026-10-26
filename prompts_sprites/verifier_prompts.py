@@ -52,6 +52,15 @@ for e, kind in ents:
 for f in list((Path(__file__).parent / "nations").glob("*.md")):
     t = f.read_text(encoding="utf-8")
     chk("_attack_back" not in t and "_back_left" not in t and "_face_left" not in t, f"{f.name}: anciens noms de fichiers")
+# V57 : aucun mot « modération » dans les prompts publiés (blocs ```text``` des .md)
+BAN = re.compile(r"\b(weapons?|armed|unarmed|dagger|kill\w*|smash|slam\w*|stab|kick\w*|bombs?|fights?|blood|death|blast|slash)\b", re.I)
+for f in list((Path(__file__).parent / "nations").glob("*.md")) + [Path(__file__).parent / "familiers.md", Path(__file__).parent / "mecanismes.md"]:
+    for blk in re.findall(r"```text\n(.*?)```", f.read_text(encoding="utf-8"), flags=re.S):
+        m = BAN.search(blk)
+        chk(m is None, f"{f.name}: mot de modération « {m.group(0) if m else ''} » dans un prompt publié")
+g = (Path(__file__).parent / "nations" / "03_sables.md").read_text(encoding="utf-8")
+chk("ADULT man in his late twenties" in g and "never a child" in g, "Géomancien : consigne d'âge adulte absente")
+chk("is held in the right hand and fully visible in this cell" in g, "Géomancien : objet tenu non rappelé dans chaque case")
 print("QC prompts :", "OK" if not bad else f"{len(bad)} problème(s)")
 for b in bad[:20]:
     print("  -", b)

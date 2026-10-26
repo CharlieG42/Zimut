@@ -12,6 +12,20 @@ Prompts prêts à copier dans un générateur d'images pour refaire **tous les s
 
 Les héros, ennemis, boss et familiers viennent de `scripts/Nations.gd`, `assets/sprites/nations/README.md` et `SPRITES_A_FOURNIR.md`.
 
+## V57 : héros adulte, objet tenu conservé, vocabulaire adapté à la modération
+
+Retour de la nation des Sables (Mistral) : le Géomancien ressemble à un enfant, perd son bâton dans 4 cases sur 5,
+et Mistral est souvent bloqué par la modération ou reformule les prompts.
+
+| Constat | Correction |
+|---|---|
+| Héros « trop enfant » (« young geomancer » + chibi à grosse tête = visage de gamin, et risque de filtre « mineur ») | carte d'identité : **adulte d'une trentaine d'années** (mâchoire marquée, barbe légère, carrure) ; description sans « young » ; ligne `PROPORTIONS` : tête = 1/3 de la hauteur (pas 40 %) et « never a child » ; interdits : turban/chapeau/bandeau (la planche en avait un), proportions d'enfant, bâton absent. Réglage réutilisable : champ `proportions=` d'une carte (identites.py) |
+| **Bâton absent** de 4 cases sur 5 (le mot « weapon » est le premier réécrit par la modération) | l'objet tenu est rappelé **dans chaque case** (« The golden staff… is held in the right hand and fully visible in this cell ») ; le bloc WEAPON devient « HELD ITEM » |
+| **Modération** | tous les prompts publiés passent par `soften()` : weapon → held item, unarmed → no held item, dagger → short curved blade, smash/slam/stab/slash/kick/blast → strike/drive/thrust/sweep/leg lift/burst, bomb → round charge, fight/kill/blood/death → act/defeat/red paint. Les consignes restent identiques ; `verifier_prompts.py` vérifie qu'aucun de ces mots ne reste dans un prompt |
+| Prompts trop longs : Mistral ignore le nombre de cases (5, 6 ou 8 sprites au lieu de 4) | **version courte** de la planche vues (≈ 1 600 caractères) sous chaque planche 1 |
+
+Pour régénérer : `python3 prompts_sprites/generer_prompts.py` puis `python3 prompts_sprites/verifier_prompts.py`.
+
 ## V55 : défauts des planches Cimes → corrections dans les prompts
 
 Retour des planches Guerrier des monts, Garde des pics, Vorkann et Griffon des cimes :
