@@ -1,0 +1,95 @@
+{
+ "chars": {
+  "heal": {
+   "folder": "players",
+   "height": 340,
+   "dedupe": 0.005,
+   "poses": {
+    "": [
+     "f1",
+     "r1c1",
+     191,
+     false
+    ],
+    "_idle_2": [
+     "f2",
+     "r1c1",
+     191,
+     false
+    ],
+    "_back": [
+     "d1",
+     "r1c1",
+     191,
+     false
+    ],
+    "_back_idle_2": [
+     "d2",
+     "r1c1",
+     191,
+     false
+    ],
+    "_walk": [
+     "walk",
+     "r1c1",
+     180,
+     false
+    ],
+    "_attack": [
+     "att1",
+     "r1c1",
+     180,
+     false
+    ],
+    "_attack_2": [
+     "att2",
+     "r1c1",
+     180,
+     false
+    ],
+    "_cast": [
+     "heal",
+     "r1c1",
+     180,
+     false
+    ],
+    "_cast_2": [
+     "summon",
+     "r1c1",
+     180,
+     false
+    ],
+    "_back_walk": [
+     "bwalk",
+     "r1c1",
+     180,
+     false
+    ],
+    "_back_attack": [
+     "batt1",
+     "r1c1",
+     180,
+     false
+    ],
+    "_back_attack_2": [
+     "batt2",
+     "r1c1",
+     180,
+     false
+    ],
+    "_back_cast": [
+     "bheal",
+     "r1c1",
+     180,
+     false
+    ],
+    "_back_cast_2": [
+     "bsummon",
+     "r1c1",
+     180,
+     false
+    ]
+   }
+  }
+ }
+}

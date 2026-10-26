@@ -147,3 +147,10 @@ python3 prompts_sprites/generer_prompts.py
 ```
 
 Ordre conseillé : commencer par un personnage (ex. Chasseur du Brasier), valider le rendu en jeu, puis enchaîner les autres.
+
+## V58 — suivi des nations
+
+- `nations/V1/` : fichiers md des nations dont **tous** les personnages sont intégrés en jeu (V1 : Sylvestre, Cimes). Le générateur y range automatiquement les nations listées dans `NATIONS_V1` (`generer_prompts.py`) ; ajouter l'id d'une nation à cet ensemble quand elle est terminée.
+- Mage (héros Cristaux) : le **grimoire** (cuir brun, coins dorés, gemme saphir, main GAUCHE) est dans la fiche d'identité.
+- Cristaux : repos + sorts (face/dos) intégrés depuis les planches Gemini (`tools/mappings/cristaux_v58.json`) ; il reste attaques et marche.
+- Marées : héros (`heal`) intégré depuis la planche ChatGPT, 14 poses (`tools/mappings/marees_heros_v58.json`) ; ennemis et boss à faire.

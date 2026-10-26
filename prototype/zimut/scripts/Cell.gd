@@ -3,6 +3,10 @@ extends Node2D
 ## Cell.gd — Une case isométrique 2:1 (128×64) dessinée entièrement par code.
 ## L'origine du nœud est le centre du losange supérieur.
 
+static var EDGE_PTS := PackedVector2Array([Vector2(-64, 0), Vector2(0, -32), Vector2(0, -32), Vector2(64, 0),
+	Vector2(64, 0), Vector2(0, 32), Vector2(0, 32), Vector2(-64, 0)])
+static var EDGE_COLS := PackedColorArray([Color(0.93, 1.0, 0.82, 0.32), Color(0.93, 1.0, 0.82, 0.24),
+	Color(0.13, 0.24, 0.12, 0.28), Color(0.13, 0.24, 0.12, 0.28)])
 const HW := 64.0
 const HH := 32.0
 const DEPTH := 68.0
@@ -199,10 +203,8 @@ func _draw() -> void:
 			draw_circle(fp, 2.6, f[1])
 			draw_circle(fp, 1.0, Color(0.95, 0.7, 0.1))
 	# Reflets/ombres sur les arêtes pour donner du volume
-	draw_line(Vector2(-HW, 0), Vector2(0, -HH), Color(0.93, 1.0, 0.82, 0.32), 2.0)
-	draw_line(Vector2(0, -HH), Vector2(HW, 0), Color(0.93, 1.0, 0.82, 0.24), 2.0)
-	draw_line(Vector2(HW, 0), Vector2(0, HH), Color(0.13, 0.24, 0.12, 0.28), 2.0)
-	draw_line(Vector2(0, HH), Vector2(-HW, 0), Color(0.13, 0.24, 0.12, 0.28), 2.0)
+	# V58 : les 4 arêtes en une seule commande de dessin (64 cases × 4 appels économisés par image)
+	draw_multiline_colors(EDGE_PTS, EDGE_COLS, 2.0)
 	_outline(top, Color(0.12, 0.22, 0.10, 0.30), 1.25)
 
 	# ── Surbrillances ─────────────────────────────────────────────────────

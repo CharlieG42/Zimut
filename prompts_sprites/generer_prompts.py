@@ -89,6 +89,8 @@ OBJ_STYLE = (
     "rounded proportions, readable at small size. Soft key light from the upper left."
 )
 # Verrou de style : une planche est sortie en pixel art (griffon) au milieu de planches en dessin vectoriel.
+NATIONS_V1 = {"sylvestre", "cimes"}  # à compléter quand une nation est entièrement intégrée
+
 STYLE_LOCK = (
     "STYLE LOCK: smooth hand-drawn vector cartoon with THICK DARK OUTLINES, exactly like Dofus / Waven / Wakfu "
     "character art and like the other sheets of this game — NEVER pixel art, never low-resolution, never a "
@@ -959,8 +961,11 @@ def atelier_catalog():
 
 def main():
     (OUT / "nations").mkdir(exist_ok=True)
+    (OUT / "nations" / "V1").mkdir(exist_ok=True)
     for i, n in enumerate(NATIONS, 1):
-        (OUT / "nations" / f"{i:02d}_{n['id']}.md").write_text(soften_fences(nation_md(n)), encoding="utf-8")
+        # nations dont TOUS les personnages sont intégrés (V1) : rangées dans nations/V1/
+        sub = "V1" if n["id"] in NATIONS_V1 else ""
+        (OUT / "nations" / sub / f"{i:02d}_{n['id']}.md").write_text(soften_fences(nation_md(n)), encoding="utf-8")
     (OUT / "familiers.md").write_text(soften_fences(familiers_md()), encoding="utf-8")
     (OUT / "mecanismes.md").write_text(soften_fences(mecanismes_md()), encoding="utf-8")
     # 10 nations × (1 planche de style + 6 personnages × 3 planches) + 12 familiers × 3 + mécanismes

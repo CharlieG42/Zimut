@@ -1,0 +1,190 @@
+{
+ "chars": {
+  "mage": {
+   "folder": "players",
+   "height": 340,
+   "dedupe": 0.02,
+   "poses": {
+    "": [
+     "id1c1",
+     "r1c1",
+     295,
+     false
+    ],
+    "_back": [
+     "id2c1",
+     "r1c1",
+     295,
+     false
+    ],
+    "_cast": [
+     "cs1c6",
+     "r1c1",
+     295,
+     true
+    ],
+    "_back_cast": [
+     "cs2c6",
+     "r1c1",
+     295,
+     true
+    ]
+   }
+  },
+  "araignee_de_cristal": {
+   "folder": "nations/ennemis/cristaux",
+   "height": 190,
+   "dedupe": 0.02,
+   "poses": {
+    "": [
+     "id1c2",
+     "r1c1",
+     196,
+     false
+    ],
+    "_back": [
+     "id2c2",
+     "r1c1",
+     196,
+     false
+    ],
+    "_cast": [
+     "cs1c5",
+     "r1c1",
+     196,
+     true
+    ],
+    "_back_cast": [
+     "cs2c5",
+     "r1c1",
+     196,
+     true
+    ]
+   }
+  },
+  "mage_cristallin": {
+   "folder": "nations/ennemis/cristaux",
+   "height": 235,
+   "dedupe": 0.02,
+   "poses": {
+    "": [
+     "id1c3",
+     "r1c1",
+     272,
+     false
+    ],
+    "_back": [
+     "id2c3",
+     "r1c1",
+     272,
+     false
+    ],
+    "_cast": [
+     "cs1c4",
+     "r1c1",
+     272,
+     true
+    ],
+    "_back_cast": [
+     "cs2c4",
+     "r1c1",
+     272,
+     true
+    ]
+   }
+  },
+  "golem_de_cristal": {
+   "folder": "nations/ennemis/cristaux",
+   "height": 240,
+   "dedupe": 0.02,
+   "poses": {
+    "": [
+     "id1c4",
+     "r1c1",
+     265,
+     false
+    ],
+    "_back": [
+     "id2c4",
+     "r1c1",
+     265,
+     false
+    ],
+    "_cast": [
+     "cs1c3",
+     "r1c1",
+     265,
+     true
+    ],
+    "_back_cast": [
+     "cs2c3",
+     "r1c1",
+     265,
+     true
+    ]
+   }
+  },
+  "elementaire_de_cristal": {
+   "folder": "nations/ennemis/cristaux",
+   "height": 240,
+   "dedupe": 0.02,
+   "poses": {
+    "": [
+     "id1c5",
+     "r1c1",
+     276,
+     false
+    ],
+    "_back": [
+     "id2c5",
+     "r1c1",
+     276,
+     false
+    ],
+    "_cast": [
+     "cs1c2",
+     "r1c1",
+     276,
+     true
+    ],
+    "_back_cast": [
+     "cs2c2",
+     "r1c1",
+     276,
+     true
+    ]
+   }
+  },
+  "cristaux": {
+   "folder": "nations/boss",
+   "height": 300,
+   "dedupe": 0.02,
+   "poses": {
+    "": [
+     "id1c6",
+     "r1c1",
+     343,
+     false
+    ],
+    "_back": [
+     "id2c6",
+     "r1c1",
+     343,
+     false
+    ],
+    "_cast": [
+     "cs1c1",
+     "r1c1",
+     343,
+     true
+    ],
+    "_back_cast": [
+     "cs2c1",
+     "r1c1",
+     343,
+     true
+    ]
+   }
+  }
+ }
+}

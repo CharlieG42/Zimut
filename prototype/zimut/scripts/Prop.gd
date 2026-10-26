@@ -14,6 +14,7 @@ var _sway: float = 0.0
 var _draw_kind: String = "tree"
 var _scale: float = 1.0
 var _t: float = 0.0
+var _redraw_acc: float = 0.0
 
 
 func setup(k: String, cell: Vector2i, b: String = "Forêt") -> void:
@@ -60,7 +61,11 @@ func _process(delta: float) -> void:
 	_t += delta
 	if kind == "tree" or _draw_kind == "torch":
 		rotation = sin(_t * 1.25 + _sway) * 0.014
-	queue_redraw()
+	# V58 : le décor n'a pas besoin d'être redessiné à chaque image (flammes/lueurs à ~15 i/s)
+	_redraw_acc += delta
+	if _redraw_acc >= 0.066:
+		_redraw_acc = 0.0
+		queue_redraw()
 
 
 func _draw() -> void:
