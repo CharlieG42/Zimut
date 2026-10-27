@@ -11,8 +11,8 @@ for n, f in (("tank", tank), ("guerrier_des_monts", guerrier), ("griffon_des_cim
 from PIL import Image
 names = ["tank", "guerrier_des_monts", "griffon_des_cimes", "garde_des_pics", "rochebrute", "boss_cimes"]
 ims = [Image.open(f"{OUT}/{n}.png").convert("RGBA") for n in names]
-H = 520; ims = [i.resize((int(i.width * H / i.height), H), Image.LANCZOS) for i in ims]
+S = 520 / max(i.height for i in ims); ims = [i.resize((int(i.width * S), int(i.height * S)), Image.LANCZOS) for i in ims]; H = 520
 W = sum(i.width for i in ims) + 12 * len(ims)
-sh = Image.new("RGBA", (W, H), (128, 140, 150, 255)); x = 0
-for i in ims: sh.alpha_composite(i, (x, 0)); x += i.width + 12
+sh = Image.new("RGBA", (W, H), (214, 216, 222, 255)); x = 0
+for i in ims: sh.alpha_composite(i, (x, H - i.height)); x += i.width + 12
 sh.convert("RGB").save(sys.argv[1] if len(sys.argv) > 1 else "/tmp/preview.png")

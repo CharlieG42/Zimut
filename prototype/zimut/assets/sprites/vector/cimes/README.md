@@ -1,7 +1,9 @@
-# Nation des Cimes — essai vectoriel
+# Nation des Cimes — sprites vectoriels (v2)
 
-Sprites écrits en SVG (source) + PNG rendus x2. Générés par `prototype/zimut/tools/vector/render_cimes.py`
-(`pip install cairosvg pillow`). Poses actuelles : repos de face uniquement.
+SVG (source) + PNG rendus. Générés par `prototype/zimut/tools/vector/render_cimes.py` (`pip install cairosvg pillow`).
+v2 : vue 3/4 vers la droite, contours fins de la teinte de chaque matière, yeux sévères, matières détaillées.
+Poses actuelles : repos de face uniquement. Échelle : héros/ennemis 340x400, boss 450x485 (≈1,5x).
 
-Les sprites PNG d'origine sont conservés dans `assets/sprites/_archive/cimes_png_v57/` (ignoré par Godot via `.gdignore`)
-et restent actifs en jeu : rien n'est encore branché sur ce dossier.
+- v1 (premier essai, contours bruns épais) : `../cimes_v1/` — sources dans `tools/vector/v1/`
+- PNG d'origine du jeu : `assets/sprites/_archive/cimes_png_v57/` (ignoré par Godot) et toujours actifs en jeu.
+Rien n'est encore branché sur ce dossier.

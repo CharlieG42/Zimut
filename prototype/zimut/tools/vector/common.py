@@ -6,11 +6,38 @@ W_OUT = 5            # contour de silhouette
 W_IN = 2.6           # contour interne
 
 _gid = [0]
+_gcol = {}          # id de dégradé -> (couleur haute, couleur basse)
+TONAL = True        # contours fins, de la teinte de la matière (rendu « illustration »)
+
+def _hex(c):
+    c = c.lstrip("#")
+    if len(c) == 3: c = "".join(ch * 2 for ch in c)
+    return [int(c[i:i + 2], 16) for i in (0, 2, 4)]
+
+def tonal(fill):
+    """Couleur de contour dérivée de la matière : version sombre et légèrement bleutée."""
+    col = None
+    if fill.startswith("url(#"):
+        col = _gcol.get(fill[5:-1], (None, None))[1]
+    elif fill.startswith("#"):
+        col = fill
+    if col is None:
+        return OUT
+    r, g, b = _hex(col)
+    lum = (0.3 * r + 0.59 * g + 0.11 * b) / 255
+    k = 0.58 if lum > 0.75 else 0.40
+    return "#%02x%02x%02x" % (int(r * k * 0.95), int(g * k * 0.98), min(255, int(b * k * 1.08)))
+
+def _outline(fill, w, stroke):
+    if not TONAL or stroke != OUT or w == 0:
+        return w, stroke
+    return max(1.1, w * 0.55), tonal(fill)
 
 def grad(defs, c_top, c_bot, x1=0, y1=0, x2=0, y2=1, mid=None):
     """Dégradé linéaire (objectBoundingBox). Retourne 'url(#id)'."""
     _gid[0] += 1
     i = f"g{_gid[0]}"
+    _gcol[i] = (c_top, c_bot)
     m = f'<stop offset="0.5" stop-color="{mid}"/>' if mid else ""
     defs.append(f'<linearGradient id="{i}" x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}">'
                 f'<stop offset="0" stop-color="{c_top}"/>{m}<stop offset="1" stop-color="{c_bot}"/></linearGradient>')
@@ -19,14 +46,17 @@ def grad(defs, c_top, c_bot, x1=0, y1=0, x2=0, y2=1, mid=None):
 def rgrad(defs, c_in, c_out, cx=.4, cy=.35, r=.75):
     _gid[0] += 1
     i = f"r{_gid[0]}"
+    _gcol[i] = (c_in, c_out)
     defs.append(f'<radialGradient id="{i}" cx="{cx}" cy="{cy}" r="{r}">'
                 f'<stop offset="0" stop-color="{c_in}"/><stop offset="1" stop-color="{c_out}"/></radialGradient>')
     return f"url(#{i})"
 
 def p(d, fill, w=W_IN, stroke=OUT, extra=""):
+    w, stroke = _outline(fill, w, stroke)
     return f'<path d="{d}" fill="{fill}" stroke="{stroke}" stroke-width="{w}" stroke-linejoin="round" stroke-linecap="round" {extra}/>'
 
 def e(cx, cy, rx, ry, fill, w=W_IN, stroke=OUT, rot=0):
+    w, stroke = _outline(fill, w, stroke)
     t = f' transform="rotate({rot} {cx} {cy})"' if rot else ""
     return f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" fill="{fill}" stroke="{stroke}" stroke-width="{w}"{t}/>'
 
@@ -64,7 +94,9 @@ def svg(w, h, defs, body, shadow=True, sx=None):
     sh = ""
     if shadow:
         sx = sx or w * .36
-        sh = f'<ellipse cx="{w/2}" cy="{h-14}" rx="{sx}" ry="{sx*.2}" fill="#000" fill-opacity=".28"/>'
+        defs.append('<radialGradient id="gsh"><stop offset="0" stop-color="#000" stop-opacity=".42"/>'
+                    '<stop offset=".6" stop-color="#000" stop-opacity=".22"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>')
+        sh = f'<ellipse cx="{w/2}" cy="{h-14}" rx="{sx*1.15}" ry="{sx*.26}" fill="url(#gsh)"/>'
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}">'
             f'<defs>{"".join(defs)}</defs>{sh}{body}</svg>')
 

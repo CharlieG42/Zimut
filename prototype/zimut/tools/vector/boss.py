@@ -6,6 +6,11 @@ def vorkann():
     gIron = grad(d, "#59657a", "#161b26"); gIron2 = grad(d, "#3c4658", "#0e121a"); gIce = grad(d, "#eaffff", "#2aa0e8", 0, 0, 1, 1, mid="#8fe0ff")
     gFur = grad(d, "#ffffff", "#bfd0e6"); gTower = grad(d, "#3a4458", "#10141d", 0, 0, 1, 1); gHam = grad(d, "#78889e", "#2a3446", 0, 0, 1, 1)
     gHandle = grad(d, "#7a5a3c", "#3a2412", 0, 0, 1, 0); gGlow = rgrad(d, "#d9ffff", "#1fa0e8", .5, .5, .6)
+    gCape = grad(d, "#59657c", "#171c2a"); gTrim = grad(d, "#b4c2dc", "#6a7a9a")
+    # cape en lambeaux
+    b.append(p("M92 206 Q60 290 70 372 L86 358 L98 384 L118 362 L132 388 L150 364 L170 384 L190 360 L214 386 L236 358 L254 380 L262 340 Q272 270 228 206 Z", gCape, 4))
+    b.append(shade("M170 220 L228 206 Q272 270 262 340 L254 380 L236 358 L214 386 L190 360 L170 384 Q182 300 170 220 Z", "#000", .3))
+    b.append(hl("M82 240 Q74 300 80 350", "#9fb0cf", .55, 2.4))
     # marteau (derrière, à droite)
     b.append(p("M276 330 L296 322 L308 170 L286 164 Z", gHandle, 4))
     b.append(p("M232 104 Q232 88 250 86 L316 94 Q334 96 334 114 L332 160 Q330 176 312 178 L250 172 Q232 170 232 152 Z", gHam, 5.4))
@@ -21,11 +26,14 @@ def vorkann():
     # fourrure basse
     b.append(p("M80 290 Q66 320 90 332 Q130 340 150 322 Q176 340 214 332 Q240 320 224 290 Z", gFur, 4.6))
     b.append(hl("M96 306 Q130 320 150 308 Q176 320 210 306", "#a9bad4", .9, 2.4))
+    b.append(hl("M80 306 Q152 330 224 306", "#b4c2dc", .8, 2.2))
     # torse
     b.append(p("M82 210 Q68 262 84 298 Q152 322 220 298 Q236 262 222 210 Q152 188 82 210 Z", gIron, 5.4))
     b.append(shade("M184 212 Q226 236 220 296 Q196 306 174 310 Q196 258 184 212 Z", "#000", .3))
     b.append(fillhl("M94 222 Q86 252 92 280 Q104 250 108 226 Z", "#fff", .22))
     b.append(p("M112 232 Q152 248 192 232 L188 276 Q152 292 116 276 Z", gIron2, 3.4)); b.append(hl("M122 244 Q152 258 182 244", "#8aa4c8", .7, 2.4))
+    for (x, y) in ((126, 244), (178, 244), (130, 268), (174, 268)): b.append(e(x, y, 2.8, 2.8, "#d2deef", 1))
+    b.append(hl("M118 238 Q152 252 186 238", "#cfe0f6", .55, 1.8))
     b.append(p("M138 252 L152 234 L168 252 L152 278 Z", gGlow, 3.4)); b.append(fillhl("M142 252 L152 240 L152 266 Z", "#fff", .7))
     b.append(p("M80 290 Q152 314 224 290 L224 306 Q152 330 80 306 Z", "#4a3022", 4))
     # bouclier tour (à gauche)
@@ -44,7 +52,8 @@ def vorkann():
     # épaulières fourrure + cristaux
     for x, y, s in ((84, 206, 1), (222, 206, -1)):
         b.append(p(f"M{x} {y} Q{x-s*46} {y-12} {x-s*40} {y+30} Q{x-s*14} {y+46} {x+s*18} {y+28} Q{x+s*24} {y+6} {x} {y} Z", gFur, 5))
-        b.append(hl(f"M{x-s*30} {y+8} Q{x-s*30} {y+24} {x-s*14} {y+32}", "#a9bad4", .9, 2.6))
+        b.append(hl(f"M{x-s*30} {y+8} Q{x-s*30} {y+24} {x-s*14} {y+32}", "#a9bad4", .9, 2.2))
+        b.append(hl(f"M{x-s*18} {y+2} Q{x-s*18} {y+20} {x-s*6} {y+28}", "#a9bad4", .8, 1.6)); b.append(hl(f"M{x-s*38} {y+14} Q{x-s*36} {y+26} {x-s*26} {y+34}", "#a9bad4", .8, 1.6))
         b.append(p(f"M{x-s*8} {y-6} Q{x-s*40} {y-24} {x-s*26} {y+6} Q{x-s*10} {y+8} {x-s*8} {y-6} Z", gIron, 4.4))
         b.append(crystal(d, x - s * 26, y - 8, 46, 24, rot=-s * 24)); b.append(crystal(d, x - s * 6, y - 16, 34, 18, rot=s * 12))
     # heaume
@@ -55,8 +64,8 @@ def vorkann():
     b.append(hl("M96 128 Q152 100 208 128", "#8aa4c8", .6, 2.2))
     # yeux de glace
     for x in (120, 184):
-        b.append(p(f"M{x-22} 146 Q{x} 130 {x+22} 146 Q{x+16} 162 {x-2} 162 Q{x-18} 160 {x-22} 146 Z", gGlow, 3))
-        b.append(e(x - 2, 150, 7, 9, "#fff", 0))
+        b.append(p(f"M{x-22} 142 Q{x} 134 {x+22} 148 Q{x+14} 160 {x-2} 160 Q{x-18} 158 {x-22} 142 Z", gGlow, 2.6))
+        b.append(e(x - 1, 151, 5.5, 7, "#fff", 0)); b.append(hl(f"M{x-22} 140 Q{x} 130 {x+24} 144", "#06101e", 1, 4))
     b.append(p("M112 176 Q152 192 192 176 L190 200 Q152 214 114 200 Z", "#10151f", 3.4))
     for i in range(7):
         x = 122 + i * 11; b.append(hl(f"M{x} 182 L{x} 202", "#7a8ca8", .8, 2))
@@ -65,4 +74,5 @@ def vorkann():
     for (x, y, h, w, r) in ((98, 100, 54, 26, -34), (118, 80, 66, 30, -16), (152, 64, 82, 36, 0), (186, 80, 66, 30, 16), (206, 100, 54, 26, 34)):
         b.append(crystal(d, x, y + 6, h, w, rot=r))
     b.append(p("M86 112 Q152 76 218 112 L216 126 Q152 92 88 128 Z", gIron2, 4))
-    return svg(360, 388, d, "".join(b), sx=128)
+    out = svg(360, 388, d, "".join(b), sx=128)
+    return out.replace('width="360" height="388"', 'width="450" height="485"')
