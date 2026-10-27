@@ -156,12 +156,36 @@ static func ord_color(e: Dictionary) -> Color:
 	return Color(0.45, 0.70, 1.0)
 
 
+static var _contact_tex: GradientTexture2D = null
+static func _contact_texture() -> GradientTexture2D:
+	if _contact_tex == null:
+		var g := Gradient.new()
+		g.colors = PackedColorArray([Color(1, 1, 1, 1), Color(1, 1, 1, 0.55), Color(1, 1, 1, 0)])
+		g.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
+		_contact_tex = GradientTexture2D.new()
+		_contact_tex.gradient = g
+		_contact_tex.fill = GradientTexture2D.FILL_RADIAL
+		_contact_tex.fill_from = Vector2(0.5, 0.5)
+		_contact_tex.fill_to = Vector2(1.0, 0.5)
+		_contact_tex.width = 96
+		_contact_tex.height = 96
+	return _contact_tex
+
+
 func setup(e: Dictionary) -> void:
 	entity = e
 	_phase = float(int(e["uid"]) % 7)
 	shown_pv = float(e["current_pv"])
 	ghost_pv = shown_pv
 	_light = light_of(_current_biome())
+	# V62 : ombre de contact (ellipse douce sous les pieds) → l'unité se détache du sol
+	var contact := Sprite2D.new()
+	contact.texture = _contact_texture()
+	contact.position = Vector2(0, -4)
+	contact.scale = Vector2(1.5, 0.62)
+	contact.self_modulate = Color(0, 0, 0, 0.55)
+	contact.z_index = -1
+	add_child(contact)
 	_shadow = Sprite2D.new()
 	_shadow.centered = true
 	add_child(_shadow)

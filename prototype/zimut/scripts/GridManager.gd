@@ -108,6 +108,9 @@ func _build_layers() -> void:
 	_fx_layer.name = "FX"
 	_fx_layer.z_index = 200
 	add_child(_fx_layer)
+	# V61 : décor de contour un cran plus sombre → le plateau jouable ressort.
+	if _scenery != null:
+		_scenery.modulate = Color(0.80, 0.82, 0.86)
 	_configure_scenery(game_manager.fight_biome)
 
 
