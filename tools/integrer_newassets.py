@@ -52,6 +52,8 @@ def roles(src):
         names = sorted({re.sub(r"_(actions_dos|actions|vues)\.png$", "", f) for f in os.listdir(d)
                         if re.search(r"_(actions_dos|actions|vues)\.png$", f)})
         for n in names:
+            if n in FILE_TO_GAME and FILE_TO_GAME[n] in names:
+                continue   # ancienne orthographe : la planche correctement nommée fait foi
             if n == HEROES.get(nat):
                 gid = GAME_HERO.get(n, n)
                 out.append((nat, n, gid, "hero", "players"))
@@ -234,7 +236,18 @@ def main():
     ap.add_argument("src"); ap.add_argument("dst"); ap.add_argument("reports")
     ap.add_argument("--only", default=""); ap.add_argument("--dry", action="store_true")
     ap.add_argument("--flip", default="")
+    ap.add_argument("--merge", action="store_true", help="écrit les rapports à partir des _reps_*.json déjà produits")
+    ap.add_argument("--cache", default="/tmp/newassets_reps")
     a = ap.parse_args()
+    os.makedirs(a.cache, exist_ok=True)
+    if a.merge:
+        reps = []
+        for fn in sorted(os.listdir(a.cache)):
+            if fn.endswith(".json"):
+                reps.extend(json.load(open(os.path.join(a.cache, fn))))
+        n_ok, n_bad = write_reports(reps, a.reports, False)
+        print(f"{n_ok} validés, {n_bad} à corriger → {a.reports}")
+        return
     flips = json.load(open(a.flip)) if a.flip and os.path.exists(a.flip) else {}
     tmp = tempfile.mkdtemp(prefix="newassets_")
     reps = []
@@ -244,6 +257,11 @@ def main():
         r = process(a.src, a.dst, nat, name, gid, role, folder, tmp, flips, a.dry)
         reps.append(r)
         print(f"{nat}/{name}: {len(r['poses'])} poses, {len(r['problems'])} problème(s), cohérence {r['score']}")
+    if not a.dry:
+        json.dump(reps, open(os.path.join(a.cache, (a.only.replace("/", "_") or "tout") + ".json"), "w"), default=str)
+    if a.only:
+        shutil.rmtree(tmp, ignore_errors=True)
+        return
     n_ok, n_bad = write_reports(reps, a.reports, a.dry)
     print(f"{n_ok} validés, {n_bad} à corriger → {a.reports}")
     shutil.rmtree(tmp, ignore_errors=True)

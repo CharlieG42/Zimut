@@ -1,0 +1,151 @@
+# Sprites à corriger
+
+Intégrés quand même quand c'était exploitable ; voici ce qu'il faut reprendre.
+
+- **chasseur** (hero, `brasier`) — 14 poses : repos, _attack, _attack_2, _attack_3, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.92
+  - « vues » : 2 personnage(s) détecté(s) au lieu de 4
+  - vues r2c1 : case vide
+  - vues r2c2 : case vide
+- **devoreur_de_flammes** (enemy, `brasier`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.95
+  - « actions_dos » : poses presque identiques (attaque, sort et marche indiscernables)
+- **golem_de_lave** (enemy, `brasier`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.85
+  - « actions_dos » : poses presque identiques (attaque, sort et marche indiscernables)
+- **kharaz_le_flamboyant** (boss, `brasier`) — 15 poses : _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.86
+  - « vues » : 3 personnage(s) détecté(s) au lieu de 4
+  - vues r1c1 : case vide
+  - pas de repos de face exploitable
+  - note : non intégré : pas de repos de face, l'ancien sprite du jeu est conservé
+- **salamandre** (enemy, `brasier`) — 11 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack_2, _back_idle_2, _cast, _cast_2, _idle_2, _walk — cohérence 0.55
+  - « actions_dos » : 1 personnage(s) détecté(s) au lieu de 6
+  - actions_dos r1c1 : case vide
+  - actions_dos r1c3 : case vide
+  - actions_dos r2c1 : case vide
+  - actions_dos r2c2 : case vide
+  - actions_dos r2c3 : case vide
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.55)
+- **brumeux** (enemy, `brumes`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.63
+  - « actions_dos » : poses presque identiques (attaque, sort et marche indiscernables)
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.63)
+- **fantome** (enemy, `brumes`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.9
+  - « actions_dos » : poses presque identiques (attaque, sort et marche indiscernables)
+- **invocateur** (hero, `brumes`) — 14 poses : _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _walk — cohérence 0.9
+  - « vues » : 2 personnage(s) détecté(s) au lieu de 4
+  - vues r1c1 : case vide
+  - vues r1c2 : case vide
+  - pas de repos de face exploitable
+  - note : non intégré : pas de repos de face, l'ancien sprite du jeu est conservé
+- **liche_des_brumes** (enemy, `brumes`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.77
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.77)
+- **guerrier_des_monts** (enemy, `cimes`) — 14 poses : _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _walk — cohérence 0.6
+  - « vues » : 2 personnage(s) détecté(s) au lieu de 4
+  - vues r1c1 : case vide
+  - vues r1c2 : case vide
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.6)
+  - pas de repos de face exploitable
+  - note : non intégré : pas de repos de face, l'ancien sprite du jeu est conservé
+- **rochebrute** (enemy, `cimes`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.25
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.25)
+- **vorkann_le_givre** (boss, `cimes`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.73
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.73)
+- **araignee_de_cristal** (enemy, `cristaux`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.99
+  - « actions » : poses presque identiques (attaque, sort et marche indiscernables)
+- **golem_de_cristal** (enemy, `cristaux`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.93
+  - « actions » : poses presque identiques (attaque, sort et marche indiscernables)
+  - « actions_dos » : poses presque identiques (attaque, sort et marche indiscernables)
+- **crabe_geant** (enemy, `marees`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.47
+  - « actions_dos » : poses presque identiques (attaque, sort et marche indiscernables)
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.47)
+- **neree_la_tempete** (boss, `marees`) — 13 poses : repos, _attack, _attack_2, _attack_3, _back, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.78
+  - « actions_dos » : 3 personnage(s) détecté(s) au lieu de 6
+  - actions_dos r1c1 : case vide
+  - actions_dos r1c2 : case vide
+  - actions_dos r1c3 : case vide
+  - « actions_dos » : poses presque identiques (attaque, sort et marche indiscernables)
+- **nereide** (enemy, `marees`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.62
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.62)
+- **pirate_des_mers** (enemy, `marees`) — 14 poses : _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _walk — cohérence 0.75
+  - « vues » : 2 personnage(s) détecté(s) au lieu de 4
+  - vues r1c1 : case vide
+  - vues r1c2 : case vide
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.75)
+  - pas de repos de face exploitable
+  - note : non intégré : pas de repos de face, l'ancien sprite du jeu est conservé
+- **requin** (enemy, `marees`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.55
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.55)
+- **soigneur** (hero, `marees`) — 15 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _walk — cohérence 0.76
+  - vues r1c2 : pose écartée (trop petite : effet seul ou personnage absent)
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.76)
+- **assassin_des_ombres** (enemy, `ombres`) — 14 poses : _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _walk — cohérence 0.91
+  - « vues » : 2 personnage(s) détecté(s) au lieu de 4
+  - vues r1c1 : case vide
+  - vues r1c2 : case vide
+  - « actions_dos » : poses presque identiques (attaque, sort et marche indiscernables)
+  - pas de repos de face exploitable
+  - note : non intégré : pas de repos de face, l'ancien sprite du jeu est conservé
+- **liche** (enemy, `ombres`) — 15 poses : _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.93
+  - « vues » : 3 personnage(s) détecté(s) au lieu de 4
+  - vues r1c1 : case vide
+  - pas de repos de face exploitable
+  - note : non intégré : pas de repos de face, l'ancien sprite du jeu est conservé
+- **nebulia_l_illusionniste** (boss, `ombres`) — 15 poses : _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.92
+  - « vues » : 3 personnage(s) détecté(s) au lieu de 4
+  - vues r1c1 : case vide
+  - pas de repos de face exploitable
+  - note : non intégré : pas de repos de face, l'ancien sprite du jeu est conservé
+- **ombre_infernale** (enemy, `ombres`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.91
+  - « actions_dos » : poses presque identiques (attaque, sort et marche indiscernables)
+- **spectre** (enemy, `ombres`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.93
+  - « actions_dos » : poses presque identiques (attaque, sort et marche indiscernables)
+- **araignee_mecanique** (enemy, `rouages`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.75
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.75)
+- **artificier** (hero, `rouages`) — 15 poses : _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.96
+  - « vues » : 3 personnage(s) détecté(s) au lieu de 4
+  - vues r1c1 : case vide
+  - pas de repos de face exploitable
+  - note : non intégré : pas de repos de face, l'ancien sprite du jeu est conservé
+- **automate_de_combat** (enemy, `rouages`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.93
+  - « actions_dos » : poses presque identiques (attaque, sort et marche indiscernables)
+- **colosse_d_engrenages** (boss, `rouages`) — 15 poses : _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.93
+  - « vues » : 3 personnage(s) détecté(s) au lieu de 4
+  - vues r1c1 : case vide
+  - pas de repos de face exploitable
+  - note : non intégré : pas de repos de face, l'ancien sprite du jeu est conservé
+- **drone_aerien** (enemy, `rouages`) — 15 poses : repos, _attack, _attack_2, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.84
+  - « actions » : 5 personnage(s) détecté(s) au lieu de 6
+  - actions r1c3 : case vide
+- **roue_engrenee** (enemy, `rouages`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.95
+  - « actions_dos » : poses presque identiques (attaque, sort et marche indiscernables)
+- **geomancien** (hero, `sables`) — 14 poses : _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _walk — cohérence 0.91
+  - « vues » : 2 personnage(s) détecté(s) au lieu de 4
+  - vues r1c1 : case vide
+  - vues r1c2 : case vide
+  - pas de repos de face exploitable
+  - note : non intégré : pas de repos de face, l'ancien sprite du jeu est conservé
+- **scarabee_geant** (enemy, `sables`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.76
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.76)
+- **sphinx** (enemy, `sables`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.71
+  - « actions_dos » : poses presque identiques (attaque, sort et marche indiscernables)
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.71)
+- **druide** (hero, `sylvestre`) — 14 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _walk — cohérence 0.86
+  - « actions_dos » : 5 personnage(s) détecté(s) au lieu de 6
+  - vues r1c2 : pose écartée (trop petite : effet seul ou personnage absent)
+  - actions_dos r1c3 : case vide
+- **loup_forestier** (enemy, `sylvestre`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.91
+  - « actions » : poses presque identiques (attaque, sort et marche indiscernables)
+  - « actions_dos » : poses presque identiques (attaque, sort et marche indiscernables)
+- **aigle_celeste** (enemy, `vents`) — 16 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.66
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.66)
+- **elementaire_de_vent** (enemy, `vents`) — 15 poses : repos, _attack, _attack_2, _attack_3, _back_attack, _back_attack_2, _back_attack_3, _back_cast, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.66
+  - vues r2c1 : pose écartée (trop petite : effet seul ou personnage absent)
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.66)
+- **harpie** (enemy, `vents`) — 14 poses : repos, _attack, _attack_2, _attack_3, _back, _back_attack, _back_attack_2, _back_cast_2, _back_idle_2, _back_walk, _cast, _cast_2, _idle_2, _walk — cohérence 0.35
+  - personnage différent d'une planche à l'autre (cohérence des couleurs 0.35)
+  - note : actions_dos r1c3 : copie d'une autre pose (écartée)
+  - note : actions_dos r2c1 : copie d'une autre pose (écartée)
+
+## Décisions manuelles après intégration (V59)
+
+- **harpie** (vents) et **rochebrute** (cimes) : cohérence trop faible (0,35 / 0,25) → ancien sprite du jeu conservé. À refaire.
+- **soigneur / Héros des Marées** (`heal`) : la planche de Mistral donne le bâton seul comme repos et mélange deux personnages → version V58 (ChatGPT) conservée.
+- **druide** : le « repos » de la planche était le bâton seul → repos = pose « attack » de face ; vue de dos = « back_attack_2 ». Les poses jeune garçon (mauvais personnage) ont été retirées. Le druide reste à reprendre (planche « vues » : 2 personnages au lieu de 4).
+- **artificier, géomancien, invocateur** : pas de repos de face exploitable → non intégrés, anciens sprites conservés.
