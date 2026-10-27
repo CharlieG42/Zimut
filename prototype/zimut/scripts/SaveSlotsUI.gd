@@ -400,6 +400,39 @@ func _prompt_pseudo(slot: int) -> void:
 	line.custom_minimum_size = Vector2(0, 56)
 	line.add_theme_font_size_override("font_size", _ui_font(24))
 	box.add_child(line)
+	# V63 : genre du joueur (pour que Gultur s'adresse à toi correctement)
+	var gtitle := Label.new()
+	gtitle.text = "Tu es…"
+	gtitle.add_theme_font_size_override("font_size", _ui_font(20))
+	gtitle.add_theme_color_override("font_color", COL_TXT)
+	box.add_child(gtitle)
+	var grow := HBoxContainer.new()
+	grow.add_theme_constant_override("separation", 12)
+	box.add_child(grow)
+	var gender_sel: Array = ["m"]
+	var gbtns: Dictionary = {}
+	for g: Array in [["m", "Un homme"], ["f", "Une femme"]]:
+		var gb := Button.new()
+		gb.name = "Gender_" + String(g[0])
+		gb.text = String(g[1])
+		gb.toggle_mode = true
+		gb.button_pressed = (String(g[0]) == "m")
+		gb.custom_minimum_size = Vector2(0, 52)
+		gb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		gb.add_theme_font_size_override("font_size", _ui_font(22))
+		for stn: String in ["pressed", "hover_pressed"]:
+			var sb := StyleBoxFlat.new()
+			sb.bg_color = Color(0.95, 0.76, 0.25)
+			sb.set_corner_radius_all(8)
+			gb.add_theme_stylebox_override(stn, sb)
+		gb.add_theme_color_override("font_pressed_color", Color(0.15, 0.1, 0.02))
+		gb.add_theme_color_override("font_hover_pressed_color", Color(0.15, 0.1, 0.02))
+		gb.pressed.connect(func() -> void:
+			gender_sel[0] = String(g[0])
+			for k: String in gbtns:
+				(gbtns[k] as Button).button_pressed = (k == String(g[0])))
+		grow.add_child(gb)
+		gbtns[String(g[0])] = gb
 	var sub := Label.new()
 	sub.text = "Le même pseudo peut être utilisé par plusieurs parties."
 	sub.add_theme_font_size_override("font_size", _ui_font(16))
@@ -424,17 +457,17 @@ func _prompt_pseudo(slot: int) -> void:
 	var go := func() -> void:
 		var pseudo: String = line.text.strip_edges()
 		overlay.queue_free()
-		_create_game(slot, pseudo)
+		_create_game(slot, pseudo, String(gender_sel[0]))
 	ok.pressed.connect(go)
 	line.text_submitted.connect(func(_t: String) -> void: go.call())
 	row.add_child(ok)
 	line.grab_focus()
 
 
-func _create_game(slot: int, pseudo: String) -> void:
+func _create_game(slot: int, pseudo: String, gender: String = "m") -> void:
 	# Toute nouvelle partie relance le tutoriel de Gultur, même si une autre partie existe déjà.
 	GameSettings.restart_tutorial()
-	_current = ProgressionManager.new_game(slot, pseudo)
+	_current = ProgressionManager.new_game(slot, pseudo, gender)
 	GameManager.active_save = _current
 	_current_slot = slot
 	refresh()

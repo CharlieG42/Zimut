@@ -709,8 +709,9 @@ func save_exists(slot: int) -> bool:
 func _path(slot: int) -> String:
 	return "%s/partie_%d.json" % [SAVE_DIR, slot]
 
-func new_game(slot: int, game_name: String = "") -> Dictionary:
+func new_game(slot: int, game_name: String = "", gender: String = "m") -> Dictionary:
 	var data := _fresh_save()
+	data["gender"] = "f" if gender == "f" else "m"   # V63 : accords des textes de Gultur
 	data["name"] = game_name if game_name != "" else "Partie %d" % (slot + 1)
 	ensure_roster(data)
 	write_save(slot, data)
