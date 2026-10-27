@@ -29,6 +29,7 @@ func _ready() -> void:
 	grid_manager.init(game_manager)
 	Music.play_combat(String(game_manager.fight_biome))
 	_setup_camera()
+	_build_vignette()
 	ui_manager.init(game_manager)
 	turn_manager.init(game_manager)
 
@@ -78,13 +79,36 @@ func _setup_camera() -> void:
 	if cam == null:
 		return
 	cam.enabled = true
-	cam.zoom = Vector2(1.18, 1.18)
+	cam.zoom = Vector2(1.30, 1.30)  # V62 : cadrage plus serré sur le plateau
 	cam.position = grid_manager.grid_center() + Vector2(0, -30)
 	cam.position_smoothing_enabled = false
 	cam.make_current()
 	var bd: Node2D = get_node_or_null("Backdrop")
 	if bd != null:
 		bd.position = grid_manager.grid_center()
+
+
+func _build_vignette() -> void:
+	## V62 : léger assombrissement des bords de l'écran → le regard reste sur le plateau.
+	var layer := CanvasLayer.new()
+	layer.layer = 0
+	add_child(layer)
+	var g := Gradient.new()
+	g.colors = PackedColorArray([Color(0, 0, 0, 0.0), Color(0, 0, 0, 0.0), Color(0.02, 0.04, 0.08, 0.38)])
+	g.offsets = PackedFloat32Array([0.0, 0.62, 1.0])
+	var tex := GradientTexture2D.new()
+	tex.gradient = g
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.5)
+	tex.fill_to = Vector2(1.0, 0.5)
+	tex.width = 256
+	tex.height = 256
+	var r := TextureRect.new()
+	r.texture = tex
+	r.stretch_mode = TextureRect.STRETCH_SCALE
+	r.set_anchors_preset(Control.PRESET_FULL_RECT)
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(r)
 
 
 func _build_background() -> void:
