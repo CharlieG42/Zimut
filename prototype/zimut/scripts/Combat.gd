@@ -818,7 +818,7 @@ const SUMMONS := {
 	"Faille":       {"pv": 999, "force": 0, "defense": 0, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.35, 0.22, 0.12), "spell": [], "static": true, "terrain": true, "turns": 3, "span": 3, "indestructible": true},
 	"Cristal ambré": {"pv": 90, "force": 0, "defense": 40, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.95, 0.65, 0.15), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1},
 	# Mécanismes de l'Artificier (V26) : posés comme du terrain (ne comptent pas comme familiers).
-	"Bombe":        {"pv": 20, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.85, 0.25, 0.20), "spell": [], "static": true, "terrain": true, "turns": 2, "span": 1, "mech": "bomb"},
+	"Bombe":        {"pv": 36, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.85, 0.25, 0.20), "spell": [], "static": true, "terrain": true, "turns": 2, "span": 1, "mech": "bomb"},
 	"Tourelle":     {"pv": 60, "force": 0, "defense": 20, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.55, 0.62, 0.72), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1, "mech": "turret"},
 	"Balise de transposition": {"pv": 15, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.30, 0.85, 0.90), "spell": [], "static": true, "terrain": true, "turns": 5, "span": 1, "mech": "swap"},
 	"Balise":       {"pv": 90, "force": 0, "defense": 30, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.90, 0.60, 0.20), "spell": [], "static": true, "beacon": true},
