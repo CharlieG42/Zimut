@@ -103,7 +103,8 @@ def tank():
     b.append(p("M112 198 Q128 180 148 194 Q142 212 126 214 Q112 210 112 198 Z", gNavyL, 2.4)); b.append(hl("M120 200 L130 206 L140 194", "#aebfe8", .8, 1.6))
     b.append(hl("M106 190 Q112 176 130 172", "#fff", .9, 2.4)); b.append(hl("M106 214 Q116 226 134 224", "#a8b0c6", .8, 1.6))
 
-    # ---------- tête ----------
+    # ---------- tête (agrandie : proportions chibi de la référence) ----------
+    b.append('<g transform="translate(190 160) scale(1.2 1.07) translate(-190 -160)">')
     b.append(p("M142 96 Q138 142 166 152 Q192 158 216 148 Q240 134 238 102 Q234 66 190 62 Q146 64 142 96 Z", gSkin, 3.6))
     b.append(shade("M214 70 Q240 92 236 120 Q230 140 214 148 Q226 112 214 70 Z", "#8a3a0c", .22))
     b.append(p("M138 104 Q130 112 134 126 Q142 132 148 124 L148 108 Z", gSkinD, 2.4)); b.append(hl("M139 110 Q137 118 141 124", "#8a3a0c", .6, 1.2))   # oreille
@@ -134,6 +135,7 @@ def tank():
     for pth in ("M150 90 Q164 66 196 56", "M146 100 Q158 76 186 66", "M158 84 Q180 68 214 64"):
         b.append(hl(pth, "#9ba7c4", .85, 1.4))
     b.append(hl("M156 70 Q176 54 206 52", "#ffffff", .95, 2.6))
+    b.append("</g>")
     return svg(340, 400, d, "".join(b), sx=108)
 
 if __name__ == "__main__":
