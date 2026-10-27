@@ -205,23 +205,26 @@ func _draw() -> void:
 	# Reflets/ombres sur les arêtes pour donner du volume
 	# V58 : les 4 arêtes en une seule commande de dessin (64 cases × 4 appels économisés par image)
 	draw_multiline_colors(EDGE_PTS, EDGE_COLS, 2.0)
-	_outline(top, Color(0.12, 0.22, 0.10, 0.30), 1.25)
+	# V61 lisibilité : le sol est calmé (texture moins contrastée) et la grille bien visible,
+	# pour que unités et cases colorées ressortent (comme Dofus / Waven).
+	draw_colored_polygon(_diamond(0.99), Color(0.16, 0.26, 0.14, 0.26))
+	_outline(top, Color(0.06, 0.12, 0.06, 0.62), 2.0)
 
 	# ── Surbrillances ─────────────────────────────────────────────────────
 	var t_ms: float = float(Time.get_ticks_msec()) / 1000.0
 	var pulse: float = 0.5 + 0.5 * sin(t_ms * 5.0 + _pulse_phase)
 
 	if threat == 2:
-		draw_colored_polygon(_diamond(0.94), Color(0.95, 0.12, 0.12, 0.30))
-		_outline(_diamond(0.94), Color(1.0, 0.35, 0.30, 0.85), 2.0)
+		draw_colored_polygon(_diamond(0.94), Color(0.95, 0.12, 0.12, 0.46))
+		_outline(_diamond(0.94), Color(1.0, 0.35, 0.30, 1.0), 3.0)
 	elif threat == 1:
-		draw_colored_polygon(_diamond(0.94), Color(1.0, 0.62, 0.10, 0.30))
+		draw_colored_polygon(_diamond(0.94), Color(1.0, 0.62, 0.10, 0.46))
 		_outline(_diamond(0.94), Color(1.0, 0.78, 0.30, 0.85), 2.0)
 	if in_move_range:
-		draw_colored_polygon(_diamond(0.94), Color(0.25, 0.55, 1.0, 0.30))
-		_outline(_diamond(0.94), Color(0.45, 0.75, 1.0, 0.85), 2.0)
+		draw_colored_polygon(_diamond(0.94), Color(0.22, 0.52, 1.0, 0.52))
+		_outline(_diamond(0.94), Color(0.60, 0.85, 1.0, 1.0), 3.0)
 	if in_spell_range:
-		draw_colored_polygon(_diamond(0.94), Color(1.0, 0.45, 0.2, 0.22))
+		draw_colored_polygon(_diamond(0.94), Color(1.0, 0.45, 0.2, 0.38))
 		_outline(_diamond(0.94), Color(1.0, 0.6, 0.3, 0.7), 2.0)
 	if ally_target:
 		draw_colored_polygon(_diamond(0.94), Color(0.3, 1.0, 0.45, 0.20 + 0.14 * pulse))
