@@ -1687,8 +1687,10 @@ func max_hero_level(data: Dictionary) -> int:
 	return best
 
 
+## V60 : le niveau du JOUEUR (affiché en tête de la partie) compte autant que celui du meilleur héros.
 func mode_unlocked(data: Dictionary, mode: String) -> bool:
-	return max_hero_level(data) >= int(MODE_MIN_LEVEL.get(mode, 1))
+	var lvl: int = maxi(max_hero_level(data), HeroUnlock.player_level(data))
+	return lvl >= int(MODE_MIN_LEVEL.get(mode, 1))
 
 ## ── Temps de jeu (V46) ───────────────────────────────────────────────
 ## Stocké dans la sauvegarde : "playtime" (total, secondes) et

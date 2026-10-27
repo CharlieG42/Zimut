@@ -457,6 +457,50 @@ func _select_first_empty_slot() -> void:
 	message.add_theme_color_override("font_color", COL_TXT)
 	_detail_box.add_child(message)
 
+## V60 : progression du joueur vers le niveau suivant (barre + pourcentage), sous le résumé de la partie.
+func _level_progress(data: Dictionary, compact: bool) -> Control:
+	var lvl: int = HeroUnlock.player_level(data)
+	var xp: int = HeroUnlock.player_xp(data)
+	var box := VBoxContainer.new()
+	box.name = "LevelProgress"
+	box.add_theme_constant_override("separation", 3)
+	var lbl := Label.new()
+	lbl.name = "LevelProgressLabel"
+	lbl.add_theme_font_size_override("font_size", _ui_font(13 if compact else 15))
+	lbl.add_theme_color_override("font_color", COL_TXT)
+	var bar := ProgressBar.new()
+	bar.name = "LevelProgressBar"
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(0, 14 if compact else 18)
+	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.10, 0.12, 0.20, 0.55)
+	bg.set_corner_radius_all(7)
+	bg.set_border_width_all(1)
+	bg.border_color = COL_BORDER.darkened(0.2)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = Color(0.95, 0.76, 0.25)
+	fill.set_corner_radius_all(7)
+	bar.add_theme_stylebox_override("background", bg)
+	bar.add_theme_stylebox_override("fill", fill)
+	if lvl >= ClassRules.MAX_LEVEL:
+		lbl.text = "NIVEAU MAXIMUM ATTEINT"
+		bar.max_value = 1.0
+		bar.value = 1.0
+	else:
+		var cur: int = ProgressionManager.xp_for_level(lvl)
+		var nxt: int = ProgressionManager.xp_for_level(lvl + 1)
+		var span: int = maxi(1, nxt - cur)
+		var got: int = clampi(xp - cur, 0, span)
+		var pct: int = int(floor(100.0 * float(got) / float(span)))
+		lbl.text = "PROGRESSION  ·  %d %% vers le niveau %d   (%d / %d XP)" % [pct, lvl + 1, got, span]
+		bar.max_value = float(span)
+		bar.value = float(got)
+	box.add_child(lbl)
+	box.add_child(bar)
+	return box
+
+
 func _show_detail(data: Dictionary, slot: int) -> void:
 	_current = data
 	_current_slot = slot
@@ -475,6 +519,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	summary.add_theme_font_size_override("font_size", _ui_font(13 if compact else 15))
 	summary.add_theme_color_override("font_color", COL_BORDER.darkened(0.3))
 	_detail_box.add_child(summary)
+	_detail_box.add_child(_level_progress(data, compact))
 	_detail_box.add_child(_section_separator())
 
 	# Difficulté des ennemis : propre à cette partie, modifiable à tout moment.
@@ -975,7 +1020,7 @@ func _mode_button(title_txt: String, desc: String, art_path: String, accent: Col
 	b.add_child(art)
 	if not enabled:
 		var need: int = int(ProgressionManager.MODE_MIN_LEVEL.get("adventure" if title_txt == "Aventure" else "conquest", 1))
-		b.tooltip_text = "%s — verrouillé : atteignez le niveau %d avec un de vos héros." % [title_txt, need]
+		b.tooltip_text = "%s — verrouillé : atteignez le niveau %d (niveau du joueur ou d'un de vos héros)." % [title_txt, need]
 		var lock := Label.new()
 		lock.name = "LockLabel"
 		lock.text = "🔒\nNiveau %d requis" % need

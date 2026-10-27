@@ -91,5 +91,40 @@ func _boot() -> void:
 		gm._check_deaths()
 		check(bool(nb.get("exploded", false)), "bombe détruite explose")
 		check(int(foe["current_pv"]) < fhp or int(foe["current_pv"]) <= 0, "…et blesse l'ennemi proche")
+	# V60 : une bombe blessée mais vivante n'explose PAS
+	art["casts"] = {}
+	gm.cast_spell(art, bombspell, ca)
+	var hb: Dictionary = gm.entity_at(ca)
+	if String(hb.get("mech", "")) == "bomb":
+		var half: int = int(hb["current_pv"]) / 3
+		gm._apply_damage(foe, hb, half, "phys", false, false)
+		gm._check_deaths()
+		check(int(hb["current_pv"]) > 0 and not bool(hb.get("exploded", false)), "bombe blessée mais vivante : pas d'explosion")
+		check(gm.mechs_of(art).size() >= 1, "…elle reste sur le terrain")
+		gm._apply_damage(foe, hb, int(hb["current_pv"]), "phys", false, false)
+		gm._check_deaths()
+		check(bool(hb.get("exploded", false)), "à 0 PV elle explose")
+	# V60 : à bas niveau, une seule explosion ne détruit pas une bombe voisine intacte (il en faut deux)
+	art["level"] = 3
+	art["casts"] = {}
+	var c1 := Vector2i(-1, -1)
+	var c2 := Vector2i(-1, -1)
+	for y: int in range(gm.GRID_SIZE):
+		for x: int in range(gm.GRID_SIZE):
+			var c := Vector2i(x, y)
+			if c1.x < 0 and gm.is_free(c) and Combat.manhattan(c, apos) >= 2 and Combat.manhattan(c, apos) <= 4:
+				c1 = c
+	for d2: Vector2i in Combat.DIRS:
+		if c2.x < 0 and gm.is_free(c1 + d2) and Combat.manhattan(c1 + d2, apos) >= 2 and Combat.manhattan(c1 + d2, apos) <= 4:
+			c2 = c1 + d2
+	if c1.x >= 0 and c2.x >= 0:
+		gm.cast_spell(art, bombspell, c1)
+		art["casts"] = {}
+		gm.cast_spell(art, bombspell, c2)
+		var b1: Dictionary = gm.entity_at(c1)
+		var b2: Dictionary = gm.entity_at(c2)
+		var pv2: int = int(b2["current_pv"])
+		gm._mech_explode(art, b1)
+		check(int(b2["current_pv"]) < pv2, "la bombe voisine est touchée")
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
