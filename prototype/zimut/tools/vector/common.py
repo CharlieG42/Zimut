@@ -7,6 +7,7 @@ W_IN = 2.6           # contour interne
 
 _gid = [0]
 _gcol = {}          # id de dégradé -> (couleur haute, couleur basse)
+SHADOW = True       # ombre de sol incluse (aperçus) ; le jeu dessine la sienne
 TONAL = True        # contours fins, de la teinte de la matière (rendu « illustration »)
 
 def _hex(c):
@@ -92,7 +93,7 @@ def crystal(defs, x, y, h, w=None, rot=0, c1="#d9f6ff", c2="#3aa7e0", c3="#1c5fa
 
 def svg(w, h, defs, body, shadow=True, sx=None):
     sh = ""
-    if shadow:
+    if shadow and SHADOW:
         sx = sx or w * .36
         defs.append('<radialGradient id="gsh"><stop offset="0" stop-color="#000" stop-opacity=".42"/>'
                     '<stop offset=".6" stop-color="#000" stop-opacity=".22"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>')
