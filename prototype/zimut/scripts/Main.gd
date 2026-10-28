@@ -40,6 +40,7 @@ func _ready() -> void:
 	# une partie avant de revenir choisir une nouvelle équipe.
 	if game_manager.has_method("reset_game"):
 		game_manager.reset_game()
+	grid_manager.show_start_zones()
 
 	_connect_signals()
 
