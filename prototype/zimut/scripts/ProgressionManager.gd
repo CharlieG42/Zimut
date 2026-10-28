@@ -709,8 +709,9 @@ func save_exists(slot: int) -> bool:
 func _path(slot: int) -> String:
 	return "%s/partie_%d.json" % [SAVE_DIR, slot]
 
-func new_game(slot: int, game_name: String = "") -> Dictionary:
+func new_game(slot: int, game_name: String = "", gender: String = "m") -> Dictionary:
 	var data := _fresh_save()
+	data["gender"] = "f" if gender == "f" else "m"   # V63 : accords des textes de Gultur
 	data["name"] = game_name if game_name != "" else "Partie %d" % (slot + 1)
 	ensure_roster(data)
 	write_save(slot, data)
@@ -3417,6 +3418,15 @@ func auto_equip(data: Dictionary) -> int:
 
 
 ## Renomme une partie existante. Retourne "" si OK.
+## V63 : genre du joueur (« m » ou « f »), pour les accords des répliques de Gultur.
+func set_gender(slot: int, gender: String) -> bool:
+	var data := load_save(slot)
+	if data.is_empty():
+		return false
+	data["gender"] = "f" if gender == "f" else "m"
+	return write_save(slot, data)
+
+
 func rename_save(slot: int, new_name: String) -> String:
 	new_name = new_name.strip_edges()
 	if new_name == "":

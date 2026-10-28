@@ -14,7 +14,7 @@ const PORTRAIT_PATH := "res://assets/sprites/npc/gultur.png"
 const C_PANEL := Color(0.07, 0.09, 0.15, 0.96)
 const C_GOLD := Color(1.0, 0.82, 0.35)
 
-## Répliques du tutoriel (« {pseudo} » est remplacé par le pseudo du joueur).
+## Répliques du tutoriel (« {pseudo} » est remplacé par le pseudo du joueur ; « {e} » par « e » si le joueur a choisi « Femme »).
 const INTRO := [
 	"Bienvenue, [b]{pseudo}[/b] ! Je suis [b]Gultur[/b], gardien des Pierres, et je guide les voyageurs égarés depuis bien longtemps.",
 	"Ici, c'est [b]Zimut[/b], un monde où chaque [b]Nation[/b] veille sur un élément : la forêt, la montagne, le désert, les ombres…",
@@ -22,7 +22,7 @@ const INTRO := [
 	"Depuis, les créatures se déchaînent, les routes sont coupées et l'harmonie entre les Nations se brise un peu plus chaque jour.",
 	"Retrouver les Pierres est [b]indispensable[/b] pour rétablir l'ordre : tant qu'elles seront perdues, Zimut sombrera dans le chaos.",
 	"Et prends garde : chaque Pierre confère à son possesseur des [b]pouvoirs incroyables[/b]. Entre de mauvaises mains, elle serait une arme terrible ; entre les tiennes, un espoir.",
-	"Tu es venu d'un autre monde, appelé par les Pierres elles-mêmes : [b]toi seul[/b] peux les retrouver, {pseudo}. Alors, es-tu prêt ?",
+	"Tu es venu{e} d'un autre monde, appelé par les Pierres elles-mêmes : [b]toi seul[/b] peux les retrouver, {pseudo}. Alors, es-tu prêt{e} ?",
 ]
 ## Fin du tutoriel : choix des 3 héros de départ (V48), puis premier combat.
 const PICK := [
@@ -66,12 +66,12 @@ const EQUIP := [
 	"Dans la fiche d'un héros, un [b]▲ vert[/b] t'indique les objets conseillés (plus puissants que ceux portés).",
 ]
 const LVL3 := [
-	"Bravo ! Un de tes héros a atteint le [b]niveau 3[/b] : le mode [b]Aventure[/b] s'ouvre à toi.",
+	"Bravo, [b]{pseudo}[/b] ! [b]Toi[/b] qui viens d'atteindre le [b]niveau 3[/b] de joueur : le mode [b]Aventure[/b] s'ouvre à toi.",
 	"Explore la carte : touche une case pour y marcher, le brouillard se lève. Des [b]groupes de monstres[/b] rôdent (vert = facile, rouge = dangereux).",
 	"Au [b]camp[/b], prends un contrat. Les énigmes et les coffres cachent de précieuses récompenses… et peut-être la trace d'une Pierre.",
 ]
 const LVL5 := [
-	"Impressionnant ! Un héros a atteint le [b]niveau 5[/b] : le mode [b]Conquête[/b] est débloqué.",
+	"Impressionnant, [b]{pseudo}[/b] ! Te voilà [b]niveau 5[/b] de joueur : le mode [b]Conquête[/b] est débloqué.",
 	"Prends les cités une à une, nomme des [b]gouverneurs[/b], recrute des soldats et défends tes villes contre les raids.",
 	"Les Nations gardent jalousement leurs Pierres dans leurs cités. Plus ton empire grandit, plus tu t'en approches !",
 ]
@@ -107,12 +107,15 @@ static func say(parent: Node, id: String, lines: Array, target: Control = null, 
 	g._id = id
 	g._lines = lines.duplicate()
 	var pseudo: String = ""
+	var fem: String = ""
 	if Engine.get_main_loop() is SceneTree:
 		var gm: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameManager")
 		if gm != null and not (gm.get("active_save") as Dictionary).is_empty():
 			pseudo = String((gm.get("active_save") as Dictionary).get("name", ""))
+			if String((gm.get("active_save") as Dictionary).get("gender", "m")) == "f":
+				fem = "e"
 	for i: int in range(g._lines.size()):
-		g._lines[i] = String(g._lines[i]).replace("{pseudo}", pseudo if pseudo != "" else "voyageur")
+		g._lines[i] = String(g._lines[i]).replace("{pseudo}", pseudo if pseudo != "" else ("voyageuse" if fem == "e" else "voyageur")).replace("{e}", fem)
 	g._target = target
 	g.layer = 100
 	if on_done.is_valid():
