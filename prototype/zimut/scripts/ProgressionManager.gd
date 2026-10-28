@@ -3418,6 +3418,15 @@ func auto_equip(data: Dictionary) -> int:
 
 
 ## Renomme une partie existante. Retourne "" si OK.
+## V63 : genre du joueur (« m » ou « f »), pour les accords des répliques de Gultur.
+func set_gender(slot: int, gender: String) -> bool:
+	var data := load_save(slot)
+	if data.is_empty():
+		return false
+	data["gender"] = "f" if gender == "f" else "m"
+	return write_save(slot, data)
+
+
 func rename_save(slot: int, new_name: String) -> String:
 	new_name = new_name.strip_edges()
 	if new_name == "":

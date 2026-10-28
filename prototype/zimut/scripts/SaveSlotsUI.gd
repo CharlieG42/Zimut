@@ -401,38 +401,8 @@ func _prompt_pseudo(slot: int) -> void:
 	line.add_theme_font_size_override("font_size", _ui_font(24))
 	box.add_child(line)
 	# V63 : genre du joueur (pour que Gultur s'adresse à toi correctement)
-	var gtitle := Label.new()
-	gtitle.text = "Tu es…"
-	gtitle.add_theme_font_size_override("font_size", _ui_font(20))
-	gtitle.add_theme_color_override("font_color", COL_TXT)
-	box.add_child(gtitle)
-	var grow := HBoxContainer.new()
-	grow.add_theme_constant_override("separation", 12)
-	box.add_child(grow)
 	var gender_sel: Array = ["m"]
-	var gbtns: Dictionary = {}
-	for g: Array in [["m", "Un homme"], ["f", "Une femme"]]:
-		var gb := Button.new()
-		gb.name = "Gender_" + String(g[0])
-		gb.text = String(g[1])
-		gb.toggle_mode = true
-		gb.button_pressed = (String(g[0]) == "m")
-		gb.custom_minimum_size = Vector2(0, 52)
-		gb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		gb.add_theme_font_size_override("font_size", _ui_font(22))
-		for stn: String in ["pressed", "hover_pressed"]:
-			var sb := StyleBoxFlat.new()
-			sb.bg_color = Color(0.95, 0.76, 0.25)
-			sb.set_corner_radius_all(8)
-			gb.add_theme_stylebox_override(stn, sb)
-		gb.add_theme_color_override("font_pressed_color", Color(0.15, 0.1, 0.02))
-		gb.add_theme_color_override("font_hover_pressed_color", Color(0.15, 0.1, 0.02))
-		gb.pressed.connect(func() -> void:
-			gender_sel[0] = String(g[0])
-			for k: String in gbtns:
-				(gbtns[k] as Button).button_pressed = (k == String(g[0])))
-		grow.add_child(gb)
-		gbtns[String(g[0])] = gb
+	box.add_child(_gender_picker(gender_sel))
 	var sub := Label.new()
 	sub.text = "Le même pseudo peut être utilisé par plusieurs parties."
 	sub.add_theme_font_size_override("font_size", _ui_font(16))
@@ -462,6 +432,45 @@ func _prompt_pseudo(slot: int) -> void:
 	line.text_submitted.connect(func(_t: String) -> void: go.call())
 	row.add_child(ok)
 	line.grab_focus()
+
+
+## V63 : sélecteur « Tu es… un homme / une femme ». `sel[0]` reçoit « m » ou « f ».
+func _gender_picker(sel: Array) -> Control:
+	var wrap := VBoxContainer.new()
+	wrap.name = "GenderPicker"
+	wrap.add_theme_constant_override("separation", 8)
+	var gtitle := Label.new()
+	gtitle.text = "Tu es…"
+	gtitle.add_theme_font_size_override("font_size", _ui_font(20))
+	gtitle.add_theme_color_override("font_color", COL_TXT)
+	wrap.add_child(gtitle)
+	var grow := HBoxContainer.new()
+	grow.add_theme_constant_override("separation", 12)
+	wrap.add_child(grow)
+	var gbtns: Dictionary = {}
+	for g: Array in [["m", "Un homme"], ["f", "Une femme"]]:
+		var gb := Button.new()
+		gb.name = "Gender_" + String(g[0])
+		gb.text = String(g[1])
+		gb.toggle_mode = true
+		gb.button_pressed = (String(g[0]) == String(sel[0]))
+		gb.custom_minimum_size = Vector2(0, 52)
+		gb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		gb.add_theme_font_size_override("font_size", _ui_font(22))
+		for stn: String in ["pressed", "hover_pressed"]:
+			var sb := StyleBoxFlat.new()
+			sb.bg_color = Color(0.95, 0.76, 0.25)
+			sb.set_corner_radius_all(8)
+			gb.add_theme_stylebox_override(stn, sb)
+		gb.add_theme_color_override("font_pressed_color", Color(0.15, 0.1, 0.02))
+		gb.add_theme_color_override("font_hover_pressed_color", Color(0.15, 0.1, 0.02))
+		gb.pressed.connect(func() -> void:
+			sel[0] = String(g[0])
+			for k: String in gbtns:
+				(gbtns[k] as Button).button_pressed = (k == String(g[0])))
+		grow.add_child(gb)
+		gbtns[String(g[0])] = gb
+	return wrap
 
 
 func _create_game(slot: int, pseudo: String, gender: String = "m") -> void:
@@ -738,7 +747,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	# Objectifs (Pierres, primes) juste sous les modes de jeu : visibles sans défiler
 	_detail_box.move_child(goal_row, grid.get_index())
 
-	var rename_btn := _action_button("rename", "RENOMMER CETTE PARTIE", COL_TXT)
+	var rename_btn := _action_button("rename", "NOM ET GENRE DE LA PARTIE", COL_TXT)
 	rename_btn.pressed.connect(func() -> void:
 		var line := LineEdit.new()
 		line.text = String(data.get("name", ""))
@@ -746,13 +755,15 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		line.max_length = 30
 		line.custom_minimum_size = Vector2(0, 64)
 		line.add_theme_font_size_override("font_size", _ui_font(26))
-		_modal("Renommer la partie", "Nouveau nom de la partie :", [
+		var gsel: Array = [String(data.get("gender", "m"))]
+		_modal("Nom et genre", "Nom de la partie :", [
 			["Annuler", Color(0.45, 0.40, 0.32), Callable()],
-			["RENOMMER", Color(0.30, 0.55, 0.30), func() -> void:
+			["ENREGISTRER", Color(0.30, 0.55, 0.30), func() -> void:
 				ProgressionManager.rename_save(slot, line.text)
+				ProgressionManager.set_gender(slot, String(gsel[0]))
 				_current = ProgressionManager.load_save(slot)
 				refresh()],
-		], line)
+		], line, _gender_picker(gsel))
 		line.call_deferred("grab_focus"))
 	var delete_btn := _action_button("delete", "SUPPRIMER CETTE PARTIE", Color(0.35, 0.08, 0.05))
 	delete_btn.pressed.connect(func() -> void:
@@ -850,7 +861,7 @@ func _import_text(text: String) -> void:
 
 ## Fenêtre modale lisible sur téléphone (remplace les petites boîtes système).
 ## buttons : [[libellé, couleur, Callable (peut être vide)], ...] — chaque bouton ferme la fenêtre.
-func _modal(title: String, text: String, buttons: Array, extra: Control = null) -> Control:
+func _modal(title: String, text: String, buttons: Array, extra: Control = null, extra2: Control = null) -> Control:
 	var overlay := ColorRect.new()
 	overlay.name = "Modal"
 	overlay.color = Color(0, 0, 0, 0.6)
@@ -890,6 +901,8 @@ func _modal(title: String, text: String, buttons: Array, extra: Control = null) 
 	box.add_child(body)
 	if extra != null:
 		box.add_child(extra)
+	if extra2 != null:
+		box.add_child(extra2)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 14)
 	box.add_child(row)
@@ -951,7 +964,7 @@ const ACTION_ICONS := {
 ## Libellé écrit par Godot sur la plaque (donc traduisible, contrairement à un texte cuit dans le PNG).
 const ACTION_LABELS := {
 	"team": "Gérer l'équipe", "chars": "Personnages", "forge": "Forge",
-	"governors": "Gouverneurs", "rename": "Renommer", "delete": "Supprimer",
+	"governors": "Gouverneurs", "rename": "Nom & genre", "delete": "Supprimer",
 }
 const ACTION_ASPECT := 512.0 / 192.0
 
