@@ -1701,3 +1701,9 @@ Roue engrenée	Geared Wheel
 Automate de combat	Combat Automaton
 Vitesse des animations	Animation speed
 Lente	Slow
+Rappel	Recall
+Poser Bombe incendiaire	Place Fire Bomb
+Maintenance	Maintenance
+Poser Bombe assourdissante	Place Stun Bomb
+Poser Tourelle lourde	Place Heavy Turret
+Poser Charge à fragmentation	Place Frag Charge

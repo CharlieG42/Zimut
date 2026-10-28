@@ -252,25 +252,25 @@ Géomancien,88,Pierre vivante
 Géomancien,95,Fracas des montagnes
 Géomancien,100,Cataclysme minéral
 Artificier,1,Déclencheur;Pistolet à ressort;Poser Bombe
-Artificier,3,Pétard
+Artificier,3,Rappel
 Artificier,5,Fumigène
-Artificier,8,Tir de barrage
+Artificier,8,Poser Bombe incendiaire
 Artificier,10,Poser Mine
 Artificier,12,Pas de côté
 Artificier,15,Piège à ressort
 Artificier,18,Entrave
 Artificier,20,Pistolet à silex;Poser Tourelle
 Artificier,24,Cri de guerre
-Artificier,26,Balle incendiaire
-Artificier,30,Grenade assourdissante
+Artificier,26,Maintenance
+Artificier,30,Poser Bombe assourdissante
 Artificier,35,Marque du prédateur;Poser Balise de transposition
 Artificier,40,Tir de précision
 Artificier,44,Mine à fragmentation
 Artificier,48,Surcharge
 Artificier,50,Glyphe de surcharge
-Artificier,55,Fusil à lunette
+Artificier,55,Poser Tourelle lourde
 Artificier,60,Roquette
-Artificier,65,Grenade à fragmentation
+Artificier,65,Poser Charge à fragmentation
 Artificier,70,Rafale de mitraillette
 Artificier,75,Canon à main
 Artificier,80,Fusil à pompe

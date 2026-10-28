@@ -349,7 +349,7 @@ func _run_tutorial_steps(steps: Array) -> void:
 ## l'écran d'équipe et l'écran de victoire.
 func _maybe_pick_heroes() -> void:
 	var data: Dictionary = _current
-	if data.is_empty() or get_node_or_null("HeroPickUI") != null:
+	if data.is_empty() or find_child("HeroPickUI", true, false) != null:
 		return
 	if HeroUnlock.needs_initial_picks(data):
 		HeroPickUI.open(self, data, true, func(_p: Array) -> void:

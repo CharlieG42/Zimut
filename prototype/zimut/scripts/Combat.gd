@@ -373,6 +373,21 @@ static func parse(spell: Dictionary) -> Dictionary:
 		p["min_range"] = 0
 		spell["_p"] = p
 		return p
+	# V68 : Rappel (désinvoque un mécanisme) et Maintenance (répare + prolonge les mécanismes)
+	if sname == "Rappel":
+		p["kind"] = "recall_mech"
+		p["target"] = "cell"
+		p["needs_los"] = false
+		p["min_range"] = 0
+		spell["_p"] = p
+		return p
+	if sname == "Maintenance":
+		p["kind"] = "maintain"
+		p["target"] = "self"
+		p["needs_los"] = false
+		p["min_range"] = 0
+		spell["_p"] = p
+		return p
 	if sname == "Arsenal total":
 		p["kind"] = "trigger_all"
 		p["target"] = "self"
@@ -818,7 +833,12 @@ const SUMMONS := {
 	"Faille":       {"pv": 999, "force": 0, "defense": 0, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.35, 0.22, 0.12), "spell": [], "static": true, "terrain": true, "turns": 3, "span": 3, "indestructible": true},
 	"Cristal ambré": {"pv": 90, "force": 0, "defense": 40, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.95, 0.65, 0.15), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1},
 	# Mécanismes de l'Artificier (V26) : posés comme du terrain (ne comptent pas comme familiers).
-	"Bombe":        {"pv": 36, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.85, 0.25, 0.20), "spell": [], "static": true, "terrain": true, "turns": 2, "span": 1, "mech": "bomb"},
+	"Bombe":        {"pv": 36, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.85, 0.25, 0.20), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1, "mech": "bomb"},
+	# V68 : variantes (bomb_* / turret_* sont recopiés sur le mécanisme posé)
+	"Bombe incendiaire": {"pv": 36, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(1.0, 0.45, 0.10), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1, "mech": "bomb", "bomb_mult": 0.9, "bomb_status": "burn", "bomb_status_turns": 2},
+	"Bombe assourdissante": {"pv": 36, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.95, 0.85, 0.25), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1, "mech": "bomb", "bomb_mult": 0.7, "bomb_status": "stun", "bomb_status_turns": 1},
+	"Charge à fragmentation": {"pv": 44, "force": 0, "defense": 12, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.55, 0.30, 0.20), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1, "mech": "bomb", "bomb_mult": 1.6, "bomb_radius": 3},
+	"Tourelle lourde": {"pv": 80, "force": 0, "defense": 25, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.40, 0.45, 0.55), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1, "mech": "turret", "turret_mult": 1.8, "turret_range": 6},
 	"Tourelle":     {"pv": 60, "force": 0, "defense": 20, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.55, 0.62, 0.72), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1, "mech": "turret"},
 	"Balise de transposition": {"pv": 15, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.30, 0.85, 0.90), "spell": [], "static": true, "terrain": true, "turns": 5, "span": 1, "mech": "swap"},
 	"Balise":       {"pv": 90, "force": 0, "defense": 30, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.90, 0.60, 0.20), "spell": [], "static": true, "beacon": true},

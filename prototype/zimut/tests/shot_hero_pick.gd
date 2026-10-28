@@ -30,6 +30,8 @@ func _boot() -> void:
 	sc.current = sc.classes.find("Assassin")
 	sc.refresh()
 	await _shot("equipe_verrouille", dir)
+	sc._on_unlock_hero()
+	await _shot("pick_unlock_equipe", dir)
 	sc.queue_free()
 	var pick2: HeroPickUI = HeroPickUI.open(root, d, false)
 	pick2._focus = "Sylvain"
