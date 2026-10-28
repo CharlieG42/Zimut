@@ -150,6 +150,16 @@ func _pit_wall_decor(a: Vector2, b: Vector2) -> void:
 				draw_polyline(PackedVector2Array([p, p + Vector2(1.5, h * 0.6), p + Vector2(-1.0, h)]), Color(0, 0, 0, 0.35), 1.6, true)
 
 
+var _veil_cache: Color = Color(0, 0, 0, 0)
+
+func _veil_col() -> Color:
+	if _veil_cache.a == 0.0:
+		var pal: Dictionary = BattleScenery.pal(biome)
+		var c: Color = pal.get("top_b", Color(0.47, 0.62, 0.28))
+		_veil_cache = Color(c.r * 0.34, c.g * 0.40, c.b * 0.34, 1.0)
+	return _veil_cache
+
+
 func _draw() -> void:
 	# ── Falaises latérales (bord de l'île) ────────────────────────────────
 	var face_pal: Dictionary = BattleScenery.pal(biome)
@@ -207,8 +217,10 @@ func _draw() -> void:
 	draw_multiline_colors(EDGE_PTS, EDGE_COLS, 2.0)
 	# V61 lisibilité : le sol est calmé (texture moins contrastée) et la grille bien visible,
 	# pour que unités et cases colorées ressortent (comme Dofus / Waven).
-	draw_colored_polygon(_diamond(0.99), Color(0.16, 0.26, 0.14, 0.26))
-	_outline(top, Color(0.06, 0.12, 0.06, 0.62), 2.0)
+	# V63 : la teinte du voile suit le biome (vert forêt, sable, pierre, cristal…).
+	var veil: Color = _veil_col()
+	draw_colored_polygon(_diamond(0.99), Color(veil.r, veil.g, veil.b, 0.26))
+	_outline(top, Color(veil.r * 0.4, veil.g * 0.4, veil.b * 0.4, 0.66), 2.0)
 
 	# ── Surbrillances ─────────────────────────────────────────────────────
 	var t_ms: float = float(Time.get_ticks_msec()) / 1000.0
