@@ -156,6 +156,7 @@ static func ord_color(e: Dictionary) -> Color:
 	return Color(0.45, 0.70, 1.0)
 
 
+var _base_mod: Color = Color.WHITE   # V68 : teinte permanente (variantes de mécanismes)
 static var _contact_tex: GradientTexture2D = null
 static func _contact_texture() -> GradientTexture2D:
 	if _contact_tex == null:
@@ -485,6 +486,12 @@ static func skin_names(ent: Dictionary) -> Array[String]:
 	var sk: String = String(ent.get("skin", ""))
 	if sk != "":
 		out.append(sprite_key(sk))
+	# V68 : variantes de mécanismes (bombe incendiaire, tourelle lourde…) → sprite de base teinté
+	match String(ent.get("mech", "")):
+		"bomb":
+			out.append("bombe")
+		"turret":
+			out.append("tourelle")
 	return out
 
 
@@ -558,6 +565,9 @@ func _load_texture() -> void:
 		_mat = null
 		sprite.material = null
 	sprite.visible = true
+	if String(entity.get("mech", "")) != "" and not tex.resource_path.get_file().get_basename() == sprite_key(String(entity.get("classe", ""))):
+		_base_mod = Color.WHITE.lerp(entity.get("color", Color.WHITE) as Color, 0.55)
+		sprite.modulate = _base_mod
 
 
 func _process(delta: float) -> void:
@@ -749,7 +759,7 @@ func tint_flash(col: Color, dur: float = 0.25, amount: float = 0.65) -> void:
 		return
 	sprite.modulate = Color.WHITE.lerp(col, amount)
 	var tw: Tween = create_tween()
-	tw.tween_property(sprite, "modulate", Color.WHITE, dur).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(sprite, "modulate", _base_mod, dur).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
 func pop_in() -> Tween:
@@ -893,6 +903,18 @@ func _draw() -> void:
 		draw_circle(oc, 12.0, Color(0, 0, 0, 0.88))
 		draw_circle(oc, 10.5, ord_color(entity))
 		draw_string(ThemeDB.fallback_font, oc + Vector2(-10.0, 6.0), str(ord_no), HORIZONTAL_ALIGNMENT_CENTER, 20.0, 17, Color(0.1, 0.05, 0.0))
+
+	# V68 : compte à rebours des mécanismes (bombe : tours avant explosion ; autres : tours restants)
+	var life: int = int(entity.get("lifetime", -1))
+	if String(entity.get("mech", "")) != "" and life > 0:
+		var bomb: bool = String(entity.get("mech", "")) == "bomb"
+		var cc := Vector2(bw * 0.5 + 18.0, by2 + bh * 0.5)
+		var urgent: bool = bomb and life <= 1
+		var rr: float = 15.0 + (2.0 * sin(_t * 8.0) if urgent else 0.0)
+		draw_circle(cc, rr + 2.0, Color(0, 0, 0, 0.9))
+		draw_circle(cc, rr, (entity.get("color", Color(0.92, 0.22, 0.14)) as Color) if bomb else Color(0.35, 0.62, 0.85))
+		draw_string_outline(ThemeDB.fallback_font, cc + Vector2(-12.0, 7.0), str(life), HORIZONTAL_ALIGNMENT_CENTER, 24.0, 20, 4, Color(0, 0, 0, 0.9))
+		draw_string(ThemeDB.fallback_font, cc + Vector2(-12.0, 7.0), str(life), HORIZONTAL_ALIGNMENT_CENTER, 24.0, 20, Color(1, 1, 0.85))
 
 	# Statuts
 	var font: Font = ThemeDB.fallback_font

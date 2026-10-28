@@ -1,0 +1,14 @@
+2048x1024 sprite sheet. 4 cells. 2 rows x 2 columns. Each cell 1024x512. Plain white #FFFFFF background. No ground. No shadow. No text.
+
+Same adult man forest druid in all 4 cells. Around 40, short dark-green beard, messy dark green hair with small leaves. Calm stern face. Broad shoulders. Armor-robe of moss-green leaves #5E8C3A and brown bark plates #6B4A2B. Dark brown trousers, brown boots with green cloth wraps. Two crossed leather belts on chest. No hood, no cape. Head = 1/3 of height. Chibi. Thick black outlines. Dofus vector style.
+
+TOP-LEFT: front view, facing right, relaxed.
+TOP-RIGHT: front view, facing right, other pose.
+BOTTOM-LEFT: back view, dark green hair from behind, facing upper-right.
+BOTTOM-RIGHT: back view, dark green hair from behind, facing upper-right, other pose.
+
+All 4 sprites: same exact height. Feet on same line per row. Taller than wide. Wide empty gaps between sprites. Sprites never touch.
+
+RIGHT hand holds tall wooden staff with leaf-shaped emerald crystal #3FD08A. In ALL 4 cells. Staff always gripped in right hand. Never drawn alone beside character. Never left. Never floating. Never missing.
+
+NOT pixel art. NOT realistic. NOT thin lines. NOT extra sprites. NO 5th character. NO grid lines. NO borders. NO child or boy.

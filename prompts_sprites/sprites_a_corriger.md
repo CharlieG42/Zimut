@@ -149,3 +149,10 @@ Intégrés quand même quand c'était exploitable ; voici ce qu'il faut reprendr
 - **soigneur / Héros des Marées** (`heal`) : la planche de Mistral donne le bâton seul comme repos et mélange deux personnages → version V58 (ChatGPT) conservée.
 - **druide** : le « repos » de la planche était le bâton seul → repos = pose « attack » de face ; vue de dos = « back_attack_2 ». Les poses jeune garçon (mauvais personnage) ont été retirées. Le druide reste à reprendre (planche « vues » : 2 personnages au lieu de 4).
 - **artificier, géomancien, invocateur** : pas de repos de face exploitable → non intégrés, anciens sprites conservés.
+
+## V67 — héros refaits en 2×2 par Mistral (planches composées)
+
+- **soigneur (heal), druide, géomancien, invocateur** : nouvelles vues intégrées (repos, repos 2, dos, dos 2), découpe `tools/couper_composite.py` (rectangles de fond retirés, ombres claires effacées ; `--sombre` pour l'invocateur).
+- **géomancien, invocateur** : les anciennes poses d'action (autres personnages : géomancien couronné, invocateur barbu) sont **retirées** → le jeu anime le repos en attendant les nouvelles planches `actions` / `actions_dos` à faire en édition de ces vues.
+- **druide, soigneur** : poses d'action conservées (même personnage).
+- **artificier** : en cours chez Mistral.

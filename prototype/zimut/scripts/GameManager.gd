@@ -1440,6 +1440,12 @@ func validate_cast(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Str
 				return err2
 		if tk == "turret" and _turret_target(entity_at(cell)).is_empty():
 			return "Aucune cible à portée de la tourelle."
+	if p["kind"] == "recall_mech":
+		var rk: String = trigger_kind(caster, cell)
+		if rk == "" or rk == "glyph":
+			return "Il faut viser un de vos mécanismes."
+	if p["kind"] == "maintain" and mechs_of(caster).is_empty():
+		return "Aucun mécanisme à entretenir."
 	if p["kind"] == "trigger_all" and trigger_all_count(caster) == 0:
 		return "Aucun mécanisme à déclencher."
 	if p["kind"] == "recall":
@@ -1540,6 +1546,10 @@ func cast_spell(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> bool:
 			summary = _resolve_trigger(caster, cell)
 		"trigger_all":
 			summary = _resolve_trigger_all(caster)
+		"recall_mech":
+			summary = _resolve_recall_mech(caster, cell)
+		"maintain":
+			summary = _resolve_maintain(caster)
 		"recall":
 			remove_entity_from_grid(target)
 			fx.emit("beacon", {"from": cell, "cells": [cell] as Array[Vector2i]})
@@ -1917,6 +1927,9 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 		s["terrain"] = true
 	if mech_kind != "":
 		s["mech"] = mech_kind
+		for k: String in info.keys():
+			if k.begins_with("bomb_") or k.begins_with("turret_"):
+				s[k] = info[k]
 	if bool(info.get("indestructible", false)):
 		s["indestructible"] = true
 	if bool(info.get("tower", false)):
@@ -2038,7 +2051,7 @@ func _tower_attacks(owner: Dictionary) -> void:
 #  Artificier (V26) : mécanismes, Déclencheur, inversion
 # ═══════════════════════════════════════════════════════════════════════════
 
-const MECH_MAX := 3
+const MECH_MAX := 5   # V68 : 5 mécanismes sur le terrain
 const TURRET_RANGE := 5
 
 
@@ -2105,7 +2118,7 @@ func _turret_target(tw: Dictionary) -> Dictionary:
 		if not is_alive(e) or bool(e.get("terrain", false)) or bool(e.get("beacon", false)) or Combat.has_status(e, "invisible"):
 			continue
 		var d: int = Combat.manhattan(tpos, pos_of(e))
-		if d <= TURRET_RANGE and d < best_d:
+		if d <= int(tw.get("turret_range", TURRET_RANGE)) and d < best_d:
 			best = e
 			best_d = d
 	return best
@@ -2115,7 +2128,7 @@ func _turret_fire(owner: Dictionary, tw: Dictionary) -> bool:
 	var best: Dictionary = _turret_target(tw)
 	if best.is_empty():
 		return false
-	var base: float = (26.0 + float(owner["level"]) * 0.8) / 1.8
+	var base: float = (26.0 + float(owner["level"]) * 0.8) / 1.8 * float(tw.get("turret_mult", 1.0))
 	var r: Dictionary = Combat.calc_damage(owner, best, base, "phys", 0.0, false, false)
 	fx.emit("cast", {"caster": tw, "spell": "Tir de tourelle", "kind": "attack", "dtype": "phys",
 		"from": pos_of(tw), "to": pos_of(best), "ranged": true, "cells": [pos_of(best)] as Array[Vector2i]})
@@ -2164,8 +2177,10 @@ func _mech_explode(owner: Dictionary, bomb: Dictionary) -> void:
 		bomb["current_pv"] = 0
 		return
 	var center: Vector2i = pos_of(bomb)
-	var base: float = (34.0 + float(owner["level"]) * 1.0) / 1.8
-	var cells: Array[Vector2i] = Combat.zone_cells(center, BOMB_RADIUS, "diamond", GRID_SIZE)
+	var base: float = (34.0 + float(owner["level"]) * 1.0) / 1.8 * float(bomb.get("bomb_mult", 1.0))
+	var radius: int = int(bomb.get("bomb_radius", BOMB_RADIUS))
+	var st_id: String = String(bomb.get("bomb_status", ""))
+	var cells: Array[Vector2i] = Combat.zone_cells(center, radius, "diamond", GRID_SIZE)
 	fx.emit("cast", {"caster": owner, "spell": "Explosion", "kind": "attack", "dtype": "phys",
 		"from": center, "to": center, "ranged": true, "cells": cells})
 	var dealt: int = 0
@@ -2181,6 +2196,9 @@ func _mech_explode(owner: Dictionary, bomb: Dictionary) -> void:
 		if not is_bomb and String(e.get("team", "")) == String(owner.get("team", "")):
 			dmg = maxi(1, dmg / 2)
 		dealt += _apply_damage(owner, e, dmg, "phys", bool(r["crit"]), false)
+		if st_id != "" and not is_bomb and String(e.get("team", "")) != String(owner.get("team", "")) and is_alive(e):
+			var sv: float = maxf(1.0, base * 0.25) if st_id == "burn" else 1.0
+			_apply_status(owner, e, st_id, int(bomb.get("bomb_status_turns", 1)), sv)
 		if is_bomb and int(e["current_pv"]) <= 0:
 			chain.append(e)
 	message_requested.emit("La bombe explose ! (%d dégâts)" % dealt)
@@ -2254,6 +2272,33 @@ func _resolve_trigger(caster: Dictionary, cell: Vector2i) -> String:
 		"glyph":
 			_retrigger_glyph(caster, cell)
 	return "%s déclenche un mécanisme." % caster["name"]
+
+
+## V68 : Rappel — le mécanisme visé disparaît sans se déclencher (libère une place).
+func _resolve_recall_mech(caster: Dictionary, cell: Vector2i) -> String:
+	if trigger_kind(caster, cell) == "mine":
+		for tr: Dictionary in traps.duplicate():
+			if tr["pos"] == cell and int(tr["owner"]) == int(caster["uid"]):
+				traps.erase(tr)
+		fx.emit("beacon", {"from": cell, "cells": [cell] as Array[Vector2i]})
+		return "%s récupère une mine." % caster["name"]
+	var t: Dictionary = entity_at(cell)
+	t["exploded"] = true   # une bombe rappelée n'explose pas
+	remove_entity_from_grid(t)
+	fx.emit("beacon", {"from": cell, "cells": [cell] as Array[Vector2i]})
+	return "%s rappelle %s." % [caster["name"], String(t.get("classe", "un mécanisme"))]
+
+
+## V68 : Maintenance — tous les mécanismes reviennent à leurs PV max et gagnent 2 tours.
+func _resolve_maintain(caster: Dictionary) -> String:
+	var n: int = 0
+	for m: Dictionary in mechs_of(caster):
+		m["current_pv"] = int(m["max_pv"])
+		if int(m.get("lifetime", -1)) > 0:
+			m["lifetime"] = int(m["lifetime"]) + 2
+		fx.emit("status", {"target": m, "text": "+2 tours", "color": Color(0.5, 0.9, 1.0), "good": true})
+		n += 1
+	return "%s entretient %d mécanisme(s)." % [caster["name"], n]
 
 
 func trigger_all_count(caster: Dictionary) -> int:

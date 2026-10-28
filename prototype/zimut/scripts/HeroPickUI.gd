@@ -56,7 +56,16 @@ static func open(parent: Node, data: Dictionary, initial: bool, on_done: Callabl
 	ui.mouse_filter = Control.MOUSE_FILTER_STOP
 	if on_done.is_valid():
 		ui.done.connect(on_done)
-	parent.add_child(ui)
+	# V68 : calque propre, plein écran : la fenêtre ne dépend plus de la mise à l'échelle de l'écran
+	# parent (sinon, ouverte depuis l'écran d'équipe déjà agrandi, elle sortait à droite sur téléphone).
+	var layer := CanvasLayer.new()
+	layer.name = "HeroPickLayer"
+	layer.layer = 60
+	parent.add_child(layer)
+	layer.add_child(ui)
+	ui.tree_exited.connect(func() -> void:
+		if is_instance_valid(layer):
+			layer.queue_free())
 	return ui
 
 

@@ -25,11 +25,11 @@ func _boot() -> void:
 	for p: Dictionary in gm.players:
 		if String(p["classe"]) == "Artificier":
 			art = p
-	art["spells"] = gm._build_spells("Artificier", 60)
+	art["spells"] = gm._build_spells("Artificier", 70)
 	art["current_pa"] = 40
 	art["level"] = 70
 	var gp: Vector2i = gm.pos_of(art)
-	var seq: Array = ["Poser Bombe", "Poser Tourelle", "Poser Mine", "Glyphe de surcharge", "Poser Balise de transposition"]
+	var seq: Array = ["Poser Bombe", "Poser Bombe incendiaire", "Poser Tourelle lourde", "Poser Bombe assourdissante", "Poser Charge à fragmentation", "Poser Mine"]
 	var done: Array[String] = []
 	for nm: String in seq:
 		var spell: Dictionary = {}

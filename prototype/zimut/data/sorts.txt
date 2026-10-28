@@ -271,10 +271,10 @@ Géomancien,Fracas des montagnes,4,0,7,129 dégâts en zone (4x4) + immobilise (
 Géomancien,Cataclysme minéral,4,0,7,122 dégâts en zone (4x4),100,Attaque,122,0,0,0,0,0,0,0,0
 Artificier,Déclencheur,1,0,6,Déclenche l'effet d'un de vos mécanismes (bombe; mine; tourelle; glyphe; balise de transposition),1,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Pistolet à ressort,2,0,5,14 dégâts,1,Attaque,14,0,0,0,0,0,0,0,0
-Artificier,Poser Bombe,2,0,4,Pose une bombe : explose (2 cases autour) à la fin du 2e tour de l'Artificier ou dès qu'on la déclenche ou la détruit; touche ennemis et autres bombes; alliés moitié moins,1,Invocation,0,0,0,0,0,0,0,0,0
-Artificier,Pétard,1,0,4,14 dégâts,3,Attaque,14,0,0,0,0,0,0,0,0
+Artificier,Poser Bombe,2,0,4,Pose une bombe : explose (2 cases autour) à la fin du 4e tour de l'Artificier ou dès qu'on la déclenche ou la détruit; touche ennemis et autres bombes; alliés moitié moins,1,Invocation,0,0,0,0,0,0,0,0,0
+Artificier,Rappel,1,0,5,Désinvoque un de vos mécanismes (bombe; tourelle; balise; mine) sans le déclencher,3,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Fumigène,2,0,0,Invisible (2 tours),5,Buff,0,0,0,0,0,0,0,0,0
-Artificier,Tir de barrage,2,0,5,29 dégâts [Enchaînement après Pistolet à ressort : bonus 35%],8,Attaque,29,0,0,0,0,0,0,0,0
+Artificier,Poser Bombe incendiaire,2,0,4,Pose une bombe incendiaire : explose comme une bombe et enflamme les ennemis touchés (brûlure 2 tours),8,Invocation,0,0,0,0,0,0,0,0,0
 Artificier,Poser Mine,2,0,4,Pose un piège (mine) : 22 dégâts; explose en croix si on la déclenche,10,Attaque,0,0,0,0,0,0,0,0,0
 Artificier,Pas de côté,1,0,0,+30% esquive (2 tours),12,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Piège à ressort,2,0,4,Pose un piège : 35 dégâts,15,Attaque,35,0,0,0,0,0,0,0,0
@@ -282,17 +282,17 @@ Artificier,Entrave,2,0,4,Immobilise l'ennemi (1 tour),18,Debuff,0,0,0,0,0,0,0,0,
 Artificier,Pistolet à silex,2,0,5,38 dégâts + ralentit 1 pm (1 tour),20,Attaque,38,0,0,0,0,0,0,0,0
 Artificier,Poser Tourelle,3,0,4,Installe une tourelle : tire sur l'ennemi le plus proche (rayon 5) à la fin de chacun de vos tours (4 tours; 1 seule),20,Invocation,0,0,0,0,0,0,0,0,0
 Artificier,Cri de guerre,2,0,0,+15% dégâts pour l'équipe (2 tours),24,Buff,0,0,0,0,0,0,0,0,0
-Artificier,Balle incendiaire,3,0,5,48 dégâts + brûle 12 dégâts/tour (2 tours),26,Attaque,48,0,0,0,0,0,0,0,0
-Artificier,Grenade assourdissante,3,0,5,39 dégâts en zone (3x3) + étourdit 1 tour (30%),30,Attaque,39,0,0,0,0,0,0,0,0
+Artificier,Maintenance,2,0,0,Répare tous vos mécanismes (PV au maximum) et prolonge leur durée de 2 tours,26,Buff,0,0,0,0,0,0,0,0,0
+Artificier,Poser Bombe assourdissante,3,0,4,Pose une bombe assourdissante : explose comme une bombe (dégâts réduits) et étourdit les ennemis touchés 1 tour,30,Invocation,0,0,0,0,0,0,0,0,0
 Artificier,Marque du prédateur,1,0,0,Critique garanti (prochaine attaque),35,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Poser Balise de transposition,2,0,6,Pose une balise et échange votre place avec elle; le Déclencheur sur la balise refait l'échange (1 déplacement par tour),35,Invocation,0,0,0,0,0,0,0,0,0
 Artificier,Tir de précision,3,0,6,66 dégâts [Combo brûlure : bonus 50%],40,Attaque,66,0,0,0,0,0,0,0,0
 Artificier,Mine à fragmentation,3,0,4,Pose un piège (mine) : 65 dégâts; explose en croix si on la déclenche,44,Attaque,65,0,0,0,0,0,0,0,0
 Artificier,Surcharge,2,0,0,+30% dégâts (2 tours),48,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Glyphe de surcharge,3,0,5,Trace un glyphe (croix; 3 tours) : alliés +25% dégâts | ennemis 22 dégâts,50,Attaque,25,0,0,0,0,0,0,0,0
-Artificier,Fusil à lunette,4,0,7,103 dégâts,55,Attaque,103,0,0,0,0,0,0,0,0
+Artificier,Poser Tourelle lourde,4,0,4,Installe une tourelle lourde : tire fort sur l'ennemi le plus proche (rayon 6) à la fin de chacun de vos tours (4 tours; compte comme une tourelle),55,Invocation,0,0,0,0,0,0,0,0,0
 Artificier,Roquette,4,0,6,83 dégâts en zone (3x3) [Combo étourdissement : bonus 40%],60,Attaque,83,0,0,0,0,0,0,0,0
-Artificier,Grenade à fragmentation,3,0,5,34 dégâts en zone (3x3),65,Attaque,34,0,0,0,0,0,0,0,0
+Artificier,Poser Charge à fragmentation,3,0,4,Pose une charge : explosion large (3 cases autour) et plus puissante qu'une bombe,65,Invocation,0,0,0,0,0,0,0,0,0
 Artificier,Rafale de mitraillette,4,0,5,69 dégâts à tous les ennemis,70,Attaque,69,0,0,0,0,0,0,0,0
 Artificier,Canon à main,4,0,4,133 dégâts [Enchaînement après Fusil à pompe : bonus 40%],75,Attaque,133,0,0,0,0,0,0,0,0
 Artificier,Fusil à pompe,3,0,3,53 dégâts,80,Attaque,53,0,0,0,0,0,0,0,0

@@ -1,0 +1,16 @@
+Character reference sheet. 2048 pixels wide, 1024 pixels tall. Four equal panels in a 2 by 2 arrangement. Each panel is exactly 1024x512 pixels.
+
+Panel 1 (upper left quadrant): full body, front three-quarter view facing right, standing at ease.
+Panel 2 (upper right quadrant): full body, front three-quarter view facing right, hands clasped in front.
+Panel 3 (lower left quadrant): full body, back three-quarter view facing upper right, no face visible.
+Panel 4 (lower right quadrant): full body, back three-quarter view facing upper right, weight shifted to one leg.
+
+All four panels show the IDENTICAL character: adult female healer, long white hair, pointed ears, white robe with turquoise blue panels and gold embroidered trim. Proportions: head occupies one third of total height, chibi style, thick dark cartoon outlines, Dofus Waven Ankama aesthetic. Vector illustration, flat colors, no gradients except on the crystal.
+
+Uniform solid light gray background #E8E8E8 across the entire canvas. No floor, no shadow beneath characters, no text labels, no panel borders, no dividing lines.
+
+Every panel: the character holds a tall golden staff in her RIGHT hand. The staff has a glowing cyan water-drop crystal at the top (#7FE8FF). The staff is visibly gripped. It appears in all four panels. It is never absent, never in the left hand, never floating.
+
+All four figures are exactly the same height in pixels. Within each row, the top of the head aligns horizontally and the feet align horizontally. Figures are vertically oriented (taller than wide). Generous empty space surrounds each figure on all sides.
+
+Do not draw: more than four figures, grid lines, cell borders, ground plane, drop shadows, text, watermarks, extra accessories, different hair colors, staff in left hand, child or teen proportions, profile-only views, extreme close-ups.

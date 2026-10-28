@@ -377,3 +377,9 @@ Lame d'ombre,blade_shadow
 Vrilles sylvestres,ivy
 Flèche de sève,arrow
 Coup de branche,wood_arm
+Rappel,shield
+Poser Bombe incendiaire,slash
+Maintenance,shield_group
+Poser Bombe assourdissante,slash
+Poser Tourelle lourde,slash
+Poser Charge à fragmentation,slash

@@ -35,7 +35,7 @@ func _boot() -> void:
 	check(not art.is_empty(), "Artificier jouable")
 	art["spells"] = gm._build_spells("Artificier", 100)
 	check(art["spells"].size() == 30, "30 sorts au niveau 100")
-	for nm: String in ["Pistolet à ressort", "Poser Bombe", "Déclencheur", "Poser Mine", "Poser Tourelle", "Poser Balise de transposition", "Glyphe de surcharge", "Grenade à fragmentation", "Fusil à pompe", "Arsenal total"]:
+	for nm: String in ["Pistolet à ressort", "Poser Bombe", "Déclencheur", "Poser Mine", "Poser Tourelle", "Poser Balise de transposition", "Glyphe de surcharge", "Poser Charge à fragmentation", "Fusil à pompe", "Arsenal total", "Rappel", "Maintenance", "Poser Bombe incendiaire", "Poser Bombe assourdissante", "Poser Tourelle lourde"]:
 		check(not _sp(art, nm).is_empty(), "sort " + nm)
 	var dec: Dictionary = _sp(art, "Déclencheur")
 	check(int(dec["cost_pa"]) == 1, "Déclencheur = 1 PA")
@@ -117,6 +117,49 @@ func _boot() -> void:
 	art["swapped"] = false
 	Combat.add_status(art, "root", 1, 1.0)
 	check(gm.validate_cast(art, _sp(art, "Déclencheur"), far[0]) != "", "immobilisé : inversion refusée")
+	# V68 : bombes à 4 tours, Rappel, Maintenance, variantes, 5 mécanismes
+	gm.init_grid()
+	gm.init_entities()
+	for p3: Dictionary in gm.players:
+		if String(p3["classe"]) == "Artificier":
+			art = p3
+	art["spells"] = gm._build_spells("Artificier", 100)
+	art["current_pa"] = 60
+	var rap: Dictionary = _sp(art, "Rappel")
+	check(int(rap["cost_pa"]) == 1 and int(rap["range"]) == 5, "Rappel : 1 PA, 5 PO")
+	var fc: Array = _free_at(gm, gm.pos_of(art), 2, 4, 8)
+	art["casts"] = {}
+	check(gm.cast_spell(art, _sp(art, "Poser Bombe"), fc[0]), "bombe (V68)")
+	var bb: Dictionary = gm.entity_at(fc[0])
+	check(int(bb.get("lifetime", 0)) == 4, "bombe : explosion au bout de 4 tours")
+	art["casts"] = {}
+	check(gm.cast_spell(art, rap, fc[0]), "Rappel sur la bombe")
+	check(gm.mechs_of(art).is_empty() and not gm.is_alive(bb) or gm.entity_at(fc[0]).is_empty(), "bombe rappelée sans explosion")
+	var kinds: Array = ["Poser Bombe", "Poser Bombe incendiaire", "Poser Bombe assourdissante", "Poser Charge à fragmentation", "Poser Tourelle"]
+	for i: int in range(5):
+		art["casts"] = {}
+		check(gm.cast_spell(art, _sp(art, kinds[i]), fc[i + 1]), "mécanisme %d (%s)" % [i + 1, kinds[i]])
+	check(gm.mechs_of(art).size() == 5, "5 mécanismes sur le terrain")
+	art["casts"] = {}
+	check(gm.validate_cast(art, _sp(art, "Poser Bombe"), fc[6]) != "", "6e mécanisme refusé")
+	var fr: Dictionary = gm.entity_at(fc[4])
+	check(int(fr.get("bomb_radius", 0)) == 3, "charge à fragmentation : rayon 3")
+	var mt: Dictionary = gm.entity_at(fc[1])
+	mt["current_pv"] = 1
+	art["casts"] = {}
+	check(gm.cast_spell(art, _sp(art, "Maintenance"), gm.pos_of(art)), "Maintenance")
+	check(int(mt["current_pv"]) == int(mt["max_pv"]) and int(mt["lifetime"]) == 6, "réparée et prolongée de 2 tours")
+	# bombe incendiaire : brûle l'ennemi touché
+	var foe2: Dictionary = gm.enemies[0]
+	var ib: Dictionary = gm.entity_at(fc[2])
+	for d3: Vector2i in Combat.DIRS:
+		if gm.is_free(fc[2] + d3):
+			gm._teleport_entity(foe2, fc[2] + d3)
+			break
+	foe2["current_pv"] = foe2["max_pv"]
+	art["casts"] = {}
+	check(gm.cast_spell(art, _sp(art, "Déclencheur"), fc[2]), "Déclencheur bombe incendiaire")
+	check(Combat.has_status(foe2, "burn"), "ennemi en feu")
 	# Nation
 	check(Nations.has("Rouages") and Nations.nation_name("Rouages") == "Rouages", "Nation Rouages")
 	check(Nations.info("Rouages")["hero"] == "Artificier", "héros de la nation")

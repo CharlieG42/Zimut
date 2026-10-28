@@ -538,7 +538,7 @@ func _on_lead() -> void:
 	refresh()
 
 func _on_unlock_hero() -> void:
-	if GameManager.active_save.is_empty() or get_node_or_null("HeroPickUI") != null:
+	if GameManager.active_save.is_empty() or find_child("HeroPickUI", true, false) != null:
 		return
 	var root_node: Node = _root if _root != null else self
 	HeroPickUI.open(root_node, GameManager.active_save, false, func(_p: Array) -> void:
