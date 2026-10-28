@@ -1,0 +1,53 @@
+Canvas 2048x1024 pixels. EXACTLY 4 sprites, ONLY 4 sprites, NO MORE. Arranged in a strict 2x2 grid: 2 rows, 2 columns. Each cell is 1024x512 pixels.
+
+Cell coordinates:
+- TOP-LEFT cell = pixels x:0-1023, y:0-511. One sprite centered here.
+- TOP-RIGHT cell = pixels x:1024-2047, y:0-511. One sprite centered here.
+- BOTTOM-LEFT cell = pixels x:0-1023, y:512-1023. One sprite centered here.
+- BOTTOM-RIGHT cell = pixels x:1024-2047, y:512-1023. One sprite centered here.
+
+Each cell has at least 80 pixels of empty background margin on all four sides. Sprites never touch each other. Sprites never cross cell boundaries.
+
+Background: solid flat light gray #E8E8E8 everywhere. No ground line. No shadow. No texture. No text. No border. No grid lines.
+
+THE CHARACTER — same adult man in all 4 cells:
+- Late twenties, calm serious face, defined jaw
+- Black medium-length hair with messy bangs (#15151C)
+- Violet eyes (#9B6BFF), pale skin
+- Long black coat with violet trims (#7A3FD0) and silver clasps
+- Black trousers, black boots with silver buckles
+- Head is exactly one third (1/3) of total body height
+- Chibi proportions: big head, short body, big hands and boots
+- NO hood, NO mask, NO white hair
+
+Cell 1 (top-left): FRONT view. Standing relaxed. Facing front-right (3/4 view toward the right). Both feet visible.
+Cell 2 (top-right): FRONT view. Different relaxed pose. Facing front-right (3/4 view toward the right). Both feet visible.
+Cell 3 (bottom-left): BACK view. Back of head, black hair visible from behind. No face. Turned toward upper-right. Both feet visible.
+Cell 4 (bottom-right): BACK view. Back of head, black hair visible from behind. No face. Different pose from cell 3. Turned toward upper-right. Both feet visible.
+
+ALIGNMENT RULES (critical):
+- All 4 sprites have EXACTLY the same pixel height
+- Top of head at the same Y coordinate within each row
+- Feet (bottom of sprite) at the same Y coordinate within each row: Y=480 for top row, Y=992 for bottom row
+- Each sprite is TALLER than it is WIDE (vertical proportions)
+
+HELD ITEM (critical — same in ALL 4 cells):
+- RIGHT hand holds a spiked dark staff topped with a violet crystal
+- A small dark grimoire floats at his LEFT side, visible in each cell
+- Staff is gripped firmly in the RIGHT hand
+- Staff and grimoire are visible in ALL 4 cells (front and back views)
+- Staff is NEVER in the left hand
+- Staff is NEVER floating or detached from the hand
+- Staff is NEVER missing from any cell
+
+STYLE:
+- Smooth vector cartoon with thick dark outlines (Dofus / Waven / Ankama style)
+- Light chibi proportions identical to existing game sprites
+- NOT pixel art
+- NOT realistic 3D render
+- NOT thin-line model sheet
+- NOT realistic anime proportions
+- NO white sticker outline around sprites
+- NO black horizontal bands
+
+NEGATIVE (do not include): extra sprites, 5th or 6th character, grid lines, cell borders, ground, shadow, floating objects, hood, mask, white hair, staff in left hand, child proportions, close-up headshots, profile views.
