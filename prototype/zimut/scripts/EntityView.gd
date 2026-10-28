@@ -653,8 +653,9 @@ func _process(delta: float) -> void:
 			_mat.set_shader_parameter("flash", _flash)
 			# Contour sombre permanent pour détacher les sprites du feuillage et du sol.
 			# Le contour actif reste plus épais et coloré pour garder le repérage tactique.
-			var outline_w: float = 1.35
-			var oc := Color(0.10, 0.16, 0.12, 0.96)
+			# V65 : contour un peu plus épais et teinté par camp (bleu nuit / rouge sombre).
+			var outline_w: float = 1.8
+			var oc := Color(0.04, 0.10, 0.24, 0.97) if entity["team"] == "player" else Color(0.26, 0.05, 0.05, 0.97)
 			if entity.get("is_active", false):
 				outline_w = 2.5 + sin(_t * 5.0) * 0.35
 				oc = Color(1.0, 0.83, 0.24, 1.0)

@@ -30,6 +30,9 @@ var path_cost: int = 0
 ## Menace d'un ennemi (appui long) : 1 = il peut y aller, 2 = il peut y frapper
 var threat: int = 0
 var flash: float = 0.0
+## V65 : case de départ d'une équipe (1 = alliés, 2 = ennemis), affichée au début du combat puis estompée.
+var team_mark: int = 0
+var mark_a: float = 0.0
 
 var _base: Color = Color(0.43, 0.68, 0.27)
 var _forest_tile_texture: Texture2D = null
@@ -226,6 +229,10 @@ func _draw() -> void:
 	var t_ms: float = float(Time.get_ticks_msec()) / 1000.0
 	var pulse: float = 0.5 + 0.5 * sin(t_ms * 5.0 + _pulse_phase)
 
+	if team_mark > 0 and mark_a > 0.01:
+		var mc: Color = Color(0.22, 0.52, 1.0) if team_mark == 1 else Color(0.95, 0.20, 0.16)
+		draw_colored_polygon(_diamond(0.94), Color(mc.r, mc.g, mc.b, 0.50 * mark_a))
+		_outline(_diamond(0.94), Color(minf(mc.r + 0.4, 1.0), minf(mc.g + 0.4, 1.0), minf(mc.b + 0.4, 1.0), mark_a), 3.0)
 	if threat == 2:
 		draw_colored_polygon(_diamond(0.94), Color(0.95, 0.12, 0.12, 0.46))
 		_outline(_diamond(0.94), Color(1.0, 0.35, 0.30, 1.0), 3.0)

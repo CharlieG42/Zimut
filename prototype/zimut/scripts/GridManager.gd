@@ -60,6 +60,34 @@ func init(manager) -> void:
 	game_manager.state_changed.connect(func() -> void: refresh_highlights())
 
 
+## V65 (façon Dofus) : au début du combat, les cases de départ sont teintées bleu (ton équipe) et
+## rouge (ennemis), puis s'estompent après ~3 s.
+func show_start_zones() -> void:
+	var marked: Array = []
+	for team: Array in [[game_manager.players, 1], [game_manager.enemies, 2]]:
+		for e: Dictionary in (team[0] as Array):
+			var p: Vector2i = game_manager.pos_of(e)
+			if p.x < 0 or p.y < 0 or p.y >= cell_nodes.size() or p.x >= (cell_nodes[p.y] as Array).size():
+				continue
+			var c: Cell = cell_nodes[p.y][p.x]
+			c.team_mark = int(team[1])
+			c.mark_a = 1.0
+			c.queue_redraw()
+			marked.append(c)
+	var tw: Tween = create_tween()
+	tw.tween_interval(1.8)
+	tw.tween_method(func(a: float) -> void:
+		for c: Variant in marked:
+			if is_instance_valid(c):
+				(c as Cell).mark_a = a
+				(c as Cell).queue_redraw(), 1.0, 0.0, 1.4)
+	tw.tween_callback(func() -> void:
+		for c: Variant in marked:
+			if is_instance_valid(c):
+				(c as Cell).team_mark = 0
+				(c as Cell).queue_redraw())
+
+
 func _make_glow_texture() -> void:
 	var g := Gradient.new()
 	g.colors = PackedColorArray([Color(1, 1, 1, 1), Color(1, 1, 1, 0)])

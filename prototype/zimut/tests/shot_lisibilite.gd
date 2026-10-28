@@ -30,9 +30,9 @@ func _boot() -> void:
 	gm.fight_biome = "Montagne"
 	var main: Node = (load("res://scenes/Main.tscn") as PackedScene).instantiate()
 	root.add_child(main)
-	await create_timer(1.5).timeout
+	await create_timer(0.3).timeout
 	for i: int in range(count):
-		await create_timer(1.5).timeout
+		await create_timer(0.6).timeout
 		var img: Image = root.get_viewport().get_texture().get_image()
 		img.save_png("%s/shot_%02d.png" % [shots_dir, i])
 		print("capture ", i, " tour ", gm.turn_count)
