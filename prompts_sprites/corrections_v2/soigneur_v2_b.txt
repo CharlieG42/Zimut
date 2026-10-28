@@ -1,0 +1,16 @@
+2048x1024 sprite sheet. 4 cells. 2 rows x 2 columns. Each cell 1024x512. Plain light gray #E8E8E8 background. No ground. No shadow. No text.
+
+Same adult woman healer in all 4 cells. Long WHITE hair. Pointed ears. White robe, turquoise panels #24C1C9, gold trim #E8C067. Head = 1/3 of height. Chibi. Thick black outlines. Dofus vector style.
+
+TOP-LEFT: front view, facing right, relaxed.
+TOP-RIGHT: front view, facing right, other pose.
+BOTTOM-LEFT: back view, white hair from behind, facing upper-right.
+BOTTOM-RIGHT: back view, white hair from behind, facing upper-right, other pose.
+
+All 4 sprites: same exact height. Feet on same line per row. Taller than wide. Wide empty gaps between sprites. Sprites never touch.
+
+RIGHT hand holds golden staff with glowing blue water-drop crystal #7FE8FF. In ALL 4 cells. Staff always in right hand. Never left. Never floating. Never on ground. Never missing.
+
+Copy the face, hair, and outfit EXACTLY from the attached reference image (heal.png).
+
+NOT pixel art. NOT realistic. NOT thin lines. NOT extra sprites. NO 5th character. NO grid lines. NO borders between cells.

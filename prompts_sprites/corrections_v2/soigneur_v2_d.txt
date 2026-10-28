@@ -1,0 +1,7 @@
+A 2x2 character reference sheet. Four panels. Top row: two front views. Bottom row: two back views. Same adult female elf healer in every panel. Long white hair, pointed ears, white and turquoise robe with gold embroidery. Chibi Dofus style, thick black outlines, head one third of height. Light gray background #E8E8E8, no ground, no shadow, no text.
+
+All four figures same height, feet aligned per row, tall narrow proportions, big empty gaps between figures.
+
+Golden staff with glowing blue water-drop crystal in right hand in every panel. Staff always held in right hand, never left, never floating.
+
+Canvas 2048x1024. Each panel 1024x512. Exactly four figures, no more, no less. Vector cartoon, not pixel art, not realistic.

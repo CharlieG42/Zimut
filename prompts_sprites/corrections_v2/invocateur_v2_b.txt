@@ -1,0 +1,14 @@
+2048x1024 sprite sheet. 4 cells. 2 rows x 2 columns. Each cell 1024x512. Plain light gray #E8E8E8 background. No ground. No shadow. No text.
+
+Same adult man dark summoner in all 4 cells. Black medium-length hair with messy bangs #15151C. Violet eyes #9B6BFF. Pale skin. Long black coat with violet trims #7A3FD0, silver clasps. Black trousers, black boots with silver buckles. No hood, no mask, no white hair. Head = 1/3 of height. Chibi. Thick black outlines. Dofus vector style.
+
+TOP-LEFT: front view, facing right, relaxed.
+TOP-RIGHT: front view, facing right, other pose.
+BOTTOM-LEFT: back view, black hair from behind, facing upper-right.
+BOTTOM-RIGHT: back view, black hair from behind, facing upper-right, other pose.
+
+All 4 sprites: same exact height. Feet on same line per row. Taller than wide. Wide empty gaps between sprites. Sprites never touch.
+
+RIGHT hand holds spiked dark staff with violet crystal. Small dark grimoire floats at LEFT side. Both visible in ALL 4 cells. Staff always in right hand. Never left. Never floating. Never missing.
+
+NOT pixel art. NOT realistic. NOT thin lines. NOT extra sprites. NO 5th character. NO grid lines. NO borders between cells.

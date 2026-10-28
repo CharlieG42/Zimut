@@ -1,0 +1,40 @@
+Canvas 2048x1024 pixels. EXACTLY 4 sprites, ONLY 4 sprites, NO MORE. Strict 2x2 grid: 2 rows, 2 columns. Each cell is 1024x512 pixels.
+
+Cell coordinates:
+- TOP-LEFT  = x:0-1023,    y:0-511   → one sprite, FRONT view, facing right, relaxed pose A
+- TOP-RIGHT = x:1024-2047, y:0-511   → one sprite, FRONT view, facing right, relaxed pose B (different from A)
+- BOT-LEFT  = x:0-1023,    y:512-1023 → one sprite, BACK view, facing upper-right, pose C
+- BOT-RIGHT = x:1024-2047, y:512-1023 → one sprite, BACK view, facing upper-right, pose D (different from C)
+
+Each cell: at least 80px empty margin on all sides. Sprites never touch. Never cross cell boundaries.
+
+Background: solid flat [COLOR] everywhere. No ground. No shadow. No texture. No text. No border. No grid lines.
+
+THE CHARACTER — same [adulte/adulte] [homme/femme] in all 4 cells:
+- [Description du visage : âge, expression, mâchoire, etc.]
+- [Description des cheveux : couleur, longueur, style]
+- [Description de la tenue : couleurs exactes avec codes hex, accessoires]
+- Head = exactly 1/3 of total height
+- Chibi proportions: big head, short body, big hands
+- [Interdictions : pas de chapeau, pas de cape, etc.]
+
+ALIGNMENT (critical):
+- All 4 sprites EXACTLY same pixel height
+- Top of head at same Y within each row
+- Feet at same Y within each row: Y=480 (top row), Y=992 (bottom row)
+- Each sprite TALLER than WIDE
+
+HELD ITEM (critical — ALL 4 cells):
+- RIGHT hand holds [description de l'objet avec couleur hex]
+- [Détails de l'objet : cristal, forme, couleur]
+- Gripped firmly in RIGHT hand
+- Visible in ALL 4 cells (front and back)
+- NEVER left hand, NEVER floating, NEVER on ground, NEVER missing
+
+STYLE:
+- Smooth vector cartoon, thick dark outlines, Dofus / Waven / Ankama
+- Light chibi proportions
+- NOT pixel art, NOT realistic, NOT thin lines
+- NO white sticker outline, NO black bands
+
+NEGATIVE: extra sprites, 5th+ character, grid lines, cell borders, ground, shadow, floating objects, wrong hair color, item in left hand, child proportions, close-up headshots, profile views.
