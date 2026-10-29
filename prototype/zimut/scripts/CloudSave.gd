@@ -70,15 +70,21 @@ static func fmt_unix(unix: int) -> String:
 
 ## Sauvegarde Cloud automatique (fin de combat) : silencieuse, jamais de demande de code,
 ## et jamais d'écrasement d'une sauvegarde plus récente faite sur un autre appareil.
-static func auto_backup(tree: SceneTree) -> void:
+static func auto_enabled(tree: SceneTree) -> bool:
 	var gs: Node = tree.root.get_node_or_null("GameSettings")
-	if gs == null or not bool(gs.get("cloud_auto")) or not is_configured() or not is_linked():
-		return
+	return gs != null and bool(gs.get("cloud_auto")) and is_configured() and is_linked()
+
+
+## Retourne "" (option désactivée ou pas reliée), "ok", "conflict" ou "fail".
+static func auto_backup(tree: SceneTree) -> String:
+	if not auto_enabled(tree):
+		return ""
 	var node := CloudSave.new()
 	node.name = "CloudAutoBackup"
 	tree.root.add_child(node)
-	await node.backup(false, false)
+	var r: String = await node.backup(false, false)
 	node.queue_free()
+	return r
 
 
 # ═══════════════════════════════════════════════════════════════════════════

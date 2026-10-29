@@ -98,6 +98,44 @@ class SpellCard extends Button:
 	var card_scale: float = 1.0
 	var badge_mode: bool = false
 	var _elem: String = ""
+	## V70 : défilement tactile de la colonne de sorts. Un Button consomme le geste : le doigt posé
+	## sur une carte ne faisait pas défiler. On fait défiler nous-mêmes le ScrollContainer parent dès
+	## que le doigt a bougé de plus de 10 px, et on neutralise alors le clic de la carte.
+	var dragged: bool = false
+	var _touch_on: bool = false
+	var _touch_from: Vector2 = Vector2.ZERO
+
+	func _gui_input(event: InputEvent) -> void:
+		var sc: ScrollContainer = _scroll_parent()
+		if sc == null:
+			return
+		if event is InputEventScreenTouch:
+			var t := event as InputEventScreenTouch
+			_touch_on = t.pressed
+			if t.pressed:
+				_touch_from = t.position
+				dragged = false
+		elif event is InputEventScreenDrag and _touch_on:
+			var d := event as InputEventScreenDrag
+			if not dragged and d.position.distance_to(_touch_from) >= 10.0:
+				dragged = true
+			if dragged:
+				sc.scroll_vertical = maxi(0, sc.scroll_vertical - int(roundf(d.relative.y)))
+				accept_event()
+		elif event is InputEventMouseButton:
+			var mb := event as InputEventMouseButton
+			if mb.pressed and mb.button_index == MOUSE_BUTTON_WHEEL_UP:
+				sc.scroll_vertical = maxi(0, sc.scroll_vertical - 90)
+				accept_event()
+			elif mb.pressed and mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				sc.scroll_vertical += 90
+				accept_event()
+
+	func _scroll_parent() -> ScrollContainer:
+		var n: Node = get_parent()
+		while n != null and not (n is ScrollContainer):
+			n = n.get_parent()
+		return n as ScrollContainer
 
 	static func hexagon(c: Vector2, r: float) -> PackedVector2Array:
 		var pts := PackedVector2Array()
@@ -1604,7 +1642,11 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 		card.focus_mode = Control.FOCUS_NONE
 		_style_card(card, false)
-		card.pressed.connect(func() -> void: spell_selected.emit(spell))
+		card.pressed.connect(func() -> void:
+			if card.dragged:   # le doigt a fait défiler la colonne : ce n'est pas un choix de sort
+				card.dragged = false
+				return
+			spell_selected.emit(spell))
 		card.mouse_entered.connect(func() -> void: _show_tip(spell))
 		card.mouse_exited.connect(func() -> void: _show_tip(game_manager.selected_spell))
 		_spell_box.add_child(card)
@@ -1836,7 +1878,6 @@ const UK = preload("res://scripts/UiKit.gd")
 
 func _show_result_window(victory: bool) -> void:
 	var save: Dictionary = game_manager.active_save
-	CloudSave.auto_backup(get_tree())   # V49 : sauvegarde Cloud automatique (option)
 	var res: Dictionary = save.get("last_result", {})
 	var loots: Array = save.get("last_loots", []) if victory else []
 	var dim: ColorRect = ColorRect.new()
@@ -2052,6 +2093,7 @@ func _show_result_window(victory: bool) -> void:
 func _result_extras(content: VBoxContainer, save: Dictionary, victory: bool) -> void:
 	var res: Dictionary = save.get("last_result", {})
 	_result_player_card(content, save)
+	_result_cloud_line(content)   # V49/V71 : sauvegarde Cloud automatique (option) + son état
 	var obj: Dictionary = res.get("objective", {})
 	if not obj.is_empty():
 		var ok: bool = bool(obj.get("success", false))
@@ -2067,6 +2109,54 @@ func _result_extras(content: VBoxContainer, save: Dictionary, victory: bool) -> 
 		row.add_theme_stylebox_override("panel", UK.box(Color(0.20, 0.15, 0.05, 0.95), Color(1.0, 0.82, 0.35), 12, 2, 10))
 		row.add_child(UK.lbl("🏆 Succès débloqué : %s — %s" % [String(a.get("name", "")), String(a.get("reward_text", ""))], 19, Color(1.0, 0.88, 0.5)))
 		content.add_child(row)
+
+
+## V71 : ligne d'état de la sauvegarde Cloud automatique (seulement si l'option est active et le compte relié).
+var _cloud_lbl: Label = null
+var _cloud_busy: bool = false
+var _cloud_again: bool = false
+
+func _result_cloud_line(content: VBoxContainer) -> void:
+	_cloud_lbl = null
+	if not CloudSave.auto_enabled(get_tree()):
+		return
+	_cloud_lbl = UK.lbl("", 17, UK.C_DIM)
+	_cloud_lbl.name = "CloudStatus"
+	_cloud_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content.add_child(_cloud_lbl)
+	_cloud_send()
+
+
+func _cloud_send() -> void:
+	var lbl: Label = _cloud_lbl
+	if lbl == null or not is_instance_valid(lbl):
+		return
+	if _cloud_busy:
+		_cloud_again = true   # un envoi est déjà en cours : on renverra juste après (état à jour)
+		return
+	_cloud_busy = true
+	lbl.text = "☁  Sauvegarde sur Google Drive…"
+	lbl.add_theme_color_override("font_color", UK.C_DIM)
+	var r: String = await CloudSave.auto_backup(get_tree())
+	_cloud_busy = false
+	if _cloud_again:
+		_cloud_again = false
+		_cloud_send()
+		return
+	if not is_instance_valid(lbl):
+		return
+	match r:
+		"ok":
+			lbl.text = "☁  ✓ Partie sauvegardée sur Google Drive"
+			lbl.add_theme_color_override("font_color", UK.C_GOOD)
+		"conflict":
+			lbl.text = "⚠  Drive contient une sauvegarde plus récente (autre appareil) : rien n'a été envoyé. Voir Réglages → Cloud."
+			lbl.add_theme_color_override("font_color", Color(1.0, 0.72, 0.30))
+		"":
+			lbl.text = ""
+		_:
+			lbl.text = "⚠  Sauvegarde Drive impossible (réseau ou connexion Google) : elle sera retentée au prochain combat."
+			lbl.add_theme_color_override("font_color", Color(1.0, 0.72, 0.30))
 
 
 ## V47 : niveau du joueur (barre d'XP) et déblocage de héros.
@@ -2101,6 +2191,7 @@ func _result_player_card(content: VBoxContainer, save: Dictionary) -> void:
 				if picked.is_empty():
 					return   # « Plus tard » : le bouton reste disponible
 				ProgressionManager.write_save(game_manager.active_slot, save)
+				_cloud_send()   # V71 : le héros débloqué part aussi sur Drive
 				var left: int = HeroUnlock.pending_unlocks(save)
 				if left > 0:
 					b.text = "🔓  CHOISIR UN NOUVEAU HÉROS  (%d)" % left

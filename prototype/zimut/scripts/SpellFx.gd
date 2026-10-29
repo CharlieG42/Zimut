@@ -226,6 +226,58 @@ class Pillar extends Node2D:
 		draw_line(Vector2(0, 0), Vector2(0, -h), Color(1, 1, 1, a * 0.7), 3.0, true)
 
 
+## V70 : faisceau de lumière de la mort. Une colonne tombe du ciel sur le personnage vaincu,
+## l'enveloppe un instant, puis s'éteint pendant que le personnage se dissout dans la lumière.
+## `pos` = pied du personnage ; la tête du faisceau atteint le sol en HIT secondes.
+class DeathBeam extends Node2D:
+	const HIT := 0.20
+	var col: Color = Color(0.85, 0.95, 1.0)
+	var life: float = 1.05
+	var half_w: float = 21.0
+	var t: float = 0.0
+	func _ready() -> void:
+		var m := CanvasItemMaterial.new()
+		m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		material = m
+		z_index = 20
+	func _process(d: float) -> void:
+		t += d
+		if t >= life:
+			queue_free()
+			return
+		queue_redraw()
+	func _draw() -> void:
+		var top: float = -1100.0
+		var land: float = clampf(t / HIT, 0.0, 1.0)
+		var head: float = lerpf(top, 6.0, land * land)
+		var fade: float = 1.0
+		if t > life * 0.70:
+			fade = clampf(1.0 - (t - life * 0.70) / (life * 0.30), 0.0, 1.0)
+		var w: float = half_w * (1.0 + 0.10 * sin(t * 38.0)) * (0.35 + 0.65 * fade)
+		# colonne en couches : halo large, corps, cœur blanc
+		for layer: Array in [[2.2, 0.08], [1.5, 0.16], [0.9, 0.32], [0.4, 0.62]]:
+			var lw: float = w * float(layer[0])
+			var la: float = float(layer[1]) * fade
+			var c: Color = col if float(layer[0]) > 0.5 else Color(1, 1, 1)
+			draw_rect(Rect2(-lw, top, lw * 2.0, head - top), Color(c.r, c.g, c.b, la))
+		# tête lumineuse qui tombe
+		draw_circle(Vector2(0, head), w * (0.9 + (1.0 - land) * 0.8), Color(1, 1, 1, 0.40 * fade))
+		if t < HIT:
+			return
+		# impact : onde elliptique au sol
+		var k: float = clampf((t - HIT) / 0.55, 0.0, 1.0)
+		draw_set_transform(Vector2(0, 6), 0.0, Vector2(1.0, 0.42))
+		draw_arc(Vector2.ZERO, 24.0 + 78.0 * k, 0.0, TAU, 40, Color(col.r, col.g, col.b, (1.0 - k) * 0.9), 5.0 * (1.0 - k) + 1.0, true)
+		draw_circle(Vector2.ZERO, 22.0 * (1.0 - k * 0.6), Color(1, 1, 1, 0.25 * (1.0 - k)))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		# étincelles qui montent le long du faisceau
+		for i: int in range(16):
+			var ph: float = fposmod((t - HIT) * 1.5 + float(i) * 0.137, 1.0)
+			var x: float = sin(float(i) * 7.3) * w * 1.15
+			var y: float = -ph * 150.0
+			draw_circle(Vector2(x, y), 3.2 * (1.0 - ph), Color(1, 1, 1, (1.0 - ph) * fade))
+
+
 ## Projectile : flèche, éclat de glace, boule... orienté dans le sens du déplacement.
 class Missile extends Node2D:
 	var kind: String = "orb"
