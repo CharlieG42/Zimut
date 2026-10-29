@@ -162,3 +162,6 @@ Intégrés quand même quand c'était exploitable ; voici ce qu'il faut reprendr
 - **chasseur_actions_dos** : case haut-droite ratée (rectangle noir, personnage coupé) → `chasseur_back_attack_2` retirée (repli sur le repos).
 - **chasseur** : de l'espace blanc plein est resté dans l'arc (intérieur de l'arc non transparent) sur plusieurs poses.
 - Poses `_attack_3` et `_walk` retirées pour mage, sylvain, chasseur, assassin, tank, géomancien, invocateur (ancien personnage ; les planches 2×2 n'en ont que 4).
+
+## V69b — contrôle de la passe V3/V4 de Mistral
+Voir `prompts_sprites/corrections_heros_V3.md` (druide et soigneur : vues anciennes conservées ; artificier attaques 1-2 et chasseur arc à refaire).
