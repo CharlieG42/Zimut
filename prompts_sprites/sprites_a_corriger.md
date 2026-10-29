@@ -165,3 +165,15 @@ Intégrés quand même quand c'était exploitable ; voici ce qu'il faut reprendr
 
 ## V69b — contrôle de la passe V3/V4 de Mistral
 Voir `prompts_sprites/corrections_heros_V3.md` (druide et soigneur : vues anciennes conservées ; artificier attaques 1-2 et chasseur arc à refaire).
+
+## V72 — passe Mistral V5–V8 + ennemis/boss 2×2 (35 personnages)
+Outils : `tools/integrer_heros_v2b.py` (héros), `tools/integrer_ennemis_v2b.py` (ennemis/boss), `tools/nettoyer_blanc_sol.py` (plaques blanches résiduelles), `tools/couper_composite.py --blanc`.
+- **Vues de repos conservées (anciennes)** : druide (barbu), soigneur (cheveux blancs), artificier (jeune, sans barbe). Les nouvelles vues de Mistral montrent un garçon imberbe (druide), des cheveux turquoise (soigneur) et un homme barbu (artificier) : à NE PAS refaire dans ce sens.
+- **Artificier** : attaques de face OK (jeune, sans barbe, marteau à engrenages).
+- **Chasseur** : intérieur de l'arc transparent (corrigé à la découpe).
+- **soigneur** : `heal_cast_2` face garde un bloc blanc en haut à gauche.
+- **géomancien** : poses d'action de dos plus « enfantines » (corps petit, tête grosse) que les vues de repos.
+- **assassin_des_ombres** : le repos de face et les vues de dos montrent deux créatures différentes (face = humanoïde, dos = félin à épines).
+- **Doublons** : beaucoup de poses « dos » identiques entre elles (back = back_attack = back_cast_2…), notamment araignee_mecanique, araignee_de_cristal, spectre.
+- Plaques blanches au sol : retirées automatiquement sauf pour les corps blancs (requin, néréide, fantôme, brumeux, pirate, guerrier des monts, spectre, liche des brumes, aigle, harpie, élémentaire de vent) — quelques restes possibles.
+- Le repos de dos du fantôme et de l'élémentaire de vent est une simple silhouette sans visage (normal).

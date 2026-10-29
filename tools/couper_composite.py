@@ -26,7 +26,7 @@ def flood_bg(rgb, seeds, tol):
     return bg
 
 
-def cut_cell(cell, tol=26, sombre=False):
+def cut_cell(cell, tol=26, sombre=False, blanc=False):
     rgb = np.asarray(cell.convert("RGB"))
     h, w, _ = rgb.shape
     # 1) fond de la planche, depuis les bords de la case
@@ -74,6 +74,13 @@ def cut_cell(cell, tol=26, sombre=False):
         for i in touch:
             if i:
                 alpha[labl == i] = 0
+    if blanc:   # plages blanches enfermées (intérieur d'un arc…) : le personnage n'a aucun vêtement blanc
+        white = (b.min(axis=2) >= 240) & (alpha > 0)
+        lw, nw = ndimage.label(white)
+        if nw:
+            for i, v in enumerate(ndimage.sum(white, lw, range(1, nw + 1)), 1):
+                if v > 300:
+                    alpha[lw == i] = 0
     out = np.dstack([box, alpha])
     im = Image.fromarray(out, "RGBA")
     bb = im.getbbox()
@@ -85,12 +92,13 @@ def main():
     ap.add_argument("sheet"); ap.add_argument("out"); ap.add_argument("prefix")
     ap.add_argument("--hauteur", type=int, default=340)
     ap.add_argument("--sombre", action="store_true", help="personnage sans blanc ni gris clair : retire tout halo clair")
+    ap.add_argument("--blanc", action="store_true", help="retire les grandes plages blanches enfermées (intérieur d'un arc)")
     a = ap.parse_args()
     im = Image.open(a.sheet).convert("RGB")
     W, H = im.size
     os.makedirs(a.out, exist_ok=True)
     cells = [im.crop((c * W // 2, r * H // 2, (c + 1) * W // 2, (r + 1) * H // 2)) for r in range(2) for c in range(2)]
-    sprites = [cut_cell(c, sombre=a.sombre) for c in cells]
+    sprites = [cut_cell(c, sombre=a.sombre, blanc=a.blanc) for c in cells]
     ref = max(s.height for s in sprites if s is not None)
     sc = a.hauteur / ref
     for suf, s in zip(SUFFIX, sprites):
