@@ -1,48 +1,45 @@
 class_name Adv3DWorld
 extends RefCounted
-## Adv3DWorld.gd — Monde 3D low-poly d'une carte d'Aventure (V60, bêta).
+## Adv3DWorld.gd — Terrain 3D low-poly d'une carte d'Aventure (V60, refondu en V61).
 ##
-## Génère, à partir du terrain DÉJÀ utilisé par la carte classique (AdventureTerrain :
-## cases, obstacles, sentiers, portes, lieux), une île 3D flottante : même monde, vu au sol.
+## Génère, à partir du terrain DÉJÀ utilisé par la carte classique (AdventureTerrain : cases,
+## obstacles, sentiers, portes, lieux), une île 3D flottante : même monde, vu au sol.
 ## Rien n'est importé : tout est construit en code (légèreté Android, style low-poly).
+## Les meshes de décor viennent de Adv3DMeshes ; personnages et marqueurs de Adv3DActors.
 ##
 ## Repère : la case (cx, cy) de la grille occupe [cx·CELL, (cx+1)·CELL] sur X et
 ## [cy·CELL, (cy+1)·CELL] sur Z. L'axe Y est la hauteur.
 
 const CELL := 3.0
-const SKIRT := 3.2                 # profondeur de la falaise sous l'île
+const SKIRT := 3.4                 # profondeur de la falaise sous l'île
 const OBSTACLE_RADIUS := 0.95      # rayon bloquant d'un arbre / rocher (< demi-case : les cases restent reliées)
 const HEIGHT_AMPLITUDE := 0.42
+const SUN_SHADOW_OFFSET := Vector3(0.28, 0.0, 0.22)   # les ombres tombent du côté opposé au soleil
 
-## Couleurs par biome (les Nations sans palette propre reprennent celle de la Forêt).
+## Couleurs par biome (sRGB ; les Nations sans palette propre reprennent celle de la Forêt).
 const PALETTES := {
 	"Forêt": {
-		"ground": [Color(0.29, 0.51, 0.22), Color(0.34, 0.57, 0.25), Color(0.26, 0.46, 0.21)],
-		"path": Color(0.62, 0.49, 0.31), "cliff_top": Color(0.45, 0.33, 0.22), "cliff_bot": Color(0.20, 0.15, 0.12),
-		"sky_top": Color(0.30, 0.55, 0.82), "sky_hor": Color(0.80, 0.89, 0.92), "fog": Color(0.76, 0.86, 0.88),
-		"sun": Color(1.0, 0.95, 0.82),
+		"ground": [Color(0.38, 0.66, 0.27), Color(0.45, 0.72, 0.31), Color(0.33, 0.58, 0.25)],
+		"path": Color(0.74, 0.60, 0.40), "cliff_top": Color(0.50, 0.37, 0.25), "cliff_bot": Color(0.20, 0.15, 0.13),
+		"sky_top": Color(0.24, 0.50, 0.84), "sky_hor": Color(0.74, 0.88, 0.96), "fog": Color(0.74, 0.86, 0.92),
+		"sun": Color(1.0, 0.94, 0.80), "ambient": Color(0.62, 0.74, 0.92),
 	},
 	"Montagne": {
-		"ground": [Color(0.55, 0.57, 0.60), Color(0.62, 0.64, 0.67), Color(0.82, 0.86, 0.90)],
-		"path": Color(0.45, 0.42, 0.40), "cliff_top": Color(0.40, 0.42, 0.46), "cliff_bot": Color(0.16, 0.17, 0.20),
-		"sky_top": Color(0.40, 0.58, 0.82), "sky_hor": Color(0.86, 0.90, 0.95), "fog": Color(0.84, 0.88, 0.93),
-		"sun": Color(0.95, 0.97, 1.0),
+		"ground": [Color(0.50, 0.57, 0.62), Color(0.64, 0.71, 0.76), Color(0.84, 0.90, 0.95)],
+		"path": Color(0.50, 0.46, 0.42), "cliff_top": Color(0.44, 0.46, 0.52), "cliff_bot": Color(0.17, 0.18, 0.23),
+		"sky_top": Color(0.30, 0.52, 0.82), "sky_hor": Color(0.82, 0.90, 0.97), "fog": Color(0.82, 0.88, 0.95),
+		"sun": Color(0.96, 0.97, 1.0), "ambient": Color(0.66, 0.74, 0.92),
 	},
 	"Désert": {
-		"ground": [Color(0.86, 0.72, 0.45), Color(0.90, 0.77, 0.50), Color(0.82, 0.66, 0.40)],
-		"path": Color(0.72, 0.55, 0.34), "cliff_top": Color(0.66, 0.46, 0.28), "cliff_bot": Color(0.30, 0.20, 0.13),
-		"sky_top": Color(0.38, 0.62, 0.88), "sky_hor": Color(0.96, 0.88, 0.74), "fog": Color(0.95, 0.86, 0.70),
-		"sun": Color(1.0, 0.92, 0.75),
+		"ground": [Color(0.90, 0.74, 0.46), Color(0.94, 0.80, 0.52), Color(0.84, 0.68, 0.40)],
+		"path": Color(0.74, 0.55, 0.34), "cliff_top": Color(0.70, 0.48, 0.28), "cliff_bot": Color(0.30, 0.20, 0.14),
+		"sky_top": Color(0.28, 0.54, 0.88), "sky_hor": Color(0.98, 0.88, 0.72), "fog": Color(0.97, 0.86, 0.68),
+		"sun": Color(1.0, 0.92, 0.72), "ambient": Color(0.92, 0.80, 0.68),
 	},
-}
-
-## Couleur des marqueurs de lieux, par type (POI).
-const POI_COLORS := {
-	"combat": Color(0.90, 0.28, 0.22), "chest": Color(0.96, 0.78, 0.25), "puzzle": Color(0.62, 0.42, 0.90),
-	"camp": Color(0.35, 0.80, 0.45), "reveal": Color(0.40, 0.75, 0.95), "exit": Color(0.30, 0.82, 0.78),
 }
 
 static var _noise: FastNoiseLite = null
+static var _patch_noise: FastNoiseLite = null
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -99,11 +96,20 @@ static func point_walkable(t: Dictionary, p: Vector3) -> bool:
 	return true
 
 
+## Bruit de « plaques » (0..1) : variations douces de la couleur du sol.
+static func _patch(x: float, z: float) -> float:
+	if _patch_noise == null:
+		_patch_noise = FastNoiseLite.new()
+		_patch_noise.seed = 777
+		_patch_noise.frequency = 0.11
+	return clampf(_patch_noise.get_noise_2d(x, z) * 0.5 + 0.5, 0.0, 1.0)
+
+
 # ══════════════════════════════════════════════════════════════════════
 #  Construction de la carte
 # ══════════════════════════════════════════════════════════════════════
 
-## Racine 3D de la zone : sol, falaises, arbres/rochers, décors de sol.
+## Racine 3D de la zone : sol, falaises, dessous d'île, arbres/rochers, décors de sol, ombres.
 static func build(zone_id: String) -> Node3D:
 	var t: Dictionary = AdventureTerrain.zone_terrain(zone_id)
 	var biome: String = String(t["biome"])
@@ -111,18 +117,44 @@ static func build(zone_id: String) -> Node3D:
 	var root := Node3D.new()
 	root.name = "ZoneWorld"
 	root.add_child(_build_ground(zone_id, t, pal))
-	_build_obstacles(root, zone_id, t, biome)
-	_build_decor(root, zone_id, t)
+	_build_underside(root, zone_id, t, pal)
+	_build_props(root, zone_id, t, biome)
+	_build_decor(root, zone_id, t, biome)
 	return root
+
+
+# ── Sol : couleurs lissées entre cases (plus de damier), facettes plates ──
+
+static func _cell_color(c: Vector2i, t: Dictionary, pal: Dictionary) -> Color:
+	if (t["paths"] as Dictionary).has(c):
+		return pal["path"]
+	var cols: Array = pal["ground"]
+	var n: float = _patch((float(c.x) + 0.5) * CELL * 0.5, (float(c.y) + 0.5) * CELL * 0.5)
+	var f: float = n * float(cols.size() - 1)
+	var i: int = clampi(floori(f), 0, cols.size() - 2)
+	return (cols[i] as Color).lerp(cols[i + 1], f - float(i))
 
 
 static func _build_ground(zone_id: String, t: Dictionary, pal: Dictionary) -> MeshInstance3D:
 	var size: Vector2i = t["size"]
 	var voids: Dictionary = t["voids"]
-	var paths: Dictionary = t["paths"]
-	var rng := RandomNumberGenerator.new()
-	rng.seed = absi(zone_id.hash()) + 77
-	var ground_cols: Array = pal["ground"]
+	# Couleur de chaque coin de grille = moyenne des cases voisines praticables (adoucit sentiers et plaques).
+	var corner_col: Dictionary = {}
+	for iz: int in range(size.y + 1):
+		for ix: int in range(size.x + 1):
+			var acc := Color(0, 0, 0, 0)
+			var n: int = 0
+			for d: Vector2i in [Vector2i(-1, -1), Vector2i(0, -1), Vector2i(-1, 0), Vector2i(0, 0)]:
+				var c := Vector2i(ix, iz) + d
+				if c.x < 0 or c.y < 0 or c.x >= size.x or c.y >= size.y or voids.has(c):
+					continue
+				var cc: Color = _cell_color(c, t, pal)
+				acc += cc
+				n += 1
+			if n > 0:
+				var avg: Color = acc / float(n)
+				var tone: float = (_patch(float(ix) * 1.7, float(iz) * 1.7) - 0.5) * 0.10
+				corner_col[Vector2i(ix, iz)] = Color(avg.r + tone, avg.g + tone, avg.b + tone * 0.6)
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var dirs: Array = [
@@ -133,8 +165,6 @@ static func _build_ground(zone_id: String, t: Dictionary, pal: Dictionary) -> Me
 			var c := Vector2i(cx, cy)
 			if voids.has(c):
 				continue
-			var col: Color = pal["path"] if paths.has(c) else ground_cols[rng.randi_range(0, ground_cols.size() - 1)]
-			col = col.lightened(rng.randf_range(-0.04, 0.05))
 			var x0: float = float(cx) * CELL
 			var x1: float = float(cx + 1) * CELL
 			var z0: float = float(cy) * CELL
@@ -143,9 +173,13 @@ static func _build_ground(zone_id: String, t: Dictionary, pal: Dictionary) -> Me
 			var b := Vector3(x1, corner_h(cx + 1, cy), z0)
 			var d := Vector3(x1, corner_h(cx + 1, cy + 1), z1)
 			var e := Vector3(x0, corner_h(cx, cy + 1), z1)
+			var ca: Color = corner_col.get(Vector2i(cx, cy), pal["path"])
+			var cb: Color = corner_col.get(Vector2i(cx + 1, cy), ca)
+			var cd: Color = corner_col.get(Vector2i(cx + 1, cy + 1), ca)
+			var ce: Color = corner_col.get(Vector2i(cx, cy + 1), ca)
 			# Dessus : deux triangles à normales distinctes → facettes low-poly.
-			_tri(st, a, b, d, col)
-			_tri(st, a, d, e, col.darkened(0.04))
+			_tri(st, a, b, d, ca, cb, cd)
+			_tri(st, a, d, e, ca, cd, ce)
 			# Falaises : sur chaque bord qui touche le vide ou l'extérieur de l'île.
 			for dd: Array in dirs:
 				var n: Vector2i = c + (dd[0] as Vector2i)
@@ -163,40 +197,81 @@ static func _build_ground(zone_id: String, t: Dictionary, pal: Dictionary) -> Me
 					p0 = a; p1 = e
 				else:
 					p0 = b; p1 = d
-				_skirt(st, p0, p1, o, pal)
+				_skirt(st, p0, p1, o, pal, zone_id)
 	var mi := MeshInstance3D.new()
 	mi.name = "Ground"
 	mi.mesh = st.commit()
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.roughness = 1.0
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	mi.material_override = mat
+	mi.material_override = Adv3DMeshes.solid_material(true)
 	return mi
 
 
 ## Triangle à normale plate (le sens de la normale est forcé vers le haut).
-static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, col: Color) -> void:
+static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, ca: Color, cb: Color, cc: Color) -> void:
 	var n: Vector3 = (c - a).cross(b - a).normalized()
 	if n.y < 0.0:
 		n = -n
-	for v: Vector3 in [a, b, c]:
-		st.set_color(col)
+	var cols: Array = [ca, cb, cc]
+	var vs: Array = [a, b, c]
+	for i: int in range(3):
+		st.set_color(cols[i])
 		st.set_normal(n)
-		st.add_vertex(v)
+		st.add_vertex(vs[i])
 
 
-## Pan de falaise sous l'arête p0-p1, dégradé du brun clair vers le sombre.
-static func _skirt(st: SurfaceTool, p0: Vector3, p1: Vector3, outward: Vector3, pal: Dictionary) -> void:
+## Pan de falaise : dégradé terre → roche sombre, avec une lèvre d'herbe au sommet et une strate.
+static func _skirt(st: SurfaceTool, p0: Vector3, p1: Vector3, outward: Vector3, pal: Dictionary, zone_id: String) -> void:
 	var top: Color = pal["cliff_top"]
+	var mid: Color = (pal["cliff_top"] as Color).lerp(pal["cliff_bot"], 0.45)
 	var bot: Color = pal["cliff_bot"]
+	var lip: Color = (pal["ground"] as Array)[2]
+	var y_lip: float = 0.28
+	var y_mid: float = SKIRT * 0.45
 	var q0 := Vector3(p0.x, -SKIRT, p0.z)
 	var q1 := Vector3(p1.x, -SKIRT, p1.z)
-	var verts: Array = [[p0, top], [p1, top], [q1, bot], [p0, top], [q1, bot], [q0, bot]]
-	for e: Array in verts:
-		st.set_color(e[1])
-		st.set_normal(outward)
-		st.add_vertex(e[0])
+	var l0 := Vector3(p0.x, p0.y - y_lip, p0.z)
+	var l1 := Vector3(p1.x, p1.y - y_lip, p1.z)
+	var m0 := Vector3(p0.x, -y_mid, p0.z)
+	var m1 := Vector3(p1.x, -y_mid, p1.z)
+	var quads: Array = [
+		[p0, p1, l1, l0, lip.darkened(0.15), lip.darkened(0.15), top, top],
+		[l0, l1, m1, m0, top, top, mid, mid],
+		[m0, m1, q1, q0, mid, mid, bot, bot]]
+	for q: Array in quads:
+		var order: Array = [[0, 1, 2], [0, 2, 3]]
+		for tri: Array in order:
+			for i: int in tri:
+				st.set_color(q[4 + i])
+				st.set_normal(outward)
+				st.add_vertex(q[i])
+
+
+## Dessous de l'île : stalactites de roche qui pendent, pour le côté « île flottante ».
+static func _build_underside(root: Node3D, zone_id: String, t: Dictionary, pal: Dictionary) -> void:
+	var size: Vector2i = t["size"]
+	var voids: Dictionary = t["voids"]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = absi(zone_id.hash()) + 5
+	var xf: Array = []
+	var cl: Array = []
+	for cy: int in range(size.y):
+		for cx: int in range(size.x):
+			var c := Vector2i(cx, cy)
+			if voids.has(c):
+				continue
+			var edge: bool = false
+			for d: Vector2i in [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]:
+				var n: Vector2i = c + d
+				if n.x < 0 or n.y < 0 or n.x >= size.x or n.y >= size.y or voids.has(n):
+					edge = true
+			var count: int = 2 if edge else (1 if rng.randf() < 0.3 else 0)
+			for k: int in range(count):
+				var p := Vector3((float(cx) + rng.randf_range(0.15, 0.85)) * CELL, -SKIRT + 0.2, (float(cy) + rng.randf_range(0.15, 0.85)) * CELL)
+				var len: float = rng.randf_range(1.6, 4.6) * (1.0 if edge else 1.3)
+				var wid: float = rng.randf_range(0.9, 1.7)
+				xf.append(_xf(p, rng.randf() * TAU, Vector3(wid, len, wid)))
+				cl.append(Color.WHITE)
+	var mesh: Mesh = Adv3DMeshes.stalactite(pal["cliff_bot"].lerp(pal["cliff_top"], 0.35), pal["cliff_bot"].darkened(0.3))
+	_multi(root, "Stalactites", mesh, xf, cl, Adv3DMeshes.solid_material(true))
 
 
 # ── Arbres, rochers, cactus (MultiMesh : un seul appel de rendu par type) ──
@@ -204,158 +279,169 @@ static func _skirt(st: SurfaceTool, p0: Vector3, p1: Vector3, outward: Vector3, 
 static func _kind_category(kind: String) -> String:
 	var k: String = kind.to_lower()
 	if k.contains("pine") or k.contains("sapin"):
-		return "cone"
+		return "pine"
 	if k.contains("cactus"):
 		return "cactus"
 	if k.contains("palm"):
 		return "palm"
-	if k.contains("rock") or k.contains("stone") or k.contains("pillar") or k.contains("crystal") \
-			or k.contains("rubble") or k.contains("crate") or k.contains("jar") or k.contains("column"):
+	if k.contains("crystal"):
+		return "crystal"
+	if k.contains("pillar") or k.contains("column") or k.contains("torch") or k.contains("banner"):
+		return "pillar"
+	if k.contains("rock") or k.contains("stone") or k.contains("rubble") or k.contains("crate") or k.contains("jar"):
 		return "rock"
-	if k.contains("hedge") or k.contains("bush") or k.contains("stump") or k.contains("thorn"):
+	if k.contains("stump") or k.contains("log"):
+		return "stump"
+	if k.contains("hedge") or k.contains("bush") or k.contains("thorn"):
 		return "bush"
 	return "round"
 
 
-static func _build_obstacles(root: Node3D, zone_id: String, t: Dictionary, biome: String) -> void:
+## (rayon d'ombre, décalage vertical de l'ombre) par catégorie.
+const SHADOW_R := {"pine": 1.15, "round": 1.25, "rock": 1.1, "bush": 0.95, "cactus": 0.55, "palm": 0.9,
+	"stump": 0.6, "crystal": 0.7, "pillar": 0.7}
+
+
+static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: String) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = absi(zone_id.hash()) + 913
-	var buckets: Dictionary = {"cone": [], "round": [], "rock": [], "bush": [], "cactus": [], "palm": []}
+	var buckets: Dictionary = {}
+	for k: String in ["pine", "round", "rock", "bush", "cactus", "palm", "stump", "crystal", "pillar"]:
+		buckets[k] = {"xf": [], "cl": []}
+	var shadow_xf: Array = []
+	var shadow_cl: Array = []
+	var warm: bool = biome == "Désert"
+	var snow: bool = biome == "Montagne"
 	for c: Vector2i in (t["obstacles"] as Dictionary).keys():
 		var cat: String = _kind_category(String(t["obstacles"][c]))
 		var ctr := Vector3((float(c.x) + 0.5) * CELL + rng.randf_range(-0.25, 0.25), 0.0, (float(c.y) + 0.5) * CELL + rng.randf_range(-0.25, 0.25))
 		ctr.y = height_at(ctr.x, ctr.z)
-		(buckets[cat] as Array).append({"pos": ctr, "rot": rng.randf() * TAU, "s": rng.randf_range(0.85, 1.3), "v": rng.randf()})
-	# Troncs (arbres à feuillage, pins, palmiers) + couronnes
-	var trunk_mesh := CylinderMesh.new()
-	trunk_mesh.top_radius = 0.10
-	trunk_mesh.bottom_radius = 0.17
-	trunk_mesh.height = 1.0
-	trunk_mesh.radial_segments = 5
-	trunk_mesh.rings = 1
-	var trunk_items: Array = []
-	var cone_mesh := CylinderMesh.new()
-	cone_mesh.top_radius = 0.0
-	cone_mesh.bottom_radius = 0.95
-	cone_mesh.height = 2.2
-	cone_mesh.radial_segments = 6
-	cone_mesh.rings = 1
-	var round_mesh := SphereMesh.new()
-	round_mesh.radius = 0.95
-	round_mesh.height = 1.7
-	round_mesh.radial_segments = 6
-	round_mesh.rings = 3
-	var rock_mesh := SphereMesh.new()
-	rock_mesh.radius = 0.8
-	rock_mesh.height = 1.2
-	rock_mesh.radial_segments = 5
-	rock_mesh.rings = 3
-	var bush_mesh := SphereMesh.new()
-	bush_mesh.radius = 0.62
-	bush_mesh.height = 0.9
-	bush_mesh.radial_segments = 6
-	bush_mesh.rings = 3
-	var cactus_mesh := CapsuleMesh.new()
-	cactus_mesh.radius = 0.24
-	cactus_mesh.height = 1.7
-	cactus_mesh.radial_segments = 6
-	cactus_mesh.rings = 2
-	var leaf_cols: Array = [Color(0.22, 0.46, 0.20), Color(0.28, 0.54, 0.24), Color(0.20, 0.40, 0.22)]
-	var pine_cols: Array = [Color(0.14, 0.34, 0.24), Color(0.18, 0.40, 0.28)]
-	if biome == "Montagne":
-		pine_cols = [Color(0.16, 0.32, 0.30), Color(0.74, 0.82, 0.86)]
-	var dry_cols: Array = [Color(0.40, 0.55, 0.26), Color(0.52, 0.58, 0.30)]
-	var trunk_col := Color(0.42, 0.29, 0.18)
-	var rock_cols: Array = [Color(0.52, 0.50, 0.48), Color(0.60, 0.58, 0.54), Color(0.46, 0.45, 0.46)]
-	var round_xf: Array = []
-	var round_cl: Array = []
-	var cone_xf: Array = []
-	var cone_cl: Array = []
-	var rock_xf: Array = []
-	var rock_cl: Array = []
-	var bush_xf: Array = []
-	var bush_cl: Array = []
-	var cactus_xf: Array = []
-	var cactus_cl: Array = []
-	var trunk_xf: Array = []
-	var trunk_cl: Array = []
-	for it: Dictionary in buckets["round"]:
-		var s: float = it["s"]
-		trunk_xf.append(_xf(it["pos"] + Vector3(0, 0.5 * s * 1.1, 0), it["rot"], Vector3(s, 1.1 * s, s)))
-		trunk_cl.append(trunk_col)
-		round_xf.append(_xf(it["pos"] + Vector3(0, 1.55 * s, 0), it["rot"], Vector3(s, s, s)))
-		round_cl.append(dry_cols[int(float(it["v"]) * dry_cols.size()) % dry_cols.size()] if biome == "Désert" else leaf_cols[int(float(it["v"]) * 3.0) % 3])
-	for it2: Dictionary in buckets["cone"]:
-		var s2: float = it2["s"]
-		trunk_xf.append(_xf(it2["pos"] + Vector3(0, 0.45 * s2, 0), it2["rot"], Vector3(s2, 0.9 * s2, s2)))
-		trunk_cl.append(trunk_col)
-		cone_xf.append(_xf(it2["pos"] + Vector3(0, 1.9 * s2, 0), it2["rot"], Vector3(s2, s2, s2)))
-		cone_cl.append(pine_cols[int(float(it2["v"]) * pine_cols.size()) % pine_cols.size()])
-	for it3: Dictionary in buckets["palm"]:
-		var s3: float = it3["s"]
-		trunk_xf.append(_xf(it3["pos"] + Vector3(0, 0.9 * s3, 0), it3["rot"], Vector3(0.9 * s3, 1.8 * s3, 0.9 * s3)))
-		trunk_cl.append(trunk_col.lightened(0.15))
-		round_xf.append(_xf(it3["pos"] + Vector3(0, 1.95 * s3, 0), it3["rot"], Vector3(1.1 * s3, 0.45 * s3, 1.1 * s3)))
-		round_cl.append(Color(0.36, 0.58, 0.28))
-	for it4: Dictionary in buckets["rock"]:
-		var s4: float = it4["s"]
-		rock_xf.append(_xf(it4["pos"] + Vector3(0, 0.35 * s4, 0), it4["rot"], Vector3(s4 * 1.1, s4 * (0.8 + float(it4["v"]) * 0.7), s4)))
-		rock_cl.append(rock_cols[int(float(it4["v"]) * 3.0) % 3])
-	for it5: Dictionary in buckets["bush"]:
-		var s5: float = it5["s"]
-		bush_xf.append(_xf(it5["pos"] + Vector3(0, 0.3 * s5, 0), it5["rot"], Vector3(s5 * 1.2, s5, s5 * 1.2)))
-		bush_cl.append(leaf_cols[int(float(it5["v"]) * 3.0) % 3].darkened(0.1))
-	for it6: Dictionary in buckets["cactus"]:
-		var s6: float = it6["s"]
-		cactus_xf.append(_xf(it6["pos"] + Vector3(0, 0.85 * s6, 0), it6["rot"], Vector3(s6, s6, s6)))
-		cactus_cl.append(Color(0.30, 0.52, 0.30))
-	_multi(root, "Troncs", trunk_mesh, trunk_xf, trunk_cl)
-	_multi(root, "Feuillages", round_mesh, round_xf, round_cl)
-	_multi(root, "Pins", cone_mesh, cone_xf, cone_cl)
-	_multi(root, "Rochers", rock_mesh, rock_xf, rock_cl)
-	_multi(root, "Buissons", bush_mesh, bush_xf, bush_cl)
-	_multi(root, "Cactus", cactus_mesh, cactus_xf, cactus_cl)
+		var s: float = rng.randf_range(0.85, 1.3)
+		var tint: Color = Color.WHITE
+		if cat == "round" and rng.randf() < 0.22:
+			tint = Color(1.0, 0.86, 0.55) if rng.randf() < 0.6 else Color(0.85, 1.0, 0.78)
+		else:
+			var v: float = rng.randf_range(0.86, 1.0)
+			tint = Color(v, v, v)
+		(buckets[cat]["xf"] as Array).append(_xf(ctr, rng.randf() * TAU, Vector3(s, s * rng.randf_range(0.95, 1.2), s)))
+		(buckets[cat]["cl"] as Array).append(tint)
+		var sr: float = float(SHADOW_R.get(cat, 1.0)) * s
+		shadow_xf.append(_xf(ctr + SUN_SHADOW_OFFSET * s + Vector3(0, 0.07, 0), 0.0, Vector3(sr, 1.0, sr * 0.9)))
+		shadow_cl.append(Color.WHITE)
+	_multi(root, "OmbresDecors", Adv3DMeshes.shadow_mesh(), shadow_xf, shadow_cl, Adv3DMeshes.shadow_material())
+	var foliage: ShaderMaterial = Adv3DMeshes.foliage_material(0.16)
+	var solid: StandardMaterial3D = Adv3DMeshes.solid_material(true)
+	_multi(root, "Pins", Adv3DMeshes.pine(snow), buckets["pine"]["xf"], buckets["pine"]["cl"], foliage)
+	_multi(root, "Feuillus", Adv3DMeshes.broadleaf(), buckets["round"]["xf"], buckets["round"]["cl"], foliage)
+	_multi(root, "Palmiers", Adv3DMeshes.palm(), buckets["palm"]["xf"], buckets["palm"]["cl"], foliage)
+	_multi(root, "Rochers", Adv3DMeshes.rock(warm), buckets["rock"]["xf"], buckets["rock"]["cl"], solid)
+	_multi(root, "Cactus", Adv3DMeshes.cactus(), buckets["cactus"]["xf"], buckets["cactus"]["cl"], solid)
+	_multi(root, "Souches", Adv3DMeshes.stump(), buckets["stump"]["xf"], buckets["stump"]["cl"], solid)
+	_multi(root, "Cristaux", Adv3DMeshes.crystal(), buckets["crystal"]["xf"], buckets["crystal"]["cl"], solid)
+	_multi(root, "Piliers", Adv3DMeshes.pillar(), buckets["pillar"]["xf"], buckets["pillar"]["cl"], solid)
+	# Buissons : ceux de la carte + quelques-uns posés sur les bords de falaise (non bloquants).
+	var bush_xf: Array = buckets["bush"]["xf"]
+	var bush_cl: Array = buckets["bush"]["cl"]
+	for c2: Vector2i in _edge_cells(t):
+		if (t["obstacles"] as Dictionary).has(c2) or (t["paths"] as Dictionary).has(c2) or rng.randf() > 0.4:
+			continue
+		var p := Vector3((float(c2.x) + rng.randf_range(0.1, 0.9)) * CELL, 0.0, (float(c2.y) + rng.randf_range(0.1, 0.9)) * CELL)
+		p.y = height_at(p.x, p.z)
+		var sc: float = rng.randf_range(0.5, 0.85)
+		bush_xf.append(_xf(p, rng.randf() * TAU, Vector3(sc, sc, sc)))
+		bush_cl.append(Color(0.92, 0.92, 0.92))
+	_multi(root, "Buissons", Adv3DMeshes.bush(), bush_xf, bush_cl, foliage)
+
+
+## Cases praticables qui touchent le vide (bord de falaise).
+static func _edge_cells(t: Dictionary) -> Array:
+	var size: Vector2i = t["size"]
+	var voids: Dictionary = t["voids"]
+	var out: Array = []
+	for cy: int in range(size.y):
+		for cx: int in range(size.x):
+			var c := Vector2i(cx, cy)
+			if voids.has(c):
+				continue
+			for d: Vector2i in [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]:
+				var n: Vector2i = c + d
+				if n.x < 0 or n.y < 0 or n.x >= size.x or n.y >= size.y or voids.has(n):
+					out.append(c)
+					break
+	return out
 
 
 # ── Décors de sol non bloquants (herbes, fleurs, champignons…) ──────────
 
-static func _build_decor(root: Node3D, zone_id: String, t: Dictionary) -> void:
+static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: String) -> void:
+	var size: Vector2i = t["size"]
 	var rng := RandomNumberGenerator.new()
 	rng.seed = absi(zone_id.hash()) + 311
-	var tuft_mesh := CylinderMesh.new()
-	tuft_mesh.top_radius = 0.0
-	tuft_mesh.bottom_radius = 0.10
-	tuft_mesh.height = 0.38
-	tuft_mesh.radial_segments = 4
-	tuft_mesh.rings = 1
-	var dot_mesh := SphereMesh.new()
-	dot_mesh.radius = 0.10
-	dot_mesh.height = 0.20
-	dot_mesh.radial_segments = 5
-	dot_mesh.rings = 2
 	var tuft_xf: Array = []
 	var tuft_cl: Array = []
-	var dot_xf: Array = []
-	var dot_cl: Array = []
-	for c: Vector2i in (t["decor"] as Dictionary).keys():
-		var kind: String = String(t["decor"][c]).to_lower()
-		for i: int in range(3):
-			var p := Vector3((float(c.x) + rng.randf_range(0.18, 0.82)) * CELL, 0.0, (float(c.y) + rng.randf_range(0.18, 0.82)) * CELL)
-			p.y = height_at(p.x, p.z)
-			if kind.contains("flower"):
-				dot_xf.append(_xf(p + Vector3(0, 0.12, 0), 0.0, Vector3.ONE))
-				dot_cl.append([Color(0.95, 0.40, 0.45), Color(0.98, 0.85, 0.30), Color(0.95, 0.95, 0.90), Color(0.65, 0.50, 0.95)][rng.randi_range(0, 3)])
+	var flower_xf: Array = []
+	var flower_cl: Array = []
+	var mush_xf: Array = []
+	var mush_cl: Array = []
+	var pebble_xf: Array = []
+	var pebble_cl: Array = []
+	var dry: bool = biome == "Désert"
+	var decor: Dictionary = t["decor"]
+	var flower_cols: Array = [Color(0.95, 0.38, 0.45), Color(0.98, 0.86, 0.30), Color(0.96, 0.96, 0.92), Color(0.66, 0.52, 0.96), Color(0.98, 0.62, 0.30)]
+	for cy: int in range(size.y):
+		for cx: int in range(size.x):
+			var c := Vector2i(cx, cy)
+			if (t["voids"] as Dictionary).has(c) or (t["obstacles"] as Dictionary).has(c):
+				continue
+			var on_path: bool = (t["paths"] as Dictionary).has(c)
+			var dens: float = _patch(float(cx) * 2.3 + 40.0, float(cy) * 2.3 + 40.0)
+			var n_tufts: int = (0 if on_path else int(2.0 + dens * 5.0))
+			if on_path and rng.randf() < 0.35:
+				n_tufts = 1                              # brins sur le bord du sentier
+			for i: int in range(n_tufts):
+				var p := _rand_in_cell(rng, c)
+				var sc: float = rng.randf_range(0.8, 1.5)
+				tuft_xf.append(_xf(p, rng.randf() * TAU, Vector3(sc, sc * rng.randf_range(0.8, 1.3), sc)))
+				var v: float = rng.randf_range(0.82, 1.0)
+				tuft_cl.append(Color(1.0, 0.95, 0.65) * v if dry else Color(v, v, v))
+			var kind: String = String(decor.get(c, "")).to_lower()
+			if kind.contains("flower") or (not on_path and not dry and rng.randf() < 0.07):
+				for k: int in range(rng.randi_range(3, 6)):
+					var pf := _rand_in_cell(rng, c)
+					var sf: float = rng.randf_range(0.8, 1.3)
+					flower_xf.append(_xf(pf, rng.randf() * TAU, Vector3(sf, sf, sf)))
+					flower_cl.append(flower_cols[(c.x * 3 + c.y) % flower_cols.size()] if k < 3 else flower_cols[rng.randi_range(0, flower_cols.size() - 1)])
 			elif kind.contains("mushroom"):
-				dot_xf.append(_xf(p + Vector3(0, 0.10, 0), 0.0, Vector3(1.3, 1.0, 1.3)))
-				dot_cl.append(Color(0.85, 0.25, 0.22))
-			elif kind.contains("grass") or kind.contains("reed"):
-				tuft_xf.append(_xf(p + Vector3(0, 0.19, 0), rng.randf() * TAU, Vector3.ONE * rng.randf_range(0.8, 1.5)))
-				tuft_cl.append(Color(0.34, 0.56, 0.24) if not kind.contains("dry") else Color(0.68, 0.60, 0.34))
-			else:
-				dot_xf.append(_xf(p + Vector3(0, 0.07, 0), rng.randf() * TAU, Vector3(1.2, 0.7, 1.0)))
-				dot_cl.append(Color(0.62, 0.60, 0.56))
-	_multi(root, "HerbesDecor", tuft_mesh, tuft_xf, tuft_cl)
-	_multi(root, "PetitsDecors", dot_mesh, dot_xf, dot_cl)
+				for k2: int in range(rng.randi_range(2, 4)):
+					var pm := _rand_in_cell(rng, c)
+					var sm: float = rng.randf_range(0.8, 1.6)
+					mush_xf.append(_xf(pm, rng.randf() * TAU, Vector3(sm, sm, sm)))
+					mush_cl.append(Color.WHITE)
+			elif kind != "" and not kind.contains("flower") and not kind.contains("grass") and not kind.contains("reed"):
+				# bois mort, os, gravats… : petits cailloux discrets
+				for k3: int in range(rng.randi_range(2, 3)):
+					var pp := _rand_in_cell(rng, c)
+					var sp: float = rng.randf_range(0.18, 0.34)
+					pebble_xf.append(_xf(pp + Vector3(0, 0.02, 0), rng.randf() * TAU, Vector3(sp, sp * 0.8, sp)))
+					pebble_cl.append(Color(0.85, 0.85, 0.85))
+	# Herbes en bordure de falaise : le bord paraît vivant plutôt que coupé au couteau.
+	for ce: Vector2i in _edge_cells(t):
+		for i2: int in range(3):
+			var pe := _rand_in_cell(rng, ce)
+			var se: float = rng.randf_range(1.0, 1.7)
+			tuft_xf.append(_xf(pe, rng.randf() * TAU, Vector3(se, se, se)))
+			tuft_cl.append(Color(0.95, 0.95, 0.95))
+	var foliage: ShaderMaterial = Adv3DMeshes.foliage_material(0.5)
+	_multi(root, "Herbes", Adv3DMeshes.tuft(), tuft_xf, tuft_cl, foliage)
+	_multi(root, "Fleurs", Adv3DMeshes.flower(), flower_xf, flower_cl, Adv3DMeshes.foliage_material(0.7))
+	_multi(root, "Champignons", Adv3DMeshes.mushroom(), mush_xf, mush_cl, Adv3DMeshes.solid_material(true))
+	_multi(root, "Cailloux", Adv3DMeshes.rock(dry), pebble_xf, pebble_cl, Adv3DMeshes.solid_material(true))
+
+
+static func _rand_in_cell(rng: RandomNumberGenerator, c: Vector2i) -> Vector3:
+	var p := Vector3((float(c.x) + rng.randf_range(0.08, 0.92)) * CELL, 0.0, (float(c.y) + rng.randf_range(0.08, 0.92)) * CELL)
+	p.y = height_at(p.x, p.z)
+	return p
 
 
 static func _xf(pos: Vector3, yaw: float, scl: Vector3) -> Transform3D:
@@ -363,7 +449,7 @@ static func _xf(pos: Vector3, yaw: float, scl: Vector3) -> Transform3D:
 	return Transform3D(b, pos)
 
 
-static func _multi(parent: Node3D, node_name: String, mesh: Mesh, xforms: Array, colors: Array) -> void:
+static func _multi(parent: Node3D, node_name: String, mesh: Mesh, xforms: Array, colors: Array, mat: Material) -> void:
 	if xforms.is_empty():
 		return
 	var mm := MultiMesh.new()
@@ -374,201 +460,52 @@ static func _multi(parent: Node3D, node_name: String, mesh: Mesh, xforms: Array,
 	for i: int in range(xforms.size()):
 		mm.set_instance_transform(i, xforms[i])
 		mm.set_instance_color(i, colors[i])
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.roughness = 0.95
 	var mmi := MultiMeshInstance3D.new()
 	mmi.name = node_name
 	mmi.multimesh = mm
 	mmi.material_override = mat
+	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	parent.add_child(mmi)
 
 
 # ══════════════════════════════════════════════════════════════════════
-#  Éléments de jeu : marqueurs de lieux, portes, groupes de monstres, explorateur
+#  Ciel : nuages qui dérivent autour et sous l'île
 # ══════════════════════════════════════════════════════════════════════
 
-static func _mat(col: Color, emissive: float = 0.0) -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	m.albedo_color = col
-	m.roughness = 0.9
-	if emissive > 0.0:
-		m.emission_enabled = true
-		m.emission = col
-		m.emission_energy_multiplier = emissive
-	return m
-
-
-static func _label(text: String, y: float, size_px: int = 40, col: Color = Color(1, 1, 1)) -> Label3D:
-	var l := Label3D.new()
-	l.text = text
-	l.position = Vector3(0, y, 0)
-	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	l.font_size = size_px
-	l.pixel_size = 0.011
-	l.outline_size = 10
-	l.modulate = col
-	l.no_depth_test = true
-	return l
-
-
-## Marqueur de lieu : socle de pierre, cristal lumineux, nom flottant.
-static func make_poi_marker(kind: String, title: String, done: bool) -> Node3D:
-	var col: Color = POI_COLORS.get(kind, Color(0.9, 0.9, 0.9))
-	if done:
-		col = col.darkened(0.55)
-	var n := Node3D.new()
-	var base := MeshInstance3D.new()
-	var cyl := CylinderMesh.new()
-	cyl.top_radius = 0.55
-	cyl.bottom_radius = 0.7
-	cyl.height = 0.35
-	cyl.radial_segments = 8
-	base.mesh = cyl
-	base.material_override = _mat(Color(0.52, 0.50, 0.48))
-	base.position.y = 0.17
-	n.add_child(base)
-	var gem := MeshInstance3D.new()
-	var sph := SphereMesh.new()
-	sph.radius = 0.38
-	sph.height = 0.9
-	sph.radial_segments = 4
-	sph.rings = 2
-	gem.mesh = sph
-	gem.material_override = _mat(col, 0.0 if done else 1.6)
-	gem.position.y = 1.15
-	gem.name = "Gem"
-	n.add_child(gem)
-	n.add_child(_label(title, 2.15, 34, Color(0.8, 0.8, 0.8) if done else Color(1, 1, 1)))
-	return n
-
-
-## Porte vers une carte voisine : arche de pierre orientée selon le bord de l'île.
-static func make_gate(dir: String, title: String, open: bool) -> Node3D:
-	var n := Node3D.new()
-	var col: Color = Color(0.40, 0.85, 0.65) if open else Color(0.85, 0.35, 0.30)
-	var along_x: bool = dir == "N" or dir == "S"     # les piliers s'écartent le long de l'axe du bord
-	var off: Vector3 = Vector3(1.05, 0, 0) if along_x else Vector3(0, 0, 1.05)
-	for sgn: float in [-1.0, 1.0]:
-		var pil := MeshInstance3D.new()
-		var box := BoxMesh.new()
-		box.size = Vector3(0.45, 2.4, 0.45)
-		pil.mesh = box
-		pil.material_override = _mat(Color(0.55, 0.52, 0.48))
-		pil.position = off * sgn + Vector3(0, 1.2, 0)
-		n.add_child(pil)
-	var lintel := MeshInstance3D.new()
-	var lb := BoxMesh.new()
-	lb.size = Vector3(2.9, 0.4, 0.5) if along_x else Vector3(0.5, 0.4, 2.9)
-	lintel.mesh = lb
-	lintel.material_override = _mat(col, 1.2)
-	lintel.position = Vector3(0, 2.5, 0)
-	n.add_child(lintel)
-	n.add_child(_label("➜ " + title, 3.2, 34, col.lightened(0.3)))
-	return n
-
-
-## Groupe de monstres : petits « gobelins » low-poly (nombre = effectif du groupe).
-static func make_mob_group(g: Dictionary, title: String) -> Node3D:
-	var n := Node3D.new()
-	var elite: bool = bool(g.get("elite", false))
-	var count: int = clampi(int(g.get("count", 3)), 1, 6)
-	var skin: Color = Color(0.78, 0.30, 0.25) if elite else Color(0.52, 0.66, 0.30)
-	var sc: float = 1.35 if elite else 1.0
-	for i: int in range(count):
-		var ang: float = float(i) / float(count) * TAU
-		var m := Node3D.new()
-		m.position = Vector3(cos(ang), 0.0, sin(ang)) * (0.0 if count == 1 else 0.62 * sc)
-		m.rotation.y = -ang + PI * 0.5
-		var body := MeshInstance3D.new()
-		var cap := CapsuleMesh.new()
-		cap.radius = 0.24 * sc
-		cap.height = 0.85 * sc
-		cap.radial_segments = 6
-		cap.rings = 2
-		body.mesh = cap
-		body.material_override = _mat(skin)
-		body.position.y = 0.45 * sc
-		m.add_child(body)
-		for sgn: float in [-1.0, 1.0]:
-			var eye := MeshInstance3D.new()
-			var es := SphereMesh.new()
-			es.radius = 0.05 * sc
-			es.height = 0.10 * sc
-			es.radial_segments = 4
-			es.rings = 2
-			eye.mesh = es
-			eye.material_override = _mat(Color(1.0, 0.9, 0.2), 1.0)
-			eye.position = Vector3(0.09 * sc * sgn, 0.72 * sc, 0.2 * sc)
-			m.add_child(eye)
-		n.add_child(m)
-	n.add_child(_label("%s · niv %d" % [title, int(g.get("level", 1))], 1.9 * sc, 32, Color(1.0, 0.82, 0.78) if elite else Color(1, 1, 1)))
-	return n
-
-
-## Explorateur (le joueur lui-même, pas un héros) : silhouette low-poly vectorielle.
-static func make_explorer() -> Node3D:
-	var n := Node3D.new()
-	var coat := _mat(Color(0.62, 0.36, 0.20))
-	var skin := _mat(Color(0.90, 0.72, 0.56))
-	var hat := _mat(Color(0.36, 0.25, 0.16))
-	var pack := _mat(Color(0.30, 0.42, 0.28))
-	var legs := _mat(Color(0.26, 0.28, 0.36))
-	var torso := MeshInstance3D.new()
-	var cap := CapsuleMesh.new()
-	cap.radius = 0.27
-	cap.height = 0.95
-	cap.radial_segments = 8
-	cap.rings = 3
-	torso.mesh = cap
-	torso.material_override = coat
-	torso.position.y = 0.95
-	torso.name = "Torso"
-	n.add_child(torso)
-	for sgn: float in [-1.0, 1.0]:
-		var leg := MeshInstance3D.new()
-		var lb := BoxMesh.new()
-		lb.size = Vector3(0.18, 0.55, 0.20)
-		leg.mesh = lb
-		leg.material_override = legs
-		leg.position = Vector3(0.12 * sgn, 0.28, 0)
-		leg.name = "Leg%s" % ("L" if sgn < 0.0 else "R")
-		n.add_child(leg)
-	var head := MeshInstance3D.new()
-	var hs := SphereMesh.new()
-	hs.radius = 0.2
-	hs.height = 0.4
-	hs.radial_segments = 8
-	hs.rings = 4
-	head.mesh = hs
-	head.material_override = skin
-	head.position.y = 1.62
-	n.add_child(head)
-	var brim := MeshInstance3D.new()
-	var bc := CylinderMesh.new()
-	bc.top_radius = 0.34
-	bc.bottom_radius = 0.34
-	bc.height = 0.04
-	bc.radial_segments = 10
-	brim.mesh = bc
-	brim.material_override = hat
-	brim.position.y = 1.74
-	n.add_child(brim)
-	var crown := MeshInstance3D.new()
-	var cc := CylinderMesh.new()
-	cc.top_radius = 0.17
-	cc.bottom_radius = 0.21
-	cc.height = 0.2
-	cc.radial_segments = 8
-	crown.mesh = cc
-	crown.material_override = hat
-	crown.position.y = 1.84
-	n.add_child(crown)
-	var bag := MeshInstance3D.new()
-	var bb := BoxMesh.new()
-	bb.size = Vector3(0.42, 0.55, 0.22)
-	bag.mesh = bb
-	bag.material_override = pack
-	bag.position = Vector3(0, 1.0, -0.3)
-	n.add_child(bag)
-	return n
+## Nuages (MeshInstance3D) autour de l'île ; chacun porte meta « speed » (m/s) pour la dérive.
+static func make_clouds(size: Vector2i, seed_v: int) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Nuages"
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_v
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.vertex_color_use_as_albedo = true
+	mat.vertex_color_is_srgb = true
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(1, 1, 1, 0.92)
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var w: float = float(size.x) * CELL
+	var d: float = float(size.y) * CELL
+	for i: int in range(18):
+		var m := MeshInstance3D.new()
+		m.mesh = Adv3DMeshes.cloud()
+		m.material_override = mat
+		var below: bool = i < 12
+		var x: float = rng.randf_range(-w * 0.7, w * 1.7)
+		var z: float = rng.randf_range(-d * 0.7, d * 1.7)
+		var y: float = rng.randf_range(-16.0, -7.0) if below else rng.randf_range(16.0, 30.0)
+		# les nuages du dessus restent à distance de l'île pour ne jamais gêner la vue
+		if not below:
+			if x > -w * 0.1 and x < w * 1.1 and z > -d * 0.1 and z < d * 1.1:
+				x += w * 1.6
+		m.position = Vector3(x, y, z)
+		var sc: float = rng.randf_range(1.2, 2.6)
+		m.scale = Vector3(sc, sc * 0.8, sc)
+		m.rotation.y = rng.randf() * TAU
+		m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		m.set_meta("speed", rng.randf_range(0.35, 0.9))
+		root.add_child(m)
+	root.set_meta("min_x", -w * 0.9)
+	root.set_meta("max_x", w * 1.9)
+	return root
