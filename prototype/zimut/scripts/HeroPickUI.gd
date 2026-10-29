@@ -205,6 +205,10 @@ func _on_confirm() -> void:
 		ok = HeroUnlock.unlock(_data, _picked[0])
 	if not ok:
 		return
+	# V70 : le choix est écrit sur le disque tout de suite (avant même la fermeture de la fenêtre),
+	# pour qu'il survive à une fermeture brutale de l'appli.
+	if GameManager.active_slot >= 0 and is_same(_data, GameManager.active_save):
+		ProgressionManager.write_save(GameManager.active_slot, _data)
 	var out: Array = _picked.duplicate()
 	done.emit(out)
 	queue_free()

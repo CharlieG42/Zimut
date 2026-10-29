@@ -1093,9 +1093,17 @@ func _play_death(d: Dictionary) -> void:
 	Sfx.play("death")
 	Sfx.buzz(45 if String(e.get("team", "")) == "enemy" else 90)
 	v.set_hp(0.0)
-	_burst(v.position + Vector2(0, -30), Color(0.85, 0.85, 0.85, 0.9), 24, 150.0, 0.7, 6.0)
-	_shake(5.0)
-	await v.die().finished
+	# V70 : faisceau de lumière qui tombe sur le personnage vaincu et le dissout
+	var beam := SpellFx.DeathBeam.new()
+	beam.position = v.position + Vector2(0, 6)
+	beam.col = Color(0.78, 0.92, 1.0) if String(e.get("team", "")) == "player" else Color(1.0, 0.90, 0.68)
+	_fx_layer.add_child(beam)
+	var tw_die: Tween = v.die()
+	var pos_die: Vector2 = v.position
+	get_tree().create_timer(SpellFx.DeathBeam.HIT).timeout.connect(func() -> void:
+		_shake(4.0)
+		_burst(pos_die + Vector2(0, -50), Color(1.0, 1.0, 0.92, 0.95), 20, 120.0, 0.8, 4.0, 180.0, Vector2.UP, Vector2(0, -160)))
+	await tw_die.finished
 	views.erase(int(e["uid"]))
 	v.queue_free()
 

@@ -787,23 +787,16 @@ func appear() -> Tween:
 
 
 func die() -> Tween:
+	## V70 : mort = dissolution dans un faisceau de lumière (le faisceau est créé par GridManager).
+	## Le personnage reste debout, s'illumine quand la lumière le touche, puis s'étire vers le haut et s'efface.
 	dying = true
-	_flash = 1.0
 	var tw: Tween = create_tween()
-	if _has_tex and sprite != null and not _is_static():
-		# il bascule en arrière, s'affaisse, puis s'efface
-		var side: float = -1.0 if sprite.flip_h else 1.0
-		tw.tween_property(self, "scale", Vector2(1.08, 0.94), 0.10)
-		tw.tween_callback(func() -> void: _falling = true)
-		tw.tween_property(self, "_tilt", -side * 1.35, 0.32).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-		tw.parallel().tween_property(self, "_kb", Vector2(-side * 18.0, 16.0), 0.32).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-		tw.parallel().tween_property(self, "scale", Vector2.ONE, 0.2)
-		tw.tween_interval(0.12)
-		tw.tween_property(self, "modulate:a", 0.0, 0.3)
-		return tw
-	tw.tween_property(self, "scale", Vector2(1.15, 0.85), 0.12)
-	tw.tween_property(self, "scale", Vector2(0.4, 0.05), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	tw.parallel().tween_property(self, "modulate:a", 0.0, 0.35)
+	tw.tween_interval(0.16)   # la tête du faisceau arrive au sol à 0,20 s
+	tw.tween_callback(func() -> void: _flash = 1.0)
+	tw.tween_property(self, "modulate", Color(2.6, 2.6, 2.8, 1.0), 0.16)
+	tw.tween_interval(0.14)
+	tw.tween_property(self, "scale", Vector2(0.55, 1.35), 0.42).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw.parallel().tween_property(self, "modulate:a", 0.0, 0.42)
 	return tw
 
 

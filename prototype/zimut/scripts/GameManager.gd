@@ -397,13 +397,21 @@ func init_entities() -> void:
 		var st: Dictionary = {}
 		var plevel: int = QUICK_PLAYER_LEVEL
 		var pfx: Dictionary = {}
-		if use_save:
-			# Stats = classes.txt au niveau du perso + points investis + équipement/panoplies
-			st = ProgressionManager.member_stats(active_save, active_save["team"][i])
+		if not active_save.is_empty():
+			# Stats = classes.txt au niveau du perso + points investis + équipement/panoplies.
+			# V70 : même si l'équipe enregistrée ne correspond pas exactement à celle du combat
+			# (ordre, héros remplacé…), on reste sur le niveau du héros dans la partie : le niveau 20
+			# par défaut ne sert qu'hors partie (tests, démonstration).
+			var member: Dictionary = {"classe": classe, "equipment": {}}
+			if use_save:
+				member = active_save["team"][i]
+			st = ProgressionManager.member_stats(active_save, member)
 			if not st.is_empty():
 				plevel = int(st["level"])
 				pfx = st["fx"]
 				st["color"] = COLORS.get(classe, Color(1, 1, 1))
+			else:
+				plevel = ProgressionManager.member_level(active_save, classe)
 		if st.is_empty():
 			st = _stats_from_csv(classes_data, classe, plevel)
 			if st.is_empty():
@@ -429,7 +437,7 @@ func init_entities() -> void:
 		}, true)
 		player["spells"] = _build_spells(classe, plevel)
 		# V42 : seuls les sorts ACTIFS du build courant sont disponibles en combat
-		if use_save:
+		if not active_save.is_empty():
 			var active_names: Array = Builds.active_spells(active_save, classe)
 			if not active_names.is_empty():
 				var kept: Array = []

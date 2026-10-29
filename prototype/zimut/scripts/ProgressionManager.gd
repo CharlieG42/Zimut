@@ -837,6 +837,16 @@ func write_save(slot: int, data: Dictionary) -> bool:
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 	DirAccess.rename_absolute(ProjectSettings.globalize_path(tmp), ProjectSettings.globalize_path(path))
+	# V70 : contrôle de relecture. Si le remplacement du fichier a échoué (certains systèmes de
+	# fichiers Android), on écrit directement : mieux vaut une écriture non atomique qu'une perte.
+	if _read_json(path).is_empty():
+		var direct := FileAccess.open(path, FileAccess.WRITE)
+		if direct == null:
+			push_error("Sauvegarde %d : écriture impossible" % slot)
+			return false
+		direct.store_string(payload)
+		direct.close()
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(tmp))
 	return true
 
 func delete_save(slot: int) -> void:

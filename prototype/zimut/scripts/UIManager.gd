@@ -98,6 +98,44 @@ class SpellCard extends Button:
 	var card_scale: float = 1.0
 	var badge_mode: bool = false
 	var _elem: String = ""
+	## V70 : défilement tactile de la colonne de sorts. Un Button consomme le geste : le doigt posé
+	## sur une carte ne faisait pas défiler. On fait défiler nous-mêmes le ScrollContainer parent dès
+	## que le doigt a bougé de plus de 10 px, et on neutralise alors le clic de la carte.
+	var dragged: bool = false
+	var _touch_on: bool = false
+	var _touch_from: Vector2 = Vector2.ZERO
+
+	func _gui_input(event: InputEvent) -> void:
+		var sc: ScrollContainer = _scroll_parent()
+		if sc == null:
+			return
+		if event is InputEventScreenTouch:
+			var t := event as InputEventScreenTouch
+			_touch_on = t.pressed
+			if t.pressed:
+				_touch_from = t.position
+				dragged = false
+		elif event is InputEventScreenDrag and _touch_on:
+			var d := event as InputEventScreenDrag
+			if not dragged and d.position.distance_to(_touch_from) >= 10.0:
+				dragged = true
+			if dragged:
+				sc.scroll_vertical = maxi(0, sc.scroll_vertical - int(roundf(d.relative.y)))
+				accept_event()
+		elif event is InputEventMouseButton:
+			var mb := event as InputEventMouseButton
+			if mb.pressed and mb.button_index == MOUSE_BUTTON_WHEEL_UP:
+				sc.scroll_vertical = maxi(0, sc.scroll_vertical - 90)
+				accept_event()
+			elif mb.pressed and mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				sc.scroll_vertical += 90
+				accept_event()
+
+	func _scroll_parent() -> ScrollContainer:
+		var n: Node = get_parent()
+		while n != null and not (n is ScrollContainer):
+			n = n.get_parent()
+		return n as ScrollContainer
 
 	static func hexagon(c: Vector2, r: float) -> PackedVector2Array:
 		var pts := PackedVector2Array()
@@ -1604,7 +1642,11 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 		card.focus_mode = Control.FOCUS_NONE
 		_style_card(card, false)
-		card.pressed.connect(func() -> void: spell_selected.emit(spell))
+		card.pressed.connect(func() -> void:
+			if card.dragged:   # le doigt a fait défiler la colonne : ce n'est pas un choix de sort
+				card.dragged = false
+				return
+			spell_selected.emit(spell))
 		card.mouse_entered.connect(func() -> void: _show_tip(spell))
 		card.mouse_exited.connect(func() -> void: _show_tip(game_manager.selected_spell))
 		_spell_box.add_child(card)
