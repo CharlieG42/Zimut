@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b82c29c3b0805"
-path="res://.godot/imported/bombe_incendiaire.png-82c29c3b0805.ctex"
+uid="uid://b82c3ac3b0805"
+path="res://.godot/imported/bombe_incendiaire.png-c13633129a32abde6c246ab83e56a0d1.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/summons/bombe_incendiaire.png"
-dest_files=["res://.godot/imported/bombe_incendiaire.png-82c29c3b0805.ctex"]
+dest_files=["res://.godot/imported/bombe_incendiaire.png-c13633129a32abde6c246ab83e56a0d1.ctex"]
 
 [params]
 

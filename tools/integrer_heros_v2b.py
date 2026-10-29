@@ -9,6 +9,7 @@ HEROES = {"sylvestre": "druide", "cimes": "tank", "sables": "geomancien", "crist
           "vents": "sylvain", "brasier": "chasseur", "brumes": "invocateur", "ombres": "assassin", "rouages": "artificier"}
 GAME = {"soigneur": "heal"}
 SOMBRE = set(os.environ.get("SOMBRE", "").split(","))
+BLANC = set(os.environ.get("BLANC", "").split(","))
 VUES = ["", "_idle_2", "_back", "_back_idle_2"]
 ACT = ["_attack", "_attack_2", "_cast", "_cast_2"]
 root = sys.argv[1]; only = set(sys.argv[2].split(",")) if len(sys.argv) > 2 else None
@@ -20,7 +21,7 @@ for nat, h in HEROES.items():
         sheet = f"{src}/{h}_{kind}.png"
         if not os.path.exists(sheet): print("absent", sheet); continue
         d = tempfile.mkdtemp()
-        subprocess.run([sys.executable, CUT, sheet, d, "x"] + (["--sombre"] if h in SOMBRE else []), check=True, capture_output=True)
+        subprocess.run([sys.executable, CUT, sheet, d, "x"] + (["--sombre"] if h in SOMBRE else []) + (["--blanc"] if h in BLANC else []), check=True, capture_output=True)
         for suf, name in zip(VUES, names):
             if not os.path.exists(f"{d}/x{suf}.png"):
                 print("  CASE VIDE, ignorée :", name); 

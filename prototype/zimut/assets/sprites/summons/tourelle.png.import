@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b1e296a440a06"
-path="res://.godot/imported/tourelle.png-1e296a440a06.ctex"
+uid="uid://b1e3a6a440a06"
+path="res://.godot/imported/tourelle.png-33b80f62d3f7eb1f59e6067b6807ef2f.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/summons/tourelle.png"
-dest_files=["res://.godot/imported/tourelle.png-1e296a440a06.ctex"]
+dest_files=["res://.godot/imported/tourelle.png-33b80f62d3f7eb1f59e6067b6807ef2f.ctex"]
 
 [params]
 
