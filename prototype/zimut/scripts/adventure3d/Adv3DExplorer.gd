@@ -23,11 +23,12 @@ var current_cell: Vector2i = Vector2i(-1, -1)
 
 var _model: Node3D = null
 var _walk_t: float = 0.0
+var _breath: float = 0.0
 var _cam_yaw: float = 0.0
 
 
 func _ready() -> void:
-	_model = Adv3DWorld.make_explorer()
+	_model = Adv3DActors.make_explorer()
 	add_child(_model)
 	camera = Camera3D.new()
 	camera.fov = 52.0
@@ -115,23 +116,44 @@ func _animate_walk() -> void:
 	if _model == null:
 		return
 	var swing: float = sin(_walk_t) * 0.5
+	var dust: CPUParticles3D = _model.get_node_or_null("Dust")
+	if dust != null:
+		dust.emitting = true
+	var arml: Node3D = _model.get_node_or_null("Body/ArmL")
+	var armr: Node3D = _model.get_node_or_null("Body/ArmR")
+	if arml != null:
+		arml.rotation.x = -swing * 0.9
+	if armr != null:
+		armr.rotation.x = swing * 0.9
 	var legl: Node3D = _model.get_node_or_null("LegL")
 	var legr: Node3D = _model.get_node_or_null("LegR")
 	if legl != null:
 		legl.rotation.x = swing
 	if legr != null:
 		legr.rotation.x = -swing
-	_model.position.y = absf(sin(_walk_t)) * 0.06
+	var bod: Node3D = _model.get_node_or_null("Body")
+	if bod != null:
+		bod.position.y = absf(sin(_walk_t)) * 0.07
 
 
 func _idle_pose(delta: float) -> void:
 	if _model == null:
 		return
+	var dust: CPUParticles3D = _model.get_node_or_null("Dust")
+	if dust != null:
+		dust.emitting = false
+	_breath += delta
+	var bod: Node3D = _model.get_node_or_null("Body")
+	if bod != null:
+		bod.position.y = sin(_breath * 2.0) * 0.012
+	for nm: String in ["Body/ArmL", "Body/ArmR"]:
+		var arm: Node3D = _model.get_node_or_null(nm)
+		if arm != null:
+			arm.rotation.x = lerpf(arm.rotation.x, 0.0, clampf(delta * 10.0, 0.0, 1.0))
 	for nm: String in ["LegL", "LegR"]:
 		var leg: Node3D = _model.get_node_or_null(nm)
 		if leg != null:
 			leg.rotation.x = lerpf(leg.rotation.x, 0.0, clampf(delta * 10.0, 0.0, 1.0))
-	_model.position.y = lerpf(_model.position.y, 0.0, clampf(delta * 10.0, 0.0, 1.0))
 
 
 func _place_camera(delta: float) -> void:

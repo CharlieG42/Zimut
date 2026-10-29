@@ -23,6 +23,8 @@ var zone_id: String = ""
 var terrain: Dictionary = {}
 var explorer: Adv3DExplorer = null
 var world_root: Node3D = null
+var _clouds: Node3D = null
+var _anim_t: float = 0.0
 
 var _mob_nodes: Dictionary = {}       # id de groupe -> Node3D
 var _mob_tweens: Dictionary = {}
@@ -40,6 +42,8 @@ var _act_btn: Button = null
 var _act_poi_key: String = ""
 var _modal_root: Control = null
 var _drag_index: int = -1
+var _touches: Dictionary = {}         # doigts actuellement posés (index -> true)
+var _btn_touch: Dictionary = {}       # doigt secondaire -> bouton visé
 var _dirty: bool = false
 var _since_persist: float = 0.0
 var _left: bool = false
@@ -59,6 +63,8 @@ func _ready() -> void:
 	_build_environment()
 	world_root = Adv3DWorld.build(zone_id)
 	add_child(world_root)
+	_clouds = Adv3DWorld.make_clouds(terrain["size"], absi(zone_id.hash()))
+	add_child(_clouds)
 	_build_explorer()
 	_build_hud()
 	_spawn_static_markers()
@@ -94,7 +100,7 @@ func _build_environment() -> void:
 	env.ambient_light_energy = 0.55
 	env.fog_enabled = true
 	env.fog_light_color = pal["fog"]
-	env.fog_density = 0.006
+	env.fog_density = 0.0035
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	var we := WorldEnvironment.new()
 	we.environment = env
@@ -144,7 +150,7 @@ func _spawn_static_markers() -> void:
 		_make_poi_node(key, pois[key])
 	for c: Vector2i in manager.gates().keys():
 		var g: Dictionary = manager.gate_at(c)
-		var node: Node3D = Adv3DWorld.make_gate(String(g.get("dir", "E")), String(g.get("name", "?")), bool(g.get("open", false)))
+		var node: Node3D = Adv3DActors.make_gate(String(g.get("dir", "E")), String(g.get("name", "?")), bool(g.get("open", false)))
 		node.position = Adv3DWorld.cell_center(c)
 		world_root.add_child(node)
 		_gate_nodes[c] = node
@@ -155,7 +161,7 @@ func _make_poi_node(key: String, poi: Dictionary) -> void:
 		(_poi_nodes[key] as Node3D).queue_free()
 	var cell: Vector2i = AdventureTerrain.parse(key)
 	var done: bool = ProgressionManager.adventure_poi_completed(manager.state, key)
-	var node: Node3D = Adv3DWorld.make_poi_marker(String(poi.get("kind", "")), String(poi.get("name", "Lieu")), done)
+	var node: Node3D = Adv3DActors.make_poi_marker(String(poi.get("kind", "")), String(poi.get("name", "Lieu")), done)
 	node.position = Adv3DWorld.cell_center(cell)
 	world_root.add_child(node)
 	_poi_nodes[key] = node
@@ -172,7 +178,7 @@ func _sync_mobs(snap: bool) -> void:
 		var id: int = int(g.get("id", -1))
 		alive[id] = true
 		if not _mob_nodes.has(id):
-			var node: Node3D = Adv3DWorld.make_mob_group(g, AdventureMobs.label(g, manager.zone_biome()).split("·")[-1].strip_edges())
+			var node: Node3D = Adv3DActors.make_mob_group(g, AdventureMobs.label(g, manager.zone_biome()).split("·")[-1].strip_edges())
 			node.position = Adv3DWorld.cell_center(AdventureMobs.pos_of(g))
 			world_root.add_child(node)
 			_mob_nodes[id] = node
@@ -213,7 +219,38 @@ func _on_cell_changed(cell: Vector2i) -> void:
 #  Boucle : contacts, sauvegarde
 # ══════════════════════════════════════════════════════════════════════
 
+func _animate_world(delta: float) -> void:
+	_anim_t += delta
+	if _clouds != null:
+		var lo: float = _clouds.get_meta("min_x")
+		var hi: float = _clouds.get_meta("max_x")
+		for c: Node3D in _clouds.get_children():
+			c.position.x += float(c.get_meta("speed")) * delta
+			if c.position.x > hi:
+				c.position.x = lo
+	for k: String in _poi_nodes.keys():
+		var pn: Node3D = _poi_nodes[k]
+		if not is_instance_valid(pn):
+			continue
+		var gem: Node3D = pn.get_node_or_null("Gem")
+		if gem != null:
+			gem.rotation.y = _anim_t * 1.6
+			gem.scale = Vector3.ONE * (1.0 + sin(_anim_t * 3.0) * 0.08)
+		var pulse: Node3D = pn.get_node_or_null("Pulse")
+		if pulse != null:
+			var f: float = fmod(_anim_t * 0.7, 1.0)
+			pulse.scale = Vector3.ONE * (0.6 + f * 0.9)
+	for id: int in _mob_nodes.keys():
+		var mn: Node3D = _mob_nodes[id]
+		if not is_instance_valid(mn):
+			continue
+		for ch: Node in mn.get_children():
+			if ch.has_meta("phase"):
+				(ch as Node3D).position.y = absf(sin(_anim_t * 3.0 + float(ch.get_meta("phase")))) * 0.08
+
+
 func _process(delta: float) -> void:
+	_animate_world(delta)
 	if explorer == null or _left:
 		return
 	_since_persist += delta
@@ -298,12 +335,12 @@ func _ask_mob_combat(g: Dictionary) -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 14)
 	box.add_child(row)
-	var go: Button = U.btn("⚔  COMBATTRE", Color(0.90, 0.28, 0.22), 24, Vector2(300, 66))
+	var go: Button = _btn("⚔  COMBATTRE", Color(0.90, 0.28, 0.22), 24, Vector2(300, 84))
 	go.pressed.connect(func() -> void:
 		_close_modal()
 		_start_mob_combat(g))
 	row.add_child(go)
-	var flee: Button = U.btn("PLUS TARD", U.C_BORDER, 22, Vector2(220, 66))
+	var flee: Button = _btn("PLUS TARD", U.C_BORDER, 22, Vector2(220, 84))
 	flee.pressed.connect(func() -> void:
 		_declined_mobs[int(g.get("id", -1))] = true
 		_close_modal())
@@ -367,7 +404,7 @@ func _confirm_poi_combat(key: String, poi: Dictionary) -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 14)
 	box.add_child(row)
-	var go: Button = U.btn("⚔  COMBATTRE", Color(0.90, 0.28, 0.22), 24, Vector2(300, 66))
+	var go: Button = _btn("⚔  COMBATTRE", Color(0.90, 0.28, 0.22), 24, Vector2(300, 84))
 	go.pressed.connect(func() -> void:
 		_close_modal()
 		manager.interact()                       # pose pending_challenge
@@ -376,7 +413,7 @@ func _confirm_poi_combat(key: String, poi: Dictionary) -> void:
 		GameManager.fight_biome = manager.zone_biome()
 		_leave_to("res://scenes/TeamSelection.tscn"))
 	row.add_child(go)
-	var later: Button = U.btn("PLUS TARD", U.C_BORDER, 22, Vector2(220, 66))
+	var later: Button = _btn("PLUS TARD", U.C_BORDER, 22, Vector2(220, 84))
 	later.pressed.connect(_close_modal)
 	row.add_child(later)
 
@@ -402,7 +439,7 @@ func _ask_gate(c: Vector2i) -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 14)
 	box.add_child(row)
-	var go: Button = U.btn("➜  PASSER", Color(0.30, 0.72, 0.55), 24, Vector2(280, 66))
+	var go: Button = _btn("➜  PASSER", Color(0.30, 0.72, 0.55), 24, Vector2(280, 84))
 	go.pressed.connect(func() -> void:
 		_close_modal()
 		manager.state["hero_pos"] = [c.x, c.y]
@@ -413,7 +450,7 @@ func _ask_gate(c: Vector2i) -> void:
 		else:
 			_show_toast("Le passage est impossible pour le moment."))
 	row.add_child(go)
-	var stay: Button = U.btn("RESTER", U.C_BORDER, 22, Vector2(200, 66))
+	var stay: Button = _btn("RESTER", U.C_BORDER, 22, Vector2(200, 84))
 	stay.pressed.connect(_close_modal)
 	row.add_child(stay)
 
@@ -447,6 +484,9 @@ func _leave_to(scene_path: String) -> void:
 
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		_touches.clear()
+		_btn_touch.clear()
 	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_WM_CLOSE_REQUEST:
 		if manager != null and explorer != null and not _left:
 			_persist()
@@ -486,26 +526,26 @@ func _build_hud() -> void:
 	top.add_theme_constant_override("separation", 10)
 	top.anchor_left = 1.0
 	top.anchor_right = 1.0
-	top.offset_left = -480.0
+	top.offset_left = -520.0
 	top.offset_right = -20.0
 	top.offset_top = 14.0
 	root.add_child(top)
-	var classic: Button = U.btn("Carte classique", U.C_BORDER, 19, Vector2(240, 54))
+	var classic: Button = _btn("Carte classique", U.C_BORDER, 22, Vector2(260, 74))
 	classic.pressed.connect(func() -> void: _leave_to("res://scenes/AdventureMap.tscn"))
 	top.add_child(classic)
-	var menu: Button = U.btn("☰ Menu", U.C_BORDER, 19, Vector2(140, 54))
+	var menu: Button = _btn("☰ Menu", U.C_BORDER, 22, Vector2(160, 74))
 	menu.pressed.connect(func() -> void: _leave_to("res://scenes/SaveSlots.tscn"))
 	top.add_child(menu)
 	# Bouton d'action contextuel (bas-droite)
-	_act_btn = U.btn("", Color(0.30, 0.55, 0.85), 24, Vector2(420, 78))
+	_act_btn = _btn("", Color(0.30, 0.55, 0.85), 27, Vector2(440, 100))
 	_act_btn.anchor_left = 1.0
 	_act_btn.anchor_right = 1.0
 	_act_btn.anchor_top = 1.0
 	_act_btn.anchor_bottom = 1.0
-	_act_btn.offset_left = -450.0
+	_act_btn.offset_left = -470.0
 	_act_btn.offset_right = -30.0
-	_act_btn.offset_top = -130.0
-	_act_btn.offset_bottom = -52.0
+	_act_btn.offset_top = -160.0
+	_act_btn.offset_bottom = -60.0
 	_act_btn.visible = false
 	_act_btn.pressed.connect(_on_action_pressed)
 	root.add_child(_act_btn)
@@ -519,6 +559,76 @@ func _build_hud() -> void:
 	_toast.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_toast.modulate.a = 0.0
 	root.add_child(_toast)
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  Boutons : réactivité
+# ══════════════════════════════════════════════════════════════════════
+## Godot ne transforme en « clic » que le PREMIER doigt posé : tant qu'un doigt tient le stick,
+## un bouton touché avec un deuxième doigt ne réagit pas. On traite donc nous-mêmes les doigts
+## secondaires (appui à la pose, déclenchement au relâchement dans le bouton), sans doublon avec
+## le premier doigt, géré par le moteur.
+
+func _btn(text: String, col: Color, size: int, min_size: Vector2) -> Button:
+	var b: Button = U.btn(text, col, size, min_size)
+	b.button_down.connect(func() -> void: _press_feedback(b, true))
+	b.button_up.connect(func() -> void: _press_feedback(b, false))
+	return b
+
+
+func _press_feedback(b: Button, down: bool) -> void:
+	if not is_instance_valid(b):
+		return
+	b.modulate = Color(0.78, 0.78, 0.78) if down else Color.WHITE
+	b.pivot_offset = b.size * 0.5
+	b.scale = Vector2(0.96, 0.96) if down else Vector2.ONE
+	if down and GameSettings.haptics_on and OS.has_feature("mobile"):
+		Input.vibrate_handheld(14)
+
+
+func _input(event: InputEvent) -> void:
+	if not (event is InputEventScreenTouch):
+		return
+	var t := event as InputEventScreenTouch
+	if t.pressed:
+		var secondary: bool = not _touches.is_empty()
+		_touches[t.index] = true
+		if secondary:
+			var b: Button = _button_at(t.position)
+			if b != null:
+				_btn_touch[t.index] = b
+				_press_feedback(b, true)
+				get_viewport().set_input_as_handled()
+	else:
+		_touches.erase(t.index)
+		if _btn_touch.has(t.index):
+			var tb: Button = _btn_touch[t.index]
+			_btn_touch.erase(t.index)
+			if is_instance_valid(tb):
+				_press_feedback(tb, false)
+				if not t.canceled and tb.is_visible_in_tree() and not tb.disabled \
+						and tb.get_global_rect().grow(10.0).has_point(t.position):
+					tb.pressed.emit()
+			get_viewport().set_input_as_handled()
+
+
+## Bouton visible sous le doigt (dans la fenêtre ouverte s'il y en a une, sinon dans le HUD).
+func _button_at(p: Vector2) -> Button:
+	var scope: Node = _modal_root if (_modal_root != null and is_instance_valid(_modal_root)) else _hud
+	if scope == null:
+		return null
+	var found: Button = null
+	var stack: Array[Node] = [scope]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		if n is Button:
+			var cand := n as Button
+			if cand.is_visible_in_tree() and not cand.disabled and cand.get_global_rect().grow(10.0).has_point(p):
+				found = cand
+		for c: Node in n.get_children():
+			stack.append(c)
+	return found
+
 
 
 func _on_look_input(event: InputEvent) -> void:
