@@ -12,6 +12,9 @@ const MOUSE_INDEX := 1000
 const MAX_REACH := 90.0
 
 var value: Vector2 = Vector2.ZERO
+var rest_right: bool = false          # position de repos : coin bas-droit (stick de caméra)
+var tint: Color = Color(1, 1, 1)
+var caption: String = ""
 var _index: int = -1
 var _center: Vector2 = Vector2.ZERO
 var _finger: Vector2 = Vector2.ZERO
@@ -29,7 +32,8 @@ func is_pressed() -> bool:
 
 func _rest() -> void:
 	if _index == -1:
-		_center = Vector2(minf(size.x * 0.5, 130.0), size.y - minf(size.y * 0.5, 130.0))
+		var rx: float = size.x - minf(size.x * 0.5, 130.0) if rest_right else minf(size.x * 0.5, 130.0)
+		_center = Vector2(rx, size.y - minf(size.y * 0.5, 130.0))
 		_finger = _center
 		queue_redraw()
 
@@ -98,6 +102,10 @@ func _release() -> void:
 func _draw() -> void:
 	var active: bool = _index != -1
 	draw_circle(_center, MAX_REACH + 8.0, Color(0.05, 0.08, 0.06, 0.28 if not active else 0.40))
-	draw_arc(_center, MAX_REACH + 8.0, 0.0, TAU, 48, Color(1, 1, 1, 0.45 if not active else 0.8), 3.0, true)
-	draw_circle(_finger, 40.0, Color(1, 1, 1, 0.55 if not active else 0.9))
+	draw_arc(_center, MAX_REACH + 8.0, 0.0, TAU, 48, Color(tint.r, tint.g, tint.b, 0.55 if not active else 0.9), 3.0, true)
+	if caption != "" and not active:
+		var f: Font = ThemeDB.fallback_font
+		var w: float = f.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
+		draw_string(f, _center + Vector2(-w * 0.5, MAX_REACH + 34.0), caption, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(1, 1, 1, 0.85))
+	draw_circle(_finger, 40.0, Color(tint.r, tint.g, tint.b, 0.55 if not active else 0.9))
 	draw_arc(_finger, 40.0, 0.0, TAU, 32, Color(0.2, 0.3, 0.2, 0.9), 2.5, true)

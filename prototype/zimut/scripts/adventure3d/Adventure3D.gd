@@ -26,10 +26,12 @@ var world_root: Node3D = null
 var _clouds: Node3D = null
 var _islets: Node3D = null
 var _ambient: CPUParticles3D = null
+var _companion: Adv3DCompanion = null
 var _minimap: Adv3DMinimap = null
 var _map_btn: Button = null
+var _map_icon: Adv3DChevrons = null
 var _map_tick: float = 0.0
-var _cam_dir: float = 0.0
+var _cam_stick: Adv3DStick = null
 var _anim_t: float = 0.0
 
 var _mob_nodes: Dictionary = {}       # id de groupe -> Node3D
@@ -138,6 +140,10 @@ func _build_explorer() -> void:
 	add_child(explorer)
 	explorer.place_at(_start_position())
 	explorer.cell_changed.connect(_on_cell_changed)
+	_companion = Adv3DCompanion.create(terrain, explorer)
+	if _companion != null:
+		add_child(_companion)
+		_companion.place_near_target()
 	_build_ambient()
 
 
@@ -336,8 +342,9 @@ func _process(delta: float) -> void:
 	if _modal_root != null:
 		return
 	explorer.stick_input = _stick.value if _stick != null else Vector2.ZERO
-	if _cam_dir != 0.0:
-		explorer.rotate_camera(_cam_dir * 1.9 * delta)
+	if _cam_stick != null and _cam_stick.value.length() > 0.12:
+		var cv: Vector2 = _cam_stick.value
+		explorer.rotate_camera(-cv.x * 2.4 * delta, -cv.y * 1.3 * delta)
 	if _minimap != null and _minimap.visible:
 		_minimap.set_player(Vector2(explorer.position.x, explorer.position.z) / Adv3DWorld.CELL, explorer.yaw)
 		_map_tick += delta
@@ -411,6 +418,7 @@ func _kind_icon(kind: String) -> String:
 # ══════════════════════════════════════════════════════════════════════
 
 func _ask_mob_combat(g: Dictionary) -> void:
+	_emote("surpris")
 	var title: String = AdventureMobs.label(g, manager.zone_biome())
 	var box: VBoxContainer = _modal("⚔  " + title, Color(0.90, 0.28, 0.22))
 	var t: Label = U.lbl("Combat au tour par tour (mode Tactique), ennemis niveau %d, décor %s.\nVictoire : XP, objets, or et ressources pour toute l'équipe." % [
@@ -432,7 +440,14 @@ func _ask_mob_combat(g: Dictionary) -> void:
 	row.add_child(flee)
 
 
+## Gligli réagit (bulle d'émotion) s'il est présent.
+func _emote(kind: String) -> void:
+	if _companion != null and is_instance_valid(_companion):
+		_companion.emote(kind)
+
+
 func _start_mob_combat(g: Dictionary) -> void:
+	_emote("colere")
 	_save_position()
 	manager.start_mob_combat(g)
 	GameManager.fight_biome = manager.zone_biome()
@@ -508,6 +523,7 @@ func _after_poi(key: String, poi: Dictionary, message: String) -> void:
 	_dirty = true
 	_persist()
 	_show_toast(message)
+	_emote("heureux")
 
 
 func _ask_gate(c: Vector2i) -> void:
@@ -627,8 +643,8 @@ func _build_hud() -> void:
 	_act_btn.anchor_right = 1.0
 	_act_btn.anchor_top = 1.0
 	_act_btn.anchor_bottom = 1.0
-	_act_btn.offset_left = -470.0
-	_act_btn.offset_right = -30.0
+	_act_btn.offset_left = -740.0
+	_act_btn.offset_right = -300.0
 	_act_btn.offset_top = -160.0
 	_act_btn.offset_bottom = -60.0
 	_act_btn.visible = false
@@ -644,8 +660,12 @@ func _build_hud() -> void:
 	map_box.offset_top = 100.0
 	map_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(map_box)
-	_map_btn = _btn("", U.C_BORDER, 20, Vector2(190, 56))
+	_map_btn = _btn("", U.C_BORDER, 20, Vector2(84, 56))
 	_map_btn.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_map_icon = Adv3DChevrons.new()
+	_map_icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_map_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_map_btn.add_child(_map_icon)
 	_map_btn.pressed.connect(_cycle_map_mode)
 	map_box.add_child(_map_btn)
 	_minimap = Adv3DMinimap.new()
@@ -655,21 +675,16 @@ func _build_hud() -> void:
 	_minimap.set_mode(Adv3DMinimap.mode)
 	_update_map_button()
 	_refresh_minimap_markers()
-	# Boutons de caméra (maintenir pour tourner), bord droit
-	var cam_row := HBoxContainer.new()
-	cam_row.add_theme_constant_override("separation", 12)
-	cam_row.anchor_left = 1.0
-	cam_row.anchor_right = 1.0
-	cam_row.anchor_top = 0.62
-	cam_row.offset_left = -220.0
-	cam_row.offset_right = -20.0
-	cam_row.offset_top = 0.0
-	root.add_child(cam_row)
-	for dir: float in [1.0, -1.0]:
-		var cb: Button = _btn("◀" if dir > 0.0 else "▶", Color(0.20, 0.28, 0.40), 34, Vector2(94, 94))
-		cb.button_down.connect(func() -> void: _cam_dir = dir)
-		cb.button_up.connect(func() -> void: _cam_dir = 0.0)
-		cam_row.add_child(cb)
+	# Stick de caméra (quart bas-droit) : gauche/droite = rotation, haut/bas = inclinaison.
+	_cam_stick = Adv3DStick.new()
+	_cam_stick.rest_right = true
+	_cam_stick.tint = Color(0.55, 0.78, 1.0)
+	_cam_stick.caption = "Caméra"
+	_cam_stick.anchor_left = 0.70
+	_cam_stick.anchor_right = 1.0
+	_cam_stick.anchor_top = 0.38
+	_cam_stick.anchor_bottom = 1.0
+	root.add_child(_cam_stick)
 	# Message éphémère (bas-centre)
 	_toast = U.lbl("", 24, U.C_TXT, true)
 	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -760,7 +775,10 @@ func _cycle_map_mode() -> void:
 func _update_map_button() -> void:
 	if _map_btn == null:
 		return
-	_map_btn.text = ["Réduire ▴", "Masquer ✕", "Carte ▾"][Adv3DMinimap.mode]
+	# chevrons vers le haut = réduire (grande → petite → masquée), vers le bas = agrandir
+	_map_icon.expand = Adv3DMinimap.mode == Adv3DMinimap.MODE_HIDDEN
+	_map_icon.count = 2 if Adv3DMinimap.mode == Adv3DMinimap.MODE_BIG else 1 if Adv3DMinimap.mode == Adv3DMinimap.MODE_SMALL else 2
+	_map_icon.queue_redraw()
 
 
 func _refresh_minimap_markers() -> void:
@@ -770,7 +788,7 @@ func _refresh_minimap_markers() -> void:
 	var defs: Dictionary = ProgressionManager.ADVENTURE_POIS.get(zone_id, {})
 	for key: String in defs.keys():
 		var poi: Dictionary = defs[key]
-		pois.append({"cell": AdventureTerrain.parse(key), "color": Adv3DActors.POI_COLORS.get(String(poi.get("kind", "")), Color(0.9, 0.9, 0.9)),
+		pois.append({"cell": AdventureTerrain.parse(key), "kind": String(poi.get("kind", "")), "dungeon": Dungeons.is_dungeon(poi),
 			"done": ProgressionManager.adventure_poi_completed(manager.state, key)})
 	var gates: Array = []
 	for c: Vector2i in manager.gates().keys():

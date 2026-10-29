@@ -26,6 +26,8 @@ var yaw: float = 0.0
 var current_cell: Vector2i = Vector2i(-1, -1)
 
 var _model: Node3D = null
+var _sprite: Adv3DSpriteActor = null     # joueur « carton » (illustration) ; null = modèle low-poly de secours
+var _facing: float = 0.0
 var _walk_t: float = 0.0
 var _breath: float = 0.0
 var _cam_yaw: float = 0.0
@@ -34,8 +36,18 @@ var distance: float = CAM_DISTANCE
 
 
 func _ready() -> void:
-	_model = Adv3DActors.make_explorer()
-	add_child(_model)
+	_sprite = Adv3DSpriteActor.create("hero")
+	if _sprite != null:
+		_model = _sprite
+		add_child(_model)
+		Adv3DActors.add_shadow(_model, 0.55)
+		var dust: CPUParticles3D = Adv3DActors.make_dust()
+		dust.name = "Dust"
+		_model.add_child(dust)
+		_facing = yaw + PI
+	else:
+		_model = Adv3DActors.make_explorer()
+		add_child(_model)
 	camera = Camera3D.new()
 	camera.fov = 52.0
 	camera.near = 0.2
@@ -59,6 +71,16 @@ func rotate_camera(delta_yaw: float, delta_pitch: float = 0.0) -> void:
 	pitch = clampf(pitch + delta_pitch, PITCH_MIN, PITCH_MAX)
 
 
+## Cap actuel du joueur (même repère que atan2(x, z)).
+func facing() -> float:
+	return _facing
+
+
+## Angle de la caméra autour du joueur (lissé).
+func camera_yaw() -> float:
+	return _cam_yaw
+
+
 func zoom_camera(factor: float) -> void:
 	distance = clampf(distance * factor, DIST_MIN, DIST_MAX)
 
@@ -73,12 +95,16 @@ func _physics_process(delta: float) -> void:
 		input = input.normalized()
 	if frozen or input.length() < 0.12:
 		_idle_pose(delta)
+		if _sprite != null:
+			_sprite.animate(delta, 0.0)
 		_place_camera(delta)
 		return
 	var dir: Vector3 = Basis(Vector3.UP, yaw) * Vector3(input.x, 0.0, input.y)
 	var step: Vector3 = dir * SPEED * input.length() * delta
 	_try_move(step)
 	_face(dir, delta)
+	if _sprite != null:
+		_sprite.animate(delta, input.length())
 	_walk_t += delta * SPEED * 2.2 * input.length()
 	_animate_walk()
 	var cell: Vector2i = Adv3DWorld.world_to_cell(position)
@@ -124,6 +150,9 @@ func _face(dir: Vector3, delta: float) -> void:
 	if _model == null or dir.length() < 0.01:
 		return
 	var want: float = atan2(dir.x, dir.z)
+	if _sprite != null:
+		_facing = lerp_angle(_facing, want, clampf(delta * 12.0, 0.0, 1.0))
+		return
 	_model.rotation.y = lerp_angle(_model.rotation.y, want, clampf(delta * 12.0, 0.0, 1.0))
 
 
@@ -187,3 +216,5 @@ func _place_camera(delta: float) -> void:
 	var offset: Vector3 = Basis(Vector3.UP, _cam_yaw) * Basis(Vector3.RIGHT, pitch) * Vector3(0.0, 0.0, distance)
 	camera.global_position = focus + offset
 	camera.look_at(focus, Vector3.UP)
+	if _sprite != null:
+		_sprite.set_facing(_facing, _cam_yaw)

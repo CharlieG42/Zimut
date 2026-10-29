@@ -89,6 +89,19 @@ static func _particles(col: Color, amount: int, life: float, vel: float, grav: V
 	return p
 
 
+static func add_shadow(parent: Node3D, radius: float) -> void:
+	_shadow(parent, radius)
+
+
+## Poussière de pas (désactivée par défaut ; l'appelant active « emitting » en marchant).
+static func make_dust() -> CPUParticles3D:
+	var dust := _particles(Color(0.85, 0.78, 0.62), 10, 0.55, 0.7, Vector3(0, 0.2, 0), 0.16)
+	dust.position = Vector3(0, 0.08, -0.12)
+	dust.emitting = false
+	dust.spread = 60.0
+	return dust
+
+
 static func _shadow(parent: Node3D, radius: float) -> void:
 	var s := MeshInstance3D.new()
 	s.mesh = Adv3DMeshes.shadow_mesh()

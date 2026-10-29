@@ -89,6 +89,27 @@ func _boot() -> void:
 	check(scene._poi_nodes.size() == pois.size(), "scène : un marqueur par lieu (%d)" % pois.size())
 	check(scene._gate_nodes.size() == scene.manager.gates().size(), "scène : un portique par porte")
 
+	# personnage « carton » : joueur et Gligli, 8 directions
+	var spr: Adv3DSpriteActor = scene.explorer._sprite
+	check(spr != null, "sprites : le joueur est une illustration")
+	check(scene._companion != null, "sprites : Gligli est présent")
+	if spr != null:
+		var expect: Array = [[0.0, "face", false], [PI * 0.25, "quart_face", false], [PI * 0.5, "cote", false], [PI * 0.75, "quart_dos", false],
+			[PI, "dos", false], [-PI * 0.75, "quart_dos", true], [-PI * 0.5, "cote", true], [-PI * 0.25, "quart_face", true]]
+		var ok_dirs := true
+		for e: Array in expect:
+			spr.set_facing(float(e[0]) + 0.3, 0.3)
+			if spr._current_key != String(e[1]) or (String(e[1]) != "dos" and spr._sprite.flip_h != bool(e[2])):
+				ok_dirs = false
+				print("   direction ", e, " -> ", spr._current_key, " flip=", spr._sprite.flip_h)
+		check(ok_dirs, "sprites : la vue suit l'angle caméra / cap (8 directions)")
+		check(absf(spr._sprite.pixel_size * spr._sprite.texture.get_height() - 2.3) < 0.01, "sprites : le joueur mesure 2,3 m")
+	if scene._companion != null:
+		var dd: float = scene._companion.position.distance_to(scene.explorer.position)
+		check(dd < 3.0, "sprites : Gligli est près du joueur (%.1f m)" % dd)
+		scene._companion.emote("heureux")
+		check(scene._companion._emote.visible, "sprites : bulle d'émotion affichée")
+
 	# marche : on déplace l'explorateur de quelques cases et on vérifie l'état de jeu
 	var moves0: int = int(scene.manager.state.get("moves", 0))
 	var start_cell: Vector2i = scene.explorer.current_cell
