@@ -26,6 +26,7 @@ var world_root: Node3D = null
 var _clouds: Node3D = null
 var _islets: Node3D = null
 var _ambient: CPUParticles3D = null
+var _companion: Adv3DCompanion = null
 var _minimap: Adv3DMinimap = null
 var _map_btn: Button = null
 var _map_icon: Adv3DChevrons = null
@@ -139,6 +140,10 @@ func _build_explorer() -> void:
 	add_child(explorer)
 	explorer.place_at(_start_position())
 	explorer.cell_changed.connect(_on_cell_changed)
+	_companion = Adv3DCompanion.create(terrain, explorer)
+	if _companion != null:
+		add_child(_companion)
+		_companion.place_near_target()
 	_build_ambient()
 
 
@@ -413,6 +418,7 @@ func _kind_icon(kind: String) -> String:
 # ══════════════════════════════════════════════════════════════════════
 
 func _ask_mob_combat(g: Dictionary) -> void:
+	_emote("surpris")
 	var title: String = AdventureMobs.label(g, manager.zone_biome())
 	var box: VBoxContainer = _modal("⚔  " + title, Color(0.90, 0.28, 0.22))
 	var t: Label = U.lbl("Combat au tour par tour (mode Tactique), ennemis niveau %d, décor %s.\nVictoire : XP, objets, or et ressources pour toute l'équipe." % [
@@ -434,7 +440,14 @@ func _ask_mob_combat(g: Dictionary) -> void:
 	row.add_child(flee)
 
 
+## Gligli réagit (bulle d'émotion) s'il est présent.
+func _emote(kind: String) -> void:
+	if _companion != null and is_instance_valid(_companion):
+		_companion.emote(kind)
+
+
 func _start_mob_combat(g: Dictionary) -> void:
+	_emote("colere")
 	_save_position()
 	manager.start_mob_combat(g)
 	GameManager.fight_biome = manager.zone_biome()
@@ -510,6 +523,7 @@ func _after_poi(key: String, poi: Dictionary, message: String) -> void:
 	_dirty = true
 	_persist()
 	_show_toast(message)
+	_emote("heureux")
 
 
 func _ask_gate(c: Vector2i) -> void:
