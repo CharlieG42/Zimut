@@ -54,7 +54,7 @@ func _check_scene() -> void:
 	var path: String = scene.scene_file_path
 	if path.ends_with("/Main.tscn") or path.ends_with("/TeamSelection.tscn"):
 		_start("tactique")
-	elif path.ends_with("/AdventureMap.tscn"):
+	elif path.ends_with("/AdventureMap.tscn") or path.ends_with("/Adventure3D.tscn"):
 		_start("adventure")
 	elif path.ends_with("/ConquestMap.tscn"):
 		_start("conquest")

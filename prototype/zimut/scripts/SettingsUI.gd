@@ -63,6 +63,9 @@ func _ready() -> void:
 			GameSettings.set_sfx(idx < 2)
 			GameSettings.set_haptics(idx == 0)))
 
+	box.add_child(_setting_row("Mode Aventure", ["Carte classique", "Monde 3D (bêta)"] as Array[String],
+		1 if GameSettings.adventure_3d else 0, func(idx: int) -> void: GameSettings.set_adventure_3d(idx == 1)))
+
 	box.add_child(_setting_row("Taille du texte des menus", GameSettings.TEXT_SIZES,
 		GameSettings.text_size, func(idx: int) -> void: GameSettings.set_text_size(idx)))
 

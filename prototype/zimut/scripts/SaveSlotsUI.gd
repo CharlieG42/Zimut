@@ -633,7 +633,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	modes_row.add_child(_mode_button("Aventure",
 		"Explorez, découvrez et relevez des défis", "res://assets/ui/modes/mode_aventure.png",
 		Color(0.22, 0.48, 0.31), adv_ok, func() -> void:
-			_launch_campaign_mode("adventure", "res://scenes/AdventureMap.tscn", slot)))
+			_launch_campaign_mode("adventure", GameSettings.adventure_scene(), slot)))
 	modes_row.add_child(_mode_button("Conquête",
 		"Conquérez les cités par les armes", "res://assets/ui/modes/mode_conquete.png",
 		Color(0.62, 0.25, 0.20), con_ok, func() -> void:

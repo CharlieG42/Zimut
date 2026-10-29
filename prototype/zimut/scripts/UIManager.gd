@@ -2079,7 +2079,7 @@ func _show_result_window(victory: bool) -> void:
 		holder.queue_free()
 		PlayTimer.flush()
 		if back_mode == "adventure":
-			get_tree().change_scene_to_file("res://scenes/AdventureMap.tscn")
+			get_tree().change_scene_to_file(GameSettings.adventure_scene())
 		elif back_mode == "conquest":
 			get_tree().change_scene_to_file("res://scenes/ConquestMap.tscn")
 		else:
