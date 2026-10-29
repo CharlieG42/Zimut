@@ -32,6 +32,7 @@ void vertex() {
 }
 void fragment() {
 	ALBEDO = pow(COLOR.rgb, vec3(2.2));
+	EMISSION = ALBEDO * 0.22;
 	ROUGHNESS = 0.92;
 }
 """
@@ -90,6 +91,25 @@ static func shadow_mesh() -> Mesh:
 # ══════════════════════════════════════════════════════════════════════
 
 ## Triangle à normale plate orientée « vers l'extérieur » du volume centré en `center`.
+## Ombrage doux (organique) ou facettes plates (minéral) : réglé par chaque constructeur de mesh.
+static var smooth_mode: bool = true
+
+
+## Triangle avec une normale par sommet (ombrage lissé).
+static func _tri_n(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, ca: Color, cb: Color, cc: Color,
+		na: Vector3, nb: Vector3, nc: Vector3, center: Vector3) -> void:
+	var fn: Vector3 = (c - a).cross(b - a)
+	if fn.length_squared() < 0.0000001:
+		return
+	var vs: Array = [a, b, c]
+	var cs: Array = [ca, cb, cc]
+	var ns: Array = [na, nb, nc]
+	for i: int in range(3):
+		st.set_color(cs[i])
+		st.set_normal(ns[i])
+		st.add_vertex(vs[i])
+
+
 static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, ca: Color, cb: Color, cc: Color, center: Vector3) -> void:
 	var n: Vector3 = (c - a).cross(b - a)
 	if n.length_squared() < 0.0000001:
@@ -126,13 +146,24 @@ static func add_cone(st: SurfaceTool, base: Vector3, r_bot: float, r_top: float,
 		ring_t.append(base + Vector3(cos(a) * r_top, height, sin(a) * r_top) + _jit(rng, jitter * 0.5) * Vector3(1, 0.2, 1))
 	var top_c: Vector3 = base + Vector3(0, height, 0)
 	var bot_c: Vector3 = base
+	var slope: float = (r_bot - r_top) / maxf(height, 0.001)
 	for i: int in range(segs):
 		var j: int = (i + 1) % segs
+		var ni: Vector3 = (Vector3(ring_b[i].x - base.x, 0.0, ring_b[i].z - base.z).normalized() + Vector3(0, slope, 0)).normalized()
+		var nj: Vector3 = (Vector3(ring_b[j].x - base.x, 0.0, ring_b[j].z - base.z).normalized() + Vector3(0, slope, 0)).normalized()
 		if r_top <= 0.001:
-			_tri(st, ring_b[i], ring_b[j], top_c, col_bot, col_bot, col_top, center)
+			if smooth_mode:
+				var nt: Vector3 = (ni + nj).normalized()
+				_tri_n(st, ring_b[i], ring_b[j], top_c, col_bot, col_bot, col_top, ni, nj, nt, center)
+			else:
+				_tri(st, ring_b[i], ring_b[j], top_c, col_bot, col_bot, col_top, center)
 		else:
-			_tri(st, ring_b[i], ring_b[j], ring_t[j], col_bot, col_bot, col_top, center)
-			_tri(st, ring_b[i], ring_t[j], ring_t[i], col_bot, col_top, col_top, center)
+			if smooth_mode:
+				_tri_n(st, ring_b[i], ring_b[j], ring_t[j], col_bot, col_bot, col_top, ni, nj, nj, center)
+				_tri_n(st, ring_b[i], ring_t[j], ring_t[i], col_bot, col_top, col_top, ni, nj, ni, center)
+			else:
+				_tri(st, ring_b[i], ring_b[j], ring_t[j], col_bot, col_bot, col_top, center)
+				_tri(st, ring_b[i], ring_t[j], ring_t[i], col_bot, col_top, col_top, center)
 			_tri(st, ring_t[i], ring_t[j], top_c, col_top, col_top, col_top, center)
 		if cap_bottom:
 			_tri(st, ring_b[i], ring_b[j], bot_c, col_bot, col_bot, col_bot, center)
@@ -169,7 +200,19 @@ static func add_blob(st: SurfaceTool, center: Vector3, radii: Vector3, segs: int
 			var cb: Color = cols[r][s2]
 			var cc2: Color = cols[r + 1][s2]
 			var cd: Color = cols[r + 1][s]
-			if r == 0:
+			if smooth_mode:
+				var na: Vector3 = ((a - center) / radii).normalized()
+				var nb: Vector3 = ((b - center) / radii).normalized()
+				var nc: Vector3 = ((c - center) / radii).normalized()
+				var nd: Vector3 = ((d - center) / radii).normalized()
+				if r == 0:
+					_tri_n(st, a, c, d, ca, cc2, cd, na, nc, nd, center)
+				elif r == rings - 1:
+					_tri_n(st, a, b, d, ca, cb, cd, na, nb, nd, center)
+				else:
+					_tri_n(st, a, b, c, ca, cb, cc2, na, nb, nc, center)
+					_tri_n(st, a, c, d, ca, cc2, cd, na, nc, nd, center)
+			elif r == 0:
 				_tri(st, a, c, d, ca, cc2, cd, center)
 			elif r == rings - 1:
 				_tri(st, a, b, d, ca, cb, cd, center)
@@ -235,7 +278,9 @@ static func _begin() -> SurfaceTool:
 
 static func _cached(key: String, builder: Callable) -> Mesh:
 	if not _cache.has(key):
+		smooth_mode = true
 		_cache[key] = builder.call()
+		smooth_mode = true
 	return _cache[key]
 
 
@@ -246,7 +291,7 @@ static func pine(snow: bool = false) -> Mesh:
 		var rng: RandomNumberGenerator = _rng(11)
 		var bark_b := Color(0.30, 0.20, 0.13)
 		var bark_t := Color(0.42, 0.29, 0.18)
-		add_cone(st, Vector3.ZERO, 0.19, 0.12, 1.0, 6, bark_b, bark_t, rng, 0.01)
+		add_cone(st, Vector3.ZERO, 0.19, 0.12, 1.0, 8, bark_b, bark_t, rng, 0.01)
 		var tiers: Array = [[0.55, 1.15, 1.35], [1.35, 0.88, 1.20], [2.05, 0.60, 1.10]]
 		for i: int in range(tiers.size()):
 			var t: Array = tiers[i]
@@ -255,7 +300,7 @@ static func pine(snow: bool = false) -> Mesh:
 			if snow:
 				light = Color(0.92, 0.96, 0.98)
 				dark = Color(0.36, 0.56, 0.52)
-			add_cone(st, Vector3(0, t[0], 0), t[1], 0.0, t[2], 7, dark, light, rng, 0.05, false)
+			add_cone(st, Vector3(0, t[0], 0), t[1], 0.0, t[2], 12, dark, light, rng, 0.03, false)
 		return _commit(st))
 
 
@@ -266,18 +311,19 @@ static func broadleaf() -> Mesh:
 		var rng: RandomNumberGenerator = _rng(23)
 		add_cone(st, Vector3.ZERO, 0.22, 0.12, 1.5, 6, Color(0.28, 0.19, 0.12), Color(0.45, 0.31, 0.20), rng, 0.015)
 		add_cone(st, Vector3(0, 1.0, 0), 0.10, 0.06, 0.7, 5, Color(0.40, 0.28, 0.18), Color(0.42, 0.30, 0.19), rng, 0.01)
-		var dark := Color(0.12, 0.33, 0.14)
-		var light := Color(0.42, 0.68, 0.26)
-		add_blob(st, Vector3(0.0, 2.05, 0.0), Vector3(1.05, 0.88, 1.05), 8, 4, dark, light, rng, 0.05)
-		add_blob(st, Vector3(0.62, 1.72, 0.25), Vector3(0.72, 0.62, 0.72), 7, 3, dark, light.darkened(0.04), rng, 0.05)
-		add_blob(st, Vector3(-0.58, 1.78, -0.30), Vector3(0.70, 0.60, 0.70), 7, 3, dark, light.darkened(0.06), rng, 0.05)
-		add_blob(st, Vector3(0.05, 2.65, 0.05), Vector3(0.62, 0.50, 0.62), 7, 3, dark.lightened(0.05), light.lightened(0.05), rng, 0.05)
+		var dark := Color(0.18, 0.42, 0.19)
+		var light := Color(0.52, 0.78, 0.30)
+		add_blob(st, Vector3(0.0, 2.05, 0.0), Vector3(1.05, 0.88, 1.05), 12, 6, dark, light, rng, 0.03)
+		add_blob(st, Vector3(0.62, 1.72, 0.25), Vector3(0.72, 0.62, 0.72), 10, 5, dark, light.darkened(0.04), rng, 0.05)
+		add_blob(st, Vector3(-0.58, 1.78, -0.30), Vector3(0.70, 0.60, 0.70), 10, 5, dark, light.darkened(0.06), rng, 0.05)
+		add_blob(st, Vector3(0.05, 2.65, 0.05), Vector3(0.62, 0.50, 0.62), 10, 5, dark.lightened(0.05), light.lightened(0.05), rng, 0.05)
 		return _commit(st))
 
 
 ## Rocher + petits cailloux ; `warm` = grès du désert, sinon granit moussu.
 static func rock(warm: bool = false) -> Mesh:
 	return _cached("rock_%s" % warm, func() -> Mesh:
+		smooth_mode = false
 		var st: SurfaceTool = _begin()
 		var rng: RandomNumberGenerator = _rng(37)
 		var bot: Color = Color(0.34, 0.26, 0.20) if warm else Color(0.34, 0.34, 0.36)
@@ -298,7 +344,7 @@ static func bush() -> Mesh:
 		var rng: RandomNumberGenerator = _rng(41)
 		var dark := Color(0.12, 0.32, 0.14)
 		var light := Color(0.36, 0.62, 0.24)
-		add_blob(st, Vector3(0, 0.38, 0), Vector3(0.75, 0.55, 0.72), 7, 3, dark, light, rng, 0.06)
+		add_blob(st, Vector3(0, 0.38, 0), Vector3(0.75, 0.55, 0.72), 10, 5, dark, light, rng, 0.06)
 		add_blob(st, Vector3(0.50, 0.28, 0.2), Vector3(0.48, 0.38, 0.48), 6, 3, dark, light.darkened(0.05), rng, 0.06)
 		add_blob(st, Vector3(-0.42, 0.30, -0.18), Vector3(0.50, 0.40, 0.46), 6, 3, dark, light.darkened(0.08), rng, 0.06)
 		return _commit(st))
@@ -323,7 +369,7 @@ static func cactus() -> Mesh:
 		var dark := Color(0.16, 0.38, 0.20)
 		var light := Color(0.38, 0.64, 0.32)
 		add_cone(st, Vector3.ZERO, 0.30, 0.26, 1.7, 7, dark, light, rng, 0.012)
-		add_blob(st, Vector3(0, 1.72, 0), Vector3(0.27, 0.22, 0.27), 7, 3, dark.lightened(0.1), light, rng, 0.01)
+		add_blob(st, Vector3(0, 1.72, 0), Vector3(0.27, 0.22, 0.27), 10, 5, dark.lightened(0.1), light, rng, 0.01)
 		add_cone(st, Vector3(0.25, 0.7, 0), 0.15, 0.13, 0.42, 6, dark, light, rng, 0.008)
 		add_cone(st, Vector3(0.56, 0.7, 0), 0.14, 0.13, 0.75, 6, dark, light, rng, 0.008)
 		add_blob(st, Vector3(0.56, 1.47, 0), Vector3(0.15, 0.13, 0.15), 6, 3, dark.lightened(0.1), light, rng, 0.01)
@@ -362,6 +408,7 @@ static func palm() -> Mesh:
 ## Cristal (grappe de pointes) pour les décors de montagne.
 static func crystal() -> Mesh:
 	return _cached("crystal", func() -> Mesh:
+		smooth_mode = false
 		var st: SurfaceTool = _begin()
 		var rng: RandomNumberGenerator = _rng(71)
 		var cols: Array = [[Color(0.30, 0.55, 0.78), Color(0.78, 0.94, 1.0)], [Color(0.42, 0.40, 0.80), Color(0.86, 0.84, 1.0)]]
@@ -376,6 +423,7 @@ static func crystal() -> Mesh:
 ## Pilier de pierre (donjon / ruines).
 static func pillar() -> Mesh:
 	return _cached("pillar", func() -> Mesh:
+		smooth_mode = false
 		var st: SurfaceTool = _begin()
 		var rng: RandomNumberGenerator = _rng(73)
 		var bot := Color(0.30, 0.30, 0.34)
@@ -426,6 +474,7 @@ static func mushroom() -> Mesh:
 ## Stalactite pointe vers le bas (dessous de l'île) ; couleurs données par la palette du biome.
 static func stalactite(top_col: Color, tip_col: Color) -> Mesh:
 	return _cached("stalactite_%s_%s" % [top_col.to_html(), tip_col.to_html()], func() -> Mesh:
+		smooth_mode = false
 		var st: SurfaceTool = _begin()
 		var rng: RandomNumberGenerator = _rng(97)
 		var segs := 6
