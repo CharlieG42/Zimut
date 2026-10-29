@@ -13,7 +13,7 @@ extends RefCounted
 const CELL := 3.0
 const SKIRT := 3.4                 # profondeur de la falaise sous l'île
 const OBSTACLE_RADIUS := 0.95      # rayon bloquant d'un arbre / rocher (< demi-case : les cases restent reliées)
-const HEIGHT_AMPLITUDE := 0.42
+const HEIGHT_AMPLITUDE := 0.6
 const SUN_SHADOW_OFFSET := Vector3(0.28, 0.0, 0.22)   # les ombres tombent du côté opposé au soleil
 
 ## Couleurs par biome (sRGB ; les Nations sans palette propre reprennent celle de la Forêt).
@@ -65,7 +65,7 @@ static func corner_h(ix: int, iz: int) -> float:
 	if _noise == null:
 		_noise = FastNoiseLite.new()
 		_noise.seed = 4242
-		_noise.frequency = 0.16
+		_noise.frequency = 0.11
 	return _noise.get_noise_2d(float(ix), float(iz)) * HEIGHT_AMPLITUDE
 
 
@@ -178,8 +178,12 @@ static func _build_ground(zone_id: String, t: Dictionary, pal: Dictionary) -> Me
 			var cd: Color = corner_col.get(Vector2i(cx + 1, cy + 1), ca)
 			var ce: Color = corner_col.get(Vector2i(cx, cy + 1), ca)
 			# Dessus : deux triangles à normales distinctes → facettes low-poly.
-			_tri(st, a, b, d, ca, cb, cd)
-			_tri(st, a, d, e, ca, cd, ce)
+			var na: Vector3 = _corner_normal(cx, cy)
+			var nb: Vector3 = _corner_normal(cx + 1, cy)
+			var nd: Vector3 = _corner_normal(cx + 1, cy + 1)
+			var ne: Vector3 = _corner_normal(cx, cy + 1)
+			_tri_n(st, a, b, d, ca, cb, cd, na, nb, nd)
+			_tri_n(st, a, d, e, ca, cd, ce, na, nd, ne)
 			# Falaises : sur chaque bord qui touche le vide ou l'extérieur de l'île.
 			for dd: Array in dirs:
 				var n: Vector2i = c + (dd[0] as Vector2i)
@@ -205,6 +209,24 @@ static func _build_ground(zone_id: String, t: Dictionary, pal: Dictionary) -> Me
 	return mi
 
 
+## Normale lissée au coin de grille (ix, iz), d'après le relief voisin : fini l'aspect « blocs ».
+static func _corner_normal(ix: int, iz: int) -> Vector3:
+	var dx: float = corner_h(ix - 1, iz) - corner_h(ix + 1, iz)
+	var dz: float = corner_h(ix, iz - 1) - corner_h(ix, iz + 1)
+	return Vector3(dx, 2.0 * CELL, dz).normalized()
+
+
+static func _tri_n(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, ca: Color, cb: Color, cc: Color,
+		na: Vector3, nb: Vector3, nc: Vector3) -> void:
+	var cols: Array = [ca, cb, cc]
+	var vs: Array = [a, b, c]
+	var ns: Array = [na, nb, nc]
+	for i: int in range(3):
+		st.set_color(cols[i])
+		st.set_normal(ns[i])
+		st.add_vertex(vs[i])
+
+
 ## Triangle à normale plate (le sens de la normale est forcé vers le haut).
 static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, ca: Color, cb: Color, cc: Color) -> void:
 	var n: Vector3 = (c - a).cross(b - a).normalized()
@@ -226,12 +248,13 @@ static func _skirt(st: SurfaceTool, p0: Vector3, p1: Vector3, outward: Vector3, 
 	var lip: Color = (pal["ground"] as Array)[2]
 	var y_lip: float = 0.28
 	var y_mid: float = SKIRT * 0.45
-	var q0 := Vector3(p0.x, -SKIRT, p0.z)
-	var q1 := Vector3(p1.x, -SKIRT, p1.z)
-	var l0 := Vector3(p0.x, p0.y - y_lip, p0.z)
-	var l1 := Vector3(p1.x, p1.y - y_lip, p1.z)
-	var m0 := Vector3(p0.x, -y_mid, p0.z)
-	var m1 := Vector3(p1.x, -y_mid, p1.z)
+	var tap: Vector3 = -outward * 1.5           # l'île s'effile vers le bas : silhouette de rocher flottant
+	var q0 := Vector3(p0.x, -SKIRT, p0.z) + tap * 1.6
+	var q1 := Vector3(p1.x, -SKIRT, p1.z) + tap * 1.6
+	var l0 := Vector3(p0.x, p0.y - y_lip, p0.z) - outward * 0.12
+	var l1 := Vector3(p1.x, p1.y - y_lip, p1.z) - outward * 0.12
+	var m0 := Vector3(p0.x, -y_mid, p0.z) + tap * 0.55
+	var m1 := Vector3(p1.x, -y_mid, p1.z) + tap * 0.55
 	var quads: Array = [
 		[p0, p1, l1, l0, lip.darkened(0.15), lip.darkened(0.15), top, top],
 		[l0, l1, m1, m0, top, top, mid, mid],
@@ -241,7 +264,7 @@ static func _skirt(st: SurfaceTool, p0: Vector3, p1: Vector3, outward: Vector3, 
 		for tri: Array in order:
 			for i: int in tri:
 				st.set_color(q[4 + i])
-				st.set_normal(outward)
+				st.set_normal((outward + Vector3(0, -0.35, 0)).normalized())
 				st.add_vertex(q[i])
 
 
