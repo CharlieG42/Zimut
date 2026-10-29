@@ -320,6 +320,22 @@ static func broadleaf() -> Mesh:
 		return _commit(st))
 
 
+## Bouleau : fin tronc clair tacheté, feuillage léger jaune-vert.
+static func birch() -> Mesh:
+	return _cached("birch", func() -> Mesh:
+		var st: SurfaceTool = _begin()
+		var rng: RandomNumberGenerator = _rng(71)
+		add_cone(st, Vector3.ZERO, 0.13, 0.08, 2.3, 7, Color(0.80, 0.78, 0.72), Color(0.95, 0.94, 0.90), rng, 0.01)
+		for i: int in range(4):
+			add_cone(st, Vector3(0, 0.35 + float(i) * 0.5, 0), 0.136 - float(i) * 0.012, 0.136 - float(i) * 0.012, 0.07, 7, Color(0.12, 0.11, 0.10), Color(0.16, 0.14, 0.13), rng, 0.0, false)
+		var dark := Color(0.30, 0.52, 0.20)
+		var light := Color(0.66, 0.82, 0.30)
+		add_blob(st, Vector3(0, 2.55, 0), Vector3(0.78, 0.9, 0.78), 12, 6, dark, light, rng, 0.03)
+		add_blob(st, Vector3(0.38, 2.15, 0.2), Vector3(0.5, 0.52, 0.5), 10, 5, dark, light.lightened(0.05), rng, 0.03)
+		add_blob(st, Vector3(-0.36, 2.2, -0.2), Vector3(0.5, 0.5, 0.5), 10, 5, dark, light.lightened(0.05), rng, 0.03)
+		return _commit(st))
+
+
 ## Rocher + petits cailloux ; `warm` = grès du désert, sinon granit moussu.
 static func rock(warm: bool = false) -> Mesh:
 	return _cached("rock_%s" % warm, func() -> Mesh:
@@ -502,4 +518,19 @@ static func cloud() -> Mesh:
 		add_blob(st, Vector3(2.4, -0.15, 0.4), Vector3(2.2, 0.85, 1.7), 7, 3, white_b, white_t, rng, 0.04)
 		add_blob(st, Vector3(-2.3, -0.1, -0.3), Vector3(2.0, 0.8, 1.6), 7, 3, white_b, white_t, rng, 0.04)
 		add_blob(st, Vector3(0.4, 0.7, 0.2), Vector3(1.9, 0.9, 1.5), 7, 3, white_b, white_t, rng, 0.04)
+		return _commit(st))
+
+
+## Îlot flottant lointain : dessus d'herbe bombé, dessous de roche effilé (décor du ciel).
+static func islet(top_col: Color, rock_col: Color) -> Mesh:
+	return _cached("islet_%s_%s" % [top_col.to_html(), rock_col.to_html()], func() -> Mesh:
+		var st: SurfaceTool = _begin()
+		var rng: RandomNumberGenerator = _rng(83)
+		add_blob(st, Vector3(0, 0, 0), Vector3(1.0, 0.28, 1.0), 12, 4, top_col.darkened(0.1), top_col.lightened(0.08), rng, 0.02)
+		# dessous : cône inversé en trois étages de roche
+		smooth_mode = false
+		add_blob(st, Vector3(0, -0.45, 0), Vector3(0.82, 0.55, 0.82), 9, 5, rock_col.darkened(0.45), rock_col, rng, 0.08)
+		add_blob(st, Vector3(0.05, -1.05, 0.0), Vector3(0.5, 0.65, 0.5), 7, 4, rock_col.darkened(0.55), rock_col.darkened(0.2), rng, 0.08)
+		add_blob(st, Vector3(0.0, -1.6, 0.05), Vector3(0.24, 0.5, 0.24), 6, 3, rock_col.darkened(0.6), rock_col.darkened(0.3), rng, 0.06)
+		smooth_mode = true
 		return _commit(st))

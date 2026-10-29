@@ -321,7 +321,7 @@ static func _kind_category(kind: String) -> String:
 
 
 ## (rayon d'ombre, décalage vertical de l'ombre) par catégorie.
-const SHADOW_R := {"pine": 1.15, "round": 1.25, "rock": 1.1, "bush": 0.95, "cactus": 0.55, "palm": 0.9,
+const SHADOW_R := {"birch": 0.95, "pine": 1.15, "round": 1.25, "rock": 1.1, "bush": 0.95, "cactus": 0.55, "palm": 0.9,
 	"stump": 0.6, "crystal": 0.7, "pillar": 0.7}
 
 
@@ -329,7 +329,7 @@ static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	var rng := RandomNumberGenerator.new()
 	rng.seed = absi(zone_id.hash()) + 913
 	var buckets: Dictionary = {}
-	for k: String in ["pine", "round", "rock", "bush", "cactus", "palm", "stump", "crystal", "pillar"]:
+	for k: String in ["pine", "round", "birch", "rock", "bush", "cactus", "palm", "stump", "crystal", "pillar"]:
 		buckets[k] = {"xf": [], "cl": []}
 	var shadow_xf: Array = []
 	var shadow_cl: Array = []
@@ -337,6 +337,8 @@ static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	var snow: bool = biome == "Montagne"
 	for c: Vector2i in (t["obstacles"] as Dictionary).keys():
 		var cat: String = _kind_category(String(t["obstacles"][c]))
+		if cat == "round" and biome == "Forêt" and rng.randf() < 0.28:
+			cat = "birch"
 		var ctr := Vector3((float(c.x) + 0.5) * CELL + rng.randf_range(-0.25, 0.25), 0.0, (float(c.y) + 0.5) * CELL + rng.randf_range(-0.25, 0.25))
 		ctr.y = height_at(ctr.x, ctr.z)
 		var s: float = rng.randf_range(0.85, 1.3)
@@ -356,6 +358,7 @@ static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	var solid: StandardMaterial3D = Adv3DMeshes.solid_material(true)
 	_multi(root, "Pins", Adv3DMeshes.pine(snow), buckets["pine"]["xf"], buckets["pine"]["cl"], foliage)
 	_multi(root, "Feuillus", Adv3DMeshes.broadleaf(), buckets["round"]["xf"], buckets["round"]["cl"], foliage)
+	_multi(root, "Bouleaux", Adv3DMeshes.birch(), buckets["birch"]["xf"], buckets["birch"]["cl"], foliage)
 	_multi(root, "Palmiers", Adv3DMeshes.palm(), buckets["palm"]["xf"], buckets["palm"]["cl"], foliage)
 	_multi(root, "Rochers", Adv3DMeshes.rock(warm), buckets["rock"]["xf"], buckets["rock"]["cl"], solid)
 	_multi(root, "Cactus", Adv3DMeshes.cactus(), buckets["cactus"]["xf"], buckets["cactus"]["cl"], solid)
@@ -531,4 +534,58 @@ static func make_clouds(size: Vector2i, seed_v: int) -> Node3D:
 		root.add_child(m)
 	root.set_meta("min_x", -w * 0.9)
 	root.set_meta("max_x", w * 1.9)
+	return root
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  Îlots flottants lointains (décor du ciel)
+# ══════════════════════════════════════════════════════════════════════
+
+## Quelques îlots à l'horizon ; chacun porte meta « base_y » / « phase » pour flotter doucement.
+static func make_islets(size: Vector2i, biome: String, seed_v: int) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Ilots"
+	var pal: Dictionary = palette(biome)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_v + 99
+	var w: float = float(size.x) * CELL
+	var d: float = float(size.y) * CELL
+	var top: Color = (pal["ground"] as Array)[0]
+	var rock: Color = (pal["cliff_top"] as Color).lerp(pal["cliff_bot"], 0.2)
+	var mat: StandardMaterial3D = Adv3DMeshes.solid_material(true)
+	var foliage: ShaderMaterial = Adv3DMeshes.foliage_material(0.12)
+	var count: int = 9
+	for i: int in range(count):
+		var ang: float = float(i) / float(count) * TAU + rng.randf_range(-0.2, 0.2)
+		var dist: float = maxf(w, d) * rng.randf_range(0.85, 1.25) + 18.0
+		var n := Node3D.new()
+		var cx: float = w * 0.5 + cos(ang) * dist
+		var cz: float = d * 0.5 + sin(ang) * dist
+		var by: float = rng.randf_range(-6.0, 9.0)
+		n.position = Vector3(cx, by, cz)
+		var sc: float = rng.randf_range(3.5, 8.0)
+		n.scale = Vector3(sc, sc, sc)
+		n.rotation.y = rng.randf() * TAU
+		var body := MeshInstance3D.new()
+		body.mesh = Adv3DMeshes.islet(top, rock)
+		body.material_override = mat
+		n.add_child(body)
+		# un arbre (ou un cactus / pin) sur la plupart des îlots
+		if rng.randf() < 0.8:
+			var tree := MeshInstance3D.new()
+			if biome == "Désert":
+				tree.mesh = Adv3DMeshes.cactus()
+				tree.material_override = mat
+			elif biome == "Montagne":
+				tree.mesh = Adv3DMeshes.pine(true)
+				tree.material_override = foliage
+			else:
+				tree.mesh = Adv3DMeshes.broadleaf() if rng.randf() < 0.6 else Adv3DMeshes.birch()
+				tree.material_override = foliage
+			tree.position = Vector3(rng.randf_range(-0.3, 0.3), 0.2, rng.randf_range(-0.3, 0.3))
+			tree.scale = Vector3.ONE * 0.22
+			n.add_child(tree)
+		n.set_meta("base_y", by)
+		n.set_meta("phase", rng.randf() * TAU)
+		root.add_child(n)
 	return root
