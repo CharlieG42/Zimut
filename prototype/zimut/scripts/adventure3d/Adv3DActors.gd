@@ -123,31 +123,46 @@ static func make_explorer() -> Node3D:
 	var scarf := _cached("ex_scarf", func() -> Mesh:
 		var st := _st()
 		Adv3DMeshes.add_cone(st, Vector3(0, 1.12, 0), 0.25, 0.2, 0.12, 8, Color(0.80, 0.18, 0.18), Color(0.92, 0.30, 0.25), _rng(3), 0.0, false)
-		Adv3DMeshes.add_box(st, Vector3(0.12, 1.02, 0.2), Vector3(0.1, 0.26, 0.07), Color(0.70, 0.14, 0.14), Color(0.86, 0.24, 0.20))
+		Adv3DMeshes.add_blob(st, Vector3(0.12, 1.02, 0.2), Vector3(0.06, 0.14, 0.04), 6, 4, Color(0.70, 0.14, 0.14), Color(0.86, 0.24, 0.20), _rng(13), 0.0)
 		return st.commit())
 	_part(body, scarf)
 	# Tête : visage, cheveux, yeux.
 	var head := _cached("ex_head", func() -> Mesh:
 		var st := _st()
-		Adv3DMeshes.add_blob(st, Vector3(0, 1.38, 0), Vector3(0.21, 0.22, 0.21), 10, 6, Color(0.88, 0.66, 0.50), Color(0.97, 0.78, 0.62), _rng(4), 0.0)
-		Adv3DMeshes.add_blob(st, Vector3(0, 1.43, -0.07), Vector3(0.23, 0.2, 0.19), 8, 5, Color(0.22, 0.14, 0.10), Color(0.34, 0.22, 0.14), _rng(5), 0.01)
-		Adv3DMeshes.add_box(st, Vector3(0.08, 1.4, 0.19), Vector3(0.05, 0.06, 0.03), Color(0.1, 0.08, 0.08), Color(0.1, 0.08, 0.08))
-		Adv3DMeshes.add_box(st, Vector3(-0.08, 1.4, 0.19), Vector3(0.05, 0.06, 0.03), Color(0.1, 0.08, 0.08), Color(0.1, 0.08, 0.08))
+		Adv3DMeshes.add_blob(st, Vector3(0, 1.4, 0), Vector3(0.25, 0.26, 0.25), 12, 8, Color(0.88, 0.66, 0.50), Color(0.97, 0.78, 0.62), _rng(4), 0.0)
+		Adv3DMeshes.add_blob(st, Vector3(0, 1.47, -0.07), Vector3(0.27, 0.23, 0.22), 10, 6, Color(0.22, 0.14, 0.10), Color(0.34, 0.22, 0.14), _rng(5), 0.01)
+		Adv3DMeshes.add_blob(st, Vector3(0.09, 1.42, 0.23), Vector3(0.036, 0.045, 0.02), 6, 4, Color(0.08, 0.06, 0.06), Color(0.14, 0.1, 0.1), _rng(14), 0.0)
+		Adv3DMeshes.add_blob(st, Vector3(-0.09, 1.42, 0.23), Vector3(0.036, 0.045, 0.02), 6, 4, Color(0.08, 0.06, 0.06), Color(0.14, 0.1, 0.1), _rng(15), 0.0)
+		Adv3DMeshes.add_blob(st, Vector3(0, 1.38, 0.25), Vector3(0.035, 0.03, 0.03), 6, 4, Color(0.92, 0.62, 0.48), Color(0.98, 0.72, 0.58), _rng(19), 0.0)   # nez
+		for sx: float in [-1.0, 1.0]:
+			Adv3DMeshes.add_blob(st, Vector3(0.15 * sx, 1.34, 0.19), Vector3(0.05, 0.03, 0.02), 6, 3, Color(0.95, 0.55, 0.50), Color(0.98, 0.62, 0.56), _rng(20), 0.0)   # joues
+			Adv3DMeshes.add_blob(st, Vector3(0.09 * sx, 1.425, 0.245), Vector3(0.012, 0.016, 0.01), 4, 3, Color(1, 1, 1), Color(1, 1, 1), _rng(21), 0.0)   # reflet des yeux
 		return st.commit())
 	_part(body, head)
 	# Chapeau d'explorateur à large bord et ruban.
 	var hat := _cached("ex_hat", func() -> Mesh:
 		var st := _st()
-		Adv3DMeshes.add_cone(st, Vector3(0, 1.55, 0), 0.40, 0.38, 0.04, 12, Color(0.40, 0.27, 0.15), Color(0.52, 0.36, 0.20), _rng(6), 0.0)
-		Adv3DMeshes.add_cone(st, Vector3(0, 1.58, 0), 0.22, 0.17, 0.2, 10, Color(0.46, 0.31, 0.17), Color(0.58, 0.41, 0.23), _rng(7), 0.0)
-		Adv3DMeshes.add_cone(st, Vector3(0, 1.59, 0), 0.225, 0.225, 0.05, 10, Color(0.78, 0.20, 0.18), Color(0.78, 0.20, 0.18), _rng(8), 0.0, false)
+		Adv3DMeshes.add_cone(st, Vector3(0, 1.62, 0), 0.46, 0.42, 0.05, 14, Color(0.40, 0.27, 0.15), Color(0.52, 0.36, 0.20), _rng(6), 0.0)
+		Adv3DMeshes.add_cone(st, Vector3(0, 1.66, 0), 0.26, 0.2, 0.22, 12, Color(0.46, 0.31, 0.17), Color(0.58, 0.41, 0.23), _rng(7), 0.0)
+		Adv3DMeshes.add_cone(st, Vector3(0, 1.67, 0), 0.265, 0.265, 0.05, 12, Color(0.78, 0.20, 0.18), Color(0.78, 0.20, 0.18), _rng(8), 0.0, false)
 		return st.commit())
 	_part(body, hat)
+	# Écharpe flottante (animée par l'explorateur).
+	var tail := Node3D.new()
+	tail.name = "ScarfTail"
+	tail.position = Vector3(-0.1, 1.08, -0.2)
+	body.add_child(tail)
+	var tm := _cached("ex_tail", func() -> Mesh:
+		var st := _st()
+		Adv3DMeshes.add_blob(st, Vector3(0, 0, -0.17), Vector3(0.07, 0.035, 0.22), 6, 4, Color(0.70, 0.14, 0.14), Color(0.92, 0.30, 0.25), _rng(22), 0.0)
+		Adv3DMeshes.add_blob(st, Vector3(0, 0, -0.42), Vector3(0.06, 0.03, 0.14), 6, 4, Color(0.66, 0.12, 0.12), Color(0.88, 0.26, 0.22), _rng(23), 0.0)
+		return st.commit())
+	_part(tail, tm)
 	# Sac à dos + rouleau de couchage.
 	var pack := _cached("ex_pack", func() -> Mesh:
 		var st := _st()
-		Adv3DMeshes.add_box(st, Vector3(0, 0.88, -0.28), Vector3(0.36, 0.42, 0.2), Color(0.24, 0.36, 0.22), Color(0.34, 0.50, 0.30))
-		Adv3DMeshes.add_box(st, Vector3(0, 1.14, -0.3), Vector3(0.42, 0.12, 0.14), Color(0.70, 0.62, 0.40), Color(0.82, 0.74, 0.50))
+		Adv3DMeshes.add_blob(st, Vector3(0, 0.88, -0.27), Vector3(0.2, 0.25, 0.13), 10, 6, Color(0.24, 0.36, 0.22), Color(0.36, 0.52, 0.31), _rng(16), 0.0)
+		Adv3DMeshes.add_blob(st, Vector3(0, 1.16, -0.3), Vector3(0.23, 0.07, 0.09), 10, 4, Color(0.70, 0.62, 0.40), Color(0.84, 0.76, 0.52), _rng(17), 0.0)
 		return st.commit())
 	_part(body, pack)
 	# Bras (pivot à l'épaule).
@@ -162,6 +177,24 @@ static func make_explorer() -> Node3D:
 			Adv3DMeshes.add_blob(st, Vector3(0, -0.4, 0), Vector3(0.075, 0.075, 0.075), 6, 4, Color(0.88, 0.66, 0.50), Color(0.97, 0.78, 0.62), _rng(10), 0.0)
 			return st.commit())
 		_part(arm, am)
+		if sgn > 0.0:
+			# lanterne tenue à la main droite
+			var lan := MeshInstance3D.new()
+			var ls := SphereMesh.new()
+			ls.radius = 0.07
+			ls.height = 0.14
+			ls.radial_segments = 6
+			ls.rings = 3
+			lan.mesh = ls
+			lan.material_override = _glow(Color(1.0, 0.82, 0.4), 2.2)
+			lan.position = Vector3(0.0, -0.58, 0.04)
+			arm.add_child(lan)
+			var ll := OmniLight3D.new()
+			ll.light_color = Color(1.0, 0.85, 0.5)
+			ll.omni_range = 3.2
+			ll.light_energy = 0.55
+			ll.position = Vector3(0.0, -0.58, 0.04)
+			arm.add_child(ll)
 	# Jambes (pivot à la hanche) avec bottes.
 	for sgn2: float in [-1.0, 1.0]:
 		var leg := Node3D.new()
@@ -171,7 +204,7 @@ static func make_explorer() -> Node3D:
 		var lm := _cached("ex_leg", func() -> Mesh:
 			var st := _st()
 			Adv3DMeshes.add_cone(st, Vector3(0, -0.4, 0), 0.085, 0.1, 0.4, 6, Color(0.20, 0.22, 0.32), Color(0.30, 0.33, 0.46), _rng(12), 0.0, false)
-			Adv3DMeshes.add_box(st, Vector3(0, -0.5, 0.04), Vector3(0.17, 0.14, 0.26), Color(0.18, 0.11, 0.07), Color(0.32, 0.20, 0.12))
+			Adv3DMeshes.add_blob(st, Vector3(0, -0.5, 0.05), Vector3(0.1, 0.08, 0.15), 8, 5, Color(0.18, 0.11, 0.07), Color(0.34, 0.22, 0.13), _rng(18), 0.0)
 			return st.commit())
 		_part(leg, lm)
 	# Poussière aux pieds (activée par Adv3DExplorer quand il marche).
@@ -335,7 +368,7 @@ static func make_mob_group(g: Dictionary, title: String) -> Node3D:
 		Adv3DMeshes.add_blob(st, Vector3(0, 0.8, 0.02), Vector3(0.22, 0.2, 0.21), 8, 5, skin_b.lightened(0.1), skin_t.lightened(0.1), r, 0.01)   # tête
 		for sgn: float in [-1.0, 1.0]:
 			Adv3DMeshes.add_cone(st, Vector3(0.2 * sgn, 0.84, 0), 0.07, 0.0, 0.3, 4, skin_b, skin_t, r, 0.0, false)          # oreilles
-			Adv3DMeshes.add_box(st, Vector3(0.08 * sgn, 0.84, 0.2), Vector3(0.07, 0.05, 0.03), Color(1.0, 0.9, 0.2), Color(1.0, 0.95, 0.4))  # yeux
+			Adv3DMeshes.add_blob(st, Vector3(0.08 * sgn, 0.84, 0.2), Vector3(0.04, 0.03, 0.02), 6, 4, Color(1.0, 0.9, 0.2), Color(1.0, 0.95, 0.4), r, 0.0)
 			Adv3DMeshes.add_cone(st, Vector3(0.13 * sgn, 0.0, 0.02), 0.07, 0.08, 0.16, 5, Color(0.2, 0.13, 0.08), Color(0.3, 0.2, 0.12), r, 0.0)  # pieds
 		Adv3DMeshes.add_box(st, Vector3(0, 0.74, 0.215), Vector3(0.16, 0.03, 0.02), Color(0.12, 0.05, 0.05), Color(0.12, 0.05, 0.05))   # bouche
 		Adv3DMeshes.add_cone(st, Vector3(0.3, 0.1, 0.1), 0.05, 0.09, 0.7, 5, Color(0.40, 0.26, 0.14), Color(0.54, 0.38, 0.2), r, 0.01)  # gourdin

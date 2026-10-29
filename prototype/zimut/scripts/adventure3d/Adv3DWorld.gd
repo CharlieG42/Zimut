@@ -13,7 +13,7 @@ extends RefCounted
 const CELL := 3.0
 const SKIRT := 3.4                 # profondeur de la falaise sous l'île
 const OBSTACLE_RADIUS := 0.95      # rayon bloquant d'un arbre / rocher (< demi-case : les cases restent reliées)
-const HEIGHT_AMPLITUDE := 0.42
+const HEIGHT_AMPLITUDE := 0.6
 const SUN_SHADOW_OFFSET := Vector3(0.28, 0.0, 0.22)   # les ombres tombent du côté opposé au soleil
 
 ## Couleurs par biome (sRGB ; les Nations sans palette propre reprennent celle de la Forêt).
@@ -65,7 +65,7 @@ static func corner_h(ix: int, iz: int) -> float:
 	if _noise == null:
 		_noise = FastNoiseLite.new()
 		_noise.seed = 4242
-		_noise.frequency = 0.16
+		_noise.frequency = 0.11
 	return _noise.get_noise_2d(float(ix), float(iz)) * HEIGHT_AMPLITUDE
 
 
@@ -178,8 +178,12 @@ static func _build_ground(zone_id: String, t: Dictionary, pal: Dictionary) -> Me
 			var cd: Color = corner_col.get(Vector2i(cx + 1, cy + 1), ca)
 			var ce: Color = corner_col.get(Vector2i(cx, cy + 1), ca)
 			# Dessus : deux triangles à normales distinctes → facettes low-poly.
-			_tri(st, a, b, d, ca, cb, cd)
-			_tri(st, a, d, e, ca, cd, ce)
+			var na: Vector3 = _corner_normal(cx, cy)
+			var nb: Vector3 = _corner_normal(cx + 1, cy)
+			var nd: Vector3 = _corner_normal(cx + 1, cy + 1)
+			var ne: Vector3 = _corner_normal(cx, cy + 1)
+			_tri_n(st, a, b, d, ca, cb, cd, na, nb, nd)
+			_tri_n(st, a, d, e, ca, cd, ce, na, nd, ne)
 			# Falaises : sur chaque bord qui touche le vide ou l'extérieur de l'île.
 			for dd: Array in dirs:
 				var n: Vector2i = c + (dd[0] as Vector2i)
@@ -205,6 +209,24 @@ static func _build_ground(zone_id: String, t: Dictionary, pal: Dictionary) -> Me
 	return mi
 
 
+## Normale lissée au coin de grille (ix, iz), d'après le relief voisin : fini l'aspect « blocs ».
+static func _corner_normal(ix: int, iz: int) -> Vector3:
+	var dx: float = corner_h(ix - 1, iz) - corner_h(ix + 1, iz)
+	var dz: float = corner_h(ix, iz - 1) - corner_h(ix, iz + 1)
+	return Vector3(dx, 2.0 * CELL, dz).normalized()
+
+
+static func _tri_n(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, ca: Color, cb: Color, cc: Color,
+		na: Vector3, nb: Vector3, nc: Vector3) -> void:
+	var cols: Array = [ca, cb, cc]
+	var vs: Array = [a, b, c]
+	var ns: Array = [na, nb, nc]
+	for i: int in range(3):
+		st.set_color(cols[i])
+		st.set_normal(ns[i])
+		st.add_vertex(vs[i])
+
+
 ## Triangle à normale plate (le sens de la normale est forcé vers le haut).
 static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, ca: Color, cb: Color, cc: Color) -> void:
 	var n: Vector3 = (c - a).cross(b - a).normalized()
@@ -226,12 +248,13 @@ static func _skirt(st: SurfaceTool, p0: Vector3, p1: Vector3, outward: Vector3, 
 	var lip: Color = (pal["ground"] as Array)[2]
 	var y_lip: float = 0.28
 	var y_mid: float = SKIRT * 0.45
-	var q0 := Vector3(p0.x, -SKIRT, p0.z)
-	var q1 := Vector3(p1.x, -SKIRT, p1.z)
-	var l0 := Vector3(p0.x, p0.y - y_lip, p0.z)
-	var l1 := Vector3(p1.x, p1.y - y_lip, p1.z)
-	var m0 := Vector3(p0.x, -y_mid, p0.z)
-	var m1 := Vector3(p1.x, -y_mid, p1.z)
+	var tap: Vector3 = -outward * 1.5           # l'île s'effile vers le bas : silhouette de rocher flottant
+	var q0 := Vector3(p0.x, -SKIRT, p0.z) + tap * 1.6
+	var q1 := Vector3(p1.x, -SKIRT, p1.z) + tap * 1.6
+	var l0 := Vector3(p0.x, p0.y - y_lip, p0.z) - outward * 0.12
+	var l1 := Vector3(p1.x, p1.y - y_lip, p1.z) - outward * 0.12
+	var m0 := Vector3(p0.x, -y_mid, p0.z) + tap * 0.55
+	var m1 := Vector3(p1.x, -y_mid, p1.z) + tap * 0.55
 	var quads: Array = [
 		[p0, p1, l1, l0, lip.darkened(0.15), lip.darkened(0.15), top, top],
 		[l0, l1, m1, m0, top, top, mid, mid],
@@ -241,7 +264,7 @@ static func _skirt(st: SurfaceTool, p0: Vector3, p1: Vector3, outward: Vector3, 
 		for tri: Array in order:
 			for i: int in tri:
 				st.set_color(q[4 + i])
-				st.set_normal(outward)
+				st.set_normal((outward + Vector3(0, -0.35, 0)).normalized())
 				st.add_vertex(q[i])
 
 
@@ -298,7 +321,7 @@ static func _kind_category(kind: String) -> String:
 
 
 ## (rayon d'ombre, décalage vertical de l'ombre) par catégorie.
-const SHADOW_R := {"pine": 1.15, "round": 1.25, "rock": 1.1, "bush": 0.95, "cactus": 0.55, "palm": 0.9,
+const SHADOW_R := {"birch": 0.95, "pine": 1.15, "round": 1.25, "rock": 1.1, "bush": 0.95, "cactus": 0.55, "palm": 0.9,
 	"stump": 0.6, "crystal": 0.7, "pillar": 0.7}
 
 
@@ -306,7 +329,7 @@ static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	var rng := RandomNumberGenerator.new()
 	rng.seed = absi(zone_id.hash()) + 913
 	var buckets: Dictionary = {}
-	for k: String in ["pine", "round", "rock", "bush", "cactus", "palm", "stump", "crystal", "pillar"]:
+	for k: String in ["pine", "round", "birch", "rock", "bush", "cactus", "palm", "stump", "crystal", "pillar"]:
 		buckets[k] = {"xf": [], "cl": []}
 	var shadow_xf: Array = []
 	var shadow_cl: Array = []
@@ -314,6 +337,8 @@ static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	var snow: bool = biome == "Montagne"
 	for c: Vector2i in (t["obstacles"] as Dictionary).keys():
 		var cat: String = _kind_category(String(t["obstacles"][c]))
+		if cat == "round" and biome == "Forêt" and rng.randf() < 0.28:
+			cat = "birch"
 		var ctr := Vector3((float(c.x) + 0.5) * CELL + rng.randf_range(-0.25, 0.25), 0.0, (float(c.y) + 0.5) * CELL + rng.randf_range(-0.25, 0.25))
 		ctr.y = height_at(ctr.x, ctr.z)
 		var s: float = rng.randf_range(0.85, 1.3)
@@ -333,6 +358,7 @@ static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	var solid: StandardMaterial3D = Adv3DMeshes.solid_material(true)
 	_multi(root, "Pins", Adv3DMeshes.pine(snow), buckets["pine"]["xf"], buckets["pine"]["cl"], foliage)
 	_multi(root, "Feuillus", Adv3DMeshes.broadleaf(), buckets["round"]["xf"], buckets["round"]["cl"], foliage)
+	_multi(root, "Bouleaux", Adv3DMeshes.birch(), buckets["birch"]["xf"], buckets["birch"]["cl"], foliage)
 	_multi(root, "Palmiers", Adv3DMeshes.palm(), buckets["palm"]["xf"], buckets["palm"]["cl"], foliage)
 	_multi(root, "Rochers", Adv3DMeshes.rock(warm), buckets["rock"]["xf"], buckets["rock"]["cl"], solid)
 	_multi(root, "Cactus", Adv3DMeshes.cactus(), buckets["cactus"]["xf"], buckets["cactus"]["cl"], solid)
@@ -508,4 +534,58 @@ static func make_clouds(size: Vector2i, seed_v: int) -> Node3D:
 		root.add_child(m)
 	root.set_meta("min_x", -w * 0.9)
 	root.set_meta("max_x", w * 1.9)
+	return root
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  Îlots flottants lointains (décor du ciel)
+# ══════════════════════════════════════════════════════════════════════
+
+## Quelques îlots à l'horizon ; chacun porte meta « base_y » / « phase » pour flotter doucement.
+static func make_islets(size: Vector2i, biome: String, seed_v: int) -> Node3D:
+	var root := Node3D.new()
+	root.name = "Ilots"
+	var pal: Dictionary = palette(biome)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_v + 99
+	var w: float = float(size.x) * CELL
+	var d: float = float(size.y) * CELL
+	var top: Color = (pal["ground"] as Array)[0]
+	var rock: Color = (pal["cliff_top"] as Color).lerp(pal["cliff_bot"], 0.2)
+	var mat: StandardMaterial3D = Adv3DMeshes.solid_material(true)
+	var foliage: ShaderMaterial = Adv3DMeshes.foliage_material(0.12)
+	var count: int = 9
+	for i: int in range(count):
+		var ang: float = float(i) / float(count) * TAU + rng.randf_range(-0.2, 0.2)
+		var dist: float = maxf(w, d) * rng.randf_range(0.85, 1.25) + 18.0
+		var n := Node3D.new()
+		var cx: float = w * 0.5 + cos(ang) * dist
+		var cz: float = d * 0.5 + sin(ang) * dist
+		var by: float = rng.randf_range(-6.0, 9.0)
+		n.position = Vector3(cx, by, cz)
+		var sc: float = rng.randf_range(3.5, 8.0)
+		n.scale = Vector3(sc, sc, sc)
+		n.rotation.y = rng.randf() * TAU
+		var body := MeshInstance3D.new()
+		body.mesh = Adv3DMeshes.islet(top, rock)
+		body.material_override = mat
+		n.add_child(body)
+		# un arbre (ou un cactus / pin) sur la plupart des îlots
+		if rng.randf() < 0.8:
+			var tree := MeshInstance3D.new()
+			if biome == "Désert":
+				tree.mesh = Adv3DMeshes.cactus()
+				tree.material_override = mat
+			elif biome == "Montagne":
+				tree.mesh = Adv3DMeshes.pine(true)
+				tree.material_override = foliage
+			else:
+				tree.mesh = Adv3DMeshes.broadleaf() if rng.randf() < 0.6 else Adv3DMeshes.birch()
+				tree.material_override = foliage
+			tree.position = Vector3(rng.randf_range(-0.3, 0.3), 0.2, rng.randf_range(-0.3, 0.3))
+			tree.scale = Vector3.ONE * 0.22
+			n.add_child(tree)
+		n.set_meta("base_y", by)
+		n.set_meta("phase", rng.randf() * TAU)
+		root.add_child(n)
 	return root

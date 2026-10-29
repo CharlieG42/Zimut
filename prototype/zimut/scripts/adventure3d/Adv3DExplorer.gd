@@ -12,6 +12,10 @@ const SPEED := 4.4
 const RADIUS := 0.32
 const CAM_DISTANCE := 10.5
 const CAM_PITCH := -0.82          # radians (≈ -47°) : vue d'exploration, presque « Dofus 3D »
+const PITCH_MIN := -1.30          # presque vue du dessus
+const PITCH_MAX := -0.28          # presque à hauteur d'yeux
+const DIST_MIN := 5.5
+const DIST_MAX := 17.0
 const CAM_HEIGHT := 1.1
 
 var terrain: Dictionary = {}
@@ -25,6 +29,8 @@ var _model: Node3D = null
 var _walk_t: float = 0.0
 var _breath: float = 0.0
 var _cam_yaw: float = 0.0
+var pitch: float = CAM_PITCH
+var distance: float = CAM_DISTANCE
 
 
 func _ready() -> void:
@@ -48,11 +54,20 @@ func place_at(p: Vector3) -> void:
 	_place_camera(1.0)
 
 
-func rotate_camera(delta_yaw: float) -> void:
+func rotate_camera(delta_yaw: float, delta_pitch: float = 0.0) -> void:
 	yaw = wrapf(yaw + delta_yaw, -PI, PI)
+	pitch = clampf(pitch + delta_pitch, PITCH_MIN, PITCH_MAX)
+
+
+func zoom_camera(factor: float) -> void:
+	distance = clampf(distance * factor, DIST_MIN, DIST_MAX)
 
 
 func _physics_process(delta: float) -> void:
+	if Input.is_physical_key_pressed(KEY_Q):
+		rotate_camera(1.8 * delta)
+	if Input.is_physical_key_pressed(KEY_E):
+		rotate_camera(-1.8 * delta)
 	var input: Vector2 = stick_input + _keyboard_vector()
 	if input.length() > 1.0:
 		input = input.normalized()
@@ -115,6 +130,10 @@ func _face(dir: Vector3, delta: float) -> void:
 func _animate_walk() -> void:
 	if _model == null:
 		return
+	var tail: Node3D = _model.get_node_or_null("Body/ScarfTail")
+	if tail != null:
+		tail.rotation.x = -0.35 + sin(_walk_t * 1.3) * 0.18
+		tail.rotation.y = sin(_walk_t * 0.9) * 0.25
 	var swing: float = sin(_walk_t) * 0.5
 	var dust: CPUParticles3D = _model.get_node_or_null("Dust")
 	if dust != null:
@@ -143,6 +162,10 @@ func _idle_pose(delta: float) -> void:
 	if dust != null:
 		dust.emitting = false
 	_breath += delta
+	var tail: Node3D = _model.get_node_or_null("Body/ScarfTail")
+	if tail != null:
+		tail.rotation.x = lerpf(tail.rotation.x, 0.1 + sin(_breath * 1.7) * 0.05, clampf(delta * 6.0, 0.0, 1.0))
+		tail.rotation.y = lerpf(tail.rotation.y, sin(_breath * 1.1) * 0.12, clampf(delta * 6.0, 0.0, 1.0))
 	var bod: Node3D = _model.get_node_or_null("Body")
 	if bod != null:
 		bod.position.y = sin(_breath * 2.0) * 0.012
@@ -161,6 +184,6 @@ func _place_camera(delta: float) -> void:
 		return
 	_cam_yaw = lerp_angle(_cam_yaw, yaw, clampf(delta * 10.0, 0.0, 1.0))
 	var focus: Vector3 = position + Vector3(0.0, CAM_HEIGHT, 0.0)
-	var offset: Vector3 = Basis(Vector3.UP, _cam_yaw) * Basis(Vector3.RIGHT, CAM_PITCH) * Vector3(0.0, 0.0, CAM_DISTANCE)
+	var offset: Vector3 = Basis(Vector3.UP, _cam_yaw) * Basis(Vector3.RIGHT, pitch) * Vector3(0.0, 0.0, distance)
 	camera.global_position = focus + offset
 	camera.look_at(focus, Vector3.UP)

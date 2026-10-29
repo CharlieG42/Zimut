@@ -24,6 +24,12 @@ var terrain: Dictionary = {}
 var explorer: Adv3DExplorer = null
 var world_root: Node3D = null
 var _clouds: Node3D = null
+var _islets: Node3D = null
+var _ambient: CPUParticles3D = null
+var _minimap: Adv3DMinimap = null
+var _map_btn: Button = null
+var _map_tick: float = 0.0
+var _cam_dir: float = 0.0
 var _anim_t: float = 0.0
 
 var _mob_nodes: Dictionary = {}       # id de groupe -> Node3D
@@ -65,6 +71,8 @@ func _ready() -> void:
 	add_child(world_root)
 	_clouds = Adv3DWorld.make_clouds(terrain["size"], absi(zone_id.hash()))
 	add_child(_clouds)
+	_islets = Adv3DWorld.make_islets(terrain["size"], String(terrain["biome"]), absi(zone_id.hash()))
+	add_child(_islets)
 	_build_explorer()
 	_build_hud()
 	_spawn_static_markers()
@@ -102,6 +110,12 @@ func _build_environment() -> void:
 	env.fog_light_color = pal["fog"]
 	env.fog_density = 0.0035
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	env.glow_enabled = true
+	env.glow_intensity = 0.5
+	env.glow_bloom = 0.04
+	env.adjustment_enabled = true
+	env.adjustment_saturation = 1.15
+	env.adjustment_contrast = 1.06
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
@@ -124,6 +138,63 @@ func _build_explorer() -> void:
 	add_child(explorer)
 	explorer.place_at(_start_position())
 	explorer.cell_changed.connect(_on_cell_changed)
+	_build_ambient()
+
+
+## Particules d'ambiance autour du joueur : lucioles (forêt), sable (désert), neige (montagne).
+func _build_ambient() -> void:
+	var biome: String = String(terrain["biome"])
+	var p := CPUParticles3D.new()
+	p.name = "Ambiance"
+	p.local_coords = false
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	p.emission_box_extents = Vector3(11.0, 4.0, 11.0)
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var orb := SphereMesh.new()
+	orb.radius = 0.5
+	orb.height = 1.0
+	orb.radial_segments = 6
+	orb.rings = 3
+	p.mesh = orb
+	match biome:
+		"Montagne":
+			p.amount = 90
+			p.lifetime = 7.0
+			p.gravity = Vector3(0.25, -1.0, 0.1)
+			p.initial_velocity_min = 0.0
+			p.initial_velocity_max = 0.4
+			p.scale_amount_min = 0.08
+			p.scale_amount_max = 0.16
+			mat.albedo_color = Color(1, 1, 1, 0.9)
+		"Désert":
+			p.amount = 40
+			p.lifetime = 5.0
+			p.gravity = Vector3(1.2, 0.0, 0.3)
+			p.initial_velocity_min = 0.3
+			p.initial_velocity_max = 0.9
+			p.scale_amount_min = 0.05
+			p.scale_amount_max = 0.11
+			mat.albedo_color = Color(0.92, 0.80, 0.55, 0.7)
+		_:
+			p.amount = 40
+			p.lifetime = 6.0
+			p.gravity = Vector3(0, 0.06, 0)
+			p.initial_velocity_min = 0.1
+			p.initial_velocity_max = 0.4
+			p.direction = Vector3.UP
+			p.spread = 180.0
+			p.scale_amount_min = 0.07
+			p.scale_amount_max = 0.14
+			mat.albedo_color = Color(1.0, 0.95, 0.5, 0.85)
+			mat.emission_enabled = true
+			mat.emission = Color(1.0, 0.9, 0.4)
+			mat.emission_energy_multiplier = 1.5
+	p.material_override = mat
+	add_child(p)
+	_ambient = p
 
 
 ## Reprend la position 3D sauvegardée si elle correspond encore à la case du héros
@@ -228,6 +299,12 @@ func _animate_world(delta: float) -> void:
 			c.position.x += float(c.get_meta("speed")) * delta
 			if c.position.x > hi:
 				c.position.x = lo
+	if _islets != null:
+		for isl: Node3D in _islets.get_children():
+			isl.position.y = float(isl.get_meta("base_y")) + sin(_anim_t * 0.4 + float(isl.get_meta("phase"))) * 0.8
+			isl.rotation.y += delta * 0.02
+	if _ambient != null and explorer != null:
+		_ambient.global_position = explorer.global_position + Vector3(0, 3.0, 0)
 	for k: String in _poi_nodes.keys():
 		var pn: Node3D = _poi_nodes[k]
 		if not is_instance_valid(pn):
@@ -259,6 +336,14 @@ func _process(delta: float) -> void:
 	if _modal_root != null:
 		return
 	explorer.stick_input = _stick.value if _stick != null else Vector2.ZERO
+	if _cam_dir != 0.0:
+		explorer.rotate_camera(_cam_dir * 1.9 * delta)
+	if _minimap != null and _minimap.visible:
+		_minimap.set_player(Vector2(explorer.position.x, explorer.position.z) / Adv3DWorld.CELL, explorer.yaw)
+		_map_tick += delta
+		if _map_tick >= 0.4:
+			_map_tick = 0.0
+			_refresh_minimap_markers()
 	var pos: Vector3 = explorer.position
 	# Groupes de monstres : contact → proposition de combat.
 	var pos2 := Vector2(pos.x, pos.z)
@@ -549,6 +634,42 @@ func _build_hud() -> void:
 	_act_btn.visible = false
 	_act_btn.pressed.connect(_on_action_pressed)
 	root.add_child(_act_btn)
+	# Mini-carte (haut-droite, sous les boutons) + bouton pour la réduire / la masquer
+	var map_box := VBoxContainer.new()
+	map_box.add_theme_constant_override("separation", 8)
+	map_box.anchor_left = 1.0
+	map_box.anchor_right = 1.0
+	map_box.offset_left = -340.0
+	map_box.offset_right = -20.0
+	map_box.offset_top = 100.0
+	map_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(map_box)
+	_map_btn = _btn("", U.C_BORDER, 20, Vector2(190, 56))
+	_map_btn.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_map_btn.pressed.connect(_cycle_map_mode)
+	map_box.add_child(_map_btn)
+	_minimap = Adv3DMinimap.new()
+	_minimap.size_flags_horizontal = Control.SIZE_SHRINK_END
+	map_box.add_child(_minimap)
+	_minimap.setup(terrain, Adv3DWorld.palette(String(terrain["biome"])))
+	_minimap.set_mode(Adv3DMinimap.mode)
+	_update_map_button()
+	_refresh_minimap_markers()
+	# Boutons de caméra (maintenir pour tourner), bord droit
+	var cam_row := HBoxContainer.new()
+	cam_row.add_theme_constant_override("separation", 12)
+	cam_row.anchor_left = 1.0
+	cam_row.anchor_right = 1.0
+	cam_row.anchor_top = 0.62
+	cam_row.offset_left = -220.0
+	cam_row.offset_right = -20.0
+	cam_row.offset_top = 0.0
+	root.add_child(cam_row)
+	for dir: float in [1.0, -1.0]:
+		var cb: Button = _btn("◀" if dir > 0.0 else "▶", Color(0.20, 0.28, 0.40), 34, Vector2(94, 94))
+		cb.button_down.connect(func() -> void: _cam_dir = dir)
+		cb.button_up.connect(func() -> void: _cam_dir = 0.0)
+		cam_row.add_child(cb)
 	# Message éphémère (bas-centre)
 	_toast = U.lbl("", 24, U.C_TXT, true)
 	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -597,7 +718,7 @@ func _input(event: InputEvent) -> void:
 			var b: Button = _button_at(t.position)
 			if b != null:
 				_btn_touch[t.index] = b
-				_press_feedback(b, true)
+				b.button_down.emit()
 				get_viewport().set_input_as_handled()
 	else:
 		_touches.erase(t.index)
@@ -605,7 +726,7 @@ func _input(event: InputEvent) -> void:
 			var tb: Button = _btn_touch[t.index]
 			_btn_touch.erase(t.index)
 			if is_instance_valid(tb):
-				_press_feedback(tb, false)
+				tb.button_up.emit()
 				if not t.canceled and tb.is_visible_in_tree() and not tb.disabled \
 						and tb.get_global_rect().grow(10.0).has_point(t.position):
 					tb.pressed.emit()
@@ -631,6 +752,35 @@ func _button_at(p: Vector2) -> Button:
 
 
 
+func _cycle_map_mode() -> void:
+	_minimap.set_mode((Adv3DMinimap.mode + 1) % 3)
+	_update_map_button()
+
+
+func _update_map_button() -> void:
+	if _map_btn == null:
+		return
+	_map_btn.text = ["Réduire ▴", "Masquer ✕", "Carte ▾"][Adv3DMinimap.mode]
+
+
+func _refresh_minimap_markers() -> void:
+	if _minimap == null:
+		return
+	var pois: Array = []
+	var defs: Dictionary = ProgressionManager.ADVENTURE_POIS.get(zone_id, {})
+	for key: String in defs.keys():
+		var poi: Dictionary = defs[key]
+		pois.append({"cell": AdventureTerrain.parse(key), "color": Adv3DActors.POI_COLORS.get(String(poi.get("kind", "")), Color(0.9, 0.9, 0.9)),
+			"done": ProgressionManager.adventure_poi_completed(manager.state, key)})
+	var gates: Array = []
+	for c: Vector2i in manager.gates().keys():
+		gates.append({"cell": c, "open": bool(manager.gate_at(c).get("open", false))})
+	var mobs: Array = []
+	for g: Dictionary in manager.mobs():
+		mobs.append(AdventureMobs.pos_of(g))
+	_minimap.set_markers(pois, gates, mobs)
+
+
 func _on_look_input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var t := event as InputEventScreenTouch
@@ -641,11 +791,17 @@ func _on_look_input(event: InputEvent) -> void:
 	elif event is InputEventScreenDrag:
 		var d := event as InputEventScreenDrag
 		if d.index == _drag_index:
-			explorer.rotate_camera(-d.relative.x * 0.006)
+			explorer.rotate_camera(-d.relative.x * 0.006, -d.relative.y * 0.004)
 	elif event is InputEventMouseMotion:
 		var m := event as InputEventMouseMotion
 		if m.device != InputEvent.DEVICE_ID_EMULATION and (m.button_mask & MOUSE_BUTTON_MASK_RIGHT) != 0:
-			explorer.rotate_camera(-m.relative.x * 0.006)
+			explorer.rotate_camera(-m.relative.x * 0.006, -m.relative.y * 0.004)
+	elif event is InputEventMouseButton and (event as InputEventMouseButton).pressed:
+		var mb := event as InputEventMouseButton
+		if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
+			explorer.zoom_camera(0.9)
+		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			explorer.zoom_camera(1.1)
 
 
 func _show_toast(text: String) -> void:
