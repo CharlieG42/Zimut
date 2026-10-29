@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bygqxupro0v1d"
-path="res://.godot/imported/heal_back_walk.png-5a9c5cb8b64d4fa9b3f037b07f8549cc.ctex"
+uid="uid://yaorfiuiefc"
+path="res://.godot/imported/invocateur_back_cast.png-ce2057b891b3c469999e84e42d2e43bd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/heal_back_walk.png"
-dest_files=["res://.godot/imported/heal_back_walk.png-5a9c5cb8b64d4fa9b3f037b07f8549cc.ctex"]
+source_file="res://assets/sprites/players/invocateur_back_cast.png"
+dest_files=["res://.godot/imported/invocateur_back_cast.png-ce2057b891b3c469999e84e42d2e43bd.ctex"]
 
 [params]
 
