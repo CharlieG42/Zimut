@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d2cnri8ss6f1l"
-path="res://.godot/imported/tank_back_walk.png-5bb732d1e954536990568455eecc07ef.ctex"
+uid="uid://bpwmt8332ayoj"
+path="res://.godot/imported/chasseur_on_white.png-225f462d677c5002185480f79fcd7fea.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/tank_back_walk.png"
-dest_files=["res://.godot/imported/tank_back_walk.png-5bb732d1e954536990568455eecc07ef.ctex"]
+source_file="res://assets/sprites/nations/heros/chasseur_on_white.png"
+dest_files=["res://.godot/imported/chasseur_on_white.png-225f462d677c5002185480f79fcd7fea.ctex"]
 
 [params]
 

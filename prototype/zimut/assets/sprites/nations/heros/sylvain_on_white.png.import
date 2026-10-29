@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dnd81ynphdhic"
-path="res://.godot/imported/tank_attack_3.png-10a9cb6d83f149862e3f20da704ba118.ctex"
+uid="uid://dj4ogoy8iy34o"
+path="res://.godot/imported/sylvain_on_white.png-c77286af6de4134f6fdf500e7791b314.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/tank_attack_3.png"
-dest_files=["res://.godot/imported/tank_attack_3.png-10a9cb6d83f149862e3f20da704ba118.ctex"]
+source_file="res://assets/sprites/nations/heros/sylvain_on_white.png"
+dest_files=["res://.godot/imported/sylvain_on_white.png-c77286af6de4134f6fdf500e7791b314.ctex"]
 
 [params]
 

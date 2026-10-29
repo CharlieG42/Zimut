@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://currg1kic7fvs"
-path="res://.godot/imported/assassin_back_walk.png-852819fb3c4713a9dfa26c9808af9a85.ctex"
+uid="uid://cocboff0u1hi1"
+path="res://.godot/imported/tank_on_white.png-5db56ac413f575c1c323f982d8c3905b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/assassin_back_walk.png"
-dest_files=["res://.godot/imported/assassin_back_walk.png-852819fb3c4713a9dfa26c9808af9a85.ctex"]
+source_file="res://assets/sprites/nations/heros/tank_on_white.png"
+dest_files=["res://.godot/imported/tank_on_white.png-5db56ac413f575c1c323f982d8c3905b.ctex"]
 
 [params]
 

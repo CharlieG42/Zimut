@@ -156,3 +156,9 @@ Intégrés quand même quand c'était exploitable ; voici ce qu'il faut reprendr
 - **géomancien, invocateur** : les anciennes poses d'action (autres personnages : géomancien couronné, invocateur barbu) sont **retirées** → le jeu anime le repos en attendant les nouvelles planches `actions` / `actions_dos` à faire en édition de ces vues.
 - **druide, soigneur** : poses d'action conservées (même personnage).
 - **artificier** : en cours chez Mistral.
+
+## V69 — planches héros V2 (actions 2×2)
+- **druide, soigneur, artificier** : les planches d'actions ne montrent pas le même personnage que les vues de repos (druide imberbe / soigneur cheveux turquoise / artificier barbu) → non intégrées, anciennes poses conservées.
+- **chasseur_actions_dos** : case haut-droite ratée (rectangle noir, personnage coupé) → `chasseur_back_attack_2` retirée (repli sur le repos).
+- **chasseur** : de l'espace blanc plein est resté dans l'arc (intérieur de l'arc non transparent) sur plusieurs poses.
+- Poses `_attack_3` et `_walk` retirées pour mage, sylvain, chasseur, assassin, tank, géomancien, invocateur (ancien personnage ; les planches 2×2 n'en ont que 4).
