@@ -1878,7 +1878,6 @@ const UK = preload("res://scripts/UiKit.gd")
 
 func _show_result_window(victory: bool) -> void:
 	var save: Dictionary = game_manager.active_save
-	CloudSave.auto_backup(get_tree())   # V49 : sauvegarde Cloud automatique (option)
 	var res: Dictionary = save.get("last_result", {})
 	var loots: Array = save.get("last_loots", []) if victory else []
 	var dim: ColorRect = ColorRect.new()
@@ -2094,6 +2093,7 @@ func _show_result_window(victory: bool) -> void:
 func _result_extras(content: VBoxContainer, save: Dictionary, victory: bool) -> void:
 	var res: Dictionary = save.get("last_result", {})
 	_result_player_card(content, save)
+	_result_cloud_line(content)   # V49/V71 : sauvegarde Cloud automatique (option) + son état
 	var obj: Dictionary = res.get("objective", {})
 	if not obj.is_empty():
 		var ok: bool = bool(obj.get("success", false))
@@ -2109,6 +2109,54 @@ func _result_extras(content: VBoxContainer, save: Dictionary, victory: bool) -> 
 		row.add_theme_stylebox_override("panel", UK.box(Color(0.20, 0.15, 0.05, 0.95), Color(1.0, 0.82, 0.35), 12, 2, 10))
 		row.add_child(UK.lbl("🏆 Succès débloqué : %s — %s" % [String(a.get("name", "")), String(a.get("reward_text", ""))], 19, Color(1.0, 0.88, 0.5)))
 		content.add_child(row)
+
+
+## V71 : ligne d'état de la sauvegarde Cloud automatique (seulement si l'option est active et le compte relié).
+var _cloud_lbl: Label = null
+var _cloud_busy: bool = false
+var _cloud_again: bool = false
+
+func _result_cloud_line(content: VBoxContainer) -> void:
+	_cloud_lbl = null
+	if not CloudSave.auto_enabled(get_tree()):
+		return
+	_cloud_lbl = UK.lbl("", 17, UK.C_DIM)
+	_cloud_lbl.name = "CloudStatus"
+	_cloud_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content.add_child(_cloud_lbl)
+	_cloud_send()
+
+
+func _cloud_send() -> void:
+	var lbl: Label = _cloud_lbl
+	if lbl == null or not is_instance_valid(lbl):
+		return
+	if _cloud_busy:
+		_cloud_again = true   # un envoi est déjà en cours : on renverra juste après (état à jour)
+		return
+	_cloud_busy = true
+	lbl.text = "☁  Sauvegarde sur Google Drive…"
+	lbl.add_theme_color_override("font_color", UK.C_DIM)
+	var r: String = await CloudSave.auto_backup(get_tree())
+	_cloud_busy = false
+	if _cloud_again:
+		_cloud_again = false
+		_cloud_send()
+		return
+	if not is_instance_valid(lbl):
+		return
+	match r:
+		"ok":
+			lbl.text = "☁  ✓ Partie sauvegardée sur Google Drive"
+			lbl.add_theme_color_override("font_color", UK.C_GOOD)
+		"conflict":
+			lbl.text = "⚠  Drive contient une sauvegarde plus récente (autre appareil) : rien n'a été envoyé. Voir Réglages → Cloud."
+			lbl.add_theme_color_override("font_color", Color(1.0, 0.72, 0.30))
+		"":
+			lbl.text = ""
+		_:
+			lbl.text = "⚠  Sauvegarde Drive impossible (réseau ou connexion Google) : elle sera retentée au prochain combat."
+			lbl.add_theme_color_override("font_color", Color(1.0, 0.72, 0.30))
 
 
 ## V47 : niveau du joueur (barre d'XP) et déblocage de héros.
@@ -2143,6 +2191,7 @@ func _result_player_card(content: VBoxContainer, save: Dictionary) -> void:
 				if picked.is_empty():
 					return   # « Plus tard » : le bouton reste disponible
 				ProgressionManager.write_save(game_manager.active_slot, save)
+				_cloud_send()   # V71 : le héros débloqué part aussi sur Drive
 				var left: int = HeroUnlock.pending_unlocks(save)
 				if left > 0:
 					b.text = "🔓  CHOISIR UN NOUVEAU HÉROS  (%d)" % left
