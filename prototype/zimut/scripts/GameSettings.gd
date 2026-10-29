@@ -48,6 +48,8 @@ var turn_timer_mode: int = 3
 var language: String = "fr"
 var sfx_on: bool = true
 var haptics_on: bool = true
+## V60 : mode Aventure en monde 3D (bêta) au lieu de la carte classique.
+var adventure_3d: bool = false
 var xp_speed: int = 1
 var text_size: int = 1
 ## Aide du premier combat déjà vue (ou passée).
@@ -87,6 +89,7 @@ func load_settings() -> void:
 	sfx_on = bool(parsed.get("sfx_on", sfx_on))
 	language = String(parsed.get("language", language))
 	haptics_on = bool(parsed.get("haptics_on", haptics_on))
+	adventure_3d = bool(parsed.get("adventure_3d", adventure_3d))
 	cloud_auto = bool(parsed.get("cloud_auto", cloud_auto))
 	_apply_sfx()
 
@@ -95,7 +98,7 @@ func save_settings() -> void:
 	if f == null:
 		push_error("Impossible d'écrire les réglages")
 		return
-	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "anim_speed": anim_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "language": language, "turn_timer_mode": turn_timer_mode, "cloud_auto": cloud_auto}, "\t"))
+	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "anim_speed": anim_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "adventure_3d": adventure_3d, "language": language, "turn_timer_mode": turn_timer_mode, "cloud_auto": cloud_auto}, "\t"))
 	f.close()
 
 func set_difficulty(idx: int) -> void:
@@ -128,6 +131,14 @@ func set_sfx(on: bool) -> void:
 
 func set_cloud_auto(on: bool) -> void:
 	cloud_auto = on
+	save_settings()
+
+## Scène du mode Aventure : monde 3D (bêta) ou carte classique.
+func adventure_scene() -> String:
+	return "res://scenes/Adventure3D.tscn" if adventure_3d else "res://scenes/AdventureMap.tscn"
+
+func set_adventure_3d(on: bool) -> void:
+	adventure_3d = on
 	save_settings()
 
 func set_haptics(on: bool) -> void:
