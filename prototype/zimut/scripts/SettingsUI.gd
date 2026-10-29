@@ -31,43 +31,50 @@ func _ready() -> void:
 		pad.add_theme_constant_override("margin_" + side, 34 if side in ["left", "right"] else 26)
 	panel.add_child(pad)
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 14)
+	box.add_theme_constant_override("separation", 12)
 	pad.add_child(box)
 
 	var title := Label.new()
 	title.text = "RÉGLAGES"
-	title.add_theme_font_size_override("font_size", 42)
+	title.add_theme_font_size_override("font_size", 38)
 	title.add_theme_color_override("font_color", COL_TXT)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 
-	box.add_child(_setting_row("Langue", Loc.LANG_NAMES,
+	# Réglages en grille de deux colonnes : tout tient à l'écran, sans défilement.
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 28)
+	grid.add_theme_constant_override("v_separation", 10)
+	box.add_child(grid)
+
+	grid.add_child(_setting_cell("Langue", Loc.LANG_NAMES,
 		maxi(0, Loc.LANGS.find(GameSettings.language)), func(idx: int) -> void: GameSettings.set_language(Loc.LANGS[idx])))
 
-	box.add_child(_setting_row("Rapidité de progression XP", GameSettings.XP_SPEEDS,
+	grid.add_child(_setting_cell("Taille du texte des menus", GameSettings.TEXT_SIZES,
+		GameSettings.text_size, func(idx: int) -> void: GameSettings.set_text_size(idx)))
+
+	grid.add_child(_setting_cell("Rapidité de progression XP", GameSettings.XP_SPEEDS,
 		GameSettings.xp_speed, func(idx: int) -> void: GameSettings.set_xp_speed(idx)))
 
-	box.add_child(_setting_row("Vitesse des tours ennemis", GameSettings.COMBAT_SPEEDS,
-		GameSettings.combat_speed, func(idx: int) -> void: GameSettings.set_combat_speed(idx)))
-
-	box.add_child(_setting_row("Vitesse des animations", GameSettings.ANIM_SPEEDS,
-		GameSettings.anim_speed, func(idx: int) -> void: GameSettings.set_anim_speed(idx)))
-
 	# V42 : timer de tour (fin automatique du tour à l'expiration)
-	box.add_child(_setting_row("Timer de tour", GameSettings.TURN_TIMER_MODES,
+	grid.add_child(_setting_cell("Timer de tour", GameSettings.TURN_TIMER_MODES,
 		GameSettings.turn_timer_mode, func(idx: int) -> void: GameSettings.set_turn_timer_mode(idx)))
 
-	box.add_child(_setting_row("Sons et vibrations", ["Sons + vibr.", "Sons seuls", "Silence"] as Array[String],
+	grid.add_child(_setting_cell("Vitesse des tours ennemis", GameSettings.COMBAT_SPEEDS,
+		GameSettings.combat_speed, func(idx: int) -> void: GameSettings.set_combat_speed(idx)))
+
+	grid.add_child(_setting_cell("Vitesse des animations", GameSettings.ANIM_SPEEDS,
+		GameSettings.anim_speed, func(idx: int) -> void: GameSettings.set_anim_speed(idx)))
+
+	grid.add_child(_setting_cell("Sons et vibrations", ["Sons + vibr.", "Sons seuls", "Silence"] as Array[String],
 		0 if (GameSettings.sfx_on and GameSettings.haptics_on) else (1 if GameSettings.sfx_on else 2),
 		func(idx: int) -> void:
 			GameSettings.set_sfx(idx < 2)
 			GameSettings.set_haptics(idx == 0)))
 
-	box.add_child(_setting_row("Mode Aventure", ["Carte classique", "Monde 3D (bêta)"] as Array[String],
+	grid.add_child(_setting_cell("Mode Aventure", ["Carte classique", "Monde 3D (bêta)"] as Array[String],
 		1 if GameSettings.adventure_3d else 0, func(idx: int) -> void: GameSettings.set_adventure_3d(idx == 1)))
-
-	box.add_child(_setting_row("Taille du texte des menus", GameSettings.TEXT_SIZES,
-		GameSettings.text_size, func(idx: int) -> void: GameSettings.set_text_size(idx)))
 
 	var tuto := Button.new()
 	tuto.name = "TutoRestart"
@@ -82,14 +89,14 @@ func _ready() -> void:
 		tuto.text = "✓  Tutoriel relancé")
 	tuto.text = "🎓  Tutoriel"
 	tuto.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tuto.custom_minimum_size = Vector2(0, 64)
+	tuto.custom_minimum_size = Vector2(0, 58)
 	_tuto_btn = tuto
 
 	_build_cloud(box)
 
 	var hint := Label.new()
-	hint.text = "La rapidité XP règle le gain d'expérience de chaque combat. La taille du texte agrandit les menus (utile sur téléphone).\nLa difficulté des ennemis se règle pour chaque partie, dans « Mes Parties »."
-	hint.add_theme_font_size_override("font_size", 19)
+	hint.text = "La difficulté des ennemis se règle pour chaque partie, dans « Mes Parties »."
+	hint.add_theme_font_size_override("font_size", 18)
 	hint.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12))
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -97,31 +104,20 @@ func _ready() -> void:
 
 	# Informations de build : le numéro final correspond au numéro de PR.
 	var info_panel := PanelContainer.new()
-	info_panel.custom_minimum_size = Vector2(0, 90)
+	info_panel.custom_minimum_size = Vector2(0, 46)
 	info_panel.add_theme_stylebox_override("panel", _flat(Color(0.86, 0.81, 0.68, 0.96), COL_BORDER, 12, 2))
 	box.add_child(info_panel)
 
-	var info_box := VBoxContainer.new()
-	info_box.add_theme_constant_override("separation", 6)
-	info_panel.add_child(info_box)
-
-	var info_title := Label.new()
-	info_title.text = "INFO"
-	info_title.add_theme_font_size_override("font_size", 22)
-	info_title.add_theme_color_override("font_color", COL_TXT)
-	info_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	info_box.add_child(info_title)
-
 	var version_label := Label.new()
 	var game_version: String = str(ProjectSettings.get_setting("application/config/version", "0.0.01.0.0"))
-	version_label.text = "Version du jeu : %s" % game_version
-	version_label.add_theme_font_size_override("font_size", 25)
+	version_label.text = "INFO  ·  Version du jeu : %s" % game_version
+	version_label.add_theme_font_size_override("font_size", 22)
 	version_label.add_theme_color_override("font_color", COL_TXT)
 	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	info_box.add_child(version_label)
+	info_panel.add_child(version_label)
 	var back := Button.new()
 	back.text = "← MENU"
-	back.custom_minimum_size = Vector2(0, 76)
+	back.custom_minimum_size = Vector2(0, 66)
 	back.add_theme_font_size_override("font_size", 26)
 	back.add_theme_color_override("font_color", COL_TXT)
 	back.add_theme_stylebox_override("normal", _flat(Color(0.88, 0.82, 0.66), COL_BORDER, 12, 3))
@@ -372,6 +368,37 @@ func _confirm(title: String, text: String, ok_txt: String, on_ok: Callable) -> v
 
 
 ## Une ligne de réglage : libellé à gauche, groupe d'options à droite.
+## Réglage en « cellule » : libellé au-dessus, boutons d'options répartis sur la largeur.
+func _setting_cell(label_txt: String, options: Array[String], current: int, on_pick: Callable) -> Control:
+	var cell := VBoxContainer.new()
+	cell.add_theme_constant_override("separation", 4)
+	cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var lbl := Label.new()
+	lbl.text = label_txt
+	lbl.add_theme_font_size_override("font_size", 22)
+	lbl.add_theme_color_override("font_color", COL_TXT)
+	cell.add_child(lbl)
+
+	var group := HBoxContainer.new()
+	group.add_theme_constant_override("separation", 6)
+	cell.add_child(group)
+	for i: int in range(options.size()):
+		var opt := Button.new()
+		opt.text = options[i]
+		opt.custom_minimum_size = Vector2(0, 52)
+		opt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		opt.add_theme_font_size_override("font_size", 20)
+		opt.focus_mode = Control.FOCUS_NONE
+		_refresh_opt(opt, i == current)
+		var idx_ref: int = i
+		opt.pressed.connect(func() -> void:
+			on_pick.call(idx_ref)
+			for j: int in range(group.get_child_count()):
+				_refresh_opt(group.get_child(j) as Button, j == idx_ref))
+		group.add_child(opt)
+	return cell
+
 func _setting_row(label_txt: String, options: Array[String], current: int, on_pick: Callable) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 16)
