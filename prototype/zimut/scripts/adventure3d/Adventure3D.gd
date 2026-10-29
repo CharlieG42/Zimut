@@ -671,6 +671,7 @@ func _build_hud() -> void:
 	_minimap = Adv3DMinimap.new()
 	_minimap.size_flags_horizontal = Control.SIZE_SHRINK_END
 	map_box.add_child(_minimap)
+	_minimap.tapped.connect(_open_full_map)
 	_minimap.setup(terrain, Adv3DWorld.palette(String(terrain["biome"])))
 	_minimap.set_mode(Adv3DMinimap.mode)
 	_update_map_button()
@@ -765,6 +766,47 @@ func _button_at(p: Vector2) -> Button:
 			stack.append(c)
 	return found
 
+
+
+## Carte en plein écran (toucher la mini-carte) : relief, lieux, monstres, joueur et légende.
+func _open_full_map() -> void:
+	if _modal_root != null:
+		return
+	explorer.stick_input = Vector2.ZERO
+	var dim := ColorRect.new()
+	dim.color = Color(0.02, 0.03, 0.06, 0.93)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	_hud.add_child(dim)
+	_modal_root = dim
+	var vs: Vector2 = get_viewport().get_visible_rect().size
+	var box := VBoxContainer.new()
+	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	box.offset_left = 30.0
+	box.offset_right = -30.0
+	box.offset_top = 20.0
+	box.offset_bottom = -20.0
+	box.add_theme_constant_override("separation", 12)
+	dim.add_child(box)
+	var head := HBoxContainer.new()
+	box.add_child(head)
+	var title: Label = U.lbl("Carte — " + manager.zone_name(), 34, U.C_GOLD, true)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(title)
+	var close: Button = _btn("✕  Fermer", U.C_BORDER, 26, Vector2(240, 80))
+	close.pressed.connect(_close_modal)
+	head.add_child(close)
+	var big := Adv3DMinimap.new()
+	big.full = true
+	big.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	big.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	big.custom_minimum_size = Vector2(vs.x - 60.0, vs.y - 160.0)
+	box.add_child(big)
+	big.setup(terrain, Adv3DWorld.palette(String(terrain["biome"])))
+	# mêmes marqueurs que la mini-carte
+	_refresh_minimap_markers()
+	big.set_markers(_minimap._pois, _minimap._gates, _minimap._mobs)
+	big.set_player(Vector2(explorer.position.x, explorer.position.z) / Adv3DWorld.CELL, explorer.yaw)
 
 
 func _cycle_map_mode() -> void:
