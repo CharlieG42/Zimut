@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d1cqjsgevab86"
-path="res://.godot/imported/druide_attack_3.png-f6f64c50a60ecf3231bf3fa6ebaf7244.ctex"
+uid="uid://cuoere01c0tvh"
+path="res://.godot/imported/invocateur_cast_2.png-1aa310be05942d9a849d9f720b53e13c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/druide_attack_3.png"
-dest_files=["res://.godot/imported/druide_attack_3.png-f6f64c50a60ecf3231bf3fa6ebaf7244.ctex"]
+source_file="res://assets/sprites/players/invocateur_cast_2.png"
+dest_files=["res://.godot/imported/invocateur_cast_2.png-1aa310be05942d9a849d9f720b53e13c.ctex"]
 
 [params]
 

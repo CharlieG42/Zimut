@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c1a7qselreari"
-path="res://.godot/imported/heal_walk.png-8e51e12fc6d3b0148b871e6a5d24eb87.ctex"
+uid="uid://dmokcoeewvgf5"
+path="res://.godot/imported/artificier_cast_2.png-656366d0e2245f897af0739ff7ec8c7a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/heal_walk.png"
-dest_files=["res://.godot/imported/heal_walk.png-8e51e12fc6d3b0148b871e6a5d24eb87.ctex"]
+source_file="res://assets/sprites/players/artificier_cast_2.png"
+dest_files=["res://.godot/imported/artificier_cast_2.png-656366d0e2245f897af0739ff7ec8c7a.ctex"]
 
 [params]
 
