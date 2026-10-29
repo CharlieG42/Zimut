@@ -29,7 +29,7 @@ var _ambient: CPUParticles3D = null
 var _minimap: Adv3DMinimap = null
 var _map_btn: Button = null
 var _map_tick: float = 0.0
-var _cam_dir: float = 0.0
+var _cam_stick: Adv3DStick = null
 var _anim_t: float = 0.0
 
 var _mob_nodes: Dictionary = {}       # id de groupe -> Node3D
@@ -336,8 +336,9 @@ func _process(delta: float) -> void:
 	if _modal_root != null:
 		return
 	explorer.stick_input = _stick.value if _stick != null else Vector2.ZERO
-	if _cam_dir != 0.0:
-		explorer.rotate_camera(_cam_dir * 1.9 * delta)
+	if _cam_stick != null and _cam_stick.value.length() > 0.12:
+		var cv: Vector2 = _cam_stick.value
+		explorer.rotate_camera(-cv.x * 2.4 * delta, -cv.y * 1.3 * delta)
 	if _minimap != null and _minimap.visible:
 		_minimap.set_player(Vector2(explorer.position.x, explorer.position.z) / Adv3DWorld.CELL, explorer.yaw)
 		_map_tick += delta
@@ -627,8 +628,8 @@ func _build_hud() -> void:
 	_act_btn.anchor_right = 1.0
 	_act_btn.anchor_top = 1.0
 	_act_btn.anchor_bottom = 1.0
-	_act_btn.offset_left = -470.0
-	_act_btn.offset_right = -30.0
+	_act_btn.offset_left = -740.0
+	_act_btn.offset_right = -300.0
 	_act_btn.offset_top = -160.0
 	_act_btn.offset_bottom = -60.0
 	_act_btn.visible = false
@@ -655,21 +656,16 @@ func _build_hud() -> void:
 	_minimap.set_mode(Adv3DMinimap.mode)
 	_update_map_button()
 	_refresh_minimap_markers()
-	# Boutons de caméra (maintenir pour tourner), bord droit
-	var cam_row := HBoxContainer.new()
-	cam_row.add_theme_constant_override("separation", 12)
-	cam_row.anchor_left = 1.0
-	cam_row.anchor_right = 1.0
-	cam_row.anchor_top = 0.62
-	cam_row.offset_left = -220.0
-	cam_row.offset_right = -20.0
-	cam_row.offset_top = 0.0
-	root.add_child(cam_row)
-	for dir: float in [1.0, -1.0]:
-		var cb: Button = _btn("◀" if dir > 0.0 else "▶", Color(0.20, 0.28, 0.40), 34, Vector2(94, 94))
-		cb.button_down.connect(func() -> void: _cam_dir = dir)
-		cb.button_up.connect(func() -> void: _cam_dir = 0.0)
-		cam_row.add_child(cb)
+	# Stick de caméra (quart bas-droit) : gauche/droite = rotation, haut/bas = inclinaison.
+	_cam_stick = Adv3DStick.new()
+	_cam_stick.rest_right = true
+	_cam_stick.tint = Color(0.55, 0.78, 1.0)
+	_cam_stick.caption = "Caméra"
+	_cam_stick.anchor_left = 0.70
+	_cam_stick.anchor_right = 1.0
+	_cam_stick.anchor_top = 0.38
+	_cam_stick.anchor_bottom = 1.0
+	root.add_child(_cam_stick)
 	# Message éphémère (bas-centre)
 	_toast = U.lbl("", 24, U.C_TXT, true)
 	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
