@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bj5425aa1j7sd"
-path="res://.godot/imported/tank_back_attack_3.png-b86e50dd06fb7985382c073fa69d0a02.ctex"
+uid="uid://ch1hxlhowmjmy"
+path="res://.godot/imported/mage_on_white.png-bf426999c359d6bde0a1ce791f9876d2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/players/tank_back_attack_3.png"
-dest_files=["res://.godot/imported/tank_back_attack_3.png-b86e50dd06fb7985382c073fa69d0a02.ctex"]
+source_file="res://assets/sprites/nations/heros/mage_on_white.png"
+dest_files=["res://.godot/imported/mage_on_white.png-bf426999c359d6bde0a1ce791f9876d2.ctex"]
 
 [params]
 
