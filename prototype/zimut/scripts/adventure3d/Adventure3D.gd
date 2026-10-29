@@ -28,6 +28,7 @@ var _islets: Node3D = null
 var _ambient: CPUParticles3D = null
 var _minimap: Adv3DMinimap = null
 var _map_btn: Button = null
+var _map_icon: Adv3DChevrons = null
 var _map_tick: float = 0.0
 var _cam_stick: Adv3DStick = null
 var _anim_t: float = 0.0
@@ -645,8 +646,12 @@ func _build_hud() -> void:
 	map_box.offset_top = 100.0
 	map_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(map_box)
-	_map_btn = _btn("", U.C_BORDER, 20, Vector2(190, 56))
+	_map_btn = _btn("", U.C_BORDER, 20, Vector2(84, 56))
 	_map_btn.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_map_icon = Adv3DChevrons.new()
+	_map_icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_map_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_map_btn.add_child(_map_icon)
 	_map_btn.pressed.connect(_cycle_map_mode)
 	map_box.add_child(_map_btn)
 	_minimap = Adv3DMinimap.new()
@@ -756,7 +761,10 @@ func _cycle_map_mode() -> void:
 func _update_map_button() -> void:
 	if _map_btn == null:
 		return
-	_map_btn.text = ["Réduire ▴", "Masquer ✕", "Carte ▾"][Adv3DMinimap.mode]
+	# chevrons vers le haut = réduire (grande → petite → masquée), vers le bas = agrandir
+	_map_icon.expand = Adv3DMinimap.mode == Adv3DMinimap.MODE_HIDDEN
+	_map_icon.count = 2 if Adv3DMinimap.mode == Adv3DMinimap.MODE_BIG else 1 if Adv3DMinimap.mode == Adv3DMinimap.MODE_SMALL else 2
+	_map_icon.queue_redraw()
 
 
 func _refresh_minimap_markers() -> void:
@@ -766,7 +774,7 @@ func _refresh_minimap_markers() -> void:
 	var defs: Dictionary = ProgressionManager.ADVENTURE_POIS.get(zone_id, {})
 	for key: String in defs.keys():
 		var poi: Dictionary = defs[key]
-		pois.append({"cell": AdventureTerrain.parse(key), "color": Adv3DActors.POI_COLORS.get(String(poi.get("kind", "")), Color(0.9, 0.9, 0.9)),
+		pois.append({"cell": AdventureTerrain.parse(key), "kind": String(poi.get("kind", "")), "dungeon": Dungeons.is_dungeon(poi),
 			"done": ProgressionManager.adventure_poi_completed(manager.state, key)})
 	var gates: Array = []
 	for c: Vector2i in manager.gates().keys():
