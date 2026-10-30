@@ -47,6 +47,8 @@ var _zone_label: Label = null
 var _toast: Label = null
 var _toast_tween: Tween = null
 var _act_btn: Button = null
+var _toast_panel: PanelContainer = null
+var _toast_title: Label = null
 var _act_poi_key: String = ""
 var _modal_root: Control = null
 var _drag_index: int = -1
@@ -157,6 +159,7 @@ func _build_ambient() -> void:
 	p.emission_box_extents = Vector3(11.0, 4.0, 11.0)
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var mat := StandardMaterial3D.new()
+	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED   # évite les taches noires (NaN) sur GPU mobiles
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	var orb := SphereMesh.new()
@@ -532,7 +535,12 @@ func _ask_gate(c: Vector2i) -> void:
 		return
 	_declined_gate = c
 	if not bool(g.get("open", false)):
-		_show_toast("%s — %s" % [String(g.get("name", "?")), String(g.get("reason", "Route gardée."))])
+		var reason: String = String(g.get("reason", "Route gardée."))
+		var cut: int = reason.find(":")
+		if cut > 0:
+			reason = reason.substr(cut + 1).strip_edges()
+			reason = reason.substr(0, 1).to_upper() + reason.substr(1)
+		_show_info("🔒  Route vers %s fermée" % String(g.get("name", "?")), reason, Color(0.92, 0.42, 0.34), 4.5)
 		return
 	var box: VBoxContainer = _modal("➜  " + String(g.get("name", "Carte voisine")), Color(0.40, 0.85, 0.65))
 	var t: Label = U.lbl("Niveau %d · %s" % [int(g.get("level", 1)), ProgressionManager.biome_label(String(g.get("biome", "Forêt")))], 22, U.C_TXT)
@@ -614,7 +622,7 @@ func _build_hud() -> void:
 	# Stick de déplacement (quart bas-gauche).
 	_stick = Adv3DStick.new()
 	_stick.anchor_top = 0.38
-	_stick.anchor_right = 0.45
+	_stick.anchor_right = 0.40
 	_stick.anchor_bottom = 1.0
 	root.add_child(_stick)
 	# Bandeau de zone
@@ -638,15 +646,17 @@ func _build_hud() -> void:
 	menu.pressed.connect(func() -> void: _leave_to("res://scenes/SaveSlots.tscn"))
 	top.add_child(menu)
 	# Bouton d'action contextuel (bas-droite)
-	_act_btn = _btn("", Color(0.30, 0.55, 0.85), 27, Vector2(440, 100))
-	_act_btn.anchor_left = 1.0
-	_act_btn.anchor_right = 1.0
+	# Bouton d'action contextuel : en bas, ENTRE les deux zones de joystick (40 % et 72 % de la largeur),
+	# pour qu'aucun stick ne capte le doigt qui l'appuie.
+	_act_btn = _btn("", Color(0.30, 0.55, 0.85), 27, Vector2(420, 100))
+	_act_btn.anchor_left = 0.56
+	_act_btn.anchor_right = 0.56
 	_act_btn.anchor_top = 1.0
 	_act_btn.anchor_bottom = 1.0
-	_act_btn.offset_left = -740.0
-	_act_btn.offset_right = -300.0
-	_act_btn.offset_top = -160.0
-	_act_btn.offset_bottom = -60.0
+	_act_btn.offset_left = -210.0
+	_act_btn.offset_right = 210.0
+	_act_btn.offset_top = -150.0
+	_act_btn.offset_bottom = -50.0
 	_act_btn.visible = false
 	_act_btn.pressed.connect(_on_action_pressed)
 	root.add_child(_act_btn)
@@ -681,21 +691,36 @@ func _build_hud() -> void:
 	_cam_stick.rest_right = true
 	_cam_stick.tint = Color(0.55, 0.78, 1.0)
 	_cam_stick.caption = "Caméra"
-	_cam_stick.anchor_left = 0.70
+	_cam_stick.anchor_left = 0.72
 	_cam_stick.anchor_right = 1.0
 	_cam_stick.anchor_top = 0.38
 	_cam_stick.anchor_bottom = 1.0
 	root.add_child(_cam_stick)
-	# Message éphémère (bas-centre)
-	_toast = U.lbl("", 24, U.C_TXT, true)
+	root.move_child(_act_btn, -1)          # au-dessus des zones de stick
+	# Panneau d'information (haut-centre) : fond sombre, liseré coloré, titre + texte, bien lisible
+	# sur l'herbe comme sur le ciel.
+	_toast_panel = PanelContainer.new()
+	_toast_panel.anchor_left = 0.5
+	_toast_panel.anchor_right = 0.5
+	_toast_panel.offset_left = -420.0
+	_toast_panel.offset_right = 420.0
+	_toast_panel.offset_top = 14.0
+	_toast_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_toast_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_toast_panel.modulate.a = 0.0
+	root.add_child(_toast_panel)
+	var tbox := VBoxContainer.new()
+	tbox.add_theme_constant_override("separation", 6)
+	tbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_toast_panel.add_child(tbox)
+	_toast_title = U.lbl("", 30, U.C_GOLD, true)
+	_toast_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tbox.add_child(_toast_title)
+	_toast = U.lbl("", 25, Color(0.96, 0.95, 0.90), false)
 	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_toast.anchor_left = 0.2
-	_toast.anchor_right = 0.8
-	_toast.anchor_top = 0.82
-	_toast.anchor_bottom = 0.82
 	_toast.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_toast.modulate.a = 0.0
-	root.add_child(_toast)
+	_toast.custom_minimum_size = Vector2(780, 0)
+	tbox.add_child(_toast)
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -865,15 +890,25 @@ func _on_look_input(event: InputEvent) -> void:
 
 
 func _show_toast(text: String) -> void:
-	if _toast == null:
+	_show_info("", text, U.C_BORDER)
+
+
+## Panneau d'information : titre facultatif, texte, couleur d'accent (liseré + titre).
+func _show_info(title: String, text: String, accent: Color, seconds: float = 3.6) -> void:
+	if _toast == null or _toast_panel == null:
 		return
+	_toast_title.text = title
+	_toast_title.visible = title != ""
+	_toast_title.add_theme_color_override("font_color", accent.lightened(0.25))
 	_toast.text = text
+	_toast_panel.add_theme_stylebox_override("panel", U.box(Color(0.06, 0.08, 0.13, 0.9), accent, 16, 3, 18))
 	if _toast_tween != null and _toast_tween.is_valid():
 		_toast_tween.kill()
-	_toast.modulate.a = 1.0
+	_toast_panel.modulate.a = 1.0
+	_toast_panel.scale = Vector2.ONE
 	_toast_tween = create_tween()
-	_toast_tween.tween_interval(3.2)
-	_toast_tween.tween_property(_toast, "modulate:a", 0.0, 0.8)
+	_toast_tween.tween_interval(seconds)
+	_toast_tween.tween_property(_toast_panel, "modulate:a", 0.0, 0.7)
 
 
 func _modal(title: String, accent: Color) -> VBoxContainer:

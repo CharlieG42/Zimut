@@ -45,6 +45,7 @@ static func _cached(key: String, f: Callable) -> Mesh:
 
 static func _glow(col: Color, energy: float = 1.6) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
+	m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED   # évite les taches noires (NaN) sur GPU mobiles
 	m.albedo_color = col
 	m.emission_enabled = true
 	m.emission = col
@@ -339,6 +340,7 @@ static func make_gate(dir: String, title: String, open: bool) -> Node3D:
 	qm.size = Vector2(1.9, 2.4)
 	veil.mesh = qm
 	var vm := StandardMaterial3D.new()
+	vm.specular_mode = BaseMaterial3D.SPECULAR_DISABLED   # évite les taches noires (NaN) sur GPU mobiles
 	vm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	vm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	vm.albedo_color = Color(col.r, col.g, col.b, 0.35 if open else 0.22)
@@ -357,8 +359,42 @@ static func make_gate(dir: String, title: String, open: bool) -> Node3D:
 		sp.position.y = 0.3
 		sp.spread = 20.0
 		n.add_child(sp)
+	if not open:
+		# route gardée : planches clouées en croix dans l'arche + écriteau
+		var bars := _cached("gate_bars", func() -> Mesh:
+			var st := _st()
+			var wd := Color(0.36, 0.22, 0.12)
+			var wl := Color(0.58, 0.38, 0.20)
+			for k: float in [0.58, -0.58]:
+				var ax := Vector3(0.88, k * 1.05, 0.0)          # demi-longueur de la planche, en diagonale
+				var ay := Vector3(-k, 0.88, 0.0).normalized() * 0.11
+				_obox(st, Vector3(0, 1.3, k * 0.03), ax, ay, Vector3(0, 0, 0.05), wd, wl)
+			Adv3DMeshes.add_box(st, Vector3(0, 1.3, 0.08), Vector3(0.62, 0.42, 0.06), Color(0.45, 0.30, 0.16), Color(0.70, 0.50, 0.28))   # écriteau
+			Adv3DMeshes.add_box(st, Vector3(0, 1.3, 0.115), Vector3(0.12, 0.16, 0.02), Color(0.75, 0.22, 0.18), Color(0.9, 0.3, 0.25))   # cadenas
+			return st.commit())
+		_part(pivot, bars)
+		var lb := _label("➜ " + title, 3.55, 34, col.lightened(0.3))
+		n.add_child(lb)
+		n.add_child(_label("route fermée", 3.12, 26, Color(1.0, 0.82, 0.72)))
+		return n
 	n.add_child(_label("➜ " + title, 3.3, 34, col.lightened(0.3)))
 	return n
+
+
+## Boîte orientée (demi-axes ax, ay, az) : planches en diagonale.
+static func _obox(st: SurfaceTool, c: Vector3, ax: Vector3, ay: Vector3, az: Vector3, col_d: Color, col_l: Color) -> void:
+	var v: Array[Vector3] = []
+	for sx: float in [-1.0, 1.0]:
+		for sy: float in [-1.0, 1.0]:
+			for sz: float in [-1.0, 1.0]:
+				v.append(c + ax * sx + ay * sy + az * sz)
+	for f: Array in [[0, 1, 3, 2], [4, 6, 7, 5], [0, 4, 5, 1], [2, 3, 7, 6], [0, 2, 6, 4], [1, 5, 7, 3]]:
+		var k0: Color = col_d if v[f[0]].y < c.y else col_l
+		var k1: Color = col_d if v[f[1]].y < c.y else col_l
+		var k2: Color = col_d if v[f[2]].y < c.y else col_l
+		var k3: Color = col_d if v[f[3]].y < c.y else col_l
+		Adv3DMeshes._tri(st, v[f[0]], v[f[1]], v[f[2]], k0, k1, k2, c)
+		Adv3DMeshes._tri(st, v[f[0]], v[f[2]], v[f[3]], k0, k2, k3, c)
 
 
 # ══════════════════════════════════════════════════════════════════════
