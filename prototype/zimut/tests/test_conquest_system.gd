@@ -261,6 +261,55 @@ func _boot() -> void:
 	var empire: Dictionary = pm.conquest_empire_yield(sp["conquest"])
 	check(int(empire.get("Magie", 0)) == 0, "ville pillée : la spécialité n'entre pas dans la production d'empire")
 
+	# ── V59 Lieutenance : missions des héros libres ──
+	var mi: Dictionary = _fresh(["capitale", "clairiere"])
+	var mcq: Dictionary = mi["conquest"]
+	check(ConquestSystem.missions(mcq).is_empty(), "aucune mission au départ")
+	check(pm.conquest_send_mission(mi, "Assassin", "caravane") == "", "envoi d'un héros libre en mission")
+	check(ConquestSystem.hero_on_mission(mcq, "Assassin").get("eta", 0) == ConquestSystem.MISSION_BATTLES, "mission de 3 batailles")
+	check(pm.conquest_send_mission(mi, "Assassin", "filon") != "", "un héros ne part pas deux fois")
+	pm.conquest_assign_hero(mi, "clairiere", "Tank")
+	check(pm.conquest_send_mission(mi, "Tank", "caravane") != "", "un gouverneur ne part pas en mission")
+	check(pm.conquest_busy_heroes(mi).has("Assassin") and pm.conquest_busy_heroes(mi).has("Tank"), "gouverneurs et lieutenants indisponibles pour les assauts")
+	check(pm.conquest_send_mission(mi, "Mage", "inconnu") != "", "mission inconnue refusée")
+	# Décompte : la mission avance d'une bataille par victoire
+	var mr := RandomNumberGenerator.new()
+	mr.seed = 42
+	ConquestSystem.after_victory(mi, mcq, mr, pm.CONQUEST_ROUTES, names, "", ["vieille_tour", "fort_racine"])
+	check(int(ConquestSystem.hero_on_mission(mi["conquest"], "Assassin").get("eta", -1)) == ConquestSystem.MISSION_BATTLES - 1, "la mission avance d'une bataille")
+	# Retour bredouille possible : on boucle jusqu'au retour
+	var news_assassin: bool = false
+	var guard: int = 0
+	while ConquestSystem.hero_on_mission(mi["conquest"], "Assassin") != {} and guard < 10:
+		guard += 1
+		ConquestSystem.after_victory(mi, mi["conquest"], mr, pm.CONQUEST_ROUTES, names, "", [])
+		mi["conquest"].erase("event_pending")
+	news_assassin = true
+	check(news_assassin and guard < 10, "la mission se termine en 3 batailles")
+	check(ConquestSystem.missions(mi["conquest"]).is_empty(), "le héros est de retour")
+	var any_flag: bool = false
+	for n: String in mi["conquest"].get("events", []):
+		if n.begins_with("⚑"):
+			any_flag = true
+	check(any_flag, "le retour de mission est journalisé")
+	# Cartographie : révélation de villes (déterministe : on force le succès)
+	var mc: Dictionary = _fresh(["capitale", "clairiere"])
+	mc["conquest"]["missions"] = {"Mage": {"type": "carte", "eta": 1}}
+	var mcr := RandomNumberGenerator.new()
+	mcr.seed = 7
+	var tries: int = 0
+	var revealed_ids: Array = []
+	while revealed_ids.is_empty() and tries < 50:
+		tries += 1
+		mc["conquest"]["missions"] = {"Mage": {"type": "carte", "eta": 1}}
+		ConquestSystem.after_victory(mc, mc["conquest"], mcr, pm.CONQUEST_ROUTES, names, "", ["vieille_tour", "fort_racine", "pont_mousse"])
+		revealed_ids = mc["conquest"].get("missions_revealed", [])
+	check(revealed_ids.size() == 2, "cartographie : 2 villes révélées")
+	check(revealed_ids.has("vieille_tour") and revealed_ids.has("fort_racine"), "les bonnes villes sont révélées")
+	# Rappel anticipé
+	pm.conquest_send_mission(mc, "Chasseur", "filon")
+	check(pm.conquest_abort_mission(mc, "Chasseur") == "" and ConquestSystem.missions(mc["conquest"]).is_empty(), "rappel du lieutenant")
+
 	# Sauvegarde / rechargement JSON
 	var js: String = JSON.stringify(lg)
 	var back: Variant = JSON.parse_string(js)

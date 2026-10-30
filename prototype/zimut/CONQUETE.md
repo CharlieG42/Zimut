@@ -34,11 +34,19 @@ Tous les 5 batailles (dès 2 villes conquises), le Chancelier demande audience v
 - **Manœuvres** (60 or) : +2 défense dans toutes les villes pendant 3 batailles.
 - **Entretien des routes** (40 or) : +2 Bois et +1 Cuir à chaque victoire pendant 4 batailles.
 
+## Lieutenance — missions des héros libres (V59)
+Les héros qui ne gouvernent ni ne combattent peuvent partir en **mission de 3 batailles** (bouton « ⚑ MISSIONS DES LIEUTENANTS » sur une ville alliée). Ils redeviennent disponibles à leur retour :
+- **Escorte de caravane** : +90 or et +4 Cuir (mis à l'échelle du niveau du héros).
+- **Cartographie** : révèle 2 villes inconnues sur la carte (même état que les belvédères d'Aventure).
+- **Prospection** : +30 or et +8 Fer.
+
+20 % de complication : l'expédition échoue et coûte de l'or. Un héros en mission ne peut ni combattre ni gouverner ; une mission peut être rappelée sans récompense.
+
 ## Spécialités économiques (V59)
 Chaque ville conquise produit en plus une ressource propre à son biome/Nation (`ConquestSystem.CITY_TRAITS`), versée à chaque victoire et mise à l'échelle du niveau de la ville (×1 / ×1,5 / ×2). Gelée si la ville est pillée. Exemples : Mine de Cristal → +3 Magie, Forge du Givre → +3 Fer, Marais des Spectres → +3 Venin. Affichée dans le Conseil de l'écran de ville et sur la carte.
 
 ## Sauvegarde
-Clés ajoutées à `conquest` (toutes optionnelles) : `city_levels`, `garrisons`, `threat`, `event_pending`, `news`, `truce`, `lost`, `rewarded`, `battle_count`, `event_cd`, `threat_cd`, `chancellor_cd`, `chancellor_seen`, `drill`, `roadworks`.
+Clés ajoutées à `conquest` (toutes optionnelles) : `city_levels`, `garrisons`, `threat`, `event_pending`, `news`, `truce`, `lost`, `rewarded`, `battle_count`, `event_cd`, `threat_cd`, `chancellor_cd`, `chancellor_seen`, `drill`, `roadworks`, `missions`, `missions_revealed`.
 
 ## Tests
 `tests/test_conquest_system.gd` (moteur, + bloc V59 Chancelier/spécialités), `tests/test_conquest_team.gd` (sélection d'équipe, nécessite xvfb), `tests/shot_conquest_v14.gd` (captures).

@@ -46,6 +46,20 @@ const DRILL_BATTLES := 3
 const ROADS_BOIS := 2
 const ROADS_BATTLES := 4
 
+## Lieutenance — missions de 3 batailles pour les héros libres : un héros
+## envoyé en mission ne participe ni aux assauts ni au gouvernement, et
+## rapporte sa récompense (ou sa complication) à son retour.
+const MISSION_BATTLES := 3
+const MISSION_CHANCE := 0.20
+const MISSION_TYPES := {
+	"caravane": {"label": "Escorte de caravane", "text": "Protéger les marchands jusqu'aux passes de l'empire.",
+		"gold": 90, "res": {"Cuir": 4}},
+	"carte": {"label": "Cartographie", "text": "Relever les terres inexplorées au-delà des frontières.",
+		"reveal": 2},
+	"filon": {"label": "Prospection", "text": "Chercher des filons dans les montagnes voisines.",
+		"gold": 30, "res": {"Fer": 8}},
+	}
+
 ## Spécialité économique de chaque ville (biome/Nation) : ressources versées
 ## à chaque victoire, mises à l'échelle du niveau de la ville. Les villes sans
 ## entrée (capitale, Donjon) n'ont pas de spécialité.
@@ -300,6 +314,112 @@ static func recall_hero(data: Dictionary, id: String) -> String:
 	data["conquest"] = conq
 	return ""
 
+# ═════════════════════════════════════════════════════════════════════════════
+#  Lieutenance — missions des héros libres
+# ═════════════════════════════════════════════════════════════════════════════
+
+## Héros en mission : {classe -> {"type": mission_id, "eta": batailles restantes}}.
+static func missions(conq: Dictionary) -> Dictionary:
+	return conq.get("missions", {})
+
+static func hero_on_mission(conq: Dictionary, classe: String) -> Dictionary:
+	return missions(conq).get(classe, {})
+
+## Héros indisponibles (gouverneurs + en mission), pour la sélection d'équipe
+## et le choix des gouverneurs.
+static func busy_heroes(conq: Dictionary) -> Array:
+	var out: Array = stationed_heroes(conq)
+	for classe: String in missions(conq).keys():
+		if not out.has(classe):
+			out.append(classe)
+	return out
+
+## Types de missions disponibles (tous peuvent être tentés à tout moment).
+static func mission_types() -> Array:
+	return MISSION_TYPES.keys()
+
+static func mission_text(type_id: String) -> String:
+	return String(MISSION_TYPES.get(type_id, {}).get("text", ""))
+
+static func mission_label(type_id: String) -> String:
+	return String(MISSION_TYPES.get(type_id, {}).get("label", "Mission"))
+
+## Envoie un héros libre en mission de 3 batailles. Retourne "" si OK.
+static func send_mission(conq: Dictionary, classe: String, type_id: String) -> String:
+	if not GOVERNOR.has(classe):
+		return "Héros inconnu."
+	if not MISSION_TYPES.has(type_id):
+		return "Mission inconnue."
+	if hero_city(conq, classe) != "":
+		return "%s gouverne déjà une ville." % classe
+	if not hero_on_mission(conq, classe).is_empty():
+		return "%s est déjà en mission." % classe
+	var m: Dictionary = missions(conq)
+	m[classe] = {"type": type_id, "eta": MISSION_BATTLES}
+	conq["missions"] = m
+	return ""
+
+## Rappelle un héros de sa mission (il revient bredouille, sans récompense).
+static func abort_mission(conq: Dictionary, classe: String) -> String:
+	if hero_on_mission(conq, classe).is_empty():
+		return "Aucune mission en cours pour ce héros."
+	var m: Dictionary = missions(conq)
+	m.erase(classe)
+	conq["missions"] = m
+	return ""
+
+## Fait avancer les missions d'une bataille et règle les retours. Les villes
+## révélées sont ajoutées à adventure.revealed_cities (pont inter-modes) par
+## ProgressionManager, qui passe les candidates ici.
+static func _tick_missions(data: Dictionary, conq: Dictionary, rng: RandomNumberGenerator,
+		unrevealed: Array) -> void:
+	var m: Dictionary = missions(conq)
+	if m.is_empty():
+		return
+	for classe: String in m.keys().duplicate():
+		var job: Dictionary = m[classe]
+		job["eta"] = int(job.get("eta", 1)) - 1
+		if int(job["eta"]) > 0:
+			m[classe] = job
+			continue
+		m.erase(classe)
+		var type: String = String(job.get("type", "caravane"))
+		var info: Dictionary = MISSION_TYPES.get(type, {})
+		var lvl: int = hero_level(data, classe)
+		if rng.randf() < MISSION_CHANCE:
+			var loss: int = 10 + lvl
+			data["gold"] = maxi(0, int(data.get("gold", 0)) - loss)
+			note(conq, "⚑ %s revient de « %s » bredouille : l'expédition a coûté %d or." % [classe, mission_label(type), loss])
+			continue
+		var gold: int = int(info.get("gold", 0)) + lvl * 2
+		if gold > 0:
+			data["gold"] = int(data.get("gold", 0)) + gold
+		var drops: Dictionary = {}
+		for r: String in info.get("res", {}).keys():
+			drops[r] = int(info["res"][r]) + int(lvl / 3.0)
+		if not drops.is_empty():
+			_add_res(data, drops)
+		var revealed: Array = []
+		if int(info.get("reveal", 0)) > 0 and not unrevealed.is_empty():
+			for i: int in range(mini(int(info["reveal"]), unrevealed.size())):
+				revealed.append(unrevealed[i])
+			if not revealed.is_empty():
+			var so_far: Array = conq.get("missions_revealed", [])
+			for cid: String in revealed:
+				if not so_far.has(cid):
+					so_far.append(cid)
+			conq["missions_revealed"] = so_far
+		var parts: Array = ["+%d or" % gold]
+		for r: String in drops.keys():
+			parts.append("+%d %s" % [int(drops[r]), r])
+		if not revealed.is_empty():
+			var rnames: Array = []
+			for cid: String in revealed:
+				rnames.append(_name(conq, cid))
+			parts.append("révèle %s" % ", ".join(PackedStringArray(rnames)))
+		note(conq, "⚑ %s revient de « %s » : %s." % [classe, mission_label(type), ", ".join(PackedStringArray(parts))])
+	conq["missions"] = m
+
 static func _set_garrison(conq: Dictionary, id: String, n: int, hero: String) -> void:
 	var g: Dictionary = conq.get("garrisons", {})
 	g[id] = {"troops": clampi(n, 0, garrison_cap(conq, id)), "hero": hero}
@@ -341,8 +461,9 @@ static func _name(conq: Dictionary, id: String) -> String:
 
 ## names : id -> nom de ville (fourni par ProgressionManager pour les messages).
 ## routes : CONQUEST_ROUTES (pour repérer les villes frontalières).
+## unrevealed : villes que la cartographie peut révéler (pont Aventure).
 static func after_victory(data: Dictionary, conq: Dictionary, rng: RandomNumberGenerator,
-		routes: Array, names: Dictionary, just_conquered: String) -> void:
+		routes: Array, names: Dictionary, just_conquered: String, unrevealed: Array = []) -> void:
 	conq["_names"] = names
 	conq["news"] = []
 	conq["battle_count"] = int(conq.get("battle_count", 0)) + 1
@@ -351,6 +472,7 @@ static func after_victory(data: Dictionary, conq: Dictionary, rng: RandomNumberG
 	_collect_income(data, conq)
 	_regen_garrisons(data, conq)
 	_tick_threat(data, conq, rng)
+	_tick_missions(data, conq, rng, unrevealed)
 	_tick_chancellor_buffs(conq)
 	maybe_chancellor(conq)
 	if int(conq.get("truce", 0)) > 0:

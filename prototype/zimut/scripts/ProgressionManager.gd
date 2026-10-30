@@ -2245,8 +2245,29 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 		for cid: String in CONQUEST_CITIES.keys():
 			names[cid] = String(CONQUEST_CITIES[cid].get("name", cid))
 		data["conquest"] = conquest
-		ConquestSystem.after_victory(data, conquest, _rng, CONQUEST_ROUTES, names, just_conquered)
+		# Lieutenance : les missions de cartographie révèlent des villes encore
+		# inconnues (le même état que les belvédères d'Aventure).
+		var adv: Dictionary = data.get("adventure", {})
+		var known: Array = adv.get("revealed_cities", [])
+		var unrevealed: Array = []
+		for cid: String in CONQUEST_CITIES.keys():
+			if cid == "capitale" or cid == "donjon_roi":
+				continue
+			if not (conquest.get("owned", []) as Array).has(cid) and not known.has(cid):
+				unrevealed.append(cid)
+		ConquestSystem.after_victory(data, conquest, _rng, CONQUEST_ROUTES, names, just_conquered, unrevealed)
 		conquest = data.get("conquest", conquest)
+		var newly_revealed: Array = conquest.get("missions_revealed", [])
+		if not newly_revealed.is_empty():
+			var adv2: Dictionary = data.get("adventure", {})
+			var known2: Array = adv2.get("revealed_cities", [])
+			for cid: String in newly_revealed:
+				if not known2.has(cid):
+					known2.append(cid)
+			adv2["revealed_cities"] = known2
+			data["adventure"] = adv2
+			conquest.erase("missions_revealed")
+			data["conquest"] = conquest
 		# Le choix de préparation ne s'applique qu'à une seule bataille,
 		# même si le siège de cette ville nécessite plusieurs vagues.
 		conquest.erase("pending_tactic")
@@ -2909,6 +2930,38 @@ func conquest_stationed_heroes(data: Dictionary) -> Array:
 	if String(data.get("campaign_mode", "")) != "conquest":
 		return []
 	return ConquestSystem.stationed_heroes(data.get("conquest", {}))
+
+## Héros en mission de lieutenance : indisponibles pour les assauts et le
+## gouvernement, comme les gouverneurs.
+func conquest_busy_heroes(data: Dictionary) -> Array:
+	if String(data.get("campaign_mode", "")) != "conquest":
+		return []
+	return ConquestSystem.busy_heroes(data.get("conquest", {}))
+
+## Missions en cours : classe -> {"type", "eta"}.
+func conquest_missions(data: Dictionary) -> Dictionary:
+	return ConquestSystem.missions(data.get("conquest", {}))
+
+func conquest_mission_types() -> Array:
+	return ConquestSystem.mission_types()
+
+func conquest_mission_label(type_id: String) -> String:
+	return ConquestSystem.mission_label(type_id)
+
+func conquest_mission_text(type_id: String) -> String:
+	return ConquestSystem.mission_text(type_id)
+
+func conquest_send_mission(data: Dictionary, classe: String, type_id: String) -> String:
+	var err: String = ConquestSystem.send_mission(data.get("conquest", {}), classe, type_id)
+	if err == "":
+		data["conquest"] = data.get("conquest", {})
+	return err
+
+func conquest_abort_mission(data: Dictionary, classe: String) -> String:
+	var err: String = ConquestSystem.abort_mission(data.get("conquest", {}), classe)
+	if err == "":
+		data["conquest"] = data.get("conquest", {})
+	return err
 
 func conquest_pending_event(conquest: Dictionary) -> Dictionary:
 	return ConquestSystem.pending_event(conquest)

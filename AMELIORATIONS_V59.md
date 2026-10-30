@@ -1,4 +1,4 @@
-# V59 — Conquête : le Chancelier et les spécialités des villes
+# V59 — Conquête : le Chancelier, les missions de lieutenance et les spécialités des villes
 
 ## Chancelier (décisions stratégiques récurrentes)
 - Tous les 5 batailles gagnées, dès 2 villes conquises, le Chancelier demande audience (popup des événements, `ConquestSystem.maybe_chancellor`).
@@ -14,6 +14,12 @@
 - Production mise à l'échelle du niveau de la ville (×1 / ×1,5 / ×2), gelée si la ville est pillée.
 - Sommée dans `ConquestSystem.trait_yield` et versée par `conquest_empire_yield` ; affichée dans le Conseil de l'écran de ville (« Spécialité — … ») et sur la carte.
 - Renforce l'identité économique des Nations (voir `NATIONS.md`) : conquérir un biome donne accès à sa ressource, pas seulement à son bestiaire.
+
+## Missions de lieutenance (héros libres)
+- Depuis une ville alliée, bouton « ⚑ MISSIONS DES LIEUTENANTS » : envoyer un héros libre 3 batailles en **Escorte de caravane** (+90 or, +4 Cuir), **Cartographie** (révèle 2 villes inconnues — même état que les belvédères d'Aventure) ou **Prospection** (+30 or, +8 Fer) ; récompenses mises à l'échelle du niveau du héros.
+- 20 % de complication : l'expédition échoue et coûte de l'or (journalisée dans les nouvelles).
+- Un héros en mission ne peut ni combattre (exclu de la sélection d'équipe) ni gouverner (exclu du sélecteur) ; mission rappelable sans récompense.
+- Sauvegarde : clés optionnelles `missions` {classe -> {type, eta}} et `missions_revealed`.
 
 ## Détail des modifications
 - `prototype/zimut/scripts/ConquestSystem.gd` : moteur (constantes, `CITY_TRAITS`, édits, buffs, `defense`, `after_victory`).

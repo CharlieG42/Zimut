@@ -826,6 +826,16 @@ func _build_panel(city_id: String, conquered: bool) -> void:
 	b.add_theme_stylebox_override("hover", _style(Color(0.30, 0.42, 0.24, 0.97), GOLD))
 	b.pressed.connect(_open_city_screen.bind(city_id))
 	_build_box.add_child(b)
+	var miss := Button.new()
+	miss.name = "MissionsButton"
+	miss.text = "⚑ MISSIONS DES LIEUTENANTS"
+	miss.custom_minimum_size.y = 54
+	miss.add_theme_font_size_override("font_size", 18)
+	miss.add_theme_color_override("font_color", TEXT)
+	miss.add_theme_stylebox_override("normal", _style(Color(0.18, 0.26, 0.34, 0.97), GOLD))
+	miss.add_theme_stylebox_override("hover", _style(Color(0.24, 0.34, 0.44, 0.97), GOLD))
+	miss.pressed.connect(_show_mission_picker)
+	_build_box.add_child(miss)
 
 ## Clic sur une ville de la carte : sélection ; si elle nous appartient, on y entre.
 func _on_city_pressed(city_id: String) -> void:
@@ -984,6 +994,7 @@ func _show_governor_picker(city_id: String) -> void:
 	sc.add_child(list)
 	for classe: String in ProgressionManager.CLASS_ORDER:
 		var elsewhere: String = ConquestSystem.hero_city(_conquest, classe)
+		var on_mission: Dictionary = ConquestSystem.hero_on_mission(_conquest, classe)
 		var b := Button.new()
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		b.custom_minimum_size.y = 52
@@ -992,6 +1003,10 @@ func _show_governor_picker(city_id: String) -> void:
 		if elsewhere != "":
 			line = "%s — déjà en poste à %s" % [classe, ProgressionManager.conquest_city_name(elsewhere)]
 			b.disabled = true
+		elif not on_mission.is_empty():
+			line = "%s — en mission « %s » (%d bataille(s) restante(s))" % [classe,
+				ConquestSystem.mission_label(String(on_mission.get("type", ""))), int(on_mission.get("eta", 0))]
+			b.disabled = true
 		b.text = line
 		if not b.disabled:
 			b.pressed.connect(func() -> void:
@@ -999,6 +1014,93 @@ func _show_governor_picker(city_id: String) -> void:
 				ProgressionManager.conquest_assign_hero(_save, city_id, classe)
 				_after_management(city_id))
 		list.add_child(b)
+	var cancel := Button.new()
+	cancel.text = "ANNULER"
+	cancel.custom_minimum_size.y = 46
+	cancel.pressed.connect(func() -> void: dim.queue_free())
+	outer.add_child(cancel)
+
+## Missions de lieutenance : envoyer un héros libre en mission de 3 batailles
+## (escorte, cartographie, prospection) ou rappeler une mission en cours.
+func _show_mission_picker() -> void:
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	var dim := ColorRect.new()
+	dim.name = "MissionPicker"
+	dim.color = Color(0.015, 0.035, 0.055, 0.82)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(dim)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _style(Color(0.10, 0.17, 0.22, 0.99), GOLD))
+	panel.custom_minimum_size = Vector2(minf(680.0, vp.x - 40.0), 0)
+	_center_panel(panel)
+	dim.add_child(panel)
+	var outer := VBoxContainer.new()
+	outer.add_theme_constant_override("separation", 8)
+	panel.add_child(outer)
+	var title := Label.new()
+	title.text = "MISSIONS DES LIEUTENANTS"
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title.add_theme_font_size_override("font_size", 22)
+	title.add_theme_color_override("font_color", GOLD)
+	outer.add_child(title)
+	var hint := Label.new()
+	hint.text = "Un héros libre part en mission de 3 batailles : il ne combat ni ne gouverne pendant ce temps. À son retour : récompense… ou complication."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.add_theme_font_size_override("font_size", 14)
+	hint.add_theme_color_override("font_color", TEXT)
+	outer.add_child(hint)
+	var sc := ScrollContainer.new()
+	TouchScroll.install(sc)
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	sc.custom_minimum_size.y = minf(360.0, maxf(200.0, vp.y - 200.0))
+	outer.add_child(sc)
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 6)
+	sc.add_child(list)
+	var missions: Dictionary = ConquestSystem.missions(_conquest)
+	for classe: String in ProgressionManager.CLASS_ORDER:
+		var job: Dictionary = missions.get(classe, {})
+		var header := Label.new()
+		header.text = classe
+		header.add_theme_font_size_override("font_size", 18)
+		header.add_theme_color_override("font_color", GOLD)
+		list.add_child(header)
+		if not job.is_empty():
+			var running := Button.new()
+			running.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			running.text = "⚑ En mission « %s » — %d bataille(s) restante(s)\nRAPPELER (sans récompense)" % [
+					ConquestSystem.mission_label(String(job.get("type", ""))), int(job.get("eta", 0))]
+			running.custom_minimum_size.y = 58
+			running.add_theme_font_size_override("font_size", 15)
+			running.pressed.connect(func() -> void:
+				dim.queue_free()
+				ProgressionManager.conquest_abort_mission(_save, classe)
+				_after_management(_selected_id))
+			list.add_child(running)
+			continue
+		var elsewhere: String = ConquestSystem.hero_city(_conquest, classe)
+		if elsewhere != "":
+			var busy := Label.new()
+			busy.text = "Gouverneur de %s" % ProgressionManager.conquest_city_name(elsewhere)
+			busy.add_theme_font_size_override("font_size", 14)
+			busy.add_theme_color_override("font_color", TEXT.darkened(0.2))
+			list.add_child(busy)
+			continue
+		for type_id: String in ConquestSystem.mission_types():
+			var b := Button.new()
+			b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			b.text = "⚑ %s\n%s" % [ConquestSystem.mission_label(type_id), ConquestSystem.mission_text(type_id)]
+			b.custom_minimum_size.y = 52
+			b.add_theme_font_size_override("font_size", 14)
+			b.pressed.connect(func() -> void:
+				dim.queue_free()
+				var err: String = ProgressionManager.conquest_send_mission(_save, classe, type_id)
+				_after_management(_selected_id)
+				if err != "":
+					_message.text = err)
+			list.add_child(b)
 	var cancel := Button.new()
 	cancel.text = "ANNULER"
 	cancel.custom_minimum_size.y = 46
