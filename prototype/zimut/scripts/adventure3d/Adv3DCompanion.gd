@@ -32,7 +32,7 @@ static func create(terr: Dictionary, who: Adv3DExplorer) -> Adv3DCompanion:
 	c.name = "Gligli"
 	c.terrain = terr
 	c.target = who
-	if GameSettings.adventure_models_3d:
+	if Adv3DHeroModel.enabled():
 		var m: Node3D = Adv3DHeroModel.make_gligli()
 		m.scale = Vector3.ONE * SCALE_3D
 		c._model = m

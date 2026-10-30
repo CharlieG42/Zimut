@@ -17,6 +17,15 @@ const HAIR_L := Color(0.96, 0.72, 0.36)
 static var _cache: Dictionary = {}
 
 
+## Réglage Options « Personnages du monde 3D » (true = vrais modèles). Lu via l'arbre pour ne pas dépendre de l'autoload à la compilation.
+static func enabled() -> bool:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return true
+	var gs: Node = tree.root.get_node_or_null("GameSettings")
+	return true if gs == null else bool(gs.get("adventure_models_3d"))
+
+
 static func _st() -> SurfaceTool:
 	Adv3DMeshes.smooth_mode = true
 	var st := SurfaceTool.new()

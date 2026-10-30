@@ -36,7 +36,7 @@ var distance: float = CAM_DISTANCE
 
 
 func _ready() -> void:
-	if GameSettings.adventure_models_3d:
+	if Adv3DHeroModel.enabled():
 		_model = Adv3DHeroModel.make_hero()      # vrai modèle low-poly (ombre incluse)
 		add_child(_model)
 		var dust3: CPUParticles3D = Adv3DActors.make_dust()
