@@ -264,8 +264,14 @@ func _start_position() -> Vector3:
 
 func _spawn_static_markers() -> void:
 	var pois: Dictionary = ProgressionManager.ADVENTURE_POIS.get(zone_id, {})
+	# bâtiments des lieux (tentes, tour, sanctuaire, ruines) : on ne les traverse plus
+	var solids: Array = []
 	for key: String in pois.keys():
 		_make_poi_node(key, pois[key])
+		if String(pois[key].get("kind", "")) in ["combat", "camp", "reveal", "puzzle", "chest"]:
+			var ctr: Vector3 = Adv3DWorld.cell_center(AdventureTerrain.parse(key)) + Vector3(0, 0, -1.35)
+			solids.append(Vector3(ctr.x, ctr.z, 0.75))
+	terrain["solids"] = solids
 	for c: Vector2i in manager.gates().keys():
 		var g: Dictionary = manager.gate_at(c)
 		var node: Node3D = Adv3DActors.make_gate(String(g.get("dir", "E")), String(g.get("name", "?")), bool(g.get("open", false)))
@@ -370,7 +376,17 @@ func _animate_world(delta: float) -> void:
 			continue
 		for ch: Node in mn.get_children():
 			if ch.has_meta("phase"):
-				(ch as Node3D).position.y = absf(sin(_anim_t * 3.0 + float(ch.get_meta("phase")))) * 0.08
+				var ph: float = float(ch.get_meta("phase"))
+				if Adv3DMobMeshes.floats(manager.zone_biome()):
+					(ch as Node3D).position.y = 0.06 + sin(_anim_t * 1.8 + ph) * 0.08      # spectres, feux follets : flottent
+				else:
+					(ch as Node3D).position.y = absf(sin(_anim_t * 3.0 + ph)) * 0.08
+				# les créatures se tournent vers le joueur quand il approche
+				if explorer != null:
+					var wp: Vector3 = mn.position + (ch as Node3D).position
+					var to: Vector3 = explorer.position - wp
+					if to.x * to.x + to.z * to.z < 81.0:
+						(ch as Node3D).rotation.y = lerp_angle((ch as Node3D).rotation.y, atan2(to.x, to.z), clampf(delta * 4.0, 0.0, 1.0))
 
 
 func _process(delta: float) -> void:

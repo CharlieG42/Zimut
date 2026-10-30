@@ -17,6 +17,10 @@ permissions:
   contents: read
   pull-requests: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   GODOT_VERSION: 4.7.2
   # Publication automatique (release « build-latest ») : à adapter si besoin
@@ -172,8 +176,14 @@ jobs:
           PUSH_NUMBER: ${{ github.run_number }}
         run: |
           # xxx : numéro de la dernière PR fusionnée (API REST, triée par date de fusion)
-          pr=$(gh api "repos/${GITHUB_REPOSITORY}/pulls?state=closed&sort=updated&direction=desc&per_page=50" \
-            --jq '[.[] | select(.merged_at != null)] | sort_by(.merged_at) | last | .number // 0' || echo 0)
+          # 1) PR associée au commit poussé (fiable même si deux PR sont fusionnées à la suite)
+          pr=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" \
+            --jq '[.[] | select(.merged_at != null)] | first | .number // 0' 2>/dev/null || echo 0)
+          # 2) Secours : dernière PR fusionnée, d'après la date de fusion
+          if [ -z "$pr" ] || [ "$pr" = "0" ]; then
+            pr=$(gh api "repos/${GITHUB_REPOSITORY}/pulls?state=closed&sort=updated&direction=desc&per_page=50" \
+              --jq '[.[] | select(.merged_at != null)] | sort_by(.merged_at) | last | .number // 0' || echo 0)
+          fi
           # Secours : « Merge pull request #N » dans le message du commit
           if [ -z "$pr" ] || [ "$pr" = "0" ]; then
             pr=$(git log -1 --format=%s | sed -n 's/.*pull request #\([0-9]*\).*/\1/p')
@@ -288,12 +298,13 @@ jobs:
   publish-release:
     name: Publier la release build-latest
     needs: build-apks
-    # Uniquement après un push sur main (= fusion de PR), jamais sur une PR
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Après un push sur main (= fusion de PR) ou un lancement manuel sur main, jamais sur une PR
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
-      contents: write   # nécessaire pour créer la release et le tag
+      contents: write        # nécessaire pour créer la release et le tag
+      pull-requests: read    # titre de la PR dans les notes de release
     concurrency:
       group: publish-build-latest
       cancel-in-progress: false
@@ -313,7 +324,7 @@ jobs:
         run: |
           cd apks
           if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "0" ]; then
-            label="PR${PR_NUMBER}"
+            label="${PR_NUMBER}"
           else
             label="${GITHUB_SHA::7}"
           fi
@@ -330,11 +341,16 @@ jobs:
       - name: Publier la release build-latest (version stable, pas de pré-version)
         run: |
           tag=build-latest
+          notes="Dernière build de main : ${PROJECT_NAME} ${GAME_VERSION} (commit ${GITHUB_SHA::7})."
+          if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "0" ]; then
+            title=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq .title 2>/dev/null || true)
+            notes="${notes}"$'\n\n'"Dernière PR fusionnée : #${PR_NUMBER} ${title}"$'\n'"${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/pull/${PR_NUMBER}"
+          fi
           # Recréation à chaque fusion : une seule paire d'APK, toujours la dernière
           gh release delete "$tag" --repo "$GITHUB_REPOSITORY" --cleanup-tag --yes || true
           gh release create "$tag" apks/* \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "Build latest — ${LABEL}" \
-            --notes "Dernière build de main : ${PROJECT_NAME} ${GAME_VERSION} (${LABEL}, commit ${GITHUB_SHA::7})." \
+            --notes "$notes" \
             --latest

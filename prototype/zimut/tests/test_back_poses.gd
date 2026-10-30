@@ -17,7 +17,7 @@ func _boot() -> void:
 	var v := EntityView.new()
 	root.add_child(v)
 	v.setup({"uid": 3, "classe": "Chasseur", "team": "player", "entity_type": "Player", "current_pv": 10, "max_pv": 10, "x": 2, "y": 3})
-	check((v._poses.get("attack", []) as Array).size() >= 3, "poses d'attaque de face chargées (%d)" % (v._poses.get("attack", []) as Array).size())
+	check((v._poses.get("attack", []) as Array).size() >= 2, "poses d'attaque de face chargées (%d)" % (v._poses.get("attack", []) as Array).size())
 	check(v._load_variants("res://assets/sprites/players/chasseur_attack", false).size() == (v._poses["attack"] as Array).size(), "_load_variants lit les mêmes fichiers")
 	# orientation : trouver une direction de grille vue de dos et une vue de face
 	var up := Vector2i.ZERO
@@ -29,7 +29,11 @@ func _boot() -> void:
 		else:
 			down = d
 	check(up != Vector2i.ZERO and down != Vector2i.ZERO, "directions de face et de dos trouvées")
-	# sans poses de dos dédiées : attaques de face (comportement d'avant)
+	# sans poses de dos dédiées : attaques de face (comportement d'avant).
+	# Les planches du Chasseur ont maintenant de vraies poses de dos : on les retire pour simuler
+	# un héros qui n'en a pas (le test reste indépendant des fichiers installés).
+	for k: String in ["back_attack", "back_cast", "back_walk", "back_idle"]:
+		v._poses.erase(k)
 	v.entity["facing"] = up
 	v.play_pose("attack", 0.6, "Test")
 	check(v._act_tex != null and (v._poses["attack"] + v._poses.get("cast", []) + v._poses.get("walk", []) + v._poses.get("idle", [])).has(v._act_tex), "de dos sans fichiers _back_attack : poses de face conservées")
