@@ -22,13 +22,14 @@ const PANTS_L := Color(0.25, 0.26, 0.20)
 # articulations du héros (repère du personnage)
 const H_HIPS := Vector3(0, 0.95, 0)
 const H_NECK := Vector3(0, 1.60, 0)
-const H_SHOULDER := Vector3(0.31, 1.52, 0)      # x signé
+const H_CHEST := Vector3(0, 1.20, 0)
+const H_SHOULDER := Vector3(0.285, 1.49, -0.01)  # x signé
 const H_ELBOW_DROP := 0.30
-const H_HIP_X := 0.13
+const H_HIP_X := 0.11
 const H_KNEE_Y := 0.52
 const H_EYES := Vector3(0, 1.80, 0.19)
-const H_CAPE := Vector3(0, 0.98, -0.21)
-const H_PACK := Vector3(0, 1.30, -0.36)
+const H_CAPE := Vector3(0, 0.98, -0.165)
+const H_PACK := Vector3(0, 1.30, -0.30)
 
 # articulations de Gligli
 const G_HEAD := Vector3(0, 0.60, 0.02)
@@ -155,20 +156,22 @@ static func make_hero() -> Node3D:
 	Adv3DActors.add_shadow(rig, 0.6)
 	var hips := _joint(rig, "Hips", H_HIPS, Vector3.ZERO)
 	_part(hips, _cached("h_pelvis", _pelvis), H_HIPS)
-	var torso := _joint(hips, "Torso", H_HIPS, H_HIPS)
-	_part(torso, _cached("h_torso", _torso), H_HIPS)
-	var head := _joint(torso, "Head", H_NECK, H_HIPS)
+	var torso := _joint(hips, "Torso", H_HIPS, H_HIPS)              # ventre / taille
+	_part(torso, _cached("h_abdomen", _abdomen), H_HIPS)
+	var chest := _joint(torso, "Chest", H_CHEST, H_HIPS)            # poitrine : la colonne plie en deux points
+	_part(chest, _cached("h_chest", _chest), H_CHEST)
+	var head := _joint(chest, "Head", H_NECK, H_CHEST)
 	_part(head, _cached("h_head", _head), H_NECK)
 	var eyes := _joint(head, "Eyes", H_EYES, H_NECK)
 	_part(eyes, _cached("h_eyes", _eyes), H_EYES)
 	var cape := _joint(hips, "Cape", H_CAPE, H_HIPS)
 	_part(cape, _cached("h_cape", _cape), H_CAPE)
-	var pack := _joint(torso, "Pack", H_PACK, H_HIPS)
+	var pack := _joint(chest, "Pack", H_PACK, H_CHEST)
 	_part(pack, _cached("h_pack", _pack), H_PACK)
 	for sgn: float in [-1.0, 1.0]:
 		var side: String = "L" if sgn < 0.0 else "R"
-		var sh := Vector3(H_SHOULDER.x * sgn, H_SHOULDER.y, 0.0)
-		var arm := _joint(torso, "Arm" + side, sh, H_HIPS)
+		var sh := Vector3(H_SHOULDER.x * sgn, H_SHOULDER.y, H_SHOULDER.z)
+		var arm := _joint(chest, "Arm" + side, sh, H_CHEST)
 		_part(arm, _cached("h_uarm", _upper_arm), Vector3(0, sh.y, 0))
 		var el := sh + Vector3(0, -H_ELBOW_DROP, 0)
 		var fore := _joint(arm, "Forearm" + side, el, sh)
@@ -183,70 +186,101 @@ static func make_hero() -> Node3D:
 	return rig
 
 
+const SHIRT_D := Color(0.78, 0.69, 0.50)
+const SHIRT_L := Color(0.93, 0.85, 0.66)
+
+
 static func _pelvis() -> Mesh:
 	var st := _st()
 	var r := _r(10)
-	Adv3DMeshes.add_blob(st, Vector3(0, 0.90, 0), Vector3(0.24, 0.13, 0.19), 10, 6, PANTS_D, PANTS_L, r, 0.0)
+	Adv3DMeshes.add_blob(st, Vector3(0, 0.93, -0.005), Vector3(0.2, 0.13, 0.15), 10, 6, PANTS_D, PANTS_L, r, 0.0)
 	return st.commit()
 
 
+## Cuisse galbée : plus large en haut, muscle à l'avant, poche cargo sur le côté.
 static func _thigh(sgn: float) -> Mesh:
 	var st := _st()
 	var r := _r(1)
 	var x: float = H_HIP_X * sgn
-	Adv3DMeshes.add_cone(st, Vector3(x, 0.50, 0), 0.105, 0.125, 0.45, 8, PANTS_D, PANTS_L, r, 0.0, false)
-	Adv3DMeshes.add_box(st, Vector3(x + 0.115 * sgn, 0.68, 0.02), Vector3(0.05, 0.16, 0.13), Color(0.18, 0.2, 0.15), Color(0.30, 0.31, 0.24))  # poche cargo
+	Adv3DMeshes.add_cone(st, Vector3(x, 0.52, 0), 0.082, 0.112, 0.43, 8, PANTS_D, PANTS_L, r, 0.0, false)
+	Adv3DMeshes.add_blob(st, Vector3(x, 0.77, 0.015), Vector3(0.108, 0.19, 0.112), 8, 6, PANTS_D, PANTS_L, r, 0.0)                     # muscle
+	Adv3DMeshes.add_blob(st, Vector3(x + 0.095 * sgn, 0.70, 0.02), Vector3(0.03, 0.075, 0.06), 6, 4, Color(0.18, 0.2, 0.15), Color(0.30, 0.31, 0.24), r, 0.0)  # poche cargo
 	return st.commit()
 
 
+## Genou, mollet bombé à l'arrière, botte avec revers.
 static func _shin(sgn: float) -> Mesh:
 	var st := _st()
 	var r := _r(7)
 	var x: float = H_HIP_X * sgn
-	Adv3DMeshes.add_blob(st, Vector3(x, H_KNEE_Y, 0), Vector3(0.11, 0.08, 0.11), 8, 5, PANTS_D, PANTS_L, r, 0.0)                                # genou
-	Adv3DMeshes.add_cone(st, Vector3(x, 0.38, 0), 0.10, 0.108, 0.16, 8, PANTS_D, PANTS_L, r, 0.0, false)                                     # bas du pantalon
-	Adv3DMeshes.add_cone(st, Vector3(x, 0.0, 0), 0.115, 0.125, 0.40, 8, BROWN_D, BROWN_L, r, 0.0)                                            # botte
-	Adv3DMeshes.add_cone(st, Vector3(x, 0.33, 0), 0.145, 0.145, 0.09, 8, Color(0.42, 0.27, 0.14), Color(0.62, 0.42, 0.22), r, 0.0, false)    # revers
-	Adv3DMeshes.add_blob(st, Vector3(x, 0.05, 0.08), Vector3(0.115, 0.075, 0.19), 8, 5, BROWN_D, BROWN_L, r, 0.0)                              # bout de botte
-	Adv3DMeshes.add_box(st, Vector3(x, 0.29, 0.145), Vector3(0.06, 0.07, 0.02), GOLD, GOLD)                                                  # boucle
+	Adv3DMeshes.add_blob(st, Vector3(x, H_KNEE_Y, 0.012), Vector3(0.088, 0.07, 0.092), 8, 5, PANTS_D, PANTS_L, r, 0.0)                     # genou
+	Adv3DMeshes.add_blob(st, Vector3(x, 0.41, -0.022), Vector3(0.086, 0.11, 0.09), 8, 5, PANTS_D, PANTS_L, r, 0.0)                         # mollet
+	Adv3DMeshes.add_cone(st, Vector3(x, 0.0, 0), 0.098, 0.108, 0.37, 8, BROWN_D, BROWN_L, r, 0.0)                                         # botte
+	Adv3DMeshes.add_cone(st, Vector3(x, 0.31, 0), 0.122, 0.13, 0.08, 8, Color(0.42, 0.27, 0.14), Color(0.62, 0.42, 0.22), r, 0.0, false)  # revers
+	Adv3DMeshes.add_blob(st, Vector3(x, 0.05, 0.075), Vector3(0.1, 0.07, 0.17), 8, 5, BROWN_D, BROWN_L, r, 0.0)                             # avant du pied
+	Adv3DMeshes.add_box(st, Vector3(x, 0.27, 0.118), Vector3(0.05, 0.06, 0.02), GOLD, GOLD)                                                # boucle
 	return st.commit()
 
 
 ## Bras construits centrés en x = 0 (même maillage des deux côtés) : posés avec un pivot sans x.
+## Épaule arrondie, manche courte, biceps qui s'affine vers le coude.
 static func _upper_arm() -> Mesh:
 	var st := _st()
 	var r := _r(2)
 	var y0: float = H_SHOULDER.y
-	Adv3DMeshes.add_blob(st, Vector3(0, y0 - 0.04, 0), Vector3(0.115, 0.11, 0.115), 8, 5, GREEN_D, GREEN_L, r, 0.0)       # manche verte
-	Adv3DMeshes.add_cone(st, Vector3(0, y0 - 0.30, 0), 0.068, 0.062, 0.24, 8, SKIN_B, SKIN_T, r, 0.0, false)               # bras
-	Adv3DMeshes.add_blob(st, Vector3(0, y0 - 0.30, 0), Vector3(0.068, 0.06, 0.068), 8, 4, SKIN_B, SKIN_T, r, 0.0)          # coude
+	Adv3DMeshes.add_blob(st, Vector3(0, y0 - 0.035, 0), Vector3(0.085, 0.085, 0.09), 8, 5, GREEN_D, GREEN_L, r, 0.0)        # épaule
+	Adv3DMeshes.add_cone(st, Vector3(0, y0 - 0.17, 0), 0.074, 0.088, 0.15, 8, GREEN_D, GREEN_L, r, 0.0, false)              # manche
+	Adv3DMeshes.add_cone(st, Vector3(0, y0 - 0.30, 0), 0.052, 0.066, 0.16, 8, SKIN_B, SKIN_T, r, 0.0, false)               # bras
+	Adv3DMeshes.add_blob(st, Vector3(0, y0 - 0.30, -0.005), Vector3(0.055, 0.055, 0.056), 8, 4, SKIN_B, SKIN_T, r, 0.0)    # coude
 	return st.commit()
 
 
+## Avant-bras : gantelet évasé vers le coude, poignet fin, main un peu aplatie.
 static func _forearm() -> Mesh:
 	var st := _st()
 	var r := _r(3)
 	var y0: float = H_SHOULDER.y - H_ELBOW_DROP
-	Adv3DMeshes.add_cone(st, Vector3(0, y0 - 0.28, 0), 0.075, 0.09, 0.27, 8, BROWN_D, BROWN_L, r, 0.0, false)                                # gantelet
-	Adv3DMeshes.add_cone(st, Vector3(0, y0 - 0.10, 0), 0.093, 0.093, 0.04, 8, Color(0.3, 0.19, 0.1), Color(0.3, 0.19, 0.1), r, 0.0, false)   # sangle
-	Adv3DMeshes.add_blob(st, Vector3(0, y0 - 0.33, 0.01), Vector3(0.07, 0.075, 0.065), 8, 5, Color(0.2, 0.13, 0.08), Color(0.34, 0.22, 0.13), r, 0.0)  # main gantée
+	Adv3DMeshes.add_cone(st, Vector3(0, y0 - 0.26, 0), 0.056, 0.074, 0.24, 8, BROWN_D, BROWN_L, r, 0.0, false)                                # gantelet
+	Adv3DMeshes.add_cone(st, Vector3(0, y0 - 0.09, 0), 0.076, 0.076, 0.035, 8, Color(0.3, 0.19, 0.1), Color(0.3, 0.19, 0.1), r, 0.0, false)  # sangle
+	Adv3DMeshes.add_blob(st, Vector3(0, y0 - 0.31, 0.012), Vector3(0.05, 0.068, 0.045), 8, 5, Color(0.2, 0.13, 0.08), Color(0.34, 0.22, 0.13), r, 0.0)  # main gantée
+	Adv3DMeshes.add_blob(st, Vector3(0, y0 - 0.285, 0.05), Vector3(0.022, 0.035, 0.022), 6, 4, Color(0.2, 0.13, 0.08), Color(0.34, 0.22, 0.13), r, 0.0)  # pouce
 	return st.commit()
 
 
-static func _torso() -> Mesh:
+## Ventre / taille : plus étroite que la poitrine (silhouette en V), ceinture, bas de la veste.
+static func _abdomen() -> Mesh:
 	var st := _st()
 	var r := _r(4)
-	Adv3DMeshes.add_cone(st, Vector3(0, 0.96, 0), 0.25, 0.225, 0.54, 10, Color(0.78, 0.69, 0.50), Color(0.93, 0.85, 0.66), r, 0.0, false)  # chemise beige
-	Adv3DMeshes.add_cone(st, Vector3(0, 0.92, 0), 0.265, 0.265, 0.12, 10, BROWN_D, BROWN_L, r, 0.0, false)                                # ceinture
-	Adv3DMeshes.add_box(st, Vector3(0, 0.98, 0.265), Vector3(0.11, 0.09, 0.03), GOLD, Color(1.0, 0.88, 0.45))                              # boucle
-	Adv3DMeshes.add_blob(st, Vector3(0.27, 0.92, 0.06), Vector3(0.075, 0.1, 0.085), 8, 5, BROWN_D, BROWN_L, r, 0.0)                        # sacoche
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.1, 0.01), Vector3(0.172, 0.17, 0.138), 10, 6, SHIRT_D, SHIRT_L, r, 0.0)                          # taille
 	for sx: float in [-1.0, 1.0]:
-		Adv3DMeshes.add_box(st, Vector3(0.2 * sx, 1.27, 0.2), Vector3(0.12, 0.5, 0.05), GREEN_D, GREEN_L)                                    # pans de la veste
-	Adv3DMeshes.add_box(st, Vector3(0, 1.24, -0.2), Vector3(0.44, 0.54, 0.05), GREEN_D, GREEN_L)                                           # dos de la veste
-	Adv3DMeshes.add_box(st, Vector3(0.05, 1.28, 0.23), Vector3(0.05, 0.52, 0.02), BROWN_D, BROWN_L)                                         # bretelle
-	Adv3DMeshes.add_blob(st, Vector3(-0.15, 1.46, 0.235), Vector3(0.04, 0.04, 0.02), 8, 4, GOLD, Color(1.0, 0.9, 0.5), r, 0.0)             # médaillon
-	Adv3DMeshes.add_blob(st, Vector3(0, 1.57, 0.0), Vector3(0.31, 0.14, 0.29), 10, 5, GREEN_D, GREEN_L, r, 0.0)                            # écharpe / capuche
-	Adv3DMeshes.add_blob(st, Vector3(0, 1.59, -0.15), Vector3(0.25, 0.16, 0.17), 10, 5, GREEN_D, GREEN_L, r, 0.0)                          # capuche dans le dos
+		Adv3DMeshes.add_blob(st, Vector3(0.118 * sx, 1.08, -0.005), Vector3(0.098, 0.165, 0.148), 8, 6, GREEN_D, GREEN_L, r, 0.0)         # bas de la veste
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.08, -0.05), Vector3(0.165, 0.16, 0.1), 8, 6, GREEN_D, GREEN_L, r, 0.0)                         # dos
+	Adv3DMeshes.add_cone(st, Vector3(0, 0.895, 0), 0.198, 0.188, 0.1, 12, BROWN_D, BROWN_L, r, 0.0, false)                                # ceinture
+	Adv3DMeshes.add_box(st, Vector3(0, 0.945, 0.192), Vector3(0.09, 0.07, 0.025), GOLD, Color(1.0, 0.88, 0.45))                           # boucle
+	Adv3DMeshes.add_blob(st, Vector3(0.205, 0.9, 0.07), Vector3(0.062, 0.085, 0.072), 8, 5, BROWN_D, BROWN_L, r, 0.0)                    # sacoche
+	return st.commit()
+
+
+## Poitrine : plus large, épaules tombantes, veste ouverte sur la chemise, bandoulière, écharpe-capuche.
+static func _chest() -> Mesh:
+	var st := _st()
+	var r := _r(5)
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.36, 0.03), Vector3(0.188, 0.19, 0.148), 10, 7, SHIRT_D, SHIRT_L, r, 0.0)                         # poitrine
+	for sx: float in [-1.0, 1.0]:
+		Adv3DMeshes.add_blob(st, Vector3(0.16 * sx, 1.34, -0.01), Vector3(0.115, 0.23, 0.158), 8, 7, GREEN_D, GREEN_L, r, 0.0)            # veste
+		Adv3DMeshes.add_blob(st, Vector3(0.18 * sx, 1.465, -0.02), Vector3(0.1, 0.055, 0.095), 8, 5, GREEN_D, GREEN_L, r, 0.0)            # trapèzes / épaules
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.33, -0.05), Vector3(0.215, 0.235, 0.128), 10, 7, GREEN_D, GREEN_L, r, 0.0)                       # dos
+	# bandoulière en diagonale, posée sur la poitrine
+	for i: int in range(12):
+		var f: float = float(i) / 11.0
+		var x: float = lerpf(0.15, -0.14, f)
+		var y: float = lerpf(1.5, 1.14, f)
+		var q: float = 1.0 - pow(x / 0.188, 2.0) - pow((y - 1.36) / 0.19, 2.0)
+		var z: float = 0.03 + 0.148 * sqrt(maxf(q, 0.05)) + 0.004
+		Adv3DMeshes.add_blob(st, Vector3(x, y, z), Vector3(0.026, 0.026, 0.01), 6, 3, BROWN_D, BROWN_L, r, 0.0)
+	Adv3DMeshes.add_blob(st, Vector3(-0.07, 1.41, 0.172), Vector3(0.03, 0.03, 0.014), 8, 4, GOLD, Color(1.0, 0.9, 0.5), r, 0.0)          # médaillon
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.545, 0.0), Vector3(0.215, 0.085, 0.195), 10, 5, GREEN_D, GREEN_L, r, 0.0)                       # écharpe
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.565, -0.12), Vector3(0.19, 0.12, 0.13), 10, 5, GREEN_D, GREEN_L, r, 0.0)                       # capuche dans le dos
 	return st.commit()
 
 
@@ -254,35 +288,35 @@ static func _torso() -> Mesh:
 static func _cape() -> Mesh:
 	var st := _st()
 	var r := _r(5)
-	Adv3DMeshes.add_box(st, Vector3(0, 0.81, -0.215), Vector3(0.5, 0.34, 0.04), Color(0.30, 0.55, 0.20), GREEN_L)
+	Adv3DMeshes.add_box(st, Vector3(0, 0.81, -0.17), Vector3(0.5, 0.34, 0.04), Color(0.30, 0.55, 0.20), GREEN_L)
 	for i: int in range(3):
 		var x: float = (float(i) - 1.0) * 0.17
-		Adv3DMeshes.add_cone(st, Vector3(x, 0.55, -0.215), 0.0, 0.085, 0.10, 5, Color(0.55, 0.72, 0.28), Color(0.40, 0.64, 0.24), r, 0.0, false)
-	Adv3DMeshes.add_blob(st, Vector3(0, 0.80, -0.24), Vector3(0.05, 0.08, 0.012), 6, 4, Color(0.78, 0.86, 0.32), Color(0.88, 0.94, 0.42), r, 0.0)   # emblème feuille
+		Adv3DMeshes.add_cone(st, Vector3(x, 0.55, -0.17), 0.0, 0.085, 0.10, 5, Color(0.55, 0.72, 0.28), Color(0.40, 0.64, 0.24), r, 0.0, false)
+	Adv3DMeshes.add_blob(st, Vector3(0, 0.80, -0.195), Vector3(0.05, 0.08, 0.012), 6, 4, Color(0.78, 0.86, 0.32), Color(0.88, 0.94, 0.42), r, 0.0)   # emblème feuille
 	return st.commit()
 
 
 static func _pack() -> Mesh:
 	var st := _st()
 	var r := _r(6)
-	Adv3DMeshes.add_blob(st, Vector3(0, 1.05, -0.40), Vector3(0.21, 0.25, 0.12), 10, 6, BROWN_D, BROWN_L, r, 0.0)                          # sac
-	Adv3DMeshes.add_box(st, Vector3(0, 1.17, -0.50), Vector3(0.28, 0.12, 0.03), Color(0.32, 0.2, 0.11), Color(0.46, 0.3, 0.16))              # rabat
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.05, -0.335), Vector3(0.21, 0.25, 0.12), 10, 6, BROWN_D, BROWN_L, r, 0.0)                          # sac
+	Adv3DMeshes.add_box(st, Vector3(0, 1.17, -0.435), Vector3(0.28, 0.12, 0.03), Color(0.32, 0.2, 0.11), Color(0.46, 0.3, 0.16))              # rabat
 	for sx: float in [-1.0, 1.0]:
-		Adv3DMeshes.add_blob(st, Vector3(0.17 * sx, 0.92, -0.40), Vector3(0.07, 0.1, 0.06), 8, 5, BROWN_D, BROWN_L, r, 0.0)                  # poches
-		Adv3DMeshes.add_blob(st, Vector3(0.27 * sx, 1.42, -0.40), Vector3(0.03, 0.08, 0.08), 8, 5, Color(0.2, 0.12, 0.07), Color(0.32, 0.2, 0.11), r, 0.0)  # bout du rouleau
-	Adv3DMeshes.add_blob(st, Vector3(0, 1.42, -0.40), Vector3(0.27, 0.08, 0.08), 10, 5, Color(0.36, 0.42, 0.22), Color(0.50, 0.56, 0.30), r, 0.0)  # rouleau de couchage (kaki)
-	Adv3DMeshes.add_box(st, Vector3(0, 1.0, -0.515), Vector3(0.05, 0.3, 0.02), Color(0.32, 0.2, 0.11), Color(0.40, 0.26, 0.14))            # sangle
-	Adv3DMeshes.add_box(st, Vector3(0, 0.97, -0.53), Vector3(0.07, 0.05, 0.015), GOLD, Color(1.0, 0.88, 0.45))                              # boucle
+		Adv3DMeshes.add_blob(st, Vector3(0.17 * sx, 0.92, -0.335), Vector3(0.07, 0.1, 0.06), 8, 5, BROWN_D, BROWN_L, r, 0.0)                  # poches
+		Adv3DMeshes.add_blob(st, Vector3(0.27 * sx, 1.42, -0.335), Vector3(0.03, 0.08, 0.08), 8, 5, Color(0.2, 0.12, 0.07), Color(0.32, 0.2, 0.11), r, 0.0)  # bout du rouleau
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.42, -0.335), Vector3(0.27, 0.08, 0.08), 10, 5, Color(0.36, 0.42, 0.22), Color(0.50, 0.56, 0.30), r, 0.0)  # rouleau de couchage (kaki)
+	Adv3DMeshes.add_box(st, Vector3(0, 1.0, -0.45), Vector3(0.05, 0.3, 0.02), Color(0.32, 0.2, 0.11), Color(0.40, 0.26, 0.14))            # sangle
+	Adv3DMeshes.add_box(st, Vector3(0, 0.97, -0.465), Vector3(0.07, 0.05, 0.015), GOLD, Color(1.0, 0.88, 0.45))                              # boucle
 	# pousse de feuille qui sort du sac (comme sur le logo)
-	Adv3DMeshes.add_blob(st, Vector3(0.12, 1.58, -0.38), Vector3(0.025, 0.12, 0.05), 6, 4, GREEN_D, Color(0.35, 0.75, 0.25), r, 0.0)
-	Adv3DMeshes.add_blob(st, Vector3(0.05, 1.56, -0.40), Vector3(0.022, 0.1, 0.045), 6, 4, GREEN_D, Color(0.30, 0.68, 0.22), r, 0.0)
+	Adv3DMeshes.add_blob(st, Vector3(0.12, 1.58, -0.315), Vector3(0.025, 0.12, 0.05), 6, 4, GREEN_D, Color(0.35, 0.75, 0.25), r, 0.0)
+	Adv3DMeshes.add_blob(st, Vector3(0.05, 1.56, -0.335), Vector3(0.022, 0.1, 0.045), 6, 4, GREEN_D, Color(0.30, 0.68, 0.22), r, 0.0)
 	return st.commit()
 
 
 static func _head() -> Mesh:
 	var st := _st()
 	var r := _r(8)
-	Adv3DMeshes.add_cone(st, Vector3(0, 1.56, 0), 0.075, 0.07, 0.14, 8, SKIN_B, SKIN_T, r, 0.0, false)                                         # cou
+	Adv3DMeshes.add_cone(st, Vector3(0, 1.52, 0), 0.064, 0.058, 0.17, 8, SKIN_B, SKIN_T, r, 0.0, false)                                        # cou
 	Adv3DMeshes.add_blob(st, Vector3(0, 1.8, 0.0), Vector3(0.205, 0.225, 0.2), 12, 8, SKIN_B, SKIN_T, r, 0.0)                                  # visage
 	Adv3DMeshes.add_blob(st, Vector3(0, 1.87, -0.03), Vector3(0.225, 0.2, 0.225), 12, 7, HAIR_D, HAIR_L, r, 0.0)                               # calotte de cheveux
 	for t: Array in [[0.12, 2.04, 0.05, 0.09], [-0.1, 2.05, 0.0, 0.09], [0.0, 2.09, 0.08, 0.085], [0.2, 1.95, 0.0, 0.08], [-0.2, 1.93, 0.02, 0.08], [0.0, 1.95, -0.2, 0.1], [0.14, 1.99, -0.12, 0.08], [-0.14, 1.99, -0.12, 0.08]]:
@@ -293,6 +327,7 @@ static func _head() -> Mesh:
 		Adv3DMeshes.add_box(st, Vector3(0.08 * sx, 1.875, 0.19), Vector3(0.07, 0.018, 0.02), HAIR_D, HAIR_D)                                    # sourcils
 		Adv3DMeshes.add_blob(st, Vector3(0.2 * sx, 1.77, 0.0), Vector3(0.03, 0.05, 0.03), 6, 4, SKIN_B, SKIN_T, r, 0.0)                         # oreilles
 		Adv3DMeshes.add_blob(st, Vector3(0.12 * sx, 1.73, 0.17), Vector3(0.04, 0.025, 0.015), 6, 3, Color(0.96, 0.58, 0.5), Color(0.98, 0.64, 0.56), r, 0.0)  # joues
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.755, 0.2), Vector3(0.02, 0.026, 0.02), 6, 4, SKIN_B, SKIN_T, r, 0.0)                                 # nez
 	Adv3DMeshes.add_box(st, Vector3(0, 1.69, 0.2), Vector3(0.05, 0.012, 0.01), Color(0.5, 0.25, 0.2), Color(0.5, 0.25, 0.2))                       # sourire
 	return st.commit()
 
