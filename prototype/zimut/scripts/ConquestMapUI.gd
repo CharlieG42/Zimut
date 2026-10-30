@@ -80,6 +80,9 @@ var _map_title_label: Label
 var _side_title: Label
 var _back_button: Button
 var _side_scroll: ScrollContainer
+var _tab_city: VBoxContainer = null
+var _tab_chron: VBoxContainer = null
+var _tab_buttons: Array[Button] = []
 var _chronicle_label: Label
 
 # Capture le glissement directement sur toute la zone de carte, y compris
@@ -134,6 +137,8 @@ func _ready() -> void:
 	_conquest["last_counterattack"] = ""
 	_save["conquest"] = _conquest
 	_persist()
+	# V59 : Gultur présente les nouveautés de la Conquête (une seule fois chacune)
+	Gultur.say(self, "conq_v59", Gultur.CONQ_V59, _side_panel)
 
 func _build() -> void:
 	var bg := ColorRect.new()
@@ -324,20 +329,48 @@ func _build() -> void:
 	_threat_banner.add_theme_stylebox_override("normal", _style(Color(0.34, 0.10, 0.08, 0.96), Color(1.0, 0.45, 0.30)))
 	box.add_child(_threat_banner)
 
+	# V59 : le conseil est en deux onglets pour tenir à l'écran sans défiler :
+	# « Ville » (illustration, situation, actions) et « Chronique » (nouvelles de l'empire).
+	var tabs := HBoxContainer.new()
+	tabs.add_theme_constant_override("separation", 6)
+	box.add_child(tabs)
+	_tab_city = VBoxContainer.new()
+	_tab_city.add_theme_constant_override("separation", 12)
+	box.add_child(_tab_city)
+	_tab_chron = VBoxContainer.new()
+	_tab_chron.add_theme_constant_override("separation", 10)
+	_tab_chron.visible = false
+	box.add_child(_tab_chron)
+	for t: Array in [["⚑ VILLE", _tab_city], ["✎ CHRONIQUE", _tab_chron]]:
+		var tb := Button.new()
+		tb.text = String(t[0])
+		tb.toggle_mode = true
+		tb.button_pressed = t[1] == _tab_city
+		tb.custom_minimum_size = Vector2(0, 44)
+		tb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tb.add_theme_font_size_override("font_size", 17)
+		tb.add_theme_color_override("font_color", TEXT)
+		tb.add_theme_stylebox_override("normal", _style(Color(0.12, 0.18, 0.22, 0.97), Color(0.42, 0.50, 0.46)))
+		tb.add_theme_stylebox_override("pressed", _style(Color(0.24, 0.30, 0.22, 0.97), GOLD))
+		tb.add_theme_stylebox_override("hover", _style(Color(0.18, 0.26, 0.28, 0.97), GOLD))
+		tabs.add_child(tb)
+		_tab_buttons.append(tb)
+		var target: VBoxContainer = t[1]
+		tb.pressed.connect(func() -> void: _show_tab(target))
+
 	_side_art = TextureRect.new()
 	_side_art.name = "SideCityArt"
-	_side_art.custom_minimum_size = Vector2(0, 150)
+	_side_art.custom_minimum_size = Vector2(0, 112)
 	_side_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_side_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_side_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.add_child(_side_art)
+	_tab_city.add_child(_side_art)
 
 	_message = Label.new()
 	_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_message.custom_minimum_size.y = 180
 	_message.add_theme_color_override("font_color", TEXT)
-	_message.add_theme_font_size_override("font_size", 18)
-	box.add_child(_message)
+	_message.add_theme_font_size_override("font_size", 17)
+	_tab_city.add_child(_message)
 
 	_attack = Button.new()
 	_attack.text = "LANCER L'ASSAUT"
@@ -345,7 +378,7 @@ func _build() -> void:
 	_attack.add_theme_font_size_override("font_size", 23)
 	_attack.pressed.connect(_attack_selected_city)
 	_style_button(_attack, Color(0.62, 0.20, 0.16), Color(1.0, 0.72, 0.42))
-	box.add_child(_attack)
+	_tab_city.add_child(_attack)
 
 	_challenge_label = Label.new()
 	_challenge_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -353,17 +386,17 @@ func _build() -> void:
 	_challenge_label.add_theme_color_override("font_color", Color(0.80, 0.72, 1.0))
 	_challenge_label.add_theme_stylebox_override("normal", _style(Color(0.13, 0.11, 0.24, 0.96), Color(0.62, 0.48, 0.95)))
 	_challenge_label.visible = false
-	box.add_child(_challenge_label)
+	_tab_city.add_child(_challenge_label)
 
 	_build_box = VBoxContainer.new()
 	_build_box.add_theme_constant_override("separation", 6)
-	box.add_child(_build_box)
+	_tab_city.add_child(_build_box)
 
 	var chronicle_title := Label.new()
 	chronicle_title.text = "CHRONIQUE RÉCENTE"
 	chronicle_title.add_theme_font_size_override("font_size", 18)
 	chronicle_title.add_theme_color_override("font_color", GOLD)
-	box.add_child(chronicle_title)
+	_tab_chron.add_child(chronicle_title)
 
 	_chronicle_label = Label.new()
 	_chronicle_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -371,7 +404,7 @@ func _build() -> void:
 	_chronicle_label.add_theme_font_size_override("font_size", 15)
 	_chronicle_label.add_theme_color_override("font_color", TEXT)
 	_chronicle_label.text = "Vos premières conquêtes apparaîtront ici."
-	box.add_child(_chronicle_label)
+	_tab_chron.add_child(_chronicle_label)
 
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -387,6 +420,16 @@ func _build() -> void:
 	_refresh_header()
 	_select_city(_selected_id)
 	_layout_responsive()
+
+## Affiche l'onglet du conseil demandé (Ville / Chronique).
+func _show_tab(target: VBoxContainer) -> void:
+	_tab_city.visible = target == _tab_city
+	_tab_chron.visible = target == _tab_chron
+	for i: int in range(_tab_buttons.size()):
+		_tab_buttons[i].button_pressed = (i == 0) == (target == _tab_city)
+	if _side_scroll != null:
+		_side_scroll.scroll_vertical = 0
+
 
 ## Adapte la carte et le conseil à la taille réelle du viewport.
 ## En format compact (téléphone/portrait), la carte est en premier et le
@@ -714,6 +757,8 @@ func _refresh_header() -> void:
 	_header.text = line
 
 func _select_city(id: String) -> void:
+	if _tab_city != null and not _tab_city.visible:
+		_show_tab(_tab_city)
 	# Un glissement de carte ne doit jamais déclencher par erreur la sélection
 	# de la ville sur laquelle le doigt a été relâché.
 	if _map_dragged:
@@ -851,6 +896,8 @@ func _build_panel(city_id: String, conquered: bool) -> void:
 			dip.add_theme_stylebox_override("hover", _style(Color(0.38, 0.34, 0.22, 0.97), GOLD))
 			dip.pressed.connect(_negotiate_city.bind(city_id))
 			_build_box.add_child(dip)
+			if not Gultur.should_show("conq_v59"):
+				Gultur.say(self, "conq_diplomatie", Gultur.CONQ_DIPLOMATIE, dip)
 		return
 	var b := Button.new()
 	b.name = "EnterCityButton"
@@ -885,6 +932,8 @@ func _build_panel(city_id: String, conquered: bool) -> void:
 		rep.disabled = int(_save.get("gold", 0)) < ConquestSystem.RUIN_REPAIR_GOLD
 		rep.pressed.connect(_repair_city.bind(city_id))
 		_build_box.add_child(rep)
+		if not Gultur.should_show("conq_v59"):
+			Gultur.say(self, "conq_ruine", Gultur.CONQ_RUINE, rep)
 
 ## Clic sur une ville de la carte : sélection ; si elle nous appartient, on y entre.
 func _on_city_pressed(city_id: String) -> void:
@@ -1072,6 +1121,8 @@ func _show_governor_picker(city_id: String) -> void:
 ## Missions de lieutenance : envoyer un héros libre en mission de 3 batailles
 ## (escorte, cartographie, prospection) ou rappeler une mission en cours.
 func _show_mission_picker() -> void:
+	if not Gultur.should_show("conq_v59"):
+		Gultur.say(self, "conq_missions", Gultur.CONQ_MISSIONS, null)
 	var vp: Vector2 = get_viewport().get_visible_rect().size
 	var dim := ColorRect.new()
 	dim.name = "MissionPicker"
@@ -1199,6 +1250,17 @@ func _show_event_popup() -> void:
 		var oid: String = String(o.get("id", ""))
 		b.pressed.connect(func() -> void: _resolve_event_choice(dim, box, oid))
 		box.add_child(b)
+	if bool(ev.get("chancellor", false)):
+		# V59 : l'audience peut attendre (elle reviendra à la prochaine ouverture de la carte)
+		var later := Button.new()
+		later.name = "LaterButton"
+		later.text = "⌛ Plus tard — le Chancelier patientera"
+		later.custom_minimum_size.y = 48
+		later.add_theme_font_size_override("font_size", 16)
+		later.pressed.connect(func() -> void: dim.queue_free())
+		box.add_child(later)
+		if not Gultur.should_show("conq_v59"):
+			Gultur.say(self, "conq_chancelier", Gultur.CONQ_CHANCELIER, panel)
 
 func _resolve_event_choice(dim: Control, box: VBoxContainer, option_id: String) -> void:
 	var out: String = ProgressionManager.conquest_resolve_event(_save, option_id)
@@ -1435,7 +1497,9 @@ func _show_annexion_popup(city_id: String) -> void:
 	for n: String in _conquest.get("news", []):
 		lines.append(n)
 	if city_id == "donjon_roi":
-		var score: Dictionary = ProgressionManager.conquest_legend_score(_save)
+		var score0: Dictionary = ProgressionManager.conquest_legend_score(_save)
+		_show_epilogue(score0, ProgressionManager.conquest_legend_ending(score0, _conquest))
+		var score: Dictionary = score0
 		var ending: Dictionary = ProgressionManager.conquest_legend_ending(score, _conquest)
 		lines.append("★ CAMPAGNE TERMINÉE : le Roi Squelette est tombé !")
 		lines.append("")
@@ -1448,6 +1512,107 @@ func _show_annexion_popup(city_id: String) -> void:
 	var title: String = "EMPIRE VICTORIEUX !" if city_id == "donjon_roi" else "VILLE ANNEXÉE !"
 	var msg: String = "%s rejoint votre empire.\n\n%s" % [cname, "\n\n".join(PackedStringArray(lines))]
 	_show_popup(title, msg)
+
+## V59 — Écran de fin de campagne : couleurs de la fin obtenue, score de Légende détaillé en barres,
+## texte de l'épilogue. Posé par-dessus le popup d'annexion (qui reste à lire en dessous).
+const ENDING_COLORS := {"heros": [Color(0.20, 0.12, 0.04), Color(1.0, 0.80, 0.32)],
+	"marchand": [Color(0.04, 0.16, 0.16), Color(0.45, 0.92, 0.80)], "bastion": [Color(0.08, 0.10, 0.18), Color(0.62, 0.74, 1.0)]}
+
+func _show_epilogue(score: Dictionary, ending: Dictionary) -> void:
+	var cols: Array = ENDING_COLORS.get(String(ending.get("id", "heros")), ENDING_COLORS["heros"])
+	var bg: Color = cols[0]
+	var acc: Color = cols[1]
+	var dim := ColorRect.new()
+	dim.name = "Epilogue"
+	dim.color = Color(bg.r, bg.g, bg.b, 0.97)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	dim.modulate.a = 0.0
+	add_child(dim)
+	var centre := CenterContainer.new()
+	centre.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.add_child(centre)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 14)
+	box.custom_minimum_size.x = minf(1100.0, get_viewport().get_visible_rect().size.x - 80.0)
+	centre.add_child(box)
+	var crown := Label.new()
+	crown.text = "★  LE ROI SQUELETTE EST TOMBÉ  ★"
+	crown.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	crown.add_theme_font_size_override("font_size", 24)
+	crown.add_theme_color_override("font_color", acc.lightened(0.2))
+	box.add_child(crown)
+	var t := Label.new()
+	t.text = String(ending.get("title", ""))
+	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	t.add_theme_font_size_override("font_size", 62)
+	t.add_theme_color_override("font_color", acc)
+	t.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
+	t.add_theme_constant_override("outline_size", 10)
+	box.add_child(t)
+	var txt := Label.new()
+	txt.text = String(ending.get("text", ""))
+	txt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	txt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	txt.add_theme_font_size_override("font_size", 22)
+	txt.add_theme_color_override("font_color", Color(0.94, 0.92, 0.86))
+	box.add_child(txt)
+	var total: int = ProgressionManager.conquest_legend_total(score)
+	var tot := Label.new()
+	tot.text = "%d points de Légende" % total
+	tot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tot.add_theme_font_size_override("font_size", 30)
+	tot.add_theme_color_override("font_color", acc.lightened(0.3))
+	box.add_child(tot)
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 14)
+	grid.add_theme_constant_override("v_separation", 8)
+	box.add_child(grid)
+	var labels := {"villes": "Villes", "niveaux": "Développement", "gouverneurs": "Gouverneurs", "pierres": "Pierres", "diplomatie": "Diplomatie", "ruines": "Ruines"}
+	var top: float = 1.0
+	for k: String in labels.keys():
+		top = maxf(top, absf(float(score.get(k, 0))))
+	for k2: String in labels.keys():
+		var v: int = int(score.get(k2, 0))
+		var l := Label.new()
+		l.text = String(labels[k2])
+		l.custom_minimum_size.x = 200
+		l.add_theme_font_size_override("font_size", 20)
+		l.add_theme_color_override("font_color", Color(0.9, 0.9, 0.86))
+		grid.add_child(l)
+		var bar := ProgressBar.new()
+		bar.show_percentage = false
+		bar.custom_minimum_size = Vector2(520, 22)
+		bar.max_value = top
+		bar.value = absf(float(v))
+		var fill := StyleBoxFlat.new()
+		fill.bg_color = acc if v >= 0 else Color(0.85, 0.35, 0.30)
+		fill.set_corner_radius_all(6)
+		var back := StyleBoxFlat.new()
+		back.bg_color = Color(1, 1, 1, 0.08)
+		back.set_corner_radius_all(6)
+		bar.add_theme_stylebox_override("fill", fill)
+		bar.add_theme_stylebox_override("background", back)
+		grid.add_child(bar)
+		var n := Label.new()
+		n.text = "%+d" % v
+		n.add_theme_font_size_override("font_size", 20)
+		n.add_theme_color_override("font_color", acc if v >= 0 else Color(1.0, 0.55, 0.5))
+		grid.add_child(n)
+	var ok := Button.new()
+	ok.text = "CONTINUER EN EMPIRE LIBRE"
+	ok.custom_minimum_size = Vector2(420, 64)
+	ok.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	ok.add_theme_font_size_override("font_size", 22)
+	ok.add_theme_stylebox_override("normal", _style(bg.lightened(0.15), acc))
+	ok.add_theme_stylebox_override("hover", _style(bg.lightened(0.25), acc))
+	ok.pressed.connect(func() -> void: dim.queue_free())
+	box.add_child(ok)
+	var tw: Tween = create_tween()
+	tw.tween_property(dim, "modulate:a", 1.0, 0.6)
+	Gultur.say(self, "conq_legende", Gultur.CONQ_LEGENDE, null)
+
 
 ## Popup plein écran (titre + message + bouton CONTINUER) posé sur cette
 ## carte : utilisé pour l'écran d'annexion après une victoire.

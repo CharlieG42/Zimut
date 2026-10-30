@@ -74,6 +74,35 @@ const LVL5 := [
 	"Impressionnant, [b]{pseudo}[/b] ! Te voilà [b]niveau 5[/b] de joueur : le mode [b]Conquête[/b] est débloqué.",
 	"Prends les cités une à une, nomme des [b]gouverneurs[/b], recrute des soldats et défends tes villes contre les raids.",
 	"Les Nations gardent jalousement leurs Pierres dans leurs cités. Plus ton empire grandit, plus tu t'en approches !",
+	"Chaque ville a sa [b]spécialité[/b], certaines s'obtiennent par [b]traité[/b], et quatre [b]généraux[/b] du Roi Squelette t'attendent. Je t'expliquerai tout sur la carte de Conquête.",
+]
+
+## V59 — Conquête : nouveautés présentées au fil du jeu (une seule fois chacune).
+const CONQ_V59 := [
+	"La Conquête s'est enrichie, [b]{pseudo}[/b] ! Chaque ville conquise produit désormais sa [b]spécialité[/b] : Magie des cristaux, Fer du givre, Cuir des ports… à chaque victoire.",
+	"Quatre [b]généraux du Roi Squelette[/b] tiennent ses forteresses. Tant qu'ils vivent, leurs sièges sont plus durs et ils lancent des offensives. Affronte-les en personne à la [b]4e bataille[/b] de leur forteresse !",
+	"Ne tarde pas trop : les villes adverses [b]renforcent leur garnison[/b] toutes les 3 victoires. Et pour un siège, prépare un [b]plan d'assaut[/b] : le blocus ou l'infiltration font sauter une vague sans combat.",
+	"Le conseil a deux onglets : [b]⚑ VILLE[/b] pour agir, [b]✎ CHRONIQUE[/b] pour relire les nouvelles de l'empire.",
+]
+const CONQ_DIPLOMATIE := [
+	"Cette ville est [b]neutre[/b] : tu peux la gagner par les armes… ou par un [b]traité[/b] ! Le bouton [b]☮ NÉGOCIER[/b] l'annexe contre de l'or et sa ressource de spécialité.",
+	"Plus la ville est grande, plus le traité coûte cher, et tes émissaires doivent se reposer [b]3 victoires[/b] entre deux négociations. Les forteresses ennemies, elles, ne négocient jamais.",
+]
+const CONQ_CHANCELIER := [
+	"Ton [b]Chancelier[/b] demande audience ! Tous les 5 batailles, il propose un édit : un [b]impôt[/b] (de l'or tout de suite, mais tes garnisons perdent un soldat), des [b]manœuvres[/b] (+2 défense) ou l'[b]entretien des routes[/b] (Bois et Cuir).",
+	"Rien ne t'oblige : tu peux le [b]congédier[/b], ou lui dire de revenir [b]plus tard[/b].",
+]
+const CONQ_MISSIONS := [
+	"Un héros qui ne gouverne pas et ne combat pas peut partir en [b]mission[/b] pendant 3 batailles : escorter une caravane, cartographier des terres inconnues ou prospecter du minerai.",
+	"Attention : un héros en mission ne peut ni combattre ni gouverner, et une expédition sur cinq tourne mal.",
+]
+const CONQ_RUINE := [
+	"Cette ville a été [b]reprise à l'ennemi[/b], mais elle est en ruine : sa production est gelée quelques batailles.",
+	"Tu peux attendre qu'elle se relève toute seule, ou payer sa [b]réparation[/b] pour la remettre en marche tout de suite.",
+]
+const CONQ_LEGENDE := [
+	"Tu l'as fait, [b]{pseudo}[/b] ! Le Roi Squelette est tombé. Ta [b]Légende[/b] résume ta campagne : villes, développement, gouverneurs, Pierres retrouvées, traités…",
+	"Ton style a décidé de ta fin : [b]Âge des Héros[/b], [b]Empire marchand[/b] ou [b]Bastion de Zimut[/b]. Le monde reste à toi : continue à le faire prospérer !",
 ]
 
 const DONJON := [
