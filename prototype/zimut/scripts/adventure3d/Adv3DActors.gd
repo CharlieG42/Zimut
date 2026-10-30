@@ -408,6 +408,15 @@ const MOB_TINT := {"Ombres": Color(0.78, 0.62, 1.0), "Brasier": Color(1.0, 0.62,
 	"Vents": Color(0.92, 1.0, 1.0)}
 
 
+static var _glow_mat: ShaderMaterial = null
+
+
+static func _mob_glow() -> ShaderMaterial:
+	if _glow_mat == null:
+		_glow_mat = Adv3DNationMeshes.glow_material(2.4)
+	return _glow_mat
+
+
 static func make_mob_group(g: Dictionary, title: String, biome: String = "") -> Node3D:
 	var n := Node3D.new()
 	var elite: bool = bool(g.get("elite", false))
@@ -440,13 +449,28 @@ static func make_mob_group(g: Dictionary, title: String, biome: String = "") -> 
 		m.rotation.y = -ang + PI * 0.5
 		m.scale = Vector3(sc, sc, sc)
 		m.set_meta("phase", float(i) * 1.3)
-		var mi: MeshInstance3D = _part(m, mesh)
-		if MOB_TINT.has(biome):
-			(mi.material_override as StandardMaterial3D).albedo_color = MOB_TINT[biome]
+		var nation_mesh: Mesh = Adv3DMobMeshes.mesh_for(biome, elite)
+		if nation_mesh != null:
+			# créature propre à la Nation (golem de cristal, crabe, harpie, diablotin de lave…)
+			var mi2 := MeshInstance3D.new()
+			mi2.mesh = nation_mesh
+			mi2.material_override = _mob_glow()
+			mi2.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			if Adv3DMobMeshes.floats(biome):
+				mi2.position.y = 0.22
+			m.add_child(mi2)
+		else:
+			var mi: MeshInstance3D = _part(m, mesh)
+			if MOB_TINT.has(biome):
+				(mi.material_override as StandardMaterial3D).albedo_color = MOB_TINT[biome]
 		n.add_child(m)
 	if elite:
 		var light := OmniLight3D.new()
 		light.light_color = Color(1.0, 0.3, 0.2)
+		if Adv3DMobMeshes.has(biome):
+			# aura de l'élite aux couleurs de sa Nation (pas de rouge qui dénature le modèle)
+			light.light_color = (Nations.info(biome).get("accent", Color(1.0, 0.85, 0.6)) as Color).lerp(Color.WHITE, 0.25)
+			light.light_energy = 0.45
 		light.omni_range = 3.5
 		light.light_energy = 0.7
 		light.position.y = 1.0
