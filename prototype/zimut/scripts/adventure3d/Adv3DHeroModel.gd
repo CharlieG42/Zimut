@@ -2,7 +2,10 @@ class_name Adv3DHeroModel
 extends RefCounted
 ## Adv3DHeroModel.gd — Personnage joueur et Gligli en VRAIE 3D low-poly, reconstruits d'après les planches
 ## de référence (couleurs, accessoires, silhouette). Tout est généré en code : aucun fichier 3D importé.
-## Repère : pieds en y = 0, regarde vers +Z. Nœuds animés : LegL/LegR, ArmL/ArmR, Body.
+##
+## Chaque personnage est un petit squelette de nœuds (articulations) : les maillages sont construits en
+## coordonnées « monde du personnage » (pieds en y = 0, regard vers +Z) puis décalés sous leur articulation.
+## L'animation (marche, course, repos, assis…) est faite par Adv3DHeroRig / Adv3DGligliRig.
 
 const SKIN_B := Color(0.86, 0.62, 0.46)
 const SKIN_T := Color(0.98, 0.78, 0.62)
@@ -13,6 +16,27 @@ const BROWN_L := Color(0.50, 0.32, 0.17)
 const GOLD := Color(0.92, 0.74, 0.25)
 const HAIR_D := Color(0.72, 0.46, 0.18)
 const HAIR_L := Color(0.96, 0.72, 0.36)
+const PANTS_D := Color(0.14, 0.15, 0.12)
+const PANTS_L := Color(0.25, 0.26, 0.20)
+
+# articulations du héros (repère du personnage)
+const H_HIPS := Vector3(0, 0.95, 0)
+const H_NECK := Vector3(0, 1.60, 0)
+const H_SHOULDER := Vector3(0.31, 1.52, 0)      # x signé
+const H_ELBOW_DROP := 0.30
+const H_HIP_X := 0.13
+const H_KNEE_Y := 0.52
+const H_EYES := Vector3(0, 1.80, 0.19)
+const H_CAPE := Vector3(0, 0.98, -0.21)
+const H_PACK := Vector3(0, 1.30, -0.36)
+
+# articulations de Gligli
+const G_HEAD := Vector3(0, 0.60, 0.02)
+const G_EYES := Vector3(0, 0.81, 0.27)
+const G_EAR := Vector3(0.17, 0.93, -0.02)       # x signé
+const G_PAW_F := Vector3(0.11, 0.24, 0.15)      # x signé
+const G_PAW_B := Vector3(0.20, 0.24, -0.04)     # x signé
+const G_TAIL := Vector3(0, 0.22, -0.25)
 
 static var _cache: Dictionary = {}
 
@@ -24,6 +48,29 @@ static func enabled() -> bool:
 		return true
 	var gs: Node = tree.root.get_node_or_null("GameSettings")
 	return true if gs == null else bool(gs.get("adventure_models_3d"))
+
+
+## Matériau unique des personnages : couleurs de sommets, léger liseré de lumière (rim) pour les détacher
+## du décor, et contour sombre fin (coque inversée) façon dessin animé. Partagé → peu d'appels de rendu.
+static func char_material() -> Material:
+	if _cache.has("mat"):
+		return _cache["mat"]
+	var m := StandardMaterial3D.new()
+	m.vertex_color_use_as_albedo = true
+	m.vertex_color_is_srgb = true
+	m.roughness = 0.82
+	m.rim_enabled = true
+	m.rim = 0.35
+	m.rim_tint = 0.55
+	var ol := StandardMaterial3D.new()
+	ol.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	ol.cull_mode = BaseMaterial3D.CULL_FRONT
+	ol.albedo_color = Color(0.13, 0.10, 0.08)
+	ol.grow = true
+	ol.grow_amount = 0.011
+	m.next_pass = ol
+	_cache["mat"] = m
+	return m
 
 
 static func _st() -> SurfaceTool:
@@ -39,21 +86,63 @@ static func _r(s: int) -> RandomNumberGenerator:
 	return r
 
 
-static func _node(parent: Node3D, mesh: Mesh, pos: Vector3 = Vector3.ZERO, nm: String = "") -> MeshInstance3D:
-	var mi := MeshInstance3D.new()
-	mi.mesh = mesh
-	mi.material_override = Adv3DMeshes.solid_material(true)
-	mi.position = pos
-	if nm != "":
-		mi.name = nm
-	parent.add_child(mi)
-	return mi
-
-
 static func _cached(key: String, f: Callable) -> Mesh:
 	if not _cache.has(key):
-		_cache[key] = f.call()
+		_cache[key] = _fix_winding(f.call())
 	return _cache[key]
+
+
+## Les briques d'Adv3DMeshes n'ont pas toutes le même sens de triangles (le décor est rendu double face).
+## Les personnages sont rendus en face avant seule (+ contour en coque inversée) : on réoriente chaque
+## triangle pour que sa face avant regarde dans le sens de sa normale.
+static func _fix_winding(m: Mesh) -> Mesh:
+	var arr: Array = m.surface_get_arrays(0)
+	var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var n: PackedVector3Array = arr[Mesh.ARRAY_NORMAL]
+	var c: PackedColorArray = arr[Mesh.ARRAY_COLOR]
+	var idx: Variant = arr[Mesh.ARRAY_INDEX]
+	if idx != null and (idx as PackedInt32Array).size() > 0:
+		return m
+	for t: int in range(0, v.size() - 2, 3):
+		var g: Vector3 = (v[t + 1] - v[t]).cross(v[t + 2] - v[t])
+		if g.dot(n[t] + n[t + 1] + n[t + 2]) > 0.0:
+			var tv: Vector3 = v[t + 1]
+			v[t + 1] = v[t + 2]
+			v[t + 2] = tv
+			var tn: Vector3 = n[t + 1]
+			n[t + 1] = n[t + 2]
+			n[t + 2] = tn
+			if c.size() == v.size():
+				var tc: Color = c[t + 1]
+				c[t + 1] = c[t + 2]
+				c[t + 2] = tc
+	arr[Mesh.ARRAY_VERTEX] = v
+	arr[Mesh.ARRAY_NORMAL] = n
+	if c.size() == v.size():
+		arr[Mesh.ARRAY_COLOR] = c
+	var out := ArrayMesh.new()
+	out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	return out
+
+
+## Articulation : nœud placé au point `pivot` (repère personnage) sous `parent` (lui-même au point `parent_pivot`).
+static func _joint(parent: Node3D, nm: String, pivot: Vector3, parent_pivot: Vector3) -> Node3D:
+	var j := Node3D.new()
+	j.name = nm
+	j.position = pivot - parent_pivot
+	parent.add_child(j)
+	return j
+
+
+## Pose un maillage (construit en repère personnage) sous une articulation située en `pivot`.
+static func _part(joint: Node3D, mesh: Mesh, pivot: Vector3) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	mi.material_override = char_material()
+	mi.position = -pivot
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	joint.add_child(mi)
+	return mi
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -61,102 +150,139 @@ static func _cached(key: String, f: Callable) -> Mesh:
 # ══════════════════════════════════════════════════════════════════════
 
 static func make_hero() -> Node3D:
-	var root := Node3D.new()
-	root.name = "Hero3D"
-	Adv3DActors.add_shadow(root, 0.6)
-	var body := Node3D.new()
-	body.name = "Body"
-	root.add_child(body)
-	_node(body, _cached("h_torso", _torso))
-	_node(body, _cached("h_cape", _cape))
-	_node(body, _cached("h_pack", _pack))
-	_node(body, _cached("h_head", _head))
+	var rig := Adv3DHeroRig.new()
+	rig.name = "Hero3D"
+	Adv3DActors.add_shadow(rig, 0.6)
+	var hips := _joint(rig, "Hips", H_HIPS, Vector3.ZERO)
+	_part(hips, _cached("h_pelvis", _pelvis), H_HIPS)
+	var torso := _joint(hips, "Torso", H_HIPS, H_HIPS)
+	_part(torso, _cached("h_torso", _torso), H_HIPS)
+	var head := _joint(torso, "Head", H_NECK, H_HIPS)
+	_part(head, _cached("h_head", _head), H_NECK)
+	var eyes := _joint(head, "Eyes", H_EYES, H_NECK)
+	_part(eyes, _cached("h_eyes", _eyes), H_EYES)
+	var cape := _joint(hips, "Cape", H_CAPE, H_HIPS)
+	_part(cape, _cached("h_cape", _cape), H_CAPE)
+	var pack := _joint(torso, "Pack", H_PACK, H_HIPS)
+	_part(pack, _cached("h_pack", _pack), H_PACK)
 	for sgn: float in [-1.0, 1.0]:
 		var side: String = "L" if sgn < 0.0 else "R"
-		var leg := Node3D.new()
-		leg.name = "Leg" + side
-		leg.position = Vector3(0.13 * sgn, 0.95, 0.0)
-		root.add_child(leg)
-		_node(leg, _cached("h_leg_%s" % side, func() -> Mesh: return _leg(sgn)))
-		var arm := Node3D.new()
-		arm.name = "Arm" + side
-		arm.position = Vector3(0.31 * sgn, 1.52, 0.0)
-		arm.rotation.z = -0.07 * sgn
-		body.add_child(arm)
-		_node(arm, _cached("h_arm", _arm))
-	return root
+		var sh := Vector3(H_SHOULDER.x * sgn, H_SHOULDER.y, 0.0)
+		var arm := _joint(torso, "Arm" + side, sh, H_HIPS)
+		_part(arm, _cached("h_uarm", _upper_arm), Vector3(0, sh.y, 0))
+		var el := sh + Vector3(0, -H_ELBOW_DROP, 0)
+		var fore := _joint(arm, "Forearm" + side, el, sh)
+		_part(fore, _cached("h_farm", _forearm), Vector3(0, el.y, 0))
+		var hip := Vector3(H_HIP_X * sgn, H_HIPS.y, 0.0)
+		var leg := _joint(hips, "Leg" + side, hip, H_HIPS)
+		_part(leg, _cached("h_thigh_" + side, func() -> Mesh: return _thigh(sgn)), hip)
+		var knee := Vector3(hip.x, H_KNEE_Y, 0.0)
+		var shin := _joint(leg, "Shin" + side, knee, hip)
+		_part(shin, _cached("h_shin_" + side, func() -> Mesh: return _shin(sgn)), knee)
+	rig.setup()
+	return rig
 
 
-static func _leg(sgn: float) -> Mesh:
+static func _pelvis() -> Mesh:
 	var st := _st()
-	var r := _r(1)
-	Adv3DMeshes.add_cone(st, Vector3(0, -0.56, 0), 0.10, 0.125, 0.56, 8, Color(0.14, 0.15, 0.12), Color(0.25, 0.26, 0.20), r, 0.0, false)     # pantalon
-	Adv3DMeshes.add_cone(st, Vector3(0, -0.95, 0), 0.115, 0.125, 0.40, 8, BROWN_D, BROWN_L, r, 0.0)                                         # botte
-	Adv3DMeshes.add_cone(st, Vector3(0, -0.62, 0), 0.145, 0.145, 0.09, 8, Color(0.42, 0.27, 0.14), Color(0.62, 0.42, 0.22), r, 0.0, false)  # revers
-	Adv3DMeshes.add_blob(st, Vector3(0, -0.9, 0.08), Vector3(0.115, 0.08, 0.19), 8, 5, BROWN_D, BROWN_L, r, 0.0)                              # bout de botte
-	Adv3DMeshes.add_box(st, Vector3(0.115 * sgn, -0.3, 0.02), Vector3(0.05, 0.16, 0.13), Color(0.18, 0.2, 0.15), Color(0.30, 0.31, 0.24))     # poche cargo
-	Adv3DMeshes.add_box(st, Vector3(0, -0.66, 0.145), Vector3(0.06, 0.07, 0.02), GOLD, GOLD)                                                 # boucle
+	var r := _r(10)
+	Adv3DMeshes.add_blob(st, Vector3(0, 0.90, 0), Vector3(0.24, 0.13, 0.19), 10, 6, PANTS_D, PANTS_L, r, 0.0)
 	return st.commit()
 
 
-static func _arm() -> Mesh:
+static func _thigh(sgn: float) -> Mesh:
+	var st := _st()
+	var r := _r(1)
+	var x: float = H_HIP_X * sgn
+	Adv3DMeshes.add_cone(st, Vector3(x, 0.50, 0), 0.105, 0.125, 0.45, 8, PANTS_D, PANTS_L, r, 0.0, false)
+	Adv3DMeshes.add_box(st, Vector3(x + 0.115 * sgn, 0.68, 0.02), Vector3(0.05, 0.16, 0.13), Color(0.18, 0.2, 0.15), Color(0.30, 0.31, 0.24))  # poche cargo
+	return st.commit()
+
+
+static func _shin(sgn: float) -> Mesh:
+	var st := _st()
+	var r := _r(7)
+	var x: float = H_HIP_X * sgn
+	Adv3DMeshes.add_blob(st, Vector3(x, H_KNEE_Y, 0), Vector3(0.11, 0.08, 0.11), 8, 5, PANTS_D, PANTS_L, r, 0.0)                                # genou
+	Adv3DMeshes.add_cone(st, Vector3(x, 0.38, 0), 0.10, 0.108, 0.16, 8, PANTS_D, PANTS_L, r, 0.0, false)                                     # bas du pantalon
+	Adv3DMeshes.add_cone(st, Vector3(x, 0.0, 0), 0.115, 0.125, 0.40, 8, BROWN_D, BROWN_L, r, 0.0)                                            # botte
+	Adv3DMeshes.add_cone(st, Vector3(x, 0.33, 0), 0.145, 0.145, 0.09, 8, Color(0.42, 0.27, 0.14), Color(0.62, 0.42, 0.22), r, 0.0, false)    # revers
+	Adv3DMeshes.add_blob(st, Vector3(x, 0.05, 0.08), Vector3(0.115, 0.075, 0.19), 8, 5, BROWN_D, BROWN_L, r, 0.0)                              # bout de botte
+	Adv3DMeshes.add_box(st, Vector3(x, 0.29, 0.145), Vector3(0.06, 0.07, 0.02), GOLD, GOLD)                                                  # boucle
+	return st.commit()
+
+
+## Bras construits centrés en x = 0 (même maillage des deux côtés) : posés avec un pivot sans x.
+static func _upper_arm() -> Mesh:
 	var st := _st()
 	var r := _r(2)
-	Adv3DMeshes.add_blob(st, Vector3(0, -0.04, 0), Vector3(0.115, 0.11, 0.115), 8, 5, GREEN_D, GREEN_L, r, 0.0)                               # manche verte
-	Adv3DMeshes.add_cone(st, Vector3(0, -0.30, 0), 0.07, 0.06, 0.22, 8, SKIN_B, SKIN_T, r, 0.0, false)                                       # bras
-	Adv3DMeshes.add_cone(st, Vector3(0, -0.58, 0), 0.075, 0.09, 0.27, 8, BROWN_D, BROWN_L, r, 0.0, false)                                     # gantelet
-	Adv3DMeshes.add_cone(st, Vector3(0, -0.40, 0), 0.093, 0.093, 0.04, 8, Color(0.3, 0.19, 0.1), Color(0.3, 0.19, 0.1), r, 0.0, false)        # sangle
-	Adv3DMeshes.add_blob(st, Vector3(0, -0.63, 0.01), Vector3(0.07, 0.075, 0.065), 8, 5, Color(0.2, 0.13, 0.08), Color(0.34, 0.22, 0.13), r, 0.0)  # main gantée
+	var y0: float = H_SHOULDER.y
+	Adv3DMeshes.add_blob(st, Vector3(0, y0 - 0.04, 0), Vector3(0.115, 0.11, 0.115), 8, 5, GREEN_D, GREEN_L, r, 0.0)       # manche verte
+	Adv3DMeshes.add_cone(st, Vector3(0, y0 - 0.30, 0), 0.068, 0.062, 0.24, 8, SKIN_B, SKIN_T, r, 0.0, false)               # bras
+	Adv3DMeshes.add_blob(st, Vector3(0, y0 - 0.30, 0), Vector3(0.068, 0.06, 0.068), 8, 4, SKIN_B, SKIN_T, r, 0.0)          # coude
+	return st.commit()
+
+
+static func _forearm() -> Mesh:
+	var st := _st()
+	var r := _r(3)
+	var y0: float = H_SHOULDER.y - H_ELBOW_DROP
+	Adv3DMeshes.add_cone(st, Vector3(0, y0 - 0.28, 0), 0.075, 0.09, 0.27, 8, BROWN_D, BROWN_L, r, 0.0, false)                                # gantelet
+	Adv3DMeshes.add_cone(st, Vector3(0, y0 - 0.10, 0), 0.093, 0.093, 0.04, 8, Color(0.3, 0.19, 0.1), Color(0.3, 0.19, 0.1), r, 0.0, false)   # sangle
+	Adv3DMeshes.add_blob(st, Vector3(0, y0 - 0.33, 0.01), Vector3(0.07, 0.075, 0.065), 8, 5, Color(0.2, 0.13, 0.08), Color(0.34, 0.22, 0.13), r, 0.0)  # main gantée
 	return st.commit()
 
 
 static func _torso() -> Mesh:
 	var st := _st()
-	var r := _r(3)
-	Adv3DMeshes.add_cone(st, Vector3(0, 0.98, 0), 0.25, 0.225, 0.52, 10, Color(0.78, 0.69, 0.50), Color(0.93, 0.85, 0.66), r, 0.0, false)  # chemise beige
+	var r := _r(4)
+	Adv3DMeshes.add_cone(st, Vector3(0, 0.96, 0), 0.25, 0.225, 0.54, 10, Color(0.78, 0.69, 0.50), Color(0.93, 0.85, 0.66), r, 0.0, false)  # chemise beige
 	Adv3DMeshes.add_cone(st, Vector3(0, 0.92, 0), 0.265, 0.265, 0.12, 10, BROWN_D, BROWN_L, r, 0.0, false)                                # ceinture
 	Adv3DMeshes.add_box(st, Vector3(0, 0.98, 0.265), Vector3(0.11, 0.09, 0.03), GOLD, Color(1.0, 0.88, 0.45))                              # boucle
-	Adv3DMeshes.add_blob(st, Vector3(0.27, 0.9, 0.06), Vector3(0.075, 0.1, 0.085), 8, 5, BROWN_D, BROWN_L, r, 0.0)                         # sacoche
+	Adv3DMeshes.add_blob(st, Vector3(0.27, 0.92, 0.06), Vector3(0.075, 0.1, 0.085), 8, 5, BROWN_D, BROWN_L, r, 0.0)                        # sacoche
 	for sx: float in [-1.0, 1.0]:
 		Adv3DMeshes.add_box(st, Vector3(0.2 * sx, 1.27, 0.2), Vector3(0.12, 0.5, 0.05), GREEN_D, GREEN_L)                                    # pans de la veste
+	Adv3DMeshes.add_box(st, Vector3(0, 1.24, -0.2), Vector3(0.44, 0.54, 0.05), GREEN_D, GREEN_L)                                           # dos de la veste
 	Adv3DMeshes.add_box(st, Vector3(0.05, 1.28, 0.23), Vector3(0.05, 0.52, 0.02), BROWN_D, BROWN_L)                                         # bretelle
 	Adv3DMeshes.add_blob(st, Vector3(-0.15, 1.46, 0.235), Vector3(0.04, 0.04, 0.02), 8, 4, GOLD, Color(1.0, 0.9, 0.5), r, 0.0)             # médaillon
 	Adv3DMeshes.add_blob(st, Vector3(0, 1.57, 0.0), Vector3(0.31, 0.14, 0.29), 10, 5, GREEN_D, GREEN_L, r, 0.0)                            # écharpe / capuche
-	Adv3DMeshes.add_blob(st, Vector3(0, 1.59, -0.14), Vector3(0.25, 0.16, 0.18), 10, 5, GREEN_D, GREEN_L, r, 0.0)                          # capuche dans le dos
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.59, -0.15), Vector3(0.25, 0.16, 0.17), 10, 5, GREEN_D, GREEN_L, r, 0.0)                          # capuche dans le dos
 	return st.commit()
 
 
+## Pans du manteau dans le dos, sous le sac (ils flottent à la marche), ourlet en pointes de feuille.
 static func _cape() -> Mesh:
 	var st := _st()
-	var r := _r(4)
-	Adv3DMeshes.add_box(st, Vector3(0, 1.02, -0.2), Vector3(0.5, 0.56, 0.04), Color(0.30, 0.55, 0.20), GREEN_L)
+	var r := _r(5)
+	Adv3DMeshes.add_box(st, Vector3(0, 0.81, -0.215), Vector3(0.5, 0.34, 0.04), Color(0.30, 0.55, 0.20), GREEN_L)
 	for i: int in range(3):
-		var x: float = (float(i) - 1.0) * 0.185
-		Adv3DMeshes.add_cone(st, Vector3(x, 0.66, -0.2), 0.0, 0.09, 0.14, 4, Color(0.55, 0.72, 0.28), Color(0.40, 0.64, 0.24), r, 0.0, false)
-	Adv3DMeshes.add_blob(st, Vector3(0, 0.98, -0.225), Vector3(0.06, 0.1, 0.01), 6, 4, Color(0.78, 0.86, 0.32), Color(0.88, 0.94, 0.42), r, 0.0)   # emblème feuille
+		var x: float = (float(i) - 1.0) * 0.17
+		Adv3DMeshes.add_cone(st, Vector3(x, 0.55, -0.215), 0.0, 0.085, 0.10, 5, Color(0.55, 0.72, 0.28), Color(0.40, 0.64, 0.24), r, 0.0, false)
+	Adv3DMeshes.add_blob(st, Vector3(0, 0.80, -0.24), Vector3(0.05, 0.08, 0.012), 6, 4, Color(0.78, 0.86, 0.32), Color(0.88, 0.94, 0.42), r, 0.0)   # emblème feuille
 	return st.commit()
 
 
 static func _pack() -> Mesh:
 	var st := _st()
-	var r := _r(5)
-	Adv3DMeshes.add_blob(st, Vector3(0, 1.05, -0.4), Vector3(0.21, 0.25, 0.12), 10, 6, BROWN_D, BROWN_L, r, 0.01)                         # sac
-	Adv3DMeshes.add_box(st, Vector3(0, 1.17, -0.5), Vector3(0.28, 0.12, 0.03), Color(0.32, 0.2, 0.11), Color(0.46, 0.3, 0.16))                # rabat
+	var r := _r(6)
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.05, -0.40), Vector3(0.21, 0.25, 0.12), 10, 6, BROWN_D, BROWN_L, r, 0.0)                          # sac
+	Adv3DMeshes.add_box(st, Vector3(0, 1.17, -0.50), Vector3(0.28, 0.12, 0.03), Color(0.32, 0.2, 0.11), Color(0.46, 0.3, 0.16))              # rabat
 	for sx: float in [-1.0, 1.0]:
-		Adv3DMeshes.add_blob(st, Vector3(0.17 * sx, 0.9, -0.4), Vector3(0.07, 0.1, 0.06), 8, 5, BROWN_D, BROWN_L, r, 0.0)                  # poches
-		Adv3DMeshes.add_box(st, Vector3(0.08 * sx, 1.07, -0.52), Vector3(0.05, 0.07, 0.02), GOLD, GOLD)                                      # boucles
-		Adv3DMeshes.add_blob(st, Vector3(0.27 * sx, 1.42, -0.4), Vector3(0.03, 0.08, 0.08), 8, 5, Color(0.2, 0.12, 0.07), Color(0.32, 0.2, 0.11), r, 0.0)  # bout du rouleau
-	Adv3DMeshes.add_blob(st, Vector3(0, 1.42, -0.4), Vector3(0.27, 0.08, 0.08), 10, 5, BROWN_D, BROWN_L, r, 0.0)                              # rouleau de couchage
-	# pousse de feuille sur l'épaule (comme sur le logo)
-	Adv3DMeshes.add_blade(st, Vector3(0.09, 1.6, -0.17), Vector3(0.17, 1.82, -0.2), 0.1, GREEN_D, Color(0.35, 0.75, 0.25))
-	Adv3DMeshes.add_blade(st, Vector3(0.09, 1.6, -0.17), Vector3(0.04, 1.8, -0.2), 0.09, GREEN_D, Color(0.30, 0.68, 0.22))
+		Adv3DMeshes.add_blob(st, Vector3(0.17 * sx, 0.92, -0.40), Vector3(0.07, 0.1, 0.06), 8, 5, BROWN_D, BROWN_L, r, 0.0)                  # poches
+		Adv3DMeshes.add_blob(st, Vector3(0.27 * sx, 1.42, -0.40), Vector3(0.03, 0.08, 0.08), 8, 5, Color(0.2, 0.12, 0.07), Color(0.32, 0.2, 0.11), r, 0.0)  # bout du rouleau
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.42, -0.40), Vector3(0.27, 0.08, 0.08), 10, 5, Color(0.36, 0.42, 0.22), Color(0.50, 0.56, 0.30), r, 0.0)  # rouleau de couchage (kaki)
+	Adv3DMeshes.add_box(st, Vector3(0, 1.0, -0.515), Vector3(0.05, 0.3, 0.02), Color(0.32, 0.2, 0.11), Color(0.40, 0.26, 0.14))            # sangle
+	Adv3DMeshes.add_box(st, Vector3(0, 0.97, -0.53), Vector3(0.07, 0.05, 0.015), GOLD, Color(1.0, 0.88, 0.45))                              # boucle
+	# pousse de feuille qui sort du sac (comme sur le logo)
+	Adv3DMeshes.add_blob(st, Vector3(0.12, 1.58, -0.38), Vector3(0.025, 0.12, 0.05), 6, 4, GREEN_D, Color(0.35, 0.75, 0.25), r, 0.0)
+	Adv3DMeshes.add_blob(st, Vector3(0.05, 1.56, -0.40), Vector3(0.022, 0.1, 0.045), 6, 4, GREEN_D, Color(0.30, 0.68, 0.22), r, 0.0)
 	return st.commit()
 
 
 static func _head() -> Mesh:
 	var st := _st()
-	var r := _r(6)
-	Adv3DMeshes.add_cone(st, Vector3(0, 1.58, 0), 0.075, 0.07, 0.12, 8, SKIN_B, SKIN_T, r, 0.0, false)                                         # cou
+	var r := _r(8)
+	Adv3DMeshes.add_cone(st, Vector3(0, 1.56, 0), 0.075, 0.07, 0.14, 8, SKIN_B, SKIN_T, r, 0.0, false)                                         # cou
 	Adv3DMeshes.add_blob(st, Vector3(0, 1.8, 0.0), Vector3(0.205, 0.225, 0.2), 12, 8, SKIN_B, SKIN_T, r, 0.0)                                  # visage
 	Adv3DMeshes.add_blob(st, Vector3(0, 1.87, -0.03), Vector3(0.225, 0.2, 0.225), 12, 7, HAIR_D, HAIR_L, r, 0.0)                               # calotte de cheveux
 	for t: Array in [[0.12, 2.04, 0.05, 0.09], [-0.1, 2.05, 0.0, 0.09], [0.0, 2.09, 0.08, 0.085], [0.2, 1.95, 0.0, 0.08], [-0.2, 1.93, 0.02, 0.08], [0.0, 1.95, -0.2, 0.1], [0.14, 1.99, -0.12, 0.08], [-0.14, 1.99, -0.12, 0.08]]:
@@ -164,11 +290,19 @@ static func _head() -> Mesh:
 	Adv3DMeshes.add_blob(st, Vector3(0.085, 1.97, 0.17), Vector3(0.1, 0.05, 0.07), 8, 4, HAIR_D, HAIR_L, r, 0.0)                                # frange
 	Adv3DMeshes.add_blob(st, Vector3(-0.09, 1.96, 0.18), Vector3(0.1, 0.05, 0.07), 8, 4, HAIR_D, HAIR_L, r, 0.0)
 	for sx: float in [-1.0, 1.0]:
-		Adv3DMeshes.add_blob(st, Vector3(0.076 * sx, 1.79, 0.185), Vector3(0.03, 0.046, 0.02), 8, 5, Color(0.28, 0.16, 0.05), Color(0.50, 0.30, 0.10), r, 0.0)   # yeux
-		Adv3DMeshes.add_blob(st, Vector3(0.068 * sx, 1.805, 0.2), Vector3(0.011, 0.014, 0.008), 5, 3, Color.WHITE, Color.WHITE, r, 0.0)               # reflet
-		Adv3DMeshes.add_blob(st, Vector3(0.2 * sx, 1.77, 0.0), Vector3(0.03, 0.05, 0.03), 6, 4, SKIN_B, SKIN_T, r, 0.0)                             # oreilles
-		Adv3DMeshes.add_blob(st, Vector3(0.12 * sx, 1.74, 0.17), Vector3(0.04, 0.025, 0.015), 6, 3, Color(0.96, 0.58, 0.5), Color(0.98, 0.64, 0.56), r, 0.0)  # joues
-	Adv3DMeshes.add_box(st, Vector3(0, 1.7, 0.2), Vector3(0.05, 0.012, 0.01), Color(0.5, 0.25, 0.2), Color(0.5, 0.25, 0.2))                       # sourire
+		Adv3DMeshes.add_box(st, Vector3(0.08 * sx, 1.875, 0.19), Vector3(0.07, 0.018, 0.02), HAIR_D, HAIR_D)                                    # sourcils
+		Adv3DMeshes.add_blob(st, Vector3(0.2 * sx, 1.77, 0.0), Vector3(0.03, 0.05, 0.03), 6, 4, SKIN_B, SKIN_T, r, 0.0)                         # oreilles
+		Adv3DMeshes.add_blob(st, Vector3(0.12 * sx, 1.73, 0.17), Vector3(0.04, 0.025, 0.015), 6, 3, Color(0.96, 0.58, 0.5), Color(0.98, 0.64, 0.56), r, 0.0)  # joues
+	Adv3DMeshes.add_box(st, Vector3(0, 1.69, 0.2), Vector3(0.05, 0.012, 0.01), Color(0.5, 0.25, 0.2), Color(0.5, 0.25, 0.2))                       # sourire
+	return st.commit()
+
+
+static func _eyes() -> Mesh:
+	var st := _st()
+	var r := _r(9)
+	for sx: float in [-1.0, 1.0]:
+		Adv3DMeshes.add_blob(st, Vector3(0.076 * sx, 1.80, 0.185), Vector3(0.034, 0.05, 0.02), 8, 5, Color(0.22, 0.12, 0.04), Color(0.46, 0.27, 0.09), r, 0.0)   # iris
+		Adv3DMeshes.add_blob(st, Vector3(0.066 * sx, 1.818, 0.2), Vector3(0.012, 0.015, 0.008), 5, 3, Color.WHITE, Color.WHITE, r, 0.0)                     # reflet
 	return st.commit()
 
 
@@ -176,40 +310,101 @@ static func _head() -> Mesh:
 #  Gligli
 # ══════════════════════════════════════════════════════════════════════
 
+const G_GD := Color(0.34, 0.56, 0.17)
+const G_GL := Color(0.60, 0.80, 0.30)
+const G_LEAF_D := Color(0.20, 0.46, 0.15)
+const G_LEAF_L := Color(0.45, 0.72, 0.25)
+
+
 static func make_gligli() -> Node3D:
-	var root := Node3D.new()
-	root.name = "Gligli3D"
-	Adv3DActors.add_shadow(root, 0.45)
-	var body := Node3D.new()
-	body.name = "Body"
-	root.add_child(body)
-	_node(body, _cached("g_body", _gligli_mesh))
-	return root
+	var rig := Adv3DGligliRig.new()
+	rig.name = "Gligli3D"
+	Adv3DActors.add_shadow(rig, 0.45)
+	var body := _joint(rig, "Body", Vector3.ZERO, Vector3.ZERO)
+	_part(body, _cached("g_body", _g_body), Vector3.ZERO)
+	var head := _joint(body, "Head", G_HEAD, Vector3.ZERO)
+	_part(head, _cached("g_head", _g_head), G_HEAD)
+	var eyes := _joint(head, "Eyes", G_EYES, G_HEAD)
+	_part(eyes, _cached("g_eyes", _g_eyes), G_EYES)
+	var tail := _joint(body, "Tail", G_TAIL, Vector3.ZERO)
+	_part(tail, _cached("g_tail", _g_tail), G_TAIL)
+	for sgn: float in [-1.0, 1.0]:
+		var side: String = "L" if sgn < 0.0 else "R"
+		var ep := Vector3(G_EAR.x * sgn, G_EAR.y, G_EAR.z)
+		var ear := _joint(head, "Ear" + side, ep, G_HEAD)
+		_part(ear, _cached("g_ear_" + side, func() -> Mesh: return _g_ear(sgn)), ep)
+		var fp := Vector3(G_PAW_F.x * sgn, G_PAW_F.y, G_PAW_F.z)
+		var pf := _joint(body, "PawF" + side, fp, Vector3.ZERO)
+		_part(pf, _cached("g_pawf_" + side, func() -> Mesh: return _g_paw_front(sgn)), fp)
+		var bp := Vector3(G_PAW_B.x * sgn, G_PAW_B.y, G_PAW_B.z)
+		var pb := _joint(body, "PawB" + side, bp, Vector3.ZERO)
+		_part(pb, _cached("g_pawb_" + side, func() -> Mesh: return _g_paw_back(sgn)), bp)
+	rig.setup()
+	return rig
 
 
-static func _gligli_mesh() -> Mesh:
+static func _g_body() -> Mesh:
 	var st := _st()
-	var r := _r(9)
-	var gd := Color(0.34, 0.56, 0.17)
-	var gl := Color(0.60, 0.80, 0.30)
-	var leaf_d := Color(0.20, 0.46, 0.15)
-	var leaf_l := Color(0.45, 0.72, 0.25)
-	Adv3DMeshes.add_blob(st, Vector3(0, 0.34, 0), Vector3(0.3, 0.33, 0.28), 12, 8, gd, gl, r, 0.0)                                              # corps
-	Adv3DMeshes.add_blob(st, Vector3(0, 0.3, 0.17), Vector3(0.17, 0.23, 0.12), 10, 6, Color(0.78, 0.84, 0.50), Color(0.92, 0.94, 0.66), r, 0.0)   # ventre
-	Adv3DMeshes.add_blob(st, Vector3(0, 0.78, 0.04), Vector3(0.31, 0.27, 0.28), 12, 8, gd, gl, r, 0.0)                                         # tête
-	for sx: float in [-1.0, 1.0]:
-		Adv3DMeshes.add_blob(st, Vector3(0.2 * sx, 1.07, -0.02), Vector3(0.1, 0.32, 0.03), 8, 6, leaf_d, leaf_l, r, 0.0)                           # grandes oreilles-feuilles
-		Adv3DMeshes.add_blob(st, Vector3(0.2 * sx, 1.04, 0.0), Vector3(0.055, 0.2, 0.02), 8, 5, Color(0.65, 0.38, 0.16), Color(0.85, 0.55, 0.25), r, 0.0)  # intérieur orangé
-		Adv3DMeshes.add_blob(st, Vector3(0.125 * sx, 0.8, 0.255), Vector3(0.072, 0.09, 0.04), 8, 6, Color(0.10, 0.12, 0.05), Color(0.28, 0.30, 0.08), r, 0.0)   # yeux
-		Adv3DMeshes.add_blob(st, Vector3(0.108 * sx, 0.835, 0.285), Vector3(0.024, 0.03, 0.012), 5, 3, Color.WHITE, Color.WHITE, r, 0.0)             # reflets
-		Adv3DMeshes.add_blob(st, Vector3(0.2 * sx, 0.72, 0.23), Vector3(0.05, 0.03, 0.02), 6, 4, Color(0.95, 0.65, 0.4), Color(0.98, 0.72, 0.48), r, 0.0)  # joues
-		Adv3DMeshes.add_blob(st, Vector3(0.11 * sx, 0.05, 0.2), Vector3(0.075, 0.06, 0.1), 8, 5, gd, gl, r, 0.0)                                  # pattes avant
-		Adv3DMeshes.add_blob(st, Vector3(0.22 * sx, 0.1, -0.03), Vector3(0.09, 0.09, 0.14), 8, 5, gd, gl, r, 0.0)                                 # pattes arrière
-	Adv3DMeshes.add_blob(st, Vector3(0, 1.1, 0.0), Vector3(0.06, 0.24, 0.025), 8, 6, leaf_d, leaf_l, r, 0.0)                                       # feuille centrale
-	Adv3DMeshes.add_blob(st, Vector3(0, 0.74, 0.31), Vector3(0.03, 0.02, 0.02), 6, 4, Color(0.2, 0.3, 0.1), Color(0.3, 0.4, 0.15), r, 0.0)       # nez
-	for i: int in range(5):                                                                                                                         # collerette de feuilles
+	var r := _r(11)
+	Adv3DMeshes.add_blob(st, Vector3(0, 0.36, 0), Vector3(0.29, 0.31, 0.27), 12, 8, G_GD, G_GL, r, 0.0)                                           # corps
+	Adv3DMeshes.add_blob(st, Vector3(0, 0.32, 0.165), Vector3(0.17, 0.22, 0.12), 10, 6, Color(0.78, 0.84, 0.50), Color(0.92, 0.94, 0.66), r, 0.0) # ventre
+	for i: int in range(5):                                                                                                                        # collerette de feuilles
 		var a: float = float(i) / 5.0 * TAU + 0.3
-		Adv3DMeshes.add_blob(st, Vector3(cos(a) * 0.2, 0.58, sin(a) * 0.17 + 0.05), Vector3(0.09, 0.03, 0.12), 6, 4, leaf_d, leaf_l, r, 0.0)
-	for t: Array in [[-0.2, 0.16, -0.3, 0.1], [0.0, 0.2, -0.36, 0.11], [0.2, 0.16, -0.3, 0.1]]:                                                      # queue en feuilles
-		Adv3DMeshes.add_blob(st, Vector3(t[0], t[1], t[2]), Vector3(0.06, 0.04, t[3] * 1.4), 6, 4, leaf_d, leaf_l, r, 0.0)
+		Adv3DMeshes.add_blob(st, Vector3(cos(a) * 0.2, 0.6, sin(a) * 0.17 + 0.05), Vector3(0.09, 0.03, 0.12), 6, 4, G_LEAF_D, G_LEAF_L, r, 0.0)
+	return st.commit()
+
+
+static func _g_head() -> Mesh:
+	var st := _st()
+	var r := _r(12)
+	Adv3DMeshes.add_blob(st, Vector3(0, 0.80, 0.04), Vector3(0.31, 0.27, 0.28), 12, 8, G_GD, G_GL, r, 0.0)                                        # tête
+	for sx: float in [-1.0, 1.0]:
+		Adv3DMeshes.add_blob(st, Vector3(0.2 * sx, 0.73, 0.235), Vector3(0.05, 0.03, 0.02), 6, 4, Color(0.95, 0.65, 0.4), Color(0.98, 0.72, 0.48), r, 0.0)  # joues
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.12, 0.0), Vector3(0.05, 0.2, 0.025), 8, 6, G_LEAF_D, G_LEAF_L, r, 0.0)                                 # feuille centrale
+	Adv3DMeshes.add_blob(st, Vector3(0, 0.755, 0.315), Vector3(0.03, 0.02, 0.02), 6, 4, Color(0.2, 0.3, 0.1), Color(0.3, 0.4, 0.15), r, 0.0)     # nez
+	Adv3DMeshes.add_box(st, Vector3(0, 0.715, 0.305), Vector3(0.05, 0.01, 0.01), Color(0.25, 0.3, 0.12), Color(0.25, 0.3, 0.12))                  # bouche
+	return st.commit()
+
+
+static func _g_eyes() -> Mesh:
+	var st := _st()
+	var r := _r(13)
+	for sx: float in [-1.0, 1.0]:
+		Adv3DMeshes.add_blob(st, Vector3(0.125 * sx, 0.81, 0.26), Vector3(0.074, 0.092, 0.04), 8, 6, Color(0.08, 0.10, 0.04), Color(0.26, 0.28, 0.08), r, 0.0)   # yeux
+		Adv3DMeshes.add_blob(st, Vector3(0.105 * sx, 0.85, 0.292), Vector3(0.026, 0.032, 0.012), 5, 3, Color.WHITE, Color.WHITE, r, 0.0)                   # reflet
+		Adv3DMeshes.add_blob(st, Vector3(0.145 * sx, 0.78, 0.293), Vector3(0.012, 0.014, 0.008), 5, 3, Color.WHITE, Color.WHITE, r, 0.0)                   # petit reflet
+	return st.commit()
+
+
+static func _g_ear(sgn: float) -> Mesh:
+	var st := _st()
+	var r := _r(14)
+	Adv3DMeshes.add_blob(st, Vector3(0.2 * sgn, 1.08, -0.02), Vector3(0.1, 0.31, 0.03), 8, 6, G_LEAF_D, G_LEAF_L, r, 0.0)                              # oreille-feuille
+	Adv3DMeshes.add_blob(st, Vector3(0.2 * sgn, 1.05, 0.004), Vector3(0.055, 0.2, 0.02), 8, 5, Color(0.65, 0.38, 0.16), Color(0.85, 0.55, 0.25), r, 0.0)  # intérieur orangé
+	return st.commit()
+
+
+static func _g_paw_front(sgn: float) -> Mesh:
+	var st := _st()
+	var r := _r(15)
+	var x: float = G_PAW_F.x * sgn
+	Adv3DMeshes.add_cone(st, Vector3(x, 0.06, 0.17), 0.055, 0.065, 0.2, 8, G_GD, G_GL, r, 0.0, false)
+	Adv3DMeshes.add_blob(st, Vector3(x, 0.05, 0.2), Vector3(0.075, 0.055, 0.1), 8, 5, G_GD, G_GL, r, 0.0)
+	return st.commit()
+
+
+static func _g_paw_back(sgn: float) -> Mesh:
+	var st := _st()
+	var r := _r(16)
+	var x: float = G_PAW_B.x * sgn
+	Adv3DMeshes.add_blob(st, Vector3(x, 0.17, -0.04), Vector3(0.1, 0.12, 0.14), 8, 5, G_GD, G_GL, r, 0.0)        # cuisse
+	Adv3DMeshes.add_blob(st, Vector3(x, 0.045, 0.02), Vector3(0.08, 0.05, 0.13), 8, 5, G_GD, G_GL, r, 0.0)       # pied
+	return st.commit()
+
+
+static func _g_tail() -> Mesh:
+	var st := _st()
+	var r := _r(17)
+	for t: Array in [[-0.16, 0.2, -0.33, 0.1, -0.5], [0.0, 0.25, -0.38, 0.11, 0.0], [0.16, 0.2, -0.33, 0.1, 0.5]]:
+		Adv3DMeshes.add_blob(st, Vector3(t[0], t[1], t[2]), Vector3(0.06, 0.035, t[3] * 1.4), 6, 4, G_LEAF_D, G_LEAF_L, r, 0.0)
 	return st.commit()

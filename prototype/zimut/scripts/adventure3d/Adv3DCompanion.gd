@@ -14,9 +14,12 @@ var terrain: Dictionary = {}
 var target: Adv3DExplorer = null
 
 var _actor: Adv3DSpriteActor = null
-var _model: Node3D = null                # vrai modèle 3D (si activé dans les Options)
+var _model: Adv3DGligliRig = null        # vrai modèle 3D (si activé dans les Options)
 var _t: float = 0.0
-const SCALE_3D := 0.72                   # Gligli un peu plus petit que le modèle de base
+const SCALE_3D := 0.8                    # Gligli un peu plus petit que le modèle de base
+const ACCEL := 14.0                      # m/s² : départs et arrêts progressifs
+var _cur_speed: float = 0.0
+var _chasing: bool = false
 const SCALE_SPRITE := 0.82
 var _facing: float = 0.0
 var _last_target_pos: Vector3 = Vector3.ZERO
@@ -33,7 +36,7 @@ static func create(terr: Dictionary, who: Adv3DExplorer) -> Adv3DCompanion:
 	c.terrain = terr
 	c.target = who
 	if Adv3DHeroModel.enabled():
-		var m: Node3D = Adv3DHeroModel.make_gligli()
+		var m: Adv3DGligliRig = Adv3DHeroModel.make_gligli() as Adv3DGligliRig
 		m.scale = Vector3.ONE * SCALE_3D
 		c._model = m
 		c.add_child(m)
@@ -92,6 +95,8 @@ func emote(kind: String, seconds: float = 2.2) -> void:
 	if _emote == null or not ResourceLoader.exists(path):
 		return
 	_emote.texture = load(path)
+	if _model != null:
+		_model.react(kind)
 	_emote.visible = true
 	_emote_label.visible = true
 	_emote.scale = Vector3.ONE * 0.2
@@ -139,9 +144,16 @@ func _process(delta: float) -> void:
 	if dist > 8.0:
 		place_near_target()
 		return
-	if dist > 0.3:
-		var speed: float = clampf(dist * 3.2, 1.2, MAX_SPEED)
-		var step: Vector3 = to_goal.normalized() * minf(speed * delta, dist)
+	var before: Vector3 = position
+	# hystérésis : il repart au-delà de 0,45 m, s'arrête sous 0,2 m (pas de piétinement)
+	if dist > 0.45:
+		_chasing = true
+	elif dist < 0.2:
+		_chasing = false
+	var desired: float = clampf(dist * 3.2, 1.2, MAX_SPEED) if _chasing else 0.0
+	_cur_speed = move_toward(_cur_speed, desired, ACCEL * delta)
+	if _cur_speed > 0.05 and dist > 0.01:
+		var step: Vector3 = to_goal.normalized() * minf(_cur_speed * delta, dist)
 		var moved: bool = true
 		if _free(position + step):
 			position += step
@@ -157,9 +169,10 @@ func _process(delta: float) -> void:
 			_facing = lerp_angle(_facing, atan2(step.x, step.z), clampf(delta * 10.0, 0.0, 1.0))
 		else:
 			_stuck += delta
+			_cur_speed = 0.0
 			if _stuck > 1.5 and dist > 2.0:
 				place_near_target()
-		running = dist > 1.4
+		running = _cur_speed > 3.0
 	position.y = Adv3DWorld.height_at(position.x, position.z)
 	if not moving:
 		# à l'arrêt : il regarde le joueur
@@ -167,32 +180,15 @@ func _process(delta: float) -> void:
 		_facing = lerp_angle(_facing, atan2(to_t.x, to_t.z), clampf(delta * 5.0, 0.0, 1.0))
 	var sitting: bool = not moving and _idle_time > 2.5 and dist < 1.2
 	if _model != null:
-		_animate_model(delta, moving, running, sitting)
+		var flat: Vector3 = position - before
+		flat.y = 0.0
+		var real_speed: float = flat.length() / delta if delta > 0.0 else 0.0
+		var to_p: Vector3 = target.position - position
+		var look: float = wrapf(atan2(to_p.x, to_p.z) - _facing, -PI, PI)
+		_model.rotation.y = _facing
+		_model.animate(delta, real_speed, sitting, look)
 		return
 	_actor.set_running(running)
 	_actor.set_sitting(sitting)
 	_actor.set_facing(_facing, target.camera_yaw())
 	_actor.animate(delta, 1.0 if moving else 0.0)
-
-
-## Animation du modèle 3D : petits bonds à la marche, galop quand il court, assis = tassé, respiration à l'arrêt.
-func _animate_model(delta: float, moving: bool, running: bool, sitting: bool) -> void:
-	_t += delta * (15.0 if running else 10.0 if moving else 2.2)
-	_model.rotation.y = _facing
-	var body: Node3D = _model.get_node_or_null("Body")
-	if body == null:
-		return
-	var k: float = clampf(delta * 12.0, 0.0, 1.0)
-	if moving:
-		var hop: float = absf(sin(_t)) * (0.16 if running else 0.09)
-		body.position.y = lerpf(body.position.y, hop, k)
-		body.rotation.x = lerpf(body.rotation.x, sin(_t) * 0.1, k)
-		body.scale = body.scale.lerp(Vector3(1.0, 1.0 + sin(_t * 2.0) * 0.04, 1.0), k)
-	elif sitting:
-		body.position.y = lerpf(body.position.y, 0.0, k)
-		body.rotation.x = lerpf(body.rotation.x, -0.12, k)
-		body.scale = body.scale.lerp(Vector3(1.06, 0.88, 1.06), k)
-	else:
-		body.position.y = lerpf(body.position.y, 0.0, k)
-		body.rotation.x = lerpf(body.rotation.x, 0.0, k)
-		body.scale = body.scale.lerp(Vector3(1.0, 1.0 + sin(_t) * 0.025, 1.0), k)
