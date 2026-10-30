@@ -310,6 +310,41 @@ func _boot() -> void:
 	pm.conquest_send_mission(mc, "Chasseur", "filon")
 	check(pm.conquest_abort_mission(mc, "Chasseur") == "" and ConquestSystem.missions(mc["conquest"]).is_empty(), "rappel du lieutenant")
 
+	# ── V59 Généraux du Roi Squelette ──
+	var ge: Dictionary = _fresh(["capitale"])
+	var gcq: Dictionary = ge["conquest"]
+	check(ConquestSystem.living_generals_count(gcq) == 4, "quatre généraux en vie au départ")
+	check(ConquestSystem.general_of(gcq, "fort_racine") == "Tharok le Végétal", "Tharok tient Fort Racine")
+	check(ConquestSystem.general_of(gcq, "garnison") == "Vorkann le Givre", "Vorkann tient la Garnison des Pics")
+	check(ConquestSystem.general_defense_bonus(gcq, "fort_racine") == ConquestSystem.GENERAL_DEF_BONUS, "bonus de défense du siège tant que le général vit")
+	# La forteresse tombe : le général est vaincu, le bonus disparaît
+	gcq["owned"].append("fort_racine")
+	check(ConquestSystem.general_of(gcq, "fort_racine") == "", "forteresse annexée : le général est vaincu")
+	check(ConquestSystem.living_generals_count(gcq) == 3, "trois généraux restants")
+	check(ConquestSystem.general_defense_bonus(gcq, "fort_racine") == 0, "plus de bonus après la chute")
+	# Tous vaincus
+	gcq["owned"].append("garnison")
+	gcq["owned"].append("tour_sable")
+	gcq["owned"].append("citadelle_ronce")
+	check(ConquestSystem.living_generals_count(gcq) == 0, "tous les généraux sont tombés")
+	# Offensives nommées : elles portent le nom d'un général vivant
+	var go: Dictionary = _fresh(["capitale", "clairiere", "pont_mousse", "vieille_tour"])
+	var gr := RandomNumberGenerator.new()
+	gr.seed = 33
+	var named_threat: bool = false
+	guard = 0
+	while not named_threat and guard < 200:
+		guard += 1
+		ConquestSystem.after_victory(go, go["conquest"], gr, pm.CONQUEST_ROUTES, names, "")
+		var th: Dictionary = ConquestSystem.threat(go["conquest"])
+		if not th.is_empty() and String(th.get("general", "")) != "":
+			named_threat = true
+		go["conquest"].erase("event_pending")
+		go["conquest"].erase("threat")
+	check(named_threat, "un général vivant peut lancer une offensive nommée")
+	# Ville neutre : pas de général
+	check(ConquestSystem.general_of(gcq, "clairiere") == "", "une ville neutre n'a pas de général")
+
 	# Sauvegarde / rechargement JSON
 	var js: String = JSON.stringify(lg)
 	var back: Variant = JSON.parse_string(js)

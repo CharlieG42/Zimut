@@ -21,6 +21,13 @@
 - Un héros en mission ne peut ni combattre (exclu de la sélection d'équipe) ni gouverner (exclu du sélecteur) ; mission rappelable sans récompense.
 - Sauvegarde : clés optionnelles `missions` {classe -> {type, eta}} et `missions_revealed`.
 
+## Généraux du Roi Squelette
+- Quatre généraux nommés tiennent les forteresses ennemies : Tharok le Végétal (Fort Racine), Vorkann le Givre (Garnison des Pics), Zahor le Sableux (Tour des Sables), Nébulia l'Illusionniste (Citadelle des Ronces) — `ConquestSystem.GENERALS`.
+- Tant qu'il vit : siège durci (+3 niveaux via `general_defense_bonus`) et offensives nommées possibles (25 % après chaque victoire, +2 de force, bannière « ☠ … mène l'offensive »).
+- La 4ᵉ bataille de sa forteresse l'oppose en personne : `GameManager._spawn_boss` substitue le nom du général (kit du boss de sa Nation, affichage du titre existant).
+- Vaincus : journal de la chute ; tous vaincus → assaut du Donjon -3 niveaux et message « ★ Tous les généraux sont tombés ».
+- Compteur en tête de carte : « ☠ N général(aux) du Roi Squelette en vie ».
+
 ## Détail des modifications
 - `prototype/zimut/scripts/ConquestSystem.gd` : moteur (constantes, `CITY_TRAITS`, édits, buffs, `defense`, `after_victory`).
 - `prototype/zimut/scripts/ProgressionManager.gd` : production d'empire (+ spécialités, + routes) et `conquest_city_trait`.

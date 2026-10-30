@@ -704,6 +704,9 @@ func _refresh_header() -> void:
 		line += "   ·   Revenus +%d or" % income
 	if not parts.is_empty():
 		line += "   ·   Production par victoire : " + " · ".join(parts)
+	var generals_alive: int = ConquestSystem.living_generals_count(_conquest)
+	if generals_alive > 0:
+		line += "   ·   ☠ %d général%s du Roi Squelette en vie" % [generals_alive, "aux" if generals_alive > 1 else ""]
 	if ProgressionManager.conquest_campaign_won(_conquest):
 		line += "   ·   ★ EMPIRE VICTORIEUX"
 	elif ProgressionManager.conquest_empire_complete(_conquest):
@@ -771,9 +774,13 @@ func _select_city(id: String) -> void:
 		if kind == "enemy":
 			var left: int = ProgressionManager.CONQUEST_SIEGE_BATTLES - prog
 			var wave_txt: String = ("\n\nSiège en cours : %d/%d — prochaine bataille : %s." % [prog, ProgressionManager.CONQUEST_SIEGE_BATTLES, "BOSS" if wave == ProgressionManager.CONQUEST_SIEGE_BATTLES else "mobs de champs"]) if prog > 0 else ""
-			_message.text = "%s · %s · Niveau conseillé %d\n\n%s\n\n⚔ VILLE ADVERSE — siège en %d batailles : %d plateaux de mobs puis le BOSS du biome.%s" % [
+			var general_txt: String = ""
+			var gname: String = ConquestSystem.general_of(_conquest, id)
+			if gname != "":
+				general_txt = "\n\n☠ FORTERESSE DU GÉNÉRAL %s — le vaincre en personne à la 4e bataille calmera sa région (%s)." % [gname.to_upper(), ConquestSystem.general_region(id)]
+			_message.text = "%s · %s · Niveau conseillé %d\n\n%s\n\n⚔ VILLE ADVERSE — siège en %d batailles : %d plateaux de mobs puis le BOSS du biome.%s%s" % [
 				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), city["desc"],
-				ProgressionManager.CONQUEST_SIEGE_BATTLES, ProgressionManager.CONQUEST_SIEGE_BATTLES - 1, wave_txt]
+				ProgressionManager.CONQUEST_SIEGE_BATTLES, ProgressionManager.CONQUEST_SIEGE_BATTLES - 1, wave_txt, general_txt]
 		else:
 			_message.text = "%s · %s · Niveau conseillé %d\n\n%s\n\n● VILLE NEUTRE — 1 bataille contre des mobs de champs suffit à la conquérir." % [
 				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), city["desc"]]
@@ -1404,8 +1411,10 @@ func _refresh_threat_banner() -> void:
 	var th: Dictionary = ConquestSystem.threat(_conquest)
 	if not th.is_empty():
 		var tid: String = String(th.get("city", ""))
-		lines.append("⚠ OFFENSIVE sur %s dans %d bataille(s)\nForce ennemie %d · défense %d%s" % [
-			ProgressionManager.conquest_city_name(tid), int(th.get("eta", 0)), int(th.get("power", 0)),
+		var who: String = String(th.get("general", ""))
+		var lead: String = "☠ %s, général du Roi Squelette, mène l'offensive !\n" % who if who != "" else ""
+		lines.append("%s⚠ OFFENSIVE sur %s dans %d bataille(s)\nForce ennemie %d · défense %d%s" % [
+			lead, ProgressionManager.conquest_city_name(tid), int(th.get("eta", 0)), int(th.get("power", 0)),
 			ConquestSystem.defense(_save, tid), " — RENFORCEZ-LA !" if ConquestSystem.defense(_save, tid) < int(th.get("power", 0)) else " — elle tiendra."])
 	if int(_conquest.get("truce", 0)) > 0:
 		lines.append("☮ Trêve : %d bataille(s) sans raid" % int(_conquest["truce"]))

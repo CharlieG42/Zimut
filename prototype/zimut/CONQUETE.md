@@ -45,6 +45,13 @@ Les héros qui ne gouvernent ni ne combattent peuvent partir en **mission de 3 b
 ## Spécialités économiques (V59)
 Chaque ville conquise produit en plus une ressource propre à son biome/Nation (`ConquestSystem.CITY_TRAITS`), versée à chaque victoire et mise à l'échelle du niveau de la ville (×1 / ×1,5 / ×2). Gelée si la ville est pillée. Exemples : Mine de Cristal → +3 Magie, Forge du Givre → +3 Fer, Marais des Spectres → +3 Venin. Affichée dans le Conseil de l'écran de ville et sur la carte.
 
+## Généraux du Roi Squelette (V59)
+Quatre généraux nommés tiennent les forteresses ennemies : **Tharok le Végétal** (Fort Racine), **Vorkann le Givre** (Garnison des Pics), **Zahor le Sableux** (Tour des Sables) et **Nébulia l'Illusionniste** (Citadelle des Ronces).
+- Tant qu'il vit, son siège est durci (+3 niveaux) et il peut lancer une **offensive nommée** (bannière rouge « ☠ … mène l'offensive »).
+- La 4ᵉ bataille de sa forteresse l'oppose **en personne** (boss nommé, kit du boss de sa Nation).
+- Le vaincre journalise sa chute ; **tous les vaincre** affaiblit l'assaut du Donjon du Roi Squelette (-3 niveaux).
+- Compteur « ☠ N généraux en vie » dans l'en-tête de la carte.
+
 ## Sauvegarde
 Clés ajoutées à `conquest` (toutes optionnelles) : `city_levels`, `garrisons`, `threat`, `event_pending`, `news`, `truce`, `lost`, `rewarded`, `battle_count`, `event_cd`, `threat_cd`, `chancellor_cd`, `chancellor_seen`, `drill`, `roadworks`, `missions`, `missions_revealed`.
 

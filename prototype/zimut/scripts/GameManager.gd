@@ -493,6 +493,12 @@ func init_entities() -> void:
 			conquest_tactic = String(conquest.get("pending_tactic", "none"))
 			if conquest_tactic == "scouts":
 				lvl = maxi(1, lvl - 1)
+			# Tous les généraux vaincus : l'assaut du Donjon est affaibli (-3 niveaux).
+			if String(conquest.get("pending_city", "")) == "donjon_roi" \
+					and ConquestSystem.living_generals_count(conquest) == 0:
+				lvl = maxi(1, lvl - 3)
+			# Un général vivant durcit le siège de sa forteresse (+3 niveaux).
+			lvl = maxi(1, lvl + ConquestSystem.general_defense_bonus(conquest, String(conquest.get("pending_city", ""))))
 	# En Aventure, le défi en cours (POI) fixe le niveau du combat : le
 	# brouillard, les POI et les zones sont dans ProgressionManager/AdventureManager.
 	if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "adventure":
@@ -625,6 +631,15 @@ func _spawn_boss(pos: Vector2i, lvl: int) -> void:
 	if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "conquest" \
 			and String(active_save.get("conquest", {}).get("pending_city", "")) == "donjon_roi":
 		boss_name = "Roi Squelette"
+	# Conquête : la 4e bataille d'une forteresse de général oppose le général lui-même
+	# (boss nommé du biome, kit du boss de Nation correspondant).
+	if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "conquest":
+		var cq_city: String = String(active_save.get("conquest", {}).get("pending_city", ""))
+		var cq_data: Dictionary = active_save.get("conquest", {})
+		if cq_city != "" and ProgressionManager.conquest_siege_is_boss(cq_data, cq_city):
+			var gname: String = ConquestSystem.general_boss_name(cq_data, cq_city)
+			if gname != "":
+				boss_name = gname
 	## Type de base dont le boss reprend le kit et la skin : le nom complet est
 	## « Boss Gobelin Roi » -> type de base « Gobelin » (2e mot).
 	var base_type: String = String({"Gobelin Roi": "Gobelin", "Troll Géant": "Troll", "Dragon": "Dragonnet",

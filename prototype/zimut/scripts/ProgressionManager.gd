@@ -2196,6 +2196,13 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 					conquest["owned"] = owned
 					conquest_add_event(conquest, "Ville annexée : %s" % conquest_city_name(pending))
 				conquest["just_annexed"] = pending
+				# Général vaincu : sa forteresse est tombée, la région respire.
+				var fallen_general: String = String(ConquestSystem.GENERALS.get(pending, {}).get("name", ""))
+				if fallen_general != "":
+					conquest_add_event(conquest, "☠ %s est vaincu ! Sa région ne lance plus d'offensives." % fallen_general)
+					var remaining: int = ConquestSystem.living_generals_count(conquest)
+					if remaining == 0:
+						conquest_add_event(conquest, "★ Tous les généraux du Roi Squelette sont tombés : l'assaut du Donjon s'annonce moins redoutable.")
 				# Butin thématique versé uniquement à la première annexion.
 				var rewarded: Array = conquest.get("rewarded", [])
 				var reward: Dictionary = CONQUEST_CITY_REWARDS.get(pending, {}) if not rewarded.has(pending) else {}

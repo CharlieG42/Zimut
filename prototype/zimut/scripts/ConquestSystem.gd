@@ -60,6 +60,20 @@ const MISSION_TYPES := {
 		"gold": 30, "res": {"Fer": 8}},
 	}
 
+## Généraux du Roi Squelette : chacun tient une forteresse (kind "enemy") d'une
+## grande région. Tant qu'il vit, sa forteresse est mieux défendue et il peut
+## lancer une offensive nommée ; le vaincre en assaut (4e bataille) calme la
+## région et affaiblit le Donjon (tous les vaincus = assaut du Donjon facilité).
+const GENERALS := {
+	"garnison":      {"name": "Vorkann le Givre",   "region": "Montagne/Cristaux/Vents"},
+	"fort_racine":   {"name": "Tharok le Végétal",  "region": "Forêt"},
+	"tour_sable":    {"name": "Zahor le Sableux",   "region": "Désert/Marées"},
+	"citadelle_ronce": {"name": "Nébulia l'Illusionniste", "region": "Ombres/Brumes"},
+}
+const GENERAL_DEF_BONUS := 3
+const GENERAL_THREAT_BONUS := 2
+const GENERAL_THREAT_CHANCE := 0.25
+
 ## Spécialité économique de chaque ville (biome/Nation) : ressources versées
 ## à chaque victoire, mises à l'échelle du niveau de la ville. Les villes sans
 ## entrée (capitale, Donjon) n'ont pas de spécialité.
@@ -420,6 +434,61 @@ static func _tick_missions(data: Dictionary, conq: Dictionary, rng: RandomNumber
 		note(conq, "⚑ %s revient de « %s » : %s." % [classe, mission_label(type), ", ".join(PackedStringArray(parts))])
 	conq["missions"] = m
 
+# ═════════════════════════════════════════════════════════════════════════════
+#  Généraux du Roi Squelette
+# ═════════════════════════════════════════════════════════════════════════════
+
+## Général tenant cette ville, ou "" (vide une fois la ville annexée : le
+## général est vaincu quand sa forteresse tombe).
+static func general_of(conq: Dictionary, id: String) -> String:
+	if (conq.get("owned", []) as Array).has(id):
+		return ""
+	return String(GENERALS.get(id, {}).get("name", ""))
+
+## Généraux encore en vie (leur forteresse n'est pas conquise).
+static func living_generals(conq: Dictionary) -> Array:
+	var out: Array = []
+	for cid: String in GENERALS.keys():
+		if general_of(conq, cid) != "":
+			out.append(cid)
+	return out
+
+static func living_generals_count(conq: Dictionary) -> int:
+	return living_generals(conq).size()
+
+static func general_region(id: String) -> String:
+	return String(GENERALS.get(id, {}).get("region", ""))
+
+## Bonus de niveau des batailles de siège tant que le général tient sa
+## forteresse (appliqué par GameManager à la difficulté, affiché sur la carte).
+static func general_defense_bonus(conq: Dictionary, id: String) -> int:
+	return GENERAL_DEF_BONUS if general_of(conq, id) != "" else 0
+
+## Nom du boss de la 4e bataille du siège d'une forteresse de général.
+## Vide pour une ville ordinaire (le boss du biome reste utilisé).
+static func general_boss_name(conq: Dictionary, id: String) -> String:
+	return general_of(conq, id)
+
+## Les généraux vivants lancent parfois leur propre offensive, plus forte que
+## les offensives anonymes (réutilise le système threat, avec un visage).
+static func _maybe_general_threat(data: Dictionary, conq: Dictionary, rng: RandomNumberGenerator,
+		routes: Array, just_conquered: String) -> void:
+	if not threat(conq).is_empty():
+		return
+	var alive: Array = living_generals(conq)
+	if alive.is_empty() or rng.randf() > GENERAL_THREAT_CHANCE:
+		return
+	var pool: Array = _target_pool(conq, routes, just_conquered, true)
+	if pool.is_empty():
+		return
+	var id: String = String(pool[rng.randi_range(0, pool.size() - 1)])
+	var power: int = roundi((8.0 + 2.0 * float(owned_count(conq)) + float(int(conq.get("battle_count", 0))) / 3.0) * rng.randf_range(0.95, 1.25)) + GENERAL_THREAT_BONUS
+	var gid: String = String(alive[rng.randi_range(0, alive.size() - 1)])
+	var gname: String = String(GENERALS.get(gid, {}).get("name", ""))
+	conq["threat"] = {"city": id, "power": power, "eta": THREAT_ETA, "general": gname}
+	conq["threat_cd"] = 0
+	note(conq, "☠ %s, général du Roi Squelette, prépare une offensive (force %d) sur %s dans %d batailles !" % [gname, power, _name(conq, id), THREAT_ETA])
+
 static func _set_garrison(conq: Dictionary, id: String, n: int, hero: String) -> void:
 	var g: Dictionary = conq.get("garrisons", {})
 	g[id] = {"troops": clampi(n, 0, garrison_cap(conq, id)), "hero": hero}
@@ -480,6 +549,7 @@ static func after_victory(data: Dictionary, conq: Dictionary, rng: RandomNumberG
 	else:
 		_roll_raid(data, conq, rng, routes, just_conquered)
 		_maybe_spawn_threat(data, conq, rng, routes, just_conquered)
+		_maybe_general_threat(data, conq, rng, routes, just_conquered)
 	_maybe_event(data, conq, rng, routes, just_conquered)
 	conq.erase("_names")
 	data["conquest"] = conq
