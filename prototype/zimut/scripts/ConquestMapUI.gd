@@ -753,12 +753,12 @@ func _select_city(id: String) -> void:
 			for r: String in yld.keys():
 				parts.append("%s +%d" % [r, int(yld[r])])
 			txt += "\nProduction : %s" % " · ".join(PackedStringArray(parts))
-		var trait: Dictionary = ProgressionManager.conquest_city_trait(id, _conquest)
-		if String(trait.get("label", "")) != "" and ravage == 0:
+		var city_trait: Dictionary = ProgressionManager.conquest_city_trait(id, _conquest)
+		if String(city_trait.get("label", "")) != "" and ravage == 0:
 			var tp: Array = []
-			for r: String in trait.get("yield", {}).keys():
-				tp.append("%s +%d" % [r, int(trait["yield"][r])])
-			txt += "\nSpécialité — %s : %s" % [String(trait["label"]), " · ".join(PackedStringArray(tp))]
+			for r: String in city_trait.get("yield", {}).keys():
+				tp.append("%s +%d" % [r, int(city_trait["yield"][r])])
+			txt += "\nSpécialité — %s : %s" % [String(city_trait["label"]), " · ".join(PackedStringArray(tp))]
 		if ConquestSystem.drill_defense(_conquest) > 0:
 			txt += "\n⚑ Manœuvres du Chancelier : +%d défense pendant %d bataille(s)." % [ConquestSystem.drill_defense(_conquest), int(_conquest.get("drill", 0))]
 		if ConquestSystem.roadworks_yield(_conquest).size() > 0:

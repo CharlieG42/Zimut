@@ -402,11 +402,13 @@ func _boot() -> void:
 	check(pm.conquest_negotiate_city(dp, "clairiere") != "", "ville déjà conquise : négociation refusée")
 	check(pm.conquest_negotiate_city(dp, "oasis") != "", "ville non reliée : négociation refusée")
 	var dgold0: int = int(dp["gold"])
-	var dres0: int = int(dp["resources"]["Bois"])
+	var dcost: Dictionary = ConquestSystem.diplomacy_cost(dpcq, "pont_mousse")
+	var dkey: String = String((dcost["res"] as Dictionary).keys()[0])     # ressource de la spécialité de la ville
+	var dres0: int = int(dp["resources"].get(dkey, 0))
 	check(pm.conquest_negotiate_city(dp, "pont_mousse") == "", "pont-mousse annexé par négociation")
 	check((dpcq["owned"] as Array).has("pont_mousse"), "la ville rejoint l'empire")
 	check(int(dp["gold"]) == dgold0 - 120, "négociation : 120 or débités")
-	check(int(dp["resources"]["Bois"]) == dres0 - 8, "négociation : 8 Bois débités (spécialité de la ville)")
+	check(int(dp["resources"].get(dkey, 0)) == dres0 - int(dcost["res"][dkey]), "négociation : %d %s débités (spécialité de la ville)" % [int(dcost["res"][dkey]), dkey])
 	check((dpcq.get("annexed_diplomacy", []) as Array).has("pont_mousse"), "annexion pacifique comptée pour la Légende")
 	# Or insuffisant (ville reliée à l'empire)
 	dp["gold"] = 50
@@ -458,8 +460,10 @@ func _boot() -> void:
 	var end1: Dictionary = ConquestSystem.legend_ending(score, lgcq)
 	check(String(end1["id"]) == "heros", "fin par défaut : Âge des Héros")
 	# Fin « marchand » : 4+ annexions pacifiques
+	var annexed: Array = lgcq.get("annexed_diplomacy", [])
 	for i: int in range(4):
-		(lgcq.get("annexed_diplomacy", []) as Array).append("v%d" % i)
+		annexed.append("v%d" % i)
+	lgcq["annexed_diplomacy"] = annexed
 	var end2: Dictionary = ConquestSystem.legend_ending(score, lgcq)
 	check(String(end2["id"]) == "marchand", "fin marchand après 4 annexions pacifiques")
 	# Fin « bastion » : développement + gouverneurs

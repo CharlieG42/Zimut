@@ -453,11 +453,11 @@ static func _tick_missions(data: Dictionary, conq: Dictionary, rng: RandomNumber
 			for i: int in range(mini(int(info["reveal"]), unrevealed.size())):
 				revealed.append(unrevealed[i])
 			if not revealed.is_empty():
-			var so_far: Array = conq.get("missions_revealed", [])
-			for cid: String in revealed:
-				if not so_far.has(cid):
-					so_far.append(cid)
-			conq["missions_revealed"] = so_far
+				var so_far: Array = conq.get("missions_revealed", [])
+				for cid: String in revealed:
+					if not so_far.has(cid):
+						so_far.append(cid)
+				conq["missions_revealed"] = so_far
 		var parts: Array = ["+%d or" % gold]
 		for r: String in drops.keys():
 			parts.append("+%d %s" % [int(drops[r]), r])
@@ -553,13 +553,13 @@ static func apply_plan(data: Dictionary, conq: Dictionary, id: String, plan: Str
 			data["gold"] = int(data.get("gold", 0)) - cost
 			if rng.randf() < PLAN_RAID_CHANCE:
 				var pool: Array = _target_pool(conq, [], "", true)
-			if not pool.is_empty():
-				var rid: String = String(pool[rng.randi_range(0, pool.size() - 1)])
-				var r: Dictionary = conq.get("ravage", {})
-				r[rid] = RAVAGE_BATTLES
+				if not pool.is_empty():
+					var rid: String = String(pool[rng.randi_range(0, pool.size() - 1)])
+					var r: Dictionary = conq.get("ravage", {})
+					r[rid] = RAVAGE_BATTLES
 					conq["ravage"] = r
 					note(conq, "Le blocus de %s agace l'ennemi : %s est pillée (%d batailles) !" % [_name(conq, id), _name(conq, rid), RAVAGE_BATTLES])
-				else:
+			else:
 				note(conq, "Le blocus de %s resserre l'étau : une vague saute sans combat." % _name(conq, id))
 			return {"skipped": true}
 		"infiltration":
@@ -960,7 +960,7 @@ static func resolve_assault(data: Dictionary, conq: Dictionary, id: String, powe
 	if int(ruins.get(id, 0)) <= 0:
 		ruins[id] = RUIN_BATTLES
 		conq["ruin"] = ruins
-			note(conq, "⚒ %s est ruinée : sa production sera gelée %d batailles après sa reprise." % [nm, RUIN_BATTLES])
+		note(conq, "⚒ %s est ruinée : sa production sera gelée %d batailles après sa reprise." % [nm, RUIN_BATTLES])
 	var r2: Dictionary = conq.get("ravage", {})
 	r2.erase(id)
 	conq["ravage"] = r2

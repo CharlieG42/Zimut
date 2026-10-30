@@ -373,12 +373,12 @@ func _build_council(parent: Control) -> void:
 	v.add_child(_pips(troops, cap, Color(0.55, 0.68, 0.95)))
 	v.add_child(_lbl("Défense : %d" % ConquestSystem.defense(_save, _city_id), 22, TEXT))
 	v.add_child(_lbl("Revenu : +%d or par victoire" % ConquestSystem.city_income(_save, _city_id), 22, GOOD))
-	var trait: Dictionary = ProgressionManager.conquest_city_trait(_city_id, conq)
-	if String(trait.get("label", "")) != "":
+	var city_trait: Dictionary = ProgressionManager.conquest_city_trait(_city_id, conq)
+	if String(city_trait.get("label", "")) != "":
 		var tp: Array = []
-		for r: String in trait.get("yield", {}).keys():
-				tp.append("%s +%d" % [r, int(trait["yield"][r])])
-		v.add_child(_wrap("Spécialité — %s : %s par victoire" % [String(trait["label"]), " · ".join(PackedStringArray(tp))], 19, GOOD))
+		for r: String in city_trait.get("yield", {}).keys():
+				tp.append("%s +%d" % [r, int(city_trait["yield"][r])])
+		v.add_child(_wrap("Spécialité — %s : %s par victoire" % [String(city_trait["label"]), " · ".join(PackedStringArray(tp))], 19, GOOD))
 	var hero: String = ConquestSystem.hero_of(conq, _city_id)
 	v.add_child(_lbl("♞ Gouverneur : %s" % (hero if hero != "" else "aucun"), 22, TEXT))
 	if ProgressionManager._is_city_ravaged(conq, _city_id):
