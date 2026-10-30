@@ -34,7 +34,7 @@ func _boot() -> void:
 			geo = p
 	check(not geo.is_empty(), "le Géomancien est présent dans l'équipe")
 	geo["spells"] = gm._build_spells("Géomancien", 100)
-	check(geo["spells"].size() == 30, "30 sorts au niveau 100 (%d)" % geo["spells"].size())
+	check(geo["spells"].size() == 31, "31 sorts au niveau 100 (dont Rappel de pierre) (%d)" % geo["spells"].size())
 	geo["current_pa"] = 20
 	geo["max_pv"] = 400
 	var gp: Vector2i = gm.pos_of(geo)
@@ -59,7 +59,7 @@ func _boot() -> void:
 		quit(1)
 		return
 	check(bool(pil.get("blocks_los", false)) and bool(pil.get("static", false)), "le pilier est statique et bloque la vue")
-	check(int(pil["lifetime"]) == 4, "le pilier dure 4 tours")
+	check(int(pil["lifetime"]) == 5, "le pilier dure 5 tours")
 	check(gm.cast_spell(geo, _spell(gm, geo, "Invoquer Muraille"), target + Vector2i(0, 0)) == false, "case occupée : impossible d'y poser une muraille")
 	# Muraille : 3 cases
 	var t2: Vector2i = Vector2i(-1, -1)
@@ -94,6 +94,37 @@ func _boot() -> void:
 	for tp: Dictionary in gm.terrain_of(geo):
 		uids[tp["uid"]] = true
 	check(uids.size() == gm.terrain_of(geo).size(), "chaque case de terrain a un identifiant unique")
+	# V73 : une muraille (3 cases) compte pour UNE construction ; 4 constructions max ; Rappel de pierre
+	check(gm.constructions_of(geo).size() == 2, "pilier + muraille = 2 constructions (%d)" % gm.constructions_of(geo).size())
+	var rp: Dictionary = _spell(gm, geo, "Rappel de pierre")
+	check(not rp.is_empty() and String(Combat.parse(rp)["kind"]) == "recall_build", "Rappel de pierre disponible")
+	var wall_cells: int = gm.terrain_of(geo).size() - 1
+	check(gm.validate_cast(geo, rp, t2) == "" and gm.cast_spell(geo, rp, t2), "Rappel de pierre sur la muraille")
+	check(gm.terrain_of(geo).size() == n0 and gm.is_free(t2), "la muraille entière (%d cases) rentre sous terre" % wall_cells)
+	check(gm.validate_cast(geo, rp, Vector2i(-5, -5)) != "" or gm.validate_cast(geo, rp, gp) != "", "Rappel de pierre : il faut viser une construction")
+	var placed: int = gm.constructions_of(geo).size()
+	var tries: int = 0
+	for yy: int in range(gm.GRID_SIZE):
+		for xx: int in range(gm.GRID_SIZE):
+			var cc := Vector2i(xx, yy)
+			if placed >= 4 or tries > 40:
+				continue
+			if gm.is_free(cc) and Combat.manhattan(gp, cc) >= 1 and Combat.manhattan(gp, cc) <= 4:
+				tries += 1
+				geo["current_pa"] = 20
+				geo["casts"] = {}
+				if gm.cast_spell(geo, _spell(gm, geo, "Invoquer Pilier"), cc):
+					placed = gm.constructions_of(geo).size()
+	check(placed == 4, "4 constructions posées (%d)" % placed)
+	var free5 := Vector2i(-1, -1)
+	for yy2: int in range(gm.GRID_SIZE):
+		for xx2: int in range(gm.GRID_SIZE):
+			var c5 := Vector2i(xx2, yy2)
+			if free5.x < 0 and gm.is_free(c5) and Combat.manhattan(gp, c5) <= 4 and Combat.manhattan(gp, c5) >= 1:
+				free5 = c5
+	geo["casts"] = {}
+	check(gm.validate_cast(geo, _spell(gm, geo, "Invoquer Pilier"), free5).contains("4 constructions"), "5e construction refusée")
+	check(int(Combat.SUMMONS["Pilier"]["pv"]) > 70 and int(Combat.SUMMONS["Muraille"]["pv"]) > 70, "piliers et murailles plus solides qu'avant (70 PV)")
 	# Faille : bloque le passage mais pas la vue
 	var finfo: Dictionary = Combat.SUMMONS["Faille"]
 	check(not bool(finfo.get("blocks_los", false)) and bool(finfo["static"]), "la faille est infranchissable mais laisse voir")
@@ -101,12 +132,12 @@ func _boot() -> void:
 	check(not bool(cinfo.get("blocks_los", false)) and int(cinfo["defense"]) >= 40, "le cristal ambré est robuste et transparent")
 	# Durée de vie : le terrain s'effrite au fil des tours du Géomancien
 	gm.active_entity = geo
-	for i: int in range(4):
+	for i: int in range(5):
 		gm.active_entity = geo
 		gm.end_current_turn()
 	await process_frame
-	check(gm.terrain_of(geo).size() == 0 or gm.terrain_of(geo).all(func(e: Dictionary) -> bool: return int(e["lifetime"]) > 0), "le pilier de 4 tours a disparu ou expire")
-	check(not gm.is_alive(pil), "le pilier est détruit après 4 tours")
+	check(gm.terrain_of(geo).size() == 0 or gm.terrain_of(geo).all(func(e: Dictionary) -> bool: return int(e["lifetime"]) > 0), "le pilier de 5 tours a disparu ou expire")
+	check(not gm.is_alive(pil), "le pilier est détruit après 5 tours")
 	# Sorts : cibles de buff, zone
 	var tp2: Dictionary = Combat.parse(_spell(gm, geo, "Glyphe de grès"))
 	check(String(tp2["kind"]) == "glyph" and (tp2["glyph_allies"] as Dictionary)["buffs"].size() > 0, "Glyphe de grès : glyphe de défense pour les alliés")

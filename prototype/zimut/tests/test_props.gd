@@ -49,6 +49,20 @@ func _boot() -> void:
 		for oc: Vector2i in gm.obstacles.keys():
 			if String(gm.obstacles[oc]) != "void":
 				obstacles += 1
+		# V73 : plus d'arbres / rochers bloquants générés sur le plateau
+		if obstacles != 0:
+			print("  ÉCHEC  combat %d : %d obstacle(s) décoratif(s) généré(s)" % [fight + 1, obstacles])
+			fails += 1
+		# … mais l'affichage suit toujours la liste d'obstacles (ex. décor posé par un script)
+		var placed: int = 0
+		for yy: int in range(gm.GRID_SIZE):
+			for xx: int in range(gm.GRID_SIZE):
+				var cc := Vector2i(xx, yy)
+				if placed < 2 and gm.is_free(cc):
+					gm.obstacles[cc] = "tree" if placed == 0 else "rock"
+					placed += 1
+		obstacles = placed
+		grid._sync_now()
 		# les props de la génération précédente (queue_free) disparaissent à la fin de frame
 		await process_frame
 		await process_frame

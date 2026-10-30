@@ -26,7 +26,7 @@ func _boot() -> void:
 	var obs: Dictionary = {}
 	for vc: Vector2i in gm.shape_void_cells("ring", gm.GRID_SIZE, 0):
 		obs[vc] = "void"
-	obs[Vector2i(7, 7)] = "void"
+	obs[Vector2i(gm.GRID_SIZE - 1, gm.GRID_SIZE - 1)] = "void"
 	gm.obstacles = obs
 	grid._sync_props()
 	await process_frame
@@ -37,7 +37,7 @@ func _boot() -> void:
 		if p.ledge:
 			ledges += 1
 	check(ledges == 1, "seule la case du coin est un replat (%d)" % ledges)
-	var c = grid.cell_nodes[1][3]   # (3,1) juste derrière le trou central (3,2)
+	var c = grid.cell_nodes[2][3]   # (3,2) juste derrière le trou central (3,3) — plateau 10 × 10
 	check(c.pit_left and c.visible, "la case derrière le gouffre affiche sa paroi")
 	check(not grid.cell_nodes[3][3].visible, "la case vide n'est plus dessinée comme une tuile")
 	for b in ["Forêt", "Montagne", "Désert", "Donjon", "Brasier"]:

@@ -220,6 +220,7 @@ Souffle de vie,heal_leaf2
 Tempête de pétales,petal_storm
 Glyphe de grès,slash
 Invoquer Pilier,summon_pilier
+Rappel de pierre,shield
 Éclat de grès,sandstone
 Caillou,stone_fist
 Lance de cristal,crystal_lance

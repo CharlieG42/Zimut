@@ -224,7 +224,7 @@ Sylvain,88,Invoquer Tronc
 Sylvain,95,Souffle de vie
 Sylvain,100,Tempête de pétales
 Géomancien,1,Glyphe de grès;Invoquer Pilier;Éclat de grès
-Géomancien,3,Caillou
+Géomancien,3,Caillou;Rappel de pierre
 Géomancien,8,Entrave
 Géomancien,10,Lance de cristal
 Géomancien,12,Armure de pierre

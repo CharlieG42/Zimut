@@ -24,7 +24,7 @@ signal ai_turn_requested(entity)
 signal fx(kind: String, data: Dictionary)
 signal state_changed()
 
-const GRID_SIZE        := 8
+const GRID_SIZE        := 10         # V73 : plateaux 10 × 10 (8 × 8 auparavant)
 const CELL_SIZE        := Vector2i(140, 140)   # conservé pour compatibilité
 const CELL_HALF_OFFSET := Vector2i(70, 70)
 
@@ -213,21 +213,24 @@ static func shape_void_cells(shape: String, n: int, variant: int = 0) -> Array[V
 				"l_shape":   # en L : un quadrant retiré
 					cut = x >= q and y < q
 				"s_shape":   # en S : deux coins opposés retirés
-					cut = (x >= n - 3 and y < 3) or (x < 3 and y >= n - 3)
+					var k3: int = maxi(3, n * 3 / 8)
+					cut = (x >= n - k3 and y < k3) or (x < k3 and y >= n - k3)
 				"diagonal":  # bande en diagonale
-					cut = absi(x - y) > 3
+					cut = absi(x - y) > n / 2 - 1
 				"islands":   # deux îlots reliés par un pont étroit
 					var sm: int = x + y
 					cut = absi(sm - (n - 1)) <= 1 and absi(x - y) > 1
 				"rect":      # rectangle 8 × 6 (ou 6 × 8 transposé)
 					cut = y < 1 or y > n - 2
 				"ring":      # anneau : grand trou central
-					cut = dx < 2.0 and dy < 2.0
+					cut = dx < float(n) * 0.25 and dy < float(n) * 0.25
 				"ridge":     # crête sinueuse
-					cut = absf(float(y) - (mid + 1.6 * sin(float(x) * 0.85))) > 2.6
-				"dunes":     # deux cuvettes vides
-					cut = (float(x) - 1.5) * (float(x) - 1.5) + (float(y) - 5.5) * (float(y) - 5.5) <= 1.7 \
-						or (float(x) - 5.5) * (float(x) - 5.5) + (float(y) - 2.5) * (float(y) - 2.5) <= 1.7
+					cut = absf(float(y) - (mid + 1.6 * sin(float(x) * 0.85))) > float(n) * 0.33
+				"dunes":     # deux cuvettes vides (positions proportionnelles à la taille du plateau)
+					var ks: float = float(n - 1) / 7.0
+					var rr: float = 1.7 * ks * ks
+					cut = (float(x) - 1.5 * ks) * (float(x) - 1.5 * ks) + (float(y) - 5.5 * ks) * (float(y) - 5.5 * ks) <= rr \
+						or (float(x) - 5.5 * ks) * (float(x) - 5.5 * ks) + (float(y) - 2.5 * ks) * (float(y) - 2.5 * ks) <= rr
 			if cut:
 				var cx: int = x
 				var cy: int = y
@@ -253,7 +256,7 @@ func _generate_obstacles() -> void:
 	if board_shape != "square":
 		for vc: Vector2i in shape_void_cells(board_shape, GRID_SIZE, _rng.randi_range(0, 7)):
 			obstacles[vc] = "void"
-		if not _all_free_connected() or GRID_SIZE * GRID_SIZE - obstacles.size() < 36:
+		if not _all_free_connected() or GRID_SIZE * GRID_SIZE - obstacles.size() < GRID_SIZE * GRID_SIZE * 9 / 16:
 			obstacles = {}
 			board_shape = "square"
 	var void_count: int = obstacles.size()
@@ -261,7 +264,10 @@ func _generate_obstacles() -> void:
 	# Les positions de départ seront tirées parmi toutes les cases libres :
 	# les équipes peuvent donc être mélangées sur l'ensemble du plateau.
 	# La forêt garde des couloirs de déplacement plus lisibles : moins d’obstacles décoratifs.
-	var wanted: int = _rng.randi_range(5, 7) if fight_biome == "Forêt" else _rng.randi_range(6, 9)
+	# V73 : plus d'arbres ni de rochers bloquants SUR le plateau (ils figeaient chaque combat au même
+	# endroit) : le décor reste tout autour de l'aire de combat ; seules les formes de plateau (vide)
+	# et les constructions des héros (piliers, murailles…) structurent désormais le terrain.
+	var wanted: int = DECOR_OBSTACLES
 	var tree_chance: float = 0.55
 	match fight_biome:
 		"Montagne":
@@ -277,6 +283,10 @@ func _generate_obstacles() -> void:
 		obstacles[c] = "tree" if _rng.randf() < tree_chance else "rock"
 		if not _all_free_connected():
 			obstacles.erase(c)
+
+
+## Arbres / rochers bloquants posés sur le plateau (0 depuis la V73).
+const DECOR_OBSTACLES: int = 0
 
 
 func _all_free_connected() -> bool:
@@ -938,6 +948,19 @@ func _glyphs_expire(e: Dictionary) -> void:
 			message_requested.emit("%s s'efface." % g["name"])
 
 
+## V73 : nombre max de constructions (piliers, murailles) d'un Géomancien sur le plateau.
+const MAX_CONSTRUCTIONS: int = 4
+
+## Constructions distinctes (une muraille de 3 cases compte pour une) d'un Géomancien.
+func constructions_of(owner: Dictionary) -> Array:
+	var seen: Dictionary = {}
+	for s: Dictionary in terrain_of(owner):
+		if String(s.get("mech", "")) != "":
+			continue
+		seen[int(s.get("build", s.get("uid", -1)))] = true
+	return seen.keys()
+
+
 ## Cases de terrain (piliers, murailles, failles, cristaux) posées par un Géomancien.
 func terrain_of(owner: Dictionary) -> Array:
 	var out: Array = []
@@ -1432,8 +1455,8 @@ func validate_cast(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Str
 	if p["kind"] == "summon" and not terr and not is_beacon and summons_of(caster).size() >= 3:
 		return "Trop de familiers (3 max)."
 	var mech: String = String(Combat.SUMMONS.get(String(p["summon"]), {}).get("mech", ""))
-	if p["kind"] == "summon" and terr and mech == "" and terrain_of(caster).size() - mechs_of(caster).size() >= 8:
-		return "Trop de terrain modifié (8 cases max)."
+	if p["kind"] == "summon" and terr and mech == "" and constructions_of(caster).size() >= MAX_CONSTRUCTIONS:
+		return "4 constructions max : utilisez Rappel de pierre."
 	if p["kind"] == "summon" and mech != "":
 		var err: String = _validate_mech(caster, mech)
 		if err != "":
@@ -1448,6 +1471,10 @@ func validate_cast(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Str
 				return err2
 		if tk == "turret" and _turret_target(entity_at(cell)).is_empty():
 			return "Aucune cible à portée de la tourelle."
+	if p["kind"] == "recall_build":
+		var tb: Dictionary = entity_at(cell)
+		if tb.is_empty() or not bool(tb.get("terrain", false)) or String(tb.get("mech", "")) != "" or int(tb.get("owner", -1)) != int(caster["uid"]):
+			return "Il faut viser une de vos constructions."
 	if p["kind"] == "recall_mech":
 		var rk: String = trigger_kind(caster, cell)
 		if rk == "" or rk == "glyph":
@@ -1556,6 +1583,8 @@ func cast_spell(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> bool:
 			summary = _resolve_trigger_all(caster)
 		"recall_mech":
 			summary = _resolve_recall_mech(caster, cell)
+		"recall_build":
+			summary = _resolve_recall_build(caster, cell)
 		"maintain":
 			summary = _resolve_maintain(caster)
 		"recall":
@@ -1933,6 +1962,7 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 	}, true)
 	if bool(info.get("terrain", false)):
 		s["terrain"] = true
+		s["build"] = s["uid"]          # V73 : une muraille (3 cases) = une seule construction
 	if mech_kind != "":
 		s["mech"] = mech_kind
 		for k: String in info.keys():
@@ -2048,7 +2078,7 @@ func _tower_attacks(owner: Dictionary) -> void:
 		if best.is_empty():
 			continue
 		# V17/V19 : aligné sur les sorts des héros (/1,7)
-		var base: float = (28.0 + float(owner["level"]) * 0.9) / 2.0
+		var base: float = (36.0 + float(owner["level"]) * 1.1) / 2.0   # V73 : piliers plus puissants
 		var r: Dictionary = Combat.calc_damage(owner, best, base, "mag", 0.0, false, false)
 		fx.emit("cast", {"caster": tw, "spell": "Éclat du pilier", "kind": "attack", "dtype": "mag",
 			"from": tpos, "to": pos_of(best), "ranged": true, "cells": [pos_of(best)] as Array[Vector2i]})
@@ -2280,6 +2310,19 @@ func _resolve_trigger(caster: Dictionary, cell: Vector2i) -> String:
 		"glyph":
 			_retrigger_glyph(caster, cell)
 	return "%s déclenche un mécanisme." % caster["name"]
+
+
+## V73 : Rappel de pierre — la construction visée (pilier, ou muraille entière) rentre sous terre.
+func _resolve_recall_build(caster: Dictionary, cell: Vector2i) -> String:
+	var t: Dictionary = entity_at(cell)
+	var bid: int = int(t.get("build", t.get("uid", -1)))
+	var cells: Array[Vector2i] = []
+	for s: Dictionary in terrain_of(caster).duplicate():
+		if String(s.get("mech", "")) == "" and int(s.get("build", s.get("uid", -2))) == bid:
+			cells.append(pos_of(s))
+			remove_entity_from_grid(s)
+	fx.emit("beacon", {"from": cell, "cells": cells})
+	return "%s fait rentrer %s sous terre." % [caster["name"], String(t.get("classe", "une construction"))]
 
 
 ## V68 : Rappel — le mécanisme visé disparaît sans se déclencher (libère une place).

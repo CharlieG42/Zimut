@@ -240,15 +240,16 @@ Sylvain,Invoquer Tronc,3,0,1,Invoque un Tronc (contrôlable; 3PM/4PA),88,Invocat
 Sylvain,Souffle de vie,4,0,0,Restaure 88 PV à tous les alliés,95,Soin,0,0,88,0,0,0,0,0,0
 Sylvain,Tempête de pétales,4,0,5,83 dégâts magiques à tous les ennemis,100,Attaque,0,83,0,0,0,0,0,0,0
 Géomancien,Glyphe de grès,2,0,3,Trace un glyphe (3x3; 3 tours) : alliés +25% défense,1,Buff,0,0,0,0,0,0,0,0,0
-Géomancien,Invoquer Pilier,2,0,4,Fait surgir un pilier de grès : bloque le passage et la vue; attaque l'ennemi le plus proche dans un rayon de 4 cases (4 tours; 8 cases de terrain max),1,Invocation,0,0,0,0,0,0,0,0,0
+Géomancien,Invoquer Pilier,2,0,4,Fait surgir un pilier de grès robuste : bloque le passage et la vue; attaque l'ennemi le plus proche dans un rayon de 4 cases (5 tours; 4 constructions max),1,Invocation,0,0,0,0,0,0,0,0,0
 Géomancien,Éclat de grès,2,0,4,24 dégâts magiques,1,Attaque,24,0,0,0,0,0,0,0,0
 Géomancien,Caillou,1,0,4,14 dégâts magiques,3,Attaque,0,14,0,0,0,0,0,0,0
+Géomancien,Rappel de pierre,1,0,6,Fait rentrer sous terre une de vos constructions (pilier ou muraille entière) : libère sa place,3,Buff,0,0,0,0,0,0,0,0,0
 Géomancien,Entrave,2,0,4,Immobilise l'ennemi (1 tour),8,Debuff,0,0,0,0,0,0,0,0,0
 Géomancien,Lance de cristal,3,0,5,41 dégâts magiques,10,Attaque,41,0,0,0,0,0,0,0,0
 Géomancien,Armure de pierre,2,0,0,+20% défense (3 tours),12,Buff,0,0,0,0,0,0,0,0,0
 Géomancien,Pointe de roc,2,0,4,32 dégâts magiques [Combo immobilisation : bonus 50%],15,Attaque,0,32,0,0,0,0,0,0,0
 Géomancien,Poussière aveuglante,2,0,4,-20% dégâts (2 tours) + ralentit 1 pm (1 tour),18,Debuff,0,0,0,0,0,0,0,0,0
-Géomancien,Invoquer Muraille,3,0,4,Érige une muraille de 3 cases : bloque le passage et la vue (3 tours),20,Invocation,0,0,0,0,0,0,0,0,0
+Géomancien,Invoquer Muraille,3,0,4,Érige une muraille robuste de 3 cases : bloque le passage et la vue (4 tours; compte pour 1 construction),20,Invocation,0,0,0,0,0,0,0,0,0
 Géomancien,Glyphe de roche,3,0,4,Trace un glyphe (3x3; 3 tours) : alliés +20% défense,22,Buff,0,0,0,0,0,0,0,0,0
 Géomancien,Lame de grès,3,0,5,47 dégâts magiques + saignement (9 dégâts/tour; 2 tours),25,Attaque,0,47,0,0,0,0,0,0,0
 Géomancien,Régénération,2,0,3,Soigne 10 PV/tour pendant 3 tours,28,Soin,0,0,0,0,0,0,0,0,0

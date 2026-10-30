@@ -80,7 +80,10 @@ func _setup_camera() -> void:
 	if cam == null:
 		return
 	cam.enabled = true
-	cam.zoom = Vector2(1.30, 1.30)  # V62 : cadrage plus serré sur le plateau
+	# V62 : cadrage serré ; V73 : le zoom suit la taille du plateau (10 × 10 → cases et personnages
+	# un peu plus petits à l'écran, le plateau entier reste visible au même endroit).
+	var z: float = 1.30 * 8.0 / float(game_manager.GRID_SIZE)
+	cam.zoom = Vector2(z, z)
 	cam.position = grid_manager.grid_center() + Vector2(0, -30)
 	cam.position_smoothing_enabled = false
 	cam.make_current()
