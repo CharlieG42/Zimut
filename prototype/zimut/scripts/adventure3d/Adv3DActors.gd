@@ -65,6 +65,10 @@ static func _label(text: String, y: float, size_px: int = 40, col: Color = Color
 	l.modulate = col
 	l.no_depth_test = true
 	l.render_priority = 5
+	# V73 : les étiquettes lointaines s'effacent (moins de texte superposé, moins à dessiner)
+	l.visibility_range_end = 34.0
+	l.visibility_range_end_margin = 6.0
+	l.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 	return l
 
 
@@ -449,9 +453,18 @@ static func make_gate(dir: String, title: String, open: bool) -> Node3D:
 		var lb := _label("➜ " + title, 3.55, 34, col.lightened(0.3))
 		n.add_child(lb)
 		n.add_child(_label("route fermée", 3.12, 26, Color(1.0, 0.82, 0.72)))
+		_far_labels(n)
 		return n
 	n.add_child(_label("➜ " + title, 3.3, 34, col.lightened(0.3)))
+	_far_labels(n)
 	return n
+
+
+## Les noms des portes restent lisibles de loin (repères d'orientation).
+static func _far_labels(n: Node3D) -> void:
+	for ch: Node in n.get_children():
+		if ch is Label3D:
+			(ch as Label3D).visibility_range_end = 0.0
 
 
 ## Boîte orientée (demi-axes ax, ay, az) : planches en diagonale.

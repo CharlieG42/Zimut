@@ -158,6 +158,9 @@ static func point_walkable(t: Dictionary, p: Vector3) -> bool:
 		return false
 	if (t["voids"] as Dictionary).has(c):
 		return false
+	for so: Vector3 in (t.get("solids", []) as Array):     # bâtiments des lieux (x, z, rayon)
+		if Vector2(p.x - so.x, p.z - so.y).length() < so.z:
+			return false
 	if (t["obstacles"] as Dictionary).has(c) or (t.get("ponds", {}) as Dictionary).has(c):
 		var ctr := Vector3((float(c.x) + 0.5) * CELL, p.y, (float(c.y) + 0.5) * CELL)
 		return Vector2(p.x - ctr.x, p.z - ctr.z).length() >= OBSTACLE_RADIUS
