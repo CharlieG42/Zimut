@@ -554,31 +554,24 @@ const CONQUEST_CITY_REWARDS := {
 }
 
 ## Routes de la carte : on ne peut attaquer qu'une ville RELIÉE par route à
-## son territoire (arbre technologique spatial). Le Donjon n'est relié qu'aux
-## trois places fortes : il exige de tenir tout le monde de Zimut.
+## son territoire (arbre technologique spatial). Les routes suivent la géographie de
+## la carte peinte. Le Donjon n'ouvre qu'une fois tout le monde de Zimut tenu.
 const CONQUEST_ROUTES: Array = [
-	["capitale", "clairiere"], ["capitale", "pont_mousse"],
-	["clairiere", "vieille_tour"], ["clairiere", "fort_racine"],
-	["vieille_tour", "fort_racine"], ["pont_mousse", "fort_racine"],
-	["fort_racine", "hameau_pin"], ["hameau_pin", "garnison"],
-	["fort_racine", "oasis"], ["garnison", "tour_sable"], ["oasis", "tour_sable"],
-	["clairiere", "village_brume"], ["village_brume", "ruines_lierre"],
-	["village_brume", "abbaye_ronce"], ["ruines_lierre", "citadelle_ronce"],
-	["abbaye_ronce", "citadelle_ronce"], ["citadelle_ronce", "vieille_tour"],
-	["hameau_pin", "col_givre"], ["col_givre", "mine_cristal"],
-	["mine_cristal", "garnison"], ["garnison", "bastion_orage"],
-	["oasis", "caravanserail"], ["caravanserail", "observatoire"],
-	["observatoire", "port_sable"], ["port_sable", "tour_sable"],
-	["fort_racine", "donjon_roi"], ["garnison", "donjon_roi"], ["tour_sable", "donjon_roi"],
-	# Branches supplémentaires pour étendre la campagne au-delà du premier écran.
-	["fort_racine", "bois_lune"], ["bois_lune", "sanctuaire_mousse"],
-	["sanctuaire_mousse", "marais_spectres"], ["marais_spectres", "abbaye_ronce"],
-	["col_givre", "forge_givre"], ["forge_givre", "pic_foudroyant"],
-	["pic_foudroyant", "bastion_orage"], ["oasis", "fort_cendre"],
-	["fort_cendre", "temple_soleil"], ["temple_soleil", "citadelle_sable"],
-	["citadelle_sable", "port_sable"], ["citadelle_sable", "tour_sable"],
-	# V27 : Nation Rouages, au nord-est
-	["garnison", "atelier_cuivre"], ["atelier_cuivre", "citadelle_engrenages"], ["citadelle_engrenages", "tour_sable"],
+	["capitale", "clairiere"], ["capitale", "pont_mousse"], ["clairiere", "vieille_tour"],
+	["clairiere", "fort_racine"], ["pont_mousse", "fort_racine"], ["vieille_tour", "fort_racine"],
+	["vieille_tour", "bastion_orage"], ["bastion_orage", "pic_foudroyant"], ["pic_foudroyant", "col_givre"],
+	["fort_racine", "ruines_lierre"], ["pont_mousse", "sanctuaire_mousse"], ["sanctuaire_mousse", "ruines_lierre"],
+	["ruines_lierre", "village_brume"], ["village_brume", "bois_lune"], ["bois_lune", "marais_spectres"],
+	["sanctuaire_mousse", "village_brume"], ["sanctuaire_mousse", "fort_cendre"], ["fort_cendre", "citadelle_sable"],
+	["village_brume", "citadelle_sable"], ["ruines_lierre", "citadelle_ronce"], ["citadelle_ronce", "abbaye_ronce"],
+	["abbaye_ronce", "bois_lune"], ["fort_racine", "hameau_pin"], ["hameau_pin", "col_givre"],
+	["col_givre", "mine_cristal"], ["mine_cristal", "garnison"], ["citadelle_ronce", "hameau_pin"],
+	["col_givre", "donjon_roi"], ["garnison", "donjon_roi"], ["tour_sable", "donjon_roi"],
+	["garnison", "tour_sable"], ["mine_cristal", "oasis"], ["abbaye_ronce", "observatoire"],
+	["oasis", "temple_soleil"], ["temple_soleil", "tour_sable"], ["oasis", "observatoire"],
+	["oasis", "caravanserail"], ["caravanserail", "observatoire"], ["caravanserail", "port_sable"],
+	["port_sable", "tour_sable"], ["forge_givre", "caravanserail"], ["forge_givre", "marais_spectres"],
+	["tour_sable", "citadelle_engrenages"], ["atelier_cuivre", "citadelle_engrenages"], ["tour_sable", "atelier_cuivre"],
 ]
 
 ## Bâtiments de ressources constructibles dans les villes conquises.

@@ -73,6 +73,16 @@ Une ville **perdue** puis reprise reste **ruinée** : la chute coûte un niveau,
 - **Empire marchand** — 4 villes ou plus annexées par négociation.
 - **Bastion de Zimut** — villes développées (40 pts de niveaux) et 3+ gouverneurs.
 
+## Carte vivante (V60)
+La carte du monde n'est plus un plateau d'illustrations : chaque ville est posée **sur sa région peinte** (forêt, cimes, désert, Ronces, lave, archipels, Rouages) et le réseau de routes suit la géographie (`CONQUEST_ROUTES`, sans croisements).
+
+- **Repères compacts** (`ConquestMapLayers.Pin`) : médaillon coloré par l'état (★ capitale, ⚑ empire, ⌂ neutre, ⚔ adverse, ☠ forteresse d'un général, ? inconnue, ✖ perdue), liseré aux couleurs de la Nation, drapeau qui flotte sur les villes de l'empire, petites tours = niveau, pions rouges = avancée du siège, fumée = ville pillée/ruinée/perdue, cadenas sur le Donjon, anneau doré pulsant = attaquable, anneau rouge = offensive annoncée. L'illustration complète reste dans le conseil et l'écran de ville.
+- **Routes** (`ConquestMapLayers.Routes`) : pavées dorées dans l'empire, pointillés dorés animés avec flèche vers les villes attaquables, sentiers pâles ailleurs. Pendant une offensive, une **colonne ennemie** marche vers la ville menacée (elle avance à mesure que l'échéance approche).
+- **Territoire** : calculé une fois par changement (SubViewport « mise à jour unique ») en champ de métaballes → teinte plus vive et frontière dorée autour de l'empire, terres des places fortes ennemies assombries, **brouillard** animé sur les terres pas encore révélées en Aventure.
+- **Carte animée** (shader + masques `conquest_world_fx.png` : R = eau, G = lave, B = cristaux) : reflets sur l'eau, lave qui pulse, cristaux qui luisent, ombres de nuages qui dérivent ; navires, oiseaux et nuages traversent la carte. En qualité « Économie », la carte reste fixe.
+- Carte en 3072×2048 (`conquest_world_map.jpg`, mipmaps), vignette sur les bords, titre et légende fixes sur la vue.
+- Gultur présente la carte une fois (`conq_carte`).
+
 ## Sauvegarde
 Clés ajoutées à `conquest` (toutes optionnelles) : `city_levels`, `garrisons`, `threat`, `event_pending`, `news`, `truce`, `lost`, `rewarded`, `battle_count`, `event_cd`, `threat_cd`, `chancellor_cd`, `chancellor_seen`, `drill`, `roadworks`, `missions`, `missions_revealed`, `annexed_diplomacy`, `ruin`.
 

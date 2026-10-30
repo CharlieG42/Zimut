@@ -84,6 +84,12 @@ const CONQ_V59 := [
 	"Ne tarde pas trop : les villes adverses [b]renforcent leur garnison[/b] toutes les 3 victoires. Et pour un siège, prépare un [b]plan d'assaut[/b] : le blocus ou l'infiltration font sauter une vague sans combat.",
 	"Le conseil a deux onglets : [b]⚑ VILLE[/b] pour agir, [b]✎ CHRONIQUE[/b] pour relire les nouvelles de l'empire.",
 ]
+const CONQ_CARTE := [
+	"Regarde la carte, [b]{pseudo}[/b] : elle vit ! Ton [b]territoire[/b] s'illumine, bordé d'or, et tes villes hissent ton [b]drapeau[/b].",
+	"Les [b]flèches dorées en pointillés[/b] montrent les villes que tu peux attaquer. Les sentiers pâles mènent plus loin… quand tu auras avancé.",
+	"Le [b]brouillard[/b] cache les terres que tu n'as pas encore explorées en Aventure. Un [b]crâne[/b] signale la forteresse d'un général, des [b]points rouges[/b] l'avancée d'un siège, la [b]fumée[/b] une ville pillée.",
+	"Et si une [b]colonne ennemie[/b] marche sur une de tes villes, renforce-la vite !",
+]
 const CONQ_DIPLOMATIE := [
 	"Cette ville est [b]neutre[/b] : tu peux la gagner par les armes… ou par un [b]traité[/b] ! Le bouton [b]☮ NÉGOCIER[/b] l'annexe contre de l'or et sa ressource de spécialité.",
 	"Plus la ville est grande, plus le traité coûte cher, et tes émissaires doivent se reposer [b]3 victoires[/b] entre deux négociations. Les forteresses ennemies, elles, ne négocient jamais.",
