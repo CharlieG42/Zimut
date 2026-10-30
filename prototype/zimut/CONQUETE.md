@@ -52,6 +52,15 @@ Quatre généraux nommés tiennent les forteresses ennemies : **Tharok le Végé
 - Le vaincre journalise sa chute ; **tous les vaincre** affaiblit l'assaut du Donjon du Roi Squelette (-3 niveaux).
 - Compteur « ☠ N généraux en vie » dans l'en-tête de la carte.
 
+## Plans d'assaut (V59)
+Avant chaque bataille d'un siège ennemi (hors vague boss), le popup de préparation propose en plus des tactiques : 
+- **Blocus** (40 or) : fait avancer le siège d'une vague **sans combat** ; 35 % de représailles (une ville possédée est pillée 3 batailles).
+- **Infiltration** (50 or) : l'Assassin **libre** (ni gouverneur ni en mission) saborde une vague de l'intérieur — sans combat ni risque ; il revient à la victoire suivante.
+Un plan peut mener à l'annexion sans verser de sang (butin normal, général vaincu le cas échéant).
+
+## Reconquête ennemie (V59)
+Les villes non possédées accumulent une garnison adverse : +1 soldat toutes les 3 victoires (max 6), soit +1 niveau de bataille par tranche de 2 soldats. Attendre une cible la durcit — la garnison est affichée dans le panneau de la ville et le bonus appliqué au combat.
+
 ## Sauvegarde
 Clés ajoutées à `conquest` (toutes optionnelles) : `city_levels`, `garrisons`, `threat`, `event_pending`, `news`, `truce`, `lost`, `rewarded`, `battle_count`, `event_cd`, `threat_cd`, `chancellor_cd`, `chancellor_seen`, `drill`, `roadworks`, `missions`, `missions_revealed`.
 

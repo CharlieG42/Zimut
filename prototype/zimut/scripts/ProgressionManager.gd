@@ -2973,6 +2973,71 @@ func conquest_abort_mission(data: Dictionary, classe: String) -> String:
 func conquest_pending_event(conquest: Dictionary) -> Dictionary:
 	return ConquestSystem.pending_event(conquest)
 
+## Plans d'assault (V59) : application au lancement du siège d'une ville
+## adverse. Le blocus / l'infiltration font avancer le siège d'une vague sans
+## combat ; l'Assassin utilisé revient après 1 bataille.
+func conquest_apply_plan(data: Dictionary, city_id: String, plan: String) -> String:
+	var conquest: Dictionary = data.get("conquest", {})
+	var out: Dictionary = ConquestSystem.apply_plan(data, conquest, city_id, plan, _rng)
+	if String(out.get("error", "")) != "":
+		return String(out["error"])
+	if bool(out.get("skipped", false)):
+		var sieges: Dictionary = conquest.get("sieges", {})
+		var progress: int = int(sieges.get(city_id, 0)) + 1
+		if progress >= conquest_city_battles(city_id, conquest):
+			_progress_to_annex(data, conquest, city_id)
+		else:
+			sieges[city_id] = progress
+			conquest["sieges"] = sieges
+			conquest_add_event(conquest, "Plan réussi : %s — %d/%d victoires" % [conquest_city_name(city_id), progress, conquest_city_battles(city_id, conquest)])
+	data["conquest"] = conquest
+	return ""
+
+## Annexions déclenchées par un plan (blocus/infiltration menant à la victoire
+## finale du siège) : mêmes effets que la victoire au combat, sans bataille.
+func _progress_to_annex(data: Dictionary, conquest: Dictionary, city_id: String) -> void:
+	var owned: Array = conquest.get("owned", ["capitale"])
+	if not owned.has(city_id):
+		owned.append(city_id)
+		conquest["owned"] = owned
+		conquest_add_event(conquest, "Ville annexée : %s" % conquest_city_name(city_id))
+		conquest["just_annexed"] = city_id
+		var rewarded: Array = conquest.get("rewarded", [])
+		if not rewarded.has(city_id):
+			var reward: Dictionary = CONQUEST_CITY_REWARDS.get(city_id, {})
+			rewarded.append(city_id)
+			conquest["rewarded"] = rewarded
+			if not reward.is_empty():
+				add_resources(data, reward.get("resources", {}))
+				data["gold"] = int(data.get("gold", 0)) + int(reward.get("gold", 0))
+				conquest["last_city_reward"] = {"city": city_id,
+					"name": String(reward.get("name", "Butin de conquête")),
+					"resources": reward.get("resources", {}).duplicate(true),
+					"gold": int(reward.get("gold", 0))}
+	var sieges: Dictionary = conquest.get("sieges", {})
+	sieges.erase(city_id)
+	conquest["sieges"] = sieges
+	conquest["pending_city"] = ""
+	conquest.erase("pending_level")
+	var fallen_general: String = String(ConquestSystem.GENERALS.get(city_id, {}).get("name", ""))
+	if fallen_general != "":
+		conquest_add_event(conquest, "☠ %s est vaincu ! Sa région ne lance plus d'offensives." % fallen_general)
+		if ConquestSystem.living_generals_count(conquest) == 0:
+			conquest_add_event(conquest, "★ Tous les généraux du Roi Squelette sont tombés : l'assaut du Donjon s'annonce moins redoutable.")
+
+## Garnison adverse d'une ville non possédée (reconquête ennemie, V59).
+func conquest_enemy_garrison(conquest: Dictionary, city_id: String) -> int:
+	return ConquestSystem.enemy_garrison(conquest, city_id)
+
+func conquest_enemy_garrison_bonus(conquest: Dictionary, city_id: String) -> int:
+	return ConquestSystem.enemy_garrison_bonus(conquest, city_id)
+
+func conquest_plan_cost(plan: String) -> int:
+	return ConquestSystem.plan_cost(plan)
+
+func conquest_infiltration_ready(conquest: Dictionary) -> bool:
+	return ConquestSystem.infiltration_ready(conquest)
+
 func conquest_resolve_event(data: Dictionary, option_id: String) -> String:
 	var names: Dictionary = {}
 	for cid: String in CONQUEST_CITIES.keys():

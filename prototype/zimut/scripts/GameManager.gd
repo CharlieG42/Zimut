@@ -499,6 +499,8 @@ func init_entities() -> void:
 				lvl = maxi(1, lvl - 3)
 			# Un général vivant durcit le siège de sa forteresse (+3 niveaux).
 			lvl = maxi(1, lvl + ConquestSystem.general_defense_bonus(conquest, String(conquest.get("pending_city", ""))))
+			# Reconquête ennemie : la garnison adverse durcit les batailles.
+			lvl = maxi(1, lvl + ConquestSystem.enemy_garrison_bonus(conquest, String(conquest.get("pending_city", ""))))
 	# En Aventure, le défi en cours (POI) fixe le niveau du combat : le
 	# brouillard, les POI et les zones sont dans ProgressionManager/AdventureManager.
 	if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "adventure":

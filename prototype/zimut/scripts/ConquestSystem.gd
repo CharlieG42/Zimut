@@ -74,6 +74,17 @@ const GENERAL_DEF_BONUS := 3
 const GENERAL_THREAT_BONUS := 2
 const GENERAL_THREAT_CHANCE := 0.25
 
+## Plans d'assaut (sièges ennemis) : le blocus et l'infiltration font
+## progresser le siège d'une vague sans combat, au prix d'un risque ou d'un
+## héros libre. L'assaut direct reste la voie des armes.
+const PLAN_COST := {"blocus": 40, "infiltration": 50}
+const PLAN_RAID_CHANCE := 0.35
+
+## Reconquête ennemie : les villes non possédées se garnissent au fil de vos
+## victoires — attendre une cible la durcit.
+const GARRISON_EVERY := 3
+const GARRISON_MAX := 6
+
 ## Spécialité économique de chaque ville (biome/Nation) : ressources versées
 ## à chaque victoire, mises à l'échelle du niveau de la ville. Les villes sans
 ## entrée (capitale, Donjon) n'ont pas de spécialité.
@@ -398,6 +409,9 @@ static func _tick_missions(data: Dictionary, conq: Dictionary, rng: RandomNumber
 			continue
 		m.erase(classe)
 		var type: String = String(job.get("type", "caravane"))
+		if type == "infiltration":
+			note(conq, "⚑ %s revient de l'infiltration : il reprend sa place au combat." % classe)
+			continue
 		var info: Dictionary = MISSION_TYPES.get(type, {})
 		var lvl: int = hero_level(data, classe)
 		if rng.randf() < MISSION_CHANCE:
@@ -488,6 +502,75 @@ static func _maybe_general_threat(data: Dictionary, conq: Dictionary, rng: Rando
 	conq["threat"] = {"city": id, "power": power, "eta": THREAT_ETA, "general": gname}
 	conq["threat_cd"] = 0
 	note(conq, "☠ %s, général du Roi Squelette, prépare une offensive (force %d) sur %s dans %d batailles !" % [gname, power, _name(conq, id), THREAT_ETA])
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  Plans d'assalt (sièges ennemis)
+# ═════════════════════════════════════════════════════════════════════════════
+
+## Coût en or du plan d'assaut (0 pour l'assaut direct).
+static func plan_cost(plan: String) -> int:
+	return int(PLAN_COST.get(plan, 0))
+
+## L'infiltration exige l'Assassin libre (ni gouverneur ni en mission).
+static func infiltration_ready(conq: Dictionary) -> bool:
+	return hero_city(conq, "Assassin") == "" and hero_on_mission(conq, "Assassin").is_empty()
+
+## Applique un plan d'assaut au lancement du siège : débite l'or, engage
+## l'Assassin si besoin, retourne {"error": raison} en cas de refus.
+## Retour {"skipped": true} si le plan fait avancer le siège d'une vague sans
+## combat (blocus / infiltration) ; l'Assassin revient après 1 bataille.
+static func apply_plan(data: Dictionary, conq: Dictionary, id: String, plan: String, rng: RandomNumberGenerator) -> Dictionary:
+	if (conq.get("owned", []) as Array).has(id):
+		return {"error": "Ville déjà conquise."}
+	match plan:
+		"direct":
+			return {"skipped": false}
+		"blocus":
+			var cost: int = plan_cost("blocus")
+			if int(data.get("gold", 0)) < cost:
+				return {"error": "Or insuffisant : %d pièces requises." % cost}
+			data["gold"] = int(data.get("gold", 0)) - cost
+			if rng.randf() < PLAN_RAID_CHANCE:
+				var pool: Array = _target_pool(conq, [], "", true)
+			if not pool.is_empty():
+				var rid: String = String(pool[rng.randi_range(0, pool.size() - 1)])
+				var r: Dictionary = conq.get("ravage", {})
+				r[rid] = RAVAGE_BATTLES
+					conq["ravage"] = r
+					note(conq, "Le blocus de %s agace l'ennemi : %s est pillée (%d batailles) !" % [_name(conq, id), _name(conq, rid), RAVAGE_BATTLES])
+				else:
+				note(conq, "Le blocus de %s resserre l'étau : une vague saute sans combat." % _name(conq, id))
+			return {"skipped": true}
+		"infiltration":
+			if not infiltration_ready(conq):
+				return {"error": "L'Assassin doit être libre (ni gouverneur ni en mission)."}
+			var cost2: int = plan_cost("infiltration")
+			if int(data.get("gold", 0)) < cost2:
+				return {"error": "Or insuffisant : %d pièces requises." % cost2}
+			data["gold"] = int(data.get("gold", 0)) - cost2
+			var m: Dictionary = missions(conq)
+			m["Assassin"] = {"type": "infiltration", "eta": 1}
+			conq["missions"] = m
+			note(conq, "L'Assassin s'infiltre dans %s : une vague ennemie est sabordée de l'intérieur. Il revient à la prochaine victoire." % _name(conq, id))
+			return {"skipped": true}
+	return {"error": "Plan d'assaut inconnu."}
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  Reconquête ennemie : garnisons adverses croissantes
+# ═════════════════════════════════════════════════════════════════════════════
+
+## Garnison adverse d'une ville non possédée (0 pour une ville possédée).
+## Elle monte de 1 toutes les GARRISON_EVERY victoires du joueur, max GARRISON_MAX.
+static func enemy_garrison(conq: Dictionary, id: String) -> int:
+	if (conq.get("owned", []) as Array).has(id):
+		return 0
+	var battles: int = int(conq.get("battle_count", 0))
+	return mini(GARRISON_MAX, int(battles / float(GARRISON_EVERY)))
+
+## Bonus de niveau des batailles contre une ville défendue (+1 par tranche de 2
+## soldats adverses) : attendre une cible la rend plus dure.
+static func enemy_garrison_bonus(conq: Dictionary, id: String) -> int:
+	return int(enemy_garrison(conq, id) / 2.0)
 
 static func _set_garrison(conq: Dictionary, id: String, n: int, hero: String) -> void:
 	var g: Dictionary = conq.get("garrisons", {})

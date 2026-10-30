@@ -786,6 +786,10 @@ func _select_city(id: String) -> void:
 				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), city["desc"]]
 		if id == "donjon_roi" and not ProgressionManager.conquest_empire_complete(_conquest):
 			_message.text += "\n\n★ Objectif final : verrouillé tant que tout Zimut n'est pas sous votre contrôle."
+		# Reconquête ennemie : la garnison adverse grossit avec le temps.
+		var eg: int = ProgressionManager.conquest_enemy_garrison(_conquest, id)
+		if eg > 0:
+			_message.text += "\n\n⚑ Garnison adverse : %d soldat(s) (+%d niveau(x) de bataille). Attendre la durcit encore." % [eg, ProgressionManager.conquest_enemy_garrison_bonus(_conquest, id)]
 		_show_challenge(id if attackable else "")
 		if attackable:
 			_attack.disabled = false
@@ -1265,11 +1269,58 @@ func _show_assault_prep() -> void:
 		dim.queue_free()
 		_choose_assault_tactic("none"))
 	box.add_child(none)
+	# V59 plans d'assaut : blocus et infiltration ne déclenchent pas de combat,
+	# ils font avancer le siège d'une vague sans verser de sang (sièges ennemis).
+	if String(city["kind"]) == "enemy" \
+			and ProgressionManager.conquest_siege_wave(_conquest, _selected_id) < ProgressionManager.CONQUEST_SIEGE_BATTLES:
+		var plans_head := Label.new()
+		plans_head.text = "─ PLANS D'ASSAUT (sans combat) ─"
+		plans_head.add_theme_font_size_override("font_size", 16)
+		plans_head.add_theme_color_override("font_color", GOLD)
+		box.add_child(plans_head)
+		var blocus := Button.new()
+		blocus.text = "⛓ BLOCUS — %d or\nSaute une vague sans combat ; 35 %% de représailles (pillage)" % ProgressionManager.conquest_plan_cost("blocus")
+		blocus.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		blocus.custom_minimum_size.y = 62
+		blocus.add_theme_font_size_override("font_size", 17)
+		blocus.disabled = gold < ProgressionManager.conquest_plan_cost("blocus")
+		blocus.pressed.connect(func() -> void:
+			dim.queue_free()
+			_apply_plan("blocus"))
+		box.add_child(blocus)
+		var infiltr := Button.new()
+		infiltr.text = "🗡 INFILTRATION — %d or\nL'Assassin libre saborde une vague de l'intérieur ; il revient à la prochaine victoire" % ProgressionManager.conquest_plan_cost("infiltration")
+		infiltr.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		infiltr.custom_minimum_size.y = 62
+		infiltr.add_theme_font_size_override("font_size", 17)
+		infiltr.disabled = gold < ProgressionManager.conquest_plan_cost("infiltration") \
+			or not ProgressionManager.conquest_infiltration_ready(_conquest)
+		infiltr.pressed.connect(func() -> void:
+			dim.queue_free()
+			_apply_plan("infiltration"))
+		box.add_child(infiltr)
 	var cancel := Button.new()
 	cancel.text = "ANNULER"
 	cancel.custom_minimum_size.y = 48
 	cancel.pressed.connect(func() -> void: dim.queue_free())
 	box.add_child(cancel)
+
+## Plan d'assaut sans combat (blocus / infiltration) : le siège avance d'une
+## vague, la carte se rafraîchit, aucun combat n'est lancé.
+func _apply_plan(plan: String) -> void:
+	var err: String = ProgressionManager.conquest_apply_plan(_save, _selected_id, plan)
+	if err != "":
+		_message.text = err
+		return
+	_conquest = _save.get("conquest", {})
+	_persist()
+	_refresh_header()
+	_select_city(_selected_id)
+	if not (_conquest.get("news", []) as Array).is_empty():
+		_show_popup("NOUVELLES DE L'EMPIRE", "\n\n".join(PackedStringArray(_conquest["news"])))
+		_conquest["news"] = []
+		_save["conquest"] = _conquest
+		_persist()
 
 func _choose_assault_tactic(tactic: String) -> void:
 	# Les coûts sont validés et débités par ProgressionManager, également

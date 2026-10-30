@@ -345,6 +345,56 @@ func _boot() -> void:
 	# Ville neutre : pas de général
 	check(ConquestSystem.general_of(gcq, "clairiere") == "", "une ville neutre n'a pas de général")
 
+	# ── V59 Plans d'assaut : blocus et infiltration ──
+	var pl: Dictionary = _fresh(["capitale", "clairiere", "pont_mousse"])
+	var plcq: Dictionary = pl["conquest"]
+	plcq["sieges"] = {"vieille_tour": 1}
+	pl["conquest"] = plcq
+	check(ConquestSystem.plan_cost("blocus") == 40 and ConquestSystem.plan_cost("infiltration") == 50, "coûts des plans")
+	check(ConquestSystem.infiltration_ready(plcq), "Assassin libre au départ")
+	pm.conquest_assign_hero(pl, "clairiere", "Assassin")
+	check(not ConquestSystem.infiltration_ready(pl["conquest"]), "Assassin gouverneur : infiltration impossible")
+	pm.conquest_recall_hero(pl, "clairiere")
+	# Blocus : or débité, siège avancé d'une vague (sans combat)
+	var g0b: int = int(pl["gold"])
+	var outb: Dictionary = ConquestSystem.apply_plan(pl, pl["conquest"], "vieille_tour", "blocus", rng)
+	check(String(outb.get("error", "")) == "" and bool(outb.get("skipped", false)), "blocus accepté")
+	check(int(pl["gold"]) == g0b - 40, "blocus : 40 or débités")
+	# Infiltration : Assassin parti 1 bataille, mission spéciale
+	var outi: Dictionary = ConquestSystem.apply_plan(pl, pl["conquest"], "vieille_tour", "infiltration", rng)
+	check(String(outi.get("error", "")) == "" and bool(outi.get("skipped", false)), "infiltration acceptée")
+	check(ConquestSystem.hero_on_mission(pl["conquest"], "Assassin").get("type", "") == "infiltration", "l'Assassin est en mission d'infiltration")
+	check(not ConquestSystem.infiltration_ready(pl["conquest"]), "Assassin en mission : pas deux infiltrations")
+	# Retour de l'Assassin après 1 victoire
+	var pr := RandomNumberGenerator.new()
+	pr.seed = 21
+	ConquestSystem.after_victory(pl, pl["conquest"], pr, pm.CONQUEST_ROUTES, names, "", [])
+	check(ConquestSystem.missions(pl["conquest"]).is_empty(), "l'Assassin revient après 1 victoire")
+	# Or insuffisant
+	pl["gold"] = 10
+	check(String(ConquestSystem.apply_plan(pl, pl["conquest"], "fort_racine", "blocus", rng).get("error", "")).begins_with("Or insuffisant"), "blocus refusé sans or")
+	# Plan inconnu
+	check(String(ConquestSystem.apply_plan(pl, pl["conquest"], "fort_racine", "zigzag", rng).get("error", "")) != "", "plan inconnu refusé")
+	# Progression complète du siège via ProgressionManager (annexion sans combat)
+	var pv: Dictionary = _fresh(["capitale", "clairiere", "pont_mousse"])
+	pv["conquest"]["sieges"] = {"vieille_tour": 3}
+	check(pm.conquest_apply_plan(pv, "vieille_tour", "blocus") == "", "blocus final : annexion sans combat")
+	check((pv["conquest"]["owned"] as Array).has("vieille_tour"), "ville annexée par le blocus")
+	check(String(pv["conquest"].get("pending_city", "")) == "", "plus de cible en attente après l'annexion par plan")
+
+	# ── V59 Reconquête ennemie : garnisons croissantes ──
+	var rg: Dictionary = _fresh(["capitale", "clairiere"])
+	var rgcq: Dictionary = rg["conquest"]
+	check(ConquestSystem.enemy_garrison(rgcq, "fort_racine") == 0, "aucune garnison adverse au départ")
+	rgcq["battle_count"] = 2
+	check(ConquestSystem.enemy_garrison(rgcq, "fort_racine") == 0, "2 victoires : pas encore de renfort")
+	rgcq["battle_count"] = 3
+	check(ConquestSystem.enemy_garrison(rgcq, "fort_racine") == 1, "3 victoires : +1 soldat adverse")
+	rgcq["battle_count"] = 30
+	check(ConquestSystem.enemy_garrison(rgcq, "fort_racine") == 6, "garnison adverse plafonnée à 6")
+	check(ConquestSystem.enemy_garrison_bonus(rgcq, "fort_racine") == 3, "bonus de niveau : +3")
+	check(ConquestSystem.enemy_garrison(rgcq, "clairiere") == 0, "ville possédée : pas de garnison adverse")
+
 	# Sauvegarde / rechargement JSON
 	var js: String = JSON.stringify(lg)
 	var back: Variant = JSON.parse_string(js)

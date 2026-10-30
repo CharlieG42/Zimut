@@ -28,6 +28,11 @@
 - Vaincus : journal de la chute ; tous vaincus → assaut du Donjon -3 niveaux et message « ★ Tous les généraux sont tombés ».
 - Compteur en tête de carte : « ☠ N général(aux) du Roi Squelette en vie ».
 
+## Plans d'assaut (sans combat) et reconquête ennemie
+- **Blocus** (40 or) et **Infiltration** (50 or, Assassin libre requis) : font avancer un siège ennemi d'une vague sans combat, depuis le popup de préparation (pas proposés sur la vague boss). Le blocus risque des représailles (35 % : pillage d'une ville possédée) ; l'infiltration est sûre mais l'Assassin revient à la victoire suivante (mission « infiltration » de 1 bataille).
+- Un plan peut annexer la ville sans combat (annexion, butin, chute du général le cas échéant : `conquest_apply_plan` → `_progress_to_annex`).
+- **Reconquête ennemie** : chaque ville non possédée gagne 1 soldat de garnison toutes les 3 victoires (max 6) ; +1 niveau de bataille par tranche de 2 soldats (`enemy_garrison_bonus`, appliqué dans `GameManager`), affiché sur la carte (« ⚑ Garnison adverse ») — attendre une cible la durcit.
+
 ## Détail des modifications
 - `prototype/zimut/scripts/ConquestSystem.gd` : moteur (constantes, `CITY_TRAITS`, édits, buffs, `defense`, `after_victory`).
 - `prototype/zimut/scripts/ProgressionManager.gd` : production d'empire (+ spécialités, + routes) et `conquest_city_trait`.
