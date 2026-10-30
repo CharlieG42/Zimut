@@ -21,6 +21,8 @@ var _cells_layer: Node2D
 var _biome: String = ""
 var _entity_layer: Node2D
 var _fx_layer: Node2D
+var _ground_fx: Node2D = null
+var _hit_stopping: bool = false
 var _forest_ambience: ForestAmbience
 var _scenery: SceneryBake
 var _scenery_over: SceneryOver
@@ -124,6 +126,10 @@ func _build_layers() -> void:
 	_forest_ambience.z_index = 0
 	_forest_ambience.configure(game_manager.GRID_SIZE, TILE_W, TILE_H, game_manager.fight_biome == "Forêt")
 	add_child(_forest_ambience)
+	# V73 : traces d'impact au sol (sous les personnages)
+	_ground_fx = Node2D.new()
+	_ground_fx.name = "GroundFX"
+	add_child(_ground_fx)
 	_entity_layer = Node2D.new()
 	_entity_layer.name = "Entities"
 	_entity_layer.y_sort_enabled = true
@@ -760,6 +766,8 @@ func _play_cast(d: Dictionary) -> void:
 		var phys: bool = String(d["dtype"]) == "phys"
 		if d["ranged"] and v != null:
 			_charge(v, elem, phys)   # V47 : charge d'incantation / élan côté lanceur
+			if not phys:
+				_rune(v.position, col)   # V73 : sceau de l'élément sous le lanceur
 			v.tint_flash(col, 0.3, 0.35)
 			await _wait(0.12)
 			v.play_pose("attack", 0.6, String(d.get("spell", "")))
@@ -797,6 +805,8 @@ func _play_cast(d: Dictionary) -> void:
 
 ## V47 : nombre d'effets à l'écran borné (lisibilité + perfs mobile).
 func _fx_ok(limit: int = 70) -> bool:
+	if GfxQuality.low():
+		limit = int(float(limit) * 0.6)     # Économie : moins d'effets simultanés
 	return _fx_layer != null and _fx_layer.get_child_count() < limit
 
 
@@ -971,6 +981,41 @@ func _pillar(pos: Vector2, col: Color) -> void:
 
 
 ## Impact visuel d'un sort selon son élément.
+## V73 : style de trace au sol par élément : [style, couleur, couleur intérieure].
+const DECALS := {
+	"fire": ["scorch", Color(0.10, 0.06, 0.04), Color(1.0, 0.45, 0.10)], "ice": ["frost", Color(0.85, 0.95, 1.0), Color(0.55, 0.85, 1.0)],
+	"water": ["puddle", Color(0.25, 0.55, 0.95), Color(0.65, 0.88, 1.0)], "poison": ["puddle", Color(0.40, 0.75, 0.20), Color(0.62, 0.30, 0.80)],
+	"shadow": ["puddle", Color(0.18, 0.06, 0.30), Color(0.45, 0.20, 0.70)], "earth": ["crack", Color.BLACK, Color.BLACK],
+	"holy": ["glow", Color(1.0, 0.95, 0.55), Color(1.0, 1.0, 1.0)], "arcane": ["glow", Color(0.62, 0.50, 1.0), Color(0.92, 0.82, 1.0)],
+	"nature": ["puddle", Color(0.24, 0.50, 0.18), Color(0.50, 0.85, 0.30)], "lightning": ["scorch", Color(0.12, 0.12, 0.18), Color(0.70, 0.80, 1.0)],
+}
+
+
+func _decal(cell: Vector2i, elem: String) -> void:
+	if not DECALS.has(elem) or _ground_fx == null or _ground_fx.get_child_count() > 16:
+		return
+	var info: Array = DECALS[elem]
+	var dc := SpellFx.GroundMark.new()
+	dc.style = String(info[0])
+	dc.col = info[1]
+	dc.col2 = info[2]
+	dc.seed_v = cell.x * 31 + cell.y * 7 + _ground_fx.get_child_count()
+	dc.position = grid_to_screen(cell.x, cell.y)
+	_ground_fx.add_child(dc)
+
+
+## V73 : arrêt sur image très bref sur les coups critiques (sensation d'impact).
+func _hit_stop(sec: float) -> void:
+	if not is_inside_tree() or _hit_stopping:
+		return
+	_hit_stopping = true
+	var prev: float = Engine.time_scale
+	Engine.time_scale = prev * 0.12
+	await get_tree().create_timer(sec, true, false, true).timeout
+	Engine.time_scale = prev
+	_hit_stopping = false
+
+
 func _impact(pos: Vector2, elem: String, crit: bool) -> void:
 	var cols: Array = SpellFx.colors(elem)
 	var col: Color = cols[0]
@@ -1050,6 +1095,10 @@ func _play_damage(d: Dictionary) -> void:
 		_float_text(v, "Dans le dos !", Color(1.0, 0.7, 0.3), 20)
 	var elem: String = "poison" if dtype == "dot" else ("earth" if dtype == "fall" else _cur_element)
 	_impact(v.position + Vector2(0, -44), elem, crit)
+	_decal(game_manager.pos_of(t), elem)
+	_ring(v.position, SpellFx.colors(elem)[0], 6.0, 46.0 if crit else 34.0, 0.4, 4.0)   # onde au sol sous la cible
+	if crit:
+		_hit_stop(0.07)
 	v.tint_flash(SpellFx.colors(elem)[0], 0.28, 0.75 if crit else 0.55)   # V47 : le sprite touché prend la teinte de l'élément
 	Sfx.play("crit" if crit else "hit")
 	if crit:

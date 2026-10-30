@@ -30,6 +30,7 @@ GameSettings="*res://scripts/GameSettings.gd"
 Loc="*res://scripts/Loc.gd"
 AssetCache="*res://scripts/AssetCache.gd"
 PlayTimer="*res://scripts/PlayTimer.gd"
+SceneVeil="*res://scripts/SceneVeil.gd"
 
 [display]
 

@@ -7,7 +7,7 @@ extends Node3D
 const DIR := "res://assets/adventure3d/gligli/"
 const FOLLOW_BEHIND := 1.5
 const FOLLOW_SIDE := 0.7
-const MAX_SPEED := 6.4
+const MAX_SPEED := 7.2
 const RADIUS := 0.25
 
 var terrain: Dictionary = {}

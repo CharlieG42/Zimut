@@ -73,7 +73,10 @@ func _ready() -> void:
 	_build_environment()
 	world_root = Adv3DWorld.build(zone_id)
 	add_child(world_root)
-	_clouds = Adv3DWorld.make_clouds(terrain["size"], absi(zone_id.hash()))
+	var wpal: Dictionary = Adv3DWorld.palette(String(terrain["biome"]))
+	_clouds = Adv3DWorld.make_clouds(terrain["size"], absi(zone_id.hash()), not bool(wpal.get("sea", false)))
+	if bool(wpal.get("sea", false)):
+		add_child(Adv3DWorld.make_sea(terrain["size"]))
 	add_child(_clouds)
 	_islets = Adv3DWorld.make_islets(terrain["size"], String(terrain["biome"]), absi(zone_id.hash()))
 	add_child(_islets)
@@ -108,17 +111,18 @@ func _build_environment() -> void:
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.78, 0.84, 0.92)
-	env.ambient_light_energy = 0.55
+	env.ambient_light_color = (pal.get("ambient", Color(0.78, 0.84, 0.92)) as Color).lerp(Color(0.78, 0.84, 0.92), 0.35)
+	env.ambient_light_energy = 0.6
 	env.fog_enabled = true
 	env.fog_light_color = pal["fog"]
-	env.fog_density = 0.0035
+	env.fog_density = float(pal.get("fog_density", 0.0035))
+	env.fog_sky_affect = 0.35
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.glow_enabled = true
+	env.glow_enabled = not GfxQuality.low()      # Économie : pas de halo (coûteux sur mobile)
 	env.glow_intensity = 0.5
 	env.glow_bloom = 0.04
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 1.15
+	env.adjustment_saturation = float(pal.get("sat", 1.15))
 	env.adjustment_contrast = 1.06
 	var we := WorldEnvironment.new()
 	we.environment = env
@@ -127,6 +131,24 @@ func _build_environment() -> void:
 	sun.light_color = pal["sun"]
 	sun.light_energy = 1.0
 	sun.rotation_degrees = Vector3(-52.0, -38.0, 0.0)
+	# Heure de la zone : soir doré (soleil bas, longues ombres) ou matin rosé et brumeux
+	match Adv3DWorld.time_of_day(zone_id, String(terrain["biome"])):
+		"soir":
+			sun.light_color = (pal["sun"] as Color).lerp(Color(1.0, 0.64, 0.38), 0.65)
+			sun.light_energy = 0.95
+			sun.rotation_degrees = Vector3(-20.0, -62.0, 0.0)
+			sky_mat.sky_horizon_color = (pal["sky_hor"] as Color).lerp(Color(1.0, 0.62, 0.38), 0.5)
+			sky_mat.sky_top_color = (pal["sky_top"] as Color).lerp(Color(0.30, 0.34, 0.62), 0.35)
+			sky_mat.ground_horizon_color = sky_mat.sky_horizon_color
+			env.fog_light_color = (pal["fog"] as Color).lerp(Color(0.98, 0.70, 0.50), 0.45)
+			env.ambient_light_color = env.ambient_light_color.lerp(Color(0.95, 0.78, 0.68), 0.3)
+		"matin":
+			sun.light_color = (pal["sun"] as Color).lerp(Color(1.0, 0.86, 0.78), 0.5)
+			sun.rotation_degrees = Vector3(-28.0, 42.0, 0.0)
+			sky_mat.sky_horizon_color = (pal["sky_hor"] as Color).lerp(Color(1.0, 0.84, 0.86), 0.35)
+			sky_mat.ground_horizon_color = sky_mat.sky_horizon_color
+			env.fog_light_color = (pal["fog"] as Color).lerp(Color(0.94, 0.90, 0.95), 0.4)
+			env.fog_density = float(pal.get("fog_density", 0.0035)) * 1.7
 	sun.shadow_enabled = false          # mobile d'abord : pas d'ombres temps réel
 	add_child(sun)
 
@@ -168,42 +190,58 @@ func _build_ambient() -> void:
 	orb.radial_segments = 6
 	orb.rings = 3
 	p.mesh = orb
-	match biome:
-		"Montagne":
-			p.amount = 90
-			p.lifetime = 7.0
-			p.gravity = Vector3(0.25, -1.0, 0.1)
-			p.initial_velocity_min = 0.0
-			p.initial_velocity_max = 0.4
-			p.scale_amount_min = 0.08
-			p.scale_amount_max = 0.16
-			mat.albedo_color = Color(1, 1, 1, 0.9)
-		"Désert":
-			p.amount = 40
-			p.lifetime = 5.0
-			p.gravity = Vector3(1.2, 0.0, 0.3)
-			p.initial_velocity_min = 0.3
-			p.initial_velocity_max = 0.9
-			p.scale_amount_min = 0.05
-			p.scale_amount_max = 0.11
-			mat.albedo_color = Color(0.92, 0.80, 0.55, 0.7)
-		_:
-			p.amount = 40
-			p.lifetime = 6.0
-			p.gravity = Vector3(0, 0.06, 0)
-			p.initial_velocity_min = 0.1
-			p.initial_velocity_max = 0.4
+	var fx: String = String(Adv3DWorld.palette(biome).get("fx", ""))
+	if biome == "Montagne":
+		fx = "snow"
+	match fx:
+		"snow":
+			_amb(p, mat, 90, 7.0, Vector3(0.25, -1.0, 0.1), 0.0, 0.4, 0.08, 0.16, Color(1, 1, 1, 0.9), 0.0)
+		"dust":
+			_amb(p, mat, 40, 5.0, Vector3(1.2, 0.0, 0.3), 0.3, 0.9, 0.05, 0.11, Color(0.92, 0.80, 0.55, 0.7), 0.0)
+		"sparkle":       # Cristaux : éclats lumineux qui montent lentement
+			_amb(p, mat, 55, 5.0, Vector3(0, 0.12, 0), 0.05, 0.25, 0.04, 0.09, Color(0.70, 0.85, 1.0, 0.95), 2.4)
+		"ember":         # Brasier : braises qui s'élèvent en tourbillonnant
+			_amb(p, mat, 70, 4.0, Vector3(0.3, 0.9, 0.1), 0.2, 0.8, 0.04, 0.09, Color(1.0, 0.55, 0.15, 0.95), 3.0)
+		"sparks":        # Rouages : étincelles qui retombent
+			_amb(p, mat, 45, 1.8, Vector3(0.2, -3.0, 0), 1.0, 2.2, 0.03, 0.06, Color(1.0, 0.78, 0.35, 1.0), 3.0)
+		"motes":         # Ombres / Donjon : poussières mauves en suspension
+			_amb(p, mat, 55, 7.0, Vector3(0, 0.03, 0), 0.05, 0.2, 0.05, 0.11, Color(0.75, 0.55, 1.0, 0.8), 1.8)
+		"mist":          # Brumes : nappes de brume qui dérivent
+			_amb(p, mat, 26, 9.0, Vector3(0.18, 0.0, 0.08), 0.05, 0.2, 1.4, 2.8, Color(0.90, 0.97, 0.95, 0.13), 0.0)
+			p.emission_box_extents = Vector3(13.0, 1.2, 13.0)
+		"spray":         # Marées : embruns légers
+			_amb(p, mat, 45, 4.5, Vector3(0.8, 0.25, 0.4), 0.2, 0.6, 0.04, 0.09, Color(0.92, 0.98, 1.0, 0.75), 0.0)
+		"wind":          # Vents : traînées de vent
+			_amb(p, mat, 26, 1.6, Vector3(7.0, 0.0, 2.0), 3.0, 5.0, 1.0, 1.0, Color(1, 1, 1, 0.38), 0.0)
+			var streak := BoxMesh.new()
+			streak.size = Vector3(0.025, 1.4, 0.025)
+			p.mesh = streak
+			p.particle_flag_align_y = true
+		_:               # Forêt : lucioles
+			_amb(p, mat, 40, 6.0, Vector3(0, 0.06, 0), 0.1, 0.4, 0.07, 0.14, Color(1.0, 0.95, 0.5, 0.85), 1.5)
 			p.direction = Vector3.UP
 			p.spread = 180.0
-			p.scale_amount_min = 0.07
-			p.scale_amount_max = 0.14
-			mat.albedo_color = Color(1.0, 0.95, 0.5, 0.85)
-			mat.emission_enabled = true
-			mat.emission = Color(1.0, 0.9, 0.4)
-			mat.emission_energy_multiplier = 1.5
+	p.amount = maxi(8, int(float(p.amount) * GfxQuality.density()))
 	p.material_override = mat
 	add_child(p)
 	_ambient = p
+
+
+func _amb(p: CPUParticles3D, mat: StandardMaterial3D, amount: int, life: float, grav: Vector3, v0: float, v1: float,
+		s0: float, s1: float, col: Color, glow: float) -> void:
+	p.amount = amount
+	p.lifetime = life
+	p.gravity = grav
+	p.initial_velocity_min = v0
+	p.initial_velocity_max = v1
+	p.spread = 180.0
+	p.scale_amount_min = s0
+	p.scale_amount_max = s1
+	mat.albedo_color = col
+	if glow > 0.0:
+		mat.emission_enabled = true
+		mat.emission = Color(col.r, col.g, col.b)
+		mat.emission_energy_multiplier = glow
 
 
 ## Reprend la position 3D sauvegardée si elle correspond encore à la case du héros
@@ -258,7 +296,7 @@ func _sync_mobs(snap: bool) -> void:
 		var id: int = int(g.get("id", -1))
 		alive[id] = true
 		if not _mob_nodes.has(id):
-			var node: Node3D = Adv3DActors.make_mob_group(g, AdventureMobs.label(g, manager.zone_biome()).split("·")[-1].strip_edges())
+			var node: Node3D = Adv3DActors.make_mob_group(g, AdventureMobs.label(g, manager.zone_biome()).split("·")[-1].strip_edges(), manager.zone_biome())
 			node.position = Adv3DWorld.cell_center(AdventureMobs.pos_of(g))
 			world_root.add_child(node)
 			_mob_nodes[id] = node

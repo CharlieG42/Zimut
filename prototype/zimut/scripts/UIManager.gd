@@ -43,6 +43,7 @@ var _tuto_panel: PanelContainer
 var _tuto_label: Label
 const LOG_WIDTH := 660.0
 var _banner: Label
+var _banner_band: TextureRect = null
 var _info_panel: PanelContainer
 var _info_label: Label
 var _over: ColorRect
@@ -1378,6 +1379,24 @@ func _build_ui() -> void:
 	_banner.offset_bottom = 290.0
 	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_banner.modulate.a = 0.0
+	# V73 : bandeau coloré derrière le texte (bleu = vous, rouge = ennemi, vert = allié / familier)
+	_banner_band = TextureRect.new()
+	var bg := Gradient.new()
+	bg.colors = PackedColorArray([Color(1, 1, 1, 0.0), Color(1, 1, 1, 1.0), Color(1, 1, 1, 1.0), Color(1, 1, 1, 0.0)])
+	bg.offsets = PackedFloat32Array([0.0, 0.25, 0.75, 1.0])
+	var bt := GradientTexture2D.new()
+	bt.gradient = bg
+	bt.width = 256
+	bt.height = 4
+	_banner_band.texture = bt
+	_banner_band.stretch_mode = TextureRect.STRETCH_SCALE
+	_banner_band.anchor_left = 0.0
+	_banner_band.anchor_right = 1.0
+	_banner_band.offset_top = 196.0
+	_banner_band.offset_bottom = 284.0
+	_banner_band.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_banner_band.modulate.a = 0.0
+	_root.add_child(_banner_band)
 	_root.add_child(_banner)
 
 	# Fiche de survol
@@ -1575,6 +1594,16 @@ func _tuto_finish() -> void:
 
 
 func _show_banner(text: String, col: Color) -> void:
+	if _banner_band != null:
+		_banner_band.self_modulate = Color(col.r * 0.35, col.g * 0.35, col.b * 0.45, 0.78)
+		_banner_band.pivot_offset = Vector2(_banner_band.size.x * 0.5, 44.0)
+		_banner_band.scale = Vector2(0.2, 1.0)
+		_banner_band.modulate.a = 0.0
+		var tb: Tween = create_tween()
+		tb.tween_property(_banner_band, "modulate:a", 1.0, 0.12)
+		tb.parallel().tween_property(_banner_band, "scale", Vector2.ONE, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tb.tween_interval(0.68)
+		tb.tween_property(_banner_band, "modulate:a", 0.0, 0.35)
 	_banner.text = text
 	_banner.add_theme_color_override("font_color", col)
 	_banner.pivot_offset = Vector2(_banner.size.x * 0.5, 50.0)
