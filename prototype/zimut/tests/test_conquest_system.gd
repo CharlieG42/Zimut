@@ -189,6 +189,78 @@ func _boot() -> void:
 		lg["conquest"].erase("event_pending")
 	check(spawned, "une offensive est annoncée au fil des batailles")
 
+	# ── V59 Chancelier : audience récurrente tous les 5 batailles (2 villes min) ──
+	var ch: Dictionary = _fresh(["capitale", "clairiere", "pont_mousse"])
+	ConquestSystem.after_victory(ch, ch["conquest"], rng, pm.CONQUEST_ROUTES, names, "")
+	check(ConquestSystem.pending_event(ch["conquest"]).is_empty(), "chancelier : rien avant 5 batailles")
+	var ch_ev: Dictionary = {}
+	for i: int in range(10):
+		var r5 := RandomNumberGenerator.new()
+		r5.seed = 700 + i
+		ConquestSystem.after_victory(ch, ch["conquest"], r5, pm.CONQUEST_ROUTES, names, "")
+		var pend: Dictionary = ConquestSystem.pending_event(ch["conquest"])
+		if String(pend.get("id", "")) == "chancelier":
+			ch_ev = pend
+			break
+		ch["conquest"].erase("event_pending")
+	check(not ch_ev.is_empty() and String(ch_ev.get("id", "")) == "chancelier", "audience du Chancelier proposée à temps")
+	check(int(ch["conquest"].get("chancellor_seen", 0)) == 1, "le compteur d'audiences est tenu")
+	check((ch_ev.get("options", []) as Array).size() == 3, "trois édits proposés")
+	# Impôt : or versé, un soldat par garnison
+	pm.conquest_recruit(ch, "clairiere", 2)
+	var g0: int = int(ch["gold"])
+	var t0: int = ConquestSystem.troops(ch["conquest"], "clairiere")
+	var expected: int = 0
+	for cid: String in ch["conquest"]["owned"]:
+		expected += ConquestSystem.city_income(ch, cid)
+	var out_ch: String = pm.conquest_resolve_event(ch, "impot")
+	check(out_ch != "", "impôt résolu")
+	check(ConquestSystem.troops(ch["conquest"], "clairiere") == t0 - 1, "impôt : la garnison perd 1 soldat")
+	check(int(ch["gold"]) == g0 + expected, "impôt : or crédité (%d attendus)" % expected)
+	# Manœuvres : +2 défense pendant 3 batailles
+	ch["conquest"]["event_pending"] = ch_ev.duplicate(true)
+	pm.conquest_resolve_event(ch, "manoeuvres")
+	var def_drill: int = ConquestSystem.drill_defense(ch["conquest"])
+	check(def_drill == 2 and int(ch["conquest"].get("drill", 0)) == 3, "manœuvres : +2 défense pendant 3 batailles")
+	var r6 := RandomNumberGenerator.new()
+	r6.seed = 900
+	ConquestSystem.after_victory(ch, ch["conquest"], r6, pm.CONQUEST_ROUTES, names, "")
+	check(int(ch["conquest"].get("drill", 0)) == 2, "le buff manœuvres décrémente à chaque victoire")
+	# Routes : +2 Bois +1 Cuir par victoire pendant 4 batailles
+	ch["conquest"]["event_pending"] = ch_ev.duplicate(true)
+	pm.conquest_resolve_event(ch, "routes")
+	check(ConquestSystem.roadworks_yield(ch["conquest"]) == {"Bois": 2, "Cuir": 1}, "routes : production temporaire active")
+	ConquestSystem.after_victory(ch, ch["conquest"], r6, pm.CONQUEST_ROUTES, names, "")
+	check(int(ch["conquest"].get("roadworks", 0)) == 3, "routes : décrément après victoire")
+	# Inactif avec une seule ville (la capitale seule ne compte pas)
+	var ch1: Dictionary = _fresh(["capitale", "clairiere"])
+	var chancellor_seen1: bool = false
+	for i: int in range(10):
+		var r7 := RandomNumberGenerator.new()
+		r7.seed = 1100 + i
+		ConquestSystem.after_victory(ch1, ch1["conquest"], r7, pm.CONQUEST_ROUTES, names, "")
+		if String(ConquestSystem.pending_event(ch1["conquest"]).get("id", "")) == "chancelier":
+			chancellor_seen1 = true
+			ch1["conquest"].erase("event_pending")
+	check(not chancellor_seen1, "chancelier : aucune audience avec une seule ville conquise")
+	
+	# ── V59 Spécialités économiques par ville/biome ──
+	var sp: Dictionary = _fresh(["capitale", "clairiere", "mine_cristal"])
+	sp["conquest"].erase("event_pending")
+	var tr_cl: Dictionary = ConquestSystem.city_trait_yield(sp["conquest"], "clairiere")
+	check(tr_cl.get("Bois", 0) == 2, "spécialité Clairière : +2 Bois au niveau 1")
+	var tr_mc: Dictionary = ConquestSystem.city_trait_yield(sp["conquest"], "mine_cristal")
+	check(tr_mc.get("Magie", 0) == 3, "spécialité Mine de Cristal : +3 Magie")
+	pm.conquest_upgrade_city(sp, "clairiere")
+	check(ConquestSystem.city_trait_yield(sp["conquest"], "clairiere").get("Bois", 0) == 3, "spécialité mise à l'échelle : Bourg = +3 Bois")
+	var tot: Dictionary = ConquestSystem.trait_yield(sp["conquest"])
+	check(int(tot.get("Bois", 0)) == 3 and int(tot.get("Magie", 0)) == 3, "production totale des spécialités")
+	check(String(ConquestSystem.city_trait_text("mine_cristal")) == "Filon de cristal", "label de spécialité")
+	sp["conquest"]["ravage"] = {"mine_cristal": 2}
+	check(ConquestSystem.city_trait_yield(sp["conquest"], "mine_cristal").is_empty(), "ville pillée : spécialité gelée")
+	var empire: Dictionary = pm.conquest_empire_yield(sp["conquest"])
+	check(int(empire.get("Magie", 0)) == 0, "ville pillée : la spécialité n'entre pas dans la production d'empire")
+
 	# Sauvegarde / rechargement JSON
 	var js: String = JSON.stringify(lg)
 	var back: Variant = JSON.parse_string(js)

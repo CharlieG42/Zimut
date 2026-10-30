@@ -2705,7 +2705,18 @@ func conquest_empire_yield(conquest: Dictionary) -> Dictionary:
 	# chaque victoire, même si aucune ville ne possède encore de bâtiment.
 	for r: String in conquest_biome_control_bonus(conquest).keys():
 		out[r] = int(out.get(r, 0)) + int(conquest_biome_control_bonus(conquest)[r])
+	# Spécialités économiques des villes (V16) et routes entretenues du Chancelier.
+	for r: String in ConquestSystem.trait_yield(conquest).keys():
+		out[r] = int(out.get(r, 0)) + int(ConquestSystem.trait_yield(conquest)[r])
+	for r: String in ConquestSystem.roadworks_yield(conquest).keys():
+		out[r] = int(out.get(r, 0)) + int(ConquestSystem.roadworks_yield(conquest)[r])
 	return out
+
+## Spécialité économique d'une ville : label et production par victoire,
+## mise à l'échelle du niveau de la ville.
+func conquest_city_trait(city_id: String, conquest: Dictionary) -> Dictionary:
+	return {"label": ConquestSystem.city_trait_text(city_id),
+		"yield": ConquestSystem.city_trait_yield(conquest, city_id)}
 
 ## Bonus de domination : il faut posséder toutes les villes conquérables
 ## d'un biome. Le Donjon et la capitale ne comptent pas dans les biomes.

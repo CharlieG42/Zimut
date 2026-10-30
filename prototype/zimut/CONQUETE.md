@@ -1,4 +1,4 @@
-# Conquête — V14 : villes vivantes, garnisons, héros et événements
+# Conquête — V59 : villes vivantes, garnisons, héros, Chancelier et spécialités
 
 Toute la logique est dans `scripts/ConquestSystem.gd` (statique, testable sans interface) ;
 `ProgressionManager` expose les points d'entrée `conquest_*` ; l'interface est `ConquestMapUI.gd`.
@@ -28,11 +28,20 @@ Interactifs : Caravane marchande, Réfugiés, Mercenaires, Agitation (villes san
 Automatiques : Bonne récolte, Cache découverte, Épidémie, Rapport du gouverneur.
 Les nouvelles s'affichent au retour sur la carte ; l'événement à trancher apparaît en popup.
 
+## Chancelier (V59)
+Tous les 5 batailles (dès 2 villes conquises), le Chancelier demande audience via le popup d'événement et propose un édit :
+- **Impôt** : encaisse le revenu d'une victoire par ville immédiatement, mais chaque garnison perd 1 soldat.
+- **Manœuvres** (60 or) : +2 défense dans toutes les villes pendant 3 batailles.
+- **Entretien des routes** (40 or) : +2 Bois et +1 Cuir à chaque victoire pendant 4 batailles.
+
+## Spécialités économiques (V59)
+Chaque ville conquise produit en plus une ressource propre à son biome/Nation (`ConquestSystem.CITY_TRAITS`), versée à chaque victoire et mise à l'échelle du niveau de la ville (×1 / ×1,5 / ×2). Gelée si la ville est pillée. Exemples : Mine de Cristal → +3 Magie, Forge du Givre → +3 Fer, Marais des Spectres → +3 Venin. Affichée dans le Conseil de l'écran de ville et sur la carte.
+
 ## Sauvegarde
-Clés ajoutées à `conquest` (toutes optionnelles) : `city_levels`, `garrisons`, `threat`, `event_pending`, `news`, `truce`, `lost`, `rewarded`, `battle_count`, `event_cd`, `threat_cd`.
+Clés ajoutées à `conquest` (toutes optionnelles) : `city_levels`, `garrisons`, `threat`, `event_pending`, `news`, `truce`, `lost`, `rewarded`, `battle_count`, `event_cd`, `threat_cd`, `chancellor_cd`, `chancellor_seen`, `drill`, `roadworks`.
 
 ## Tests
-`tests/test_conquest_system.gd` (moteur, 69 vérifications), `tests/test_conquest_team.gd` (sélection d'équipe, nécessite xvfb), `tests/shot_conquest_v14.gd` (captures).
+`tests/test_conquest_system.gd` (moteur, + bloc V59 Chancelier/spécialités), `tests/test_conquest_team.gd` (sélection d'équipe, nécessite xvfb), `tests/shot_conquest_v14.gd` (captures).
 
 ## Écran de ville (V15)
 

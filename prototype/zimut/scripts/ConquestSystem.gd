@@ -37,6 +37,49 @@ const EVENT_MIN_GAP := 2
 const EVENT_CHANCE := 0.45
 const RES_KEYS: Array[String] = ["Bois", "Fer", "Cuir", "Magie", "Venin"]
 
+## Chancelier : tous ces batailles, le Conseil propose un édit stratégique
+## (trade-off or / effet temporaire), via le même popup que les événements.
+const CHANCELLOR_INTERVAL := 5
+const CHANCELLOR_MIN_CITIES := 2
+const DRILL_DEF := 2
+const DRILL_BATTLES := 3
+const ROADS_BOIS := 2
+const ROADS_BATTLES := 4
+
+## Spécialité économique de chaque ville (biome/Nation) : ressources versées
+## à chaque victoire, mises à l'échelle du niveau de la ville. Les villes sans
+## entrée (capitale, Donjon) n'ont pas de spécialité.
+const CITY_TRAITS := {
+	"clairiere": {"label": "Scierie d'Aube", "res": {"Bois": 2}},
+	"vieille_tour": {"label": "Réserve de la Tour", "res": {"Fer": 2}},
+	"pont_mousse": {"label": "Pêche du pont", "res": {"Cuir": 2}},
+	"fort_racine": {"label": "Arsenal de Racine", "res": {"Fer": 3}},
+	"hameau_pin": {"label": "Cabanons des Pics", "res": {"Bois": 2, "Cuir": 1}},
+	"garnison": {"label": "Dépôt des Pics", "res": {"Fer": 3}},
+	"oasis": {"label": "Herbier de l'Oasis", "res": {"Venin": 2}},
+	"tour_sable": {"label": "Verriers des Dunes", "res": {"Magie": 2}},
+	"village_brume": {"label": "Herbier des Brumes", "res": {"Venin": 2}},
+	"ruines_lierre": {"label": "Pillardage du Lierre", "res": {"Magie": 2}},
+	"abbaye_ronce": {"label": "Scriptorium", "res": {"Magie": 2, "Bois": 1}},
+	"citadelle_ronce": {"label": "Fonderie des Ronces", "res": {"Fer": 2, "Cuir": 2}},
+	"col_givre": {"label": "Cueillette du Col", "res": {"Magie": 2}},
+	"mine_cristal": {"label": "Filon de cristal", "res": {"Magie": 3}},
+	"bastion_orage": {"label": "Forge de l'Orage", "res": {"Fer": 2, "Bois": 1}},
+	"caravanserail": {"label": "Comptoir rouge", "res": {"Cuir": 2}},
+	"observatoire": {"label": "Lunettes solaires", "res": {"Magie": 2}},
+	"port_sable": {"label": "Chantier naval", "res": {"Cuir": 3}},
+	"bois_lune": {"label": "Sève de lune", "res": {"Bois": 2, "Magie": 1}},
+	"sanctuaire_mousse": {"label": "Reliques moussues", "res": {"Magie": 1, "Venin": 1}},
+	"forge_givre": {"label": "Forge du Givre", "res": {"Fer": 3}},
+	"pic_foudroyant": {"label": "Capteurs de foudre", "res": {"Magie": 2, "Fer": 1}},
+	"marais_spectres": {"label": "Essences des Marais", "res": {"Venin": 3}},
+	"fort_cendre": {"label": "Trempe des Cendres", "res": {"Fer": 2, "Venin": 1}},
+	"temple_soleil": {"label": "Offrandes solaires", "res": {"Magie": 3}},
+	"citadelle_sable": {"label": "Four à grès", "res": {"Fer": 2, "Cuir": 1}},
+	"atelier_cuivre": {"label": "Ateliers de cuivre", "res": {"Fer": 2, "Cuir": 1}},
+	"citadelle_engrenages": {"label": "Usines à engrenages", "res": {"Fer": 3, "Magie": 1}},
+}
+
 ## Coût (or + ressources) pour atteindre le niveau clé.
 const UPGRADE := {
 	2: {"gold": 120, "res": {"Bois": 10, "Fer": 10}},
@@ -134,7 +177,7 @@ static func governor_text(classe: String) -> String:
 ## Défense d'une ville : soldats, niveau, muraille et héros gouverneur.
 static func defense(data: Dictionary, id: String) -> int:
 	var conq: Dictionary = data.get("conquest", {})
-	var d: int = troops(conq, id) * 2 + city_level(conq, id) * 3
+	var d: int = troops(conq, id) * 2 + city_level(conq, id) * 3 + drill_defense(conq)
 	if has_wall(conq, id):
 		d += WALL_DEFENSE
 	var h: String = hero_of(conq, id)
@@ -308,6 +351,8 @@ static func after_victory(data: Dictionary, conq: Dictionary, rng: RandomNumberG
 	_collect_income(data, conq)
 	_regen_garrisons(data, conq)
 	_tick_threat(data, conq, rng)
+	_tick_chancellor_buffs(conq)
+	maybe_chancellor(conq)
 	if int(conq.get("truce", 0)) > 0:
 		conq["truce"] = int(conq["truce"]) - 1
 	else:
@@ -404,6 +449,12 @@ static func _maybe_spawn_threat(data: Dictionary, conq: Dictionary, rng: RandomN
 	conq["threat_cd"] = 0
 	note(conq, "⚠ GRANDE OFFENSIVE ennemie (force %d) : %s sera attaquée dans %d batailles !" % [power, _name(conq, id), THREAT_ETA])
 
+static func _tick_chancellor_buffs(conq: Dictionary) -> void:
+	if int(conq.get("drill", 0)) > 0:
+		conq["drill"] = int(conq["drill"]) - 1
+	if int(conq.get("roadworks", 0)) > 0:
+		conq["roadworks"] = int(conq["roadworks"]) - 1
+
 static func _tick_threat(data: Dictionary, conq: Dictionary, rng: RandomNumberGenerator) -> void:
 	var th: Dictionary = threat(conq)
 	if th.is_empty():
@@ -467,6 +518,67 @@ static func resolve_assault(data: Dictionary, conq: Dictionary, id: String, powe
 
 static func pending_event(conq: Dictionary) -> Dictionary:
 	return conq.get("event_pending", {})
+
+## Édits du Chancelier : décision stratégique récurrente, distincte des
+## événements aléatoires. Le même popup sert à l'affichage.
+static func chancellor_ready(conq: Dictionary) -> bool:
+	return owned_count(conq) >= CHANCELLOR_MIN_CITIES
+
+static func maybe_chancellor(conq: Dictionary) -> void:
+	if not pending_event(conq).is_empty():
+		return
+	conq["chancellor_cd"] = int(conq.get("chancellor_cd", 0)) + 1
+	if not chancellor_ready(conq) or int(conq["chancellor_cd"]) < CHANCELLOR_INTERVAL:
+		return
+	var drills: Array = []
+	if int(conq.get("drill", 0)) > 0:
+		drills.append("manœuvres : %d bataille(s)" % int(conq["drill"]))
+	if int(conq.get("roadworks", 0)) > 0:
+		drills.append("routes : %d bataille(s)" % int(conq["roadworks"]))
+	var active: String = ""
+	if not drills.is_empty():
+		active = " Déjà en cours — %s." % ", ".join(PackedStringArray(drills))
+	conq["event_pending"] = {"id": "chancelier", "chancellor": true,
+		"title": "LE CHANCELIER DEMANDE AUDIENCE",
+		"text": "Monseigneur, le Conseil a réuni les tailles de l'empire. Voici les édits qui s'offrent à vous.%s" % active,
+		"options": [
+			{"id": "impot", "label": "Lever un impôt — encaisse le revenu d'une victoire par ville, chaque garnison perd 1 soldat", "gold": 0},
+			{"id": "manoeuvres", "label": "Organiser des manœuvres — +2 défense dans toutes les villes pendant 3 batailles", "gold": 60},
+			{"id": "routes", "label": "Entretenir les routes — +2 Bois et +1 Cuir à chaque victoire pendant 4 batailles", "gold": 40}]}
+	conq["chancellor_cd"] = 0
+	conq["chancellor_seen"] = int(conq.get("chancellor_seen", 0)) + 1
+
+## Effet défensif temporaire des manœuvres du Chancelier.
+static func drill_defense(conq: Dictionary) -> int:
+	return DRILL_DEF if int(conq.get("drill", 0)) > 0 else 0
+
+## Production temporaire des routes du Chancelier (par victoire).
+static func roadworks_yield(conq: Dictionary) -> Dictionary:
+	if int(conq.get("roadworks", 0)) <= 0:
+		return {}
+	return {"Bois": ROADS_BOIS, "Cuir": 1}
+
+## Spécialité économique d'une ville (CITY_TRAITS), mise à l'échelle du niveau.
+static func city_trait_yield(conq: Dictionary, id: String) -> Dictionary:
+	var spec: Dictionary = CITY_TRAITS.get(id, {})
+	if spec.is_empty() or is_ravaged(conq, id):
+		return {}
+	var mult: float = level_multiplier(conq, id)
+	var out: Dictionary = {}
+	for r: String in spec.get("res", {}).keys():
+		out[r] = maxi(1, roundi(float(spec["res"][r]) * mult))
+	return out
+
+static func city_trait_text(id: String) -> String:
+	return String(CITY_TRAITS.get(id, {}).get("label", ""))
+
+## Somme des spécialités des villes possédées (par victoire).
+static func trait_yield(conq: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for id: String in conq.get("owned", []):
+		for r: String in city_trait_yield(conq, id).keys():
+			out[r] = int(out.get(r, 0)) + int(city_trait_yield(conq, id)[r])
+	return out
 
 static func _maybe_event(data: Dictionary, conq: Dictionary, rng: RandomNumberGenerator,
 		routes: Array, just_conquered: String) -> void:
@@ -712,6 +824,21 @@ static func resolve_event(data: Dictionary, option_id: String, rng: RandomNumber
 			out = "L'espion travaille pour vous : plus de raids pendant 4 batailles."
 		"espion:relacher":
 			out = "Vous relâchez l'espion. Il ne reviendra pas."
+		"chancelier:impot":
+			var owned: Array = conq.get("owned", [])
+			var gold: int = 0
+			for cid: String in owned:
+				gold += city_income(data, cid)
+				if troops(conq, cid) > 0:
+					_set_garrison(conq, cid, troops(conq, cid) - 1, hero_of(conq, cid))
+			data["gold"] = int(data.get("gold", 0)) + gold
+			out = "L'impôt est levé : +%d or. Les garnisons, elles, ont payé le prix. Le revenu reprendra son cours normal à la prochaine victoire." % gold
+		"chancelier:manoeuvres":
+			conq["drill"] = DRILL_BATTLES
+			out = "Les manœuvres commencent : +2 défense dans toutes les villes pendant %d batailles." % DRILL_BATTLES
+		"chancelier:routes":
+			conq["roadworks"] = ROADS_BATTLES
+			out = "Les routes sont réparées : +%d Bois et +1 Cuir à chaque victoire pendant %d batailles." % [ROADS_BOIS, ROADS_BATTLES]
 		"diplomatie:tribut":
 			conq["truce"] = maxi(int(conq.get("truce", 0)), 6)
 			out = "Le tribut est versé : paix pendant 6 batailles (pas de raid, pas de nouvelle offensive)."
