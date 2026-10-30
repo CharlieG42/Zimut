@@ -2857,7 +2857,8 @@ func conquest_siege_is_boss(conquest: Dictionary, city_id: String) -> bool:
 
 ## La ville est-elle pillée (production gelée) ?
 func _is_city_ravaged(conquest: Dictionary, city_id: String) -> bool:
-	return int(_ravage_dict(conquest).get(city_id, 0)) > 0
+	return int(_ravage_dict(conquest).get(city_id, 0)) > 0 \
+		or ConquestSystem.is_ruined(conquest, city_id)
 
 func _ravage_dict(conquest: Dictionary) -> Dictionary:
 	var r: Dictionary = conquest.get("ravage", {})
@@ -3037,6 +3038,47 @@ func conquest_plan_cost(plan: String) -> int:
 
 func conquest_infiltration_ready(conquest: Dictionary) -> bool:
 	return ConquestSystem.infiltration_ready(conquest)
+
+## Diplomatie (V59) : annexion négociée d'une ville neutre reliée au territoire.
+func conquest_negotiate_city(data: Dictionary, city_id: String) -> String:
+	var conquest: Dictionary = data.get("conquest", {})
+	var names: Dictionary = {}
+	for cid: String in CONQUEST_CITIES.keys():
+		names[cid] = String(CONQUEST_CITIES[cid].get("name", cid))
+	var err: String = ConquestSystem.negotiate_city(data, conquest, city_id, CONQUEST_ROUTES, names)
+	if err == "":
+		data["conquest"] = conquest
+		# Un général ne peut pas être vaincu par la voie pacifique : une ville
+		# neutre n'en abrite jamais (les forteresses sont "enemy").
+	return err
+
+func conquest_diplomacy_cost(conquest: Dictionary, city_id: String) -> Dictionary:
+	return ConquestSystem.diplomacy_cost(conquest, city_id)
+
+## Ruine & reconstruction (V59).
+func conquest_is_ruined(conquest: Dictionary, city_id: String) -> bool:
+	return ConquestSystem.is_ruined(conquest, city_id)
+
+func conquest_repair_city(data: Dictionary, city_id: String) -> String:
+	var conquest: Dictionary = data.get("conquest", {})
+	var err: String = ConquestSystem.repair_city(data, conquest, city_id)
+	if err == "":
+		data["conquest"] = conquest
+	return err
+
+## Légende (V59) : score de fin de campagne et fin obtenue.
+func conquest_legend_score(data: Dictionary) -> Dictionary:
+	var conquest: Dictionary = data.get("conquest", {})
+	return ConquestSystem.legend_score(conquest, Stones.owned(data).size())
+
+func conquest_legend_total(score: Dictionary) -> int:
+	return ConquestSystem.legend_total(score)
+
+func conquest_legend_ending(score: Dictionary, conquest: Dictionary) -> Dictionary:
+	return ConquestSystem.legend_ending(score, conquest)
+
+func conquest_epilogue(score: Dictionary, ending: Dictionary) -> String:
+	return ConquestSystem.epilogue(score, ending)
 
 func conquest_resolve_event(data: Dictionary, option_id: String) -> String:
 	var names: Dictionary = {}

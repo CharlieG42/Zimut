@@ -33,6 +33,11 @@
 - Un plan peut annexer la ville sans combat (annexion, butin, chute du général le cas échéant : `conquest_apply_plan` → `_progress_to_annex`).
 - **Reconquête ennemie** : chaque ville non possédée gagne 1 soldat de garnison toutes les 3 victoires (max 6) ; +1 niveau de bataille par tranche de 2 soldats (`enemy_garrison_bonus`, appliqué dans `GameManager`), affiché sur la carte (« ⚑ Garnison adverse ») — attendre une cible la durcit.
 
+## Diplomatie, ruine & reconstruction, fins multiples
+- **Diplomatie** : les villes neutres atteignables peuvent être annexées sans combat (bouton « ☮ NÉGOCIER » : 120 or + 8 de la ressource spécialité de la ville) — `ConquestSystem.negotiate_city` ; les annexions pacifiques sont comptées (`annexed_diplomacy`) et pèsent dans la Légende.
+- **Ruine & reconstruction** : une ville perdue puis reprise est **ruinée** — la chute coûte un niveau, la production (revenu, spécialité, bâtiments, gouverneur) est gelée 3 batailles, réparable pour 80 or (`ruin`, `repair_city`) ; la ruine se résorbe aussi seule à chaque victoire.
+- **Légende & fins multiples** : à la chute du Donjon, l'épilogue calcule un score (villes, développement, gouverneurs, Pierres, diplomatie, ruines) et affiche l'une des trois fins selon le style de jeu — Âge des Héros / Empire marchand (4+ négociations) / Bastion de Zimut (villes développées + gouverneurs).
+
 ## Détail des modifications
 - `prototype/zimut/scripts/ConquestSystem.gd` : moteur (constantes, `CITY_TRAITS`, édits, buffs, `defense`, `after_victory`).
 - `prototype/zimut/scripts/ProgressionManager.gd` : production d'empire (+ spécialités, + routes) et `conquest_city_trait`.

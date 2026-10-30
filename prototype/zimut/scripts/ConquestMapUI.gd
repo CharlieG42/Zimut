@@ -734,6 +734,8 @@ func _select_city(id: String) -> void:
 		_attack.text = "LANCER L'ASSAUT"
 	elif conquered:
 		var txt: String = "%s\n\n%s\n\n⚑ Territoire allié.\n%s" % [city["name"], city["desc"], _city_status_text(id)]
+		if ConquestSystem.is_ruined(_conquest, id):
+			txt += "\n\n⚒ RUINÉE (perdue puis reprise) : production gelée %d bataille(s) — réparable pour %d or." % [int(_conquest.get("ruin", {}).get(id, 0)), ConquestSystem.RUIN_REPAIR_GOLD]
 		if ravage > 0:
 			txt += "\n\n⚠ PILLÉE : production gelée pendant %d bataille(s)." % ravage
 		var builds: Array = _conquest.get("buildings", {}).get(id, [])
@@ -782,8 +784,15 @@ func _select_city(id: String) -> void:
 				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), city["desc"],
 				ProgressionManager.CONQUEST_SIEGE_BATTLES, ProgressionManager.CONQUEST_SIEGE_BATTLES - 1, wave_txt, general_txt]
 		else:
-			_message.text = "%s · %s · Niveau conseillé %d\n\n%s\n\n● VILLE NEUTRE — 1 bataille contre des mobs de champs suffit à la conquérir." % [
-				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), city["desc"]]
+			var dip_txt: String = ""
+			if kind == "neutral" and attackable:
+				var dcost: Dictionary = ProgressionManager.conquest_diplomacy_cost(_conquest, id)
+				var dparts: Array = ["%d or" % int(dcost.get("gold", 0))]
+				for r: String in dcost.get("res", {}).keys():
+					dparts.append("%s %d" % [r, int(dcost["res"][r])])
+				dip_txt = "\n\n☮ DIPLOMATIE : cette ville peut aussi rejoindre l'empire par négociation (%s) — le bouton « NÉGOCIER » ci-dessous." % " · ".join(PackedStringArray(dparts))
+			_message.text = "%s · %s · Niveau conseillé %d\n\n%s\n\n● VILLE NEUTRE — 1 bataille contre des mobs de champs suffit à la conquérir.%s" % [
+				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), city["desc"], dip_txt]
 		if id == "donjon_roi" and not ProgressionManager.conquest_empire_complete(_conquest):
 			_message.text += "\n\n★ Objectif final : verrouillé tant que tout Zimut n'est pas sous votre contrôle."
 		# Reconquête ennemie : la garnison adverse grossit avec le temps.
@@ -826,6 +835,19 @@ func _build_panel(city_id: String, conquered: bool) -> void:
 	for c: Node in _build_box.get_children():
 		c.queue_free()
 	if not conquered:
+		# Ville neutre attaquable : la voie diplomatique en plus des armes.
+		if String(_city_meta(city_id)["kind"]) == "neutral" \
+				and ProgressionManager.conquest_city_attackable(_conquest, city_id, _save.get("adventure", {})):
+			var dip := Button.new()
+			dip.name = "NegotiateButton"
+			dip.text = "☮ NÉGOCIER L'ANNEXION"
+			dip.custom_minimum_size.y = 54
+			dip.add_theme_font_size_override("font_size", 18)
+			dip.add_theme_color_override("font_color", TEXT)
+			dip.add_theme_stylebox_override("normal", _style(Color(0.30, 0.26, 0.16, 0.97), GOLD))
+			dip.add_theme_stylebox_override("hover", _style(Color(0.38, 0.34, 0.22, 0.97), GOLD))
+			dip.pressed.connect(_negotiate_city.bind(city_id))
+			_build_box.add_child(dip)
 		return
 	var b := Button.new()
 	b.name = "EnterCityButton"
@@ -847,6 +869,19 @@ func _build_panel(city_id: String, conquered: bool) -> void:
 	miss.add_theme_stylebox_override("hover", _style(Color(0.24, 0.34, 0.44, 0.97), GOLD))
 	miss.pressed.connect(_show_mission_picker)
 	_build_box.add_child(miss)
+	# Ville ruinée (perdue puis reprise) : réparer pour reprendre la production.
+	if ConquestSystem.is_ruined(_conquest, city_id):
+		var rep := Button.new()
+		rep.name = "RepairButton"
+		rep.text = "⚒ RÉPARER LA VILLE — %d or" % ConquestSystem.RUIN_REPAIR_GOLD
+		rep.custom_minimum_size.y = 54
+		rep.add_theme_font_size_override("font_size", 18)
+		rep.add_theme_color_override("font_color", TEXT)
+		rep.add_theme_stylebox_override("normal", _style(Color(0.34, 0.24, 0.14, 0.97), GOLD))
+		rep.add_theme_stylebox_override("hover", _style(Color(0.42, 0.32, 0.20, 0.97), GOLD))
+		rep.disabled = int(_save.get("gold", 0)) < ConquestSystem.RUIN_REPAIR_GOLD
+		rep.pressed.connect(_repair_city.bind(city_id))
+		_build_box.add_child(rep)
 
 ## Clic sur une ville de la carte : sélection ; si elle nous appartient, on y entre.
 func _on_city_pressed(city_id: String) -> void:
@@ -1305,6 +1340,30 @@ func _show_assault_prep() -> void:
 	cancel.pressed.connect(func() -> void: dim.queue_free())
 	box.add_child(cancel)
 
+## Diplomatie : annexion négociée d'une ville neutre (or + ressource).
+func _negotiate_city(city_id: String) -> void:
+	var err: String = ProgressionManager.conquest_negotiate_city(_save, city_id)
+	if err != "":
+		_message.text = err
+		return
+	_conquest = _save.get("conquest", {})
+	_persist()
+	_refresh_header()
+	_select_city(city_id)
+	_show_annexion_popup(city_id)
+
+## Ruine & reconstruction : réparer une ville ruinée (production gelée sinon).
+func _repair_city(city_id: String) -> void:
+	var err: String = ProgressionManager.conquest_repair_city(_save, city_id)
+	if err != "":
+		_message.text = err
+		return
+	_conquest = _save.get("conquest", {})
+	_persist()
+	_refresh_header()
+	_select_city(city_id)
+	_message.text = "⚒ %s est réparée : sa production reprend." % ProgressionManager.conquest_city_name(city_id)
+
 ## Plan d'assaut sans combat (blocus / infiltration) : le siège avance d'une
 ## vague, la carte se rafraîchit, aucun combat n'est lancé.
 func _apply_plan(plan: String) -> void:
@@ -1373,7 +1432,14 @@ func _show_annexion_popup(city_id: String) -> void:
 	for n: String in _conquest.get("news", []):
 		lines.append(n)
 	if city_id == "donjon_roi":
-		lines.append("★ CAMPAGNE TERMINÉE : le Roi Squelette est tombé, Zimut vous appartient ! Vous pouvez continuer en empire libre.")
+		var score: Dictionary = ProgressionManager.conquest_legend_score(_save)
+		var ending: Dictionary = ProgressionManager.conquest_legend_ending(score, _conquest)
+		lines.append("★ CAMPAGNE TERMINÉE : le Roi Squelette est tombé !")
+		lines.append("")
+		for l: String in ProgressionManager.conquest_epilogue(score, ending).split("\n"):
+			lines.append(l)
+		lines.append("")
+		lines.append("Vous pouvez continuer en empire libre : le monde reste à vous.")
 	else:
 		lines.append("Conseil : ouvrez %s pour y bâtir, recruter une garnison ou nommer un gouverneur." % cname)
 	var title: String = "EMPIRE VICTORIEUX !" if city_id == "donjon_roi" else "VILLE ANNEXÉE !"

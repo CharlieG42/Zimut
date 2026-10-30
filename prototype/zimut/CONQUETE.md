@@ -61,8 +61,20 @@ Un plan peut mener à l'annexion sans verser de sang (butin normal, général va
 ## Reconquête ennemie (V59)
 Les villes non possédées accumulent une garnison adverse : +1 soldat toutes les 3 victoires (max 6), soit +1 niveau de bataille par tranche de 2 soldats. Attendre une cible la durcit — la garnison est affichée dans le panneau de la ville et le bonus appliqué au combat.
 
+## Diplomatie (V59)
+Une ville **neutre attaquable** peut rejoindre l'empire sans combat : bouton « ☮ NÉGOCIER L'ANNEXION » (120 or + 8 de la ressource spécialité de la ville). Même règle de routes que l'assaut. Les annexions pacifiques comptent pour la Légende (fin « Empire marchand » dès 4).
+
+## Ruine & reconstruction (V59)
+Une ville **perdue** puis reprise reste **ruinée** : la chute coûte un niveau, et la production (revenu, spécialité, bâtiments, gouverneur) reste gelée 3 batailles après la reprise. Réparable à tout moment pour 80 or (bouton « ⚒ RÉPARER »). La ruine se résorbe aussi d'elle-même, bataille après bataille.
+
+## Légende & fins multiples (V59)
+À la chute du Donjon, un **épilogue** calcule le score de Légende : villes (10 pts), développement (5 pts/niveau), gouverneurs (4 pts), Pierres Élémentaires (30 pts), annexions diplomatiques (6 pts), ruines non réparées (-8 pts). Selon le style de jeu, la fin affichée change :
+- **Âge des Héros** (défaut) — les assauts et les généraux vaincus en personne.
+- **Empire marchand** — 4 villes ou plus annexées par négociation.
+- **Bastion de Zimut** — villes développées (40 pts de niveaux) et 3+ gouverneurs.
+
 ## Sauvegarde
-Clés ajoutées à `conquest` (toutes optionnelles) : `city_levels`, `garrisons`, `threat`, `event_pending`, `news`, `truce`, `lost`, `rewarded`, `battle_count`, `event_cd`, `threat_cd`, `chancellor_cd`, `chancellor_seen`, `drill`, `roadworks`, `missions`, `missions_revealed`.
+Clés ajoutées à `conquest` (toutes optionnelles) : `city_levels`, `garrisons`, `threat`, `event_pending`, `news`, `truce`, `lost`, `rewarded`, `battle_count`, `event_cd`, `threat_cd`, `chancellor_cd`, `chancellor_seen`, `drill`, `roadworks`, `missions`, `missions_revealed`, `annexed_diplomacy`, `ruin`.
 
 ## Tests
 `tests/test_conquest_system.gd` (moteur, + bloc V59 Chancelier/spécialités), `tests/test_conquest_team.gd` (sélection d'équipe, nécessite xvfb), `tests/shot_conquest_v14.gd` (captures).

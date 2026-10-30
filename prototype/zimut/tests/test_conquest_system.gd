@@ -395,6 +395,88 @@ func _boot() -> void:
 	check(ConquestSystem.enemy_garrison_bonus(rgcq, "fort_racine") == 3, "bonus de niveau : +3")
 	check(ConquestSystem.enemy_garrison(rgcq, "clairiere") == 0, "ville possédée : pas de garnison adverse")
 
+	# ── V59 Diplomatie : annexion négociée des villes neutres ──
+	var dp: Dictionary = _fresh(["capitale", "clairiere"])
+	var dpcq: Dictionary = dp["conquest"]
+	# clairiere est reliée à la capitale
+	check(pm.conquest_negotiate_city(dp, "clairiere") != "", "ville déjà conquise : négociation refusée")
+	check(pm.conquest_negotiate_city(dp, "oasis") != "", "ville non reliée : négociation refusée")
+	var dgold0: int = int(dp["gold"])
+	var dres0: int = int(dp["resources"]["Bois"])
+	check(pm.conquest_negotiate_city(dp, "pont_mousse") == "", "pont-mousse annexé par négociation")
+	check((dpcq["owned"] as Array).has("pont_mousse"), "la ville rejoint l'empire")
+	check(int(dp["gold"]) == dgold0 - 120, "négociation : 120 or débités")
+	check(int(dp["resources"]["Bois"]) == dres0 - 8, "négociation : 8 Bois débités (spécialité de la ville)")
+	check((dpcq.get("annexed_diplomacy", []) as Array).has("pont_mousse"), "annexion pacifique comptée pour la Légende")
+	# Or insuffisant (ville reliée à l'empire)
+	dp["gold"] = 50
+	check(pm.conquest_negotiate_city(dp, "vieille_tour").begins_with("Or insuffisant"), "or insuffisant : négociation refusée")
+
+	# ── V59 Ruine & reconstruction ──
+	var ru: Dictionary = _fresh(["capitale", "clairiere"])
+	var rucq: Dictionary = ru["conquest"]
+	rucq["city_levels"] = {"clairiere": 3}
+	ru["conquest"] = rucq
+	check(not ConquestSystem.is_ruined(rucq, "clairiere"), "pas de ruine au départ")
+	# La ville tombe (offensive ennemie)
+	var out_ru: String = ConquestSystem.resolve_assault(ru, rucq, "clairiere", 999)
+	check(out_ru == "lost" and not (rucq["owned"] as Array).has("clairiere"), "ville perdue")
+	check(ConquestSystem.is_ruined(rucq, "clairiere"), "la ville est marquée ruinée")
+	check(int(rucq["city_levels"]["clairiere"]) == 2, "la chute coûte un niveau")
+	# Reprise : la ruine persiste, la production est gelée
+	rucq["owned"].append("clairiere")
+	check(int(ConquestSystem.city_income(ru, "clairiere")) == 0, "ville ruinée : revenu gelé")
+	check(ConquestSystem.city_trait_yield(rucq, "clairiere").is_empty(), "ville ruinée : spécialité gelée")
+	# La ruine décrémente à chaque victoire, puis disparaît
+	var rr2 := RandomNumberGenerator.new()
+	var tries2: int = 0
+	while ConquestSystem.is_ruined(rucq, "clairiere") and tries2 < 10:
+		tries2 += 1
+		ConquestSystem.after_victory(ru, rucq, rr2, pm.CONQUEST_ROUTES, names, "", [])
+		rucq.erase("event_pending")
+	check(not ConquestSystem.is_ruined(rucq, "clairiere"), "la ruine s'estompe après quelques victoires")
+	check(int(ConquestSystem.city_income(ru, "clairiere")) > 0, "production reprise après la ruine")
+	# Réparation immédiate (payante)
+	rucq["ruin"] = {"clairiere": 3}
+	var rgold0: int = int(ru["gold"])
+	check(pm.conquest_repair_city(ru, "clairiere") == "" and not ConquestSystem.is_ruined(rucq, "clairiere"), "réparation payée : ruine levée")
+	check(int(ru["gold"]) == rgold0 - 80, "réparation : 80 or débités")
+	ru["gold"] = 10
+	rucq["ruin"] = {"clairiere": 2}
+	check(pm.conquest_repair_city(ru, "clairiere").begins_with("Or insuffisant"), "réparation refusée sans or")
+
+	# ── V59 Légende : score et fins multiples ──
+	var lg2: Dictionary = _fresh(["capitale", "clairiere", "pont_mousse", "fort_racine", "vieille_tour"])
+	var lgcq: Dictionary = lg2["conquest"]
+	var score: Dictionary = ConquestSystem.legend_score(lgcq, 2)
+	check(int(score["villes"]) == 40, "score villes : 4 villes × 10")
+	check(int(score["pierres"]) == 60, "score pierres : 2 × 30")
+	check(int(score["diplomatie"]) == 0, "pas d'annexion pacifique : 0")
+	var total: int = ConquestSystem.legend_total(score)
+	check(total == int(score["villes"]) + int(score["niveaux"]) + int(score["gouverneurs"]) + int(score["pierres"]) + int(score["diplomatie"]) + int(score["ruines"]), "total = somme des composantes")
+	# Fin « héros » par défaut
+	var end1: Dictionary = ConquestSystem.legend_ending(score, lgcq)
+	check(String(end1["id"]) == "heros", "fin par défaut : Âge des Héros")
+	# Fin « marchand » : 4+ annexions pacifiques
+	for i: int in range(4):
+		(lgcq.get("annexed_diplomacy", []) as Array).append("v%d" % i)
+	var end2: Dictionary = ConquestSystem.legend_ending(score, lgcq)
+	check(String(end2["id"]) == "marchand", "fin marchand après 4 annexions pacifiques")
+	# Fin « bastion » : développement + gouverneurs
+	var lg3: Dictionary = _fresh(["capitale", "clairiere", "pont_mousse", "fort_racine", "vieille_tour"])
+	var lg3cq: Dictionary = lg3["conquest"]
+	lg3cq["city_levels"] = {"clairiere": 3, "pont_mousse": 3, "fort_racine": 3, "vieille_tour": 3}
+	for c: String in ["Tank", "Mage", "Heal"]:
+		var cid: String = {"Tank": "clairiere", "Mage": "pont_mousse", "Heal": "fort_racine"}[c]
+		pm.conquest_assign_hero(lg3, cid, c)
+	var score3: Dictionary = ConquestSystem.legend_score(lg3cq, 0)
+	check(int(score3["niveaux"]) >= 40 and int(score3["gouverneurs"]) >= 12, "bastion : développement (%d) et gouverneurs (%d) suffisants" % [int(score3["niveaux"]), int(score3["gouverneurs"])])
+	var end3: Dictionary = ConquestSystem.legend_ending(score3, lg3cq)
+	check(String(end3["id"]) == "bastion", "fin bastion : villes développées et gouverneurs nombreux")
+	# Épilogue contient le score et le titre
+	var epi: String = ConquestSystem.epilogue(score3, end3)
+	check(epi.contains(String(end3["title"])) and epi.contains("points de Légende"), "épilogue : titre et score présents")
+
 	# Sauvegarde / rechargement JSON
 	var js: String = JSON.stringify(lg)
 	var back: Variant = JSON.parse_string(js)

@@ -85,6 +85,27 @@ const PLAN_RAID_CHANCE := 0.35
 const GARRISON_EVERY := 3
 const GARRISON_MAX := 6
 
+## Diplomatie : coût d'annexion négociée d'une ville neutre (or + ressource
+## de son biome). Plus cher que la voie des armes… en or. La ressource exigée
+## est la spécialité de la ville (CITY_TRAITS), payable en une fois.
+const DIPLO_GOLD := 120
+const DIPLO_RES := 8
+
+## Ruine & reconstruction : une ville perdue puis reprise reste ruinée —
+## niveau -1 (min 1) et production gelée RUIN_BATTLES, relevée en payant.
+const RUIN_BATTLES := 3
+const RUIN_REPAIR_GOLD := 80
+
+## Légende (fin de campagne) : score construit tout au long de la conquête.
+## Les composantes sont simples à suivre et affichées dans l'épilogue.
+##   villes     : 10 par ville possédée (hors capitale)
+##   niveaux    : 5 par niveau de ville au-dessus de Hameau
+##   gouverneurs : 4 par gouverneur en poste
+##   pierres    : 30 par Pierre Élémentaire possédée
+##   diplomatie : 6 par ville annexée par négociation (voie pacifique)
+##   ruines    : -8 par ville ruinée non réparée à la fin
+const LEGEND_WEIGHTS := {"villes": 10, "niveaux": 5, "gouverneurs": 4, "pierres": 30, "diplomatie": 6, "ruines": -8}
+
 ## Spécialité économique de chaque ville (biome/Nation) : ressources versées
 ## à chaque victoire, mises à l'échelle du niveau de la ville. Les villes sans
 ## entrée (capitale, Donjon) n'ont pas de spécialité.
@@ -227,7 +248,7 @@ static func defense(data: Dictionary, id: String) -> int:
 ## Or versé par bataille gagnée par une ville (gelé si pillée).
 static func city_income(data: Dictionary, id: String) -> int:
 	var conq: Dictionary = data.get("conquest", {})
-	if is_ravaged(conq, id):
+	if is_ravaged(conq, id) or is_ruined(conq, id):
 		return 0
 	var base: int = (3 if id == "capitale" else 2) * city_level(conq, id)
 	var h: String = hero_of(conq, id)
@@ -250,7 +271,7 @@ static func level_multiplier(conq: Dictionary, id: String) -> float:
 static func governor_yield(conq: Dictionary) -> Dictionary:
 	var out: Dictionary = {}
 	for id: String in conq.get("owned", []):
-		if is_ravaged(conq, id):
+		if is_ravaged(conq, id) or is_ruined(conq, id):
 			continue
 		var h: String = hero_of(conq, id)
 		if h == "":
@@ -572,6 +593,158 @@ static func enemy_garrison(conq: Dictionary, id: String) -> int:
 static func enemy_garrison_bonus(conq: Dictionary, id: String) -> int:
 	return int(enemy_garrison(conq, id) / 2.0)
 
+# ═════════════════════════════════════════════════════════════════════════════
+#  Diplomatie — annexion négociée des villes neutres
+# ═════════════════════════════════════════════════════════════════════════════
+
+## Coût de l'annexion négociée d'une ville neutre : or + la ressource
+## spécialité de la ville (CITY_TRAITS), payable en une fois.
+static func diplomacy_cost(conq: Dictionary, id: String) -> Dictionary:
+	var res_key: String = ""
+	var spec: Dictionary = CITY_TRAITS.get(id, {})
+	if not spec.get("res", {}).is_empty():
+		res_key = String(spec.get("res", {}).keys()[0])
+	if res_key == "":
+		res_key = "Bois"
+	return {"gold": DIPLO_GOLD, "res": {res_key: DIPLO_RES}}
+
+## Annexe une ville neutre par négociation (voie pacifique). Retourne "" si OK.
+## routes : CONQUEST_ROUTES — la ville doit être atteignable (même règle que
+## l'assaut : reliée au territoire). names : id -> nom, pour le journal.
+static func negotiate_city(data: Dictionary, conq: Dictionary, id: String,
+		routes: Array, names: Dictionary) -> String:
+	if (conq.get("owned", []) as Array).has(id):
+		return "Ville déjà conquise."
+	conq["_names"] = names
+	var owned: Array = conq.get("owned", [])
+	var linked: bool = false
+	for pair: Array in routes:
+		var a: String = String(pair[0])
+		var b: String = String(pair[1])
+		if (a == id and owned.has(b)) or (b == id and owned.has(a)):
+			linked = true
+			break
+	if not linked:
+		conq.erase("_names")
+		return "Aucune route depuis votre territoire : conquérez d'abord une ville voisine."
+	var cost: Dictionary = diplomacy_cost(conq, id)
+	var res: Dictionary = data.get("resources", {})
+	for k: String in cost.get("res", {}).keys():
+		if int(res.get(k, 0)) < int(cost["res"][k]):
+			conq.erase("_names")
+			return "Ressource insuffisante : %s (%d/%d)." % [k, int(res.get(k, 0)), int(cost["res"][k])]
+	if int(data.get("gold", 0)) < int(cost.get("gold", 0)):
+		conq.erase("_names")
+		return "Or insuffisant : %d pièces requises." % int(cost.get("gold", 0))
+	for k: String in cost.get("res", {}).keys():
+		res[k] = int(res.get(k, 0)) - int(cost["res"][k])
+	data["resources"] = res
+	data["gold"] = int(data.get("gold", 0)) - int(cost.get("gold", 0))
+	owned.append(id)
+	conq["owned"] = owned
+	var dip: Array = conq.get("annexed_diplomacy", [])
+	if not dip.has(id):
+		dip.append(id)
+	conq["annexed_diplomacy"] = dip
+	conq["just_annexed"] = id
+	note(conq, "☮ %s rejoint l'empire par négociation : l'or a parlé plus fort que les armes." % _name(conq, id))
+	conq.erase("_names")
+	return ""
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  Ruine & reconstruction
+# ═════════════════════════════════════════════════════════════════════════════
+
+## Une ville perdue puis reprise reste ruinée : niveau -1 (min 1, reflété par
+## _ruin_level) et production gelée RUIN_BATTLES.
+static func is_ruined(conq: Dictionary, id: String) -> bool:
+	return int(conq.get("ruin", {}).get(id, 0)) > 0
+
+## La ruine décrémente à chaque victoire ; réparée, elle disparaît.
+static func _tick_ruins(conq: Dictionary) -> void:
+	var ruins: Dictionary = conq.get("ruin", {})
+	if ruins.is_empty():
+		return
+	for id: String in ruins.keys().duplicate():
+		if not (conq.get("owned", []) as Array).has(id):
+			continue
+		ruins[id] = int(ruins.get(id, 0)) - 1
+		if int(ruins[id]) <= 0:
+			ruins.erase(id)
+			note(conq, "⚒ %s se relève de ses ruines : production reprise." % _name(conq, id))
+	conq["ruin"] = ruins
+
+## Répare une ville ruinée (80 or) : la production reprend. Retourne "" si OK.
+static func repair_city(data: Dictionary, conq: Dictionary, id: String) -> String:
+	if not is_ruined(conq, id):
+		return "Cette ville n'est pas ruinée."
+	if int(data.get("gold", 0)) < RUIN_REPAIR_GOLD:
+		return "Or insuffisant : %d pièces requises." % RUIN_REPAIR_GOLD
+	data["gold"] = int(data.get("gold", 0)) - RUIN_REPAIR_GOLD
+	var ruins: Dictionary = conq.get("ruin", {})
+	ruins.erase(id)
+	conq["ruin"] = ruins
+	return ""
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  Légende — score de fin de campagne et fins multiples
+# ═════════════════════════════════════════════════════════════════════════════
+
+## Détail du score de Légende (clé -> points). stones : nombre de Pierres
+## Élémentaires du joueur (fourni par ProgressionManager depuis Stones).
+static func legend_score(conq: Dictionary, stones: int) -> Dictionary:
+	var w: Dictionary = LEGEND_WEIGHTS
+	var out: Dictionary = {"villes": 0, "niveaux": 0, "gouverneurs": 0, "pierres": 0, "diplomatie": 0, "ruines": 0}
+	out["villes"] = owned_count(conq) * int(w["villes"])
+	var lv: int = 0
+	for id: String in conq.get("owned", []):
+		lv += maxi(0, city_level(conq, id) - 1)
+	out["niveaux"] = lv * int(w["niveaux"])
+	out["gouverneurs"] = stationed_heroes(conq).size() * int(w["gouverneurs"])
+	out["pierres"] = stones * int(w["pierres"])
+	out["diplomatie"] = (conq.get("annexed_diplomacy", []) as Array).size() * int(w["diplomatie"])
+	var ruined: int = 0
+	for id: String in conq.get("owned", []):
+		if is_ruined(conq, id):
+			ruined += 1
+	out["ruines"] = ruined * int(w["ruines"])
+	return out
+
+static func legend_total(score: Dictionary) -> int:
+	var total: int = 0
+	for k: String in score.keys():
+		total += int(score[k])
+	return total
+
+## Fin de campagne selon le score : trois légendes possibles à la chute du
+## Donjon. Le style de jeu (diplomatie, développement, Pierres) décide de la
+## fin, pas seulement le fait de gagner.
+static func legend_ending(score: Dictionary, conq: Dictionary) -> Dictionary:
+	var dip: int = (conq.get("annexed_diplomacy", []) as Array).size()
+	var neutral_total: int = 0
+	for id: String in conq.get("owned", []):
+		if id != "capitale" and id != "donjon_roi":
+			neutral_total += 1
+	if dip >= 4:
+		return {"id": "marchand", "title": "EMPIRE MARCHAND",
+			"text": "L'or a conquis plus de villes que le fer. Les routes de Zimut sont à vous, les comptoirs affluent : sous votre règne, le commerce a remplacé la guerre."}
+	if int(score.get("niveaux", 0)) >= 40 and int(score.get("gouverneurs", 0)) >= 12:
+		return {"id": "bastion", "title": "BASTION DE ZIMUT",
+			"text": "Chaque ville est une forteresse, chaque gouverneur un rempart. Les Nations se souviendront longtemps de celui qui a rendu l'empire imprenable."}
+	return {"id": "heros", "title": "ÂGE DES HÉROS",
+		"text": "Vos héros ont mené chaque assaut, vaincu les généraux et le Roi Squelette en personne. Les bardes de Zimut chanteront leurs noms pendant des siècles."}
+
+## Épilogue récapitulatif (affiché à la chute du Donjon) : score, détail et fin.
+static func epilogue(score: Dictionary, ending: Dictionary) -> String:
+	var lines: PackedStringArray = []
+	lines.append("%s — %d points de Légende" % [String(ending.get("title", "")), legend_total(score)])
+	lines.append("")
+	lines.append("Villes %d · Développement +%d · Gouverneurs +%d" % [int(score.get("villes", 0)), int(score.get("niveaux", 0)), int(score.get("gouverneurs", 0))])
+	lines.append("Pierres +%d · Diplomatie +%d · Ruines %d" % [int(score.get("pierres", 0)), int(score.get("diplomatie", 0)), int(score.get("ruines", 0))])
+	lines.append("")
+	lines.append(String(ending.get("text", "")))
+	return "\n".join(lines)
+
 static func _set_garrison(conq: Dictionary, id: String, n: int, hero: String) -> void:
 	var g: Dictionary = conq.get("garrisons", {})
 	g[id] = {"troops": clampi(n, 0, garrison_cap(conq, id)), "hero": hero}
@@ -626,6 +799,7 @@ static func after_victory(data: Dictionary, conq: Dictionary, rng: RandomNumberG
 	_tick_threat(data, conq, rng)
 	_tick_missions(data, conq, rng, unrevealed)
 	_tick_chancellor_buffs(conq)
+	_tick_ruins(conq)
 	maybe_chancellor(conq)
 	if int(conq.get("truce", 0)) > 0:
 		conq["truce"] = int(conq["truce"]) - 1
@@ -781,6 +955,12 @@ static func resolve_assault(data: Dictionary, conq: Dictionary, id: String, powe
 	if not lost.has(id):
 		lost.append(id)
 	conq["lost"] = lost
+	# Ruine & reconstruction : reprise en une bataille, mais ruinée à son retour.
+	var ruins: Dictionary = conq.get("ruin", {})
+	if int(ruins.get(id, 0)) <= 0:
+		ruins[id] = RUIN_BATTLES
+		conq["ruin"] = ruins
+			note(conq, "⚒ %s est ruinée : sa production sera gelée %d batailles après sa reprise." % [nm, RUIN_BATTLES])
 	var r2: Dictionary = conq.get("ravage", {})
 	r2.erase(id)
 	conq["ravage"] = r2
@@ -836,7 +1016,7 @@ static func roadworks_yield(conq: Dictionary) -> Dictionary:
 ## Spécialité économique d'une ville (CITY_TRAITS), mise à l'échelle du niveau.
 static func city_trait_yield(conq: Dictionary, id: String) -> Dictionary:
 	var spec: Dictionary = CITY_TRAITS.get(id, {})
-	if spec.is_empty() or is_ravaged(conq, id):
+	if spec.is_empty() or is_ravaged(conq, id) or is_ruined(conq, id):
 		return {}
 	var mult: float = level_multiplier(conq, id)
 	var out: Dictionary = {}

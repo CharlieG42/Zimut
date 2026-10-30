@@ -383,6 +383,8 @@ func _build_council(parent: Control) -> void:
 	v.add_child(_lbl("♞ Gouverneur : %s" % (hero if hero != "" else "aucun"), 22, TEXT))
 	if ProgressionManager._is_city_ravaged(conq, _city_id):
 		v.add_child(_wrap("⚠ Ville PILLÉE : production gelée (%d bataille(s))." % int(conq.get("ravage", {}).get(_city_id, 0)), 19, BAD))
+	if ConquestSystem.is_ruined(conq, _city_id):
+		v.add_child(_wrap("⚒ Ville RUINÉE (perdue puis reprise) : production gelée %d bataille(s) — réparable sur la carte pour %d or." % [int(conq.get("ruin", {}).get(_city_id, 0)), ConquestSystem.RUIN_REPAIR_GOLD], 19, BAD))
 	var th: Dictionary = ConquestSystem.threat(conq)
 	if String(th.get("city", "")) == _city_id:
 		var tl := _wrap("⚠ OFFENSIVE dans %d bataille(s) — force ennemie %d. Renforcez la garnison !" % [int(th["eta"]), int(th["power"])], 19, BAD)
