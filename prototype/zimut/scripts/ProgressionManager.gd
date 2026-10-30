@@ -3045,7 +3045,10 @@ func conquest_negotiate_city(data: Dictionary, city_id: String) -> String:
 	var names: Dictionary = {}
 	for cid: String in CONQUEST_CITIES.keys():
 		names[cid] = String(CONQUEST_CITIES[cid].get("name", cid))
-	var err: String = ConquestSystem.negotiate_city(data, conquest, city_id, CONQUEST_ROUTES, names)
+	# Garde-fou : seules les villes NEUTRES négocient (jamais une forteresse ennemie, un général ou le Donjon)
+	if String(CONQUEST_CITIES.get(city_id, {}).get("kind", "")) != "neutral":
+		return "Cette ville ne négocie pas : seules les villes neutres acceptent un traité."
+	var err: String = ConquestSystem.negotiate_city(data, conquest, city_id, CONQUEST_ROUTES, names, int(CONQUEST_CITIES[city_id].get("level", 0)))
 	if err == "":
 		data["conquest"] = conquest
 		# Un général ne peut pas être vaincu par la voie pacifique : une ville
@@ -3053,7 +3056,7 @@ func conquest_negotiate_city(data: Dictionary, city_id: String) -> String:
 	return err
 
 func conquest_diplomacy_cost(conquest: Dictionary, city_id: String) -> Dictionary:
-	return ConquestSystem.diplomacy_cost(conquest, city_id)
+	return ConquestSystem.diplomacy_cost(conquest, city_id, int(CONQUEST_CITIES.get(city_id, {}).get("level", 0)))
 
 ## Ruine & reconstruction (V59).
 func conquest_is_ruined(conquest: Dictionary, city_id: String) -> bool:

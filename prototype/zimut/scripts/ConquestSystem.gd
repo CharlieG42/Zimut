@@ -90,6 +90,11 @@ const GARRISON_MAX := 6
 ## est la spécialité de la ville (CITY_TRAITS), payable en une fois.
 const DIPLO_GOLD := 120
 const DIPLO_RES := 8
+## Coût croissant avec le niveau de la ville (une ville de niveau 55 ne s'achète pas au prix d'un hameau)
+const DIPLO_GOLD_PER_LEVEL := 4
+const DIPLO_RES_PER_LEVEL := 0.15
+## Victoires à attendre entre deux négociations (la diplomatie complète les combats, sans les remplacer)
+const DIPLO_COOLDOWN := 3
 
 ## Ruine & reconstruction : une ville perdue puis reprise reste ruinée —
 ## niveau -1 (min 1) et production gelée RUIN_BATTLES, relevée en payant.
@@ -599,22 +604,29 @@ static func enemy_garrison_bonus(conq: Dictionary, id: String) -> int:
 
 ## Coût de l'annexion négociée d'une ville neutre : or + la ressource
 ## spécialité de la ville (CITY_TRAITS), payable en une fois.
-static func diplomacy_cost(conq: Dictionary, id: String) -> Dictionary:
+static func diplomacy_cost(conq: Dictionary, id: String, level: int = 0) -> Dictionary:
 	var res_key: String = ""
 	var spec: Dictionary = CITY_TRAITS.get(id, {})
 	if not spec.get("res", {}).is_empty():
 		res_key = String(spec.get("res", {}).keys()[0])
 	if res_key == "":
 		res_key = "Bois"
-	return {"gold": DIPLO_GOLD, "res": {res_key: DIPLO_RES}}
+	return {"gold": DIPLO_GOLD + maxi(0, level) * DIPLO_GOLD_PER_LEVEL, "res": {res_key: DIPLO_RES + int(float(maxi(0, level)) * DIPLO_RES_PER_LEVEL)}}
+
+
+## Victoires restantes avant de pouvoir négocier à nouveau (0 = possible).
+static func diplomacy_cooldown(conq: Dictionary) -> int:
+	return maxi(0, int(conq.get("diplo_cd", 0)))
 
 ## Annexe une ville neutre par négociation (voie pacifique). Retourne "" si OK.
 ## routes : CONQUEST_ROUTES — la ville doit être atteignable (même règle que
 ## l'assaut : reliée au territoire). names : id -> nom, pour le journal.
 static func negotiate_city(data: Dictionary, conq: Dictionary, id: String,
-		routes: Array, names: Dictionary) -> String:
+		routes: Array, names: Dictionary, level: int = 0) -> String:
 	if (conq.get("owned", []) as Array).has(id):
 		return "Ville déjà conquise."
+	if diplomacy_cooldown(conq) > 0:
+		return "Les émissaires sont encore en route : nouvelle négociation dans %d victoire(s)." % diplomacy_cooldown(conq)
 	conq["_names"] = names
 	var owned: Array = conq.get("owned", [])
 	var linked: bool = false
@@ -627,7 +639,7 @@ static func negotiate_city(data: Dictionary, conq: Dictionary, id: String,
 	if not linked:
 		conq.erase("_names")
 		return "Aucune route depuis votre territoire : conquérez d'abord une ville voisine."
-	var cost: Dictionary = diplomacy_cost(conq, id)
+	var cost: Dictionary = diplomacy_cost(conq, id, level)
 	var res: Dictionary = data.get("resources", {})
 	for k: String in cost.get("res", {}).keys():
 		if int(res.get(k, 0)) < int(cost["res"][k]):
@@ -646,6 +658,7 @@ static func negotiate_city(data: Dictionary, conq: Dictionary, id: String,
 	if not dip.has(id):
 		dip.append(id)
 	conq["annexed_diplomacy"] = dip
+	conq["diplo_cd"] = DIPLO_COOLDOWN
 	conq["just_annexed"] = id
 	note(conq, "☮ %s rejoint l'empire par négociation : l'or a parlé plus fort que les armes." % _name(conq, id))
 	conq.erase("_names")
@@ -800,6 +813,8 @@ static func after_victory(data: Dictionary, conq: Dictionary, rng: RandomNumberG
 	_tick_missions(data, conq, rng, unrevealed)
 	_tick_chancellor_buffs(conq)
 	_tick_ruins(conq)
+	if int(conq.get("diplo_cd", 0)) > 0:
+		conq["diplo_cd"] = int(conq["diplo_cd"]) - 1
 	maybe_chancellor(conq)
 	if int(conq.get("truce", 0)) > 0:
 		conq["truce"] = int(conq["truce"]) - 1
@@ -999,7 +1014,8 @@ static func maybe_chancellor(conq: Dictionary) -> void:
 		"options": [
 			{"id": "impot", "label": "Lever un impôt — encaisse le revenu d'une victoire par ville, chaque garnison perd 1 soldat", "gold": 0},
 			{"id": "manoeuvres", "label": "Organiser des manœuvres — +2 défense dans toutes les villes pendant 3 batailles", "gold": 60},
-			{"id": "routes", "label": "Entretenir les routes — +2 Bois et +1 Cuir à chaque victoire pendant 4 batailles", "gold": 40}]}
+			{"id": "routes", "label": "Entretenir les routes — +2 Bois et +1 Cuir à chaque victoire pendant 4 batailles", "gold": 40},
+			{"id": "congedier", "label": "Congédier le Chancelier — aucun édit cette fois", "gold": 0}]}
 	conq["chancellor_cd"] = 0
 	conq["chancellor_seen"] = int(conq.get("chancellor_seen", 0)) + 1
 
@@ -1279,6 +1295,8 @@ static func resolve_event(data: Dictionary, option_id: String, rng: RandomNumber
 			out = "L'espion travaille pour vous : plus de raids pendant 4 batailles."
 		"espion:relacher":
 			out = "Vous relâchez l'espion. Il ne reviendra pas."
+		"chancelier:congedier":
+			out = "Le Chancelier se retire : aucun édit promulgué."
 		"chancelier:impot":
 			var owned: Array = conq.get("owned", [])
 			var gold: int = 0

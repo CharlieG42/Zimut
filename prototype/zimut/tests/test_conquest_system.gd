@@ -205,7 +205,7 @@ func _boot() -> void:
 		ch["conquest"].erase("event_pending")
 	check(not ch_ev.is_empty() and String(ch_ev.get("id", "")) == "chancelier", "audience du Chancelier proposée à temps")
 	check(int(ch["conquest"].get("chancellor_seen", 0)) == 1, "le compteur d'audiences est tenu")
-	check((ch_ev.get("options", []) as Array).size() == 3, "trois édits proposés")
+	check((ch_ev.get("options", []) as Array).size() == 4, "trois édits proposés + congédier le Chancelier")
 	# Impôt : or versé, un soldat par garnison
 	pm.conquest_recruit(ch, "clairiere", 2)
 	var g0: int = int(ch["gold"])
@@ -402,17 +402,21 @@ func _boot() -> void:
 	check(pm.conquest_negotiate_city(dp, "clairiere") != "", "ville déjà conquise : négociation refusée")
 	check(pm.conquest_negotiate_city(dp, "oasis") != "", "ville non reliée : négociation refusée")
 	var dgold0: int = int(dp["gold"])
-	var dcost: Dictionary = ConquestSystem.diplomacy_cost(dpcq, "pont_mousse")
+	var dcost: Dictionary = pm.conquest_diplomacy_cost(dpcq, "pont_mousse")
 	var dkey: String = String((dcost["res"] as Dictionary).keys()[0])     # ressource de la spécialité de la ville
 	var dres0: int = int(dp["resources"].get(dkey, 0))
 	check(pm.conquest_negotiate_city(dp, "pont_mousse") == "", "pont-mousse annexé par négociation")
 	check((dpcq["owned"] as Array).has("pont_mousse"), "la ville rejoint l'empire")
-	check(int(dp["gold"]) == dgold0 - 120, "négociation : 120 or débités")
+	check(int(dp["gold"]) == dgold0 - int(dcost["gold"]), "négociation : %d or débités (selon le niveau)" % int(dcost["gold"]))
+	check(int(dcost["gold"]) > 120 and int(pm.conquest_diplomacy_cost(dpcq, "oasis")["gold"]) > int(dcost["gold"]), "le prix grimpe avec le niveau de la ville")
+	check(pm.conquest_negotiate_city(dp, "vieille_tour") != "", "forteresse ennemie : négociation refusée")
+	check(ConquestSystem.diplomacy_cooldown(dpcq) == 3, "délai de 3 victoires avant une autre négociation")
 	check(int(dp["resources"].get(dkey, 0)) == dres0 - int(dcost["res"][dkey]), "négociation : %d %s débités (spécialité de la ville)" % [int(dcost["res"][dkey]), dkey])
 	check((dpcq.get("annexed_diplomacy", []) as Array).has("pont_mousse"), "annexion pacifique comptée pour la Légende")
 	# Or insuffisant (ville reliée à l'empire)
 	dp["gold"] = 50
-	check(pm.conquest_negotiate_city(dp, "vieille_tour").begins_with("Or insuffisant"), "or insuffisant : négociation refusée")
+	dpcq["diplo_cd"] = 0
+	check(ConquestSystem.negotiate_city(dp, dpcq, "vieille_tour", pm.CONQUEST_ROUTES, {}).begins_with("Or insuffisant"), "or insuffisant : négociation refusée")
 
 	# ── V59 Ruine & reconstruction ──
 	var ru: Dictionary = _fresh(["capitale", "clairiere"])

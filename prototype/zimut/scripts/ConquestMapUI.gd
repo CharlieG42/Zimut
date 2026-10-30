@@ -706,7 +706,7 @@ func _refresh_header() -> void:
 		line += "   ·   Production par victoire : " + " · ".join(parts)
 	var generals_alive: int = ConquestSystem.living_generals_count(_conquest)
 	if generals_alive > 0:
-		line += "   ·   ☠ %d général%s du Roi Squelette en vie" % [generals_alive, "aux" if generals_alive > 1 else ""]
+		line += "   ·   ☠ %d %s du Roi Squelette en vie" % [generals_alive, "généraux" if generals_alive > 1 else "général"]
 	if ProgressionManager.conquest_campaign_won(_conquest):
 		line += "   ·   ★ EMPIRE VICTORIEUX"
 	elif ProgressionManager.conquest_empire_complete(_conquest):
@@ -791,6 +791,9 @@ func _select_city(id: String) -> void:
 				for r: String in dcost.get("res", {}).keys():
 					dparts.append("%s %d" % [r, int(dcost["res"][r])])
 				dip_txt = "\n\n☮ DIPLOMATIE : cette ville peut aussi rejoindre l'empire par négociation (%s) — le bouton « NÉGOCIER » ci-dessous." % " · ".join(PackedStringArray(dparts))
+				var dcd: int = ConquestSystem.diplomacy_cooldown(_conquest)
+				if dcd > 0:
+					dip_txt += " Émissaires indisponibles encore %d victoire(s)." % dcd
 			_message.text = "%s · %s · Niveau conseillé %d\n\n%s\n\n● VILLE NEUTRE — 1 bataille contre des mobs de champs suffit à la conquérir.%s" % [
 				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), city["desc"], dip_txt]
 		if id == "donjon_roi" and not ProgressionManager.conquest_empire_complete(_conquest):
