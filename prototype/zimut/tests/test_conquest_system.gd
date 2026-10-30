@@ -37,6 +37,12 @@ func _boot() -> void:
 	check(int(d["gold"]) == 880 and int(d["resources"]["Bois"]) == 40, "coût d'amélioration débité (120 or, 10 Bois, 10 Fer)")
 	check(ConquestSystem.garrison_cap(d["conquest"], "clairiere") == 6, "garnison max niveau 2 = 6")
 	check(pm.conquest_upgrade_city(d, "clairiere") == "", "amélioration en Cité acceptée")
+	check(ConquestSystem.city_level(d["conquest"], "clairiere") == 3, "Cité (niveau 3)")
+	d["gold"] = int(d["gold"]) + 5000
+	d["resources"] = {"Bois": 500, "Fer": 500, "Cuir": 500, "Magie": 500, "Venin": 500}
+	check(pm.conquest_upgrade_city(d, "clairiere") == "", "évolution en Grande Cité (V61)")
+	check(pm.conquest_upgrade_city(d, "clairiere") == "", "évolution en Métropole (V61)")
+	check(ConquestSystem.level_name(ConquestSystem.city_level(d["conquest"], "clairiere")) == "Métropole", "niveau 5 : Métropole")
 	check(pm.conquest_upgrade_city(d, "clairiere") != "", "niveau max : amélioration refusée")
 	check(pm.conquest_upgrade_city(d, "fort_racine") != "", "ville non conquise refusée")
 	var poor: Dictionary = _fresh(["capitale", "clairiere"])
@@ -490,5 +496,35 @@ func _boot() -> void:
 	var back: Variant = JSON.parse_string(js)
 	check(back is Dictionary and ConquestSystem.city_level(back["conquest"], "clairiere") >= 1, "l'état de campagne survit à la sérialisation JSON")
 
+
+	# ── V61 : bâtiments à niveaux, emplacements, Merveilles ──
+	var bv: Dictionary = _fresh(["capitale", "clairiere"])
+	bv["gold"] = 20000
+	bv["resources"] = {"Bois": 999, "Fer": 999, "Cuir": 999, "Magie": 999, "Venin": 999}
+	check(ConquestSystem.building_slots(bv["conquest"], "clairiere") == 3, "Hameau : 3 emplacements")
+	for bk: String in ["scierie", "mine", "tannerie"]:
+		check(pm.conquest_build(bv, "clairiere", bk) == "", "construction %s" % bk)
+	check(pm.conquest_build(bv, "clairiere", "verger") != "", "4e bâtiment refusé au Hameau (emplacements pleins)")
+	check(pm.conquest_upgrade_building(bv, "clairiere", "scierie") != "", "Hameau : bâtiments limités au niveau 1")
+	var y1: int = int(pm.conquest_city_building_yield(bv["conquest"], "clairiere").get("Bois", 0))
+	pm.conquest_upgrade_city(bv, "clairiere")
+	check(pm.conquest_build(bv, "clairiere", "verger") == "", "Bourg : 4e emplacement")
+	var bg0: int = int(bv["gold"])
+	check(pm.conquest_upgrade_building(bv, "clairiere", "scierie") == "", "Bourg : scierie niveau 2")
+	check(int(bv["gold"]) == bg0 - 80, "coût du niveau 2 = 2 × le coût de construction (80 or)")
+	var y2: int = int(pm.conquest_city_building_yield(bv["conquest"], "clairiere").get("Bois", 0))
+	check(y2 > y1, "la scierie niveau 2 produit davantage (%d → %d)" % [y1, y2])
+	check(pm.conquest_upgrade_building(bv, "clairiere", "scierie") != "", "Bourg : niveau 3 refusé")
+	check(pm.conquest_build_wonder(bv, "clairiere") != "", "Merveille refusée avant la Cité")
+	pm.conquest_upgrade_city(bv, "clairiere")
+	var inc0: int = ConquestSystem.city_income(bv, "clairiere")
+	var def0: int = ConquestSystem.defense(bv, "clairiere")
+	check(pm.conquest_build_wonder(bv, "clairiere") == "", "Cité : Merveille de la Nation bâtie")
+	check(pm.conquest_build_wonder(bv, "clairiere") != "", "une seule Merveille par ville")
+	check(ConquestSystem.city_income(bv, "clairiere") > inc0 and ConquestSystem.defense(bv, "clairiere") > def0, "la Merveille ajoute or et défense")
+	check(int(pm.conquest_empire_yield(bv["conquest"]).get("Bois", 0)) >= 4, "l'Arbre-Ancêtre produit du Bois")
+	check(pm.conquest_build(bv, "clairiere", "muraille") == "", "muraille construite")
+	var dw1: int = ConquestSystem.defense(bv, "clairiere")
+	check(pm.conquest_upgrade_building(bv, "clairiere", "muraille") == "" and ConquestSystem.defense(bv, "clairiere") == dw1 + 4, "muraille niveau 2 : +4 défense")
 	print("== %s ==" % ("TOUT OK" if fails == 0 else "%d échec(s)" % fails))
 	quit(1 if fails > 0 else 0)

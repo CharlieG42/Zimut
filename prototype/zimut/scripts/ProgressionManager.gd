@@ -2714,10 +2714,16 @@ func conquest_empire_yield(conquest: Dictionary) -> Dictionary:
 	for city_id: String in conquest.get("owned", []):
 		if _is_city_ravaged(conquest, city_id):
 			continue
-		var mult: float = ConquestSystem.level_multiplier(conquest, city_id)
-		for b: String in _city_buildings(conquest, city_id):
-			for r: String in CONQUEST_BUILDINGS.get(b, {}).get("yield", {}).keys():
-				out[r] = int(out.get(r, 0)) + int(roundf(float(CONQUEST_BUILDINGS[b]["yield"][r]) * mult))
+		var by: Dictionary = conquest_city_building_yield(conquest, city_id)
+		for r: String in by.keys():
+			out[r] = int(out.get(r, 0)) + int(by[r])
+	# Merveilles des Nations (V61).
+	var biomes: Dictionary = {}
+	for wid: String in conquest.get("wonders", []):
+		biomes[wid] = conquest_city_biome(wid)
+	var wy: Dictionary = ConquestSystem.wonder_yield(conquest, biomes)
+	for r: String in wy.keys():
+		out[r] = int(out.get(r, 0)) + int(wy[r])
 	# Les héros gouverneurs produisent aussi (ressources de leur classe).
 	var gy: Dictionary = ConquestSystem.governor_yield(conquest)
 	for r: String in gy.keys():
@@ -2858,6 +2864,35 @@ func _ravage_dict(conquest: Dictionary) -> Dictionary:
 	for k: String in r.keys():
 		r[k] = int(r[k])
 	return r
+
+## Production des bâtiments d'une ville (niveau du bâtiment × facteur de la ville).
+func conquest_city_building_yield(conquest: Dictionary, city_id: String) -> Dictionary:
+	var out: Dictionary = {}
+	if _is_city_ravaged(conquest, city_id):
+		return out
+	var mult: float = ConquestSystem.level_multiplier(conquest, city_id)
+	for b: String in _city_buildings(conquest, city_id):
+		var y: Dictionary = ConquestSystem.building_yield_at(CONQUEST_BUILDINGS.get(b, {}), ConquestSystem.building_level(conquest, city_id, b))
+		for r: String in y.keys():
+			out[r] = int(out.get(r, 0)) + int(roundf(float(y[r]) * mult))
+	return out
+
+## Améliore un bâtiment (V61). "" si OK.
+func conquest_upgrade_building(data: Dictionary, city_id: String, building: String) -> String:
+	var info: Dictionary = CONQUEST_BUILDINGS.get(building, {})
+	if info.is_empty():
+		return "Bâtiment inconnu."
+	var err: String = ConquestSystem.upgrade_building(data, city_id, building, info, "%s — %s" % [conquest_city_name(city_id), String(info["label"])])
+	if err == "":
+		progression_changed.emit()
+	return err
+
+## Bâtit la Merveille de la Nation de la ville (V61). "" si OK.
+func conquest_build_wonder(data: Dictionary, city_id: String) -> String:
+	var err: String = ConquestSystem.build_wonder(data, city_id, conquest_city_biome(city_id), conquest_city_name(city_id))
+	if err == "":
+		progression_changed.emit()
+	return err
 
 ## Bâtiments construits dans une ville.
 func _city_buildings(conquest: Dictionary, city_id: String) -> Array:
@@ -3193,6 +3228,8 @@ func conquest_build(data: Dictionary, city_id: String, building: String) -> Stri
 	var lst: Array = builds.get(city_id, [])
 	if lst.has(building):
 		return "Bâtiment déjà construit."
+	if lst.size() >= ConquestSystem.building_slots(conquest, city_id):
+		return "Plus d'emplacement libre : la ville doit devenir %s." % ConquestSystem.level_name(ConquestSystem.city_level_for_slots(lst.size() + 1))
 	var res: Dictionary = data.get("resources", {})
 	for k: String in info.get("cost", {}).keys():
 		if int(res.get(k, 0)) < int(info["cost"][k]):

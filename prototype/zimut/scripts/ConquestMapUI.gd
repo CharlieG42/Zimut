@@ -790,12 +790,11 @@ func _select_city(id: String) -> void:
 		if builds.size() > 0:
 			var names: Array = []
 			for b: String in builds:
-				names.append(String(ProgressionManager.CONQUEST_BUILDINGS.get(b, {}).get("label", b)))
-			txt += "\n\nBâtiments : %s" % ", ".join(PackedStringArray(names))
-		var yld: Dictionary = {}
-		for b: String in builds:
-			for r: String in ProgressionManager.CONQUEST_BUILDINGS.get(b, {}).get("yield", {}).keys():
-				yld[r] = int(yld.get(r, 0)) + int(ProgressionManager.CONQUEST_BUILDINGS[b]["yield"][r])
+				names.append("%s %s" % [String(ProgressionManager.CONQUEST_BUILDINGS.get(b, {}).get("label", b)), "★".repeat(ConquestSystem.building_level(_conquest, id, b))])
+			txt += "\n\nBâtiments (%d/%d) : %s" % [builds.size(), ConquestSystem.building_slots(_conquest, id), ", ".join(PackedStringArray(names))]
+		if ConquestSystem.has_wonder(_conquest, id):
+			txt += "\n★ Merveille : %s" % String(ConquestSystem.wonder_for(String(city["biome"]))["label"])
+		var yld: Dictionary = ProgressionManager.conquest_city_building_yield(_conquest, id)
 		if yld.size() > 0 and ravage == 0:
 			var parts: Array = []
 			for r: String in yld.keys():

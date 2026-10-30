@@ -9,7 +9,9 @@ extends RefCounted
 ## (conquest_*) et passe ici le catalogue de routes (pas d'autoload en static).
 ##
 ## Clés de data["conquest"] ajoutées :
-##   city_levels {id:int}        niveau 1..3 (Hameau / Bourg / Cité)
+##   city_levels {id:int}        niveau 1..5 (Hameau / Bourg / Cité / Grande Cité / Métropole)
+##   building_levels {id:{bâtiment:int}}  niveau 1..3 des bâtiments (V61, défaut 1)
+##   wonders     [id]            villes qui ont bâti la Merveille de leur Nation (V61)
 ##   garrisons   {id:{troops,hero}}
 ##   threat      {city,power,eta}   offensive annoncée (compte à rebours en batailles)
 ##   event_pending {…}           événement à trancher par le joueur
@@ -19,8 +21,35 @@ extends RefCounted
 ##   rewarded    [id]            villes dont le butin d'annexion a déjà été versé
 ##   battle_count, event_cd, threat_cd
 
-const MAX_LEVEL := 3
-const LEVEL_NAMES: Array[String] = ["Hameau", "Bourg", "Cité"]
+const MAX_LEVEL := 5
+const LEVEL_NAMES: Array[String] = ["Hameau", "Bourg", "Cité", "Grande Cité", "Métropole"]
+## Facteur de production (spécialité, bâtiments) par niveau de ville.
+const LEVEL_MULT: Array[float] = [1.0, 1.5, 2.0, 2.4, 2.8]
+
+## V61 — Bâtiments à niveaux : emplacements et niveau maximal des bâtiments selon le
+## niveau de la ville, production et coût selon le niveau du bâtiment.
+const BUILD_SLOTS: Array[int] = [3, 4, 5, 6, 6]
+const BUILD_LEVEL_CAP: Array[int] = [1, 2, 2, 3, 3]
+const BUILD_MAX_LEVEL := 3
+const BUILD_YIELD_MULT: Array[float] = [1.0, 1.8, 2.6]
+const BUILD_COST_MULT: Array[float] = [1.0, 2.0, 3.5]
+const WALL_DEFENSE_BY_LEVEL: Array[int] = [6, 10, 15]
+## Merveille de la Nation : une par ville, à partir de la Cité (niveau 3).
+const WONDER_MIN_LEVEL := 3
+const WONDERS := {
+	"Forêt": {"label": "Arbre-Ancêtre", "shape": "tree", "text": "Les racines de l'Ancêtre nourrissent la ville.", "gold": 2, "def": 4, "res": {"Bois": 4}},
+	"Montagne": {"label": "Forge des Cimes", "shape": "forge", "text": "L'acier des Cimes trempé au givre.", "gold": 2, "def": 4, "res": {"Fer": 4}},
+	"Désert": {"label": "Grand Bazar", "shape": "pyramid", "text": "Toutes les caravanes des Sables y font halte.", "gold": 8, "def": 0, "res": {"Cuir": 2}},
+	"Cristaux": {"label": "Prisme Éternel", "shape": "crystal", "text": "Un cristal géant qui concentre la Magie.", "gold": 2, "def": 2, "res": {"Magie": 3}},
+	"Marées": {"label": "Grand Phare", "shape": "tower", "text": "Sa lumière guide les flottes marchandes.", "gold": 6, "def": 2, "res": {"Cuir": 2}},
+	"Vents": {"label": "Moulin des Tempêtes", "shape": "mill", "text": "Les vents broient le grain et forgent les volontés.", "gold": 4, "def": 2, "res": {"Bois": 2, "Magie": 1}},
+	"Brasier": {"label": "Haut-Fourneau", "shape": "forge", "text": "Le feu du volcan coule dans ses creusets.", "gold": 2, "def": 3, "res": {"Fer": 5}},
+	"Brumes": {"label": "Serre des Brumes", "shape": "tree", "text": "Des plantes rares poussent dans la brume tiède.", "gold": 2, "def": 2, "res": {"Venin": 4}},
+	"Ombres": {"label": "Crypte des Serments", "shape": "crypt", "text": "Les anciens serments veillent sur la ville.", "gold": 0, "def": 8, "res": {"Magie": 2}},
+	"Rouages": {"label": "Grande Horloge", "shape": "tower", "text": "Ses rouages règlent toute l'économie de l'empire.", "gold": 5, "def": 2, "res": {"Fer": 2}},
+	"Donjon": {"label": "Trône d'Os", "shape": "crypt", "text": "Le trône du Roi Squelette, désormais le vôtre.", "gold": 6, "def": 6, "res": {"Magie": 2}},
+}
+const WONDER_COST := {"gold": 450, "res_amount": 20}
 const TROOP_COST := 30
 const WALL_DEFENSE := 6
 ## Équipement du gouverneur : +1 défense par 10 de puissance (max 20), +1 or par 60 (max 4).
@@ -149,6 +178,8 @@ const CITY_TRAITS := {
 const UPGRADE := {
 	2: {"gold": 120, "res": {"Bois": 10, "Fer": 10}},
 	3: {"gold": 300, "res": {"Fer": 20, "Cuir": 10, "Magie": 10}},
+	4: {"gold": 550, "res": {"Bois": 25, "Fer": 30, "Magie": 15}},
+	5: {"gold": 900, "res": {"Fer": 40, "Cuir": 25, "Magie": 25, "Venin": 15}},
 }
 
 ## Effets d'un héros gouverneur, par classe : def = défense en plus,
@@ -210,6 +241,147 @@ static func is_ravaged(conq: Dictionary, id: String) -> bool:
 static func has_wall(conq: Dictionary, id: String) -> bool:
 	return (conq.get("buildings", {}).get(id, []) as Array).has("muraille")
 
+## Défense apportée par la muraille (selon son niveau), 0 sans muraille.
+static func wall_defense(conq: Dictionary, id: String) -> int:
+	if not has_wall(conq, id):
+		return 0
+	return WALL_DEFENSE_BY_LEVEL[building_level(conq, id, "muraille") - 1]
+
+# ── Bâtiments à niveaux (V61) ──
+
+static func buildings_of(conq: Dictionary, id: String) -> Array:
+	return conq.get("buildings", {}).get(id, [])
+
+## Niveau d'un bâtiment : 0 s'il n'est pas construit, sinon 1..3.
+static func building_level(conq: Dictionary, id: String, key: String) -> int:
+	if not buildings_of(conq, id).has(key):
+		return 0
+	return clampi(int(conq.get("building_levels", {}).get(id, {}).get(key, 1)), 1, BUILD_MAX_LEVEL)
+
+## Emplacements de construction de la ville (selon son niveau).
+static func building_slots(conq: Dictionary, id: String) -> int:
+	return BUILD_SLOTS[city_level(conq, id) - 1]
+
+## Niveau maximal des bâtiments autorisé par le niveau de la ville.
+static func building_level_cap(conq: Dictionary, id: String) -> int:
+	return BUILD_LEVEL_CAP[city_level(conq, id) - 1]
+
+## Premier niveau de ville qui autorise ce niveau de bâtiment (pour l'afficher).
+static func city_level_for_building(level: int) -> int:
+	for i: int in range(BUILD_LEVEL_CAP.size()):
+		if BUILD_LEVEL_CAP[i] >= level:
+			return i + 1
+	return MAX_LEVEL
+
+## Premier niveau de ville qui offre n emplacements.
+static func city_level_for_slots(n: int) -> int:
+	for i: int in range(BUILD_SLOTS.size()):
+		if BUILD_SLOTS[i] >= n:
+			return i + 1
+	return MAX_LEVEL
+
+## Production d'un bâtiment à un niveau donné (hors facteur de la ville).
+static func building_yield_at(info: Dictionary, level: int) -> Dictionary:
+	var out: Dictionary = {}
+	if level <= 0:
+		return out
+	var m: float = BUILD_YIELD_MULT[clampi(level, 1, BUILD_MAX_LEVEL) - 1]
+	for r: String in info.get("yield", {}).keys():
+		out[r] = roundi(float(info["yield"][r]) * m)
+	return out
+
+## Coût pour amener un bâtiment au niveau `level` (1 = construction).
+static func building_cost(info: Dictionary, level: int) -> Dictionary:
+	var m: float = BUILD_COST_MULT[clampi(level, 1, BUILD_MAX_LEVEL) - 1]
+	var res: Dictionary = {}
+	for r: String in info.get("cost", {}).keys():
+		res[r] = roundi(float(info["cost"][r]) * m)
+	return {"gold": roundi(float(info.get("gold", 0)) * m), "res": res}
+
+static func _pay(data: Dictionary, cost: Dictionary) -> String:
+	var res: Dictionary = data.get("resources", {})
+	for k: String in cost.get("res", {}).keys():
+		if int(res.get(k, 0)) < int(cost["res"][k]):
+			return "Ressource insuffisante : %s (%d/%d)." % [k, int(res.get(k, 0)), int(cost["res"][k])]
+	if int(data.get("gold", 0)) < int(cost.get("gold", 0)):
+		return "Or insuffisant : %d pièces requises." % int(cost.get("gold", 0))
+	for k: String in cost.get("res", {}).keys():
+		res[k] = int(res.get(k, 0)) - int(cost["res"][k])
+	data["resources"] = res
+	data["gold"] = int(data.get("gold", 0)) - int(cost.get("gold", 0))
+	return ""
+
+## Améliore un bâtiment construit (niveau max selon la ville). "" si OK.
+static func upgrade_building(data: Dictionary, id: String, key: String, info: Dictionary, label: String = "") -> String:
+	var conq: Dictionary = data.get("conquest", {})
+	if not (conq.get("owned", []) as Array).has(id):
+		return "Ville non conquise."
+	if is_ravaged(conq, id):
+		return "Ville pillée : impossible de construire."
+	var lvl: int = building_level(conq, id, key)
+	if lvl <= 0:
+		return "Bâtiment pas encore construit."
+	if lvl >= BUILD_MAX_LEVEL:
+		return "Bâtiment déjà au niveau maximum."
+	if lvl >= building_level_cap(conq, id):
+		return "La ville doit devenir %s pour ce niveau." % level_name(city_level_for_building(lvl + 1))
+	var err: String = _pay(data, building_cost(info, lvl + 1))
+	if err != "":
+		return err
+	var bl: Dictionary = conq.get("building_levels", {})
+	var cl: Dictionary = bl.get(id, {})
+	cl[key] = lvl + 1
+	bl[id] = cl
+	conq["building_levels"] = bl
+	log_event(conq, "Bâtiment amélioré : %s niveau %d" % [label if label != "" else key, lvl + 1])
+	data["conquest"] = conq
+	return ""
+
+# ── Merveilles de Nation (V61) ──
+
+static func wonder_for(biome: String) -> Dictionary:
+	return WONDERS.get(biome, WONDERS["Forêt"])
+
+static func has_wonder(conq: Dictionary, id: String) -> bool:
+	return (conq.get("wonders", []) as Array).has(id)
+
+static func wonder_cost(biome: String) -> Dictionary:
+	var r: String = Nations.resource_of(biome) if Nations.DATA.has(biome) else "Magie"
+	var second: String = "Magie" if r != "Magie" else "Fer"
+	return {"gold": int(WONDER_COST["gold"]), "res": {r: int(WONDER_COST["res_amount"]), second: 10}}
+
+## Bâtit la Merveille de la Nation dans une ville (Cité minimum). "" si OK.
+static func build_wonder(data: Dictionary, id: String, biome: String, city_name: String = "") -> String:
+	var conq: Dictionary = data.get("conquest", {})
+	if not (conq.get("owned", []) as Array).has(id):
+		return "Ville non conquise."
+	if is_ravaged(conq, id):
+		return "Ville pillée : impossible de construire."
+	if has_wonder(conq, id):
+		return "La Merveille est déjà bâtie."
+	if city_level(conq, id) < WONDER_MIN_LEVEL:
+		return "La ville doit devenir une %s." % level_name(WONDER_MIN_LEVEL)
+	var err: String = _pay(data, wonder_cost(biome))
+	if err != "":
+		return err
+	var w: Array = conq.get("wonders", [])
+	w.append(id)
+	conq["wonders"] = w
+	log_event(conq, "★ Merveille bâtie à %s : %s" % [city_name if city_name != "" else id, String(wonder_for(biome)["label"])])
+	data["conquest"] = conq
+	return ""
+
+## Ressources produites par les Merveilles (villes non pillées ni ruinées).
+static func wonder_yield(conq: Dictionary, biomes: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for id: String in conq.get("wonders", []):
+		if not (conq.get("owned", []) as Array).has(id) or is_ravaged(conq, id) or is_ruined(conq, id):
+			continue
+		var r: Dictionary = wonder_for(String(biomes.get(id, "Forêt"))).get("res", {})
+		for k: String in r.keys():
+			out[k] = int(out.get(k, 0)) + int(r[k])
+	return out
+
 static func hero_level(data: Dictionary, classe: String) -> int:
 	return int(data.get("roster", {}).get(classe, {}).get("level", 1))
 
@@ -243,8 +415,9 @@ static func governor_text(classe: String) -> String:
 static func defense(data: Dictionary, id: String) -> int:
 	var conq: Dictionary = data.get("conquest", {})
 	var d: int = troops(conq, id) * 2 + city_level(conq, id) * 3 + drill_defense(conq)
-	if has_wall(conq, id):
-		d += WALL_DEFENSE
+	d += wall_defense(conq, id)
+	if has_wonder(conq, id):
+		d += int(wonder_for(_biome_of(id)).get("def", 0))
 	var h: String = hero_of(conq, id)
 	if h != "":
 		d += 6 + int(float(hero_level(data, h)) * 0.5) + int(GOVERNOR.get(h, {}).get("def", 0)) + governor_gear_defense(data, h)
@@ -256,6 +429,8 @@ static func city_income(data: Dictionary, id: String) -> int:
 	if is_ravaged(conq, id) or is_ruined(conq, id):
 		return 0
 	var base: int = (3 if id == "capitale" else 2) * city_level(conq, id)
+	if has_wonder(conq, id):
+		base += int(wonder_for(_biome_of(id)).get("gold", 0))
 	var h: String = hero_of(conq, id)
 	if h != "":
 		base += 2 + int(GOVERNOR.get(h, {}).get("gold", 0)) + governor_gear_gold(data, h)
@@ -270,7 +445,16 @@ static func total_income(data: Dictionary) -> int:
 
 ## Facteur de production des bâtiments selon le niveau de la ville.
 static func level_multiplier(conq: Dictionary, id: String) -> float:
-	return 1.0 + 0.5 * float(city_level(conq, id) - 1)
+	return LEVEL_MULT[city_level(conq, id) - 1]
+
+## Biome d'une ville (catalogue de ProgressionManager, lu sans autoload statique).
+static func _biome_of(id: String) -> String:
+	var loop: MainLoop = Engine.get_main_loop()
+	if loop is SceneTree:
+		var pm: Node = (loop as SceneTree).root.get_node_or_null("ProgressionManager")
+		if pm != null:
+			return String(pm.call("conquest_city_biome", id))
+	return "Forêt"
 
 ## Ressources produites par les héros gouverneurs (villes non pillées).
 static func governor_yield(conq: Dictionary) -> Dictionary:
@@ -304,7 +488,7 @@ static func upgrade_city(data: Dictionary, id: String, city_name: String = "") -
 	if is_ravaged(conq, id):
 		return "Ville pillée : impossible de l'améliorer."
 	if city_level(conq, id) >= MAX_LEVEL:
-		return "Cette ville est déjà une Cité."
+		return "Cette ville est déjà une %s." % level_name(MAX_LEVEL)
 	var cost: Dictionary = upgrade_cost(conq, id)
 	var res: Dictionary = data.get("resources", {})
 	for k: String in cost.get("res", {}).keys():

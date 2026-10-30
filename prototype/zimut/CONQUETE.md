@@ -83,6 +83,16 @@ La carte du monde n'est plus un plateau d'illustrations : chaque ville est posé
 - Carte en 3072×2048 (`conquest_world_map.jpg`, mipmaps), vignette sur les bords, titre et légende fixes sur la vue.
 - Gultur présente la carte une fois (`conq_carte`).
 
+## Villes vivantes & bâtiments à niveaux (V61)
+L'écran de ville montre la ville **dessinée** devant l'illustration de sa Nation (`ConquestCityView`) : on touche un bâtiment, sa gestion s'affiche à droite, avec un résumé de la ville dessous.
+
+- **5 niveaux de ville** : Hameau → Bourg → Cité → Grande Cité → Métropole (550 or + Bois/Fer/Magie, puis 900 or + Fer/Cuir/Magie/Venin). Garnison 4 → 12, production ×1 / 1,5 / 2 / 2,4 / 2,8. L'hôtel de ville se transforme : ailes, tour à horloge, tours d'angle, dôme et flèche dorée.
+- **Emplacements** : 3 / 4 / 5 / 6 / 6 bâtiments selon le niveau (les villes existantes gardent leurs bâtiments).
+- **Bâtiments à 3 niveaux** (étoiles) : niveau max 1 au Hameau, 2 au Bourg/Cité, 3 dès la Grande Cité. Production ×1 / ×1,8 / ×2,6, coût ×1 / ×2 / ×3,5 ; muraille +6 / +10 / +15 défense. Chacun change d'allure en montant (scies, chevalement, séchoirs, orbe, arbres, tours…).
+- **Merveille de la Nation** (dès la Cité, une par ville, 450 or + 20 de la ressource de la Nation + 10) : Arbre-Ancêtre, Forge des Cimes, Grand Bazar, Prisme Éternel, Grand Phare, Moulin des Tempêtes, Haut-Fourneau, Serre des Brumes, Crypte des Serments, Grande Horloge, Trône d'Os — or, défense et ressources à chaque victoire.
+- Vie de la ville : habitants qui circulent (plus nombreux avec le niveau), soldats à l'exercice selon la garnison, gouverneur devant sa résidence, lanternes, fumées, drapeaux ; fumée sur une ville pillée, cadre rouge pendant une offensive ; feu d'artifice doré à chaque construction.
+- Sauvegarde : `building_levels {ville:{bâtiment:niveau}}`, `wonders [ville]` (optionnelles).
+
 ## Sauvegarde
 Clés ajoutées à `conquest` (toutes optionnelles) : `city_levels`, `garrisons`, `threat`, `event_pending`, `news`, `truce`, `lost`, `rewarded`, `battle_count`, `event_cd`, `threat_cd`, `chancellor_cd`, `chancellor_seen`, `drill`, `roadworks`, `missions`, `missions_revealed`, `annexed_diplomacy`, `ruin`.
 

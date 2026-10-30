@@ -90,6 +90,11 @@ const CONQ_CARTE := [
 	"Le [b]brouillard[/b] cache les terres que tu n'as pas encore explorées en Aventure. Un [b]crâne[/b] signale la forteresse d'un général, des [b]points rouges[/b] l'avancée d'un siège, la [b]fumée[/b] une ville pillée.",
 	"Et si une [b]colonne ennemie[/b] marche sur une de tes villes, renforce-la vite !",
 ]
+const VILLE_V61 := [
+	"Bienvenue dans ta ville, [b]{pseudo}[/b] ! Touche un bâtiment pour le gérer à droite.",
+	"L'[b]Hôtel de ville[/b] fait grandir la ville jusqu'à la [b]Métropole[/b] : plus de soldats, plus d'[b]emplacements[/b] de construction et des bâtiments de plus haut niveau.",
+	"Chaque bâtiment monte jusqu'au [b]niveau 3[/b] (les étoiles) et produit davantage à chaque niveau. Dès la [b]Cité[/b], bâtis la [b]Merveille[/b] de la Nation !",
+]
 const CONQ_DIPLOMATIE := [
 	"Cette ville est [b]neutre[/b] : tu peux la gagner par les armes… ou par un [b]traité[/b] ! Le bouton [b]☮ NÉGOCIER[/b] l'annexe contre de l'or et sa ressource de spécialité.",
 	"Plus la ville est grande, plus le traité coûte cher, et tes émissaires doivent se reposer [b]3 victoires[/b] entre deux négociations. Les forteresses ennemies, elles, ne négocient jamais.",
