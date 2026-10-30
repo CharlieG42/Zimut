@@ -131,6 +131,24 @@ func _build_environment() -> void:
 	sun.light_color = pal["sun"]
 	sun.light_energy = 1.0
 	sun.rotation_degrees = Vector3(-52.0, -38.0, 0.0)
+	# Heure de la zone : soir doré (soleil bas, longues ombres) ou matin rosé et brumeux
+	match Adv3DWorld.time_of_day(zone_id, String(terrain["biome"])):
+		"soir":
+			sun.light_color = (pal["sun"] as Color).lerp(Color(1.0, 0.64, 0.38), 0.65)
+			sun.light_energy = 0.95
+			sun.rotation_degrees = Vector3(-20.0, -62.0, 0.0)
+			sky_mat.sky_horizon_color = (pal["sky_hor"] as Color).lerp(Color(1.0, 0.62, 0.38), 0.5)
+			sky_mat.sky_top_color = (pal["sky_top"] as Color).lerp(Color(0.30, 0.34, 0.62), 0.35)
+			sky_mat.ground_horizon_color = sky_mat.sky_horizon_color
+			env.fog_light_color = (pal["fog"] as Color).lerp(Color(0.98, 0.70, 0.50), 0.45)
+			env.ambient_light_color = env.ambient_light_color.lerp(Color(0.95, 0.78, 0.68), 0.3)
+		"matin":
+			sun.light_color = (pal["sun"] as Color).lerp(Color(1.0, 0.86, 0.78), 0.5)
+			sun.rotation_degrees = Vector3(-28.0, 42.0, 0.0)
+			sky_mat.sky_horizon_color = (pal["sky_hor"] as Color).lerp(Color(1.0, 0.84, 0.86), 0.35)
+			sky_mat.ground_horizon_color = sky_mat.sky_horizon_color
+			env.fog_light_color = (pal["fog"] as Color).lerp(Color(0.94, 0.90, 0.95), 0.4)
+			env.fog_density = float(pal.get("fog_density", 0.0035)) * 1.7
 	sun.shadow_enabled = false          # mobile d'abord : pas d'ombres temps réel
 	add_child(sun)
 
