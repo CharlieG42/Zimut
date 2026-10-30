@@ -26,6 +26,8 @@ var yaw: float = 0.0
 var current_cell: Vector2i = Vector2i(-1, -1)
 
 var _model: Node3D = null
+var _rig: Adv3DHeroRig = null             # modèle 3D animé (réglage « Modèles 3D »)
+var _prev_facing: float = 0.0
 var _sprite: Adv3DSpriteActor = null     # joueur « carton » (illustration) ; null = modèle low-poly de secours
 var _facing: float = 0.0
 var _walk_t: float = 0.0
@@ -36,8 +38,20 @@ var distance: float = CAM_DISTANCE
 
 
 func _ready() -> void:
-	_sprite = Adv3DSpriteActor.create("hero")
-	if _sprite != null:
+	if Adv3DHeroModel.enabled():
+		_rig = Adv3DHeroModel.make_hero() as Adv3DHeroRig
+		_model = _rig                            # vrai modèle low-poly (ombre incluse)
+		add_child(_model)
+		var dust3: CPUParticles3D = Adv3DActors.make_dust()
+		dust3.name = "Dust"
+		_model.add_child(dust3)
+		_facing = yaw + PI
+		_model.rotation.y = _facing
+	else:
+		_sprite = Adv3DSpriteActor.create("hero")
+	if _model != null:
+		pass
+	elif _sprite != null:
 		_model = _sprite
 		add_child(_model)
 		Adv3DActors.add_shadow(_model, 0.55)
@@ -90,6 +104,8 @@ func _physics_process(delta: float) -> void:
 		rotate_camera(1.8 * delta)
 	if Input.is_physical_key_pressed(KEY_E):
 		rotate_camera(-1.8 * delta)
+	var before: Vector3 = position
+	_prev_facing = _facing
 	var input: Vector2 = stick_input + _keyboard_vector()
 	if input.length() > 1.0:
 		input = input.normalized()
@@ -97,6 +113,7 @@ func _physics_process(delta: float) -> void:
 		_idle_pose(delta)
 		if _sprite != null:
 			_sprite.animate(delta, 0.0)
+		_animate_rig(delta, before)
 		_place_camera(delta)
 		return
 	var dir: Vector3 = Basis(Vector3.UP, yaw) * Vector3(input.x, 0.0, input.y)
@@ -107,11 +124,22 @@ func _physics_process(delta: float) -> void:
 		_sprite.animate(delta, input.length())
 	_walk_t += delta * SPEED * 2.2 * input.length()
 	_animate_walk()
+	_animate_rig(delta, before)
 	var cell: Vector2i = Adv3DWorld.world_to_cell(position)
 	if cell != current_cell:
 		current_cell = cell
 		cell_changed.emit(cell)
 	_place_camera(delta)
+
+
+## Modèle 3D : vitesse RÉELLE (glissement contre un obstacle = plus lent) et vitesse de rotation.
+func _animate_rig(delta: float, before: Vector3) -> void:
+	if _rig == null or delta <= 0.0:
+		return
+	var flat: Vector3 = position - before
+	flat.y = 0.0
+	var turn: float = wrapf(_facing - _prev_facing, -PI, PI) / delta
+	_rig.animate(delta, flat.length() / delta, turn)
 
 
 func _keyboard_vector() -> Vector2:
@@ -150,10 +178,9 @@ func _face(dir: Vector3, delta: float) -> void:
 	if _model == null or dir.length() < 0.01:
 		return
 	var want: float = atan2(dir.x, dir.z)
-	if _sprite != null:
-		_facing = lerp_angle(_facing, want, clampf(delta * 12.0, 0.0, 1.0))
-		return
-	_model.rotation.y = lerp_angle(_model.rotation.y, want, clampf(delta * 12.0, 0.0, 1.0))
+	_facing = lerp_angle(_facing, want, clampf(delta * 12.0, 0.0, 1.0))
+	if _sprite == null:
+		_model.rotation.y = _facing
 
 
 func _animate_walk() -> void:
