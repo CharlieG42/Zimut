@@ -118,6 +118,57 @@ class Ring extends Node2D:
 		draw_arc(Vector2.ZERO, lerpf(r0, r1, e), 0.0, TAU, 56, Color(col.r, col.g, col.b, (1.0 - k) * 0.95), maxf(1.5, thick * (1.0 - k * 0.7)), true)
 
 
+## V73 — Trace laissée AU SOL par un impact (brûlure, givre, flaque, fissure, ronces…),
+## sous les personnages ; s'estompe en ~1,6 s. Forme irrégulière stable (graine).
+class GroundMark extends Node2D:
+	var col: Color = Color.WHITE
+	var col2: Color = Color.WHITE
+	var style: String = "scorch"
+	var life: float = 1.6
+	var t: float = 0.0
+	var seed_v: int = 1
+	var _pts: PackedVector2Array = PackedVector2Array()
+	func _ready() -> void:
+		var r := RandomNumberGenerator.new()
+		r.seed = seed_v
+		for i: int in range(14):
+			var a: float = float(i) / 14.0 * TAU
+			var rr: float = r.randf_range(0.65, 1.0) * 40.0
+			_pts.append(Vector2(cos(a) * rr, sin(a) * rr * 0.5))
+	func _process(d: float) -> void:
+		t += d
+		if t >= life:
+			queue_free()
+			return
+		queue_redraw()
+	func _draw() -> void:
+		var k: float = clampf(t / life, 0.0, 1.0)
+		var grow: float = minf(1.0, t / 0.12)
+		var a: float = (1.0 - k * k) * 0.55
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2(grow, grow))
+		match style:
+			"crack":                                          # pierre : fissures rayonnantes
+				for i: int in range(6):
+					var ang: float = float(i) / 6.0 * TAU + 0.3
+					var p1 := Vector2(cos(ang), sin(ang) * 0.5) * 18.0
+					var p2 := Vector2(cos(ang + 0.25), sin(ang + 0.25) * 0.5) * 38.0
+					draw_polyline(PackedVector2Array([Vector2.ZERO, p1, p2]), Color(0.12, 0.08, 0.05, a * 1.4), 3.0, true)
+			"frost":                                          # glace : plaque givrée + cristaux
+				draw_colored_polygon(_pts, Color(col2.r, col2.g, col2.b, a * 0.6))
+				for i2: int in range(8):
+					var ang2: float = float(i2) / 8.0 * TAU
+					draw_line(Vector2.ZERO, Vector2(cos(ang2), sin(ang2) * 0.5) * 34.0, Color(col.r, col.g, col.b, a), 2.0, true)
+			"glow":                                           # sacré / arcane : cercle de lumière
+				draw_circle(Vector2.ZERO, 34.0, Color(col.r, col.g, col.b, a * 0.35))
+				draw_arc(Vector2.ZERO, 34.0, 0.0, TAU, 40, Color(col2.r, col2.g, col2.b, a), 2.0, true)
+			_:                                                # brûlure, flaque, poison, ombre, ronces
+				draw_colored_polygon(_pts, Color(col.r, col.g, col.b, a))
+				var inner := PackedVector2Array()
+				for p: Vector2 in _pts:
+					inner.append(p * 0.55)
+				draw_colored_polygon(inner, Color(col2.r, col2.g, col2.b, a * 0.8))
+
+
 ## Rune magique tournante sous le lanceur (cercle + étoile).
 class Rune extends Node2D:
 	var col: Color = Color.WHITE
