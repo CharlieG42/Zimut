@@ -16,7 +16,8 @@ const OBSTACLE_RADIUS := 0.95      # rayon bloquant d'un arbre / rocher (< demi-
 const HEIGHT_AMPLITUDE := 0.6
 const SUN_SHADOW_OFFSET := Vector3(0.28, 0.0, 0.22)   # les ombres tombent du côté opposé au soleil
 
-## Couleurs par biome (sRGB ; les Nations sans palette propre reprennent celle de la Forêt).
+## Couleurs par biome / Nation (sRGB). Clés facultatives : fog_density (brouillard), fx (particules
+## d'ambiance), grass (densité d'herbe), sea (océan sous l'île).
 const PALETTES := {
 	"Forêt": {
 		"ground": [Color(0.38, 0.66, 0.27), Color(0.45, 0.72, 0.31), Color(0.33, 0.58, 0.25)],
@@ -34,7 +35,56 @@ const PALETTES := {
 		"ground": [Color(0.90, 0.74, 0.46), Color(0.94, 0.80, 0.52), Color(0.84, 0.68, 0.40)],
 		"path": Color(0.74, 0.55, 0.34), "cliff_top": Color(0.70, 0.48, 0.28), "cliff_bot": Color(0.30, 0.20, 0.14),
 		"sky_top": Color(0.28, 0.54, 0.88), "sky_hor": Color(0.98, 0.88, 0.72), "fog": Color(0.97, 0.86, 0.68),
-		"sun": Color(1.0, 0.92, 0.72), "ambient": Color(0.92, 0.80, 0.68),
+		"sun": Color(1.0, 0.92, 0.72), "ambient": Color(0.92, 0.80, 0.68), "fx": "dust",
+	},
+	# ── Nations (couleurs reprises de Nations.DATA, ajustées pour la lumière 3D) ──
+	"Cristaux": {
+		"ground": [Color(0.30, 0.30, 0.46), Color(0.36, 0.36, 0.54), Color(0.26, 0.26, 0.40)],
+		"path": Color(0.56, 0.56, 0.70), "cliff_top": Color(0.34, 0.32, 0.54), "cliff_bot": Color(0.11, 0.10, 0.24),
+		"sky_top": Color(0.12, 0.12, 0.32), "sky_hor": Color(0.52, 0.50, 0.82), "fog": Color(0.42, 0.42, 0.70),
+		"sun": Color(0.88, 0.88, 1.0), "ambient": Color(0.62, 0.62, 0.95), "fog_density": 0.0045, "fx": "sparkle", "grass": 0.5, "sat": 1.0,
+	},
+	"Marées": {
+		"ground": [Color(0.86, 0.77, 0.55), Color(0.80, 0.71, 0.50), Color(0.50, 0.68, 0.42)],
+		"path": Color(0.72, 0.58, 0.40), "cliff_top": Color(0.82, 0.72, 0.52), "cliff_bot": Color(0.42, 0.34, 0.24),
+		"sky_top": Color(0.18, 0.52, 0.88), "sky_hor": Color(0.80, 0.95, 0.98), "fog": Color(0.74, 0.92, 0.96),
+		"sun": Color(1.0, 0.96, 0.86), "ambient": Color(0.70, 0.88, 0.96), "fx": "spray", "grass": 0.6, "sea": true,
+	},
+	"Vents": {
+		"ground": [Color(0.40, 0.62, 0.42), Color(0.48, 0.68, 0.48), Color(0.36, 0.56, 0.44)],
+		"path": Color(0.72, 0.70, 0.60), "cliff_top": Color(0.66, 0.74, 0.78), "cliff_bot": Color(0.36, 0.44, 0.56),
+		"sky_top": Color(0.30, 0.58, 0.94), "sky_hor": Color(0.84, 0.92, 1.0), "fog": Color(0.80, 0.88, 0.96),
+		"sun": Color(1.0, 1.0, 0.95), "ambient": Color(0.74, 0.84, 1.0), "fog_density": 0.003, "fx": "wind", "grass": 1.2,
+	},
+	"Brasier": {
+		"ground": [Color(0.28, 0.20, 0.19), Color(0.36, 0.25, 0.21), Color(0.22, 0.15, 0.15)],
+		"path": Color(0.46, 0.30, 0.20), "cliff_top": Color(0.36, 0.24, 0.22), "cliff_bot": Color(0.10, 0.06, 0.06),
+		"sky_top": Color(0.24, 0.10, 0.10), "sky_hor": Color(0.86, 0.46, 0.26), "fog": Color(0.52, 0.27, 0.19),
+		"sun": Color(1.0, 0.74, 0.50), "ambient": Color(0.90, 0.60, 0.48), "fog_density": 0.0045, "fx": "ember", "grass": 0.35, "sat": 1.05,
+	},
+	"Brumes": {
+		"ground": [Color(0.40, 0.55, 0.47), Color(0.48, 0.62, 0.53), Color(0.33, 0.47, 0.41)],
+		"path": Color(0.46, 0.42, 0.34), "cliff_top": Color(0.40, 0.50, 0.46), "cliff_bot": Color(0.16, 0.22, 0.22),
+		"sky_top": Color(0.34, 0.46, 0.50), "sky_hor": Color(0.78, 0.88, 0.86), "fog": Color(0.74, 0.85, 0.83),
+		"sun": Color(0.90, 0.96, 0.92), "ambient": Color(0.66, 0.80, 0.82), "fog_density": 0.0075, "fx": "mist", "grass": 1.1,
+	},
+	"Ombres": {
+		"ground": [Color(0.30, 0.28, 0.38), Color(0.36, 0.33, 0.44), Color(0.25, 0.23, 0.32)],
+		"path": Color(0.44, 0.41, 0.50), "cliff_top": Color(0.32, 0.28, 0.40), "cliff_bot": Color(0.09, 0.07, 0.14),
+		"sky_top": Color(0.12, 0.09, 0.22), "sky_hor": Color(0.44, 0.36, 0.56), "fog": Color(0.34, 0.30, 0.44),
+		"sun": Color(0.88, 0.80, 1.0), "ambient": Color(0.60, 0.54, 0.78), "fog_density": 0.005, "fx": "motes", "grass": 0.6, "sat": 0.95,
+	},
+	"Rouages": {
+		"ground": [Color(0.40, 0.37, 0.34), Color(0.47, 0.43, 0.39), Color(0.34, 0.31, 0.29)],
+		"path": Color(0.60, 0.52, 0.40), "cliff_top": Color(0.42, 0.36, 0.30), "cliff_bot": Color(0.15, 0.12, 0.11),
+		"sky_top": Color(0.36, 0.44, 0.56), "sky_hor": Color(0.94, 0.80, 0.60), "fog": Color(0.86, 0.74, 0.60),
+		"sun": Color(1.0, 0.88, 0.70), "ambient": Color(0.82, 0.74, 0.64), "fog_density": 0.005, "fx": "sparks", "grass": 0.3,
+	},
+	"Donjon": {
+		"ground": [Color(0.38, 0.38, 0.41), Color(0.45, 0.44, 0.47), Color(0.32, 0.32, 0.36)],
+		"path": Color(0.52, 0.48, 0.44), "cliff_top": Color(0.36, 0.34, 0.36), "cliff_bot": Color(0.11, 0.10, 0.13),
+		"sky_top": Color(0.12, 0.10, 0.20), "sky_hor": Color(0.50, 0.44, 0.54), "fog": Color(0.44, 0.40, 0.50),
+		"sun": Color(0.96, 0.86, 0.76), "ambient": Color(0.62, 0.56, 0.72), "fog_density": 0.007, "fx": "motes", "grass": 0.25,
 	},
 }
 
@@ -126,6 +176,10 @@ static func build(zone_id: String) -> Node3D:
 # ── Sol : couleurs lissées entre cases (plus de damier), facettes plates ──
 
 static func _cell_color(c: Vector2i, t: Dictionary, pal: Dictionary) -> Color:
+	# zones de transition (ex. Lisière du Col → Montagne au nord) : chaque case garde la couleur de SA nation
+	var cb: String = String((t.get("cell_biome", {}) as Dictionary).get(c, t["biome"]))
+	if cb != String(t["biome"]) and PALETTES.has(cb):
+		pal = PALETTES[cb]
 	if (t["paths"] as Dictionary).has(c):
 		return pal["path"]
 	var cols: Array = pal["ground"]
@@ -335,8 +389,23 @@ static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	var shadow_cl: Array = []
 	var warm: bool = biome == "Désert"
 	var snow: bool = biome == "Montagne"
+	var nation: Dictionary = {}          # clé de décor de Nation → {xf, cl}
 	for c: Vector2i in (t["obstacles"] as Dictionary).keys():
-		var cat: String = _kind_category(String(t["obstacles"][c]))
+		var kind: String = String(t["obstacles"][c])
+		if Adv3DNationMeshes.has(kind):
+			var nc := Vector3((float(c.x) + 0.5) * CELL + rng.randf_range(-0.2, 0.2), 0.0, (float(c.y) + 0.5) * CELL + rng.randf_range(-0.2, 0.2))
+			nc.y = height_at(nc.x, nc.z) - 0.04
+			var ns: float = rng.randf_range(0.85, 1.25)
+			if not nation.has(kind):
+				nation[kind] = {"xf": [], "cl": []}
+			(nation[kind]["xf"] as Array).append(_xf(nc, rng.randf() * TAU, Vector3(ns, ns * rng.randf_range(0.92, 1.15), ns)))
+			var nv: float = rng.randf_range(0.88, 1.0)
+			(nation[kind]["cl"] as Array).append(Color(nv, nv, nv))
+			var nsr: float = float(Adv3DNationMeshes.SHADOW.get(kind, 1.0)) * ns
+			shadow_xf.append(_xf(nc + SUN_SHADOW_OFFSET * ns + Vector3(0, 0.11, 0), 0.0, Vector3(nsr, 1.0, nsr * 0.9)))
+			shadow_cl.append(Color.WHITE)
+			continue
+		var cat: String = _kind_category(kind)
 		if cat == "round" and biome == "Forêt" and rng.randf() < 0.28:
 			cat = "birch"
 		var ctr := Vector3((float(c.x) + 0.5) * CELL + rng.randf_range(-0.25, 0.25), 0.0, (float(c.y) + 0.5) * CELL + rng.randf_range(-0.25, 0.25))
@@ -365,11 +434,15 @@ static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	_multi(root, "Souches", Adv3DMeshes.stump(), buckets["stump"]["xf"], buckets["stump"]["cl"], solid)
 	_multi(root, "Cristaux", Adv3DMeshes.crystal(), buckets["crystal"]["xf"], buckets["crystal"]["cl"], solid)
 	_multi(root, "Piliers", Adv3DMeshes.pillar(), buckets["pillar"]["xf"], buckets["pillar"]["cl"], solid)
+	var glow: ShaderMaterial = Adv3DNationMeshes.glow_material()
+	for nk: String in nation.keys():
+		_multi(root, "Nation_" + nk, Adv3DNationMeshes.mesh_for(nk), nation[nk]["xf"], nation[nk]["cl"], glow)
 	# Buissons : ceux de la carte + quelques-uns posés sur les bords de falaise (non bloquants).
 	var bush_xf: Array = buckets["bush"]["xf"]
 	var bush_cl: Array = buckets["bush"]["cl"]
+	var leafy: bool = biome in ["Forêt", "Montagne", "Désert", "Vents", "Brumes", "Marées"]
 	for c2: Vector2i in _edge_cells(t):
-		if (t["obstacles"] as Dictionary).has(c2) or (t["paths"] as Dictionary).has(c2) or rng.randf() > 0.4:
+		if not leafy or (t["obstacles"] as Dictionary).has(c2) or (t["paths"] as Dictionary).has(c2) or rng.randf() > 0.4:
 			continue
 		var p := Vector3((float(c2.x) + rng.randf_range(0.1, 0.9)) * CELL, 0.0, (float(c2.y) + rng.randf_range(0.1, 0.9)) * CELL)
 		p.y = height_at(p.x, p.z)
@@ -414,6 +487,15 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	var dry: bool = biome == "Désert"
 	var decor: Dictionary = t["decor"]
 	var flower_cols: Array = [Color(0.95, 0.38, 0.45), Color(0.98, 0.86, 0.30), Color(0.96, 0.96, 0.92), Color(0.66, 0.52, 0.96), Color(0.98, 0.62, 0.30)]
+	var pal: Dictionary = palette(biome)
+	var grass_k: float = float(pal.get("grass", 1.0))
+	var is_nation: bool = Nations.is_new(biome)
+	var ncell: Dictionary = Nations.cell_palette(biome) if is_nation else {}
+	var tuft_col: Color = ncell.get("tuft", Color.WHITE)
+	if is_nation and not (ncell.get("flowers", []) as Array).is_empty():
+		flower_cols = ncell["flowers"]
+	var nat_xf: Dictionary = {}
+	var nat_cl: Dictionary = {}
 	for cy: int in range(size.y):
 		for cx: int in range(size.x):
 			var c := Vector2i(cx, cy)
@@ -421,7 +503,7 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 				continue
 			var on_path: bool = (t["paths"] as Dictionary).has(c)
 			var dens: float = _patch(float(cx) * 2.3 + 40.0, float(cy) * 2.3 + 40.0)
-			var n_tufts: int = (0 if on_path else int(2.0 + dens * 5.0))
+			var n_tufts: int = (0 if on_path else int((2.0 + dens * 5.0) * grass_k))
 			if on_path and rng.randf() < 0.35:
 				n_tufts = 1                              # brins sur le bord du sentier
 			for i: int in range(n_tufts):
@@ -429,9 +511,21 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 				var sc: float = rng.randf_range(0.8, 1.5)
 				tuft_xf.append(_xf(p, rng.randf() * TAU, Vector3(sc, sc * rng.randf_range(0.8, 1.3), sc)))
 				var v: float = rng.randf_range(0.82, 1.0)
-				tuft_cl.append(Color(1.0, 0.95, 0.65) * v if dry else Color(v, v, v))
+				tuft_cl.append(Color(1.0, 0.95, 0.65) * v if dry else (tuft_col * v if is_nation else Color(v, v, v)))
 			var kind: String = String(decor.get(c, "")).to_lower()
-			if kind.contains("flower") or (not on_path and not dry and rng.randf() < 0.07):
+			if Adv3DNationMeshes.has(kind):
+				# décor de sol propre à la Nation (éclats de cristal, coquillages, os, braises…)
+				if not nat_xf.has(kind):
+					nat_xf[kind] = []
+					nat_cl[kind] = []
+				for k4: int in range(rng.randi_range(1, 3)):
+					var pn := _rand_in_cell(rng, c)
+					var sn: float = rng.randf_range(0.8, 1.35)
+					if kind == "mushroom_big":
+						sn *= 0.35
+					(nat_xf[kind] as Array).append(_xf(pn, rng.randf() * TAU, Vector3(sn, sn, sn)))
+					(nat_cl[kind] as Array).append(Color.WHITE)
+			elif kind.contains("flower") or (not on_path and not dry and rng.randf() < 0.07):
 				for k: int in range(rng.randi_range(3, 6)):
 					var pf := _rand_in_cell(rng, c)
 					var sf: float = rng.randf_range(0.8, 1.3)
@@ -452,13 +546,16 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 					pebble_cl.append(Color(0.85, 0.85, 0.85))
 	# Herbes en bordure de falaise : le bord paraît vivant plutôt que coupé au couteau.
 	for ce: Vector2i in _edge_cells(t):
-		for i2: int in range(3):
+		for i2: int in range(roundi(3.0 * minf(grass_k, 1.0))):
 			var pe := _rand_in_cell(rng, ce)
 			var se: float = rng.randf_range(1.0, 1.7)
 			tuft_xf.append(_xf(pe, rng.randf() * TAU, Vector3(se, se, se)))
-			tuft_cl.append(Color(0.95, 0.95, 0.95))
+			tuft_cl.append(tuft_col * 0.95 if is_nation else Color(0.95, 0.95, 0.95))
 	var foliage: ShaderMaterial = Adv3DMeshes.foliage_material(0.5, 0.8)      # herbe : éclairée comme le sol
-	_multi(root, "Herbes", Adv3DMeshes.tuft(), tuft_xf, tuft_cl, foliage)
+	_multi(root, "Herbes", Adv3DNationMeshes.tuft_neutral() if is_nation else Adv3DMeshes.tuft(), tuft_xf, tuft_cl, foliage)
+	var glow: ShaderMaterial = Adv3DNationMeshes.glow_material()
+	for nk: String in nat_xf.keys():
+		_multi(root, "SolNation_" + nk, Adv3DNationMeshes.mesh_for(nk), nat_xf[nk], nat_cl[nk], glow)
 	_multi(root, "Fleurs", Adv3DMeshes.flower(), flower_xf, flower_cl, Adv3DMeshes.foliage_material(0.7, 0.7))
 	_multi(root, "Champignons", Adv3DMeshes.mushroom(), mush_xf, mush_cl, Adv3DMeshes.solid_material(true, true))
 	_multi(root, "Cailloux", Adv3DMeshes.rock(dry), pebble_xf, pebble_cl, Adv3DMeshes.solid_material(true, true))
@@ -499,7 +596,7 @@ static func _multi(parent: Node3D, node_name: String, mesh: Mesh, xforms: Array,
 # ══════════════════════════════════════════════════════════════════════
 
 ## Nuages (MeshInstance3D) autour de l'île ; chacun porte meta « speed » (m/s) pour la dérive.
-static func make_clouds(size: Vector2i, seed_v: int) -> Node3D:
+static func make_clouds(size: Vector2i, seed_v: int, low: bool = true) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Nuages"
 	var rng := RandomNumberGenerator.new()
@@ -518,7 +615,9 @@ static func make_clouds(size: Vector2i, seed_v: int) -> Node3D:
 		var m := MeshInstance3D.new()
 		m.mesh = Adv3DMeshes.cloud()
 		m.material_override = mat
-		var below: bool = i < 12
+		var below: bool = i < 12 and low
+		if i < 12 and not low:
+			continue
 		var x: float = rng.randf_range(-w * 0.7, w * 1.7)
 		var z: float = rng.randf_range(-d * 0.7, d * 1.7)
 		var y: float = rng.randf_range(-16.0, -7.0) if below else rng.randf_range(16.0, 30.0)
@@ -536,6 +635,54 @@ static func make_clouds(size: Vector2i, seed_v: int) -> Node3D:
 	root.set_meta("min_x", -w * 0.9)
 	root.set_meta("max_x", w * 1.9)
 	return root
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  Océan sous l'île (Marées)
+# ══════════════════════════════════════════════════════════════════════
+
+const SEA_SHADER := """
+shader_type spatial;
+render_mode specular_disabled, cull_disabled;
+uniform vec3 shallow : source_color = vec3(0.20, 0.72, 0.78);
+uniform vec3 deep : source_color = vec3(0.04, 0.30, 0.52);
+varying vec3 wpos;
+void vertex() {
+	vec3 w = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	float h = sin(w.x * 0.11 + TIME * 0.7) * 0.35 + cos(w.z * 0.09 + TIME * 0.55) * 0.3 + sin((w.x + w.z) * 0.21 + TIME * 1.3) * 0.12;
+	VERTEX.y += h;
+	wpos = w;
+}
+void fragment() {
+	float r = sin(wpos.x * 0.35 + TIME * 1.1) * sin(wpos.z * 0.31 - TIME * 0.9);
+	float crest = smoothstep(0.72, 0.98, r);
+	float far = clamp(length(VERTEX) / 140.0, 0.0, 1.0);
+	vec3 col = mix(shallow, deep, 0.35 + 0.45 * far);
+	col = mix(col, vec3(0.92, 0.98, 1.0), crest * 0.55 * (1.0 - far));
+	ALBEDO = col;
+	EMISSION = col * 0.12;
+	ROUGHNESS = 0.35;
+}
+"""
+
+
+## Mer qui ondule sous l'île (Nation des Marées) : un seul plan subdivisé, vagues dans le shader.
+static func make_sea(size: Vector2i) -> MeshInstance3D:
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(420.0, 420.0)
+	pm.subdivide_width = 48
+	pm.subdivide_depth = 48
+	var sh := Shader.new()
+	sh.code = SEA_SHADER
+	var m := ShaderMaterial.new()
+	m.shader = sh
+	var mi := MeshInstance3D.new()
+	mi.name = "Ocean"
+	mi.mesh = pm
+	mi.material_override = m
+	mi.position = Vector3(float(size.x) * CELL * 0.5, -10.5, float(size.y) * CELL * 0.5)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return mi
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -574,7 +721,11 @@ static func make_islets(size: Vector2i, biome: String, seed_v: int) -> Node3D:
 		# un arbre (ou un cactus / pin) sur la plupart des îlots
 		if rng.randf() < 0.8:
 			var tree := MeshInstance3D.new()
-			if biome == "Désert":
+			var ninf: Dictionary = Nations.info(biome) if Nations.is_new(biome) else {}
+			if not ninf.is_empty() and Adv3DNationMeshes.has(String(ninf.get("obs_tree", ""))):
+				tree.mesh = Adv3DNationMeshes.mesh_for(String(ninf["obs_tree"]))
+				tree.material_override = Adv3DNationMeshes.glow_material()
+			elif biome == "Désert":
 				tree.mesh = Adv3DMeshes.cactus()
 				tree.material_override = mat
 			elif biome == "Montagne":

@@ -402,7 +402,13 @@ static func _obox(st: SurfaceTool, c: Vector3, ax: Vector3, ay: Vector3, az: Vec
 # ══════════════════════════════════════════════════════════════════════
 
 ## Petits gobelins à oreilles pointues, yeux jaunes et gourdin ; l'élite est plus grande, rouge, cornue.
-static func make_mob_group(g: Dictionary, title: String) -> Node3D:
+## Teinte des créatures selon la Nation (multipliée aux couleurs du modèle).
+const MOB_TINT := {"Ombres": Color(0.78, 0.62, 1.0), "Brasier": Color(1.0, 0.62, 0.50), "Cristaux": Color(0.72, 0.82, 1.0),
+	"Brumes": Color(0.78, 0.96, 0.92), "Marées": Color(0.70, 0.94, 1.0), "Rouages": Color(1.0, 0.86, 0.62), "Donjon": Color(0.82, 0.80, 0.88),
+	"Vents": Color(0.92, 1.0, 1.0)}
+
+
+static func make_mob_group(g: Dictionary, title: String, biome: String = "") -> Node3D:
 	var n := Node3D.new()
 	var elite: bool = bool(g.get("elite", false))
 	var count: int = clampi(int(g.get("count", 3)), 1, 6)
@@ -434,7 +440,9 @@ static func make_mob_group(g: Dictionary, title: String) -> Node3D:
 		m.rotation.y = -ang + PI * 0.5
 		m.scale = Vector3(sc, sc, sc)
 		m.set_meta("phase", float(i) * 1.3)
-		_part(m, mesh)
+		var mi: MeshInstance3D = _part(m, mesh)
+		if MOB_TINT.has(biome):
+			(mi.material_override as StandardMaterial3D).albedo_color = MOB_TINT[biome]
 		n.add_child(m)
 	if elite:
 		var light := OmniLight3D.new()

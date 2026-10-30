@@ -12,8 +12,8 @@ extends Node3D
 
 const HIP_Y := 0.95
 const LEG_LEN := 0.95
-const RUN_FROM := 3.0          # m/s : début de la course (vitesse max de l'explorateur : 4,4)
-const RUN_FULL := 4.3
+const RUN_FROM := 3.4          # m/s : début de la course (vitesse max de l'explorateur : 5,0)
+const RUN_FULL := 4.9
 
 var hips: Node3D
 var torso: Node3D

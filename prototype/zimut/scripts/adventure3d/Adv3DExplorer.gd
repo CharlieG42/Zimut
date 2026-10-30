@@ -8,7 +8,7 @@ extends Node3D
 
 signal cell_changed(cell: Vector2i)
 
-const SPEED := 4.4
+const SPEED := 5.0               # m/s à fond (4,4 auparavant)
 const RADIUS := 0.32
 const CAM_DISTANCE := 10.5
 const CAM_PITCH := -0.82          # radians (≈ -47°) : vue d'exploration, presque « Dofus 3D »
