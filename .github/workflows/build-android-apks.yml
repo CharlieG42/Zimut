@@ -19,12 +19,18 @@ permissions:
 
 env:
   GODOT_VERSION: 4.7.2
+  # Publication automatique (release « build-latest ») : à adapter si besoin
+  PROJECT_NAME: Zimut
+  RELEASE_VERSION: "0.001"
 
 jobs:
   build-apks:
     name: Build APK
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    outputs:
+      pr_number: ${{ steps.version.outputs.pr_number }}
+      game_version: ${{ steps.version.outputs.game_version }}
 
     steps:
       - name: Checkout repository
@@ -160,6 +166,7 @@ jobs:
           fi
 
       - name: Generate automatic build version (0.0.01.<dernière PR mergée>.<n° de push>)
+        id: version
         env:
           GH_TOKEN: ${{ github.token }}
           PUSH_NUMBER: ${{ github.run_number }}
@@ -175,6 +182,9 @@ jobs:
           version="0.0.01.${pr}.${PUSH_NUMBER}"
           echo "Version de compilation : ${version}"
           echo "GAME_VERSION=${version}" >> "$GITHUB_ENV"
+          # Sorties transmises au job de publication
+          echo "pr_number=${pr}" >> "$GITHUB_OUTPUT"
+          echo "game_version=${version}" >> "$GITHUB_OUTPUT"
           export GAME_VERSION="${version}"
           python3 - <<'PY'
           import os, re
@@ -274,3 +284,57 @@ jobs:
           if-no-files-found: error
           compression-level: 0
 
+
+  publish-release:
+    name: Publier la release build-latest
+    needs: build-apks
+    # Uniquement après un push sur main (= fusion de PR), jamais sur une PR
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write   # nécessaire pour créer la release et le tag
+    concurrency:
+      group: publish-build-latest
+      cancel-in-progress: false
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ needs.build-apks.outputs.pr_number }}
+      GAME_VERSION: ${{ needs.build-apks.outputs.game_version }}
+
+    steps:
+      - name: Télécharger les APK construits
+        uses: actions/download-artifact@v4
+        with:
+          path: apks
+          merge-multiple: true
+
+      - name: Renommer ${{ env.PROJECT_NAME }}-<type>_v<version>-<dernière PR>.apk
+        run: |
+          cd apks
+          if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "0" ]; then
+            label="PR${PR_NUMBER}"
+          else
+            label="${GITHUB_SHA::7}"
+          fi
+          echo "LABEL=${label}" >> "$GITHUB_ENV"
+          for kind in debug release; do
+            src=$(ls *-"${kind}"-v*.apk | head -n1)
+            mv "$src" "${PROJECT_NAME}-${kind}_v${RELEASE_VERSION}-${label}.apk"
+          done
+          # Empreintes recalculées avec les nouveaux noms
+          rm -f SHA256SUMS.txt
+          sha256sum "${PROJECT_NAME}"-*.apk > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Publier la release build-latest (version stable, pas de pré-version)
+        run: |
+          tag=build-latest
+          # Recréation à chaque fusion : une seule paire d'APK, toujours la dernière
+          gh release delete "$tag" --repo "$GITHUB_REPOSITORY" --cleanup-tag --yes || true
+          gh release create "$tag" apks/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Build latest — ${LABEL}" \
+            --notes "Dernière build de main : ${PROJECT_NAME} ${GAME_VERSION} (${LABEL}, commit ${GITHUB_SHA::7})." \
+            --latest
