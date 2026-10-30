@@ -57,6 +57,7 @@ static func char_material() -> Material:
 	if _cache.has("mat"):
 		return _cache["mat"]
 	var m := StandardMaterial3D.new()
+	m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED   # évite les taches noires (NaN) sur GPU mobiles
 	m.vertex_color_use_as_albedo = true
 	m.vertex_color_is_srgb = true
 	m.roughness = 0.82
@@ -64,6 +65,7 @@ static func char_material() -> Material:
 	m.rim = 0.35
 	m.rim_tint = 0.55
 	var ol := StandardMaterial3D.new()
+	ol.specular_mode = BaseMaterial3D.SPECULAR_DISABLED   # évite les taches noires (NaN) sur GPU mobiles
 	ol.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	ol.cull_mode = BaseMaterial3D.CULL_FRONT
 	ol.albedo_color = Color(0.13, 0.10, 0.08)

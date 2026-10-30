@@ -18,10 +18,22 @@ static var _cache: Dictionary = {}
 
 const FOLIAGE_SHADER := """
 shader_type spatial;
-render_mode cull_disabled;
+render_mode cull_disabled, specular_disabled;
 // Feuillage : couleurs de sommets (sRGB) + balancement au vent croissant avec la hauteur.
 uniform float sway = 0.16;
 uniform float speed = 1.5;
+// Normales tirées vers le haut : l'herbe et les feuillages restent éclairés des deux côtés
+// (sinon le revers des brins, tourné à l'opposé du soleil, paraît presque noir).
+uniform float normal_up = 0.35;
+// Fondu « tramé » près de la caméra : un buisson qui passe devant l'objectif devient transparent.
+uniform float fade_near = 1.0;
+uniform float fade_far = 2.6;
+float bayer4(vec2 p) {
+	ivec2 q = ivec2(mod(p, 4.0));
+	int i = q.x + q.y * 4;
+	int m[16] = int[16](0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5);
+	return (float(m[i]) + 0.5) / 16.0;
+}
 void vertex() {
 	float h = max(VERTEX.y, 0.0);
 	vec3 wp = MODEL_MATRIX[3].xyz;
@@ -31,7 +43,16 @@ void vertex() {
 	VERTEX.z += cos(TIME * speed * 0.8 + ph) * sway * h * h * 0.10;
 }
 void fragment() {
-	ALBEDO = pow(COLOR.rgb, vec3(2.2));
+	float dist = length(VERTEX);
+	if (dist < fade_far) {
+		float a = clamp((dist - fade_near) / (fade_far - fade_near), 0.0, 1.0);
+		if (a < bayer4(FRAGCOORD.xy)) {
+			discard;
+		}
+	}
+	vec3 up_v = normalize((VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
+	NORMAL = normalize(mix(NORMAL, up_v, normal_up));
+	ALBEDO = pow(max(COLOR.rgb, vec3(0.0)), vec3(2.2));
 	EMISSION = ALBEDO * 0.22;
 	ROUGHNESS = 0.92;
 }
@@ -39,18 +60,24 @@ void fragment() {
 
 
 ## Matériau opaque à couleurs de sommets sRGB (sol, rochers, falaises).
-static func solid_material(double_sided: bool = false) -> StandardMaterial3D:
+static func solid_material(double_sided: bool = false, near_fade: bool = false) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
+	m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED   # évite les taches noires (NaN) sur GPU mobiles
 	m.vertex_color_use_as_albedo = true
 	m.vertex_color_is_srgb = true
 	m.roughness = 0.95
 	if double_sided:
 		m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	if near_fade:
+		# un rocher / une souche qui passe devant la caméra s'efface (tramage, sans tri de transparence)
+		m.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER
+		m.distance_fade_min_distance = 1.0
+		m.distance_fade_max_distance = 2.6
 	return m
 
 
 ## Matériau de feuillage qui ondule au vent.
-static func foliage_material(sway: float = 0.16) -> ShaderMaterial:
+static func foliage_material(sway: float = 0.16, up: float = 0.35) -> ShaderMaterial:
 	if not _cache.has("foliage_shader"):
 		var sh := Shader.new()
 		sh.code = FOLIAGE_SHADER
@@ -58,12 +85,14 @@ static func foliage_material(sway: float = 0.16) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = _cache["foliage_shader"]
 	m.set_shader_parameter("sway", sway)
+	m.set_shader_parameter("normal_up", up)
 	return m
 
 
 ## Ombre douce posée au sol : disque sombre translucide.
 static func shadow_material() -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
+	m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED   # évite les taches noires (NaN) sur GPU mobiles
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	m.albedo_color = Color(0.04, 0.07, 0.03, 0.34)
@@ -455,8 +484,8 @@ static func tuft() -> Mesh:
 	return _cached("tuft", func() -> Mesh:
 		var st: SurfaceTool = _begin()
 		var rng: RandomNumberGenerator = _rng(79)
-		var dark := Color(0.16, 0.38, 0.14)
-		var light := Color(0.50, 0.74, 0.30)
+		var dark := Color(0.24, 0.48, 0.17)
+		var light := Color(0.56, 0.80, 0.33)
 		for i: int in range(5):
 			var a: float = rng.randf() * TAU
 			var r: float = rng.randf_range(0.0, 0.10)

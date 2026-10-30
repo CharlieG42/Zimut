@@ -355,7 +355,7 @@ static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: St
 		shadow_cl.append(Color.WHITE)
 	_multi(root, "OmbresDecors", Adv3DMeshes.shadow_mesh(), shadow_xf, shadow_cl, Adv3DMeshes.shadow_material())
 	var foliage: ShaderMaterial = Adv3DMeshes.foliage_material(0.16)
-	var solid: StandardMaterial3D = Adv3DMeshes.solid_material(true)
+	var solid: StandardMaterial3D = Adv3DMeshes.solid_material(true, true)
 	_multi(root, "Pins", Adv3DMeshes.pine(snow), buckets["pine"]["xf"], buckets["pine"]["cl"], foliage)
 	_multi(root, "Feuillus", Adv3DMeshes.broadleaf(), buckets["round"]["xf"], buckets["round"]["cl"], foliage)
 	_multi(root, "Bouleaux", Adv3DMeshes.birch(), buckets["birch"]["xf"], buckets["birch"]["cl"], foliage)
@@ -457,11 +457,11 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 			var se: float = rng.randf_range(1.0, 1.7)
 			tuft_xf.append(_xf(pe, rng.randf() * TAU, Vector3(se, se, se)))
 			tuft_cl.append(Color(0.95, 0.95, 0.95))
-	var foliage: ShaderMaterial = Adv3DMeshes.foliage_material(0.5)
+	var foliage: ShaderMaterial = Adv3DMeshes.foliage_material(0.5, 0.8)      # herbe : éclairée comme le sol
 	_multi(root, "Herbes", Adv3DMeshes.tuft(), tuft_xf, tuft_cl, foliage)
-	_multi(root, "Fleurs", Adv3DMeshes.flower(), flower_xf, flower_cl, Adv3DMeshes.foliage_material(0.7))
-	_multi(root, "Champignons", Adv3DMeshes.mushroom(), mush_xf, mush_cl, Adv3DMeshes.solid_material(true))
-	_multi(root, "Cailloux", Adv3DMeshes.rock(dry), pebble_xf, pebble_cl, Adv3DMeshes.solid_material(true))
+	_multi(root, "Fleurs", Adv3DMeshes.flower(), flower_xf, flower_cl, Adv3DMeshes.foliage_material(0.7, 0.7))
+	_multi(root, "Champignons", Adv3DMeshes.mushroom(), mush_xf, mush_cl, Adv3DMeshes.solid_material(true, true))
+	_multi(root, "Cailloux", Adv3DMeshes.rock(dry), pebble_xf, pebble_cl, Adv3DMeshes.solid_material(true, true))
 
 
 static func _rand_in_cell(rng: RandomNumberGenerator, c: Vector2i) -> Vector3:
@@ -505,6 +505,7 @@ static func make_clouds(size: Vector2i, seed_v: int) -> Node3D:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_v
 	var mat := StandardMaterial3D.new()
+	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED   # évite les taches noires (NaN) sur GPU mobiles
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.vertex_color_use_as_albedo = true
 	mat.vertex_color_is_srgb = true
