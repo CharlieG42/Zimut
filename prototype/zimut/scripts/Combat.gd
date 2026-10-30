@@ -381,6 +381,14 @@ static func parse(spell: Dictionary) -> Dictionary:
 		p["min_range"] = 0
 		spell["_p"] = p
 		return p
+	# V73 : Rappel de pierre (Géomancien) — une construction (pilier ou muraille entière) rentre sous terre
+	if sname == "Rappel de pierre":
+		p["kind"] = "recall_build"
+		p["target"] = "cell"
+		p["needs_los"] = false
+		p["min_range"] = 0
+		spell["_p"] = p
+		return p
 	if sname == "Maintenance":
 		p["kind"] = "maintain"
 		p["target"] = "self"
@@ -828,8 +836,9 @@ const SUMMONS := {
 	# Terrain du Géomancien : des cases de la grille deviennent des obstacles (« terrain »).
 	# Elles ne comptent pas comme familiers, disparaissent après `turns` tours du Géomancien
 	# et peuvent être détruites. `span` = nombre de cases posées d'un coup (ligne perpendiculaire).
-	"Pilier":       {"pv": 70, "force": 0, "defense": 30, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.80, 0.62, 0.35), "spell": [], "static": true, "blocks_los": true, "terrain": true, "turns": 4, "span": 1, "tower": true},
-	"Muraille":     {"pv": 70, "force": 0, "defense": 30, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.72, 0.55, 0.30), "spell": [], "static": true, "blocks_los": true, "terrain": true, "turns": 3, "span": 3},
+	# V73 : constructions limitées à 4 par Géomancien, mais plus solides (+35 % PV) et plus durables.
+	"Pilier":       {"pv": 95, "force": 0, "defense": 35, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.80, 0.62, 0.35), "spell": [], "static": true, "blocks_los": true, "terrain": true, "turns": 5, "span": 1, "tower": true},
+	"Muraille":     {"pv": 95, "force": 0, "defense": 35, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.72, 0.55, 0.30), "spell": [], "static": true, "blocks_los": true, "terrain": true, "turns": 4, "span": 3},
 	"Faille":       {"pv": 999, "force": 0, "defense": 0, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.35, 0.22, 0.12), "spell": [], "static": true, "terrain": true, "turns": 3, "span": 3, "indestructible": true},
 	"Cristal ambré": {"pv": 90, "force": 0, "defense": 40, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.95, 0.65, 0.15), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1},
 	# Mécanismes de l'Artificier (V26) : posés comme du terrain (ne comptent pas comme familiers).
