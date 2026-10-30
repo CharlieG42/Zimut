@@ -2,9 +2,10 @@ class_name CityScreenUI
 extends CanvasLayer
 
 ## CityScreenUI.gd — « Entrer dans la ville » (mode Conquête).
-## Fenêtre plein écran propre à la nation de la ville : on y gère l'Hôtel de ville
-## (évolution Hameau → Bourg → Cité), la caserne (garnison), la résidence du
-## gouverneur (héros en poste) et les bâtiments de production.
+## Fenêtre plein écran propre à la nation de la ville. V61 : la ville est dessinée
+## (ConquestCityView) — on touche un bâtiment pour le gérer dans le panneau de droite :
+## Hôtel de ville (Hameau → Métropole), caserne, résidence du gouverneur, six bâtiments
+## de production à trois niveaux et la Merveille de la Nation.
 ## Elle travaille directement sur la sauvegarde partagée avec la carte (même dictionnaire),
 ## l'écrit à chaque action et émet `closed` à la fermeture.
 
@@ -56,6 +57,9 @@ var _root: Control
 var _body: VBoxContainer
 var _info: String = ""
 var _desc: String = ""
+var _selected: String = "hall"      # quartier affiché à droite (V61)
+var _celebrate: String = ""         # effet à jouer après une construction réussie
+var _view: ConquestCityView = null
 
 func open(save: Dictionary, slot: int, city_id: String, sprite: Texture2D, desc: String = "") -> void:
 	_save = save
@@ -68,6 +72,7 @@ func open(save: Dictionary, slot: int, city_id: String, sprite: Texture2D, desc:
 	_accent = nd.get("accent", Color(0.6, 0.7, 0.5))
 	layer = 30
 	_build()
+	Gultur.say(self, "ville_v61", Gultur.VILLE_V61, _view)
 
 func _conq() -> Dictionary:
 	return _save.get("conquest", {})
@@ -142,16 +147,55 @@ func _render() -> void:
 	_build_top_bar()
 	var cols := HBoxContainer.new()
 	cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	cols.add_theme_constant_override("separation", 18)
+	cols.add_theme_constant_override("separation", 16)
 	_body.add_child(cols)
-	var left := VBoxContainer.new()
-	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	left.size_flags_stretch_ratio = 1.75
-	left.add_theme_constant_override("separation", 12)
-	cols.add_child(left)
-	_build_scene(left)
-	_build_districts(left)
+	# Vue illustrée de la ville (V61) : on touche un bâtiment pour le gérer à droite.
+	var frame := PanelContainer.new()
+	frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	frame.size_flags_stretch_ratio = 1.65
+	var fs := _box(Color(0.02, 0.03, 0.05, 0.9), _accent, 3, 18)
+	fs.set_content_margin_all(4)
+	frame.add_theme_stylebox_override("panel", fs)
+	cols.add_child(frame)
+	_view = ConquestCityView.new()
+	_view.name = "CityView"
+	_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_fill_view(_view)
+	_view.plot_pressed.connect(func(key: String) -> void:
+		_selected = key
+		_info = ""
+		_render())
+	frame.add_child(_view)
+	if _celebrate != "":
+		_view.celebrate.call_deferred(_celebrate)
+		_celebrate = ""
 	_build_council(cols)
+
+## Remplit la vue avec l'état de la ville.
+func _fill_view(v: ConquestCityView) -> void:
+	var conq: Dictionary = _conq()
+	v.biome = _biome
+	v.animate = not GfxQuality.low()
+	var art_path: String = "res://assets/ui/conquest/cities/%s.jpg" % art_key(_biome)
+	v.art = load(art_path) as Texture2D if ResourceLoader.exists(art_path) else null
+	v.city_level = ConquestSystem.city_level(conq, _city_id)
+	v.troops = ConquestSystem.troops(conq, _city_id)
+	var hero: String = ConquestSystem.hero_of(conq, _city_id)
+	if hero != "":
+		var tex_path := "res://assets/sprites/players/%s.png" % EntityView.sprite_key(hero)
+		v.hero_tex = load(tex_path) as Texture2D if ResourceLoader.exists(tex_path) else null
+	var used: int = ConquestSystem.buildings_of(conq, _city_id).size()
+	var slots: int = ConquestSystem.building_slots(conq, _city_id)
+	for key: String in ProgressionManager.CONQUEST_BUILDINGS.keys():
+		var lv: int = ConquestSystem.building_level(conq, _city_id, key)
+		v.levels[key] = lv
+		v.locked[key] = lv == 0 and used >= slots
+	v.wonder = ConquestSystem.has_wonder(conq, _city_id)
+	v.wonder_shape = String(ConquestSystem.wonder_for(_biome).get("shape", "tree"))
+	v.locked["wonder"] = v.city_level < ConquestSystem.WONDER_MIN_LEVEL
+	v.ravaged = ProgressionManager._is_city_ravaged(conq, _city_id) or ConquestSystem.is_ruined(conq, _city_id)
+	v.threat = String(ConquestSystem.threat(conq).get("city", "")) == _city_id
+	v.selected = _selected
 
 func _build_top_bar() -> void:
 	var bar := HBoxContainer.new()
@@ -165,11 +209,11 @@ func _build_top_bar() -> void:
 	var titles := VBoxContainer.new()
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.add_child(titles)
-	var t := _lbl("%s  ·  %s" % [ConquestSystem.level_name(lvl).to_upper(), ProgressionManager.conquest_city_name(_city_id).to_upper()], 36, GOLD)
+	var t := _lbl("%s  ·  %s" % [ConquestSystem.level_name(lvl).to_upper(), ProgressionManager.conquest_city_name(_city_id).to_upper()], 34, GOLD)
 	t.name = "CityTitle"
 	titles.add_child(t)
 	var nation: String = String(Nations.DATA.get(_biome, {}).get("nation", ProgressionManager.biome_label(_biome)))
-	titles.add_child(_lbl("Nation %s  ·  niveau %d / %d" % [nation, lvl, ConquestSystem.MAX_LEVEL], 20, DIM))
+	titles.add_child(_lbl("Nation %s  ·  niveau %d / %d  ·  %s" % [nation, lvl, ConquestSystem.MAX_LEVEL, _desc], 18, DIM))
 	var chips := HBoxContainer.new()
 	chips.add_theme_constant_override("separation", 8)
 	bar.add_child(chips)
@@ -178,224 +222,243 @@ func _build_top_bar() -> void:
 	for r: String in ["Bois", "Fer", "Cuir", "Magie", "Venin"]:
 		chips.add_child(_chip("%s %d" % [r, int(res.get(r, 0))], RES_COLORS[r]))
 
-func _build_scene(parent: Control) -> void:
-	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", _box(Color(0.03, 0.05, 0.08, 0.78), _accent, 3, 18))
-	parent.add_child(panel)
-	var txt := VBoxContainer.new()
-	panel.add_child(txt)
-	var desc := _lbl(_desc if _desc != "" else String(Nations.DATA.get(_biome, {}).get("trait", "")), 24, TEXT)
-	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	txt.add_child(desc)
-	var trait_txt: String = String(Nations.DATA.get(_biome, {}).get("trait", ""))
-	if trait_txt != "":
-		var tl := _lbl(trait_txt, 18, DIM)
-		tl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		txt.add_child(tl)
-	if _info != "":
-		var il := _lbl(_info, 20, GOLD)
-		il.name = "InfoLine"
-		il.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		txt.add_child(il)
+# ── Panneau de droite : bâtiment sélectionné + résumé de la ville ──────────
 
-func _build_districts(parent: Control) -> void:
-	parent.add_child(_lbl("QUARTIERS", 22, GOLD))
-	var sc := ScrollContainer.new()
-	TouchScroll.install(sc)
-	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	parent.add_child(sc)
-	var grid := GridContainer.new()
-	grid.columns = 3
-	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 12)
-	grid.add_theme_constant_override("v_separation", 12)
-	sc.add_child(grid)
-	_card_hall(grid)
-	_card_barracks(grid)
-	_card_residence(grid)
-	for key: String in ProgressionManager.CONQUEST_BUILDINGS.keys():
-		_card_building(grid, key)
-
-# ── Cartes de quartier ──────────────────────────────────────────────────────
-
-func _card(grid: Control, glyph: String, title: String, color: Color) -> VBoxContainer:
+func _build_council(parent: Control) -> void:
 	var p := PanelContainer.new()
 	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	p.add_theme_stylebox_override("panel", _box(Color(0.05, 0.08, 0.12, 0.82), color, 2, 14))
-	grid.add_child(p)
+	p.size_flags_stretch_ratio = 1.0
+	p.add_theme_stylebox_override("panel", _box(Color(0.04, 0.06, 0.09, 0.90), GOLD, 3, 18))
+	parent.add_child(p)
+	var sc := ScrollContainer.new()
+	TouchScroll.install(sc)
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	p.add_child(sc)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 6)
-	p.add_child(v)
-	v.add_child(_lbl("%s  %s" % [glyph, title], 23, color.lightened(0.3)))
-	return v
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	v.add_theme_constant_override("separation", 8)
+	sc.add_child(v)
+	match _selected:
+		"hall": _detail_hall(v)
+		"barracks": _detail_barracks(v)
+		"residence": _detail_residence(v)
+		"wonder": _detail_wonder(v)
+		_: _detail_building(v, _selected)
+	if _info != "":
+		var il := _wrap(_info, 18, BAD)
+		il.name = "InfoLine"
+		v.add_child(il)
+	var sep := HSeparator.new()
+	sep.add_theme_constant_override("separation", 10)
+	v.add_child(sep)
+	_summary(v)
 
-func _card_hall(grid: Control) -> void:
-	var v := _card(grid, "★", _names()["hall"], GOLD)
-	v.name = "CardHall"
-	var lvl: int = ConquestSystem.city_level(_conq(), _city_id)
-	v.add_child(_wrap("Fait évoluer la ville : garnison plus grande, production et défense accrues.", 17, DIM))
+func _head(v: VBoxContainer, glyph: String, title: String, sub: String, col: Color) -> void:
+	v.add_child(_lbl("%s  %s" % [glyph, title], 26, col))
+	if sub != "":
+		v.add_child(_wrap(sub, 17, DIM))
+
+## Ligne de coût colorée (vert si payable) ; retourne vrai si payable.
+func _cost_line(v: VBoxContainer, cost: Dictionary) -> bool:
+	var gold: int = int(_save.get("gold", 0))
+	var res: Dictionary = _save.get("resources", {})
+	var ok: bool = gold >= int(cost.get("gold", 0))
+	var parts: Array = ["%d or" % int(cost.get("gold", 0))]
+	for r: String in cost.get("res", {}).keys():
+		parts.append("%s %d/%d" % [r, int(res.get(r, 0)), int(cost["res"][r])])
+		ok = ok and int(res.get(r, 0)) >= int(cost["res"][r])
+	v.add_child(_wrap("Coût : " + " · ".join(PackedStringArray(parts)), 18, GOOD if ok else BAD))
+	return ok
+
+func _detail_hall(v: VBoxContainer) -> void:
+	var conq: Dictionary = _conq()
+	var lvl: int = ConquestSystem.city_level(conq, _city_id)
+	_head(v, "★", String(_names()["hall"]), "Le cœur de la ville : chaque niveau agrandit la garnison, ouvre des emplacements et des niveaux de bâtiment, et augmente la production.", GOLD)
+	v.add_child(_pips(lvl, ConquestSystem.MAX_LEVEL, GOLD))
+	v.add_child(_wrap("%s (niveau %d) : garnison %d · %d emplacements · bâtiments niv. %d max · production ×%s" % [
+		ConquestSystem.level_name(lvl), lvl, 2 + 2 * lvl, ConquestSystem.BUILD_SLOTS[lvl - 1], ConquestSystem.BUILD_LEVEL_CAP[lvl - 1],
+		_fmt_mult(ConquestSystem.LEVEL_MULT[lvl - 1])], 18, TEXT))
 	if lvl >= ConquestSystem.MAX_LEVEL:
 		v.add_child(_lbl("★ %s — niveau maximum" % ConquestSystem.level_name(lvl), 20, GOOD))
 		return
-	var cost: Dictionary = ConquestSystem.upgrade_cost(_conq(), _city_id)
-	var gold: int = int(_save.get("gold", 0))
-	var res: Dictionary = _save.get("resources", {})
-	var ok: bool = gold >= int(cost["gold"]) and not ProgressionManager._is_city_ravaged(_conq(), _city_id)
-	var parts: Array = ["%d or" % int(cost["gold"])]
-	for r: String in cost["res"].keys():
-		parts.append("%s %d/%d" % [r, int(res.get(r, 0)), int(cost["res"][r])])
-		ok = ok and int(res.get(r, 0)) >= int(cost["res"][r])
-	v.add_child(_wrap(" · ".join(PackedStringArray(parts)), 17, GOOD if ok else BAD))
-	var b := _btn("⬆ %s → %s" % [ConquestSystem.level_name(lvl), ConquestSystem.level_name(lvl + 1)], Color(0.24, 0.34, 0.16), 19, Vector2(0, 54))
+	var nx: int = lvl + 1
+	var gains: PackedStringArray = ["garnison %d" % (2 + 2 * nx)]
+	if ConquestSystem.BUILD_SLOTS[nx - 1] > ConquestSystem.BUILD_SLOTS[lvl - 1]:
+		gains.append("%d emplacements" % ConquestSystem.BUILD_SLOTS[nx - 1])
+	if ConquestSystem.BUILD_LEVEL_CAP[nx - 1] > ConquestSystem.BUILD_LEVEL_CAP[lvl - 1]:
+		gains.append("bâtiments niv. %d" % ConquestSystem.BUILD_LEVEL_CAP[nx - 1])
+	gains.append("production ×%s" % _fmt_mult(ConquestSystem.LEVEL_MULT[nx - 1]))
+	if nx == ConquestSystem.WONDER_MIN_LEVEL:
+		gains.append("Merveille de la Nation")
+	v.add_child(_wrap("→ %s : %s" % [ConquestSystem.level_name(nx), " · ".join(gains)], 18, Color(1.0, 0.86, 0.55)))
+	var ok: bool = _cost_line(v, ConquestSystem.upgrade_cost(conq, _city_id)) and not ProgressionManager._is_city_ravaged(conq, _city_id)
+	var b := _btn("⬆ %s → %s" % [ConquestSystem.level_name(lvl), ConquestSystem.level_name(nx)], Color(0.24, 0.34, 0.16), 21, Vector2(0, 58))
 	b.name = "UpgradeButton"
 	b.disabled = not ok
 	b.pressed.connect(func() -> void:
-		_act(ProgressionManager.conquest_upgrade_city(_save, _city_id)))
+		_act(ProgressionManager.conquest_upgrade_city(_save, _city_id), "hall"))
 	v.add_child(b)
 
-func _card_barracks(grid: Control) -> void:
-	var v := _card(grid, "♜", _names()["barracks"], Color(0.55, 0.68, 0.95))
-	v.name = "CardBarracks"
-	var troops: int = ConquestSystem.troops(_conq(), _city_id)
-	var cap: int = ConquestSystem.garrison_cap(_conq(), _city_id)
-	v.add_child(_lbl("Garnison : %d / %d soldats" % [troops, cap], 20, TEXT))
-	v.add_child(_wrap("Chaque soldat renforce la défense contre les offensives ennemies.", 17, DIM))
+func _detail_barracks(v: VBoxContainer) -> void:
+	var conq: Dictionary = _conq()
+	var troops: int = ConquestSystem.troops(conq, _city_id)
+	var cap: int = ConquestSystem.garrison_cap(conq, _city_id)
+	_head(v, "♜", String(_names()["barracks"]), "Chaque soldat ajoute 2 de défense contre les offensives ennemies.", Color(0.62, 0.74, 1.0))
+	v.add_child(_lbl("Garnison : %d / %d soldats" % [troops, cap], 21, TEXT))
+	v.add_child(_pips(troops, cap, Color(0.55, 0.68, 0.95)))
 	if _city_id == "capitale":
 		v.add_child(_wrap("La capitale est à l'abri des attaques.", 17, DIM))
 		return
 	var gold: int = int(_save.get("gold", 0))
 	var room: int = cap - troops
-	var b1 := _btn("RECRUTER +1 — %d or" % ConquestSystem.TROOP_COST, Color(0.20, 0.28, 0.40), 19, Vector2(0, 50))
+	var b1 := _btn("RECRUTER +1 — %d or" % ConquestSystem.TROOP_COST, Color(0.20, 0.28, 0.40), 20, Vector2(0, 54))
 	b1.name = "RecruitButton"
 	b1.disabled = room < 1 or gold < ConquestSystem.TROOP_COST
 	b1.pressed.connect(func() -> void: _act(ProgressionManager.conquest_recruit(_save, _city_id, 1)))
 	v.add_child(b1)
 	if room > 1:
-		var b2 := _btn("REMPLIR (+%d) — %d or" % [room, room * ConquestSystem.TROOP_COST], Color(0.20, 0.28, 0.40), 19, Vector2(0, 50))
+		var b2 := _btn("REMPLIR (+%d) — %d or" % [room, room * ConquestSystem.TROOP_COST], Color(0.20, 0.28, 0.40), 20, Vector2(0, 54))
 		b2.name = "FillButton"
 		b2.disabled = gold < room * ConquestSystem.TROOP_COST
 		b2.pressed.connect(func() -> void: _act(ProgressionManager.conquest_recruit(_save, _city_id, room)))
 		v.add_child(b2)
+	if room <= 0:
+		v.add_child(_wrap("Garnison pleine : faites évoluer l'%s pour l'agrandir." % String(_names()["hall"]), 17, DIM))
 
-func _card_residence(grid: Control) -> void:
-	var v := _card(grid, "♞", _names()["residence"], Color(0.85, 0.62, 0.90))
-	v.name = "CardResidence"
+func _detail_residence(v: VBoxContainer) -> void:
 	var hero: String = ConquestSystem.hero_of(_conq(), _city_id)
+	_head(v, "♞", String(_names()["residence"]), "Un héros gouverneur défend la ville et la fait prospérer, mais ne combat plus en assaut.", Color(0.90, 0.70, 0.95))
 	if hero != "":
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 10)
-		v.add_child(row)
-		var tex_path := "res://assets/sprites/players/%s.png" % EntityView.sprite_key(hero)
-		if ResourceLoader.exists(tex_path):
-			var tr := TextureRect.new()
-			tr.texture = load(tex_path)
-			tr.custom_minimum_size = Vector2(70, 70)
-			tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			row.add_child(tr)
-		var tv := VBoxContainer.new()
-		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(tv)
-		tv.add_child(_lbl("%s (niv. %d)" % [hero, ConquestSystem.hero_level(_save, hero)], 21, TEXT))
-		tv.add_child(_wrap(ConquestSystem.governor_text(hero), 16, DIM))
+		v.add_child(_lbl("%s (niv. %d)" % [hero, ConquestSystem.hero_level(_save, hero)], 22, TEXT))
+		v.add_child(_wrap(ConquestSystem.governor_text(hero), 18, GOOD))
 		var gdef: int = ConquestSystem.governor_gear_defense(_save, hero)
 		var ggold: int = ConquestSystem.governor_gear_gold(_save, hero)
-		tv.add_child(_wrap("Équipement : +%d défense · +%d or par victoire (à équiper dans Personnages › Équipement)" % [gdef, ggold], 15, GOOD))
-		var b := _btn("RAPPELER LE GOUVERNEUR", Color(0.36, 0.24, 0.32), 18, Vector2(0, 50))
+		v.add_child(_wrap("Équipement : +%d défense · +%d or par victoire (à équiper dans Personnages › Équipement)" % [gdef, ggold], 16, DIM))
+		var b := _btn("RAPPELER LE GOUVERNEUR", Color(0.36, 0.24, 0.32), 19, Vector2(0, 54))
 		b.name = "RecallButton"
 		b.pressed.connect(func() -> void:
 			ProgressionManager.conquest_recall_hero(_save, _city_id)
 			_act(""))
 		v.add_child(b)
 	else:
-		v.add_child(_wrap("Un héros gouverneur défend la ville et la fait prospérer, mais ne combat plus en assaut.", 17, DIM))
-		var b2 := _btn("NOMMER UN GOUVERNEUR", Color(0.32, 0.24, 0.38), 19, Vector2(0, 54))
+		var b2 := _btn("NOMMER UN GOUVERNEUR", Color(0.32, 0.24, 0.38), 20, Vector2(0, 58))
 		b2.name = "GovernorButton"
 		b2.pressed.connect(_show_governor_picker)
 		v.add_child(b2)
 
-func _card_building(grid: Control, key: String) -> void:
-	var info: Dictionary = ProgressionManager.CONQUEST_BUILDINGS[key]
-	var builds: Array = _conq().get("buildings", {}).get(_city_id, [])
-	var built: bool = builds.has(key)
-	var v := _card(grid, "⚒", String(info["label"]), Color(0.62, 0.74, 0.55) if built else Color(0.72, 0.68, 0.50))
-	v.name = "CardBuilding_" + key
-	var yparts: Array = []
-	for r: String in info.get("yield", {}).keys():
-		yparts.append("%s +%d par victoire" % [r, int(info["yield"][r])])
-	v.add_child(_wrap(" · ".join(PackedStringArray(yparts)) if yparts.size() > 0 else "Renforce les remparts (+6 défense).", 17, DIM))
-	if built:
-		v.add_child(_lbl("✓ Construit", 20, GOOD))
+func _detail_building(v: VBoxContainer, key: String) -> void:
+	var conq: Dictionary = _conq()
+	var info: Dictionary = ProgressionManager.CONQUEST_BUILDINGS.get(key, {})
+	if info.is_empty():
+		_selected = "hall"
+		_detail_hall(v)
 		return
-	var res: Dictionary = _save.get("resources", {})
-	var ok: bool = int(_save.get("gold", 0)) >= int(info.get("gold", 0))
-	var cparts: Array = ["%d or" % int(info.get("gold", 0))]
-	for r: String in info.get("cost", {}).keys():
-		cparts.append("%s %d/%d" % [r, int(res.get(r, 0)), int(info["cost"][r])])
-		ok = ok and int(res.get(r, 0)) >= int(info["cost"][r])
-	v.add_child(_wrap(" · ".join(PackedStringArray(cparts)), 17, GOOD if ok else BAD))
-	var b := _btn("CONSTRUIRE", Color(0.22, 0.30, 0.20), 19, Vector2(0, 50))
-	b.name = "BuildButton_" + key
+	var lv: int = ConquestSystem.building_level(conq, _city_id, key)
+	var label: String = String(info["label"]).split(" (")[0]
+	_head(v, "⚒", label, "", Color(0.75, 0.88, 0.62) if lv > 0 else Color(0.85, 0.80, 0.60))
+	if lv > 0:
+		v.add_child(_pips(lv, ConquestSystem.BUILD_MAX_LEVEL, GOLD))
+		v.add_child(_wrap("Niveau %d / %d : %s" % [lv, ConquestSystem.BUILD_MAX_LEVEL, _effect_text(key, info, lv)], 19, TEXT))
+	else:
+		v.add_child(_wrap("Pas encore construit. Au niveau 1 : %s" % _effect_text(key, info, 1), 18, TEXT))
+	var used: int = ConquestSystem.buildings_of(conq, _city_id).size()
+	var slots: int = ConquestSystem.building_slots(conq, _city_id)
+	if lv == 0:
+		v.add_child(_wrap("Emplacements utilisés : %d / %d" % [used, slots], 17, DIM))
+		if used >= slots:
+			v.add_child(_wrap("🔒 Plus d'emplacement : la ville doit devenir %s." % ConquestSystem.level_name(ConquestSystem.city_level_for_slots(used + 1)), 18, BAD))
+			return
+		var ok: bool = _cost_line(v, ConquestSystem.building_cost(info, 1)) and not ProgressionManager._is_city_ravaged(conq, _city_id)
+		var b := _btn("CONSTRUIRE", Color(0.22, 0.30, 0.20), 21, Vector2(0, 58))
+		b.name = "BuildButton_" + key
+		b.disabled = not ok
+		b.pressed.connect(func() -> void: _act(ProgressionManager.conquest_build(_save, _city_id, key), key))
+		v.add_child(b)
+		return
+	if lv >= ConquestSystem.BUILD_MAX_LEVEL:
+		v.add_child(_lbl("★ Niveau maximum", 20, GOOD))
+		return
+	v.add_child(_wrap("→ Niveau %d : %s" % [lv + 1, _effect_text(key, info, lv + 1)], 18, Color(1.0, 0.86, 0.55)))
+	if lv >= ConquestSystem.building_level_cap(conq, _city_id):
+		v.add_child(_wrap("🔒 La ville doit devenir %s pour ce niveau." % ConquestSystem.level_name(ConquestSystem.city_level_for_building(lv + 1)), 18, BAD))
+		return
+	var ok2: bool = _cost_line(v, ConquestSystem.building_cost(info, lv + 1)) and not ProgressionManager._is_city_ravaged(conq, _city_id)
+	var b2 := _btn("⬆ AMÉLIORER (niveau %d)" % (lv + 1), Color(0.24, 0.34, 0.16), 21, Vector2(0, 58))
+	b2.name = "UpgradeBuilding_" + key
+	b2.disabled = not ok2
+	b2.pressed.connect(func() -> void: _act(ProgressionManager.conquest_upgrade_building(_save, _city_id, key), key))
+	v.add_child(b2)
+
+## Effet d'un bâtiment à un niveau donné (production réelle, facteur de la ville compris).
+func _effect_text(key: String, info: Dictionary, lv: int) -> String:
+	if key == "muraille":
+		return "+%d défense" % ConquestSystem.WALL_DEFENSE_BY_LEVEL[lv - 1]
+	var y: Dictionary = ConquestSystem.building_yield_at(info, lv)
+	var mult: float = ConquestSystem.level_multiplier(_conq(), _city_id)
+	var parts: Array = []
+	for r: String in y.keys():
+		parts.append("%s +%d" % [r, roundi(float(y[r]) * mult)])
+	return " · ".join(PackedStringArray(parts)) + " par victoire"
+
+func _detail_wonder(v: VBoxContainer) -> void:
+	var conq: Dictionary = _conq()
+	var w: Dictionary = ConquestSystem.wonder_for(_biome)
+	_head(v, "✦", "Merveille — %s" % String(w["label"]), String(w["text"]), GOLD)
+	var fx: PackedStringArray = []
+	if int(w.get("gold", 0)) > 0:
+		fx.append("+%d or" % int(w["gold"]))
+	for r: String in w.get("res", {}).keys():
+		fx.append("%s +%d" % [r, int(w["res"][r])])
+	var eff: String = "Effet : %s par victoire" % " · ".join(fx)
+	if int(w.get("def", 0)) > 0:
+		eff += "  ·  +%d défense" % int(w["def"])
+	v.add_child(_wrap(eff, 18, TEXT))
+	if ConquestSystem.has_wonder(conq, _city_id):
+		v.add_child(_lbl("★ Bâtie — elle rayonne sur toute la ville", 20, GOOD))
+		return
+	if ConquestSystem.city_level(conq, _city_id) < ConquestSystem.WONDER_MIN_LEVEL:
+		v.add_child(_wrap("🔒 La ville doit devenir une %s." % ConquestSystem.level_name(ConquestSystem.WONDER_MIN_LEVEL), 18, BAD))
+		return
+	var ok: bool = _cost_line(v, ConquestSystem.wonder_cost(_biome)) and not ProgressionManager._is_city_ravaged(conq, _city_id)
+	var b := _btn("✦ BÂTIR LA MERVEILLE", Color(0.40, 0.30, 0.10), 21, Vector2(0, 58))
+	b.name = "WonderButton"
 	b.disabled = not ok
-	b.pressed.connect(func() -> void: _act(ProgressionManager.conquest_build(_save, _city_id, key)))
+	b.pressed.connect(func() -> void: _act(ProgressionManager.conquest_build_wonder(_save, _city_id), "wonder"))
 	v.add_child(b)
 
-# ── Conseil de la ville (colonne de droite) ─────────────────────────────────
-
-func _build_council(parent: Control) -> void:
-	var p := PanelContainer.new()
-	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	p.size_flags_stretch_ratio = 1.0
-	p.add_theme_stylebox_override("panel", _box(Color(0.04, 0.06, 0.09, 0.78), GOLD, 3, 18))
-	parent.add_child(p)
-	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 10)
-	p.add_child(v)
-	var art_path: String = "res://assets/ui/conquest/cities/%s.jpg" % art_key(_biome)
-	if ResourceLoader.exists(art_path):
-		var art := TextureRect.new()
-		art.name = "CityIllustration"
-		art.texture = load(art_path)
-		art.custom_minimum_size = Vector2(0, 330)
-		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-		art.clip_contents = true
-		v.add_child(art)
-	v.add_child(_lbl("CONSEIL DE LA VILLE", 26, GOLD))
+## Résumé compact de la ville, sous le bâtiment sélectionné.
+func _summary(v: VBoxContainer) -> void:
 	var conq: Dictionary = _conq()
 	var lvl: int = ConquestSystem.city_level(conq, _city_id)
-	v.add_child(_lbl("%s — niveau %d / %d" % [ConquestSystem.level_name(lvl), lvl, ConquestSystem.MAX_LEVEL], 22, TEXT))
-	v.add_child(_pips(lvl, ConquestSystem.MAX_LEVEL, GOLD))
-	var troops: int = ConquestSystem.troops(conq, _city_id)
-	var cap: int = ConquestSystem.garrison_cap(conq, _city_id)
-	v.add_child(_lbl("♜ Garnison %d / %d" % [troops, cap], 22, TEXT))
-	v.add_child(_pips(troops, cap, Color(0.55, 0.68, 0.95)))
-	v.add_child(_lbl("Défense : %d" % ConquestSystem.defense(_save, _city_id), 22, TEXT))
-	v.add_child(_lbl("Revenu : +%d or par victoire" % ConquestSystem.city_income(_save, _city_id), 22, GOOD))
-	var hero: String = ConquestSystem.hero_of(conq, _city_id)
-	v.add_child(_lbl("♞ Gouverneur : %s" % (hero if hero != "" else "aucun"), 22, TEXT))
-	if ProgressionManager._is_city_ravaged(conq, _city_id):
-		v.add_child(_wrap("⚠ Ville PILLÉE : production gelée (%d bataille(s))." % int(conq.get("ravage", {}).get(_city_id, 0)), 19, BAD))
-	var th: Dictionary = ConquestSystem.threat(conq)
-	if String(th.get("city", "")) == _city_id:
-		var tl := _wrap("⚠ OFFENSIVE dans %d bataille(s) — force ennemie %d. Renforcez la garnison !" % [int(th["eta"]), int(th["power"])], 19, BAD)
-		tl.name = "ThreatLine"
-		v.add_child(tl)
-	var yld: Dictionary = {}
-	var mult: float = ConquestSystem.level_multiplier(conq, _city_id)
-	for b: String in conq.get("buildings", {}).get(_city_id, []):
-		for r: String in ProgressionManager.CONQUEST_BUILDINGS.get(b, {}).get("yield", {}).keys():
-			yld[r] = int(yld.get(r, 0)) + roundi(float(ProgressionManager.CONQUEST_BUILDINGS[b]["yield"][r]) * mult)
+	v.add_child(_lbl("CONSEIL DE LA VILLE", 20, GOLD))
+	v.add_child(_wrap("♜ %d/%d  ·  Défense %d  ·  🪙 +%d or" % [ConquestSystem.troops(conq, _city_id), ConquestSystem.garrison_cap(conq, _city_id),
+		ConquestSystem.defense(_save, _city_id), ConquestSystem.city_income(_save, _city_id)], 18, TEXT))
+	v.add_child(_wrap("⚒ Bâtiments %d/%d  ·  production ×%s" % [ConquestSystem.buildings_of(conq, _city_id).size(), ConquestSystem.building_slots(conq, _city_id), _fmt_mult(ConquestSystem.LEVEL_MULT[lvl - 1])], 17, DIM))
+	var yld: Dictionary = ProgressionManager.conquest_city_building_yield(conq, _city_id)
 	if yld.size() > 0:
 		var parts: Array = []
 		for r: String in yld.keys():
 			parts.append("%s +%d" % [r, int(yld[r])])
-		v.add_child(_wrap("Production : " + " · ".join(PackedStringArray(parts)), 19, TEXT))
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	v.add_child(spacer)
-	v.add_child(_wrap("Les bonus du biome s'obtiennent en contrôlant toutes ses villes.", 16, DIM))
+		v.add_child(_wrap("Production : " + " · ".join(PackedStringArray(parts)), 17, GOOD))
+	var city_trait: Dictionary = ProgressionManager.conquest_city_trait(_city_id, conq)
+	if String(city_trait.get("label", "")) != "":
+		var tp: Array = []
+		for r: String in city_trait.get("yield", {}).keys():
+			tp.append("%s +%d" % [r, int(city_trait["yield"][r])])
+		v.add_child(_wrap("Spécialité — %s : %s" % [String(city_trait["label"]), " · ".join(PackedStringArray(tp))], 17, GOOD))
+	if ProgressionManager._is_city_ravaged(conq, _city_id):
+		v.add_child(_wrap("⚠ Ville PILLÉE : production gelée (%d bataille(s))." % int(conq.get("ravage", {}).get(_city_id, 0)), 17, BAD))
+	if ConquestSystem.is_ruined(conq, _city_id):
+		v.add_child(_wrap("⚒ Ville RUINÉE : production gelée %d bataille(s) — réparable sur la carte (%d or)." % [int(conq.get("ruin", {}).get(_city_id, 0)), ConquestSystem.RUIN_REPAIR_GOLD], 17, BAD))
+	var th: Dictionary = ConquestSystem.threat(conq)
+	if String(th.get("city", "")) == _city_id:
+		var tl := _wrap("⚠ OFFENSIVE dans %d bataille(s) — force ennemie %d. Renforcez la garnison !" % [int(th["eta"]), int(th["power"])], 17, BAD)
+		tl.name = "ThreatLine"
+		v.add_child(tl)
+
+func _fmt_mult(m: float) -> String:
+	return ("%.1f" % m).replace(".0", "").replace(".", ",")
 
 # ── Gouverneur ──────────────────────────────────────────────────────────────
 
@@ -451,8 +514,10 @@ func _show_governor_picker() -> void:
 # ── Actions ─────────────────────────────────────────────────────────────────
 
 ## Applique le résultat d'une action de gestion : erreur affichée, sinon sauvegarde.
-func _act(err: String) -> void:
+func _act(err: String, celebrate_key: String = "") -> void:
 	_info = err
+	if err == "" and celebrate_key != "":
+		_celebrate = celebrate_key
 	ProgressionManager.write_save(_slot, _save)
 	_render()
 

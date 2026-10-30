@@ -554,31 +554,24 @@ const CONQUEST_CITY_REWARDS := {
 }
 
 ## Routes de la carte : on ne peut attaquer qu'une ville RELIÉE par route à
-## son territoire (arbre technologique spatial). Le Donjon n'est relié qu'aux
-## trois places fortes : il exige de tenir tout le monde de Zimut.
+## son territoire (arbre technologique spatial). Les routes suivent la géographie de
+## la carte peinte. Le Donjon n'ouvre qu'une fois tout le monde de Zimut tenu.
 const CONQUEST_ROUTES: Array = [
-	["capitale", "clairiere"], ["capitale", "pont_mousse"],
-	["clairiere", "vieille_tour"], ["clairiere", "fort_racine"],
-	["vieille_tour", "fort_racine"], ["pont_mousse", "fort_racine"],
-	["fort_racine", "hameau_pin"], ["hameau_pin", "garnison"],
-	["fort_racine", "oasis"], ["garnison", "tour_sable"], ["oasis", "tour_sable"],
-	["clairiere", "village_brume"], ["village_brume", "ruines_lierre"],
-	["village_brume", "abbaye_ronce"], ["ruines_lierre", "citadelle_ronce"],
-	["abbaye_ronce", "citadelle_ronce"], ["citadelle_ronce", "vieille_tour"],
-	["hameau_pin", "col_givre"], ["col_givre", "mine_cristal"],
-	["mine_cristal", "garnison"], ["garnison", "bastion_orage"],
-	["oasis", "caravanserail"], ["caravanserail", "observatoire"],
-	["observatoire", "port_sable"], ["port_sable", "tour_sable"],
-	["fort_racine", "donjon_roi"], ["garnison", "donjon_roi"], ["tour_sable", "donjon_roi"],
-	# Branches supplémentaires pour étendre la campagne au-delà du premier écran.
-	["fort_racine", "bois_lune"], ["bois_lune", "sanctuaire_mousse"],
-	["sanctuaire_mousse", "marais_spectres"], ["marais_spectres", "abbaye_ronce"],
-	["col_givre", "forge_givre"], ["forge_givre", "pic_foudroyant"],
-	["pic_foudroyant", "bastion_orage"], ["oasis", "fort_cendre"],
-	["fort_cendre", "temple_soleil"], ["temple_soleil", "citadelle_sable"],
-	["citadelle_sable", "port_sable"], ["citadelle_sable", "tour_sable"],
-	# V27 : Nation Rouages, au nord-est
-	["garnison", "atelier_cuivre"], ["atelier_cuivre", "citadelle_engrenages"], ["citadelle_engrenages", "tour_sable"],
+	["capitale", "clairiere"], ["capitale", "pont_mousse"], ["clairiere", "vieille_tour"],
+	["clairiere", "fort_racine"], ["pont_mousse", "fort_racine"], ["vieille_tour", "fort_racine"],
+	["vieille_tour", "bastion_orage"], ["bastion_orage", "pic_foudroyant"], ["pic_foudroyant", "col_givre"],
+	["fort_racine", "ruines_lierre"], ["pont_mousse", "sanctuaire_mousse"], ["sanctuaire_mousse", "ruines_lierre"],
+	["ruines_lierre", "village_brume"], ["village_brume", "bois_lune"], ["bois_lune", "marais_spectres"],
+	["sanctuaire_mousse", "village_brume"], ["sanctuaire_mousse", "fort_cendre"], ["fort_cendre", "citadelle_sable"],
+	["village_brume", "citadelle_sable"], ["ruines_lierre", "citadelle_ronce"], ["citadelle_ronce", "abbaye_ronce"],
+	["abbaye_ronce", "bois_lune"], ["fort_racine", "hameau_pin"], ["hameau_pin", "col_givre"],
+	["col_givre", "mine_cristal"], ["mine_cristal", "garnison"], ["citadelle_ronce", "hameau_pin"],
+	["col_givre", "donjon_roi"], ["garnison", "donjon_roi"], ["tour_sable", "donjon_roi"],
+	["garnison", "tour_sable"], ["mine_cristal", "oasis"], ["abbaye_ronce", "observatoire"],
+	["oasis", "temple_soleil"], ["temple_soleil", "tour_sable"], ["oasis", "observatoire"],
+	["oasis", "caravanserail"], ["caravanserail", "observatoire"], ["caravanserail", "port_sable"],
+	["port_sable", "tour_sable"], ["forge_givre", "caravanserail"], ["forge_givre", "marais_spectres"],
+	["tour_sable", "citadelle_engrenages"], ["atelier_cuivre", "citadelle_engrenages"], ["tour_sable", "atelier_cuivre"],
 ]
 
 ## Bâtiments de ressources constructibles dans les villes conquises.
@@ -2196,6 +2189,13 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 					conquest["owned"] = owned
 					conquest_add_event(conquest, "Ville annexée : %s" % conquest_city_name(pending))
 				conquest["just_annexed"] = pending
+				# Général vaincu : sa forteresse est tombée, la région respire.
+				var fallen_general: String = String(ConquestSystem.GENERALS.get(pending, {}).get("name", ""))
+				if fallen_general != "":
+					conquest_add_event(conquest, "☠ %s est vaincu ! Sa région ne lance plus d'offensives." % fallen_general)
+					var remaining: int = ConquestSystem.living_generals_count(conquest)
+					if remaining == 0:
+						conquest_add_event(conquest, "★ Tous les généraux du Roi Squelette sont tombés : l'assaut du Donjon s'annonce moins redoutable.")
 				# Butin thématique versé uniquement à la première annexion.
 				var rewarded: Array = conquest.get("rewarded", [])
 				var reward: Dictionary = CONQUEST_CITY_REWARDS.get(pending, {}) if not rewarded.has(pending) else {}
@@ -2245,8 +2245,29 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 		for cid: String in CONQUEST_CITIES.keys():
 			names[cid] = String(CONQUEST_CITIES[cid].get("name", cid))
 		data["conquest"] = conquest
-		ConquestSystem.after_victory(data, conquest, _rng, CONQUEST_ROUTES, names, just_conquered)
+		# Lieutenance : les missions de cartographie révèlent des villes encore
+		# inconnues (le même état que les belvédères d'Aventure).
+		var adv: Dictionary = data.get("adventure", {})
+		var known: Array = adv.get("revealed_cities", [])
+		var unrevealed: Array = []
+		for cid: String in CONQUEST_CITIES.keys():
+			if cid == "capitale" or cid == "donjon_roi":
+				continue
+			if not (conquest.get("owned", []) as Array).has(cid) and not known.has(cid):
+				unrevealed.append(cid)
+		ConquestSystem.after_victory(data, conquest, _rng, CONQUEST_ROUTES, names, just_conquered, unrevealed)
 		conquest = data.get("conquest", conquest)
+		var newly_revealed: Array = conquest.get("missions_revealed", [])
+		if not newly_revealed.is_empty():
+			var adv2: Dictionary = data.get("adventure", {})
+			var known2: Array = adv2.get("revealed_cities", [])
+			for cid: String in newly_revealed:
+				if not known2.has(cid):
+					known2.append(cid)
+			adv2["revealed_cities"] = known2
+			data["adventure"] = adv2
+			conquest.erase("missions_revealed")
+			data["conquest"] = conquest
 		# Le choix de préparation ne s'applique qu'à une seule bataille,
 		# même si le siège de cette ville nécessite plusieurs vagues.
 		conquest.erase("pending_tactic")
@@ -2693,10 +2714,16 @@ func conquest_empire_yield(conquest: Dictionary) -> Dictionary:
 	for city_id: String in conquest.get("owned", []):
 		if _is_city_ravaged(conquest, city_id):
 			continue
-		var mult: float = ConquestSystem.level_multiplier(conquest, city_id)
-		for b: String in _city_buildings(conquest, city_id):
-			for r: String in CONQUEST_BUILDINGS.get(b, {}).get("yield", {}).keys():
-				out[r] = int(out.get(r, 0)) + int(roundf(float(CONQUEST_BUILDINGS[b]["yield"][r]) * mult))
+		var by: Dictionary = conquest_city_building_yield(conquest, city_id)
+		for r: String in by.keys():
+			out[r] = int(out.get(r, 0)) + int(by[r])
+	# Merveilles des Nations (V61).
+	var biomes: Dictionary = {}
+	for wid: String in conquest.get("wonders", []):
+		biomes[wid] = conquest_city_biome(wid)
+	var wy: Dictionary = ConquestSystem.wonder_yield(conquest, biomes)
+	for r: String in wy.keys():
+		out[r] = int(out.get(r, 0)) + int(wy[r])
 	# Les héros gouverneurs produisent aussi (ressources de leur classe).
 	var gy: Dictionary = ConquestSystem.governor_yield(conquest)
 	for r: String in gy.keys():
@@ -2705,7 +2732,18 @@ func conquest_empire_yield(conquest: Dictionary) -> Dictionary:
 	# chaque victoire, même si aucune ville ne possède encore de bâtiment.
 	for r: String in conquest_biome_control_bonus(conquest).keys():
 		out[r] = int(out.get(r, 0)) + int(conquest_biome_control_bonus(conquest)[r])
+	# Spécialités économiques des villes (V16) et routes entretenues du Chancelier.
+	for r: String in ConquestSystem.trait_yield(conquest).keys():
+		out[r] = int(out.get(r, 0)) + int(ConquestSystem.trait_yield(conquest)[r])
+	for r: String in ConquestSystem.roadworks_yield(conquest).keys():
+		out[r] = int(out.get(r, 0)) + int(ConquestSystem.roadworks_yield(conquest)[r])
 	return out
+
+## Spécialité économique d'une ville : label et production par victoire,
+## mise à l'échelle du niveau de la ville.
+func conquest_city_trait(city_id: String, conquest: Dictionary) -> Dictionary:
+	return {"label": ConquestSystem.city_trait_text(city_id),
+		"yield": ConquestSystem.city_trait_yield(conquest, city_id)}
 
 ## Bonus de domination : il faut posséder toutes les villes conquérables
 ## d'un biome. Le Donjon et la capitale ne comptent pas dans les biomes.
@@ -2818,13 +2856,43 @@ func conquest_siege_is_boss(conquest: Dictionary, city_id: String) -> bool:
 
 ## La ville est-elle pillée (production gelée) ?
 func _is_city_ravaged(conquest: Dictionary, city_id: String) -> bool:
-	return int(_ravage_dict(conquest).get(city_id, 0)) > 0
+	return int(_ravage_dict(conquest).get(city_id, 0)) > 0 \
+		or ConquestSystem.is_ruined(conquest, city_id)
 
 func _ravage_dict(conquest: Dictionary) -> Dictionary:
 	var r: Dictionary = conquest.get("ravage", {})
 	for k: String in r.keys():
 		r[k] = int(r[k])
 	return r
+
+## Production des bâtiments d'une ville (niveau du bâtiment × facteur de la ville).
+func conquest_city_building_yield(conquest: Dictionary, city_id: String) -> Dictionary:
+	var out: Dictionary = {}
+	if _is_city_ravaged(conquest, city_id):
+		return out
+	var mult: float = ConquestSystem.level_multiplier(conquest, city_id)
+	for b: String in _city_buildings(conquest, city_id):
+		var y: Dictionary = ConquestSystem.building_yield_at(CONQUEST_BUILDINGS.get(b, {}), ConquestSystem.building_level(conquest, city_id, b))
+		for r: String in y.keys():
+			out[r] = int(out.get(r, 0)) + int(roundf(float(y[r]) * mult))
+	return out
+
+## Améliore un bâtiment (V61). "" si OK.
+func conquest_upgrade_building(data: Dictionary, city_id: String, building: String) -> String:
+	var info: Dictionary = CONQUEST_BUILDINGS.get(building, {})
+	if info.is_empty():
+		return "Bâtiment inconnu."
+	var err: String = ConquestSystem.upgrade_building(data, city_id, building, info, "%s — %s" % [conquest_city_name(city_id), String(info["label"])])
+	if err == "":
+		progression_changed.emit()
+	return err
+
+## Bâtit la Merveille de la Nation de la ville (V61). "" si OK.
+func conquest_build_wonder(data: Dictionary, city_id: String) -> String:
+	var err: String = ConquestSystem.build_wonder(data, city_id, conquest_city_biome(city_id), conquest_city_name(city_id))
+	if err == "":
+		progression_changed.emit()
+	return err
 
 ## Bâtiments construits dans une ville.
 func _city_buildings(conquest: Dictionary, city_id: String) -> Array:
@@ -2899,8 +2967,149 @@ func conquest_stationed_heroes(data: Dictionary) -> Array:
 		return []
 	return ConquestSystem.stationed_heroes(data.get("conquest", {}))
 
+## Héros en mission de lieutenance : indisponibles pour les assauts et le
+## gouvernement, comme les gouverneurs.
+func conquest_busy_heroes(data: Dictionary) -> Array:
+	if String(data.get("campaign_mode", "")) != "conquest":
+		return []
+	return ConquestSystem.busy_heroes(data.get("conquest", {}))
+
+## Missions en cours : classe -> {"type", "eta"}.
+func conquest_missions(data: Dictionary) -> Dictionary:
+	return ConquestSystem.missions(data.get("conquest", {}))
+
+func conquest_mission_types() -> Array:
+	return ConquestSystem.mission_types()
+
+func conquest_mission_label(type_id: String) -> String:
+	return ConquestSystem.mission_label(type_id)
+
+func conquest_mission_text(type_id: String) -> String:
+	return ConquestSystem.mission_text(type_id)
+
+func conquest_send_mission(data: Dictionary, classe: String, type_id: String) -> String:
+	var err: String = ConquestSystem.send_mission(data.get("conquest", {}), classe, type_id)
+	if err == "":
+		data["conquest"] = data.get("conquest", {})
+	return err
+
+func conquest_abort_mission(data: Dictionary, classe: String) -> String:
+	var err: String = ConquestSystem.abort_mission(data.get("conquest", {}), classe)
+	if err == "":
+		data["conquest"] = data.get("conquest", {})
+	return err
+
 func conquest_pending_event(conquest: Dictionary) -> Dictionary:
 	return ConquestSystem.pending_event(conquest)
+
+## Plans d'assault (V59) : application au lancement du siège d'une ville
+## adverse. Le blocus / l'infiltration font avancer le siège d'une vague sans
+## combat ; l'Assassin utilisé revient après 1 bataille.
+func conquest_apply_plan(data: Dictionary, city_id: String, plan: String) -> String:
+	var conquest: Dictionary = data.get("conquest", {})
+	var out: Dictionary = ConquestSystem.apply_plan(data, conquest, city_id, plan, _rng)
+	if String(out.get("error", "")) != "":
+		return String(out["error"])
+	if bool(out.get("skipped", false)):
+		var sieges: Dictionary = conquest.get("sieges", {})
+		var progress: int = int(sieges.get(city_id, 0)) + 1
+		if progress >= conquest_city_battles(city_id, conquest):
+			_progress_to_annex(data, conquest, city_id)
+		else:
+			sieges[city_id] = progress
+			conquest["sieges"] = sieges
+			conquest_add_event(conquest, "Plan réussi : %s — %d/%d victoires" % [conquest_city_name(city_id), progress, conquest_city_battles(city_id, conquest)])
+	data["conquest"] = conquest
+	return ""
+
+## Annexions déclenchées par un plan (blocus/infiltration menant à la victoire
+## finale du siège) : mêmes effets que la victoire au combat, sans bataille.
+func _progress_to_annex(data: Dictionary, conquest: Dictionary, city_id: String) -> void:
+	var owned: Array = conquest.get("owned", ["capitale"])
+	if not owned.has(city_id):
+		owned.append(city_id)
+		conquest["owned"] = owned
+		conquest_add_event(conquest, "Ville annexée : %s" % conquest_city_name(city_id))
+		conquest["just_annexed"] = city_id
+		var rewarded: Array = conquest.get("rewarded", [])
+		if not rewarded.has(city_id):
+			var reward: Dictionary = CONQUEST_CITY_REWARDS.get(city_id, {})
+			rewarded.append(city_id)
+			conquest["rewarded"] = rewarded
+			if not reward.is_empty():
+				add_resources(data, reward.get("resources", {}))
+				data["gold"] = int(data.get("gold", 0)) + int(reward.get("gold", 0))
+				conquest["last_city_reward"] = {"city": city_id,
+					"name": String(reward.get("name", "Butin de conquête")),
+					"resources": reward.get("resources", {}).duplicate(true),
+					"gold": int(reward.get("gold", 0))}
+	var sieges: Dictionary = conquest.get("sieges", {})
+	sieges.erase(city_id)
+	conquest["sieges"] = sieges
+	conquest["pending_city"] = ""
+	conquest.erase("pending_level")
+	var fallen_general: String = String(ConquestSystem.GENERALS.get(city_id, {}).get("name", ""))
+	if fallen_general != "":
+		conquest_add_event(conquest, "☠ %s est vaincu ! Sa région ne lance plus d'offensives." % fallen_general)
+		if ConquestSystem.living_generals_count(conquest) == 0:
+			conquest_add_event(conquest, "★ Tous les généraux du Roi Squelette sont tombés : l'assaut du Donjon s'annonce moins redoutable.")
+
+## Garnison adverse d'une ville non possédée (reconquête ennemie, V59).
+func conquest_enemy_garrison(conquest: Dictionary, city_id: String) -> int:
+	return ConquestSystem.enemy_garrison(conquest, city_id)
+
+func conquest_enemy_garrison_bonus(conquest: Dictionary, city_id: String) -> int:
+	return ConquestSystem.enemy_garrison_bonus(conquest, city_id)
+
+func conquest_plan_cost(plan: String) -> int:
+	return ConquestSystem.plan_cost(plan)
+
+func conquest_infiltration_ready(conquest: Dictionary) -> bool:
+	return ConquestSystem.infiltration_ready(conquest)
+
+## Diplomatie (V59) : annexion négociée d'une ville neutre reliée au territoire.
+func conquest_negotiate_city(data: Dictionary, city_id: String) -> String:
+	var conquest: Dictionary = data.get("conquest", {})
+	var names: Dictionary = {}
+	for cid: String in CONQUEST_CITIES.keys():
+		names[cid] = String(CONQUEST_CITIES[cid].get("name", cid))
+	# Garde-fou : seules les villes NEUTRES négocient (jamais une forteresse ennemie, un général ou le Donjon)
+	if String(CONQUEST_CITIES.get(city_id, {}).get("kind", "")) != "neutral":
+		return "Cette ville ne négocie pas : seules les villes neutres acceptent un traité."
+	var err: String = ConquestSystem.negotiate_city(data, conquest, city_id, CONQUEST_ROUTES, names, int(CONQUEST_CITIES[city_id].get("level", 0)))
+	if err == "":
+		data["conquest"] = conquest
+		# Un général ne peut pas être vaincu par la voie pacifique : une ville
+		# neutre n'en abrite jamais (les forteresses sont "enemy").
+	return err
+
+func conquest_diplomacy_cost(conquest: Dictionary, city_id: String) -> Dictionary:
+	return ConquestSystem.diplomacy_cost(conquest, city_id, int(CONQUEST_CITIES.get(city_id, {}).get("level", 0)))
+
+## Ruine & reconstruction (V59).
+func conquest_is_ruined(conquest: Dictionary, city_id: String) -> bool:
+	return ConquestSystem.is_ruined(conquest, city_id)
+
+func conquest_repair_city(data: Dictionary, city_id: String) -> String:
+	var conquest: Dictionary = data.get("conquest", {})
+	var err: String = ConquestSystem.repair_city(data, conquest, city_id)
+	if err == "":
+		data["conquest"] = conquest
+	return err
+
+## Légende (V59) : score de fin de campagne et fin obtenue.
+func conquest_legend_score(data: Dictionary) -> Dictionary:
+	var conquest: Dictionary = data.get("conquest", {})
+	return ConquestSystem.legend_score(conquest, Stones.owned(data).size())
+
+func conquest_legend_total(score: Dictionary) -> int:
+	return ConquestSystem.legend_total(score)
+
+func conquest_legend_ending(score: Dictionary, conquest: Dictionary) -> Dictionary:
+	return ConquestSystem.legend_ending(score, conquest)
+
+func conquest_epilogue(score: Dictionary, ending: Dictionary) -> String:
+	return ConquestSystem.epilogue(score, ending)
 
 func conquest_resolve_event(data: Dictionary, option_id: String) -> String:
 	var names: Dictionary = {}
@@ -3019,6 +3228,8 @@ func conquest_build(data: Dictionary, city_id: String, building: String) -> Stri
 	var lst: Array = builds.get(city_id, [])
 	if lst.has(building):
 		return "Bâtiment déjà construit."
+	if lst.size() >= ConquestSystem.building_slots(conquest, city_id):
+		return "Plus d'emplacement libre : la ville doit devenir %s." % ConquestSystem.level_name(ConquestSystem.city_level_for_slots(lst.size() + 1))
 	var res: Dictionary = data.get("resources", {})
 	for k: String in info.get("cost", {}).keys():
 		if int(res.get(k, 0)) < int(info["cost"][k]):

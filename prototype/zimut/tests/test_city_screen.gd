@@ -33,14 +33,28 @@ func _boot() -> void:
 	up.pressed.emit()
 	await process_frame
 	check(ConquestSystem.city_level(d["conquest"], "mine_cristal") == 2, "évolution Hameau -> Bourg depuis l'écran de ville")
+	(ui.find_child("CardBarracks", true, false) as Button).pressed.emit()
+	await process_frame
 	var rec: Button = ui.find_child("RecruitButton", true, false) as Button
 	rec.pressed.emit()
 	await process_frame
 	check(ConquestSystem.troops(d["conquest"], "mine_cristal") == 1, "recrutement depuis la caserne")
+	(ui.find_child("CardBuilding_scierie", true, false) as Button).pressed.emit()
+	await process_frame
 	var bb: Button = ui.find_child("BuildButton_scierie", true, false) as Button
 	bb.pressed.emit()
 	await process_frame
 	check((d["conquest"]["buildings"]["mine_cristal"] as Array).has("scierie"), "construction d'un bâtiment")
+	check(ConquestSystem.building_level(d["conquest"], "mine_cristal", "scierie") == 1, "bâtiment construit au niveau 1")
+	var upb: Button = ui.find_child("UpgradeBuilding_scierie", true, false) as Button
+	check(upb != null and not upb.disabled, "amélioration du bâtiment proposée (Bourg : niveau 2 permis)")
+	upb.pressed.emit()
+	await process_frame
+	check(ConquestSystem.building_level(d["conquest"], "mine_cristal", "scierie") == 2, "scierie niveau 2 depuis l'écran de ville")
+	check(ui.find_child("UpgradeBuilding_scierie", true, false) == null, "niveau 3 verrouillé tant que la ville n'est pas Grande Cité")
+	check(ui.find_child("CityView", true, false) != null and ui.find_child("CardWonder", true, false) != null, "vue illustrée avec la parcelle de la Merveille")
+	(ui.find_child("CardResidence", true, false) as Button).pressed.emit()
+	await process_frame
 	(ui.find_child("GovernorButton", true, false) as Button).pressed.emit()
 	await process_frame
 	var pick: Button = ui.find_child("Pick_Tank", true, false) as Button

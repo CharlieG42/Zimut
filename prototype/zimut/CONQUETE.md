@@ -1,4 +1,4 @@
-# Conquête — V14 : villes vivantes, garnisons, héros et événements
+# Conquête — V59 : villes vivantes, garnisons, héros, Chancelier et spécialités
 
 Toute la logique est dans `scripts/ConquestSystem.gd` (statique, testable sans interface) ;
 `ProgressionManager` expose les points d'entrée `conquest_*` ; l'interface est `ConquestMapUI.gd`.
@@ -28,11 +28,76 @@ Interactifs : Caravane marchande, Réfugiés, Mercenaires, Agitation (villes san
 Automatiques : Bonne récolte, Cache découverte, Épidémie, Rapport du gouverneur.
 Les nouvelles s'affichent au retour sur la carte ; l'événement à trancher apparaît en popup.
 
+## Chancelier (V59)
+Tous les 5 batailles (dès 2 villes conquises), le Chancelier demande audience via le popup d'événement et propose un édit :
+- **Impôt** : encaisse le revenu d'une victoire par ville immédiatement, mais chaque garnison perd 1 soldat.
+- **Manœuvres** (60 or) : +2 défense dans toutes les villes pendant 3 batailles.
+- **Entretien des routes** (40 or) : +2 Bois et +1 Cuir à chaque victoire pendant 4 batailles.
+
+## Lieutenance — missions des héros libres (V59)
+Les héros qui ne gouvernent ni ne combattent peuvent partir en **mission de 3 batailles** (bouton « ⚑ MISSIONS DES LIEUTENANTS » sur une ville alliée). Ils redeviennent disponibles à leur retour :
+- **Escorte de caravane** : +90 or et +4 Cuir (mis à l'échelle du niveau du héros).
+- **Cartographie** : révèle 2 villes inconnues sur la carte (même état que les belvédères d'Aventure).
+- **Prospection** : +30 or et +8 Fer.
+
+20 % de complication : l'expédition échoue et coûte de l'or. Un héros en mission ne peut ni combattre ni gouverner ; une mission peut être rappelée sans récompense.
+
+## Spécialités économiques (V59)
+Chaque ville conquise produit en plus une ressource propre à son biome/Nation (`ConquestSystem.CITY_TRAITS`), versée à chaque victoire et mise à l'échelle du niveau de la ville (×1 / ×1,5 / ×2). Gelée si la ville est pillée. Exemples : Mine de Cristal → +3 Magie, Forge du Givre → +3 Fer, Marais des Spectres → +3 Venin. Affichée dans le Conseil de l'écran de ville et sur la carte.
+
+## Généraux du Roi Squelette (V59)
+Quatre généraux nommés tiennent les forteresses ennemies : **Tharok le Végétal** (Fort Racine), **Vorkann le Givre** (Garnison des Pics), **Zahor le Sableux** (Tour des Sables) et **Nébulia l'Illusionniste** (Citadelle des Ronces).
+- Tant qu'il vit, son siège est durci (+3 niveaux) et il peut lancer une **offensive nommée** (bannière rouge « ☠ … mène l'offensive »).
+- La 4ᵉ bataille de sa forteresse l'oppose **en personne** (boss nommé, kit du boss de sa Nation).
+- Le vaincre journalise sa chute ; **tous les vaincre** affaiblit l'assaut du Donjon du Roi Squelette (-3 niveaux).
+- Compteur « ☠ N généraux en vie » dans l'en-tête de la carte.
+
+## Plans d'assaut (V59)
+Avant chaque bataille d'un siège ennemi (hors vague boss), le popup de préparation propose en plus des tactiques : 
+- **Blocus** (40 or) : fait avancer le siège d'une vague **sans combat** ; 35 % de représailles (une ville possédée est pillée 3 batailles).
+- **Infiltration** (50 or) : l'Assassin **libre** (ni gouverneur ni en mission) saborde une vague de l'intérieur — sans combat ni risque ; il revient à la victoire suivante.
+Un plan peut mener à l'annexion sans verser de sang (butin normal, général vaincu le cas échéant).
+
+## Reconquête ennemie (V59)
+Les villes non possédées accumulent une garnison adverse : +1 soldat toutes les 3 victoires (max 6), soit +1 niveau de bataille par tranche de 2 soldats. Attendre une cible la durcit — la garnison est affichée dans le panneau de la ville et le bonus appliqué au combat.
+
+## Diplomatie (V59)
+Une ville **neutre attaquable** peut rejoindre l'empire sans combat : bouton « ☮ NÉGOCIER L'ANNEXION » (120 or + 8 de la ressource spécialité de la ville). Même règle de routes que l'assaut. Les annexions pacifiques comptent pour la Légende (fin « Empire marchand » dès 4).
+
+## Ruine & reconstruction (V59)
+Une ville **perdue** puis reprise reste **ruinée** : la chute coûte un niveau, et la production (revenu, spécialité, bâtiments, gouverneur) reste gelée 3 batailles après la reprise. Réparable à tout moment pour 80 or (bouton « ⚒ RÉPARER »). La ruine se résorbe aussi d'elle-même, bataille après bataille.
+
+## Légende & fins multiples (V59)
+À la chute du Donjon, un **épilogue** calcule le score de Légende : villes (10 pts), développement (5 pts/niveau), gouverneurs (4 pts), Pierres Élémentaires (30 pts), annexions diplomatiques (6 pts), ruines non réparées (-8 pts). Selon le style de jeu, la fin affichée change :
+- **Âge des Héros** (défaut) — les assauts et les généraux vaincus en personne.
+- **Empire marchand** — 4 villes ou plus annexées par négociation.
+- **Bastion de Zimut** — villes développées (40 pts de niveaux) et 3+ gouverneurs.
+
+## Carte vivante (V60)
+La carte du monde n'est plus un plateau d'illustrations : chaque ville est posée **sur sa région peinte** (forêt, cimes, désert, Ronces, lave, archipels, Rouages) et le réseau de routes suit la géographie (`CONQUEST_ROUTES`, sans croisements).
+
+- **Repères compacts** (`ConquestMapLayers.Pin`) : médaillon coloré par l'état (★ capitale, ⚑ empire, ⌂ neutre, ⚔ adverse, ☠ forteresse d'un général, ? inconnue, ✖ perdue), liseré aux couleurs de la Nation, drapeau qui flotte sur les villes de l'empire, petites tours = niveau, pions rouges = avancée du siège, fumée = ville pillée/ruinée/perdue, cadenas sur le Donjon, anneau doré pulsant = attaquable, anneau rouge = offensive annoncée. L'illustration complète reste dans le conseil et l'écran de ville.
+- **Routes** (`ConquestMapLayers.Routes`) : pavées dorées dans l'empire, pointillés dorés animés avec flèche vers les villes attaquables, sentiers pâles ailleurs. Pendant une offensive, une **colonne ennemie** marche vers la ville menacée (elle avance à mesure que l'échéance approche).
+- **Territoire** : calculé une fois par changement (SubViewport « mise à jour unique ») en champ de métaballes → teinte plus vive et frontière dorée autour de l'empire, terres des places fortes ennemies assombries, **brouillard** animé sur les terres pas encore révélées en Aventure.
+- **Carte animée** (shader + masques `conquest_world_fx.png` : R = eau, G = lave, B = cristaux) : reflets sur l'eau, lave qui pulse, cristaux qui luisent, ombres de nuages qui dérivent ; navires, oiseaux et nuages traversent la carte. En qualité « Économie », la carte reste fixe.
+- Carte en 3072×2048 (`conquest_world_map.jpg`, mipmaps), vignette sur les bords, titre et légende fixes sur la vue.
+- Gultur présente la carte une fois (`conq_carte`).
+
+## Villes vivantes & bâtiments à niveaux (V61)
+L'écran de ville montre la ville **dessinée** devant l'illustration de sa Nation (`ConquestCityView`) : on touche un bâtiment, sa gestion s'affiche à droite, avec un résumé de la ville dessous.
+
+- **5 niveaux de ville** : Hameau → Bourg → Cité → Grande Cité → Métropole (550 or + Bois/Fer/Magie, puis 900 or + Fer/Cuir/Magie/Venin). Garnison 4 → 12, production ×1 / 1,5 / 2 / 2,4 / 2,8. L'hôtel de ville se transforme : ailes, tour à horloge, tours d'angle, dôme et flèche dorée.
+- **Emplacements** : 3 / 4 / 5 / 6 / 6 bâtiments selon le niveau (les villes existantes gardent leurs bâtiments).
+- **Bâtiments à 3 niveaux** (étoiles) : niveau max 1 au Hameau, 2 au Bourg/Cité, 3 dès la Grande Cité. Production ×1 / ×1,8 / ×2,6, coût ×1 / ×2 / ×3,5 ; muraille +6 / +10 / +15 défense. Chacun change d'allure en montant (scies, chevalement, séchoirs, orbe, arbres, tours…).
+- **Merveille de la Nation** (dès la Cité, une par ville, 450 or + 20 de la ressource de la Nation + 10) : Arbre-Ancêtre, Forge des Cimes, Grand Bazar, Prisme Éternel, Grand Phare, Moulin des Tempêtes, Haut-Fourneau, Serre des Brumes, Crypte des Serments, Grande Horloge, Trône d'Os — or, défense et ressources à chaque victoire.
+- Vie de la ville : habitants qui circulent (plus nombreux avec le niveau), soldats à l'exercice selon la garnison, gouverneur devant sa résidence, lanternes, fumées, drapeaux ; fumée sur une ville pillée, cadre rouge pendant une offensive ; feu d'artifice doré à chaque construction.
+- Sauvegarde : `building_levels {ville:{bâtiment:niveau}}`, `wonders [ville]` (optionnelles).
+
 ## Sauvegarde
-Clés ajoutées à `conquest` (toutes optionnelles) : `city_levels`, `garrisons`, `threat`, `event_pending`, `news`, `truce`, `lost`, `rewarded`, `battle_count`, `event_cd`, `threat_cd`.
+Clés ajoutées à `conquest` (toutes optionnelles) : `city_levels`, `garrisons`, `threat`, `event_pending`, `news`, `truce`, `lost`, `rewarded`, `battle_count`, `event_cd`, `threat_cd`, `chancellor_cd`, `chancellor_seen`, `drill`, `roadworks`, `missions`, `missions_revealed`, `annexed_diplomacy`, `ruin`.
 
 ## Tests
-`tests/test_conquest_system.gd` (moteur, 69 vérifications), `tests/test_conquest_team.gd` (sélection d'équipe, nécessite xvfb), `tests/shot_conquest_v14.gd` (captures).
+`tests/test_conquest_system.gd` (moteur, + bloc V59 Chancelier/spécialités), `tests/test_conquest_team.gd` (sélection d'équipe, nécessite xvfb), `tests/shot_conquest_v14.gd` (captures).
 
 ## Écran de ville (V15)
 

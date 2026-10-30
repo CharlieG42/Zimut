@@ -9,7 +9,9 @@ extends RefCounted
 ## (conquest_*) et passe ici le catalogue de routes (pas d'autoload en static).
 ##
 ## Clés de data["conquest"] ajoutées :
-##   city_levels {id:int}        niveau 1..3 (Hameau / Bourg / Cité)
+##   city_levels {id:int}        niveau 1..5 (Hameau / Bourg / Cité / Grande Cité / Métropole)
+##   building_levels {id:{bâtiment:int}}  niveau 1..3 des bâtiments (V61, défaut 1)
+##   wonders     [id]            villes qui ont bâti la Merveille de leur Nation (V61)
 ##   garrisons   {id:{troops,hero}}
 ##   threat      {city,power,eta}   offensive annoncée (compte à rebours en batailles)
 ##   event_pending {…}           événement à trancher par le joueur
@@ -19,8 +21,35 @@ extends RefCounted
 ##   rewarded    [id]            villes dont le butin d'annexion a déjà été versé
 ##   battle_count, event_cd, threat_cd
 
-const MAX_LEVEL := 3
-const LEVEL_NAMES: Array[String] = ["Hameau", "Bourg", "Cité"]
+const MAX_LEVEL := 5
+const LEVEL_NAMES: Array[String] = ["Hameau", "Bourg", "Cité", "Grande Cité", "Métropole"]
+## Facteur de production (spécialité, bâtiments) par niveau de ville.
+const LEVEL_MULT: Array[float] = [1.0, 1.5, 2.0, 2.4, 2.8]
+
+## V61 — Bâtiments à niveaux : emplacements et niveau maximal des bâtiments selon le
+## niveau de la ville, production et coût selon le niveau du bâtiment.
+const BUILD_SLOTS: Array[int] = [3, 4, 5, 6, 6]
+const BUILD_LEVEL_CAP: Array[int] = [1, 2, 2, 3, 3]
+const BUILD_MAX_LEVEL := 3
+const BUILD_YIELD_MULT: Array[float] = [1.0, 1.8, 2.6]
+const BUILD_COST_MULT: Array[float] = [1.0, 2.0, 3.5]
+const WALL_DEFENSE_BY_LEVEL: Array[int] = [6, 10, 15]
+## Merveille de la Nation : une par ville, à partir de la Cité (niveau 3).
+const WONDER_MIN_LEVEL := 3
+const WONDERS := {
+	"Forêt": {"label": "Arbre-Ancêtre", "shape": "tree", "text": "Les racines de l'Ancêtre nourrissent la ville.", "gold": 2, "def": 4, "res": {"Bois": 4}},
+	"Montagne": {"label": "Forge des Cimes", "shape": "forge", "text": "L'acier des Cimes trempé au givre.", "gold": 2, "def": 4, "res": {"Fer": 4}},
+	"Désert": {"label": "Grand Bazar", "shape": "pyramid", "text": "Toutes les caravanes des Sables y font halte.", "gold": 8, "def": 0, "res": {"Cuir": 2}},
+	"Cristaux": {"label": "Prisme Éternel", "shape": "crystal", "text": "Un cristal géant qui concentre la Magie.", "gold": 2, "def": 2, "res": {"Magie": 3}},
+	"Marées": {"label": "Grand Phare", "shape": "tower", "text": "Sa lumière guide les flottes marchandes.", "gold": 6, "def": 2, "res": {"Cuir": 2}},
+	"Vents": {"label": "Moulin des Tempêtes", "shape": "mill", "text": "Les vents broient le grain et forgent les volontés.", "gold": 4, "def": 2, "res": {"Bois": 2, "Magie": 1}},
+	"Brasier": {"label": "Haut-Fourneau", "shape": "forge", "text": "Le feu du volcan coule dans ses creusets.", "gold": 2, "def": 3, "res": {"Fer": 5}},
+	"Brumes": {"label": "Serre des Brumes", "shape": "tree", "text": "Des plantes rares poussent dans la brume tiède.", "gold": 2, "def": 2, "res": {"Venin": 4}},
+	"Ombres": {"label": "Crypte des Serments", "shape": "crypt", "text": "Les anciens serments veillent sur la ville.", "gold": 0, "def": 8, "res": {"Magie": 2}},
+	"Rouages": {"label": "Grande Horloge", "shape": "tower", "text": "Ses rouages règlent toute l'économie de l'empire.", "gold": 5, "def": 2, "res": {"Fer": 2}},
+	"Donjon": {"label": "Trône d'Os", "shape": "crypt", "text": "Le trône du Roi Squelette, désormais le vôtre.", "gold": 6, "def": 6, "res": {"Magie": 2}},
+}
+const WONDER_COST := {"gold": 450, "res_amount": 20}
 const TROOP_COST := 30
 const WALL_DEFENSE := 6
 ## Équipement du gouverneur : +1 défense par 10 de puissance (max 20), +1 or par 60 (max 4).
@@ -37,10 +66,120 @@ const EVENT_MIN_GAP := 2
 const EVENT_CHANCE := 0.45
 const RES_KEYS: Array[String] = ["Bois", "Fer", "Cuir", "Magie", "Venin"]
 
+## Chancelier : tous ces batailles, le Conseil propose un édit stratégique
+## (trade-off or / effet temporaire), via le même popup que les événements.
+const CHANCELLOR_INTERVAL := 5
+const CHANCELLOR_MIN_CITIES := 2
+const DRILL_DEF := 2
+const DRILL_BATTLES := 3
+const ROADS_BOIS := 2
+const ROADS_BATTLES := 4
+
+## Lieutenance — missions de 3 batailles pour les héros libres : un héros
+## envoyé en mission ne participe ni aux assauts ni au gouvernement, et
+## rapporte sa récompense (ou sa complication) à son retour.
+const MISSION_BATTLES := 3
+const MISSION_CHANCE := 0.20
+const MISSION_TYPES := {
+	"caravane": {"label": "Escorte de caravane", "text": "Protéger les marchands jusqu'aux passes de l'empire.",
+		"gold": 90, "res": {"Cuir": 4}},
+	"carte": {"label": "Cartographie", "text": "Relever les terres inexplorées au-delà des frontières.",
+		"reveal": 2},
+	"filon": {"label": "Prospection", "text": "Chercher des filons dans les montagnes voisines.",
+		"gold": 30, "res": {"Fer": 8}},
+	}
+
+## Généraux du Roi Squelette : chacun tient une forteresse (kind "enemy") d'une
+## grande région. Tant qu'il vit, sa forteresse est mieux défendue et il peut
+## lancer une offensive nommée ; le vaincre en assaut (4e bataille) calme la
+## région et affaiblit le Donjon (tous les vaincus = assaut du Donjon facilité).
+const GENERALS := {
+	"garnison":      {"name": "Vorkann le Givre",   "region": "Montagne/Cristaux/Vents"},
+	"fort_racine":   {"name": "Tharok le Végétal",  "region": "Forêt"},
+	"tour_sable":    {"name": "Zahor le Sableux",   "region": "Désert/Marées"},
+	"citadelle_ronce": {"name": "Nébulia l'Illusionniste", "region": "Ombres/Brumes"},
+}
+const GENERAL_DEF_BONUS := 3
+const GENERAL_THREAT_BONUS := 2
+const GENERAL_THREAT_CHANCE := 0.25
+
+## Plans d'assaut (sièges ennemis) : le blocus et l'infiltration font
+## progresser le siège d'une vague sans combat, au prix d'un risque ou d'un
+## héros libre. L'assaut direct reste la voie des armes.
+const PLAN_COST := {"blocus": 40, "infiltration": 50}
+const PLAN_RAID_CHANCE := 0.35
+
+## Reconquête ennemie : les villes non possédées se garnissent au fil de vos
+## victoires — attendre une cible la durcit.
+const GARRISON_EVERY := 3
+const GARRISON_MAX := 6
+
+## Diplomatie : coût d'annexion négociée d'une ville neutre (or + ressource
+## de son biome). Plus cher que la voie des armes… en or. La ressource exigée
+## est la spécialité de la ville (CITY_TRAITS), payable en une fois.
+const DIPLO_GOLD := 120
+const DIPLO_RES := 8
+## Coût croissant avec le niveau de la ville (une ville de niveau 55 ne s'achète pas au prix d'un hameau)
+const DIPLO_GOLD_PER_LEVEL := 4
+const DIPLO_RES_PER_LEVEL := 0.15
+## Victoires à attendre entre deux négociations (la diplomatie complète les combats, sans les remplacer)
+const DIPLO_COOLDOWN := 3
+
+## Ruine & reconstruction : une ville perdue puis reprise reste ruinée —
+## niveau -1 (min 1) et production gelée RUIN_BATTLES, relevée en payant.
+const RUIN_BATTLES := 3
+const RUIN_REPAIR_GOLD := 80
+
+## Légende (fin de campagne) : score construit tout au long de la conquête.
+## Les composantes sont simples à suivre et affichées dans l'épilogue.
+##   villes     : 10 par ville possédée (hors capitale)
+##   niveaux    : 5 par niveau de ville au-dessus de Hameau
+##   gouverneurs : 4 par gouverneur en poste
+##   pierres    : 30 par Pierre Élémentaire possédée
+##   diplomatie : 6 par ville annexée par négociation (voie pacifique)
+##   ruines    : -8 par ville ruinée non réparée à la fin
+const LEGEND_WEIGHTS := {"villes": 10, "niveaux": 5, "gouverneurs": 4, "pierres": 30, "diplomatie": 6, "ruines": -8}
+
+## Spécialité économique de chaque ville (biome/Nation) : ressources versées
+## à chaque victoire, mises à l'échelle du niveau de la ville. Les villes sans
+## entrée (capitale, Donjon) n'ont pas de spécialité.
+const CITY_TRAITS := {
+	"clairiere": {"label": "Scierie d'Aube", "res": {"Bois": 2}},
+	"vieille_tour": {"label": "Réserve de la Tour", "res": {"Fer": 2}},
+	"pont_mousse": {"label": "Pêche du pont", "res": {"Cuir": 2}},
+	"fort_racine": {"label": "Arsenal de Racine", "res": {"Fer": 3}},
+	"hameau_pin": {"label": "Cabanons des Pics", "res": {"Bois": 2, "Cuir": 1}},
+	"garnison": {"label": "Dépôt des Pics", "res": {"Fer": 3}},
+	"oasis": {"label": "Herbier de l'Oasis", "res": {"Venin": 2}},
+	"tour_sable": {"label": "Verriers des Dunes", "res": {"Magie": 2}},
+	"village_brume": {"label": "Herbier des Brumes", "res": {"Venin": 2}},
+	"ruines_lierre": {"label": "Pillardage du Lierre", "res": {"Magie": 2}},
+	"abbaye_ronce": {"label": "Scriptorium", "res": {"Magie": 2, "Bois": 1}},
+	"citadelle_ronce": {"label": "Fonderie des Ronces", "res": {"Fer": 2, "Cuir": 2}},
+	"col_givre": {"label": "Cueillette du Col", "res": {"Magie": 2}},
+	"mine_cristal": {"label": "Filon de cristal", "res": {"Magie": 3}},
+	"bastion_orage": {"label": "Forge de l'Orage", "res": {"Fer": 2, "Bois": 1}},
+	"caravanserail": {"label": "Comptoir rouge", "res": {"Cuir": 2}},
+	"observatoire": {"label": "Lunettes solaires", "res": {"Magie": 2}},
+	"port_sable": {"label": "Chantier naval", "res": {"Cuir": 3}},
+	"bois_lune": {"label": "Sève de lune", "res": {"Bois": 2, "Magie": 1}},
+	"sanctuaire_mousse": {"label": "Reliques moussues", "res": {"Magie": 1, "Venin": 1}},
+	"forge_givre": {"label": "Forge du Givre", "res": {"Fer": 3}},
+	"pic_foudroyant": {"label": "Capteurs de foudre", "res": {"Magie": 2, "Fer": 1}},
+	"marais_spectres": {"label": "Essences des Marais", "res": {"Venin": 3}},
+	"fort_cendre": {"label": "Trempe des Cendres", "res": {"Fer": 2, "Venin": 1}},
+	"temple_soleil": {"label": "Offrandes solaires", "res": {"Magie": 3}},
+	"citadelle_sable": {"label": "Four à grès", "res": {"Fer": 2, "Cuir": 1}},
+	"atelier_cuivre": {"label": "Ateliers de cuivre", "res": {"Fer": 2, "Cuir": 1}},
+	"citadelle_engrenages": {"label": "Usines à engrenages", "res": {"Fer": 3, "Magie": 1}},
+}
+
 ## Coût (or + ressources) pour atteindre le niveau clé.
 const UPGRADE := {
 	2: {"gold": 120, "res": {"Bois": 10, "Fer": 10}},
 	3: {"gold": 300, "res": {"Fer": 20, "Cuir": 10, "Magie": 10}},
+	4: {"gold": 550, "res": {"Bois": 25, "Fer": 30, "Magie": 15}},
+	5: {"gold": 900, "res": {"Fer": 40, "Cuir": 25, "Magie": 25, "Venin": 15}},
 }
 
 ## Effets d'un héros gouverneur, par classe : def = défense en plus,
@@ -102,6 +241,147 @@ static func is_ravaged(conq: Dictionary, id: String) -> bool:
 static func has_wall(conq: Dictionary, id: String) -> bool:
 	return (conq.get("buildings", {}).get(id, []) as Array).has("muraille")
 
+## Défense apportée par la muraille (selon son niveau), 0 sans muraille.
+static func wall_defense(conq: Dictionary, id: String) -> int:
+	if not has_wall(conq, id):
+		return 0
+	return WALL_DEFENSE_BY_LEVEL[building_level(conq, id, "muraille") - 1]
+
+# ── Bâtiments à niveaux (V61) ──
+
+static func buildings_of(conq: Dictionary, id: String) -> Array:
+	return conq.get("buildings", {}).get(id, [])
+
+## Niveau d'un bâtiment : 0 s'il n'est pas construit, sinon 1..3.
+static func building_level(conq: Dictionary, id: String, key: String) -> int:
+	if not buildings_of(conq, id).has(key):
+		return 0
+	return clampi(int(conq.get("building_levels", {}).get(id, {}).get(key, 1)), 1, BUILD_MAX_LEVEL)
+
+## Emplacements de construction de la ville (selon son niveau).
+static func building_slots(conq: Dictionary, id: String) -> int:
+	return BUILD_SLOTS[city_level(conq, id) - 1]
+
+## Niveau maximal des bâtiments autorisé par le niveau de la ville.
+static func building_level_cap(conq: Dictionary, id: String) -> int:
+	return BUILD_LEVEL_CAP[city_level(conq, id) - 1]
+
+## Premier niveau de ville qui autorise ce niveau de bâtiment (pour l'afficher).
+static func city_level_for_building(level: int) -> int:
+	for i: int in range(BUILD_LEVEL_CAP.size()):
+		if BUILD_LEVEL_CAP[i] >= level:
+			return i + 1
+	return MAX_LEVEL
+
+## Premier niveau de ville qui offre n emplacements.
+static func city_level_for_slots(n: int) -> int:
+	for i: int in range(BUILD_SLOTS.size()):
+		if BUILD_SLOTS[i] >= n:
+			return i + 1
+	return MAX_LEVEL
+
+## Production d'un bâtiment à un niveau donné (hors facteur de la ville).
+static func building_yield_at(info: Dictionary, level: int) -> Dictionary:
+	var out: Dictionary = {}
+	if level <= 0:
+		return out
+	var m: float = BUILD_YIELD_MULT[clampi(level, 1, BUILD_MAX_LEVEL) - 1]
+	for r: String in info.get("yield", {}).keys():
+		out[r] = roundi(float(info["yield"][r]) * m)
+	return out
+
+## Coût pour amener un bâtiment au niveau `level` (1 = construction).
+static func building_cost(info: Dictionary, level: int) -> Dictionary:
+	var m: float = BUILD_COST_MULT[clampi(level, 1, BUILD_MAX_LEVEL) - 1]
+	var res: Dictionary = {}
+	for r: String in info.get("cost", {}).keys():
+		res[r] = roundi(float(info["cost"][r]) * m)
+	return {"gold": roundi(float(info.get("gold", 0)) * m), "res": res}
+
+static func _pay(data: Dictionary, cost: Dictionary) -> String:
+	var res: Dictionary = data.get("resources", {})
+	for k: String in cost.get("res", {}).keys():
+		if int(res.get(k, 0)) < int(cost["res"][k]):
+			return "Ressource insuffisante : %s (%d/%d)." % [k, int(res.get(k, 0)), int(cost["res"][k])]
+	if int(data.get("gold", 0)) < int(cost.get("gold", 0)):
+		return "Or insuffisant : %d pièces requises." % int(cost.get("gold", 0))
+	for k: String in cost.get("res", {}).keys():
+		res[k] = int(res.get(k, 0)) - int(cost["res"][k])
+	data["resources"] = res
+	data["gold"] = int(data.get("gold", 0)) - int(cost.get("gold", 0))
+	return ""
+
+## Améliore un bâtiment construit (niveau max selon la ville). "" si OK.
+static func upgrade_building(data: Dictionary, id: String, key: String, info: Dictionary, label: String = "") -> String:
+	var conq: Dictionary = data.get("conquest", {})
+	if not (conq.get("owned", []) as Array).has(id):
+		return "Ville non conquise."
+	if is_ravaged(conq, id):
+		return "Ville pillée : impossible de construire."
+	var lvl: int = building_level(conq, id, key)
+	if lvl <= 0:
+		return "Bâtiment pas encore construit."
+	if lvl >= BUILD_MAX_LEVEL:
+		return "Bâtiment déjà au niveau maximum."
+	if lvl >= building_level_cap(conq, id):
+		return "La ville doit devenir %s pour ce niveau." % level_name(city_level_for_building(lvl + 1))
+	var err: String = _pay(data, building_cost(info, lvl + 1))
+	if err != "":
+		return err
+	var bl: Dictionary = conq.get("building_levels", {})
+	var cl: Dictionary = bl.get(id, {})
+	cl[key] = lvl + 1
+	bl[id] = cl
+	conq["building_levels"] = bl
+	log_event(conq, "Bâtiment amélioré : %s niveau %d" % [label if label != "" else key, lvl + 1])
+	data["conquest"] = conq
+	return ""
+
+# ── Merveilles de Nation (V61) ──
+
+static func wonder_for(biome: String) -> Dictionary:
+	return WONDERS.get(biome, WONDERS["Forêt"])
+
+static func has_wonder(conq: Dictionary, id: String) -> bool:
+	return (conq.get("wonders", []) as Array).has(id)
+
+static func wonder_cost(biome: String) -> Dictionary:
+	var r: String = Nations.resource_of(biome) if Nations.DATA.has(biome) else "Magie"
+	var second: String = "Magie" if r != "Magie" else "Fer"
+	return {"gold": int(WONDER_COST["gold"]), "res": {r: int(WONDER_COST["res_amount"]), second: 10}}
+
+## Bâtit la Merveille de la Nation dans une ville (Cité minimum). "" si OK.
+static func build_wonder(data: Dictionary, id: String, biome: String, city_name: String = "") -> String:
+	var conq: Dictionary = data.get("conquest", {})
+	if not (conq.get("owned", []) as Array).has(id):
+		return "Ville non conquise."
+	if is_ravaged(conq, id):
+		return "Ville pillée : impossible de construire."
+	if has_wonder(conq, id):
+		return "La Merveille est déjà bâtie."
+	if city_level(conq, id) < WONDER_MIN_LEVEL:
+		return "La ville doit devenir une %s." % level_name(WONDER_MIN_LEVEL)
+	var err: String = _pay(data, wonder_cost(biome))
+	if err != "":
+		return err
+	var w: Array = conq.get("wonders", [])
+	w.append(id)
+	conq["wonders"] = w
+	log_event(conq, "★ Merveille bâtie à %s : %s" % [city_name if city_name != "" else id, String(wonder_for(biome)["label"])])
+	data["conquest"] = conq
+	return ""
+
+## Ressources produites par les Merveilles (villes non pillées ni ruinées).
+static func wonder_yield(conq: Dictionary, biomes: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for id: String in conq.get("wonders", []):
+		if not (conq.get("owned", []) as Array).has(id) or is_ravaged(conq, id) or is_ruined(conq, id):
+			continue
+		var r: Dictionary = wonder_for(String(biomes.get(id, "Forêt"))).get("res", {})
+		for k: String in r.keys():
+			out[k] = int(out.get(k, 0)) + int(r[k])
+	return out
+
 static func hero_level(data: Dictionary, classe: String) -> int:
 	return int(data.get("roster", {}).get(classe, {}).get("level", 1))
 
@@ -134,9 +414,10 @@ static func governor_text(classe: String) -> String:
 ## Défense d'une ville : soldats, niveau, muraille et héros gouverneur.
 static func defense(data: Dictionary, id: String) -> int:
 	var conq: Dictionary = data.get("conquest", {})
-	var d: int = troops(conq, id) * 2 + city_level(conq, id) * 3
-	if has_wall(conq, id):
-		d += WALL_DEFENSE
+	var d: int = troops(conq, id) * 2 + city_level(conq, id) * 3 + drill_defense(conq)
+	d += wall_defense(conq, id)
+	if has_wonder(conq, id):
+		d += int(wonder_for(_biome_of(id)).get("def", 0))
 	var h: String = hero_of(conq, id)
 	if h != "":
 		d += 6 + int(float(hero_level(data, h)) * 0.5) + int(GOVERNOR.get(h, {}).get("def", 0)) + governor_gear_defense(data, h)
@@ -145,9 +426,11 @@ static func defense(data: Dictionary, id: String) -> int:
 ## Or versé par bataille gagnée par une ville (gelé si pillée).
 static func city_income(data: Dictionary, id: String) -> int:
 	var conq: Dictionary = data.get("conquest", {})
-	if is_ravaged(conq, id):
+	if is_ravaged(conq, id) or is_ruined(conq, id):
 		return 0
 	var base: int = (3 if id == "capitale" else 2) * city_level(conq, id)
+	if has_wonder(conq, id):
+		base += int(wonder_for(_biome_of(id)).get("gold", 0))
 	var h: String = hero_of(conq, id)
 	if h != "":
 		base += 2 + int(GOVERNOR.get(h, {}).get("gold", 0)) + governor_gear_gold(data, h)
@@ -162,13 +445,22 @@ static func total_income(data: Dictionary) -> int:
 
 ## Facteur de production des bâtiments selon le niveau de la ville.
 static func level_multiplier(conq: Dictionary, id: String) -> float:
-	return 1.0 + 0.5 * float(city_level(conq, id) - 1)
+	return LEVEL_MULT[city_level(conq, id) - 1]
+
+## Biome d'une ville (catalogue de ProgressionManager, lu sans autoload statique).
+static func _biome_of(id: String) -> String:
+	var loop: MainLoop = Engine.get_main_loop()
+	if loop is SceneTree:
+		var pm: Node = (loop as SceneTree).root.get_node_or_null("ProgressionManager")
+		if pm != null:
+			return String(pm.call("conquest_city_biome", id))
+	return "Forêt"
 
 ## Ressources produites par les héros gouverneurs (villes non pillées).
 static func governor_yield(conq: Dictionary) -> Dictionary:
 	var out: Dictionary = {}
 	for id: String in conq.get("owned", []):
-		if is_ravaged(conq, id):
+		if is_ravaged(conq, id) or is_ruined(conq, id):
 			continue
 		var h: String = hero_of(conq, id)
 		if h == "":
@@ -196,7 +488,7 @@ static func upgrade_city(data: Dictionary, id: String, city_name: String = "") -
 	if is_ravaged(conq, id):
 		return "Ville pillée : impossible de l'améliorer."
 	if city_level(conq, id) >= MAX_LEVEL:
-		return "Cette ville est déjà une Cité."
+		return "Cette ville est déjà une %s." % level_name(MAX_LEVEL)
 	var cost: Dictionary = upgrade_cost(conq, id)
 	var res: Dictionary = data.get("resources", {})
 	for k: String in cost.get("res", {}).keys():
@@ -257,6 +549,399 @@ static func recall_hero(data: Dictionary, id: String) -> String:
 	data["conquest"] = conq
 	return ""
 
+# ═════════════════════════════════════════════════════════════════════════════
+#  Lieutenance — missions des héros libres
+# ═════════════════════════════════════════════════════════════════════════════
+
+## Héros en mission : {classe -> {"type": mission_id, "eta": batailles restantes}}.
+static func missions(conq: Dictionary) -> Dictionary:
+	return conq.get("missions", {})
+
+static func hero_on_mission(conq: Dictionary, classe: String) -> Dictionary:
+	return missions(conq).get(classe, {})
+
+## Héros indisponibles (gouverneurs + en mission), pour la sélection d'équipe
+## et le choix des gouverneurs.
+static func busy_heroes(conq: Dictionary) -> Array:
+	var out: Array = stationed_heroes(conq)
+	for classe: String in missions(conq).keys():
+		if not out.has(classe):
+			out.append(classe)
+	return out
+
+## Types de missions disponibles (tous peuvent être tentés à tout moment).
+static func mission_types() -> Array:
+	return MISSION_TYPES.keys()
+
+static func mission_text(type_id: String) -> String:
+	return String(MISSION_TYPES.get(type_id, {}).get("text", ""))
+
+static func mission_label(type_id: String) -> String:
+	return String(MISSION_TYPES.get(type_id, {}).get("label", "Mission"))
+
+## Envoie un héros libre en mission de 3 batailles. Retourne "" si OK.
+static func send_mission(conq: Dictionary, classe: String, type_id: String) -> String:
+	if not GOVERNOR.has(classe):
+		return "Héros inconnu."
+	if not MISSION_TYPES.has(type_id):
+		return "Mission inconnue."
+	if hero_city(conq, classe) != "":
+		return "%s gouverne déjà une ville." % classe
+	if not hero_on_mission(conq, classe).is_empty():
+		return "%s est déjà en mission." % classe
+	var m: Dictionary = missions(conq)
+	m[classe] = {"type": type_id, "eta": MISSION_BATTLES}
+	conq["missions"] = m
+	return ""
+
+## Rappelle un héros de sa mission (il revient bredouille, sans récompense).
+static func abort_mission(conq: Dictionary, classe: String) -> String:
+	if hero_on_mission(conq, classe).is_empty():
+		return "Aucune mission en cours pour ce héros."
+	var m: Dictionary = missions(conq)
+	m.erase(classe)
+	conq["missions"] = m
+	return ""
+
+## Fait avancer les missions d'une bataille et règle les retours. Les villes
+## révélées sont ajoutées à adventure.revealed_cities (pont inter-modes) par
+## ProgressionManager, qui passe les candidates ici.
+static func _tick_missions(data: Dictionary, conq: Dictionary, rng: RandomNumberGenerator,
+		unrevealed: Array) -> void:
+	var m: Dictionary = missions(conq)
+	if m.is_empty():
+		return
+	for classe: String in m.keys().duplicate():
+		var job: Dictionary = m[classe]
+		job["eta"] = int(job.get("eta", 1)) - 1
+		if int(job["eta"]) > 0:
+			m[classe] = job
+			continue
+		m.erase(classe)
+		var type: String = String(job.get("type", "caravane"))
+		if type == "infiltration":
+			note(conq, "⚑ %s revient de l'infiltration : il reprend sa place au combat." % classe)
+			continue
+		var info: Dictionary = MISSION_TYPES.get(type, {})
+		var lvl: int = hero_level(data, classe)
+		if rng.randf() < MISSION_CHANCE:
+			var loss: int = 10 + lvl
+			data["gold"] = maxi(0, int(data.get("gold", 0)) - loss)
+			note(conq, "⚑ %s revient de « %s » bredouille : l'expédition a coûté %d or." % [classe, mission_label(type), loss])
+			continue
+		var gold: int = int(info.get("gold", 0)) + lvl * 2
+		if gold > 0:
+			data["gold"] = int(data.get("gold", 0)) + gold
+		var drops: Dictionary = {}
+		for r: String in info.get("res", {}).keys():
+			drops[r] = int(info["res"][r]) + int(lvl / 3.0)
+		if not drops.is_empty():
+			_add_res(data, drops)
+		var revealed: Array = []
+		if int(info.get("reveal", 0)) > 0 and not unrevealed.is_empty():
+			for i: int in range(mini(int(info["reveal"]), unrevealed.size())):
+				revealed.append(unrevealed[i])
+			if not revealed.is_empty():
+				var so_far: Array = conq.get("missions_revealed", [])
+				for cid: String in revealed:
+					if not so_far.has(cid):
+						so_far.append(cid)
+				conq["missions_revealed"] = so_far
+		var parts: Array = ["+%d or" % gold]
+		for r: String in drops.keys():
+			parts.append("+%d %s" % [int(drops[r]), r])
+		if not revealed.is_empty():
+			var rnames: Array = []
+			for cid: String in revealed:
+				rnames.append(_name(conq, cid))
+			parts.append("révèle %s" % ", ".join(PackedStringArray(rnames)))
+		note(conq, "⚑ %s revient de « %s » : %s." % [classe, mission_label(type), ", ".join(PackedStringArray(parts))])
+	conq["missions"] = m
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  Généraux du Roi Squelette
+# ═════════════════════════════════════════════════════════════════════════════
+
+## Général tenant cette ville, ou "" (vide une fois la ville annexée : le
+## général est vaincu quand sa forteresse tombe).
+static func general_of(conq: Dictionary, id: String) -> String:
+	if (conq.get("owned", []) as Array).has(id):
+		return ""
+	return String(GENERALS.get(id, {}).get("name", ""))
+
+## Généraux encore en vie (leur forteresse n'est pas conquise).
+static func living_generals(conq: Dictionary) -> Array:
+	var out: Array = []
+	for cid: String in GENERALS.keys():
+		if general_of(conq, cid) != "":
+			out.append(cid)
+	return out
+
+static func living_generals_count(conq: Dictionary) -> int:
+	return living_generals(conq).size()
+
+static func general_region(id: String) -> String:
+	return String(GENERALS.get(id, {}).get("region", ""))
+
+## Bonus de niveau des batailles de siège tant que le général tient sa
+## forteresse (appliqué par GameManager à la difficulté, affiché sur la carte).
+static func general_defense_bonus(conq: Dictionary, id: String) -> int:
+	return GENERAL_DEF_BONUS if general_of(conq, id) != "" else 0
+
+## Nom du boss de la 4e bataille du siège d'une forteresse de général.
+## Vide pour une ville ordinaire (le boss du biome reste utilisé).
+static func general_boss_name(conq: Dictionary, id: String) -> String:
+	return general_of(conq, id)
+
+## Les généraux vivants lancent parfois leur propre offensive, plus forte que
+## les offensives anonymes (réutilise le système threat, avec un visage).
+static func _maybe_general_threat(data: Dictionary, conq: Dictionary, rng: RandomNumberGenerator,
+		routes: Array, just_conquered: String) -> void:
+	if not threat(conq).is_empty():
+		return
+	var alive: Array = living_generals(conq)
+	if alive.is_empty() or rng.randf() > GENERAL_THREAT_CHANCE:
+		return
+	var pool: Array = _target_pool(conq, routes, just_conquered, true)
+	if pool.is_empty():
+		return
+	var id: String = String(pool[rng.randi_range(0, pool.size() - 1)])
+	var power: int = roundi((8.0 + 2.0 * float(owned_count(conq)) + float(int(conq.get("battle_count", 0))) / 3.0) * rng.randf_range(0.95, 1.25)) + GENERAL_THREAT_BONUS
+	var gid: String = String(alive[rng.randi_range(0, alive.size() - 1)])
+	var gname: String = String(GENERALS.get(gid, {}).get("name", ""))
+	conq["threat"] = {"city": id, "power": power, "eta": THREAT_ETA, "general": gname}
+	conq["threat_cd"] = 0
+	note(conq, "☠ %s, général du Roi Squelette, prépare une offensive (force %d) sur %s dans %d batailles !" % [gname, power, _name(conq, id), THREAT_ETA])
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  Plans d'assalt (sièges ennemis)
+# ═════════════════════════════════════════════════════════════════════════════
+
+## Coût en or du plan d'assaut (0 pour l'assaut direct).
+static func plan_cost(plan: String) -> int:
+	return int(PLAN_COST.get(plan, 0))
+
+## L'infiltration exige l'Assassin libre (ni gouverneur ni en mission).
+static func infiltration_ready(conq: Dictionary) -> bool:
+	return hero_city(conq, "Assassin") == "" and hero_on_mission(conq, "Assassin").is_empty()
+
+## Applique un plan d'assaut au lancement du siège : débite l'or, engage
+## l'Assassin si besoin, retourne {"error": raison} en cas de refus.
+## Retour {"skipped": true} si le plan fait avancer le siège d'une vague sans
+## combat (blocus / infiltration) ; l'Assassin revient après 1 bataille.
+static func apply_plan(data: Dictionary, conq: Dictionary, id: String, plan: String, rng: RandomNumberGenerator) -> Dictionary:
+	if (conq.get("owned", []) as Array).has(id):
+		return {"error": "Ville déjà conquise."}
+	match plan:
+		"direct":
+			return {"skipped": false}
+		"blocus":
+			var cost: int = plan_cost("blocus")
+			if int(data.get("gold", 0)) < cost:
+				return {"error": "Or insuffisant : %d pièces requises." % cost}
+			data["gold"] = int(data.get("gold", 0)) - cost
+			if rng.randf() < PLAN_RAID_CHANCE:
+				var pool: Array = _target_pool(conq, [], "", true)
+				if not pool.is_empty():
+					var rid: String = String(pool[rng.randi_range(0, pool.size() - 1)])
+					var r: Dictionary = conq.get("ravage", {})
+					r[rid] = RAVAGE_BATTLES
+					conq["ravage"] = r
+					note(conq, "Le blocus de %s agace l'ennemi : %s est pillée (%d batailles) !" % [_name(conq, id), _name(conq, rid), RAVAGE_BATTLES])
+			else:
+				note(conq, "Le blocus de %s resserre l'étau : une vague saute sans combat." % _name(conq, id))
+			return {"skipped": true}
+		"infiltration":
+			if not infiltration_ready(conq):
+				return {"error": "L'Assassin doit être libre (ni gouverneur ni en mission)."}
+			var cost2: int = plan_cost("infiltration")
+			if int(data.get("gold", 0)) < cost2:
+				return {"error": "Or insuffisant : %d pièces requises." % cost2}
+			data["gold"] = int(data.get("gold", 0)) - cost2
+			var m: Dictionary = missions(conq)
+			m["Assassin"] = {"type": "infiltration", "eta": 1}
+			conq["missions"] = m
+			note(conq, "L'Assassin s'infiltre dans %s : une vague ennemie est sabordée de l'intérieur. Il revient à la prochaine victoire." % _name(conq, id))
+			return {"skipped": true}
+	return {"error": "Plan d'assaut inconnu."}
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  Reconquête ennemie : garnisons adverses croissantes
+# ═════════════════════════════════════════════════════════════════════════════
+
+## Garnison adverse d'une ville non possédée (0 pour une ville possédée).
+## Elle monte de 1 toutes les GARRISON_EVERY victoires du joueur, max GARRISON_MAX.
+static func enemy_garrison(conq: Dictionary, id: String) -> int:
+	if (conq.get("owned", []) as Array).has(id):
+		return 0
+	var battles: int = int(conq.get("battle_count", 0))
+	return mini(GARRISON_MAX, int(battles / float(GARRISON_EVERY)))
+
+## Bonus de niveau des batailles contre une ville défendue (+1 par tranche de 2
+## soldats adverses) : attendre une cible la rend plus dure.
+static func enemy_garrison_bonus(conq: Dictionary, id: String) -> int:
+	return int(enemy_garrison(conq, id) / 2.0)
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  Diplomatie — annexion négociée des villes neutres
+# ═════════════════════════════════════════════════════════════════════════════
+
+## Coût de l'annexion négociée d'une ville neutre : or + la ressource
+## spécialité de la ville (CITY_TRAITS), payable en une fois.
+static func diplomacy_cost(conq: Dictionary, id: String, level: int = 0) -> Dictionary:
+	var res_key: String = ""
+	var spec: Dictionary = CITY_TRAITS.get(id, {})
+	if not spec.get("res", {}).is_empty():
+		res_key = String(spec.get("res", {}).keys()[0])
+	if res_key == "":
+		res_key = "Bois"
+	return {"gold": DIPLO_GOLD + maxi(0, level) * DIPLO_GOLD_PER_LEVEL, "res": {res_key: DIPLO_RES + int(float(maxi(0, level)) * DIPLO_RES_PER_LEVEL)}}
+
+
+## Victoires restantes avant de pouvoir négocier à nouveau (0 = possible).
+static func diplomacy_cooldown(conq: Dictionary) -> int:
+	return maxi(0, int(conq.get("diplo_cd", 0)))
+
+## Annexe une ville neutre par négociation (voie pacifique). Retourne "" si OK.
+## routes : CONQUEST_ROUTES — la ville doit être atteignable (même règle que
+## l'assaut : reliée au territoire). names : id -> nom, pour le journal.
+static func negotiate_city(data: Dictionary, conq: Dictionary, id: String,
+		routes: Array, names: Dictionary, level: int = 0) -> String:
+	if (conq.get("owned", []) as Array).has(id):
+		return "Ville déjà conquise."
+	if diplomacy_cooldown(conq) > 0:
+		return "Les émissaires sont encore en route : nouvelle négociation dans %d victoire(s)." % diplomacy_cooldown(conq)
+	conq["_names"] = names
+	var owned: Array = conq.get("owned", [])
+	var linked: bool = false
+	for pair: Array in routes:
+		var a: String = String(pair[0])
+		var b: String = String(pair[1])
+		if (a == id and owned.has(b)) or (b == id and owned.has(a)):
+			linked = true
+			break
+	if not linked:
+		conq.erase("_names")
+		return "Aucune route depuis votre territoire : conquérez d'abord une ville voisine."
+	var cost: Dictionary = diplomacy_cost(conq, id, level)
+	var res: Dictionary = data.get("resources", {})
+	for k: String in cost.get("res", {}).keys():
+		if int(res.get(k, 0)) < int(cost["res"][k]):
+			conq.erase("_names")
+			return "Ressource insuffisante : %s (%d/%d)." % [k, int(res.get(k, 0)), int(cost["res"][k])]
+	if int(data.get("gold", 0)) < int(cost.get("gold", 0)):
+		conq.erase("_names")
+		return "Or insuffisant : %d pièces requises." % int(cost.get("gold", 0))
+	for k: String in cost.get("res", {}).keys():
+		res[k] = int(res.get(k, 0)) - int(cost["res"][k])
+	data["resources"] = res
+	data["gold"] = int(data.get("gold", 0)) - int(cost.get("gold", 0))
+	owned.append(id)
+	conq["owned"] = owned
+	var dip: Array = conq.get("annexed_diplomacy", [])
+	if not dip.has(id):
+		dip.append(id)
+	conq["annexed_diplomacy"] = dip
+	conq["diplo_cd"] = DIPLO_COOLDOWN
+	conq["just_annexed"] = id
+	note(conq, "☮ %s rejoint l'empire par négociation : l'or a parlé plus fort que les armes." % _name(conq, id))
+	conq.erase("_names")
+	return ""
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  Ruine & reconstruction
+# ═════════════════════════════════════════════════════════════════════════════
+
+## Une ville perdue puis reprise reste ruinée : niveau -1 (min 1, reflété par
+## _ruin_level) et production gelée RUIN_BATTLES.
+static func is_ruined(conq: Dictionary, id: String) -> bool:
+	return int(conq.get("ruin", {}).get(id, 0)) > 0
+
+## La ruine décrémente à chaque victoire ; réparée, elle disparaît.
+static func _tick_ruins(conq: Dictionary) -> void:
+	var ruins: Dictionary = conq.get("ruin", {})
+	if ruins.is_empty():
+		return
+	for id: String in ruins.keys().duplicate():
+		if not (conq.get("owned", []) as Array).has(id):
+			continue
+		ruins[id] = int(ruins.get(id, 0)) - 1
+		if int(ruins[id]) <= 0:
+			ruins.erase(id)
+			note(conq, "⚒ %s se relève de ses ruines : production reprise." % _name(conq, id))
+	conq["ruin"] = ruins
+
+## Répare une ville ruinée (80 or) : la production reprend. Retourne "" si OK.
+static func repair_city(data: Dictionary, conq: Dictionary, id: String) -> String:
+	if not is_ruined(conq, id):
+		return "Cette ville n'est pas ruinée."
+	if int(data.get("gold", 0)) < RUIN_REPAIR_GOLD:
+		return "Or insuffisant : %d pièces requises." % RUIN_REPAIR_GOLD
+	data["gold"] = int(data.get("gold", 0)) - RUIN_REPAIR_GOLD
+	var ruins: Dictionary = conq.get("ruin", {})
+	ruins.erase(id)
+	conq["ruin"] = ruins
+	return ""
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  Légende — score de fin de campagne et fins multiples
+# ═════════════════════════════════════════════════════════════════════════════
+
+## Détail du score de Légende (clé -> points). stones : nombre de Pierres
+## Élémentaires du joueur (fourni par ProgressionManager depuis Stones).
+static func legend_score(conq: Dictionary, stones: int) -> Dictionary:
+	var w: Dictionary = LEGEND_WEIGHTS
+	var out: Dictionary = {"villes": 0, "niveaux": 0, "gouverneurs": 0, "pierres": 0, "diplomatie": 0, "ruines": 0}
+	out["villes"] = owned_count(conq) * int(w["villes"])
+	var lv: int = 0
+	for id: String in conq.get("owned", []):
+		lv += maxi(0, city_level(conq, id) - 1)
+	out["niveaux"] = lv * int(w["niveaux"])
+	out["gouverneurs"] = stationed_heroes(conq).size() * int(w["gouverneurs"])
+	out["pierres"] = stones * int(w["pierres"])
+	out["diplomatie"] = (conq.get("annexed_diplomacy", []) as Array).size() * int(w["diplomatie"])
+	var ruined: int = 0
+	for id: String in conq.get("owned", []):
+		if is_ruined(conq, id):
+			ruined += 1
+	out["ruines"] = ruined * int(w["ruines"])
+	return out
+
+static func legend_total(score: Dictionary) -> int:
+	var total: int = 0
+	for k: String in score.keys():
+		total += int(score[k])
+	return total
+
+## Fin de campagne selon le score : trois légendes possibles à la chute du
+## Donjon. Le style de jeu (diplomatie, développement, Pierres) décide de la
+## fin, pas seulement le fait de gagner.
+static func legend_ending(score: Dictionary, conq: Dictionary) -> Dictionary:
+	var dip: int = (conq.get("annexed_diplomacy", []) as Array).size()
+	var neutral_total: int = 0
+	for id: String in conq.get("owned", []):
+		if id != "capitale" and id != "donjon_roi":
+			neutral_total += 1
+	if dip >= 4:
+		return {"id": "marchand", "title": "EMPIRE MARCHAND",
+			"text": "L'or a conquis plus de villes que le fer. Les routes de Zimut sont à vous, les comptoirs affluent : sous votre règne, le commerce a remplacé la guerre."}
+	if int(score.get("niveaux", 0)) >= 40 and int(score.get("gouverneurs", 0)) >= 12:
+		return {"id": "bastion", "title": "BASTION DE ZIMUT",
+			"text": "Chaque ville est une forteresse, chaque gouverneur un rempart. Les Nations se souviendront longtemps de celui qui a rendu l'empire imprenable."}
+	return {"id": "heros", "title": "ÂGE DES HÉROS",
+		"text": "Vos héros ont mené chaque assaut, vaincu les généraux et le Roi Squelette en personne. Les bardes de Zimut chanteront leurs noms pendant des siècles."}
+
+## Épilogue récapitulatif (affiché à la chute du Donjon) : score, détail et fin.
+static func epilogue(score: Dictionary, ending: Dictionary) -> String:
+	var lines: PackedStringArray = []
+	lines.append("%s — %d points de Légende" % [String(ending.get("title", "")), legend_total(score)])
+	lines.append("")
+	lines.append("Villes %d · Développement +%d · Gouverneurs +%d" % [int(score.get("villes", 0)), int(score.get("niveaux", 0)), int(score.get("gouverneurs", 0))])
+	lines.append("Pierres +%d · Diplomatie +%d · Ruines %d" % [int(score.get("pierres", 0)), int(score.get("diplomatie", 0)), int(score.get("ruines", 0))])
+	lines.append("")
+	lines.append(String(ending.get("text", "")))
+	return "\n".join(lines)
+
 static func _set_garrison(conq: Dictionary, id: String, n: int, hero: String) -> void:
 	var g: Dictionary = conq.get("garrisons", {})
 	g[id] = {"troops": clampi(n, 0, garrison_cap(conq, id)), "hero": hero}
@@ -298,8 +983,9 @@ static func _name(conq: Dictionary, id: String) -> String:
 
 ## names : id -> nom de ville (fourni par ProgressionManager pour les messages).
 ## routes : CONQUEST_ROUTES (pour repérer les villes frontalières).
+## unrevealed : villes que la cartographie peut révéler (pont Aventure).
 static func after_victory(data: Dictionary, conq: Dictionary, rng: RandomNumberGenerator,
-		routes: Array, names: Dictionary, just_conquered: String) -> void:
+		routes: Array, names: Dictionary, just_conquered: String, unrevealed: Array = []) -> void:
 	conq["_names"] = names
 	conq["news"] = []
 	conq["battle_count"] = int(conq.get("battle_count", 0)) + 1
@@ -308,11 +994,18 @@ static func after_victory(data: Dictionary, conq: Dictionary, rng: RandomNumberG
 	_collect_income(data, conq)
 	_regen_garrisons(data, conq)
 	_tick_threat(data, conq, rng)
+	_tick_missions(data, conq, rng, unrevealed)
+	_tick_chancellor_buffs(conq)
+	_tick_ruins(conq)
+	if int(conq.get("diplo_cd", 0)) > 0:
+		conq["diplo_cd"] = int(conq["diplo_cd"]) - 1
+	maybe_chancellor(conq)
 	if int(conq.get("truce", 0)) > 0:
 		conq["truce"] = int(conq["truce"]) - 1
 	else:
 		_roll_raid(data, conq, rng, routes, just_conquered)
 		_maybe_spawn_threat(data, conq, rng, routes, just_conquered)
+		_maybe_general_threat(data, conq, rng, routes, just_conquered)
 	_maybe_event(data, conq, rng, routes, just_conquered)
 	conq.erase("_names")
 	data["conquest"] = conq
@@ -404,6 +1097,12 @@ static func _maybe_spawn_threat(data: Dictionary, conq: Dictionary, rng: RandomN
 	conq["threat_cd"] = 0
 	note(conq, "⚠ GRANDE OFFENSIVE ennemie (force %d) : %s sera attaquée dans %d batailles !" % [power, _name(conq, id), THREAT_ETA])
 
+static func _tick_chancellor_buffs(conq: Dictionary) -> void:
+	if int(conq.get("drill", 0)) > 0:
+		conq["drill"] = int(conq["drill"]) - 1
+	if int(conq.get("roadworks", 0)) > 0:
+		conq["roadworks"] = int(conq["roadworks"]) - 1
+
 static func _tick_threat(data: Dictionary, conq: Dictionary, rng: RandomNumberGenerator) -> void:
 	var th: Dictionary = threat(conq)
 	if th.is_empty():
@@ -455,6 +1154,12 @@ static func resolve_assault(data: Dictionary, conq: Dictionary, id: String, powe
 	if not lost.has(id):
 		lost.append(id)
 	conq["lost"] = lost
+	# Ruine & reconstruction : reprise en une bataille, mais ruinée à son retour.
+	var ruins: Dictionary = conq.get("ruin", {})
+	if int(ruins.get(id, 0)) <= 0:
+		ruins[id] = RUIN_BATTLES
+		conq["ruin"] = ruins
+		note(conq, "⚒ %s est ruinée : sa production sera gelée %d batailles après sa reprise." % [nm, RUIN_BATTLES])
 	var r2: Dictionary = conq.get("ravage", {})
 	r2.erase(id)
 	conq["ravage"] = r2
@@ -467,6 +1172,68 @@ static func resolve_assault(data: Dictionary, conq: Dictionary, id: String, powe
 
 static func pending_event(conq: Dictionary) -> Dictionary:
 	return conq.get("event_pending", {})
+
+## Édits du Chancelier : décision stratégique récurrente, distincte des
+## événements aléatoires. Le même popup sert à l'affichage.
+static func chancellor_ready(conq: Dictionary) -> bool:
+	return owned_count(conq) >= CHANCELLOR_MIN_CITIES
+
+static func maybe_chancellor(conq: Dictionary) -> void:
+	if not pending_event(conq).is_empty():
+		return
+	conq["chancellor_cd"] = int(conq.get("chancellor_cd", 0)) + 1
+	if not chancellor_ready(conq) or int(conq["chancellor_cd"]) < CHANCELLOR_INTERVAL:
+		return
+	var drills: Array = []
+	if int(conq.get("drill", 0)) > 0:
+		drills.append("manœuvres : %d bataille(s)" % int(conq["drill"]))
+	if int(conq.get("roadworks", 0)) > 0:
+		drills.append("routes : %d bataille(s)" % int(conq["roadworks"]))
+	var active: String = ""
+	if not drills.is_empty():
+		active = " Déjà en cours — %s." % ", ".join(PackedStringArray(drills))
+	conq["event_pending"] = {"id": "chancelier", "chancellor": true,
+		"title": "LE CHANCELIER DEMANDE AUDIENCE",
+		"text": "Monseigneur, le Conseil a réuni les tailles de l'empire. Voici les édits qui s'offrent à vous.%s" % active,
+		"options": [
+			{"id": "impot", "label": "Lever un impôt — encaisse le revenu d'une victoire par ville, chaque garnison perd 1 soldat", "gold": 0},
+			{"id": "manoeuvres", "label": "Organiser des manœuvres — +2 défense dans toutes les villes pendant 3 batailles", "gold": 60},
+			{"id": "routes", "label": "Entretenir les routes — +2 Bois et +1 Cuir à chaque victoire pendant 4 batailles", "gold": 40},
+			{"id": "congedier", "label": "Congédier le Chancelier — aucun édit cette fois", "gold": 0}]}
+	conq["chancellor_cd"] = 0
+	conq["chancellor_seen"] = int(conq.get("chancellor_seen", 0)) + 1
+
+## Effet défensif temporaire des manœuvres du Chancelier.
+static func drill_defense(conq: Dictionary) -> int:
+	return DRILL_DEF if int(conq.get("drill", 0)) > 0 else 0
+
+## Production temporaire des routes du Chancelier (par victoire).
+static func roadworks_yield(conq: Dictionary) -> Dictionary:
+	if int(conq.get("roadworks", 0)) <= 0:
+		return {}
+	return {"Bois": ROADS_BOIS, "Cuir": 1}
+
+## Spécialité économique d'une ville (CITY_TRAITS), mise à l'échelle du niveau.
+static func city_trait_yield(conq: Dictionary, id: String) -> Dictionary:
+	var spec: Dictionary = CITY_TRAITS.get(id, {})
+	if spec.is_empty() or is_ravaged(conq, id) or is_ruined(conq, id):
+		return {}
+	var mult: float = level_multiplier(conq, id)
+	var out: Dictionary = {}
+	for r: String in spec.get("res", {}).keys():
+		out[r] = maxi(1, roundi(float(spec["res"][r]) * mult))
+	return out
+
+static func city_trait_text(id: String) -> String:
+	return String(CITY_TRAITS.get(id, {}).get("label", ""))
+
+## Somme des spécialités des villes possédées (par victoire).
+static func trait_yield(conq: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for id: String in conq.get("owned", []):
+		for r: String in city_trait_yield(conq, id).keys():
+			out[r] = int(out.get(r, 0)) + int(city_trait_yield(conq, id)[r])
+	return out
 
 static func _maybe_event(data: Dictionary, conq: Dictionary, rng: RandomNumberGenerator,
 		routes: Array, just_conquered: String) -> void:
@@ -712,6 +1479,23 @@ static func resolve_event(data: Dictionary, option_id: String, rng: RandomNumber
 			out = "L'espion travaille pour vous : plus de raids pendant 4 batailles."
 		"espion:relacher":
 			out = "Vous relâchez l'espion. Il ne reviendra pas."
+		"chancelier:congedier":
+			out = "Le Chancelier se retire : aucun édit promulgué."
+		"chancelier:impot":
+			var owned: Array = conq.get("owned", [])
+			var gold: int = 0
+			for cid: String in owned:
+				gold += city_income(data, cid)
+				if troops(conq, cid) > 0:
+					_set_garrison(conq, cid, troops(conq, cid) - 1, hero_of(conq, cid))
+			data["gold"] = int(data.get("gold", 0)) + gold
+			out = "L'impôt est levé : +%d or. Les garnisons, elles, ont payé le prix. Le revenu reprendra son cours normal à la prochaine victoire." % gold
+		"chancelier:manoeuvres":
+			conq["drill"] = DRILL_BATTLES
+			out = "Les manœuvres commencent : +2 défense dans toutes les villes pendant %d batailles." % DRILL_BATTLES
+		"chancelier:routes":
+			conq["roadworks"] = ROADS_BATTLES
+			out = "Les routes sont réparées : +%d Bois et +1 Cuir à chaque victoire pendant %d batailles." % [ROADS_BOIS, ROADS_BATTLES]
 		"diplomatie:tribut":
 			conq["truce"] = maxi(int(conq.get("truce", 0)), 6)
 			out = "Le tribut est versé : paix pendant 6 batailles (pas de raid, pas de nouvelle offensive)."

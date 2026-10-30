@@ -12,40 +12,39 @@ const GOLD := Color(0.96, 0.75, 0.31)
 
 ## Positions sur la carte (fractions du panneau) — le reste (noms, types,
 ## biomes, niveaux, routes) vient du catalogue de ProgressionManager.
-## Carte organisée en quatre colonnes et sept rangées : les 28 villes
-## s'étendent verticalement et demandent un défilement pour être explorées.
+## Emplacements des villes sur la carte peinte (coordonnées normalisées) : chaque ville
+## est posée sur la région qui lui correspond (forêt, cimes, désert, Ronces, Rouages…).
 const CITY_POS := {
-	# Forêt à l'ouest : villages et fortifications répartis dans les clairières.
-	"citadelle_ronce": Vector2(0.23, 0.72),
-	"vieille_tour": Vector2(0.23, 0.10),
-	"mine_cristal": Vector2(0.47, 0.12),
-	"donjon_roi": Vector2(0.55, 0.84),
-	"clairiere": Vector2(0.10, 0.15),
-	"ruines_lierre": Vector2(0.27, 0.25),
-	"col_givre": Vector2(0.42, 0.28),
-	"garnison": Vector2(0.60, 0.29),
-	"village_brume": Vector2(0.11, 0.57),
-	"capitale": Vector2(0.14, 0.30),
-	"abbaye_ronce": Vector2(0.28, 0.55),
-	"bastion_orage": Vector2(0.61, 0.46),
-	"pont_mousse": Vector2(0.09, 0.43),
-	"fort_racine": Vector2(0.25, 0.42),
-	"hameau_pin": Vector2(0.45, 0.43),
-	"tour_sable": Vector2(0.82, 0.42),
-	"caravanserail": Vector2(0.73, 0.56),
-	"oasis": Vector2(0.87, 0.58),
-	"observatoire": Vector2(0.79, 0.70),
-	"port_sable": Vector2(0.90, 0.75),
-	"bois_lune": Vector2(0.10, 0.77),
-	"sanctuaire_mousse": Vector2(0.28, 0.82),
-	"forge_givre": Vector2(0.45, 0.58),
-	"pic_foudroyant": Vector2(0.60, 0.62),
-	"marais_spectres": Vector2(0.11, 0.91),
-	"fort_cendre": Vector2(0.72, 0.84),
-	"temple_soleil": Vector2(0.84, 0.88),
-	"citadelle_sable": Vector2(0.90, 0.94),
-	"atelier_cuivre": Vector2(0.78, 0.17),
-	"citadelle_engrenages": Vector2(0.93, 0.27),
+	"capitale": Vector2(0.12, 0.28),
+	"clairiere": Vector2(0.24, 0.20),
+	"pont_mousse": Vector2(0.07, 0.43),
+	"vieille_tour": Vector2(0.33, 0.15),
+	"fort_racine": Vector2(0.27, 0.37),
+	"sanctuaire_mousse": Vector2(0.22, 0.50),
+	"bastion_orage": Vector2(0.13, 0.10),
+	"pic_foudroyant": Vector2(0.26, 0.08),
+	"hameau_pin": Vector2(0.41, 0.29),
+	"col_givre": Vector2(0.47, 0.19),
+	"garnison": Vector2(0.67, 0.24),
+	"mine_cristal": Vector2(0.55, 0.31),
+	"donjon_roi": Vector2(0.59, 0.09),
+	"ruines_lierre": Vector2(0.36, 0.50),
+	"abbaye_ronce": Vector2(0.54, 0.56),
+	"citadelle_ronce": Vector2(0.47, 0.46),
+	"village_brume": Vector2(0.37, 0.68),
+	"bois_lune": Vector2(0.50, 0.75),
+	"marais_spectres": Vector2(0.63, 0.85),
+	"fort_cendre": Vector2(0.13, 0.62),
+	"citadelle_sable": Vector2(0.18, 0.80),
+	"oasis": Vector2(0.72, 0.40),
+	"tour_sable": Vector2(0.85, 0.21),
+	"observatoire": Vector2(0.66, 0.51),
+	"temple_soleil": Vector2(0.79, 0.31),
+	"caravanserail": Vector2(0.84, 0.55),
+	"port_sable": Vector2(0.93, 0.46),
+	"forge_givre": Vector2(0.86, 0.76),
+	"atelier_cuivre": Vector2(0.91, 0.09),
+	"citadelle_engrenages": Vector2(0.96, 0.25),
 }
 var _save: Dictionary = {}
 var _slot: int = -1
@@ -67,19 +66,24 @@ var _map_scroll: Control   # fenêtre de la carte (clip) : le panneau y est dép
 var _pan: Vector2 = Vector2.ZERO
 var _zoom_focus: Vector2 = Vector2.ZERO
 var _zoom_inited: bool = false
-var _cap_halo: Control
 var _halo_t: float = 0.0
 var _map_panel: Panel
 var _side_panel: PanelContainer
 var _title_label: Label
 var _subtitle_label: Label
-var _legend_label: Label
+var _legend_label: RichTextLabel
+var _world_art: TextureRect = null
+var _territory: ConquestMapLayers.TerritoryBaker = null
+var _routes: ConquestMapLayers.Routes = null
 var _challenge_label: Label
 var _pulse_tween: Tween = null
 var _map_title_label: Label
 var _side_title: Label
 var _back_button: Button
 var _side_scroll: ScrollContainer
+var _tab_city: VBoxContainer = null
+var _tab_chron: VBoxContainer = null
+var _tab_buttons: Array[Button] = []
 var _chronicle_label: Label
 
 # Capture le glissement directement sur toute la zone de carte, y compris
@@ -97,7 +101,10 @@ var _touch_positions: Dictionary = {}
 var _pinch_start_distance: float = 0.0
 var _pinch_start_zoom: float = 1.0
 const MAP_ZOOM_MAX: float = 2.0
+const MAP_ART := "res://assets/ui/conquest/conquest_world_map.jpg"
+const MAP_FX := "res://assets/ui/conquest/conquest_world_fx.png"
 const MAP_W: float = 1536.0
+const PIN_SIZE := Vector2(96, 84)
 const MAP_H: float = 1024.0
 
 func _ready() -> void:
@@ -134,6 +141,10 @@ func _ready() -> void:
 	_conquest["last_counterattack"] = ""
 	_save["conquest"] = _conquest
 	_persist()
+	# V59 : Gultur présente les nouveautés de la Conquête (une seule fois chacune)
+	# V60 : puis la carte vivante (routes, territoire, brouillard, offensives)
+	Gultur.say(self, "conq_v59", Gultur.CONQ_V59, _side_panel,
+		func() -> void: Gultur.say(self, "conq_carte", Gultur.CONQ_CARTE, _map_scroll))
 
 func _build() -> void:
 	var bg := ColorRect.new()
@@ -207,91 +218,110 @@ func _build() -> void:
 	_map_scroll.add_child(map)
 	_map_panel = map
 
-	# Fond de carte peint : les villes, routes et interactions restent des
-	# contrôles Godot superposés à cette illustration.
+	# Fond de carte peint, animé par un shader (eau, lave, cristaux, nuages) et teinté par
+	# le territoire de l'empire et le brouillard des terres inconnues (V60).
 	var world_art := TextureRect.new()
 	world_art.name = "ConquestWorldArtwork"
 	world_art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	world_art.texture = load("res://assets/ui/conquest/conquest_world_map.png") as Texture2D
+	world_art.texture = load(MAP_ART) as Texture2D
 	world_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	world_art.stretch_mode = TextureRect.STRETCH_SCALE
 	world_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	world_art.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	world_art.material = ConquestMapLayers.world_material(load(MAP_FX) as Texture2D, GfxQuality.low())
 	map.add_child(world_art)
+	_world_art = world_art
+	_territory = ConquestMapLayers.TerritoryBaker.new()
+	_territory.name = "TerritoryBaker"
+	map.add_child(_territory)
+	var wm: ShaderMaterial = world_art.material
+	wm.set_shader_parameter("territory", _territory.get_texture())
+	wm.set_shader_parameter("has_territory", 1.0)
 
-	_map_title_label = Label.new()
-	_map_title_label.text = "LE MONDE DE ZIMUT"
-	_map_title_label.position = Vector2(22, 14)
-	_map_title_label.add_theme_color_override("font_color", GOLD)
-	_map_title_label.add_theme_stylebox_override("normal", _pill_style())
-	map.add_child(_map_title_label)
+	# Routes dessinées derrière les villes : pavées dans l'empire, pointillés animés
+	# vers les villes attaquables, sentiers discrets ailleurs.
+	_routes = ConquestMapLayers.Routes.new()
+	_routes.name = "Routes"
+	_routes.city_pos = CITY_POS
+	_routes.animate = not GfxQuality.low()
+	_routes.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	map.add_child(_routes)
 
-	_legend_label = Label.new()
-	_legend_label.text = "Vert = allié  ·  Gris = neutre  ·  Rouge = adverse  ·  ★ = votre capitale"
-	_legend_label.position = Vector2(260, 16)
-	_legend_label.add_theme_color_override("font_color", TEXT)
-	_legend_label.add_theme_stylebox_override("normal", _pill_style())
-	map.add_child(_legend_label)
-
-	# Routes dessinées derrière les villes : dorées si elles relient deux
-	# villes du territoire, ternes sinon.
-	var routes := _RouteLines.new()
-	routes.conquest = _conquest
-	routes.city_pos = CITY_POS
-	routes.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	map.add_child(routes)
-
-	_cap_halo = Control.new()
-	_cap_halo.name = "CapitalHalo"
-	_cap_halo.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_cap_halo.draw.connect(_draw_capital_halo)
-	map.add_child(_cap_halo)
+	# Vie de la carte : navires, oiseaux, nuages.
+	var ambient := ConquestMapLayers.Ambient.new()
+	ambient.name = "Ambient"
+	ambient.clouds = not GfxQuality.low()
+	ambient.active = not GfxQuality.low()
+	ambient.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	map.add_child(ambient)
 
 	for city_id: String in _city_ids():
 		var city: Dictionary = _city_meta(city_id)
 		var btn := Button.new()
-		var owned: bool = _conquest.get("owned", []).has(city_id)
-		var attackable: bool = ProgressionManager.conquest_city_attackable(
-			_conquest, city_id, _save.get("adventure", {}))
-		# Pont Aventure : une ville non révélée par l'exploration affiche « ? »
-		var revealed_cities: Array = _save.get("adventure", {}).get("revealed_cities", [])
-		var unknown: bool = (not owned) and (not revealed_cities.is_empty()) \
-				and (not revealed_cities.has(city_id))
+		btn.name = "City_" + city_id
 		btn.text = ""
 		btn.tooltip_text = "%s — %s" % [String(ProgressionManager.biome_label(String(city["biome"]))), String(city["desc"])]
-		btn.custom_minimum_size = Vector2(154, 124)
 		btn.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
 		btn.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
 		btn.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
 		btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 		btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-		var sprite := TextureRect.new()
-		sprite.name = "CityIllustration"
-		sprite.texture = _city_sprite(city_id)
-		sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		sprite.position = Vector2(18, 0)
-		sprite.size = Vector2(118, 82)
-		sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		btn.add_child(sprite)
+		var pin := ConquestMapLayers.Pin.new()
+		pin.name = "CityPin"
+		pin.animate = not GfxQuality.low()
+		pin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		btn.add_child(pin)
 		var nameplate := Label.new()
 		nameplate.name = "CityNameplate"
-		nameplate.text = _nameplate_text(city_id)
-		if city_id == "capitale":
-			nameplate.add_theme_color_override("font_color", Color(1.0, 0.93, 0.62))
 		nameplate.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		nameplate.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		nameplate.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		nameplate.position = Vector2(0, 76)
-		nameplate.size = Vector2(154, 45)
-		nameplate.add_theme_font_size_override("font_size", 13)
-		nameplate.add_theme_color_override("font_color", TEXT)
-		nameplate.add_theme_stylebox_override("normal", _city_nameplate_style(city_id, city_id == _selected_id))
+		nameplate.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+		nameplate.add_theme_constant_override("outline_size", 6)
+		nameplate.add_theme_constant_override("line_spacing", -3)
+		nameplate.add_theme_color_override("font_outline_color", Color(0.06, 0.04, 0.02, 0.92))
 		nameplate.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		btn.add_child(nameplate)
 		btn.pressed.connect(_on_city_pressed.bind(city_id))
 		map.add_child(btn)
 		_city_buttons[city_id] = btn
 		_city_labels[city_id] = nameplate
+
+	# Habillage fixe de la vue : vignette, titre et légende (ne bougent pas avec la carte).
+	var vg := Gradient.new()
+	vg.offsets = PackedFloat32Array([0.0, 0.62, 1.0])
+	vg.colors = PackedColorArray([Color(0, 0, 0, 0), Color(0, 0, 0, 0.0), Color(0.02, 0.03, 0.05, 0.55)])
+	var vt := GradientTexture2D.new()
+	vt.gradient = vg
+	vt.fill = GradientTexture2D.FILL_RADIAL
+	vt.fill_from = Vector2(0.5, 0.5)
+	vt.fill_to = Vector2(1.08, 1.08)
+	vt.width = 128
+	vt.height = 128
+	var vignette := TextureRect.new()
+	vignette.name = "Vignette"
+	vignette.texture = vt
+	vignette.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	vignette.stretch_mode = TextureRect.STRETCH_SCALE
+	vignette.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_map_scroll.add_child(vignette)
+
+	_map_title_label = Label.new()
+	_map_title_label.text = "LE MONDE DE ZIMUT"
+	_map_title_label.position = Vector2(12, 10)
+	_map_title_label.add_theme_color_override("font_color", GOLD)
+	_map_title_label.add_theme_stylebox_override("normal", _pill_style())
+	_map_title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_map_scroll.add_child(_map_title_label)
+
+	_legend_label = RichTextLabel.new()
+	_legend_label.bbcode_enabled = true
+	_legend_label.fit_content = true
+	_legend_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_legend_label.scroll_active = false
+	_legend_label.add_theme_color_override("default_color", TEXT)
+	_legend_label.add_theme_stylebox_override("normal", _pill_style())
+	_legend_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_map_scroll.add_child(_legend_label)
 
 	var side := PanelContainer.new()
 	side.position = Vector2(1340, 92)
@@ -324,20 +354,48 @@ func _build() -> void:
 	_threat_banner.add_theme_stylebox_override("normal", _style(Color(0.34, 0.10, 0.08, 0.96), Color(1.0, 0.45, 0.30)))
 	box.add_child(_threat_banner)
 
+	# V59 : le conseil est en deux onglets pour tenir à l'écran sans défiler :
+	# « Ville » (illustration, situation, actions) et « Chronique » (nouvelles de l'empire).
+	var tabs := HBoxContainer.new()
+	tabs.add_theme_constant_override("separation", 6)
+	box.add_child(tabs)
+	_tab_city = VBoxContainer.new()
+	_tab_city.add_theme_constant_override("separation", 12)
+	box.add_child(_tab_city)
+	_tab_chron = VBoxContainer.new()
+	_tab_chron.add_theme_constant_override("separation", 10)
+	_tab_chron.visible = false
+	box.add_child(_tab_chron)
+	for t: Array in [["⚑ VILLE", _tab_city], ["✎ CHRONIQUE", _tab_chron]]:
+		var tb := Button.new()
+		tb.text = String(t[0])
+		tb.toggle_mode = true
+		tb.button_pressed = t[1] == _tab_city
+		tb.custom_minimum_size = Vector2(0, 44)
+		tb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tb.add_theme_font_size_override("font_size", 17)
+		tb.add_theme_color_override("font_color", TEXT)
+		tb.add_theme_stylebox_override("normal", _style(Color(0.12, 0.18, 0.22, 0.97), Color(0.42, 0.50, 0.46)))
+		tb.add_theme_stylebox_override("pressed", _style(Color(0.24, 0.30, 0.22, 0.97), GOLD))
+		tb.add_theme_stylebox_override("hover", _style(Color(0.18, 0.26, 0.28, 0.97), GOLD))
+		tabs.add_child(tb)
+		_tab_buttons.append(tb)
+		var target: VBoxContainer = t[1]
+		tb.pressed.connect(func() -> void: _show_tab(target))
+
 	_side_art = TextureRect.new()
 	_side_art.name = "SideCityArt"
-	_side_art.custom_minimum_size = Vector2(0, 150)
+	_side_art.custom_minimum_size = Vector2(0, 112)
 	_side_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_side_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_side_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.add_child(_side_art)
+	_tab_city.add_child(_side_art)
 
 	_message = Label.new()
 	_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_message.custom_minimum_size.y = 180
 	_message.add_theme_color_override("font_color", TEXT)
-	_message.add_theme_font_size_override("font_size", 18)
-	box.add_child(_message)
+	_message.add_theme_font_size_override("font_size", 17)
+	_tab_city.add_child(_message)
 
 	_attack = Button.new()
 	_attack.text = "LANCER L'ASSAUT"
@@ -345,7 +403,7 @@ func _build() -> void:
 	_attack.add_theme_font_size_override("font_size", 23)
 	_attack.pressed.connect(_attack_selected_city)
 	_style_button(_attack, Color(0.62, 0.20, 0.16), Color(1.0, 0.72, 0.42))
-	box.add_child(_attack)
+	_tab_city.add_child(_attack)
 
 	_challenge_label = Label.new()
 	_challenge_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -353,17 +411,17 @@ func _build() -> void:
 	_challenge_label.add_theme_color_override("font_color", Color(0.80, 0.72, 1.0))
 	_challenge_label.add_theme_stylebox_override("normal", _style(Color(0.13, 0.11, 0.24, 0.96), Color(0.62, 0.48, 0.95)))
 	_challenge_label.visible = false
-	box.add_child(_challenge_label)
+	_tab_city.add_child(_challenge_label)
 
 	_build_box = VBoxContainer.new()
 	_build_box.add_theme_constant_override("separation", 6)
-	box.add_child(_build_box)
+	_tab_city.add_child(_build_box)
 
 	var chronicle_title := Label.new()
 	chronicle_title.text = "CHRONIQUE RÉCENTE"
 	chronicle_title.add_theme_font_size_override("font_size", 18)
 	chronicle_title.add_theme_color_override("font_color", GOLD)
-	box.add_child(chronicle_title)
+	_tab_chron.add_child(chronicle_title)
 
 	_chronicle_label = Label.new()
 	_chronicle_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -371,7 +429,7 @@ func _build() -> void:
 	_chronicle_label.add_theme_font_size_override("font_size", 15)
 	_chronicle_label.add_theme_color_override("font_color", TEXT)
 	_chronicle_label.text = "Vos premières conquêtes apparaîtront ici."
-	box.add_child(_chronicle_label)
+	_tab_chron.add_child(_chronicle_label)
 
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -387,6 +445,16 @@ func _build() -> void:
 	_refresh_header()
 	_select_city(_selected_id)
 	_layout_responsive()
+
+## Affiche l'onglet du conseil demandé (Ville / Chronique).
+func _show_tab(target: VBoxContainer) -> void:
+	_tab_city.visible = target == _tab_city
+	_tab_chron.visible = target == _tab_chron
+	for i: int in range(_tab_buttons.size()):
+		_tab_buttons[i].button_pressed = (i == 0) == (target == _tab_city)
+	if _side_scroll != null:
+		_side_scroll.scroll_vertical = 0
+
 
 ## Adapte la carte et le conseil à la taille réelle du viewport.
 ## En format compact (téléphone/portrait), la carte est en premier et le
@@ -423,10 +491,10 @@ func _layout_responsive() -> void:
 		_side_panel.position = Vector2(0, map_view_h + 14.0)
 		_side_panel.size = Vector2(viewport_w, side_h)
 		_side_panel.custom_minimum_size = Vector2(viewport_w, side_h)
-		_legend_label.text = "Vert : allié · Gris : neutre · Rouge : ennemi · ⚔ : attaquable"
-		_legend_label.position = Vector2(10, MAP_H - 27.0)
-		_map_title_label.add_theme_font_size_override("font_size", 17)
-		_legend_label.add_theme_font_size_override("font_size", 11)
+		_legend_label.text = "[color=#4fd27a]●[/color] Empire   [color=#b0b0a8]●[/color] Neutre   [color=#e0574a]●[/color] Adverse   [color=#ffd75e]➜[/color] Attaquable   [color=#c8ccd4]?[/color] Inconnu"
+		_legend_label.position = Vector2(10, map_view_h - 38.0)
+		_map_title_label.visible = false
+		_legend_label.add_theme_font_size_override("normal_font_size", 12)
 		_side_title.add_theme_font_size_override("font_size", 20)
 		_message.custom_minimum_size.y = 150
 		_message.add_theme_font_size_override("font_size", 15)
@@ -450,11 +518,13 @@ func _layout_responsive() -> void:
 		_side_panel.position = Vector2(map_w + 18.0, 0)
 		_side_panel.size = Vector2(side_w, map_view_h)
 		_side_panel.custom_minimum_size = Vector2(side_w, map_view_h)
-		_legend_label.text = "Vert = territoire · Gris = neutre · Rouge = adverse · ⚔ = attaquable"
-		_map_title_label.add_theme_font_size_override("font_size", 23)
-		_legend_label.add_theme_font_size_override("font_size", 14 if map_w < 900.0 else 16)
+		_legend_label.text = "[color=#4fd27a]●[/color] Empire   [color=#b0b0a8]●[/color] Neutre   [color=#e0574a]●[/color] Adverse   [color=#ffd75e]➜[/color] Attaquable   [color=#c8ccd4]?[/color] Inconnu"
+		_map_title_label.visible = true
+		_map_title_label.add_theme_font_size_override("font_size", 20)
+		_map_title_label.position = Vector2(map_w - _map_title_label.get_combined_minimum_size().x - 12.0, map_view_h - 48.0)
+		_legend_label.add_theme_font_size_override("normal_font_size", 14 if map_w < 900.0 else 16)
 		# La légende suit le cartouche du titre (fond sombre) sans le chevaucher.
-		_legend_label.position = Vector2(_map_title_label.position.x + _map_title_label.get_combined_minimum_size().x + 12.0, 16.0)
+		_legend_label.position = Vector2(12, map_view_h - 44.0)
 		_side_title.add_theme_font_size_override("font_size", 23)
 		_message.custom_minimum_size.y = 180
 		_message.add_theme_font_size_override("font_size", 18)
@@ -472,32 +542,20 @@ func _layout_responsive() -> void:
 	_map_panel.size = Vector2(MAP_W, MAP_H)
 	_map_panel.custom_minimum_size = Vector2.ZERO
 	_clamp_zoom_and_pan()
+	# Repères compacts : le point au sol (2/3 de la hauteur du bouton) tombe pile sur la ville peinte.
 	for city_id: String in _city_buttons.keys():
 		var is_cap: bool = city_id == "capitale"
-		var button_w: float = (154.0 if compact else 166.0) * (1.45 if is_cap else 1.0)
-		var button_h: float = (124.0 if compact else 132.0) * (1.45 if is_cap else 1.0)
+		var bs: Vector2 = PIN_SIZE * (1.3 if is_cap else 1.0)
 		var btn: Button = _city_buttons[city_id]
-		var p: Vector2 = CITY_POS[city_id]
-		var px: float = clampf(p.x * _map_panel.size.x - button_w * 0.5, 0.0, _map_panel.size.x - button_w)
-		var py_min: float = 34.0 if compact else 38.0
-		var py_max: float = _map_panel.size.y - button_h - (30.0 if compact else 18.0)
-		var py: float = clampf(p.y * _map_panel.size.y - button_h * 0.5, py_min, py_max)
-		btn.position = Vector2(px, py)
-		if is_cap and _cap_halo != null:
-			_cap_halo.size = Vector2(button_w * 1.5, button_w * 1.5)
-			_cap_halo.position = Vector2(px + button_w * 0.5, py + button_h * 0.42) - _cap_halo.size * 0.5
-		btn.size = Vector2(button_w, button_h)
-		btn.custom_minimum_size = Vector2(button_w, button_h)
+		var p: Vector2 = CITY_POS[city_id] * Vector2(MAP_W, MAP_H)
+		btn.size = bs
+		btn.custom_minimum_size = bs
+		btn.position = p - Vector2(bs.x * 0.5, bs.y * 0.66)
+		btn.pivot_offset = Vector2(bs.x * 0.5, bs.y * 0.66)
 		var nameplate: Label = _city_labels[city_id]
-		nameplate.size.x = button_w
-		nameplate.position.x = 0.0
-		nameplate.add_theme_font_size_override("font_size", (11 if compact else 13) + (4 if is_cap else 0))
-		var sprite: TextureRect = btn.get_node("CityIllustration") as TextureRect
-		var sprite_h: float = 82.0 * (1.45 if is_cap else 1.0)
-		sprite.size = Vector2(button_w - 36.0, sprite_h)
-		sprite.position = Vector2(18.0, 0.0)
-		nameplate.position.y = sprite_h - 6.0
-		nameplate.size.y = 45.0 * (1.3 if is_cap else 1.0)
+		nameplate.position = Vector2(-30.0, bs.y * 0.66 + 2.0)
+		nameplate.size = Vector2(bs.x + 60.0, 40.0)
+		nameplate.add_theme_font_size_override("font_size", (14 if compact else 15) + (3 if is_cap else 0))
 	if _side_scroll != null:
 		_side_scroll.queue_sort()
 	if _body_scroll != null:
@@ -507,19 +565,8 @@ func _layout_responsive() -> void:
 ## Le geste est suivi au niveau de la scène pour rester actif même si le
 ## doigt commence sur un bouton de ville. Le seuil filtre les micro-mouvements
 ## involontaires ; une fois dépassé, on déplace le contenu dans le sens du doigt.
-func _draw_capital_halo() -> void:
-	var c: Vector2 = _cap_halo.size * 0.5
-	var pulse: float = 0.5 + 0.5 * sin(_halo_t * 2.2)
-	for i: int in range(6):
-		var r: float = _cap_halo.size.x * 0.5 * (1.0 - float(i) * 0.12)
-		_cap_halo.draw_circle(c, r, Color(1.0, 0.85, 0.35, 0.05 + 0.025 * float(i) + 0.03 * pulse))
-	_cap_halo.draw_arc(c, _cap_halo.size.x * 0.40, 0.0, TAU, 48, Color(1.0, 0.88, 0.45, 0.45 + 0.35 * pulse), 3.0, true)
-
-
 func _process(delta: float) -> void:
 	_halo_t += delta
-	if _cap_halo != null and is_instance_valid(_cap_halo):
-		_cap_halo.queue_redraw()
 	if _map_panel == null or not is_instance_valid(_map_panel):
 		return
 	if not is_equal_approx(_map_zoom, _target_map_zoom):
@@ -563,7 +610,6 @@ func _clamp_zoom_and_pan() -> void:
 	var k: float = clampf(pow(_map_zoom, -0.6), 0.6, 1.2)
 	for cid: String in _city_buttons.keys():
 		var cb: Button = _city_buttons[cid]
-		cb.pivot_offset = cb.size * 0.5
 		cb.scale = Vector2(k, k)
 
 
@@ -704,6 +750,9 @@ func _refresh_header() -> void:
 		line += "   ·   Revenus +%d or" % income
 	if not parts.is_empty():
 		line += "   ·   Production par victoire : " + " · ".join(parts)
+	var generals_alive: int = ConquestSystem.living_generals_count(_conquest)
+	if generals_alive > 0:
+		line += "   ·   ☠ %d %s du Roi Squelette en vie" % [generals_alive, "généraux" if generals_alive > 1 else "général"]
 	if ProgressionManager.conquest_campaign_won(_conquest):
 		line += "   ·   ★ EMPIRE VICTORIEUX"
 	elif ProgressionManager.conquest_empire_complete(_conquest):
@@ -711,6 +760,8 @@ func _refresh_header() -> void:
 	_header.text = line
 
 func _select_city(id: String) -> void:
+	if _tab_city != null and not _tab_city.visible:
+		_show_tab(_tab_city)
 	# Un glissement de carte ne doit jamais déclencher par erreur la sélection
 	# de la ville sur laquelle le doigt a été relâché.
 	if _map_dragged:
@@ -731,23 +782,34 @@ func _select_city(id: String) -> void:
 		_attack.text = "LANCER L'ASSAUT"
 	elif conquered:
 		var txt: String = "%s\n\n%s\n\n⚑ Territoire allié.\n%s" % [city["name"], city["desc"], _city_status_text(id)]
+		if ConquestSystem.is_ruined(_conquest, id):
+			txt += "\n\n⚒ RUINÉE (perdue puis reprise) : production gelée %d bataille(s) — réparable pour %d or." % [int(_conquest.get("ruin", {}).get(id, 0)), ConquestSystem.RUIN_REPAIR_GOLD]
 		if ravage > 0:
 			txt += "\n\n⚠ PILLÉE : production gelée pendant %d bataille(s)." % ravage
 		var builds: Array = _conquest.get("buildings", {}).get(id, [])
 		if builds.size() > 0:
 			var names: Array = []
 			for b: String in builds:
-				names.append(String(ProgressionManager.CONQUEST_BUILDINGS.get(b, {}).get("label", b)))
-			txt += "\n\nBâtiments : %s" % ", ".join(PackedStringArray(names))
-		var yld: Dictionary = {}
-		for b: String in builds:
-			for r: String in ProgressionManager.CONQUEST_BUILDINGS.get(b, {}).get("yield", {}).keys():
-				yld[r] = int(yld.get(r, 0)) + int(ProgressionManager.CONQUEST_BUILDINGS[b]["yield"][r])
+				names.append("%s %s" % [String(ProgressionManager.CONQUEST_BUILDINGS.get(b, {}).get("label", b)), "★".repeat(ConquestSystem.building_level(_conquest, id, b))])
+			txt += "\n\nBâtiments (%d/%d) : %s" % [builds.size(), ConquestSystem.building_slots(_conquest, id), ", ".join(PackedStringArray(names))]
+		if ConquestSystem.has_wonder(_conquest, id):
+			txt += "\n★ Merveille : %s" % String(ConquestSystem.wonder_for(String(city["biome"]))["label"])
+		var yld: Dictionary = ProgressionManager.conquest_city_building_yield(_conquest, id)
 		if yld.size() > 0 and ravage == 0:
 			var parts: Array = []
 			for r: String in yld.keys():
 				parts.append("%s +%d" % [r, int(yld[r])])
 			txt += "\nProduction : %s" % " · ".join(PackedStringArray(parts))
+		var city_trait: Dictionary = ProgressionManager.conquest_city_trait(id, _conquest)
+		if String(city_trait.get("label", "")) != "" and ravage == 0:
+			var tp: Array = []
+			for r: String in city_trait.get("yield", {}).keys():
+				tp.append("%s +%d" % [r, int(city_trait["yield"][r])])
+			txt += "\nSpécialité — %s : %s" % [String(city_trait["label"]), " · ".join(PackedStringArray(tp))]
+		if ConquestSystem.drill_defense(_conquest) > 0:
+			txt += "\n⚑ Manœuvres du Chancelier : +%d défense pendant %d bataille(s)." % [ConquestSystem.drill_defense(_conquest), int(_conquest.get("drill", 0))]
+		if ConquestSystem.roadworks_yield(_conquest).size() > 0:
+			txt += "\n⚑ Routes entretenues du Chancelier : encore %d bataille(s)." % int(_conquest.get("roadworks", 0))
 		_message.text = txt
 		_show_challenge("")
 		_attack.disabled = true
@@ -761,14 +823,32 @@ func _select_city(id: String) -> void:
 		if kind == "enemy":
 			var left: int = ProgressionManager.CONQUEST_SIEGE_BATTLES - prog
 			var wave_txt: String = ("\n\nSiège en cours : %d/%d — prochaine bataille : %s." % [prog, ProgressionManager.CONQUEST_SIEGE_BATTLES, "BOSS" if wave == ProgressionManager.CONQUEST_SIEGE_BATTLES else "mobs de champs"]) if prog > 0 else ""
-			_message.text = "%s · %s · Niveau conseillé %d\n\n%s\n\n⚔ VILLE ADVERSE — siège en %d batailles : %d plateaux de mobs puis le BOSS du biome.%s" % [
+			var general_txt: String = ""
+			var gname: String = ConquestSystem.general_of(_conquest, id)
+			if gname != "":
+				general_txt = "\n\n☠ FORTERESSE DU GÉNÉRAL %s — le vaincre en personne à la 4e bataille calmera sa région (%s)." % [gname.to_upper(), ConquestSystem.general_region(id)]
+			_message.text = "%s · %s · Niveau conseillé %d\n\n%s\n\n⚔ VILLE ADVERSE — siège en %d batailles : %d plateaux de mobs puis le BOSS du biome.%s%s" % [
 				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), city["desc"],
-				ProgressionManager.CONQUEST_SIEGE_BATTLES, ProgressionManager.CONQUEST_SIEGE_BATTLES - 1, wave_txt]
+				ProgressionManager.CONQUEST_SIEGE_BATTLES, ProgressionManager.CONQUEST_SIEGE_BATTLES - 1, wave_txt, general_txt]
 		else:
-			_message.text = "%s · %s · Niveau conseillé %d\n\n%s\n\n● VILLE NEUTRE — 1 bataille contre des mobs de champs suffit à la conquérir." % [
-				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), city["desc"]]
+			var dip_txt: String = ""
+			if kind == "neutral" and attackable:
+				var dcost: Dictionary = ProgressionManager.conquest_diplomacy_cost(_conquest, id)
+				var dparts: Array = ["%d or" % int(dcost.get("gold", 0))]
+				for r: String in dcost.get("res", {}).keys():
+					dparts.append("%s %d" % [r, int(dcost["res"][r])])
+				dip_txt = "\n\n☮ DIPLOMATIE : cette ville peut aussi rejoindre l'empire par négociation (%s) — le bouton « NÉGOCIER » ci-dessous." % " · ".join(PackedStringArray(dparts))
+				var dcd: int = ConquestSystem.diplomacy_cooldown(_conquest)
+				if dcd > 0:
+					dip_txt += " Émissaires indisponibles encore %d victoire(s)." % dcd
+			_message.text = "%s · %s · Niveau conseillé %d\n\n%s\n\n● VILLE NEUTRE — 1 bataille contre des mobs de champs suffit à la conquérir.%s" % [
+				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), city["desc"], dip_txt]
 		if id == "donjon_roi" and not ProgressionManager.conquest_empire_complete(_conquest):
 			_message.text += "\n\n★ Objectif final : verrouillé tant que tout Zimut n'est pas sous votre contrôle."
+		# Reconquête ennemie : la garnison adverse grossit avec le temps.
+		var eg: int = ProgressionManager.conquest_enemy_garrison(_conquest, id)
+		if eg > 0:
+			_message.text += "\n\n⚑ Garnison adverse : %d soldat(s) (+%d niveau(x) de bataille). Attendre la durcit encore." % [eg, ProgressionManager.conquest_enemy_garrison_bonus(_conquest, id)]
 		_show_challenge(id if attackable else "")
 		if attackable:
 			_attack.disabled = false
@@ -785,14 +865,6 @@ func _select_city(id: String) -> void:
 	var biome_summary: String = _biome_control_summary(String(city["biome"]))
 	if biome_summary != "":
 		_message.text += "\n\n" + biome_summary
-	for other: String in _city_buttons.keys():
-		var button: Button = _city_buttons[other]
-		var nameplate: Label = _city_labels[other]
-		nameplate.add_theme_stylebox_override("normal", _city_nameplate_style(other, other == id))
-		var sprite: TextureRect = button.get_node("CityIllustration") as TextureRect
-		sprite.modulate = Color(1.08, 1.04, 0.90) if other == id else Color.WHITE
-		sprite.pivot_offset = sprite.size * Vector2(0.5, 0.9)
-		sprite.scale = Vector2.ONE
 	_refresh_nameplates()
 	_pulse_selected(id)
 	_refresh_chronicle()
@@ -805,6 +877,21 @@ func _build_panel(city_id: String, conquered: bool) -> void:
 	for c: Node in _build_box.get_children():
 		c.queue_free()
 	if not conquered:
+		# Ville neutre attaquable : la voie diplomatique en plus des armes.
+		if String(_city_meta(city_id)["kind"]) == "neutral" \
+				and ProgressionManager.conquest_city_attackable(_conquest, city_id, _save.get("adventure", {})):
+			var dip := Button.new()
+			dip.name = "NegotiateButton"
+			dip.text = "☮ NÉGOCIER L'ANNEXION"
+			dip.custom_minimum_size.y = 54
+			dip.add_theme_font_size_override("font_size", 18)
+			dip.add_theme_color_override("font_color", TEXT)
+			dip.add_theme_stylebox_override("normal", _style(Color(0.30, 0.26, 0.16, 0.97), GOLD))
+			dip.add_theme_stylebox_override("hover", _style(Color(0.38, 0.34, 0.22, 0.97), GOLD))
+			dip.pressed.connect(_negotiate_city.bind(city_id))
+			_build_box.add_child(dip)
+			if not Gultur.should_show("conq_v59"):
+				Gultur.say(self, "conq_diplomatie", Gultur.CONQ_DIPLOMATIE, dip)
 		return
 	var b := Button.new()
 	b.name = "EnterCityButton"
@@ -816,6 +903,31 @@ func _build_panel(city_id: String, conquered: bool) -> void:
 	b.add_theme_stylebox_override("hover", _style(Color(0.30, 0.42, 0.24, 0.97), GOLD))
 	b.pressed.connect(_open_city_screen.bind(city_id))
 	_build_box.add_child(b)
+	var miss := Button.new()
+	miss.name = "MissionsButton"
+	miss.text = "⚑ MISSIONS DES LIEUTENANTS"
+	miss.custom_minimum_size.y = 54
+	miss.add_theme_font_size_override("font_size", 18)
+	miss.add_theme_color_override("font_color", TEXT)
+	miss.add_theme_stylebox_override("normal", _style(Color(0.18, 0.26, 0.34, 0.97), GOLD))
+	miss.add_theme_stylebox_override("hover", _style(Color(0.24, 0.34, 0.44, 0.97), GOLD))
+	miss.pressed.connect(_show_mission_picker)
+	_build_box.add_child(miss)
+	# Ville ruinée (perdue puis reprise) : réparer pour reprendre la production.
+	if ConquestSystem.is_ruined(_conquest, city_id):
+		var rep := Button.new()
+		rep.name = "RepairButton"
+		rep.text = "⚒ RÉPARER LA VILLE — %d or" % ConquestSystem.RUIN_REPAIR_GOLD
+		rep.custom_minimum_size.y = 54
+		rep.add_theme_font_size_override("font_size", 18)
+		rep.add_theme_color_override("font_color", TEXT)
+		rep.add_theme_stylebox_override("normal", _style(Color(0.34, 0.24, 0.14, 0.97), GOLD))
+		rep.add_theme_stylebox_override("hover", _style(Color(0.42, 0.32, 0.20, 0.97), GOLD))
+		rep.disabled = int(_save.get("gold", 0)) < ConquestSystem.RUIN_REPAIR_GOLD
+		rep.pressed.connect(_repair_city.bind(city_id))
+		_build_box.add_child(rep)
+		if not Gultur.should_show("conq_v59"):
+			Gultur.say(self, "conq_ruine", Gultur.CONQ_RUINE, rep)
 
 ## Clic sur une ville de la carte : sélection ; si elle nous appartient, on y entre.
 func _on_city_pressed(city_id: String) -> void:
@@ -974,6 +1086,7 @@ func _show_governor_picker(city_id: String) -> void:
 	sc.add_child(list)
 	for classe: String in ProgressionManager.CLASS_ORDER:
 		var elsewhere: String = ConquestSystem.hero_city(_conquest, classe)
+		var on_mission: Dictionary = ConquestSystem.hero_on_mission(_conquest, classe)
 		var b := Button.new()
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		b.custom_minimum_size.y = 52
@@ -982,6 +1095,10 @@ func _show_governor_picker(city_id: String) -> void:
 		if elsewhere != "":
 			line = "%s — déjà en poste à %s" % [classe, ProgressionManager.conquest_city_name(elsewhere)]
 			b.disabled = true
+		elif not on_mission.is_empty():
+			line = "%s — en mission « %s » (%d bataille(s) restante(s))" % [classe,
+				ConquestSystem.mission_label(String(on_mission.get("type", ""))), int(on_mission.get("eta", 0))]
+			b.disabled = true
 		b.text = line
 		if not b.disabled:
 			b.pressed.connect(func() -> void:
@@ -989,6 +1106,95 @@ func _show_governor_picker(city_id: String) -> void:
 				ProgressionManager.conquest_assign_hero(_save, city_id, classe)
 				_after_management(city_id))
 		list.add_child(b)
+	var cancel := Button.new()
+	cancel.text = "ANNULER"
+	cancel.custom_minimum_size.y = 46
+	cancel.pressed.connect(func() -> void: dim.queue_free())
+	outer.add_child(cancel)
+
+## Missions de lieutenance : envoyer un héros libre en mission de 3 batailles
+## (escorte, cartographie, prospection) ou rappeler une mission en cours.
+func _show_mission_picker() -> void:
+	if not Gultur.should_show("conq_v59"):
+		Gultur.say(self, "conq_missions", Gultur.CONQ_MISSIONS, null)
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	var dim := ColorRect.new()
+	dim.name = "MissionPicker"
+	dim.color = Color(0.015, 0.035, 0.055, 0.82)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(dim)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _style(Color(0.10, 0.17, 0.22, 0.99), GOLD))
+	panel.custom_minimum_size = Vector2(minf(680.0, vp.x - 40.0), 0)
+	_center_panel(panel)
+	dim.add_child(panel)
+	var outer := VBoxContainer.new()
+	outer.add_theme_constant_override("separation", 8)
+	panel.add_child(outer)
+	var title := Label.new()
+	title.text = "MISSIONS DES LIEUTENANTS"
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title.add_theme_font_size_override("font_size", 22)
+	title.add_theme_color_override("font_color", GOLD)
+	outer.add_child(title)
+	var hint := Label.new()
+	hint.text = "Un héros libre part en mission de 3 batailles : il ne combat ni ne gouverne pendant ce temps. À son retour : récompense… ou complication."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.add_theme_font_size_override("font_size", 14)
+	hint.add_theme_color_override("font_color", TEXT)
+	outer.add_child(hint)
+	var sc := ScrollContainer.new()
+	TouchScroll.install(sc)
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	sc.custom_minimum_size.y = minf(360.0, maxf(200.0, vp.y - 200.0))
+	outer.add_child(sc)
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 6)
+	sc.add_child(list)
+	var missions: Dictionary = ConquestSystem.missions(_conquest)
+	for classe: String in ProgressionManager.CLASS_ORDER:
+		var job: Dictionary = missions.get(classe, {})
+		var header := Label.new()
+		header.text = classe
+		header.add_theme_font_size_override("font_size", 18)
+		header.add_theme_color_override("font_color", GOLD)
+		list.add_child(header)
+		if not job.is_empty():
+			var running := Button.new()
+			running.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			running.text = "⚑ En mission « %s » — %d bataille(s) restante(s)\nRAPPELER (sans récompense)" % [
+					ConquestSystem.mission_label(String(job.get("type", ""))), int(job.get("eta", 0))]
+			running.custom_minimum_size.y = 58
+			running.add_theme_font_size_override("font_size", 15)
+			running.pressed.connect(func() -> void:
+				dim.queue_free()
+				ProgressionManager.conquest_abort_mission(_save, classe)
+				_after_management(_selected_id))
+			list.add_child(running)
+			continue
+		var elsewhere: String = ConquestSystem.hero_city(_conquest, classe)
+		if elsewhere != "":
+			var busy := Label.new()
+			busy.text = "Gouverneur de %s" % ProgressionManager.conquest_city_name(elsewhere)
+			busy.add_theme_font_size_override("font_size", 14)
+			busy.add_theme_color_override("font_color", TEXT.darkened(0.2))
+			list.add_child(busy)
+			continue
+		for type_id: String in ConquestSystem.mission_types():
+			var b := Button.new()
+			b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			b.text = "⚑ %s\n%s" % [ConquestSystem.mission_label(type_id), ConquestSystem.mission_text(type_id)]
+			b.custom_minimum_size.y = 52
+			b.add_theme_font_size_override("font_size", 14)
+			b.pressed.connect(func() -> void:
+				dim.queue_free()
+				var err: String = ProgressionManager.conquest_send_mission(_save, classe, type_id)
+				_after_management(_selected_id)
+				if err != "":
+					_message.text = err)
+			list.add_child(b)
 	var cancel := Button.new()
 	cancel.text = "ANNULER"
 	cancel.custom_minimum_size.y = 46
@@ -1038,6 +1244,17 @@ func _show_event_popup() -> void:
 		var oid: String = String(o.get("id", ""))
 		b.pressed.connect(func() -> void: _resolve_event_choice(dim, box, oid))
 		box.add_child(b)
+	if bool(ev.get("chancellor", false)):
+		# V59 : l'audience peut attendre (elle reviendra à la prochaine ouverture de la carte)
+		var later := Button.new()
+		later.name = "LaterButton"
+		later.text = "⌛ Plus tard — le Chancelier patientera"
+		later.custom_minimum_size.y = 48
+		later.add_theme_font_size_override("font_size", 16)
+		later.pressed.connect(func() -> void: dim.queue_free())
+		box.add_child(later)
+		if not Gultur.should_show("conq_v59"):
+			Gultur.say(self, "conq_chancelier", Gultur.CONQ_CHANCELIER, panel)
 
 func _resolve_event_choice(dim: Control, box: VBoxContainer, option_id: String) -> void:
 	var out: String = ProgressionManager.conquest_resolve_event(_save, option_id)
@@ -1146,11 +1363,82 @@ func _show_assault_prep() -> void:
 		dim.queue_free()
 		_choose_assault_tactic("none"))
 	box.add_child(none)
+	# V59 plans d'assaut : blocus et infiltration ne déclenchent pas de combat,
+	# ils font avancer le siège d'une vague sans verser de sang (sièges ennemis).
+	if String(city["kind"]) == "enemy" \
+			and ProgressionManager.conquest_siege_wave(_conquest, _selected_id) < ProgressionManager.CONQUEST_SIEGE_BATTLES:
+		var plans_head := Label.new()
+		plans_head.text = "─ PLANS D'ASSAUT (sans combat) ─"
+		plans_head.add_theme_font_size_override("font_size", 16)
+		plans_head.add_theme_color_override("font_color", GOLD)
+		box.add_child(plans_head)
+		var blocus := Button.new()
+		blocus.text = "⛓ BLOCUS — %d or\nSaute une vague sans combat ; 35 %% de représailles (pillage)" % ProgressionManager.conquest_plan_cost("blocus")
+		blocus.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		blocus.custom_minimum_size.y = 62
+		blocus.add_theme_font_size_override("font_size", 17)
+		blocus.disabled = gold < ProgressionManager.conquest_plan_cost("blocus")
+		blocus.pressed.connect(func() -> void:
+			dim.queue_free()
+			_apply_plan("blocus"))
+		box.add_child(blocus)
+		var infiltr := Button.new()
+		infiltr.text = "🗡 INFILTRATION — %d or\nL'Assassin libre saborde une vague de l'intérieur ; il revient à la prochaine victoire" % ProgressionManager.conquest_plan_cost("infiltration")
+		infiltr.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		infiltr.custom_minimum_size.y = 62
+		infiltr.add_theme_font_size_override("font_size", 17)
+		infiltr.disabled = gold < ProgressionManager.conquest_plan_cost("infiltration") \
+			or not ProgressionManager.conquest_infiltration_ready(_conquest)
+		infiltr.pressed.connect(func() -> void:
+			dim.queue_free()
+			_apply_plan("infiltration"))
+		box.add_child(infiltr)
 	var cancel := Button.new()
 	cancel.text = "ANNULER"
 	cancel.custom_minimum_size.y = 48
 	cancel.pressed.connect(func() -> void: dim.queue_free())
 	box.add_child(cancel)
+
+## Diplomatie : annexion négociée d'une ville neutre (or + ressource).
+func _negotiate_city(city_id: String) -> void:
+	var err: String = ProgressionManager.conquest_negotiate_city(_save, city_id)
+	if err != "":
+		_message.text = err
+		return
+	_conquest = _save.get("conquest", {})
+	_persist()
+	_refresh_header()
+	_select_city(city_id)
+	_show_annexion_popup(city_id)
+
+## Ruine & reconstruction : réparer une ville ruinée (production gelée sinon).
+func _repair_city(city_id: String) -> void:
+	var err: String = ProgressionManager.conquest_repair_city(_save, city_id)
+	if err != "":
+		_message.text = err
+		return
+	_conquest = _save.get("conquest", {})
+	_persist()
+	_refresh_header()
+	_select_city(city_id)
+	_message.text = "⚒ %s est réparée : sa production reprend." % ProgressionManager.conquest_city_name(city_id)
+
+## Plan d'assaut sans combat (blocus / infiltration) : le siège avance d'une
+## vague, la carte se rafraîchit, aucun combat n'est lancé.
+func _apply_plan(plan: String) -> void:
+	var err: String = ProgressionManager.conquest_apply_plan(_save, _selected_id, plan)
+	if err != "":
+		_message.text = err
+		return
+	_conquest = _save.get("conquest", {})
+	_persist()
+	_refresh_header()
+	_select_city(_selected_id)
+	if not (_conquest.get("news", []) as Array).is_empty():
+		_show_popup("NOUVELLES DE L'EMPIRE", "\n\n".join(PackedStringArray(_conquest["news"])))
+		_conquest["news"] = []
+		_save["conquest"] = _conquest
+		_persist()
 
 func _choose_assault_tactic(tactic: String) -> void:
 	# Les coûts sont validés et débités par ProgressionManager, également
@@ -1203,12 +1491,122 @@ func _show_annexion_popup(city_id: String) -> void:
 	for n: String in _conquest.get("news", []):
 		lines.append(n)
 	if city_id == "donjon_roi":
-		lines.append("★ CAMPAGNE TERMINÉE : le Roi Squelette est tombé, Zimut vous appartient ! Vous pouvez continuer en empire libre.")
+		var score0: Dictionary = ProgressionManager.conquest_legend_score(_save)
+		_show_epilogue(score0, ProgressionManager.conquest_legend_ending(score0, _conquest))
+		var score: Dictionary = score0
+		var ending: Dictionary = ProgressionManager.conquest_legend_ending(score, _conquest)
+		lines.append("★ CAMPAGNE TERMINÉE : le Roi Squelette est tombé !")
+		lines.append("")
+		for l: String in ProgressionManager.conquest_epilogue(score, ending).split("\n"):
+			lines.append(l)
+		lines.append("")
+		lines.append("Vous pouvez continuer en empire libre : le monde reste à vous.")
 	else:
 		lines.append("Conseil : ouvrez %s pour y bâtir, recruter une garnison ou nommer un gouverneur." % cname)
 	var title: String = "EMPIRE VICTORIEUX !" if city_id == "donjon_roi" else "VILLE ANNEXÉE !"
 	var msg: String = "%s rejoint votre empire.\n\n%s" % [cname, "\n\n".join(PackedStringArray(lines))]
 	_show_popup(title, msg)
+
+## V59 — Écran de fin de campagne : couleurs de la fin obtenue, score de Légende détaillé en barres,
+## texte de l'épilogue. Posé par-dessus le popup d'annexion (qui reste à lire en dessous).
+const ENDING_COLORS := {"heros": [Color(0.20, 0.12, 0.04), Color(1.0, 0.80, 0.32)],
+	"marchand": [Color(0.04, 0.16, 0.16), Color(0.45, 0.92, 0.80)], "bastion": [Color(0.08, 0.10, 0.18), Color(0.62, 0.74, 1.0)]}
+
+func _show_epilogue(score: Dictionary, ending: Dictionary) -> void:
+	var cols: Array = ENDING_COLORS.get(String(ending.get("id", "heros")), ENDING_COLORS["heros"])
+	var bg: Color = cols[0]
+	var acc: Color = cols[1]
+	var dim := ColorRect.new()
+	dim.name = "Epilogue"
+	dim.color = Color(bg.r, bg.g, bg.b, 0.97)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	dim.modulate.a = 0.0
+	add_child(dim)
+	var centre := CenterContainer.new()
+	centre.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.add_child(centre)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 14)
+	box.custom_minimum_size.x = minf(1100.0, get_viewport().get_visible_rect().size.x - 80.0)
+	centre.add_child(box)
+	var crown := Label.new()
+	crown.text = "★  LE ROI SQUELETTE EST TOMBÉ  ★"
+	crown.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	crown.add_theme_font_size_override("font_size", 24)
+	crown.add_theme_color_override("font_color", acc.lightened(0.2))
+	box.add_child(crown)
+	var t := Label.new()
+	t.text = String(ending.get("title", ""))
+	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	t.add_theme_font_size_override("font_size", 62)
+	t.add_theme_color_override("font_color", acc)
+	t.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
+	t.add_theme_constant_override("outline_size", 10)
+	box.add_child(t)
+	var txt := Label.new()
+	txt.text = String(ending.get("text", ""))
+	txt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	txt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	txt.add_theme_font_size_override("font_size", 22)
+	txt.add_theme_color_override("font_color", Color(0.94, 0.92, 0.86))
+	box.add_child(txt)
+	var total: int = ProgressionManager.conquest_legend_total(score)
+	var tot := Label.new()
+	tot.text = "%d points de Légende" % total
+	tot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tot.add_theme_font_size_override("font_size", 30)
+	tot.add_theme_color_override("font_color", acc.lightened(0.3))
+	box.add_child(tot)
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 14)
+	grid.add_theme_constant_override("v_separation", 8)
+	box.add_child(grid)
+	var labels := {"villes": "Villes", "niveaux": "Développement", "gouverneurs": "Gouverneurs", "pierres": "Pierres", "diplomatie": "Diplomatie", "ruines": "Ruines"}
+	var top: float = 1.0
+	for k: String in labels.keys():
+		top = maxf(top, absf(float(score.get(k, 0))))
+	for k2: String in labels.keys():
+		var v: int = int(score.get(k2, 0))
+		var l := Label.new()
+		l.text = String(labels[k2])
+		l.custom_minimum_size.x = 200
+		l.add_theme_font_size_override("font_size", 20)
+		l.add_theme_color_override("font_color", Color(0.9, 0.9, 0.86))
+		grid.add_child(l)
+		var bar := ProgressBar.new()
+		bar.show_percentage = false
+		bar.custom_minimum_size = Vector2(520, 22)
+		bar.max_value = top
+		bar.value = absf(float(v))
+		var fill := StyleBoxFlat.new()
+		fill.bg_color = acc if v >= 0 else Color(0.85, 0.35, 0.30)
+		fill.set_corner_radius_all(6)
+		var back := StyleBoxFlat.new()
+		back.bg_color = Color(1, 1, 1, 0.08)
+		back.set_corner_radius_all(6)
+		bar.add_theme_stylebox_override("fill", fill)
+		bar.add_theme_stylebox_override("background", back)
+		grid.add_child(bar)
+		var n := Label.new()
+		n.text = "%+d" % v
+		n.add_theme_font_size_override("font_size", 20)
+		n.add_theme_color_override("font_color", acc if v >= 0 else Color(1.0, 0.55, 0.5))
+		grid.add_child(n)
+	var ok := Button.new()
+	ok.text = "CONTINUER EN EMPIRE LIBRE"
+	ok.custom_minimum_size = Vector2(420, 64)
+	ok.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	ok.add_theme_font_size_override("font_size", 22)
+	ok.add_theme_stylebox_override("normal", _style(bg.lightened(0.15), acc))
+	ok.add_theme_stylebox_override("hover", _style(bg.lightened(0.25), acc))
+	ok.pressed.connect(func() -> void: dim.queue_free())
+	box.add_child(ok)
+	var tw: Tween = create_tween()
+	tw.tween_property(dim, "modulate:a", 1.0, 0.6)
+	Gultur.say(self, "conq_legende", Gultur.CONQ_LEGENDE, null)
+
 
 ## Popup plein écran (titre + message + bouton CONTINUER) posé sur cette
 ## carte : utilisé pour l'écran d'annexion après une victoire.
@@ -1259,30 +1657,122 @@ func _show_counterattack_message() -> void:
 		var cname: String = ProgressionManager.conquest_city_name(counter)
 		_message.text = "⚠ CONTRE-ATTAQUE ! L'ennemi a pillé %s : production gelée %d bataille(s)." % [cname, ProgressionManager.CONQUEST_RAVAGE_BATTLES]
 
-## Texte de la plaque d'une ville : état (⚑ alliée, ⚔ cible, ? inconnue),
-## niveau et garnison pour une ville alliée, alerte d'offensive, ville perdue.
+## Nom d'une ville sous son repère : court, l'état est porté par le médaillon.
 func _nameplate_text(city_id: String) -> String:
-	var city: Dictionary = _city_meta(city_id)
-	var cname: String = String(city["name"])
+	var cname: String = String(_city_meta(city_id)["name"])
 	var owned: bool = _conquest.get("owned", []).has(city_id)
 	var th: Dictionary = ConquestSystem.threat(_conquest)
 	var alert: String = "⚠ " if String(th.get("city", "")) == city_id else ""
 	if owned:
-		var lvl: int = ConquestSystem.city_level(_conquest, city_id)
-		var hero: String = ConquestSystem.hero_of(_conquest, city_id)
-		var tag: String = "%s · ♜%d%s" % [ConquestSystem.level_name(lvl), ConquestSystem.troops(_conquest, city_id), " · ♞" if hero != "" else ""]
 		if ProgressionManager._is_city_ravaged(_conquest, city_id):
-			tag = "PILLÉE"
-		if city_id == "capitale":
-			return "★ NOTRE CAPITALE ★\n%s · %s" % [cname, tag]
-		return "%s⚑ %s\n%s" % [alert, cname, tag]
-	var revealed_cities: Array = _save.get("adventure", {}).get("revealed_cities", [])
-	var unknown: bool = (not revealed_cities.is_empty()) and (not revealed_cities.has(city_id))
+			return "%s%s\nPILLÉE" % [alert, cname]
+		if ConquestSystem.is_ruined(_conquest, city_id):
+			return "%s%s\nRUINÉE" % [alert, cname]
+		return alert + cname
 	if (_conquest.get("lost", []) as Array).has(city_id):
-		return "☠ %s\nÀ reprendre" % cname
-	var siege_p: int = ProgressionManager.conquest_siege_progress(_conquest, city_id)
-	var siege_txt: String = "\nSiège %d/%d" % [siege_p, ProgressionManager.CONQUEST_SIEGE_BATTLES] if siege_p > 0 else ""
-	return "%s  %s%s" % ["?" if unknown else "⚔", cname, siege_txt]
+		return "%s\nÀ reprendre" % cname
+	return cname
+
+## Couleur du nom d'une ville selon son état.
+func _nameplate_color(city_id: String) -> Color:
+	match _pin_state(city_id):
+		"capital": return Color(1.0, 0.88, 0.48)
+		"owned": return Color(0.82, 1.0, 0.82)
+		"attackable": return Color(1.0, 0.90, 0.58)
+		"enemy": return Color(1.0, 0.72, 0.66)
+		"lost": return Color(1.0, 0.60, 0.55)
+		"unknown": return Color(0.70, 0.72, 0.77)
+	return Color(0.93, 0.92, 0.87)
+
+func _is_unknown(city_id: String) -> bool:
+	var revealed_cities: Array = _save.get("adventure", {}).get("revealed_cities", [])
+	return (not _conquest.get("owned", []).has(city_id)) and (not revealed_cities.is_empty()) and (not revealed_cities.has(city_id))
+
+## État d'un repère : capital / owned / lost / unknown / attackable / enemy / neutral.
+func _pin_state(city_id: String) -> String:
+	if city_id == "capitale":
+		return "capital"
+	if _conquest.get("owned", []).has(city_id):
+		return "owned"
+	if _is_unknown(city_id):
+		return "unknown"
+	if (_conquest.get("lost", []) as Array).has(city_id):
+		return "lost"
+	if ProgressionManager.conquest_city_attackable(_conquest, city_id, _save.get("adventure", {})):
+		return "attackable"
+	return "enemy" if String(ProgressionManager.conquest_city_kind(city_id)) == "enemy" else "neutral"
+
+## Met à jour repères, routes et territoires d'après l'état de la campagne.
+func _refresh_map_state() -> void:
+	var owned: Array = _conquest.get("owned", [])
+	var attackable: Array = []
+	var unknown: Array = []
+	var bake: Array = []
+	var th: Dictionary = ConquestSystem.threat(_conquest)
+	var threat_city: String = String(th.get("city", ""))
+	for id: String in _city_buttons.keys():
+		var st: String = _pin_state(id)
+		var enemy_kind: bool = String(ProgressionManager.conquest_city_kind(id)) == "enemy"
+		if st == "attackable" or (st == "lost" and ProgressionManager.conquest_city_attackable(_conquest, id, _save.get("adventure", {}))):
+			attackable.append(id)
+		if st == "unknown":
+			unknown.append(id)
+		var code: float = ConquestMapLayers.STATE_NEUTRAL
+		if st == "owned" or st == "capital":
+			code = ConquestMapLayers.STATE_OWNED
+		elif st == "unknown":
+			code = ConquestMapLayers.STATE_UNKNOWN
+		elif enemy_kind or st == "lost":
+			code = ConquestMapLayers.STATE_ENEMY
+		bake.append({"pos": CITY_POS[id], "state": code})
+		var pin: ConquestMapLayers.Pin = (_city_buttons[id] as Button).get_node("CityPin")
+		pin.state = st
+		pin.enemy_kind = enemy_kind
+		pin.accent = _city_border_color(id)
+		pin.selected = id == _selected_id
+		pin.general = ConquestSystem.general_of(_conquest, id) != "" and st != "unknown"
+		pin.threatened = id == threat_city
+		pin.smoke = st == "lost" or (owned.has(id) and (ProgressionManager._is_city_ravaged(_conquest, id) or ConquestSystem.is_ruined(_conquest, id)))
+		pin.locked = id == "donjon_roi" and not ProgressionManager.conquest_empire_complete(_conquest)
+		pin.siege = 0 if owned.has(id) else ProgressionManager.conquest_siege_progress(_conquest, id)
+		pin.siege_max = ProgressionManager.CONQUEST_SIEGE_BATTLES
+		pin.level = ConquestSystem.city_level(_conquest, id) if owned.has(id) else 0
+		pin.queue_redraw()
+		var lbl: Label = _city_labels[id]
+		lbl.text = _nameplate_text(id)
+		lbl.add_theme_color_override("font_color", _nameplate_color(id))
+	if _routes != null:
+		_routes.owned = owned
+		_routes.attackable = attackable
+		_routes.unknown = unknown
+		_routes.threat_city = threat_city
+		_routes.threat_from = _threat_origin(threat_city)
+		_routes.threat_progress = 1.0 - float(int(th.get("eta", 0))) / float(ConquestSystem.THREAT_ETA + 1)
+		_routes.queue_redraw()
+	if _territory != null:
+		_territory.bake(bake)
+
+## D'où vient la colonne ennemie : une ville voisine hors de l'empire (forteresse de
+## préférence), sinon la plus proche.
+func _threat_origin(target: String) -> String:
+	if target == "" or not CITY_POS.has(target):
+		return ""
+	var owned: Array = _conquest.get("owned", [])
+	var best: String = ""
+	var best_score: float = INF
+	for id: String in CITY_POS.keys():
+		if owned.has(id) or id == target:
+			continue
+		var d: float = (CITY_POS[id] as Vector2).distance_to(CITY_POS[target])
+		var linked: bool = false
+		for pair: Array in ProgressionManager.CONQUEST_ROUTES:
+			if (pair[0] == id and pair[1] == target) or (pair[1] == id and pair[0] == target):
+				linked = true
+		var score: float = d - (0.5 if linked else 0.0) - (0.1 if String(ProgressionManager.conquest_city_kind(id)) == "enemy" else 0.0)
+		if score < best_score:
+			best_score = score
+			best = id
+	return best
 
 ## Bandeau d'alerte du conseil : offensive annoncée et trêve en cours.
 func _refresh_threat_banner() -> void:
@@ -1292,8 +1782,10 @@ func _refresh_threat_banner() -> void:
 	var th: Dictionary = ConquestSystem.threat(_conquest)
 	if not th.is_empty():
 		var tid: String = String(th.get("city", ""))
-		lines.append("⚠ OFFENSIVE sur %s dans %d bataille(s)\nForce ennemie %d · défense %d%s" % [
-			ProgressionManager.conquest_city_name(tid), int(th.get("eta", 0)), int(th.get("power", 0)),
+		var who: String = String(th.get("general", ""))
+		var lead: String = "☠ %s, général du Roi Squelette, mène l'offensive !\n" % who if who != "" else ""
+		lines.append("%s⚠ OFFENSIVE sur %s dans %d bataille(s)\nForce ennemie %d · défense %d%s" % [
+			lead, ProgressionManager.conquest_city_name(tid), int(th.get("eta", 0)), int(th.get("power", 0)),
 			ConquestSystem.defense(_save, tid), " — RENFORCEZ-LA !" if ConquestSystem.defense(_save, tid) < int(th.get("power", 0)) else " — elle tiendra."])
 	if int(_conquest.get("truce", 0)) > 0:
 		lines.append("☮ Trêve : %d bataille(s) sans raid" % int(_conquest["truce"]))
@@ -1302,8 +1794,7 @@ func _refresh_threat_banner() -> void:
 
 func _refresh_nameplates() -> void:
 	_refresh_threat_banner()
-	for id: String in _city_labels.keys():
-		(_city_labels[id] as Label).text = _nameplate_text(id)
+	_refresh_map_state()
 
 func _city_ids() -> Array:
 	return ProgressionManager.CONQUEST_CITIES.keys()
@@ -1392,23 +1883,6 @@ func _city_border_color(city_id: String) -> Color:
 			if Nations.is_new(ProgressionManager.conquest_city_biome(city_id)):
 				return Nations.accent(ProgressionManager.conquest_city_biome(city_id))
 			return Color(0.5, 0.64, 0.46)
-
-## Le statut du territoire est porté par une petite plaque sous le sprite,
-## tandis que l'illustration reste visible sans cadre rectangulaire massif.
-func _city_nameplate_style(city_id: String, selected: bool) -> StyleBoxFlat:
-	var fill: Color = _city_color(city_id)
-	var biome: Color = _city_border_color(city_id)
-	var style := _style(Color(fill.r, fill.g, fill.b, 0.92), GOLD if selected else biome)
-	style.set_border_width_all(3 if selected else 1)
-	style.set_corner_radius_all(12)
-	style.content_margin_left = 5.0
-	style.content_margin_right = 5.0
-	style.content_margin_top = 3.0
-	style.content_margin_bottom = 3.0
-	style.shadow_size = 8 if selected else 0
-	style.shadow_color = Color(GOLD.r, GOLD.g, GOLD.b, 0.36)
-	style.shadow_offset = Vector2(0, 2)
-	return style
 
 func _city_sprite(city_id: String) -> Texture2D:
 	var biome := String(_city_meta(city_id).get("biome", "Forêt"))
@@ -1538,12 +2012,15 @@ func _challenge_reward_text(ch: Dictionary) -> String:
 func _pulse_selected(id: String) -> void:
 	if _pulse_tween != null and _pulse_tween.is_valid():
 		_pulse_tween.kill()
+	for other: String in _city_buttons.keys():
+		((_city_buttons[other] as Button).get_node("CityPin") as Control).scale = Vector2.ONE
 	if not _city_buttons.has(id):
 		return
-	var sprite: TextureRect = (_city_buttons[id] as Button).get_node("CityIllustration") as TextureRect
-	_pulse_tween = sprite.create_tween().set_loops()
-	_pulse_tween.tween_property(sprite, "scale", Vector2(1.07, 1.07), 0.55).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_pulse_tween.tween_property(sprite, "scale", Vector2.ONE, 0.55).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	var pin: Control = (_city_buttons[id] as Button).get_node("CityPin") as Control
+	pin.pivot_offset = Vector2(pin.size.x * 0.5, pin.size.y * 0.66)
+	_pulse_tween = pin.create_tween().set_loops()
+	_pulse_tween.tween_property(pin, "scale", Vector2(1.12, 1.12), 0.55).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_pulse_tween.tween_property(pin, "scale", Vector2.ONE, 0.55).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func _pill_style() -> StyleBoxFlat:
 	var s := _style(Color(0.05, 0.08, 0.11, 0.82), Color(0.82, 0.66, 0.30, 0.85))
@@ -1576,164 +2053,6 @@ func _style(bg: Color, border: Color) -> StyleBoxFlat:
 	s.content_margin_top = 6
 	s.content_margin_bottom = 6
 	return s
-
-## Paysages de biome dessinés en 2D : taches de terrain irrégulières,
-## silhouettes répétées et détails légers, tous sous les routes et les villes.
-## Les positions suivent celles du catalogue, même quand la carte est redimensionnée.
-class _BiomeTerrain:
-	extends Control
-	var city_pos: Dictionary = {}
-	var city_biomes: Dictionary = {}
-
-	func _draw() -> void:
-		var sx: float = clampf(size.x / 1320.0, 0.72, 1.15)
-		var sy: float = clampf(size.y / 1600.0, 0.72, 1.15)
-		# Fond de carte peint : reliefs diffus et veines de terrain, sans grille ni cases.
-		for i: int in range(18):
-			var y: float = 55.0 + float(i) * (size.y - 110.0) / 17.0
-			draw_line(Vector2(18, y), Vector2(size.x - 18, y + sin(float(i) * 0.8) * 10.0), Color(0.76, 0.72, 0.54, 0.055), 1.0, true)
-		for city_id: String in city_pos.keys():
-			var norm: Vector2 = city_pos[city_id]
-			var center := Vector2(size.x * norm.x, size.y * norm.y)
-			var biome: String = String(city_biomes.get(city_id, "Forêt"))
-			_draw_biome_patch(center, biome, sx, sy, city_id)
-
-	func _draw_biome_patch(center: Vector2, biome: String, sx: float, sy: float, city_id: String) -> void:
-		# Chaque biome utilise maintenant une illustration vectorielle dédiée,
-		# importée comme texture par Godot. Les textures se chevauchent légèrement
-		# pour former un paysage continu au lieu d'îlots géométriques.
-		var asset := "forest"
-		match biome:
-			"Montagne":
-				asset = "mountain"
-			"Désert":
-				asset = "desert"
-			"Donjon":
-				asset = "dungeon"
-		var texture_path := "res://assets/ui/conquest/biome_%s.svg" % asset
-		var terrain_texture := load(texture_path) as Texture2D
-		if terrain_texture != null:
-			var terrain_size := Vector2(390.0 * sx, 248.0 * sy)
-			draw_texture_rect(terrain_texture, Rect2(center - terrain_size * 0.5, terrain_size), false, Color(1, 1, 1, 0.88))
-		# Un voile léger relie les bords des illustrations à la carte marine.
-		var tint := Color(0.15, 0.30, 0.21, 0.10)
-		match biome:
-			"Montagne":
-				tint = Color(0.31, 0.46, 0.54, 0.10)
-			"Désert":
-				tint = Color(0.71, 0.49, 0.23, 0.08)
-			"Donjon":
-				tint = Color(0.30, 0.22, 0.38, 0.12)
-		draw_circle(center, 78.0 * sx, tint)
-	func _draw_tree(p: Vector2, sx: float, sy: float, light: bool, alpha: float = 0.76) -> void:
-		var green := Color(0.24, 0.43, 0.27, alpha) if light else Color(0.13, 0.30, 0.20, alpha)
-		draw_line(p + Vector2(0, 2 * sy), p + Vector2(0, 11 * sy), Color(0.38, 0.29, 0.18, alpha), 2.0, true)
-		# Trois masses de feuillage superposées plutôt qu'un triangle plat.
-		draw_colored_polygon(PackedVector2Array([
-			p + Vector2(-11 * sx, 5 * sy), p + Vector2(-7 * sx, -3 * sy),
-			p + Vector2(-2 * sx, -13 * sy), p + Vector2(4 * sx, -8 * sy),
-			p + Vector2(11 * sx, 5 * sy)
-		]), green.darkened(0.12))
-		draw_colored_polygon(PackedVector2Array([
-			p + Vector2(-8 * sx, 0), p + Vector2(-3 * sx, -13 * sy),
-			p + Vector2(1 * sx, -20 * sy), p + Vector2(8 * sx, 1 * sy)
-		]), green.lightened(0.12))
-		draw_line(p + Vector2(-3 * sx, -7 * sy), p + Vector2(1 * sx, -15 * sy), Color(0.55, 0.68, 0.39, alpha * 0.55), 1.0, true)
-
-	func _draw_peak(p: Vector2, sx: float, sy: float, snowy: bool) -> void:
-		var rock := Color(0.38, 0.48, 0.53, 0.82)
-		draw_colored_polygon(PackedVector2Array([
-			p + Vector2(-27 * sx, 17 * sy), p + Vector2(-12 * sx, -7 * sy),
-			p + Vector2(-4 * sx, -25 * sy), p + Vector2(7 * sx, -8 * sy),
-			p + Vector2(17 * sx, 6 * sy), p + Vector2(28 * sx, 17 * sy)
-		]), rock)
-		draw_colored_polygon(PackedVector2Array([
-			p + Vector2(-12 * sx, -7 * sy), p + Vector2(-4 * sx, -25 * sy),
-			p + Vector2(1 * sx, -13 * sy), p + Vector2(-3 * sx, -10 * sy)
-		]), Color(0.66, 0.73, 0.75, 0.75))
-		draw_colored_polygon(PackedVector2Array([
-			p + Vector2(-4 * sx, -25 * sy), p + Vector2(7 * sx, -8 * sy),
-			p + Vector2(2 * sx, -11 * sy), p + Vector2(1 * sx, -13 * sy)
-		]), Color(0.25, 0.34, 0.39, 0.65))
-		if snowy:
-			draw_colored_polygon(PackedVector2Array([
-				p + Vector2(-9 * sx, -13 * sy), p + Vector2(-4 * sx, -25 * sy),
-				p + Vector2(3 * sx, -13 * sy), p + Vector2(-2 * sx, -9 * sy)
-			]), Color(0.90, 0.93, 0.88, 0.92))
-
-	func _draw_rock(p: Vector2, sx: float, sy: float) -> void:
-		draw_colored_polygon(PackedVector2Array([
-			p + Vector2(-10 * sx, 4 * sy), p + Vector2(-5 * sx, -5 * sy),
-			p + Vector2(3 * sx, -8 * sy), p + Vector2(11 * sx, 2 * sy),
-			p + Vector2(7 * sx, 6 * sy)
-		]), Color(0.55, 0.43, 0.30, 0.80))
-		draw_line(p + Vector2(-4 * sx, -3 * sy), p + Vector2(2 * sx, -5 * sy), Color(0.91, 0.74, 0.46, 0.7), 1.0, true)
-
-	func _draw_ruin(p: Vector2, sx: float, sy: float) -> void:
-		var stone := Color(0.43, 0.35, 0.49, 0.78)
-		draw_colored_polygon(PackedVector2Array([
-			p + Vector2(-12 * sx, 8 * sy), p + Vector2(-10 * sx, -12 * sy),
-			p + Vector2(-4 * sx, -12 * sy), p + Vector2(-3 * sx, 8 * sy)
-		]), stone)
-		draw_colored_polygon(PackedVector2Array([
-			p + Vector2(2 * sx, 8 * sy), p + Vector2(3 * sx, -7 * sy),
-			p + Vector2(9 * sx, -11 * sy), p + Vector2(12 * sx, 8 * sy)
-		]), stone.lightened(0.10))
-		draw_line(p + Vector2(-13 * sx, -13 * sy), p + Vector2(0, -18 * sy), stone.lightened(0.18), 2.0, true)
-		draw_line(p + Vector2(0, -18 * sy), p + Vector2(12 * sx, -12 * sy), stone.lightened(0.18), 2.0, true)
-
-	func _draw_landmark(p: Vector2, biome: String, sx: float, sy: float, city_id: String) -> void:
-		# Une petite silhouette de ville se devine derrière le libellé : elle donne
-		# une identité au lieu sans remplacer les informations tactiques.
-		var wall := Color(0.66, 0.59, 0.43, 0.82)
-		var roof := Color(0.35, 0.24, 0.18, 0.92)
-		if biome == "Montagne":
-			wall = Color(0.62, 0.69, 0.70, 0.84)
-			roof = Color(0.28, 0.39, 0.47, 0.94)
-		elif biome == "Désert":
-			wall = Color(0.82, 0.66, 0.40, 0.86)
-			roof = Color(0.59, 0.37, 0.20, 0.94)
-		elif biome == "Donjon":
-			wall = Color(0.46, 0.39, 0.55, 0.90)
-			roof = Color(0.22, 0.17, 0.30, 0.96)
-		var offset: float = float(abs(hash(city_id)) % 11 - 5) * sx
-		var left := p + Vector2(-26.0 * sx + offset, -14.0 * sy)
-		var right := p + Vector2(24.0 * sx + offset, -14.0 * sy)
-		draw_colored_polygon(PackedVector2Array([
-			left + Vector2(0, 16.0 * sy), left + Vector2(0, -1.0 * sy),
-			left + Vector2(8.0 * sx, -8.0 * sy), left + Vector2(16.0 * sx, -1.0 * sy),
-			left + Vector2(16.0 * sx, 16.0 * sy)
-		]), wall)
-		draw_colored_polygon(PackedVector2Array([
-			left + Vector2(-2.0 * sx, 0), left + Vector2(8.0 * sx, -11.0 * sy),
-			left + Vector2(18.0 * sx, 0)
-		]), roof)
-		draw_colored_polygon(PackedVector2Array([
-			right + Vector2(0, 16.0 * sy), right + Vector2(0, -8.0 * sy),
-			right + Vector2(9.0 * sx, -15.0 * sy), right + Vector2(18.0 * sx, -8.0 * sy),
-			right + Vector2(18.0 * sx, 16.0 * sy)
-		]), wall.darkened(0.12))
-		draw_colored_polygon(PackedVector2Array([
-			right + Vector2(-2.0 * sx, -7.0 * sy), right + Vector2(9.0 * sx, -18.0 * sy),
-			right + Vector2(20.0 * sx, -7.0 * sy)
-		]), roof)
-		draw_line(left + Vector2(5.0 * sx, 4.0 * sy), left + Vector2(5.0 * sx, 10.0 * sy), Color(0.22, 0.18, 0.13, 0.8), 2.0, true)
-		draw_line(right + Vector2(13.0 * sx, 3.0 * sy), right + Vector2(13.0 * sx, 10.0 * sy), Color(0.22, 0.18, 0.13, 0.8), 2.0, true)
-class _RouteLines:
-	extends Control
-	var conquest: Dictionary = {}
-	var city_pos: Dictionary = {}
-	func _draw() -> void:
-		for pair: Array in ProgressionManager.CONQUEST_ROUTES:
-			var a_id: String = String(pair[0])
-			var b_id: String = String(pair[1])
-			var a: Vector2 = city_pos.get(a_id, Vector2.ZERO)
-			var b: Vector2 = city_pos.get(b_id, Vector2.ZERO)
-			var owned: Array = conquest.get("owned", [])
-			var open: bool = owned.has(a_id) and owned.has(b_id)
-			var col: Color = Color(0.96, 0.75, 0.31, 0.95) if open else Color(0.79, 0.68, 0.43, 0.45)
-			draw_line(Vector2(size.x * a.x, size.y * a.y), Vector2(size.x * b.x, size.y * b.y), col, 5.0 if open else 3.0, true)
-
 
 ## Centre un panneau (taille = contenu) quelle que soit sa taille finale : ancres au centre,
 ## il grandit des deux côtés (un preset posé avant le calcul de la taille le décalait vers le bas/droite).

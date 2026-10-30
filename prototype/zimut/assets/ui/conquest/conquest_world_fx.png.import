@@ -2,22 +2,22 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bu46xwoc6f7i7"
-path="res://.godot/imported/conquest_world_map.png-f5c186653f7ef194076410549975388f.ctex"
+uid="uid://bl6t56tm0j3gb"
+path="res://.godot/imported/conquest_world_fx.png-6107b0fdb0f9e66593c5a98906c33738.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/conquest/conquest_world_map.png"
-dest_files=["res://.godot/imported/conquest_world_map.png-f5c186653f7ef194076410549975388f.ctex"]
+source_file="res://assets/ui/conquest/conquest_world_fx.png"
+dest_files=["res://.godot/imported/conquest_world_fx.png-6107b0fdb0f9e66593c5a98906c33738.ctex"]
 
 [params]
 
-compress/mode=1
+compress/mode=0
 compress/high_quality=false
-compress/lossy_quality=0.85
+compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1

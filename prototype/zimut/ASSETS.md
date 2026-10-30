@@ -62,7 +62,7 @@ ent_de_combat*, sentinelle_de_gres. (*utilisés comme sprites d'invocation.) Les
 ## 6. Interface et Conquête
 
 - Aventure : 6 icônes de lieux SVG (camp, coffre, combat, sortie, énigme, belvédère) ; il manque Donjon, Marchand, Fontaine, Porte verrouillée.
-- Conquête : icônes de ville pour Forêt, Montagne, Désert, Donjon (+ Brasier, Cristaux, Marées, Vents) ; **manquent** Sylvestre, Cimes, Sables, Ombres, Brumes, et la carte du monde `conquest_world_map.png` n'a que 4 nations.
+- Conquête : icônes de ville pour Forêt, Montagne, Désert, Donjon (+ Brasier, Cristaux, Marées, Vents) ; **manquent** Sylvestre, Cimes, Sables, Ombres, Brumes, et la carte du monde `conquest_world_map.jpg` n'a pas encore les Rouages (prompt HD : `assets/ui/conquest/reference/PROMPT_CARTE_HD.md`).
 - Sorts : 187 sorts / ≈ 170 icônes générées par `tools/gen_icons.py` (style générique, pas celui de la planche).
 - Objets : icônes d'équipement générées ; pas de sprites d'objets en main sur les héros.
 - Sons : 7 musiques, aucun effet sonore propre aux sorts de terrain (pilier, faille).

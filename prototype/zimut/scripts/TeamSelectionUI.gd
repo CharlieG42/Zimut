@@ -83,7 +83,7 @@ func _restore_previous_team() -> void:
 			team.append(classe)
 	refresh()
 
-## Conquête : un héros nommé gouverneur d'une ville ne part plus en assaut.
+## Conquête : un héros gouverneur ou en mission de lieutenance ne part plus en assaut.
 func _is_locked(classe: String) -> bool:
 	if GameManager.active_save.is_empty():
 		return false
@@ -92,7 +92,7 @@ func _is_locked(classe: String) -> bool:
 func _is_stationed(classe: String) -> bool:
 	if GameManager.active_save.is_empty():
 		return false
-	return ProgressionManager.conquest_stationed_heroes(GameManager.active_save).has(classe)
+	return ProgressionManager.conquest_busy_heroes(GameManager.active_save).has(classe)
 
 func _load_classes() -> void:
 	# Stats depuis classes.txt (meilleur niveau), fallback méta
