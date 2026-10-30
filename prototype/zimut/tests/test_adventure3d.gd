@@ -77,6 +77,8 @@ func _boot() -> void:
 	pm.adventure_state(data)
 	gm.active_save = data
 	gm.active_slot = 4
+	var gset: Node = root.get_node("GameSettings")
+	gset.adventure_models_3d = false          # scène « illustrations » (les modèles 3D sont testés plus bas)
 	var scene: Node = (load("res://scenes/Adventure3D.tscn") as PackedScene).instantiate()
 	root.add_child(scene)
 	await process_frame
@@ -109,6 +111,26 @@ func _boot() -> void:
 		check(dd < 3.0, "sprites : Gligli est près du joueur (%.1f m)" % dd)
 		scene._companion.emote("heureux")
 		check(scene._companion._emote.visible, "sprites : bulle d'émotion affichée")
+
+	# vrais modèles 3D (réglage « Modèles 3D ») : joueur + Gligli plus petit, animés
+	gset.adventure_models_3d = true
+	var scene3: Node = (load("res://scenes/Adventure3D.tscn") as PackedScene).instantiate()
+	root.add_child(scene3)
+	await process_frame
+	await process_frame
+	check(scene3.explorer._sprite == null and scene3.explorer._model != null and scene3.explorer._model.name == "Hero3D", "modèles 3D : le joueur est un vrai modèle")
+	check(scene3._companion != null and scene3._companion._model != null, "modèles 3D : Gligli est un vrai modèle")
+	if scene3._companion != null and scene3._companion._model != null:
+		check(scene3._companion._model.scale.x < 0.8, "modèles 3D : Gligli est plus petit")
+		scene3.explorer.stick_input = Vector2(0, -1)
+		for _i: int in range(40):
+			await process_frame
+		check(scene3._companion.position.distance_to(scene3.explorer.position) < 4.0, "modèles 3D : Gligli suit le joueur")
+		scene3._companion.emote("surpris")
+		check(scene3._companion._emote.visible, "modèles 3D : bulle d'émotion")
+	scene3.queue_free()
+	await process_frame
+	gset.adventure_models_3d = false
 
 	# marche : on déplace l'explorateur de quelques cases et on vérifie l'état de jeu
 	var moves0: int = int(scene.manager.state.get("moves", 0))

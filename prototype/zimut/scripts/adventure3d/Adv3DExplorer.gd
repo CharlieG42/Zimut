@@ -36,8 +36,19 @@ var distance: float = CAM_DISTANCE
 
 
 func _ready() -> void:
-	_sprite = Adv3DSpriteActor.create("hero")
-	if _sprite != null:
+	if GameSettings.adventure_models_3d:
+		_model = Adv3DHeroModel.make_hero()      # vrai modèle low-poly (ombre incluse)
+		add_child(_model)
+		var dust3: CPUParticles3D = Adv3DActors.make_dust()
+		dust3.name = "Dust"
+		_model.add_child(dust3)
+		_facing = yaw + PI
+		_model.rotation.y = _facing
+	else:
+		_sprite = Adv3DSpriteActor.create("hero")
+	if _model != null:
+		pass
+	elif _sprite != null:
 		_model = _sprite
 		add_child(_model)
 		Adv3DActors.add_shadow(_model, 0.55)
@@ -150,10 +161,9 @@ func _face(dir: Vector3, delta: float) -> void:
 	if _model == null or dir.length() < 0.01:
 		return
 	var want: float = atan2(dir.x, dir.z)
-	if _sprite != null:
-		_facing = lerp_angle(_facing, want, clampf(delta * 12.0, 0.0, 1.0))
-		return
-	_model.rotation.y = lerp_angle(_model.rotation.y, want, clampf(delta * 12.0, 0.0, 1.0))
+	_facing = lerp_angle(_facing, want, clampf(delta * 12.0, 0.0, 1.0))
+	if _sprite == null:
+		_model.rotation.y = _facing
 
 
 func _animate_walk() -> void:

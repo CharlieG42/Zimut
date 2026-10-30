@@ -14,6 +14,10 @@ var terrain: Dictionary = {}
 var target: Adv3DExplorer = null
 
 var _actor: Adv3DSpriteActor = null
+var _model: Node3D = null                # vrai modèle 3D (si activé dans les Options)
+var _t: float = 0.0
+const SCALE_3D := 0.72                   # Gligli un peu plus petit que le modèle de base
+const SCALE_SPRITE := 0.82
 var _facing: float = 0.0
 var _last_target_pos: Vector3 = Vector3.ZERO
 var _idle_time: float = 0.0
@@ -24,16 +28,23 @@ var _emote_tween: Tween = null
 
 
 static func create(terr: Dictionary, who: Adv3DExplorer) -> Adv3DCompanion:
-	var a: Adv3DSpriteActor = Adv3DSpriteActor.create("gligli")
-	if a == null:
-		return null
 	var c := Adv3DCompanion.new()
 	c.name = "Gligli"
 	c.terrain = terr
 	c.target = who
-	c._actor = a
-	c.add_child(a)
-	Adv3DActors.add_shadow(c, 0.4)
+	if GameSettings.adventure_models_3d:
+		var m: Node3D = Adv3DHeroModel.make_gligli()
+		m.scale = Vector3.ONE * SCALE_3D
+		c._model = m
+		c.add_child(m)
+	else:
+		var a: Adv3DSpriteActor = Adv3DSpriteActor.create("gligli")
+		if a == null:
+			return null
+		a.scale = Vector3.ONE * SCALE_SPRITE
+		c._actor = a
+		c.add_child(a)
+		Adv3DActors.add_shadow(c, 0.35)
 	c._build_emote()
 	return c
 
@@ -47,7 +58,7 @@ func _build_emote() -> void:
 	_emote.alpha_cut = SpriteBase3D.ALPHA_CUT_OPAQUE_PREPASS
 	_emote.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	_emote.pixel_size = 0.0045
-	_emote.position = Vector3(0, 1.55, 0)
+	_emote.position = Vector3(0, 1.35, 0)
 	_emote.visible = false
 	add_child(_emote)
 	_emote_label = Label3D.new()
@@ -58,7 +69,7 @@ func _build_emote() -> void:
 	_emote_label.outline_size = 10
 	_emote_label.modulate = Color(0.85, 1.0, 0.7)
 	_emote_label.no_depth_test = true
-	_emote_label.position = Vector3(0, 1.0, 0)
+	_emote_label.position = Vector3(0, 0.9, 0)
 	_emote_label.visible = false
 	add_child(_emote_label)
 
@@ -109,7 +120,7 @@ func _free(p: Vector3) -> bool:
 
 
 func _process(delta: float) -> void:
-	if target == null or _actor == null:
+	if target == null or (_actor == null and _model == null):
 		return
 	# le joueur est-il à l'arrêt ?
 	if target.position.distance_to(_last_target_pos) < 0.01:
@@ -154,7 +165,34 @@ func _process(delta: float) -> void:
 		# à l'arrêt : il regarde le joueur
 		var to_t: Vector3 = target.position - position
 		_facing = lerp_angle(_facing, atan2(to_t.x, to_t.z), clampf(delta * 5.0, 0.0, 1.0))
+	var sitting: bool = not moving and _idle_time > 2.5 and dist < 1.2
+	if _model != null:
+		_animate_model(delta, moving, running, sitting)
+		return
 	_actor.set_running(running)
-	_actor.set_sitting(not moving and _idle_time > 2.5 and dist < 1.2)
+	_actor.set_sitting(sitting)
 	_actor.set_facing(_facing, target.camera_yaw())
 	_actor.animate(delta, 1.0 if moving else 0.0)
+
+
+## Animation du modèle 3D : petits bonds à la marche, galop quand il court, assis = tassé, respiration à l'arrêt.
+func _animate_model(delta: float, moving: bool, running: bool, sitting: bool) -> void:
+	_t += delta * (15.0 if running else 10.0 if moving else 2.2)
+	_model.rotation.y = _facing
+	var body: Node3D = _model.get_node_or_null("Body")
+	if body == null:
+		return
+	var k: float = clampf(delta * 12.0, 0.0, 1.0)
+	if moving:
+		var hop: float = absf(sin(_t)) * (0.16 if running else 0.09)
+		body.position.y = lerpf(body.position.y, hop, k)
+		body.rotation.x = lerpf(body.rotation.x, sin(_t) * 0.1, k)
+		body.scale = body.scale.lerp(Vector3(1.0, 1.0 + sin(_t * 2.0) * 0.04, 1.0), k)
+	elif sitting:
+		body.position.y = lerpf(body.position.y, 0.0, k)
+		body.rotation.x = lerpf(body.rotation.x, -0.12, k)
+		body.scale = body.scale.lerp(Vector3(1.06, 0.88, 1.06), k)
+	else:
+		body.position.y = lerpf(body.position.y, 0.0, k)
+		body.rotation.x = lerpf(body.rotation.x, 0.0, k)
+		body.scale = body.scale.lerp(Vector3(1.0, 1.0 + sin(_t) * 0.025, 1.0), k)
