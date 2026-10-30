@@ -805,6 +805,8 @@ func _play_cast(d: Dictionary) -> void:
 
 ## V47 : nombre d'effets à l'écran borné (lisibilité + perfs mobile).
 func _fx_ok(limit: int = 70) -> bool:
+	if GfxQuality.low():
+		limit = int(float(limit) * 0.6)     # Économie : moins d'effets simultanés
 	return _fx_layer != null and _fx_layer.get_child_count() < limit
 
 

@@ -118,7 +118,7 @@ func _build_environment() -> void:
 	env.fog_density = float(pal.get("fog_density", 0.0035))
 	env.fog_sky_affect = 0.35
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.glow_enabled = true
+	env.glow_enabled = not GfxQuality.low()      # Économie : pas de halo (coûteux sur mobile)
 	env.glow_intensity = 0.5
 	env.glow_bloom = 0.04
 	env.adjustment_enabled = true
@@ -221,6 +221,7 @@ func _build_ambient() -> void:
 			_amb(p, mat, 40, 6.0, Vector3(0, 0.06, 0), 0.1, 0.4, 0.07, 0.14, Color(1.0, 0.95, 0.5, 0.85), 1.5)
 			p.direction = Vector3.UP
 			p.spread = 180.0
+	p.amount = maxi(8, int(float(p.amount) * GfxQuality.density()))
 	p.material_override = mat
 	add_child(p)
 	_ambient = p

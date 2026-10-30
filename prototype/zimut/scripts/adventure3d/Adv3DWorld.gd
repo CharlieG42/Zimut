@@ -755,9 +755,37 @@ static func _xf(pos: Vector3, yaw: float, scl: Vector3) -> Transform3D:
 	return Transform3D(b, pos)
 
 
+## Décors de sol nombreux et petits : découpés en carrés de CHUNK mètres (MultiMesh par carré) pour que
+## le moteur ne dessine que ceux qui sont dans le champ de la caméra et pas trop loin.
+const CHUNK := 15.0
+const CHUNKED := ["Herbes", "Fleurs", "Champignons", "Cailloux", "Roseaux", "Buissons", "Nenuphars"]
+
+
 static func _multi(parent: Node3D, node_name: String, mesh: Mesh, xforms: Array, colors: Array, mat: Material) -> void:
 	if xforms.is_empty():
 		return
+	if node_name in CHUNKED or node_name.begins_with("SolNation_"):
+		var groups: Dictionary = {}
+		var keep: float = GfxQuality.density() if node_name == "Herbes" else 1.0
+		for i: int in range(xforms.size()):
+			if keep < 1.0 and float(i % 100) >= keep * 100.0:
+				continue
+			var o: Vector3 = (xforms[i] as Transform3D).origin
+			var key := Vector2i(floori(o.x / CHUNK), floori(o.z / CHUNK))
+			if not groups.has(key):
+				groups[key] = [[], []]
+			(groups[key][0] as Array).append(xforms[i])
+			(groups[key][1] as Array).append(colors[i])
+		var vis_end: float = 42.0 if GfxQuality.low() else 60.0
+		for k: Vector2i in groups.keys():
+			var mmi: MultiMeshInstance3D = _multi_one(parent, "%s_%d_%d" % [node_name, k.x, k.y], mesh, groups[k][0], groups[k][1], mat)
+			mmi.visibility_range_end = vis_end
+			mmi.visibility_range_end_margin = 6.0
+		return
+	_multi_one(parent, node_name, mesh, xforms, colors, mat)
+
+
+static func _multi_one(parent: Node3D, node_name: String, mesh: Mesh, xforms: Array, colors: Array, mat: Material) -> MultiMeshInstance3D:
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.use_colors = true
@@ -772,6 +800,7 @@ static func _multi(parent: Node3D, node_name: String, mesh: Mesh, xforms: Array,
 	mmi.material_override = mat
 	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	parent.add_child(mmi)
+	return mmi
 
 
 # ══════════════════════════════════════════════════════════════════════
