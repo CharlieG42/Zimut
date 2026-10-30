@@ -11,6 +11,9 @@ const LONG_SIDE := [300.0, 170.0]
 
 static var mode: int = MODE_BIG
 
+signal tapped
+
+var full: bool = false                 # version plein écran (avec légende), indépendante des 3 états
 var _size: Vector2i = Vector2i(1, 1)
 var _tex: ImageTexture = null
 var _pois: Array = []            # [{cell, color, done}]
@@ -21,8 +24,24 @@ var _yaw: float = 0.0
 
 
 func _ready() -> void:
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mouse_filter = Control.MOUSE_FILTER_IGNORE if full else Control.MOUSE_FILTER_STOP
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+
+## Un toucher / clic sur la mini-carte l'ouvre en plein écran.
+func _gui_input(event: InputEvent) -> void:
+	if full:
+		return
+	if event is InputEventScreenTouch:
+		if not (event as InputEventScreenTouch).pressed and not (event as InputEventScreenTouch).canceled:
+			tapped.emit()
+		accept_event()
+	elif event is InputEventMouseButton:
+		var b := event as InputEventMouseButton
+		if b.device != InputEvent.DEVICE_ID_EMULATION and b.button_index == MOUSE_BUTTON_LEFT:
+			if not b.pressed:
+				tapped.emit()
+			accept_event()
 
 
 ## Construit l'image du terrain (1 pixel = 1 case).
@@ -70,6 +89,9 @@ func set_mode(m: int) -> void:
 
 
 func _apply_size() -> void:
+	if full:
+		queue_redraw()
+		return
 	visible = mode != MODE_HIDDEN
 	if mode == MODE_HIDDEN:
 		return
@@ -83,10 +105,11 @@ func _apply_size() -> void:
 
 
 func _draw() -> void:
-	if _tex == null or mode == MODE_HIDDEN:
+	if _tex == null or (mode == MODE_HIDDEN and not full):
 		return
 	var pad := Vector2(8, 8)
-	var area: Vector2 = size - pad * 2.0
+	var legend_h: float = 78.0 if full else 0.0
+	var area: Vector2 = size - pad * 2.0 - Vector2(0, legend_h)
 	var cell: float = minf(area.x / float(_size.x), area.y / float(_size.y))
 	var map_size: Vector2 = Vector2(float(_size.x), float(_size.y)) * cell
 	var origin: Vector2 = pad + (area - map_size) * 0.5
@@ -98,7 +121,7 @@ func _draw() -> void:
 	sb.set_corner_radius_all(10)
 	draw_style_box(sb, Rect2(Vector2.ZERO, size))
 	draw_texture_rect(_tex, Rect2(origin, map_size), false)
-	var sz: float = clampf(cell * 0.95, 10.0, 24.0)
+	var sz: float = clampf(cell * 0.95, 10.0, 44.0 if full else 24.0)
 	for g: Dictionary in _gates:
 		var gc: Vector2i = g["cell"]
 		var gp: Vector2 = origin + (Vector2(gc) + Vector2(0.5, 0.5)) * cell
@@ -115,12 +138,41 @@ func _draw() -> void:
 	var pl: Vector2 = origin + _player * cell
 	var fwd := Vector2(-sin(_yaw), -cos(_yaw))
 	var side := Vector2(-fwd.y, fwd.x)
-	var r: float = maxf(cell * 1.1, 7.0)
+	var r: float = maxf(cell * 1.1, 7.0) if not full else clampf(cell * 0.9, 12.0, 34.0)
 	var tri: PackedVector2Array = [pl + fwd * r, pl - fwd * r * 0.7 + side * r * 0.65, pl - fwd * r * 0.7 - side * r * 0.65]
 	draw_colored_polygon(tri, Color(1.0, 0.92, 0.25))
 	var outline: PackedVector2Array = tri.duplicate()
 	outline.append(tri[0])
 	draw_polyline(outline, Color(0.1, 0.1, 0.1), 2.0)
+	if full:
+		_draw_legend(Vector2(pad.x + 10.0, size.y - legend_h + 6.0))
+
+
+## Légende (plein écran) : un pictogramme par type d'élément.
+func _draw_legend(top_left: Vector2) -> void:
+	var f: Font = ThemeDB.fallback_font
+	var items: Array = [["dungeon", "Donjon"], ["combat", "Combat"], ["puzzle", "Énigme"], ["chest", "Coffre"], ["camp", "Camp"],
+		["reveal", "Belvédère"], ["exit", "Sentier"], ["gate", "Accès autre carte"], ["mob", "Monstres"], ["player", "Vous"]]
+	var x: float = top_left.x
+	var y: float = top_left.y + 20.0
+	for it: Array in items:
+		var label: String = it[1]
+		var w: float = f.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 22).x
+		if x + 40.0 + w > size.x - 20.0:
+			x = top_left.x
+			y += 34.0
+		var c := Vector2(x + 16.0, y)
+		match String(it[0]):
+			"gate":
+				_icon_gate(c, 22.0, Vector2(1, 0), true)
+			"mob":
+				_icon_mob(c, 22.0)
+			"player":
+				draw_colored_polygon(PackedVector2Array([c + Vector2(0, -14), c + Vector2(11, 10), c + Vector2(-11, 10)]), Color(1.0, 0.92, 0.25))
+			_:
+				_icon_poi(String(it[0]), c, 22.0, false)
+		draw_string(f, Vector2(x + 38.0, y + 7.0), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(0.92, 0.92, 0.92))
+		x += 38.0 + w + 26.0
 
 
 # ── Pictogrammes : chaque type a sa forme ET sa couleur ──────────────

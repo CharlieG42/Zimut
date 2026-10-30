@@ -110,6 +110,13 @@ func _boot() -> void:
 		scene._companion.emote("heureux")
 		check(scene._companion._emote.visible, "sprites : bulle d'émotion affichée")
 
+	# carte plein écran
+	scene._open_full_map()
+	await process_frame
+	check(scene._modal_root != null, "carte : le plein écran s'ouvre")
+	scene._close_modal()
+	check(scene._modal_root == null, "carte : le plein écran se ferme")
+
 	# marche : on déplace l'explorateur de quelques cases et on vérifie l'état de jeu
 	var moves0: int = int(scene.manager.state.get("moves", 0))
 	var start_cell: Vector2i = scene.explorer.current_cell

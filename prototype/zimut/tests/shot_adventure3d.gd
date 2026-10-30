@@ -46,5 +46,10 @@ func _boot() -> void:
 		sc.explorer.yaw = 0.0
 		await create_timer(1.0).timeout
 		_shot(out + "/a3d_groupe.png")
+	sc._close_modal()
+	sc.explorer.place_at(Adv3DWorld.cell_center(mid))
+	sc._open_full_map()
+	await create_timer(0.5).timeout
+	_shot(out + "/a3d_carte.png")
 	pm.delete_save(4)
 	quit(0)
