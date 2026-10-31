@@ -209,8 +209,28 @@ func _sprite(building: String, level: int = 0) -> Texture2D:
 	var tex: Texture2D = null
 	if ResourceLoader.exists(path):
 		tex = load(path) as Texture2D
-	_tex_cache[path] = tex
+	_tex_cache[path] = _trimmed(tex)
 	return tex
+
+
+## Recadre une planche sur ses pixels visibles (V64) : les stickers n'occupent qu'une
+## fraction de leur case et une découpe « au bord de case » laisserait le bâtiment
+## minuscule une fois normalisé à SPRITE_WIDTH. Le recadrage rend l'échelle
+## indépendante de la découpe ; sans canal alpha (détourage manquant), la texture
+## est utilisée telle quelle.
+func _trimmed(tex: Texture2D) -> Texture2D:
+	if tex == null:
+		return null
+	var img: Image = tex.get_image()
+	if img == null or not img.detect_alpha():
+		return tex
+	var used: Rect2i = img.get_used_rect()
+	if used.size.x <= 0 or used.size.y <= 0 or (used.position == Vector2i.ZERO and used.size == img.get_size()):
+		return tex
+	var atlas := AtlasTexture.new()
+	atlas.atlas = tex
+	atlas.region = Rect2(used)
+	return atlas
 
 
 ## Dessine la planche posée au sol en g (même voile soir/nuit que les sprites V62) ;

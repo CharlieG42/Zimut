@@ -34,6 +34,12 @@ Détourage : fond transparent (les planches des Cimes, Marées et Vents ont un f
 `#808080` à supprimer). Personnages et accessoires facultatifs : le jeu dessine déjà
 l'ombre au sol, la plaque de nom et les étoiles de niveau.
 
+Recadrage automatique (V64) : au chargement, `ConquestCityView` recadre chaque PNG sur
+ses pixels visibles — inutile de découper au pixel près, une découpe « au bord de case »
+(avec des marges transparentes autour du bâtiment) est corrigée automatiquement et
+l'échelle du bâtiment ne dépend plus de la découpe. Le canal alpha reste indispensable :
+un PNG opaque est utilisé tel quel, bords compris.
+
 ## Dépôt dans le projet
 
 1. Découper la planche selon la grille ci-dessus et déposer les PNG dans le dossier de la nation.

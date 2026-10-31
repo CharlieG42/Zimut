@@ -519,6 +519,22 @@ const CONQUEST_CITIES := {
 	"citadelle_sable": {"name": "Citadelle de Sable", "kind": "enemy", "biome": "Brasier", "level": 45},
 	"atelier_cuivre": {"name": "Atelier de Cuivre", "kind": "neutral", "biome": "Rouages", "level": 95},
 	"citadelle_engrenages": {"name": "Citadelle des Engrenages", "kind": "enemy", "biome": "Rouages", "level": 115},
+	"hutaie_doree": {"name": "Hutaie Dorée", "kind": "neutral", "biome": "Forêt", "level": 10},
+	"moulin_vents": {"name": "Moulin des Vents", "kind": "neutral", "biome": "Vents", "level": 20},
+	"autel_vent": {"name": "Autel du Vent", "kind": "enemy", "biome": "Vents", "level": 35},
+	"refuge_corniche": {"name": "Refuge de la Corniche", "kind": "neutral", "biome": "Montagne", "level": 30},
+	"tour_guet_givre": {"name": "Tour de Guet du Givre", "kind": "enemy", "biome": "Montagne", "level": 42},
+	"geode_eclat": {"name": "Géode de l'Éclat", "kind": "neutral", "biome": "Cristaux", "level": 50},
+	"spire_prisme": {"name": "Spire du Prisme", "kind": "enemy", "biome": "Cristaux", "level": 78},
+	"crypte_oubliee": {"name": "Crypte Oubliée", "kind": "enemy", "biome": "Ombres", "level": 26},
+	"riziere_brume": {"name": "Rizière des Brumes", "kind": "neutral", "biome": "Brumes", "level": 32},
+	"cratere_forges": {"name": "Cratère des Forges", "kind": "neutral", "biome": "Brasier", "level": 38},
+	"fournaise": {"name": "Fournaise Éternelle", "kind": "enemy", "biome": "Brasier", "level": 60},
+	"caravane_dunes": {"name": "Caravane des Dunes", "kind": "neutral", "biome": "Désert", "level": 76},
+	"phare_perle": {"name": "Phare de la Perle", "kind": "neutral", "biome": "Marées", "level": 75},
+	"havre_maree": {"name": "Havre des Marées", "kind": "neutral", "biome": "Marées", "level": 95},
+	"hangar_engrenages": {"name": "Hangar des Engrenages", "kind": "neutral", "biome": "Rouages", "level": 85},
+	"tour_horloger": {"name": "Tour du Grand Horloger", "kind": "enemy", "biome": "Rouages", "level": 110},
 }
 
 ## Récompense de première annexion : chaque lieu offre un petit butin
@@ -553,6 +569,22 @@ const CONQUEST_CITY_REWARDS := {
 	"citadelle_sable": {"name": "Trésor de la Citadelle", "resources": {"Fer": 20, "Cuir": 12, "Magie": 8}, "gold": 220},
 	"atelier_cuivre": {"name": "Caisse de pièces détachées", "resources": {"Fer": 14, "Cuir": 6}, "gold": 120},
 	"citadelle_engrenages": {"name": "Coffre du Grand Horloger", "resources": {"Fer": 24, "Magie": 10}, "gold": 260},
+	"hutaie_doree": {"name": "Miellier doré", "resources": {"Bois": 14, "Magie": 3}, "gold": 65},
+	"moulin_vents": {"name": "Farine du moulin", "resources": {"Bois": 8, "Cuir": 5}, "gold": 55},
+	"autel_vent": {"name": "Offrande des Cimes venteuses", "resources": {"Magie": 10, "Fer": 6}, "gold": 100},
+	"refuge_corniche": {"name": "Provisions des guides", "resources": {"Cuir": 7, "Fer": 6}, "gold": 70},
+	"tour_guet_givre": {"name": "Réserve de la guette", "resources": {"Fer": 14, "Bois": 6}, "gold": 95},
+	"geode_eclat": {"name": "Éclat brut", "resources": {"Magie": 9}, "gold": 85},
+	"spire_prisme": {"name": "Prisme taillé", "resources": {"Magie": 16}, "gold": 150},
+	"crypte_oubliee": {"name": "Trésor de la Crypte", "resources": {"Magie": 10, "Fer": 8}, "gold": 90},
+	"riziere_brume": {"name": "Récolte de la rizière", "resources": {"Venin": 10, "Bois": 6}, "gold": 75},
+	"cratere_forges": {"name": "Lingots du cratère", "resources": {"Fer": 12, "Venin": 4}, "gold": 105},
+	"fournaise": {"name": "Cœur de la Fournaise", "resources": {"Fer": 22, "Magie": 6}, "gold": 200},
+	"caravane_dunes": {"name": "Balles de la caravane", "resources": {"Cuir": 10, "Venin": 6}, "gold": 125},
+	"phare_perle": {"name": "Nacre du phare", "resources": {"Cuir": 9, "Magie": 4}, "gold": 120},
+	"havre_maree": {"name": "Cale du havre", "resources": {"Cuir": 14}, "gold": 130},
+	"hangar_engrenages": {"name": "Caisse de prototypes", "resources": {"Fer": 12, "Cuir": 8}, "gold": 140},
+	"tour_horloger": {"name": "Chronomètre du Grand Horloger", "resources": {"Fer": 26, "Magie": 12}, "gold": 280},
 }
 
 ## Routes de la carte : on ne peut attaquer qu'une ville RELIÉE par route à
@@ -574,6 +606,12 @@ const CONQUEST_ROUTES: Array = [
 	["oasis", "caravanserail"], ["caravanserail", "observatoire"], ["caravanserail", "port_sable"],
 	["port_sable", "tour_sable"], ["forge_givre", "caravanserail"], ["forge_givre", "marais_spectres"],
 	["tour_sable", "citadelle_engrenages"], ["atelier_cuivre", "citadelle_engrenages"], ["tour_sable", "atelier_cuivre"],
+	["sanctuaire_mousse", "hutaie_doree"], ["bastion_orage", "moulin_vents"], ["pic_foudroyant", "autel_vent"],
+	["hameau_pin", "refuge_corniche"], ["col_givre", "tour_guet_givre"], ["mine_cristal", "geode_eclat"],
+	["forge_givre", "spire_prisme"], ["citadelle_ronce", "crypte_oubliee"], ["bois_lune", "riziere_brume"],
+	["fort_cendre", "cratere_forges"], ["citadelle_sable", "fournaise"], ["temple_soleil", "caravane_dunes"],
+	["caravanserail", "phare_perle"], ["port_sable", "havre_maree"], ["atelier_cuivre", "hangar_engrenages"],
+	["citadelle_engrenages", "tour_horloger"],
 ]
 
 ## Bâtiments de ressources constructibles dans les villes conquises.
