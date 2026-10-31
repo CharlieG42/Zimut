@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="220" viewBox="0 0 260 220">
+<ellipse cx="130.0" cy="200.0" rx="52.0" ry="16.0" fill="#000" opacity="0.25"/>
+<g id="plot"><ellipse cx="130" cy="200" rx="50" ry="15" fill="none" stroke="#f0e0a0" stroke-width="2" stroke-dasharray="6 5" opacity="0.7"/></g>
+<line x1="90.0" y1="200.0" x2="90.0" y2="182.0" stroke="#7a5a30" stroke-width="3" stroke-linecap="round"/>
+<line x1="170.0" y1="200.0" x2="170.0" y2="182.0" stroke="#7a5a30" stroke-width="3" stroke-linecap="round"/>
+</svg>

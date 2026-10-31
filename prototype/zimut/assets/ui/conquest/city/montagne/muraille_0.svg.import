@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://1iio4bai49q0l"
+path="res://.godot/imported/muraille_0.svg-c3714c586db32b5d1b14b9a92874730e.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/montagne/muraille_0.svg"
+dest_files=["res://.godot/imported/muraille_0.svg-c3714c586db32b5d1b14b9a92874730e.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

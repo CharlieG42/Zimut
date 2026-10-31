@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://2bgpbodw5a0ce"
+path="res://.godot/imported/muraille_3.svg-c6407b971f0682086bb89ac1fe9ccf56.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/vents/muraille_3.svg"
+dest_files=["res://.godot/imported/muraille_3.svg-c6407b971f0682086bb89ac1fe9ccf56.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

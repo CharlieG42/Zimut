@@ -1,13 +1,19 @@
 class_name ConquestCityView
 extends Control
-## ConquestCityView.gd — Vue illustrée d'une ville de Conquête (V61).
+## ConquestCityView.gd — Vue illustrée d'une ville de Conquête (V62).
 ##
-## La ville est dessinée devant l'illustration de sa Nation : hôtel de ville au centre (il grandit
-## avec le niveau de la ville : ailes, tours, dôme, flèche dorée), caserne avec ses soldats,
-## résidence du gouverneur (le héros en poste se tient devant), six parcelles de production et
-## la parcelle de la Merveille. Chaque bâtiment change d'allure avec son niveau (1 à 3) et
-## s'anime (scie qui tourne, lanterne de la mine, orbe des mages, fumées, drapeaux) ; des
-## habitants circulent sur les chemins. Toucher un bâtiment émet `plot_pressed(clé)`.
+## V62 : chaque bâtiment est une **illustration** (SVG généré dans
+## assets/ui/conquest/city/<biome>/, un fichier par bâtiment et par niveau, plus les
+## merveilles, les décors et trois ciels) dessinée à la place des formes vectorielles
+## (qui restent en repli si un fichier manque). La ville vit au fil d'un **jour / soir /
+## nuit** (bouton ☀/🌙 : fenêtres et lanternes s'allument la nuit), subit des
+## **événements de ville** (fête, incendie, marchand de passage) et change d'allure avec
+## la **spécialisation** choisie au niveau Cité (militaire / marchande).
+##
+## La ville est dessinée devant l'illustration de sa Nation : hôtel de ville au centre (il
+## grandit avec le niveau de la ville), caserne avec ses soldats, résidence du gouverneur
+## (le héros en poste se tient devant), six parcelles de production et la parcelle de la
+## Merveille. Toucher un bâtiment émet `plot_pressed(clé)`.
 
 signal plot_pressed(key: String)
 
@@ -39,6 +45,18 @@ const STYLE := {
 const RES_GLOW := {"Bois": Color(0.62, 0.85, 0.40), "Fer": Color(0.80, 0.86, 0.95), "Cuir": Color(0.90, 0.66, 0.42),
 	"Magie": Color(0.72, 0.58, 1.0), "Venin": Color(0.55, 0.92, 0.55)}
 
+## V62 — illustrations par bâtiment (assets/ui/conquest/city/<biome>/…), fallback vectoriel.
+const ART_DIR := "res://assets/ui/conquest/city/"
+const BIOME_KEY := {"Forêt": "foret", "Montagne": "montagne", "Désert": "desert", "Cristaux": "cristaux",
+	"Marées": "marees", "Vents": "vents", "Brasier": "brasier", "Brumes": "brumes",
+	"Ombres": "ombres", "Rouages": "rouages", "Donjon": "donjon"}
+## Échelle du sprite d'une parcelle (l'hôtel de ville est plus imposant).
+const PLOT_SCALE := {"hall": 1.30, "wonder": 1.15, "barracks": 1.05, "residence": 1.05}
+## Point d'ancrage dans le viewBox 260x220 des sprites (pied du bâtiment, au sol).
+const SPRITE_ANCHOR := Vector2(130, 200)
+## Emplacements de décor fixes (fractions de la vue), lus aussi dans city_layout.json.
+const DECO_SLOTS := [Vector2(0.30, 0.63), Vector2(0.70, 0.63), Vector2(0.045, 0.71), Vector2(0.955, 0.71), Vector2(0.42, 0.94), Vector2(0.58, 0.94)]
+
 ## État de la ville à dessiner (rempli par CityScreenUI).
 var biome: String = "Forêt"
 var art: Texture2D = null
@@ -53,12 +71,17 @@ var ravaged: bool = false
 var threat: bool = false
 var selected: String = "hall"
 var animate: bool = true
+## V62 — heure du jour ("jour" / "soir" / "nuit"), événement de ville et spécialisation.
+var time_of_day: String = "jour"
+var city_event: String = ""
+var spec: String = ""
 
 var _t: float = 0.0
 var _fx_key: String = ""
 var _fx_t: float = -1.0
 var _buttons: Dictionary = {}
 var _fade: GradientTexture2D = null
+var _tex_cache: Dictionary = {}
 
 
 func _ready() -> void:
@@ -104,7 +127,8 @@ func _process(d: float) -> void:
 		_fx_t += d
 		if _fx_t > 1.6:
 			_fx_t = -1.0
-	if animate or _fx_t >= 0.0:
+	# V62 : le cycle jour/nuit continue de tourner lentement (bouton dans CityScreenUI)
+	if animate or _fx_t >= 0.0 or time_of_day != "jour":
 		queue_redraw()
 
 
@@ -116,20 +140,77 @@ func _style(i: int) -> Color:
 	return (STYLE.get(biome, STYLE["Forêt"]) as Array)[i]
 
 
+# ── Illustrations (V62) ─────────────────────────────────────────
+
+func _biome_key() -> String:
+	return String(BIOME_KEY.get(biome, "foret"))
+
+## Charge (et cache) une illustration ; null si le fichier n'existe pas (repli vectoriel).
+func _art(rel: String) -> Texture2D:
+	var path: String = ART_DIR + rel
+	if _tex_cache.has(path):
+		return _tex_cache[path]
+	var tex: Texture2D = null
+	if ResourceLoader.exists(path):
+		tex = load(path) as Texture2D
+	_tex_cache[path] = tex
+	return tex
+
+func _sky_art() -> Texture2D:
+	return _art("%s/sky_%s.svg" % [_biome_key(), time_of_day])
+
+func _building_art(key: String, lv: int) -> Texture2D:
+	if key == "wonder":
+		return _art("%s/wonder_%s.svg" % [_biome_key(), wonder_shape])
+	var cl: int = clampi(lv, 0, 5 if key == "hall" else 3)
+	return _art("%s/%s_%d.svg" % [_biome_key(), key, cl])
+
+func _deco_art(kind: String) -> Texture2D:
+	return _art("%s/deco_%s.svg" % [_biome_key(), kind])
+
+## Dessine un sprite de bâtiment ancré à son pied (PLOTS[key] = point au sol).
+func _draw_sprite(tex: Texture2D, g: Vector2, u: float, key: String, night: bool) -> void:
+	if tex == null:
+		return
+	var sc: float = (2.30 if key == "hall" else 1.55) * u * PLOT_SCALE.get(key, 1.0)
+	var ts: Vector2 = tex.get_size()
+	var dw: Vector2 = ts * sc
+	var r := Rect2(g - Vector2(dw.x * SPRITE_ANCHOR.x / ts.x, dw.y * SPRITE_ANCHOR.y / ts.y), dw)
+	var mod := Color(1, 1, 1)
+	if night:
+		mod = Color(0.55, 0.58, 0.78)   # voile nocturne ; les "lit" restent chauds
+	elif time_of_day == "soir":
+		mod = Color(0.92, 0.80, 0.72)
+	draw_texture_rect(tex, r, false, mod)
+
+
 # ── Dessin général ─────────────────────────────────────────────────────────
 
 func _draw() -> void:
 	var u: float = _unit()
 	var ground: Color = _style(3)
-	# ciel / illustration de la Nation en fond
-	if art != null:
-		var ts: Vector2 = art.get_size()
-		var sc: float = maxf(size.x / ts.x, size.y * 0.75 / ts.y)
+	var night: bool = time_of_day == "nuit"
+	# V62 : ciel jour / soir / nuit, sinon illustration de la Nation en fond
+	var sky: Texture2D = _sky_art()
+	if sky != null:
+		var ts: Vector2 = sky.get_size()
+		var sc: float = maxf(size.x / ts.x, size.y * 0.62 / ts.y)
 		var dw: Vector2 = ts * sc
-		draw_texture_rect(art, Rect2(Vector2((size.x - dw.x) * 0.5, size.y * 0.62 - dw.y), dw), false, Color(0.66, 0.66, 0.72))
+		draw_texture_rect(sky, Rect2(Vector2((size.x - dw.x) * 0.5, size.y * 0.60 - dw.y), dw), false)
+	elif art != null:
+		var ts2: Vector2 = art.get_size()
+		var sc2: float = maxf(size.x / ts2.x, size.y * 0.75 / ts2.y)
+		var dw2: Vector2 = ts2 * sc2
+		var sky_mod := Color(1, 1, 1) if not night else Color(0.35, 0.38, 0.6)
+		draw_texture_rect(art, Rect2(Vector2((size.x - dw2.x) * 0.5, size.y * 0.62 - dw2.y), dw2), false, sky_mod * (Color(0.66, 0.66, 0.72) if not night else Color(1, 1, 1)))
 	else:
-		draw_rect(Rect2(Vector2.ZERO, size), _style(1).darkened(0.6))
-	# sol : fondu de l'illustration vers la place de la ville
+		var sky_col: Color = _style(1).darkened(0.6)
+		if night:
+			sky_col = sky_col.darkened(0.75).lerp(Color(0.08, 0.10, 0.22), 0.6)
+		elif time_of_day == "soir":
+			sky_col = sky_col.lerp(Color(0.95, 0.55, 0.30), 0.35)
+		draw_rect(Rect2(Vector2.ZERO, size), sky_col)
+	# sol : fondu du ciel vers la place de la ville
 	if _fade == null:
 		var gr := Gradient.new()
 		gr.colors = PackedColorArray([Color(ground.r, ground.g, ground.b, 0.0), ground])
@@ -140,30 +221,42 @@ func _draw() -> void:
 		_fade.width = 4
 		_fade.height = 128
 	draw_texture_rect(_fade, Rect2(0, size.y * 0.30, size.x, size.y * 0.31), false)
-	draw_rect(Rect2(0, size.y * 0.60, size.x, size.y * 0.40), ground)
+	var ground_mod := Color(1, 1, 1)
+	if night:
+		ground_mod = Color(0.42, 0.46, 0.66)
+	elif time_of_day == "soir":
+		ground_mod = Color(0.90, 0.76, 0.62)
+	draw_rect(Rect2(0, size.y * 0.60, size.x, size.y * 0.40), ground * ground_mod)
+	# voile nocturne global (les halos/fenêtres dessinés après restent visibles)
+	if night:
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0.06, 0.08, 0.22, 0.18))
 	if threat:
 		var pulse: float = 0.5 + 0.5 * sin(_t * 2.0)
 		for i: int in range(4):
 			draw_rect(Rect2(Vector2(float(i) * 6.0, float(i) * 6.0), size - Vector2(float(i) * 12.0, float(i) * 12.0)), Color(0.95, 0.15, 0.08, (0.35 - 0.08 * float(i)) * (0.5 + 0.5 * pulse)), false, 6.0)
 	# place pavée et chemins
 	var hall_p: Vector2 = (PLOTS["hall"] as Vector2) * size
-	var path_col := Color(0.86, 0.78, 0.60, 0.55)
+	var path_col := Color(0.86, 0.78, 0.60, 0.55) * ground_mod
 	for key: String in PLOTS.keys():
 		if key == "hall":
 			continue
 		var p: Vector2 = (PLOTS[key] as Vector2) * size
 		draw_line(hall_p + Vector2(0, 8 * u), p, Color(0.20, 0.15, 0.10, 0.22), 14.0 * u, true)
 		draw_line(hall_p + Vector2(0, 8 * u), p, path_col, 9.0 * u, true)
-	_ellipse(hall_p + Vector2(0, 14 * u), Vector2(170, 52) * u, Color(0.80, 0.74, 0.60, 0.85))
-	_ellipse(hall_p + Vector2(0, 14 * u), Vector2(150, 42) * u, Color(0.72, 0.66, 0.52, 0.85))
-	# lanternes autour de la place (elles s'allument et vacillent)
+	_ellipse(hall_p + Vector2(0, 14 * u), Vector2(170, 52) * u, Color(0.80, 0.74, 0.60, 0.85) * ground_mod)
+	_ellipse(hall_p + Vector2(0, 14 * u), Vector2(150, 42) * u, Color(0.72, 0.66, 0.52, 0.85) * ground_mod)
+	# lanternes autour de la place (elles s'allument la nuit et vacillent)
+	var lamp_on: float = 1.0 if night else (0.35 if time_of_day == "soir" else 0.12)
 	for i: int in range(6):
 		var a: float = PI * (0.08 + 0.84 * float(i) / 5.0)
 		var lp: Vector2 = hall_p + Vector2(-cos(a) * 190.0 * u, 14.0 * u + sin(a) * 62.0 * u)
 		draw_line(lp, lp + Vector2(0, -30 * u), Color(0.20, 0.16, 0.12), 2.5 * u, true)
-		var fl: float = 0.75 + 0.25 * sin(_t * 9.0 + float(i) * 1.7)
-		draw_circle(lp + Vector2(0, -32 * u), 9.0 * u, Color(1.0, 0.80, 0.35, 0.22 * fl))
-		draw_circle(lp + Vector2(0, -32 * u), 3.5 * u, Color(1.0, 0.88, 0.50, fl))
+		var fl: float = (0.75 + 0.25 * sin(_t * 9.0 + float(i) * 1.7)) * lamp_on
+		if fl > 0.02:
+			draw_circle(lp + Vector2(0, -32 * u), 9.0 * u, Color(1.0, 0.80, 0.35, 0.30 * fl))
+			draw_circle(lp + Vector2(0, -32 * u), 3.5 * u, Color(1.0, 0.88, 0.50, fl))
+	# V62 : décors de la ville (arbres, rochers, puits…) + événement de ville
+	_draw_decorations(u, night)
 	# muraille : rempart en avant de la ville
 	var wall_lv: int = int(levels.get("muraille", 0))
 	if wall_lv > 0:
@@ -175,6 +268,11 @@ func _draw() -> void:
 	keys.sort_custom(func(a: String, b: String) -> bool: return (PLOTS[a] as Vector2).y < (PLOTS[b] as Vector2).y)
 	for key: String in keys:
 		_draw_plot(key, (PLOTS[key] as Vector2) * size, u)
+	# halos de nuit par-dessus les sprites (lanternes de la place + fenêtres "lit")
+	if night or time_of_day == "soir":
+		_draw_night_glows(u, hall_p)
+	if city_event == "incendie":
+		_draw_fire_event(u, hall_p)
 	if ravaged:
 		for i: int in range(5):
 			var ph: float = fposmod(_t * 0.35 + float(i) * 0.2, 1.0)
@@ -193,28 +291,43 @@ func _draw_plot(key: String, g: Vector2, u: float) -> void:
 		draw_arc(Vector2.ZERO, 88.0 * u * (1.3 if key == "hall" else 1.0), 0.0, TAU, 48, Color(1.0, 0.86, 0.40, 0.9), 3.0 * u / 0.32 * 0.32, true)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var lv: int = 0
+	# V62 : illustration du bâtiment quand elle existe, sinon dessin vectoriel (repli)
+	var tex: Texture2D = null
 	match key:
 		"hall":
 			lv = city_level
-			_hall(g, u)
+			tex = _building_art("hall", lv)
 		"barracks":
 			lv = 1
-			_barracks(g, u)
+			tex = _building_art("barracks", 1)
 		"residence":
 			lv = 1
-			_residence(g, u)
+			tex = _building_art("residence", 1)
 		"wonder":
 			lv = 1 if wonder else 0
-			if wonder:
-				_wonder(g, u)
-			else:
-				_empty_plot(g, u, bool(locked.get("wonder", true)))
+			tex = _building_art("wonder", 1) if wonder else _building_art("hall", 0)
 		_:
 			lv = int(levels.get(key, 0))
-			if lv <= 0:
-				_empty_plot(g, u, bool(locked.get(key, false)))
-			else:
-				call("_b_" + key, g, u, lv)
+			tex = _building_art(key, lv)
+	if tex != null and (wonder or key != "wonder"):
+		_draw_sprite(tex, g, u, key, time_of_day == "nuit")
+	elif key == "wonder" and not wonder:
+		_empty_plot(g, u, bool(locked.get("wonder", true)))
+	else:
+		match key:
+			"hall":
+				_hall(g, u)
+			"barracks":
+				_barracks(g, u)
+			"residence":
+				_residence(g, u)
+			"wonder":
+				_wonder(g, u)
+			_:
+				if lv <= 0:
+					_empty_plot(g, u, bool(locked.get(key, false)))
+				else:
+					call("_b_" + key, g, u, lv)
 	_plate(key, g, u, lv)
 
 
@@ -627,6 +740,87 @@ func _rampart(lv: int, u: float) -> void:
 	draw_line(Vector2(0, y - h), Vector2(size.x, y - h), stone.darkened(0.4), 1.5 * u)
 
 
+# ── Décors, événements de ville et nuit (V62) ─────────────────
+
+## Décor fixe de la ville + spécialisation + événement (fête / marchand / incendie).
+func _draw_decorations(u: float, night: bool) -> void:
+	var kinds := ["tree", "rock", "well", "tree", "rock", "tree"]
+	# spécialisation : la cité militaire hérisse la ville de lances et bannières,
+	# la cité marchande peuple la place d'étals et de charrettes
+	if spec == "militaire":
+		kinds = ["rock", "tree", "well", "rock", "tree", "rock"]
+	elif spec == "marchande":
+		kinds = ["stall", "cart", "stall", "tree", "cart", "stall"]
+	for i: int in range(DECO_SLOTS.size()):
+		var tex: Texture2D = _deco_art(kinds[i % kinds.size()])
+		if tex == null:
+			continue
+		var g: Vector2 = (DECO_SLOTS[i] as Vector2) * size
+		var sc: float = 0.85 * u
+		var ts: Vector2 = tex.get_size()
+		var dw: Vector2 = ts * sc
+		var mod := Color(1, 1, 1)
+		if night:
+			mod = Color(0.55, 0.58, 0.78)
+		draw_texture_rect(tex, Rect2(g - Vector2(dw.x * 0.5, dw.y * 100.0 / 110.0), dw), false, mod)
+	# événement de ville : fête = étals + feu de joie ; marchand = charrette sur la place
+	match city_event:
+		"fete":
+			var ft: Texture2D = _deco_art("fire")
+			if ft != null:
+				var fp: Vector2 = (PLOTS["hall"] as Vector2) * size + Vector2(0, 26 * u)
+				var fs: float = 1.1 * u
+				var fsz: Vector2 = ft.get_size() * fs
+				draw_texture_rect(ft, Rect2(fp - Vector2(fsz.x * 0.5, fsz.y * 40.0 / 110.0), fsz), false)
+			var st: Texture2D = _deco_art("stall")
+			if st != null:
+				for sx in [-1.0, 1.0]:
+					var sp: Vector2 = (PLOTS["hall"] as Vector2) * size + Vector2(sx * 120.0 * u, 22.0 * u)
+					var ss: float = 1.0 * u
+					var ssz: Vector2 = st.get_size() * ss
+					draw_texture_rect(st, Rect2(sp - Vector2(ssz.x * 0.5, ssz.y * 100.0 / 110.0), ssz), false)
+		"marchand":
+			var ct: Texture2D = _deco_art("cart")
+			if ct != null:
+				var cp: Vector2 = (PLOTS["hall"] as Vector2) * size + Vector2(90.0 * u, 30.0 * u)
+				var cs: float = 1.2 * u
+				var csz: Vector2 = ct.get_size() * cs
+				draw_texture_rect(ct, Rect2(cp - Vector2(csz.x * 0.5, csz.y * 100.0 / 110.0), csz), false)
+
+## Halos chauds la nuit / au soir : lanternes de la place + fenêtres des bâtiments.
+func _draw_night_glows(u: float, hall_p: Vector2) -> void:
+	var on: float = 1.0 if time_of_day == "nuit" else 0.4
+	for i: int in range(6):
+		var a: float = PI * (0.08 + 0.84 * float(i) / 5.0)
+		var lp: Vector2 = hall_p + Vector2(-cos(a) * 190.0 * u, 14.0 * u + sin(a) * 62.0 * u) + Vector2(0, -32 * u)
+		var fl: float = (0.75 + 0.25 * sin(_t * 9.0 + float(i) * 1.7)) * on
+		draw_circle(lp, (14.0 + 4.0 * sin(_t * 5.0 + float(i))) * u, Color(1.0, 0.78, 0.35, 0.20 * fl))
+	# fenêtres "lit" des bâtiments construits
+	for key: String in PLOTS.keys():
+		var built: bool = key in ["barracks", "residence"] or int(levels.get(key, 0)) > 0 or (key == "wonder" and wonder) or key == "hall"
+		if not built:
+			continue
+		var g: Vector2 = (PLOTS[key] as Vector2) * size
+		var n_win: int = 3 if key == "hall" else 2
+		for w: int in range(n_win):
+			var wx: float = g.x + (float(w) - float(n_win - 1) * 0.5) * 26.0 * u * PLOT_SCALE.get(key, 1.0)
+			var wy: float = g.y - 52.0 * u * PLOT_SCALE.get(key, 1.0)
+			draw_rect(Rect2(wx - 4 * u, wy - 5 * u, 8 * u, 10 * u), Color(1.0, 0.82, 0.42, 0.85 * on))
+			draw_circle(Vector2(wx, wy), 10.0 * u, Color(1.0, 0.80, 0.35, 0.14 * on))
+
+## Incendie de ville : flammes et fumée noire sur l'hôtel de ville.
+func _draw_fire_event(u: float, hall_p: Vector2) -> void:
+	var pulse: float = 0.5 + 0.5 * sin(_t * 7.0)
+	var fp: Vector2 = hall_p + Vector2(30.0 * u, -70.0 * u)
+	draw_circle(fp, (26.0 + 8.0 * pulse) * u, Color(1.0, 0.45, 0.10, 0.35))
+	for k: int in range(3):
+		var ph: float = fposmod(_t * 1.4 + float(k) * 0.33, 1.0)
+		var sp: Vector2 = fp + Vector2(sin(ph * 8.0 + float(k)) * 6.0 * u + ph * 10.0 * u, -ph * 70.0 * u)
+		draw_circle(sp, (8.0 + ph * 14.0) * u, Color(0.12, 0.11, 0.11, 0.5 * (1.0 - ph)))
+	var fl: float = 0.7 + 0.3 * sin(_t * 11.0)
+	draw_circle(fp + Vector2(-6 * u, -14 * u), 9.0 * u * fl, Color(1.0, 0.55, 0.10, 0.9))
+	draw_circle(fp + Vector2(4 * u, -18 * u), 7.0 * u * fl, Color(1.0, 0.75, 0.25, 0.9))
+
 ## Habitants qui vont et viennent entre l'hôtel de ville et les bâtiments.
 func _villagers(u: float) -> void:
 	var hall_p: Vector2 = (PLOTS["hall"] as Vector2) * size + Vector2(0, 10 * u)
@@ -638,6 +832,8 @@ func _villagers(u: float) -> void:
 		return
 	var n: int = 2 + city_level * 2
 	var cols: Array = [Color(0.75, 0.30, 0.25), Color(0.25, 0.45, 0.75), Color(0.85, 0.70, 0.25), Color(0.40, 0.62, 0.35)]
+	if time_of_day == "nuit":
+		cols = cols.map(func(c: Color) -> Color: return c * Color(0.55, 0.58, 0.80))
 	for i: int in range(n):
 		var tgt: Vector2 = (PLOTS[targets[i % targets.size()]] as Vector2) * size
 		var ph: float = fposmod(_t * (0.05 + 0.012 * float(i % 3)) + float(i) * 0.37, 1.0)

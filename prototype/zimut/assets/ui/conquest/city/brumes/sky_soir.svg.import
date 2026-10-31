@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://xozqhdm4fixi1"
+path="res://.godot/imported/sky_soir.svg-2d93a4e893405201f3aa1916d9fae61e.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brumes/sky_soir.svg"
+dest_files=["res://.godot/imported/sky_soir.svg-2d93a4e893405201f3aa1916d9fae61e.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

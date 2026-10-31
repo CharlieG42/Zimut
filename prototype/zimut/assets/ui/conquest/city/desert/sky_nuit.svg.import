@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://tkisfaoj7yq6l"
+path="res://.godot/imported/sky_nuit.svg-6817b8d3689f67b500dc542e58866a5a.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/desert/sky_nuit.svg"
+dest_files=["res://.godot/imported/sky_nuit.svg-6817b8d3689f67b500dc542e58866a5a.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

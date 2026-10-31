@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://u7kxvrdbi5uqs"
+path="res://.godot/imported/wonder_forge.svg-96d9e8c64685a0b00e153fd0d83ed831.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brumes/wonder_forge.svg"
+dest_files=["res://.godot/imported/wonder_forge.svg-96d9e8c64685a0b00e153fd0d83ed831.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

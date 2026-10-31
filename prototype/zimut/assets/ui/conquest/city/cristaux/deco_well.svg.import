@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://r1z6ii2cw64xb"
+path="res://.godot/imported/deco_well.svg-d9010a2a6052f22623285bd5538c83e2.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/cristaux/deco_well.svg"
+dest_files=["res://.godot/imported/deco_well.svg-d9010a2a6052f22623285bd5538c83e2.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://ohwrwmbkmvgp7"
+path="res://.godot/imported/deco_stall.svg-75e1073309774a5aa28b113641ed9694.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/deco_stall.svg"
+dest_files=["res://.godot/imported/deco_stall.svg-75e1073309774a5aa28b113641ed9694.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

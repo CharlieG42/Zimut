@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://viqe1iy0xeixx"
+path="res://.godot/imported/residence_3.svg-bd694ccd30a2399ffd834f6aafed8abc.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/cristaux/residence_3.svg"
+dest_files=["res://.godot/imported/residence_3.svg-bd694ccd30a2399ffd834f6aafed8abc.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

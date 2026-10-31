@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://aakblrwk645xw"
+path="res://.godot/imported/scierie_0.svg-c1d2403132e988d1916e1ba8cda7cc7f.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/ombres/scierie_0.svg"
+dest_files=["res://.godot/imported/scierie_0.svg-c1d2403132e988d1916e1ba8cda7cc7f.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

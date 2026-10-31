@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://y97jum61qpnu0"
+path="res://.godot/imported/deco_lamp.svg-de8e83183fb3a8d7cb980b063367fc47.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/cristaux/deco_lamp.svg"
+dest_files=["res://.godot/imported/deco_lamp.svg-de8e83183fb3a8d7cb980b063367fc47.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

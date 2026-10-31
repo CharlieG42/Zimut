@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://wmua2ng32s1fq"
+path="res://.godot/imported/wonder_tower.svg-f0976718f5be2409d91620f8bac83eb5.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/wonder_tower.svg"
+dest_files=["res://.godot/imported/wonder_tower.svg-f0976718f5be2409d91620f8bac83eb5.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

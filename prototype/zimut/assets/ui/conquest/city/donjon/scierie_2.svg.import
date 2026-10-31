@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://vixs3o3vxg5qb"
+path="res://.godot/imported/scierie_2.svg-df2b75b8476d2794a299a2e83265a280.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/scierie_2.svg"
+dest_files=["res://.godot/imported/scierie_2.svg-df2b75b8476d2794a299a2e83265a280.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

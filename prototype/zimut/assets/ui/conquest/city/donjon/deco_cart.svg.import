@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://k639vgqe0domd"
+path="res://.godot/imported/deco_cart.svg-e7748433106a4a222e089f1284ca472f.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/deco_cart.svg"
+dest_files=["res://.godot/imported/deco_cart.svg-e7748433106a4a222e089f1284ca472f.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

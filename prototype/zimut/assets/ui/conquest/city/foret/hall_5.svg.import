@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://hcju1hvl3xsxi"
+path="res://.godot/imported/hall_5.svg-8992a80fd3cec0ee983212b5f1743f93.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/foret/hall_5.svg"
+dest_files=["res://.godot/imported/hall_5.svg-8992a80fd3cec0ee983212b5f1743f93.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

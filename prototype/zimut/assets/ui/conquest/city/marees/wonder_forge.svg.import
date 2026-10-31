@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://5uiznad04ovnk"
+path="res://.godot/imported/wonder_forge.svg-bc7564ccd7e04517d468597ba983e83e.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/marees/wonder_forge.svg"
+dest_files=["res://.godot/imported/wonder_forge.svg-bc7564ccd7e04517d468597ba983e83e.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

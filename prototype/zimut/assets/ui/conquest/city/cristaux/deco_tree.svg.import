@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://75ccfct6o5l2z"
+path="res://.godot/imported/deco_tree.svg-09e4bd05c218d57065d963bbcff81674.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/cristaux/deco_tree.svg"
+dest_files=["res://.godot/imported/deco_tree.svg-09e4bd05c218d57065d963bbcff81674.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

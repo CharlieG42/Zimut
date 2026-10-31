@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://51wgssuxv4fc0"
+path="res://.godot/imported/residence_2.svg-af4071c138b936468429f5ecc14e3e41.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/desert/residence_2.svg"
+dest_files=["res://.godot/imported/residence_2.svg-af4071c138b936468429f5ecc14e3e41.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

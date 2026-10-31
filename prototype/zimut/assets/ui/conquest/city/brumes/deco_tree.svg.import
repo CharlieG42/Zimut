@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://zerbw43ss6wd2"
+path="res://.godot/imported/deco_tree.svg-912bc24d4f1e0469c6af241bf16abb72.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brumes/deco_tree.svg"
+dest_files=["res://.godot/imported/deco_tree.svg-912bc24d4f1e0469c6af241bf16abb72.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

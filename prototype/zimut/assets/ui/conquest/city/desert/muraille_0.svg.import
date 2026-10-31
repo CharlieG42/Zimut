@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://rj7ad51ftqy7l"
+path="res://.godot/imported/muraille_0.svg-982a45161befd6a9b29cd8c70456d305.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/desert/muraille_0.svg"
+dest_files=["res://.godot/imported/muraille_0.svg-982a45161befd6a9b29cd8c70456d305.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

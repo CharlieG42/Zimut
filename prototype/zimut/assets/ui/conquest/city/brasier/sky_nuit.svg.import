@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://s52zacq73p9bz"
+path="res://.godot/imported/sky_nuit.svg-1616cd30e51d39f6b7ba53dbf3237a54.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/sky_nuit.svg"
+dest_files=["res://.godot/imported/sky_nuit.svg-1616cd30e51d39f6b7ba53dbf3237a54.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

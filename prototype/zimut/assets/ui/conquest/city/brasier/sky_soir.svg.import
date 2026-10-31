@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://krnxmjdfp1mg4"
+path="res://.godot/imported/sky_soir.svg-b4c3c4aa81a73c5bd63714993c4fd497.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/sky_soir.svg"
+dest_files=["res://.godot/imported/sky_soir.svg-b4c3c4aa81a73c5bd63714993c4fd497.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

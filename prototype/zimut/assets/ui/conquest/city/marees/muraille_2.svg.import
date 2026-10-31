@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://bo6cyzowiyhyt"
+path="res://.godot/imported/muraille_2.svg-6b7e02489ccd4bbf9bd9776d99d1d842.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/marees/muraille_2.svg"
+dest_files=["res://.godot/imported/muraille_2.svg-6b7e02489ccd4bbf9bd9776d99d1d842.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

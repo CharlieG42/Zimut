@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://g5rs50ief62o5"
+path="res://.godot/imported/deco_fire.svg-c56c5828483cd1b077ab612bac88e6d8.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/vents/deco_fire.svg"
+dest_files=["res://.godot/imported/deco_fire.svg-c56c5828483cd1b077ab612bac88e6d8.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

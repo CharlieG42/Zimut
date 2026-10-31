@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://7zphfql74jj60"
+path="res://.godot/imported/deco_stall.svg-c849dac3397eabb0677e84035cd8cf7a.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/deco_stall.svg"
+dest_files=["res://.godot/imported/deco_stall.svg-c849dac3397eabb0677e84035cd8cf7a.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

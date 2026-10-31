@@ -382,6 +382,108 @@ static func wonder_yield(conq: Dictionary, biomes: Dictionary) -> Dictionary:
 			out[k] = int(out.get(k, 0)) + int(r[k])
 	return out
 
+# ─────────────────────────────────────────────────────────────
+#  Aspect graphique de la ville (V62) : heure du jour, événements
+#  de ville et spécialisation choisie au niveau Cité.
+# ─────────────────────────────────────────────────────────────
+
+const DAY_CYCLE := ["jour", "soir", "nuit"]
+## Événements de ville (décor + ambiance, sans effet de gameplay) :
+## fête (étals + feu), incendie (fumée noire sur un bâtiment), marchand de passage (charrette).
+const CITY_EVENTS := ["fete", "incendie", "marchand"]
+## Spécialisations choisies au niveau Cité (niveau 3) : changent l'allure de la ville.
+const CITY_SPECS := {
+	"militaire": {"label": "Cité militaire", "text": "Remparts, casernes et bannières : la ville se hérisse.", "def": 2, "gold": 0, "res": {}},
+	"marchande": {"label": "Cité marchande", "text": "Étals, bannières et charrettes : le commerce anime la place.", "def": 0, "gold": 3, "res": {}},
+}
+const SPEC_MIN_LEVEL := 3
+
+## Heure du jour d'une ville : "jour", "soir" ou "nuit" (cycle lent, déterministe).
+static func time_of_day(conq: Dictionary, id: String) -> String:
+	var bc: int = int(conq.get("battle_count", 0))
+	var idx: int = (bc + _city_index(conq, id)) % DAY_CYCLE.size()
+	return DAY_CYCLE[maxi(idx, 0)]
+
+## Avance l'heure de la ville (bouton jour/nuit de l'écran de ville).
+static func cycle_time_of_day(conq: Dictionary, id: String) -> String:
+	var cur: String = time_of_day(conq, id)
+	var idx: int = DAY_CYCLE.find(cur)
+	conq["city_time"] = conq.get("city_time", {})
+	var t: Dictionary = conq["city_time"]
+	t[id] = (idx + 1) % DAY_CYCLE.size()
+	return DAY_CYCLE[int(t[id])]
+
+## Heure effective : décalage manuel prioritaire, sinon cycle automatique.
+static func effective_time(conq: Dictionary, id: String) -> String:
+	var t: Dictionary = conq.get("city_time", {})
+	if t.has(id):
+		return DAY_CYCLE[int(t[id]) % DAY_CYCLE.size()]
+	return time_of_day(conq, id)
+
+static func _city_index(conq: Dictionary, id: String) -> int:
+	var owned: Array = conq.get("owned", [])
+	var i: int = owned.find(id)
+	return i if i >= 0 else 0
+
+## Événement de ville en cours : "" ou "fete" / "incendie" / "marchand".
+static func city_event(conq: Dictionary, id: String) -> String:
+	var ev: Dictionary = conq.get("city_events", {})
+	return String(ev.get(id, ""))
+
+## Déclenche un événement de ville (appelé à l'entrée dans la ville, proba faible).
+static func maybe_city_event(conq: Dictionary, id: String, rng: RandomNumberGenerator = null) -> String:
+	var r := rng if rng != null else RandomNumberGenerator.new()
+	var ev: Dictionary = conq.get("city_events", {})
+	if String(ev.get(id, "")) != "":
+		return String(ev[id])
+	if r.randf() > 0.25:
+		return ""
+	var pick: String = CITY_EVENTS[r.randi() % CITY_EVENTS.size()]
+	ev[id] = pick
+	conq["city_events"] = ev
+	return pick
+
+## Fait expirer les événements de ville (appelé à chaque victoire).
+static func tick_city_events(conq: Dictionary) -> void:
+	var ev: Dictionary = conq.get("city_events", {})
+	for id: String in ev.keys().duplicate():
+		if not (conq.get("owned", []) as Array).has(id):
+			ev.erase(id)
+			continue
+		if randi() % 3 == 0:
+			ev.erase(id)
+	conq["city_events"] = ev
+
+## Spécialisation de la ville choisie au niveau Cité : "" sinon.
+static func city_spec(conq: Dictionary, id: String) -> String:
+	return String(conq.get("city_specs", {}).get(id, ""))
+
+## Choisit la spécialisation d'une ville devenue Cité (niveau 3+). "" si OK.
+static func choose_spec(data: Dictionary, id: String, spec: String) -> String:
+	if not CITY_SPECS.has(spec):
+		return "Spécialisation inconnue."
+	var conq: Dictionary = data.get("conquest", {})
+	if not (conq.get("owned", []) as Array).has(id):
+		return "Ville non conquise."
+	if city_level(conq, id) < SPEC_MIN_LEVEL:
+		return "La ville doit devenir une %s." % level_name(SPEC_MIN_LEVEL)
+	if String(conq.get("city_specs", {}).get(id, "")) != "":
+		return "Spécialisation déjà choisie."
+	var s: Dictionary = conq.get("city_specs", {})
+	s[id] = spec
+	conq["city_specs"] = s
+	data["conquest"] = conq
+	log_event(conq, "⚑ %s devient une %s" % [id, String(CITY_SPECS[spec]["label"]).to_lower()])
+	return ""
+
+## Bonus de la spécialisation (défense / or par victoire), ville non pillée ni ruinée.
+static func spec_bonus(conq: Dictionary, id: String) -> Dictionary:
+	var spec: String = city_spec(conq, id)
+	if spec == "" or is_ravaged(conq, id) or is_ruined(conq, id):
+		return {"def": 0, "gold": 0, "res": {}}
+	var s: Dictionary = CITY_SPECS.get(spec, {})
+	return {"def": int(s.get("def", 0)), "gold": int(s.get("gold", 0)), "res": s.get("res", {})}
+
 static func hero_level(data: Dictionary, classe: String) -> int:
 	return int(data.get("roster", {}).get(classe, {}).get("level", 1))
 
@@ -421,6 +523,7 @@ static func defense(data: Dictionary, id: String) -> int:
 	var h: String = hero_of(conq, id)
 	if h != "":
 		d += 6 + int(float(hero_level(data, h)) * 0.5) + int(GOVERNOR.get(h, {}).get("def", 0)) + governor_gear_defense(data, h)
+	d += int(spec_bonus(conq, id).get("def", 0))   # spécialisation Cité (V62)
 	return d
 
 ## Or versé par bataille gagnée par une ville (gelé si pillée).
@@ -434,6 +537,7 @@ static func city_income(data: Dictionary, id: String) -> int:
 	var h: String = hero_of(conq, id)
 	if h != "":
 		base += 2 + int(GOVERNOR.get(h, {}).get("gold", 0)) + governor_gear_gold(data, h)
+	base += int(spec_bonus(conq, id).get("gold", 0))   # spécialisation Cité (V62)
 	return base
 
 static func total_income(data: Dictionary) -> int:
@@ -997,6 +1101,7 @@ static func after_victory(data: Dictionary, conq: Dictionary, rng: RandomNumberG
 	_tick_missions(data, conq, rng, unrevealed)
 	_tick_chancellor_buffs(conq)
 	_tick_ruins(conq)
+	tick_city_events(conq)   # V62 : les événements de ville s'éteignent avec le temps
 	if int(conq.get("diplo_cd", 0)) > 0:
 		conq["diplo_cd"] = int(conq["diplo_cd"]) - 1
 	maybe_chancellor(conq)

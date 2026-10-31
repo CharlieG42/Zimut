@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://6zxgpe25h74u4"
+path="res://.godot/imported/barracks_0.svg-a9055b4414b57201b61dfe8c53fe285e.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brumes/barracks_0.svg"
+dest_files=["res://.godot/imported/barracks_0.svg-a9055b4414b57201b61dfe8c53fe285e.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

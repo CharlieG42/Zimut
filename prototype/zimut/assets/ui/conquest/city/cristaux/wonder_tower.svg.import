@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://wmdtcwl226fv6"
+path="res://.godot/imported/wonder_tower.svg-ca134c674e1c84af6ce3c7e4547b229d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/cristaux/wonder_tower.svg"
+dest_files=["res://.godot/imported/wonder_tower.svg-ca134c674e1c84af6ce3c7e4547b229d.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

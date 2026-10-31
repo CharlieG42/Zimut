@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://yqlpx6uu0lf0r"
+path="res://.godot/imported/sky_soir.svg-2bc0cf853cccd53d6280be0be1dca616.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/sky_soir.svg"
+dest_files=["res://.godot/imported/sky_soir.svg-2bc0cf853cccd53d6280be0be1dca616.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://3ssvhb9yswzys"
+path="res://.godot/imported/deco_well.svg-9900e1c765d77a8cd250db33067081f0.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/deco_well.svg"
+dest_files=["res://.godot/imported/deco_well.svg-9900e1c765d77a8cd250db33067081f0.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://qraz52m7rrgfi"
+path="res://.godot/imported/wonder_mill.svg-f3ead0ec41a357d5e7ba82e477b65351.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/marees/wonder_mill.svg"
+dest_files=["res://.godot/imported/wonder_mill.svg-f3ead0ec41a357d5e7ba82e477b65351.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

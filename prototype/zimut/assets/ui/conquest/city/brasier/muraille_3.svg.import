@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://rmd2watwd16gq"
+path="res://.godot/imported/muraille_3.svg-35489cdf49c0a4e1e17870d4b5b3a828.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/muraille_3.svg"
+dest_files=["res://.godot/imported/muraille_3.svg-35489cdf49c0a4e1e17870d4b5b3a828.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

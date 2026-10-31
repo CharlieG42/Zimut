@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://yolcoaltepwbt"
+path="res://.godot/imported/tannerie_3.svg-3518486a4d6e3f0644c540a8dc1ad56c.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/ombres/tannerie_3.svg"
+dest_files=["res://.godot/imported/tannerie_3.svg-3518486a4d6e3f0644c540a8dc1ad56c.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

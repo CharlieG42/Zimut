@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://efp7m0gq8po63"
+path="res://.godot/imported/muraille_3.svg-3e9427b6834d0c4ff5c69d8b78419c1a.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brumes/muraille_3.svg"
+dest_files=["res://.godot/imported/muraille_3.svg-3e9427b6834d0c4ff5c69d8b78419c1a.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://a38tw7rss8c9d"
+path="res://.godot/imported/hall_2.svg-81f2341ae0fec43cf01d75c6abe974a6.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brumes/hall_2.svg"
+dest_files=["res://.godot/imported/hall_2.svg-81f2341ae0fec43cf01d75c6abe974a6.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

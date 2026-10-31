@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://5yrvbovm0nw5k"
+path="res://.godot/imported/deco_well.svg-6b7557bf39a73b41a349e8086dbe900d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/montagne/deco_well.svg"
+dest_files=["res://.godot/imported/deco_well.svg-6b7557bf39a73b41a349e8086dbe900d.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

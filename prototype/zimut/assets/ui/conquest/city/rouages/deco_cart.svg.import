@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://56d43fkmdrkky"
+path="res://.godot/imported/deco_cart.svg-17644d187a3aef6ab9b0c94b20557778.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/rouages/deco_cart.svg"
+dest_files=["res://.godot/imported/deco_cart.svg-17644d187a3aef6ab9b0c94b20557778.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

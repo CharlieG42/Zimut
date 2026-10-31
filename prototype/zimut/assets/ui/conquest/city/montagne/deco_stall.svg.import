@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://a0q3dyon66bbl"
+path="res://.godot/imported/deco_stall.svg-237755b92cd89667890bf093ef45c6c8.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/montagne/deco_stall.svg"
+dest_files=["res://.godot/imported/deco_stall.svg-237755b92cd89667890bf093ef45c6c8.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

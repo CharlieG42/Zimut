@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://o6q11ezpfs316"
+path="res://.godot/imported/scierie_3.svg-d89cc68cad8cde67b7d033a537f4a464.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/foret/scierie_3.svg"
+dest_files=["res://.godot/imported/scierie_3.svg-d89cc68cad8cde67b7d033a537f4a464.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

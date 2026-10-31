@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://9q07l189yo4iv"
+path="res://.godot/imported/verger_0.svg-c70785b78e41a37c31621b121d162154.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/verger_0.svg"
+dest_files=["res://.godot/imported/verger_0.svg-c70785b78e41a37c31621b121d162154.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://dy7og25twpynn"
+path="res://.godot/imported/deco_tree.svg-226733e3215e75a9f6d12b3b45245e55.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/ombres/deco_tree.svg"
+dest_files=["res://.godot/imported/deco_tree.svg-226733e3215e75a9f6d12b3b45245e55.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

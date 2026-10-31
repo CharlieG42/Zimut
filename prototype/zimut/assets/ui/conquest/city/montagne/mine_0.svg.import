@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://ohjsdvmvy4uw6"
+path="res://.godot/imported/mine_0.svg-955a308ff9ed7b4a550ac32dc286abca.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/montagne/mine_0.svg"
+dest_files=["res://.godot/imported/mine_0.svg-955a308ff9ed7b4a550ac32dc286abca.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

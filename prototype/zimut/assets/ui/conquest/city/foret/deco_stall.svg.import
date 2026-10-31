@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://0fb7lrhp3kib1"
+path="res://.godot/imported/deco_stall.svg-052d505a25e134330919e28cd85d8123.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/foret/deco_stall.svg"
+dest_files=["res://.godot/imported/deco_stall.svg-052d505a25e134330919e28cd85d8123.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

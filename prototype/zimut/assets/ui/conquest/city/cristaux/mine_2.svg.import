@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://7h2vwe5qoj6jk"
+path="res://.godot/imported/mine_2.svg-23504633cb9dbb14e8ec9e04e84ce2c8.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/cristaux/mine_2.svg"
+dest_files=["res://.godot/imported/mine_2.svg-23504633cb9dbb14e8ec9e04e84ce2c8.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

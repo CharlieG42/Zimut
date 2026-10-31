@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://nthhtz8p5nt71"
+path="res://.godot/imported/tannerie_2.svg-f20d87baabd6ade1ffce015da2adbcea.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/tannerie_2.svg"
+dest_files=["res://.godot/imported/tannerie_2.svg-f20d87baabd6ade1ffce015da2adbcea.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

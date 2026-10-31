@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://tuor0scecnv20"
+path="res://.godot/imported/sky_nuit.svg-3df95f147a71c3aa2a01718613cdab94.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/sky_nuit.svg"
+dest_files=["res://.godot/imported/sky_nuit.svg-3df95f147a71c3aa2a01718613cdab94.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

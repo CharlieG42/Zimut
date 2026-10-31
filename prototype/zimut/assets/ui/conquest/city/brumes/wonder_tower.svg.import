@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://k6mrxsumgr7hw"
+path="res://.godot/imported/wonder_tower.svg-578acc14da5f7da54edf86eb68fbb2be.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brumes/wonder_tower.svg"
+dest_files=["res://.godot/imported/wonder_tower.svg-578acc14da5f7da54edf86eb68fbb2be.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

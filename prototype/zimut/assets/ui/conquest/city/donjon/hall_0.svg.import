@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://w176brh0mq6we"
+path="res://.godot/imported/hall_0.svg-86b63161b6eb33e005898884f6253876.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/hall_0.svg"
+dest_files=["res://.godot/imported/hall_0.svg-86b63161b6eb33e005898884f6253876.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

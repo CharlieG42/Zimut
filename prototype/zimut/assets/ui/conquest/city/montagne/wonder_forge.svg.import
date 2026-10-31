@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://olcxxcuvzkqr9"
+path="res://.godot/imported/wonder_forge.svg-7e954b0cb74487dc46c723a55d73eeb5.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/montagne/wonder_forge.svg"
+dest_files=["res://.godot/imported/wonder_forge.svg-7e954b0cb74487dc46c723a55d73eeb5.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

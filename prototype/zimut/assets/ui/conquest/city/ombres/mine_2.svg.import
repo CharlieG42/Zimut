@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://sgxmt55kbbd3d"
+path="res://.godot/imported/mine_2.svg-67c2003201cd6f95af73871919989ffd.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/ombres/mine_2.svg"
+dest_files=["res://.godot/imported/mine_2.svg-67c2003201cd6f95af73871919989ffd.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

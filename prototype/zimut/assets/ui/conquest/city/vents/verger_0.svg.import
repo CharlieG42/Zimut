@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://oazzevp2qysxj"
+path="res://.godot/imported/verger_0.svg-a8cec5183b7e982e196440cfe9a54712.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/vents/verger_0.svg"
+dest_files=["res://.godot/imported/verger_0.svg-a8cec5183b7e982e196440cfe9a54712.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

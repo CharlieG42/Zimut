@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://do2humybu4hu5"
+path="res://.godot/imported/barracks_2.svg-7b8774d3733be06e5a6570e4c8a345de.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/montagne/barracks_2.svg"
+dest_files=["res://.godot/imported/barracks_2.svg-7b8774d3733be06e5a6570e4c8a345de.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

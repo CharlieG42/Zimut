@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://m54asmyj30eau"
+path="res://.godot/imported/residence_3.svg-a4b8a2c7a7e6302b2365db2d323c339c.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/montagne/residence_3.svg"
+dest_files=["res://.godot/imported/residence_3.svg-a4b8a2c7a7e6302b2365db2d323c339c.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://ytvmfyrnu9ln7"
+path="res://.godot/imported/wonder_crypt.svg-0d4727eb497e3e536d6eb82867a4a1fa.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/wonder_crypt.svg"
+dest_files=["res://.godot/imported/wonder_crypt.svg-0d4727eb497e3e536d6eb82867a4a1fa.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

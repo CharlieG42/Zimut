@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://3rxmvens5ccga"
+path="res://.godot/imported/deco_rock.svg-a0989fc03407ee74417d9c698e05462e.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/deco_rock.svg"
+dest_files=["res://.godot/imported/deco_rock.svg-a0989fc03407ee74417d9c698e05462e.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://62r4fmpjwnzx7"
+path="res://.godot/imported/scierie_2.svg-e0c1fd4b4d0f694239d3cf858d286251.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/desert/scierie_2.svg"
+dest_files=["res://.godot/imported/scierie_2.svg-e0c1fd4b4d0f694239d3cf858d286251.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

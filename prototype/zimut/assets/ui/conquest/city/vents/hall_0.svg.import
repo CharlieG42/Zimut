@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://tzgmr70d5i9d4"
+path="res://.godot/imported/hall_0.svg-4865d647a861818cf5d7648379cb9ce5.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/vents/hall_0.svg"
+dest_files=["res://.godot/imported/hall_0.svg-4865d647a861818cf5d7648379cb9ce5.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://r8zfanvczx6fb"
+path="res://.godot/imported/tannerie_2.svg-3d187be5028222cf2cee1caa4baef4f1.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/marees/tannerie_2.svg"
+dest_files=["res://.godot/imported/tannerie_2.svg-3d187be5028222cf2cee1caa4baef4f1.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

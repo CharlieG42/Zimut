@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://chhfwsmf1p5ga"
+path="res://.godot/imported/hall_5.svg-077b9a4b2c8e6eb9da157de9777cea4e.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/hall_5.svg"
+dest_files=["res://.godot/imported/hall_5.svg-077b9a4b2c8e6eb9da157de9777cea4e.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

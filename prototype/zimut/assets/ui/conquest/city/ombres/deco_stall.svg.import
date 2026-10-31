@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://0s9ax61hawxi5"
+path="res://.godot/imported/deco_stall.svg-730b6c4ef4a60a393e53cfce08228ecb.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/ombres/deco_stall.svg"
+dest_files=["res://.godot/imported/deco_stall.svg-730b6c4ef4a60a393e53cfce08228ecb.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

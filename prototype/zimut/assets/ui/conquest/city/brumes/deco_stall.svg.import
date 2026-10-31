@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://axkezwyn6x2uk"
+path="res://.godot/imported/deco_stall.svg-fa8a5910818f144fb815361e1cad487f.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brumes/deco_stall.svg"
+dest_files=["res://.godot/imported/deco_stall.svg-fa8a5910818f144fb815361e1cad487f.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

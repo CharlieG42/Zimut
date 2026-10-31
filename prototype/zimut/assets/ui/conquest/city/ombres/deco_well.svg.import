@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://96elkxoaf4b1t"
+path="res://.godot/imported/deco_well.svg-f529de72e8c190b528191eb38f1ee956.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/ombres/deco_well.svg"
+dest_files=["res://.godot/imported/deco_well.svg-f529de72e8c190b528191eb38f1ee956.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

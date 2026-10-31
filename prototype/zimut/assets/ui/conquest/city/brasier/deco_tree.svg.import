@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://qxi28wjecdkah"
+path="res://.godot/imported/deco_tree.svg-950f831a78a24de3efb2741df3a7ae1d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/deco_tree.svg"
+dest_files=["res://.godot/imported/deco_tree.svg-950f831a78a24de3efb2741df3a7ae1d.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

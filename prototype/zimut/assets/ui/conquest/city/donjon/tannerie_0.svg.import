@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://k48s4tu9t8z9c"
+path="res://.godot/imported/tannerie_0.svg-3398733ba2aa958da968f59d107f40eb.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/tannerie_0.svg"
+dest_files=["res://.godot/imported/tannerie_0.svg-3398733ba2aa958da968f59d107f40eb.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

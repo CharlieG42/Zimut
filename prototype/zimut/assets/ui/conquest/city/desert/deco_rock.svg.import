@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://17pfnyxuktfz0"
+path="res://.godot/imported/deco_rock.svg-0dc6f8f0e11fbbf8123490cb62aa0dfc.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/desert/deco_rock.svg"
+dest_files=["res://.godot/imported/deco_rock.svg-0dc6f8f0e11fbbf8123490cb62aa0dfc.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

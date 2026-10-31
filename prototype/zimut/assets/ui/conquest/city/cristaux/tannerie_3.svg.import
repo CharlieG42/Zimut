@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://7zqymk6bl5co1"
+path="res://.godot/imported/tannerie_3.svg-5baf67037991447a5b71e477a537d332.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/cristaux/tannerie_3.svg"
+dest_files=["res://.godot/imported/tannerie_3.svg-5baf67037991447a5b71e477a537d332.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

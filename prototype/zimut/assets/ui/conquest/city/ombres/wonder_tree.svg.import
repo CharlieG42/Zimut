@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://hi73m5y5f5ujw"
+path="res://.godot/imported/wonder_tree.svg-ca1856e61c2e7344b566e455c47c74a4.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/ombres/wonder_tree.svg"
+dest_files=["res://.godot/imported/wonder_tree.svg-ca1856e61c2e7344b566e455c47c74a4.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

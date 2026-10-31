@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://zipjjqh7q4vds"
+path="res://.godot/imported/mine_0.svg-594c678ed6dde1eba31d497d9eae138d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/mine_0.svg"
+dest_files=["res://.godot/imported/mine_0.svg-594c678ed6dde1eba31d497d9eae138d.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

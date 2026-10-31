@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://92qyukpi7wsxt"
+path="res://.godot/imported/hall_2.svg-c429a379063369886695b3e4a0e4a487.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/cristaux/hall_2.svg"
+dest_files=["res://.godot/imported/hall_2.svg-c429a379063369886695b3e4a0e4a487.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

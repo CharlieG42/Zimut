@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://bhci8mtvokz58"
+path="res://.godot/imported/wonder_crypt.svg-3f9c1805197ea2f5a69d14f6c8008006.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/montagne/wonder_crypt.svg"
+dest_files=["res://.godot/imported/wonder_crypt.svg-3f9c1805197ea2f5a69d14f6c8008006.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

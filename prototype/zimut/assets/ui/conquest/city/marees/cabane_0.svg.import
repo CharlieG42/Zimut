@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://wqrpb3mk3frkl"
+path="res://.godot/imported/cabane_0.svg-25a0773038e72864b0553e2e92e9379c.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/marees/cabane_0.svg"
+dest_files=["res://.godot/imported/cabane_0.svg-25a0773038e72864b0553e2e92e9379c.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

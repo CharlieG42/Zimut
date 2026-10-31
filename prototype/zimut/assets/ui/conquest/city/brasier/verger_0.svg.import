@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://grknhqahhoe6h"
+path="res://.godot/imported/verger_0.svg-406601b315c469fcba49759362fe1af6.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/verger_0.svg"
+dest_files=["res://.godot/imported/verger_0.svg-406601b315c469fcba49759362fe1af6.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://982p42okuhaz4"
+path="res://.godot/imported/muraille_1.svg-13efff99f3bcf55b94a6d6c02684a9e9.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/rouages/muraille_1.svg"
+dest_files=["res://.godot/imported/muraille_1.svg-13efff99f3bcf55b94a6d6c02684a9e9.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

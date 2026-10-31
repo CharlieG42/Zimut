@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://5qahcanigconk"
+path="res://.godot/imported/deco_well.svg-0a8c8bf71ab0f2bf6874912ca4662642.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/deco_well.svg"
+dest_files=["res://.godot/imported/deco_well.svg-0a8c8bf71ab0f2bf6874912ca4662642.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

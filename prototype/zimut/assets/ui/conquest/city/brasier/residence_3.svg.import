@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://zcbqxjeyr66hs"
+path="res://.godot/imported/residence_3.svg-70264be4e180945680ae4829ef0ff767.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/residence_3.svg"
+dest_files=["res://.godot/imported/residence_3.svg-70264be4e180945680ae4829ef0ff767.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

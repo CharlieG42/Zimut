@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://oun7e66wwiguo"
+path="res://.godot/imported/scierie_3.svg-89ec032682c01fdcc8501de68019b6a4.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/cristaux/scierie_3.svg"
+dest_files=["res://.godot/imported/scierie_3.svg-89ec032682c01fdcc8501de68019b6a4.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

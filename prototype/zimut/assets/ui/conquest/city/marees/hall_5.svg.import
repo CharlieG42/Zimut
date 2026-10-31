@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://2fgqd2lhv1reb"
+path="res://.godot/imported/hall_5.svg-32ee5b467f9779d4cb703d1b4a0705a3.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/marees/hall_5.svg"
+dest_files=["res://.godot/imported/hall_5.svg-32ee5b467f9779d4cb703d1b4a0705a3.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

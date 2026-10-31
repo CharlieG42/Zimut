@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://gmfejkxfmqkqw"
+path="res://.godot/imported/deco_cart.svg-581120b881b0a35f43b6bbc346d77406.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/montagne/deco_cart.svg"
+dest_files=["res://.godot/imported/deco_cart.svg-581120b881b0a35f43b6bbc346d77406.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

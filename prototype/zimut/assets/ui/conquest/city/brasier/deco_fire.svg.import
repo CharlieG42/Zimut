@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://eow7gg3gb9efw"
+path="res://.godot/imported/deco_fire.svg-2145dd0e49af1c35c2d6119b106e0291.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/deco_fire.svg"
+dest_files=["res://.godot/imported/deco_fire.svg-2145dd0e49af1c35c2d6119b106e0291.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://26e3wjxemfw1h"
+path="res://.godot/imported/wonder_crypt.svg-25bc466d00592de6439257bbaa58db5a.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brumes/wonder_crypt.svg"
+dest_files=["res://.godot/imported/wonder_crypt.svg-25bc466d00592de6439257bbaa58db5a.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

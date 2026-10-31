@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://o754tz5yfur1d"
+path="res://.godot/imported/deco_cart.svg-0e2059afec681821f6ef09a7ef536e8a.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/deco_cart.svg"
+dest_files=["res://.godot/imported/deco_cart.svg-0e2059afec681821f6ef09a7ef536e8a.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

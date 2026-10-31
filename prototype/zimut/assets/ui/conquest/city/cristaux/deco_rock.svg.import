@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://tr28ux0k95fod"
+path="res://.godot/imported/deco_rock.svg-b8e826c09980b850c6e1fc210f97aa87.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/cristaux/deco_rock.svg"
+dest_files=["res://.godot/imported/deco_rock.svg-b8e826c09980b850c6e1fc210f97aa87.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

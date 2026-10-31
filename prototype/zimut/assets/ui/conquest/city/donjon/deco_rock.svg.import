@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://89k44qnd3d0rj"
+path="res://.godot/imported/deco_rock.svg-8165d98152190925b1b4076da293abfd.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/deco_rock.svg"
+dest_files=["res://.godot/imported/deco_rock.svg-8165d98152190925b1b4076da293abfd.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

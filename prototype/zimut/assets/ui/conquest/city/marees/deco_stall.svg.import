@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://ojeeg1fekyfji"
+path="res://.godot/imported/deco_stall.svg-c8fdf472a593b50323ab1dd26fd5a218.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/marees/deco_stall.svg"
+dest_files=["res://.godot/imported/deco_stall.svg-c8fdf472a593b50323ab1dd26fd5a218.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://bsopq6of0hvkw"
+path="res://.godot/imported/tannerie_3.svg-7e13b65ec1652ebfd29fb56ff9a4c2df.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brumes/tannerie_3.svg"
+dest_files=["res://.godot/imported/tannerie_3.svg-7e13b65ec1652ebfd29fb56ff9a4c2df.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

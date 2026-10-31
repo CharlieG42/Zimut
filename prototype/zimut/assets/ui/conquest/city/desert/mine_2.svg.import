@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://y4kdy82qnqw9y"
+path="res://.godot/imported/mine_2.svg-297f7770e3128d5b1dadfa161cf06b9c.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/desert/mine_2.svg"
+dest_files=["res://.godot/imported/mine_2.svg-297f7770e3128d5b1dadfa161cf06b9c.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

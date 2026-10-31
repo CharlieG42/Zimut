@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://7xiinv5t0yyfx"
+path="res://.godot/imported/wonder_pyramid.svg-e9f24266934bf1a4e83f4d6eda0e6de1.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/montagne/wonder_pyramid.svg"
+dest_files=["res://.godot/imported/wonder_pyramid.svg-e9f24266934bf1a4e83f4d6eda0e6de1.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://7djmb4am5xxc0"
+path="res://.godot/imported/wonder_crystal.svg-b1db1198d5db95cab27e4226f7401704.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/foret/wonder_crystal.svg"
+dest_files=["res://.godot/imported/wonder_crystal.svg-b1db1198d5db95cab27e4226f7401704.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

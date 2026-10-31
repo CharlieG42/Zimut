@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://cece5me121b7s"
+path="res://.godot/imported/mine_1.svg-97bd75d79284a8cceacab6805709ee3f.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brumes/mine_1.svg"
+dest_files=["res://.godot/imported/mine_1.svg-97bd75d79284a8cceacab6805709ee3f.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://li6ja9d8sbsro"
+path="res://.godot/imported/residence_3.svg-9d55c24ebb01e3909e9e3d0d72032817.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/residence_3.svg"
+dest_files=["res://.godot/imported/residence_3.svg-9d55c24ebb01e3909e9e3d0d72032817.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

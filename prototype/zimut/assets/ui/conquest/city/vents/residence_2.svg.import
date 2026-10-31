@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://sf47bl0bm3yo8"
+path="res://.godot/imported/residence_2.svg-09bcb9ebceb73e5aaa042c1d61a7a4dc.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/vents/residence_2.svg"
+dest_files=["res://.godot/imported/residence_2.svg-09bcb9ebceb73e5aaa042c1d61a7a4dc.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

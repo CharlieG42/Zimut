@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://1ee5iyxbsy9np"
+path="res://.godot/imported/deco_cart.svg-5fc516c44b0bf52cd16a75d9cbc9cb8b.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brumes/deco_cart.svg"
+dest_files=["res://.godot/imported/deco_cart.svg-5fc516c44b0bf52cd16a75d9cbc9cb8b.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

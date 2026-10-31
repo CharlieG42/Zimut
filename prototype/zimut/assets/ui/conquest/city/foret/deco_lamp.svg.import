@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://7vm8s49ai30ox"
+path="res://.godot/imported/deco_lamp.svg-0d419c254744eec6379ec0553f129ddc.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/foret/deco_lamp.svg"
+dest_files=["res://.godot/imported/deco_lamp.svg-0d419c254744eec6379ec0553f129ddc.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

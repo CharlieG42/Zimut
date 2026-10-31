@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://mi7rc3i4ermor"
+path="res://.godot/imported/scierie_1.svg-f922e069de145dafeb074048a968900e.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/scierie_1.svg"
+dest_files=["res://.godot/imported/scierie_1.svg-f922e069de145dafeb074048a968900e.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

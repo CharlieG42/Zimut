@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://u8n8s3rh3u23d"
+path="res://.godot/imported/wonder_mill.svg-9649e482b8b0c4471784ad8deb513586.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/wonder_mill.svg"
+dest_files=["res://.godot/imported/wonder_mill.svg-9649e482b8b0c4471784ad8deb513586.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

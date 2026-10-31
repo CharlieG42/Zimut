@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://bare32oqfotvl"
+path="res://.godot/imported/residence_2.svg-182148a135aecafb0b699fb07833dc4d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/foret/residence_2.svg"
+dest_files=["res://.godot/imported/residence_2.svg-182148a135aecafb0b699fb07833dc4d.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

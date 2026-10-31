@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://ueo2ttadmr7ws"
+path="res://.godot/imported/mine_0.svg-d8b6ae4c3929c1b03de4bf3b1aaed0f7.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/mine_0.svg"
+dest_files=["res://.godot/imported/mine_0.svg-d8b6ae4c3929c1b03de4bf3b1aaed0f7.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

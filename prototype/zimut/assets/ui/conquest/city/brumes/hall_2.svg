@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="220" viewBox="0 0 260 220">
+<ellipse cx="130.0" cy="204.0" rx="108.8" ry="14.0" fill="#000000" opacity="0.28"/>
+<rect x="4.6" y="148.0" width="66.6" height="52.0" fill="#7c8378" stroke="#444842" stroke-width="2.5"/>
+<rect x="41.2" y="148.0" width="30.0" height="52.0" fill="#696f66" opacity="0.85"/>
+<polygon points="-2.1,148.0 37.8,118.0 77.8,148.0" fill="#3c756e" stroke="#244642" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="37.8,118.0 77.8,148.0 45.8,148.0" fill="#2e5b55"/>
+<path d="M31.2 200.0 v-21.8 q6.7 -8.3 13.3 0 v21.8 z" fill="#3a2a1a" stroke="#1e140c" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="188.9" y="148.0" width="66.6" height="52.0" fill="#7c8378" stroke="#444842" stroke-width="2.5"/>
+<rect x="225.5" y="148.0" width="30.0" height="52.0" fill="#696f66" opacity="0.85"/>
+<polygon points="182.2,148.0 222.2,118.0 262.1,148.0" fill="#3c756e" stroke="#244642" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="222.2,118.0 262.1,148.0 230.1,148.0" fill="#2e5b55"/>
+<path d="M215.5 200.0 v-21.8 q6.7 -8.3 13.3 0 v21.8 z" fill="#3a2a1a" stroke="#1e140c" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="66.0" y="124.0" width="128.0" height="76.0" fill="#848c80" stroke="#484d46" stroke-width="2.5"/>
+<rect x="136.4" y="124.0" width="57.6" height="76.0" fill="#70776c" opacity="0.85"/>
+<polygon points="53.2,124.0 130.0,72.0 206.8,124.0" fill="#428078" stroke="#274c48" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="130.0,72.0 206.8,124.0 145.4,124.0" fill="#33635d"/>
+<path d="M117.2 200.0 v-31.9 q12.8 -12.2 25.6 0 v31.9 z" fill="#3a2a1a" stroke="#1e140c" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="66.0" y="124.0" width="128.0" height="7.0" fill="#b8f0dc"/>
+<line x1="130.0" y1="72.0" x2="130.0" y2="48.6" stroke="#4a3018" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M130.0 48.6 l18.0 4 l-18.0 9 l18.0 0 z" fill="#3fae62" stroke="#25683a" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

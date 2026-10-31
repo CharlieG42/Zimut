@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://icaw4mop1lir4"
+path="res://.godot/imported/sky_soir.svg-bc2ab08074d002d304de4e3dbfecbd70.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/desert/sky_soir.svg"
+dest_files=["res://.godot/imported/sky_soir.svg-bc2ab08074d002d304de4e3dbfecbd70.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

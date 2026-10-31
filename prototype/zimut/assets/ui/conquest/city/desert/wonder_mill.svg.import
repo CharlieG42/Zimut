@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://76kq2l186q313"
+path="res://.godot/imported/wonder_mill.svg-50d9a4d19142eb11fcb467974ab4f92a.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/desert/wonder_mill.svg"
+dest_files=["res://.godot/imported/wonder_mill.svg-50d9a4d19142eb11fcb467974ab4f92a.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

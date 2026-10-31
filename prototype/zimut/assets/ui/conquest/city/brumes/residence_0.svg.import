@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://995agw1ymii5u"
+path="res://.godot/imported/residence_0.svg-7f54266185e9dc46a4df08c6fc72e8fa.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brumes/residence_0.svg"
+dest_files=["res://.godot/imported/residence_0.svg-7f54266185e9dc46a4df08c6fc72e8fa.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

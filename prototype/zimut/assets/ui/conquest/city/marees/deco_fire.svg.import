@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://zrosaqdyuujbg"
+path="res://.godot/imported/deco_fire.svg-8e1f877ccae2d455d9ad965c6e29af9d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/marees/deco_fire.svg"
+dest_files=["res://.godot/imported/deco_fire.svg-8e1f877ccae2d455d9ad965c6e29af9d.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

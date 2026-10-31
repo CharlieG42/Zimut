@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://y7m3x7q4kxks1"
+path="res://.godot/imported/cabane_0.svg-eb71ff95b4cf17dee5342e10611afe4b.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/cabane_0.svg"
+dest_files=["res://.godot/imported/cabane_0.svg-eb71ff95b4cf17dee5342e10611afe4b.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

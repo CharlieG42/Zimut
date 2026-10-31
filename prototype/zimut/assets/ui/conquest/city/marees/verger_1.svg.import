@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://gptfjrsb0btq1"
+path="res://.godot/imported/verger_1.svg-e1e8ce93cbf879b1453d6e5b3342a2f0.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/marees/verger_1.svg"
+dest_files=["res://.godot/imported/verger_1.svg-e1e8ce93cbf879b1453d6e5b3342a2f0.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

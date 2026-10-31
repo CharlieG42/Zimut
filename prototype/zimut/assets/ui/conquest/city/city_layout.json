@@ -1,0 +1,177 @@
+{
+ "version": 1,
+ "buildings": {
+  "hall": {
+   "max_level": 5,
+   "anchor": [
+    130,
+    200
+   ],
+   "size": [
+    260,
+    220
+   ]
+  },
+  "barracks": {
+   "max_level": 3,
+   "anchor": [
+    130,
+    200
+   ],
+   "size": [
+    260,
+    220
+   ]
+  },
+  "residence": {
+   "max_level": 3,
+   "anchor": [
+    130,
+    200
+   ],
+   "size": [
+    260,
+    220
+   ]
+  },
+  "scierie": {
+   "max_level": 3,
+   "anchor": [
+    130,
+    200
+   ],
+   "size": [
+    260,
+    220
+   ]
+  },
+  "mine": {
+   "max_level": 3,
+   "anchor": [
+    130,
+    200
+   ],
+   "size": [
+    260,
+    220
+   ]
+  },
+  "tannerie": {
+   "max_level": 3,
+   "anchor": [
+    130,
+    200
+   ],
+   "size": [
+    260,
+    220
+   ]
+  },
+  "cabane": {
+   "max_level": 3,
+   "anchor": [
+    130,
+    200
+   ],
+   "size": [
+    260,
+    220
+   ]
+  },
+  "verger": {
+   "max_level": 3,
+   "anchor": [
+    130,
+    200
+   ],
+   "size": [
+    260,
+    220
+   ]
+  },
+  "muraille": {
+   "max_level": 3,
+   "anchor": [
+    130,
+    200
+   ],
+   "size": [
+    260,
+    220
+   ]
+  }
+ },
+ "deco_slots": [
+  [
+   0.3,
+   0.62
+  ],
+  [
+   0.7,
+   0.62
+  ],
+  [
+   0.05,
+   0.7
+  ],
+  [
+   0.95,
+   0.7
+  ],
+  [
+   0.42,
+   0.93
+  ],
+  [
+   0.58,
+   0.93
+  ]
+ ],
+ "sky": {
+  "jour": "donjon/sky_jour.svg",
+  "soir": "donjon/sky_soir.svg",
+  "nuit": "donjon/sky_nuit.svg"
+ },
+ "plots": {
+  "hall": [
+   0.5,
+   0.5
+  ],
+  "barracks": [
+   0.19,
+   0.58
+  ],
+  "residence": [
+   0.81,
+   0.58
+  ],
+  "wonder": [
+   0.5,
+   0.79
+  ],
+  "scierie": [
+   0.1,
+   0.83
+  ],
+  "mine": [
+   0.22,
+   0.91
+  ],
+  "tannerie": [
+   0.35,
+   0.84
+  ],
+  "cabane": [
+   0.65,
+   0.84
+  ],
+  "verger": [
+   0.8,
+   0.91
+  ],
+  "muraille": [
+   0.92,
+   0.83
+  ]
+ }
+}

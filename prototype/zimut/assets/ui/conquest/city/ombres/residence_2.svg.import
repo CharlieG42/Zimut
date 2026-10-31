@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://ne00pfrpj53qu"
+path="res://.godot/imported/residence_2.svg-b2525dd6ec414d11273654a0737c3bf6.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/ombres/residence_2.svg"
+dest_files=["res://.godot/imported/residence_2.svg-b2525dd6ec414d11273654a0737c3bf6.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

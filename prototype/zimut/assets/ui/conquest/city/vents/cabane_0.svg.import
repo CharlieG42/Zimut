@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://audgwrfj24x8y"
+path="res://.godot/imported/cabane_0.svg-3b42fa56fb2f5c23d35f86a48966acc3.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/vents/cabane_0.svg"
+dest_files=["res://.godot/imported/cabane_0.svg-3b42fa56fb2f5c23d35f86a48966acc3.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

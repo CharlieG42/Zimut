@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://917qptj4hulz3"
+path="res://.godot/imported/deco_rock.svg-ae1674acc6b9afab96c66fe9181b3849.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/marees/deco_rock.svg"
+dest_files=["res://.godot/imported/deco_rock.svg-ae1674acc6b9afab96c66fe9181b3849.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

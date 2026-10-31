@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://57l5pk72ky4ut"
+path="res://.godot/imported/deco_fire.svg-8f233d2af764f2fcc84498c9e84d089b.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/montagne/deco_fire.svg"
+dest_files=["res://.godot/imported/deco_fire.svg-8f233d2af764f2fcc84498c9e84d089b.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://85g0z98yc8aq9"
+path="res://.godot/imported/muraille_2.svg-2040d3021cd3de62cd53b970a978b5cc.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/muraille_2.svg"
+dest_files=["res://.godot/imported/muraille_2.svg-2040d3021cd3de62cd53b970a978b5cc.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

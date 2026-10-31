@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://ys8fg5ojdpppd"
+path="res://.godot/imported/wonder_crystal.svg-318fd8f5ccfe3ab902b845f414bbc305.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/wonder_crystal.svg"
+dest_files=["res://.godot/imported/wonder_crystal.svg-318fd8f5ccfe3ab902b845f414bbc305.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

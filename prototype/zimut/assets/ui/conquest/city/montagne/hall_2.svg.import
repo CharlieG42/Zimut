@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://w5n4a80jlsr6k"
+path="res://.godot/imported/hall_2.svg-0ee1cef9f51fcf9b43b4fe103ecf6ef0.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/montagne/hall_2.svg"
+dest_files=["res://.godot/imported/hall_2.svg-0ee1cef9f51fcf9b43b4fe103ecf6ef0.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://jfz0oxo4cutax"
+path="res://.godot/imported/wonder_tower.svg-63548e92f3f8edb76487b99653f5f833.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/wonder_tower.svg"
+dest_files=["res://.godot/imported/wonder_tower.svg-63548e92f3f8edb76487b99653f5f833.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

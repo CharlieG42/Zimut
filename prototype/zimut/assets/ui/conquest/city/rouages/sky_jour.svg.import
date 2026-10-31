@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://lx1agy6qik39d"
+path="res://.godot/imported/sky_jour.svg-24ecbfed7fe360cb344d2cb9dd4f8dec.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/rouages/sky_jour.svg"
+dest_files=["res://.godot/imported/sky_jour.svg-24ecbfed7fe360cb344d2cb9dd4f8dec.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

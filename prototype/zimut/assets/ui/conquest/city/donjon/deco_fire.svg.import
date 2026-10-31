@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://lxsrpu0nabigh"
+path="res://.godot/imported/deco_fire.svg-2f40abd24825201698f77d39abe5faed.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/deco_fire.svg"
+dest_files=["res://.godot/imported/deco_fire.svg-2f40abd24825201698f77d39abe5faed.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

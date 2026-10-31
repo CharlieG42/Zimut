@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://wiyemeeg39rdm"
+path="res://.godot/imported/deco_lamp.svg-bcfe9315c13e2038514c2a4757ed65ea.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/marees/deco_lamp.svg"
+dest_files=["res://.godot/imported/deco_lamp.svg-bcfe9315c13e2038514c2a4757ed65ea.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

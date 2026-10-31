@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://x5a3z91igsa2w"
+path="res://.godot/imported/cabane_3.svg-e323673ba0a869b50bda829f1f558c72.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/donjon/cabane_3.svg"
+dest_files=["res://.godot/imported/cabane_3.svg-e323673ba0a869b50bda829f1f558c72.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

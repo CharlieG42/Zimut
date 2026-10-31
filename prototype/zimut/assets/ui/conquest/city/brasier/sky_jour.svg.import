@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://10jx9oyxcwjo7"
+path="res://.godot/imported/sky_jour.svg-564548578703e27f3a5f0365973d2309.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/brasier/sky_jour.svg"
+dest_files=["res://.godot/imported/sky_jour.svg-564548578703e27f3a5f0365973d2309.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

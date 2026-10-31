@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://kqmhxmzooyawg"
+path="res://.godot/imported/residence_0.svg-0812222d98ce7f47a8cb1db7ad2a0a47.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/marees/residence_0.svg"
+dest_files=["res://.godot/imported/residence_0.svg-0812222d98ce7f47a8cb1db7ad2a0a47.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0

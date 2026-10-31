@@ -1,0 +1,19 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://bl49dwjex551v"
+path="res://.godot/imported/tannerie_3.svg-398065ff590f5c9c4a7ac90be93afee7.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/city/desert/tannerie_3.svg"
+dest_files=["res://.godot/imported/tannerie_3.svg-398065ff590f5c9c4a7ac90be93afee7.ctex"]
+
+[params]
+
+compress/mode=0
+svg/scale=1.0
