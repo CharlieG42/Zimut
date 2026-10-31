@@ -70,7 +70,7 @@ jobs:
           echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> "$GITHUB_ENV"
 
       - name: Run headless tests (GDScript)
-        timeout-minutes: 20
+        timeout-minutes: 10
         run: |
           cd prototype/zimut
           set -o pipefail
@@ -100,32 +100,11 @@ jobs:
           echo ""
           # V48-V50 : niveau du joueur, sauvegarde Cloud, gouffres, arbre du Sylvain
           # V61b : sprites de bâtiments de la vue de ville Conquête
-          for t in test_hero_unlock test_cloud_save test_void_pits test_tree test_ville_sprites test_spell_icons_unique; do
+          for t in test_hero_unlock test_cloud_save test_void_pits test_tree test_ville_sprites test_spell_icons_unique test_conquest_roads test_gultur_conquete test_conquest_ui_v64; do
             echo "=== $t.gd ==="
             timeout 60 godot --headless -s tests/$t.gd --path . 2>&1 | tail -30 || echo "($t timeout ou échec - ignoré)"
             echo ""
           done
-          # V64 : suite complète — tous les tests/test_*.gd. Les échecs sont signalés par une
-          # annotation (::warning::) sans bloquer l'APK, pour ne pas casser le build sur un test instable.
-          # GitHub lance « bash -e » : sans « || » ou « set +e », le premier test en échec arrêterait l'étape.
-          set +e
-          failed=""
-          for f in tests/test_*.gd; do
-            t=$(basename "$f" .gd)
-            timeout 90 godot --headless -s "$f" --path . > "/tmp/$t.log" 2>&1
-            rc=$?
-            if [ $rc -ne 0 ]; then
-              failed="$failed $t"
-              echo "::warning::Test en échec : $t (code $rc)"
-              tail -15 "/tmp/$t.log"
-            fi
-          done
-          if [ -n "$failed" ]; then
-            echo "Tests en échec :$failed"
-          else
-            echo "Suite complète : tous les tests passent."
-          fi
-          set -e
           echo "Tests headless exécutés."
 
       - name: Decode release keystore from GitHub Secrets
