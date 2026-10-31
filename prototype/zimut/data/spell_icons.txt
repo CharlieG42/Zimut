@@ -4,41 +4,41 @@ Protection,shield_group
 Soin de combat,tank_heal
 Garde haute,shield
 Charge,power_strike
-Revers de bouclier,shield_bash
+Revers de bouclier,shield_bash_v2
 Frappe puissante,power_strike_t1
 Cri de guerre,roar
 Entaille lourde,eviscerate
 Rempart,wall
 Provocation,taunt
-Second souffle,tank_heal
+Second souffle,tank_heal_v2
 Balayage,slash
 Coup de tête,stone_fist
-Mur de pierre,wall
-Intimidation,taunt
+Mur de pierre,wall_v2
+Intimidation,taunt_v2
 Brise-garde,crushing
 Mêlée furieuse,fury
 Tremblement de terre,earthquake
 Égide,shield_holy
 Marteau du colosse,colossus
 Volonté de fer,stone_skin
-Colère,fury
+Colère,fury_v2
 Sentence,final_blow
-Ruée dévastatrice,power_strike
-Coup écrasant,crushing
-Bastion vivant,shield_group
-Écrasement tellurique,earthquake
-Fureur du titan,fury
+Ruée dévastatrice,power_strike_v2
+Coup écrasant,crushing_v2
+Bastion vivant,shield_group_v2
+Écrasement tellurique,earthquake_v2
+Fureur du titan,fury_v3
 Bouclier légendaire,shield_holy_t3
 Lame fatale,dagger_fatal
 Poison,poison_drop
 Soin rapide,heal_hand
 Estoc rapide,low_blow
-Pas de côté,camouflage
-Lame empoisonnée,poison_drop
-Coup bas,low_blow
+Pas de côté,camouflage_v2
+Lame empoisonnée,poison_drop_v2
+Coup bas,low_blow_v2
 Marque du prédateur,death_mark
-Fente,dagger_fatal
-Croche-pied,low_blow
+Fente,dagger_fatal_v2
+Croche-pied,low_blow_v3
 Ombre,shadow_step
 Disparition,invisible
 Entrave,root
@@ -46,38 +46,38 @@ Hémorragie,eviscerate
 Glyphe de venin,slash
 Lame jumelle,dagger_rain
 Frappe sournoise,assassinate
-Danse des lames,dagger_rain
-Éviscération,eviscerate
+Danse des lames,dagger_rain_v2
+Éviscération,eviscerate_v2
 Exécution,final_blow
 Voile mortel,curse_t2
-Glyphe d'ombre,shadow_step
+Glyphe d'ombre,shadow_step_v2
 Rafale de lames,blade_shadow
 Venin foudroyant,poison_mass
-Lame de l'ombre,blade_shadow
-Ombre mortelle,blade_shadow
-Danse macabre,dagger_rain
+Lame de l'ombre,blade_shadow_v2
+Ombre mortelle,blade_shadow_v3
+Danse macabre,dagger_rain_v3
 Coup final,final_blow_t2
 Glyphe d'entrave,slash
 Soin de chasseur,heal_nature
 Tir précis,arrow
-Tir rapide,arrow
+Tir rapide,arrow_v2
 Balise de chasse,beacon
 Flèche empoisonnée,arrow_poison
 Tir explosif,arrow_explosive
-Tir en rafale,arrow
+Tir en rafale,arrow_v3
 Piège à loup,trap
 Flèche de feu,arrow_fire
-Rappel de balise,beacon
-Tir du chasseur,arrow
-Pluie de flèches,arrow_explosive
+Rappel de balise,beacon_v2
+Tir du chasseur,arrow_v4
+Pluie de flèches,arrow_explosive_v2
 Tir ciblé,arrow_pierce
-Glyphe de flammes,slash
+Glyphe de flammes,slash_v2
 Tir d'estoc,recoil
 Œil de faucon,haste
 Flèche de glace,arrow_ice
-Tir de recul,recoil
+Tir de recul,recoil_v2
 Tir mortel,arrow_pierce_t2
-Salve,arrow_explosive
+Salve,arrow_explosive_v3
 Tir légendaire,arrow_t3
 Tir de grâce,final_blow
 Flèche du destin,arrow_holy
@@ -87,32 +87,32 @@ Bouclier magique,arcane_shield
 Boule de feu,fireball
 Éclair,lightning2
 Étincelle,lightning
-Armure de givre,arcane_shield
+Armure de givre,arcane_shield_v2
 Trait de glace,arrow_ice
 Explosion,explosion
 Brûlure,fire_breath
-Foudre,lightning2
-Mur de flammes,explosion
+Foudre,lightning2_v2
+Mur de flammes,explosion_v2
 Téléportation,teleport
 Concentration,inspire
 Nova de givre,freeze
 Purification,purify
 Météore,meteor
-Rayon ardent,fireball
-Lance de glace,arrow_ice
+Rayon ardent,fireball_v2
+Lance de glace,arrow_ice_v2
 Maléfice,curse
-Gel,freeze
-Tempête de feu,meteor
+Gel,freeze_v2
+Tempête de feu,meteor_v2
 Éclair en chaîne,chain_lightning
 Brise-esprit,disintegrate
-Chaîne de foudre,chain_lightning
-Blizzard,freeze
+Chaîne de foudre,chain_lightning_v2
+Blizzard,freeze_v3
 Colère des éléments,cataclysm
-Désintégration,disintegrate
-Foudroiement,lightning
+Désintégration,disintegrate_v2
+Foudroiement,lightning_v2
 Sphère d'annihilation,apocalypse
 Maîtrise arcanique,supreme_bless
-Apocalypse,apocalypse
+Apocalypse,apocalypse_v2
 Attaque sacrée,holy_attack
 Bénédiction,bless
 Soin,heal_cross
@@ -125,14 +125,14 @@ Inspiration,inspire
 Fureur de la nature,nature_wrath
 Épines,thorn
 Chant de vie,heal_group
-Soin de groupe,heal_group
+Soin de groupe,heal_group_v2
 Sceau de lumière,light_shield
 Harmonie,haste
-Frappe de l'aube,holy_attack
+Frappe de l'aube,holy_attack_v2
 Renaissance,rebirth
 Rayon solaire,light_burst
 Étreinte de vie,heal_leaf2
-Bénédiction des anciens,bless
+Bénédiction des anciens,bless_v2
 Attaque divine,holy_attack_t2
 Colère divine,judgment_t2
 Éveil de la forêt,heal_leaf
@@ -147,7 +147,7 @@ Toucher guérisseur,heal_touch
 Gouttes de rosée,heal_heart
 Bouclier de lumière,light_shield
 Onde apaisante,heal_group
-Lumière bénie,regen
+Lumière bénie,regen_v2
 Mot de restauration,word_restore
 Aura de courage,inspire
 Châtiment sacré,holy_attack
@@ -155,61 +155,61 @@ Prière rapide,heal_hand
 Voile de lumière,barrier_magic
 Éclat de lumière,light_burst
 Sceau d'espoir,heal_cross
-Rayon purificateur,purify
-Sanctuaire,light_shield
+Rayon purificateur,purify_v2
+Sanctuaire,light_shield_v2
 Soin supérieur,heal_cross_t2
 Intervention divine,divine_t2
-Pluie de lumière,heal_group
+Pluie de lumière,heal_group_v2
 Renaissance sacrée,rebirth
 Soin de groupe supérieur,heal_group_t2
 Colère céleste,judgment
 Protection vitale,protect_vital_t1
-Étreinte éternelle,word_restore
-Nova sacrée,light_burst
+Étreinte éternelle,word_restore_v2
+Nova sacrée,light_burst_v2
 Miracle,resurrection
 Soin ultime,heal_hand_t3
 Frappe spectrale,spectral
 Invoquer Golem de Pierre,summon_golem_de_pierre
 Symbiose,symbiosis
-Lien d'âme,symbiosis
+Lien d'âme,symbiosis_v2
 Invoquer Archer Sylvestre,summon_archer_sylvestre
 Invoquer Loup Spectral,summon_loup_spectral
 Rayon spectral,spectral_bolt
 Frénésie du familier,summon_speed
 Attaque de l'invocation,summon_atk
-Éclat d'âme,spectral
+Éclat d'âme,spectral_v2
 Offrande,summon_heal
 Tempête spectrale,summon_aoe
 Invoquer Requin des Marées,summon_requin_des_marees
-Coup de l'invocation,summon_atk
+Coup de l'invocation,summon_atk_v2
 Pacte de sang,summon_buff
 Chaîne d'âmes,chain_lightning
-Buff de l'invocation,summon_buff
+Buff de l'invocation,summon_buff_v2
 Appel du néant,summon_debuff
 Explosion d'âme,explosion
 Invoquer Ent de Combat,summon_ent_de_combat
 Invoquer Élémentaire de Cristal,summon_elementaire_de_cristal
-Bénédiction du lien,summon_heal
+Bénédiction du lien,summon_heal_v2
 Déferlement spectral,summon_atk2
 Invoquer Ombre,shadow_step
 Fusion d'âmes,disintegrate
-Légion des ombres,summon_buff
+Légion des ombres,summon_buff_v3
 Invoquer Esprit de la Forêt,summon_esprit_de_la_foret
 Ronce,thorn
 Sève vitale,sap_t1
-Épine,thorn
+Épine,thorn_v2
 Écorce,shield_roots
 Lierre,ivy
-Poison de ronce,thorn
+Poison de ronce,thorn_v3
 Fouet épineux,whip
 Invoquer Arbre,summon_arbre
 Nuée de spores,spores
 Étreinte végétale,root
-Racine,root
+Racine,root_v2
 Sève bienfaitrice,sap
 Racines étrangleuses,roots_block
 Invoquer Sarriette,summon_sarriette
-Soin de sève,sap
+Soin de sève,sap_v2
 Floraison,heal_leaf
 Rage de la forêt,forest_roar
 Ronces mortelles,thorn_multi
@@ -228,50 +228,50 @@ Armure de pierre,stone_skin
 Pointe de roc,rockslide
 Poussière aveuglante,sandstorm
 Invoquer Muraille,summon_muraille
-Glyphe de roche,sandstone
-Lame de grès,sandstone
-Avalanche,rockslide
+Glyphe de roche,sandstone_v2
+Lame de grès,sandstone_v3
+Avalanche,rockslide_v2
 Rempart de pierre,wall
-Éboulement,rockslide
+Éboulement,rockslide_v3
 Entrave sismique,earthquake
 Fracture,quake_amber
-Glyphe sismique,slash
+Glyphe sismique,slash_v2
 Colonne d'ambre,amber_rain
 Glyphe de fer,stone_rage
 Éruption,explosion
-Tempête de sable,sandstorm
-Grondement,earthquake
+Tempête de sable,sandstorm_v2
+Grondement,earthquake_v2
 Écrasement,crushing
-Séisme ambré,quake_amber
-Pierre vivante,stone_skin
+Séisme ambré,quake_amber_v2
+Pierre vivante,stone_skin_v2
 Fracas des montagnes,cataclysm
-Cataclysme minéral,cataclysm
-Déclencheur,slash
+Cataclysme minéral,cataclysm_v2
+Déclencheur,ing_detonateur
 Pistolet à ressort,slash
-Poser Bombe,slash
+Poser Bombe,ing_bombe
 Pétard,explosion
 Fumigène,camouflage
 Tir de barrage,arrow
-Poser Mine,slash
+Poser Mine,ing_mine
 Piège à ressort,trap
 Pistolet à silex,arrow
-Poser Tourelle,slash
+Poser Tourelle,ing_tourelle
 Balle incendiaire,arrow_fire
 Grenade assourdissante,explosion
 Poser Balise de transposition,beacon
 Tir de précision,arrow_pierce
-Mine à fragmentation,trap_para
+Mine à fragmentation,ing_mine_v2
 Surcharge,fury
-Glyphe de surcharge,slash
+Glyphe de surcharge,slash_v2
 Fusil à lunette,arrow_pierce
 Roquette,meteor
 Grenade à fragmentation,slash
 Rafale de mitraillette,arrow_explosive
 Canon à main,power_strike
-Fusil à pompe,slash
+Fusil à pompe,slash_v3
 Bombe à fragmentation,cataclysm
 Tir d'artillerie,meteor_rain
-Arsenal total,slash_t2
+Arsenal total,ing_detonateur_v2
 Morsure,bite
 Coup d'os,bone
 Coup de massue,club
@@ -378,10 +378,10 @@ Lame d'ombre,blade_shadow
 Vrilles sylvestres,ivy
 Flèche de sève,arrow
 Coup de branche,wood_arm
-Rappel,shield
-Poser Bombe incendiaire,slash
-Maintenance,shield_group
-Couplage,beacon
-Poser Bombe assourdissante,slash
-Poser Tourelle lourde,slash
-Poser Charge à fragmentation,slash
+Rappel,ing_rappel
+Poser Bombe incendiaire,ing_bombe_feu
+Maintenance,ing_maintenance
+Couplage,ing_couplage
+Poser Bombe assourdissante,ing_bombe_assourd
+Poser Tourelle lourde,ing_tourelle_lourde
+Poser Charge à fragmentation,ing_charge_frag
