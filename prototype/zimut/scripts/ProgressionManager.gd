@@ -2812,16 +2812,18 @@ func conquest_city_attackable(conquest: Dictionary, city_id: String, adventure: 
 		return false
 	if city_id == "donjon_roi" and not conquest_empire_complete(conquest):
 		return false
-	var revealed: Array = []
-	if not adventure.is_empty():
-		revealed = adventure.get("revealed_cities", [])
-	if not revealed.is_empty() and not revealed.has(city_id):
-		return false
+	# Une voie ouverte depuis l'empire suffit : le brouillard (villes révélées par
+	# l'Aventure) ne cache que ce qui est au-delà de la frontière, jamais le
+	# prochain objectif — sinon la campagne se bloquait dès la première révélation.
+	return conquest_city_adjacent_to_empire(conquest, city_id)
+
+## La ville est-elle reliée par une route à une ville de l'empire ?
+func conquest_city_adjacent_to_empire(conquest: Dictionary, city_id: String) -> bool:
+	var owned: Array = conquest.get("owned", [])
 	for pair: Array in CONQUEST_ROUTES:
 		var a: String = String(pair[0])
 		var b: String = String(pair[1])
-		if (a == city_id and conquest.get("owned", []).has(b)) \
-			or (b == city_id and conquest.get("owned", []).has(a)):
+		if (a == city_id and owned.has(b)) or (b == city_id and owned.has(a)):
 			return true
 	return false
 

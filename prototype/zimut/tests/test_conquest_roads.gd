@@ -69,6 +69,15 @@ func _boot() -> void:
 	full["owned"].append("donjon_roi")
 	check(pm.conquest_campaign_won(full), "Campagne gagnée après la chute du Donjon")
 
+	# ── Brouillard : une ville voisine de l'empire reste attaquable même non révélée ──
+	var fog: Dictionary = {"revealed_cities": ["capitale", "hameau_pin"]}
+	var own3: Dictionary = {"owned": ["capitale", "clairiere", "pont_mousse"], "pending_city": ""}
+	check(pm.conquest_city_attackable(own3, "fort_racine", fog), "voie ouverte : Fort Racine attaquable malgré le brouillard")
+	check(pm.conquest_city_attackable(own3, "vieille_tour", fog), "voie ouverte : Vieille Tour attaquable malgré le brouillard")
+	check(pm.conquest_city_attackable(own3, "sanctuaire_mousse", fog), "voie ouverte : Sanctuaire attaquable malgré le brouillard")
+	check(not pm.conquest_city_attackable(own3, "hameau_pin", fog), "révélée mais sans route : reste hors de portée")
+	check(not pm.conquest_city_attackable(own3, "garnison", fog), "au-delà de la frontière : hors de portée")
+
 	# ── Annexion : just_annexed posé pour l'écran de victoire, puis consommé ──
 	var d: Dictionary = pm.new_game(4, "ConqRoads")
 	d["campaign_mode"] = "conquest"

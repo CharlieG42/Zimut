@@ -1688,7 +1688,9 @@ func _nameplate_color(city_id: String) -> Color:
 
 func _is_unknown(city_id: String) -> bool:
 	var revealed_cities: Array = _save.get("adventure", {}).get("revealed_cities", [])
-	return (not _conquest.get("owned", []).has(city_id)) and (not revealed_cities.is_empty()) and (not revealed_cities.has(city_id))
+	return (not _conquest.get("owned", []).has(city_id)) and (not revealed_cities.is_empty()) \
+		and (not revealed_cities.has(city_id)) \
+		and not ProgressionManager.conquest_city_adjacent_to_empire(_conquest, city_id)
 
 ## État d'un repère : capital / owned / lost / unknown / attackable / enemy / neutral.
 func _pin_state(city_id: String) -> String:
