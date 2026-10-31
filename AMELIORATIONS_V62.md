@@ -13,6 +13,13 @@ par bâtiment**, avec un cycle **jour / soir / nuit**, des **événements de vil
   `city_layout.json`) : le jeu pose le bâtiment exactement sur sa parcelle.
 - **Repli automatique** : si un fichier manque, le dessin vectoriel V61 reprend la main
   (`_draw_plot` teste la texture avant de dessiner).
+- **Illustrations IA prioritaires** : `_art()` essaie d'abord `<nom>.png` puis `<nom>.svg` —
+  déposer un PNG généré (voir `prompts_sprites/villes/`) à côté du SVG le remplace instantanément.
+- **Animations conservées au-dessus des sprites** (`_draw_sprite_anims`) : fumée de cheminée,
+  scie qui tourne, orbe des mages, lanterne de la mine, drapeaux, ailes du moulin, lueur du phare.
+- **Sprites enrichis** (v6 du générateur) : matières hachurées (planches / joints de pierre),
+  tuiles sur les deux pans du toit, dégradés de toit, bande de lumière sur le bord gauche des murs,
+  feuillage en volume (dégradés radiaux + reflets), roche de la mine à facettes.
 - Pour passer aux vraies illustrations (générateur d'images) : prompts prêts à l'emploi dans
   `prompts_sprites/villes/` (style verrouillé Ankama/Dofus, palettes par biome, ancrage 130,200,
   fond transparent) — déposer les PNG à la place des SVG (mêmes noms de base).
