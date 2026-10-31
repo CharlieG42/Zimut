@@ -666,6 +666,12 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 
 	var team_btn := _action_button("team", "Gérer l'équipe (libre à chaque combat)", COL_TXT)
 	team_btn.pressed.connect(func() -> void:
+		# La partie active DOIT être fixée avant d'ouvrir l'écran d'équipe : sans emplacement actif,
+		# un héros débloqué là-bas n'était jamais écrit sur le disque et disparaissait au retour.
+		if not ProgressionManager.write_save(slot, _current):
+			return
+		GameManager.active_save = ProgressionManager.load_save(slot)
+		GameManager.active_slot = slot
 		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
 	grid.add_child(team_btn)
 
