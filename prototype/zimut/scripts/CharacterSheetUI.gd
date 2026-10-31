@@ -1493,7 +1493,20 @@ func _spell_pick_card(sname: String, on: bool, rebuild: Callable) -> PanelContai
 	var ch := HBoxContainer.new()
 	ch.add_theme_constant_override("separation", 8)
 	cv.add_child(ch)
-	ch.add_child(_lbl("✓" if on else "○", 20, C_GOOD if on else C_DIM))
+	# V64 : vraie case à cocher, grande cible visuelle (48 px) pour le téléphone
+	var cbox := PanelContainer.new()
+	cbox.name = "CheckBox"
+	cbox.custom_minimum_size = Vector2(48, 48)
+	cbox.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	cbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cbox.add_theme_stylebox_override("panel", _box(C_GOOD.darkened(0.35) if on else C_CARD.darkened(0.25), C_GOOD if on else C_DIM, 10, 3, 0))
+	var ccenter := CenterContainer.new()
+	ccenter.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cbox.add_child(ccenter)
+	var tick := _lbl("✓" if on else "", 34, Color(1, 1, 1))
+	tick.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ccenter.add_child(tick)
+	ch.add_child(cbox)
 	var pname := _lbl(sname, 19, C_TXT)
 	pname.clip_text = true
 	pname.size_flags_horizontal = Control.SIZE_EXPAND_FILL

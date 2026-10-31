@@ -23,5 +23,18 @@ func _boot() -> void:
 	await create_timer(0.6).timeout
 	await process_frame
 	root.get_viewport().get_texture().get_image().save_png(out + "/voies.png")
+	sc._select_city("vieille_tour")
+	sc._show_tab(sc._tab_targets)
+	await create_timer(0.5).timeout
+	root.get_viewport().get_texture().get_image().save_png(out + "/cibles.png")
+	sc._select_city("ruines_lierre")
+	sc._center_on(Vector2(0.4, 0.5))
+	await create_timer(0.6).timeout
+	root.get_viewport().get_texture().get_image().save_png(out + "/loin.png")
+	sc._select_city("pont_mousse")
+	sc.details_collapsed = true
+	sc._apply_details_state()
+	await create_timer(0.5).timeout
+	root.get_viewport().get_texture().get_image().save_png(out + "/replie.png")
 	pm.delete_save(4)
 	quit()

@@ -83,6 +83,12 @@ var _back_button: Button
 var _side_scroll: ScrollContainer
 var _tab_city: VBoxContainer = null
 var _tab_chron: VBoxContainer = null
+var _tab_targets: VBoxContainer = null
+var _details: Label
+var _details_toggle: Button
+## V64 : le détail de la ville (garnison, production, domination…) se replie pour garder
+## « Lancer l'assaut » visible sans défiler ; le choix est gardé pendant la session.
+static var details_collapsed: bool = false
 var _tab_buttons: Array[Button] = []
 var _chronicle_label: Label
 
@@ -362,18 +368,22 @@ func _build() -> void:
 	_tab_city = VBoxContainer.new()
 	_tab_city.add_theme_constant_override("separation", 12)
 	box.add_child(_tab_city)
+	_tab_targets = VBoxContainer.new()
+	_tab_targets.add_theme_constant_override("separation", 8)
+	_tab_targets.visible = false
+	box.add_child(_tab_targets)
 	_tab_chron = VBoxContainer.new()
 	_tab_chron.add_theme_constant_override("separation", 10)
 	_tab_chron.visible = false
 	box.add_child(_tab_chron)
-	for t: Array in [["⚑ VILLE", _tab_city], ["✎ CHRONIQUE", _tab_chron]]:
+	for t: Array in [["⚑ VILLE", _tab_city], ["⚔ CIBLES", _tab_targets], ["✎ CHRONIQUE", _tab_chron]]:
 		var tb := Button.new()
 		tb.text = String(t[0])
 		tb.toggle_mode = true
 		tb.button_pressed = t[1] == _tab_city
 		tb.custom_minimum_size = Vector2(0, 44)
 		tb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tb.add_theme_font_size_override("font_size", 17)
+		tb.add_theme_font_size_override("font_size", 15)
 		tb.add_theme_color_override("font_color", TEXT)
 		tb.add_theme_stylebox_override("normal", _style(Color(0.12, 0.18, 0.22, 0.97), Color(0.42, 0.50, 0.46)))
 		tb.add_theme_stylebox_override("pressed", _style(Color(0.24, 0.30, 0.22, 0.97), GOLD))
@@ -418,6 +428,30 @@ func _build() -> void:
 	_build_box.add_theme_constant_override("separation", 6)
 	_tab_city.add_child(_build_box)
 
+	_details_toggle = Button.new()
+	_details_toggle.name = "DetailsToggle"
+	_details_toggle.custom_minimum_size.y = 44
+	_details_toggle.add_theme_font_size_override("font_size", 16)
+	_details_toggle.add_theme_color_override("font_color", TEXT)
+	_details_toggle.add_theme_stylebox_override("normal", _style(Color(0.12, 0.18, 0.22, 0.97), Color(0.42, 0.50, 0.46)))
+	_details_toggle.add_theme_stylebox_override("hover", _style(Color(0.18, 0.26, 0.28, 0.97), GOLD))
+	_details_toggle.pressed.connect(func() -> void:
+		details_collapsed = not details_collapsed
+		_apply_details_state())
+	_tab_city.add_child(_details_toggle)
+	_details = Label.new()
+	_details.name = "CityDetails"
+	_details.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_details.add_theme_color_override("font_color", TEXT)
+	_details.add_theme_font_size_override("font_size", 16)
+	_tab_city.add_child(_details)
+
+	var targets_title := Label.new()
+	targets_title.text = "PROCHAINES CIBLES"
+	targets_title.add_theme_font_size_override("font_size", 18)
+	targets_title.add_theme_color_override("font_color", GOLD)
+	_tab_targets.add_child(targets_title)
+
 	var chronicle_title := Label.new()
 	chronicle_title.text = "CHRONIQUE RÉCENTE"
 	chronicle_title.add_theme_font_size_override("font_size", 18)
@@ -449,10 +483,11 @@ func _build() -> void:
 
 ## Affiche l'onglet du conseil demandé (Ville / Chronique).
 func _show_tab(target: VBoxContainer) -> void:
-	_tab_city.visible = target == _tab_city
-	_tab_chron.visible = target == _tab_chron
-	for i: int in range(_tab_buttons.size()):
-		_tab_buttons[i].button_pressed = (i == 0) == (target == _tab_city)
+	var tabs: Array = [_tab_city, _tab_targets, _tab_chron]
+	for i: int in range(tabs.size()):
+		(tabs[i] as VBoxContainer).visible = tabs[i] == target
+		if i < _tab_buttons.size():
+			_tab_buttons[i].button_pressed = tabs[i] == target
 	if _side_scroll != null:
 		_side_scroll.scroll_vertical = 0
 
@@ -497,8 +532,9 @@ func _layout_responsive() -> void:
 		_map_title_label.visible = false
 		_legend_label.add_theme_font_size_override("normal_font_size", 12)
 		_side_title.add_theme_font_size_override("font_size", 20)
-		_message.custom_minimum_size.y = 150
+		_message.custom_minimum_size.y = 84
 		_message.add_theme_font_size_override("font_size", 15)
+		_details.add_theme_font_size_override("font_size", 14)
 		_attack.custom_minimum_size.y = 56
 		_attack.add_theme_font_size_override("font_size", 18)
 		_back_button.custom_minimum_size.y = 44
@@ -527,8 +563,9 @@ func _layout_responsive() -> void:
 		# La légende suit le cartouche du titre (fond sombre) sans le chevaucher.
 		_legend_label.position = Vector2(12, map_view_h - 44.0)
 		_side_title.add_theme_font_size_override("font_size", 23)
-		_message.custom_minimum_size.y = 180
+		_message.custom_minimum_size.y = 110
 		_message.add_theme_font_size_override("font_size", 18)
+		_details.add_theme_font_size_override("font_size", 16)
 		_attack.custom_minimum_size.y = 68
 		_attack.add_theme_font_size_override("font_size", 23)
 		_back_button.custom_minimum_size.y = 50
@@ -772,6 +809,7 @@ func _select_city(id: String) -> void:
 	var owned: Array = _conquest.get("owned", ["capitale"])
 	var conquered: bool = owned.has(id)
 	var ravage: int = int(_conquest.get("ravage", {}).get(id, 0))
+	var keep: int = 2    # paragraphes gardés dans l'en-tête ; le reste va sous « Détails »
 	_build_panel(id, conquered)
 	if _side_art != null:
 		_side_art.texture = _city_sprite(id)
@@ -817,10 +855,16 @@ func _select_city(id: String) -> void:
 		_attack.text = "LANCER L'ASSAUT"
 	else:
 		var kind: String = String(city["kind"])
+		keep = 3
 		var prog: int = ProgressionManager.conquest_siege_progress(_conquest, id)
 		var wave: int = ProgressionManager.conquest_siege_wave(_conquest, id)
 		var attackable: bool = ProgressionManager.conquest_city_attackable(
 			_conquest, id, _save.get("adventure", {}))
+		# Aide au siège : niveau moyen de l'équipe contre le niveau conseillé.
+		var advice: String = ""
+		if attackable:
+			var avg: int = ConquestSystem.team_avg_level(_save)
+			advice = "\nVotre équipe : niveau moyen %d — %s" % [avg, String(ConquestSystem.assault_advice(avg, int(city["level"]))["text"])]
 		if kind == "enemy":
 			var left: int = ProgressionManager.CONQUEST_SIEGE_BATTLES - prog
 			var wave_txt: String = ("\n\nSiège en cours : %d/%d — prochaine bataille : %s." % [prog, ProgressionManager.CONQUEST_SIEGE_BATTLES, "BOSS" if wave == ProgressionManager.CONQUEST_SIEGE_BATTLES else "mobs de champs"]) if prog > 0 else ""
@@ -828,8 +872,8 @@ func _select_city(id: String) -> void:
 			var gname: String = ConquestSystem.general_of(_conquest, id)
 			if gname != "":
 				general_txt = "\n\n☠ FORTERESSE DU GÉNÉRAL %s — le vaincre en personne à la 4e bataille calmera sa région (%s)." % [gname.to_upper(), ConquestSystem.general_region(id)]
-			_message.text = "%s · %s · Niveau conseillé %d\n\n%s\n\n⚔ VILLE ADVERSE — siège en %d batailles : %d plateaux de mobs puis le BOSS du biome.%s%s" % [
-				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), city["desc"],
+			_message.text = "%s · %s · Niveau conseillé %d%s\n\n%s\n\n⚔ VILLE ADVERSE — siège en %d batailles : %d plateaux de mobs puis le BOSS du biome.%s%s" % [
+				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), advice, city["desc"],
 				ProgressionManager.CONQUEST_SIEGE_BATTLES, ProgressionManager.CONQUEST_SIEGE_BATTLES - 1, wave_txt, general_txt]
 		else:
 			var dip_txt: String = ""
@@ -842,8 +886,8 @@ func _select_city(id: String) -> void:
 				var dcd: int = ConquestSystem.diplomacy_cooldown(_conquest)
 				if dcd > 0:
 					dip_txt += " Émissaires indisponibles encore %d victoire(s)." % dcd
-			_message.text = "%s · %s · Niveau conseillé %d\n\n%s\n\n● VILLE NEUTRE — 1 bataille contre des mobs de champs suffit à la conquérir.%s" % [
-				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), city["desc"], dip_txt]
+			_message.text = "%s · %s · Niveau conseillé %d%s\n\n%s\n\n● VILLE NEUTRE — 1 bataille contre des mobs de champs suffit à la conquérir.%s" % [
+				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), advice, city["desc"], dip_txt]
 		if id == "donjon_roi" and not ProgressionManager.conquest_empire_complete(_conquest):
 			_message.text += "\n\n★ Objectif final : verrouillé tant que tout Zimut n'est pas sous votre contrôle."
 		# Reconquête ennemie : la garnison adverse grossit avec le temps.
@@ -860,16 +904,95 @@ func _select_city(id: String) -> void:
 		else:
 			_attack.disabled = true
 			_attack.text = "HORS DE PORTÉE — CONQUÉREZ UNE VILLE RELIÉE"
-			_message.text += "\n\n✖ Aucune route depuis votre territoire : conquérez d'abord une ville voisine."
+			var way: Array = ConquestSystem.path_to(owned, ProgressionManager.CONQUEST_ROUTES, id)
+			if way.size() > 1:
+				var names: Array = []
+				for w: Variant in way:
+					names.append(ProgressionManager.conquest_city_name(String(w)))
+				_message.text += "\n\n⇢ Chemin à ouvrir (%d étapes) : %s." % [way.size(), " → ".join(PackedStringArray(names))]
+			else:
+				_message.text += "\n\n✖ Aucune route depuis votre territoire : conquérez d'abord une ville voisine."
 	# Rendre visible la progression de domination régionale au moment où
 	# le joueur compare les cibles : les bonus existent déjà dans l'économie.
 	var biome_summary: String = _biome_control_summary(String(city["biome"]))
 	if biome_summary != "":
 		_message.text += "\n\n" + biome_summary
 	_message.text = Typo.fr(_message.text)
+	_split_message(_message.text, keep)
 	_refresh_nameplates()
 	_pulse_selected(id)
 	_refresh_chronicle()
+
+## Sépare le texte du conseil : l'en-tête reste visible, le reste passe sous « Détails ».
+func _split_message(full: String, keep: int) -> void:
+	if _details == null or _details_toggle == null:
+		return
+	var paras: PackedStringArray = full.split("\n\n")
+	_message.text = "\n\n".join(paras.slice(0, keep))
+	_details.text = "\n\n".join(paras.slice(keep))
+	_apply_details_state()
+
+func _apply_details_state() -> void:
+	var has: bool = _details.text.strip_edges() != ""
+	_details_toggle.visible = has
+	_details.visible = has and not details_collapsed
+	_details_toggle.text = "▸ DÉTAILS DE LA VILLE" if details_collapsed else "▾ DÉTAILS DE LA VILLE"
+
+## Onglet « Cibles » : villes attaquables, de la plus accessible à la plus dure.
+func _refresh_targets(ids: Array) -> void:
+	if _tab_targets == null:
+		return
+	while _tab_targets.get_child_count() > 1:
+		var old: Node = _tab_targets.get_child(1)
+		_tab_targets.remove_child(old)
+		old.queue_free()
+	var sorted_ids: Array = ids.duplicate()
+	sorted_ids.sort_custom(func(a: String, b: String) -> bool:
+		return int(_city_meta(a)["level"]) < int(_city_meta(b)["level"]))
+	if sorted_ids.is_empty():
+		var none := Label.new()
+		none.text = "Aucune cible à portée : conquérez ou révélez une ville voisine."
+		none.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		none.add_theme_font_size_override("font_size", 15)
+		none.add_theme_color_override("font_color", TEXT)
+		_tab_targets.add_child(none)
+		return
+	var avg: int = ConquestSystem.team_avg_level(_save)
+	for id: String in sorted_ids:
+		var meta: Dictionary = _city_meta(id)
+		var rw: Dictionary = ProgressionManager.conquest_city_reward(id)
+		var parts: Array = []
+		if int(rw.get("gold", 0)) > 0:
+			parts.append("%d or" % int(rw["gold"]))
+		for r: String in rw.get("resources", {}).keys():
+			parts.append("%s %d" % [r, int(rw["resources"][r])])
+		var kind_txt: String = "adverse · siège %d/%d" % [ProgressionManager.conquest_siege_progress(_conquest, id), ProgressionManager.CONQUEST_SIEGE_BATTLES] if String(meta["kind"]) == "enemy" else "neutre · 1 bataille"
+		var adv: Dictionary = ConquestSystem.assault_advice(avg, int(meta["level"]))
+		var b := Button.new()
+		b.name = "Target_" + id
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		b.custom_minimum_size.y = 84
+		b.add_theme_font_size_override("font_size", 15)
+		b.add_theme_color_override("font_color", TEXT)
+		var edge: Color = {"ok": Color(0.45, 0.85, 0.50), "risky": Color(0.95, 0.75, 0.30), "weak": Color(0.90, 0.40, 0.35)}[String(adv["verdict"])]
+		b.add_theme_stylebox_override("normal", _style(Color(0.12, 0.18, 0.22, 0.97), edge))
+		b.add_theme_stylebox_override("hover", _style(Color(0.18, 0.26, 0.28, 0.97), GOLD))
+		b.text = Typo.fr("%s — niv. %d\n%s · %s\nButin : %s" % [
+			String(meta["name"]), int(meta["level"]), kind_txt, String(adv["text"]), String(rw.get("name", "—")) + (" (" + ", ".join(PackedStringArray(parts)) + ")" if not parts.is_empty() else "")])
+		b.pressed.connect(func() -> void:
+			_select_city(id)
+			_center_on(CITY_POS[id]))
+		_tab_targets.add_child(b)
+
+## Ville révélée mais encore séparée de l'empire : « vue de loin ».
+func _is_far(city_id: String) -> bool:
+	if _conquest.get("owned", []).has(city_id) or city_id == "capitale":
+		return false
+	var st: String = _pin_state(city_id)
+	if st == "unknown" or st == "attackable" or st == "lost":
+		return false
+	return not ConquestSystem.path_to(_conquest.get("owned", []), ProgressionManager.CONQUEST_ROUTES, city_id).is_empty()
 
 ## Panneau latéral d'une ville alliée : un seul bouton pour « entrer dans la ville »
 ## (la gestion complète — bâtiments, garnison, gouverneur — vit dans CityScreenUI).
@@ -1673,7 +1796,13 @@ func _nameplate_text(city_id: String) -> String:
 		return alert + cname
 	if (_conquest.get("lost", []) as Array).has(city_id):
 		return "%s\nÀ reprendre" % cname
+	if _is_far(city_id):
+		var steps: int = ConquestSystem.path_to(owned_list(), ProgressionManager.CONQUEST_ROUTES, city_id).size()
+		return "%s\nà %d étapes" % [cname, steps]
 	return cname
+
+func owned_list() -> Array:
+	return _conquest.get("owned", [])
 
 ## Couleur du nom d'une ville selon son état.
 func _nameplate_color(city_id: String) -> Color:
@@ -1683,7 +1812,7 @@ func _nameplate_color(city_id: String) -> Color:
 		"attackable": return Color(1.0, 0.90, 0.58)
 		"enemy": return Color(1.0, 0.72, 0.66)
 		"lost": return Color(1.0, 0.60, 0.55)
-		"unknown": return Color(0.70, 0.72, 0.77)
+		"unknown": return Color(0.84, 0.86, 0.90)
 	return Color(0.93, 0.92, 0.87)
 
 func _is_unknown(city_id: String) -> bool:
@@ -1734,6 +1863,8 @@ func _refresh_map_state() -> void:
 		pin.enemy_kind = enemy_kind
 		pin.accent = _city_border_color(id)
 		pin.selected = id == _selected_id
+		var far: bool = _is_far(id)
+		pin.far = far
 		pin.general = ConquestSystem.general_of(_conquest, id) != "" and st != "unknown"
 		pin.threatened = id == threat_city
 		pin.smoke = st == "lost" or (owned.has(id) and (ProgressionManager._is_city_ravaged(_conquest, id) or ConquestSystem.is_ruined(_conquest, id)))
@@ -1745,6 +1876,8 @@ func _refresh_map_state() -> void:
 		var lbl: Label = _city_labels[id]
 		lbl.text = _nameplate_text(id)
 		lbl.add_theme_color_override("font_color", _nameplate_color(id))
+		# Noms au-delà de la frontière : contour plus épais pour rester lisibles sur le brouillard.
+		lbl.add_theme_constant_override("outline_size", 9 if (st == "unknown" or far) else 6)
 	if _routes != null:
 		_routes.owned = owned
 		_routes.attackable = attackable
@@ -1755,6 +1888,7 @@ func _refresh_map_state() -> void:
 		_routes.queue_redraw()
 	if _territory != null:
 		_territory.bake(bake)
+	_refresh_targets(attackable)
 
 ## D'où vient la colonne ennemie : une ville voisine hors de l'empire (forteresse de
 ## préférence), sinon la plus proche.

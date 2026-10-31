@@ -487,6 +487,60 @@ static func spec_bonus(conq: Dictionary, id: String) -> Dictionary:
 static func hero_level(data: Dictionary, classe: String) -> int:
 	return int(data.get("roster", {}).get(classe, {}).get("level", 1))
 
+## Niveau moyen des héros de l'équipe (1 si l'équipe est vide).
+static func team_avg_level(data: Dictionary) -> int:
+	var total: int = 0
+	var n: int = 0
+	for m: Dictionary in data.get("team", []):
+		total += hero_level(data, String(m.get("classe", "")))
+		n += 1
+	return maxi(1, int(round(float(total) / float(n)))) if n > 0 else 1
+
+## Avis sur un assaut : niveau moyen de l'équipe contre le niveau conseillé de la ville.
+## verdict : "ok" (à portée), "risky" (risqué), "weak" (trop faible).
+static func assault_advice(avg_level: int, recommended: int) -> Dictionary:
+	var gap: int = recommended - avg_level
+	if gap <= 2:
+		return {"verdict": "ok", "text": "✔ à votre portée"}
+	if gap <= 6:
+		return {"verdict": "risky", "text": "⚠ risqué (%d niveaux d'écart)" % gap}
+	return {"verdict": "weak", "text": "✖ trop fort (%d niveaux d'écart)" % gap}
+
+## Plus court chemin des villes à conquérir pour atteindre `target` depuis l'empire
+## (parcours en largeur sur les routes). Le résultat commence par la ville voisine
+## de l'empire et finit par `target` ; vide si la cible est déjà conquise ou inaccessible.
+static func path_to(owned: Array, routes: Array, target: String) -> Array:
+	if owned.has(target):
+		return []
+	var prev: Dictionary = {}
+	var queue: Array = []
+	for o: Variant in owned:
+		prev[String(o)] = ""
+		queue.append(String(o))
+	while not queue.is_empty():
+		var cur: String = queue.pop_front()
+		if cur == target:
+			break
+		for pair: Array in routes:
+			var a: String = String(pair[0])
+			var b: String = String(pair[1])
+			var nxt: String = ""
+			if a == cur:
+				nxt = b
+			elif b == cur:
+				nxt = a
+			if nxt != "" and not prev.has(nxt):
+				prev[nxt] = cur
+				queue.append(nxt)
+	if not prev.has(target):
+		return []
+	var out: Array = []
+	var at: String = target
+	while at != "" and not owned.has(at):
+		out.push_front(at)
+		at = String(prev[at])
+	return out
+
 ## Équipement du gouverneur : valeur totale de ses objets portés (ItemRules.power).
 static func governor_gear_power(data: Dictionary, classe: String) -> int:
 	var total: int = 0

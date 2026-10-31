@@ -78,6 +78,19 @@ func _boot() -> void:
 	check(not pm.conquest_city_attackable(own3, "hameau_pin", fog), "révélée mais sans route : reste hors de portée")
 	check(not pm.conquest_city_attackable(own3, "garnison", fog), "au-delà de la frontière : hors de portée")
 
+	# ── V64 : chemin vers une ville lointaine, avis d'assaut, niveau d'équipe ──
+	var routes: Array = pm.CONQUEST_ROUTES
+	var way: Array = ConquestSystem.path_to(["capitale"], routes, "ruines_lierre")
+	check(way.size() == 3 and String(way[way.size() - 1]) == "ruines_lierre", "chemin vers les Ruines du Lierre : %s" % str(way))
+	check(ConquestSystem.path_to(["capitale"], routes, "clairiere") == ["clairiere"], "ville voisine : chemin d'une étape")
+	check(ConquestSystem.path_to(["capitale", "clairiere"], routes, "clairiere").is_empty(), "ville déjà conquise : pas de chemin")
+	check(ConquestSystem.assault_advice(10, 10)["verdict"] == "ok", "avis : niveau égal = à portée")
+	check(ConquestSystem.assault_advice(10, 14)["verdict"] == "risky", "avis : 4 niveaux d'écart = risqué")
+	check(ConquestSystem.assault_advice(5, 15)["verdict"] == "weak", "avis : 10 niveaux d'écart = trop fort")
+	var td: Dictionary = {"team": [{"classe": "Mage"}, {"classe": "Chasseur"}], "roster": {"Mage": {"level": 10}, "Chasseur": {"level": 6}}}
+	check(ConquestSystem.team_avg_level(td) == 8, "niveau moyen d'équipe")
+	check(ConquestSystem.team_avg_level({}) == 1, "équipe vide : niveau 1")
+
 	# ── Annexion : just_annexed posé pour l'écran de victoire, puis consommé ──
 	var d: Dictionary = pm.new_game(4, "ConqRoads")
 	d["campaign_mode"] = "conquest"
