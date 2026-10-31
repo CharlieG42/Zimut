@@ -14,6 +14,12 @@ extends Control
 ## grandit avec le niveau de la ville), caserne avec ses soldats, résidence du gouverneur
 ## (le héros en poste se tient devant), six parcelles de production et la parcelle de la
 ## Merveille. Toucher un bâtiment émet `plot_pressed(clé)`.
+##
+## V61b — planches découpées : si le PNG d'un bâtiment existe dans
+## assets/ui/conquest/cities/batiments/<nation>/, il passe DEVANT l'illustration V62
+## (les soldats à l'exercice et le gouverneur restent dessinés par-dessus) ; sinon
+## illustration V62, sinon dessin vectoriel. Convention de découpe : README du dossier
+## batiments/.
 
 signal plot_pressed(key: String)
 
@@ -56,6 +62,19 @@ const PLOT_SCALE := {"hall": 1.30, "wonder": 1.15, "barracks": 1.05, "residence"
 const SPRITE_ANCHOR := Vector2(130, 200)
 ## Emplacements de décor fixes (fractions de la vue), lus aussi dans city_layout.json.
 const DECO_SLOTS := [Vector2(0.30, 0.63), Vector2(0.70, 0.63), Vector2(0.045, 0.71), Vector2(0.955, 0.71), Vector2(0.42, 0.94), Vector2(0.58, 0.94)]
+
+## V61b — planches découpées par nation (cities/batiments/), PRIORITAIRES sur les
+## illustrations V62 (même clé de nation que CityScreenUI.ART).
+const NATION_KEY := {"Forêt": "sylvestre", "Montagne": "cimes", "Désert": "sables", "Cristaux": "cristaux",
+	"Marées": "marees", "Vents": "vents", "Brasier": "brasier", "Brumes": "brumes", "Ombres": "ombres",
+	"Rouages": "rouages", "Donjon": "donjon"}
+## Dossier des planches : <SPRITE_DIR>/<nation>/<bâtiment>[_<niveau>].png
+const SPRITE_DIR := "res://assets/ui/conquest/cities/batiments"
+## Largeur cible (unités) de chaque planche (hauteur = aspect conservé).
+const SPRITE_WIDTH := {"hall": 250.0, "caserne": 180.0, "residence": 180.0, "merveille": 250.0,
+	"scierie": 200.0, "mine": 200.0, "tannerie": 200.0, "cabane": 180.0, "verger": 200.0, "muraille": 200.0}
+## Clé de planche correspondant à une parcelle (les autres portent déjà le bon nom).
+const V61B_KEY := {"barracks": "caserne", "wonder": "merveille"}
 
 ## État de la ville à dessiner (rempli par CityScreenUI).
 var biome: String = "Forêt"
@@ -171,6 +190,46 @@ func _building_art(key: String, lv: int) -> Texture2D:
 
 func _deco_art(kind: String) -> Texture2D:
 	return _art("%s/deco_%s.svg" % [_biome_key(), kind])
+
+
+# ── V61b : planches découpées (cities/batiments/) ───────────────────────────
+
+## Chemin d'une planche (niveau 0 : sans suffixe, ex. caserne, merveille).
+static func sprite_path(nation_key: String, building: String, level: int = 0) -> String:
+	if level > 0:
+		return "%s/%s/%s_%d.png" % [SPRITE_DIR, nation_key, building, level]
+	return "%s/%s/%s.png" % [SPRITE_DIR, nation_key, building]
+
+
+## Planche découpée d'un bâtiment pour la nation courante (null → pas de planche).
+func _sprite(building: String, level: int = 0) -> Texture2D:
+	var path: String = sprite_path(String(NATION_KEY.get(biome, "sylvestre")), building, level)
+	if _tex_cache.has(path):
+		return _tex_cache[path]
+	var tex: Texture2D = null
+	if ResourceLoader.exists(path):
+		tex = load(path) as Texture2D
+	_tex_cache[path] = tex
+	return tex
+
+
+## Dessine la planche posée au sol en g (même voile soir/nuit que les sprites V62) ;
+## faux → aucune planche, poursuivre vers l'illustration V62 ou le vectoriel.
+func _draw_tex_if_any(sprite_key: String, level: int, g: Vector2, u: float) -> bool:
+	var tex: Texture2D = _sprite(sprite_key, level)
+	if tex == null:
+		return false
+	var dw: float = SPRITE_WIDTH.get(sprite_key, 180.0) * u
+	_shadow(g, dw * 0.72, u)
+	var ts: Vector2 = tex.get_size()
+	var dh: float = dw * ts.y / maxf(ts.x, 1.0)
+	var mod := Color(1, 1, 1)
+	if time_of_day == "nuit":
+		mod = Color(0.55, 0.58, 0.78)   # même voile nocturne que _draw_sprite
+	elif time_of_day == "soir":
+		mod = Color(0.92, 0.80, 0.72)
+	draw_texture_rect(tex, Rect2(g.x - dw * 0.5, g.y - dh, dw, dh), false, mod)
+	return true
 
 ## Dessine un sprite de bâtiment ancré à son pied (PLOTS[key] = point au sol).
 func _draw_sprite(tex: Texture2D, g: Vector2, u: float, key: String, night: bool) -> void:
@@ -350,10 +409,14 @@ func _draw_plot(key: String, g: Vector2, u: float) -> void:
 	var lv: int = 0
 	# V62 : illustration du bâtiment quand elle existe, sinon dessin vectoriel (repli)
 	var tex: Texture2D = null
+	# V61b : planche découpée équivalente + niveau de son fichier
+	var sk: String = String(V61B_KEY.get(key, key))
+	var skl: int = 0
 	match key:
 		"hall":
 			lv = city_level
 			tex = _building_art("hall", lv)
+			skl = clampi(city_level, 1, 5)
 		"barracks":
 			lv = 1
 			tex = _building_art("barracks", 1)
@@ -366,7 +429,15 @@ func _draw_plot(key: String, g: Vector2, u: float) -> void:
 		_:
 			lv = int(levels.get(key, 0))
 			tex = _building_art(key, lv)
-	if tex != null and (wonder or key != "wonder"):
+			skl = clampi(lv, 0, 3)
+	# V61b — planche découpée prioritaire (soldats/gouverneur redessinés par-dessus),
+	# puis illustration V62, puis dessin vectoriel.
+	if (wonder or key != "wonder") and _draw_tex_if_any(sk, skl, g, u):
+		if key == "barracks":
+			_troops_drill(g, u)
+		elif key == "residence":
+			_governor_stand(g, u)
+	elif tex != null and (wonder or key != "wonder"):
 		_draw_sprite(tex, g, u, key, time_of_day == "nuit")
 		_draw_sprite_anims(key, g, u, lv)   # V62 : animations par-dessus le sprite (fumée, scie, orbe…)
 	elif key == "wonder" and not wonder:
@@ -377,8 +448,10 @@ func _draw_plot(key: String, g: Vector2, u: float) -> void:
 				_hall(g, u)
 			"barracks":
 				_barracks(g, u)
+				_troops_drill(g, u)   # V61b : soldats extraits, dessinés aussi sur la planche
 			"residence":
 				_residence(g, u)
+				_governor_stand(g, u)   # V61b : gouverneur extrait, dessiné aussi sur la planche
 			"wonder":
 				_wonder(g, u)
 			_:
@@ -577,7 +650,10 @@ func _barracks(g: Vector2, u: float) -> void:
 	draw_rect(Rect2(g.x - 13 * u, g.y - 30 * u, 26 * u, 30 * u), Color(0.20, 0.13, 0.08))
 	var top: Vector2 = _tower(g + Vector2(w * 0.38, 0), 30.0 * u, 70.0 * u, wall, roof, u)
 	_flag(top, Color(0.55, 0.68, 0.95), u, 0.9)
-	# soldats à l'exercice
+
+
+## Soldats à l'exercice devant la caserne (V61b : dessinés par-dessus la planche aussi).
+func _troops_drill(g: Vector2, u: float) -> void:
 	for i: int in range(mini(troops, 12)):
 		var row: int = i / 6
 		var col: int = i % 6
@@ -601,6 +677,10 @@ func _residence(g: Vector2, u: float) -> void:
 		draw_rect(Rect2(x - 3 * u, g.y - 30 * u, 6 * u, 30 * u), trim.lightened(0.2))
 	draw_rect(Rect2(g.x - 50 * u, g.y - 34 * u, 100 * u, 5 * u), trim)
 	_flag(top, Color(0.85, 0.62, 0.90), u, 0.9)
+
+
+## Le gouverneur se tient devant sa résidence (V61b : dessiné par-dessus la planche aussi).
+func _governor_stand(g: Vector2, u: float) -> void:
 	if hero_tex != null:
 		var hs: float = 70.0 * u
 		var hp: Vector2 = g + Vector2(40 * u, 12 * u)
@@ -919,3 +999,4 @@ func _draw_fx(g: Vector2, u: float) -> void:
 	var tp: Vector2 = g + Vector2(-w * 0.5, -150.0 * u - 50.0 * t * u)
 	draw_string_outline(font, tp, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 6, Color(0.1, 0.05, 0.0, a))
 	draw_string(font, tp, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(1.0, 0.88, 0.40, a))
+
