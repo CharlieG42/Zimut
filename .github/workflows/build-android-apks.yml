@@ -99,7 +99,8 @@ jobs:
           timeout 60 godot --headless -s tests/test_playtime.gd --path . 2>&1 | tail -30 || echo "(test_playtime timeout ou échec - ignoré)"
           echo ""
           # V48-V50 : niveau du joueur, sauvegarde Cloud, gouffres, arbre du Sylvain
-          for t in test_hero_unlock test_cloud_save test_void_pits test_tree; do
+          # V61b : sprites de bâtiments de la vue de ville Conquête
+          for t in test_hero_unlock test_cloud_save test_void_pits test_tree test_ville_sprites; do
             echo "=== $t.gd ==="
             timeout 60 godot --headless -s tests/$t.gd --path . 2>&1 | tail -30 || echo "($t timeout ou échec - ignoré)"
             echo ""
@@ -234,8 +235,8 @@ jobs:
           cd prototype/zimut
           # Godot peut planter a la fermeture (corruption heap connue en headless)
           # alors que l'APK est deja genere et signe : on valide le fichier produit.
-          godot --headless --export-debug "Android" export/Zimut-debug.apk \
-            || godot --headless --export-debug "Android" export/Zimut-debug.apk \
+          godot --headless --export_debug "Android" export/Zimut-debug.apk \
+            || godot --headless --export_debug "Android" export/Zimut-debug.apk \
             || true
           test -s export/Zimut-debug.apk
 

@@ -8,6 +8,12 @@ extends Control
 ## la parcelle de la Merveille. Chaque bâtiment change d'allure avec son niveau (1 à 3) et
 ## s'anime (scie qui tourne, lanterne de la mine, orbe des mages, fumées, drapeaux) ; des
 ## habitants circulent sur les chemins. Toucher un bâtiment émet `plot_pressed(clé)`.
+##
+## V61b — sprites découpés : si le PNG d'un bâtiment existe dans
+## assets/ui/conquest/cities/batiments/<nation>/, il remplace le dessin vectoriel
+## (même échelle, posé au point au sol de sa parcelle) ; sinon la vue dessine comme
+## avant. Les effets vivants (soldats à l'exercice, gouverneur, plaques, étoiles)
+## restent dessinés par-dessus le sprite.
 
 signal plot_pressed(key: String)
 
@@ -39,6 +45,16 @@ const STYLE := {
 const RES_GLOW := {"Bois": Color(0.62, 0.85, 0.40), "Fer": Color(0.80, 0.86, 0.95), "Cuir": Color(0.90, 0.66, 0.42),
 	"Magie": Color(0.72, 0.58, 1.0), "Venin": Color(0.55, 0.92, 0.55)}
 
+## V61b — planches de bâtiments découpées (même clé de nation que CityScreenUI.ART).
+const NATION_KEY := {"Forêt": "sylvestre", "Montagne": "cimes", "Désert": "sables", "Cristaux": "cristaux",
+	"Marées": "marees", "Vents": "vents", "Brasier": "brasier", "Brumes": "brumes", "Ombres": "ombres",
+	"Rouages": "rouages", "Donjon": "donjon"}
+## Dossier des sprites : <SPRITE_DIR>/<nation>/<bâtiment>[_<niveau>].png
+const SPRITE_DIR := "res://assets/ui/conquest/cities/batiments"
+## Largeur cible (unités) de chaque bâtiment quand un sprite existe (hauteur = aspect conservé).
+const SPRITE_WIDTH := {"hall": 250.0, "caserne": 180.0, "residence": 180.0, "merveille": 250.0,
+	"scierie": 200.0, "mine": 200.0, "tannerie": 200.0, "cabane": 180.0, "verger": 200.0, "muraille": 200.0}
+
 ## État de la ville à dessiner (rempli par CityScreenUI).
 var biome: String = "Forêt"
 var art: Texture2D = null
@@ -59,6 +75,7 @@ var _fx_key: String = ""
 var _fx_t: float = -1.0
 var _buttons: Dictionary = {}
 var _fade: GradientTexture2D = null
+var _tex_cache: Dictionary = {}       # V61b : chemin -> Texture2D (ou null, repli vectoriel)
 
 
 func _ready() -> void:
@@ -114,6 +131,40 @@ func _unit() -> float:
 
 func _style(i: int) -> Color:
 	return (STYLE.get(biome, STYLE["Forêt"]) as Array)[i]
+
+
+# ── Sprites de bâtiments (V61b) ──────────────────────────────────────────────
+
+## Chemin du sprite d'un bâtiment (niveau 0 : sans suffixe, ex. caserne).
+static func sprite_path(nation_key: String, building: String, level: int = 0) -> String:
+	if level > 0:
+		return "%s/%s/%s_%d.png" % [SPRITE_DIR, nation_key, building, level]
+	return "%s/%s/%s.png" % [SPRITE_DIR, nation_key, building]
+
+
+## Texture découpée d'un bâtiment pour la nation courante (null → dessin vectoriel).
+func _sprite(building: String, level: int = 0) -> Texture2D:
+	var path: String = sprite_path(String(NATION_KEY.get(biome, "sylvestre")), building, level)
+	if _tex_cache.has(path):
+		return _tex_cache[path]
+	var tex: Texture2D = null
+	if ResourceLoader.exists(path):
+		tex = load(path) as Texture2D
+	_tex_cache[path] = tex
+	return tex
+
+
+## Affiche le sprite d'un bâtiment posé au sol en g ; faux → dessiner en vectoriel.
+func _draw_tex_if_any(sprite_key: String, level: int, g: Vector2, u: float) -> bool:
+	var tex: Texture2D = _sprite(sprite_key, level)
+	if tex == null:
+		return false
+	var dw: float = SPRITE_WIDTH.get(sprite_key, 180.0) * u
+	_shadow(g, dw * 0.72, u)
+	var ts: Vector2 = tex.get_size()
+	var dh: float = dw * ts.y / maxf(ts.x, 1.0)
+	draw_texture_rect(tex, Rect2(g.x - dw * 0.5, g.y - dh, dw, dh), false)
+	return true
 
 
 # ── Dessin général ─────────────────────────────────────────────────────────
@@ -196,24 +247,30 @@ func _draw_plot(key: String, g: Vector2, u: float) -> void:
 	match key:
 		"hall":
 			lv = city_level
-			_hall(g, u)
+			if not _draw_tex_if_any("hall", lv, g, u):
+				_hall(g, u)
 		"barracks":
 			lv = 1
-			_barracks(g, u)
+			if not _draw_tex_if_any("caserne", 0, g, u):
+				_barracks(g, u)
+			_troops_drill(g, u)
 		"residence":
 			lv = 1
-			_residence(g, u)
+			if not _draw_tex_if_any("residence", 0, g, u):
+				_residence(g, u)
+			_governor_stand(g, u)
 		"wonder":
 			lv = 1 if wonder else 0
 			if wonder:
-				_wonder(g, u)
+				if not _draw_tex_if_any("merveille", 0, g, u):
+					_wonder(g, u)
 			else:
 				_empty_plot(g, u, bool(locked.get("wonder", true)))
 		_:
 			lv = int(levels.get(key, 0))
 			if lv <= 0:
 				_empty_plot(g, u, bool(locked.get(key, false)))
-			else:
+			elif not _draw_tex_if_any(key, lv, g, u):
 				call("_b_" + key, g, u, lv)
 	_plate(key, g, u, lv)
 
@@ -406,7 +463,10 @@ func _barracks(g: Vector2, u: float) -> void:
 	draw_rect(Rect2(g.x - 13 * u, g.y - 30 * u, 26 * u, 30 * u), Color(0.20, 0.13, 0.08))
 	var top: Vector2 = _tower(g + Vector2(w * 0.38, 0), 30.0 * u, 70.0 * u, wall, roof, u)
 	_flag(top, Color(0.55, 0.68, 0.95), u, 0.9)
-	# soldats à l'exercice
+
+
+## Soldats à l'exercice devant la caserne (dessinés par-dessus le sprite aussi).
+func _troops_drill(g: Vector2, u: float) -> void:
 	for i: int in range(mini(troops, 12)):
 		var row: int = i / 6
 		var col: int = i % 6
@@ -430,6 +490,10 @@ func _residence(g: Vector2, u: float) -> void:
 		draw_rect(Rect2(x - 3 * u, g.y - 30 * u, 6 * u, 30 * u), trim.lightened(0.2))
 	draw_rect(Rect2(g.x - 50 * u, g.y - 34 * u, 100 * u, 5 * u), trim)
 	_flag(top, Color(0.85, 0.62, 0.90), u, 0.9)
+
+
+## Le gouverneur se tient devant sa résidence (dessiné par-dessus le sprite aussi).
+func _governor_stand(g: Vector2, u: float) -> void:
 	if hero_tex != null:
 		var hs: float = 70.0 * u
 		var hp: Vector2 = g + Vector2(40 * u, 12 * u)
