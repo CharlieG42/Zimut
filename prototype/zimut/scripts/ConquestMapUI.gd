@@ -45,6 +45,22 @@ const CITY_POS := {
 	"forge_givre": Vector2(0.86, 0.76),
 	"atelier_cuivre": Vector2(0.91, 0.09),
 	"citadelle_engrenages": Vector2(0.96, 0.25),
+	"hutaie_doree": Vector2(0.15, 0.18),
+	"moulin_vents": Vector2(0.06, 0.20),
+	"autel_vent": Vector2(0.18, 0.04),
+	"refuge_corniche": Vector2(0.44, 0.24),
+	"tour_guet_givre": Vector2(0.52, 0.14),
+	"geode_eclat": Vector2(0.60, 0.37),
+	"crypte_oubliee": Vector2(0.42, 0.55),
+	"riziere_brume": Vector2(0.44, 0.70),
+	"cratere_forges": Vector2(0.08, 0.70),
+	"fournaise": Vector2(0.24, 0.88),
+	"caravane_dunes": Vector2(0.70, 0.62),
+	"spire_prisme": Vector2(0.90, 0.68),
+	"phare_perle": Vector2(0.87, 0.66),
+	"havre_maree": Vector2(0.95, 0.60),
+	"hangar_engrenages": Vector2(0.94, 0.14),
+	"tour_horloger": Vector2(0.89, 0.33),
 }
 var _save: Dictionary = {}
 var _slot: int = -1
@@ -106,12 +122,15 @@ const MAP_ZOOM_SMOOTHING: float = 7.5
 var _touch_positions: Dictionary = {}
 var _pinch_start_distance: float = 0.0
 var _pinch_start_zoom: float = 1.0
-const MAP_ZOOM_MAX: float = 2.0
+const MAP_ZOOM_MAX: float = 3.0
 const MAP_ART := "res://assets/ui/conquest/conquest_world_map.jpg"
 const MAP_FX := "res://assets/ui/conquest/conquest_world_fx.png"
-const MAP_W: float = 1536.0
 const PIN_SIZE := Vector2(96, 84)
-const MAP_H: float = 1024.0
+## Taille du monde en pixels de la carte fournie (V64 : lue au chargement du fond —
+## n'importe quel fond s'affiche sans distorsion, l'ancien monde 1536×1024 comme le
+## nouveau monde élargi ; zoom max 3.0 pour lire une carte plus vaste).
+var MAP_W: float = 1536.0
+var MAP_H: float = 1024.0
 
 func _ready() -> void:
 	set_process_input(true)
@@ -241,6 +260,9 @@ func _build() -> void:
 	world_art.name = "ConquestWorldArtwork"
 	world_art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	world_art.texture = load(MAP_ART) as Texture2D
+	if world_art.texture != null:
+		MAP_W = float(world_art.texture.get_width())
+		MAP_H = float(world_art.texture.get_height())
 	world_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	world_art.stretch_mode = TextureRect.STRETCH_SCALE
 	world_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
