@@ -71,8 +71,11 @@ static func create_build(data: Dictionary, classe: String, name: String = "", sn
 	var b: Dictionary = {
 		"name": name if name != "" else ("Build %d" % (arr.size() + 1)),
 		"equipment": {},
-		"spells": [],
+		# V63 : un nouveau build part des sorts actuellement actifs (un build sans sort laissait
+		# le héros avec seulement les sorts débloqués ensuite)
+		"spells": active_spells(data, classe),
 		"talents": {"unlocked": {}, "points": 0},
+		"spells_ok": true,
 	}
 	if not snapshot.is_empty():
 		if snapshot.has("equipment"):
@@ -116,12 +119,17 @@ static func active_spells(data: Dictionary, classe: String) -> Array:
 	var ent: Dictionary = _entry(data, classe)
 	if ent.is_empty():
 		return []
+	var out: Array = []
 	var ai: int = active_index(data, classe)
-	if ai >= 0:
-		var b: Dictionary = build_at(data, classe, ai)
-		if not b.is_empty():
-			return (b.get("spells", []) as Array).duplicate()
-	return (ent.get("active_spells", []) as Array).duplicate()
+	var b: Dictionary = build_at(data, classe, ai) if ai >= 0 else {}
+	if not b.is_empty():
+		out = (b.get("spells", []) as Array).duplicate()
+	else:
+		out = (ent.get("active_spells", []) as Array).duplicate()
+	# V63 : jamais de sélection vide (un héros sans sort actif) → sorts par défaut
+	if out.is_empty():
+		out = _default_active_spells(data, classe)
+	return out
 
 
 ## Sorts actifs bruts du roster (hors build) — référence persistée.
@@ -188,13 +196,16 @@ static func set_active_spells(data: Dictionary, classe: String, names: Array) ->
 	var ent: Dictionary = _entry(data, classe)
 	if ent.is_empty():
 		return
+	if out.is_empty():
+		return   # V63 : au moins un sort actif
 	var ai: int = active_index(data, classe)
 	if ai >= 0:
 		var b: Dictionary = build_at(data, classe, ai)
 		if not b.is_empty():
 			b["spells"] = out
-			return
-	ent["active_spells"] = out
+	# V63 : le roster reste le reflet du build actif (une seule vérité : sinon changer de build
+	# écrasait la sélection du build quitté avec une ancienne liste)
+	ent["active_spells"] = out.duplicate()
 
 
 ## Écrit la sélection de sorts DANS un build précis (quel qu'il soit actif ou non).
@@ -214,6 +225,8 @@ static func set_active_spells_in_build(data: Dictionary, classe: String, index: 
 static func toggle_spell(data: Dictionary, classe: String, spell_name: String) -> void:
 	var cur: Array = active_spells(data, classe)
 	if cur.has(spell_name):
+		if cur.size() <= 1:
+			return   # V63 : on garde au moins un sort actif
 		cur.erase(spell_name)
 	else:
 		if cur.size() >= MAX_ACTIVE_SPELLS:
@@ -227,11 +240,12 @@ static func toggle_spell(data: Dictionary, classe: String, spell_name: String) -
 ## Montée de niveau : les sorts nouvellement débloqués prennent les places LIBRES du build actif
 ## (jamais à la place d'un sort déjà choisi : au-delà de 10, c'est au joueur de trancher).
 static func on_level_up(data: Dictionary, classe: String, from_level: int, to_level: int) -> void:
-	var cur: Array = active_spells(data, classe)
-	if cur.size() >= MAX_ACTIVE_SPELLS:
+	var fresh: Array = _pm().spells_unlocked_between(classe, from_level, to_level)
+	if fresh.is_empty():
 		return
+	var cur: Array = active_spells(data, classe)
 	var changed: bool = false
-	for n: String in _pm().spells_unlocked_between(classe, from_level, to_level):
+	for n: String in fresh:
 		if cur.size() >= MAX_ACTIVE_SPELLS:
 			break
 		if not cur.has(n):
@@ -239,6 +253,19 @@ static func on_level_up(data: Dictionary, classe: String, from_level: int, to_le
 			changed = true
 	if changed:
 		set_active_spells(data, classe, cur)
+	# V63 : les autres builds profitent aussi des nouveaux sorts (places libres seulement)
+	var ai: int = active_index(data, classe)
+	for i: int in range(build_count(data, classe)):
+		if i == ai:
+			continue
+		var b: Dictionary = build_at(data, classe, i)
+		var bs: Array = b.get("spells", [])
+		for n2: String in fresh:
+			if bs.size() >= MAX_ACTIVE_SPELLS:
+				break
+			if not bs.has(n2):
+				bs.append(n2)
+		b["spells"] = bs
 
 
 ## ── Équipement d'un build ──
@@ -292,11 +319,13 @@ static func activate(data: Dictionary, classe: String, index: int, from_index: i
 		var src: Dictionary = build_at(data, classe, from_index)
 		if not src.is_empty():
 			src["equipment"] = _pm().hero_equipment(data, classe).duplicate(true)
-			src["spells"] = _roster_spells(data, classe).duplicate()
+			src["spells"] = active_spells(data, classe)
 			src["talents"] = _current_talents(data, classe).duplicate(true)
 	# Applique le build cible
 	var b: Dictionary = build_at(data, classe, index)
 	_pm().set_hero_equipment(data, classe, (b.get("equipment", {}) as Dictionary).duplicate(true))
+	if (b.get("spells", []) as Array).is_empty():
+		b["spells"] = _default_active_spells(data, classe)
 	ent["active_spells"] = (b.get("spells", []) as Array).duplicate()
 	ent["talents"] = (b.get("talents", {"unlocked": {}, "points": 0}) as Dictionary).duplicate(true)
 	ent["build_index"] = index
@@ -335,6 +364,35 @@ static func ensure(data: Dictionary, classe: String) -> void:
 		ent["build_index"] = -1
 	if not ent.has("active_spells"):
 		ent["active_spells"] = _default_active_spells(data, classe)
+	_repair_spells(data, classe)
+
+
+## V63 — Réparation des anciennes sauvegardes : un build créé vide ne recevait ensuite que les sorts
+## débloqués après sa création (ex. Ingénieur niveau 7 avec 2 sorts). Une fois par build, on
+## complète les places libres avec les sorts débloqués manquants ; le roster suit le build actif.
+static func _repair_spells(data: Dictionary, classe: String) -> void:
+	var ent: Dictionary = _entry(data, classe)
+	var defaults: Array = _default_active_spells(data, classe)
+	for b: Dictionary in _builds(data, classe):
+		if bool(b.get("spells_ok", false)):
+			continue
+		var bs: Array = b.get("spells", [])
+		for n: String in defaults:
+			if bs.size() >= MAX_ACTIVE_SPELLS:
+				break
+			if not bs.has(n):
+				bs.append(n)
+		b["spells"] = bs
+		b["spells_ok"] = true
+	if not bool(ent.get("spells_ok", false)):
+		var rs: Array = ent.get("active_spells", [])
+		if rs.is_empty():
+			ent["active_spells"] = defaults.duplicate()
+		ent["spells_ok"] = true
+	var ai: int = active_index(data, classe)
+	var ab: Dictionary = build_at(data, classe, ai) if ai >= 0 else {}
+	if not ab.is_empty():
+		ent["active_spells"] = (ab.get("spells", []) as Array).duplicate()
 
 
 ## ── Aperçu ──
