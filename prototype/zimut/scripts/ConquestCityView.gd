@@ -235,7 +235,7 @@ func _draw_tex_if_any(sprite_key: String, level: int, g: Vector2, u: float) -> b
 func _draw_sprite(tex: Texture2D, g: Vector2, u: float, key: String, night: bool) -> void:
 	if tex == null:
 		return
-	var sc: float = (2.30 if key == "hall" else 1.55) * u * PLOT_SCALE.get(key, 1.0)
+	var sc: float = (0.88 if key == "hall" else 0.90) * u * PLOT_SCALE.get(key, 1.0)
 	var ts: Vector2 = tex.get_size()
 	var dw: Vector2 = ts * sc
 	var r := Rect2(g - Vector2(dw.x * SPRITE_ANCHOR.x / ts.x, dw.y * SPRITE_ANCHOR.y / ts.y), dw)
@@ -250,15 +250,11 @@ func _draw_sprite(tex: Texture2D, g: Vector2, u: float, key: String, night: bool
 ## tourne, orbe des mages, lanterne de la mine, drapeaux) — identiques que le rendu soit
 ## un PNG (illustration IA) ou le SVG généré.
 func _draw_sprite_anims(key: String, g: Vector2, u: float, lv: int) -> void:
-	var top_y: float = g.y - 150.0 * u * PLOT_SCALE.get(key, 1.0)   # hauteur approximative du toit
+	var top_y: float = g.y - 165.0 * u   # toit des sprites (viewBox 260×220, pied à y = 200)
 	match key:
 		"hall":
 			_smoke(Vector2(g.x + 30.0 * u, top_y + 20.0 * u), u)
 			_flag(Vector2(g.x, top_y - 6.0 * u), Color(0.20, 0.62, 0.34), u, 0.9)
-		"barracks":
-			_flag(Vector2(g.x + 44.0 * u, top_y - 20.0 * u), Color(0.55, 0.68, 0.95), u, 0.9)
-		"residence":
-			_flag(Vector2(g.x, top_y + 4.0 * u), Color(0.85, 0.62, 0.90), u, 0.9)
 		"scierie":
 			var sc: Vector2 = g + Vector2(-52.0 * u, -26.0 * u)
 			var r: float = (13.0 + 2.0 * float(lv)) * u
@@ -439,7 +435,11 @@ func _draw_plot(key: String, g: Vector2, u: float) -> void:
 			_governor_stand(g, u)
 	elif tex != null and (wonder or key != "wonder"):
 		_draw_sprite(tex, g, u, key, time_of_day == "nuit")
+		# Animations exprimées en unités du viewBox des sprites : on les ramène à l'échelle du sprite.
+		var k: float = (0.88 if key == "hall" else 0.90) * float(PLOT_SCALE.get(key, 1.0))
+		draw_set_transform(g * (1.0 - k), 0.0, Vector2(k, k))
 		_draw_sprite_anims(key, g, u, lv)   # V62 : animations par-dessus le sprite (fumée, scie, orbe…)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	elif key == "wonder" and not wonder:
 		_empty_plot(g, u, bool(locked.get("wonder", true)))
 	else:

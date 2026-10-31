@@ -212,8 +212,9 @@ func _build_top_bar() -> void:
 	bar.add_child(back)
 	# V62 : bouton jour / soir / nuit de la ville
 	var tod: String = ConquestSystem.effective_time(_conq(), _city_id)
-	var glyph := {"jour": "☀", "soir": "🌇", "nuit": "🌙"}.get(tod, "☀")
-	var day_btn := _btn("%s %s" % [glyph, tod.capitalize()], Color(0.24, 0.22, 0.34), 20, Vector2(150, 62))
+	var glyph: String = {"jour": "☀", "soir": "🌇", "nuit": "🌙"}.get(tod, "☀")
+	var day_btn := _btn(glyph, Color(0.24, 0.22, 0.34), 26, Vector2(70, 62))
+	day_btn.tooltip_text = tod.capitalize()
 	day_btn.name = "DayNightButton"
 	day_btn.pressed.connect(func() -> void:
 		ConquestSystem.cycle_time_of_day(_conq(), _city_id)
@@ -226,9 +227,14 @@ func _build_top_bar() -> void:
 	bar.add_child(titles)
 	var t := _lbl("%s  ·  %s" % [ConquestSystem.level_name(lvl).to_upper(), ProgressionManager.conquest_city_name(_city_id).to_upper()], 34, GOLD)
 	t.name = "CityTitle"
+	t.clip_text = true
+	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	titles.add_child(t)
 	var nation: String = String(Nations.DATA.get(_biome, {}).get("nation", ProgressionManager.biome_label(_biome)))
-	titles.add_child(_lbl("Nation %s  ·  niveau %d / %d  ·  %s" % [nation, lvl, ConquestSystem.MAX_LEVEL, _desc], 18, DIM))
+	var sub := _lbl("Nation %s  ·  niveau %d / %d  ·  %s" % [nation, lvl, ConquestSystem.MAX_LEVEL, _desc], 18, DIM)
+	sub.clip_text = true
+	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	titles.add_child(sub)
 	var chips := HBoxContainer.new()
 	chips.add_theme_constant_override("separation", 8)
 	bar.add_child(chips)
@@ -475,7 +481,7 @@ func _summary(v: VBoxContainer) -> void:
 	_build_spec_choice(v, conq, lvl)
 	var ev: String = ConquestSystem.city_event(conq, _city_id)
 	if ev != "":
-		var ev_txt := {"fete": "🎉 Fête dans la ville : étals et feu de joie sur la place.",
+		var ev_txt: String = {"fete": "🎉 Fête dans la ville : étals et feu de joie sur la place.",
 			"incendie": "🔥 Incendie dans la ville ! La fumée monte sur l'hôtel de ville.",
 			"marchand": "🛒 Un marchand de passage dresse sa charrette près de la place."}.get(ev, "")
 		v.add_child(_wrap(ev_txt, 17, Color(1.0, 0.85, 0.45)))
@@ -599,6 +605,8 @@ func _pips(n: int, total: int, col: Color) -> Control:
 func _btn(t: String, col: Color, size: int, min_size: Vector2) -> Button:
 	var b := Button.new()
 	b.text = t
+	# Le texte revient à la ligne : un bouton ne doit jamais élargir le panneau hors de l'écran.
+	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	b.custom_minimum_size = min_size
 	b.add_theme_font_size_override("font_size", size)
 	b.add_theme_color_override("font_color", TEXT)

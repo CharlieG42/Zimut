@@ -11,8 +11,7 @@ func _boot() -> void:
 	var pm: Node = root.get_node("ProgressionManager")
 	var gm: Node = root.get_node("GameManager")
 	var gs: Node = root.get_node("GameSettings")
-	gs.tutorial_enabled = true
-	gs.tuto_seen = {"ville_v61": true}
+	gs.tutorial_enabled = false
 	var data: Dictionary = pm.new_game(4, "CaptureV62")
 	pm.rebuild_team(data, ["Chasseur", "Mage", "Sylvain"])
 	data["campaign_mode"] = "conquest"
