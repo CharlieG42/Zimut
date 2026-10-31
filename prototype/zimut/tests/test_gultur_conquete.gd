@@ -24,8 +24,8 @@ func _boot() -> void:
 			check(not txt.contains("{pseudo}") and not txt.contains("{e}"), "%s : marqueurs remplacés" % id)
 			g.queue_free()
 	check(String(" ".join(Gultur.CONQ_BROUILLARD)).contains("belvédère") and String(" ".join(Gultur.CONQ_BROUILLARD)).contains("explorateur"), "brouillard : explique belvédère et explorateur")
-	check(String(" ".join(Gultur.CONQ_EXPLORATEUR)).contains("Cartographie") and String(" ".join(Gultur.CONQ_EXPLORATEUR)).contains("2 villes"), "explorateur : Cartographie, 2 villes")
-	check(ConquestSystem.MISSION_TYPES["carte"]["reveal"] == 2 and ConquestSystem.MISSION_BATTLES == 3, "le conseil colle aux règles (2 villes, 3 batailles)")
+	check(String(" ".join(Gultur.CONQ_EXPLORATEUR)).contains("Cartographie") and String(" ".join(Gultur.CONQ_EXPLORATEUR)).contains("trois"), "explorateur : Cartographie, jusqu'à trois villes")
+	check(ConquestSystem.cartography_count(1) == 1 and ConquestSystem.cartography_count(15) == 2 and ConquestSystem.cartography_count(40) == 3 and ConquestSystem.MISSION_BATTLES == 3, "le conseil colle aux règles (1 / 2 dès niv. 15 / 3 dès niv. 40, 3 batailles)")
 	# Une fois vue, une réplique ne revient pas.
 	gs.mark_tuto_seen("conq_brouillard")
 	check(Gultur.say(root, "conq_brouillard", Gultur.CONQ_BROUILLARD) == null, "réplique déjà vue : non répétée")

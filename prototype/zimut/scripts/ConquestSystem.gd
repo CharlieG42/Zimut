@@ -83,8 +83,8 @@ const MISSION_CHANCE := 0.20
 const MISSION_TYPES := {
 	"caravane": {"label": "Escorte de caravane", "text": "Protéger les marchands jusqu'aux passes de l'empire.",
 		"gold": 90, "res": {"Cuir": 4}},
-	"carte": {"label": "Cartographie", "text": "Relever les terres inexplorées au-delà des frontières.",
-		"reveal": 2},
+	"carte": {"label": "Cartographie", "text": "Relever les terres inexplorées au-delà des frontières : 1 ville de plus en plus loin, jusqu'à 3 pour un héros expérimenté.",
+		"reveal": 3},
 	"filon": {"label": "Prospection", "text": "Chercher des filons dans les montagnes voisines.",
 		"gold": 30, "res": {"Fer": 8}},
 	}
@@ -688,6 +688,8 @@ static func assign_hero(data: Dictionary, id: String, classe: String) -> String:
 		return "Ville non conquise."
 	if not GOVERNOR.has(classe):
 		return "Héros inconnu."
+	if not HeroUnlock.is_unlocked(data, classe):
+		return "%s n'est pas encore débloqué." % classe
 	if hero_of(conq, id) != "":
 		return "Cette ville a déjà un gouverneur."
 	if stationed_heroes(conq).size() >= 6:
@@ -738,9 +740,11 @@ static func mission_label(type_id: String) -> String:
 	return String(MISSION_TYPES.get(type_id, {}).get("label", "Mission"))
 
 ## Envoie un héros libre en mission de 3 batailles. Retourne "" si OK.
-static func send_mission(conq: Dictionary, classe: String, type_id: String) -> String:
+static func send_mission(conq: Dictionary, classe: String, type_id: String, data: Dictionary = {}) -> String:
 	if not GOVERNOR.has(classe):
 		return "Héros inconnu."
+	if not data.is_empty() and not HeroUnlock.is_unlocked(data, classe):
+		return "%s n'est pas encore débloqué." % classe
 	if not MISSION_TYPES.has(type_id):
 		return "Mission inconnue."
 	if hero_city(conq, classe) != "":
@@ -751,6 +755,26 @@ static func send_mission(conq: Dictionary, classe: String, type_id: String) -> S
 	m[classe] = {"type": type_id, "eta": MISSION_BATTLES}
 	conq["missions"] = m
 	return ""
+
+## Villes révélées par une Cartographie selon le niveau du héros : 1, puis 2 dès le
+## niveau 15 et 3 dès le niveau 40 (maximum).
+static func cartography_count(hero_lvl: int) -> int:
+	return 1 + (1 if hero_lvl >= 15 else 0) + (1 if hero_lvl >= 40 else 0)
+
+## Annule les missions de héros pas encore débloqués (anciennes sauvegardes) ;
+## retourne les classes rappelées.
+static func cancel_locked_missions(data: Dictionary) -> Array:
+	var conq: Dictionary = data.get("conquest", {})
+	var m: Dictionary = missions(conq)
+	var out: Array = []
+	for classe: String in m.keys().duplicate():
+		if not HeroUnlock.is_unlocked(data, classe):
+			m.erase(classe)
+			out.append(classe)
+	if not out.is_empty():
+		conq["missions"] = m
+		data["conquest"] = conq
+	return out
 
 ## Rappelle un héros de sa mission (il revient bredouille, sans récompense).
 static func abort_mission(conq: Dictionary, classe: String) -> String:
@@ -765,7 +789,7 @@ static func abort_mission(conq: Dictionary, classe: String) -> String:
 ## révélées sont ajoutées à adventure.revealed_cities (pont inter-modes) par
 ## ProgressionManager, qui passe les candidates ici.
 static func _tick_missions(data: Dictionary, conq: Dictionary, rng: RandomNumberGenerator,
-		unrevealed: Array) -> void:
+		unrevealed: Array, routes: Array = []) -> void:
 	var m: Dictionary = missions(conq)
 	if m.is_empty():
 		return
@@ -797,8 +821,17 @@ static func _tick_missions(data: Dictionary, conq: Dictionary, rng: RandomNumber
 			_add_res(data, drops)
 		var revealed: Array = []
 		if int(info.get("reveal", 0)) > 0 and not unrevealed.is_empty():
-			for i: int in range(mini(int(info["reveal"]), unrevealed.size())):
-				revealed.append(unrevealed[i])
+			# Les terres les plus proches de l'empire d'abord (une à une), puis par identifiant.
+			var owned_now: Array = conq.get("owned", [])
+			var order: Array = unrevealed.duplicate()
+			order.sort_custom(func(a: String, b: String) -> bool:
+				var da: int = path_to(owned_now, routes, a).size() if not routes.is_empty() else 0
+				var db: int = path_to(owned_now, routes, b).size() if not routes.is_empty() else 0
+				if da != db:
+					return da < db
+				return a < b)
+			for i: int in range(mini(cartography_count(lvl), order.size())):
+				revealed.append(order[i])
 			if not revealed.is_empty():
 				var so_far: Array = conq.get("missions_revealed", [])
 				for cid: String in revealed:
@@ -1152,7 +1185,7 @@ static func after_victory(data: Dictionary, conq: Dictionary, rng: RandomNumberG
 	_collect_income(data, conq)
 	_regen_garrisons(data, conq)
 	_tick_threat(data, conq, rng)
-	_tick_missions(data, conq, rng, unrevealed)
+	_tick_missions(data, conq, rng, unrevealed, routes)
 	_tick_chancellor_buffs(conq)
 	_tick_ruins(conq)
 	tick_city_events(conq)   # V62 : les événements de ville s'éteignent avec le temps

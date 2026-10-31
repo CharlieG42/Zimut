@@ -2992,7 +2992,7 @@ func conquest_mission_text(type_id: String) -> String:
 	return ConquestSystem.mission_text(type_id)
 
 func conquest_send_mission(data: Dictionary, classe: String, type_id: String) -> String:
-	var err: String = ConquestSystem.send_mission(data.get("conquest", {}), classe, type_id)
+	var err: String = ConquestSystem.send_mission(data.get("conquest", {}), classe, type_id, data)
 	if err == "":
 		data["conquest"] = data.get("conquest", {})
 	return err
