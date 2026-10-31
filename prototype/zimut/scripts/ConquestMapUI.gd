@@ -149,8 +149,15 @@ func _ready() -> void:
 	_persist()
 	# V59 : Gultur présente les nouveautés de la Conquête (une seule fois chacune)
 	# V60 : puis la carte vivante (routes, territoire, brouillard, offensives)
+	# V64 : puis comment sortir du brouillard (s'il en reste) et les nouveautés de la carte.
 	Gultur.say(self, "conq_v59", Gultur.CONQ_V59, _side_panel,
-		func() -> void: Gultur.say(self, "conq_carte", Gultur.CONQ_CARTE, _map_scroll))
+		func() -> void: Gultur.say(self, "conq_carte", Gultur.CONQ_CARTE, _map_scroll,
+			func() -> void:
+				if _fog_remaining() > 0:
+					Gultur.say(self, "conq_brouillard", Gultur.CONQ_BROUILLARD, _map_scroll,
+						func() -> void: Gultur.say(self, "conq_v64", Gultur.CONQ_CIBLES_V64, _side_panel))
+				else:
+					Gultur.say(self, "conq_v64", Gultur.CONQ_CIBLES_V64, _side_panel)))
 
 func _build() -> void:
 	var bg := ColorRect.new()
@@ -985,6 +992,14 @@ func _refresh_targets(ids: Array) -> void:
 			_center_on(CITY_POS[id]))
 		_tab_targets.add_child(b)
 
+## Nombre de villes encore dans le brouillard (ni conquises, ni révélées, ni voisines de l'empire).
+func _fog_remaining() -> int:
+	var n: int = 0
+	for id: String in CITY_POS.keys():
+		if _is_unknown(id):
+			n += 1
+	return n
+
 ## Ville révélée mais encore séparée de l'empire : « vue de loin ».
 func _is_far(city_id: String) -> bool:
 	if _conquest.get("owned", []).has(city_id) or city_id == "capitale":
@@ -1241,7 +1256,11 @@ func _show_governor_picker(city_id: String) -> void:
 ## (escorte, cartographie, prospection) ou rappeler une mission en cours.
 func _show_mission_picker() -> void:
 	if not Gultur.should_show("conq_v59"):
-		Gultur.say(self, "conq_missions", Gultur.CONQ_MISSIONS, null)
+		# Présentation des missions, puis — s'il reste du brouillard — de l'explorateur.
+		Gultur.say(self, "conq_missions", Gultur.CONQ_MISSIONS, null,
+			func() -> void:
+				if _fog_remaining() > 0:
+					Gultur.say(self, "conq_explorateur", Gultur.CONQ_EXPLORATEUR, null))
 	var vp: Vector2 = get_viewport().get_visible_rect().size
 	var dim := ColorRect.new()
 	dim.name = "MissionPicker"
