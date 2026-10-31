@@ -21,6 +21,7 @@ func _start() -> void:
 	_test_activate_deactivate()
 	_test_build_talents()
 	_test_migration_default()
+	_test_v63_spells()
 	print("")
 	if failures > 0:
 		print("ÉCHEC : %d test(s) en erreur." % failures)
@@ -192,3 +193,43 @@ func _test_migration_default() -> void:
 	_check(Builds.active_index(data, "Tank") == -1, "build_index = -1 par défaut")
 	_check(Builds.active_spells(data, "Tank").size() > 0, "sorts actifs par défaut renseignés")
 	_check(Builds.build_count(data, "Tank") == 0, "aucun build par défaut")
+
+
+## V63 : l'Ingénieur se retrouvait avec 2 sorts (build créé vide, puis seuls les sorts débloqués
+## ensuite y entraient) ; changer de build écrasait la sélection ; sélection vide possible.
+func _test_v63_spells() -> void:
+	print("Builds — V63 sorts actifs fiables :")
+	# Ancienne sauvegarde : build actif avec seulement Rappel et Couplage, sans marque de réparation
+	var data: Dictionary = _make_save("Artificier", 7)
+	var ent: Dictionary = data["roster"]["Artificier"]
+	ent["builds"] = [{"name": "Build 1", "equipment": {}, "spells": ["Rappel", "Couplage"], "talents": {"unlocked": {}, "points": 0}}]
+	ent["build_index"] = 0
+	ent.erase("spells_ok")
+	ProgressionManager.ensure_roster(data)
+	var act: Array = Builds.active_spells(data, "Artificier")
+	_check(act.size() == Builds.unlocked_spell_names(data, "Artificier").size(), "build réparé : tous les sorts débloqués actifs (%d)" % act.size())
+	_check(act.has("Déclencheur") and act.has("Poser Bombe") and act.has("Couplage"), "Déclencheur, Bombe et Couplage actifs")
+	_check(Builds.active_spells(data, "Artificier") == Array(ent["active_spells"]), "le roster reflète le build actif")
+	# Nouveau build : il reprend les sorts actifs (pas un build vide)
+	var d2: Dictionary = _make_save("Mage", 2)
+	var i0: int = Builds.create_build(d2, "Mage", "A")
+	_check(not Builds.build_at(d2, "Mage", i0)["spells"].is_empty(), "un nouveau build reprend les sorts actifs")
+	Builds.activate(d2, "Mage", i0, -1)
+	var i1: int = Builds.create_build(d2, "Mage", "B")
+	# montée de niveau : tous les builds profitent des nouveaux sorts
+	var before_b: int = (Builds.build_at(d2, "Mage", i1)["spells"] as Array).size()
+	d2["roster"]["Mage"]["level"] = 20
+	Builds.on_level_up(d2, "Mage", 2, 20)
+	_check(Builds.active_spells(d2, "Mage").size() > 2, "le build actif reçoit les nouveaux sorts")
+	_check((Builds.build_at(d2, "Mage", i1)["spells"] as Array).size() > before_b, "le build inactif aussi")
+	# sélection du build A, puis changement de build et retour : la sélection est conservée
+	Builds.set_active_spells(d2, "Mage", ["Boule de feu", "Éclair"])
+	Builds.activate(d2, "Mage", i1, i0)
+	Builds.activate(d2, "Mage", i0, i1)
+	_check(Builds.active_spells(d2, "Mage") == ["Boule de feu", "Éclair"], "changer de build ne perd pas la sélection")
+	# on ne peut pas retirer le dernier sort
+	Builds.set_active_spells(d2, "Mage", ["Éclair"])
+	Builds.toggle_spell(d2, "Mage", "Éclair")
+	_check(Builds.active_spells(d2, "Mage") == ["Éclair"], "le dernier sort actif ne peut pas être retiré")
+	Builds.set_active_spells(d2, "Mage", [])
+	_check(not Builds.active_spells(d2, "Mage").is_empty(), "une sélection vide est refusée")

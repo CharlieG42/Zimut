@@ -1440,16 +1440,44 @@ func _open_spell_picker() -> void:
 	grid.add_theme_constant_override("v_separation", 10)
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(grid)
-	var rebuild: Callable
-	rebuild = func() -> void:
-		counter.text = "%d / %d sorts actifs" % [Builds.active_spell_count(_save, _classe), Builds.MAX_ACTIVE_SPELLS]
-		for c in grid.get_children():
-			c.queue_free()
-		var cur: Array = Builds.active_spells(_save, _classe)
-		for sname: String in Builds.unlocked_spell_names(_save, _classe):
-			grid.add_child(_spell_pick_card(sname, cur.has(sname), rebuild))
-	rebuild.call()
+	var tools := HBoxContainer.new()
+	tools.add_theme_constant_override("separation", 10)
+	v.add_child(tools)
+	var reset := _btn("↺ LES %d PREMIERS" % Builds.MAX_ACTIVE_SPELLS, C_BORDER, 16, Vector2(220, 44))
+	reset.name = "PickDefaults"
+	reset.tooltip_text = "Sélectionne les sorts débloqués dans l'ordre (jusqu'à 10)"
+	reset.pressed.connect(func() -> void:
+		Builds.set_active_spells(_save, _classe, Builds.unlocked_spell_names(_save, _classe))
+		_persist()
+		_picker_rebuild())
+	tools.add_child(reset)
+	var hint := _lbl("Touchez un sort pour l'ajouter ou le retirer (au moins un sort reste actif).", 15, C_DIM)
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tools.add_child(hint)
+	_picker_counter = counter
+	_picker_grid = grid
+	_picker_rebuild()
 	dlg.popup_centered()
+
+
+## V63 : reconstruction du sélecteur par une méthode (et non une lambda qui s'appelait elle-même :
+## la variable capturée valait null, si bien qu'après un toucher la liste ne se rafraîchissait pas
+## — l'affichage ne correspondait plus à la sélection, et un second toucher la défaisait).
+var _picker_grid: GridContainer = null
+var _picker_counter: Label = null
+
+func _picker_rebuild() -> void:
+	if _picker_grid == null or not is_instance_valid(_picker_grid):
+		return
+	var n_act: int = Builds.active_spell_count(_save, _classe)
+	_picker_counter.text = "%d / %d sorts actifs%s" % [n_act, Builds.MAX_ACTIVE_SPELLS, "  —  complet" if n_act >= Builds.MAX_ACTIVE_SPELLS else ""]
+	for c in _picker_grid.get_children():
+		_picker_grid.remove_child(c)
+		c.queue_free()
+	var cur: Array = Builds.active_spells(_save, _classe)
+	for sname: String in Builds.unlocked_spell_names(_save, _classe):
+		_picker_grid.add_child(_spell_pick_card(sname, cur.has(sname), Callable()))
 
 
 ## Carte d'un sort dans le sélecteur de sorts actifs (clic = toggle).
@@ -1482,12 +1510,17 @@ func _spell_pick_card(sname: String, on: bool, rebuild: Callable) -> PanelContai
 	pdesc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cv.add_child(pdesc)
 	var btn := Button.new()
+	btn.name = "Pick_" + sname
+	btn.flat = true
+	# V63 : bouton transparent (il recouvrait la carte d'un voile gris qui masquait l'état coché)
+	for stn: String in ["normal", "hover", "pressed", "focus", "disabled", "hover_pressed"]:
+		btn.add_theme_stylebox_override(stn, StyleBoxEmpty.new())
 	btn.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	btn.focus_mode = Control.FOCUS_NONE
 	btn.mouse_filter = Control.MOUSE_FILTER_STOP
 	btn.pressed.connect(func() -> void:
 		Builds.toggle_spell(_save, _classe, sname)
 		_persist()
-		rebuild.call())
+		_picker_rebuild.call_deferred())
 	card.add_child(btn)
 	return card
