@@ -96,6 +96,7 @@ func _boot() -> void:
 	# ── Couplage ──
 	var link: Dictionary = _sp(art, "Couplage")
 	check(not link.is_empty(), "sort Couplage connu au niveau 100")
+	check(SpellIcons.icon_id("Couplage") == "ing_couplage" and FileAccess.file_exists("res://assets/icons/spells/ing_couplage.svg"), "Couplage a sa propre icône")
 	var tur: Dictionary = _sp(art, "Poser Bombe")
 	_put(gm, art, Vector2i(3, 2))
 	_put(gm, foe, Vector2i(4, 4))

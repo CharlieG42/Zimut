@@ -246,21 +246,21 @@ Séisme ambré,quake_amber
 Pierre vivante,stone_skin
 Fracas des montagnes,cataclysm
 Cataclysme minéral,cataclysm
-Déclencheur,slash
+Déclencheur,ing_detonateur
 Pistolet à ressort,slash
-Poser Bombe,slash
+Poser Bombe,ing_bombe
 Pétard,explosion
 Fumigène,camouflage
 Tir de barrage,arrow
-Poser Mine,slash
+Poser Mine,ing_mine
 Piège à ressort,trap
 Pistolet à silex,arrow
-Poser Tourelle,slash
+Poser Tourelle,ing_tourelle
 Balle incendiaire,arrow_fire
 Grenade assourdissante,explosion
 Poser Balise de transposition,beacon
 Tir de précision,arrow_pierce
-Mine à fragmentation,trap_para
+Mine à fragmentation,ing_mine
 Surcharge,fury
 Glyphe de surcharge,slash
 Fusil à lunette,arrow_pierce
@@ -271,7 +271,7 @@ Canon à main,power_strike
 Fusil à pompe,slash
 Bombe à fragmentation,cataclysm
 Tir d'artillerie,meteor_rain
-Arsenal total,slash_t2
+Arsenal total,ing_detonateur
 Morsure,bite
 Coup d'os,bone
 Coup de massue,club
@@ -378,10 +378,10 @@ Lame d'ombre,blade_shadow
 Vrilles sylvestres,ivy
 Flèche de sève,arrow
 Coup de branche,wood_arm
-Rappel,shield
-Poser Bombe incendiaire,slash
-Maintenance,shield_group
-Couplage,beacon
-Poser Bombe assourdissante,slash
-Poser Tourelle lourde,slash
-Poser Charge à fragmentation,slash
+Rappel,ing_rappel
+Poser Bombe incendiaire,ing_bombe_feu
+Maintenance,ing_maintenance
+Couplage,ing_couplage
+Poser Bombe assourdissante,ing_bombe_assourd
+Poser Tourelle lourde,ing_tourelle_lourde
+Poser Charge à fragmentation,ing_charge_frag
