@@ -127,6 +127,10 @@ func _ready() -> void:
 		_conquest = {"owned": ["capitale"], "pending_city": ""}
 	_save["conquest"] = _conquest
 	_save["campaign_mode"] = "conquest"
+	# Un héros pas encore débloqué ne peut pas être en mission (anciennes sauvegardes) : rappel.
+	for locked: String in ConquestSystem.cancel_locked_missions(_save):
+		_conquest = _save.get("conquest", _conquest)
+		ProgressionManager.conquest_add_event(_conquest, "⚑ %s rappelé de mission : héros pas encore débloqué." % locked)
 	_persist()
 	_build()
 	var annexed: String = String(_conquest.get("just_annexed", ""))
@@ -993,13 +997,13 @@ func _refresh_targets(ids: Array) -> void:
 		b.name = "Target_" + id
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		b.custom_minimum_size.y = 84
-		b.add_theme_font_size_override("font_size", 15)
+		b.custom_minimum_size.y = 118
+		b.add_theme_font_size_override("font_size", 19)
 		b.add_theme_color_override("font_color", TEXT)
 		var edge: Color = {"ok": Color(0.45, 0.85, 0.50), "risky": Color(0.95, 0.75, 0.30), "weak": Color(0.90, 0.40, 0.35)}[String(adv["verdict"])]
 		b.add_theme_stylebox_override("normal", _style(Color(0.12, 0.18, 0.22, 0.97), edge))
 		b.add_theme_stylebox_override("hover", _style(Color(0.18, 0.26, 0.28, 0.97), GOLD))
-		b.text = Typo.fr("%s — niv. %d\n%s · %s\nButin : %s" % [
+		b.text = Typo.fr("%s — niv. %d\n%s\n%s\nButin : %s" % [
 			String(meta["name"]), int(meta["level"]), kind_txt, String(adv["text"]), String(rw.get("name", "—")) + (" (" + ", ".join(PackedStringArray(parts)) + ")" if not parts.is_empty() else "")])
 		b.pressed.connect(func() -> void:
 			_select_city(id)
@@ -1256,6 +1260,8 @@ func _show_governor_picker(city_id: String) -> void:
 	list.add_theme_constant_override("separation", 6)
 	sc.add_child(list)
 	for classe: String in ProgressionManager.CLASS_ORDER:
+		if not HeroUnlock.is_unlocked(_save, classe):
+			continue    # héros pas encore débloqué : jamais proposé
 		var elsewhere: String = ConquestSystem.hero_city(_conquest, classe)
 		var on_mission: Dictionary = ConquestSystem.hero_on_mission(_conquest, classe)
 		var b := Button.new()
@@ -1330,6 +1336,8 @@ func _show_mission_picker() -> void:
 	sc.add_child(list)
 	var missions: Dictionary = ConquestSystem.missions(_conquest)
 	for classe: String in ProgressionManager.CLASS_ORDER:
+		if not HeroUnlock.is_unlocked(_save, classe):
+			continue    # héros pas encore débloqué : jamais proposé
 		var job: Dictionary = missions.get(classe, {})
 		var header := Label.new()
 		header.text = classe
@@ -1368,7 +1376,7 @@ func _show_mission_picker() -> void:
 			b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			b.text = "⚑ %s\n%s" % [ConquestSystem.mission_label(type_id), ConquestSystem.mission_text(type_id)]
 			if type_id == "carte" and fog > 0:
-				b.text = "★ RECOMMANDÉE — %s\n%s %d ville(s) encore dans le brouillard." % [ConquestSystem.mission_label(type_id), ConquestSystem.mission_text(type_id), fog]
+				b.text = "★ RECOMMANDÉE — %s\nRévèle %d ville(s) (selon le niveau du héros) parmi les %d encore dans le brouillard." % [ConquestSystem.mission_label(type_id), ConquestSystem.cartography_count(ConquestSystem.hero_level(_save, classe)), fog]
 				b.add_theme_stylebox_override("normal", _style(Color(0.22, 0.28, 0.18, 0.97), GOLD))
 			b.custom_minimum_size.y = 52
 			b.add_theme_font_size_override("font_size", 14)

@@ -19,7 +19,8 @@
 - Récapitulatif d'annexion : « Nouvelles voies ouvertes : … ».
 
 ## Explorateur
-- Mission de **Cartographie** (3 batailles, 2 villes révélées, 1 chance sur 5 de complication) : recommandée et placée
+- Mission de **Cartographie** (3 batailles, 1 chance sur 5 de complication) : **1 ville** révélée, la plus proche de l'empire
+  (2 dès le niveau 15 du héros, 3 dès le niveau 40 — maximum) : recommandée et placée
   en premier dans le sélecteur tant qu'il reste du brouillard, avec le nombre de villes à découvrir.
 
 ## Difficulté
@@ -38,3 +39,9 @@
 - Le workflow lance désormais **tous** les `tests/test_*.gd` ; les échecs sont signalés en `::warning::` sans bloquer l'APK.
 - Nouveaux : `test_gultur_conquete`, `test_conquest_ui_v64` ; `test_conquest_roads` étendu (brouillard, chemins, niveaux).
 - Captures : `shot_conquete_voies`, `shot_conquete_portrait`, `shot_gultur_brouillard`.
+
+## V64b — correctifs après test sur téléphone
+- Onglet Cibles : police 15 → 19, cartes plus hautes (une info par ligne).
+- **Héros non débloqués** : jamais proposés ni acceptés pour une mission ou un gouvernorat (sélecteurs + règles
+  `ConquestSystem.send_mission` / `assign_hero`). Les missions déjà en cours d'un héros non débloqué sont rappelées à l'ouverture de la carte.
+- Cartographie : villes révélées une à une, les plus proches d'abord (`ConquestSystem.cartography_count`).
