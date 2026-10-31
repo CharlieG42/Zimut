@@ -8,8 +8,8 @@
   jusqu'au niveau 4. Explosion ×1 / ×1,3 / ×1,65 / ×2. Étoile dorée avec le niveau sur chaque bombe,
   « Niveau N ! » à chaque montée. Déclenchée tôt = faible ; laissée mûrir = dévastatrice.
 - **Couplage** (niv. 6, 1 PA, portée 6) : couple un de vos mécanismes pendant 3 tours. Deux mécanismes couplés,
-  alignés (ligne ou colonne, 1 à 6 cases d'écart), tendent une **barrière électrique** : les ennemis ne peuvent pas
-  la franchir (les alliés oui) et ceux qui s'y trouvent quand elle se forme sont électrocutés. Arc animé entre les
+  alignés (ligne ou colonne, 1 à 6 cases d'écart), tendent une **barrière électrique** franchissable : quiconque la traverse
+  (ou s'y trouve quand elle se forme) est électrocuté — plein pot pour les ennemis, moitié moins pour les alliés. Arc animé entre les
   deux mécanismes, cases illuminées, éclair bleu sur les mécanismes couplés. Fonctionne avec tous les mécanismes
   (bombes, tourelles, balise).
 - Gultur présente ces nouveautés sur l'écran d'équipe ; fiche de classe mise à jour.
@@ -24,6 +24,13 @@
 - **Carte plein écran** : chaque accès indique sa destination et son niveau (« → Marais des Brumes · Niv. 26 »,
   « ✖ … · fermé »).
 
+## Mode Tactique
+- **Objectifs toujours visibles** à droite du bouton « Quitter le combat » : objectif du combat, défi de Conquête
+  et synergies actives, avec leur état en direct (✔ réussi, ✖ manqué, tour n/4, n/3 héros…). En-tête
+  « ▾ OBJECTIFS 0/1 » : un toucher replie ou déplie le panneau (choix gardé pour les combats suivants de la session).
+- Correction : un héros tombé ne comptait pas comme perte (l'objectif « sans qu'aucun héros ne tombe » et le défi
+  « Sans pertes » étaient toujours réussis).
+
 ## Conquête
 - Panneau de droite : boutons à retour à la ligne, typographie française (espaces insécables avant « : ! ? % »,
   entre un nombre et son unité) — plus de « 100 | % » ni de « 12 | or » coupés, plus de panneau qui déborde.
@@ -31,6 +38,6 @@
   trois fois trop grands, panneau plus large que l'écran.
 
 ## Tests
-- `tests/test_v63.gd` : bombes à niveaux, Couplage (barrière, blocage, allié qui passe, expiration), glyphe
+- `tests/test_v63.gd` : bombes à niveaux, Couplage (barrière, électrocution au passage, alliés moitié, expiration), glyphe
   traversé, nom affiché.
 - Captures : `shot_ingenieur_v63.gd`, `shot_donjon_3d.gd`, `shot_carte_portails.gd`.

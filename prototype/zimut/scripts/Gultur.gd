@@ -92,7 +92,7 @@ const CONQ_CARTE := [
 ]
 const INGENIEUR_V63 := [
 	"L'Artificier devient l'[b]Ingénieur[/b], [b]{pseudo}[/b] ! Ses [b]bombes mûrissent[/b] : niveau 1 à la pose, +1 à chaque fin de son tour, jusqu'au niveau 4 (explosion ×2). L'étoile dorée affiche leur niveau.",
-	"Nouveau sort [b]Couplage[/b] : couple deux mécanismes alignés et une [b]barrière électrique[/b] se tend entre eux. Les ennemis ne la franchissent pas et ceux qui s'y trouvent sont électrocutés.",
+	"Nouveau sort [b]Couplage[/b] : couple deux mécanismes alignés et une [b]barrière électrique[/b] se tend entre eux. Elle reste franchissable, mais quiconque la traverse est [b]électrocuté[/b] : plein pot pour les ennemis, moitié moins pour tes alliés.",
 ]
 const VILLE_V61 := [
 	"Bienvenue dans ta ville, [b]{pseudo}[/b] ! Touche un bâtiment pour le gérer à droite.",

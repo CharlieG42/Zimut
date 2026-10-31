@@ -116,16 +116,26 @@ func _boot() -> void:
 	var bars: Array = gm.barriers()
 	check(bars.size() == 1 and (bars[0]["cells"] as Array).size() == 2, "barrière de 2 cases entre A et C")
 	check(int(foe["current_pv"]) < fp0, "l'ennemi pris dans la barrière est électrocuté")
-	# l'ennemi au nord de la barrière ne peut pas la franchir ; l'allié oui
+	# la barrière est franchissable, mais électrocute : ennemis plein pot, alliés moitié
 	_put(gm, foe, Vector2i(4, 3))
 	foe["current_pm"] = 2
-	var reach: Dictionary = gm.compute_reach(foe)
-	check(not (reach["cost"] as Dictionary).has(Vector2i(4, 4)) and not (reach["cost"] as Dictionary).has(Vector2i(4, 5)), "l'ennemi ne franchit pas la barrière")
+	foe["max_pv"] = 5000
+	foe["current_pv"] = 5000
+	gm.active_entity = foe
+	check(gm.try_move(foe, Vector2i(4, 5)), "l'ennemi franchit la barrière")
+	var foe_loss: int = 5000 - int(foe["current_pv"])
+	check(foe_loss > 0, "l'ennemi qui traverse est électrocuté (%d)" % foe_loss)
 	_put(gm, foe, Vector2i(8, 8))
 	_put(gm, geo, Vector2i(4, 3))
 	geo["current_pm"] = 2
-	var reach2: Dictionary = gm.compute_reach(geo)
-	check((reach2["cost"] as Dictionary).has(Vector2i(4, 5)), "un allié traverse la barrière")
+	geo["current_pv"] = 5000
+	geo["defense"] = foe.get("defense", 0)
+	geo["res_mag"] = foe.get("res_mag", 0)
+	gm.active_entity = geo
+	check(gm.try_move(geo, Vector2i(4, 5)), "un allié traverse la barrière")
+	var ally_loss: int = 5000 - int(geo["current_pv"])
+	check(ally_loss > 0, "l'allié est électrocuté lui aussi (%d)" % ally_loss)
+	print("   électrocution ennemi %d · allié %d" % [foe_loss, ally_loss])
 	# la barrière tombe quand le couplage expire
 	for m: Dictionary in gm.mechs_of(art):
 		m["link_turns"] = 0

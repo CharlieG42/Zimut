@@ -1054,6 +1054,76 @@ func _setup_objective_and_synergies() -> void:
 		message_requested.emit("✦✦ Synergie %s (%s) : %s" % [sy["name"], sy["trio"], sy["desc"]])
 
 
+## État en direct des objectifs du combat (panneau du mode Tactique) :
+## [{icon, label, reward, state: "ok" | "ko" | "pending" | "bonus", detail}]
+func objectives_status() -> Array:
+	var out: Array = []
+	var deaths: int = 0
+	var heal_total: int = 0
+	var hit: int = 0
+	deaths = graveyard.size()
+	for p: Dictionary in players:
+		if not is_alive(p):
+			deaths += 1
+		var stp: Dictionary = combat_stats.get(int(p["uid"]), {})
+		heal_total += int(stp.get("heal", 0))
+		if int(stp.get("dmg", 0)) > 0:
+			hit += 1
+	if not fight_objective.is_empty():
+		var o: Dictionary = {"icon": "◆", "label": String(fight_objective.get("label", "")), "reward": String(fight_objective.get("reward_text", "")), "state": "pending", "detail": ""}
+		match String(fight_objective.get("kind", "")):
+			"swift":
+				var lim: int = ProgressionManager.OBJECTIVE_SWIFT_TURNS
+				o["state"] = "ko" if turn_count > lim else "pending"
+				o["detail"] = "tour %d / %d" % [mini(turn_count, lim), lim]
+			"flawless":
+				o["state"] = "ko" if deaths > 0 else "pending"
+			"chief":
+				var ch_name: String = ""
+				var ch: Dictionary = _entity_by_uid(_chief_uid)
+				if not ch.is_empty():
+					ch_name = String(ch.get("name", ""))
+					o["label"] = "Vaincre en premier le chef : %s" % ch_name
+				if _first_kill_uid >= 0:
+					o["state"] = "ok" if _first_kill_uid == _chief_uid else "ko"
+			"no_heal":
+				o["state"] = "ko" if heal_total > 0 else "pending"
+			"all_hit":
+				o["state"] = "ok" if hit >= players.size() and players.size() > 0 else "pending"
+				o["detail"] = "%d / %d héros" % [hit, players.size()]
+		out.append(o)
+	if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "conquest":
+		var city: String = String(active_save.get("conquest", {}).get("pending_city", ""))
+		var cc: Dictionary = ProgressionManager.conquest_challenge_for(active_save, city)
+		if not cc.is_empty():
+			var parts: PackedStringArray = ["+%d or" % int(cc.get("gold", 0))]
+			for r: String in cc.get("resources", {}).keys():
+				parts.append("+%d %s" % [int(cc["resources"][r]), r])
+			var c2: Dictionary = {"icon": "◆", "label": "Défi : " + String(cc.get("label", "")), "reward": " · ".join(parts), "state": "pending", "detail": ""}
+			match String(cc.get("kind", "")):
+				"swift":
+					var lim2: int = ProgressionManager.CONQUEST_SWIFT_TURNS
+					c2["state"] = "ko" if turn_count > lim2 else "pending"
+					c2["detail"] = "tour %d / %d" % [mini(turn_count, lim2), lim2]
+				"flawless":
+					c2["state"] = "ko" if deaths > 0 else "pending"
+				"class":
+					var has_cls: bool = false
+					for p2: Dictionary in players:
+						if String(p2.get("classe", "")) == String(cc.get("class", "")):
+							has_cls = true
+					c2["state"] = "ok" if has_cls else "ko"
+			out.append(c2)
+	var classes: Array = []
+	for p3: Dictionary in players:
+		classes.append(String(p3.get("classe", "")))
+	for sy: Dictionary in ProgressionManager.active_synergies(classes):
+		out.append({"icon": "✦", "label": "Synergie %s" % String(sy["name"]), "reward": String(sy["desc"]), "state": "bonus", "detail": ""})
+	for sy2: Dictionary in ProgressionManager.active_synergy_trios(classes):
+		out.append({"icon": "✦✦", "label": "Synergie %s" % String(sy2["name"]), "reward": String(sy2["desc"]), "state": "bonus", "detail": ""})
+	return out
+
+
 func start_battle() -> void:
 	_epoch += 1
 	combat_stats = {}
@@ -1330,7 +1400,6 @@ func compute_reach(e: Dictionary, max_cost: int = -1) -> Dictionary:
 	var prev: Dictionary = {}
 	var queue: Array[Vector2i] = [start]
 	var flies: bool = bool(e.get("fly", false))
-	var bars: Array = barriers() if not _no_links() else []
 	while not queue.is_empty():
 		var cur: Vector2i = queue.pop_front()
 		if int(cost[cur]) >= limit:
@@ -1340,8 +1409,6 @@ func compute_reach(e: Dictionary, max_cost: int = -1) -> Dictionary:
 			if cost.has(n) or not _in_bounds(n) or grid[n.y][n.x] != null:
 				continue
 			if obstacles.has(n) and (not flies or String(obstacles[n]) == "void"):
-				continue
-			if not bars.is_empty() and _barrier_blocks(e, n, bars):
 				continue
 			cost[n] = int(cost[cur]) + 1
 			prev[n] = cur
@@ -1393,6 +1460,7 @@ func try_move(e: Dictionary, cell: Vector2i) -> bool:
 	entity_moved.emit(e, start, cell)
 	# V63 : traverser un glyphe (allié ou ennemi) déclenche son effet, comme s'y arrêter
 	_glyphs_on_path(e, path)
+	_barriers_on_path(e, path)
 	_check_traps(e)
 	_after_action()
 	return true
@@ -2304,16 +2372,35 @@ func barriers() -> Array:
 	return out
 
 
-## La barrière d'un camp adverse bloque-t-elle cette case pour `e` ?
-func _barrier_blocks(e: Dictionary, cell: Vector2i, bars: Array) -> bool:
-	for b: Dictionary in bars:
-		if String(b["team"]) != String(e.get("team", "")) and (b["cells"] as Array).has(cell):
-			return true
-	return false
+## Dégâts d'électrocution d'une barrière (lanceur = propriétaire des mécanismes).
+func _barrier_shock(owner: Dictionary, t: Dictionary) -> int:
+	if owner.is_empty() or t.is_empty() or not is_alive(t) or bool(t.get("terrain", false)) or bool(t.get("beacon", false)):
+		return 0
+	var r: Dictionary = Combat.calc_damage(owner, t, (20.0 + float(owner["level"]) * 0.6) / 1.8, "mag", 0.0, false, false)
+	var dmg: int = int(r["dmg"])
+	if String(t.get("team", "")) == String(owner.get("team", "")):
+		dmg = maxi(1, dmg / 2)   # alliés : électrocution divisée par 2
+	fx.emit("status", {"target": t, "text": "Électrocuté", "color": Color(0.55, 0.85, 1.0)})
+	return _apply_damage(owner, t, dmg, "mag", bool(r["crit"]), false)
+
+
+## Traverser une barrière (ou s'arrêter dedans) électrocute : ennemis plein pot, alliés moitié.
+## Une fois par barrière et par déplacement.
+func _barriers_on_path(e: Dictionary, path: Array[Vector2i]) -> void:
+	if _no_links() or path.is_empty() or bool(e.get("terrain", false)):
+		return
+	for b: Dictionary in barriers():
+		if not is_alive(e):
+			return
+		for c: Vector2i in path:
+			if (b["cells"] as Array).has(c):
+				_barrier_shock(_entity_by_uid(int(b["owner"])), e)
+				break
 
 
 ## Couplage : le mécanisme visé est couplé pour LINK_TURNS tours ; une barrière se tend
-## vers chaque autre mécanisme couplé aligné. Les ennemis pris dans la barrière sont électrocutés.
+## vers chaque autre mécanisme couplé aligné. Elle reste franchissable, mais quiconque la traverse
+## ou s'y trouve quand elle se forme est électrocuté (ennemis : plein pot, alliés : moitié).
 func _resolve_link(caster: Dictionary, cell: Vector2i) -> String:
 	var m: Dictionary = entity_at(cell)
 	var before: int = barriers().size()
@@ -2328,14 +2415,13 @@ func _resolve_link(caster: Dictionary, cell: Vector2i) -> String:
 			"from": pos_of(b["a"]), "to": pos_of(b["b"]), "ranged": true, "cells": b["cells"]})
 		for c: Vector2i in b["cells"]:
 			var t: Dictionary = entity_at(c)
-			if t.is_empty() or not is_alive(t) or String(t.get("team", "")) == String(caster["team"]) or bool(t.get("terrain", false)):
+			if t.is_empty() or not is_alive(t) or bool(t.get("terrain", false)):
 				continue
-			var r: Dictionary = Combat.calc_damage(caster, t, (20.0 + float(caster["level"]) * 0.6) / 1.8, "mag", 0.0, false, false)
-			_apply_damage(caster, t, int(r["dmg"]), "mag", bool(r["crit"]), false)
+			_barrier_shock(caster, t)
 			shocked += 1
 	var made: int = bars.size() - before
 	if made > 0:
-		return "%s tend %d barrière(s)%s." % [caster["name"], made, (" — %d ennemi(s) électrocuté(s)" % shocked) if shocked > 0 else ""]
+		return "%s tend %d barrière(s)%s." % [caster["name"], made, (" — %d électrocuté(s)" % shocked) if shocked > 0 else ""]
 	return "%s couple %s : alignez un 2e mécanisme couplé pour tendre une barrière." % [caster["name"], String(m.get("classe", "un mécanisme"))]
 
 
@@ -2712,7 +2798,7 @@ func check_game_over() -> void:
 	for e: Dictionary in enemies:
 		if is_alive(e):
 			alive_e += 1
-	var deaths: int = 0
+	var deaths: int = graveyard.size()   # héros tombés (retirés de players) — V63 : ils comptaient pour 0
 	for pl_d: Dictionary in players:
 		if not is_alive(pl_d):
 			deaths += 1

@@ -1338,6 +1338,7 @@ func _build_ui() -> void:
 	_quit_btn.tooltip_text = "Quitter ce combat et revenir à la sélection d'équipe."
 	_quit_btn.pressed.connect(_on_quit_combat_pressed)
 	_root.add_child(_quit_btn)
+	_build_objectives_panel()
 
 	# Journal de combat : bas-gauche, à droite de la colonne de sorts, sur un fond
 	# sombre pour rester lisible ; les lignes s'empilent vers le haut (4 au plus).
@@ -1470,6 +1471,116 @@ func _build_ui() -> void:
 		PlayTimer.flush()
 		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn"))
 	box.add_child(saves_btn)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  V63 : objectifs, défi et synergies du combat — toujours visibles à droite du bouton
+#  « Quitter le combat », repliables d'un toucher.
+# ═══════════════════════════════════════════════════════════════════════════
+
+static var objectives_collapsed: bool = false
+var _obj_panel: PanelContainer = null
+var _obj_list: VBoxContainer = null
+var _obj_toggle: Button = null
+var _obj_sig: String = ""
+
+
+func _build_objectives_panel() -> void:
+	_obj_panel = PanelContainer.new()
+	_obj_panel.name = "ObjectivesPanel"
+	var st := _flat(Color(0.03, 0.04, 0.07, 0.78), Color(0.85, 0.70, 0.35, 0.75), 12, 2)
+	st.content_margin_left = 10
+	st.content_margin_right = 10
+	st.content_margin_top = 4
+	st.content_margin_bottom = 6
+	_obj_panel.add_theme_stylebox_override("panel", st)
+	_obj_panel.anchor_left = 0.5
+	_obj_panel.anchor_right = 0.5
+	_obj_panel.anchor_top = 1.0
+	_obj_panel.anchor_bottom = 1.0
+	_obj_panel.offset_left = 134.0
+	_obj_panel.offset_right = 134.0 + 470.0
+	_obj_panel.offset_top = -64.0
+	_obj_panel.offset_bottom = -16.0
+	_obj_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_root.add_child(_obj_panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 2)
+	_obj_panel.add_child(box)
+	_obj_toggle = Button.new()
+	_obj_toggle.name = "ObjectivesToggle"
+	_obj_toggle.flat = true
+	_obj_toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_obj_toggle.add_theme_font_size_override("font_size", 16)
+	_obj_toggle.add_theme_color_override("font_color", Color(1.0, 0.86, 0.45))
+	_obj_toggle.add_theme_color_override("font_hover_color", Color(1.0, 0.95, 0.7))
+	_obj_toggle.custom_minimum_size = Vector2(0, 34)
+	_obj_toggle.tooltip_text = "Afficher ou masquer les objectifs du combat"
+	_obj_toggle.pressed.connect(func() -> void:
+		objectives_collapsed = not objectives_collapsed
+		_obj_sig = ""
+		_refresh_objectives())
+	box.add_child(_obj_toggle)
+	_obj_list = VBoxContainer.new()
+	_obj_list.name = "ObjectivesList"
+	_obj_list.add_theme_constant_override("separation", 2)
+	box.add_child(_obj_list)
+	_refresh_objectives()
+
+
+func _refresh_objectives() -> void:
+	if _obj_panel == null or not is_instance_valid(_obj_panel) or game_manager == null or not game_manager.has_method("objectives_status"):
+		return
+	var items: Array = game_manager.objectives_status()
+	var sig: String = str(items) + str(objectives_collapsed)
+	if sig == _obj_sig:
+		return
+	_obj_sig = sig
+	_obj_panel.visible = not items.is_empty()
+	var done: int = 0
+	var goals: int = 0
+	for it: Dictionary in items:
+		if String(it["state"]) != "bonus":
+			goals += 1
+			if String(it["state"]) == "ok":
+				done += 1
+	var head: String = "OBJECTIFS" if goals > 0 else "BONUS"
+	if goals > 0:
+		head += " %d/%d" % [done, goals]
+	_obj_toggle.text = ("▸ " if objectives_collapsed else "▾ ") + head + ("  (afficher)" if objectives_collapsed else "")
+	for c: Node in _obj_list.get_children():
+		c.queue_free()
+	_obj_list.visible = not objectives_collapsed
+	if objectives_collapsed:
+		return
+	for it2: Dictionary in items:
+		var state: String = String(it2["state"])
+		var mark: String = String(it2["icon"])
+		var col := Color(1.0, 0.88, 0.55)
+		match state:
+			"ok":
+				mark = "✔"
+				col = Color(0.55, 0.95, 0.55)
+			"ko":
+				mark = "✖"
+				col = Color(0.62, 0.60, 0.58)
+			"bonus":
+				col = Color(0.62, 0.86, 1.0)
+		var txt: String = "%s %s" % [mark, String(it2["label"])]
+		if String(it2.get("detail", "")) != "":
+			txt += " (%s)" % String(it2["detail"])
+		if String(it2.get("reward", "")) != "":
+			txt += " — " + String(it2["reward"])
+		var l := Label.new()
+		l.text = Typo.fr(txt)
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		l.custom_minimum_size.x = 446
+		l.add_theme_font_size_override("font_size", 15)
+		l.add_theme_color_override("font_color", col)
+		l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+		l.add_theme_constant_override("outline_size", 3)
+		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_obj_list.add_child(l)
 
 
 func _small_button(text: String, toggle: bool) -> Button:
@@ -1736,6 +1847,7 @@ func _refresh() -> void:
 		card.modulate = Color(1, 1, 1, 1.0 if my_turn else 0.5)
 		card.queue_redraw()
 	_end_btn.disabled = not my_turn
+	_refresh_objectives()
 	# Réaffirmer la visibilité des couches de combat après chaque changement d'état.
 	if is_instance_valid(_root):
 		_root.visible = true
