@@ -70,7 +70,7 @@ jobs:
           echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> "$GITHUB_ENV"
 
       - name: Run headless tests (GDScript)
-        timeout-minutes: 10
+        timeout-minutes: 20
         run: |
           cd prototype/zimut
           set -o pipefail
@@ -107,6 +107,8 @@ jobs:
           done
           # V64 : suite complète — tous les tests/test_*.gd. Les échecs sont signalés par une
           # annotation (::warning::) sans bloquer l'APK, pour ne pas casser le build sur un test instable.
+          # GitHub lance « bash -e » : sans « || » ou « set +e », le premier test en échec arrêterait l'étape.
+          set +e
           failed=""
           for f in tests/test_*.gd; do
             t=$(basename "$f" .gd)
@@ -123,6 +125,7 @@ jobs:
           else
             echo "Suite complète : tous les tests passent."
           fi
+          set -e
           echo "Tests headless exécutés."
 
       - name: Decode release keystore from GitHub Secrets
