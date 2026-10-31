@@ -97,7 +97,7 @@ const CONQ_BROUILLARD := [
 	"Une ville révélée mais pas encore reliée à ton empire garde un [b]anneau pointillé[/b] et indique [b]« à N étapes »[/b] : c'est le nombre de villes à conquérir pour l'atteindre.",
 ]
 const CONQ_EXPLORATEUR := [
-	"Un [b]explorateur[/b], c'est un héros libre en mission de [b]Cartographie[/b]. Au bout de [b]3 batailles[/b], il revient avec le relevé de [b]2 villes[/b] cachées dans le brouillard.",
+	"Un [b]explorateur[/b], c'est un héros [b]débloqué[/b] et libre, en mission de [b]Cartographie[/b]. Au bout de [b]3 batailles[/b], il revient avec le relevé d'[b]une ville[/b] cachée dans le brouillard, la plus proche de ton empire. Un héros expérimenté en révèle jusqu'à [b]trois[/b] : deux dès le niveau 15, trois dès le niveau 40.",
 	"Choisis un héros qui n'est ni gouverneur ni dans l'équipe de combat : pendant sa mission, il ne peut rien faire d'autre. Et une expédition sur cinq tourne mal : elle coûte de l'or, sans rien révéler.",
 	"Astuce : lance la Cartographie [b]avant[/b] d'attaquer une ville de la frontière. Quand ton empire s'agrandira, les nouvelles villes révélées seront déjà prêtes à être conquises.",
 ]
