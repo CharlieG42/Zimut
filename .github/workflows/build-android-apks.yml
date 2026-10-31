@@ -235,8 +235,8 @@ jobs:
           cd prototype/zimut
           # Godot peut planter a la fermeture (corruption heap connue en headless)
           # alors que l'APK est deja genere et signe : on valide le fichier produit.
-          godot --headless --export-debug "Android" export/Zimut-debug.apk \
-            || godot --headless --export-debug "Android" export/Zimut-debug.apk \
+          godot --headless --export_debug "Android" export/Zimut-debug.apk \
+            || godot --headless --export_debug "Android" export/Zimut-debug.apk \
             || true
           test -s export/Zimut-debug.apk
 
@@ -355,4 +355,3 @@ jobs:
             --title "Build latest — ${LABEL}" \
             --notes "$notes" \
             --latest
-
