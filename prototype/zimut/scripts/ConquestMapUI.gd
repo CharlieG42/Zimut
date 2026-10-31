@@ -821,6 +821,19 @@ func _select_city(id: String) -> void:
 	if _side_art != null:
 		_side_art.texture = _city_sprite(id)
 	_layout_responsive()
+	if _is_unknown(id):
+		# Terres dans le brouillard : ni description, ni butin, ni chemin — seulement comment les révéler.
+		if _side_art != null:
+			_side_art.texture = null
+		_message.text = Typo.fr("Terres inconnues\n\nCette région est dans le brouillard. Pour la révéler : conquérir une ville voisine, grimper à un belvédère en Aventure, ou envoyer un explorateur en Cartographie (⚑ MISSIONS DES LIEUTENANTS, depuis une ville de l'empire).")
+		_split_message(_message.text, 2)
+		_show_challenge("")
+		_attack.disabled = true
+		_attack.text = "TERRES INCONNUES"
+		_refresh_nameplates()
+		_pulse_selected(id)
+		_refresh_chronicle()
+		return
 	if String(city["kind"]) == "capital":
 		_message.text = Typo.fr("%s\n\n%s\n\nVotre territoire de départ, à l'abri des attaques.\n%s" % [city["name"], city["desc"], _city_status_text(id)])
 		_show_challenge("")
@@ -963,6 +976,7 @@ func _refresh_targets(ids: Array) -> void:
 		none.add_theme_font_size_override("font_size", 15)
 		none.add_theme_color_override("font_color", TEXT)
 		_tab_targets.add_child(none)
+		_add_explorer_button()
 		return
 	var avg: int = ConquestSystem.team_avg_level(_save)
 	for id: String in sorted_ids:
@@ -991,6 +1005,23 @@ func _refresh_targets(ids: Array) -> void:
 			_select_city(id)
 			_center_on(CITY_POS[id]))
 		_tab_targets.add_child(b)
+	_add_explorer_button()
+
+## Raccourci vers la mission de Cartographie tant qu'il reste du brouillard.
+func _add_explorer_button() -> void:
+	var fog: int = _fog_remaining()
+	if fog <= 0:
+		return
+	var ex := Button.new()
+	ex.name = "ExplorerButton"
+	ex.text = "⚑ ENVOYER UN EXPLORATEUR\n%d ville(s) dans le brouillard" % fog
+	ex.custom_minimum_size.y = 64
+	ex.add_theme_font_size_override("font_size", 16)
+	ex.add_theme_color_override("font_color", TEXT)
+	ex.add_theme_stylebox_override("normal", _style(Color(0.18, 0.26, 0.34, 0.97), GOLD))
+	ex.add_theme_stylebox_override("hover", _style(Color(0.24, 0.34, 0.44, 0.97), GOLD))
+	ex.pressed.connect(_show_mission_picker)
+	_tab_targets.add_child(ex)
 
 ## Nombre de villes encore dans le brouillard (ni conquises, ni révélées, ni voisines de l'empire).
 func _fog_remaining() -> int:
@@ -1326,10 +1357,19 @@ func _show_mission_picker() -> void:
 			busy.add_theme_color_override("font_color", TEXT.darkened(0.2))
 			list.add_child(busy)
 			continue
-		for type_id: String in ConquestSystem.mission_types():
+		var fog: int = _fog_remaining()
+		var types: Array = ConquestSystem.mission_types()
+		if fog > 0 and types.has("carte"):
+			# Du brouillard à lever : la Cartographie passe en premier, recommandée.
+			types.erase("carte")
+			types.push_front("carte")
+		for type_id: String in types:
 			var b := Button.new()
 			b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			b.text = "⚑ %s\n%s" % [ConquestSystem.mission_label(type_id), ConquestSystem.mission_text(type_id)]
+			if type_id == "carte" and fog > 0:
+				b.text = "★ RECOMMANDÉE — %s\n%s %d ville(s) encore dans le brouillard." % [ConquestSystem.mission_label(type_id), ConquestSystem.mission_text(type_id), fog]
+				b.add_theme_stylebox_override("normal", _style(Color(0.22, 0.28, 0.18, 0.97), GOLD))
 			b.custom_minimum_size.y = 52
 			b.add_theme_font_size_override("font_size", 14)
 			b.pressed.connect(func() -> void:
@@ -1426,7 +1466,61 @@ func _attack_selected_city() -> void:
 	if not ProgressionManager.conquest_city_attackable(
 			_conquest, _selected_id, _save.get("adventure", {})):
 		return
+	var city: Dictionary = _city_meta(_selected_id)
+	var avg: int = ConquestSystem.team_avg_level(_save)
+	var advice: Dictionary = ConquestSystem.assault_advice(avg, int(city["level"]))
+	if String(advice["verdict"]) == "weak":
+		_confirm_risky_assault(String(city["name"]), avg, int(city["level"]))
+		return
 	_show_assault_prep()
+
+## Alerte avant un siège jugé « trop fort » : monter les niveaux, ou attaquer quand même.
+func _confirm_risky_assault(cname: String, avg: int, recommended: int) -> void:
+	var dim := ColorRect.new()
+	dim.name = "RiskyAssaultConfirm"
+	dim.color = Color(0.015, 0.035, 0.055, 0.82)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(dim)
+	var centre := CenterContainer.new()
+	centre.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	centre.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	dim.add_child(centre)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _style(Color(0.10, 0.17, 0.22, 0.99), Color(0.90, 0.40, 0.35)))
+	centre.add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 12)
+	box.custom_minimum_size.x = minf(620.0, get_viewport().get_visible_rect().size.x - 60.0)
+	panel.add_child(box)
+	var t := Label.new()
+	t.text = "⚠ SIÈGE TRÈS RISQUÉ"
+	t.add_theme_font_size_override("font_size", 24)
+	t.add_theme_color_override("font_color", Color(1.0, 0.62, 0.50))
+	box.add_child(t)
+	var m := Label.new()
+	m.text = Typo.fr("%s est conseillée au niveau %d, et votre équipe n'est qu'au niveau moyen %d. Faites monter vos héros sur des villes plus faciles (onglet ⚔ CIBLES), ou préparez un plan d'assaut. Attaquer quand même ?" % [cname, recommended, avg])
+	m.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	m.add_theme_font_size_override("font_size", 17)
+	m.add_theme_color_override("font_color", TEXT)
+	box.add_child(m)
+	var back := Button.new()
+	back.name = "RiskyCancel"
+	back.text = "← CHOISIR UNE AUTRE CIBLE"
+	back.custom_minimum_size.y = 56
+	back.pressed.connect(func() -> void:
+		dim.queue_free()
+		_show_tab(_tab_targets))
+	box.add_child(back)
+	var go := Button.new()
+	go.name = "RiskyGo"
+	go.text = "ATTAQUER QUAND MÊME"
+	go.custom_minimum_size.y = 50
+	_style_button(go, Color(0.50, 0.16, 0.13), Color(1.0, 0.72, 0.42))
+	go.pressed.connect(func() -> void:
+		dim.queue_free()
+		_show_assault_prep())
+	box.add_child(go)
 
 ## Choix tactique facultatif avant l'assaut. Le coût est payé une seule fois,
 ## puis l'effet est transmis au combat et consommé à sa résolution.
@@ -1646,6 +1740,17 @@ func _show_annexion_popup(city_id: String) -> void:
 		lines.append("")
 		lines.append("Vous pouvez continuer en empire libre : le monde reste à vous.")
 	else:
+		var opened: Array = []
+		for pair: Array in ProgressionManager.CONQUEST_ROUTES:
+			var other: String = ""
+			if String(pair[0]) == city_id:
+				other = String(pair[1])
+			elif String(pair[1]) == city_id:
+				other = String(pair[0])
+			if other != "" and not (_conquest.get("owned", []) as Array).has(other) and other != "donjon_roi":
+				opened.append(ProgressionManager.conquest_city_name(other))
+		if not opened.is_empty():
+			lines.append("➜ Nouvelles voies ouvertes : %s %s maintenant à portée." % [" · ".join(PackedStringArray(opened)), "est" if opened.size() == 1 else "sont"])
 		lines.append("Conseil : ouvrez %s pour y bâtir, recruter une garnison ou nommer un gouverneur." % cname)
 	var title: String = "EMPIRE VICTORIEUX !" if city_id == "donjon_roi" else "VILLE ANNEXÉE !"
 	var msg: String = "%s rejoint votre empire.\n\n%s" % [cname, "\n\n".join(PackedStringArray(lines))]

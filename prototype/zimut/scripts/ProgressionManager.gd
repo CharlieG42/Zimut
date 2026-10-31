@@ -486,6 +486,8 @@ const ADVENTURE_PUZZLES := {
 ##   neutral : 1 bataille de mobs ;
 ##   enemy   : siège en 4 batailles (3 mobs + boss du biome) ;
 ##   donjon_roi : objectif final, débloqué quand tout l'empire est conquis.
+## Niveaux conseillés : plafonnés selon la distance à la capitale (voir test_conquest_roads :
+## 5 / 18 / 30 / 45 / 60 / 85 / 120 aux étapes 1 à 7), pour que la courbe suive les routes.
 const CONQUEST_CITIES := {
 	"capitale":     {"name": "Sylve-Cœur",      "kind": "capital",    "biome": "Forêt",     "level": 0},
 	"clairiere":    {"name": "Clairière d'Aube", "kind": "neutral",   "biome": "Forêt",     "level": 1},
@@ -503,18 +505,18 @@ const CONQUEST_CITIES := {
 	"citadelle_ronce": {"name": "Citadelle des Ronces", "kind": "enemy", "biome": "Ombres", "level": 20},
 	"col_givre": {"name": "Col du Givre", "kind": "neutral", "biome": "Montagne", "level": 33},
 	"mine_cristal": {"name": "Mine de Cristal", "kind": "enemy", "biome": "Cristaux", "level": 47},
-	"bastion_orage": {"name": "Bastion de l'Orage", "kind": "enemy", "biome": "Vents", "level": 63},
+	"bastion_orage": {"name": "Bastion de l'Orage", "kind": "enemy", "biome": "Vents", "level": 30},
 	"caravanserail": {"name": "Caravansérail Rouge", "kind": "neutral", "biome": "Marées", "level": 72},
 	"observatoire": {"name": "Observatoire Solaire", "kind": "neutral", "biome": "Désert", "level": 81},
 	"port_sable": {"name": "Port des Sables", "kind": "enemy", "biome": "Marées", "level": 90},
 	"bois_lune": {"name": "Bois de Lune", "kind": "neutral", "biome": "Brumes", "level": 26},
-	"sanctuaire_mousse": {"name": "Sanctuaire Moussu", "kind": "neutral", "biome": "Forêt", "level": 33},
+	"sanctuaire_mousse": {"name": "Sanctuaire Moussu", "kind": "neutral", "biome": "Forêt", "level": 18},
 	"forge_givre": {"name": "Forge du Givre", "kind": "enemy", "biome": "Cristaux", "level": 81},
-	"pic_foudroyant": {"name": "Pic Foudroyant", "kind": "enemy", "biome": "Vents", "level": 90},
+	"pic_foudroyant": {"name": "Pic Foudroyant", "kind": "enemy", "biome": "Vents", "level": 45},
 	"marais_spectres": {"name": "Marais des Spectres", "kind": "neutral", "biome": "Brumes", "level": 40},
-	"fort_cendre": {"name": "Fort des Cendres", "kind": "enemy", "biome": "Brasier", "level": 110},
+	"fort_cendre": {"name": "Fort des Cendres", "kind": "enemy", "biome": "Brasier", "level": 30},
 	"temple_soleil": {"name": "Temple du Soleil", "kind": "neutral", "biome": "Désert", "level": 100},
-	"citadelle_sable": {"name": "Citadelle de Sable", "kind": "enemy", "biome": "Brasier", "level": 120},
+	"citadelle_sable": {"name": "Citadelle de Sable", "kind": "enemy", "biome": "Brasier", "level": 45},
 	"atelier_cuivre": {"name": "Atelier de Cuivre", "kind": "neutral", "biome": "Rouages", "level": 95},
 	"citadelle_engrenages": {"name": "Citadelle des Engrenages", "kind": "enemy", "biome": "Rouages", "level": 115},
 }

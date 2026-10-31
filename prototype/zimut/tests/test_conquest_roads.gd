@@ -78,6 +78,15 @@ func _boot() -> void:
 	check(not pm.conquest_city_attackable(own3, "hameau_pin", fog), "révélée mais sans route : reste hors de portée")
 	check(not pm.conquest_city_attackable(own3, "garnison", fog), "au-delà de la frontière : hors de portée")
 
+	# ── V64 : la difficulté conseillée suit la distance à la capitale ──
+	var caps: Array = [0, 5, 18, 30, 45, 60, 85, 120]
+	for cid: String in pm.CONQUEST_CITIES.keys():
+		if cid == "capitale" or cid == "donjon_roi":
+			continue
+		var steps: int = ConquestSystem.path_to(["capitale"], pm.CONQUEST_ROUTES, cid).size()
+		var lvl: int = int(pm.CONQUEST_CITIES[cid]["level"])
+		check(steps > 0 and lvl <= int(caps[mini(steps, 7)]), "niveau de %s (%d) cohérent avec %d étape(s)" % [cid, lvl, steps])
+
 	# ── V64 : chemin vers une ville lointaine, avis d'assaut, niveau d'équipe ──
 	var routes: Array = pm.CONQUEST_ROUTES
 	var way: Array = ConquestSystem.path_to(["capitale"], routes, "ruines_lierre")
