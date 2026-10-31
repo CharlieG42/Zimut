@@ -3,6 +3,7 @@
 <rect x="0.0" y="0.0" width="1000.0" height="400.0" fill="url(#g)" stroke="none"/>
 <circle cx="880.0" cy="70.0" r="34.0" fill="#fff8d0" stroke="#f0e0a0" stroke-width="2"/>
 <circle cx="880.0" cy="70.0" r="44.0" fill="#fff8d0" opacity="0.3"/>
+<circle cx="880.0" cy="70.0" r="58.0" fill="#ffefd0" opacity="0.12"/>
 <ellipse cx="180.0" cy="80.0" rx="46.0" ry="16.0" fill="#ffffff" opacity="0.9"/>
 <ellipse cx="210.0" cy="84.0" rx="34.0" ry="13.0" fill="#ffffff" opacity="0.9"/>
 <ellipse cx="420.0" cy="50.0" rx="32.2" ry="11.2" fill="#ffffff" opacity="0.9"/>

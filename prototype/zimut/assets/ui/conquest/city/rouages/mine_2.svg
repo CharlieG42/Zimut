@@ -1,7 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="260" height="220" viewBox="0 0 260 220">
 <ellipse cx="130.0" cy="204.0" rx="95.0" ry="13.0" fill="#000" opacity="0.3"/>
-<polygon points="68.0,200.0 96.0,142.4 124.0,128.0 160.0,149.6 192.0,200.0" fill="#7a7880" stroke="#49484c" stroke-width="2.5" stroke-linejoin="round"/>
-<polygon points="124.0,128.0 160.0,149.6 192.0,200.0 140.0,200.0" fill="#616066"/>
+<defs><linearGradient id="grock1391" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8d8c93"/><stop offset="1" stop-color="#6d6c73"/></linearGradient></defs>
+<defs><linearGradient id="grock2392" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#737279"/><stop offset="1" stop-color="#555459"/></linearGradient></defs>
+<polygon points="68.0,200.0 96.0,142.4 124.0,128.0 160.0,149.6 192.0,200.0" fill="url(#grock1391)" stroke="#49484c" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="124.0,128.0 160.0,149.6 192.0,200.0 140.0,200.0" fill="url(#grock2392)"/>
+<line x1="96.0" y1="142.4" x2="120.0" y2="174.8" stroke="#3d3c40" stroke-width="2.2" stroke-linecap="round" opacity="0.8"/>
+<line x1="124.0" y1="128.0" x2="138.0" y2="171.2" stroke="#a8a7ac" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+<line x1="160.0" y1="149.6" x2="148.0" y2="178.4" stroke="#434246" stroke-width="2.2" stroke-linecap="round" opacity="0.8"/>
+<line x1="68.0" y1="200.0" x2="96.0" y2="142.4" stroke="#9b999f" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
+<circle cx="100.0" cy="156.8" r="2.2" fill="#b5b4b9" opacity="0.9"/>
+<circle cx="142.0" cy="164.0" r="2.2" fill="#b5b4b9" opacity="0.9"/>
+<circle cx="164.0" cy="171.2" r="2.2" fill="#b5b4b9" opacity="0.9"/>
 <circle cx="126.0" cy="182.0" r="17.0" fill="#141010"/>
 <rect x="106.0" y="162.0" width="4.0" height="38.0" fill="#6a4a28"/>
 <rect x="142.0" y="162.0" width="4.0" height="38.0" fill="#6a4a28"/>

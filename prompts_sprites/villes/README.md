@@ -6,7 +6,10 @@ que les sprites de combat (Ankama / Dofus-like, cf. `prompts_sprites/README.md`)
 
 ## Format attendu (identique aux SVG, pour un remplacement 1:1)
 
-Chaque image remplace un fichier de `assets/ui/conquest/city/<biome>/` :
+Chaque image remplace un fichier de `assets/ui/conquest/city/<biome>/`.
+**Le jeu charge le `.png` en priorité** (`ConquestCityView._art` essaie `<nom>.png` d'abord,
+puis retombe sur `<nom>.svg`) : il suffit de déposer le PNG généré à côté du SVG, même nom,
+même taille de canvas — aucun changement de code.
 
 | Fichier | Taille | Contenu |
 |---|---|---|

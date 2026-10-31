@@ -79,6 +79,22 @@ class S:
         self.add('<path d="%s"%s%s/>' % (d, a, extra))
     def group(self, gid, inner):
         self.add('<g id="%s">%s</g>' % (gid, inner))
+    def defs_gradient(self, gid, c0, c1, vertical=True):
+        d = 'x1="0" y1="0" x2="%d" y2="%d"' % (0, 1) if vertical else 'x1="0" y1="0" x2="1" y2="0"'
+        self.add('<defs><linearGradient id="%s" %s><stop offset="0" stop-color="%s"/><stop offset="1" stop-color="%s"/></linearGradient></defs>' % (gid, d, c0, c1))
+    def defs_pattern_stone(self, gid, base, joint):
+        self.add('<defs><pattern id="%s" width="0.14" height="0.12" patternUnits="objectBoundingBox">'
+                 '<rect width="0.14" height="0.12" fill="none"/>'
+                 '<path d="M0 0.5h0.14M0.5 0v0.5M0.25 0.5v0.5M0.75 0.5v0.5" stroke="%s" stroke-width="0.045" opacity="0.9" fill="none" vector-effect="non-scaling-stroke"/></pattern></defs>' % (gid, joint))
+    def defs_pattern_planks(self, gid, base, joint):
+        self.add('<defs><pattern id="%s" width="0.1" height="0.35" patternUnits="objectBoundingBox">'
+                 '<rect width="0.1" height="0.35" fill="none"/>'
+                 '<path d="M0 0v0.35M0.5 0v0.35" stroke="%s" stroke-width="0.06" opacity="0.8" fill="none" vector-effect="non-scaling-stroke"/></pattern></defs>' % (gid, joint))
+    def defs_pattern_tiles(self, gid, c0, joint):
+        self.add('<defs><pattern id="%s" width="0.09" height="0.16" patternUnits="objectBoundingBox">'
+                 '<path d="M0 0.5h1M0.5 0v0.5" stroke="%s" stroke-width="0.05" opacity="0.9" fill="none" vector-effect="non-scaling-stroke"/>'
+                 '<path d="M0 0.93h1" stroke="%s" stroke-width="0.07" opacity="0.5" fill="none" vector-effect="non-scaling-stroke"/></pattern></defs>'
+                 % (gid, joint, shade(joint, -0.25)))
     def raw(self, s):
         self.add(s)
     def out(self):
@@ -98,14 +114,63 @@ def shade(hexcol, f):
 # Chaque bâtiment: viewBox 260x220, ancre au sol (130, 200) — centre bas.
 # Groupes: id="body", id="lit" (fenêtres), id="glow" (halos), id="anim" (fumée/scie...)
 
+
+def _wall_texture(s, x, y, w, h, wall, wood):
+    """Hachures de matière dessinées dans l'espace du mur (planches verticales ou joints de pierre)."""
+    c = shade(wall, -0.38)
+    if wood:
+        n = max(2, int(w / 13))
+        for i in range(1, n):
+            lx = x + w * float(i) / n
+            s.line(lx, y, lx, y + h, c, 1.3, opacity=0.75)
+        s.line(x, y + h * 0.33, x + w, y + h * 0.33, c, 1.0, opacity=0.4)
+        s.line(x, y + h * 0.66, x + w, y + h * 0.66, c, 1.0, opacity=0.4)
+    else:
+        rows = max(2, int(h / 11))
+        cols = max(2, int(w / 22))
+        for r in range(1, rows):
+            ly = y + h * float(r) / rows
+            s.line(x, ly, x + w, ly, c, 1.2, opacity=0.8)
+        for r in range(rows):
+            off = (w / cols) * 0.5 if r % 2 else 0.0
+            for cix in range(cols + 1):
+                lx = x + off + w * float(cix) / cols
+                if x <= lx <= x + w:
+                    s.line(lx, y + h * float(r) / rows, lx, y + h * float(r + 1) / rows, c, 1.1, opacity=0.7)
+
+def _roof_tiles(s, xa, ya, xt, yt, xb, yb, roof, opacity):
+    """Lignes de tuiles dans le pan de toit (horizontales entre les arêtes + courtes verticales depuis le faîte)."""
+    c = shade(roof, -0.55)
+    for i in range(1, 6):
+        f = float(i) / 6.0
+        s.line(xa + (xt - xa) * f, ya + (yt - ya) * f, xb + (xt - xb) * f, yb + (yt - yb) * f, c, 1.5, opacity=opacity)
+    for i in range(1, 8):
+        f = float(i) / 8.0
+        px = xa + (xb - xa) * f; py = ya + (yb - ya) * f
+        s.line(px, py, xt, yt, c, 0.0, opacity=0.0)  # pas de verticales depuis le faîte (lisible sinon)
+
+_gid = [0]
+def _uid(prefix):
+    _gid[0] += 1
+    return "%s%d" % (prefix, _gid[0])
+
 def house(s, cx, base, w, h, roof_h, wall, roof, trim, lit_windows=()):
     x0 = cx - w / 2; y0 = base - h
+    # murs : base + matière (planches de bois ou joints de pierre) + ombre à droite + lumière de bord gauche
     s.rect(x0, y0, w, h, wall, stroke=shade(wall, -0.45), sw=2.5)
+    _wall_texture(s, x0 + 2, y0 + 2, w - 4, h - 4, wall,
+                  wood=wall in ("#8a6a44", "#9e7042", "#e0c088", "#a08868", "#c89a68", "#d8dce2", "#e0ddd0"))
     s.rect(x0 + w * 0.55, y0, w * 0.45, h, shade(wall, -0.15), opacity=0.85)
+    s.rect(x0 + 1.5, y0 + 2, 6, h - 4, shade(wall, 0.55), opacity=0.95)   # lumière de bord (clé haut-gauche)
+    s.rect(x0 + 8, y0 + 2, 3, h - 4, shade(wall, 0.28), opacity=0.6)
     # toit à deux pans avec débord
     over = w * 0.10
-    s.poly([(x0 - over, y0), (cx, y0 - roof_h), (x0 + w + over, y0)], roof, stroke=shade(roof, -0.4), sw=2.5)
+    groof = _uid("gr")
+    s.defs_gradient(groof, shade(roof, 0.18), shade(roof, -0.12))
+    s.poly([(x0 - over, y0), (cx, y0 - roof_h), (x0 + w + over, y0)], "url(#%s)" % groof, stroke=shade(roof, -0.4), sw=2.5)
+    _roof_tiles(s, x0 - over, y0, cx, y0 - roof_h, x0 + w + over, y0, roof, 0.85)
     s.poly([(cx, y0 - roof_h), (x0 + w + over, y0), (cx + w * 0.12, y0)], shade(roof, -0.22))
+    _roof_tiles(s, cx, y0 - roof_h, x0 + w + over, y0, cx + w * 0.12, y0, shade(roof, -0.22), 0.6)
     # porte
     dw = min(w * 0.2, 26)
     s.path("M%.1f %.1f v-%.1f q%.1f -%.1f %.1f 0 v%.1f z" % (cx - dw/2, base, h*0.42, dw/2, h*0.16, dw, h*0.42),
@@ -120,7 +185,9 @@ def house(s, cx, base, w, h, roof_h, wall, roof, trim, lit_windows=()):
 
 def tower(s, cx, base, w, h, wall, roof, trim):
     s.rect(cx - w/2, base - h, w, h, shade(wall, -0.06), stroke=shade(wall, -0.45), sw=2.5)
+    _wall_texture(s, cx - w/2 + 2, base - h + 2, w - 4, h - 4, shade(wall, -0.06), wood=False)
     s.rect(cx, base - h, w/2, h, shade(wall, -0.2), opacity=0.8)
+    s.rect(cx - w/2 + 1.5, base - h, 3, h, shade(wall, 0.3), opacity=0.7)
     top = (cx, base - h - w * 1.15)
     s.poly([(cx - w*0.68, base - h), top, (cx + w*0.68, base - h)], roof, stroke=shade(roof, -0.4), sw=2.5)
     s.poly([top, (cx + w*0.68, base - h), (cx + w*0.1, base - h)], shade(roof, -0.22))
@@ -228,8 +295,18 @@ def b_mine(s, pal, lv):
     rock = "#7a7880"
     mh = 52 + 10 * lv
     s.ellipse(cx, base + 4, 95, 13, "#000", opacity=0.3)
-    s.poly([(cx-62, base), (cx-34, base - mh*0.8), (cx-6, base - mh), (cx+30, base - mh*0.7), (cx+62, base)], rock, stroke=shade(rock, -0.4), sw=2.5)
-    s.poly([(cx-6, base - mh), (cx+30, base - mh*0.7), (cx+62, base), (cx+10, base)], shade(rock, -0.2))
+    g1 = _uid("grock1"); s.defs_gradient(g1, shade(rock, 0.15), shade(rock, -0.1))
+    g2 = _uid("grock2"); s.defs_gradient(g2, shade(rock, -0.05), shade(rock, -0.3))
+    s.poly([(cx-62, base), (cx-34, base - mh*0.8), (cx-6, base - mh), (cx+30, base - mh*0.7), (cx+62, base)], "url(#%s)" % g1, stroke=shade(rock, -0.4), sw=2.5)
+    s.poly([(cx-6, base - mh), (cx+30, base - mh*0.7), (cx+62, base), (cx+10, base)], "url(#%s)" % g2)
+    # facettes de roche (arêtes internes)
+    s.line(cx-34, base - mh*0.8, cx-10, base - mh*0.35, shade(rock, -0.5), 2.2, opacity=0.8)
+    s.line(cx-6, base - mh, cx+8, base - mh*0.4, shade(rock, 0.35), 2.0, opacity=0.7)
+    s.line(cx+30, base - mh*0.7, cx+18, base - mh*0.3, shade(rock, -0.45), 2.2, opacity=0.8)
+    s.line(cx-62, base, cx-34, base - mh*0.8, shade(rock, 0.25), 1.6, opacity=0.6)
+    # éclats de minerai (points clairs)
+    for (mx, my) in [(-30, -mh*0.6), (12, -mh*0.5), (34, -mh*0.4)]:
+        s.circle(cx + mx, base + my, 2.2, shade(rock, 0.45), opacity=0.9)
     s.circle(cx - 4, base - 18, 17, "#141010")
     s.rect(cx - 24, base - 38, 4, 38, "#6a4a28")
     s.rect(cx + 12, base - 38, 4, 38, "#6a4a28")
@@ -312,11 +389,18 @@ def b_wonder(s, pal, shape):
     s.ellipse(cx, base + 4, 80, 13, "#000", opacity=0.28)
     lit = ""
     if shape == "tree":
-        s.rect(cx - 10, base - 70, 20, 70, "#6a4426", stroke="#3c2412", sw=2.5)
-        for k in range(5):
-            s.circle(cx, base - 96 + (k - 2) * 8, 30 - abs(k - 2) * 4, shade(roof, 0.06 * (k % 2)), stroke=shade(roof, -0.35), sw=2)
-        s.circle(cx, base - 104, 30, shade(roof, 0.14), stroke=shade(roof, -0.35), sw=2)
-        lit = '<circle cx="%.1f" cy="%.1f" r="5" fill="#fff0a0"/>' % (cx, base - 104)
+        gtr = _uid("gwtrunk")
+        s.defs_gradient(gtr, "#7a5230", "#452c14", vertical=False)
+        s.rect(cx - 10, base - 70, 20, 70, "url(#%s)" % gtr, stroke="#33200f", sw=2.5)
+        # houppes en dégradé radial (volume), du fond vers le devant
+        blobs = [(-16, -88, 22), (16, -90, 20), (0, -108, 30), (-10, -118, 18), (12, -116, 17)]
+        for (ox, oy, r) in blobs:
+            gg = _uid("gwfol")
+            s.add('<defs><radialGradient id="%s" cx="0.38" cy="0.3" r="0.95"><stop offset="0" stop-color="%s"/><stop offset="0.6" stop-color="%s"/><stop offset="1" stop-color="%s"/></radialGradient></defs>'
+                  % (gg, shade(roof, 0.30), shade(roof, 0.06), shade(roof, -0.30)))
+            s.circle(cx + ox, base + oy, r, "url(#%s)" % gg, stroke=shade(roof, -0.45), sw=2)
+            s.circle(cx + ox - r*0.32, base + oy - r*0.34, r*0.3, shade(roof, 0.6), opacity=0.8)
+        lit = '<circle cx="%.1f" cy="%.1f" r="5" fill="#fff0a0"/>' % (cx, base - 108)
     elif shape == "crystal":
         for k in range(3):
             off = (k - 1) * 26
@@ -373,9 +457,23 @@ BUILD_FN = {"hall": b_hall, "barracks": b_barracks, "residence": b_residence, "s
 def d_tree(s, pal, rng):
     cx, base = 60, 100
     s.ellipse(cx, base + 2, 34, 9, "#000", opacity=0.25)
-    s.path("M%.1f %.1f q-6 -30 4 -52 l6 -2 q-8 22 -2 54 z" % (cx, base), "#5a3c22", stroke="#33200f", sw=1.5)
-    for k in range(3):
-        s.circle(cx + rng.randint(-16, 16), base - 52 - k * 12, 20 - k * 3, shade("#3f7a3a", 0.06 * k), stroke="#26522a", sw=2)
+    # tronc avec dégradé (éclairé à gauche)
+    gtr = _uid("gtrunk")
+    s.defs_gradient(gtr, "#6a4a2c", "#3c2812", vertical=False)
+    s.path("M%.1f %.1f q-6 -30 4 -52 l6 -2 q-8 22 -2 54 z" % (cx, base), "url(#%s)" % gtr, stroke="#2c1c0c", sw=1.5)
+    # 5 houppes : cœur sombre d'abord, puis dégradés radiaux du plus sombre au plus clair
+    blobs = [(0, -50, 22, "#2c5a24"), (-14, -62, 17, None), (14, -60, 16, None), (-6, -74, 15, None), (8, -72, 14, None)]
+    for i, (ox, oy, r, forced) in enumerate(blobs):
+        gx, gy = cx + ox, base + oy
+        if forced:
+            s.circle(gx, gy, r, forced, opacity=0.9)
+        else:
+            gg = _uid("gfol")
+            s.add('<defs><radialGradient id="%s" cx="0.38" cy="0.32" r="0.95"><stop offset="0" stop-color="%s"/><stop offset="0.55" stop-color="%s"/><stop offset="1" stop-color="%s"/></radialGradient></defs>'
+                  % (gg, shade("#6ab054", 0.12), shade("#4a8a42", 0.02), shade("#2c5a24", -0.02)))
+            s.circle(gx, gy, r, "url(#%s)" % gg, stroke="#26522a", sw=2)
+            # reflet de clé sur chaque houppe
+            s.circle(gx - r*0.34, gy - r*0.36, r*0.34, "#a4e088", opacity=0.85)
     return ""
 
 def d_rock(s, pal, rng):
@@ -445,6 +543,7 @@ def sky(kind, pal):
         s.rect(0, 0, w, h, "url(#g)", extra=' stroke="none"')
         s.circle(880, 70, 34, "#fff8d0", stroke="#f0e0a0", sw=2)
         s.circle(880, 70, 44, "#fff8d0", opacity=0.3)
+        s.circle(880, 70, 58, "#ffefd0", opacity=0.12)
         for (x, y, sc) in [(180, 80, 1.0), (420, 50, 0.7), (640, 110, 0.85)]:
             s.ellipse(x, y, 46 * sc, 16 * sc, "#ffffff", opacity=0.9)
             s.ellipse(x + 30 * sc, y + 4 * sc, 34 * sc, 13 * sc, "#ffffff", opacity=0.9)

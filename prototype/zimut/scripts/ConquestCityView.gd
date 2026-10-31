@@ -146,14 +146,18 @@ func _biome_key() -> String:
 	return String(BIOME_KEY.get(biome, "foret"))
 
 ## Charge (et cache) une illustration ; null si le fichier n'existe pas (repli vectoriel).
+## Charge une illustration : essaie d'abord le PNG (illustration IA déposée à la main),
+## puis retombe sur le SVG vectoriel généré. Cache le résultat (null compris).
 func _art(rel: String) -> Texture2D:
-	var path: String = ART_DIR + rel
-	if _tex_cache.has(path):
-		return _tex_cache[path]
+	var png: String = rel.replace(".svg", ".png")
+	if _tex_cache.has(png):
+		return _tex_cache[png]
 	var tex: Texture2D = null
-	if ResourceLoader.exists(path):
-		tex = load(path) as Texture2D
-	_tex_cache[path] = tex
+	if ResourceLoader.exists(ART_DIR + png):
+		tex = load(ART_DIR + png) as Texture2D
+	elif ResourceLoader.exists(ART_DIR + rel):
+		tex = load(ART_DIR + rel) as Texture2D
+	_tex_cache[png] = tex
 	return tex
 
 func _sky_art() -> Texture2D:
@@ -182,6 +186,59 @@ func _draw_sprite(tex: Texture2D, g: Vector2, u: float, key: String, night: bool
 	elif time_of_day == "soir":
 		mod = Color(0.92, 0.80, 0.72)
 	draw_texture_rect(tex, r, false, mod)
+
+## Animations dessinées PAR-DESSUS le sprite du bâtiment (fumée de cheminée, scie qui
+## tourne, orbe des mages, lanterne de la mine, drapeaux) — identiques que le rendu soit
+## un PNG (illustration IA) ou le SVG généré.
+func _draw_sprite_anims(key: String, g: Vector2, u: float, lv: int) -> void:
+	var top_y: float = g.y - 150.0 * u * PLOT_SCALE.get(key, 1.0)   # hauteur approximative du toit
+	match key:
+		"hall":
+			_smoke(Vector2(g.x + 30.0 * u, top_y + 20.0 * u), u)
+			_flag(Vector2(g.x, top_y - 6.0 * u), Color(0.20, 0.62, 0.34), u, 0.9)
+		"barracks":
+			_flag(Vector2(g.x + 44.0 * u, top_y - 20.0 * u), Color(0.55, 0.68, 0.95), u, 0.9)
+		"residence":
+			_flag(Vector2(g.x, top_y + 4.0 * u), Color(0.85, 0.62, 0.90), u, 0.9)
+		"scierie":
+			var sc: Vector2 = g + Vector2(-52.0 * u, -26.0 * u)
+			var r: float = (13.0 + 2.0 * float(lv)) * u
+			for j: int in range(10):
+				var a: float = _t * 6.0 + float(j) * TAU / 10.0
+				draw_line(sc + Vector2(cos(a), sin(a)) * r, sc + Vector2(cos(a + 0.2), sin(a + 0.2)) * (r + 4 * u), Color(0.35, 0.37, 0.42), 2.0 * u, true)
+		"mine":
+			var glow: float = 0.6 + 0.4 * sin(_t * 3.0)
+			draw_circle(g + Vector2(14.0 * u, -30.0 * u), 9.0 * u, Color(1.0, 0.75, 0.3, 0.25 * glow))
+			draw_circle(g + Vector2(14.0 * u, -30.0 * u), 3.0 * u, Color(1.0, 0.85, 0.4))
+			if lv >= 3:
+				_smoke(g + Vector2(40.0 * u, -52.0 * u), u, true)
+		"tannerie":
+			if lv >= 3:
+				_smoke(g + Vector2(-58.0 * u, -50.0 * u), u)
+		"cabane":
+			var orb: Vector2 = g + Vector2(0, top_y - 22.0 * u + sin(_t * 1.7) * 3.0 * u)
+			var pulse: float = 0.5 + 0.5 * sin(_t * 2.6)
+			draw_circle(orb, (14.0 + 6.0 * pulse) * u, Color(0.72, 0.58, 1.0, 0.25))
+			draw_circle(orb, 7.0 * u, Color(0.85, 0.78, 1.0))
+			for k: int in range(maxi(lv * 2, 2)):
+				var a: float = _t * 1.8 + float(k) * TAU / float(maxi(lv * 2, 2))
+				draw_circle(orb + Vector2(cos(a) * 22.0 * u, sin(a) * 8.0 * u), 2.2 * u, Color(0.80, 0.70, 1.0, 0.9))
+		"wonder":
+			if wonder_shape == "mill":
+				var hub: Vector2 = g + Vector2(0, -70.0 * u * PLOT_SCALE.get("wonder", 1.0))
+				for k: int in range(4):
+					var a2: float = _t * 1.2 + float(k) * PI * 0.5
+					var tip: Vector2 = hub + Vector2(cos(a2), sin(a2)) * 58.0 * u
+					draw_line(hub, tip, Color(0.45, 0.32, 0.18), 3.0 * u, true)
+					draw_colored_polygon(PackedVector2Array([hub.lerp(tip, 0.3), tip, tip + Vector2(-sin(a2), cos(a2)) * 10.0 * u, hub.lerp(tip, 0.3) + Vector2(-sin(a2), cos(a2)) * 10.0 * u]), Color(0.95, 0.93, 0.85, 0.9))
+			elif wonder_shape == "forge":
+				_smoke(g + Vector2(35.0 * u, top_y - 60.0 * u), u, true)
+			elif wonder_shape == "tower":
+				var pulse: float = 0.5 + 0.5 * sin(_t * 2.0)
+				draw_circle(g + Vector2(0, top_y - 20.0 * u), (12.0 + 4.0 * pulse) * u, Color(1.0, 0.92, 0.55, 0.5))
+				draw_circle(g + Vector2(0, top_y - 20.0 * u), 7.0 * u, Color(1.0, 0.95, 0.7, 0.9))
+		_:
+			pass
 
 
 # ── Dessin général ─────────────────────────────────────────────────────────
@@ -311,6 +368,7 @@ func _draw_plot(key: String, g: Vector2, u: float) -> void:
 			tex = _building_art(key, lv)
 	if tex != null and (wonder or key != "wonder"):
 		_draw_sprite(tex, g, u, key, time_of_day == "nuit")
+		_draw_sprite_anims(key, g, u, lv)   # V62 : animations par-dessus le sprite (fumée, scie, orbe…)
 	elif key == "wonder" and not wonder:
 		_empty_plot(g, u, bool(locked.get("wonder", true)))
 	else:
