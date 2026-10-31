@@ -343,6 +343,7 @@ class Pin:
 	var general: bool = false
 	var threatened: bool = false
 	var locked: bool = false
+	var far: bool = false           # V64 : révélée mais sans route (vue de loin)
 	var siege: int = 0
 	var siege_max: int = 4
 	var level: int = 1
@@ -401,6 +402,11 @@ class Pin:
 			for k: int in range(8):
 				var a0: float = _t * 1.4 + float(k) * TAU / 8.0
 				draw_arc(Vector2.ZERO, 26.0 * s, a0, a0 + 0.45, 6, Color(1.0, 0.88, 0.42, 0.95), 3.5, true)
+		if far:
+			# anneau pointillé : repère « vue de loin », pas encore à portée
+			for k: int in range(14):
+				var a1: float = float(k) * TAU / 14.0
+				draw_arc(Vector2.ZERO, 20.0 * s, a1, a1 + 0.2, 4, Color(0.86, 0.90, 0.95, 0.75), 2.5, true)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		# halo de la capitale
 		if state == "capital":
@@ -429,6 +435,8 @@ class Pin:
 		var fill: Color = _fill()
 		if locked:
 			fill = fill.darkened(0.35)
+		if far:
+			fill = fill.darkened(0.2)
 		draw_circle(c + Vector2(0, 2), r + 3.0, Color(0, 0, 0, 0.45))
 		draw_circle(c, r + 3.0 * s, accent if state != "unknown" else Color(0.45, 0.47, 0.50))
 		draw_circle(c, r, fill)

@@ -90,6 +90,25 @@ const CONQ_CARTE := [
 	"Le [b]brouillard[/b] cache les terres que tu n'as pas encore explorées en Aventure. Un [b]crâne[/b] signale la forteresse d'un général, des [b]points rouges[/b] l'avancée d'un siège, la [b]fumée[/b] une ville pillée.",
 	"Et si une [b]colonne ennemie[/b] marche sur une de tes villes, renforce-la vite !",
 ]
+## V64 — Conquête : sortir du brouillard.
+const CONQ_BROUILLARD := [
+	"Ces villes marquées d'un [b]?[/b] sont dans le [b]brouillard[/b], [b]{pseudo}[/b]. Bonne nouvelle : toute ville reliée par une route à ton empire apparaît et devient [b]attaquable[/b] dès que tu as conquis sa voisine.",
+	"Pour voir plus loin, il y a deux moyens. En [b]Aventure[/b], grimpe à un [b]belvédère[/b] (le losange bleu 👁) : il révèle les villes de la région. Ou envoie un [b]explorateur[/b] : une mission de [b]Cartographie[/b] depuis une de tes villes.",
+	"Une ville révélée mais pas encore reliée à ton empire garde un [b]anneau pointillé[/b] et indique [b]« à N étapes »[/b] : c'est le nombre de villes à conquérir pour l'atteindre.",
+]
+const CONQ_EXPLORATEUR := [
+	"Un [b]explorateur[/b], c'est un héros libre en mission de [b]Cartographie[/b]. Au bout de [b]3 batailles[/b], il revient avec le relevé de [b]2 villes[/b] cachées dans le brouillard.",
+	"Choisis un héros qui n'est ni gouverneur ni dans l'équipe de combat : pendant sa mission, il ne peut rien faire d'autre. Et une expédition sur cinq tourne mal : elle coûte de l'or, sans rien révéler.",
+	"Astuce : lance la Cartographie [b]avant[/b] d'attaquer une ville de la frontière. Quand ton empire s'agrandira, les nouvelles villes révélées seront déjà prêtes à être conquises.",
+]
+const CONQ_CIBLES_V64 := [
+	"Du nouveau sur la carte, [b]{pseudo}[/b] ! L'onglet [b]⚔ CIBLES[/b] liste les villes que tu peux attaquer, de la plus facile à la plus dure, avec leur [b]butin[/b].",
+	"Avant un siège, regarde l'avis du conseil : [b]à votre portée[/b], [b]risqué[/b] ou [b]trop fort[/b], selon le niveau moyen de ton équipe. Le détail de la ville se replie avec le bouton [b]▾ DÉTAILS[/b].",
+]
+const ADV_BELVEDERE := [
+	"Un [b]belvédère[/b] ! Du haut, tu repères les villes de la région : elles apparaissent hors du [b]brouillard[/b] sur la carte de [b]Conquête[/b].",
+	"Attention, les voir ne suffit pas à les attaquer : il faut d'abord les relier à ton empire en conquérant les villes qui y mènent. Un explorateur en [b]Cartographie[/b] révèle les autres.",
+]
 const INGENIEUR_V63 := [
 	"L'Artificier devient l'[b]Ingénieur[/b], [b]{pseudo}[/b] ! Ses [b]bombes mûrissent[/b] : niveau 1 à la pose, +1 à chaque fin de son tour, jusqu'au niveau 4 (explosion ×2). L'étoile dorée affiche leur niveau.",
 	"Nouveau sort [b]Couplage[/b] : couple deux mécanismes alignés et une [b]barrière électrique[/b] se tend entre eux. Elle reste franchissable, mais quiconque la traverse est [b]électrocuté[/b] : plein pot pour les ennemis, moitié moins pour tes alliés.",

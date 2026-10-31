@@ -553,6 +553,8 @@ func _on_action_pressed() -> void:
 			var res3: Dictionary = manager.interact()
 			var cities: Array = res3.get("names", [])
 			_after_poi(key, poi, "Belvédère : %s" % (", ".join(cities) if not cities.is_empty() else "rien de nouveau"))
+			if not cities.is_empty():
+				Gultur.say(self, "adv_belvedere", Gultur.ADV_BELVEDERE, null)
 		"exit":
 			var revealed: Array = manager.take_exit(key)
 			_after_poi(key, poi, "Sentier découvert !" if not revealed.is_empty() else "Le sentier est déjà connu.")

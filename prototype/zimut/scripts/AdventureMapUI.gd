@@ -1166,7 +1166,8 @@ func _interact() -> void:
 					lines2.append("⚑ " + String(n))
 				_log("Belvédère : %d ville(s) repérée(s)." % names.size())
 				_reward_modal("👁  Horizons découverts !", POI_COLOR["reveal"],
-					"Du haut du belvédère, vous repérez de nouvelles villes. Elles deviennent attaquables en CONQUÊTE.", lines2)
+					"Du haut du belvédère, vous repérez de nouvelles villes. Elles sortent du brouillard sur la carte de CONQUÊTE (il faudra les relier à votre empire pour les attaquer).", lines2)
+				Gultur.say(self, "adv_belvedere", Gultur.ADV_BELVEDERE, null)
 		"exit":
 			_show_exit(String(cmd.get("key", "")))
 		_:
