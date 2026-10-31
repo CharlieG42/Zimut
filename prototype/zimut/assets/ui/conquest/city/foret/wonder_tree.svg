@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="220" viewBox="0 0 260 220">
+<ellipse cx="130.0" cy="204.0" rx="85.0" ry="14.0" fill="#e8c86a" opacity="0.3"/>
+<ellipse cx="130.0" cy="204.0" rx="80.0" ry="13.0" fill="#000" opacity="0.28"/>
+<defs><linearGradient id="gwtrunk30" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7a5230"/><stop offset="1" stop-color="#452c14"/></linearGradient></defs>
+<rect x="120.0" y="130.0" width="20.0" height="70.0" fill="url(#gwtrunk30)" stroke="#33200f" stroke-width="2.5"/>
+<defs><radialGradient id="gwfol31" cx="0.38" cy="0.3" r="0.95"><stop offset="0" stop-color="#78a17c"/><stop offset="0.6" stop-color="#4a814f"/><stop offset="1" stop-color="#2c552f"/></radialGradient></defs>
+<circle cx="114.0" cy="112.0" r="22.0" fill="url(#gwfol31)" stroke="#224325" stroke-width="2"/>
+<circle cx="107.0" cy="104.5" r="6.6" fill="#b2c9b4" opacity="0.8"/>
+<defs><radialGradient id="gwfol32" cx="0.38" cy="0.3" r="0.95"><stop offset="0" stop-color="#78a17c"/><stop offset="0.6" stop-color="#4a814f"/><stop offset="1" stop-color="#2c552f"/></radialGradient></defs>
+<circle cx="146.0" cy="110.0" r="20.0" fill="url(#gwfol32)" stroke="#224325" stroke-width="2"/>
+<circle cx="139.6" cy="103.2" r="6.0" fill="#b2c9b4" opacity="0.8"/>
+<defs><radialGradient id="gwfol33" cx="0.38" cy="0.3" r="0.95"><stop offset="0" stop-color="#78a17c"/><stop offset="0.6" stop-color="#4a814f"/><stop offset="1" stop-color="#2c552f"/></radialGradient></defs>
+<circle cx="130.0" cy="92.0" r="30.0" fill="url(#gwfol33)" stroke="#224325" stroke-width="2"/>
+<circle cx="120.4" cy="81.8" r="9.0" fill="#b2c9b4" opacity="0.8"/>
+<defs><radialGradient id="gwfol34" cx="0.38" cy="0.3" r="0.95"><stop offset="0" stop-color="#78a17c"/><stop offset="0.6" stop-color="#4a814f"/><stop offset="1" stop-color="#2c552f"/></radialGradient></defs>
+<circle cx="120.0" cy="82.0" r="18.0" fill="url(#gwfol34)" stroke="#224325" stroke-width="2"/>
+<circle cx="114.2" cy="75.9" r="5.4" fill="#b2c9b4" opacity="0.8"/>
+<defs><radialGradient id="gwfol35" cx="0.38" cy="0.3" r="0.95"><stop offset="0" stop-color="#78a17c"/><stop offset="0.6" stop-color="#4a814f"/><stop offset="1" stop-color="#2c552f"/></radialGradient></defs>
+<circle cx="142.0" cy="84.0" r="17.0" fill="url(#gwfol35)" stroke="#224325" stroke-width="2"/>
+<circle cx="136.6" cy="78.2" r="5.1" fill="#b2c9b4" opacity="0.8"/>
+</svg>

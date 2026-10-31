@@ -130,6 +130,11 @@ func _build_layers() -> void:
 	_ground_fx = Node2D.new()
 	_ground_fx.name = "GroundFX"
 	add_child(_ground_fx)
+	# V63 : barrières tendues entre mécanismes couplés
+	var bars := BarrierFx.new()
+	bars.name = "Barriers"
+	bars.grid_mgr = self
+	add_child(bars)
 	_entity_layer = Node2D.new()
 	_entity_layer.name = "Entities"
 	_entity_layer.y_sort_enabled = true
@@ -1248,3 +1253,43 @@ func _process(delta: float) -> void:
 		_shake_amp = maxf(0.0, _shake_amp - delta * 40.0)
 		if _shake_amp == 0.0 and cam != null:
 			cam.offset = Vector2.ZERO
+
+
+## V63 — Barrières électriques entre deux mécanismes couplés et alignés (Artificier) :
+## arc animé de mécanisme à mécanisme, cases de la barrière illuminées.
+class BarrierFx:
+	extends Node2D
+	var grid_mgr: Node = null
+	var _t: float = 0.0
+
+	func _process(d: float) -> void:
+		_t += d
+		queue_redraw()
+
+	func _draw() -> void:
+		if grid_mgr == null or grid_mgr.game_manager == null or not grid_mgr.game_manager.has_method("barriers"):
+			return
+		var gm: Node = grid_mgr.game_manager
+		for b: Dictionary in gm.barriers():
+			var ally: bool = String(b["team"]) == "player"
+			var col: Color = Color(0.45, 0.85, 1.0) if ally else Color(1.0, 0.45, 0.35)
+			for c: Vector2i in b["cells"]:
+				var p: Vector2 = grid_mgr.grid_to_screen(c.x, c.y)
+				var pulse: float = 0.5 + 0.5 * sin(_t * 6.0 + float(c.x + c.y))
+				draw_set_transform(p, 0.0, Vector2(1.0, 0.5))
+				draw_circle(Vector2.ZERO, 30.0, Color(col.r, col.g, col.b, 0.16 + 0.12 * pulse))
+				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			var a: Vector2 = grid_mgr.grid_to_screen(int(b["a"]["x"]), int(b["a"]["y"])) + Vector2(0, -26)
+			var z: Vector2 = grid_mgr.grid_to_screen(int(b["b"]["x"]), int(b["b"]["y"])) + Vector2(0, -26)
+			for k: int in range(3):
+				var pts := PackedVector2Array()
+				var n: int = 12
+				var nrm: Vector2 = (z - a).orthogonal().normalized()
+				for i: int in range(n + 1):
+					var f: float = float(i) / float(n)
+					var jitter: float = 0.0 if i == 0 or i == n else sin(_t * 23.0 + float(i) * 2.7 + float(k) * 4.1) * 7.0
+					pts.append(a.lerp(z, f) + nrm * jitter + Vector2(0, -6.0 * float(k)))
+				draw_polyline(pts, Color(col.r, col.g, col.b, 0.35), 7.0, true)
+				draw_polyline(pts, Color(1, 1, 1, 0.9), 2.0, true)
+			draw_circle(a, 7.0, Color(1, 1, 1, 0.9))
+			draw_circle(z, 7.0, Color(1, 1, 1, 0.9))

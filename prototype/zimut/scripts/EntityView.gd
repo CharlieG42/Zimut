@@ -908,6 +908,23 @@ func _draw() -> void:
 		draw_circle(cc, rr, (entity.get("color", Color(0.92, 0.22, 0.14)) as Color) if bomb else Color(0.35, 0.62, 0.85))
 		draw_string_outline(ThemeDB.fallback_font, cc + Vector2(-12.0, 7.0), str(life), HORIZONTAL_ALIGNMENT_CENTER, 24.0, 20, 4, Color(0, 0, 0, 0.9))
 		draw_string(ThemeDB.fallback_font, cc + Vector2(-12.0, 7.0), str(life), HORIZONTAL_ALIGNMENT_CENTER, 24.0, 20, Color(1, 1, 0.85))
+		# V63 : niveau de la bombe (étoile dorée à gauche de la barre) et couplage (éclair bleu)
+		if bomb:
+			var lc := Vector2(-bw * 0.5 - 18.0, by2 + bh * 0.5)
+			var lv: int = int(entity.get("bomb_level", 1))
+			var pts := PackedVector2Array()
+			for i: int in range(10):
+				var a: float = -PI * 0.5 + float(i) * PI / 5.0
+				pts.append(lc + Vector2(cos(a), sin(a)) * ((17.0 if i % 2 == 0 else 8.5) + (1.5 * sin(_t * 6.0) if lv >= 4 else 0.0)))
+			draw_colored_polygon(pts, Color(1.0, 0.78, 0.25) if lv < 4 else Color(1.0, 0.45, 0.15))
+			pts.append(pts[0])
+			draw_polyline(pts, Color(0, 0, 0, 0.9), 2.0, true)
+			draw_string(ThemeDB.fallback_font, lc + Vector2(-12.0, 7.0), str(lv), HORIZONTAL_ALIGNMENT_CENTER, 24.0, 18, Color(0.15, 0.06, 0.0))
+		if int(entity.get("link_turns", 0)) > 0:
+			var kc := Vector2(bw * 0.5 + 18.0, by2 - 22.0)
+			draw_circle(kc, 12.0, Color(0, 0, 0, 0.85))
+			draw_circle(kc, 10.0, Color(0.45, 0.85, 1.0))
+			draw_polyline(PackedVector2Array([kc + Vector2(2, -8), kc + Vector2(-4, 1), kc + Vector2(2, 1), kc + Vector2(-2, 9)]), Color(1, 1, 1), 2.5, true)
 
 	# Statuts
 	var font: Font = ThemeDB.fallback_font

@@ -389,6 +389,14 @@ static func parse(spell: Dictionary) -> Dictionary:
 		p["min_range"] = 0
 		spell["_p"] = p
 		return p
+	# V63 : Couplage (deux mécanismes couplés et alignés tendent une barrière)
+	if sname == "Couplage":
+		p["kind"] = "link"
+		p["target"] = "cell"
+		p["needs_los"] = false
+		p["min_range"] = 0
+		spell["_p"] = p
+		return p
 	if sname == "Maintenance":
 		p["kind"] = "maintain"
 		p["target"] = "self"

@@ -399,6 +399,7 @@ func _build() -> void:
 
 	_attack = Button.new()
 	_attack.text = "LANCER L'ASSAUT"
+	_attack.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_attack.custom_minimum_size.y = 68
 	_attack.add_theme_font_size_override("font_size", 23)
 	_attack.pressed.connect(_attack_selected_city)
@@ -776,7 +777,7 @@ func _select_city(id: String) -> void:
 		_side_art.texture = _city_sprite(id)
 	_layout_responsive()
 	if String(city["kind"]) == "capital":
-		_message.text = "%s\n\n%s\n\nVotre territoire de départ, à l'abri des attaques.\n%s" % [city["name"], city["desc"], _city_status_text(id)]
+		_message.text = Typo.fr("%s\n\n%s\n\nVotre territoire de départ, à l'abri des attaques.\n%s" % [city["name"], city["desc"], _city_status_text(id)])
 		_show_challenge("")
 		_attack.disabled = true
 		_attack.text = "LANCER L'ASSAUT"
@@ -810,7 +811,7 @@ func _select_city(id: String) -> void:
 			txt += "\n⚑ Manœuvres du Chancelier : +%d défense pendant %d bataille(s)." % [ConquestSystem.drill_defense(_conquest), int(_conquest.get("drill", 0))]
 		if ConquestSystem.roadworks_yield(_conquest).size() > 0:
 			txt += "\n⚑ Routes entretenues du Chancelier : encore %d bataille(s)." % int(_conquest.get("roadworks", 0))
-		_message.text = txt
+		_message.text = Typo.fr(txt)
 		_show_challenge("")
 		_attack.disabled = true
 		_attack.text = "LANCER L'ASSAUT"
@@ -865,6 +866,7 @@ func _select_city(id: String) -> void:
 	var biome_summary: String = _biome_control_summary(String(city["biome"]))
 	if biome_summary != "":
 		_message.text += "\n\n" + biome_summary
+	_message.text = Typo.fr(_message.text)
 	_refresh_nameplates()
 	_pulse_selected(id)
 	_refresh_chronicle()
@@ -956,7 +958,7 @@ func _open_city_screen(city_id: String) -> void:
 func _on_build_pressed(city_id: String, building: String) -> void:
 	var err: String = ProgressionManager.conquest_build(_save, city_id, building)
 	if err != "":
-		_message.text = err
+		_message.text = Typo.fr(err)
 		return
 	ProgressionManager.write_save(_slot, _save)
 	_conquest = _save.get("conquest", {})
@@ -1034,13 +1036,13 @@ func _on_upgrade_pressed(city_id: String) -> void:
 	var err: String = ProgressionManager.conquest_upgrade_city(_save, city_id)
 	_after_management(city_id)
 	if err != "":
-		_message.text = err
+		_message.text = Typo.fr(err)
 
 func _on_recruit_pressed(city_id: String, n: int) -> void:
 	var err: String = ProgressionManager.conquest_recruit(_save, city_id, n)
 	_after_management(city_id)
 	if err != "":
-		_message.text = err
+		_message.text = Typo.fr(err)
 
 func _on_recall_pressed(city_id: String) -> void:
 	ProgressionManager.conquest_recall_hero(_save, city_id)
@@ -1193,7 +1195,7 @@ func _show_mission_picker() -> void:
 				var err: String = ProgressionManager.conquest_send_mission(_save, classe, type_id)
 				_after_management(_selected_id)
 				if err != "":
-					_message.text = err)
+					_message.text = Typo.fr(err))
 			list.add_child(b)
 	var cancel := Button.new()
 	cancel.text = "ANNULER"
@@ -1403,7 +1405,7 @@ func _show_assault_prep() -> void:
 func _negotiate_city(city_id: String) -> void:
 	var err: String = ProgressionManager.conquest_negotiate_city(_save, city_id)
 	if err != "":
-		_message.text = err
+		_message.text = Typo.fr(err)
 		return
 	_conquest = _save.get("conquest", {})
 	_persist()
@@ -1415,20 +1417,20 @@ func _negotiate_city(city_id: String) -> void:
 func _repair_city(city_id: String) -> void:
 	var err: String = ProgressionManager.conquest_repair_city(_save, city_id)
 	if err != "":
-		_message.text = err
+		_message.text = Typo.fr(err)
 		return
 	_conquest = _save.get("conquest", {})
 	_persist()
 	_refresh_header()
 	_select_city(city_id)
-	_message.text = "⚒ %s est réparée : sa production reprend." % ProgressionManager.conquest_city_name(city_id)
+	_message.text = Typo.fr("⚒ %s est réparée : sa production reprend." % ProgressionManager.conquest_city_name(city_id))
 
 ## Plan d'assaut sans combat (blocus / infiltration) : le siège avance d'une
 ## vague, la carte se rafraîchit, aucun combat n'est lancé.
 func _apply_plan(plan: String) -> void:
 	var err: String = ProgressionManager.conquest_apply_plan(_save, _selected_id, plan)
 	if err != "":
-		_message.text = err
+		_message.text = Typo.fr(err)
 		return
 	_conquest = _save.get("conquest", {})
 	_persist()
@@ -1445,7 +1447,7 @@ func _choose_assault_tactic(tactic: String) -> void:
 	# utilisé par les tests de gameplay.
 	var payment_error: String = ProgressionManager.conquest_pay_assault_tactic(_save, tactic)
 	if payment_error != "":
-		_message.text = payment_error
+		_message.text = Typo.fr(payment_error)
 		return
 	var city: Dictionary = _city_meta(_selected_id)
 	_conquest["pending_city"] = _selected_id
@@ -1655,7 +1657,7 @@ func _show_counterattack_message() -> void:
 	var counter: String = String(_conquest.get("last_counterattack", ""))
 	if counter != "" and _message != null:
 		var cname: String = ProgressionManager.conquest_city_name(counter)
-		_message.text = "⚠ CONTRE-ATTAQUE ! L'ennemi a pillé %s : production gelée %d bataille(s)." % [cname, ProgressionManager.CONQUEST_RAVAGE_BATTLES]
+		_message.text = Typo.fr("⚠ CONTRE-ATTAQUE ! L'ennemi a pillé %s : production gelée %d bataille(s)." % [cname, ProgressionManager.CONQUEST_RAVAGE_BATTLES])
 
 ## Nom d'une ville sous son repère : court, l'état est porté par le médaillon.
 func _nameplate_text(city_id: String) -> String:
@@ -1790,7 +1792,7 @@ func _refresh_threat_banner() -> void:
 	if int(_conquest.get("truce", 0)) > 0:
 		lines.append("☮ Trêve : %d bataille(s) sans raid" % int(_conquest["truce"]))
 	_threat_banner.visible = not lines.is_empty()
-	_threat_banner.text = "\n".join(lines)
+	_threat_banner.text = Typo.fr("\n".join(lines))
 
 func _refresh_nameplates() -> void:
 	_refresh_threat_banner()
@@ -1977,7 +1979,7 @@ func _refresh_chronicle() -> void:
 	while index >= 0 and lines.size() < 4:
 		lines.append("• " + String(events[index]))
 		index -= 1
-	_chronicle_label.text = "\n".join(lines)
+	_chronicle_label.text = Typo.fr("\n".join(lines))
 
 func _persist() -> void:
 	_save["conquest"] = _conquest
@@ -1999,7 +2001,7 @@ func _show_challenge(city_id: String) -> void:
 	_challenge_label.visible = not ch.is_empty()
 	if ch.is_empty():
 		return
-	_challenge_label.text = "◆ DÉFI FACULTATIF\n%s\nBonus : %s" % [String(ch["label"]), _challenge_reward_text(ch)]
+	_challenge_label.text = Typo.fr("◆ DÉFI FACULTATIF\n%s\nBonus : %s" % [String(ch["label"]), _challenge_reward_text(ch)])
 
 func _challenge_reward_text(ch: Dictionary) -> String:
 	var parts: PackedStringArray = ["+%d or" % int(ch.get("gold", 0))]

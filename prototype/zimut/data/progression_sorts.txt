@@ -254,6 +254,7 @@ Géomancien,100,Cataclysme minéral
 Artificier,1,Déclencheur;Pistolet à ressort;Poser Bombe
 Artificier,3,Rappel
 Artificier,5,Fumigène
+Artificier,6,Couplage
 Artificier,8,Poser Bombe incendiaire
 Artificier,10,Poser Mine
 Artificier,12,Pas de côté

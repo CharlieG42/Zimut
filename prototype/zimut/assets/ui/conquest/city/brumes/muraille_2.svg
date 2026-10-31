@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="220" viewBox="0 0 260 220">
+<ellipse cx="130.0" cy="204.0" rx="95.0" ry="13.0" fill="#000" opacity="0.3"/>
+<rect x="80.0" y="150.0" width="100.0" height="50.0" fill="#8a8a90" stroke="#4b4b4f" stroke-width="2.5"/>
+<rect x="80.0" y="141.0" width="20.0" height="9.0" fill="#939398"/>
+<rect x="120.0" y="141.0" width="20.0" height="9.0" fill="#939398"/>
+<rect x="160.0" y="141.0" width="20.0" height="9.0" fill="#939398"/>
+<rect x="68.0" y="128.0" width="24.0" height="72.0" fill="#818187" stroke="#4b4b4f" stroke-width="2.5"/>
+<line x1="70.0" y1="141.3" x2="90.0" y2="141.3" stroke="#4f4f53" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
+<line x1="70.0" y1="152.7" x2="90.0" y2="152.7" stroke="#4f4f53" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
+<line x1="70.0" y1="164.0" x2="90.0" y2="164.0" stroke="#4f4f53" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
+<line x1="70.0" y1="175.3" x2="90.0" y2="175.3" stroke="#4f4f53" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
+<line x1="70.0" y1="186.7" x2="90.0" y2="186.7" stroke="#4f4f53" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
+<line x1="70.0" y1="130.0" x2="70.0" y2="141.3" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="80.0" y1="130.0" x2="80.0" y2="141.3" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="90.0" y1="130.0" x2="90.0" y2="141.3" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="75.0" y1="141.3" x2="75.0" y2="152.7" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="85.0" y1="141.3" x2="85.0" y2="152.7" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="70.0" y1="152.7" x2="70.0" y2="164.0" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="80.0" y1="152.7" x2="80.0" y2="164.0" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="90.0" y1="152.7" x2="90.0" y2="164.0" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="75.0" y1="164.0" x2="75.0" y2="175.3" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="85.0" y1="164.0" x2="85.0" y2="175.3" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="70.0" y1="175.3" x2="70.0" y2="186.7" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="80.0" y1="175.3" x2="80.0" y2="186.7" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="90.0" y1="175.3" x2="90.0" y2="186.7" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="75.0" y1="186.7" x2="75.0" y2="198.0" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="85.0" y1="186.7" x2="85.0" y2="198.0" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<rect x="80.0" y="128.0" width="12.0" height="72.0" fill="#6e6e73" opacity="0.8"/>
+<rect x="69.5" y="128.0" width="3.0" height="72.0" fill="#adadb1" opacity="0.7"/>
+<polygon points="63.7,128.0 80.0,100.4 96.3,128.0" fill="#428078" stroke="#274c48" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="80.0,100.4 96.3,128.0 82.4,128.0" fill="#33635d"/>
+<rect x="168.0" y="128.0" width="24.0" height="72.0" fill="#818187" stroke="#4b4b4f" stroke-width="2.5"/>
+<line x1="170.0" y1="141.3" x2="190.0" y2="141.3" stroke="#4f4f53" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
+<line x1="170.0" y1="152.7" x2="190.0" y2="152.7" stroke="#4f4f53" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
+<line x1="170.0" y1="164.0" x2="190.0" y2="164.0" stroke="#4f4f53" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
+<line x1="170.0" y1="175.3" x2="190.0" y2="175.3" stroke="#4f4f53" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
+<line x1="170.0" y1="186.7" x2="190.0" y2="186.7" stroke="#4f4f53" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
+<line x1="170.0" y1="130.0" x2="170.0" y2="141.3" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="180.0" y1="130.0" x2="180.0" y2="141.3" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="190.0" y1="130.0" x2="190.0" y2="141.3" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="175.0" y1="141.3" x2="175.0" y2="152.7" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="185.0" y1="141.3" x2="185.0" y2="152.7" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="170.0" y1="152.7" x2="170.0" y2="164.0" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="180.0" y1="152.7" x2="180.0" y2="164.0" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="190.0" y1="152.7" x2="190.0" y2="164.0" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="175.0" y1="164.0" x2="175.0" y2="175.3" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="185.0" y1="164.0" x2="185.0" y2="175.3" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="170.0" y1="175.3" x2="170.0" y2="186.7" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="180.0" y1="175.3" x2="180.0" y2="186.7" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="190.0" y1="175.3" x2="190.0" y2="186.7" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="175.0" y1="186.7" x2="175.0" y2="198.0" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<line x1="185.0" y1="186.7" x2="185.0" y2="198.0" stroke="#4f4f53" stroke-width="1.1" stroke-linecap="round" opacity="0.7"/>
+<rect x="180.0" y="128.0" width="12.0" height="72.0" fill="#6e6e73" opacity="0.8"/>
+<rect x="169.5" y="128.0" width="3.0" height="72.0" fill="#adadb1" opacity="0.7"/>
+<polygon points="163.7,128.0 180.0,100.4 196.3,128.0" fill="#428078" stroke="#274c48" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="180.0,100.4 196.3,128.0 182.4,128.0" fill="#33635d"/>
+</svg>

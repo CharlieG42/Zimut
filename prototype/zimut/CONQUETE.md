@@ -1,4 +1,4 @@
-# Conquête — V59 : villes vivantes, garnisons, héros, Chancelier et spécialités
+# Conquête — V62 : la ville illustrée, jour & nuit, événements de ville et spécialisation
 
 Toute la logique est dans `scripts/ConquestSystem.gd` (statique, testable sans interface) ;
 `ProgressionManager` expose les points d'entrée `conquest_*` ; l'interface est `ConquestMapUI.gd`.
@@ -93,8 +93,22 @@ L'écran de ville montre la ville **dessinée** devant l'illustration de sa Nati
 - Vie de la ville : habitants qui circulent (plus nombreux avec le niveau), soldats à l'exercice selon la garnison, gouverneur devant sa résidence, lanternes, fumées, drapeaux ; fumée sur une ville pillée, cadre rouge pendant une offensive ; feu d'artifice doré à chaque construction.
 - Sauvegarde : `building_levels {ville:{bâtiment:niveau}}`, `wonders [ville]` (optionnelles).
 
+## Ville illustrée, jour & nuit, événements et spécialisation (V62)
+L'écran de ville affiche des **illustrations par bâtiment** (`assets/ui/conquest/city/<biome>/`,
+générées par `tools/gen_city_art.py`, repli vectoriel si un fichier manque) :
+- **Jour / soir / nuit** : 3 ciels par biome, voile nocturne, **fenêtres et lanternes allumées**
+  la nuit ; bouton ☀/🌇/🌙 dans la barre de l'écran (`ConquestSystem.cycle_time_of_day`,
+  sinon cycle auto avec les batailles).
+- **Événements de ville** : fête (étals + feu), incendie (fumée sur l'hôtel), marchand de passage
+  (charrette) — `ConquestSystem.CITY_EVENTS`, déclenchés à l'entrée dans la ville, affichés dans
+  le conseil.
+- **Spécialisation au niveau Cité** : militaire (+2 défense, allure hérissée) ou marchande
+  (+3 or, place commerçante) — `ConquestSystem.CITY_SPECS` / `choose_spec`, bonus dans
+  `defense` et `city_income`.
+- Pour remplacer les SVG par de vraies illustrations IA : prompts dans `prompts_sprites/villes/`.
+
 ## Sauvegarde
-Clés ajoutées à `conquest` (toutes optionnelles) : `city_levels`, `garrisons`, `threat`, `event_pending`, `news`, `truce`, `lost`, `rewarded`, `battle_count`, `event_cd`, `threat_cd`, `chancellor_cd`, `chancellor_seen`, `drill`, `roadworks`, `missions`, `missions_revealed`, `annexed_diplomacy`, `ruin`.
+Clés ajoutées à `conquest` (toutes optionnelles) : `city_levels`, `garrisons`, `threat`, `event_pending`, `news`, `truce`, `lost`, `rewarded`, `battle_count`, `event_cd`, `threat_cd`, `chancellor_cd`, `chancellor_seen`, `drill`, `roadworks`, `missions`, `missions_revealed`, `annexed_diplomacy`, `ruin`, `city_time`, `city_events`, `city_specs`.
 
 ## Tests
 `tests/test_conquest_system.gd` (moteur, + bloc V59 Chancelier/spécialités), `tests/test_conquest_team.gd` (sélection d'équipe, nécessite xvfb), `tests/shot_conquest_v14.gd` (captures).

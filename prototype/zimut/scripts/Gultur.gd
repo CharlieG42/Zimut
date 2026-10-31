@@ -90,6 +90,10 @@ const CONQ_CARTE := [
 	"Le [b]brouillard[/b] cache les terres que tu n'as pas encore explorées en Aventure. Un [b]crâne[/b] signale la forteresse d'un général, des [b]points rouges[/b] l'avancée d'un siège, la [b]fumée[/b] une ville pillée.",
 	"Et si une [b]colonne ennemie[/b] marche sur une de tes villes, renforce-la vite !",
 ]
+const INGENIEUR_V63 := [
+	"L'Artificier devient l'[b]Ingénieur[/b], [b]{pseudo}[/b] ! Ses [b]bombes mûrissent[/b] : niveau 1 à la pose, +1 à chaque fin de son tour, jusqu'au niveau 4 (explosion ×2). L'étoile dorée affiche leur niveau.",
+	"Nouveau sort [b]Couplage[/b] : couple deux mécanismes alignés et une [b]barrière électrique[/b] se tend entre eux. Elle reste franchissable, mais quiconque la traverse est [b]électrocuté[/b] : plein pot pour les ennemis, moitié moins pour tes alliés.",
+]
 const VILLE_V61 := [
 	"Bienvenue dans ta ville, [b]{pseudo}[/b] ! Touche un bâtiment pour le gérer à droite.",
 	"L'[b]Hôtel de ville[/b] fait grandir la ville jusqu'à la [b]Métropole[/b] : plus de soldats, plus d'[b]emplacements[/b] de construction et des bâtiments de plus haut niveau.",

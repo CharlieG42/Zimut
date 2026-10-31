@@ -272,7 +272,8 @@ Géomancien,Fracas des montagnes,4,0,7,129 dégâts en zone (4x4) + immobilise (
 Géomancien,Cataclysme minéral,4,0,7,122 dégâts en zone (4x4),100,Attaque,122,0,0,0,0,0,0,0,0
 Artificier,Déclencheur,1,0,6,Déclenche l'effet d'un de vos mécanismes (bombe; mine; tourelle; glyphe; balise de transposition),1,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Pistolet à ressort,2,0,5,14 dégâts,1,Attaque,14,0,0,0,0,0,0,0,0
-Artificier,Poser Bombe,2,0,4,Pose une bombe : explose (2 cases autour) à la fin du 4e tour de l'Artificier ou dès qu'on la déclenche ou la détruit; touche ennemis et autres bombes; alliés moitié moins,1,Invocation,0,0,0,0,0,0,0,0,0
+Artificier,Poser Bombe,2,0,4,Pose une bombe niveau 1 : elle gagne un niveau à chaque fin de tour de l'Artificier (explosion ×1.3 puis ×1.65 puis ×2) et explose (2 cases autour) à la fin du 4e tour ou dès qu'on la déclenche ou la détruit; touche ennemis et autres bombes; alliés moitié moins,1,Invocation,0,0,0,0,0,0,0,0,0
+Artificier,Couplage,1,0,6,Couple un de vos mécanismes (3 tours) : deux mécanismes couplés et alignés tendent une barrière électrique : quiconque la traverse ou s'y trouve est électrocuté (alliés moitié moins),6,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Rappel,1,0,5,Désinvoque un de vos mécanismes (bombe; tourelle; balise; mine) sans le déclencher,3,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Fumigène,2,0,0,Invisible (2 tours),5,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Poser Bombe incendiaire,2,0,4,Pose une bombe incendiaire : explose comme une bombe et enflamme les ennemis touchés (brûlure 2 tours),8,Invocation,0,0,0,0,0,0,0,0,0

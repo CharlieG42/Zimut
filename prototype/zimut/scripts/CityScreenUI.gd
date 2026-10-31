@@ -196,6 +196,11 @@ func _fill_view(v: ConquestCityView) -> void:
 	v.ravaged = ProgressionManager._is_city_ravaged(conq, _city_id) or ConquestSystem.is_ruined(conq, _city_id)
 	v.threat = String(ConquestSystem.threat(conq).get("city", "")) == _city_id
 	v.selected = _selected
+	# V62 : heure du jour, événement de ville et spécialisation (allure de la ville)
+	v.time_of_day = ConquestSystem.effective_time(conq, _city_id)
+	ConquestSystem.maybe_city_event(conq, _city_id)
+	v.city_event = ConquestSystem.city_event(conq, _city_id)
+	v.spec = ConquestSystem.city_spec(conq, _city_id)
 
 func _build_top_bar() -> void:
 	var bar := HBoxContainer.new()
@@ -205,15 +210,31 @@ func _build_top_bar() -> void:
 	back.name = "BackButton"
 	back.pressed.connect(close)
 	bar.add_child(back)
+	# V62 : bouton jour / soir / nuit de la ville
+	var tod: String = ConquestSystem.effective_time(_conq(), _city_id)
+	var glyph: String = {"jour": "☀", "soir": "🌇", "nuit": "🌙"}.get(tod, "☀")
+	var day_btn := _btn(glyph, Color(0.24, 0.22, 0.34), 26, Vector2(70, 62))
+	day_btn.tooltip_text = tod.capitalize()
+	day_btn.name = "DayNightButton"
+	day_btn.pressed.connect(func() -> void:
+		ConquestSystem.cycle_time_of_day(_conq(), _city_id)
+		ProgressionManager.write_save(_slot, _save)
+		_render())
+	bar.add_child(day_btn)
 	var lvl: int = ConquestSystem.city_level(_conq(), _city_id)
 	var titles := VBoxContainer.new()
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.add_child(titles)
 	var t := _lbl("%s  ·  %s" % [ConquestSystem.level_name(lvl).to_upper(), ProgressionManager.conquest_city_name(_city_id).to_upper()], 34, GOLD)
 	t.name = "CityTitle"
+	t.clip_text = true
+	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	titles.add_child(t)
 	var nation: String = String(Nations.DATA.get(_biome, {}).get("nation", ProgressionManager.biome_label(_biome)))
-	titles.add_child(_lbl("Nation %s  ·  niveau %d / %d  ·  %s" % [nation, lvl, ConquestSystem.MAX_LEVEL, _desc], 18, DIM))
+	var sub := _lbl("Nation %s  ·  niveau %d / %d  ·  %s" % [nation, lvl, ConquestSystem.MAX_LEVEL, _desc], 18, DIM)
+	sub.clip_text = true
+	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	titles.add_child(sub)
 	var chips := HBoxContainer.new()
 	chips.add_theme_constant_override("separation", 8)
 	bar.add_child(chips)
@@ -456,6 +477,31 @@ func _summary(v: VBoxContainer) -> void:
 		var tl := _wrap("⚠ OFFENSIVE dans %d bataille(s) — force ennemie %d. Renforcez la garnison !" % [int(th["eta"]), int(th["power"])], 17, BAD)
 		tl.name = "ThreatLine"
 		v.add_child(tl)
+	# V62 : spécialisation de la Cité (choix au niveau 3) et événement de ville en cours
+	_build_spec_choice(v, conq, lvl)
+	var ev: String = ConquestSystem.city_event(conq, _city_id)
+	if ev != "":
+		var ev_txt: String = {"fete": "🎉 Fête dans la ville : étals et feu de joie sur la place.",
+			"incendie": "🔥 Incendie dans la ville ! La fumée monte sur l'hôtel de ville.",
+			"marchand": "🛒 Un marchand de passage dresse sa charrette près de la place."}.get(ev, "")
+		v.add_child(_wrap(ev_txt, 17, Color(1.0, 0.85, 0.45)))
+
+## V62 — choix de la spécialisation quand la ville devient une Cité (niveau 3).
+func _build_spec_choice(v: VBoxContainer, conq: Dictionary, lvl: int) -> void:
+	if lvl < ConquestSystem.SPEC_MIN_LEVEL:
+		return
+	var cur: String = ConquestSystem.city_spec(conq, _city_id)
+	if cur != "":
+		var s: Dictionary = ConquestSystem.CITY_SPECS[cur]
+		v.add_child(_wrap("⚑ Spécialisation : %s — %s" % [String(s["label"]), String(s["text"])], 17, Color(0.85, 0.75, 1.0)))
+		return
+	v.add_child(_lbl("⚑ Choisissez la spécialisation de la Cité :", 19, Color(0.85, 0.75, 1.0)))
+	for spec: String in ConquestSystem.CITY_SPECS.keys():
+		var s: Dictionary = ConquestSystem.CITY_SPECS[spec]
+		var b := _btn("%s — %s" % [String(s["label"]), String(s["text"])], Color(0.26, 0.22, 0.38), 17, Vector2(0, 62))
+		b.name = "Spec_" + spec
+		b.pressed.connect(func() -> void: _act(ConquestSystem.choose_spec(_save, _city_id, spec)))
+		v.add_child(b)
 
 func _fmt_mult(m: float) -> String:
 	return ("%.1f" % m).replace(".0", "").replace(".", ",")
@@ -529,7 +575,7 @@ func close() -> void:
 
 func _lbl(t: String, size: int, col: Color) -> Label:
 	var l := Label.new()
-	l.text = t
+	l.text = Typo.fr(t)
 	l.add_theme_font_size_override("font_size", size)
 	l.add_theme_color_override("font_color", col)
 	return l
@@ -559,6 +605,8 @@ func _pips(n: int, total: int, col: Color) -> Control:
 func _btn(t: String, col: Color, size: int, min_size: Vector2) -> Button:
 	var b := Button.new()
 	b.text = t
+	# Le texte revient à la ligne : un bouton ne doit jamais élargir le panneau hors de l'écran.
+	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	b.custom_minimum_size = min_size
 	b.add_theme_font_size_override("font_size", size)
 	b.add_theme_color_override("font_color", TEXT)
