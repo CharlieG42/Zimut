@@ -285,7 +285,8 @@ func _make_poi_node(key: String, poi: Dictionary) -> void:
 		(_poi_nodes[key] as Node3D).queue_free()
 	var cell: Vector2i = AdventureTerrain.parse(key)
 	var done: bool = ProgressionManager.adventure_poi_completed(manager.state, key)
-	var node: Node3D = Adv3DActors.make_poi_marker(String(poi.get("kind", "")), String(poi.get("name", "Lieu")), done)
+	var mk_kind: String = "dungeon" if Dungeons.is_dungeon(poi) else String(poi.get("kind", ""))
+	var node: Node3D = Adv3DActors.make_poi_marker(mk_kind, String(poi.get("name", "Lieu")), done and mk_kind != "dungeon")
 	node.position = Adv3DWorld.cell_center(cell)
 	world_root.add_child(node)
 	_poi_nodes[key] = node
@@ -456,6 +457,13 @@ func _update_action_button(pos2: Vector2) -> void:
 	var done: bool = ProgressionManager.adventure_poi_completed(manager.state, near_key)
 	var kind: String = String(poi.get("kind", ""))
 	_act_btn.visible = true
+	var dungeon: bool = Dungeons.is_dungeon(poi)
+	if dungeon:
+		var gb: String = String(poi.get("guardian", ""))
+		var rm: int = Dungeons.current_room(manager.state, gb)
+		_act_btn.text = "🏰  %s  (salle %d/%d)" % [String(poi.get("name", "Donjon")), rm, Dungeons.ROOMS]
+		_act_btn.disabled = false
+		return
 	_act_btn.text = "%s  %s" % [_kind_icon(kind), String(poi.get("name", "Lieu"))] if (not done or kind == "camp") else "✓  %s" % String(poi.get("name", "Lieu"))
 	_act_btn.disabled = done and kind != "camp"
 
@@ -525,7 +533,7 @@ func _on_action_pressed() -> void:
 	match kind:
 		"combat":
 			if Dungeons.is_dungeon(poi):
-				_show_toast("Donjon : à explorer pour l'instant depuis la carte classique.")
+				_confirm_dungeon(poi)
 				return
 			_confirm_poi_combat(key, poi)
 		"chest":
@@ -550,6 +558,49 @@ func _on_action_pressed() -> void:
 			_after_poi(key, poi, "Sentier découvert !" if not revealed.is_empty() else "Le sentier est déjà connu.")
 		_:
 			_show_toast("Énigme : à résoudre pour l'instant depuis la carte classique.")
+
+
+## V63 : porte d'un donjon de Nation depuis le monde 3D — 4 salles, la dernière abrite le
+## Gardien et la Pierre (mêmes règles que sur la carte classique).
+func _confirm_dungeon(poi: Dictionary) -> void:
+	var biome: String = String(poi.get("guardian", ""))
+	var room: int = Dungeons.current_room(manager.state, biome)
+	var box: VBoxContainer = _modal("🏰  " + String(poi.get("name", "Donjon")), Color(0.70, 0.40, 0.95))
+	var lines: PackedStringArray = []
+	if String(poi.get("desc", "")) != "":
+		lines.append(String(poi.get("desc", "")))
+		lines.append("")
+	for r: int in range(1, Dungeons.ROOMS + 1):
+		var mark: String = "✔" if r < room else ("▶" if r == room else "○")
+		var who: String = "  —  le Gardien : %s" % Nations.boss_title(biome) if r == Dungeons.ROOMS and Nations.boss_title(biome) != "" else ""
+		lines.append("%s  Salle %d · %s · niv %d%s" % [mark, r, Dungeons.room_name(r), Dungeons.room_level(biome, r), who])
+	lines.append("")
+	if Stones.has(manager.save, biome):
+		lines.append("💎  %s déjà retrouvée : le donjon reste ouvert pour le butin." % Stones.stone_name(biome))
+	else:
+		lines.append("💎  %s : %d %% de chances au prochain Gardien vaincu." % [Stones.stone_name(biome), roundi(Dungeons.stone_chance(manager.state, biome) * 100.0)])
+	lines.append("Défaite, combat abandonné ou arrêt du jeu : retour à l'entrée.")
+	var t: Label = U.lbl(Typo.fr("\n".join(lines)), 22, U.C_TXT)
+	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(t)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	box.add_child(row)
+	var go: Button = _btn("⚔  %s" % ("ENTRER" if room == 1 else "POURSUIVRE"), Color(0.70, 0.40, 0.95), 24, Vector2(300, 84))
+	go.name = "DungeonEnter"
+	go.pressed.connect(func() -> void:
+		_close_modal()
+		_emote("colere")
+		manager.interact()
+		Dungeons.begin(manager.state, biome)   # niveau et effectif de la salle
+		_save_position()
+		GameManager.fight_biome = manager.zone_biome()
+		_leave_to("res://scenes/TeamSelection.tscn"))
+	row.add_child(go)
+	var later: Button = _btn("PLUS TARD", U.C_BORDER, 22, Vector2(220, 84))
+	later.pressed.connect(_close_modal)
+	row.add_child(later)
+	Gultur.say(self, "donjon", Gultur.DONJON, null)
 
 
 func _confirm_poi_combat(key: String, poi: Dictionary) -> void:
@@ -913,7 +964,9 @@ func _refresh_minimap_markers() -> void:
 			"done": ProgressionManager.adventure_poi_completed(manager.state, key)})
 	var gates: Array = []
 	for c: Vector2i in manager.gates().keys():
-		gates.append({"cell": c, "open": bool(manager.gate_at(c).get("open", false))})
+		var gi: Dictionary = manager.gate_at(c)
+		gates.append({"cell": c, "open": bool(gi.get("open", false)), "to": String(gi.get("to", "")),
+			"name": String(gi.get("name", "")), "level": int(gi.get("level", 0)), "visited": bool(gi.get("visited", false))})
 	var mobs: Array = []
 	for g: Dictionary in manager.mobs():
 		mobs.append(AdventureMobs.pos_of(g))

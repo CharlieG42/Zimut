@@ -14,6 +14,24 @@ const LANGS: Array[String] = ["fr", "en"]
 const LANG_NAMES: Array[String] = ["Français", "English"]
 
 var _tr: LocTranslation
+var _fr: FrRename
+
+## V63 : nom affiché des classes renommées (la clé interne reste inchangée : sauvegardes,
+## données et sprites ne bougent pas). Changer ici le nom suffit à le changer partout.
+const CLASS_RENAMES := {"Artificier": "Ingénieur", "artificier": "ingénieur", "ARTIFICIER": "INGÉNIEUR"}
+
+
+## Nom affiché d'une classe (clé interne → nom à l'écran).
+static func class_name_of(classe: String) -> String:
+	return String(CLASS_RENAMES.get(classe, classe))
+
+
+static func rename(text: String) -> String:
+	if not text.contains("rtificier") and not text.contains("RTIFICIER"):
+		return text
+	for k: String in CLASS_RENAMES.keys():
+		text = text.replace(k, String(CLASS_RENAMES[k]))
+	return text
 
 
 func _ready() -> void:
@@ -21,6 +39,9 @@ func _ready() -> void:
 	_tr.locale = "en"
 	_tr.load_table("res://data/i18n/en.txt")
 	TranslationServer.add_translation(_tr)
+	_fr = FrRename.new()
+	_fr.locale = "fr"
+	TranslationServer.add_translation(_fr)
 	apply()
 
 
@@ -29,6 +50,9 @@ func _exit_tree() -> void:
 	if _tr != null:
 		TranslationServer.remove_translation(_tr)
 		_tr = null
+	if _fr != null:
+		TranslationServer.remove_translation(_fr)
+		_fr = null
 
 
 ## Applique la langue choisie dans les Réglages.
@@ -41,7 +65,7 @@ func apply() -> void:
 ## Traduction explicite (pour le texte dessiné à la main, hors Label/Button).
 func t(text: String) -> String:
 	if _tr == null or TranslationServer.get_locale().begins_with("fr"):
-		return text
+		return rename(text)
 	return String(_tr._get_message(StringName(text), StringName()))
 
 
@@ -214,3 +238,13 @@ class LocTranslation extends Translation:
 			out += tpl[i]
 			i += 1
 		return out
+
+
+## V63 : en français, remplace à l'affichage les noms de classe renommés (Label / Button).
+class FrRename extends Translation:
+	func _get_message(src_message: StringName, _context: StringName) -> StringName:
+		var t: String = String(src_message)
+		if not t.contains("rtificier") and not t.contains("RTIFICIER"):
+			return StringName()
+		var r: String = t.replace("Artificier", "Ingénieur").replace("artificier", "ingénieur").replace("ARTIFICIER", "INGÉNIEUR")
+		return StringName(r)

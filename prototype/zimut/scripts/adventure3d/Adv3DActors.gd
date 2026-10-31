@@ -7,6 +7,7 @@ extends RefCounted
 const POI_COLORS := {
 	"combat": Color(0.90, 0.28, 0.22), "chest": Color(0.96, 0.78, 0.25), "puzzle": Color(0.62, 0.42, 0.90),
 	"camp": Color(0.35, 0.80, 0.45), "reveal": Color(0.40, 0.75, 0.95), "exit": Color(0.30, 0.82, 0.78),
+	"dungeon": Color(0.72, 0.42, 1.0),
 }
 
 static var _cache: Dictionary = {}
@@ -340,7 +341,7 @@ static func _tent(st: SurfaceTool, c: Vector3, r: float, h: float, cb: Color, ct
 
 ## Bâtiment d'un lieu d'Aventure (null si aucun). Repère : sol en y = 0, devant = +Z.
 static func _poi_building(kind: String) -> Mesh:
-	if not kind in ["combat", "camp", "reveal", "puzzle", "chest"]:
+	if not kind in ["combat", "camp", "reveal", "puzzle", "chest", "dungeon"]:
 		return null
 	return _cached("poi_bld_" + kind, func() -> Mesh:
 		Adv3DMeshes.smooth_mode = false
@@ -381,6 +382,16 @@ static func _poi_building(kind: String) -> Mesh:
 				Adv3DMeshes.add_box(st, Vector3(0, 0.3, -0.1), Vector3(0.8, 0.6, 0.5), stone_b, stone_t)
 				Adv3DMeshes.add_box(st, Vector3(0, 2.2, 0.25), Vector3(0.34, 0.2, 0.02), Color(0.66, 0.42, 1.0, 0.0), Color(0.88, 0.72, 1.0, 0.0))
 				Adv3DMeshes.add_box(st, Vector3(0, 0.45, 0.16), Vector3(0.2, 0.2, 0.02), Color(0.66, 0.42, 1.0, 0.0), Color(0.88, 0.72, 1.0, 0.0))
+			"dungeon":     # V63 : entrée de donjon — deux tours crénelées, porte sombre et arche
+				for sx3: float in [-1.0, 1.0]:
+					Adv3DMeshes.add_box(st, Vector3(1.1 * sx3, 1.3, 0), Vector3(0.8, 2.6, 0.8), stone_b, stone_t)
+					for k3: int in range(2):
+						Adv3DMeshes.add_box(st, Vector3(1.1 * sx3 + (float(k3) - 0.5) * 0.45, 2.75, 0), Vector3(0.22, 0.3, 0.8), stone_b, stone_t)
+					Adv3DMeshes.add_cone(st, Vector3(1.1 * sx3, 2.6, 0), 0.62, 0.0, 1.0, 4, Color(0.30, 0.18, 0.40), Color(0.52, 0.32, 0.70), r, 0.0)
+				Adv3DMeshes.add_box(st, Vector3(0, 1.0, -0.05), Vector3(1.5, 2.0, 0.6), stone_b, stone_t)
+				Adv3DMeshes.add_box(st, Vector3(0, 2.15, 0), Vector3(1.7, 0.35, 0.7), stone_b, stone_t)
+				Adv3DMeshes.add_box(st, Vector3(0, 0.75, 0.27), Vector3(0.9, 1.5, 0.04), Color(0.06, 0.03, 0.10), Color(0.16, 0.08, 0.24))
+				Adv3DMeshes.add_box(st, Vector3(0, 1.62, 0.29), Vector3(0.5, 0.12, 0.02), Color(0.72, 0.42, 1.0, 0.0), Color(0.90, 0.72, 1.0, 0.0))
 			"chest":       # ruines : colonne brisée et gravats
 				Adv3DNationMeshes._spike(st, Vector3(-0.6, 0, 0), Vector3(0, 1, 0), 0.26, 1.7, 0.0, 8, stone_b, stone_t, stone_t)
 				Adv3DNationMeshes._spike(st, Vector3(0.5, 0, 0.2), Vector3(0, 1, 0), 0.26, 0.7, 0.0, 8, stone_b, stone_t, stone_t)

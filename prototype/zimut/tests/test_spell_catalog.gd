@@ -18,7 +18,7 @@ func _boot() -> void:
 	var combos := 0
 	for classe: String in pm.class_names():
 		var spells: Array = gm._build_spells(classe, 100)
-		var want: int = 31 if classe == "Géomancien" else 30   # V73 : + Rappel de pierre
+		var want: int = 31 if classe in ["Géomancien", "Artificier"] else 30   # V73 : + Rappel de pierre ; V63 : + Couplage
 		check(spells.size() == want, "%s : %d sorts au niveau 100 (%d)" % [classe, want, spells.size()])
 		var names := {}
 		for s: Dictionary in spells:
@@ -33,7 +33,7 @@ func _boot() -> void:
 				"attack": ok = int(p["dmg"]) > 0 or p["dots"].size() > 0 or p["debuffs"].size() > 0 or bool(p["needs_summon"]) or int(p["stun_chance"]) > 0
 				"heal": ok = int(p["heal"]) > 0 or int(p["heal_pct"]) > 0 or int(p["regen"]) > 0
 				"buff": ok = p["buffs"].size() > 0 or bool(p["cure"]) or String(p["target"]) != ""
-				"summon", "glyph", "trap", "teleport", "revive", "trigger", "trigger_all", "recall": ok = true
+				"summon", "glyph", "trap", "teleport", "revive", "trigger", "trigger_all", "recall", "link": ok = true
 			# un sort sans effet reconnu retombe en « petit buff neutre » : on le détecte
 			if kind == "buff" and p["buffs"].size() == 1 and String(p["buffs"][0]["id"]) == "dmg_up" and float(p["buffs"][0]["value"]) == 10.0 and not String(s["effect"]).to_lower().contains("10%"):
 				ok = false

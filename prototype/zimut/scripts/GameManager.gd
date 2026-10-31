@@ -1222,6 +1222,10 @@ func end_current_turn() -> void:
 				_mech_explode(e, tp)
 			tp["current_pv"] = 0
 			message_requested.emit("%s s'effrite." % tp["name"] if String(tp.get("mech", "")) == "" else "%s disparaît." % tp["name"])
+		elif String(tp.get("mech", "")) == "bomb" and is_alive(tp):
+			_bomb_level_up(tp)
+		if int(tp.get("link_turns", 0)) > 0:
+			tp["link_turns"] = int(tp["link_turns"]) - 1
 	_glyphs_expire(e)
 	active_entity = {}
 	selected_spell = null
@@ -1326,6 +1330,7 @@ func compute_reach(e: Dictionary, max_cost: int = -1) -> Dictionary:
 	var prev: Dictionary = {}
 	var queue: Array[Vector2i] = [start]
 	var flies: bool = bool(e.get("fly", false))
+	var bars: Array = barriers() if not _no_links() else []
 	while not queue.is_empty():
 		var cur: Vector2i = queue.pop_front()
 		if int(cost[cur]) >= limit:
@@ -1335,6 +1340,8 @@ func compute_reach(e: Dictionary, max_cost: int = -1) -> Dictionary:
 			if cost.has(n) or not _in_bounds(n) or grid[n.y][n.x] != null:
 				continue
 			if obstacles.has(n) and (not flies or String(obstacles[n]) == "void"):
+				continue
+			if not bars.is_empty() and _barrier_blocks(e, n, bars):
 				continue
 			cost[n] = int(cost[cur]) + 1
 			prev[n] = cur
@@ -1384,8 +1391,30 @@ func try_move(e: Dictionary, cell: Vector2i) -> bool:
 	e["facing"] = cell - prev_cell
 	fx.emit("move", {"entity": e, "path": path, "from": start})
 	entity_moved.emit(e, start, cell)
+	# V63 : traverser un glyphe (allié ou ennemi) déclenche son effet, comme s'y arrêter
+	_glyphs_on_path(e, path)
 	_check_traps(e)
 	_after_action()
+	return true
+
+
+## Applique les glyphes des cases traversées (case d'arrivée exclue : _check_traps s'en charge).
+## Chaque glyphe ne s'applique qu'une fois par créature et par tour (garde de _glyph_apply).
+func _glyphs_on_path(e: Dictionary, path: Array[Vector2i]) -> void:
+	if glyphs.is_empty() or bool(e.get("terrain", false)) or bool(e.get("beacon", false)):
+		return
+	for i: int in range(path.size() - 1):
+		if not is_alive(e):
+			return
+		for g: Dictionary in glyphs.duplicate():
+			if (g["cells"] as Array).has(path[i]):
+				_glyph_apply(g, e)
+
+
+func _no_links() -> bool:
+	for m: Dictionary in summons:
+		if int(m.get("link_turns", 0)) > 0:
+			return false
 	return true
 
 
@@ -1496,6 +1525,10 @@ func validate_cast(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Str
 		var rk: String = trigger_kind(caster, cell)
 		if rk == "" or rk == "glyph":
 			return "Il faut viser un de vos mécanismes."
+	if p["kind"] == "link":
+		var lt: Dictionary = entity_at(cell)
+		if lt.is_empty() or not is_alive(lt) or int(lt.get("owner", -1)) != int(caster["uid"]) or String(lt.get("mech", "")) == "":
+			return "Il faut viser un de vos mécanismes."
 	if p["kind"] == "maintain" and mechs_of(caster).is_empty():
 		return "Aucun mécanisme à entretenir."
 	if p["kind"] == "trigger_all" and trigger_all_count(caster) == 0:
@@ -1604,6 +1637,8 @@ func cast_spell(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> bool:
 			summary = _resolve_recall_build(caster, cell)
 		"maintain":
 			summary = _resolve_maintain(caster)
+		"link":
+			summary = _resolve_link(caster, cell)
 		"recall":
 			remove_entity_from_grid(target)
 			fx.emit("beacon", {"from": cell, "cells": [cell] as Array[Vector2i]})
@@ -1985,6 +2020,8 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 		for k: String in info.keys():
 			if k.begins_with("bomb_") or k.begins_with("turret_"):
 				s[k] = info[k]
+		if mech_kind == "bomb":
+			s["bomb_level"] = 1   # V63 : la bombe monte de niveau à chaque fin de tour de son poseur
 	if bool(info.get("indestructible", false)):
 		s["indestructible"] = true
 	if bool(info.get("tower", false)):
@@ -2207,6 +2244,100 @@ func _blast(owner: Dictionary, center: Vector2i, base: float, label: String) -> 
 ## Rayon d'une explosion de bombe (cases autour, en losange).
 const BOMB_RADIUS := 2
 
+## V63 — Bombes à niveaux (esprit du Roublard) : une bombe posée commence au niveau 1 et
+## gagne un niveau à chaque fin de tour de son poseur ; son explosion est multipliée d'autant.
+const BOMB_MAX_LEVEL := 4
+const BOMB_LEVEL_MULT: Array[float] = [1.0, 1.3, 1.65, 2.0]
+
+
+func _bomb_level_up(b: Dictionary) -> void:
+	var lv: int = int(b.get("bomb_level", 1))
+	if lv >= BOMB_MAX_LEVEL:
+		return
+	b["bomb_level"] = lv + 1
+	fx.emit("status", {"target": b, "text": "Niveau %d !" % (lv + 1), "color": Color(1.0, 0.75, 0.25), "good": true})
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  V63 — Couplage : deux mécanismes couplés et alignés tendent une barrière
+# ═══════════════════════════════════════════════════════════════════════════
+
+const LINK_TURNS := 3
+const LINK_MAX_GAP := 6      # cases libres au plus entre deux mécanismes couplés
+
+
+## Mécanismes couplés (actifs) d'un propriétaire.
+func _linked_mechs(owner_uid: int) -> Array:
+	var out: Array = []
+	for m: Dictionary in all_entities():
+		if is_alive(m) and int(m.get("owner", -1)) == owner_uid and String(m.get("mech", "")) != "" and int(m.get("link_turns", 0)) > 0:
+			out.append(m)
+	return out
+
+
+## Barrières actives : [{a, b, cells: Array[Vector2i], team, owner}] entre paires de mécanismes
+## couplés du même propriétaire, alignés sur une ligne ou une colonne (2 à 7 cases d'écart).
+func barriers() -> Array:
+	var out: Array = []
+	var owners: Dictionary = {}
+	for m: Dictionary in all_entities():
+		if is_alive(m) and String(m.get("mech", "")) != "" and int(m.get("link_turns", 0)) > 0:
+			owners[int(m.get("owner", -1))] = true
+	for uid: int in owners.keys():
+		var ms: Array = _linked_mechs(uid)
+		for i: int in range(ms.size()):
+			for j: int in range(i + 1, ms.size()):
+				var pa: Vector2i = pos_of(ms[i])
+				var pb: Vector2i = pos_of(ms[j])
+				if pa.x != pb.x and pa.y != pb.y:
+					continue
+				var gap: int = Combat.manhattan(pa, pb) - 1
+				if gap < 1 or gap > LINK_MAX_GAP:
+					continue
+				var step := Vector2i(signi(pb.x - pa.x), signi(pb.y - pa.y))
+				var cells: Array[Vector2i] = []
+				var c: Vector2i = pa + step
+				while c != pb:
+					cells.append(c)
+					c += step
+				out.append({"a": ms[i], "b": ms[j], "cells": cells, "team": String(ms[i].get("team", "")), "owner": uid})
+	return out
+
+
+## La barrière d'un camp adverse bloque-t-elle cette case pour `e` ?
+func _barrier_blocks(e: Dictionary, cell: Vector2i, bars: Array) -> bool:
+	for b: Dictionary in bars:
+		if String(b["team"]) != String(e.get("team", "")) and (b["cells"] as Array).has(cell):
+			return true
+	return false
+
+
+## Couplage : le mécanisme visé est couplé pour LINK_TURNS tours ; une barrière se tend
+## vers chaque autre mécanisme couplé aligné. Les ennemis pris dans la barrière sont électrocutés.
+func _resolve_link(caster: Dictionary, cell: Vector2i) -> String:
+	var m: Dictionary = entity_at(cell)
+	var before: int = barriers().size()
+	m["link_turns"] = LINK_TURNS
+	fx.emit("status", {"target": m, "text": "Couplé", "color": Color(0.45, 0.85, 1.0), "good": true})
+	var bars: Array = barriers()
+	var shocked: int = 0
+	for b: Dictionary in bars:
+		if b["a"] != m and b["b"] != m:
+			continue
+		fx.emit("cast", {"caster": caster, "spell": "Barrière", "kind": "attack", "dtype": "mag",
+			"from": pos_of(b["a"]), "to": pos_of(b["b"]), "ranged": true, "cells": b["cells"]})
+		for c: Vector2i in b["cells"]:
+			var t: Dictionary = entity_at(c)
+			if t.is_empty() or not is_alive(t) or String(t.get("team", "")) == String(caster["team"]) or bool(t.get("terrain", false)):
+				continue
+			var r: Dictionary = Combat.calc_damage(caster, t, (20.0 + float(caster["level"]) * 0.6) / 1.8, "mag", 0.0, false, false)
+			_apply_damage(caster, t, int(r["dmg"]), "mag", bool(r["crit"]), false)
+			shocked += 1
+	var made: int = bars.size() - before
+	if made > 0:
+		return "%s tend %d barrière(s)%s." % [caster["name"], made, (" — %d ennemi(s) électrocuté(s)" % shocked) if shocked > 0 else ""]
+	return "%s couple %s : alignez un 2e mécanisme couplé pour tendre une barrière." % [caster["name"], String(m.get("classe", "un mécanisme"))]
+
 
 ## Propriétaire d'une bombe, même s'il est tombé entre-temps (cimetière compris).
 func _bomb_owner(bomb: Dictionary) -> Dictionary:
@@ -2232,7 +2363,8 @@ func _mech_explode(owner: Dictionary, bomb: Dictionary) -> void:
 		bomb["current_pv"] = 0
 		return
 	var center: Vector2i = pos_of(bomb)
-	var base: float = (34.0 + float(owner["level"]) * 1.0) / 1.8 * float(bomb.get("bomb_mult", 1.0))
+	var blv: int = clampi(int(bomb.get("bomb_level", 1)), 1, BOMB_MAX_LEVEL)
+	var base: float = (34.0 + float(owner["level"]) * 1.0) / 1.8 * float(bomb.get("bomb_mult", 1.0)) * BOMB_LEVEL_MULT[blv - 1]
 	var radius: int = int(bomb.get("bomb_radius", BOMB_RADIUS))
 	var st_id: String = String(bomb.get("bomb_status", ""))
 	var cells: Array[Vector2i] = Combat.zone_cells(center, radius, "diamond", GRID_SIZE)
@@ -2256,7 +2388,7 @@ func _mech_explode(owner: Dictionary, bomb: Dictionary) -> void:
 			_apply_status(owner, e, st_id, int(bomb.get("bomb_status_turns", 1)), sv)
 		if is_bomb and int(e["current_pv"]) <= 0:
 			chain.append(e)
-	message_requested.emit("La bombe explose ! (%d dégâts)" % dealt)
+	message_requested.emit("La bombe niv. %d explose ! (%d dégâts)" % [blv, dealt])
 	bomb["current_pv"] = 0
 	for b: Dictionary in chain:
 		message_requested.emit("Réaction en chaîne !")

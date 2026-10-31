@@ -134,6 +134,8 @@ func _draw() -> void:
 	for m: Vector2i in _mobs:
 		var mp: Vector2 = origin + (Vector2(m) + Vector2(0.5, 0.5)) * cell
 		_icon_mob(mp, sz)
+	if full:
+		_draw_gate_labels(origin, cell)
 	# joueur : triangle orienté selon la caméra
 	var pl: Vector2 = origin + _player * cell
 	var fwd := Vector2(-sin(_yaw), -cos(_yaw))
@@ -146,6 +148,49 @@ func _draw() -> void:
 	draw_polyline(outline, Color(0.1, 0.1, 0.1), 2.0)
 	if full:
 		_draw_legend(Vector2(pad.x + 10.0, size.y - legend_h + 6.0))
+
+
+## Plein écran : destination et niveau de chaque accès (une étiquette par carte voisine,
+## posée vers l'intérieur de la carte, au centre des cases de la sortie).
+func _draw_gate_labels(origin: Vector2, cell: float) -> void:
+	var groups: Dictionary = {}
+	for g: Dictionary in _gates:
+		var to: String = String(g.get("to", ""))
+		if to == "" or String(g.get("name", "")) == "":
+			continue
+		if not groups.has(to):
+			groups[to] = {"cells": [], "g": g}
+		(groups[to]["cells"] as Array).append(g["cell"])
+	var f: Font = ThemeDB.fallback_font
+	var map_rect := Rect2(origin, Vector2(float(_size.x), float(_size.y)) * cell)
+	for to: String in groups.keys():
+		var g: Dictionary = groups[to]["g"]
+		var sum := Vector2.ZERO
+		for c: Vector2i in groups[to]["cells"]:
+			sum += Vector2(c)
+		var mid: Vector2 = sum / float((groups[to]["cells"] as Array).size())
+		var dir: Vector2 = _gate_dir(Vector2i(roundi(mid.x), roundi(mid.y)))
+		var anchor: Vector2 = origin + (mid + Vector2(0.5, 0.5)) * cell - dir * maxf(cell * 2.2, 46.0)
+		var open: bool = bool(g.get("open", false))
+		var lvl: int = int(g.get("level", 0))
+		var l1: String = ("→ " if open else "✖ ") + String(g["name"])
+		var l2: String = "Niv. %d" % lvl + ("" if open else "  ·  fermé")
+		var fs1: int = 22
+		var fs2: int = 19
+		var w: float = maxf(f.get_string_size(l1, HORIZONTAL_ALIGNMENT_LEFT, -1, fs1).x, f.get_string_size(l2, HORIZONTAL_ALIGNMENT_LEFT, -1, fs2).x) + 24.0
+		var h: float = 58.0
+		var r := Rect2(anchor - Vector2(w, h) * 0.5, Vector2(w, h))
+		# reste dans la carte
+		r.position.x = clampf(r.position.x, map_rect.position.x + 4.0, map_rect.end.x - w - 4.0)
+		r.position.y = clampf(r.position.y, map_rect.position.y + 4.0, map_rect.end.y - h - 4.0)
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.05, 0.08, 0.12, 0.88)
+		sb.border_color = Color(0.25, 0.95, 0.70) if open else Color(0.95, 0.40, 0.32)
+		sb.set_border_width_all(2)
+		sb.set_corner_radius_all(10)
+		draw_style_box(sb, r)
+		draw_string(f, r.position + Vector2(12, 25), l1, HORIZONTAL_ALIGNMENT_LEFT, -1, fs1, Color(1, 1, 1) if open else Color(1.0, 0.86, 0.80))
+		draw_string(f, r.position + Vector2(12, 49), l2, HORIZONTAL_ALIGNMENT_LEFT, -1, fs2, Color(1.0, 0.85, 0.40))
 
 
 ## Légende (plein écran) : un pictogramme par type d'élément.

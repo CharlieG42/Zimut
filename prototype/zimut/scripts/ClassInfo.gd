@@ -70,11 +70,11 @@ const INFO := {
 		"tips": "Place une muraille pour couper la route aux ennemis et protéger tes tireurs. Les glyphes agissent tant que tes alliés restent dessus.",
 	},
 	"Artificier": {
-		"icon": "💣", "role": "Ingénieur · Pièges et explosifs", "difficulty": 3,
-		"description": "Un ingénieur qui pose bombes, mines, tourelles et glyphes, puis les déclenche au bon moment pour des explosions en chaîne. Il joue sur l'anticipation : le piège posé aujourd'hui fait mal demain.",
-		"strengths": ["Dégâts massifs en zone avec les mécanismes", "Tirs de précision à longue portée", "Marque du prédateur : critique garanti"],
+		"icon": "💣", "role": "Mécanismes · Pièges et explosifs", "difficulty": 3,
+		"description": "Un ingénieur qui pose bombes, mines, tourelles et glyphes, puis les déclenche au bon moment pour des explosions en chaîne. Ses bombes mûrissent : elles montent d'un niveau à chaque fin de tour (jusqu'au niveau 4, explosion ×2). Le Couplage relie deux mécanismes alignés par une barrière que les ennemis ne franchissent pas.",
+		"strengths": ["Dégâts massifs en zone avec les mécanismes", "Bombes qui gagnent en puissance avec le temps", "Barrières de Couplage pour enfermer l'ennemi"],
 		"weaknesses": ["Style exigeant (poser puis déclencher)", "Fragile en mêlée"],
-		"tips": "Pose tes mines sur le chemin des ennemis, puis Déclencheur les fait exploser. Combine avec un Tank qui les retient dessus.",
+		"tips": "Pose tes bombes tôt et laisse-les monter de niveau ; couple deux mécanismes alignés pour couper la route aux ennemis, puis déclenche tout quand ils sont pris au piège.",
 	},
 }
 

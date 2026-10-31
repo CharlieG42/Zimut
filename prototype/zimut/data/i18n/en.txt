@@ -1582,7 +1582,7 @@ Gultur · gardien des Pierres	Gultur · keeper of the Stones
 ✓  Exporté (+ code copié)	✓  Exported (+ code copied)
 D'où importer la partie ?	Import the game from where?
 Presse-papiers	Clipboard
-Artificier	Artificer
+Artificier	Engineer
 Rouages	Gears
 Ateliers des Rouages	Gear Workshops
 Pistolet à ressort	Spring Pistol
@@ -1598,7 +1598,7 @@ Arsenal total	Total Arsenal
 14 dégâts	14 damage
 34 dégâts en zone (3x3)	34 damage in area (3x3)
 53 dégâts	53 damage
-Pose une bombe : explose en croix (5 cases) à la fin du 2e tour de l'Artificier ou dès qu'on la déclenche	Places a bomb: explodes in a cross (5 tiles) at the end of the Artificer's 2nd turn or as soon as it is triggered
+Pose une bombe : explose en croix (5 cases) à la fin du 2e tour de l'Artificier ou dès qu'on la déclenche	Places a bomb: explodes in a cross (5 tiles) at the end of the Engineer's 2nd turn or as soon as it is triggered
 Déclenche l'effet d'un de vos mécanismes (bombe; mine; tourelle; glyphe; balise de transposition)	Triggers the effect of one of your mechanisms (bomb; mine; turret; glyph; transposition beacon)
 Pose un piège (mine) : 22 dégâts; explose en croix si on la déclenche	Sets a trap (mine): 22 damage; explodes in a cross if triggered
 Installe une tourelle : tire sur l'ennemi le plus proche (rayon 5) à la fin de chacun de vos tours (4 tours; 1 seule)	Installs a turret: shoots the nearest enemy (range 5) at the end of each of your turns (4 turns; only 1)
@@ -1707,3 +1707,8 @@ Maintenance	Maintenance
 Poser Bombe assourdissante	Place Stun Bomb
 Poser Tourelle lourde	Place Heavy Turret
 Poser Charge à fragmentation	Place Frag Charge
+
+Couplage	Coupling
+Couple un de vos mécanismes (3 tours) : deux mécanismes couplés et alignés tendent une barrière que les ennemis ne peuvent pas franchir; ceux qui s'y trouvent sont électrocutés	Couples one of your devices (3 turns): two coupled, aligned devices stretch a barrier enemies cannot cross; those inside are shocked
+Pose une bombe niveau 1 : elle gagne un niveau à chaque fin de tour de l'Artificier (explosion ×1.3 puis ×1.65 puis ×2) et explose (2 cases autour) à la fin du 4e tour ou dès qu'on la déclenche ou la détruit; touche ennemis et autres bombes; alliés moitié moins	Places a level 1 bomb: it gains a level at the end of each of the Engineer's turns (explosion ×1.3, then ×1.65, then ×2) and explodes (2 tiles around) at the end of its 4th turn or as soon as it is triggered or destroyed; hits enemies and other bombs; allies take half
+Ingénieur	Engineer

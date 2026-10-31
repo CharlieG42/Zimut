@@ -575,7 +575,7 @@ func close() -> void:
 
 func _lbl(t: String, size: int, col: Color) -> Label:
 	var l := Label.new()
-	l.text = t
+	l.text = Typo.fr(t)
 	l.add_theme_font_size_override("font_size", size)
 	l.add_theme_color_override("font_color", col)
 	return l

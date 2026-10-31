@@ -34,7 +34,7 @@ const CLASS_META: Dictionary = {
 	"Invocateur": {"icon": "🎭", "description": "Invoque des créatures, contrôle le champ."},
 	"Sylvain":     {"icon": "🌿", "description": "Maître des plantes : invoque la forêt, empoisonne et soigne par la sève."},
 	"Géomancien":     {"icon": "🪨", "description": "Mage de pierre et de sable : érige piliers, murs et failles pour bloquer, isoler et protéger."},
-	"Artificier": {"icon": "💣", "description": "Ingénieur : pose bombes, mines, tourelles et glyphes, puis les déclenche au bon moment."},
+	"Artificier": {"icon": "💣", "description": "Pose bombes, mines, tourelles et glyphes, les couple en barrières et les déclenche au bon moment."},
 }
 
 var classes: Array[String] = []       # classes disponibles (triées)
@@ -840,6 +840,9 @@ func _gultur_hint() -> void:
 	elif Gultur.should_show("equip") and not (save.get("inventory", []) as Array).is_empty():
 		_gultur_shown = true
 		Gultur.say(self, "equip", Gultur.EQUIP, _equip_btn)
+	elif has_player and not HeroUnlock.locked(save).has("Artificier") and Gultur.should_show("ingenieur_v63"):
+		_gultur_shown = true
+		Gultur.say(self, "ingenieur_v63", Gultur.INGENIEUR_V63, null)
 	elif has_player and HeroUnlock.locked(save).is_empty() and Gultur.should_show("all_unlocked"):
 		_gultur_shown = true
 		Gultur.say(self, "all_unlocked", Gultur.ALL_UNLOCKED, null)

@@ -34,7 +34,7 @@ const CLASS_META: Dictionary = {
 	"Invocateur": {"icon": "🎭", "description": "Invoque des créatures, contrôle le champ."},
 	"Sylvain":    {"icon": "🌿", "description": "Maître des plantes : invoque la forêt, empoisonne et soigne par la sève."},
 	"Géomancien":    {"icon": "🪨", "description": "Mage de pierre et de sable : érige piliers, murs et failles pour bloquer, isoler et protéger."},
-	"Artificier": {"icon": "💣", "description": "Ingénieur : pose bombes, mines, tourelles et glyphes, puis les déclenche au bon moment."},
+	"Artificier": {"icon": "💣", "description": "Pose bombes, mines, tourelles et glyphes, les couple en barrières et les déclenche au bon moment."},
 }
 
 var available_classes: Array[String] = []
