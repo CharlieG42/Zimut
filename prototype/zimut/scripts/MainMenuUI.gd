@@ -48,36 +48,19 @@ func _start_new_game() -> void:
 	get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
 
 
-## Reprend la sauvegarde la plus récemment modifiée, puis rouvre la sélection d'équipe
-## (qui restaure l'équipe enregistrée avant le prochain combat).
+## Ouvre « Mes Parties » : la sauvegarde la plus récente y est déjà présélectionnée
+## (détail affiché), le joueur la lance depuis cet écran.
 func _continue_game() -> void:
-	var saves: Array = ProgressionManager.list_saves()
-	if saves.is_empty():
+	if ProgressionManager.list_saves().is_empty():
 		# Première visite : le bouton Continuer propose simplement de créer la partie.
 		_start_new_game()
 		return
-
-	var latest: Dictionary = saves[0]
-	for entry: Dictionary in saves:
-		if String(entry.get("timestamp", "")) > String(latest.get("timestamp", "")):
-			latest = entry
-
-	var slot: int = int(latest.get("id", -1))
-	var data: Dictionary = ProgressionManager.load_save(slot)
-	if slot < 0 or data.is_empty():
-		# Sauvegarde devenue illisible : revenir au gestionnaire sans écraser de données.
-		GameManager.menu_intent = ""
-		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
-		return
-
-	GameManager.active_slot = slot
-	GameManager.active_save = data
-	# V46 : le temps de jeu reprend dès la reprise de la partie (sélection d'équipe = mode tactique).
 	PlayTimer.flush()
-	PlayTimer.resume_tactique()
+	GameManager.active_save = {}
+	GameManager.active_slot = -1
 	GameManager.clear_custom_team()
 	GameManager.menu_intent = ""
-	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
+	get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
 
 
 func _add_menu_hitbox(parent: Control, node_name: String, left: float, top: float, right: float, bottom: float, action: Callable) -> void:
