@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://jqsy91oiqklcv"
+path="res://.godot/imported/tannerie_5.png-1897b6ef0688df2e5b1303a2bb2523c1.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/vents/tannerie_5.png"
+dest_files=["res://.godot/imported/tannerie_5.png-1897b6ef0688df2e5b1303a2bb2523c1.ctex"]
+
+[params]
+
+compress/mode=0
