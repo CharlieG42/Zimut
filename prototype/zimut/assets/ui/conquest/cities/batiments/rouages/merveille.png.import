@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://a0bebijed06uj"
+path="res://.godot/imported/merveille.png-5394cbc8ade9d93bae45510c2af65a05.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/rouages/merveille.png"
+dest_files=["res://.godot/imported/merveille.png-5394cbc8ade9d93bae45510c2af65a05.ctex"]
+
+[params]
+
+compress/mode=0
