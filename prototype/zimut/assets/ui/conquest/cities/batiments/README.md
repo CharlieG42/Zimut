@@ -34,6 +34,12 @@ Détourage : fond transparent (les planches des Cimes, Marées et Vents ont un f
 `#808080` à supprimer). Personnages et accessoires facultatifs : le jeu dessine déjà
 l'ombre au sol, la plaque de nom et les étoiles de niveau.
 
+Recadrage automatique (V64) : au chargement, `ConquestCityView` recadre chaque PNG sur
+ses pixels visibles — inutile de découper au pixel près, une découpe « au bord de case »
+(avec des marges transparentes autour du bâtiment) est corrigée automatiquement et
+l'échelle du bâtiment ne dépend plus de la découpe. Le canal alpha reste indispensable :
+un PNG opaque est utilisé tel quel, bords compris.
+
 ## Dépôt dans le projet
 
 1. Découper la planche selon la grille ci-dessus et déposer les PNG dans le dossier de la nation.
@@ -54,3 +60,30 @@ l'ombre au sol, la plaque de nom et les étoiles de niveau.
 
 Illustration de fond de l'écran de ville : `assets/ui/conquest/cities/<nation>.jpg`
 (voir `SPRITES_A_FOURNIR.md`, §6).
+
+## V65 — planches isométriques (Forêt et Montagne) et outil de découpe
+
+Les premières planches isométriques (style Rise of Kingdoms) sont découpées par
+`tools/slice_city_sprites.py` : fond blanc ou gris supprimé, un PNG par bâtiment, toile commune par
+bâtiment (les niveaux gardent leur taille relative), largeur de toile normalisée (`TARGET_W`).
+
+```
+python3 tools/slice_city_sprites.py <dossier des planches p01.jpg … p16.jpg> [--only sylvestre|cimes]
+```
+
+Le tableau `MANIFEST` du script dit quelle partie de quelle planche devient quel fichier : pour
+réaffecter un dessin, modifier la ligne puis relancer. Les planches sources ne sont pas dans le dépôt.
+
+| Nation | Livré | Repli vectoriel |
+|---|---|---|
+| `sylvestre` (Forêt) | hall (1 dessin), caserne, résidence, scierie, mine (1 dessin), tannerie 1-3, cabane 1-3, verger 1-3, muraille 1 et 3, merveille (arbre) | — |
+| `cimes` (Montagne) | hall 1-5, caserne, résidence, scierie, mine (1 dessin), tannerie 1-3, cabane 1-3, verger (1 dessin) | muraille, merveille |
+
+**Repli de niveau** : si le fichier du niveau demandé n'existe pas, le jeu prend le dessin du niveau
+inférieur le plus proche (puis supérieur) — une nation qui n'a livré qu'un dessin par bâtiment l'utilise
+à tous les niveaux. Un emplacement vide (niveau 0) reste dessiné en vectoriel.
+
+Pour la prochaine génération : **voir [`NORME_GENERATION_V65.md`](NORME_GENERATION_V65.md)** —
+un bâtiment par image, fond uni (blanc pur ou vert chroma `#00B140`), sans ombre au sol, même
+caméra isométrique 2:1, même losange de socle, **5 niveaux par bâtiment** (validation du
+2026-11-01), emprise fixe 1×1 / 2×2 / 3×3 selon la table des emprises.

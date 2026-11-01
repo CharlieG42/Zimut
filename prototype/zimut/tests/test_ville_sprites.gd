@@ -35,7 +35,30 @@ func _boot() -> void:
 	var v := ConquestCityView.new()
 	v.biome = "Forêt"
 	check(v._sprite("hall", 99) == null, "repli vectoriel : pas de hall_99.png → null")
-	check(v._sprite("caserne", 0) == null, "repli vectoriel : pas de caserne.png → null")
+	v.biome = "Rouages"
+	check(v._sprite("caserne", 0) == null, "repli vectoriel : pas de caserne.png pour une nation sans planche → null")
 	v.free()
+	# Planches isométriques livrées (Forêt = sylvestre, Montagne = cimes) : fichiers présents et repli par niveau
+	for nation: String in ["sylvestre", "cimes"]:
+		for f: String in ["hall_1", "caserne", "residence", "scierie_1", "mine_1", "tannerie_1", "cabane_1", "verger_1"]:
+			check(ResourceLoader.exists("%s/%s/%s.png" % [base, nation, f]), "planche livrée : %s/%s.png" % [nation, f])
+	var vf := ConquestCityView.new()
+	vf.biome = "Forêt"
+	check(vf._sprite_best("hall", 5) != null, "repli de niveau : hall 5 de la Forêt reprend le dessin disponible")
+	check(vf._sprite_best("scierie", 3) == vf._sprite("scierie", 1), "repli de niveau : scierie 3 → scierie_1 (seul dessin livré)")
+	check(vf._sprite_best("tannerie", 2) == vf._sprite("tannerie", 2), "niveau livré : tannerie 2 utilise tannerie_2")
+	check(vf._sprite_best("caserne", 0) == vf._sprite("caserne", 0), "niveau 0 : exact (caserne.png)")
+	check(vf._sprite_best("scierie", 0) == null, "parcelle vide (niveau 0) : pas de repli, emplacement vide dessiné")
+	vf.free()
+	var vc := ConquestCityView.new()
+	vc.biome = "Montagne"
+	check(vc._sprite_best("hall", 3) == vc._sprite("hall", 3), "Cimes : hall 3 a son propre dessin")
+	check(vc._sprite_best("hall", 5) == vc._sprite("hall", 5), "Cimes : hall 5 a son propre dessin")
+	check(vc._sprite("hall", 1) != vc._sprite("hall", 4), "Cimes : les niveaux du hall sont des dessins distincts")
+	vc.free()
+	var vr := ConquestCityView.new()
+	vr.biome = "Rouages"
+	check(vr._sprite_best("hall", 3) == null, "nation sans planche : repli vectoriel")
+	vr.free()
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)

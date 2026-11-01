@@ -49,6 +49,20 @@ par bâtiment**, avec un cycle **jour / soir / nuit**, des **événements de vil
   se peuple d'étals et de charrettes (`_draw_decorations` selon `spec`).
 - Bonus intégrés à `ConquestSystem.defense` et `city_income`, gelés si la ville est pillée/ruinée.
 
+## V61b/V65 — vraies planches isométriques (Forêt & Montagne) intégrées
+- `assets/ui/conquest/cities/batiments/<nation>/<bâtiment>[_<niveau>].png` : **sprites réels découpés
+  des planches Mistral** (style 3D peint, cf. PR #211 `feature/ville-iso-sprites`), chargés **en priorité**
+  sur les illustrations V62 (`_draw_tex_if_any`) ; repli de niveau (`_sprite_best`) puis V62 puis vectoriel.
+- 33 PNG livrés pour `sylvestre` (hall, caserne, résidence, scierie, mine, tannerie 1-3, cabane 1-3,
+  verger 1-3, muraille 1/3, merveille) et `cimes` (hall 1-5, caserne, résidence, scierie, mine,
+  tannerie 1-3, cabane 1-3, verger) + `.png.import` (CI `tools/check_assets.py` OK).
+- Norme de génération V65 (`batiments/NORME_GENERATION_V65.md`, PR #212) : 1 bâtiment par image,
+  5 niveaux, caméra iso 2:1, emprises 1×1/2×2/3×3, fond blanc ou chroma `#00B140`, sans ombre/halo/perso.
+- Outil de découpe reproductible : `prototype/zimut/tools/slice_city_sprites.py` (MANIFEST planche→fichier).
+- Test : `tests/test_ville_sprites.gd` (chemins, couverture, repli de niveau, nation sans planche).
+- Aperçus : `Examples/v62_ville/planche_reelles_sylvestre.png`, `planche_reelles_cimes.png`,
+  `v65_ville_reelle_sylvestre.png`, `v65_ville_reelle_cimes.png`.
+
 ## Fichiers
 - `scripts/ConquestCityView.gd` : rendu par sprites (ancrage, voile jour/nuit, halos, décors,
   événements) + repli vectoriel V61 intact.
