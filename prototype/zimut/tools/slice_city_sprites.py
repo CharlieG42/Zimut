@@ -217,22 +217,58 @@ V65_EMPRISE = {"hall": 3, "caserne": 2, "residence": 2, "scierie": 2, "mine": 3,
                "cabane": 2, "verger": 3, "muraille": 3, "merveille": 3}
 
 
-def crop_v65(rgba, fg, building, cells=5):
-    """Découpe V65 : `cells` cases horizontales égales (5 niveaux), détourées individuellement."""
+def crop_v65(rgba, fg, building, cells=5, inset=0.06):
+    """Découpe V65 : coupe verticale au point le plus vide de chaque cinquième de la planche,
+    puis ne garde que la composante du bas-centre de chaque tranche (le bâtiment et son socle).
+    Robuste aux bâtiments qui se touchent. `inset` : marge de sécurité sur les bords de coupe."""
     w = rgba.shape[1]
+    prof = fg.sum(axis=0)
+    bounds = [0]
+    for i in range(1, cells):
+        lo = max(bounds[-1] + 4, w * i // cells - int(w * 0.10))
+        hi = min(w - 4, w * i // cells + int(w * 0.10))
+        bounds.append(lo + int(np.argmin(prof[lo:hi])))
+    bounds.append(w)
     out = []
     for i in range(cells):
-        x0 = w * i // cells
-        x1 = w * (i + 1) // cells
+        a, b = bounds[i], bounds[i + 1] - 1
+        m = max(2, int((b - a + 1) * inset))
+        x0, x1 = a + m, b - m + 1
         sub = rgba[:, x0:x1].copy()
         subfg = fg[:, x0:x1]
-        keep = main_part(subfg)
+        # labellise SANS dilation : on veut les vraies composantes séparées
+        lab, n = ndi.label(subfg)
+        if n:
+            sizes = ndi.sum(subfg, lab, range(1, n + 1))
+            objs = ndi.find_objects(lab)
+            h0 = subfg.shape[0]
+            cx = subfg.shape[1] / 2.0
+            # best = composante qui touche le bas de la tranche (pied), la plus grosse, la plus centrée
+            def score(j):
+                sl = objs[j]
+                touches_bottom = sl[0].stop >= h0 * 0.55
+                return (sizes[j] if touches_bottom else 0) - abs((sl[1].start + sl[1].stop) / 2.0 - cx) * 3.0
+            best = max(range(n), key=score)
+            bs = objs[best]
+            bw = bs[1].stop - bs[1].start
+            ok = [best + 1]
+            for j in range(n):
+                if j == best:
+                    continue
+                sl = objs[j]
+                # socle/pied légitime : touche best ET chevauche best horizontalement sur >50%
+                overlap = min(sl[1].stop, bs[1].stop) - max(sl[1].start, bs[1].start)
+                near = ndi.binary_dilation(lab == best + 1, iterations=12)
+                if overlap > bw * 0.5 and lab[near & (lab == j + 1)].any():
+                    ok.append(j + 1)
+            keep = np.isin(lab, ok)
+        else:
+            keep = subfg
         sub[..., 3] = np.where(keep, sub[..., 3], 0)
         ys, xs = np.where(sub[..., 3] > 8)
         if len(ys) == 0:
             out.append(Image.new("RGBA", (8, 8), (0, 0, 0, 0)))
             continue
-        # coupe horizontale seule : toute la hauteur de la case est conservée pour ancrer le pied en bas
         out.append(Image.fromarray(sub[:, xs.min():xs.max() + 1], "RGBA"))
     return out
 
@@ -257,8 +293,23 @@ def run_v65(sheets_dir, only=None):
             fg = rgba[..., 3] > 8
             cells = 1 if building == "merveille" else 5
             pieces = crop_v65(rgba, fg, building, cells)
-            # le pied (bas du contenu) doit rester le même dans toutes les cases : on recadre
-            # chaque case sur son contenu PUIS on ancre tout en bas de la toile commune
+            # recadre chaque case sur son contenu visible (enlève le halo résiduel)
+            trimmed = []
+            for im in pieces:
+                bb = im.getbbox()
+                trimmed.append(im.crop(bb) if bb else im)
+            pieces = trimmed
+            # repli de niveau vide : case quasi vide (<3000 px) -> copie du niveau le plus proche non vide
+            if cells > 1:
+                sizes = [int((np.array(im)[..., 3] > 8).sum()) for im in pieces]
+                for i, s in enumerate(sizes):
+                    if s < 3000:
+                        cand = [j for j in range(cells) if sizes[j] >= 3000]
+                        if cand:
+                            j = min(cand, key=lambda jj: abs(jj - i))
+                            pieces[i] = pieces[j].copy()
+                            print("  repli niveau %d <- %d (%s)" % (i + 1, j + 1, building))
+            # le pied (bas du contenu) doit rester le même dans toutes les cases : on ancre tout en bas de la toile commune
             k = min(1.25, TARGET_W.get(building, 480) / max(max(im.width for im in pieces), 1))
             w = max(1, round(max(im.width for im in pieces) * k))
             h = max(1, round(max(im.height for im in pieces) * k))
