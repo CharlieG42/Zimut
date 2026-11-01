@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://ph9y2mhnwh0pq"
+path="res://.godot/imported/scierie_3.png-0aa3f0f501017d6991f3b3878b96fee6.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/cristaux/scierie_3.png"
+dest_files=["res://.godot/imported/scierie_3.png-0aa3f0f501017d6991f3b3878b96fee6.ctex"]
+
+[params]
+
+compress/mode=0

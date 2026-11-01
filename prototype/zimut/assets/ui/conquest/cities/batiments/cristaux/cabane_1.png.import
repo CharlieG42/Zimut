@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://bxybd0xqdjzkn"
+path="res://.godot/imported/cabane_1.png-e875bbaa03ffc3a1c150460ba7f4b512.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/cristaux/cabane_1.png"
+dest_files=["res://.godot/imported/cabane_1.png-e875bbaa03ffc3a1c150460ba7f4b512.ctex"]
+
+[params]
+
+compress/mode=0
