@@ -550,5 +550,19 @@ func _boot() -> void:
 	check(pm.conquest_build(bv, "clairiere", "muraille") == "", "muraille construite")
 	var dw1: int = ConquestSystem.defense(bv, "clairiere")
 	check(pm.conquest_upgrade_building(bv, "clairiere", "muraille") == "" and ConquestSystem.defense(bv, "clairiere") == dw1 + 4, "muraille niveau 2 : +4 défense")
+	# V66 — 5 niveaux par bâtiment, un niveau de ville par niveau de bâtiment
+	check(ConquestSystem.BUILD_MAX_LEVEL == 5 and ConquestSystem.BUILD_YIELD_MULT.size() == 5 and ConquestSystem.BUILD_COST_MULT.size() == 5 and ConquestSystem.WALL_DEFENSE_BY_LEVEL.size() == 5, "bâtiments : 5 niveaux de barèmes")
+	var b5: Dictionary = _fresh(["capitale", "clairiere"])
+	b5["gold"] = 99999
+	b5["resources"] = {"Bois": 999, "Fer": 999, "Cuir": 999, "Magie": 999, "Venin": 999}
+	check(pm.conquest_build(b5, "clairiere", "scierie") == "", "V66 : scierie construite")
+	for target: int in [2, 3, 4, 5]:
+		check(pm.conquest_upgrade_building(b5, "clairiere", "scierie") != "", "scierie niveau %d refusé sans ville niveau %d" % [target, target])
+		pm.conquest_upgrade_city(b5, "clairiere")
+		check(pm.conquest_upgrade_building(b5, "clairiere", "scierie") == "", "scierie niveau %d avec ville niveau %d" % [target, target])
+	check(ConquestSystem.building_level(b5["conquest"], "clairiere", "scierie") == 5, "scierie au niveau 5")
+	check(pm.conquest_upgrade_building(b5, "clairiere", "scierie") != "", "niveau 5 = maximum")
+	var inf: Dictionary = pm.CONQUEST_BUILDINGS["scierie"]
+	check(int(ConquestSystem.building_cost(inf, 5)["gold"]) == 400 and ConquestSystem.building_yield_at(inf, 5)["Bois"] == 11, "niveau 5 : coût x10, production x3,7")
 	print("== %s ==" % ("TOUT OK" if fails == 0 else "%d échec(s)" % fails))
 	quit(1 if fails > 0 else 0)

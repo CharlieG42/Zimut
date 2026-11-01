@@ -10,7 +10,7 @@ extends RefCounted
 ##
 ## Clés de data["conquest"] ajoutées :
 ##   city_levels {id:int}        niveau 1..5 (Hameau / Bourg / Cité / Grande Cité / Métropole)
-##   building_levels {id:{bâtiment:int}}  niveau 1..3 des bâtiments (V61, défaut 1)
+##   building_levels {id:{bâtiment:int}}  niveau 1..5 des bâtiments (V61/V66, défaut 1)
 ##   wonders     [id]            villes qui ont bâti la Merveille de leur Nation (V61)
 ##   garrisons   {id:{troops,hero}}
 ##   threat      {city,power,eta}   offensive annoncée (compte à rebours en batailles)
@@ -29,11 +29,15 @@ const LEVEL_MULT: Array[float] = [1.0, 1.5, 2.0, 2.4, 2.8]
 ## V61 — Bâtiments à niveaux : emplacements et niveau maximal des bâtiments selon le
 ## niveau de la ville, production et coût selon le niveau du bâtiment.
 const BUILD_SLOTS: Array[int] = [3, 4, 5, 6, 6]
-const BUILD_LEVEL_CAP: Array[int] = [1, 2, 2, 3, 3]
-const BUILD_MAX_LEVEL := 3
-const BUILD_YIELD_MULT: Array[float] = [1.0, 1.8, 2.6]
-const BUILD_COST_MULT: Array[float] = [1.0, 2.0, 3.5]
-const WALL_DEFENSE_BY_LEVEL: Array[int] = [6, 10, 15]
+## V66 — 5 niveaux par bâtiment : le niveau N n'est accessible qu'à partir de la ville
+## de niveau N (Hameau→Métropole). Le coût croît plus vite que la production
+## (x1 / x2 / x3,5 / x6 / x10 contre x1 / x1,7 / x2,3 / x3 / x3,7) : les derniers
+## niveaux sont un investissement de long terme, ce qui allonge la partie.
+const BUILD_LEVEL_CAP: Array[int] = [1, 2, 3, 4, 5]
+const BUILD_MAX_LEVEL := 5
+const BUILD_YIELD_MULT: Array[float] = [1.0, 1.7, 2.3, 3.0, 3.7]
+const BUILD_COST_MULT: Array[float] = [1.0, 2.0, 3.5, 6.0, 10.0]
+const WALL_DEFENSE_BY_LEVEL: Array[int] = [6, 10, 14, 18, 22]
 ## Merveille de la Nation : une par ville, à partir de la Cité (niveau 3).
 const WONDER_MIN_LEVEL := 3
 const WONDERS := {
@@ -252,7 +256,7 @@ static func wall_defense(conq: Dictionary, id: String) -> int:
 static func buildings_of(conq: Dictionary, id: String) -> Array:
 	return conq.get("buildings", {}).get(id, [])
 
-## Niveau d'un bâtiment : 0 s'il n'est pas construit, sinon 1..3.
+## Niveau d'un bâtiment : 0 s'il n'est pas construit, sinon 1..5.
 static func building_level(conq: Dictionary, id: String, key: String) -> int:
 	if not buildings_of(conq, id).has(key):
 		return 0
