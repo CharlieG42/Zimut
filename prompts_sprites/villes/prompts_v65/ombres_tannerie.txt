@@ -1,0 +1,18 @@
+Building sprite sheet for a premium mobile strategy game: the tannerie of the Ombres gothic nation,
+ONE single building shown at its 5 upgrade levels, for a city-building screen.
+STYLE: hand-painted stylized 3D game render like a premium mobile strategy game, vibrant saturated
+palette, warm golden-hour lighting, toy-like proportions with exaggerated glossy roofs, highly
+readable silhouettes — same art style as the existing forest and mountain building sheets of this game.
+NATION IDENTITY (keep the spirit of the nation in every level): Landes gothiques, pavés runiques, ronces violettes, torches mauves, corbeaux, porte sombre.
+ARCHITECTURE ID CARD: walls #615270 pierre violette ; roofs #704094 violet profond ; trim and details #C794FF lilas luisant, ronces, ogives gothiques #7858F0.
+FORBIDDEN: no dominant light/white colors, no gold, no green.
+LAYOUT: 5 cells in one horizontal row; ONE building per cell; the SAME building, one upgrade level
+higher in each cell (left = level 1, right = level 5); EVERY cell uses the exact SAME isometric 2:1
+camera angle and the exact SAME diamond-shaped stone plaza base, identical footprint of 2x2
+tiles in every cell, so all five levels could sit on the same isometric grid; NO cast shadow on the
+ground, NO glow halo, NO reflections; plain white background, no gradient, no vignette.
+LEVELS: cell 1 = tente + 2 peaux ; cell 2 = 3 séchoirs + cabane ; cell 3 = atelier complet + cheminée ; cell 4 = cuves + caisses ; cell 5 = grande tannerie + cour.
+BUILDING CHECK: EXACTLY 5 buildings, the SAME building growing, the SAME base in every cell.
+AVOID: people, characters, flat vector art, outline cartoon, pixel art, anime, text, labels, logos,
+different base shapes, different scales, cast shadows, background gradients, extra buildings.
+Save as planches/ombres/tannerie.png

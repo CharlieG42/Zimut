@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Détoure et découpe les planches de bâtiments (Mistral) en PNG transparents pour la vue de ville.
 
-Usage : python3 tools/slice_city_sprites.py <dossier des planches p01.jpg … p16.jpg> [--only sylvestre|cimes]
+Usage : python3 tools/slice_city_sprites.py <dossier p01.jpg…> [--only sylvestre|cimes]
+       python3 tools/slice_city_sprites.py <dossier> --v65 [--only sables]   # mode V65 : planches/<nation>/<batiment>.png, 5 niveaux en ligne
 
 Sortie : assets/ui/conquest/cities/batiments/<nation>/<bâtiment>[_<niveau>].png
 (convention : assets/ui/conquest/cities/batiments/README.md).
@@ -164,11 +165,80 @@ def crop(rgba, fg, how):
     return Image.fromarray(sub[ys.min():ys.max() + 1, xs.min():xs.max() + 1], "RGBA")
 
 
+
+# ── Mode V65 : 1 bâtiment par image, 5 niveaux en ligne ─────────
+# MANIFEST_V65 : (planche, nation, bâtiment, emprise) — la planche est découpée en 5 cases
+# horizontales égales (niveau 1 à gauche → 5 à droite) ; merveille = 1 case entière.
+MANIFEST_V65 = [
+    # nation, bâtiment, emprise (3x3 ou 2x2) — la planche se découpe seule en 5 cases égales
+]
+V65_BUILDINGS_5 = ["hall", "caserne", "residence", "scierie", "mine", "tannerie", "cabane", "verger", "muraille"]
+V65_EMPRISE = {"hall": 3, "caserne": 2, "residence": 2, "scierie": 2, "mine": 3, "tannerie": 2,
+               "cabane": 2, "verger": 3, "muraille": 3, "merveille": 3}
+
+
+def crop_v65(rgba, fg, building, cells=5):
+    """Découpe V65 : `cells` cases horizontales égales (5 niveaux), détourées individuellement."""
+    w = rgba.shape[1]
+    out = []
+    for i in range(cells):
+        x0 = w * i // cells
+        x1 = w * (i + 1) // cells
+        sub = rgba[:, x0:x1].copy()
+        subfg = fg[:, x0:x1]
+        keep = main_part(subfg)
+        sub[..., 3] = np.where(keep, sub[..., 3], 0)
+        ys, xs = np.where(sub[..., 3] > 8)
+        if len(ys) == 0:
+            out.append(Image.new("RGBA", (8, 8), (0, 0, 0, 0)))
+            continue
+        out.append(Image.fromarray(sub[ys.min():ys.max() + 1, xs.min():xs.max() + 1], "RGBA"))
+    return out
+
+
+def run_v65(sheets_dir, only=None):
+    """Découpe les planches V65 (planches/<nation>/<batiment>.png) en sprites <batiment>_<n>.png."""
+    nations = [d for d in os.listdir(os.path.join(sheets_dir, "planches")) if os.path.isdir(os.path.join(sheets_dir, "planches", d))]
+    for nation in nations:
+        if only and nation != only:
+            continue
+        pdir = os.path.join(sheets_dir, "planches", nation)
+        for fname in sorted(os.listdir(pdir)):
+            if not fname.endswith((".png", ".jpg")):
+                continue
+            building = fname.rsplit(".", 1)[0]
+            a = load(os.path.join(pdir, fname))
+            rgba, fg = cut_out(a, summer=False)
+            cells = 1 if building == "merveille" else 5
+            pieces = crop_v65(rgba, fg, building, cells)
+            # toile commune par bâtiment (pied centré en bas) : conserve la taille relative des niveaux
+            w = max(im.width for im in pieces)
+            h = max(im.height for im in pieces)
+            k = min(1.25, TARGET_W.get(building, 480) / max(w, 1))
+            d = os.path.join(OUT_ROOT, nation)
+            os.makedirs(d, exist_ok=True)
+            for i, im in enumerate(pieces):
+                canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+                canvas.alpha_composite(im, ((w - im.width) // 2, h - im.height))
+                if abs(k - 1.0) > 0.01:
+                    canvas = canvas.resize((max(8, round(w * k)), max(8, round(h * k))), Image.LANCZOS)
+                if cells == 1:
+                    out_name = building + ".png"
+                else:
+                    out_name = "%s_%d.png" % (building, i + 1)
+                canvas.save(os.path.join(d, out_name), optimize=True)
+                print("%-10s %-14s %dx%d" % (nation, out_name, canvas.width, canvas.height))
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("sheets")
+    ap.add_argument("sheets", nargs="?", default=None)
     ap.add_argument("--only")
+    ap.add_argument("--v65", action="store_true", help="mode V65 : planches/<nation>/<batiment>.png (5 niveaux en ligne)")
     args = ap.parse_args()
+    if args.v65:
+        run_v65(args.sheets or ".", only=args.only)
+        return
     cache = {}
     pieces = {}      # (nation, fichier) -> image
     for sheet, nation, name, how in MANIFEST:
