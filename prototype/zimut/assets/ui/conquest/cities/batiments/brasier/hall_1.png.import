@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://92fnlgb26s6u7"
+path="res://.godot/imported/hall_1.png-c5e9ec600956fde34c4e149b293164c3.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/brasier/hall_1.png"
+dest_files=["res://.godot/imported/hall_1.png-c5e9ec600956fde34c4e149b293164c3.ctex"]
+
+[params]
+
+compress/mode=0
