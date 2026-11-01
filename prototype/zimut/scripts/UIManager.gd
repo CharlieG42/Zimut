@@ -1339,6 +1339,7 @@ func _build_ui() -> void:
 	_quit_btn.pressed.connect(_on_quit_combat_pressed)
 	_root.add_child(_quit_btn)
 	_build_objectives_panel()
+	_build_turn_badge()
 
 	# Journal de combat : bas-gauche, à droite de la colonne de sorts, sur un fond
 	# sombre pour rester lisible ; les lignes s'empilent vers le haut (4 au plus).
@@ -1526,6 +1527,66 @@ func _build_objectives_panel() -> void:
 	_obj_list.add_theme_constant_override("separation", 2)
 	box.add_child(_obj_list)
 	_refresh_objectives()
+
+
+## Compteur de tour (haut, centre) : toujours visible, avec la limite des défis « rapides »
+## (« TOUR 3 / 8 ») et une alerte quand elle approche ou que la rage ennemie commence.
+var _turn_badge: PanelContainer = null
+var _turn_label: Label = null
+
+
+func _build_turn_badge() -> void:
+	_turn_badge = PanelContainer.new()
+	_turn_badge.name = "TurnBadge"
+	_turn_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var st := _flat(Color(0.03, 0.04, 0.07, 0.82), Color(0.85, 0.70, 0.35, 0.85), 14, 2)
+	st.content_margin_left = 18
+	st.content_margin_right = 18
+	st.content_margin_top = 4
+	st.content_margin_bottom = 4
+	_turn_badge.add_theme_stylebox_override("panel", st)
+	_turn_badge.anchor_left = 0.5
+	_turn_badge.anchor_right = 0.5
+	_turn_badge.anchor_top = 0.0
+	_turn_badge.anchor_bottom = 0.0
+	_turn_badge.offset_top = 12.0
+	_turn_badge.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_root.add_child(_turn_badge)
+	_turn_label = Label.new()
+	_turn_label.name = "TurnLabel"
+	_turn_label.add_theme_font_size_override("font_size", 26)
+	_turn_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	_turn_label.add_theme_constant_override("outline_size", 4)
+	_turn_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_turn_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_turn_badge.add_child(_turn_label)
+	_refresh_turn_badge()
+
+
+func _refresh_turn_badge() -> void:
+	if _turn_label == null or not is_instance_valid(_turn_label) or game_manager == null:
+		return
+	var t: int = int(game_manager.turn_count)
+	var lim: int = int(game_manager.turn_limit())
+	var txt: String = "TOUR %d" % t
+	var col := Color(1.0, 0.88, 0.45)
+	var tip: String = "Numéro du tour en cours."
+	if lim > 0:
+		txt += " / %d" % lim
+		tip = "Défi : terminer le combat en %d tours maximum." % lim
+		if t > lim:
+			col = Color(0.62, 0.60, 0.58)
+		elif t == lim:
+			col = Color(1.0, 0.5, 0.25)
+		elif t == lim - 1:
+			col = Color(1.0, 0.72, 0.3)
+	if t > int(game_manager.ENRAGE_AFTER_TURN):
+		txt += "  ·  RAGE"
+		col = Color(1.0, 0.4, 0.35)
+		tip = "Les ennemis deviennent de plus en plus puissants après le tour %d." % int(game_manager.ENRAGE_AFTER_TURN)
+	_turn_label.text = txt
+	_turn_label.add_theme_color_override("font_color", col)
+	_turn_badge.tooltip_text = tip
 
 
 func _refresh_objectives() -> void:
@@ -1848,6 +1909,7 @@ func _refresh() -> void:
 		card.queue_redraw()
 	_end_btn.disabled = not my_turn
 	_refresh_objectives()
+	_refresh_turn_badge()
 	# Réaffirmer la visibilité des couches de combat après chaque changement d'état.
 	if is_instance_valid(_root):
 		_root.visible = true
