@@ -220,6 +220,7 @@ V65_BUILDINGS = ["hall", "caserne", "residence", "scierie", "mine", "tannerie", 
 # droite), "single" = un seul dessin. Tout ce qui n'est pas listé (grilles, 3-4 niveaux, ensemble unique,
 # texte dans l'image…) est À REPRENDRE par Mistral : voir RETOUR_MISTRAL_V65.md.
 LAYOUT_V65 = {
+    ("brasier", "hall"): "row5",
     ("brasier", "scierie"): "row5", ("brasier", "cabane"): "row5", ("brasier", "merveille"): "single",
     ("brumes", "caserne"): "row5", ("brumes", "merveille"): "single",
     ("cristaux", "hall"): "row5", ("cristaux", "residence"): "row5", ("cristaux", "scierie"): "row5",
@@ -357,8 +358,24 @@ def piece_from_mask(rgba, mask):
 
 
 def run_v65(sheets_dir, only=None, report=None):
-    """Découpe les planches V65 listées dans LAYOUT_V65 en <bâtiment>_<niveau>.png (toile commune)."""
+    """Découpe les planches V65 (planches/<nation>/<batiment>.jpg) en <bâtiment>_<niveau>.png (toile commune)."""
     log = []
+    # toute planche présente dans planches/<nation>/ est traitée : row5 par défaut, single pour merveille
+    pdir_root = os.path.join(sheets_dir, "planches")
+    if os.path.isdir(pdir_root):
+        for nation in sorted(os.listdir(pdir_root)):
+            if only and nation != only:
+                continue
+            nd = os.path.join(pdir_root, nation)
+            if not os.path.isdir(nd):
+                continue
+            for f in sorted(os.listdir(nd)):
+                if not f.endswith((".png", ".jpg")):
+                    continue
+                b = f.rsplit(".", 1)[0]
+                if b.startswith(nation + "_"):
+                    b = b[len(nation) + 1:]
+                LAYOUT_V65.setdefault((nation, b), "single" if b == "merveille" else "row5")
     for (nation, building), layout in sorted(LAYOUT_V65.items()):
         if only and nation != only:
             continue

@@ -1,0 +1,19 @@
+Building sprite sheet for a premium mobile strategy game: the mine of the vents nation, ONE single building shown at its 5 upgrade levels, for a city-building screen.
+STYLE: hand-painted stylized 3D game render like a premium mobile strategy game, vibrant saturated palette, warm lighting, toy-like proportions with exaggerated glossy roofs, highly readable silhouettes — same art style as the existing forest and mountain building sheets of this game.
+NATION IDENTITY (keep the spirit of the nation in every level): Îles flottantes, moulins, rubans de vent, totems à plumes, arche céleste.
+ARCHITECTURE ID CARD: walls #DBE3EB plâtre pâle ; roofs #66ADD1 sarcelle ; trim and details #F5F5FF blanc, totems, girouettes, volutes.
+FORBIDDEN: no dark stone, no lava, no gold.
+LAYOUT — HARD RULES, CHECK BEFORE SUBMITTING:
+1. EXACTLY 5 buildings in ONE SINGLE HORIZONTAL ROW, left to right (level 1 to level 5). NO grid (not 2x3, 3x3, cross), NOT 3 or 4 buildings, NOT one big ensemble.
+2. A CLEAR EMPTY BACKGROUND GAP between every pair of buildings: the diamond-shaped ground bases must NOT touch, NOT overlap, NOT share a ground line (no zigzag, no common platform).
+3. ONE isolated diamond base per level, SAME footprint of 3x3 tiles in all 5 levels — only the building changes.
+4. Same scale across levels: no level 3x bigger than the previous one.
+5. Background: PURE WHITE #FFFFFF uniform (do NOT use green chroma #00B140 — plain white only) — uniform, no gradient, no pink/pastel tint, no black band/banner, no vignette.
+6. NO text, NO numbers, NO labels, NO legends anywhere in the image.
+7. NO cast shadow on the ground, NO glow halo, NO reflections.
+8. NO foliage or grass of the same color as the background.
+9. NO pixel of any building may touch the left/right/top/bottom EDGE of the image: keep at least 12% margin on every side (never start at the left edge; the first building must be fully inside, not at x=0). If a building touches an edge, REDRAW THE WHOLE IMAGE smaller and centered. A cut-off building = REJECTED image.
+10. Every building fully visible, whole silhouette.
+LEVELS: level 1 = tunnel entrance plus lantern; level 2 = headframe plus minecart; level 3 = 2 minecarts plus chimney; level 4 = double headframe plus hopper; level 5 = grand mining complex.
+EVERY level: exact SAME isometric 2:1 camera. BUILDING CHECK: EXACTLY 5 buildings, the SAME building growing from small to grand, SAME diamond base, all feet on the same ground line; if you draw 4 or 6, redraw with exactly 5.
+AVOID: people, flat vector art, pixel art, text, labels, grids, different base shapes, different scales, cast shadows, background gradients, extra buildings.
