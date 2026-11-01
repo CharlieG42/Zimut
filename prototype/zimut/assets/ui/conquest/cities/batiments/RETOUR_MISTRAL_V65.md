@@ -2,6 +2,37 @@
 
 Analyse des 80 planches (8 nations × 10 bâtiments) et des sprites découpés, 2026-11-01.
 
+## 0. Mise à jour du 2026-11-01 (après fusion des PR #214-#216) — sprites retirés
+Une revue visuelle des sprites fusionnés a montré 15 planches défectueuses : elles sont **retirées** (le jeu retombe sur le
+dessin vectoriel) et sont à refaire. Une planche = un bâtiment × 5 niveaux ; dès qu'un niveau est mauvais, toute la ligne part,
+pour garder une progression cohérente.
+
+| Nation | Bâtiment | Défauts constatés |
+|---|---|---|
+| Brumes | Caserne | Niv. 3 = dalle vide sans bâtiment, niv. 4 = petite maison, niv. 5 = énorme tour : progression incohérente |
+| Brumes | Résidence | Niv. 2 et 4 réduits à un fragment ; niv. 1, 3, 5 avec une étiquette de texte flottante (« Swamp manor », « Manor plus ») |
+| Brumes | Scierie | Niv. 2 et 4 fragments ; niv. 1, 3, 5 avec deux bâtiments empilés dans l'image |
+| Brumes | Mine | Niv. 2 et 4 fragments ; niv. 3 avec deux bâtiments empilés |
+| Brumes | Tannerie | Niv. 2 et 4 coupés à gauche/droite ; niv. 3 et 5 : socle collé au bord |
+| Brumes | Cabane | Niv. 2 minuscule, niv. 4 coupé en deux, niv. 5 trop grand |
+| Brumes | Verger | Niv. 2 et 4 coupés ; socle du niv. 3 tronqué |
+| Brumes | Muraille | Niv. 3 coupé en deux ; niv. 1, 2, 4 socle tronqué d'un côté |
+| Brasier | Résidence | Niv. 1 minuscule, niv. 5 coupé verticalement |
+| Brasier | Mine | Deux bâtiments empilés dans chaque image ; niv. 2 et 4 fragments |
+| Brasier | Tannerie | Niv. 3, 4, 5 : socle tronqué à gauche et en bas |
+| Brasier | Verger | Trois variantes empilées dans chaque image ; niv. 2 et 4 coupés |
+| Brasier | Muraille | Niv. 1 minuscule, niv. 2 et 4 bandes coupées, niv. 3 grande dalle plate + fragments |
+| Cristaux | Hôtel de ville | Niv. 2 et 4 : base rognée et échelle bien plus petite que les niv. 1, 3, 5 |
+| Cristaux | Muraille | Niv. 2 et 4 = petites tours de porte, niv. 1, 3, 5 = enceintes carrées : pas le même objet |
+
+**Conservés (revus, corrects)** : Brumes hôtel de ville + merveille ; Brasier hôtel de ville, caserne, scierie, cabane, merveille ;
+Cristaux résidence, scierie, merveille ; Ombres hôtel de ville, merveille ; Rouages résidence, mine, muraille, merveille ;
+Marées, Sables, Vents merveille.
+**Jamais livrés** (à produire) : Cristaux caserne/mine/tannerie/cabane/verger ; Rouages hôtel de ville/caserne/scierie/tannerie/cabane/verger ;
+Ombres 8 bâtiments (tout sauf hôtel de ville) ; Marées, Sables, Vents 9 bâtiments chacun (tout sauf merveille).
+Les consignes du §4 s'appliquent, en particulier : **une seule rangée de 5 niveaux, un seul bâtiment par niveau (pas d'empilement),
+aucun texte, marges suffisantes** (rien ne doit toucher le bord de l'image).
+
 ## 1. Pourquoi les premiers sprites étaient coupés
 La première découpe tranchait chaque planche en **5 colonnes de largeur fixe**. Les bâtiments grandissent avec le
 niveau et débordent de leur colonne : niveaux 2 à 4 tronqués à gauche et à droite, avec des morceaux du voisin.
