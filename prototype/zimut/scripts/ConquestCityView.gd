@@ -71,8 +71,8 @@ const NATION_KEY := {"Forêt": "sylvestre", "Montagne": "cimes", "Désert": "sab
 ## Dossier des planches : <SPRITE_DIR>/<nation>/<bâtiment>[_<niveau>].png
 const SPRITE_DIR := "res://assets/ui/conquest/cities/batiments"
 ## Largeur cible (unités) de chaque planche (hauteur = aspect conservé).
-const SPRITE_WIDTH := {"hall": 250.0, "caserne": 180.0, "residence": 180.0, "merveille": 250.0,
-	"scierie": 200.0, "mine": 200.0, "tannerie": 200.0, "cabane": 180.0, "verger": 200.0, "muraille": 200.0}
+const SPRITE_WIDTH := {"hall": 240.0, "caserne": 170.0, "residence": 160.0, "merveille": 220.0,
+	"scierie": 170.0, "mine": 160.0, "tannerie": 150.0, "cabane": 120.0, "verger": 160.0, "muraille": 220.0}
 ## Clé de planche correspondant à une parcelle (les autres portent déjà le bon nom).
 const V61B_KEY := {"barracks": "caserne", "wonder": "merveille"}
 
@@ -213,10 +213,27 @@ func _sprite(building: String, level: int = 0) -> Texture2D:
 	return tex
 
 
+## Planche du niveau demandé ; à défaut, celle du niveau inférieur le plus proche, puis du supérieur
+## (une nation qui n'a livré qu'un dessin par bâtiment l'utilise à tous les niveaux). Niveau 0 : exact.
+func _sprite_best(building: String, level: int) -> Texture2D:
+	var tex: Texture2D = _sprite(building, level)
+	if tex != null or level <= 0:
+		return tex
+	for lv: int in range(level - 1, 0, -1):
+		tex = _sprite(building, lv)
+		if tex != null:
+			return tex
+	for lv2: int in range(level + 1, 6):
+		tex = _sprite(building, lv2)
+		if tex != null:
+			return tex
+	return null
+
+
 ## Dessine la planche posée au sol en g (même voile soir/nuit que les sprites V62) ;
 ## faux → aucune planche, poursuivre vers l'illustration V62 ou le vectoriel.
 func _draw_tex_if_any(sprite_key: String, level: int, g: Vector2, u: float) -> bool:
-	var tex: Texture2D = _sprite(sprite_key, level)
+	var tex: Texture2D = _sprite_best(sprite_key, level)
 	if tex == null:
 		return false
 	var dw: float = SPRITE_WIDTH.get(sprite_key, 180.0) * u
