@@ -70,7 +70,7 @@ const NATION_KEY := {"Forêt": "sylvestre", "Montagne": "cimes", "Désert": "sab
 	"Rouages": "rouages", "Donjon": "donjon"}
 ## Nations dont les planches viennent de tools/slice_city_sprites.py : tous les niveaux d'un bâtiment
 ## partagent une toile (pied centré en bas) pour garder leur taille relative — pas de recadrage.
-const COMMON_CANVAS := ["sylvestre", "cimes"]
+const COMMON_CANVAS := ["sylvestre", "cimes", "sables", "cristaux", "marees", "vents", "brasier", "brumes", "ombres", "rouages"]
 ## Dossier des planches : <SPRITE_DIR>/<nation>/<bâtiment>[_<niveau>].png
 const SPRITE_DIR := "res://assets/ui/conquest/cities/batiments"
 ## Largeur cible (unités) de chaque planche (hauteur = aspect conservé).
@@ -233,7 +233,7 @@ func _sprite_best(building: String, level: int) -> Texture2D:
 		tex = _sprite(building, lv2)
 		if tex != null:
 			return tex
-	return null
+	return _sprite(building, 0)     # dessin sans suffixe (caserne.png, residence.png des premières nations)
 
 
 ## Recadre une planche sur ses pixels visibles (V64) : les stickers n'occupent qu'une
@@ -459,9 +459,11 @@ func _draw_plot(key: String, g: Vector2, u: float) -> void:
 		"barracks":
 			lv = 1
 			tex = _building_art("barracks", 1)
+			skl = clampi(city_level, 1, 5)     # V65 : la caserne grandit avec la ville
 		"residence":
 			lv = 1
 			tex = _building_art("residence", 1)
+			skl = clampi(city_level, 1, 5)
 		"wonder":
 			lv = 1 if wonder else 0
 			tex = _building_art("wonder", 1) if wonder else _building_art("hall", 0)

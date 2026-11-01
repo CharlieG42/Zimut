@@ -60,5 +60,18 @@ func _boot() -> void:
 	vr.biome = "Rouages"
 	check(vr._sprite_best("hall", 3) == null, "nation sans planche : repli vectoriel")
 	vr.free()
+	# V65 : planches saines livrées pour les 8 autres nations ; caserne/résidence suivent le niveau de la ville
+	for pair: Array in [["brasier", "scierie_5"], ["brumes", "caserne_3"], ["cristaux", "hall_5"], ["cristaux", "residence_2"],
+			["ombres", "hall_4"], ["rouages", "mine_5"], ["rouages", "muraille_3"], ["marees", "merveille"],
+			["sables", "merveille"], ["vents", "merveille"]]:
+		check(ResourceLoader.exists("%s/%s/%s.png" % [base, pair[0], pair[1]]), "V65 livré : %s/%s.png" % [pair[0], pair[1]])
+	var vb := ConquestCityView.new()
+	vb.biome = "Brumes"
+	check(vb._sprite_best("caserne", 4) == vb._sprite("caserne", 4), "Brumes : la caserne de niveau 4 a son dessin")
+	vb.biome = "Forêt"
+	check(vb._sprite_best("caserne", 3) == vb._sprite("caserne", 0), "Forêt : caserne sans suffixe reprise à tous les niveaux")
+	vb.biome = "Désert"
+	check(vb._sprite_best("hall", 2) == null, "Désert : hôtel de ville non livré → repli vectoriel")
+	vb.free()
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)

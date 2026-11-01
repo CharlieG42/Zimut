@@ -17,11 +17,11 @@ func _boot() -> void:
 	data["resources"] = {"Bois": 60, "Fer": 60, "Cuir": 25, "Magie": 25, "Venin": 10}
 	var all3: Dictionary = {"scierie": 3, "mine": 3, "tannerie": 3, "cabane": 3, "verger": 3, "muraille": 3}
 	var all1: Dictionary = {"scierie": 1, "mine": 1, "tannerie": 1, "cabane": 1, "verger": 1}
-	data["conquest"] = {"owned": ["capitale", "clairiere", "hameau_pin"], "pending_city": "",
-		"city_levels": {"clairiere": 4, "hameau_pin": 2},
-		"garrisons": {"clairiere": {"troops": 5, "hero": "Tank"}, "hameau_pin": {"troops": 3, "hero": ""}},
-		"buildings": {"clairiere": all3.keys(), "hameau_pin": all1.keys()},
-		"building_levels": {"clairiere": all3, "hameau_pin": all1},
+	data["conquest"] = {"owned": ["capitale", "clairiere", "hameau_pin", "mine_cristal", "atelier_cuivre"], "pending_city": "",
+		"city_levels": {"clairiere": 4, "hameau_pin": 2, "mine_cristal": 5, "atelier_cuivre": 3},
+		"garrisons": {"clairiere": {"troops": 5, "hero": "Tank"}, "hameau_pin": {"troops": 3, "hero": ""}, "mine_cristal": {"troops": 3, "hero": ""}, "atelier_cuivre": {"troops": 3, "hero": ""}},
+		"buildings": {"clairiere": all3.keys(), "hameau_pin": all1.keys(), "mine_cristal": all3.keys(), "atelier_cuivre": all3.keys()},
+		"building_levels": {"clairiere": all3, "hameau_pin": all1, "mine_cristal": all3, "atelier_cuivre": all3},
 		"wonders": ["clairiere"], "battle_count": 4}
 	gm.active_save = data
 	gm.active_slot = 4
@@ -36,4 +36,10 @@ func _boot() -> void:
 	sc._on_city_pressed("hameau_pin")
 	await create_timer(0.8).timeout
 	_shot(out + "/iso_montagne.png")
+	for cid: String in ["mine_cristal", "atelier_cuivre"]:
+		sc.get_node("CityScreen").close()
+		await create_timer(0.3).timeout
+		sc._on_city_pressed(cid)
+		await create_timer(0.8).timeout
+		_shot(out + "/iso_%s.png" % cid)
 	quit(0)

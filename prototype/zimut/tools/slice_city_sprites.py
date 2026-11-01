@@ -212,74 +212,182 @@ def crop(rgba, fg, how):
 MANIFEST_V65 = [
     # nation, bâtiment, emprise (3x3 ou 2x2) — la planche se découpe seule en 5 cases égales
 ]
-V65_BUILDINGS_5 = ["hall", "caserne", "residence", "scierie", "mine", "tannerie", "cabane", "verger", "muraille"]
 V65_EMPRISE = {"hall": 3, "caserne": 2, "residence": 2, "scierie": 2, "mine": 3, "tannerie": 2,
                "cabane": 2, "verger": 3, "muraille": 3, "merveille": 3}
+V65_BUILDINGS = ["hall", "caserne", "residence", "scierie", "mine", "tannerie", "cabane", "verger", "muraille", "merveille"]
+
+# Planches V65 à découper : (nation, bâtiment) -> mise en page. "row5" = 5 niveaux en rangée (de gauche à
+# droite), "single" = un seul dessin. Tout ce qui n'est pas listé (grilles, 3-4 niveaux, ensemble unique,
+# texte dans l'image…) est À REPRENDRE par Mistral : voir RETOUR_MISTRAL_V65.md.
+LAYOUT_V65 = {
+    ("brasier", "scierie"): "row5", ("brasier", "cabane"): "row5", ("brasier", "merveille"): "single",
+    ("brumes", "caserne"): "row5", ("brumes", "merveille"): "single",
+    ("cristaux", "hall"): "row5", ("cristaux", "residence"): "row5", ("cristaux", "scierie"): "row5",
+    ("cristaux", "muraille"): "row5", ("cristaux", "merveille"): "single",
+    ("marees", "merveille"): "single",
+    ("ombres", "hall"): "row5", ("ombres", "merveille"): "single",
+    ("rouages", "residence"): "row5", ("rouages", "mine"): "row5", ("rouages", "muraille"): "row5",
+    ("rouages", "merveille"): "single",
+    ("sables", "merveille"): "single",
+    ("vents", "merveille"): "single",
+}
+# Planches rangées sur 5 niveaux MAIS dont les socles (losanges au sol) se touchent ou se chevauchent :
+# toute coupure verticale entame le sol d'un bâtiment voisin. Non livrées → à espacer chez Mistral.
+SOCLES_COLLES = [("brasier", "caserne"), ("brasier", "tannerie"), ("brumes", "tannerie"), ("brumes", "verger"),
+                 ("cristaux", "tannerie"), ("ombres", "caserne"), ("ombres", "tannerie"), ("rouages", "caserne"),
+                 ("vents", "caserne"), ("vents", "cabane"), ("sables", "verger"), ("vents", "scierie")]
+# Fond vert de même teinte que le dessin (feuillage, herbe) : détourage impossible sans abîmer le sprite.
+FOND_CONFONDU = [("vents", "verger"), ("vents", "residence")]
 
 
-def crop_v65(rgba, fg, building, cells=5):
-    """Découpe V65 : `cells` cases horizontales égales (5 niveaux), détourées individuellement."""
-    w = rgba.shape[1]
-    out = []
-    for i in range(cells):
-        x0 = w * i // cells
-        x1 = w * (i + 1) // cells
-        sub = rgba[:, x0:x1].copy()
-        subfg = fg[:, x0:x1]
-        keep = main_part(subfg)
-        sub[..., 3] = np.where(keep, sub[..., 3], 0)
-        ys, xs = np.where(sub[..., 3] > 8)
-        if len(ys) == 0:
-            out.append(Image.new("RGBA", (8, 8), (0, 0, 0, 0)))
-            continue
-        # coupe horizontale seule : toute la hauteur de la case est conservée pour ancrer le pied en bas
-        out.append(Image.fromarray(sub[:, xs.min():xs.max() + 1], "RGBA"))
-    return out
+def load_v65(path):
+    """Ouvre une planche : retire bandeaux noirs et marges de texte en haut/bas."""
+    a = np.array(Image.open(path).convert("RGB")).astype(np.int16)
+    dark = a.mean(axis=2) < 40
+    rows = np.where(dark.mean(axis=1) < 0.55)[0]       # une ligne presque toute noire = bandeau
+    cols = np.where(dark.mean(axis=0) < 0.55)[0]
+    a = a[rows[0]:rows[-1] + 1, cols[0]:cols[-1] + 1]
+    # bandeau noir en haut contenant du texte clair : on coupe jusqu'à la dernière ligne sombre du bandeau
+    top = a[: a.shape[0] // 4]
+    band = np.where((top.mean(axis=2) < 40).mean(axis=1) > 0.6)[0]
+    if len(band):
+        a = a[band.max() + 1:]
+    return a
 
 
-def run_v65(sheets_dir, only=None):
-    """Découpe les planches V65 (planches/<nation>/<batiment>.png) en sprites <batiment>_<n>.png."""
-    nations = [d for d in os.listdir(os.path.join(sheets_dir, "planches")) if os.path.isdir(os.path.join(sheets_dir, "planches", d))]
-    for nation in nations:
+def background_v65(a, grad_max=9.0):
+    """Fond = pixels reliés au bord, de couleur proche de celle du bord ET sans arête franche
+    (fond uni, dégradé ou ombre douce) ; un contour de bâtiment arrête toujours l'extension."""
+    h, w, _ = a.shape
+    sm = np.stack([ndi.gaussian_filter(a[..., c].astype(np.float32), 1.0) for c in range(3)], axis=2)
+    band = np.concatenate([a[:6].reshape(-1, 3), a[-6:].reshape(-1, 3), a[:, :6].reshape(-1, 3), a[:, -6:].reshape(-1, 3)])
+    med = np.median(band, axis=0)
+    dist = np.abs(sm - med).max(axis=2)
+    grad = np.zeros((h, w), np.float32)
+    for c in range(3):
+        grad = np.maximum(grad, np.hypot(ndi.sobel(sm[..., c], 0), ndi.sobel(sm[..., c], 1)) / 8.0)
+    cand = (grad < grad_max) & (dist < 85)
+    lab, _ = ndi.label(cand)
+    edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
+    return np.isin(lab, list(edge))
+
+
+# Réglages propres à une planche : seuil d'arête du fond (plus bas = le fond ne mange pas les surfaces
+# claires), suppression des résidus du fond chroma vert.
+TUNE_V65 = {("sables", "merveille"): {"grad": 3.5}, ("vents", "merveille"): {"grad": 5.0, "chroma": True},
+            ("vents", "residence"): {"chroma": True},
+            ("vents", "scierie"): {"chroma": True}}
+
+
+def cutout_v65(a, tune=None):
+    tune = tune or {}
+    fg = ~background_v65(a, tune.get("grad", 9.0))
+    if tune.get("chroma"):      # résidus du vert de fond : vert clair vif, jamais présent dans les dessins
+        r, g, b = a[..., 0], a[..., 1], a[..., 2]
+        fg &= ~((g > 170) & (g > r + 35) & (g > b + 35))
+    fg = ndi.binary_opening(fg, iterations=1)
+    lab, n = ndi.label(fg)
+    sizes = ndi.sum(fg, lab, range(1, n + 1))
+    fg = np.isin(lab, [i + 1 for i, sz in enumerate(sizes) if sz > 600])       # texte, poussières
+    fg = ndi.binary_fill_holes(fg)
+    alpha = np.clip((ndi.gaussian_filter(fg.astype(np.float32), 0.8) - 0.25) / 0.6, 0, 1)
+    rgba = np.dstack([a.clip(0, 255).astype(np.uint8), (alpha * 255).astype(np.uint8)])
+    return rgba, fg
+
+
+def split_row(fg, n=5):
+    """Sépare n bâtiments alignés de gauche à droite. Renvoie (masques, qualité) :
+    ensembles distincts s'ils le sont, sinon coupures verticales placées aux creux de la silhouette."""
+    lab, m = ndi.label(ndi.binary_dilation(fg, iterations=3))
+    sizes = np.array(ndi.sum(fg, lab, range(1, m + 1)))
+    big = [i + 1 for i, sz in enumerate(sizes) if sz > 0.03 * fg.sum()]
+    if len(big) == n:
+        cx = [ndi.center_of_mass(lab == i)[1] for i in big]
+        order = [big[i] for i in np.argsort(cx)]
+        return [fg & (lab == i) for i in order], "séparés"
+    cover = ndi.uniform_filter1d(fg.sum(axis=0).astype(np.float32), 9)
+    xs = np.where(fg.any(axis=0))[0]
+    x0, x1 = xs.min(), xs.max()
+    cuts = [x0 + (x1 - x0) * k / n for k in range(1, n)]
+    for _ in range(12):                       # k-means 1D pondéré par la silhouette
+        bounds = [x0] + cuts + [x1]
+        cent = []
+        for i in range(n):
+            seg = cover[int(bounds[i]):int(bounds[i + 1]) + 1]
+            idx = np.arange(int(bounds[i]), int(bounds[i]) + len(seg))
+            cent.append((seg * idx).sum() / max(seg.sum(), 1))
+        cuts = [(cent[i] + cent[i + 1]) / 2 for i in range(n - 1)]
+    snapped, worst = [], 0.0
+    win = int((x1 - x0) * 0.05)
+    peak = cover.max()
+    for c in cuts:
+        lo, hi = max(int(c) - win, x0 + 1), min(int(c) + win, x1 - 1)
+        j = lo + int(np.argmin(cover[lo:hi]))
+        snapped.append(j)
+        worst = max(worst, cover[j] / peak)
+    bounds = [x0] + snapped + [x1 + 1]
+    masks = []
+    for i in range(n):
+        m_i = np.zeros_like(fg)
+        m_i[:, bounds[i]:bounds[i + 1]] = fg[:, bounds[i]:bounds[i + 1]]
+        masks.append(m_i)
+    return masks, ("coupures (creux à %d %%)" % round(100 * worst))
+
+
+def defringe(rgba, keep):
+    """Retire le liseré de bord : contour blanc d'autocollant et frange verte du fond chroma."""
+    inner = ndi.binary_erosion(keep, iterations=3)
+    band = keep & ~inner
+    r = rgba[..., 0].astype(np.int16); g = rgba[..., 1].astype(np.int16); b = rgba[..., 2].astype(np.int16)
+    sat = np.maximum(np.maximum(r, g), b) - np.minimum(np.minimum(r, g), b)
+    green = (g > r + 18) & (g > b + 18)
+    white = ((r + g + b) / 3 > 232) & (sat < 24)
+    out = keep & ~(band & (green | white))
+    return ndi.binary_erosion(out, iterations=1) | (out & inner)
+
+
+def piece_from_mask(rgba, mask):
+    mask = defringe(rgba, mask)
+    keep = main_part(mask, 0.15)
+    sub = rgba.copy()
+    soft = ndi.gaussian_filter(keep.astype(np.float32), 0.8)
+    sub[..., 3] = (np.clip((soft - 0.25) / 0.6, 0, 1) * 255).astype(np.uint8)
+    ys, xs = np.where(keep)
+    return Image.fromarray(sub[ys.min():ys.max() + 1, xs.min():xs.max() + 1], "RGBA")
+
+
+def run_v65(sheets_dir, only=None, report=None):
+    """Découpe les planches V65 listées dans LAYOUT_V65 en <bâtiment>_<niveau>.png (toile commune)."""
+    log = []
+    for (nation, building), layout in sorted(LAYOUT_V65.items()):
         if only and nation != only:
             continue
         pdir = os.path.join(sheets_dir, "planches", nation)
-        for fname in sorted(os.listdir(pdir)):
-            if not fname.endswith((".png", ".jpg")):
-                continue
-            building = fname.rsplit(".", 1)[0]
-            if building.startswith(nation + "_"):
-                building = building[len(nation) + 1:]
-            a = load(os.path.join(pdir, fname))
-            rgba, fg = cut_out(a, summer=False)
-            rgba = strip_ground_shadow(rgba, fg)
-            rgba = strip_chroma(rgba)
-            fg = rgba[..., 3] > 8
-            cells = 1 if building == "merveille" else 5
-            pieces = crop_v65(rgba, fg, building, cells)
-            # le pied (bas du contenu) doit rester le même dans toutes les cases : on recadre
-            # chaque case sur son contenu PUIS on ancre tout en bas de la toile commune
-            k = min(1.25, TARGET_W.get(building, 480) / max(max(im.width for im in pieces), 1))
-            w = max(1, round(max(im.width for im in pieces) * k))
-            h = max(1, round(max(im.height for im in pieces) * k))
-            # borne la hauteur : un artefact vertical isolé ne doit pas gonfler la toile
-            med_h = sorted(im.height for im in pieces)[len(pieces) // 2]
-            if h > med_h * k * 1.6:
-                h = max(1, round(med_h * k * 1.6))
-            d = os.path.join(OUT_ROOT, nation)
-            os.makedirs(d, exist_ok=True)
-            for i, im in enumerate(pieces):
-                canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-                sim = im.resize((max(1, round(im.width * k)), max(1, round(im.height * k))), Image.LANCZOS) if abs(k - 1.0) > 0.01 else im
-                canvas.alpha_composite(sim, ((w - sim.width) // 2, h - sim.height))
-                if cells == 1:
-                    out_name = building + ".png"
-                else:
-                    out_name = "%s_%d.png" % (building, i + 1)
-                if out_name.startswith(nation + "_"):
-                    out_name = out_name[len(nation) + 1:]
-                canvas.save(os.path.join(d, out_name), optimize=True)
-                print("%-10s %-14s %dx%d" % (nation, out_name, canvas.width, canvas.height))
+        src = next((os.path.join(pdir, f) for f in os.listdir(pdir) if f.rsplit(".", 1)[0] in (building, "%s_%s" % (nation, building))), None)
+        if src is None:
+            log.append((nation, building, "planche absente"))
+            continue
+        a = load_v65(src)
+        rgba, fg = cutout_v65(a, TUNE_V65.get((nation, building)))
+        if layout == "single":
+            pieces, how = [piece_from_mask(rgba, fg)], "unique"
+        else:
+            masks, how = split_row(fg, 5)
+            pieces = [piece_from_mask(rgba, m) for m in masks]
+        k = min(1.25, TARGET_W.get(building, 480) / max(max(im.width for im in pieces), 1))
+        w = max(1, round(max(im.width for im in pieces) * k))
+        h = max(1, round(max(im.height for im in pieces) * k))
+        d = os.path.join(OUT_ROOT, nation)
+        os.makedirs(d, exist_ok=True)
+        for i, im in enumerate(pieces):
+            canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+            sim = im.resize((max(1, round(im.width * k)), max(1, round(im.height * k))), Image.LANCZOS)
+            canvas.alpha_composite(sim, ((w - sim.width) // 2, h - sim.height))
+            name = building + ".png" if layout == "single" else "%s_%d.png" % (building, i + 1)
+            canvas.save(os.path.join(d, name), optimize=True)
+        log.append((nation, building, how))
+        print("%-10s %-10s %s  %dx%d" % (nation, building, how, w, h))
+    return log
 
 
 def main():
