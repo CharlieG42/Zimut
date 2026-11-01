@@ -83,5 +83,7 @@ réaffecter un dessin, modifier la ligne puis relancer. Les planches sources ne 
 inférieur le plus proche (puis supérieur) — une nation qui n'a livré qu'un dessin par bâtiment l'utilise
 à tous les niveaux. Un emplacement vide (niveau 0) reste dessiné en vectoriel.
 
-Pour la prochaine génération : un bâtiment par image, fond uni, sans ombre au sol, même caméra
-isométrique 2:1 et même losange de socle, niveaux 1 à 4 (ou 5 pour l'hôtel de ville) côte à côte.
+Pour la prochaine génération : **voir [`NORME_GENERATION_V65.md`](NORME_GENERATION_V65.md)** —
+un bâtiment par image, fond uni (blanc pur ou vert chroma `#00B140`), sans ombre au sol, même
+caméra isométrique 2:1, même losange de socle, **5 niveaux par bâtiment** (validation du
+2026-11-01), emprise fixe 1×1 / 2×2 / 3×3 selon la table des emprises.
