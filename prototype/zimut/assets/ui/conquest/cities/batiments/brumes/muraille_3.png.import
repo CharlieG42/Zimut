@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://1jv03ipyxaky8"
+path="res://.godot/imported/muraille_3.png-82aa3f4d90caa702dda85189c44887b7.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/brumes/muraille_3.png"
+dest_files=["res://.godot/imported/muraille_3.png-82aa3f4d90caa702dda85189c44887b7.ctex"]
+
+[params]
+
+compress/mode=0

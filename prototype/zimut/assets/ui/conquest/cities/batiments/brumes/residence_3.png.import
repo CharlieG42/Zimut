@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://sj7o0ytqwzaea"
+path="res://.godot/imported/residence_3.png-adb88cf9eb9ffbc175d225bd3865168d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/brumes/residence_3.png"
+dest_files=["res://.godot/imported/residence_3.png-adb88cf9eb9ffbc175d225bd3865168d.ctex"]
+
+[params]
+
+compress/mode=0
