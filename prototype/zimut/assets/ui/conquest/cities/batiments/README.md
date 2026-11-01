@@ -60,3 +60,28 @@ un PNG opaque est utilisé tel quel, bords compris.
 
 Illustration de fond de l'écran de ville : `assets/ui/conquest/cities/<nation>.jpg`
 (voir `SPRITES_A_FOURNIR.md`, §6).
+
+## V65 — planches isométriques (Forêt et Montagne) et outil de découpe
+
+Les premières planches isométriques (style Rise of Kingdoms) sont découpées par
+`tools/slice_city_sprites.py` : fond blanc ou gris supprimé, un PNG par bâtiment, toile commune par
+bâtiment (les niveaux gardent leur taille relative), largeur de toile normalisée (`TARGET_W`).
+
+```
+python3 tools/slice_city_sprites.py <dossier des planches p01.jpg … p16.jpg> [--only sylvestre|cimes]
+```
+
+Le tableau `MANIFEST` du script dit quelle partie de quelle planche devient quel fichier : pour
+réaffecter un dessin, modifier la ligne puis relancer. Les planches sources ne sont pas dans le dépôt.
+
+| Nation | Livré | Repli vectoriel |
+|---|---|---|
+| `sylvestre` (Forêt) | hall (1 dessin), caserne, résidence, scierie, mine (1 dessin), tannerie 1-3, cabane 1-3, verger 1-3, muraille 1 et 3, merveille (arbre) | — |
+| `cimes` (Montagne) | hall 1-5, caserne, résidence, scierie, mine (1 dessin), tannerie 1-3, cabane 1-3, verger (1 dessin) | muraille, merveille |
+
+**Repli de niveau** : si le fichier du niveau demandé n'existe pas, le jeu prend le dessin du niveau
+inférieur le plus proche (puis supérieur) — une nation qui n'a livré qu'un dessin par bâtiment l'utilise
+à tous les niveaux. Un emplacement vide (niveau 0) reste dessiné en vectoriel.
+
+Pour la prochaine génération : un bâtiment par image, fond uni, sans ombre au sol, même caméra
+isométrique 2:1 et même losange de socle, niveaux 1 à 4 (ou 5 pour l'hôtel de ville) côte à côte.
