@@ -223,12 +223,35 @@ def crop_v65(rgba, fg, building, cells=5, inset=0.06):
     Robuste aux bâtiments qui se touchent. `inset` : marge de sécurité sur les bords de coupe."""
     w = rgba.shape[1]
     prof = fg.sum(axis=0)
-    bounds = [0]
-    for i in range(1, cells):
-        lo = max(bounds[-1] + 4, w * i // cells - int(w * 0.10))
-        hi = min(w - 4, w * i // cells + int(w * 0.10))
-        bounds.append(lo + int(np.argmin(prof[lo:hi])))
-    bounds.append(w)
+    # 1) d'abord, détecter les vrais gaps entre bâtiments (colonnes quasi vides sur toute la hauteur)
+    colmin = ndi.minimum_filter1d(prof, size=int(w * 0.02))
+    gap_cols = colmin <= max(2, int(rgba.shape[0] * 0.02))
+    runs = []
+    x = 0
+    while x < w:
+        if not gap_cols[x]:
+            s = x
+            while x < w and not gap_cols[x]:
+                x += 1
+            runs.append([s, x - 1])
+        else:
+            x += 1
+    # 2) si on trouve exactement cells-1 gaps larges, couper au milieu de chaque gap
+    big_gaps = []
+    for i in range(1, len(runs)):
+        g = runs[i][0] - runs[i - 1][1] - 1
+        if g >= w * 0.03:
+            big_gaps.append(runs[i - 1][1] + g // 2)
+    if len(big_gaps) == cells - 1 and len(runs) == cells:
+        bounds = [0] + big_gaps + [w]
+    else:
+        # repli : coupe au point le plus vide de chaque segment
+        bounds = [0]
+        for i in range(1, cells):
+            lo = max(bounds[-1] + 4, w * i // cells - int(w * 0.10))
+            hi = min(w - 4, w * i // cells + int(w * 0.10))
+            bounds.append(lo + int(np.argmin(prof[lo:hi])))
+        bounds.append(w)
     out = []
     for i in range(cells):
         a, b = bounds[i], bounds[i + 1] - 1
