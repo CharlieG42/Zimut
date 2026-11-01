@@ -3,5 +3,5 @@ STYLE: hand-painted stylized 3D game render like a premium mobile strategy game,
 NATION IDENTITY: snowy mountain — grey granite, blue slate roofs, white snow and ice crystals.
 ARCHITECTURE ID CARD: walls #B8BDC7 granite; roofs #4766A3 blue slate with snow; trim #EBF5FF white.
 FORBIDDEN: no green forest, no lava, no sand, no purple.
-LAYOUT — HARD RULES: ONE single building, centered, in a 3x3 diamond-shaped stone plaza base; isometric 2:1 camera; background PURE WHITE #FFFFFF uniform (no gradient, no chroma); NO text/labels; NO cast shadow, NO ground glow halo, NO reflections; at least 10% white margin on every side — if the building touches any edge, REDRAW smaller and centered (cut-off = REJECTED).
+LAYOUT — HARD RULES: ONE single building, centered, in a 3x3 diamond-shaped stone plaza base; isometric 2:1 camera; background PURE WHITE #FFFFFF uniform (no gradient, no chroma); NO text/labels; NO cast shadow, NO ground glow halo, NO reflections; at least 12% white margin on every side — if the building touches any edge, REDRAW smaller and centered (cut-off = REJECTED).
 AVOID: people, characters, flat vector art, pixel art, text, labels, logos, cast shadows, background gradients, extra buildings. The wonder must read as ONE grand building: Forge des Cimes (tall forge tower with glowing furnace mouth and snowy roof).

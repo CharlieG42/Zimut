@@ -12,7 +12,7 @@ LAYOUT — HARD RULES, CHECK BEFORE SUBMITTING:
 6. NO text, NO numbers, NO labels, NO legends anywhere in the image.
 7. NO cast shadow on the ground, NO glow halo, NO reflections.
 8. NO foliage or grass of the same color as the background.
-9. NO pixel of any building may touch the left/right/top/bottom EDGE of the image: keep at least 8% margin on every side. If a building touches an edge, REDRAW THE WHOLE IMAGE smaller and centered. A cut-off building = REJECTED image.
+9. NO pixel of any building may touch the left/right/top/bottom EDGE of the image: keep at least 12% margin on every side (never start at the left edge; the first building must be fully inside, not at x=0). If a building touches an edge, REDRAW THE WHOLE IMAGE smaller and centered. A cut-off building = REJECTED image.
 10. Every building fully visible, whole silhouette.
 LEVELS: level 1 = simple house; level 2 = plus 2 side wings; level 3 = central clock tower; level 4 = corner towers with flags; level 5 = golden dome and spire.
 EVERY level: exact SAME isometric 2:1 camera. BUILDING CHECK: EXACTLY 5 buildings, the SAME building growing from small to grand, SAME diamond base, all feet on the same ground line; if you draw 4 or 6, redraw with exactly 5.
