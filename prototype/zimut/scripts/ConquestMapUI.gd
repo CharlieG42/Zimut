@@ -45,6 +45,22 @@ const CITY_POS := {
 	"forge_givre": Vector2(0.86, 0.76),
 	"atelier_cuivre": Vector2(0.91, 0.09),
 	"citadelle_engrenages": Vector2(0.96, 0.25),
+	"hutaie_doree": Vector2(0.15, 0.18),
+	"moulin_vents": Vector2(0.06, 0.20),
+	"autel_vent": Vector2(0.18, 0.04),
+	"refuge_corniche": Vector2(0.44, 0.24),
+	"tour_guet_givre": Vector2(0.52, 0.14),
+	"geode_eclat": Vector2(0.60, 0.37),
+	"crypte_oubliee": Vector2(0.42, 0.55),
+	"riziere_brume": Vector2(0.44, 0.70),
+	"cratere_forges": Vector2(0.08, 0.70),
+	"fournaise": Vector2(0.24, 0.88),
+	"caravane_dunes": Vector2(0.70, 0.62),
+	"spire_prisme": Vector2(0.90, 0.68),
+	"phare_perle": Vector2(0.87, 0.66),
+	"havre_maree": Vector2(0.95, 0.60),
+	"hangar_engrenages": Vector2(0.94, 0.14),
+	"tour_horloger": Vector2(0.89, 0.33),
 }
 var _save: Dictionary = {}
 var _slot: int = -1
@@ -106,12 +122,15 @@ const MAP_ZOOM_SMOOTHING: float = 7.5
 var _touch_positions: Dictionary = {}
 var _pinch_start_distance: float = 0.0
 var _pinch_start_zoom: float = 1.0
-const MAP_ZOOM_MAX: float = 2.0
+const MAP_ZOOM_MAX: float = 3.0
 const MAP_ART := "res://assets/ui/conquest/conquest_world_map.jpg"
 const MAP_FX := "res://assets/ui/conquest/conquest_world_fx.png"
-const MAP_W: float = 1536.0
 const PIN_SIZE := Vector2(96, 84)
-const MAP_H: float = 1024.0
+## Taille du monde en pixels de la carte fournie (V64 : lue au chargement du fond —
+## n'importe quel fond s'affiche sans distorsion, l'ancien monde 1536×1024 comme le
+## nouveau monde élargi ; zoom max 3.0 pour lire une carte plus vaste).
+var MAP_W: float = 1536.0
+var MAP_H: float = 1024.0
 
 func _ready() -> void:
 	set_process_input(true)
@@ -127,6 +146,10 @@ func _ready() -> void:
 		_conquest = {"owned": ["capitale"], "pending_city": ""}
 	_save["conquest"] = _conquest
 	_save["campaign_mode"] = "conquest"
+	# Un héros pas encore débloqué ne peut pas être en mission (anciennes sauvegardes) : rappel.
+	for locked: String in ConquestSystem.cancel_locked_missions(_save):
+		_conquest = _save.get("conquest", _conquest)
+		ProgressionManager.conquest_add_event(_conquest, "⚑ %s rappelé de mission : héros pas encore débloqué." % locked)
 	_persist()
 	_build()
 	var annexed: String = String(_conquest.get("just_annexed", ""))
@@ -237,6 +260,9 @@ func _build() -> void:
 	world_art.name = "ConquestWorldArtwork"
 	world_art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	world_art.texture = load(MAP_ART) as Texture2D
+	if world_art.texture != null:
+		MAP_W = float(world_art.texture.get_width())
+		MAP_H = float(world_art.texture.get_height())
 	world_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	world_art.stretch_mode = TextureRect.STRETCH_SCALE
 	world_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -993,13 +1019,13 @@ func _refresh_targets(ids: Array) -> void:
 		b.name = "Target_" + id
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		b.custom_minimum_size.y = 84
-		b.add_theme_font_size_override("font_size", 15)
+		b.custom_minimum_size.y = 118
+		b.add_theme_font_size_override("font_size", 19)
 		b.add_theme_color_override("font_color", TEXT)
 		var edge: Color = {"ok": Color(0.45, 0.85, 0.50), "risky": Color(0.95, 0.75, 0.30), "weak": Color(0.90, 0.40, 0.35)}[String(adv["verdict"])]
 		b.add_theme_stylebox_override("normal", _style(Color(0.12, 0.18, 0.22, 0.97), edge))
 		b.add_theme_stylebox_override("hover", _style(Color(0.18, 0.26, 0.28, 0.97), GOLD))
-		b.text = Typo.fr("%s — niv. %d\n%s · %s\nButin : %s" % [
+		b.text = Typo.fr("%s — niv. %d\n%s\n%s\nButin : %s" % [
 			String(meta["name"]), int(meta["level"]), kind_txt, String(adv["text"]), String(rw.get("name", "—")) + (" (" + ", ".join(PackedStringArray(parts)) + ")" if not parts.is_empty() else "")])
 		b.pressed.connect(func() -> void:
 			_select_city(id)
@@ -1256,6 +1282,8 @@ func _show_governor_picker(city_id: String) -> void:
 	list.add_theme_constant_override("separation", 6)
 	sc.add_child(list)
 	for classe: String in ProgressionManager.CLASS_ORDER:
+		if not HeroUnlock.is_unlocked(_save, classe):
+			continue    # héros pas encore débloqué : jamais proposé
 		var elsewhere: String = ConquestSystem.hero_city(_conquest, classe)
 		var on_mission: Dictionary = ConquestSystem.hero_on_mission(_conquest, classe)
 		var b := Button.new()
@@ -1330,6 +1358,8 @@ func _show_mission_picker() -> void:
 	sc.add_child(list)
 	var missions: Dictionary = ConquestSystem.missions(_conquest)
 	for classe: String in ProgressionManager.CLASS_ORDER:
+		if not HeroUnlock.is_unlocked(_save, classe):
+			continue    # héros pas encore débloqué : jamais proposé
 		var job: Dictionary = missions.get(classe, {})
 		var header := Label.new()
 		header.text = classe
@@ -1368,7 +1398,7 @@ func _show_mission_picker() -> void:
 			b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			b.text = "⚑ %s\n%s" % [ConquestSystem.mission_label(type_id), ConquestSystem.mission_text(type_id)]
 			if type_id == "carte" and fog > 0:
-				b.text = "★ RECOMMANDÉE — %s\n%s %d ville(s) encore dans le brouillard." % [ConquestSystem.mission_label(type_id), ConquestSystem.mission_text(type_id), fog]
+				b.text = "★ RECOMMANDÉE — %s\nRévèle %d ville(s) (selon le niveau du héros) parmi les %d encore dans le brouillard." % [ConquestSystem.mission_label(type_id), ConquestSystem.cartography_count(ConquestSystem.hero_level(_save, classe)), fog]
 				b.add_theme_stylebox_override("normal", _style(Color(0.22, 0.28, 0.18, 0.97), GOLD))
 			b.custom_minimum_size.y = 52
 			b.add_theme_font_size_override("font_size", 14)

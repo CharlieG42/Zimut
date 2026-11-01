@@ -40,8 +40,11 @@ func _boot() -> void:
 		"col_givre", "mine_cristal", "bastion_orage", "caravanserail",
 		"observatoire", "port_sable", "bois_lune", "sanctuaire_mousse",
 		"forge_givre", "pic_foudroyant", "marais_spectres", "fort_cendre",
-		"temple_soleil", "citadelle_sable", "atelier_cuivre", "citadelle_engrenages"], "pending_city": ""}
-	check(pm.CONQUEST_CITIES.size() == 30, "campagne étendue à trente villes (V27 : Rouages)")
+		"temple_soleil", "citadelle_sable", "atelier_cuivre", "citadelle_engrenages",
+		"hutaie_doree", "moulin_vents", "autel_vent", "refuge_corniche", "tour_guet_givre",
+		"geode_eclat", "spire_prisme", "crypte_oubliee", "riziere_brume", "cratere_forges",
+		"fournaise", "caravane_dunes", "phare_perle", "havre_maree", "hangar_engrenages", "tour_horloger"], "pending_city": ""}
+	check(pm.CONQUEST_CITIES.size() == 46, "campagne étendue à quarante-six villes (V64 : grandes nations)")
 	var reachable: Array[String] = ["capitale"]
 	var changed: bool = true
 	while changed:
@@ -115,7 +118,7 @@ func _boot() -> void:
 	check(int(reward.get("resources", {}).get("Bois", 0)) == 12, "récompense de Clairière crédite 12 Bois")
 	check(int(reward.get("gold", 0)) == 35, "récompense de Clairière crédite 35 or")
 	check(pm.conquest_city_reward("pont_mousse").get("name", "") != pm.conquest_city_reward("clairiere").get("name", ""), "les villes ont des récompenses distinctes")
-	check(pm.CONQUEST_CITY_REWARDS.size() == 29, "29 villes non-capitales disposent d'un butin unique")
+	check(pm.CONQUEST_CITY_REWARDS.size() == 45, "45 villes non-capitales disposent d'un butin unique")
 
 	# ── Chronique : événements de campagne bornés et persistants ──
 	check(cq.get("events", []).any(func(event: String) -> bool: return event.contains("Ville annexée") and event.contains("Clairière")), "chronique : annexion enregistrée")

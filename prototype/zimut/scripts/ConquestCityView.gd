@@ -68,6 +68,9 @@ const DECO_SLOTS := [Vector2(0.30, 0.63), Vector2(0.70, 0.63), Vector2(0.045, 0.
 const NATION_KEY := {"Forêt": "sylvestre", "Montagne": "cimes", "Désert": "sables", "Cristaux": "cristaux",
 	"Marées": "marees", "Vents": "vents", "Brasier": "brasier", "Brumes": "brumes", "Ombres": "ombres",
 	"Rouages": "rouages", "Donjon": "donjon"}
+## Nations dont les planches viennent de tools/slice_city_sprites.py : tous les niveaux d'un bâtiment
+## partagent une toile (pied centré en bas) pour garder leur taille relative — pas de recadrage.
+const COMMON_CANVAS := ["sylvestre", "cimes"]
 ## Dossier des planches : <SPRITE_DIR>/<nation>/<bâtiment>[_<niveau>].png
 const SPRITE_DIR := "res://assets/ui/conquest/cities/batiments"
 ## Largeur cible (unités) de chaque planche (hauteur = aspect conservé).
@@ -209,6 +212,9 @@ func _sprite(building: String, level: int = 0) -> Texture2D:
 	var tex: Texture2D = null
 	if ResourceLoader.exists(path):
 		tex = load(path) as Texture2D
+	var nation: String = String(NATION_KEY.get(biome, "sylvestre"))
+	if not COMMON_CANVAS.has(nation):
+		tex = _trimmed(tex)
 	_tex_cache[path] = tex
 	return tex
 
@@ -228,6 +234,26 @@ func _sprite_best(building: String, level: int) -> Texture2D:
 		if tex != null:
 			return tex
 	return null
+
+
+## Recadre une planche sur ses pixels visibles (V64) : les stickers n'occupent qu'une
+## fraction de leur case et une découpe « au bord de case » laisserait le bâtiment
+## minuscule une fois normalisé à SPRITE_WIDTH. Le recadrage rend l'échelle
+## indépendante de la découpe ; sans canal alpha (détourage manquant), la texture
+## est utilisée telle quelle.
+func _trimmed(tex: Texture2D) -> Texture2D:
+	if tex == null:
+		return null
+	var img: Image = tex.get_image()
+	if img == null or not img.detect_alpha():
+		return tex
+	var used: Rect2i = img.get_used_rect()
+	if used.size.x <= 0 or used.size.y <= 0 or (used.position == Vector2i.ZERO and used.size == img.get_size()):
+		return tex
+	var atlas := AtlasTexture.new()
+	atlas.atlas = tex
+	atlas.region = Rect2(used)
+	return atlas
 
 
 ## Dessine la planche posée au sol en g (même voile soir/nuit que les sprites V62) ;

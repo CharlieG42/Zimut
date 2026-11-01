@@ -12,6 +12,7 @@ func _boot() -> void:
 	var d: Dictionary = pm.new_game(4, "Charlie")
 	pm.rebuild_team(d, ["Chasseur", "Mage", "Sylvain"])
 	d["campaign_mode"] = "conquest"
+	d["heroes_unlocked"] = ["Chasseur", "Mage", "Sylvain"]
 	d["conquest"] = {"owned": ["capitale", "clairiere", "pont_mousse"], "pending_city": "", "battle_count": 3}
 	var adv: Dictionary = pm.adventure_state(d)
 	adv["revealed_cities"] = ["capitale", "hameau_pin"]

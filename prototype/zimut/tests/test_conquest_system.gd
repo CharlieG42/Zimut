@@ -20,6 +20,7 @@ func _fresh(owned: Array) -> Dictionary:
 	d["gold"] = 1000
 	d["resources"] = {"Bois": 50, "Fer": 50, "Cuir": 50, "Magie": 50, "Venin": 50}
 	d["conquest"] = {"owned": owned, "pending_city": ""}
+	d["heroes_unlocked"] = pm.CLASS_ORDER.duplicate()   # héros non débloqués : ni mission ni gouvernorat
 	return d
 
 func _boot() -> void:
@@ -310,8 +311,31 @@ func _boot() -> void:
 		mc["conquest"]["missions"] = {"Mage": {"type": "carte", "eta": 1}}
 		ConquestSystem.after_victory(mc, mc["conquest"], mcr, pm.CONQUEST_ROUTES, names, "", ["vieille_tour", "fort_racine", "pont_mousse"])
 		revealed_ids = mc["conquest"].get("missions_revealed", [])
-	check(revealed_ids.size() == 2, "cartographie : 2 villes révélées")
-	check(revealed_ids.has("vieille_tour") and revealed_ids.has("fort_racine"), "les bonnes villes sont révélées")
+	check(revealed_ids.size() == 1, "cartographie (héros niveau 1) : une ville révélée")
+	check(["vieille_tour", "fort_racine", "pont_mousse"].has(String(revealed_ids[0])), "la ville révélée fait partie des candidates")
+	# Plus le héros est expérimenté, plus il révèle (3 au maximum) ; les plus proches d'abord
+	for lv_case: Array in [[15, 2], [40, 3], [90, 3]]:
+		var mx: Dictionary = _fresh(["capitale", "clairiere"])
+		mx["roster"]["Mage"]["level"] = int(lv_case[0])
+		var got: Array = []
+		var mxr := RandomNumberGenerator.new()
+		mxr.seed = 11
+		var tries2: int = 0
+		while got.is_empty() and tries2 < 50:
+			tries2 += 1
+			mx["conquest"]["missions"] = {"Mage": {"type": "carte", "eta": 1}}
+			ConquestSystem.after_victory(mx, mx["conquest"], mxr, pm.CONQUEST_ROUTES, names, "", ["marais_spectres", "vieille_tour", "ruines_lierre", "fort_racine"])
+			got = mx["conquest"].get("missions_revealed", [])
+		check(got.size() == int(lv_case[1]), "cartographie niveau %d : %d ville(s)" % [int(lv_case[0]), int(lv_case[1])])
+		check(got.has("vieille_tour") and got.has("fort_racine") or got.size() == 1, "niveau %d : les villes les plus proches d'abord" % int(lv_case[0]))
+	# Héros pas encore débloqué : ni mission ni gouvernorat, et les missions existantes sont rappelées
+	var lk: Dictionary = _fresh(["capitale", "clairiere"])
+	lk["heroes_unlocked"] = ["Mage", "Chasseur", "Sylvain"]
+	check(pm.conquest_send_mission(lk, "Tank", "carte") != "", "héros non débloqué : mission refusée")
+	check(pm.conquest_send_mission(lk, "Chasseur", "carte") == "", "héros débloqué : mission acceptée")
+	check(pm.conquest_assign_hero(lk, "clairiere", "Tank") != "", "héros non débloqué : gouvernorat refusé")
+	lk["conquest"]["missions"]["Tank"] = {"type": "carte", "eta": 3}
+	check(ConquestSystem.cancel_locked_missions(lk) == ["Tank"] and not ConquestSystem.missions(lk["conquest"]).has("Tank") and ConquestSystem.missions(lk["conquest"]).has("Chasseur"), "mission d'un héros non débloqué rappelée, les autres gardées")
 	# Rappel anticipé
 	pm.conquest_send_mission(mc, "Chasseur", "filon")
 	check(pm.conquest_abort_mission(mc, "Chasseur") == "" and ConquestSystem.missions(mc["conquest"]).is_empty(), "rappel du lieutenant")
