@@ -388,7 +388,7 @@ func _build() -> void:
 
 	_threat_banner = Label.new()
 	_threat_banner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_threat_banner.add_theme_font_size_override("font_size", 16)
+	_threat_banner.add_theme_font_size_override("font_size", 18)
 	_threat_banner.add_theme_color_override("font_color", Color(1.0, 0.88, 0.80))
 	_threat_banner.add_theme_stylebox_override("normal", _style(Color(0.34, 0.10, 0.08, 0.96), Color(1.0, 0.45, 0.30)))
 	box.add_child(_threat_banner)
@@ -416,7 +416,7 @@ func _build() -> void:
 		tb.button_pressed = t[1] == _tab_city
 		tb.custom_minimum_size = Vector2(0, 44)
 		tb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tb.add_theme_font_size_override("font_size", 15)
+		tb.add_theme_font_size_override("font_size", 17)
 		tb.add_theme_color_override("font_color", TEXT)
 		tb.add_theme_stylebox_override("normal", _style(Color(0.12, 0.18, 0.22, 0.97), Color(0.42, 0.50, 0.46)))
 		tb.add_theme_stylebox_override("pressed", _style(Color(0.24, 0.30, 0.22, 0.97), GOLD))
@@ -451,7 +451,7 @@ func _build() -> void:
 
 	_challenge_label = Label.new()
 	_challenge_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_challenge_label.add_theme_font_size_override("font_size", 16)
+	_challenge_label.add_theme_font_size_override("font_size", 18)
 	_challenge_label.add_theme_color_override("font_color", Color(0.80, 0.72, 1.0))
 	_challenge_label.add_theme_stylebox_override("normal", _style(Color(0.13, 0.11, 0.24, 0.96), Color(0.62, 0.48, 0.95)))
 	_challenge_label.visible = false
@@ -464,7 +464,7 @@ func _build() -> void:
 	_details_toggle = Button.new()
 	_details_toggle.name = "DetailsToggle"
 	_details_toggle.custom_minimum_size.y = 44
-	_details_toggle.add_theme_font_size_override("font_size", 16)
+	_details_toggle.add_theme_font_size_override("font_size", 18)
 	_details_toggle.add_theme_color_override("font_color", TEXT)
 	_details_toggle.add_theme_stylebox_override("normal", _style(Color(0.12, 0.18, 0.22, 0.97), Color(0.42, 0.50, 0.46)))
 	_details_toggle.add_theme_stylebox_override("hover", _style(Color(0.18, 0.26, 0.28, 0.97), GOLD))
@@ -476,7 +476,7 @@ func _build() -> void:
 	_details.name = "CityDetails"
 	_details.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_details.add_theme_color_override("font_color", TEXT)
-	_details.add_theme_font_size_override("font_size", 16)
+	_details.add_theme_font_size_override("font_size", 18)
 	_tab_city.add_child(_details)
 
 	var targets_title := Label.new()
@@ -494,7 +494,7 @@ func _build() -> void:
 	_chronicle_label = Label.new()
 	_chronicle_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_chronicle_label.custom_minimum_size.y = 104
-	_chronicle_label.add_theme_font_size_override("font_size", 15)
+	_chronicle_label.add_theme_font_size_override("font_size", 17)
 	_chronicle_label.add_theme_color_override("font_color", TEXT)
 	_chronicle_label.text = "Vos premières conquêtes apparaîtront ici."
 	_tab_chron.add_child(_chronicle_label)
@@ -563,18 +563,18 @@ func _layout_responsive() -> void:
 		_legend_label.text = "[color=#4fd27a]●[/color] Empire   [color=#b0b0a8]●[/color] Neutre   [color=#e0574a]●[/color] Adverse   [color=#ffd75e]➜[/color] Attaquable   [color=#c8ccd4]?[/color] Inconnu"
 		_legend_label.position = Vector2(10, map_view_h - 38.0)
 		_map_title_label.visible = false
-		_legend_label.add_theme_font_size_override("normal_font_size", 12)
+		_legend_label.add_theme_font_size_override("normal_font_size", 14)
 		_side_title.add_theme_font_size_override("font_size", 20)
 		_message.custom_minimum_size.y = 84
-		_message.add_theme_font_size_override("font_size", 15)
-		_details.add_theme_font_size_override("font_size", 14)
+		_message.add_theme_font_size_override("font_size", 17)
+		_details.add_theme_font_size_override("font_size", 16)
 		_attack.custom_minimum_size.y = 56
 		_attack.add_theme_font_size_override("font_size", 18)
 		_back_button.custom_minimum_size.y = 44
 		for child: Node in _build_box.get_children():
 			if child is Button:
 				(child as Button).custom_minimum_size.y = 44
-				(child as Button).add_theme_font_size_override("font_size", 13)
+				(child as Button).add_theme_font_size_override("font_size", 15)
 	else:
 		var side_w: float = clampf(w * 0.27, 330.0, 430.0)
 		var map_w: float = maxf(420.0, w - side_w - 18.0)
@@ -592,20 +592,20 @@ func _layout_responsive() -> void:
 		_map_title_label.visible = true
 		_map_title_label.add_theme_font_size_override("font_size", 20)
 		_map_title_label.position = Vector2(map_w - _map_title_label.get_combined_minimum_size().x - 12.0, map_view_h - 48.0)
-		_legend_label.add_theme_font_size_override("normal_font_size", 14 if map_w < 900.0 else 16)
+		_legend_label.add_theme_font_size_override("normal_font_size", 16 if map_w < 900.0 else 18)
 		# La légende suit le cartouche du titre (fond sombre) sans le chevaucher.
 		_legend_label.position = Vector2(12, map_view_h - 44.0)
 		_side_title.add_theme_font_size_override("font_size", 23)
 		_message.custom_minimum_size.y = 110
 		_message.add_theme_font_size_override("font_size", 18)
-		_details.add_theme_font_size_override("font_size", 16)
+		_details.add_theme_font_size_override("font_size", 18)
 		_attack.custom_minimum_size.y = 68
 		_attack.add_theme_font_size_override("font_size", 23)
 		_back_button.custom_minimum_size.y = 50
 		for child: Node in _build_box.get_children():
 			if child is Button:
 				(child as Button).custom_minimum_size.y = 54
-				(child as Button).add_theme_font_size_override("font_size", 16)
+				(child as Button).add_theme_font_size_override("font_size", 18)
 
 	# Le panneau complet (fond, routes, sprites et libellés) porte le zoom.
 	# Les contrôles gardent donc leurs dimensions de base et suivent ensemble
@@ -999,7 +999,7 @@ func _refresh_targets(ids: Array) -> void:
 		var none := Label.new()
 		none.text = "Aucune cible à portée : conquérez ou révélez une ville voisine."
 		none.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		none.add_theme_font_size_override("font_size", 15)
+		none.add_theme_font_size_override("font_size", 17)
 		none.add_theme_color_override("font_color", TEXT)
 		_tab_targets.add_child(none)
 		_add_explorer_button()
@@ -1042,7 +1042,7 @@ func _add_explorer_button() -> void:
 	ex.name = "ExplorerButton"
 	ex.text = "⚑ ENVOYER UN EXPLORATEUR\n%d ville(s) dans le brouillard" % fog
 	ex.custom_minimum_size.y = 64
-	ex.add_theme_font_size_override("font_size", 16)
+	ex.add_theme_font_size_override("font_size", 18)
 	ex.add_theme_color_override("font_color", TEXT)
 	ex.add_theme_stylebox_override("normal", _style(Color(0.18, 0.26, 0.34, 0.97), GOLD))
 	ex.add_theme_stylebox_override("hover", _style(Color(0.24, 0.34, 0.44, 0.97), GOLD))
@@ -1269,7 +1269,7 @@ func _show_governor_picker(city_id: String) -> void:
 	var hint := Label.new()
 	hint.text = "Un gouverneur défend la ville et la fait prospérer, mais ne combat plus en assaut."
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.add_theme_font_size_override("font_size", 14)
+	hint.add_theme_font_size_override("font_size", 18)
 	hint.add_theme_color_override("font_color", TEXT)
 	outer.add_child(hint)
 	var sc := ScrollContainer.new()
@@ -1289,7 +1289,7 @@ func _show_governor_picker(city_id: String) -> void:
 		var b := Button.new()
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		b.custom_minimum_size.y = 52
-		b.add_theme_font_size_override("font_size", 16)
+		b.add_theme_font_size_override("font_size", 19)
 		var line: String = "%s — niv. %d · %s" % [classe, ConquestSystem.hero_level(_save, classe), ConquestSystem.governor_text(classe)]
 		if elsewhere != "":
 			line = "%s — déjà en poste à %s" % [classe, ProgressionManager.conquest_city_name(elsewhere)]
@@ -1307,6 +1307,7 @@ func _show_governor_picker(city_id: String) -> void:
 		list.add_child(b)
 	var cancel := Button.new()
 	cancel.text = "ANNULER"
+	cancel.add_theme_font_size_override("font_size", 20)
 	cancel.custom_minimum_size.y = 46
 	cancel.pressed.connect(func() -> void: dim.queue_free())
 	outer.add_child(cancel)
@@ -1344,7 +1345,7 @@ func _show_mission_picker() -> void:
 	var hint := Label.new()
 	hint.text = "Un héros libre part en mission de 3 batailles : il ne combat ni ne gouverne pendant ce temps. À son retour : récompense… ou complication."
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.add_theme_font_size_override("font_size", 14)
+	hint.add_theme_font_size_override("font_size", 18)
 	hint.add_theme_color_override("font_color", TEXT)
 	outer.add_child(hint)
 	var sc := ScrollContainer.new()
@@ -1363,7 +1364,7 @@ func _show_mission_picker() -> void:
 		var job: Dictionary = missions.get(classe, {})
 		var header := Label.new()
 		header.text = classe
-		header.add_theme_font_size_override("font_size", 18)
+		header.add_theme_font_size_override("font_size", 20)
 		header.add_theme_color_override("font_color", GOLD)
 		list.add_child(header)
 		if not job.is_empty():
@@ -1372,7 +1373,7 @@ func _show_mission_picker() -> void:
 			running.text = "⚑ En mission « %s » — %d bataille(s) restante(s)\nRAPPELER (sans récompense)" % [
 					ConquestSystem.mission_label(String(job.get("type", ""))), int(job.get("eta", 0))]
 			running.custom_minimum_size.y = 58
-			running.add_theme_font_size_override("font_size", 15)
+			running.add_theme_font_size_override("font_size", 18)
 			running.pressed.connect(func() -> void:
 				dim.queue_free()
 				ProgressionManager.conquest_abort_mission(_save, classe)
@@ -1383,7 +1384,7 @@ func _show_mission_picker() -> void:
 		if elsewhere != "":
 			var busy := Label.new()
 			busy.text = "Gouverneur de %s" % ProgressionManager.conquest_city_name(elsewhere)
-			busy.add_theme_font_size_override("font_size", 14)
+			busy.add_theme_font_size_override("font_size", 18)
 			busy.add_theme_color_override("font_color", TEXT.darkened(0.2))
 			list.add_child(busy)
 			continue
@@ -1401,7 +1402,7 @@ func _show_mission_picker() -> void:
 				b.text = "★ RECOMMANDÉE — %s\nRévèle %d ville(s) (selon le niveau du héros) parmi les %d encore dans le brouillard." % [ConquestSystem.mission_label(type_id), ConquestSystem.cartography_count(ConquestSystem.hero_level(_save, classe)), fog]
 				b.add_theme_stylebox_override("normal", _style(Color(0.22, 0.28, 0.18, 0.97), GOLD))
 			b.custom_minimum_size.y = 52
-			b.add_theme_font_size_override("font_size", 14)
+			b.add_theme_font_size_override("font_size", 18)
 			b.pressed.connect(func() -> void:
 				dim.queue_free()
 				var err: String = ProgressionManager.conquest_send_mission(_save, classe, type_id)
@@ -1411,6 +1412,7 @@ func _show_mission_picker() -> void:
 			list.add_child(b)
 	var cancel := Button.new()
 	cancel.text = "ANNULER"
+	cancel.add_theme_font_size_override("font_size", 20)
 	cancel.custom_minimum_size.y = 46
 	cancel.pressed.connect(func() -> void: dim.queue_free())
 	outer.add_child(cancel)
@@ -1444,7 +1446,7 @@ func _show_event_popup() -> void:
 	var text := Label.new()
 	text.text = String(ev.get("text", ""))
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	text.add_theme_font_size_override("font_size", 18)
+	text.add_theme_font_size_override("font_size", 20)
 	text.add_theme_color_override("font_color", TEXT)
 	box.add_child(text)
 	var gold: int = int(_save.get("gold", 0))
@@ -1453,7 +1455,7 @@ func _show_event_popup() -> void:
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		b.text = String(o.get("label", ""))
 		b.custom_minimum_size.y = 56
-		b.add_theme_font_size_override("font_size", 17)
+		b.add_theme_font_size_override("font_size", 19)
 		b.disabled = gold < int(o.get("gold", 0))
 		var oid: String = String(o.get("id", ""))
 		b.pressed.connect(func() -> void: _resolve_event_choice(dim, box, oid))
@@ -1464,7 +1466,7 @@ func _show_event_popup() -> void:
 		later.name = "LaterButton"
 		later.text = "⌛ Plus tard — le Chancelier patientera"
 		later.custom_minimum_size.y = 48
-		later.add_theme_font_size_override("font_size", 16)
+		later.add_theme_font_size_override("font_size", 19)
 		later.pressed.connect(func() -> void: dim.queue_free())
 		box.add_child(later)
 		if not Gultur.should_show("conq_v59"):
@@ -1488,6 +1490,7 @@ func _resolve_event_choice(dim: Control, box: VBoxContainer, option_id: String) 
 	box.add_child(done)
 	var ok := Button.new()
 	ok.text = "CONTINUER"
+	ok.add_theme_font_size_override("font_size", 20)
 	ok.custom_minimum_size.y = 52
 	ok.pressed.connect(func() -> void: dim.queue_free())
 	box.add_child(ok)
@@ -1531,7 +1534,7 @@ func _confirm_risky_assault(cname: String, avg: int, recommended: int) -> void:
 	var m := Label.new()
 	m.text = Typo.fr("%s est conseillée au niveau %d, et votre équipe n'est qu'au niveau moyen %d. Faites monter vos héros sur des villes plus faciles (onglet ⚔ CIBLES), ou préparez un plan d'assaut. Attaquer quand même ?" % [cname, recommended, avg])
 	m.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	m.add_theme_font_size_override("font_size", 17)
+	m.add_theme_font_size_override("font_size", 19)
 	m.add_theme_color_override("font_color", TEXT)
 	box.add_child(m)
 	var back := Button.new()
@@ -1580,7 +1583,7 @@ func _show_assault_prep() -> void:
 	var intro := Label.new()
 	intro.text = "Choisis une approche, ou pars sans dépenser de ressources."
 	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	intro.add_theme_font_size_override("font_size", 17)
+	intro.add_theme_font_size_override("font_size", 19)
 	intro.add_theme_color_override("font_color", TEXT)
 	box.add_child(intro)
 	var ch: Dictionary = ProgressionManager.conquest_challenge_for(_save, _selected_id)
@@ -1588,7 +1591,7 @@ func _show_assault_prep() -> void:
 		var chl := Label.new()
 		chl.text = "◆ Défi facultatif : %s  →  %s" % [String(ch["label"]), _challenge_reward_text(ch)]
 		chl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		chl.add_theme_font_size_override("font_size", 16)
+		chl.add_theme_font_size_override("font_size", 19)
 		chl.add_theme_color_override("font_color", Color(0.80, 0.72, 1.0))
 		box.add_child(chl)
 	var resources: Dictionary = _save.get("resources", {})
@@ -1599,7 +1602,7 @@ func _show_assault_prep() -> void:
 	var scout := Button.new()
 	scout.text = "🔎 ÉCLAIREURS — 25 or\nRéduit le niveau des ennemis de 1"
 	scout.custom_minimum_size.y = 66
-	scout.add_theme_font_size_override("font_size", 18)
+	scout.add_theme_font_size_override("font_size", 20)
 	scout.disabled = gold < 25
 	scout.pressed.connect(func() -> void:
 		dim.queue_free()
@@ -1608,7 +1611,7 @@ func _show_assault_prep() -> void:
 	var sabotage := Button.new()
 	sabotage.text = "🧨 SABOTAGE — 12 Bois + 8 Fer\nRéduit les PV et l'attaque ennemis de 15 %"
 	sabotage.custom_minimum_size.y = 66
-	sabotage.add_theme_font_size_override("font_size", 18)
+	sabotage.add_theme_font_size_override("font_size", 20)
 	sabotage.disabled = wood < 12 or iron < 8
 	sabotage.pressed.connect(func() -> void:
 		dim.queue_free()
@@ -1617,7 +1620,7 @@ func _show_assault_prep() -> void:
 	var supply := Button.new()
 	supply.text = "📦 RAVITAILLEMENT — 15 or + 6 Cuir\nRéduit l'attaque ennemie de 10 %"
 	supply.custom_minimum_size.y = 66
-	supply.add_theme_font_size_override("font_size", 18)
+	supply.add_theme_font_size_override("font_size", 20)
 	supply.disabled = gold < 15 or leather < 6
 	supply.pressed.connect(func() -> void:
 		dim.queue_free()
@@ -1626,7 +1629,7 @@ func _show_assault_prep() -> void:
 	var none := Button.new()
 	none.text = "⚔ PARTIR SANS PRÉPARATION"
 	none.custom_minimum_size.y = 58
-	none.add_theme_font_size_override("font_size", 18)
+	none.add_theme_font_size_override("font_size", 20)
 	none.pressed.connect(func() -> void:
 		dim.queue_free()
 		_choose_assault_tactic("none"))
@@ -1637,14 +1640,14 @@ func _show_assault_prep() -> void:
 			and ProgressionManager.conquest_siege_wave(_conquest, _selected_id) < ProgressionManager.CONQUEST_SIEGE_BATTLES:
 		var plans_head := Label.new()
 		plans_head.text = "─ PLANS D'ASSAUT (sans combat) ─"
-		plans_head.add_theme_font_size_override("font_size", 16)
+		plans_head.add_theme_font_size_override("font_size", 19)
 		plans_head.add_theme_color_override("font_color", GOLD)
 		box.add_child(plans_head)
 		var blocus := Button.new()
 		blocus.text = "⛓ BLOCUS — %d or\nSaute une vague sans combat ; 35 %% de représailles (pillage)" % ProgressionManager.conquest_plan_cost("blocus")
 		blocus.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		blocus.custom_minimum_size.y = 62
-		blocus.add_theme_font_size_override("font_size", 17)
+		blocus.add_theme_font_size_override("font_size", 19)
 		blocus.disabled = gold < ProgressionManager.conquest_plan_cost("blocus")
 		blocus.pressed.connect(func() -> void:
 			dim.queue_free()
@@ -1654,7 +1657,7 @@ func _show_assault_prep() -> void:
 		infiltr.text = "🗡 INFILTRATION — %d or\nL'Assassin libre saborde une vague de l'intérieur ; il revient à la prochaine victoire" % ProgressionManager.conquest_plan_cost("infiltration")
 		infiltr.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		infiltr.custom_minimum_size.y = 62
-		infiltr.add_theme_font_size_override("font_size", 17)
+		infiltr.add_theme_font_size_override("font_size", 19)
 		infiltr.disabled = gold < ProgressionManager.conquest_plan_cost("infiltration") \
 			or not ProgressionManager.conquest_infiltration_ready(_conquest)
 		infiltr.pressed.connect(func() -> void:
@@ -1663,6 +1666,7 @@ func _show_assault_prep() -> void:
 		box.add_child(infiltr)
 	var cancel := Button.new()
 	cancel.text = "ANNULER"
+	cancel.add_theme_font_size_override("font_size", 20)
 	cancel.custom_minimum_size.y = 48
 	cancel.pressed.connect(func() -> void: dim.queue_free())
 	box.add_child(cancel)
@@ -1921,6 +1925,7 @@ func _show_popup(title: String, message: String) -> void:
 	box.add_child(m)
 	var ok := Button.new()
 	ok.text = "CONTINUER"
+	ok.add_theme_font_size_override("font_size", 20)
 	ok.custom_minimum_size = Vector2(300, 60)
 	ok.add_theme_font_size_override("font_size", 22)
 	ok.add_theme_color_override("font_color", Color(0.22, 0.15, 0.05))
