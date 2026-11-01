@@ -188,7 +188,7 @@ func _sky_art() -> Texture2D:
 func _building_art(key: String, lv: int) -> Texture2D:
 	if key == "wonder":
 		return _art("%s/wonder_%s.svg" % [_biome_key(), wonder_shape])
-	var cl: int = clampi(lv, 0, 5 if key == "hall" else 3)
+	var cl: int = clampi(lv, 0, 5 if key == "hall" else 3)  # dessins vectoriels : 3 niveaux (4-5 réutilisent le 3)
 	return _art("%s/%s_%d.svg" % [_biome_key(), key, cl])
 
 func _deco_art(kind: String) -> Texture2D:
@@ -468,7 +468,7 @@ func _draw_plot(key: String, g: Vector2, u: float) -> void:
 		_:
 			lv = int(levels.get(key, 0))
 			tex = _building_art(key, lv)
-			skl = clampi(lv, 0, 3)
+			skl = clampi(lv, 0, ConquestSystem.BUILD_MAX_LEVEL)
 	# V61b — planche découpée prioritaire (soldats/gouverneur redessinés par-dessus),
 	# puis illustration V62, puis dessin vectoriel.
 	if (wonder or key != "wonder") and _draw_tex_if_any(sk, skl, g, u):
