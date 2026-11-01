@@ -1056,6 +1056,18 @@ func _setup_objective_and_synergies() -> void:
 
 ## État en direct des objectifs du combat (panneau du mode Tactique) :
 ## [{icon, label, reward, state: "ok" | "ko" | "pending" | "bonus", detail}]
+## Limite de tours d'un défi « rapide » du combat en cours (0 s'il n'y en a pas).
+func turn_limit() -> int:
+	if String(fight_objective.get("kind", "")) == "swift":
+		return ProgressionManager.OBJECTIVE_SWIFT_TURNS
+	if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "conquest":
+		var city: String = String(active_save.get("conquest", {}).get("pending_city", ""))
+		var cc: Dictionary = ProgressionManager.conquest_challenge_for(active_save, city)
+		if String(cc.get("kind", "")) == "swift":
+			return ProgressionManager.CONQUEST_SWIFT_TURNS
+	return 0
+
+
 func objectives_status() -> Array:
 	var out: Array = []
 	var deaths: int = 0
