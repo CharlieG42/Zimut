@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://dljmc59b4x1b6"
+path="res://.godot/imported/muraille_1.png-6c9ea2c384abc089041e50dd880dcb35.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/rouages/muraille_1.png"
+dest_files=["res://.godot/imported/muraille_1.png-6c9ea2c384abc089041e50dd880dcb35.ctex"]
+
+[params]
+
+compress/mode=0

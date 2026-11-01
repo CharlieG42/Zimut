@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://im78ob9wlef4w"
+path="res://.godot/imported/verger_1.png-3e4dc57b04a05488a4e4c4d79b6c0f05.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/cristaux/verger_1.png"
+dest_files=["res://.godot/imported/verger_1.png-3e4dc57b04a05488a4e4c4d79b6c0f05.ctex"]
+
+[params]
+
+compress/mode=0

@@ -1,0 +1,16 @@
+Building sprite sheet for a premium mobile strategy game: the hall of the Brumes misty swamp nation,
+ONE single building shown at its 5 upgrade levels, for a city-building screen.
+STYLE: hand-painted stylized 3D game render like a premium mobile strategy game, vibrant saturated
+palette, warm golden-hour lighting, toy-like proportions with exaggerated glossy roofs, highly
+readable silhouettes — same art style as the existing forest and mountain building sheets of this game.
+NATION IDENTITY (keep the spirit of the nation in every level): Marais embrumé, champignons phosphorescents, arbres morts, feux follets.
+ARCHITECTURE ID CARD: walls #859985 pierre vert pâle moussue ; roofs #42807A vert-de-gris ; trim and details #B8F5DB menthe pâle, champignons tachetés, brume.
+FORBIDDEN: no saturated bright colors, no lava, no gold.
+LAYOUT: EXACTLY 5 cells in one horizontal row, EQUAL width, separated by wide empty white gaps; ONE building per cell, centered in its cell; the SAME building, one upgrade level higher in each cell (left = level 1, right = level 5); a light grid line may separate the cells; EVERY cell uses the exact SAME isometric 2:1
+camera angle and the exact SAME diamond-shaped stone plaza base, identical footprint of 3x3
+tiles in every cell, so all five levels could sit on the same isometric grid; NO cast shadow on the ground (delete any ground shadow), NO glow halo, NO reflections; plain PURE WHITE #FFFFFF background everywhere, no gradient, no vignette, no ground line.
+LEVELS: cell 1 = maison simple ; cell 2 = + 2 ailes ; cell 3 = tour d'horloge centrale ; cell 4 = tours d'angle à drapeaux ; cell 5 = dôme doré + flèche.
+BUILDING CHECK: EXACTLY 5 buildings, the SAME building growing from small (cell 1) to grand (cell 5), the SAME diamond base in every cell, all feet on the same ground line. If you draw 4 or 6 buildings, redraw with exactly 5.
+AVOID: people, characters, flat vector art, outline cartoon, pixel art, anime, text, labels, logos,
+different base shapes, different scales, cast shadows, background gradients, extra buildings.
+Save as planches/brumes/hall.png

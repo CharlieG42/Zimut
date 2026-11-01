@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://ja81bjnso8b0d"
+path="res://.godot/imported/mine_2.png-f43a78b40c4f8da3fce1dc49241da656.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/rouages/mine_2.png"
+dest_files=["res://.godot/imported/mine_2.png-f43a78b40c4f8da3fce1dc49241da656.ctex"]
+
+[params]
+
+compress/mode=0

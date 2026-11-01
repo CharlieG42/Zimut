@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://45auepzev8o0p"
+path="res://.godot/imported/residence_2.png-f94f402c24f6ac36d649a720f0684f3c.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/sables/residence_2.png"
+dest_files=["res://.godot/imported/residence_2.png-f94f402c24f6ac36d649a720f0684f3c.ctex"]
+
+[params]
+
+compress/mode=0

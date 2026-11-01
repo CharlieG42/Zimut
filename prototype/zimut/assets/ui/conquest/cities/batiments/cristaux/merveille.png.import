@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://4moaeayapouku"
+path="res://.godot/imported/merveille.png-db398230cd9ce6402c29eae8e8619464.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/cristaux/merveille.png"
+dest_files=["res://.godot/imported/merveille.png-db398230cd9ce6402c29eae8e8619464.ctex"]
+
+[params]
+
+compress/mode=0

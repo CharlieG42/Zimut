@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://cpu822jhhiim4"
+path="res://.godot/imported/mine_3.png-96c4a4cc1ef458948bb387c68543bddb.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/vents/mine_3.png"
+dest_files=["res://.godot/imported/mine_3.png-96c4a4cc1ef458948bb387c68543bddb.ctex"]
+
+[params]
+
+compress/mode=0

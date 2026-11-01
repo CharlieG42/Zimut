@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://344ap7txvtjc9"
+path="res://.godot/imported/verger_2.png-90cbb7cabefc260ac13bbd1fc73f2e07.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/brumes/verger_2.png"
+dest_files=["res://.godot/imported/verger_2.png-90cbb7cabefc260ac13bbd1fc73f2e07.ctex"]
+
+[params]
+
+compress/mode=0

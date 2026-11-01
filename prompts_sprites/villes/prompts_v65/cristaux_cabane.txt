@@ -1,0 +1,16 @@
+Building sprite sheet for a premium mobile strategy game: the cabane of the Cristaux crystal nation,
+ONE single building shown at its 5 upgrade levels, for a city-building screen.
+STYLE: hand-painted stylized 3D game render like a premium mobile strategy game, vibrant saturated
+palette, warm golden-hour lighting, toy-like proportions with exaggerated glossy roofs, highly
+readable silhouettes — same art style as the existing forest and mountain building sheets of this game.
+NATION IDENTITY (keep the spirit of the nation in every level): Grottes de cristal, éclats lumineux, runes, monolithe de cristal.
+ARCHITECTURE ID CARD: walls #8F87BD pierre violet-gris + gemmes ; roofs #6B99FA bleu ciel ; trim and details #D1B8FF lilas, cristaux #8FD4FF, fenêtres en ogive.
+FORBIDDEN: no red bricks, no medieval gold, no wood.
+LAYOUT: EXACTLY 5 cells in one horizontal row, EQUAL width, separated by wide empty white gaps; ONE building per cell, centered in its cell; the SAME building, one upgrade level higher in each cell (left = level 1, right = level 5); a light grid line may separate the cells; EVERY cell uses the exact SAME isometric 2:1
+camera angle and the exact SAME diamond-shaped stone plaza base, identical footprint of 2x2
+tiles in every cell, so all five levels could sit on the same isometric grid; NO cast shadow on the ground (delete any ground shadow), NO glow halo, NO reflections; plain PURE WHITE #FFFFFF background everywhere, no gradient, no vignette, no ground line.
+LEVELS: cell 1 = hutte ronde + orbe ; cell 2 = plus haute + annexe ; cell 3 = petite tour + anneau de runes ; cell 4 = lanternes magiques ; cell 5 = grande tour + dôme runique.
+BUILDING CHECK: EXACTLY 5 buildings, the SAME building growing from small (cell 1) to grand (cell 5), the SAME diamond base in every cell, all feet on the same ground line. If you draw 4 or 6 buildings, redraw with exactly 5.
+AVOID: people, characters, flat vector art, outline cartoon, pixel art, anime, text, labels, logos,
+different base shapes, different scales, cast shadows, background gradients, extra buildings.
+Save as planches/cristaux/cabane.png

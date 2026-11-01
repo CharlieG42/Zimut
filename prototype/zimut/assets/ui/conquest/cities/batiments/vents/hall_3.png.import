@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://6ry9xnfom5rup"
+path="res://.godot/imported/hall_3.png-5bcae0fb8355572533b3e78de200983b.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/vents/hall_3.png"
+dest_files=["res://.godot/imported/hall_3.png-5bcae0fb8355572533b3e78de200983b.ctex"]
+
+[params]
+
+compress/mode=0

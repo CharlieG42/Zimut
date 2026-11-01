@@ -1,0 +1,17 @@
+Building sprite sheet for a premium mobile strategy game: the verger of the Vents sky-islands nation,
+ONE single building shown at its 5 upgrade levels, for a city-building screen.
+STYLE: hand-painted stylized 3D game render like a premium mobile strategy game, vibrant saturated
+palette, warm golden-hour lighting, toy-like proportions with exaggerated glossy roofs, highly
+readable silhouettes — same art style as the existing forest and mountain building sheets of this game.
+NATION IDENTITY (keep the spirit of the nation in every level): Îles flottantes, moulins, rubans de vent, totems à plumes, arche céleste.
+ARCHITECTURE ID CARD: walls #DBE3EB plâtre pâle ; roofs #66ADD1 sarcelle ; trim and details #F5F5FF blanc, totems, girouettes, volutes.
+FORBIDDEN: no dark stone, no lava, no gold.
+LAYOUT: EXACTLY 5 cells in one horizontal row, EQUAL width, separated by wide empty white gaps; ONE building per cell, centered in its cell; the SAME building, one upgrade level higher in each cell (left = level 1, right = level 5); a light grid line may separate the cells; EVERY cell uses the exact SAME isometric 2:1
+camera angle and the exact SAME diamond-shaped stone plaza base, identical footprint of 3x3
+tiles in every cell, so all five levels could sit on the same isometric grid; NO cast shadow on the
+ground, NO glow halo, NO reflections; plain uniform green chroma key #00B140 background, no gradient, no vignette.
+LEVELS: cell 1 = 3 arbres fruitiers ; cell 2 = 5 arbres + puits ; cell 3 = 2 rangées + lanterne + abri ; cell 4 = treillis + paniers ; cell 5 = verger en terrasses + murets.
+BUILDING CHECK: EXACTLY 5 buildings, the SAME building growing from small (cell 1) to grand (cell 5), the SAME diamond base in every cell, all feet on the same ground line. If you draw 4 or 6 buildings, redraw with exactly 5.
+AVOID: people, characters, flat vector art, outline cartoon, pixel art, anime, text, labels, logos,
+different base shapes, different scales, cast shadows, background gradients, extra buildings.
+Save as planches/vents/verger.png

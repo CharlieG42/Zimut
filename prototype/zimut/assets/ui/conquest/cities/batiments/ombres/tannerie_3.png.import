@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://27fahgachc2gg"
+path="res://.godot/imported/tannerie_3.png-9b163f0a2b78e4e16e991677f4506915.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/ombres/tannerie_3.png"
+dest_files=["res://.godot/imported/tannerie_3.png-9b163f0a2b78e4e16e991677f4506915.ctex"]
+
+[params]
+
+compress/mode=0

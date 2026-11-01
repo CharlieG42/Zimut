@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://bww3t4f6u97nx"
+path="res://.godot/imported/caserne_4.png-644f31d7116c9eceef87a32865b02086.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/rouages/caserne_4.png"
+dest_files=["res://.godot/imported/caserne_4.png-644f31d7116c9eceef87a32865b02086.ctex"]
+
+[params]
+
+compress/mode=0

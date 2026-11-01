@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://aov1ladx98xb7"
+path="res://.godot/imported/cabane_1.png-70829fbdb8117a742e58ef4485e7c690.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/brasier/cabane_1.png"
+dest_files=["res://.godot/imported/cabane_1.png-70829fbdb8117a742e58ef4485e7c690.ctex"]
+
+[params]
+
+compress/mode=0

@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://nybhtfoirxa90"
+path="res://.godot/imported/residence_1.png-d3dcb30c8c2233036760aed82427a560.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/cristaux/residence_1.png"
+dest_files=["res://.godot/imported/residence_1.png-d3dcb30c8c2233036760aed82427a560.ctex"]
+
+[params]
+
+compress/mode=0

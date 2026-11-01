@@ -1,0 +1,14 @@
+Building sprite for a premium mobile strategy game: the national wonder "Grand Bazar (bazar à dômes et auvents rayés, lanternes)" of the
+Sables desert nation, for a city-building screen.
+STYLE: hand-painted stylized 3D game render like a premium mobile strategy game, vibrant saturated
+palette, warm golden-hour lighting, toy-like proportions, highly readable silhouette — same art style
+as the existing forest and mountain building sheets of this game.
+NATION IDENTITY: Dunes, cactus, obélisque, puits de grès, caravanes et marché oriental.
+ARCHITECTURE ID CARD: walls #E6C78C grès ; roofs #CC7338 terre cuite (+ dômes blancs) ; trim and details #FADB73 doré, auvents rayés, palmiers, lanternes.
+FORBIDDEN: no snow, no dark wood, no forest green.
+LAYOUT: ONE single cell, ONE building; isometric 2:1 camera angle; diamond-shaped stone plaza base,
+footprint of 3x3 tiles; NO cast shadow on the ground, NO glow halo outside the building itself,
+NO reflections; plain white background, no gradient.
+AVOID: people, characters, flat vector art, pixel art, text, labels, logos, cast shadows,
+background gradients, extra buildings.
+Save as planches/sables/merveille.png

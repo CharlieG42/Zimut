@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://iuw3m3coc1wt1"
+path="res://.godot/imported/muraille_3.png-b2f89c2d43087d6db1bd65df51593ff5.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/marees/muraille_3.png"
+dest_files=["res://.godot/imported/muraille_3.png-b2f89c2d43087d6db1bd65df51593ff5.ctex"]
+
+[params]
+
+compress/mode=0

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Détoure et découpe les planches de bâtiments (Mistral) en PNG transparents pour la vue de ville.
 
-Usage : python3 tools/slice_city_sprites.py <dossier des planches p01.jpg … p16.jpg> [--only sylvestre|cimes]
+Usage : python3 tools/slice_city_sprites.py <dossier p01.jpg…> [--only sylvestre|cimes]
+       python3 tools/slice_city_sprites.py <dossier> --v65 [--only sables]   # mode V65 : planches/<nation>/<batiment>.png, 5 niveaux en ligne
 
 Sortie : assets/ui/conquest/cities/batiments/<nation>/<bâtiment>[_<niveau>].png
 (convention : assets/ui/conquest/cities/batiments/README.md).
@@ -91,13 +92,53 @@ def background(a):
     border = np.concatenate([a[0], a[-1], a[:, 0], a[:, -1]])
     med = np.median(border, axis=0)
     sat = a.max(axis=2) - a.min(axis=2)
+    # chroma vert V65 (#00B140) : très saturé, canal G dominant
+    if med[1] > 120 and med[1] > med[0] * 1.4 and med[1] > med[2] * 1.2:
+        cand = (np.abs(a[:, :, 1].astype(int) - int(med[1])) < 45) & \
+               (np.abs(a[:, :, 0].astype(int) - int(med[0])) < 60) & \
+               (np.abs(a[:, :, 2].astype(int) - int(med[2])) < 60)
+        lab, _ = ndi.label(cand)
+        edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
+        return np.isin(lab, list(edge))
     if med.min() > 235:
-        cand = (np.abs(a - med).max(axis=2) < 26) & (sat < 22)
+        cand = (np.abs(a - med).max(axis=2) < 34) & (sat < 26)
     else:
         cand = (np.abs(a.mean(axis=2) - med.mean()) < 38) & (sat < 22)
     lab, _ = ndi.label(cand)
     edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
     return np.isin(lab, list(edge))
+
+
+def strip_chroma(rgba):
+    """Supprime le fond chroma vert #00B140 résiduel (pixels très verts, canal G dominant)."""
+    r = rgba[..., 0].astype(np.int16); g = rgba[..., 1].astype(np.int16); b = rgba[..., 2].astype(np.int16)
+    green = (g > 100) & (g > r + 30) & (g > b + 20) & (rgba[..., 3] > 8)
+    out = rgba.copy()
+    out[..., 3] = np.where(green, 0, out[..., 3])
+    return out
+
+
+def strip_ground_shadow(rgba, fg):
+    """Supprime l'ombre portée au sol sous un bâtiment : pixels grisâtres sombres, peu saturés,
+    dans la partie basse de la case et reliés au pied du bâtiment."""
+    a = rgba[..., :3].astype(np.float32)
+    alpha = rgba[..., 3]
+    lum = a.mean(axis=2)
+    sat = (a.max(axis=2) - a.min(axis=2)) / np.maximum(a.max(axis=2), 1)
+    shadowish = (lum > 60) & (lum < 200) & (sat < 0.18) & (alpha > 40)
+    # seulement dans le tiers inférieur de l'image
+    h = rgba.shape[0]
+    mask = np.zeros_like(shadowish)
+    mask[int(h * 0.62):, :] = shadowish[int(h * 0.62):, :]
+    # ne garder que les composantes reliées au bas (l'ombre touche le bas de la case)
+    lab, n = ndi.label(mask)
+    if n == 0:
+        return rgba
+    bottom = set(np.unique(lab[-1, :])) - {0}
+    keep = np.isin(lab, list(bottom))
+    out = rgba.copy()
+    out[..., 3] = np.where(keep, 0, out[..., 3])
+    return out
 
 
 def cut_out(a, summer=False, min_blob=100):
@@ -164,11 +205,92 @@ def crop(rgba, fg, how):
     return Image.fromarray(sub[ys.min():ys.max() + 1, xs.min():xs.max() + 1], "RGBA")
 
 
+
+# ── Mode V65 : 1 bâtiment par image, 5 niveaux en ligne ─────────
+# MANIFEST_V65 : (planche, nation, bâtiment, emprise) — la planche est découpée en 5 cases
+# horizontales égales (niveau 1 à gauche → 5 à droite) ; merveille = 1 case entière.
+MANIFEST_V65 = [
+    # nation, bâtiment, emprise (3x3 ou 2x2) — la planche se découpe seule en 5 cases égales
+]
+V65_BUILDINGS_5 = ["hall", "caserne", "residence", "scierie", "mine", "tannerie", "cabane", "verger", "muraille"]
+V65_EMPRISE = {"hall": 3, "caserne": 2, "residence": 2, "scierie": 2, "mine": 3, "tannerie": 2,
+               "cabane": 2, "verger": 3, "muraille": 3, "merveille": 3}
+
+
+def crop_v65(rgba, fg, building, cells=5):
+    """Découpe V65 : `cells` cases horizontales égales (5 niveaux), détourées individuellement."""
+    w = rgba.shape[1]
+    out = []
+    for i in range(cells):
+        x0 = w * i // cells
+        x1 = w * (i + 1) // cells
+        sub = rgba[:, x0:x1].copy()
+        subfg = fg[:, x0:x1]
+        keep = main_part(subfg)
+        sub[..., 3] = np.where(keep, sub[..., 3], 0)
+        ys, xs = np.where(sub[..., 3] > 8)
+        if len(ys) == 0:
+            out.append(Image.new("RGBA", (8, 8), (0, 0, 0, 0)))
+            continue
+        # coupe horizontale seule : toute la hauteur de la case est conservée pour ancrer le pied en bas
+        out.append(Image.fromarray(sub[:, xs.min():xs.max() + 1], "RGBA"))
+    return out
+
+
+def run_v65(sheets_dir, only=None):
+    """Découpe les planches V65 (planches/<nation>/<batiment>.png) en sprites <batiment>_<n>.png."""
+    nations = [d for d in os.listdir(os.path.join(sheets_dir, "planches")) if os.path.isdir(os.path.join(sheets_dir, "planches", d))]
+    for nation in nations:
+        if only and nation != only:
+            continue
+        pdir = os.path.join(sheets_dir, "planches", nation)
+        for fname in sorted(os.listdir(pdir)):
+            if not fname.endswith((".png", ".jpg")):
+                continue
+            building = fname.rsplit(".", 1)[0]
+            if building.startswith(nation + "_"):
+                building = building[len(nation) + 1:]
+            a = load(os.path.join(pdir, fname))
+            rgba, fg = cut_out(a, summer=False)
+            rgba = strip_ground_shadow(rgba, fg)
+            rgba = strip_chroma(rgba)
+            fg = rgba[..., 3] > 8
+            cells = 1 if building == "merveille" else 5
+            pieces = crop_v65(rgba, fg, building, cells)
+            # le pied (bas du contenu) doit rester le même dans toutes les cases : on recadre
+            # chaque case sur son contenu PUIS on ancre tout en bas de la toile commune
+            k = min(1.25, TARGET_W.get(building, 480) / max(max(im.width for im in pieces), 1))
+            w = max(1, round(max(im.width for im in pieces) * k))
+            h = max(1, round(max(im.height for im in pieces) * k))
+            # borne la hauteur : un artefact vertical isolé ne doit pas gonfler la toile
+            med_h = sorted(im.height for im in pieces)[len(pieces) // 2]
+            if h > med_h * k * 1.6:
+                h = max(1, round(med_h * k * 1.6))
+            d = os.path.join(OUT_ROOT, nation)
+            os.makedirs(d, exist_ok=True)
+            for i, im in enumerate(pieces):
+                canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+                sim = im.resize((max(1, round(im.width * k)), max(1, round(im.height * k))), Image.LANCZOS) if abs(k - 1.0) > 0.01 else im
+                canvas.alpha_composite(sim, ((w - sim.width) // 2, h - sim.height))
+                if cells == 1:
+                    out_name = building + ".png"
+                else:
+                    out_name = "%s_%d.png" % (building, i + 1)
+                if out_name.startswith(nation + "_"):
+                    out_name = out_name[len(nation) + 1:]
+                canvas.save(os.path.join(d, out_name), optimize=True)
+                print("%-10s %-14s %dx%d" % (nation, out_name, canvas.width, canvas.height))
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("sheets")
+    ap.add_argument("sheets", nargs="?", default=None)
     ap.add_argument("--only")
+    ap.add_argument("--v65", action="store_true", help="mode V65 : planches/<nation>/<batiment>.png (5 niveaux en ligne)")
     args = ap.parse_args()
+    if args.v65:
+        run_v65(args.sheets or ".", only=args.only)
+        return
     cache = {}
     pieces = {}      # (nation, fichier) -> image
     for sheet, nation, name, how in MANIFEST:

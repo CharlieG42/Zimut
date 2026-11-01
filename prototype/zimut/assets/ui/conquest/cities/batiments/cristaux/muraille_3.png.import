@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://2uqvp73sza594"
+path="res://.godot/imported/muraille_3.png-ef407394d2e8bf08dcadf516a10d89a9.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/cristaux/muraille_3.png"
+dest_files=["res://.godot/imported/muraille_3.png-ef407394d2e8bf08dcadf516a10d89a9.ctex"]
+
+[params]
+
+compress/mode=0

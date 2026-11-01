@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://6z2l26if8w2if"
+path="res://.godot/imported/residence_4.png-8507b69deaa6e21753eed9f7faaaa44c.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/brasier/residence_4.png"
+dest_files=["res://.godot/imported/residence_4.png-8507b69deaa6e21753eed9f7faaaa44c.ctex"]
+
+[params]
+
+compress/mode=0

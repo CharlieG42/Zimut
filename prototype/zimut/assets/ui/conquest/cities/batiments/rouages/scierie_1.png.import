@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://7i110zup1wmmp"
+path="res://.godot/imported/scierie_1.png-1ad07685075ef6b07d52696c8b5996bf.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/rouages/scierie_1.png"
+dest_files=["res://.godot/imported/scierie_1.png-1ad07685075ef6b07d52696c8b5996bf.ctex"]
+
+[params]
+
+compress/mode=0

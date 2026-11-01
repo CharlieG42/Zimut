@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://h221tabc8lwsd"
+path="res://.godot/imported/muraille_2.png-85336a81f24e7d9625cf0eb85d36c112.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/brasier/muraille_2.png"
+dest_files=["res://.godot/imported/muraille_2.png-85336a81f24e7d9625cf0eb85d36c112.ctex"]
+
+[params]
+
+compress/mode=0

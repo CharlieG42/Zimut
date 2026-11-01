@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://kwcb0putvgzc8"
+path="res://.godot/imported/hall_4.png-14f1708009fb2dcd124e06d287591cd6.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/cristaux/hall_4.png"
+dest_files=["res://.godot/imported/hall_4.png-14f1708009fb2dcd124e06d287591cd6.ctex"]
+
+[params]
+
+compress/mode=0
