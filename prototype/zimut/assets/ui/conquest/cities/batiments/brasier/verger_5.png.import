@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://q0tlf043chb9o"
+path="res://.godot/imported/verger_5.png-2c668fad864cd5e2c8f3ed99fe3bb92d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/brasier/verger_5.png"
+dest_files=["res://.godot/imported/verger_5.png-2c668fad864cd5e2c8f3ed99fe3bb92d.ctex"]
+
+[params]
+
+compress/mode=0

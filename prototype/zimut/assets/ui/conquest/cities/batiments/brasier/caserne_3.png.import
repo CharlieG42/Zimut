@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://rbj6mb3jrrv1z"
+path="res://.godot/imported/caserne_3.png-13a523f8c031906f7e78519b65f61d8e.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/brasier/caserne_3.png"
+dest_files=["res://.godot/imported/caserne_3.png-13a523f8c031906f7e78519b65f61d8e.ctex"]
+
+[params]
+
+compress/mode=0

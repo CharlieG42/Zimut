@@ -93,12 +93,35 @@ def background(a):
     med = np.median(border, axis=0)
     sat = a.max(axis=2) - a.min(axis=2)
     if med.min() > 235:
-        cand = (np.abs(a - med).max(axis=2) < 26) & (sat < 22)
+        cand = (np.abs(a - med).max(axis=2) < 34) & (sat < 26)
     else:
         cand = (np.abs(a.mean(axis=2) - med.mean()) < 38) & (sat < 22)
     lab, _ = ndi.label(cand)
     edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
     return np.isin(lab, list(edge))
+
+
+def strip_ground_shadow(rgba, fg):
+    """Supprime l'ombre portée au sol sous un bâtiment : pixels grisâtres sombres, peu saturés,
+    dans la partie basse de la case et reliés au pied du bâtiment."""
+    a = rgba[..., :3].astype(np.float32)
+    alpha = rgba[..., 3]
+    lum = a.mean(axis=2)
+    sat = (a.max(axis=2) - a.min(axis=2)) / np.maximum(a.max(axis=2), 1)
+    shadowish = (lum > 60) & (lum < 200) & (sat < 0.18) & (alpha > 40)
+    # seulement dans le tiers inférieur de l'image
+    h = rgba.shape[0]
+    mask = np.zeros_like(shadowish)
+    mask[int(h * 0.62):, :] = shadowish[int(h * 0.62):, :]
+    # ne garder que les composantes reliées au bas (l'ombre touche le bas de la case)
+    lab, n = ndi.label(mask)
+    if n == 0:
+        return rgba
+    bottom = set(np.unique(lab[-1, :])) - {0}
+    keep = np.isin(lab, list(bottom))
+    out = rgba.copy()
+    out[..., 3] = np.where(keep, 0, out[..., 3])
+    return out
 
 
 def cut_out(a, summer=False, min_blob=100):
@@ -192,7 +215,8 @@ def crop_v65(rgba, fg, building, cells=5):
         if len(ys) == 0:
             out.append(Image.new("RGBA", (8, 8), (0, 0, 0, 0)))
             continue
-        out.append(Image.fromarray(sub[ys.min():ys.max() + 1, xs.min():xs.max() + 1], "RGBA"))
+        # coupe horizontale seule : toute la hauteur de la case est conservée pour ancrer le pied en bas
+        out.append(Image.fromarray(sub[:, xs.min():xs.max() + 1], "RGBA"))
     return out
 
 
@@ -207,25 +231,35 @@ def run_v65(sheets_dir, only=None):
             if not fname.endswith((".png", ".jpg")):
                 continue
             building = fname.rsplit(".", 1)[0]
+            if building.startswith(nation + "_"):
+                building = building[len(nation) + 1:]
             a = load(os.path.join(pdir, fname))
             rgba, fg = cut_out(a, summer=False)
+            rgba = strip_ground_shadow(rgba, fg)
+            fg = rgba[..., 3] > 8
             cells = 1 if building == "merveille" else 5
             pieces = crop_v65(rgba, fg, building, cells)
-            # toile commune par bâtiment (pied centré en bas) : conserve la taille relative des niveaux
-            w = max(im.width for im in pieces)
-            h = max(im.height for im in pieces)
-            k = min(1.25, TARGET_W.get(building, 480) / max(w, 1))
+            # le pied (bas du contenu) doit rester le même dans toutes les cases : on recadre
+            # chaque case sur son contenu PUIS on ancre tout en bas de la toile commune
+            k = min(1.25, TARGET_W.get(building, 480) / max(max(im.width for im in pieces), 1))
+            w = max(1, round(max(im.width for im in pieces) * k))
+            h = max(1, round(max(im.height for im in pieces) * k))
+            # borne la hauteur : un artefact vertical isolé ne doit pas gonfler la toile
+            med_h = sorted(im.height for im in pieces)[len(pieces) // 2]
+            if h > med_h * k * 1.6:
+                h = max(1, round(med_h * k * 1.6))
             d = os.path.join(OUT_ROOT, nation)
             os.makedirs(d, exist_ok=True)
             for i, im in enumerate(pieces):
                 canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-                canvas.alpha_composite(im, ((w - im.width) // 2, h - im.height))
-                if abs(k - 1.0) > 0.01:
-                    canvas = canvas.resize((max(8, round(w * k)), max(8, round(h * k))), Image.LANCZOS)
+                sim = im.resize((max(1, round(im.width * k)), max(1, round(im.height * k))), Image.LANCZOS) if abs(k - 1.0) > 0.01 else im
+                canvas.alpha_composite(sim, ((w - sim.width) // 2, h - sim.height))
                 if cells == 1:
                     out_name = building + ".png"
                 else:
                     out_name = "%s_%d.png" % (building, i + 1)
+                if out_name.startswith(nation + "_"):
+                    out_name = out_name[len(nation) + 1:]
                 canvas.save(os.path.join(d, out_name), optimize=True)
                 print("%-10s %-14s %dx%d" % (nation, out_name, canvas.width, canvas.height))
 

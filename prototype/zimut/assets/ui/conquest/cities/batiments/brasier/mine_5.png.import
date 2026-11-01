@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://ldi4m1v2s0a3h"
+path="res://.godot/imported/mine_5.png-e19d312fb546c9cd61ee7cdf5a844a68.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/brasier/mine_5.png"
+dest_files=["res://.godot/imported/mine_5.png-e19d312fb546c9cd61ee7cdf5a844a68.ctex"]
+
+[params]
+
+compress/mode=0
