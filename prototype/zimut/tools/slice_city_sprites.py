@@ -316,11 +316,17 @@ def run_v65(sheets_dir, only=None):
             fg = rgba[..., 3] > 8
             cells = 1 if building == "merveille" else 5
             pieces = crop_v65(rgba, fg, building, cells)
-            # recadre chaque case sur son contenu visible (enlève le halo résiduel)
+            # recadre chaque case sur son contenu visible (enlève le halo résiduel) + marge transparente 4%
             trimmed = []
             for im in pieces:
                 bb = im.getbbox()
-                trimmed.append(im.crop(bb) if bb else im)
+                if bb:
+                    im = im.crop(bb)
+                pad_x = max(2, int(im.width * 0.04))
+                pad_y = max(2, int(im.height * 0.04))
+                canvas = Image.new("RGBA", (im.width + 2 * pad_x, im.height + 2 * pad_y), (0, 0, 0, 0))
+                canvas.alpha_composite(im, (pad_x, pad_y))
+                trimmed.append(canvas)
             pieces = trimmed
             # repli de niveau vide : case quasi vide (<3000 px) -> copie du niveau le plus proche non vide
             if cells > 1:

@@ -9,6 +9,6 @@ FORBIDDEN: no saturated bright colors, no lava, no gold.
 LAYOUT: ONE single cell, ONE building; isometric 2:1 camera angle; diamond-shaped stone plaza base,
 footprint of 3x3 tiles; NO cast shadow on the ground, NO glow halo outside the building itself,
 NO reflections; plain white background, no gradient.
- NO TRUNCATION: every building must be FULLY visible inside its own cell, with a CLEAR EMPTY MARGIN of at least 20% of the cell width on the left and right and at least 15% of the cell height on top and bottom. The building must NEVER touch or cross the cell borders, the image edge, or the top/bottom of the image. If any part of a building is cut off, clipped, cropped or touches a border, the image is WRONG: redraw that building SMALLER and more centered until it fits entirely with the full margin. All 5 buildings must be completely visible with their whole silhouette, including roofs, spires, chimneys and flags. All 5 buildings completely visible, nothing clipped. AVOID: people, characters, flat vector art, pixel art, text, labels, logos, cast shadows,
+ All 5 buildings completely visible, nothing clipped. AVOID: people, characters, flat vector art, pixel art, text, labels, logos, cast shadows,
 background gradients, extra buildings.
 Save as planches/brumes/merveille.png
