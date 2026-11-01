@@ -92,6 +92,14 @@ def background(a):
     border = np.concatenate([a[0], a[-1], a[:, 0], a[:, -1]])
     med = np.median(border, axis=0)
     sat = a.max(axis=2) - a.min(axis=2)
+    # chroma vert V65 (#00B140) : très saturé, canal G dominant
+    if med[1] > 120 and med[1] > med[0] * 1.4 and med[1] > med[2] * 1.2:
+        cand = (np.abs(a[:, :, 1].astype(int) - int(med[1])) < 45) & \
+               (np.abs(a[:, :, 0].astype(int) - int(med[0])) < 60) & \
+               (np.abs(a[:, :, 2].astype(int) - int(med[2])) < 60)
+        lab, _ = ndi.label(cand)
+        edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
+        return np.isin(lab, list(edge))
     if med.min() > 235:
         cand = (np.abs(a - med).max(axis=2) < 34) & (sat < 26)
     else:
@@ -99,6 +107,15 @@ def background(a):
     lab, _ = ndi.label(cand)
     edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
     return np.isin(lab, list(edge))
+
+
+def strip_chroma(rgba):
+    """Supprime le fond chroma vert #00B140 résiduel (pixels très verts, canal G dominant)."""
+    r = rgba[..., 0].astype(np.int16); g = rgba[..., 1].astype(np.int16); b = rgba[..., 2].astype(np.int16)
+    green = (g > 100) & (g > r + 30) & (g > b + 20) & (rgba[..., 3] > 8)
+    out = rgba.copy()
+    out[..., 3] = np.where(green, 0, out[..., 3])
+    return out
 
 
 def strip_ground_shadow(rgba, fg):
@@ -236,6 +253,7 @@ def run_v65(sheets_dir, only=None):
             a = load(os.path.join(pdir, fname))
             rgba, fg = cut_out(a, summer=False)
             rgba = strip_ground_shadow(rgba, fg)
+            rgba = strip_chroma(rgba)
             fg = rgba[..., 3] > 8
             cells = 1 if building == "merveille" else 5
             pieces = crop_v65(rgba, fg, building, cells)

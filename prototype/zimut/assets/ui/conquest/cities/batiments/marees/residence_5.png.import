@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://fu7t9blfaua9g"
+path="res://.godot/imported/residence_5.png-15072fd6ea1440328b3598951f03ef15.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/marees/residence_5.png"
+dest_files=["res://.godot/imported/residence_5.png-15072fd6ea1440328b3598951f03ef15.ctex"]
+
+[params]
+
+compress/mode=0

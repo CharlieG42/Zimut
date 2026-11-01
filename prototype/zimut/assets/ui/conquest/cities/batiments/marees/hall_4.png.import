@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://0iwep5936choe"
+path="res://.godot/imported/hall_4.png-528f9e7dd122cbcb762f831b3cc1d400.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/marees/hall_4.png"
+dest_files=["res://.godot/imported/hall_4.png-528f9e7dd122cbcb762f831b3cc1d400.ctex"]
+
+[params]
+
+compress/mode=0
