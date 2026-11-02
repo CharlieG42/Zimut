@@ -63,6 +63,8 @@ var tutorial_enabled: bool = true
 var tuto_seen: Dictionary = {}
 ## V49 : sauvegarde Cloud automatique après chaque combat (si un compte Google est relié).
 var cloud_auto: bool = false
+## Dernière version du journal des nouveautés montrée au joueur.
+var changelog_seen: String = ""
 
 func _ready() -> void:
 	load_settings()
@@ -82,6 +84,7 @@ func load_settings() -> void:
 	text_size = clampi(int(parsed.get("text_size", text_size)), 0, TEXT_SIZES.size() - 1)
 	tutorial_done = bool(parsed.get("tutorial_done", tutorial_done))
 	tutorial_enabled = bool(parsed.get("tutorial_enabled", tutorial_enabled))
+	changelog_seen = String(parsed.get("changelog_seen", changelog_seen))
 	var seen_v: Variant = parsed.get("tuto_seen", {})
 	if typeof(seen_v) == TYPE_DICTIONARY:
 		tuto_seen = seen_v
@@ -104,7 +107,7 @@ func save_settings() -> void:
 	if f == null:
 		push_error("Impossible d'écrire les réglages")
 		return
-	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "anim_speed": anim_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "adventure_3d": adventure_3d, "adventure_models_3d": adventure_models_3d, "graphics_quality": graphics_quality, "language": language, "turn_timer_mode": turn_timer_mode, "cloud_auto": cloud_auto}, "\t"))
+	f.store_string(JSON.stringify({"difficulty": difficulty, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "anim_speed": anim_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "adventure_3d": adventure_3d, "adventure_models_3d": adventure_models_3d, "graphics_quality": graphics_quality, "language": language, "turn_timer_mode": turn_timer_mode, "cloud_auto": cloud_auto, "changelog_seen": changelog_seen}, "\t"))
 	f.close()
 
 func set_difficulty(idx: int) -> void:
@@ -153,6 +156,10 @@ func set_graphics_quality(idx: int) -> void:
 
 func set_adventure_models_3d(on: bool) -> void:
 	adventure_models_3d = on
+	save_settings()
+
+func mark_changelog_seen(id: String) -> void:
+	changelog_seen = id
 	save_settings()
 
 func set_haptics(on: bool) -> void:

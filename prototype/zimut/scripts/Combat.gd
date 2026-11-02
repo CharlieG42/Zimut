@@ -786,6 +786,38 @@ static func range_scales(p: Dictionary, rng: int) -> bool:
 	return not (String(p["kind"]) in ["attack", "heal"])
 
 
+## Texte « Niv. 3 → 4 : 24 → 25 · durée +1 · portée +1 » pour l'infobulle de combat ("" si rien à dire).
+static func level_hint(spell: Dictionary) -> String:
+	var lvl: int = int(spell.get("spell_level", 1))
+	var p: Dictionary = parse(spell)
+	var parts: Array[String] = []
+	var val: int = 0
+	var lbl: String = ""
+	for pair: Array in [["dmg", "dégâts"], ["heal", "soin"], ["trap", "piège"], ["regen", "régén."]]:
+		if int(p[pair[0]]) > 0:
+			val = int(p[pair[0]])
+			lbl = String(pair[1])
+			break
+	if lvl < 10:
+		var nxt: Dictionary = spell.duplicate(true)
+		nxt.erase("_p")
+		nxt["spell_level"] = lvl + 1
+		nxt["mult"] = 1.0 + float(lvl) * 0.06
+		var pn: Dictionary = parse(nxt)
+		if val > 0 and lbl != "":
+			var key: String = "dmg" if lbl == "dégâts" else ("heal" if lbl == "soin" else ("trap" if lbl == "piège" else "regen"))
+			parts.append("%s %d → %d au niv. %d" % [lbl, val, int(pn[key]), lvl + 1])
+		var tn: Dictionary = level_perks(lvl + 1)
+		var tc: Dictionary = level_perks(lvl)
+		if int(tn["turns"]) > int(tc["turns"]):
+			parts.append("durée +1 au niv. %d" % (lvl + 1))
+		if int(tn["range"]) > int(tc["range"]) and range_scales(p, int(spell.get("range", 0))):
+			parts.append("portée +1 au niv. %d" % (lvl + 1))
+	elif val > 0:
+		parts.append("niveau max")
+	return "  ·  ".join(parts)
+
+
 ## Nombre de lancers autorisés par tour (évite le spam du meilleur sort).
 static func max_casts(spell: Dictionary) -> int:
 	# Une seule invocation de créature par tour : on bâtit son armée au fil des tours
