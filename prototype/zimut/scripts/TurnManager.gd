@@ -199,6 +199,10 @@ func _score_cast(e: Dictionary, spell: Dictionary, p: Dictionary, c: Vector2i) -
 					gs += 14.0 * float(foes_fx["debuffs"].size())
 			return gs if gs >= 20.0 else 0.0
 		"summon":
+			# Les balises du Chasseur ne font rien seules (outil de combo) : l'IA ne les repose pas en boucle
+			# au lieu d'attaquer (blocage de 342 tours observé face à un ennemi qui les détruit chaque tour).
+			if bool(Combat.SUMMONS.get(String(p.get("summon", "")), {}).get("beacon", false)):
+				return 0.0
 			return 75.0 if gm.summons_of(e).size() < 2 else 0.0
 		"revive":
 			return 140.0 if not gm.graveyard.is_empty() else 0.0
