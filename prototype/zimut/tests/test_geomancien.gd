@@ -94,7 +94,7 @@ func _boot() -> void:
 	for tp: Dictionary in gm.terrain_of(geo):
 		uids[tp["uid"]] = true
 	check(uids.size() == gm.terrain_of(geo).size(), "chaque case de terrain a un identifiant unique")
-	# V73 : une muraille (3 cases) compte pour UNE construction ; 4 constructions max ; Rappel de pierre
+	# V73 : une muraille (3 cases) compte pour UNE construction ; 3 constructions max ; Rappel de pierre
 	check(gm.constructions_of(geo).size() == 2, "pilier + muraille = 2 constructions (%d)" % gm.constructions_of(geo).size())
 	var rp: Dictionary = _spell(gm, geo, "Rappel de pierre")
 	check(not rp.is_empty() and String(Combat.parse(rp)["kind"]) == "recall_build", "Rappel de pierre disponible")
@@ -107,7 +107,7 @@ func _boot() -> void:
 	for yy: int in range(gm.GRID_SIZE):
 		for xx: int in range(gm.GRID_SIZE):
 			var cc := Vector2i(xx, yy)
-			if placed >= 4 or tries > 40:
+			if placed >= 3 or tries > 40:
 				continue
 			if gm.is_free(cc) and Combat.manhattan(gp, cc) >= 1 and Combat.manhattan(gp, cc) <= 4:
 				tries += 1
@@ -115,7 +115,7 @@ func _boot() -> void:
 				geo["casts"] = {}
 				if gm.cast_spell(geo, _spell(gm, geo, "Invoquer Pilier"), cc):
 					placed = gm.constructions_of(geo).size()
-	check(placed == 4, "4 constructions posées (%d)" % placed)
+	check(placed == 3, "3 constructions posées (%d)" % placed)
 	var free5 := Vector2i(-1, -1)
 	for yy2: int in range(gm.GRID_SIZE):
 		for xx2: int in range(gm.GRID_SIZE):
@@ -123,7 +123,7 @@ func _boot() -> void:
 			if free5.x < 0 and gm.is_free(c5) and Combat.manhattan(gp, c5) <= 4 and Combat.manhattan(gp, c5) >= 1:
 				free5 = c5
 	geo["casts"] = {}
-	check(gm.validate_cast(geo, _spell(gm, geo, "Invoquer Pilier"), free5).contains("4 constructions"), "5e construction refusée")
+	check(gm.validate_cast(geo, _spell(gm, geo, "Invoquer Pilier"), free5).contains("3 constructions"), "4e construction refusée")
 	check(int(Combat.SUMMONS["Pilier"]["pv"]) > 70 and int(Combat.SUMMONS["Muraille"]["pv"]) > 70, "piliers et murailles plus solides qu'avant (70 PV)")
 	# Faille : bloque le passage mais pas la vue
 	var finfo: Dictionary = Combat.SUMMONS["Faille"]

@@ -969,14 +969,7 @@ func _glyphs_expire(e: Dictionary) -> void:
 
 
 ## V73 : nombre max de constructions (piliers, murailles) d'un Géomancien sur le plateau.
-const MAX_CONSTRUCTIONS: int = 4
-
-
-## TEMPORAIRE (réglage de l'équilibrage) : lit un multiplicateur dans l'environnement.
-func _tune(key: String, default_v: float) -> float:
-	var v: String = OS.get_environment(key)
-	return float(v) if v != "" else default_v
-
+const MAX_CONSTRUCTIONS: int = 3   # V76 : 4 → 3 (équilibrage : les constructions faisaient du Géomancien la classe dominante)
 
 ## Constructions distinctes (une muraille de 3 cases compte pour une) d'un Géomancien.
 func constructions_of(owner: Dictionary) -> Array:
@@ -1594,10 +1587,8 @@ func validate_cast(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Str
 	if p["kind"] == "summon" and not terr and not is_beacon and summons_of(caster).size() >= 3:
 		return "Trop de familiers (3 max)."
 	var mech: String = String(Combat.SUMMONS.get(String(p["summon"]), {}).get("mech", ""))
-	if p["kind"] == "summon" and terr and mech == "" and _tune("ZIMUT_NO_BUILD", 0.0) > 0.0:
-		return "(test) constructions désactivées"
-	if p["kind"] == "summon" and terr and mech == "" and constructions_of(caster).size() >= int(_tune("ZIMUT_MAX_BUILD", float(MAX_CONSTRUCTIONS))):
-		return "4 constructions max : utilisez Rappel de pierre."
+	if p["kind"] == "summon" and terr and mech == "" and constructions_of(caster).size() >= MAX_CONSTRUCTIONS:
+		return "%d constructions max : utilisez Rappel de pierre." % MAX_CONSTRUCTIONS
 	if p["kind"] == "summon" and mech != "":
 		var err: String = _validate_mech(caster, mech)
 		if err != "":
@@ -2122,7 +2113,7 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 		int(caster["level"]), cell)
 	var scale: float = (0.7 + float(caster["level"]) / 400.0) * (1.0 + float(caster.get("intelligence", 0)) / 400.0) * float(p.get("summon_mult", 1.0))
 	s.merge({
-		"max_pv": int(float(info["pv"]) * scale * (_tune("ZIMUT_BUILD_PV", 1.0) if bool(info.get("terrain", false)) else 1.0)), "current_pv": int(float(info["pv"]) * scale * (_tune("ZIMUT_BUILD_PV", 1.0) if bool(info.get("terrain", false)) else 1.0)),
+		"max_pv": int(float(info["pv"]) * scale), "current_pv": int(float(info["pv"]) * scale),
 		"force": int(float(info["force"]) * scale), "intelligence": int(float(info["force"]) * scale),
 		"agility": info["agility"], "wisdom": 20, "defense": info["defense"],
 		"max_pa": info["pa"], "current_pa": 0, "max_pm": info["pm"], "current_pm": 0,
@@ -2255,7 +2246,7 @@ func _tower_attacks(owner: Dictionary) -> void:
 		if best.is_empty():
 			continue
 		# V17/V19 : aligné sur les sorts des héros (/1,7)
-		var base: float = (36.0 + float(owner["level"]) * 1.1) / 2.0 * _tune("ZIMUT_PILLAR_MULT", 1.0)   # V73 : piliers plus puissants
+		var base: float = (36.0 + float(owner["level"]) * 1.1) / 2.0   # V73 : piliers plus puissants
 		var r: Dictionary = Combat.calc_damage(owner, best, base, "mag", 0.0, false, false)
 		fx.emit("cast", {"caster": tw, "spell": "Éclat du pilier", "kind": "attack", "dtype": "mag",
 			"from": tpos, "to": pos_of(best), "ranged": true, "cells": [pos_of(best)] as Array[Vector2i]})
