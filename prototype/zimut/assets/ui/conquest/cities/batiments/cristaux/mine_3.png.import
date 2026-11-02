@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://kiw8hfwaodecok"
+path="res://.godot/imported/mine_3-29d9f6cbc27c4372b21e6f46c55394b8.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/cristaux/mine_3"
+dest_files=["res://.godot/imported/mine_3-29d9f6cbc27c4372b21e6f46c55394b8.ctex"]
+
+[params]
+
+compress/mode=0
