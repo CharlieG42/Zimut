@@ -19,6 +19,7 @@ const PERSIST_EVERY := 3.0
 const MOB_STEP_TIME := 0.7
 
 var manager: Node = null
+var _leaves: CPUParticles3D = null
 var zone_id: String = ""
 var terrain: Dictionary = {}
 var explorer: Adv3DExplorer = null
@@ -226,6 +227,49 @@ func _build_ambient() -> void:
 	p.material_override = mat
 	add_child(p)
 	_ambient = p
+	if biome == "Forêt":
+		_build_falling_leaves()
+
+
+## Forêt : quelques feuilles qui tombent en tournoyant (2e émetteur, léger).
+func _build_falling_leaves() -> void:
+	var lp := CPUParticles3D.new()
+	lp.name = "FeuillesTombantes"
+	lp.local_coords = false
+	lp.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	lp.emission_box_extents = Vector3(10.0, 0.5, 10.0)
+	lp.position = Vector3(0, 5.5, 0)
+	lp.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.32, 0.2)
+	lp.mesh = quad
+	var m := StandardMaterial3D.new()
+	m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	m.vertex_color_use_as_albedo = true
+	lp.material_override = m
+	lp.amount = maxi(8, int(26.0 * GfxQuality.density()))
+	lp.preprocess = 7.0
+	lp.lifetime = 7.0
+	lp.direction = Vector3.DOWN
+	lp.spread = 25.0
+	lp.gravity = Vector3(0.35, -0.55, 0.15)
+	lp.initial_velocity_min = 0.1
+	lp.initial_velocity_max = 0.4
+	lp.angle_min = 0.0
+	lp.angle_max = 360.0
+	lp.angular_velocity_min = -140.0
+	lp.angular_velocity_max = 140.0
+	lp.particle_flag_rotate_y = true
+	lp.damping_min = 0.4
+	lp.damping_max = 0.8
+	var g := Gradient.new()
+	g.colors = PackedColorArray([Color(0.45, 0.72, 0.25), Color(0.85, 0.70, 0.22), Color(0.80, 0.42, 0.18)])
+	g.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
+	lp.color_initial_ramp = g
+	add_child(lp)
+	_leaves = lp
 
 
 func _amb(p: CPUParticles3D, mat: StandardMaterial3D, amount: int, life: float, grav: Vector3, v0: float, v1: float,
@@ -360,6 +404,8 @@ func _animate_world(delta: float) -> void:
 			isl.rotation.y += delta * 0.02
 	if _ambient != null and explorer != null:
 		_ambient.global_position = explorer.global_position + Vector3(0, 3.0, 0)
+		if _leaves != null:
+			_leaves.global_position = explorer.global_position + Vector3(0, 5.5, 0)
 	for k: String in _poi_nodes.keys():
 		var pn: Node3D = _poi_nodes[k]
 		if not is_instance_valid(pn):

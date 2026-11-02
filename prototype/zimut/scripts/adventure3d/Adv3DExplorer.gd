@@ -141,6 +141,8 @@ func _animate_rig(delta: float, before: Vector3) -> void:
 	flat.y = 0.0
 	var turn: float = wrapf(_facing - _prev_facing, -PI, PI) / delta
 	_rig.animate(delta, flat.length() / delta, turn)
+	# Sensation de vitesse : le champ de vision s'ouvre un peu en course (52° → 57°)
+	camera.fov = lerpf(camera.fov, 52.0 + 5.0 * _rig.run_amount(), 1.0 - exp(-delta * 4.0))
 
 
 func _keyboard_vector() -> Vector2:
