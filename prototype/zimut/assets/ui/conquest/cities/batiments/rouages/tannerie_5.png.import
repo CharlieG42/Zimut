@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://wn6qpi3lrp2o6b"
+path="res://.godot/imported/tannerie_5-a6707f202a234afab19500478f21e532.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/rouages/tannerie_5"
+dest_files=["res://.godot/imported/tannerie_5-a6707f202a234afab19500478f21e532.ctex"]
+
+[params]
+
+compress/mode=0
