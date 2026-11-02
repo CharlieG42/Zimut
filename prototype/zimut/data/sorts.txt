@@ -241,7 +241,7 @@ Sylvain,Invoquer Tronc,3,0,1,Invoque un Tronc (contrôlable; 3PM/4PA),88,Invocat
 Sylvain,Souffle de vie,4,0,0,Restaure 88 PV à tous les alliés,95,Soin,0,0,88,0,0,0,0,0,0
 Sylvain,Tempête de pétales,4,0,5,83 dégâts magiques à tous les ennemis,100,Attaque,0,83,0,0,0,0,0,0,0
 Géomancien,Glyphe de grès,2,0,3,Trace un glyphe (3x3; 3 tours) : alliés +25% défense,1,Buff,0,0,0,0,0,0,0,0,0
-Géomancien,Invoquer Pilier,2,0,4,Fait surgir un pilier de grès robuste : bloque le passage et la vue; attaque l'ennemi le plus proche dans un rayon de 4 cases (permanent jusqu'à destruction ou rappel; 4 constructions max),1,Invocation,0,0,0,0,0,0,0,0,0
+Géomancien,Invoquer Pilier,2,0,4,Fait surgir un pilier de grès robuste : bloque le passage et la vue; attaque l'ennemi le plus proche dans un rayon de 4 cases (permanent jusqu'à destruction ou rappel; 3 constructions max),1,Invocation,0,0,0,0,0,0,0,0,0
 Géomancien,Éclat de grès,2,0,4,24 dégâts magiques,1,Attaque,24,0,0,0,0,0,0,0,0
 Géomancien,Caillou,1,0,4,14 dégâts magiques,3,Attaque,0,14,0,0,0,0,0,0,0
 Géomancien,Rappel de pierre,1,0,6,Fait rentrer sous terre une de vos constructions (pilier ou muraille entière) : libère sa place,3,Buff,0,0,0,0,0,0,0,0,0

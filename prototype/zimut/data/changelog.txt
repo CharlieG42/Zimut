@@ -1,3 +1,4 @@
+V76|Équilibrage : le Géomancien ne peut plus avoir que 3 constructions en même temps (au lieu de 4).
 V74|Constructions du Géomancien et mécanismes de l'Ingénieur permanents : ils ne disparaissent plus avec les tours.
 V74|Ingénieur : Maintenance devient Renforcement (soin + niveau max des mécanismes +1) ; nouveau sort Transposition.
 V74|Invocateur : nouveau sort Rappel d'invocation.

@@ -969,7 +969,7 @@ func _glyphs_expire(e: Dictionary) -> void:
 
 
 ## V73 : nombre max de constructions (piliers, murailles) d'un Géomancien sur le plateau.
-const MAX_CONSTRUCTIONS: int = 4
+const MAX_CONSTRUCTIONS: int = 3   # V76 : 4 → 3 (équilibrage : les constructions faisaient du Géomancien la classe dominante)
 
 ## Constructions distinctes (une muraille de 3 cases compte pour une) d'un Géomancien.
 func constructions_of(owner: Dictionary) -> Array:
@@ -1588,7 +1588,7 @@ func validate_cast(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Str
 		return "Trop de familiers (3 max)."
 	var mech: String = String(Combat.SUMMONS.get(String(p["summon"]), {}).get("mech", ""))
 	if p["kind"] == "summon" and terr and mech == "" and constructions_of(caster).size() >= MAX_CONSTRUCTIONS:
-		return "4 constructions max : utilisez Rappel de pierre."
+		return "%d constructions max : utilisez Rappel de pierre." % MAX_CONSTRUCTIONS
 	if p["kind"] == "summon" and mech != "":
 		var err: String = _validate_mech(caster, mech)
 		if err != "":
