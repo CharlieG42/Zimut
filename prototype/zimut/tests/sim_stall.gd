@@ -39,6 +39,9 @@ func _boot() -> void:
 		gm.set_custom_team(ct)
 		gm.auto_mode = true
 		print("niveau ennemis : ", pm.enemy_level_for(data))
+		gm.spell_casted.connect(func(c, sp, t, res): if gm.turn_count > 40: print("T%d cast %s %s -> %s" % [gm.turn_count, c.get("classe"), sp.get("name"), str(res)]))
+		gm.entity_moved.connect(func(en, f, to): if gm.turn_count > 40: print("T%d move %s %s -> %s" % [gm.turn_count, en.get("classe"), str(f), str(to)]))
+		gm.turn_started.connect(func(en): if gm.turn_count > 40: print("T%d début tour %s pa=%d pm=%d pv=%d" % [gm.turn_count, en.get("classe"), int(en.get("current_pa", 0)), int(en.get("current_pm", 0)), int(en.get("current_pv", 0))]))
 		var main: Node = (load("res://scenes/Main.tscn") as PackedScene).instantiate()
 		root.add_child(main)
 		var t0: int = Time.get_ticks_msec()
