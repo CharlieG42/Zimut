@@ -91,7 +91,7 @@ func _on_scene_changed() -> void:
 		biome = String(_autoload("GameManager", "fight_biome", "Forêt"))
 		title = "⚔  Combat"
 		sub = _nation_line(biome)
-	elif path.ends_with("Adventure3D.tscn") or path.ends_with("AdventureMap.tscn"):
+	elif path.ends_with("Adventure3D.tscn") or path.ends_with("AdventureMap.tscn") or path.ends_with("AdventureOpen3D.tscn"):
 		var zid: String = String(sc.get("zone_id")) if sc.get("zone_id") != null else ""
 		var mgr: Object = sc.get("manager")
 		if zid == "" and mgr != null and mgr.has_method("zone_id"):

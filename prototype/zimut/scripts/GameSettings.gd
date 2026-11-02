@@ -142,9 +142,31 @@ func set_cloud_auto(on: bool) -> void:
 	cloud_auto = on
 	save_settings()
 
-## Scène du mode Aventure : monde 3D (bêta) ou carte classique.
+## Scènes des vues du mode Aventure, indexées par la vue mémorisée dans la
+## sauvegarde (« adventure_view » : "map", "3d" ou "open3d").
+const ADVENTURE_SCENES := {
+	"map": "res://scenes/AdventureMap.tscn",
+	"3d": "res://scenes/Adventure3D.tscn",
+	"open3d": "res://scenes/AdventureOpen3D.tscn",
+}
+
+## Scène du mode Aventure : la vue mémorisée dans la partie active si elle existe
+## (monde ouvert 3D, 3D iso, carte classique), sinon le réglage « Mode Aventure ».
 func adventure_scene() -> String:
-	return "res://scenes/Adventure3D.tscn" if adventure_3d else "res://scenes/AdventureMap.tscn"
+	var view: String = active_adventure_view()
+	if view != "" and ADVENTURE_SCENES.has(view):
+		return ADVENTURE_SCENES[view]
+	return ADVENTURE_SCENES["3d" if adventure_3d else "map"]
+
+## Vue d'Aventure mémorisée dans la partie active ("" = suivre le réglage).
+func active_adventure_view() -> String:
+	var gm: Node = get_node_or_null("/root/GameManager")
+	if gm == null:
+		return ""
+	var save: Dictionary = gm.get("active_save")
+	if save.is_empty():
+		return ""
+	return String(save.get("adventure_view", ""))
 
 func set_adventure_3d(on: bool) -> void:
 	adventure_3d = on

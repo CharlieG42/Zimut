@@ -120,6 +120,9 @@ func _ready() -> void:
 	manager.set_script(load("res://scripts/AdventureManager.gd"))
 	add_child(manager)
 	manager.load_state(_save, _slot)
+	# Vue d'Aventure courante mémorisée : le retour d'un combat reviendra ici.
+	_save["adventure_view"] = "map"
+	manager.persist()
 	manager.cities_revealed.connect(_on_cities_revealed)
 	_build()
 	_rebuild_world()

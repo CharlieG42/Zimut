@@ -8,8 +8,9 @@ extends Node
 ## ("playtime_modes"), affichés dans « Mes Parties ».
 ##
 ## Le mode suivi est déduit de la scène courante (pas besoin de le régler à la
-## main) : Main.tscn + TeamSelection.tscn → "tactique", AdventureMap.tscn →
-## "adventure", ConquestMap.tscn → "conquest".
+## main) : Main.tscn + TeamSelection.tscn → "tactique", AdventureMap.tscn +
+## Adventure3D.tscn → "adventure", AdventureOpen3D.tscn → "openworld",
+## ConquestMap.tscn → "conquest".
 
 signal playtime_updated(mode: String, seconds: float)
 
@@ -56,6 +57,8 @@ func _check_scene() -> void:
 		_start("tactique")
 	elif path.ends_with("/AdventureMap.tscn") or path.ends_with("/Adventure3D.tscn"):
 		_start("adventure")
+	elif path.ends_with("/AdventureOpen3D.tscn"):
+		_start("openworld")
 	elif path.ends_with("/ConquestMap.tscn"):
 		_start("conquest")
 	else:

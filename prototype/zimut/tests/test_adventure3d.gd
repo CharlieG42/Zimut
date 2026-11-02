@@ -194,13 +194,20 @@ func _boot() -> void:
 	check(int(st.get("pending_level", 0)) == int(g["level"]), "combat : niveau du groupe transmis")
 	check(gm.fight_biome == "Forêt", "combat : décor de la zone")
 
-	# réglage et scène d'Aventure
+	# réglage et scène d'Aventure (la vue mémorisée dans la partie prime sur le réglage)
 	var gs: Node = root.get_node("GameSettings")
+	gm.active_save.erase("adventure_view")
 	gs.adventure_3d = false
-	check(gs.adventure_scene().ends_with("AdventureMap.tscn"), "réglage : carte classique par défaut")
+	check(gs.adventure_scene().ends_with("AdventureMap.tscn"), "réglage : carte classique par défaut (sans vue mémorisée)")
 	gs.adventure_3d = true
 	check(gs.adventure_scene().ends_with("Adventure3D.tscn"), "réglage : monde 3D si activé")
+	gm.active_save["adventure_view"] = "3d"
 	gs.adventure_3d = false
+	check(gs.adventure_scene().ends_with("Adventure3D.tscn"), "vue mémorisée 3D : retour en monde 3D même si le réglage est carte")
+	gm.active_save["adventure_view"] = "open3d"
+	check(gs.adventure_scene().ends_with("AdventureOpen3D.tscn"), "vue mémorisée open3d : retour en monde ouvert 3D")
+	gs.adventure_3d = false
+	gm.active_save.erase("adventure_view")
 
 	pm.delete_save(4)
 	print("ÉCHECS : %d" % fails)

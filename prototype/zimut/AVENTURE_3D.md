@@ -57,3 +57,37 @@ tests/shot_adventure3d.gd     # captures d'écran (xvfb)
 - [ ] Biomes des Nations (Vents, Brumes, Brasier…) : palettes et props dédiés (repli sur la Forêt).
 - [ ] Sprites HD / ambiance sonore par zone ; pinch pour zoomer.
 - [ ] Mesure de fluidité sur téléphone milieu de gamme (pas d'ombres temps réel pour l'instant).
+
+---
+
+# Monde Ouvert 3D — 4e mode de jeu (V79)
+
+Quatrième bouton de mode dans **Mes Parties → Choisir un mode de jeu** :
+« Monde Ouvert 3D ». C'est le **même monde et la même sauvegarde** que les
+autres modes Aventure (héros, loots, XP, difficulté et temps de jeu sont ceux
+de la partie) ; seule la présentation change, façon Zelda / RPG :
+
+- déplacement libre au sol, caméra 3e personne plus basse et plus proche
+  (`OW_PITCH` / `OW_DISTANCE` dans `AdventureOpen3D.gd`) ;
+- **toucher un groupe de monstres → le combat Tactique se lance directement**
+  (TeamSelection → Main, inchangé) ;
+- **entrer dans un donjon → les 4 salles se lancent directement** ;
+- franchir une porte ouverte → la zone voisine se charge ;
+- au retour d'un combat (victoire ou défaite), on revient dans le monde ouvert
+  à la même place : la vue utilisée est mémorisée dans la sauvegarde
+  (`adventure_view` = `"open3d"`, et `GameSettings.adventure_scene()` s'y réfère).
+
+Le HUD reprend tout ce qui est commun aux autres modes : bandeau de zone avec
+biome, niveau, **difficulté de la partie** et **temps de jeu du mode** (bucket
+`openworld`, affiché aussi dans « Mes Parties »), boutons d'accès aux **héros**
+(fiches) et au **butin** (inventaire commun), mini-carte, boutons vers les deux
+autres vues d'Aventure (« Carte 2D », « Vue 3D iso »).
+
+Un contact déjà « décliné » (monstre/donjon encore sous le joueur au retour d'un
+combat) ne redéclenche pas tant qu'on ne s'en éloigne pas.
+
+```
+scenes/AdventureOpen3D.tscn
+scripts/adventure3d/AdventureOpen3D.gd   # scène du 4e mode (réutilise Adv3D* + AdventureManager)
+tests/test_adventure_open3d.gd            # headless : routage, sauvegarde partagée, playtime, combats
+```
