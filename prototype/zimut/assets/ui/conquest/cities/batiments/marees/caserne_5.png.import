@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://vbn85kcm7hob18"
+path="res://.godot/imported/caserne_5-55de7d67a3d346c09732c04cee0dea40.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/marees/caserne_5"
+dest_files=["res://.godot/imported/caserne_5-55de7d67a3d346c09732c04cee0dea40.ctex"]
+
+[params]
+
+compress/mode=0
