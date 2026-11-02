@@ -9,6 +9,15 @@ func check(c: bool, m: String) -> void:
 	if not c:
 		fails += 1
 
+func _find_btn(n: Node, txt: String) -> Button:
+	if n is Button and String((n as Button).text) == txt:
+		return n as Button
+	for c: Node in n.get_children():
+		var r: Button = _find_btn(c, txt)
+		if r != null:
+			return r
+	return null
+
 func _init() -> void:
 	_boot.call_deferred()
 
@@ -90,6 +99,11 @@ func _boot() -> void:
 	var pois: Dictionary = pm.ADVENTURE_POIS["foret_sylve"]
 	check(scene._poi_nodes.size() == pois.size(), "scène : un marqueur par lieu (%d)" % pois.size())
 	check(scene._gate_nodes.size() == scene.manager.gates().size(), "scène : un portique par porte")
+
+	# V80 : HUD — bouton « Héros » et ligne vue / temps de jeu / difficulté
+	check(scene._mode_label != null and String(scene._mode_label.text).contains("Difficulté"),
+		"HUD : ligne vue/temps/difficulté affichée (%s)" % String(scene._mode_label.text if scene._mode_label != null else ""))
+	check(_find_btn(scene._hud, "Héros") != null, "HUD : bouton 'Héros' présent")
 
 	# personnage « carton » : joueur et Gligli, 8 directions
 	var spr: Adv3DSpriteActor = scene.explorer._sprite
