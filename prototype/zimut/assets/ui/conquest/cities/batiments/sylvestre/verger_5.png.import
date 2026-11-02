@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://5b6tqt2ckn1i5b"
+path="res://.godot/imported/verger_5-1df6f43d167a45c98e6384d7b4b97c11.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/sylvestre/verger_5"
+dest_files=["res://.godot/imported/verger_5-1df6f43d167a45c98e6384d7b4b97c11.ctex"]
+
+[params]
+
+compress/mode=0
