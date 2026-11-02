@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://1fcim9nzq95jdn"
+path="res://.godot/imported/muraille_3-8d588e3552ab4c68bb48b1b507d28c70.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/sables/muraille_3"
+dest_files=["res://.godot/imported/muraille_3-8d588e3552ab4c68bb48b1b507d28c70.ctex"]
+
+[params]
+
+compress/mode=0

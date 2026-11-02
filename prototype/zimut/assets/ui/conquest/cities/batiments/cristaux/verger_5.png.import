@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://lfqfwk32vhh5si"
+path="res://.godot/imported/verger_5-90274819f7c242729540a149f9b3d1a3.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/cristaux/verger_5"
+dest_files=["res://.godot/imported/verger_5-90274819f7c242729540a149f9b3d1a3.ctex"]
+
+[params]
+
+compress/mode=0

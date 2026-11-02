@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://l9jtla10jgiw7n"
+path="res://.godot/imported/mine_2-feff418293c54c67a346008b5f1fec53.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/sables/mine_2"
+dest_files=["res://.godot/imported/mine_2-feff418293c54c67a346008b5f1fec53.ctex"]
+
+[params]
+
+compress/mode=0

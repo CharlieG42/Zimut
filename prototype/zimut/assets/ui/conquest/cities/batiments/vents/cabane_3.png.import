@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://3mgcwhyvllbo7t"
+path="res://.godot/imported/cabane_3-c0221aa594464bf4b09e7a74c74afedc.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/vents/cabane_3"
+dest_files=["res://.godot/imported/cabane_3-c0221aa594464bf4b09e7a74c74afedc.ctex"]
+
+[params]
+
+compress/mode=0

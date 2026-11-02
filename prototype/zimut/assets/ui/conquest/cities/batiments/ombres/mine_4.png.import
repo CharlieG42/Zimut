@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://etp91l2ns2034s"
+path="res://.godot/imported/mine_4-67157b21c73c4c2a8a9133c921dd96c2.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/ombres/mine_4"
+dest_files=["res://.godot/imported/mine_4-67157b21c73c4c2a8a9133c921dd96c2.ctex"]
+
+[params]
+
+compress/mode=0

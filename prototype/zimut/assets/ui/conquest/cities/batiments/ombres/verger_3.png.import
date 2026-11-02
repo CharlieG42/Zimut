@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://jilinv5htuq5rt"
+path="res://.godot/imported/verger_3-01b62f0f0f8344b3a0aa6b67bd049140.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/ombres/verger_3"
+dest_files=["res://.godot/imported/verger_3-01b62f0f0f8344b3a0aa6b67bd049140.ctex"]
+
+[params]
+
+compress/mode=0

@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://8dxra3tm7o9yhn"
+path="res://.godot/imported/cabane_5-bfa78d4f5f7a4cd5b4154cba8acf947e.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/ombres/cabane_5"
+dest_files=["res://.godot/imported/cabane_5-bfa78d4f5f7a4cd5b4154cba8acf947e.ctex"]
+
+[params]
+
+compress/mode=0

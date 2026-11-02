@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://8c5lcdh7vfyzht"
+path="res://.godot/imported/cabane_2-95faf0163a1447658ae0c381166f53f8.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/rouages/cabane_2"
+dest_files=["res://.godot/imported/cabane_2-95faf0163a1447658ae0c381166f53f8.ctex"]
+
+[params]
+
+compress/mode=0

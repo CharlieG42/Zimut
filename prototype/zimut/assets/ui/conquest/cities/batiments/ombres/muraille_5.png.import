@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://oxx3900xvabqim"
+path="res://.godot/imported/muraille_5-5aa4a3f4d0444e28b8bc149f07d9c937.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/ombres/muraille_5"
+dest_files=["res://.godot/imported/muraille_5-5aa4a3f4d0444e28b8bc149f07d9c937.ctex"]
+
+[params]
+
+compress/mode=0

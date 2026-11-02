@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://5v64gbx7fp6j9e"
+path="res://.godot/imported/mine_5-e3c73c6b4333403097b7ffde93c22992.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/cimes/mine_5"
+dest_files=["res://.godot/imported/mine_5-e3c73c6b4333403097b7ffde93c22992.ctex"]
+
+[params]
+
+compress/mode=0
