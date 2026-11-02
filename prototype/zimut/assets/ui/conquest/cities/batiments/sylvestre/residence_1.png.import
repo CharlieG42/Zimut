@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://nomxaaqbg2f1bz"
+path="res://.godot/imported/residence_1-cb5989c2d1de40efa9590fa491ddab29.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/sylvestre/residence_1"
+dest_files=["res://.godot/imported/residence_1-cb5989c2d1de40efa9590fa491ddab29.ctex"]
+
+[params]
+
+compress/mode=0
