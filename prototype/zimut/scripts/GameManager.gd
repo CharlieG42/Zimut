@@ -1596,7 +1596,7 @@ func validate_cast(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Str
 	var mech: String = String(Combat.SUMMONS.get(String(p["summon"]), {}).get("mech", ""))
 	if p["kind"] == "summon" and terr and mech == "" and _tune("ZIMUT_NO_BUILD", 0.0) > 0.0:
 		return "(test) constructions désactivées"
-	if p["kind"] == "summon" and terr and mech == "" and constructions_of(caster).size() >= MAX_CONSTRUCTIONS:
+	if p["kind"] == "summon" and terr and mech == "" and constructions_of(caster).size() >= int(_tune("ZIMUT_MAX_BUILD", float(MAX_CONSTRUCTIONS))):
 		return "4 constructions max : utilisez Rappel de pierre."
 	if p["kind"] == "summon" and mech != "":
 		var err: String = _validate_mech(caster, mech)
@@ -2122,7 +2122,7 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 		int(caster["level"]), cell)
 	var scale: float = (0.7 + float(caster["level"]) / 400.0) * (1.0 + float(caster.get("intelligence", 0)) / 400.0) * float(p.get("summon_mult", 1.0))
 	s.merge({
-		"max_pv": int(float(info["pv"]) * scale), "current_pv": int(float(info["pv"]) * scale),
+		"max_pv": int(float(info["pv"]) * scale * (_tune("ZIMUT_BUILD_PV", 1.0) if bool(info.get("terrain", false)) else 1.0)), "current_pv": int(float(info["pv"]) * scale * (_tune("ZIMUT_BUILD_PV", 1.0) if bool(info.get("terrain", false)) else 1.0)),
 		"force": int(float(info["force"]) * scale), "intelligence": int(float(info["force"]) * scale),
 		"agility": info["agility"], "wisdom": 20, "defense": info["defense"],
 		"max_pa": info["pa"], "current_pa": 0, "max_pm": info["pm"], "current_pm": 0,
