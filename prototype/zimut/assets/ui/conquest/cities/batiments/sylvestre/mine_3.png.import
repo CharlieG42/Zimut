@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://ni1eee3ic987nq"
+path="res://.godot/imported/mine_3-4054ab88b8dd4657a56171a9902782f0.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/sylvestre/mine_3"
+dest_files=["res://.godot/imported/mine_3-4054ab88b8dd4657a56171a9902782f0.ctex"]
+
+[params]
+
+compress/mode=0
