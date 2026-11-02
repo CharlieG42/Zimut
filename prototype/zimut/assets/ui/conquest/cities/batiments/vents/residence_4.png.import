@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://xjt3b8sklqv4z5"
+path="res://.godot/imported/residence_4-2c21c8bb80894950a3778d8056d45e9c.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/vents/residence_4"
+dest_files=["res://.godot/imported/residence_4-2c21c8bb80894950a3778d8056d45e9c.ctex"]
+
+[params]
+
+compress/mode=0

@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://seala70p54hyhj"
+path="res://.godot/imported/residence_3-6f8e29d07edb49be8c109b1a4e190365.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/vents/residence_3"
+dest_files=["res://.godot/imported/residence_3-6f8e29d07edb49be8c109b1a4e190365.ctex"]
+
+[params]
+
+compress/mode=0
