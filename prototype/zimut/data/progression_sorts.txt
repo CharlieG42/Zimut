@@ -170,7 +170,7 @@ Heal,100,Soin ultime
 Invocateur,1,Frappe spectrale;Invoquer Golem de Pierre;Symbiose
 Invocateur,3,Lien d'âme
 Invocateur,5,Invoquer Archer Sylvestre
-Invocateur,8,Trait de lumière
+Invocateur,8,Trait de lumière;Rappel d'invocation
 Invocateur,10,Invoquer Loup Spectral
 Invocateur,12,Rayon spectral
 Invocateur,15,Purification
@@ -262,8 +262,8 @@ Artificier,15,Piège à ressort
 Artificier,18,Entrave
 Artificier,20,Pistolet à silex;Poser Tourelle
 Artificier,24,Cri de guerre
-Artificier,26,Maintenance
-Artificier,30,Poser Bombe assourdissante
+Artificier,26,Renforcement
+Artificier,30,Poser Bombe assourdissante;Transposition
 Artificier,35,Marque du prédateur;Poser Balise de transposition
 Artificier,40,Tir de précision
 Artificier,44,Mine à fragmentation

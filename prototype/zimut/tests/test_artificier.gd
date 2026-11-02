@@ -34,8 +34,8 @@ func _boot() -> void:
 			art = p
 	check(not art.is_empty(), "Artificier jouable")
 	art["spells"] = gm._build_spells("Artificier", 100)
-	check(art["spells"].size() == 31, "31 sorts au niveau 100 (V63 : Couplage)")
-	for nm: String in ["Pistolet à ressort", "Poser Bombe", "Déclencheur", "Poser Mine", "Poser Tourelle", "Poser Balise de transposition", "Glyphe de surcharge", "Poser Charge à fragmentation", "Fusil à pompe", "Arsenal total", "Rappel", "Maintenance", "Poser Bombe incendiaire", "Poser Bombe assourdissante", "Poser Tourelle lourde"]:
+	check(art["spells"].size() == 32, "32 sorts au niveau 100 (V74 : Transposition)")
+	for nm: String in ["Pistolet à ressort", "Poser Bombe", "Déclencheur", "Poser Mine", "Poser Tourelle", "Poser Balise de transposition", "Glyphe de surcharge", "Poser Charge à fragmentation", "Fusil à pompe", "Arsenal total", "Rappel", "Renforcement", "Transposition", "Poser Bombe incendiaire", "Poser Bombe assourdissante", "Poser Tourelle lourde"]:
 		check(not _sp(art, nm).is_empty(), "sort " + nm)
 	var dec: Dictionary = _sp(art, "Déclencheur")
 	check(int(dec["cost_pa"]) == 1, "Déclencheur = 1 PA")
@@ -131,7 +131,7 @@ func _boot() -> void:
 	art["casts"] = {}
 	check(gm.cast_spell(art, _sp(art, "Poser Bombe"), fc[0]), "bombe (V68)")
 	var bb: Dictionary = gm.entity_at(fc[0])
-	check(int(bb.get("lifetime", 0)) == 4, "bombe : explosion au bout de 4 tours")
+	check(int(bb.get("lifetime", 0)) == -1, "bombe : permanente (plus de compte à rebours)")
 	art["casts"] = {}
 	check(gm.cast_spell(art, rap, fc[0]), "Rappel sur la bombe")
 	check(gm.mechs_of(art).is_empty() and not gm.is_alive(bb) or gm.entity_at(fc[0]).is_empty(), "bombe rappelée sans explosion")
@@ -147,8 +147,25 @@ func _boot() -> void:
 	var mt: Dictionary = gm.entity_at(fc[1])
 	mt["current_pv"] = 1
 	art["casts"] = {}
-	check(gm.cast_spell(art, _sp(art, "Maintenance"), gm.pos_of(art)), "Maintenance")
-	check(int(mt["current_pv"]) == int(mt["max_pv"]) and int(mt["lifetime"]) == 6, "réparée et prolongée de 2 tours")
+	check(gm.mech_cap(art) == 5, "niveau max des mécanismes : 5")
+	check(gm.cast_spell(art, _sp(art, "Renforcement"), gm.pos_of(art)), "Renforcement")
+	check(int(mt["current_pv"]) == int(mt["max_pv"]) and int(mt["lifetime"]) == -1, "mécanisme soigné et toujours permanent")
+	check(gm.mech_cap(art) == 6, "Renforcement : niveau max +1")
+	# Transposition : échange avec un mécanisme ciblé
+	var home_a: Vector2i = gm.pos_of(art)
+	var tgt_c: Vector2i = gm.pos_of(mt)
+	art["casts"] = {}
+	art["swapped"] = false
+	check(gm.cast_spell(art, _sp(art, "Transposition"), tgt_c), "Transposition")
+	check(gm.pos_of(art) == tgt_c and gm.pos_of(mt) == home_a, "positions échangées")
+	art["casts"] = {}
+	check(gm.validate_cast(art, _sp(art, "Transposition"), tgt_c) != "", "un seul déplacement par tour")
+	# tours qui passent : rien ne disparaît
+	for _i: int in range(8):
+		gm.active_entity = art
+		gm.end_current_turn()
+		art["swapped"] = false
+	check(gm.mechs_of(art).size() == 5 and gm.is_alive(mt), "mécanismes toujours là après 8 tours")
 	# bombe incendiaire : brûle l'ennemi touché
 	var foe2: Dictionary = gm.enemies[0]
 	var ib: Dictionary = gm.entity_at(fc[2])

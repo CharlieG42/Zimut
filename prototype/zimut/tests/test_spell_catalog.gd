@@ -18,7 +18,7 @@ func _boot() -> void:
 	var combos := 0
 	for classe: String in pm.class_names():
 		var spells: Array = gm._build_spells(classe, 100)
-		var want: int = 31 if classe in ["Géomancien", "Artificier"] else 30   # V73 : + Rappel de pierre ; V63 : + Couplage
+		var want: int = 32 if classe == "Artificier" else (31 if classe in ["Géomancien", "Invocateur"] else 30)   # + Rappel de pierre / Rappel d'invocation ; Artificier : + Couplage + Transposition
 		check(spells.size() == want, "%s : %d sorts au niveau 100 (%d)" % [classe, want, spells.size()])
 		var names := {}
 		for s: Dictionary in spells:

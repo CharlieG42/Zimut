@@ -380,7 +380,9 @@ Flèche de sève,arrow
 Coup de branche,wood_arm
 Rappel,ing_rappel
 Poser Bombe incendiaire,ing_bombe_feu
-Maintenance,ing_maintenance
+Renforcement,ing_maintenance
+Transposition,teleport
+Rappel d'invocation,ing_rappel
 Couplage,ing_couplage
 Poser Bombe assourdissante,ing_bombe_assourd
 Poser Tourelle lourde,ing_tourelle_lourde

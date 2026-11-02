@@ -181,6 +181,7 @@ Heal,Miracle,4,0,3,Restaure 163 PV,95,Soin,0,0,163,0,0,0,0,0,0
 Heal,Soin ultime,4,0,1,Restaure 141 PV,100,Soin,0,0,141,0,0,0,0,0,0
 Invocateur,Frappe spectrale,2,0,4,17 dégâts magiques,1,Attaque,0,17,0,0,0,0,0,0,0
 Invocateur,Invoquer Golem de Pierre,2,0,1,Invoque un Golem de Pierre (contrôlable; 3PM/4PA),1,Invocation,0,0,0,0,0,0,0,0,0
+Invocateur,Rappel d'invocation,1,0,6,Rappelle une de vos invocations : libère sa place,6,Buff,0,0,0,0,0,0,0,0,0
 Invocateur,Symbiose,2,0,1,L'invocation restaure 8 PV à tous les alliés,1,Soin,0,0,8,0,0,0,0,0,0
 Invocateur,Lien d'âme,1,0,1,L'invocation gagne +15% dégâts (2 tours),3,Buff,0,0,0,0,0,0,0,0,0
 Invocateur,Invoquer Archer Sylvestre,2,0,1,Invoque un Archer Sylvestre (contrôlable; 3PM/4PA),5,Invocation,0,0,0,0,0,0,0,0,0
@@ -240,7 +241,7 @@ Sylvain,Invoquer Tronc,3,0,1,Invoque un Tronc (contrôlable; 3PM/4PA),88,Invocat
 Sylvain,Souffle de vie,4,0,0,Restaure 88 PV à tous les alliés,95,Soin,0,0,88,0,0,0,0,0,0
 Sylvain,Tempête de pétales,4,0,5,83 dégâts magiques à tous les ennemis,100,Attaque,0,83,0,0,0,0,0,0,0
 Géomancien,Glyphe de grès,2,0,3,Trace un glyphe (3x3; 3 tours) : alliés +25% défense,1,Buff,0,0,0,0,0,0,0,0,0
-Géomancien,Invoquer Pilier,2,0,4,Fait surgir un pilier de grès robuste : bloque le passage et la vue; attaque l'ennemi le plus proche dans un rayon de 4 cases (5 tours; 4 constructions max),1,Invocation,0,0,0,0,0,0,0,0,0
+Géomancien,Invoquer Pilier,2,0,4,Fait surgir un pilier de grès robuste : bloque le passage et la vue; attaque l'ennemi le plus proche dans un rayon de 4 cases (permanent jusqu'à destruction ou rappel; 4 constructions max),1,Invocation,0,0,0,0,0,0,0,0,0
 Géomancien,Éclat de grès,2,0,4,24 dégâts magiques,1,Attaque,24,0,0,0,0,0,0,0,0
 Géomancien,Caillou,1,0,4,14 dégâts magiques,3,Attaque,0,14,0,0,0,0,0,0,0
 Géomancien,Rappel de pierre,1,0,6,Fait rentrer sous terre une de vos constructions (pilier ou muraille entière) : libère sa place,3,Buff,0,0,0,0,0,0,0,0,0
@@ -249,7 +250,7 @@ Géomancien,Lance de cristal,3,0,5,41 dégâts magiques,10,Attaque,41,0,0,0,0,0,
 Géomancien,Armure de pierre,2,0,0,+20% défense (3 tours),12,Buff,0,0,0,0,0,0,0,0,0
 Géomancien,Pointe de roc,2,0,4,32 dégâts magiques [Combo immobilisation : bonus 50%],15,Attaque,0,32,0,0,0,0,0,0,0
 Géomancien,Poussière aveuglante,2,0,4,-20% dégâts (2 tours) + ralentit 1 pm (1 tour),18,Debuff,0,0,0,0,0,0,0,0,0
-Géomancien,Invoquer Muraille,3,0,4,Érige une muraille robuste de 3 cases : bloque le passage et la vue (4 tours; compte pour 1 construction),20,Invocation,0,0,0,0,0,0,0,0,0
+Géomancien,Invoquer Muraille,3,0,4,Érige une muraille robuste de 3 cases : bloque le passage et la vue (permanente jusqu'à destruction ou rappel; compte pour 1 construction),20,Invocation,0,0,0,0,0,0,0,0,0
 Géomancien,Glyphe de roche,3,0,4,Trace un glyphe (3x3; 3 tours) : alliés +20% défense,22,Buff,0,0,0,0,0,0,0,0,0
 Géomancien,Lame de grès,3,0,5,47 dégâts magiques + saignement (9 dégâts/tour; 2 tours),25,Attaque,0,47,0,0,0,0,0,0,0
 Géomancien,Régénération,2,0,3,Soigne 10 PV/tour pendant 3 tours,28,Soin,0,0,0,0,0,0,0,0,0
@@ -272,7 +273,7 @@ Géomancien,Fracas des montagnes,4,0,7,129 dégâts en zone (4x4) + immobilise (
 Géomancien,Cataclysme minéral,4,0,7,122 dégâts en zone (4x4),100,Attaque,122,0,0,0,0,0,0,0,0
 Artificier,Déclencheur,1,0,6,Déclenche l'effet d'un de vos mécanismes (bombe; mine; tourelle; glyphe; balise de transposition),1,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Pistolet à ressort,2,0,5,14 dégâts,1,Attaque,14,0,0,0,0,0,0,0,0
-Artificier,Poser Bombe,2,0,4,Pose une bombe niveau 1 : elle gagne un niveau à chaque fin de tour de l'Artificier (explosion ×1.3 puis ×1.65 puis ×2) et explose (2 cases autour) à la fin du 4e tour ou dès qu'on la déclenche ou la détruit; touche ennemis et autres bombes; alliés moitié moins,1,Invocation,0,0,0,0,0,0,0,0,0
+Artificier,Poser Bombe,2,0,4,Pose une bombe niveau 1 : elle gagne un niveau à chaque fin de tour de l'Artificier (explosion ×1.3 puis ×1.65 puis ×2) et explose (2 cases autour) dès qu'on la déclenche ou la détruit; touche ennemis et autres bombes; alliés moitié moins,1,Invocation,0,0,0,0,0,0,0,0,0
 Artificier,Couplage,1,0,6,Couple un de vos mécanismes (3 tours) : deux mécanismes couplés et alignés tendent une barrière électrique : quiconque la traverse ou s'y trouve est électrocuté (alliés moitié moins),6,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Rappel,1,0,5,Désinvoque un de vos mécanismes (bombe; tourelle; balise; mine) sans le déclencher,3,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Fumigène,2,0,0,Invisible (2 tours),5,Buff,0,0,0,0,0,0,0,0,0
@@ -282,9 +283,10 @@ Artificier,Pas de côté,1,0,0,+30% esquive (2 tours),12,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Piège à ressort,2,0,4,Pose un piège : 35 dégâts,15,Attaque,35,0,0,0,0,0,0,0,0
 Artificier,Entrave,2,0,4,Immobilise l'ennemi (1 tour),18,Debuff,0,0,0,0,0,0,0,0,0
 Artificier,Pistolet à silex,2,0,5,38 dégâts + ralentit 1 pm (1 tour),20,Attaque,38,0,0,0,0,0,0,0,0
-Artificier,Poser Tourelle,3,0,4,Installe une tourelle : tire sur l'ennemi le plus proche (rayon 5) à la fin de chacun de vos tours (4 tours; 1 seule),20,Invocation,0,0,0,0,0,0,0,0,0
+Artificier,Poser Tourelle,3,0,4,Installe une tourelle : tire sur l'ennemi le plus proche (rayon 5) à la fin de chacun de vos tours (permanente; monte de niveau chaque tour; 1 seule),20,Invocation,0,0,0,0,0,0,0,0,0
 Artificier,Cri de guerre,2,0,0,+15% dégâts pour l'équipe (2 tours),24,Buff,0,0,0,0,0,0,0,0,0
-Artificier,Maintenance,2,0,0,Répare tous vos mécanismes (PV au maximum) et prolonge leur durée de 2 tours,26,Buff,0,0,0,0,0,0,0,0,0
+Artificier,Renforcement,2,0,0,Soigne tous vos mécanismes (PV au maximum) et relève de 1 leur niveau maximal (5 au départ),26,Buff,0,0,0,0,0,0,0,0,0
+Artificier,Transposition,1,0,6,Échange votre place avec le mécanisme ciblé (1 déplacement par tour),30,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Poser Bombe assourdissante,3,0,4,Pose une bombe assourdissante : explose comme une bombe (dégâts réduits) et étourdit les ennemis touchés 1 tour,30,Invocation,0,0,0,0,0,0,0,0,0
 Artificier,Marque du prédateur,1,0,0,Critique garanti (prochaine attaque),35,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Poser Balise de transposition,2,0,6,Pose une balise et échange votre place avec elle; le Déclencheur sur la balise refait l'échange (1 déplacement par tour),35,Invocation,0,0,0,0,0,0,0,0,0
@@ -292,7 +294,7 @@ Artificier,Tir de précision,3,0,6,66 dégâts [Combo brûlure : bonus 50%],40,A
 Artificier,Mine à fragmentation,3,0,4,Pose un piège (mine) : 65 dégâts; explose en croix si on la déclenche,44,Attaque,65,0,0,0,0,0,0,0,0
 Artificier,Surcharge,2,0,0,+30% dégâts (2 tours),48,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Glyphe de surcharge,3,0,5,Trace un glyphe (croix; 3 tours) : alliés +25% dégâts | ennemis 22 dégâts,50,Attaque,25,0,0,0,0,0,0,0,0
-Artificier,Poser Tourelle lourde,4,0,4,Installe une tourelle lourde : tire fort sur l'ennemi le plus proche (rayon 6) à la fin de chacun de vos tours (4 tours; compte comme une tourelle),55,Invocation,0,0,0,0,0,0,0,0,0
+Artificier,Poser Tourelle lourde,4,0,4,Installe une tourelle lourde : tire fort sur l'ennemi le plus proche (rayon 6) à la fin de chacun de vos tours (permanente; monte de niveau chaque tour; compte comme une tourelle),55,Invocation,0,0,0,0,0,0,0,0,0
 Artificier,Roquette,4,0,6,83 dégâts en zone (3x3) [Combo étourdissement : bonus 40%],60,Attaque,83,0,0,0,0,0,0,0,0
 Artificier,Poser Charge à fragmentation,3,0,4,Pose une charge : explosion large (3 cases autour) et plus puissante qu'une bombe,65,Invocation,0,0,0,0,0,0,0,0,0
 Artificier,Rafale de mitraillette,4,0,5,69 dégâts à tous les ennemis,70,Attaque,69,0,0,0,0,0,0,0,0

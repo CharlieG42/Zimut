@@ -306,7 +306,12 @@ static func _glyph_effects(txt: String, default_dtype: String, mult: float) -> D
 static func parse(spell: Dictionary) -> Dictionary:
 	if spell.has("_p"):
 		return spell["_p"]
+	var parsed: Dictionary = _parse_base(spell)
+	_apply_spell_level(spell, parsed)   # après TOUS les chemins de parse (certains sorts sortent tôt)
+	return parsed
 
+
+static func _parse_base(spell: Dictionary) -> Dictionary:
 	var sname: String = String(spell.get("name", ""))
 	var t: String = String(spell.get("effect", "")).to_lower()
 	# V43 : clauses de synergie « [Combo poison : bonus 40%] » / « [Enchaînement après X : bonus 30%] »
@@ -373,10 +378,26 @@ static func parse(spell: Dictionary) -> Dictionary:
 		p["min_range"] = 0
 		spell["_p"] = p
 		return p
-	# V68 : Rappel (désinvoque un mécanisme) et Maintenance (répare + prolonge les mécanismes)
+	# V68 : Rappel (désinvoque un mécanisme) et Renforcement (soigne les mécanismes, relève leur niveau max)
 	if sname == "Rappel":
 		p["kind"] = "recall_mech"
 		p["target"] = "cell"
+		p["needs_los"] = false
+		p["min_range"] = 0
+		spell["_p"] = p
+		return p
+	# V74 : Transposition (Artificier) — échange sa place avec un de ses mécanismes
+	if sname == "Transposition":
+		p["kind"] = "transpose"
+		p["target"] = "cell"
+		p["needs_los"] = false
+		p["min_range"] = 1
+		spell["_p"] = p
+		return p
+	# V74 : Rappel d'invocation (Invocateur) — une de ses invocations disparaît (libère une place)
+	if sname == "Rappel d'invocation":
+		p["kind"] = "recall_summon"
+		p["target"] = "any_entity"
 		p["needs_los"] = false
 		p["min_range"] = 0
 		spell["_p"] = p
@@ -397,8 +418,8 @@ static func parse(spell: Dictionary) -> Dictionary:
 		p["min_range"] = 0
 		spell["_p"] = p
 		return p
-	if sname == "Maintenance":
-		p["kind"] = "maintain"
+	if sname == "Renforcement":
+		p["kind"] = "reinforce"
 		p["target"] = "self"
 		p["needs_los"] = false
 		p["min_range"] = 0
@@ -701,20 +722,68 @@ static func parse(spell: Dictionary) -> Dictionary:
 	if p["kind"] == "attack" and bless:
 		p["buffs"] = []
 
-	# ── Niveau de sort (amélioration 1..10) : +SPELL_LEVEL_BONUS_PCT / niveau ──
+	spell["_p"] = p
+	return p
+
+
+## Applique le niveau du sort (« mult » / « spell_level ») au résultat de parse, en place.
+static func _apply_spell_level(spell: Dictionary, p: Dictionary) -> void:
+	# ── Niveau de sort (amélioration 1..10) ──
+	#  • valeurs (dégâts, soins, pièges, effets, PV/force des invocations et mécanismes) :
+	#    +SPELL_LEVEL_BONUS_PCT % par niveau ;
+	#  • sorts d'effet « tout ou rien » (PA/PM, immunités, invisibilité…) : la valeur ne bouge pas, mais
+	#    la DURÉE monte (+1 tour au niv. 5, +2 au niv. 10) et la PORTÉE des sorts utilitaires aussi
+	#    (+1 au niv. 4, +2 au niv. 8) — voir level_perks().
 	var smult: float = float(spell.get("mult", 1.0))
+	var slvl: int = int(spell.get("spell_level", 1))
 	if smult != 1.0 and smult > 0.0:
-		for key: String in ["dmg", "heal", "regen", "adj_dmg", "summon_dmg_base"]:
+		for key: String in ["dmg", "heal", "regen", "adj_dmg", "summon_dmg_base", "trap"]:
 			p[key] = int(roundf(float(p[key]) * smult))
 		for d: Dictionary in p["dots"]:
 			d["value"] = float(d["value"]) * smult
 		for b: Dictionary in p["buffs"]:
-			b["value"] = float(b["value"]) * smult
+			if not FLAT_EFFECTS.has(String(b.get("id", ""))):
+				b["value"] = float(b["value"]) * smult
 		for db: Dictionary in p["debuffs"]:
-			db["value"] = float(db["value"]) * smult
+			if not FLAT_EFFECTS.has(String(db.get("id", ""))):
+				db["value"] = float(db["value"]) * smult
+		p["summon_mult"] = smult
+	if slvl > 1:
+		var perks: Dictionary = level_perks(slvl)
+		var tb: int = int(perks["turns"])
+		if tb > 0:
+			for b2: Dictionary in p["buffs"]:
+				b2["turns"] = int(b2["turns"]) + tb
+			for sb: Dictionary in p["self_buffs"]:
+				sb["turns"] = int(sb["turns"]) + tb
+			for db2: Dictionary in p["debuffs"]:
+				if not (String(db2.get("id", "")) in ["stun", "root"]):
+					db2["turns"] = int(db2["turns"]) + tb
+			if int(p["glyph_turns"]) > 0:
+				p["glyph_turns"] = int(p["glyph_turns"]) + tb
+			if int(p["regen_turns"]) > 0:
+				p["regen_turns"] = int(p["regen_turns"]) + tb
+		p["range_bonus"] = int(perks["range"])
 
-	spell["_p"] = p
-	return p
+
+## Effets dont la valeur ne monte pas avec le niveau du sort (PA/PM, immunités…) : c'est la durée qui monte.
+const FLAT_EFFECTS: Array[String] = ["pa_up", "pm_up", "immune_phys", "immune", "immune_neg", "invisible", "stun", "root", "slow"]
+
+
+## Paliers de niveau de sort : { "turns": durée en plus, "range": portée en plus (sorts utilitaires) }.
+static func level_perks(spell_level: int) -> Dictionary:
+	return {
+		"turns": (1 if spell_level >= 5 else 0) + (1 if spell_level >= 10 else 0),
+		"range": (1 if spell_level >= 4 else 0) + (1 if spell_level >= 8 else 0),
+	}
+
+
+## Le sort gagne-t-il de la portée avec son niveau ? (sorts utilitaires ciblés à distance, pas les attaques/soins
+## qui montent déjà en puissance)
+static func range_scales(p: Dictionary, rng: int) -> bool:
+	if rng < 2 or String(p["target"]) == "self":
+		return false
+	return not (String(p["kind"]) in ["attack", "heal"])
 
 
 ## Nombre de lancers autorisés par tour (évite le spam du meilleur sort).
@@ -844,20 +913,22 @@ const SUMMONS := {
 	# Terrain du Géomancien : des cases de la grille deviennent des obstacles (« terrain »).
 	# Elles ne comptent pas comme familiers, disparaissent après `turns` tours du Géomancien
 	# et peuvent être détruites. `span` = nombre de cases posées d'un coup (ligne perpendiculaire).
-	# V73 : constructions limitées à 4 par Géomancien, mais plus solides (+35 % PV) et plus durables.
-	"Pilier":       {"pv": 95, "force": 0, "defense": 35, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.80, 0.62, 0.35), "spell": [], "static": true, "blocks_los": true, "terrain": true, "turns": 5, "span": 1, "tower": true},
-	"Muraille":     {"pv": 95, "force": 0, "defense": 35, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.72, 0.55, 0.30), "spell": [], "static": true, "blocks_los": true, "terrain": true, "turns": 4, "span": 3},
+	# V73 : constructions limitées à 4 par Géomancien, plus solides (+35 % PV). V74 : permanentes ("turns": -1) :
+	# elles ne disparaissent que détruites par un ennemi ou rappelées (Rappel de pierre).
+	"Pilier":       {"pv": 95, "force": 0, "defense": 35, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.80, 0.62, 0.35), "spell": [], "static": true, "blocks_los": true, "terrain": true, "turns": -1, "span": 1, "tower": true},
+	"Muraille":     {"pv": 95, "force": 0, "defense": 35, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.72, 0.55, 0.30), "spell": [], "static": true, "blocks_los": true, "terrain": true, "turns": -1, "span": 3},
 	"Faille":       {"pv": 999, "force": 0, "defense": 0, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.35, 0.22, 0.12), "spell": [], "static": true, "terrain": true, "turns": 3, "span": 3, "indestructible": true},
-	"Cristal ambré": {"pv": 90, "force": 0, "defense": 40, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.95, 0.65, 0.15), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1},
+	"Cristal ambré": {"pv": 90, "force": 0, "defense": 40, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.95, 0.65, 0.15), "spell": [], "static": true, "terrain": true, "turns": -1, "span": 1},
 	# Mécanismes de l'Artificier (V26) : posés comme du terrain (ne comptent pas comme familiers).
-	"Bombe":        {"pv": 36, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.85, 0.25, 0.20), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1, "mech": "bomb"},
+	# V74 : permanents ("turns": -1) ; ils montent de niveau à chaque tour de leur poseur (plafond 5, relevé par Renforcement).
+	"Bombe":        {"pv": 36, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.85, 0.25, 0.20), "spell": [], "static": true, "terrain": true, "turns": -1, "span": 1, "mech": "bomb"},
 	# V68 : variantes (bomb_* / turret_* sont recopiés sur le mécanisme posé)
-	"Bombe incendiaire": {"pv": 36, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(1.0, 0.45, 0.10), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1, "mech": "bomb", "bomb_mult": 0.9, "bomb_status": "burn", "bomb_status_turns": 2},
-	"Bombe assourdissante": {"pv": 36, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.95, 0.85, 0.25), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1, "mech": "bomb", "bomb_mult": 0.7, "bomb_status": "stun", "bomb_status_turns": 1},
-	"Charge à fragmentation": {"pv": 44, "force": 0, "defense": 12, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.55, 0.30, 0.20), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1, "mech": "bomb", "bomb_mult": 1.6, "bomb_radius": 3},
-	"Tourelle lourde": {"pv": 80, "force": 0, "defense": 25, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.40, 0.45, 0.55), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1, "mech": "turret", "turret_mult": 1.8, "turret_range": 6},
-	"Tourelle":     {"pv": 60, "force": 0, "defense": 20, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.55, 0.62, 0.72), "spell": [], "static": true, "terrain": true, "turns": 4, "span": 1, "mech": "turret"},
-	"Balise de transposition": {"pv": 15, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.30, 0.85, 0.90), "spell": [], "static": true, "terrain": true, "turns": 5, "span": 1, "mech": "swap"},
+	"Bombe incendiaire": {"pv": 36, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(1.0, 0.45, 0.10), "spell": [], "static": true, "terrain": true, "turns": -1, "span": 1, "mech": "bomb", "bomb_mult": 0.9, "bomb_status": "burn", "bomb_status_turns": 2},
+	"Bombe assourdissante": {"pv": 36, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.95, 0.85, 0.25), "spell": [], "static": true, "terrain": true, "turns": -1, "span": 1, "mech": "bomb", "bomb_mult": 0.7, "bomb_status": "stun", "bomb_status_turns": 1},
+	"Charge à fragmentation": {"pv": 44, "force": 0, "defense": 12, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.55, 0.30, 0.20), "spell": [], "static": true, "terrain": true, "turns": -1, "span": 1, "mech": "bomb", "bomb_mult": 1.6, "bomb_radius": 3},
+	"Tourelle lourde": {"pv": 80, "force": 0, "defense": 25, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.40, 0.45, 0.55), "spell": [], "static": true, "terrain": true, "turns": -1, "span": 1, "mech": "turret", "turret_mult": 1.8, "turret_range": 6},
+	"Tourelle":     {"pv": 60, "force": 0, "defense": 20, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.55, 0.62, 0.72), "spell": [], "static": true, "terrain": true, "turns": -1, "span": 1, "mech": "turret"},
+	"Balise de transposition": {"pv": 15, "force": 0, "defense": 10, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.30, 0.85, 0.90), "spell": [], "static": true, "terrain": true, "turns": -1, "span": 1, "mech": "swap"},
 	"Balise":       {"pv": 90, "force": 0, "defense": 30, "agility": 0, "pa": 0, "pm": 0, "color": Color(0.90, 0.60, 0.20), "spell": [], "static": true, "beacon": true},
 }
 

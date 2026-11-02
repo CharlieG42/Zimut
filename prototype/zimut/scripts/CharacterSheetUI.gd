@@ -981,6 +981,16 @@ func _spell_card(parent: Control, s: Dictionary, char_level: int, free_pts: int)
 	elif slvl > 1:
 		v.add_child(_lbl("Efficacité : +%d %%" % roundi((float(pv["mult"]) - 1.0) * 100.0), 19, C_GOOD))
 
+	# Paliers de durée / portée (sorts à effet fixe : +PA, +PM, immunités… et sorts utilitaires)
+	var perks: Dictionary = pv.get("perks", {})
+	var bonus_txt: Array[String] = []
+	if int(perks.get("turns", 0)) > 0:
+		bonus_txt.append("durée +%d tour(s)" % int(perks["turns"]))
+	if int(perks.get("range", 0)) > 0 and bool(pv.get("range_scales", false)):
+		bonus_txt.append("portée +%d" % int(perks["range"]))
+	if not bonus_txt.is_empty():
+		v.add_child(_lbl("Bonus de niveau : " + ", ".join(bonus_txt) + "  (paliers : durée niv. 5 et 10, portée niv. 4 et 8)", 17, C_GOOD))
+
 	# 10 crans de niveau
 	var pips := HBoxContainer.new()
 	pips.add_theme_constant_override("separation", 4)
