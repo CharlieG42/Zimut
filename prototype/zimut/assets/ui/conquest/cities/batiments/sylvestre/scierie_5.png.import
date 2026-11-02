@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://va29cw1sd5hi74"
+path="res://.godot/imported/scierie_5-dcf6a28c888d4877982a30ab64a228b7.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/sylvestre/scierie_5"
+dest_files=["res://.godot/imported/scierie_5-dcf6a28c888d4877982a30ab64a228b7.ctex"]
+
+[params]
+
+compress/mode=0
