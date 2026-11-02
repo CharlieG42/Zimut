@@ -8,7 +8,7 @@ extends CanvasLayer
 ## Rendu dans le même langage graphique que le mode Tactique : tuiles de sol des
 ## arènes, décors BattleScenery, fond d'îles flottantes (BackdropFx), héros = sprite de
 ## la classe choisie. Les icônes de lieux restent dans assets/adventure/poi/ (remplaçables).
-## La progression reste dans la sauvegarde commune aux trois modes.
+## La progression reste dans la sauvegarde commune aux quatre modes.
 
 const U = preload("res://scripts/UiKit.gd")
 
@@ -1051,7 +1051,7 @@ func _refresh_side() -> void:
 	var hint := U.lbl("Marchez jusqu'aux flèches au bord de l'île pour passer à la carte voisine. Touchez une carte déjà visitée pour y voyager.", 19, DIM)
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_side_box.add_child(hint)
-	var foot := U.lbl("XP, objets, or et ressources : sauvegarde commune aux trois modes.", 19, DIM)
+	var foot := U.lbl("XP, objets, or et ressources : sauvegarde commune aux quatre modes.", 19, DIM)
 	foot.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_side_box.add_child(foot)
 	_refresh_hud()

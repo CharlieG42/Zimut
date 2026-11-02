@@ -45,6 +45,9 @@ var _declined_gate: Vector2i = Vector2i(-99, -99)
 var _hud: CanvasLayer = null
 var _stick: Adv3DStick = null
 var _zone_label: Label = null
+var _mode_label: Label = null
+var _mode_label_txt: String = ""
+var _mode_tick: float = 0.0
 var _toast: Label = null
 var _toast_tween: Tween = null
 var _act_btn: Button = null
@@ -459,6 +462,10 @@ func _process(delta: float) -> void:
 		if _map_tick >= 0.4:
 			_map_tick = 0.0
 			_refresh_minimap_markers()
+	_mode_tick += delta
+	if _mode_tick >= 1.0:
+		_mode_tick = 0.0
+		_refresh_mode_label()
 	var pos: Vector3 = explorer.position
 	# Groupes de monstres : contact → proposition de combat.
 	var pos2 := Vector2(pos.x, pos.z)
@@ -787,18 +794,28 @@ func _build_hud() -> void:
 	_zone_label.position = Vector2(26, 18)
 	_zone_label.text = manager.zone_name()
 	root.add_child(_zone_label)
+	# V80 : ligne d'infos sous le nom de zone — vue en cours, temps de jeu du mode
+	# Aventure et difficulté de la partie, comme dans « Mes Parties » et le monde ouvert.
+	_mode_label = U.lbl("", 19, Color(0.88, 0.90, 0.96), false)
+	_mode_label.position = Vector2(26, 56)
+	root.add_child(_mode_label)
+	_refresh_mode_label()
+	PlayTimer.playtime_updated.connect(func(_m: String, _s: float) -> void: _refresh_mode_label())
 	# Boutons haut-droite
 	var top := HBoxContainer.new()
 	top.add_theme_constant_override("separation", 10)
 	top.anchor_left = 1.0
 	top.anchor_right = 1.0
-	top.offset_left = -520.0
+	top.offset_left = -640.0
 	top.offset_right = -20.0
 	top.offset_top = 14.0
 	root.add_child(top)
 	var classic: Button = _btn("Carte classique", U.C_BORDER, 22, Vector2(260, 74))
 	classic.pressed.connect(func() -> void: _leave_to("res://scenes/AdventureMap.tscn"))
 	top.add_child(classic)
+	var heroes: Button = _btn("Héros", U.C_BORDER, 22, Vector2(150, 74))
+	heroes.pressed.connect(_open_heroes)
+	top.add_child(heroes)
 	var menu: Button = _btn("☰ Menu", U.C_BORDER, 22, Vector2(160, 74))
 	menu.pressed.connect(func() -> void: _leave_to("res://scenes/SaveSlots.tscn"))
 	top.add_child(menu)
@@ -903,6 +920,34 @@ func _press_feedback(b: Button, down: bool) -> void:
 	b.scale = Vector2(0.96, 0.96) if down else Vector2.ONE
 	if down and GameSettings.haptics_on and OS.has_feature("mobile"):
 		Input.vibrate_handheld(14)
+
+
+## V80 : ligne d'infos sous le nom de zone — vue en cours, temps de jeu du mode
+## Aventure (compteur PlayTimer, bucket "adventure") et difficulté de la partie,
+## communs à tous les modes.
+func _refresh_mode_label() -> void:
+	if _mode_label == null:
+		return
+	var save: Dictionary = GameManager.active_save
+	var txt: String = "Aventure · vue 3D iso  ·  ⏱ %s  ·  Difficulté : %s" % [
+		ProgressionManager.format_playtime(ProgressionManager.playtime_mode(save, "adventure")),
+		GameSettings.save_difficulty_label(save)]
+	if txt != _mode_label_txt:
+		_mode_label_txt = txt
+		_mode_label.text = txt
+
+
+## V80 : accès aux héros depuis la vue 3D — la fiche complète (niveau,
+## caractéristiques, sorts, équipement), même écran que depuis « Mes Parties ».
+func _open_heroes() -> void:
+	if _modal_root != null or GameManager.active_save.is_empty() or GameManager.active_slot < 0:
+		return
+	_persist()
+	var ui: CanvasLayer = (load("res://scripts/CharacterSheetUI.gd") as GDScript).new()
+	ui.layer = 20
+	add_child(ui)
+	ui.closed.connect(func() -> void: ui.queue_free())
+	ui.open(GameManager.active_save, GameManager.active_slot)
 
 
 func _input(event: InputEvent) -> void:

@@ -91,3 +91,21 @@ scenes/AdventureOpen3D.tscn
 scripts/adventure3d/AdventureOpen3D.gd   # scène du 4e mode (réutilise Adv3D* + AdventureManager)
 tests/test_adventure_open3d.gd            # headless : routage, sauvegarde partagée, playtime, combats
 ```
+
+## Le 4e mode « Monde Ouvert 3D » (V79)
+
+La scène `AdventureOpen3D.tscn` (`scripts/adventure3d/AdventureOpen3D.gd`) est le **4e mode de jeu**,
+lancé depuis « Mes Parties » : caméra plus basse et plus proche (façon Zelda/RPG), toucher un
+groupe de monstres ou entrer dans un donjon lance **directement** le combat Tactique, et on
+revient à la même place après le combat. La vue d'Aventure utilisée est mémorisée dans la
+sauvegarde (`adventure_view` : `"map"`, `"3d"` ou `"open3d"`) : `GameSettings.adventure_scene()`
+y revient après chaque combat. HUD du monde ouvert : boutons Carte 2D / Vue 3D iso / **Héros** /
+Butin / Menu, ligne d'infos (biome, niveau de zone, difficulté de la partie, temps de jeu du
+bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
+
+## HUD de cette vue 3D iso (V80)
+
+- Bouton **« Héros »** en haut à droite : fiche complète des héros (niveaux, caractéristiques,
+  sorts, équipement), même écran que depuis « Mes Parties ».
+- Ligne sous le nom de zone : vue en cours, **temps de jeu** du mode Aventure et **difficulté**
+  de la partie (rafraîchie chaque seconde et à chaque écriture du compteur).

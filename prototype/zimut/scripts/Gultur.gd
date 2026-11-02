@@ -66,7 +66,7 @@ const EQUIP := [
 	"Dans la fiche d'un héros, un [b]▲ vert[/b] t'indique les objets conseillés (plus puissants que ceux portés).",
 ]
 const LVL3 := [
-	"Bravo, [b]{pseudo}[/b] ! [b]Toi[/b] qui viens d'atteindre le [b]niveau 3[/b] de joueur : le mode [b]Aventure[/b] s'ouvre à toi.",
+	"Bravo, [b]{pseudo}[/b] ! [b]Toi[/b] qui viens d'atteindre le [b]niveau 3[/b] de joueur : les modes [b]Aventure[/b] et [b]Monde Ouvert 3D[/b] s'ouvrent à toi.",
 	"Explore la carte : touche une case pour y marcher, le brouillard se lève. Des [b]groupes de monstres[/b] rôdent (vert = facile, rouge = dangereux).",
 	"Au [b]camp[/b], prends un contrat. Les énigmes et les coffres cachent de précieuses récompenses… et peut-être la trace d'une Pierre.",
 ]
