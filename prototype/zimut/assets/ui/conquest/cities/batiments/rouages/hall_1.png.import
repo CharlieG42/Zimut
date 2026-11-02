@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://iui73s7iy8ympu"
+path="res://.godot/imported/hall_1-7ef722dd0af3488d92cff7de6568db0c.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/rouages/hall_1"
+dest_files=["res://.godot/imported/hall_1-7ef722dd0af3488d92cff7de6568db0c.ctex"]
+
+[params]
+
+compress/mode=0
