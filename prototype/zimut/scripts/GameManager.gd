@@ -971,6 +971,13 @@ func _glyphs_expire(e: Dictionary) -> void:
 ## V73 : nombre max de constructions (piliers, murailles) d'un Géomancien sur le plateau.
 const MAX_CONSTRUCTIONS: int = 4
 
+
+## TEMPORAIRE (réglage de l'équilibrage) : lit un multiplicateur dans l'environnement.
+func _tune(key: String, default_v: float) -> float:
+	var v: String = OS.get_environment(key)
+	return float(v) if v != "" else default_v
+
+
 ## Constructions distinctes (une muraille de 3 cases compte pour une) d'un Géomancien.
 func constructions_of(owner: Dictionary) -> Array:
 	var seen: Dictionary = {}
@@ -2246,7 +2253,7 @@ func _tower_attacks(owner: Dictionary) -> void:
 		if best.is_empty():
 			continue
 		# V17/V19 : aligné sur les sorts des héros (/1,7)
-		var base: float = (36.0 + float(owner["level"]) * 1.1) / 2.0   # V73 : piliers plus puissants
+		var base: float = (36.0 + float(owner["level"]) * 1.1) / 2.0 * _tune("ZIMUT_PILLAR_MULT", 1.0)   # V73 : piliers plus puissants
 		var r: Dictionary = Combat.calc_damage(owner, best, base, "mag", 0.0, false, false)
 		fx.emit("cast", {"caster": tw, "spell": "Éclat du pilier", "kind": "attack", "dtype": "mag",
 			"from": tpos, "to": pos_of(best), "ranged": true, "cells": [pos_of(best)] as Array[Vector2i]})
