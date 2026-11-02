@@ -48,6 +48,24 @@ func _boot() -> void:
 				print("== BLOCAGE tour %d ==" % gm.turn_count)
 				for e2 in gm.all_entities():
 					print("%s %s pos=%s pv=%d/%d pa=%d pm=%d st=%s inv=%s" % [e2.get("team"), e2.get("classe"), str(gm.pos_of(e2)), int(e2["current_pv"]), int(e2["max_pv"]), int(e2.get("current_pa", 0)), int(e2.get("current_pm", 0)), str((e2.get("statuses", []) as Array).map(func(s): return s.get("id"))), str(e2.get("invisible", false))])
+				for e3 in gm.all_entities():
+					var foes: Array = gm.enemies_of(e3)
+					if foes.is_empty() or int(e3["current_pv"]) <= 0:
+						continue
+					var tgt: Dictionary = foes[0]
+					print("-- %s -> %s dist=%d, tour actif=%s" % [e3.get("classe"), tgt.get("classe"), Combat.manhattan(gm.pos_of(e3), gm.pos_of(tgt)), str(gm.active_entity.get("classe", ""))])
+					for sp in e3.get("spells", []):
+						var pp: Dictionary = Combat.parse(sp)
+						if String(pp["kind"]) == "attack":
+							print("   %s portée=%d pa=%d : %s" % [sp["name"], int(sp["range"]), int(sp["cost_pa"]), gm.validate_cast(e3, sp, gm.pos_of(tgt))])
+				var line: String = ""
+				for yy in range(gm.GRID_SIZE):
+					line = ""
+					for xx in range(gm.GRID_SIZE):
+						var c := Vector2i(xx, yy)
+						var en: Dictionary = gm.entity_at(c)
+						line += ("P" if String(en.get("team", "")) == "player" else ("E" if not en.is_empty() else ("." if gm.is_free(c) else "#")))
+					print(line)
 				quit(1)
 				return
 		var alive: int = 0
