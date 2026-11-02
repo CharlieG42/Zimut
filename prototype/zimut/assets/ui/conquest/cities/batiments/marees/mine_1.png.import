@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://ve54mshgfmng51"
+path="res://.godot/imported/mine_1-608416ff73514b8b8885332e5d72ee84.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/marees/mine_1"
+dest_files=["res://.godot/imported/mine_1-608416ff73514b8b8885332e5d72ee84.ctex"]
+
+[params]
+
+compress/mode=0
