@@ -1594,6 +1594,8 @@ func validate_cast(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Str
 	if p["kind"] == "summon" and not terr and not is_beacon and summons_of(caster).size() >= 3:
 		return "Trop de familiers (3 max)."
 	var mech: String = String(Combat.SUMMONS.get(String(p["summon"]), {}).get("mech", ""))
+	if p["kind"] == "summon" and terr and mech == "" and _tune("ZIMUT_NO_BUILD", 0.0) > 0.0:
+		return "(test) constructions désactivées"
 	if p["kind"] == "summon" and terr and mech == "" and constructions_of(caster).size() >= MAX_CONSTRUCTIONS:
 		return "4 constructions max : utilisez Rappel de pierre."
 	if p["kind"] == "summon" and mech != "":
