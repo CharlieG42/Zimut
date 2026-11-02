@@ -199,14 +199,90 @@ func _score_cast(e: Dictionary, spell: Dictionary, p: Dictionary, c: Vector2i) -
 					gs += 14.0 * float(foes_fx["debuffs"].size())
 			return gs if gs >= 20.0 else 0.0
 		"summon":
-			# Les balises du Chasseur ne font rien seules (outil de combo) : l'IA ne les repose pas en boucle
-			# au lieu d'attaquer (blocage de 342 tours observé face à un ennemi qui les détruit chaque tour).
-			if bool(Combat.SUMMONS.get(String(p.get("summon", "")), {}).get("beacon", false)):
-				return 0.0
-			return 75.0 if gm.summons_of(e).size() < 2 else 0.0
+			return _score_summon(e, p, c)
+		"trigger":
+			return _score_trigger(e, c)
+		"trigger_all":
+			var tot: float = 0.0
+			for m: Dictionary in gm.mechs_of(e):
+				if String(m["mech"]) == "bomb":
+					tot += _score_trigger(e, gm.pos_of(m))
+			return tot
+		"reinforce":
+			var hurt: int = 0
+			for m2: Dictionary in gm.mechs_of(e):
+				if float(m2["current_pv"]) < float(m2["max_pv"]) * 0.7:
+					hurt += 1
+			return 30.0 * float(hurt) if hurt > 0 else 0.0
+		"trap":
+			# Mines / pièges : utiles seulement près des ennemis, et pas en rafale
+			var nt: int = 0
+			for tr: Dictionary in gm.traps:
+				if int(tr["owner"]) == int(e["uid"]):
+					nt += 1
+			return 30.0 if nt < 3 and _foes_near(e, c, 3) > 0 else 0.0
 		"revive":
 			return 140.0 if not gm.graveyard.is_empty() else 0.0
 	return 0.0
+
+
+
+func _foes_near(e: Dictionary, c: Vector2i, r: int) -> int:
+	var n: int = 0
+	for f: Dictionary in game_manager.enemies_of(e):
+		if game_manager.is_alive(f) and not bool(f.get("terrain", false)) and not bool(f.get("beacon", false)) \
+				and Combat.manhattan(c, game_manager.pos_of(f)) <= r:
+			n += 1
+	return n
+
+
+func _friends_near(e: Dictionary, c: Vector2i, r: int) -> int:
+	var n: int = 0
+	for f: Dictionary in game_manager.entities_of_team(String(e["team"])):
+		if game_manager.is_alive(f) and not bool(f.get("terrain", false)) and not bool(f.get("beacon", false)) \
+				and Combat.manhattan(c, game_manager.pos_of(f)) <= r:
+			n += 1
+	return n
+
+
+## Invocation : créature (75 tant qu'il en a moins de 2) ; constructions et mécanismes jugés sur leur emplacement.
+## (Les balises de chasse ne font rien seules : l'IA ne les repose pas en boucle — blocage observé.)
+func _score_summon(e: Dictionary, p: Dictionary, c: Vector2i) -> float:
+	var gm: Node = game_manager
+	var info: Dictionary = Combat.SUMMONS.get(String(p.get("summon", "")), {})
+	if bool(info.get("beacon", false)):
+		return 0.0
+	var mech: String = String(info.get("mech", ""))
+	if mech == "swap":
+		return 0.0   # balise de transposition : demande un enchaînement que l'IA ne joue pas
+	if mech == "bomb":
+		# une bombe n'a d'intérêt que si des ennemis sont (ou seront) dans son rayon
+		var r: int = int(info.get("bomb_radius", gm.BOMB_RADIUS))
+		var foes: int = _foes_near(e, c, r + 1)
+		if foes == 0:
+			return 0.0
+		return 20.0 + 28.0 * float(foes) - 25.0 * float(_friends_near(e, c, r))
+	if mech == "turret":
+		return 65.0 if _foes_near(e, c, int(info.get("turret_range", gm.TURRET_RANGE)) + 2) > 0 else 0.0
+	if bool(info.get("terrain", false)):
+		# pilier / muraille / cristal : à portée de tir d'un ennemi, jamais collé à un allié
+		if _foes_near(e, c, gm.TOWER_RANGE) == 0 or _friends_near(e, c, 1) > 0:
+			return 0.0
+		return 55.0 if int(info.get("span", 1)) == 1 else 0.0
+	return 75.0 if gm.summons_of(e).size() < 2 else 0.0
+
+
+## Déclencheur sur une bombe : dégâts attendus (ennemis dans le rayon) moins les alliés touchés.
+func _score_trigger(e: Dictionary, c: Vector2i) -> float:
+	var gm: Node = game_manager
+	if gm.trigger_kind(e, c) != "bomb":
+		return 0.0
+	var bomb: Dictionary = gm.entity_at(c)
+	var r: int = int(bomb.get("bomb_radius", gm.BOMB_RADIUS))
+	var foes: int = _foes_near(e, c, r)
+	var lvl: int = int(bomb.get("bomb_level", 1))
+	var sc: float = 38.0 * float(foes) * (0.8 + 0.2 * float(lvl)) - 30.0 * float(_friends_near(e, c, r))
+	return sc if sc >= 30.0 else 0.0
 
 
 func _has_negative(e: Dictionary) -> bool:
