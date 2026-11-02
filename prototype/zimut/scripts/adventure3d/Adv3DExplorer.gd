@@ -28,6 +28,7 @@ var current_cell: Vector2i = Vector2i(-1, -1)
 var _model: Node3D = null
 var _rig: Adv3DHeroRig = null             # modèle 3D animé (réglage « Modèles 3D »)
 var _prev_facing: float = 0.0
+var hero_class: String = ""             # classe incarnée (tenue du modèle 3D) ; vide = tenue Sylvain
 var _sprite: Adv3DSpriteActor = null     # joueur « carton » (illustration) ; null = modèle low-poly de secours
 var _facing: float = 0.0
 var _walk_t: float = 0.0
@@ -39,7 +40,7 @@ var distance: float = CAM_DISTANCE
 
 func _ready() -> void:
 	if Adv3DHeroModel.enabled():
-		_rig = Adv3DHeroModel.make_hero() as Adv3DHeroRig
+		_rig = Adv3DHeroModel.make_hero(hero_class) as Adv3DHeroRig
 		_model = _rig                            # vrai modèle low-poly (ombre incluse)
 		add_child(_model)
 		var dust3: CPUParticles3D = Adv3DActors.make_dust()

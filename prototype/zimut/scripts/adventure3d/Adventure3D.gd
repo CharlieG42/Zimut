@@ -160,6 +160,7 @@ func _build_environment() -> void:
 func _build_explorer() -> void:
 	explorer = Adv3DExplorer.new()
 	explorer.terrain = terrain
+	explorer.hero_class = String(manager.hero_class())
 	explorer.name = "Explorer"
 	add_child(explorer)
 	explorer.place_at(_start_position())

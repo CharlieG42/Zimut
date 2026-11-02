@@ -40,6 +40,8 @@ const G_PAW_B := Vector3(0.20, 0.24, -0.04)     # x signé
 const G_TAIL := Vector3(0, 0.22, -0.25)
 
 static var _cache: Dictionary = {}
+static var _cls: String = ""
+static var _pal: Dictionary = {}
 
 
 ## Réglage Options « Personnages du monde 3D » (true = vrais modèles). Lu via l'arbre pour ne pas dépendre de l'autoload à la compilation.
@@ -90,6 +92,8 @@ static func _r(s: int) -> RandomNumberGenerator:
 
 
 static func _cached(key: String, f: Callable) -> Mesh:
+	if key.begins_with("h_"):
+		key = _cls + "|" + key
 	if not _cache.has(key):
 		_cache[key] = _fix_winding(f.call())
 	return _cache[key]
@@ -148,11 +152,101 @@ static func _part(joint: Node3D, mesh: Mesh, pivot: Vector3) -> MeshInstance3D:
 	return mi
 
 
+
+# ══════════════════════════════════════════════════════════════════════
+#  Tenue par classe : palette (veste, cheveux, rouleau) + accessoires de tête / d'épaules
+# ══════════════════════════════════════════════════════════════════════
+
+const CLASS_LOOK: Dictionary = {
+	"Sylvain":    {"tun": [Color(0.10, 0.34, 0.13), Color(0.24, 0.58, 0.20)], "hair": [Color(0.72, 0.46, 0.18), Color(0.96, 0.72, 0.36)], "acc": "feuilles"},
+	"Chasseur":   {"tun": [Color(0.20, 0.30, 0.10), Color(0.42, 0.52, 0.22)], "hair": [Color(0.36, 0.22, 0.10), Color(0.56, 0.38, 0.20)], "acc": "chapeau_plume"},
+	"Tank":       {"tun": [Color(0.18, 0.26, 0.42), Color(0.42, 0.54, 0.74)], "hair": [Color(0.30, 0.22, 0.16), Color(0.50, 0.38, 0.28)], "acc": "casque"},
+	"Assassin":   {"tun": [Color(0.12, 0.10, 0.14), Color(0.52, 0.12, 0.14)], "hair": [Color(0.10, 0.08, 0.10), Color(0.24, 0.20, 0.24)], "acc": "capuche"},
+	"Mage":       {"tun": [Color(0.28, 0.12, 0.46), Color(0.58, 0.34, 0.82)], "hair": [Color(0.78, 0.78, 0.84), Color(0.96, 0.96, 1.0)], "acc": "chapeau_pointu"},
+	"Druide":     {"tun": [Color(0.40, 0.24, 0.10), Color(0.78, 0.50, 0.20)], "hair": [Color(0.50, 0.30, 0.12), Color(0.74, 0.50, 0.24)], "acc": "bois"},
+	"Heal":       {"tun": [Color(0.55, 0.70, 0.74), Color(0.96, 0.98, 0.98)], "hair": [Color(0.86, 0.66, 0.30), Color(0.99, 0.86, 0.50)], "acc": "diademe"},
+	"Invocateur": {"tun": [Color(0.20, 0.08, 0.30), Color(0.50, 0.20, 0.62)], "hair": [Color(0.16, 0.10, 0.24), Color(0.34, 0.24, 0.46)], "acc": "capuche_gemme"},
+	"Géomancien": {"tun": [Color(0.50, 0.36, 0.18), Color(0.86, 0.66, 0.34)], "hair": [Color(0.46, 0.34, 0.22), Color(0.66, 0.52, 0.36)], "acc": "epaulieres_pierre"},
+	"Artificier": {"tun": [Color(0.46, 0.22, 0.08), Color(0.92, 0.50, 0.20)], "hair": [Color(0.22, 0.14, 0.08), Color(0.42, 0.28, 0.16)], "acc": "lunettes"},
+}
+
+
+static func _set_class(classe: String) -> void:
+	var look: Dictionary = CLASS_LOOK.get(classe, CLASS_LOOK["Sylvain"])
+	_cls = classe if CLASS_LOOK.has(classe) else "Sylvain"
+	_pal = {
+		"tun_d": (look["tun"] as Array)[0], "tun_l": (look["tun"] as Array)[1],
+		"hair_d": (look["hair"] as Array)[0], "hair_l": (look["hair"] as Array)[1],
+		"acc": look["acc"],
+		"roll_d": ((look["tun"] as Array)[0] as Color).lerp(Color(0.36, 0.42, 0.22), 0.5),
+		"roll_l": ((look["tun"] as Array)[1] as Color).lerp(Color(0.50, 0.56, 0.30), 0.5),
+	}
+
+
+## Accessoires de tête (repère personnage : crâne centré en (0, 1.87, -0.03), rayon ≈ 0.22).
+static func _head_accessory(st: SurfaceTool, r: RandomNumberGenerator) -> void:
+	var td: Color = _pal["tun_d"]
+	var tl: Color = _pal["tun_l"]
+	match String(_pal["acc"]):
+		"feuilles":
+			for i: int in range(5):
+				var a: float = float(i) / 5.0 * TAU
+				Adv3DMeshes.add_blob(st, Vector3(sin(a) * 0.2, 2.0 + 0.02 * float(i % 2), cos(a) * 0.2 - 0.03), Vector3(0.03, 0.07, 0.06), 6, 4, Color(0.2, 0.5, 0.15), Color(0.5, 0.8, 0.3), r, 0.0)
+		"chapeau_plume":
+			Adv3DMeshes.add_cone(st, Vector3(0, 1.99, -0.03), 0.30, 0.15, 0.04, 12, td, tl, r, 0.0)               # bords
+			Adv3DMeshes.add_cone(st, Vector3(0, 2.02, -0.03), 0.17, 0.13, 0.13, 12, td, tl, r, 0.0)               # calotte
+			Adv3DMeshes.add_blob(st, Vector3(0.17, 2.12, -0.06), Vector3(0.02, 0.10, 0.05), 6, 4, Color(0.8, 0.25, 0.2), Color(1.0, 0.5, 0.3), r, 0.0)   # plume
+		"casque":
+			Adv3DMeshes.add_blob(st, Vector3(0, 2.0, -0.03), Vector3(0.245, 0.15, 0.245), 12, 7, Color(0.38, 0.40, 0.46), Color(0.72, 0.76, 0.84), r, 0.0)
+			Adv3DMeshes.add_box(st, Vector3(0, 1.92, 0.2), Vector3(0.04, 0.1, 0.02), Color(0.45, 0.47, 0.52), Color(0.8, 0.83, 0.9))     # nasal
+			Adv3DMeshes.add_blob(st, Vector3(0, 2.15, -0.03), Vector3(0.025, 0.07, 0.12), 6, 4, Color(0.7, 0.15, 0.15), Color(0.95, 0.3, 0.25), r, 0.0)  # crête
+		"capuche":
+			Adv3DMeshes.add_blob(st, Vector3(0, 1.9, -0.045), Vector3(0.255, 0.24, 0.25), 12, 7, td, tl, r, 0.0)
+			Adv3DMeshes.add_blob(st, Vector3(0, 1.69, 0.15), Vector3(0.16, 0.06, 0.07), 8, 4, Color(0.08, 0.06, 0.1), Color(0.14, 0.1, 0.16), r, 0.0)   # masque
+		"chapeau_pointu":
+			Adv3DMeshes.add_cone(st, Vector3(0, 1.98, -0.03), 0.34, 0.2, 0.04, 14, td, tl, r, 0.0)
+			Adv3DMeshes.add_cone(st, Vector3(0, 2.0, -0.03), 0.19, 0.0, 0.42, 12, td, tl, r, 0.0)
+			Adv3DMeshes.add_cone(st, Vector3(0, 2.0, -0.03), 0.195, 0.185, 0.045, 12, Color(0.95, 0.78, 0.25), Color(1.0, 0.9, 0.45), r, 0.0)  # galon
+		"bois":
+			for sx: float in [-1.0, 1.0]:
+				Adv3DMeshes.add_cone(st, Vector3(0.14 * sx, 2.02, -0.03), 0.035, 0.015, 0.22, 6, Color(0.40, 0.28, 0.16), Color(0.62, 0.46, 0.28), r, 0.0)
+				Adv3DMeshes.add_cone(st, Vector3(0.17 * sx, 2.13, -0.03), 0.025, 0.0, 0.12, 6, Color(0.40, 0.28, 0.16), Color(0.62, 0.46, 0.28), r, 0.0)
+		"diademe":
+			Adv3DMeshes.add_cone(st, Vector3(0, 1.95, -0.03), 0.225, 0.225, 0.035, 14, Color(0.9, 0.7, 0.2), Color(1.0, 0.9, 0.5), r, 0.0, false)
+			Adv3DMeshes.add_blob(st, Vector3(0, 1.975, 0.2), Vector3(0.035, 0.04, 0.02), 8, 4, Color(0.4, 0.9, 0.95), Color(0.8, 1.0, 1.0), r, 0.0)   # gemme
+		"capuche_gemme":
+			Adv3DMeshes.add_blob(st, Vector3(0, 1.9, -0.045), Vector3(0.255, 0.24, 0.25), 12, 7, td, tl, r, 0.0)
+			Adv3DMeshes.add_blob(st, Vector3(0, 1.99, 0.2), Vector3(0.04, 0.05, 0.02), 8, 4, Color(0.8, 0.2, 0.9), Color(1.0, 0.6, 1.0), r, 0.0)       # gemme
+		"lunettes":
+			Adv3DMeshes.add_box(st, Vector3(0, 1.95, 0.0), Vector3(0.47, 0.05, 0.4), Color(0.25, 0.16, 0.1), Color(0.45, 0.3, 0.18))             # sangle
+			for sx: float in [-1.0, 1.0]:
+				Adv3DMeshes.add_cone(st, Vector3(0.085 * sx, 1.95, 0.2), 0.06, 0.06, 0.05, 10, Color(0.7, 0.5, 0.2), Color(1.0, 0.8, 0.4), r, 0.0, false)  # monture
+				Adv3DMeshes.add_blob(st, Vector3(0.085 * sx, 1.975, 0.245), Vector3(0.045, 0.045, 0.012), 8, 4, Color(0.35, 0.75, 0.85), Color(0.7, 0.95, 1.0), r, 0.0)  # verre
+		"epaulieres_pierre":
+			Adv3DMeshes.add_blob(st, Vector3(0, 2.0, 0.17), Vector3(0.1, 0.04, 0.04), 8, 4, Color(0.5, 0.45, 0.4), Color(0.75, 0.7, 0.62), r, 0.0)    # bandeau de pierre
+			Adv3DMeshes.add_blob(st, Vector3(0, 2.04, 0.19), Vector3(0.035, 0.05, 0.025), 6, 4, Color(0.9, 0.55, 0.2), Color(1.0, 0.8, 0.4), r, 0.0)   # cristal
+
+
+## Accessoires d'épaules / de poitrine (repère personnage : épaules à y ≈ 1.49, x = ±0.285).
+static func _chest_accessory(st: SurfaceTool, r: RandomNumberGenerator) -> void:
+	match String(_pal["acc"]):
+		"casque", "epaulieres_pierre":
+			var d: Color = Color(0.36, 0.38, 0.44) if String(_pal["acc"]) == "casque" else Color(0.45, 0.40, 0.34)
+			var l: Color = Color(0.74, 0.78, 0.86) if String(_pal["acc"]) == "casque" else Color(0.72, 0.66, 0.56)
+			for sx: float in [-1.0, 1.0]:
+				Adv3DMeshes.add_blob(st, Vector3(0.275 * sx, 1.5, -0.01), Vector3(0.12, 0.075, 0.125), 8, 5, d, l, r, 0.0)
+		"capuche", "capuche_gemme":
+			Adv3DMeshes.add_blob(st, Vector3(0, 1.58, -0.01), Vector3(0.23, 0.07, 0.21), 10, 5, _pal["tun_d"], _pal["tun_l"], r, 0.0)     # col relevé
+		"lunettes":
+			Adv3DMeshes.add_box(st, Vector3(0, 1.3, 0.175), Vector3(0.05, 0.07, 0.03), Color(0.8, 0.2, 0.1), Color(1.0, 0.45, 0.2))      # bâton de dynamite
+
+
 # ══════════════════════════════════════════════════════════════════════
 #  Joueur
 # ══════════════════════════════════════════════════════════════════════
 
-static func make_hero() -> Node3D:
+static func make_hero(classe: String = "") -> Node3D:
+	_set_class(classe)
 	var rig := Adv3DHeroRig.new()
 	rig.name = "Hero3D"
 	Adv3DActors.add_shadow(rig, 0.6)
@@ -230,8 +324,8 @@ static func _upper_arm() -> Mesh:
 	var st := _st()
 	var r := _r(2)
 	var y0: float = H_SHOULDER.y
-	Adv3DMeshes.add_blob(st, Vector3(0, y0 - 0.035, 0), Vector3(0.085, 0.085, 0.09), 8, 5, GREEN_D, GREEN_L, r, 0.0)        # épaule
-	Adv3DMeshes.add_cone(st, Vector3(0, y0 - 0.17, 0), 0.074, 0.088, 0.15, 8, GREEN_D, GREEN_L, r, 0.0, false)              # manche
+	Adv3DMeshes.add_blob(st, Vector3(0, y0 - 0.035, 0), Vector3(0.085, 0.085, 0.09), 8, 5, _pal["tun_d"], _pal["tun_l"], r, 0.0)        # épaule
+	Adv3DMeshes.add_cone(st, Vector3(0, y0 - 0.17, 0), 0.074, 0.088, 0.15, 8, _pal["tun_d"], _pal["tun_l"], r, 0.0, false)              # manche
 	Adv3DMeshes.add_cone(st, Vector3(0, y0 - 0.30, 0), 0.052, 0.066, 0.16, 8, SKIN_B, SKIN_T, r, 0.0, false)               # bras
 	Adv3DMeshes.add_blob(st, Vector3(0, y0 - 0.30, -0.005), Vector3(0.055, 0.055, 0.056), 8, 4, SKIN_B, SKIN_T, r, 0.0)    # coude
 	return st.commit()
@@ -255,8 +349,8 @@ static func _abdomen() -> Mesh:
 	var r := _r(4)
 	Adv3DMeshes.add_blob(st, Vector3(0, 1.1, 0.01), Vector3(0.172, 0.17, 0.138), 10, 6, SHIRT_D, SHIRT_L, r, 0.0)                          # taille
 	for sx: float in [-1.0, 1.0]:
-		Adv3DMeshes.add_blob(st, Vector3(0.118 * sx, 1.08, -0.005), Vector3(0.098, 0.165, 0.148), 8, 6, GREEN_D, GREEN_L, r, 0.0)         # bas de la veste
-	Adv3DMeshes.add_blob(st, Vector3(0, 1.08, -0.05), Vector3(0.165, 0.16, 0.1), 8, 6, GREEN_D, GREEN_L, r, 0.0)                         # dos
+		Adv3DMeshes.add_blob(st, Vector3(0.118 * sx, 1.08, -0.005), Vector3(0.098, 0.165, 0.148), 8, 6, _pal["tun_d"], _pal["tun_l"], r, 0.0)         # bas de la veste
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.08, -0.05), Vector3(0.165, 0.16, 0.1), 8, 6, _pal["tun_d"], _pal["tun_l"], r, 0.0)                         # dos
 	Adv3DMeshes.add_cone(st, Vector3(0, 0.895, 0), 0.198, 0.188, 0.1, 12, BROWN_D, BROWN_L, r, 0.0, false)                                # ceinture
 	Adv3DMeshes.add_box(st, Vector3(0, 0.945, 0.192), Vector3(0.09, 0.07, 0.025), GOLD, Color(1.0, 0.88, 0.45))                           # boucle
 	Adv3DMeshes.add_blob(st, Vector3(0.205, 0.9, 0.07), Vector3(0.062, 0.085, 0.072), 8, 5, BROWN_D, BROWN_L, r, 0.0)                    # sacoche
@@ -269,9 +363,9 @@ static func _chest() -> Mesh:
 	var r := _r(5)
 	Adv3DMeshes.add_blob(st, Vector3(0, 1.36, 0.03), Vector3(0.188, 0.19, 0.148), 10, 7, SHIRT_D, SHIRT_L, r, 0.0)                         # poitrine
 	for sx: float in [-1.0, 1.0]:
-		Adv3DMeshes.add_blob(st, Vector3(0.16 * sx, 1.34, -0.01), Vector3(0.115, 0.23, 0.158), 8, 7, GREEN_D, GREEN_L, r, 0.0)            # veste
-		Adv3DMeshes.add_blob(st, Vector3(0.18 * sx, 1.465, -0.02), Vector3(0.1, 0.055, 0.095), 8, 5, GREEN_D, GREEN_L, r, 0.0)            # trapèzes / épaules
-	Adv3DMeshes.add_blob(st, Vector3(0, 1.33, -0.05), Vector3(0.215, 0.235, 0.128), 10, 7, GREEN_D, GREEN_L, r, 0.0)                       # dos
+		Adv3DMeshes.add_blob(st, Vector3(0.16 * sx, 1.34, -0.01), Vector3(0.115, 0.23, 0.158), 8, 7, _pal["tun_d"], _pal["tun_l"], r, 0.0)            # veste
+		Adv3DMeshes.add_blob(st, Vector3(0.18 * sx, 1.465, -0.02), Vector3(0.1, 0.055, 0.095), 8, 5, _pal["tun_d"], _pal["tun_l"], r, 0.0)            # trapèzes / épaules
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.33, -0.05), Vector3(0.215, 0.235, 0.128), 10, 7, _pal["tun_d"], _pal["tun_l"], r, 0.0)                       # dos
 	# bandoulière en diagonale, posée sur la poitrine
 	for i: int in range(12):
 		var f: float = float(i) / 11.0
@@ -281,8 +375,9 @@ static func _chest() -> Mesh:
 		var z: float = 0.03 + 0.148 * sqrt(maxf(q, 0.05)) + 0.004
 		Adv3DMeshes.add_blob(st, Vector3(x, y, z), Vector3(0.026, 0.026, 0.01), 6, 3, BROWN_D, BROWN_L, r, 0.0)
 	Adv3DMeshes.add_blob(st, Vector3(-0.07, 1.41, 0.172), Vector3(0.03, 0.03, 0.014), 8, 4, GOLD, Color(1.0, 0.9, 0.5), r, 0.0)          # médaillon
-	Adv3DMeshes.add_blob(st, Vector3(0, 1.545, 0.0), Vector3(0.215, 0.085, 0.195), 10, 5, GREEN_D, GREEN_L, r, 0.0)                       # écharpe
-	Adv3DMeshes.add_blob(st, Vector3(0, 1.565, -0.12), Vector3(0.19, 0.12, 0.13), 10, 5, GREEN_D, GREEN_L, r, 0.0)                       # capuche dans le dos
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.545, 0.0), Vector3(0.215, 0.085, 0.195), 10, 5, _pal["tun_d"], _pal["tun_l"], r, 0.0)                       # écharpe
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.565, -0.12), Vector3(0.19, 0.12, 0.13), 10, 5, _pal["tun_d"], _pal["tun_l"], r, 0.0)                       # capuche dans le dos
+	_chest_accessory(st, r)
 	return st.commit()
 
 
@@ -290,10 +385,10 @@ static func _chest() -> Mesh:
 static func _cape() -> Mesh:
 	var st := _st()
 	var r := _r(5)
-	Adv3DMeshes.add_box(st, Vector3(0, 0.81, -0.17), Vector3(0.5, 0.34, 0.04), Color(0.30, 0.55, 0.20), GREEN_L)
+	Adv3DMeshes.add_box(st, Vector3(0, 0.81, -0.17), Vector3(0.5, 0.34, 0.04), (_pal["tun_l"] as Color).darkened(0.12), _pal["tun_l"])
 	for i: int in range(3):
 		var x: float = (float(i) - 1.0) * 0.17
-		Adv3DMeshes.add_cone(st, Vector3(x, 0.55, -0.17), 0.0, 0.085, 0.10, 5, Color(0.55, 0.72, 0.28), Color(0.40, 0.64, 0.24), r, 0.0, false)
+		Adv3DMeshes.add_cone(st, Vector3(x, 0.55, -0.17), 0.0, 0.085, 0.10, 5, (_pal["tun_l"] as Color).lightened(0.2), _pal["tun_l"], r, 0.0, false)
 	Adv3DMeshes.add_blob(st, Vector3(0, 0.80, -0.195), Vector3(0.05, 0.08, 0.012), 6, 4, Color(0.78, 0.86, 0.32), Color(0.88, 0.94, 0.42), r, 0.0)   # emblème feuille
 	return st.commit()
 
@@ -306,12 +401,12 @@ static func _pack() -> Mesh:
 	for sx: float in [-1.0, 1.0]:
 		Adv3DMeshes.add_blob(st, Vector3(0.17 * sx, 0.92, -0.335), Vector3(0.07, 0.1, 0.06), 8, 5, BROWN_D, BROWN_L, r, 0.0)                  # poches
 		Adv3DMeshes.add_blob(st, Vector3(0.27 * sx, 1.42, -0.335), Vector3(0.03, 0.08, 0.08), 8, 5, Color(0.2, 0.12, 0.07), Color(0.32, 0.2, 0.11), r, 0.0)  # bout du rouleau
-	Adv3DMeshes.add_blob(st, Vector3(0, 1.42, -0.335), Vector3(0.27, 0.08, 0.08), 10, 5, Color(0.36, 0.42, 0.22), Color(0.50, 0.56, 0.30), r, 0.0)  # rouleau de couchage (kaki)
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.42, -0.335), Vector3(0.27, 0.08, 0.08), 10, 5, _pal["roll_d"], _pal["roll_l"], r, 0.0)  # rouleau de couchage (kaki)
 	Adv3DMeshes.add_box(st, Vector3(0, 1.0, -0.45), Vector3(0.05, 0.3, 0.02), Color(0.32, 0.2, 0.11), Color(0.40, 0.26, 0.14))            # sangle
 	Adv3DMeshes.add_box(st, Vector3(0, 0.97, -0.465), Vector3(0.07, 0.05, 0.015), GOLD, Color(1.0, 0.88, 0.45))                              # boucle
 	# pousse de feuille qui sort du sac (comme sur le logo)
-	Adv3DMeshes.add_blob(st, Vector3(0.12, 1.58, -0.315), Vector3(0.025, 0.12, 0.05), 6, 4, GREEN_D, Color(0.35, 0.75, 0.25), r, 0.0)
-	Adv3DMeshes.add_blob(st, Vector3(0.05, 1.56, -0.335), Vector3(0.022, 0.1, 0.045), 6, 4, GREEN_D, Color(0.30, 0.68, 0.22), r, 0.0)
+	Adv3DMeshes.add_blob(st, Vector3(0.12, 1.58, -0.315), Vector3(0.025, 0.12, 0.05), 6, 4, _pal["tun_d"], Color(0.35, 0.75, 0.25), r, 0.0)
+	Adv3DMeshes.add_blob(st, Vector3(0.05, 1.56, -0.335), Vector3(0.022, 0.1, 0.045), 6, 4, _pal["tun_d"], Color(0.30, 0.68, 0.22), r, 0.0)
 	return st.commit()
 
 
@@ -320,17 +415,18 @@ static func _head() -> Mesh:
 	var r := _r(8)
 	Adv3DMeshes.add_cone(st, Vector3(0, 1.52, 0), 0.064, 0.058, 0.17, 8, SKIN_B, SKIN_T, r, 0.0, false)                                        # cou
 	Adv3DMeshes.add_blob(st, Vector3(0, 1.8, 0.0), Vector3(0.205, 0.225, 0.2), 12, 8, SKIN_B, SKIN_T, r, 0.0)                                  # visage
-	Adv3DMeshes.add_blob(st, Vector3(0, 1.87, -0.03), Vector3(0.225, 0.2, 0.225), 12, 7, HAIR_D, HAIR_L, r, 0.0)                               # calotte de cheveux
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.87, -0.03), Vector3(0.225, 0.2, 0.225), 12, 7, _pal["hair_d"], _pal["hair_l"], r, 0.0)                               # calotte de cheveux
 	for t: Array in [[0.12, 2.04, 0.05, 0.09], [-0.1, 2.05, 0.0, 0.09], [0.0, 2.09, 0.08, 0.085], [0.2, 1.95, 0.0, 0.08], [-0.2, 1.93, 0.02, 0.08], [0.0, 1.95, -0.2, 0.1], [0.14, 1.99, -0.12, 0.08], [-0.14, 1.99, -0.12, 0.08]]:
-		Adv3DMeshes.add_blob(st, Vector3(t[0], t[1], t[2]), Vector3(t[3], t[3] * 1.1, t[3]), 8, 5, HAIR_D, HAIR_L, r, 0.0)                    # mèches
-	Adv3DMeshes.add_blob(st, Vector3(0.085, 1.97, 0.17), Vector3(0.1, 0.05, 0.07), 8, 4, HAIR_D, HAIR_L, r, 0.0)                                # frange
-	Adv3DMeshes.add_blob(st, Vector3(-0.09, 1.96, 0.18), Vector3(0.1, 0.05, 0.07), 8, 4, HAIR_D, HAIR_L, r, 0.0)
+		Adv3DMeshes.add_blob(st, Vector3(t[0], t[1], t[2]), Vector3(t[3], t[3] * 1.1, t[3]), 8, 5, _pal["hair_d"], _pal["hair_l"], r, 0.0)                    # mèches
+	Adv3DMeshes.add_blob(st, Vector3(0.085, 1.97, 0.17), Vector3(0.1, 0.05, 0.07), 8, 4, _pal["hair_d"], _pal["hair_l"], r, 0.0)                                # frange
+	Adv3DMeshes.add_blob(st, Vector3(-0.09, 1.96, 0.18), Vector3(0.1, 0.05, 0.07), 8, 4, _pal["hair_d"], _pal["hair_l"], r, 0.0)
 	for sx: float in [-1.0, 1.0]:
-		Adv3DMeshes.add_box(st, Vector3(0.08 * sx, 1.875, 0.19), Vector3(0.07, 0.018, 0.02), HAIR_D, HAIR_D)                                    # sourcils
+		Adv3DMeshes.add_box(st, Vector3(0.08 * sx, 1.875, 0.19), Vector3(0.07, 0.018, 0.02), _pal["hair_d"], _pal["hair_d"])                                    # sourcils
 		Adv3DMeshes.add_blob(st, Vector3(0.2 * sx, 1.77, 0.0), Vector3(0.03, 0.05, 0.03), 6, 4, SKIN_B, SKIN_T, r, 0.0)                         # oreilles
 		Adv3DMeshes.add_blob(st, Vector3(0.12 * sx, 1.73, 0.17), Vector3(0.04, 0.025, 0.015), 6, 3, Color(0.96, 0.58, 0.5), Color(0.98, 0.64, 0.56), r, 0.0)  # joues
 	Adv3DMeshes.add_blob(st, Vector3(0, 1.755, 0.2), Vector3(0.02, 0.026, 0.02), 6, 4, SKIN_B, SKIN_T, r, 0.0)                                 # nez
 	Adv3DMeshes.add_box(st, Vector3(0, 1.69, 0.2), Vector3(0.05, 0.012, 0.01), Color(0.5, 0.25, 0.2), Color(0.5, 0.25, 0.2))                       # sourire
+	_head_accessory(st, r)
 	return st.commit()
 
 
