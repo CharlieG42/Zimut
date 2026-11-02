@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://2xqhhmv3y12mdk"
+path="res://.godot/imported/tannerie_1-1fa8bee68cbe4250a6014a429c93c397.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/cristaux/tannerie_1"
+dest_files=["res://.godot/imported/tannerie_1-1fa8bee68cbe4250a6014a429c93c397.ctex"]
+
+[params]
+
+compress/mode=0
