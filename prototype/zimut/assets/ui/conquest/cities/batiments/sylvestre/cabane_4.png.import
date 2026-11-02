@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://81anmu0cjzr5jg"
+path="res://.godot/imported/cabane_4-f72bb6c9fa9445c4a2c96c12e66b46fa.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/sylvestre/cabane_4"
+dest_files=["res://.godot/imported/cabane_4-f72bb6c9fa9445c4a2c96c12e66b46fa.ctex"]
+
+[params]
+
+compress/mode=0
