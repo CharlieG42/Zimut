@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://4qiayp19ramaq6"
+path="res://.godot/imported/tannerie_4-e0813a8a0e8b43b4839fbed3da928545.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/marees/tannerie_4"
+dest_files=["res://.godot/imported/tannerie_4-e0813a8a0e8b43b4839fbed3da928545.ctex"]
+
+[params]
+
+compress/mode=0
