@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://vqqsoov8odkgzt"
+path="res://.godot/imported/hall_3-b8b4f22e648844afa1b2a679c9cd30b5.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/sylvestre/hall_3"
+dest_files=["res://.godot/imported/hall_3-b8b4f22e648844afa1b2a679c9cd30b5.ctex"]
+
+[params]
+
+compress/mode=0
