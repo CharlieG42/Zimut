@@ -51,6 +51,9 @@ var _stance_target: float = 1.0
 var _stance_timer: float = 4.0
 var _head_base: Vector3 = Vector3.ZERO
 var _rng := RandomNumberGenerator.new()
+var _fidget_t: float = -1.0       # étirement au repos : -1 = inactif, sinon temps écoulé (s)
+var _fidget_wait: float = 9.0
+const FIDGET_LEN := 2.2
 
 
 func setup() -> void:
@@ -153,11 +156,22 @@ func animate(delta: float, speed: float, turn_rate: float) -> void:
 		arms[i].rotation = Vector3(s2 * arm_amp + idle_sway - 0.05 + lean * 0.3, -sgn * 0.12 * still, sgn * (0.09 + 0.05 * _r + breath * 0.012 * still) + st * 0.03)
 		fores[i].rotation = Vector3(-(0.28 + 0.12 * _w + 0.85 * _r + maxf(0.0, -s2) * 0.25 * _w), sgn * 0.25 * still, 0.0)
 
+	# ── étirement : après un long repos, le héros lève les bras, se cambre et lève le nez
+	var fid: float = _update_fidget(delta)
+	if fid > 0.0:
+		var up: float = fid * (1.0 - 0.15 * sin(_t * 9.0))
+		for i2: int in range(2):
+			var sg: float = -1.0 if i2 == 0 else 1.0
+			arms[i2].rotation = arms[i2].rotation.lerp(Vector3(-2.7, -sg * 0.15, sg * 0.35), up)
+			fores[i2].rotation = fores[i2].rotation.lerp(Vector3(-0.25, 0.0, 0.0), up)
+		chest.rotation.x -= 0.16 * fid
+		torso.rotation.x -= 0.06 * fid
+
 	# ── tête : stabilisée, regarde dans le virage, se promène au repos
 	_turn_look = lerpf(_turn_look, clampf(turn_rate * 0.09, -0.45, 0.45), _k(delta, 5.0))
 	_update_look(delta)
 	head.position = _head_base
-	head.rotation = Vector3(0.05 - lean * 0.6 + _look.y + sin(_phase * 2.0) * 0.025 * _w, -twist * 0.85 + _look.x * still + _turn_look, -_bank * 0.3 + _look.x * 0.08 * still)
+	head.rotation = Vector3(0.05 - lean * 0.6 - 0.35 * fid + _look.y + sin(_phase * 2.0) * 0.025 * _w, -twist * 0.85 + _look.x * still + _turn_look, -_bank * 0.3 + _look.x * 0.08 * still)
 
 	# ── yeux : clignements
 	_blink_timer -= delta
@@ -187,6 +201,35 @@ func animate(delta: float, speed: float, turn_rate: float) -> void:
 	cape.rotation = Vector3(_cape_a, 0.0, sin(_phase) * 0.05 * _w)
 	pack.position = Vector3(0.0, Adv3DHeroModel.H_PACK.y - Adv3DHeroModel.H_CHEST.y + _pack_y, Adv3DHeroModel.H_PACK.z)
 	pack.rotation.x = -_pack_y * 2.0
+
+
+## Courbe d'étirement 0 → 1 → 0 ; se déclenche après un long repos, puis toutes les 14-26 s d'immobilité.
+func _update_fidget(delta: float) -> float:
+	if _idle_time < 0.5:
+		_fidget_t = -1.0
+		_fidget_wait = maxf(_fidget_wait, 9.0) if _idle_time == 0.0 else _fidget_wait
+		return 0.0
+	if _fidget_t < 0.0:
+		_fidget_wait -= delta
+		if _fidget_wait <= 0.0:
+			_fidget_t = 0.0
+		return 0.0
+	_fidget_t += delta
+	if _fidget_t >= FIDGET_LEN:
+		_fidget_t = -1.0
+		_fidget_wait = _rng.randf_range(14.0, 26.0)
+		return 0.0
+	return smoothstep(0.0, 0.5, _fidget_t) * (1.0 - smoothstep(FIDGET_LEN - 0.6, FIDGET_LEN, _fidget_t))
+
+
+## Déclenche l'étirement tout de suite (tests / captures).
+func force_fidget() -> void:
+	_fidget_t = 0.0
+
+
+## 0 = marche ou repos, 1 = pleine course.
+func run_amount() -> float:
+	return _r
 
 
 func _update_look(delta: float) -> void:

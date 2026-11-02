@@ -606,8 +606,14 @@ void fragment() {
 	col += vec3(0.06) * rip * (1.0 - rim);
 	float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
 	col = mix(col, vec3(0.82, 0.92, 1.0), fres * 0.45);
+	// scintillements : petits points de lumière qui s'allument et s'éteignent
+	vec2 gc = floor(wpos.xz * 7.0);
+	float gh = fract(sin(dot(gc, vec2(12.9898, 78.233))) * 43758.5453);
+	float tw = pow(max(0.0, sin(TIME * (1.2 + gh * 2.0) + gh * 40.0)), 14.0);
+	vec2 gf = fract(wpos.xz * 7.0) - 0.5;
+	float glint = step(0.82, gh) * tw * smoothstep(0.32, 0.05, length(gf)) * (1.0 - rim * 0.6);
 	ALBEDO = col;
-	EMISSION = col * 0.10;
+	EMISSION = col * 0.10 + vec3(1.0, 0.98, 0.9) * glint * 1.3;
 	ROUGHNESS = 0.18;
 	ALPHA = mix(0.85, 0.6, rim);
 }
