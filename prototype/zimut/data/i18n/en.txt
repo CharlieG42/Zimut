@@ -1703,7 +1703,9 @@ Vitesse des animations	Animation speed
 Lente	Slow
 Rappel	Recall
 Poser Bombe incendiaire	Place Fire Bomb
-Maintenance	Maintenance
+Renforcement	Reinforcement
+Transposition	Transposition
+Rappel d'invocation	Summon Recall
 Poser Bombe assourdissante	Place Stun Bomb
 Poser Tourelle lourde	Place Heavy Turret
 Poser Charge à fragmentation	Place Frag Charge

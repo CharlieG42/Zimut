@@ -899,17 +899,18 @@ func _draw() -> void:
 
 	# V68 : compte à rebours des mécanismes (bombe : tours avant explosion ; autres : tours restants)
 	var life: int = int(entity.get("lifetime", -1))
-	if String(entity.get("mech", "")) != "" and life > 0:
+	if String(entity.get("mech", "")) != "":
 		var bomb: bool = String(entity.get("mech", "")) == "bomb"
-		var cc := Vector2(bw * 0.5 + 18.0, by2 + bh * 0.5)
-		var urgent: bool = bomb and life <= 1
-		var rr: float = 15.0 + (2.0 * sin(_t * 8.0) if urgent else 0.0)
-		draw_circle(cc, rr + 2.0, Color(0, 0, 0, 0.9))
-		draw_circle(cc, rr, (entity.get("color", Color(0.92, 0.22, 0.14)) as Color) if bomb else Color(0.35, 0.62, 0.85))
-		draw_string_outline(ThemeDB.fallback_font, cc + Vector2(-12.0, 7.0), str(life), HORIZONTAL_ALIGNMENT_CENTER, 24.0, 20, 4, Color(0, 0, 0, 0.9))
-		draw_string(ThemeDB.fallback_font, cc + Vector2(-12.0, 7.0), str(life), HORIZONTAL_ALIGNMENT_CENTER, 24.0, 20, Color(1, 1, 0.85))
+		if life > 0:
+			var cc := Vector2(bw * 0.5 + 18.0, by2 + bh * 0.5)
+			var urgent: bool = bomb and life <= 1
+			var rr: float = 15.0 + (2.0 * sin(_t * 8.0) if urgent else 0.0)
+			draw_circle(cc, rr + 2.0, Color(0, 0, 0, 0.9))
+			draw_circle(cc, rr, (entity.get("color", Color(0.92, 0.22, 0.14)) as Color) if bomb else Color(0.35, 0.62, 0.85))
+			draw_string_outline(ThemeDB.fallback_font, cc + Vector2(-12.0, 7.0), str(life), HORIZONTAL_ALIGNMENT_CENTER, 24.0, 20, 4, Color(0, 0, 0, 0.9))
+			draw_string(ThemeDB.fallback_font, cc + Vector2(-12.0, 7.0), str(life), HORIZONTAL_ALIGNMENT_CENTER, 24.0, 20, Color(1, 1, 0.85))
 		# V63 : niveau de la bombe (étoile dorée à gauche de la barre) et couplage (éclair bleu)
-		if bomb:
+		if entity.has("bomb_level"):
 			var lc := Vector2(-bw * 0.5 - 18.0, by2 + bh * 0.5)
 			var lv: int = int(entity.get("bomb_level", 1))
 			var pts := PackedVector2Array()

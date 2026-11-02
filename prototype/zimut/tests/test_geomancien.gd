@@ -59,7 +59,7 @@ func _boot() -> void:
 		quit(1)
 		return
 	check(bool(pil.get("blocks_los", false)) and bool(pil.get("static", false)), "le pilier est statique et bloque la vue")
-	check(int(pil["lifetime"]) == 5, "le pilier dure 5 tours")
+	check(int(pil["lifetime"]) == -1, "le pilier est permanent")
 	check(gm.cast_spell(geo, _spell(gm, geo, "Invoquer Muraille"), target + Vector2i(0, 0)) == false, "case occupée : impossible d'y poser une muraille")
 	# Muraille : 3 cases
 	var t2: Vector2i = Vector2i(-1, -1)
@@ -130,14 +130,13 @@ func _boot() -> void:
 	check(not bool(finfo.get("blocks_los", false)) and bool(finfo["static"]), "la faille est infranchissable mais laisse voir")
 	var cinfo: Dictionary = Combat.SUMMONS["Cristal ambré"]
 	check(not bool(cinfo.get("blocks_los", false)) and int(cinfo["defense"]) >= 40, "le cristal ambré est robuste et transparent")
-	# Durée de vie : le terrain s'effrite au fil des tours du Géomancien
+	# Permanence : le terrain ne disparaît plus avec les tours (destruction ou rappel seulement)
 	gm.active_entity = geo
 	for i: int in range(5):
 		gm.active_entity = geo
 		gm.end_current_turn()
 	await process_frame
-	check(gm.terrain_of(geo).size() == 0 or gm.terrain_of(geo).all(func(e: Dictionary) -> bool: return int(e["lifetime"]) > 0), "le pilier de 5 tours a disparu ou expire")
-	check(not gm.is_alive(pil), "le pilier est détruit après 5 tours")
+	check(gm.is_alive(pil), "le pilier est toujours là après 5 tours (permanent)")
 	# Sorts : cibles de buff, zone
 	var tp2: Dictionary = Combat.parse(_spell(gm, geo, "Glyphe de grès"))
 	check(String(tp2["kind"]) == "glyph" and (tp2["glyph_allies"] as Dictionary)["buffs"].size() > 0, "Glyphe de grès : glyphe de défense pour les alliés")

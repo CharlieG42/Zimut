@@ -455,20 +455,23 @@ func init_entities() -> void:
 					if active_names.has(String(s["name"])):
 						kept.append(s)
 				player["spells"] = kept
-		# Portée bonus du perso (points de caractéristiques + objets, plafonnée à 3)
-		var po_bonus: int = int(st.get("po", 0))
-		if po_bonus > 0:
-			for s: Dictionary in player["spells"]:
-				var sp: Dictionary = Combat.parse(s)
-				if String(sp["target"]) != "self" and int(s["range"]) < 99:
-					s["range"] = int(s["range"]) + po_bonus
-		# Niveaux de sorts améliorés (1..10) : multiplicateur d'efficacité
+		# Niveaux de sorts améliorés (1..10) : multiplicateur d'efficacité. À poser AVANT tout Combat.parse :
+		# parse() met son résultat en cache, un sort analysé trop tôt perdrait son bonus de niveau.
 		if not active_save.is_empty():
 			for s: Dictionary in player["spells"]:
 				var slvl: int = ProgressionManager.spell_level(active_save, classe, String(s["name"]))
 				if slvl > 1:
 					s["spell_level"] = slvl
 					s["mult"] = 1.0 + (float(slvl) - 1.0) * ProgressionManager.SPELL_LEVEL_BONUS_PCT / 100.0
+		# Portée bonus du perso (points de caractéristiques + objets, plafonnée à 3) et paliers de portée
+		# des sorts utilitaires (niveau de sort 4 et 8)
+		var po_bonus: int = int(st.get("po", 0))
+		for s: Dictionary in player["spells"]:
+			var sp: Dictionary = Combat.parse(s)
+			if String(sp["target"]) != "self" and int(s["range"]) < 99:
+				s["range"] = int(s["range"]) + po_bonus
+			if int(sp.get("range_bonus", 0)) > 0 and Combat.range_scales(sp, int(s["range"]) - po_bonus):
+				s["range"] = int(s["range"]) + int(sp["range_bonus"])
 		# Effets d'objets actifs dès le début du combat
 		if int(pfx.get("start_immune_neg", 0)) > 0:
 			Combat.add_status(player, "immune_neg", int(pfx["start_immune_neg"]), 0.0)
@@ -1298,14 +1301,17 @@ func end_current_turn() -> void:
 			message_requested.emit("%s disparaît." % e["name"])
 	_tower_attacks(e)
 	for tp: Dictionary in terrain_of(e):
-		tp["lifetime"] = int(tp["lifetime"]) - 1
-		if int(tp["lifetime"]) <= 0:
-			if String(tp.get("mech", "")) == "bomb":
-				_mech_explode(e, tp)
-			tp["current_pv"] = 0
-			message_requested.emit("%s s'effrite." % tp["name"] if String(tp.get("mech", "")) == "" else "%s disparaît." % tp["name"])
-		elif String(tp.get("mech", "")) == "bomb" and is_alive(tp):
-			_bomb_level_up(tp)
+		# Constructions et mécanismes sont permanents (lifetime -1) : seuls un ennemi ou un rappel les retirent.
+		if int(tp.get("lifetime", -1)) > 0:
+			tp["lifetime"] = int(tp["lifetime"]) - 1
+			if int(tp["lifetime"]) <= 0:
+				if String(tp.get("mech", "")) == "bomb":
+					_mech_explode(e, tp)
+				tp["current_pv"] = 0
+				message_requested.emit("%s s'effrite." % tp["name"] if String(tp.get("mech", "")) == "" else "%s disparaît." % tp["name"])
+				continue
+		if tp.has("bomb_level") and is_alive(tp):
+			_bomb_level_up(tp, e)
 		if int(tp.get("link_turns", 0)) > 0:
 			tp["link_turns"] = int(tp["link_turns"]) - 1
 	_glyphs_expire(e)
@@ -1609,8 +1615,22 @@ func validate_cast(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Str
 		var lt: Dictionary = entity_at(cell)
 		if lt.is_empty() or not is_alive(lt) or int(lt.get("owner", -1)) != int(caster["uid"]) or String(lt.get("mech", "")) == "":
 			return "Il faut viser un de vos mécanismes."
-	if p["kind"] == "maintain" and mechs_of(caster).is_empty():
-		return "Aucun mécanisme à entretenir."
+	if p["kind"] == "reinforce":
+		if mechs_of(caster).is_empty():
+			return "Aucun mécanisme à renforcer."
+		if mech_cap(caster) >= BOMB_LEVEL_MULT.size() and mechs_of(caster).all(func(m): return int(m["current_pv"]) >= int(m["max_pv"])):
+			return "Rien à renforcer."
+	if p["kind"] == "transpose":
+		var tk: String = trigger_kind(caster, cell)
+		if tk != "bomb" and tk != "turret" and tk != "swap":
+			return "Il faut viser un de vos mécanismes."
+		var tsw: String = _validate_swap(caster)
+		if tsw != "":
+			return tsw
+	if p["kind"] == "recall_summon":
+		if t.is_empty() or not is_alive(t) or int(t.get("owner", -1)) != int(caster["uid"]) \
+				or bool(t.get("terrain", false)) or String(t.get("mech", "")) != "" or bool(t.get("beacon", false)):
+			return "Il faut viser une de vos invocations."
 	if p["kind"] == "trigger_all" and trigger_all_count(caster) == 0:
 		return "Aucun mécanisme à déclencher."
 	if p["kind"] == "recall":
@@ -1715,8 +1735,17 @@ func cast_spell(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> bool:
 			summary = _resolve_recall_mech(caster, cell)
 		"recall_build":
 			summary = _resolve_recall_build(caster, cell)
-		"maintain":
-			summary = _resolve_maintain(caster)
+		"reinforce":
+			summary = _resolve_reinforce(caster)
+		"transpose":
+			var tm: Dictionary = entity_at(cell)
+			_do_swap(caster, tm)
+			summary = "%s échange sa place avec %s." % [caster["name"], String(tm.get("classe", "un mécanisme"))]
+		"recall_summon":
+			var rs: Dictionary = entity_at(cell)
+			remove_entity_from_grid(rs)
+			fx.emit("beacon", {"from": cell, "cells": [cell] as Array[Vector2i]})
+			summary = "%s rappelle %s." % [caster["name"], String(rs.get("classe", "une invocation"))]
 		"link":
 			summary = _resolve_link(caster, cell)
 		"recall":
@@ -2082,7 +2111,7 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 				remove_entity_from_grid(old_m)
 	var s: Dictionary = _base_entity("%s (inv.)" % sname, "Summon", String(caster["team"]), sname,
 		int(caster["level"]), cell)
-	var scale: float = (0.7 + float(caster["level"]) / 400.0) * (1.0 + float(caster.get("intelligence", 0)) / 400.0)
+	var scale: float = (0.7 + float(caster["level"]) / 400.0) * (1.0 + float(caster.get("intelligence", 0)) / 400.0) * float(p.get("summon_mult", 1.0))
 	s.merge({
 		"max_pv": int(float(info["pv"]) * scale), "current_pv": int(float(info["pv"]) * scale),
 		"force": int(float(info["force"]) * scale), "intelligence": int(float(info["force"]) * scale),
@@ -2100,8 +2129,13 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 		for k: String in info.keys():
 			if k.begins_with("bomb_") or k.begins_with("turret_"):
 				s[k] = info[k]
-		if mech_kind == "bomb":
-			s["bomb_level"] = 1   # V63 : la bombe monte de niveau à chaque fin de tour de son poseur
+		if mech_kind == "bomb" or mech_kind == "turret":
+			s["bomb_level"] = 1   # V63/V74 : le mécanisme monte de niveau à chaque fin de tour de son poseur
+		var smu: float = float(p.get("summon_mult", 1.0))
+		if smu != 1.0:   # niveau du sort : dégâts du mécanisme proportionnels
+			for mk: String in ["bomb_mult", "turret_mult"]:
+				if s.has(mk):
+					s[mk] = float(s[mk]) * smu
 	if bool(info.get("indestructible", false)):
 		s["indestructible"] = true
 	if bool(info.get("tower", false)):
@@ -2300,7 +2334,7 @@ func _turret_fire(owner: Dictionary, tw: Dictionary) -> bool:
 	var best: Dictionary = _turret_target(tw)
 	if best.is_empty():
 		return false
-	var base: float = (26.0 + float(owner["level"]) * 0.8) / 1.8 * float(tw.get("turret_mult", 1.0))
+	var base: float = (26.0 + float(owner["level"]) * 0.8) / 1.8 * float(tw.get("turret_mult", 1.0)) * BOMB_LEVEL_MULT[clampi(int(tw.get("bomb_level", 1)), 1, BOMB_LEVEL_MULT.size()) - 1]
 	var r: Dictionary = Combat.calc_damage(owner, best, base, "phys", 0.0, false, false)
 	fx.emit("cast", {"caster": tw, "spell": "Tir de tourelle", "kind": "attack", "dtype": "phys",
 		"from": pos_of(tw), "to": pos_of(best), "ranged": true, "cells": [pos_of(best)] as Array[Vector2i]})
@@ -2326,13 +2360,21 @@ const BOMB_RADIUS := 2
 
 ## V63 — Bombes à niveaux (esprit du Roublard) : une bombe posée commence au niveau 1 et
 ## gagne un niveau à chaque fin de tour de son poseur ; son explosion est multipliée d'autant.
-const BOMB_MAX_LEVEL := 4
-const BOMB_LEVEL_MULT: Array[float] = [1.0, 1.3, 1.65, 2.0]
+## V74 : bombes ET tourelles montent de niveau (plafond 5, +1 par « Renforcement », 8 au maximum).
+const BOMB_MAX_LEVEL := 5
+const BOMB_LEVEL_MULT: Array[float] = [1.0, 1.3, 1.65, 2.0, 2.4, 2.8, 3.2, 3.6]
 
 
-func _bomb_level_up(b: Dictionary) -> void:
+## Niveau maximal atteignable par les mécanismes d'un poseur.
+func mech_cap(owner: Dictionary) -> int:
+	return clampi(BOMB_MAX_LEVEL + int(owner.get("mech_cap_bonus", 0)), 1, BOMB_LEVEL_MULT.size())
+
+
+func _bomb_level_up(b: Dictionary, owner: Dictionary = {}) -> void:
 	var lv: int = int(b.get("bomb_level", 1))
-	if lv >= BOMB_MAX_LEVEL:
+	if owner.is_empty():
+		owner = _bomb_owner(b)
+	if lv >= (mech_cap(owner) if not owner.is_empty() else BOMB_MAX_LEVEL):
 		return
 	b["bomb_level"] = lv + 1
 	fx.emit("status", {"target": b, "text": "Niveau %d !" % (lv + 1), "color": Color(1.0, 0.75, 0.25), "good": true})
@@ -2461,7 +2503,7 @@ func _mech_explode(owner: Dictionary, bomb: Dictionary) -> void:
 		bomb["current_pv"] = 0
 		return
 	var center: Vector2i = pos_of(bomb)
-	var blv: int = clampi(int(bomb.get("bomb_level", 1)), 1, BOMB_MAX_LEVEL)
+	var blv: int = clampi(int(bomb.get("bomb_level", 1)), 1, BOMB_LEVEL_MULT.size())
 	var base: float = (34.0 + float(owner["level"]) * 1.0) / 1.8 * float(bomb.get("bomb_mult", 1.0)) * BOMB_LEVEL_MULT[blv - 1]
 	var radius: int = int(bomb.get("bomb_radius", BOMB_RADIUS))
 	var st_id: String = String(bomb.get("bomb_status", ""))
@@ -2587,16 +2629,15 @@ func _resolve_recall_mech(caster: Dictionary, cell: Vector2i) -> String:
 	return "%s rappelle %s." % [caster["name"], String(t.get("classe", "un mécanisme"))]
 
 
-## V68 : Maintenance — tous les mécanismes reviennent à leurs PV max et gagnent 2 tours.
-func _resolve_maintain(caster: Dictionary) -> String:
+## V74 : Renforcement — soigne tous les mécanismes et relève de 1 le niveau maximal qu'ils peuvent atteindre.
+func _resolve_reinforce(caster: Dictionary) -> String:
+	caster["mech_cap_bonus"] = int(caster.get("mech_cap_bonus", 0)) + (1 if mech_cap(caster) < BOMB_LEVEL_MULT.size() else 0)
 	var n: int = 0
 	for m: Dictionary in mechs_of(caster):
 		m["current_pv"] = int(m["max_pv"])
-		if int(m.get("lifetime", -1)) > 0:
-			m["lifetime"] = int(m["lifetime"]) + 2
-		fx.emit("status", {"target": m, "text": "+2 tours", "color": Color(0.5, 0.9, 1.0), "good": true})
+		fx.emit("status", {"target": m, "text": "Niv. max %d" % mech_cap(caster), "color": Color(0.5, 0.9, 1.0), "good": true})
 		n += 1
-	return "%s entretient %d mécanisme(s)." % [caster["name"], n]
+	return "%s renforce %d mécanisme(s) (niveau max %d)." % [caster["name"], n, mech_cap(caster)]
 
 
 func trigger_all_count(caster: Dictionary) -> int:

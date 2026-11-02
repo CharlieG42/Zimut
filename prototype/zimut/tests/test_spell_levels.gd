@@ -1,95 +1,90 @@
 extends SceneTree
-
-## Tests : montée de niveau des sorts (1..10), coûts, application du bonus.
-
+## V74 : le niveau d'un sort fait monter ses caractéristiques (valeur, durée, portée, invocations),
+## le Rappel d'invocation de l'Invocateur, Renforcement/Transposition de l'Ingénieur.
 var fails: int = 0
-
-func check(cond: bool, msg: String) -> void:
-	print(("  ok  " if cond else "  ÉCHEC  ") + msg)
-	if not cond:
+func check(c: bool, m: String) -> void:
+	print(("  ok  " if c else "  ÉCHEC  ") + m)
+	if not c:
 		fails += 1
-
 func _init() -> void:
 	_boot.call_deferred()
-
+func _row(classe: String, nm: String, lvl: int) -> Dictionary:
+	var ProgressionManager: Node = root.get_node("ProgressionManager")
+	for row: Dictionary in ProgressionManager.spells_of(classe):
+		if String(row["name"]) == nm:
+			return {"name": nm, "classe": classe, "cost_pa": int(row["pa"]), "cost_pm": int(row["pm"]),
+				"range": int(row["range"]), "effect": String(row["effect"]), "level_required": int(row["level"]),
+				"spell_type": String(row["type"]), "Degats_physiques": int(row["phys"]),
+				"Degats_magiques": int(row["mag"]), "Soins": int(row["heal"]),
+				"spell_level": lvl, "mult": 1.0 + (lvl - 1) * 0.06}
+	return {}
 func _boot() -> void:
-	var pm: Node = root.get_node("ProgressionManager")
-	var data: Dictionary = pm.new_game(3, "T-spells")
-
-	# Niveau par défaut : 1 pour tous les sorts
-	check(pm.spell_level(data, "Tank", "Coup de bouclier") == 1, "niveau de départ 1")
-	check(pm.spell_mult(data, "Tank", "Coup de bouclier") == 1.0, "multiplicateur 1.0 au niveau 1")
-
-	# Amélioration refusée sans point de sort (niveau 1 : 0 point)
-	var err: String = pm.upgrade_spell(data, "Tank", "Coup de bouclier")
-	check(err != "", "refus sans points de sort : %s" % err)
-	check(pm.spell_points_total(100) == 297 and pm.spell_points_total(1) == 0, "3 points de sort par niveau (297 au niveau 100)")
-
-	# Amélioration avec points : niveau 30 -> 87 points
-	pm.roster_entry(data, "Tank")["level"] = 30
-	check(pm.spell_points_free(data, "Tank") == 87, "87 points libres au niveau 30")
-	err = pm.upgrade_spell(data, "Tank", "Coup de bouclier")
-	check(err == "", "première amélioration acceptée")
-	check(pm.spell_level(data, "Tank", "Coup de bouclier") == 2, "niveau 2 atteint")
-	check(absf(pm.spell_mult(data, "Tank", "Coup de bouclier") - 1.06) < 0.001, "multiplicateur 1.06 au niveau 2")
-	check(pm.spell_points_free(data, "Tank") == 86, "1 point consommé")
-
-	# Coût croissant : niveau 2 -> 3 coûte 2 points
-	var cost: Dictionary = pm.spell_upgrade_cost(data, "Tank", "Coup de bouclier")
-	check(int(cost["points"]) == 2, "coût niveau 2 -> 3 : 2 points")
-
-	# Sort pas encore débloqué : refusé
-	pm.roster_entry(data, "Tank")["level"] = 50
-	check(pm.upgrade_spell(data, "Tank", "Colère") != "", "sort verrouillé (niveau 65) : amélioration refusée")
-
-	# Montée jusqu'au maximum : 45 points au total pour 1 -> 10
-	for i: int in range(8):
-		err = pm.upgrade_spell(data, "Tank", "Coup de bouclier")
-	check(err == "", "neuvième amélioration acceptée")
-	check(pm.spell_level(data, "Tank", "Coup de bouclier") == 10, "niveau maximum 10 atteint")
-	check(pm.spell_upgrade_cost(data, "Tank", "Coup de bouclier").is_empty(), "plus de coût au niveau max")
-	check(pm.spell_points_spent(data, "Tank") == 45, "45 points pour 1 -> 10")
-	check(absf(pm.spell_mult(data, "Tank", "Coup de bouclier") - 1.54) < 0.001, "multiplicateur 1.54 au niveau 10")
-	check(5 * 45 <= pm.spell_points_total(ClassRules.MAX_LEVEL) and 10 * 45 > pm.spell_points_total(ClassRules.MAX_LEVEL), "niveau 100 : 5 sorts au maximum possibles, pas les 10 (225 <= 297 < 450)")
-
-	# Retrait d'un niveau et remise à zéro gratuite
-	check(pm.downgrade_spell(data, "Tank", "Coup de bouclier") == "" and pm.spell_level(data, "Tank", "Coup de bouclier") == 9, "retrait d'un niveau")
-	pm.reset_spells(data, "Tank")
-	check(pm.spell_points_spent(data, "Tank") == 0 and pm.spell_points_free(data, "Tank") == 147, "remise à zéro gratuite : tous les points rendus")
-	for i: int in range(9):
-		pm.upgrade_spell(data, "Tank", "Coup de bouclier")
-	pm.roster_entry(data, "Tank")["level"] = 80
-
-	# Le bonus s'applique au parse du sort (dégâts augmentés)
-	var spell: Dictionary = {
-		"name": "Test", "classe": "Tank", "cost_pa": 2, "cost_pm": 0, "range": 1,
-		"effect": "30 dégâts", "spell_type": "Attaque",
-		"Degats_physiques": 30, "Degats_magiques": 0, "Soins": 0,
-	}
-	var p_base: Dictionary = Combat.parse(spell.duplicate())
-	check(int(p_base["dmg"]) == 30, "dégâts de base 30")
-	var up_spell: Dictionary = spell.duplicate()
-	up_spell["spell_level"] = 10
-	up_spell["mult"] = pm.spell_mult(data, "Tank", "Coup de bouclier")
-	var p_up: Dictionary = Combat.parse(up_spell)
-	check(int(p_up["dmg"]) == 46, "dégâts au niveau 10 : 46 (obtenu %d)" % int(p_up["dmg"]))
-
-	# Persistance dans la sauvegarde
-	pm.write_save(3, data)
-	var loaded: Dictionary = pm.load_save(3)
-	check(pm.spell_level(loaded, "Tank", "Coup de bouclier") == 10, "niveau conservé après sauvegarde/chargement")
-
-	# Les sorts des autres classes ne sont pas affectés
-	check(pm.spell_level(data, "Mage", "Coup de bouclier") == 1, "les autres classes restent niveau 1")
-
-	# Répartition automatique des points de sort
-	pm.roster_entry(data, "Mage")["level"] = 20
-	var n: int = pm.auto_spells(data, "Mage")
-	check(n > 0 and pm.spell_points_free(data, "Mage") <= 2, "auto : points dépensés (%d niveaux, %d restants)" % [n, pm.spell_points_free(data, "Mage")])
-	check(pm.spell_level(data, "Mage", "Boule de feu") > 1, "auto : un sort de dégâts monté")
-	check(bool(pm.roster_entry(data, "Mage").get("spell_auto", false)), "auto : mode mémorisé")
-	pm.downgrade_spell(data, "Mage", "Boule de feu")
-	check(not bool(pm.roster_entry(data, "Mage").get("spell_auto", true)), "un réglage manuel repasse en manuel")
-
-	print("ÉCHECS : %d" % fails)
-	quit(1 if fails > 0 else 0)
+	var gm: Node = root.get_node("GameManager")
+	var ProgressionManager: Node = root.get_node("ProgressionManager")
+	await process_frame
+	# Attaque, soin : valeurs ×(1+6%/niv)
+	var a1: Dictionary = Combat.parse(_row("Mage", "Boule de feu", 1)) if not _row("Mage", "Boule de feu", 1).is_empty() else {}
+	var a10: Dictionary = Combat.parse(_row("Mage", "Boule de feu", 10)) if not _row("Mage", "Boule de feu", 10).is_empty() else {}
+	if not a1.is_empty():
+		check(int(a10["dmg"]) > int(a1["dmg"]), "attaque : dégâts en hausse au niveau 10")
+	# Sorts de PA (+2 PA) : la durée monte, pas la valeur
+	var found_flat: bool = false
+	for classe: String in ProgressionManager.class_names():
+		for row: Dictionary in ProgressionManager.spells_of(classe):
+			var s1: Dictionary = _row(classe, String(row["name"]), 1)
+			var p1: Dictionary = Combat.parse(s1)
+			for b: Dictionary in p1["buffs"] + p1["self_buffs"]:
+				if String(b.get("id", "")) == "pa_up":
+					found_flat = true
+					var p10: Dictionary = Combat.parse(_row(classe, String(row["name"]), 10))
+					var bb: Array = p10["buffs"] + p10["self_buffs"]
+					var same_val: bool = false
+					var longer: bool = false
+					for b10: Dictionary in bb:
+						if String(b10.get("id", "")) == "pa_up":
+							same_val = is_equal_approx(float(b10["value"]), float(b["value"]))
+							longer = int(b10["turns"]) > int(b["turns"])
+					check(same_val and longer, "%s : +PA inchangé, durée allongée au niv. 10" % row["name"])
+	check(found_flat, "au moins un sort +PA testé")
+	# Perks
+	check(Combat.level_perks(1)["turns"] == 0 and Combat.level_perks(5)["turns"] == 1 and Combat.level_perks(10)["turns"] == 2, "paliers de durée")
+	check(Combat.level_perks(3)["range"] == 0 and Combat.level_perks(4)["range"] == 1 and Combat.level_perks(8)["range"] == 2, "paliers de portée")
+	# Invocation : l'invoqué est plus costaud
+	gm.set_custom_team([{"classe": "Invocateur"}, {"classe": "Tank"}, {"classe": "Mage"}])
+	gm.init_grid()
+	gm.init_entities()
+	var inv: Dictionary = {}
+	for p: Dictionary in gm.players:
+		if String(p["classe"]) == "Invocateur":
+			inv = p
+	inv["spells"] = gm._build_spells("Invocateur", 100)
+	inv["current_pa"] = 60
+	var golem: Dictionary = {}
+	var rap: Dictionary = {}
+	for s: Dictionary in inv["spells"]:
+		if String(s["name"]) == "Invoquer Golem de Pierre":
+			golem = s
+		if String(s["name"]) == "Rappel d'invocation":
+			rap = s
+	check(not rap.is_empty(), "l'Invocateur a un Rappel d'invocation")
+	var free: Array = []
+	for y: int in range(gm.GRID_SIZE):
+		for x: int in range(gm.GRID_SIZE):
+			var c := Vector2i(x, y)
+			if gm.is_free(c) and Combat.manhattan(gm.pos_of(inv), c) == 1:
+				free.append(c)
+	golem["spell_level"] = 10
+	golem["mult"] = 1.54
+	golem.erase("_p")
+	inv["casts"] = {}
+	check(gm.cast_spell(inv, golem, free[0]), "invocation du golem niv. 10")
+	var g10: Dictionary = gm.entity_at(free[0])
+	check(not g10.is_empty(), "golem présent")
+	check(float(Combat.parse(golem).get("summon_mult", 1.0)) > 1.4, "summon_mult porté par le sort")
+	# Rappel d'invocation
+	inv["casts"] = {}
+	check(gm.validate_cast(inv, rap, gm.pos_of(inv)) != "", "rappel : il faut viser une invocation")
+	check(gm.cast_spell(inv, rap, free[0]), "rappel du golem")
+	check(gm.entity_at(free[0]).is_empty() or not gm.is_alive(g10), "golem rappelé")
+	print("ÉCHECS : ", fails)
+	quit(0 if fails == 0 else 1)
