@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://np85c97xhb9axv"
+path="res://.godot/imported/scierie_3-031cb460bb5d43019dc15cead117b929.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/ombres/scierie_3"
+dest_files=["res://.godot/imported/scierie_3-031cb460bb5d43019dc15cead117b929.ctex"]
+
+[params]
+
+compress/mode=0
