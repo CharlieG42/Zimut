@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://m03qg7win9tpjs"
+path="res://.godot/imported/mine_5-0427ed2ab2f644e38c5dbdcb32f38518.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/vents/mine_5"
+dest_files=["res://.godot/imported/mine_5-0427ed2ab2f644e38c5dbdcb32f38518.ctex"]
+
+[params]
+
+compress/mode=0

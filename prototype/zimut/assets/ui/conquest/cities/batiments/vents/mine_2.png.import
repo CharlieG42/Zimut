@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://nti5tauujixoel"
+path="res://.godot/imported/mine_2-38fa0c664fb44b5ea74ba648cc7688a5.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/vents/mine_2"
+dest_files=["res://.godot/imported/mine_2-38fa0c664fb44b5ea74ba648cc7688a5.ctex"]
+
+[params]
+
+compress/mode=0
