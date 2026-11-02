@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://tjluaae8krjrv4"
+path="res://.godot/imported/caserne_5-89568293cb314f819cf62b498a6d5f22.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/sylvestre/caserne_5"
+dest_files=["res://.godot/imported/caserne_5-89568293cb314f819cf62b498a6d5f22.ctex"]
+
+[params]
+
+compress/mode=0
