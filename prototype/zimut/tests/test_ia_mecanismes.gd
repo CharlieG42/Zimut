@@ -19,6 +19,26 @@ func _cell_at(gm: Node, from: Vector2i, d: int, avoid: Array) -> Vector2i:
 			if gm.is_free(c) and Combat.manhattan(from, c) == d and not avoid.has(c):
 				return c
 	return Vector2i(-1, -1)
+## Cherche (a, f, n) libres : f à distance da de a, n à distance 1 (ou 2) de f et au moins dn de a.
+func _triple(gm: Node, da: int, dfn: int, dn: int) -> Array:
+	for ya: int in range(gm.GRID_SIZE):
+		for xa: int in range(gm.GRID_SIZE):
+			var a := Vector2i(xa, ya)
+			if not gm.is_free(a):
+				continue
+			for yf: int in range(gm.GRID_SIZE):
+				for xf: int in range(gm.GRID_SIZE):
+					var f := Vector2i(xf, yf)
+					if f == a or not gm.is_free(f) or Combat.manhattan(a, f) != da:
+						continue
+					for yn: int in range(gm.GRID_SIZE):
+						for xn: int in range(gm.GRID_SIZE):
+							var n := Vector2i(xn, yn)
+							if n != a and n != f and gm.is_free(n) and Combat.manhattan(n, f) == dfn and Combat.manhattan(n, a) >= dn:
+								return [a, f, n]
+	return []
+
+
 func _boot() -> void:
 	var gm: Node = root.get_node("GameManager")
 	await process_frame
@@ -39,10 +59,24 @@ func _boot() -> void:
 	for e2: Dictionary in gm.enemies:
 		if e2 != foe:
 			e2["current_pv"] = 0   # un seul ennemi vivant : mesures lisibles
-	var far: Vector2i = _cell_at(gm, gm.pos_of(art), 3, [])
+	var tri: Array = _triple(gm, 4, 1, 3)
+	gm._teleport_entity(art, tri[0])
+	var far: Vector2i = tri[1]
 	gm._teleport_entity(foe, far)
+	# alliés éloignés : le test ne dépend pas du placement aléatoire du début de combat
+	for al: Dictionary in gm.players:
+		if al != art:
+			var away: Vector2i = Vector2i(-1, -1)
+			for y0: int in range(gm.GRID_SIZE):
+				for x0: int in range(gm.GRID_SIZE):
+					var c0 := Vector2i(x0, y0)
+					if away.x < 0 and gm.is_free(c0) and Combat.manhattan(c0, gm.pos_of(art)) >= 9 and Combat.manhattan(c0, tri[1]) >= 6:
+						away = c0
+			if away.x >= 0:
+				gm._teleport_entity(al, away)
+
 	var bomb_sp: Dictionary = _sp(art, "Poser Bombe")
-	var spot: Vector2i = _cell_at(gm, far, 1, [gm.pos_of(art)])
+	var spot: Vector2i = tri[2]
 	check(tm._score_cast(art, bomb_sp, Combat.parse(bomb_sp), spot) > 0.0, "bombe : posée près d'un ennemi")
 	var nowhere := Vector2i(-1, -1)
 	for y: int in range(gm.GRID_SIZE):
@@ -56,6 +90,8 @@ func _boot() -> void:
 	check(gm.cast_spell(art, bomb_sp, spot), "bombe posée")
 	var trig: Dictionary = _sp(art, "Déclencheur")
 	var sc: float = tm._score_cast(art, trig, Combat.parse(trig), spot)
+	if sc <= 0.0:
+		print("DIAG kind=", gm.trigger_kind(art, spot), " bomb=", gm.entity_at(spot).get("mech", "?"), " foes=", tm._foes_near(art, spot, 2), " friends=", tm._friends_near(art, spot, 2), " foe=", gm.pos_of(foe), " spot=", spot, " art=", gm.pos_of(art), " pv=", foe["current_pv"])
 	check(sc > 0.0, "Déclencheur rentable avec un ennemi dans le rayon (%.0f)" % sc)
 	var ally: Dictionary = gm.players[1] if gm.players[1] != art else gm.players[2]
 	var near_ally: Vector2i = _cell_at(gm, spot, 1, [far, gm.pos_of(art)])
@@ -75,16 +111,16 @@ func _boot() -> void:
 	for e3: Dictionary in gm.enemies:
 		if e3 != f2:
 			e3["current_pv"] = 0
-	var fpos: Vector2i = _cell_at(gm, gm.pos_of(geo), 3, [])
+	var tri2: Array = _triple(gm, 3, 2, 3)
+	gm._teleport_entity(geo, tri2[0])
+	var fpos: Vector2i = tri2[1]
 	gm._teleport_entity(f2, fpos)
+	for al2: Dictionary in gm.players:
+		if al2 != geo:
+			gm._teleport_entity(al2, _cell_at(gm, tri2[0], 8, [tri2[1], tri2[2]]))
 	var pil: Dictionary = _sp(geo, "Invoquer Pilier")
 	var mur: Dictionary = _sp(geo, "Invoquer Muraille")
-	var near_foe := Vector2i(-1, -1)
-	for y3: int in range(gm.GRID_SIZE):
-		for x3: int in range(gm.GRID_SIZE):
-			var c3 := Vector2i(x3, y3)
-			if near_foe.x < 0 and gm.is_free(c3) and Combat.manhattan(c3, fpos) == 2 and Combat.manhattan(c3, gm.pos_of(geo)) >= 3:
-				near_foe = c3
+	var near_foe: Vector2i = tri2[2]
 	check(tm._score_cast(geo, pil, Combat.parse(pil), near_foe) > 0.0, "pilier : à portée de tir d'un ennemi")
 	check(tm._score_cast(geo, mur, Combat.parse(mur), near_foe) == 0.0, "muraille : l'IA n'en pose pas")
 	print("ÉCHECS : ", fails)
