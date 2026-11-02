@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://nytn2ganvvssdn"
+path="res://.godot/imported/verger_2-81e0d772925f4290932a48e11dbdd38f.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/marees/verger_2"
+dest_files=["res://.godot/imported/verger_2-81e0d772925f4290932a48e11dbdd38f.ctex"]
+
+[params]
+
+compress/mode=0
