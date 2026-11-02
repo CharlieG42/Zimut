@@ -45,10 +45,16 @@ func _boot() -> void:
 		while not gm.game_over and Time.get_ticks_msec() - t0 < 240000:
 			await create_timer(0.5).timeout
 		var alive: int = 0
+		var hp_now: float = 0.0
+		var hp_max: float = 0.0
+		for e0 in gm.players:
+			if e0.get("team", "") == "player" and e0.get("entity_type", "") != "Summon":
+				hp_now += maxf(0.0, float(e0.get("current_pv", 0)))
+				hp_max += float(e0.get("max_pv", e0.get("pv_max", 1)))
 		for e in gm.players:
 			if e.get("team", "") == "player" and int(e.get("current_pv", 0)) > 0 and e.get("entity_type", "") != "Summon":
 				alive += 1
-		print("combat %d : %s en %d tours, héros debout %d" % [k, "VICTOIRE" if gm.victory else ("DÉFAITE" if gm.game_over else "TIMEOUT"), gm.turn_count, alive])
+		print("combat %d : %s en %d tours, héros debout %d, PV restants %d %%" % [k, "VICTOIRE" if gm.victory else ("DÉFAITE" if gm.game_over else "TIMEOUT"), gm.turn_count, alive, int(100.0 * hp_now / maxf(1.0, hp_max))])
 		if gm.victory:
 			wins += 1
 		turns.append(gm.turn_count)
