@@ -1,5 +1,7 @@
+V78|Fiche personnage : la fenêtre ne dépasse plus de l'écran quand plusieurs sorts ont des bonus de niveau.
+V78|Niveaux de sort : les effets en % (ex. Lien d'âme) affichent leur valeur réelle (+15 % → +17 %) ; les petits soins progressent d'au moins 1 par niveau.
 V78|Aventure 3D : étirement du héros après un long repos, champ de vision qui s’ouvre en course, feuilles qui tombent en forêt, scintillements sur l’eau.
-V77|Mode Aventure 3D : le personnage porte désormais la tenue de sa classe (couleurs et accessoire : casque, chapeau de mage, bois de druide, lunettes d’artificier…).
+V78|Mode Aventure 3D : le personnage porte désormais la tenue de sa classe (couleurs et accessoire : casque, chapeau de mage, bois de druide, lunettes d’artificier…).
 V76|Équilibrage : le Géomancien ne peut plus avoir que 3 constructions en même temps (au lieu de 4).
 V74|Constructions du Géomancien et mécanismes de l'Ingénieur permanents : ils ne disparaissent plus avec les tours.
 V74|Ingénieur : Maintenance devient Renforcement (soin + niveau max des mécanismes +1) ; nouveau sort Transposition.

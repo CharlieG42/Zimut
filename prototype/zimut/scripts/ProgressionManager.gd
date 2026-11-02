@@ -1493,9 +1493,24 @@ func spell_preview(classe: String, spell_name: String, level: int) -> Dictionary
 			base = int(float(d["value"]))
 			label = "Dégâts par tour"
 	var mult: float = 1.0 + (float(clampi(level, 1, SPELL_LEVEL_MAX)) - 1.0) * SPELL_LEVEL_BONUS_PCT / 100.0
-	return {"pa": int(row["pa"]), "pm": int(row["pm"]), "range": int(row["range"]), "kind": String(p["kind"]),
+	# Effet en % (bonus de dégâts/défense…) à ce niveau et au suivant, calculé par le vrai parseur
+	var eff: Dictionary = {}
+	for lv: int in [clampi(level, 1, SPELL_LEVEL_MAX), clampi(level + 1, 1, SPELL_LEVEL_MAX)]:
+		var sp2: Dictionary = spell.duplicate(true)
+		sp2.erase("_p")
+		sp2["spell_level"] = lv
+		sp2["mult"] = 1.0 + (float(lv) - 1.0) * SPELL_LEVEL_BONUS_PCT / 100.0
+		var e2: Dictionary = Combat.pct_effect(Combat.parse(sp2))
+		if e2.is_empty():
+			eff = {}
+			break
+		if eff.is_empty():
+			eff = {"label": e2["label"], "value": e2["value"], "next": e2["value"]}
+		else:
+			eff["next"] = e2["value"]
+	return {"pct_effect": eff, "pa": int(row["pa"]), "pm": int(row["pm"]), "range": int(row["range"]), "kind": String(p["kind"]),
 		"target": String(p["target"]), "aoe": String(p["aoe"]), "zone": int(p["zone_r"]),
-		"los": bool(p["needs_los"]), "value": roundi(float(base) * mult), "base_value": base, "label": label,
+		"los": bool(p["needs_los"]), "value": Combat.scale_value(base, mult), "base_value": base, "label": label,
 		"mult": mult, "perks": Combat.level_perks(clampi(level, 1, SPELL_LEVEL_MAX)), "range_scales": Combat.range_scales(p, int(row["range"])),
 		"desc": Combat.describe(spell), "type": String(row["type"]), "req": int(row["level"])}
 
