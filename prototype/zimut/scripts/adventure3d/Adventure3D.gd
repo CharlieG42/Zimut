@@ -69,6 +69,9 @@ func _ready() -> void:
 	manager.set_script(load("res://scripts/AdventureManager.gd"))
 	add_child(manager)
 	manager.load_state(save, GameManager.active_slot)
+	# Vue d'Aventure courante mémorisée : le retour d'un combat reviendra ici.
+	manager.save["adventure_view"] = "3d"
+	manager.persist()
 	zone_id = manager.zone_id()
 	terrain = AdventureTerrain.zone_terrain(zone_id)
 	_build_environment()

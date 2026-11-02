@@ -1,3 +1,4 @@
+V79|Nouveau 4e mode « Monde Ouvert 3D » (Mes Parties) : explorez Zimut en 3D libre façon RPG — toucher un monstre ou entrer dans un donjon lance directement le combat Tactique ; héros, butin, XP, temps de jeu et difficulté partagés avec les autres modes.
 V78|Aventure 3D : étirement du héros après un long repos, champ de vision qui s’ouvre en course, feuilles qui tombent en forêt, scintillements sur l’eau.
 V77|Mode Aventure 3D : le personnage porte désormais la tenue de sa classe (couleurs et accessoire : casque, chapeau de mage, bois de druide, lunettes d’artificier…).
 V76|Équilibrage : le Géomancien ne peut plus avoir que 3 constructions en même temps (au lieu de 4).

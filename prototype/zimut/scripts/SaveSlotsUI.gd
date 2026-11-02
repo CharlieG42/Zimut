@@ -633,7 +633,16 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	modes_row.add_child(_mode_button("Aventure",
 		"Explorez, découvrez et relevez des défis", "res://assets/ui/modes/mode_aventure.png",
 		Color(0.22, 0.48, 0.31), adv_ok, func() -> void:
+			# La vue d'Aventure repart du réglage (pas de la vue mémorisée d'une autre partie).
+			GameManager.active_save = {}
+			_current["adventure_view"] = ""
 			_launch_campaign_mode("adventure", GameSettings.adventure_scene(), slot)))
+	modes_row.add_child(_mode_button("Monde Ouvert 3D",
+		"Explorez Zimut en 3D libre, façon RPG : toucher un monstre ou entrer dans un donjon lance le combat Tactique", "res://assets/ui/modes/mode_aventure.png",
+		Color(0.20, 0.52, 0.58), adv_ok, func() -> void:
+			GameManager.active_save = {}
+			_current["adventure_view"] = "open3d"
+			_launch_campaign_mode("adventure", "res://scenes/AdventureOpen3D.tscn", slot), "adventure"))
 	modes_row.add_child(_mode_button("Conquête",
 		"Conquérez les cités par les armes", "res://assets/ui/modes/mode_conquete.png",
 		Color(0.62, 0.25, 0.20), con_ok, func() -> void:
@@ -644,14 +653,15 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	times_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	times_row.add_theme_constant_override("separation", 10)
 	_detail_box.add_child(times_row)
-	for mode: String in ["tactique", "adventure", "conquest"]:
+	for entry: Array in [["tactique", "Tactique"], ["adventure", "Aventure"], ["openworld", "Monde ouvert"], ["conquest", "Conquête"]]:
+		var mode: String = String(entry[0])
 		var t := Label.new()
 		t.name = "Playtime_%s" % mode
 		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		t.add_theme_font_size_override("font_size", _ui_font(14))
 		t.add_theme_color_override("font_color", COL_BORDER.darkened(0.3))
-		t.text = "⏱ %s" % ProgressionManager.format_playtime(ProgressionManager.playtime_mode(data, mode))
+		t.text = "⏱ %s · %s" % [String(entry[1]), ProgressionManager.format_playtime(ProgressionManager.playtime_mode(data, mode))]
 		times_row.add_child(t)
 
 	_start_tutorial(data, tac_btn)
@@ -1050,7 +1060,7 @@ const COL_DISABLED_TXT := Color(0.45, 0.48, 0.55)
 
 ## Carte de mode : l'illustration PNG occupe tout le bouton (elle est
 ## explicite), sans texte superposé ; le libellé reste en info-bulle.
-func _mode_button(title_txt: String, desc: String, art_path: String, accent: Color, enabled: bool, cb: Callable) -> Button:
+func _mode_button(title_txt: String, desc: String, art_path: String, accent: Color, enabled: bool, cb: Callable, unlock_mode: String = "") -> Button:
 	var b := Button.new()
 	b.text = ""
 	b.tooltip_text = "%s — %s" % [title_txt, desc]
@@ -1071,7 +1081,8 @@ func _mode_button(title_txt: String, desc: String, art_path: String, accent: Col
 		art.modulate = Color(0.30, 0.30, 0.36)
 	b.add_child(art)
 	if not enabled:
-		var need: int = int(ProgressionManager.MODE_MIN_LEVEL.get("adventure" if title_txt == "Aventure" else "conquest", 1))
+		var umode: String = unlock_mode if unlock_mode != "" else ("adventure" if title_txt == "Aventure" else "conquest")
+		var need: int = int(ProgressionManager.MODE_MIN_LEVEL.get(umode, 1))
 		b.tooltip_text = "%s — verrouillé : atteignez le niveau %d (niveau du joueur ou d'un de vos héros)." % [title_txt, need]
 		var lock := Label.new()
 		lock.name = "LockLabel"
