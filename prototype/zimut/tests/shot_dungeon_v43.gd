@@ -10,15 +10,15 @@ func _boot() -> void:
 	pm.rebuild_team(data, ["Chasseur", "Mage", "Sylvain"])
 	data["campaign_mode"] = "adventure"
 	var adv: Dictionary = pm.adventure_state(data)
-	adv["zone"] = "foret_ronces"
-	adv["hero_pos"] = [1, 1]
+	adv["zone"] = "foret_sylve"
+	adv["hero_pos"] = [30, 18]
 	adv["dungeon"] = {"biome": "Forêt", "room": 3}
 	gm.active_save = data
 	gm.active_slot = 4
 	var sc: Node = (load("res://scenes/AdventureMap.tscn") as PackedScene).instantiate()
 	root.add_child(sc)
 	await create_timer(0.8).timeout
-	var poi: Dictionary = sc.manager.poi_at(Vector2i(1, 1))
+	var poi: Dictionary = sc.manager.poi_at(Vector2i(30, 18))
 	sc._confirm_combat(poi)
 	await create_timer(0.6).timeout
 	root.get_viewport().get_texture().get_image().save_png(out + "/dungeon_dialog.png")

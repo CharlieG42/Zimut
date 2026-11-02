@@ -96,7 +96,7 @@ func _boot() -> void:
 	check(scene.get("world_root") != null, "scène : monde construit")
 	var mobs: Array = scene.manager.mobs()
 	check(mobs.size() >= 1 and scene._mob_nodes.size() == mobs.size(), "scène : un nœud 3D par groupe de monstres (%d)" % mobs.size())
-	var pois: Dictionary = pm.ADVENTURE_POIS["foret_sylve"]
+	var pois: Dictionary = pm.pois_of("foret_sylve")
 	check(scene._poi_nodes.size() == pois.size(), "scène : un marqueur par lieu (%d)" % pois.size())
 	check(scene._gate_nodes.size() == scene.manager.gates().size(), "scène : un portique par porte")
 

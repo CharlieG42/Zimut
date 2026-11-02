@@ -19,13 +19,13 @@ func _boot() -> void:
 		var size: Vector2i = t["size"]
 		var bad: int = 0
 		var unreachable: int = 0
-		for k: String in pm.ADVENTURE_POIS[zone_id].keys():
+		for k: String in pm.pois_of(zone_id).keys():
 			var p: Vector2i = AdventureTerrain.parse(k)
 			if p.x < 0 or p.y < 0 or p.x >= size.x or p.y >= size.y or t["obstacles"].has(p) or t["voids"].has(p):
 				bad += 1
 			if p != t["start"] and AdventureTerrain.find_path(zone_id, t["start"], p).is_empty():
 				unreachable += 1
-			if String(pm.ADVENTURE_POIS[zone_id][k]["kind"]) == "puzzle":
+			if String(pm.pois_of(zone_id)[k]["kind"]) == "puzzle":
 				check(pm.ADVENTURE_PUZZLES.has("%s,%s" % [zone_id, k]), "%s %s : énigme au catalogue" % [zone_id, k])
 		check(bad == 0 and not t["obstacles"].has(t["start"]), "%s : aucun obstacle sur départ ni lieux, lieux dans la grille" % zone_id)
 		check(unreachable == 0, "%s : tous les lieux accessibles depuis le départ" % zone_id)

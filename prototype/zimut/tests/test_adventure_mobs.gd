@@ -27,10 +27,11 @@ func _run() -> void:
 	# Peuplement
 	mgr.ensure_mobs()
 	var groups: Array = mgr.mobs()
-	check(groups.size() == AdventureMobs.PER_ZONE, "la carte se peuple de %d groupes (%d)" % [AdventureMobs.PER_ZONE, groups.size()])
+	var t: Dictionary = AdventureTerrain.zone_terrain(zone)
+	# V81 : les grandes zones de nation accueillent plus de groupes (per_zone selon la taille)
+	check(groups.size() == AdventureMobs.per_zone(t["size"]), "la carte se peuple de %d groupes (%d)" % [AdventureMobs.per_zone(t["size"]), groups.size()])
 	var hero: Vector2i = mgr.hero_pos()
 	var ok_pos: bool = true
-	var t: Dictionary = AdventureTerrain.zone_terrain(zone)
 	for g: Dictionary in groups:
 		var p: Vector2i = AdventureMobs.pos_of(g)
 		if not AdventureTerrain.walkable(zone, p) or (t["pois"] as Array).has(p) or (t["gates"] as Array).has(p) or absi(p.x - hero.x) + absi(p.y - hero.y) < AdventureMobs.MIN_SPAWN_DIST:

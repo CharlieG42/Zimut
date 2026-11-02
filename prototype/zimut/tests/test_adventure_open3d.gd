@@ -7,6 +7,15 @@ func ck(c: bool, m: String) -> void:
 	print(("  ok  " if c else "  ÉCHEC  ") + m)
 	if not c: fails += 1
 
+func _find_btn(n: Node, txt: String) -> Button:
+	if n is Button and String((n as Button).text) == txt:
+		return n as Button
+	for c: Node in n.get_children():
+		var r: Button = _find_btn(c, txt)
+		if r != null:
+			return r
+	return null
+
 func _init() -> void:
 	_run.call_deferred()
 
@@ -91,6 +100,68 @@ func _run() -> void:
 		ck(String(res.get("action", "")) == "combat", "interact() sur le donjon → action combat (%s)" % String(res.get("action", "")))
 		Dungeons.begin(adv, String(poi.get("guardian", "")))
 		ck(Dungeons.current_room(adv, String(poi.get("guardian", ""))) == 1, "Dungeons.begin → salle 1/%d" % Dungeons.ROOMS)
+
+	# V81 : monde par nations — 11 zones (10 nations + Donjon), grandes tailles, ≤ 2 portails,
+	# POI générés en plus du catalogue (déterministes).
+	ck(pm.ADVENTURE_ZONES.size() == 11, "11 zones : 10 nations + le Donjon (%d)" % pm.ADVENTURE_ZONES.size())
+	var max_gates: int = 0
+	for z: String in pm.ADVENTURE_ZONES.keys():
+		max_gates = maxi(max_gates, pm.adventure_gates(z).size())
+		var sz: Array = pm.ADVENTURE_ZONES[z].get("size", [14, 10])
+		if String(pm.ADVENTURE_ZONES[z].get("biome", "")) != "Donjon":
+			ck(int(sz[0]) >= 30 and int(sz[1]) >= 20, "%s : grande zone de nation %s" % [z, str(sz)])
+	ck(max_gates <= 2, "au plus 2 portails par zone (max %d)" % max_gates)
+	var pois_gen: Dictionary = pm.pois_of("foret_sylve")
+	ck(pois_gen.size() > pm.ADVENTURE_POIS["foret_sylve"].size(),
+		"POI générés en plus du catalogue : %d > %d" % [pois_gen.size(), pm.ADVENTURE_POIS["foret_sylve"].size()])
+	ck(pm.pois_of("foret_sylve") == pois_gen, "pois_of déterministe (cache stable)")
+
+	# V81 : scène du monde ouvert instanciée — caméra reculée, mini-carte ronde,
+	# pop-up « combattre ou non », carte plein écran à onglets (instance + monde).
+	var gs: Node = root.get_node("GameSettings")
+	gs.adventure_models_3d = false
+	var scene: Node = (load("res://scenes/AdventureOpen3D.tscn") as PackedScene).instantiate()
+	root.add_child(scene)
+	await process_frame
+	await process_frame
+	ck(scene.explorer != null, "scène open3d : explorateur présent")
+	ck(scene.explorer.distance >= 9.0, "caméra reculée : distance %.1f (≥ 9 m)" % scene.explorer.distance)
+	ck(scene._minimap != null and scene._minimap._tex_round != null, "mini-carte ronde : texture circulaire construite")
+	ck(scene._minimap != null and scene._minimap.custom_minimum_size.x == scene._minimap.custom_minimum_size.y,
+		"mini-carte carrée (affichée en rond)")
+	var gates_n: int = scene.manager.gates().size()
+	ck(gates_n >= 1 and gates_n <= 2, "foret_sylve : %d portail(s) (1-2 max)" % gates_n)
+	# Rencontre avec un groupe → pop-up demandant si l'on veut battre
+	var mobs2: Array = scene.manager.mobs()
+	ck(not mobs2.is_empty(), "groupes de monstres présents dans la zone (%d)" % mobs2.size())
+	if not mobs2.is_empty():
+		var g0: Dictionary = mobs2[0]
+		var mnode: Node3D = scene._mob_nodes[int(g0["id"])]
+		scene._declined_mobs.clear()
+		scene.explorer.place_at(Vector3(mnode.position.x, 0.0, mnode.position.z))
+		await process_frame
+		await process_frame
+		ck(scene._modal_root != null, "rencontre : la pop-up s'ouvre (battre ou non ?)")
+		var later: Button = _find_btn(scene._modal_root, "PLUS TARD")
+		var fight: Button = _find_btn(scene._modal_root, "⚔  COMBATTRE")
+		ck(later != null and fight != null, "pop-up : boutons « COMBATTRE » et « PLUS TARD »")
+		if later != null:
+			later.pressed.emit()
+			ck(scene._modal_root == null and scene._declined_mobs.has(int(g0["id"])),
+				"« PLUS TARD » ferme la fenêtre et laisse passer le groupe")
+	# Carte plein écran : onglet instance (nation) + onglet monde (toutes les nations)
+	scene._open_full_map()
+	ck(scene._modal_root != null and scene._full_map_big != null, "carte plein écran : onglet instance ouvert")
+	ck(scene._full_map_world != null and not scene._full_map_world.visible, "onglet monde présent (masqué au départ)")
+	scene._toggle_full_map_tab()
+	ck(scene._full_map_world.visible and not scene._full_map_big.visible, "bascule vers la carte du monde total")
+	scene._toggle_full_map_tab()
+	ck(scene._full_map_big.visible and not scene._full_map_world.visible, "retour à la carte de l'instance (nation)")
+	scene._close_modal()
+	ck(scene._modal_root == null, "la carte plein écran se ferme")
+	scene.queue_free()
+	await process_frame
+	gs.adventure_models_3d = true
 
 	mgr.queue_free()
 	pm.delete_save(4)
