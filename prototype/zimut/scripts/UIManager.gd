@@ -1955,6 +1955,9 @@ func _show_tip(spell) -> void:
 		extra.append("Ligne de vue")
 	if not extra.is_empty():
 		lines.append("  ·  ".join(extra))
+	var hint: String = Combat.level_hint(spell)
+	if hint != "":
+		lines.append("▲ " + hint)
 	_tip_label.text = "\n".join(lines)
 	_tip_panel.visible = true
 	_place_tip()

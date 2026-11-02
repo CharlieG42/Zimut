@@ -464,7 +464,7 @@ func refresh_highlights() -> void:
 					if p["kind"] == "attack" and t["team"] != e["team"]:
 						var dmg: int = game_manager.estimate_damage(e, spell, t)
 						if dmg > 0:
-							_view(t).preview_text = "-%d" % dmg
+							_view(t).preview_text = ("-%d  KO" % dmg) if dmg >= int(t["current_pv"]) else ("-%d" % dmg)
 					elif p["kind"] == "heal" and t["team"] == e["team"] and int(p["heal"]) > 0:
 						_view(t).preview_text = "+%d" % roundi(float(p["heal"]) * (1.0 + float(e.get("intelligence", 0)) / 300.0))
 	if not _threat_of.is_empty():
@@ -488,6 +488,25 @@ const THREAT_HOLD := 0.45
 func show_threat(e: Dictionary) -> void:
 	_threat_of = e if not e.is_empty() and String(e.get("team", "")) == "enemy" else {}
 	refresh_highlights()
+
+
+## Appui long sur un de ses mécanismes : portée de tir de la tourelle ou rayon d'explosion de la bombe.
+func show_mech_range(m: Dictionary) -> void:
+	_threat_of = {}
+	refresh_highlights()
+	var kind: String = String(m.get("mech", ""))
+	var r: int = 0
+	if kind == "turret":
+		r = int(m.get("turret_range", game_manager.TURRET_RANGE))
+	elif kind == "bomb":
+		r = int(m.get("bomb_radius", game_manager.BOMB_RADIUS))
+	if r <= 0:
+		return
+	var center: Vector2i = game_manager.pos_of(m)
+	for c: Vector2i in Combat.zone_cells(center, r, "diamond", game_manager.GRID_SIZE):
+		if c != center:
+			_cell(c).threat = 2
+			_cell(c).refresh()
 
 
 ## Orange : cases où l'ennemi peut se rendre ce tour-ci ; rouge : cases qu'il peut frapper en plus.
@@ -1246,6 +1265,8 @@ func _process(delta: float) -> void:
 			var t: Dictionary = game_manager.entity_at(_press_cell) if _valid(_press_cell) else {}
 			if not t.is_empty() and String(t.get("team", "")) == "enemy":
 				show_threat(t)
+			elif not t.is_empty() and String(t.get("mech", "")) != "":
+				show_mech_range(t)
 	if _shake_amp > 0.0:
 		var cam: Camera2D = get_viewport().get_camera_2d()
 		if cam != null:

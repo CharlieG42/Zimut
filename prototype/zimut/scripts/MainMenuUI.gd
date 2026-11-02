@@ -37,6 +37,9 @@ func _ready() -> void:
 		get_tree().change_scene_to_file("res://scenes/Settings.tscn"))
 	_add_menu_hitbox(root, "Quitter", 0.646, 0.839, 0.828, 0.911, func() -> void:
 		get_tree().quit())
+	var news: Dictionary = Changelog.pending()
+	if not news.is_empty():
+		root.add_child(Changelog.build_popup(news))
 
 
 func _start_new_game() -> void:

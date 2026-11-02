@@ -1,0 +1,5 @@
+V74|Constructions du Géomancien et mécanismes de l'Ingénieur permanents : ils ne disparaissent plus avec les tours.
+V74|Ingénieur : Maintenance devient Renforcement (soin + niveau max des mécanismes +1) ; nouveau sort Transposition.
+V74|Invocateur : nouveau sort Rappel d'invocation.
+V74|Niveaux de sort : tous les sorts progressent (valeurs, durée des effets comme +PA, portée des sorts utilitaires).
+V74|Combat : l'info-bulle montre la valeur du niveau suivant ; la prévisualisation signale les coups mortels (KO) ; appui long sur un mécanisme pour voir sa portée.
