@@ -1,0 +1,18 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://dm8q17jnf3vb34"
+path="res://.godot/imported/tannerie_5-468ecb64787942ee92f5e903761f806b.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/conquest/cities/batiments/sylvestre/tannerie_5"
+dest_files=["res://.godot/imported/tannerie_5-468ecb64787942ee92f5e903761f806b.ctex"]
+
+[params]
+
+compress/mode=0
