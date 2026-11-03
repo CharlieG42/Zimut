@@ -11,12 +11,13 @@ func _boot() -> void:
 	var gm: Node = root.get_node("GameManager")
 	var BA: GDScript = load("res://scripts/BoardArt.gd")
 	var AT: GDScript = load("res://scripts/AdventureTerrain.gd")
+	root.get_node("GameSettings").skip_tutorial()
 	var data: Dictionary = pm.new_game(4, "PL")
 	pm.rebuild_team(data, ["Chasseur", "Mage", "Sylvain"])
 	data["campaign_mode"] = "adventure"
 	var adv: Dictionary = pm.adventure_state(data)
 	adv["zone"] = "foret_sylve"
-	adv["hero_pos"] = [36, 23]
+	adv["hero_pos"] = [53, 35]
 	data["adventure_view"] = "map"
 	gm.active_save = data
 	gm.active_slot = 4
@@ -46,5 +47,27 @@ func _boot() -> void:
 		n += 1
 		if n >= 3:
 			break
+	# retour au départ + tap sur un obstacle : le héros va à la case libre la plus proche
+	var st := Vector2i(53, 35)
+	sc.manager.state["hero_pos"] = [st.x, st.y]
+	sc._hero.position = sc.cell_center(st)
+	sc._recenter(false)
+	sc._refresh_world()
+	var blocked := Vector2i(-1, -1)
+	for r: int in range(3, 12):
+		var cand := Vector2i(st.x - r, st.y)
+		if not AT.walkable("foret_sylve", cand):
+			blocked = cand
+			break
+	print("tap obstacle : ", blocked)
+	sc._on_cell_tapped(blocked)
+	await create_timer(2.5).timeout
+	print("héros arrivé en : ", sc.manager.hero_pos())
+	_shot("%s/pl_tap_obstacle.png" % out)
+	# éditeur de masque
+	sc._set_edit(true)
+	sc._edit_mode = "close"
+	await create_timer(0.5).timeout
+	_shot("%s/pl_editeur.png" % out)
 	pm.delete_save(4)
 	quit(0)

@@ -229,7 +229,7 @@ static func parse(k: String) -> Vector2i:
 ##   cell_biome {Vector2i: biome} (uniquement les cases d'un autre biome que la carte) }
 ## V83 : terrain d'une planche illustrée : cases jouables = masque, aucun décor généré.
 static func _board_terrain(zone_id: String) -> Dictionary:
-	var key: String = "board:" + zone_id
+	var key: String = "board:%s:%d" % [zone_id, BoardArt.rev]
 	if _cache.has(key):
 		return _cache[key]
 	var meta: Dictionary = ProgressionManager.ADVENTURE_ZONES.get(zone_id, {})

@@ -1,3 +1,6 @@
+V84|TEST — Planche 2D plus libre : tout est marchable sauf les obstacles du décor (eau, rochers, arbres denses), cases deux fois plus fines (96 × 64) et passages élargis ; marche plus fluide.
+V84|Toucher un obstacle envoie le héros à la case libre la plus proche au lieu d'afficher « bloqué ».
+V84|Outil de retouche du masque en jeu (bouton « Masque ») : ouvrir / fermer des cases au doigt, enregistrer, copier les retouches.
 V83|TEST — Mode 2D : première « planche » illustrée (Grande Forêt de la Sylve) à la place du biome généré par code : le héros et les monstres évoluent sur l'illustration, les lieux sont posés sur ses sentiers.
 V83|La planche montre 5 entrées de donjon : 4 grottes de difficulté croissante (feuille, patte, cristal, chêne noir) et le Grand Arbre au centre, donjon final de la nation avec le Gardien et la Pierre.
 V83|Les vues 3D et le monde ouvert ne changent pas ; la planche n'est utilisée que dans la carte 2D.

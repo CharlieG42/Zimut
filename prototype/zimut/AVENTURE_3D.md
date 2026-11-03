@@ -146,8 +146,10 @@ bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
 ## V83 — Planches illustrées du mode 2D (TEST)
 
 - `BoardArt` (scripts/BoardArt.gd) : une zone peut avoir une planche `data/boards/<zone>.json` + `assets/boards/<zone>.jpg`. Active **uniquement** quand la partie est dans la carte 2D (`adventure_view == "map"`, posé avant le chargement de l'état) ; les vues 3D/monde ouvert gardent le terrain généré.
-- Le JSON contient : grille (cases de 24 px d'illustration, 48 px dans le monde 2D), masque des cases jouables (`#`), départ, lieux (entrées de donjon en « Forêt#1 » à « Forêt#4 » + « Forêt » = Grand Arbre).
+- Le JSON contient : grille (cases de 16 px d'illustration, 32 px dans le monde 2D), masque des cases jouables (`#`), départ, lieux (entrées de donjon en « Forêt#1 » à « Forêt#4 » + « Forêt » = Grand Arbre).
 - `tools/gen_board.py <image> <zone>` : détecte les sentiers/clairières par couleur, applique des blocs (couronnes d'arbres) et des traits (accès aux entrées), écrit le JSON et une image de contrôle.
 - `Dungeons.TIERS` = 5 : le monde ouvert utilise les paliers 2 et 4 (+ le Gardien), la planche 2D les paliers 1 à 4 (+ le Gardien).
 - Pas de portes sur une planche (voyage par la carte du monde) ; pas de brouillard ; 14 groupes de monstres maximum.
+- V84 : masque « inversé » (tout est marchable sauf eau/roche/arbres denses, `tools/gen_board.py`), grille 96 × 64, `BOARD_STEP_TIME` 0,085 s, appui sur un obstacle → case libre la plus proche (`_board_nearest_free`).
+- Retouche en jeu : bouton « ✎ Masque » (Ouvrir / Fermer / Déplacer / Enregistrer / Copier / Annuler tout). Enregistrée dans `user://boards/<zone>_edits.json` ({open, close}) et rechargée au lancement ; « Copier » met le JSON dans le presse-papiers pour l'intégrer au masque généré.
 - Test : `tests/test_planche_2d.gd` ; captures : `tests/shot_planche.gd`.
