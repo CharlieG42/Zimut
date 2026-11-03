@@ -186,3 +186,11 @@ bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
 - `Adv3DKit.arena(model)` : modèles de la « Mini Arena » de Kenney (`assets/kenney_arena/`, CC0 : colonnes pour les piliers, statue/bannière/mur disponibles). Palette `colormap.png`.
 - Teintes par biome : rochers (Désert chaud, Montagne froid), piliers (sable), dalles de chemin (`RockPath_*`, 28 % des cases de sentier).
 - Les packs reçus qui restent à exploiter : Mini Arena `statue`, `wall`, `bricks`, `banner` (ruines, entrées de donjon) ; Bestiary (Imp, Puglin) pour des monstres animés.
+
+
+## V89 — Nations sans kit : peinture, cartes, formes organiques (TEST)
+
+- `Adv3DNationMeshes.glow_material()` utilise désormais le shader peint/toon (`Adv3DMeshes.solid_material`) avec un paramètre `glow` : les sommets d'alpha 0 restent lumineux, mais les décors reçoivent peinture triplanaire, éclairage cartoon et ombres du soleil.
+- Rochers/socles (cristaux, marée, nuages, lave, Ombres) en normales lissées (9–10 segments) ; pointes et cristaux restent à facettes.
+- `palm()` : cartes de feuilles le long des frondes ; `pine()` : touffes d'aiguilles (cartes) sur chaque étage, blanches pour la version enneigée.
+- Constat : l'Atelier des Rouages monte à ~550 k primitives (existant avant V89) — à alléger si le téléphone peine.
