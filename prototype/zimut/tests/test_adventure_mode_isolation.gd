@@ -33,7 +33,10 @@ func _boot() -> void:
 	var map_ui: String = FileAccess.get_file_as_string("res://scripts/AdventureMapUI.gd")
 	check(map_ui.contains('back.pressed.connect(_back_to_save)') and map_ui.contains('← MES PARTIES'),
 		"la carte 2D propose le retour à Mes Parties")
-	check(not map_ui.contains('if walking:\n\t\t\t_gait_t += delta'),
+	var board_start: int = map_ui.find("class AdventureBoard extends Node2D:")
+	var hero_start: int = map_ui.find("class HeroView extends Node2D:")
+	var board_code: String = map_ui.substr(board_start, hero_start - board_start)
+	check(not board_code.contains("walking") and not board_code.contains("_gait_t"),
 		"AdventureBoard ne référence plus les variables de HeroView")
 
 	var open3d: String = FileAccess.get_file_as_string("res://scripts/adventure3d/AdventureOpen3D.gd")
