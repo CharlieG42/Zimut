@@ -84,14 +84,17 @@ static func _free(adv: Dictionary, zone: String, p: Vector2i, hero: Vector2i) ->
 ## Fourchette de niveaux des groupes par carte, DANS la tranche de sa nation
 ## (voir Nations.LEVEL_BANDS) : chaque nation occupe une tranche de niveaux distincte, les
 ## cartes d'une même nation se partagent la sienne. Hors liste : niveau de la carte à +2.
+# V81 : une zone par nation (grandes cartes 36 × 24) ; chaque nation garde sa tranche.
 const LEVEL_RANGE := {
-	"foret_sylve": [1, 7], "foret_ronces": [8, 14], "lisiere_col": [12, 17],
-	"brasier_cendres": [18, 25], "brumes_marais": [26, 31],
-	"montagne_pics": [32, 37], "piemont_ocre": [38, 41], "cretes_givre": [42, 45],
-	"vents_plateau": [46, 54], "ombres_necropole": [55, 63], "desert_dunes": [64, 70],
-	"marees_cotes": [71, 78], "cristaux_caverne": [79, 86], "rouages_atelier": [87, 93],
-	"portes_donjon": [94, 100],
+	"foret_sylve": [1, 16], "brasier_cendres": [18, 24], "brumes_marais": [26, 30],
+	"montagne_pics": [32, 44], "vents_plateau": [46, 53], "ombres_necropole": [55, 62],
+	"desert_dunes": [64, 69], "marees_cotes": [71, 77], "cristaux_caverne": [79, 85],
+	"rouages_atelier": [87, 92], "portes_donjon": [94, 100],
 }
+
+## Nombre de groupes visés sur une carte : au moins PER_ZONE, plus sur les grandes zones.
+static func per_zone(size: Vector2i) -> int:
+	return maxi(PER_ZONE, int(float(size.x * size.y) / 110.0))
 
 static func level_range(zone: String) -> Vector2i:
 	if LEVEL_RANGE.has(zone):
@@ -153,9 +156,10 @@ static func ensure(adv: Dictionary, zone: String, hero: Vector2i, rng: RandomNum
 	var nxt: Dictionary = adv["mob_next"]
 	var moves: int = int(adv.get("moves", 0))
 	var normal: int = list.filter(func(g: Dictionary) -> bool: return not bool(g.get("elite", false))).size()
+	var target: int = per_zone(AdventureTerrain.zone_terrain(zone)["size"])
 	if not nxt.has(zone):
 		# première visite : la carte se peuple d'un coup
-		while normal < PER_ZONE:
+		while normal < target:
 			var g: Dictionary = roll_group(adv, zone, rng)
 			if not place(adv, zone, g, hero, rng):
 				break
@@ -163,7 +167,7 @@ static func ensure(adv: Dictionary, zone: String, hero: Vector2i, rng: RandomNum
 			normal += 1
 		nxt[zone] = moves + RESPAWN_STEPS
 		return added
-	if normal < PER_ZONE and moves >= int(nxt[zone]):
+	if normal < target and moves >= int(nxt[zone]):
 		var g2: Dictionary = roll_group(adv, zone, rng)
 		if place(adv, zone, g2, hero, rng):
 			added.append(g2)

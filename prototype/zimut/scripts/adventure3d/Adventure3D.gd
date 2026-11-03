@@ -314,7 +314,7 @@ func _start_position() -> Vector3:
 # ══════════════════════════════════════════════════════════════════════
 
 func _spawn_static_markers() -> void:
-	var pois: Dictionary = ProgressionManager.ADVENTURE_POIS.get(zone_id, {})
+	var pois: Dictionary = ProgressionManager.pois_of(zone_id)
 	# bâtiments des lieux (tentes, tour, sanctuaire, ruines) : on ne les traverse plus
 	var solids: Array = []
 	for key: String in pois.keys():
@@ -499,7 +499,7 @@ func _process(delta: float) -> void:
 
 func _update_action_button(pos2: Vector2) -> void:
 	var near_key: String = ""
-	var pois: Dictionary = ProgressionManager.ADVENTURE_POIS.get(zone_id, {})
+	var pois: Dictionary = ProgressionManager.pois_of(zone_id)
 	for key: String in pois.keys():
 		var ctr: Vector3 = Adv3DWorld.cell_center(AdventureTerrain.parse(key))
 		if Vector2(ctr.x, ctr.z).distance_to(pos2) <= POI_TOUCH_DIST:
@@ -580,7 +580,7 @@ func _on_action_pressed() -> void:
 	if _act_poi_key == "" or _modal_root != null:
 		return
 	var key: String = _act_poi_key
-	var poi: Dictionary = ProgressionManager.ADVENTURE_POIS.get(zone_id, {}).get(key, {})
+	var poi: Dictionary = ProgressionManager.pois_of(zone_id).get(key, {})
 	if poi.is_empty():
 		return
 	var kind: String = String(poi.get("kind", ""))
@@ -1054,7 +1054,7 @@ func _refresh_minimap_markers() -> void:
 	if _minimap == null:
 		return
 	var pois: Array = []
-	var defs: Dictionary = ProgressionManager.ADVENTURE_POIS.get(zone_id, {})
+	var defs: Dictionary = ProgressionManager.pois_of(zone_id)
 	for key: String in defs.keys():
 		var poi: Dictionary = defs[key]
 		pois.append({"cell": AdventureTerrain.parse(key), "kind": String(poi.get("kind", "")), "dungeon": Dungeons.is_dungeon(poi),

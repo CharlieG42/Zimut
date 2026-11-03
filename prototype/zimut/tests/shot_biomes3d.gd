@@ -2,7 +2,7 @@ extends SceneTree
 ## Captures du monde 3D de chaque Nation (vue de jeu + vue rasante), une image par zone.
 ##   xvfb-run -a godot --rendering-method gl_compatibility --path . -s tests/shot_biomes3d.gd -- <dossier> [zone1,zone2,…]
 const ZONES := ["foret_sylve", "montagne_pics", "desert_dunes", "vents_plateau", "brumes_marais", "brasier_cendres",
-	"ombres_necropole", "cristaux_caverne", "marees_cotes", "rouages_atelier", "portes_donjon", "lisiere_col"]
+	"ombres_necropole", "cristaux_caverne", "marees_cotes", "rouages_atelier", "portes_donjon", "brumes_marais"]
 
 func _init() -> void:
 	_boot.call_deferred()

@@ -284,13 +284,15 @@ static func make_poi_marker(kind: String, title: String, done: bool) -> Node3D:
 	var gem := MeshInstance3D.new()
 	gem.name = "Gem"
 	var sph := SphereMesh.new()
-	sph.radius = 0.3
+	sph.radius = 0.46 if kind == "dungeon" else 0.3     # V81 : la gemme du donjon est plus grosse
 	sph.height = 0.7 if kind != "camp" else 0.9
+	if kind == "dungeon":
+		sph.height = 1.1
 	sph.radial_segments = 5
 	sph.rings = 3
 	gem.mesh = sph
 	gem.material_override = _glow(shown, 0.6 if done else 1.8)
-	gem.position.y = 0.55 if kind == "camp" else (1.45 if kind != "chest" else 1.2)
+	gem.position.y = 0.55 if kind == "camp" else (2.6 if kind == "dungeon" else (1.45 if kind != "chest" else 1.2))
 	n.add_child(gem)
 	if not done:
 		var ring := MeshInstance3D.new()
@@ -382,16 +384,26 @@ static func _poi_building(kind: String) -> Mesh:
 				Adv3DMeshes.add_box(st, Vector3(0, 0.3, -0.1), Vector3(0.8, 0.6, 0.5), stone_b, stone_t)
 				Adv3DMeshes.add_box(st, Vector3(0, 2.2, 0.25), Vector3(0.34, 0.2, 0.02), Color(0.66, 0.42, 1.0, 0.0), Color(0.88, 0.72, 1.0, 0.0))
 				Adv3DMeshes.add_box(st, Vector3(0, 0.45, 0.16), Vector3(0.2, 0.2, 0.02), Color(0.66, 0.42, 1.0, 0.0), Color(0.88, 0.72, 1.0, 0.0))
-			"dungeon":     # V63 : entrée de donjon — deux tours crénelées, porte sombre et arche
+			"dungeon":     # V81 : entrée de donjon bien distincte — deux hautes tours crénelées,
+				# PORTAIL VIOLET LUMINEUX dans l'arche, bannières et gemme flottante
 				for sx3: float in [-1.0, 1.0]:
-					Adv3DMeshes.add_box(st, Vector3(1.1 * sx3, 1.3, 0), Vector3(0.8, 2.6, 0.8), stone_b, stone_t)
-					for k3: int in range(2):
-						Adv3DMeshes.add_box(st, Vector3(1.1 * sx3 + (float(k3) - 0.5) * 0.45, 2.75, 0), Vector3(0.22, 0.3, 0.8), stone_b, stone_t)
-					Adv3DMeshes.add_cone(st, Vector3(1.1 * sx3, 2.6, 0), 0.62, 0.0, 1.0, 4, Color(0.30, 0.18, 0.40), Color(0.52, 0.32, 0.70), r, 0.0)
-				Adv3DMeshes.add_box(st, Vector3(0, 1.0, -0.05), Vector3(1.5, 2.0, 0.6), stone_b, stone_t)
-				Adv3DMeshes.add_box(st, Vector3(0, 2.15, 0), Vector3(1.7, 0.35, 0.7), stone_b, stone_t)
-				Adv3DMeshes.add_box(st, Vector3(0, 0.75, 0.27), Vector3(0.9, 1.5, 0.04), Color(0.06, 0.03, 0.10), Color(0.16, 0.08, 0.24))
-				Adv3DMeshes.add_box(st, Vector3(0, 1.62, 0.29), Vector3(0.5, 0.12, 0.02), Color(0.72, 0.42, 1.0, 0.0), Color(0.90, 0.72, 1.0, 0.0))
+					Adv3DMeshes.add_box(st, Vector3(1.25 * sx3, 1.75, 0), Vector3(0.95, 3.5, 0.95), stone_b, stone_t)
+					for k3: int in range(3):
+						Adv3DMeshes.add_box(st, Vector3(1.25 * sx3 + (float(k3) - 1.0) * 0.5, 3.65, 0), Vector3(0.24, 0.32, 0.95), stone_b, stone_t)
+					Adv3DMeshes.add_cone(st, Vector3(1.25 * sx3, 3.5, 0), 0.78, 0.0, 1.15, 4, Color(0.30, 0.18, 0.40), Color(0.55, 0.34, 0.75), r, 0.0)
+					# bannière violette
+					Adv3DMeshes.add_box(st, Vector3(1.25 * sx3, 3.1, 0.55), Vector3(0.05, 1.4, 0.05), wood_b, wood_t)
+					Adv3DMeshes.add_box(st, Vector3(1.25 * sx3, 2.75, 0.60), Vector3(0.55, 0.85, 0.04), Color(0.28, 0.10, 0.46), Color(0.58, 0.30, 0.90))
+				Adv3DMeshes.add_box(st, Vector3(0, 1.25, -0.05), Vector3(1.7, 2.5, 0.7), stone_b, stone_t)
+				Adv3DMeshes.add_box(st, Vector3(0, 2.6, 0), Vector3(2.0, 0.4, 0.8), stone_b, stone_t)
+				# porte sombre
+				Adv3DMeshes.add_box(st, Vector3(0, 0.9, 0.32), Vector3(1.0, 1.8, 0.05), Color(0.05, 0.02, 0.09), Color(0.14, 0.07, 0.22))
+				# PORTAIL : voile violet lumineux devant la porte (bien visible de loin)
+				Adv3DMeshes.add_box(st, Vector3(0, 0.95, 0.42), Vector3(0.82, 1.9, 0.06), Color(0.55, 0.25, 1.0, 0.0), Color(0.85, 0.60, 1.0, 0.0))
+				Adv3DMeshes.add_box(st, Vector3(0, 0.95, 0.47), Vector3(0.5, 1.2, 0.04), Color(0.95, 0.80, 1.0, 0.0), Color(1.0, 0.95, 1.0, 0.0))
+				# gemme flottante au-dessus de l'arche
+				Adv3DMeshes.add_cone(st, Vector3(0, 3.6, 0), 0.34, 0.0, 0.62, 6, Color(0.70, 0.45, 1.0), Color(0.95, 0.85, 1.0), r, 0.0)
+				Adv3DMeshes.add_cone(st, Vector3(0, 3.28, 0), 0.34, 0.0, -0.5, 6, Color(0.70, 0.45, 1.0), Color(0.95, 0.85, 1.0), r, 0.0)
 			"chest":       # ruines : colonne brisée et gravats
 				Adv3DNationMeshes._spike(st, Vector3(-0.6, 0, 0), Vector3(0, 1, 0), 0.26, 1.7, 0.0, 8, stone_b, stone_t, stone_t)
 				Adv3DNationMeshes._spike(st, Vector3(0.5, 0, 0.2), Vector3(0, 1, 0), 0.26, 0.7, 0.0, 8, stone_b, stone_t, stone_t)

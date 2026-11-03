@@ -40,15 +40,17 @@ func _boot() -> void:
 			check(gp == t["start"] or not AdventureTerrain.find_path(z2, t["start"], gp).is_empty(), "%s : porte %s accessible depuis le départ" % [z2, info["dir"]])
 			var arrive: Vector2i = pm.adventure_gate_cell(String(info["to"]), String(pm.ADVENTURE_OPPOSITE[info["dir"]])) - pm.ADVENTURE_DIRS[pm.ADVENTURE_OPPOSITE[info["dir"]]]
 			check(AdventureTerrain.walkable(String(info["to"]), arrive), "%s → %s : case d'arrivée franchissable" % [z2, info["to"]])
-	# Lisière : deux biomes sur la même carte
-	var lis: Dictionary = AdventureTerrain.zone_terrain("lisiere_col")
-	var other: int = 0
-	for b: String in (lis["cell_biome"] as Dictionary).values():
-		if b == "Montagne":
-			other += 1
-	check(other >= 20 and other <= 100, "Lisière du Col : %d cases de montagne au nord" % other)
-	check(AdventureTerrain.cell_biome("lisiere_col", Vector2i(5, 6)) == "Forêt", "Lisière du Col : le sud reste forestier")
-	check(AdventureTerrain.cell_biome("piemont_ocre", Vector2i(9, 3)) == "Désert", "Piémont Ocre : l'est est désertique")
+	# V81 : une grande zone par nation, 1 à 2 portails max par zone
+	var nation_zones: int = 0
+	for z4: String in pm.ADVENTURE_ZONES.keys():
+		var meta: Dictionary = pm.ADVENTURE_ZONES[z4]
+		var sz: Array = meta.get("size", [14, 10])
+		if String(meta.get("biome", "")) != "Donjon":
+			nation_zones += 1
+			check(int(sz[0]) >= 30 and int(sz[1]) >= 20, "%s : grande zone de nation %s" % [z4, str(sz)])
+			var ng: int = pm.adventure_gates(z4).size()
+			check(ng >= 1 and ng <= 2, "%s : %d portail(s) (1 à 2 max)" % [z4, ng])
+	check(nation_zones == 10, "10 nations = 10 grandes zones (%d)" % nation_zones)
 
 	# Couverture Conquête : chaque ville (hors capitale) est révélée par une carte
 	var revealed: Dictionary = {}
@@ -72,8 +74,8 @@ func _boot() -> void:
 	root.add_child(mgr)
 	await process_frame
 	var adv: Dictionary = mgr.state
-	check(not pm.adventure_gate_open(adv, "foret_sylve", "lisiere_col"), "route vers la Lisière (niv 14) gardée au départ")
-	check(pm.adventure_gate_lock_reason(adv, "foret_sylve", "lisiere_col").contains("Camp gobelin"), "le message nomme le gardien")
+	check(not pm.adventure_gate_open(adv, "foret_sylve", "brasier_cendres"), "route vers les Terres de Cendre (niv 18) gardée au départ")
+	check(pm.adventure_gate_lock_reason(adv, "foret_sylve", "brasier_cendres").contains("Camp gobelin"), "le message nomme le gardien")
 	var east: Vector2i = pm.adventure_gate_cell("foret_sylve", "E")
 	adv["hero_pos"] = [east.x, east.y]
 	check(not mgr.cross_gate(east), "porte fermée : on reste sur la carte")
@@ -81,28 +83,29 @@ func _boot() -> void:
 	adv["completed"].append("foret_sylve,7,2")
 	check(mgr.gate_at(east)["open"], "Camp gobelin vaincu : la route s'ouvre")
 	check(mgr.cross_gate(east), "passage de la frontière est")
-	check(mgr.zone_id() == "lisiere_col", "arrivée dans la Lisière du Col")
-	check(mgr.hero_pos() == pm.adventure_gate_cell("lisiere_col", "W") + Vector2i(1, 0), "le héros entre par l'ouest, à côté de la porte")
-	check(mgr.cell_discovered(Vector2i(1, 3)) and mgr.cell_discovered(Vector2i(0, 3)), "le brouillard se lève à l'arrivée")
-	check(mgr.visited_zones().has("lisiere_col"), "la Lisière rejoint les cartes visitées")
-	var west: Vector2i = pm.adventure_gate_cell("lisiere_col", "W")
-	check(pm.adventure_gate_open(adv, "lisiere_col", "foret_sylve"), "retour vers une carte plus facile toujours ouvert")
+	check(mgr.zone_id() == "brasier_cendres", "arrivée dans les Terres de Cendre (nation Brasier)")
+	check(mgr.hero_pos() == pm.adventure_gate_cell("brasier_cendres", "W") + Vector2i(1, 0), "le héros entre par l'ouest, à côté de la porte")
+	check(mgr.cell_discovered(Vector2i(1, 12)) and mgr.cell_discovered(Vector2i(0, 12)), "le brouillard se lève à l'arrivée")
+	check(mgr.visited_zones().has("brasier_cendres"), "les Terres de Cendre rejoignent les cartes visitées")
+	var west: Vector2i = pm.adventure_gate_cell("brasier_cendres", "W")
+	check(pm.adventure_gate_open(adv, "brasier_cendres", "foret_sylve"), "retour vers une carte plus facile toujours ouvert")
 	adv["hero_pos"] = [west.x, west.y]
-	check(mgr.cross_gate(west) and mgr.zone_id() == "foret_sylve", "retour dans la Sylve par l'ouest de la Lisière")
+	check(mgr.cross_gate(west) and mgr.zone_id() == "foret_sylve", "retour dans la Sylve par l'ouest des Terres de Cendre")
 	check(mgr.hero_pos() == east - Vector2i(1, 0), "arrivée juste devant la porte est de la Sylve")
 	# Un chemin ne traverse jamais une porte par accident
 	var through: Array[Vector2i] = mgr.path_to(Vector2i(8, 3))
 	check(not through.has(east), "le trajet évite la porte quand elle n'est pas la destination")
 	# Voyage rapide vers une carte visitée
-	check(mgr.enter_zone("lisiere_col") and mgr.zone_id() == "lisiere_col", "voyage rapide vers une carte visitée")
+	check(mgr.enter_zone("brasier_cendres") and mgr.zone_id() == "brasier_cendres", "voyage rapide vers une carte visitée")
 	check(not mgr.enter_zone("portes_donjon"), "pas de voyage rapide vers une carte jamais visitée")
-	# Ancienne sauvegarde : zones débloquées par les anciennes sorties
+	# Ancienne sauvegarde : les zones fondues disparaissent, celles connues sont conservées
 	var old: Dictionary = {"zone": "montagne_pics", "hero_pos": [3, 3], "discovered": [], "completed": [],
 		"zones_unlocked": ["foret_sylve", "foret_ronces", "montagne_pics", "desert_dunes"]}
 	var od: Dictionary = {"adventure": old}
 	pm.adventure_state(od)
-	check(pm.adventure_gate_open(od["adventure"], "montagne_pics", "lisiere_col"), "ancienne partie : descente vers la Lisière ouverte")
+	check(pm.adventure_gate_open(od["adventure"], "montagne_pics", "brumes_marais"), "ancienne partie : descente vers les Brumes ouverte (niv 26 ≤ 32)")
 	check(pm.adventure_available_zones(od["adventure"]).has("desert_dunes"), "ancienne partie : zones déjà débloquées conservées")
+	check(not pm.adventure_available_zones(od["adventure"]).has("foret_ronces"), "ancienne partie : zone fondue retirée des débloquées")
 
 	pm.delete_save(3)
 	print("\n%s — %d échec(s)" % ["OK" if fails == 0 else "KO", fails])

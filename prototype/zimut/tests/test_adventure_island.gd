@@ -1,6 +1,6 @@
 extends SceneTree
-## V47 : Sylve agrandie (22 × 16) à contour irrégulier — cases « hors île », lieux et portes accessibles,
-## ancienne sauvegarde réparée.
+## V81 : Sylve = grande zone de nation (36 × 24) à contour irrégulier — cases « hors île »,
+## lieux (catalogue + générés) et portes accessibles, ancienne sauvegarde réparée.
 ## Lancement : godot --headless --path . -s tests/test_adventure_island.gd
 var fails: int = 0
 func check(c: bool, m: String) -> void:
@@ -15,7 +15,7 @@ func _boot() -> void:
 	var t: Dictionary = AdventureTerrain.zone_terrain(zid)
 	var size: Vector2i = t["size"]
 	var voids: Dictionary = t["voids"]
-	check(size == Vector2i(22, 16), "la Sylve fait 22 × 16 (%s)" % str(size))
+	check(size == Vector2i(36, 24), "la Sylve fait 36 × 24, grande zone de nation (%s)" % str(size))
 	check(voids.size() >= 15, "contour irrégulier : %d cases hors île" % voids.size())
 	# La façade (dernière ligne / dernière colonne) reste pleine : la falaise est dessinée dessous.
 	var facade_ok := true
@@ -32,8 +32,9 @@ func _boot() -> void:
 	for gd: String in ["N", "E", "S", "W"]:
 		var gc: Vector2i = AdventureTerrain.gate_cell(zid, gd)
 		check(AdventureTerrain.walkable(zid, gc), "porte %s %s franchissable" % [gd, str(gc)])
-	var pois: Dictionary = pm.ADVENTURE_POIS[zid]
-	check(pois.size() >= 12, "%d lieux dans la Sylve" % pois.size())
+	var pois: Dictionary = pm.pois_of(zid)
+	check(pois.size() >= 20, "%d lieux dans la Sylve (catalogue + générés)" % pois.size())
+	check(pm.ADVENTURE_POIS[zid].size() < pois.size(), "les lieux générés complètent le catalogue (%d écrits)" % pm.ADVENTURE_POIS[zid].size())
 	var unreachable := 0
 	for k: String in pois.keys():
 		var p: Vector2i = AdventureTerrain.parse(k)
@@ -69,6 +70,6 @@ func _boot() -> void:
 	check(AdventureTerrain.walkable(zid, mgr.hero_pos()), "héros sur case vide ramené sur l'île (%s)" % str(mgr.hero_pos()))
 	# Plateau assez grand pour la vue défilante sur téléphone.
 	var ui_script: GDScript = load("res://scripts/AdventureMapUI.gd")
-	check(ui_script.scroll_needed(size, Vector2(1100, 850)), "22 × 16 : défilement activé")
+	check(ui_script.scroll_needed(size, Vector2(1100, 850)), "36 × 24 : défilement activé")
 	print("OK" if fails == 0 else "ÉCHEC")
 	quit(fails)

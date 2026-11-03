@@ -23,9 +23,10 @@ const POI_TOUCH_DIST := 2.1
 const GATE_TOUCH_DIST := 1.7
 const PERSIST_EVERY := 3.0
 const MOB_STEP_TIME := 0.7
-## Caméra « monde ouvert » : plus basse et plus proche que la vue 3D iso (Zelda-like).
-const OW_PITCH := -0.46
-const OW_DISTANCE := 7.2
+## Caméra « monde ouvert » : plus basse que la vue 3D iso, et RECULÉE (V81) pour voir
+## plus loin sur les grandes zones de nation (Zelda-like).
+const OW_PITCH := -0.55
+const OW_DISTANCE := 9.8
 
 var manager: Node = null
 var _leaves: CPUParticles3D = null
@@ -71,6 +72,11 @@ var _btn_touch: Dictionary = {}       # doigt secondaire -> bouton visé
 var _dirty: bool = false
 var _since_persist: float = 0.0
 var _left: bool = false
+var _full_map_big: Adv3DMinimap = null      # onglet « Instance » de la carte plein écran
+var _full_map_world: Adv3DWorldMap = null   # onglet « Monde » (toutes les nations)
+var _full_map_title: Label = null
+var _full_map_tab_btn: Button = null
+var _full_map_tab: int = 0                  # 0 = instance (nation courante), 1 = monde
 
 
 func _ready() -> void:
@@ -109,8 +115,8 @@ func _ready() -> void:
 		var n0: Node3D = _mob_nodes[id]
 		if Vector2(n0.position.x, n0.position.z).distance_to(p0) <= MOB_TOUCH_DIST:
 			_declined_mobs[id] = true
-	for key: String in ProgressionManager.ADVENTURE_POIS.get(zone_id, {}).keys():
-		var poi: Dictionary = ProgressionManager.ADVENTURE_POIS[zone_id][key]
+	for key: String in ProgressionManager.pois_of(zone_id).keys():
+		var poi: Dictionary = ProgressionManager.pois_of(zone_id)[key]
 		if not Dungeons.is_dungeon(poi):
 			continue
 		var ctr: Vector3 = Adv3DWorld.cell_center(AdventureTerrain.parse(key))
@@ -139,18 +145,18 @@ func _build_environment() -> void:
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = (pal.get("ambient", Color(0.78, 0.84, 0.92)) as Color).lerp(Color(0.78, 0.84, 0.92), 0.35)
-	env.ambient_light_energy = 0.6
+	env.ambient_light_energy = 0.72         # V81 : un peu plus de lumière sur les grandes zones
 	env.fog_enabled = true
 	env.fog_light_color = pal["fog"]
-	env.fog_density = float(pal.get("fog_density", 0.0035))
+	env.fog_density = float(pal.get("fog_density", 0.0035)) * 1.25   # V81 : le brouillard voile les bords des grandes instances
 	env.fog_sky_affect = 0.35
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.glow_enabled = not GfxQuality.low()
-	env.glow_intensity = 0.5
-	env.glow_bloom = 0.04
+	env.glow_intensity = 0.55
+	env.glow_bloom = 0.05
 	env.adjustment_enabled = true
-	env.adjustment_saturation = float(pal.get("sat", 1.15))
-	env.adjustment_contrast = 1.06
+	env.adjustment_saturation = float(pal.get("sat", 1.15)) * 1.08
+	env.adjustment_contrast = 1.08
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
@@ -335,7 +341,7 @@ func _start_position() -> Vector3:
 # ═══════════════════════════════════════════════════════════════════════
 
 func _spawn_static_markers() -> void:
-	var pois: Dictionary = ProgressionManager.ADVENTURE_POIS.get(zone_id, {})
+	var pois: Dictionary = ProgressionManager.pois_of(zone_id)
 	var solids: Array = []
 	for key: String in pois.keys():
 		_make_poi_node(key, pois[key])
@@ -499,20 +505,20 @@ func _process(delta: float) -> void:
 		var ctr: Vector3 = Adv3DWorld.cell_center(AdventureTerrain.parse(key))
 		if Vector2(ctr.x, ctr.z).distance_to(pos2) > POI_TOUCH_DIST + 2.5:
 			_declined_pois.erase(key)
-	# Rencontre d'un monstre : le combat Tactique se lance directement (style RPG).
+	# Rencontre d'un monstre : pop-up « combattre ou non » (comme la version initiale).
 	for g: Dictionary in manager.mobs():
 		var id2: int = int(g.get("id", -1))
 		var node: Node3D = _mob_nodes.get(id2)
 		if node == null or _declined_mobs.has(id2):
 			continue
 		if Vector2(node.position.x, node.position.z).distance_to(pos2) <= MOB_TOUCH_DIST:
-			_start_mob_combat(g)
+			_ask_mob_combat(g)
 			return
 	# Entrée d'un donjon : les salles se lancent directement.
-	for key: String in ProgressionManager.ADVENTURE_POIS.get(zone_id, {}).keys():
+	for key: String in ProgressionManager.pois_of(zone_id).keys():
 		if _declined_pois.has(key):
 			continue
-		var poi: Dictionary = ProgressionManager.ADVENTURE_POIS[zone_id][key]
+		var poi: Dictionary = ProgressionManager.pois_of(zone_id)[key]
 		if not Dungeons.is_dungeon(poi):
 			continue
 		var ctr: Vector3 = Adv3DWorld.cell_center(AdventureTerrain.parse(key))
@@ -541,7 +547,35 @@ func _process(delta: float) -> void:
 #  Actions : combat monstre, donjon, lieux, portes
 # ═══════════════════════════════════════════════════════════════════════
 
-## Rencontre avec un groupe errant → combat Tactique immédiat.
+## V81 : rencontre avec un groupe errant → pop-up demandant si l'on veut battre ou non
+## (« PLUS TARD » laisse passer le groupe jusqu'à ce qu'on s'éloigne).
+func _ask_mob_combat(g: Dictionary) -> void:
+	if _modal_root != null:
+		return
+	_emote("surpris")
+	var id2: int = int(g.get("id", -1))
+	var title: String = AdventureMobs.label(g, manager.zone_biome())
+	var box: VBoxContainer = _modal("⚔  " + title, Color(0.90, 0.28, 0.22))
+	var t: Label = U.lbl("Combat au tour par tour (mode Tactique), ennemis niveau %d, décor %s.\nVictoire : XP, objets, or et ressources pour toute l'équipe.\n\nVoulez-vous engager le combat ?" % [
+		int(g.get("level", 1)), ProgressionManager.biome_label(manager.zone_biome())], 22, U.C_TXT)
+	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(t)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	box.add_child(row)
+	var go: Button = _btn("⚔  COMBATTRE", Color(0.90, 0.28, 0.22), 24, Vector2(300, 84))
+	go.pressed.connect(func() -> void:
+		_close_modal()
+		_start_mob_combat(g))
+	row.add_child(go)
+	var flee: Button = _btn("PLUS TARD", U.C_BORDER, 22, Vector2(220, 84))
+	flee.pressed.connect(func() -> void:
+		_declined_mobs[id2] = true
+		_close_modal())
+	row.add_child(flee)
+
+
+## Le combat est accepté : combat Tactique (TeamSelection → Main), retour ici après.
 func _start_mob_combat(g: Dictionary) -> void:
 	_emote("surpris")
 	_show_toast("⚔ %s" % AdventureMobs.label(g, manager.zone_biome()))
@@ -595,7 +629,7 @@ func _try_gate(c: Vector2i) -> void:
 
 func _update_action_button(pos2: Vector2) -> void:
 	var near_key: String = ""
-	var pois: Dictionary = ProgressionManager.ADVENTURE_POIS.get(zone_id, {})
+	var pois: Dictionary = ProgressionManager.pois_of(zone_id)
 	for key: String in pois.keys():
 		var poi: Dictionary = pois[key]
 		if Dungeons.is_dungeon(poi):
@@ -637,7 +671,7 @@ func _on_action_pressed() -> void:
 	if _act_poi_key == "" or _modal_root != null:
 		return
 	var key: String = _act_poi_key
-	var poi: Dictionary = ProgressionManager.ADVENTURE_POIS.get(zone_id, {}).get(key, {})
+	var poi: Dictionary = ProgressionManager.pois_of(zone_id).get(key, {})
 	if poi.is_empty():
 		return
 	var kind: String = String(poi.get("kind", ""))
@@ -1034,7 +1068,9 @@ func _button_at(p: Vector2) -> Button:
 	return found
 
 
-## Carte en plein écran (toucher la mini-carte).
+## Carte en plein écran (toucher la mini-carte ronde) — V81 : deux onglets,
+## « Instance » (la nation courante, avec lieux / monstres / portails) et « Monde »
+## (toutes les nations et leurs portails).
 func _open_full_map() -> void:
 	if _modal_root != null:
 		return
@@ -1056,22 +1092,48 @@ func _open_full_map() -> void:
 	dim.add_child(box)
 	var head := HBoxContainer.new()
 	box.add_child(head)
-	var title: Label = U.lbl("Carte — " + manager.zone_name(), 34, U.C_GOLD, true)
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(title)
+	_full_map_title = U.lbl("Carte — " + manager.zone_name(), 34, U.C_GOLD, true)
+	_full_map_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(_full_map_title)
+	_full_map_tab_btn = _btn("🌍 Monde", U.C_BORDER, 24, Vector2(200, 76))
+	_full_map_tab_btn.pressed.connect(_toggle_full_map_tab)
+	head.add_child(_full_map_tab_btn)
 	var close: Button = _btn("✕  Fermer", U.C_BORDER, 26, Vector2(240, 80))
 	close.pressed.connect(_close_modal)
 	head.add_child(close)
-	var big := Adv3DMinimap.new()
-	big.full = true
-	big.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	big.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	big.custom_minimum_size = Vector2(vs.x - 60.0, vs.y - 160.0)
-	box.add_child(big)
-	big.setup(terrain, Adv3DWorld.palette(String(terrain["biome"])))
+	# Onglet 0 : la carte de l'instance courante (la nation), plein écran, avec légende.
+	_full_map_big = Adv3DMinimap.new()
+	_full_map_big.full = true
+	_full_map_big.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_full_map_big.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_full_map_big.custom_minimum_size = Vector2(vs.x - 60.0, vs.y - 170.0)
+	box.add_child(_full_map_big)
+	_full_map_big.setup(terrain, Adv3DWorld.palette(String(terrain["biome"])))
 	_refresh_minimap_markers()
-	big.set_markers(_minimap._pois, _minimap._gates, _minimap._mobs)
-	big.set_player(Vector2(explorer.position.x, explorer.position.z) / Adv3DWorld.CELL, explorer.yaw)
+	_full_map_big.set_markers(_minimap._pois, _minimap._gates, _minimap._mobs)
+	_full_map_big.set_player(Vector2(explorer.position.x, explorer.position.z) / Adv3DWorld.CELL, explorer.yaw)
+	# Onglet 1 : la carte du monde total (toutes les nations, portails ouverts/fermés).
+	_full_map_world = Adv3DWorldMap.new()
+	_full_map_world.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_full_map_world.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_full_map_world.custom_minimum_size = Vector2(vs.x - 60.0, vs.y - 170.0)
+	_full_map_world.visible = false
+	box.add_child(_full_map_world)
+	_full_map_world.setup(GameManager.active_save, manager.state, zone_id)
+	_full_map_tab = 0
+
+
+## Bascule la carte plein écran entre l'instance courante et le monde total.
+func _toggle_full_map_tab() -> void:
+	if _full_map_big == null or not is_instance_valid(_full_map_big):
+		return
+	_full_map_tab = 1 - _full_map_tab
+	_full_map_big.visible = _full_map_tab == 0
+	_full_map_world.visible = _full_map_tab == 1
+	if _full_map_title != null:
+		_full_map_title.text = ("Carte — " + manager.zone_name()) if _full_map_tab == 0 else "Carte du monde — Zimut"
+	if _full_map_tab_btn != null:
+		_full_map_tab_btn.text = "🌍 Monde" if _full_map_tab == 0 else "🗺  Instance"
 
 
 func _cycle_map_mode() -> void:
@@ -1091,7 +1153,7 @@ func _refresh_minimap_markers() -> void:
 	if _minimap == null:
 		return
 	var pois: Array = []
-	var defs: Dictionary = ProgressionManager.ADVENTURE_POIS.get(zone_id, {})
+	var defs: Dictionary = ProgressionManager.pois_of(zone_id)
 	for key: String in defs.keys():
 		var poi: Dictionary = defs[key]
 		pois.append({"cell": AdventureTerrain.parse(key), "kind": String(poi.get("kind", "")), "dungeon": Dungeons.is_dungeon(poi),
@@ -1179,3 +1241,7 @@ func _close_modal() -> void:
 	if _modal_root != null and is_instance_valid(_modal_root):
 		_modal_root.queue_free()
 	_modal_root = null
+	_full_map_big = null
+	_full_map_world = null
+	_full_map_title = null
+	_full_map_tab_btn = null

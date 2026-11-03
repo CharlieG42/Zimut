@@ -109,3 +109,25 @@ bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
   sorts, équipement), même écran que depuis « Mes Parties ».
 - Ligne sous le nom de zone : vue en cours, **temps de jeu** du mode Aventure et **difficulté**
   de la partie (rafraîchie chaque seconde et à chaque écriture du compteur).
+## V81 — Monde ouvert par nations, mini-carte ronde et pop-up de rencontre
+
+- **Une grande zone instanciée par nation** (36 × 24, contre 14 × 10 avant) : les anciennes
+  petites cartes ont été fondues dans la zone de leur nation (ex. `foret_ronces`/`lisiere_col`
+  → `foret_sylve`). Les 10 nations + le Donjon forment un chemin de 11 zones reliées par
+  **1 à 2 portails maximum** chacune (`AdventureTerrain.gates_of` dérive les portails de la
+  grille). Les POI du catalogue sont relocalisés (donjon de chaque nation en `30,18`) et
+  complétés par des lieux **générés de façon déterministe** (`ProgressionManager.pois_of`)
+  ; les groupes de monstres suivent la taille (`AdventureMobs.per_zone`).
+- **Mini-carte ronde en haut à droite** (`Adv3DMinimap._tex_round`, masque circulaire) ;
+  toucher → **carte plein écran à deux onglets** : « Instance » (la nation courante, avec
+  lieux/monstres/portails et légende) et « **Monde** » (`Adv3DWorldMap` : toutes les nations,
+  portails ouverts en vert / fermés en rouge, nation courante surlignée).
+- **Caméra reculée** (`OW_DISTANCE` 7.2 → 9.8, `OW_PITCH` -0.46 → -0.55).
+- **Rencontre avec un groupe de monstres → pop-up « COMBATTRE / PLUS TARD »** (comme la
+  version initiale), au lieu de lancer le combat directement.
+- **Graphisme** : entrée de donjon retravaillée (hautes tours crénelées, **portail violet
+  lumineux**, bannières, gemme flottante et grosse gemme de marqueur), lumière ambiante et
+  saturation relevées, brouillard un peu plus dense sur les grandes zones, plus de décor au sol.
+- Tests : `test_adventure_open3d.gd` (monde par nations, ≤ 2 portails, caméra, mini-carte ronde,
+  pop-up, onglets), `test_adventure_world.gd` / `test_adventure_island.gd` / `test_adventure_v2.gd`
+  / `test_adventure_mobs.gd` mis à jour.

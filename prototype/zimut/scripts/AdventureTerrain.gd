@@ -131,7 +131,7 @@ static func voids_of(zone_id: String) -> Dictionary:
 	var h: int = int(sz[1])
 	var st: Array = meta.get("start", [1, 3])
 	var keep: Array[Vector2i] = [Vector2i(int(st[0]), int(st[1]))]
-	for k: String in ProgressionManager.ADVENTURE_POIS.get(zone_id, {}).keys():
+	for k: String in ProgressionManager.pois_of(zone_id).keys():
 		keep.append(parse(k))
 	for g: Vector2i in gates_of(zone_id).keys():
 		keep.append(g)
@@ -235,7 +235,7 @@ static func zone_terrain(zone_id: String) -> Dictionary:
 	var start := Vector2i(int(st[0]), int(st[1]))
 	var biome: String = String(meta.get("biome", "Forêt"))
 	var pois: Array[Vector2i] = []
-	for k: String in ProgressionManager.ADVENTURE_POIS.get(zone_id, {}).keys():
+	for k: String in ProgressionManager.pois_of(zone_id).keys():
 		pois.append(parse(k))
 	var gates: Array[Vector2i] = []
 	for g: Vector2i in gates_of(zone_id).keys():
@@ -310,7 +310,7 @@ static func zone_terrain(zone_id: String) -> Dictionary:
 			if voids.has(c2) or obstacles.has(c2) or pois.has(c2) or paths.has(c2) or gates.has(c2) or c2 == start:
 				continue
 			var gkinds: Array = _ground_for(String(cell_biome.get(c2, biome)))
-			if rng.randf() < 0.22:
+			if rng.randf() < 0.28:   # V81 : un peu plus de fleurs/herbes sur les grandes zones
 				decor[c2] = String(gkinds[rng.randi_range(0, gkinds.size() - 1)])
 	var out: Dictionary = {"size": size, "start": start, "biome": biome, "obstacles": obstacles,
 		"paths": paths, "decor": decor, "pois": pois, "gates": gates, "cell_biome": cell_biome, "voids": voids}
