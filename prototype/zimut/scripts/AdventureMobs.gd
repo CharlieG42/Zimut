@@ -84,7 +84,7 @@ static func _free(adv: Dictionary, zone: String, p: Vector2i, hero: Vector2i) ->
 ## Fourchette de niveaux des groupes par carte, DANS la tranche de sa nation
 ## (voir Nations.LEVEL_BANDS) : chaque nation occupe une tranche de niveaux distincte, les
 ## cartes d'une même nation se partagent la sienne. Hors liste : niveau de la carte à +2.
-# V81 : une zone par nation (grandes cartes 36 × 24) ; chaque nation garde sa tranche.
+# V81 : une zone par nation (grandes cartes 54 × 36) ; chaque nation garde sa tranche.
 const LEVEL_RANGE := {
 	"foret_sylve": [1, 16], "brasier_cendres": [18, 24], "brumes_marais": [26, 30],
 	"montagne_pics": [32, 44], "vents_plateau": [46, 53], "ombres_necropole": [55, 62],

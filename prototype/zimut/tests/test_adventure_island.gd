@@ -1,5 +1,5 @@
 extends SceneTree
-## V81 : Sylve = grande zone de nation (36 × 24) à contour irrégulier — cases « hors île »,
+## V81 : Sylve = grande zone de nation (54 × 36) à contour irrégulier — cases « hors île »,
 ## lieux (catalogue + générés) et portes accessibles, ancienne sauvegarde réparée.
 ## Lancement : godot --headless --path . -s tests/test_adventure_island.gd
 var fails: int = 0
@@ -15,7 +15,7 @@ func _boot() -> void:
 	var t: Dictionary = AdventureTerrain.zone_terrain(zid)
 	var size: Vector2i = t["size"]
 	var voids: Dictionary = t["voids"]
-	check(size == Vector2i(36, 24), "la Sylve fait 36 × 24, grande zone de nation (%s)" % str(size))
+	check(size == Vector2i(54, 36), "la Sylve fait 54 × 36, grande zone de nation (%s)" % str(size))
 	check(voids.size() >= 15, "contour irrégulier : %d cases hors île" % voids.size())
 	# La façade (dernière ligne / dernière colonne) reste pleine : la falaise est dessinée dessous.
 	var facade_ok := true
@@ -42,7 +42,7 @@ func _boot() -> void:
 			unreachable += 1
 	check(unreachable == 0, "tous les lieux sont accessibles")
 	# Les 6 lieux d'origine gardent leur clé (progression des anciennes sauvegardes).
-	for old: String in ["4,1", "7,2", "3,4", "5,5", "8,5", "2,1"]:
+	for old: String in ["6,2", "10,3", "4,6", "8,8", "12,8", "3,2"]:
 		check(pois.has(old), "lieu d'origine %s conservé" % old)
 	# Aucune case vide n'est franchissable ni ne reçoit de trouvaille.
 	for v2: Vector2i in voids.keys():
@@ -52,7 +52,7 @@ func _boot() -> void:
 	for f: Vector2i in AdventureTerrain.finds_of(zid).keys():
 		if voids.has(f):
 			check(false, "trouvaille sur une case vide %s" % str(f))
-	check(AdventureTerrain.finds_of(zid).size() == 6, "6 trouvailles")
+	check(AdventureTerrain.finds_of(zid).size() == 10, "10 trouvailles")
 	# Ancienne sauvegarde : héros sur une case devenue hors île → ramené au départ.
 	var gm: Node = root.get_node("GameManager")
 	var data: Dictionary = pm.new_game(4, "IleTest")
@@ -70,6 +70,6 @@ func _boot() -> void:
 	check(AdventureTerrain.walkable(zid, mgr.hero_pos()), "héros sur case vide ramené sur l'île (%s)" % str(mgr.hero_pos()))
 	# Plateau assez grand pour la vue défilante sur téléphone.
 	var ui_script: GDScript = load("res://scripts/AdventureMapUI.gd")
-	check(ui_script.scroll_needed(size, Vector2(1100, 850)), "36 × 24 : défilement activé")
+	check(ui_script.scroll_needed(size, Vector2(1100, 850)), "54 × 36 : défilement activé")
 	print("OK" if fails == 0 else "ÉCHEC")
 	quit(fails)

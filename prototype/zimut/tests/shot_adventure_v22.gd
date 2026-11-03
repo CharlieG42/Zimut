@@ -33,7 +33,7 @@ func _boot() -> void:
 	await create_timer(0.5).timeout
 	_shot(out + "/v22_mob.png")
 	sc._close_modal()
-	sc._camp_modal("foret_sylve,5,5", 30)
+	sc._camp_modal("foret_sylve,8,8", 30)
 	await create_timer(0.5).timeout
 	_shot(out + "/v22_camp.png")
 	sc.manager.accept_contract()

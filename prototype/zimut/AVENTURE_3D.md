@@ -111,7 +111,7 @@ bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
   de la partie (rafraîchie chaque seconde et à chaque écriture du compteur).
 ## V81 — Monde ouvert par nations, mini-carte ronde et pop-up de rencontre
 
-- **Une grande zone instanciée par nation** (36 × 24, contre 14 × 10 avant) : les anciennes
+- **Une grande zone instanciée par nation** (54 × 36 depuis V82 ; 36 × 24 en V81, 14 × 10 avant) : les anciennes
   petites cartes ont été fondues dans la zone de leur nation (ex. `foret_ronces`/`lisiere_col`
   → `foret_sylve`). Les 10 nations + le Donjon forment un chemin de 11 zones reliées par
   **1 à 2 portails maximum** chacune (`AdventureTerrain.gates_of` dérive les portails de la
@@ -131,3 +131,13 @@ bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
 - Tests : `test_adventure_open3d.gd` (monde par nations, ≤ 2 portails, caméra, mini-carte ronde,
   pop-up, onglets), `test_adventure_world.gd` / `test_adventure_island.gd` / `test_adventure_v2.gd`
   / `test_adventure_mobs.gd` mis à jour.
+
+
+## V82 — Refonte du Monde Ouvert (TEST)
+
+- **Zones ×1,5** (54 × 36) ; lieux, énigmes et sentiers recalés sur la nouvelle grille ; 12 lieux générés par zone, 10 trouvailles.
+- **Relief** (`Adv3DWorld.set_relief`) : collines en deux octaves, amplitude par nation (`OPEN_AMPLITUDE`), aplanies autour des lieux/départ/portes ; la vue iso garde son relief doux. Nuances de couleur par région et altitude (`_open_tint`).
+- **Caméra** : `OW_DISTANCE` 14,6 (contre 9,8 en V81 initial).
+- **Donjons à paliers** : clé « Nation#1 », « Nation#2 » (paliers 1-2, générés par `ProgressionManager._add_dungeon_tiers`), « Nation » = palier 3 (Gardien + Pierre). `Dungeons.base/tier/tier_key` ; niveaux décalés dans la tranche de la nation, pas de Pierre aux paliers 1-2.
+- **Carte du monde** : `Adv3DWorldMap` dessinée sur `conquest_world_map.jpg`, repères `NATION_POS`.
+- Test : `tests/test_monde_ouvert_v82.gd` ; captures : `tests/shot_openworld.gd`.

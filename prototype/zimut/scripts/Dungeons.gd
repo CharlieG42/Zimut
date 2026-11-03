@@ -37,10 +37,36 @@ static func is_dungeon(poi: Dictionary) -> bool:
 	return String(poi.get("guardian", "")) != ""
 
 
+## V82 : une Nation compte plusieurs donjons de difficulté croissante (monde ouvert). La clé « guardian »
+## d'un POI est la Nation (« Forêt » = donjon principal, palier 3, avec Gardien et Pierre) ou
+## « Forêt#1 » / « Forêt#2 » (paliers 1 et 2 : mêmes 4 salles, ennemis plus faibles, pas de Pierre).
+const TIERS := 3
+const TIER_SEP := "#"
+
+
+## Nation d'une clé de donjon (« Forêt#2 » → « Forêt »).
+static func base(key: String) -> String:
+	return key.split(TIER_SEP)[0]
+
+
+## Palier d'une clé de donjon (1..TIERS ; la clé nue = palier le plus haut).
+static func tier(key: String) -> int:
+	var parts: PackedStringArray = key.split(TIER_SEP)
+	if parts.size() < 2:
+		return TIERS
+	return clampi(int(parts[1]), 1, TIERS)
+
+
+static func tier_key(biome: String, t: int) -> String:
+	return biome if t >= TIERS else "%s%s%d" % [biome, TIER_SEP, t]
+
+
 ## Niveau des ennemis d'une salle : les 4 derniers niveaux de la tranche de la Nation.
-static func room_level(biome: String, room: int) -> int:
-	var band: Vector2i = Nations.level_band(biome)
-	return clampi(band.y - (ROOMS - clampi(room, 1, ROOMS)), band.x, band.y)
+static func room_level(key: String, room: int) -> int:
+	var band: Vector2i = Nations.level_band(base(key))
+	var step: int = maxi(2, (band.y - band.x) / 5)       # écart de niveau entre deux paliers
+	var top: int = band.y - (TIERS - tier(key)) * step
+	return clampi(top - (ROOMS - clampi(room, 1, ROOMS)), band.x, band.y)
 
 
 static func room_name(room: int) -> String:
@@ -65,6 +91,8 @@ static func clears(adv: Dictionary, biome: String) -> int:
 
 ## Chance de Pierre au prochain Gardien vaincu.
 static func stone_chance(adv: Dictionary, biome: String) -> float:
+	if tier(biome) < TIERS:
+		return 0.0
 	return STONE_FIRST if int(stats(adv, biome).get("boss_kills", 0)) == 0 else STONE_LATER
 
 
@@ -99,7 +127,9 @@ static func win_room(adv: Dictionary, biome: String, roll: float, stone_owned: b
 	out["cleared"] = true
 	out["first_clear"] = int(st.get("clears", 0)) == 0
 	out["chance"] = STONE_FIRST if int(st.get("boss_kills", 0)) == 0 else STONE_LATER
-	if stone_owned:
+	if tier(biome) < TIERS:
+		out["chance"] = 0.0           # paliers 1-2 : pas de Pierre (le Gardien de la Nation la garde)
+	elif stone_owned:
 		out["stone_roll"] = "owned"
 	else:
 		out["stone_roll"] = "won" if roll < float(out["chance"]) else "missed"

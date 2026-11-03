@@ -457,9 +457,9 @@ func _rebuild_world() -> void:
 		# V27 : sanctuaire d'une Pierre Élémentaire (boss de la Nation)
 		var gb: String = String(poi.get("guardian", ""))
 		if gb != "":
-			node.gem = Stones.info(gb).get("color", Color.WHITE)
-			node.gem_taken = Stones.has(manager.save, gb)
-			var btex: Texture2D = Nations.boss_texture(gb)
+			node.gem = Stones.info(Dungeons.base(gb)).get("color", Color.WHITE)
+			node.gem_taken = Stones.has(manager.save, Dungeons.base(gb))
+			var btex: Texture2D = Nations.boss_texture(Dungeons.base(gb))
 			if btex != null:
 				node.enemy_tex = btex
 		node.position = cell_center(pos)
@@ -1189,10 +1189,12 @@ func _confirm_dungeon(poi: Dictionary) -> void:
 	lines.append("")
 	for r: int in range(1, Dungeons.ROOMS + 1):
 		var mark: String = "✔" if r < room else ("▶" if r == room else "○")
-		var who: String = "  —  le Gardien : %s" % Nations.boss_title(biome) if r == Dungeons.ROOMS and Nations.boss_title(biome) != "" else ""
+		var who: String = "  —  le Gardien : %s" % Nations.boss_title(Dungeons.base(biome)) if r == Dungeons.ROOMS and Nations.boss_title(Dungeons.base(biome)) != "" else ""
 		lines.append("%s  Salle %d · %s · niv %d%s" % [mark, r, Dungeons.room_name(r), Dungeons.room_level(biome, r), who])
 	lines.append("")
-	if Stones.has(manager.save, biome):
+	if Dungeons.tier(biome) < Dungeons.TIERS:
+		lines.append("Donjon de palier %d/%d : le Gardien de la Nation, lui, garde la Pierre." % [Dungeons.tier(biome), Dungeons.TIERS])
+	elif Stones.has(manager.save, biome):
 		lines.append("💎  %s déjà retrouvée : le donjon reste ouvert pour le butin." % Stones.stone_name(biome))
 	else:
 		lines.append("💎  %s : %d %% de chances au prochain Gardien vaincu." % [Stones.stone_name(biome), roundi(Dungeons.stone_chance(manager.state, biome) * 100.0)])
