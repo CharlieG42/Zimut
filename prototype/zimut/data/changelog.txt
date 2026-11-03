@@ -1,3 +1,6 @@
+V86|TEST — Rendu 3D : feuillage en « cartes » de feuilles (feuillus, bouleaux, buissons) à l'ombrage doux et rond, au lieu de blocs facettés.
+V86|Sol, rochers et décors « peints » : texture de coups de pinceau projetée en triplanaire sur toutes les surfaces, rochers aux volumes arrondis.
+V86|Textures générées par tools/gen_textures3d.py (aucun asset externe) ; le héros n'est pas modifié.
 V85|TEST — Rendu 3D plus proche de Zelda / Genshin : éclairage « cartoon » (dégradés en paliers, ombres teintées de bleu, liseré lumineux côté soleil) sur le décor, le sol et les personnages.
 V85|Vraies ombres portées du soleil (arbres, rochers, héros, monstres) en qualité Haute ; en Économie, on garde les ombres rondes au sol. Ciel au dégradé plus riche, lueur du soleil dans la brume.
 V85|Teintes douces à grande échelle sur le décor (aplats « peints »), éclairage et saturation recalibrés pour les 10 nations.

@@ -160,3 +160,11 @@ bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
 - `Adv3DMeshes.TOON_LIGHT` : fonction `light()` partagée (demi-Lambert en paliers adoucis, ombre teintée `shade_tint`, rim `rim_color`). `solid_material()` et `foliage_material()` sont désormais des `ShaderMaterial` (même shader, `sway = 0` pour le rigide) ; la matière des personnages (`Adv3DHeroModel.char_material`) l'utilise aussi, avec son contour.
 - `Adv3DMeshes.setup_sun(sun, env)` : ombres temps réel du soleil (2 cascades, 70 m) quand `GfxQuality` n'est pas « Économie » ; `real_shadows` allège alors les ombres rondes et active `cast_shadow` sur les gros décors (`_casts_shadow`) et le héros. L'herbe, les fleurs et les cailloux ne projettent pas d'ombre.
 - Ciel : `sky_curve`, disque solaire, `fog_sun_scatter`. Captures : `tests/shot_openworld.gd`.
+
+
+## V86 — Peinture et feuillage en cartes (TEST)
+
+- `tools/gen_textures3d.py` → `assets/textures3d/paint.png` (aplats + coups de pinceau, tuilable) et `leaf.png` (amas de feuilles RGBA). Mipmaps activés dans leurs `.import`.
+- Shader partagé (`Adv3DMeshes.FOLIAGE_SHADER`) : peinture triplanaire monde (`paint_amt` : 0,4 solide / 0,18 feuillage), et « cartes » : un sommet à UV non nul échantillonne `leaf_tex` (alpha scissor). `_begin()` pose UV (0,0) pour tous les sommets ordinaires.
+- `Adv3DMeshes.add_cards()` : couronne de quads orientés en spirale, normales dirigées vers l'extérieur (ombrage rond) ; utilisée par `broadleaf`, `birch`, `bush`. Pins, palmiers et cactus restent inchangés.
+- Assets externes : les dépôts publics Kenney (starter kits) n'ont presque rien de naturel et kenney.nl / Quaternius sont inaccessibles depuis l'environnement de travail → pas d'import glTF pour l'instant (un pack déposé dans `assets/` pourrait être instancié via `PackedScene`).

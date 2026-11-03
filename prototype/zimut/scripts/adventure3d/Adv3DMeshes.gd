@@ -71,7 +71,13 @@ uniform float flip_back = 0.0;
 uniform float fade_near = 1.0;
 uniform float fade_far = 2.6;
 uniform float emit = 0.12;
+// V86 : peinture triplanaire (aplats + coups de pinceau) et cartes de feuilles (UV non nul = carte).
+uniform sampler2D paint : filter_linear_mipmap, repeat_enable, hint_default_white;
+uniform sampler2D leaf_tex : filter_linear_mipmap, repeat_disable, hint_default_white;
+uniform float paint_amt = 0.5;
+uniform float paint_scale = 0.11;
 varying vec3 wpos;
+varying vec3 wnorm;
 float bayer4(vec2 p) {
 	ivec2 q = ivec2(mod(p, 4.0));
 	int i = q.x + q.y * 4;
@@ -86,6 +92,7 @@ void vertex() {
 	VERTEX.x += w * sway * h * h * 0.18;
 	VERTEX.z += cos(TIME * speed * 0.8 + ph) * sway * h * h * 0.10;
 	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	wnorm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 }
 void fragment() {
 	float dist = length(VERTEX);
@@ -95,6 +102,14 @@ void fragment() {
 			discard;
 		}
 	}
+	float leaf_k = 1.0;
+	if (UV.x + UV.y > 0.001) {
+		vec4 lt = texture(leaf_tex, UV);
+		if (lt.a < 0.5) {
+			discard;
+		}
+		leaf_k = 0.72 + lt.r * 0.5;
+	}
 	if (flip_back > 0.5 && !FRONT_FACING) {
 		NORMAL = -NORMAL;
 	}
@@ -102,7 +117,15 @@ void fragment() {
 	NORMAL = normalize(mix(NORMAL, up_v, normal_up));
 	// Variation douce de teinte à grande échelle (aplats peints) : évite les surfaces uniformes.
 	float v = sin(wpos.x * 0.35 + sin(wpos.z * 0.23) * 2.0) * sin(wpos.z * 0.31 + sin(wpos.x * 0.19) * 2.0);
-	vec3 col = COLOR.rgb * (1.0 + v * 0.06);
+	vec3 bw = pow(abs(wnorm), vec3(4.0));
+	bw /= (bw.x + bw.y + bw.z + 0.0001);
+	vec2 px = wpos.zy * paint_scale;
+	vec2 py = wpos.xz * paint_scale;
+	vec2 pz = wpos.xy * paint_scale;
+	float pa = texture(paint, px).r * bw.x + texture(paint, py).r * bw.y + texture(paint, pz).r * bw.z;
+	float pb = texture(paint, px * 0.23 + 0.31).r * bw.x + texture(paint, py * 0.23 + 0.31).r * bw.y + texture(paint, pz * 0.23 + 0.31).r * bw.z;
+	float pv = mix(pa, pb, 0.5);
+	vec3 col = COLOR.rgb * (1.0 + v * 0.06) * (1.0 + (pv - 0.5) * paint_amt * 2.0) * leaf_k;
 	ALBEDO = pow(max(col, vec3(0.0)), vec3(2.2));
 	EMISSION = ALBEDO * emit;
 	ROUGHNESS = 0.92;
@@ -120,6 +143,19 @@ static func _shader_for(double_sided: bool) -> Shader:
 
 
 ## Matériau opaque à couleurs de sommets sRGB (sol, rochers, falaises), éclairage cartoon.
+static func tex(name: String) -> Texture2D:
+	var key: String = "tex_" + name
+	if not _cache.has(key):
+		_cache[key] = load("res://assets/textures3d/%s.png" % name)
+	return _cache[key]
+
+
+static func _set_textures(m: ShaderMaterial, amt: float) -> void:
+	m.set_shader_parameter("paint", tex("paint"))
+	m.set_shader_parameter("leaf_tex", tex("leaf"))
+	m.set_shader_parameter("paint_amt", amt)
+
+
 static func solid_material(double_sided: bool = false, near_fade: bool = false) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = _shader_for(double_sided)
@@ -127,6 +163,7 @@ static func solid_material(double_sided: bool = false, near_fade: bool = false) 
 	m.set_shader_parameter("normal_up", 0.0)
 	m.set_shader_parameter("flip_back", 1.0 if double_sided else 0.0)
 	m.set_shader_parameter("emit", 0.05)
+	_set_textures(m, 0.4)
 	if near_fade:
 		# un rocher / une souche qui passe devant la caméra s'efface (tramage, sans tri de transparence)
 		m.set_shader_parameter("fade_near", 1.0)
@@ -143,6 +180,7 @@ static func foliage_material(sway: float = 0.16, up: float = 0.35) -> ShaderMate
 	m.shader = _shader_for(true)
 	m.set_shader_parameter("sway", sway)
 	m.set_shader_parameter("normal_up", up)
+	_set_textures(m, 0.18)
 	return m
 
 
@@ -359,7 +397,44 @@ static func _rng(seed_v: int) -> RandomNumberGenerator:
 static func _begin() -> SurfaceTool:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_uv(Vector2.ZERO)     # tous les sommets portent un UV (0,0 = pas une carte de feuilles)
 	return st
+
+
+## V86 : couronne de feuillage en cartes (quads texturés, normales dirigées vers l'extérieur du volume
+## → ombrage doux et rond comme un feuillage peint). UV non nul : le shader y applique `leaf_tex`.
+static func add_cards(st: SurfaceTool, center: Vector3, radii: Vector3, count: int, card: float,
+		col_bot: Color, col_top: Color, rng: RandomNumberGenerator) -> void:
+	for i: int in range(count):
+		# répartition en spirale dorée sur la demi-sphère haute + un peu sur les flancs
+		var u: float = (float(i) + 0.5) / float(count)
+		var y: float = lerpf(-0.35, 1.0, u)
+		var rr: float = sqrt(maxf(0.0, 1.0 - y * y))
+		var th: float = float(i) * 2.399963 + rng.randf() * 0.3
+		var dir := Vector3(cos(th) * rr, y, sin(th) * rr)
+		var depth: float = rng.randf_range(0.62, 1.0)
+		var p: Vector3 = center + dir * radii * depth
+		var right: Vector3 = dir.cross(Vector3.UP)
+		if right.length_squared() < 0.01:
+			right = Vector3.RIGHT
+		right = right.normalized().rotated(dir, rng.randf() * TAU)
+		var upv: Vector3 = right.cross(dir).normalized()
+		var h: float = card * 1.3 * rng.randf_range(0.8, 1.2)
+		var k: float = clampf((p.y - (center.y - radii.y)) / maxf(radii.y * 2.0, 0.001), 0.0, 1.0)
+		var base_c: Color = col_bot.lerp(col_top, k)
+		var vv: float = rng.randf_range(0.92, 1.08)
+		base_c = Color(base_c.r * vv, base_c.g * vv, base_c.b * vv)
+		var corners: Array = [p - right * h + upv * h * 0.2, p + right * h + upv * h * 0.2, p + right * h + upv * h * 1.8, p - right * h + upv * h * 1.8]
+		var uvs: Array = [Vector2(0.02, 0.98), Vector2(0.98, 0.98), Vector2(0.98, 0.02), Vector2(0.02, 0.02)]
+		for idx: Array in [[0, 1, 2], [0, 2, 3]]:
+			for j: int in idx:
+				var cp: Vector3 = corners[j]
+				var nrm: Vector3 = ((cp - center) / radii).normalized()
+				st.set_uv(uvs[j])
+				st.set_color(base_c)
+				st.set_normal(nrm)
+				st.add_vertex(cp)
+	st.set_uv(Vector2.ZERO)
 
 
 static func _cached(key: String, builder: Callable) -> Mesh:
@@ -399,10 +474,12 @@ static func broadleaf() -> Mesh:
 		add_cone(st, Vector3(0, 1.0, 0), 0.10, 0.06, 0.7, 5, Color(0.40, 0.28, 0.18), Color(0.42, 0.30, 0.19), rng, 0.01)
 		var dark := Color(0.18, 0.42, 0.19)
 		var light := Color(0.52, 0.78, 0.30)
-		add_blob(st, Vector3(0.0, 2.05, 0.0), Vector3(1.05, 0.88, 1.05), 12, 6, dark, light, rng, 0.03)
-		add_blob(st, Vector3(0.62, 1.72, 0.25), Vector3(0.72, 0.62, 0.72), 10, 5, dark, light.darkened(0.04), rng, 0.05)
-		add_blob(st, Vector3(-0.58, 1.78, -0.30), Vector3(0.70, 0.60, 0.70), 10, 5, dark, light.darkened(0.06), rng, 0.05)
-		add_blob(st, Vector3(0.05, 2.65, 0.05), Vector3(0.62, 0.50, 0.62), 10, 5, dark.lightened(0.05), light.lightened(0.05), rng, 0.05)
+		# V86 : noyau sombre (évite les trous) + cartes de feuilles par amas
+		add_blob(st, Vector3(0.0, 2.0, 0.0), Vector3(0.9, 0.75, 0.9), 8, 4, dark, dark.lerp(light, 0.3), rng, 0.03)
+		add_cards(st, Vector3(0.0, 2.05, 0.0), Vector3(1.12, 0.92, 1.12), 34, 0.46, dark, light, rng)
+		add_cards(st, Vector3(0.62, 1.72, 0.25), Vector3(0.78, 0.66, 0.78), 16, 0.38, dark, light.darkened(0.04), rng)
+		add_cards(st, Vector3(-0.58, 1.78, -0.30), Vector3(0.76, 0.64, 0.76), 16, 0.38, dark, light.darkened(0.06), rng)
+		add_cards(st, Vector3(0.05, 2.65, 0.05), Vector3(0.66, 0.54, 0.66), 14, 0.34, dark.lightened(0.05), light.lightened(0.05), rng)
 		return _commit(st))
 
 
@@ -416,23 +493,24 @@ static func birch() -> Mesh:
 			add_cone(st, Vector3(0, 0.35 + float(i) * 0.5, 0), 0.136 - float(i) * 0.012, 0.136 - float(i) * 0.012, 0.07, 7, Color(0.12, 0.11, 0.10), Color(0.16, 0.14, 0.13), rng, 0.0, false)
 		var dark := Color(0.30, 0.52, 0.20)
 		var light := Color(0.66, 0.82, 0.30)
-		add_blob(st, Vector3(0, 2.55, 0), Vector3(0.78, 0.9, 0.78), 12, 6, dark, light, rng, 0.03)
-		add_blob(st, Vector3(0.38, 2.15, 0.2), Vector3(0.5, 0.52, 0.5), 10, 5, dark, light.lightened(0.05), rng, 0.03)
-		add_blob(st, Vector3(-0.36, 2.2, -0.2), Vector3(0.5, 0.5, 0.5), 10, 5, dark, light.lightened(0.05), rng, 0.03)
+		add_blob(st, Vector3(0, 2.45, 0), Vector3(0.6, 0.7, 0.6), 8, 4, dark, dark.lerp(light, 0.3), rng, 0.03)
+		add_cards(st, Vector3(0, 2.55, 0), Vector3(0.84, 0.96, 0.84), 28, 0.40, dark, light, rng)
+		add_cards(st, Vector3(0.38, 2.15, 0.2), Vector3(0.54, 0.56, 0.54), 12, 0.32, dark, light.lightened(0.05), rng)
+		add_cards(st, Vector3(-0.36, 2.2, -0.2), Vector3(0.54, 0.54, 0.54), 12, 0.32, dark, light.lightened(0.05), rng)
 		return _commit(st))
 
 
 ## Rocher + petits cailloux ; `warm` = grès du désert, sinon granit moussu.
 static func rock(warm: bool = false) -> Mesh:
 	return _cached("rock_%s" % warm, func() -> Mesh:
-		smooth_mode = false
+		smooth_mode = true   # V86 : rochers aux volumes arrondis, la peinture triplanaire fait la matière
 		var st: SurfaceTool = _begin()
 		var rng: RandomNumberGenerator = _rng(37)
 		var bot: Color = Color(0.34, 0.26, 0.20) if warm else Color(0.34, 0.34, 0.36)
 		var top: Color = Color(0.84, 0.66, 0.44) if warm else Color(0.66, 0.68, 0.62)
-		add_blob(st, Vector3(0, 0.42, 0), Vector3(1.0, 0.72, 0.85), 6, 4, bot, top, rng, 0.14)
-		add_blob(st, Vector3(0.95, 0.18, 0.4), Vector3(0.40, 0.28, 0.36), 5, 3, bot, top.darkened(0.06), rng, 0.12)
-		add_blob(st, Vector3(-0.8, 0.14, -0.55), Vector3(0.30, 0.22, 0.28), 5, 3, bot, top.darkened(0.1), rng, 0.12)
+		add_blob(st, Vector3(0, 0.42, 0), Vector3(1.0, 0.72, 0.85), 9, 5, bot, top, rng, 0.12)
+		add_blob(st, Vector3(0.95, 0.18, 0.4), Vector3(0.40, 0.28, 0.36), 7, 4, bot, top.darkened(0.06), rng, 0.1)
+		add_blob(st, Vector3(-0.8, 0.14, -0.55), Vector3(0.30, 0.22, 0.28), 7, 4, bot, top.darkened(0.1), rng, 0.1)
 		if not warm:
 			# calotte de mousse sur le dessus
 			add_blob(st, Vector3(0.05, 0.92, 0.0), Vector3(0.62, 0.20, 0.55), 6, 2, Color(0.22, 0.42, 0.20), Color(0.36, 0.60, 0.26), rng, 0.05)
@@ -446,9 +524,10 @@ static func bush() -> Mesh:
 		var rng: RandomNumberGenerator = _rng(41)
 		var dark := Color(0.12, 0.32, 0.14)
 		var light := Color(0.36, 0.62, 0.24)
-		add_blob(st, Vector3(0, 0.38, 0), Vector3(0.75, 0.55, 0.72), 10, 5, dark, light, rng, 0.06)
-		add_blob(st, Vector3(0.50, 0.28, 0.2), Vector3(0.48, 0.38, 0.48), 6, 3, dark, light.darkened(0.05), rng, 0.06)
-		add_blob(st, Vector3(-0.42, 0.30, -0.18), Vector3(0.50, 0.40, 0.46), 6, 3, dark, light.darkened(0.08), rng, 0.06)
+		add_blob(st, Vector3(0, 0.34, 0), Vector3(0.55, 0.38, 0.52), 7, 3, dark, dark.lerp(light, 0.3), rng, 0.05)
+		add_cards(st, Vector3(0, 0.38, 0), Vector3(0.82, 0.6, 0.78), 22, 0.30, dark, light, rng)
+		add_cards(st, Vector3(0.50, 0.28, 0.2), Vector3(0.52, 0.4, 0.52), 9, 0.24, dark, light.darkened(0.05), rng)
+		add_cards(st, Vector3(-0.42, 0.30, -0.18), Vector3(0.54, 0.42, 0.5), 9, 0.24, dark, light.darkened(0.08), rng)
 		return _commit(st))
 
 
