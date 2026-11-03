@@ -36,10 +36,10 @@ func _boot() -> void:
 		var pz: Dictionary = pm.ADVENTURE_PUZZLES[k]
 		if String(pz.get("type", "riddle")) == "riddle":
 			check((pz["choices"] as Array).has(pz["answer"]), "%s : la bonne réponse figure dans les choix" % k)
-	var fire: Dictionary = pm.ADVENTURE_PUZZLES["foret_sylve,4,1"]
+	var fire: Dictionary = pm.ADVENTURE_PUZZLES["foret_sylve,6,2"]
 	check(pm.adventure_answer_matches(fire, "feu") and pm.adventure_answer_matches(fire, "  LE FEU ! ") and pm.adventure_answer_matches(fire, "Le Feu"), "réponse tolérante (article, casse, ponctuation)")
 	check(not pm.adventure_answer_matches(fire, "l'eau"), "mauvaise réponse refusée")
-	check(pm.adventure_answer_matches(pm.ADVENTURE_PUZZLES["desert_dunes,6,1"], "piece de monnaie"), "réponse sans accent ni article")
+	check(pm.adventure_answer_matches(pm.ADVENTURE_PUZZLES["desert_dunes,9,2"], "piece de monnaie"), "réponse sans accent ni article")
 
 	# ── AdventureManager ──────────────────────────────────────────────────
 	var data: Dictionary = pm.new_game(3, "AdvV2")
@@ -74,10 +74,10 @@ func _boot() -> void:
 	# Énigmes de réflexion
 	var xp_before: int = int(pm.roster_entry(data, "Tank")["xp"])
 	var res_before: int = int(data.get("resources", {}).get("Bois", 0))
-	var r: Dictionary = mgr.complete_puzzle("foret_sylve,2,1")
+	var r: Dictionary = mgr.complete_puzzle("foret_sylve,3,2")
 	check(int(r.get("xp", 0)) > 0 and int(pm.roster_entry(data, "Tank")["xp"]) > xp_before and int(data["resources"].get("Bois", 0)) > res_before, "énigme de runes : XP + ressource partagées")
-	check(mgr.complete_puzzle("foret_sylve,2,1").is_empty(), "une énigme ne rapporte qu'une fois")
-	check(mgr.solve_puzzle("foret_sylve,4,1", "le feu"), "énigme à réponse tolérante résolue")
+	check(mgr.complete_puzzle("foret_sylve,3,2").is_empty(), "une énigme ne rapporte qu'une fois")
+	check(mgr.solve_puzzle("foret_sylve,6,2", "le feu"), "énigme à réponse tolérante résolue")
 	# Événements de route
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7

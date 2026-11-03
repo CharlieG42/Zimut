@@ -59,7 +59,7 @@ static func finds_of(zone_id: String) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = absi(zone_id.hash()) + 777
 	var out: Dictionary = {}
-	var kinds: Array = ["herb", "gold", "herb", "relic", "gold", "herb"]
+	var kinds: Array = ["herb", "gold", "herb", "relic", "gold", "herb", "herb", "relic", "gold", "herb"]
 	var guard: int = 0
 	while out.size() < kinds.size() and guard < 300:
 		guard += 1

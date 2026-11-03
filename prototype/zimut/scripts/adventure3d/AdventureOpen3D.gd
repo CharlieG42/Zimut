@@ -25,8 +25,8 @@ const PERSIST_EVERY := 3.0
 const MOB_STEP_TIME := 0.7
 ## Caméra « monde ouvert » : plus basse que la vue 3D iso, et RECULÉE (V81) pour voir
 ## plus loin sur les grandes zones de nation (Zelda-like).
-const OW_PITCH := -0.55
-const OW_DISTANCE := 9.8
+const OW_PITCH := -0.58
+const OW_DISTANCE := 14.6
 
 var manager: Node = null
 var _leaves: CPUParticles3D = null
@@ -95,7 +95,7 @@ func _ready() -> void:
 	zone_id = manager.zone_id()
 	terrain = AdventureTerrain.zone_terrain(zone_id)
 	_build_environment()
-	world_root = Adv3DWorld.build(zone_id)
+	world_root = Adv3DWorld.build(zone_id, true)
 	add_child(world_root)
 	var wpal: Dictionary = Adv3DWorld.palette(String(terrain["biome"]))
 	_clouds = Adv3DWorld.make_clouds(terrain["size"], absi(zone_id.hash()), not bool(wpal.get("sea", false)))

@@ -118,7 +118,7 @@ func _run() -> void:
 
 	# V81 : scène du monde ouvert instanciée — caméra reculée, mini-carte ronde,
 	# pop-up « combattre ou non », carte plein écran à onglets (instance + monde).
-	var gs: Node = root.get_node("GameSettings")
+	gs = root.get_node("GameSettings")
 	gs.adventure_models_3d = false
 	var scene: Node = (load("res://scenes/AdventureOpen3D.tscn") as PackedScene).instantiate()
 	root.add_child(scene)

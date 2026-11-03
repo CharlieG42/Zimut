@@ -128,13 +128,78 @@ static func palette(biome: String) -> Dictionary:
 	return PALETTES.get(biome, PALETTES["Forêt"])
 
 
+## V82 — Relief du MONDE OUVERT : collines franches (amplitude par nation) en deux octaves,
+## aplanies autour des lieux, du départ et des portes pour que bâtiments et sentiers restent posés.
+## `set_relief` est appelé par `build` ; la vue iso garde le relief doux historique.
+const OPEN_AMPLITUDE := {
+	"Forêt": 1.7, "Brasier": 2.3, "Brumes": 0.9, "Montagne": 3.6, "Vents": 3.0, "Ombres": 1.5,
+	"Désert": 2.0, "Marées": 1.0, "Cristaux": 2.4, "Rouages": 0.9, "Donjon": 1.6,
+}
+static var _amp: float = HEIGHT_AMPLITUDE
+static var _open: bool = false
+static var _hills: FastNoiseLite = null
+static var _flat: Dictionary = {}          # coin → facteur 0..1 (0 = plat) ; cache
+static var _anchors: Array[Vector2] = []   # cases à aplanir (lieux, départ, portes)
+
+
+static func set_relief(zone_id: String, open_world: bool) -> void:
+	_open = open_world
+	_flat = {}
+	_anchors = []
+	if not open_world:
+		_amp = HEIGHT_AMPLITUDE
+		return
+	var biome: String = String(ProgressionManager.ADVENTURE_ZONES.get(zone_id, {}).get("biome", "Forêt"))
+	_amp = float(OPEN_AMPLITUDE.get(biome, 1.6))
+	if _hills == null:
+		_hills = FastNoiseLite.new()
+		_hills.seed = 9091
+		_hills.frequency = 0.07
+		_hills.fractal_octaves = 2
+	# Le relief diffère d'une nation à l'autre (décalage du bruit)
+	_hills.offset = Vector3(float(absi(zone_id.hash()) % 997), float(absi(zone_id.hash() / 7) % 991), 0.0)
+	for k: String in ProgressionManager.pois_of(zone_id).keys():
+		_anchors.append(Vector2(AdventureTerrain.parse(k)))
+	var meta: Dictionary = ProgressionManager.ADVENTURE_ZONES.get(zone_id, {})
+	var st: Array = meta.get("start", [1, 3])
+	_anchors.append(Vector2(float(st[0]), float(st[1])))
+	for g: Vector2i in AdventureTerrain.gates_of(zone_id).keys():
+		_anchors.append(Vector2(g))
+
+
+## Facteur de relief (0 = aplani, 1 = plein relief) autour des lieux.
+static func _relief_factor(ix: int, iz: int) -> float:
+	var key: int = ix * 4096 + iz
+	if _flat.has(key):
+		return _flat[key]
+	var dmin: float = 99.0
+	var p := Vector2(float(ix), float(iz))
+	for a: Vector2 in _anchors:
+		dmin = minf(dmin, p.distance_to(a + Vector2(0.5, 0.5)))
+	var f: float = smoothstep(1.5, 5.0, dmin)
+	_flat[key] = f
+	return f
+
+
 ## Hauteur du coin de grille (ix, iz) : relief doux, continu d'une case à l'autre.
 static func corner_h(ix: int, iz: int) -> float:
+	if _open:
+		var big: float = _hills.get_noise_2d(float(ix), float(iz))
+		var mid: float = _noise_mid(ix, iz)
+		return (big * 0.85 + mid * 0.30) * _amp * _relief_factor(ix, iz)
 	if _noise == null:
 		_noise = FastNoiseLite.new()
 		_noise.seed = 4242
 		_noise.frequency = 0.11
 	return _noise.get_noise_2d(float(ix), float(iz)) * HEIGHT_AMPLITUDE
+
+
+static func _noise_mid(ix: int, iz: int) -> float:
+	if _noise == null:
+		_noise = FastNoiseLite.new()
+		_noise.seed = 4242
+		_noise.frequency = 0.11
+	return _noise.get_noise_2d(float(ix), float(iz))
 
 
 ## Hauteur du sol au point (x, z) : interpolation bilinéaire des quatre coins de la case.
@@ -181,7 +246,8 @@ static func _patch(x: float, z: float) -> float:
 # ══════════════════════════════════════════════════════════════════════
 
 ## Racine 3D de la zone : sol, falaises, dessous d'île, arbres/rochers, décors de sol, ombres.
-static func build(zone_id: String) -> Node3D:
+static func build(zone_id: String, open_world: bool = false) -> Node3D:
+	set_relief(zone_id, open_world)
 	var t: Dictionary = AdventureTerrain.zone_terrain(zone_id)
 	var biome: String = String(t["biome"])
 	var pal: Dictionary = palette(biome)
@@ -213,6 +279,25 @@ static func _cell_color(c: Vector2i, t: Dictionary, pal: Dictionary) -> Color:
 	return (cols[i] as Color).lerp(cols[i + 1], f - float(i))
 
 
+static func biome_of_t(t: Dictionary) -> String:
+	return String(t.get("biome", "Forêt"))
+
+
+## V82 : nuances de couleur du monde ouvert — grandes régions teintées (teinte ±, clair/sombre),
+## vallées plus sombres, sommets éclaircis (neige/roche pour les nations froides).
+static func _open_tint(c: Color, ix: int, iz: int, biome: String) -> Color:
+	var r: float = _patch(float(ix) * 0.35 + 130.0, float(iz) * 0.35 - 70.0)      # 0..1, grandes régions
+	var hh: float = clampf(corner_h(ix, iz) / maxf(_amp, 0.1), -1.0, 1.0)         # -1 vallée … +1 sommet
+	var h_: float = c.h + (r - 0.5) * 0.09
+	var v: float = c.v * (0.90 + r * 0.18) * (1.0 + hh * 0.10)
+	var out: Color = Color.from_hsv(fposmod(h_, 1.0), clampf(c.s * (1.0 - hh * 0.06), 0.0, 1.0), clampf(v, 0.0, 1.0))
+	if hh > 0.45 and (biome == "Montagne" or biome == "Vents" or biome == "Cristaux"):
+		out = out.lerp(Color(0.93, 0.96, 1.0), (hh - 0.45) * 0.9)
+	elif hh > 0.55:
+		out = out.lerp(Color(0.60, 0.55, 0.48), (hh - 0.55) * 0.5)    # affleurements rocheux
+	return out
+
+
 static func _build_ground(zone_id: String, t: Dictionary, pal: Dictionary) -> MeshInstance3D:
 	var size: Vector2i = t["size"]
 	var voids: Dictionary = t["voids"]
@@ -232,6 +317,8 @@ static func _build_ground(zone_id: String, t: Dictionary, pal: Dictionary) -> Me
 			if n > 0:
 				var avg: Color = acc / float(n)
 				var tone: float = (_patch(float(ix) * 1.7, float(iz) * 1.7) - 0.5) * 0.10
+				if _open:
+					avg = _open_tint(avg, ix, iz, biome_of_t(t))
 				corner_col[Vector2i(ix, iz)] = Color(avg.r + tone, avg.g + tone, avg.b + tone * 0.6)
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)

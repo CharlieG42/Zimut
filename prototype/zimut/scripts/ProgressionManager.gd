@@ -151,55 +151,55 @@ const ADVENTURE_BASE_XP := 60
 ## difficiles (les cartes de niveau égal ou inférieur restent toujours ouvertes).
 ## `unlock` est conservé pour les anciennes sauvegardes (voyage rapide).
 const ADVENTURE_ZONES := {
-	# V81 : UNE grande zone instanciée par NATION (36 × 24), reliées par 1 à 2 portails
+	# V81 : UNE grande zone instanciée par NATION (54 × 36), reliées par 1 à 2 portails
 	# maximum (cases de grille adjacentes), dans l'ordre de progression des niveaux.
 	# Les anciennes petites cartes (foret_ronces, lisiere_col, cretes_givre, piemont_ocre)
 	# ont été fondues dans la zone de leur nation.
 	"foret_sylve": {
-		"name": "Grande Forêt de la Sylve", "biome": "Forêt", "size": [36, 24], "shape": "ile", "grid": [0, 0],
-		"start": [2, 4], "unlock": "", "key_poi": "7,2",
+		"name": "Grande Forêt de la Sylve", "biome": "Forêt", "size": [54, 36], "shape": "ile", "grid": [0, 0],
+		"start": [3, 6], "unlock": "", "key_poi": "10,3",
 		"reveals": ["clairiere", "village_brume", "pont_mousse", "abbaye_ronce", "ruines_lierre", "citadelle_ronce", "marais_spectres", "vieille_tour", "fort_racine", "bois_lune", "sanctuaire_mousse"],
 	},
 	"brasier_cendres": {
-		"name": "Terres de Cendre", "biome": "Brasier", "size": [36, 24], "shape": "ile", "grid": [1, 0],
-		"start": [2, 4], "unlock": "foret_sylve", "key_poi": "6,4", "reveals": ["fort_cendre", "citadelle_sable"],
+		"name": "Terres de Cendre", "biome": "Brasier", "size": [54, 36], "shape": "ile", "grid": [1, 0],
+		"start": [3, 6], "unlock": "foret_sylve", "key_poi": "9,6", "reveals": ["fort_cendre", "citadelle_sable"],
 	},
 	"brumes_marais": {
-		"name": "Marais des Brumes", "biome": "Brumes", "size": [36, 24], "shape": "ile", "grid": [2, 0],
-		"start": [2, 4], "unlock": "brasier_cendres", "key_poi": "6,2", "reveals": ["village_brume", "marais_spectres", "bois_lune"],
+		"name": "Marais des Brumes", "biome": "Brumes", "size": [54, 36], "shape": "ile", "grid": [2, 0],
+		"start": [3, 6], "unlock": "brasier_cendres", "key_poi": "9,3", "reveals": ["village_brume", "marais_spectres", "bois_lune"],
 	},
 	"montagne_pics": {
-		"name": "Hauts Pics du Givre", "biome": "Montagne", "size": [36, 24], "shape": "ile", "grid": [3, 0],
-		"start": [2, 4], "unlock": "brumes_marais", "key_poi": "5,2",
+		"name": "Hauts Pics du Givre", "biome": "Montagne", "size": [54, 36], "shape": "ile", "grid": [3, 0],
+		"start": [3, 6], "unlock": "brumes_marais", "key_poi": "8,3",
 		"reveals": ["hameau_pin", "col_givre", "garnison", "mine_cristal", "bastion_orage", "forge_givre", "pic_foudroyant", "observatoire", "temple_soleil", "fort_cendre"],
 	},
 	"vents_plateau": {
-		"name": "Plateau des Vents", "biome": "Vents", "size": [36, 24], "shape": "ile", "grid": [4, 0],
-		"start": [2, 4], "unlock": "montagne_pics", "key_poi": "6,3", "reveals": ["bastion_orage", "pic_foudroyant"],
+		"name": "Plateau des Vents", "biome": "Vents", "size": [54, 36], "shape": "ile", "grid": [4, 0],
+		"start": [3, 6], "unlock": "montagne_pics", "key_poi": "9,4", "reveals": ["bastion_orage", "pic_foudroyant"],
 	},
 	"ombres_necropole": {
-		"name": "Nécropole d'Ombre", "biome": "Ombres", "size": [36, 24], "shape": "ile", "grid": [5, 0],
-		"start": [2, 4], "unlock": "vents_plateau", "key_poi": "5,3", "reveals": ["abbaye_ronce", "citadelle_ronce", "ruines_lierre"],
+		"name": "Nécropole d'Ombre", "biome": "Ombres", "size": [54, 36], "shape": "ile", "grid": [5, 0],
+		"start": [3, 6], "unlock": "vents_plateau", "key_poi": "8,4", "reveals": ["abbaye_ronce", "citadelle_ronce", "ruines_lierre"],
 	},
 	"desert_dunes": {
-		"name": "Dunes Perdues", "biome": "Désert", "size": [36, 24], "shape": "ile", "grid": [5, 1],
-		"start": [2, 4], "unlock": "ombres_necropole", "key_poi": "4,3", "reveals": ["oasis", "caravanserail", "tour_sable"],
+		"name": "Dunes Perdues", "biome": "Désert", "size": [54, 36], "shape": "ile", "grid": [5, 1],
+		"start": [3, 6], "unlock": "ombres_necropole", "key_poi": "6,4", "reveals": ["oasis", "caravanserail", "tour_sable"],
 	},
 	"marees_cotes": {
-		"name": "Côtes des Marées", "biome": "Marées", "size": [36, 24], "shape": "ile", "grid": [5, 2],
-		"start": [2, 4], "unlock": "desert_dunes", "key_poi": "6,2", "reveals": ["port_sable", "caravanserail"],
+		"name": "Côtes des Marées", "biome": "Marées", "size": [54, 36], "shape": "ile", "grid": [5, 2],
+		"start": [3, 6], "unlock": "desert_dunes", "key_poi": "9,3", "reveals": ["port_sable", "caravanserail"],
 	},
 	"cristaux_caverne": {
-		"name": "Caverne de Cristal", "biome": "Cristaux", "size": [36, 24], "shape": "ile", "grid": [4, 2],
-		"start": [2, 4], "unlock": "marees_cotes", "key_poi": "6,3", "reveals": ["mine_cristal", "forge_givre"],
+		"name": "Caverne de Cristal", "biome": "Cristaux", "size": [54, 36], "shape": "ile", "grid": [4, 2],
+		"start": [3, 6], "unlock": "marees_cotes", "key_poi": "9,4", "reveals": ["mine_cristal", "forge_givre"],
 	},
 	"rouages_atelier": {
-		"name": "Ateliers des Rouages", "biome": "Rouages", "size": [36, 24], "shape": "ile", "grid": [3, 2],
-		"start": [2, 4], "unlock": "cristaux_caverne", "key_poi": "6,3", "reveals": ["atelier_cuivre", "citadelle_engrenages"],
+		"name": "Ateliers des Rouages", "biome": "Rouages", "size": [54, 36], "shape": "ile", "grid": [3, 2],
+		"start": [3, 6], "unlock": "cristaux_caverne", "key_poi": "9,4", "reveals": ["atelier_cuivre", "citadelle_engrenages"],
 	},
 	"portes_donjon": {
-		"name": "Portes du Donjon", "biome": "Donjon", "size": [20, 14], "shape": "ile", "grid": [2, 2],
-		"start": [2, 4], "unlock": "rouages_atelier", "key_poi": "5,3",
+		"name": "Portes du Donjon", "biome": "Donjon", "size": [30, 21], "shape": "ile", "grid": [2, 2],
+		"start": [3, 6], "unlock": "rouages_atelier", "key_poi": "8,4",
 		"reveals": ["donjon_roi", "citadelle_sable", "port_sable"],
 	},
 }
@@ -208,195 +208,195 @@ const ADVENTURE_POIS := {
 	# V81 : une grande zone par nation — le donjon de la Nation occupe le coin lointain
 	# (30,18), les anciennes cartes fondues ont leurs lieux déplacés dans la zone mère.
 	"foret_sylve": {
-		"4,1": {"kind": "puzzle", "name": "Sanctuaire des runes", "level": 1,
+		"6,2": {"kind": "puzzle", "name": "Sanctuaire des runes", "level": 1,
 			"desc": "De vieilles runes attendent une réponse."},
-		"7,2": {"kind": "combat", "name": "Camp gobelin", "level": 1,
+		"10,3": {"kind": "combat", "name": "Camp gobelin", "level": 1,
 			"desc": "Des gobelins ont dressé leurs tentes."},
-		"3,4": {"kind": "chest", "name": "Coffre moussu", "level": 1,
+		"4,6": {"kind": "chest", "name": "Coffre moussu", "level": 1,
 			"desc": "Un coffre à demi enseveli sous la mousse."},
-		"5,5": {"kind": "camp", "name": "Source claire", "level": 1,
+		"8,8": {"kind": "camp", "name": "Source claire", "level": 1,
 			"desc": "Un endroit sûr pour reprendre souffle."},
-		"8,5": {"kind": "reveal", "name": "Belvédère de la Sylve", "level": 1,
+		"12,8": {"kind": "reveal", "name": "Belvédère de la Sylve", "level": 1,
 			"desc": "Du haut de l’arbre, la vallée se dévoile."},
-		"2,1": {"kind": "puzzle", "name": "Cercle des pierres chantantes", "level": 1,
+		"3,2": {"kind": "puzzle", "name": "Cercle des pierres chantantes", "level": 1,
 			"desc": "Des menhirs s'illuminent puis se taisent."},
-		"5,10": {"kind": "combat", "name": "Tanière du sanglier", "level": 2,
+		"8,15": {"kind": "combat", "name": "Tanière du sanglier", "level": 2,
 			"desc": "Un grand sanglier défend sa bauge."},
-		"11,7": {"kind": "combat", "name": "Embuscade sous les pins", "level": 3,
+		"16,10": {"kind": "combat", "name": "Embuscade sous les pins", "level": 3,
 			"desc": "Des brigands guettent le sentier."},
-		"14,11": {"kind": "combat", "name": "Meute de loups gris", "level": 4,
+		"21,16": {"kind": "combat", "name": "Meute de loups gris", "level": 4,
 			"desc": "Des hurlements montent des fourrés."},
-		"10,12": {"kind": "camp", "name": "Clairière des lucioles", "level": 1,
+		"15,18": {"kind": "camp", "name": "Clairière des lucioles", "level": 1,
 			"desc": "Des lucioles dansent autour d'un feu tranquille."},
-		"19,4": {"kind": "chest", "name": "Souche creuse", "level": 2,
+		"28,6": {"kind": "chest", "name": "Souche creuse", "level": 2,
 			"desc": "Quelque chose brille au fond de la souche."},
-		"18,12": {"kind": "chest", "name": "Cache du bûcheron", "level": 3,
+		"27,18": {"kind": "chest", "name": "Cache du bûcheron", "level": 3,
 			"desc": "Un coffre dissimulé sous des fagots."},
 		# venus de foret_ronces (donjon de la Nation Sylvestre en 30,18)
-		"30,18": {"kind": "combat", "guardian": "Forêt", "name": "Donjon de la Nation Sylvestre", "level": 17,
+		"45,27": {"kind": "combat", "guardian": "Forêt", "name": "Donjon de la Nation Sylvestre", "level": 17,
 			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre de Sève."},
-		"22,6": {"kind": "combat", "name": "Embûche de ronces", "level": 8,
+		"33,9": {"kind": "combat", "name": "Embûche de ronces", "level": 8,
 			"desc": "Quelque chose remue sous les ronces."},
-		"24,10": {"kind": "puzzle", "name": "Autel du Lierre", "level": 8,
+		"36,15": {"kind": "puzzle", "name": "Autel du Lierre", "level": 8,
 			"desc": "L’autel du Lierre pose son énigme."},
-		"26,14": {"kind": "chest", "name": "Cachette du braconnier", "level": 8,
+		"39,21": {"kind": "chest", "name": "Cachette du braconnier", "level": 8,
 			"desc": "Un vieux sac oublié sous une racine."},
-		"28,8": {"kind": "combat", "name": "Patrouille de la Citadelle", "level": 14,
+		"42,12": {"kind": "combat", "name": "Patrouille de la Citadelle", "level": 14,
 			"desc": "Des soldats des Ronces rôdent ici."},
-		"32,4": {"kind": "puzzle", "name": "Dalles du cloître", "level": 8,
+		"48,6": {"kind": "puzzle", "name": "Dalles du cloître", "level": 8,
 			"desc": "Neuf dalles gravées, certaines éteintes."},
-		"20,16": {"kind": "camp", "name": "Feu de camp des pèlerins", "level": 8,
+		"30,24": {"kind": "camp", "name": "Feu de camp des pèlerins", "level": 8,
 			"desc": "Des braises encore tièdes sous un abri de ronces."},
 		# venus de lisiere_col
-		"24,20": {"kind": "combat", "name": "Loups de la lisière", "level": 12,
+		"36,30": {"kind": "combat", "name": "Loups de la lisière", "level": 12,
 			"desc": "Une meute garde le passage vers les hauteurs."},
-		"28,20": {"kind": "chest", "name": "Cabane du bûcheron", "level": 12,
+		"42,30": {"kind": "chest", "name": "Cabane du bûcheron", "level": 12,
 			"desc": "Une cabane abandonnée, la porte entrouverte."},
-		"33,16": {"kind": "puzzle", "name": "Totem des deux versants", "level": 12,
+		"50,24": {"kind": "puzzle", "name": "Totem des deux versants", "level": 12,
 			"desc": "Les runes du totem s'allument tour à tour."},
-		"33,8": {"kind": "reveal", "name": "Mirador de la lisière", "level": 12,
+		"50,12": {"kind": "reveal", "name": "Mirador de la lisière", "level": 12,
 			"desc": "D'ici, forêts et sommets se partagent l'horizon."},
-		"30,22": {"kind": "camp", "name": "Halte des colporteurs", "level": 12,
+		"45,33": {"kind": "camp", "name": "Halte des colporteurs", "level": 12,
 			"desc": "Un abri de toile où l'on échange les nouvelles."},
 	},
 	"brasier_cendres": {
-		"30,18": {"kind": "combat", "guardian": "Brasier", "name": "Donjon de la Nation Brasier", "level": 25,
+		"45,27": {"kind": "combat", "guardian": "Brasier", "name": "Donjon de la Nation Brasier", "level": 25,
 			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre de Braise."},
-		"3,2": {"kind": "combat", "name": "Lieutenants de braise", "level": 18, "desc": "Des soldats de feu montent la garde."},
-		"6,4": {"kind": "combat", "name": "Golem de lave", "level": 25, "desc": "Un colosse de roche en fusion."},
-		"2,5": {"kind": "chest", "name": "Forge abandonnée", "level": 18, "desc": "Une forge oubliée, encore tiède."},
-		"7,1": {"kind": "puzzle", "name": "Brasero oraculaire", "level": 18, "desc": "Les flammes posent une question."},
-		"8,5": {"kind": "reveal", "name": "Cratère-belvédère", "level": 18, "desc": "Du bord du cratère on voit loin."},
-		"4,4": {"kind": "camp", "name": "Source chaude", "level": 18, "desc": "Une source bienfaisante."},
+		"4,3": {"kind": "combat", "name": "Lieutenants de braise", "level": 18, "desc": "Des soldats de feu montent la garde."},
+		"9,6": {"kind": "combat", "name": "Golem de lave", "level": 25, "desc": "Un colosse de roche en fusion."},
+		"3,8": {"kind": "chest", "name": "Forge abandonnée", "level": 18, "desc": "Une forge oubliée, encore tiède."},
+		"10,2": {"kind": "puzzle", "name": "Brasero oraculaire", "level": 18, "desc": "Les flammes posent une question."},
+		"12,8": {"kind": "reveal", "name": "Cratère-belvédère", "level": 18, "desc": "Du bord du cratère on voit loin."},
+		"6,6": {"kind": "camp", "name": "Source chaude", "level": 18, "desc": "Une source bienfaisante."},
 	},
 	"brumes_marais": {
-		"30,18": {"kind": "combat", "guardian": "Brumes", "name": "Donjon de la Nation Brumes", "level": 31,
+		"45,27": {"kind": "combat", "guardian": "Brumes", "name": "Donjon de la Nation Brumes", "level": 31,
 			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre de Lune-des-Marais."},
-		"3,2": {"kind": "combat", "name": "Rôdeurs brumeux", "level": 26, "desc": "Des formes se glissent dans la brume."},
-		"6,2": {"kind": "combat", "name": "Liche du marais", "level": 31, "desc": "Un mort-vivant garde le marais."},
-		"2,5": {"kind": "chest", "name": "Coffre englouti", "level": 26, "desc": "Un coffre à moitié enfoui dans la vase."},
-		"7,1": {"kind": "puzzle", "name": "Champignon sage", "level": 26, "desc": "Un grand champignon pose une devinette."},
-		"8,5": {"kind": "reveal", "name": "Arbre des esprits", "level": 26, "desc": "On voit loin depuis ses branches."},
-		"4,4": {"kind": "camp", "name": "Cabane sur pilotis", "level": 26, "desc": "Un refuge au-dessus de l'eau."},
+		"4,3": {"kind": "combat", "name": "Rôdeurs brumeux", "level": 26, "desc": "Des formes se glissent dans la brume."},
+		"9,3": {"kind": "combat", "name": "Liche du marais", "level": 31, "desc": "Un mort-vivant garde le marais."},
+		"3,8": {"kind": "chest", "name": "Coffre englouti", "level": 26, "desc": "Un coffre à moitié enfoui dans la vase."},
+		"10,2": {"kind": "puzzle", "name": "Champignon sage", "level": 26, "desc": "Un grand champignon pose une devinette."},
+		"12,8": {"kind": "reveal", "name": "Arbre des esprits", "level": 26, "desc": "On voit loin depuis ses branches."},
+		"6,6": {"kind": "camp", "name": "Cabane sur pilotis", "level": 26, "desc": "Un refuge au-dessus de l'eau."},
 	},
 	"montagne_pics": {
-		"5,2": {"kind": "combat", "name": "Caverne du Troll", "level": 32,
+		"8,3": {"kind": "combat", "name": "Caverne du Troll", "level": 32,
 			"desc": "Un troll garde le passage."},
-		"2,4": {"kind": "puzzle", "name": "Runes du Col", "level": 32,
+		"3,6": {"kind": "puzzle", "name": "Runes du Col", "level": 32,
 			"desc": "Des runes gelées à déchiffrer."},
-		"7,5": {"kind": "chest", "name": "Grotte au cristal", "level": 32,
+		"10,8": {"kind": "chest", "name": "Grotte au cristal", "level": 32,
 			"desc": "Un éclat de cristal brille au fond."},
-		"8,1": {"kind": "reveal", "name": "Panneau du Givre", "level": 32,
+		"12,2": {"kind": "reveal", "name": "Panneau du Givre", "level": 32,
 			"desc": "Tout le massif s’étale sous vos yeux."},
-		"3,1": {"kind": "puzzle", "name": "Orgue de glace", "level": 32,
+		"4,2": {"kind": "puzzle", "name": "Orgue de glace", "level": 32,
 			"desc": "Des stalactites résonnent au gré du vent."},
-		"5,4": {"kind": "camp", "name": "Refuge du berger", "level": 32,
+		"8,6": {"kind": "camp", "name": "Refuge du berger", "level": 32,
 			"desc": "Une cabane de pierre, un poêle et du thé chaud."},
 		# venus de cretes_givre (donjon de la Nation Cimes en 30,18)
-		"30,18": {"kind": "combat", "guardian": "Montagne", "name": "Donjon de la Nation Cimes", "level": 45,
+		"45,27": {"kind": "combat", "guardian": "Montagne", "name": "Donjon de la Nation Cimes", "level": 45,
 			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre de Givre."},
-		"22,6": {"kind": "combat", "name": "Sentinelles de glace", "level": 42,
+		"33,9": {"kind": "combat", "name": "Sentinelles de glace", "level": 42,
 			"desc": "Des silhouettes figées bougent quand on approche."},
-		"26,10": {"kind": "combat", "name": "Troll des crêtes", "level": 45,
+		"39,15": {"kind": "combat", "name": "Troll des crêtes", "level": 45,
 			"desc": "Un troll énorme réclame un droit de passage."},
-		"24,14": {"kind": "puzzle", "name": "Miroirs de givre", "level": 42,
+		"36,21": {"kind": "puzzle", "name": "Miroirs de givre", "level": 42,
 			"desc": "Seize miroirs de glace, la plupart ternis."},
-		"28,14": {"kind": "chest", "name": "Cache du contrebandier", "level": 42,
+		"42,21": {"kind": "chest", "name": "Cache du contrebandier", "level": 42,
 			"desc": "Un coffre arrimé sous un surplomb."},
-		"32,6": {"kind": "reveal", "name": "Aiguille des Crêtes", "level": 42,
+		"48,9": {"kind": "reveal", "name": "Aiguille des Crêtes", "level": 42,
 			"desc": "Le plus haut sommet de Zimut."},
-		"20,18": {"kind": "camp", "name": "Grotte tiède", "level": 42,
+		"30,27": {"kind": "camp", "name": "Grotte tiède", "level": 42,
 			"desc": "Une source chaude fume au fond de la grotte."},
 		# venus de piemont_ocre
-		"24,20": {"kind": "combat", "name": "Pillards du piémont", "level": 38,
+		"36,30": {"kind": "combat", "name": "Pillards du piémont", "level": 38,
 			"desc": "Des pillards rançonnent les caravanes."},
-		"28,22": {"kind": "puzzle", "name": "Stèle des caravaniers", "level": 38,
+		"42,33": {"kind": "puzzle", "name": "Stèle des caravaniers", "level": 38,
 			"desc": "Une stèle gravée d'une question."},
-		"33,20": {"kind": "chest", "name": "Sacoche du muletier", "level": 38,
+		"50,30": {"kind": "chest", "name": "Sacoche du muletier", "level": 38,
 			"desc": "Une sacoche tombée d'un bât."},
-		"32,16": {"kind": "reveal", "name": "Promontoire ocre", "level": 38,
+		"48,24": {"kind": "reveal", "name": "Promontoire ocre", "level": 38,
 			"desc": "Les dunes s'étendent jusqu'à la mer."},
-		"16,20": {"kind": "camp", "name": "Bivouac des canyons", "level": 38,
+		"24,30": {"kind": "camp", "name": "Bivouac des canyons", "level": 38,
 			"desc": "Un feu à l'abri du vent des canyons."},
 	},
 	"vents_plateau": {
-		"30,18": {"kind": "combat", "guardian": "Vents", "name": "Donjon de la Nation Vents", "level": 54,
+		"45,27": {"kind": "combat", "guardian": "Vents", "name": "Donjon de la Nation Vents", "level": 54,
 			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre d'Azur."},
-		"3,2": {"kind": "combat", "name": "Garde aérienne", "level": 46, "desc": "Des sentinelles ailées patrouillent."},
-		"6,3": {"kind": "combat", "name": "Harpies du plateau", "level": 54, "desc": "Les harpies défendent leur nid."},
-		"2,5": {"kind": "chest", "name": "Nid d'aigle", "level": 46, "desc": "Un nid garni de trouvailles."},
-		"7,1": {"kind": "puzzle", "name": "Totem du souffle", "level": 46, "desc": "Le totem murmure une énigme."},
-		"8,5": {"kind": "reveal", "name": "Tour des vents", "level": 46, "desc": "Une tour qui domine les nuages."},
-		"4,4": {"kind": "camp", "name": "Abri de plume", "level": 46, "desc": "Un abri contre les rafales."},
+		"4,3": {"kind": "combat", "name": "Garde aérienne", "level": 46, "desc": "Des sentinelles ailées patrouillent."},
+		"9,4": {"kind": "combat", "name": "Harpies du plateau", "level": 54, "desc": "Les harpies défendent leur nid."},
+		"3,8": {"kind": "chest", "name": "Nid d'aigle", "level": 46, "desc": "Un nid garni de trouvailles."},
+		"10,2": {"kind": "puzzle", "name": "Totem du souffle", "level": 46, "desc": "Le totem murmure une énigme."},
+		"12,8": {"kind": "reveal", "name": "Tour des vents", "level": 46, "desc": "Une tour qui domine les nuages."},
+		"6,6": {"kind": "camp", "name": "Abri de plume", "level": 46, "desc": "Un abri contre les rafales."},
 	},
 	"ombres_necropole": {
-		"30,18": {"kind": "combat", "guardian": "Ombres", "name": "Donjon de la Nation Ombres", "level": 63,
+		"45,27": {"kind": "combat", "guardian": "Ombres", "name": "Donjon de la Nation Ombres", "level": 63,
 			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre d'Ébène."},
-		"3,2": {"kind": "combat", "name": "Assassins des ombres", "level": 55, "desc": "Des silhouettes jaillissent des tombes."},
-		"5,3": {"kind": "combat", "name": "Spectre gardien", "level": 63, "desc": "Le gardien de la nécropole."},
-		"2,5": {"kind": "chest", "name": "Caveau scellé", "level": 55, "desc": "Un caveau dont le sceau a cédé."},
-		"7,1": {"kind": "puzzle", "name": "Obélisque funèbre", "level": 55, "desc": "L'obélisque exige une réponse."},
-		"8,5": {"kind": "reveal", "name": "Tour du corbeau", "level": 55, "desc": "Un perchoir sur la nécropole."},
-		"4,4": {"kind": "camp", "name": "Crypte tranquille", "level": 55, "desc": "Un coin de calme parmi les stèles."},
+		"4,3": {"kind": "combat", "name": "Assassins des ombres", "level": 55, "desc": "Des silhouettes jaillissent des tombes."},
+		"8,4": {"kind": "combat", "name": "Spectre gardien", "level": 63, "desc": "Le gardien de la nécropole."},
+		"3,8": {"kind": "chest", "name": "Caveau scellé", "level": 55, "desc": "Un caveau dont le sceau a cédé."},
+		"10,2": {"kind": "puzzle", "name": "Obélisque funèbre", "level": 55, "desc": "L'obélisque exige une réponse."},
+		"12,8": {"kind": "reveal", "name": "Tour du corbeau", "level": 55, "desc": "Un perchoir sur la nécropole."},
+		"6,6": {"kind": "camp", "name": "Crypte tranquille", "level": 55, "desc": "Un coin de calme parmi les stèles."},
 	},
 	"desert_dunes": {
-		"30,18": {"kind": "combat", "guardian": "Désert", "name": "Donjon de la Nation Sables", "level": 70,
+		"45,27": {"kind": "combat", "guardian": "Désert", "name": "Donjon de la Nation Sables", "level": 70,
 			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre d'Ocre."},
-		"4,3": {"kind": "combat", "name": "Squelettes des sables", "level": 64,
+		"6,4": {"kind": "combat", "name": "Squelettes des sables", "level": 64,
 			"desc": "Des ossements s’animent à votre approche."},
-		"6,1": {"kind": "puzzle", "name": "Obélisque Solaire", "level": 64,
+		"9,2": {"kind": "puzzle", "name": "Obélisque Solaire", "level": 64,
 			"desc": "L’obélisque attend sa constellation."},
-		"2,5": {"kind": "chest", "name": "Épave du convoi", "level": 64,
+		"3,8": {"kind": "chest", "name": "Épave du convoi", "level": 64,
 			"desc": "Les restes d’un convoi ensevelis."},
-		"8,5": {"kind": "reveal", "name": "Mirador du Désert", "level": 64,
+		"12,8": {"kind": "reveal", "name": "Mirador du Désert", "level": 64,
 			"desc": "Un mirador dominant les Dunes."},
-		"5,5": {"kind": "puzzle", "name": "Mosaïque du soleil", "level": 64,
+		"8,8": {"kind": "puzzle", "name": "Mosaïque du soleil", "level": 64,
 			"desc": "Seize tuiles de verre attendent la lumière."},
-		"1,1": {"kind": "camp", "name": "Puits de l'oasis", "level": 64,
+		"2,2": {"kind": "camp", "name": "Puits de l'oasis", "level": 64,
 			"desc": "Une eau fraîche au fond d'un puits de grès."},
 	},
 	"marees_cotes": {
-		"30,18": {"kind": "combat", "guardian": "Marées", "name": "Donjon de la Nation Marées", "level": 78,
+		"45,27": {"kind": "combat", "guardian": "Marées", "name": "Donjon de la Nation Marées", "level": 78,
 			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre de Corail."},
-		"3,2": {"kind": "combat", "name": "Pirates des marées", "level": 71, "desc": "Des pirates ont jeté l'ancre."},
-		"6,2": {"kind": "combat", "name": "Crabe titan", "level": 78, "desc": "Un crabe gigantesque garde la crique."},
-		"2,5": {"kind": "chest", "name": "Épave échouée", "level": 71, "desc": "Une épave pleine de butin."},
-		"7,1": {"kind": "puzzle", "name": "Phare muet", "level": 71, "desc": "Le gardien du phare pose une devinette."},
-		"8,5": {"kind": "reveal", "name": "Grand phare", "level": 71, "desc": "Du phare, on voit tout le littoral."},
-		"4,4": {"kind": "camp", "name": "Plage abritée", "level": 71, "desc": "Une crique calme pour souffler."},
+		"4,3": {"kind": "combat", "name": "Pirates des marées", "level": 71, "desc": "Des pirates ont jeté l'ancre."},
+		"9,3": {"kind": "combat", "name": "Crabe titan", "level": 78, "desc": "Un crabe gigantesque garde la crique."},
+		"3,8": {"kind": "chest", "name": "Épave échouée", "level": 71, "desc": "Une épave pleine de butin."},
+		"10,2": {"kind": "puzzle", "name": "Phare muet", "level": 71, "desc": "Le gardien du phare pose une devinette."},
+		"12,8": {"kind": "reveal", "name": "Grand phare", "level": 71, "desc": "Du phare, on voit tout le littoral."},
+		"6,6": {"kind": "camp", "name": "Plage abritée", "level": 71, "desc": "Une crique calme pour souffler."},
 	},
 	"cristaux_caverne": {
-		"30,18": {"kind": "combat", "guardian": "Cristaux", "name": "Donjon de la Nation Cristaux", "level": 86,
+		"45,27": {"kind": "combat", "guardian": "Cristaux", "name": "Donjon de la Nation Cristaux", "level": 86,
 			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre de Prisme."},
-		"3,2": {"kind": "combat", "name": "Mineurs cristallins", "level": 79, "desc": "Des ouvriers de cristal veillent."},
-		"6,3": {"kind": "combat", "name": "Golem prismatique", "level": 86, "desc": "Le gardien lumineux de la caverne."},
-		"2,5": {"kind": "chest", "name": "Géode brisée", "level": 79, "desc": "Une géode pleine d'éclats précieux."},
-		"7,1": {"kind": "puzzle", "name": "Miroir d'améthyste", "level": 79, "desc": "Le cristal pose son énigme."},
-		"8,5": {"kind": "reveal", "name": "Dôme de cristal", "level": 79, "desc": "Une vue sur toute la caverne."},
-		"4,4": {"kind": "camp", "name": "Grotte tiède", "level": 79, "desc": "Un coin chaud et abrité."},
+		"4,3": {"kind": "combat", "name": "Mineurs cristallins", "level": 79, "desc": "Des ouvriers de cristal veillent."},
+		"9,4": {"kind": "combat", "name": "Golem prismatique", "level": 86, "desc": "Le gardien lumineux de la caverne."},
+		"3,8": {"kind": "chest", "name": "Géode brisée", "level": 79, "desc": "Une géode pleine d'éclats précieux."},
+		"10,2": {"kind": "puzzle", "name": "Miroir d'améthyste", "level": 79, "desc": "Le cristal pose son énigme."},
+		"12,8": {"kind": "reveal", "name": "Dôme de cristal", "level": 79, "desc": "Une vue sur toute la caverne."},
+		"6,6": {"kind": "camp", "name": "Grotte tiède", "level": 79, "desc": "Un coin chaud et abrité."},
 	},
 	"rouages_atelier": {
-		"30,18": {"kind": "combat", "guardian": "Rouages", "name": "Donjon de la Nation Rouages", "level": 93,
+		"45,27": {"kind": "combat", "guardian": "Rouages", "name": "Donjon de la Nation Rouages", "level": 93,
 			"desc": "Quatre salles de plus en plus dures ; le Gardien veille sur la Pierre d'Airain."},
-		"3,2": {"kind": "combat", "name": "Gobelins mécaniciens", "level": 87, "desc": "Des bricoleurs testent leurs inventions sur les visiteurs."},
-		"6,3": {"kind": "combat", "name": "Colosse d'engrenages", "level": 93, "desc": "Une machine géante garde la grande forge."},
-		"2,5": {"kind": "chest", "name": "Caisse d'outils scellée", "level": 87, "desc": "Une caisse pleine de pièces rares."},
-		"7,1": {"kind": "puzzle", "name": "Tableau de commande", "level": 87, "desc": "Des cadrans à régler dans le bon ordre."},
-		"8,5": {"kind": "reveal", "name": "Pont de l'horloger", "level": 87, "desc": "Le toit de l'atelier domine la région."},
-		"4,4": {"kind": "camp", "name": "Chaufferie tiède", "level": 87, "desc": "Une chaudière ronronne : on s'y réchauffe."},
+		"4,3": {"kind": "combat", "name": "Gobelins mécaniciens", "level": 87, "desc": "Des bricoleurs testent leurs inventions sur les visiteurs."},
+		"9,4": {"kind": "combat", "name": "Colosse d'engrenages", "level": 93, "desc": "Une machine géante garde la grande forge."},
+		"3,8": {"kind": "chest", "name": "Caisse d'outils scellée", "level": 87, "desc": "Une caisse pleine de pièces rares."},
+		"10,2": {"kind": "puzzle", "name": "Tableau de commande", "level": 87, "desc": "Des cadrans à régler dans le bon ordre."},
+		"12,8": {"kind": "reveal", "name": "Pont de l'horloger", "level": 87, "desc": "Le toit de l'atelier domine la région."},
+		"6,6": {"kind": "camp", "name": "Chaufferie tiède", "level": 87, "desc": "Une chaudière ronronne : on s'y réchauffe."},
 	},
 	"portes_donjon": {
-		"5,3": {"kind": "combat", "name": "Garde des Portes", "level": 94,
+		"8,4": {"kind": "combat", "name": "Garde des Portes", "level": 94,
 			"desc": "Les squelettes de la garde royale veillent encore."},
-		"3,5": {"kind": "combat", "name": "Crypte oubliée", "level": 100,
+		"4,8": {"kind": "combat", "name": "Crypte oubliée", "level": 100,
 			"desc": "Quelque chose gratte sous la dalle."},
-		"2,2": {"kind": "puzzle", "name": "Sceau des Portes", "level": 94,
+		"3,3": {"kind": "puzzle", "name": "Sceau des Portes", "level": 94,
 			"desc": "Sept sceaux à rallumer dans le bon ordre."},
-		"8,2": {"kind": "chest", "name": "Ossuaire", "level": 94,
+		"12,3": {"kind": "chest", "name": "Ossuaire", "level": 94,
 			"desc": "Des offrandes oubliées parmi les os."},
-		"7,5": {"kind": "reveal", "name": "Tour de guet morte", "level": 94,
+		"10,8": {"kind": "reveal", "name": "Tour de guet morte", "level": 94,
 			"desc": "Du sommet, le Donjon du Roi Squelette."},
-		"1,1": {"kind": "camp", "name": "Brasero des pèlerins", "level": 94,
+		"2,2": {"kind": "camp", "name": "Brasero des pèlerins", "level": 94,
 			"desc": "Une flamme bleue qui ne s'éteint jamais."},
 	},
 }
@@ -409,52 +409,52 @@ const ADVENTURE_POIS := {
 ##   type « lights » : dalles — allumer toutes les dalles d'une grille `size`×`size`
 ##     (toucher une dalle bascule aussi ses voisines), mélangée en `scramble` coups.
 const ADVENTURE_PUZZLES := {
-	"foret_sylve,4,1": {"type": "riddle", "text": "Je grandis quand on me nourrit, mais je meurs si l’on me donne à boire. Qui suis-je ?",
+	"foret_sylve,6,2": {"type": "riddle", "text": "Je grandis quand on me nourrit, mais je meurs si l’on me donne à boire. Qui suis-je ?",
 		"answer": "Le feu", "choices": ["Le feu", "L'arbre", "Le vent"], "wrong": "Les runes restent muettes."},
-	"foret_sylve,24,10": {"type": "riddle", "text": "Plus j’ai de gardiens, moins je vaux. Moins j’en ai, plus je vaux. Qui suis-je ?",
+	"foret_sylve,36,15": {"type": "riddle", "text": "Plus j’ai de gardiens, moins je vaux. Moins j’en ai, plus je vaux. Qui suis-je ?",
 		"answer": "Le secret", "choices": ["Le secret", "Le trésor", "La promesse"], "wrong": "L’autel garde son silence."},
-	"montagne_pics,2,4": {"type": "riddle", "text": "Je brille sans brûler, je fuis sans marcher, je reviens chaque nuit. Qui suis-je ?",
+	"montagne_pics,3,6": {"type": "riddle", "text": "Je brille sans brûler, je fuis sans marcher, je reviens chaque nuit. Qui suis-je ?",
 		"answer": "La lune", "choices": ["La lune", "L'étoile filante", "Le feu follet"], "wrong": "Le givre dévore la réponse."},
-	"desert_dunes,6,1": {"type": "riddle", "text": "On me jette car je perds ma valeur ; on me ramasse car j’en gagne une autre. Qui suis-je ?",
+	"desert_dunes,9,2": {"type": "riddle", "text": "On me jette car je perds ma valeur ; on me ramasse car j’en gagne une autre. Qui suis-je ?",
 		"answer": "Une pièce de monnaie", "choices": ["Une pièce de monnaie", "Une graine", "Un os"], "wrong": "L’obélisque reste ténébreux."},
-	"foret_sylve,2,1": {"type": "runes", "length": 4,
+	"foret_sylve,3,2": {"type": "runes", "length": 4,
 		"text": "Les pierres du cercle s'allument une à une. Reproduisez leur chant dans le même ordre.",
 		"wrong": "Les pierres se taisent… et recommencent leur chant."},
-	"foret_sylve,32,4": {"type": "lights", "size": 3, "scramble": 3,
+	"foret_sylve,48,6": {"type": "lights", "size": 3, "scramble": 3,
 		"text": "Allumez les neuf dalles. Toucher une dalle bascule aussi ses voisines (haut, bas, gauche, droite).",
 		"wrong": "Les dalles s'éteignent dans un soupir de pierre."},
-	"montagne_pics,3,1": {"type": "runes", "length": 6,
+	"montagne_pics,4,2": {"type": "runes", "length": 6,
 		"text": "Le vent joue un air sur les stalactites. Rejouez la mélodie note après note.",
 		"wrong": "La glace grince : fausse note. Écoutez de nouveau."},
-	"desert_dunes,5,5": {"type": "lights", "size": 4, "scramble": 4,
+	"desert_dunes,8,8": {"type": "lights", "size": 4, "scramble": 4,
 		"text": "Faites briller les seize tuiles de la mosaïque. Chaque tuile entraîne ses voisines.",
 		"wrong": "Le soleil se voile sur la mosaïque."},
-	"foret_sylve,33,16": {"type": "runes", "length": 5,
+	"foret_sylve,50,24": {"type": "runes", "length": 5,
 		"text": "Le totem fait briller ses runes une à une. Rejouez la même suite.",
 		"wrong": "Le totem s'éteint. Il recommence…"},
-	"montagne_pics,24,14": {"type": "lights", "size": 4, "scramble": 5,
+	"montagne_pics,36,21": {"type": "lights", "size": 4, "scramble": 5,
 		"text": "Faites briller les seize miroirs. Chaque miroir touché bascule aussi ses voisins.",
 		"wrong": "Le givre recouvre les miroirs."},
-	"montagne_pics,28,22": {"type": "riddle", "text": "Je n'ai ni bouche ni voix, et pourtant je réponds à qui m'appelle dans la montagne. Qui suis-je ?",
+	"montagne_pics,42,33": {"type": "riddle", "text": "Je n'ai ni bouche ni voix, et pourtant je réponds à qui m'appelle dans la montagne. Qui suis-je ?",
 		"answer": "L'écho", "choices": ["L'écho", "Le vent", "Le torrent"], "wrong": "La stèle reste silencieuse."},
-	"portes_donjon,2,2": {"type": "runes", "length": 7,
+	"portes_donjon,3,3": {"type": "runes", "length": 7,
 		"text": "Les sept sceaux s'allument dans un ordre précis. Rallumez-les dans le même ordre.",
 		"wrong": "Les sceaux se referment avec un grondement."},
-	"vents_plateau,7,1": {"type": "riddle", "text": "Je traverse les montagnes sans bouger de ma place et je dévore la forêt sans dent. Qui suis-je ?",
+	"vents_plateau,10,2": {"type": "riddle", "text": "Je traverse les montagnes sans bouger de ma place et je dévore la forêt sans dent. Qui suis-je ?",
 		"answer": "Le vent", "choices": ["Le vent", "Le feu", "Le torrent"], "wrong": "Le totem reste silencieux."},
-	"brumes_marais,7,1": {"type": "riddle", "text": "Plus il y a de moi, moins tu vois. Qui suis-je ?",
+	"brumes_marais,10,2": {"type": "riddle", "text": "Plus il y a de moi, moins tu vois. Qui suis-je ?",
 		"answer": "La brume", "choices": ["La brume", "La lumière", "La nuit"], "wrong": "Le champignon vire au gris."},
-	"brasier_cendres,7,1": {"type": "riddle", "text": "Je nais du bois, je meurs de l'eau, et je laisse la cendre derrière moi. Qui suis-je ?",
+	"brasier_cendres,10,2": {"type": "riddle", "text": "Je nais du bois, je meurs de l'eau, et je laisse la cendre derrière moi. Qui suis-je ?",
 		"answer": "Le feu", "choices": ["Le feu", "La fumée", "La lave"], "wrong": "Le brasero crache des étincelles."},
-	"ombres_necropole,7,1": {"type": "runes", "length": 6,
+	"ombres_necropole,10,2": {"type": "runes", "length": 6,
 		"text": "Les runes de l'obélisque s'éveillent une à une. Rejouez leur ordre sans faillir.",
 		"wrong": "L'obélisque se tait, puis recommence."},
-	"cristaux_caverne,7,1": {"type": "lights", "size": 4, "scramble": 5,
+	"cristaux_caverne,10,2": {"type": "lights", "size": 4, "scramble": 5,
 		"text": "Faites briller les seize facettes du miroir. Chaque facette touchée bascule ses voisines.",
 		"wrong": "Le miroir s'éteint dans un tintement."},
-	"marees_cotes,7,1": {"type": "riddle", "text": "Je monte et je descends sans jamais bouger d'un pas, deux fois par jour. Qui suis-je ?",
+	"marees_cotes,10,2": {"type": "riddle", "text": "Je monte et je descends sans jamais bouger d'un pas, deux fois par jour. Qui suis-je ?",
 		"answer": "La marée", "choices": ["La marée", "Le courant", "La vague"], "wrong": "Le phare reste éteint."},
-	"rouages_atelier,7,1": {"type": "runes", "length": 6,
+	"rouages_atelier,10,2": {"type": "runes", "length": 6,
 		"text": "Les voyants du tableau s'allument un à un. Rejouez la séquence sans vous tromper.",
 		"wrong": "Le tableau grésille, puis redémarre."},
 }
@@ -2337,15 +2337,16 @@ func adventure_dungeon_biome(data: Dictionary) -> String:
 ## V43 : une salle de donjon vient d'être gagnée. Avance l'expédition ; à la 4e salle : butin,
 ## tirage de la Pierre (50 % la 1re fois, puis 5 %) et bilan du donjon.
 func _dungeon_victory(data: Dictionary, adventure: Dictionary, key: String, biome: String) -> void:
-	var res: Dictionary = Dungeons.win_room(adventure, biome, _rng.randf(), Stones.has(data, biome))
+	var nation: String = Dungeons.base(biome)   # V82 : « Forêt#2 » → « Forêt » (paliers de donjon)
+	var res: Dictionary = Dungeons.win_room(adventure, biome, _rng.randf(), Stones.has(data, nation))
 	if bool(res["cleared"]):
-		if String(res["stone_roll"]) == "won" and Stones.grant(data, biome):
-			data["last_result"]["stone"] = biome
+		if String(res["stone_roll"]) == "won" and Stones.grant(data, nation):
+			data["last_result"]["stone"] = nation
 			Achievements.bump(data, "stones")
 		var lvl: int = Dungeons.room_level(biome, Dungeons.ROOMS)
 		var gold: int = 100 + 15 * lvl
 		data["gold"] = int(data.get("gold", 0)) + gold
-		var res_name: String = String(CONQUEST_BIOME_RESOURCE.get(biome, Nations.resource_of(biome)))
+		var res_name: String = String(CONQUEST_BIOME_RESOURCE.get(nation, Nations.resource_of(nation)))
 		var loot_res: Dictionary = {res_name: 3 + lvl / 12, res_key(res_name, 2): 1 + lvl / 30}
 		add_resources(data, loot_res)
 		res["gold"] = gold
@@ -2496,7 +2497,7 @@ static var _pois_cache: Dictionary = {}
 
 ## V81 : POI d'une zone = catalogue écrit à la main (ADVENTURE_POIS : donjons, POI clés,
 ## énigmes) + lieux générés de façon DÉTERMINISTE pour remplir les grandes zones par
-## nation (36 × 24). Le cache garantit des clés stables d'une frame à l'autre (et d'une
+## nation (54 × 36). Le cache garantit des clés stables d'une frame à l'autre (et d'une
 ## sauvegarde à l'autre, puisque la génération ne dépend que de zone_id).
 static func pois_of(zone_id: String) -> Dictionary:
 	if _pois_cache.has(zone_id):
@@ -2504,7 +2505,7 @@ static func pois_of(zone_id: String) -> Dictionary:
 	var out: Dictionary = (ADVENTURE_POIS.get(zone_id, {}) as Dictionary).duplicate(true)
 	var meta: Dictionary = ADVENTURE_ZONES.get(zone_id, {})
 	var sz: Array = meta.get("size", [14, 10])
-	if int(sz[0]) >= 30:
+	if int(sz[0]) >= 40:
 		var w: int = int(sz[0])
 		var h: int = int(sz[1])
 		var rng := RandomNumberGenerator.new()
@@ -2517,6 +2518,7 @@ static func pois_of(zone_id: String) -> Dictionary:
 		var gates: Dictionary = AdventureTerrain.gates_of(zone_id)
 		var st: Array = meta.get("start", [1, 3])
 		var start := Vector2i(int(st[0]), int(st[1]))
+		_add_dungeon_tiers(out, meta, w, h)
 		var kinds: Array[String] = ["combat", "chest", "camp", "combat", "reveal", "chest", "combat", "camp"]
 		var names := {
 			"combat": ["Camp de monstres", "Embuscade", "Repaire des bêtes", "Poste ennemi", "Antre du prédateur"],
@@ -2532,7 +2534,7 @@ static func pois_of(zone_id: String) -> Dictionary:
 		}
 		var n: int = 0
 		var guard: int = 0
-		while n < 8 and guard < 500:
+		while n < 12 and guard < 800:
 			guard += 1
 			var c := Vector2i(rng.randi_range(3, w - 4), rng.randi_range(3, h - 4))
 			var key := "%d,%d" % [c.x, c.y]
@@ -2554,6 +2556,57 @@ static func pois_of(zone_id: String) -> Dictionary:
 			n += 1
 	_pois_cache[zone_id] = out
 	return out
+
+## V82 : donjons de paliers 1 et 2 d'une zone de Nation (le palier 3 est le donjon principal, déjà
+## dans ADVENTURE_POIS). Placés loin du départ, de plus en plus profond dans la zone.
+const DUNGEON_TIER_NAMES := {
+	"Forêt": ["Terrier des Ronces", "Crypte des Racines"], "Brasier": ["Mine de Braise", "Fosse Ardente"],
+	"Brumes": ["Grotte Moussue", "Crypte Spectrale"], "Montagne": ["Mine Gelée", "Caverne du Givre"],
+	"Vents": ["Grotte Venteuse", "Aire des Tempêtes"], "Ombres": ["Caveau Funèbre", "Ossuaire Profond"],
+	"Désert": ["Tombe Ensablée", "Hypogée des Sables"], "Marées": ["Grotte Marine", "Épave Maudite"],
+	"Cristaux": ["Galerie Cristalline", "Géode Profonde"], "Rouages": ["Fonderie Oubliée", "Cœur des Rouages"],
+}
+const DUNGEON_TIER_ANCHORS := [Vector2i(21, 25), Vector2i(43, 8)]
+
+
+static func _add_dungeon_tiers(out: Dictionary, meta: Dictionary, w: int, h: int) -> void:
+	var nation: String = ""
+	for k: String in out.keys():
+		if String(out[k].get("guardian", "")) != "":
+			nation = String(out[k]["guardian"])
+	if nation == "" or not DUNGEON_TIER_NAMES.has(nation):
+		return
+	var names: Array = DUNGEON_TIER_NAMES[nation]
+	for i: int in range(2):
+		var anchor: Vector2i = DUNGEON_TIER_ANCHORS[i]
+		anchor = Vector2i(clampi(anchor.x * w / 54, 4, w - 5), clampi(anchor.y * h / 36, 4, h - 5))
+		var best := Vector2i(-1, -1)
+		var best_d: float = INF
+		for y: int in range(4, h - 4):
+			for x: int in range(4, w - 4):
+				var c := Vector2i(x, y)
+				if out.has("%d,%d" % [x, y]) or (absi(x - w * 2 / 3) <= 2 and absi(y - h / 3) <= 4):
+					continue          # pas sur un lieu existant ni dans le ravin
+				var too_close: bool = false
+				for k2: String in out.keys():
+					var p2: Vector2i = AdventureTerrain.parse(k2)
+					if absi(p2.x - x) + absi(p2.y - y) < 6:
+						too_close = true
+						break
+				if too_close:
+					continue
+				var d: float = Vector2(c).distance_to(Vector2(anchor))
+				if d < best_d:
+					best_d = d
+					best = c
+		if best.x < 0:
+			continue
+		var tier: int = i + 1
+		var key: String = Dungeons.tier_key(nation, tier)
+		out["%d,%d" % [best.x, best.y]] = {"kind": "combat", "guardian": key, "name": String(names[i]),
+			"level": Dungeons.room_level(key, Dungeons.ROOMS),
+			"desc": "Quatre salles, palier %d sur %d : plus bas dans la Nation, la Pierre n'est pas ici." % [tier, Dungeons.TIERS]}
+
 
 ## Clé de sauvegarde d'un POI ("zone,x,y").
 func adventure_poi_key(zone_id: String, pos: Vector2i) -> String:

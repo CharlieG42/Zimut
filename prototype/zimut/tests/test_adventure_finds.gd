@@ -15,7 +15,7 @@ func _boot() -> void:
 		var biome: String = String(pm.ADVENTURE_ZONES[z]["biome"])
 		check(Nations.is_new(biome), "%s : biome de nation (%s)" % [z, biome])
 		var finds: Dictionary = AdventureTerrain.finds_of(z)
-		check(finds.size() == 6, "%s : 6 trouvailles (%d)" % [z, finds.size()])
+		check(finds.size() == 10, "%s : 10 trouvailles (%d)" % [z, finds.size()])
 		var t: Dictionary = AdventureTerrain.zone_terrain(z)
 		var ok: bool = true
 		for p: Vector2i in finds.keys():
@@ -43,6 +43,6 @@ func _boot() -> void:
 	check(mgr.find_taken(cell), "trouvaille marquée comme prise")
 	check(mgr.collect_find(cell).is_empty(), "on ne ramasse pas deux fois")
 	var pr: Dictionary = mgr.finds_progress()
-	check(int(pr["found"]) == 1 and int(pr["total"]) == 6, "progression 1/6")
+	check(int(pr["found"]) == 1 and int(pr["total"]) == 10, "progression 1/10")
 	pm.delete_save(4)
 	quit(1 if fails > 0 else 0)

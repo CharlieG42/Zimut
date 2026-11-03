@@ -1,3 +1,6 @@
+V82|TEST — Monde Ouvert 3D remanié : zones de nation 1,5× plus grandes (54 × 36), relief de collines propre à chaque nation (montagnes enneigées, dunes, replats autour des lieux), nuances de couleurs par région dans le thème de la nation, caméra encore reculée.
+V82|Trois donjons par nation, de difficulté croissante (palier 1 et 2 dans la zone, palier 3 = donjon du Gardien) ; la Pierre Élémentaire ne tombe qu'au palier 3.
+V82|Carte du monde du Monde Ouvert : dessinée sur la carte peinte de la Conquête, avec un repère par nation et les portails entre elles.
 V81|Monde Ouvert 3D : une grande carte par nation (10 nations, 1-2 portails entre elles), mini-carte ronde en haut à droite, carte plein écran de la nation + carte du monde total, caméra plus reculée, pop-up « combattre ou non ? » à la rencontre d'un monstre, entrées de donjon retravaillées.
 V80|Vue 3D iso de l'Aventure : boutons « Héros » et ligne mode / temps de jeu / difficulté, comme dans le monde ouvert 3D (4e mode).
 V79|Nouveau 4e mode « Monde Ouvert 3D » (Mes Parties) : explorez Zimut en 3D libre façon RPG — toucher un monstre ou entrer dans un donjon lance directement le combat Tactique ; héros, butin, XP, temps de jeu et difficulté partagés avec les autres modes.
