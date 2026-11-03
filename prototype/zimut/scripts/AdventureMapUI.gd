@@ -2192,6 +2192,19 @@ class AdventureBoard extends Node2D:
 	var _t: float = 0.0
 
 	func _ready() -> void:
+		# Les poses de marche et de dos sont partagées avec les sprites de combat.
+		# Certaines classes n'ont pas encore toutes les poses : le sprite de repos reste le fallback.
+		if tex != null:
+			var sprite_key: String = tex.resource_path.get_file().get_basename()
+			var pose_root: String = "res://assets/sprites/nations/heros/poses/"
+			for pose: String in ["walk", "back", "back_walk"]:
+				var path: String = pose_root + sprite_key + "_" + pose + ".png"
+				if ResourceLoader.exists(path):
+					var pose_tex: Texture2D = load(path) as Texture2D
+					match pose:
+						"walk": walk_tex = pose_tex
+						"back": back_tex = pose_tex
+						"back_walk": back_walk_tex = pose_tex
 		set_process(true)
 
 	func _process(delta: float) -> void:
@@ -2500,6 +2513,9 @@ class FindNode extends Node2D:
 ## Héros : sprite de la classe de l'explorateur, ombre, anneau doré, petit rebond.
 class HeroView extends Node2D:
 	var tex: Texture2D = null
+	var walk_tex: Texture2D = null
+	var back_tex: Texture2D = null
+	var back_walk_tex: Texture2D = null
 	var hop: float = 0.0
 	var _flip: bool = false
 	var walking: bool = false
@@ -2532,9 +2548,18 @@ class HeroView extends Node2D:
 		if tex == null:
 			draw_circle(Vector2(0, -40), 24.0, Color(0.9, 0.8, 0.4))
 			return
+		var facing_back: bool = _walk_dir.y < -0.12
+		var display_tex: Texture2D = tex
+		if walking:
+			if facing_back and back_walk_tex != null:
+				display_tex = back_walk_tex
+			elif not facing_back and walk_tex != null:
+				display_tex = walk_tex
+		elif facing_back and back_tex != null:
+			display_tex = back_tex
 		var h: float = 104.0
-		var sc: float = h / float(tex.get_height())
-		var w: float = float(tex.get_width()) * sc
+		var sc: float = h / float(display_tex.get_height())
+		var w: float = float(display_tex.get_width()) * sc
 		var breathe: float = sin(_t * 2.2) * 1.5
 		var stride: float = sin(_t * 15.0) if walking else 0.0
 		var bob: float = absf(stride) * 3.0 if walking else 0.0
@@ -2546,8 +2571,8 @@ class HeroView extends Node2D:
 		# Liseré sombre discret pour détacher le héros des feuillages clairs.
 		var rect := Rect2(Vector2(x - w * 0.5, y), Vector2(w, h + breathe))
 		for o: Vector2 in [Vector2(-1.5, 0), Vector2(1.5, 0), Vector2(0, -1.5), Vector2(0, 1.5)]:
-			draw_texture_rect(tex, Rect2(rect.position + o, rect.size), false, Color(0.05, 0.07, 0.10, 0.42))
-		draw_texture_rect(tex, rect, false)
+			draw_texture_rect(display_tex, Rect2(rect.position + o, rect.size), false, Color(0.05, 0.07, 0.10, 0.42))
+		draw_texture_rect(display_tex, rect, false)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
