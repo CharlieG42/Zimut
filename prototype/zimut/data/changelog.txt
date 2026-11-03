@@ -1,3 +1,6 @@
+V89|TEST — Monde Ouvert 3D : les décors de Nation sans kit (cristaux, totems, tours à rouages, tombes, champignons géants…) passent au rendu peint : texture de peinture triplanaire, éclairage cartoon et ombres portées du soleil, avec les lueurs conservées.
+V89|Rochers plus organiques : socles de cristaux, rochers de marée, de nuages, de lave et des Ombres en volumes arrondis (normales lissées) ; seules les pointes restent à facettes.
+V89|Palmiers du Désert et sapins enneigés de la Montagne refaits avec des cartes de feuilles/aiguilles : plus fournis et plus organiques, toujours légers.
 V88|TEST — Monde Ouvert 3D : les autres Nations profitent des assets libres — arbres morts du Marais des Brumes et arbres calcinés du Brasier, rochers des côtes, colonnes antiques du Désert et des donjons (Kenney), rochers teintés par biome.
 V88|Dalles de chemin posées sur les sentiers, bouleaux remplacés par des arbres fins du kit, fleurs réservées aux biomes verts (Forêt, Vents, Marées, Brumes).
 V88|Les décors propres aux Nations (cristaux, braises, totems, tombes, engrenages) restent inchangés.

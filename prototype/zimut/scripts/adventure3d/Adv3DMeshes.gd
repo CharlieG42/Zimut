@@ -71,6 +71,8 @@ uniform float flip_back = 0.0;
 uniform float fade_near = 1.0;
 uniform float fade_far = 2.6;
 uniform float emit = 0.12;
+// V89 : sommet d'alpha 0 = lumineux (cristaux, lave, runes des décors de Nation).
+uniform float glow = 0.0;
 // V86 : peinture triplanaire (aplats + coups de pinceau) et cartes de feuilles (UV non nul = carte).
 uniform sampler2D paint : filter_linear_mipmap, repeat_enable, hint_default_white;
 uniform sampler2D leaf_tex : filter_linear_mipmap, repeat_disable, hint_default_white;
@@ -127,7 +129,7 @@ void fragment() {
 	float pv = mix(pa, pb, 0.5);
 	vec3 col = COLOR.rgb * (1.0 + v * 0.06) * (1.0 + (pv - 0.5) * paint_amt * 2.0) * leaf_k;
 	ALBEDO = pow(max(col, vec3(0.0)), vec3(2.2));
-	EMISSION = ALBEDO * emit;
+	EMISSION = ALBEDO * emit + ALBEDO * (1.0 - clamp(COLOR.a, 0.0, 1.0)) * glow;
 	ROUGHNESS = 0.92;
 }
 """ + TOON_LIGHT
@@ -462,6 +464,10 @@ static func pine(snow: bool = false) -> Mesh:
 				light = Color(0.92, 0.96, 0.98)
 				dark = Color(0.36, 0.56, 0.52)
 			add_cone(st, Vector3(0, t[0], 0), t[1], 0.0, t[2], 12, dark, light, rng, 0.03, false)
+			# V89 : touffes d'aiguilles (cartes) par-dessus chaque étage, branches plus fournies et organiques
+			var ccol: Color = light if not snow else Color(0.96, 0.98, 1.0)
+			add_cards(st, Vector3(0, float(t[0]) + float(t[2]) * 0.30, 0), Vector3(float(t[1]) * 0.92, float(t[2]) * 0.42, float(t[1]) * 0.92),
+				24 - i * 4, 0.24 - float(i) * 0.03, dark.lightened(0.05), ccol, rng)
 		return _commit(st))
 
 
@@ -583,6 +589,11 @@ static func palm() -> Mesh:
 			add_blade(st, crown, mid, 0.5, dark, light)
 			add_blade(st, mid, tip, 0.42, light, dark.lightened(0.1))
 		add_blob(st, crown + Vector3(0, 0.08, 0), Vector3(0.2, 0.17, 0.2), 6, 3, Color(0.45, 0.30, 0.15), Color(0.62, 0.44, 0.22), rng, 0.01)
+		# V89 : frondes plus fournies — cartes de feuilles le long de chaque palme
+		for k2: int in range(8):
+			var ang2: float = float(k2) / 8.0 * TAU + 0.2
+			var out2 := Vector3(cos(ang2), 0.0, sin(ang2))
+			add_cards(st, crown + out2 * 0.95 + Vector3(0, 0.12, 0), Vector3(0.62, 0.22, 0.62), 6, 0.30, dark, light, rng)
 		return _commit(st))
 
 
