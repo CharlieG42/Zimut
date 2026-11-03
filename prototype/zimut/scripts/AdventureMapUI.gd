@@ -2500,9 +2500,11 @@ class FindNode extends Node2D:
 ## Héros : sprite de la classe de l'explorateur, ombre, anneau doré, petit rebond.
 class HeroView extends Node2D:
 	var tex: Texture2D = null
-	var walk_tex: Texture2D = null
+	var walk_poses: Array[Texture2D] = []
 	var back_tex: Texture2D = null
-	var back_walk_tex: Texture2D = null
+	var back_walk_poses: Array[Texture2D] = []
+	var idle_poses: Array[Texture2D] = []
+	var back_idle_poses: Array[Texture2D] = []
 	var hop: float = 0.0
 	var _flip: bool = false
 	var walking: bool = false
@@ -2510,22 +2512,30 @@ class HeroView extends Node2D:
 	var _t: float = 0.0
 
 	func _ready() -> void:
-		# Réutilise les poses de marche et de dos des sprites de combat.
-		# Les classes sans pose dédiée conservent le sprite de repos et son mouvement procédural.
+		# Les poses sont rangées à côté du sprite de classe (comme pour EntityView).
+		# On charge toutes les variantes walk_2…, idle_2… et back_walk_2… disponibles.
 		if tex != null:
-			var sprite_key: String = tex.resource_path.get_file().get_basename()
-			var pose_root: String = "res://assets/sprites/nations/heros/poses/"
-			for pose: String in ["walk", "back", "back_walk"]:
-				var path: String = pose_root + sprite_key + "_" + pose + ".png"
-				if ResourceLoader.exists(path):
-					var pose_tex: Texture2D = load(path) as Texture2D
-					if pose == "walk":
-						walk_tex = pose_tex
-					elif pose == "back":
-						back_tex = pose_tex
-					elif pose == "back_walk":
-						back_walk_tex = pose_tex
+			var base: String = tex.resource_path.get_basename()
+			var back_path: String = base + "_back.png"
+			if ResourceLoader.exists(back_path):
+				back_tex = load(back_path) as Texture2D
+			walk_poses = _load_pose_variants(base + "_walk", false)
+			back_walk_poses = _load_pose_variants(base + "_back_walk", false)
+			idle_poses = _load_pose_variants(base + "_idle", true)
+			back_idle_poses = _load_pose_variants(base + "_back_idle", true)
 		set_process(true)
+
+	func _load_pose_variants(stem: String, skip_first: bool) -> Array[Texture2D]:
+		var result: Array[Texture2D] = []
+		for index: int in range(1, 10):
+			if skip_first and index == 1:
+				continue
+			var path: String = stem + ".png" if index == 1 else stem + "_%d.png" % index
+			if ResourceLoader.exists(path):
+				var pose_tex: Texture2D = load(path) as Texture2D
+				if pose_tex != null:
+					result.append(pose_tex)
+		return result
 
 	func _process(delta: float) -> void:
 		_t += delta
@@ -2551,14 +2561,19 @@ class HeroView extends Node2D:
 			draw_circle(Vector2(0, -40), 24.0, Color(0.9, 0.8, 0.4))
 			return
 		var facing_back: bool = _walk_dir.y < -0.12
-		var display_tex: Texture2D = tex
-		if walking:
-			if facing_back and back_walk_tex != null:
-				display_tex = back_walk_tex
-			elif not facing_back and walk_tex != null:
-				display_tex = walk_tex
-		elif facing_back and back_tex != null:
-			display_tex = back_tex
+		var rest_tex: Texture2D = back_tex if facing_back and back_tex != null else tex
+		var display_tex: Texture2D = rest_tex
+		# Petite variation de repos : le héros change naturellement d'attitude après quelques secondes.
+		if not walking:
+			var idle_pool: Array[Texture2D] = back_idle_poses if facing_back else idle_poses
+			if not idle_pool.is_empty() and fposmod(_t, 8.0) > 5.5:
+				display_tex = idle_pool[posmod(int(_t / 5.5), idle_pool.size())]
+		# Foulée en deux temps : appui sur la pose de marche, puis retour au repos.
+		var walk_pool: Array[Texture2D] = back_walk_poses if facing_back else walk_poses
+		if walking and not walk_pool.is_empty():
+			var gait_step: int = int(_t / 0.16)
+			if gait_step % 2 == 0:
+				display_tex = walk_pool[(gait_step >> 1) % walk_pool.size()]
 		var h: float = 104.0
 		var sc: float = h / float(display_tex.get_height())
 		var w: float = float(display_tex.get_width()) * sc
