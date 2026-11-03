@@ -1,3 +1,6 @@
+V88|TEST — Monde Ouvert 3D : les autres Nations profitent des assets libres — arbres morts du Marais des Brumes et arbres calcinés du Brasier, rochers des côtes, colonnes antiques du Désert et des donjons (Kenney), rochers teintés par biome.
+V88|Dalles de chemin posées sur les sentiers, bouleaux remplacés par des arbres fins du kit, fleurs réservées aux biomes verts (Forêt, Vents, Marées, Brumes).
+V88|Les décors propres aux Nations (cristaux, braises, totems, tombes, engrenages) restent inchangés.
 V87|TEST — Monde Ouvert 3D : vrais arbres, pins, buissons fleuris, rochers, fleurs, champignons, galets et touffes d'herbe du « Stylized Nature MegaKit » (Quaternius, libre de droits), habillés avec l'éclairage cartoon du jeu.
 V87|Feuillages animés par le vent, ombres portées du soleil sur les arbres et les rochers ; le décor propre à chaque Nation (cristaux, dunes, marais…) reste inchangé.
 V87|Textures du kit réduites (512 px) et compressées pour garder l'APK léger.

@@ -501,17 +501,26 @@ static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	var warm: bool = biome == "Désert"
 	var snow: bool = biome == "Montagne"
 	var nation: Dictionary = {}          # clé de décor de Nation → {xf, cl}
+	var nation_kit: Dictionary = {}      # V88 : décors de Nation rendus par un modèle du kit
 	for c: Vector2i in (t["obstacles"] as Dictionary).keys():
 		var kind: String = String(t["obstacles"][c])
 		if Adv3DNationMeshes.has(kind):
 			var nc := Vector3((float(c.x) + 0.5) * CELL + rng.randf_range(-0.2, 0.2), 0.0, (float(c.y) + 0.5) * CELL + rng.randf_range(-0.2, 0.2))
 			nc.y = height_at(nc.x, nc.z) - 0.04
 			var ns: float = rng.randf_range(0.85, 1.25)
-			if not nation.has(kind):
-				nation[kind] = {"xf": [], "cl": []}
-			(nation[kind]["xf"] as Array).append(_xf(nc, rng.randf() * TAU, Vector3(ns, ns * rng.randf_range(0.92, 1.15), ns)))
 			var nv: float = rng.randf_range(0.88, 1.0)
-			(nation[kind]["cl"] as Array).append(Color(nv, nv, nv))
+			var nxf: Transform3D = _xf(nc, rng.randf() * TAU, Vector3(ns, ns * rng.randf_range(0.92, 1.15), ns))
+			var ov: Dictionary = Adv3DKit.override_for(kind) if Adv3DKit.available() else {}
+			if not ov.is_empty() and not (ov["models"] as Array).is_empty():
+				if not nation_kit.has(kind):
+					nation_kit[kind] = {"xf": [], "cl": [], "ov": ov}
+				(nation_kit[kind]["xf"] as Array).append(nxf)
+				(nation_kit[kind]["cl"] as Array).append((ov["tint"] as Color) * nv)
+			else:
+				if not nation.has(kind):
+					nation[kind] = {"xf": [], "cl": []}
+				(nation[kind]["xf"] as Array).append(nxf)
+				(nation[kind]["cl"] as Array).append(Color(nv, nv, nv))
 			var nsr: float = float(Adv3DNationMeshes.SHADOW.get(kind, 1.0)) * ns
 			shadow_xf.append(_xf(nc + SUN_SHADOW_OFFSET * ns * shadow_len + Vector3(0, 0.11, 0), 0.0, Vector3(nsr * (0.7 + 0.3 * shadow_len), 1.0, nsr * 0.9)))
 			shadow_cl.append(Color.WHITE)
@@ -545,16 +554,33 @@ static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: St
 		_multi_kit(root, "Feuillus", Adv3DKit.variants("CommonTree", 5), buckets["round"]["xf"], buckets["round"]["cl"], 0.55)
 	else:
 		_multi(root, "Feuillus", Adv3DMeshes.broadleaf(), buckets["round"]["xf"], buckets["round"]["cl"], foliage)
-	_multi(root, "Bouleaux", Adv3DMeshes.birch(), buckets["birch"]["xf"], buckets["birch"]["cl"], foliage)
+	if kit:
+		_multi_kit(root, "FeuillusFins", [Adv3DKit.mesh("CommonTree_3"), Adv3DKit.mesh("CommonTree_4")], buckets["birch"]["xf"], buckets["birch"]["cl"], 0.5)
+	else:
+		_multi(root, "Bouleaux", Adv3DMeshes.birch(), buckets["birch"]["xf"], buckets["birch"]["cl"], foliage)
 	_multi(root, "Palmiers", Adv3DMeshes.palm(), buckets["palm"]["xf"], buckets["palm"]["cl"], foliage)
 	if kit:
-		_multi_kit(root, "Rochers", Adv3DKit.variants("Rock_Medium", 3), buckets["rock"]["xf"], buckets["rock"]["cl"], 0.62)
+		var rock_tint: Color = Color(1.0, 0.82, 0.58) if warm else (Color(0.82, 0.9, 1.0) if snow else Color.WHITE)
+		var rock_cl: Array = []
+		for rc: Color in buckets["rock"]["cl"]:
+			rock_cl.append(rc * rock_tint)
+		_multi_kit(root, "Rochers", Adv3DKit.variants("Rock_Medium", 3), buckets["rock"]["xf"], rock_cl, 0.62)
 	else:
 		_multi(root, "Rochers", Adv3DMeshes.rock(warm), buckets["rock"]["xf"], buckets["rock"]["cl"], solid)
 	_multi(root, "Cactus", Adv3DMeshes.cactus(), buckets["cactus"]["xf"], buckets["cactus"]["cl"], solid)
 	_multi(root, "Souches", Adv3DMeshes.stump(), buckets["stump"]["xf"], buckets["stump"]["cl"], solid)
 	_multi(root, "Cristaux", Adv3DMeshes.crystal(), buckets["crystal"]["xf"], buckets["crystal"]["cl"], solid)
-	_multi(root, "Piliers", Adv3DMeshes.pillar(), buckets["pillar"]["xf"], buckets["pillar"]["cl"], solid)
+	if kit and Adv3DKit.arena("column") != null:
+		var pil_tint: Color = Color(0.72, 0.58, 0.4) if warm else Color(0.62, 0.64, 0.7)
+		var pil_cl: Array = []
+		for pc: Color in buckets["pillar"]["cl"]:
+			pil_cl.append(pc * pil_tint)
+		_multi_kit(root, "Piliers", [Adv3DKit.arena("column"), Adv3DKit.arena("column-damaged"), Adv3DKit.arena("column")], buckets["pillar"]["xf"], pil_cl, 3.0)
+	else:
+		_multi(root, "Piliers", Adv3DMeshes.pillar(), buckets["pillar"]["xf"], buckets["pillar"]["cl"], solid)
+	for kk: String in nation_kit.keys():
+		var kd: Dictionary = nation_kit[kk]
+		_multi_kit(root, "Nation_kit_" + kk, kd["ov"]["models"], kd["xf"], kd["cl"], float(kd["ov"]["k"]))
 	var glow: ShaderMaterial = Adv3DNationMeshes.glow_material()
 	for nk: String in nation.keys():
 		_multi(root, "Nation_" + nk, Adv3DNationMeshes.mesh_for(nk), nation[nk]["xf"], nation[nk]["cl"], glow)
@@ -698,12 +724,26 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	for nk: String in nat_xf.keys():
 		_multi(root, "SolNation_" + nk, Adv3DNationMeshes.mesh_for(nk), nat_xf[nk], nat_cl[nk], glow)
 	if kit:
-		var fk_xf: Array = []
-		var fk_cl: Array = []
-		for i4: int in range(0, flower_xf.size(), 4):
-			fk_xf.append(flower_xf[i4])
-			fk_cl.append(Color.WHITE)
-		_multi_kit(root, "Fleurs", [Adv3DKit.mesh("Flower_3_Group"), Adv3DKit.mesh("Flower_4_Group")], fk_xf, fk_cl, 0.6)
+		var dl_tint: Color = {"Désert": Color(1.0, 0.85, 0.62), "Brasier": Color(0.7, 0.55, 0.5), "Ombres": Color(0.7, 0.65, 0.85), "Montagne": Color(0.85, 0.92, 1.0)}.get(biome, Color.WHITE)
+		var dl_xf: Array = []
+		var dl_cl: Array = []
+		for pc2: Vector2i in (t["paths"] as Dictionary).keys():
+			if rng.randf() < 0.28:
+				var pd: Vector3 = _rand_in_cell(rng, pc2)
+				var sd: float = rng.randf_range(1.0, 1.6)
+				dl_xf.append(_xf(pd + Vector3(0, 0.02, 0), rng.randf() * TAU, Vector3(sd, sd, sd)))
+				var dv: float = rng.randf_range(0.55, 0.72)
+				dl_cl.append(Color(dv, dv, dv) * dl_tint)
+		_multi_kit(root, "Dalles", [Adv3DKit.mesh("RockPath_Round_Small_1"), Adv3DKit.mesh("RockPath_Round_Small_2"), Adv3DKit.mesh("RockPath_Square_Small_1"), Adv3DKit.mesh("RockPath_Square_Small_2")], dl_xf, dl_cl, 1.0)
+		if biome in ["Forêt", "Vents", "Marées", "Brumes"]:
+			var fk_xf: Array = []
+			var fk_cl: Array = []
+			for i4: int in range(0, flower_xf.size(), 4):
+				fk_xf.append(flower_xf[i4])
+				fk_cl.append(Color.WHITE)
+			_multi_kit(root, "Fleurs", [Adv3DKit.mesh("Flower_3_Group"), Adv3DKit.mesh("Flower_4_Group")], fk_xf, fk_cl, 0.6)
+		else:
+			_multi(root, "Fleurs", Adv3DMeshes.flower(), flower_xf, flower_cl, Adv3DMeshes.foliage_material(0.7, 0.7))
 		_multi_kit(root, "Champignons", [Adv3DKit.mesh("Mushroom_Common")], mush_xf, mush_cl, 0.9)
 		_multi_kit(root, "Cailloux", [Adv3DKit.mesh("Pebble_Round_1"), Adv3DKit.mesh("Pebble_Round_2"), Adv3DKit.mesh("Pebble_Square_1"), Adv3DKit.mesh("Pebble_Square_2")], pebble_xf, pebble_cl, 3.2)
 	else:
@@ -894,7 +934,7 @@ static func _xf(pos: Vector3, yaw: float, scl: Vector3) -> Transform3D:
 ## Décors de sol nombreux et petits : découpés en carrés de CHUNK mètres (MultiMesh par carré) pour que
 ## le moteur ne dessine que ceux qui sont dans le champ de la caméra et pas trop loin.
 const CHUNK := 15.0
-const CHUNKED := ["Herbes", "HerbesKit", "Fleurs", "Champignons", "Cailloux", "Roseaux", "Buissons", "Nenuphars", "Feuillus", "Pins"]
+const CHUNKED := ["Dalles", "Herbes", "HerbesKit", "Fleurs", "Champignons", "Cailloux", "Roseaux", "Buissons", "Nenuphars", "Feuillus", "Pins"]
 
 
 static func _multi(parent: Node3D, node_name: String, mesh: Mesh, xforms: Array, colors: Array, mat: Material) -> void:

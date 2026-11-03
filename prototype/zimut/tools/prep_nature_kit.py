@@ -12,6 +12,7 @@ MODELS = (["CommonTree_%d" % i for i in range(1, 6)] + ["Pine_%d" % i for i in r
           + ["Bush_Common", "Bush_Common_Flowers", "Fern_1", "Plant_1", "Plant_7", "Clover_1"]
           + ["Rock_Medium_%d" % i for i in range(1, 4)] + ["Pebble_Round_%d" % i for i in range(1, 4)] + ["Pebble_Square_1", "Pebble_Square_2"]
           + ["Mushroom_Common", "Mushroom_Laetiporus", "Flower_3_Group", "Flower_4_Group"]
+          + ["RockPath_Round_Small_%d" % i for i in range(1, 4)] + ["RockPath_Square_Small_%d" % i for i in range(1, 4)]
           + ["Grass_Common_Short", "Grass_Common_Tall", "Grass_Wispy_Short", "Grass_Wispy_Tall"])
 MAXPX = 512
 os.makedirs(DST, exist_ok=True)

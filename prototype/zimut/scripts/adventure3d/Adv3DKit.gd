@@ -122,6 +122,41 @@ static func _first_mesh(n: Node) -> MeshInstance3D:
 	return null
 
 
+## Modèle de la « Mini Arena » de Kenney (CC0, assets/kenney_arena/) : colonnes, statue, bannière…
+static func arena(model: String) -> Mesh:
+	var ck: String = "arena_" + model
+	if _meshes.has(ck):
+		return _meshes[ck]
+	var out: Mesh = null
+	var path: String = "res://assets/kenney_arena/%s.glb" % model
+	if ResourceLoader.exists(path):
+		var ps: PackedScene = load(path)
+		if ps != null:
+			var root: Node = ps.instantiate()
+			var mi: MeshInstance3D = _first_mesh(root)
+			if mi != null:
+				out = (mi.mesh as Mesh).duplicate()
+				for i: int in range(out.get_surface_count()):
+					var m: ShaderMaterial = material_for(out.surface_get_material(i)).duplicate()
+					m.set_shader_parameter("emit", 0.04)
+					out.surface_set_material(i, m)
+			root.free()
+	_meshes[ck] = out
+	return out
+
+
+## Décors de Nation remplacés par des modèles du kit : {models, tint, k} (vide si on garde le maillage maison).
+static func override_for(kind: String) -> Dictionary:
+	match kind:
+		"dead_tree":
+			return {"models": variants("DeadTree", 3), "tint": Color(0.74, 0.82, 0.78), "k": 0.42}
+		"charred_tree":
+			return {"models": variants("DeadTree", 3), "tint": Color(0.30, 0.24, 0.22), "k": 0.42}
+		"tide_rock":
+			return {"models": variants("Rock_Medium", 3), "tint": Color(0.86, 0.9, 0.96), "k": 0.7}
+	return {}
+
+
 ## Liste de maillages « Nom_1 … Nom_n » (ceux qui existent).
 static func variants(prefix: String, count: int) -> Array:
 	var out: Array = []
