@@ -151,7 +151,7 @@ Le fond de la Nation Sylvestre a été ajouté au dépôt sur `main` sous le nom
 
 `assets/boards/Sylvestre.png`
 
-La définition `data/boards/foret_sylve.json` est mise à jour dans la branche de travail pour référencer ce PNG. La grille actuelle reste de 96 × 64 cases, avec un masque de déplacement existant et 18 points d'intérêt, dont les cinq donjons. Les coordonnées ne sont pas déplacées automatiquement : elles devront être validées visuellement sur la nouvelle illustration avant d'ajouter de nouveaux POI.
+La définition `data/boards/foret_sylve.json` est mise à jour dans la branche de travail pour référencer ce PNG. La grille a été recalibrée sur les dimensions réelles du PNG : 96 × 54 cases (1536 × 864 pixels), avec 18 points d'intérêt. Les cinq donjons ont été repositionnés à proximité immédiate de leurs portes visibles sur l'illustration.
 
 Dans `AdventureMapUI.gd`, la carte illustrée conserve son défilement et le recentrage sur le héros. Le zoom a été ajouté :
 - pincement à deux doigts sur écran tactile ;
@@ -172,15 +172,32 @@ Les contrôles de zoom ne modifient pas la position logique du héros ni la gril
 - Le mini-plan et les panneaux restent lisibles sur écran Android paysage.
 - Les modes Tactique et Conquête et les sauvegardes existantes ne régressent pas.
 
-## Audit technique de la planche Sylvestre (2026-11-03)
 
-Contrôles réalisés sur `data/boards/foret_sylve.json` et le code de projection :
 
-- Grille déclarée : 96 × 64 cases, 16 pixels source par case, soit 1536 × 1024 pixels ; avec `BoardArt.IMAGE_SCALE = 2`, une case représente 32 unités du monde et l'illustration 3072 × 2048 unités.
-- Les 64 lignes du masque ont exactement 96 caractères ; 1283 cases sont praticables et toutes sont reliées au départ (53,35).
-- Les 18 POI, dont les cinq donjons, sont dans la grille et sur une case praticable.
-- La projection de la planche est orthogonale (pas isométrique) : le centre de la case (x,y) est placé à ((x+0,5)×32, (y+0,5)×32). Le sprite de fond et la grille partagent ainsi la même origine.
+## 11. Audit visuel et recalibrage du fond Sylvestre (2026-11-03)
 
-**Anomalie de placement à résoudre avant validation artistique :** le générateur indique une position de référence en pixels (240,380) pour le « Coffre moussu », soit la case (15,23). Cette case est fermée dans le masque actuel ; la case praticable la plus proche est (21,29), à 12 cases de distance Manhattan. Le point actuellement enregistré est donc très éloigné de son ancrage artistique prévu. Il n'a pas été déplacé arbitrairement : il faut inspecter l'illustration et décider si le masque doit être ouvert autour du coffre ou si l'ancrage pixel de ce POI est erroné.
+L'illustration fournie dans la conversation a été inspectée directement. Ses dimensions réelles sont **1536 × 864 pixels** (ratio 16:9), et non 1536 × 1024. L'ancien JSON décrivait donc 10 rangées de cases supplémentaires sous le bord inférieur du décor. La grille a été corrigée en **96 × 54 cases**, avec 16 pixels source par case. À l'échelle `BoardArt.IMAGE_SCALE = 2`, la planche occupe 3072 × 1728 unités monde.
 
-Le générateur `tools/gen_board.py` a été durci : il conserve désormais le nom et l'extension de l'image source dans le JSON (au lieu de forcer un chemin `.jpg`) et interrompt la génération lorsqu'un POI doit être déplacé de plus de quatre cases pour rejoindre le masque. Cela évite de produire silencieusement des lieux manifestement décalés. La validation visuelle de l'image et le lancement dans Godot restent nécessaires ; ils ne sont pas remplacés par ces contrôles structurels.
+Les cinq donjons ont été replacés sur les approches de leurs portes visibles (coordonnées en cases, origine en haut à gauche) :
+
+| Donjon | Case | Centre de case en pixels source |
+|---|---:|---:|
+| Grotte de la Feuille (nord-ouest) | (19,11) | (312,184) |
+| Crypte du Chêne Noir (nord-est) | (76,12) | (1224,200) |
+| Donjon de la Nation Sylvestre (centre) | (50,24) | (808,392) |
+| Antre de la Patte (sud-ouest) | (17,31) | (280,504) |
+| Sanctuaire de Cristal (sud-est) | (76,40) | (1224,648) |
+
+Les treize autres lieux ont également été recalés sur des zones visuellement cohérentes avec leur fonction. Le « Coffre moussu » est maintenant en (16,21), proche de la cache visible dans la partie ouest, et n'est plus repoussé de douze cases par le masque.
+
+Le masque a été reconstruit pour cette image : contour du plateau, bassins et cours d'eau exclus, empreintes des cinq monuments principaux et bâtiments majeurs exclues, puis conservation de la composante reliée au départ. Contrôles structurels après recalibrage :
+
+- 54 rangées de 96 caractères, toutes conformes ;
+- 2 027 cases praticables ;
+- toutes les cases praticables reliées au départ (48,35) ;
+- 18 POI sur des cases praticables et reliées, sans doublon ;
+- cinq donjons aux emplacements définis ci-dessus.
+
+Le générateur `tools/gen_board.py` a été réécrit pour reproduire ce découpage et refuser les images Sylvestre dont les dimensions ne sont pas exactement 1536 × 864. Il génère également un aperçu de contrôle local `/tmp/board_overlay.png`.
+
+**Limite de validation :** le recalage des portes et lieux a été fait par inspection de l'illustration, mais le masque est une première approximation géométrique, pas une segmentation artistique parfaite. Il faut encore ouvrir la scène dans Godot, comparer le masque aux chemins réels, tester les collisions et vérifier le déplacement tactile sur appareil Android. Aucun test moteur n'a été exécuté dans cet environnement.
