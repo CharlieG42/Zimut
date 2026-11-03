@@ -16,8 +16,8 @@ const BROWN_L := Color(0.50, 0.32, 0.17)
 const GOLD := Color(0.92, 0.74, 0.25)
 const HAIR_D := Color(0.72, 0.46, 0.18)
 const HAIR_L := Color(0.96, 0.72, 0.36)
-const PANTS_D := Color(0.14, 0.15, 0.12)
-const PANTS_L := Color(0.25, 0.26, 0.20)
+const PANTS_D := Color(0.24, 0.25, 0.18)
+const PANTS_L := Color(0.42, 0.43, 0.30)
 
 # articulations du héros (repère du personnage)
 const H_HIPS := Vector3(0, 0.95, 0)
@@ -61,15 +61,28 @@ static func char_material() -> Material:
 	var m: ShaderMaterial = Adv3DMeshes.solid_material(false)   # V85 : même éclairage cartoon que le décor
 	m.set_shader_parameter("emit", 0.08)
 	m.set_shader_parameter("rim", 0.7)
+	m.set_shader_parameter("paint_amt", 0.10)   # V90 : peinture discrète (sinon stries sur le visage)
 	var ol := StandardMaterial3D.new()
 	ol.specular_mode = BaseMaterial3D.SPECULAR_DISABLED   # évite les taches noires (NaN) sur GPU mobiles
 	ol.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	ol.cull_mode = BaseMaterial3D.CULL_FRONT
-	ol.albedo_color = Color(0.13, 0.10, 0.08)
+	ol.albedo_color = Color(0.17, 0.11, 0.09)
 	ol.grow = true
-	ol.grow_amount = 0.011
+	ol.grow_amount = 0.0065
 	m.next_pass = ol
 	_cache["mat"] = m
+	return m
+
+
+## V90 : détails du visage (yeux, joues, nez, bouche, sourcils) sans contour — évite les anneaux noirs autour des petits volumes.
+static func detail_material() -> Material:
+	if _cache.has("mat_detail"):
+		return _cache["mat_detail"]
+	var m: ShaderMaterial = Adv3DMeshes.solid_material(false)
+	m.set_shader_parameter("emit", 0.10)
+	m.set_shader_parameter("rim", 0.25)
+	m.set_shader_parameter("paint_amt", 0.0)
+	_cache["mat_detail"] = m
 	return m
 
 
@@ -137,10 +150,10 @@ static func _joint(parent: Node3D, nm: String, pivot: Vector3, parent_pivot: Vec
 
 
 ## Pose un maillage (construit en repère personnage) sous une articulation située en `pivot`.
-static func _part(joint: Node3D, mesh: Mesh, pivot: Vector3) -> MeshInstance3D:
+static func _part(joint: Node3D, mesh: Mesh, pivot: Vector3, mat: Material = null) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	mi.mesh = mesh
-	mi.material_override = char_material()
+	mi.material_override = mat if mat != null else char_material()
 	mi.position = -pivot
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if Adv3DMeshes.real_shadows \
 		else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -241,6 +254,13 @@ static func _chest_accessory(st: SurfaceTool, r: RandomNumberGenerator) -> void:
 #  Joueur
 # ══════════════════════════════════════════════════════════════════════
 
+## V91 : héros du joueur — modèle KayKit animé si les assets sont présents, sinon héros procédural.
+static func make_player(classe: String = "") -> Node3D:
+	if Adv3DKayKit.available():
+		return Adv3DKayKit.make(classe)
+	return make_hero(classe)
+
+
 static func make_hero(classe: String = "") -> Node3D:
 	_set_class(classe)
 	var rig := Adv3DHeroRig.new()
@@ -255,7 +275,8 @@ static func make_hero(classe: String = "") -> Node3D:
 	var head := _joint(chest, "Head", H_NECK, H_CHEST)
 	_part(head, _cached("h_head", _head), H_NECK)
 	var eyes := _joint(head, "Eyes", H_EYES, H_NECK)
-	_part(eyes, _cached("h_eyes", _eyes), H_EYES)
+	_part(eyes, _cached("h_eyes", _eyes), H_EYES, detail_material())
+	_part(eyes, _cached("h_face", _face_details), H_EYES, detail_material())
 	var cape := _joint(hips, "Cape", H_CAPE, H_HIPS)
 	_part(cape, _cached("h_cape", _cape), H_CAPE)
 	var pack := _joint(chest, "Pack", H_PACK, H_CHEST)
@@ -381,7 +402,7 @@ static func _chest() -> Mesh:
 static func _cape() -> Mesh:
 	var st := _st()
 	var r := _r(5)
-	Adv3DMeshes.add_box(st, Vector3(0, 0.81, -0.17), Vector3(0.5, 0.34, 0.04), (_pal["tun_l"] as Color).darkened(0.12), _pal["tun_l"])
+	Adv3DMeshes.add_blob(st, Vector3(0, 0.78, -0.17), Vector3(0.27, 0.25, 0.035), 12, 6, (_pal["tun_l"] as Color).darkened(0.18), _pal["tun_l"], r, 0.0)   # drapé arrondi (V90)
 	for i: int in range(3):
 		var x: float = (float(i) - 1.0) * 0.17
 		Adv3DMeshes.add_cone(st, Vector3(x, 0.55, -0.17), 0.0, 0.085, 0.10, 5, (_pal["tun_l"] as Color).lightened(0.2), _pal["tun_l"], r, 0.0, false)
@@ -412,17 +433,35 @@ static func _head() -> Mesh:
 	Adv3DMeshes.add_cone(st, Vector3(0, 1.52, 0), 0.064, 0.058, 0.17, 8, SKIN_B, SKIN_T, r, 0.0, false)                                        # cou
 	Adv3DMeshes.add_blob(st, Vector3(0, 1.8, 0.0), Vector3(0.205, 0.225, 0.2), 12, 8, SKIN_B, SKIN_T, r, 0.0)                                  # visage
 	Adv3DMeshes.add_blob(st, Vector3(0, 1.87, -0.03), Vector3(0.225, 0.2, 0.225), 12, 7, _pal["hair_d"], _pal["hair_l"], r, 0.0)                               # calotte de cheveux
-	for t: Array in [[0.12, 2.04, 0.05, 0.09], [-0.1, 2.05, 0.0, 0.09], [0.0, 2.09, 0.08, 0.085], [0.2, 1.95, 0.0, 0.08], [-0.2, 1.93, 0.02, 0.08], [0.0, 1.95, -0.2, 0.1], [0.14, 1.99, -0.12, 0.08], [-0.14, 1.99, -0.12, 0.08]]:
-		Adv3DMeshes.add_blob(st, Vector3(t[0], t[1], t[2]), Vector3(t[3], t[3] * 1.1, t[3]), 8, 5, _pal["hair_d"], _pal["hair_l"], r, 0.0)                    # mèches
-	Adv3DMeshes.add_blob(st, Vector3(0.085, 1.97, 0.17), Vector3(0.1, 0.05, 0.07), 8, 4, _pal["hair_d"], _pal["hair_l"], r, 0.0)                                # frange
-	Adv3DMeshes.add_blob(st, Vector3(-0.09, 1.96, 0.18), Vector3(0.1, 0.05, 0.07), 8, 4, _pal["hair_d"], _pal["hair_l"], r, 0.0)
+	# V90 : mèches effilées (pointes dirigées) au lieu de boules — cheveux plus naturels
+	var hc := Vector3(0, 1.87, -0.03)
+	var hd: Color = _pal["hair_d"]
+	var hl: Color = _pal["hair_l"]
+	var locks: Array = [[0.0, 0.95, 0.12, 0.22], [0.8, 0.8, 0.12, 0.2], [1.6, 0.8, 0.12, 0.2], [2.4, 0.8, 0.13, 0.2], [3.2, 0.8, 0.12, 0.2],
+		[4.0, 0.8, 0.13, 0.2], [4.8, 0.8, 0.12, 0.2], [0.4, 0.45, 0.12, 0.17], [2.0, 0.4, 0.12, 0.17], [3.6, 0.35, 0.12, 0.18], [5.2, 0.4, 0.12, 0.17]]
+	for l: Array in locks:
+		var ang: float = l[0]
+		var up: float = l[1]
+		var out := Vector3(cos(ang) * (1.0 - up * 0.5), up, sin(ang) * (1.0 - up * 0.5)).normalized()
+		var base: Vector3 = hc + out * 0.17
+		Adv3DNationMeshes._spike(st, base - out * 0.04, out + Vector3(0, 0.1, 0), 0.085, float(l[3]) * 0.62, 0.35, 8, hd, hl.lerp(hd, 0.25), hl, 0.07)
+	# frange : trois mèches qui retombent sur le front
+	for fx: float in [-0.1, 0.0, 0.1]:
+		Adv3DNationMeshes._spike(st, Vector3(fx, 2.04, 0.1), Vector3(fx * 1.5, -0.45, 0.85), 0.07, 0.14, 0.4, 8, hd, hl.lerp(hd, 0.2), hl, 0.045)
 	for sx: float in [-1.0, 1.0]:
-		Adv3DMeshes.add_box(st, Vector3(0.08 * sx, 1.875, 0.19), Vector3(0.07, 0.018, 0.02), _pal["hair_d"], _pal["hair_d"])                                    # sourcils
-		Adv3DMeshes.add_blob(st, Vector3(0.2 * sx, 1.77, 0.0), Vector3(0.03, 0.05, 0.03), 6, 4, SKIN_B, SKIN_T, r, 0.0)                         # oreilles
-		Adv3DMeshes.add_blob(st, Vector3(0.12 * sx, 1.73, 0.17), Vector3(0.04, 0.025, 0.015), 6, 3, Color(0.96, 0.58, 0.5), Color(0.98, 0.64, 0.56), r, 0.0)  # joues
-	Adv3DMeshes.add_blob(st, Vector3(0, 1.755, 0.2), Vector3(0.02, 0.026, 0.02), 6, 4, SKIN_B, SKIN_T, r, 0.0)                                 # nez
-	Adv3DMeshes.add_box(st, Vector3(0, 1.69, 0.2), Vector3(0.05, 0.012, 0.01), Color(0.5, 0.25, 0.2), Color(0.5, 0.25, 0.2))                       # sourire
+		Adv3DMeshes.add_blob(st, Vector3(0.2 * sx, 1.77, 0.0), Vector3(0.03, 0.05, 0.03), 8, 5, SKIN_B, SKIN_T, r, 0.0)                         # oreilles
 	_head_accessory(st, r)
+	return st.commit()
+
+
+static func _face_details() -> Mesh:
+	var st := _st()
+	var r := _r(10)
+	for sx: float in [-1.0, 1.0]:
+		Adv3DMeshes.add_box(st, Vector3(0.08 * sx, 1.875, 0.19), Vector3(0.07, 0.018, 0.02), _pal["hair_d"], _pal["hair_d"])                       # sourcils
+		Adv3DMeshes.add_blob(st, Vector3(0.12 * sx, 1.73, 0.17), Vector3(0.04, 0.025, 0.015), 8, 4, Color(0.96, 0.58, 0.5), Color(0.98, 0.64, 0.56), r, 0.0)  # joues
+	Adv3DMeshes.add_blob(st, Vector3(0, 1.755, 0.2), Vector3(0.02, 0.026, 0.02), 8, 5, SKIN_B, SKIN_T, r, 0.0)                                  # nez
+	Adv3DMeshes.add_box(st, Vector3(0, 1.69, 0.2), Vector3(0.05, 0.012, 0.01), Color(0.5, 0.25, 0.2), Color(0.5, 0.25, 0.2))                        # sourire
 	return st.commit()
 
 

@@ -29,6 +29,7 @@ func _boot() -> void:
 		root.add_child(sc)
 		await create_timer(1.6).timeout
 		_shot("%s/ow_%s_jeu.png" % [out, zone])
+		print("PERF %s : %d primitives, %d objets" % [zone, RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME), RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME)])
 		var t: Dictionary = AT.zone_terrain(zone)
 		var mid := Vector2i((t["size"] as Vector2i).x / 2, (t["size"] as Vector2i).y / 2)
 		for dd: int in range(0, 30):

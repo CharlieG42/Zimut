@@ -1,3 +1,21 @@
+V91|TEST — Nouveau héros 3D : les modèles KayKit « Adventurers » (Kay Lousberg, licence CC0) remplacent le héros maison — vrai personnage skinné, animé en repos / marche / course (+ léger mouvement au repos), rendu toon avec ombres et contour fin.
+V91|Chaque classe a son modèle : Tank = Chevalier, Mage = Mage, Chasseur = Rôdeur, Sylvain = Voleuse verte, Assassin = Voleur à capuche sombre ; Druide (Barbare), Soigneur et Invocateur (Mage), Géomancien (Chevalier doré) et Artificier (Rôdeur) sont des recolorations.
+V91|Le héros procédural reste en secours si les fichiers manquent ; licence et crédit dans assets/kaykit/License.txt.
+V90|TEST — Personnage 3D plus propre : visage sans anneaux noirs (yeux, joues, nez, bouche et sourcils sans contour), contour du corps affiné, peinture du tissu adoucie pour supprimer les stries.
+V90|Cheveux en mèches effilées (au lieu de boules) avec frange, cape en drapé arrondi, pantalon cargo éclairci (il paraissait noir).
+V90|Les 10 classes en profitent (chapeaux, capuches et accessoires conservés).
+V89|TEST — Monde Ouvert 3D : les décors de Nation sans kit (cristaux, totems, tours à rouages, tombes, champignons géants…) passent au rendu peint : texture de peinture triplanaire, éclairage cartoon et ombres portées du soleil, avec les lueurs conservées.
+V89|Rochers plus organiques : socles de cristaux, rochers de marée, de nuages, de lave et des Ombres en volumes arrondis (normales lissées) ; seules les pointes restent à facettes.
+V89|Palmiers du Désert et sapins enneigés de la Montagne refaits avec des cartes de feuilles/aiguilles : plus fournis et plus organiques, toujours légers.
+V88|TEST — Monde Ouvert 3D : les autres Nations profitent des assets libres — arbres morts du Marais des Brumes et arbres calcinés du Brasier, rochers des côtes, colonnes antiques du Désert et des donjons (Kenney), rochers teintés par biome.
+V88|Dalles de chemin posées sur les sentiers, bouleaux remplacés par des arbres fins du kit, fleurs réservées aux biomes verts (Forêt, Vents, Marées, Brumes).
+V88|Les décors propres aux Nations (cristaux, braises, totems, tombes, engrenages) restent inchangés.
+V87|TEST — Monde Ouvert 3D : vrais arbres, pins, buissons fleuris, rochers, fleurs, champignons, galets et touffes d'herbe du « Stylized Nature MegaKit » (Quaternius, libre de droits), habillés avec l'éclairage cartoon du jeu.
+V87|Feuillages animés par le vent, ombres portées du soleil sur les arbres et les rochers ; le décor propre à chaque Nation (cristaux, dunes, marais…) reste inchangé.
+V87|Textures du kit réduites (512 px) et compressées pour garder l'APK léger.
+V86|TEST — Rendu 3D : feuillage en « cartes » de feuilles (feuillus, bouleaux, buissons) à l'ombrage doux et rond, au lieu de blocs facettés.
+V86|Sol, rochers et décors « peints » : texture de coups de pinceau projetée en triplanaire sur toutes les surfaces, rochers aux volumes arrondis.
+V86|Textures générées par tools/gen_textures3d.py (aucun asset externe) ; le héros n'est pas modifié.
 V85|TEST — Rendu 3D plus proche de Zelda / Genshin : éclairage « cartoon » (dégradés en paliers, ombres teintées de bleu, liseré lumineux côté soleil) sur le décor, le sol et les personnages.
 V85|Vraies ombres portées du soleil (arbres, rochers, héros, monstres) en qualité Haute ; en Économie, on garde les ombres rondes au sol. Ciel au dégradé plus riche, lueur du soleil dans la brume.
 V85|Teintes douces à grande échelle sur le décor (aplats « peints »), éclairage et saturation recalibrés pour les 10 nations.

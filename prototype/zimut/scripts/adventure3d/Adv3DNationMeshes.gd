@@ -8,44 +8,12 @@ extends RefCounted
 ## pointes de cristaux, fissures de lave, chapeaux phosphorescents, runes, fenêtres de forge…
 ## Tout est mis en cache et rendu en MultiMesh par Adv3DWorld (un appel de rendu par type).
 
-const GLOW_SHADER := """
-shader_type spatial;
-render_mode cull_disabled, specular_disabled;
-// Couleurs de sommets (sRGB) ; alpha du sommet = 0 → la couleur devient lumineuse.
-uniform float glow = 2.2;
-uniform float fade_near = 1.0;
-uniform float fade_far = 2.6;
-float bayer4(vec2 p) {
-	ivec2 q = ivec2(mod(p, 4.0));
-	int i = q.x + q.y * 4;
-	int m[16] = int[16](0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5);
-	return (float(m[i]) + 0.5) / 16.0;
-}
-void fragment() {
-	float dist = length(VERTEX);
-	if (dist < fade_far) {
-		float a = clamp((dist - fade_near) / (fade_far - fade_near), 0.0, 1.0);
-		if (a < bayer4(FRAGCOORD.xy)) {
-			discard;
-		}
-	}
-	ALBEDO = pow(clamp(COLOR.rgb, vec3(0.0), vec3(1.0)), vec3(2.2));
-	EMISSION = ALBEDO * (1.0 - clamp(COLOR.a, 0.0, 1.0)) * glow;
-	ROUGHNESS = 0.9;
-}
-"""
-
-static var _shader: Shader = null
-
-
-## Matériau des décors de Nation (avec lueurs).
+## Matériau des décors de Nation : shader peint + éclairage cartoon + ombres du soleil (V89),
+## avec lueurs (sommets d'alpha 0).
 static func glow_material(strength: float = 2.2) -> ShaderMaterial:
-	if _shader == null:
-		_shader = Shader.new()
-		_shader.code = GLOW_SHADER
-	var m := ShaderMaterial.new()
-	m.shader = _shader
+	var m: ShaderMaterial = Adv3DMeshes.solid_material(true, true)
 	m.set_shader_parameter("glow", strength)
+	m.set_shader_parameter("emit", 0.06)
 	return m
 
 
@@ -151,10 +119,11 @@ static func _g(c: Color) -> Color:
 # ══════════════════════════════════════════════════════════════════════
 
 static func _amethyst_spire() -> Mesh:
-	Adv3DMeshes.smooth_mode = false
+	Adv3DMeshes.smooth_mode = true     # V89 : socle rocheux arrondi, cristaux à facettes
 	var st := Adv3DMeshes._begin()
 	var rng := Adv3DMeshes._rng(301)
-	Adv3DMeshes.add_blob(st, Vector3(0, 0.18, 0), Vector3(0.85, 0.32, 0.75), 6, 3, Color(0.16, 0.13, 0.26), Color(0.34, 0.30, 0.48), rng, 0.12)
+	Adv3DMeshes.add_blob(st, Vector3(0, 0.18, 0), Vector3(0.85, 0.32, 0.75), 9, 4, Color(0.16, 0.13, 0.26), Color(0.34, 0.30, 0.48), rng, 0.1)
+	Adv3DMeshes.smooth_mode = false
 	var cb := Color(0.30, 0.18, 0.52)
 	var ct := Color(0.66, 0.48, 0.96)
 	for e: Array in [[Vector3(0, 0.2, 0), Vector3(0.05, 1, 0.02), 0.32, 2.7], [Vector3(0.35, 0.15, 0.15), Vector3(0.45, 1, 0.2), 0.22, 1.7],
@@ -165,10 +134,11 @@ static func _amethyst_spire() -> Mesh:
 
 
 static func _crystal_rock() -> Mesh:
-	Adv3DMeshes.smooth_mode = false
+	Adv3DMeshes.smooth_mode = true
 	var st := Adv3DMeshes._begin()
 	var rng := Adv3DMeshes._rng(303)
-	Adv3DMeshes.add_blob(st, Vector3(0, 0.42, 0), Vector3(0.95, 0.68, 0.82), 6, 4, Color(0.16, 0.14, 0.26), Color(0.40, 0.36, 0.56), rng, 0.14)
+	Adv3DMeshes.add_blob(st, Vector3(0, 0.42, 0), Vector3(0.95, 0.68, 0.82), 10, 5, Color(0.16, 0.14, 0.26), Color(0.40, 0.36, 0.56), rng, 0.12)
+	Adv3DMeshes.smooth_mode = false
 	for e: Array in [[Vector3(0.3, 0.8, 0.2), Vector3(0.4, 1, 0.3), 0.14, 0.7], [Vector3(-0.35, 0.6, 0.35), Vector3(-0.6, 1, 0.4), 0.11, 0.55],
 			[Vector3(0.1, 0.9, -0.3), Vector3(0.0, 1, -0.4), 0.12, 0.6]]:
 		_spike(st, e[0], e[1], e[2], e[3], 0.3, 6, Color(0.24, 0.42, 0.70), Color(0.52, 0.86, 1.0), _g(Color(0.80, 0.97, 1.0)))
@@ -189,12 +159,11 @@ static func _shards() -> Mesh:
 # ══════════════════════════════════════════════════════════════════════
 
 static func _tide_rock() -> Mesh:
-	Adv3DMeshes.smooth_mode = false
+	Adv3DMeshes.smooth_mode = true
 	var st := Adv3DMeshes._begin()
 	var rng := Adv3DMeshes._rng(311)
-	Adv3DMeshes.add_blob(st, Vector3(0, 0.45, 0), Vector3(1.0, 0.75, 0.85), 7, 4, Color(0.30, 0.36, 0.40), Color(0.66, 0.72, 0.74), rng, 0.12)
-	Adv3DMeshes.add_blob(st, Vector3(0.85, 0.2, 0.35), Vector3(0.38, 0.28, 0.34), 5, 3, Color(0.30, 0.36, 0.40), Color(0.58, 0.64, 0.66), rng, 0.1)
-	Adv3DMeshes.smooth_mode = true
+	Adv3DMeshes.add_blob(st, Vector3(0, 0.45, 0), Vector3(1.0, 0.75, 0.85), 10, 5, Color(0.30, 0.36, 0.40), Color(0.66, 0.72, 0.74), rng, 0.12)
+	Adv3DMeshes.add_blob(st, Vector3(0.85, 0.2, 0.35), Vector3(0.38, 0.28, 0.34), 7, 4, Color(0.30, 0.36, 0.40), Color(0.58, 0.64, 0.66), rng, 0.1)
 	Adv3DMeshes.add_blob(st, Vector3(0, 0.08, 0), Vector3(1.08, 0.13, 0.93), 10, 3, Color(0.14, 0.34, 0.28), Color(0.24, 0.52, 0.40), rng, 0.04)   # algues
 	for i: int in range(7):
 		var a: float = rng.randf() * TAU
@@ -265,9 +234,8 @@ static func _wind_totem() -> Mesh:
 static func _cloud_rock() -> Mesh:
 	var st := Adv3DMeshes._begin()
 	var rng := Adv3DMeshes._rng(323)
-	Adv3DMeshes.smooth_mode = false
-	Adv3DMeshes.add_blob(st, Vector3(0, 0.3, 0), Vector3(0.9, 0.5, 0.78), 6, 3, Color(0.46, 0.52, 0.60), Color(0.74, 0.78, 0.84), rng, 0.12)
 	Adv3DMeshes.smooth_mode = true
+	Adv3DMeshes.add_blob(st, Vector3(0, 0.3, 0), Vector3(0.9, 0.5, 0.78), 9, 4, Color(0.46, 0.52, 0.60), Color(0.74, 0.78, 0.84), rng, 0.1)
 	Adv3DMeshes.add_blob(st, Vector3(0.1, 0.8, 0.05), Vector3(0.62, 0.36, 0.55), 10, 5, Color(0.86, 0.90, 0.96), Color(1, 1, 1), rng, 0.03)
 	Adv3DMeshes.add_blob(st, Vector3(-0.42, 0.66, 0.2), Vector3(0.38, 0.26, 0.36), 8, 4, Color(0.86, 0.90, 0.96), Color(1, 1, 1), rng, 0.03)
 	Adv3DMeshes.add_blob(st, Vector3(0.48, 0.62, -0.25), Vector3(0.34, 0.22, 0.3), 8, 4, Color(0.86, 0.90, 0.96), Color(1, 1, 1), rng, 0.03)
@@ -318,13 +286,14 @@ static func _charred_tree() -> Mesh:
 
 
 static func _lava_rock() -> Mesh:
-	Adv3DMeshes.smooth_mode = false
+	Adv3DMeshes.smooth_mode = true
 	var st := Adv3DMeshes._begin()
 	var rng := Adv3DMeshes._rng(333)
 	var cb := Color(0.07, 0.06, 0.06)
 	var ct := Color(0.24, 0.19, 0.18)
-	Adv3DMeshes.add_blob(st, Vector3(0, 0.42, 0), Vector3(1.0, 0.72, 0.85), 6, 4, cb, ct, rng, 0.16)
-	Adv3DMeshes.add_blob(st, Vector3(0.9, 0.2, -0.3), Vector3(0.4, 0.3, 0.35), 5, 3, cb, ct, rng, 0.12)
+	Adv3DMeshes.add_blob(st, Vector3(0, 0.42, 0), Vector3(1.0, 0.72, 0.85), 10, 5, cb, ct, rng, 0.14)
+	Adv3DMeshes.add_blob(st, Vector3(0.9, 0.2, -0.3), Vector3(0.4, 0.3, 0.35), 7, 4, cb, ct, rng, 0.1)
+	Adv3DMeshes.smooth_mode = false
 	for i: int in range(6):                                        # veines de lave
 		var a: float = float(i) / 6.0 * TAU + 0.3
 		var p := Vector3(cos(a) * 0.82, 0.2 + float(i % 3) * 0.22, sin(a) * 0.7)
@@ -404,10 +373,11 @@ static func _glowcaps() -> Mesh:
 # ══════════════════════════════════════════════════════════════════════
 
 static func _dark_spire() -> Mesh:
-	Adv3DMeshes.smooth_mode = false
+	Adv3DMeshes.smooth_mode = true
 	var st := Adv3DMeshes._begin()
 	var rng := Adv3DMeshes._rng(351)
-	Adv3DMeshes.add_blob(st, Vector3(0, 0.15, 0), Vector3(0.6, 0.25, 0.55), 6, 3, Color(0.10, 0.08, 0.14), Color(0.26, 0.22, 0.32), rng, 0.1)
+	Adv3DMeshes.add_blob(st, Vector3(0, 0.15, 0), Vector3(0.6, 0.25, 0.55), 9, 4, Color(0.10, 0.08, 0.14), Color(0.26, 0.22, 0.32), rng, 0.08)
+	Adv3DMeshes.smooth_mode = false
 	_spike(st, Vector3(0, 0.1, 0), Vector3(0, 1, 0), 0.32, 3.0, 0.16, 4, Color(0.06, 0.05, 0.10), Color(0.22, 0.16, 0.32), _g(Color(0.80, 0.55, 1.0)), 0.2)
 	# runes lumineuses sur les quatre faces
 	for i: int in range(4):

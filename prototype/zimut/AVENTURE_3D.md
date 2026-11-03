@@ -160,3 +160,54 @@ bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
 - `Adv3DMeshes.TOON_LIGHT` : fonction `light()` partagée (demi-Lambert en paliers adoucis, ombre teintée `shade_tint`, rim `rim_color`). `solid_material()` et `foliage_material()` sont désormais des `ShaderMaterial` (même shader, `sway = 0` pour le rigide) ; la matière des personnages (`Adv3DHeroModel.char_material`) l'utilise aussi, avec son contour.
 - `Adv3DMeshes.setup_sun(sun, env)` : ombres temps réel du soleil (2 cascades, 70 m) quand `GfxQuality` n'est pas « Économie » ; `real_shadows` allège alors les ombres rondes et active `cast_shadow` sur les gros décors (`_casts_shadow`) et le héros. L'herbe, les fleurs et les cailloux ne projettent pas d'ombre.
 - Ciel : `sky_curve`, disque solaire, `fog_sun_scatter`. Captures : `tests/shot_openworld.gd`.
+
+
+## V86 — Peinture et feuillage en cartes (TEST)
+
+- `tools/gen_textures3d.py` → `assets/textures3d/paint.png` (aplats + coups de pinceau, tuilable) et `leaf.png` (amas de feuilles RGBA). Mipmaps activés dans leurs `.import`.
+- Shader partagé (`Adv3DMeshes.FOLIAGE_SHADER`) : peinture triplanaire monde (`paint_amt` : 0,4 solide / 0,18 feuillage), et « cartes » : un sommet à UV non nul échantillonne `leaf_tex` (alpha scissor). `_begin()` pose UV (0,0) pour tous les sommets ordinaires.
+- `Adv3DMeshes.add_cards()` : couronne de quads orientés en spirale, normales dirigées vers l'extérieur (ombrage rond) ; utilisée par `broadleaf`, `birch`, `bush`. Pins, palmiers et cactus restent inchangés.
+- Assets externes : les dépôts publics Kenney (starter kits) n'ont presque rien de naturel et kenney.nl / Quaternius sont inaccessibles depuis l'environnement de travail → pas d'import glTF pour l'instant (un pack déposé dans `assets/` pourrait être instancié via `PackedScene`).
+
+
+## V87 — Nature MegaKit (TEST)
+
+- `assets/nature/` : sous-ensemble du *Stylized Nature MegaKit [Standard]* (Quaternius, CC0), produit par `tools/prep_nature_kit.py` (textures 512 px, normales retirées). Import Godot : mipmaps + compression VRAM sur les textures.
+- `Adv3DKit` : charge un glTF, en extrait le maillage et remplace ses matériaux par un `ShaderMaterial` maison (texture de base, découpe alpha des feuilles, vent, `TOON_LIGHT`). `variants("CommonTree", 5)` → liste de maillages ; `Adv3DWorld._multi_kit()` répartit les instances entre variantes (échelle `k`).
+- Remplacés : feuillus (CommonTree 1-5), pins hors Montagne (Pine 1-5), rochers (Rock_Medium), buissons (Bush_Common, rouge → vert par `swap_rg`), fleurs, champignons, galets, 1 touffe d'herbe sur 3 en Forêt. Gardés : bouleaux, palmiers, cactus, pins enneigés, décor des Nations.
+- Si `assets/nature/` est absent (`Adv3DKit.available()`), on retombe sur les maillages codés (V61-V86).
+- Coût : ~240 000 à 340 000 primitives par image sur les captures (ombres comprises) ; la qualité « Économie » coupe les ombres temps réel.
+- Bestiary (Imp, Puglin) : reçu mais non intégré (monstres ~9 Mo pièce, licence QAL : pas de redistribution comme assets).
+
+
+## V88 — Décors de Nation avec le kit (TEST)
+
+- `Adv3DKit.override_for(kind)` : décors de Nation rendus par un modèle du kit (`dead_tree` → DeadTree teinté gris-vert, `charred_tree` → DeadTree charbon, `tide_rock` → Rock_Medium). Les autres clés gardent leurs maillages `Adv3DNationMeshes` (lueurs).
+- `Adv3DKit.arena(model)` : modèles de la « Mini Arena » de Kenney (`assets/kenney_arena/`, CC0 : colonnes pour les piliers, statue/bannière/mur disponibles). Palette `colormap.png`.
+- Teintes par biome : rochers (Désert chaud, Montagne froid), piliers (sable), dalles de chemin (`RockPath_*`, 28 % des cases de sentier).
+- Les packs reçus qui restent à exploiter : Mini Arena `statue`, `wall`, `bricks`, `banner` (ruines, entrées de donjon) ; Bestiary (Imp, Puglin) pour des monstres animés.
+
+
+## V89 — Nations sans kit : peinture, cartes, formes organiques (TEST)
+
+- `Adv3DNationMeshes.glow_material()` utilise désormais le shader peint/toon (`Adv3DMeshes.solid_material`) avec un paramètre `glow` : les sommets d'alpha 0 restent lumineux, mais les décors reçoivent peinture triplanaire, éclairage cartoon et ombres du soleil.
+- Rochers/socles (cristaux, marée, nuages, lave, Ombres) en normales lissées (9–10 segments) ; pointes et cristaux restent à facettes.
+- `palm()` : cartes de feuilles le long des frondes ; `pine()` : touffes d'aiguilles (cartes) sur chaque étage, blanches pour la version enneigée.
+- Constat : l'Atelier des Rouages monte à ~550 k primitives (existant avant V89) — à alléger si le téléphone peine.
+
+
+## V90 — Personnage plus propre (TEST)
+
+- `Adv3DHeroModel.detail_material()` : yeux et détails du visage (`h_face` : sourcils, joues, nez, bouche) rendus sans coque de contour ; contour du corps 0,011 → 0,0065 ; `paint_amt` du personnage 0,10.
+- Cheveux : mèches par `Adv3DNationMeshes._spike` (11 + 3 de frange) sur la calotte ; cape : drapé en blob aplati ; pantalon éclairci.
+- Outil : `tests/shot_hero_close.gd <dossier> [classe]` (face, trois-quarts, dos, tête).
+
+
+## V91 — Héros KayKit (TEST)
+
+- `assets/kaykit/` : 6 personnages (Knight, Barbarian, Mage, Ranger, Rogue, Rogue_Hooded) + animations `Rig_Medium_General` / `Rig_Medium_MovementBasic` de **KayKit : Adventurers 2.0** — Kay Lousberg, CC0 (`License.txt`).
+- `Adv3DKayKit` (hérite de `Adv3DHeroRig`, même interface `animate / run_amount / stride / force_fidget`) : instancie le GLB, remplace les matériaux par un shader toon (texture d'atlas + `TOON_LIGHT` + contour), joue Idle_A / Walking_A / Running_A selon la vitesse (vitesse d'animation proportionnelle), Idle_B en micro-mouvement au repos, léger roulis en virage.
+- Recoloration par classe dans le shader (`LOOKS`) : décalage de teinte des étoffes saturées (peau, cuir et cheveux préservés), multiplicateurs sat/val, teinte du métal/gris.
+- `Adv3DHeroModel.make_player(classe)` : KayKit si disponible, sinon héros procédural (`make_hero`, toujours utilisé par les tests de la V90).
+- Non fait : armes en main (assets `Assets/` du pack : épée, arc, bâton…), animations de combat/sort (absentes de la version gratuite), Universal Animation Library (squelette différent).
+- Outil : `tests/shot_kaykit.gd <dossier>` (10 classes : repos, marche, course).
