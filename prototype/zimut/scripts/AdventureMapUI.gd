@@ -21,7 +21,7 @@ const BOARD_SCALE := 0.78          # V83 : échelle d'une planche illustrée
 const PAN_THRESHOLD := 14.0
 const SIDE_W := 440.0
 const STEP_TIME := 0.15
-const BOARD_STEP_TIME := 0.14   # déplacements de planche plus lisibles, adaptés aux petites cases
+const BOARD_STEP_TIME := 0.24   # laisse le temps de lire une foulée complète sur la planche
 const HELP_STEPS := 30          # l'aide de contrôle disparaît après ces premiers pas
 const DIM := Color(0.80, 0.84, 0.92)          # texte secondaire (plus clair que UiKit.C_DIM)
 
@@ -2196,6 +2196,8 @@ class AdventureBoard extends Node2D:
 
 	func _process(delta: float) -> void:
 		_t += delta
+		if walking:
+			_gait_t += delta
 		queue_redraw()
 
 	func _diamond(c: Vector2, s: float = 1.0) -> PackedVector2Array:
@@ -2510,6 +2512,7 @@ class HeroView extends Node2D:
 	var walking: bool = false
 	var _walk_dir: Vector2 = Vector2.DOWN
 	var _t: float = 0.0
+	var _gait_t: float = 0.0
 
 	func _ready() -> void:
 		# Les poses sont rangées à côté du sprite de classe (comme pour EntityView).
@@ -2547,7 +2550,11 @@ class HeroView extends Node2D:
 			_flip = dx < 0.0
 
 	func locomotion(direction: Vector2, active: bool) -> void:
+		if active and not walking:
+			_gait_t = 0.0
 		walking = active
+		if not active:
+			_gait_t = 0.0
 		if direction.length_squared() > 0.01:
 			_walk_dir = direction.normalized()
 			face(direction.x)
@@ -2572,14 +2579,14 @@ class HeroView extends Node2D:
 		# Foulée en deux temps : appui sur la pose de marche, puis retour au repos.
 		var walk_pool: Array[Texture2D] = back_walk_poses if facing_back else walk_poses
 		if walking and not walk_pool.is_empty():
-			var gait_step: int = int(_t / 0.16)
+			var gait_step: int = int(_gait_t / 0.12)
 			if gait_step % 2 == 0:
 				display_tex = walk_pool[(gait_step >> 1) % walk_pool.size()]
 		var h: float = 104.0
 		var sc: float = h / float(display_tex.get_height())
 		var w: float = float(display_tex.get_width()) * sc
 		var breathe: float = sin(_t * 2.2) * 1.5
-		var stride: float = sin(_t * 15.0) if walking else 0.0
+		var stride: float = sin(_gait_t * TAU / 0.24) if walking else 0.0
 		var bob: float = absf(stride) * 3.0 if walking else 0.0
 		var lean: float = _walk_dir.x * 2.0 if walking else 0.0
 		var y: float = -h + 6.0 - hop - breathe - bob
