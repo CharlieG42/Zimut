@@ -2515,14 +2515,15 @@ class HeroView extends Node2D:
 		# Les poses sont rangées à côté du sprite de classe (comme pour EntityView).
 		# On charge toutes les variantes walk_2…, idle_2… et back_walk_2… disponibles.
 		if tex != null:
-			var base: String = tex.resource_path.get_basename()
-			var back_path: String = base + "_back.png"
+			var sprite_key: String = tex.resource_path.get_file().get_basename()
+			var pose_root: String = "res://assets/sprites/nations/heros/poses/"
+			var back_path: String = pose_root + sprite_key + "_back.png"
 			if ResourceLoader.exists(back_path):
 				back_tex = load(back_path) as Texture2D
-			walk_poses = _load_pose_variants(base + "_walk", false)
-			back_walk_poses = _load_pose_variants(base + "_back_walk", false)
-			idle_poses = _load_pose_variants(base + "_idle", true)
-			back_idle_poses = _load_pose_variants(base + "_back_idle", true)
+			walk_poses = _load_pose_variants(pose_root + sprite_key + "_walk", false)
+			back_walk_poses = _load_pose_variants(pose_root + sprite_key + "_back_walk", false)
+			idle_poses = _load_pose_variants(pose_root + sprite_key + "_idle", true)
+			back_idle_poses = _load_pose_variants(pose_root + sprite_key + "_back_idle", true)
 		set_process(true)
 
 	func _load_pose_variants(stem: String, skip_first: bool) -> Array[Texture2D]:
