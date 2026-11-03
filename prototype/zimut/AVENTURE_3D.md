@@ -168,3 +168,13 @@ bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
 - Shader partagé (`Adv3DMeshes.FOLIAGE_SHADER`) : peinture triplanaire monde (`paint_amt` : 0,4 solide / 0,18 feuillage), et « cartes » : un sommet à UV non nul échantillonne `leaf_tex` (alpha scissor). `_begin()` pose UV (0,0) pour tous les sommets ordinaires.
 - `Adv3DMeshes.add_cards()` : couronne de quads orientés en spirale, normales dirigées vers l'extérieur (ombrage rond) ; utilisée par `broadleaf`, `birch`, `bush`. Pins, palmiers et cactus restent inchangés.
 - Assets externes : les dépôts publics Kenney (starter kits) n'ont presque rien de naturel et kenney.nl / Quaternius sont inaccessibles depuis l'environnement de travail → pas d'import glTF pour l'instant (un pack déposé dans `assets/` pourrait être instancié via `PackedScene`).
+
+
+## V87 — Nature MegaKit (TEST)
+
+- `assets/nature/` : sous-ensemble du *Stylized Nature MegaKit [Standard]* (Quaternius, CC0), produit par `tools/prep_nature_kit.py` (textures 512 px, normales retirées). Import Godot : mipmaps + compression VRAM sur les textures.
+- `Adv3DKit` : charge un glTF, en extrait le maillage et remplace ses matériaux par un `ShaderMaterial` maison (texture de base, découpe alpha des feuilles, vent, `TOON_LIGHT`). `variants("CommonTree", 5)` → liste de maillages ; `Adv3DWorld._multi_kit()` répartit les instances entre variantes (échelle `k`).
+- Remplacés : feuillus (CommonTree 1-5), pins hors Montagne (Pine 1-5), rochers (Rock_Medium), buissons (Bush_Common, rouge → vert par `swap_rg`), fleurs, champignons, galets, 1 touffe d'herbe sur 3 en Forêt. Gardés : bouleaux, palmiers, cactus, pins enneigés, décor des Nations.
+- Si `assets/nature/` est absent (`Adv3DKit.available()`), on retombe sur les maillages codés (V61-V86).
+- Coût : ~240 000 à 340 000 primitives par image sur les captures (ombres comprises) ; la qualité « Économie » coupe les ombres temps réel.
+- Bestiary (Imp, Puglin) : reçu mais non intégré (monstres ~9 Mo pièce, licence QAL : pas de redistribution comme assets).

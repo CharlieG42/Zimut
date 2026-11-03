@@ -1,3 +1,6 @@
+V87|TEST — Monde Ouvert 3D : vrais arbres, pins, buissons fleuris, rochers, fleurs, champignons, galets et touffes d'herbe du « Stylized Nature MegaKit » (Quaternius, libre de droits), habillés avec l'éclairage cartoon du jeu.
+V87|Feuillages animés par le vent, ombres portées du soleil sur les arbres et les rochers ; le décor propre à chaque Nation (cristaux, dunes, marais…) reste inchangé.
+V87|Textures du kit réduites (512 px) et compressées pour garder l'APK léger.
 V86|TEST — Rendu 3D : feuillage en « cartes » de feuilles (feuillus, bouleaux, buissons) à l'ombrage doux et rond, au lieu de blocs facettés.
 V86|Sol, rochers et décors « peints » : texture de coups de pinceau projetée en triplanaire sur toutes les surfaces, rochers aux volumes arrondis.
 V86|Textures générées par tools/gen_textures3d.py (aucun asset externe) ; le héros n'est pas modifié.
