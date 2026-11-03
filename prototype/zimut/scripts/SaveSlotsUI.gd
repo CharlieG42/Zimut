@@ -606,7 +606,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	_detail_box.add_child(diff_hint)
 	_detail_box.add_child(_section_separator())
 
-	# Les trois modes utilisent la même sauvegarde : roster, XP, caractéristiques,
+	# Les quatre modes utilisent la même sauvegarde : roster, XP, caractéristiques,
 	# sorts, équipement et inventaire ne sont jamais dupliqués par mode.
 	var mode_lbl := Label.new()
 	mode_lbl.text = "CHOISIR UN MODE DE JEU"
