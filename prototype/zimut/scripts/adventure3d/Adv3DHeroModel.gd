@@ -254,6 +254,13 @@ static func _chest_accessory(st: SurfaceTool, r: RandomNumberGenerator) -> void:
 #  Joueur
 # ══════════════════════════════════════════════════════════════════════
 
+## V91 : héros du joueur — modèle KayKit animé si les assets sont présents, sinon héros procédural.
+static func make_player(classe: String = "") -> Node3D:
+	if Adv3DKayKit.available():
+		return Adv3DKayKit.make(classe)
+	return make_hero(classe)
+
+
 static func make_hero(classe: String = "") -> Node3D:
 	_set_class(classe)
 	var rig := Adv3DHeroRig.new()
