@@ -574,6 +574,7 @@ func _rebuild_board(biome: String) -> void:
 		var poi: Dictionary = pois[k]
 		var node := PoiNode.new()
 		node.kind = String(poi.get("kind", "combat"))
+		node.is_dungeon = Dungeons.is_dungeon(poi)
 		node.title = String(poi.get("name", "?"))
 		node.level = int(poi.get("level", 10))
 		node.biome = biome
