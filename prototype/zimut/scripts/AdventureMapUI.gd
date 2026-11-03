@@ -2196,8 +2196,6 @@ class AdventureBoard extends Node2D:
 
 	func _process(delta: float) -> void:
 		_t += delta
-		if walking:
-			_gait_t += delta
 		queue_redraw()
 
 	func _diamond(c: Vector2, s: float = 1.0) -> PackedVector2Array:
@@ -2543,6 +2541,8 @@ class HeroView extends Node2D:
 
 	func _process(delta: float) -> void:
 		_t += delta
+		if walking:
+			_gait_t += delta
 		queue_redraw()
 
 	func face(dx: float) -> void:
