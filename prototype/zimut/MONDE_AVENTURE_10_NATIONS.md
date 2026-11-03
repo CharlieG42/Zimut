@@ -171,3 +171,16 @@ Les contrôles de zoom ne modifient pas la position logique du héros ni la gril
 - Les coffres, énigmes et découvertes donnent des récompenses persistantes.
 - Le mini-plan et les panneaux restent lisibles sur écran Android paysage.
 - Les modes Tactique et Conquête et les sauvegardes existantes ne régressent pas.
+
+## Audit technique de la planche Sylvestre (2026-11-03)
+
+Contrôles réalisés sur `data/boards/foret_sylve.json` et le code de projection :
+
+- Grille déclarée : 96 × 64 cases, 16 pixels source par case, soit 1536 × 1024 pixels ; avec `BoardArt.IMAGE_SCALE = 2`, une case représente 32 unités du monde et l'illustration 3072 × 2048 unités.
+- Les 64 lignes du masque ont exactement 96 caractères ; 1283 cases sont praticables et toutes sont reliées au départ (53,35).
+- Les 18 POI, dont les cinq donjons, sont dans la grille et sur une case praticable.
+- La projection de la planche est orthogonale (pas isométrique) : le centre de la case (x,y) est placé à ((x+0,5)×32, (y+0,5)×32). Le sprite de fond et la grille partagent ainsi la même origine.
+
+**Anomalie de placement à résoudre avant validation artistique :** le générateur indique une position de référence en pixels (240,380) pour le « Coffre moussu », soit la case (15,23). Cette case est fermée dans le masque actuel ; la case praticable la plus proche est (21,29), à 12 cases de distance Manhattan. Le point actuellement enregistré est donc très éloigné de son ancrage artistique prévu. Il n'a pas été déplacé arbitrairement : il faut inspecter l'illustration et décider si le masque doit être ouvert autour du coffre ou si l'ancrage pixel de ce POI est erroné.
+
+Le générateur `tools/gen_board.py` a été durci : il conserve désormais le nom et l'extension de l'image source dans le JSON (au lieu de forcer un chemin `.jpg`) et interrompt la génération lorsqu'un POI doit être déplacé de plus de quatre cases pour rejoindre le masque. Cela évite de produire silencieusement des lieux manifestement décalés. La validation visuelle de l'image et le lancement dans Godot restent nécessaires ; ils ne sont pas remplacés par ces contrôles structurels.
