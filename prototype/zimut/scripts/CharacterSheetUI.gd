@@ -95,6 +95,11 @@ static func _box(bg: Color, border: Color, radius: int = 14, bw: int = 2, margin
 	return s
 
 
+## 16.8 → « +17 » (arrondi, sans décimale inutile).
+static func _fmt_pct(x: float, sign: String = "+") -> String:
+	return "%s%d" % [sign, roundi(x)]
+
+
 func _lbl(text: String, size: int = 20, col: Color = C_TXT, outline: bool = false) -> Label:
 	var l := Label.new()
 	l.text = text
@@ -978,8 +983,20 @@ func _spell_card(parent: Control, s: Dictionary, char_level: int, free_pts: int)
 		if not maxed:
 			txt += "   →   %d au niveau %d" % [int(nxt["value"]), slvl + 1]
 		v.add_child(_lbl(txt, 19, C_GOOD))
+	elif not (pv.get("pct_effect", {}) as Dictionary).is_empty():
+		# Effet en % : valeur réelle à ce niveau → au suivant (la description ci-dessus donne la valeur de base)
+		var pe: Dictionary = pv["pct_effect"]
+		var sgn: String = "-" if String(pe["label"]).begins_with("Affaiblissement") else "+"
+		var etxt: String = "%s : %s %%" % [pe["label"], _fmt_pct(float(pe["value"]), sgn)]
+		if slvl < ProgressionManager.SPELL_LEVEL_MAX:
+			etxt += "   →   %s %% au niveau %d" % [_fmt_pct(float(pe["next"]), sgn), slvl + 1]
+		var el: Label = _lbl(etxt, 19, C_GOOD)
+		el.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(el)
 	elif slvl > 1:
-		v.add_child(_lbl("Efficacité : +%d %%" % roundi((float(pv["mult"]) - 1.0) * 100.0), 19, C_GOOD))
+		var pl: Label = _lbl("Puissance : +%d %% par rapport au niveau 1" % roundi((float(pv["mult"]) - 1.0) * 100.0), 19, C_GOOD)
+		pl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(pl)
 
 	# Paliers de durée / portée (sorts à effet fixe : +PA, +PM, immunités… et sorts utilitaires)
 	var perks: Dictionary = pv.get("perks", {})
@@ -989,7 +1006,10 @@ func _spell_card(parent: Control, s: Dictionary, char_level: int, free_pts: int)
 	if int(perks.get("range", 0)) > 0 and bool(pv.get("range_scales", false)):
 		bonus_txt.append("portée +%d" % int(perks["range"]))
 	if not bonus_txt.is_empty():
-		v.add_child(_lbl("Bonus de niveau : " + ", ".join(bonus_txt) + "  (paliers : durée niv. 5 et 10, portée niv. 4 et 8)", 17, C_GOOD))
+		# autowrap : sans lui cette ligne (~800 px) élargissait toute la grille et la fiche débordait de l'écran
+		var bl: Label = _lbl("Bonus de niveau : " + ", ".join(bonus_txt) + "  (paliers : durée niv. 5 et 10, portée niv. 4 et 8)", 17, C_GOOD)
+		bl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(bl)
 
 	# 10 crans de niveau
 	var pips := HBoxContainer.new()
