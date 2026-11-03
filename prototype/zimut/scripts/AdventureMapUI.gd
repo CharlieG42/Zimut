@@ -1112,7 +1112,7 @@ func _walk(path: Array[Vector2i]) -> void:
 	# les longs trajets sont plus rapides (jusqu'à deux fois)
 	var step_time: float = STEP_TIME * clampf(8.0 / float(maxi(1, path.size())), 0.5, 1.0)
 	if is_board():
-		step_time = BOARD_STEP_TIME * clampf(16.0 / float(maxi(1, path.size())), 0.5, 1.0)
+		step_time = BOARD_STEP_TIME
 	for step: Vector2i in path:
 		if _redirect.x >= 0:
 			break
