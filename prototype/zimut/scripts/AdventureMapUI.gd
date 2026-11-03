@@ -21,7 +21,7 @@ const BOARD_SCALE := 0.78          # V83 : échelle d'une planche illustrée
 const PAN_THRESHOLD := 14.0
 const SIDE_W := 440.0
 const STEP_TIME := 0.15
-const BOARD_STEP_TIME := 0.085  # V84 : cases deux fois plus fines sur la planche
+const BOARD_STEP_TIME := 0.24   # laisse le temps de lire une foulée complète sur la planche
 const HELP_STEPS := 30          # l'aide de contrôle disparaît après ces premiers pas
 const DIM := Color(0.80, 0.84, 0.92)          # texte secondaire (plus clair que UiKit.C_DIM)
 
@@ -496,6 +496,7 @@ func _rebuild_world() -> void:
 		var poi: Dictionary = pois[k]
 		var node := PoiNode.new()
 		node.kind = String(poi.get("kind", "combat"))
+		node.is_dungeon = Dungeons.is_dungeon(poi)
 		node.title = String(poi.get("name", "?"))
 		node.level = int(poi.get("level", 10))
 		node.biome = biome
@@ -573,6 +574,7 @@ func _rebuild_board(biome: String) -> void:
 		var poi: Dictionary = pois[k]
 		var node := PoiNode.new()
 		node.kind = String(poi.get("kind", "combat"))
+		node.is_dungeon = Dungeons.is_dungeon(poi)
 		node.title = String(poi.get("name", "?"))
 		node.level = int(poi.get("level", 10))
 		node.biome = biome
@@ -638,7 +640,7 @@ func _refresh_world() -> void:
 				pn.done = manager.poi_done(p) and pn.kind != "camp"
 				var hp: Vector2i = manager.hero_pos()
 				var near: int = 4 if is_board() else 2
-				pn.show_label = (absi(p.x - hp.x) + absi(p.y - hp.y) <= near or p == _board.hover) and not pn.done
+				pn.show_label = (pn.is_dungeon or absi(p.x - hp.x) + absi(p.y - hp.y) <= near or p == _board.hover) and not pn.done
 				pn.z_index = 3 if pn.show_label else 0  # étiquette lisible au-dessus des voisins
 				pn.queue_redraw()
 			elif n is GateNode:
@@ -1110,7 +1112,7 @@ func _walk(path: Array[Vector2i]) -> void:
 	# les longs trajets sont plus rapides (jusqu'à deux fois)
 	var step_time: float = STEP_TIME * clampf(8.0 / float(maxi(1, path.size())), 0.5, 1.0)
 	if is_board():
-		step_time = BOARD_STEP_TIME * clampf(16.0 / float(maxi(1, path.size())), 0.5, 1.0)
+		step_time = BOARD_STEP_TIME
 	for step: Vector2i in path:
 		if _redirect.x >= 0:
 			break
@@ -1119,14 +1121,14 @@ func _walk(path: Array[Vector2i]) -> void:
 			break
 		var from: Vector2 = _hero.position
 		var to: Vector2 = cell_center(step)
-		_hero.face(to.x - from.x)
+		_hero.locomotion(to - from, true)
 		var fresh: Array = manager.move_hero(step)
 		if _board.preview.size() > 0:
 			_board.preview.remove_at(0)
 		var tw := create_tween()
 		tw.tween_method(func(f: float) -> void:
 			_hero.position = from.lerp(to, f)
-			_hero.hop = sin(f * PI) * 10.0, 0.0, 1.0, step_time)
+			_hero.hop = sin(f * PI) * 7.0, 0.0, 1.0, step_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		_after_step()
 		if not _pan_moved:
 			_focus_cell(step, true, step_time)
@@ -1140,6 +1142,8 @@ func _walk(path: Array[Vector2i]) -> void:
 			_refresh_world()
 			_refresh_side()
 			if _check_mastery():
+				_hero.locomotion(Vector2.ZERO, false)
+				_hero.hop = 0.0
 				_walking = false
 				_board.preview = []
 				return
@@ -1149,6 +1153,8 @@ func _walk(path: Array[Vector2i]) -> void:
 		var ev: Dictionary = manager.roll_event(_rng)
 		if not ev.is_empty():
 			_show_event(ev)
+	_hero.locomotion(Vector2.ZERO, false)
+	_hero.hop = 0.0
 	_walking = false
 	_board.preview = []
 	if _help_panel != null and manager.moves() >= HELP_STEPS:
@@ -2190,6 +2196,8 @@ class AdventureBoard extends Node2D:
 
 	func _process(delta: float) -> void:
 		_t += delta
+		if walking:
+			_gait_t += delta
 		queue_redraw()
 
 	func _diamond(c: Vector2, s: float = 1.0) -> PackedVector2Array:
@@ -2363,6 +2371,7 @@ class DecorNode extends Node2D:
 ## Lieu remarquable : objet au sol, halo, icône flottante, nom, ennemi pour les camps.
 class PoiNode extends Node2D:
 	var kind: String = "combat"
+	var is_dungeon: bool = false
 	var title: String = ""
 	var level: int = 10
 	var biome: String = "Forêt"
@@ -2385,12 +2394,16 @@ class PoiNode extends Node2D:
 		queue_redraw()
 
 	func _draw() -> void:
-		var col: Color = POI_COLOR.get(kind, Color.WHITE)
-		var pulse: float = 0.5 + 0.5 * sin(_t * 2.4)
+		var col: Color = Color(0.72, 0.43, 1.0) if is_dungeon else POI_COLOR.get(kind, Color.WHITE)
+		var pulse: float = 0.5 + 0.5 * sin(_t * (2.0 if is_dungeon else 2.4))
 		if not done:
 			draw_set_transform(Vector2(0, 4), 0.0, Vector2(1.0, 0.5))
-			draw_circle(Vector2.ZERO, 46.0 + pulse * 4.0, Color(col.r, col.g, col.b, 0.16))
-			draw_arc(Vector2.ZERO, 44.0 + pulse * 4.0, 0.0, TAU, 40, Color(col.r, col.g, col.b, 0.75), 3.0, true)
+			if is_dungeon:
+				# Double halo violet : le seuil reste repérable même à l'échelle générale.
+				draw_circle(Vector2.ZERO, 68.0 + pulse * 8.0, Color(0.58, 0.28, 1.0, 0.10 + 0.08 * pulse))
+				draw_arc(Vector2.ZERO, 58.0 + pulse * 6.0, 0.0, TAU, 48, Color(0.82, 0.58, 1.0, 0.88), 4.0, true)
+			draw_circle(Vector2.ZERO, 46.0 + pulse * 4.0, Color(col.r, col.g, col.b, 0.18 if is_dungeon else 0.16))
+			draw_arc(Vector2.ZERO, 44.0 + pulse * 4.0, 0.0, TAU, 40, Color(col.r, col.g, col.b, 0.85 if is_dungeon else 0.75), 4.0 if is_dungeon else 3.0, true)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		var mod: Color = Color(1, 1, 1) if not done else Color(0.62, 0.62, 0.66)
 		if prop != "":
@@ -2419,12 +2432,17 @@ class PoiNode extends Node2D:
 			draw_texture_rect(enemy_tex, Rect2(Vector2(-w * 0.5 + 14.0, -h + 6.0), Vector2(w, h)), false)
 		# Icône flottante
 		var bob: float = sin(_t * 2.0) * 4.0
-		var ic := Vector2(0, -100 + bob)
-		draw_circle(ic + Vector2(0, 3), 24.0, Color(0, 0, 0, 0.35))
-		draw_circle(ic, 24.0, Color(0.06, 0.08, 0.14, 0.95))
-		draw_arc(ic, 23.0, 0.0, TAU, 36, col if not done else Color(0.5, 0.5, 0.55), 3.0, true)
+		var icon_r: float = 29.0 if is_dungeon else 24.0
+		var icon_size: float = 48.0 if is_dungeon else 38.0
+		var icon_y: float = -118.0 if is_dungeon else -100.0
+		var ic := Vector2(0, icon_y + bob)
+		if is_dungeon and not done:
+			draw_circle(ic, icon_r + 9.0 + pulse * 3.0, Color(0.66, 0.35, 1.0, 0.18))
+		draw_circle(ic + Vector2(0, 3), icon_r, Color(0, 0, 0, 0.42))
+		draw_circle(ic, icon_r, Color(0.06, 0.08, 0.14, 0.97))
+		draw_arc(ic, icon_r - 1.0, 0.0, TAU, 40, col if not done else Color(0.5, 0.5, 0.55), 4.0 if is_dungeon else 3.0, true)
 		if icon != null:
-			draw_texture_rect(icon, Rect2(ic - Vector2(19, 19), Vector2(38, 38)), false, mod)
+			draw_texture_rect(icon, Rect2(ic - Vector2(icon_size * 0.5, icon_size * 0.5), Vector2(icon_size, icon_size)), false, mod)
 		if done:
 			draw_circle(ic + Vector2(19, -18), 11.0, Color(0.25, 0.75, 0.35))
 			draw_string(ThemeDB.fallback_font, ic + Vector2(12, -12), "✓", HORIZONTAL_ALIGNMENT_CENTER, 14.0, 16, Color.WHITE)
@@ -2484,12 +2502,44 @@ class FindNode extends Node2D:
 ## Héros : sprite de la classe de l'explorateur, ombre, anneau doré, petit rebond.
 class HeroView extends Node2D:
 	var tex: Texture2D = null
+	var walk_poses: Array[Texture2D] = []
+	var back_tex: Texture2D = null
+	var back_walk_poses: Array[Texture2D] = []
+	var idle_poses: Array[Texture2D] = []
+	var back_idle_poses: Array[Texture2D] = []
 	var hop: float = 0.0
 	var _flip: bool = false
+	var walking: bool = false
+	var _walk_dir: Vector2 = Vector2.DOWN
 	var _t: float = 0.0
+	var _gait_t: float = 0.0
 
 	func _ready() -> void:
+		# Les poses sont rangées à côté du sprite de classe (comme pour EntityView).
+		# On charge toutes les variantes walk_2…, idle_2… et back_walk_2… disponibles.
+		if tex != null:
+			var sprite_key: String = tex.resource_path.get_file().get_basename()
+			var pose_root: String = "res://assets/sprites/nations/heros/poses/"
+			var back_path: String = pose_root + sprite_key + "_back.png"
+			if ResourceLoader.exists(back_path):
+				back_tex = load(back_path) as Texture2D
+			walk_poses = _load_pose_variants(pose_root + sprite_key + "_walk", false)
+			back_walk_poses = _load_pose_variants(pose_root + sprite_key + "_back_walk", false)
+			idle_poses = _load_pose_variants(pose_root + sprite_key + "_idle", true)
+			back_idle_poses = _load_pose_variants(pose_root + sprite_key + "_back_idle", true)
 		set_process(true)
+
+	func _load_pose_variants(stem: String, skip_first: bool) -> Array[Texture2D]:
+		var result: Array[Texture2D] = []
+		for index: int in range(1, 10):
+			if skip_first and index == 1:
+				continue
+			var path: String = stem + ".png" if index == 1 else stem + "_%d.png" % index
+			if ResourceLoader.exists(path):
+				var pose_tex: Texture2D = load(path) as Texture2D
+				if pose_tex != null:
+					result.append(pose_tex)
+		return result
 
 	func _process(delta: float) -> void:
 		_t += delta
@@ -2499,6 +2549,17 @@ class HeroView extends Node2D:
 		if absf(dx) > 1.0:
 			_flip = dx < 0.0
 
+	func locomotion(direction: Vector2, active: bool) -> void:
+		if active and not walking:
+			_gait_t = 0.0
+		walking = active
+		if not active:
+			_gait_t = 0.0
+		if direction.length_squared() > 0.01:
+			_walk_dir = direction.normalized()
+			face(direction.x)
+			queue_redraw()
+
 	func _draw() -> void:
 		draw_set_transform(Vector2(0, 4), 0.0, Vector2(1.0, 0.45))
 		draw_circle(Vector2.ZERO, 34.0, Color(0, 0, 0, 0.30))
@@ -2507,14 +2568,36 @@ class HeroView extends Node2D:
 		if tex == null:
 			draw_circle(Vector2(0, -40), 24.0, Color(0.9, 0.8, 0.4))
 			return
+		var facing_back: bool = _walk_dir.y < -0.12
+		var rest_tex: Texture2D = back_tex if facing_back and back_tex != null else tex
+		var display_tex: Texture2D = rest_tex
+		# Petite variation de repos : le héros change naturellement d'attitude après quelques secondes.
+		if not walking:
+			var idle_pool: Array[Texture2D] = back_idle_poses if facing_back else idle_poses
+			if not idle_pool.is_empty() and fposmod(_t, 8.0) > 5.5:
+				display_tex = idle_pool[posmod(int(_t / 5.5), idle_pool.size())]
+		# Foulée en deux temps : appui sur la pose de marche, puis retour au repos.
+		var walk_pool: Array[Texture2D] = back_walk_poses if facing_back else walk_poses
+		if walking and not walk_pool.is_empty():
+			var gait_step: int = int(_gait_t / 0.12)
+			if gait_step % 2 == 0:
+				display_tex = walk_pool[(gait_step >> 1) % walk_pool.size()]
 		var h: float = 104.0
-		var sc: float = h / float(tex.get_height())
-		var w: float = float(tex.get_width()) * sc
+		var sc: float = h / float(display_tex.get_height())
+		var w: float = float(display_tex.get_width()) * sc
 		var breathe: float = sin(_t * 2.2) * 1.5
-		var y: float = -h + 6.0 - hop - breathe
+		var stride: float = sin(_gait_t * TAU / 0.24) if walking else 0.0
+		var bob: float = absf(stride) * 3.0 if walking else 0.0
+		var lean: float = _walk_dir.x * 2.0 if walking else 0.0
+		var y: float = -h + 6.0 - hop - breathe - bob
+		var x: float = lean + (stride * 1.2 if walking else 0.0)
 		if _flip:
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0, 1.0))
-		draw_texture_rect(tex, Rect2(Vector2(-w * 0.5, y), Vector2(w, h + breathe)), false)
+		# Liseré sombre discret pour détacher le héros des feuillages clairs.
+		var rect := Rect2(Vector2(x - w * 0.5, y), Vector2(w, h + breathe))
+		for o: Vector2 in [Vector2(-1.5, 0), Vector2(1.5, 0), Vector2(0, -1.5), Vector2(0, 1.5)]:
+			draw_texture_rect(display_tex, Rect2(rect.position + o, rect.size), false, Color(0.05, 0.07, 0.10, 0.42))
+		draw_texture_rect(display_tex, rect, false)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
