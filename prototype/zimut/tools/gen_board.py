@@ -4,11 +4,13 @@ Usage : python3 tools/gen_board.py <image.png> foret_sylve
 Le masque est détecté par couleur (sentiers et clairières claires), puis corrigé à la main
 (blocs = couronnes d'arbres ; traits = passages vers les entrées de donjon)."""
 import sys, json
+from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
 from scipy import ndimage as ndi
 
 CELL = 16                                   # pixels d'image par case
+MAX_POI_SNAP_CELLS = 4                       # au-delà, la position du lieu doit être corrigée manuellement
 src, name = sys.argv[1], sys.argv[2]
 im = Image.open(src).convert("RGB")
 W, H = im.size
@@ -128,16 +130,22 @@ for px, py, dfn in POIS:
     c = near(px, py)
     if c is None or c in [tuple(map(int, k.split(","))) for k in pois]:
         continue
-    if abs(c[0] - px // CELL) + abs(c[1] - py // CELL) > 4:
-        print("AVERTISSEMENT lieu éloigné de sa place :", dfn["name"], c, (px // CELL, py // CELL))
+    snap_distance = abs(c[0] - px // CELL) + abs(c[1] - py // CELL)
+    if snap_distance > MAX_POI_SNAP_CELLS:
+        raise SystemExit("ERREUR : lieu trop éloigné du point prévu : %s — cible %s, case retenue %s (écart Manhattan %d cases). Corriger le masque ou la position pixel avant de générer la carte." % (dfn["name"], (px // CELL, py // CELL), c, snap_distance))
     pois["%d,%d" % c] = dfn
 
-out = {"image": "res://assets/boards/%s.jpg" % name, "image_size": [W, H], "cell_px": CELL,
+image_name = Path(src).name
+image_output = Path("assets/boards") / image_name
+out = {"image": "res://assets/boards/%s" % image_name, "image_size": [W, H], "cell_px": CELL,
        "cols": COLS, "rows": ROWS, "start": list(start),
        "mask": ["".join("#" if grid[y, x] else "." for x in range(COLS)) for y in range(ROWS)],
        "pois": pois}
 json.dump(out, open("data/boards/%s.json" % name, "w"), ensure_ascii=False, indent=0)
-im.save("assets/boards/%s.jpg" % name, quality=92)
+if image_output.suffix.lower() in (".jpg", ".jpeg"):
+    im.save(image_output, quality=92)
+else:
+    im.save(image_output)
 ov = np.asarray(im).copy()
 for y in range(ROWS):
     for x in range(COLS):
