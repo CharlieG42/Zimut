@@ -145,7 +145,23 @@ Cette carte montrera les territoires, les grandes voies de liaison et les accès
 - Décliner le système sur les neuf autres territoires.
 - Profiler les performances sur Android.
 
-## 9. Critères d'acceptation de la Nation Sylvestre
+## 9. Intégration initiale du nouveau fond
+
+Le fond de la Nation Sylvestre a été ajouté au dépôt sur `main` sous le nom exact :
+
+`assets/boards/Sylvestre.png`
+
+La définition `data/boards/foret_sylve.json` est mise à jour dans la branche de travail pour référencer ce PNG. La grille actuelle reste de 96 × 64 cases, avec un masque de déplacement existant et 18 points d'intérêt, dont les cinq donjons. Les coordonnées ne sont pas déplacées automatiquement : elles devront être validées visuellement sur la nouvelle illustration avant d'ajouter de nouveaux POI.
+
+Dans `AdventureMapUI.gd`, la carte illustrée conserve son défilement et le recentrage sur le héros. Le zoom a été ajouté :
+- pincement à deux doigts sur écran tactile ;
+- boutons + / − à l'écran pour les appareils mobiles ;
+- molette de souris en test sur ordinateur ;
+- zoom centré sur le point visé, avec limites pour préserver la lisibilité.
+
+Les contrôles de zoom ne modifient pas la position logique du héros ni la grille de déplacement.
+
+## 10. Critères d'acceptation de la Nation Sylvestre
 
 - La carte complète est parcourable sans réduire son échelle à l'écran.
 - Le héros se déplace uniquement sur les chemins et surfaces praticables.
