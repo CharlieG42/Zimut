@@ -2192,19 +2192,6 @@ class AdventureBoard extends Node2D:
 	var _t: float = 0.0
 
 	func _ready() -> void:
-		# Les poses de marche et de dos sont partagées avec les sprites de combat.
-		# Certaines classes n'ont pas encore toutes les poses : le sprite de repos reste le fallback.
-		if tex != null:
-			var sprite_key: String = tex.resource_path.get_file().get_basename()
-			var pose_root: String = "res://assets/sprites/nations/heros/poses/"
-			for pose: String in ["walk", "back", "back_walk"]:
-				var path: String = pose_root + sprite_key + "_" + pose + ".png"
-				if ResourceLoader.exists(path):
-					var pose_tex: Texture2D = load(path) as Texture2D
-					match pose:
-						"walk": walk_tex = pose_tex
-						"back": back_tex = pose_tex
-						"back_walk": back_walk_tex = pose_tex
 		set_process(true)
 
 	func _process(delta: float) -> void:
@@ -2523,6 +2510,21 @@ class HeroView extends Node2D:
 	var _t: float = 0.0
 
 	func _ready() -> void:
+		# Réutilise les poses de marche et de dos des sprites de combat.
+		# Les classes sans pose dédiée conservent le sprite de repos et son mouvement procédural.
+		if tex != null:
+			var sprite_key: String = tex.resource_path.get_file().get_basename()
+			var pose_root: String = "res://assets/sprites/nations/heros/poses/"
+			for pose: String in ["walk", "back", "back_walk"]:
+				var path: String = pose_root + sprite_key + "_" + pose + ".png"
+				if ResourceLoader.exists(path):
+					var pose_tex: Texture2D = load(path) as Texture2D
+					if pose == "walk":
+						walk_tex = pose_tex
+					elif pose == "back":
+						back_tex = pose_tex
+					elif pose == "back_walk":
+						back_walk_tex = pose_tex
 		set_process(true)
 
 	func _process(delta: float) -> void:
