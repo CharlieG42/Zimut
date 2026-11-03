@@ -803,14 +803,6 @@ func _leave_to(scene_path: String) -> void:
 	get_tree().change_scene_to_file(scene_path)
 
 
-## Change de vue d'Aventure (carte 2D / 3D iso) : la vue est mémorisée pour le retour de combat.
-func _switch_view(view: String, scene_path: String) -> void:
-	if manager != null and not manager.save.is_empty():
-		manager.save["adventure_view"] = view
-		manager.persist()
-	_leave_to(scene_path)
-
-
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
 		_touches.clear()
@@ -860,19 +852,13 @@ func _build_hud() -> void:
 	top.offset_right = -20.0
 	top.offset_top = 14.0
 	root.add_child(top)
-	var map2d: Button = _btn("🗺 Carte 2D", U.C_BORDER, 19, Vector2(150, 64))
-	map2d.pressed.connect(func() -> void: _switch_view("map", "res://scenes/AdventureMap.tscn"))
-	top.add_child(map2d)
-	var iso3d: Button = _btn("🎥 Vue 3D iso", U.C_BORDER, 19, Vector2(150, 64))
-	iso3d.pressed.connect(func() -> void: _switch_view("3d", "res://scenes/Adventure3D.tscn"))
-	top.add_child(iso3d)
 	var heroes: Button = _btn("🧑 Héros", U.C_BORDER, 19, Vector2(140, 64))
 	heroes.pressed.connect(_open_heroes)
 	top.add_child(heroes)
 	var loot: Button = _btn("🎒 Butin", U.C_BORDER, 19, Vector2(140, 64))
 	loot.pressed.connect(_open_loot)
 	top.add_child(loot)
-	var menu: Button = _btn("☰ Menu", U.C_BORDER, 19, Vector2(130, 64))
+	var menu: Button = _btn("← Mes Parties", U.C_BORDER, 19, Vector2(170, 64))
 	menu.pressed.connect(func() -> void: _leave_to("res://scenes/SaveSlots.tscn"))
 	top.add_child(menu)
 	# Bouton d'action contextuel (bas, entre les deux sticks)

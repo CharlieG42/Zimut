@@ -816,13 +816,10 @@ func _build_hud() -> void:
 	top.offset_right = -20.0
 	top.offset_top = 14.0
 	root.add_child(top)
-	var classic: Button = _btn("Carte classique", U.C_BORDER, 22, Vector2(260, 74))
-	classic.pressed.connect(func() -> void: _leave_to("res://scenes/AdventureMap.tscn"))
-	top.add_child(classic)
 	var heroes: Button = _btn("Héros", U.C_BORDER, 22, Vector2(150, 74))
 	heroes.pressed.connect(_open_heroes)
 	top.add_child(heroes)
-	var menu: Button = _btn("☰ Menu", U.C_BORDER, 22, Vector2(160, 74))
+	var menu: Button = _btn("← Mes Parties", U.C_BORDER, 22, Vector2(190, 74))
 	menu.pressed.connect(func() -> void: _leave_to("res://scenes/SaveSlots.tscn"))
 	top.add_child(menu)
 	# Bouton d'action contextuel (bas-droite)

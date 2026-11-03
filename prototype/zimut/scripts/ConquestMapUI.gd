@@ -504,7 +504,7 @@ func _build() -> void:
 	box.add_child(spacer)
 
 	_back_button = Button.new()
-	_back_button.text = "← MENU"
+	_back_button.text = "← MES PARTIES"
 	_back_button.custom_minimum_size.y = 50
 	_back_button.pressed.connect(_back_to_save)
 	_style_button(_back_button, Color(0.13, 0.22, 0.27), Color(0.55, 0.66, 0.5))

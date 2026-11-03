@@ -1289,7 +1289,7 @@ func _refresh_side() -> void:
 	_side_box.add_child(head)
 	head.add_child(U.lbl("🧭 AVENTURE", 28, U.C_GOLD, true))
 	head.add_child(U.spacer())
-	var back := U.btn("← PARTIE", Color(0.55, 0.62, 0.80), 20, Vector2(150, 56))
+	var back := U.btn("← MES PARTIES", Color(0.55, 0.62, 0.80), 20, Vector2(190, 56))
 	back.pressed.connect(_back_to_save)
 	head.add_child(back)
 
@@ -2196,8 +2196,6 @@ class AdventureBoard extends Node2D:
 
 	func _process(delta: float) -> void:
 		_t += delta
-		if walking:
-			_gait_t += delta
 		queue_redraw()
 
 	func _diamond(c: Vector2, s: float = 1.0) -> PackedVector2Array:
@@ -2543,6 +2541,8 @@ class HeroView extends Node2D:
 
 	func _process(delta: float) -> void:
 		_t += delta
+		if walking:
+			_gait_t += delta
 		queue_redraw()
 
 	func face(dx: float) -> void:
