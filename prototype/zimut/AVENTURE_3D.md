@@ -178,3 +178,11 @@ bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
 - Si `assets/nature/` est absent (`Adv3DKit.available()`), on retombe sur les maillages codés (V61-V86).
 - Coût : ~240 000 à 340 000 primitives par image sur les captures (ombres comprises) ; la qualité « Économie » coupe les ombres temps réel.
 - Bestiary (Imp, Puglin) : reçu mais non intégré (monstres ~9 Mo pièce, licence QAL : pas de redistribution comme assets).
+
+
+## V88 — Décors de Nation avec le kit (TEST)
+
+- `Adv3DKit.override_for(kind)` : décors de Nation rendus par un modèle du kit (`dead_tree` → DeadTree teinté gris-vert, `charred_tree` → DeadTree charbon, `tide_rock` → Rock_Medium). Les autres clés gardent leurs maillages `Adv3DNationMeshes` (lueurs).
+- `Adv3DKit.arena(model)` : modèles de la « Mini Arena » de Kenney (`assets/kenney_arena/`, CC0 : colonnes pour les piliers, statue/bannière/mur disponibles). Palette `colormap.png`.
+- Teintes par biome : rochers (Désert chaud, Montagne froid), piliers (sable), dalles de chemin (`RockPath_*`, 28 % des cases de sentier).
+- Les packs reçus qui restent à exploiter : Mini Arena `statue`, `wall`, `bricks`, `banner` (ruines, entrées de donjon) ; Bestiary (Imp, Puglin) pour des monstres animés.
