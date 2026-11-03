@@ -73,9 +73,6 @@ func _ready() -> void:
 			GameSettings.set_sfx(idx < 2)
 			GameSettings.set_haptics(idx == 0)))
 
-	grid.add_child(_setting_cell("Mode Aventure", ["Carte classique", "Monde 3D (bêta)"] as Array[String],
-		1 if GameSettings.adventure_3d else 0, func(idx: int) -> void: GameSettings.set_adventure_3d(idx == 1)))
-
 	grid.add_child(_setting_cell("Qualité graphique", GfxQuality.LABELS,
 		GameSettings.graphics_quality, func(idx: int) -> void: GameSettings.set_graphics_quality(idx)))
 
