@@ -45,6 +45,10 @@ func _boot() -> void:
 	check(open3d.contains('res://scenes/SaveSlots.tscn') and open3d.contains("Mes Parties"),
 		"le monde 3D conserve le retour à Mes Parties")
 
+	var iso3d: String = FileAccess.get_file_as_string("res://scripts/adventure3d/Adventure3D.gd")
+	check(not iso3d.contains('"Carte classique"') and iso3d.contains('res://scenes/SaveSlots.tscn'),
+		"la vue 3D isométrique ne propose plus de bascule vers la carte 2D et garde son retour menu")
+
 	var settings: String = FileAccess.get_file_as_string("res://scripts/SettingsUI.gd")
 	check(not settings.contains('"Mode Aventure"'), "le choix 2D/3D n'est plus un réglage global")
 
