@@ -535,7 +535,7 @@ static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: St
 		shadow_cl.append(Color.WHITE)
 	_multi(root, "OmbresDecors", Adv3DMeshes.shadow_mesh(), shadow_xf, shadow_cl, Adv3DMeshes.shadow_material())
 	var foliage: ShaderMaterial = Adv3DMeshes.foliage_material(0.16)
-	var solid: StandardMaterial3D = Adv3DMeshes.solid_material(true, true)
+	var solid: ShaderMaterial = Adv3DMeshes.solid_material(true, true)
 	_multi(root, "Pins", Adv3DMeshes.pine(snow), buckets["pine"]["xf"], buckets["pine"]["cl"], foliage)
 	_multi(root, "Feuillus", Adv3DMeshes.broadleaf(), buckets["round"]["xf"], buckets["round"]["cl"], foliage)
 	_multi(root, "Bouleaux", Adv3DMeshes.birch(), buckets["birch"]["xf"], buckets["birch"]["cl"], foliage)
@@ -894,9 +894,18 @@ static func _multi_one(parent: Node3D, node_name: String, mesh: Mesh, xforms: Ar
 	mmi.name = node_name
 	mmi.multimesh = mm
 	mmi.material_override = mat
-	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if (Adv3DMeshes.real_shadows and _casts_shadow(node_name)) \
+		else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	parent.add_child(mmi)
 	return mmi
+
+
+## V85 : seuls les gros décors projettent l'ombre du soleil (pas l'herbe, les fleurs, les cailloux).
+static func _casts_shadow(node_name: String) -> bool:
+	for pre: String in ["Pins", "Feuillus", "Bouleaux", "Palmiers", "Rochers", "Cactus", "Souches", "Cristaux", "Piliers", "Buissons", "Nation_"]:
+		if node_name.begins_with(pre):
+			return true
+	return false
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -1008,7 +1017,7 @@ static func make_islets(size: Vector2i, biome: String, seed_v: int) -> Node3D:
 	var d: float = float(size.y) * CELL
 	var top: Color = (pal["ground"] as Array)[0]
 	var rock: Color = (pal["cliff_top"] as Color).lerp(pal["cliff_bot"], 0.2)
-	var mat: StandardMaterial3D = Adv3DMeshes.solid_material(true)
+	var mat: ShaderMaterial = Adv3DMeshes.solid_material(true)
 	var foliage: ShaderMaterial = Adv3DMeshes.foliage_material(0.12)
 	var count: int = 9
 	for i: int in range(count):

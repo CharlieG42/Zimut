@@ -113,6 +113,9 @@ func _build_environment() -> void:
 	sky_mat.sky_horizon_color = pal["sky_hor"]
 	sky_mat.ground_bottom_color = (pal["sky_hor"] as Color).darkened(0.35)
 	sky_mat.ground_horizon_color = pal["sky_hor"]
+	sky_mat.sky_curve = 0.2             # V85 : dégradé de ciel plus riche, disque solaire visible
+	sky_mat.sun_angle_max = 28.0
+	sky_mat.sun_curve = 0.12
 	var sky := Sky.new()
 	sky.sky_material = sky_mat
 	var env := Environment.new()
@@ -157,7 +160,7 @@ func _build_environment() -> void:
 			sky_mat.ground_horizon_color = sky_mat.sky_horizon_color
 			env.fog_light_color = (pal["fog"] as Color).lerp(Color(0.94, 0.90, 0.95), 0.4)
 			env.fog_density = float(pal.get("fog_density", 0.0035)) * 1.7
-	sun.shadow_enabled = false          # mobile d'abord : pas d'ombres temps réel
+	Adv3DMeshes.setup_sun(sun, env)     # V85 : ombres temps réel en qualité Haute, sinon ombres rondes
 	add_child(sun)
 
 

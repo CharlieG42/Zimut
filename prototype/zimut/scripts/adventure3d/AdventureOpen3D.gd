@@ -139,6 +139,9 @@ func _build_environment() -> void:
 	sky_mat.sky_horizon_color = pal["sky_hor"]
 	sky_mat.ground_bottom_color = (pal["sky_hor"] as Color).darkened(0.35)
 	sky_mat.ground_horizon_color = pal["sky_hor"]
+	sky_mat.sky_curve = 0.2             # V85 : dégradé de ciel plus riche, disque solaire visible
+	sky_mat.sun_angle_max = 28.0
+	sky_mat.sun_curve = 0.12
 	var sky := Sky.new()
 	sky.sky_material = sky_mat
 	var env := Environment.new()
@@ -146,7 +149,7 @@ func _build_environment() -> void:
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = (pal.get("ambient", Color(0.78, 0.84, 0.92)) as Color).lerp(Color(0.78, 0.84, 0.92), 0.35)
-	env.ambient_light_energy = 0.72         # V81 : un peu plus de lumière sur les grandes zones
+	env.ambient_light_energy = 0.6          # V85 : éclairage cartoon (le soleil fait le modelé)
 	env.fog_enabled = true
 	env.fog_light_color = pal["fog"]
 	env.fog_density = float(pal.get("fog_density", 0.0035)) * 1.25   # V81 : le brouillard voile les bords des grandes instances
@@ -156,14 +159,14 @@ func _build_environment() -> void:
 	env.glow_intensity = 0.55
 	env.glow_bloom = 0.05
 	env.adjustment_enabled = true
-	env.adjustment_saturation = float(pal.get("sat", 1.15)) * 1.08
-	env.adjustment_contrast = 1.08
+	env.adjustment_saturation = float(pal.get("sat", 1.15)) * 0.96
+	env.adjustment_contrast = 1.1
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
 	var sun := DirectionalLight3D.new()
 	sun.light_color = pal["sun"]
-	sun.light_energy = 1.0
+	sun.light_energy = 0.92
 	sun.rotation_degrees = Vector3(-52.0, -38.0, 0.0)
 	match Adv3DWorld.time_of_day(zone_id, String(terrain["biome"])):
 		"soir":
@@ -182,7 +185,7 @@ func _build_environment() -> void:
 			sky_mat.ground_horizon_color = sky_mat.sky_horizon_color
 			env.fog_light_color = (pal["fog"] as Color).lerp(Color(0.94, 0.90, 0.95), 0.4)
 			env.fog_density = float(pal.get("fog_density", 0.0035)) * 1.7
-	sun.shadow_enabled = false          # mobile d'abord : pas d'ombres temps réel
+	Adv3DMeshes.setup_sun(sun, env)     # V85 : ombres temps réel en qualité Haute, sinon ombres rondes
 	add_child(sun)
 
 

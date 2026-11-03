@@ -10,24 +10,68 @@ extends RefCounted
 ## Les couleurs sont données en sRGB (ce que l'on voit) ; les matériaux les convertissent.
 
 static var _cache: Dictionary = {}
+## V85 : ombres temps réel du soleil actives (qualité Haute) — les ombres rondes au sol s'allègent alors.
+static var real_shadows: bool = false
+
+
+## Règle le soleil et l'environnement (ombres portées, éclat, lueur du soleil dans la brume).
+static func setup_sun(sun: DirectionalLight3D, env: Environment) -> void:
+	real_shadows = not GfxQuality.low()
+	sun.shadow_enabled = real_shadows
+	if real_shadows:
+		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+		sun.directional_shadow_max_distance = 70.0
+		sun.directional_shadow_split_1 = 0.28
+		sun.shadow_bias = 0.06
+		sun.shadow_normal_bias = 1.4
+		sun.shadow_blur = 1.6
+	env.fog_sun_scatter = 0.22
+	env.glow_hdr_threshold = 0.95
+
 
 
 # ══════════════════════════════════════════════════════════════════════
 #  Matériaux
 # ══════════════════════════════════════════════════════════════════════
 
+## V85 : éclairage « cartoon » façon Zelda / Genshin — dégradé en paliers adoucis (lumière chaude,
+## ombres teintées), liseré lumineux (rim) côté soleil, ombres portées du soleil quand elles sont actives.
+const TOON_LIGHT := """
+uniform vec3 rim_color : source_color = vec3(1.0, 0.93, 0.78);
+uniform float rim = 0.45;
+uniform float toon = 0.7;
+uniform vec3 shade_tint : source_color = vec3(0.62, 0.66, 0.95);
+void light() {
+	float ndl = dot(NORMAL, LIGHT);
+	float h = ndl * 0.5 + 0.5;
+	float soft = h * h * (3.0 - 2.0 * h);
+	float band = smoothstep(0.40, 0.55, h) * 0.55 + smoothstep(0.68, 0.82, h) * 0.45;
+	float lit = mix(soft, band, toon);
+	float sh = ATTENUATION;
+	vec3 shade = mix(shade_tint, vec3(1.0), sh);
+	DIFFUSE_LIGHT += LIGHT_COLOR * lit * sh / PI;
+	DIFFUSE_LIGHT *= shade;
+	float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
+	DIFFUSE_LIGHT += rim_color * fres * rim * clamp(ndl + 0.6, 0.0, 1.0) * sh * 0.5;
+}
+"""
+
+## Feuillage et décor : couleurs de sommets (sRGB), balancement au vent croissant avec la hauteur
+## (sway = 0 pour les objets rigides) et éclairage cartoon (TOON_LIGHT).
 const FOLIAGE_SHADER := """
 shader_type spatial;
-render_mode cull_disabled, specular_disabled;
-// Feuillage : couleurs de sommets (sRGB) + balancement au vent croissant avec la hauteur.
+render_mode @CULL@ specular_disabled;
 uniform float sway = 0.16;
 uniform float speed = 1.5;
 // Normales tirées vers le haut : l'herbe et les feuillages restent éclairés des deux côtés
 // (sinon le revers des brins, tourné à l'opposé du soleil, paraît presque noir).
 uniform float normal_up = 0.35;
+uniform float flip_back = 0.0;
 // Fondu « tramé » près de la caméra : un buisson qui passe devant l'objectif devient transparent.
 uniform float fade_near = 1.0;
 uniform float fade_far = 2.6;
+uniform float emit = 0.12;
+varying vec3 wpos;
 float bayer4(vec2 p) {
 	ivec2 q = ivec2(mod(p, 4.0));
 	int i = q.x + q.y * 4;
@@ -41,6 +85,7 @@ void vertex() {
 	float w = sin(TIME * speed + ph) * 0.6 + sin(TIME * speed * 1.7 + ph * 1.3) * 0.25;
 	VERTEX.x += w * sway * h * h * 0.18;
 	VERTEX.z += cos(TIME * speed * 0.8 + ph) * sway * h * h * 0.10;
+	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 }
 void fragment() {
 	float dist = length(VERTEX);
@@ -50,40 +95,52 @@ void fragment() {
 			discard;
 		}
 	}
+	if (flip_back > 0.5 && !FRONT_FACING) {
+		NORMAL = -NORMAL;
+	}
 	vec3 up_v = normalize((VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
 	NORMAL = normalize(mix(NORMAL, up_v, normal_up));
-	ALBEDO = pow(max(COLOR.rgb, vec3(0.0)), vec3(2.2));
-	EMISSION = ALBEDO * 0.22;
+	// Variation douce de teinte à grande échelle (aplats peints) : évite les surfaces uniformes.
+	float v = sin(wpos.x * 0.35 + sin(wpos.z * 0.23) * 2.0) * sin(wpos.z * 0.31 + sin(wpos.x * 0.19) * 2.0);
+	vec3 col = COLOR.rgb * (1.0 + v * 0.06);
+	ALBEDO = pow(max(col, vec3(0.0)), vec3(2.2));
+	EMISSION = ALBEDO * emit;
 	ROUGHNESS = 0.92;
 }
-"""
+""" + TOON_LIGHT
 
 
-## Matériau opaque à couleurs de sommets sRGB (sol, rochers, falaises).
-static func solid_material(double_sided: bool = false, near_fade: bool = false) -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED   # évite les taches noires (NaN) sur GPU mobiles
-	m.vertex_color_use_as_albedo = true
-	m.vertex_color_is_srgb = true
-	m.roughness = 0.95
-	if double_sided:
-		m.cull_mode = BaseMaterial3D.CULL_DISABLED
+static func _shader_for(double_sided: bool) -> Shader:
+	var key: String = "toon_ds" if double_sided else "toon_cb"
+	if not _cache.has(key):
+		var sh := Shader.new()
+		sh.code = FOLIAGE_SHADER.replace("@CULL@", "cull_disabled," if double_sided else "cull_back,")
+		_cache[key] = sh
+	return _cache[key]
+
+
+## Matériau opaque à couleurs de sommets sRGB (sol, rochers, falaises), éclairage cartoon.
+static func solid_material(double_sided: bool = false, near_fade: bool = false) -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	m.shader = _shader_for(double_sided)
+	m.set_shader_parameter("sway", 0.0)
+	m.set_shader_parameter("normal_up", 0.0)
+	m.set_shader_parameter("flip_back", 1.0 if double_sided else 0.0)
+	m.set_shader_parameter("emit", 0.05)
 	if near_fade:
 		# un rocher / une souche qui passe devant la caméra s'efface (tramage, sans tri de transparence)
-		m.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER
-		m.distance_fade_min_distance = 1.0
-		m.distance_fade_max_distance = 2.6
+		m.set_shader_parameter("fade_near", 1.0)
+		m.set_shader_parameter("fade_far", 2.6)
+	else:
+		m.set_shader_parameter("fade_near", 0.0)
+		m.set_shader_parameter("fade_far", 0.0)
 	return m
 
 
 ## Matériau de feuillage qui ondule au vent.
 static func foliage_material(sway: float = 0.16, up: float = 0.35) -> ShaderMaterial:
-	if not _cache.has("foliage_shader"):
-		var sh := Shader.new()
-		sh.code = FOLIAGE_SHADER
-		_cache["foliage_shader"] = sh
 	var m := ShaderMaterial.new()
-	m.shader = _cache["foliage_shader"]
+	m.shader = _shader_for(true)
 	m.set_shader_parameter("sway", sway)
 	m.set_shader_parameter("normal_up", up)
 	return m
@@ -95,7 +152,7 @@ static func shadow_material() -> StandardMaterial3D:
 	m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED   # évite les taches noires (NaN) sur GPU mobiles
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	m.albedo_color = Color(0.04, 0.07, 0.03, 0.34)
+	m.albedo_color = Color(0.04, 0.07, 0.03, 0.16 if real_shadows else 0.34)
 	m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	m.no_depth_test = false
 	return m
