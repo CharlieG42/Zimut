@@ -143,3 +143,23 @@ Les variantes par Nation partageront une silhouette et une qualité de rendu coh
 - La fenêtre Options a été agrandie et ses titres, libellés, boutons et informations de version ont une taille de police supérieure.
 - La carte Conquête prend en charge le pincement à deux doigts sur écran tactile, avec un zoom minimal de `1.0` (le cadrage de référence actuel) et un maximum de `2.2`. La molette de souris permet également de zoomer et dézoomer en test sur ordinateur.
 - Premier lot complémentaire de sprites SVG créé pour les Nations des Vents, des Marées, du Brasier et des Cristaux. Ces variantes doivent encore être affectées aux villes dans les données et testées en jeu.
+
+
+## 10. Monde Aventure — 10 Nations
+
+La direction est désormais validée : le monde d'Aventure est composé de dix grandes cartes de Nation continues, parcourables librement en vue isométrique 2.5D. Le joueur dispose de deux niveaux de lecture : une carte du monde synthétique et une carte détaillée pour la Nation active.
+
+La Nation Sylvestre sert de référence artistique et technique. Sa carte globale doit comporter cinq donjons physiques (quatre périphériques et un central), des territoires de monstres, des villages et des points de découverte (coffres, énigmes, sanctuaires, ressources et reliques).
+
+Le prototype possède déjà le défilement tactile, les interactions de POI, les monstres errants, les récompenses persistantes et le système de planches illustrées. La nouvelle carte doit remplacer le fond de la planche Sylvestre et réutiliser ces systèmes, sans créer une navigation parallèle.
+
+Voir [MONDE_AVENTURE_10_NATIONS.md](MONDE_AVENTURE_10_NATIONS.md) pour l'architecture, les règles de contenu, les recommandations de performance Android, les étapes d'intégration et les critères d'acceptation.
+
+
+## 11. Intégration de la carte Sylvestre — première passe
+
+Le nouveau fond a été ajouté au dépôt sous le nom exact `assets/boards/Sylvestre.png` (1536 × 864 px). La définition de la planche a été recalibrée sur 96 × 54 cases, avec 18 POI et cinq donjons repositionnés devant leurs portes visibles. Le masque compte 2 027 cases praticables toutes reliées au point de départ.
+
+Le mode carte illustrée dispose d'un zoom progressif (pincement tactile, boutons +/− et molette de souris), en complément du scrolling et du recentrage sur le héros. Le masque a été reconstruit à partir du contour de l'île, des bassins et des principaux bâtiments ; il reste une approximation à valider en jeu, notamment sur les chemins secondaires et les collisions.
+
+Voir `MONDE_AVENTURE_10_NATIONS.md` pour le détail de l'audit et les critères de validation.

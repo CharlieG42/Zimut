@@ -113,6 +113,14 @@ var _pan_moved: bool = false
 var _pan_total: float = 0.0
 var _cam_tween: Tween = null
 var _recenter_btn: Button = null
+var _zoom_in_btn: Button = null
+var _zoom_out_btn: Button = null
+var _touch_points: Dictionary = {} # index tactile -> position dans la vue
+var _pinch_active: bool = false
+var _pinch_start_distance: float = 0.0
+var _pinch_start_scale: float = BOARD_SCALE
+const MAP_ZOOM_MIN := 0.50
+const MAP_ZOOM_MAX := 1.45
 
 
 func _ready() -> void:
@@ -185,6 +193,40 @@ func _build() -> void:
 	_recenter_btn.pressed.connect(func() -> void: _recenter(true))
 	_recenter_btn.hide()
 	_map_view.add_child(_recenter_btn)
+
+	# Zoom accessible sur mobile, en complément du pincement à deux doigts.
+	_zoom_in_btn = Button.new()
+	_zoom_in_btn.text = "+"
+	_zoom_in_btn.focus_mode = Control.FOCUS_NONE
+	_zoom_in_btn.add_theme_font_size_override("font_size", 30)
+	_zoom_in_btn.anchor_left = 1.0
+	_zoom_in_btn.anchor_right = 1.0
+	_zoom_in_btn.anchor_top = 1.0
+	_zoom_in_btn.anchor_bottom = 1.0
+	_zoom_in_btn.offset_left = -126.0
+	_zoom_in_btn.offset_top = -146.0
+	_zoom_in_btn.offset_right = -70.0
+	_zoom_in_btn.offset_bottom = -90.0
+	_zoom_in_btn.pressed.connect(func() -> void: _zoom_at(_map_view.size * 0.5, 1.15))
+	_zoom_in_btn.hide()
+	_map_view.add_child(_zoom_in_btn)
+
+	_zoom_out_btn = Button.new()
+	_zoom_out_btn.text = "−"
+	_zoom_out_btn.focus_mode = Control.FOCUS_NONE
+	_zoom_out_btn.add_theme_font_size_override("font_size", 30)
+	_zoom_out_btn.anchor_left = 1.0
+	_zoom_out_btn.anchor_right = 1.0
+	_zoom_out_btn.anchor_top = 1.0
+	_zoom_out_btn.anchor_bottom = 1.0
+	_zoom_out_btn.offset_left = -126.0
+	_zoom_out_btn.offset_top = -82.0
+	_zoom_out_btn.offset_right = -70.0
+	_zoom_out_btn.offset_bottom = -26.0
+	_zoom_out_btn.pressed.connect(func() -> void: _zoom_at(_map_view.size * 0.5, 1.0 / 1.15))
+	_zoom_out_btn.hide()
+	_map_view.add_child(_zoom_out_btn)
+
 	_build_edit_ui()
 
 	# Voile de transition entre deux cartes (nuages)
@@ -632,6 +674,10 @@ func _fit_world() -> void:
 		_scroll_mode = true
 		if _recenter_btn != null:
 			_recenter_btn.visible = true
+		if _zoom_in_btn != null:
+			_zoom_in_btn.visible = true
+		if _zoom_out_btn != null:
+			_zoom_out_btn.visible = true
 		if _edit_btn != null:
 			_edit_btn.visible = true
 		_world.scale = Vector2(BOARD_SCALE, BOARD_SCALE)
@@ -643,6 +689,10 @@ func _fit_world() -> void:
 		_set_edit(false)
 	if _recenter_btn != null:
 		_recenter_btn.visible = _scroll_mode
+	if _zoom_in_btn != null:
+		_zoom_in_btn.visible = _scroll_mode
+	if _zoom_out_btn != null:
+		_zoom_out_btn.visible = _scroll_mode
 	if _scroll_mode:
 		# échelle fixe et lisible ; la caméra suit le héros
 		_world.scale = Vector2(READABLE_SCALE, READABLE_SCALE)
@@ -707,16 +757,35 @@ func _recenter(animated: bool) -> void:
 func _handle_pan(event: InputEvent) -> bool:
 	if event is InputEventScreenTouch:
 		if event.pressed:
+			_touch_points[int(event.index)] = event.position
+			if _touch_points.size() >= 2:
+				_start_pinch()
+				return true
 			_pan_active = true
 			_pan_moved = false
 			_pan_total = 0.0
 			return false
+		_touch_points.erase(int(event.index))
+		if _pinch_active:
+			_pinch_active = false
+			_pan_active = _touch_points.size() == 1
+			_pan_moved = true
+			return true
 		var was_moved: bool = _pan_moved
 		_pan_active = false
 		_pan_moved = false
 		return was_moved
-	if event is InputEventScreenDrag and _pan_active:
-		return _pan_by(event.relative)
+	if event is InputEventScreenDrag:
+		if _touch_points.has(int(event.index)):
+			_touch_points[int(event.index)] = event.position
+		if _pinch_active and _touch_points.size() >= 2:
+			_update_pinch()
+			return true
+		if _pan_active:
+			return _pan_by(event.relative)
+	if event is InputEventMouseButton and (event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN) and event.pressed:
+		_zoom_at(event.position, 1.12 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / 1.12)
+		return true
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.device != InputEvent.DEVICE_ID_EMULATION:
 		if event.pressed:
 			_pan_active = true
@@ -731,6 +800,50 @@ func _handle_pan(event: InputEvent) -> bool:
 			and (event.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
 		return _pan_by(event.relative)
 	return false
+
+
+func _start_pinch() -> void:
+	var ids: Array = _touch_points.keys()
+	var a: Vector2 = _touch_points[ids[0]]
+	var b: Vector2 = _touch_points[ids[1]]
+	_pinch_start_distance = maxf(a.distance_to(b), 1.0)
+	_pinch_start_scale = _world.scale.x
+	_pinch_active = true
+	_pan_active = false
+	_pan_moved = true
+	if _cam_tween != null and _cam_tween.is_valid():
+		_cam_tween.kill()
+
+
+func _update_pinch() -> void:
+	var ids: Array = _touch_points.keys()
+	if ids.size() < 2:
+		return
+	var a: Vector2 = _touch_points[ids[0]]
+	var b: Vector2 = _touch_points[ids[1]]
+	var distance: float = maxf(a.distance_to(b), 1.0)
+	var center: Vector2 = (a + b) * 0.5
+	var next_scale: float = clampf(_pinch_start_scale * distance / _pinch_start_distance, MAP_ZOOM_MIN, MAP_ZOOM_MAX)
+	var old_scale: float = _world.scale.x
+	if is_equal_approx(next_scale, old_scale):
+		return
+	var world_anchor: Vector2 = (center - _world.position) / old_scale
+	_world.scale = Vector2(next_scale, next_scale)
+	_world.position = _clamp_cam(center - world_anchor * next_scale)
+
+
+func _zoom_at(screen_point: Vector2, factor: float) -> void:
+	if not _scroll_mode or _map_view == null:
+		return
+	if _cam_tween != null and _cam_tween.is_valid():
+		_cam_tween.kill()
+	var old_scale: float = _world.scale.x
+	var next_scale: float = clampf(old_scale * factor, MAP_ZOOM_MIN, MAP_ZOOM_MAX)
+	if is_equal_approx(next_scale, old_scale):
+		return
+	var world_anchor: Vector2 = (screen_point - _world.position) / old_scale
+	_world.scale = Vector2(next_scale, next_scale)
+	_world.position = _clamp_cam(screen_point - world_anchor * next_scale)
 
 
 func _pan_by(rel: Vector2) -> bool:
