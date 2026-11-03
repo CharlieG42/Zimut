@@ -1,5 +1,5 @@
 extends SceneTree
-## V83 (TEST) : planche illustrée du mode 2D (Sylve) — masque, lieux (5 entrées de donjon), accessibilité,
+## V83-84 (TEST) : planche illustrée du mode 2D (Sylve) — masque, lieux (5 entrées de donjon), accessibilité,
 ## et aucune incidence sur les vues 3D.
 ## Lancement : xvfb-run -a godot --rendering-method gl_compatibility --path . -s tests/test_planche_2d.gd
 var fails: int = 0
@@ -27,9 +27,9 @@ func _boot() -> void:
 	gm.active_save = {"adventure_view": "map"}
 	var t: Dictionary = AT.zone_terrain(z)
 	var sz: Vector2i = t["size"]
-	check(sz == BA.size(z) and sz.x >= 60, "carte 2D : grille de la planche (%s)" % str(sz))
+	check(sz == BA.size(z) and sz.x >= 90, "carte 2D : grille de la planche (%s)" % str(sz))
 	check(AT.walkable(z, t["start"]), "départ jouable")
-	check((t["paths"] as Dictionary).size() >= 300, "assez de cases jouables (%d)" % (t["paths"] as Dictionary).size())
+	check((t["paths"] as Dictionary).size() >= 900, "assez de cases jouables (%d)" % (t["paths"] as Dictionary).size())
 	var pois: Dictionary = pm.pois_of(z)
 	var tiers: Array = []
 	var bad := 0
@@ -50,6 +50,17 @@ func _boot() -> void:
 			lv.append(int(pois[k2]["level"]))
 	lv.sort()
 	check(lv[0] < lv[4], "difficulté croissante entre entrées (niv %s)" % str(lv))
+	# V84 : retouche du masque en mémoire
+	var probe := Vector2i(-1, -1)
+	for y: int in range(sz.y):
+		for x: int in range(sz.x):
+			if probe.x < 0 and not AT.walkable(z, Vector2i(x, y)):
+				probe = Vector2i(x, y)
+	BA.set_cell(z, probe, true)
+	check(AT.walkable(z, probe), "retouche : case ouverte")
+	check((BA.diff(z)["open"] as Array).has("%d,%d" % [probe.x, probe.y]), "retouche : diff signalée")
+	BA.reset_edits(z)
+	check(not AT.walkable(z, probe), "retouche : annulation")
 	check(pm.adventure_gates(z).is_empty(), "pas de portes : voyage par la carte du monde")
 	print("OK" if fails == 0 else "ÉCHEC")
 	quit(fails)

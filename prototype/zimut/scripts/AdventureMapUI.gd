@@ -21,6 +21,7 @@ const BOARD_SCALE := 0.78          # V83 : échelle d'une planche illustrée
 const PAN_THRESHOLD := 14.0
 const SIDE_W := 440.0
 const STEP_TIME := 0.15
+const BOARD_STEP_TIME := 0.085  # V84 : cases deux fois plus fines sur la planche
 const HELP_STEPS := 30          # l'aide de contrôle disparaît après ces premiers pas
 const DIM := Color(0.80, 0.84, 0.92)          # texte secondaire (plus clair que UiKit.C_DIM)
 
@@ -103,6 +104,11 @@ var _target_mob: int = -1                       # groupe visé (il ne bouge plus
 var _help_panel: Control = null
 var _scroll_mode: bool = false                  # V43 : plateau plus grand que l'écran → vue défilante
 var _pan_active: bool = false
+var _edit_drag: bool = false
+var _edit_on: bool = false          # V84 : retouche du masque de la planche
+var _edit_mode: String = "open"    # open | close | move
+var _edit_bar: HBoxContainer = null
+var _edit_btn: Button = null
 var _pan_moved: bool = false
 var _pan_total: float = 0.0
 var _cam_tween: Tween = null
@@ -179,6 +185,7 @@ func _build() -> void:
 	_recenter_btn.pressed.connect(func() -> void: _recenter(true))
 	_recenter_btn.hide()
 	_map_view.add_child(_recenter_btn)
+	_build_edit_ui()
 
 	# Voile de transition entre deux cartes (nuages)
 	_fade = ColorRect.new()
@@ -588,7 +595,8 @@ func _refresh_world() -> void:
 				var pn: PoiNode = n
 				pn.done = manager.poi_done(p) and pn.kind != "camp"
 				var hp: Vector2i = manager.hero_pos()
-				pn.show_label = (absi(p.x - hp.x) + absi(p.y - hp.y) <= 2 or p == _board.hover) and not pn.done
+				var near: int = 4 if is_board() else 2
+				pn.show_label = (absi(p.x - hp.x) + absi(p.y - hp.y) <= near or p == _board.hover) and not pn.done
 				pn.z_index = 3 if pn.show_label else 0  # étiquette lisible au-dessus des voisins
 				pn.queue_redraw()
 			elif n is GateNode:
@@ -624,10 +632,15 @@ func _fit_world() -> void:
 		_scroll_mode = true
 		if _recenter_btn != null:
 			_recenter_btn.visible = true
+		if _edit_btn != null:
+			_edit_btn.visible = true
 		_world.scale = Vector2(BOARD_SCALE, BOARD_SCALE)
 		_recenter(false)
 		return
 	_scroll_mode = scroll_needed(size, vs)
+	if _edit_btn != null and _edit_btn.visible:
+		_edit_btn.hide()
+		_set_edit(false)
 	if _recenter_btn != null:
 		_recenter_btn.visible = _scroll_mode
 	if _scroll_mode:
@@ -742,13 +755,14 @@ func is_board() -> bool:
 
 func cell_center(p: Vector2i) -> Vector2:
 	if is_board():
-		return (Vector2(p) + Vector2(0.5, 0.5)) * BoardArt.CELL_WORLD
+		return (Vector2(p) + Vector2(0.5, 0.5)) * BoardArt.cell_world(manager.zone_id())
 	return Vector2(float(p.x - p.y) * TILE_W * 0.5, float(p.x + p.y) * TILE_H * 0.5)
 
 
 func screen_to_cell(local: Vector2) -> Vector2i:
 	if is_board():
-		return Vector2i(floori(local.x / BoardArt.CELL_WORLD), floori(local.y / BoardArt.CELL_WORLD))
+		var cwz: float = BoardArt.cell_world(manager.zone_id())
+		return Vector2i(floori(local.x / cwz), floori(local.y / cwz))
 	var gx: float = (local.y / (TILE_H * 0.5) + local.x / (TILE_W * 0.5)) * 0.5
 	var gy: float = (local.y / (TILE_H * 0.5) - local.x / (TILE_W * 0.5)) * 0.5
 	return Vector2i(roundi(gx), roundi(gy))
@@ -765,6 +779,9 @@ func _inside(p: Vector2i) -> bool:
 
 func _on_map_input(event: InputEvent) -> void:
 	if _modal_root != null:
+		return
+	if _edit_on and _edit_mode != "move":
+		_edit_input(event)
 		return
 	if _scroll_mode and _handle_pan(event):
 		return
@@ -817,6 +834,108 @@ func _nearest_reachable(target: Vector2i) -> Vector2i:
 	return best
 
 
+## ── V84 : outil de retouche du masque (planche) ──
+func _build_edit_ui() -> void:
+	_edit_btn = Button.new()
+	_edit_btn.text = "✎  Masque"
+	_edit_btn.focus_mode = Control.FOCUS_NONE
+	_edit_btn.add_theme_font_size_override("font_size", 22)
+	_edit_btn.anchor_top = 1.0
+	_edit_btn.anchor_bottom = 1.0
+	_edit_btn.offset_left = 204.0
+	_edit_btn.offset_top = -74.0
+	_edit_btn.offset_right = 390.0
+	_edit_btn.offset_bottom = -14.0
+	_edit_btn.pressed.connect(func() -> void: _set_edit(not _edit_on))
+	_edit_btn.hide()
+	_map_view.add_child(_edit_btn)
+	_edit_bar = HBoxContainer.new()
+	_edit_bar.add_theme_constant_override("separation", 8)
+	_edit_bar.anchor_top = 1.0
+	_edit_bar.anchor_bottom = 1.0
+	_edit_bar.offset_left = 250.0
+	_edit_bar.offset_top = -150.0
+	_edit_bar.offset_bottom = -90.0
+	_edit_bar.offset_right = 1450.0
+	_edit_bar.hide()
+	_map_view.add_child(_edit_bar)
+	var defs: Array = [["open", "🟢 Ouvrir"], ["close", "🔴 Fermer"], ["move", "✋ Déplacer"],
+		["save", "💾 Enregistrer"], ["copy", "📋 Copier"], ["reset", "↺ Annuler tout"]]
+	for d: Array in defs:
+		var b := Button.new()
+		b.text = String(d[1])
+		b.focus_mode = Control.FOCUS_NONE
+		b.add_theme_font_size_override("font_size", 22)
+		var id: String = String(d[0])
+		b.pressed.connect(func() -> void: _edit_action(id))
+		_edit_bar.add_child(b)
+
+
+func _set_edit(on: bool) -> void:
+	_edit_on = on and is_board()
+	_edit_mode = "open"
+	if _edit_bar != null:
+		_edit_bar.visible = _edit_on
+	_board.queue_redraw()
+
+
+func _edit_action(id: String) -> void:
+	var zid: String = manager.zone_id()
+	match id:
+		"open", "close", "move":
+			_edit_mode = id
+		"save":
+			var df: Dictionary = BoardArt.save_edits(zid)
+			_toast_show("Masque enregistré (%d ouvertes, %d fermées)" % [df["open"].size(), df["close"].size()], 22)
+		"copy":
+			DisplayServer.clipboard_set(JSON.stringify(BoardArt.diff(zid)))
+			_toast_show("Retouches copiées dans le presse-papiers", 22)
+		"reset":
+			BoardArt.reset_edits(zid)
+			_board.queue_redraw()
+			_toast_show("Retouches annulées", 22)
+
+
+func _edit_input(event: InputEvent) -> void:
+	var pressed_pos: Variant = null
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.device == InputEvent.DEVICE_ID_EMULATION:
+			return
+		_edit_drag = event.pressed
+		if event.pressed:
+			pressed_pos = event.position
+	elif event is InputEventMouseMotion and _edit_drag and event.device != InputEvent.DEVICE_ID_EMULATION:
+		pressed_pos = event.position
+	elif event is InputEventScreenTouch:
+		_edit_drag = event.pressed
+		if event.pressed:
+			pressed_pos = event.position
+	elif event is InputEventScreenDrag and _edit_drag:
+		pressed_pos = event.position
+	if pressed_pos == null:
+		return
+	var c: Vector2i = screen_to_cell(((pressed_pos as Vector2) - _world.position) / _world.scale.x)
+	if _inside(c):
+		BoardArt.set_cell(manager.zone_id(), c, _edit_mode == "open")
+		_board.queue_redraw()
+
+
+## V84 (planche) : case libre atteignable la plus proche d'une case bloquée.
+func _board_nearest_free(target: Vector2i) -> Vector2i:
+	var zid: String = manager.zone_id()
+	var cands: Array = []
+	for dy: int in range(-14, 15):
+		for dx: int in range(-14, 15):
+			var c := Vector2i(target.x + dx, target.y + dy)
+			if c != manager.hero_pos() and _inside(c) and AdventureTerrain.walkable(zid, c):
+				cands.append([dx * dx + dy * dy, c])
+	cands.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	for i: int in range(mini(24, cands.size())):
+		if not manager.path_to(cands[i][1]).is_empty():
+			return cands[i][1]
+	return Vector2i(-1, -1)
+
+
 func _on_cell_tapped(p: Vector2i, _touch: bool = false) -> void:
 	if p == manager.hero_pos():
 		_pending = Vector2i(-1, -1)
@@ -848,8 +967,15 @@ func _on_cell_tapped(p: Vector2i, _touch: bool = false) -> void:
 			_say("Le brouillard est trop dense par là. Explorez les environs.")
 			return
 	elif not AdventureTerrain.walkable(manager.zone_id(), p):
-		_say("Le passage est bloqué par le décor.")
-		return
+		if is_board():
+			# V84 : un appui sur un obstacle mène à la case libre la plus proche.
+			target = _board_nearest_free(p)
+			if target.x < 0:
+				_say("Le passage est bloqué par le décor.")
+				return
+		else:
+			_say("Le passage est bloqué par le décor.")
+			return
 	var path: Array[Vector2i] = manager.path_to(target)
 	if path.is_empty():
 		_say("Aucun sentier ne mène là pour l'instant.")
@@ -870,6 +996,8 @@ func _walk(path: Array[Vector2i]) -> void:
 	_action_btn.hide()
 	# les longs trajets sont plus rapides (jusqu'à deux fois)
 	var step_time: float = STEP_TIME * clampf(8.0 / float(maxi(1, path.size())), 0.5, 1.0)
+	if is_board():
+		step_time = BOARD_STEP_TIME * clampf(16.0 / float(maxi(1, path.size())), 0.5, 1.0)
 	for step: Vector2i in path:
 		if _redirect.x >= 0:
 			break
@@ -1956,7 +2084,14 @@ class AdventureBoard extends Node2D:
 
 	func _draw_board() -> void:
 		var mgr: Node = ui.manager
-		var cw: float = BoardArt.CELL_WORLD
+		var cw: float = BoardArt.cell_world(mgr.zone_id())
+		if ui._edit_on:
+			var bsz: Vector2i = mgr.zone_size()
+			for ey: int in range(bsz.y):
+				for ex: int in range(bsz.x):
+					var ok: bool = BoardArt.walkable_cell(mgr.zone_id(), Vector2i(ex, ey))
+					draw_rect(Rect2(Vector2(ex, ey) * cw, Vector2(cw, cw)).grow(-1.0),
+						Color(0.2, 0.9, 0.3, 0.30) if ok else Color(0.9, 0.2, 0.2, 0.32))
 		for i: int in range(preview.size()):
 			var pc: Vector2 = ui.cell_center(preview[i])
 			var last: bool = i == preview.size() - 1

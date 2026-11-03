@@ -8,24 +8,57 @@ import numpy as np
 from PIL import Image, ImageDraw
 from scipy import ndimage as ndi
 
-CELL = 24                                   # pixels d'image par case
+CELL = 16                                   # pixels d'image par case
 src, name = sys.argv[1], sys.argv[2]
 im = Image.open(src).convert("RGB")
 W, H = im.size
 COLS, ROWS = W // CELL, -(-H // CELL)
 hsv = np.asarray(im.convert("HSV")).astype(float)
 h, s, v = hsv[..., 0] / 255 * 360, hsv[..., 1] / 255, hsv[..., 2] / 255
-m = (h > 38) & (h < 90) & (s > 0.38) & (v > 0.55)
-m = ndi.binary_opening(m, iterations=2)
-m = ndi.binary_closing(m, iterations=3)
-m = ndi.binary_erosion(m, iterations=1)
+
+ISLAND = {  # contour approximatif du dessus de l'île (px image)
+    "foret_sylve": [(60, 230), (120, 200), (250, 90), (450, 70), (620, 170), (700, 140), (1000, 150), (1100, 130), (1200, 100),
+                    (1300, 40), (1440, 70), (1500, 250), (1500, 500), (1480, 700), (1380, 790), (1180, 840), (1040, 860),
+                    (900, 930), (560, 975), (450, 940), (150, 810), (60, 700), (30, 500), (40, 300)]}
+isl = Image.new("L", im.size, 0)
+ImageDraw.Draw(isl).polygon(ISLAND[name], fill=255)
+isl = np.asarray(isl) > 0
+# V83b : logique inversée — jouable SAUF obstacle (eau, ciel, roche, ombre dense, feuillages, bâtiments)
+water = (h > 165) & (h < 215) & (s > 0.18) & (v > 0.55)
+sky = (s < 0.18) & (v > 0.75)
+rock = (s < 0.38) & (v > 0.38) & (v < 0.92) & ~((h > 38) & (h < 95) & (s > 0.3))
+dark = v < 0.30
+green = (h > 70) & (h < 175)
+dense = green & (v < 0.52)
+mean = ndi.uniform_filter(v, 9)
+std = np.sqrt(np.maximum(ndi.uniform_filter(v * v, 9) - mean ** 2, 0))
+foliage = (std > 0.095) & green
+autumn = ((h > 8) & (h < 42) & (s > 0.45)) | (((h > 300) | (h < 8)) & (s > 0.35) & (v > 0.4))
+blocked = ndi.binary_dilation(water | sky | rock | dark | dense | foliage | autumn, iterations=1)
+m = isl & ~blocked
+m = ndi.binary_closing(m, iterations=2)
+m = ndi.binary_opening(m, iterations=3)
 
 BLOCKS = {  # polygones (px image) à rendre infranchissables
     "foret_sylve": [
-        [(650, 100), (990, 100), (1000, 270), (930, 335), (700, 335), (650, 240)],   # couronne du grand arbre
-        [(95, 430), (255, 430), (255, 615), (95, 615)],                               # arbres dorés
-        [(1090, 350), (1190, 350), (1190, 420), (1090, 420)],
+        [(650, 100), (1000, 100), (1000, 300), (940, 372), (700, 372), (650, 300)],   # couronne et tronc du grand arbre
+        [(250, 60), (450, 60), (450, 140), (250, 140)],                               # entrée feuille (façade)
+        [(200, 500), (410, 500), (410, 630), (200, 630)],                             # entrée patte
+        [(1140, 520), (1420, 520), (1420, 690), (1140, 690)],                         # entrée cristal
+        [(1100, 20), (1500, 20), (1500, 212), (1100, 212)],                           # maison de l'arbre violette
+        [(630, 515), (740, 515), (740, 600), (630, 600)],                             # ruines
+        [(800, 630), (930, 630), (930, 740), (800, 740)],                             # arche
+        [(1090, 420), (1200, 420), (1200, 480), (1090, 480)],                         # petite cabane de pierre
         [(480, 925), (1080, 925), (1080, 1024), (480, 1024)],                         # bord de falaise
+    ]}
+OPENS = {   # polygones (px image) à rendre franchissables (après les blocs)
+    "foret_sylve": [
+        [(700, 385), (940, 385), (940, 470), (700, 470)],                             # esplanade du grand arbre
+        [(570, 305), (690, 305), (690, 380), (570, 380)],                             # pelouse à gauche de l'arbre
+        [(945, 305), (1015, 305), (1015, 400), (945, 400)],                           # pelouse à droite de l'arbre
+        [(1040, 218), (1285, 218), (1290, 262), (1040, 300)],                         # chemin vers la maison violette
+        [(40, 395), (250, 395), (250, 470), (40, 470)],                               # prairie de gauche
+        [(570, 860), (930, 860), (930, 925), (570, 925)],                             # clairière du sud
     ]}
 STROKES = {  # traits (px image, épaisseur) à rendre franchissables
     "foret_sylve": [
@@ -41,6 +74,8 @@ img = Image.fromarray((m * 255).astype("uint8"))
 d = ImageDraw.Draw(img)
 for poly in BLOCKS.get(name, []):
     d.polygon(poly, fill=0)
+for poly in OPENS.get(name, []):
+    d.polygon(poly, fill=255)
 for pts, w in STROKES.get(name, []):
     d.line(pts, fill=255, width=w)
     for p in pts:
@@ -50,7 +85,7 @@ grid = np.zeros((ROWS, COLS), bool)
 for gy in range(ROWS):
     for gx in range(COLS):
         blk = m[gy * CELL:(gy + 1) * CELL, gx * CELL:(gx + 1) * CELL]
-        grid[gy, gx] = blk.size > 0 and blk.mean() >= 0.4
+        grid[gy, gx] = blk.size > 0 and blk.mean() >= 0.45
 
 def near(px, py):
     cx, cy = px // CELL, py // CELL
