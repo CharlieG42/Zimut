@@ -738,7 +738,7 @@ static func _apply_spell_level(spell: Dictionary, p: Dictionary) -> void:
 	var slvl: int = int(spell.get("spell_level", 1))
 	if smult != 1.0 and smult > 0.0:
 		for key: String in ["dmg", "heal", "regen", "adj_dmg", "summon_dmg_base", "trap"]:
-			p[key] = int(roundf(float(p[key]) * smult))
+			p[key] = scale_value(int(p[key]), smult)
 		for d: Dictionary in p["dots"]:
 			d["value"] = float(d["value"]) * smult
 		for b: Dictionary in p["buffs"]:
@@ -764,6 +764,32 @@ static func _apply_spell_level(spell: Dictionary, p: Dictionary) -> void:
 			if int(p["regen_turns"]) > 0:
 				p["regen_turns"] = int(p["regen_turns"]) + tb
 		p["range_bonus"] = int(perks["range"])
+
+
+## Valeur de sort mise à l'échelle du niveau (arrondie), avec au moins +1 dès le niveau 2 : une petite valeur
+## (soin de 8) ne reste plus bloquée à « 8 → 8 ». Sur les grandes valeurs, rien ne change.
+static func scale_value(base: int, smult: float) -> int:
+	var r: int = int(roundf(float(base) * smult))
+	if base > 0 and smult > 1.0 and r <= base:
+		return base + 1
+	return r
+
+
+## Effets en pourcentage affichables « +15 % → +17 % » dans la fiche (libellé court).
+const PCT_EFFECT_LABELS := {
+	"dmg_up": "Bonus de dégâts", "def_up": "Bonus de défense", "mres_up": "Résistance magique",
+	"dodge": "Esquive", "weaken": "Affaiblissement de la cible",
+}
+
+
+## Premier effet en % d'un sort parsé (buffs, buffs sur soi, débuffs) : {"label", "value"} ou {} s'il n'y en a pas.
+static func pct_effect(p: Dictionary) -> Dictionary:
+	for key: String in ["buffs", "self_buffs", "debuffs"]:
+		for b: Dictionary in p.get(key, []):
+			var id: String = String(b.get("id", ""))
+			if PCT_EFFECT_LABELS.has(id) and not FLAT_EFFECTS.has(id):
+				return {"label": PCT_EFFECT_LABELS[id], "value": float(b["value"])}
+	return {}
 
 
 ## Effets dont la valeur ne monte pas avec le niveau du sort (PA/PM, immunités…) : c'est la durée qui monte.
