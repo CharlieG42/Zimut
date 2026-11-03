@@ -31,7 +31,7 @@ func _boot() -> void:
 			if g != "":
 				tiers[D.tier(g)] = g
 		check(inside, "%s : tous les lieux dans la zone" % z)
-		check(tiers.size() == 3, "%s : 3 donjons (paliers 1, 2, 3)" % z)
+		check(tiers.size() == 3 and tiers.has(2) and tiers.has(4) and tiers.has(5), "%s : 3 donjons (paliers 2, 4 et Gardien)" % z)
 		var t: Dictionary = AT.zone_terrain(z)
 		var bad := 0
 		for k2: String in pois.keys():
@@ -40,14 +40,14 @@ func _boot() -> void:
 				bad += 1
 		check(bad == 0, "%s : lieux et donjons accessibles" % z)
 		if tiers.size() == 3:
-			var l1: int = D.room_level(tiers[1], 4)
-			var l2: int = D.room_level(tiers[2], 4)
-			var l3: int = D.room_level(tiers[3], 4)
+			var l1: int = D.room_level(tiers[2], 4)
+			var l2: int = D.room_level(tiers[4], 4)
+			var l3: int = D.room_level(tiers[5], 4)
 			check(l1 <= l2 and l2 <= l3, "%s : niveaux croissants entre paliers (%d ≤ %d ≤ %d)" % [z, l1, l2, l3])
 	# Pierre : seulement au palier 3
 	var adv: Dictionary = {}
 	var key1: String = D.tier_key("Forêt", 1)
-	check(D.base(key1) == "Forêt" and D.tier(key1) == 1 and D.tier("Forêt") == 3, "clés de palier : base / palier")
+	check(D.base(key1) == "Forêt" and D.tier(key1) == 1 and D.tier("Forêt") == D.TIERS, "clés de palier : base / palier")
 	for i: int in range(3):
 		D.begin(adv, key1)
 		D.win_room(adv, key1, 0.0, false)

@@ -71,6 +71,8 @@ func zone_biome() -> String:
 
 ## Dimensions de la grille de la zone courante.
 func zone_size() -> Vector2i:
+	if not BoardArt.def(zone_id()).is_empty():
+		return BoardArt.size(zone_id())
 	var s: Array = zone_meta().get("size", [14, 10])
 	return Vector2i(int(s[0]), int(s[1]))
 
@@ -265,6 +267,8 @@ func finds_progress() -> Dictionary:
 
 ## Une case est-elle hors brouillard dans la zone courante ?
 func cell_discovered(pos: Vector2i) -> bool:
+	if not BoardArt.def(zone_id()).is_empty():
+		return true         # V83 : la planche est toujours visible en entier (pas de brouillard)
 	# V47 : appelée pour chaque case à chaque image (cartes jusqu'à 22 × 16) : on indexe la liste
 	# des cases découvertes dans un Dictionary (recalculé seulement quand la liste change).
 	var arr: Array = state.get("discovered", [])

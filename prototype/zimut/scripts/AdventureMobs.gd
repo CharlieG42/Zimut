@@ -93,6 +93,9 @@ const LEVEL_RANGE := {
 }
 
 ## Nombre de groupes visés sur une carte : au moins PER_ZONE, plus sur les grandes zones.
+## V83 : nombre de groupes de monstres sur une planche illustrée.
+const BOARD_MOBS := 14
+
 static func per_zone(size: Vector2i) -> int:
 	return maxi(PER_ZONE, int(float(size.x * size.y) / 110.0))
 
@@ -157,6 +160,8 @@ static func ensure(adv: Dictionary, zone: String, hero: Vector2i, rng: RandomNum
 	var moves: int = int(adv.get("moves", 0))
 	var normal: int = list.filter(func(g: Dictionary) -> bool: return not bool(g.get("elite", false))).size()
 	var target: int = per_zone(AdventureTerrain.zone_terrain(zone)["size"])
+	if not BoardArt.def(zone).is_empty():
+		target = mini(target, BOARD_MOBS)   # V83 : planche illustrée — moins de groupes, ils sont plus gros que les cases
 	if not nxt.has(zone):
 		# première visite : la carte se peuple d'un coup
 		while normal < target:

@@ -141,3 +141,13 @@ bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
 - **Donjons à paliers** : clé « Nation#1 », « Nation#2 » (paliers 1-2, générés par `ProgressionManager._add_dungeon_tiers`), « Nation » = palier 3 (Gardien + Pierre). `Dungeons.base/tier/tier_key` ; niveaux décalés dans la tranche de la nation, pas de Pierre aux paliers 1-2.
 - **Carte du monde** : `Adv3DWorldMap` dessinée sur `conquest_world_map.jpg`, repères `NATION_POS`.
 - Test : `tests/test_monde_ouvert_v82.gd` ; captures : `tests/shot_openworld.gd`.
+
+
+## V83 — Planches illustrées du mode 2D (TEST)
+
+- `BoardArt` (scripts/BoardArt.gd) : une zone peut avoir une planche `data/boards/<zone>.json` + `assets/boards/<zone>.jpg`. Active **uniquement** quand la partie est dans la carte 2D (`adventure_view == "map"`, posé avant le chargement de l'état) ; les vues 3D/monde ouvert gardent le terrain généré.
+- Le JSON contient : grille (cases de 24 px d'illustration, 48 px dans le monde 2D), masque des cases jouables (`#`), départ, lieux (entrées de donjon en « Forêt#1 » à « Forêt#4 » + « Forêt » = Grand Arbre).
+- `tools/gen_board.py <image> <zone>` : détecte les sentiers/clairières par couleur, applique des blocs (couronnes d'arbres) et des traits (accès aux entrées), écrit le JSON et une image de contrôle.
+- `Dungeons.TIERS` = 5 : le monde ouvert utilise les paliers 2 et 4 (+ le Gardien), la planche 2D les paliers 1 à 4 (+ le Gardien).
+- Pas de portes sur une planche (voyage par la carte du monde) ; pas de brouillard ; 14 groupes de monstres maximum.
+- Test : `tests/test_planche_2d.gd` ; captures : `tests/shot_planche.gd`.

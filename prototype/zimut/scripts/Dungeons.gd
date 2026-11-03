@@ -38,9 +38,9 @@ static func is_dungeon(poi: Dictionary) -> bool:
 
 
 ## V82 : une Nation compte plusieurs donjons de difficulté croissante (monde ouvert). La clé « guardian »
-## d'un POI est la Nation (« Forêt » = donjon principal, palier 3, avec Gardien et Pierre) ou
-## « Forêt#1 » / « Forêt#2 » (paliers 1 et 2 : mêmes 4 salles, ennemis plus faibles, pas de Pierre).
-const TIERS := 3
+## d'un POI est la Nation (« Forêt » = donjon principal, palier 5, avec Gardien et Pierre) ou
+## « Forêt#1 » … « Forêt#4 » (mêmes 4 salles, ennemis plus faibles, pas de Pierre).
+const TIERS := 5
 const TIER_SEP := "#"
 
 
