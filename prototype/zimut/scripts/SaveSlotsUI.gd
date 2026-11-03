@@ -630,17 +630,14 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	modes_row.add_child(tac_btn)
 	var adv_ok: bool = ProgressionManager.mode_unlocked(data, "adventure")
 	var con_ok: bool = ProgressionManager.mode_unlocked(data, "conquest")
-	modes_row.add_child(_mode_button("Aventure",
-		"Explorez, découvrez et relevez des défis", "res://assets/ui/modes/mode_aventure.png",
+	modes_row.add_child(_mode_button("2D",
+		"Explorez Zimut sur la carte illustrée en deux dimensions", "res://assets/ui/modes/mode_aventure.png",
 		Color(0.22, 0.48, 0.31), adv_ok, func() -> void:
-			# La vue d'Aventure repart du réglage (pas de la vue mémorisée d'une autre partie).
-			GameManager.active_save = {}
-			_current["adventure_view"] = ""
-			_launch_campaign_mode("adventure", GameSettings.adventure_scene(), slot)))
-	modes_row.add_child(_mode_button("Monde Ouvert 3D",
-		"Explorez Zimut en 3D libre, façon RPG : toucher un monstre ou entrer dans un donjon lance le combat Tactique", "res://assets/ui/modes/mode_aventure.png",
+			_current["adventure_view"] = "map"
+			_launch_campaign_mode("adventure", "res://scenes/AdventureMap.tscn", slot), "adventure"))
+	modes_row.add_child(_mode_button("3D",
+		"Explorez Zimut en monde 3D libre, façon RPG", "res://assets/ui/modes/mode_aventure.png",
 		Color(0.20, 0.52, 0.58), adv_ok, func() -> void:
-			GameManager.active_save = {}
 			_current["adventure_view"] = "open3d"
 			_launch_campaign_mode("adventure", "res://scenes/AdventureOpen3D.tscn", slot), "adventure"))
 	modes_row.add_child(_mode_button("Conquête",
@@ -653,7 +650,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	times_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	times_row.add_theme_constant_override("separation", 10)
 	_detail_box.add_child(times_row)
-	for entry: Array in [["tactique", "Tactique"], ["adventure", "Aventure"], ["openworld", "Monde ouvert"], ["conquest", "Conquête"]]:
+	for entry: Array in [["tactique", "Tactique"], ["adventure", "2D"], ["openworld", "3D"], ["conquest", "Conquête"]]:
 		var mode: String = String(entry[0])
 		var t := Label.new()
 		t.name = "Playtime_%s" % mode
