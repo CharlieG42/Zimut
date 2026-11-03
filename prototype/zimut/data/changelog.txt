@@ -1,3 +1,6 @@
+V90|TEST — Personnage 3D plus propre : visage sans anneaux noirs (yeux, joues, nez, bouche et sourcils sans contour), contour du corps affiné, peinture du tissu adoucie pour supprimer les stries.
+V90|Cheveux en mèches effilées (au lieu de boules) avec frange, cape en drapé arrondi, pantalon cargo éclairci (il paraissait noir).
+V90|Les 10 classes en profitent (chapeaux, capuches et accessoires conservés).
 V89|TEST — Monde Ouvert 3D : les décors de Nation sans kit (cristaux, totems, tours à rouages, tombes, champignons géants…) passent au rendu peint : texture de peinture triplanaire, éclairage cartoon et ombres portées du soleil, avec les lueurs conservées.
 V89|Rochers plus organiques : socles de cristaux, rochers de marée, de nuages, de lave et des Ombres en volumes arrondis (normales lissées) ; seules les pointes restent à facettes.
 V89|Palmiers du Désert et sapins enneigés de la Montagne refaits avec des cartes de feuilles/aiguilles : plus fournis et plus organiques, toujours légers.

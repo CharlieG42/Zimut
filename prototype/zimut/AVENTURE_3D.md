@@ -194,3 +194,10 @@ bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
 - Rochers/socles (cristaux, marée, nuages, lave, Ombres) en normales lissées (9–10 segments) ; pointes et cristaux restent à facettes.
 - `palm()` : cartes de feuilles le long des frondes ; `pine()` : touffes d'aiguilles (cartes) sur chaque étage, blanches pour la version enneigée.
 - Constat : l'Atelier des Rouages monte à ~550 k primitives (existant avant V89) — à alléger si le téléphone peine.
+
+
+## V90 — Personnage plus propre (TEST)
+
+- `Adv3DHeroModel.detail_material()` : yeux et détails du visage (`h_face` : sourcils, joues, nez, bouche) rendus sans coque de contour ; contour du corps 0,011 → 0,0065 ; `paint_amt` du personnage 0,10.
+- Cheveux : mèches par `Adv3DNationMeshes._spike` (11 + 3 de frange) sur la calotte ; cape : drapé en blob aplati ; pantalon éclairci.
+- Outil : `tests/shot_hero_close.gd <dossier> [classe]` (face, trois-quarts, dos, tête).
