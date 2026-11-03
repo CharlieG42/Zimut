@@ -58,14 +58,9 @@ static func enabled() -> bool:
 static func char_material() -> Material:
 	if _cache.has("mat"):
 		return _cache["mat"]
-	var m := StandardMaterial3D.new()
-	m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED   # évite les taches noires (NaN) sur GPU mobiles
-	m.vertex_color_use_as_albedo = true
-	m.vertex_color_is_srgb = true
-	m.roughness = 0.82
-	m.rim_enabled = true
-	m.rim = 0.35
-	m.rim_tint = 0.55
+	var m: ShaderMaterial = Adv3DMeshes.solid_material(false)   # V85 : même éclairage cartoon que le décor
+	m.set_shader_parameter("emit", 0.08)
+	m.set_shader_parameter("rim", 0.7)
 	var ol := StandardMaterial3D.new()
 	ol.specular_mode = BaseMaterial3D.SPECULAR_DISABLED   # évite les taches noires (NaN) sur GPU mobiles
 	ol.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -147,7 +142,8 @@ static func _part(joint: Node3D, mesh: Mesh, pivot: Vector3) -> MeshInstance3D:
 	mi.mesh = mesh
 	mi.material_override = char_material()
 	mi.position = -pivot
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if Adv3DMeshes.real_shadows \
+		else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	joint.add_child(mi)
 	return mi
 

@@ -1,3 +1,6 @@
+V85|TEST — Rendu 3D plus proche de Zelda / Genshin : éclairage « cartoon » (dégradés en paliers, ombres teintées de bleu, liseré lumineux côté soleil) sur le décor, le sol et les personnages.
+V85|Vraies ombres portées du soleil (arbres, rochers, héros, monstres) en qualité Haute ; en Économie, on garde les ombres rondes au sol. Ciel au dégradé plus riche, lueur du soleil dans la brume.
+V85|Teintes douces à grande échelle sur le décor (aplats « peints »), éclairage et saturation recalibrés pour les 10 nations.
 V84|TEST — Planche 2D plus libre : tout est marchable sauf les obstacles du décor (eau, rochers, arbres denses), cases deux fois plus fines (96 × 64) et passages élargis ; marche plus fluide.
 V84|Toucher un obstacle envoie le héros à la case libre la plus proche au lieu d'afficher « bloqué ».
 V84|Outil de retouche du masque en jeu (bouton « Masque ») : ouvrir / fermer des cases au doigt, enregistrer, copier les retouches.

@@ -153,3 +153,10 @@ bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
 - V84 : masque « inversé » (tout est marchable sauf eau/roche/arbres denses, `tools/gen_board.py`), grille 96 × 64, `BOARD_STEP_TIME` 0,085 s, appui sur un obstacle → case libre la plus proche (`_board_nearest_free`).
 - Retouche en jeu : bouton « ✎ Masque » (Ouvrir / Fermer / Déplacer / Enregistrer / Copier / Annuler tout). Enregistrée dans `user://boards/<zone>_edits.json` ({open, close}) et rechargée au lancement ; « Copier » met le JSON dans le presse-papiers pour l'intégrer au masque généré.
 - Test : `tests/test_planche_2d.gd` ; captures : `tests/shot_planche.gd`.
+
+
+## V85 — Rendu « cartoon » (TEST)
+
+- `Adv3DMeshes.TOON_LIGHT` : fonction `light()` partagée (demi-Lambert en paliers adoucis, ombre teintée `shade_tint`, rim `rim_color`). `solid_material()` et `foliage_material()` sont désormais des `ShaderMaterial` (même shader, `sway = 0` pour le rigide) ; la matière des personnages (`Adv3DHeroModel.char_material`) l'utilise aussi, avec son contour.
+- `Adv3DMeshes.setup_sun(sun, env)` : ombres temps réel du soleil (2 cascades, 70 m) quand `GfxQuality` n'est pas « Économie » ; `real_shadows` allège alors les ombres rondes et active `cast_shadow` sur les gros décors (`_casts_shadow`) et le héros. L'herbe, les fleurs et les cailloux ne projettent pas d'ombre.
+- Ciel : `sky_curve`, disque solaire, `fog_sun_scatter`. Captures : `tests/shot_openworld.gd`.
