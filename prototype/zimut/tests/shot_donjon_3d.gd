@@ -8,7 +8,7 @@ func _shot(p: String) -> void:
 	root.get_viewport().get_texture().get_image().save_png(p)
 func _boot() -> void:
 	var out: String = OS.get_cmdline_user_args()[0]
-	var zone: String = "foret_ronces"
+	var zone: String = "foret_sylve"
 	var pm: Node = root.get_node("ProgressionManager")
 	var gm: Node = root.get_node("GameManager")
 	root.get_node("GameSettings").tutorial_enabled = false

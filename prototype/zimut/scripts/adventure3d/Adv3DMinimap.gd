@@ -16,6 +16,7 @@ signal tapped
 var full: bool = false                 # version plein écran (avec légende), indépendante des 3 états
 var _size: Vector2i = Vector2i(1, 1)
 var _tex: ImageTexture = null
+var _tex_round: ImageTexture = null    # V81 : même carte, centrée dans un carré et masquée en rond
 var _pois: Array = []            # [{cell, color, done}]
 var _gates: Array = []           # [{cell, open}]
 var _mobs: Array = []            # [Vector2i]
@@ -66,6 +67,20 @@ func setup(terrain: Dictionary, pal: Dictionary) -> void:
 				col = Color(0.38, 0.40, 0.42) if (k.contains("rock") or k.contains("stone") or k.contains("crystal") or k.contains("pillar")) else (ground[0] as Color).darkened(0.45)
 			img.set_pixel(cx, cy, col)
 	_tex = ImageTexture.create_from_image(img)
+	# V81 : version ronde de la mini-carte (style ZimutAdventure) — carte centrée dans un
+	# carré, puis masque circulaire (les coins deviennent transparents).
+	var s: int = maxi(_size.x, _size.y)
+	var img2 := Image.create(s, s, false, Image.FORMAT_RGBA8)
+	img2.fill(Color(0, 0, 0, 0))
+	img2.blit_rect(img, Rect2i(0, 0, _size.x, _size.y), Vector2i((s - _size.x) / 2, (s - _size.y) / 2))
+	var rad: float = float(s) * 0.5
+	for yy: int in range(s):
+		for xx: int in range(s):
+			var dx: float = float(xx) + 0.5 - rad
+			var dy: float = float(yy) + 0.5 - rad
+			if dx * dx + dy * dy > rad * rad:
+				img2.set_pixel(xx, yy, Color(0, 0, 0, 0))
+	_tex_round = ImageTexture.create_from_image(img2)
 	_apply_size()
 
 
@@ -96,10 +111,8 @@ func _apply_size() -> void:
 	if mode == MODE_HIDDEN:
 		return
 	var long_side: float = LONG_SIDE[mode]
-	var ratio: float = float(_size.x) / float(maxi(_size.y, 1))
-	var w: float = long_side if ratio >= 1.0 else long_side * ratio
-	var h: float = long_side / ratio if ratio >= 1.0 else long_side
-	custom_minimum_size = Vector2(w, h) + Vector2(16, 16)
+	# V81 : mini-carte RONDE → zone carrée (la carte tient dans le cercle)
+	custom_minimum_size = Vector2(long_side, long_side) + Vector2(16, 16)
 	size = custom_minimum_size
 	queue_redraw()
 
@@ -108,6 +121,9 @@ func _draw() -> void:
 	if _tex == null or (mode == MODE_HIDDEN and not full):
 		return
 	var pad := Vector2(8, 8)
+	if not full:
+		_draw_round(pad)
+		return
 	var legend_h: float = 78.0 if full else 0.0
 	var area: Vector2 = size - pad * 2.0 - Vector2(0, legend_h)
 	var cell: float = minf(area.x / float(_size.x), area.y / float(_size.y))
@@ -148,6 +164,47 @@ func _draw() -> void:
 	draw_polyline(outline, Color(0.1, 0.1, 0.1), 2.0)
 	if full:
 		_draw_legend(Vector2(pad.x + 10.0, size.y - legend_h + 6.0))
+
+
+## V81 : mini-carte ronde (haut à droite) : fond circulaire, carte masquée en rond,
+## marqueurs et joueur dessinés dans le repère de la carte centrée, anneau doré.
+func _draw_round(pad: Vector2) -> void:
+	var area: Vector2 = size - pad * 2.0
+	var side: float = minf(area.x, area.y)
+	var origin: Vector2 = pad + (area - Vector2(side, side)) * 0.5
+	var center: Vector2 = origin + Vector2(side, side) * 0.5
+	var rad: float = side * 0.5
+	draw_circle(center, rad, Color(0.06, 0.09, 0.14, 0.72))
+	if _tex_round != null:
+		draw_texture_rect(_tex_round, Rect2(origin, Vector2(side, side)), false)
+	var s: int = maxi(_size.x, _size.y)
+	var cell: float = side / float(s)
+	var map_origin: Vector2 = origin + Vector2(float(s - _size.x), float(s - _size.y)) * 0.5 * cell
+	var sz: float = clampf(cell * 0.95, 10.0, 24.0)
+	for g: Dictionary in _gates:
+		var gc: Vector2i = g["cell"]
+		var gp: Vector2 = map_origin + (Vector2(gc) + Vector2(0.5, 0.5)) * cell
+		_icon_gate(gp, sz, _gate_dir(gc), bool(g["open"]))
+	for p: Dictionary in _pois:
+		var pc: Vector2i = p["cell"]
+		var pp: Vector2 = map_origin + (Vector2(pc) + Vector2(0.5, 0.5)) * cell
+		var kind: String = "dungeon" if bool(p.get("dungeon", false)) else String(p.get("kind", ""))
+		_icon_poi(kind, pp, sz, bool(p["done"]))
+	for m: Vector2i in _mobs:
+		var mp: Vector2 = map_origin + (Vector2(m) + Vector2(0.5, 0.5)) * cell
+		_icon_mob(mp, sz)
+	# joueur : triangle orienté selon la caméra
+	var pl: Vector2 = map_origin + _player * cell
+	var fwd := Vector2(-sin(_yaw), -cos(_yaw))
+	var side_v := Vector2(-fwd.y, fwd.x)
+	var r: float = maxf(cell * 1.1, 7.0)
+	var tri: PackedVector2Array = [pl + fwd * r, pl - fwd * r * 0.7 + side_v * r * 0.65, pl - fwd * r * 0.7 - side_v * r * 0.65]
+	draw_colored_polygon(tri, Color(1.0, 0.92, 0.25))
+	var outline: PackedVector2Array = tri.duplicate()
+	outline.append(tri[0])
+	draw_polyline(outline, Color(0.1, 0.1, 0.1), 2.0)
+	# anneau doré
+	draw_arc(center, rad - 1.5, 0.0, TAU, 64, Color(0.85, 0.72, 0.35, 0.95), 3.0)
 
 
 ## Plein écran : destination et niveau de chaque accès (une étiquette par carte voisine,

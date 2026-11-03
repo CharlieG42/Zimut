@@ -18,7 +18,7 @@ func _boot() -> void:
 	pm.rebuild_team(data, ["Chasseur", "Mage", "Sylvain"])
 	data["campaign_mode"] = "adventure"
 	var adv: Dictionary = pm.adventure_state(data)
-	for z: String in ["foret_ronces", "lisiere_col", "montagne_pics", "piemont_ocre", "desert_dunes", zone]:
+	for z: String in ["brasier_cendres", "brumes_marais", "montagne_pics", "vents_plateau", "desert_dunes", zone]:
 		pm.adventure_unlock_zone(adv, z)
 	pm.adventure_enter_zone(adv, zone)
 	gm.active_save = data

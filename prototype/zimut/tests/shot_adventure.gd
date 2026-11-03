@@ -16,7 +16,7 @@ func _boot() -> void:
 		pm.roster_entry(data, c)["level"] = 14
 	data["campaign_mode"] = "adventure"
 	var adv: Dictionary = pm.adventure_state(data)
-	for z: String in ["foret_ronces", "lisiere_col", "montagne_pics", "piemont_ocre", "desert_dunes", zone]:
+	for z: String in ["brasier_cendres", "brumes_marais", "montagne_pics", "vents_plateau", "desert_dunes", zone]:
 		pm.adventure_unlock_zone(adv, z)
 	pm.adventure_enter_zone(adv, zone)
 	# Découvre une bonne partie de la carte, déplace le héros au centre
@@ -55,9 +55,9 @@ func _boot() -> void:
 	await create_timer(0.6).timeout
 	_shot(out + "/adv_lights.png")
 	var combat_poi: Dictionary = {}
-	for k2: String in pm.ADVENTURE_POIS[zone].keys():
-		if String(pm.ADVENTURE_POIS[zone][k2]["kind"]) == "combat":
-			combat_poi = pm.ADVENTURE_POIS[zone][k2]
+	for k2: String in pm.pois_of(zone).keys():
+		if String(pm.pois_of(zone)[k2]["kind"]) == "combat":
+			combat_poi = pm.pois_of(zone)[k2]
 			break
 	sc._confirm_combat(combat_poi)
 	await create_timer(0.6).timeout

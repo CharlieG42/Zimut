@@ -57,3 +57,77 @@ tests/shot_adventure3d.gd     # captures d'écran (xvfb)
 - [ ] Biomes des Nations (Vents, Brumes, Brasier…) : palettes et props dédiés (repli sur la Forêt).
 - [ ] Sprites HD / ambiance sonore par zone ; pinch pour zoomer.
 - [ ] Mesure de fluidité sur téléphone milieu de gamme (pas d'ombres temps réel pour l'instant).
+
+---
+
+# Monde Ouvert 3D — 4e mode de jeu (V79)
+
+Quatrième bouton de mode dans **Mes Parties → Choisir un mode de jeu** :
+« Monde Ouvert 3D ». C'est le **même monde et la même sauvegarde** que les
+autres modes Aventure (héros, loots, XP, difficulté et temps de jeu sont ceux
+de la partie) ; seule la présentation change, façon Zelda / RPG :
+
+- déplacement libre au sol, caméra 3e personne plus basse et plus proche
+  (`OW_PITCH` / `OW_DISTANCE` dans `AdventureOpen3D.gd`) ;
+- **toucher un groupe de monstres → le combat Tactique se lance directement**
+  (TeamSelection → Main, inchangé) ;
+- **entrer dans un donjon → les 4 salles se lancent directement** ;
+- franchir une porte ouverte → la zone voisine se charge ;
+- au retour d'un combat (victoire ou défaite), on revient dans le monde ouvert
+  à la même place : la vue utilisée est mémorisée dans la sauvegarde
+  (`adventure_view` = `"open3d"`, et `GameSettings.adventure_scene()` s'y réfère).
+
+Le HUD reprend tout ce qui est commun aux autres modes : bandeau de zone avec
+biome, niveau, **difficulté de la partie** et **temps de jeu du mode** (bucket
+`openworld`, affiché aussi dans « Mes Parties »), boutons d'accès aux **héros**
+(fiches) et au **butin** (inventaire commun), mini-carte, boutons vers les deux
+autres vues d'Aventure (« Carte 2D », « Vue 3D iso »).
+
+Un contact déjà « décliné » (monstre/donjon encore sous le joueur au retour d'un
+combat) ne redéclenche pas tant qu'on ne s'en éloigne pas.
+
+```
+scenes/AdventureOpen3D.tscn
+scripts/adventure3d/AdventureOpen3D.gd   # scène du 4e mode (réutilise Adv3D* + AdventureManager)
+tests/test_adventure_open3d.gd            # headless : routage, sauvegarde partagée, playtime, combats
+```
+
+## Le 4e mode « Monde Ouvert 3D » (V79)
+
+La scène `AdventureOpen3D.tscn` (`scripts/adventure3d/AdventureOpen3D.gd`) est le **4e mode de jeu**,
+lancé depuis « Mes Parties » : caméra plus basse et plus proche (façon Zelda/RPG), toucher un
+groupe de monstres ou entrer dans un donjon lance **directement** le combat Tactique, et on
+revient à la même place après le combat. La vue d'Aventure utilisée est mémorisée dans la
+sauvegarde (`adventure_view` : `"map"`, `"3d"` ou `"open3d"`) : `GameSettings.adventure_scene()`
+y revient après chaque combat. HUD du monde ouvert : boutons Carte 2D / Vue 3D iso / **Héros** /
+Butin / Menu, ligne d'infos (biome, niveau de zone, difficulté de la partie, temps de jeu du
+bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
+
+## HUD de cette vue 3D iso (V80)
+
+- Bouton **« Héros »** en haut à droite : fiche complète des héros (niveaux, caractéristiques,
+  sorts, équipement), même écran que depuis « Mes Parties ».
+- Ligne sous le nom de zone : vue en cours, **temps de jeu** du mode Aventure et **difficulté**
+  de la partie (rafraîchie chaque seconde et à chaque écriture du compteur).
+## V81 — Monde ouvert par nations, mini-carte ronde et pop-up de rencontre
+
+- **Une grande zone instanciée par nation** (36 × 24, contre 14 × 10 avant) : les anciennes
+  petites cartes ont été fondues dans la zone de leur nation (ex. `foret_ronces`/`lisiere_col`
+  → `foret_sylve`). Les 10 nations + le Donjon forment un chemin de 11 zones reliées par
+  **1 à 2 portails maximum** chacune (`AdventureTerrain.gates_of` dérive les portails de la
+  grille). Les POI du catalogue sont relocalisés (donjon de chaque nation en `30,18`) et
+  complétés par des lieux **générés de façon déterministe** (`ProgressionManager.pois_of`)
+  ; les groupes de monstres suivent la taille (`AdventureMobs.per_zone`).
+- **Mini-carte ronde en haut à droite** (`Adv3DMinimap._tex_round`, masque circulaire) ;
+  toucher → **carte plein écran à deux onglets** : « Instance » (la nation courante, avec
+  lieux/monstres/portails et légende) et « **Monde** » (`Adv3DWorldMap` : toutes les nations,
+  portails ouverts en vert / fermés en rouge, nation courante surlignée).
+- **Caméra reculée** (`OW_DISTANCE` 7.2 → 9.8, `OW_PITCH` -0.46 → -0.55).
+- **Rencontre avec un groupe de monstres → pop-up « COMBATTRE / PLUS TARD »** (comme la
+  version initiale), au lieu de lancer le combat directement.
+- **Graphisme** : entrée de donjon retravaillée (hautes tours crénelées, **portail violet
+  lumineux**, bannières, gemme flottante et grosse gemme de marqueur), lumière ambiante et
+  saturation relevées, brouillard un peu plus dense sur les grandes zones, plus de décor au sol.
+- Tests : `test_adventure_open3d.gd` (monde par nations, ≤ 2 portails, caméra, mini-carte ronde,
+  pop-up, onglets), `test_adventure_world.gd` / `test_adventure_island.gd` / `test_adventure_v2.gd`
+  / `test_adventure_mobs.gd` mis à jour.

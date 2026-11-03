@@ -9,6 +9,15 @@ func check(c: bool, m: String) -> void:
 	if not c:
 		fails += 1
 
+func _find_btn(n: Node, txt: String) -> Button:
+	if n is Button and String((n as Button).text) == txt:
+		return n as Button
+	for c: Node in n.get_children():
+		var r: Button = _find_btn(c, txt)
+		if r != null:
+			return r
+	return null
+
 func _init() -> void:
 	_boot.call_deferred()
 
@@ -87,9 +96,14 @@ func _boot() -> void:
 	check(scene.get("world_root") != null, "scène : monde construit")
 	var mobs: Array = scene.manager.mobs()
 	check(mobs.size() >= 1 and scene._mob_nodes.size() == mobs.size(), "scène : un nœud 3D par groupe de monstres (%d)" % mobs.size())
-	var pois: Dictionary = pm.ADVENTURE_POIS["foret_sylve"]
+	var pois: Dictionary = pm.pois_of("foret_sylve")
 	check(scene._poi_nodes.size() == pois.size(), "scène : un marqueur par lieu (%d)" % pois.size())
 	check(scene._gate_nodes.size() == scene.manager.gates().size(), "scène : un portique par porte")
+
+	# V80 : HUD — bouton « Héros » et ligne vue / temps de jeu / difficulté
+	check(scene._mode_label != null and String(scene._mode_label.text).contains("Difficulté"),
+		"HUD : ligne vue/temps/difficulté affichée (%s)" % String(scene._mode_label.text if scene._mode_label != null else ""))
+	check(_find_btn(scene._hud, "Héros") != null, "HUD : bouton 'Héros' présent")
 
 	# personnage « carton » : joueur et Gligli, 8 directions
 	var spr: Adv3DSpriteActor = scene.explorer._sprite
@@ -194,13 +208,20 @@ func _boot() -> void:
 	check(int(st.get("pending_level", 0)) == int(g["level"]), "combat : niveau du groupe transmis")
 	check(gm.fight_biome == "Forêt", "combat : décor de la zone")
 
-	# réglage et scène d'Aventure
+	# réglage et scène d'Aventure (la vue mémorisée dans la partie prime sur le réglage)
 	var gs: Node = root.get_node("GameSettings")
+	gm.active_save.erase("adventure_view")
 	gs.adventure_3d = false
-	check(gs.adventure_scene().ends_with("AdventureMap.tscn"), "réglage : carte classique par défaut")
+	check(gs.adventure_scene().ends_with("AdventureMap.tscn"), "réglage : carte classique par défaut (sans vue mémorisée)")
 	gs.adventure_3d = true
 	check(gs.adventure_scene().ends_with("Adventure3D.tscn"), "réglage : monde 3D si activé")
+	gm.active_save["adventure_view"] = "3d"
 	gs.adventure_3d = false
+	check(gs.adventure_scene().ends_with("Adventure3D.tscn"), "vue mémorisée 3D : retour en monde 3D même si le réglage est carte")
+	gm.active_save["adventure_view"] = "open3d"
+	check(gs.adventure_scene().ends_with("AdventureOpen3D.tscn"), "vue mémorisée open3d : retour en monde ouvert 3D")
+	gs.adventure_3d = false
+	gm.active_save.erase("adventure_view")
 
 	pm.delete_save(4)
 	print("ÉCHECS : %d" % fails)
