@@ -158,8 +158,8 @@ Voir [MONDE_AVENTURE_10_NATIONS.md](MONDE_AVENTURE_10_NATIONS.md) pour l'archite
 
 ## 11. Intégration de la carte Sylvestre — première passe
 
-Le nouveau fond a été ajouté au dépôt sous le nom exact `assets/boards/Sylvestre.png`. La définition de la planche Sylvestre référence désormais ce PNG. La grille 96 × 64, les cinq donjons, les POI existants et le système de progression sont conservés pour éviter de casser les sauvegardes et les interactions déjà en place.
+Le nouveau fond a été ajouté au dépôt sous le nom exact `assets/boards/Sylvestre.png` (1536 × 864 px). La définition de la planche a été recalibrée sur 96 × 54 cases, avec 18 POI et cinq donjons repositionnés devant leurs portes visibles. Le masque compte 2 027 cases praticables toutes reliées au point de départ.
 
-Le mode carte illustrée dispose maintenant d'un zoom progressif (pincement tactile, boutons +/− et molette de souris), en complément du scrolling et du recentrage sur le héros. Les coordonnées des POI et le masque de déplacement restent à contrôler sur la nouvelle illustration en jeu avant d'être considérés comme validés.
+Le mode carte illustrée dispose d'un zoom progressif (pincement tactile, boutons +/− et molette de souris), en complément du scrolling et du recentrage sur le héros. Le masque a été reconstruit à partir du contour de l'île, des bassins et des principaux bâtiments ; il reste une approximation à valider en jeu, notamment sur les chemins secondaires et les collisions.
 
-Voir `MONDE_AVENTURE_10_NATIONS.md` pour le suivi et les critères de validation.
+Voir `MONDE_AVENTURE_10_NATIONS.md` pour le détail de l'audit et les critères de validation.
