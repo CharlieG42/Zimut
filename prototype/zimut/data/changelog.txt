@@ -1,3 +1,6 @@
+V91|TEST — Nouveau héros 3D : les modèles KayKit « Adventurers » (Kay Lousberg, licence CC0) remplacent le héros maison — vrai personnage skinné, animé en repos / marche / course (+ léger mouvement au repos), rendu toon avec ombres et contour fin.
+V91|Chaque classe a son modèle : Tank = Chevalier, Mage = Mage, Chasseur = Rôdeur, Sylvain = Voleuse verte, Assassin = Voleur à capuche sombre ; Druide (Barbare), Soigneur et Invocateur (Mage), Géomancien (Chevalier doré) et Artificier (Rôdeur) sont des recolorations.
+V91|Le héros procédural reste en secours si les fichiers manquent ; licence et crédit dans assets/kaykit/License.txt.
 V90|TEST — Personnage 3D plus propre : visage sans anneaux noirs (yeux, joues, nez, bouche et sourcils sans contour), contour du corps affiné, peinture du tissu adoucie pour supprimer les stries.
 V90|Cheveux en mèches effilées (au lieu de boules) avec frange, cape en drapé arrondi, pantalon cargo éclairci (il paraissait noir).
 V90|Les 10 classes en profitent (chapeaux, capuches et accessoires conservés).

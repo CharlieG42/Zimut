@@ -201,3 +201,13 @@ bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
 - `Adv3DHeroModel.detail_material()` : yeux et détails du visage (`h_face` : sourcils, joues, nez, bouche) rendus sans coque de contour ; contour du corps 0,011 → 0,0065 ; `paint_amt` du personnage 0,10.
 - Cheveux : mèches par `Adv3DNationMeshes._spike` (11 + 3 de frange) sur la calotte ; cape : drapé en blob aplati ; pantalon éclairci.
 - Outil : `tests/shot_hero_close.gd <dossier> [classe]` (face, trois-quarts, dos, tête).
+
+
+## V91 — Héros KayKit (TEST)
+
+- `assets/kaykit/` : 6 personnages (Knight, Barbarian, Mage, Ranger, Rogue, Rogue_Hooded) + animations `Rig_Medium_General` / `Rig_Medium_MovementBasic` de **KayKit : Adventurers 2.0** — Kay Lousberg, CC0 (`License.txt`).
+- `Adv3DKayKit` (hérite de `Adv3DHeroRig`, même interface `animate / run_amount / stride / force_fidget`) : instancie le GLB, remplace les matériaux par un shader toon (texture d'atlas + `TOON_LIGHT` + contour), joue Idle_A / Walking_A / Running_A selon la vitesse (vitesse d'animation proportionnelle), Idle_B en micro-mouvement au repos, léger roulis en virage.
+- Recoloration par classe dans le shader (`LOOKS`) : décalage de teinte des étoffes saturées (peau, cuir et cheveux préservés), multiplicateurs sat/val, teinte du métal/gris.
+- `Adv3DHeroModel.make_player(classe)` : KayKit si disponible, sinon héros procédural (`make_hero`, toujours utilisé par les tests de la V90).
+- Non fait : armes en main (assets `Assets/` du pack : épée, arc, bâton…), animations de combat/sort (absentes de la version gratuite), Universal Animation Library (squelette différent).
+- Outil : `tests/shot_kaykit.gd <dossier>` (10 classes : repos, marche, course).

@@ -40,7 +40,7 @@ var distance: float = CAM_DISTANCE
 
 func _ready() -> void:
 	if Adv3DHeroModel.enabled():
-		_rig = Adv3DHeroModel.make_hero(hero_class) as Adv3DHeroRig
+		_rig = Adv3DHeroModel.make_player(hero_class) as Adv3DHeroRig
 		_model = _rig                            # vrai modèle low-poly (ombre incluse)
 		add_child(_model)
 		var dust3: CPUParticles3D = Adv3DActors.make_dust()
