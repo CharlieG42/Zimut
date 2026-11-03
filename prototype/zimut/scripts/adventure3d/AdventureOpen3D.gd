@@ -85,6 +85,7 @@ func _ready() -> void:
 		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
 		return
 	_rng.randomize()
+	save["adventure_view"] = "open3d"   # avant le chargement : les planches 2D ne sont actives que dans la carte 2D
 	manager = Node.new()
 	manager.set_script(load("res://scripts/AdventureManager.gd"))
 	add_child(manager)

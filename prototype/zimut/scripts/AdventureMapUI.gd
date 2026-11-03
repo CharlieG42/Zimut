@@ -17,6 +17,7 @@ const TILE_H := 64.0
 ## V43 : en dessous de cette échelle, la carte entière deviendrait illisible : on passe en vue
 ## défilante (glisser pour parcourir, caméra qui suit le héros) au lieu de tout rétrécir.
 const READABLE_SCALE := 0.82
+const BOARD_SCALE := 0.78          # V83 : échelle d'une planche illustrée
 const PAN_THRESHOLD := 14.0
 const SIDE_W := 440.0
 const STEP_TIME := 0.15
@@ -116,12 +117,13 @@ func _ready() -> void:
 	if _save.is_empty() or _slot < 0:
 		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
 		return
+	# Vue d'Aventure courante mémorisée : le retour d'un combat reviendra ici (et les planches
+	# illustrées, actives seulement dans cette vue, doivent l'être avant le chargement de l'état).
+	_save["adventure_view"] = "map"
 	manager = Node.new()
 	manager.set_script(load("res://scripts/AdventureManager.gd"))
 	add_child(manager)
 	manager.load_state(_save, _slot)
-	# Vue d'Aventure courante mémorisée : le retour d'un combat reviendra ici.
-	_save["adventure_view"] = "map"
 	manager.persist()
 	manager.cities_revealed.connect(_on_cities_revealed)
 	_build()
@@ -396,6 +398,9 @@ func _rebuild_world() -> void:
 	var layer: int = ProgressionManager.adventure_biome_layer(biome)
 	_set_sky(layer)
 	var zs: Vector2i = manager.zone_size()
+	if is_board():
+		_rebuild_board(biome)
+		return
 	var land := AdventureLandscape.new()
 	land.z_index = 0
 	_world.add_child(land)
@@ -492,6 +497,60 @@ func _rebuild_world() -> void:
 	_fit_world.call_deferred()
 
 
+## V83 : planche illustrée — l'illustration sert de décor, lieux / trouvailles / héros / monstres posés dessus.
+func _rebuild_board(biome: String) -> void:
+	var zid: String = manager.zone_id()
+	var d: Dictionary = BoardArt.raw(zid)
+	var spr := Sprite2D.new()
+	spr.texture = load(String(d["image"])) as Texture2D
+	spr.centered = false
+	var ws: Vector2 = BoardArt.world_size(zid)
+	spr.scale = ws / Vector2(spr.texture.get_size())
+	spr.z_index = 0
+	_world.add_child(spr)
+	_backdrop = spr
+	_board = AdventureBoard.new()
+	_board.ui = self
+	_board.z_index = 1
+	_world.add_child(_board)
+	_entities = Node2D.new()
+	_entities.y_sort_enabled = true
+	_entities.z_index = 2
+	_world.add_child(_entities)
+	var pal: Dictionary = BattleScenery.pal(biome)
+	var pois: Dictionary = ProgressionManager.adventure_zone_pois(zid)
+	for k: String in pois.keys():
+		var pos: Vector2i = AdventureTerrain.parse(k)
+		var poi: Dictionary = pois[k]
+		var node := PoiNode.new()
+		node.kind = String(poi.get("kind", "combat"))
+		node.title = String(poi.get("name", "?"))
+		node.level = int(poi.get("level", 10))
+		node.biome = biome
+		node.pal = pal
+		node.icon = load(String(POI_ICONS.get(node.kind, POI_ICONS["combat"]))) as Texture2D
+		node.prop = ""                      # les bâtiments / entrées sont dessinés dans la planche
+		node.position = cell_center(pos)
+		_entities.add_child(node)
+		_cell_nodes[pos] = _cell_nodes.get(pos, []) + [node]
+	var finds: Dictionary = AdventureTerrain.finds_of(zid)
+	for fp: Vector2i in finds.keys():
+		var fnode := FindNode.new()
+		fnode.kind = String(finds[fp])
+		fnode.position = cell_center(fp)
+		_entities.add_child(fnode)
+		_cell_nodes[fp] = _cell_nodes.get(fp, []) + [fnode]
+	_hero = HeroView.new()
+	_hero.tex = Portraits.get_texture({"classe": manager.hero_class(), "team": "player", "entity_type": "Player"})
+	_hero.position = cell_center(manager.hero_pos())
+	_entities.add_child(_hero)
+	_mob_nodes.clear()
+	manager.ensure_mobs()
+	_sync_mobs(false)
+	_refresh_world()
+	_fit_world.call_deferred()
+
+
 ## Dégradé du ciel selon l'étage : ciel lumineux, surface (par défaut), profondeurs sombres.
 func _set_sky(layer: int) -> void:
 	if _bg_grad == null:
@@ -560,6 +619,14 @@ func _fit_world() -> void:
 	var vs: Vector2 = _map_view.size
 	if vs.x < 10.0:
 		return
+	if is_board():
+		# planche illustrée : échelle lisible fixe, la caméra suit le héros
+		_scroll_mode = true
+		if _recenter_btn != null:
+			_recenter_btn.visible = true
+		_world.scale = Vector2(BOARD_SCALE, BOARD_SCALE)
+		_recenter(false)
+		return
 	_scroll_mode = scroll_needed(size, vs)
 	if _recenter_btn != null:
 		_recenter_btn.visible = _scroll_mode
@@ -577,6 +644,8 @@ func _fit_world() -> void:
 
 ## Rectangle du plateau en coordonnées du monde (avec marge pour décors hauts et falaise).
 func _world_bounds() -> Rect2:
+	if is_board():
+		return Rect2(Vector2.ZERO, BoardArt.world_size(manager.zone_id()))
 	var s: Vector2i = manager.zone_size()
 	var left: float = -float(s.y) * TILE_W * 0.5 - 60.0
 	var right: float = float(s.x) * TILE_W * 0.5 + 60.0
@@ -666,11 +735,20 @@ func _pan_by(rel: Vector2) -> bool:
 #  Projection
 # ══════════════════════════════════════════════════════════════════════
 
+## V83 : la zone courante est-elle une planche illustrée (grille à plat sur l'image) ?
+func is_board() -> bool:
+	return manager != null and not BoardArt.def(manager.zone_id()).is_empty()
+
+
 func cell_center(p: Vector2i) -> Vector2:
+	if is_board():
+		return (Vector2(p) + Vector2(0.5, 0.5)) * BoardArt.CELL_WORLD
 	return Vector2(float(p.x - p.y) * TILE_W * 0.5, float(p.x + p.y) * TILE_H * 0.5)
 
 
 func screen_to_cell(local: Vector2) -> Vector2i:
+	if is_board():
+		return Vector2i(floori(local.x / BoardArt.CELL_WORLD), floori(local.y / BoardArt.CELL_WORLD))
 	var gx: float = (local.y / (TILE_H * 0.5) + local.x / (TILE_W * 0.5)) * 0.5
 	var gy: float = (local.y / (TILE_H * 0.5) - local.x / (TILE_W * 0.5)) * 0.5
 	return Vector2i(roundi(gx), roundi(gy))
@@ -1306,6 +1384,8 @@ func _sync_mobs(animate: bool) -> void:
 		var mn: MobNode = _mob_nodes.get(id, null)
 		if mn == null or not is_instance_valid(mn):
 			mn = MobNode.new()
+			if is_board():
+				mn.scale = Vector2(0.66, 0.66)      # V83 : sur la planche, les monstres restent à l'échelle du décor
 			mn.level = int(g.get("level", 1))
 			mn.count = int(g.get("count", 3))
 			mn.elite = bool(g.get("elite", false))
@@ -1874,7 +1954,28 @@ class AdventureBoard extends Node2D:
 	func _diamond(c: Vector2, s: float = 1.0) -> PackedVector2Array:
 		return PackedVector2Array([c + Vector2(0, -32 * s), c + Vector2(64 * s, 0), c + Vector2(0, 32 * s), c + Vector2(-64 * s, 0)])
 
+	func _draw_board() -> void:
+		var mgr: Node = ui.manager
+		var cw: float = BoardArt.CELL_WORLD
+		for i: int in range(preview.size()):
+			var pc: Vector2 = ui.cell_center(preview[i])
+			var last: bool = i == preview.size() - 1
+			draw_circle(pc, 7.0 if not last else 13.0, Color(1.0, 0.95, 0.55, 0.85))
+			if last and preview.size() > 1:
+				var tag: String = "%d pas" % preview.size()
+				var fnt: Font = ThemeDB.fallback_font
+				var tw: Vector2 = fnt.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 26)
+				var tp: Vector2 = pc + Vector2(-tw.x * 0.5, -40.0)
+				draw_rect(Rect2(tp + Vector2(-10, -tw.y + 2), tw + Vector2(20, 10)), Color(0.05, 0.07, 0.12, 0.88))
+				draw_string(fnt, tp, tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 26, Color(1.0, 0.92, 0.55))
+		if hover.x >= 0:
+			var ok: bool = AdventureTerrain.walkable(mgr.zone_id(), hover)
+			draw_rect(Rect2(Vector2(hover) * cw, Vector2(cw, cw)), Color(1, 1, 1, 0.9) if ok else Color(1, 0.4, 0.35, 0.8), false, 2.5)
+
 	func _draw() -> void:
+		if ui.is_board():
+			_draw_board()
+			return
 		var mgr: Node = ui.manager
 		var size: Vector2i = mgr.zone_size()
 		var biome: String = mgr.zone_biome()

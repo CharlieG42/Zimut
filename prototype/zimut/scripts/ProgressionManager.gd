@@ -2515,6 +2515,8 @@ static var _pois_cache: Dictionary = {}
 ## nation (54 × 36). Le cache garantit des clés stables d'une frame à l'autre (et d'une
 ## sauvegarde à l'autre, puisque la génération ne dépend que de zone_id).
 static func pois_of(zone_id: String) -> Dictionary:
+	if not BoardArt.def(zone_id).is_empty():
+		return BoardArt.pois(zone_id)      # V83 : planche illustrée (carte 2D)
 	if _pois_cache.has(zone_id):
 		return _pois_cache[zone_id]
 	var out: Dictionary = (ADVENTURE_POIS.get(zone_id, {}) as Dictionary).duplicate(true)
@@ -2616,7 +2618,7 @@ static func _add_dungeon_tiers(out: Dictionary, meta: Dictionary, w: int, h: int
 					best = c
 		if best.x < 0:
 			continue
-		var tier: int = i + 1
+		var tier: int = 2 + i * 2      # monde ouvert : paliers 2 et 4 (le Gardien = 5 ; la planche 2D utilise 1 à 4)
 		var key: String = Dungeons.tier_key(nation, tier)
 		out["%d,%d" % [best.x, best.y]] = {"kind": "combat", "guardian": key, "name": String(names[i]),
 			"level": Dungeons.room_level(key, Dungeons.ROOMS),

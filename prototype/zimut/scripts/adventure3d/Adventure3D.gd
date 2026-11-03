@@ -68,6 +68,7 @@ func _ready() -> void:
 	if save.is_empty() or GameManager.active_slot < 0:
 		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
 		return
+	save["adventure_view"] = "3d"   # avant le chargement : les planches 2D ne sont actives que dans la carte 2D
 	manager = Node.new()
 	manager.set_script(load("res://scripts/AdventureManager.gd"))
 	add_child(manager)

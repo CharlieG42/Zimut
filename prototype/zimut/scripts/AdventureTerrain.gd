@@ -109,6 +109,8 @@ static func gate_cell(zone_id: String, dir: String) -> Vector2i:
 ## Portes d'une carte : { Vector2i : {"dir", "to"} }.
 static func gates_of(zone_id: String) -> Dictionary:
 	var out: Dictionary = {}
+	if not BoardArt.def(zone_id).is_empty():
+		return out          # V83 : une planche illustrée n'a pas de portes (voyage par la carte du monde)
 	for dir: String in DIRS.keys():
 		var to: String = neighbor(zone_id, dir)
 		if to != "":
@@ -225,7 +227,31 @@ static func parse(k: String) -> Vector2i:
 ##   paths {Vector2i: true}, decor {Vector2i: kind}, pois [Vector2i], gates [Vector2i],
 ##   voids {Vector2i: true} (cases hors île, V47),
 ##   cell_biome {Vector2i: biome} (uniquement les cases d'un autre biome que la carte) }
+## V83 : terrain d'une planche illustrée : cases jouables = masque, aucun décor généré.
+static func _board_terrain(zone_id: String) -> Dictionary:
+	var key: String = "board:" + zone_id
+	if _cache.has(key):
+		return _cache[key]
+	var meta: Dictionary = ProgressionManager.ADVENTURE_ZONES.get(zone_id, {})
+	var pois: Array[Vector2i] = []
+	for k: String in BoardArt.pois(zone_id).keys():
+		pois.append(parse(k))
+	var paths: Dictionary = {}
+	var sz: Vector2i = BoardArt.size(zone_id)
+	for y: int in range(sz.y):
+		for x: int in range(sz.x):
+			if BoardArt.walkable_cell(zone_id, Vector2i(x, y)):
+				paths[Vector2i(x, y)] = true
+	var out: Dictionary = {"size": sz, "start": BoardArt.start(zone_id), "biome": String(meta.get("biome", "Forêt")),
+		"obstacles": {}, "paths": paths, "decor": {}, "pois": pois, "gates": [] as Array[Vector2i],
+		"cell_biome": {}, "voids": BoardArt.voids(zone_id)}
+	_cache[key] = out
+	return out
+
+
 static func zone_terrain(zone_id: String) -> Dictionary:
+	if not BoardArt.def(zone_id).is_empty():
+		return _board_terrain(zone_id)
 	if _cache.has(zone_id):
 		return _cache[zone_id]
 	var meta: Dictionary = ProgressionManager.ADVENTURE_ZONES.get(zone_id, {})
