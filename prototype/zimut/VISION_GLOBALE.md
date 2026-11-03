@@ -154,3 +154,12 @@ La Nation Sylvestre sert de référence artistique et technique. Sa carte global
 Le prototype possède déjà le défilement tactile, les interactions de POI, les monstres errants, les récompenses persistantes et le système de planches illustrées. La nouvelle carte doit remplacer le fond de la planche Sylvestre et réutiliser ces systèmes, sans créer une navigation parallèle.
 
 Voir [MONDE_AVENTURE_10_NATIONS.md](MONDE_AVENTURE_10_NATIONS.md) pour l'architecture, les règles de contenu, les recommandations de performance Android, les étapes d'intégration et les critères d'acceptation.
+
+
+## 11. Intégration de la carte Sylvestre — première passe
+
+Le nouveau fond a été ajouté au dépôt sous le nom exact `assets/boards/Sylvestre.png`. La définition de la planche Sylvestre référence désormais ce PNG. La grille 96 × 64, les cinq donjons, les POI existants et le système de progression sont conservés pour éviter de casser les sauvegardes et les interactions déjà en place.
+
+Le mode carte illustrée dispose maintenant d'un zoom progressif (pincement tactile, boutons +/− et molette de souris), en complément du scrolling et du recentrage sur le héros. Les coordonnées des POI et le masque de déplacement restent à contrôler sur la nouvelle illustration en jeu avant d'être considérés comme validés.
+
+Voir `MONDE_AVENTURE_10_NATIONS.md` pour le suivi et les critères de validation.
