@@ -164,8 +164,9 @@ Les contrôles de zoom ne modifient pas la position logique du héros ni la gril
 ## 10. Améliorations de lisibilité et de déplacement (2026-11-03)
 
 - Les cinq POI de type donjon sont identifiés séparément dans le rendu de la planche : halo violet double, anneau plus marqué, icône agrandie et nom affiché en permanence tant que le donjon n'a pas été maîtrisé.
-- L'entrée sud-est (`Sanctuaire de Cristal`) est remontée d'une case de grille, de `(76,40)` à `(76,39)`, sans changer son identifiant de gardien. La case reste praticable et reliée au départ.
+- Les cinq portails de donjon sont positionnés sur la grille selon le relevé du joueur : bas droite `(76,39)` ; bas gauche `(16,32)` ; haut gauche `(19,10)` ; haut droite `(76,11)` ; portail central `(50,23)`. Le portail bas droite conserve la retouche initiale. Les cellules nécessaires du masque sont ouvertes pour garder les seuils accessibles, avec un raccord de chemin supplémentaire au sud-ouest.
 - Le déplacement sur la planche utilise une durée de pas moins précipitée et une interpolation douce. Le héros reçoit un état de locomotion pendant le trajet, avec rebond rythmé, léger déhanchement selon la direction et liseré discret pour mieux se détacher du fond illustré.
+- Le rendu du héros charge les poses `walk`, `back` et `back_walk` depuis `assets/sprites/nations/heros/poses/` lorsqu'elles existent pour sa classe ; les classes sans pose dédiée conservent le sprite de base animé procéduralement.
 - Le pathfinding existant et les règles de collision restent la source de vérité : aucun déplacement direct à travers le décor, aucun changement de format de sauvegarde.
 
 ## 11. Critères d'acceptation de la Nation Sylvestre
