@@ -695,6 +695,8 @@ func _refresh_world() -> void:
 					n.z_index = p.y * 4 + 1
 			if n is PoiNode:
 				var pn: PoiNode = n
+				# Les POI non découverts ne sont pas animés : aucun rendu visible à rafraîchir.
+				pn.set_process(n.visible)
 				pn.done = manager.poi_done(p) and pn.kind != "camp"
 				var near: int = 4 if board_depth else 2
 				var hero_distance: int = absi(p.x - hp.x) + absi(p.y - hp.y)
@@ -1786,8 +1788,12 @@ func _sync_mobs(animate: bool) -> void:
 			var to: Vector2 = cell_center(cell)
 			mn.face(to.x - mn.position.x)
 			if animate:
-				create_tween().tween_property(mn, "position", to, STEP_TIME * 1.6).set_trans(Tween.TRANS_SINE)
+				mn.begin_walk()
+				var mob_tween: Tween = create_tween()
+				mob_tween.tween_property(mn, "position", to, STEP_TIME * 1.6).set_trans(Tween.TRANS_SINE)
+				mob_tween.tween_callback(Callable(mn, "end_walk"))
 			else:
+				mn.end_walk()
 				mn.position = to
 	for id2: int in _mob_nodes.keys():
 		if not live.has(id2):
@@ -2528,6 +2534,15 @@ class PoiNode extends Node2D:
 	func _draw() -> void:
 		var col: Color = Color(0.72, 0.43, 1.0) if is_dungeon else POI_COLOR.get(kind, Color.WHITE)
 		var pulse: float = 0.5 + 0.5 * sin(_t * (2.0 if is_dungeon else 2.4))
+		# Assise au sol : ombre douce et anneau de matière pour mieux détacher le POI du décor.
+		# Cette couche est purement graphique et reste centrée sur la position existante.
+		var ground_radius: float = 48.0 if is_dungeon else 34.0
+		draw_set_transform(Vector2(0, 5), 0.0, Vector2(1.0, 0.34))
+		draw_circle(Vector2.ZERO, ground_radius + 10.0, Color(0.015, 0.025, 0.035, 0.18))
+		draw_circle(Vector2.ZERO, ground_radius, Color(col.r * 0.45, col.g * 0.45, col.b * 0.45, 0.24))
+		draw_arc(Vector2.ZERO, ground_radius - 3.0, PI * 0.12, PI * 0.88, 32,
+			Color(col.r, col.g, col.b, 0.42 if not done else 0.20), 2.2, true)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		if not done:
 			draw_set_transform(Vector2(0, 4), 0.0, Vector2(1.0, 0.5))
 			if is_dungeon:
@@ -2576,9 +2591,18 @@ class PoiNode extends Node2D:
 			draw_circle(ic, icon_r + 8.0 + pulse * 3.0, Color(col.r, col.g, col.b, 0.10 + pulse * 0.08))
 			draw_arc(ic, icon_r + 7.0 + pulse * 3.0, 0.0, TAU, 40,
 				Color(col.r, col.g, col.b, 0.48 + pulse * 0.32), 2.5, true)
-		draw_circle(ic + Vector2(0, 3), icon_r, Color(0, 0, 0, 0.42))
-		draw_circle(ic, icon_r, Color(0.06, 0.08, 0.14, 0.97))
-		draw_arc(ic, icon_r - 1.0, 0.0, TAU, 40, col if not done else Color(0.5, 0.5, 0.55), 4.0 if is_dungeon else 3.0, true)
+		draw_circle(ic + Vector2(0, 3), icon_r + 2.0, Color(0.01, 0.02, 0.04, 0.32))
+		draw_circle(ic, icon_r + 2.0, Color(col.r, col.g, col.b, 0.12 if not done else 0.06))
+		draw_circle(ic, icon_r, Color(0.035, 0.05, 0.095, 0.99))
+		# Double liseré : bord externe sombre, tranche colorée et filet intérieur lumineux.
+		var rim_col: Color = col if not done else Color(0.5, 0.5, 0.55)
+		draw_arc(ic, icon_r + 0.5, 0.0, TAU, 48, Color(0.015, 0.02, 0.04, 0.95), 5.0, true)
+		draw_arc(ic, icon_r - 1.0, 0.0, TAU, 48, rim_col, 3.0 if is_dungeon else 2.5, true)
+		draw_arc(ic + Vector2(0, 1), icon_r - 4.0, PI * 0.08, PI * 0.92, 28,
+			Color(0.01, 0.015, 0.03, 0.72 if not done else 0.35), 2.0, true)
+		# Reflet supérieur : donne un léger volume au médaillon sans changer sa zone tactile.
+		draw_arc(ic + Vector2(0, -1), icon_r - 4.0, PI * 1.12, PI * 1.88, 24,
+			Color(1.0, 1.0, 1.0, 0.30 if not done else 0.12), 1.5, true)
 		if icon != null:
 			draw_texture_rect(icon, Rect2(ic - Vector2(icon_size * 0.5, icon_size * 0.5), Vector2(icon_size, icon_size)), false, mod)
 		if done:
@@ -2596,7 +2620,9 @@ class PoiNode extends Node2D:
 			sb.set_border_width_all(1)
 			sb.set_corner_radius_all(10)
 			draw_style_box(sb, r)
-			draw_string(font, r.position + Vector2(9, 18), txt, HORIZONTAL_ALIGNMENT_LEFT, tw, 15, Color(1, 0.96, 0.85))
+			# Ombre portée typographique : le nom reste lisible sur les zones claires du décor.
+			draw_string(font, r.position + Vector2(9, 19), txt, HORIZONTAL_ALIGNMENT_LEFT, tw, 15, Color(0.0, 0.0, 0.0, 0.85))
+			draw_string(font, r.position + Vector2(9, 17), txt, HORIZONTAL_ALIGNMENT_LEFT, tw, 15, Color(1, 0.96, 0.85))
 
 
 ## Trouvaille cachée : petit scintillement au sol (herbe, bourse ou relique).
@@ -2790,7 +2816,10 @@ class HeroView extends Node2D:
 			turn_squash = 1.0 - 0.16 * sin((1.0 - _turn_t / 0.18) * PI)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2((-1.0 if _flip else 1.0) * turn_squash, 1.0))
 		# Liseré sombre discret pour détacher le héros des feuillages clairs.
-		var rect := Rect2(Vector2(x - w * 0.5, y), Vector2(w, h + breathe))
+		# Respiration très légère au repos : elle anime la silhouette sans déformer le sprite.
+		var idle_breath: float = sin(_t * 1.9) * 0.012 if not walking else 0.0
+		var rect := Rect2(Vector2(x - w * (1.0 + idle_breath) * 0.5, y - idle_breath * h * 0.5),
+			Vector2(w * (1.0 + idle_breath), (h + breathe) * (1.0 - idle_breath)))
 		for o: Vector2 in [Vector2(-1.5, 0), Vector2(1.5, 0), Vector2(0, -1.5), Vector2(0, 1.5)]:
 			draw_texture_rect(display_tex, Rect2(rect.position + o, rect.size), false, Color(0.05, 0.07, 0.10, 0.42))
 		draw_texture_rect(display_tex, rect, false)
@@ -3010,13 +3039,69 @@ class MobNode extends Node2D:
 	var cell: Vector2i = Vector2i.ZERO
 	var _flip: bool = false
 	var _t: float = 0.0
+	var _idle_variants: Array = []
+	var _idle_choices: Array = []
+	var _walk_variants: Array = []
+	var _walking: bool = false
+	var _gait_t: float = 0.0
+	var _idle_timer: float = 4.5
 
 	func _ready() -> void:
 		_t = float(absi(int(position.x * 5 + position.y * 3))) * 0.01
+		_idle_timer = randf_range(3.5, 6.0)
+		for tex: Texture2D in texes:
+			var idle_variants: Array[Texture2D] = []
+			var walk_variants: Array[Texture2D] = []
+			if tex != null and tex.resource_path != "":
+				var base: String = tex.resource_path.get_basename()
+				idle_variants = _load_pose_variants(base + "_idle", true)
+				walk_variants = _load_pose_variants(base + "_walk", false)
+			_idle_variants.append(idle_variants)
+			_idle_choices.append(null)
+			_walk_variants.append(walk_variants)
 		set_process(true)
+
+	func _load_pose_variants(stem: String, skip_first: bool) -> Array[Texture2D]:
+		var result: Array[Texture2D] = []
+		for index: int in range(1, 10):
+			if skip_first and index == 1:
+				continue
+			var path: String = stem + ".png" if index == 1 else "%s_%d.png" % [stem, index]
+			if ResourceLoader.exists(path):
+				var pose_tex: Texture2D = load(path) as Texture2D
+				if pose_tex != null:
+					result.append(pose_tex)
+		return result
+
+	func begin_walk() -> void:
+		_walking = true
+		_gait_t = 0.0
+		queue_redraw()
+
+	func end_walk() -> void:
+		_walking = false
+		_gait_t = 0.0
+		queue_redraw()
 
 	func _process(delta: float) -> void:
 		_t += delta
+		if _walking:
+			_gait_t += delta
+		_idle_timer -= delta
+		if _idle_timer <= 0.0:
+			var candidates: Array[int] = []
+			for i: int in range(_idle_variants.size()):
+				var available: Array = _idle_variants[i]
+				if not available.is_empty():
+					candidates.append(i)
+			if not candidates.is_empty():
+				var chosen: int = candidates[randi() % candidates.size()]
+				var variants: Array = _idle_variants[chosen]
+				if _idle_choices[chosen] == null:
+					_idle_choices[chosen] = variants[randi() % variants.size()]
+				else:
+					_idle_choices[chosen] = null
+			_idle_timer = randf_range(3.5, 6.0)
 		queue_redraw()
 
 	func face(dx: float) -> void:
@@ -3036,17 +3121,32 @@ class MobNode extends Node2D:
 			var tex: Texture2D = texes[i]
 			if tex == null:
 				continue
-			var h: float = (84.0 if i == 0 else 66.0) * (1.12 if elite else 1.0)
-			var sc: float = h / float(tex.get_height())
-			var w: float = float(tex.get_width()) * sc
-			var bob: float = sin(_t * 2.0 + float(i)) * 1.5
+			var phase: float = _t * (2.0 if i == 0 else 1.7) + float(i) * 1.9
+			var idle_tex: Texture2D = _idle_choices[i] if i < _idle_choices.size() and _idle_choices[i] is Texture2D else null
+			var display_tex: Texture2D = idle_tex if idle_tex != null else tex
+			# Les poses de marche dédiées sont utilisées uniquement pendant le déplacement.
+			# Sans fichier _walk, le sprite de base reste affiché : repli sans rupture.
+			if _walking and i < _walk_variants.size():
+				var walk_pool: Array = _walk_variants[i]
+				if not walk_pool.is_empty():
+					var gait_step: int = int(_gait_t / 0.12)
+					display_tex = walk_pool[(gait_step >> 1) % walk_pool.size()]
+			var breathe: float = 1.0 + sin(phase) * (0.018 if i == 0 else 0.026)
+			var h: float = (84.0 if i == 0 else 66.0) * (1.12 if elite else 1.0) * breathe
+			var sc: float = h / float(display_tex.get_height())
+			var w: float = float(display_tex.get_width()) * sc
+			var bob: float = sin(phase) * (2.2 if i == 0 else 2.8)
 			var o: Vector2 = offs[i]
+			# Ombre de contact individuelle : elle ancre chaque silhouette au sol.
+			draw_set_transform(o + Vector2(0, 2), 0.0, Vector2(1.0, 0.34))
+			draw_circle(Vector2.ZERO, 19.0 if i == 0 else 15.0, Color(0.02, 0.04, 0.05, 0.30 if i == 0 else 0.22))
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			if _flip:
 				draw_set_transform(Vector2(-o.x, o.y), 0.0, Vector2(-1.0, 1.0))
-				draw_texture_rect(tex, Rect2(Vector2(-w * 0.5, -h + 4.0 - bob), Vector2(w, h)), false, Color(1, 1, 1) if i == 0 else Color(0.85, 0.85, 0.9))
+				draw_texture_rect(display_tex, Rect2(Vector2(-w * 0.5, -h + 4.0 - bob), Vector2(w, h)), false, Color(1, 1, 1) if i == 0 else Color(0.85, 0.85, 0.9))
 				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			else:
-				draw_texture_rect(tex, Rect2(o + Vector2(-w * 0.5, -h + 4.0 - bob), Vector2(w, h)), false, Color(1, 1, 1) if i == 0 else Color(0.85, 0.85, 0.9))
+				draw_texture_rect(display_tex, Rect2(o + Vector2(-w * 0.5, -h + 4.0 - bob), Vector2(w, h)), false, Color(1, 1, 1) if i == 0 else Color(0.85, 0.85, 0.9))
 		# Badge : niveau + effectif
 		var bcol: Color = Color(0.45, 0.88, 0.50) if danger <= 1 else (Color(1.0, 0.72, 0.30) if danger <= 4 else Color(1.0, 0.40, 0.36))
 		var font: Font = ThemeDB.fallback_font
