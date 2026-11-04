@@ -594,6 +594,7 @@ func _rebuild_world() -> void:
 ## V83 : planche illustrée — l'illustration sert de décor, lieux / trouvailles / héros / monstres posés dessus.
 func _rebuild_board(biome: String) -> void:
 	var zid: String = manager.zone_id()
+	var zs: Vector2i = manager.zone_size()
 	var d: Dictionary = BoardArt.raw(zid)
 	var spr := Sprite2D.new()
 	spr.texture = load(String(d["image"])) as Texture2D
