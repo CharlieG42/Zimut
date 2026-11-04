@@ -348,6 +348,9 @@ func complete_puzzle(key: String) -> Dictionary:
 
 ## Coffre : XP d'exploration + un objet de l'inventaire commun.
 func open_chest(key: String, level: int) -> Array:
+	# Garde-fou local : même un appel direct ne peut pas créditer deux fois le même coffre.
+	if ProgressionManager.adventure_poi_completed(state, key):
+		return []
 	var drops: Array = ProgressionManager._roll_loots(maxi(1, level), false)
 	var looted: Array = []
 	if not drops.is_empty():
