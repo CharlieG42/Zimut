@@ -62,7 +62,7 @@ func _boot() -> void:
 
 	# Contrat de progression : les modes appellent les mêmes mutations sur la sauvegarde de partie.
 	var progression: String = FileAccess.get_file_as_string("res://scripts/ProgressionManager.gd")
-	check(progression.contains("func award_xp(data: Dictionary") and progression.contains("static func add_resources(data: Dictionary"),
+	check(progression.contains("func award_xp(data: Dictionary") and progression.contains("func add_resources(data: Dictionary"),
 		"XP et ressources disposent de points d’entrée communs dans ProgressionManager")
 	check(progression.contains("func register_victory(data: Dictionary") and progression.contains("data[\"inventory\"].append(l)"),
 		"les victoires ajoutent XP et butin à la sauvegarde commune")
