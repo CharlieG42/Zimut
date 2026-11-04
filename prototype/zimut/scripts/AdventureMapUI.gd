@@ -2791,7 +2791,7 @@ class HeroView extends Node2D:
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2((-1.0 if _flip else 1.0) * turn_squash, 1.0))
 		# Liseré sombre discret pour détacher le héros des feuillages clairs.
 		# Respiration très légère au repos : elle anime la silhouette sans déformer le sprite.
-		var idle_breath: float = sin(_t * 1.9 + _phase) * 0.012 if not walking else 0.0
+		var idle_breath: float = sin(_t * 1.9) * 0.012 if not walking else 0.0
 		var rect := Rect2(Vector2(x - w * (1.0 + idle_breath) * 0.5, y - idle_breath * h * 0.5),
 			Vector2(w * (1.0 + idle_breath), (h + breathe) * (1.0 - idle_breath)))
 		for o: Vector2 in [Vector2(-1.5, 0), Vector2(1.5, 0), Vector2(0, -1.5), Vector2(0, 1.5)]:
