@@ -16,8 +16,9 @@ func configure(grid_size: int, biome: String, seed_value: int = 1) -> void:
 	_parts.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value * 61 + 3
-	# La planche utilise le même budget d'effets que les autres scènes.
-	var count: int = roundi(34.0 * GfxQuality.density())
+	# Même budget d'effets que les autres scènes, avec un minimum de vie visuelle.
+	var density: float = clampf(GfxQuality.density(), 0.35, 1.0)
+	var count: int = maxi(12, roundi(34.0 * density))
 	for i: int in range(count):
 		_parts.append({
 			"x": rng.randf_range(-_span.x, _span.x), "y": rng.randf_range(-120.0, _span.y),
@@ -25,6 +26,11 @@ func configure(grid_size: int, biome: String, seed_value: int = 1) -> void:
 		})
 	set_process(true)
 	queue_redraw()
+
+
+## Nombre de particules actives (utile au diagnostic qualité et aux tests).
+func particle_count() -> int:
+	return _parts.size()
 
 
 func _process(delta: float) -> void:

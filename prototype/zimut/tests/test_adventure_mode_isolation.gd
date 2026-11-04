@@ -137,6 +137,28 @@ func _boot() -> void:
 	check(manager.contains('ProgressionManager.add_resources(save, res)'),
 		"les récoltes d’exploration alimentent l’inventaire de ressources partagé")
 
+	# Contrat de progression : les modes appellent les mêmes mutations sur la sauvegarde de partie.
+	var progression: String = FileAccess.get_file_as_string("res://scripts/ProgressionManager.gd")
+	check(progression.contains("func award_xp(data: Dictionary") and progression.contains("func add_resources(data: Dictionary"),
+		"XP et ressources disposent de points d’entrée communs dans ProgressionManager")
+	check(progression.contains("func register_victory(data: Dictionary") and progression.contains("data[\"inventory\"].append(l)"),
+		"les victoires ajoutent XP et butin à la sauvegarde commune")
+	var conquest: String = FileAccess.get_file_as_string("res://scripts/ConquestSystem.gd")
+	check(conquest.contains("static func _pay(data: Dictionary") and conquest.contains("data[\"resources\"] = res") and conquest.contains("data[\"gold\"] = int(data.get(\"gold\", 0)) - int(cost.get(\"gold\", 0))"),
+		"les dépenses de Conquête mutent les mêmes champs or/ressources de la sauvegarde")
+	var chest_start: int = manager.find("func open_chest(key: String, level: int) -> Array")
+	var chest_end: int = manager.find("## Camp (source claire)", chest_start)
+	var chest_code: String = manager.substr(chest_start, chest_end - chest_start)
+	check(chest_code.contains("ProgressionManager.adventure_poi_completed(state, key)"),
+		"un coffre déjà ouvert ne peut pas être récompensé une seconde fois")
+	var puzzle_start: int = manager.find("func solve_puzzle(key: String, answer: String) -> bool")
+	var puzzle_end: int = manager.find("## Énigmes de réflexion", puzzle_start)
+	var puzzle_code: String = manager.substr(puzzle_start, puzzle_end - puzzle_start)
+	check(puzzle_code.contains("ProgressionManager.adventure_poi_completed(state, key)"),
+		"une énigme déjà validée ne peut pas rapporter une seconde fois")
+	check(manager.contains("ProgressionManager.award_xp(save, xp)") and manager.contains("ProgressionManager.write_save(slot, save)"),
+		"l’exploration crédite le roster commun et persiste la même sauvegarde")
+
 	check(manager.contains('and pos != target') and manager.contains('not Dungeons.is_dungeon(poi)'),
 		"les combats ordinaires bloquent le passage, mais les portes de donjon restent traversables")
 	check(map_ui.contains('Dungeons.is_dungeon(poi) and step != path.back()'),
@@ -199,7 +221,7 @@ func _boot() -> void:
 	check(map_ui.contains('ambient.name = "Ambient"') and map_ui.contains("ambient.configure(maxi(zs.x, zs.y), biome"),
 		"la planche illustrée reçoit aussi les effets d'ambiance du biome sans modifier son image")
 	var ambient_script: String = FileAccess.get_file_as_string("res://scripts/SceneryAmbient.gd")
-	check(ambient_script.contains("GfxQuality.density()") and ambient_script.contains("roundi(34.0 * GfxQuality.density())"),
+	check(ambient_script.contains("clampf(GfxQuality.density(), 0.35, 1.0)") and ambient_script.contains("roundi(34.0 * density)"),
 		"les particules de la planche respectent le profil graphique Auto/Économie/Haute")
 	check(ambient_script.contains('"leaves" if _biome == "Forêt"') and ambient_script.contains('"leaves":'),
 		"Sylvestre reçoit un léger feuillage animé indépendant du fond illustré")

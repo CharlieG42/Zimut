@@ -25,6 +25,8 @@ func _boot() -> void:
 		await process_frame
 		check(back.get_child_count() >= 24, "%s : rebord surélevé généré (%d éléments)" % [biome, back.get_child_count()])
 		check(is_instance_valid(over) and is_instance_valid(amb) and is_instance_valid(bd), "%s : couches de lèvre / ambiance / fond créées" % biome)
+	check(amb.particle_count() == maxi(12, roundi(34.0 * clampf(GfxQuality.density(), 0.35, 1.0))),
+		"%s : densité de particules adaptée au réglage graphique" % biome)
 		# reconfiguration (changement de biome en cours de partie) : pas de fuite de nœuds
 		var before: int = back.get_child_count()
 		back.configure(8, biome, 7)
@@ -64,5 +66,18 @@ func _boot() -> void:
 		if c.get("water") == true:
 			water_cnt += 1
 	check(water_cnt >= 3, "forêt : rivière sur le rebord (%d blocs d'eau)" % water_cnt)
+
+	# Profils d’ambiance des Nations : ils doivent rester distincts et pilotés par Nations.gd.
+	var nation_profiles: Dictionary = {"Marées": "bubble", "Vents": "wind", "Brasier": "ember",
+		"Brumes": "fog", "Ombres": "motes", "Rouages": "ember"}
+	for nation: String in nation_profiles.keys():
+		check(Nations.ambient(nation) == String(nation_profiles[nation]),
+			"%s : profil d’ambiance dédié conservé" % nation)
+	var nation_ambient := SceneryAmbient.new()
+	root.add_child(nation_ambient)
+	for nation: String in nation_profiles.keys():
+		nation_ambient.configure(8, nation, 17)
+		check(nation_ambient.particle_count() > 0, "%s : particules générées" % nation)
+	nation_ambient.queue_free()
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)

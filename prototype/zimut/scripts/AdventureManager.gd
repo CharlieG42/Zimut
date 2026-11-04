@@ -328,7 +328,7 @@ func interact() -> Dictionary:
 ## Valide la réponse d'une énigme : récompense et complétion si correcte.
 func solve_puzzle(key: String, answer: String) -> bool:
 	var puzzle: Dictionary = ProgressionManager.ADVENTURE_PUZZLES.get(key, {})
-	if puzzle.is_empty():
+	if puzzle.is_empty() or ProgressionManager.adventure_poi_completed(state, key):
 		return false
 	if not ProgressionManager.adventure_answer_matches(puzzle, answer):
 		return false
@@ -351,6 +351,9 @@ func complete_puzzle(key: String) -> Dictionary:
 
 ## Coffre : XP d'exploration + un objet de l'inventaire commun.
 func open_chest(key: String, level: int) -> Array:
+	# Garde-fou local : même un appel direct ne peut pas créditer deux fois le même coffre.
+	if ProgressionManager.adventure_poi_completed(state, key):
+		return []
 	var drops: Array = ProgressionManager._roll_loots(maxi(1, level), false)
 	var looted: Array = []
 	if not drops.is_empty():
