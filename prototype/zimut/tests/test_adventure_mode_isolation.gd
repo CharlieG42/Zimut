@@ -153,11 +153,14 @@ func _boot() -> void:
 	var ambient_script: String = FileAccess.get_file_as_string("res://scripts/SceneryAmbient.gd")
 	check(ambient_script.contains("GfxQuality.density()") and ambient_script.contains("roundi(34.0 * GfxQuality.density())"),
 		"les particules de la planche respectent le profil graphique Auto/Économie/Haute")
+	check(ambient_script.contains('"leaves" if _biome == "Forêt"') and ambient_script.contains('"leaves":'),
+		"Sylvestre reçoit un léger feuillage animé indépendant du fond illustré")
 	check(map_ui.contains("func _adjacent_interaction()") and map_ui.contains('nearby_kind == "find"')
 		and map_ui.contains('nearby_kind == "gate"') and map_ui.contains('_walk([target])'),
 		"les POI, trouvailles et portails accessibles à une case proposent une action contextuelle")
 	check(map_ui.contains("var _motion_blend: float = 0.0") and map_ui.contains("var _settle_t: float = 0.0")
-		and map_ui.contains("var _turn_t: float = 0.0") and map_ui.contains("shadow_radius"),
+		and map_ui.contains("var _turn_t: float = 0.0") and map_ui.contains("shadow_radius")
+		and map_ui.contains("if walking or _settle_t > 0.0"),
 		"les départs/arrêts et demi-tours du héros sont amortis et son ombre suit la profondeur")
 	check(manager.contains("ProgressionManager.add_resources(save, res)") and manager.contains('save["gold"]')
 		and manager.contains('save["inventory"].append(drops[0])') and manager.contains("ProgressionManager.award_xp(save, xp)"),
