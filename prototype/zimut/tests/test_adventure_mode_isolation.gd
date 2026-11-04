@@ -54,7 +54,7 @@ func _check_sylvestre_board_connectivity() -> void:
 		if not _board_cell_reachable(mask, start, target):
 			disconnected.append(String(pois[key].get("name", key)))
 	check(disconnected.is_empty(), "tous les lieux et donjons Sylvestre sont reliés au départ" +
-		(" — bloqués : " + ", ".join(disconnected) if not disconnected.is_empty() else ""))
+		(" — bloqués : " + str(disconnected) if not disconnected.is_empty() else ""))
 
 func _init() -> void:
 	_boot.call_deferred()
