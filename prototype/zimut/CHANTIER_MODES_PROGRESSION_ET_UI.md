@@ -85,7 +85,7 @@ Les étapes sont volontairement petites et vérifiables. Sylvestre reste la zone
 - Critères : une interaction ne se déclenche qu'une fois ; les objets déjà consommés sont visuellement différenciés ; l'action reste possible sans précision de souris.
 
 ### Étape D — Récompenses et progression commune
-<small>Audit initial confirmé : XP, or, objets et ressources d'exploration écrivent dans la sauvegarde commune ; la centralisation complète des flux Tactique/2D/3D/Conquête et les tests de sauvegarde croisés restent à étendre.</small>
+<small>Audit confirmé : les vues Aventure 2D, 3D isométrique et 3D ouverte instancient le même AdventureManager et lisent la même sauvegarde. Les trois affichent maintenant le sac de ressources commun ; les récompenses d'exploration passent par ProgressionManager (XP, or, objets, ressources). La centralisation complète des flux Tactique/Conquête et les tests de persistance croisée restent à étendre.</small>
 - Cartographier les points d'entrée/sortie de récompense de Tactique, Découverte 2D, Découverte 3D et Conquête.
 - Centraliser les ajouts d'XP, d'or, d'objets et de ressources dans les services de progression partagés.
 - Vérifier la persistance après changement de mode, retour au menu, sauvegarde et rechargement.
