@@ -67,6 +67,7 @@ Cette première tranche rend visibles les ressources de la sauvegarde commune da
 - Les tests de décor vérifient le respect de cette densité et les profils propres aux Nations Marées, Vents, Brasier, Brumes, Ombres et Rouages.
 - Audit du flux de progression : l'exploration crédite le roster avec `ProgressionManager.award_xp`, les récompenses d'exploration passent par les mutations communes de la sauvegarde, les combats utilisent `register_victory` pour XP/butin/ressources, et les dépenses de Conquête modifient les mêmes champs `gold` et `resources`.
 - Des garde-fous statiques ont été ajoutés au test d'isolation pour détecter une rupture de ces points d'entrée communs.
+- Les récompenses des coffres et des énigmes sont désormais idempotentes même si leur fonction est appelée directement : un POI déjà validé ne peut pas distribuer une seconde fois XP, objet ou ressource.
 
 ### Limites de validation restantes
 - Ces vérifications de progression sont des contrôles de contrat dans les scripts de test ; elles ne remplacent pas encore un scénario runtime complet qui enchaîne combat, exploration, Conquête, fermeture puis rechargement de la même partie.
