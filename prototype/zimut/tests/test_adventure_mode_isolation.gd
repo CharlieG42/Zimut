@@ -82,6 +82,9 @@ func _boot() -> void:
 		"la carte 2D affiche les ressources de la sauvegarde commune")
 	check(open3d.contains('_resource_label') and open3d.contains('save.get("resources", {})'),
 		"le monde ouvert 3D affiche les ressources de la sauvegarde commune")
+	check(iso3d.contains('_resource_label') and iso3d.contains('save.get("resources", {})')
+		and iso3d.contains('resources.keys()'),
+		"la vue 3D isométrique affiche elle aussi les ressources de la sauvegarde commune")
 	var manager: String = FileAccess.get_file_as_string("res://scripts/AdventureManager.gd")
 	check(manager.contains('ProgressionManager.add_resources(save, res)'),
 		"les récoltes d’exploration alimentent l’inventaire de ressources partagé")
