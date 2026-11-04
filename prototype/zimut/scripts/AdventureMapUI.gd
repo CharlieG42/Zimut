@@ -330,6 +330,26 @@ func _build_hud() -> void:
 	help.visible = manager.moves() < HELP_STEPS
 
 
+## Interaction de proximité : POI, trouvailles et portes accessibles à une case.
+## L'activation emprunte le déplacement normal et conserve les règles existantes.
+func _adjacent_interaction() -> Dictionary:
+	var hp: Vector2i = manager.hero_pos()
+	for direction: Vector2i in [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)]:
+		var target: Vector2i = hp + direction
+		if not _inside(target) or not manager.can_move_to(target):
+			continue
+		var gate: Dictionary = manager.gate_at(target)
+		if not gate.is_empty() and bool(gate.get("open", false)):
+			return {"kind": "gate", "pos": target, "info": gate}
+		var poi: Dictionary = manager.poi_at(target)
+		if not poi.is_empty() and (not manager.poi_done(target) or String(poi.get("kind", "")) == "camp"):
+			return {"kind": "poi", "pos": target, "info": poi}
+		var find_kind: String = manager.find_at(target)
+		if find_kind != "" and not manager.find_taken(target):
+			return {"kind": "find", "pos": target, "info": {"kind": find_kind}}
+	return {}
+
+
 ## Met à jour la plaque d'infos et le bouton d'action selon la case du héros.
 func _refresh_hud() -> void:
 	if _hud_title == null:
@@ -353,6 +373,21 @@ func _refresh_hud() -> void:
 			_action_btn.show()
 		return
 	if poi.is_empty():
+		var nearby: Dictionary = _adjacent_interaction()
+		if nearby.is_empty():
+			return
+		var nearby_kind: String = String(nearby.get("kind", ""))
+		var nearby_info: Dictionary = nearby.get("info", {})
+		if nearby_kind == "gate":
+			_action_btn.text = "➜  PASSER VERS %s" % String(nearby_info.get("name", "LA CARTE VOISINE")).to_upper()
+		elif nearby_kind == "find":
+			_action_btn.text = "✦  RAMASSER LA TROUVAILLE"
+		else:
+			var nearby_action: String = String(POI_ACTION.get(String(nearby_info.get("kind", "")), "INTERAGIR"))
+			if String(nearby_info.get("kind", "")) == "combat" and Dungeons.is_dungeon(nearby_info):
+				nearby_action = "ENTRER DANS LE DONJON"
+			_action_btn.text = "▶  %s · %s" % [nearby_action, String(nearby_info.get("name", "LIEU")).to_upper()]
+		_action_btn.show()
 		return
 	var kind: String = String(poi.get("kind", ""))
 	if manager.poi_done(pos) and kind != "camp":
@@ -374,8 +409,17 @@ func _on_action_pressed() -> void:
 	var pos: Vector2i = manager.hero_pos()
 	if not manager.gate_at(pos).is_empty() and manager.poi_at(pos).is_empty():
 		_cross_gate(pos)
-	else:
-		_interact()
+		return
+	if manager.poi_at(pos).is_empty():
+		var nearby: Dictionary = _adjacent_interaction()
+		if not nearby.is_empty():
+			var target: Vector2i = nearby.get("pos", Vector2i(-1, -1))
+			if manager.can_move_to(target):
+				_walk([target])
+			else:
+				_say("Le passage est momentanément bloqué.")
+			return
+	_interact()
 
 
 func _process(_delta: float) -> void:
@@ -591,6 +635,14 @@ func _rebuild_board(biome: String) -> void:
 		fnode.position = cell_center(fp)
 		_entities.add_child(fnode)
 		_cell_nodes[fp] = _cell_nodes.get(fp, []) + [fnode]
+	# Même ambiance vivante que les cartes isométriques classiques : les effets
+	# restent une couche indépendante et ne modifient jamais l'illustration de fond.
+	var ambient := SceneryAmbient.new()
+	ambient.name = "Ambient"
+	ambient.z_index = 1
+	ambient.configure(maxi(zs.x, zs.y), biome, absi(zid.hash()) % 997)
+	ambient.position = cell_center(Vector2i(zs.x / 2, zs.y / 2)) + Vector2(0, -150)
+	_world.add_child(ambient)
 	_hero = HeroView.new()
 	_hero.tex = Portraits.get_texture({"classe": manager.hero_class(), "team": "player", "entity_type": "Player"})
 	_hero.position = cell_center(manager.hero_pos())
@@ -629,27 +681,35 @@ func _add_decor(p: Vector2i, kind: String, biome: String, pal: Dictionary, sc: f
 
 ## Met à jour la visibilité (brouillard) et l'état des lieux.
 func _refresh_world() -> void:
+	var board_depth: bool = is_board()
+	var hp: Vector2i = manager.hero_pos()
+	_apply_hero_depth(hp)
 	for p: Vector2i in _cell_nodes.keys():
 		var seen: bool = manager.cell_discovered(p)
 		for n: Node2D in _cell_nodes[p]:
 			n.visible = seen
 			if n is FindNode:
 				n.visible = seen and not manager.find_taken(p)
+				if board_depth:
+					n.z_index = p.y * 4 + 1
 			if n is PoiNode:
 				var pn: PoiNode = n
 				pn.done = manager.poi_done(p) and pn.kind != "camp"
-				var hp: Vector2i = manager.hero_pos()
-				var near: int = 4 if is_board() else 2
-				pn.show_label = (pn.is_dungeon or absi(p.x - hp.x) + absi(p.y - hp.y) <= near or p == _board.hover) and not pn.done
-				pn.z_index = 3 if pn.show_label else 0  # étiquette lisible au-dessus des voisins
+				var near: int = 4 if board_depth else 2
+				var hero_distance: int = absi(p.x - hp.x) + absi(p.y - hp.y)
+				pn.nearby = hero_distance <= near and not pn.done
+				pn.show_label = (pn.is_dungeon or pn.nearby or p == _board.hover) and not pn.done
+				pn.z_index = p.y * 4 + (3 if pn.show_label else 1) if board_depth else (3 if pn.show_label else 0)
 				pn.queue_redraw()
 			elif n is GateNode:
-				n.z_index = 2
+				n.z_index = p.y * 4 + 2 if board_depth else 2
 	var team_lvl: int = _team_level()
 	for id: int in _mob_nodes.keys():
 		var mn: MobNode = _mob_nodes[id]
 		mn.visible = manager.cell_discovered(mn.cell)
 		mn.danger = mn.level - team_lvl
+		if board_depth:
+			mn.z_index = mn.cell.y * 4 + 2
 	_board.queue_redraw()
 
 
@@ -874,6 +934,23 @@ func cell_center(p: Vector2i) -> Vector2:
 	return Vector2(float(p.x - p.y) * TILE_W * 0.5, float(p.x + p.y) * TILE_H * 0.5)
 
 
+## Échelle et ordre de profondeur de la planche : le héros grandit légèrement vers le premier plan.
+func _hero_depth_scale(p: Vector2i) -> Vector2:
+	if not is_board():
+		return Vector2.ONE
+	var max_y: int = maxi(1, manager.zone_size().y - 1)
+	var depth: float = clampf(float(p.y) / float(max_y), 0.0, 1.0)
+	var factor: float = lerpf(0.86, 1.12, depth)
+	return Vector2.ONE * factor
+
+
+func _apply_hero_depth(p: Vector2i) -> void:
+	if _hero == null:
+		return
+	_hero.scale = _hero_depth_scale(p)
+	_hero.z_index = p.y * 4 + 2 if is_board() else 0
+
+
 func screen_to_cell(local: Vector2) -> Vector2i:
 	if is_board():
 		var cwz: float = BoardArt.cell_world(manager.zone_id())
@@ -881,6 +958,25 @@ func screen_to_cell(local: Vector2) -> Vector2i:
 	var gx: float = (local.y / (TILE_H * 0.5) + local.x / (TILE_W * 0.5)) * 0.5
 	var gy: float = (local.y / (TILE_H * 0.5) - local.x / (TILE_W * 0.5)) * 0.5
 	return Vector2i(roundi(gx), roundi(gy))
+
+
+## Les icônes flottantes des lieux ont une zone tactile dédiée, plus large que leur case au sol.
+func _pointer_to_cell(screen_pos: Vector2) -> Vector2i:
+	var world_pos: Vector2 = (screen_pos - _world.position) / _world.scale.x
+	var best: Vector2i = Vector2i(-1, -1)
+	var best_distance: float = INF
+	for p: Vector2i in _cell_nodes.keys():
+		for node: Node2D in _cell_nodes[p]:
+			if not (node is PoiNode) or not node.visible:
+				continue
+			var poi_node: PoiNode = node
+			var icon_center: Vector2 = cell_center(p) + Vector2(0, -112.0 if poi_node.is_dungeon else -94.0)
+			var hit_radius: float = 48.0 if poi_node.is_dungeon else 42.0
+			var distance: float = world_pos.distance_squared_to(icon_center)
+			if distance <= hit_radius * hit_radius and distance < best_distance:
+				best = p
+				best_distance = distance
+	return best if best.x >= 0 else screen_to_cell(world_pos)
 
 
 func _inside(p: Vector2i) -> bool:
@@ -905,26 +1001,26 @@ func _on_map_input(event: InputEvent) -> void:
 		var released: bool = (event is InputEventScreenTouch and not event.pressed) \
 			or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed and event.device != InputEvent.DEVICE_ID_EMULATION)
 		if released:
-			var cr: Vector2i = screen_to_cell((event.position - _world.position) / _world.scale.x)
+			var cr: Vector2i = _pointer_to_cell(event.position)
 			if _inside(cr):
 				_redirect = cr
 		return
 	if event is InputEventMouseMotion:
-		var c: Vector2i = screen_to_cell((event.position - _world.position) / _world.scale.x)
+		var c: Vector2i = _pointer_to_cell(event.position)
 		_board.hover = c if _inside(c) else Vector2i(-1, -1)
 		if _pending.x < 0:
 			_board.preview = manager.path_to(c) if _inside(c) and c != manager.hero_pos() else []
 		_refresh_world()
 	elif event is InputEventScreenTouch and not event.pressed:
 		# Tactile : un premier appui montre le trajet, le second confirme.
-		var ct: Vector2i = screen_to_cell((event.position - _world.position) / _world.scale.x)
+		var ct: Vector2i = _pointer_to_cell(event.position)
 		if _inside(ct):
 			_on_cell_tapped(ct, true)
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 		# Les clics émulés par le tactile sont déjà traités par l'événement tactile.
 		if event.device == InputEvent.DEVICE_ID_EMULATION:
 			return
-		var c2: Vector2i = screen_to_cell((event.position - _world.position) / _world.scale.x)
+		var c2: Vector2i = _pointer_to_cell(event.position)
 		if _inside(c2):
 			_on_cell_tapped(c2, false)
 
@@ -1110,9 +1206,10 @@ func _walk(path: Array[Vector2i]) -> void:
 	_board.preview = path.duplicate()
 	_action_btn.hide()
 	# les longs trajets sont plus rapides (jusqu'à deux fois)
+	var sprint: bool = is_board() and path.size() >= 8
 	var step_time: float = STEP_TIME * clampf(8.0 / float(maxi(1, path.size())), 0.5, 1.0)
 	if is_board():
-		step_time = BOARD_STEP_TIME
+		step_time = BOARD_STEP_TIME * (0.72 if sprint else 1.0)
 	for step: Vector2i in path:
 		if _redirect.x >= 0:
 			break
@@ -1121,7 +1218,7 @@ func _walk(path: Array[Vector2i]) -> void:
 			break
 		var from: Vector2 = _hero.position
 		var to: Vector2 = cell_center(step)
-		_hero.locomotion(to - from, true)
+		_hero.locomotion(to - from, true, sprint)
 		var fresh: Array = manager.move_hero(step)
 		if _board.preview.size() > 0:
 			_board.preview.remove_at(0)
@@ -1129,6 +1226,9 @@ func _walk(path: Array[Vector2i]) -> void:
 		tw.tween_method(func(f: float) -> void:
 			_hero.position = from.lerp(to, f)
 			_hero.hop = sin(f * PI) * 7.0, 0.0, 1.0, step_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		if is_board():
+			tw.parallel().tween_property(_hero, "scale", _hero_depth_scale(step), step_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			_hero.z_index = step.y * 4 + 2
 		_after_step()
 		if not _pan_moved:
 			_focus_cell(step, true, step_time)
@@ -1137,6 +1237,7 @@ func _walk(path: Array[Vector2i]) -> void:
 			_refresh_world()
 		var got: Dictionary = manager.collect_find(step)
 		if not got.is_empty():
+			_hero.react()
 			_toast_show("✦ " + String(got["text"]), 24)
 			_log(String(got["text"]) + ".")
 			_refresh_world()
@@ -1148,7 +1249,12 @@ func _walk(path: Array[Vector2i]) -> void:
 				_board.preview = []
 				return
 		var poi: Dictionary = manager.poi_at(step)
-		if not poi.is_empty() or not manager.gate_at(step).is_empty():
+		# Une entrée de donjon située au milieu du chemin est franchie sans ouvrir
+		# le donjon. Elle déclenche l'interaction uniquement si elle est la destination.
+		var dungeon_transit: bool = Dungeons.is_dungeon(poi) and step != path.back()
+		if not poi.is_empty() and not dungeon_transit:
+			_hero.react()
+		if (not poi.is_empty() and not dungeon_transit) or not manager.gate_at(step).is_empty():
 			break
 		var ev: Dictionary = manager.roll_event(_rng)
 		if not ev.is_empty():
@@ -2405,6 +2511,7 @@ class PoiNode extends Node2D:
 	var enemy_tex: Texture2D = null
 	var done: bool = false
 	var show_label: bool = false
+	var nearby: bool = false
 	var gem: Color = Color(0, 0, 0, 0)
 	var gem_taken: bool = false
 	var _t: float = 0.0
@@ -2462,6 +2569,12 @@ class PoiNode extends Node2D:
 		var ic := Vector2(0, icon_y + bob)
 		if is_dungeon and not done:
 			draw_circle(ic, icon_r + 9.0 + pulse * 3.0, Color(0.66, 0.35, 1.0, 0.18))
+		# À proximité, un anneau doux et pulsé indique que le lieu peut être activé.
+		# Il reste discret à distance pour préserver la lisibilité de la carte.
+		if nearby:
+			draw_circle(ic, icon_r + 8.0 + pulse * 3.0, Color(col.r, col.g, col.b, 0.10 + pulse * 0.08))
+			draw_arc(ic, icon_r + 7.0 + pulse * 3.0, 0.0, TAU, 40,
+				Color(col.r, col.g, col.b, 0.48 + pulse * 0.32), 2.5, true)
 		draw_circle(ic + Vector2(0, 3), icon_r, Color(0, 0, 0, 0.42))
 		draw_circle(ic, icon_r, Color(0.06, 0.08, 0.14, 0.97))
 		draw_arc(ic, icon_r - 1.0, 0.0, TAU, 40, col if not done else Color(0.5, 0.5, 0.55), 4.0 if is_dungeon else 3.0, true)
@@ -2534,9 +2647,16 @@ class HeroView extends Node2D:
 	var hop: float = 0.0
 	var _flip: bool = false
 	var walking: bool = false
+	var running: bool = false
 	var _walk_dir: Vector2 = Vector2.DOWN
 	var _t: float = 0.0
 	var _gait_t: float = 0.0
+	var _reaction_t: float = 0.0
+	var _idle_timer: float = 4.0
+	var _idle_variant: Texture2D = null
+	var _motion_blend: float = 0.0
+	var _settle_t: float = 0.0
+	var _turn_t: float = 0.0
 
 	func _ready() -> void:
 		# Les poses sont rangées à côté du sprite de classe (comme pour EntityView).
@@ -2551,6 +2671,7 @@ class HeroView extends Node2D:
 			back_walk_poses = _load_pose_variants(pose_root + sprite_key + "_back_walk", false)
 			idle_poses = _load_pose_variants(pose_root + sprite_key + "_idle", true)
 			back_idle_poses = _load_pose_variants(pose_root + sprite_key + "_back_idle", true)
+		_idle_timer = randf_range(3.5, 6.0)
 		set_process(true)
 
 	func _load_pose_variants(stem: String, skip_first: bool) -> Array[Texture2D]:
@@ -2567,29 +2688,73 @@ class HeroView extends Node2D:
 
 	func _process(delta: float) -> void:
 		_t += delta
+		_motion_blend = move_toward(_motion_blend, 1.0 if walking else 0.0, delta * (6.5 if walking else 4.0))
+		_turn_t = maxf(0.0, _turn_t - delta)
+		if _settle_t > 0.0:
+			_settle_t = maxf(0.0, _settle_t - delta)
+			if _settle_t == 0.0 and not walking:
+				_gait_t = 0.0
 		if walking:
 			_gait_t += delta
+			_idle_variant = null
+			_idle_timer = randf_range(3.5, 6.0)
+		else:
+			_idle_timer -= delta
+			if _idle_timer <= 0.0:
+				if _idle_variant == null:
+					var facing_back: bool = _walk_dir.y < -0.12
+					var idle_pool: Array[Texture2D] = back_idle_poses if facing_back else idle_poses
+					if not idle_pool.is_empty():
+						_idle_variant = idle_pool[randi() % idle_pool.size()]
+						_idle_timer = randf_range(1.0, 1.7)
+					else:
+						_idle_timer = randf_range(4.0, 7.0)
+				else:
+					_idle_variant = null
+					_idle_timer = randf_range(4.0, 7.0)
+		if _reaction_t > 0.0:
+			_reaction_t = maxf(0.0, _reaction_t - delta)
+		queue_redraw()
+
+	## Petite réaction positive à une trouvaille ou à l'arrivée sur un lieu.
+	func react() -> void:
+		_reaction_t = 0.65
 		queue_redraw()
 
 	func face(dx: float) -> void:
 		if absf(dx) > 1.0:
-			_flip = dx < 0.0
+			var next_flip: bool = dx < 0.0
+			if next_flip != _flip:
+				_flip = next_flip
+				_turn_t = 0.18
+				queue_redraw()
 
-	func locomotion(direction: Vector2, active: bool) -> void:
+	func locomotion(direction: Vector2, active: bool, sprint: bool = false) -> void:
 		if active and not walking:
 			_gait_t = 0.0
+			_settle_t = 0.0
+		if not active and walking:
+			# Conserve brièvement la dernière pose de marche pour amortir l'arrêt.
+			_settle_t = 0.16
 		walking = active
-		if not active:
-			_gait_t = 0.0
+		running = active and sprint
 		if direction.length_squared() > 0.01:
 			_walk_dir = direction.normalized()
 			face(direction.x)
 			queue_redraw()
 
 	func _draw() -> void:
+		# Ombre de contact adaptée à la profondeur et à la hauteur du saut.
+		var depth_t: float = clampf((scale.x - 0.86) / 0.26, 0.0, 1.0)
+		var shadow_radius: float = lerpf(30.0, 38.0, depth_t)
+		var shadow_alpha: float = clampf(0.30 - hop * 0.012, 0.12, 0.30)
 		draw_set_transform(Vector2(0, 4), 0.0, Vector2(1.0, 0.45))
-		draw_circle(Vector2.ZERO, 34.0, Color(0, 0, 0, 0.30))
-		draw_arc(Vector2.ZERO, 36.0, 0.0, TAU, 40, Color(1.0, 0.84, 0.3, 0.9), 3.5, true)
+		draw_circle(Vector2.ZERO, shadow_radius, Color(0, 0, 0, shadow_alpha))
+		draw_arc(Vector2.ZERO, shadow_radius + 2.0, 0.0, TAU, 40, Color(1.0, 0.84, 0.3, 0.9), 3.5, true)
+		if _reaction_t > 0.0:
+			var pulse: float = 1.0 - _reaction_t / 0.65
+			draw_arc(Vector2.ZERO, 44.0 + pulse * 12.0, 0.0, TAU, 40,
+				Color(1.0, 0.86, 0.42, (1.0 - pulse) * 0.85), 3.0, true)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		if tex == null:
 			draw_circle(Vector2(0, -40), 24.0, Color(0.9, 0.8, 0.4))
@@ -2597,28 +2762,32 @@ class HeroView extends Node2D:
 		var facing_back: bool = _walk_dir.y < -0.12
 		var rest_tex: Texture2D = back_tex if facing_back and back_tex != null else tex
 		var display_tex: Texture2D = rest_tex
-		# Petite variation de repos : le héros change naturellement d'attitude après quelques secondes.
-		if not walking:
-			var idle_pool: Array[Texture2D] = back_idle_poses if facing_back else idle_poses
-			if not idle_pool.is_empty() and fposmod(_t, 8.0) > 5.5:
-				display_tex = idle_pool[posmod(int(_t / 5.5), idle_pool.size())]
+		# De temps en temps, le héros adopte brièvement une pose de repos alternative.
+		# Le choix est fait dans _process (et non dans _draw) pour éviter tout scintillement
+		# ou changement de pose provoqué par la fréquence de rafraîchissement.
+		if not walking and _idle_variant != null:
+			display_tex = _idle_variant
 		# Foulée en deux temps : appui sur la pose de marche, puis retour au repos.
 		var walk_pool: Array[Texture2D] = back_walk_poses if facing_back else walk_poses
-		if walking and not walk_pool.is_empty():
-			var gait_step: int = int(_gait_t / 0.12)
+		if (walking or _settle_t > 0.0) and not walk_pool.is_empty():
+			var gait_step: int = int(_gait_t / (0.09 if running else 0.12))
 			if gait_step % 2 == 0:
 				display_tex = walk_pool[(gait_step >> 1) % walk_pool.size()]
 		var h: float = 104.0
 		var sc: float = h / float(display_tex.get_height())
 		var w: float = float(display_tex.get_width()) * sc
 		var breathe: float = sin(_t * 2.2) * 1.5
-		var stride: float = sin(_gait_t * TAU / 0.24) if walking else 0.0
-		var bob: float = absf(stride) * 3.0 if walking else 0.0
-		var lean: float = _walk_dir.x * 2.0 if walking else 0.0
-		var y: float = -h + 6.0 - hop - breathe - bob
+		var stride_period: float = 0.18 if running else 0.24
+		var stride: float = sin(_gait_t * TAU / stride_period) if walking or _settle_t > 0.0 else 0.0
+		var bob: float = absf(stride) * (4.5 if running else 3.0) * _motion_blend
+		var lean: float = _walk_dir.x * (3.0 if running else 2.0) * _motion_blend
+		var reaction_bob: float = sin((1.0 - _reaction_t / 0.65) * PI) * 8.0 if _reaction_t > 0.0 else 0.0
+		var y: float = -h + 6.0 - hop - breathe - bob - reaction_bob
 		var x: float = lean + (stride * 1.2 if walking else 0.0)
-		if _flip:
-			draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0, 1.0))
+		var turn_squash: float = 1.0
+		if _turn_t > 0.0:
+			turn_squash = 1.0 - 0.16 * sin((1.0 - _turn_t / 0.18) * PI)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2((-1.0 if _flip else 1.0) * turn_squash, 1.0))
 		# Liseré sombre discret pour détacher le héros des feuillages clairs.
 		var rect := Rect2(Vector2(x - w * 0.5, y), Vector2(w, h + breathe))
 		for o: Vector2 in [Vector2(-1.5, 0), Vector2(1.5, 0), Vector2(0, -1.5), Vector2(0, 1.5)]:

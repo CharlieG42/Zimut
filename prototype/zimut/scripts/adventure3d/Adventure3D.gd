@@ -46,6 +46,7 @@ var _hud: CanvasLayer = null
 var _stick: Adv3DStick = null
 var _zone_label: Label = null
 var _mode_label: Label = null
+var _resource_label: Label = null
 var _mode_label_txt: String = ""
 var _mode_tick: float = 0.0
 var _toast: Label = null
@@ -805,6 +806,10 @@ func _build_hud() -> void:
 	_mode_label = U.lbl("", 19, Color(0.88, 0.90, 0.96), false)
 	_mode_label.position = Vector2(26, 56)
 	root.add_child(_mode_label)
+	_resource_label = U.lbl("", 17, Color(0.72, 0.90, 0.78))
+	_resource_label.position = Vector2(26, 84)
+	_resource_label.custom_minimum_size = Vector2(500, 24)
+	root.add_child(_resource_label)
 	_refresh_mode_label()
 	PlayTimer.playtime_updated.connect(func(_m: String, _s: float) -> void: _refresh_mode_label())
 	# Boutons haut-droite
@@ -938,6 +943,15 @@ func _refresh_mode_label() -> void:
 	if txt != _mode_label_txt:
 		_mode_label_txt = txt
 		_mode_label.text = txt
+	if _resource_label != null:
+		var resources: Dictionary = save.get("resources", {})
+		var names: Array = resources.keys()
+		names.sort()
+		var parts: PackedStringArray = []
+		for i: int in range(mini(names.size(), 5)):
+			var resource_name: String = String(names[i])
+			parts.append("%s %d" % [resource_name, int(resources[resource_name])])
+		_resource_label.text = "Ressources : " + ("  ·  ".join(parts) if not parts.is_empty() else "aucune récoltée")
 
 
 ## V80 : accès aux héros depuis la vue 3D — la fiche complète (niveau,
