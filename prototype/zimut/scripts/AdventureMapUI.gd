@@ -2532,6 +2532,15 @@ class PoiNode extends Node2D:
 	func _draw() -> void:
 		var col: Color = Color(0.72, 0.43, 1.0) if is_dungeon else POI_COLOR.get(kind, Color.WHITE)
 		var pulse: float = 0.5 + 0.5 * sin(_t * (2.0 if is_dungeon else 2.4))
+		# Assise au sol : ombre douce et anneau de matière pour mieux détacher le POI du décor.
+		# Cette couche est purement graphique et reste centrée sur la position existante.
+		var ground_radius: float = 48.0 if is_dungeon else 34.0
+		draw_set_transform(Vector2(0, 5), 0.0, Vector2(1.0, 0.34))
+		draw_circle(Vector2.ZERO, ground_radius + 10.0, Color(0.015, 0.025, 0.035, 0.18))
+		draw_circle(Vector2.ZERO, ground_radius, Color(col.r * 0.45, col.g * 0.45, col.b * 0.45, 0.24))
+		draw_arc(Vector2.ZERO, ground_radius - 3.0, PI * 0.12, PI * 0.88, 32,
+			Color(col.r, col.g, col.b, 0.42 if not done else 0.20), 2.2, true)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		if not done:
 			draw_set_transform(Vector2(0, 4), 0.0, Vector2(1.0, 0.5))
 			if is_dungeon:
@@ -2580,9 +2589,13 @@ class PoiNode extends Node2D:
 			draw_circle(ic, icon_r + 8.0 + pulse * 3.0, Color(col.r, col.g, col.b, 0.10 + pulse * 0.08))
 			draw_arc(ic, icon_r + 7.0 + pulse * 3.0, 0.0, TAU, 40,
 				Color(col.r, col.g, col.b, 0.48 + pulse * 0.32), 2.5, true)
-		draw_circle(ic + Vector2(0, 3), icon_r, Color(0, 0, 0, 0.42))
+		draw_circle(ic + Vector2(0, 3), icon_r + 2.0, Color(0.01, 0.02, 0.04, 0.32))
+		draw_circle(ic, icon_r + 2.0, Color(col.r, col.g, col.b, 0.12 if not done else 0.06))
 		draw_circle(ic, icon_r, Color(0.06, 0.08, 0.14, 0.97))
 		draw_arc(ic, icon_r - 1.0, 0.0, TAU, 40, col if not done else Color(0.5, 0.5, 0.55), 4.0 if is_dungeon else 3.0, true)
+		# Reflet supérieur : donne un léger volume au médaillon sans changer sa zone tactile.
+		draw_arc(ic + Vector2(0, -1), icon_r - 4.0, PI * 1.12, PI * 1.88, 24,
+			Color(1.0, 1.0, 1.0, 0.30 if not done else 0.12), 1.5, true)
 		if icon != null:
 			draw_texture_rect(icon, Rect2(ic - Vector2(icon_size * 0.5, icon_size * 0.5), Vector2(icon_size, icon_size)), false, mod)
 		if done:
