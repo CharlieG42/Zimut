@@ -906,6 +906,25 @@ func screen_to_cell(local: Vector2) -> Vector2i:
 	return Vector2i(roundi(gx), roundi(gy))
 
 
+## Les icônes flottantes des lieux ont une zone tactile dédiée, plus large que leur case au sol.
+func _pointer_to_cell(screen_pos: Vector2) -> Vector2i:
+	var world_pos: Vector2 = (screen_pos - _world.position) / _world.scale.x
+	var best: Vector2i = Vector2i(-1, -1)
+	var best_distance: float = INF
+	for p: Vector2i in _cell_nodes.keys():
+		for node: Node2D in _cell_nodes[p]:
+			if not (node is PoiNode) or not node.visible:
+				continue
+			var poi_node: PoiNode = node
+			var icon_center: Vector2 = cell_center(p) + Vector2(0, -112.0 if poi_node.is_dungeon else -94.0)
+			var hit_radius: float = 48.0 if poi_node.is_dungeon else 42.0
+			var distance: float = world_pos.distance_squared_to(icon_center)
+			if distance <= hit_radius * hit_radius and distance < best_distance:
+				best = p
+				best_distance = distance
+	return best if best.x >= 0 else screen_to_cell(world_pos)
+
+
 func _inside(p: Vector2i) -> bool:
 	var s: Vector2i = manager.zone_size()
 	return p.x >= 0 and p.y >= 0 and p.x < s.x and p.y < s.y
@@ -928,26 +947,26 @@ func _on_map_input(event: InputEvent) -> void:
 		var released: bool = (event is InputEventScreenTouch and not event.pressed) \
 			or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed and event.device != InputEvent.DEVICE_ID_EMULATION)
 		if released:
-			var cr: Vector2i = screen_to_cell((event.position - _world.position) / _world.scale.x)
+			var cr: Vector2i = _pointer_to_cell(event.position)
 			if _inside(cr):
 				_redirect = cr
 		return
 	if event is InputEventMouseMotion:
-		var c: Vector2i = screen_to_cell((event.position - _world.position) / _world.scale.x)
+		var c: Vector2i = _pointer_to_cell(event.position)
 		_board.hover = c if _inside(c) else Vector2i(-1, -1)
 		if _pending.x < 0:
 			_board.preview = manager.path_to(c) if _inside(c) and c != manager.hero_pos() else []
 		_refresh_world()
 	elif event is InputEventScreenTouch and not event.pressed:
 		# Tactile : un premier appui montre le trajet, le second confirme.
-		var ct: Vector2i = screen_to_cell((event.position - _world.position) / _world.scale.x)
+		var ct: Vector2i = _pointer_to_cell(event.position)
 		if _inside(ct):
 			_on_cell_tapped(ct, true)
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 		# Les clics émulés par le tactile sont déjà traités par l'événement tactile.
 		if event.device == InputEvent.DEVICE_ID_EMULATION:
 			return
-		var c2: Vector2i = screen_to_cell((event.position - _world.position) / _world.scale.x)
+		var c2: Vector2i = _pointer_to_cell(event.position)
 		if _inside(c2):
 			_on_cell_tapped(c2, false)
 
