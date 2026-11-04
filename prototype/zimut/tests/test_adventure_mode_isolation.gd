@@ -137,6 +137,9 @@ func _boot() -> void:
 		"les personnages et groupes sont triés selon leur profondeur sur la planche")
 	check(map_ui.contains("var sprint: bool = is_board() and path.size() >= 8") and map_ui.contains("var running: bool = false") and map_ui.contains("stride_period: float = 0.18 if running else 0.24"),
 		"les longs trajets déclenchent une course plus rapide que la marche")
+	check(map_ui.contains("var _idle_timer: float = 4.0") and map_ui.contains("_idle_variant = idle_pool[randi() % idle_pool.size()]")
+		and map_ui.contains("if not walking and _idle_variant != null"),
+		"les poses de repos du héros sont choisies par séquences espacées et stables")
 	check(map_ui.contains("func _pointer_to_cell") and map_ui.contains("distance_squared_to(icon_center)") and map_ui.contains("hit_radius: float = 48.0 if poi_node.is_dungeon else 42.0"),
 		"les icônes de lieux et de donjons disposent d'une zone tactile élargie")
 	check(map_ui.contains('ambient.name = "Ambient"') and map_ui.contains("ambient.configure(maxi(zs.x, zs.y), biome"),
