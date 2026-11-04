@@ -591,6 +591,14 @@ func _rebuild_board(biome: String) -> void:
 		fnode.position = cell_center(fp)
 		_entities.add_child(fnode)
 		_cell_nodes[fp] = _cell_nodes.get(fp, []) + [fnode]
+	# Même ambiance vivante que les cartes isométriques classiques : les effets
+	# restent une couche indépendante et ne modifient jamais l'illustration de fond.
+	var ambient := SceneryAmbient.new()
+	ambient.name = "Ambient"
+	ambient.z_index = 1
+	ambient.configure(maxi(zs.x, zs.y), biome, absi(zid.hash()) % 997)
+	ambient.position = cell_center(Vector2i(zs.x / 2, zs.y / 2)) + Vector2(0, -150)
+	_world.add_child(ambient)
 	_hero = HeroView.new()
 	_hero.tex = Portraits.get_texture({"classe": manager.hero_class(), "team": "player", "entity_type": "Player"})
 	_hero.position = cell_center(manager.hero_pos())
