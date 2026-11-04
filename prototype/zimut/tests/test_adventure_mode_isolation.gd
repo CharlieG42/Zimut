@@ -139,6 +139,8 @@ func _boot() -> void:
 		"les longs trajets déclenchent une course plus rapide que la marche")
 	check(map_ui.contains("func _pointer_to_cell") and map_ui.contains("distance_squared_to(icon_center)") and map_ui.contains("hit_radius: float = 48.0 if poi_node.is_dungeon else 42.0"),
 		"les icônes de lieux et de donjons disposent d'une zone tactile élargie")
+	check(map_ui.contains('ambient.name = "Ambient"') and map_ui.contains("ambient.configure(maxi(zs.x, zs.y), biome"),
+		"la planche illustrée reçoit aussi les effets d'ambiance du biome sans modifier son image")
 
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
