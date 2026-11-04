@@ -3039,7 +3039,7 @@ class MobNode extends Node2D:
 			var tex: Texture2D = texes[i]
 			if tex == null:
 				continue
-				var phase: float = _t * (2.0 if i == 0 else 1.7) + float(i) * 1.9
+			var phase: float = _t * (2.0 if i == 0 else 1.7) + float(i) * 1.9
 			var breathe: float = 1.0 + sin(phase) * (0.018 if i == 0 else 0.026)
 			var h: float = (84.0 if i == 0 else 66.0) * (1.12 if elite else 1.0) * breathe
 			var sc: float = h / float(tex.get_height())
