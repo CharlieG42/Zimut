@@ -23,5 +23,8 @@ func _init() -> void:
 	check(adventure.contains("var ground_radius: float = 48.0 if is_dungeon else 34.0"), "les POI ont une assise au sol adaptée à leur type")
 	check(adventure.contains("draw_arc(Vector2.ZERO, ground_radius - 3.0"), "les POI disposent d'un anneau de matière au sol")
 	check(adventure.contains("Reflet supérieur"), "les médaillons de POI ont un reflet de volume discret")
+	check(adventure.contains("Double liseré : bord externe sombre"), "les médaillons de POI ont un contour biseauté à deux niveaux")
+	check(adventure.contains("Ombre portée typographique"), "les noms des POI disposent d'un contraste renforcé")
+	check(adventure.contains("pn.set_process(n.visible)"), "les POI non découverts ne rafraîchissent pas leur rendu en continu")
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
