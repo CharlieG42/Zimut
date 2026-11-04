@@ -695,6 +695,8 @@ func _refresh_world() -> void:
 					n.z_index = p.y * 4 + 1
 			if n is PoiNode:
 				var pn: PoiNode = n
+				# Les POI non découverts ne sont pas animés : aucun rendu visible à rafraîchir.
+				pn.set_process(n.visible)
 				pn.done = manager.poi_done(p) and pn.kind != "camp"
 				var near: int = 4 if board_depth else 2
 				var hero_distance: int = absi(p.x - hp.x) + absi(p.y - hp.y)
@@ -2591,8 +2593,13 @@ class PoiNode extends Node2D:
 				Color(col.r, col.g, col.b, 0.48 + pulse * 0.32), 2.5, true)
 		draw_circle(ic + Vector2(0, 3), icon_r + 2.0, Color(0.01, 0.02, 0.04, 0.32))
 		draw_circle(ic, icon_r + 2.0, Color(col.r, col.g, col.b, 0.12 if not done else 0.06))
-		draw_circle(ic, icon_r, Color(0.06, 0.08, 0.14, 0.97))
-		draw_arc(ic, icon_r - 1.0, 0.0, TAU, 40, col if not done else Color(0.5, 0.5, 0.55), 4.0 if is_dungeon else 3.0, true)
+		draw_circle(ic, icon_r, Color(0.035, 0.05, 0.095, 0.99))
+		# Double liseré : bord externe sombre, tranche colorée et filet intérieur lumineux.
+		var rim_col: Color = col if not done else Color(0.5, 0.5, 0.55)
+		draw_arc(ic, icon_r + 0.5, 0.0, TAU, 48, Color(0.015, 0.02, 0.04, 0.95), 5.0, true)
+		draw_arc(ic, icon_r - 1.0, 0.0, TAU, 48, rim_col, 3.0 if is_dungeon else 2.5, true)
+		draw_arc(ic + Vector2(0, 1), icon_r - 4.0, PI * 0.08, PI * 0.92, 28,
+			Color(0.01, 0.015, 0.03, 0.72 if not done else 0.35), 2.0, true)
 		# Reflet supérieur : donne un léger volume au médaillon sans changer sa zone tactile.
 		draw_arc(ic + Vector2(0, -1), icon_r - 4.0, PI * 1.12, PI * 1.88, 24,
 			Color(1.0, 1.0, 1.0, 0.30 if not done else 0.12), 1.5, true)
@@ -2613,7 +2620,9 @@ class PoiNode extends Node2D:
 			sb.set_border_width_all(1)
 			sb.set_corner_radius_all(10)
 			draw_style_box(sb, r)
-			draw_string(font, r.position + Vector2(9, 18), txt, HORIZONTAL_ALIGNMENT_LEFT, tw, 15, Color(1, 0.96, 0.85))
+			# Ombre portée typographique : le nom reste lisible sur les zones claires du décor.
+			draw_string(font, r.position + Vector2(9, 19), txt, HORIZONTAL_ALIGNMENT_LEFT, tw, 15, Color(0.0, 0.0, 0.0, 0.85))
+			draw_string(font, r.position + Vector2(9, 17), txt, HORIZONTAL_ALIGNMENT_LEFT, tw, 15, Color(1, 0.96, 0.85))
 
 
 ## Trouvaille cachée : petit scintillement au sol (herbe, bourse ou relique).
