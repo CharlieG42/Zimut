@@ -325,7 +325,7 @@ func interact() -> Dictionary:
 ## Valide la réponse d'une énigme : récompense et complétion si correcte.
 func solve_puzzle(key: String, answer: String) -> bool:
 	var puzzle: Dictionary = ProgressionManager.ADVENTURE_PUZZLES.get(key, {})
-	if puzzle.is_empty():
+	if puzzle.is_empty() or ProgressionManager.adventure_poi_completed(state, key):
 		return false
 	if not ProgressionManager.adventure_answer_matches(puzzle, answer):
 		return false
