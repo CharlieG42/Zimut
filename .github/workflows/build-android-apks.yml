@@ -100,7 +100,7 @@ jobs:
           echo ""
           # V48-V50 : niveau du joueur, sauvegarde Cloud, gouffres, arbre du Sylvain
           # V61b : sprites de bâtiments de la vue de ville Conquête
-          for t in test_adventure_mode_isolation test_scenery test_hero_unlock test_heros_classes test_monde_ouvert_v82 test_planche_2d test_fiche_sorts test_cloud_save test_void_pits test_tree test_ville_sprites test_spell_icons_unique test_conquest_roads test_gultur_conquete test_conquest_ui_v64 test_deblocage_persistant test_continuer_mes_parties test_turn_badge test_spell_levels test_amelioration_joueur test_ia_balises test_ia_mecanismes; do
+          for t in test_adventure_mode_isolation test_scenery test_visual_polish test_hero_unlock test_heros_classes test_monde_ouvert_v82 test_planche_2d test_fiche_sorts test_cloud_save test_void_pits test_tree test_ville_sprites test_spell_icons_unique test_conquest_roads test_gultur_conquete test_conquest_ui_v64 test_deblocage_persistant test_continuer_mes_parties test_turn_badge test_spell_levels test_amelioration_joueur test_ia_balises test_ia_mecanismes; do
             echo "=== $t.gd ==="
             timeout 60 godot --headless -s tests/$t.gd --path . 2>&1 | tail -30 || echo "($t timeout ou échec - ignoré)"
             echo ""
