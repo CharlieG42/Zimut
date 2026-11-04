@@ -76,6 +76,7 @@ Donner aux personnages une présence vivante et cohérente, avec des animations 
 - Base existante confirmée : poses multiples, variantes de dos, transitions, réactions aux impacts, ombres et contre-jours dans le combat.
 - Base Aventure : marche, course, poses de repos, orientation, arrêt amorti et réaction positive du héros.
 - Livraison initiale : respiration discrète du héros Aventure et micro-variations de respiration/balancement des groupes de monstres. Les variantes de repos déjà présentes dans les planches sont exploitées, avec ombres de contact individuelles.
+- Complément : les groupes de monstres utilisent maintenant les poses `_walk` disponibles pendant leurs déplacements sur la carte ; en l'absence de planche de marche, le sprite de base reste utilisé.
 - À poursuivre : audit des planches réellement disponibles par classe/Nation, puis combler les manques d'animations par lots cohérents.
 
 ---
@@ -153,6 +154,7 @@ Consolider la qualité générale du jeu et réduire les risques de régression 
 - La CI de la première livraison a réussi : tests GDScript, exports APK Debug et Release.
 - Les particules utilisent désormais la profondeur pour leur taille et leur vitesse.
 - Les groupes de monstres exploitent les poses alternatives de repos disponibles et disposent d'ombres de contact par silhouette.
+- Les poses `_walk` existantes sont maintenant jouées pendant le déplacement des groupes ; repli automatique sur le sprite de base si aucune pose n'est présente.
 - Ajout de contrôles automatisés pour ces comportements ; validation visuelle Android toujours attendue.
 
 ### 2026-11-04 — Initialisation de la feuille de route
