@@ -105,6 +105,11 @@ func _boot() -> void:
 		"chaque mode mémorise sa propre vue")
 
 	var map_ui: String = FileAccess.get_file_as_string("res://scripts/AdventureMapUI.gd")
+	var board_rebuild_start: int = map_ui.find("func _rebuild_board(biome: String) -> void:")
+	var board_rebuild_end: int = map_ui.find("## Dégradé du ciel", board_rebuild_start)
+	var board_rebuild_code: String = map_ui.substr(board_rebuild_start, board_rebuild_end - board_rebuild_start)
+	check(board_rebuild_code.contains("var zs: Vector2i = manager.zone_size()") and board_rebuild_code.contains("ambient.configure(maxi(zs.x, zs.y)"),
+		"la reconstruction de la planche 2D déclare sa taille locale avant de configurer l’ambiance")
 	check(map_ui.contains('back.pressed.connect(_back_to_save)') and map_ui.contains('← MES PARTIES'),
 		"la carte 2D propose le retour à Mes Parties")
 	var board_start: int = map_ui.find("class AdventureBoard extends Node2D:")
