@@ -142,6 +142,8 @@ func _boot() -> void:
 		"les poses de repos du héros sont choisies par séquences espacées et stables")
 	check(map_ui.contains("func _pointer_to_cell") and map_ui.contains("distance_squared_to(icon_center)") and map_ui.contains("hit_radius: float = 48.0 if poi_node.is_dungeon else 42.0"),
 		"les icônes de lieux et de donjons disposent d'une zone tactile élargie")
+	check(map_ui.contains("pn.nearby = hero_distance <= near and not pn.done") and map_ui.contains("if nearby:") and map_ui.contains("draw_arc(ic, icon_r + 7.0 + pulse * 3.0"),
+		"les lieux proches du héros affichent un halo pulsé discret indiquant leur disponibilité")
 	check(map_ui.contains('ambient.name = "Ambient"') and map_ui.contains("ambient.configure(maxi(zs.x, zs.y), biome"),
 		"la planche illustrée reçoit aussi les effets d'ambiance du biome sans modifier son image")
 
