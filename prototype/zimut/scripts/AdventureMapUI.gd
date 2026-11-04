@@ -1786,8 +1786,12 @@ func _sync_mobs(animate: bool) -> void:
 			var to: Vector2 = cell_center(cell)
 			mn.face(to.x - mn.position.x)
 			if animate:
-				create_tween().tween_property(mn, "position", to, STEP_TIME * 1.6).set_trans(Tween.TRANS_SINE)
+				mn.begin_walk()
+				var mob_tween: Tween = create_tween()
+				mob_tween.tween_property(mn, "position", to, STEP_TIME * 1.6).set_trans(Tween.TRANS_SINE)
+				mob_tween.tween_callback(Callable(mn, "end_walk"))
 			else:
+				mn.end_walk()
 				mn.position = to
 	for id2: int in _mob_nodes.keys():
 		if not live.has(id2):
@@ -3015,27 +3019,52 @@ class MobNode extends Node2D:
 	var _t: float = 0.0
 	var _idle_variants: Array = []
 	var _idle_choices: Array = []
+	var _walk_variants: Array = []
+	var _walking: bool = false
+	var _gait_t: float = 0.0
 	var _idle_timer: float = 4.5
 
 	func _ready() -> void:
 		_t = float(absi(int(position.x * 5 + position.y * 3))) * 0.01
 		_idle_timer = randf_range(3.5, 6.0)
 		for tex: Texture2D in texes:
-			var variants: Array[Texture2D] = []
+			var idle_variants: Array[Texture2D] = []
+			var walk_variants: Array[Texture2D] = []
 			if tex != null and tex.resource_path != "":
 				var base: String = tex.resource_path.get_basename()
-				for variant_index: int in range(2, 10):
-					var variant_path: String = "%s_idle_%d.png" % [base, variant_index]
-					if ResourceLoader.exists(variant_path):
-						var variant_tex: Texture2D = load(variant_path) as Texture2D
-						if variant_tex != null:
-							variants.append(variant_tex)
-			_idle_variants.append(variants)
+				idle_variants = _load_pose_variants(base + "_idle", true)
+				walk_variants = _load_pose_variants(base + "_walk", false)
+			_idle_variants.append(idle_variants)
 			_idle_choices.append(null)
+			_walk_variants.append(walk_variants)
 		set_process(true)
+
+	func _load_pose_variants(stem: String, skip_first: bool) -> Array[Texture2D]:
+		var result: Array[Texture2D] = []
+		for index: int in range(1, 10):
+			if skip_first and index == 1:
+				continue
+			var path: String = stem + ".png" if index == 1 else "%s_%d.png" % [stem, index]
+			if ResourceLoader.exists(path):
+				var pose_tex: Texture2D = load(path) as Texture2D
+				if pose_tex != null:
+					result.append(pose_tex)
+		return result
+
+	func begin_walk() -> void:
+		_walking = true
+		_gait_t = 0.0
+		queue_redraw()
+
+	func end_walk() -> void:
+		_walking = false
+		_gait_t = 0.0
+		queue_redraw()
 
 	func _process(delta: float) -> void:
 		_t += delta
+		if _walking:
+			_gait_t += delta
 		_idle_timer -= delta
 		if _idle_timer <= 0.0:
 			var candidates: Array[int] = []
@@ -3073,6 +3102,13 @@ class MobNode extends Node2D:
 			var phase: float = _t * (2.0 if i == 0 else 1.7) + float(i) * 1.9
 			var idle_tex: Texture2D = _idle_choices[i] if i < _idle_choices.size() and _idle_choices[i] is Texture2D else null
 			var display_tex: Texture2D = idle_tex if idle_tex != null else tex
+			# Les poses de marche dédiées sont utilisées uniquement pendant le déplacement.
+			# Sans fichier _walk, le sprite de base reste affiché : repli sans rupture.
+			if _walking and i < _walk_variants.size():
+				var walk_pool: Array = _walk_variants[i]
+				if not walk_pool.is_empty():
+					var gait_step: int = int(_gait_t / 0.12)
+					display_tex = walk_pool[(gait_step >> 1) % walk_pool.size()]
 			var breathe: float = 1.0 + sin(phase) * (0.018 if i == 0 else 0.026)
 			var h: float = (84.0 if i == 0 else 66.0) * (1.12 if elite else 1.0) * breathe
 			var sc: float = h / float(display_tex.get_height())
