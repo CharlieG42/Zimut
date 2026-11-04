@@ -69,9 +69,15 @@ func _boot() -> void:
 	var conquest: String = FileAccess.get_file_as_string("res://scripts/ConquestSystem.gd")
 	check(conquest.contains("static func _pay(data: Dictionary") and conquest.contains("data[\"resources\"] = res") and conquest.contains("data[\"gold\"] = int(data.get(\"gold\", 0)) - int(cost.get(\"gold\", 0))"),
 		"les dépenses de Conquête mutent les mêmes champs or/ressources de la sauvegarde")
-	check(manager.contains("func open_chest(key: String, level: int) -> Array") and manager.contains("ProgressionManager.adventure_poi_completed(state, key)"),
+	var chest_start: int = manager.find("func open_chest(key: String, level: int) -> Array")
+	var chest_end: int = manager.find("## Camp (source claire)", chest_start)
+	var chest_code: String = manager.substr(chest_start, chest_end - chest_start)
+	check(chest_code.contains("ProgressionManager.adventure_poi_completed(state, key)"),
 		"un coffre déjà ouvert ne peut pas être récompensé une seconde fois")
-	check(manager.contains("func solve_puzzle(key: String, answer: String) -> bool") and manager.contains("puzzle.is_empty() or ProgressionManager.adventure_poi_completed(state, key)"),
+	var puzzle_start: int = manager.find("func solve_puzzle(key: String, answer: String) -> bool")
+	var puzzle_end: int = manager.find("## Énigmes de réflexion", puzzle_start)
+	var puzzle_code: String = manager.substr(puzzle_start, puzzle_end - puzzle_start)
+	check(puzzle_code.contains("ProgressionManager.adventure_poi_completed(state, key)"),
 		"une énigme déjà validée ne peut pas rapporter une seconde fois")
 	check(manager.contains("ProgressionManager.award_xp(save, xp)") and manager.contains("ProgressionManager.write_save(slot, save)"),
 		"l’exploration crédite le roster commun et persiste la même sauvegarde")
