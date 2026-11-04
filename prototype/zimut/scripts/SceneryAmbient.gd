@@ -16,7 +16,8 @@ func configure(grid_size: int, biome: String, seed_value: int = 1) -> void:
 	_parts.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value * 61 + 3
-	var count: int = 34
+	# La planche utilise le même budget d'effets que les autres scènes.
+	var count: int = roundi(34.0 * GfxQuality.density())
 	for i: int in range(count):
 		_parts.append({
 			"x": rng.randf_range(-_span.x, _span.x), "y": rng.randf_range(-120.0, _span.y),
