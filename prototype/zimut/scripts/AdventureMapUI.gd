@@ -2599,6 +2599,8 @@ class HeroView extends Node2D:
 	var _t: float = 0.0
 	var _gait_t: float = 0.0
 	var _reaction_t: float = 0.0
+	var _idle_timer: float = 4.0
+	var _idle_variant: Texture2D = null
 
 	func _ready() -> void:
 		# Les poses sont rangées à côté du sprite de classe (comme pour EntityView).
@@ -2613,6 +2615,7 @@ class HeroView extends Node2D:
 			back_walk_poses = _load_pose_variants(pose_root + sprite_key + "_back_walk", false)
 			idle_poses = _load_pose_variants(pose_root + sprite_key + "_idle", true)
 			back_idle_poses = _load_pose_variants(pose_root + sprite_key + "_back_idle", true)
+		_idle_timer = randf_range(3.5, 6.0)
 		set_process(true)
 
 	func _load_pose_variants(stem: String, skip_first: bool) -> Array[Texture2D]:
@@ -2631,6 +2634,22 @@ class HeroView extends Node2D:
 		_t += delta
 		if walking:
 			_gait_t += delta
+			_idle_variant = null
+			_idle_timer = randf_range(3.5, 6.0)
+		else:
+			_idle_timer -= delta
+			if _idle_timer <= 0.0:
+				if _idle_variant == null:
+					var facing_back: bool = _walk_dir.y < -0.12
+					var idle_pool: Array[Texture2D] = back_idle_poses if facing_back else idle_poses
+					if not idle_pool.is_empty():
+						_idle_variant = idle_pool[randi() % idle_pool.size()]
+						_idle_timer = randf_range(1.0, 1.7)
+					else:
+						_idle_timer = randf_range(4.0, 7.0)
+				else:
+					_idle_variant = null
+					_idle_timer = randf_range(4.0, 7.0)
 		if _reaction_t > 0.0:
 			_reaction_t = maxf(0.0, _reaction_t - delta)
 		queue_redraw()
@@ -2671,11 +2690,11 @@ class HeroView extends Node2D:
 		var facing_back: bool = _walk_dir.y < -0.12
 		var rest_tex: Texture2D = back_tex if facing_back and back_tex != null else tex
 		var display_tex: Texture2D = rest_tex
-		# Petite variation de repos : le héros change naturellement d'attitude après quelques secondes.
-		if not walking:
-			var idle_pool: Array[Texture2D] = back_idle_poses if facing_back else idle_poses
-			if not idle_pool.is_empty() and fposmod(_t, 8.0) > 5.5:
-				display_tex = idle_pool[posmod(int(_t / 5.5), idle_pool.size())]
+		# De temps en temps, le héros adopte brièvement une pose de repos alternative.
+		# Le choix est fait dans _process (et non dans _draw) pour éviter tout scintillement
+		# ou changement de pose provoqué par la fréquence de rafraîchissement.
+		if not walking and _idle_variant != null:
+			display_tex = _idle_variant
 		# Foulée en deux temps : appui sur la pose de marche, puis retour au repos.
 		var walk_pool: Array[Texture2D] = back_walk_poses if facing_back else walk_poses
 		if walking and not walk_pool.is_empty():
