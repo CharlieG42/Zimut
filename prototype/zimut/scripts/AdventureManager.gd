@@ -127,7 +127,10 @@ func path_to(target: Vector2i) -> Array[Vector2i]:
 	for k: String in ProgressionManager.adventure_zone_pois(zone_id()).keys():
 		var pos := AdventureTerrain.parse(k)
 		var poi: Dictionary = ProgressionManager.adventure_zone_pois(zone_id())[k]
-		if String(poi.get("kind", "")) == KIND_COMBAT and not poi_done(pos):
+		# Une entrée de donjon est un lieu interactif, pas un mur : on doit pouvoir
+		# traverser sa case pour rejoindre les secteurs situés derrière elle.
+		# Les camps de combat ordinaires restent bloquants tant qu'ils ne sont pas vaincus.
+		if String(poi.get("kind", "")) == KIND_COMBAT and not Dungeons.is_dungeon(poi) and not poi_done(pos):
 			blocked[pos] = true
 	# On ne franchit une porte que si c'est la destination choisie.
 	for g: Vector2i in gates().keys():
