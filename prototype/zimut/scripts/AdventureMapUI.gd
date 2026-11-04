@@ -1133,9 +1133,10 @@ func _walk(path: Array[Vector2i]) -> void:
 	_board.preview = path.duplicate()
 	_action_btn.hide()
 	# les longs trajets sont plus rapides (jusqu'à deux fois)
+	var sprint: bool = is_board() and path.size() >= 8
 	var step_time: float = STEP_TIME * clampf(8.0 / float(maxi(1, path.size())), 0.5, 1.0)
 	if is_board():
-		step_time = BOARD_STEP_TIME
+		step_time = BOARD_STEP_TIME * (0.72 if sprint else 1.0)
 	for step: Vector2i in path:
 		if _redirect.x >= 0:
 			break
@@ -1144,7 +1145,7 @@ func _walk(path: Array[Vector2i]) -> void:
 			break
 		var from: Vector2 = _hero.position
 		var to: Vector2 = cell_center(step)
-		_hero.locomotion(to - from, true)
+		_hero.locomotion(to - from, true, sprint)
 		var fresh: Array = manager.move_hero(step)
 		if _board.preview.size() > 0:
 			_board.preview.remove_at(0)
@@ -2566,6 +2567,7 @@ class HeroView extends Node2D:
 	var hop: float = 0.0
 	var _flip: bool = false
 	var walking: bool = false
+	var running: bool = false
 	var _walk_dir: Vector2 = Vector2.DOWN
 	var _t: float = 0.0
 	var _gait_t: float = 0.0
@@ -2615,10 +2617,11 @@ class HeroView extends Node2D:
 		if absf(dx) > 1.0:
 			_flip = dx < 0.0
 
-	func locomotion(direction: Vector2, active: bool) -> void:
+	func locomotion(direction: Vector2, active: bool, sprint: bool = false) -> void:
 		if active and not walking:
 			_gait_t = 0.0
 		walking = active
+		running = active and sprint
 		if not active:
 			_gait_t = 0.0
 		if direction.length_squared() > 0.01:
@@ -2649,16 +2652,17 @@ class HeroView extends Node2D:
 		# Foulée en deux temps : appui sur la pose de marche, puis retour au repos.
 		var walk_pool: Array[Texture2D] = back_walk_poses if facing_back else walk_poses
 		if walking and not walk_pool.is_empty():
-			var gait_step: int = int(_gait_t / 0.12)
+			var gait_step: int = int(_gait_t / (0.09 if running else 0.12))
 			if gait_step % 2 == 0:
 				display_tex = walk_pool[(gait_step >> 1) % walk_pool.size()]
 		var h: float = 104.0
 		var sc: float = h / float(display_tex.get_height())
 		var w: float = float(display_tex.get_width()) * sc
 		var breathe: float = sin(_t * 2.2) * 1.5
-		var stride: float = sin(_gait_t * TAU / 0.24) if walking else 0.0
-		var bob: float = absf(stride) * 3.0 if walking else 0.0
-		var lean: float = _walk_dir.x * 2.0 if walking else 0.0
+		var stride_period: float = 0.18 if running else 0.24
+		var stride: float = sin(_gait_t * TAU / stride_period) if walking else 0.0
+		var bob: float = absf(stride) * (4.5 if running else 3.0) if walking else 0.0
+		var lean: float = _walk_dir.x * (3.0 if running else 2.0) if walking else 0.0
 		var reaction_bob: float = sin((1.0 - _reaction_t / 0.65) * PI) * 8.0 if _reaction_t > 0.0 else 0.0
 		var y: float = -h + 6.0 - hop - breathe - bob - reaction_bob
 		var x: float = lean + (stride * 1.2 if walking else 0.0)
