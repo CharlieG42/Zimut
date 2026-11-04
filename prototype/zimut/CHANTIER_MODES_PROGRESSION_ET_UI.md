@@ -58,3 +58,17 @@ Les états purement spatiaux et les règles locales restent indépendants : posi
 ## Première livraison
 
 Cette première tranche rend visibles les ressources de la sauvegarde commune dans l'exploration 2D et dans le HUD du monde ouvert 3D. Elle ajoute des vérifications statiques au test de séparation des modes. Elle ne prétend pas terminer les cinq phases : elle pose le contrat commun et ouvre le chantier par une amélioration transversale vérifiable.
+
+## Livraison suivante — ambiance adaptative et audit de progression
+
+### Réalisé dans la branche `feat/adventure-polish-shared-progression`
+- La couche `SceneryAmbient` adapte désormais son nombre de particules au réglage graphique existant via `GfxQuality.density()` : la qualité Économie/Auto sur appareil modeste réduit le travail de rendu, sans supprimer l'identité du biome.
+- Le nombre de particules reste borné (12 à 34) pour conserver un minimum de vie visuelle et éviter une densité excessive.
+- Les tests de décor vérifient le respect de cette densité et les profils propres aux Nations Marées, Vents, Brasier, Brumes, Ombres et Rouages.
+- Audit du flux de progression : l'exploration crédite le roster avec `ProgressionManager.award_xp`, les récompenses d'exploration passent par les mutations communes de la sauvegarde, les combats utilisent `register_victory` pour XP/butin/ressources, et les dépenses de Conquête modifient les mêmes champs `gold` et `resources`.
+- Des garde-fous statiques ont été ajoutés au test d'isolation pour détecter une rupture de ces points d'entrée communs.
+
+### Limites de validation restantes
+- Ces vérifications de progression sont des contrôles de contrat dans les scripts de test ; elles ne remplacent pas encore un scénario runtime complet qui enchaîne combat, exploration, Conquête, fermeture puis rechargement de la même partie.
+- Les animations d'ouverture de coffre et les dialogues de PNJ doivent être traités à partir des données réelles des POI et de leurs scènes dédiées ; ne pas simuler une interaction qui n'existe pas dans le catalogue.
+- La validation tactile et visuelle reste à faire sur Android. Aucune végétation statique de premier plan ni correction du masque/coordonnées de Sylvestre n'est introduite dans cette tranche.
