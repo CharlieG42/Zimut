@@ -3038,22 +3038,18 @@ class MobNode extends Node2D:
 		_t += delta
 		_idle_timer -= delta
 		if _idle_timer <= 0.0:
-			var has_variants: bool = false
+			var candidates: Array[int] = []
 			for i: int in range(_idle_variants.size()):
-				var variants: Array = _idle_variants[i]
-				if variants.is_empty():
-					continue
-				has_variants = true
-				if _idle_choices[i] == null:
-					_idle_choices[i] = variants[randi() % variants.size()]
+				if not (_idle_variants[i] as Array).is_empty():
+					candidates.append(i)
+			if not candidates.is_empty():
+				var chosen: int = candidates[randi() % candidates.size()]
+				var variants: Array = _idle_variants[chosen]
+				if _idle_choices[chosen] == null:
+					_idle_choices[chosen] = variants[randi() % variants.size()]
 				else:
-					_idle_choices[i] = null
-			var showing_variant: bool = false
-			for choice: Variant in _idle_choices:
-				if choice != null:
-					showing_variant = true
-					break
-			_idle_timer = randf_range(1.2, 2.0) if has_variants and showing_variant else randf_range(4.0, 7.0)
+					_idle_choices[chosen] = null
+			_idle_timer = randf_range(3.5, 6.0)
 		queue_redraw()
 
 	func face(dx: float) -> void:
@@ -3078,7 +3074,7 @@ class MobNode extends Node2D:
 			var display_tex: Texture2D = idle_tex if idle_tex != null else tex
 			var breathe: float = 1.0 + sin(phase) * (0.018 if i == 0 else 0.026)
 			var h: float = (84.0 if i == 0 else 66.0) * (1.12 if elite else 1.0) * breathe
-			var sc: float = h / float(tex.get_height())
+			var sc: float = h / float(display_tex.get_height())
 			var w: float = float(display_tex.get_width()) * sc
 			var bob: float = sin(phase) * (2.2 if i == 0 else 2.8)
 			var o: Vector2 = offs[i]

@@ -18,5 +18,6 @@ func _init() -> void:
 	check(adventure.contains('var variant_path: String = "%s_idle_%d.png"'), "les variantes de repos des sprites monstres sont détectées")
 	check(adventure.contains("var display_tex: Texture2D = idle_tex if idle_tex != null else tex"), "les poses de repos alternatives sont affichées avec repli sur le sprite de base")
 	check(adventure.contains("Ombre de contact individuelle"), "chaque monstre reçoit une ombre de contact propre")
+	check(adventure.contains("var candidates: Array[int] = []"), "les poses alternatives des monstres sont déclenchées de façon espacée")
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)

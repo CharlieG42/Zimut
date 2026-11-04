@@ -41,7 +41,7 @@ func _process(delta: float) -> void:
 	if st == "":
 		st = "leaves" if _biome == "Forêt" else _biome
 	for pt: Dictionary in _parts:
-		var depth_speed: float = depth_speed * float(pt.get("depth", 1.0))
+		var depth_speed: float = float(pt["v"]) * float(pt.get("depth", 1.0))
 		match st:
 			"leaves":
 				pt["y"] = float(pt["y"]) + delta * depth_speed * 0.9
