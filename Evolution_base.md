@@ -80,6 +80,7 @@ Donner aux personnages une présence vivante et cohérente, avec des animations 
 - Livraison initiale : respiration discrète du héros Aventure et micro-variations de respiration/balancement des groupes de monstres. Les variantes de repos déjà présentes dans les planches sont exploitées, avec ombres de contact individuelles.
 - Complément : les groupes de monstres utilisent maintenant les poses `_walk` disponibles pendant leurs déplacements sur la carte ; en l'absence de planche de marche, le sprite de base reste utilisé.
 - À poursuivre : audit des planches réellement disponibles par classe/Nation, puis combler les manques d'animations par lots cohérents.
+- Audit initial des ressources : les poses de marche sont présentes pour plusieurs héros (notamment Druide, Mage, Tank, Soigneur, Sylvain, Chasseur et Assassin) et pour certains boss ; la recherche des fichiers importés montre une couverture moins régulière côté ennemis. Ce relevé reste indicatif et sera remplacé par le rapport exhaustif du test automatisé.
 
 ---
 
@@ -151,6 +152,11 @@ Consolider la qualité générale du jeu et réduire les risques de régression 
 ---
 
 ## Journal des livraisons
+
+### 2026-11-04 — Audit des ressources d'animation
+- Ajout d'un test headless qui inventorie les poses `walk`, `idle`, `attack` et `cast` (face/dos) dans les dossiers de sprites des Nations et des familiers.
+- Le contrôle signale les poses orphelines dont le sprite de base est absent ; les manques de couverture restent informatifs afin de ne pas bloquer la livraison lorsqu'une animation n'a pas encore été créée.
+- Le test est intégré à la boucle CI Android.
 
 ### 2026-11-04 — Complément des étapes 1 et 2
 - La CI de la première livraison a réussi : tests GDScript, exports APK Debug et Release.
