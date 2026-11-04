@@ -47,6 +47,7 @@ Faire de Sylvestre la référence de qualité du monde Aventure 2D, puis appliqu
 ### Avancement
 - Base existante confirmée : fond illustré Sylvestre, sentiers, falaises, POI animés et ambiances par biome/Nation.
 - Livraison initiale : variation de profondeur des particules d'ambiance ; la profondeur module désormais leur taille et leur vitesse.
+- Complément : les marqueurs de POI disposent d'une assise au sol (ombre et anneau de matière) et d'un médaillon légèrement biseauté pour améliorer leur séparation du décor. Les positions, dimensions interactives et données de terrain restent inchangées.
 - À poursuivre : contrôle visuel sur appareil, retouches fines des contours et des points d'intérêt à partir de captures annotées.
 - **Précaution active :** ne pas retoucher le masque ni les coordonnées de Sylvestre sans capture annotée.
 
@@ -155,6 +156,7 @@ Consolider la qualité générale du jeu et réduire les risques de régression 
 - Les particules utilisent désormais la profondeur pour leur taille et leur vitesse.
 - Les groupes de monstres exploitent les poses alternatives de repos disponibles et disposent d'ombres de contact par silhouette.
 - Les poses `_walk` existantes sont maintenant jouées pendant le déplacement des groupes ; repli automatique sur le sprite de base si aucune pose n'est présente.
+- Les POI reçoivent une assise au sol, un anneau de matière et un reflet discret sur leur médaillon ; aucune coordonnée ni zone interactive n'est modifiée.
 - Ajout de contrôles automatisés pour ces comportements ; validation visuelle Android toujours attendue.
 
 ### 2026-11-04 — Initialisation de la feuille de route
