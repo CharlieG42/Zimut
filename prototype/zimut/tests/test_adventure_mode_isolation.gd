@@ -81,7 +81,6 @@ func _boot() -> void:
 			dungeons_on_walkable = false
 	check(dungeons_on_walkable, "les cinq entrées de donjon Sylvestre sont placées sur des cases ouvertes")
 
-	var map_ui: String = FileAccess.get_file_as_string("res://scripts/AdventureMapUI.gd")
 	check(map_ui.contains("func react()") and map_ui.contains("_hero.react()"),
 		"le héros réagit visuellement aux trouvailles et aux lieux découverts")
 
