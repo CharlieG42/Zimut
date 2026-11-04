@@ -137,6 +137,8 @@ func _boot() -> void:
 		"les personnages et groupes sont triés selon leur profondeur sur la planche")
 	check(map_ui.contains("var sprint: bool = is_board() and path.size() >= 8") and map_ui.contains("var running: bool = false") and map_ui.contains("stride_period: float = 0.18 if running else 0.24"),
 		"les longs trajets déclenchent une course plus rapide que la marche")
+	check(map_ui.contains("func _pointer_to_cell") and map_ui.contains("distance_squared_to(icon_center)") and map_ui.contains("hit_radius: float = 48.0 if poi_node.is_dungeon else 42.0"),
+		"les icônes de lieux et de donjons disposent d'une zone tactile élargie")
 
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
