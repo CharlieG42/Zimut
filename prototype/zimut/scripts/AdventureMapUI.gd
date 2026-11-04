@@ -3040,7 +3040,8 @@ class MobNode extends Node2D:
 		if _idle_timer <= 0.0:
 			var candidates: Array[int] = []
 			for i: int in range(_idle_variants.size()):
-				if not (_idle_variants[i] as Array).is_empty():
+				var available: Array = _idle_variants[i]
+				if not available.is_empty():
 					candidates.append(i)
 			if not candidates.is_empty():
 				var chosen: int = candidates[randi() % candidates.size()]
