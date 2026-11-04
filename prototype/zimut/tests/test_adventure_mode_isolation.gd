@@ -42,6 +42,7 @@ func _boot() -> void:
 		"res://scripts/adventure3d/AdventureOpen3D.gd",
 		"res://scripts/SaveSlotsUI.gd",
 		"res://scripts/SettingsUI.gd",
+		"res://scripts/SceneryAmbient.gd",
 		"res://scripts/ConquestMapUI.gd",
 	]
 	for path: String in scripts:
@@ -146,6 +147,18 @@ func _boot() -> void:
 		"les lieux proches du héros affichent un halo pulsé discret indiquant leur disponibilité")
 	check(map_ui.contains('ambient.name = "Ambient"') and map_ui.contains("ambient.configure(maxi(zs.x, zs.y), biome"),
 		"la planche illustrée reçoit aussi les effets d'ambiance du biome sans modifier son image")
+	var ambient_script: String = FileAccess.get_file_as_string("res://scripts/SceneryAmbient.gd")
+	check(ambient_script.contains("GfxQuality.density()") and ambient_script.contains("roundi(34.0 * GfxQuality.density())"),
+		"les particules de la planche respectent le profil graphique Auto/Économie/Haute")
+	check(map_ui.contains("func _adjacent_interaction()") and map_ui.contains('nearby_kind == "find"')
+		and map_ui.contains('nearby_kind == "gate"') and map_ui.contains('_walk([target])'),
+		"les POI, trouvailles et portails accessibles à une case proposent une action contextuelle")
+	check(map_ui.contains("var _motion_blend: float = 0.0") and map_ui.contains("var _settle_t: float = 0.0")
+		and map_ui.contains("var _turn_t: float = 0.0") and map_ui.contains("shadow_radius"),
+		"les départs/arrêts et demi-tours du héros sont amortis et son ombre suit la profondeur")
+	check(manager.contains("ProgressionManager.add_resources(save, res)") and manager.contains('save["gold"]')
+		and manager.contains('save["inventory"].append(drops[0])') and manager.contains("ProgressionManager.award_xp(save, xp)"),
+		"les récompenses d'exploration restent versées dans les données communes de la sauvegarde")
 
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
