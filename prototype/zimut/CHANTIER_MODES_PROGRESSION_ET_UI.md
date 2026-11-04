@@ -68,7 +68,7 @@ Les étapes sont volontairement petites et vérifiables. Sylvestre reste la zone
 - Critères : aucune pose manquante ne bloque l'animation ; retour au repos garanti après chaque déplacement ; aucune modification des commandes ou du chemin calculé.
 
 ### Étape B — Environnement illustré plus vivant
-<small>Base intégrée : couche d'ambiance indépendante et densité des particules reliée au réglage graphique Auto/Économie/Haute. La végétation de premier plan reste à valider visuellement avant tout placement sur la carte annotée.</small>
+<small>Couche d'ambiance indépendante, densité des particules reliée au réglage Auto/Économie/Haute et petites feuilles animées en Sylvestre. La végétation statique de premier plan reste à valider visuellement avant tout placement sur la carte annotée.</small>
 - Ajouter une végétation de premier plan en petites touffes ou silhouettes, uniquement aux emplacements validés comme praticables et sans masquer les points d'intérêt.
 - Faire passer le héros derrière les éléments hauts lorsque leur profondeur le demande ; garder les éléments de premier plan devant ses jambes.
 - Enrichir l'ambiance de Sylvestre avec quelques lucioles/pollens à trajectoires lentes, une variation de lumière très douce et des feuilles au vent. Garder les particules rares et de petite taille.
