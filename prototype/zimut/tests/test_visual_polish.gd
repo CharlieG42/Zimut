@@ -20,5 +20,8 @@ func _init() -> void:
 	check(adventure.contains("func begin_walk()") and adventure.contains("func end_walk()"), "les monstres disposent d'un état de déplacement explicite")
 	check(adventure.contains('mob_tween.tween_callback(Callable(mn, "end_walk"))'), "la pose de marche s'arrête à la fin du déplacement")
 	check(adventure.contains("if not walk_pool.is_empty()"), "l'absence de pose de marche conserve un repli sur le sprite de base")
+	check(adventure.contains("var ground_radius: float = 48.0 if is_dungeon else 34.0"), "les POI ont une assise au sol adaptée à leur type")
+	check(adventure.contains("draw_arc(Vector2.ZERO, ground_radius - 3.0"), "les POI disposent d'un anneau de matière au sol")
+	check(adventure.contains("Reflet supérieur"), "les médaillons de POI ont un reflet de volume discret")
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
