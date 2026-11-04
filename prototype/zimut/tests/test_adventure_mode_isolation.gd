@@ -131,6 +131,10 @@ func _boot() -> void:
 
 	check(map_ui.contains("func react()") and map_ui.contains("_hero.react()"),
 		"le héros réagit visuellement aux trouvailles et aux lieux découverts")
+	check(map_ui.contains("func _hero_depth_scale") and map_ui.contains("lerpf(0.86, 1.12") and map_ui.contains('tween_property(_hero, "scale"'),
+		"le héros adapte progressivement son échelle à la profondeur de la planche")
+	check(map_ui.contains("mn.z_index = mn.cell.y * 4 + 2"),
+		"les personnages et groupes sont triés selon leur profondeur sur la planche")
 
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
