@@ -7,6 +7,31 @@ func check(ok: bool, message: String) -> void:
 	if not ok:
 		fails += 1
 
+func _mask_path_exists(mask: Array, cols: int, from: Vector2i, to: Vector2i, blocked: Dictionary) -> bool:
+	if from.x < 0 or from.y < 0 or from.x >= cols or from.y >= mask.size():
+		return false
+	if to.x < 0 or to.y < 0 or to.x >= cols or to.y >= mask.size():
+		return false
+	if String(mask[from.y])[from.x] != "#" or String(mask[to.y])[to.x] != "#":
+		return false
+	var queue: Array[Vector2i] = [from]
+	var seen: Dictionary = {from: true}
+	var head: int = 0
+	while head < queue.size():
+		var current: Vector2i = queue[head]
+		head += 1
+		if current == to:
+			return true
+		for direction: Vector2i in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)]:
+			var next: Vector2i = current + direction
+			if next.x < 0 or next.y < 0 or next.x >= cols or next.y >= mask.size():
+				continue
+			if String(mask[next.y])[next.x] != "#" or blocked.has(next) or seen.has(next):
+				continue
+			seen[next] = true
+			queue.append(next)
+	return false
+
 func _init() -> void:
 	_boot.call_deferred()
 
@@ -60,8 +85,10 @@ func _boot() -> void:
 	check(manager.contains('ProgressionManager.add_resources(save, res)'),
 		"les récoltes d’exploration alimentent l’inventaire de ressources partagé")
 
-	check(manager.contains('and pos != target'),
-		"un lieu de combat reste bloquant en traversée mais atteignable comme destination")
+	check(manager.contains('and pos != target') and manager.contains('not Dungeons.is_dungeon(poi)'),
+		"les combats ordinaires bloquent le passage, mais les portes de donjon restent traversables")
+	check(map_ui.contains('Dungeons.is_dungeon(poi) and step != path.back()'),
+		"une porte de donjon intermédiaire ne déclenche pas son interaction")
 
 	var board: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/boards/foret_sylve.json"))
 	var mask: Array = board.get("mask", [])
@@ -80,6 +107,27 @@ func _boot() -> void:
 		if y < 0 or y >= mask.size() or x < 0 or x >= String(mask[y]).length() or String(mask[y])[x] != "#":
 			dungeons_on_walkable = false
 	check(dungeons_on_walkable, "les cinq entrées de donjon Sylvestre sont placées sur des cases ouvertes")
+
+	# Vérifie le chemin réel sur le masque, en appliquant les règles de blocage :
+	# les combats ordinaires barrent le passage ; les donjons restent franchissables.
+	var poi_data: Dictionary = board.get("pois", {})
+	var start_xy: Array = board.get("start", [0, 0])
+	var start_cell := Vector2i(int(start_xy[0]), int(start_xy[1]))
+	var all_pois_reachable: bool = true
+	for target_key: String in poi_data.keys():
+		var target_xy: PackedStringArray = target_key.split(",")
+		var target_cell := Vector2i(int(target_xy[0]), int(target_xy[1]))
+		var blocked_cells: Dictionary = {}
+		for other_key: String in poi_data.keys():
+			var other_poi: Dictionary = poi_data[other_key]
+			if String(other_poi.get("kind", "")) != "combat" or String(other_poi.get("guardian", "")) != "" or other_key == target_key:
+				continue
+			var other_xy: PackedStringArray = other_key.split(",")
+			blocked_cells[Vector2i(int(other_xy[0]), int(other_xy[1]))] = true
+		if not _mask_path_exists(mask, int(board.get("cols", 0)), start_cell, target_cell, blocked_cells):
+			all_pois_reachable = false
+	check(all_pois_reachable and poi_data.size() == 18,
+		"les 18 lieux de Sylvestre restent atteignables avec les combats ordinaires bloquants et les donjons traversables")
 
 	check(map_ui.contains("func react()") and map_ui.contains("_hero.react()"),
 		"le héros réagit visuellement aux trouvailles et aux lieux découverts")
