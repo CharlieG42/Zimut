@@ -58,6 +58,7 @@ var _hud: CanvasLayer = null
 var _stick: Adv3DStick = null
 var _zone_label: Label = null
 var _info_label: Label = null
+var _resource_label: Label = null
 var _toast: Label = null
 var _toast_tween: Tween = null
 var _act_btn: Button = null
@@ -842,6 +843,10 @@ func _build_hud() -> void:
 	_info_label = U.lbl("", 19, Color(0.92, 0.94, 0.98))
 	_info_label.position = Vector2(26, 54)
 	root.add_child(_info_label)
+	_resource_label = U.lbl("", 17, Color(0.72, 0.90, 0.78))
+	_resource_label.position = Vector2(26, 82)
+	_resource_label.custom_minimum_size = Vector2(500, 24)
+	root.add_child(_resource_label)
 	_refresh_info()
 	# Boutons haut-droite : autres vues, héros, butin, menu
 	var top := HBoxContainer.new()
@@ -947,6 +952,15 @@ func _refresh_info() -> void:
 		ProgressionManager.biome_label(manager.zone_biome()),
 		ProgressionManager.adventure_zone_level(zone_id),
 		diff, ProgressionManager.format_playtime(t)]
+	if _resource_label != null:
+		var resources: Dictionary = save.get("resources", {})
+		var names: Array = resources.keys()
+		names.sort()
+		var parts: PackedStringArray = []
+		for i: int in range(mini(names.size(), 5)):
+			var resource_name: String = String(names[i])
+			parts.append("%s %d" % [resource_name, int(resources[resource_name])])
+		_resource_label.text = "Ressources : " + ("  ·  ".join(parts) if not parts.is_empty() else "aucune récoltée")
 
 
 func _on_playtime_updated(mode: String, _seconds: float) -> void:

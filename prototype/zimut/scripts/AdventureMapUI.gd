@@ -1349,6 +1349,32 @@ func _refresh_side() -> void:
 			_refresh_side())
 		team_row.add_child(b)
 
+	# Ressources communes : ce panneau reflète directement la sauvegarde partagée.
+	var resources: Dictionary = _save.get("resources", {})
+	var resource_card := PanelContainer.new()
+	resource_card.add_theme_stylebox_override("panel", U.box(Color(0.08, 0.12, 0.15), Color(0.42, 0.72, 0.58), 14, 1, 12))
+	_side_box.add_child(resource_card)
+	var rv := VBoxContainer.new()
+	rv.add_theme_constant_override("separation", 5)
+	resource_card.add_child(rv)
+	rv.add_child(U.lbl("SAC DE RESSOURCES", 18, Color(0.62, 0.88, 0.72), true))
+	var resource_names: Array = resources.keys()
+	resource_names.sort()
+	if resource_names.is_empty():
+		rv.add_child(U.lbl("Aucune ressource récoltée", 17, DIM))
+	else:
+		var resource_text := ""
+		for ri: int in range(resource_names.size()):
+			var resource_name: String = String(resource_names[ri])
+			if ri > 0:
+				resource_text += "   ·   "
+			resource_text += "%s %d" % [resource_name, int(resources[resource_name])]
+			if ri % 3 == 2 or ri == resource_names.size() - 1:
+				var resource_line: Label = U.lbl(resource_text, 17, U.C_TXT)
+				resource_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				rv.add_child(resource_line)
+				resource_text = ""
+
 	# Journal
 	var journal: Array = manager.state.get("journal", [])
 	if not journal.is_empty():

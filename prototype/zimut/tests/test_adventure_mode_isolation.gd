@@ -52,5 +52,13 @@ func _boot() -> void:
 	var settings: String = FileAccess.get_file_as_string("res://scripts/SettingsUI.gd")
 	check(not settings.contains('"Mode Aventure"'), "le choix 2D/3D n'est plus un réglage global")
 
+	check(map_ui.contains('"SAC DE RESSOURCES"') and map_ui.contains('_save.get("resources", {})'),
+		"la carte 2D affiche les ressources de la sauvegarde commune")
+	check(open3d.contains('_resource_label') and open3d.contains('save.get("resources", {})'),
+		"le monde ouvert 3D affiche les ressources de la sauvegarde commune")
+	var manager: String = FileAccess.get_file_as_string("res://scripts/AdventureManager.gd")
+	check(manager.contains('ProgressionManager.add_resources(save, res)'),
+		"les récoltes d’exploration alimentent l’inventaire de ressources partagé")
+
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
