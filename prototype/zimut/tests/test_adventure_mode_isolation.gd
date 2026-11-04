@@ -59,6 +59,10 @@ func _boot() -> void:
 	var manager: String = FileAccess.get_file_as_string("res://scripts/AdventureManager.gd")
 	check(manager.contains('ProgressionManager.add_resources(save, res)'),
 		"les récoltes d’exploration alimentent l’inventaire de ressources partagé")
+	check(manager.contains('not Dungeons.is_dungeon(poi)'),
+		"les entrées de donjon restent traversables pendant les trajets vers d’autres secteurs")
+	check(map_ui.contains('Dungeons.is_dungeon(poi) and step != path.back()'),
+		"la marche ne s’interrompt pas sur un donjon qui n’est qu’une case de passage")
 
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
