@@ -1137,6 +1137,7 @@ func _walk(path: Array[Vector2i]) -> void:
 			_refresh_world()
 		var got: Dictionary = manager.collect_find(step)
 		if not got.is_empty():
+			_hero.react()
 			_toast_show("✦ " + String(got["text"]), 24)
 			_log(String(got["text"]) + ".")
 			_refresh_world()
@@ -1148,6 +1149,8 @@ func _walk(path: Array[Vector2i]) -> void:
 				_board.preview = []
 				return
 		var poi: Dictionary = manager.poi_at(step)
+		if not poi.is_empty():
+			_hero.react()
 		if not poi.is_empty() or not manager.gate_at(step).is_empty():
 			break
 		var ev: Dictionary = manager.roll_event(_rng)
@@ -2537,6 +2540,7 @@ class HeroView extends Node2D:
 	var _walk_dir: Vector2 = Vector2.DOWN
 	var _t: float = 0.0
 	var _gait_t: float = 0.0
+	var _reaction_t: float = 0.0
 
 	func _ready() -> void:
 		# Les poses sont rangées à côté du sprite de classe (comme pour EntityView).
@@ -2569,6 +2573,13 @@ class HeroView extends Node2D:
 		_t += delta
 		if walking:
 			_gait_t += delta
+		if _reaction_t > 0.0:
+			_reaction_t = maxf(0.0, _reaction_t - delta)
+		queue_redraw()
+
+	## Petite réaction positive à une trouvaille ou à l'arrivée sur un lieu.
+	func react() -> void:
+		_reaction_t = 0.65
 		queue_redraw()
 
 	func face(dx: float) -> void:
@@ -2590,6 +2601,10 @@ class HeroView extends Node2D:
 		draw_set_transform(Vector2(0, 4), 0.0, Vector2(1.0, 0.45))
 		draw_circle(Vector2.ZERO, 34.0, Color(0, 0, 0, 0.30))
 		draw_arc(Vector2.ZERO, 36.0, 0.0, TAU, 40, Color(1.0, 0.84, 0.3, 0.9), 3.5, true)
+		if _reaction_t > 0.0:
+			var pulse: float = 1.0 - _reaction_t / 0.65
+			draw_arc(Vector2.ZERO, 44.0 + pulse * 12.0, 0.0, TAU, 40,
+				Color(1.0, 0.86, 0.42, (1.0 - pulse) * 0.85), 3.0, true)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		if tex == null:
 			draw_circle(Vector2(0, -40), 24.0, Color(0.9, 0.8, 0.4))
@@ -2615,7 +2630,8 @@ class HeroView extends Node2D:
 		var stride: float = sin(_gait_t * TAU / 0.24) if walking else 0.0
 		var bob: float = absf(stride) * 3.0 if walking else 0.0
 		var lean: float = _walk_dir.x * 2.0 if walking else 0.0
-		var y: float = -h + 6.0 - hop - breathe - bob
+		var reaction_bob: float = sin((1.0 - _reaction_t / 0.65) * PI) * 8.0 if _reaction_t > 0.0 else 0.0
+		var y: float = -h + 6.0 - hop - breathe - bob - reaction_bob
 		var x: float = lean + (stride * 1.2 if walking else 0.0)
 		if _flip:
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0, 1.0))
