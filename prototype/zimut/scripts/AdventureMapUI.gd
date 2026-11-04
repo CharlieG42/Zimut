@@ -330,6 +330,26 @@ func _build_hud() -> void:
 	help.visible = manager.moves() < HELP_STEPS
 
 
+## Interaction de proximité : POI, trouvailles et portes accessibles à une case.
+## L'activation emprunte le déplacement normal et conserve les règles existantes.
+func _adjacent_interaction() -> Dictionary:
+	var hp: Vector2i = manager.hero_pos()
+	for direction: Vector2i in [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)]:
+		var target: Vector2i = hp + direction
+		if not _inside(target) or not manager.can_move_to(target):
+			continue
+		var gate: Dictionary = manager.gate_at(target)
+		if not gate.is_empty() and bool(gate.get("open", false)):
+			return {"kind": "gate", "pos": target, "info": gate}
+		var poi: Dictionary = manager.poi_at(target)
+		if not poi.is_empty() and (not manager.poi_done(target) or String(poi.get("kind", "")) == "camp"):
+			return {"kind": "poi", "pos": target, "info": poi}
+		var find_kind: String = manager.find_at(target)
+		if find_kind != "" and not manager.find_taken(target):
+			return {"kind": "find", "pos": target, "info": {"kind": find_kind}}
+	return {}
+
+
 ## Met à jour la plaque d'infos et le bouton d'action selon la case du héros.
 func _refresh_hud() -> void:
 	if _hud_title == null:
@@ -353,6 +373,18 @@ func _refresh_hud() -> void:
 			_action_btn.show()
 		return
 	if poi.is_empty():
+		var nearby: Dictionary = _adjacent_interaction()
+		if nearby.is_empty():
+			return
+		var nearby_kind: String = String(nearby.get("kind", ""))
+		var nearby_info: Dictionary = nearby.get("info", {})
+		if nearby_kind == "gate":
+			_action_btn.text = "➜  PASSER VERS %s" % String(nearby_info.get("name", "LA CARTE VOISINE")).to_upper()
+		elif nearby_kind == "find":
+			_action_btn.text = "✦  RAMASSER · %s" % String(nearby_info.get("kind", "trouvaille")).to_upper()
+		else:
+			_action_btn.text = "▶  %s · %s" % [String(POI_ACTION.get(String(nearby_info.get("kind", "")), "INTERAGIR")), String(nearby_info.get("name", "LIEU")).to_upper()]
+		_action_btn.show()
 		return
 	var kind: String = String(poi.get("kind", ""))
 	if manager.poi_done(pos) and kind != "camp":
@@ -374,8 +406,17 @@ func _on_action_pressed() -> void:
 	var pos: Vector2i = manager.hero_pos()
 	if not manager.gate_at(pos).is_empty() and manager.poi_at(pos).is_empty():
 		_cross_gate(pos)
-	else:
-		_interact()
+		return
+	if manager.poi_at(pos).is_empty():
+		var nearby: Dictionary = _adjacent_interaction()
+		if not nearby.is_empty():
+			var target: Vector2i = nearby.get("pos", Vector2i(-1, -1))
+			if manager.can_move_to(target):
+				_walk([target])
+			else:
+				_say("Le passage est momentanément bloqué.")
+			return
+	_interact()
 
 
 func _process(_delta: float) -> void:
@@ -2610,6 +2651,9 @@ class HeroView extends Node2D:
 	var _reaction_t: float = 0.0
 	var _idle_timer: float = 4.0
 	var _idle_variant: Texture2D = null
+	var _motion_blend: float = 0.0
+	var _settle_t: float = 0.0
+	var _turn_t: float = 0.0
 
 	func _ready() -> void:
 		# Les poses sont rangées à côté du sprite de classe (comme pour EntityView).
@@ -2641,6 +2685,12 @@ class HeroView extends Node2D:
 
 	func _process(delta: float) -> void:
 		_t += delta
+		_motion_blend = move_toward(_motion_blend, 1.0 if walking else 0.0, delta * (6.5 if walking else 4.0))
+		_turn_t = maxf(0.0, _turn_t - delta)
+		if _settle_t > 0.0:
+			_settle_t = maxf(0.0, _settle_t - delta)
+			if _settle_t == 0.0 and not walking:
+				_gait_t = 0.0
 		if walking:
 			_gait_t += delta
 			_idle_variant = null
@@ -2670,24 +2720,34 @@ class HeroView extends Node2D:
 
 	func face(dx: float) -> void:
 		if absf(dx) > 1.0:
-			_flip = dx < 0.0
+			var next_flip: bool = dx < 0.0
+			if next_flip != _flip:
+				_flip = next_flip
+				_turn_t = 0.18
+				queue_redraw()
 
 	func locomotion(direction: Vector2, active: bool, sprint: bool = false) -> void:
 		if active and not walking:
 			_gait_t = 0.0
+			_settle_t = 0.0
+		if not active and walking:
+			# Conserve brièvement la dernière pose de marche pour amortir l'arrêt.
+			_settle_t = 0.16
 		walking = active
 		running = active and sprint
-		if not active:
-			_gait_t = 0.0
 		if direction.length_squared() > 0.01:
 			_walk_dir = direction.normalized()
 			face(direction.x)
 			queue_redraw()
 
 	func _draw() -> void:
+		# Ombre de contact adaptée à la profondeur et à la hauteur du saut.
+		var depth_t: float = clampf((scale.x - 0.86) / 0.26, 0.0, 1.0)
+		var shadow_radius: float = lerpf(30.0, 38.0, depth_t)
+		var shadow_alpha: float = clampf(0.30 - hop * 0.012, 0.12, 0.30)
 		draw_set_transform(Vector2(0, 4), 0.0, Vector2(1.0, 0.45))
-		draw_circle(Vector2.ZERO, 34.0, Color(0, 0, 0, 0.30))
-		draw_arc(Vector2.ZERO, 36.0, 0.0, TAU, 40, Color(1.0, 0.84, 0.3, 0.9), 3.5, true)
+		draw_circle(Vector2.ZERO, shadow_radius, Color(0, 0, 0, shadow_alpha))
+		draw_arc(Vector2.ZERO, shadow_radius + 2.0, 0.0, TAU, 40, Color(1.0, 0.84, 0.3, 0.9), 3.5, true)
 		if _reaction_t > 0.0:
 			var pulse: float = 1.0 - _reaction_t / 0.65
 			draw_arc(Vector2.ZERO, 44.0 + pulse * 12.0, 0.0, TAU, 40,
@@ -2706,7 +2766,7 @@ class HeroView extends Node2D:
 			display_tex = _idle_variant
 		# Foulée en deux temps : appui sur la pose de marche, puis retour au repos.
 		var walk_pool: Array[Texture2D] = back_walk_poses if facing_back else walk_poses
-		if walking and not walk_pool.is_empty():
+		if (walking or _settle_t > 0.0) and not walk_pool.is_empty():
 			var gait_step: int = int(_gait_t / (0.09 if running else 0.12))
 			if gait_step % 2 == 0:
 				display_tex = walk_pool[(gait_step >> 1) % walk_pool.size()]
@@ -2716,13 +2776,15 @@ class HeroView extends Node2D:
 		var breathe: float = sin(_t * 2.2) * 1.5
 		var stride_period: float = 0.18 if running else 0.24
 		var stride: float = sin(_gait_t * TAU / stride_period) if walking else 0.0
-		var bob: float = absf(stride) * (4.5 if running else 3.0) if walking else 0.0
-		var lean: float = _walk_dir.x * (3.0 if running else 2.0) if walking else 0.0
+		var bob: float = absf(stride) * (4.5 if running else 3.0) * _motion_blend
+		var lean: float = _walk_dir.x * (3.0 if running else 2.0) * _motion_blend
 		var reaction_bob: float = sin((1.0 - _reaction_t / 0.65) * PI) * 8.0 if _reaction_t > 0.0 else 0.0
 		var y: float = -h + 6.0 - hop - breathe - bob - reaction_bob
 		var x: float = lean + (stride * 1.2 if walking else 0.0)
-		if _flip:
-			draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0, 1.0))
+		var turn_squash: float = 1.0
+		if _turn_t > 0.0:
+			turn_squash = 1.0 - 0.16 * sin((1.0 - _turn_t / 0.18) * PI)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2((-1.0 if _flip else 1.0) * turn_squash, 1.0))
 		# Liseré sombre discret pour détacher le héros des feuillages clairs.
 		var rect := Rect2(Vector2(x - w * 0.5, y), Vector2(w, h + breathe))
 		for o: Vector2 in [Vector2(-1.5, 0), Vector2(1.5, 0), Vector2(0, -1.5), Vector2(0, 1.5)]:
