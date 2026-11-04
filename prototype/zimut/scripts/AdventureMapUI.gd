@@ -629,27 +629,33 @@ func _add_decor(p: Vector2i, kind: String, biome: String, pal: Dictionary, sc: f
 
 ## Met à jour la visibilité (brouillard) et l'état des lieux.
 func _refresh_world() -> void:
+	var board_depth: bool = is_board()
+	var hp: Vector2i = manager.hero_pos()
+	_apply_hero_depth(hp)
 	for p: Vector2i in _cell_nodes.keys():
 		var seen: bool = manager.cell_discovered(p)
 		for n: Node2D in _cell_nodes[p]:
 			n.visible = seen
 			if n is FindNode:
 				n.visible = seen and not manager.find_taken(p)
+				if board_depth:
+					n.z_index = p.y * 4 + 1
 			if n is PoiNode:
 				var pn: PoiNode = n
 				pn.done = manager.poi_done(p) and pn.kind != "camp"
-				var hp: Vector2i = manager.hero_pos()
-				var near: int = 4 if is_board() else 2
+				var near: int = 4 if board_depth else 2
 				pn.show_label = (pn.is_dungeon or absi(p.x - hp.x) + absi(p.y - hp.y) <= near or p == _board.hover) and not pn.done
-				pn.z_index = 3 if pn.show_label else 0  # étiquette lisible au-dessus des voisins
+				pn.z_index = p.y * 4 + (3 if pn.show_label else 1) if board_depth else (3 if pn.show_label else 0)
 				pn.queue_redraw()
 			elif n is GateNode:
-				n.z_index = 2
+				n.z_index = p.y * 4 + 2 if board_depth else 2
 	var team_lvl: int = _team_level()
 	for id: int in _mob_nodes.keys():
 		var mn: MobNode = _mob_nodes[id]
 		mn.visible = manager.cell_discovered(mn.cell)
 		mn.danger = mn.level - team_lvl
+		if board_depth:
+			mn.z_index = mn.cell.y * 4 + 2
 	_board.queue_redraw()
 
 
@@ -872,6 +878,23 @@ func cell_center(p: Vector2i) -> Vector2:
 	if is_board():
 		return (Vector2(p) + Vector2(0.5, 0.5)) * BoardArt.cell_world(manager.zone_id())
 	return Vector2(float(p.x - p.y) * TILE_W * 0.5, float(p.x + p.y) * TILE_H * 0.5)
+
+
+## Échelle et ordre de profondeur de la planche : le héros grandit légèrement vers le premier plan.
+func _hero_depth_scale(p: Vector2i) -> Vector2:
+	if not is_board():
+		return Vector2.ONE
+	var max_y: int = maxi(1, manager.zone_size().y - 1)
+	var depth: float = clampf(float(p.y) / float(max_y), 0.0, 1.0)
+	var factor: float = lerpf(0.86, 1.12, depth)
+	return Vector2.ONE * factor
+
+
+func _apply_hero_depth(p: Vector2i) -> void:
+	if _hero == null:
+		return
+	_hero.scale = _hero_depth_scale(p)
+	_hero.z_index = p.y * 4 + 2 if is_board() else 0
 
 
 func screen_to_cell(local: Vector2) -> Vector2i:
@@ -1129,6 +1152,9 @@ func _walk(path: Array[Vector2i]) -> void:
 		tw.tween_method(func(f: float) -> void:
 			_hero.position = from.lerp(to, f)
 			_hero.hop = sin(f * PI) * 7.0, 0.0, 1.0, step_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		if is_board():
+			tw.parallel().tween_property(_hero, "scale", _hero_depth_scale(step), step_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			_hero.z_index = step.y * 4 + 2
 		_after_step()
 		if not _pan_moved:
 			_focus_cell(step, true, step_time)
