@@ -127,7 +127,10 @@ func path_to(target: Vector2i) -> Array[Vector2i]:
 	for k: String in ProgressionManager.adventure_zone_pois(zone_id()).keys():
 		var pos := AdventureTerrain.parse(k)
 		var poi: Dictionary = ProgressionManager.adventure_zone_pois(zone_id())[k]
-		if String(poi.get("kind", "")) == KIND_COMBAT and not poi_done(pos):
+		# Un lieu de combat bloque le passage, mais doit rester atteignable comme destination.
+		# Sans cette exception, les camps ET les cinq entrées de donjon étaient eux-mêmes
+		# ajoutés aux murs du pathfinding : le héros ne pouvait jamais arriver dessus.
+		if String(poi.get("kind", "")) == KIND_COMBAT and not poi_done(pos) and pos != target:
 			blocked[pos] = true
 	# On ne franchit une porte que si c'est la destination choisie.
 	for g: Vector2i in gates().keys():
