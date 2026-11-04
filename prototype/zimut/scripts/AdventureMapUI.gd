@@ -3013,13 +3013,47 @@ class MobNode extends Node2D:
 	var cell: Vector2i = Vector2i.ZERO
 	var _flip: bool = false
 	var _t: float = 0.0
+	var _idle_variants: Array = []
+	var _idle_choices: Array = []
+	var _idle_timer: float = 4.5
 
 	func _ready() -> void:
 		_t = float(absi(int(position.x * 5 + position.y * 3))) * 0.01
+		_idle_timer = randf_range(3.5, 6.0)
+		for tex: Texture2D in texes:
+			var variants: Array[Texture2D] = []
+			if tex != null and tex.resource_path != "":
+				var base: String = tex.resource_path.get_basename()
+				for variant_index: int in range(2, 10):
+					var variant_path: String = "%s_idle_%d.png" % [base, variant_index]
+					if ResourceLoader.exists(variant_path):
+						var variant_tex: Texture2D = load(variant_path) as Texture2D
+						if variant_tex != null:
+							variants.append(variant_tex)
+			_idle_variants.append(variants)
+			_idle_choices.append(null)
 		set_process(true)
 
 	func _process(delta: float) -> void:
 		_t += delta
+		_idle_timer -= delta
+		if _idle_timer <= 0.0:
+			var has_variants: bool = false
+			for i: int in range(_idle_variants.size()):
+				var variants: Array = _idle_variants[i]
+				if variants.is_empty():
+					continue
+				has_variants = true
+				if _idle_choices[i] == null:
+					_idle_choices[i] = variants[randi() % variants.size()]
+				else:
+					_idle_choices[i] = null
+			var showing_variant: bool = false
+			for choice: Variant in _idle_choices:
+				if choice != null:
+					showing_variant = true
+					break
+			_idle_timer = randf_range(1.2, 2.0) if has_variants and showing_variant else randf_range(4.0, 7.0)
 		queue_redraw()
 
 	func face(dx: float) -> void:
@@ -3040,18 +3074,24 @@ class MobNode extends Node2D:
 			if tex == null:
 				continue
 			var phase: float = _t * (2.0 if i == 0 else 1.7) + float(i) * 1.9
+			var idle_tex: Texture2D = _idle_choices[i] if i < _idle_choices.size() and _idle_choices[i] is Texture2D else null
+			var display_tex: Texture2D = idle_tex if idle_tex != null else tex
 			var breathe: float = 1.0 + sin(phase) * (0.018 if i == 0 else 0.026)
 			var h: float = (84.0 if i == 0 else 66.0) * (1.12 if elite else 1.0) * breathe
 			var sc: float = h / float(tex.get_height())
-			var w: float = float(tex.get_width()) * sc
+			var w: float = float(display_tex.get_width()) * sc
 			var bob: float = sin(phase) * (2.2 if i == 0 else 2.8)
 			var o: Vector2 = offs[i]
+			# Ombre de contact individuelle : elle ancre chaque silhouette au sol.
+			draw_set_transform(o + Vector2(0, 2), 0.0, Vector2(1.0, 0.34))
+			draw_circle(Vector2.ZERO, 19.0 if i == 0 else 15.0, Color(0.02, 0.04, 0.05, 0.30 if i == 0 else 0.22))
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			if _flip:
 				draw_set_transform(Vector2(-o.x, o.y), 0.0, Vector2(-1.0, 1.0))
-				draw_texture_rect(tex, Rect2(Vector2(-w * 0.5, -h + 4.0 - bob), Vector2(w, h)), false, Color(1, 1, 1) if i == 0 else Color(0.85, 0.85, 0.9))
+				draw_texture_rect(display_tex, Rect2(Vector2(-w * 0.5, -h + 4.0 - bob), Vector2(w, h)), false, Color(1, 1, 1) if i == 0 else Color(0.85, 0.85, 0.9))
 				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			else:
-				draw_texture_rect(tex, Rect2(o + Vector2(-w * 0.5, -h + 4.0 - bob), Vector2(w, h)), false, Color(1, 1, 1) if i == 0 else Color(0.85, 0.85, 0.9))
+				draw_texture_rect(display_tex, Rect2(o + Vector2(-w * 0.5, -h + 4.0 - bob), Vector2(w, h)), false, Color(1, 1, 1) if i == 0 else Color(0.85, 0.85, 0.9))
 		# Badge : niveau + effectif
 		var bcol: Color = Color(0.45, 0.88, 0.50) if danger <= 1 else (Color(1.0, 0.72, 0.30) if danger <= 4 else Color(1.0, 0.40, 0.36))
 		var font: Font = ThemeDB.fallback_font

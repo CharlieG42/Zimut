@@ -46,7 +46,7 @@ Faire de Sylvestre la référence de qualité du monde Aventure 2D, puis appliqu
 
 ### Avancement
 - Base existante confirmée : fond illustré Sylvestre, sentiers, falaises, POI animés et ambiances par biome/Nation.
-- Livraison initiale : variation de profondeur des particules d'ambiance pour éviter un rendu trop uniforme.
+- Livraison initiale : variation de profondeur des particules d'ambiance ; la profondeur module désormais leur taille et leur vitesse.
 - À poursuivre : contrôle visuel sur appareil, retouches fines des contours et des points d'intérêt à partir de captures annotées.
 - **Précaution active :** ne pas retoucher le masque ni les coordonnées de Sylvestre sans capture annotée.
 
@@ -75,7 +75,7 @@ Donner aux personnages une présence vivante et cohérente, avec des animations 
 ### Avancement
 - Base existante confirmée : poses multiples, variantes de dos, transitions, réactions aux impacts, ombres et contre-jours dans le combat.
 - Base Aventure : marche, course, poses de repos, orientation, arrêt amorti et réaction positive du héros.
-- Livraison initiale : respiration discrète du héros Aventure et micro-variations de respiration/balancement des groupes de monstres.
+- Livraison initiale : respiration discrète du héros Aventure et micro-variations de respiration/balancement des groupes de monstres. Les variantes de repos déjà présentes dans les planches sont exploitées, avec ombres de contact individuelles.
 - À poursuivre : audit des planches réellement disponibles par classe/Nation, puis combler les manques d'animations par lots cohérents.
 
 ---
@@ -148,6 +148,12 @@ Consolider la qualité générale du jeu et réduire les risques de régression 
 ---
 
 ## Journal des livraisons
+
+### 2026-11-04 — Complément des étapes 1 et 2
+- La CI de la première livraison a réussi : tests GDScript, exports APK Debug et Release.
+- Les particules utilisent désormais la profondeur pour leur taille et leur vitesse.
+- Les groupes de monstres exploitent les poses alternatives de repos disponibles et disposent d'ombres de contact par silhouette.
+- Ajout de contrôles automatisés pour ces comportements ; validation visuelle Android toujours attendue.
 
 ### 2026-11-04 — Initialisation de la feuille de route
 - Création de cette référence.

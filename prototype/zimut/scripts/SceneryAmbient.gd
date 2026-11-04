@@ -41,53 +41,54 @@ func _process(delta: float) -> void:
 	if st == "":
 		st = "leaves" if _biome == "Forêt" else _biome
 	for pt: Dictionary in _parts:
+		var depth_speed: float = depth_speed * float(pt.get("depth", 1.0))
 		match st:
 			"leaves":
-				pt["y"] = float(pt["y"]) + delta * float(pt["v"]) * 0.9
-				pt["x"] = float(pt["x"]) + delta * float(pt["v"]) * 1.4 + sin(_t * 0.8 + float(pt["ph"])) * delta * 9.0
+				pt["y"] = float(pt["y"]) + delta * depth_speed * 0.9
+				pt["x"] = float(pt["x"]) + delta * depth_speed * 1.4 + sin(_t * 0.8 + float(pt["ph"])) * delta * 9.0
 				if float(pt["y"]) > _span.y:
 					pt["y"] = -140.0
 			"sparkle", "motes":
-				pt["y"] = float(pt["y"]) - delta * float(pt["v"]) * 0.3
+				pt["y"] = float(pt["y"]) - delta * depth_speed * 0.3
 				pt["x"] = float(pt["x"]) + sin(_t * 0.9 + float(pt["ph"])) * delta * 8.0
 				if float(pt["y"]) < -140.0:
 					pt["y"] = _span.y
 			"bubble":
-				pt["y"] = float(pt["y"]) - delta * float(pt["v"]) * 1.1
+				pt["y"] = float(pt["y"]) - delta * depth_speed * 1.1
 				pt["x"] = float(pt["x"]) + sin(_t * 1.6 + float(pt["ph"])) * delta * 14.0
 				if float(pt["y"]) < -140.0:
 					pt["y"] = _span.y
 			"wind":
-				pt["x"] = float(pt["x"]) + delta * float(pt["v"]) * 3.2
+				pt["x"] = float(pt["x"]) + delta * depth_speed * 3.2
 				pt["y"] = float(pt["y"]) + sin(_t * 1.2 + float(pt["ph"])) * delta * 14.0
 				if float(pt["x"]) > _span.x:
 					pt["x"] = -_span.x
 			"ember":
-				pt["y"] = float(pt["y"]) - delta * float(pt["v"]) * 1.9
+				pt["y"] = float(pt["y"]) - delta * depth_speed * 1.9
 				pt["x"] = float(pt["x"]) + sin(_t * 2.0 + float(pt["ph"])) * delta * 16.0
 				if float(pt["y"]) < -140.0:
 					pt["y"] = _span.y
 			"fog":
-				pt["x"] = float(pt["x"]) + delta * float(pt["v"]) * 0.6
+				pt["x"] = float(pt["x"]) + delta * depth_speed * 0.6
 				if float(pt["x"]) > _span.x:
 					pt["x"] = -_span.x
 			"Montagne":
-				pt["y"] = float(pt["y"]) + delta * float(pt["v"]) * 1.4
+				pt["y"] = float(pt["y"]) + delta * depth_speed * 1.4
 				pt["x"] = float(pt["x"]) + sin(_t * 0.7 + float(pt["ph"])) * delta * 12.0 + delta * 6.0
 				if float(pt["y"]) > _span.y:
 					pt["y"] = -140.0
 			"Désert":
-				pt["x"] = float(pt["x"]) + delta * float(pt["v"]) * 1.8
+				pt["x"] = float(pt["x"]) + delta * depth_speed * 1.8
 				pt["y"] = float(pt["y"]) + sin(_t + float(pt["ph"])) * delta * 8.0
 				if float(pt["x"]) > _span.x:
 					pt["x"] = -_span.x
 			"Donjon":
-				pt["y"] = float(pt["y"]) - delta * float(pt["v"]) * 1.6
+				pt["y"] = float(pt["y"]) - delta * depth_speed * 1.6
 				pt["x"] = float(pt["x"]) + sin(_t * 1.3 + float(pt["ph"])) * delta * 10.0
 				if float(pt["y"]) < -140.0:
 					pt["y"] = _span.y
 			_:
-				pt["y"] = float(pt["y"]) - delta * float(pt["v"]) * 0.5
+				pt["y"] = float(pt["y"]) - delta * depth_speed * 0.5
 				pt["x"] = float(pt["x"]) + sin(_t * 0.6 + float(pt["ph"])) * delta * 9.0
 				if float(pt["y"]) < -140.0:
 					pt["y"] = _span.y
