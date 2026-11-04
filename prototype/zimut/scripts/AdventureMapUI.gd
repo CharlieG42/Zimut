@@ -2790,7 +2790,10 @@ class HeroView extends Node2D:
 			turn_squash = 1.0 - 0.16 * sin((1.0 - _turn_t / 0.18) * PI)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2((-1.0 if _flip else 1.0) * turn_squash, 1.0))
 		# Liseré sombre discret pour détacher le héros des feuillages clairs.
-		var rect := Rect2(Vector2(x - w * 0.5, y), Vector2(w, h + breathe))
+		# Respiration très légère au repos : elle anime la silhouette sans déformer le sprite.
+		var idle_breath: float = sin(_t * 1.9 + _phase) * 0.012 if not walking else 0.0
+		var rect := Rect2(Vector2(x - w * (1.0 + idle_breath) * 0.5, y - idle_breath * h * 0.5),
+			Vector2(w * (1.0 + idle_breath), (h + breathe) * (1.0 - idle_breath)))
 		for o: Vector2 in [Vector2(-1.5, 0), Vector2(1.5, 0), Vector2(0, -1.5), Vector2(0, 1.5)]:
 			draw_texture_rect(display_tex, Rect2(rect.position + o, rect.size), false, Color(0.05, 0.07, 0.10, 0.42))
 		draw_texture_rect(display_tex, rect, false)
@@ -3036,10 +3039,12 @@ class MobNode extends Node2D:
 			var tex: Texture2D = texes[i]
 			if tex == null:
 				continue
-			var h: float = (84.0 if i == 0 else 66.0) * (1.12 if elite else 1.0)
+				var phase: float = _t * (2.0 if i == 0 else 1.7) + float(i) * 1.9
+			var breathe: float = 1.0 + sin(phase) * (0.018 if i == 0 else 0.026)
+			var h: float = (84.0 if i == 0 else 66.0) * (1.12 if elite else 1.0) * breathe
 			var sc: float = h / float(tex.get_height())
 			var w: float = float(tex.get_width()) * sc
-			var bob: float = sin(_t * 2.0 + float(i)) * 1.5
+			var bob: float = sin(phase) * (2.2 if i == 0 else 2.8)
 			var o: Vector2 = offs[i]
 			if _flip:
 				draw_set_transform(Vector2(-o.x, o.y), 0.0, Vector2(-1.0, 1.0))

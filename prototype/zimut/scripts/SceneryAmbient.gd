@@ -23,6 +23,8 @@ func configure(grid_size: int, biome: String, seed_value: int = 1) -> void:
 		_parts.append({
 			"x": rng.randf_range(-_span.x, _span.x), "y": rng.randf_range(-120.0, _span.y),
 			"v": rng.randf_range(8.0, 26.0), "ph": rng.randf() * TAU, "r": rng.randf_range(1.2, 3.2),
+			# Variation de profondeur : les particules lointaines sont plus fines et lentes.
+			"depth": rng.randf_range(0.62, 1.18),
 		})
 	set_process(true)
 	queue_redraw()
@@ -95,7 +97,7 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	for pt: Dictionary in _parts:
 		var c := Vector2(float(pt["x"]), float(pt["y"]))
-		var r: float = float(pt["r"])
+		var r: float = float(pt["r"]) * float(pt.get("depth", 1.0))
 		var tw: float = 0.5 + 0.5 * sin(_t * 2.2 + float(pt["ph"]))
 		var st2: String = Nations.ambient(_biome)
 		if st2 == "":
