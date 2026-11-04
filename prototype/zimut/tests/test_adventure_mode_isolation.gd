@@ -135,6 +135,8 @@ func _boot() -> void:
 		"le héros adapte progressivement son échelle à la profondeur de la planche")
 	check(map_ui.contains("mn.z_index = mn.cell.y * 4 + 2"),
 		"les personnages et groupes sont triés selon leur profondeur sur la planche")
+	check(map_ui.contains("var sprint: bool = is_board() and path.size() >= 8") and map_ui.contains("var running: bool = false") and map_ui.contains("stride_period: float = 0.18 if running else 0.24"),
+		"les longs trajets déclenchent une course plus rapide que la marche")
 
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
