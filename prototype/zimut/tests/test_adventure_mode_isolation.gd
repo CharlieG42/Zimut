@@ -60,5 +60,26 @@ func _boot() -> void:
 	check(manager.contains('ProgressionManager.add_resources(save, res)'),
 		"les récoltes d’exploration alimentent l’inventaire de ressources partagé")
 
+	check(manager.contains('and pos != target'),
+		"un lieu de combat reste bloquant en traversée mais atteignable comme destination")
+
+	var board: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/boards/foret_sylve.json"))
+	var mask: Array = board.get("mask", [])
+	check(mask.size() == int(board.get("rows", 0)), "masque Sylvestre : nombre de lignes conforme")
+	var mask_valid: bool = true
+	for row: String in mask:
+		if row.length() != int(board.get("cols", 0)):
+			mask_valid = false
+	check(mask_valid, "masque Sylvestre : toutes les lignes ont la largeur attendue")
+	var dungeon_cells: Array[String] = ["19,10", "76,11", "50,23", "16,32", "76,39"]
+	var dungeons_on_walkable: bool = true
+	for key: String in dungeon_cells:
+		var xy: PackedStringArray = key.split(",")
+		var x: int = int(xy[0])
+		var y: int = int(xy[1])
+		if y < 0 or y >= mask.size() or x < 0 or x >= String(mask[y]).length() or String(mask[y])[x] != "#":
+			dungeons_on_walkable = false
+	check(dungeons_on_walkable, "les cinq entrées de donjon Sylvestre sont placées sur des cases ouvertes")
+
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
