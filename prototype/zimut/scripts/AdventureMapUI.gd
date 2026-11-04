@@ -652,7 +652,9 @@ func _refresh_world() -> void:
 				var pn: PoiNode = n
 				pn.done = manager.poi_done(p) and pn.kind != "camp"
 				var near: int = 4 if board_depth else 2
-				pn.show_label = (pn.is_dungeon or absi(p.x - hp.x) + absi(p.y - hp.y) <= near or p == _board.hover) and not pn.done
+				var hero_distance: int = absi(p.x - hp.x) + absi(p.y - hp.y)
+				pn.nearby = hero_distance <= near and not pn.done
+				pn.show_label = (pn.is_dungeon or pn.nearby or p == _board.hover) and not pn.done
 				pn.z_index = p.y * 4 + (3 if pn.show_label else 1) if board_depth else (3 if pn.show_label else 0)
 				pn.queue_redraw()
 			elif n is GateNode:
@@ -2465,6 +2467,7 @@ class PoiNode extends Node2D:
 	var enemy_tex: Texture2D = null
 	var done: bool = false
 	var show_label: bool = false
+	var nearby: bool = false
 	var gem: Color = Color(0, 0, 0, 0)
 	var gem_taken: bool = false
 	var _t: float = 0.0
@@ -2522,6 +2525,12 @@ class PoiNode extends Node2D:
 		var ic := Vector2(0, icon_y + bob)
 		if is_dungeon and not done:
 			draw_circle(ic, icon_r + 9.0 + pulse * 3.0, Color(0.66, 0.35, 1.0, 0.18))
+		# À proximité, un anneau doux et pulsé indique que le lieu peut être activé.
+		# Il reste discret à distance pour préserver la lisibilité de la carte.
+		if nearby:
+			draw_circle(ic, icon_r + 8.0 + pulse * 3.0, Color(col.r, col.g, col.b, 0.10 + pulse * 0.08))
+			draw_arc(ic, icon_r + 7.0 + pulse * 3.0, 0.0, TAU, 40,
+				Color(col.r, col.g, col.b, 0.48 + pulse * 0.32), 2.5, true)
 		draw_circle(ic + Vector2(0, 3), icon_r, Color(0, 0, 0, 0.42))
 		draw_circle(ic, icon_r, Color(0.06, 0.08, 0.14, 0.97))
 		draw_arc(ic, icon_r - 1.0, 0.0, TAU, 40, col if not done else Color(0.5, 0.5, 0.55), 4.0 if is_dungeon else 3.0, true)
