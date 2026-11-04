@@ -58,3 +58,19 @@ Les états purement spatiaux et les règles locales restent indépendants : posi
 ## Première livraison
 
 Cette première tranche rend visibles les ressources de la sauvegarde commune dans l'exploration 2D et dans le HUD du monde ouvert 3D. Elle ajoute des vérifications statiques au test de séparation des modes. Elle ne prétend pas terminer les cinq phases : elle pose le contrat commun et ouvre le chantier par une amélioration transversale vérifiable.
+
+
+## Audit d'accessibilité — planche Sylvestre (04/11/2026)
+
+La grille de `data/boards/foret_sylve.json` contient 96 × 54 cases. Un contrôle de connexité du masque confirme que les 2 031 cases marquées comme praticables sont toutes reliées au point de départ et que les 18 POI déclarés, dont les cinq donjons, sont posés sur des cases praticables.
+
+Le défaut identifié se situe dans le calcul de trajet : les donjons sont des POI de type combat, mais `poi_done()` les considère volontairement toujours rejouables. `path_to()` les classait donc systématiquement parmi les cases interdites. Cela transformait certaines entrées en murs permanents, notamment lorsqu'elles se trouvaient sur un passage vers une autre partie de la carte.
+
+Correction engagée :
+- une entrée de donjon n'est plus ajoutée aux cases bloquées du pathfinder ;
+- pendant un trajet vers une autre destination, le héros peut traverser une case d'entrée de donjon ;
+- si l'entrée est la destination, l'arrêt et l'interaction habituels sont conservés.
+
+Les combats ordinaires non terminés restent des obstacles intentionnels : ils continuent de provoquer une rencontre au contact.
+
+Limite de l'audit : cette vérification confirme la connexité du masque et des coordonnées de POI, pas encore le bon alignement pixel par pixel entre la planche graphique et chaque cellule. Une validation tactile sur appareil Android reste nécessaire.
