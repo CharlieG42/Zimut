@@ -381,9 +381,12 @@ func _refresh_hud() -> void:
 		if nearby_kind == "gate":
 			_action_btn.text = "➜  PASSER VERS %s" % String(nearby_info.get("name", "LA CARTE VOISINE")).to_upper()
 		elif nearby_kind == "find":
-			_action_btn.text = "✦  RAMASSER · %s" % String(nearby_info.get("kind", "trouvaille")).to_upper()
+			_action_btn.text = "✦  RAMASSER LA TROUVAILLE"
 		else:
-			_action_btn.text = "▶  %s · %s" % [String(POI_ACTION.get(String(nearby_info.get("kind", "")), "INTERAGIR")), String(nearby_info.get("name", "LIEU")).to_upper()]
+			var nearby_action: String = String(POI_ACTION.get(String(nearby_info.get("kind", "")), "INTERAGIR"))
+			if String(nearby_info.get("kind", "")) == "combat" and Dungeons.is_dungeon(nearby_info):
+				nearby_action = "ENTRER DANS LE DONJON"
+			_action_btn.text = "▶  %s · %s" % [nearby_action, String(nearby_info.get("name", "LIEU")).to_upper()]
 		_action_btn.show()
 		return
 	var kind: String = String(poi.get("kind", ""))
@@ -2775,7 +2778,7 @@ class HeroView extends Node2D:
 		var w: float = float(display_tex.get_width()) * sc
 		var breathe: float = sin(_t * 2.2) * 1.5
 		var stride_period: float = 0.18 if running else 0.24
-		var stride: float = sin(_gait_t * TAU / stride_period) if walking else 0.0
+		var stride: float = sin(_gait_t * TAU / stride_period) if walking or _settle_t > 0.0 else 0.0
 		var bob: float = absf(stride) * (4.5 if running else 3.0) * _motion_blend
 		var lean: float = _walk_dir.x * (3.0 if running else 2.0) * _motion_blend
 		var reaction_bob: float = sin((1.0 - _reaction_t / 0.65) * PI) * 8.0 if _reaction_t > 0.0 else 0.0
