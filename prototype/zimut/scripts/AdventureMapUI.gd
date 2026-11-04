@@ -1148,7 +1148,10 @@ func _walk(path: Array[Vector2i]) -> void:
 				_board.preview = []
 				return
 		var poi: Dictionary = manager.poi_at(step)
-		if not poi.is_empty() or not manager.gate_at(step).is_empty():
+		var is_dungeon_transit: bool = Dungeons.is_dungeon(poi) and step != path.back()
+		# Une entrée de donjon peut être traversée si elle n'est qu'un passage.
+		# Elle reste interactive dès qu'elle constitue la destination choisie.
+		if (not poi.is_empty() and not is_dungeon_transit) or not manager.gate_at(step).is_empty():
 			break
 		var ev: Dictionary = manager.roll_event(_rng)
 		if not ev.is_empty():
