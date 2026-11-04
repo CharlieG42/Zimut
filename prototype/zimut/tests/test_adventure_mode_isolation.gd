@@ -60,5 +60,16 @@ func _boot() -> void:
 	check(manager.contains('ProgressionManager.add_resources(save, res)'),
 		"les récoltes d’exploration alimentent l’inventaire de ressources partagé")
 
+	# Contrat de progression : les modes appellent les mêmes mutations sur la sauvegarde de partie.
+	var progression: String = FileAccess.get_file_as_string("res://scripts/ProgressionManager.gd")
+	check(progression.contains("func award_xp(data: Dictionary") and progression.contains("static func add_resources(data: Dictionary"),
+		"XP et ressources disposent de points d’entrée communs dans ProgressionManager")
+	check(progression.contains("func register_victory(data: Dictionary") and progression.contains("data[\"inventory\"].append(l)"),
+		"les victoires ajoutent XP et butin à la sauvegarde commune")
+	var conquest: String = FileAccess.get_file_as_string("res://scripts/ConquestSystem.gd")
+	check(conquest.contains("static func _pay(data: Dictionary") and conquest.contains("data[\"resources\"] = res") and conquest.contains("data[\"gold\"] = int(data.get(\"gold\", 0)) - int(cost.get(\"gold\", 0))"),
+		"les dépenses de Conquête mutent les mêmes champs or/ressources de la sauvegarde")
+	check(manager.contains("ProgressionManager.award_xp(save, xp)") and manager.contains("ProgressionManager.write_save(slot, save)"),
+		"l’exploration crédite le roster commun et persiste la même sauvegarde")
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
