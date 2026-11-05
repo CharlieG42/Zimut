@@ -16,6 +16,7 @@ func _init() -> void:
 	check(ambient.contains('draw_circle(c, r * 4.2, glow)'), "les lucioles ont un halo doux et localisé")
 	check(ambient.contains('_effect_kind = Nations.ambient(_biome)'), "le type d’ambiance est résolu à la configuration")
 	check(ambient.contains('var st: String = _effect_kind'), "la boucle d’animation réutilise le type d’ambiance mis en cache")
+	check(ambient.contains('if st == "leaves" and String(pt.get("kind", "leaf")) == "firefly"'), "les lucioles ont une trajectoire dédiée")
 	check(ambient.contains('var depth_speed: float = float(pt["v"]) * float(pt.get("depth", 1.0))'), "la profondeur module aussi la vitesse des particules")
 	check(adventure.contains("var idle_breath: float = sin(_t * 1.9)"), "le héros Aventure reçoit une respiration discrète au repos")
 	check(adventure.contains("var breathe: float = 1.0 + sin(phase)"), "les monstres ont une respiration différenciée")
