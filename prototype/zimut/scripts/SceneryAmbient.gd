@@ -8,10 +8,14 @@ var _biome: String = "Forêt"
 var _parts: Array[Dictionary] = []
 var _t: float = 0.0
 var _span: Vector2 = Vector2(560.0, 360.0)
+var _effect_kind: String = "leaves"
 
 
 func configure(grid_size: int, biome: String, seed_value: int = 1) -> void:
 	_biome = biome
+	_effect_kind = Nations.ambient(_biome)
+	if _effect_kind == "":
+		_effect_kind = "leaves" if _biome == "Forêt" else _biome
 	_span = Vector2(float(grid_size) * BattleScenery.HW * 0.95, float(grid_size) * BattleScenery.HH * 1.5)
 	_parts.clear()
 	var rng := RandomNumberGenerator.new()
@@ -20,7 +24,9 @@ func configure(grid_size: int, biome: String, seed_value: int = 1) -> void:
 	var density: float = clampf(GfxQuality.density(), 0.35, 1.0)
 	var count: int = maxi(12, roundi(34.0 * density))
 	for i: int in range(count):
+		var is_firefly: bool = _effect_kind == "leaves" and rng.randf() < 0.20
 		_parts.append({
+			"kind": "firefly" if is_firefly else "leaf",
 			"x": rng.randf_range(-_span.x, _span.x), "y": rng.randf_range(-120.0, _span.y),
 			"v": rng.randf_range(8.0, 26.0), "ph": rng.randf() * TAU, "r": rng.randf_range(1.2, 3.2),
 			# Variation de profondeur : les particules lointaines sont plus fines et lentes.
@@ -37,9 +43,7 @@ func particle_count() -> int:
 
 func _process(delta: float) -> void:
 	_t += delta
-	var st: String = Nations.ambient(_biome)
-	if st == "":
-		st = "leaves" if _biome == "Forêt" else _biome
+	var st: String = _effect_kind
 	for pt: Dictionary in _parts:
 		var depth_speed: float = float(pt["v"]) * float(pt.get("depth", 1.0))
 		match st:
@@ -100,9 +104,12 @@ func _draw() -> void:
 		var c := Vector2(float(pt["x"]), float(pt["y"]))
 		var r: float = float(pt["r"]) * float(pt.get("depth", 1.0))
 		var tw: float = 0.5 + 0.5 * sin(_t * 2.2 + float(pt["ph"]))
-		var st2: String = Nations.ambient(_biome)
-		if st2 == "":
-			st2 = "leaves" if _biome == "Forêt" else _biome
+		var st2: String = _effect_kind
+		if st2 == "leaves" and String(pt.get("kind", "leaf")) == "firefly":
+			var glow := Color(1.0, 0.94, 0.52, 0.06 + 0.10 * tw)
+			draw_circle(c, r * 4.2, glow)
+			draw_circle(c, r * 1.45, Color(1.0, 0.98, 0.72, 0.35 + 0.48 * tw))
+			continue
 		match st2:
 			"leaves":
 				var leaf_color := Color(0.55, 0.76, 0.38, 0.38 + 0.22 * tw)
