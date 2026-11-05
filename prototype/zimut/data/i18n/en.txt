@@ -50,7 +50,7 @@ DIFFICULTÉ DES ENNEMIS (cette partie)	ENEMY DIFFICULTY (this game)
 Facile	Easy
 Difficile	Hard
 Enfer	Hell
-Facile ×0,85 · Normal ×1 · Difficile ×1,2 · Enfer : bien plus de PV. S'applique aux prochains combats.	Easy ×0.85 · Normal ×1 · Hard ×1.2 · Hell: much more HP. Applies to the next battles.
+Facile ×1 · Normal ×1,2 · Difficile ×1,65 PV · Enfer ×2,15 PV et ×1,4 attaque. S'applique aux prochains combats.	Easy ×1 · Normal ×1.2 · Hard ×1.65 HP · Hell ×2.15 HP and ×1.4 attack. Applies to the next battles.
 CHOISIR UN MODE DE JEU	CHOOSE A GAME MODE
 Combats Tactiques	Tactical Battles
 Combats stratégiques au tour par tour	Turn-based strategic battles
@@ -1448,7 +1448,7 @@ Renommer	Rename
 Supprimer	Delete
 📋  Exporter la partie	📋  Export game
 ✓  Code copié !	✓  Code copied!
-Facile ×0,85 · Normal ×1 · Difficile ×1,2 · Enfer : bien plus de PV.	Easy ×0.85 · Normal ×1 · Hard ×1.2 · Hell: much more HP.
+Facile ×1 · Normal ×1,2 · Difficile ×1,65 PV · Enfer ×2,15 PV et ×1,4 attaque.	Easy ×1 · Normal ×1.2 · Hard ×1.65 HP · Hell ×2.15 HP and ×1.4 attack.
 Tharok le Végétal	Tharok the Verdant
 Vorkann le Givre	Vorkann the Frost
 Zahor le Sableux	Zahor the Sandborn

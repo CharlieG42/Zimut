@@ -599,7 +599,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 				GameManager.active_save["difficulty"] = di_ref)
 		diff_row.add_child(db)
 	var diff_hint := Label.new()
-	diff_hint.text = "Facile ×0,85 · Normal ×1 · Difficile ×1,2 · Enfer : bien plus de PV."
+	diff_hint.text = "Facile ×1 · Normal ×1,2 · Difficile ×1,65 PV · Enfer ×2,15 PV et ×1,4 attaque."
 	diff_hint.add_theme_font_size_override("font_size", _ui_font(13))
 	diff_hint.add_theme_color_override("font_color", COL_BORDER.darkened(0.3))
 	diff_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

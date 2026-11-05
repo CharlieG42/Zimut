@@ -31,7 +31,44 @@ func _boot() -> void:
 	var total_combats: int = 0
 	for lv: int in range(1, ClassRules.MAX_LEVEL):
 		total_combats += pm.combats_for_level(lv)
-	check(total_combats > 1800 and total_combats < 3200, "durée de vie : %d combats de 1 à 100" % total_combats)
+	check(total_combats > 3000 and total_combats < 4500, "durée de vie : %d combats de 1 à 100 (gain d'XP -25 %%)" % total_combats)
+	# V92 : gains d'XP -25 % (combats réels = combats des paliers / 0,75)
+	check(absf(ClassRules.XP_GAIN_MULT - 0.75) < 0.0001, "gains d'XP réduits de 25 %")
+	check(pm.combats_for_level(1) == 4, "lv1 -> lv2 : 4 combats réels (3 / 0,75) (%d)" % pm.combats_for_level(1))
+	# V92 : courbe exponentielle — l'XP à gagner par niveau croît d'un facteur ~constant, et monter est
+	# toujours plus long à haut niveau (même rapport entre niveaux voisins au début et à la fin).
+	var ratios: Array[float] = []
+	for lv: int in range(2, ClassRules.MAX_LEVEL - 1):
+		var a: float = float(pm.xp_for_level(lv + 1) - pm.xp_for_level(lv))
+		var b: float = float(pm.xp_for_level(lv + 2) - pm.xp_for_level(lv + 1))
+		ratios.append(b / a)
+	var min_r: float = ratios.min()
+	var max_r: float = ratios.max()
+	check(min_r >= 1.0 and max_r < 1.09, "chaque niveau demande plus d'XP que le précédent, sans à-coup (x%.3f à x%.3f)" % [min_r, max_r])
+	var step10: float = float(pm.xp_for_level(11) - pm.xp_for_level(10))
+	var step50: float = float(pm.xp_for_level(51) - pm.xp_for_level(50))
+	var step90: float = float(pm.xp_for_level(91) - pm.xp_for_level(90))
+	check(step50 / step10 > 5.0 and step90 / step50 > 5.0, "croissance exponentielle : x%.1f de 10 à 50, x%.1f de 50 à 90" % [step50 / step10, step90 / step50])
+	check(pm.combats_for_level(90) > 15 * pm.combats_for_level(10), "à haut niveau, monter demande bien plus de combats (%d contre %d)" % [pm.combats_for_level(90), pm.combats_for_level(10)])
+	# L'XP distribuée est réduite de 25 %
+	var gdata: Dictionary = pm.new_game(4, "Gain")
+	pm.rebuild_team(gdata, ["Tank", "Mage", "Heal"])
+	var rep: Dictionary = pm.award_xp(gdata, 1000, 1.0, 0)
+	var g_tank: int = int(rep["Tank"]["gain"])
+	var expected: int = roundi(1000.0 * 0.75 * ClassRules.xp_mult("Tank"))
+	check(abs(g_tank - expected) <= 1, "award_xp : 1000 XP brute -> %d (attendu %d)" % [g_tank, expected])
+	# Ancienne sauvegarde : niveaux conservés, XP convertie vers les nouveaux paliers
+	var old: Dictionary = pm.new_game(4, "Old")
+	pm.rebuild_team(old, ["Tank", "Mage", "Heal"])
+	old.erase("xp_curve_v")
+	old["roster"]["Tank"]["level"] = 40
+	old["roster"]["Tank"]["xp"] = (pm._legacy_xp_for_level(40) + pm._legacy_xp_for_level(41)) / 2
+	old["player"] = {"level": 40, "xp": pm._legacy_xp_for_level(40)}
+	pm.ensure_roster(old)
+	var tank_xp: int = int(old["roster"]["Tank"]["xp"])
+	var mid: int = (pm.xp_for_level(40) + pm.xp_for_level(41)) / 2
+	check(int(old["roster"]["Tank"]["level"]) == 40 and absi(tank_xp - mid) <= 2, "ancienne sauvegarde : niveau 40 et mi-barre conservés (%d / %d)" % [tank_xp, mid])
+	check(int(old["xp_curve_v"]) == 2, "la conversion de courbe n'est faite qu'une fois")
 	var monotone: bool = true
 	var prev: int = -1
 	for lv: int in range(1, ClassRules.MAX_LEVEL + 1):
