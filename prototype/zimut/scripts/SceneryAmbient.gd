@@ -46,6 +46,12 @@ func _process(delta: float) -> void:
 	var st: String = _effect_kind
 	for pt: Dictionary in _parts:
 		var depth_speed: float = float(pt["v"]) * float(pt.get("depth", 1.0))
+		if st == "leaves" and String(pt.get("kind", "leaf")) == "firefly":
+			pt["y"] = float(pt["y"]) - delta * depth_speed * 0.22
+			pt["x"] = float(pt["x"]) + sin(_t * 0.65 + float(pt["ph"])) * delta * 13.0
+			if float(pt["y"]) < -140.0:
+				pt["y"] = _span.y
+			continue
 		match st:
 			"leaves":
 				pt["y"] = float(pt["y"]) + delta * depth_speed * 0.9
