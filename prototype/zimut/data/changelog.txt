@@ -1,3 +1,6 @@
+V96|Fiche personnage, onglet Caractéristiques : les 9 caractéristiques (Vitalité à Défense, PA, PM, Portée) tiennent sur un seul écran en 3 colonnes, sans défilement.
+V96|Chaque carte affiche le total, une jauge et le détail en couleur (base + points investis + objets), avec les boutons − / + et le coût du prochain point.
+V96|Les descriptions des caractéristiques passent en info-bulle (appui long) pour gagner de la place.
 V93|Nouvelle carte 2D de la Sylve : île flottante avec village, moulins, place des runes et Grand Arbre. L'ancienne carte reste disponible (Réglages → « Carte 2D de la Sylve »).
 V93|La nouvelle carte compte 18 lieux : les 5 donjons sont sur les portes du dessin (grotte, maison-moulin, moulin de pierre, arbre à porte bleue, Grand Arbre).
 V93|Réglages : « Carte 2D de la Sylve » permet de revenir à l'ancienne carte à tout moment ; les parties en cours replacent le héros au départ si besoin.

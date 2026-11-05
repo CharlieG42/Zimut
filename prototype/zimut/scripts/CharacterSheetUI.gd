@@ -572,166 +572,66 @@ func _build_stats() -> void:
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.add_child(sp)
-	var auto_b := _btn("RÉPARTITION AUTO", Color(0.45, 0.80, 0.50), 20, Vector2(270, 52))
+	var auto_b := _btn("RÉPARTITION AUTO", Color(0.45, 0.80, 0.50), 20, Vector2(270, 46))
 	auto_b.tooltip_text = "Dépense le capital selon la recette de la classe, y compris aux prochains niveaux."
 	auto_b.pressed.connect(func() -> void:
 		ProgressionManager.auto_points(_save, _classe)
 		_persist()
 		refresh())
 	bar.add_child(auto_b)
-	var reset_b := _btn("RÉINITIALISER", Color(0.95, 0.60, 0.40), 20, Vector2(230, 52))
+	var reset_b := _btn("RÉINITIALISER", Color(0.95, 0.60, 0.40), 20, Vector2(230, 46))
 	reset_b.tooltip_text = "Rend tous les points investis (gratuit). Les prochains points seront à répartir à la main."
 	reset_b.pressed.connect(func() -> void:
 		ProgressionManager.reset_points(_save, _classe)
 		_persist()
 		refresh())
 	bar.add_child(reset_b)
-	var mode: String = "automatique" if bool(ent.get("auto", true)) else "manuelle"
-	_content.add_child(_lbl("Répartition %s — les points gagnés plus tard sont %s." % [mode,
-		"dépensés pour vous" if bool(ent.get("auto", true)) else "à répartir par vous"], 16, C_DIM))
-
-	# Cartes de caractéristiques (2 colonnes)
+	# Cartes de caractéristiques : 3 colonnes × 3 lignes, tout tient à l'écran
 	var grid := GridContainer.new()
-	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 12)
-	grid.add_theme_constant_override("v_separation", 12)
+	grid.name = "StatGrid"
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 8)
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_content.add_child(grid)
 	for stat: String in ClassRules.STATS:
 		var inv_pts: int = int(ent["invested"].get(stat, 0))
 		var gain: int = int(ClassRules.STAT_GAIN[stat])
-		var base_val: int = int(base.get("vita" if stat == "vita" else stat, 0))
-		var eq_val: int = int(eq.get(stat, 0))
 		var tier: String = ClassRules.affinity(_classe, stat)
 		var cost: int = ClassRules.point_cost(_classe, stat, inv_pts)
-		var col: Color = STAT_COLOR[stat]
 		var total: int = int(st.get("max_pv", 0)) if stat == "vita" else int(st.get(stat, 0))
-
-		var card := PanelContainer.new()
-		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		card.add_theme_stylebox_override("panel", _box(C_CARD, col.darkened(0.3), 14, 2, 14))
-		grid.add_child(card)
-		var v := VBoxContainer.new()
-		v.add_theme_constant_override("separation", 6)
-		card.add_child(v)
-		var h1 := HBoxContainer.new()
-		h1.add_theme_constant_override("separation", 10)
-		v.add_child(h1)
-		h1.add_child(_lbl("%s %s" % [STAT_ICON[stat], ClassRules.STAT_LABEL[stat]], 26, col, true))
-		var tier_chip := _chip("Affinité %s" % tier, TIER_COLOR[tier], 15)
-		tier_chip.tooltip_text = "A : 1 point de capital par point (jusqu'à 40), puis 2, puis 3.\nB : 2 puis 3.   C : 3."
-		h1.add_child(tier_chip)
-		var sp1 := Control.new()
-		sp1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		h1.add_child(sp1)
-		h1.add_child(_lbl(str(total), 36, C_GOLD, true))
-		var sbar := StatBar.new()
-		sbar.custom_minimum_size = Vector2(0, 16)
-		sbar.col = col
-		sbar.cap = 320.0 if stat == "vita" else 140.0
-		sbar.base = float(base_val)
-		sbar.pts = float(inv_pts * gain)
-		sbar.eq = float(eq_val)
-		v.add_child(sbar)
-		var h2 := HBoxContainer.new()
-		h2.add_theme_constant_override("separation", 8)
-		v.add_child(h2)
-		var det := _lbl("base %d  +  points %d  +  objets %d" % [base_val, inv_pts * gain, eq_val], 17, C_DIM)
-		det.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		h2.add_child(det)
-		var minus := _btn("−", Color(0.85, 0.5, 0.4), 30, Vector2(54, 48))
-		minus.disabled = inv_pts <= 0
-		minus.pressed.connect(func() -> void:
-			ProgressionManager.refund_point(_save, _classe, stat)
-			_persist()
-			refresh())
-		h2.add_child(minus)
-		var plus := _btn("+", Color(0.45, 0.80, 0.50), 30, Vector2(54, 48))
-		plus.disabled = unspent < cost
-		plus.pressed.connect(func() -> void:
-			ProgressionManager.invest_point(_save, _classe, stat)
-			_persist()
-			refresh())
-		h2.add_child(plus)
-		var cost_l := _lbl("coût %d" % cost, 17, C_GOOD if unspent >= cost else C_BAD)
-		cost_l.custom_minimum_size = Vector2(66, 0)
-		h2.add_child(cost_l)
-		v.add_child(_lbl(String(ClassRules.STAT_HELP[stat]), 15, C_DIM))
-
-	# Cartes bonus PA / PM / Portée : 3 niveaux max, 4 points par niveau
+		grid.add_child(_stat_card(stat, "%s %s" % [STAT_ICON[stat], ClassRules.STAT_LABEL[stat]], STAT_COLOR[stat],
+			"Affinité %s" % tier, TIER_COLOR[tier],
+			"A : 1 point de capital par point (jusqu'à 40), puis 2, puis 3.\nB : 2 puis 3.   C : 3.",
+			str(total), 320.0 if stat == "vita" else 140.0,
+			int(base.get("vita" if stat == "vita" else stat, 0)), inv_pts * gain, int(eq.get(stat, 0)),
+			cost, unspent >= cost, inv_pts > 0, unspent >= cost, String(ClassRules.STAT_HELP[stat])))
+	# Bonus PA / PM / Portée : 3 niveaux max, 4 points par niveau
+	var fx_all: Dictionary = ItemRules.aggregate(member.get("equipment", {}))["fx"]
 	for stat: String in ClassRules.BONUS_STATS:
 		var inv_pts: int = int(ent["invested"].get(stat, 0))
 		var cost: int = ClassRules.BONUS_POINT_COST
-		var col: Color = Color(0.45, 0.80, 0.92)
-		var fx_val: int = int(ItemRules.aggregate(member.get("equipment", {}))["fx"].get(stat, 0))
-		var eq_val: int = int(fx_val)
+		var eq_val: int = int(fx_all.get(stat, 0))
 		var base_val: int = 0 if stat == "po" else int(base.get(stat, 0))
-		var pts_val: int = inv_pts
-		var total: int = base_val + pts_val + eq_val
-		if stat == "pa":
-			total = int(st.get("pa", 0))
-		elif stat == "pm":
-			total = int(st.get("pm", 0))
-		elif stat == "po":
-			total = int(st.get("po", 0))
-
-		var card := PanelContainer.new()
-		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		card.add_theme_stylebox_override("panel", _box(C_CARD, col.darkened(0.3), 14, 2, 14))
-		grid.add_child(card)
-		var v := VBoxContainer.new()
-		v.add_theme_constant_override("separation", 6)
-		card.add_child(v)
-		var h1 := HBoxContainer.new()
-		h1.add_theme_constant_override("separation", 10)
-		v.add_child(h1)
-		h1.add_child(_lbl("%s %s" % ["\u2794" if stat == "po" else ("\u26a1" if stat == "pa" else "\u27b6"), ClassRules.BONUS_STAT_LABEL[stat]], 26, col, true))
-		var tier_chip := _chip("Max %d niveaux" % ClassRules.BONUS_MAX_LEVELS, Color(0.55, 0.75, 0.95), 15)
-		tier_chip.tooltip_text = "Chaque niveau coûte %d points de capital." % ClassRules.BONUS_POINT_COST
-		h1.add_child(tier_chip)
-		var sp1 := Control.new()
-		sp1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		h1.add_child(sp1)
+		var total: int = base_val + inv_pts + eq_val
+		if stat == "pa" or stat == "pm" or stat == "po":
+			total = int(st.get(stat, 0))
 		var cap: int = ClassRules.PA_CAP if stat == "pa" else (ClassRules.PM_CAP if stat == "pm" else ClassRules.PO_CAP)
-		h1.add_child(_lbl("%d / %d" % [total, cap], 26, C_GOLD, true))
-		var sbar := StatBar.new()
-		sbar.custom_minimum_size = Vector2(0, 16)
-		sbar.col = col
-		sbar.cap = float(cap)
-		sbar.base = float(base_val)
-		sbar.pts = float(pts_val)
-		sbar.eq = float(eq_val)
-		v.add_child(sbar)
-		var h2 := HBoxContainer.new()
-		h2.add_theme_constant_override("separation", 8)
-		v.add_child(h2)
-		var det := _lbl("base %d  +  niveaux %d/%d  +  objets %d" % [base_val, inv_pts, ClassRules.BONUS_MAX_LEVELS, eq_val], 17, C_DIM)
-		det.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		h2.add_child(det)
-		var minus := _btn("\u2212", Color(0.85, 0.5, 0.4), 30, Vector2(54, 48))
-		minus.disabled = inv_pts <= 0
-		minus.pressed.connect(func() -> void:
-			ProgressionManager.refund_point(_save, _classe, stat)
-			_persist()
-			refresh())
-		h2.add_child(minus)
-		var plus := _btn("+", Color(0.45, 0.80, 0.50), 30, Vector2(54, 48))
-		plus.disabled = unspent < cost or inv_pts >= ClassRules.BONUS_MAX_LEVELS or (stat != "po" and total >= cap)
-		plus.pressed.connect(func() -> void:
-			ProgressionManager.invest_point(_save, _classe, stat)
-			_persist()
-			refresh())
-		h2.add_child(plus)
-		var cost_l := _lbl("coût %d" % cost, 17, C_GOOD if unspent >= cost else C_BAD)
-		cost_l.custom_minimum_size = Vector2(66, 0)
-		h2.add_child(cost_l)
-		v.add_child(_lbl(String(ClassRules.BONUS_STAT_HELP[stat]), 15, C_DIM))
+		var can_plus: bool = not (unspent < cost or inv_pts >= ClassRules.BONUS_MAX_LEVELS or (stat != "po" and total >= cap))
+		grid.add_child(_stat_card(stat, "%s %s" % ["\u2794" if stat == "po" else ("\u26a1" if stat == "pa" else "\u27b6"), ClassRules.BONUS_STAT_LABEL[stat]],
+			Color(0.45, 0.80, 0.92), "Max %d niv." % ClassRules.BONUS_MAX_LEVELS, Color(0.55, 0.75, 0.95),
+			"Chaque niveau coûte %d points de capital." % ClassRules.BONUS_POINT_COST,
+			"%d / %d" % [total, cap], float(cap), base_val, inv_pts, eq_val, cost, unspent >= cost, inv_pts > 0, can_plus,
+			String(ClassRules.BONUS_STAT_HELP[stat])))
 
 	var legend := HBoxContainer.new()
 	legend.add_theme_constant_override("separation", 18)
 	legend.add_child(_lbl("■ base de classe", 15, STAT_COLOR["vita"].darkened(0.45).lightened(0.2)))
 	legend.add_child(_lbl("■ points investis", 15, STAT_COLOR["vita"]))
 	legend.add_child(_lbl("■ objets et panoplies", 15, Color(0.55, 0.95, 0.60)))
+	var mode: String = "automatique" if bool(ent.get("auto", true)) else "manuelle"
+	var mode_l := _lbl("·  répartition %s : points futurs %s" % [mode, "dépensés pour vous" if bool(ent.get("auto", true)) else "à répartir par vous"], 15, C_DIM)
+	legend.add_child(mode_l)
 	_content.add_child(legend)
 	var extras: Array[String] = []
 	for sline in st.get("sets", []):
@@ -745,6 +645,74 @@ func _build_stats() -> void:
 		for e in extras:
 			fl.add_child(_chip(e, Color(0.65, 0.55, 0.95), 16))
 		_content.add_child(fl)
+
+
+## Carte compacte d'une caractéristique : titre + total, jauge, détail coloré, boutons − / +.
+func _stat_card(stat: String, title: String, col: Color, chip_txt: String, chip_col: Color, chip_tip: String,
+		total_txt: String, cap: float, base_val: int, pts_val: int, eq_val: int, cost: int, afford: bool,
+		can_minus: bool, can_plus: bool, help: String) -> PanelContainer:
+	var card := PanelContainer.new()
+	card.name = "StatCard_" + stat
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.tooltip_text = help
+	card.add_theme_stylebox_override("panel", _box(C_CARD, col.darkened(0.3), 14, 2, 8))
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 3)
+	card.add_child(v)
+	var h1 := HBoxContainer.new()
+	h1.add_theme_constant_override("separation", 8)
+	v.add_child(h1)
+	h1.add_child(_lbl(title, 22, col, true))
+	var chip := _chip(chip_txt, chip_col, 13)
+	chip.tooltip_text = chip_tip
+	h1.add_child(chip)
+	var sp1 := Control.new()
+	sp1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h1.add_child(sp1)
+	h1.add_child(_lbl(total_txt, 30, C_GOLD, true))
+	var sbar := StatBar.new()
+	sbar.custom_minimum_size = Vector2(0, 13)
+	sbar.col = col
+	sbar.cap = cap
+	sbar.base = float(base_val)
+	sbar.pts = float(pts_val)
+	sbar.eq = float(eq_val)
+	v.add_child(sbar)
+	var h2 := HBoxContainer.new()
+	h2.add_theme_constant_override("separation", 6)
+	v.add_child(h2)
+	var det := RichTextLabel.new()
+	det.bbcode_enabled = true
+	det.fit_content = true
+	det.scroll_active = false
+	det.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	det.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	det.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	det.add_theme_font_size_override("normal_font_size", 17)
+	det.text = "[color=#%s]%d[/color] + [color=#%s]%d[/color] + [color=#8cf29a]%d[/color]" % [
+		col.darkened(0.45).lightened(0.25).to_html(false), base_val, col.to_html(false), pts_val, eq_val]
+	h2.add_child(det)
+	var minus := _btn("\u2212", Color(0.85, 0.5, 0.4), 26, Vector2(46, 38))
+	minus.name = "StatMinus_" + stat
+	minus.disabled = not can_minus
+	minus.pressed.connect(func() -> void:
+		ProgressionManager.refund_point(_save, _classe, stat)
+		_persist()
+		refresh())
+	h2.add_child(minus)
+	var plus := _btn("+", Color(0.45, 0.80, 0.50), 26, Vector2(46, 38))
+	plus.name = "StatPlus_" + stat
+	plus.disabled = not can_plus
+	plus.pressed.connect(func() -> void:
+		ProgressionManager.invest_point(_save, _classe, stat)
+		_persist()
+		refresh())
+	h2.add_child(plus)
+	var cost_l := _lbl("×%d" % cost, 17, C_GOOD if afford else C_BAD)
+	cost_l.tooltip_text = "Coût en points de capital"
+	cost_l.custom_minimum_size = Vector2(30, 0)
+	h2.add_child(cost_l)
+	return card
 
 
 # ══════════════════════════════════════════════════════════════════════════
