@@ -633,7 +633,7 @@ func _rebuild_board(biome: String) -> void:
 	_backdrop = spr
 	if zid == "foret_sylve":
 		_add_sylvestre_overlay("sylvestre_atmosphere.svg", ws, 1, "SylvestreAtmosphere")
-		_add_sylvestre_overlay("sylvestre_midground.svg", ws, 2, "SylvestreMidground")
+		_add_sylvestre_overlay("sylvestre_midground.svg", ws, 3, "SylvestreMidground")
 	_board = AdventureBoard.new()
 	_board.ui = self
 	_board.z_index = 2

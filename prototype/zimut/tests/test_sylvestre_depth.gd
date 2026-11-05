@@ -15,6 +15,16 @@ func _init() -> void:
 func _run() -> void:
 	var ui_path := "res://scripts/AdventureMapUI.gd"
 	var ui: String = FileAccess.get_file_as_string(ui_path)
+	var board_text: String = FileAccess.get_file_as_string("res://data/boards/foret_sylve.json")
+	var board_data: Dictionary = JSON.parse_string(board_text)
+	var walk_mask: Array = board_data.get("mask", [])
+	var safe_anchors: Array[Vector2i] = [Vector2i(4, 10), Vector2i(91, 10), Vector2i(4, 40),
+		Vector2i(90, 40), Vector2i(34, 47), Vector2i(64, 47)]
+	var anchors_outside_mask: bool = true
+	for anchor_cell: Vector2i in safe_anchors:
+		if anchor_cell.y >= walk_mask.size() or String(walk_mask[anchor_cell.y]).substr(anchor_cell.x, 1) != ".":
+			anchors_outside_mask = false
+	check(anchors_outside_mask, "les six arbres restent hors du masque de déplacement")
 	var tree_path := "res://assets/boards/sylvestre_foreground_tree.svg"
 	check(ResourceLoader.exists(tree_path), "asset de premier plan Sylvestre présent")
 	var tree_texture: Texture2D = load(tree_path) as Texture2D
