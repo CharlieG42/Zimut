@@ -656,16 +656,17 @@ func _rebuild_board(biome: String) -> void:
 				{"cell": Vector2i(64, 47), "scale": 0.78, "flip": true},
 			]
 			for tree_data: Dictionary in foreground_trees:
+				var tree_cell: Vector2i = tree_data["cell"]
 				var tree := Sprite2D.new()
 				tree.texture = foreground_tree_tex
 				tree.centered = true
 				tree.offset = Vector2(0, -88)
-				tree.position = cell_center(tree_data["cell"]) + Vector2(0, 4)
+				tree.position = cell_center(tree_cell) + Vector2(0, 4)
 				tree.scale = Vector2.ONE * float(tree_data["scale"])
 				tree.flip_h = bool(tree_data["flip"])
-				tree.z_index = int(tree_data["cell"].y) * 4 + 2
+				tree.z_index = tree_cell.y * 4 + 2
 				tree.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-				tree.name = "SylvestreForegroundTree"
+				tree.name = "SylvestreForegroundTree_%d" % tree_cell.x
 				_entities.add_child(tree)
 	# Même ambiance vivante que les cartes isométriques classiques : les effets
 	# restent une couche indépendante et ne modifient jamais l'illustration de fond.
