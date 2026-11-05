@@ -42,6 +42,7 @@ var _content: VBoxContainer
 var _res_label: Label
 var _gear_pick: String = ""     # emplacement dont on choisit l'objet ("" = vue d'ensemble)
 var _gear_msg: String = ""
+var _talent_sel: String = ""       # talent sélectionné dans l'arbre
 
 
 ## Barre de composition d'une caractéristique : base | points investis | objets.
@@ -379,6 +380,7 @@ func _refresh_list() -> void:
 		btn.add_theme_stylebox_override("pressed", _box(C_CARD_HI, accent, 14, 3, 10))
 		btn.pressed.connect(func() -> void:
 			_classe = classe
+			_talent_sel = ""
 			refresh())
 		_list_box.add_child(btn)
 		var row := HBoxContainer.new()
@@ -771,82 +773,63 @@ func _build_talents() -> void:
 	var bar := HBoxContainer.new()
 	bar.add_theme_constant_override("separation", 14)
 	_content.add_child(bar)
-	bar.add_child(_chip("★ %d point%s de pouvoir" % [pts, "s" if pts > 1 else ""], C_GOOD if pts > 0 else C_DIM, 24))
+	bar.add_child(_chip("★ %d point%s de pouvoir" % [pts, "s" if pts > 1 else ""], C_GOOD if pts > 0 else C_DIM, 22))
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.add_child(sp)
-	bar.add_child(_lbl("%d talent%s débloqué%s" % [unlocked_n, "s" if unlocked_n > 1 else "", "s" if unlocked_n > 1 else ""], 18, C_DIM))
-	_content.add_child(_note("1 point de pouvoir tous les %d niveaux à partir du niveau %d. Les bonus ne s'appliquent qu'à ce héros." % [TalentTree.POWER_PER_LEVEL, TalentTree.UNLOCK_LEVEL]))
-	# Grille 2x2 des branches
-	var grid := GridContainer.new()
-	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 12)
-	grid.add_theme_constant_override("v_separation", 12)
-	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_content.add_child(grid)
-	for branch: String in ["offense", "defense", "utility", "power"]:
-		grid.add_child(_build_talent_branch(branch, pts))
+	bar.add_child(_lbl("%d / %d talents  ·  1 point tous les %d niveaux dès le niveau %d" % [unlocked_n, TalentTree.LIST.size(), TalentTree.POWER_PER_LEVEL, TalentTree.UNLOCK_LEVEL], 16, C_DIM))
+	var tree := TalentTreeView.new()
+	tree.name = "TalentTreeView"
+	tree.custom_minimum_size = Vector2(0, 372)
+	tree.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tree.clip_contents = true
+	tree.setup(_save, _classe, _talent_sel)
+	tree.node_selected.connect(func(id: String) -> void:
+		_talent_sel = id
+		refresh())
+	_content.add_child(tree)
+	_content.add_child(_talent_detail(pts))
 
 
-func _build_talent_branch(branch: String, pts: int) -> PanelContainer:
-	var info: Dictionary = TalentTree.BRANCHES[branch]
-	var panel := PanelContainer.new()
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	panel.add_theme_stylebox_override("panel", _box(C_PANEL, info["color"], 14, 3, 14))
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	panel.add_child(box)
-	box.add_child(_lbl("%s %s" % [info["icon"], info["label"]], 22, info["color"], true))
-	for t: Array in TalentTree.branch_talents(branch):
-		box.add_child(_build_talent_node(String(t[0]), String(t[1]), String(t[2]), int(t[3]), info["color"], pts))
-	return panel
-
-
-func _build_talent_node(id: String, name: String, desc: String, cost: int, branch_color: Color, pts: int) -> Control:
-	var unlocked: bool = TalentTree.is_unlocked(_save, _classe, id)
-	var affordable: bool = pts >= cost and not unlocked
+## Bandeau de détail du talent sélectionné + bouton « Débloquer ».
+func _talent_detail(pts: int) -> Control:
 	var card := PanelContainer.new()
-	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size = Vector2(0, 62)
-	var bg_col: Color = C_CARD_HI if unlocked else (C_CARD if affordable else Color(0.08, 0.10, 0.14))
-	var border_col: Color = C_GOOD if unlocked else (branch_color if affordable else Color(0.20, 0.22, 0.30))
-	card.add_theme_stylebox_override("panel", _box(bg_col, border_col, 10, 2, 10))
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 10)
-	card.add_child(hbox)
-	var mark := _lbl("✓" if unlocked else ("★" if affordable else "🔒"), 20,
-		C_GOOD if unlocked else (branch_color if affordable else C_DIM))
-	mark.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	hbox.add_child(mark)
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 2)
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hbox.add_child(vbox)
-	var nl := _lbl(name, 18, C_TXT if unlocked or affordable else C_DIM)
-	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	nl.custom_minimum_size = Vector2(60, 0)
-	vbox.add_child(nl)
-	var dl := _lbl(desc, 14, C_DIM)
+	card.name = "TalentDetail"
+	card.custom_minimum_size = Vector2(0, 76)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	card.add_child(row)
+	if _talent_sel == "" or TalentTree.talent_info(_talent_sel).is_empty():
+		card.add_theme_stylebox_override("panel", _box(C_CARD, C_BORDER, 14, 2, 12))
+		var hint := _lbl("Touchez un fruit de l'arbre pour voir son effet. Un talent se débloque une fois celui qui le précède acquis.", 18, C_DIM)
+		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(hint)
+		return card
+	var info: Dictionary = TalentTree.talent_info(_talent_sel)
+	var col: Color = TalentTree.BRANCHES[String(info["branch"])]["color"]
+	card.add_theme_stylebox_override("panel", _box(C_CARD, col, 14, 3, 12))
+	var txt := VBoxContainer.new()
+	txt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	txt.add_theme_constant_override("separation", 2)
+	row.add_child(txt)
+	txt.add_child(_lbl("%s   ★ %d" % [String(info["name"]), int(info["cost"])], 22, col.lightened(0.3), true))
+	var dl := _lbl(String(info["desc"]), 18, C_TXT)
 	dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	dl.custom_minimum_size = Vector2(60, 0)
-	vbox.add_child(dl)
-	var cost_lbl := _lbl("★ %d" % cost, 17, C_GOLD if affordable else C_DIM)
-	cost_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	cost_lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	hbox.add_child(cost_lbl)
-	var btn := Button.new()
-	btn.flat = true
-	btn.focus_mode = Control.FOCUS_NONE
-	btn.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	btn.tooltip_text = desc
-	btn.disabled = unlocked or not affordable
-	if not unlocked and affordable:
-		btn.pressed.connect(func() -> void:
-			if TalentTree.spend_point(_save, _classe, id):
+	txt.add_child(dl)
+	var why: String = TalentTree.unlock_block(_save, _classe, _talent_sel)
+	var unlocked: bool = TalentTree.is_unlocked(_save, _classe, _talent_sel)
+	var status := _lbl("✓ Débloqué" if unlocked else ("Prêt à débloquer" if why == "" else why), 16, C_GOOD if (unlocked or why == "") else C_DIM)
+	txt.add_child(status)
+	if not unlocked:
+		var b := _btn("DÉBLOQUER", C_GOLD if why == "" else C_BORDER, 22, Vector2(220, 60))
+		b.name = "TalentUnlock"
+		b.disabled = why != ""
+		b.pressed.connect(func() -> void:
+			if TalentTree.spend_point(_save, _classe, _talent_sel):
 				_persist()
 				refresh())
-	card.add_child(btn)
+		row.add_child(b)
 	return card
 
 

@@ -65,6 +65,9 @@ func _test_talent_basics() -> void:
 	_check(TalentTree.is_unlocked(data, "Tank", "off_veteran"), "off_veteran débloqué")
 	_check(TalentTree.points(data, "Tank") == 1, "1 point restant")
 	_check(not TalentTree.spend_point(data, "Tank", "off_fury"), "off_fury coûte 3, refusé avec 1 point")
+	_check(not TalentTree.spend_point(data, "Tank", "off_master"), "off_master refusé : il faut off_critique d'abord")
+	_check(TalentTree.unlock_block(data, "Tank", "off_master").begins_with("Nécessite"), "raison du refus : talent requis")
+	_check(TalentTree.parent_of("off_veteran") == "" and TalentTree.parent_of("off_master") == "off_critique", "structure de l'arbre (parents)")
 	_check(not TalentTree.spend_point(data, "Tank", "off_veteran"), "re-déblocage refusé")
 	_check(not TalentTree.spend_point(data, "Tank", "id_inexistant"), "talent inconnu refusé")
 	_check(TalentTree.unlocked_count(data, "Tank") == 1, "1 talent débloqué au total")
@@ -99,10 +102,11 @@ func _test_talent_bonus_aggregation() -> void:
 	print("TalentTree — agrégation des bonus (par personnage) :")
 	var data: Dictionary = _make_save("Assassin", 30)
 	var ent: Dictionary = data["roster"]["Assassin"]
-	ent["talents"]["points"] = 10
+	ent["talents"]["points"] = 14
 	TalentTree.spend_point(data, "Assassin", "off_veteran")    # +5% dmg
 	TalentTree.spend_point(data, "Assassin", "off_critique")   # +5% crit
 	TalentTree.spend_point(data, "Assassin", "def_vita")       # +5% PV
+	TalentTree.spend_point(data, "Assassin", "util_pa")        # +1 PA (requis par util_soin)
 	TalentTree.spend_point(data, "Assassin", "util_soin")      # +10% soins
 	var bonus: Dictionary = TalentTree.total_bonus(data, "Assassin")
 	_check(int(bonus["dmg_pct"]) == 5, "dmg_pct = 5 (off_veteran)")

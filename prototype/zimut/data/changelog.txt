@@ -1,3 +1,6 @@
+V95|Arbre de talents refait en vrai arbre : un tronc, quatre branches maîtresses (Offense, Défense, Utilitaire, Puissance), des rameaux qui se divisent et des fruits à débloquer.
+V95|Un talent exige désormais celui qui le précède sur sa branche (ex. Maître d'armes demande Coup critique, qui demande Vétéran) ; les talents déjà acquis restent acquis.
+V95|Touchez un fruit pour lire son effet, puis « Débloquer » : fini la liste à faire défiler. « Action supplémentaire » devient « Action bonus » (même effet).
 V93|Nouvelle carte 2D de la Sylve : île flottante avec village, moulins, place des runes et Grand Arbre. L'ancienne carte reste disponible (Réglages → « Carte 2D de la Sylve »).
 V93|La nouvelle carte compte 18 lieux : les 5 donjons sont sur les portes du dessin (grotte, maison-moulin, moulin de pierre, arbre à porte bleue, Grand Arbre).
 V93|Réglages : « Carte 2D de la Sylve » permet de revenir à l'ancienne carte à tout moment ; les parties en cours replacent le héros au départ si besoin.
