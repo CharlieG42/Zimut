@@ -11,6 +11,7 @@ func _init() -> void:
 	_boot.call_deferred()
 func _boot() -> void:
 	var gm: Node = root.get_node("/root/GameManager")
+	root.get_node("/root/GameSettings").sylvestre_board = "classic"   # ancienne planche = BACKUP (la nouvelle : test_planche_sylvestre_v2)
 	var pm: Node = root.get_node("/root/ProgressionManager")
 	var BA: GDScript = load("res://scripts/BoardArt.gd")
 	var AT: GDScript = load("res://scripts/AdventureTerrain.gd")

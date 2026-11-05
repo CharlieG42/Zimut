@@ -17,7 +17,7 @@ func _boot() -> void:
 	data["campaign_mode"] = "adventure"
 	var adv: Dictionary = pm.adventure_state(data)
 	adv["zone"] = "foret_sylve"
-	adv["hero_pos"] = [53, 35]
+	adv["hero_pos"] = [54, 45]
 	data["adventure_view"] = "map"
 	gm.active_save = data
 	gm.active_slot = 4
