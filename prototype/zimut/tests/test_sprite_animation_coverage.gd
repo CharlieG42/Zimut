@@ -68,8 +68,12 @@ func _check_png(folder: String, filename: String) -> void:
 			by_kind[kind] = int(by_kind[kind]) + 1
 		animation_files += 1
 		var base_stem: String = stem.left(stem.length() - suffix.length())
-		var base_path: String = folder.path_join(base_stem + ".png")
-		if not FileAccess.file_exists(base_path):
-			push_error("Pose sans sprite de base : %s" % folder.path_join(filename))
+		var base_filename: String = base_stem + ".png"
+		# Les planches de poses des héros sont rangées dans un sous-dossier "poses",
+		# tandis que le sprite de référence reste dans le dossier parent.
+		var base_in_folder: String = folder.path_join(base_filename)
+		var base_in_parent: String = folder.get_base_dir().path_join(base_filename)
+		if not FileAccess.file_exists(base_in_folder) and not FileAccess.file_exists(base_in_parent):
+			push_error("Pose sans sprite de base (dossier courant ou parent) : %s" % folder.path_join(filename))
 			orphan_files += 1
 		return
