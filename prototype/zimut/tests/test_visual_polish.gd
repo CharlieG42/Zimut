@@ -13,7 +13,7 @@ func _init() -> void:
 	check(ambient.contains('"depth": rng.randf_range(0.62, 1.18)'), "les particules d'ambiance possèdent une profondeur visuelle déterministe")
 	check(ambient.contains('float(pt.get("depth", 1.0))'), "la profondeur module la taille des particules")
 	check(ambient.contains('"kind": "firefly" if is_firefly else "leaf"'), "la forêt mélange feuilles dérivantes et lucioles discrètes")
-	check(ambient.contains('draw_circle(c, r * 4.2, glow)'), "les lucioles ont un halo doux et localisé")
+	check(ambient.contains('draw_circle(c, r * 4.2, Color(1.0, 0.94, 0.52'), "les lucioles ont un halo doux et localisé")
 	check(ambient.contains('_effect_kind = Nations.ambient(_biome)'), "le type d’ambiance est résolu à la configuration")
 	check(ambient.contains('var st: String = _effect_kind'), "la boucle d’animation réutilise le type d’ambiance mis en cache")
 	check(ambient.contains('if st == "leaves" and String(pt.get("kind", "leaf")) == "firefly"'), "les lucioles ont une trajectoire dédiée")
@@ -27,8 +27,24 @@ func _init() -> void:
 	check(adventure.contains("if not walk_pool.is_empty()"), "l'absence de pose de marche conserve un repli sur le sprite de base")
 	check(adventure.contains("var ground_radius: float = 48.0 if is_dungeon else 34.0"), "les POI ont une assise au sol adaptée à leur type")
 	check(adventure.contains("draw_arc(Vector2.ZERO, ground_radius - 3.0"), "les POI disposent d'un anneau de matière au sol")
+	# Lucioles de la planche : elles couvrent toute l'image (pas la grille isométrique) et restent visibles.
+	var amb := SceneryAmbient.new()
+	amb.configure_board(Vector2(3072.0, 1728.0), "Forêt", 5)
+	check(amb.particle_count() >= 40, "la planche illustrée a assez de particules d'ambiance (%d)" % amb.particle_count())
+	var in_rect: bool = true
+	var fireflies: int = 0
+	for pt: Dictionary in amb._parts:
+		if absf(float(pt["x"])) > 1536.0 or absf(float(pt["y"])) > 864.0:
+			in_rect = false
+		if String(pt["kind"]) == "firefly":
+			fireflies += 1
+	check(in_rect, "les particules de la planche sont réparties sur toute l'image")
+	check(fireflies >= 12, "la planche illustrée compte plusieurs lucioles (%d)" % fireflies)
+	amb.free()
+	check(adventure.contains("plate.z_index = 320") and adventure.contains("_joystick.z_index = 322"),
+		"l'interface de la planche reste au-dessus des nœuds de profondeur du monde")
 	check(adventure.contains("Reflet supérieur"), "les médaillons de POI ont un reflet de volume discret")
-	check(adventure.contains("Double liseré : bord externe sombre"), "les médaillons de POI ont un contour biseauté à deux niveaux")
+	check(adventure.contains("draw_polyline(ring, rim_col"), "les médaillons de POI ont un contour sombre et un liseré coloré, avec une silhouette propre à chaque type")
 	check(adventure.contains("Ombre portée typographique"), "les noms des POI disposent d'un contraste renforcé")
 	check(adventure.contains("pn.set_process(n.visible)"), "les POI non découverts ne rafraîchissent pas leur rendu en continu")
 	check(adventure.contains("_modal_canvas.layer = 100"), "les fenêtres de l’Aventure utilisent une couche d’affichage prioritaire")
