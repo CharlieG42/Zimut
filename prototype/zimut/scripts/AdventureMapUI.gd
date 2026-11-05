@@ -90,6 +90,7 @@ var _fade: ColorRect
 var _toast: Label
 var _side_box: VBoxContainer
 var _modal_root: Control = null
+var _modal_canvas: CanvasLayer = null
 var _walking: bool = false
 var _pending: Vector2i = Vector2i(-1, -1)      # destination en attente de confirmation (appui tactile)
 var _hud_title: Label
@@ -125,6 +126,11 @@ const MAP_ZOOM_MAX := 1.45
 
 func _ready() -> void:
 	layer = 10
+	# Les fenêtres modales doivent rester au-dessus de tous les panneaux de l'Aventure.
+	_modal_canvas = CanvasLayer.new()
+	_modal_canvas.name = "AdventureModalLayer"
+	_modal_canvas.layer = 100
+	add_child(_modal_canvas)
 	_rng.randomize()
 	_save = GameManager.active_save
 	_slot = GameManager.active_slot
@@ -2223,8 +2229,8 @@ func _modal(title: String, accent: Color) -> VBoxContainer:
 	dim.color = Color(0, 0, 0, 0.55)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
-	dim.z_index = 30
-	add_child(dim)
+	dim.z_index = 0
+	_modal_canvas.add_child(dim)
 	_modal_root = dim
 	var center := CenterContainer.new()
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
