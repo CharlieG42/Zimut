@@ -79,37 +79,30 @@ jobs:
         run: |
           cd prototype/zimut
           set -o pipefail
-          # Timeout de sécurité : chaque test ne doit pas dépasser 60s
-          # Tests de règles de combat (doivent quitter avec code 0)
-          echo "=== test_combat.gd ==="
-          timeout 60 godot --headless -s tests/test_combat.gd --path . 2>&1 | tail -30
-          echo ""
-          # Test de progression (peut bloquer sur await process_frame en headless -s)
-          echo "=== test_progression.gd ==="
-          timeout 60 godot --headless -s tests/test_progression.gd --path . 2>&1 | tail -30 || echo "(test_progression timeout ou échec - ignoré)"
-          echo ""
-          # V42 : tests arbre de talents + timer de tour
-          echo "=== test_talents.gd ==="
-          timeout 60 godot --headless -s tests/test_talents.gd --path . 2>&1 | tail -30 || echo "(test_talents timeout ou échec - ignoré)"
-          echo ""
-          echo "=== test_timer.gd ==="
-          timeout 60 godot --headless -s tests/test_timer.gd --path . 2>&1 | tail -30 || echo "(test_timer timeout ou échec - ignoré)"
-          echo ""
-          # V42 : tests builds par personnage
-          echo "=== test_builds.gd ==="
-          timeout 60 godot --headless -s tests/test_builds.gd --path . 2>&1 | tail -30 || echo "(test_builds timeout ou échec - ignoré)"
-          echo ""
-          # V46 : tests compteur de temps de jeu
-          echo "=== test_playtime.gd ==="
-          timeout 60 godot --headless -s tests/test_playtime.gd --path . 2>&1 | tail -30 || echo "(test_playtime timeout ou échec - ignoré)"
-          echo ""
-          # V48-V50 : niveau du joueur, sauvegarde Cloud, gouffres, arbre du Sylvain
-          # V61b : sprites de bâtiments de la vue de ville Conquête
-          for t in test_adventure_mode_isolation test_scenery test_visual_polish test_hero_unlock test_heros_classes test_monde_ouvert_v82 test_planche_2d test_fiche_sorts test_cloud_save test_void_pits test_tree test_ville_sprites test_spell_icons_unique test_conquest_roads test_gultur_conquete test_conquest_ui_v64 test_deblocage_persistant test_continuer_mes_parties test_turn_badge test_spell_levels test_amelioration_joueur test_ia_balises test_ia_mecanismes; do
-            echo "=== $t.gd ==="
-            timeout 60 godot --headless -s tests/$t.gd --path . 2>&1 | tail -30 || echo "($t timeout ou échec - ignoré)"
+          # Chaque test a 60 s maximum. Un test en échec (code retour non nul, « ÉCHEC » ou
+          # « ÉCHECS : n » affiché) fait échouer l'étape, mais tous les tests sont exécutés
+          # avant de conclure pour voir l'ensemble des échecs en une seule passe.
+          failed=""
+          run_test() {
+            echo "=== $1.gd ==="
+            local out rc=0
+            out=$(timeout 60 godot --headless -s "tests/$1.gd" --path . 2>&1) || rc=$?
+            echo "$out" | tail -30
+            if [ "$rc" -ne 0 ] || echo "$out" | grep -qE "ÉCHEC |ÉCHECS : [1-9]"; then
+              echo "::error::$1 en échec"
+              failed="$failed $1"
+            fi
             echo ""
+          }
+          # Règles de combat, progression, talents, timer, builds, temps de jeu,
+          # niveau du joueur, sauvegarde Cloud, gouffres, arbre du Sylvain, sprites de ville Conquête…
+          for t in test_combat test_progression test_talents test_timer test_builds test_playtime test_adventure_mode_isolation test_scenery test_visual_polish test_hero_unlock test_heros_classes test_monde_ouvert_v82 test_planche_2d test_fiche_sorts test_cloud_save test_void_pits test_tree test_ville_sprites test_spell_icons_unique test_conquest_roads test_gultur_conquete test_conquest_ui_v64 test_deblocage_persistant test_continuer_mes_parties test_turn_badge test_spell_levels test_amelioration_joueur test_ia_balises test_ia_mecanismes; do
+            run_test "$t"
           done
+          if [ -n "$failed" ]; then
+            echo "::error::Tests en échec :$failed"
+            exit 1
+          fi
           echo "=== test_sprite_animation_coverage.gd (bloquant) ==="
           timeout 60 godot --headless --path . -s tests/test_sprite_animation_coverage.gd 2>&1 | tee /tmp/sprite-animation-coverage.log
           test "${PIPESTATUS[0]}" -eq 0
