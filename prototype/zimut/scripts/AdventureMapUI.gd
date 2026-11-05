@@ -199,6 +199,7 @@ func _build() -> void:
 	_recenter_btn.pressed.connect(func() -> void: _recenter(true))
 	_recenter_btn.hide()
 	_map_view.add_child(_recenter_btn)
+	_recenter_btn.z_index = 321   # au-dessus des nœuds du monde (z_index de profondeur de la planche)
 
 	# Zoom accessible sur mobile, en complément du pincement à deux doigts.
 	_zoom_in_btn = Button.new()
@@ -216,6 +217,7 @@ func _build() -> void:
 	_zoom_in_btn.pressed.connect(func() -> void: _zoom_at(_map_view.size * 0.5, 1.15))
 	_zoom_in_btn.hide()
 	_map_view.add_child(_zoom_in_btn)
+	_zoom_in_btn.z_index = 321   # au-dessus des nœuds du monde (z_index de profondeur de la planche)
 
 	_zoom_out_btn = Button.new()
 	_zoom_out_btn.text = "−"
@@ -232,6 +234,7 @@ func _build() -> void:
 	_zoom_out_btn.pressed.connect(func() -> void: _zoom_at(_map_view.size * 0.5, 1.0 / 1.15))
 	_zoom_out_btn.hide()
 	_map_view.add_child(_zoom_out_btn)
+	_zoom_out_btn.z_index = 321   # au-dessus des nœuds du monde (z_index de profondeur de la planche)
 
 	_build_edit_ui()
 
@@ -240,7 +243,7 @@ func _build() -> void:
 	_fade.color = Color(0.86, 0.91, 0.95, 0.0)
 	_fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_fade.z_index = 20  # au-dessus des panonceaux (z_index des nœuds du monde)
+	_fade.z_index = 420  # au-dessus des panonceaux (z_index des nœuds du monde)
 	_map_view.add_child(_fade)
 
 	# Bandeau d'annonce (fondu)
@@ -251,7 +254,7 @@ func _build() -> void:
 	_toast.offset_bottom = 70.0
 	_toast.modulate.a = 0.0
 	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_toast.z_index = 21
+	_toast.z_index = 421
 	_map_view.add_child(_toast)
 	_build_hud()
 
@@ -278,7 +281,7 @@ func _build_hud() -> void:
 	var plate := PanelContainer.new()
 	plate.position = Vector2(16, 16)
 	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	plate.z_index = 5
+	plate.z_index = 320
 	plate.add_theme_stylebox_override("panel", U.box(Color(0.05, 0.07, 0.12, 0.88), Color(0.86, 0.68, 0.30), 14, 2, 14))
 	_map_view.add_child(plate)
 	var pv := VBoxContainer.new()
@@ -299,7 +302,7 @@ func _build_hud() -> void:
 	_action_btn.offset_right = 260.0
 	_action_btn.offset_top = -100.0
 	_action_btn.offset_bottom = -24.0
-	_action_btn.z_index = 6
+	_action_btn.z_index = 322
 	_action_btn.pressed.connect(_on_action_pressed)
 	_action_btn.hide()
 	_map_view.add_child(_action_btn)
@@ -312,7 +315,7 @@ func _build_hud() -> void:
 	_joystick.offset_top = -236.0
 	_joystick.offset_right = 232.0
 	_joystick.offset_bottom = -24.0
-	_joystick.z_index = 6
+	_joystick.z_index = 322
 	_map_view.add_child(_joystick)
 
 	# Aide de contrôle, en bas à droite de la carte
@@ -326,7 +329,7 @@ func _build_hud() -> void:
 	help.offset_top = -120.0
 	help.offset_bottom = -24.0
 	help.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	help.z_index = 5
+	help.z_index = 322
 	help.add_theme_stylebox_override("panel", U.box(Color(0.05, 0.07, 0.12, 0.80), Color(0.30, 0.36, 0.50), 12, 1, 10))
 	var hl: Label = U.lbl("Touchez une case pour y marcher (touchez ailleurs pour changer de cap).\nTouchez un groupe de monstres pour le combattre. Joystick : marche continue.", 16, Color(0.92, 0.94, 0.98))
 	hl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -647,8 +650,8 @@ func _rebuild_board(biome: String) -> void:
 	var ambient := SceneryAmbient.new()
 	ambient.name = "Ambient"
 	ambient.z_index = 1
-	ambient.configure(maxi(zs.x, zs.y), biome, absi(zid.hash()) % 997)
-	ambient.position = cell_center(Vector2i(zs.x / 2, zs.y / 2)) + Vector2(0, -150)
+	ambient.configure_board(BoardArt.world_size(zid), biome, absi(zid.hash()) % 997)
+	ambient.position = BoardArt.world_size(zid) * 0.5
 	_world.add_child(ambient)
 	_hero = HeroView.new()
 	_hero.tex = Portraits.get_texture({"classe": manager.hero_class(), "team": "player", "entity_type": "Player"})
@@ -1069,6 +1072,7 @@ func _build_edit_ui() -> void:
 	_edit_btn.pressed.connect(func() -> void: _set_edit(not _edit_on))
 	_edit_btn.hide()
 	_map_view.add_child(_edit_btn)
+	_edit_btn.z_index = 321   # au-dessus des nœuds du monde (z_index de profondeur de la planche)
 	_edit_bar = HBoxContainer.new()
 	_edit_bar.add_theme_constant_override("separation", 8)
 	_edit_bar.anchor_top = 1.0
@@ -1079,6 +1083,7 @@ func _build_edit_ui() -> void:
 	_edit_bar.offset_right = 1450.0
 	_edit_bar.hide()
 	_map_view.add_child(_edit_bar)
+	_edit_bar.z_index = 321   # au-dessus des nœuds du monde (z_index de profondeur de la planche)
 	var defs: Array = [["open", "🟢 Ouvrir"], ["close", "🔴 Fermer"], ["move", "✋ Déplacer"],
 		["save", "💾 Enregistrer"], ["copy", "📋 Copier"], ["reset", "↺ Annuler tout"]]
 	for d: Array in defs:
@@ -2537,6 +2542,20 @@ class PoiNode extends Node2D:
 		_t += delta
 		queue_redraw()
 
+	## Forme du médaillon selon le type de lieu (0 = rond) et sa rotation.
+	const MEDAL_SIDES: Dictionary = {"combat": 6, "chest": 4, "puzzle": 4, "reveal": 8, "camp": 0}
+	const MEDAL_ROT: Dictionary = {"combat": PI / 6.0, "chest": PI / 4.0, "puzzle": 0.0, "reveal": PI / 8.0}
+
+	static func _medal_pts(center: Vector2, r: float, sides: int, rot: float) -> PackedVector2Array:
+		var n: int = sides if sides >= 3 else 40
+		var pts := PackedVector2Array()
+		for i: int in range(n):
+			var a: float = rot + TAU * float(i) / float(n)
+			# un carré / losange reste plus compact qu'un polygone inscrit au même rayon
+			var k: float = 1.0 if sides != 4 else 0.86
+			pts.append(center + Vector2(cos(a), sin(a)) * r * k)
+		return pts
+
 	func _draw() -> void:
 		var col: Color = Color(0.72, 0.43, 1.0) if is_dungeon else POI_COLOR.get(kind, Color.WHITE)
 		var pulse: float = 0.5 + 0.5 * sin(_t * (2.0 if is_dungeon else 2.4))
@@ -2585,9 +2604,9 @@ class PoiNode extends Node2D:
 			draw_texture_rect(enemy_tex, Rect2(Vector2(-w * 0.5 + 14.0, -h + 6.0), Vector2(w, h)), false)
 		# Icône flottante
 		var bob: float = sin(_t * 2.0) * 4.0
-		var icon_r: float = 29.0 if is_dungeon else 24.0
-		var icon_size: float = 48.0 if is_dungeon else 38.0
-		var icon_y: float = -118.0 if is_dungeon else -100.0
+		var icon_r: float = 33.0 if is_dungeon else 28.0
+		var icon_size: float = 58.0 if is_dungeon else 46.0
+		var icon_y: float = -122.0 if is_dungeon else -104.0
 		var ic := Vector2(0, icon_y + bob)
 		if is_dungeon and not done:
 			draw_circle(ic, icon_r + 9.0 + pulse * 3.0, Color(0.66, 0.35, 1.0, 0.18))
@@ -2597,18 +2616,22 @@ class PoiNode extends Node2D:
 			draw_circle(ic, icon_r + 8.0 + pulse * 3.0, Color(col.r, col.g, col.b, 0.10 + pulse * 0.08))
 			draw_arc(ic, icon_r + 7.0 + pulse * 3.0, 0.0, TAU, 40,
 				Color(col.r, col.g, col.b, 0.48 + pulse * 0.32), 2.5, true)
-		draw_circle(ic + Vector2(0, 3), icon_r + 2.0, Color(0.01, 0.02, 0.04, 0.32))
-		draw_circle(ic, icon_r + 2.0, Color(col.r, col.g, col.b, 0.12 if not done else 0.06))
-		draw_circle(ic, icon_r, Color(0.035, 0.05, 0.095, 0.99))
-		# Double liseré : bord externe sombre, tranche colorée et filet intérieur lumineux.
+		# Médaillon : silhouette propre à chaque type de lieu, fond teinté (et non noir) pour que
+		# l'icône ressorte, même à l'échelle générale de la planche.
+		var sides: int = 8 if is_dungeon else int(MEDAL_SIDES.get(kind, 0))
+		var rot: float = float(MEDAL_ROT.get(kind, 0.0)) if not is_dungeon else PI / 8.0
 		var rim_col: Color = col if not done else Color(0.5, 0.5, 0.55)
-		draw_arc(ic, icon_r + 0.5, 0.0, TAU, 48, Color(0.015, 0.02, 0.04, 0.95), 5.0, true)
-		draw_arc(ic, icon_r - 1.0, 0.0, TAU, 48, rim_col, 3.0 if is_dungeon else 2.5, true)
-		draw_arc(ic + Vector2(0, 1), icon_r - 4.0, PI * 0.08, PI * 0.92, 28,
-			Color(0.01, 0.015, 0.03, 0.72 if not done else 0.35), 2.0, true)
+		var fill: Color = Color(0.06, 0.08, 0.14).lerp(col, 0.30 if not done else 0.10)
+		draw_colored_polygon(_medal_pts(ic + Vector2(0, 4), icon_r + 3.0, sides, rot), Color(0.01, 0.02, 0.04, 0.34))
+		var outer: PackedVector2Array = _medal_pts(ic, icon_r + 1.0, sides, rot)
+		draw_colored_polygon(outer, Color(0.015, 0.02, 0.04, 0.97))
+		draw_colored_polygon(_medal_pts(ic, icon_r - 2.5, sides, rot), fill)
+		var ring: PackedVector2Array = _medal_pts(ic, icon_r - 1.0, sides, rot)
+		ring.append(ring[0])
+		draw_polyline(ring, rim_col, 3.5 if is_dungeon else 3.0, true)
 		# Reflet supérieur : donne un léger volume au médaillon sans changer sa zone tactile.
-		draw_arc(ic + Vector2(0, -1), icon_r - 4.0, PI * 1.12, PI * 1.88, 24,
-			Color(1.0, 1.0, 1.0, 0.30 if not done else 0.12), 1.5, true)
+		draw_arc(ic + Vector2(0, -1), icon_r - 6.0, PI * 1.15, PI * 1.85, 24,
+			Color(1.0, 1.0, 1.0, 0.34 if not done else 0.12), 1.6, true)
 		if icon != null:
 			draw_texture_rect(icon, Rect2(ic - Vector2(icon_size * 0.5, icon_size * 0.5), Vector2(icon_size, icon_size)), false, mod)
 		if done:

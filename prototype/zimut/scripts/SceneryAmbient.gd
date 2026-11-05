@@ -9,6 +9,10 @@ var _parts: Array[Dictionary] = []
 var _t: float = 0.0
 var _span: Vector2 = Vector2(560.0, 360.0)
 var _effect_kind: String = "leaves"
+var _ytop: float = -140.0       # bords de réapparition verticale (la planche les redéfinit)
+var _ybot: float = 360.0
+var _px: float = 1.0            # échelle des particules (la planche illustrée est vue de plus loin)
+var _firefly_ratio: float = 0.20
 
 
 func configure(grid_size: int, biome: String, seed_value: int = 1) -> void:
@@ -17,6 +21,10 @@ func configure(grid_size: int, biome: String, seed_value: int = 1) -> void:
 	if _effect_kind == "":
 		_effect_kind = "leaves" if _biome == "Forêt" else _biome
 	_span = Vector2(float(grid_size) * BattleScenery.HW * 0.95, float(grid_size) * BattleScenery.HH * 1.5)
+	_ytop = -140.0
+	_ybot = _span.y
+	_px = 1.0
+	_firefly_ratio = 0.20
 	_parts.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value * 61 + 3
@@ -24,12 +32,41 @@ func configure(grid_size: int, biome: String, seed_value: int = 1) -> void:
 	var density: float = clampf(GfxQuality.density(), 0.35, 1.0)
 	var count: int = maxi(12, roundi(34.0 * density))
 	for i: int in range(count):
-		var is_firefly: bool = _effect_kind == "leaves" and rng.randf() < 0.20
+		var is_firefly: bool = _effect_kind == "leaves" and rng.randf() < _firefly_ratio
 		_parts.append({
 			"kind": "firefly" if is_firefly else "leaf",
 			"x": rng.randf_range(-_span.x, _span.x), "y": rng.randf_range(-120.0, _span.y),
 			"v": rng.randf_range(8.0, 26.0), "ph": rng.randf() * TAU, "r": rng.randf_range(1.2, 3.2),
 			# Variation de profondeur : les particules lointaines sont plus fines et lentes.
+			"depth": rng.randf_range(0.62, 1.18),
+		})
+	set_process(true)
+	queue_redraw()
+
+
+## Planche illustrée 2D : les particules couvrent exactement l'image (centrée sur le nœud),
+## en plus grand et en plus grand nombre qu'en vue isométrique, avec une bonne part de lucioles.
+func configure_board(world_size: Vector2, biome: String, seed_value: int = 1) -> void:
+	_biome = biome
+	_effect_kind = Nations.ambient(_biome)
+	if _effect_kind == "":
+		_effect_kind = "leaves" if _biome == "Forêt" else _biome
+	_span = world_size * 0.5
+	_ytop = -_span.y
+	_ybot = _span.y
+	_px = 2.6
+	_firefly_ratio = 0.45
+	_parts.clear()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value * 61 + 3
+	var density: float = clampf(GfxQuality.density(), 0.35, 1.0)
+	var count: int = maxi(40, roundi(150.0 * density))
+	for i: int in range(count):
+		var is_firefly: bool = _effect_kind == "leaves" and rng.randf() < _firefly_ratio
+		_parts.append({
+			"kind": "firefly" if is_firefly else "leaf",
+			"x": rng.randf_range(-_span.x, _span.x), "y": rng.randf_range(-_span.y, _span.y),
+			"v": rng.randf_range(8.0, 26.0), "ph": rng.randf() * TAU, "r": rng.randf_range(1.2, 3.2),
 			"depth": rng.randf_range(0.62, 1.18),
 		})
 	set_process(true)
@@ -49,25 +86,27 @@ func _process(delta: float) -> void:
 		if st == "leaves" and String(pt.get("kind", "leaf")) == "firefly":
 			pt["y"] = float(pt["y"]) - delta * depth_speed * 0.22
 			pt["x"] = float(pt["x"]) + sin(_t * 0.65 + float(pt["ph"])) * delta * 13.0
-			if float(pt["y"]) < -140.0:
-				pt["y"] = _span.y
+			if float(pt["y"]) < _ytop:
+				pt["y"] = _ybot
+			if absf(float(pt["x"])) > _span.x:
+				pt["x"] = -signf(float(pt["x"])) * _span.x
 			continue
 		match st:
 			"leaves":
 				pt["y"] = float(pt["y"]) + delta * depth_speed * 0.9
 				pt["x"] = float(pt["x"]) + delta * depth_speed * 1.4 + sin(_t * 0.8 + float(pt["ph"])) * delta * 9.0
-				if float(pt["y"]) > _span.y:
-					pt["y"] = -140.0
+				if float(pt["y"]) > _ybot:
+					pt["y"] = _ytop
 			"sparkle", "motes":
 				pt["y"] = float(pt["y"]) - delta * depth_speed * 0.3
 				pt["x"] = float(pt["x"]) + sin(_t * 0.9 + float(pt["ph"])) * delta * 8.0
-				if float(pt["y"]) < -140.0:
-					pt["y"] = _span.y
+				if float(pt["y"]) < _ytop:
+					pt["y"] = _ybot
 			"bubble":
 				pt["y"] = float(pt["y"]) - delta * depth_speed * 1.1
 				pt["x"] = float(pt["x"]) + sin(_t * 1.6 + float(pt["ph"])) * delta * 14.0
-				if float(pt["y"]) < -140.0:
-					pt["y"] = _span.y
+				if float(pt["y"]) < _ytop:
+					pt["y"] = _ybot
 			"wind":
 				pt["x"] = float(pt["x"]) + delta * depth_speed * 3.2
 				pt["y"] = float(pt["y"]) + sin(_t * 1.2 + float(pt["ph"])) * delta * 14.0
@@ -76,8 +115,8 @@ func _process(delta: float) -> void:
 			"ember":
 				pt["y"] = float(pt["y"]) - delta * depth_speed * 1.9
 				pt["x"] = float(pt["x"]) + sin(_t * 2.0 + float(pt["ph"])) * delta * 16.0
-				if float(pt["y"]) < -140.0:
-					pt["y"] = _span.y
+				if float(pt["y"]) < _ytop:
+					pt["y"] = _ybot
 			"fog":
 				pt["x"] = float(pt["x"]) + delta * depth_speed * 0.6
 				if float(pt["x"]) > _span.x:
@@ -85,8 +124,8 @@ func _process(delta: float) -> void:
 			"Montagne":
 				pt["y"] = float(pt["y"]) + delta * depth_speed * 1.4
 				pt["x"] = float(pt["x"]) + sin(_t * 0.7 + float(pt["ph"])) * delta * 12.0 + delta * 6.0
-				if float(pt["y"]) > _span.y:
-					pt["y"] = -140.0
+				if float(pt["y"]) > _ybot:
+					pt["y"] = _ytop
 			"Désert":
 				pt["x"] = float(pt["x"]) + delta * depth_speed * 1.8
 				pt["y"] = float(pt["y"]) + sin(_t + float(pt["ph"])) * delta * 8.0
@@ -95,26 +134,27 @@ func _process(delta: float) -> void:
 			"Donjon":
 				pt["y"] = float(pt["y"]) - delta * depth_speed * 1.6
 				pt["x"] = float(pt["x"]) + sin(_t * 1.3 + float(pt["ph"])) * delta * 10.0
-				if float(pt["y"]) < -140.0:
-					pt["y"] = _span.y
+				if float(pt["y"]) < _ytop:
+					pt["y"] = _ybot
 			_:
 				pt["y"] = float(pt["y"]) - delta * depth_speed * 0.5
 				pt["x"] = float(pt["x"]) + sin(_t * 0.6 + float(pt["ph"])) * delta * 9.0
-				if float(pt["y"]) < -140.0:
-					pt["y"] = _span.y
+				if float(pt["y"]) < _ytop:
+					pt["y"] = _ybot
 	queue_redraw()
 
 
 func _draw() -> void:
 	for pt: Dictionary in _parts:
 		var c := Vector2(float(pt["x"]), float(pt["y"]))
-		var r: float = float(pt["r"]) * float(pt.get("depth", 1.0))
+		var r: float = float(pt["r"]) * float(pt.get("depth", 1.0)) * _px
 		var tw: float = 0.5 + 0.5 * sin(_t * 2.2 + float(pt["ph"]))
 		var st2: String = _effect_kind
 		if st2 == "leaves" and String(pt.get("kind", "leaf")) == "firefly":
-			var glow := Color(1.0, 0.94, 0.52, 0.06 + 0.10 * tw)
-			draw_circle(c, r * 4.2, glow)
-			draw_circle(c, r * 1.45, Color(1.0, 0.98, 0.72, 0.35 + 0.48 * tw))
+			var boost: float = 1.0 if _px <= 1.0 else 1.7    # sur la planche (image claire) : plus lumineuses
+			draw_circle(c, r * 4.2, Color(1.0, 0.94, 0.52, minf(0.06 + 0.10 * tw, 1.0) * boost))
+			draw_circle(c, r * 2.4, Color(1.0, 0.95, 0.5, minf((0.10 + 0.14 * tw) * boost, 1.0)))
+			draw_circle(c, r * 1.1, Color(1.0, 0.98, 0.78, minf(0.55 + 0.45 * tw, 1.0)))
 			continue
 		match st2:
 			"leaves":

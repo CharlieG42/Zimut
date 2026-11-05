@@ -108,7 +108,7 @@ func _boot() -> void:
 	var board_rebuild_start: int = map_ui.find("func _rebuild_board(biome: String) -> void:")
 	var board_rebuild_end: int = map_ui.find("## Dégradé du ciel", board_rebuild_start)
 	var board_rebuild_code: String = map_ui.substr(board_rebuild_start, board_rebuild_end - board_rebuild_start)
-	check(board_rebuild_code.contains("var zs: Vector2i = manager.zone_size()") and board_rebuild_code.contains("ambient.configure(maxi(zs.x, zs.y)"),
+	check(board_rebuild_code.contains("var zs: Vector2i = manager.zone_size()") and board_rebuild_code.contains("ambient.configure_board(BoardArt.world_size(zid)"),
 		"la reconstruction de la planche 2D déclare sa taille locale avant de configurer l’ambiance")
 	check(map_ui.contains('back.pressed.connect(_back_to_save)') and map_ui.contains('← MES PARTIES'),
 		"la carte 2D propose le retour à Mes Parties")
@@ -223,7 +223,7 @@ func _boot() -> void:
 		"les icônes de lieux et de donjons disposent d'une zone tactile élargie")
 	check(map_ui.contains("pn.nearby = hero_distance <= near and not pn.done") and map_ui.contains("if nearby:") and map_ui.contains("draw_arc(ic, icon_r + 7.0 + pulse * 3.0"),
 		"les lieux proches du héros affichent un halo pulsé discret indiquant leur disponibilité")
-	check(map_ui.contains('ambient.name = "Ambient"') and map_ui.contains("ambient.configure(maxi(zs.x, zs.y), biome"),
+	check(map_ui.contains('ambient.name = "Ambient"') and map_ui.contains("ambient.configure_board(BoardArt.world_size(zid), biome"),
 		"la planche illustrée reçoit aussi les effets d'ambiance du biome sans modifier son image")
 	var ambient_script: String = FileAccess.get_file_as_string("res://scripts/SceneryAmbient.gd")
 	check(ambient_script.contains("clampf(GfxQuality.density(), 0.35, 1.0)") and ambient_script.contains("roundi(34.0 * density)"),
