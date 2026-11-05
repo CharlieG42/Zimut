@@ -663,6 +663,7 @@ func _rebuild_board(biome: String) -> void:
 				tree.position = cell_center(tree_data["cell"]) + Vector2(0, 4)
 				tree.scale = Vector2.ONE * float(tree_data["scale"])
 				tree.flip_h = bool(tree_data["flip"])
+				tree.z_index = int(tree_data["cell"].y) * 4 + 2
 				tree.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 				tree.name = "SylvestreForegroundTree"
 				_entities.add_child(tree)
