@@ -48,3 +48,9 @@ doit retourner `671984e051cc741dd7b39810dce105fa`.
 
 Découpage : `tools/extract_sheet_sprites.py --grid 5x4` puis `detoure_planche.py`.
 Prompt complet et intégration Godot : canvas « Forêt féerique — Projet Godot 4 de démonstration ».
+
+## Décodage automatique (GitHub Action)
+
+Une GitHub Action (`.github/workflows/decode-examples-b64.yml`) décode désormais
+automatiquement tout `.b64` poussé dans `Examples/` et commite le fichier binaire
+à côté (push sur `main`). Les commandes manuelles ci-dessus restent valables en local.
