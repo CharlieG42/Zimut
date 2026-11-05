@@ -1,3 +1,4 @@
+V93|Nouvelle carte 2D de la Sylve : île flottante avec village, moulins, place des runes et Grand Arbre. L'ancienne carte reste disponible (Réglages → « Carte 2D de la Sylve »).
 V92|ÉQUILIBRAGE — Difficulté des combats décalée d'un cran : Facile = l'ancien Normal, Normal = l'ancien Difficile, Difficile = l'ancien Enfer. Le nouvel Enfer est 1,5 fois plus dur que l'ancien (PV ×2,15 et attaque ×1,4).
 V92|Tous les gains d'XP sont réduits de 25 % : il faut un tiers de combats en plus pour monter de niveau, surtout sensible avant le niveau 25 (4 combats par niveau au départ au lieu de 3).
 V92|Courbe d'XP exponentielle : chaque niveau demande ~3,6 % de combats en plus que le précédent (≈ 5 combats au niveau 10, ≈ 23 au 50, ≈ 130 au 99) ; monter est donc toujours plus long à haut niveau. Les anciennes parties gardent leurs niveaux et leur barre d'XP, et leur difficulté est décalée pour rester la même.

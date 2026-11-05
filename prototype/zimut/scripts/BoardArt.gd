@@ -35,11 +35,27 @@ static func def(zone_id: String) -> Dictionary:
 	return raw(zone_id)
 
 
+## Planche à utiliser pour une zone : « foret_sylve » (ancienne planche, conservée en BACKUP) ou
+## « foret_sylve_v2 » (nouvelle illustration, par défaut). Réglage : GameSettings.sylvestre_board.
+const ALT_BOARDS := {"foret_sylve": "foret_sylve_v2"}
+
+
+static func file_stem(zone_id: String) -> String:
+	if not ALT_BOARDS.has(zone_id):
+		return zone_id
+	var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameSettings")
+	var variant: String = "v2" if gs == null else String(gs.get("sylvestre_board"))
+	if variant == "classic":
+		return zone_id
+	return String(ALT_BOARDS[zone_id]) if FileAccess.file_exists(DIR + String(ALT_BOARDS[zone_id]) + ".json") else zone_id
+
+
 static func raw(zone_id: String) -> Dictionary:
-	if _defs.has(zone_id):
-		return _defs[zone_id]
+	var stem: String = file_stem(zone_id)
+	if _defs.has(stem):
+		return _defs[stem]
 	var out: Dictionary = {}
-	var path: String = DIR + zone_id + ".json"
+	var path: String = DIR + stem + ".json"
 	if FileAccess.file_exists(path):
 		var f: FileAccess = FileAccess.open(path, FileAccess.READ)
 		var parsed: Variant = JSON.parse_string(f.get_as_text())
@@ -47,14 +63,14 @@ static func raw(zone_id: String) -> Dictionary:
 			out = parsed
 	if not out.is_empty():
 		out["base_mask"] = (out["mask"] as Array).duplicate()
-		_apply_edits(zone_id, out)
-	_defs[zone_id] = out
+		_apply_edits(stem, out)
+	_defs[stem] = out
 	return out
 
 
 ## Retouches faites en jeu (user://boards/<zone>_edits.json : {"open": ["x,y"…], "close": ["x,y"…]}).
 static func _apply_edits(zone_id: String, d: Dictionary) -> void:
-	var path: String = EDIT_DIR + zone_id + "_edits.json"
+	var path: String = EDIT_DIR + zone_id + "_edits.json"   # zone_id = nom de fichier de la planche
 	if not FileAccess.file_exists(path):
 		return
 	var parsed: Variant = JSON.parse_string(FileAccess.open(path, FileAccess.READ).get_as_text())
@@ -107,7 +123,7 @@ static func diff(zone_id: String) -> Dictionary:
 static func save_edits(zone_id: String) -> Dictionary:
 	var df: Dictionary = diff(zone_id)
 	DirAccess.make_dir_recursive_absolute(EDIT_DIR)
-	var f: FileAccess = FileAccess.open(EDIT_DIR + zone_id + "_edits.json", FileAccess.WRITE)
+	var f: FileAccess = FileAccess.open(EDIT_DIR + file_stem(zone_id) + "_edits.json", FileAccess.WRITE)
 	f.store_string(JSON.stringify(df))
 	f.close()
 	return df
@@ -117,7 +133,7 @@ static func save_edits(zone_id: String) -> Dictionary:
 static func reset_edits(zone_id: String) -> void:
 	var d: Dictionary = raw(zone_id)
 	d["mask"] = (d.get("base_mask", d["mask"]) as Array).duplicate()
-	var path: String = EDIT_DIR + zone_id + "_edits.json"
+	var path: String = EDIT_DIR + file_stem(zone_id) + "_edits.json"
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(path)
 	rev += 1
