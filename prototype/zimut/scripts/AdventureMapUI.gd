@@ -600,6 +600,24 @@ func _rebuild_world() -> void:
 	_fit_world.call_deferred()
 
 
+## Charge une couche illustrée à l'échelle exacte de la planche Sylvestre.
+func _add_sylvestre_overlay(file_name: String, world_size: Vector2, depth: int, node_name: String) -> void:
+	var path: String = "res://assets/boards/" + file_name
+	var tex: Texture2D = load(path) as Texture2D
+	if tex == null:
+		push_warning("Couche Sylvestre introuvable : " + path)
+		return
+	var layer := Sprite2D.new()
+	layer.name = node_name
+	layer.texture = tex
+	layer.centered = false
+	layer.position = Vector2.ZERO
+	layer.scale = world_size / Vector2(tex.get_size())
+	layer.z_index = depth
+	layer.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_world.add_child(layer)
+
+
 ## V83 : planche illustrée — l'illustration sert de décor, lieux / trouvailles / héros / monstres posés dessus.
 func _rebuild_board(biome: String) -> void:
 	var zid: String = manager.zone_id()
@@ -613,13 +631,16 @@ func _rebuild_board(biome: String) -> void:
 	spr.z_index = 0
 	_world.add_child(spr)
 	_backdrop = spr
+	if zid == "foret_sylve":
+		_add_sylvestre_overlay("sylvestre_atmosphere.svg", ws, 1, "SylvestreAtmosphere")
+		_add_sylvestre_overlay("sylvestre_midground.svg", ws, 2, "SylvestreMidground")
 	_board = AdventureBoard.new()
 	_board.ui = self
-	_board.z_index = 1
+	_board.z_index = 2
 	_world.add_child(_board)
 	_entities = Node2D.new()
 	_entities.y_sort_enabled = true
-	_entities.z_index = 2
+	_entities.z_index = 3
 	_world.add_child(_entities)
 	var pal: Dictionary = BattleScenery.pal(biome)
 	var pois: Dictionary = ProgressionManager.adventure_zone_pois(zid)
@@ -635,6 +656,7 @@ func _rebuild_board(biome: String) -> void:
 		node.pal = pal
 		node.icon = load(String(POI_ICONS.get(node.kind, POI_ICONS["combat"]))) as Texture2D
 		node.prop = ""                      # les bâtiments / entrées sont dessinés dans la planche
+		node.forest_style = zid == "foret_sylve"
 		node.position = cell_center(pos)
 		_entities.add_child(node)
 		_cell_nodes[pos] = _cell_nodes.get(pos, []) + [node]
@@ -652,6 +674,10 @@ func _rebuild_board(biome: String) -> void:
 		var foreground_tree_tex: Texture2D = load("res://assets/boards/sylvestre_foreground_tree.svg") as Texture2D
 		if foreground_tree_tex != null:
 			var foreground_trees: Array[Dictionary] = [
+				{"cell": Vector2i(4, 10), "scale": 0.92, "flip": false},
+				{"cell": Vector2i(91, 10), "scale": 0.96, "flip": true},
+				{"cell": Vector2i(4, 40), "scale": 0.82, "flip": true},
+				{"cell": Vector2i(90, 40), "scale": 0.88, "flip": false},
 				{"cell": Vector2i(34, 47), "scale": 0.86, "flip": false},
 				{"cell": Vector2i(64, 47), "scale": 0.78, "flip": true},
 			]
@@ -672,10 +698,12 @@ func _rebuild_board(biome: String) -> void:
 	# restent une couche indépendante et ne modifient jamais l'illustration de fond.
 	var ambient := SceneryAmbient.new()
 	ambient.name = "Ambient"
-	ambient.z_index = 1
+	ambient.z_index = 4
 	ambient.configure_board(BoardArt.world_size(zid), biome, absi(zid.hash()) % 997)
 	ambient.position = BoardArt.world_size(zid) * 0.5
 	_world.add_child(ambient)
+	if zid == "foret_sylve":
+		_add_sylvestre_overlay("sylvestre_foreground_canopy.svg", BoardArt.world_size(zid), 80, "SylvestreForegroundCanopy")
 	_hero = HeroView.new()
 	_hero.tex = Portraits.get_texture({"classe": manager.hero_class(), "team": "player", "entity_type": "Player"})
 	if zid == "foret_sylve":
@@ -2546,6 +2574,7 @@ class DecorNode extends Node2D:
 
 ## Lieu remarquable : objet au sol, halo, icône flottante, nom, ennemi pour les camps.
 class PoiNode extends Node2D:
+	var forest_style: bool = false
 	var kind: String = "combat"
 	var is_dungeon: bool = false
 	var title: String = ""
@@ -2592,9 +2621,18 @@ class PoiNode extends Node2D:
 		var ground_radius: float = 48.0 if is_dungeon else 34.0
 		draw_set_transform(Vector2(0, 5), 0.0, Vector2(1.0, 0.34))
 		draw_circle(Vector2.ZERO, ground_radius + 10.0, Color(0.015, 0.025, 0.035, 0.18))
-		draw_circle(Vector2.ZERO, ground_radius, Color(col.r * 0.45, col.g * 0.45, col.b * 0.45, 0.24))
-		draw_arc(Vector2.ZERO, ground_radius - 3.0, PI * 0.12, PI * 0.88, 32,
-			Color(col.r, col.g, col.b, 0.42 if not done else 0.20), 2.2, true)
+		if forest_style:
+			# Socle organique : mousse et pierres au lieu d'un simple disque lumineux.
+			draw_circle(Vector2.ZERO, ground_radius + 2.0, Color(0.16, 0.29, 0.13, 0.38))
+			for stone: Vector2 in [Vector2(-27, -5), Vector2(22, -10), Vector2(-9, 17), Vector2(31, 12)]:
+				draw_circle(stone, 7.0, Color(0.34, 0.39, 0.27, 0.72))
+				draw_circle(stone + Vector2(-1, -2), 3.5, Color(0.57, 0.61, 0.40, 0.72))
+			draw_arc(Vector2.ZERO, ground_radius - 2.0, PI * 0.12, PI * 0.88, 32,
+				Color(0.48, 0.68, 0.31, 0.44 if not done else 0.20), 2.4, true)
+		else:
+			draw_circle(Vector2.ZERO, ground_radius, Color(col.r * 0.45, col.g * 0.45, col.b * 0.45, 0.24))
+			draw_arc(Vector2.ZERO, ground_radius - 3.0, PI * 0.12, PI * 0.88, 32,
+				Color(col.r, col.g, col.b, 0.42 if not done else 0.20), 2.2, true)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		if not done:
 			draw_set_transform(Vector2(0, 4), 0.0, Vector2(1.0, 0.5))

@@ -18,24 +18,25 @@
 - Toute nouvelle couche de décor doit être purement visuelle et ne pas bloquer les interactions tactiles.
 - Préserver les performances sur Android ; les couches statiques doivent être mises en cache et les animations rester légères.
 
-## Premier passage — profondeur et héros
+## Passe actuelle — profondeur, héros et intégration des lieux
 
-- Ajout d'un arbre transparent de premier plan, instancié à deux emplacements périphériques de la planche Sylvestre.
+- Trois couches transparentes : lumière/brume atmosphérique, lisière forestière intermédiaire et canopée de premier plan.
+- Six arbres indépendants à ancrage Y-sorté sur les marges, avec le pied du tronc comme origine.
 - Les arbres sont des nœuds indépendants dans le conteneur trié en profondeur : leur origine est placée au pied du tronc, afin que le héros puisse passer derrière eux.
 - Les deux points d'ancrage sont hors du masque jouable ; aucune case ni interaction n'est changée.
 - Le héros Sylvestre reçoit une taille de rendu légèrement supérieure, une ombre plus douce et un repère au sol vert discret.
+- Les lieux Sylvestre reçoivent une assise organique de mousse et de pierres, sans déplacement ni changement de zone tactile.
 - Les réglages sont conditionnés explicitement à foret_sylve ; aucune autre carte n'est affectée.
 
-Ce premier passage est une preuve technique d'occlusion et d'intégration. Il ne constitue pas encore la refonte complète du paysage.
+Les couches sont statiques, alignées sur la taille de la planche et placées sous les entités ; la canopée cadre le plateau sans modifier la zone jouable. La validation visuelle finale reste à faire sur appareil.
 
 ## Étapes suivantes
 
-### C — Construire les plans du paysage
+### C — Consolider les plans du paysage
 
-- Décomposer la direction artistique validée en couches alignées sur la planche 1536 × 864.
-- Prévoir un arrière-plan atmosphérique, un plan de végétation intermédiaire, les détails du sol et des éléments de premier plan.
-- Définir des zones d'occlusion explicites autour des arbres et constructions, avec un tri cohérent selon la position du héros.
-- Ajouter des variations discrètes de lumière, de brume et de végétation sans surcharger la lecture du terrain.
+- Vérifier l'alignement et le dosage des couches après capture en jeu.
+- Étendre les zones d'occlusion aux grands arbres et constructions réellement présents dans l'illustration.
+- Ajuster lumière et brume pour conserver un contraste suffisant sur les chemins et les POI.
 
 ### Héros
 
@@ -46,9 +47,10 @@ Ce premier passage est une preuve technique d'occlusion et d'intégration. Il ne
 
 ### D — Lieux remarquables
 
-- Remplacer progressivement les marqueurs génériques par des éléments contextualisés dans le décor.
-- Garder une indication d'interaction suffisamment visible et accessible au tactile.
-- Préserver strictement les positions existantes et les cinq entrées de donjon validées.
+- Première intégration : assises de mousse et pierres pour les POI Sylvestre, avec repères d'interaction conservés.
+- Finition à prévoir : contextualiser les cinq entrées de donjon et sanctuaires par des éléments dédiés, sans déplacer leurs positions.
+- Garder une indication d'interaction visible et accessible au tactile.
+- Préserver strictement les cinq entrées de donjon validées.
 
 ## Validation de Sylvestre
 

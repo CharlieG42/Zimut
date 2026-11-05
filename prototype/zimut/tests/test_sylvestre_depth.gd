@@ -19,6 +19,14 @@ func _run() -> void:
 	check(ResourceLoader.exists(tree_path), "asset de premier plan Sylvestre présent")
 	var tree_texture: Texture2D = load(tree_path) as Texture2D
 	check(tree_texture != null, "asset de premier plan importable comme texture")
+	for layer_name: String in ["sylvestre_atmosphere.svg", "sylvestre_midground.svg", "sylvestre_foreground_canopy.svg"]:
+		var layer_path: String = "res://assets/boards/" + layer_name
+		check(ResourceLoader.exists(layer_path) and load(layer_path) is Texture2D,
+			"couche illustrée importable : " + layer_name)
+	check(ui.contains('_add_sylvestre_overlay("sylvestre_atmosphere.svg"')
+		and ui.contains('_add_sylvestre_overlay("sylvestre_midground.svg"')
+		and ui.contains('_add_sylvestre_overlay("sylvestre_foreground_canopy.svg"'),
+		"les trois plans de décor sont chargés sur la planche Sylvestre")
 	check(ui.contains('if zid == "foret_sylve":') and ui.contains("SylvestreForegroundTree"),
 		"les arbres de premier plan sont limités à la planche Sylvestre")
 	check(ui.contains('Vector2i(34, 47)') and ui.contains('Vector2i(64, 47)'),
@@ -31,4 +39,8 @@ func _run() -> void:
 		"la variation d'échelle de profondeur est limitée à Sylvestre")
 	check(ui.contains('if forest_style:') and ui.contains('Color(0.72, 0.91, 0.48, 0.68)'),
 		"l'ombre et le repère au sol adoptent une teinte forestière")
+	check(ui.contains('node.forest_style = zid == "foret_sylve"') and ui.contains("Socle organique"),
+		"les lieux remarquables reçoivent une assise de mousse et de pierres Sylvestre")
+	check(ui.contains('ambient.z_index = 4') and ui.contains('layer.z_index = depth'),
+		"les plans atmosphériques restent derrière les acteurs et l'ambiance devant eux")
 	quit(fails)
