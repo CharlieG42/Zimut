@@ -80,6 +80,7 @@ Donner aux personnages une présence vivante et cohérente, avec des animations 
 - Livraison initiale : respiration discrète du héros Aventure et micro-variations de respiration/balancement des groupes de monstres. Les variantes de repos déjà présentes dans les planches sont exploitées, avec ombres de contact individuelles.
 - Complément : les groupes de monstres utilisent maintenant les poses `_walk` disponibles pendant leurs déplacements sur la carte ; en l'absence de planche de marche, le sprite de base reste utilisé.
 - À poursuivre : audit des planches réellement disponibles par classe/Nation, puis combler les manques d'animations par lots cohérents.
+- Audit automatisé initial (CI du 5 novembre 2026) : 657 fichiers de poses détectés, répartis en 22 `walk`, 20 `back_walk`, 61 `idle`, 60 `back_idle`, 138 `attack`, 130 `back_attack`, 114 `cast` et 112 `back_cast`. Aucun fichier de pose orphelin détecté. Ces volumes comptent des fichiers, pas des entités animées uniques ; ils ne prouvent donc pas à eux seuls une couverture complète de chaque héros ou ennemi. La prochaine passe doit établir les manques par sprite de base et par Nation avant de créer des assets.
 
 ---
 
@@ -151,6 +152,18 @@ Consolider la qualité générale du jeu et réduire les risques de régression 
 ---
 
 ## Journal des livraisons
+
+### 2026-11-05 — Résultat de l'audit des animations
+- 657 fichiers de poses recensés : 22 marche face, 20 marche dos, 61 repos face, 60 repos dos, 138 attaques face, 130 attaques dos, 114 incantations face et 112 incantations dos.
+- 0 pose orpheline : chaque fichier d'animation analysé possède un sprite de base dans son dossier ou dans le dossier parent.
+- CI réussie : tests headless et exports APK Debug/Release. La couverture par personnage reste à détailler ; le nombre de fichiers ne signifie pas que chaque entité possède toutes les animations.
+
+
+### 2026-11-04 — Audit des ressources d'animation
+- Ajout d'un test headless qui inventorie les poses `walk`, `idle`, `attack` et `cast` (face/dos) dans les dossiers de sprites des Nations et des familiers.
+- Le contrôle signale les poses orphelines dont le sprite de base est absent ; les manques de couverture restent informatifs afin de ne pas bloquer la livraison lorsqu'une animation n'a pas encore été créée.
+- Après analyse des journaux CI, le test a été déplacé après l'import Godot et rendu bloquant indépendamment : les erreurs de chargement précédentes ne doivent plus être masquées par la boucle de tests tolérante.
+- Validation CI du 5 novembre 2026 : test d'inventaire exécuté après import Godot, 657 poses détectées et 0 pose orpheline ; tests GDScript et exports APK Debug/Release réussis.
 
 ### 2026-11-04 — Complément des étapes 1 et 2
 - La CI de la première livraison a réussi : tests GDScript, exports APK Debug et Release.

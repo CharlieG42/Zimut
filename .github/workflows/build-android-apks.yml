@@ -69,6 +69,11 @@ jobs:
         run: |
           echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> "$GITHUB_ENV"
 
+      - name: Import project resources and generate Godot class cache
+        run: |
+          cd prototype/zimut
+          godot --headless --editor --path . --import
+
       - name: Run headless tests (GDScript)
         timeout-minutes: 10
         run: |
@@ -105,6 +110,10 @@ jobs:
             timeout 60 godot --headless -s tests/$t.gd --path . 2>&1 | tail -30 || echo "($t timeout ou échec - ignoré)"
             echo ""
           done
+          echo "=== test_sprite_animation_coverage.gd (bloquant) ==="
+          timeout 60 godot --headless --path . -s tests/test_sprite_animation_coverage.gd 2>&1 | tee /tmp/sprite-animation-coverage.log
+          test "${PIPESTATUS[0]}" -eq 0
+          echo ""
           echo "Tests headless exécutés."
 
       - name: Decode release keystore from GitHub Secrets
