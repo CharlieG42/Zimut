@@ -10,11 +10,15 @@ signal settings_changed
 const SETTINGS_PATH := "user://settings.json"
 
 ## Difficulté : index dans DIFFICULTIES (0 = Facile, 3 = Enfer).
+## Échelle V92 : l'ancien Normal devient Facile, l'ancien Difficile devient Normal, l'ancien Enfer
+## devient Difficile, et le nouvel Enfer est 1,5 fois plus dur que l'ancien (menace = PV × attaque :
+## 1,65 × 1,2 = 1,98 avant, 2,145 × 1,38 = 2,96 maintenant). Les sauvegardes d'avant sont décalées
+## d'un cran à l'ouverture (clé « diff_v ») pour conserver la difficulté réellement jouée.
 const DIFFICULTIES: Array[String] = ["Facile", "Normal", "Difficile", "Enfer"]
-## Enfer augmente surtout la résistance : les PV dépassent Difficile de 37,5 %.
-## Les attaques d'Enfer restent au même niveau que Difficile pour éviter un pic injuste.
-const DIFFICULTY_HP_POWER := [0.85, 1.0, 1.2, 1.65]
-const DIFFICULTY_ATK_POWER := [0.85, 1.0, 1.2, 1.2]
+const DIFFICULTY_HP_POWER := [1.0, 1.2, 1.65, 2.145]
+const DIFFICULTY_ATK_POWER := [1.0, 1.2, 1.2, 1.38]
+## Version de l'échelle de difficulté des sauvegardes (voir ProgressionManager.ensure_roster).
+const DIFFICULTY_VERSION := 2
 
 ## Rapidité XP : index dans XP_SPEEDS.
 const XP_SPEEDS: Array[String] = ["Lente", "Normale", "Rapide"]

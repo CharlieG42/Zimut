@@ -53,6 +53,14 @@ const XP_PER_COMBAT_BASE := 75.6
 const XP_PER_COMBAT_GROWTH := 1.038   ## par niveau de l'ancienne échelle (= 2 niveaux actuels)
 const XP_PER_COMBAT_FLOOR := 110.0
 const XP_PER_COMBAT_CEIL := 476.0
+## V92 : tous les gains d'XP sont réduits de 25 % (appliqué dans ProgressionManager.award_xp, les
+## paliers de niveau restent inchangés : il faut donc 1/0,75 fois plus de combats partout).
+const XP_GAIN_MULT := 0.75
+## V92 : courbe exponentielle. Combats (à gain d'XP plein) pour passer du niveau 1 au 2, puis du niveau 99
+## au 100 : le nombre de combats par niveau est multiplié par la même raison à chaque niveau
+## (≈ +3,6 % par niveau), au lieu de la courbe plate jusqu'au niveau 30 puis raide d'avant.
+const XP_CURVE_FIRST := 3.0
+const XP_CURVE_LAST := 103.0
 ## Les classes hors équipe gagnent une part de l'XP (pour tester d'autres compos)
 const BENCH_XP_RATIO := 0.05
 ## Une défaite rapporte quand même un peu d'XP

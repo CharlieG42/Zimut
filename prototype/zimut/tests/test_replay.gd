@@ -15,14 +15,20 @@ func _boot() -> void:
 	var lv_start: Array = []
 	for c in ["Tank", "Mage", "Sylvain"]:
 		lv_start.append(pm.member_level(data, c))
-	# 6 victoires de la frontière (1 ennemi faible par combat) : l'équipe progresse
-	# au nouveau rythme calibré — ici 1 niveau sur 6 combats contre un ennemi seul,
-	# plus avec une équipe complète au niveau du combat (~3 combats/palier).
+	# 6 victoires de la frontière (1 ennemi faible par combat), puis 4 de plus pour le niveau :
+	# l'équipe progresse au rythme calibré — ici 1 niveau sur 10 combats contre un ennemi seul
+	# (V92 : gains d'XP -25 %), plus avec une équipe complète au niveau du combat (~4 combats/palier).
 	var lv_after6: int = 0
 	for i in range(6):
 		pm.register_victory(data, {"enemies": [{"type": "Gobelin", "level": 10, "boss": false}]})
 		lv_after6 = pm.member_level(data, "Tank")
-	check(lv_after6 > int(lv_start[0]), "6 victoires : l'équipe progresse d'au moins 1 niveau (XP calibrée, fin du gain garanti)")
+	var lv_after10: int = lv_after6
+	var probe: Dictionary = pm.new_game(3, "R2")
+	pm.rebuild_team(probe, ["Tank", "Mage", "Sylvain"])
+	for i in range(10):
+		pm.register_victory(probe, {"enemies": [{"type": "Gobelin", "level": 10, "boss": false}]})
+		lv_after10 = pm.member_level(probe, "Tank")
+	check(lv_after10 > int(lv_start[0]), "10 victoires : l'équipe progresse d'au moins 1 niveau (XP calibrée, fin du gain garanti)")
 	check(int(data["victories"]) == 6 and data["fight_levels"].size() == 6, "historique des niveaux de combat (6)")
 	# XP hors équipe : <= 10 % du gain d'un membre de l'équipe (même multiplicateur de classe)
 	var rep: Dictionary = pm.award_xp(data, 10000)

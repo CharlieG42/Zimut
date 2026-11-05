@@ -56,6 +56,13 @@ static func _early_xp_mult(lv: int) -> float:
 	var t: float = clampf(float(lv - 1) / float(EARLY_XP_MULT_END - 1), 0.0, 1.0)
 	return lerpf(EARLY_XP_MULT_START, 1.0, t)
 
+## Combats (à gain d'XP plein) nécessaires pour passer de `lv` à `lv + 1` : suite géométrique
+## de XP_CURVE_FIRST (niveau 1) à XP_CURVE_LAST (niveau 100). Monter devient donc toujours plus
+## long, et de plus en plus vite : la raison est constante (≈ ×1,036 par niveau).
+static func combats_at(lv: int) -> float:
+	var ratio: float = pow(ClassRules.XP_CURVE_LAST / ClassRules.XP_CURVE_FIRST, 1.0 / float(ClassRules.MAX_LEVEL - 1))
+	return ClassRules.XP_CURVE_FIRST * pow(ratio, float(clampi(lv, 1, ClassRules.MAX_LEVEL) - 1))
+
 func _build_level_tables() -> void:
 	LEVEL_XP = PackedInt32Array()
 	LEVEL_COMBATS = PackedInt32Array()
@@ -63,17 +70,36 @@ func _build_level_tables() -> void:
 	LEVEL_COMBATS.resize(ClassRules.MAX_LEVEL + 2)
 	var acc: float = 0.0
 	for lv: int in range(1, ClassRules.MAX_LEVEL + 1):
+		var c: float = combats_at(lv)
+		LEVEL_COMBATS[lv] = maxi(2, roundi(c))
+		LEVEL_XP[lv] = roundi(acc)
+		acc += c * float(_combat_xp_raw(lv)) * ClassRules.FIGHT_XP_MULT
+	LEVEL_XP[ClassRules.MAX_LEVEL + 1] = roundi(acc)
+	LEVEL_COMBATS[ClassRules.MAX_LEVEL + 1] = LEVEL_COMBATS[ClassRules.MAX_LEVEL]
+
+## Ancienne courbe (avant V92), conservée pour convertir les sauvegardes : palier XP cumulé du niveau `level`.
+func _legacy_xp_for_level(level: int) -> int:
+	var acc: float = 0.0
+	var need_prev: int = 0
+	for lv: int in range(1, mini(level, ClassRules.MAX_LEVEL + 1)):
 		var ol: float = 1.0 + float(lv - 1) * 49.0 / 99.0
 		var i0: int = clampi(int(floor(ol)), 1, 49)
 		var c_old: float = lerpf(float(OLD_LEVEL_COMBATS[i0]), float(OLD_LEVEL_COMBATS[i0 + 1]), ol - float(i0))
 		var need: int = maxi(2, roundi(c_old * 0.5 * _early_xp_mult(lv)))
 		if lv > 1:
-			need = maxi(need, int(LEVEL_COMBATS[lv - 1]))   # jamais moins de combats qu'au niveau précédent
-		LEVEL_COMBATS[lv] = need
-		LEVEL_XP[lv] = roundi(acc)
+			need = maxi(need, need_prev)
+		need_prev = need
 		acc += float(need) * float(_combat_xp_raw(lv)) * ClassRules.FIGHT_XP_MULT
-	LEVEL_XP[ClassRules.MAX_LEVEL + 1] = roundi(acc)
-	LEVEL_COMBATS[ClassRules.MAX_LEVEL + 1] = LEVEL_COMBATS[ClassRules.MAX_LEVEL]
+	return roundi(acc)
+
+## Convertit une XP de l'ancienne courbe vers la nouvelle en gardant le niveau et la fraction de barre.
+func _convert_legacy_xp(level: int, xp: int) -> int:
+	var lvl: int = clampi(level, 1, ClassRules.MAX_LEVEL)
+	var old_cur: int = _legacy_xp_for_level(lvl)
+	var old_nxt: int = _legacy_xp_for_level(lvl + 1)
+	var frac: float = clampf(float(xp - old_cur) / float(maxi(1, old_nxt - old_cur)), 0.0, 0.999)
+	var new_cur: int = xp_for_level(lvl)
+	return new_cur + roundi(frac * float(xp_for_level(lvl + 1) - new_cur))
 
 ## XP de base d'un combat de niveau `fight_level` (avant FIGHT_XP_MULT et réglage de vitesse).
 func _combat_xp_raw(fight_level: int) -> int:
@@ -744,6 +770,8 @@ func _fresh_save() -> Dictionary:
 		"heroes_unlocked": [],             # V47 : héros disponibles (3 choisis en fin de tutoriel, puis déblocages)
 		"balance_v": BALANCE_VERSION,
 		"difficulty": 1,      # difficulté des mobs propre à la partie (0 Facile … 3 Enfer)
+		"diff_v": 2,   # V92 : échelle de difficulté (2 = Facile ← ancien Normal…)
+		"xp_curve_v": 2,      # V92 : courbe d'XP exponentielle (1 = ancienne courbe, convertie à l'ouverture)
 		"playtime": 0,        # V46 : temps de jeu total en secondes
 		"playtime_modes": {}, # V46 : temps de jeu par mode {"tactique": s, "adventure": s, "conquest": s}
 		"timestamp": Time.get_datetime_string_from_system(),
@@ -979,14 +1007,14 @@ func combat_xp(fight_level: int) -> int:
 	var speed: float = settings.xp_mult() if settings != null else 1.0
 	return maxi(1, roundi(gain * ClassRules.FIGHT_XP_MULT * speed))
 
-## Nombre de combats de la frontière estimé pour passer de `level` à `level + 1`.
+## Nombre de combats de la frontière estimé pour passer de `level` à `level + 1` (gain d'XP réduit de 25 % compris).
 func combats_for_level(level: int) -> int:
 	if LEVEL_COMBATS.is_empty():
 		_build_level_tables()
 	var lv: int = clampi(level, 1, ClassRules.MAX_LEVEL)
 	var need: int = int(LEVEL_COMBATS[lv])
 	if need > 0:
-		return need
+		return roundi(float(need) / ClassRules.XP_GAIN_MULT)   # combats réels, malus d'XP de 25 % compris
 	var step: int = xp_for_level(lv + 1) - xp_for_level(lv)
 	if step <= 0:
 		return 1
@@ -1666,12 +1694,33 @@ func ensure_roster(data: Dictionary) -> void:
 		Builds.ensure(data, classe)
 	data["roster"] = roster
 	data["balance_v"] = BALANCE_VERSION
+	_migrate_xp_curve(data)
 	HeroUnlock.ensure(data, xp_for_level)   # V47 : niveau du joueur + héros débloqués (migration)
 	if not data.has("difficulty"):
 		# Anciennes parties : reprend le réglage global qui existait avant (Options).
 		var gs: Node = get_node_or_null("/root/GameSettings")
 		data["difficulty"] = int(gs.difficulty) if gs != null else 1
+	# V92 : nouvelle échelle (ancien Normal → Facile, ancien Difficile → Normal, ancien Enfer → Difficile).
+	if int(data.get("diff_v", 1)) < 2:
+		data["difficulty"] = maxi(0, int(data["difficulty"]) - 1)
+		data["diff_v"] = 2
 	data["level"] = frontier_level(data)
+
+## V92 : une sauvegarde de l'ancienne courbe d'XP (pas de « xp_curve_v ») garde ses niveaux et la fraction
+## de barre en cours ; seules les valeurs d'XP sont converties vers les nouveaux paliers.
+func _migrate_xp_curve(data: Dictionary) -> void:
+	if int(data.get("xp_curve_v", 1)) >= 2:
+		return
+	var roster: Dictionary = data.get("roster", {})
+	for classe: String in roster.keys():
+		var ent: Dictionary = roster[classe]
+		ent["xp"] = _convert_legacy_xp(int(ent.get("level", 1)), int(ent.get("xp", 0)))
+	var p: Dictionary = data.get("player", {})
+	if not p.is_empty():
+		p["xp"] = _convert_legacy_xp(int(p.get("level", 1)), int(p.get("xp", 0)))
+		data["player"] = p
+	data["xp_curve_v"] = 2
+
 
 ## Conversion d'une sauvegarde d'avant l'équilibrage V15 : niveaux 1..50 -> 1..100,
 ## capital de points conservé (mêmes choix du joueur), points de sorts remis à zéro
@@ -1950,7 +1999,8 @@ func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0, fight_level: in
 	var avg: int = team_average_level(data)
 	var report: Dictionary = {}
 	# V47 : le joueur gagne l'XP du combat à 100 % ; aucun héros ne peut dépasser son niveau.
-	var p_gain: float = float(raw_xp) * ratio * HeroUnlock.PLAYER_XP_MULT
+	var raw_xp_f: float = float(raw_xp) * ClassRules.XP_GAIN_MULT   # V92 : -25 % sur tous les gains d'XP
+	var p_gain: float = raw_xp_f * ratio * HeroUnlock.PLAYER_XP_MULT
 	if fight_level > 0:
 		p_gain *= xp_level_factor(fight_level, HeroUnlock.player_level(data))
 	var player_rep: Dictionary = HeroUnlock.add_xp(data, roundi(p_gain), xp_for_level, level_for_xp)
@@ -1959,7 +2009,7 @@ func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0, fight_level: in
 	for classe: String in data["roster"].keys():
 		var e: Dictionary = data["roster"][classe]
 		var in_team: bool = team_classes.has(classe)
-		var gain: float = float(raw_xp) * ratio * ClassRules.xp_mult(classe)
+		var gain: float = raw_xp_f * ratio * ClassRules.xp_mult(classe)
 		if fight_level > 0:
 			gain *= xp_level_factor(fight_level, int(e["level"]))
 		if not in_team:
