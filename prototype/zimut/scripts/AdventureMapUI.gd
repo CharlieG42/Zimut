@@ -600,24 +600,6 @@ func _rebuild_world() -> void:
 	_fit_world.call_deferred()
 
 
-## Charge une couche illustrée à l'échelle exacte de la planche Sylvestre.
-func _add_sylvestre_overlay(file_name: String, world_size: Vector2, depth: int, node_name: String) -> void:
-	var path: String = "res://assets/boards/" + file_name
-	var tex: Texture2D = load(path) as Texture2D
-	if tex == null:
-		push_warning("Couche Sylvestre introuvable : " + path)
-		return
-	var layer := Sprite2D.new()
-	layer.name = node_name
-	layer.texture = tex
-	layer.centered = false
-	layer.position = Vector2.ZERO
-	layer.scale = world_size / Vector2(tex.get_size())
-	layer.z_index = depth
-	layer.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	_world.add_child(layer)
-
-
 ## V83 : planche illustrée — l'illustration sert de décor, lieux / trouvailles / héros / monstres posés dessus.
 func _rebuild_board(biome: String) -> void:
 	var zid: String = manager.zone_id()
@@ -631,16 +613,13 @@ func _rebuild_board(biome: String) -> void:
 	spr.z_index = 0
 	_world.add_child(spr)
 	_backdrop = spr
-	if zid == "foret_sylve":
-		_add_sylvestre_overlay("sylvestre_atmosphere.svg", ws, 1, "SylvestreAtmosphere")
-		_add_sylvestre_overlay("sylvestre_midground.svg", ws, 3, "SylvestreMidground")
 	_board = AdventureBoard.new()
 	_board.ui = self
-	_board.z_index = 2
+	_board.z_index = 1
 	_world.add_child(_board)
 	_entities = Node2D.new()
 	_entities.y_sort_enabled = true
-	_entities.z_index = 3
+	_entities.z_index = 2
 	_world.add_child(_entities)
 	var pal: Dictionary = BattleScenery.pal(biome)
 	var pois: Dictionary = ProgressionManager.adventure_zone_pois(zid)
@@ -656,7 +635,6 @@ func _rebuild_board(biome: String) -> void:
 		node.pal = pal
 		node.icon = load(String(POI_ICONS.get(node.kind, POI_ICONS["combat"]))) as Texture2D
 		node.prop = ""                      # les bâtiments / entrées sont dessinés dans la planche
-		node.forest_style = zid == "foret_sylve"
 		node.position = cell_center(pos)
 		_entities.add_child(node)
 		_cell_nodes[pos] = _cell_nodes.get(pos, []) + [node]
@@ -667,33 +645,6 @@ func _rebuild_board(biome: String) -> void:
 		fnode.position = cell_center(fp)
 		_entities.add_child(fnode)
 		_cell_nodes[fp] = _cell_nodes.get(fp, []) + [fnode]
-	# Premier plan forestier : ces arbres sont des éléments indépendants de la planche.
-	# Leur origine est placée au pied du tronc pour que le Y-sort fasse passer le héros
-	# derrière leur feuillage lorsqu’il marche plus au nord, sans toucher au masque.
-	if zid == "foret_sylve":
-		var foreground_tree_tex: Texture2D = load("res://assets/boards/sylvestre_foreground_tree.svg") as Texture2D
-		if foreground_tree_tex != null:
-			var foreground_trees: Array[Dictionary] = [
-				{"cell": Vector2i(4, 10), "scale": 0.92, "flip": false},
-				{"cell": Vector2i(91, 10), "scale": 0.96, "flip": true},
-				{"cell": Vector2i(4, 40), "scale": 0.82, "flip": true},
-				{"cell": Vector2i(90, 40), "scale": 0.88, "flip": false},
-				{"cell": Vector2i(34, 47), "scale": 0.86, "flip": false},
-				{"cell": Vector2i(64, 47), "scale": 0.78, "flip": true},
-			]
-			for tree_data: Dictionary in foreground_trees:
-				var tree_cell: Vector2i = tree_data["cell"]
-				var tree := Sprite2D.new()
-				tree.texture = foreground_tree_tex
-				tree.centered = true
-				tree.offset = Vector2(0, -88)
-				tree.position = cell_center(tree_cell) + Vector2(0, 4)
-				tree.scale = Vector2.ONE * float(tree_data["scale"])
-				tree.flip_h = bool(tree_data["flip"])
-				tree.z_index = tree_cell.y * 4 + 2
-				tree.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-				tree.name = "SylvestreForegroundTree_%d" % tree_cell.x
-				_entities.add_child(tree)
 	# Même ambiance vivante que les cartes isométriques classiques : les effets
 	# restent une couche indépendante et ne modifient jamais l'illustration de fond.
 	var ambient := SceneryAmbient.new()
@@ -702,8 +653,6 @@ func _rebuild_board(biome: String) -> void:
 	ambient.configure_board(BoardArt.world_size(zid), biome, absi(zid.hash()) % 997)
 	ambient.position = BoardArt.world_size(zid) * 0.5
 	_world.add_child(ambient)
-	if zid == "foret_sylve":
-		_add_sylvestre_overlay("sylvestre_foreground_canopy.svg", BoardArt.world_size(zid), 80, "SylvestreForegroundCanopy")
 	_hero = HeroView.new()
 	_hero.tex = Portraits.get_texture({"classe": manager.hero_class(), "team": "player", "entity_type": "Player"})
 	if zid == "foret_sylve":
