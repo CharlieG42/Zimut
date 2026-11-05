@@ -645,6 +645,27 @@ func _rebuild_board(biome: String) -> void:
 		fnode.position = cell_center(fp)
 		_entities.add_child(fnode)
 		_cell_nodes[fp] = _cell_nodes.get(fp, []) + [fnode]
+	# Premier plan forestier : ces arbres sont des éléments indépendants de la planche.
+	# Leur origine est placée au pied du tronc pour que le Y-sort fasse passer le héros
+	# derrière leur feuillage lorsqu’il marche plus au nord, sans toucher au masque.
+	if zid == "foret_sylve":
+		var foreground_tree_tex: Texture2D = load("res://assets/boards/sylvestre_foreground_tree.svg") as Texture2D
+		if foreground_tree_tex != null:
+			var foreground_trees: Array[Dictionary] = [
+				{"cell": Vector2i(34, 47), "scale": 0.86, "flip": false},
+				{"cell": Vector2i(64, 47), "scale": 0.78, "flip": true},
+			]
+			for tree_data: Dictionary in foreground_trees:
+				var tree := Sprite2D.new()
+				tree.texture = foreground_tree_tex
+				tree.centered = true
+				tree.offset = Vector2(0, -88)
+				tree.position = cell_center(tree_data["cell"]) + Vector2(0, 4)
+				tree.scale = Vector2.ONE * float(tree_data["scale"])
+				tree.flip_h = bool(tree_data["flip"])
+				tree.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+				tree.name = "SylvestreForegroundTree"
+				_entities.add_child(tree)
 	# Même ambiance vivante que les cartes isométriques classiques : les effets
 	# restent une couche indépendante et ne modifient jamais l'illustration de fond.
 	var ambient := SceneryAmbient.new()
@@ -655,6 +676,9 @@ func _rebuild_board(biome: String) -> void:
 	_world.add_child(ambient)
 	_hero = HeroView.new()
 	_hero.tex = Portraits.get_texture({"classe": manager.hero_class(), "team": "player", "entity_type": "Player"})
+	if zid == "foret_sylve":
+		_hero.sprite_height = 118.0
+		_hero.forest_style = true
 	_hero.position = cell_center(manager.hero_pos())
 	_entities.add_child(_hero)
 	_mob_nodes.clear()
@@ -953,6 +977,8 @@ func _hero_depth_scale(p: Vector2i) -> Vector2:
 	var max_y: int = maxi(1, manager.zone_size().y - 1)
 	var depth: float = clampf(float(p.y) / float(max_y), 0.0, 1.0)
 	var factor: float = lerpf(0.86, 1.12, depth)
+	if manager.zone_id() == "foret_sylve":
+		factor = lerpf(0.94, 1.18, depth)
 	return Vector2.ONE * factor
 
 
@@ -2695,6 +2721,8 @@ class FindNode extends Node2D:
 ## Héros : sprite de la classe de l'explorateur, ombre, anneau doré, petit rebond.
 class HeroView extends Node2D:
 	var tex: Texture2D = null
+	var sprite_height: float = 104.0
+	var forest_style: bool = false
 	var walk_poses: Array[Texture2D] = []
 	var back_tex: Texture2D = null
 	var back_walk_poses: Array[Texture2D] = []
@@ -2805,8 +2833,13 @@ class HeroView extends Node2D:
 		var shadow_radius: float = lerpf(30.0, 38.0, depth_t)
 		var shadow_alpha: float = clampf(0.30 - hop * 0.012, 0.12, 0.30)
 		draw_set_transform(Vector2(0, 4), 0.0, Vector2(1.0, 0.45))
+		draw_circle(Vector2.ZERO, shadow_radius + 8.0, Color(0.06, 0.12, 0.05, 0.12))
 		draw_circle(Vector2.ZERO, shadow_radius, Color(0, 0, 0, shadow_alpha))
-		draw_arc(Vector2.ZERO, shadow_radius + 2.0, 0.0, TAU, 40, Color(1.0, 0.84, 0.3, 0.9), 3.5, true)
+		if forest_style:
+			draw_circle(Vector2(0, 2), shadow_radius * 0.72, Color(0.28, 0.48, 0.18, 0.12))
+			draw_arc(Vector2.ZERO, shadow_radius + 2.0, 0.0, TAU, 40, Color(0.72, 0.91, 0.48, 0.68), 2.4, true)
+		else:
+			draw_arc(Vector2.ZERO, shadow_radius + 2.0, 0.0, TAU, 40, Color(1.0, 0.84, 0.3, 0.9), 3.5, true)
 		if _reaction_t > 0.0:
 			var pulse: float = 1.0 - _reaction_t / 0.65
 			draw_arc(Vector2.ZERO, 44.0 + pulse * 12.0, 0.0, TAU, 40,
@@ -2829,7 +2862,7 @@ class HeroView extends Node2D:
 			var gait_step: int = int(_gait_t / (0.09 if running else 0.12))
 			if gait_step % 2 == 0:
 				display_tex = walk_pool[(gait_step >> 1) % walk_pool.size()]
-		var h: float = 104.0
+		var h: float = sprite_height
 		var sc: float = h / float(display_tex.get_height())
 		var w: float = float(display_tex.get_width()) * sc
 		var breathe: float = sin(_t * 2.2) * 1.5
