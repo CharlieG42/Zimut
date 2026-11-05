@@ -23,7 +23,7 @@ func _run() -> void:
 		"les arbres de premier plan sont limités à la planche Sylvestre")
 	check(ui.contains('Vector2i(34, 47)') and ui.contains('Vector2i(64, 47)'),
 		"les deux arbres sont ancrés hors du masque jouable")
-	check(ui.contains('tree.offset = Vector2(0, -88)') and ui.contains('tree.position = cell_center(tree_data["cell"])'),
+	check(ui.contains('tree.offset = Vector2(0, -88)') and ui.contains('tree.position = cell_center(tree_cell)'),
 		"l'origine de chaque arbre reste à son pied pour le Y-sort")
 	check(ui.contains('_hero.sprite_height = 118.0') and ui.contains('_hero.forest_style = true'),
 		"le héros Sylvestre bénéficie d'une silhouette plus lisible")
