@@ -11,6 +11,7 @@ extends CanvasLayer
 
 signal closed
 
+const StonesScript = preload("res://scripts/StonesUI.gd")
 const C_BG := Color(0.05, 0.07, 0.12, 1.0)
 const C_PANEL := Color(0.09, 0.11, 0.17, 0.98)
 const C_CARD := Color(0.12, 0.15, 0.23, 1.0)
@@ -42,6 +43,7 @@ var _content: VBoxContainer
 var _res_label: Label
 var _gear_pick: String = ""     # emplacement dont on choisit l'objet ("" = vue d'ensemble)
 var _gear_msg: String = ""
+var _stone_pick: int = -1       # emplacement Pierre (0 ou 1) dont on choisit la Pierre (-1 = aucun)
 
 
 ## Barre de composition d'une caractéristique : base | points investis | objets.
@@ -379,6 +381,8 @@ func _refresh_list() -> void:
 		btn.add_theme_stylebox_override("pressed", _box(C_CARD_HI, accent, 14, 3, 10))
 		btn.pressed.connect(func() -> void:
 			_classe = classe
+			_stone_pick = -1
+			_gear_pick = ""
 			refresh())
 		_list_box.add_child(btn)
 		var row := HBoxContainer.new()
@@ -513,6 +517,7 @@ func _refresh_tabs() -> void:
 			_tab = tab_id
 			if tab_id == "gear":
 				_gear_pick = ""
+				_stone_pick = -1
 				_gear_msg = ""
 			refresh())
 		_tabs_row.add_child(b)
@@ -1072,7 +1077,27 @@ func _gear_governor_line() -> String:
 	return ""
 
 
+## Emplacements autour du héros (poupée d'équipement) : colonne gauche / colonne droite.
+const DOLL_LEFT: Array[String] = ["casque", "collier", "armure", "gants", "bague"]
+const DOLL_RIGHT: Array[String] = ["arme", "bouclier", "cape", "bottes", "boucle_oreille"]
+
+
+## Emplacement « Pierre » vide : cercle pointillé et « + ».
+class EmptySocket extends Control:
+	func _draw() -> void:
+		var c: Vector2 = size * 0.5
+		var r: float = minf(size.x, size.y) * 0.40
+		for i: int in range(16):
+			var a0: float = float(i) * TAU / 16.0
+			draw_arc(c, r, a0, a0 + TAU / 32.0, 4, Color(0.50, 0.56, 0.70), 3.0, true)
+		draw_line(c + Vector2(-r * 0.38, 0), c + Vector2(r * 0.38, 0), Color(0.50, 0.56, 0.70), 3.0, true)
+		draw_line(c + Vector2(0, -r * 0.38), c + Vector2(0, r * 0.38), Color(0.50, 0.56, 0.70), 3.0, true)
+
+
 func _build_gear() -> void:
+	if _stone_pick >= 0:
+		_build_stone_picker(_stone_pick)
+		return
 	if _gear_pick != "":
 		_build_gear_picker(_gear_pick)
 		return
@@ -1083,30 +1108,131 @@ func _build_gear() -> void:
 		var v: int = int(agg["stats"].get(k, 0))
 		if v != 0:
 			sum_parts.append("%s %+d" % [String(ItemRules.STAT_SHORT[k]), v])
-	var info := _lbl("Bonus d'équipement : %s" % (" · ".join(sum_parts) if not sum_parts.is_empty() else "aucun"), 19, C_GOOD if not sum_parts.is_empty() else C_DIM)
-	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_content.add_child(info)
+	var notes: PackedStringArray = []
 	for line: String in agg["sets"]:
-		_content.add_child(_lbl("◈ " + line, 16, C_GOLD))
+		notes.append("◈ " + line)
 	var gov: String = _gear_governor_line()
 	if gov != "":
-		var gl := _lbl(gov, 17, Color(0.78, 0.62, 1.0))
-		gl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		_content.add_child(gl)
+		notes.append(gov)
 	elif not _team_classes().has(_classe):
-		var nl := _lbl("Ce héros n'est pas dans l'équipe : son équipement est conservé et compte s'il devient gouverneur.", 16, C_DIM)
-		nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		_content.add_child(nl)
+		notes.append("Ce héros n'est pas dans l'équipe : son équipement est conservé et compte s'il devient gouverneur.")
 	if _gear_msg != "":
 		_content.add_child(_lbl(_gear_msg, 18, C_BAD))
-	var grid := GridContainer.new()
-	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 10)
-	grid.add_theme_constant_override("v_separation", 10)
-	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_content.add_child(grid)
-	for slot: String in GearUi.SLOT_ORDER:
-		grid.add_child(_gear_slot_card(slot, eq))
+	var doll := HBoxContainer.new()
+	doll.name = "Paperdoll"
+	doll.add_theme_constant_override("separation", 14)
+	doll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_content.add_child(doll)
+	doll.add_child(_doll_column(DOLL_LEFT, eq))
+	doll.add_child(_doll_center(sum_parts, notes))
+	doll.add_child(_doll_column(DOLL_RIGHT, eq))
+
+
+func _doll_column(slots: Array[String], eq: Dictionary) -> VBoxContainer:
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 8)
+	col.custom_minimum_size = Vector2(330, 0)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.size_flags_stretch_ratio = 1.0
+	for slot: String in slots:
+		col.add_child(_gear_slot_card(slot, eq))
+	return col
+
+
+## Colonne centrale : le héros en pied, son bonus d'équipement, puis ses 2 emplacements Pierre.
+func _doll_center(sum_parts: PackedStringArray, notes: PackedStringArray) -> Control:
+	var accent: Color = GameManager.COLORS.get(_classe, C_GOLD)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	box.custom_minimum_size = Vector2(300, 0)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.size_flags_stretch_ratio = 1.7
+	var stage := PanelContainer.new()
+	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	stage.add_theme_stylebox_override("panel", _box(accent.darkened(0.78), accent.darkened(0.25), 18, 2, 8))
+	box.add_child(stage)
+	var tex: Texture2D = Portraits.get_texture({"classe": _classe, "team": "player", "entity_type": "Player"})
+	var hero := TextureRect.new()
+	hero.name = "DollHero"
+	hero.texture = tex
+	hero.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	hero.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	hero.custom_minimum_size = Vector2(200, 250)
+	hero.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.add_child(hero)
+	var bonus := _lbl("Équipement : %s" % (" · ".join(sum_parts) if not sum_parts.is_empty() else "aucun bonus"), 16,
+		C_GOOD if not sum_parts.is_empty() else C_DIM)
+	bonus.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	bonus.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	bonus.name = "DollBonus"
+	box.add_child(bonus)
+	for n: String in notes:
+		var nl := _lbl(n, 14, C_GOLD if n.begins_with("◈") else C_DIM)
+		nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		box.add_child(nl)
+	var stones := HBoxContainer.new()
+	stones.name = "StoneSockets"
+	stones.add_theme_constant_override("separation", 8)
+	box.add_child(stones)
+	var slots: Array[String] = Stones.slots_of(_save, _classe)
+	for i: int in range(slots.size()):
+		stones.add_child(_stone_socket(i, slots[i]))
+	return box
+
+
+func _stone_socket(index: int, biome: String) -> Control:
+	var card := PanelContainer.new()
+	card.name = "StoneSocket_%d" % index
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var col: Color = Stones.info(biome).get("color", C_BORDER) if biome != "" else C_BORDER
+	card.add_theme_stylebox_override("panel", _box(C_CARD, col, 14, 3 if biome != "" else 2, 8))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	card.add_child(row)
+	var icon: Control
+	if biome != "":
+		var g := StonesScript.GemIcon.new()
+		g.col = col
+		g.found = true
+		g.lv = Stones.level(_save, biome)
+		icon = g
+	else:
+		icon = EmptySocket.new()
+	icon.custom_minimum_size = Vector2(58, 58)
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(icon)
+	var mid := VBoxContainer.new()
+	mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	mid.add_theme_constant_override("separation", 0)
+	mid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(mid)
+	mid.add_child(_lbl("PIERRE %d" % (index + 1), 12, C_DIM))
+	if biome == "":
+		mid.add_child(_lbl("— vide —", 16, C_DIM))
+	else:
+		var lv: int = Stones.level(_save, biome)
+		var nm := _lbl(Stones.stone_name(biome), 15, col.lightened(0.25))
+		nm.clip_text = true
+		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		mid.add_child(nm)
+		mid.add_child(_lbl("★".repeat(lv) + "☆".repeat(Stones.MAX_LEVEL - lv), 13, C_GOLD))
+		var bl := _lbl(", ".join(Stones.bonus_lines(biome, lv)), 12, C_GOOD)
+		bl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		bl.custom_minimum_size = Vector2(60, 0)
+		mid.add_child(bl)
+	var btn := Button.new()
+	btn.name = "StonePick_%d" % index
+	btn.flat = true
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	btn.pressed.connect(func() -> void:
+		_stone_pick = index
+		_gear_msg = ""
+		refresh())
+	card.add_child(btn)
+	return card
 
 
 ## Objets libres de l'inventaire pour un emplacement : "rec" = conseillés (niveau
@@ -1137,53 +1263,128 @@ func _gear_slot_card(slot: String, eq: Dictionary) -> Control:
 	var it: Dictionary = eq.get(slot, {})
 	var card := PanelContainer.new()
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.custom_minimum_size = Vector2(0, 86)
 	var edge: Color = ItemRules.rarity_color(it) if not it.is_empty() else C_BORDER
-	card.add_theme_stylebox_override("panel", _box(C_CARD, edge, 14, 2, 10))
+	card.add_theme_stylebox_override("panel", _box(C_CARD, edge, 14, 3 if not it.is_empty() else 2, 8))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	card.add_child(row)
-	row.add_child(GearUi.tile(slot, 60.0))
+	var tile: TextureRect = GearUi.tile(slot, 62.0)
+	if it.is_empty():
+		tile.modulate = Color(1, 1, 1, 0.45)
+	row.add_child(tile)
 	var mid := VBoxContainer.new()
 	mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	mid.add_theme_constant_override("separation", 2)
+	mid.add_theme_constant_override("separation", 0)
+	mid.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(mid)
-	mid.add_child(_lbl(GearUi.slot_label(slot).to_upper(), 14, C_DIM))
+	mid.add_child(_lbl(GearUi.slot_label(slot).to_upper(), 12, C_DIM))
 	if it.is_empty():
-		mid.add_child(_lbl("— vide —", 19, C_DIM))
+		mid.add_child(_lbl("— vide —", 17, C_DIM))
 	else:
-		var nm := _lbl(ItemRules.display_name(it), 19, ItemRules.rarity_color(it).lightened(0.3))
-		nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		var nm := _lbl(ItemRules.display_name(it), 16, ItemRules.rarity_color(it).lightened(0.3))
+		nm.clip_text = true
+		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		mid.add_child(nm)
-		mid.add_child(_lbl("niv. %d · %s" % [int(it.get("level", 0)), ItemRules.stat_line(it)], 15, C_TXT))
+		var sl := _lbl("niv. %d · %s" % [int(it.get("level", 0)), ItemRules.stat_line(it)], 13, C_TXT)
+		sl.clip_text = true
+		sl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		mid.add_child(sl)
 	var opt: Dictionary = _gear_options(slot)
-	if int(opt["rec"]) > 0 or int(opt["other"]) > 0:
-		var parts: PackedStringArray = []
-		if int(opt["rec"]) > 0:
-			parts.append("▲ %d conseillé%s" % [int(opt["rec"]), "s" if int(opt["rec"]) > 1 else ""])
-		if int(opt["other"]) > 0:
-			parts.append("%d autre%s" % [int(opt["other"]), "s" if int(opt["other"]) > 1 else ""])
-		var bl := _lbl(" · ".join(parts), 15, C_GOOD if int(opt["rec"]) > 0 else C_DIM, int(opt["rec"]) > 0)
+	if int(opt["rec"]) > 0:
+		var bl := _lbl("▲%d" % int(opt["rec"]), 16, C_GOOD, true)
 		bl.name = "GearAvail_" + slot
-		mid.add_child(bl)
-	var btns := VBoxContainer.new()
-	btns.add_theme_constant_override("separation", 6)
-	row.add_child(btns)
-	var b := _btn("CHANGER" if not it.is_empty() else "ÉQUIPER", C_GOLD, 17, Vector2(120, 44))
+		bl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(bl)
+	elif int(opt["other"]) > 0:
+		var ol := _lbl("+%d" % int(opt["other"]), 14, C_DIM)
+		ol.name = "GearAvail_" + slot
+		ol.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(ol)
+	var b := Button.new()
 	b.name = "GearPick_" + slot
+	b.flat = true
+	b.focus_mode = Control.FOCUS_NONE
+	b.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	b.pressed.connect(func() -> void:
 		_gear_pick = slot
 		_gear_msg = ""
 		refresh())
-	btns.add_child(b)
-	if not it.is_empty():
-		var r := _btn("RETIRER", C_BAD, 15, Vector2(120, 38))
-		r.name = "GearRemove_" + slot
-		r.pressed.connect(func() -> void:
-			_gear_msg = ProgressionManager.unequip_hero_item(_save, _classe, slot)
-			_persist()
-			refresh())
-		btns.add_child(r)
+	card.add_child(b)
 	return card
+
+
+## Choix d'une Pierre pour un emplacement : toutes les Pierres retrouvées, avec leur porteur actuel.
+func _build_stone_picker(socket: int) -> void:
+	var back := _btn("←  RETOUR À L'ÉQUIPEMENT", C_BORDER, 19, Vector2(0, 48))
+	back.pressed.connect(func() -> void:
+		_stone_pick = -1
+		refresh())
+	_content.add_child(back)
+	_content.add_child(_lbl("Pierre %d de %s" % [socket + 1, _classe], 24, C_GOLD, true))
+	if _gear_msg != "":
+		_content.add_child(_lbl(_gear_msg, 18, C_BAD))
+	var cur: String = Stones.slots_of(_save, _classe)[socket]
+	if cur != "":
+		var r := _btn("RETIRER  %s" % Stones.stone_name(cur), C_BAD, 17, Vector2(0, 44))
+		r.name = "StoneRemove"
+		r.pressed.connect(func() -> void:
+			Stones.unequip(_save, cur)
+			_persist()
+			_stone_pick = -1
+			refresh())
+		_content.add_child(r)
+	var any: bool = false
+	for biome: String in Stones.ORDER:
+		if not Stones.has(_save, biome):
+			continue
+		any = true
+		var lv: int = Stones.level(_save, biome)
+		var col: Color = Stones.info(biome).get("color", C_GOLD)
+		var owner: String = Stones.owner_of(_save, biome)
+		var b := Button.new()
+		b.name = "StoneChoice_" + biome
+		b.custom_minimum_size = Vector2(0, 84)
+		b.focus_mode = Control.FOCUS_NONE
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		var tag: String = ""
+		if owner == _classe:
+			tag = "   (déjà portée)"
+		elif owner != "":
+			tag = "   (portée par %s : sera reprise)" % owner
+		b.text = "%s   %s%s\n%s" % [Stones.stone_name(biome), "★".repeat(lv) + "☆".repeat(Stones.MAX_LEVEL - lv), tag,
+			", ".join(Stones.bonus_lines(biome, lv))]
+		b.add_theme_font_size_override("font_size", 19)
+		for st_name in ["font_color", "font_hover_color", "font_pressed_color"]:
+			b.add_theme_color_override(st_name, col.lightened(0.3))
+		var sbx: StyleBoxFlat = _box(C_CARD, col.darkened(0.2), 12, 2, 12)
+		sbx.content_margin_left = 84
+		b.add_theme_stylebox_override("normal", sbx)
+		b.add_theme_stylebox_override("hover", _box(C_CARD_HI, col, 12, 3, 12))
+		b.add_theme_stylebox_override("pressed", sbx)
+		var gem := StonesScript.GemIcon.new()
+		gem.col = col
+		gem.found = true
+		gem.lv = lv
+		gem.custom_minimum_size = Vector2(60, 60)
+		gem.position = Vector2(12, 12)
+		gem.size = Vector2(60, 60)
+		gem.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(gem)
+		b.pressed.connect(func() -> void:
+			var err: String = Stones.assign(_save, biome, _classe, socket)
+			if err != "":
+				_gear_msg = err
+			else:
+				_gear_msg = ""
+				_stone_pick = -1
+				_persist()
+			refresh())
+		_content.add_child(b)
+	if not any:
+		var e := _lbl("Aucune Pierre retrouvée pour l'instant : vaincre le boss d'une Nation (Tactique, sanctuaire en Aventure ou siège en Conquête).", 19, C_DIM)
+		e.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_content.add_child(e)
 
 
 ## Liste des objets libres de l'inventaire compatibles avec un emplacement.
@@ -1198,6 +1399,15 @@ func _build_gear_picker(slot: String) -> void:
 		_content.add_child(_lbl(_gear_msg, 18, C_BAD))
 	var level: int = ProgressionManager.member_level(_save, _classe)
 	var cur: Dictionary = ProgressionManager.hero_equipment(_save, _classe).get(slot, {})
+	if not cur.is_empty():
+		var rm := _btn("RETIRER  %s" % ItemRules.display_name(cur), C_BAD, 17, Vector2(0, 44))
+		rm.name = "GearRemove_" + slot
+		rm.pressed.connect(func() -> void:
+			_gear_msg = ProgressionManager.unequip_hero_item(_save, _classe, slot)
+			_persist()
+			_gear_pick = ""
+			refresh())
+		_content.add_child(rm)
 	var cur_power: int = ItemRules.power(cur) if not cur.is_empty() else 0
 	var rows: Array = []
 	var inv: Array = _save.get("inventory", [])

@@ -1,3 +1,6 @@
+V94|Fiche personnage : l'onglet Équipement montre désormais le héros en pied, ses 10 emplacements autour de lui (tête, buste et mains à gauche ; arme, cape et pieds à droite), sans défilement.
+V94|Chaque héros dispose de 2 emplacements Pierre élémentaire directement sur sa fiche : touchez-en un pour choisir une Pierre (une Pierre portée par un autre héros lui est reprise).
+V94|Sur un emplacement, ▲ indique le nombre d'objets conseillés ; « Retirer » se trouve dans la liste de choix de l'objet.
 V93|Nouvelle carte 2D de la Sylve : île flottante avec village, moulins, place des runes et Grand Arbre. L'ancienne carte reste disponible (Réglages → « Carte 2D de la Sylve »).
 V93|La nouvelle carte compte 18 lieux : les 5 donjons sont sur les portes du dessin (grotte, maison-moulin, moulin de pierre, arbre à porte bleue, Grand Arbre).
 V93|Réglages : « Carte 2D de la Sylve » permet de revenir à l'ancienne carte à tout moment ; les parties en cours replacent le héros au départ si besoin.
