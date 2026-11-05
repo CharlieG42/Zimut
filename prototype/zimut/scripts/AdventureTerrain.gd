@@ -33,6 +33,12 @@ static var _cache: Dictionary = {}
 
 
 ## Obstacles bloquants d'un biome (les nations utilisent leurs propres décors).
+## Autoload ProgressionManager, résolu à l'exécution : un identifiant global ne compile pas quand un
+## script (test headless) charge ce fichier avant que les autoloads n'existent.
+static func _pm() -> Node:
+	return (Engine.get_main_loop() as SceneTree).root.get_node("ProgressionManager")
+
+
 static func _obstacles_for(biome: String) -> Array:
 	if Nations.is_new(biome):
 		var inf: Dictionary = Nations.info(biome)
@@ -81,14 +87,14 @@ const DIRS := {"N": Vector2i(0, -1), "E": Vector2i(1, 0), "S": Vector2i(0, 1), "
 
 # ── Monde en grille (logique pure, utilisée aussi par ProgressionManager) ──
 static func grid_of(zone_id: String) -> Vector2i:
-	var g: Array = ProgressionManager.ADVENTURE_ZONES.get(zone_id, {}).get("grid", [0, 0])
+	var g: Array = _pm().ADVENTURE_ZONES.get(zone_id, {}).get("grid", [0, 0])
 	return Vector2i(int(g[0]), int(g[1]))
 
 
 ## Carte voisine dans une direction ("" si le bord donne sur le vide).
 static func neighbor(zone_id: String, dir: String) -> String:
 	var target: Vector2i = grid_of(zone_id) + DIRS.get(dir, Vector2i.ZERO)
-	for other: String in ProgressionManager.ADVENTURE_ZONES.keys():
+	for other: String in _pm().ADVENTURE_ZONES.keys():
 		if other != zone_id and grid_of(other) == target:
 			return other
 	return ""
@@ -96,7 +102,7 @@ static func neighbor(zone_id: String, dir: String) -> String:
 
 ## Case de la porte d'un bord : milieu du côté (axe x de la grille = est/ouest).
 static func gate_cell(zone_id: String, dir: String) -> Vector2i:
-	var sz: Array = ProgressionManager.ADVENTURE_ZONES.get(zone_id, {}).get("size", [14, 10])
+	var sz: Array = _pm().ADVENTURE_ZONES.get(zone_id, {}).get("size", [14, 10])
 	var w: int = int(sz[0])
 	var h: int = int(sz[1])
 	match dir:
@@ -123,7 +129,7 @@ static func gates_of(zone_id: String) -> Dictionary:
 ## et dernière colonne, où est dessinée la falaise) restent pleins ; les portes, le départ,
 ## les lieux et leurs abords ne sont jamais coupés. Déterministe (même zone = même contour).
 static func voids_of(zone_id: String) -> Dictionary:
-	var meta: Dictionary = ProgressionManager.ADVENTURE_ZONES.get(zone_id, {})
+	var meta: Dictionary = _pm().ADVENTURE_ZONES.get(zone_id, {})
 	var out: Dictionary = {}
 	var shape: String = String(meta.get("shape", ""))
 	if shape == "":
@@ -133,7 +139,7 @@ static func voids_of(zone_id: String) -> Dictionary:
 	var h: int = int(sz[1])
 	var st: Array = meta.get("start", [1, 3])
 	var keep: Array[Vector2i] = [Vector2i(int(st[0]), int(st[1]))]
-	for k: String in ProgressionManager.pois_of(zone_id).keys():
+	for k: String in _pm().pois_of(zone_id).keys():
 		keep.append(parse(k))
 	for g: Vector2i in gates_of(zone_id).keys():
 		keep.append(g)
@@ -232,7 +238,7 @@ static func _board_terrain(zone_id: String) -> Dictionary:
 	var key: String = "board:%s:%d" % [zone_id, BoardArt.rev]
 	if _cache.has(key):
 		return _cache[key]
-	var meta: Dictionary = ProgressionManager.ADVENTURE_ZONES.get(zone_id, {})
+	var meta: Dictionary = _pm().ADVENTURE_ZONES.get(zone_id, {})
 	var pois: Array[Vector2i] = []
 	for k: String in BoardArt.pois(zone_id).keys():
 		pois.append(parse(k))
@@ -254,14 +260,14 @@ static func zone_terrain(zone_id: String) -> Dictionary:
 		return _board_terrain(zone_id)
 	if _cache.has(zone_id):
 		return _cache[zone_id]
-	var meta: Dictionary = ProgressionManager.ADVENTURE_ZONES.get(zone_id, {})
+	var meta: Dictionary = _pm().ADVENTURE_ZONES.get(zone_id, {})
 	var sz: Array = meta.get("size", [14, 10])
 	var size := Vector2i(int(sz[0]), int(sz[1]))
 	var st: Array = meta.get("start", [1, 3])
 	var start := Vector2i(int(st[0]), int(st[1]))
 	var biome: String = String(meta.get("biome", "Forêt"))
 	var pois: Array[Vector2i] = []
-	for k: String in ProgressionManager.pois_of(zone_id).keys():
+	for k: String in _pm().pois_of(zone_id).keys():
 		pois.append(parse(k))
 	var gates: Array[Vector2i] = []
 	for g: Vector2i in gates_of(zone_id).keys():

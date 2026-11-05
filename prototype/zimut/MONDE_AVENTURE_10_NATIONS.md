@@ -122,7 +122,7 @@ Cette carte montrera les territoires, les grandes voies de liaison et les accès
 ## 8. Plan d'intégration proposé
 
 ### Étape 1 — Nation Sylvestre, référence jouable
-- Remplacer l'illustration actuelle de `assets/boards/foret_sylve.jpg` par la nouvelle illustration validée, après préparation de l'image source et contrôle de ses dimensions.
+- ~~Remplacer l'illustration par la nouvelle~~ Fait : `assets/boards/Sylvestre.png` (l'ancienne `foret_sylve.jpg` est supprimée). Pour les autres nations : préparer l'image source et contrôler ses dimensions.
 - Recaler le masque de navigation sur les chemins réellement visibles.
 - Vérifier le point de départ, les cinq entrées de donjon et les zones praticables.
 - Ajouter des zones de monstres, découvertes, coffres et énigmes sans déplacer les POI persistants déjà utilisés par les sauvegardes.

@@ -7,6 +7,16 @@ func check(c: bool, m: String) -> void:
 		fails += 1
 func _init() -> void:
 	_boot.call_deferred()
+## Une planche (n'importe quel niveau, avec ou sans suffixe) est-elle livrée pour ce bâtiment ?
+## Les tests suivent les fichiers réellement présents : livrer de nouvelles planches ne les casse plus.
+func _delivered(nation: String, building: String) -> bool:
+	for lv: int in range(0, 6):
+		var path: String = ConquestCityView.sprite_path(nation, building, lv)
+		if ResourceLoader.exists(path) and load(path) != null:
+			return true
+	return false
+
+
 func _boot() -> void:
 	var base := "res://assets/ui/conquest/cities/batiments"
 	# Convention des chemins : niveau en suffixe, caserne/résidence/merveille sans suffixe
@@ -58,7 +68,8 @@ func _boot() -> void:
 	vc.free()
 	var vr := ConquestCityView.new()
 	vr.biome = "Rouages"
-	check(vr._sprite_best("hall", 3) == null, "nation sans planche : repli vectoriel")
+	check((vr._sprite_best("hall", 3) == null) != _delivered("rouages", "hall"),
+		"repli vectoriel seulement si la nation n'a livré aucune planche de hall (Rouages)")
 	vr.free()
 	# V65 : planches saines livrées pour les 8 autres nations ; caserne/résidence suivent le niveau de la ville
 	for pair: Array in [["brasier", "scierie_5"], ["brumes", "hall_3"], ["cristaux", "scierie_5"], ["cristaux", "residence_2"],
@@ -68,11 +79,15 @@ func _boot() -> void:
 	var vb := ConquestCityView.new()
 	vb.biome = "Brumes"
 	check(vb._sprite_best("hall", 4) == vb._sprite("hall", 4), "Brumes : l'hôtel de ville de niveau 4 a son dessin")
-	check(vb._sprite_best("caserne", 4) == null, "Brumes : caserne retirée (défauts) → repli vectoriel")
+	check((vb._sprite_best("caserne", 4) == null) != _delivered("brumes", "caserne"),
+		"Brumes : repli vectoriel seulement si aucune planche de caserne n'est livrée")
 	vb.biome = "Forêt"
-	check(vb._sprite_best("caserne", 3) == vb._sprite("caserne", 0), "Forêt : caserne sans suffixe reprise à tous les niveaux")
+	# Le niveau demandé s'il est livré, sinon le dessin sans suffixe (repli) : jamais autre chose.
+	var forest_expected: Texture2D = vb._sprite("caserne", 3) if vb._sprite("caserne", 3) != null else vb._sprite("caserne", 0)
+	check(vb._sprite_best("caserne", 3) == forest_expected, "Forêt : caserne du niveau livré, à défaut dessin sans suffixe")
 	vb.biome = "Désert"
-	check(vb._sprite_best("hall", 2) == null, "Désert : hôtel de ville non livré → repli vectoriel")
+	check((vb._sprite_best("hall", 2) == null) != _delivered("sables", "hall"),
+		"Désert : repli vectoriel seulement si aucune planche de hall n'est livrée")
 	vb.free()
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)

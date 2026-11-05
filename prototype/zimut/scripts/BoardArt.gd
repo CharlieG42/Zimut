@@ -21,11 +21,16 @@ static var rev: int = 0   # incrémenté à chaque retouche (invalide le cache d
 
 
 ## Définition de la planche d'une zone ({} si la zone n'a pas de planche ou si le mode est inactif).
+## Autoload GameManager, résolu à l'exécution (voir AdventureTerrain._pm).
+static func _gm() -> Node:
+	return (Engine.get_main_loop() as SceneTree).root.get_node("GameManager")
+
+
 static func def(zone_id: String) -> Dictionary:
 	if not enabled:
 		return {}
 	# Actif seulement tant que la partie est dans la carte 2D (y compris pendant un combat lancé d'ici).
-	if String(GameManager.active_save.get("adventure_view", "")) != "map":
+	if String(_gm().active_save.get("adventure_view", "")) != "map":
 		return {}
 	return raw(zone_id)
 
