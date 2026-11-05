@@ -1,6 +1,5 @@
 extends SceneTree
-## Vérifie le premier passage de profondeur de la planche Sylvestre.
-## Ces contrôles portent sur le rendu uniquement : aucune donnée de terrain n'est modifiée.
+## Vérifie que la carte Sylvestre conserve son illustration complète et lisible.
 
 var fails: int = 0
 
@@ -15,42 +14,18 @@ func _init() -> void:
 func _run() -> void:
 	var ui_path := "res://scripts/AdventureMapUI.gd"
 	var ui: String = FileAccess.get_file_as_string(ui_path)
+	check(not ui.contains("_add_sylvestre_overlay"), "aucune couche plein cadre superposée à la planche")
+	check(not ui.contains("SylvestreForegroundCanopy"), "aucune canopée opaque ne masque le plateau")
+	check(not ui.contains("SylvestreForegroundTree_"), "aucun arbre décoratif flottant ne recouvre la carte")
+	check(ui.contains('spr.z_index = 0') and ui.contains('_board.z_index = 1')
+		and ui.contains('_entities.z_index = 2'), "ordre de rendu de la planche et des entités rétabli")
 	var board_text: String = FileAccess.get_file_as_string("res://data/boards/foret_sylve.json")
 	var board_data: Dictionary = JSON.parse_string(board_text)
-	var walk_mask: Array = board_data.get("mask", [])
-	var safe_anchors: Array[Vector2i] = [Vector2i(4, 10), Vector2i(91, 10), Vector2i(4, 40),
-		Vector2i(90, 40), Vector2i(34, 47), Vector2i(64, 47)]
-	var anchors_outside_mask: bool = true
-	for anchor_cell: Vector2i in safe_anchors:
-		if anchor_cell.y >= walk_mask.size() or String(walk_mask[anchor_cell.y]).substr(anchor_cell.x, 1) != ".":
-			anchors_outside_mask = false
-	check(anchors_outside_mask, "les six arbres restent hors du masque de déplacement")
-	var tree_path := "res://assets/boards/sylvestre_foreground_tree.svg"
-	check(ResourceLoader.exists(tree_path), "asset de premier plan Sylvestre présent")
-	var tree_texture: Texture2D = load(tree_path) as Texture2D
-	check(tree_texture != null, "asset de premier plan importable comme texture")
-	for layer_name: String in ["sylvestre_atmosphere.svg", "sylvestre_midground.svg", "sylvestre_foreground_canopy.svg"]:
-		var layer_path: String = "res://assets/boards/" + layer_name
-		check(ResourceLoader.exists(layer_path) and load(layer_path) is Texture2D,
-			"couche illustrée importable : " + layer_name)
-	check(ui.contains('_add_sylvestre_overlay("sylvestre_atmosphere.svg"')
-		and ui.contains('_add_sylvestre_overlay("sylvestre_midground.svg"')
-		and ui.contains('_add_sylvestre_overlay("sylvestre_foreground_canopy.svg"'),
-		"les trois plans de décor sont chargés sur la planche Sylvestre")
-	check(ui.contains('if zid == "foret_sylve":') and ui.contains("SylvestreForegroundTree"),
-		"les arbres de premier plan sont limités à la planche Sylvestre")
-	check(ui.contains('Vector2i(34, 47)') and ui.contains('Vector2i(64, 47)'),
-		"les deux arbres sont ancrés hors du masque jouable")
-	check(ui.contains('tree.offset = Vector2(0, -88)') and ui.contains('tree.position = cell_center(tree_cell)'),
-		"l'origine de chaque arbre reste à son pied pour le Y-sort")
-	check(ui.contains('_hero.sprite_height = 118.0') and ui.contains('_hero.forest_style = true'),
-		"le héros Sylvestre bénéficie d'une silhouette plus lisible")
-	check(ui.contains('if manager.zone_id() == "foret_sylve":') and ui.contains('lerpf(0.94, 1.18, depth)'),
-		"la variation d'échelle de profondeur est limitée à Sylvestre")
-	check(ui.contains('if forest_style:') and ui.contains('Color(0.72, 0.91, 0.48, 0.68)'),
-		"l'ombre et le repère au sol adoptent une teinte forestière")
-	check(ui.contains('node.forest_style = zid == "foret_sylve"') and ui.contains("Socle organique"),
-		"les lieux remarquables reçoivent une assise de mousse et de pierres Sylvestre")
-	check(ui.contains('ambient.z_index = 4') and ui.contains('layer.z_index = depth'),
-		"les plans atmosphériques restent derrière les acteurs et l'ambiance devant eux")
-	quit(fails)
+	check(board_data.get("image", "") == "res://assets/boards/Sylvestre.png",
+		"la planche originale Sylvestre reste la seule base visuelle")
+	if fails > 0:
+		push_error("ÉCHEC : %d contrôle(s) Sylvestre" % fails)
+		quit(1)
+	else:
+		print("Tous les contrôles de lisibilité Sylvestre sont réussis.")
+		quit(0)
