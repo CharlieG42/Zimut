@@ -31,17 +31,17 @@ func _boot() -> void:
 	check(AT.walkable(z, t["start"]), "départ jouable")
 	check((t["paths"] as Dictionary).size() >= 900, "assez de cases jouables (%d)" % (t["paths"] as Dictionary).size())
 	var pois: Dictionary = pm.pois_of(z)
-	var dungeon_doors: Array[String] = ["19,10", "16,32", "76,11", "76,39", "50,23"]
+	var dungeon_doors: Array[String] = ["19,9", "14,32", "76,10", "77,38", "50,21"]
 	var doors_ok: bool = true
 	for door: String in dungeon_doors:
 		if not pois.has(door) or not D.is_dungeon(pois.get(door, {})):
 			doors_ok = false
 	check(doors_ok, "quatre entrées périphériques + Grand Arbre référencés comme donjons")
-	check(pois.has("76,39") and not pois.has("76,40"), "entrée sud-est conservée à la position proposée")
-	check(pois.has("16,32") and not pois.has("17,31"), "entrée sud-ouest décalée à gauche et en bas")
-	check(pois.has("19,10") and not pois.has("19,11"), "entrée nord-ouest remontée d’une case")
-	check(pois.has("76,11") and not pois.has("76,12"), "entrée nord-est remontée d’une case")
-	check(pois.has("50,23") and not pois.has("50,24"), "entrée centrale remontée d’une case")
+	check(pois.has("77,38") and not pois.has("76,39"), "entrée sud-est calée sur le seuil cristallin")
+	check(pois.has("14,32") and not pois.has("16,32"), "entrée sud-ouest calée sur le seuil de la porte")
+	check(pois.has("19,9") and not pois.has("19,10"), "entrée nord-ouest calée devant la porte")
+	check(pois.has("76,10") and not pois.has("76,11"), "entrée nord-est calée sur le seuil violet")
+	check(pois.has("50,21") and not pois.has("50,23"), "entrée centrale calée devant la porte du Grand Arbre")
 	var tiers: Array = []
 	var bad := 0
 	for k: String in pois.keys():

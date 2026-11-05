@@ -146,31 +146,31 @@
       "level": 1,
       "desc": "Du haut de l'arbre, la vallée se dévoile."
     },
-    "76,39": {
+    "77,38": {
       "kind": "combat",
       "guardian": "Forêt#3",
       "name": "Sanctuaire de Cristal",
       "desc": "Des cristaux chantent dans l'ombre : quatre salles."
     },
-    "16,32": {
+    "14,32": {
       "kind": "combat",
       "guardian": "Forêt#2",
       "name": "Antre de la Patte",
       "desc": "Le territoire d'une grande bête : quatre salles."
     },
-    "19,10": {
+    "19,9": {
       "kind": "combat",
       "guardian": "Forêt#1",
       "name": "Grotte de la Feuille",
       "desc": "Un terrier moussu : quatre salles, la plus douce des entrées."
     },
-    "76,11": {
+    "76,10": {
       "kind": "combat",
       "guardian": "Forêt#4",
       "name": "Crypte du Chêne Noir",
       "desc": "Une porte violette sous les racines : quatre salles, très dures."
     },
-    "50,23": {
+    "50,21": {
       "kind": "combat",
       "guardian": "Forêt",
       "name": "Donjon de la Nation Sylvestre",

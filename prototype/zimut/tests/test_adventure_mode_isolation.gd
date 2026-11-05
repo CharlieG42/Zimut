@@ -177,7 +177,7 @@ func _boot() -> void:
 		if row.length() != int(board.get("cols", 0)):
 			mask_valid = false
 	check(mask_valid, "masque Sylvestre : toutes les lignes ont la largeur attendue")
-	var dungeon_cells: Array[String] = ["19,10", "76,11", "50,23", "16,32", "76,39"]
+	var dungeon_cells: Array[String] = ["19,9", "76,10", "50,21", "14,32", "77,38"]
 	var dungeons_on_walkable: bool = true
 	for key: String in dungeon_cells:
 		var xy: PackedStringArray = key.split(",")
