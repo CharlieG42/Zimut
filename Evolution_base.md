@@ -49,6 +49,7 @@ Faire de Sylvestre la référence de qualité du monde Aventure 2D, puis appliqu
 - Livraison initiale : variation de profondeur des particules d'ambiance ; la profondeur module désormais leur taille et leur vitesse.
 - Complément : les marqueurs de POI disposent d'une assise au sol (ombre et anneau de matière), d'un médaillon à double liseré et d'un libellé avec ombre portée pour améliorer leur séparation du décor. Les positions, dimensions interactives et données de terrain restent inchangées.
 - Optimisation : les POI non découverts ne rafraîchissent plus leur rendu en continu.
+- Ambiance Sylvestre : mélange de feuilles dérivantes et de lucioles à faible densité, avec halos localisés ; le type d'effet est résolu à la configuration et réutilisé pendant l'animation et le rendu.
 - À poursuivre : contrôle visuel sur appareil, retouches fines des contours et des points d'intérêt à partir de captures annotées.
 - **Précaution active :** ne pas retoucher le masque ni les coordonnées de Sylvestre sans capture annotée.
 
@@ -152,6 +153,13 @@ Consolider la qualité générale du jeu et réduire les risques de régression 
 ---
 
 ## Journal des livraisons
+
+### 2026-11-05 — Ambiance Sylvestre (complément)
+- Réintégration sur la base incluant les PR #262 et #263.
+- Mélange de feuilles et de lucioles à faible densité, avec dérive lente, halos localisés et profondeur conservée.
+- Le type d'ambiance est calculé une fois à la configuration et réutilisé dans les boucles d'animation et de dessin.
+- Tests statiques étendus ; validation CI de cette réintégration à venir.
+
 
 ### 2026-11-05 — Résultat de l'audit des animations
 - 657 fichiers de poses recensés : 22 marche face, 20 marche dos, 61 repos face, 60 repos dos, 138 attaques face, 130 attaques dos, 114 incantations face et 112 incantations dos.
