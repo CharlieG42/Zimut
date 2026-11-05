@@ -26,5 +26,7 @@ func _init() -> void:
 	check(adventure.contains("Double liseré : bord externe sombre"), "les médaillons de POI ont un contour biseauté à deux niveaux")
 	check(adventure.contains("Ombre portée typographique"), "les noms des POI disposent d'un contraste renforcé")
 	check(adventure.contains("pn.set_process(n.visible)"), "les POI non découverts ne rafraîchissent pas leur rendu en continu")
+	check(adventure.contains("_modal_canvas.layer = 100"), "les fenêtres de l’Aventure utilisent une couche d’affichage prioritaire")
+	check(adventure.contains("_modal_canvas.add_child(dim)"), "les fenêtres modales sont indépendantes du clipping de la carte")
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
