@@ -156,7 +156,8 @@ Consolider la qualité générale du jeu et réduire les risques de régression 
 ### 2026-11-04 — Audit des ressources d'animation
 - Ajout d'un test headless qui inventorie les poses `walk`, `idle`, `attack` et `cast` (face/dos) dans les dossiers de sprites des Nations et des familiers.
 - Le contrôle signale les poses orphelines dont le sprite de base est absent ; les manques de couverture restent informatifs afin de ne pas bloquer la livraison lorsqu'une animation n'a pas encore été créée.
-- Le test est intégré à la boucle CI Android.
+- Après analyse des journaux CI, le test a été déplacé après l'import Godot et rendu bloquant indépendamment : les erreurs de chargement précédentes ne doivent plus être masquées par la boucle de tests tolérante.
+- La validation réelle de cette correction dépend du prochain passage CI.
 
 ### 2026-11-04 — Complément des étapes 1 et 2
 - La CI de la première livraison a réussi : tests GDScript, exports APK Debug et Release.
