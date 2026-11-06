@@ -17,6 +17,14 @@ signal playtime_updated(mode: String, seconds: float)
 ## Persiste le temps écoulé toutes les 10 s (et à chaque changement de scène).
 const SAVE_EVERY := 10.0
 
+## Garde-fous contre un temps de jeu gonflé (V97) : une image ne compte jamais plus de MAX_STEP secondes
+## (au retour d'une mise en veille / de l'arrière-plan Android, le premier « delta » couvre toute l'absence),
+## le compteur s'arrête quand l'appli perd le focus, et après IDLE_LIMIT secondes sans aucune action du joueur.
+const MAX_STEP := 1.0
+const IDLE_LIMIT := 600.0
+
+var _focused: bool = true        # l'appli est au premier plan
+var _idle: float = 0.0           # secondes depuis la dernière action du joueur
 var _running: bool = false       # le compteur tourne
 var _mode: String = ""           # mode en cours ("" = aucun)
 var _elapsed: float = 0.0       # secondes accumulées depuis le dernier flush
@@ -29,8 +37,27 @@ func _ready() -> void:
 	_check_scene.call_deferred()
 
 
+func _input(_event: InputEvent) -> void:
+	_idle = 0.0
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED \
+			or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		_flush()
+		_focused = false
+	elif what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_APPLICATION_RESUMED \
+			or what == NOTIFICATION_WM_WINDOW_FOCUS_IN:
+		_focused = true
+		_idle = 0.0
+
+
 func _process(delta: float) -> void:
 	if not _running:
+		return
+	delta = minf(delta, MAX_STEP)
+	_idle += delta
+	if not _focused or _idle > IDLE_LIMIT:
 		return
 	_elapsed += delta
 	_since_save += delta
