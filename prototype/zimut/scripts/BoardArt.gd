@@ -37,7 +37,8 @@ static func def(zone_id: String) -> Dictionary:
 
 ## Planche à utiliser pour une zone : « foret_sylve » (ancienne planche, conservée en BACKUP) ou
 ## « foret_sylve_v2 » (nouvelle illustration, par défaut). Réglage : GameSettings.sylvestre_board.
-const ALT_BOARDS := {"foret_sylve": "foret_sylve_v2"}
+## Les Cimes (V103) : « montagne_pics_v2 » ; en mode « Ancienne », la zone retrouve son décor généré par code.
+const ALT_BOARDS := {"foret_sylve": "foret_sylve_v2", "montagne_pics": "montagne_pics_v2"}
 
 
 static func file_stem(zone_id: String) -> String:

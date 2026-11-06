@@ -1,0 +1,4 @@
+V103|Nouvelle carte 2D de la Nation des Cimes : village de montagne, ponts, cascades, château de glace et cinq portes de donjon. Le réglage « Cartes 2D » permet de revenir à l'ancienne carte.
+V103|Cinq donjons par Nation, de difficulté croissante : un donjon ne s'ouvre qu'une fois terminé celui du palier d'en dessous (cadenas 🔒 sur la carte et message explicatif).
+V103|Le donjon final de chaque Nation est nettement plus difficile que les quatre autres : au moins trois niveaux d'écart avec la dernière salle du palier précédent.
+V103|Sylve : les deux énigmes de la place (cercle des pierres chantantes, sanctuaire des runes) sont enfin jouables sur la nouvelle carte.

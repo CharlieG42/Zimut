@@ -61,12 +61,50 @@ static func tier_key(biome: String, t: int) -> String:
 	return biome if t >= TIERS else "%s%s%d" % [biome, TIER_SEP, t]
 
 
-## Niveau des ennemis d'une salle : les 4 derniers niveaux de la tranche de la Nation.
+## Écart minimal (en niveaux) entre la salle 4 du palier 4 et la 1re salle du donjon final.
+const FINAL_GAP := 3
+
+
+## Niveau de la dernière salle d'un palier. Le donjon final (palier 5) culmine en haut de la tranche de
+## la Nation ; les paliers 1 à 4 se répartissent régulièrement en dessous, avec FINAL_GAP niveaux
+## d'écart avec la 1re salle du final : le final est donc réellement plus dur que les quatre autres.
+static func tier_top(key: String) -> int:
+	var band: Vector2i = Nations.level_band(base(key))
+	var t: int = tier(key)
+	if t >= TIERS:
+		return band.y
+	var final_first: int = maxi(band.x, band.y - (ROOMS - 1))
+	var top4: int = maxi(band.x, final_first - FINAL_GAP)
+	var top1: int = mini(top4, band.x + ROOMS - 1)
+	return roundi(lerpf(float(top1), float(top4), float(t - 1) / float(TIERS - 2)))
+
+
+## Niveau des ennemis d'une salle : les 4 derniers niveaux sous le sommet du palier.
 static func room_level(key: String, room: int) -> int:
 	var band: Vector2i = Nations.level_band(base(key))
-	var step: int = maxi(2, (band.y - band.x) / 5)       # écart de niveau entre deux paliers
-	var top: int = band.y - (TIERS - tier(key)) * step
-	return clampi(top - (ROOMS - clampi(room, 1, ROOMS)), band.x, band.y)
+	return clampi(tier_top(key) - (ROOMS - clampi(room, 1, ROOMS)), band.x, band.y)
+
+
+## Déblocage séquentiel : un donjon ne s'ouvre qu'une fois terminé celui du palier juste en dessous
+## (le plus haut donjon de même Nation, de palier inférieur, présent dans `pois`). Le palier le plus
+## bas est toujours ouvert, et un donjon déjà terminé le reste (anciennes sauvegardes).
+## Retourne le lieu à terminer d'abord ({} si le donjon est ouvert).
+static func locked_by(adv: Dictionary, pois: Dictionary, key: String) -> Dictionary:
+	if clears(adv, key) > 0:
+		return {}
+	var best: Dictionary = {}
+	var best_tier: int = 0
+	for k: String in pois.keys():
+		var g: String = String((pois[k] as Dictionary).get("guardian", ""))
+		if g == "" or base(g) != base(key):
+			continue
+		var t: int = tier(g)
+		if t < tier(key) and t > best_tier:
+			best_tier = t
+			best = pois[k]
+	if best.is_empty() or clears(adv, String(best["guardian"])) > 0:
+		return {}
+	return best
 
 
 static func room_name(room: int) -> String:
