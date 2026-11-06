@@ -43,6 +43,9 @@ func _boot() -> void:
 	await process_frame
 	await process_frame
 	check(ui.find_child("Paperdoll", true, false) != null, "vue poupée d'équipement")
+	check(ui.find_child("GearRing", true, false) != null, "tuiles d'équipement en anneau autour du héros")
+	var bonus: Label = ui.find_child("DollBonus", true, false) as Label
+	check(bonus != null and not bonus.text.contains("F+") and (bonus.text == "Aucun bonus" or bonus.text.contains("Vitalité") or bonus.text.contains("Force") or bonus.text.contains("Défense") or bonus.text.contains("Agilité") or bonus.text.contains("Intelligence") or bonus.text.contains("Sagesse")), "somme des bonus en noms complets (« %s »)" % (bonus.text.replace("\n", " | ") if bonus else ""))
 	check(ui.find_child("StonePick_0", true, false) != null and ui.find_child("StonePick_1", true, false) != null, "2 emplacements Pierre affichés")
 	for slot: String in ["arme", "bouclier", "casque", "armure", "bottes", "bague", "collier", "gants", "boucle_oreille", "cape"]:
 		if ui.find_child("GearPick_" + slot, true, false) == null:

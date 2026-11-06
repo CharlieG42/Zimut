@@ -1077,9 +1077,20 @@ func _gear_governor_line() -> String:
 	return ""
 
 
-## Emplacements autour du héros (poupée d'équipement) : colonne gauche / colonne droite.
-const DOLL_LEFT: Array[String] = ["casque", "collier", "armure", "gants", "bague"]
-const DOLL_RIGHT: Array[String] = ["arme", "bouclier", "cape", "bottes", "boucle_oreille"]
+## Position (centre de la tuile, relative au héros) des 10 emplacements autour de lui.
+const RING_LAYOUT := {
+	"cape":           Vector2(0, -190),
+	"arme":           Vector2(-215, -80),
+	"bouclier":       Vector2(215, -80),
+	"casque":         Vector2(-215, 38),
+	"bottes":         Vector2(215, 38),
+	"bague":          Vector2(-215, 156),
+	"boucle_oreille": Vector2(215, 156),
+	"collier":        Vector2(-105, 200),
+	"gants":          Vector2(105, 200),
+	"armure":         Vector2(0, 160),
+}
+const RING_TILE := 88.0
 
 
 ## Emplacement « Pierre » vide : cercle pointillé et « + ».
@@ -1103,11 +1114,6 @@ func _build_gear() -> void:
 		return
 	var eq: Dictionary = ProgressionManager.hero_equipment(_save, _classe)
 	var agg: Dictionary = ItemRules.aggregate(eq)
-	var sum_parts: PackedStringArray = []
-	for k: String in ItemRules.STAT_KEYS:
-		var v: int = int(agg["stats"].get(k, 0))
-		if v != 0:
-			sum_parts.append("%s %+d" % [String(ItemRules.STAT_SHORT[k]), v])
 	var notes: PackedStringArray = []
 	for line: String in agg["sets"]:
 		notes.append("◈ " + line)
@@ -1120,58 +1126,129 @@ func _build_gear() -> void:
 		_content.add_child(_lbl(_gear_msg, 18, C_BAD))
 	var doll := HBoxContainer.new()
 	doll.name = "Paperdoll"
-	doll.add_theme_constant_override("separation", 14)
+	doll.add_theme_constant_override("separation", 18)
 	doll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_content.add_child(doll)
-	doll.add_child(_doll_column(DOLL_LEFT, eq))
-	doll.add_child(_doll_center(sum_parts, notes))
-	doll.add_child(_doll_column(DOLL_RIGHT, eq))
+	doll.add_child(_gear_ring(eq))
+	doll.add_child(_gear_info(agg, notes))
 
 
-func _doll_column(slots: Array[String], eq: Dictionary) -> VBoxContainer:
-	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 8)
-	col.custom_minimum_size = Vector2(330, 0)
-	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.size_flags_stretch_ratio = 1.0
-	for slot: String in slots:
-		col.add_child(_gear_slot_card(slot, eq))
-	return col
-
-
-## Colonne centrale : le héros en pied, son bonus d'équipement, puis ses 2 emplacements Pierre.
-func _doll_center(sum_parts: PackedStringArray, notes: PackedStringArray) -> Control:
+## Le héros au centre, entouré des 10 tuiles d'équipement (bordure = rareté).
+func _gear_ring(eq: Dictionary) -> Control:
 	var accent: Color = GameManager.COLORS.get(_classe, C_GOLD)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	box.custom_minimum_size = Vector2(300, 0)
-	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	box.size_flags_stretch_ratio = 1.7
-	var stage := PanelContainer.new()
-	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	stage.add_theme_stylebox_override("panel", _box(accent.darkened(0.78), accent.darkened(0.25), 18, 2, 8))
-	box.add_child(stage)
-	var tex: Texture2D = Portraits.get_texture({"classe": _classe, "team": "player", "entity_type": "Player"})
+	var ring := Control.new()
+	ring.name = "GearRing"
+	ring.custom_minimum_size = Vector2(620, 530)
+	ring.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	var center := Vector2(310, 250)
+	var stage := Panel.new()
+	stage.add_theme_stylebox_override("panel", _box(accent.darkened(0.8), accent.darkened(0.3), 24, 2, 0))
+	stage.position = Vector2(20, 0)
+	stage.size = Vector2(580, 530)
+	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ring.add_child(stage)
 	var hero := TextureRect.new()
 	hero.name = "DollHero"
-	hero.texture = tex
+	hero.texture = Portraits.get_texture({"classe": _classe, "team": "player", "entity_type": "Player"})
 	hero.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	hero.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	hero.custom_minimum_size = Vector2(200, 250)
+	hero.size = Vector2(180, 235)
+	hero.position = center - Vector2(90, 135)
 	hero.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	stage.add_child(hero)
-	var bonus := _lbl("Équipement : %s" % (" · ".join(sum_parts) if not sum_parts.is_empty() else "aucun bonus"), 16,
-		C_GOOD if not sum_parts.is_empty() else C_DIM)
-	bonus.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	bonus.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ring.add_child(hero)
+	for slot: String in RING_LAYOUT:
+		var t: Control = _gear_tile(slot, eq)
+		t.position = center + RING_LAYOUT[slot] - Vector2(RING_TILE * 0.5, RING_TILE * 0.5 + 6.0)
+		ring.add_child(t)
+	return ring
+
+
+## Tuile d'un emplacement : icône de la catégorie, bordure de rareté, badge ▲ si mieux dispo, nom dessous.
+func _gear_tile(slot: String, eq: Dictionary) -> Control:
+	var it: Dictionary = eq.get(slot, {})
+	var holder := Control.new()
+	holder.custom_minimum_size = Vector2(RING_TILE + 20.0, RING_TILE + 24.0)
+	holder.size = holder.custom_minimum_size
+	var edge: Color = ItemRules.rarity_color(it) if not it.is_empty() else C_BORDER
+	var frame := Panel.new()
+	frame.position = Vector2(10, 0)
+	frame.size = Vector2(RING_TILE, RING_TILE)
+	frame.add_theme_stylebox_override("panel", _box(Color(0.24, 0.36, 0.20) if not it.is_empty() else Color(0.10, 0.13, 0.20), edge, 14, 5 if not it.is_empty() else 2, 0))
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.add_child(frame)
+	var tile: TextureRect = GearUi.tile(slot, RING_TILE - 16.0)
+	tile.position = Vector2(18, 8)
+	tile.size = Vector2(RING_TILE - 16.0, RING_TILE - 16.0)
+	if it.is_empty():
+		tile.modulate = Color(1, 1, 1, 0.4)
+	holder.add_child(tile)
+	var opt: Dictionary = _gear_options(slot)
+	var badge_txt: String = ""
+	var badge_col: Color = C_GOOD
+	if int(opt["rec"]) > 0:
+		badge_txt = "▲%d" % int(opt["rec"])
+	elif int(opt["other"]) > 0:
+		badge_txt = "+%d" % int(opt["other"])
+		badge_col = C_DIM
+	if badge_txt != "":
+		var bl := _lbl(badge_txt, 15, badge_col, true)
+		bl.name = "GearAvail_" + slot
+		bl.position = Vector2(RING_TILE - 22.0, 2)
+		bl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		holder.add_child(bl)
+	var cap := _lbl(ItemRules.display_name(it) if not it.is_empty() else GearUi.slot_label(slot), 12,
+		ItemRules.rarity_color(it).lightened(0.3) if not it.is_empty() else C_DIM)
+	cap.position = Vector2(0, RING_TILE + 3)
+	cap.size = Vector2(RING_TILE + 20.0, 18)
+	cap.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	cap.clip_text = true
+	cap.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	cap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.add_child(cap)
+	var b := Button.new()
+	b.name = "GearPick_" + slot
+	b.flat = true
+	b.focus_mode = Control.FOCUS_NONE
+	b.position = Vector2(10, 0)
+	b.size = Vector2(RING_TILE, RING_TILE + 20.0)
+	b.tooltip_text = ItemRules.describe(it) if not it.is_empty() else "%s (vide)" % GearUi.slot_label(slot)
+	b.pressed.connect(func() -> void:
+		_gear_pick = slot
+		_gear_msg = ""
+		refresh())
+	holder.add_child(b)
+	return holder
+
+
+## Panneau de droite : somme des bonus (noms complets), panoplies, puis les 2 Pierres.
+func _gear_info(agg: Dictionary, notes: PackedStringArray) -> Control:
+	var box := VBoxContainer.new()
+	box.name = "GearInfo"
+	box.add_theme_constant_override("separation", 8)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_child(_lbl("BONUS DE L'ÉQUIPEMENT", 14, C_DIM))
+	var lines: PackedStringArray = []
+	for k: String in ItemRules.STAT_KEYS:
+		var v: int = int(agg["stats"].get(k, 0))
+		if v != 0:
+			lines.append("%s %+d" % [String(ClassRules.STAT_LABEL.get(k, k)), v])
+	var bonus := _lbl("\n".join(lines) if not lines.is_empty() else "Aucun bonus", 20, C_GOOD if not lines.is_empty() else C_DIM)
 	bonus.name = "DollBonus"
 	box.add_child(bonus)
+	var fx: Array[String] = ItemRules.fx_lines(agg["fx"])
+	for f: String in fx:
+		var fl := _lbl("✦ " + f, 15, C_TXT)
+		fl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(fl)
 	for n: String in notes:
-		var nl := _lbl(n, 14, C_GOLD if n.begins_with("◈") else C_DIM)
+		var nl := _lbl(n, 15, C_GOLD if n.begins_with("◈") else C_DIM)
 		nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		box.add_child(nl)
-	var stones := HBoxContainer.new()
+	var sp := Control.new()
+	sp.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	box.add_child(sp)
+	box.add_child(_lbl("PIERRES ÉLÉMENTAIRES", 14, C_DIM))
+	var stones := VBoxContainer.new()
 	stones.name = "StoneSockets"
 	stones.add_theme_constant_override("separation", 8)
 	box.add_child(stones)
@@ -1257,61 +1334,6 @@ func _gear_total_rec() -> int:
 	for slot: String in GearUi.SLOT_ORDER:
 		n += int(_gear_options(slot)["rec"])
 	return n
-
-
-func _gear_slot_card(slot: String, eq: Dictionary) -> Control:
-	var it: Dictionary = eq.get(slot, {})
-	var card := PanelContainer.new()
-	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size = Vector2(0, 86)
-	var edge: Color = ItemRules.rarity_color(it) if not it.is_empty() else C_BORDER
-	card.add_theme_stylebox_override("panel", _box(C_CARD, edge, 14, 3 if not it.is_empty() else 2, 8))
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
-	card.add_child(row)
-	var tile: TextureRect = GearUi.tile(slot, 62.0)
-	if it.is_empty():
-		tile.modulate = Color(1, 1, 1, 0.45)
-	row.add_child(tile)
-	var mid := VBoxContainer.new()
-	mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	mid.add_theme_constant_override("separation", 0)
-	mid.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(mid)
-	mid.add_child(_lbl(GearUi.slot_label(slot).to_upper(), 12, C_DIM))
-	if it.is_empty():
-		mid.add_child(_lbl("— vide —", 17, C_DIM))
-	else:
-		var nm := _lbl(ItemRules.display_name(it), 16, ItemRules.rarity_color(it).lightened(0.3))
-		nm.clip_text = true
-		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		mid.add_child(nm)
-		var sl := _lbl("niv. %d · %s" % [int(it.get("level", 0)), ItemRules.stat_line(it)], 13, C_TXT)
-		sl.clip_text = true
-		sl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		mid.add_child(sl)
-	var opt: Dictionary = _gear_options(slot)
-	if int(opt["rec"]) > 0:
-		var bl := _lbl("▲%d" % int(opt["rec"]), 16, C_GOOD, true)
-		bl.name = "GearAvail_" + slot
-		bl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		row.add_child(bl)
-	elif int(opt["other"]) > 0:
-		var ol := _lbl("+%d" % int(opt["other"]), 14, C_DIM)
-		ol.name = "GearAvail_" + slot
-		ol.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		row.add_child(ol)
-	var b := Button.new()
-	b.name = "GearPick_" + slot
-	b.flat = true
-	b.focus_mode = Control.FOCUS_NONE
-	b.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	b.pressed.connect(func() -> void:
-		_gear_pick = slot
-		_gear_msg = ""
-		refresh())
-	card.add_child(b)
-	return card
 
 
 ## Choix d'une Pierre pour un emplacement : toutes les Pierres retrouvées, avec leur porteur actuel.
