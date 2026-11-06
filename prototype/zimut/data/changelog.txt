@@ -1,3 +1,6 @@
+V99|Sprites des personnages retouchés : le fond blanc resté accroché au Mage (à droite de la cape et de la tête) est supprimé.
+V99|Détourage amélioré entre les membres (bras/torse, jambes) pour l'Artificier, l'Assassin, la Chasseuse, le Druide et le Géomancien, dans toutes leurs poses.
+V99|Un fragment parasite en bas à gauche de l'Invocateur a été retiré.
 V93|Nouvelle carte 2D de la Sylve : île flottante avec village, moulins, place des runes et Grand Arbre. L'ancienne carte reste disponible (Réglages → « Carte 2D de la Sylve »).
 V93|La nouvelle carte compte 18 lieux : les 5 donjons sont sur les portes du dessin (grotte, maison-moulin, moulin de pierre, arbre à porte bleue, Grand Arbre).
 V93|Réglages : « Carte 2D de la Sylve » permet de revenir à l'ancienne carte à tout moment ; les parties en cours replacent le héros au départ si besoin.
