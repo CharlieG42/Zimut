@@ -39,7 +39,7 @@ const POI_COLOR := {
 }
 const POI_ACTION := {
 	"combat": "⚔  COMBATTRE", "chest": "◇  OUVRIR LE COFFRE", "puzzle": "✦  RÉSOUDRE L'ÉNIGME",
-	"camp": "☀  SE REPOSER", "reveal": "👁  OBSERVER L'HORIZON", "exit": "➜  PRENDRE LE SENTIER",
+	"camp": "☀  SE REPOSER", "reveal": "👁  OBSERVER L'HORIZON", "exit": "🌀  FRANCHIR LE PORTAIL",
 }
 ## Objet posé au sol sous chaque lieu (décors BattleScenery), par biome.
 const POI_PROP := {
@@ -1648,7 +1648,9 @@ func _interact() -> void:
 					"Du haut du belvédère, vous repérez de nouvelles villes. Elles sortent du brouillard sur la carte de CONQUÊTE (il faudra les relier à votre empire pour les attaquer).", lines2)
 				Gultur.say(self, "adv_belvedere", Gultur.ADV_BELVEDERE, null)
 		"exit":
-			_show_exit(String(cmd.get("key", "")))
+			_show_exit(String(cmd.get("key", "")), bool(cmd.get("portal", false)))
+		"portal_locked":
+			_show_portal_locked(cmd)
 		_:
 			_say("Rien de particulier ici… pour l'instant.")
 	_refresh_world()
@@ -1727,14 +1729,29 @@ func _start_combat(poi: Dictionary) -> void:
 	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
 
 
-func _show_exit(key: String) -> void:
+## V104 : portail scellé tant que le donjon final de la Nation n'est pas vaincu.
+func _show_portal_locked(cmd: Dictionary) -> void:
+	var poi: Dictionary = cmd.get("poi", {})
+	var box: VBoxContainer = _modal("🔒  " + String(poi.get("name", "Portail")), POI_COLOR["exit"])
+	var t: Label = U.lbl("%s\n\nLe portail est scellé. Vainquez « %s » pour l'ouvrir et gagner la Nation suivante." % [
+		String(poi.get("desc", "")), String((cmd.get("lock", {}) as Dictionary).get("name", "le donjon final"))], 18, U.C_TXT)
+	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(t)
+	var ok := U.btn("COMPRIS", U.C_BORDER, 22, Vector2(240, 60))
+	ok.pressed.connect(_close_modal)
+	box.add_child(ok)
+
+
+func _show_exit(key: String, portal: bool = false) -> void:
 	var revealed: Array = manager.take_exit(key)
-	var box: VBoxContainer = _modal("➜  Sentier découvert !", POI_COLOR["exit"])
+	var box: VBoxContainer = _modal("🌀  Portail" if portal else "➜  Sentier découvert !", POI_COLOR["exit"])
 	var targets: Array = []
 	for r: String in revealed:
 		if String(r).begins_with("zone:"):
 			targets.append(String(r).substr(5))
 	var msg: String = "Le sentier s'ouvre vers de nouvelles terres." if not targets.is_empty() else "Ce sentier vous est familier. Où voulez-vous aller ?"
+	if portal:
+		msg = "Le portail s'ouvre vers de nouvelles terres." if not targets.is_empty() else "Le portail s'ouvre. Où voulez-vous aller ?"
 	box.add_child(U.lbl(msg, 18, U.C_TXT))
 	var choices: Array = targets if not targets.is_empty() else manager.available_zones()
 	for zid: String in choices:
