@@ -1,3 +1,6 @@
+V99|Sprites des personnages retouchés : le fond blanc resté accroché au Mage (à droite de la cape et de la tête) est supprimé.
+V99|Détourage amélioré entre les membres (bras/torse, jambes) pour l'Artificier, l'Assassin, la Chasseuse, le Druide et le Géomancien, dans toutes leurs poses.
+V99|Un fragment parasite en bas à gauche de l'Invocateur a été retiré.
 V98|Vue Équipement : la somme des bonus du personnage s'écrit avec les noms complets (Vitalité, Force, Intelligence, Agilité, Sagesse, Défense, PA, PM) au lieu de F / I / A / S / D.
 V98|Inventaire, Forge et listes d'objets : les bonus d'un objet sont aussi en toutes lettres (« Force +4 · Agilité +4 · Sagesse +2 »).
 V98|La comparaison d'un objet avec celui déjà porté utilise elle aussi les noms complets.
