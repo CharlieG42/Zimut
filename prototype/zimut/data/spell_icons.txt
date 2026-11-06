@@ -390,3 +390,7 @@ Couplage,ing_couplage
 Poser Bombe assourdissante,ing_bombe_assourd
 Poser Tourelle lourde,ing_tourelle_lourde
 Poser Charge à fragmentation,ing_charge_frag
+Flèche-grappin,arrow
+Tir de dispersion,arrow_explosive_v2
+Grappin mécanique,chain_lightning
+Onde de choc,earthquake

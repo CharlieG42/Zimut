@@ -1721,3 +1721,12 @@ Ingénieur	Engineer
 Cartes 2D (Sylve et Cimes)	2D maps (Sylve and Peaks)
 Nouvelle	New
 Ancienne	Classic
+Flèche-grappin	Grappling Arrow
+Tir de dispersion	Scatter Shot
+Grappin mécanique	Mechanical Grapple
+Onde de choc	Shockwave
+40 dégâts + attire de 2 cases	40 damage + pulls 2 tiles
+55 dégâts en zone (3x3) + repousse de 1 case	55 damage in area (3x3) + pushes 1 tile
+30 dégâts + attire de 3 cases	30 damage + pulls 3 tiles
+62 dégâts en zone (3x3) + repousse de 2 cases	62 damage in area (3x3) + pushes 2 tiles
+Attire de %d case(s)	Pulls %d cell(s)

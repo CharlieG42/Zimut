@@ -74,12 +74,14 @@ Chasseur,Nuée empoisonnée,3,0,5,36 dégâts en zone (3x3) + (10 dégâts/tour;
 Chasseur,Piège à loup,2,0,5,Pose un piège : 44 dégâts,25,Attaque,44,0,0,0,0,0,0,0,0
 Chasseur,Cri de guerre,2,0,0,+15% dégâts pour l'équipe (2 tours),28,Buff,0,0,0,0,0,0,0,0,0
 Chasseur,Flèche de feu,3,0,5,50 dégâts + brûle 13 dégâts/tour (2 tours),30,Attaque,50,0,0,0,0,0,0,0,0
+Chasseur,Flèche-grappin,3,0,5,40 dégâts + attire de 2 cases,32,Attaque,40,0,0,0,0,0,0,0,0
 Chasseur,Rappel de balise,1,0,8,Rappelle une de vos balises (elle disparaît du terrain),35,Invocation,0,0,0,0,0,0,0,0,0
 Chasseur,Tir du chasseur,3,0,6,61 dégâts [Combo ralentissement : bonus 40%],38,Attaque,61,0,0,0,0,0,0,0,0
 Chasseur,Pluie de flèches,4,0,6,66 dégâts en zone (3x3),42,Attaque,66,0,0,0,0,0,0,0,0
 Chasseur,Tir ciblé,3,0,6,69 dégâts [Combo immobilisation : bonus 50%],45,Attaque,69,0,0,0,0,0,0,0,0
 Chasseur,Gerbe de glace,4,0,6,62 dégâts en zone (3x3) + ralentit 2 pm (2 tours),48,Attaque,62,0,0,0,0,0,0,0,0
 Chasseur,Glyphe de flammes,3,0,5,Trace un glyphe (3x3; 3 tours) : ennemis 25 dégâts + brûle 20 dégâts/tour (2 tours),50,Attaque,25,0,0,0,0,0,0,0,0
+Chasseur,Tir de dispersion,3,0,5,55 dégâts en zone (3x3) + repousse de 1 case,52,Attaque,55,0,0,0,0,0,0,0,0
 Chasseur,Tir d'estoc,3,0,5,66 dégâts + repousse de 1 case,55,Attaque,66,0,0,0,0,0,0,0,0
 Chasseur,Œil de faucon,2,0,0,+30% dégâts (2 tours),58,Buff,0,0,0,0,0,0,0,0,0
 Chasseur,Flèche de glace,3,0,5,70 dégâts + immobilise (1 tour),62,Attaque,70,0,0,0,0,0,0,0,0
@@ -293,11 +295,13 @@ Artificier,Transposition,1,0,6,Échange votre place avec le mécanisme ciblé (1
 Artificier,Poser Bombe assourdissante,3,0,4,Pose une bombe assourdissante : explose comme une bombe (dégâts réduits) et étourdit les ennemis touchés 1 tour,30,Invocation,0,0,0,0,0,0,0,0,0
 Artificier,Marque du prédateur,1,0,0,Critique garanti (prochaine attaque),35,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Poser Balise de transposition,2,0,6,Pose une balise et échange votre place avec elle; le Déclencheur sur la balise refait l'échange (1 déplacement par tour),35,Invocation,0,0,0,0,0,0,0,0,0
+Artificier,Grappin mécanique,2,0,6,30 dégâts + attire de 3 cases,36,Attaque,30,0,0,0,0,0,0,0,0
 Artificier,Tir de précision,3,0,6,66 dégâts [Combo brûlure : bonus 50%],40,Attaque,66,0,0,0,0,0,0,0,0
 Artificier,Mine à fragmentation,3,0,4,Pose un piège (mine) : 65 dégâts; explose en croix si on la déclenche,44,Attaque,65,0,0,0,0,0,0,0,0
 Artificier,Surcharge,2,0,0,+30% dégâts (2 tours),48,Buff,0,0,0,0,0,0,0,0,0
 Artificier,Glyphe de surcharge,3,0,5,Trace un glyphe (croix; 3 tours) : alliés +25% dégâts | ennemis 22 dégâts,50,Attaque,25,0,0,0,0,0,0,0,0
 Artificier,Poser Tourelle lourde,4,0,4,Installe une tourelle lourde : tire fort sur l'ennemi le plus proche (rayon 6) à la fin de chacun de vos tours (permanente; monte de niveau chaque tour; compte comme une tourelle),55,Invocation,0,0,0,0,0,0,0,0,0
+Artificier,Onde de choc,3,0,4,62 dégâts en zone (3x3) + repousse de 2 cases,58,Attaque,62,0,0,0,0,0,0,0,0
 Artificier,Roquette,4,0,6,83 dégâts en zone (3x3) [Combo étourdissement : bonus 40%],60,Attaque,83,0,0,0,0,0,0,0,0
 Artificier,Poser Charge à fragmentation,3,0,4,Pose une charge : explosion large (3 cases autour) et plus puissante qu'une bombe,65,Invocation,0,0,0,0,0,0,0,0,0
 Artificier,Rafale de mitraillette,4,0,5,69 dégâts à tous les ennemis,70,Attaque,69,0,0,0,0,0,0,0,0

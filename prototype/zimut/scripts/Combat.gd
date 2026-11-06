@@ -17,6 +17,16 @@ const PUSH := {
 	"Tir de recul": 2,
 	"Éboulement": 1,
 	"Séisme ambré": 1,
+	"Fusil à pompe": 2,
+	"Roquette": 1,
+	"Tir de dispersion": 1,
+	"Onde de choc": 2,
+}
+
+## V108 : sorts qui attirent la cible vers le lanceur (nombre de cases ; s'arrête au contact d'un obstacle ou d'une entité).
+const PULL := {
+	"Flèche-grappin": 2,
+	"Grappin mécanique": 3,
 }
 
 ## V43 : états que les sorts « Combo » reconnaissent chez la cible (mot du texte -> statut).
@@ -348,7 +358,7 @@ static func _parse_base(spell: Dictionary) -> Dictionary:
 		"dmg": 0, "dtype": "mag" if (magic_class or t.contains("magique")) else "phys",
 		"heal": 0, "heal_pct": 0, "regen": 0, "regen_turns": 0,
 		"dots": [], "buffs": [], "debuffs": [], "self_buffs": [],
-		"ignore_def": 0, "cond": "", "push": 0,
+		"ignore_def": 0, "cond": "", "push": 0, "pull": 0,
 		"summon": "", "summon_turns": -1,
 		"adj_dmg": 0, "chain": 0, "cure": false, "tele": "", "trap": 0,
 		"stun_chance": 0, "stun_turns": 0,
@@ -362,6 +372,8 @@ static func _parse_base(spell: Dictionary) -> Dictionary:
 	}
 	if PUSH.has(sname):
 		p["push"] = int(PUSH[sname])
+	if PULL.has(sname):
+		p["pull"] = int(PULL[sname])
 
 	# ── Artificier (V26) : mécanismes posés sur le terrain et Déclencheur ───────────────
 	if sname.begins_with("Poser ") and stype == "Invocation":
@@ -869,6 +881,8 @@ static func describe(spell: Dictionary) -> String:
 	parts.append(rx_b.sub(String(spell.get("effect", "")), "", true))
 	if int(p["push"]) > 0:
 		parts.append("Repousse de %d case(s)" % int(p["push"]))
+	if int(p["pull"]) > 0:
+		parts.append("Attire de %d case(s)" % int(p["pull"]))
 	if String(p.get("combo_status", "")) != "":
 		parts.append("Combo : +%d %% si la cible est %s" % [int(p["combo_pct"]), String(COMBO_LABELS.get(p["combo_status"], ""))])
 	if String(p.get("chain_spell", "")) != "":
@@ -959,7 +973,7 @@ const SUMMONS := {
 	"Élémentaire de Cristal": {"pv": 170, "force": 60, "defense": 30, "agility": 34, "pa": 4, "pm": 3, "color": Color(1.00, 0.95, 0.60), "spell": ["Éclat de cristal", 2, 3, 65]},
 	"Ombre": {"pv": 160, "force": 65, "defense": 30, "agility": 55, "pa": 4, "pm": 4, "color": Color(0.80, 0.55, 0.25), "spell": ["Lame d'ombre", 2, 3, 70]},
 	"Esprit de la Forêt": {"pv": 260, "force": 70, "defense": 40, "agility": 45, "pa": 5, "pm": 4, "color": Color(0.65, 0.40, 0.25), "spell": ["Vrilles sylvestres", 2, 5, 80]},
-	"Archer Sylvestre": {"pv": 150, "force": 45, "defense": 24, "agility": 35, "pa": 3, "pm": 3, "color": Color(0.30, 0.55, 0.25), "spell": ["Flèche de sève", 2, 5, "40 dégâts + ralentit 1 pm (1 tour)"]},
+	"Archer Sylvestre": {"pv": 150, "force": 45, "defense": 24, "agility": 35, "pa": 3, "pm": 3, "color": Color(0.30, 0.55, 0.25), "spell": ["Flèche de sève", 2, 7, "40 dégâts + ralentit 1 pm (1 tour)"]},
 	"Ent de Combat": {"pv": 240, "force": 45, "defense": 42, "agility": 12, "pa": 3, "pm": 2, "color": Color(0.85, 0.55, 0.40), "spell": ["Coup de branche", 2, 1, "55 dégâts + étourdit 1 tour (25%)"]},
 	"Tronc":        {"pv": 320, "force": 45, "defense": 65, "agility": 10, "pa": 4, "pm": 2, "color": Color(0.45, 0.32, 0.18), "spell": ["Bras de bois", 2, 1, 60]},
 	"Sarriette":    {"pv": 200, "force": 60, "defense": 32, "agility": 40, "pa": 4, "pm": 3, "color": Color(0.55, 0.80, 0.35), "spell": ["Fouet de sarriette", 2, 4, 75]},

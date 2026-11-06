@@ -34,7 +34,7 @@ func _boot() -> void:
 			art = p
 	check(not art.is_empty(), "Artificier jouable")
 	art["spells"] = gm._build_spells("Artificier", 100)
-	check(art["spells"].size() == 32, "32 sorts au niveau 100 (V74 : Transposition)")
+	check(art["spells"].size() == 34, "34 sorts au niveau 100 (V74 : Transposition ; V108 : Grappin mécanique, Onde de choc)")
 	for nm: String in ["Pistolet à ressort", "Poser Bombe", "Déclencheur", "Poser Mine", "Poser Tourelle", "Poser Balise de transposition", "Glyphe de surcharge", "Poser Charge à fragmentation", "Fusil à pompe", "Arsenal total", "Rappel", "Renforcement", "Transposition", "Poser Bombe incendiaire", "Poser Bombe assourdissante", "Poser Tourelle lourde"]:
 		check(not _sp(art, nm).is_empty(), "sort " + nm)
 	var dec: Dictionary = _sp(art, "Déclencheur")

@@ -1860,6 +1860,8 @@ func _hit_target(caster: Dictionary, spell: Dictionary, p: Dictionary, t: Dictio
 		_apply_status(caster, t, String(d["id"]), int(d["turns"]), v)
 	if int(p["push"]) > 0 and int(t["current_pv"]) > 0:
 		_push(caster, t, int(p["push"]))
+	if int(p["pull"]) > 0 and int(t["current_pv"]) > 0:
+		_push(caster, t, int(p["pull"]), true)
 	return dealt
 
 
@@ -2750,10 +2752,13 @@ func _resolve_teleport(caster: Dictionary, _spell: Dictionary, p: Dictionary, ce
 
 # ── Poussée ────────────────────────────────────────────────────────────────
 
-func _push(caster: Dictionary, tgt: Dictionary, n: int) -> void:
+## `pull` = true : la cible est attirée vers le lanceur (V108). Elle s'arrête au contact sans dégâts de collision.
+func _push(caster: Dictionary, tgt: Dictionary, n: int, pull: bool = false) -> void:
 	var dir: Vector2i = Combat.dir_to(pos_of(caster), pos_of(tgt))
 	if dir == Vector2i.ZERO:
 		return
+	if pull:
+		dir = -dir
 	var path: Array[Vector2i] = []
 	var collided: bool = false
 	var coll_dmg: int = 0
@@ -2762,7 +2767,7 @@ func _push(caster: Dictionary, tgt: Dictionary, n: int) -> void:
 		var nxt: Vector2i = pos_of(tgt) + dir * (path.size() + 1)
 		if not _in_bounds(nxt) or obstacles.has(nxt) or grid[nxt.y][nxt.x] != null:
 			collided = true
-			coll_dmg = 15 * (n - i) + int(float(caster["level"]) / 3.0)
+			coll_dmg = 0 if pull else 15 * (n - i) + int(float(caster["level"]) / 3.0)
 			if _in_bounds(nxt):
 				other = entity_at(nxt)
 			break

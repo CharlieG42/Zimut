@@ -68,12 +68,14 @@ Chasseur,25,Piège à loup
 Chasseur,26,Nuée empoisonnée
 Chasseur,28,Cri de guerre
 Chasseur,30,Flèche de feu
+Chasseur,32,Flèche-grappin
 Chasseur,35,Rappel de balise
 Chasseur,38,Tir du chasseur
 Chasseur,42,Pluie de flèches
 Chasseur,45,Tir ciblé
 Chasseur,48,Gerbe de glace
 Chasseur,50,Glyphe de flammes
+Chasseur,52,Tir de dispersion
 Chasseur,55,Tir d'estoc
 Chasseur,58,Œil de faucon
 Chasseur,62,Flèche de glace
@@ -268,11 +270,13 @@ Artificier,24,Cri de guerre
 Artificier,26,Renforcement
 Artificier,30,Poser Bombe assourdissante;Transposition
 Artificier,35,Marque du prédateur;Poser Balise de transposition
+Artificier,36,Grappin mécanique
 Artificier,40,Tir de précision
 Artificier,44,Mine à fragmentation
 Artificier,48,Surcharge
 Artificier,50,Glyphe de surcharge
 Artificier,55,Poser Tourelle lourde
+Artificier,58,Onde de choc
 Artificier,60,Roquette
 Artificier,65,Poser Charge à fragmentation
 Artificier,70,Rafale de mitraillette
