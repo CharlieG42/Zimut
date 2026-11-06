@@ -1,0 +1,3 @@
+V104|Portail vers la Nation suivante : la carte de la Sylve en possède un (au bout du pont), scellé tant que le donjon final n'est pas vaincu.
+V104|Vaincre le donjon final d'une Nation ouvre la Nation suivante : le portail s'ouvre et le résultat du combat l'annonce.
+V104|Le portail se reprend à volonté et permet aussi de voyager vers n'importe quelle Nation déjà débloquée.

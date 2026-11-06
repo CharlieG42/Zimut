@@ -2170,6 +2170,8 @@ func _show_result_window(victory: bool) -> void:
 					dtxt += "   ·   la Pierre n'est pas tombée (%d %%) — le donjon se refait à volonté." % roundi(float(dg.get("chance", 0.0)) * 100.0)
 				"owned":
 					dtxt += "   ·   Pierre déjà en ta possession."
+			if String(dg.get("unlocked_zone", "")) != "":
+				dtxt += "\n🌀  Le portail s'ouvre : %s est désormais accessible !" % ProgressionManager.adventure_zone_name(String(dg["unlocked_zone"]))
 			dcol = Color(0.55, 0.95, 0.60)
 		else:
 			dtxt = "🏰  Salle %d / %d vaincue — la suivante t'attend." % [int(dg.get("room", 1)), int(dg.get("rooms", Dungeons.ROOMS))]
