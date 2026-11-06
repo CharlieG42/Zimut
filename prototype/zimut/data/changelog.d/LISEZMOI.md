@@ -1,0 +1,3 @@
+Journal des nouveautés : un fichier par version, nommé V101.txt, V102.txt…
+Chaque ligne : V101|texte affiché au joueur (au moins 3 lignes pour la version la plus récente).
+Ne plus modifier data/changelog.txt (historique) : cela provoquait un conflit à chaque merge.
