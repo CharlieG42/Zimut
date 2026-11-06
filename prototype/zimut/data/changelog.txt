@@ -1,6 +1,9 @@
 V100|Carte 2D d'aventure : le héros utilise désormais les modèles 3D du mode 3D, cuits en sprites animés : il se tourne dans 8 directions et marche avec un vrai cycle de pas.
 V100|Au repos, le héros respire doucement dans la direction où il regarde ; la course accélère la cadence de marche.
 V100|Réglages : « Héros de la carte 2D » permet de revenir aux anciennes illustrations (Modèles 3D animés / Illustrés).
+V97|Temps de jeu corrigé : le compteur ne tourne plus quand l'appli est en arrière-plan, en veille ou sans action pendant 10 minutes (le temps affiché dans Mes Parties était gonflé).
+V97|Un compteur déjà gonflé (plus de 36 h dans un seul mode) est remis à zéro une fois au chargement de la partie ; les autres temps sont conservés.
+V97|Chaque image compte au maximum 1 seconde, ce qui évite qu'un long retour de veille s'ajoute d'un coup au temps total.
 V96|Fiche personnage, onglet Caractéristiques : les 9 caractéristiques (Vitalité à Défense, PA, PM, Portée) tiennent sur un seul écran en 3 colonnes, sans défilement.
 V96|Chaque carte affiche le total, une jauge et le détail en couleur (base + points investis + objets), avec les boutons − / + et le coût du prochain point.
 V96|Les descriptions des caractéristiques passent en info-bulle (appui long) pour gagner de la place.
