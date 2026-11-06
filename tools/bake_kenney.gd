@@ -99,12 +99,12 @@ func _boot() -> void:
 		holder.add_child(sun)
 		var cam := Camera3D.new()
 		cam.projection = Camera3D.PROJECTION_ORTHOGONAL
-		cam.size = VIEW
+		cam.size = float(job.get("view", VIEW))
 		holder.add_child(cam)
 		root.add_child(vp)
 		await process_frame
 		var fp: Array = job["fp"]
-		var ctr := Vector3(float(fp[0]) * 0.5, 2.5, float(fp[1]) * 0.5)
+		var ctr := Vector3(float(fp[0]) * 0.5, float(job.get("cy", 2.5)), float(fp[1]) * 0.5)
 		var dir := Vector3(1, 0.8165, 1).normalized()
 		cam.look_at_from_position(ctr + dir * 40.0, ctr, Vector3.UP)
 		cam.current = true
