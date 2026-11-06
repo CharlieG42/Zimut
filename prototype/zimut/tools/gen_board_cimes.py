@@ -74,6 +74,7 @@ POIS = {
     "17,60": poi("combat", "Tour des Runes Violettes", "Des menhirs chantent autour d'une porte violette : quatre salles, plus dures.", guardian="Montagne#3"),
     "81,18": poi("combat", "Mine d'Or Gelée", "Une porte dorée sous la roche : quatre salles, très dures.", guardian="Montagne#4"),
     "50,13": poi("combat", "Donjon de la Nation Cimes", "Le château de glace : quatre salles ; le Gardien veille sur la Pierre de Givre.", guardian="Montagne"),
+    "33,18": poi("exit", "Portail des Vents", "Un portail de givre s'ouvre sur la Nation suivante : le Plateau des Vents.", level=45, portal=True, requires="Montagne", to="vents_plateau"),
     "23,41": poi("combat", "Sentinelles de glace", "Des silhouettes figées bougent quand on approche.", level=34),
     "60,60": poi("combat", "Pillards du piémont", "Des pillards rançonnent les voyageurs du pont.", level=36),
     "30,54": poi("combat", "Yétis de la corniche", "Une famille de yétis défend sa corniche.", level=38),

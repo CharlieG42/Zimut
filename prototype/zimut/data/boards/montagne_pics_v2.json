@@ -116,6 +116,15 @@
 "desc": "Le château de glace : quatre salles ; le Gardien veille sur la Pierre de Givre.",
 "guardian": "Montagne"
 },
+"33,18": {
+"kind": "exit",
+"name": "Portail des Vents",
+"desc": "Un portail de givre s'ouvre sur la Nation suivante : le Plateau des Vents.",
+"level": 45,
+"portal": true,
+"requires": "Montagne",
+"to": "vents_plateau"
+},
 "23,41": {
 "kind": "combat",
 "name": "Sentinelles de glace",

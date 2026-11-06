@@ -449,6 +449,12 @@ const ADVENTURE_PUZZLES := {
 		"wrong": "Les menhirs se taisent… et recommencent leur chant."},
 	"foret_sylve,54,30": {"type": "riddle", "text": "Je grandis quand on me nourrit, mais je meurs si l’on me donne à boire. Qui suis-je ?",
 		"answer": "Le feu", "choices": ["Le feu", "L'arbre", "Le vent"], "wrong": "Les runes restent muettes."},
+	# Planches temporaires du Brasier et des Brumes (V105)
+	"brasier_cendres,46,46": {"type": "lights", "size": 3, "scramble": 3,
+		"text": "Allumez les neuf braises. Toucher une braise bascule aussi ses voisines.",
+		"wrong": "Les braises s'éteignent dans un soupir."},
+	"brumes_marais,34,48": {"type": "riddle", "text": "Plus il y a de moi, moins tu vois. Qui suis-je ?",
+		"answer": "La brume", "choices": ["La brume", "La lumière", "La nuit"], "wrong": "Le champignon vire au gris."},
 	# Planche des Cimes (V103)
 	"montagne_pics,56,45": {"type": "lights", "size": 4, "scramble": 5,
 		"text": "Faites briller les seize miroirs. Chaque miroir touché bascule aussi ses voisins.",
@@ -2816,6 +2822,9 @@ func adventure_enter_zone(adv: Dictionary, zone_id: String) -> bool:
 		return false
 	adv["zone"] = zone_id
 	adv["hero_pos"] = ADVENTURE_ZONES[zone_id]["start"].duplicate()
+	if not BoardArt.def(zone_id).is_empty():          # carte illustrée : départ de la planche (la grille est plus grande)
+		var bs: Vector2i = BoardArt.start(zone_id)
+		adv["hero_pos"] = [bs.x, bs.y]
 	var pos := Vector2i(int(adv["hero_pos"][0]), int(adv["hero_pos"][1]))
 	adventure_move(adv, pos)
 	adv["moves"] = maxi(0, int(adv.get("moves", 1)) - 1)

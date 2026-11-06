@@ -1,0 +1,3 @@
+V105|Cartes 2D (provisoires) du Brasier et des Brumes : chacune compte 5 portes de donjon (4 de champ + le final) et un portail vers la Nation suivante.
+V105|Les Cimes ont maintenant leur portail vers le Plateau des Vents, et le portail reste ouvert pour de bon une fois débloqué.
+V105|Chaîne complète : Sylve, Brasier, Brumes, Cimes, Vents — chaque donjon final ouvre la Nation suivante.

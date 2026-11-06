@@ -63,6 +63,7 @@ func _boot() -> void:
 	check(not mgr.poi_done(p), "le portail reste utilisable (jamais « terminé »)")
 	check(mgr.interact().get("action", "") == "exit", "…et se reprend à volonté")
 	check(mgr.enter_zone(String(poi["to"])) and mgr.zone_id() == String(poi["to"]), "traversée : arrivée dans la Nation suivante")
+	check(AT.walkable(String(poi["to"]), mgr.hero_pos()) or BA.def(String(poi["to"])).is_empty(), "arrivée sur une case jouable de la planche de destination")
 	var prog: Dictionary = {}
 	mgr.enter_zone(z)
 	prog = mgr.zone_progress()

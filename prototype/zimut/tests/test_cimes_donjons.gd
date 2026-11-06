@@ -26,7 +26,7 @@ func _boot() -> void:
 	check(int(isz[0]) % 16 == 0 and int(isz[1]) % 16 == 0 and BA.size(z) == Vector2i(int(isz[0]) / 16, int(isz[1]) / 16), "grille = image / 16")
 	check(AT.walkable(z, BA.start(z)), "départ jouable")
 	var pois: Dictionary = pm.pois_of(z)
-	check(pois.size() == 19, "19 lieux (%d)" % pois.size())
+	check(pois.size() == 20, "20 lieux (%d)" % pois.size())
 	var tiers: Array = []
 	var bad: int = 0
 	for k: String in pois.keys():
