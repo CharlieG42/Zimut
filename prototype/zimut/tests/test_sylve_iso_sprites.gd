@@ -83,7 +83,13 @@ func _boot() -> void:
 			check(SpriteDecor.texture(String(e[0])) != null, "sprite %s chargé" % e[0])
 	var terrain: Dictionary = AdventureTerrain.zone_terrain(z)
 	for kind: String in (terrain["obstacles"] as Dictionary).values() + (terrain["decor"] as Dictionary).values():
-		check(SpriteDecor.SPRITES.has(kind), "décor %s a un sprite" % kind)
+		check(kind == "building" or SpriteDecor.SPRITES.has(kind), "décor %s a un sprite" % kind)
+	var blds: Array = BoardArt.buildings(z)
+	check(blds.size() >= 8, "bâtiments posés (%d)" % blds.size())
+	for b: Dictionary in blds:
+		for yy: int in range(int(b["y"]), int(b["y"]) + int(b["h"])):
+			for xx: int in range(int(b["x"]), int(b["x"]) + int(b["w"])):
+				check(not AdventureTerrain.walkable(z, Vector2i(xx, yy)), "bâtiment %s bloque %d,%d" % [b["k"], xx, yy])
 	gs.set_sylvestre_board("bidon")
 	check(gs.sylvestre_board == "v2", "valeur inconnue → v2")
 	gs.set_sylvestre_board("classic")

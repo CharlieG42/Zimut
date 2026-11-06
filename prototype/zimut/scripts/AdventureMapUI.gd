@@ -637,9 +637,19 @@ func _rebuild_board(biome: String) -> void:
 		# V106 : arbres, rochers, fleurs… (sprites) sur le plateau à étages
 		var terrain: Dictionary = AdventureTerrain.zone_terrain(zid)
 		for p: Vector2i in (terrain["obstacles"] as Dictionary).keys():
-			_add_decor(p, String(terrain["obstacles"][p]), biome, pal, 0.8)
+			if String(terrain["obstacles"][p]) != "building":
+				_add_decor(p, String(terrain["obstacles"][p]), biome, pal, 0.8)
 		for p2: Vector2i in (terrain["decor"] as Dictionary).keys():
 			_add_decor(p2, String(terrain["decor"][p2]), biome, pal, 0.7)
+		for b: Dictionary in BoardArt.buildings(zid):
+			var bn := BuildingNode.new()
+			bn.kind = String(b["k"])
+			bn.fw = int(b["w"])
+			bn.fh = int(b["h"])
+			bn.cs = BoardArt.iso_cs(zid)
+			bn.seed_value = int(b["x"]) * 31 + int(b["y"]) * 17
+			bn.position = cell_center(Vector2i(int(b["x"]) + bn.fw - 1, int(b["y"]) + bn.fh - 1)) + Vector2(0, BoardArt.ISO_TH * bn.cs * 0.5)
+			_entities.add_child(bn)
 	for k: String in pois.keys():
 		var pos: Vector2i = AdventureTerrain.parse(k)
 		var poi: Dictionary = pois[k]
@@ -2674,6 +2684,164 @@ class IsoGround extends Node2D:
 					top = _tint(trail, float(h) / float(BoardArt.raw(zid).get("unit", 4)) * 0.4, x, y)
 				var e: float = 1.015   # recouvrement léger : aucun interstice entre les cases
 				draw_colored_polygon(PackedVector2Array([ctr + Vector2(0, -hh * e), ctr + Vector2(hw * e, 0), ctr + Vector2(0, hh * e), ctr + Vector2(-hw * e, 0)]), top)
+
+
+## V106 : bâtiment stylisé du plateau iso (maison, chaumière, grange, moulin, tour, chapelle).
+## Dessiné en code : un volume isométrique à deux faces (lumière à gauche) + toit. Origine = sommet avant de l'emprise.
+class BuildingNode extends Node2D:
+	var kind: String = "maison"
+	var fw: int = 2
+	var fh: int = 2
+	var cs: float = 0.625
+	var seed_value: int = 0
+	var _t: float = 0.0
+
+	const STYLE := {
+		"maison": {"wall": Color(0.90, 0.83, 0.68), "frame": Color(0.45, 0.30, 0.18), "roof": Color(0.70, 0.30, 0.22), "wh": 44.0, "rh": 32.0, "roof_kind": "gable"},
+		"chaumiere": {"wall": Color(0.74, 0.58, 0.40), "frame": Color(0.40, 0.27, 0.16), "roof": Color(0.82, 0.68, 0.34), "wh": 30.0, "rh": 30.0, "roof_kind": "gable"},
+		"grange": {"wall": Color(0.62, 0.40, 0.30), "frame": Color(0.36, 0.22, 0.16), "roof": Color(0.52, 0.26, 0.22), "wh": 50.0, "rh": 36.0, "roof_kind": "gable"},
+		"moulin": {"wall": Color(0.80, 0.77, 0.72), "frame": Color(0.50, 0.46, 0.42), "roof": Color(0.55, 0.36, 0.26), "wh": 86.0, "rh": 36.0, "roof_kind": "pyramid"},
+		"tour": {"wall": Color(0.70, 0.70, 0.72), "frame": Color(0.44, 0.44, 0.48), "roof": Color(0.30, 0.42, 0.58), "wh": 112.0, "rh": 46.0, "roof_kind": "pyramid"},
+		"chapelle": {"wall": Color(0.82, 0.82, 0.80), "frame": Color(0.50, 0.50, 0.52), "roof": Color(0.32, 0.45, 0.60), "wh": 54.0, "rh": 36.0, "roof_kind": "gable"},
+	}
+
+	func _ready() -> void:
+		set_process(kind == "moulin")
+
+	func _process(delta: float) -> void:
+		_t += delta
+		queue_redraw()
+
+	func _up(h: float) -> Vector2:
+		return Vector2(0.0, -h)
+
+	func _quad(a: Vector2, b: Vector2, c: Vector2, d: Vector2, col: Color, line: bool = true) -> void:
+		draw_colored_polygon(PackedVector2Array([a, b, c, d]), col)
+		if line:
+			draw_polyline(PackedVector2Array([a, b, c, d, a]), Color(0.10, 0.07, 0.05, 0.55), 1.2, true)
+
+	func _tri(a: Vector2, b: Vector2, c: Vector2, col: Color) -> void:
+		draw_colored_polygon(PackedVector2Array([a, b, c]), col)
+		draw_polyline(PackedVector2Array([a, b, c, a]), Color(0.10, 0.07, 0.05, 0.55), 1.2, true)
+
+	func _draw() -> void:
+		var st: Dictionary = STYLE.get(kind, STYLE["maison"])
+		var hw: float = BoardArt.ISO_TW * cs * 0.5
+		var hh: float = BoardArt.ISO_TH * cs * 0.5
+		var inset: float = 0.10
+		var ex := Vector2(hw * fw, hh * fw) * (1.0 - inset)
+		var ey := Vector2(-hw * fh, hh * fh) * (1.0 - inset)
+		# C = sommet avant (origine) ; on recentre légèrement l'emprise pour laisser un peu d'herbe autour
+		var C := Vector2(0.0, -hh * 0.35)
+		var D: Vector2 = C - ex
+		var B: Vector2 = C - ey
+		var A: Vector2 = C - ex - ey
+		var wh: float = float(st["wh"])
+		var rh: float = float(st["rh"])
+		var wall: Color = st["wall"]
+		var frame: Color = st["frame"]
+		var roof: Color = st["roof"]
+		var wl: Color = wall
+		var wr: Color = wall.darkened(0.22)
+		# ombre au sol
+		draw_colored_polygon(PackedVector2Array([A + Vector2(8, 3), B + Vector2(14, 4), C + Vector2(10, 8), D + Vector2(2, 6)]), Color(0.03, 0.06, 0.08, 0.20))
+		var A2: Vector2 = A + _up(wh)
+		var B2: Vector2 = B + _up(wh)
+		var C2: Vector2 = C + _up(wh)
+		var D2: Vector2 = D + _up(wh)
+		var rg: String = String(st["roof_kind"])
+		var rs: Vector2 = (A + D) * 0.5 + _up(wh + rh)
+		var re: Vector2 = (B + C) * 0.5 + _up(wh + rh)
+		var apex: Vector2 = (A + C) * 0.5 + _up(wh + rh)
+		if rg == "gable":
+			_quad(A2, B2, re, rs, roof.darkened(0.30))                      # pan arrière
+		# murs
+		_quad(D, C, C2, D2, wl)
+		_quad(C, B, B2, C2, wr)
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seed_value
+		var timber: bool = kind in ["maison", "chaumiere", "grange"]
+		# structure : colombages / assises de pierre
+		if timber:
+			for i: int in range(1, fw * 2):
+				var f: float = float(i) / float(fw * 2)
+				draw_line(D.lerp(C, f), D2.lerp(C2, f), frame, 2.0)
+			draw_line(D2.lerp(C2, 0.0), C2, frame, 2.5)
+			draw_line(D + _up(wh * 0.5), C + _up(wh * 0.5), frame.lightened(0.1), 1.5)
+			for i2: int in range(1, fh * 2):
+				var f2: float = float(i2) / float(fh * 2)
+				draw_line(C.lerp(B, f2), C2.lerp(B2, f2), frame.darkened(0.15), 2.0)
+		else:
+			for row: int in range(1, int(wh / 14.0)):
+				var hy: float = float(row) * 14.0
+				draw_line(D + _up(hy), C + _up(hy), frame, 1.0)
+				draw_line(C + _up(hy), B + _up(hy), frame.darkened(0.2), 1.0)
+				for j: int in range(1, 4):
+					var jf: float = (float(j) + float(row % 2) * 0.5) / 4.0
+					draw_line(D.lerp(C, jf) + _up(hy - 14.0), D.lerp(C, jf) + _up(hy), frame, 1.0)
+		# porte et fenêtres sur la face gauche
+		var door_c: Vector2 = D.lerp(C, 0.5)
+		var dw: float = 0.12 if kind != "grange" else 0.22
+		var dh: float = minf(wh * 0.62, 30.0) if kind != "grange" else 36.0
+		var d0: Vector2 = D.lerp(C, 0.5 - dw)
+		var d1: Vector2 = D.lerp(C, 0.5 + dw)
+		_quad(d0, d1, d1 + _up(dh), d0 + _up(dh), Color(0.20, 0.12, 0.08))
+		if kind == "grange":
+			draw_line(door_c, door_c + _up(dh), Color(0.5, 0.35, 0.2), 1.5)
+		if wh > 40.0 and kind != "grange":
+			for wf: float in [0.2, 0.8]:
+				var w0: Vector2 = D.lerp(C, wf - 0.07) + _up(wh * 0.55)
+				var w1: Vector2 = D.lerp(C, wf + 0.07) + _up(wh * 0.55)
+				_quad(w0, w1, w1 + _up(13.0), w0 + _up(13.0), Color(0.95, 0.82, 0.45) if kind != "tour" else Color(0.15, 0.12, 0.2))
+		if wh > 40.0 and kind in ["tour", "moulin", "chapelle"]:
+			var wc: Vector2 = C.lerp(B, 0.5) + _up(wh * 0.6)
+			var w2: Vector2 = wc + (B - C).normalized() * 6.0
+			var w3: Vector2 = wc - (B - C).normalized() * 6.0
+			_quad(w3, w2, w2 + _up(15.0), w3 + _up(15.0), Color(0.15, 0.12, 0.2) if kind != "chapelle" else Color(0.45, 0.65, 0.85))
+		# toit
+		if rg == "gable":
+			_tri(C2, B2, re, wr)                                           # pignon (face droite)
+			_quad(D2, C2, re, rs, roof)                                     # pan avant
+			# rebord de toit
+			draw_line(D2, C2, roof.darkened(0.45), 3.0)
+			draw_line(rs, re, roof.lightened(0.25), 2.5)
+			if kind in ["maison", "grange"]:
+				var ch: Vector2 = D2.lerp(re, 0.55) + Vector2(10, 0)
+				_quad(ch, ch + Vector2(9, 3), ch + Vector2(9, -9), ch + Vector2(0, -12), Color(0.55, 0.50, 0.46))
+				_quad(ch + Vector2(0, -12), ch + Vector2(9, -9), ch + Vector2(9, -19), ch + Vector2(0, -22), Color(0.40, 0.36, 0.34))
+			if kind == "chaumiere":
+				for i3: int in range(1, 5):
+					var tf: float = float(i3) / 5.0
+					draw_line(D2.lerp(rs, tf), C2.lerp(re, tf), roof.darkened(0.18), 1.2)
+			if kind == "chapelle":
+				var sb: Vector2 = (rs + re) * 0.5
+				_quad(sb + Vector2(-7, 0), sb + Vector2(7, 5), sb + Vector2(7, -22), sb + Vector2(-7, -27), wl)
+				_tri(sb + Vector2(-9, -26), sb + Vector2(9, -20), sb + Vector2(0, -52), roof.lightened(0.1))
+				draw_circle(sb + Vector2(0, -56), 3.0, Color(0.95, 0.8, 0.3))
+		else:
+			var fl: Vector2 = C2 + Vector2(0, 0)
+			_tri(D2, C2, apex, roof)
+			_tri(C2, B2, apex, roof.darkened(0.25))
+			draw_line(D2, C2, roof.darkened(0.45), 3.0)
+			draw_line(C2, B2, roof.darkened(0.55), 3.0)
+			if kind == "tour":
+				# créneaux sous le toit et fanion
+				for i4: int in range(1, 4):
+					var cf: float = float(i4) / 4.0
+					var m0: Vector2 = D2.lerp(C2, cf)
+					draw_rect(Rect2(m0 + Vector2(-3, -5), Vector2(6, 5)), wall.darkened(0.1))
+				draw_line(apex, apex + Vector2(0, -22), Color(0.2, 0.15, 0.1), 2.0)
+				draw_colored_polygon(PackedVector2Array([apex + Vector2(0, -22), apex + Vector2(16, -17), apex + Vector2(0, -12)]), Color(0.85, 0.2, 0.2))
+			if kind == "moulin":
+				var hub: Vector2 = (D + C) * 0.5 + _up(wh * 0.72) + Vector2(0, 2)
+				var ang: float = _t * 0.9
+				for i5: int in range(4):
+					var a5: float = ang + float(i5) * PI * 0.5
+					var tip: Vector2 = hub + Vector2(cos(a5), sin(a5)) * 44.0
+					draw_line(hub, tip, Color(0.45, 0.32, 0.20), 3.0, true)
+					var side: Vector2 = Vector2(-sin(a5), cos(a5)) * 9.0
+					draw_colored_polygon(PackedVector2Array([hub + (tip - hub) * 0.35, tip, tip + side, hub + (tip - hub) * 0.35 + side]), Color(0.93, 0.90, 0.80, 0.95))
+				draw_circle(hub, 4.0, Color(0.3, 0.2, 0.12))
 
 
 ## Décor (arbre, rocher, fleurs…) dessiné par BattleScenery.

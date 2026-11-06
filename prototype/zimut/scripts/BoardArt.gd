@@ -290,3 +290,8 @@ static func iso_cell_at(zone_id: String, w: Vector2) -> Vector2i:
 		if int(hs.get(c, -1)) == hu:
 			return c
 	return fallback
+
+
+## Bâtiments du plateau iso : [{k, x, y, w, h}] (emprise en cases ; leurs cases sont des obstacles « building »).
+static func buildings(zone_id: String) -> Array:
+	return raw(zone_id).get("buildings", [])

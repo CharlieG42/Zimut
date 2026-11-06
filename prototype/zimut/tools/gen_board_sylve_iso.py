@@ -252,6 +252,53 @@ for k in list(obstacles):
         n = (x + rng.choice((-1, 1, 0, 0)), y + rng.choice((-1, 1, 0, 0)))
         if walk[n[1]][n[0]] and n not in protected and "%d,%d" % n not in obstacles and 0 <= n[0] < COLS and 0 <= n[1] < ROWS:
             obstacles["%d,%d" % n] = rng.choice(OBST)
+# ── Bâtiments (V106) : emprises plates et libres, nom, taille en cases ──
+BUILDINGS = []
+SIZES = {"maison": (2, 2), "chaumiere": (2, 2), "grange": (3, 2), "moulin": (2, 2), "tour": (2, 2), "chapelle": (2, 2)}
+BPLAN = [  # (type, cible x, y, étage)
+    ("maison", 55, 35, 0), ("chaumiere", 60, 39, 0), ("maison", 52, 33, 0), ("grange", 65, 36, 0), ("moulin", 68, 44, 0),
+    ("chaumiere", 28, 44, 0),
+    ("chaumiere", 42, 34, 1), ("tour", 52, 27, 1), ("maison", 24, 34, 1),
+    ("chapelle", 42, 24, 2), ("tour", 30, 16, 2),
+    ("chapelle", 22, 13, 3),
+]
+occupied = set()
+def free_rect(x0, y0, w, h, lv):
+    for yy in range(y0 - 1, y0 + h + 1):
+        for xx in range(x0 - 1, x0 + w + 1):
+            if not (0 <= xx < COLS and 0 <= yy < ROWS) or not walk[yy][xx] or (xx, yy) in occupied:
+                return False
+            inner = x0 <= xx < x0 + w and y0 <= yy < y0 + h
+            if H[yy][xx] != lv * UNIT or (inner and (xx, yy) in protected_core) or (xx, yy) in ramp_cells:
+                return False
+    return True
+protected_core = set(trail) | {tuple(START)}
+for k in POIS:
+    px, py = map(int, k.split(","))
+    for i in range(-2, 3):
+        for j in range(-2, 3):
+            protected_core.add((px + i, py + j))
+ramp_cells = {(x, y) for lv, cells in ramps for k, x, y in cells}
+for typ, tx, ty, lv in BPLAN:
+    w, h = SIZES[typ]
+    best = None
+    for y0 in range(ROWS):
+        for x0 in range(COLS):
+            if LV[y0][x0] == lv and free_rect(x0, y0, w, h, lv):
+                dd = (x0 - tx) ** 2 + (y0 - ty) ** 2
+                if best is None or dd < best[0]:
+                    best = (dd, x0, y0)
+    if best is None:
+        print("bâtiment sans place :", typ, tx, ty); continue
+    _, x0, y0 = best
+    BUILDINGS.append(dict(k=typ, x=x0, y=y0, w=w, h=h))
+    for yy in range(y0 - 1, y0 + h + 1):
+        for xx in range(x0 - 1, x0 + w + 1):
+            occupied.add((xx, yy))
+            obstacles.pop("%d,%d" % (xx, yy), None); decor.pop("%d,%d" % (xx, yy), None)
+    for yy in range(y0, y0 + h):
+        for xx in range(x0, x0 + w):
+            obstacles["%d,%d" % (xx, yy)] = "building"
 # sécurité : tout reste atteignable
 blocked = {tuple(map(int, k.split(","))) for k in obstacles}
 reach2 = bfs(tuple(START), frozenset(blocked))
@@ -260,7 +307,9 @@ for k in POIS:
     guard = 0
     while t not in bfs(tuple(START), frozenset(blocked)) and guard < 400:
         guard += 1
-        near = min(blocked, key=lambda o: abs(o[0] - t[0]) + abs(o[1] - t[1]))
+        cands_rm = [o for o in blocked if obstacles.get("%d,%d" % o) != "building"]
+        if not cands_rm: break
+        near = min(cands_rm, key=lambda o: abs(o[0] - t[0]) + abs(o[1] - t[1]))
         blocked.discard(near); obstacles.pop("%d,%d" % near, None)
 for k in list(decor):
     if k in obstacles: del decor[k]
@@ -268,9 +317,11 @@ for k in list(decor):
 mask = ["".join("#" if walk[y][x] else "." for x in range(COLS)) for y in range(ROWS)]
 heights = ["".join(chr(ord("0") + H[y][x] // 1) if H[y][x] < 10 else chr(ord("a") + H[y][x] - 10) for x in range(COLS)) for y in range(ROWS)]
 out = dict(iso=True, cols=COLS, rows=ROWS, unit=UNIT, cell_scale=0.625, start=START, mask=mask, heights=heights,
-           trail=["%d,%d" % c for c in sorted(trail)], obstacles=obstacles, decor=decor, pois=POIS)
+           trail=["%d,%d" % c for c in sorted(trail)], buildings=BUILDINGS, obstacles=obstacles, decor=decor, pois=POIS)
 dst = Path(__file__).resolve().parent.parent / "data/boards/foret_sylve_iso.json"
 dst.write_text(json.dumps(out, ensure_ascii=False, indent=0))
+bad2 = [k for k in POIS if tuple(map(int, k.split(","))) not in bfs(tuple(START), frozenset(blocked))]
+print("lieux inaccessibles (après bâtiments) :", bad2, "| bâtiments :", [(b["k"], b["x"], b["y"]) for b in BUILDINGS])
 print("écrit", dst, "| cases", sum(r.count("#") for r in mask), "| obstacles", len(obstacles), "| décors", len(decor), "| départ", START)
 for k, p in sorted(POIS.items(), key=lambda kv: kv[1].get("guardian", "z")):
     x, y = map(int, k.split(","))

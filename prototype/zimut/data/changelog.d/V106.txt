@@ -1,3 +1,4 @@
 V106|Nouvelle option de carte 2D « Iso (test) » pour la Sylve : plateau isométrique à 4 étages, décoré de sprites illustrés.
 V106|Cases plus petites et deux fois plus nombreuses, quadrillage effacé ; falaises entre les étages, rampes pour monter.
 V106|Les 4 donjons de champ puis le donjon final s’étagent jusqu’au sommet, où s’ouvre le portail vers le Brasier.
+V106|Bâtiments stylisés : maisons, chaumières, grange, moulin animé, tours de guet et chapelles répartis sur les étages.
