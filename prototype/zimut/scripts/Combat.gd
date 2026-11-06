@@ -973,7 +973,7 @@ const SUMMONS := {
 	"Élémentaire de Cristal": {"pv": 170, "force": 60, "defense": 30, "agility": 34, "pa": 4, "pm": 3, "color": Color(1.00, 0.95, 0.60), "spell": ["Éclat de cristal", 2, 3, 65]},
 	"Ombre": {"pv": 160, "force": 65, "defense": 30, "agility": 55, "pa": 4, "pm": 4, "color": Color(0.80, 0.55, 0.25), "spell": ["Lame d'ombre", 2, 3, 70]},
 	"Esprit de la Forêt": {"pv": 260, "force": 70, "defense": 40, "agility": 45, "pa": 5, "pm": 4, "color": Color(0.65, 0.40, 0.25), "spell": ["Vrilles sylvestres", 2, 5, 80]},
-	"Archer Sylvestre": {"pv": 150, "force": 45, "defense": 24, "agility": 35, "pa": 3, "pm": 3, "color": Color(0.30, 0.55, 0.25), "spell": ["Flèche de sève", 2, 7, "40 dégâts + ralentit 1 pm (1 tour)"]},
+	"Archer Sylvestre": {"pv": 150, "force": 45, "defense": 24, "agility": 35, "pa": 3, "pm": 3, "color": Color(0.30, 0.55, 0.25), "spell": ["Flèche de sève", 2, 5, "40 dégâts + ralentit 1 pm (1 tour)"]},
 	"Ent de Combat": {"pv": 240, "force": 45, "defense": 42, "agility": 12, "pa": 3, "pm": 2, "color": Color(0.85, 0.55, 0.40), "spell": ["Coup de branche", 2, 1, "55 dégâts + étourdit 1 tour (25%)"]},
 	"Tronc":        {"pv": 320, "force": 45, "defense": 65, "agility": 10, "pa": 4, "pm": 2, "color": Color(0.45, 0.32, 0.18), "spell": ["Bras de bois", 2, 1, 60]},
 	"Sarriette":    {"pv": 200, "force": 60, "defense": 32, "agility": 40, "pa": 4, "pm": 3, "color": Color(0.55, 0.80, 0.35), "spell": ["Fouet de sarriette", 2, 4, 75]},

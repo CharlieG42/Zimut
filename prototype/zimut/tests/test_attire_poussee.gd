@@ -1,5 +1,5 @@
 extends SceneTree
-## V108 — Archer Sylvestre à plus longue portée ; Chasseur et Ingénieur : poussées et attirance (« attire de N cases »).
+## V108 — Héros Chasseur : +1 de portée sur ses sorts ; Chasseur et Ingénieur : poussées et attirance (« attire de N cases »).
 ## Lancement : godot --headless --path . -s tests/test_attire_poussee.gd
 var fails: int = 0
 func check(c: bool, m: String) -> void:
@@ -18,7 +18,18 @@ func _boot() -> void:
 	await process_frame
 	# Archer Sylvestre
 	var arc: Dictionary = Combat.summon_spells("Archer Sylvestre")[0]
-	check(int(arc["range"]) == 7, "Archer Sylvestre : portée 7 (%s)" % str(arc["range"]))
+	check(int(arc["range"]) == 5, "Archer Sylvestre inchangé (portée 5)")
+	# Héros Chasseur : +1 PO sur ses sorts à distance
+	var ch_max: int = 0
+	for line: String in FileAccess.get_file_as_string("res://data/sorts.txt").split("\n"):
+		var c: PackedStringArray = line.split(",")
+		if c.size() > 4 and c[0] == "Chasseur":
+			ch_max = maxi(ch_max, int(c[4]))
+			if c[1] == "Tir précis":
+				check(int(c[4]) == 6, "Tir précis : portée 6 (5 + 1)")
+			if c[1] == "Flèche du destin":
+				check(int(c[4]) == 9, "Flèche du destin : portée 9 (8 + 1)")
+	check(ch_max == 9, "portée max du Chasseur : 9")
 	# données
 	var sorts: String = FileAccess.get_file_as_string("res://data/sorts.txt")
 	var prog: String = FileAccess.get_file_as_string("res://data/progression_sorts.txt")
