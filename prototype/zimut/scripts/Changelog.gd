@@ -1,28 +1,54 @@
 class_name Changelog
 extends RefCounted
-## Journal des nouveautés : data/changelog.txt (lignes « version|texte », la plus récente en premier).
+## Journal des nouveautés : data/changelog.txt (historique) + data/changelog.d/*.txt (un fichier par version, lignes « version|texte »).
 ## Affiché une seule fois par version, au premier lancement du menu (réglage « changelog_seen »).
 
 const PATH := "res://data/changelog.txt"
+## Nouvelles entrées : UN FICHIER PAR VERSION (data/changelog.d/V101.txt, lignes « V101|texte »).
+## Chaque PR ajoute son propre fichier : plus aucun conflit de merge sur le haut de changelog.txt.
+const DIR := "res://data/changelog.d/"
 
 
-## { "id": "V74", "lines": [texte, …] } pour la version la plus récente ({} si fichier absent).
+static func _num(id: String) -> int:
+	return int(id.trim_prefix("V"))
+
+
+## Fusionne plusieurs textes « version|texte » et renvoie la version la plus élevée
+## (comparaison numérique : V100 > V99) avec toutes ses lignes, dans l'ordre des sources.
+static func merge_latest(sources: Array) -> Dictionary:
+	var best: String = ""
+	var lines_by: Dictionary = {}
+	for src: Variant in sources:
+		for raw: String in String(src).split("\n"):
+			var l: String = raw.strip_edges()
+			if l == "" or not l.contains("|"):
+				continue
+			var parts: PackedStringArray = l.split("|", true, 1)
+			var id: String = parts[0].strip_edges()
+			if not lines_by.has(id):
+				lines_by[id] = [] as Array[String]
+			lines_by[id].append(parts[1])
+			if best == "" or _num(id) > _num(best):
+				best = id
+	return {} if best == "" else {"id": best, "lines": lines_by[best]}
+
+
+## { "id": "V74", "lines": [texte, …] } pour la version la plus récente ({} si rien).
 static func latest() -> Dictionary:
+	var sources: Array = []
 	var f := FileAccess.open(PATH, FileAccess.READ)
-	if f == null:
-		return {}
-	var id: String = ""
-	var lines: Array[String] = []
-	while not f.eof_reached():
-		var l: String = f.get_line().strip_edges()
-		if l == "" or not l.contains("|"):
-			continue
-		var parts: PackedStringArray = l.split("|", true, 1)
-		if id == "":
-			id = parts[0]
-		if parts[0] == id:
-			lines.append(parts[1])
-	return {} if id == "" else {"id": id, "lines": lines}
+	if f != null:
+		sources.append(f.get_as_text())
+		f.close()
+	var names: PackedStringArray = DirAccess.get_files_at(DIR)
+	names.sort()
+	for n: String in names:
+		if n.ends_with(".txt"):
+			var g := FileAccess.open(DIR + n, FileAccess.READ)
+			if g != null:
+				sources.append(g.get_as_text())
+				g.close()
+	return merge_latest(sources)
 
 
 ## Faut-il montrer le journal ? (nouvelle version jamais vue)
