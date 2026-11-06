@@ -60,11 +60,14 @@ Coup final,final_blow_t2
 Glyphe d'entrave,slash
 Soin de chasseur,heal_nature
 Tir précis,arrow
-Tir rapide,arrow_v2
+Volée de flèches,arrow_v2
 Balise de chasse,beacon
 Flèche empoisonnée,arrow_poison
 Tir explosif,arrow_explosive
 Tir en rafale,arrow_v3
+Nuée empoisonnée,arrow_poison_v2
+Gerbe de glace,arrow_ice
+Averse ardente,arrow_fire_v2
 Piège à loup,trap
 Flèche de feu,arrow_fire
 Rappel de balise,beacon_v2
@@ -74,7 +77,7 @@ Tir ciblé,arrow_pierce
 Glyphe de flammes,slash_v2
 Tir d'estoc,recoil
 Œil de faucon,haste
-Flèche de glace,arrow_ice
+Flèche de glace,arrow_ice_v2
 Tir de recul,recoil_v2
 Tir mortel,arrow_pierce_t2
 Salve,arrow_explosive_v3

@@ -1623,6 +1623,8 @@ const SPELL_RENAMES := {
 	# V19 : sorts transformés en glyphes
 	"Armure de grès": "Glyphe de grès", "Invoquer Faille": "Glyphe sismique", "Piège": "Glyphe d'entrave",
 	"Fleche enflammée": "Glyphe de flammes", "Marque de la mort": "Glyphe de venin", "Invisibilité": "Glyphe d'ombre",
+	# V102 : Tir rapide du Chasseur devient un sort de zone
+	"Tir rapide": "Volée de flèches",
 }
 
 

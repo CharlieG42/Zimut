@@ -695,6 +695,10 @@ Tempête de pétales	Petal Storm
 Tempête de sable	Sandstorm
 Tir de recul	Recoil Shot
 Tir explosif	Explosive Shot
+Volée de flèches	Arrow Volley
+Nuée empoisonnée	Poison Swarm
+Gerbe de glace	Ice Spray
+Averse ardente	Blazing Downpour
 Tir légendaire	Legendary Shot
 Tir perçant ultime	Ultimate Piercing Shot
 Tir précis	Precise Shot

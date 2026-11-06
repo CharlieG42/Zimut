@@ -1,0 +1,3 @@
+V102|Chasseur : « Tir rapide » devient « Volée de flèches », un sort de zone (3x3) disponible dès le niveau 3. Vos niveaux de sort et vos builds sont conservés.
+V102|Trois nouveaux sorts de zone pour le Chasseur : Nuée empoisonnée (niv. 26, poison), Gerbe de glace (niv. 48, ralentit) et Averse ardente (niv. 68, zone 4x4 + brûlure).
+V102|Le Chasseur passe de 5 à 10 sorts de zone sur l'ensemble de ses niveaux, ce qui renforce son jeu avec les Balises de chasse.
