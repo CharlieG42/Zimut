@@ -67,5 +67,8 @@ func _boot() -> void:
 	mgr.enter_zone(z)
 	prog = mgr.zone_progress()
 	check(int(prog["total"]) == pm.pois_of(z).size() - 3, "le portail ne compte pas dans les lieux à explorer (%d)" % int(prog["total"]))
+	# une fois débloqué, le portail reste ouvert même si le compteur de donjon est perdu
+	mgr.state["dungeons"] = {}
+	check(mgr.portal_lock(poi).is_empty(), "portail toujours ouvert une fois la zone débloquée")
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)

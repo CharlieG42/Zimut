@@ -98,7 +98,8 @@ func portal_lock(poi: Dictionary) -> Dictionary:
 	if not is_portal(poi):
 		return {}
 	var nation: String = String(poi.get("requires", ""))
-	if nation == "" or Dungeons.clears(state, nation) > 0:
+	# Une fois la Nation suivante débloquée (donjon final vaincu, sortie prise…), le portail reste ouvert pour de bon.
+	if nation == "" or Dungeons.clears(state, nation) > 0 or (state.get("zones_unlocked", []) as Array).has(String(poi.get("to", ""))):
 		return {}
 	var pois: Dictionary = ProgressionManager.adventure_zone_pois(zone_id())
 	for k: String in pois.keys():
