@@ -2709,9 +2709,14 @@ class FindNode extends Node2D:
 
 ## Héros : sprite de la classe de l'explorateur, ombre, anneau doré, petit rebond.
 class HeroView extends Node2D:
+	const WALK_SHEET_DIR := "res://assets/sprites/walk3d/"
+	const SHEET_IDLE := 4
+	const SHEET_WALK := 8
 	var tex: Texture2D = null
 	var sprite_height: float = 104.0
 	var forest_style: bool = false
+	## Planche « modèle 3D cuit » (8 directions × [4 repos + 8 marche]) ; null = illustrations seules.
+	var sheet: Texture2D = null
 	var walk_poses: Array[Texture2D] = []
 	var back_tex: Texture2D = null
 	var back_walk_poses: Array[Texture2D] = []
@@ -2736,6 +2741,11 @@ class HeroView extends Node2D:
 		# On charge toutes les variantes walk_2…, idle_2… et back_walk_2… disponibles.
 		if tex != null:
 			var sprite_key: String = tex.resource_path.get_file().get_basename()
+			var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameSettings")
+			if gs == null or bool(gs.get("adventure_walk_sprites")):
+				var sheet_path: String = WALK_SHEET_DIR + sprite_key + ".png"
+				if ResourceLoader.exists(sheet_path):
+					sheet = load(sheet_path) as Texture2D
 			var pose_root: String = "res://assets/sprites/nations/heros/poses/"
 			var back_path: String = pose_root + sprite_key + "_back.png"
 			if ResourceLoader.exists(back_path):
@@ -2746,6 +2756,29 @@ class HeroView extends Node2D:
 			back_idle_poses = _load_pose_variants(pose_root + sprite_key + "_back_idle", true)
 		_idle_timer = randf_range(3.5, 6.0)
 		set_process(true)
+
+	## Direction (0 = vers le bas, puis par pas de 45° dans le sens horaire de l'écran) d'un vecteur de marche.
+	static func sheet_dir(v: Vector2) -> int:
+		return posmod(roundi(atan2(v.x, v.y) / (PI / 4.0)), 8)
+
+	## Colonne de la planche : 0‑3 repos (respiration lente), 4‑11 boucle de marche.
+	static func sheet_col(moving: bool, running_now: bool, gait: float, t: float) -> int:
+		if moving:
+			return SHEET_IDLE + int(gait / (0.075 if running_now else 0.1)) % SHEET_WALK
+		return int(t * 2.5) % SHEET_IDLE
+
+	func _draw_sheet_frame() -> void:
+		var cell := Vector2(sheet.get_width() / float(SHEET_IDLE + SHEET_WALK), sheet.get_height() / 8.0)
+		var moving: bool = walking or _settle_t > 0.0
+		var col: int = sheet_col(moving, running, _gait_t, _t)
+		var src := Rect2(Vector2(col * cell.x, sheet_dir(_walk_dir) * cell.y), cell)
+		var dh: float = sprite_height / 0.89
+		var dw: float = dh * cell.x / cell.y
+		var bob: float = absf(sin(_gait_t * TAU / (0.18 if running else 0.24))) * (3.0 if running else 2.0) * _motion_blend
+		var dest := Rect2(Vector2(-dw * 0.5, 0.05 * dh + 4.0 - dh - hop - bob), Vector2(dw, dh))
+		for o: Vector2 in [Vector2(-1.5, 0), Vector2(1.5, 0), Vector2(0, -1.5), Vector2(0, 1.5)]:
+			draw_texture_rect_region(sheet, Rect2(dest.position + o, dest.size), src, Color(0.05, 0.07, 0.10, 0.30))
+		draw_texture_rect_region(sheet, dest, src)
 
 	func _load_pose_variants(stem: String, skip_first: bool) -> Array[Texture2D]:
 		var result: Array[Texture2D] = []
@@ -2836,6 +2869,9 @@ class HeroView extends Node2D:
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		if tex == null:
 			draw_circle(Vector2(0, -40), 24.0, Color(0.9, 0.8, 0.4))
+			return
+		if sheet != null:
+			_draw_sheet_frame()
 			return
 		var facing_back: bool = _walk_dir.y < -0.12
 		var rest_tex: Texture2D = back_tex if facing_back and back_tex != null else tex

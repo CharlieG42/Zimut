@@ -1,3 +1,6 @@
+V100|Carte 2D d'aventure : le héros utilise désormais les modèles 3D du mode 3D, cuits en sprites animés : il se tourne dans 8 directions et marche avec un vrai cycle de pas.
+V100|Au repos, le héros respire doucement dans la direction où il regarde ; la course accélère la cadence de marche.
+V100|Réglages : « Héros de la carte 2D » permet de revenir aux anciennes illustrations (Modèles 3D animés / Illustrés).
 V99|Sprites des personnages retouchés : le fond blanc resté accroché au Mage (à droite de la cape et de la tête) est supprimé.
 V99|Détourage amélioré entre les membres (bras/torse, jambes) pour l'Artificier, l'Assassin, la Chasseuse, le Druide et le Géomancien, dans toutes leurs poses.
 V99|Un fragment parasite en bas à gauche de l'Invocateur a été retiré.
