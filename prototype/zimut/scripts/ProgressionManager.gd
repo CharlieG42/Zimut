@@ -1786,6 +1786,9 @@ func mode_unlocked(data: Dictionary, mode: String) -> bool:
 ## "playtime_modes" ({mode -> secondes}). Les anciennes parties sans ces
 ## champs sont migrées au chargement (ensure_playtime, appelé par ensure_roster).
 
+## Au-delà de 36 h dans un seul mode, un compteur est considéré comme gonflé (réparé une fois, V97).
+const PLAYTIME_SUSPECT := 36 * 3600
+
 ## Migration rétroactive : ajoute les champs de temps de jeu s'ils manquent.
 func ensure_playtime(data: Dictionary) -> void:
 	if data.is_empty():
@@ -1795,6 +1798,21 @@ func ensure_playtime(data: Dictionary) -> void:
 		data["playtime"] = 0
 	if not data.has("playtime_modes") or typeof(data["playtime_modes"]) != TYPE_DICTIONARY:
 		data["playtime_modes"] = {}
+	# V97 : réparation unique des compteurs gonflés (temps d'arrière-plan / de veille compté par erreur) :
+	# un mode au-delà de PLAYTIME_SUSPECT est remis à zéro, le total est recalculé.
+	if int(data.get("playtime_v", 0)) < 2:
+		data["playtime_v"] = 2
+		var modes: Dictionary = data["playtime_modes"]
+		var fixed: bool = false
+		for k: Variant in modes.keys():
+			if int(modes[k]) > PLAYTIME_SUSPECT:
+				modes[k] = 0
+				fixed = true
+		if fixed:
+			var sum: int = 0
+			for k2: Variant in modes.keys():
+				sum += int(modes[k2])
+			data["playtime"] = sum
 
 ## Temps de jeu total en secondes (migré si absent).
 func playtime_total(data: Dictionary) -> int:
