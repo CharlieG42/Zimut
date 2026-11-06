@@ -254,9 +254,9 @@ for k in list(obstacles):
             obstacles["%d,%d" % n] = rng.choice(OBST)
 # ── Bâtiments (V106) : emprises plates et libres, nom, taille en cases ──
 BUILDINGS = []
-SIZES = {"maison": (2, 2), "chaumiere": (2, 2), "grange": (3, 2), "moulin": (2, 2), "tour": (2, 2), "chapelle": (2, 2)}
+SIZES = {"maison": (3, 3), "chaumiere": (3, 2), "grange": (4, 3), "moulin": (3, 3), "tour": (3, 3), "chapelle": (3, 3)}
 BPLAN = [  # (type, cible x, y, étage)
-    ("maison", 55, 35, 0), ("chaumiere", 60, 39, 0), ("maison", 52, 33, 0), ("grange", 65, 36, 0), ("moulin", 68, 44, 0),
+    ("maison", 55, 35, 0), ("chaumiere", 60, 39, 0), ("maison", 52, 33, 0), ("grange", 65, 36, 0), ("moulin", 42, 44, 0),
     ("chaumiere", 28, 44, 0),
     ("chaumiere", 42, 34, 1), ("tour", 52, 27, 1), ("maison", 24, 34, 1),
     ("chapelle", 42, 24, 2), ("tour", 30, 16, 2),

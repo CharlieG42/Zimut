@@ -1006,7 +1006,7 @@ func _hero_depth_scale(p: Vector2i) -> Vector2:
 	if not is_board():
 		return Vector2.ONE
 	if is_iso():
-		return Vector2.ONE * 0.8
+		return Vector2.ONE * 0.72
 	var max_y: int = maxi(1, manager.zone_size().y - 1)
 	var depth: float = clampf(float(p.y) / float(max_y), 0.0, 1.0)
 	var factor: float = lerpf(0.86, 1.12, depth)
@@ -2697,12 +2697,12 @@ class BuildingNode extends Node2D:
 	var _t: float = 0.0
 
 	const STYLE := {
-		"maison": {"wall": Color(0.90, 0.83, 0.68), "frame": Color(0.45, 0.30, 0.18), "roof": Color(0.70, 0.30, 0.22), "wh": 44.0, "rh": 32.0, "roof_kind": "gable"},
-		"chaumiere": {"wall": Color(0.74, 0.58, 0.40), "frame": Color(0.40, 0.27, 0.16), "roof": Color(0.82, 0.68, 0.34), "wh": 30.0, "rh": 30.0, "roof_kind": "gable"},
-		"grange": {"wall": Color(0.62, 0.40, 0.30), "frame": Color(0.36, 0.22, 0.16), "roof": Color(0.52, 0.26, 0.22), "wh": 50.0, "rh": 36.0, "roof_kind": "gable"},
-		"moulin": {"wall": Color(0.80, 0.77, 0.72), "frame": Color(0.50, 0.46, 0.42), "roof": Color(0.55, 0.36, 0.26), "wh": 86.0, "rh": 36.0, "roof_kind": "pyramid"},
-		"tour": {"wall": Color(0.70, 0.70, 0.72), "frame": Color(0.44, 0.44, 0.48), "roof": Color(0.30, 0.42, 0.58), "wh": 112.0, "rh": 46.0, "roof_kind": "pyramid"},
-		"chapelle": {"wall": Color(0.82, 0.82, 0.80), "frame": Color(0.50, 0.50, 0.52), "roof": Color(0.32, 0.45, 0.60), "wh": 54.0, "rh": 36.0, "roof_kind": "gable"},
+		"maison": {"wall": Color(0.90, 0.83, 0.68), "frame": Color(0.45, 0.30, 0.18), "roof": Color(0.70, 0.30, 0.22), "wh": 96.0, "rh": 64.0, "roof_kind": "gable"},
+		"chaumiere": {"wall": Color(0.74, 0.58, 0.40), "frame": Color(0.40, 0.27, 0.16), "roof": Color(0.82, 0.68, 0.34), "wh": 62.0, "rh": 52.0, "roof_kind": "gable"},
+		"grange": {"wall": Color(0.62, 0.40, 0.30), "frame": Color(0.36, 0.22, 0.16), "roof": Color(0.52, 0.26, 0.22), "wh": 100.0, "rh": 66.0, "roof_kind": "gable"},
+		"moulin": {"wall": Color(0.80, 0.77, 0.72), "frame": Color(0.50, 0.46, 0.42), "roof": Color(0.55, 0.36, 0.26), "wh": 170.0, "rh": 66.0, "roof_kind": "pyramid"},
+		"tour": {"wall": Color(0.70, 0.70, 0.72), "frame": Color(0.44, 0.44, 0.48), "roof": Color(0.30, 0.42, 0.58), "wh": 210.0, "rh": 80.0, "roof_kind": "pyramid"},
+		"chapelle": {"wall": Color(0.82, 0.82, 0.80), "frame": Color(0.50, 0.50, 0.52), "roof": Color(0.32, 0.45, 0.60), "wh": 112.0, "rh": 66.0, "roof_kind": "gable"},
 	}
 
 	func _ready() -> void:
@@ -2772,17 +2772,17 @@ class BuildingNode extends Node2D:
 				var f2: float = float(i2) / float(fh * 2)
 				draw_line(C.lerp(B, f2), C2.lerp(B2, f2), frame.darkened(0.15), 2.0)
 		else:
-			for row: int in range(1, int(wh / 14.0)):
-				var hy: float = float(row) * 14.0
+			for row: int in range(1, int(wh / 20.0)):
+				var hy: float = float(row) * 20.0
 				draw_line(D + _up(hy), C + _up(hy), frame, 1.0)
 				draw_line(C + _up(hy), B + _up(hy), frame.darkened(0.2), 1.0)
 				for j: int in range(1, 4):
 					var jf: float = (float(j) + float(row % 2) * 0.5) / 4.0
-					draw_line(D.lerp(C, jf) + _up(hy - 14.0), D.lerp(C, jf) + _up(hy), frame, 1.0)
+					draw_line(D.lerp(C, jf) + _up(hy - 20.0), D.lerp(C, jf) + _up(hy), frame, 1.0)
 		# porte et fenêtres sur la face gauche
 		var door_c: Vector2 = D.lerp(C, 0.5)
 		var dw: float = 0.12 if kind != "grange" else 0.22
-		var dh: float = minf(wh * 0.62, 30.0) if kind != "grange" else 36.0
+		var dh: float = minf(wh * 0.72, 74.0) if kind != "grange" else 84.0
 		var d0: Vector2 = D.lerp(C, 0.5 - dw)
 		var d1: Vector2 = D.lerp(C, 0.5 + dw)
 		_quad(d0, d1, d1 + _up(dh), d0 + _up(dh), Color(0.20, 0.12, 0.08))
@@ -2790,14 +2790,14 @@ class BuildingNode extends Node2D:
 			draw_line(door_c, door_c + _up(dh), Color(0.5, 0.35, 0.2), 1.5)
 		if wh > 40.0 and kind != "grange":
 			for wf: float in [0.2, 0.8]:
-				var w0: Vector2 = D.lerp(C, wf - 0.07) + _up(wh * 0.55)
-				var w1: Vector2 = D.lerp(C, wf + 0.07) + _up(wh * 0.55)
-				_quad(w0, w1, w1 + _up(13.0), w0 + _up(13.0), Color(0.95, 0.82, 0.45) if kind != "tour" else Color(0.15, 0.12, 0.2))
+				var w0: Vector2 = D.lerp(C, wf - 0.07) + _up(wh * 0.58)
+				var w1: Vector2 = D.lerp(C, wf + 0.07) + _up(wh * 0.58)
+				_quad(w0, w1, w1 + _up(24.0), w0 + _up(24.0), Color(0.95, 0.82, 0.45) if kind != "tour" else Color(0.15, 0.12, 0.2))
 		if wh > 40.0 and kind in ["tour", "moulin", "chapelle"]:
 			var wc: Vector2 = C.lerp(B, 0.5) + _up(wh * 0.6)
-			var w2: Vector2 = wc + (B - C).normalized() * 6.0
-			var w3: Vector2 = wc - (B - C).normalized() * 6.0
-			_quad(w3, w2, w2 + _up(15.0), w3 + _up(15.0), Color(0.15, 0.12, 0.2) if kind != "chapelle" else Color(0.45, 0.65, 0.85))
+			var w2: Vector2 = wc + (B - C).normalized() * 10.0
+			var w3: Vector2 = wc - (B - C).normalized() * 10.0
+			_quad(w3, w2, w2 + _up(28.0), w3 + _up(28.0), Color(0.15, 0.12, 0.2) if kind != "chapelle" else Color(0.45, 0.65, 0.85))
 		# toit
 		if rg == "gable":
 			_tri(C2, B2, re, wr)                                           # pignon (face droite)
@@ -2807,17 +2807,17 @@ class BuildingNode extends Node2D:
 			draw_line(rs, re, roof.lightened(0.25), 2.5)
 			if kind in ["maison", "grange"]:
 				var ch: Vector2 = D2.lerp(re, 0.55) + Vector2(10, 0)
-				_quad(ch, ch + Vector2(9, 3), ch + Vector2(9, -9), ch + Vector2(0, -12), Color(0.55, 0.50, 0.46))
-				_quad(ch + Vector2(0, -12), ch + Vector2(9, -9), ch + Vector2(9, -19), ch + Vector2(0, -22), Color(0.40, 0.36, 0.34))
+				_quad(ch, ch + Vector2(15, 5), ch + Vector2(15, -17), ch + Vector2(0, -22), Color(0.55, 0.50, 0.46))
+				_quad(ch + Vector2(0, -22), ch + Vector2(15, -17), ch + Vector2(15, -38), ch + Vector2(0, -43), Color(0.40, 0.36, 0.34))
 			if kind == "chaumiere":
 				for i3: int in range(1, 5):
 					var tf: float = float(i3) / 5.0
 					draw_line(D2.lerp(rs, tf), C2.lerp(re, tf), roof.darkened(0.18), 1.2)
 			if kind == "chapelle":
 				var sb: Vector2 = (rs + re) * 0.5
-				_quad(sb + Vector2(-7, 0), sb + Vector2(7, 5), sb + Vector2(7, -22), sb + Vector2(-7, -27), wl)
-				_tri(sb + Vector2(-9, -26), sb + Vector2(9, -20), sb + Vector2(0, -52), roof.lightened(0.1))
-				draw_circle(sb + Vector2(0, -56), 3.0, Color(0.95, 0.8, 0.3))
+				_quad(sb + Vector2(-12, 0), sb + Vector2(12, 8), sb + Vector2(12, -38), sb + Vector2(-12, -46), wl)
+				_tri(sb + Vector2(-15, -44), sb + Vector2(15, -34), sb + Vector2(0, -88), roof.lightened(0.1))
+				draw_circle(sb + Vector2(0, -94), 5.0, Color(0.95, 0.8, 0.3))
 		else:
 			var fl: Vector2 = C2 + Vector2(0, 0)
 			_tri(D2, C2, apex, roof)
@@ -2829,19 +2829,19 @@ class BuildingNode extends Node2D:
 				for i4: int in range(1, 4):
 					var cf: float = float(i4) / 4.0
 					var m0: Vector2 = D2.lerp(C2, cf)
-					draw_rect(Rect2(m0 + Vector2(-3, -5), Vector2(6, 5)), wall.darkened(0.1))
-				draw_line(apex, apex + Vector2(0, -22), Color(0.2, 0.15, 0.1), 2.0)
-				draw_colored_polygon(PackedVector2Array([apex + Vector2(0, -22), apex + Vector2(16, -17), apex + Vector2(0, -12)]), Color(0.85, 0.2, 0.2))
+					draw_rect(Rect2(m0 + Vector2(-5, -9), Vector2(10, 9)), wall.darkened(0.1))
+				draw_line(apex, apex + Vector2(0, -36), Color(0.2, 0.15, 0.1), 3.0)
+				draw_colored_polygon(PackedVector2Array([apex + Vector2(0, -36), apex + Vector2(26, -28), apex + Vector2(0, -20)]), Color(0.85, 0.2, 0.2))
 			if kind == "moulin":
 				var hub: Vector2 = (D + C) * 0.5 + _up(wh * 0.72) + Vector2(0, 2)
 				var ang: float = _t * 0.9
 				for i5: int in range(4):
 					var a5: float = ang + float(i5) * PI * 0.5
-					var tip: Vector2 = hub + Vector2(cos(a5), sin(a5)) * 44.0
-					draw_line(hub, tip, Color(0.45, 0.32, 0.20), 3.0, true)
-					var side: Vector2 = Vector2(-sin(a5), cos(a5)) * 9.0
+					var tip: Vector2 = hub + Vector2(cos(a5), sin(a5)) * 80.0
+					draw_line(hub, tip, Color(0.45, 0.32, 0.20), 5.0, true)
+					var side: Vector2 = Vector2(-sin(a5), cos(a5)) * 15.0
 					draw_colored_polygon(PackedVector2Array([hub + (tip - hub) * 0.35, tip, tip + side, hub + (tip - hub) * 0.35 + side]), Color(0.93, 0.90, 0.80, 0.95))
-				draw_circle(hub, 4.0, Color(0.3, 0.2, 0.12))
+				draw_circle(hub, 7.0, Color(0.3, 0.2, 0.12))
 
 
 ## Décor (arbre, rocher, fleurs…) dessiné par BattleScenery.
