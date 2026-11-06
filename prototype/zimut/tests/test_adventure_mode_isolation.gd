@@ -212,7 +212,7 @@ func _boot() -> void:
 		"le héros réagit visuellement aux trouvailles et aux lieux découverts")
 	check(map_ui.contains("func _hero_depth_scale") and map_ui.contains("lerpf(0.86, 1.12") and map_ui.contains('tween_property(_hero, "scale"'),
 		"le héros adapte progressivement son échelle à la profondeur de la planche")
-	check(map_ui.contains("mn.z_index = mn.cell.y * 4 + 2"),
+	check(map_ui.contains("mn.z_index = _depth(mn.cell) + 2") and map_ui.contains("return (p.x + p.y) * 4 if is_iso() else p.y * 4"),
 		"les personnages et groupes sont triés selon leur profondeur sur la planche")
 	check(map_ui.contains("var sprint: bool = is_board() and path.size() >= 8") and map_ui.contains("var running: bool = false") and map_ui.contains("stride_period: float = 0.18 if running else 0.24"),
 		"les longs trajets déclenchent une course plus rapide que la marche")

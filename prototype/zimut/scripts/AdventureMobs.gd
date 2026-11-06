@@ -194,7 +194,7 @@ static func wander(adv: Dictionary, zone: String, hero: Vector2i, rng: RandomNum
 		dirs.shuffle()
 		for d: Vector2i in dirs:
 			var to: Vector2i = from + d
-			if _free(adv, zone, to, hero) and absi(to.x - hero.x) + absi(to.y - hero.y) >= 1:
+			if _free(adv, zone, to, hero) and AdventureTerrain.can_step(zone, from, to) and absi(to.x - hero.x) + absi(to.y - hero.y) >= 1:
 				g["x"] = to.x
 				g["y"] = to.y
 				moved.append({"id": int(g["id"]), "from": from, "to": to})

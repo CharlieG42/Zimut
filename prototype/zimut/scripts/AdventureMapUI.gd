@@ -17,6 +17,7 @@ const TILE_H := 64.0
 ## V43 : en dessous de cette échelle, la carte entière deviendrait illisible : on passe en vue
 ## défilante (glisser pour parcourir, caméra qui suit le héros) au lieu de tout rétrécir.
 const READABLE_SCALE := 0.82
+const ISO_SCALE := 0.95            # V106 : plateau isométrique à étages
 const BOARD_SCALE := 0.78          # V83 : échelle d'une planche illustrée
 const PAN_THRESHOLD := 14.0
 const SIDE_W := 440.0
@@ -607,14 +608,21 @@ func _rebuild_board(biome: String) -> void:
 	var zid: String = manager.zone_id()
 	var zs: Vector2i = manager.zone_size()
 	var d: Dictionary = BoardArt.raw(zid)
-	var spr := Sprite2D.new()
-	spr.texture = load(String(d["image"])) as Texture2D
-	spr.centered = false
 	var ws: Vector2 = BoardArt.world_size(zid)
-	spr.scale = ws / Vector2(spr.texture.get_size())
-	spr.z_index = 0
-	_world.add_child(spr)
-	_backdrop = spr
+	if BoardArt.is_iso(zid):
+		var ground := IsoGround.new()
+		ground.ui = self
+		ground.z_index = 0
+		_world.add_child(ground)
+		_backdrop = ground
+	else:
+		var spr := Sprite2D.new()
+		spr.texture = load(String(d["image"])) as Texture2D
+		spr.centered = false
+		spr.scale = ws / Vector2(spr.texture.get_size())
+		spr.z_index = 0
+		_world.add_child(spr)
+		_backdrop = spr
 	_board = AdventureBoard.new()
 	_board.ui = self
 	_board.z_index = 1
@@ -625,6 +633,23 @@ func _rebuild_board(biome: String) -> void:
 	_world.add_child(_entities)
 	var pal: Dictionary = BattleScenery.pal(biome)
 	var pois: Dictionary = ProgressionManager.adventure_zone_pois(zid)
+	if BoardArt.is_iso(zid):
+		# V106 : arbres, rochers, fleurs… (sprites) sur le plateau à étages
+		var terrain: Dictionary = AdventureTerrain.zone_terrain(zid)
+		for p: Vector2i in (terrain["obstacles"] as Dictionary).keys():
+			if String(terrain["obstacles"][p]) != "building":
+				_add_decor(p, String(terrain["obstacles"][p]), biome, pal, 0.8)
+		for p2: Vector2i in (terrain["decor"] as Dictionary).keys():
+			_add_decor(p2, String(terrain["decor"][p2]), biome, pal, 0.7)
+		for b: Dictionary in BoardArt.buildings(zid):
+			var bn := BuildingNode.new()
+			bn.kind = String(b["k"])
+			bn.fw = int(b["w"])
+			bn.fh = int(b["h"])
+			bn.cs = BoardArt.iso_cs(zid)
+			bn.seed_value = int(b["x"]) * 31 + int(b["y"]) * 17
+			bn.position = cell_center(Vector2i(int(b["x"]) + bn.fw - 1, int(b["y"]) + bn.fh - 1)) + Vector2(0, BoardArt.ISO_TH * bn.cs * 0.5)
+			_entities.add_child(bn)
 	for k: String in pois.keys():
 		var pos: Vector2i = AdventureTerrain.parse(k)
 		var poi: Dictionary = pois[k]
@@ -637,6 +662,18 @@ func _rebuild_board(biome: String) -> void:
 		node.pal = pal
 		node.icon = load(String(POI_ICONS.get(node.kind, POI_ICONS["combat"]))) as Texture2D
 		node.prop = ""                      # les bâtiments / entrées sont dessinés dans la planche
+		if BoardArt.is_iso(zid):
+			node.prop = String(POI_PROP.get(node.kind, {}).get(biome, ""))
+			if node.kind == "combat":
+				var etypes: Array[String] = ProgressionManager.biome_enemy_types(biome)
+				node.enemy_tex = Portraits.get_texture({"classe": etypes[absi(k.hash()) % etypes.size()], "team": "enemy", "entity_type": "Enemy"})
+			var gb: String = String(poi.get("guardian", ""))
+			if gb != "":
+				node.gem = Stones.info(Dungeons.base(gb)).get("color", Color.WHITE)
+				node.gem_taken = Stones.has(manager.save, Dungeons.base(gb))
+				var btex: Texture2D = Nations.boss_texture(Dungeons.base(gb))
+				if btex != null:
+					node.enemy_tex = btex
 		node.position = cell_center(pos)
 		_entities.add_child(node)
 		_cell_nodes[pos] = _cell_nodes.get(pos, []) + [node]
@@ -706,7 +743,7 @@ func _refresh_world() -> void:
 			if n is FindNode:
 				n.visible = seen and not manager.find_taken(p)
 				if board_depth:
-					n.z_index = p.y * 4 + 1
+					n.z_index = _depth(p) + 1
 			if n is PoiNode:
 				var pn: PoiNode = n
 				# Les POI non découverts ne sont pas animés : aucun rendu visible à rafraîchir.
@@ -717,17 +754,17 @@ func _refresh_world() -> void:
 				var hero_distance: int = absi(p.x - hp.x) + absi(p.y - hp.y)
 				pn.nearby = hero_distance <= near and not pn.done
 				pn.show_label = (pn.is_dungeon or pn.nearby or p == _board.hover) and not pn.done
-				pn.z_index = p.y * 4 + (3 if pn.show_label else 1) if board_depth else (3 if pn.show_label else 0)
+				pn.z_index = _depth(p) + (3 if pn.show_label else 1) if board_depth else (3 if pn.show_label else 0)
 				pn.queue_redraw()
 			elif n is GateNode:
-				n.z_index = p.y * 4 + 2 if board_depth else 2
+				n.z_index = _depth(p) + 2 if board_depth else 2
 	var team_lvl: int = _team_level()
 	for id: int in _mob_nodes.keys():
 		var mn: MobNode = _mob_nodes[id]
 		mn.visible = manager.cell_discovered(mn.cell)
 		mn.danger = mn.level - team_lvl
 		if board_depth:
-			mn.z_index = mn.cell.y * 4 + 2
+			mn.z_index = _depth(mn.cell) + 2
 	_board.queue_redraw()
 
 
@@ -759,8 +796,8 @@ func _fit_world() -> void:
 		if _zoom_out_btn != null:
 			_zoom_out_btn.visible = true
 		if _edit_btn != null:
-			_edit_btn.visible = true
-		_world.scale = Vector2(BOARD_SCALE, BOARD_SCALE)
+			_edit_btn.visible = not is_iso()
+		_world.scale = Vector2.ONE * (ISO_SCALE if is_iso() else BOARD_SCALE)
 		_recenter(false)
 		return
 	_scroll_mode = scroll_needed(size, vs)
@@ -946,7 +983,19 @@ func is_board() -> bool:
 	return manager != null and not BoardArt.def(manager.zone_id()).is_empty()
 
 
+## V106 : plateau isométrique à étages (cases plus petites, hauteurs).
+func is_iso() -> bool:
+	return is_board() and BoardArt.is_iso(manager.zone_id())
+
+
+## Ordre de profondeur d'une case (z_index) : la rangée en planche plate, la diagonale x+y en isométrique.
+func _depth(p: Vector2i) -> int:
+	return (p.x + p.y) * 4 if is_iso() else p.y * 4
+
+
 func cell_center(p: Vector2i) -> Vector2:
+	if is_iso():
+		return BoardArt.iso_pos(manager.zone_id(), p)
 	if is_board():
 		return (Vector2(p) + Vector2(0.5, 0.5)) * BoardArt.cell_world(manager.zone_id())
 	return Vector2(float(p.x - p.y) * TILE_W * 0.5, float(p.x + p.y) * TILE_H * 0.5)
@@ -956,6 +1005,8 @@ func cell_center(p: Vector2i) -> Vector2:
 func _hero_depth_scale(p: Vector2i) -> Vector2:
 	if not is_board():
 		return Vector2.ONE
+	if is_iso():
+		return Vector2.ONE * 0.72
 	var max_y: int = maxi(1, manager.zone_size().y - 1)
 	var depth: float = clampf(float(p.y) / float(max_y), 0.0, 1.0)
 	var factor: float = lerpf(0.86, 1.12, depth)
@@ -968,10 +1019,12 @@ func _apply_hero_depth(p: Vector2i) -> void:
 	if _hero == null:
 		return
 	_hero.scale = _hero_depth_scale(p)
-	_hero.z_index = p.y * 4 + 2 if is_board() else 0
+	_hero.z_index = _depth(p) + 2 if is_board() else 0
 
 
 func screen_to_cell(local: Vector2) -> Vector2i:
+	if is_iso():
+		return BoardArt.iso_cell_at(manager.zone_id(), local)
 	if is_board():
 		var cwz: float = BoardArt.cell_world(manager.zone_id())
 		return Vector2i(floori(local.x / cwz), floori(local.y / cwz))
@@ -1105,7 +1158,7 @@ func _build_edit_ui() -> void:
 
 
 func _set_edit(on: bool) -> void:
-	_edit_on = on and is_board()
+	_edit_on = on and is_board() and not is_iso()
 	_edit_mode = "open"
 	if _edit_bar != null:
 		_edit_bar.visible = _edit_on
@@ -1250,7 +1303,7 @@ func _walk(path: Array[Vector2i]) -> void:
 			_hero.hop = sin(f * PI) * 7.0, 0.0, 1.0, step_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		if is_board():
 			tw.parallel().tween_property(_hero, "scale", _hero_depth_scale(step), step_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-			_hero.z_index = step.y * 4 + 2
+			_hero.z_index = _depth(step) + 2
 		_after_step()
 		if not _pan_moved:
 			_focus_cell(step, true, step_time)
@@ -2394,6 +2447,9 @@ class AdventureBoard extends Node2D:
 
 	func _draw_board() -> void:
 		var mgr: Node = ui.manager
+		if ui.is_iso():
+			_draw_iso_overlay()
+			return
 		var cw: float = BoardArt.cell_world(mgr.zone_id())
 		if ui._edit_on:
 			var bsz: Vector2i = mgr.zone_size()
@@ -2416,6 +2472,29 @@ class AdventureBoard extends Node2D:
 		if hover.x >= 0:
 			var ok: bool = AdventureTerrain.walkable(mgr.zone_id(), hover)
 			draw_rect(Rect2(Vector2(hover) * cw, Vector2(cw, cw)), Color(1, 1, 1, 0.9) if ok else Color(1, 0.4, 0.35, 0.8), false, 2.5)
+
+	## V106 : survol et trajet sur le plateau à étages (losanges posés sur la hauteur de chaque case).
+	func _draw_iso_overlay() -> void:
+		var mgr: Node = ui.manager
+		var cs: float = BoardArt.iso_cs(mgr.zone_id())
+		for i: int in range(preview.size()):
+			var pc: Vector2 = ui.cell_center(preview[i])
+			var last: bool = i == preview.size() - 1
+			draw_set_transform(pc, 0.0, Vector2(1.0, 0.5))
+			draw_circle(Vector2.ZERO, (6.0 if not last else 10.0), Color(1.0, 0.95, 0.55, 0.85))
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			if last and preview.size() > 1:
+				var tag: String = "%d pas" % preview.size()
+				var fnt: Font = ThemeDB.fallback_font
+				var tw: Vector2 = fnt.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 26)
+				var tp: Vector2 = pc + Vector2(-tw.x * 0.5, -40.0)
+				draw_rect(Rect2(tp + Vector2(-10, -tw.y + 2), tw + Vector2(20, 10)), Color(0.05, 0.07, 0.12, 0.88))
+				draw_string(fnt, tp, tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 26, Color(1.0, 0.92, 0.55))
+		if hover.x >= 0:
+			var ok: bool = AdventureTerrain.walkable(mgr.zone_id(), hover)
+			var hc: Vector2 = ui.cell_center(hover)
+			var dm := PackedVector2Array([hc + Vector2(0, -32 * cs), hc + Vector2(64 * cs, 0), hc + Vector2(0, 32 * cs), hc + Vector2(-64 * cs, 0), hc + Vector2(0, -32 * cs)])
+			draw_polyline(dm, Color(1, 1, 1, 0.9) if ok else Color(1, 0.4, 0.35, 0.8), 2.0, true)
 
 	func _draw() -> void:
 		if ui.is_board():
@@ -2544,6 +2623,244 @@ class AdventureBoard extends Node2D:
 		draw_line(a, b, Color(0.20, 0.35, 0.15, 0.5), 5.0, true)
 
 
+## V106 : sol du plateau à étages — cases lisses (sans quadrillage), falaises entre les étages, sentiers.
+## Dessiné une seule fois (le nœud ne se redessine pas à chaque image).
+class IsoGround extends Node2D:
+	var ui: Node = null
+
+	func _ready() -> void:
+		queue_redraw()
+
+	static func _tint(base: Color, h: float, x: int, y: int) -> Color:
+		# relief doux : chaque étage éclaircit un peu ; un bruit à grande échelle évite l'effet damier
+		var n: float = 0.5 + 0.5 * sin(float(x) * 0.37 + sin(float(y) * 0.21) * 1.7) * cos(float(y) * 0.29 + float(x) * 0.11)
+		return base.lightened(h * 0.045 + n * 0.05).darkened((1.0 - n) * 0.03)
+
+	func _draw() -> void:
+		var zid: String = ui.manager.zone_id()
+		var d: Dictionary = BoardArt.raw(zid)
+		var cols: int = int(d.get("cols", 0))
+		var rows: int = int(d.get("rows", 0))
+		var cs: float = BoardArt.iso_cs(zid)
+		var hs: Dictionary = BoardArt.heights(zid)
+		var up: float = BoardArt.iso_unit_px(zid)
+		var hw: float = BoardArt.ISO_TW * cs * 0.5
+		var hh: float = BoardArt.ISO_TH * cs * 0.5
+		var p: Dictionary = BattleScenery.pal("Forêt")
+		var grass := Color(0.33, 0.55, 0.25)
+		var rock_t := Color(0.55, 0.47, 0.36)
+		var rock_b := Color(0.25, 0.20, 0.17)
+		var trail := Color(0.80, 0.67, 0.45)
+		var paths: Dictionary = AdventureTerrain.zone_terrain(zid)["paths"]
+		var base_y: float = BoardArt.iso_origin(zid).y
+		# ombre portée sous l'île flottante
+		var bot: Vector2 = BoardArt.iso_origin(zid) + Vector2(float(cols - rows) * hw * 0.5, float(cols + rows) * hh * 0.5)
+		draw_set_transform(bot + Vector2(0, 250), 0.0, Vector2(1.0, 0.22))
+		draw_circle(Vector2.ZERO, float(cols + rows) * hw * 0.5, Color(0.03, 0.06, 0.10, 0.12))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		for sum: int in range(cols + rows - 1):
+			for x: int in range(maxi(0, sum - rows + 1), mini(cols, sum + 1)):
+				var y: int = sum - x
+				var c := Vector2i(x, y)
+				if not hs.has(c) or not BoardArt.walkable_cell(zid, c):
+					continue
+				var h: int = int(hs[c])
+				var ctr: Vector2 = BoardArt.iso_pos(zid, c)
+				# faces de falaise : vers le sud-ouest (x, y+1) et le sud-est (x+1, y)
+				for side: int in range(2):
+					var n := Vector2i(x, y + 1) if side == 0 else Vector2i(x + 1, y)
+					var nh: int = int(hs[n]) if hs.has(n) and BoardArt.walkable_cell(zid, n) else -99
+					var drop: float
+					if nh == -99:
+						drop = 2.6 * BoardArt.ISO_LEVEL_PX + float(h) * up * 0.0
+					else:
+						drop = float(h - nh) * up
+					if drop <= 0.5:
+						continue
+					var a: Vector2 = ctr + (Vector2(-hw, 0) if side == 0 else Vector2(0, hh))
+					var b: Vector2 = ctr + (Vector2(0, hh) if side == 0 else Vector2(hw, 0))
+					var shade: float = 0.0 if side == 0 else 0.22
+					var ragged: float = 0.0
+					if nh == -99:
+						var rr := RandomNumberGenerator.new()
+						rr.seed = x * 131 + y * 17 + side
+						ragged = rr.randf_range(0.0, 26.0)
+					var t_col: Color = rock_t.darkened(shade)
+					var b_col: Color = (rock_b if nh == -99 else rock_t.darkened(0.30)).darkened(shade * 0.6)
+					# haut de falaise herbeux
+					var lip: float = minf(drop, 9.0)
+					draw_polygon(PackedVector2Array([a, b, b + Vector2(0, drop + ragged), a + Vector2(0, drop + ragged)]),
+						PackedColorArray([t_col, t_col, b_col, b_col]))
+					draw_polygon(PackedVector2Array([a, b, b + Vector2(0, lip), a + Vector2(0, lip)]),
+						PackedColorArray([grass.darkened(0.25 + shade * 0.5), grass.darkened(0.25 + shade * 0.5), grass.darkened(0.45 + shade * 0.4), grass.darkened(0.45 + shade * 0.4)]))
+					if drop > 20.0:
+						draw_line(a + Vector2(0, drop * 0.5), b + Vector2(0, drop * 0.5), Color(0, 0, 0, 0.10), 1.5)
+				# dessus de la case
+				var top: Color = _tint(grass, float(h) / float(BoardArt.raw(zid).get("unit", 4)), x, y)
+				if paths.has(c):
+					top = _tint(trail, float(h) / float(BoardArt.raw(zid).get("unit", 4)) * 0.4, x, y)
+				var e: float = 1.015   # recouvrement léger : aucun interstice entre les cases
+				draw_colored_polygon(PackedVector2Array([ctr + Vector2(0, -hh * e), ctr + Vector2(hw * e, 0), ctr + Vector2(0, hh * e), ctr + Vector2(-hw * e, 0)]), top)
+
+
+## V106 : bâtiment stylisé du plateau iso (maison, chaumière, grange, moulin, tour, chapelle).
+## Dessiné en code : un volume isométrique à deux faces (lumière à gauche) + toit. Origine = sommet avant de l'emprise.
+class BuildingNode extends Node2D:
+	var kind: String = "maison"
+	var fw: int = 2
+	var fh: int = 2
+	var cs: float = 0.625
+	var seed_value: int = 0
+	var _t: float = 0.0
+
+	const STYLE := {
+		"maison": {"wall": Color(0.90, 0.83, 0.68), "frame": Color(0.45, 0.30, 0.18), "roof": Color(0.70, 0.30, 0.22), "wh": 96.0, "rh": 64.0, "roof_kind": "gable"},
+		"chaumiere": {"wall": Color(0.74, 0.58, 0.40), "frame": Color(0.40, 0.27, 0.16), "roof": Color(0.82, 0.68, 0.34), "wh": 62.0, "rh": 52.0, "roof_kind": "gable"},
+		"grange": {"wall": Color(0.62, 0.40, 0.30), "frame": Color(0.36, 0.22, 0.16), "roof": Color(0.52, 0.26, 0.22), "wh": 100.0, "rh": 66.0, "roof_kind": "gable"},
+		"moulin": {"wall": Color(0.80, 0.77, 0.72), "frame": Color(0.50, 0.46, 0.42), "roof": Color(0.55, 0.36, 0.26), "wh": 170.0, "rh": 66.0, "roof_kind": "pyramid"},
+		"tour": {"wall": Color(0.70, 0.70, 0.72), "frame": Color(0.44, 0.44, 0.48), "roof": Color(0.30, 0.42, 0.58), "wh": 210.0, "rh": 80.0, "roof_kind": "pyramid"},
+		"chapelle": {"wall": Color(0.82, 0.82, 0.80), "frame": Color(0.50, 0.50, 0.52), "roof": Color(0.32, 0.45, 0.60), "wh": 112.0, "rh": 66.0, "roof_kind": "gable"},
+	}
+
+	func _ready() -> void:
+		set_process(kind == "moulin")
+
+	func _process(delta: float) -> void:
+		_t += delta
+		queue_redraw()
+
+	func _up(h: float) -> Vector2:
+		return Vector2(0.0, -h)
+
+	func _quad(a: Vector2, b: Vector2, c: Vector2, d: Vector2, col: Color, line: bool = true) -> void:
+		draw_colored_polygon(PackedVector2Array([a, b, c, d]), col)
+		if line:
+			draw_polyline(PackedVector2Array([a, b, c, d, a]), Color(0.10, 0.07, 0.05, 0.55), 1.2, true)
+
+	func _tri(a: Vector2, b: Vector2, c: Vector2, col: Color) -> void:
+		draw_colored_polygon(PackedVector2Array([a, b, c]), col)
+		draw_polyline(PackedVector2Array([a, b, c, a]), Color(0.10, 0.07, 0.05, 0.55), 1.2, true)
+
+	func _draw() -> void:
+		var st: Dictionary = STYLE.get(kind, STYLE["maison"])
+		var hw: float = BoardArt.ISO_TW * cs * 0.5
+		var hh: float = BoardArt.ISO_TH * cs * 0.5
+		var inset: float = 0.10
+		var ex := Vector2(hw * fw, hh * fw) * (1.0 - inset)
+		var ey := Vector2(-hw * fh, hh * fh) * (1.0 - inset)
+		# C = sommet avant (origine) ; on recentre légèrement l'emprise pour laisser un peu d'herbe autour
+		var C := Vector2(0.0, -hh * 0.35)
+		var D: Vector2 = C - ex
+		var B: Vector2 = C - ey
+		var A: Vector2 = C - ex - ey
+		var wh: float = float(st["wh"])
+		var rh: float = float(st["rh"])
+		var wall: Color = st["wall"]
+		var frame: Color = st["frame"]
+		var roof: Color = st["roof"]
+		var wl: Color = wall
+		var wr: Color = wall.darkened(0.22)
+		# ombre au sol
+		draw_colored_polygon(PackedVector2Array([A + Vector2(8, 3), B + Vector2(14, 4), C + Vector2(10, 8), D + Vector2(2, 6)]), Color(0.03, 0.06, 0.08, 0.20))
+		var A2: Vector2 = A + _up(wh)
+		var B2: Vector2 = B + _up(wh)
+		var C2: Vector2 = C + _up(wh)
+		var D2: Vector2 = D + _up(wh)
+		var rg: String = String(st["roof_kind"])
+		var rs: Vector2 = (A + D) * 0.5 + _up(wh + rh)
+		var re: Vector2 = (B + C) * 0.5 + _up(wh + rh)
+		var apex: Vector2 = (A + C) * 0.5 + _up(wh + rh)
+		if rg == "gable":
+			_quad(A2, B2, re, rs, roof.darkened(0.30))                      # pan arrière
+		# murs
+		_quad(D, C, C2, D2, wl)
+		_quad(C, B, B2, C2, wr)
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seed_value
+		var timber: bool = kind in ["maison", "chaumiere", "grange"]
+		# structure : colombages / assises de pierre
+		if timber:
+			for i: int in range(1, fw * 2):
+				var f: float = float(i) / float(fw * 2)
+				draw_line(D.lerp(C, f), D2.lerp(C2, f), frame, 2.0)
+			draw_line(D2.lerp(C2, 0.0), C2, frame, 2.5)
+			draw_line(D + _up(wh * 0.5), C + _up(wh * 0.5), frame.lightened(0.1), 1.5)
+			for i2: int in range(1, fh * 2):
+				var f2: float = float(i2) / float(fh * 2)
+				draw_line(C.lerp(B, f2), C2.lerp(B2, f2), frame.darkened(0.15), 2.0)
+		else:
+			for row: int in range(1, int(wh / 20.0)):
+				var hy: float = float(row) * 20.0
+				draw_line(D + _up(hy), C + _up(hy), frame, 1.0)
+				draw_line(C + _up(hy), B + _up(hy), frame.darkened(0.2), 1.0)
+				for j: int in range(1, 4):
+					var jf: float = (float(j) + float(row % 2) * 0.5) / 4.0
+					draw_line(D.lerp(C, jf) + _up(hy - 20.0), D.lerp(C, jf) + _up(hy), frame, 1.0)
+		# porte et fenêtres sur la face gauche
+		var door_c: Vector2 = D.lerp(C, 0.5)
+		var dw: float = 0.12 if kind != "grange" else 0.22
+		var dh: float = minf(wh * 0.72, 74.0) if kind != "grange" else 84.0
+		var d0: Vector2 = D.lerp(C, 0.5 - dw)
+		var d1: Vector2 = D.lerp(C, 0.5 + dw)
+		_quad(d0, d1, d1 + _up(dh), d0 + _up(dh), Color(0.20, 0.12, 0.08))
+		if kind == "grange":
+			draw_line(door_c, door_c + _up(dh), Color(0.5, 0.35, 0.2), 1.5)
+		if wh > 40.0 and kind != "grange":
+			for wf: float in [0.2, 0.8]:
+				var w0: Vector2 = D.lerp(C, wf - 0.07) + _up(wh * 0.58)
+				var w1: Vector2 = D.lerp(C, wf + 0.07) + _up(wh * 0.58)
+				_quad(w0, w1, w1 + _up(24.0), w0 + _up(24.0), Color(0.95, 0.82, 0.45) if kind != "tour" else Color(0.15, 0.12, 0.2))
+		if wh > 40.0 and kind in ["tour", "moulin", "chapelle"]:
+			var wc: Vector2 = C.lerp(B, 0.5) + _up(wh * 0.6)
+			var w2: Vector2 = wc + (B - C).normalized() * 10.0
+			var w3: Vector2 = wc - (B - C).normalized() * 10.0
+			_quad(w3, w2, w2 + _up(28.0), w3 + _up(28.0), Color(0.15, 0.12, 0.2) if kind != "chapelle" else Color(0.45, 0.65, 0.85))
+		# toit
+		if rg == "gable":
+			_tri(C2, B2, re, wr)                                           # pignon (face droite)
+			_quad(D2, C2, re, rs, roof)                                     # pan avant
+			# rebord de toit
+			draw_line(D2, C2, roof.darkened(0.45), 3.0)
+			draw_line(rs, re, roof.lightened(0.25), 2.5)
+			if kind in ["maison", "grange"]:
+				var ch: Vector2 = D2.lerp(re, 0.55) + Vector2(10, 0)
+				_quad(ch, ch + Vector2(15, 5), ch + Vector2(15, -17), ch + Vector2(0, -22), Color(0.55, 0.50, 0.46))
+				_quad(ch + Vector2(0, -22), ch + Vector2(15, -17), ch + Vector2(15, -38), ch + Vector2(0, -43), Color(0.40, 0.36, 0.34))
+			if kind == "chaumiere":
+				for i3: int in range(1, 5):
+					var tf: float = float(i3) / 5.0
+					draw_line(D2.lerp(rs, tf), C2.lerp(re, tf), roof.darkened(0.18), 1.2)
+			if kind == "chapelle":
+				var sb: Vector2 = (rs + re) * 0.5
+				_quad(sb + Vector2(-12, 0), sb + Vector2(12, 8), sb + Vector2(12, -38), sb + Vector2(-12, -46), wl)
+				_tri(sb + Vector2(-15, -44), sb + Vector2(15, -34), sb + Vector2(0, -88), roof.lightened(0.1))
+				draw_circle(sb + Vector2(0, -94), 5.0, Color(0.95, 0.8, 0.3))
+		else:
+			var fl: Vector2 = C2 + Vector2(0, 0)
+			_tri(D2, C2, apex, roof)
+			_tri(C2, B2, apex, roof.darkened(0.25))
+			draw_line(D2, C2, roof.darkened(0.45), 3.0)
+			draw_line(C2, B2, roof.darkened(0.55), 3.0)
+			if kind == "tour":
+				# créneaux sous le toit et fanion
+				for i4: int in range(1, 4):
+					var cf: float = float(i4) / 4.0
+					var m0: Vector2 = D2.lerp(C2, cf)
+					draw_rect(Rect2(m0 + Vector2(-5, -9), Vector2(10, 9)), wall.darkened(0.1))
+				draw_line(apex, apex + Vector2(0, -36), Color(0.2, 0.15, 0.1), 3.0)
+				draw_colored_polygon(PackedVector2Array([apex + Vector2(0, -36), apex + Vector2(26, -28), apex + Vector2(0, -20)]), Color(0.85, 0.2, 0.2))
+			if kind == "moulin":
+				var hub: Vector2 = (D + C) * 0.5 + _up(wh * 0.72) + Vector2(0, 2)
+				var ang: float = _t * 0.9
+				for i5: int in range(4):
+					var a5: float = ang + float(i5) * PI * 0.5
+					var tip: Vector2 = hub + Vector2(cos(a5), sin(a5)) * 80.0
+					draw_line(hub, tip, Color(0.45, 0.32, 0.20), 5.0, true)
+					var side: Vector2 = Vector2(-sin(a5), cos(a5)) * 15.0
+					draw_colored_polygon(PackedVector2Array([hub + (tip - hub) * 0.35, tip, tip + side, hub + (tip - hub) * 0.35 + side]), Color(0.93, 0.90, 0.80, 0.95))
+				draw_circle(hub, 7.0, Color(0.3, 0.2, 0.12))
+
+
 ## Décor (arbre, rocher, fleurs…) dessiné par BattleScenery.
 class DecorNode extends Node2D:
 	var kind: String = "tree"
@@ -2554,6 +2871,8 @@ class DecorNode extends Node2D:
 	func _draw() -> void:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = seed_value
+		if SpriteDecor.active(biome) and SpriteDecor.draw(self, kind, rng):
+			return
 		BattleScenery.draw_prop(self, kind, pal, biome, rng, 0.0)
 
 

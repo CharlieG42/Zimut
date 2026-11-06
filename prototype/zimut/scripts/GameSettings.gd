@@ -107,7 +107,7 @@ func load_settings() -> void:
 	adventure_3d = bool(parsed.get("adventure_3d", adventure_3d))
 	adventure_models_3d = bool(parsed.get("adventure_models_3d", adventure_models_3d))
 	graphics_quality = clampi(int(parsed.get("graphics_quality", graphics_quality)), 0, 2)
-	sylvestre_board = "classic" if String(parsed.get("sylvestre_board", sylvestre_board)) == "classic" else "v2"
+	sylvestre_board = _board_variant(String(parsed.get("sylvestre_board", sylvestre_board)))
 	adventure_walk_sprites = bool(parsed.get("adventure_walk_sprites", adventure_walk_sprites))
 	cloud_auto = bool(parsed.get("cloud_auto", cloud_auto))
 	_apply_sfx()
@@ -190,9 +190,14 @@ func set_adventure_walk_sprites(on: bool) -> void:
 	adventure_walk_sprites = on
 	save_settings()
 
+## Variante des cartes 2D : « v2 » (illustrées, défaut), « classic » (ancienne planche) ou « iso » (V106 : biome tactique + sprites, Sylve).
+static func _board_variant(v: String) -> String:
+	return v if v in ["classic", "iso"] else "v2"
+
 func set_sylvestre_board(variant: String) -> void:
-	sylvestre_board = "classic" if variant == "classic" else "v2"
+	sylvestre_board = _board_variant(variant)
 	BoardArt.rev += 1          # invalide le cache du terrain
+	AdventureTerrain._cache.clear()
 	save_settings()
 
 func set_adventure_models_3d(on: bool) -> void:
