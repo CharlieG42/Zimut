@@ -2455,6 +2455,14 @@ func _dungeon_victory(data: Dictionary, adventure: Dictionary, key: String, biom
 		if not drops.is_empty():
 			data["inventory"].append(drops[0])
 			res["item"] = drops[0]
+		# V104 : le donjon final (palier 5) ouvre la Nation suivante (portail de la carte)
+		if Dungeons.tier(biome) >= Dungeons.TIERS:
+			var from_zone: String = String(adventure.get("zone", ""))
+			var known: Array = adventure.get("zones_unlocked", [])
+			for next_id: String in ADVENTURE_ZONES.keys():
+				if String(ADVENTURE_ZONES[next_id].get("unlock", "")) == from_zone and not known.has(next_id):
+					adventure_unlock_zone(adventure, next_id)
+					res["unlocked_zone"] = next_id
 		if bool(res["first_clear"]):
 			var completed: Array = adventure.get("completed", [])
 			if not completed.has(key):

@@ -89,6 +89,24 @@ func moves() -> int:
 func poi_at(pos: Vector2i) -> Dictionary:
 	return ProgressionManager.adventure_poi(zone_id(), pos)
 
+## V104 : portail vers la Nation suivante (lieu « exit » marqué "portal").
+func is_portal(poi: Dictionary) -> bool:
+	return String(poi.get("kind", "")) == KIND_EXIT and bool(poi.get("portal", false))
+
+## Portail scellé ? Retourne le donjon final à vaincre d'abord ({} si ouvert ou si ce n'est pas un portail).
+func portal_lock(poi: Dictionary) -> Dictionary:
+	if not is_portal(poi):
+		return {}
+	var nation: String = String(poi.get("requires", ""))
+	# Une fois la Nation suivante débloquée (donjon final vaincu, sortie prise…), le portail reste ouvert pour de bon.
+	if nation == "" or Dungeons.clears(state, nation) > 0 or (state.get("zones_unlocked", []) as Array).has(String(poi.get("to", ""))):
+		return {}
+	var pois: Dictionary = ProgressionManager.adventure_zone_pois(zone_id())
+	for k: String in pois.keys():
+		if String(pois[k].get("guardian", "")) == nation:
+			return pois[k]
+	return {"name": "le donjon final"}
+
 ## V103 : donjon verrouillé ? Retourne le donjon à terminer d'abord ({} si ouvert ou si ce n'est pas un donjon).
 func dungeon_lock(poi: Dictionary) -> Dictionary:
 	if not Dungeons.is_dungeon(poi):
@@ -102,8 +120,8 @@ func poi_key(pos: Vector2i) -> String:
 ## Le POI à cette position est-il déjà complété ?
 func poi_done(pos: Vector2i) -> bool:
 	# V43 : un donjon de Nation se refait autant de fois qu'on veut : jamais « terminé »
-	if Dungeons.is_dungeon(poi_at(pos)):
-		return false
+	if Dungeons.is_dungeon(poi_at(pos)) or is_portal(poi_at(pos)):
+		return false      # un portail se reprend à volonté
 	return ProgressionManager.adventure_poi_completed(state, poi_key(pos))
 
 ## Déplacement possible : case adjacente (4 directions), dans la grille, sans obstacle.
@@ -207,7 +225,7 @@ func zone_progress() -> Dictionary:
 	var done: int = 0
 	var total: int = 0
 	for k: String in pois.keys():
-		if String(pois[k].get("kind", "")) == KIND_CAMP:
+		if String(pois[k].get("kind", "")) == KIND_CAMP or is_portal(pois[k]):
 			continue
 		total += 1
 		if Dungeons.is_dungeon(pois[k]):
@@ -329,7 +347,10 @@ func interact() -> Dictionary:
 			persist()
 			return {"action": "combat", "key": key, "poi": poi.duplicate(true)}
 		KIND_EXIT:
-			return {"action": "exit", "key": key}
+			var lock: Dictionary = portal_lock(poi)
+			if not lock.is_empty():
+				return {"action": "portal_locked", "lock": lock, "poi": poi.duplicate(true)}
+			return {"action": "exit", "key": key, "portal": is_portal(poi), "poi": poi.duplicate(true)}
 		_:
 			return {"action": "nothing"}
 

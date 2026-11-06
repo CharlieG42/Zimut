@@ -189,6 +189,15 @@
 "desc": "De vieilles runes attendent une réponse.",
 "level": 1
 },
+"66,63": {
+"kind": "exit",
+"name": "Portail des Terres de Cendre",
+"desc": "Une arche de pierre vibre au bout du pont : elle s'ouvre sur la Nation suivante, le Brasier.",
+"level": 17,
+"portal": true,
+"requires": "Forêt",
+"to": "brasier_cendres"
+},
 "66,25": {
 "kind": "reveal",
 "name": "Belvédère de la Sylve",

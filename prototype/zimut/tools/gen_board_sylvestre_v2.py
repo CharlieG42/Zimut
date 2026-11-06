@@ -84,6 +84,7 @@ POIS = {
     "70,56": poi("camp", "Clairière des lucioles", "Des lucioles dansent autour d'un feu tranquille.", level=1),
     "40,30": poi("puzzle", "Cercle des pierres chantantes", "Des menhirs s'illuminent puis se taisent.", level=1),
     "54,30": poi("puzzle", "Sanctuaire des runes", "De vieilles runes attendent une réponse.", level=1),
+    "66,63": poi("exit", "Portail des Terres de Cendre", "Une arche de pierre vibre au bout du pont : elle s'ouvre sur la Nation suivante, le Brasier.", level=17, portal=True, requires="Forêt", to="brasier_cendres"),
     "66,25": poi("reveal", "Belvédère de la Sylve", "Du haut de l'arbre, la vallée se dévoile.", level=1),
 }
 START = [54, 45]
