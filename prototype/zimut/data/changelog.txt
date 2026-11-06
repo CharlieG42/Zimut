@@ -1,3 +1,6 @@
+V97|Temps de jeu corrigé : le compteur ne tourne plus quand l'appli est en arrière-plan, en veille ou sans action pendant 10 minutes (le temps affiché dans Mes Parties était gonflé).
+V97|Un compteur déjà gonflé (plus de 36 h dans un seul mode) est remis à zéro une fois au chargement de la partie ; les autres temps sont conservés.
+V97|Chaque image compte au maximum 1 seconde, ce qui évite qu'un long retour de veille s'ajoute d'un coup au temps total.
 V93|Nouvelle carte 2D de la Sylve : île flottante avec village, moulins, place des runes et Grand Arbre. L'ancienne carte reste disponible (Réglages → « Carte 2D de la Sylve »).
 V93|La nouvelle carte compte 18 lieux : les 5 donjons sont sur les portes du dessin (grotte, maison-moulin, moulin de pierre, arbre à porte bleue, Grand Arbre).
 V93|Réglages : « Carte 2D de la Sylve » permet de revenir à l'ancienne carte à tout moment ; les parties en cours replacent le héros au départ si besoin.

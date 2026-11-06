@@ -74,6 +74,43 @@ func _run() -> void:
 	ck(pm.format_playtime(120) == "2 min", "format 2 min")
 	ck(pm.format_playtime(3661) == "1 h 01", "format 1 h 01")
 
+	# V97 : garde-fous contre un temps gonflé
+	gm.active_slot = 3
+	gm.active_save = pm.load_save(3)
+	pt.flush()
+	pt.resume_tactique()
+	pt.set("_elapsed", 0.0)
+	pt.set("_idle", 0.0)
+	pt.set("_focused", true)
+	pt._process(5000.0)   # un énorme « delta » (retour de veille) ne compte que MAX_STEP
+	ck(absf(float(pt.get("_elapsed")) - 1.0) < 0.01, "delta plafonné à 1 s (%s)" % str(pt.get("_elapsed")))
+	pt.set("_elapsed", 0.0)
+	pt.set("_focused", false)
+	pt._process(0.5)
+	ck(float(pt.get("_elapsed")) == 0.0, "appli en arrière-plan : rien n'est compté")
+	pt.set("_focused", true)
+	pt.set("_idle", 601.0)
+	pt._process(0.5)
+	ck(float(pt.get("_elapsed")) == 0.0, "10 min sans action : le compteur s'arrête")
+	pt._input(InputEventScreenTouch.new())
+	pt._process(0.5)
+	ck(absf(float(pt.get("_elapsed")) - 0.5) < 0.01, "une action du joueur relance le compteur")
+	pt.set("_elapsed", 0.0)
+	pt.flush()
+
+	# Réparation unique d'un compteur gonflé (> 36 h dans un mode)
+	var bad: Dictionary = pm.new_game(4, "Gonflée")
+	bad["playtime_modes"] = {"adventure": 5 * 86400, "tactique": 600}
+	bad["playtime"] = 5 * 86400 + 600
+	bad["playtime_v"] = 1
+	pm.write_save(4, bad)
+	var rb: Dictionary = pm.load_save(4)
+	ck(pm.playtime_mode(rb, "adventure") == 0, "réparation : mode gonflé remis à 0")
+	ck(pm.playtime_mode(rb, "tactique") == 600 and pm.playtime_total(rb) == 600, "réparation : le reste est conservé, total recalculé")
+	pm.add_playtime(4, rb, "adventure", 120.0)
+	var rb2: Dictionary = pm.load_save(4)
+	ck(pm.playtime_mode(rb2, "adventure") == 120, "après réparation : le temps repart normalement")
+
 	pm.delete_save(3)
 	pm.delete_save(4)
 	print("ÉCHECS : %d" % fails)
