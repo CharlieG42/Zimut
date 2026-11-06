@@ -41,6 +41,11 @@ static func def(zone_id: String) -> Dictionary:
 const ALT_BOARDS := {"foret_sylve": "foret_sylve_v2", "montagne_pics": "montagne_pics_v2"}
 
 
+static func _variant() -> String:
+	var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameSettings")
+	return "v2" if gs == null else String(gs.get("sylvestre_board"))
+
+
 static func file_stem(zone_id: String) -> String:
 	if not ALT_BOARDS.has(zone_id):
 		return zone_id
@@ -52,6 +57,8 @@ static func file_stem(zone_id: String) -> String:
 
 
 static func raw(zone_id: String) -> Dictionary:
+	if zone_id == "foret_sylve" and _variant() == "iso":
+		return {}                      # V106 : carte isométrique (biome tactique + sprites), pas de planche
 	var stem: String = file_stem(zone_id)
 	if _defs.has(stem):
 		return _defs[stem]

@@ -2537,6 +2537,8 @@ class DecorNode extends Node2D:
 	func _draw() -> void:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = seed_value
+		if SpriteDecor.active(biome) and SpriteDecor.draw(self, kind, rng):
+			return
 		BattleScenery.draw_prop(self, kind, pal, biome, rng, 0.0)
 
 

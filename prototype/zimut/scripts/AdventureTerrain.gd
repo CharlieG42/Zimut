@@ -40,6 +40,8 @@ static func _pm() -> Node:
 
 
 static func _obstacles_for(biome: String) -> Array:
+	if SpriteDecor.active(biome):
+		return SpriteDecor.OBSTACLES
 	if Nations.is_new(biome):
 		var inf: Dictionary = Nations.info(biome)
 		return [inf["obs_tree"], inf["obs_tree"], inf["obs_rock"], inf["obs_rock"], inf["obs_tree"]]
@@ -48,6 +50,8 @@ static func _obstacles_for(biome: String) -> Array:
 
 ## Décors de sol (non bloquants) d'un biome.
 static func _ground_for(biome: String) -> Array:
+	if SpriteDecor.active(biome):
+		return SpriteDecor.GROUND
 	if Nations.is_new(biome):
 		var out: Array = []
 		for e: Array in Nations.info(biome).get("props", []):
