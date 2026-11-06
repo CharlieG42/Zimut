@@ -79,6 +79,9 @@ func _ready() -> void:
 	grid.add_child(_setting_cell("Personnages du monde 3D", ["Illustrés", "Modèles 3D"] as Array[String],
 		1 if GameSettings.adventure_models_3d else 0, func(idx: int) -> void: GameSettings.set_adventure_models_3d(idx == 1)))
 
+	grid.add_child(_setting_cell("Héros de la carte 2D", ["Modèles 3D animés", "Illustrés"] as Array[String],
+		0 if GameSettings.adventure_walk_sprites else 1, func(idx: int) -> void: GameSettings.set_adventure_walk_sprites(idx == 0)))
+
 	grid.add_child(_setting_cell("Carte 2D de la Sylve", ["Nouvelle", "Ancienne"] as Array[String],
 		1 if GameSettings.sylvestre_board == "classic" else 0, func(idx: int) -> void: GameSettings.set_sylvestre_board("classic" if idx == 1 else "v2")))
 
