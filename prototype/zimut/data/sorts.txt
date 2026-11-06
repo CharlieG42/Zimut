@@ -62,7 +62,7 @@ Assassin,Coup final,4,0,1,133 dégâts (tue si <20% PV ennemi),100,Attaque,133,0
 Chasseur,Glyphe d'entrave,2,0,4,Trace un glyphe (croix; 3 tours) : ennemis ralentis 2 pm (1 tour),1,Debuff,0,0,0,0,0,0,0,0,0
 Chasseur,Soin de chasseur,3,0,1,Restaure 20 PV,1,Soin,0,0,20,0,0,0,0,0,0
 Chasseur,Tir précis,2,0,5,41 dégâts,1,Attaque,41,0,0,0,0,0,0,0,0
-Chasseur,Tir rapide,1,0,4,14 dégâts,3,Attaque,14,0,0,0,0,0,0,0,0
+Chasseur,Volée de flèches,2,0,4,24 dégâts en zone (3x3),3,Attaque,24,0,0,0,0,0,0,0,0
 Chasseur,Pas de côté,1,0,0,+30% esquive (2 tours),8,Buff,0,0,0,0,0,0,0,0,0
 Chasseur,Balise de chasse,2,0,4,Plante une balise (3 max; la plus ancienne disparaît) : un sort de zone du Chasseur qui touche une balise se réplique autour de toutes les autres,10,Invocation,0,0,0,0,0,0,0,0,0
 Chasseur,Flèche empoisonnée,2,0,5,24 dégâts + (10 dégâts/tour; 2 tours),12,Attaque,24,0,0,0,0,0,0,0,0
@@ -70,6 +70,7 @@ Chasseur,Entrave,2,0,4,Immobilise l'ennemi (1 tour),15,Debuff,0,0,0,0,0,0,0,0,0
 Chasseur,Marque du prédateur,1,0,0,Critique garanti (prochaine attaque),18,Buff,0,0,0,0,0,0,0,0,0
 Chasseur,Tir explosif,4,1,4,41 dégâts en zone (3x3),20,Attaque,41,0,0,0,0,0,0,0,0
 Chasseur,Tir en rafale,3,0,5,40 dégâts (2 cibles),22,Attaque,40,0,0,0,0,0,0,0,0
+Chasseur,Nuée empoisonnée,3,0,5,36 dégâts en zone (3x3) + (10 dégâts/tour; 2 tours),26,Attaque,36,0,0,0,0,0,0,0,0
 Chasseur,Piège à loup,2,0,5,Pose un piège : 44 dégâts,25,Attaque,44,0,0,0,0,0,0,0,0
 Chasseur,Cri de guerre,2,0,0,+15% dégâts pour l'équipe (2 tours),28,Buff,0,0,0,0,0,0,0,0,0
 Chasseur,Flèche de feu,3,0,5,50 dégâts + brûle 13 dégâts/tour (2 tours),30,Attaque,50,0,0,0,0,0,0,0,0
@@ -77,11 +78,13 @@ Chasseur,Rappel de balise,1,0,8,Rappelle une de vos balises (elle disparaît du 
 Chasseur,Tir du chasseur,3,0,6,61 dégâts [Combo ralentissement : bonus 40%],38,Attaque,61,0,0,0,0,0,0,0,0
 Chasseur,Pluie de flèches,4,0,6,66 dégâts en zone (3x3),42,Attaque,66,0,0,0,0,0,0,0,0
 Chasseur,Tir ciblé,3,0,6,69 dégâts [Combo immobilisation : bonus 50%],45,Attaque,69,0,0,0,0,0,0,0,0
+Chasseur,Gerbe de glace,4,0,6,62 dégâts en zone (3x3) + ralentit 2 pm (2 tours),48,Attaque,62,0,0,0,0,0,0,0,0
 Chasseur,Glyphe de flammes,3,0,5,Trace un glyphe (3x3; 3 tours) : ennemis 25 dégâts + brûle 20 dégâts/tour (2 tours),50,Attaque,25,0,0,0,0,0,0,0,0
 Chasseur,Tir d'estoc,3,0,5,66 dégâts + repousse de 1 case,55,Attaque,66,0,0,0,0,0,0,0,0
 Chasseur,Œil de faucon,2,0,0,+30% dégâts (2 tours),58,Buff,0,0,0,0,0,0,0,0,0
 Chasseur,Flèche de glace,3,0,5,70 dégâts + immobilise (1 tour),62,Attaque,70,0,0,0,0,0,0,0,0
 Chasseur,Tir de recul,3,0,5,44 dégâts + repousse de 2 cases,65,Attaque,44,0,0,0,0,0,0,0,0
+Chasseur,Averse ardente,4,0,6,98 dégâts en zone (4x4) + brûle 20 dégâts/tour (2 tours),68,Attaque,98,0,0,0,0,0,0,0,0
 Chasseur,Tir mortel,4,0,7,123 dégâts [Enchaînement après Tir précis : bonus 40%],70,Attaque,123,0,0,0,0,0,0,0,0
 Chasseur,Salve,4,0,6,72 dégâts à tous les ennemis,75,Attaque,72,0,0,0,0,0,0,0,0
 Chasseur,Tir légendaire,4,0,7,100 dégâts,80,Attaque,100,0,0,0,0,0,0,0,0

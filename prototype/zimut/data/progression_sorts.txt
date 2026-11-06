@@ -56,7 +56,7 @@ Assassin,90,Ombre mortelle
 Assassin,95,Danse macabre
 Assassin,100,Coup final
 Chasseur,1,Glyphe d'entrave;Soin de chasseur;Tir précis
-Chasseur,3,Tir rapide
+Chasseur,3,Volée de flèches
 Chasseur,8,Pas de côté
 Chasseur,10,Balise de chasse
 Chasseur,12,Flèche empoisonnée
@@ -65,17 +65,20 @@ Chasseur,18,Marque du prédateur
 Chasseur,20,Tir explosif
 Chasseur,22,Tir en rafale
 Chasseur,25,Piège à loup
+Chasseur,26,Nuée empoisonnée
 Chasseur,28,Cri de guerre
 Chasseur,30,Flèche de feu
 Chasseur,35,Rappel de balise
 Chasseur,38,Tir du chasseur
 Chasseur,42,Pluie de flèches
 Chasseur,45,Tir ciblé
+Chasseur,48,Gerbe de glace
 Chasseur,50,Glyphe de flammes
 Chasseur,55,Tir d'estoc
 Chasseur,58,Œil de faucon
 Chasseur,62,Flèche de glace
 Chasseur,65,Tir de recul
+Chasseur,68,Averse ardente
 Chasseur,70,Tir mortel
 Chasseur,75,Salve
 Chasseur,80,Tir légendaire
