@@ -110,6 +110,29 @@ static func equip(data: Dictionary, biome: String, classe: String) -> String:
 	return ""
 
 
+## Les 2 emplacements « Pierre » d'un héros : tableau de MAX_PER_HERO cases (biome ou "" si vide).
+static func slots_of(data: Dictionary, classe: String) -> Array[String]:
+	var out: Array[String] = stones_of(data, classe)
+	while out.size() < MAX_PER_HERO:
+		out.append("")
+	return out
+
+
+## Place la Pierre `biome` dans l'emplacement `socket` (0 ou 1) de `classe` : la Pierre qui s'y trouvait
+## est rendue, et la Pierre est reprise à son ancien porteur s'il y en avait un. "" si OK.
+static func assign(data: Dictionary, biome: String, classe: String, socket: int) -> String:
+	if not has(data, biome):
+		return "Pierre non trouvée."
+	if classe == "" or socket < 0 or socket >= MAX_PER_HERO:
+		return "Emplacement invalide."
+	var worn: Array[String] = stones_of(data, classe)
+	if worn.has(biome):
+		return ""
+	if socket < worn.size():
+		unequip(data, worn[socket])
+	return equip(data, biome, classe)
+
+
 static func unequip(data: Dictionary, biome: String) -> void:
 	if has(data, biome):
 		owned(data)[biome]["owner"] = ""
