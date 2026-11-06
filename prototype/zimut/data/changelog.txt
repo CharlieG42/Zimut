@@ -1,6 +1,9 @@
 V97|Temps de jeu corrigé : le compteur ne tourne plus quand l'appli est en arrière-plan, en veille ou sans action pendant 10 minutes (le temps affiché dans Mes Parties était gonflé).
 V97|Un compteur déjà gonflé (plus de 36 h dans un seul mode) est remis à zéro une fois au chargement de la partie ; les autres temps sont conservés.
 V97|Chaque image compte au maximum 1 seconde, ce qui évite qu'un long retour de veille s'ajoute d'un coup au temps total.
+V96|Fiche personnage, onglet Caractéristiques : les 9 caractéristiques (Vitalité à Défense, PA, PM, Portée) tiennent sur un seul écran en 3 colonnes, sans défilement.
+V96|Chaque carte affiche le total, une jauge et le détail en couleur (base + points investis + objets), avec les boutons − / + et le coût du prochain point.
+V96|Les descriptions des caractéristiques passent en info-bulle (appui long) pour gagner de la place.
 V95|Arbre de talents refait en vrai arbre : un tronc, quatre branches maîtresses (Offense, Défense, Utilitaire, Puissance), des rameaux qui se divisent et des fruits à débloquer.
 V95|Un talent exige désormais celui qui le précède sur sa branche (ex. Maître d'armes demande Coup critique, qui demande Vétéran) ; les talents déjà acquis restent acquis.
 V95|Touchez un fruit pour lire son effet, puis « Débloquer » : fini la liste à faire défiler. « Action supplémentaire » devient « Action bonus » (même effet).
