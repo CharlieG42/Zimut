@@ -1,6 +1,13 @@
 V99|Sprites des personnages retouchés : le fond blanc resté accroché au Mage (à droite de la cape et de la tête) est supprimé.
 V99|Détourage amélioré entre les membres (bras/torse, jambes) pour l'Artificier, l'Assassin, la Chasseuse, le Druide et le Géomancien, dans toutes leurs poses.
 V99|Un fragment parasite en bas à gauche de l'Invocateur a été retiré.
+V95|Arbre de talents refait en vrai arbre : un tronc, quatre branches maîtresses (Offense, Défense, Utilitaire, Puissance), des rameaux qui se divisent et des fruits à débloquer.
+V95|Un talent exige désormais celui qui le précède sur sa branche (ex. Maître d'armes demande Coup critique, qui demande Vétéran) ; les talents déjà acquis restent acquis.
+V95|Touchez un fruit pour lire son effet, puis « Débloquer » : fini la liste à faire défiler. « Action supplémentaire » devient « Action bonus » (même effet).
+V94|Équipement : les 10 emplacements sont des tuiles à bordure de rareté disposées en anneau autour du héros ; à droite, la somme des bonus en noms complets (Vitalité, Force, Intelligence…) et les 2 Pierres.
+V94|Fiche personnage : l'onglet Équipement montre désormais le héros en pied, ses 10 emplacements autour de lui (tête, buste et mains à gauche ; arme, cape et pieds à droite), sans défilement.
+V94|Chaque héros dispose de 2 emplacements Pierre élémentaire directement sur sa fiche : touchez-en un pour choisir une Pierre (une Pierre portée par un autre héros lui est reprise).
+V94|Sur un emplacement, ▲ indique le nombre d'objets conseillés ; « Retirer » se trouve dans la liste de choix de l'objet.
 V93|Nouvelle carte 2D de la Sylve : île flottante avec village, moulins, place des runes et Grand Arbre. L'ancienne carte reste disponible (Réglages → « Carte 2D de la Sylve »).
 V93|La nouvelle carte compte 18 lieux : les 5 donjons sont sur les portes du dessin (grotte, maison-moulin, moulin de pierre, arbre à porte bleue, Grand Arbre).
 V93|Réglages : « Carte 2D de la Sylve » permet de revenir à l'ancienne carte à tout moment ; les parties en cours replacent le héros au départ si besoin.

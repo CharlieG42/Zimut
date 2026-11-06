@@ -11,6 +11,7 @@ extends CanvasLayer
 
 signal closed
 
+const StonesScript = preload("res://scripts/StonesUI.gd")
 const C_BG := Color(0.05, 0.07, 0.12, 1.0)
 const C_PANEL := Color(0.09, 0.11, 0.17, 0.98)
 const C_CARD := Color(0.12, 0.15, 0.23, 1.0)
@@ -42,6 +43,8 @@ var _content: VBoxContainer
 var _res_label: Label
 var _gear_pick: String = ""     # emplacement dont on choisit l'objet ("" = vue d'ensemble)
 var _gear_msg: String = ""
+var _talent_sel: String = ""       # talent sélectionné dans l'arbre
+var _stone_pick: int = -1       # emplacement Pierre (0 ou 1) dont on choisit la Pierre (-1 = aucun)
 
 
 ## Barre de composition d'une caractéristique : base | points investis | objets.
@@ -379,6 +382,9 @@ func _refresh_list() -> void:
 		btn.add_theme_stylebox_override("pressed", _box(C_CARD_HI, accent, 14, 3, 10))
 		btn.pressed.connect(func() -> void:
 			_classe = classe
+			_talent_sel = ""
+			_stone_pick = -1
+			_gear_pick = ""
 			refresh())
 		_list_box.add_child(btn)
 		var row := HBoxContainer.new()
@@ -513,6 +519,7 @@ func _refresh_tabs() -> void:
 			_tab = tab_id
 			if tab_id == "gear":
 				_gear_pick = ""
+				_stone_pick = -1
 				_gear_msg = ""
 			refresh())
 		_tabs_row.add_child(b)
@@ -771,82 +778,63 @@ func _build_talents() -> void:
 	var bar := HBoxContainer.new()
 	bar.add_theme_constant_override("separation", 14)
 	_content.add_child(bar)
-	bar.add_child(_chip("★ %d point%s de pouvoir" % [pts, "s" if pts > 1 else ""], C_GOOD if pts > 0 else C_DIM, 24))
+	bar.add_child(_chip("★ %d point%s de pouvoir" % [pts, "s" if pts > 1 else ""], C_GOOD if pts > 0 else C_DIM, 22))
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.add_child(sp)
-	bar.add_child(_lbl("%d talent%s débloqué%s" % [unlocked_n, "s" if unlocked_n > 1 else "", "s" if unlocked_n > 1 else ""], 18, C_DIM))
-	_content.add_child(_note("1 point de pouvoir tous les %d niveaux à partir du niveau %d. Les bonus ne s'appliquent qu'à ce héros." % [TalentTree.POWER_PER_LEVEL, TalentTree.UNLOCK_LEVEL]))
-	# Grille 2x2 des branches
-	var grid := GridContainer.new()
-	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 12)
-	grid.add_theme_constant_override("v_separation", 12)
-	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_content.add_child(grid)
-	for branch: String in ["offense", "defense", "utility", "power"]:
-		grid.add_child(_build_talent_branch(branch, pts))
+	bar.add_child(_lbl("%d / %d talents  ·  1 point tous les %d niveaux dès le niveau %d" % [unlocked_n, TalentTree.LIST.size(), TalentTree.POWER_PER_LEVEL, TalentTree.UNLOCK_LEVEL], 16, C_DIM))
+	var tree := TalentTreeView.new()
+	tree.name = "TalentTreeView"
+	tree.custom_minimum_size = Vector2(0, 372)
+	tree.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tree.clip_contents = true
+	tree.setup(_save, _classe, _talent_sel)
+	tree.node_selected.connect(func(id: String) -> void:
+		_talent_sel = id
+		refresh())
+	_content.add_child(tree)
+	_content.add_child(_talent_detail(pts))
 
 
-func _build_talent_branch(branch: String, pts: int) -> PanelContainer:
-	var info: Dictionary = TalentTree.BRANCHES[branch]
-	var panel := PanelContainer.new()
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	panel.add_theme_stylebox_override("panel", _box(C_PANEL, info["color"], 14, 3, 14))
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	panel.add_child(box)
-	box.add_child(_lbl("%s %s" % [info["icon"], info["label"]], 22, info["color"], true))
-	for t: Array in TalentTree.branch_talents(branch):
-		box.add_child(_build_talent_node(String(t[0]), String(t[1]), String(t[2]), int(t[3]), info["color"], pts))
-	return panel
-
-
-func _build_talent_node(id: String, name: String, desc: String, cost: int, branch_color: Color, pts: int) -> Control:
-	var unlocked: bool = TalentTree.is_unlocked(_save, _classe, id)
-	var affordable: bool = pts >= cost and not unlocked
+## Bandeau de détail du talent sélectionné + bouton « Débloquer ».
+func _talent_detail(pts: int) -> Control:
 	var card := PanelContainer.new()
-	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size = Vector2(0, 62)
-	var bg_col: Color = C_CARD_HI if unlocked else (C_CARD if affordable else Color(0.08, 0.10, 0.14))
-	var border_col: Color = C_GOOD if unlocked else (branch_color if affordable else Color(0.20, 0.22, 0.30))
-	card.add_theme_stylebox_override("panel", _box(bg_col, border_col, 10, 2, 10))
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 10)
-	card.add_child(hbox)
-	var mark := _lbl("✓" if unlocked else ("★" if affordable else "🔒"), 20,
-		C_GOOD if unlocked else (branch_color if affordable else C_DIM))
-	mark.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	hbox.add_child(mark)
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 2)
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hbox.add_child(vbox)
-	var nl := _lbl(name, 18, C_TXT if unlocked or affordable else C_DIM)
-	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	nl.custom_minimum_size = Vector2(60, 0)
-	vbox.add_child(nl)
-	var dl := _lbl(desc, 14, C_DIM)
+	card.name = "TalentDetail"
+	card.custom_minimum_size = Vector2(0, 76)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	card.add_child(row)
+	if _talent_sel == "" or TalentTree.talent_info(_talent_sel).is_empty():
+		card.add_theme_stylebox_override("panel", _box(C_CARD, C_BORDER, 14, 2, 12))
+		var hint := _lbl("Touchez un fruit de l'arbre pour voir son effet. Un talent se débloque une fois celui qui le précède acquis.", 18, C_DIM)
+		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(hint)
+		return card
+	var info: Dictionary = TalentTree.talent_info(_talent_sel)
+	var col: Color = TalentTree.BRANCHES[String(info["branch"])]["color"]
+	card.add_theme_stylebox_override("panel", _box(C_CARD, col, 14, 3, 12))
+	var txt := VBoxContainer.new()
+	txt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	txt.add_theme_constant_override("separation", 2)
+	row.add_child(txt)
+	txt.add_child(_lbl("%s   ★ %d" % [String(info["name"]), int(info["cost"])], 22, col.lightened(0.3), true))
+	var dl := _lbl(String(info["desc"]), 18, C_TXT)
 	dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	dl.custom_minimum_size = Vector2(60, 0)
-	vbox.add_child(dl)
-	var cost_lbl := _lbl("★ %d" % cost, 17, C_GOLD if affordable else C_DIM)
-	cost_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	cost_lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	hbox.add_child(cost_lbl)
-	var btn := Button.new()
-	btn.flat = true
-	btn.focus_mode = Control.FOCUS_NONE
-	btn.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	btn.tooltip_text = desc
-	btn.disabled = unlocked or not affordable
-	if not unlocked and affordable:
-		btn.pressed.connect(func() -> void:
-			if TalentTree.spend_point(_save, _classe, id):
+	txt.add_child(dl)
+	var why: String = TalentTree.unlock_block(_save, _classe, _talent_sel)
+	var unlocked: bool = TalentTree.is_unlocked(_save, _classe, _talent_sel)
+	var status := _lbl("✓ Débloqué" if unlocked else ("Prêt à débloquer" if why == "" else why), 16, C_GOOD if (unlocked or why == "") else C_DIM)
+	txt.add_child(status)
+	if not unlocked:
+		var b := _btn("DÉBLOQUER", C_GOLD if why == "" else C_BORDER, 22, Vector2(220, 60))
+		b.name = "TalentUnlock"
+		b.disabled = why != ""
+		b.pressed.connect(func() -> void:
+			if TalentTree.spend_point(_save, _classe, _talent_sel):
 				_persist()
 				refresh())
-	card.add_child(btn)
+		row.add_child(b)
 	return card
 
 
@@ -1072,41 +1060,239 @@ func _gear_governor_line() -> String:
 	return ""
 
 
+## Position (centre de la tuile, relative au héros) des 10 emplacements autour de lui.
+const RING_LAYOUT := {
+	"cape":           Vector2(0, -190),
+	"arme":           Vector2(-215, -80),
+	"bouclier":       Vector2(215, -80),
+	"casque":         Vector2(-215, 38),
+	"bottes":         Vector2(215, 38),
+	"bague":          Vector2(-215, 156),
+	"boucle_oreille": Vector2(215, 156),
+	"collier":        Vector2(-105, 200),
+	"gants":          Vector2(105, 200),
+	"armure":         Vector2(0, 160),
+}
+const RING_TILE := 88.0
+
+
+## Emplacement « Pierre » vide : cercle pointillé et « + ».
+class EmptySocket extends Control:
+	func _draw() -> void:
+		var c: Vector2 = size * 0.5
+		var r: float = minf(size.x, size.y) * 0.40
+		for i: int in range(16):
+			var a0: float = float(i) * TAU / 16.0
+			draw_arc(c, r, a0, a0 + TAU / 32.0, 4, Color(0.50, 0.56, 0.70), 3.0, true)
+		draw_line(c + Vector2(-r * 0.38, 0), c + Vector2(r * 0.38, 0), Color(0.50, 0.56, 0.70), 3.0, true)
+		draw_line(c + Vector2(0, -r * 0.38), c + Vector2(0, r * 0.38), Color(0.50, 0.56, 0.70), 3.0, true)
+
+
 func _build_gear() -> void:
+	if _stone_pick >= 0:
+		_build_stone_picker(_stone_pick)
+		return
 	if _gear_pick != "":
 		_build_gear_picker(_gear_pick)
 		return
 	var eq: Dictionary = ProgressionManager.hero_equipment(_save, _classe)
 	var agg: Dictionary = ItemRules.aggregate(eq)
-	var sum_parts: PackedStringArray = []
+	var notes: PackedStringArray = []
+	for line: String in agg["sets"]:
+		notes.append("◈ " + line)
+	var gov: String = _gear_governor_line()
+	if gov != "":
+		notes.append(gov)
+	elif not _team_classes().has(_classe):
+		notes.append("Ce héros n'est pas dans l'équipe : son équipement est conservé et compte s'il devient gouverneur.")
+	if _gear_msg != "":
+		_content.add_child(_lbl(_gear_msg, 18, C_BAD))
+	var doll := HBoxContainer.new()
+	doll.name = "Paperdoll"
+	doll.add_theme_constant_override("separation", 18)
+	doll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_content.add_child(doll)
+	doll.add_child(_gear_ring(eq))
+	doll.add_child(_gear_info(agg, notes))
+
+
+## Le héros au centre, entouré des 10 tuiles d'équipement (bordure = rareté).
+func _gear_ring(eq: Dictionary) -> Control:
+	var accent: Color = GameManager.COLORS.get(_classe, C_GOLD)
+	var ring := Control.new()
+	ring.name = "GearRing"
+	ring.custom_minimum_size = Vector2(620, 530)
+	ring.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	var center := Vector2(310, 250)
+	var stage := Panel.new()
+	stage.add_theme_stylebox_override("panel", _box(accent.darkened(0.8), accent.darkened(0.3), 24, 2, 0))
+	stage.position = Vector2(20, 0)
+	stage.size = Vector2(580, 530)
+	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ring.add_child(stage)
+	var hero := TextureRect.new()
+	hero.name = "DollHero"
+	hero.texture = Portraits.get_texture({"classe": _classe, "team": "player", "entity_type": "Player"})
+	hero.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	hero.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	hero.size = Vector2(180, 235)
+	hero.position = center - Vector2(90, 135)
+	hero.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ring.add_child(hero)
+	for slot: String in RING_LAYOUT:
+		var t: Control = _gear_tile(slot, eq)
+		t.position = center + RING_LAYOUT[slot] - Vector2(RING_TILE * 0.5, RING_TILE * 0.5 + 6.0)
+		ring.add_child(t)
+	return ring
+
+
+## Tuile d'un emplacement : icône de la catégorie, bordure de rareté, badge ▲ si mieux dispo, nom dessous.
+func _gear_tile(slot: String, eq: Dictionary) -> Control:
+	var it: Dictionary = eq.get(slot, {})
+	var holder := Control.new()
+	holder.custom_minimum_size = Vector2(RING_TILE + 20.0, RING_TILE + 24.0)
+	holder.size = holder.custom_minimum_size
+	var edge: Color = ItemRules.rarity_color(it) if not it.is_empty() else C_BORDER
+	var frame := Panel.new()
+	frame.position = Vector2(10, 0)
+	frame.size = Vector2(RING_TILE, RING_TILE)
+	frame.add_theme_stylebox_override("panel", _box(Color(0.24, 0.36, 0.20) if not it.is_empty() else Color(0.10, 0.13, 0.20), edge, 14, 5 if not it.is_empty() else 2, 0))
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.add_child(frame)
+	var tile: TextureRect = GearUi.tile(slot, RING_TILE - 16.0)
+	tile.position = Vector2(18, 8)
+	tile.size = Vector2(RING_TILE - 16.0, RING_TILE - 16.0)
+	if it.is_empty():
+		tile.modulate = Color(1, 1, 1, 0.4)
+	holder.add_child(tile)
+	var opt: Dictionary = _gear_options(slot)
+	var badge_txt: String = ""
+	var badge_col: Color = C_GOOD
+	if int(opt["rec"]) > 0:
+		badge_txt = "▲%d" % int(opt["rec"])
+	elif int(opt["other"]) > 0:
+		badge_txt = "+%d" % int(opt["other"])
+		badge_col = C_DIM
+	if badge_txt != "":
+		var bl := _lbl(badge_txt, 15, badge_col, true)
+		bl.name = "GearAvail_" + slot
+		bl.position = Vector2(RING_TILE - 22.0, 2)
+		bl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		holder.add_child(bl)
+	var cap := _lbl(ItemRules.display_name(it) if not it.is_empty() else GearUi.slot_label(slot), 12,
+		ItemRules.rarity_color(it).lightened(0.3) if not it.is_empty() else C_DIM)
+	cap.position = Vector2(0, RING_TILE + 3)
+	cap.size = Vector2(RING_TILE + 20.0, 18)
+	cap.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	cap.clip_text = true
+	cap.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	cap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.add_child(cap)
+	var b := Button.new()
+	b.name = "GearPick_" + slot
+	b.flat = true
+	b.focus_mode = Control.FOCUS_NONE
+	b.position = Vector2(10, 0)
+	b.size = Vector2(RING_TILE, RING_TILE + 20.0)
+	b.tooltip_text = ItemRules.describe(it) if not it.is_empty() else "%s (vide)" % GearUi.slot_label(slot)
+	b.pressed.connect(func() -> void:
+		_gear_pick = slot
+		_gear_msg = ""
+		refresh())
+	holder.add_child(b)
+	return holder
+
+
+## Panneau de droite : somme des bonus (noms complets), panoplies, puis les 2 Pierres.
+func _gear_info(agg: Dictionary, notes: PackedStringArray) -> Control:
+	var box := VBoxContainer.new()
+	box.name = "GearInfo"
+	box.add_theme_constant_override("separation", 8)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_child(_lbl("BONUS DE L'ÉQUIPEMENT", 14, C_DIM))
+	var lines: PackedStringArray = []
 	for k: String in ItemRules.STAT_KEYS:
 		var v: int = int(agg["stats"].get(k, 0))
 		if v != 0:
-			sum_parts.append("%s %+d" % [String(ItemRules.STAT_SHORT[k]), v])
-	var info := _lbl("Bonus d'équipement : %s" % (" · ".join(sum_parts) if not sum_parts.is_empty() else "aucun"), 19, C_GOOD if not sum_parts.is_empty() else C_DIM)
-	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_content.add_child(info)
-	for line: String in agg["sets"]:
-		_content.add_child(_lbl("◈ " + line, 16, C_GOLD))
-	var gov: String = _gear_governor_line()
-	if gov != "":
-		var gl := _lbl(gov, 17, Color(0.78, 0.62, 1.0))
-		gl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		_content.add_child(gl)
-	elif not _team_classes().has(_classe):
-		var nl := _lbl("Ce héros n'est pas dans l'équipe : son équipement est conservé et compte s'il devient gouverneur.", 16, C_DIM)
+			lines.append("%s %+d" % [String(ClassRules.STAT_LABEL.get(k, k)), v])
+	var bonus := _lbl("\n".join(lines) if not lines.is_empty() else "Aucun bonus", 20, C_GOOD if not lines.is_empty() else C_DIM)
+	bonus.name = "DollBonus"
+	box.add_child(bonus)
+	var fx: Array[String] = ItemRules.fx_lines(agg["fx"])
+	for f: String in fx:
+		var fl := _lbl("✦ " + f, 15, C_TXT)
+		fl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(fl)
+	for n: String in notes:
+		var nl := _lbl(n, 15, C_GOLD if n.begins_with("◈") else C_DIM)
 		nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		_content.add_child(nl)
-	if _gear_msg != "":
-		_content.add_child(_lbl(_gear_msg, 18, C_BAD))
-	var grid := GridContainer.new()
-	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 10)
-	grid.add_theme_constant_override("v_separation", 10)
-	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_content.add_child(grid)
-	for slot: String in GearUi.SLOT_ORDER:
-		grid.add_child(_gear_slot_card(slot, eq))
+		box.add_child(nl)
+	var sp := Control.new()
+	sp.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	box.add_child(sp)
+	box.add_child(_lbl("PIERRES ÉLÉMENTAIRES", 14, C_DIM))
+	var stones := VBoxContainer.new()
+	stones.name = "StoneSockets"
+	stones.add_theme_constant_override("separation", 8)
+	box.add_child(stones)
+	var slots: Array[String] = Stones.slots_of(_save, _classe)
+	for i: int in range(slots.size()):
+		stones.add_child(_stone_socket(i, slots[i]))
+	return box
+
+
+func _stone_socket(index: int, biome: String) -> Control:
+	var card := PanelContainer.new()
+	card.name = "StoneSocket_%d" % index
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var col: Color = Stones.info(biome).get("color", C_BORDER) if biome != "" else C_BORDER
+	card.add_theme_stylebox_override("panel", _box(C_CARD, col, 14, 3 if biome != "" else 2, 8))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	card.add_child(row)
+	var icon: Control
+	if biome != "":
+		var g := StonesScript.GemIcon.new()
+		g.col = col
+		g.found = true
+		g.lv = Stones.level(_save, biome)
+		icon = g
+	else:
+		icon = EmptySocket.new()
+	icon.custom_minimum_size = Vector2(58, 58)
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(icon)
+	var mid := VBoxContainer.new()
+	mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	mid.add_theme_constant_override("separation", 0)
+	mid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(mid)
+	mid.add_child(_lbl("PIERRE %d" % (index + 1), 12, C_DIM))
+	if biome == "":
+		mid.add_child(_lbl("— vide —", 16, C_DIM))
+	else:
+		var lv: int = Stones.level(_save, biome)
+		var nm := _lbl(Stones.stone_name(biome), 15, col.lightened(0.25))
+		nm.clip_text = true
+		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		mid.add_child(nm)
+		mid.add_child(_lbl("★".repeat(lv) + "☆".repeat(Stones.MAX_LEVEL - lv), 13, C_GOLD))
+		var bl := _lbl(", ".join(Stones.bonus_lines(biome, lv)), 12, C_GOOD)
+		bl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		bl.custom_minimum_size = Vector2(60, 0)
+		mid.add_child(bl)
+	var btn := Button.new()
+	btn.name = "StonePick_%d" % index
+	btn.flat = true
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	btn.pressed.connect(func() -> void:
+		_stone_pick = index
+		_gear_msg = ""
+		refresh())
+	card.add_child(btn)
+	return card
 
 
 ## Objets libres de l'inventaire pour un emplacement : "rec" = conseillés (niveau
@@ -1133,57 +1319,77 @@ func _gear_total_rec() -> int:
 	return n
 
 
-func _gear_slot_card(slot: String, eq: Dictionary) -> Control:
-	var it: Dictionary = eq.get(slot, {})
-	var card := PanelContainer.new()
-	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var edge: Color = ItemRules.rarity_color(it) if not it.is_empty() else C_BORDER
-	card.add_theme_stylebox_override("panel", _box(C_CARD, edge, 14, 2, 10))
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
-	card.add_child(row)
-	row.add_child(GearUi.tile(slot, 60.0))
-	var mid := VBoxContainer.new()
-	mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	mid.add_theme_constant_override("separation", 2)
-	row.add_child(mid)
-	mid.add_child(_lbl(GearUi.slot_label(slot).to_upper(), 14, C_DIM))
-	if it.is_empty():
-		mid.add_child(_lbl("— vide —", 19, C_DIM))
-	else:
-		var nm := _lbl(ItemRules.display_name(it), 19, ItemRules.rarity_color(it).lightened(0.3))
-		nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		mid.add_child(nm)
-		mid.add_child(_lbl("niv. %d · %s" % [int(it.get("level", 0)), ItemRules.stat_line(it)], 15, C_TXT))
-	var opt: Dictionary = _gear_options(slot)
-	if int(opt["rec"]) > 0 or int(opt["other"]) > 0:
-		var parts: PackedStringArray = []
-		if int(opt["rec"]) > 0:
-			parts.append("▲ %d conseillé%s" % [int(opt["rec"]), "s" if int(opt["rec"]) > 1 else ""])
-		if int(opt["other"]) > 0:
-			parts.append("%d autre%s" % [int(opt["other"]), "s" if int(opt["other"]) > 1 else ""])
-		var bl := _lbl(" · ".join(parts), 15, C_GOOD if int(opt["rec"]) > 0 else C_DIM, int(opt["rec"]) > 0)
-		bl.name = "GearAvail_" + slot
-		mid.add_child(bl)
-	var btns := VBoxContainer.new()
-	btns.add_theme_constant_override("separation", 6)
-	row.add_child(btns)
-	var b := _btn("CHANGER" if not it.is_empty() else "ÉQUIPER", C_GOLD, 17, Vector2(120, 44))
-	b.name = "GearPick_" + slot
-	b.pressed.connect(func() -> void:
-		_gear_pick = slot
-		_gear_msg = ""
+## Choix d'une Pierre pour un emplacement : toutes les Pierres retrouvées, avec leur porteur actuel.
+func _build_stone_picker(socket: int) -> void:
+	var back := _btn("←  RETOUR À L'ÉQUIPEMENT", C_BORDER, 19, Vector2(0, 48))
+	back.pressed.connect(func() -> void:
+		_stone_pick = -1
 		refresh())
-	btns.add_child(b)
-	if not it.is_empty():
-		var r := _btn("RETIRER", C_BAD, 15, Vector2(120, 38))
-		r.name = "GearRemove_" + slot
+	_content.add_child(back)
+	_content.add_child(_lbl("Pierre %d de %s" % [socket + 1, _classe], 24, C_GOLD, true))
+	if _gear_msg != "":
+		_content.add_child(_lbl(_gear_msg, 18, C_BAD))
+	var cur: String = Stones.slots_of(_save, _classe)[socket]
+	if cur != "":
+		var r := _btn("RETIRER  %s" % Stones.stone_name(cur), C_BAD, 17, Vector2(0, 44))
+		r.name = "StoneRemove"
 		r.pressed.connect(func() -> void:
-			_gear_msg = ProgressionManager.unequip_hero_item(_save, _classe, slot)
+			Stones.unequip(_save, cur)
 			_persist()
+			_stone_pick = -1
 			refresh())
-		btns.add_child(r)
-	return card
+		_content.add_child(r)
+	var any: bool = false
+	for biome: String in Stones.ORDER:
+		if not Stones.has(_save, biome):
+			continue
+		any = true
+		var lv: int = Stones.level(_save, biome)
+		var col: Color = Stones.info(biome).get("color", C_GOLD)
+		var owner: String = Stones.owner_of(_save, biome)
+		var b := Button.new()
+		b.name = "StoneChoice_" + biome
+		b.custom_minimum_size = Vector2(0, 84)
+		b.focus_mode = Control.FOCUS_NONE
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		var tag: String = ""
+		if owner == _classe:
+			tag = "   (déjà portée)"
+		elif owner != "":
+			tag = "   (portée par %s : sera reprise)" % owner
+		b.text = "%s   %s%s\n%s" % [Stones.stone_name(biome), "★".repeat(lv) + "☆".repeat(Stones.MAX_LEVEL - lv), tag,
+			", ".join(Stones.bonus_lines(biome, lv))]
+		b.add_theme_font_size_override("font_size", 19)
+		for st_name in ["font_color", "font_hover_color", "font_pressed_color"]:
+			b.add_theme_color_override(st_name, col.lightened(0.3))
+		var sbx: StyleBoxFlat = _box(C_CARD, col.darkened(0.2), 12, 2, 12)
+		sbx.content_margin_left = 84
+		b.add_theme_stylebox_override("normal", sbx)
+		b.add_theme_stylebox_override("hover", _box(C_CARD_HI, col, 12, 3, 12))
+		b.add_theme_stylebox_override("pressed", sbx)
+		var gem := StonesScript.GemIcon.new()
+		gem.col = col
+		gem.found = true
+		gem.lv = lv
+		gem.custom_minimum_size = Vector2(60, 60)
+		gem.position = Vector2(12, 12)
+		gem.size = Vector2(60, 60)
+		gem.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(gem)
+		b.pressed.connect(func() -> void:
+			var err: String = Stones.assign(_save, biome, _classe, socket)
+			if err != "":
+				_gear_msg = err
+			else:
+				_gear_msg = ""
+				_stone_pick = -1
+				_persist()
+			refresh())
+		_content.add_child(b)
+	if not any:
+		var e := _lbl("Aucune Pierre retrouvée pour l'instant : vaincre le boss d'une Nation (Tactique, sanctuaire en Aventure ou siège en Conquête).", 19, C_DIM)
+		e.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_content.add_child(e)
 
 
 ## Liste des objets libres de l'inventaire compatibles avec un emplacement.
@@ -1198,6 +1404,15 @@ func _build_gear_picker(slot: String) -> void:
 		_content.add_child(_lbl(_gear_msg, 18, C_BAD))
 	var level: int = ProgressionManager.member_level(_save, _classe)
 	var cur: Dictionary = ProgressionManager.hero_equipment(_save, _classe).get(slot, {})
+	if not cur.is_empty():
+		var rm := _btn("RETIRER  %s" % ItemRules.display_name(cur), C_BAD, 17, Vector2(0, 44))
+		rm.name = "GearRemove_" + slot
+		rm.pressed.connect(func() -> void:
+			_gear_msg = ProgressionManager.unequip_hero_item(_save, _classe, slot)
+			_persist()
+			_gear_pick = ""
+			refresh())
+		_content.add_child(rm)
 	var cur_power: int = ItemRules.power(cur) if not cur.is_empty() else 0
 	var rows: Array = []
 	var inv: Array = _save.get("inventory", [])
