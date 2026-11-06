@@ -49,16 +49,16 @@ static func _variant() -> String:
 static func file_stem(zone_id: String) -> String:
 	if not ALT_BOARDS.has(zone_id):
 		return zone_id
-	var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameSettings")
-	var variant: String = "v2" if gs == null else String(gs.get("sylvestre_board"))
+	var variant: String = _variant()
 	if variant == "classic":
 		return zone_id
+	# V106 : « Iso » = plateau isométrique à étages pour la Sylve ; les autres nations gardent leur planche v2.
+	if variant == "iso" and zone_id == "foret_sylve" and FileAccess.file_exists(DIR + "foret_sylve_iso.json"):
+		return "foret_sylve_iso"
 	return String(ALT_BOARDS[zone_id]) if FileAccess.file_exists(DIR + String(ALT_BOARDS[zone_id]) + ".json") else zone_id
 
 
 static func raw(zone_id: String) -> Dictionary:
-	if zone_id == "foret_sylve" and _variant() == "iso":
-		return {}                      # V106 : carte isométrique (biome tactique + sprites), pas de planche
 	var stem: String = file_stem(zone_id)
 	if _defs.has(stem):
 		return _defs[stem]
@@ -204,5 +204,89 @@ static func pois(zone_id: String) -> Dictionary:
 ## Taille de l'illustration dans le monde 2D (pixels).
 static func world_size(zone_id: String) -> Vector2:
 	var d: Dictionary = raw(zone_id)
+	if bool(d.get("iso", false)):
+		var cs: float = iso_cs(zone_id)
+		var span: float = float(int(d.get("cols", 0)) + int(d.get("rows", 0)))
+		return Vector2(span * ISO_TW * cs * 0.5 + 200.0, span * ISO_TH * cs * 0.5 + iso_origin(zone_id).y + 330.0)
 	var isz: Array = d.get("image_size", [0, 0])
 	return Vector2(float(isz[0]), float(isz[1])) * IMAGE_SCALE
+
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  V106 — plateau isométrique à étages (« foret_sylve_iso »)
+#  Cases de ISO_TW×ISO_TH × cell_scale, hauteur par case en quarts d'étage (`unit`), un étage = ISO_LEVEL_PX.
+# ══════════════════════════════════════════════════════════════════════
+const ISO_TW := 128.0
+const ISO_TH := 64.0
+const ISO_LEVEL_PX := 64.0
+static var _heights: Dictionary = {}
+
+
+static func is_iso(zone_id: String) -> bool:
+	return bool(raw(zone_id).get("iso", false))
+
+
+static func iso_cs(zone_id: String) -> float:
+	return float(raw(zone_id).get("cell_scale", 0.625))
+
+
+## Pixels du monde par quart d'étage.
+static func iso_unit_px(zone_id: String) -> float:
+	return ISO_LEVEL_PX / float(maxi(1, int(raw(zone_id).get("unit", 4))))
+
+
+## Hauteur de chaque case (quarts d'étage) : { Vector2i: int }.
+static func heights(zone_id: String) -> Dictionary:
+	var stem: String = file_stem(zone_id)
+	var key: String = "%s:%d" % [stem, rev]
+	if _heights.has(key):
+		return _heights[key]
+	var out: Dictionary = {}
+	var rows: Array = raw(zone_id).get("heights", [])
+	for y: int in range(rows.size()):
+		var row: String = rows[y]
+		for x: int in range(row.length()):
+			var code: int = row.unicode_at(x)
+			out[Vector2i(x, y)] = code - 48 if code < 97 else 10 + code - 97
+	_heights[key] = out
+	return out
+
+
+static func iso_max_height(zone_id: String) -> int:
+	var m: int = 0
+	for v: Variant in heights(zone_id).values():
+		m = maxi(m, int(v))
+	return m
+
+
+## Origine du monde 2D de la case (0,0) : tout reste en coordonnées positives.
+static func iso_origin(zone_id: String) -> Vector2:
+	var cs: float = iso_cs(zone_id)
+	var rows: int = int(raw(zone_id).get("rows", 0))
+	return Vector2(float(rows) * ISO_TW * cs * 0.5 + 100.0, 220.0 + float(iso_max_height(zone_id)) * iso_unit_px(zone_id))
+
+
+static func iso_pos(zone_id: String, c: Vector2i) -> Vector2:
+	var cs: float = iso_cs(zone_id)
+	var h: float = float(heights(zone_id).get(c, 0)) * iso_unit_px(zone_id)
+	return iso_origin(zone_id) + Vector2(float(c.x - c.y) * ISO_TW * cs * 0.5, float(c.x + c.y) * ISO_TH * cs * 0.5 - h)
+
+
+## Case sous un point du monde (tient compte des hauteurs : on teste du plus haut au plus bas).
+static func iso_cell_at(zone_id: String, w: Vector2) -> Vector2i:
+	var cs: float = iso_cs(zone_id)
+	var hs: Dictionary = heights(zone_id)
+	var d: Vector2 = w - iso_origin(zone_id)
+	var up: float = iso_unit_px(zone_id)
+	var fallback := Vector2i(-1, -1)
+	for hu: int in range(iso_max_height(zone_id), -1, -1):
+		var ly: float = d.y + float(hu) * up
+		var gx: float = (ly / (ISO_TH * cs * 0.5) + d.x / (ISO_TW * cs * 0.5)) * 0.5
+		var gy: float = (ly / (ISO_TH * cs * 0.5) - d.x / (ISO_TW * cs * 0.5)) * 0.5
+		var c := Vector2i(roundi(gx), roundi(gy))
+		if hu == 0:
+			fallback = c
+		if int(hs.get(c, -1)) == hu:
+			return c
+	return fallback

@@ -116,6 +116,8 @@ func can_move_to(pos: Vector2i) -> bool:
 		return false
 	if not AdventureMobs.at(state, zone_id(), pos).is_empty():
 		return false
+	if not AdventureTerrain.can_step(zone_id(), h, pos):
+		return false          # V106 : falaise entre deux étages
 	return absi(pos.x - h.x) + absi(pos.y - h.y) == 1
 
 ## Chemin jusqu'à une case découverte (déplacement par appui) : [] si impossible.

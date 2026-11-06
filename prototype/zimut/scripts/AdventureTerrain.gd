@@ -252,9 +252,23 @@ static func _board_terrain(zone_id: String) -> Dictionary:
 		for x: int in range(sz.x):
 			if BoardArt.walkable_cell(zone_id, Vector2i(x, y)):
 				paths[Vector2i(x, y)] = true
+	var obstacles: Dictionary = {}
+	var decor: Dictionary = {}
+	var heights: Dictionary = {}
+	if BoardArt.is_iso(zone_id):
+		# V106 : plateau isométrique — sentiers, arbres, décors et hauteurs viennent des données de la planche.
+		var d: Dictionary = BoardArt.raw(zone_id)
+		paths = {}
+		for k: Variant in d.get("trail", []):
+			paths[parse(String(k))] = true
+		for k: String in (d.get("obstacles", {}) as Dictionary).keys():
+			obstacles[parse(k)] = String(d["obstacles"][k])
+		for k: String in (d.get("decor", {}) as Dictionary).keys():
+			decor[parse(k)] = String(d["decor"][k])
+		heights = BoardArt.heights(zone_id)
 	var out: Dictionary = {"size": sz, "start": BoardArt.start(zone_id), "biome": String(meta.get("biome", "Forêt")),
-		"obstacles": {}, "paths": paths, "decor": {}, "pois": pois, "gates": [] as Array[Vector2i],
-		"cell_biome": {}, "voids": BoardArt.voids(zone_id)}
+		"obstacles": obstacles, "paths": paths, "decor": decor, "pois": pois, "gates": [] as Array[Vector2i],
+		"cell_biome": {}, "voids": BoardArt.voids(zone_id), "heights": heights}
 	_cache[key] = out
 	return out
 
@@ -393,10 +407,16 @@ static func find_path(zone_id: String, from: Vector2i, to: Vector2i, blocked: Di
 	for b: Vector2i in blocked.keys():
 		if b != to:
 			walls[b] = true
-	return _bfs_path(t["size"], walls, from, to)
+	return _bfs_path(t["size"], walls, from, to, t.get("heights", {}))
 
 
-static func _bfs_path(size: Vector2i, walls: Dictionary, from: Vector2i, to: Vector2i) -> Array[Vector2i]:
+## Une marche d'une case à sa voisine est-elle possible ? (V106 : pas de falaise : écart ≤ 1 quart d'étage)
+static func can_step(zone_id: String, a: Vector2i, b: Vector2i) -> bool:
+	var hs: Dictionary = zone_terrain(zone_id).get("heights", {})
+	return hs.is_empty() or absi(int(hs.get(b, 0)) - int(hs.get(a, 0))) <= 1
+
+
+static func _bfs_path(size: Vector2i, walls: Dictionary, from: Vector2i, to: Vector2i, heights: Dictionary = {}) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
 	if from == to or not _inside(size, to) or walls.has(to):
 		return out
@@ -412,6 +432,8 @@ static func _bfs_path(size: Vector2i, walls: Dictionary, from: Vector2i, to: Vec
 			var n: Vector2i = cur + d
 			if not _inside(size, n) or walls.has(n) or came.has(n):
 				continue
+			if not heights.is_empty() and absi(int(heights.get(n, 0)) - int(heights.get(cur, 0))) > 1:
+				continue          # falaise
 			came[n] = cur
 			queue.append(n)
 	if not came.has(to):
