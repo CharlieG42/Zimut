@@ -2722,8 +2722,41 @@ class BuildingNode extends Node2D:
 		"chapelle": {"wall": Color(0.82, 0.82, 0.80), "frame": Color(0.50, 0.50, 0.52), "roof": Color(0.32, 0.45, 0.60), "wh": 112.0, "rh": 66.0, "roof_kind": "gable"},
 	}
 
+	## V107 : sprites cuits depuis les kits Kenney (CC0) — tools/bake_kenney.gd ; repli sur le dessin en code si absents.
+	const KENNEY_DIR := "res://assets/sprites/decor/kenney/batiments/"
+	const KENNEY_VARIANTS := {"maison": ["maison_bois", "maison_pierre"], "chaumiere": ["chaumiere"], "grange": ["grange"],
+		"moulin": ["moulin"], "tour": ["tour"], "chapelle": ["chapelle"]}
+	static var _ktable: Dictionary = {}
+	static var _ktex: Dictionary = {}
+
+	static func kenney_sprite(kind_: String, seed_: int) -> String:
+		if _ktable.is_empty():
+			var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/batiments_kenney.json"))
+			_ktable = raw if raw is Dictionary else {"_": true}
+		var names: Array = KENNEY_VARIANTS.get(kind_, [])
+		if names.is_empty():
+			return ""
+		var nm: String = String(names[absi(seed_) % names.size()])
+		if not _ktable.has(nm):
+			return ""
+		if not _ktex.has(nm):
+			_ktex[nm] = load(KENNEY_DIR + nm + ".png") as Texture2D
+		return nm if _ktex[nm] != null else ""
+
+	func _draw_kenney(nm: String) -> void:
+		var m: Dictionary = _ktable[nm]
+		var tex: Texture2D = _ktex[nm]
+		var hw: float = BoardArt.ISO_TW * cs * 0.5
+		var hh: float = BoardArt.ISO_TH * cs * 0.5
+		var sc: float = float(fw + fh) * hw / float(m["ref"])
+		# ombre douce au sol (emprise de la bâtisse)
+		var ex := Vector2(hw * fw, hh * fw)
+		var ey := Vector2(-hw * fh, hh * fh)
+		draw_colored_polygon(PackedVector2Array([Vector2(8, 3) - ex - ey, Vector2(14, 4) - ey, Vector2(10, 8), Vector2(2, 6) - ex]), Color(0.03, 0.06, 0.08, 0.20))
+		draw_texture_rect(tex, Rect2(-Vector2(float(m["ax"]), float(m["ay"])) * sc, Vector2(tex.get_width(), tex.get_height()) * sc), false)
+
 	func _ready() -> void:
-		set_process(kind == "moulin")
+		set_process(kind == "moulin" and kenney_sprite(kind, seed_value) == "")
 
 	func _process(delta: float) -> void:
 		_t += delta
@@ -2742,6 +2775,10 @@ class BuildingNode extends Node2D:
 		draw_polyline(PackedVector2Array([a, b, c, a]), Color(0.10, 0.07, 0.05, 0.55), 1.2, true)
 
 	func _draw() -> void:
+		var kn: String = kenney_sprite(kind, seed_value)
+		if kn != "":
+			_draw_kenney(kn)
+			return
 		var st: Dictionary = STYLE.get(kind, STYLE["maison"])
 		var hw: float = BoardArt.ISO_TW * cs * 0.5
 		var hh: float = BoardArt.ISO_TH * cs * 0.5

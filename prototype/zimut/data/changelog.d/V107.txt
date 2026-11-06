@@ -1,0 +1,3 @@
+V107|Sylve (option Iso) : les bâtiments sont désormais des modèles 3D Kenney (licence CC0) cuits en sprites — maisons à colombages ou en pierre, chaumière, grange, moulin à ailes, tour de guet, chapelle.
+V107|Plus de détails (fenêtres, portes cintrées, cheminées, toits colorés) et des proportions fidèles au kit ; les anciens dessins en code restent en repli.
+V107|Nouvel outil tools/bake_kenney.gd : transforme n’importe quel assemblage de modèles du kit en sprite isométrique, pour les prochaines Nations.
