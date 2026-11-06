@@ -35,7 +35,7 @@ const LIST: Array = [
 	["def_resilience", "Résilience", "+10 % de PV max", 3, "defense", {"pv_pct": 10}],
 	["def_implacable", "Implacable", "+10 % de défense", 4, "defense", {"def_pct": 10}],
 	# ── Branche Utilitaire ──
-	["util_pa", "Action supplémentaire", "+1 PA au début de chaque combat", 2, "utility", {"pa": 1}],
+	["util_pa", "Action bonus", "+1 PA au début de chaque combat", 2, "utility", {"pa": 1}],
 	["util_pm", "Course", "+1 PM au début de chaque combat", 2, "utility", {"pm": 1}],
 	["util_soin", "Soigneur né", "+10 % de soins", 3, "utility", {"heal_pct": 10}],
 	# ── Branche Puissance (spécifique arbre de perso) ──
@@ -50,6 +50,36 @@ const BRANCHES: Dictionary = {
 	"utility": {"label": "Utilitaire", "color": Color(0.55, 0.90, 0.55), "icon": "✨"},
 	"power": {"label": "Puissance", "color": Color(0.85, 0.45, 0.95), "icon": "★"},
 }
+
+
+## Structure de l'arbre : talent → talent requis ("" = racine de sa branche, accessible depuis le tronc).
+## Un talent ne se débloque qu'une fois son parent débloqué.
+const PARENT: Dictionary = {
+	"off_veteran": "", "off_critique": "off_veteran", "off_fury": "off_veteran", "off_master": "off_critique",
+	"def_vita": "", "def_armure": "def_vita", "def_resilience": "def_vita", "def_implacable": "def_armure",
+	"util_pa": "", "util_pm": "util_pa", "util_soin": "util_pa",
+	"pow_rage": "", "pow_aura": "pow_rage", "pow_second_souffle": "pow_aura",
+}
+
+
+static func parent_of(id: String) -> String:
+	return String(PARENT.get(id, ""))
+
+
+## "" si le talent peut être débloqué maintenant, sinon la raison.
+static func unlock_block(data: Dictionary, classe: String, id: String) -> String:
+	var info: Dictionary = talent_info(id)
+	if info.is_empty():
+		return "Talent inconnu."
+	if is_unlocked(data, classe, id):
+		return "Déjà débloqué."
+	var par: String = parent_of(id)
+	if par != "" and not is_unlocked(data, classe, par):
+		return "Nécessite : %s." % String(talent_info(par).get("name", par))
+	var cost: int = int(info["cost"])
+	if points(data, classe) < cost:
+		return "Il faut %d points de pouvoir (vous en avez %d)." % [cost, points(data, classe)]
+	return ""
 
 
 ## ── État d'un héros (dans data["roster"][classe]) ──
@@ -103,6 +133,9 @@ static func spend_point(data: Dictionary, classe: String, id: String) -> bool:
 	var cost: int = int(info["cost"])
 	var unlocked: Dictionary = t["unlocked"]
 	if bool(unlocked.get(id, false)) or int(t.get("points", 0)) < cost:
+		return false
+	var par: String = parent_of(id)
+	if par != "" and not bool(unlocked.get(par, false)):
 		return false
 	unlocked[id] = true
 	t["points"] = int(t.get("points", 0)) - cost
