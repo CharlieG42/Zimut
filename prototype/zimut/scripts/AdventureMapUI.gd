@@ -394,7 +394,7 @@ func _refresh_hud() -> void:
 		else:
 			var nearby_action: String = String(POI_ACTION.get(String(nearby_info.get("kind", "")), "INTERAGIR"))
 			if String(nearby_info.get("kind", "")) == "combat" and Dungeons.is_dungeon(nearby_info):
-				nearby_action = "ENTRER DANS LE DONJON"
+				nearby_action = "ENTRER DANS LE DONJON" if manager.dungeon_lock(nearby_info).is_empty() else "🔒 DONJON VERROUILLÉ"
 			_action_btn.text = "▶  %s · %s" % [nearby_action, String(nearby_info.get("name", "LIEU")).to_upper()]
 		_action_btn.show()
 		return
@@ -406,6 +406,8 @@ func _refresh_hud() -> void:
 		var gb: String = String(poi["guardian"])
 		var rm: int = Dungeons.current_room(manager.state, gb)
 		act = "🏰  %s  (salle %d/%d · niv %d)" % ["ENTRER" if rm == 1 else "POURSUIVRE", rm, Dungeons.ROOMS, Dungeons.room_level(gb, rm)]
+		if not manager.dungeon_lock(poi).is_empty():
+			act = "🔒  DONJON VERROUILLÉ  (niv %d)" % Dungeons.room_level(gb, Dungeons.ROOMS)
 	elif kind == "combat":
 		act += "  (niv %d)" % manager.challenge_level(poi)
 	_action_btn.text = "▶  %s" % act
@@ -710,6 +712,7 @@ func _refresh_world() -> void:
 				# Les POI non découverts ne sont pas animés : aucun rendu visible à rafraîchir.
 				pn.set_process(n.visible)
 				pn.done = manager.poi_done(p) and pn.kind != "camp"
+				pn.locked = pn.is_dungeon and not manager.dungeon_lock(manager.poi_at(p)).is_empty()
 				var near: int = 4 if board_depth else 2
 				var hero_distance: int = absi(p.x - hp.x) + absi(p.y - hp.y)
 				pn.nearby = hero_distance <= near and not pn.done
@@ -1605,6 +1608,8 @@ func _place_card() -> Control:
 			var gb2: String = String(poi["guardian"])
 			var rm2: int = Dungeons.current_room(manager.state, gb2)
 			act = "🏰  %s  (salle %d/%d)" % ["ENTRER" if rm2 == 1 else "POURSUIVRE", rm2, Dungeons.ROOMS]
+			if not manager.dungeon_lock(poi).is_empty():
+				act = "🔒  DONJON VERROUILLÉ"
 		elif kind == "combat":
 			act += "  (niv %d)" % manager.challenge_level(poi)
 		var b := U.btn(act, col, 24, Vector2(0, 72))
@@ -1661,6 +1666,18 @@ func _interact() -> void:
 func _confirm_dungeon(poi: Dictionary) -> void:
 	var biome: String = String(poi["guardian"])
 	var room: int = Dungeons.current_room(manager.state, biome)
+	var lock: Dictionary = manager.dungeon_lock(poi)
+	if not lock.is_empty():
+		var lbox: VBoxContainer = _modal("🔒  " + String(poi.get("name", "Donjon")), POI_COLOR["combat"])
+		var lt: Label = U.lbl("%s\n\nCe donjon est verrouillé : terminez d'abord « %s » (niveau %d) pour en forcer l'entrée.\nPalier %d/%d · ennemis niveau %d à %d." % [
+			String(poi.get("desc", "")), String(lock.get("name", "?")), Dungeons.room_level(String(lock["guardian"]), Dungeons.ROOMS),
+			Dungeons.tier(biome), Dungeons.TIERS, Dungeons.room_level(biome, 1), Dungeons.room_level(biome, Dungeons.ROOMS)], 18, U.C_TXT)
+		lt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		lbox.add_child(lt)
+		var ok := U.btn("COMPRIS", U.C_BORDER, 22, Vector2(240, 60))
+		ok.pressed.connect(_close_modal)
+		lbox.add_child(ok)
+		return
 	var box: VBoxContainer = _modal("🏰  " + String(poi.get("name", "Donjon")), POI_COLOR["combat"])
 	var lines: PackedStringArray = []
 	lines.append(String(poi.get("desc", "")))
@@ -1720,6 +1737,8 @@ func _confirm_combat(poi: Dictionary) -> void:
 
 
 func _start_combat(poi: Dictionary) -> void:
+	if not manager.dungeon_lock(poi).is_empty():
+		return                                  # donjon verrouillé : jamais de combat
 	if Dungeons.is_dungeon(poi):
 		Dungeons.begin(manager.state, String(poi["guardian"]))   # niveau et effectif de la salle
 	else:
@@ -2555,6 +2574,7 @@ class PoiNode extends Node2D:
 	var nearby: bool = false
 	var gem: Color = Color(0, 0, 0, 0)
 	var gem_taken: bool = false
+	var locked: bool = false
 	var _t: float = 0.0
 
 	func _ready() -> void:
@@ -2666,6 +2686,10 @@ class PoiNode extends Node2D:
 			Color(1.0, 1.0, 1.0, 0.34 if not done else 0.12), 1.6, true)
 		if icon != null:
 			draw_texture_rect(icon, Rect2(ic - Vector2(icon_size * 0.5, icon_size * 0.5), Vector2(icon_size, icon_size)), false, mod)
+		if locked:
+			draw_circle(ic, icon_r - 2.0, Color(0.02, 0.03, 0.07, 0.62))
+			draw_circle(ic + Vector2(19, -18), 12.0, Color(0.75, 0.25, 0.25))
+			draw_string(ThemeDB.fallback_font, ic + Vector2(8, -12), "🔒", HORIZONTAL_ALIGNMENT_CENTER, 22.0, 16, Color.WHITE)
 		if done:
 			draw_circle(ic + Vector2(19, -18), 11.0, Color(0.25, 0.75, 0.35))
 			draw_string(ThemeDB.fallback_font, ic + Vector2(12, -12), "✓", HORIZONTAL_ALIGNMENT_CENTER, 14.0, 16, Color.WHITE)

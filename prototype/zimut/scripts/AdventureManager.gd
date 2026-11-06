@@ -107,6 +107,12 @@ func portal_lock(poi: Dictionary) -> Dictionary:
 			return pois[k]
 	return {"name": "le donjon final"}
 
+## V103 : donjon verrouillé ? Retourne le donjon à terminer d'abord ({} si ouvert ou si ce n'est pas un donjon).
+func dungeon_lock(poi: Dictionary) -> Dictionary:
+	if not Dungeons.is_dungeon(poi):
+		return {}
+	return Dungeons.locked_by(state, ProgressionManager.adventure_zone_pois(zone_id()), String(poi["guardian"]))
+
 ## Clé de sauvegarde d'un POI : "zone,x,y".
 func poi_key(pos: Vector2i) -> String:
 	return ProgressionManager.adventure_poi_key(zone_id(), pos)
