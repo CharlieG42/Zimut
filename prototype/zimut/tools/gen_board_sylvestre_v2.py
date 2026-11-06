@@ -55,6 +55,11 @@ poly([(54, 54), (60, 52.2), (60, 52.8), (54, 54.6)], bd)
 
 mask = [[(walk.getpixel((x*S + S//2, y*S + S//2)) > 0 and block.getpixel((x*S + S//2, y*S + S//2)) == 0)
          for x in range(COLS)] for y in range(ROWS)]
+# ── Sentiers de terre repérés sur l'illustration et restés fermés par le masque (V101) ──
+# (virage du moulin à l'est, chemin du potager au sud-ouest) : cases « couleur de chemin ».
+EXTRA_PATH = [(27, 60), (31, 56), (31, 57), (31, 63), (32, 56), (33, 55), (33, 64), (34, 55), (35, 54), (35, 55), (36, 53), (36, 54), (37, 52), (37, 53), (37, 54), (38, 52), (38, 53), (39, 51), (39, 52), (40, 51), (40, 52), (58, 50), (59, 43), (60, 43), (61, 43), (61, 44), (61, 50), (62, 44), (62, 50), (63, 50), (64, 50), (68, 45), (68, 46), (69, 44), (69, 45), (69, 46), (70, 32), (70, 33), (70, 34), (70, 35), (70, 43), (70, 44), (71, 33), (71, 34), (71, 35), (71, 36), (71, 42), (71, 43), (72, 34), (72, 35), (72, 36), (72, 37), (72, 42), (73, 37), (73, 38), (73, 39), (73, 40), (73, 41), (74, 38), (74, 39), (74, 40)]
+for _x, _y in EXTRA_PATH:
+    mask[_y][_x] = True
 # la porte reste franchissable
 rows = ["".join("#" if c else "." for c in r) for r in mask]
 
