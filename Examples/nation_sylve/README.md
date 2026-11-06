@@ -6,8 +6,12 @@ cel-shading doux, contours brun foncé nets, couleurs riches mais douces, lumiè
 l'après-midi venant du haut à gauche, brume douce aux bords de l'île. Format 16:9, 1920×1080.
 
 - Génération : gen-image (édition v2 affinée), 2026-11-06, puis reformatage 16:9 1920×1080
-- Fichier source ici : `carte_nation_sylve_v1.jpg.b64` (base64)
-- MD5 attendu après décodage : `a9a8a57b5088e12271a942c77b394834` (519 120 octets)
+- Fichiers source ici : `carte_nation_sylve_v1.jpg.b64` et `carte_nation_sylve_v1.png.b64` (base64)
+- MD5 attendus après décodage :
+  - JPG : `a9a8a57b5088e12271a942c77b394834` (519 120 octets)
+  - PNG (version sans perte, pratique pour mobile) : `a9311b3d84a07023f8b73bae659c7e88` (2 795 886 octets)
+- Lien direct PNG (branche) : `https://raw.githubusercontent.com/CharlieG42/Zimut/vibe/nation-sylve-map-44586e/Examples/nation_sylve/carte_nation_sylve_v1.png`
+  (après merge sur `main`, remplacer la branche par `main` dans l'URL)
 
 ## Pourquoi un .b64 ?
 
@@ -16,14 +20,16 @@ qui corrompt les fichiers binaires. Le JPEG est donc stocké en base64 texte, tr
 vérifié intégralement. La GitHub Action `.github/workflows/decode-examples-b64.yml` décode
 automatiquement tout `.b64` poussé dans `Examples/` (push sur `main`).
 
-## Décoder le JPG
+## Décoder le JPG / le PNG
 
 Linux / macOS / Git Bash :
 
     base64 -d carte_nation_sylve_v1.jpg.b64 > carte_nation_sylve_v1.jpg
+    base64 -d carte_nation_sylve_v1.png.b64 > carte_nation_sylve_v1.png
 
 Vérifier : `md5sum carte_nation_sylve_v1.jpg` doit retourner
-`a9a8a57b5088e12271a942c77b394834`.
+`a9a8a57b5088e12271a942c77b394834` et `md5sum carte_nation_sylve_v1.png` doit retourner
+`a9311b3d84a07023f8b73bae659c7e88`.
 
 ## Contenu de la carte
 
