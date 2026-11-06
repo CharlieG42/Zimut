@@ -7,25 +7,28 @@ l'après-midi venant du haut à gauche, brume douce aux bords de l'île. Format 
 
 ## Versions
 
-- **v2 (retenue)** — `carte_nation_sylve_v2.*` : version **allégée et étendue**, inspirée de
-  **Northgard** : grandes prairies ouvertes dominantes, forêt en quelques îlots espacés
-  (~11 % de canopée contre ~16 % en v1), bâtiments réduits et bien espacés, accessoires
-  minimaux, chemins larges et propres. Les 5 entrées de donjon restent parfaitement lisibles.
-  - MD5 après décodage : JPG `053c1a994398f23dc090088ef175b561` (379 892 octets),
-    PNG `5b8a0df179d8d08eaa059008bfcf8246` (2 219 205 octets)
+- **v3 (retenue)** — `carte_nation_sylve_v3.*` : version **agrandie et plus large**, 16:9 en
+  **2560×1440** (contre 1920×1080), territoire panoramique étiré d'un bord à l'autre, même
+  esprit aéré façon Northgard que la v2. Les 5 entrées de donjon restent parfaitement lisibles.
+  - MD5 après décodage : JPG `b0894396a6c2296e519bc4acf97acb71` (564 080 octets),
+    PNG `3f00e73abe7e9025ddbc6f8f220e6e02` (3 331 047 octets)
+  - Lien direct PNG (branche) : `https://raw.githubusercontent.com/CharlieG42/Zimut/vibe/nation-sylve-map-44586e/Examples/nation_sylve/carte_nation_sylve_v3.png`
+- **v2** — `carte_nation_sylve_v2.*` : version allégée façon Northgard en 1920×1080 (prairies
+  ouvertes dominantes, forêt en îlots espacés, bâtiments réduits et espacés).
+  - MD5 : JPG `053c1a994398f23dc090088ef175b561` (379 892 o), PNG `5b8a0df179d8d08eaa059008bfcf8246` (2 219 205 o)
   - Lien direct PNG (branche) : `https://raw.githubusercontent.com/CharlieG42/Zimut/vibe/nation-sylve-map-44586e/Examples/nation_sylve/carte_nation_sylve_v2.png`
 - **v1 (conservée pour comparaison)** — `carte_nation_sylve_v1.*` : première version, plus
-  dense et chargée.
-  - MD5 après décodage : JPG `a9a8a57b5088e12271a942c77b394834` (519 120 octets),
-    PNG `a9311b3d84a07023f8b73bae659c7e88` (2 795 886 octets)
+  dense et chargée, 1920×1080.
+  - MD5 : JPG `a9a8a57b5088e12271a942c77b394834` (519 120 o), PNG `a9311b3d84a07023f8b73bae659c7e88` (2 795 886 o)
   - Lien direct PNG (branche) : `https://raw.githubusercontent.com/CharlieG42/Zimut/vibe/nation-sylve-map-44586e/Examples/nation_sylve/carte_nation_sylve_v1.png`
 
 Après merge sur `main`, remplacer la branche par `main` dans les URL raw.
 
-- Génération : gen-image, 2026-11-06, puis reformatage 16:9 1920×1080 (upscale + extension de
-  brume sur les côtés, couture invisible)
+- Génération : gen-image, 2026-11-06, puis reformatage 16:9 (upscale + extension de brume sur
+  les côtés, couture invisible) — 1920×1080 pour v1/v2, 2560×1440 pour v3
 - Fichiers source ici : `carte_nation_sylve_v1.jpg.b64`, `carte_nation_sylve_v1.png.b64`,
-  `carte_nation_sylve_v2.jpg.b64`, `carte_nation_sylve_v2.png.b64` (base64)
+  `carte_nation_sylve_v2.jpg.b64`, `carte_nation_sylve_v2.png.b64`,
+  `carte_nation_sylve_v3.jpg.b64`, `carte_nation_sylve_v3.png.b64` (base64)
 
 ## Pourquoi un .b64 ?
 
@@ -34,18 +37,20 @@ qui corrompt les fichiers binaires. Le JPEG est donc stocké en base64 texte, tr
 vérifié intégralement. La GitHub Action `.github/workflows/decode-examples-b64.yml` décode
 automatiquement tout `.b64` poussé dans `Examples/` (push sur `main`).
 
-## Décoder le JPG / le PNG (v1 et v2)
+## Décoder le JPG / le PNG (v1, v2 et v3)
 
 Linux / macOS / Git Bash :
 
-    base64 -d carte_nation_sylve_v2.jpg.b64 > carte_nation_sylve_v2.jpg
-    base64 -d carte_nation_sylve_v2.png.b64 > carte_nation_sylve_v2.png
+    base64 -d carte_nation_sylve_v3.jpg.b64 > carte_nation_sylve_v3.jpg
+    base64 -d carte_nation_sylve_v3.png.b64 > carte_nation_sylve_v3.png
 
-Vérifier : `md5sum carte_nation_sylve_v2.jpg` → `053c1a994398f23dc090088ef175b561`,
-`md5sum carte_nation_sylve_v2.png` → `5b8a0df179d8d08eaa059008bfcf8246`
-(mêmes commandes avec `_v1` pour la v1).
+Vérifier : `md5sum carte_nation_sylve_v3.jpg` → `b0894396a6c2296e519bc4acf97acb71`,
+`md5sum carte_nation_sylve_v3.png` → `3f00e73abe7e9025ddbc6f8f220e6e02`
+(mêmes commandes avec `_v1` / `_v2` pour les autres versions).
 
-## Contenu de la carte (v2, retenue)
+## Contenu de la carte (v3, retenue — identique à la v2, plus grande)
+
+- Territoire **panoramique étendu d'un bord à l'autre** de l'image 2560×1440
 
 - **5 entrées de donjon**, chacune dans sa propre zone ouverte et bien lisible :
   1. Haut gauche : arbre creux géant à la porte dorée lumineuse et racines apparentes
@@ -75,4 +80,4 @@ Vérifier : `md5sum carte_nation_sylve_v2.jpg` → `053c1a994398f23dc090088ef175
 - Aucun texte, UI, personnage, logo ou watermark
 
 (v1 : même contenu mais forêt dense ~40 %, nombreux accessoires et bâtiments — voir
-`carte_nation_sylve_v1.*`)
+`carte_nation_sylve_v1.*` ; v2 : 1920×1080 — voir `carte_nation_sylve_v2.*`)
