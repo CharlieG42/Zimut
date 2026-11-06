@@ -269,13 +269,26 @@ static func display_name(item: Dictionary) -> String:
 	return "%s%s" % [String(item.get("name", "?")), (" R%d" % rank) if rank > 1 else ""]
 
 
+## Bonus d'un objet avec les noms complets : « Force +4 · Agilité +4 · Sagesse +2 ».
 static func stat_line(item: Dictionary) -> String:
 	var parts: Array[String] = []
 	for k: String in STAT_KEYS:
 		var v: int = int(item.get(k, 0))
 		if v != 0:
-			parts.append("%s%+d" % [STAT_SHORT[k], v])
-	return " ".join(parts)
+			parts.append("%s %+d" % [String(ClassRules.STAT_LABEL.get(k, k)), v])
+	return " · ".join(parts)
+
+
+## Somme des caractéristiques d'un perso (member_stats) avec les noms complets :
+## « Vitalité 161 · Force 28 · Intelligence 46 · … · PA 6 · PM 4 ».
+static func totals_line(stt: Dictionary) -> String:
+	var parts: Array[String] = []
+	parts.append("Vitalité\u00a0%d" % int(stt.get("max_pv", stt.get("vita", 0))))
+	for k: String in ["force", "intelligence", "agility", "wisdom", "defense"]:
+		parts.append("%s\u00a0%d" % [String(ClassRules.STAT_LABEL[k]), int(stt.get(k, 0))])
+	parts.append("PA\u00a0%d" % int(stt.get("pa", 0)))
+	parts.append("PM\u00a0%d" % int(stt.get("pm", 0)))
+	return " · ".join(parts)
 
 
 static func describe(item: Dictionary) -> String:

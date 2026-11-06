@@ -267,8 +267,7 @@ func refresh() -> void:
 		var stt: Dictionary = ProgressionManager.member_stats(_save, team[i2])
 		if stt.is_empty():
 			continue
-		var txt: String = "PV %d · F%d I%d A%d S%d D%d · PA%d PM%d" % [int(stt["max_pv"]), int(stt["force"]),
-			int(stt["intelligence"]), int(stt["agility"]), int(stt["wisdom"]), int(stt["defense"]), int(stt["pa"]), int(stt["pm"])]
+		var txt: String = ItemRules.totals_line(stt)
 		for sline in stt.get("sets", []):
 			txt += "\n◈ " + String(sline)
 		sl.text = txt
@@ -419,8 +418,8 @@ func _stat_delta_line(new_it: Dictionary, old_it: Dictionary) -> String:
 	for k: String in ItemRules.STAT_KEYS:
 		var d: int = int(new_it.get(k, 0)) - int(old_it.get(k, 0))
 		if d != 0:
-			parts.append("%s%+d" % [ItemRules.STAT_SHORT[k], d])
-	return " ".join(parts)
+			parts.append("%s %+d" % [String(ClassRules.STAT_LABEL.get(k, k)), d])
+	return " · ".join(parts)
 
 
 ## Forge : fenêtre dédiée (ForgeUI).
