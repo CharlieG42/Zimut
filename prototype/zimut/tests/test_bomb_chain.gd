@@ -1,5 +1,5 @@
 extends SceneTree
-## V53 : bombes de l'Artificier — rayon 2, ennemis et bombes pleins dégâts, alliés moitié,
+## V53 : bombes de l'Artificier — rayon 3 (V110), ennemis et bombes pleins dégâts, alliés moitié,
 ## une bombe détruite explose (réaction en chaîne).
 var fails: int = 0
 func check(c: bool, m: String) -> void:
@@ -73,7 +73,7 @@ func _boot() -> void:
 	var a0: int = int(ally["current_pv"])
 	var art0: int = int(art["current_pv"])
 	check(gm.cast_spell(art, dec, ca), "déclenche A")
-	check(int(foe["current_pv"]) < f0, "ennemi à 2 cases blessé (rayon 2)")
+	check(int(foe["current_pv"]) < f0, "ennemi à 2 cases blessé (rayon 3)")
 	check(int(ally["current_pv"]) < a0, "allié à 2 cases blessé (moitié)")
 	check(int(ally["current_pv"]) > a0 - (f0 - int(foe["current_pv"])) or int(ally["max_pv"]) != int(foe["max_pv"]), "allié moins touché que l'ennemi")
 	check(bool(ba.get("exploded", false)), "A a explosé")

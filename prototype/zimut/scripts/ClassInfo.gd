@@ -71,7 +71,7 @@ const INFO := {
 	},
 	"Artificier": {
 		"icon": "💣", "role": "Mécanismes · Pièges et explosifs", "difficulty": 3,
-		"description": "Un ingénieur qui pose bombes, mines, tourelles et glyphes, puis les déclenche au bon moment pour des explosions en chaîne. Ses bombes mûrissent : elles montent d'un niveau à chaque fin de tour (jusqu'au niveau 4, explosion ×2). Le Couplage relie deux mécanismes alignés par une barrière électrique qui électrocute quiconque la traverse.",
+		"description": "Un ingénieur qui pose bombes, mines, tourelles et glyphes, puis les déclenche au bon moment pour des explosions en chaîne. Ses bombes mûrissent : elles montent d'un niveau à chaque fin de tour (jusqu'au niveau 4, explosion ×2). Le Couplage (permanent) relie deux mécanismes alignés par une barrière électrique qui électrocute quiconque la traverse ou y commence son tour.",
 		"strengths": ["Dégâts massifs en zone avec les mécanismes", "Bombes qui gagnent en puissance avec le temps", "Barrières de Couplage qui électrocutent au passage"],
 		"weaknesses": ["Style exigeant (poser puis déclencher)", "Fragile en mêlée"],
 		"tips": "Pose tes bombes tôt et laisse-les monter de niveau ; couple deux mécanismes alignés sur le chemin des ennemis (attention : tes alliés y prennent la moitié des dégâts), puis déclenche tout au bon moment.",

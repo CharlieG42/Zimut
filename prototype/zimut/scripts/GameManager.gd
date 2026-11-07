@@ -1218,6 +1218,7 @@ func _begin_turn(e: Dictionary) -> void:
 			"regen":
 				_do_heal({}, e, int(s["value"]))
 	_glyph_tick(e)
+	_barrier_shock_at_turn_start(e)
 	_check_deaths()
 	if not is_alive(e) or game_over:
 		active_entity = {}
@@ -1312,8 +1313,7 @@ func end_current_turn() -> void:
 				continue
 		if tp.has("bomb_level") and is_alive(tp):
 			_bomb_level_up(tp, e)
-		if int(tp.get("link_turns", 0)) > 0:
-			tp["link_turns"] = int(tp["link_turns"]) - 1
+		# V110 : couplage permanent — link_turns n'est plus décrémenté en fin de tour.
 	_glyphs_expire(e)
 	active_entity = {}
 	selected_spell = null
@@ -1649,6 +1649,11 @@ func get_aoe_cells(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> Arr
 	var p: Dictionary = Combat.parse(spell)
 	var out: Array[Vector2i] = []
 	var cpos: Vector2i = pos_of(caster)
+	# V110 : Déclencheur sur une bombe -> la zone d'impact de l'explosion est prévisualisée.
+	if String(p["kind"]) == "trigger" and trigger_kind(caster, cell) == "bomb":
+		var bm: Dictionary = entity_at(cell)
+		out = Combat.zone_cells(cell, int(bm.get("bomb_radius", BOMB_RADIUS)), "diamond", GRID_SIZE)
+		return out
 	match String(p["aoe"]):
 		"zone":
 			out = Combat.zone_cells(cell, int(p["zone_r"]), String(p["zone_shape"]), GRID_SIZE)
@@ -2357,8 +2362,8 @@ func _blast(owner: Dictionary, center: Vector2i, base: float, label: String) -> 
 	return total
 
 
-## Rayon d'une explosion de bombe (cases autour, en losange).
-const BOMB_RADIUS := 2
+## Rayon d'une explosion de bombe (cases autour, en losange). V110 : 3 cases (au lieu de 2).
+const BOMB_RADIUS := 3
 
 ## V63 — Bombes à niveaux (esprit du Roublard) : une bombe posée commence au niveau 1 et
 ## gagne un niveau à chaque fin de tour de son poseur ; son explosion est multipliée d'autant.
@@ -2386,7 +2391,8 @@ func _bomb_level_up(b: Dictionary, owner: Dictionary = {}) -> void:
 #  V63 — Couplage : deux mécanismes couplés et alignés tendent une barrière
 # ═══════════════════════════════════════════════════════════════════════════
 
-const LINK_TURNS := 3
+## V110 : le couplage est permanent — link_turns sert de drapeau (> 0 = couplé), il n'est plus décrémenté.
+const LINK_TURNS := 9999
 const LINK_MAX_GAP := 6      # cases libres au plus entre deux mécanismes couplés
 
 
@@ -2454,7 +2460,20 @@ func _barriers_on_path(e: Dictionary, path: Array[Vector2i]) -> void:
 				break
 
 
-## Couplage : le mécanisme visé est couplé pour LINK_TURNS tours ; une barrière se tend
+## V110 : un tour qui commence dans une barrière électrique électrocute la créature
+## (tous les personnages : ennemis plein pot, alliés moitié).
+func _barrier_shock_at_turn_start(e: Dictionary) -> void:
+	if _no_links() or not is_alive(e) or bool(e.get("terrain", false)) or bool(e.get("beacon", false)):
+		return
+	var p: Vector2i = pos_of(e)
+	for b: Dictionary in barriers():
+		if not is_alive(e):
+			return
+		if (b["cells"] as Array).has(p):
+			_barrier_shock(_entity_by_uid(int(b["owner"])), e)
+
+
+## Couplage : le mécanisme visé est couplé de façon permanente (V110) ; une barrière se tend
 ## vers chaque autre mécanisme couplé aligné. Elle reste franchissable, mais quiconque la traverse
 ## ou s'y trouve quand elle se forme est électrocuté (ennemis : plein pot, alliés : moitié).
 func _resolve_link(caster: Dictionary, cell: Vector2i) -> String:
