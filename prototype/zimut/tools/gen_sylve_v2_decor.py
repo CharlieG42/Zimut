@@ -13,7 +13,8 @@ au départ ni aux POI — la logique de jeu est inchangée) :
 
 Le type de sol de chaque case est lu dans l'illustration elle-même (moyenne RGB
 de l'intérieur de la case), pour ne poser des fleurs que sur l'herbe, rien sur
-l'eau, etc.
+l'eau, etc. Les surfaces PEINTES (bâtiments, toits, murs, zones plates : écart-type
+faible) sont exclues : aucun décor ni arbre ne se pose jamais sur un bâtiment.
 
 Usage : python3 tools/gen_sylve_v2_decor.py [foret_sylve_v2]
 """
@@ -40,6 +41,7 @@ OVER_DENSITY = 0.30
 POI_CLEAR_OVER = 3   # distance de Chebyshev minimale entre un arbre "over" et un POI
 POI_CLEAR_DECOR = 2  # idem pour les petits décors
 START_CLEAR = 2
+MIN_STD = 10.0       # en dessous : surface peinte (bâtiment/toit/mur/plat) -> interdit
 
 
 def classify(px: np.ndarray) -> str:
@@ -88,10 +90,13 @@ def main() -> None:
 
     rng = random.Random(SEED)
     cls = {}
+    std = {}
     for y in range(rows):
         for x in range(cols):
-            inner = im[y * C + 4:(y + 1) * C - 4, x * C + 4:(x + 1) * C - 4]
+            cell = im[y * C:(y + 1) * C, x * C:(x + 1) * C]
+            inner = cell[4:-4, 4:-4]
             cls[(x, y)] = classify(inner)
+            std[(x, y)] = float(cell.reshape(-1, 3).std(axis=0).mean())
 
     def walkable(x, y) -> bool:
         return 0 <= y < rows and 0 <= x < len(mask[y]) and mask[y][x] == "#"
@@ -104,6 +109,8 @@ def main() -> None:
         for x in range(cols):
             c = (x, y)
             t = cls[c]
+            if std[c] < MIN_STD:
+                continue  # surface peinte (bâtiment, toit, mur, plat) : jamais de décor
             if walkable(x, y):
                 if near_poi(c, POI_CLEAR_DECOR) or chebyshev(c, start) <= START_CLEAR:
                     continue
@@ -113,11 +120,12 @@ def main() -> None:
                         kinds = [("grass", 2), ("flowers", 1), ("mushrooms", 3)]
                     decor["%d,%d" % c] = pick_weighted(rng, kinds)
             else:
-                # premier plan : case non jouable avec une case jouable juste au nord
+                # premier plan : case non jouable avec une case jouable juste au nord,
+                # et uniquement sur la forêt texturée (jamais sur un bâtiment peint)
                 if not walkable(x, y - 1):
                     continue
                 if t in ("water", "rock", "snow"):
-                    continue
+                    continue  # hors eau/roche/neige ; le garde-fou std ci-dessus exclut les bâtiments peints
                 if near_poi(c, POI_CLEAR_OVER) or chebyshev(c, start) <= START_CLEAR:
                     continue
                 if rng.random() < OVER_DENSITY:

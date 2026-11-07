@@ -93,6 +93,8 @@ var _side_box: VBoxContainer
 var _modal_root: Control = null
 var _modal_canvas: CanvasLayer = null
 var _walking: bool = false
+var _walk_s: float = 0.0        # V114 : position (longueur d'arc) courante sur le trajet continu
+var _walk_stop_s: float = 0.0   # V114 : point d'arrêt si blocage en route
 var _pending: Vector2i = Vector2i(-1, -1)      # destination en attente de confirmation (appui tactile)
 var _hud_title: Label
 var _hud_sub: Label
@@ -1296,29 +1298,63 @@ func _walk(path: Array[Vector2i]) -> void:
 	var step_time: float = STEP_TIME * clampf(8.0 / float(maxi(1, path.size())), 0.5, 1.0)
 	if is_board():
 		step_time = BOARD_STEP_TIME * (0.72 if sprint else 1.0)
-	for step: Vector2i in path:
+	# V114 : déplacement continu — UNE seule tween le long d'une polyligne à coins
+	# arrondis (vitesse constante au milieu, accélération/décélération globales),
+	# au lieu d'un arrêt à chaque case. La logique par case (monstres, trouvailles,
+	# lieux, événements) est inchangée : elle se déclenche à chaque frontière de case.
+	var pts: Array[Vector2] = [_hero.position]
+	for s0: Vector2i in path:
+		pts.append(cell_center(s0))
+	var sp: Array = _smooth_path(pts)
+	var cum: Array[float] = [0.0]
+	for i: int in range(1, sp.size()):
+		cum.append(cum[i - 1] + float(sp[i].distance_to(sp[i - 1])))
+	var total_len: float = maxi(0.001, float(cum.back()))
+	var dur: float = step_time * float(maxi(1, path.size()))
+	_walk_s = 0.0
+	_walk_stop_s = total_len
+	var tw := create_tween()
+	tw.tween_method(func(f: float) -> void:
+		var s: float = clampf(f, 0.0, 1.0) * total_len
+		if s > _walk_stop_s:
+			s = _walk_stop_s
+		_walk_s = s
+		var k: int = 0
+		while k < cum.size() - 2 and cum[k + 1] <= s:
+			k += 1
+		var seg: float = maxi(0.001, float(cum[k + 1] - cum[k]))
+		var lt: float = clampf((s - cum[k]) / seg, 0.0, 1.0)
+		_hero.position = sp[k].lerp(sp[k + 1], lt)
+		_hero.hop = sin(lt * PI) * 7.0
+		if is_board() and path.size() > 0:
+			var c0: Vector2i = path[maxi(0, k - 1)]
+			var c1: Vector2i = path[mini(path.size() - 1, k)]
+			_hero.scale = _hero_depth_scale(c0).lerp(_hero_depth_scale(c1), lt)
+	, 0.0, 1.0, dur).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	for j: int in range(path.size()):
+		var step: Vector2i = path[j]
+		await _walk_until(tw, float(cum[j]))       # départ de la case j (point j atteint)
+		if not tw.is_running():
+			break
 		if _redirect.x >= 0:
+			_walk_stop_s = float(cum[j])
 			break
 		if not manager.mob_at(step).is_empty():
 			_say("Un groupe de monstres vous barre la route.")
+			_walk_stop_s = float(cum[j])
 			break
-		var from: Vector2 = _hero.position
-		var to: Vector2 = cell_center(step)
-		_hero.locomotion(to - from, true, sprint)
+		_hero.locomotion(cell_center(step) - _hero.position, true, sprint)
 		var fresh: Array = manager.move_hero(step)
 		if _board.preview.size() > 0:
 			_board.preview.remove_at(0)
-		var tw := create_tween()
-		tw.tween_method(func(f: float) -> void:
-			_hero.position = from.lerp(to, f)
-			_hero.hop = sin(f * PI) * 7.0, 0.0, 1.0, step_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		if is_board():
-			tw.parallel().tween_property(_hero, "scale", _hero_depth_scale(step), step_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 			_hero.z_index = _depth(step) + 2
 		_after_step()
 		if not _pan_moved:
 			_focus_cell(step, true, step_time)
-		await tw.finished
+		await _walk_until(tw, float(cum[j + 1]))   # arrivée sur la case
+		if not tw.is_running():
+			break
 		if not fresh.is_empty():
 			_refresh_world()
 		var got: Dictionary = manager.collect_find(step)
@@ -1329,6 +1365,9 @@ func _walk(path: Array[Vector2i]) -> void:
 			_refresh_world()
 			_refresh_side()
 			if _check_mastery():
+				if tw.is_running():
+					tw.kill()
+				_walk_place_hero(sp, cum)
 				_hero.locomotion(Vector2.ZERO, false)
 				_hero.hop = 0.0
 				_walking = false
@@ -1341,10 +1380,14 @@ func _walk(path: Array[Vector2i]) -> void:
 		if not poi.is_empty() and not dungeon_transit:
 			_hero.react()
 		if (not poi.is_empty() and not dungeon_transit) or not manager.gate_at(step).is_empty():
+			_walk_stop_s = float(cum[j + 1])
 			break
 		var ev: Dictionary = manager.roll_event(_rng)
 		if not ev.is_empty():
 			_show_event(ev)
+	if tw.is_running():
+		tw.kill()
+	_walk_place_hero(sp, cum)
 	_hero.locomotion(Vector2.ZERO, false)
 	_hero.hop = 0.0
 	_walking = false
@@ -1389,6 +1432,36 @@ func _walk(path: Array[Vector2i]) -> void:
 			_interact()
 		return
 	_refresh_side()
+
+
+## V114 : coins arrondis d'une polyligne — chaque sommet intérieur est tiré vers le
+## milieu de ses deux voisins (extrémités inchangées).
+func _smooth_path(pts: Array[Vector2]) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	for i: int in range(pts.size()):
+		if i == 0 or i == pts.size() - 1 or pts.size() < 3:
+			out.append(pts[i])
+		else:
+			out.append((pts[i - 1] + pts[i] * 2.0 + pts[i + 1]) * 0.25)
+	return out
+
+
+## V114 : attend que le trajet continu atteigne la longueur d'arc target_s (ou que la tween meure).
+func _walk_until(tw: Tween, target_s: float) -> void:
+	while tw.is_valid() and tw.is_running() and _walk_s < target_s:
+		await get_tree().process_frame
+
+
+## V114 : cale le héros sur la polyligne à la position atteinte (min(s, stop_s)).
+func _walk_place_hero(sp: Array, cum: Array[float]) -> void:
+	var s: float = minf(_walk_s, _walk_stop_s)
+	var k: int = 0
+	while k < cum.size() - 2 and cum[k + 1] <= s:
+		k += 1
+	var seg: float = maxi(0.001, float(cum[k + 1] - cum[k]))
+	var lt: float = clampf((s - cum[k]) / seg, 0.0, 1.0)
+	_hero.position = sp[k].lerp(sp[k + 1], lt)
+	_hero.hop = 0.0
 
 
 ## Après chaque pas : les groupes flânent, un groupe réapparaît si le délai est écoulé.

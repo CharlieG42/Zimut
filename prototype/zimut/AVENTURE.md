@@ -212,7 +212,20 @@ rendu dans la branche non-iso de `_rebuild_board` (`AdventureMapUI.gd`) :
 Le masque, le départ, les POI et les déplacements ne changent jamais : les décors
 sont générés par `tools/gen_sylve_v2_decor.py` (type de sol lu dans l'illustration,
 distances de sécurité aux lieux) et contrôlés par `tests/test_sylve_v2_decor.gd`.
+Les surfaces **peintes** (bâtiments, toits, murs : cases plates, écart-type des
+pixels < 10) sont exclues : aucun arbre ni décor ne se pose sur un bâtiment.
 Prévisualisation de composition : `tools/preview_sylve_v2.py` (PIL, hors moteur).
+
+### Déplacement continu (V114)
+
+`_walk` n'arrête plus le héros à chaque case : une seule tween parcourt une polyligne
+à coins arrondis (`_smooth_path`), vitesse constante au milieu avec
+accélération/décélération globales (`TRANS_SINE` / `EASE_IN_OUT` sur tout le trajet).
+La logique par case (monstres bloquants, trouvailles, lieux, événements, portes) est
+inchangée et se déclenche à chaque frontière de case (`_walk_until`) ; en cas de
+blocage, `_walk_stop_s` freine le héros sur la dernière case atteinte. L'échelle de
+profondeur du héros est interpolée en continu le long du trajet.
+Test : `tests/test_walk_continu.gd`.
 
 ## Déplacement et lisibilité (V10)
 
