@@ -27,6 +27,9 @@ var aoe_hl: bool = false
 var ally_target: bool = false
 var path_hl: bool = false
 var path_cost: int = 0
+## V109 : aperçu du déplacement d'une cible poussée / attirée (1 = trajet, 2 = arrivée, 3 = arrivée bloquée → choc)
+var disp: int = 0
+var disp_pull: bool = false
 ## Menace d'un ennemi (appui long) : 1 = il peut y aller, 2 = il peut y frapper
 var threat: int = 0
 var flash: float = 0.0
@@ -257,6 +260,18 @@ func _draw() -> void:
 	if path_hl:
 		draw_colored_polygon(_diamond(0.38), Color(1.0, 0.95, 0.5, 0.85))
 		_outline(_diamond(0.38), Color(0.4, 0.3, 0.0, 0.6), 1.5)
+	if disp > 0:
+		var dc := Color(0.45, 0.85, 1.0) if disp_pull else Color(0.85, 0.45, 1.0)
+		if disp == 1:
+			draw_colored_polygon(_diamond(0.30), Color(dc.r, dc.g, dc.b, 0.85))
+			_outline(_diamond(0.30), Color(0.1, 0.05, 0.2, 0.7), 1.5)
+		else:
+			var col2: Color = Color(1.0, 0.35, 0.25) if disp == 3 else dc
+			draw_colored_polygon(_diamond(0.72), Color(col2.r, col2.g, col2.b, 0.38))
+			_outline(_diamond(0.72), Color(col2.r, col2.g, col2.b, 1.0), 3.5)
+			if disp == 3:
+				draw_line(Vector2(-12, -7), Vector2(12, 7), Color(1, 0.3, 0.2), 4.0)
+				draw_line(Vector2(-12, 7), Vector2(12, -7), Color(1, 0.3, 0.2), 4.0)
 	if hover:
 		draw_colored_polygon(_diamond(0.98), Color(1, 1, 1, 0.14))
 		_outline(_diamond(0.98), Color(1, 1, 1, 0.95), 2.5)

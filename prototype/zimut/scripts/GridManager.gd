@@ -423,6 +423,7 @@ func _clear_highlights() -> void:
 			c.ally_target = false
 			c.path_hl = false
 			c.path_cost = 0
+			c.disp = 0
 			c.threat = 0
 	for v: EntityView in views.values():
 		v.preview_text = ""
@@ -462,6 +463,7 @@ func refresh_highlights() -> void:
 					if t.is_empty() or not _view(t):
 						continue
 					if p["kind"] == "attack" and t["team"] != e["team"]:
+						_preview_displacement(e, t, p)
 						var dmg: int = game_manager.estimate_damage(e, spell, t)
 						if dmg > 0:
 							_view(t).preview_text = ("-%d  KO" % dmg) if dmg >= int(t["current_pv"]) else ("-%d" % dmg)
@@ -475,6 +477,27 @@ func refresh_highlights() -> void:
 			c.refresh()
 	for v: EntityView in views.values():
 		v.hovered = _valid(hover_cell) and game_manager.pos_of(v.entity) == hover_cell
+
+
+## V109 : trajet prévu d'une cible poussée / attirée par le sort visé (cases du trajet, arrivée, choc éventuel).
+func _preview_displacement(caster: Dictionary, t: Dictionary, p: Dictionary) -> void:
+	var n: int = int(p["push"]) if int(p["push"]) > 0 else int(p.get("pull", 0))
+	if n <= 0:
+		return
+	var pull: bool = int(p["push"]) <= 0
+	var d: Dictionary = game_manager.preview_displacement(caster, t, n, pull)
+	if d.is_empty():
+		return
+	var path: Array = d["path"]
+	for i: int in range(path.size()):
+		var cn: Cell = _cell(path[i])
+		cn.disp = 1
+		cn.disp_pull = pull
+	if path.is_empty():
+		return
+	var last: Cell = _cell(path[path.size() - 1])
+	last.disp = 3 if bool(d["collided"]) else 2
+	last.disp_pull = pull
 
 
 # ── Menace d'un ennemi (appui long sur lui ou sur son portrait) ──────────────

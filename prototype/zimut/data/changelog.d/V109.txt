@@ -1,0 +1,3 @@
+V109|Combat : en visant un sort qui repousse ou attire, le trajet de la cible s’affiche (cases traversées, arrivée, croix rouge si elle heurte un obstacle ou une entité).
+V109|Légende : violet = poussée, bleu = attirance ; l’attirance s’arrête au contact du lanceur sans dégâts.
+V109|Fonctionne aussi pour les sorts de zone : chaque ennemi touché montre son propre trajet.

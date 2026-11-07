@@ -2750,6 +2750,27 @@ func _resolve_teleport(caster: Dictionary, _spell: Dictionary, p: Dictionary, ce
 
 # ── Poussée ────────────────────────────────────────────────────────────────
 
+## V109 : trajet que suivrait `tgt` s'il était poussé (ou attiré si `pull`) de `n` cases, sans rien modifier.
+## Renvoie {path, collided, block} ({} si la direction est indéterminée). L'attirance ne « heurte » pas le lanceur.
+func preview_displacement(caster: Dictionary, tgt: Dictionary, n: int, pull: bool = false) -> Dictionary:
+	var dir: Vector2i = Combat.dir_to(pos_of(caster), pos_of(tgt))
+	if dir == Vector2i.ZERO:
+		return {}
+	if pull:
+		dir = -dir
+	var path: Array[Vector2i] = []
+	var collided: bool = false
+	var block: Vector2i = Vector2i(-1, -1)
+	for i: int in range(n):
+		var nxt: Vector2i = pos_of(tgt) + dir * (path.size() + 1)
+		if not _in_bounds(nxt) or obstacles.has(nxt) or grid[nxt.y][nxt.x] != null:
+			collided = not pull
+			block = nxt
+			break
+		path.append(nxt)
+	return {"path": path, "collided": collided, "block": block}
+
+
 func _push(caster: Dictionary, tgt: Dictionary, n: int) -> void:
 	var dir: Vector2i = Combat.dir_to(pos_of(caster), pos_of(tgt))
 	if dir == Vector2i.ZERO:
