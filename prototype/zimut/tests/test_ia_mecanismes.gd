@@ -20,7 +20,7 @@ func _cell_at(gm: Node, from: Vector2i, d: int, avoid: Array) -> Vector2i:
 				return c
 	return Vector2i(-1, -1)
 ## Cherche (a, f, n) libres : f à distance da de a, n à distance 1 (ou 2) de f et au moins dn de a.
-func _triple(gm: Node, da: int, dfn: int, dn: int) -> Array:
+func _triple(gm: Node, da: int, dfn: int, dn: int, dmax: int = 99) -> Array:
 	for ya: int in range(gm.GRID_SIZE):
 		for xa: int in range(gm.GRID_SIZE):
 			var a := Vector2i(xa, ya)
@@ -34,7 +34,7 @@ func _triple(gm: Node, da: int, dfn: int, dn: int) -> Array:
 					for yn: int in range(gm.GRID_SIZE):
 						for xn: int in range(gm.GRID_SIZE):
 							var n := Vector2i(xn, yn)
-							if n != a and n != f and gm.is_free(n) and Combat.manhattan(n, f) == dfn and Combat.manhattan(n, a) >= dn:
+							if n != a and n != f and gm.is_free(n) and Combat.manhattan(n, f) == dfn and Combat.manhattan(n, a) >= dn and Combat.manhattan(n, a) <= dmax:
 								return [a, f, n]
 	return []
 
@@ -59,7 +59,7 @@ func _boot() -> void:
 	for e2: Dictionary in gm.enemies:
 		if e2 != foe:
 			e2["current_pv"] = 0   # un seul ennemi vivant : mesures lisibles
-	var tri: Array = _triple(gm, 4, 1, 3)
+	var tri: Array = _triple(gm, 4, 1, 3, 4)   # bombe : portée 4, donc case de pose à ≤ 4 de l'Artificier
 	gm._teleport_entity(art, tri[0])
 	var far: Vector2i = tri[1]
 	gm._teleport_entity(foe, far)
