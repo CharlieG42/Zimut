@@ -1,0 +1,3 @@
+V111|Forge : les listes du Briseur et de l'onglet Améliorer ne débordent plus de l'écran (textes longs tronqués avec « … », détail complet dans le panneau de droite) ; le bouton Fermer et le panneau de détail restent visibles.
+V111|Forge : les lignes de la liste de fabrication tronquent aussi les noms et statistiques trop longs au lieu d'élargir la page.
+V111|Combat : la hauteur des vignettes de la barre de sorts s'adapte pour que 10 sorts tiennent sans défilement, y compris sur mobile.
