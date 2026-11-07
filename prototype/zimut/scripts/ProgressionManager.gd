@@ -1184,8 +1184,7 @@ func craft_recipe(recipe_name: String) -> Dictionary:
 	return {}
 
 ## Objet obtenu en forgeant la recette : stats de stuff.txt (ligne la plus proche en
-## dessous du niveau de la recette), qualité RARE (+15 % de stats) — un objet forgé est
-## toujours meilleur qu'un objet commun de même niveau.
+## dessous du niveau de la recette), rareté donnée par `recipe_rarity` (niveau de la recette).
 func forged_item(recipe: Dictionary) -> Dictionary:
 	var item: Dictionary = {}
 	var best_lvl: int = -1
@@ -1205,7 +1204,24 @@ func forged_item(recipe: Dictionary) -> Dictionary:
 	if item.is_empty():
 		item = {"type": String(recipe["type"]), "name": String(recipe["name"]), "level": int(recipe["level"]),
 			"force": 0, "intelligence": 0, "agility": 0, "wisdom": 0, "vita": 0, "defense": 0, "effect": ""}
-	return ItemRules.apply_rarity(item.duplicate(), "rare", _rng)
+	# Rareté selon le niveau de la recette ; tirage des bonus d'Épique/Légendaire figé par le nom
+	# (l'objet affiché dans la Forge est exactement celui qui sera fabriqué).
+	var frng := RandomNumberGenerator.new()
+	frng.seed = hash(String(recipe["name"]))
+	return ItemRules.apply_rarity(item.duplicate(), recipe_rarity(recipe), frng)
+
+
+## Rareté d'un objet forgé, selon le niveau de la recette :
+## Commun (< 34), Rare (34-66), Épique (67-89), Légendaire (90 et plus).
+static func recipe_rarity(recipe: Dictionary) -> String:
+	var lv: int = int(recipe.get("level", 1))
+	if lv >= 90:
+		return "legendaire"
+	if lv >= 67:
+		return "epique"
+	if lv >= 34:
+		return "rare"
+	return "commun"
 
 ## ── Forge : rangs (1..10), fusion de ressources, amélioration d'équipement ──────────────
 ## Une ressource a un rang : « Fer » = rang 1, « Fer@2 » = rang 2, etc. Deux ressources de même type
