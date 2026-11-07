@@ -1,0 +1,3 @@
+V112|Forge — Fabrication : nouveau panneau « Filtres et tri » (rareté, types de bonus, ordre d'affichage) ; plusieurs bonus cochés = l'objet doit tous les porter.
+V112|Forge : la rareté d'un objet forgé dépend du niveau de la recette — Commun (niv. 1-33), Rare (34-66), Épique (67-89), Légendaire (90+). Les bonus supplémentaires Épique/Légendaire sont désormais fixes pour une recette donnée.
+V112|Forge : tri de la liste par fabricables d'abord, niveau, rareté, puissance ou nom (croissant/décroissant) ; le nom des recettes prend la couleur de leur rareté.

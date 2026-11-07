@@ -5,7 +5,8 @@ extends CanvasLayer
 ##  • Liste triée : fabricables d'abord ; ressources manquantes en rouge, possédées en vert
 ##  • Panneau de détail : stats de l'objet forgé comparées à ce que porte le personnage choisi,
 ##    ressources nécessaires avec barres, boutons FABRIQUER et FABRIQUER ET ÉQUIPER
-##  • Les objets forgés sont de qualité RARE (+15 % de stats)
+##  • La rareté d'un objet forgé dépend du niveau de la recette (Commun → Légendaire)
+##  • Filtres par rareté et par type de bonus (multi-sélection), tri au choix
 
 signal closed
 signal crafted
@@ -27,6 +28,11 @@ var _save: Dictionary = {}
 var _slot: int = -1
 var _filter: String = "all"
 var _only_craftable: bool = false
+var _rar_filter: String = ""        # "" = toutes les raretés
+var _stat_filter: Array = []        # bonus exigés (ex. ["force", "defense"]) : l'objet doit les avoir tous
+var _sort: String = "ready"         # ready | level | rarity | power | name
+var _sort_desc: bool = false
+var _filters_open: bool = false     # panneau « Filtres et tri » déplié
 var _mode: String = "craft"      # craft | upgrade | fusion | salvage
 var _tier: int = 1                # rang de fabrication (1..10)
 var _up_key: String = ""
@@ -367,36 +373,176 @@ func _refresh_filters() -> void:
 	for cat: Array in CATEGORIES:
 		if String(cat[0]) == _filter:
 			cat_name = String(cat[1])
+	var shown: int = _visible_recipes().size()
 	var cnt_all: Array = counts.get(_filter, [0, 0])
-	var info := U.lbl("%s : %d fabricable(s) sur %d · rang %d" % [cat_name, int(cnt_all[0]), int(cnt_all[1]), _tier], 18, U.C_DIM)
+	var info := U.lbl("%s : %d affiché(s) · %d fabricable(s) · rang %d" % [cat_name, shown, int(cnt_all[0]), _tier], 18, U.C_DIM)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	info.clip_text = true
+	info.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	row2.add_child(info)
+	var active: int = _active_filter_count()
+	var ft := U.btn("%s Filtres et tri%s" % ["▾" if _filters_open else "▸", " (%d)" % active if active > 0 else ""],
+		Color(0.95, 0.65, 0.30) if (_filters_open or active > 0) else U.C_BORDER, 18, Vector2(260, 46))
+	ft.pressed.connect(func() -> void:
+		_filters_open = not _filters_open
+		refresh())
+	row2.add_child(ft)
 	var t := U.btn("✓ Fabricables" if _only_craftable else "☐ Fabricables",
 		Color(0.45, 0.80, 0.50) if _only_craftable else U.C_BORDER, 18, Vector2(190, 46))
 	t.pressed.connect(func() -> void:
 		_only_craftable = not _only_craftable
 		refresh())
 	row2.add_child(t)
+	if _filters_open:
+		_build_filter_panel()
+
+
+## Nombre de filtres actifs (rareté, bonus, « fabricables ») — affiché sur le bouton du panneau.
+func _active_filter_count() -> int:
+	return (1 if _rar_filter != "" else 0) + _stat_filter.size() + (1 if _only_craftable else 0)
+
+
+func _chip_btn(text: String, on: bool, col: Color, size: int = 17) -> Button:
+	var c: Color = col if on else U.C_BORDER
+	var b := U.btn(text, c, size, Vector2(0, 42))
+	# marges internes réduites : les libellés (« Intelligence », « Légendaire 2 ») tiennent sans coupure
+	b.add_theme_stylebox_override("normal", U.box(c.darkened(0.35), c, 12, 2, 3))
+	b.add_theme_stylebox_override("hover", U.box(c.darkened(0.15), c.lightened(0.3), 12, 3, 3))
+	b.add_theme_stylebox_override("pressed", U.box(c.darkened(0.5), c.lightened(0.3), 12, 3, 3))
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.clip_text = true
+	return b
+
+
+func _filter_row(title: String) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	var tl := U.lbl(title, 17, U.C_DIM)
+	tl.custom_minimum_size = Vector2(70, 0)
+	tl.add_theme_font_size_override("font_size", 15)
+	tl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	row.add_child(tl)
+	_filters_box.add_child(row)
+	return row
+
+
+## Panneau repliable : rareté, types de bonus (multi-sélection), tri et réinitialisation.
+func _build_filter_panel() -> void:
+	# Rareté (avec le nombre de recettes concernées par les autres filtres)
+	var rr := _filter_row("Rareté")
+	var rc: Dictionary = {}
+	for r: Dictionary in ProgressionManager.craft_recipes():
+		if _passes(r, true, false):
+			var k: String = ProgressionManager.recipe_rarity(r)
+			rc[k] = int(rc.get(k, 0)) + 1
+	var all_n: int = 0
+	for k: String in rc.keys():
+		all_n += int(rc[k])
+	var ball := _chip_btn("Toutes %d" % all_n, _rar_filter == "", Color(0.95, 0.65, 0.30))
+	ball.pressed.connect(func() -> void:
+		_rar_filter = ""
+		refresh())
+	rr.add_child(ball)
+	for rk: String in ItemRules.RARITY_ORDER:
+		var col: Color = ItemRules.RARITY[rk]["color"]
+		var b := _chip_btn("%s %d" % [ItemRules.RARITY[rk]["label"], int(rc.get(rk, 0))], _rar_filter == rk, col)
+		b.add_theme_color_override("font_color", col.lightened(0.25))
+		b.pressed.connect(func() -> void:
+			_rar_filter = "" if _rar_filter == rk else rk
+			refresh())
+		rr.add_child(b)
+	# Types de bonus : l'objet doit porter TOUS les bonus cochés
+	var sr := _filter_row("Bonus")
+	for k: String in ItemRules.STAT_KEYS:
+		var on: bool = _stat_filter.has(k)
+		var b := _chip_btn(String(ClassRules.STAT_LABEL.get(k, k)), on, Color(0.45, 0.80, 0.50), 17)
+		b.pressed.connect(func() -> void:
+			if _stat_filter.has(k):
+				_stat_filter.erase(k)
+			else:
+				_stat_filter.append(k)
+			refresh())
+		sr.add_child(b)
+	# Tri
+	var tr := _filter_row("Tri")
+	for so: Array in [["ready", "Prêts"], ["level", "Niveau"], ["rarity", "Rareté"], ["power", "Puiss."], ["name", "Nom"]]:
+		var key: String = String(so[0])
+		var b := _chip_btn(String(so[1]), _sort == key, Color(0.95, 0.65, 0.30), 17)
+		b.tooltip_text = {"ready": "Fabricables d'abord", "level": "Niveau de la recette", "rarity": "Rareté", "power": "Puissance totale des bonus", "name": "Ordre alphabétique"}[key]
+		b.pressed.connect(func() -> void:
+			_sort = key
+			refresh())
+		tr.add_child(b)
+	var dir := U.btn("▼" if _sort_desc else "▲", Color(0.95, 0.65, 0.30), 18, Vector2(56, 42))
+	dir.tooltip_text = "Ordre décroissant" if _sort_desc else "Ordre croissant"
+	dir.pressed.connect(func() -> void:
+		_sort_desc = not _sort_desc
+		refresh())
+	tr.add_child(dir)
+	var rz := U.btn("Réinit.", U.C_BORDER, 16, Vector2(110, 42))
+	rz.disabled = _active_filter_count() == 0 and _sort == "ready" and not _sort_desc
+	rz.pressed.connect(func() -> void:
+		_rar_filter = ""
+		_stat_filter = []
+		_only_craftable = false
+		_sort = "ready"
+		_sort_desc = false
+		refresh())
+	tr.add_child(rz)
 
 
 # ── Liste des recettes ──────────────────────────────────────────────────────
+## Une recette passe-t-elle les filtres (catégorie, rareté, bonus, fabricables) ? Les deux
+## drapeaux permettent de compter les résultats d'une famille de filtres sans elle-même.
+func _passes(r: Dictionary, skip_rarity: bool = false, skip_craftable: bool = false) -> bool:
+	if _filter != "all" and _category_of(r) != _filter:
+		return false
+	if not skip_rarity and _rar_filter != "" and ProgressionManager.recipe_rarity(r) != _rar_filter:
+		return false
+	if not _stat_filter.is_empty():
+		var item: Dictionary = ProgressionManager.forged_item(r)
+		for k: String in _stat_filter:
+			if int(item.get(k, 0)) <= 0:
+				return false
+	if not skip_craftable and _only_craftable and not bool(ProgressionManager.craft_status(_save, r, _tier)["craftable"]):
+		return false
+	return true
+
+
 func _visible_recipes() -> Array:
 	var out: Array = []
 	for r: Dictionary in ProgressionManager.craft_recipes():
-		if _filter != "all" and _category_of(r) != _filter:
+		if not _passes(r):
 			continue
 		var st: Dictionary = ProgressionManager.craft_status(_save, r, _tier)
-		if _only_craftable and not bool(st["craftable"]):
-			continue
-		out.append({"r": r, "st": st})
+		out.append({"r": r, "st": st, "rar": ItemRules.RARITY_ORDER.find(ProgressionManager.recipe_rarity(r)),
+			"pow": ItemRules.power(ProgressionManager.forged_item_ranked(r, _tier))})
 	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-		if bool(a["st"]["craftable"]) != bool(b["st"]["craftable"]):
-			return bool(a["st"]["craftable"])
-		if int(a["r"]["level"]) != int(b["r"]["level"]):
-			return int(a["r"]["level"]) < int(b["r"]["level"])
-		return String(a["r"]["name"]) < String(b["r"]["name"]))
+		var c: int = _cmp_rows(a, b)
+		return c > 0 if _sort_desc else c < 0)
 	return out
+
+
+## Comparaison selon le tri choisi (<0 : a avant b). Égalités départagées par niveau puis nom.
+func _cmp_rows(a: Dictionary, b: Dictionary) -> int:
+	var c: int = 0
+	match _sort:
+		"ready":
+			c = int(bool(b["st"]["craftable"])) - int(bool(a["st"]["craftable"]))
+		"rarity":
+			c = int(a["rar"]) - int(b["rar"])
+		"power":
+			c = int(a["pow"]) - int(b["pow"])
+		"name":
+			c = String(a["r"]["name"]).naturalnocasecmp_to(String(b["r"]["name"]))
+	if c != 0:
+		return c
+	if _sort != "name":
+		var lv: int = int(a["r"]["level"]) - int(b["r"]["level"])
+		if lv != 0:
+			return lv
+	return String(a["r"]["name"]).naturalnocasecmp_to(String(b["r"]["name"]))
 
 
 func _refresh_list() -> void:
@@ -455,12 +601,12 @@ func _recipe_row(r: Dictionary, st: Dictionary) -> Control:
 	info.alignment = BoxContainer.ALIGNMENT_CENTER
 	info.add_theme_constant_override("separation", 2)
 	h.add_child(info)
-	var nm := U.lbl(String(r["name"]), 23, U.C_TXT)
+	var nm := U.lbl(String(r["name"]), 23, ItemRules.rarity_color(item).lightened(0.25))
 	nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	nm.clip_text = true
 	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	info.add_child(nm)
-	var sub := U.lbl("%s · niv. %d · %s" % [r["type"], int(r["level"]), ItemRules.stat_line(item)], 17, U.C_DIM)
+	var sub := U.lbl("%s · niv. %d · %s" % [ItemRules.rarity_label(item), int(r["level"]), ItemRules.stat_line(item)], 17, U.C_DIM)
 	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	sub.clip_text = true
 	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
