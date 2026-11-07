@@ -212,7 +212,36 @@ rendu dans la branche non-iso de `_rebuild_board` (`AdventureMapUI.gd`) :
 Le masque, le départ, les POI et les déplacements ne changent jamais : les décors
 sont générés par `tools/gen_sylve_v2_decor.py` (type de sol lu dans l'illustration,
 distances de sécurité aux lieux) et contrôlés par `tests/test_sylve_v2_decor.gd`.
+Les surfaces **peintes** (bâtiments, toits, murs : cases plates, écart-type des
+pixels < 10) sont exclues : aucun arbre ni décor ne se pose sur un bâtiment.
 Prévisualisation de composition : `tools/preview_sylve_v2.py` (PIL, hors moteur).
+
+### Déplacement continu (V114)
+
+`_walk` n'arrête plus le héros à chaque case : une seule tween parcourt une polyligne
+à coins arrondis (`_smooth_path`), vitesse constante au milieu avec
+accélération/décélération globales (`TRANS_SINE` / `EASE_IN_OUT` sur tout le trajet).
+La logique par case (monstres bloquants, trouvailles, lieux, événements, portes) est
+inchangée et se déclenche à chaque frontière de case (`_walk_until`) ; en cas de
+blocage, `_walk_stop_s` freine le héros sur la dernière case atteinte. L'échelle de
+profondeur du héros est interpolée en continu le long du trajet.
+Test : `tests/test_walk_continu.gd`.
+
+### Planche iso « test » de la Sylve enrichie (V114)
+
+- `IsoGround` : eau animée autour de l'île flottante (clapot), ombre portée, arrière-plan
+  (soleil, collines dans la brume, nuages qui dérivent), **rivage** (cases basses en bord
+  d'île teintées sable humide) et **escaliers de bois** dessinés sur les faces où le
+  sentier gravit une marche ;
+- teinte d'altitude des décors (`_add_decor(..., hgt)`) : les basses terres sont ombrées,
+  les hauteurs restent claires ;
+- nouveaux aménagements dessinés en code dans `BuildingNode` : `puits`, `feu` (flamme
+  animée), `etal` — placés par `tools/gen_sylve_iso_buildings.py` (empreintes en
+  obstacles `building`, hors sentier/POI, sur des replats) ;
+- prévisualisation : `tools/preview_sylve_iso.py` (`Examples/sylve_iso_preview/`) ;
+- captures in-engine des deux variantes (écran virtuel requis) :
+  `xvfb-run -a godot --rendering-method gl_compatibility --path . -s tests/shot_sylve_variants.gd -- <dossier>` ;
+- test : `tests/test_sylve_iso_v114.gd`.
 
 ## Déplacement et lisibilité (V10)
 

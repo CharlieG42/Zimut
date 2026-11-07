@@ -72,6 +72,29 @@ func _boot() -> void:
 			bad += 1
 	check(bad == 0, "premier plan : cases non jouables au sud d'un chemin, à distance des lieux")
 
+	# Aucun décor ni arbre sur une surface PEINTE (bâtiment/toit) : case texturée
+	# (écart-type des pixels >= 9.5), lu directement dans l'illustration.
+	var img := Image.new()
+	var lerr: int = img.load(String(d["image"]))
+	check(lerr == OK, "illustration rechargeable en Image (%d)" % lerr)
+	var flat_bad := 0
+	for k: String in decor.keys() + over.keys():
+		var p: Vector2i = AT.parse(k)
+		var m := Vector3.ZERO
+		var m2 := Vector3.ZERO
+		for yy in range(16):
+			for xx in range(16):
+				var c: Color = img.get_pixel(p.x * 16 + xx, p.y * 16 + yy)
+				var v := Vector3(c.r, c.g, c.b)
+				m += v
+				m2 += v * v
+		m /= 256.0
+		var var_ch: Vector3 = m2 / 256.0 - m * m
+		var std_ch: float = (sqrt(maxf(0.0, var_ch.x)) + sqrt(maxf(0.0, var_ch.y)) + sqrt(maxf(0.0, var_ch.z))) / 3.0
+		if std_ch * 255.0 < 9.5:   # composantes Color normalisées 0..1
+			flat_bad += 1
+	check(flat_bad == 0, "aucun décor/arbre sur surface peinte (std < 9.5/255) : %d" % flat_bad)
+
 	# La scène instancie bien les nœuds de décor sprites.
 	var data: Dictionary = pm.new_game(4, "TestDecorV114")
 	pm.rebuild_team(data, ["Chasseur", "Mage", "Sylvain"])

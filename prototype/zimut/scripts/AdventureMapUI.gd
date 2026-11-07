@@ -93,6 +93,8 @@ var _side_box: VBoxContainer
 var _modal_root: Control = null
 var _modal_canvas: CanvasLayer = null
 var _walking: bool = false
+var _walk_s: float = 0.0        # V114 : position (longueur d'arc) courante sur le trajet continu
+var _walk_stop_s: float = 0.0   # V114 : point d'arrêt si blocage en route
 var _pending: Vector2i = Vector2i(-1, -1)      # destination en attente de confirmation (appui tactile)
 var _hud_title: Label
 var _hud_sub: Label
@@ -638,9 +640,9 @@ func _rebuild_board(biome: String) -> void:
 		var terrain: Dictionary = AdventureTerrain.zone_terrain(zid)
 		for p: Vector2i in (terrain["obstacles"] as Dictionary).keys():
 			if String(terrain["obstacles"][p]) != "building":
-				_add_decor(p, String(terrain["obstacles"][p]), biome, pal, 0.8)
+				_add_decor(p, String(terrain["obstacles"][p]), biome, pal, 0.8, false, false, int(BoardArt.heights(zid).get(p, 0)))
 		for p2: Vector2i in (terrain["decor"] as Dictionary).keys():
-			_add_decor(p2, String(terrain["decor"][p2]), biome, pal, 0.7)
+			_add_decor(p2, String(terrain["decor"][p2]), biome, pal, 0.7, false, false, int(BoardArt.heights(zid).get(p2, 0)))
 		for b: Dictionary in BoardArt.buildings(zid):
 			var bn := BuildingNode.new()
 			bn.kind = String(b["k"])
@@ -726,7 +728,7 @@ func _set_sky(layer: int) -> void:
 			_bg_grad.colors = PackedColorArray([Color(0.46, 0.62, 0.74), Color(0.72, 0.83, 0.88), Color(0.80, 0.88, 0.86)])
 
 
-func _add_decor(p: Vector2i, kind: String, biome: String, pal: Dictionary, sc: float, use_sprites: bool = false, over: bool = false) -> void:
+func _add_decor(p: Vector2i, kind: String, biome: String, pal: Dictionary, sc: float, use_sprites: bool = false, over: bool = false, hgt: int = -1) -> void:
 	var d := DecorNode.new()
 	d.kind = kind
 	d.biome = biome
@@ -735,6 +737,9 @@ func _add_decor(p: Vector2i, kind: String, biome: String, pal: Dictionary, sc: f
 	d.scale = Vector2(sc, sc)
 	d.position = cell_center(p) + Vector2(0, 6)
 	d.use_sprites = use_sprites
+	if hgt >= 0:
+		# V114 : teinte d'altitude — les basses terres sont ombrées, les hauteurs restent claires
+		d.self_modulate = Color.WHITE.darkened(clampf(1.0 - float(hgt) / 12.0, 0.0, 1.0) * 0.22)
 	if over:
 		# Premier plan : au-dessus du héros (z_index = _depth+2) sur sa rangée et au nord.
 		d.z_index = _depth(p) + 4
@@ -1296,29 +1301,63 @@ func _walk(path: Array[Vector2i]) -> void:
 	var step_time: float = STEP_TIME * clampf(8.0 / float(maxi(1, path.size())), 0.5, 1.0)
 	if is_board():
 		step_time = BOARD_STEP_TIME * (0.72 if sprint else 1.0)
-	for step: Vector2i in path:
+	# V114 : déplacement continu — UNE seule tween le long d'une polyligne à coins
+	# arrondis (vitesse constante au milieu, accélération/décélération globales),
+	# au lieu d'un arrêt à chaque case. La logique par case (monstres, trouvailles,
+	# lieux, événements) est inchangée : elle se déclenche à chaque frontière de case.
+	var pts: Array[Vector2] = [_hero.position]
+	for s0: Vector2i in path:
+		pts.append(cell_center(s0))
+	var sp: Array = _smooth_path(pts)
+	var cum: Array[float] = [0.0]
+	for i: int in range(1, sp.size()):
+		cum.append(cum[i - 1] + float(sp[i].distance_to(sp[i - 1])))
+	var total_len: float = maxi(0.001, float(cum.back()))
+	var dur: float = step_time * float(maxi(1, path.size()))
+	_walk_s = 0.0
+	_walk_stop_s = total_len
+	var tw := create_tween()
+	tw.tween_method(func(f: float) -> void:
+		var s: float = clampf(f, 0.0, 1.0) * total_len
+		if s > _walk_stop_s:
+			s = _walk_stop_s
+		_walk_s = s
+		var k: int = 0
+		while k < cum.size() - 2 and cum[k + 1] <= s:
+			k += 1
+		var seg: float = maxi(0.001, float(cum[k + 1] - cum[k]))
+		var lt: float = clampf((s - cum[k]) / seg, 0.0, 1.0)
+		_hero.position = sp[k].lerp(sp[k + 1], lt)
+		_hero.hop = sin(lt * PI) * 7.0
+		if is_board() and path.size() > 0:
+			var c0: Vector2i = path[maxi(0, k - 1)]
+			var c1: Vector2i = path[mini(path.size() - 1, k)]
+			_hero.scale = _hero_depth_scale(c0).lerp(_hero_depth_scale(c1), lt)
+	, 0.0, 1.0, dur).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	for j: int in range(path.size()):
+		var step: Vector2i = path[j]
+		await _walk_until(tw, float(cum[j]))       # départ de la case j (point j atteint)
+		if not tw.is_running():
+			break
 		if _redirect.x >= 0:
+			_walk_stop_s = float(cum[j])
 			break
 		if not manager.mob_at(step).is_empty():
 			_say("Un groupe de monstres vous barre la route.")
+			_walk_stop_s = float(cum[j])
 			break
-		var from: Vector2 = _hero.position
-		var to: Vector2 = cell_center(step)
-		_hero.locomotion(to - from, true, sprint)
+		_hero.locomotion(cell_center(step) - _hero.position, true, sprint)
 		var fresh: Array = manager.move_hero(step)
 		if _board.preview.size() > 0:
 			_board.preview.remove_at(0)
-		var tw := create_tween()
-		tw.tween_method(func(f: float) -> void:
-			_hero.position = from.lerp(to, f)
-			_hero.hop = sin(f * PI) * 7.0, 0.0, 1.0, step_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		if is_board():
-			tw.parallel().tween_property(_hero, "scale", _hero_depth_scale(step), step_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 			_hero.z_index = _depth(step) + 2
 		_after_step()
 		if not _pan_moved:
 			_focus_cell(step, true, step_time)
-		await tw.finished
+		await _walk_until(tw, float(cum[j + 1]))   # arrivée sur la case
+		if not tw.is_running():
+			break
 		if not fresh.is_empty():
 			_refresh_world()
 		var got: Dictionary = manager.collect_find(step)
@@ -1329,6 +1368,9 @@ func _walk(path: Array[Vector2i]) -> void:
 			_refresh_world()
 			_refresh_side()
 			if _check_mastery():
+				if tw.is_running():
+					tw.kill()
+				_walk_place_hero(sp, cum)
 				_hero.locomotion(Vector2.ZERO, false)
 				_hero.hop = 0.0
 				_walking = false
@@ -1341,10 +1383,14 @@ func _walk(path: Array[Vector2i]) -> void:
 		if not poi.is_empty() and not dungeon_transit:
 			_hero.react()
 		if (not poi.is_empty() and not dungeon_transit) or not manager.gate_at(step).is_empty():
+			_walk_stop_s = float(cum[j + 1])
 			break
 		var ev: Dictionary = manager.roll_event(_rng)
 		if not ev.is_empty():
 			_show_event(ev)
+	if tw.is_running():
+		tw.kill()
+	_walk_place_hero(sp, cum)
 	_hero.locomotion(Vector2.ZERO, false)
 	_hero.hop = 0.0
 	_walking = false
@@ -1389,6 +1435,36 @@ func _walk(path: Array[Vector2i]) -> void:
 			_interact()
 		return
 	_refresh_side()
+
+
+## V114 : coins arrondis d'une polyligne — chaque sommet intérieur est tiré vers le
+## milieu de ses deux voisins (extrémités inchangées).
+func _smooth_path(pts: Array[Vector2]) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	for i: int in range(pts.size()):
+		if i == 0 or i == pts.size() - 1 or pts.size() < 3:
+			out.append(pts[i])
+		else:
+			out.append((pts[i - 1] + pts[i] * 2.0 + pts[i + 1]) * 0.25)
+	return out
+
+
+## V114 : attend que le trajet continu atteigne la longueur d'arc target_s (ou que la tween meure).
+func _walk_until(tw: Tween, target_s: float) -> void:
+	while tw.is_valid() and tw.is_running() and _walk_s < target_s:
+		await get_tree().process_frame
+
+
+## V114 : cale le héros sur la polyligne à la position atteinte (min(s, stop_s)).
+func _walk_place_hero(sp: Array, cum: Array[float]) -> void:
+	var s: float = minf(_walk_s, _walk_stop_s)
+	var k: int = 0
+	while k < cum.size() - 2 and cum[k + 1] <= s:
+		k += 1
+	var seg: float = maxi(0.001, float(cum[k + 1] - cum[k]))
+	var lt: float = clampf((s - cum[k]) / seg, 0.0, 1.0)
+	_hero.position = sp[k].lerp(sp[k + 1], lt)
+	_hero.hop = 0.0
 
 
 ## Après chaque pas : les groupes flânent, un groupe réapparaît si le délai est écoulé.
@@ -2638,8 +2714,14 @@ class AdventureBoard extends Node2D:
 ## Dessiné une seule fois (le nœud ne se redessine pas à chaque image).
 class IsoGround extends Node2D:
 	var ui: Node = null
+	var _t: float = 0.0   # V114 : animation de l'eau et des nuages
 
 	func _ready() -> void:
+		set_process(true)
+		queue_redraw()
+
+	func _process(delta: float) -> void:
+		_t += delta
 		queue_redraw()
 
 	static func _tint(base: Color, h: float, x: int, y: int) -> Color:
@@ -2664,8 +2746,44 @@ class IsoGround extends Node2D:
 		var trail := Color(0.80, 0.67, 0.45)
 		var paths: Dictionary = AdventureTerrain.zone_terrain(zid)["paths"]
 		var base_y: float = BoardArt.iso_origin(zid).y
+		# V114 : arrière-plan lointain — soleil, deux rides de collines dans la brume, nuages qui dérivent
+		var wsize: Vector2 = BoardArt.world_size(zid)
+		var sun := Vector2(wsize.x * 0.82, base_y - 250.0)
+		draw_circle(sun, 64.0, Color(1.0, 0.95, 0.75, 0.16))
+		draw_circle(sun, 44.0, Color(1.0, 0.96, 0.78, 0.85))
+		for ridge in range(2):
+			var yb: float = base_y - 40.0 + float(ridge) * 52.0
+			var hcol: Color = Color(0.42, 0.58, 0.48, 0.38 - float(ridge) * 0.13)
+			var rpts := PackedVector2Array()
+			for i in range(24):
+				var fx: float = float(i) / 23.0
+				rpts.append(Vector2(fx * wsize.x, yb - 70.0 - sin(fx * 9.0 + float(ridge) * 3.0) * 52.0 - sin(fx * 23.0) * 18.0))
+			rpts.append(Vector2(wsize.x, yb + 200.0))
+			rpts.append(Vector2(0.0, yb + 200.0))
+			draw_colored_polygon(rpts, hcol)
+		for ci in range(3):
+			var cx: float = fposmod(float(ci) * 0.37 * wsize.x + _t * (6.0 + float(ci) * 2.5), wsize.x + 320.0) - 160.0
+			var cy: float = base_y - 320.0 + float(ci) * 38.0
+			draw_set_transform(Vector2(cx, cy), 0.0, Vector2(1.0, 0.45))
+			draw_circle(Vector2.ZERO, 34.0 + float(ci) * 8.0, Color(1, 1, 1, 0.72))
+			draw_circle(Vector2(-26, 6), 22.0, Color(1, 1, 1, 0.55))
+			draw_circle(Vector2(24, 8), 26.0, Color(1, 1, 1, 0.55))
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		# ombre portée sous l'île flottante
 		var bot: Vector2 = BoardArt.iso_origin(zid) + Vector2(float(cols - rows) * hw * 0.5, float(cols + rows) * hh * 0.5)
+		# V114 : eau autour de l'île + clapot animé
+		var wr: float = float(cols + rows) * hw * 0.62
+		draw_set_transform(bot + Vector2(0, 170.0), 0.0, Vector2(1.0, 0.24))
+		draw_circle(Vector2.ZERO, wr, Color(0.09, 0.24, 0.32))
+		draw_circle(Vector2.ZERO, wr * 0.94, Color(0.15, 0.38, 0.45))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		for k in range(12):
+			var rr := RandomNumberGenerator.new()
+			rr.seed = k * 71 + 3
+			var ang: float = float(k) / 12.0 * TAU + sin(_t * 0.7 + float(k)) * 0.06
+			var rad: float = wr * (0.97 + 0.05 * sin(_t * 1.1 + float(k) * 2.0))
+			var wp: Vector2 = bot + Vector2(cos(ang) * rad, 170.0 + sin(ang) * rad * 0.24)
+			draw_arc(wp, rr.randf_range(12.0, 26.0), ang + 0.4, ang + PI - 0.4, 10, Color(0.60, 0.85, 0.88, 0.30), 2.0, true)
 		draw_set_transform(bot + Vector2(0, 250), 0.0, Vector2(1.0, 0.22))
 		draw_circle(Vector2.ZERO, float(cols + rows) * hw * 0.5, Color(0.03, 0.06, 0.10, 0.12))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
@@ -2706,10 +2824,25 @@ class IsoGround extends Node2D:
 						PackedColorArray([grass.darkened(0.25 + shade * 0.5), grass.darkened(0.25 + shade * 0.5), grass.darkened(0.45 + shade * 0.4), grass.darkened(0.45 + shade * 0.4)]))
 					if drop > 20.0:
 						draw_line(a + Vector2(0, drop * 0.5), b + Vector2(0, drop * 0.5), Color(0, 0, 0, 0.10), 1.5)
+					# V114 : escalier de bois là où le sentier gravit une marche
+					if nh != -99 and paths.has(c) and drop > 0.5:
+						var wood := Color(0.55, 0.40, 0.24)
+						for s_i in range(3):
+							var fy: float = drop * (0.25 + 0.25 * float(s_i))
+							draw_line(a + Vector2(0, fy), b + Vector2(0, fy), wood.lightened(0.08 * float(s_i)), 5.0, true)
 				# dessus de la case
 				var top: Color = _tint(grass, float(h) / float(BoardArt.raw(zid).get("unit", 4)), x, y)
 				if paths.has(c):
 					top = _tint(trail, float(h) / float(BoardArt.raw(zid).get("unit", 4)) * 0.4, x, y)
+				# V114 : rivage — cases basses au bord de l'île, teinte de sable humide
+				if h <= int(d.get("unit", 4)) and not paths.has(c):
+					var edge: bool = false
+					for dd: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+						var nn := c + dd
+						if not hs.has(nn) or not BoardArt.walkable_cell(zid, nn):
+							edge = true
+					if edge:
+						top = top.lerp(Color(0.72, 0.62, 0.40), 0.55)
 				var e: float = 1.015   # recouvrement léger : aucun interstice entre les cases
 				draw_colored_polygon(PackedVector2Array([ctr + Vector2(0, -hh * e), ctr + Vector2(hw * e, 0), ctr + Vector2(0, hh * e), ctr + Vector2(-hw * e, 0)]), top)
 
@@ -2767,7 +2900,7 @@ class BuildingNode extends Node2D:
 		draw_texture_rect(tex, Rect2(-Vector2(float(m["ax"]), float(m["ay"])) * sc, Vector2(tex.get_width(), tex.get_height()) * sc), false)
 
 	func _ready() -> void:
-		set_process(kind == "moulin" and kenney_sprite(kind, seed_value) == "")
+		set_process((kind == "moulin" and kenney_sprite(kind, seed_value) == "") or kind == "feu")
 
 	func _process(delta: float) -> void:
 		_t += delta
@@ -2785,10 +2918,62 @@ class BuildingNode extends Node2D:
 		draw_colored_polygon(PackedVector2Array([a, b, c]), col)
 		draw_polyline(PackedVector2Array([a, b, c, a]), Color(0.10, 0.07, 0.05, 0.55), 1.2, true)
 
+	## V114 : petits aménagements dessinés en code (pas de sprite Kenney cuit pour ceux-là).
+	func _draw_small_prop(kind: String, hw: float, hh: float) -> void:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seed_value
+		var wood := Color(0.50, 0.36, 0.22)
+		var wood_l := wood.lightened(0.15)
+		var stone := Color(0.55, 0.55, 0.58)
+		match kind:
+			"puits":
+				draw_set_transform(Vector2(0, 2), 0.0, Vector2(1.0, 0.45))
+				draw_circle(Vector2.ZERO, 26.0, stone.darkened(0.15))
+				draw_circle(Vector2.ZERO, 19.0, Color(0.08, 0.12, 0.16))
+				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+				for i in range(8):
+					var a := TAU * float(i) / 8.0
+					draw_circle(Vector2(cos(a) * 24.0, 2.0 + sin(a) * 11.0), 5.0, stone.lightened(rng.randf_range(-0.08, 0.08)))
+				draw_line(Vector2(-20, 0), Vector2(-20, -46), wood, 6.0)
+				draw_line(Vector2(20, 0), Vector2(20, -46), wood, 6.0)
+				_tri(Vector2(-26, -44), Vector2(0, -62), Vector2(26, -44), Color(0.62, 0.30, 0.20))
+				draw_line(Vector2(-20, -44), Vector2(20, -44), wood_l, 3.0)
+				draw_line(Vector2(0, -44), Vector2(0, -18), Color(0.25, 0.20, 0.14), 2.0)
+				draw_rect(Rect2(-5, -20, 10, 8), Color(0.45, 0.33, 0.20))
+			"feu":
+				var fl: float = 1.0 + 0.18 * sin(_t * 9.0) + 0.08 * sin(_t * 23.0)
+				draw_set_transform(Vector2(0, 4), 0.0, Vector2(1.0, 0.42))
+				draw_circle(Vector2.ZERO, 30.0 + 6.0 * sin(_t * 9.0), Color(1.0, 0.55, 0.15, 0.16))
+				draw_circle(Vector2.ZERO, 24.0, Color(0.06, 0.05, 0.05, 0.25))
+				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+				for i in range(7):
+					var a2 := TAU * float(i) / 7.0
+					draw_circle(Vector2(cos(a2) * 20.0, 4.0 + sin(a2) * 8.0), 4.5, stone.darkened(rng.randf_range(0.0, 0.15)))
+				draw_line(Vector2(-12, 2), Vector2(10, -6), wood, 5.0)
+				draw_line(Vector2(-8, -4), Vector2(12, 4), wood_l, 5.0)
+				_tri(Vector2(-10, 2), Vector2(0, -26.0 * fl), Vector2(10, 2), Color(1.0, 0.62, 0.18, 0.95))
+				_tri(Vector2(-5, 2), Vector2(0, -16.0 * fl), Vector2(5, 2), Color(1.0, 0.88, 0.40, 0.95))
+			"etal":
+				for px in [-24.0, 24.0]:
+					draw_line(Vector2(px, 2), Vector2(px, -40), wood, 5.0)
+				_quad(Vector2(-30, -38), Vector2(30, -38), Vector2(24, -50), Vector2(-24, -50), Color(0.85, 0.30, 0.25))
+				for i in range(4):
+					var x0: float = -30.0 + float(i) * 15.0
+					_quad(Vector2(x0, -38), Vector2(x0 + 7.5, -38), Vector2(x0 + 6.0, -50), Vector2(x0 - 1.5, -50), Color(0.95, 0.92, 0.82))
+				draw_rect(Rect2(-26, -14, 52, 12), wood_l)
+				draw_rect(Rect2(-26, -14, 52, 4), wood.darkened(0.2))
+				draw_rect(Rect2(-20, -26, 12, 10), Color(0.65, 0.45, 0.25))
+				draw_rect(Rect2(8, -27, 12, 11), Color(0.55, 0.38, 0.22))
+
 	func _draw() -> void:
 		var kn: String = kenney_sprite(kind, seed_value)
 		if kn != "":
 			_draw_kenney(kn)
+			return
+		if kind in ["puits", "feu", "etal"]:
+			var hw0: float = BoardArt.ISO_TW * cs * 0.5
+			var hh0: float = BoardArt.ISO_TH * cs * 0.5
+			_draw_small_prop(kind, hw0, hh0)
 			return
 		var st: Dictionary = STYLE.get(kind, STYLE["maison"])
 		var hw: float = BoardArt.ISO_TW * cs * 0.5
