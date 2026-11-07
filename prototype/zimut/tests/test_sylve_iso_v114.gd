@@ -77,6 +77,32 @@ func _boot() -> void:
 		"bâtiments instanciés : %s" % str(counts))
 	check(tinted > 0, "décors teintés selon l'altitude (%d nœuds non blancs)" % tinted)
 
+	# V114 perf : le sol iso reste statique ; la couche animée (IsoFx) est légère et
+	# absente en qualité « Économie » — sinon tout le plateau est redessiné à chaque frame.
+	var src: String = FileAccess.get_file_as_string("res://scripts/AdventureMapUI.gd")
+	var i0: int = src.find("class IsoGround")
+	var i1: int = src.find("class IsoFx")
+	check(i0 >= 0 and i1 > i0 and not src.substr(i0, i1 - i0).contains("set_process"),
+		"IsoGround statique (aucun redraw par frame)")
+	var fx_count := 0
+	for n: Node in sc.get("_world").get_children():
+		if n.get("_acc") != null:
+			fx_count += 1
+	check(fx_count == 1, "IsoFx présent en qualité haute (%d)" % fx_count)
+	gs.set_graphics_quality(1)
+	sc._rebuild_world()
+	for i in 5:
+		await process_frame
+	fx_count = 0
+	for n: Node in sc.get("_world").get_children():
+		if n.get("_acc") != null:
+			fx_count += 1
+	check(fx_count == 0, "IsoFx absent en qualité Économie (%d)" % fx_count)
+	gs.set_graphics_quality(0)
+	sc._rebuild_world()
+	for i in 5:
+		await process_frame
+
 	# petite marche sur le plateau à étages
 	var mgr: Node = sc.get("manager")
 	var start: Vector2i = mgr.hero_pos()
