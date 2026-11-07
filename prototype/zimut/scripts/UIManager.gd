@@ -2184,6 +2184,9 @@ func _show_result_window(victory: bool) -> void:
 					dtxt += "   ·   la Pierre n'est pas tombée (%d %%) — le donjon se refait à volonté." % roundi(float(dg.get("chance", 0.0)) * 100.0)
 				"owned":
 					dtxt += "   ·   Pierre déjà en ta possession."
+			var dsh: Dictionary = dg.get("shards", {})
+			for dsb: String in dsh.keys():
+				dtxt += "\n💠  Le Gardien laisse des éclats : %s +%d" % [Shards.shard_name(dsb), int(dsh[dsb])]
 			if String(dg.get("unlocked_zone", "")) != "":
 				dtxt += "\n🌀  Le portail s'ouvre : %s est désormais accessible !" % ProgressionManager.adventure_zone_name(String(dg["unlocked_zone"]))
 			dcol = Color(0.55, 0.95, 0.60)
@@ -2266,6 +2269,9 @@ func _show_result_window(victory: bool) -> void:
 		content.add_child(chips)
 		for kk: String in drops.keys():
 			chips.add_child(UK.chip("%s +%d" % [kk, int(drops[kk])], UK.RES_COLOR.get(kk.split("@")[0], UK.C_TXT), 19))
+		var shard_got: Dictionary = save.get("last_shards", {})
+		for sbk: String in shard_got.keys():
+			chips.add_child(UK.chip("💠 %s +%d" % [Shards.shard_name(sbk), int(shard_got[sbk])], Shards.color_of(sbk), 19))
 		chips.add_child(UK.chip("🪙 %d or" % ProgressionManager.gold(save), UK.C_GOLD, 19))
 	# Conquête : production de l'empire et défi facultatif
 	if victory and String(save.get("campaign_mode", "")) == "conquest":

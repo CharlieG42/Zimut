@@ -220,7 +220,7 @@ func _card(biome: String) -> Control:
 	if lv < Stones.MAX_LEVEL:
 		var cost: Dictionary = Stones.awaken_cost(_save, biome)
 		var ok: bool = Stones.can_awaken(_save, biome) == ""
-		var aw := U.btn("✦ Éveiller  %d or + %d %s" % [int(cost["gold"]), int(cost["qty"]), String(cost["res"])],
+		var aw := U.btn("✦ Éveiller  %d or + %d %s + %d éclats (%d)" % [int(cost["gold"]), int(cost["qty"]), String(cost["res"]), int(cost["shards"]), Shards.count(_save, biome)],
 			col if ok else U.C_BORDER, 17, Vector2(0, 50))
 		aw.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		aw.pressed.connect(func() -> void:

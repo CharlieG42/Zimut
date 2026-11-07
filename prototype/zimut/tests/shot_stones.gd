@@ -16,6 +16,7 @@ func _boot() -> void:
 	Stones.equip(data, "Rouages", "Artificier")
 	data["gold"] = 5000
 	data["resources"] = {"Magie": 50, "Bois": 3}
+	Shards.add(data, "Cristaux", 2)
 	Stones.awaken(data, "Cristaux")
 	var ui: CanvasLayer = (load("res://scripts/StonesUI.gd") as GDScript).new()
 	root.add_child(ui)

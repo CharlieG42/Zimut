@@ -55,6 +55,9 @@ func _boot() -> void:
 	check(Stones.awaken(data, "Cristaux") != "", "éveil refusé sans or")
 	data["gold"] = 10000
 	data["resources"]["Magie"] = 100
+	data["shards"] = {}
+	check(Stones.awaken(data, "Cristaux") != "", "éveil refusé sans éclats")
+	Shards.add(data, "Cristaux", 2)
 	check(Stones.awaken(data, "Cristaux") == "" and Stones.level(data, "Cristaux") == 2, "éveil niveau 2")
 	check(int(pm.member_stats(data, data["team"][1])["intelligence"]) == int(mage_before["intelligence"]) + 10, "bonus doublé au niveau 2")
 	# Conquête Rouages

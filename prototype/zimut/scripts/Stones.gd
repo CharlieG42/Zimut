@@ -138,11 +138,15 @@ static func unequip(data: Dictionary, biome: String) -> void:
 		owned(data)[biome]["owner"] = ""
 
 
-## Coût de l'éveil vers le niveau suivant : or + ressource de la Nation.
+## Éclats de la Nation exigés par niveau d'éveil (niveau actuel × 2 : 2, 4, 6, 8 = 20 au total).
+const AWAKEN_SHARDS_PER_LEVEL := 2
+
+
+## Coût de l'éveil vers le niveau suivant : or + ressource de la Nation + éclats de la Nation.
 static func awaken_cost(data: Dictionary, biome: String) -> Dictionary:
 	var lv: int = level(data, biome)
 	var res: String = Nations.resource_of(biome)
-	return {"gold": 250 * lv * lv, "res": res, "qty": 8 * lv}
+	return {"gold": 250 * lv * lv, "res": res, "qty": 8 * lv, "shards": AWAKEN_SHARDS_PER_LEVEL * lv}
 
 
 static func can_awaken(data: Dictionary, biome: String) -> String:
@@ -156,6 +160,8 @@ static func can_awaken(data: Dictionary, biome: String) -> String:
 		return "Il faut %d or." % int(c["gold"])
 	if int(data.get("resources", {}).get(String(c["res"]), 0)) < int(c["qty"]):
 		return "Il faut %d %s." % [int(c["qty"]), String(c["res"])]
+	if int(data.get("shards", {}).get(biome, 0)) < int(c["shards"]):
+		return "Il faut %d éclats de cette Pierre." % int(c["shards"])
 	return ""
 
 
@@ -168,6 +174,9 @@ static func awaken(data: Dictionary, biome: String) -> String:
 	var res: Dictionary = data.get("resources", {})
 	res[String(c["res"])] = int(res.get(String(c["res"]), 0)) - int(c["qty"])
 	data["resources"] = res
+	var sh: Dictionary = data.get("shards", {})
+	sh[biome] = int(sh.get(biome, 0)) - int(c["shards"])
+	data["shards"] = sh
 	owned(data)[biome]["level"] = level(data, biome) + 1
 	return ""
 

@@ -256,6 +256,7 @@ static func aggregate(equipment: Dictionary) -> Dictionary:
 		for k: String in STAT_KEYS:
 			stats[k] = int(stats[k]) + int(it.get(k, 0))
 		merge_fx(fx, parse_effect(String(it.get("effect", ""))))
+	merge_fx(fx, Shards.equipment_fx(equipment))   # V113 : fortifications (PA/PM/PO plafonnés)
 	var sb: Dictionary = set_bonuses(equipment)
 	for k: String in sb["stats"].keys():
 		stats[k] = int(stats.get(k, 0)) + int(sb["stats"][k])
@@ -272,6 +273,9 @@ static func display_name(item: Dictionary) -> String:
 ## Bonus d'un objet avec les noms complets : « Force +4 · Agilité +4 · Sagesse +2 ».
 static func stat_line(item: Dictionary) -> String:
 	var parts: Array[String] = []
+	var fl: String = Shards.fort_line(item)   # bonus de fortification en tête : visible même si la ligne est tronquée
+	if fl != "":
+		parts.append(fl)
 	for k: String in STAT_KEYS:
 		var v: int = int(item.get(k, 0))
 		if v != 0:
