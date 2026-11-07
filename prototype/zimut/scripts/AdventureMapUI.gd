@@ -650,6 +650,13 @@ func _rebuild_board(biome: String) -> void:
 			bn.seed_value = int(b["x"]) * 31 + int(b["y"]) * 17
 			bn.position = cell_center(Vector2i(int(b["x"]) + bn.fw - 1, int(b["y"]) + bn.fh - 1)) + Vector2(0, BoardArt.ISO_TH * bn.cs * 0.5)
 			_entities.add_child(bn)
+	else:
+		# V114 : planche « v2 enrichie » — décors superposés lus dans la planche (clés "decor" / "over").
+		# "over" = grands arbres sur cases non jouables, juste au sud des chemins : occlusion du héros.
+		for dk: String in (d.get("decor", {}) as Dictionary).keys():
+			_add_decor(AdventureTerrain.parse(dk), String(d["decor"][dk]), biome, pal, 0.7, true)
+		for ok: String in (d.get("over", {}) as Dictionary).keys():
+			_add_decor(AdventureTerrain.parse(ok), String(d["over"][ok]), biome, pal, 1.05, true, true)
 	for k: String in pois.keys():
 		var pos: Vector2i = AdventureTerrain.parse(k)
 		var poi: Dictionary = pois[k]
@@ -719,7 +726,7 @@ func _set_sky(layer: int) -> void:
 			_bg_grad.colors = PackedColorArray([Color(0.46, 0.62, 0.74), Color(0.72, 0.83, 0.88), Color(0.80, 0.88, 0.86)])
 
 
-func _add_decor(p: Vector2i, kind: String, biome: String, pal: Dictionary, sc: float) -> void:
+func _add_decor(p: Vector2i, kind: String, biome: String, pal: Dictionary, sc: float, use_sprites: bool = false, over: bool = false) -> void:
 	var d := DecorNode.new()
 	d.kind = kind
 	d.biome = biome
@@ -727,6 +734,10 @@ func _add_decor(p: Vector2i, kind: String, biome: String, pal: Dictionary, sc: f
 	d.seed_value = p.x * 31 + p.y * 57 + 3
 	d.scale = Vector2(sc, sc)
 	d.position = cell_center(p) + Vector2(0, 6)
+	d.use_sprites = use_sprites
+	if over:
+		# Premier plan : au-dessus du héros (z_index = _depth+2) sur sa rangée et au nord.
+		d.z_index = _depth(p) + 4
 	_entities.add_child(d)
 	_cell_nodes[p] = _cell_nodes.get(p, []) + [d]
 
@@ -2904,11 +2915,12 @@ class DecorNode extends Node2D:
 	var biome: String = "Forêt"
 	var pal: Dictionary = {}
 	var seed_value: int = 0
+	var use_sprites: bool = false   # V114 : planche v2 — sprites illustrés même hors réglage « iso »
 
 	func _draw() -> void:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = seed_value
-		if SpriteDecor.active(biome) and SpriteDecor.draw(self, kind, rng):
+		if (use_sprites or SpriteDecor.active(biome)) and SpriteDecor.draw(self, kind, rng):
 			return
 		BattleScenery.draw_prop(self, kind, pal, biome, rng, 0.0)
 

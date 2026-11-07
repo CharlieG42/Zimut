@@ -196,6 +196,24 @@ Waven approximatif mais organisé) : remplacer les fichiers suffit, le code
 charge les chemins constants en tête de `AdventureMapUI.gd`
 (`ZONE_TILES`, `POI_ICONS`, `HERO_SPRITE`, `FOG_TILE`).
 
+### Planche Sylve « v2 enrichie » (V114)
+
+La planche `foret_sylve_v2` peut porter deux clés de décors superposés, lues au
+rendu dans la branche non-iso de `_rebuild_board` (`AdventureMapUI.gd`) :
+
+- `"decor"` : petits décors non bloquants sur cases jouables (`grass`, `flowers`,
+  `mushrooms`) — sprites `assets/sprites/decor/sylve/` via `SpriteDecor`, même hors
+  réglage « Iso » (flag `use_sprites` sur `DecorNode`) ;
+- `"over"` : grands arbres (`tree`, `big_tree`, `pine`) sur cases **non jouables**
+  situées juste au sud d'un chemin : `z_index = _depth(case) + 4`, donc au-dessus du
+  héros (`_depth + 2`) quand il passe au nord — occlusion de premier plan, l'anneau
+  et l'ombre du héros restent visibles au sol.
+
+Le masque, le départ, les POI et les déplacements ne changent jamais : les décors
+sont générés par `tools/gen_sylve_v2_decor.py` (type de sol lu dans l'illustration,
+distances de sécurité aux lieux) et contrôlés par `tests/test_sylve_v2_decor.gd`.
+Prévisualisation de composition : `tools/preview_sylve_v2.py` (PIL, hors moteur).
+
 ## Déplacement et lisibilité (V10)
 
 - **Appui tactile** : un premier appui sur une case affiche le trajet et le nombre de pas ; un second appui sur la même case lance la marche. À la souris, un clic suffit (le survol montre déjà le trajet).
