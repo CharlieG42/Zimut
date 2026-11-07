@@ -1,4 +1,4 @@
-name: Build Android APK (Zimut)
+name: Build Zimut (APK Android + EXE PC)
 
 on:
   workflow_dispatch:
@@ -29,7 +29,7 @@ env:
 
 jobs:
   build-apks:
-    name: Build APK
+    name: Build APK + EXE PC
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     outputs:
@@ -260,23 +260,36 @@ jobs:
           godot --headless --verbose --export-release "Android" export/Zimut-release.apk || true
           test -s export/Zimut-release.apk
 
-      - name: Nommer les APK par build + empreintes SHA-256
+      - name: Export Zimut EXE (Windows Desktop, Release)
+        # Exécutable PC autonome (pck embarqué, voir export_presets.cfg) produit en même
+        # temps que l'APK release ; aucun secret requis, donc aussi sur les PR (forks inclus).
+        timeout-minutes: 10
+        run: |
+          cd prototype/zimut
+          # Godot peut planter à la fermeture alors que l'EXE est déjà généré : on valide le fichier.
+          godot --headless --export-release "Windows Desktop" export/Zimut-release-pc.exe || true
+          test -s export/Zimut-release-pc.exe
+
+      - name: Nommer les builds (APK + EXE) par version + empreintes SHA-256
         run: |
           cd prototype/zimut/export
           sha_short="${GITHUB_SHA::7}"
           # Noms uniques par build : sous Android, un APK portant le même
           # nom que le zip (ex. Zimut-release.apk dans Zimut-release.zip)
           # fait échouer l'extraction (« le fichier existe déjà »).
-          # Cette étape s'exécute APRÈS les deux exports : les deux APK
-          # existent, aucun glob d'upload ne peut être vide.
+          # Cette étape s'exécute APRÈS les exports (APK debug, APK release, EXE PC) :
+          # tous les fichiers existent, aucun glob d'upload ne peut être vide.
           for kind in debug release; do
             if [ -f "Zimut-${kind}.apk" ]; then
               mv "Zimut-${kind}.apk" "Zimut-${kind}-v${GAME_VERSION}-${sha_short}.apk"
             fi
           done
-          sha256sum Zimut-*-*.apk > SHA256SUMS.txt
+          if [ -f "Zimut-release-pc.exe" ]; then
+            mv "Zimut-release-pc.exe" "Zimut-release-pc-v${GAME_VERSION}-${sha_short}.exe"
+          fi
+          sha256sum Zimut-*-*.apk Zimut-*-*.exe > SHA256SUMS.txt
           cat SHA256SUMS.txt
-          ls -la Zimut-*.apk
+          ls -la Zimut-*.apk Zimut-*.exe
 
       - name: Upload Zimut Debug APK
         uses: actions/upload-artifact@v4
@@ -289,7 +302,7 @@ jobs:
           if-no-files-found: error
           compression-level: 0
 
-      - name: Upload Zimut Release APK
+      - name: Upload Zimut Release (APK + EXE PC)
         # Release signée aussi sur les PR de ce dépôt (les secrets ne sont pas transmis aux forks)
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/upload-artifact@v4
@@ -297,6 +310,7 @@ jobs:
           name: Zimut-release
           path: |
             prototype/zimut/export/Zimut-release-*.apk
+            prototype/zimut/export/Zimut-release-pc-*.exe
             prototype/zimut/export/SHA256SUMS.txt
           retention-days: 2
           if-no-files-found: error
@@ -322,13 +336,13 @@ jobs:
       GAME_VERSION: ${{ needs.build-apks.outputs.game_version }}
 
     steps:
-      - name: Télécharger les APK construits
+      - name: Télécharger les builds construits (APK + EXE)
         uses: actions/download-artifact@v4
         with:
           path: apks
           merge-multiple: true
 
-      - name: Renommer ${{ env.PROJECT_NAME }}-<type>_v<version>-<dernière PR>.apk
+      - name: Renommer ${{ env.PROJECT_NAME }}-<type>_v<version>-<dernière PR> (.apk + .exe)
         run: |
           cd apks
           if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "0" ]; then
@@ -341,20 +355,22 @@ jobs:
             src=$(ls *-"${kind}"-v*.apk | head -n1)
             mv "$src" "${PROJECT_NAME}-${kind}_v${RELEASE_VERSION}-${label}.apk"
           done
+          src=$(ls *-pc-v*.exe | head -n1)
+          mv "$src" "${PROJECT_NAME}-pc_v${RELEASE_VERSION}-${label}.exe"
           # Empreintes recalculées avec les nouveaux noms
           rm -f SHA256SUMS.txt
-          sha256sum "${PROJECT_NAME}"-*.apk > SHA256SUMS.txt
+          sha256sum "${PROJECT_NAME}"-* > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
       - name: Publier la release build-latest (version stable, pas de pré-version)
         run: |
           tag=build-latest
-          notes="Dernière build de main : ${PROJECT_NAME} ${GAME_VERSION} (commit ${GITHUB_SHA::7})."
+          notes="Dernière build de main : ${PROJECT_NAME} ${GAME_VERSION} (commit ${GITHUB_SHA::7})."$'\n'"APK Android (debug + release signé) + EXE Windows (PC)."
           if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "0" ]; then
             title=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq .title 2>/dev/null || true)
             notes="${notes}"$'\n\n'"Dernière PR fusionnée : #${PR_NUMBER} ${title}"$'\n'"${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/pull/${PR_NUMBER}"
           fi
-          # Recréation à chaque fusion : une seule paire d'APK, toujours la dernière
+          # Recréation à chaque fusion : une seule paire APK + EXE PC, toujours la dernière
           gh release delete "$tag" --repo "$GITHUB_REPOSITORY" --cleanup-tag --yes || true
           gh release create "$tag" apks/* \
             --repo "$GITHUB_REPOSITORY" \
