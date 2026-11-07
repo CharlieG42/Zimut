@@ -1227,13 +1227,13 @@ func _build_ui() -> void:
 	st.offset_left = 18.0
 	st.offset_right = 458.0
 	st.offset_top = 14.0
-	st.offset_bottom = 250.0
+	st.offset_bottom = 226.0
 	_root.add_child(st)
 	_stats = st
 
 	# Barre de sorts verticale sous le portrait ; le défilement est vertical.
-	var badge_w: float = 86.0 * _spell_scale
-	var badge_h: float = 58.0 * _spell_scale
+	var badge_w: float = 90.0 * _spell_scale
+	var badge_h: float = 62.0 * _spell_scale
 	_spell_scroll = ScrollContainer.new()
 	_spell_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_spell_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
@@ -1243,8 +1243,8 @@ func _build_ui() -> void:
 	_spell_scroll.anchor_bottom = 1.0
 	_spell_scroll.offset_left = 18.0
 	_spell_scroll.offset_right = 18.0 + badge_w + 18.0
-	_spell_scroll.offset_top = 282.0
-	_spell_scroll.offset_bottom = -76.0
+	_spell_scroll.offset_top = 244.0
+	_spell_scroll.offset_bottom = -20.0
 	_spell_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
 	var spell_panel := PanelContainer.new()
 	spell_panel.anchor_left = 0.0
@@ -1253,8 +1253,8 @@ func _build_ui() -> void:
 	spell_panel.anchor_bottom = 1.0
 	spell_panel.offset_left = 10.0
 	spell_panel.offset_right = 18.0 + badge_w + 26.0
-	spell_panel.offset_top = 274.0
-	spell_panel.offset_bottom = -68.0
+	spell_panel.offset_top = 236.0
+	spell_panel.offset_bottom = -12.0
 	spell_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	spell_panel.add_theme_stylebox_override("panel", _flat(Color(0.03, 0.05, 0.09, 0.30), Color(0.35, 0.48, 0.65, 0.35), 20, 1))
 	_root.add_child(spell_panel)
@@ -1316,8 +1316,8 @@ func _build_ui() -> void:
 	# Bouton rentré dans la vignette (marge ≥ 14 px) pour ne plus chevaucher la jauge de temps.
 	_end_btn.offset_left = 34.0
 	_end_btn.offset_right = 442.0
-	_end_btn.offset_top = 182.0
-	_end_btn.offset_bottom = 234.0
+	_end_btn.offset_top = 168.0
+	_end_btn.offset_bottom = 220.0
 	_end_btn.pressed.connect(func() -> void:
 		Sfx.play("click")
 		end_turn_requested.emit())
@@ -1833,7 +1833,7 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.base_col = _kind_color(spell)
 		card.card_scale = _spell_scale
 		card.badge_mode = true
-		card.custom_minimum_size = Vector2(86.0 * _spell_scale, 58.0 * _spell_scale)
+		card.custom_minimum_size = Vector2(90.0 * _spell_scale, 62.0 * _spell_scale)
 		card.text = ""
 		card.tooltip_text = String(spell["name"]) + " · " + str(int(spell.get("cost_pa", 0))) + " PA" + (" · " + str(int(spell.get("cost_pm", 0))) + " PM" if int(spell.get("cost_pm", 0)) > 0 else "") + " · Portée " + str(int(spell.get("range", 1)))
 		var nlen: int = String(spell["name"]).length()

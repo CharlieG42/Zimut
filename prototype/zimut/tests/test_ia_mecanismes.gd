@@ -59,7 +59,8 @@ func _boot() -> void:
 	for e2: Dictionary in gm.enemies:
 		if e2 != foe:
 			e2["current_pv"] = 0   # un seul ennemi vivant : mesures lisibles
-	var tri: Array = _triple(gm, 4, 1, 3, 4)   # bombe : portée 4, donc case de pose à ≤ 4 de l'Artificier
+	# bombe : posée à 4 de l'Artificier (portée 4, hors de son propre rayon 3) et à 1 de l'ennemi
+	var tri: Array = _triple(gm, 5, 1, 4, 4)
 	gm._teleport_entity(art, tri[0])
 	var far: Vector2i = tri[1]
 	gm._teleport_entity(foe, far)

@@ -1,0 +1,4 @@
+V110|Ingénieur — Couplage : le couplage est désormais permanent (il n’expire plus après 3 tours).
+V110|Barrière électrique : tout personnage qui commence son tour dans la barrière est électrocuté (ennemis plein pot, alliés moitié moins), en plus de l’électrocution au passage.
+V110|Déclencheur sur une bombe : la zone d’impact de l’explosion s’affiche en surbrillance pendant le ciblage ; les bombes explosent désormais à 3 cases autour (au lieu de 2).
+V110|Combat : la barre de sorts est remontée et légèrement agrandie (badges plus grands, vignette du personnage réduite) pour limiter le défilement avec 10 sorts.
