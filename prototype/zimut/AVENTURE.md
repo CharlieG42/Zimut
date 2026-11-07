@@ -227,6 +227,22 @@ blocage, `_walk_stop_s` freine le héros sur la dernière case atteinte. L'éche
 profondeur du héros est interpolée en continu le long du trajet.
 Test : `tests/test_walk_continu.gd`.
 
+### Planche iso « test » de la Sylve enrichie (V114)
+
+- `IsoGround` : eau animée autour de l'île flottante (clapot), ombre portée, arrière-plan
+  (soleil, collines dans la brume, nuages qui dérivent), **rivage** (cases basses en bord
+  d'île teintées sable humide) et **escaliers de bois** dessinés sur les faces où le
+  sentier gravit une marche ;
+- teinte d'altitude des décors (`_add_decor(..., hgt)`) : les basses terres sont ombrées,
+  les hauteurs restent claires ;
+- nouveaux aménagements dessinés en code dans `BuildingNode` : `puits`, `feu` (flamme
+  animée), `etal` — placés par `tools/gen_sylve_iso_buildings.py` (empreintes en
+  obstacles `building`, hors sentier/POI, sur des replats) ;
+- prévisualisation : `tools/preview_sylve_iso.py` (`Examples/sylve_iso_preview/`) ;
+- captures in-engine des deux variantes (écran virtuel requis) :
+  `xvfb-run -a godot --rendering-method gl_compatibility --path . -s tests/shot_sylve_variants.gd -- <dossier>` ;
+- test : `tests/test_sylve_iso_v114.gd`.
+
 ## Déplacement et lisibilité (V10)
 
 - **Appui tactile** : un premier appui sur une case affiche le trajet et le nombre de pas ; un second appui sur la même case lance la marche. À la souris, un clic suffit (le survol montre déjà le trajet).
