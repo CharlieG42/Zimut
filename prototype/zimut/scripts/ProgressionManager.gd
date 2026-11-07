@@ -2191,6 +2191,20 @@ func _objective_met(obj: Dictionary, info: Dictionary) -> bool:
 	return false
 
 
+## Nation dont l'éclat peut tomber après ce combat : celle du combat (Tactique), du donjon en cours
+## ou, à défaut (Aventure / Conquête), une Nation tirée au hasard.
+func _shard_biome(data: Dictionary, info: Dictionary, fight_no: int, campaign: bool) -> String:
+	var b: String = String(info.get("biome", ""))
+	if Stones.DATA.has(b):
+		return b
+	if campaign:
+		var d: String = adventure_dungeon_biome(data)
+		if d != "":
+			return Dungeons.base(d)
+		return String(Stones.ORDER[_rng.randi_range(0, Stones.ORDER.size() - 1)])
+	return biome_for_fight(fight_no)
+
+
 func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	if data.is_empty():
 		return {}
@@ -2229,6 +2243,11 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	var gold_gain: int = (50 + 10 * fight_level) * (3 if was_boss else 1)
 	data["gold"] = int(data.get("gold", 0)) + (gold_gain if (frontier or campaign) else int(gold_gain * 0.6))
 	data["last_resources"] = drops
+	# V113 : éclat de Pierre Élémentaire (rare), même si la Pierre de la Nation est déjà possédée
+	var shard_drop: Dictionary = Shards.roll_fight(_rng, _shard_biome(data, info, fight_no, campaign), was_boss)
+	for sb: String in shard_drop.keys():
+		Shards.add(data, sb, int(shard_drop[sb]))
+	data["last_shards"] = shard_drop
 	data["level"] = frontier_level(data)
 	data["last_result"] = {"victory": true, "xp": report, "boss": was_boss, "fight_level": fight_level,
 		"turns": int(info.get("turns", 0)), "fight_no": fight_no, "replay": not frontier and not campaign}
@@ -2287,6 +2306,7 @@ func register_defeat(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	data["defeats"] = int(data.get("defeats", 0)) + 1
 	data["last_loots"] = []
 	data["last_resources"] = {}
+	data["last_shards"] = {}
 	data["level"] = frontier_level(data)
 	data["last_result"] = {"victory": false, "xp": report, "boss": bool(info.get("boss", false)),
 		"fight_level": fight_level, "turns": int(info.get("turns", 0))}
@@ -2459,6 +2479,16 @@ func _dungeon_victory(data: Dictionary, adventure: Dictionary, key: String, biom
 		if String(res["stone_roll"]) == "won" and Stones.grant(data, nation):
 			data["last_result"]["stone"] = nation
 			Achievements.bump(data, "stones")
+		elif String(res["stone_roll"]) in ["owned", "missed"]:
+			# V113 : sans Pierre à gagner, le Gardien peut laisser des éclats (toujours possible)
+			var sh: Dictionary = Shards.roll_dungeon(_rng, nation)
+			for sb: String in sh.keys():
+				Shards.add(data, sb, int(sh[sb]))
+			var ls: Dictionary = data.get("last_shards", {})
+			for sb2: String in sh.keys():
+				ls[sb2] = int(ls.get(sb2, 0)) + int(sh[sb2])
+			data["last_shards"] = ls
+			res["shards"] = sh
 		var lvl: int = Dungeons.room_level(biome, Dungeons.ROOMS)
 		var gold: int = 100 + 15 * lvl
 		data["gold"] = int(data.get("gold", 0)) + gold

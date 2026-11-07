@@ -33,12 +33,14 @@ var _stat_filter: Array = []        # bonus exigés (ex. ["force", "defense"]) :
 var _sort: String = "ready"         # ready | level | rarity | power | name
 var _sort_desc: bool = false
 var _filters_open: bool = false     # panneau « Filtres et tri » déplié
-var _mode: String = "craft"      # craft | upgrade | fusion | salvage
+var _mode: String = "craft"      # craft | upgrade | fortify | fusion | salvage
 var _tier: int = 1                # rang de fabrication (1..10)
 var _up_key: String = ""
 var _fuse_max: bool = false        # Fusion : ×1 ou « tout fusionner »
 var _salv_sel: Dictionary = {}
 var _ach_seen: Dictionary = {}      # succès déjà connus à l'ouverture (pour annoncer les nouveaux)     # objet sélectionné au Briseur          # objet sélectionné en mode amélioration
+var _fort_biome: String = ""        # Nation de l'éclat choisi (onglet Fortifier)
+var _shatter_confirm: String = ""   # Pierre en attente de confirmation de brisure
 var _tabs_row: HBoxContainer
 var _selected: String = ""
 var _member: int = 0
@@ -64,7 +66,7 @@ func open(save_data: Dictionary, slot: int, member_index: int = 0) -> void:
 
 ## Ouvre la Forge directement sur un onglet (craft | upgrade | fusion | salvage).
 func show_mode(mode: String) -> void:
-	if not ["craft", "upgrade", "fusion", "salvage"].has(mode):
+	if not ["craft", "upgrade", "fortify", "fusion", "salvage"].has(mode):
 		return
 	_mode = mode
 	_message = ""
@@ -247,12 +249,13 @@ func _build() -> void:
 
 
 const MODES: Array = [
-	["craft", "Fabriquer", "arme"], ["upgrade", "Améliorer", "casque"],
+	["craft", "Fabriquer", "arme"], ["upgrade", "Améliorer", "casque"], ["fortify", "Fortifier", "bouclier"],
 	["fusion", "Fusion", "bague"], ["salvage", "Briseur", "bottes"],
 ]
 const MODE_SUB := {
 	"craft": "Fabriquer de l'équipement (rang 1 à 10)",
 	"upgrade": "Monter un équipement d'un rang avec des ressources de rang supérieur",
+	"fortify": "Greffer un bonus (PA, PM, Portée…) à un équipement avec des éclats de Pierre",
 	"fusion": "Fondre 2 ressources identiques en 1 ressource de rang supérieur",
 	"salvage": "Briser de l'équipement pour récupérer des ressources",
 }
@@ -299,6 +302,7 @@ func _refresh_tabs() -> void:
 			_up_key = ""
 			_salv_sel = {}
 			_message = ""
+			_shatter_confirm = ""
 			refresh())
 		_tabs_row.add_child(b)
 
@@ -323,6 +327,15 @@ func _refresh_stock() -> void:
 		chip.add_child(_res_label(k, txt, col.lightened(0.15), 24, 34.0))
 		_res_row.add_child(chip)
 	_res_row.add_child(U.spacer())
+	var n_sh: int = Shards.total(_save)
+	if n_sh > 0:
+		var sh_chip := U.chip("💠  %d" % n_sh, Color(0.72, 0.60, 1.0), 24)
+		var tip: PackedStringArray = []
+		for b: String in Stones.ORDER:
+			if Shards.count(_save, b) > 0:
+				tip.append("%s : %d" % [Shards.shard_name(b), Shards.count(_save, b)])
+		sh_chip.tooltip_text = "\n".join(tip)
+		_res_row.add_child(sh_chip)
 	_res_row.add_child(U.chip("🪙  %d" % ProgressionManager.gold(_save), U.C_GOLD, 24))
 
 
@@ -552,7 +565,7 @@ func _refresh_list() -> void:
 		"salvage":
 			_refresh_salvage_list()
 			return
-		"upgrade":
+		"upgrade", "fortify":
 			_refresh_upgrade_list()
 			return
 		"fusion":
@@ -788,6 +801,9 @@ func _refresh_detail() -> void:
 		"upgrade":
 			_refresh_upgrade_detail()
 			return
+		"fortify":
+			_refresh_fortify_detail()
+			return
 		"fusion":
 			_refresh_fusion_detail()
 			return
@@ -990,11 +1006,14 @@ func _find_entry(key: String) -> Dictionary:
 
 func _refresh_upgrade_list() -> void:
 	var entries: Array = ProgressionManager.upgradable_items(_save)
-	if entries.is_empty():
+	if entries.is_empty() and _mode != "fortify":
 		_list_box.add_child(U.lbl("Aucun équipement : fabriquez-en ou looter-en en combat.", 20, U.C_DIM))
 		return
-	if _up_key == "" or _find_entry(_up_key).is_empty():
-		_up_key = _entry_key(entries[0])
+	if not (_mode == "fortify" and _up_key.begins_with("stone|") and Stones.has(_save, _up_key.substr(6))):
+		if (_up_key == "" or _find_entry(_up_key).is_empty()) and not entries.is_empty():
+			_up_key = _entry_key(entries[0])
+		elif _find_entry(_up_key).is_empty():
+			_up_key = ""
 	var team: Array = _save.get("team", [])
 	for e: Dictionary in entries:
 		var it: Dictionary = e["item"]
@@ -1036,6 +1055,8 @@ func _refresh_upgrade_list() -> void:
 		tile.offset_bottom = 32
 		b.add_child(tile)
 		_list_box.add_child(b)
+	if _mode == "fortify":
+		_append_stone_rows()
 
 
 func _refresh_upgrade_detail() -> void:
@@ -1236,3 +1257,180 @@ func _after_craft(err: String, ok_msg: String) -> void:
 		ProgressionManager.write_save(_slot, _save)
 		crafted.emit()
 	refresh()
+
+
+# ── Mode FORTIFIER ──────────────────────────────────────────────────────────
+## Pierres Élémentaires possédées, en bas de la liste : on peut les briser pour des éclats.
+func _append_stone_rows() -> void:
+	var head := U.lbl("PIERRES ÉLÉMENTAIRES (briser = obtenir des éclats)", 17, U.C_DIM)
+	head.custom_minimum_size = Vector2(0, 34)
+	_list_box.add_child(head)
+	var any: bool = false
+	for biome: String in Stones.ORDER:
+		if not Stones.has(_save, biome):
+			continue
+		any = true
+		var key: String = "stone|%s" % biome
+		var sel: bool = key == _up_key
+		var col: Color = Shards.color_of(biome)
+		var b := Button.new()
+		b.custom_minimum_size = Vector2(0, 70)
+		b.focus_mode = Control.FOCUS_NONE
+		var stn: StyleBoxFlat = U.box(Color(0.17, 0.13, 0.11, 0.95) if sel else Color(0.13, 0.10, 0.09, 0.92), Color(1.0, 0.75, 0.35) if sel else col.darkened(0.3), 14, 3 if sel else 2, 10)
+		b.add_theme_stylebox_override("normal", stn)
+		b.add_theme_stylebox_override("hover", stn)
+		b.add_theme_stylebox_override("pressed", stn)
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.clip_text = true
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		var owner: String = Stones.owner_of(_save, biome)
+		b.text = "💎 %s · éveil %d/%d\nBriser : %d éclats%s" % [Stones.stone_name(biome), Stones.level(_save, biome), Stones.MAX_LEVEL,
+			Shards.shatter_yield(_save, biome), ("  · portée par %s" % owner) if owner != "" else ""]
+		b.add_theme_font_size_override("font_size", 19)
+		b.add_theme_color_override("font_color", col.lightened(0.3))
+		b.add_theme_color_override("font_hover_color", col.lightened(0.45))
+		b.add_theme_color_override("font_pressed_color", col.lightened(0.45))
+		b.pressed.connect(func() -> void:
+			_up_key = key
+			_message = ""
+			_shatter_confirm = ""
+			refresh())
+		_list_box.add_child(b)
+	if not any:
+		_list_box.add_child(U.lbl("Aucune Pierre : elles se gagnent en terminant les donjons d'Aventure.", 18, U.C_DIM))
+
+
+func _refresh_fortify_detail() -> void:
+	if _up_key.begins_with("stone|"):
+		_refresh_stone_detail(_up_key.substr(6))
+		return
+	var e: Dictionary = _find_entry(_up_key)
+	if e.is_empty():
+		_detail_box.add_child(U.lbl("Sélectionnez un équipement.", 22, U.C_DIM))
+		return
+	var it: Dictionary = e["item"]
+	var sl: String = ProgressionManager.slot_for_type(String(it.get("type", "")))
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 12)
+	_detail_box.add_child(head)
+	head.add_child(_tile(sl if sl != "" else "bague", 92.0))
+	var hv := VBoxContainer.new()
+	hv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(hv)
+	var nm := U.lbl(String(it.get("name", "?")), 28, ItemRules.rarity_color(it).lightened(0.2), true)
+	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hv.add_child(nm)
+	hv.add_child(U.lbl("%s · %s · niv. %d" % [it.get("type", ""), ItemRules.rarity_label(it), int(it.get("level", 1))], 17, U.C_DIM))
+	var base_line := U.lbl(_base_stat_line(it), 19, U.C_TXT)
+	base_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_detail_box.add_child(base_line)
+	var cur: Dictionary = Shards.fort_of(it)
+	var fort_lbl := U.lbl(("Fortification actuelle : %s (%s) — sera remplacée" % [Shards.fort_line(it), Shards.shard_name(String(cur.get("biome", "")))]) if not cur.is_empty() else "Aucune fortification : un bonus peut être greffé.", 18,
+		Color(0.72, 0.60, 1.0) if not cur.is_empty() else U.C_DIM)
+	fort_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_detail_box.add_child(fort_lbl)
+	_detail_box.add_child(U.lbl("ÉCLAT À UTILISER", 17, U.C_DIM))
+	if _fort_biome == "" or not Shards.FORT.has(_fort_biome):
+		_fort_biome = "Rouages"
+		for b0: String in Stones.ORDER:
+			if Shards.count(_save, b0) >= Shards.fort_cost(b0):
+				_fort_biome = b0
+				break
+	for biome: String in Stones.ORDER:
+		var on: bool = biome == _fort_biome
+		var have: int = Shards.count(_save, biome)
+		var need: int = Shards.fort_cost(biome)
+		var col: Color = Shards.color_of(biome)
+		var b := U.btn("%s  ×%d   →   %s   (coût %d)" % [Shards.shard_name(biome), have, Shards.fx_text(Shards.fort_fx(biome)), need],
+			col if on else U.C_BORDER, 17, Vector2(0, 38))
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.clip_text = true
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		b.add_theme_color_override("font_color", (col.lightened(0.3) if have >= need else Color(0.62, 0.55, 0.55)))
+		b.pressed.connect(func() -> void:
+			_fort_biome = biome
+			_message = ""
+			refresh())
+		_detail_box.add_child(b)
+	var biome_sel: String = _fort_biome
+	var need_n: int = Shards.fort_cost(biome_sel)
+	var have_n: int = Shards.count(_save, biome_sel)
+	var gold_n: int = Shards.gold_cost(it)
+	var cost := U.lbl("Coût : %d × %s (vous : %d) · %d or (vous : %d)" % [need_n, Shards.shard_name(biome_sel), have_n, gold_n, ProgressionManager.gold(_save)], 18,
+		U.C_GOOD if (have_n >= need_n and ProgressionManager.gold(_save) >= gold_n) else U.C_BAD)
+	cost.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_actions.add_child(cost)   # toujours visible, au-dessus du bouton
+	var tip := U.lbl("Un seul bonus par équipement ; PA, PM et Portée de fortification plafonnés à +2 chacun par héros. Les éclats se trouvent après les combats (rarement), les donjons d'Aventure, ou en brisant une Pierre (liste de gauche, en bas).", 16, U.C_DIM)
+	tip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_detail_box.add_child(tip)
+	var err: String = Shards.can_fortify(_save, it, biome_sel)
+	var fb := U.btn("❖  FORTIFIER  (%s)" % Shards.fx_text(Shards.fort_fx(biome_sel)), Color(0.72, 0.60, 1.0), 24, Vector2(0, 60))
+	fb.disabled = err != ""
+	if err != "":
+		fb.tooltip_text = err
+	fb.pressed.connect(func() -> void:
+		var res_err: String = Shards.fortify(_save, it, biome_sel)
+		_message_ok = res_err == ""
+		_message = ("%s fortifié : %s" % [String(it.get("name", "?")), Shards.fx_text(Shards.fort_fx(biome_sel))]) if res_err == "" else res_err
+		if res_err == "":
+			Sfx.play("forge")
+			ProgressionManager.write_save(_slot, _save)
+			crafted.emit()
+		refresh())
+	_actions.add_child(fb)
+	if err != "" and _message == "":
+		var hl := U.lbl(err, 18, U.C_BAD)
+		hl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_actions.add_child(hl)
+		_actions.move_child(hl, 0)
+	if _message != "":
+		var ml := U.lbl(_message, 20, U.C_GOOD if _message_ok else U.C_BAD)
+		ml.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_actions.add_child(ml)
+		_actions.move_child(ml, 0)
+
+
+## Statistiques de base d'un objet, sans la ligne de fortification.
+func _base_stat_line(it: Dictionary) -> String:
+	var d: Dictionary = it.duplicate()
+	d.erase("fort")
+	return ItemRules.stat_line(d)
+
+
+func _refresh_stone_detail(biome: String) -> void:
+	if not Stones.has(_save, biome):
+		_detail_box.add_child(U.lbl("Sélectionnez une Pierre.", 22, U.C_DIM))
+		return
+	var col: Color = Shards.color_of(biome)
+	_detail_box.add_child(U.lbl("💎 %s" % Stones.stone_name(biome), 28, col.lightened(0.2), true))
+	_detail_box.add_child(U.lbl("Éveil %d / %d · %s" % [Stones.level(_save, biome), Stones.MAX_LEVEL, "  ".join(Stones.bonus_lines(biome, Stones.level(_save, biome)))], 18, U.C_DIM))
+	var yield_n: int = Shards.shatter_yield(_save, biome)
+	var info := U.lbl("Briser cette Pierre donne %d × %s. La Pierre et son éveil sont PERDUS : il faudra la regagner en terminant à nouveau le donjon de la Nation." % [yield_n, Shards.shard_name(biome)], 19, U.C_TXT)
+	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_detail_box.add_child(info)
+	var owner: String = Stones.owner_of(_save, biome)
+	if owner != "":
+		_detail_box.add_child(U.lbl("Actuellement portée par %s : elle lui sera retirée." % owner, 18, U.C_BAD))
+	var confirm: bool = _shatter_confirm == biome
+	var bb := U.btn("⚠  CONFIRMER : BRISER LA PIERRE" if confirm else "🔨  BRISER LA PIERRE (%d éclats)" % yield_n, Color(0.90, 0.35, 0.30), 24, Vector2(0, 60))
+	bb.pressed.connect(func() -> void:
+		if _shatter_confirm != biome:
+			_shatter_confirm = biome
+			refresh()
+			return
+		var r: Dictionary = Shards.shatter(_save, biome)
+		_shatter_confirm = ""
+		_message_ok = bool(r["ok"])
+		_message = ("%s brisée : +%d × %s" % [Stones.stone_name(biome), int(r["shards"]), Shards.shard_name(biome)]) if bool(r["ok"]) else String(r["reason"])
+		if bool(r["ok"]):
+			Sfx.play("forge")
+			ProgressionManager.write_save(_slot, _save)
+			crafted.emit()
+			_up_key = ""
+		refresh())
+	_actions.add_child(bb)
+	if _message != "":
+		var ml := U.lbl(_message, 20, U.C_GOOD if _message_ok else U.C_BAD)
+		ml.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_actions.add_child(ml)
+		_actions.move_child(ml, 0)
