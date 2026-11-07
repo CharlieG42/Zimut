@@ -631,6 +631,15 @@ func _rebuild_board(biome: String) -> void:
 		spr.z_index = 0
 		_world.add_child(spr)
 		_backdrop = spr
+		# V114 : couche de détails peints par-dessus la planche (clé "detail", fond transparent)
+		if d.has("detail") and ResourceLoader.exists(String(d["detail"])):
+			var det := Sprite2D.new()
+			det.texture = load(String(d["detail"])) as Texture2D
+			if det.texture != null:
+				det.centered = false
+				det.scale = ws / Vector2(det.texture.get_size())
+				det.z_index = 0
+				_world.add_child(det)
 	_board = AdventureBoard.new()
 	_board.ui = self
 	_board.z_index = 1
@@ -662,9 +671,9 @@ func _rebuild_board(biome: String) -> void:
 		# V114 : planche « v2 enrichie » — décors superposés lus dans la planche (clés "decor" / "over").
 		# "over" = grands arbres sur cases non jouables, juste au sud des chemins : occlusion du héros.
 		for dk: String in (d.get("decor", {}) as Dictionary).keys():
-			_add_decor(AdventureTerrain.parse(dk), String(d["decor"][dk]), biome, pal, 0.7, true)
+			_add_decor(AdventureTerrain.parse(dk), String(d["decor"][dk]), biome, pal, 0.7, biome == "Forêt")
 		for ok: String in (d.get("over", {}) as Dictionary).keys():
-			_add_decor(AdventureTerrain.parse(ok), String(d["over"][ok]), biome, pal, 1.05, true, true)
+			_add_decor(AdventureTerrain.parse(ok), String(d["over"][ok]), biome, pal, 1.05, biome == "Forêt", true)
 	for k: String in pois.keys():
 		var pos: Vector2i = AdventureTerrain.parse(k)
 		var poi: Dictionary = pois[k]
@@ -707,6 +716,11 @@ func _rebuild_board(biome: String) -> void:
 	ambient.configure_board(BoardArt.world_size(zid), biome, absi(zid.hash()) % 997)
 	ambient.position = BoardArt.world_size(zid) * 0.5
 	_world.add_child(ambient)
+	# V114 : couche de lumière statique (vignette, teinte chaude, taches de lumière, rayons)
+	var light := BoardLight.new()
+	light.ui = self
+	light.z_index = 5
+	_world.add_child(light)
 	_hero = HeroView.new()
 	_hero.tex = Portraits.get_texture({"classe": manager.hero_class(), "team": "player", "entity_type": "Player"})
 	if zid == "foret_sylve":
@@ -1369,6 +1383,11 @@ func _walk(path: Array[Vector2i]) -> void:
 		var got: Dictionary = manager.collect_find(step)
 		if not got.is_empty():
 			_hero.react()
+			# V114 : flash lumineux sur la trouvaille
+			var fl := FxFlash.new()
+			fl.position = cell_center(step)
+			fl.z_index = 3
+			_world.add_child(fl)
 			_toast_show("✦ " + String(got["text"]), 24)
 			_log(String(got["text"]) + ".")
 			_refresh_world()
@@ -2885,6 +2904,92 @@ class IsoFx extends Node2D:
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
+## V114 : couche de LUMIÈRE statique au-dessus de la carte 2D (planche ou plateau iso) :
+## teinte globale chaude, taches de lumière au sol (dappled light), ombres de contact
+## renforcées sous les arbres de premier plan, rayons de soleil aux lisières, vignette.
+## Un seul redraw ; allégé en qualité « Économie ».
+class BoardLight extends Node2D:
+	var ui: Node = null
+	static var _vg: Texture2D = null
+
+	func _ready() -> void:
+		queue_redraw()
+
+	static func _vignette_tex() -> Texture2D:
+		if _vg != null:
+			return _vg
+		var img := Image.create(256, 256, false, Image.FORMAT_RGBA8)
+		for y in range(256):
+			for x in range(256):
+				var dx: float = (float(x) - 128.0) / 128.0
+				var dy: float = (float(y) - 128.0) / 128.0
+				var q: float = clampf(sqrt(dx * dx + dy * dy) - 0.55, 0.0, 1.0) / 0.45
+				img.set_pixel(x, y, Color(0.04, 0.03, 0.08, q * q * 0.42))
+		_vg = ImageTexture.create_from_image(img)
+		return _vg
+
+	func _draw() -> void:
+		var zid: String = ui.manager.zone_id()
+		var d: Dictionary = BoardArt.raw(zid)
+		var ws: Vector2 = BoardArt.world_size(zid)
+		var low: bool = GfxQuality.low()
+		# teinte globale chaude
+		draw_rect(Rect2(Vector2.ZERO, ws), Color(1.0, 0.94, 0.82, 0.05))
+		if not low:
+			var sz: Vector2i = BoardArt.size(zid)
+			var rng := RandomNumberGenerator.new()
+			rng.seed = absi(zid.hash()) + 77
+			# taches de lumière filtrant la canopée
+			var n: int = int(260.0 * GfxQuality.density())
+			for i in range(n):
+				var c := Vector2i(rng.randi_range(0, sz.x - 1), rng.randi_range(0, sz.y - 1))
+				if not BoardArt.walkable_cell(zid, c):
+					continue
+				var p: Vector2 = ui.cell_center(c)
+				draw_set_transform(p, 0.0, Vector2(1.0, 0.5))
+				draw_circle(Vector2.ZERO, rng.randf_range(18.0, 46.0), Color(1.0, 0.95, 0.70, rng.randf_range(0.05, 0.11)))
+				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			# ombres de contact renforcées + rayons de soleil aux lisières (clé "over")
+			for k: String in (d.get("over", {}) as Dictionary).keys():
+				var op: Vector2i = AdventureTerrain.parse(k)
+				var pp: Vector2 = ui.cell_center(op)
+				draw_set_transform(pp + Vector2(6, 10), 0.0, Vector2(1.0, 0.4))
+				draw_circle(Vector2.ZERO, 52.0, Color(0.02, 0.05, 0.02, 0.30))
+				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+				for b in range(2):
+					var bx: float = pp.x + rng.randf_range(-30.0, 30.0)
+					var w0: float = rng.randf_range(8.0, 16.0)
+					draw_polygon(PackedVector2Array([
+						Vector2(bx - w0, -ws.y * 0.2), Vector2(bx + w0, -ws.y * 0.2),
+						pp + Vector2(rng.randf_range(26.0, 60.0), -40.0), pp + Vector2(rng.randf_range(-60.0, -26.0), -40.0)]),
+						PackedColorArray([Color(1.0, 0.93, 0.66, 0.10), Color(1.0, 0.93, 0.66, 0.10),
+							Color(1.0, 0.93, 0.66, 0.0), Color(1.0, 0.93, 0.66, 0.0)]))
+		# vignette douce
+		var vg := _vignette_tex()
+		if vg != null:
+			draw_texture_rect(vg, Rect2(Vector2.ZERO, ws), false)
+
+
+## V114 : flash bref sur une case (trouvaille ramassée) — anneau qui s'élargit et s'estompe.
+class FxFlash extends Node2D:
+	var _t: float = 0.0
+
+	func _ready() -> void:
+		set_process(true)
+
+	func _process(delta: float) -> void:
+		_t += delta
+		if _t >= 0.55:
+			queue_free()
+			return
+		queue_redraw()
+
+	func _draw() -> void:
+		var f: float = _t / 0.55
+		draw_arc(Vector2.ZERO, 20.0 + f * 60.0, 0.0, TAU, 24, Color(1.0, 0.9, 0.5, (1.0 - f) * 0.8), 4.0, true)
+		draw_circle(Vector2.ZERO, 10.0 * (1.0 - f) + 4.0, Color(1.0, 0.95, 0.6, (1.0 - f) * 0.5))
+
+
 ## V106 : bâtiment stylisé du plateau iso (maison, chaumière, grange, moulin, tour, chapelle).
 ## Dessiné en code : un volume isométrique à deux faces (lumière à gauche) + toit. Origine = sommet avant de l'emprise.
 class BuildingNode extends Node2D:
@@ -3277,6 +3382,12 @@ class PoiNode extends Node2D:
 			Color(1.0, 1.0, 1.0, 0.34 if not done else 0.12), 1.6, true)
 		if icon != null:
 			draw_texture_rect(icon, Rect2(ic - Vector2(icon_size * 0.5, icon_size * 0.5), Vector2(icon_size, icon_size)), false, mod)
+		# V114 : étincelles autour du médaillon (absentes en qualité « Économie »)
+		if not done and not GfxQuality.low():
+			for s_i in range(3):
+				var sa: float = _t * 1.6 + float(s_i) * TAU / 3.0
+				var sp := ic + Vector2(cos(sa), sin(sa) * 0.45) * (icon_r + 13.0 + 3.0 * sin(_t * 2.0 + float(s_i)))
+				draw_circle(sp, 2.2, Color(1.0, 0.95, 0.60, 0.55 + 0.35 * sin(_t * 3.0 + float(s_i) * 2.0)))
 		if locked:
 			draw_circle(ic, icon_r - 2.0, Color(0.02, 0.03, 0.07, 0.62))
 			draw_circle(ic + Vector2(19, -18), 12.0, Color(0.75, 0.25, 0.25))

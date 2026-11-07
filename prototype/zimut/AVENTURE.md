@@ -248,6 +248,21 @@ Test : `tests/test_walk_continu.gd`.
 > « Économie » via `GfxQuality.low()`), pour ne jamais redessiner tout le plateau
 > à chaque frame.
 
+### Lumière, atmosphère et détails peints (V114)
+
+- `BoardLight` (z=5, statique, un seul redraw) au-dessus de toute carte 2D : teinte
+  globale chaude, **taches de lumière** au sol, **ombres de contact renforcées** sous
+  les arbres de premier plan, **rayons de soleil** aux lisières (clé `over`), vignette
+  radiale ; allégé en qualité « Économie » ;
+- micro-VFX : **étincelles** autour des médaillons de POI (absentes en Économie),
+  **flash** à la récolte d'une trouvaille (`FxFlash`) ; particules ambiantes
+  (lucioles/pollen) déjà présentes via `SceneryAmbient` ;
+- clé `"detail"` dans une planche : PNG transparent peint par-dessus l'illustration
+  (détails de sol générés par IA + détourage par saturation, `tools/chroma_key_overlay.py`)
+  — `Sylvestre_v2_detail.png` (Forêt) et `Cimes_detail.png` (Montagne) ;
+- pipeline décors étendue à la **Cimes** (`montagne_pics_v2`, kinds Montagne) ;
+- prévisualisations : `tools/preview_sylve_v2.py` (Sylve + Cimes).
+
 ## Déplacement et lisibilité (V10)
 
 - **Appui tactile** : un premier appui sur une case affiche le trajet et le nombre de pas ; un second appui sur la même case lance la marche. À la souris, un clic suffit (le survol montre déjà le trajet).

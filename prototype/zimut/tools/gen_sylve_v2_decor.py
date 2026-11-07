@@ -30,10 +30,20 @@ ROOT = Path(__file__).resolve().parent.parent
 BOARDS = ROOT / "data" / "boards"
 SEED = 114
 
-# kind -> poids relatif (petits décors de sol, cf. SpriteDecor.GROUND)
-GROUND_KINDS = [("grass", 3), ("flowers", 2), ("mushrooms", 1)]
-# grands arbres de premier plan (cf. SpriteDecor.OBSTACLES / SPRITES)
-OVER_KINDS = [("big_tree", 4), ("pine", 4), ("tree", 2)]
+# kind -> poids relatif, selon la zone (cf. AdventureTerrain.GROUND_DECOR / OBSTACLES)
+KINDS_BY_ZONE = {
+    "foret_sylve": ([("grass", 3), ("flowers", 2), ("mushrooms", 1)],
+                    [("big_tree", 4), ("pine", 4), ("tree", 2)]),
+    "montagne_pics": ([("snow_mound", 3), ("grass", 3), ("log", 1), ("stakes", 1)],
+                      [("pine", 5), ("rock_snow", 3), ("crystal", 1)]),
+}
+
+
+def kinds_for(name: str):
+    for prefix, kinds in KINDS_BY_ZONE.items():
+        if name.startswith(prefix):
+            return kinds
+    return KINDS_BY_ZONE["foret_sylve"]
 
 DECOR_DENSITY = {"grass": 0.30, "shade": 0.38, "other": 0.10, "sand": 0.05,
                  "rock": 0.0, "water": 0.0, "snow": 0.0}
@@ -89,6 +99,7 @@ def main() -> None:
     pois = [tuple(int(v) for v in k.split(",")) for k in d.get("pois", {}).keys()]
 
     rng = random.Random(SEED)
+    ground_kinds, over_kinds = kinds_for(name)
     cls = {}
     std = {}
     for y in range(rows):
@@ -115,8 +126,8 @@ def main() -> None:
                 if near_poi(c, POI_CLEAR_DECOR) or chebyshev(c, start) <= START_CLEAR:
                     continue
                 if rng.random() < DECOR_DENSITY.get(t, 0.0):
-                    kinds = GROUND_KINDS
-                    if t == "shade":  # sous les arbres : plus de champignons
+                    kinds = ground_kinds
+                    if t == "shade" and name.startswith("foret_sylve"):  # sous les arbres : plus de champignons
                         kinds = [("grass", 2), ("flowers", 1), ("mushrooms", 3)]
                     decor["%d,%d" % c] = pick_weighted(rng, kinds)
             else:
@@ -129,7 +140,7 @@ def main() -> None:
                 if near_poi(c, POI_CLEAR_OVER) or chebyshev(c, start) <= START_CLEAR:
                     continue
                 if rng.random() < OVER_DENSITY:
-                    over["%d,%d" % c] = pick_weighted(rng, OVER_KINDS)
+                    over["%d,%d" % c] = pick_weighted(rng, over_kinds)
 
     d["decor"] = {k: decor[k] for k in sorted(decor, key=lambda s: tuple(int(v) for v in s.split(",")))}
     d["over"] = {k: over[k] for k in sorted(over, key=lambda s: tuple(int(v) for v in s.split(",")))}

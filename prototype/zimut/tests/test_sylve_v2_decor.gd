@@ -95,6 +95,50 @@ func _boot() -> void:
 			flat_bad += 1
 	check(flat_bad == 0, "aucun décor/arbre sur surface peinte (std < 9.5/255) : %d" % flat_bad)
 
+	# Même invariants pour la planche v2 des Cimes (biome Montagne, décors vectoriels)
+	var zc := "montagne_pics"
+	var dc: Dictionary = BA.raw(zc)
+	var decor_c: Dictionary = dc.get("decor", {})
+	var over_c: Dictionary = dc.get("over", {})
+	check(decor_c.size() > 30 and over_c.size() >= 3, "Cimes : décors présents (%d sol, %d premier plan)" % [decor_c.size(), over_c.size()])
+	var img_c := Image.new()
+	check(img_c.load(String(dc["image"])) == OK, "Cimes : illustration chargeable")
+	check(dc.has("detail") and ResourceLoader.exists(String(dc["detail"])), "Cimes : overlay de détails présent")
+	var badc := 0
+	var trail_c: Dictionary = {}
+	var startc: Vector2i = AT.parse("%d,%d" % [int(dc["start"][0]), int(dc["start"][1])])
+	var poic: Array[Vector2i] = []
+	for k: String in dc["pois"].keys():
+		poic.append(AT.parse(k))
+	for k: String in decor_c.keys() + over_c.keys():
+		var p: Vector2i = AT.parse(k)
+		var is_over: bool = over_c.has(k)
+		if is_over and (AT.walkable(zc, p) or not AT.walkable(zc, p + Vector2i(0, -1))):
+			badc += 1
+		if not is_over and not AT.walkable(zc, p):
+			badc += 1
+		for pc: Vector2i in poic:
+			if _cheb(p, pc) < (3 if is_over else 2):
+				badc += 1
+		if _cheb(p, startc) <= 2:
+			badc += 1
+		# surface peinte (plate) interdite
+		var m := Vector3.ZERO
+		var m2 := Vector3.ZERO
+		for yy in range(16):
+			for xx in range(16):
+				var c: Color = img_c.get_pixel(p.x * 16 + xx, p.y * 16 + yy)
+				var v := Vector3(c.r, c.g, c.b)
+				m += v
+				m2 += v * v
+		m /= 256.0
+		var var_ch: Vector3 = m2 / 256.0 - m * m
+		var std_ch: float = (sqrt(maxf(0.0, var_ch.x)) + sqrt(maxf(0.0, var_ch.y)) + sqrt(maxf(0.0, var_ch.z))) / 3.0
+		if std_ch * 255.0 < 9.5:
+			badc += 1
+	check(badc == 0, "Cimes : décors valides (cases, distances, pas sur surface peinte) : %d" % badc)
+	check(dc["mask"].size() == 72 and dc["pois"].size() == 19, "Cimes : masque et 19 lieux inchangés")
+
 	# La scène instancie bien les nœuds de décor sprites.
 	var data: Dictionary = pm.new_game(4, "TestDecorV114")
 	pm.rebuild_team(data, ["Chasseur", "Mage", "Sylvain"])
@@ -123,6 +167,11 @@ func _boot() -> void:
 	check(n_sprites == decor.size() + over.size(), "nœuds de décor instanciés (%d attendus, %d trouvés)" % [decor.size() + over.size(), n_sprites])
 	check(n_over == over.size(), "arbres de premier plan tous avec z au-dessus du héros (%d/%d, z ok=%s)" % [n_over, over.size(), str(z_ok)])
 	check(sc.get("_hero") != null, "héros présent")
+	var n_light := 0
+	for n: Node in sc.get("_world").get_children():
+		if n.z_index == 5:
+			n_light += 1
+	check(n_light == 1, "couche de lumière BoardLight présente (z=5)")
 
 	# La variante iso reste fonctionnelle.
 	gs.set_sylvestre_board("iso")
