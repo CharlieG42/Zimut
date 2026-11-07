@@ -1833,7 +1833,7 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		card.base_col = _kind_color(spell)
 		card.card_scale = _spell_scale
 		card.badge_mode = true
-		card.custom_minimum_size = Vector2(90.0 * _spell_scale, 62.0 * _spell_scale)
+		card.custom_minimum_size = Vector2(90.0 * _spell_scale, _badge_height(ordered_spells.size()))
 		card.text = ""
 		card.tooltip_text = String(spell["name"]) + " · " + str(int(spell.get("cost_pa", 0))) + " PA" + (" · " + str(int(spell.get("cost_pm", 0))) + " PM" if int(spell.get("cost_pm", 0)) > 0 else "") + " · Portée " + str(int(spell.get("range", 1)))
 		var nlen: int = String(spell["name"]).length()
@@ -1854,6 +1854,20 @@ func _rebuild_spell_bar(e: Dictionary) -> void:
 		_cards.append(card)
 	_spell_scroll.scroll_horizontal = 0
 	_spell_scroll.scroll_vertical = 0
+
+
+## Hauteur d'un badge de sort : réduite au besoin pour que jusqu'à 10 sorts tiennent dans la
+## colonne sans défilement (la hauteur de référence est 62 ; plancher 44 pour rester lisible).
+func _badge_height(count: int) -> float:
+	var full: float = 62.0 * _spell_scale
+	var n: int = mini(maxi(count, 1), 10)
+	var vh: float = 1080.0
+	if _root != null and is_instance_valid(_root) and _root.size.y > 100.0:
+		vh = _root.size.y
+	var avail: float = vh - 244.0 - 20.0
+	var sep: float = 6.0 * _spell_scale
+	var fit: float = (avail - float(n - 1) * sep) / float(n)
+	return clampf(fit, 44.0, full)
 
 
 func _spell_type_order(spell: Dictionary) -> int:

@@ -199,6 +199,8 @@ func _build() -> void:
 
 	var mid := PanelContainer.new()
 	mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	mid.custom_minimum_size = Vector2(0, 0)
+	mid.clip_contents = true
 	mid.add_theme_stylebox_override("panel", U.box(Color(0.09, 0.07, 0.07, 0.88), Color(0.62, 0.43, 0.24), 18, 3, 10))
 	body.add_child(mid)
 	var midv := VBoxContainer.new()
@@ -455,9 +457,13 @@ func _recipe_row(r: Dictionary, st: Dictionary) -> Control:
 	h.add_child(info)
 	var nm := U.lbl(String(r["name"]), 23, U.C_TXT)
 	nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	nm.clip_text = true
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	info.add_child(nm)
 	var sub := U.lbl("%s · niv. %d · %s" % [r["type"], int(r["level"]), ItemRules.stat_line(item)], 17, U.C_DIM)
 	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	sub.clip_text = true
+	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	info.add_child(sub)
 	# Coûts
 	var costs := VBoxContainer.new()
@@ -525,6 +531,8 @@ func _refresh_salvage_list() -> void:
 		b.text = "%s\n%s · niv. %d · %s" % [ItemRules.display_name(it), ItemRules.rarity_label(it),
 			int(it.get("level", 0)), ItemRules.stat_line(it)]
 		b.add_theme_font_size_override("font_size", 19)
+		b.clip_text = true
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		for st_name in ["font_color", "font_hover_color", "font_pressed_color"]:
 			b.add_theme_color_override(st_name, ItemRules.rarity_color(it).lightened(0.3))
 		var st_n: StyleBoxFlat = U.box(Color(0.20, 0.12, 0.10, 0.95) if sel else Color(0.13, 0.09, 0.08, 0.92),
@@ -569,7 +577,9 @@ func _refresh_salvage_detail() -> void:
 	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hv.add_child(nm)
 	hv.add_child(U.lbl("%s · %s · niveau %d" % [it.get("type", ""), ItemRules.rarity_label(it), int(it.get("level", 1))], 17, U.C_DIM))
-	_detail_box.add_child(U.lbl(ItemRules.stat_line(it), 20, U.C_TXT))
+	var sl_lbl := U.lbl(ItemRules.stat_line(it), 20, U.C_TXT)
+	sl_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_detail_box.add_child(sl_lbl)
 	var pv: Dictionary = ProgressionManager.salvage_preview(it)
 	_detail_box.add_child(U.lbl("RENDEMENT", 17, U.C_DIM))
 	var names: Array[String] = []
@@ -862,6 +872,8 @@ func _refresh_upgrade_list() -> void:
 			who = "  · porté par %s" % String(e.get("classe", "?"))
 		b.text = "%s%s\n%s · rang %d/%d%s" % [ItemRules.display_name(it), "", ItemRules.stat_line(it), rank, ProgressionManager.MAX_RANK, who]
 		b.add_theme_font_size_override("font_size", 19)
+		b.clip_text = true
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		b.add_theme_color_override("font_color", ItemRules.rarity_color(it).lightened(0.3))
 		b.add_theme_color_override("font_hover_color", ItemRules.rarity_color(it).lightened(0.45))
 		b.add_theme_color_override("font_pressed_color", ItemRules.rarity_color(it).lightened(0.45))
