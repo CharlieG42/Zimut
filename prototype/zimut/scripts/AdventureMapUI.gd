@@ -617,6 +617,12 @@ func _rebuild_board(biome: String) -> void:
 		ground.z_index = 0
 		_world.add_child(ground)
 		_backdrop = ground
+		# V114 : couche animée légère (clapot + nuages) — absente en qualité « Économie »
+		if not GfxQuality.low():
+			var fx := IsoFx.new()
+			fx.ui = self
+			fx.z_index = 0
+			_world.add_child(fx)
 	else:
 		var spr := Sprite2D.new()
 		spr.texture = load(String(d["image"])) as Texture2D
@@ -2714,14 +2720,10 @@ class AdventureBoard extends Node2D:
 ## Dessiné une seule fois (le nœud ne se redessine pas à chaque image).
 class IsoGround extends Node2D:
 	var ui: Node = null
-	var _t: float = 0.0   # V114 : animation de l'eau et des nuages
+	# V114 : le sol reste STATIQUE (redessiné une fois) — l'animation (clapot, nuages)
+	# vit dans IsoFx, une couche légère à part, pour ne pas relancer tout le plateau à chaque frame.
 
 	func _ready() -> void:
-		set_process(true)
-		queue_redraw()
-
-	func _process(delta: float) -> void:
-		_t += delta
 		queue_redraw()
 
 	static func _tint(base: Color, h: float, x: int, y: int) -> Color:
@@ -2761,29 +2763,14 @@ class IsoGround extends Node2D:
 			rpts.append(Vector2(wsize.x, yb + 200.0))
 			rpts.append(Vector2(0.0, yb + 200.0))
 			draw_colored_polygon(rpts, hcol)
-		for ci in range(3):
-			var cx: float = fposmod(float(ci) * 0.37 * wsize.x + _t * (6.0 + float(ci) * 2.5), wsize.x + 320.0) - 160.0
-			var cy: float = base_y - 320.0 + float(ci) * 38.0
-			draw_set_transform(Vector2(cx, cy), 0.0, Vector2(1.0, 0.45))
-			draw_circle(Vector2.ZERO, 34.0 + float(ci) * 8.0, Color(1, 1, 1, 0.72))
-			draw_circle(Vector2(-26, 6), 22.0, Color(1, 1, 1, 0.55))
-			draw_circle(Vector2(24, 8), 26.0, Color(1, 1, 1, 0.55))
-			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		# ombre portée sous l'île flottante
 		var bot: Vector2 = BoardArt.iso_origin(zid) + Vector2(float(cols - rows) * hw * 0.5, float(cols + rows) * hh * 0.5)
-		# V114 : eau autour de l'île + clapot animé
+		# V114 : eau autour de l'île (base statique ; le clapot animé est dans IsoFx)
 		var wr: float = float(cols + rows) * hw * 0.62
 		draw_set_transform(bot + Vector2(0, 170.0), 0.0, Vector2(1.0, 0.24))
 		draw_circle(Vector2.ZERO, wr, Color(0.09, 0.24, 0.32))
 		draw_circle(Vector2.ZERO, wr * 0.94, Color(0.15, 0.38, 0.45))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-		for k in range(12):
-			var rr := RandomNumberGenerator.new()
-			rr.seed = k * 71 + 3
-			var ang: float = float(k) / 12.0 * TAU + sin(_t * 0.7 + float(k)) * 0.06
-			var rad: float = wr * (0.97 + 0.05 * sin(_t * 1.1 + float(k) * 2.0))
-			var wp: Vector2 = bot + Vector2(cos(ang) * rad, 170.0 + sin(ang) * rad * 0.24)
-			draw_arc(wp, rr.randf_range(12.0, 26.0), ang + 0.4, ang + PI - 0.4, 10, Color(0.60, 0.85, 0.88, 0.30), 2.0, true)
 		draw_set_transform(bot + Vector2(0, 250), 0.0, Vector2(1.0, 0.22))
 		draw_circle(Vector2.ZERO, float(cols + rows) * hw * 0.5, Color(0.03, 0.06, 0.10, 0.12))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
@@ -2847,6 +2834,57 @@ class IsoGround extends Node2D:
 				draw_colored_polygon(PackedVector2Array([ctr + Vector2(0, -hh * e), ctr + Vector2(hw * e, 0), ctr + Vector2(0, hh * e), ctr + Vector2(-hw * e, 0)]), top)
 
 
+## V114 : couche animée LÉGÈRE au-dessus du sol iso — clapot de l'eau + nuages qui dérivent.
+## Redessin partiel (~30 ips) : le plateau lui-même (IsoGround) reste statique.
+## Absente en qualité « Économie » (GfxQuality.low()).
+class IsoFx extends Node2D:
+	var ui: Node = null
+	var _t: float = 0.0
+	var _acc: float = 0.0
+
+	func _ready() -> void:
+		set_process(true)
+		queue_redraw()
+
+	func _process(delta: float) -> void:
+		_acc += delta
+		if _acc < 1.0 / 30.0:
+			return
+		_t += _acc
+		_acc = 0.0
+		queue_redraw()
+
+	func _draw() -> void:
+		var zid: String = ui.manager.zone_id()
+		var d: Dictionary = BoardArt.raw(zid)
+		var cols: int = int(d.get("cols", 0))
+		var rows: int = int(d.get("rows", 0))
+		var cs: float = BoardArt.iso_cs(zid)
+		var hw: float = BoardArt.ISO_TW * cs * 0.5
+		var hh: float = BoardArt.ISO_TH * cs * 0.5
+		var bot: Vector2 = BoardArt.iso_origin(zid) + Vector2(float(cols - rows) * hw * 0.5, float(cols + rows) * hh * 0.5)
+		# clapot autour de l'île
+		var wr: float = float(cols + rows) * hw * 0.62
+		for k in range(12):
+			var rr := RandomNumberGenerator.new()
+			rr.seed = k * 71 + 3
+			var ang: float = float(k) / 12.0 * TAU + sin(_t * 0.7 + float(k)) * 0.06
+			var rad: float = wr * (0.97 + 0.05 * sin(_t * 1.1 + float(k) * 2.0))
+			var wp: Vector2 = bot + Vector2(cos(ang) * rad, 170.0 + sin(ang) * rad * 0.24)
+			draw_arc(wp, rr.randf_range(12.0, 26.0), ang + 0.4, ang + PI - 0.4, 10, Color(0.60, 0.85, 0.88, 0.30), 2.0, true)
+		# nuages qui dérivent
+		var wsize: Vector2 = BoardArt.world_size(zid)
+		var base_y: float = BoardArt.iso_origin(zid).y
+		for ci in range(3):
+			var cx: float = fposmod(float(ci) * 0.37 * wsize.x + _t * (6.0 + float(ci) * 2.5), wsize.x + 320.0) - 160.0
+			var cy: float = base_y - 320.0 + float(ci) * 38.0
+			draw_set_transform(Vector2(cx, cy), 0.0, Vector2(1.0, 0.45))
+			draw_circle(Vector2.ZERO, 34.0 + float(ci) * 8.0, Color(1, 1, 1, 0.72))
+			draw_circle(Vector2(-26, 6), 22.0, Color(1, 1, 1, 0.55))
+			draw_circle(Vector2(24, 8), 26.0, Color(1, 1, 1, 0.55))
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
 ## V106 : bâtiment stylisé du plateau iso (maison, chaumière, grange, moulin, tour, chapelle).
 ## Dessiné en code : un volume isométrique à deux faces (lumière à gauche) + toit. Origine = sommet avant de l'emprise.
 class BuildingNode extends Node2D:
@@ -2900,7 +2938,7 @@ class BuildingNode extends Node2D:
 		draw_texture_rect(tex, Rect2(-Vector2(float(m["ax"]), float(m["ay"])) * sc, Vector2(tex.get_width(), tex.get_height()) * sc), false)
 
 	func _ready() -> void:
-		set_process((kind == "moulin" and kenney_sprite(kind, seed_value) == "") or kind == "feu")
+		set_process(((kind == "moulin" and kenney_sprite(kind, seed_value) == "") or kind == "feu") and not GfxQuality.low())
 
 	func _process(delta: float) -> void:
 		_t += delta

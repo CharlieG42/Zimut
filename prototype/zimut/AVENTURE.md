@@ -243,6 +243,11 @@ Test : `tests/test_walk_continu.gd`.
   `xvfb-run -a godot --rendering-method gl_compatibility --path . -s tests/shot_sylve_variants.gd -- <dossier>` ;
 - test : `tests/test_sylve_iso_v114.gd`.
 
+> Perf : le sol iso (`IsoGround`) est **statique** — l'animation (clapot, nuages) est
+> portée par une couche légère dédiée (`IsoFx`, ~30 ips, absente en qualité
+> « Économie » via `GfxQuality.low()`), pour ne jamais redessiner tout le plateau
+> à chaque frame.
+
 ## Déplacement et lisibilité (V10)
 
 - **Appui tactile** : un premier appui sur une case affiche le trajet et le nombre de pas ; un second appui sur la même case lance la marche. À la souris, un clic suffit (le survol montre déjà le trajet).
