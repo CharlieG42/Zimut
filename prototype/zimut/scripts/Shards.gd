@@ -38,9 +38,9 @@ const DROP_FIGHT := 0.03        # n'importe quel combat gagné
 const DROP_BOSS := 0.15         # combat de boss
 const DROP_DUNGEON := 0.40      # fin de donjon sans Pierre gagnée (déjà possédée ou ratée) : 1 à 3 éclats
 
-## Éclats rendus en brisant une Pierre : de base, + par niveau d'éveil au-delà du premier.
-const SHATTER_BASE := 6
-const SHATTER_PER_LEVEL := 4
+## Éclats rendus en brisant une Pierre : une base + la moitié des éclats investis dans son éveil
+## (toujours inférieur au coût investi : briser n'est jamais rentable pour « recycler » un éveil).
+const SHATTER_BASE := 3
 
 
 static func shard_name(biome: String) -> String:
@@ -96,7 +96,9 @@ static func roll_dungeon(rng: RandomNumberGenerator, biome: String) -> Dictionar
 # ── Brisure d'une Pierre ────────────────────────────────────────────────────
 
 static func shatter_yield(data: Dictionary, biome: String) -> int:
-	return SHATTER_BASE + SHATTER_PER_LEVEL * maxi(0, Stones.level(data, biome) - 1)
+	var lv: int = maxi(1, Stones.level(data, biome))
+	var invested: int = Stones.AWAKEN_SHARDS_PER_LEVEL * lv * (lv - 1) / 2   # 2+4+… éclats déjà payés
+	return SHATTER_BASE + invested / 2
 
 
 ## Brise la Pierre `biome` : elle disparaît (il faudra la regagner) et donne des éclats.

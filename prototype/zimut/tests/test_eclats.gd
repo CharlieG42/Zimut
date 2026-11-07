@@ -46,13 +46,29 @@ func _boot() -> void:
 	Stones.equip(data, "Forêt", "Tank")
 	var before: int = Shards.count(data, "Forêt")
 	var y: int = Shards.shatter_yield(data, "Forêt")
-	check(y == Shards.SHATTER_BASE + 2 * Shards.SHATTER_PER_LEVEL, "rendement niveau 3 = %d" % y)
+	check(y == Shards.SHATTER_BASE + 6 / 2, "rendement niveau 3 = %d (base + moitié des 6 éclats investis)" % y)
 	var r: Dictionary = Shards.shatter(data, "Forêt")
 	check(bool(r["ok"]) and not Stones.has(data, "Forêt"), "la Pierre disparaît")
 	check(Shards.count(data, "Forêt") == before + y, "les éclats sont crédités")
 	check(Stones.stones_of(data, "Tank").is_empty(), "le porteur perd la Pierre")
 	check(Stones.grant(data, "Forêt"), "la Pierre peut être regagnée après brisure")
 	check(not bool(Shards.shatter(data, "Montagne")["ok"]), "briser une Pierre absente échoue")
+	# ── éveil : coûte des éclats de la Nation ──
+	Stones.grant(data, "Vents")
+	data["gold"] = 100000
+	data["resources"] = {"Fer": 999, "Bois": 999, "Cuir": 999, "Magie": 999, "Venin": 999}
+	var c2: Dictionary = Stones.awaken_cost(data, "Vents")
+	check(int(c2["shards"]) == 2, "éveil 1 → 2 coûte 2 éclats")
+	data["shards"] = {}
+	check(Stones.can_awaken(data, "Vents") != "", "éveil refusé sans éclats")
+	Shards.add(data, "Vents", 20)
+	var paid: bool = true
+	for _i in range(4):
+		paid = paid and Stones.awaken(data, "Vents") == ""
+	check(paid and Stones.level(data, "Vents") == Stones.MAX_LEVEL, "4 éveils → niveau max")
+	check(Shards.count(data, "Vents") == 0, "20 éclats dépensés au total")
+	check(Shards.shatter_yield(data, "Vents") < 20, "briser un niveau 5 rend moins que ce qui a été investi (%d < 20)" % Shards.shatter_yield(data, "Vents"))
+	Shards.shatter(data, "Vents")
 	# ── fortification ──
 	var item: Dictionary = {"type": "Épée (1 main)", "name": "Épée test", "level": 10, "rarity": "commun", "force": 5, "defense": 2}
 	check(Shards.can_fortify(data, item, "Rouages") != "", "sans éclats : fortification refusée")
