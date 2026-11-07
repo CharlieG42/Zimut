@@ -128,6 +128,8 @@ func _score_cast(e: Dictionary, spell: Dictionary, p: Dictionary, c: Vector2i) -
 					total += 0.4 * float(p["stun_chance"])
 				if int(p["push"]) > 0:
 					total += 8.0
+				if int(p["pull"]) > 0:
+					total += 6.0
 				if taunt_uid >= 0 and int(t["uid"]) == taunt_uid:
 					total += 15.0
 			return total

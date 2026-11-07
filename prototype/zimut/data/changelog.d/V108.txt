@@ -1,0 +1,4 @@
+V108|Chasseur : tous ses sorts à distance gagnent +1 de portée (de 5-8 à 6-9 cases).
+V108|Nouveau mécanisme : certains sorts attirent la cible vers le lanceur (elle s’arrête au contact, sans dégâts de collision).
+V108|Chasseur : Flèche-grappin (niv. 32, attire de 2 cases) et Tir de dispersion (niv. 52, zone + repousse 1 case).
+V108|Ingénieur : Grappin mécanique (niv. 36, attire de 3 cases), Onde de choc (niv. 58, zone + repousse 2 cases) ; Fusil à pompe repousse de 2 cases et Roquette de 1 case.

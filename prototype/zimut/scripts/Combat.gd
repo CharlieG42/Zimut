@@ -17,6 +17,16 @@ const PUSH := {
 	"Tir de recul": 2,
 	"Éboulement": 1,
 	"Séisme ambré": 1,
+	"Fusil à pompe": 2,
+	"Roquette": 1,
+	"Tir de dispersion": 1,
+	"Onde de choc": 2,
+}
+
+## V108 : sorts qui attirent la cible vers le lanceur (nombre de cases ; s'arrête au contact d'un obstacle ou d'une entité).
+const PULL := {
+	"Flèche-grappin": 2,
+	"Grappin mécanique": 3,
 }
 
 ## V43 : états que les sorts « Combo » reconnaissent chez la cible (mot du texte -> statut).
@@ -348,7 +358,7 @@ static func _parse_base(spell: Dictionary) -> Dictionary:
 		"dmg": 0, "dtype": "mag" if (magic_class or t.contains("magique")) else "phys",
 		"heal": 0, "heal_pct": 0, "regen": 0, "regen_turns": 0,
 		"dots": [], "buffs": [], "debuffs": [], "self_buffs": [],
-		"ignore_def": 0, "cond": "", "push": 0,
+		"ignore_def": 0, "cond": "", "push": 0, "pull": 0,
 		"summon": "", "summon_turns": -1,
 		"adj_dmg": 0, "chain": 0, "cure": false, "tele": "", "trap": 0,
 		"stun_chance": 0, "stun_turns": 0,
@@ -362,6 +372,8 @@ static func _parse_base(spell: Dictionary) -> Dictionary:
 	}
 	if PUSH.has(sname):
 		p["push"] = int(PUSH[sname])
+	if PULL.has(sname):
+		p["pull"] = int(PULL[sname])
 
 	# ── Artificier (V26) : mécanismes posés sur le terrain et Déclencheur ───────────────
 	if sname.begins_with("Poser ") and stype == "Invocation":
@@ -869,6 +881,8 @@ static func describe(spell: Dictionary) -> String:
 	parts.append(rx_b.sub(String(spell.get("effect", "")), "", true))
 	if int(p["push"]) > 0:
 		parts.append("Repousse de %d case(s)" % int(p["push"]))
+	if int(p["pull"]) > 0:
+		parts.append("Attire de %d case(s)" % int(p["pull"]))
 	if String(p.get("combo_status", "")) != "":
 		parts.append("Combo : +%d %% si la cible est %s" % [int(p["combo_pct"]), String(COMBO_LABELS.get(p["combo_status"], ""))])
 	if String(p.get("chain_spell", "")) != "":
