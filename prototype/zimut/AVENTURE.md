@@ -274,6 +274,16 @@ saturées, cel-shading, contours foncés) ; les décors `decor`/`over` sont ensu
 recalculés sur la nouvelle peinture (`tools/gen_sylve_v2_decor.py`). Appliqué à
 `Sylvestre_v2.png` ; à répliquer sur `Cimes.png` ensuite.
 
+### Extension de la carte (monde plus vaste, défilement) — V114
+
+`tools/extend_planche.py <zone.json> <art.jpg> <+cols> <+rows>` agrandit une planche
+(ici Sylve 96×73 → **128×96**, soit 2048×1536 px, monde 2D 4096×3072 px → défilement
+caméra actif) : l'ancienne zone garde ses coordonnées exactes (masque, POI, départ),
+la nouvelle terre pousse par dilation chaînée dans la marge + **isthme** vers l'île,
+3 nouveaux lieux sont placés dans l'extension (tous atteignables — test), l'art est
+calé sur le masque (eau sur case jouable → herbe, hors île → mer). L'overlay `detail`
+est régénéré à la nouvelle taille. Les décors `decor`/`over` sont recalculés.
+
 ## Déplacement et lisibilité (V10)
 
 - **Appui tactile** : un premier appui sur une case affiche le trajet et le nombre de pas ; un second appui sur la même case lance la marche. À la souris, un clic suffit (le survol montre déjà le trajet).

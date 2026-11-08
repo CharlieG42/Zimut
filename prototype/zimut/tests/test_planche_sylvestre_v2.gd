@@ -33,7 +33,7 @@ func _boot() -> void:
 	check(rows_ok, "masque aux dimensions de la grille")
 	check(AT.walkable(z, BA.start(z)), "départ jouable")
 	var pois: Dictionary = pm.pois_of(z)
-	check(pois.size() == 19, "19 lieux (%d)" % pois.size())
+	check(pois.size() == 22, "22 lieux (%d, dont 3 dans l'extension)" % pois.size())
 	var tiers: Array = []
 	var bad: int = 0
 	for k: String in pois.keys():

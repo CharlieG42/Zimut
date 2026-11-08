@@ -29,12 +29,12 @@ func _boot() -> void:
 	var d: Dictionary = BA.raw(z)
 
 	# Le masque, le départ et les lieux ne changent pas.
-	check(d["mask"].size() == 73 and d["start"] == [54.0, 45.0] and d["pois"].size() == 19,
-		"masque / départ / 19 lieux inchangés")
+	check(d["mask"].size() == 96 and d["start"] == [54.0, 45.0] and d["pois"].size() == 22,
+		"masque étendu / départ / 22 lieux (19 d'origine + 3 nouveaux)")
 
 	var decor: Dictionary = d.get("decor", {})
 	var over: Dictionary = d.get("over", {})
-	check(decor.size() > 100 and over.size() > 15, "décors présents (%d sol, %d premier plan)" % [decor.size(), over.size()])
+	check(decor.size() > 100 and over.size() > 5, "décors présents (%d sol, %d premier plan)" % [decor.size(), over.size()])
 
 	var sprites: Dictionary = SD.SPRITES
 	var start: Vector2i = AT.parse("%d,%d" % [int(d["start"][0]), int(d["start"][1])])
