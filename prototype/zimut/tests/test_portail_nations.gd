@@ -66,7 +66,13 @@ func _boot() -> void:
 	var prog: Dictionary = {}
 	mgr.enter_zone(z)
 	prog = mgr.zone_progress()
-	check(int(prog["total"]) == pm.pois_of(z).size() - 3, "le portail ne compte pas dans les lieux à explorer (%d)" % int(prog["total"]))
+	var expected := 0
+	for k: String in pm.pois_of(z).keys():
+		var pd: Dictionary = pm.pois_of(z)[k]
+		if String(pd.get("kind", "")) == "camp" or mgr.is_portal(pd):
+			continue
+		expected += 1
+	check(int(prog["total"]) == expected, "le portail et les camps ne comptent pas dans les lieux à explorer (%d attendu %d)" % [int(prog["total"]), expected])
 	# une fois débloqué, le portail reste ouvert même si le compteur de donjon est perdu
 	mgr.state["dungeons"] = {}
 	check(mgr.portal_lock(poi).is_empty(), "portail toujours ouvert une fois la zone débloquée")
