@@ -263,6 +263,17 @@ Test : `tests/test_walk_continu.gd`.
 - pipeline décors étendue à la **Cimes** (`montagne_pics_v2`, kinds Montagne) ;
 - prévisualisations : `tools/preview_sylve_v2.py` (Sylve + Cimes).
 
+### Re-peinture des planches (V114, style cartoon Ankama/Waven/Dofus)
+
+`tools/repaint_planche.py <art_IA.jpg> <planche.png> <zone.json>` repeint une planche
+sans toucher au gameplay : le **masque reste identique**, la silhouette de l'île est
+imposée depuis le masque (mer profonde autour, floutée sur ~1 case), et l'eau peinte
+par l'IA sur une case jouable est remplacée par de l'herbe texturée (pas de damier).
+L'art est généré par l'outil IA de la session (prompt style Ankama : couleurs
+saturées, cel-shading, contours foncés) ; les décors `decor`/`over` sont ensuite
+recalculés sur la nouvelle peinture (`tools/gen_sylve_v2_decor.py`). Appliqué à
+`Sylvestre_v2.png` ; à répliquer sur `Cimes.png` ensuite.
+
 ## Déplacement et lisibilité (V10)
 
 - **Appui tactile** : un premier appui sur une case affiche le trajet et le nombre de pas ; un second appui sur la même case lance la marche. À la souris, un clic suffit (le survol montre déjà le trajet).

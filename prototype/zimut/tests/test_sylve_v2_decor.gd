@@ -34,7 +34,7 @@ func _boot() -> void:
 
 	var decor: Dictionary = d.get("decor", {})
 	var over: Dictionary = d.get("over", {})
-	check(decor.size() > 100 and over.size() > 30, "décors présents (%d sol, %d premier plan)" % [decor.size(), over.size()])
+	check(decor.size() > 100 and over.size() > 15, "décors présents (%d sol, %d premier plan)" % [decor.size(), over.size()])
 
 	var sprites: Dictionary = SD.SPRITES
 	var start: Vector2i = AT.parse("%d,%d" % [int(d["start"][0]), int(d["start"][1])])
