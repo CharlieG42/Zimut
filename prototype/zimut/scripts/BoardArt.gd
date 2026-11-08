@@ -55,6 +55,9 @@ static func file_stem(zone_id: String) -> String:
 	# V106 : « Iso » = plateau isométrique à étages pour la Sylve ; les autres nations gardent leur planche v2.
 	if variant == "iso" and zone_id == "foret_sylve" and FileAccess.file_exists(DIR + "foret_sylve_iso.json"):
 		return "foret_sylve_iso"
+	# V115 : « Diorama » = scène 3D pré-rendue (HD-2D) de la Sylve, posée sur un plateau iso jouable.
+	if variant == "diorama" and zone_id == "foret_sylve" and FileAccess.file_exists(DIR + "foret_sylve_diorama.json"):
+		return "foret_sylve_diorama"
 	return String(ALT_BOARDS[zone_id]) if FileAccess.file_exists(DIR + String(ALT_BOARDS[zone_id]) + ".json") else zone_id
 
 
@@ -295,3 +298,56 @@ static func iso_cell_at(zone_id: String, w: Vector2) -> Vector2i:
 ## Bâtiments du plateau iso : [{k, x, y, w, h}] (emprise en cases ; leurs cases sont des obstacles « building »).
 static func buildings(zone_id: String) -> Array:
 	return raw(zone_id).get("buildings", [])
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  V115 — « Diorama » : rendu 3D pré-calculé posé sur le plateau iso (« foret_sylve_diorama »)
+#  L'image (tuiles) est calée sur iso_pos : la case (x,y) au sol tombe sur son pixel du rendu.
+#  Les bâtiments / arbres sont aussi découpés en « occultants » triés en profondeur avec le héros.
+#  Généré par tools/diorama_sylve/bake_board.py.
+# ══════════════════════════════════════════════════════════════════════
+static func is_diorama(zone_id: String) -> bool:
+	return bool(raw(zone_id).get("diorama", false))
+
+
+## Pixels du monde 2D par pixel du rendu.
+static func diorama_scale(zone_id: String) -> float:
+	return float(raw(zone_id).get("image_scale", 1.0))
+
+
+static func _diorama_origin(zone_id: String) -> Vector2:
+	var o: Array = raw(zone_id).get("image_offset", [0, 0])
+	return Vector2(float(o[0]), float(o[1]))
+
+
+## Tuiles de fond : [{tex, pos}] (pos = coin haut-gauche dans le monde 2D).
+static func diorama_tiles(zone_id: String) -> Array:
+	var out: Array = []
+	var sc: float = diorama_scale(zone_id)
+	for t: Dictionary in raw(zone_id).get("image_tiles", []):
+		var tex: Texture2D = load(String(t["path"])) as Texture2D
+		if tex == null:
+			continue
+		var px: Array = t["px"]
+		out.append({"tex": tex, "pos": _diorama_origin(zone_id) + Vector2(float(px[0]), float(px[1])) * sc})
+	return out
+
+
+## Occultants : [{tex, rect, pos, cell}] (rect = zone de la page d'atlas, cell = case qui fixe la profondeur).
+static func diorama_occluders(zone_id: String) -> Array:
+	var d: Dictionary = raw(zone_id)
+	var pages: Array = []
+	for p: Variant in d.get("occluder_pages", []):
+		pages.append(load(String(p)) as Texture2D)
+	var out: Array = []
+	var sc: float = diorama_scale(zone_id)
+	for o: Dictionary in d.get("occluders", []):
+		var pi: int = int(o["page"])
+		if pi < 0 or pi >= pages.size() or pages[pi] == null:
+			continue
+		var r: Array = o["r"]
+		var px: Array = o["px"]
+		var c: Array = o["cell"]
+		out.append({"tex": pages[pi], "rect": Rect2(float(r[0]), float(r[1]), float(r[2]), float(r[3])),
+			"pos": _diorama_origin(zone_id) + Vector2(float(px[0]), float(px[1])) * sc, "cell": Vector2i(int(c[0]), int(c[1]))})
+	return out

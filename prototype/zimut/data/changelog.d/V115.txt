@@ -1,0 +1,4 @@
+V115|Nouvelle carte 2D « Diorama » pour la Grande Forêt de la Sylve (Réglages › Graphismes › Cartes 2D) : un village de 48×48 rendu en 3D (16 bâtiments variés, champs de blé, potager, prairies fleuries, verger, cimetière, ferme) avec lumière dorée, brume et halo, posé sur un plateau iso de 72×72 cases.
+V115|Diorama : maisons, arbres, étals et lanternes sont découpés du rendu et passent devant le héros quand il marche derrière ; les 20 lieux de la Sylve (donjons, camps, coffres, belvédère, portail) y sont répartis du village vers les bois. Les autres styles de carte restent disponibles pour comparer.
+V115|Réglages : la fenêtre est rangée en 4 onglets (Général, Combat, Graphismes, Sauvegarde) au lieu d'une seule page chargée.
+V115|Aventure : en entrant dans une zone dotée d'une planche 2D, le héros part du départ de la planche.

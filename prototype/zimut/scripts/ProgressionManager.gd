@@ -2862,6 +2862,10 @@ func adventure_enter_zone(adv: Dictionary, zone_id: String) -> bool:
 		return false
 	adv["zone"] = zone_id
 	adv["hero_pos"] = ADVENTURE_ZONES[zone_id]["start"].duplicate()
+	# V115 : sur une planche (carte 2D), on part de son propre départ (le diorama a une case jouable au départ du catalogue)
+	if not BoardArt.def(zone_id).is_empty():
+		var bst: Vector2i = BoardArt.start(zone_id)
+		adv["hero_pos"] = [bst.x, bst.y]
 	var pos := Vector2i(int(adv["hero_pos"][0]), int(adv["hero_pos"][1]))
 	adventure_move(adv, pos)
 	adv["moves"] = maxi(0, int(adv.get("moves", 1)) - 1)

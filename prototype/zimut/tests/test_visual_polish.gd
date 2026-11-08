@@ -41,7 +41,7 @@ func _init() -> void:
 	check(in_rect, "les particules de la planche sont réparties sur toute l'image")
 	check(fireflies >= 12, "la planche illustrée compte plusieurs lucioles (%d)" % fireflies)
 	amb.free()
-	check(adventure.contains("plate.z_index = 320") and adventure.contains("_joystick.z_index = 322"),
+	check(adventure.contains("plate.z_index = 1320") and adventure.contains("_joystick.z_index = 1322"),
 		"l'interface de la planche reste au-dessus des nœuds de profondeur du monde")
 	check(adventure.contains("Reflet supérieur"), "les médaillons de POI ont un reflet de volume discret")
 	check(adventure.contains("draw_polyline(ring, rim_col"), "les médaillons de POI ont un contour sombre et un liseré coloré, avec une silhouette propre à chaque type")

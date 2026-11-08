@@ -19,6 +19,7 @@ const TILE_H := 64.0
 const READABLE_SCALE := 0.82
 const ISO_SCALE := 0.95            # V106 : plateau isométrique à étages
 const BOARD_SCALE := 0.78          # V83 : échelle d'une planche illustrée
+const DIORAMA_SCALE := 0.72        # V115 : diorama pré-rendu (~1 pixel du rendu par pixel écran)
 const PAN_THRESHOLD := 14.0
 const SIDE_W := 440.0
 const STEP_TIME := 0.15
@@ -202,7 +203,7 @@ func _build() -> void:
 	_recenter_btn.pressed.connect(func() -> void: _recenter(true))
 	_recenter_btn.hide()
 	_map_view.add_child(_recenter_btn)
-	_recenter_btn.z_index = 321   # au-dessus des nœuds du monde (z_index de profondeur de la planche)
+	_recenter_btn.z_index = 1321   # au-dessus des nœuds du monde (z_index de profondeur de la planche, jusqu'à ~600 sur un plateau iso 72x72)
 
 	# Zoom accessible sur mobile, en complément du pincement à deux doigts.
 	_zoom_in_btn = Button.new()
@@ -220,7 +221,7 @@ func _build() -> void:
 	_zoom_in_btn.pressed.connect(func() -> void: _zoom_at(_map_view.size * 0.5, 1.15))
 	_zoom_in_btn.hide()
 	_map_view.add_child(_zoom_in_btn)
-	_zoom_in_btn.z_index = 321   # au-dessus des nœuds du monde (z_index de profondeur de la planche)
+	_zoom_in_btn.z_index = 1321   # au-dessus des nœuds du monde (z_index de profondeur de la planche, jusqu'à ~600 sur un plateau iso 72x72)
 
 	_zoom_out_btn = Button.new()
 	_zoom_out_btn.text = "−"
@@ -237,7 +238,7 @@ func _build() -> void:
 	_zoom_out_btn.pressed.connect(func() -> void: _zoom_at(_map_view.size * 0.5, 1.0 / 1.15))
 	_zoom_out_btn.hide()
 	_map_view.add_child(_zoom_out_btn)
-	_zoom_out_btn.z_index = 321   # au-dessus des nœuds du monde (z_index de profondeur de la planche)
+	_zoom_out_btn.z_index = 1321   # au-dessus des nœuds du monde (z_index de profondeur de la planche, jusqu'à ~600 sur un plateau iso 72x72)
 
 	_build_edit_ui()
 
@@ -246,7 +247,7 @@ func _build() -> void:
 	_fade.color = Color(0.86, 0.91, 0.95, 0.0)
 	_fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_fade.z_index = 420  # au-dessus des panonceaux (z_index des nœuds du monde)
+	_fade.z_index = 1420  # au-dessus des panonceaux (z_index des nœuds du monde)
 	_map_view.add_child(_fade)
 
 	# Bandeau d'annonce (fondu)
@@ -257,7 +258,7 @@ func _build() -> void:
 	_toast.offset_bottom = 70.0
 	_toast.modulate.a = 0.0
 	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_toast.z_index = 421
+	_toast.z_index = 1421
 	_map_view.add_child(_toast)
 	_build_hud()
 
@@ -284,7 +285,7 @@ func _build_hud() -> void:
 	var plate := PanelContainer.new()
 	plate.position = Vector2(16, 16)
 	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	plate.z_index = 320
+	plate.z_index = 1320
 	plate.add_theme_stylebox_override("panel", U.box(Color(0.05, 0.07, 0.12, 0.88), Color(0.86, 0.68, 0.30), 14, 2, 14))
 	_map_view.add_child(plate)
 	var pv := VBoxContainer.new()
@@ -305,7 +306,7 @@ func _build_hud() -> void:
 	_action_btn.offset_right = 260.0
 	_action_btn.offset_top = -100.0
 	_action_btn.offset_bottom = -24.0
-	_action_btn.z_index = 322
+	_action_btn.z_index = 1322
 	_action_btn.pressed.connect(_on_action_pressed)
 	_action_btn.hide()
 	_map_view.add_child(_action_btn)
@@ -318,7 +319,7 @@ func _build_hud() -> void:
 	_joystick.offset_top = -236.0
 	_joystick.offset_right = 232.0
 	_joystick.offset_bottom = -24.0
-	_joystick.z_index = 322
+	_joystick.z_index = 1322
 	_map_view.add_child(_joystick)
 
 	# Aide de contrôle, en bas à droite de la carte
@@ -332,7 +333,7 @@ func _build_hud() -> void:
 	help.offset_top = -120.0
 	help.offset_bottom = -24.0
 	help.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	help.z_index = 322
+	help.z_index = 1322
 	help.add_theme_stylebox_override("panel", U.box(Color(0.05, 0.07, 0.12, 0.80), Color(0.30, 0.36, 0.50), 12, 1, 10))
 	var hl: Label = U.lbl("Touchez une case pour y marcher (touchez ailleurs pour changer de cap).\nTouchez un groupe de monstres pour le combattre. Joystick : marche continue.", 16, Color(0.92, 0.94, 0.98))
 	hl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -611,7 +612,20 @@ func _rebuild_board(biome: String) -> void:
 	var zs: Vector2i = manager.zone_size()
 	var d: Dictionary = BoardArt.raw(zid)
 	var ws: Vector2 = BoardArt.world_size(zid)
-	if BoardArt.is_iso(zid):
+	if BoardArt.is_diorama(zid):
+		# V115 : « Diorama » — scène 3D pré-rendue (tuiles) posée sur le plateau iso ; héros, lieux et monstres par-dessus.
+		var holder := Node2D.new()
+		holder.z_index = 0
+		_world.add_child(holder)
+		for t: Dictionary in BoardArt.diorama_tiles(zid):
+			var tile := Sprite2D.new()
+			tile.texture = t["tex"]
+			tile.centered = false
+			tile.position = t["pos"]
+			tile.scale = Vector2.ONE * BoardArt.diorama_scale(zid)
+			holder.add_child(tile)
+		_backdrop = holder
+	elif BoardArt.is_iso(zid):
 		var ground := IsoGround.new()
 		ground.ui = self
 		ground.z_index = 0
@@ -658,6 +672,17 @@ func _rebuild_board(biome: String) -> void:
 				_add_decor(p, String(terrain["obstacles"][p]), biome, pal, 0.8, false, false, int(BoardArt.heights(zid).get(p, 0)))
 		for p2: Vector2i in (terrain["decor"] as Dictionary).keys():
 			_add_decor(p2, String(terrain["decor"][p2]), biome, pal, 0.7, false, false, int(BoardArt.heights(zid).get(p2, 0)))
+		# V115 : bâtiments et arbres du diorama découpés dans le rendu : ils passent devant le héros quand il est derrière.
+		for oc: Dictionary in BoardArt.diorama_occluders(zid):
+			var os := Sprite2D.new()
+			os.texture = oc["tex"]
+			os.region_enabled = true
+			os.region_rect = oc["rect"]
+			os.centered = false
+			os.position = oc["pos"]
+			os.scale = Vector2.ONE * BoardArt.diorama_scale(zid)
+			os.z_index = _depth(oc["cell"]) + 3
+			_entities.add_child(os)
 		for b: Dictionary in BoardArt.buildings(zid):
 			var bn := BuildingNode.new()
 			bn.kind = String(b["k"])
@@ -717,10 +742,12 @@ func _rebuild_board(biome: String) -> void:
 	ambient.position = BoardArt.world_size(zid) * 0.5
 	_world.add_child(ambient)
 	# V114 : couche de lumière statique (vignette, teinte chaude, taches de lumière, rayons)
-	var light := BoardLight.new()
-	light.ui = self
-	light.z_index = 5
-	_world.add_child(light)
+	# (le diorama a déjà sa lumière, son étalonnage et sa brume cuits dans le rendu)
+	if not BoardArt.is_diorama(zid):
+		var light := BoardLight.new()
+		light.ui = self
+		light.z_index = 5
+		_world.add_child(light)
 	_hero = HeroView.new()
 	_hero.tex = Portraits.get_texture({"classe": manager.hero_class(), "team": "player", "entity_type": "Player"})
 	if zid == "foret_sylve":
@@ -833,7 +860,7 @@ func _fit_world() -> void:
 			_zoom_out_btn.visible = true
 		if _edit_btn != null:
 			_edit_btn.visible = not is_iso()
-		_world.scale = Vector2.ONE * (ISO_SCALE if is_iso() else BOARD_SCALE)
+		_world.scale = Vector2.ONE * (DIORAMA_SCALE if BoardArt.is_diorama(manager.zone_id()) else (ISO_SCALE if is_iso() else BOARD_SCALE))
 		_recenter(false)
 		return
 	_scroll_mode = scroll_needed(size, vs)
@@ -1169,7 +1196,7 @@ func _build_edit_ui() -> void:
 	_edit_btn.pressed.connect(func() -> void: _set_edit(not _edit_on))
 	_edit_btn.hide()
 	_map_view.add_child(_edit_btn)
-	_edit_btn.z_index = 321   # au-dessus des nœuds du monde (z_index de profondeur de la planche)
+	_edit_btn.z_index = 1321   # au-dessus des nœuds du monde (z_index de profondeur de la planche, jusqu'à ~600 sur un plateau iso 72x72)
 	_edit_bar = HBoxContainer.new()
 	_edit_bar.add_theme_constant_override("separation", 8)
 	_edit_bar.anchor_top = 1.0
@@ -1180,7 +1207,7 @@ func _build_edit_ui() -> void:
 	_edit_bar.offset_right = 1450.0
 	_edit_bar.hide()
 	_map_view.add_child(_edit_bar)
-	_edit_bar.z_index = 321   # au-dessus des nœuds du monde (z_index de profondeur de la planche)
+	_edit_bar.z_index = 1321   # au-dessus des nœuds du monde (z_index de profondeur de la planche, jusqu'à ~600 sur un plateau iso 72x72)
 	var defs: Array = [["open", "🟢 Ouvrir"], ["close", "🔴 Fermer"], ["move", "✋ Déplacer"],
 		["save", "💾 Enregistrer"], ["copy", "📋 Copier"], ["reset", "↺ Annuler tout"]]
 	for d: Array in defs:
