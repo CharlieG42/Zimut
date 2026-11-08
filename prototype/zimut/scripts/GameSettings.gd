@@ -56,7 +56,8 @@ var haptics_on: bool = true
 var adventure_3d: bool = false
 ## Personnages du monde 3D : vrais modèles low-poly (true) ou illustrations « carton » (false).
 var adventure_models_3d: bool = true
-## Carte 2D de la Sylve : "v2" (nouvelle illustration, défaut) ou "classic" (ancienne planche, BACKUP).
+## Carte 2D de la Sylve : "v2" (nouvelle illustration, défaut), "classic" (ancienne planche, BACKUP),
+## "iso" (plateau iso de test) ou "diorama" (V115 : scène 3D pré-rendue HD-2D).
 var sylvestre_board: String = "v2"
 ## Héros de la carte 2D d'aventure : true = modèles 3D du mode 3D cuits en sprites animés (8 directions), false = illustrations.
 var adventure_walk_sprites: bool = true
@@ -192,7 +193,7 @@ func set_adventure_walk_sprites(on: bool) -> void:
 
 ## Variante des cartes 2D : « v2 » (illustrées, défaut), « classic » (ancienne planche) ou « iso » (V106 : biome tactique + sprites, Sylve).
 static func _board_variant(v: String) -> String:
-	return v if v in ["classic", "iso"] else "v2"
+	return v if v in ["classic", "iso", "diorama"] else "v2"
 
 func set_sylvestre_board(variant: String) -> void:
 	sylvestre_board = _board_variant(variant)

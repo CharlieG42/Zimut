@@ -1,0 +1,55 @@
+extends SceneTree
+## V115 — Captures in-engine de la carte 2D Sylve « Diorama » (scène 3D pré-rendue HD-2D).
+## Nécessite un écran virtuel :
+##   xvfb-run -a -s "-screen 0 1920x1080x24" godot --rendering-method gl_compatibility --path . -s tests/shot_sylve_diorama.gd -- <dossier>
+## Produit : diorama_depart.png, diorama_place.png, diorama_derriere.png (héros masqué par une maison), diorama_options.png
+func _init() -> void:
+	_boot.call_deferred()
+
+func _shot(path: String) -> void:
+	await RenderingServer.frame_post_draw
+	root.get_viewport().get_texture().get_image().save_png(path)
+	print("capture ", path)
+
+func _boot() -> void:
+	var args: PackedStringArray = OS.get_cmdline_user_args()
+	var out: String = args[0] if args.size() > 0 else "/tmp"
+	var zone: String = "foret_sylve"
+	var pm: Node = root.get_node("/root/ProgressionManager")
+	var gm: Node = root.get_node("/root/GameManager")
+	var gs: Node = root.get_node("/root/GameSettings")
+	var BA: GDScript = load("res://scripts/BoardArt.gd")
+	var data: Dictionary = pm.new_game(4, "ShotSylveDiorama")
+	pm.rebuild_team(data, ["Chasseur", "Mage", "Sylvain"])
+	data["campaign_mode"] = "adventure"
+	data["adventure_view"] = "map"
+	gm.active_save = data
+	gm.active_slot = 4
+	var before: String = gs.sylvestre_board
+	gs.set_sylvestre_board("diorama")
+	var adv: Dictionary = pm.adventure_state(data)
+	pm.adventure_unlock_zone(adv, zone)
+	pm.adventure_enter_zone(adv, zone)
+	var st: Vector2i = BA.start(zone)
+	for y in range(72):
+		for x in range(72):
+			adv["discovered"].append("%s,%d,%d" % [zone, x, y])
+	adv["hero_pos"] = [st.x, st.y]
+	var sc: Node = (load("res://scenes/AdventureMap.tscn") as PackedScene).instantiate()
+	root.add_child(sc)
+	await create_timer(1.5).timeout
+	await _shot(out + "/diorama_depart.png")
+	print("départ ", st, " héros ", sc.manager.hero_pos())
+	# héros posé à d'autres endroits : place du village, puis derrière une maison (occultation)
+	var spots: Dictionary = {"place": Vector2i(36, 30), "derriere": Vector2i(int(args[1]), int(args[2])) if args.size() > 2 else Vector2i(24, 21)}
+	for nm: String in spots.keys():
+		var dest: Vector2i = spots[nm]
+		sc.manager.state["hero_pos"] = [dest.x, dest.y]
+		sc._hero.position = sc.cell_center(dest)
+		sc._apply_hero_depth(dest)
+		sc._focus_cell(dest, false)
+		await create_timer(0.6).timeout
+		await _shot(out + "/diorama_%s.png" % nm)
+	gs.set_sylvestre_board(before)
+	pm.delete_save(4)
+	quit(0)

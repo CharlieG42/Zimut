@@ -7,6 +7,21 @@ const COL_PANEL := Color(0.94, 0.89, 0.78, 0.97)
 const COL_BORDER := Color(0.72, 0.58, 0.28, 1.0)
 const COL_TXT := Color(0.22, 0.15, 0.05)
 
+const TABS := [["general", "⚙  Général"], ["combat", "⚔  Combat"], ["graphismes", "🎨  Graphismes"], ["sauvegarde", "☁  Sauvegarde"]]
+const BOARD_VARIANTS: Array[String] = ["v2", "classic", "iso", "diorama"]
+## Onglet ouvert (conservé pendant la session).
+static var _tab: int = 0
+
+
+func _grid(parent: Control) -> GridContainer:
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 28)
+	grid.add_theme_constant_override("v_separation", 14)
+	parent.add_child(grid)
+	return grid
+
+
 func _ready() -> void:
 	var root := Control.new()
 	add_child(root)
@@ -41,54 +56,60 @@ func _ready() -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 
-	# Réglages en grille de deux colonnes : tout tient à l'écran, sans défilement.
-	var grid := GridContainer.new()
-	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 28)
-	grid.add_theme_constant_override("v_separation", 10)
-	box.add_child(grid)
+	# V115 : réglages rangés en onglets (Général / Combat / Graphismes / Sauvegarde) : une page courte à la fois.
+	var tabs := HBoxContainer.new()
+	tabs.name = "Tabs"
+	tabs.add_theme_constant_override("separation", 8)
+	box.add_child(tabs)
+	var pages := PanelContainer.new()
+	pages.name = "Pages"
+	pages.custom_minimum_size = Vector2(0, 380)
+	pages.add_theme_stylebox_override("panel", _flat(Color(0.97, 0.93, 0.84, 0.9), Color(0.80, 0.68, 0.40), 14, 2))
+	box.add_child(pages)
+	var page_list: Array[Control] = []
+	for t: Array in TABS:
+		var pg := MarginContainer.new()
+		pg.name = "Page_" + String(t[0])
+		for side in ["left", "right", "top", "bottom"]:
+			pg.add_theme_constant_override("margin_" + side, 22 if side in ["left", "right"] else 18)
+		var v := VBoxContainer.new()
+		v.add_theme_constant_override("separation", 14)
+		pg.add_child(v)
+		pages.add_child(pg)
+		page_list.append(pg)
+		var tb := Button.new()
+		tb.name = "Tab_" + String(t[0])
+		tb.text = String(t[1])
+		tb.custom_minimum_size = Vector2(0, 60)
+		tb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tb.add_theme_font_size_override("font_size", 23)
+		tb.focus_mode = Control.FOCUS_NONE
+		tabs.add_child(tb)
+	var show_tab := func(idx: int) -> void:
+		_tab = idx
+		for i: int in range(page_list.size()):
+			page_list[i].visible = i == idx
+			_refresh_opt(tabs.get_child(i) as Button, i == idx)
+	for i: int in range(tabs.get_child_count()):
+		var idx_ref: int = i
+		(tabs.get_child(i) as Button).pressed.connect(func() -> void: show_tab.call(idx_ref))
 
-	grid.add_child(_setting_cell("Langue", Loc.LANG_NAMES,
+	# — Général
+	var gen: VBoxContainer = page_list[0].get_child(0)
+	var g1 := _grid(gen)
+	g1.add_child(_setting_cell("Langue", Loc.LANG_NAMES,
 		maxi(0, Loc.LANGS.find(GameSettings.language)), func(idx: int) -> void: GameSettings.set_language(Loc.LANGS[idx])))
-
-	grid.add_child(_setting_cell("Taille du texte des menus", GameSettings.TEXT_SIZES,
+	g1.add_child(_setting_cell("Taille du texte des menus", GameSettings.TEXT_SIZES,
 		GameSettings.text_size, func(idx: int) -> void: GameSettings.set_text_size(idx)))
-
-	grid.add_child(_setting_cell("Rapidité de progression XP", GameSettings.XP_SPEEDS,
-		GameSettings.xp_speed, func(idx: int) -> void: GameSettings.set_xp_speed(idx)))
-
-	# V42 : timer de tour (fin automatique du tour à l'expiration)
-	grid.add_child(_setting_cell("Timer de tour", GameSettings.TURN_TIMER_MODES,
-		GameSettings.turn_timer_mode, func(idx: int) -> void: GameSettings.set_turn_timer_mode(idx)))
-
-	grid.add_child(_setting_cell("Vitesse des tours ennemis", GameSettings.COMBAT_SPEEDS,
-		GameSettings.combat_speed, func(idx: int) -> void: GameSettings.set_combat_speed(idx)))
-
-	grid.add_child(_setting_cell("Vitesse des animations", GameSettings.ANIM_SPEEDS,
-		GameSettings.anim_speed, func(idx: int) -> void: GameSettings.set_anim_speed(idx)))
-
-	grid.add_child(_setting_cell("Sons et vibrations", ["Sons + vibr.", "Sons seuls", "Silence"] as Array[String],
+	g1.add_child(_setting_cell("Sons et vibrations", ["Sons + vibr.", "Sons seuls", "Silence"] as Array[String],
 		0 if (GameSettings.sfx_on and GameSettings.haptics_on) else (1 if GameSettings.sfx_on else 2),
 		func(idx: int) -> void:
 			GameSettings.set_sfx(idx < 2)
 			GameSettings.set_haptics(idx == 0)))
-
-	grid.add_child(_setting_cell("Qualité graphique", GfxQuality.LABELS,
-		GameSettings.graphics_quality, func(idx: int) -> void: GameSettings.set_graphics_quality(idx)))
-
-	grid.add_child(_setting_cell("Personnages du monde 3D", ["Illustrés", "Modèles 3D"] as Array[String],
-		1 if GameSettings.adventure_models_3d else 0, func(idx: int) -> void: GameSettings.set_adventure_models_3d(idx == 1)))
-
-	grid.add_child(_setting_cell("Héros de la carte 2D", ["Modèles 3D animés", "Illustrés"] as Array[String],
-		0 if GameSettings.adventure_walk_sprites else 1, func(idx: int) -> void: GameSettings.set_adventure_walk_sprites(idx == 0)))
-
-	grid.add_child(_setting_cell("Cartes 2D (Sylve et Cimes)", ["Nouvelle", "Ancienne", "Iso (test)"] as Array[String],
-		{"classic": 1, "iso": 2}.get(GameSettings.sylvestre_board, 0), func(idx: int) -> void: GameSettings.set_sylvestre_board(["v2", "classic", "iso"][idx])))
-
 	var tuto := Button.new()
 	tuto.name = "TutoRestart"
 	tuto.text = "🎓  Relancer le tutoriel de Gultur"
-	tuto.custom_minimum_size = Vector2(0, 58)
+	tuto.custom_minimum_size = Vector2(0, 62)
 	tuto.add_theme_font_size_override("font_size", 21)
 	tuto.add_theme_color_override("font_color", COL_TXT)
 	tuto.add_theme_stylebox_override("normal", _flat(Color(0.86, 0.80, 0.64), COL_BORDER, 12, 2))
@@ -96,20 +117,51 @@ func _ready() -> void:
 	tuto.pressed.connect(func() -> void:
 		GameSettings.restart_tutorial()
 		tuto.text = "✓  Tutoriel relancé")
-	tuto.text = "🎓  Tutoriel"
-	tuto.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tuto.custom_minimum_size = Vector2(0, 58)
-	_tuto_btn = tuto
+	gen.add_child(tuto)
 
-	_build_cloud(box)
-
+	# — Combat & progression
+	var cmb: VBoxContainer = page_list[1].get_child(0)
+	var g2 := _grid(cmb)
+	g2.add_child(_setting_cell("Rapidité de progression XP", GameSettings.XP_SPEEDS,
+		GameSettings.xp_speed, func(idx: int) -> void: GameSettings.set_xp_speed(idx)))
+	# V42 : timer de tour (fin automatique du tour à l'expiration)
+	g2.add_child(_setting_cell("Timer de tour", GameSettings.TURN_TIMER_MODES,
+		GameSettings.turn_timer_mode, func(idx: int) -> void: GameSettings.set_turn_timer_mode(idx)))
+	g2.add_child(_setting_cell("Vitesse des tours ennemis", GameSettings.COMBAT_SPEEDS,
+		GameSettings.combat_speed, func(idx: int) -> void: GameSettings.set_combat_speed(idx)))
+	g2.add_child(_setting_cell("Vitesse des animations", GameSettings.ANIM_SPEEDS,
+		GameSettings.anim_speed, func(idx: int) -> void: GameSettings.set_anim_speed(idx)))
 	var hint := Label.new()
 	hint.text = "La difficulté des ennemis se règle pour chaque partie, dans « Mes Parties »."
 	hint.add_theme_font_size_override("font_size", 18)
 	hint.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12))
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(hint)
+	cmb.add_child(hint)
+
+	# — Graphismes
+	var gfx: VBoxContainer = page_list[2].get_child(0)
+	var g3 := _grid(gfx)
+	g3.add_child(_setting_cell("Qualité graphique", GfxQuality.LABELS,
+		GameSettings.graphics_quality, func(idx: int) -> void: GameSettings.set_graphics_quality(idx)))
+	g3.add_child(_setting_cell("Personnages du monde 3D", ["Illustrés", "Modèles 3D"] as Array[String],
+		1 if GameSettings.adventure_models_3d else 0, func(idx: int) -> void: GameSettings.set_adventure_models_3d(idx == 1)))
+	g3.add_child(_setting_cell("Héros de la carte 2D", ["Modèles 3D animés", "Illustrés"] as Array[String],
+		0 if GameSettings.adventure_walk_sprites else 1, func(idx: int) -> void: GameSettings.set_adventure_walk_sprites(idx == 0)))
+	gfx.add_child(_setting_cell("Cartes 2D (Sylve et Cimes)", ["Nouvelle", "Ancienne", "Iso (test)", "Diorama (Sylve)"] as Array[String],
+		BOARD_VARIANTS.find(GameSettings.sylvestre_board) if BOARD_VARIANTS.has(GameSettings.sylvestre_board) else 0,
+		func(idx: int) -> void: GameSettings.set_sylvestre_board(BOARD_VARIANTS[idx])))
+	var gfx_hint := Label.new()
+	gfx_hint.text = "« Diorama » : la Sylve en scène 3D pré-rendue (lumière, brume, maisons et arbres qui masquent le héros). Les Cimes gardent la nouvelle planche."
+	gfx_hint.add_theme_font_size_override("font_size", 17)
+	gfx_hint.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12))
+	gfx_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	gfx.add_child(gfx_hint)
+
+	# — Sauvegarde (Cloud)
+	_build_cloud(page_list[3].get_child(0) as VBoxContainer)
+
+	show_tab.call(clampi(_tab, 0, TABS.size() - 1))
 
 	# Informations de build : le numéro final correspond au numéro de PR.
 	var info_panel := PanelContainer.new()
@@ -141,7 +193,6 @@ func _ready() -> void:
 # ═══════════════════════════════════════════════════════════════════════════
 
 var _cloud: CloudSave
-var _tuto_btn: Button
 var _cloud_status: Label
 var _cloud_btns: Array[Button] = []
 var _code_panel: PanelContainer
@@ -158,8 +209,6 @@ func _build_cloud(box: VBoxContainer) -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 14)
 	box.add_child(row)
-	if _tuto_btn != null:
-		row.add_child(_tuto_btn)
 	var up := _cloud_button("☁  Sauvegarde sur Cloud", Color(0.70, 0.84, 0.98))
 	up.name = "CloudBackup"
 	up.pressed.connect(_on_cloud_backup)
