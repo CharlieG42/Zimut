@@ -46,15 +46,20 @@ def main() -> None:
     # canevas : nouvelle art en fond, ancienne planche par-dessus (couture fondue sur 3 cases)
     art = np.asarray(Image.open(art_path).convert("RGB").resize((W2, H2), Image.LANCZOS)).astype(float)
     old_a = np.asarray(old).astype(float)
+    # étalonnage colorimétrique de l'art d'extension sur l'ancienne planche (même palette)
+    for i in range(3):
+        mo, so = old_a[..., i].mean(), old_a[..., i].std() + 1e-6
+        ma, sa = art[..., i].mean(), art[..., i].std() + 1e-6
+        art[..., i] = np.clip((art[..., i] - ma) * (so / sa) + mo, 0, 255)
     alpha = np.zeros((H2, W2), dtype=float)
     alpha[:H0, :W0] = 1.0
     # dégradé de 3 cases sur les bords droit/bas de l'ancienne zone
-    f = 3 * C
+    f = 8 * C
     for x in range(W0, min(W2, W0 + f)):
         alpha[:H0, x] = 1.0 - (x - W0) / float(f)
     for y in range(H0, min(H2, H0 + f)):
         alpha[y, :W0] = 1.0 - (y - H0) / float(f)
-    a3 = ndi.gaussian_filter(alpha, 6.0)[..., None]
+    a3 = ndi.gaussian_filter(alpha, 12.0)[..., None]
     pad = np.zeros((H2, W2, 3))
     pad[:H0, :W0] = old_a
     comp = pad * a3 + art * (1.0 - a3)
