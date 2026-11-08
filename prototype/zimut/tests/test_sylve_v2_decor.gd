@@ -29,7 +29,7 @@ func _boot() -> void:
 	var d: Dictionary = BA.raw(z)
 
 	# Le masque, le départ et les lieux ne changent pas.
-	check(d["mask"].size() == 96 and d["start"] == [54.0, 45.0] and d["pois"].size() == 22,
+	check(d["mask"].size() == 128 and d["start"] == [54.0, 45.0] and d["pois"].size() == 25,
 		"masque étendu / départ / 22 lieux (19 d'origine + 3 nouveaux)")
 
 	var decor: Dictionary = d.get("decor", {})

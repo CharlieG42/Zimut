@@ -82,7 +82,7 @@ def main() -> None:
     edge[rows2 - 3:, :] = True
     frontier = old_walk.copy()
     new_land = np.zeros((rows2, cols2), dtype=bool)
-    for _ in range(10):
+    for _ in range(40):
         frontier = ndi.binary_dilation(frontier)
         new_land |= frontier & margin & ~edge
     # côte irrégulière : on retire ~15% des cases ajoutées au hasard

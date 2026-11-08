@@ -283,6 +283,13 @@ la nouvelle terre pousse par dilation chaînée dans la marge + **isthme** vers 
 3 nouveaux lieux sont placés dans l'extension (tous atteignables — test), l'art est
 calé sur le masque (eau sur case jouable → herbe, hors île → mer). L'overlay `detail`
 est régénéré à la nouvelle taille. Les décors `decor`/`over` sont recalculés.
+Sylve : 96×73 → 128×96 → **160×128** (image 2560×2048, monde 5120×4096 px).
+
+L'overlay `detail` de la Sylve est désormais généré **procéduralement** à partir des
+vrais sprites de décor du jeu (`tools/gen_detail_overlay.py`) : touffes de 6-26 px
+(< 2 cases), densité ~11 %, style identique aux décors posés — vérifié à l'échelle du
+jeu (preview x2). L'overlay IA (détourage par saturation) reste utilisable pour les
+autres planches via `tools/chroma_key_overlay.py`.
 
 ## Déplacement et lisibilité (V10)
 
