@@ -2,7 +2,7 @@
 import json, math
 objs = json.load(open("objects.json"))
 plan = json.load(open("plan.json"))
-TAGS = {"tree", "stall", "cart", "fountain", "lantern", "banner", "prop", "hay", "grave"}
+TAGS = {"tree", "stall", "cart", "fountain", "lantern", "banner", "prop", "hay", "grave", "ruin", "stone"}
 occ = []
 bi = 0
 oid = 0

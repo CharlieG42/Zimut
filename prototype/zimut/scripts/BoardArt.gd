@@ -320,34 +320,32 @@ static func _diorama_origin(zone_id: String) -> Vector2:
 	return Vector2(float(o[0]), float(o[1]))
 
 
-## Tuiles de fond : [{tex, pos}] (pos = coin haut-gauche dans le monde 2D).
+## Tuiles de fond : [{path, pos, size}] (pos / size dans le monde 2D) — textures chargées à la demande.
 static func diorama_tiles(zone_id: String) -> Array:
 	var out: Array = []
 	var sc: float = diorama_scale(zone_id)
 	for t: Dictionary in raw(zone_id).get("image_tiles", []):
-		var tex: Texture2D = load(String(t["path"])) as Texture2D
-		if tex == null:
-			continue
 		var px: Array = t["px"]
-		out.append({"tex": tex, "pos": _diorama_origin(zone_id) + Vector2(float(px[0]), float(px[1])) * sc})
+		var sz: Array = t.get("size", [2560, 1440])
+		out.append({"path": String(t["path"]), "pos": _diorama_origin(zone_id) + Vector2(float(px[0]), float(px[1])) * sc,
+			"size": Vector2(float(sz[0]), float(sz[1])) * sc})
 	return out
 
 
-## Occultants : [{tex, rect, pos, cell}] (rect = zone de la page d'atlas, cell = case qui fixe la profondeur).
+## Occultants : [{page, path, rect, pos, size, cell}] (rect = zone de la page d'atlas, cell = case qui fixe la profondeur).
 static func diorama_occluders(zone_id: String) -> Array:
 	var d: Dictionary = raw(zone_id)
-	var pages: Array = []
-	for p: Variant in d.get("occluder_pages", []):
-		pages.append(load(String(p)) as Texture2D)
+	var pages: Array = d.get("occluder_pages", [])
 	var out: Array = []
 	var sc: float = diorama_scale(zone_id)
 	for o: Dictionary in d.get("occluders", []):
 		var pi: int = int(o["page"])
-		if pi < 0 or pi >= pages.size() or pages[pi] == null:
+		if pi < 0 or pi >= pages.size():
 			continue
 		var r: Array = o["r"]
 		var px: Array = o["px"]
 		var c: Array = o["cell"]
-		out.append({"tex": pages[pi], "rect": Rect2(float(r[0]), float(r[1]), float(r[2]), float(r[3])),
-			"pos": _diorama_origin(zone_id) + Vector2(float(px[0]), float(px[1])) * sc, "cell": Vector2i(int(c[0]), int(c[1]))})
+		out.append({"page": pi, "path": String(pages[pi]), "rect": Rect2(float(r[0]), float(r[1]), float(r[2]), float(r[3])),
+			"pos": _diorama_origin(zone_id) + Vector2(float(px[0]), float(px[1])) * sc,
+			"size": Vector2(float(r[2]), float(r[3])) * sc, "cell": Vector2i(int(c[0]), int(c[1]))})
 	return out

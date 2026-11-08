@@ -1,9 +1,8 @@
 extends SceneTree
-## Rend la Sylve en passes : beauty | depth | normal.
-## DIORAMA_WORK=<dossier> godot --rendering-method gl_compatibility --path <proj> -s scene.gd -- <mode> <out.png> <largeur> <hauteur> [tuiles tx ty]
-## mode : beauty | depth | normal | id
-const S := 48.0
-const AMP := 0.75
+## Rend la Sylve 96x96 en passes : beauty | depth | normal | id, en NTxNT tuiles (voir render96.sh).
+## DIORAMA_WORK=<dossier> godot --rendering-method gl_compatibility --path <proj> -s scene96.gd -- <mode> <dossier_sortie> <largeur> <hauteur> <NT> [tx_ty]
+const S := 96.0
+const AMP := 2.6     # = HMAX de layout96 (height2.png normalisé)
 const DMAX := 220.0
 var DIR: String = OS.get_environment("DIORAMA_WORK").path_join("")
 const PASS_HEAD := "shader_type spatial; render_mode unshaded, cull_disabled;
@@ -16,6 +15,7 @@ void vertex() { dd = -(MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).z; }
 "
 const DEPTH_FRAG := "void fragment() { if (use_tex > 0.5 && texture(tex, UV).a < cut) discard; float v = clamp(dd / 220.0, 0.0, 1.0) * 255.0; ALBEDO = vec3(floor(v) / 255.0, fract(v), cls); }"
 const ID_FRAG := "uniform vec3 idc = vec3(0.0); void fragment() { if (use_tex > 0.5 && texture(tex, UV).a < cut) discard; ALBEDO = idc; }"
+const ID_FRAG_END := ""
 const NORMAL_FRAG := "void fragment() { if (use_tex > 0.5 && texture(tex, UV).a < cut) discard; vec3 n = (INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz; if (!FRONT_FACING) n = -n; ALBEDO = n * 0.5 + 0.5; }"
 var pass_shader: Shader
 const TINT_SHADER := "shader_type spatial; render_mode cull_disabled;
@@ -112,68 +112,75 @@ func _first_mesh(n: Node, t: Transform3D, out: Array) -> void:
 	for c in n.get_children():
 		_first_mesh(c, tt, out)
 
-func _terrain() -> MeshInstance3D:
+func _terrain() -> Node3D:
 	var himg := Image.load_from_file(DIR + "height2.png")
-	himg.convert(Image.FORMAT_RF) if himg.get_format() != Image.FORMAT_RF else null
+	himg.convert(Image.FORMAT_RF)
+	var HW: int = himg.get_width()
+	var root3 := Node3D.new()
+	var CHN := 2
 	var N := 480
+	var cs: float = S / CHN
+	var NT: int = N * CHN
 	var hs := PackedFloat32Array()
-	hs.resize((N + 1) * (N + 1))
-	var W := himg.get_width()
-	for j in range(N + 1):
-		for i in range(N + 1):
-			var px: int = mini(W - 1, int(float(i) / N * W))
-			var py: int = mini(W - 1, int(float(j) / N * W))
-			hs[j * (N + 1) + i] = himg.get_pixel(px, py).r * AMP
-	var st := SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for j in range(N):
-		for i in range(N):
-			var p00 := Vector3(float(i) / N * S, hs[j * (N + 1) + i], float(j) / N * S)
-			var p10 := Vector3(float(i + 1) / N * S, hs[j * (N + 1) + i + 1], float(j) / N * S)
-			var p01 := Vector3(float(i) / N * S, hs[(j + 1) * (N + 1) + i], float(j + 1) / N * S)
-			var p11 := Vector3(float(i + 1) / N * S, hs[(j + 1) * (N + 1) + i + 1], float(j + 1) / N * S)
-			var uv00 := Vector2(float(i) / N, float(j) / N)
-			var uv10 := Vector2(float(i + 1) / N, float(j) / N)
-			var uv01 := Vector2(float(i) / N, float(j + 1) / N)
-			var uv11 := Vector2(float(i + 1) / N, float(j + 1) / N)
-			for tri in [[p00, p10, p01, uv00, uv10, uv01], [p10, p11, p01, uv10, uv11, uv01]]:
-				for k in range(3):
-					st.set_uv(tri[3 + k])
-					st.add_vertex(tri[k])
-	st.generate_normals()
-	var mesh: ArrayMesh = st.commit()
-	var mat := StandardMaterial3D.new()
-	var gimg := Image.load_from_file(DIR + "ground4k.png")
-	gimg.generate_mipmaps()
-	mat.albedo_texture = ImageTexture.create_from_image(gimg)
-	print("tex ", mat.albedo_texture, " ", mat.albedo_texture.get_size())
-	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
-	mat.roughness = 1.0
-	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-	mesh.surface_set_material(0, mat)
-	var mi := MeshInstance3D.new()
-	mi.mesh = mesh
-	# jupe : bords du diorama (terre + strates)
+	hs.resize((NT + 1) * (NT + 1))
+	for j in range(NT + 1):
+		for i in range(NT + 1):
+			var px: int = mini(HW - 1, int(float(i) / NT * HW))
+			var py: int = mini(HW - 1, int(float(j) / NT * HW))
+			hs[j * (NT + 1) + i] = himg.get_pixel(px, py).r * AMP
+	for cj in range(CHN):
+		for ci in range(CHN):
+			var st := SurfaceTool.new()
+			st.begin(Mesh.PRIMITIVE_TRIANGLES)
+			for j in range(N):
+				for i in range(N):
+					var gi: int = ci * N + i
+					var gj: int = cj * N + j
+					var p00 := Vector3(float(gi) / NT * S, hs[gj * (NT + 1) + gi], float(gj) / NT * S)
+					var p10 := Vector3(float(gi + 1) / NT * S, hs[gj * (NT + 1) + gi + 1], float(gj) / NT * S)
+					var p01 := Vector3(float(gi) / NT * S, hs[(gj + 1) * (NT + 1) + gi], float(gj + 1) / NT * S)
+					var p11 := Vector3(float(gi + 1) / NT * S, hs[(gj + 1) * (NT + 1) + gi + 1], float(gj + 1) / NT * S)
+					var uv00 := Vector2(float(i) / N, float(j) / N)
+					var uv10 := Vector2(float(i + 1) / N, float(j) / N)
+					var uv01 := Vector2(float(i) / N, float(j + 1) / N)
+					var uv11 := Vector2(float(i + 1) / N, float(j + 1) / N)
+					for tri in [[p00, p10, p01, uv00, uv10, uv01], [p10, p11, p01, uv10, uv11, uv01]]:
+						for k in range(3):
+							st.set_uv(tri[3 + k])
+							st.add_vertex(tri[k])
+			st.generate_normals()
+			var mesh: ArrayMesh = st.commit()
+			var mat := StandardMaterial3D.new()
+			var gimg := Image.load_from_file(DIR + "ground_%d_%d.png" % [ci, cj])
+			gimg.generate_mipmaps()
+			mat.albedo_texture = ImageTexture.create_from_image(gimg)
+			mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+			mat.texture_repeat = false
+			mat.roughness = 1.0
+			mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+			mesh.surface_set_material(0, mat)
+			var mi := MeshInstance3D.new()
+			mi.mesh = mesh
+			root3.add_child(mi)
+	# jupe : bords du monde (terre + strates)
 	var sk := SurfaceTool.new()
 	sk.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var bottom := -1.7
 	var edges: Array = []
-	for i in range(N):
-		edges.append([Vector3(float(i) / N * S, hs[i], 0.0), Vector3(float(i + 1) / N * S, hs[i + 1], 0.0)])
-		edges.append([Vector3(float(i + 1) / N * S, hs[N * (N + 1) + i + 1], S), Vector3(float(i) / N * S, hs[N * (N + 1) + i], S)])
-		edges.append([Vector3(0.0, hs[(i + 1) * (N + 1)], float(i + 1) / N * S), Vector3(0.0, hs[i * (N + 1)], float(i) / N * S)])
-		edges.append([Vector3(S, hs[i * (N + 1) + N], float(i) / N * S), Vector3(S, hs[(i + 1) * (N + 1) + N], float(i + 1) / N * S)])
+	for i in range(NT):
+		edges.append([Vector3(float(i) / NT * S, hs[i], 0.0), Vector3(float(i + 1) / NT * S, hs[i + 1], 0.0)])
+		edges.append([Vector3(float(i + 1) / NT * S, hs[NT * (NT + 1) + i + 1], S), Vector3(float(i) / NT * S, hs[NT * (NT + 1) + i], S)])
+		edges.append([Vector3(0.0, hs[(i + 1) * (NT + 1)], float(i + 1) / NT * S), Vector3(0.0, hs[i * (NT + 1)], float(i) / NT * S)])
+		edges.append([Vector3(S, hs[i * (NT + 1) + NT], float(i) / NT * S), Vector3(S, hs[(i + 1) * (NT + 1) + NT], float(i + 1) / NT * S)])
 	for e in edges:
 		var a: Vector3 = e[0]
 		var b: Vector3 = e[1]
 		var ab := Vector3(a.x, bottom, a.z)
 		var bb := Vector3(b.x, bottom, b.z)
 		var nrm := (b - a).cross(ab - a).normalized()
-		# bandes de strates : 5 couches de teintes terre/roche
-		var layers := 5
-		for L in range(layers):
-			var t0: float = float(L) / layers
-			var t1: float = float(L + 1) / layers
+		for L in range(5):
+			var t0: float = float(L) / 5
+			var t1: float = float(L + 1) / 5
 			var c: Color = [Color(0.36, 0.25, 0.16), Color(0.43, 0.31, 0.20), Color(0.33, 0.24, 0.16), Color(0.46, 0.35, 0.24), Color(0.30, 0.22, 0.15)][L]
 			var va := a.lerp(ab, t0)
 			var vb := b.lerp(bb, t0)
@@ -192,7 +199,30 @@ func _terrain() -> MeshInstance3D:
 	skm.surface_set_material(0, smat)
 	var skirt := MeshInstance3D.new()
 	skirt.mesh = skm
-	mi.add_child(skirt)
+	root3.add_child(skirt)
+	return root3
+
+func _water(o: Dictionary) -> MeshInstance3D:
+	var cm := CylinderMesh.new()
+	cm.top_radius = 1.0
+	cm.bottom_radius = 1.0
+	cm.height = 0.02
+	cm.radial_segments = 96
+	var wm := StandardMaterial3D.new()
+	wm.albedo_color = Color(0.13, 0.28, 0.34)
+	wm.roughness = 0.12
+	wm.metallic_specular = 0.9
+	wm.rim_enabled = true
+	wm.rim = 0.35
+	cm.material = wm
+	var mi := MeshInstance3D.new()
+	mi.mesh = cm
+	var c: Array = o["c"]
+	var r: Array = o["r"]
+	mi.position = Vector3(float(c[0]), float(o["y"]), float(c[1]))
+	mi.rotation_degrees.y = -float(o["ang"])
+	mi.scale = Vector3(float(r[0]), 1.0, float(r[1]))
+	mi.set_meta("cls", 0.0)
 	return mi
 
 func _t(l: String) -> void:
@@ -222,6 +252,9 @@ func _boot() -> void:
 	var objs: Array = JSON.parse_string(FileAccess.get_file_as_string(DIR + "objects.json"))
 	var mm_groups := {}
 	for o in objs:
+		if o["type"] == "water":
+			world.add_child(_water(o))
+			continue
 		var p: Array = o["p"]
 		if o["type"] == "asm":
 			var asm := Node3D.new()
@@ -263,7 +296,10 @@ func _boot() -> void:
 			continue
 		var f: String = o["f"]
 		var tkey: String = f + ("|" + JSON.stringify(o["tint"]) if o.has("tint") else "")
-		var xf := Transform3D(Basis.from_euler(Vector3(0, deg_to_rad(float(o["r"])), 0)).scaled(Vector3.ONE * float(o["s"])), Vector3(p[0], p[1], p[2]))
+		var scv: Vector3 = Vector3.ONE * float(o["s"])
+		if o.has("sc"):
+			scv = Vector3(float(o["sc"][0]), float(o["sc"][1]), float(o["sc"][2])) * float(o["s"])
+		var xf := Transform3D(Basis.from_euler(Vector3(0, deg_to_rad(float(o["r"])), 0)) * Basis.from_scale(scv), Vector3(p[0], p[1], p[2]))
 		if o.get("mm", false):
 			if not mm_groups.has(tkey):
 				mm_groups[tkey] = []
@@ -271,6 +307,8 @@ func _boot() -> void:
 			continue
 		var n2: Node3D = _load(f).duplicate()
 		n2.transform = xf
+		if o.has("mul"):
+			_tint(n2, Color(float(o["mul"][0]), float(o["mul"][1]), float(o["mul"][2])), true)
 		n2.set_meta("oid", int(o.get("oid", 0)))
 		n2.set_meta("cls", 1.0 if (f.contains("kenney") or f.contains("Rock") or f.contains("rock")) else 0.5)
 		world.add_child(n2)
@@ -329,14 +367,14 @@ func _boot() -> void:
 	var env := WorldEnvironment.new()
 	env.environment = e
 	holder.add_child(env)
-	var center := Vector3(24, 0.0, 24)
+	var center := Vector3(48, 0.0, 48)
 	if mode == "beauty":
 		var sun := DirectionalLight3D.new()
 		sun.light_energy = 1.55
 		sun.light_color = Color(1.0, 0.93, 0.80)
 		sun.shadow_enabled = true
 		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
-		sun.directional_shadow_max_distance = 150.0
+		sun.directional_shadow_max_distance = 200.0
 		sun.shadow_bias = 0.03
 		sun.shadow_normal_bias = 1.2
 		sun.shadow_blur = 1.6
@@ -351,13 +389,10 @@ func _boot() -> void:
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
 	cam.keep_aspect = Camera3D.KEEP_HEIGHT
 	var nt: int = int(a[4]) if a.size() > 4 else 1
-	var tx: int = int(a[5]) if a.size() > 5 else 0
-	var ty: int = int(a[6]) if a.size() > 6 else 0
-	var full := 49.6
+	var only: String = a[5] if a.size() > 5 else ""
+	var full := 99.2
 	var fw := full * float(W) / float(H)
 	cam.size = full / nt
-	cam.h_offset = -fw / 2.0 + (tx + 0.5) * fw / nt
-	cam.v_offset = full / 2.0 - (ty + 0.5) * full / nt
 	cam.near = 0.5
 	cam.far = 260.0
 	holder.add_child(cam)
@@ -366,12 +401,17 @@ func _boot() -> void:
 	var dir := Vector3(1, 0.8165, 1).normalized()
 	cam.look_at_from_position(center + Vector3(0, 1.6, 0) + dir * 100.0, center + Vector3(0, 1.6, 0), Vector3.UP)
 	cam.current = true
-	for i in range(2):
-		await process_frame
-		_t("frame")
-	_t("frames")
-	await RenderingServer.frame_post_draw
-	vp.get_texture().get_image().save_png(out)
+	for ty in range(nt):
+		for tx in range(nt):
+			if only != "" and only != "%d_%d" % [tx, ty]:
+				continue
+			cam.h_offset = -fw / 2.0 + (tx + 0.5) * fw / nt
+			cam.v_offset = full / 2.0 - (ty + 0.5) * full / nt
+			for i in range(3):
+				await process_frame
+			await RenderingServer.frame_post_draw
+			vp.get_texture().get_image().save_png(out.path_join("%s_%d_%d.png" % [mode, tx, ty]))
+			_t("tuile %d %d" % [tx, ty])
 	quit()
 
 var cur_oid: int = 0
@@ -380,7 +420,7 @@ func _pass_mat(m: Material, cls: float) -> ShaderMaterial:
 	var sm := ShaderMaterial.new()
 	sm.shader = pass_shader
 	sm.set_shader_parameter("cls", cls)
-	sm.set_shader_parameter("idc", Color(float(56 + (cur_oid % 13) * 15) / 255.0, float(56 + (cur_oid / 13) * 15) / 255.0, 0.0) if cur_oid > 0 else Color(0, 0, 0))
+	sm.set_shader_parameter("idc", Color(float(56 + (cur_oid % 13) * 15) / 255.0, float(56 + ((cur_oid / 13) % 13) * 15) / 255.0, float(56 + (cur_oid / 169) * 15) / 255.0) if cur_oid > 0 else Color(0, 0, 0))
 	if m is ShaderMaterial and (m as ShaderMaterial).get_shader_parameter("tex") != null:
 		sm.set_shader_parameter("tex", (m as ShaderMaterial).get_shader_parameter("tex"))
 		sm.set_shader_parameter("use_tex", 1.0)

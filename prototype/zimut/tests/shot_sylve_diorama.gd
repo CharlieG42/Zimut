@@ -2,7 +2,7 @@ extends SceneTree
 ## V115 — Captures in-engine de la carte 2D Sylve « Diorama » (scène 3D pré-rendue HD-2D).
 ## Nécessite un écran virtuel :
 ##   xvfb-run -a -s "-screen 0 1920x1080x24" godot --rendering-method gl_compatibility --path . -s tests/shot_sylve_diorama.gd -- <dossier>
-## Produit : diorama_depart.png, diorama_place.png, diorama_derriere.png (héros masqué par une maison), diorama_options.png
+## Produit : diorama_depart.png, diorama_place.png, diorama_derriere.png, diorama_lac.png, diorama_ruines.png
 func _init() -> void:
 	_boot.call_deferred()
 
@@ -31,8 +31,8 @@ func _boot() -> void:
 	pm.adventure_unlock_zone(adv, zone)
 	pm.adventure_enter_zone(adv, zone)
 	var st: Vector2i = BA.start(zone)
-	for y in range(72):
-		for x in range(72):
+	for y in range(144):
+		for x in range(144):
 			adv["discovered"].append("%s,%d,%d" % [zone, x, y])
 	adv["hero_pos"] = [st.x, st.y]
 	var sc: Node = (load("res://scenes/AdventureMap.tscn") as PackedScene).instantiate()
@@ -41,13 +41,14 @@ func _boot() -> void:
 	await _shot(out + "/diorama_depart.png")
 	print("départ ", st, " héros ", sc.manager.hero_pos())
 	# héros posé à d'autres endroits : place du village, puis derrière une maison (occultation)
-	var spots: Dictionary = {"place": Vector2i(36, 30), "derriere": Vector2i(int(args[1]), int(args[2])) if args.size() > 2 else Vector2i(24, 21)}
+	var spots: Dictionary = {"place": Vector2i(72, 66), "derriere": Vector2i(int(args[1]), int(args[2])) if args.size() > 2 else Vector2i(60, 57), "lac": Vector2i(118, 36), "ruines": Vector2i(26, 26)}
 	for nm: String in spots.keys():
 		var dest: Vector2i = spots[nm]
 		sc.manager.state["hero_pos"] = [dest.x, dest.y]
 		sc._hero.position = sc.cell_center(dest)
 		sc._apply_hero_depth(dest)
 		sc._focus_cell(dest, false)
+		sc._dio_sync = true
 		await create_timer(0.6).timeout
 		await _shot(out + "/diorama_%s.png" % nm)
 	gs.set_sylvestre_board(before)

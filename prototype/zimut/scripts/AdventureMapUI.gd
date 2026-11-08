@@ -82,6 +82,11 @@ var _slot: int = -1
 var _map_view: Control
 var _world: Node2D
 var _backdrop: Node2D
+## V115 : diorama — morceaux (tuiles de fond / pages d'occultants) chargés à la demande selon la vue.
+## [{path, rect (monde), sprites: Array[Sprite2D], req: bool}]
+var _dio_chunks: Array = []
+var _dio_clock: float = 0.0
+var _dio_sync: bool = true
 var _bg_grad: Gradient
 var _board: AdventureBoard
 var _entities: Node2D
@@ -197,9 +202,9 @@ func _build() -> void:
 	_recenter_btn.anchor_top = 1.0
 	_recenter_btn.anchor_bottom = 1.0
 	_recenter_btn.offset_left = 14.0
-	_recenter_btn.offset_top = -74.0
+	_recenter_btn.offset_top = -316.0     # V115 : au-dessus du joystick (qui le recouvrait)
 	_recenter_btn.offset_right = 190.0
-	_recenter_btn.offset_bottom = -14.0
+	_recenter_btn.offset_bottom = -256.0
 	_recenter_btn.pressed.connect(func() -> void: _recenter(true))
 	_recenter_btn.hide()
 	_map_view.add_child(_recenter_btn)
@@ -214,10 +219,10 @@ func _build() -> void:
 	_zoom_in_btn.anchor_right = 1.0
 	_zoom_in_btn.anchor_top = 1.0
 	_zoom_in_btn.anchor_bottom = 1.0
-	_zoom_in_btn.offset_left = -126.0
-	_zoom_in_btn.offset_top = -146.0
-	_zoom_in_btn.offset_right = -70.0
-	_zoom_in_btn.offset_bottom = -90.0
+	_zoom_in_btn.offset_left = -86.0      # V115 : colonne de droite, au-dessus de l'aide (qui les masquait)
+	_zoom_in_btn.offset_top = -270.0
+	_zoom_in_btn.offset_right = -24.0
+	_zoom_in_btn.offset_bottom = -208.0
 	_zoom_in_btn.pressed.connect(func() -> void: _zoom_at(_map_view.size * 0.5, 1.15))
 	_zoom_in_btn.hide()
 	_map_view.add_child(_zoom_in_btn)
@@ -231,10 +236,10 @@ func _build() -> void:
 	_zoom_out_btn.anchor_right = 1.0
 	_zoom_out_btn.anchor_top = 1.0
 	_zoom_out_btn.anchor_bottom = 1.0
-	_zoom_out_btn.offset_left = -126.0
-	_zoom_out_btn.offset_top = -82.0
-	_zoom_out_btn.offset_right = -70.0
-	_zoom_out_btn.offset_bottom = -26.0
+	_zoom_out_btn.offset_left = -86.0
+	_zoom_out_btn.offset_top = -200.0
+	_zoom_out_btn.offset_right = -24.0
+	_zoom_out_btn.offset_bottom = -138.0
 	_zoom_out_btn.pressed.connect(func() -> void: _zoom_at(_map_view.size * 0.5, 1.0 / 1.15))
 	_zoom_out_btn.hide()
 	_map_view.add_child(_zoom_out_btn)
@@ -438,9 +443,45 @@ func _on_action_pressed() -> void:
 
 
 func _process(_delta: float) -> void:
+	if not _dio_chunks.is_empty():
+		_dio_clock += _delta
+		if _dio_sync or _dio_clock >= 0.15:
+			_dio_clock = 0.0
+			_diorama_stream()
 	if _joystick == null or not _joystick.pushed() or _walking or _modal_root != null:
 		return
 	_joy_step(_joystick.vector)
+
+
+## V115 : diorama — charge les tuiles / pages d'occultants proches de la vue (fil de chargement), libère les autres.
+## Le premier passage (et après une reconstruction) charge de façon synchrone pour éviter un écran vide.
+func _diorama_stream() -> void:
+	if _world == null or _map_view == null:
+		return
+	var sc: float = maxf(_world.scale.x, 0.01)
+	var view := Rect2(-_world.position / sc, _map_view.size / sc).grow(900.0 / sc + 400.0)
+	var sync: bool = _dio_sync
+	_dio_sync = false
+	for ch: Dictionary in _dio_chunks:
+		var want: bool = view.intersects(ch["rect"])
+		var spr: Sprite2D = (ch["sprites"] as Array)[0]
+		var path: String = ch["path"]
+		if want and spr.texture == null:
+			var tex: Texture2D = null
+			if sync or ResourceLoader.has_cached(path):
+				tex = load(path) as Texture2D
+			elif not bool(ch["req"]):
+				ResourceLoader.load_threaded_request(path, "Texture2D")
+				ch["req"] = true
+			elif ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_LOADED:
+				tex = ResourceLoader.load_threaded_get(path) as Texture2D
+				ch["req"] = false
+			if tex != null:
+				for s2: Sprite2D in ch["sprites"]:
+					s2.texture = tex
+		elif not want and spr.texture != null:
+			for s2: Sprite2D in ch["sprites"]:
+				s2.texture = null
 
 
 ## Un pas dans la direction du joystick ; si l'axe de grille voulu est bloqué, essaie l'autre.
@@ -612,18 +653,21 @@ func _rebuild_board(biome: String) -> void:
 	var zs: Vector2i = manager.zone_size()
 	var d: Dictionary = BoardArt.raw(zid)
 	var ws: Vector2 = BoardArt.world_size(zid)
+	_dio_chunks.clear()
 	if BoardArt.is_diorama(zid):
 		# V115 : « Diorama » — scène 3D pré-rendue (tuiles) posée sur le plateau iso ; héros, lieux et monstres par-dessus.
 		var holder := Node2D.new()
 		holder.z_index = 0
+		holder.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		_world.add_child(holder)
+		_dio_sync = true
 		for t: Dictionary in BoardArt.diorama_tiles(zid):
 			var tile := Sprite2D.new()
-			tile.texture = t["tex"]
 			tile.centered = false
 			tile.position = t["pos"]
 			tile.scale = Vector2.ONE * BoardArt.diorama_scale(zid)
 			holder.add_child(tile)
+			_dio_chunks.append({"path": t["path"], "rect": Rect2(t["pos"], t["size"]), "sprites": [tile], "req": false})
 		_backdrop = holder
 	elif BoardArt.is_iso(zid):
 		var ground := IsoGround.new()
@@ -673,16 +717,23 @@ func _rebuild_board(biome: String) -> void:
 		for p2: Vector2i in (terrain["decor"] as Dictionary).keys():
 			_add_decor(p2, String(terrain["decor"][p2]), biome, pal, 0.7, false, false, int(BoardArt.heights(zid).get(p2, 0)))
 		# V115 : bâtiments et arbres du diorama découpés dans le rendu : ils passent devant le héros quand il est derrière.
+		var pages := {}
 		for oc: Dictionary in BoardArt.diorama_occluders(zid):
 			var os := Sprite2D.new()
-			os.texture = oc["tex"]
 			os.region_enabled = true
 			os.region_rect = oc["rect"]
 			os.centered = false
 			os.position = oc["pos"]
 			os.scale = Vector2.ONE * BoardArt.diorama_scale(zid)
+			os.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 			os.z_index = _depth(oc["cell"]) + 3
 			_entities.add_child(os)
+			var pk: int = int(oc["page"])
+			if not pages.has(pk):
+				pages[pk] = {"path": oc["path"], "rect": Rect2(oc["pos"], oc["size"]), "sprites": [], "req": false}
+				_dio_chunks.append(pages[pk])
+			(pages[pk]["sprites"] as Array).append(os)
+			pages[pk]["rect"] = (pages[pk]["rect"] as Rect2).merge(Rect2(oc["pos"], oc["size"]))
 		for b: Dictionary in BoardArt.buildings(zid):
 			var bn := BuildingNode.new()
 			bn.kind = String(b["k"])
@@ -1190,9 +1241,9 @@ func _build_edit_ui() -> void:
 	_edit_btn.anchor_top = 1.0
 	_edit_btn.anchor_bottom = 1.0
 	_edit_btn.offset_left = 204.0
-	_edit_btn.offset_top = -74.0
+	_edit_btn.offset_top = -316.0
 	_edit_btn.offset_right = 390.0
-	_edit_btn.offset_bottom = -14.0
+	_edit_btn.offset_bottom = -256.0
 	_edit_btn.pressed.connect(func() -> void: _set_edit(not _edit_on))
 	_edit_btn.hide()
 	_map_view.add_child(_edit_btn)
@@ -1202,8 +1253,8 @@ func _build_edit_ui() -> void:
 	_edit_bar.anchor_top = 1.0
 	_edit_bar.anchor_bottom = 1.0
 	_edit_bar.offset_left = 250.0
-	_edit_bar.offset_top = -150.0
-	_edit_bar.offset_bottom = -90.0
+	_edit_bar.offset_top = -392.0
+	_edit_bar.offset_bottom = -332.0
 	_edit_bar.offset_right = 1450.0
 	_edit_bar.hide()
 	_map_view.add_child(_edit_bar)

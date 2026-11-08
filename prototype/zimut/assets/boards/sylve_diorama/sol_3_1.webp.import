@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://q1k6vq3pyesh"
-path="res://.godot/imported/occ_1.webp-99e0403d33519e1427379043555c893a.ctex"
+uid="uid://r77lryuupdqb"
+path="res://.godot/imported/sol_3_1.webp-7aa3182e71653b7251848ccd8792d660.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/boards/sylve_diorama/occ_1.webp"
-dest_files=["res://.godot/imported/occ_1.webp-99e0403d33519e1427379043555c893a.ctex"]
+source_file="res://assets/boards/sylve_diorama/sol_3_1.webp"
+dest_files=["res://.godot/imported/sol_3_1.webp-7aa3182e71653b7251848ccd8792d660.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
