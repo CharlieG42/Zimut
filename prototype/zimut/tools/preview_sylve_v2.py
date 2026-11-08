@@ -121,6 +121,11 @@ def main() -> None:
     d = json.loads((BOARDS / (name + ".json")).read_text(encoding="utf-8"))
     img = Image.open(ROOT / str(d["image"]).replace("res://", "")).convert("RGBA")
     base = img.resize((int(img.width * IMAGE_SCALE), int(img.height * IMAGE_SCALE)), Image.LANCZOS)
+    # V114 : couche de détails peints (clé "detail", fond transparent) au-dessus de la planche
+    if d.get("detail"):
+        det = Image.open(ROOT / str(d["detail"]).replace("res://", "")).convert("RGBA")
+        det = det.resize(base.size, Image.LANCZOS)
+        base.alpha_composite(det)
     sprites = load_sprites_table()
     decor = {tuple(int(v) for v in k.split(",")): v for k, v in d.get("decor", {}).items()}
     over = {tuple(int(v) for v in k.split(",")): v for k, v in d.get("over", {}).items()}
