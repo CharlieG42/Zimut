@@ -70,6 +70,8 @@ const NATION_POI_PROP := {
 	"Ombres": ["gravestone", "thorn_bush", "cracked_obelisk", "purple_torch", "raven_perch", "dark_gate"],
 	"Rouages": ["gear_tower", "scrap_pile", "cog_wheel", "anvil", "tesla_coil", "workshop_crane"],
 }
+## V129 : profondeur d'affichage des portails, au-dessus de tous les éléments du décor (max ~1150), sous l'interface (1320).
+const PORTAL_Z := 1190
 const POI_KIND_INDEX := {"combat": 0, "chest": 1, "puzzle": 2, "camp": 3, "reveal": 4, "exit": 5}
 const RUNE_SHAPES: Array = ["●", "▲", "■", "◆", "★", "✚"]
 const RUNE_COLORS: Array = [Color(0.95, 0.40, 0.35), Color(0.35, 0.80, 0.45), Color(0.35, 0.60, 1.0),
@@ -1007,6 +1009,9 @@ func _refresh_world() -> void:
 				# V119 : les donjons gardent leur étiquette d'état (Ouvert / Verrouillé / Terminé) en permanence.
 				pn.show_label = pn.is_dungeon or ((pn.nearby or p == _board.hover) and not pn.done)
 				pn.z_index = _depth(p) + (3 if pn.show_label else 1) if board_depth else (3 if pn.show_label else 0)
+				if pn.portal and board_depth:
+					pn.z_index = PORTAL_Z     # V129 : jamais caché par un arbre ou un bâtiment découpé du décor
+					pn.scale = Vector2.ONE * 1.3
 				pn.queue_redraw()
 			elif n is GateNode:
 				n.z_index = _depth(p) + 2 if board_depth else 2
@@ -1295,8 +1300,8 @@ func _pointer_to_cell(screen_pos: Vector2) -> Vector2i:
 			if not (node is PoiNode) or not node.visible:
 				continue
 			var poi_node: PoiNode = node
-			var icon_center: Vector2 = cell_center(p) + Vector2(0, -112.0 if poi_node.is_dungeon else -94.0)
-			var hit_radius: float = 48.0 if poi_node.is_dungeon else 42.0
+			var icon_center: Vector2 = cell_center(p) + Vector2(0, -90.0 if poi_node.portal else (-112.0 if poi_node.is_dungeon else -94.0))
+			var hit_radius: float = 80.0 if poi_node.portal else (48.0 if poi_node.is_dungeon else 42.0)
 			var distance: float = world_pos.distance_squared_to(icon_center)
 			if distance <= hit_radius * hit_radius and distance < best_distance:
 				best = p
@@ -2382,6 +2387,15 @@ func _check_mastery() -> bool:
 	return true
 
 
+## V129 : case du portail vers la Nation suivante sur la carte courante ((-1,-1) s'il n'y en a pas).
+func portal_cell() -> Vector2i:
+	var pois: Dictionary = ProgressionManager.adventure_zone_pois(manager.zone_id())
+	for k: String in pois.keys():
+		if manager.is_portal(pois[k]):
+			return AdventureTerrain.parse(k)
+	return Vector2i(-1, -1)
+
+
 ## Objectifs de la carte (panneau latéral, hors lieu).
 func _objectives_into(v: VBoxContainer) -> void:
 	v.add_child(U.lbl("OBJECTIFS DE LA CARTE", 18, U.C_GOLD))
@@ -2406,6 +2420,17 @@ func _objectives_into(v: VBoxContainer) -> void:
 		var hl: Label = U.lbl("📜 Passez au camp pour prendre un contrat de chasse.", 16, DIM)
 		hl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(hl)
+	# V129 : le portail de la Nation — état, et bouton pour le montrer sur la carte
+	var pc: Vector2i = portal_cell()
+	if pc.x >= 0:
+		var ppoi: Dictionary = manager.poi_at(pc)
+		var plock: Dictionary = manager.portal_lock(ppoi)
+		var pb := U.btn("🌀 Portail OUVERT · le voir" if plock.is_empty() else "🔒 Portail scellé · le voir",
+			PoiNode.PORTAL_OPEN if plock.is_empty() else U.C_BORDER, 18, Vector2(0, 52))
+		pb.tooltip_text = String(ppoi.get("name", "Portail"))
+		pb.name = "PortalShow"
+		pb.pressed.connect(func() -> void: _focus_cell(pc, true, 0.6))
+		v.add_child(pb)
 	var n: int = manager.mobs().size()
 	var kills: int = int((manager.state.get("mob_kills", {}) as Dictionary).get(manager.zone_id(), 0))
 	v.add_child(U.lbl("⚔ Groupes de monstres : %d sur la carte · %d vaincus" % [n, kills], 16, DIM))
@@ -3575,10 +3600,31 @@ class PoiNode extends Node2D:
 	const DUN_LOCK := Color(0.56, 0.50, 0.54)
 	const DUN_DONE := Color(0.42, 0.82, 0.48)
 
+	const PORTAL_OPEN := Color(0.42, 0.92, 1.0)
+
 	func _dungeon_col() -> Color:
+		if portal:
+			return DUN_LOCK if locked else PORTAL_OPEN
 		if done:
 			return DUN_DONE
 		return DUN_LOCK if locked else DUN_OPEN
+
+	## V129 : le portail lui-même — un ovale dressé, cœur sombre, anneaux qui tournent quand il est ouvert.
+	func _draw_portal(col: Color, pulse: float) -> void:
+		var open: bool = not locked
+		draw_set_transform(Vector2(0, -60), 0.0, Vector2(0.66, 1.0))
+		draw_circle(Vector2.ZERO, 66.0 + pulse * 4.0, Color(col.r, col.g, col.b, 0.16 + 0.10 * pulse if open else 0.08))
+		draw_circle(Vector2.ZERO, 54.0, Color(0.02, 0.04, 0.10, 0.92))
+		if open:
+			draw_circle(Vector2.ZERO, 46.0, Color(col.r * 0.25, col.g * 0.45, col.b * 0.65, 0.85))
+			for k: int in range(4):
+				var rr: float = 12.0 + float(k) * 10.0
+				var a0: float = _t * (1.6 - float(k) * 0.25) * (1.0 if k % 2 == 0 else -1.0) + float(k) * 1.3
+				draw_arc(Vector2.ZERO, rr, a0, a0 + PI * 1.25, 20, Color(col.r, col.g, col.b, 0.85 - float(k) * 0.12).lightened(0.35), 3.4, true)
+			draw_circle(Vector2.ZERO, 6.0 + pulse * 3.0, Color(1, 1, 1, 0.9))
+		draw_arc(Vector2.ZERO, 54.0, 0.0, TAU, 48, Color(0.86, 0.84, 0.78) if open else Color(0.52, 0.50, 0.52), 9.0, true)
+		draw_arc(Vector2.ZERO, 59.0, 0.0, TAU, 48, col if open else col.darkened(0.2), 3.0, true)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 	## Cadenas vectoriel (les émojis ne s'affichent pas sur tous les Android).
 	func _draw_padlock(c: Vector2, s: float) -> void:
@@ -3600,15 +3646,17 @@ class PoiNode extends Node2D:
 		var dun_open: bool = is_dungeon and not done and not locked
 		if dun_open:
 			# Colonne de lumière dorée : un donjon ouvert se repère de loin, même dézoomé.
-			var bh: float = 230.0
+			var bh: float = 340.0 if portal else 230.0
 			for k: int in range(4):
 				var w: float = 30.0 - float(k) * 7.0
 				var a: float = (0.07 + 0.05 * pulse) * (1.0 + float(k) * 0.6)
 				draw_colored_polygon(PackedVector2Array([Vector2(-w, 0), Vector2(w, 0), Vector2(w * 0.45, -bh), Vector2(-w * 0.45, -bh)]),
-					Color(1.0, 0.86, 0.45, a))
+					Color(col.r, col.g, col.b, a * 1.5) if portal else Color(1.0, 0.86, 0.45, a))
 			for k: int in range(3):
 				var f: float = fmod(_t * 0.35 + float(k) / 3.0, 1.0)
 				draw_circle(Vector2(sin(_t * 1.3 + float(k) * 2.1) * 10.0, -f * bh), 2.4, Color(1.0, 0.95, 0.70, 0.75 * (1.0 - f)))
+		if portal:
+			_draw_portal(col, pulse)
 		# Assise au sol : ombre douce et anneau de matière pour mieux détacher le POI du décor.
 		# Cette couche est purement graphique et reste centrée sur la position existante.
 		var ground_radius: float = 48.0 if is_dungeon else 34.0
@@ -3673,7 +3721,7 @@ class PoiNode extends Node2D:
 		var bob: float = sin(_t * 2.0) * 4.0
 		var icon_r: float = 33.0 if is_dungeon else 28.0
 		var icon_size: float = 58.0 if is_dungeon else 46.0
-		var icon_y: float = -122.0 if is_dungeon else -104.0
+		var icon_y: float = -168.0 if portal else (-122.0 if is_dungeon else -104.0)
 		var ic := Vector2(0, icon_y + bob)
 		if dun_open:
 			draw_circle(ic, icon_r + 9.0 + pulse * 3.0, Color(1.0, 0.75, 0.25, 0.22))

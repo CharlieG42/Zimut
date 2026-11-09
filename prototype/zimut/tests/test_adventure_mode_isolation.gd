@@ -219,7 +219,7 @@ func _boot() -> void:
 	check(map_ui.contains("var _idle_timer: float = 4.0") and map_ui.contains("_idle_variant = idle_pool[randi() % idle_pool.size()]")
 		and map_ui.contains("if not walking and _idle_variant != null"),
 		"les poses de repos du héros sont choisies par séquences espacées et stables")
-	check(map_ui.contains("func _pointer_to_cell") and map_ui.contains("distance_squared_to(icon_center)") and map_ui.contains("hit_radius: float = 48.0 if poi_node.is_dungeon else 42.0"),
+	check(map_ui.contains("func _pointer_to_cell") and map_ui.contains("distance_squared_to(icon_center)") and map_ui.contains("48.0 if poi_node.is_dungeon else 42.0"),
 		"les icônes de lieux et de donjons disposent d'une zone tactile élargie")
 	check(map_ui.contains("pn.nearby = hero_distance <= near and not pn.done") and map_ui.contains("if nearby:") and map_ui.contains("draw_arc(ic, icon_r + 7.0 + pulse * 3.0"),
 		"les lieux proches du héros affichent un halo pulsé discret indiquant leur disponibilité")
