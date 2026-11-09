@@ -151,6 +151,8 @@ func _ready() -> void:
 	gfx.add_child(_setting_cell("Cartes 2D (Sylve et Cimes)", ["Nouvelle", "Ancienne", "Iso (test)", "Diorama"] as Array[String],
 		BOARD_VARIANTS.find(GameSettings.sylvestre_board) if BOARD_VARIANTS.has(GameSettings.sylvestre_board) else 0,
 		func(idx: int) -> void: GameSettings.set_sylvestre_board(BOARD_VARIANTS[idx])))
+	gfx.add_child(_setting_cell("Compteur d'images (carte d'aventure)", ["Masqué", "Affiché"] as Array[String],
+		1 if GameSettings.show_perf else 0, func(idx: int) -> void: GameSettings.set_show_perf(idx == 1)))
 	var gfx_hint := Label.new()
 	gfx_hint.text = "« Diorama » : la Sylve et le Brasier en scènes 3D pré-rendues (lumière, brume, maisons et arbres qui masquent le héros). Les autres Nations gardent leur carte."
 	gfx_hint.add_theme_font_size_override("font_size", 17)

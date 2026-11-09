@@ -272,7 +272,7 @@ func move_hero(pos: Vector2i) -> Array:
 	if not can_move_to(pos):
 		return []
 	var fresh: Array = ProgressionManager.adventure_move(state, pos)
-	persist()
+	persist_soon()
 	return fresh
 
 ## Trouvailles cachées : herbes, bourses, reliques à ramasser en explorant.
@@ -607,7 +607,36 @@ func check_mastery() -> Dictionary:
 	return r
 
 
+## V119 : pendant la marche, la sauvegarde (JSON complet + copie de secours + relecture, à chaque pas)
+## faisait saccader le déplacement sur téléphone. On la regroupe : une écriture 1,2 s après le dernier
+## pas ; toute autre action (combat, coffre, sortie…) ou la sortie de l'écran écrit immédiatement.
+const PERSIST_DELAY := 1.2
+var _dirty: bool = false
+var _dirty_gen: int = 0
+
+func persist_soon() -> void:
+	if save.is_empty() or slot < 0:
+		return
+	_dirty = true
+	_dirty_gen += 1
+	var gen: int = _dirty_gen
+	if not is_inside_tree():
+		persist()
+		return
+	get_tree().create_timer(PERSIST_DELAY).timeout.connect(func() -> void:
+		if _dirty and gen == _dirty_gen:
+			persist())
+
+func flush() -> void:
+	if _dirty:
+		persist()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_EXIT_TREE or what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		flush()
+
 func persist() -> void:
+	_dirty = false
 	if save.is_empty() or slot < 0:
 		return
 	save["adventure"] = state

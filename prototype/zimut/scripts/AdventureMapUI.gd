@@ -88,6 +88,11 @@ var _dio_chunks: Array = []
 var _dio_clock: float = 0.0
 var _dio_sync: bool = true
 var _dio_low: Sprite2D = null
+var _dio_pending: bool = false
+## V119 : compteur de fluidité (Réglages › Graphismes) : images/s, moyenne et pire image sur 2 s.
+var _perf_lbl: Label = null
+var _perf_acc: Array[float] = []
+var _perf_clock: float = 0.0
 var _bg_grad: Gradient
 var _board: AdventureBoard
 var _entities: Node2D
@@ -254,6 +259,7 @@ func _build() -> void:
 	_fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_fade.z_index = 1420  # au-dessus des panonceaux (z_index des nœuds du monde)
+	_fade.visible = false   # V119 : n'est montré que pendant une transition (couche plein écran)
 	_map_view.add_child(_fade)
 
 	# Bandeau d'annonce (fondu)
@@ -265,8 +271,15 @@ func _build() -> void:
 	_toast.modulate.a = 0.0
 	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_toast.z_index = 1421
+	_toast.visible = false
 	_map_view.add_child(_toast)
 	_build_hud()
+	if GameSettings.show_perf:
+		_perf_lbl = U.lbl("…", 18, Color(0.6, 1.0, 0.6), true)
+		_perf_lbl.position = Vector2(16, 112)
+		_perf_lbl.z_index = 1330
+		_perf_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_map_view.add_child(_perf_lbl)
 
 	# Panneau latéral
 	var side := PanelContainer.new()
@@ -444,14 +457,36 @@ func _on_action_pressed() -> void:
 
 
 func _process(_delta: float) -> void:
+	if _perf_lbl != null:
+		_perf_tick(_delta)
 	if not _dio_chunks.is_empty():
 		_dio_clock += _delta
-		if _dio_sync or _dio_clock >= 0.15:
+		if _dio_sync or _dio_pending or _dio_clock >= 0.15:
 			_dio_clock = 0.0
 			_diorama_stream()
 	if _joystick == null or not _joystick.pushed() or _walking or _modal_root != null:
 		return
 	_joy_step(_joystick.vector)
+
+
+func _perf_tick(dt: float) -> void:
+	_perf_acc.append(dt)
+	_perf_clock += dt
+	if _perf_clock < 0.5:
+		return
+	_perf_clock = 0.0
+	while _perf_acc.size() > 240:
+		_perf_acc.remove_at(0)
+	var tot: float = 0.0
+	var worst: float = 0.0
+	var slow: int = 0
+	for v: float in _perf_acc:
+		tot += v
+		worst = maxf(worst, v)
+		if v > 1.0 / 40.0:
+			slow += 1
+	var avg: float = tot / maxf(1.0, float(_perf_acc.size()))
+	_perf_lbl.text = "%d i/s · %.0f ms · pire %.0f ms · saccades %d" % [roundi(1.0 / maxf(avg, 0.0001)), avg * 1000.0, worst * 1000.0, slow]
 
 
 ## V115 : diorama — charge les tuiles / pages d'occultants proches de la vue (fil de chargement), libère les autres.
@@ -467,11 +502,18 @@ func _diorama_stream() -> void:
 	var keep := vis.grow(2200.0 / sc + 900.0)
 	var sync: bool = _dio_sync
 	_dio_sync = false
+	# V119 : au plus UN nouveau morceau envoyé au GPU par image (l'envoi d'une grande texture bloque
+	# l'image courante : plusieurs d'un coup au dézoom faisaient une saccade).
+	var budget: int = 99 if sync else 1
+	_dio_pending = false
 	for ch: Dictionary in _dio_chunks:
 		var want: bool = view.intersects(ch["rect"])
 		var spr: Sprite2D = (ch["sprites"] as Array)[0]
 		var path: String = ch["path"]
 		if want and spr.texture == null:
+			if budget <= 0:
+				_dio_pending = true
+				continue
 			var tex: Texture2D = null
 			if sync or ResourceLoader.has_cached(path):
 				tex = load(path) as Texture2D
@@ -482,8 +524,11 @@ func _diorama_stream() -> void:
 				tex = ResourceLoader.load_threaded_get(path) as Texture2D
 				ch["req"] = false
 			if tex != null:
+				budget -= 1
 				for s2: Sprite2D in ch["sprites"]:
 					s2.texture = tex
+			else:
+				_dio_pending = true
 		elif spr.texture != null and not keep.intersects(ch["rect"]):
 			for s2: Sprite2D in ch["sprites"]:
 				s2.texture = null
@@ -882,7 +927,8 @@ func _refresh_world() -> void:
 				var near: int = 4 if board_depth else 2
 				var hero_distance: int = absi(p.x - hp.x) + absi(p.y - hp.y)
 				pn.nearby = hero_distance <= near and not pn.done
-				pn.show_label = (pn.is_dungeon or pn.nearby or p == _board.hover) and not pn.done
+				# V119 : les donjons gardent leur étiquette d'état (Ouvert / Verrouillé / Terminé) en permanence.
+				pn.show_label = pn.is_dungeon or ((pn.nearby or p == _board.hover) and not pn.done)
 				pn.z_index = _depth(p) + (3 if pn.show_label else 1) if board_depth else (3 if pn.show_label else 0)
 				pn.queue_redraw()
 			elif n is GateNode:
@@ -1625,11 +1671,13 @@ func _cross_gate(pos: Vector2i) -> void:
 		out_pos += Vector2(0, 90)
 		dur = 0.7
 		_toast_show(String(g.get("text", "")), 22)
+	_fade.visible = true
 	tw.tween_property(_hero, "position", out_pos, dur)
 	tw.parallel().tween_property(_fade, "color:a", 1.0, dur)
 	await tw.finished
 	if not manager.cross_gate(pos):
 		_fade.color.a = 0.0
+		_fade.visible = false
 		_walking = false
 		_rebuild_world()
 		return
@@ -1648,6 +1696,7 @@ func _cross_gate(pos: Vector2i) -> void:
 	await tw2.finished
 	_walking = false
 	_fade.color = Color(0.86, 0.91, 0.95, 0.0)
+	_fade.visible = false
 	_refresh_world()
 	_refresh_side()
 	var team_lvl: int = 1
@@ -2599,11 +2648,13 @@ func _toast_show(text: String, size: int = 26) -> void:
 	_toast.text = text
 	_toast.add_theme_font_size_override("font_size", size)
 	_toast.modulate.a = 1.0
+	_toast.visible = true
 	if _toast_tw != null and _toast_tw.is_valid():
 		_toast_tw.kill()
 	_toast_tw = create_tween()
 	_toast_tw.tween_interval(1.6)
 	_toast_tw.tween_property(_toast, "modulate:a", 0.0, 0.6)
+	_toast_tw.tween_callback(func() -> void: _toast.visible = false)
 
 
 func _log(text: String) -> void:
@@ -2644,13 +2695,26 @@ class AdventureBoard extends Node2D:
 	var hover: Vector2i = Vector2i(-1, -1)
 	var preview: Array = []
 	var _t: float = 0.0
+	var _sig: String = ""
+	var _since: float = 0.0
 
 	func _ready() -> void:
 		set_process(true)
 
+	## V119 : ne redessine que si quelque chose a changé (survol, trajet, brouillard…) ; sur les cartes
+	## générées, le brouillard ondule doucement : 4 fois par seconde suffisent (avant : chaque image,
+	## des milliers de nuages redessinés).
 	func _process(delta: float) -> void:
 		_t += delta
-		queue_redraw()
+		_since += delta
+		var mgr: Node = ui.manager if ui != null else null
+		var sig: String = "%s|%d|%s|%s|%d|%d" % [str(hover), preview.size(), str(preview[0]) if not preview.is_empty() else "",
+			str(ui._edit_on) if ui != null else "", int(mgr.moves()) if mgr != null else 0, BoardArt.rev]
+		var animated: bool = ui != null and not ui.is_board() and _since >= 0.25
+		if sig != _sig or animated:
+			_sig = sig
+			_since = 0.0
+			queue_redraw()
 
 
 	func _diamond(c: Vector2, s: float = 1.0) -> PackedVector2Array:
@@ -3410,9 +3474,45 @@ class PoiNode extends Node2D:
 			pts.append(center + Vector2(cos(a), sin(a)) * r * k)
 		return pts
 
+	## V119 : couleur d'état d'un donjon — or (ouvert), gris rougeâtre (verrouillé), vert (terminé).
+	const DUN_OPEN := Color(1.0, 0.78, 0.30)
+	const DUN_LOCK := Color(0.56, 0.50, 0.54)
+	const DUN_DONE := Color(0.42, 0.82, 0.48)
+
+	func _dungeon_col() -> Color:
+		if done:
+			return DUN_DONE
+		return DUN_LOCK if locked else DUN_OPEN
+
+	## Cadenas vectoriel (les émojis ne s'affichent pas sur tous les Android).
+	func _draw_padlock(c: Vector2, s: float) -> void:
+		draw_circle(c + Vector2(0, 1.5 * s), 12.0 * s, Color(0.02, 0.02, 0.04, 0.55))
+		draw_arc(c + Vector2(0, -3.0 * s), 6.0 * s, PI, TAU, 16, Color(0.10, 0.10, 0.12), 4.6 * s, true)
+		draw_arc(c + Vector2(0, -3.0 * s), 6.0 * s, PI, TAU, 16, Color(0.80, 0.80, 0.84), 2.6 * s, true)
+		draw_line(c + Vector2(-6.0 * s, -3.0 * s), c + Vector2(-6.0 * s, 0), Color(0.80, 0.80, 0.84), 2.6 * s, true)
+		draw_line(c + Vector2(6.0 * s, -3.0 * s), c + Vector2(6.0 * s, 0), Color(0.80, 0.80, 0.84), 2.6 * s, true)
+		var body := Rect2(c + Vector2(-9.0 * s, -1.0 * s), Vector2(18.0 * s, 13.0 * s))
+		draw_rect(body.grow(1.5 * s), Color(0.10, 0.06, 0.06))
+		draw_rect(body, Color(0.78, 0.26, 0.22))
+		draw_rect(Rect2(body.position, Vector2(body.size.x, 3.0 * s)), Color(0.93, 0.45, 0.38))
+		draw_circle(c + Vector2(0, 4.5 * s), 2.2 * s, Color(0.12, 0.04, 0.04))
+		draw_line(c + Vector2(0, 4.5 * s), c + Vector2(0, 8.5 * s), Color(0.12, 0.04, 0.04), 1.6 * s)
+
 	func _draw() -> void:
-		var col: Color = Color(0.72, 0.43, 1.0) if is_dungeon else POI_COLOR.get(kind, Color.WHITE)
+		var col: Color = _dungeon_col() if is_dungeon else POI_COLOR.get(kind, Color.WHITE)
 		var pulse: float = 0.5 + 0.5 * sin(_t * (2.0 if is_dungeon else 2.4))
+		var dun_open: bool = is_dungeon and not done and not locked
+		if dun_open:
+			# Colonne de lumière dorée : un donjon ouvert se repère de loin, même dézoomé.
+			var bh: float = 230.0
+			for k: int in range(4):
+				var w: float = 30.0 - float(k) * 7.0
+				var a: float = (0.07 + 0.05 * pulse) * (1.0 + float(k) * 0.6)
+				draw_colored_polygon(PackedVector2Array([Vector2(-w, 0), Vector2(w, 0), Vector2(w * 0.45, -bh), Vector2(-w * 0.45, -bh)]),
+					Color(1.0, 0.86, 0.45, a))
+			for k: int in range(3):
+				var f: float = fmod(_t * 0.35 + float(k) / 3.0, 1.0)
+				draw_circle(Vector2(sin(_t * 1.3 + float(k) * 2.1) * 10.0, -f * bh), 2.4, Color(1.0, 0.95, 0.70, 0.75 * (1.0 - f)))
 		# Assise au sol : ombre douce et anneau de matière pour mieux détacher le POI du décor.
 		# Cette couche est purement graphique et reste centrée sur la position existante.
 		var ground_radius: float = 48.0 if is_dungeon else 34.0
@@ -3433,14 +3533,22 @@ class PoiNode extends Node2D:
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		if not done:
 			draw_set_transform(Vector2(0, 4), 0.0, Vector2(1.0, 0.5))
-			if is_dungeon:
-				# Double halo violet : le seuil reste repérable même à l'échelle générale.
-				draw_circle(Vector2.ZERO, 68.0 + pulse * 8.0, Color(0.58, 0.28, 1.0, 0.10 + 0.08 * pulse))
-				draw_arc(Vector2.ZERO, 58.0 + pulse * 6.0, 0.0, TAU, 48, Color(0.82, 0.58, 1.0, 0.88), 4.0, true)
+			if dun_open:
+				# Double halo doré pulsé : le seuil est ouvert.
+				draw_circle(Vector2.ZERO, 68.0 + pulse * 8.0, Color(1.0, 0.72, 0.22, 0.12 + 0.10 * pulse))
+				draw_arc(Vector2.ZERO, 58.0 + pulse * 6.0, 0.0, TAU, 48, Color(1.0, 0.86, 0.45, 0.92), 4.0, true)
+			elif is_dungeon:
+				# Verrouillé : anneau fixe en pointillés, sans pulsation ni lumière.
+				for k: int in range(16):
+					var a0: float = TAU * float(k) / 16.0
+					draw_arc(Vector2.ZERO, 58.0, a0, a0 + TAU / 32.0, 4, Color(0.62, 0.30, 0.30, 0.80), 3.5, true)
 			draw_circle(Vector2.ZERO, 46.0 + pulse * 4.0, Color(col.r, col.g, col.b, 0.18 if is_dungeon else 0.16))
 			draw_arc(Vector2.ZERO, 44.0 + pulse * 4.0, 0.0, TAU, 40, Color(col.r, col.g, col.b, 0.85 if is_dungeon else 0.75), 4.0 if is_dungeon else 3.0, true)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		var mod: Color = Color(1, 1, 1) if not done else Color(0.62, 0.62, 0.66)
+		if is_dungeon and locked and not done:
+			mod = Color(0.50, 0.48, 0.52)
+			pulse = 0.0
 		if prop != "":
 			var rng := RandomNumberGenerator.new()
 			rng.seed = 17
@@ -3471,8 +3579,8 @@ class PoiNode extends Node2D:
 		var icon_size: float = 58.0 if is_dungeon else 46.0
 		var icon_y: float = -122.0 if is_dungeon else -104.0
 		var ic := Vector2(0, icon_y + bob)
-		if is_dungeon and not done:
-			draw_circle(ic, icon_r + 9.0 + pulse * 3.0, Color(0.66, 0.35, 1.0, 0.18))
+		if dun_open:
+			draw_circle(ic, icon_r + 9.0 + pulse * 3.0, Color(1.0, 0.75, 0.25, 0.22))
 		# À proximité, un anneau doux et pulsé indique que le lieu peut être activé.
 		# Il reste discret à distance pour préserver la lisibilité de la carte.
 		if nearby:
@@ -3498,15 +3606,14 @@ class PoiNode extends Node2D:
 		if icon != null:
 			draw_texture_rect(icon, Rect2(ic - Vector2(icon_size * 0.5, icon_size * 0.5), Vector2(icon_size, icon_size)), false, mod)
 		# V114 : étincelles autour du médaillon (absentes en qualité « Économie »)
-		if not done and not GfxQuality.low():
+		if not done and not (is_dungeon and locked) and not GfxQuality.low():
 			for s_i in range(3):
 				var sa: float = _t * 1.6 + float(s_i) * TAU / 3.0
 				var sp := ic + Vector2(cos(sa), sin(sa) * 0.45) * (icon_r + 13.0 + 3.0 * sin(_t * 2.0 + float(s_i)))
 				draw_circle(sp, 2.2, Color(1.0, 0.95, 0.60, 0.55 + 0.35 * sin(_t * 3.0 + float(s_i) * 2.0)))
-		if locked:
-			draw_circle(ic, icon_r - 2.0, Color(0.02, 0.03, 0.07, 0.62))
-			draw_circle(ic + Vector2(19, -18), 12.0, Color(0.75, 0.25, 0.25))
-			draw_string(ThemeDB.fallback_font, ic + Vector2(8, -12), "🔒", HORIZONTAL_ALIGNMENT_CENTER, 22.0, 16, Color.WHITE)
+		if locked and not done:
+			draw_circle(ic, icon_r - 2.0, Color(0.02, 0.03, 0.07, 0.45))
+			_draw_padlock(ic + Vector2(0, 2), 1.25)
 		if done:
 			draw_circle(ic + Vector2(19, -18), 11.0, Color(0.25, 0.75, 0.35))
 			draw_string(ThemeDB.fallback_font, ic + Vector2(12, -12), "✓", HORIZONTAL_ALIGNMENT_CENTER, 14.0, 16, Color.WHITE)
@@ -3515,6 +3622,18 @@ class PoiNode extends Node2D:
 			var font: Font = ThemeDB.fallback_font
 			var txt: String = title
 			var tw: float = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x + 18.0
+			if is_dungeon:
+				# Pastille d'état sous le nom : lisible sans couleur (texte) et sans émoji.
+				var st: String = "TERMINÉ" if done else ("VERROUILLÉ" if locked else "OUVERT")
+				var sw: float = font.get_string_size(st, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 16.0
+				var sr := Rect2(Vector2(-sw * 0.5, 48), Vector2(sw, 20))
+				var ssb := StyleBoxFlat.new()
+				ssb.bg_color = Color(col.r * 0.30, col.g * 0.30, col.b * 0.30, 0.92)
+				ssb.border_color = col
+				ssb.set_border_width_all(2)
+				ssb.set_corner_radius_all(9)
+				draw_style_box(ssb, sr)
+				draw_string(font, sr.position + Vector2(8, 15), st, HORIZONTAL_ALIGNMENT_LEFT, sw, 13, col.lightened(0.35))
 			var r := Rect2(Vector2(-tw * 0.5, 22), Vector2(tw, 24))
 			var sb := StyleBoxFlat.new()
 			sb.bg_color = Color(0.05, 0.07, 0.12, 0.85)

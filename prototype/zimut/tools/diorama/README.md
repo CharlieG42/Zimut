@@ -29,6 +29,9 @@ Quaternius (non versionné : chemin dans `QUATERNIUS_NATURE`).
    Brasier : `DIORAMA_AMP=12 DIORAMA_MOOD=brasier`.
 5. `python3 post96.py 4` — finition B (ombres de contact, contours fins, étalonnage, brume, halo,
    vignette ; Brasier : ombres pourpres, lave rayonnante) → `fin_tx_ty.webp`.
+   Phase 2 (V119, `python3 post96.py 4 phase2` pour la relancer seule) : décor peint de `scene_bg.py`
+   (ciel, montagnes, nuages, falaise sous l'île, cascades d'eau / coulées de lave détectées au bord,
+   mer de nuages) et étalonnage « peint » (`scene_bg.paint`).
 6. `python3 bake96.py` — cases jouables, hauteurs, lieux (`PLACES` + donjons), tuiles, occultants,
    fond basse définition. Puis importer dans Godot et régler les `.import` en **VRAM compressée +
    mipmaps** (`compress/mode=2`, `mipmaps/generate=true`).
