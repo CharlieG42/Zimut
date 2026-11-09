@@ -337,6 +337,25 @@ Défaite, combat abandonné ou arrêt du jeu ne font plus rien perdre (`Dungeons
 session). La porte d'un donjon commencé propose « REPRENDRE · SALLE n » et « ↺ RECOMMENCER » (`Dungeons.restart`, qui ne
 touche que ce donjon). L'ancien format `adventure["dungeon"]` reste lu. Terminer la salle du Gardien efface la progression.
 
+### Étalonnage des vues 3D (V128)
+
+Lot 4 du plan d'amélioration graphique. `scripts/adventure3d/Adv3DLook.gd`, appelé par le monde ouvert et la
+vue 3D par cases après `Adv3DMeshes.setup_sun` :
+
+- **brume de distance** (`FOG_MODE_DEPTH`, début / fin / opacité par Nation dans `Adv3DLook.NATION`) à la place
+  du brouillard exponentiel qui délavait toute l'image ; le ciel n'est plus voilé ;
+- **lumière** : soleil 1,12, ambiance 0,44 plus froide, carte de reflets désactivée ;
+- **ciel** : panorama de nuages 512 × 256 calculé une fois (`cloud_cover`, clé `sky_cover` du ciel procédural),
+  sans shader de ciel animé ;
+- **lointain** : `make_backdrop` = deux chaînes de crêtes sans éclairage qui suivent la caméra (rayon 138 et
+  152 m, sous le plan lointain de 160 m) ;
+- **sol** : uniformes `macro_col` / `macro_amt` du shader commun = plaques de teinte basse fréquence (mousse
+  sur sol herbeux, neutre ailleurs ; clé `macro` possible dans la palette).
+
+Réglé avec le rendu « mobile » (Vulkan), celui du téléphone : le rendu « compatibilité » des captures
+habituelles donne des couleurs très différentes. Capture : `xvfb-run -a godot --rendering-method mobile
+--path . -s tests/shot_openworld.gd -- <dossier> foret_sylve`. Test : `tests/test_adv3d_look.gd`.
+
 ### Position des donjons dans une Nation (V122)
 
 Règle pour **toutes** les Nations (Sylve, Brasier et les suivantes) : un donjon dans chacun des quatre
