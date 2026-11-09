@@ -816,6 +816,8 @@ func _rebuild_board(biome: String) -> void:
 			holder.add_child(tile)
 			_dio_chunks.append({"path": t["path"], "rect": Rect2(t["pos"], t["size"]), "sprites": [tile], "req": false})
 		_backdrop = holder
+		# V127 : eau, lave, ombres de nuages et rayons animés (calques au-dessus des tuiles)
+		DioramaFx.attach(holder, _world, zid, biome)
 	elif BoardArt.is_iso(zid):
 		var ground := IsoGround.new()
 		ground.ui = self

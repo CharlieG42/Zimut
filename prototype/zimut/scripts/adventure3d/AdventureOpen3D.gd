@@ -105,6 +105,8 @@ func _ready() -> void:
 		add_child(Adv3DWorld.make_sea(terrain["size"]))
 	add_child(_clouds)
 	_islets = Adv3DWorld.make_islets(terrain["size"], String(terrain["biome"]), absi(zone_id.hash()))
+	if not GfxQuality.low():      # V128 : crêtes lointaines, pour un horizon au lieu d'un bord coupé net
+		add_child(Adv3DLook.make_backdrop(terrain["size"], wpal, absi(zone_id.hash())))
 	add_child(_islets)
 	_build_explorer()
 	_build_hud()
@@ -187,6 +189,7 @@ func _build_environment() -> void:
 			env.fog_light_color = (pal["fog"] as Color).lerp(Color(0.94, 0.90, 0.95), 0.4)
 			env.fog_density = float(pal.get("fog_density", 0.0035)) * 1.7
 	Adv3DMeshes.setup_sun(sun, env)     # V85 : ombres temps réel en qualité Haute, sinon ombres rondes
+	Adv3DLook.apply(env, sun, sky_mat, pal, String(terrain["biome"]), Adv3DWorld.time_of_day(zone_id, String(terrain["biome"])))   # V128 : étalonnage commun
 	add_child(sun)
 
 
