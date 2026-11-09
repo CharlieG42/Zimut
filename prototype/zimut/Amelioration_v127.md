@@ -4,7 +4,8 @@ Objectif : améliorer nettement le rendu des deux vues du mode Aventure, la **ca
 **monde 3D**, sans dégrader la fluidité sur téléphone (référence : Galaxy S23+).
 
 Ce document décrit ce que je compte faire, dans quel ordre, et comment on jugera le résultat.
-Rien n'est encore codé : chaque lot ci-dessous sera une PR séparée, testable sur téléphone.
+Chaque lot est une PR séparée, testable sur téléphone. Ordre validé : lot 1, puis lot 4, puis le reste ;
+la Nation des Brumes passe après.
 
 ## Règles que je m'impose
 
@@ -52,22 +53,25 @@ Constaté sur captures (Sylve) :
 
 ## Ce que je compte faire
 
-### Lot 1 — Diorama : la carte prend vie (V127)
+### Lot 1 — Diorama : la carte prend vie (V127) — FAIT
 
-Sans retoucher les tuiles (aucun nouveau rendu, mémoire inchangée) :
+Sans retoucher les tuiles (aucun nouveau rendu des cartes) :
 
-- **Eau et lave animées** : un shader léger sur les zones d'eau / de lave (masque exporté par l'outil de
-  génération) : reflets qui glissent, liseré d'écume sur les berges, lueur pulsée pour la lave.
-- **Vent dans le feuillage** : légère ondulation des cimes d'arbres et des herbes hautes, limitée aux
-  zones visibles à l'écran.
-- **Particules d'ambiance par Nation** : pollen et lucioles (Sylve), braises et cendres (Brasier),
-  feux follets (Brumes, plus tard). Quantité liée au réglage de qualité.
-- **Rayons de lumière et ombres de nuages** qui dérivent lentement sur la carte.
+- **Eau animée** : reflets, creux plus sombres et écume sur la berge du lac de la Sylve.
+- **Lave animée** : croûte sombre qui dérive et lueurs qui pulsent sur les coulées et le cratère du Brasier.
+- **Ombres de nuages et rayons de lumière** qui glissent lentement sur l'île (fumées sombres au Brasier).
+- Un seul masque basse définition par Nation (1280 × 720) ; tout est coupé en qualité « Économie ».
 
-Critère : sur une vidéo de 10 s sans toucher l'écran, la carte doit paraître vivante ; le compteur ne
-doit pas bouger de plus de 1 ms.
+Écarts par rapport au plan initial :
 
-### Lot 2 — Diorama : personnages intégrés au décor (V128)
+- **Particules d'ambiance** : elles existaient déjà (feuilles et lucioles en Sylve, braises au Brasier), je
+  n'y ai pas touché.
+- **Vent dans le feuillage** : non fait. Déformer les tuiles demande une passe plein écran et fait
+  apparaître un double des arbres découpés ; à reprendre autrement (lot 3, avec une régénération).
+- **Fluidité** : non mesurée sur téléphone. À vérifier avec le compteur (3 lignes) : si le rendu perd plus
+  de 1 ms, le calque « ciel » est le premier à alléger.
+
+### Lot 2 — Diorama : personnages intégrés au décor (à numéroter)
 
 - **Ombre de contact** douce sous le héros, Gligli et chaque groupe de monstres.
 - **Teinte de lumière locale** : les personnages prennent la couleur ambiante du lieu (sous-bois plus
@@ -77,7 +81,7 @@ doit pas bouger de plus de 1 ms.
   lissage quand la carte est dézoomée).
 - **Poussière de pas** et petite animation d'arrivée sur un lieu.
 
-### Lot 3 — Diorama : lieux, portail et bord du monde (V129)
+### Lot 3 — Diorama : lieux, portail et bord du monde (à numéroter)
 
 - **Portail** : vraie structure dans le décor (arche + vortex animé), dégagée comme les entrées de
   donjon. Nécessite de régénérer les tuiles concernées.
@@ -86,7 +90,7 @@ doit pas bouger de plus de 1 ms.
 - **Ciel et lointain** : nuages en couches derrière l'île, cascade ou brume au bord du monde.
 - **Moment de la journée** (optionnel, à valider) : teinte globale matin / jour / soir.
 
-### Lot 4 — Monde 3D : sol, lumière et ciel (V130)
+### Lot 4 — Monde 3D : sol, lumière et ciel (V128)
 
 Le lot qui change le plus l'image :
 
@@ -102,7 +106,7 @@ Le lot qui change le plus l'image :
 Critère : la capture « vue de jeu » de la Sylve ne doit plus montrer d'aplat vert uniforme ni d'horizon
 coupé net.
 
-### Lot 5 — Monde 3D : végétation, eau et vie (V131)
+### Lot 5 — Monde 3D : végétation, eau et vie (à numéroter)
 
 - **Herbe dense autour du joueur** (instanciée, ondulant au vent, qui s'efface avec la distance) à la
   place des touffes isolées.
@@ -110,7 +114,7 @@ coupé net.
 - **Arbres** : feuillage plus fourni, variation de taille et de teinte, vent.
 - **Particules d'ambiance** par Nation, papillons / oiseaux lointains.
 
-### Lot 6 — Monde 3D : lieux, monstres et interface (V132)
+### Lot 6 — Monde 3D : lieux, monstres et interface (à numéroter)
 
 - **Lieux** : repères remplacés par de petites constructions du style de la Nation (camp, coffre,
   cercle de pierres), entrées de donjon reprises des bâtiments du Diorama.

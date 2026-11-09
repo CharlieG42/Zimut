@@ -49,7 +49,7 @@ func _boot() -> void:
 	check(occ.size() >= 150, "occultants (%d)" % occ.size())
 	var vram := true
 	for f: String in DirAccess.get_files_at("res://assets/boards/brasier_diorama/"):
-		if f.ends_with(".import"):
+		if f.ends_with(".import") and f != "fx.png.import":      # V127 : le masque d'effets reste sans perte (1280 × 720)
 			var txt: String = FileAccess.get_file_as_string("res://assets/boards/brasier_diorama/" + f)
 			vram = vram and txt.contains("compress/mode=2") and txt.contains("mipmaps/generate=true")
 	check(vram, "textures compressées pour le GPU, avec mipmaps")

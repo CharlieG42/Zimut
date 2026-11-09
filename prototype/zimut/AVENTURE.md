@@ -316,6 +316,20 @@ trajet appelle `cell_center` → `BoardArt.iso_pos` → `iso_origin` → `iso_ma
 choix de planche (`_stem_cache`), la hauteur maximale et l'origine (`_maxh_cache`, `_origin_cache`, clé = planche + `rev`).
 Règle : rien qui parcourt toute la carte ou le disque dans une fonction appelée par case ou par image.
 
+### Carte Diorama vivante (V127)
+
+Premier lot de `Amelioration_v127.md`. Les tuiles pré-rendues ne changent pas : `tools/diorama/fx_masks.py`
+produit un masque au 1/8 (`assets/boards/<nation>/fx.png`, 1280 × 720 : R = eau visible, V = lave et lumières,
+B = terre ferme) à partir du rendu fini, de la passe d'identifiants (objets hauts devant l'eau), du relief et
+d'`objects.json`, et inscrit `image_fx` (chemin, facteur, `ground_rect`) dans le JSON de la planche
+(`bake96.py` conserve cette clé). À lancer après `bake96.py`.
+
+`scripts/DioramaFx.gd` pose deux calques : **sol** (dans le porte-tuiles, sous les personnages, limité à
+`ground_rect`) pour l'eau et la lave, **ciel** (z 1200, au-dessus des personnages, sous l'interface) pour les
+ombres de nuages et les rayons. Un bruit 128 px répétable est calculé une fois. Réglages par Nation dans
+`DioramaFx.MOODS`. Rien n'est posé en qualité « Économie ». Le vent dans le feuillage n'est pas fait : déformer
+les tuiles coûterait une passe plein écran et ferait apparaître un double des arbres découpés.
+
 ### Reprise des donjons (V125)
 
 La dernière salle terminée est mémorisée **par donjon** (`save["adventure"]["dungeon_rooms"] = {donjon: prochaine salle}`).
