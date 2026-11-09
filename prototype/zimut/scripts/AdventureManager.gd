@@ -58,7 +58,7 @@ func _repair_after_resize() -> void:
 ## sauvegarde y a accumulées ne servent plus et alourdissaient chaque sauvegarde (écrite à chaque pas).
 ## On en garde une seule (une liste vide relancerait la « première visite »).
 func _prune_board_fog(zid: String) -> void:
-	if zid != "foret_sylve" or BoardArt.def(zid).is_empty():
+	if BoardArt.def(zid).is_empty() or not BoardArt.is_diorama(zid):
 		return
 	var arr: Array = state.get("discovered", [])
 	var prefix: String = zid + ","

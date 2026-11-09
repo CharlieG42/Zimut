@@ -2029,8 +2029,13 @@ func _show_exit(key: String, portal: bool = false) -> void:
 	var msg: String = "Le sentier s'ouvre vers de nouvelles terres." if not targets.is_empty() else "Ce sentier vous est familier. Où voulez-vous aller ?"
 	if portal:
 		msg = "Le portail s'ouvre vers de nouvelles terres." if not targets.is_empty() else "Le portail s'ouvre. Où voulez-vous aller ?"
-	box.add_child(U.lbl(msg, 18, U.C_TXT))
 	var choices: Array = targets if not targets.is_empty() else manager.available_zones()
+	# V118 : chemin de retour : uniquement vers la Nation précédente
+	var exit_poi: Dictionary = ProgressionManager.adventure_zone_pois(manager.zone_id()).get(key.substr(manager.zone_id().length() + 1), {})
+	if bool(exit_poi.get("back", false)):
+		choices = [String(exit_poi.get("to", ""))]
+		msg = "Le sentier redescend vers une terre déjà parcourue."
+	box.add_child(U.lbl(msg, 18, U.C_TXT))
 	for zid: String in choices:
 		if zid == manager.zone_id():
 			continue
@@ -2647,6 +2652,7 @@ class AdventureBoard extends Node2D:
 		_t += delta
 		queue_redraw()
 
+
 	func _diamond(c: Vector2, s: float = 1.0) -> PackedVector2Array:
 		return PackedVector2Array([c + Vector2(0, -32 * s), c + Vector2(64 * s, 0), c + Vector2(0, 32 * s), c + Vector2(-64 * s, 0)])
 
@@ -3140,7 +3146,15 @@ class BuildingNode extends Node2D:
 
 	func _process(delta: float) -> void:
 		_t += delta
-		queue_redraw()
+		if _on_screen():
+			queue_redraw()
+
+	## V118 : on ne redessine (animation) que si le nœud est à l'écran — sur les grandes cartes,
+	## des dizaines de lieux / monstres / trouvailles se redessinaient à chaque image même hors champ.
+	func _on_screen() -> bool:
+		var p: Vector2 = get_global_transform_with_canvas().origin
+		var vs: Vector2 = get_viewport_rect().size
+		return p.x > -260.0 and p.y > -260.0 and p.x < vs.x + 260.0 and p.y < vs.y + 260.0
 
 	func _up(h: float) -> Vector2:
 		return Vector2(0.0, -h)
@@ -3372,7 +3386,15 @@ class PoiNode extends Node2D:
 
 	func _process(delta: float) -> void:
 		_t += delta
-		queue_redraw()
+		if _on_screen():
+			queue_redraw()
+
+	## V118 : on ne redessine (animation) que si le nœud est à l'écran — sur les grandes cartes,
+	## des dizaines de lieux / monstres / trouvailles se redessinaient à chaque image même hors champ.
+	func _on_screen() -> bool:
+		var p: Vector2 = get_global_transform_with_canvas().origin
+		var vs: Vector2 = get_viewport_rect().size
+		return p.x > -260.0 and p.y > -260.0 and p.x < vs.x + 260.0 and p.y < vs.y + 260.0
 
 	## Forme du médaillon selon le type de lieu (0 = rond) et sa rotation.
 	const MEDAL_SIDES: Dictionary = {"combat": 6, "chest": 4, "puzzle": 4, "reveal": 8, "camp": 0}
@@ -3516,7 +3538,15 @@ class FindNode extends Node2D:
 
 	func _process(delta: float) -> void:
 		_t += delta
-		queue_redraw()
+		if _on_screen():
+			queue_redraw()
+
+	## V118 : on ne redessine (animation) que si le nœud est à l'écran — sur les grandes cartes,
+	## des dizaines de lieux / monstres / trouvailles se redessinaient à chaque image même hors champ.
+	func _on_screen() -> bool:
+		var p: Vector2 = get_global_transform_with_canvas().origin
+		var vs: Vector2 = get_viewport_rect().size
+		return p.x > -260.0 and p.y > -260.0 and p.x < vs.x + 260.0 and p.y < vs.y + 260.0
 
 	func _draw() -> void:
 		var pulse: float = 0.5 + 0.5 * sin(_t * 3.0)
@@ -3761,7 +3791,15 @@ class GateNode extends Node2D:
 
 	func _process(delta: float) -> void:
 		_t += delta
-		queue_redraw()
+		if _on_screen():
+			queue_redraw()
+
+	## V118 : on ne redessine (animation) que si le nœud est à l'écran — sur les grandes cartes,
+	## des dizaines de lieux / monstres / trouvailles se redessinaient à chaque image même hors champ.
+	func _on_screen() -> bool:
+		var p: Vector2 = get_global_transform_with_canvas().origin
+		var vs: Vector2 = get_viewport_rect().size
+		return p.x > -260.0 and p.y > -260.0 and p.x < vs.x + 260.0 and p.y < vs.y + 260.0
 
 	func _draw() -> void:
 		var open: bool = bool(info.get("open", false))
@@ -3822,6 +3860,7 @@ class MiniMap extends Control:
 	func _process(delta: float) -> void:
 		_t += delta
 		queue_redraw()
+
 
 	func _raw(zone_id: String) -> Vector2:
 		var g: Vector2i = ProgressionManager.adventure_zone_grid(zone_id)
@@ -4025,7 +4064,15 @@ class MobNode extends Node2D:
 				else:
 					_idle_choices[chosen] = null
 			_idle_timer = randf_range(3.5, 6.0)
-		queue_redraw()
+		if _on_screen():
+			queue_redraw()
+
+	## V118 : on ne redessine (animation) que si le nœud est à l'écran — sur les grandes cartes,
+	## des dizaines de lieux / monstres / trouvailles se redessinaient à chaque image même hors champ.
+	func _on_screen() -> bool:
+		var p: Vector2 = get_global_transform_with_canvas().origin
+		var vs: Vector2 = get_viewport_rect().size
+		return p.x > -260.0 and p.y > -260.0 and p.x < vs.x + 260.0 and p.y < vs.y + 260.0
 
 	func face(dx: float) -> void:
 		if absf(dx) > 1.0:

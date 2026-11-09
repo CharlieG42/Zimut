@@ -46,18 +46,21 @@ static func _variant() -> String:
 	return "v2" if gs == null else String(gs.get("sylvestre_board"))
 
 
+## V118 : Nations qui ont une carte « Diorama » (scène 3D pré-rendue) : zone -> planche.
+const DIORAMA_BOARDS := {"foret_sylve": "foret_sylve_diorama", "brasier_cendres": "brasier_cendres_diorama"}
+
+
 static func file_stem(zone_id: String) -> String:
+	var variant: String = _variant()
+	if variant == "diorama" and DIORAMA_BOARDS.has(zone_id) and FileAccess.file_exists(DIR + String(DIORAMA_BOARDS[zone_id]) + ".json"):
+		return String(DIORAMA_BOARDS[zone_id])
 	if not ALT_BOARDS.has(zone_id):
 		return zone_id
-	var variant: String = _variant()
 	if variant == "classic":
 		return zone_id
 	# V106 : « Iso » = plateau isométrique à étages pour la Sylve ; les autres nations gardent leur planche v2.
 	if variant == "iso" and zone_id == "foret_sylve" and FileAccess.file_exists(DIR + "foret_sylve_iso.json"):
 		return "foret_sylve_iso"
-	# V115 : « Diorama » = scène 3D pré-rendue (HD-2D) de la Sylve, posée sur un plateau iso jouable.
-	if variant == "diorama" and zone_id == "foret_sylve" and FileAccess.file_exists(DIR + "foret_sylve_diorama.json"):
-		return "foret_sylve_diorama"
 	return String(ALT_BOARDS[zone_id]) if FileAccess.file_exists(DIR + String(ALT_BOARDS[zone_id]) + ".json") else zone_id
 
 
@@ -304,7 +307,7 @@ static func buildings(zone_id: String) -> Array:
 #  V115 — « Diorama » : rendu 3D pré-calculé posé sur le plateau iso (« foret_sylve_diorama »)
 #  L'image (tuiles) est calée sur iso_pos : la case (x,y) au sol tombe sur son pixel du rendu.
 #  Les bâtiments / arbres sont aussi découpés en « occultants » triés en profondeur avec le héros.
-#  Généré par tools/diorama_sylve/bake_board.py.
+#  Généré par tools/diorama/bake96.py.
 # ══════════════════════════════════════════════════════════════════════
 static func is_diorama(zone_id: String) -> bool:
 	return bool(raw(zone_id).get("diorama", false))
@@ -355,5 +358,5 @@ static func diorama_occluders(zone_id: String) -> Array:
 		var c: Array = o["cell"]
 		out.append({"page": pi, "path": String(pages[pi]), "rect": Rect2(float(r[0]), float(r[1]), float(r[2]), float(r[3])),
 			"pos": _diorama_origin(zone_id) + Vector2(float(px[0]), float(px[1])) * sc,
-			"size": Vector2(float(r[2]), float(r[3])) * sc, "cell": Vector2i(int(c[0]), int(c[1]))})
+			"size": Vector2(float(r[2]), float(r[3])) * sc, "cell": Vector2i(int(c[0]), int(c[1])), "kind": String(o.get("k", ""))})
 	return out

@@ -1,0 +1,5 @@
+V118|Nouvelle carte « Diorama » pour les Terres de Cendre (Nation du Brasier), aussi vaste que la Sylve : un bourg de forgerons autour d'un grand brasier, des rivières de lave descendues d'un volcan, des landes de cendre, des bois calcinés et des champs d'obsidienne luisante.
+V118|Brasier : cinq donjons (Galerie des Scories, Mine de Braise, Antre de la Salamandre, Fosse Ardente et la forteresse du Gardien au pied du volcan) et un portail vers les Brumes, scellé tant que le Gardien règne.
+V118|Donjons mis en évidence : chacun a désormais son propre bâtiment éclairé sur les cartes Diorama (grotte, mine étayée, antre de rochers, sanctuaire de cristaux, crypte, porte fortifiée, fosse de lave, forteresse) ; le lieu est posé devant l'entrée.
+V118|Fluidité : les petits décors (lanternes, bannières, tombes, meules…) ne sont plus des calques séparés au-dessus du héros, et les lieux, monstres et trouvailles hors de l'écran ne sont plus redessinés à chaque image.
+V118|Brasier : un « Sentier de la Sylve » à l'ouest ramène toujours à la Nation précédente, sans rien débloquer ; seul le portail des Brumes, ouvert après la victoire sur le Gardien, mène à la Nation suivante.

@@ -19,6 +19,7 @@ func _boot() -> void:
 	var gm: Node = root.get_node("/root/GameManager")
 	var gs: Node = root.get_node("/root/GameSettings")
 	var BA: GDScript = load("res://scripts/BoardArt.gd")
+	var AT: GDScript = load("res://scripts/AdventureTerrain.gd")
 	var data: Dictionary = pm.new_game(4, "ShotSylveDiorama")
 	pm.rebuild_team(data, ["Chasseur", "Mage", "Sylvain"])
 	data["campaign_mode"] = "adventure"
@@ -51,6 +52,29 @@ func _boot() -> void:
 		sc._dio_sync = true
 		await create_timer(0.6).timeout
 		await _shot(out + "/diorama_%s.png" % nm)
+	# V118 : le Brasier (Terres de Cendre) et ses donjons
+	if args.has("brasier"):
+		adv["zones_unlocked"] = ["foret_sylve", "brasier_cendres"]
+		pm.adventure_enter_zone(adv, "brasier_cendres")
+		sc._rebuild_world()
+		sc._refresh_world()
+		sc._fit_world.call_deferred()
+		await create_timer(1.5).timeout
+		var BA2: GDScript = load("res://scripts/BoardArt.gd")
+		var shots := {"brasier_depart": BA2.start("brasier_cendres")}
+		for k: String in BA2.pois("brasier_cendres").keys():
+			var nm: String = String(BA2.pois("brasier_cendres")[k]["name"])
+			if nm in ["Donjon de la Nation Brasier", "Fosse Ardente", "Mine de Braise"]:
+				shots["brasier_" + nm.split(" ")[0].to_lower() + "_" + nm.split(" ")[-1].to_lower()] = AT.parse(k) + Vector2i(1, 1)
+		for nm: String in shots.keys():
+			var dest: Vector2i = shots[nm]
+			sc.manager.state["hero_pos"] = [dest.x, dest.y]
+			sc._hero.position = sc.cell_center(dest)
+			sc._apply_hero_depth(dest)
+			sc._focus_cell(dest, false)
+			sc._dio_sync = true
+			await create_timer(0.8).timeout
+			await _shot(out + "/%s.png" % nm)
 	gs.set_sylvestre_board(before)
 	pm.delete_save(4)
 	quit(0)

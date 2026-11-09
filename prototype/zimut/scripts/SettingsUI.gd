@@ -148,11 +148,11 @@ func _ready() -> void:
 		1 if GameSettings.adventure_models_3d else 0, func(idx: int) -> void: GameSettings.set_adventure_models_3d(idx == 1)))
 	g3.add_child(_setting_cell("Héros de la carte 2D", ["Modèles 3D animés", "Illustrés"] as Array[String],
 		0 if GameSettings.adventure_walk_sprites else 1, func(idx: int) -> void: GameSettings.set_adventure_walk_sprites(idx == 0)))
-	gfx.add_child(_setting_cell("Cartes 2D (Sylve et Cimes)", ["Nouvelle", "Ancienne", "Iso (test)", "Diorama (Sylve)"] as Array[String],
+	gfx.add_child(_setting_cell("Cartes 2D (Sylve et Cimes)", ["Nouvelle", "Ancienne", "Iso (test)", "Diorama"] as Array[String],
 		BOARD_VARIANTS.find(GameSettings.sylvestre_board) if BOARD_VARIANTS.has(GameSettings.sylvestre_board) else 0,
 		func(idx: int) -> void: GameSettings.set_sylvestre_board(BOARD_VARIANTS[idx])))
 	var gfx_hint := Label.new()
-	gfx_hint.text = "« Diorama » : la Sylve en scène 3D pré-rendue (lumière, brume, maisons et arbres qui masquent le héros). Les Cimes gardent la nouvelle planche."
+	gfx_hint.text = "« Diorama » : la Sylve et le Brasier en scènes 3D pré-rendues (lumière, brume, maisons et arbres qui masquent le héros). Les autres Nations gardent leur carte."
 	gfx_hint.add_theme_font_size_override("font_size", 17)
 	gfx_hint.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12))
 	gfx_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

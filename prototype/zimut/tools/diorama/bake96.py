@@ -1,21 +1,25 @@
 #!/usr/bin/env python3
-"""Cuit la Sylve « diorama » (monde 96x96, finition B) en planche iso jouable pour la carte 2D.
+"""Cuit une Nation « diorama » (monde 96x96, finition B) en planche iso jouable pour la carte 2D (DIORAMA_PLAN = plan de la Nation).
 
-Entrées (dossier courant) : fin_<tx>_<ty>.webp/.png (post96), render/id_<tx>_<ty>.png (passe d'identifiants 4x4),
-objects.json, occluders.json, plan.json, height2.npy, mask_path.npy.
+Entrées (dossier courant) : sylve48_B.png (5120x2880), id_<tx>_<ty>.png (passe d'identifiants 2x2 en 5120x2880),
+objects.json, occluders.json, plan.json, height2.png, mask_path.npy.
 Sorties : <repo>/assets/boards/sylve_diorama/*.webp + <repo>/data/boards/foret_sylve_diorama.json
 """
 import json, math, sys, os, numpy as np, cv2
 from collections import deque
 from PIL import Image
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import plan96 as W
-from plan96 import FIELDS, ORCHARD, LAKE, OFF
+import importlib
+W = importlib.import_module(os.environ.get("DIORAMA_PLAN", "plan96"))     # plan de la Nation (plan96 = Sylve, plan_brasier = Brasier)
+import dungeons3d as DG
+FIELDS, OFF = W.FIELDS, W.OFF
+ORCHARD = getattr(W, "ORCHARD", None)
+LAKE = getattr(W, "LAKE", None)
 Image.MAX_IMAGE_PIXELS = None
 
 REPO = sys.argv[1] if len(sys.argv) > 1 else os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../.."))
-OUT_DIR = REPO + "/assets/boards/sylve_diorama/"
-RES_DIR = "res://assets/boards/sylve_diorama/"
+OUT_DIR = REPO + "/assets/boards/%s/" % W.ASSET_DIR
+RES_DIR = "res://assets/boards/%s/" % W.ASSET_DIR
 os.makedirs(OUT_DIR, exist_ok=True)
 
 S = 96.0                  # monde (unités)
@@ -66,10 +70,10 @@ def block_rect(cx, cz, w, h, ang, m=0.0):
     v = -(X - cx) * math.sin(a) + (Z - cz) * math.cos(a)
     block[(np.abs(u) < w / 2 + m) & (np.abs(v) < h / 2 + m)] = True
 bi = 0
-RAD = {"ruin": 1.0, "stone": 0.55, "tree": 0.55, "stall": 1.15, "cart": 0.9, "fountain": 2.75, "lantern": 0.3, "banner": 0.35, "prop": 0.45,
+RAD = {"dungeon": 0.85, "crystal": 0.5, "ruin": 1.0, "stone": 0.55, "tree": 0.55, "stall": 1.15, "cart": 0.9, "fountain": 2.75, "lantern": 0.3, "banner": 0.35, "prop": 0.45,
        "hay": 0.5, "grave": 0.45, "rock": 0.45, "bush": 0.4, "hedge": 0.45, "bench": 0.6}
 for o in objs:
-    if o["type"] == "water":
+    if o["type"] in ("water", "lava", "light"):
         continue
     if o["type"] == "asm":
         job, cx, cz, r, s = plan["B"][bi]; bi += 1
@@ -91,30 +95,34 @@ for o in objs:
 for kind, cx, cz, w, h, ang in FIELDS:
     block_rect(cx, cz, w, h, ang, 0.1)
 # lac
-_a = math.radians(LAKE[4])
-_u = (X - LAKE[0]) * math.cos(_a) + (Z - LAKE[1]) * math.sin(_a); _v = -(X - LAKE[0]) * math.sin(_a) + (Z - LAKE[1]) * math.cos(_a)
-block[np.sqrt((_u / (LAKE[2] + 0.3)) ** 2 + (_v / (LAKE[3] + 0.3)) ** 2) < 1.0] = True
-block_rect(ORCHARD[0], ORCHARD[1], ORCHARD[2], ORCHARD[3], 0, 0.0)
+if LAKE:
+    _a = math.radians(LAKE[4])
+    _u = (X - LAKE[0]) * math.cos(_a) + (Z - LAKE[1]) * math.sin(_a); _v = -(X - LAKE[0]) * math.sin(_a) + (Z - LAKE[1]) * math.cos(_a)
+    block[np.sqrt((_u / (LAKE[2] + 0.3)) ** 2 + (_v / (LAKE[3] + 0.3)) ** 2) < 1.0] = True
+if ORCHARD:
+    block_rect(ORCHARD[0], ORCHARD[1], ORCHARD[2], ORCHARD[3], 0, 0.0)
+# rivières / lacs de lave (masque en coordonnées monde, 1 = lave), zones interdites (volcan…)
+for npy in ("lava.npy", "forbid.npy"):
+    if os.path.exists(npy):
+        LM = np.load(npy); lr = LM.shape[0]
+        iy = np.clip(((np.arange(N) + 0.5) * CW / S * lr).astype(int), 0, lr - 1)
+        block |= LM[np.ix_(iy, iy)] > 0.35
 block[0, :] = block[-1, :] = True
 block[:, 0] = block[:, -1] = True
 walk = ~block
 # Départ du catalogue (ADVENTURE_ZONES « start » = 3,6) fermé : une partie neuve y est posée par défaut ;
 # case non jouable -> AdventureManager la replace au départ de la planche (comme pour les planches v2 / iso).
 walk[6, 3] = False
+for ex_c in getattr(W, "FORCE_OPEN", []):
+    walk[ex_c[1], ex_c[0]] = True
 
-# ── lieux (positions monde -> case jouable la plus proche) ; jeu de lieux de la planche iso
-iso = json.load(open(REPO + "/data/boards/foret_sylve_iso.json"))
-by_name = {}
-for k, v in iso["pois"].items():
-    by_name.setdefault(v["name"], []).append(v)
-PLACES = [("Source claire", 44.0, 59.2), ("Coffre moussu", 50.6, 69.6), ("Camp gobelin", 55.2, 57.4),
-          ("Tanière du sanglier", 35.6, 55.4), ("Grotte de la Feuille", 19.5, 86.0), ("Meute de loups gris", 58.0, 88.5),
-          ("Antre de la Patte", 82.0, 92.0), ("Clairière des lucioles", 84.5, 62.0), ("Embuscade sous les pins", 88.0, 50.0),
-          ("Souche creuse", 13.0, 40.0), ("Poste de la Citadelle", 86.5, 34.0), ("Sanctuaire de Cristal", 77.5, 22.0),
-          ("Crypte du Chêne Noir", 9.0, 66.0), ("Refuge des hauteurs", 52.0, 11.0), ("Cache du bûcheron", 60.5, 7.0),
-          ("Garde des cimes", 34.0, 8.0), ("Antre du prédateur", 26.0, 4.5), ("Donjon de la Nation Sylvestre", 16.0, 16.0),
-          ("Belvédère de la Sylve", 70.0, 4.0), ("Portail vers les Cendres", 4.0, 24.0)]
-START_W = (48.0, 54.2)
+# ── lieux : liste du plan (nom, x, z) ; les donjons sont posés devant l'entrée de leur bâtiment
+POI_DEFS = W.poi_defs(REPO)
+PLACES = list(W.PLACES)
+for dname, dkind, dx, dz in W.DUNGEONS:
+    ex, ez = DG.entrance(dx, dz, W.DUNGEON_RAD[dkind])
+    PLACES.append((dname, ex, ez))
+START_W = W.START_W
 
 def cell_of(x, z):
     return (min(N - 1, int(x / CW)), min(N - 1, int(z / CW)))
@@ -149,8 +157,8 @@ for name, x, z in PLACES:
         ok[max(0, ty - 2):ty + 3, max(0, tx - 2):tx + 3] = False
     c = nearest(cell_of(x, z), ok)
     taken.add(c)
-    pois["%d,%d" % c] = by_name[name][0]
-assert len(pois) == len(iso["pois"]), (len(pois), len(iso["pois"]))
+    pois["%d,%d" % c] = POI_DEFS[name]
+assert len(pois) == len(PLACES), (len(pois), len(PLACES))
 
 # ── sentiers (cases de chemin)
 MP = np.load("mask_path.npy"); pr = MP.shape[0]
@@ -251,7 +259,7 @@ board = {
     "occluder_pages": page_paths,
     "occluders": occl,
 }
-json.dump(board, open(REPO + "/data/boards/foret_sylve_diorama.json", "w"), ensure_ascii=False, separators=(",", ":"))
+json.dump(board, open(REPO + "/data/boards/%s.json" % W.BOARD_STEM, "w"), ensure_ascii=False, separators=(",", ":"))
 print("échelle", round(SCALE, 4), "maxh", maxh, "jouables", int(walk.sum()), "occultants", len(occl), "pages", len(page_paths), "départ", start)
 # aperçu de contrôle : cases jouables + lieux sur l'image
 dbg = Image.fromarray(final).resize((1280, 720))
