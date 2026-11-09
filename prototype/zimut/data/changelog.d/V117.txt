@@ -1,0 +1,4 @@
+V117|Carte « Diorama » plus fluide : images compressées pour la carte graphique (8 fois moins de mémoire : 63 Mo au lieu de 326 Mo, chargement d'un morceau 40 fois plus rapide) et fond basse définition toujours présent sous la carte (plus de trou au zoom ou au défilement).
+V117|Déplacements plus fluides sur les grandes cartes 2D : recherche de chemin native (environ 15 fois plus rapide), plus de brouillard tenu à jour à chaque pas sur les planches toujours visibles, sauvegardes allégées.
+V117|Diorama : les pentes douces ne bloquent plus la marche comme de fausses falaises.
+V117|Correction : sur une grande carte 2D, le héros parti loin du départ n'est plus renvoyé au village à chaque rechargement (retour de combat…).

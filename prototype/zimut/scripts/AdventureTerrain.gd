@@ -266,6 +266,10 @@ static func _board_terrain(zone_id: String) -> Dictionary:
 		for k: String in (d.get("decor", {}) as Dictionary).keys():
 			decor[parse(k)] = String(d["decor"][k])
 		heights = BoardArt.heights(zone_id)
+		# V117 : le diorama est un rendu : ses hauteurs servent à poser le héros sur le sol,
+		# pas à bloquer la marche (une pente douce quantifiée y ferait de fausses falaises).
+		if BoardArt.is_diorama(zone_id):
+			heights = {}
 	var out: Dictionary = {"size": sz, "start": BoardArt.start(zone_id), "biome": String(meta.get("biome", "Forêt")),
 		"obstacles": obstacles, "paths": paths, "decor": decor, "pois": pois, "gates": [] as Array[Vector2i],
 		"cell_biome": {}, "voids": BoardArt.voids(zone_id), "heights": heights}
@@ -403,6 +407,9 @@ static func walkable(zone_id: String, p: Vector2i) -> bool:
 ## `blocked` : cases interdites en plus des obstacles (sauf la destination).
 static func find_path(zone_id: String, from: Vector2i, to: Vector2i, blocked: Dictionary = {}) -> Array[Vector2i]:
 	var t: Dictionary = zone_terrain(zone_id)
+	var tsz: Vector2i = t["size"]
+	if tsz.x * tsz.y >= ASTAR_MIN_CELLS:
+		return _astar_path(t, from, to, blocked)
 	var walls: Dictionary = _merge(t["obstacles"], t["voids"])
 	for b: Vector2i in blocked.keys():
 		if b != to:
@@ -414,6 +421,70 @@ static func find_path(zone_id: String, from: Vector2i, to: Vector2i, blocked: Di
 static func can_step(zone_id: String, a: Vector2i, b: Vector2i) -> bool:
 	var hs: Dictionary = zone_terrain(zone_id).get("heights", {})
 	return hs.is_empty() or absi(int(hs.get(b, 0)) - int(hs.get(a, 0))) <= 1
+
+
+## V117 : grandes cartes (planches 144×144…) : recherche de chemin native (AStar2D, construite une fois par
+## carte et gardée dans le terrain en cache) au lieu d'un parcours en largeur en GDScript (~100 ms par appui).
+## Mêmes règles que _bfs_path : 4 voisins, murs = obstacles + vides, falaise si écart de hauteur > 1,
+## cases « blocked » fermées le temps de la requête (sauf la destination). Chemin le plus court équivalent.
+const ASTAR_MIN_CELLS := 4000
+
+static func _astar_of(t: Dictionary) -> AStar2D:
+	if t.has("_astar"):
+		return t["_astar"]
+	var size: Vector2i = t["size"]
+	var walls: Dictionary = _merge(t["obstacles"], t["voids"])
+	var heights: Dictionary = t.get("heights", {})
+	var a := AStar2D.new()
+	a.reserve_space(size.x * size.y)
+	for y: int in range(size.y):
+		for x: int in range(size.x):
+			var c := Vector2i(x, y)
+			if not walls.has(c):
+				a.add_point(y * size.x + x, Vector2(x, y))
+	for y: int in range(size.y):
+		for x: int in range(size.x):
+			var id: int = y * size.x + x
+			if not a.has_point(id):
+				continue
+			for d: Vector2i in [Vector2i(1, 0), Vector2i(0, 1)]:
+				var n := Vector2i(x, y) + d
+				if not _inside(size, n):
+					continue
+				var nid: int = n.y * size.x + n.x
+				if not a.has_point(nid):
+					continue
+				if not heights.is_empty() and absi(int(heights.get(n, 0)) - int(heights.get(Vector2i(x, y), 0))) > 1:
+					continue
+				a.connect_points(id, nid)
+	t["_astar"] = a
+	return a
+
+
+static func _astar_path(t: Dictionary, from: Vector2i, to: Vector2i, blocked: Dictionary) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	var size: Vector2i = t["size"]
+	if from == to or not _inside(size, to) or not _inside(size, from):
+		return out
+	var a: AStar2D = _astar_of(t)
+	var fid: int = from.y * size.x + from.x
+	var tid: int = to.y * size.x + to.x
+	if not a.has_point(tid) or not a.has_point(fid):
+		return out
+	var closed: Array[int] = []
+	for b: Vector2i in blocked.keys():
+		if b == to or b == from or not _inside(size, b):
+			continue
+		var bid: int = b.y * size.x + b.x
+		if a.has_point(bid) and not a.is_point_disabled(bid):
+			a.set_point_disabled(bid, true)
+			closed.append(bid)
+	var ids: PackedInt64Array = a.get_id_path(fid, tid)
+	for bid: int in closed:
+		a.set_point_disabled(bid, false)
+	for i: int in range(1, ids.size()):
+		out.append(Vector2i(int(ids[i]) % size.x, int(ids[i]) / size.x))
+	return out
 
 
 static func _bfs_path(size: Vector2i, walls: Dictionary, from: Vector2i, to: Vector2i, heights: Dictionary = {}) -> Array[Vector2i]:

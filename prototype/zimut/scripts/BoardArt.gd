@@ -332,6 +332,14 @@ static func diorama_tiles(zone_id: String) -> Array:
 	return out
 
 
+## Fond basse définition (toute l'image réduite) : {path, pos, scale} ou {} — toujours chargé sous les tuiles.
+static func diorama_low(zone_id: String) -> Dictionary:
+	var lo: Dictionary = raw(zone_id).get("image_low", {})
+	if lo.is_empty():
+		return {}
+	return {"path": String(lo["path"]), "pos": _diorama_origin(zone_id), "scale": diorama_scale(zone_id) * float(lo.get("factor", 4))}
+
+
 ## Occultants : [{page, path, rect, pos, size, cell}] (rect = zone de la page d'atlas, cell = case qui fixe la profondeur).
 static func diorama_occluders(zone_id: String) -> Array:
 	var d: Dictionary = raw(zone_id)

@@ -2604,8 +2604,14 @@ func adventure_state(data: Dictionary) -> Dictionary:
 		adv.erase("pos3d_zone")
 	var zone: Dictionary = ADVENTURE_ZONES[String(adv["zone"])]
 	var pos: Array = adv.get("hero_pos", [])
+	# V117 : en carte 2D, la planche peut être bien plus grande que l'île du catalogue (54×36) :
+	# sans cela, un héros parti au-delà était renvoyé au départ à chaque rechargement (retour de combat…).
+	var lim := Vector2i(int(zone["size"][0]), int(zone["size"][1]))
+	if String(data.get("adventure_view", "")) == "map":
+		var bsz: Vector2i = BoardArt.size(String(adv["zone"]))
+		lim = Vector2i(maxi(lim.x, bsz.x), maxi(lim.y, bsz.y))
 	if pos.size() != 2 or int(pos[0]) < 0 or int(pos[1]) < 0 \
-				or int(pos[0]) >= int(zone["size"][0]) or int(pos[1]) >= int(zone["size"][1]):
+				or int(pos[0]) >= lim.x or int(pos[1]) >= lim.y:
 		adv["hero_pos"] = zone["start"].duplicate()
 	for k: String in ["discovered", "completed", "revealed_cities", "finds"]:
 		if not adv.has(k) or not (adv[k] is Array):
@@ -2786,6 +2792,10 @@ func adventure_move(adv: Dictionary, pos: Vector2i) -> Array:
 		return []
 	adv["hero_pos"] = [pos.x, pos.y]
 	adv["moves"] = int(adv.get("moves", 0)) + 1
+	# V117 : une planche (carte 2D) est toujours visible en entière : pas de brouillard à tenir à jour.
+	# (sur 144×144 cases, la liste des découvertes grossissait sans fin et était parcourue à chaque pas)
+	if not BoardArt.def(zone_id).is_empty():
+		return []
 	var discovered: Array = adv.get("discovered", [])
 	var fresh: Array = []
 	var radius: int = ADVENTURE_FOG_RADIUS

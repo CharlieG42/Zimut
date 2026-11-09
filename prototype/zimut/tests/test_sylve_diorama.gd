@@ -89,6 +89,38 @@ func _boot() -> void:
 	pm.adventure_enter_zone(adv, z)
 	check(Vector2i(int(adv["hero_pos"][0]), int(adv["hero_pos"][1])) == st, "entrée dans la Sylve : héros au départ du diorama")
 
+	# --- V117 : fluidité
+	var vram := true
+	for path: String in ["res://assets/boards/sylve_diorama/sol_0_0.webp.import", "res://assets/boards/sylve_diorama/occ_1_1.webp.import", "res://assets/boards/sylve_diorama/fond_bas.webp.import"]:
+		var txt: String = FileAccess.get_file_as_string(path)
+		vram = vram and txt.contains("compress/mode=2") and txt.contains("mipmaps/generate=true")
+	check(vram, "textures du diorama compressées pour le GPU (ETC2 / S3TC) avec mipmaps")
+	check(not BA.diorama_low(z).is_empty() and load(String(BA.diorama_low(z)["path"])) is Texture2D, "fond basse définition sous les tuiles")
+	gm.active_save = {"adventure_view": "map"}
+	var data2: Dictionary = gm.active_save
+	var adv2: Dictionary = pm.adventure_state(data2)
+	adv2["hero_pos"] = [100, 90]
+	pm.adventure_state(data2)
+	check(Vector2i(int(adv2["hero_pos"][0]), int(adv2["hero_pos"][1])) == Vector2i(100, 90), "héros loin du départ (100,90) : position gardée au rechargement")
+	var n0: int = (adv2.get("discovered", []) as Array).size()
+	pm.adventure_move(adv2, Vector2i(101, 90))
+	check((adv2.get("discovered", []) as Array).size() == n0, "pas de brouillard tenu à jour sur une planche (liste des découvertes stable)")
+	var tz: Dictionary = AT.zone_terrain(z)
+	check((tz.get("heights", {}) as Dictionary).is_empty(), "diorama : pas de fausses falaises (pentes quantifiées)")
+	var same := true
+	var walls: Dictionary = AT._merge(tz["obstacles"], tz["voids"])
+	for pair: Array in [[st, Vector2i(30, 128)], [st, Vector2i(120, 30)], [Vector2i(40, 40), Vector2i(110, 120)]]:
+		var a0: Vector2i = pair[0]
+		var b0: Vector2i = pair[1]
+		while not BA.walkable_cell(z, b0):
+			b0 += Vector2i(1, 0)
+		while not BA.walkable_cell(z, a0):
+			a0 += Vector2i(1, 0)
+		var p1: Array = AT.find_path(z, a0, b0)
+		var p2: Array = AT._bfs_path(tz["size"], walls, a0, b0, {})
+		same = same and p1.size() == p2.size() and p1.size() > 0 and p1.back() == b0
+	check(same, "chemins natifs (AStar) aussi courts que le parcours en largeur")
+
 	# --- Options en onglets
 	var opt: Node = (load("res://scenes/Settings.tscn") as PackedScene).instantiate()
 	root.add_child(opt)
