@@ -246,6 +246,8 @@ for ty in range(NT):
 
 def enc(v):
     return chr(48 + v) if v < 10 else chr(97 + v - 10)
+_old = REPO + "/data/boards/%s.json" % W.BOARD_STEM
+OLD_FX = json.load(open(_old)).get("image_fx") if os.path.exists(_old) else None
 board = {
     "iso": True, "diorama": True, "cols": N, "rows": N, "unit": UNIT, "cell_scale": CS,
     "start": list(start),
@@ -256,6 +258,7 @@ board = {
     "image_size": [IMG_W, IMG_H], "image_scale": SCALE, "image_offset": [round(offset[0], 2), round(offset[1], 2)],
     "image_tiles": tiles,
     "image_low": {"path": RES_DIR + "fond_bas.webp", "factor": 4},
+    **({"image_fx": OLD_FX} if OLD_FX else {}),   # V127 : masque des effets animés, écrit par fx_masks.py (conservé d'une cuisson à l'autre)
     "occluder_pages": page_paths,
     "occluders": occl,
 }

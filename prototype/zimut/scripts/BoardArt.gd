@@ -375,6 +375,18 @@ static func diorama_low(zone_id: String) -> Dictionary:
 	return {"path": String(lo["path"]), "pos": _diorama_origin(zone_id), "scale": diorama_scale(zone_id) * float(lo.get("factor", 4))}
 
 
+## V127 : masque des effets animés (eau, lave / lumières, terre ferme) : {path, pos, scale} ou {}.
+static func diorama_fx(zone_id: String) -> Dictionary:
+	var fx: Dictionary = raw(zone_id).get("image_fx", {})
+	if fx.is_empty() or not ResourceLoader.exists(String(fx.get("path", ""))):
+		return {}
+	var out: Dictionary = {"path": String(fx["path"]), "pos": _diorama_origin(zone_id), "scale": diorama_scale(zone_id) * float(fx.get("factor", 8))}
+	var gr: Array = fx.get("ground_rect", [])
+	if gr.size() == 4:
+		out["ground_rect"] = Rect2(float(gr[0]), float(gr[1]), float(gr[2]), float(gr[3]))
+	return out
+
+
 ## Occultants : [{page, path, rect, pos, size, cell}] (rect = zone de la page d'atlas, cell = case qui fixe la profondeur).
 static func diorama_occluders(zone_id: String) -> Array:
 	var d: Dictionary = raw(zone_id)
