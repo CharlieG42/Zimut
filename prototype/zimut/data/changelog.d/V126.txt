@@ -1,0 +1,3 @@
+V126|Carte Diorama : le portail vers la Nation suivante se repère maintenant comme un donjon (halo, colonne de lumière, étiquette « SCELLÉ » ou « OUVERT »), il ne se perd plus derrière les arbres.
+V126|Forge : dans Améliorer (et Fortifier), le héros qui porte l'équipement apparaît sur la ligne de l'objet et dans le détail (« Porté par … »).
+V126|Après un donjon final, l'écran de victoire indique de chercher la colonne de lumière du portail sur la carte.

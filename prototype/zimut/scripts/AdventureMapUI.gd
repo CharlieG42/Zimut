@@ -714,7 +714,8 @@ func _rebuild_world() -> void:
 		var poi: Dictionary = pois[k]
 		var node := PoiNode.new()
 		node.kind = String(poi.get("kind", "combat"))
-		node.is_dungeon = Dungeons.is_dungeon(poi)
+		node.portal = manager.is_portal(poi)          # V126 : un portail se repère comme un donjon (halo, étiquette d'état)
+		node.is_dungeon = Dungeons.is_dungeon(poi) or node.portal
 		node.title = String(poi.get("name", "?"))
 		node.level = int(poi.get("level", 10))
 		node.biome = biome
@@ -890,7 +891,8 @@ func _rebuild_board(biome: String) -> void:
 		var poi: Dictionary = pois[k]
 		var node := PoiNode.new()
 		node.kind = String(poi.get("kind", "combat"))
-		node.is_dungeon = Dungeons.is_dungeon(poi)
+		node.portal = manager.is_portal(poi)          # V126 : un portail se repère comme un donjon (halo, étiquette d'état)
+		node.is_dungeon = Dungeons.is_dungeon(poi) or node.portal
 		node.title = String(poi.get("name", "?"))
 		node.level = int(poi.get("level", 10))
 		node.biome = biome
@@ -997,8 +999,8 @@ func _refresh_world() -> void:
 				var pn: PoiNode = n
 				# Les POI non découverts ne sont pas animés : aucun rendu visible à rafraîchir.
 				pn.set_process(n.visible)
-				pn.done = manager.poi_done(p) and pn.kind != "camp"
-				pn.locked = pn.is_dungeon and not manager.dungeon_lock(manager.poi_at(p)).is_empty()
+				pn.done = manager.poi_done(p) and pn.kind != "camp" and not pn.portal
+				pn.locked = pn.is_dungeon and not (manager.portal_lock(manager.poi_at(p)) if pn.portal else manager.dungeon_lock(manager.poi_at(p))).is_empty()
 				var near: int = 4 if board_depth else 2
 				var hero_distance: int = absi(p.x - hp.x) + absi(p.y - hp.y)
 				pn.nearby = hero_distance <= near and not pn.done
@@ -3522,6 +3524,7 @@ class PoiNode extends Node2D:
 	var forest_style: bool = false
 	var kind: String = "combat"
 	var is_dungeon: bool = false
+	var portal: bool = false
 	var title: String = ""
 	var level: int = 10
 	var biome: String = "Forêt"
@@ -3717,7 +3720,7 @@ class PoiNode extends Node2D:
 			var tw: float = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x + 18.0
 			if is_dungeon:
 				# Pastille d'état sous le nom : lisible sans couleur (texte) et sans émoji.
-				var st: String = "TERMINÉ" if done else ("VERROUILLÉ" if locked else "OUVERT")
+				var st: String = ("SCELLÉ" if locked else "OUVERT") if portal else ("TERMINÉ" if done else ("VERROUILLÉ" if locked else "OUVERT"))
 				var sw: float = font.get_string_size(st, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 16.0
 				var sr := Rect2(Vector2(-sw * 0.5, 48), Vector2(sw, 20))
 				var ssb := StyleBoxFlat.new()

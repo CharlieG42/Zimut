@@ -1004,6 +1004,16 @@ func _find_entry(key: String) -> Dictionary:
 	return {}
 
 
+## V126 : classe du héros qui porte l'équipement de cette entrée ("" si l'objet est dans le sac).
+func _owner_class(e: Dictionary) -> String:
+	var team: Array = _save.get("team", [])
+	if String(e.get("src", "")) == "team" and int(e.get("member", -1)) >= 0 and int(e["member"]) < team.size():
+		return String(team[int(e["member"])].get("classe", ""))
+	if String(e.get("src", "")) == "hero":
+		return String(e.get("classe", ""))
+	return ""
+
+
 func _refresh_upgrade_list() -> void:
 	var entries: Array = ProgressionManager.upgradable_items(_save)
 	if entries.is_empty() and _mode != "fortify":
@@ -1026,6 +1036,9 @@ func _refresh_upgrade_list() -> void:
 		var edge: Color = ItemRules.rarity_color(it)
 		var st_n: StyleBoxFlat = U.box(Color(0.17, 0.13, 0.11, 0.95) if sel else Color(0.13, 0.10, 0.09, 0.92), Color(1.0, 0.75, 0.35) if sel else edge.darkened(0.3), 14, 3 if sel else 2, 10)
 		st_n.content_margin_left = 84
+		var owner_cls: String = _owner_class(e)
+		if owner_cls != "":
+			st_n.content_margin_right = 78       # place pour le portrait du porteur
 		b.add_theme_stylebox_override("normal", st_n)
 		b.add_theme_stylebox_override("hover", st_n)
 		b.add_theme_stylebox_override("pressed", st_n)
@@ -1054,6 +1067,16 @@ func _refresh_upgrade_list() -> void:
 		tile.offset_top = -32
 		tile.offset_bottom = 32
 		b.add_child(tile)
+		if owner_cls != "":                      # V126 : le héros qui porte l'objet
+			var face: Control = U.portrait(owner_cls, 60.0)
+			face.name = "Porteur"
+			face.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			face.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
+			face.offset_left = -70
+			face.offset_right = -10
+			face.offset_top = -30
+			face.offset_bottom = 30
+			b.add_child(face)
 		_list_box.add_child(b)
 	if _mode == "fortify":
 		_append_stone_rows()
@@ -1079,6 +1102,14 @@ func _refresh_upgrade_detail() -> void:
 	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hv.add_child(nm)
 	hv.add_child(U.lbl("%s · %s · rang %d / %d" % [it.get("type", ""), ItemRules.rarity_label(it), rank, ProgressionManager.MAX_RANK], 17, U.C_DIM))
+	var owner_cls: String = _owner_class(e)
+	if owner_cls != "":                          # V126 : héros porteur, visible dans le détail
+		var orow := HBoxContainer.new()
+		orow.name = "PorteurDetail"
+		orow.add_theme_constant_override("separation", 8)
+		orow.add_child(U.portrait(owner_cls, 44.0))
+		orow.add_child(U.lbl("Porté par %s" % owner_cls, 19, U.C_TXT))
+		hv.add_child(orow)
 	if rank >= ProgressionManager.MAX_RANK:
 		_detail_box.add_child(U.lbl("Rang maximum atteint !", 22, U.C_GOOD))
 		return
@@ -1321,6 +1352,14 @@ func _refresh_fortify_detail() -> void:
 	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hv.add_child(nm)
 	hv.add_child(U.lbl("%s · %s · niv. %d" % [it.get("type", ""), ItemRules.rarity_label(it), int(it.get("level", 1))], 17, U.C_DIM))
+	var owner_cls: String = _owner_class(e)
+	if owner_cls != "":
+		var orow := HBoxContainer.new()
+		orow.name = "PorteurDetail"
+		orow.add_theme_constant_override("separation", 8)
+		orow.add_child(U.portrait(owner_cls, 44.0))
+		orow.add_child(U.lbl("Porté par %s" % owner_cls, 19, U.C_TXT))
+		hv.add_child(orow)
 	var base_line := U.lbl(_base_stat_line(it), 19, U.C_TXT)
 	base_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_detail_box.add_child(base_line)

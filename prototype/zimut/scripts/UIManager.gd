@@ -2188,7 +2188,7 @@ func _show_result_window(victory: bool) -> void:
 			for dsb: String in dsh.keys():
 				dtxt += "\n💠  Le Gardien laisse des éclats : %s +%d" % [Shards.shard_name(dsb), int(dsh[dsb])]
 			if String(dg.get("unlocked_zone", "")) != "":
-				dtxt += "\n🌀  Le portail s'ouvre : %s est désormais accessible !" % ProgressionManager.adventure_zone_name(String(dg["unlocked_zone"]))
+				dtxt += "\n🌀  Le portail s'ouvre : %s est désormais accessible ! Repère la colonne de lumière du portail sur la carte." % ProgressionManager.adventure_zone_name(String(dg["unlocked_zone"]))
 			dcol = Color(0.55, 0.95, 0.60)
 		else:
 			dtxt = "🏰  Salle %d / %d vaincue — la suivante t'attend." % [int(dg.get("room", 1)), int(dg.get("rooms", Dungeons.ROOMS))]
