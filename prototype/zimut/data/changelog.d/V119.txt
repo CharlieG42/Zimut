@@ -1,0 +1,5 @@
+V119|Fluidité : la partie n'est plus réécrite entièrement à chaque pas (sauvegarde regroupée), les tuiles du décor arrivent une par une au lieu de toutes dans la même image, et la carte ne se redessine plus quand rien ne change.
+V119|Réglages › Graphismes : nouveau « Compteur d'images » sur la carte d'aventure (images par seconde, pire image, nombre de saccades) pour mesurer la fluidité sur téléphone.
+V119|Cartes Diorama (Sylve et Brasier) : l'île flotte désormais dans le ciel, avec montagnes lointaines, nuages, falaise rocheuse, cascades (ou coulées de lave) et une mer de nuages ; couleurs plus riches et rendu plus « peint ».
+V119|Donjons plus lisibles : un donjon ouvert est signalé par une colonne de lumière dorée, un donjon verrouillé est grisé avec un cadenas, et chaque donjon affiche son état (Ouvert, Verrouillé, Terminé) sous son nom.
+V119|Cartes Diorama plus nettes : le décor n'est plus adouci par le filtrage quand la carte est peu dézoomée, et le rendu garde davantage de détails (brins d'herbe, tuiles, contours).

@@ -52,6 +52,13 @@ func _boot() -> void:
 		sc._dio_sync = true
 		await create_timer(0.6).timeout
 		await _shot(out + "/diorama_%s.png" % nm)
+	# V119 : vue dézoomée (île flottante, états des donjons)
+	sc._focus_cell(Vector2i(60, 70), false)
+	sc._zoom_at(sc._map_view.size * 0.5, 0.45)
+	sc._dio_sync = true
+	await create_timer(1.0).timeout
+	await _shot(out + "/diorama_vue.png")
+	sc._zoom_at(sc._map_view.size * 0.5, 1.0 / 0.45)
 	# V118 : le Brasier (Terres de Cendre) et ses donjons
 	if args.has("brasier"):
 		adv["zones_unlocked"] = ["foret_sylve", "brasier_cendres"]

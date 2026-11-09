@@ -145,8 +145,14 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
+	# V119 : on ne dessine que les particules visibles (sur une grande planche, la plupart sont hors champ)
+	var inv: Transform2D = get_global_transform_with_canvas().affine_inverse()
+	var vr: Rect2 = get_viewport_rect()
+	var view: Rect2 = Rect2(inv * vr.position, Vector2.ZERO).expand(inv * vr.end).grow(60.0)
 	for pt: Dictionary in _parts:
 		var c := Vector2(float(pt["x"]), float(pt["y"]))
+		if not view.has_point(c):
+			continue
 		var r: float = float(pt["r"]) * float(pt.get("depth", 1.0)) * _px
 		var tw: float = 0.5 + 0.5 * sin(_t * 2.2 + float(pt["ph"]))
 		var st2: String = _effect_kind

@@ -71,53 +71,84 @@ if "phase2" not in sys.argv:
             print("phase 1", tx, ty, flush=True)
     tile.cache_clear()
 
-# ── phase 2
+# ── phase 2 (V119 : île flottante dans un décor peint — ciel, montagnes, falaise, cascades, mer de nuages)
+import scene_bg
+from functools import lru_cache as _lru
 Q = 4
 qw, qh = OW // Q, OH // Q
 glob = np.zeros((qh * NT, qw * NT, 4), np.float32)
+Q2 = 2
+q2w, q2h = OW // Q2, OH // Q2
+g2 = np.zeros((q2h * NT, q2w * NT, 4), np.float32)
 for ty in range(NT):
     for tx in range(NT):
         t = np.load(L + f"p1_{tx}_{ty}.npy").astype(np.float32)
         glob[ty * qh:(ty + 1) * qh, tx * qw:(tx + 1) * qw] = cv2.resize(t, (qw, qh), interpolation=cv2.INTER_AREA)
+        g2[ty * q2h:(ty + 1) * q2h, tx * q2w:(tx + 1) * q2w] = cv2.resize(t, (q2w, q2h), interpolation=cv2.INTER_AREA)
 gi, ga = glob[..., :3], glob[..., 3]
 lum = (gi * np.array([0.3, 0.59, 0.11], np.float32)).sum(2)
 bright = np.clip(gi - MOOD["bloom_thr"][0], 0, 1) * np.clip((lum[..., None] - MOOD["bloom_thr"][1]) * 3, 0, 1)
-k = 0.5 / Q            # rayons (pixels de la vue globale réduite)
+k = 0.5 / Q
 bk = MOOD["bloom_k"]
 bloom = P.blur(bright, max(0.8, 18 * k)) * bk[0] + P.blur(bright, 70 * k) * bk[1] + P.blur(bright, 180 * k) * bk[2]
 GW, GH = OW * NT, OH * NT
-sh = P.blur(ga, GW * 0.012 / Q)
-sh = cv2.warpAffine(sh, np.float32([[1, 0, 0], [0, 1, 0.035 * GH / Q]]), (sh.shape[1], sh.shape[0])) * 0.55
+BG = scene_bg.build(g2[..., 3], g2[..., :3], BR)
+del g2
+print("décor ok", flush=True)
+
+def up(gl, tx, ty, f):
+    """Morceau d'une vue globale réduite (facteur f) remis à l'échelle de la tuile (tx, ty)."""
+    sw, sh_ = OW // f, OH // f
+    x0, y0 = tx * sw, ty * sh_
+    pad = cv2.copyMakeBorder(gl, 1, 1, 1, 1, cv2.BORDER_REPLICATE)
+    sub = pad[y0:y0 + sh_ + 2, x0:x0 + sw + 2]
+    mx = (np.arange(OW, dtype=np.float32) + 0.5) / f - 0.5 + 1
+    my = (np.arange(OH, dtype=np.float32) + 0.5) / f - 0.5 + 1
+    gx, gy_ = np.meshgrid(mx, my)
+    return cv2.remap(sub, gx, gy_, cv2.INTER_LINEAR)
+
+@_lru(maxsize=8)
+def p1(tx, ty):
+    if not (0 <= tx < NT and 0 <= ty < NT):
+        return None
+    return np.load(L + f"p1_{tx}_{ty}.npy").astype(np.float32)
+
+PM = 16    # marge prise chez les voisines pour le lissage « peint » (pas de couture)
+def p1_region(tx, ty):
+    X0, Y0 = tx * OW - PM, ty * OH - PM
+    out = np.zeros((OH + 2 * PM, OW + 2 * PM, 4), np.float32)
+    for dy in (-1, 0, 1):
+        for dx in (-1, 0, 1):
+            t = p1(tx + dx, ty + dy)
+            if t is None:
+                continue
+            nx0, ny0 = (tx + dx) * OW, (ty + dy) * OH
+            ax0, ay0 = max(X0, nx0), max(Y0, ny0)
+            ax1, ay1 = min(X0 + OW + 2 * PM, nx0 + OW), min(Y0 + OH + 2 * PM, ny0 + OH)
+            if ax1 <= ax0 or ay1 <= ay0:
+                continue
+            out[ay0 - Y0:ay1 - Y0, ax0 - X0:ax1 - X0] = t[ay0 - ny0:ay1 - ny0, ax0 - nx0:ax1 - nx0]
+    return out
+
 rng = np.random.default_rng(1)
 prev = np.zeros((qh * NT, qw * NT, 3), np.uint8)
-for ty in range(NT):
-    for tx in range(NT):
-        t = np.load(L + f"p1_{tx}_{ty}.npy").astype(np.float32)
-        img, a = t[..., :3], t[..., 3]
-        # morceaux globaux (avec 1 px de bord) remis à l'échelle de la tuile
-        def up(gl):
-            x0, y0 = tx * qw, ty * qh
-            pad = cv2.copyMakeBorder(gl, 1, 1, 1, 1, cv2.BORDER_REPLICATE)
-            sub = pad[y0:y0 + qh + 2, x0:x0 + qw + 2]
-            mx = (np.arange(OW, dtype=np.float32) + 0.5) / Q - 0.5 + 1
-            my = (np.arange(OH, dtype=np.float32) + 0.5) / Q - 0.5 + 1
-            gx, gy_ = np.meshgrid(mx, my)
-            return cv2.remap(sub, gx, gy_, cv2.INTER_LINEAR)
-        img = img + up(bloom) * np.array([1.0, 0.9, 0.72], np.float32)
-        s = up(sh)
-        yy = (np.arange(ty * OH, (ty + 1) * OH, dtype=np.float32) / GH)[:, None, None]
-        top = np.array(MOOD["top"], np.float32); bot = np.array(MOOD["bot"], np.float32)
-        bg = np.repeat(top * (1 - yy) + bot * yy, OW, axis=1)
-        out = bg * (1 - s[..., None]) * (1 - a[..., None]) + img * a[..., None]
-        gx_ = (np.arange(tx * OW, (tx + 1) * OW, dtype=np.float32))[None, :]
-        gy2 = (np.arange(ty * OH, (ty + 1) * OH, dtype=np.float32))[:, None]
-        r = np.sqrt(((gx_ - GW / 2) / (GW * 0.62)) ** 2 + ((gy2 - GH * 0.5) / (GH * 0.62)) ** 2)
-        vig = 1 - np.clip(r - 0.55, 0, 1) ** 1.6 * 0.6
-        out = out * vig[..., None] + rng.normal(0, 0.006, (OH, OW))[..., None].astype(np.float32)
-        out8 = (np.clip(out, 0, 1) * 255 + 0.5).astype(np.uint8)
-        Image.fromarray(out8).save(L + f"fin_{tx}_{ty}.webp", "WEBP", quality=90, method=6)
-        Image.fromarray(out8).save(L + f"fin_{tx}_{ty}.png")
-        prev[ty * qh:(ty + 1) * qh, tx * qw:(tx + 1) * qw] = cv2.resize(out8, (qw, qh), interpolation=cv2.INTER_AREA)
-        print("phase 2", tx, ty, flush=True)
+order = [(tx, ty) for ty in range(NT) for tx in range(NT)]
+for tx, ty in order:
+    t = p1_region(tx, ty)
+    img = scene_bg.paint(t[..., :3], BR, 7)[PM:PM + OH, PM:PM + OW]
+    a = t[PM:PM + OH, PM:PM + OW, 3]
+    img = img + up(bloom, tx, ty, Q) * np.array([1.0, 0.9, 0.72], np.float32)
+    bg = up(BG, tx, ty, Q2)
+    out = bg * (1 - a[..., None]) + img * a[..., None]
+    gx_ = (np.arange(tx * OW, (tx + 1) * OW, dtype=np.float32))[None, :]
+    gy2 = (np.arange(ty * OH, (ty + 1) * OH, dtype=np.float32))[:, None]
+    r = np.sqrt(((gx_ - GW / 2) / (GW * 0.62)) ** 2 + ((gy2 - GH * 0.5) / (GH * 0.62)) ** 2)
+    vig = 1 - np.clip(r - 0.65, 0, 1) ** 1.6 * 0.45
+    out = out * vig[..., None] + rng.normal(0, 0.006, (OH, OW))[..., None].astype(np.float32)
+    out8 = (np.clip(out, 0, 1) * 255 + 0.5).astype(np.uint8)
+    Image.fromarray(out8).save(L + f"fin_{tx}_{ty}.webp", "WEBP", quality=90, method=6)
+    Image.fromarray(out8).save(L + f"fin_{tx}_{ty}.png")
+    prev[ty * qh:(ty + 1) * qh, tx * qw:(tx + 1) * qw] = cv2.resize(out8, (qw, qh), interpolation=cv2.INTER_AREA)
+    print("phase 2", tx, ty, flush=True)
 Image.fromarray(prev).save(L + "apercu.png")
 print("ok")
