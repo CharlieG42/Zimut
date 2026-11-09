@@ -276,7 +276,9 @@ une **scène 3D pré-rendue** (Kenney + Quaternius, CC0) posée sur un plateau i
   utilisent une scène pré-rendue ; les autres Nations gardent leur carte.
 - Terres de Cendre : bourg de forgerons, lave (masque `lava.npy` infranchissable, émission non ombrée au
   rendu), volcan (`forbid.npy`), 5 donjons `Brasier#1..#4` + `Brasier`, portail vers les Brumes
-  (`requires: "Brasier"`). Pas de « sortie » non scellée : toute sortie débloque la Nation suivante.
+  (`requires: "Brasier"`) et **sentier de retour** vers la Sylve (`kind: "exit"`, `back: true`, `to`) :
+  toujours ouvert, il ne propose que la Nation précédente et ne débloque rien
+  (`adventure_complete_poi` ignore les sorties `back`). Règle : N-1 toujours accessible, N+1 après le Gardien de N.
 - Bâtiments de donjon (`tools/diorama/dungeons3d.py`) : un groupe d'objets par donjon = **un seul**
   occultant (`kind: "dungeon"`) ; le lieu est posé devant l'entrée (`DG.entrance`).
 - Fluidité : petits décors non découpés (moins de nœuds) ; `PoiNode`, `FindNode`, `MobNode`,

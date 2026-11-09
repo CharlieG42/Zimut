@@ -2029,8 +2029,13 @@ func _show_exit(key: String, portal: bool = false) -> void:
 	var msg: String = "Le sentier s'ouvre vers de nouvelles terres." if not targets.is_empty() else "Ce sentier vous est familier. Où voulez-vous aller ?"
 	if portal:
 		msg = "Le portail s'ouvre vers de nouvelles terres." if not targets.is_empty() else "Le portail s'ouvre. Où voulez-vous aller ?"
-	box.add_child(U.lbl(msg, 18, U.C_TXT))
 	var choices: Array = targets if not targets.is_empty() else manager.available_zones()
+	# V118 : chemin de retour : uniquement vers la Nation précédente
+	var exit_poi: Dictionary = ProgressionManager.adventure_zone_pois(manager.zone_id()).get(key.substr(manager.zone_id().length() + 1), {})
+	if bool(exit_poi.get("back", false)):
+		choices = [String(exit_poi.get("to", ""))]
+		msg = "Le sentier redescend vers une terre déjà parcourue."
+	box.add_child(U.lbl(msg, 18, U.C_TXT))
 	for zid: String in choices:
 		if zid == manager.zone_id():
 			continue

@@ -90,6 +90,28 @@ func _boot() -> void:
 	adv["zones_unlocked"] = ["foret_sylve", "brasier_cendres"]
 	pm.adventure_enter_zone(adv, z)
 	check(Vector2i(int(adv["hero_pos"][0]), int(adv["hero_pos"][1])) == st, "entrée : héros au départ du bourg")
+	# V118 : règles de voyage — N-1 toujours accessible, N+1 seulement après le Gardien de N
+	var back_key := ""
+	var portal_key := ""
+	for k: String in pois.keys():
+		if String(pois[k].get("kind", "")) == "exit":
+			if bool(pois[k].get("back", false)) and String(pois[k].get("to", "")) == "foret_sylve":
+				back_key = k
+			elif bool(pois[k].get("portal", false)):
+				portal_key = k
+	check(back_key != "" and seen.has(AT.parse(back_key)), "sentier de retour vers la Sylve, atteignable")
+	var mgr: Node = load("res://scripts/AdventureManager.gd").new()
+	root.add_child(mgr)
+	mgr.load_state(data, -1)
+	mgr.state = adv
+	check(not mgr.portal_lock(pois[portal_key]).is_empty(), "portail vers les Brumes scellé tant que le Gardien règne")
+	check(mgr.portal_lock(pois[back_key]).is_empty(), "le sentier de retour n'est jamais scellé")
+	var revealed: Array = pm.adventure_complete_poi(adv, "%s,%s" % [z, back_key], "exit")
+	check(revealed.is_empty() and not (adv["zones_unlocked"] as Array).has("brumes_marais"), "prendre le sentier de retour ne débloque pas les Brumes")
+	check((adv["zones_unlocked"] as Array).has("foret_sylve"), "la Sylve reste accessible")
+	pm.adventure_complete_poi(adv, "%s,%s" % [z, portal_key], "exit")
+	check((adv["zones_unlocked"] as Array).has("brumes_marais"), "le portail (une fois ouvert) débloque bien les Brumes")
+	mgr.queue_free()
 	# Sylve : les 5 donjons ont maintenant un bâtiment (un occultant « dungeon » près de chaque lieu de donjon)
 	var occ_s: Array = BA.diorama_occluders("foret_sylve")
 	var occ_b: Array = occ

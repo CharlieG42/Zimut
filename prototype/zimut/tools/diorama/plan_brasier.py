@@ -53,7 +53,7 @@ PLACES = [("Source chaude", 53.0, 50.0), ("Forge abandonnée", 38.0, 60.0), ("Li
           ("Repaire des bêtes", 56.5, 78.0), ("Trésor enfoui", 52.0, 88.0), ("Camp de monstres", 78.0, 66.5),
           ("Refuge de basalte", 84.0, 46.5), ("Cache du mineur", 88.0, 30.0), ("Golem de lave", 76.0, 34.5),
           ("Cratère-belvédère", 73.5, 31.5), ("Repaire des salamandres", 34.0, 26.0),
-          ("Portail vers les Brumes", 94.0, 51.5), ("Bois calciné", 12.0, 82.0)]
+          ("Portail vers les Brumes", 94.0, 51.5), ("Sentier de la Sylve", 1.6, 51.0), ("Bois calciné", 12.0, 82.0)]
 
 def poi_defs(repo):
     d = {
@@ -72,6 +72,8 @@ def poi_defs(repo):
         "Cratère-belvédère": {"kind": "reveal", "level": 18, "desc": "Du bord du cratère on voit loin."},
         "Repaire des salamandres": {"kind": "combat", "level": 21, "desc": "Des salamandres se chauffent sur les pierres."},
         "Bois calciné": {"kind": "combat", "level": 23, "desc": "Des esprits de cendre hantent les arbres morts."},
+        "Sentier de la Sylve": {"kind": "exit", "level": 1, "back": True, "to": "foret_sylve",
+                                "desc": "Le chemin du retour vers la Grande Forêt de la Sylve (toujours ouvert)."},
         "Portail vers les Brumes": {"kind": "exit", "level": 1, "portal": True, "requires": "Brasier", "to": "brumes_marais",
                                     "desc": "Un portail de lumière, scellé tant que le Gardien du Brasier règne."},
         "Galerie des Scories": {"kind": "combat", "guardian": "Brasier#1", "desc": "Des galeries de scories : quatre salles, la plus douce des entrées."},

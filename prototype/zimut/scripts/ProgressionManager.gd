@@ -2838,6 +2838,11 @@ func adventure_complete_poi(adv: Dictionary, poi_key: String, kind: String = "")
 				poi_kind = String(pois_of(zone_id)[k].get("kind", "exit"))
 				break
 	var revealed: Array = []
+	# V118 : un chemin de retour (« back ») mène à la Nation précédente sans rien débloquer :
+	# seule la sortie principale (portail scellé par le Gardien) ouvre la Nation suivante.
+	var poi_def: Dictionary = pois_of(zone_id).get(poi_key.substr(zone_id.length() + 1), {})
+	if poi_kind == "exit" and bool(poi_def.get("back", false)):
+		return revealed
 	if poi_kind == "exit":
 		for next_id: String in ADVENTURE_ZONES.keys():
 			if String(ADVENTURE_ZONES[next_id].get("unlock", "")) == zone_id:
