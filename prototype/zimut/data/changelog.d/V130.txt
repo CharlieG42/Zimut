@@ -1,0 +1,3 @@
+V130|Carte Diorama : le héros et les monstres prennent la lumière du lieu — plus sombres et verts sous les arbres, orangés près de la lave. Ils ne paraissent plus « posés » sur le décor.
+V130|La teinte du héros change en douceur pendant la marche, sans saut de couleur d'une case à l'autre.
+V130|Les sprites des personnages sont lissés sur la carte Diorama : leurs contours ne crénellent plus sur le décor peint.

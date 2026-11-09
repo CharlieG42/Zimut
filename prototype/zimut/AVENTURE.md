@@ -323,6 +323,15 @@ Défaite, combat abandonné ou arrêt du jeu ne font plus rien perdre (`Dungeons
 session). La porte d'un donjon commencé propose « REPRENDRE · SALLE n » et « ↺ RECOMMENCER » (`Dungeons.restart`, qui ne
 touche que ce donjon). L'ancien format `adventure["dungeon"]` reste lu. Terminer la salle du Gardien efface la progression.
 
+### Personnages intégrés au décor du Diorama (V130)
+
+Lot 2 du plan d'amélioration graphique. `tools/diorama/light_map.py` réduit l'image finie à 320 × 180 et
+l'adoucit (`assets/boards/lumieres/<dossier des tuiles>.png`, import sans perte, trouvée par convention :
+`BoardArt.diorama_light`). `AdventureMapUI.light_tint(case)` y lit la couleur ambiante et en tire une teinte
+bornée (teinte ×0,28, luminosité 0,78 à 1,05). Le héros la rejoint en douceur (`HeroView.light_target`), les
+monstres la reçoivent dans `_refresh_world` (alpha de fondu conservé). Héros et monstres passent en filtrage
+linéaire sur le Diorama. Ombres de contact et liseré existaient déjà (V119) ; la poussière de pas n'est pas faite.
+
 ### Position des donjons dans une Nation (V122)
 
 Règle pour **toutes** les Nations (Sylve, Brasier et les suivantes) : un donjon dans chacun des quatre

@@ -375,6 +375,19 @@ static func diorama_low(zone_id: String) -> Dictionary:
 	return {"path": String(lo["path"]), "pos": _diorama_origin(zone_id), "scale": diorama_scale(zone_id) * float(lo.get("factor", 4))}
 
 
+## V130 : carte de lumière (image finie réduite, `assets/boards/lumieres/<dossier des tuiles>.png`) : {path, pos, scale} ou {}.
+## `scale` = pixels du monde 2D par pixel de la carte de lumière.
+static func diorama_light(zone_id: String) -> Dictionary:
+	var lo: Dictionary = raw(zone_id).get("image_low", {})
+	if lo.is_empty():
+		return {}
+	var path: String = "res://assets/boards/lumieres/%s.png" % String(lo["path"]).get_base_dir().get_file()
+	if not ResourceLoader.exists(path):
+		return {}
+	var isz: Array = raw(zone_id).get("image_size", [10240, 5760])
+	return {"path": path, "pos": _diorama_origin(zone_id), "scale": diorama_scale(zone_id) * float(isz[0]) / 320.0}
+
+
 ## Occultants : [{page, path, rect, pos, size, cell}] (rect = zone de la page d'atlas, cell = case qui fixe la profondeur).
 static func diorama_occluders(zone_id: String) -> Array:
 	var d: Dictionary = raw(zone_id)
