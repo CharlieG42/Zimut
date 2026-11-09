@@ -1,0 +1,3 @@
+V121|Compteur d'images : la troisième ligne sépare maintenant le temps de la scène (calculs du jeu, animations) et le temps de rendu (envoi des dessins à l'écran), pour savoir lequel provoque les pires images.
+V121|Les mesures prises sur téléphone ont écarté le chargement des tuiles, les pas, la sauvegarde et les monstres : chacun reste sous 20 ms alors que la pire image dépasse 130 ms.
+V121|Aucun changement de comportement : le compteur reste désactivé par défaut (Réglages › Graphismes › Compteur d'images).

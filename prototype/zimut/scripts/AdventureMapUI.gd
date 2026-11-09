@@ -103,8 +103,22 @@ var _perf_clock: float = 0.0
 ## logique), sauv (écriture), maj (rafraîchissement du monde), mob (groupes). Affiché sous le compteur.
 var _perf_max: Dictionary = {"tuile": 0.0, "pas": 0.0, "sauv": 0.0, "maj": 0.0, "mob": 0.0}
 var _perf_win: float = 0.0
-## Temps de calcul du jeu (script + scène, hors rendu GPU) : max sur la fenêtre, en ms.
-var _perf_proc_max: float = 0.0
+## V121 : durée de la scène (tous les _process, tweens, signaux) et du rendu (envoi des dessins + attente
+## de l'écran), séparées par les signaux process_frame / frame_pre_draw / frame_post_draw. Max sur ~4 s.
+var _perf_t0: int = 0
+var _perf_t1: int = 0
+var _perf_scene_max: float = 0.0
+var _perf_draw_max: float = 0.0
+
+func _perf_connect() -> void:
+	get_tree().process_frame.connect(func() -> void: _perf_t0 = Time.get_ticks_usec())
+	RenderingServer.frame_pre_draw.connect(func() -> void:
+		_perf_t1 = Time.get_ticks_usec()
+		if _perf_t0 > 0:
+			_perf_scene_max = maxf(_perf_scene_max, float(_perf_t1 - _perf_t0) / 1000.0))
+	RenderingServer.frame_post_draw.connect(func() -> void:
+		if _perf_t1 > 0:
+			_perf_draw_max = maxf(_perf_draw_max, float(Time.get_ticks_usec() - _perf_t1) / 1000.0))
 
 func _perf_t(key: String, t0_usec: int) -> void:
 	if _perf_lbl == null:
@@ -299,6 +313,7 @@ func _build() -> void:
 		_perf_lbl.z_index = 1330
 		_perf_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_map_view.add_child(_perf_lbl)
+		_perf_connect()
 
 	# Panneau latéral
 	var side := PanelContainer.new()
@@ -506,7 +521,6 @@ func _dio_filter_sync() -> void:
 
 
 func _perf_tick(dt: float) -> void:
-	_perf_proc_max = maxf(_perf_proc_max, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0)
 	_perf_acc.append(dt)
 	_perf_clock += dt
 	if _perf_clock < 0.5:
@@ -527,14 +541,15 @@ func _perf_tick(dt: float) -> void:
 	manager.last_persist_ms = 0.0
 	_perf_win += 0.5
 	var detail: String = "tuile %.0f · pas %.0f · sauv %.0f · maj %.0f · mob %.0f ms (max)" % [_perf_max["tuile"], _perf_max["pas"], _perf_max["sauv"], _perf_max["maj"], _perf_max["mob"]]
-	var rend: String = "calcul max %.0f ms · dessins %d · objets %d · vram %d Mo · nœuds %d" % [
-		_perf_proc_max, int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)),
+	var rend: String = "scène %.0f · rendu %.0f ms (max) · dessins %d · objets %d · vram %d Mo · nœuds %d" % [
+		_perf_scene_max, _perf_draw_max, int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)),
 		int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)),
 		int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0),
 		int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))]
 	if _perf_win >= 4.0:
 		_perf_win = 0.0
-		_perf_proc_max = 0.0
+		_perf_scene_max = 0.0
+		_perf_draw_max = 0.0
 		for k: String in _perf_max.keys():
 			_perf_max[k] = 0.0
 	_perf_lbl.text = "%d i/s · %.0f ms · pire %.0f ms · saccades %d\n%s\n%s" % [roundi(1.0 / maxf(avg, 0.0001)), avg * 1000.0, worst * 1000.0, slow, detail, rend]
