@@ -22,6 +22,10 @@ MOOD = dict(sat=(0.88, 0.96, -5, 1.02), tone=(0.22, (1.08, 1.0, 0.88), (0.03, 0.
 if BR:   # Brasier : ombres pourpres, lumières orangées, brume de cendre chaude, la lave rayonne
     MOOD.update(sat=(1.0, 1.0, 0, 1.05), tone=(0.24, (1.10, 0.98, 0.86), (0.06, 0.02, 0.05)), fog=(0.78, 0.62, 0.55),
                 bloom_thr=(0.70, 0.55), bloom_k=(0.8, 0.9, 0.6), top=(0.12, 0.06, 0.09), bot=(0.36, 0.14, 0.10))
+BM = os.environ.get("DIORAMA_MOOD") == "brumes"
+if BM:   # Marais des Brumes : verts gris, ombres bleu-vert, brume épaisse, lueurs de feux follets
+    MOOD.update(sat=(0.84, 0.94, -3, 1.0), tone=(0.22, (0.98, 1.04, 0.96), (0.02, 0.05, 0.07)), fog=(0.66, 0.78, 0.74),
+                bloom_thr=(0.78, 0.66), bloom_k=(0.55, 0.75, 0.65), top=(0.10, 0.16, 0.16), bot=(0.24, 0.30, 0.28))
 M = 200
 
 @lru_cache(maxsize=12)
@@ -92,7 +96,7 @@ k = 0.5 / Q
 bk = MOOD["bloom_k"]
 bloom = P.blur(bright, max(0.8, 18 * k)) * bk[0] + P.blur(bright, 70 * k) * bk[1] + P.blur(bright, 180 * k) * bk[2]
 GW, GH = OW * NT, OH * NT
-BG = scene_bg.build(g2[..., 3], g2[..., :3], BR)
+BG = scene_bg.build(g2[..., 3], g2[..., :3], BR, pal=("brumes" if BM else None))
 del g2
 print("décor ok", flush=True)
 
@@ -135,7 +139,7 @@ prev = np.zeros((qh * NT, qw * NT, 3), np.uint8)
 order = [(tx, ty) for ty in range(NT) for tx in range(NT)]
 for tx, ty in order:
     t = p1_region(tx, ty)
-    img = scene_bg.paint(t[..., :3], BR, 7)[PM:PM + OH, PM:PM + OW]
+    img = scene_bg.paint(t[..., :3], BR, 7, BM)[PM:PM + OH, PM:PM + OW]
     a = t[PM:PM + OH, PM:PM + OW, 3]
     img = img + up(bloom, tx, ty, Q) * np.array([1.0, 0.9, 0.72], np.float32)
     bg = up(BG, tx, ty, Q2)

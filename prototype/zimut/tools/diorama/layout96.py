@@ -355,6 +355,8 @@ for pa in paths:
             if 0.2 < nx < S - 0.2 and 0.2 < nz < S - 0.2 and not on_path(nx, nz, 0.4) and not near_plaza(nx, nz, 5.8) and not in_pad(nx, nz, 0.3) and not in_field(nx, nz, 0.2):
                 add(NAT + ["Grass_Common_Tall.gltf", "Grass_Wispy_Tall.gltf"][rng.integers(0, 2)], nx, nz, float(rng.uniform(0, 360)), float(rng.uniform(0.28, 0.45)), "grass", 0.0, True)
 exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "wild96.py")).read())
+from thin_paths import thin
+objs = thin(objs, PATH if "PATH" in globals() else np.load("mask_path.npy"), 96.0)
 json.dump(objs, open("objects.json", "w"))
 json.dump({"pads": [(x + OFF, z + OFF, r) for x, z, r in pads], "B": [(j, x + OFF, z + OFF, r, s_) for j, x, z, r, s_ in B]}, open("plan.json", "w"))
 from collections import Counter

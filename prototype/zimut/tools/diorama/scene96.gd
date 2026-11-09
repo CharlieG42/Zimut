@@ -4,7 +4,7 @@ extends SceneTree
 const S := 96.0
 var AMP: float = float(OS.get_environment("DIORAMA_AMP")) if OS.get_environment("DIORAMA_AMP") != "" else 2.6   # = HMAX du plan (height2.png normalisé)
 const DMAX := 220.0
-var DIR: String = OS.get_environment("DIORAMA_WORK").path_join("")
+var DIR: String = OS.get_environment("DIORAMA_WORK").path_join("") if OS.get_environment("DIORAMA_WORK") != "" else "/tmp/claude-0/sylve96/"
 const PASS_HEAD := "shader_type spatial; render_mode unshaded, cull_disabled;
 uniform sampler2D tex : source_color, filter_linear_mipmap;
 uniform float use_tex = 0.0;
@@ -331,7 +331,7 @@ func _boot() -> void:
 					mi.mesh = pm
 					n = mi
 				else:
-					n = _load(ProjectSettings.globalize_path("res://").path_join("../../atelier_3d/kenney/") + String(part["f"])).duplicate()
+					n = _load("/home/claude/zimut/atelier_3d/kenney/" + String(part["f"])).duplicate()
 					var pf: String = String(part["f"])
 					if pf.contains("roof"):
 						_tint(n, Color(float(o["roof"][0]), float(o["roof"][1]), float(o["roof"][2])), false)
@@ -416,9 +416,10 @@ func _boot() -> void:
 	e.background_mode = Environment.BG_COLOR
 	e.background_color = Color(0, 0, 0, 0)
 	var brasier: bool = OS.get_environment("DIORAMA_MOOD") == "brasier"
+	var brumes: bool = OS.get_environment("DIORAMA_MOOD") == "brumes"
 	if mode == "beauty":
 		e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-		e.ambient_light_color = Color(0.70, 0.62, 0.66) if brasier else Color(0.66, 0.76, 0.95)
+		e.ambient_light_color = Color(0.70, 0.62, 0.66) if brasier else (Color(0.62, 0.76, 0.72) if brumes else Color(0.66, 0.76, 0.95))
 		e.ambient_light_energy = 0.55 if brasier else 0.62
 		e.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 		e.tonemap_exposure = 1.05
@@ -428,8 +429,8 @@ func _boot() -> void:
 	var center := Vector3(48, 0.0, 48)
 	if mode == "beauty":
 		var sun := DirectionalLight3D.new()
-		sun.light_energy = 1.3 if brasier else 1.55
-		sun.light_color = Color(1.0, 0.88, 0.74) if brasier else Color(1.0, 0.93, 0.80)
+		sun.light_energy = 1.3 if brasier else (1.35 if brumes else 1.55)
+		sun.light_color = Color(1.0, 0.88, 0.74) if brasier else (Color(0.90, 0.97, 0.88) if brumes else Color(1.0, 0.93, 0.80))
 		sun.shadow_enabled = true
 		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 		sun.directional_shadow_max_distance = 200.0
@@ -440,7 +441,7 @@ func _boot() -> void:
 		sun.look_at_from_position(center + Vector3(-0.38, 0.82, 0.62) * 100.0, center, Vector3.UP)
 		var fill := DirectionalLight3D.new()
 		fill.light_energy = 0.28
-		fill.light_color = Color(1.0, 0.45, 0.25) if brasier else Color(0.62, 0.74, 1.0)
+		fill.light_color = Color(1.0, 0.45, 0.25) if brasier else (Color(0.45, 0.85, 0.75) if brumes else Color(0.62, 0.74, 1.0))
 		holder.add_child(fill)
 		fill.look_at_from_position(center + Vector3(0.7, 0.4, -0.5) * 50.0, center, Vector3.UP)
 	var cam := Camera3D.new()

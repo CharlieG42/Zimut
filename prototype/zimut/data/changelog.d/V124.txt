@@ -1,0 +1,3 @@
+V124|Cartes Diorama (Sylve et Brasier) : l'herbe haute est éclaircie le long des chemins, les sentiers se lisent mieux et les personnages ne disparaissent plus dans les herbes.
+V124|Dessin des cartes un peu plus net : mélange peinture/rendu et netteté retouchés, les feuillages gardent plus de détail.
+V124|Les cartes sont régénérées avec ces réglages ; l'outil de génération prépare aussi la prochaine Nation (Brumes).

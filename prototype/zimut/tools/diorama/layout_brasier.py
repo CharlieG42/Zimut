@@ -218,6 +218,8 @@ scatter([NAT + "Grass_Wispy_Tall.gltf"], 2200, (0.3, 0.5), "grass", where=mead, 
 def lava_edge(x, z):
     return on_lava(x, z, 0.0001) is False and any(on_lava(x + dx, z + dz, 0.3) for dx, dz in ((1.2, 0), (-1.2, 0), (0, 1.2), (0, -1.2)))
 scatter([CA + "rocks-small.glb"], 90, (0.7, 1.2), "rock", mm=False, mul=BAS, where=lava_edge)
+from thin_paths import thin
+objs = thin(objs, PATH if "PATH" in globals() else np.load("mask_path.npy"), 96.0)
 
 json.dump(objs, open("objects.json", "w"))
 json.dump({"pads": pads, "B": [list(b) for b in W.TOWN]}, open("plan.json", "w"))
