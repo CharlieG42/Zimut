@@ -212,8 +212,9 @@ def build(alpha, col, brasier, seed=7):
 def paint(img, brasier, d=7):
     """Étalonnage « peint » de l'île : couleurs plus riches, aplats lissés en gardant les contours."""
     img = np.clip(img, 0, 1).astype(np.float32)
+    # V120 : lissage « peint » plus léger (0.65 -> 0.40) pour garder les brins, tuiles et contours
     sm = cv2.bilateralFilter(img, d, 0.10, d * 0.8)
-    img = img * 0.35 + sm * 0.65
+    img = img * 0.60 + sm * 0.40
     hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
     h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
     if not brasier:
@@ -230,4 +231,8 @@ def paint(img, brasier, d=7):
     if brasier:
         v = v * (0.88 + 0.12 * v)
     out = cv2.cvtColor(np.stack([h % 360, s, np.clip(v, 0, 1)], 2).astype(np.float32), cv2.COLOR_HSV2RGB)
-    return out
+    # V120 : netteté — masque flou à deux rayons (micro-détails + formes), sans halo sur les forts contrastes
+    for rad, amt in ((0.8, 0.55), (2.5, 0.25)):
+        hi = out - cv2.GaussianBlur(out, (0, 0), rad)
+        out = out + amt * np.clip(hi, -0.12, 0.12)
+    return np.clip(out, 0, 1)

@@ -89,6 +89,12 @@ var _dio_clock: float = 0.0
 var _dio_sync: bool = true
 var _dio_low: Sprite2D = null
 var _dio_pending: bool = false
+## V120 : netteté — sans mipmaps tant que l'image n'est pas trop réduite à l'écran (le filtrage
+## trilinéaire mélangeait le niveau ½ et floutait le décor dès qu'on n'était pas au zoom maximal).
+var _dio_holder: Node2D = null
+var _dio_occ: Array[Sprite2D] = []
+var _dio_mip: bool = true
+var _dio_px: float = 1.0
 ## V119 : compteur de fluidité (Réglages › Graphismes) : images/s, moyenne et pire image sur 2 s.
 var _perf_lbl: Label = null
 var _perf_acc: Array[float] = []
@@ -464,9 +470,26 @@ func _process(_delta: float) -> void:
 		if _dio_sync or _dio_pending or _dio_clock >= 0.15:
 			_dio_clock = 0.0
 			_diorama_stream()
+			_dio_filter_sync()
 	if _joystick == null or not _joystick.pushed() or _walking or _modal_root != null:
 		return
 	_joy_step(_joystick.vector)
+
+
+## Pixels écran par pixel du rendu ; sous ~0,58 on repasse en mipmaps (sinon l'herbe scintille au dézoom).
+func _dio_filter_sync() -> void:
+	if _dio_holder == null or not is_instance_valid(_dio_holder):
+		return
+	var eff: float = _world.scale.x * _dio_px * get_viewport().get_screen_transform().get_scale().x
+	var want_mip: bool = eff < (0.62 if _dio_mip else 0.55)
+	if want_mip == _dio_mip:
+		return
+	_dio_mip = want_mip
+	var f: int = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS if want_mip else CanvasItem.TEXTURE_FILTER_LINEAR
+	_dio_holder.texture_filter = f
+	for o: Sprite2D in _dio_occ:
+		if is_instance_valid(o):
+			o.texture_filter = f
 
 
 func _perf_tick(dt: float) -> void:
@@ -704,12 +727,18 @@ func _rebuild_board(biome: String) -> void:
 	var d: Dictionary = BoardArt.raw(zid)
 	var ws: Vector2 = BoardArt.world_size(zid)
 	_dio_chunks.clear()
+	_dio_holder = null
+	_dio_occ.clear()
 	if BoardArt.is_diorama(zid):
 		# V115 : « Diorama » — scène 3D pré-rendue (tuiles) posée sur le plateau iso ; héros, lieux et monstres par-dessus.
 		var holder := Node2D.new()
 		holder.z_index = 0
 		holder.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		_world.add_child(holder)
+		_dio_holder = holder
+		_dio_occ.clear()
+		_dio_mip = true
+		_dio_px = BoardArt.diorama_scale(zid)
 		_dio_sync = true
 		# V117 : fond basse définition toujours présent sous les tuiles (aucun trou pendant un chargement)
 		var lo: Dictionary = BoardArt.diorama_low(zid)
@@ -786,6 +815,7 @@ func _rebuild_board(biome: String) -> void:
 			os.position = oc["pos"]
 			os.scale = Vector2.ONE * BoardArt.diorama_scale(zid)
 			os.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			_dio_occ.append(os)
 			os.z_index = _depth(oc["cell"]) + 3
 			_entities.add_child(os)
 			var pk: int = int(oc["page"])

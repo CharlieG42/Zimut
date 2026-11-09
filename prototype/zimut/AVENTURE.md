@@ -300,6 +300,9 @@ une **scène 3D pré-rendue** (Kenney + Quaternius, CC0) posée sur un plateau i
   ciel en dégradé, montagnes dans la brume, bancs de nuages, **falaise rocheuse** sous la dalle, cascades
   (eau pour la Sylve, **coulées de lave** détectées au bord pour le Brasier), mer de nuages ; étalonnage
   « peint » (filtre bilatéral, verts de prairie plus profonds) avec une marge prise chez les tuiles voisines.
+- Netteté : lissage « peint » allégé + masque flou à deux rayons (`scene_bg.paint`) ; à l'écran, le décor
+  et les occultants passent en filtrage **linéaire sans mipmaps** tant qu'un pixel du rendu fait au moins
+  ~0,6 pixel écran (`_dio_filter_sync`, hystérésis 0,55 / 0,62), mipmaps au-delà (pas de scintillement).
 - Donjons (`PoiNode`) : **ouvert** = colonne de lumière et halo dorés pulsés ; **verrouillé** = gris,
   anneau rouge en pointillés, cadenas vectoriel (plus d'émoji) ; **terminé** = vert. Une pastille
   OUVERT / VERROUILLÉ / TERMINÉ reste affichée sous le nom de chaque donjon.
