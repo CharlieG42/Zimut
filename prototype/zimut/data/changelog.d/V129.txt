@@ -1,0 +1,3 @@
+V129|Carte Diorama : le portail vers la Nation suivante est maintenant dessiné devant les arbres et les bâtiments ; il n'est plus jamais caché par le décor.
+V129|Le portail a une vraie allure de portail : ovale lumineux qui tourbillonne quand il est ouvert, gris avec cadenas quand il est scellé, colonne de lumière plus haute.
+V129|Panneau « Objectifs » : bouton « Portail OUVERT · le voir » (ou « scellé ») qui amène la carte sur le portail ; zone tactile du portail agrandie.

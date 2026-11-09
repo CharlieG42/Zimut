@@ -355,6 +355,13 @@ vue 3D par cases après `Adv3DMeshes.setup_sun` :
 Réglé avec le rendu « mobile » (Vulkan), celui du téléphone : le rendu « compatibilité » des captures
 habituelles donne des couleurs très différentes. Capture : `xvfb-run -a godot --rendering-method mobile
 --path . -s tests/shot_openworld.gd -- <dossier> foret_sylve`. Test : `tests/test_adv3d_look.gd`.
+### Portail toujours visible (V129)
+
+Sur la carte Diorama, le médaillon du portail passait derrière un arbre découpé du décor (occultant, profondeur
+de case + 3) : on ne voyait que l'étiquette. Le nœud du portail est désormais à `PORTAL_Z` (1190, au-dessus de
+tous les occultants, sous l'interface), agrandi ×1,3, et dessine un ovale de portail (`PoiNode._draw_portal`) :
+cyan et animé quand il est ouvert, gris quand il est scellé. `portal_cell()` donne sa case ; le panneau des
+objectifs a un bouton `PortalShow` qui centre la carte dessus.
 
 ### Position des donjons dans une Nation (V122)
 
