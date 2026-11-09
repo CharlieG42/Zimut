@@ -316,6 +316,13 @@ trajet appelle `cell_center` → `BoardArt.iso_pos` → `iso_origin` → `iso_ma
 choix de planche (`_stem_cache`), la hauteur maximale et l'origine (`_maxh_cache`, `_origin_cache`, clé = planche + `rev`).
 Règle : rien qui parcourt toute la carte ou le disque dans une fonction appelée par case ou par image.
 
+### Reprise des donjons (V125)
+
+La dernière salle terminée est mémorisée **par donjon** (`save["adventure"]["dungeon_rooms"] = {donjon: prochaine salle}`).
+Défaite, combat abandonné ou arrêt du jeu ne font plus rien perdre (`Dungeons.DEFEAT_RESETS = false`, plus de numéro de
+session). La porte d'un donjon commencé propose « REPRENDRE · SALLE n » et « ↺ RECOMMENCER » (`Dungeons.restart`, qui ne
+touche que ce donjon). L'ancien format `adventure["dungeon"]` reste lu. Terminer la salle du Gardien efface la progression.
+
 ### Position des donjons dans une Nation (V122)
 
 Règle pour **toutes** les Nations (Sylve, Brasier et les suivantes) : un donjon dans chacun des quatre

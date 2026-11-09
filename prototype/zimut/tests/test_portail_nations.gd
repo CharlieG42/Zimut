@@ -49,7 +49,7 @@ func _boot() -> void:
 	var res_adv: Dictionary = mgr.state
 	res_adv["zone"] = z
 	data["last_result"] = {}
-	res_adv["dungeon"] = {"biome": "Forêt", "room": D.ROOMS, "session": D.session}
+	res_adv["dungeon_rooms"] = {"Forêt": D.ROOMS}
 	pm._dungeon_victory(data, res_adv, "%s,45,27" % z, "Forêt")
 	var dres: Dictionary = data["last_result"]["dungeon"]
 	check(bool(dres["cleared"]) and String(dres.get("unlocked_zone", "")) == String(poi["to"]), "donjon final vaincu → %s débloquée" % String(poi["to"]))

@@ -1,0 +1,3 @@
+V125|Donjons : la dernière salle terminée est mémorisée. Après une défaite, un combat abandonné ou en quittant le jeu, tu reprends à la salle suivante au lieu de tout recommencer.
+V125|Chaque donjon garde sa propre progression : tu peux en avoir plusieurs en cours en même temps, et jouer un donjon même si tu n'as le temps que d'un seul combat.
+V125|Sur la porte d'un donjon commencé : « REPRENDRE · SALLE n » ou « ↺ RECOMMENCER » pour repartir de la salle 1.

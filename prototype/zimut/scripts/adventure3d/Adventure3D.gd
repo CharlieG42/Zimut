@@ -645,14 +645,17 @@ func _confirm_dungeon(poi: Dictionary) -> void:
 		lines.append("💎  %s déjà retrouvée : le donjon reste ouvert pour le butin." % Stones.stone_name(biome))
 	else:
 		lines.append("💎  %s : %d %% de chances au prochain Gardien vaincu." % [Stones.stone_name(biome), roundi(Dungeons.stone_chance(manager.state, biome) * 100.0)])
-	lines.append("Défaite, combat abandonné ou arrêt du jeu : retour à l'entrée.")
+	if room > 1:
+		lines.append("Expédition commencée : tu reprends à la salle %d (salles terminées : %d). Défaite ou abandon ne font rien perdre." % [room, room - 1])
+	else:
+		lines.append("Ta progression est gardée salle par salle : tu peux quitter après n'importe quel combat.")
 	var t: Label = U.lbl(Typo.fr("\n".join(lines)), 22, U.C_TXT)
 	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(t)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 14)
 	box.add_child(row)
-	var go: Button = _btn("⚔  %s" % ("ENTRER" if room == 1 else "POURSUIVRE"), Color(0.70, 0.40, 0.95), 24, Vector2(300, 84))
+	var go: Button = _btn("⚔  %s" % ("ENTRER" if room == 1 else "REPRENDRE · SALLE %d" % room), Color(0.70, 0.40, 0.95), 24, Vector2(360, 84))
 	go.name = "DungeonEnter"
 	go.pressed.connect(func() -> void:
 		_close_modal()
@@ -663,6 +666,15 @@ func _confirm_dungeon(poi: Dictionary) -> void:
 		GameManager.fight_biome = manager.zone_biome()
 		_leave_to("res://scenes/TeamSelection.tscn"))
 	row.add_child(go)
+	if room > 1:      # V124 : donjon commencé → possibilité de le recommencer depuis la salle 1
+		var again: Button = _btn("↺ RECOMMENCER", U.C_BORDER, 22, Vector2(250, 84))
+		again.name = "DungeonRestart"
+		again.pressed.connect(func() -> void:
+			Dungeons.restart(manager.state, biome)
+			manager.persist()
+			_close_modal()
+			_confirm_dungeon(poi))
+		row.add_child(again)
 	var later: Button = _btn("PLUS TARD", U.C_BORDER, 22, Vector2(220, 84))
 	later.pressed.connect(_close_modal)
 	row.add_child(later)
