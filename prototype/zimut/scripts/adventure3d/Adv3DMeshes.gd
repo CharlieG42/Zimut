@@ -78,6 +78,9 @@ uniform sampler2D paint : filter_linear_mipmap, repeat_enable, hint_default_whit
 uniform sampler2D leaf_tex : filter_linear_mipmap, repeat_disable, hint_default_white;
 uniform float paint_amt = 0.5;
 uniform float paint_scale = 0.11;
+// V128 : grandes plaques de teinte (sol) — couleur multipliée là où la peinture basse fréquence est forte.
+uniform vec3 macro_col = vec3(1.0);
+uniform float macro_amt = 0.0;
 varying vec3 wpos;
 varying vec3 wnorm;
 float bayer4(vec2 p) {
@@ -128,6 +131,7 @@ void fragment() {
 	float pb = texture(paint, px * 0.23 + 0.31).r * bw.x + texture(paint, py * 0.23 + 0.31).r * bw.y + texture(paint, pz * 0.23 + 0.31).r * bw.z;
 	float pv = mix(pa, pb, 0.5);
 	vec3 col = COLOR.rgb * (1.0 + v * 0.06) * (1.0 + (pv - 0.5) * paint_amt * 2.0) * leaf_k;
+	col = mix(col, col * macro_col, macro_amt * smoothstep(0.40, 0.62, pb));
 	ALBEDO = pow(max(col, vec3(0.0)), vec3(2.2));
 	EMISSION = ALBEDO * emit + ALBEDO * (1.0 - clamp(COLOR.a, 0.0, 1.0)) * glow;
 	ROUGHNESS = 0.92;

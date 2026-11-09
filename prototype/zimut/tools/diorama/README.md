@@ -35,6 +35,8 @@ Quaternius (non versionné : chemin dans `QUATERNIUS_NATURE`).
 6. `python3 bake96.py` — cases jouables, hauteurs, lieux (`PLACES` + donjons), tuiles, occultants,
    fond basse définition. Puis importer dans Godot et régler les `.import` en **VRAM compressée +
    mipmaps** (`compress/mode=2`, `mipmaps/generate=true`).
+7. `python3 fx_masks.py` (V127) — masque des effets animés `fx.png` (eau, lave / lumières, terre ferme) et
+   clé `image_fx` du JSON de la planche ; `fx.png` reste en import **sans perte, sans mipmaps**.
 
-Contrôle : `tests/test_sylve_diorama.gd`, `tests/test_brasier_diorama.gd`, `tests/test_boutons_carte.gd`
-(CI) et `xvfb-run -a godot --rendering-method gl_compatibility --path . -s tests/shot_sylve_diorama.gd -- <dossier> 26 17 brasier`.
+Contrôle : `tests/test_sylve_diorama.gd`, `tests/test_brasier_diorama.gd`, `tests/test_boutons_carte.gd`,
+`tests/test_diorama_fx.gd` (CI) et `xvfb-run -a godot --rendering-method gl_compatibility --path . -s tests/shot_sylve_diorama.gd -- <dossier> 26 17 brasier`.

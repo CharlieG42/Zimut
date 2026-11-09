@@ -316,6 +316,20 @@ trajet appelle `cell_center` → `BoardArt.iso_pos` → `iso_origin` → `iso_ma
 choix de planche (`_stem_cache`), la hauteur maximale et l'origine (`_maxh_cache`, `_origin_cache`, clé = planche + `rev`).
 Règle : rien qui parcourt toute la carte ou le disque dans une fonction appelée par case ou par image.
 
+### Carte Diorama vivante (V127)
+
+Premier lot de `Amelioration_v127.md`. Les tuiles pré-rendues ne changent pas : `tools/diorama/fx_masks.py`
+produit un masque au 1/8 (`assets/boards/<nation>/fx.png`, 1280 × 720 : R = eau visible, V = lave et lumières,
+B = terre ferme) à partir du rendu fini, de la passe d'identifiants (objets hauts devant l'eau), du relief et
+d'`objects.json`, et inscrit `image_fx` (chemin, facteur, `ground_rect`) dans le JSON de la planche
+(`bake96.py` conserve cette clé). À lancer après `bake96.py`.
+
+`scripts/DioramaFx.gd` pose deux calques : **sol** (dans le porte-tuiles, sous les personnages, limité à
+`ground_rect`) pour l'eau et la lave, **ciel** (z 1200, au-dessus des personnages, sous l'interface) pour les
+ombres de nuages et les rayons. Un bruit 128 px répétable est calculé une fois. Réglages par Nation dans
+`DioramaFx.MOODS`. Rien n'est posé en qualité « Économie ». Le vent dans le feuillage n'est pas fait : déformer
+les tuiles coûterait une passe plein écran et ferait apparaître un double des arbres découpés.
+
 ### Reprise des donjons (V125)
 
 La dernière salle terminée est mémorisée **par donjon** (`save["adventure"]["dungeon_rooms"] = {donjon: prochaine salle}`).
@@ -323,6 +337,24 @@ Défaite, combat abandonné ou arrêt du jeu ne font plus rien perdre (`Dungeons
 session). La porte d'un donjon commencé propose « REPRENDRE · SALLE n » et « ↺ RECOMMENCER » (`Dungeons.restart`, qui ne
 touche que ce donjon). L'ancien format `adventure["dungeon"]` reste lu. Terminer la salle du Gardien efface la progression.
 
+### Étalonnage des vues 3D (V128)
+
+Lot 4 du plan d'amélioration graphique. `scripts/adventure3d/Adv3DLook.gd`, appelé par le monde ouvert et la
+vue 3D par cases après `Adv3DMeshes.setup_sun` :
+
+- **brume de distance** (`FOG_MODE_DEPTH`, début / fin / opacité par Nation dans `Adv3DLook.NATION`) à la place
+  du brouillard exponentiel qui délavait toute l'image ; le ciel n'est plus voilé ;
+- **lumière** : soleil 1,12, ambiance 0,44 plus froide, carte de reflets désactivée ;
+- **ciel** : panorama de nuages 512 × 256 calculé une fois (`cloud_cover`, clé `sky_cover` du ciel procédural),
+  sans shader de ciel animé ;
+- **lointain** : `make_backdrop` = deux chaînes de crêtes sans éclairage qui suivent la caméra (rayon 138 et
+  152 m, sous le plan lointain de 160 m) ;
+- **sol** : uniformes `macro_col` / `macro_amt` du shader commun = plaques de teinte basse fréquence (mousse
+  sur sol herbeux, neutre ailleurs ; clé `macro` possible dans la palette).
+
+Réglé avec le rendu « mobile » (Vulkan), celui du téléphone : le rendu « compatibilité » des captures
+habituelles donne des couleurs très différentes. Capture : `xvfb-run -a godot --rendering-method mobile
+--path . -s tests/shot_openworld.gd -- <dossier> foret_sylve`. Test : `tests/test_adv3d_look.gd`.
 ### Portail toujours visible (V129)
 
 Sur la carte Diorama, le médaillon du portail passait derrière un arbre découpé du décor (occultant, profondeur

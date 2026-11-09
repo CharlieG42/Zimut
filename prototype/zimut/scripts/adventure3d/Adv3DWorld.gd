@@ -370,7 +370,14 @@ static func _build_ground(zone_id: String, t: Dictionary, pal: Dictionary) -> Me
 	var mi := MeshInstance3D.new()
 	mi.name = "Ground"
 	mi.mesh = st.commit()
-	mi.material_override = Adv3DMeshes.solid_material(true)
+	var gmat: ShaderMaterial = Adv3DMeshes.solid_material(true)
+	# V128 : plaques plus sombres et plus froides (mousse, herbe dense) qui cassent l'aplat du sol
+	var g0: Color = (pal["ground"] as Array)[0]
+	var grassy: bool = g0.g > g0.r * 1.2 and g0.g > g0.b * 1.2
+	var mc: Color = pal.get("macro", Color(0.56, 0.78, 0.66) if grassy else Color(0.80, 0.83, 0.87))
+	gmat.set_shader_parameter("macro_col", Vector3(mc.r, mc.g, mc.b))
+	gmat.set_shader_parameter("macro_amt", 0.9)
+	mi.material_override = gmat
 	return mi
 
 
