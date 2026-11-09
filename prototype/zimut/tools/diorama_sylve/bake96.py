@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Cuit la Sylve « diorama » (rendu 48x48 finition B) en planche iso jouable pour la carte 2D.
+"""Cuit la Sylve « diorama » (monde 96x96, finition B) en planche iso jouable pour la carte 2D.
 
-Entrées (dossier courant) : sylve48_B.png (5120x2880), id_<tx>_<ty>.png (passe d'identifiants 2x2 en 5120x2880),
-objects.json, occluders.json, plan.json, height2.png, mask_path.npy.
+Entrées (dossier courant) : fin_<tx>_<ty>.webp/.png (post96), render/id_<tx>_<ty>.png (passe d'identifiants 4x4),
+objects.json, occluders.json, plan.json, height2.npy, mask_path.npy.
 Sorties : <repo>/assets/boards/sylve_diorama/*.webp + <repo>/data/boards/foret_sylve_diorama.json
 """
 import json, math, sys, os, numpy as np, cv2
 from collections import deque
 from PIL import Image
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from plan_v2 import FIELDS, ORCHARD
+import plan96 as W
+from plan96 import FIELDS, ORCHARD, LAKE, OFF
 Image.MAX_IMAGE_PIXELS = None
 
 REPO = sys.argv[1] if len(sys.argv) > 1 else os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../.."))
@@ -17,28 +18,29 @@ OUT_DIR = REPO + "/assets/boards/sylve_diorama/"
 RES_DIR = "res://assets/boards/sylve_diorama/"
 os.makedirs(OUT_DIR, exist_ok=True)
 
-S = 48.0                  # monde (unités)
-N = 72                    # cases par côté
+S = 96.0                  # monde (unités)
+N = 144                   # cases par côté
 CW = S / N                # taille d'une case (unités)
-IMG_W, IMG_H = 5120, 2880
-K = IMG_H / 49.6          # pixels d'image par unité (caméra orthographique, hauteur 49.6)
-CAM_C = np.array([24.0, 1.6, 24.0])
+NT = 4                    # tuiles de rendu par côté
+TILE_W, TILE_H = 2560, 1440
+IMG_W, IMG_H = TILE_W * NT, TILE_H * NT
+K = IMG_H / 99.2          # pixels d'image par unité (caméra orthographique, hauteur 49.6)
+CAM_C = np.array([48.0, 1.6, 48.0])
 TW, TH, CS = 128.0, 64.0, 0.625
 SCALE = (TW * CS * 0.5) / (0.70710678 * K * CW)      # pixels du monde du jeu par pixel d'image
-UNIT = 16                 # quarts d'étage -> 64/16 = 4 px du monde par cran de hauteur
+UNIT = 8                  # huitièmes d'étage -> 64/8 = 8 px du monde par cran de hauteur
 UNIT_PX = 64.0 / UNIT
-AMP = 0.75
 
 def img_px(wx, h, wz):
     dx, dh, dz = wx - CAM_C[0], h - CAM_C[1], wz - CAM_C[2]
     return (IMG_W / 2 + 0.70710678 * K * (dx - dz), IMG_H / 2 + K * (0.35355339 * (dx + dz) - 0.8660254 * dh))
 
 # ── relief par case
-H = cv2.imread("height2.png", cv2.IMREAD_UNCHANGED).astype(np.float32) / 65535.0
+H = np.load("height2.npy")
 hr = H.shape[0]
 def ground_h(x, z):
     i = min(hr - 1, max(0, int(z / S * hr))); j = min(hr - 1, max(0, int(x / S * hr)))
-    return float(H[i, j]) * AMP
+    return float(H[i, j])
 hpx_per_unit = 0.8660254 * K * SCALE                   # pixels du monde par unité de hauteur
 heights = np.zeros((N, N), int)
 for cy in range(N):
@@ -64,9 +66,11 @@ def block_rect(cx, cz, w, h, ang, m=0.0):
     v = -(X - cx) * math.sin(a) + (Z - cz) * math.cos(a)
     block[(np.abs(u) < w / 2 + m) & (np.abs(v) < h / 2 + m)] = True
 bi = 0
-RAD = {"tree": 0.55, "stall": 1.15, "cart": 0.9, "fountain": 2.75, "lantern": 0.3, "banner": 0.35, "prop": 0.45,
+RAD = {"ruin": 1.0, "stone": 0.55, "tree": 0.55, "stall": 1.15, "cart": 0.9, "fountain": 2.75, "lantern": 0.3, "banner": 0.35, "prop": 0.45,
        "hay": 0.5, "grave": 0.45, "rock": 0.45, "bush": 0.4, "hedge": 0.45, "bench": 0.6}
 for o in objs:
+    if o["type"] == "water":
+        continue
     if o["type"] == "asm":
         job, cx, cz, r, s = plan["B"][bi]; bi += 1
         fp = None
@@ -86,6 +90,10 @@ for o in objs:
         block_disc(x, z, RAD[tag] * (1.0 if tag in ("fountain", "stall") else 1.0))
 for kind, cx, cz, w, h, ang in FIELDS:
     block_rect(cx, cz, w, h, ang, 0.1)
+# lac
+_a = math.radians(LAKE[4])
+_u = (X - LAKE[0]) * math.cos(_a) + (Z - LAKE[1]) * math.sin(_a); _v = -(X - LAKE[0]) * math.sin(_a) + (Z - LAKE[1]) * math.cos(_a)
+block[np.sqrt((_u / (LAKE[2] + 0.3)) ** 2 + (_v / (LAKE[3] + 0.3)) ** 2) < 1.0] = True
 block_rect(ORCHARD[0], ORCHARD[1], ORCHARD[2], ORCHARD[3], 0, 0.0)
 block[0, :] = block[-1, :] = True
 block[:, 0] = block[:, -1] = True
@@ -99,14 +107,14 @@ iso = json.load(open(REPO + "/data/boards/foret_sylve_iso.json"))
 by_name = {}
 for k, v in iso["pois"].items():
     by_name.setdefault(v["name"], []).append(v)
-PLACES = [("Grotte de la Feuille", 15.8, 46.4), ("Source claire", 20.0, 35.2), ("Camp gobelin", 31.2, 33.4),
-          ("Coffre moussu", 26.6, 45.6), ("Tanière du sanglier", 11.6, 31.4), ("Meute de loups gris", 45.2, 29.4),
-          ("Antre de la Patte", 44.6, 23.6), ("Clairière des lucioles", 42.0, 17.6), ("Souche creuse", 36.6, 11.8),
-          ("Embuscade sous les pins", 30.0, 10.4), ("Poste de la Citadelle", 9.0, 24.6), ("Sanctuaire de Cristal", 45.8, 5.8),
-          ("Crypte du Chêne Noir", 1.8, 18.2), ("Refuge des hauteurs", 22.2, 12.8), ("Cache du bûcheron", 10.8, 7.4),
-          ("Garde des cimes", 24.0, 2.2), ("Antre du prédateur", 31.6, 2.6), ("Donjon de la Nation Sylvestre", 10.2, 2.6),
-          ("Belvédère de la Sylve", 7.6, 7.2), ("Portail vers les Cendres", 2.6, 3.0)]
-START_W = (24.0, 30.2)
+PLACES = [("Source claire", 44.0, 59.2), ("Coffre moussu", 50.6, 69.6), ("Camp gobelin", 55.2, 57.4),
+          ("Tanière du sanglier", 35.6, 55.4), ("Grotte de la Feuille", 19.5, 86.0), ("Meute de loups gris", 58.0, 88.5),
+          ("Antre de la Patte", 82.0, 92.0), ("Clairière des lucioles", 84.5, 62.0), ("Embuscade sous les pins", 88.0, 50.0),
+          ("Souche creuse", 13.0, 40.0), ("Poste de la Citadelle", 86.5, 34.0), ("Sanctuaire de Cristal", 77.5, 22.0),
+          ("Crypte du Chêne Noir", 9.0, 66.0), ("Refuge des hauteurs", 52.0, 11.0), ("Cache du bûcheron", 60.5, 7.0),
+          ("Garde des cimes", 34.0, 8.0), ("Antre du prédateur", 26.0, 4.5), ("Donjon de la Nation Sylvestre", 16.0, 16.0),
+          ("Belvédère de la Sylve", 70.0, 4.0), ("Portail vers les Cendres", 4.0, 24.0)]
+START_W = (48.0, 54.2)
 
 def cell_of(x, z):
     return (min(N - 1, int(x / CW)), min(N - 1, int(z / CW)))
@@ -152,29 +160,41 @@ for cy in range(N):
         if walk[cy, cx] and MP[min(pr - 1, int((cy + 0.5) * CW / S * pr)), min(pr - 1, int((cx + 0.5) * CW / S * pr))] > 0.3:
             trail.append("%d,%d" % (cx, cy))
 
-# ── image de fond en 4 tuiles
-final = Image.open("sylve48_B.png").convert("RGB")
+# ── image de fond : tuiles de post96
+import shutil
 tiles = []
-for ty in range(2):
-    for tx in range(2):
-        box = (tx * 2560, ty * 1440, tx * 2560 + 2560, ty * 1440 + 1440)
+for ty in range(NT):
+    for tx in range(NT):
         fn = "sol_%d_%d.webp" % (tx, ty)
-        final.crop(box).save(OUT_DIR + fn, "WEBP", quality=90, method=6)
-        tiles.append({"path": RES_DIR + fn, "px": [box[0], box[1]]})
-
+        shutil.copy("fin_%d_%d.webp" % (tx, ty), OUT_DIR + fn)
+        tiles.append({"path": RES_DIR + fn, "px": [tx * TILE_W, ty * TILE_H], "size": [TILE_W, TILE_H]})
+final = np.zeros((IMG_H, IMG_W, 3), np.uint8)
+for ty in range(NT):
+    for tx in range(NT):
+        final[ty * TILE_H:(ty + 1) * TILE_H, tx * TILE_W:(tx + 1) * TILE_W] = np.array(Image.open("fin_%d_%d.png" % (tx, ty)).convert("RGB"))
 # ── occultants : découpes (couverture de la passe d'identifiants, 2x plus fine) rangées en atlas
 idf = np.zeros((IMG_H * 2, IMG_W * 2), np.int16)
-for ty in range(2):
-    for tx in range(2):
-        a = np.array(Image.open("id_%d_%d.png" % (tx, ty)).convert("RGBA")).astype(np.int16)
+RT_W, RT_H = TILE_W * 2, TILE_H * 2
+for ty in range(NT):
+    for tx in range(NT):
+        a = np.array(Image.open("render/id_%d_%d.png" % (tx, ty)).convert("RGBA")).astype(np.int16)
         m = (a[..., 3] > 0) & (a[..., 0] > 30)
-        k = np.round((a[..., 0] - 56) / 15.0).astype(np.int16) + 13 * np.round((a[..., 1] - 56) / 15.0).astype(np.int16)
-        idf[ty * IMG_H:(ty + 1) * IMG_H, tx * IMG_W:(tx + 1) * IMG_W] = np.where(m, k, 0)
-fin = np.array(final)
+        k = (np.round((a[..., 0] - 56) / 15.0) + 13 * np.round((a[..., 1] - 56) / 15.0) + 169 * np.round((np.maximum(a[..., 2], 56) - 56) / 15.0)).astype(np.int16)
+        idf[ty * RT_H:(ty + 1) * RT_H, tx * RT_W:(tx + 1) * RT_W] = np.where(m, k, 0)
+        del a, m, k
+fin = final
 occ = json.load(open("occluders.json"))
 cuts = []
+# boîtes englobantes de tous les identifiants en un passage
+from scipy import ndimage
+objs_sl = ndimage.find_objects(idf.astype(np.int32))
 for o in occ:
-    ys, xs = np.nonzero(idf == o["oid"])
+    sl = objs_sl[o["oid"] - 1] if o["oid"] - 1 < len(objs_sl) else None
+    if sl is None:
+        continue
+    sub_ = idf[sl] == o["oid"]
+    ys, xs = np.nonzero(sub_)
+    ys = ys + sl[0].start; xs = xs + sl[1].start
     if len(xs) < 40:
         continue
     x0, x1 = (xs.min() // 2) - 1, (xs.max() // 2) + 2
@@ -186,27 +206,32 @@ for o in occ:
     cx, cz = o["c"]
     cell = cell_of(cx, cz)
     cuts.append({"img": rgba, "px": [int(x0), int(y0)], "cell": [int(cell[0]), int(cell[1])], "kind": o["kind"]})
-# rangement en étagères sur des pages de 2048
-PAGE = 2048
-pages, cur, sx, sy, row_h = [], None, 0, 0, 0
-cuts.sort(key=lambda c: -c["img"].shape[0])
-for c in cuts:
-    h, w = c["img"].shape[:2]
-    if cur is None or sx + w > PAGE:
-        sx, sy, row_h = 0, sy + row_h + 2, 0
-    if cur is None or sy + h > PAGE:
-        cur = np.zeros((PAGE, PAGE, 4), np.uint8); pages.append(cur); sx, sy, row_h = 0, 0, 0
-    cur[sy:sy + h, sx:sx + w] = c["img"]
-    c["page"] = len(pages) - 1; c["r"] = [sx, sy, w, h]
-    sx += w + 2; row_h = max(row_h, h)
+# rangement en étagères : une page d'atlas par tuile de fond (chargées avec elles, à la demande)
 occl = []
-for i, pg in enumerate(pages):
-    used = np.nonzero(pg[..., 3].max(1))[0]
-    hh = int(used.max()) + 2 if len(used) else 4
-    hh = int(math.ceil(hh / 4) * 4)
-    Image.fromarray(pg[:hh]).save(OUT_DIR + "occ_%d.webp" % i, "WEBP", quality=92, method=6)
-for c in cuts:
-    occl.append({"page": c["page"], "r": c["r"], "px": c["px"], "cell": c["cell"], "k": c["kind"]})
+page_paths = []
+for ty in range(NT):
+    for tx in range(NT):
+        group = [c for c in cuts if c["px"][0] // TILE_W == tx and c["px"][1] // TILE_H == ty]
+        if not group:
+            continue
+        group.sort(key=lambda c: -c["img"].shape[0])
+        PW = 2048
+        sx = sy = row_h = 0
+        place = []
+        for c in group:
+            h, w = c["img"].shape[:2]
+            if sx + w > PW:
+                sx, sy, row_h = 0, sy + row_h + 2, 0
+            place.append((c, sx, sy)); sx += w + 2; row_h = max(row_h, h)
+        ph = int(math.ceil((sy + row_h + 2) / 4) * 4)
+        pg = np.zeros((ph, PW, 4), np.uint8)
+        for c, x_, y_ in place:
+            h, w = c["img"].shape[:2]
+            pg[y_:y_ + h, x_:x_ + w] = c["img"]
+            occl.append({"page": len(page_paths), "r": [x_, y_, w, h], "px": c["px"], "cell": c["cell"], "k": c["kind"]})
+        fn = "occ_%d_%d.webp" % (tx, ty)
+        Image.fromarray(pg).save(OUT_DIR + fn, "WEBP", quality=92, method=6)
+        page_paths.append(RES_DIR + fn)
 
 def enc(v):
     return chr(48 + v) if v < 10 else chr(97 + v - 10)
@@ -219,13 +244,13 @@ board = {
     "pois": pois,
     "image_size": [IMG_W, IMG_H], "image_scale": SCALE, "image_offset": [round(offset[0], 2), round(offset[1], 2)],
     "image_tiles": tiles,
-    "occluder_pages": [RES_DIR + "occ_%d.webp" % i for i in range(len(pages))],
+    "occluder_pages": page_paths,
     "occluders": occl,
 }
 json.dump(board, open(REPO + "/data/boards/foret_sylve_diorama.json", "w"), ensure_ascii=False, separators=(",", ":"))
-print("échelle", round(SCALE, 4), "maxh", maxh, "jouables", int(walk.sum()), "occultants", len(occl), "pages", len(pages), "départ", start)
+print("échelle", round(SCALE, 4), "maxh", maxh, "jouables", int(walk.sum()), "occultants", len(occl), "pages", len(page_paths), "départ", start)
 # aperçu de contrôle : cases jouables + lieux sur l'image
-dbg = final.resize((1280, 720))
+dbg = Image.fromarray(final).resize((1280, 720))
 d = np.array(dbg)
 for cy in range(N):
     for cx in range(N):
@@ -233,5 +258,5 @@ for cy in range(N):
         col = (60, 255, 60) if walk[cy, cx] else (255, 40, 40)
         if "%d,%d" % (cx, cy) in pois: col = (255, 255, 0)
         if (cx, cy) == start: col = (0, 200, 255)
-        cv2.circle(d, (int(px / 4), int(py / 4)), 2 if col[1] in (255, 40) and col[0] != 255 or col == (255, 40, 40) else 5, col, -1)
+        cv2.circle(d, (int(px / 8), int(py / 8)), 2 if col[1] in (255, 40) and col[0] != 255 or col == (255, 40, 40) else 5, col, -1)
 Image.fromarray(d).save("board_debug.png")

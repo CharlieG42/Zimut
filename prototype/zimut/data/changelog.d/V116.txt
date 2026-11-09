@@ -1,0 +1,4 @@
+V116|Carte « Diorama » de la Sylve 4 fois plus vaste (96×96, 144×144 cases) : le village au centre, et tout autour des plaines sauvages de hautes herbes et de fleurs, des bois denses aux quatre coins, un lac bordé de roseaux, les ruines d'un fort, un cercle de pierres levées et un hameau avec ses champs.
+V116|Les 20 lieux de la Sylve sont répartis du village (camps, coffres, premiers combats) vers les plaines et les bois (donjons, Sanctuaire au bord du lac, Donjon de la Nation dans les ruines, Portail à l'ouest).
+V116|Diorama : tuiles et occultants chargés à la demande autour de la vue (mémoire maîtrisée sur mobile) ; buissons rouges reteintés en vert, couleurs des plaines adoucies.
+V116|Carte d'aventure : « Centrer » n'est plus caché sous le joystick et les boutons + / − ne sont plus sous l'aide ; nouveau test qui vérifie que chaque bouton de la carte et des Réglages est branché et cliquable.

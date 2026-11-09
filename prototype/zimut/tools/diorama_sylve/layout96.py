@@ -2,21 +2,21 @@
 """Sylve 48x48 v2 : bâtiments plus grands et variés, champs, prairies, forêt allégée -> objects.json."""
 import json, math, io, contextlib, runpy, sys, os, numpy as np, cv2
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from plan_v2 import ROADS, FIELDS, MEADOWS, ORCHARD
+from plan96 import V_ROADS as ROADS, V_FIELDS as FIELDS, V_MEADOWS as MEADOWS, V_ORCHARD as ORCHARD, OFF
+import plan96 as W
 rng = np.random.default_rng(23)
 S = 48.0
 C = 24.0
-ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../.."))
 NAT = os.environ.get("QUATERNIUS_NATURE", "/tmp/kits/nature/Stylized Nature MegaKit[Standard]/glTF/")
-KT = ROOT + "/atelier_3d/kenney/"
-H = cv2.imread("height.png", cv2.IMREAD_UNCHANGED).astype(np.float32) / 65535.0
-PATH = np.load("mask_path.npy")
+KT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../..")) + "/atelier_3d/kenney/"
+H = np.load("height.npy")          # monde 96, en unités
+PATH = np.load("mask_path.npy")    # monde 96
 PR = PATH.shape[0]
-AMP = 0.75
+SW = W.S
 GS = 1.3   # agrandissement des bâtiments
 
 with contextlib.redirect_stdout(io.StringIO()):
-    ns = runpy.run_path(ROOT + "/tools/kenney_batiments_jobs.py")
+    ns = runpy.run_path(KT + "../../tools/kenney_batiments_jobs.py")
 jobs = {j["name"]: j for j in ns["jobs"]}
 
 def P(f, x, y, z, r=0, sc=None):
@@ -127,24 +127,25 @@ def foot(job, s):
     fp = jobs[job]["fp"]; gs = jobs[job].get("gs", 1.0) * GS * s
     return fp[0] * gs, fp[1] * gs
 
+B = B + [(j, x - OFF, z - OFF, r, s) for j, x, z, r, s in W.HAMLET]   # hameau des plaines (coordonnées village)
 Hh = H.copy()
 res = Hh.shape[0]
-yy, xx = np.mgrid[0:res, 0:res].astype(np.float32) * (S / res)
+yy, xx = np.mgrid[0:res, 0:res].astype(np.float32) * (SW / res) - OFF     # coordonnées village
 for job, cx, cz, r, s in B:
     fx, fz = foot(job, s)
     rad = max(fx, fz) * 0.6 + 0.7
     d = np.hypot(xx - cx, yy - cz)
     w = np.clip((rad + 1.6 - d) / 1.6, 0, 1); w = w * w * (3 - 2 * w)
-    tgt = float(Hh[int(cz / S * res), int(cx / S * res)])
+    tgt = float(Hh[int((cz + OFF) / SW * res), int((cx + OFF) / SW * res)])
     Hh = Hh * (1 - w) + tgt * w
     pads.append((cx, cz, rad))
-cv2.imwrite("height2.png", (np.clip(Hh, 0, 1) * 65535).astype(np.uint16))
+np.save("height2.npy", Hh.astype(np.float32))
 
 def gy(x, z):
-    i = min(res - 1, max(0, int(z / S * res))); j = min(res - 1, max(0, int(x / S * res)))
-    return float(Hh[i, j]) * AMP
+    i = min(res - 1, max(0, int((z + OFF) / SW * res))); j = min(res - 1, max(0, int((x + OFF) / SW * res)))
+    return float(Hh[i, j])
 def on_path(x, z, thr=0.12):
-    i = min(PR - 1, max(0, int(z / S * PR))); j = min(PR - 1, max(0, int(x / S * PR)))
+    i = min(PR - 1, max(0, int((z + OFF) / SW * PR))); j = min(PR - 1, max(0, int((x + OFF) / SW * PR)))
     return PATH[i, j] > thr
 def in_pad(x, z, extra=0.0):
     return any(math.hypot(x - cx, z - cz) < rad + extra for cx, cz, rad in pads)
@@ -167,13 +168,14 @@ for job, cx, cz, r, s in B:
     j = jobs[job]; fx, fz = j["fp"][0], j["fp"][1]
     gs = j.get("gs", 1.0) * GS * s
     ox, oz = rot(fx * 0.5 * gs, fz * 0.5 * gs, r)
-    objs.append({"type": "asm", "job": job, "parts": j["parts"], "p": [cx - ox, gy(cx, cz), cz - oz], "r": r, "s": gs,
+    objs.append({"type": "asm", "job": job, "parts": j["parts"], "p": [cx - ox + OFF, gy(cx, cz), cz - oz + OFF], "r": r, "s": gs,
                  "roof": ROOF.get(job, (0.5, 0.25, 0.18)), "wood": job in WOOD})
 
 occupied = []
-def add(f, x, z, r=0, s=1.0, tag="", yoff=0.0, mm=False, keep=0.0, tint=None):
-    o = {"type": "glb", "f": f, "p": [x, gy(x, z) + yoff, z], "r": r, "s": s, "tag": tag, "mm": mm}
+def add(f, x, z, r=0, s=1.0, tag="", yoff=0.0, mm=False, keep=0.0, tint=None, sc=None):
+    o = {"type": "glb", "f": f, "p": [x + OFF, gy(x, z) + yoff, z + OFF], "r": r, "s": s, "tag": tag, "mm": mm}
     if tint: o["tint"] = tint
+    if sc: o["sc"] = sc
     objs.append(o)
     if keep > 0: occupied.append((x, z, keep))
 def free(x, z, r):
@@ -304,12 +306,12 @@ def free_spot(x, z, mind):
 groves = [(10, 46, 2.4), (45.5, 31, 1.8), (20, 5.5, 1.8), (2.5, 9, 1.6), (46, 3, 2.0), (30, 33, 1.2)]
 tries = 0
 n_tree = 0
-while n_tree < 92 and tries < 40000:
+while n_tree < 60 and tries < 40000:
     tries += 1
     x, z = rng.uniform(0, S, 2)
     cheb = max(abs(x - C), abs(z - C))
     ing = any(math.hypot(x - a_, z - b_) < r for a_, b_, r in groves)
-    pr = 0.9 if cheb > 21.8 else (0.8 if ing else 0.015)
+    pr = 0.25 if cheb > 21.8 else (0.8 if ing else 0.015)
     if rng.random() > pr: continue
     m = 2.2 if (cheb > 21.8 or ing) else 4.0
     if not free_spot(x, z, m): continue
@@ -334,7 +336,7 @@ def scatter(files, n, scale, tag, mind=0.9, cluster=None, mm=False, avoid_path=T
         add(files[rng.integers(0, len(files))], x, z, float(rng.uniform(0, 360)), float(rng.uniform(*scale)), tag, 0.0, mm)
         k += 1
 notmead = lambda x, z: not in_meadow(x, z)
-scatter([NAT + "Bush_Common.gltf", NAT + "Plant_1_Big.gltf", NAT + "Plant_7_Big.gltf"], 110, (0.42, 0.62), "bush", 1.4, where=notmead)
+scatter([NAT + "Bush_Common.gltf", NAT + "Plant_1_Big.gltf"], 110, (0.42, 0.62), "bush", 1.4, where=notmead)
 scatter([NAT + "Rock_Medium_%d.gltf" % i for i in (1, 2, 3)], 26, (0.22, 0.42), "rock", 1.6)
 scatter([NAT + "Pebble_Round_%d.gltf" % i for i in (1, 2, 3, 4, 5)] + [NAT + "Pebble_Square_%d.gltf" % i for i in (1, 3, 4)], 300, (0.5, 0.9), "pebble", 0.5, mm=True)
 scatter([NAT + "Fern_1.gltf"], 110, (0.28, 0.42), "fern", 1.0, mm=True, where=notmead)
@@ -354,7 +356,10 @@ for pa in paths:
             nx = x + side * rng.uniform(1.1, 1.7) + rng.normal(0, 0.15); nz = z + rng.normal(0, 0.3)
             if 0.2 < nx < S - 0.2 and 0.2 < nz < S - 0.2 and not on_path(nx, nz, 0.4) and not near_plaza(nx, nz, 5.8) and not in_pad(nx, nz, 0.3) and not in_field(nx, nz, 0.2):
                 add(NAT + ["Grass_Common_Tall.gltf", "Grass_Wispy_Tall.gltf"][rng.integers(0, 2)], nx, nz, float(rng.uniform(0, 360)), float(rng.uniform(0.28, 0.45)), "grass", 0.0, True)
+exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "wild96.py")).read())
 json.dump(objs, open("objects.json", "w"))
-json.dump({"pads": pads, "B": B}, open("plan.json", "w"))
+json.dump({"pads": [(x + OFF, z + OFF, r) for x, z, r in pads], "B": [(j, x + OFF, z + OFF, r, s_) for j, x, z, r, s_ in B]}, open("plan.json", "w"))
 from collections import Counter
 print(Counter(o.get("tag", o["type"]) for o in objs))
+HMAX = 2.6
+cv2.imwrite("height2.png", (np.clip(Hh / HMAX, 0, 1) * 65535).astype(np.uint16))

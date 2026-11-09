@@ -251,17 +251,22 @@ Test : `tests/test_walk_continu.gd`.
 ### Carte « Diorama » de la Sylve (V115)
 
 Quatrième style de carte 2D (Réglages › Graphismes › Cartes 2D › « Diorama (Sylve) ») :
-une **scène 3D pré-rendue** (village 48×48 : Kenney + Quaternius, CC0) posée sur un plateau iso
-`foret_sylve_diorama` de 72×72 cases (`"iso": true, "diorama": true`).
+une **scène 3D pré-rendue** (Kenney + Quaternius, CC0) posée sur un plateau iso
+`foret_sylve_diorama` (`"iso": true, "diorama": true`). V116 : monde de 96×96 unités = 144×144 cases
+(village au centre, plaines sauvages, bois, lac, ruines, pierres levées, hameau).
 
-- l'image (4 tuiles WebP 2560×1440) est calée sur `BoardArt.iso_pos` via `image_scale` /
+- l'image (16 tuiles WebP 2560×1440, chargées **à la demande** autour de la vue :
+  `_diorama_stream`, chargement en fil) est calée sur `BoardArt.iso_pos` via `image_scale` /
   `image_offset` : chaque case au sol tombe sur son pixel du rendu (hauteurs par case, `unit` 16) ;
 - **occultants** : bâtiments, arbres, étals, lanternes… sont découpés du rendu (passe
   d'identifiants) et rangés en atlas (`occluders`) ; posés dans `_entities` avec
-  `z_index = _depth(case) + 3`, ils passent devant le héros quand il marche derrière ;
+  `z_index = _depth(case) + 3`, ils passent devant le héros quand il marche derrière ; une page
+  d'atlas par tuile, chargée avec elle ;
 - pas d'`IsoGround` / `IsoFx` / `BoardLight` : lumière, brume et étalonnage sont cuits dans le rendu ;
   échelle d'affichage `DIORAMA_SCALE` (≈ 1 pixel du rendu par pixel écran) ;
 - seuls la Sylve change : les Cimes gardent leur planche v2 ;
+- interface de la carte : z 1320+ (au-dessus des nœuds de profondeur, ~1150 sur 144×144) ;
+  « Centrer » au-dessus du joystick, zoom au-dessus de l'aide (`tests/test_boutons_carte.gd`) ;
 - chaîne de production : `tools/diorama_sylve/` (README) ; test `tests/test_sylve_diorama.gd`,
   captures `tests/shot_sylve_diorama.gd`.
 

@@ -30,25 +30,31 @@ func _boot() -> void:
 	# --- données de la planche
 	var d: Dictionary = BA.raw(z)
 	var sz: Vector2i = BA.size(z)
-	check(sz == Vector2i(72, 72) and (d["mask"] as Array).size() == 72 and (d["heights"] as Array).size() == 72, "plateau 72x72 (masque + hauteurs)")
+	check(sz == Vector2i(144, 144) and (d["mask"] as Array).size() == 144 and (d["heights"] as Array).size() == 144, "monde 144x144 cases (masque + hauteurs)")
 	check((d["pois"] as Dictionary).size() == 20, "20 lieux (%d)" % (d["pois"] as Dictionary).size())
 	var tiles: Array = BA.diorama_tiles(z)
-	check(tiles.size() == 4, "4 tuiles de fond chargées")
+	var tiles_ok: bool = tiles.size() == 16
+	for t: Dictionary in tiles:
+		tiles_ok = tiles_ok and load(String(t["path"])) is Texture2D
+	check(tiles_ok, "16 tuiles de fond (%d), toutes chargeables" % tiles.size())
 	var occ: Array = BA.diorama_occluders(z)
-	check(occ.size() >= 100, "occultants découpés (%d)" % occ.size())
+	check(occ.size() >= 300, "occultants découpés (%d)" % occ.size())
 	var occ_ok := true
+	var occ_pages := {}
 	for o: Dictionary in occ:
 		var r: Rect2 = o["rect"]
-		var tex: Texture2D = o["tex"]
-		if r.end.x > tex.get_width() + 0.5 or r.end.y > tex.get_height() + 0.5:
+		if not occ_pages.has(o["path"]):
+			occ_pages[o["path"]] = load(String(o["path"])) as Texture2D
+		var tex: Texture2D = occ_pages[o["path"]]
+		if tex == null or r.end.x > tex.get_width() + 0.5 or r.end.y > tex.get_height() + 0.5:
 			occ_ok = false
 	check(occ_ok, "occultants dans leur page d'atlas")
 
 	# --- calage : la case (0,0) et la case (71,71) tombent dans l'image ; l'image couvre le plateau
 	var sc: float = BA.diorama_scale(z)
-	var img_rect := Rect2((tiles[0] as Dictionary)["pos"], Vector2(5120, 2880) * sc)
+	var img_rect := Rect2((tiles[0] as Dictionary)["pos"], Vector2(10240, 5760) * sc)
 	var inside := true
-	for c: Vector2i in [Vector2i(0, 0), Vector2i(71, 0), Vector2i(0, 71), Vector2i(71, 71), Vector2i(36, 36)]:
+	for c: Vector2i in [Vector2i(0, 0), Vector2i(143, 0), Vector2i(0, 143), Vector2i(143, 143), Vector2i(72, 72)]:
 		inside = inside and img_rect.has_point(BA.iso_pos(z, c))
 	check(inside, "coins du plateau dans le rendu")
 	var ws: Vector2 = BA.world_size(z)
@@ -72,7 +78,7 @@ func _boot() -> void:
 		if not seen.has(AT.parse(k)):
 			unreached.append(k)
 	check(unreached.is_empty(), "tous les lieux atteignables depuis le départ %s" % [unreached])
-	check(seen.size() > 2500, "grande surface jouable (%d cases)" % seen.size())
+	check(seen.size() > 11000, "monde vaste : grande surface jouable (%d cases)" % seen.size())
 
 	# --- entrée dans la zone : le héros part du départ de la planche (pas du coin du Portail)
 	var pm: Node = root.get_node("/root/ProgressionManager")
