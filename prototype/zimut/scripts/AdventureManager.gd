@@ -635,12 +635,17 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_EXIT_TREE or what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		flush()
 
+## V120 : durée de la dernière écriture de sauvegarde (ms) — lue par le compteur d'images.
+var last_persist_ms: float = 0.0
+
 func persist() -> void:
 	_dirty = false
 	if save.is_empty() or slot < 0:
 		return
+	var t0: int = Time.get_ticks_usec()
 	save["adventure"] = state
 	save["campaign_mode"] = "adventure"
 	ProgressionManager.write_save(slot, save)
 	GameManager.active_save = save
 	GameManager.active_slot = slot
+	last_persist_ms = float(Time.get_ticks_usec() - t0) / 1000.0

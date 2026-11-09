@@ -99,6 +99,17 @@ var _dio_px: float = 1.0
 var _perf_lbl: Label = null
 var _perf_acc: Array[float] = []
 var _perf_clock: float = 0.0
+## V120 : temps le plus long (ms) par catégorie sur ~4 s : tuile (chargement + pose), pas (déplacement
+## logique), sauv (écriture), maj (rafraîchissement du monde), mob (groupes). Affiché sous le compteur.
+var _perf_max: Dictionary = {"tuile": 0.0, "pas": 0.0, "sauv": 0.0, "maj": 0.0, "mob": 0.0}
+var _perf_win: float = 0.0
+
+func _perf_t(key: String, t0_usec: int) -> void:
+	if _perf_lbl == null:
+		return
+	var ms: float = float(Time.get_ticks_usec() - t0_usec) / 1000.0
+	if ms > float(_perf_max.get(key, 0.0)):
+		_perf_max[key] = ms
 var _bg_grad: Gradient
 var _board: AdventureBoard
 var _entities: Node2D
@@ -509,7 +520,15 @@ func _perf_tick(dt: float) -> void:
 		if v > 1.0 / 40.0:
 			slow += 1
 	var avg: float = tot / maxf(1.0, float(_perf_acc.size()))
-	_perf_lbl.text = "%d i/s · %.0f ms · pire %.0f ms · saccades %d" % [roundi(1.0 / maxf(avg, 0.0001)), avg * 1000.0, worst * 1000.0, slow]
+	_perf_max["sauv"] = maxf(float(_perf_max["sauv"]), manager.last_persist_ms) if manager != null else 0.0
+	manager.last_persist_ms = 0.0
+	_perf_win += 0.5
+	var detail: String = "tuile %.0f · pas %.0f · sauv %.0f · maj %.0f · mob %.0f ms (max)" % [_perf_max["tuile"], _perf_max["pas"], _perf_max["sauv"], _perf_max["maj"], _perf_max["mob"]]
+	if _perf_win >= 4.0:
+		_perf_win = 0.0
+		for k: String in _perf_max.keys():
+			_perf_max[k] = 0.0
+	_perf_lbl.text = "%d i/s · %.0f ms · pire %.0f ms · saccades %d\n%s" % [roundi(1.0 / maxf(avg, 0.0001)), avg * 1000.0, worst * 1000.0, slow, detail]
 
 
 ## V115 : diorama — charge les tuiles / pages d'occultants proches de la vue (fil de chargement), libère les autres.
@@ -537,6 +556,7 @@ func _diorama_stream() -> void:
 			if budget <= 0:
 				_dio_pending = true
 				continue
+			var t_tile: int = Time.get_ticks_usec()
 			var tex: Texture2D = null
 			if sync or ResourceLoader.has_cached(path):
 				tex = load(path) as Texture2D
@@ -550,6 +570,7 @@ func _diorama_stream() -> void:
 				budget -= 1
 				for s2: Sprite2D in ch["sprites"]:
 					s2.texture = tex
+				_perf_t("tuile", t_tile)
 			else:
 				_dio_pending = true
 		elif spr.texture != null and not keep.intersects(ch["rect"]):
@@ -1536,19 +1557,23 @@ func _walk(path: Array[Vector2i]) -> void:
 			_walk_stop_s = float(cum[j])
 			break
 		_hero.locomotion(cell_center(step) - _hero.position, true, sprint)
+		var t_step: int = Time.get_ticks_usec()
 		var fresh: Array = manager.move_hero(step)
 		if _board.preview.size() > 0:
 			_board.preview.remove_at(0)
 		if is_board():
 			_hero.z_index = _depth(step) + 2
 		_after_step()
+		_perf_t("pas", t_step)
 		if not _pan_moved:
 			_focus_cell(step, true, step_time)
 		await _walk_until(tw, float(cum[j + 1]))   # arrivée sur la case
 		if not tw.is_running():
 			break
 		if not fresh.is_empty():
+			var t_maj: int = Time.get_ticks_usec()
 			_refresh_world()
+			_perf_t("maj", t_maj)
 		var got: Dictionary = manager.collect_find(step)
 		if not got.is_empty():
 			_hero.react()
@@ -1666,7 +1691,9 @@ func _after_step() -> void:
 	var moved: Array = manager.wander_mobs(_target_mob)
 	var added: Array = manager.ensure_mobs()
 	if not moved.is_empty() or not added.is_empty():
+		var t_mob: int = Time.get_ticks_usec()
 		_sync_mobs(true)
+		_perf_t("mob", t_mob)
 
 
 ## Passage d'une carte à l'autre : le héros sort par le bord de l'île, un voile
