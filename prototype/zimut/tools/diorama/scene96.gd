@@ -1,8 +1,8 @@
 extends SceneTree
-## Rend la Sylve 96x96 en passes : beauty | depth | normal | id, en NTxNT tuiles (voir render96.sh).
-## DIORAMA_WORK=<dossier> godot --rendering-method gl_compatibility --path <proj> -s scene96.gd -- <mode> <dossier_sortie> <largeur> <hauteur> <NT> [tx_ty]
+## Rend la Sylve en passes : beauty | depth | normal.
+## godot --rendering-method gl_compatibility --path <proj> -s scene.gd -- <mode> <out.png> <largeur> <hauteur>
 const S := 96.0
-const AMP := 2.6     # = HMAX de layout96 (height2.png normalisé)
+var AMP: float = float(OS.get_environment("DIORAMA_AMP")) if OS.get_environment("DIORAMA_AMP") != "" else 2.6   # = HMAX du plan (height2.png normalisé)
 const DMAX := 220.0
 var DIR: String = OS.get_environment("DIORAMA_WORK").path_join("")
 const PASS_HEAD := "shader_type spatial; render_mode unshaded, cull_disabled;
@@ -103,6 +103,23 @@ func _tint(n: Node, col: Color, mult: bool) -> void:
 	for c in n.get_children():
 		_tint(c, col, mult)
 
+func _emit(n: Node, col: Color, e: float) -> void:
+	if n is MeshInstance3D:
+		var mi: MeshInstance3D = n
+		if mi.mesh != null:
+			for i in range(mi.mesh.get_surface_count()):
+				var m: Material = mi.get_surface_override_material(i)
+				if m == null:
+					m = mi.mesh.surface_get_material(i)
+				if m is BaseMaterial3D:
+					var d: BaseMaterial3D = (m as BaseMaterial3D).duplicate()
+					d.emission_enabled = true
+					d.emission = col
+					d.emission_energy_multiplier = e
+					mi.set_surface_override_material(i, d)
+	for c in n.get_children():
+		_emit(c, col, e)
+
 func _first_mesh(n: Node, t: Transform3D, out: Array) -> void:
 	var tt: Transform3D = t
 	if n is Node3D:
@@ -156,9 +173,22 @@ func _terrain() -> Node3D:
 			mat.albedo_texture = ImageTexture.create_from_image(gimg)
 			mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 			mat.texture_repeat = false
+			var emit_path: String = DIR + "ground_emit_%d_%d.png" % [ci, cj]
 			mat.roughness = 1.0
 			mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-			mesh.surface_set_material(0, mat)
+			if FileAccess.file_exists(emit_path):
+				# lave : émission lue dans une texture (non ombrée), via un shader (plus sûr que emission_texture en GLES3)
+				var eimg := Image.load_from_file(emit_path)
+				eimg.generate_mipmaps()
+				var sh := Shader.new()
+				sh.code = "shader_type spatial; render_mode specular_disabled; uniform sampler2D alb : source_color, filter_linear_mipmap_anisotropic; uniform sampler2D emi : source_color, filter_linear_mipmap; void fragment() { ALBEDO = texture(alb, UV).rgb; EMISSION = texture(emi, UV).rgb * 0.55; ROUGHNESS = 1.0; }"
+				var smt := ShaderMaterial.new()
+				smt.shader = sh
+				smt.set_shader_parameter("alb", mat.albedo_texture)
+				smt.set_shader_parameter("emi", ImageTexture.create_from_image(eimg))
+				mesh.surface_set_material(0, smt)
+			else:
+				mesh.surface_set_material(0, mat)
 			var mi := MeshInstance3D.new()
 			mi.mesh = mesh
 			root3.add_child(mi)
@@ -255,6 +285,30 @@ func _boot() -> void:
 		if o["type"] == "water":
 			world.add_child(_water(o))
 			continue
+		if o["type"] == "lava":
+			var lv: MeshInstance3D = _water(o)
+			var lm := StandardMaterial3D.new()
+			lm.albedo_color = Color(0.9, 0.32, 0.06)
+			lm.emission_enabled = true
+			lm.emission = Color(1.0, 0.42, 0.08)
+			lm.emission_energy_multiplier = 1.1
+			lm.roughness = 0.6
+			(lv.mesh as CylinderMesh).material = lm
+			world.add_child(lv)
+			continue
+		if o["type"] == "light":
+			if mode == "beauty":
+				var ol := OmniLight3D.new()
+				var lp: Array = o["p"]
+				ol.position = Vector3(float(lp[0]), float(lp[1]), float(lp[2]))
+				var lc: Array = o["c"]
+				ol.light_color = Color(float(lc[0]), float(lc[1]), float(lc[2]))
+				ol.light_energy = float(o.get("e", 2.0))
+				ol.omni_range = float(o.get("range", 4.0))
+				ol.omni_attenuation = 1.4
+				ol.shadow_enabled = false
+				world.add_child(ol)
+			continue
 		var p: Array = o["p"]
 		if o["type"] == "asm":
 			var asm := Node3D.new()
@@ -270,7 +324,7 @@ func _boot() -> void:
 					pm.size = Vector3(ps[0], ps[1], ps[2])
 					var mat := StandardMaterial3D.new()
 					var c: Array = part["col"]
-					mat.albedo_color = Color(c[0], c[1], c[2]) if bool(o.get("wood", false)) else Color(0.86, 0.80, 0.68)
+					mat.albedo_color = Color(c[0], c[1], c[2]) if bool(o.get("wood", false)) else Color(0.86, 0.80, 0.68) * Color(float(o.get("wall_mul", [1, 1, 1])[0]), float(o.get("wall_mul", [1, 1, 1])[1]), float(o.get("wall_mul", [1, 1, 1])[2]))
 					mat.roughness = 0.9
 					pm.material = mat
 					var mi := MeshInstance3D.new()
@@ -282,7 +336,8 @@ func _boot() -> void:
 					if pf.contains("roof"):
 						_tint(n, Color(float(o["roof"][0]), float(o["roof"][1]), float(o["roof"][2])), false)
 					elif pf.contains("wall") and not pf.contains("wood"):
-						_tint(n, Color(1.0, 0.98, 0.95), true)
+						var wm: Array = o.get("wall_mul", [1.0, 0.98, 0.95])
+						_tint(n, Color(float(wm[0]), float(wm[1]), float(wm[2])), true)
 				var pp: Array = part.get("p", [0, 0, 0])
 				n.position = Vector3(pp[0], pp[1], pp[2])
 				n.rotation_degrees.y = float(part.get("r", 0))
@@ -309,6 +364,8 @@ func _boot() -> void:
 		n2.transform = xf
 		if o.has("mul"):
 			_tint(n2, Color(float(o["mul"][0]), float(o["mul"][1]), float(o["mul"][2])), true)
+		if o.has("emit"):
+			_emit(n2, Color(float(o["emit"][0]), float(o["emit"][1]), float(o["emit"][2])), float(o.get("emit_e", 1.0)))
 		n2.set_meta("oid", int(o.get("oid", 0)))
 		n2.set_meta("cls", 1.0 if (f.contains("kenney") or f.contains("Rock") or f.contains("rock")) else 0.5)
 		world.add_child(n2)
@@ -358,10 +415,11 @@ func _boot() -> void:
 	var e := Environment.new()
 	e.background_mode = Environment.BG_COLOR
 	e.background_color = Color(0, 0, 0, 0)
+	var brasier: bool = OS.get_environment("DIORAMA_MOOD") == "brasier"
 	if mode == "beauty":
 		e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-		e.ambient_light_color = Color(0.66, 0.76, 0.95)
-		e.ambient_light_energy = 0.62
+		e.ambient_light_color = Color(0.70, 0.62, 0.66) if brasier else Color(0.66, 0.76, 0.95)
+		e.ambient_light_energy = 0.55 if brasier else 0.62
 		e.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 		e.tonemap_exposure = 1.05
 	var env := WorldEnvironment.new()
@@ -370,8 +428,8 @@ func _boot() -> void:
 	var center := Vector3(48, 0.0, 48)
 	if mode == "beauty":
 		var sun := DirectionalLight3D.new()
-		sun.light_energy = 1.55
-		sun.light_color = Color(1.0, 0.93, 0.80)
+		sun.light_energy = 1.3 if brasier else 1.55
+		sun.light_color = Color(1.0, 0.88, 0.74) if brasier else Color(1.0, 0.93, 0.80)
 		sun.shadow_enabled = true
 		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 		sun.directional_shadow_max_distance = 200.0
@@ -382,7 +440,7 @@ func _boot() -> void:
 		sun.look_at_from_position(center + Vector3(-0.38, 0.82, 0.62) * 100.0, center, Vector3.UP)
 		var fill := DirectionalLight3D.new()
 		fill.light_energy = 0.28
-		fill.light_color = Color(0.62, 0.74, 1.0)
+		fill.light_color = Color(1.0, 0.45, 0.25) if brasier else Color(0.62, 0.74, 1.0)
 		holder.add_child(fill)
 		fill.look_at_from_position(center + Vector3(0.7, 0.4, -0.5) * 50.0, center, Vector3.UP)
 	var cam := Camera3D.new()
@@ -403,7 +461,7 @@ func _boot() -> void:
 	cam.current = true
 	for ty in range(nt):
 		for tx in range(nt):
-			if only != "" and only != "%d_%d" % [tx, ty]:
+			if only != "" and not only.split(",").has("%d_%d" % [tx, ty]):
 				continue
 			cam.h_offset = -fw / 2.0 + (tx + 0.5) * fw / nt
 			cam.v_offset = full / 2.0 - (ty + 0.5) * full / nt

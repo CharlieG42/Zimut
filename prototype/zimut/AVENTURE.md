@@ -267,8 +267,21 @@ une **scène 3D pré-rendue** (Kenney + Quaternius, CC0) posée sur un plateau i
 - seuls la Sylve change : les Cimes gardent leur planche v2 ;
 - interface de la carte : z 1320+ (au-dessus des nœuds de profondeur, ~1150 sur 144×144) ;
   « Centrer » au-dessus du joystick, zoom au-dessus de l'aide (`tests/test_boutons_carte.gd`) ;
-- chaîne de production : `tools/diorama_sylve/` (README) ; test `tests/test_sylve_diorama.gd`,
+- chaîne de production : `tools/diorama/` (README) ; test `tests/test_sylve_diorama.gd`,
   captures `tests/shot_sylve_diorama.gd`.
+
+### Diorama du Brasier et bâtiments de donjon (V118)
+
+- `BoardArt.DIORAMA_BOARDS` : en réglage « Diorama », la Sylve **et** le Brasier (`brasier_cendres_diorama`)
+  utilisent une scène pré-rendue ; les autres Nations gardent leur carte.
+- Terres de Cendre : bourg de forgerons, lave (masque `lava.npy` infranchissable, émission non ombrée au
+  rendu), volcan (`forbid.npy`), 5 donjons `Brasier#1..#4` + `Brasier`, portail vers les Brumes
+  (`requires: "Brasier"`). Pas de « sortie » non scellée : toute sortie débloque la Nation suivante.
+- Bâtiments de donjon (`tools/diorama/dungeons3d.py`) : un groupe d'objets par donjon = **un seul**
+  occultant (`kind: "dungeon"`) ; le lieu est posé devant l'entrée (`DG.entrance`).
+- Fluidité : petits décors non découpés (moins de nœuds) ; `PoiNode`, `FindNode`, `MobNode`,
+  `GateNode`, `BuildingNode` ne se redessinent que s'ils sont à l'écran (`_on_screen`).
+- Chaîne de production : `tools/diorama/` (README) ; test `tests/test_brasier_diorama.gd`.
 
 ### Lumière, atmosphère et détails peints (V114)
 

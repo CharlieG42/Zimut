@@ -36,14 +36,22 @@ def special(x, z, m=0.0):
 # ── lac
 objs.append({"type": "water", "c": [W.LAKE[0], W.LAKE[1]], "r": [W.LAKE[2] + 0.6, W.LAKE[3] + 0.6], "ang": W.LAKE[4], "y": WL})
 
+# ── bâtiments de donjon (V118) : un groupe d'objets par donjon (un seul occultant en jeu)
+import dungeons3d as DG
+for gi, (dname, dkind, dx, dz) in enumerate(W.DUNGEONS):
+    for o_ in DG.build(dkind, dx, dz, wgy, KT, NAT):
+        o_["group"] = "donjon%d" % gi
+        o_["gc"] = [dx, dz]
+        objs.append(o_)
+    occupied.append((dx - OFF, dz - OFF, W.DUNGEON_RAD[dkind] + 0.8))
+
+
 # ── ruines du fort (nord-ouest) : enceinte éboulée, tours, engins de siège démolis
 CA = KT + "castle/"
 ruin = [("tower-base", -4, -4, 0), ("wall-half", -2, -4, 0), ("wall", 0, -4, 0), ("wall-half", 4, -4, 180), ("tower-base", 4, -4, 0),
-        ("wall-half", -4, -2, 90), ("wall", -4, 2, 90), ("wall-corner", -4, 4, 0), ("wall-half", -2, 4, 180),
-        ("wall-half", 4, 2, 270), ("wall-pillar", 4, 4, 0)]
+        ("wall-half", -4, -2, 90), ("wall", -4, 2, 90), ("wall-corner", -4, 4, 0)]   # V118 : façade ouverte sur le donjon
 for nm, dx, dz, r in ruin:
     wadd(CA + nm + ".glb", RX + dx * 0.8, RZ + dz * 0.8, r, 1.6, "ruin", keep=1.1, mul=STONE_MUL)
-wadd(CA + "siege-tower-demolished.glb", RX + 0.6, RZ + 0.8, 30, 1.5, "ruin", keep=2.0, mul=STONE_MUL)
 wadd(CA + "siege-catapult-demolished.glb", RX + 6.5, RZ + 4.5, 200, 1.6, "ruin", keep=1.4)
 for k in range(10):
     a_ = wrng.uniform(0, 2 * math.pi); d_ = wrng.uniform(2.5, 7.0)

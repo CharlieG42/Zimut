@@ -42,3 +42,27 @@ WOODS = [(10.0, 10.0, 8.5), (11.0, 88.0, 8.0), (89.0, 90.0, 7.5), (5.0, 66.0, 5.
 RUINS = (16.0, 15.0)                         # ruines du fort (nord-ouest)
 STONES = (90.0, 30.0)                        # cercle de pierres levées (plaine de l est)
 HAMLET = [("chaumiere", 72.0, 77.5, 180, 1.0), ("grange", 81.0, 80.5, 270, 1.0), ("maison_bois2", 66.0, 75.0, 90, 1.0)]
+
+# ── Donjons (V118) : bâtiment 3D propre à chaque donjon ; le lieu est posé devant l'entrée
+NATION = "sylve"
+BOARD_STEM = "foret_sylve_diorama"
+ASSET_DIR = "sylve_diorama"
+DUNGEONS = [("Grotte de la Feuille", "grotte", 17.0, 83.0), ("Antre de la Patte", "antre", 79.5, 89.0),
+            ("Sanctuaire de Cristal", "sanctuaire", 74.5, 21.5), ("Crypte du Chêne Noir", "crypte", 7.0, 63.0),
+            ("Donjon de la Nation Sylvestre", "donjon_sylve", 16.0, 14.0)]
+DUNGEON_RAD = {"grotte": 3.2, "mine": 3.2, "antre": 3.0, "sanctuaire": 3.8, "crypte": 3.0, "donjon_sylve": 2.6, "fosse": 3.6, "forteresse": 4.2}
+
+START_W = (48.0, 54.2)
+PLACES = [("Source claire", 44.0, 59.2), ("Coffre moussu", 50.6, 69.6), ("Camp gobelin", 55.2, 57.4),
+          ("Tanière du sanglier", 35.6, 55.4), ("Meute de loups gris", 58.0, 88.5),
+          ("Clairière des lucioles", 84.5, 62.0), ("Embuscade sous les pins", 88.0, 50.0),
+          ("Souche creuse", 13.0, 40.0), ("Poste de la Citadelle", 86.5, 34.0),
+          ("Refuge des hauteurs", 52.0, 11.0), ("Cache du bûcheron", 60.5, 7.0),
+          ("Garde des cimes", 34.0, 8.0), ("Antre du prédateur", 26.0, 4.5),
+          ("Belvédère de la Sylve", 70.0, 4.0), ("Portail vers les Cendres", 4.0, 24.0)]
+
+def poi_defs(repo):
+    """Lieux de la Sylve : ceux de la planche iso (mêmes textes, niveaux, gardiens)."""
+    import json
+    iso = json.load(open(repo + "/data/boards/foret_sylve_iso.json"))
+    return {v["name"]: v for v in iso["pois"].values()}
