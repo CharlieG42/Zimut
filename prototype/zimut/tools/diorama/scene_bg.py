@@ -40,6 +40,12 @@ SYLVE = dict(
     cloud=(1.0, 0.99, 0.96), cloud_sh=(0.66, 0.74, 0.88), sea=(0.93, 0.95, 0.98),
     rock_lit=(0.62, 0.50, 0.40), rock_dark=(0.30, 0.24, 0.24), rock_band=(0.50, 0.40, 0.34), lip=(0.30, 0.45, 0.18),
     fall=(0.82, 0.93, 1.0), fall_core=(1.0, 1.0, 1.0), fall_glow=0.0, crack=None)
+BRUMES = dict(
+    sky_top=(0.30, 0.42, 0.46), sky_mid=(0.55, 0.68, 0.68), sky_hor=(0.82, 0.88, 0.80), hor=0.50,
+    mount=[((0.46, 0.58, 0.58), 0.40, 0.10), ((0.34, 0.46, 0.48), 0.47, 0.07)],
+    cloud=(0.90, 0.95, 0.92), cloud_sh=(0.56, 0.66, 0.66), sea=(0.80, 0.88, 0.84),
+    rock_lit=(0.46, 0.46, 0.38), rock_dark=(0.20, 0.22, 0.18), rock_band=(0.36, 0.36, 0.28), lip=(0.22, 0.34, 0.20),
+    fall=(0.78, 0.92, 0.88), fall_core=(0.95, 1.0, 0.98), fall_glow=0.0, crack=None)
 BRASIER = dict(
     sky_top=(0.10, 0.04, 0.07), sky_mid=(0.34, 0.10, 0.08), sky_hor=(0.86, 0.42, 0.18), hor=0.52,
     mount=[((0.36, 0.14, 0.12), 0.40, 0.11), ((0.22, 0.08, 0.08), 0.47, 0.08)],
@@ -48,11 +54,11 @@ BRASIER = dict(
     fall=(1.0, 0.52, 0.12), fall_core=(1.0, 0.86, 0.45), fall_glow=0.9, crack=(1.0, 0.38, 0.08))
 
 
-def build(alpha, col, brasier, seed=7):
+def build(alpha, col, brasier, seed=7, pal=None):
     """alpha, col : vue globale de l'île (H, W) / (H, W, 3) à l'échelle Q2.
     Renvoie (fond RGB, masque « devant l'île » RGBA) : le fond passe derrière l'île,
     la mer de nuages basse passe devant la falaise mais derrière l'île elle-même."""
-    S = BRASIER if brasier else SYLVE
+    S = BRUMES if pal == "brumes" else (BRASIER if brasier else SYLVE)
     H, W = alpha.shape
     rng = np.random.default_rng(seed)
     yy = np.linspace(0, 1, H, dtype=np.float32)[:, None]
@@ -209,15 +215,17 @@ def build(alpha, col, brasier, seed=7):
     return np.clip(out, 0, 1).astype(np.float32)
 
 
-def paint(img, brasier, d=7):
+def paint(img, brasier, d=7, brumes=False):
     """Étalonnage « peint » de l'île : couleurs plus riches, aplats lissés en gardant les contours."""
     img = np.clip(img, 0, 1).astype(np.float32)
     # V120 : lissage « peint » plus léger (0.65 -> 0.40) pour garder les brins, tuiles et contours
     sm = cv2.bilateralFilter(img, d, 0.10, d * 0.8)
-    img = img * 0.60 + sm * 0.40
+    img = img * 0.68 + sm * 0.32            # V124 : encore un peu moins de lissage (dessins plus fins)
     hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
     h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
-    if not brasier:
+    if brumes:
+        s = np.clip(s * 0.92, 0, 1)                     # V124 : marais, verts gris
+    elif not brasier:
         y = np.exp(-((h - 62) / 22.0) ** 2)              # jaune-vert acide -> vert prairie
         h = h + y * 16
         s = s * (1 + 0.10 * y)
@@ -232,7 +240,7 @@ def paint(img, brasier, d=7):
         v = v * (0.88 + 0.12 * v)
     out = cv2.cvtColor(np.stack([h % 360, s, np.clip(v, 0, 1)], 2).astype(np.float32), cv2.COLOR_HSV2RGB)
     # V120 : netteté — masque flou à deux rayons (micro-détails + formes), sans halo sur les forts contrastes
-    for rad, amt in ((0.8, 0.55), (2.5, 0.25)):
+    for rad, amt in ((0.8, 0.65), (2.5, 0.25)):
         hi = out - cv2.GaussianBlur(out, (0, 0), rad)
         out = out + amt * np.clip(hi, -0.12, 0.12)
     return np.clip(out, 0, 1)
