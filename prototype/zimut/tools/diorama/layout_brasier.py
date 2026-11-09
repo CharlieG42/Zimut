@@ -78,22 +78,15 @@ for job, cx, cz, r, s in W.TOWN:
                  "roof": W.ROOF.get(job, (0.3, 0.2, 0.2)), "wood": job in BT.WOOD, "wall_mul": list(W.WALL_MUL)})
 GY_, SV, CA, TD, FT = KT + "graveyard/", KT + "survival/", KT + "castle/", KT + "tower-defense/", KT + "fantasy-town/"
 FIRE = dict(emit=[1.0, 0.45, 0.1], emit_e=1.4)
-# grand brasier de la place + cercle de vasques
-add(GY_ + "fire-basket.glb", C, C, 0, 7.0, "fountain", keep=2.6, **FIRE)
-objs.append({"type": "light", "p": [C, gy(C, C) + 2.4, C], "c": [1.0, 0.55, 0.2], "e": 3.0, "range": 9.0})
-for k in range(8):
-    a = k * math.pi / 4 + 0.39
-    x, z = C + 5.0 * math.cos(a), C + 5.0 * math.sin(a)
-    add(GY_ + "pillar-small.glb", x, z, 0, 1.4, "lantern", keep=0.4, mul=[0.5, 0.45, 0.45])
-    add(GY_ + "fire-basket.glb", x, z, 0, 1.5, "lantern", yoff=1.4 * 0.62, **FIRE)
-for f, x, z, r in (("stall-red", 52.0, 44.2, 200), ("stall", 43.6, 51.6, 20)):
+# V122 : la forteresse de la Nation occupe le centre de la place (posée par la boucle des donjons) ; plus de grand brasier
+for f, x, z, r in (("stall", 41.6, 51.0, 20),):
     add(FT + f + ".glb", x, z, r, 2.2, "stall", keep=1.4, mul=[0.8, 0.6, 0.55])
 # forges : enclumes, tonneaux, bois, braises
 for fx_, fz_ in ((40.0, 44.5), (58.0, 46.5)):
     for f, dx, dz, r in (("workbench-anvil", 0.0, 0.0, 30), ("barrel", 1.2, 0.6, 0), ("resource-wood", -1.3, 0.4, 70), ("campfire-pit", 0.6, -1.1, 0)):
         add(SV + f + ".glb", fx_ + dx, fz_ + dz, r, 2.0, "prop", keep=0.4, **(FIRE if "campfire" in f else {}))
     objs.append({"type": "light", "p": [fx_ + 0.6, gy(fx_, fz_) + 0.8, fz_ - 1.1], "c": [1.0, 0.5, 0.15], "e": 1.6, "range": 4.0})
-for x, z, r in ((50.5, 42.4, 0), (51.2, 42.9, 40), (45.5, 53.8, 10)):
+for x, z, r in ((42.6, 54.0, 10),):
     add(SV + "barrel.glb", x, z, r, 2.0, "prop", keep=0.4)
 add(SV + "signpost.glb", 30.6, 48.0, 30, 2.0, "prop", keep=0.4)
 add(SV + "signpost.glb", 66.5, 51.2, 200, 2.0, "prop", keep=0.4)
@@ -101,11 +94,11 @@ add(SV + "signpost.glb", 66.5, 51.2, 200, 2.0, "prop", keep=0.4)
 # ── paves : place et routes du bourg (basalte)
 PAV = [NAT + "RockPath_Square_Small_%d.gltf" % i for i in (1, 2, 3)] + [NAT + "RockPath_Round_Small_%d.gltf" % i for i in (1, 2)]
 BASALT = [0.42, 0.38, 0.38]
-for gx in np.arange(C - 5.6, C + 5.6, 0.78):
-    for gz in np.arange(C - 5.6, C + 5.6, 0.78):
+for gx in np.arange(49.0, 57.5, 0.78):
+    for gz in np.arange(49.0, 57.5, 0.78):
         x = gx + rng.uniform(-0.25, 0.25); z = gz + rng.uniform(-0.25, 0.25)
         d = math.hypot(x - C, z - C)
-        if 3.0 < d < 5.5 - rng.uniform(0, 0.6) and free(x, z, 0.15):
+        if math.hypot(x - 53.0, z - 53.0) < 3.4 - rng.uniform(0, 0.6) and free(x, z, 0.15):    # parvis devant la porte de la forteresse
             add(PAV[rng.integers(0, len(PAV))], x, z, float(rng.uniform(0, 360)), float(rng.uniform(0.5, 0.64)), "pave", mm=True, tint=BASALT)
 
 def bez(pts, n=160):
@@ -144,6 +137,8 @@ for gi, (dname, dkind, dx, dz) in enumerate(W.DUNGEONS):
             o_.pop("tint", None)                    # buissons rouges : de saison au Brasier
         objs.append(o_)
     occupied.append((dx, dz, W.DUNGEON_RAD[dkind] + 0.8))
+    for k_ in (4.8, 7.4, 10.0):                      # V122 : cône de vue dégagé devant l'entrée (rien ne cache le donjon)
+        occupied.append((dx + 0.7071 * k_, dz + 0.7071 * k_, 3.0))
 # volcan : lueur du cratère
 vx, vz, vr, vh, cr = W.VOLCANO
 objs.append({"type": "light", "p": [vx, gy(vx, vz) + 1.0, vz], "c": [1.0, 0.45, 0.12], "e": 6.0, "range": 10.0})

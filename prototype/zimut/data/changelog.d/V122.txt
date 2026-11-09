@@ -1,0 +1,3 @@
+V122|Les donjons changent de place, en Sylve comme au Brasier : un donjon dans chacun des quatre coins de la carte, et le donjon de la Nation au centre, à la place de la fontaine (Sylve) et du grand brasier (Brasier).
+V122|Plus de donjon caché : un cône de vue est dégagé devant chaque entrée, plus aucun arbre ni bois ne se dresse devant (le bois du sud-est de la Sylve a été déplacé, le hameau est relié à l'Antre de la Patte par un chemin).
+V122|Cette disposition est désormais la règle pour toutes les Nations à venir ; un test vérifie le centre et les quatre coins. Les lieux voisins (Source chaude, Cache du mineur, Bois calciné…) ont été déplacés au besoin.

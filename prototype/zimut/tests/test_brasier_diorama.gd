@@ -130,6 +130,26 @@ func _boot() -> void:
 					near += 1
 					break
 		check(n_d == 5 and near == n_d, "%s : un bâtiment devant chacun des %d donjons (%d)" % [zz, n_d, near])
+		# V122 : règle de placement — un donjon par coin du monde (haut, droite, bas, gauche), celui de la Nation au centre
+		var tips: Array = [Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 1)]
+		var used: Array = []
+		var centre_ok := false
+		for k2: String in BA.pois(zz).keys():
+			var pd: Dictionary = BA.pois(zz)[k2]
+			if not DG.is_dungeon(pd):
+				continue
+			var c2: Vector2i = AT.parse(k2)
+			var uv := Vector2(c2.x / 144.0, c2.y / 144.0)
+			if String(pd.get("name", "")).contains("Nation"):
+				centre_ok = uv.distance_to(Vector2(0.5, 0.5)) < 0.12
+				continue
+			var best := 0
+			for ti in range(4):
+				if uv.distance_to(tips[ti]) < uv.distance_to(tips[best]):
+					best = ti
+			if uv.distance_to(tips[best]) <= 0.42 and not used.has(best):
+				used.append(best)
+		check(centre_ok and used.size() == 4, "%s : donjon de la Nation au centre, un donjon par coin (%d coins)" % [zz, used.size()])
 	gs.set_sylvestre_board(before)
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
