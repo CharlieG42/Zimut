@@ -1,0 +1,1 @@
+V120|Compteur d'images : une seconde ligne indique le temps le plus long (en ms) passé à charger une tuile du décor, à faire un pas, à sauvegarder, à rafraîchir la carte et à déplacer les monstres, pour repérer ce qui provoque les saccades sur téléphone.
