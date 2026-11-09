@@ -61,8 +61,10 @@ func _boot() -> void:
 	check(String(D.win_room(adv, "Forêt", 0.0, true)["stone_roll"]) == "owned", "Pierre déjà possédée : pas de tirage")
 	D.begin(adv, "Marées")
 	D.win_room(adv, "Marées", 0.0, false)
-	D.lose(adv)
-	check(D.current_room(adv, "Marées") == 1, "défaite : retour à l'entrée")
+	D.lose(adv, "Marées")
+	check(D.current_room(adv, "Marées") == 2, "défaite : la progression est gardée (V124)")
+	D.restart(adv, "Marées")
+	check(D.current_room(adv, "Marées") == 1, "recommencer : retour à l'entrée")
 	print("Intégration (sauvegarde, victoire, défaite) :")
 	var data: Dictionary = pm.new_game(4, "Donjon")
 	pm.rebuild_team(data, ["Chasseur", "Mage", "Sylvain"])
@@ -102,17 +104,26 @@ func _boot() -> void:
 	check(D.current_room(a, "Forêt") == 2, "salle 2 en cours")
 	pm.register_defeat(data, {"enemies": [{"type": "Gobelin", "level": 15, "boss": false}], "turns": 4})
 	a = data["adventure"]
-	check(D.current_room(a, "Forêt") == 1 and bool(data["last_result"]["dungeon"]["lost"]), "défaite : retour à la salle 1, résultat signalé")
-	# Arrêt du jeu : une autre session de jeu repart de la salle 1
-	a["dungeon"] = {"biome": "Forêt", "room": 3, "session": D.session}
-	check(D.current_room(a, "Forêt") == 3, "même session : salle 3 conservée")
-	a["dungeon"]["session"] = D.session + 1
-	check(D.current_room(a, "Forêt") == 1, "jeu relancé : retour à la salle 1")
+	check(D.current_room(a, "Forêt") == 2 and bool(data["last_result"]["dungeon"]["lost"]), "défaite : la salle 2 reste à jouer (progression gardée), résultat signalé")
+	# V124 : arrêt du jeu / rechargement : la dernière salle terminée est conservée dans la sauvegarde
+	a["dungeon_rooms"] = {"Forêt": 3}
+	check(D.current_room(a, "Forêt") == 3 and D.in_progress(a, "Forêt"), "salle 3 conservée, expédition en cours")
+	check(D.current_room(a, "Forêt#2") == 1 and not D.in_progress(a, "Forêt#2"), "un autre donjon n'est pas touché")
+	D.win_room(a, "Forêt#2", 0.0, false)
+	check(D.current_room(a, "Forêt#2") == 2 and D.current_room(a, "Forêt") == 3, "deux expéditions en parallèle, chacune sa salle")
+	var reloaded: Dictionary = JSON.parse_string(JSON.stringify(a))
+	check(D.current_room(reloaded, "Forêt") == 3 and D.current_room(reloaded, "Forêt#2") == 2, "survit à une sauvegarde / rechargement")
+	D.restart(a, "Forêt")
+	check(D.current_room(a, "Forêt") == 1 and D.current_room(a, "Forêt#2") == 2, "recommencer : retour à la salle 1 pour ce donjon seulement")
+	a["dungeon"] = {"biome": "Forêt", "room": 3, "session": 1}
+	check(D.current_room(a, "Forêt") == 3, "ancien format de sauvegarde encore lu")
+	D.restart(a, "Forêt")
+	check(D.current_room(a, "Forêt") == 1 and not a.has("dungeon"), "recommencer efface aussi l'ancien format")
 	print("Combat (salles 1 et 4) :")
 	a["zone"] = gz
 	for room2: int in [1, 4]:
 		a["pending_challenge"] = key
-		a["dungeon"] = {"biome": "Forêt", "room": room2, "session": D.session}
+		a["dungeon_rooms"] = {"Forêt": room2}
 		D.begin(a, "Forêt")
 		gm.active_slot = 4
 		gm.active_save = data

@@ -2173,7 +2173,7 @@ func _show_result_window(victory: bool) -> void:
 		var dcol: Color = Color(0.95, 0.75, 0.40)
 		if bool(dg.get("lost", false)):
 			dtxt = "🏰  Défaite en salle %d / %d du donjon : tu retournes à l'entrée." % [int(dg.get("room", 1)), int(dg.get("rooms", Dungeons.ROOMS))] \
-				if bool(dg.get("reset", true)) else "🏰  Défaite en salle %d / %d du donjon : ta progression est gardée." % [int(dg.get("room", 1)), int(dg.get("rooms", Dungeons.ROOMS))]
+				if bool(dg.get("reset", true)) else "🏰  Défaite en salle %d / %d du donjon : tu pourras la retenter, ta progression est gardée." % [int(dg.get("room", 1)), int(dg.get("rooms", Dungeons.ROOMS))]
 			dcol = Color(1.0, 0.55, 0.45)
 		elif bool(dg.get("cleared", false)):
 			dtxt = "🏰  Donjon terminé !  +%d or" % int(dg.get("gold", 0))
@@ -2516,12 +2516,12 @@ func _on_spell_button_selected(spell: Dictionary) -> void:
 func _on_quit_combat_pressed() -> void:
 	Sfx.play("click")
 	PlayTimer.flush()
-	# V43 : abandonner un combat de donjon = échec de l'expédition (retour à la salle 1)
+	# V43 : abandonner un combat de donjon : la progression du donjon est gardée (V124)
 	var gm: Node = get_node_or_null("/root/GameManager")
 	if gm != null and not gm.game_over and gm.active_slot >= 0 and gm.active_save.get("campaign_mode", "") == "adventure":
 		var adv: Dictionary = gm.active_save.get("adventure", {})
 		if ProgressionManager.adventure_dungeon_biome(gm.active_save) != "":
-			Dungeons.lose(adv)
+			Dungeons.lose(adv, ProgressionManager.adventure_dungeon_biome(gm.active_save))
 			adv["pending_challenge"] = ""
 			gm.active_save["adventure"] = adv
 			ProgressionManager.write_save(gm.active_slot, gm.active_save)

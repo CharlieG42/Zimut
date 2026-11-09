@@ -3668,7 +3668,7 @@ func _apply_campaign_defeat(data: Dictionary) -> void:
 		var lost_biome: String = adventure_dungeon_biome(data)
 		if lost_biome != "":
 			var room_lost: int = Dungeons.current_room(adventure, lost_biome)
-			Dungeons.lose(adventure)
+			Dungeons.lose(adventure, lost_biome)
 			if data.has("last_result"):
 				data["last_result"]["dungeon"] = {"lost": true, "biome": lost_biome, "room": room_lost,
 					"rooms": Dungeons.ROOMS, "reset": Dungeons.DEFEAT_RESETS}
