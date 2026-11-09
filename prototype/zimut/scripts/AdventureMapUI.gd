@@ -103,6 +103,8 @@ var _perf_clock: float = 0.0
 ## logique), sauv (écriture), maj (rafraîchissement du monde), mob (groupes). Affiché sous le compteur.
 var _perf_max: Dictionary = {"tuile": 0.0, "pas": 0.0, "sauv": 0.0, "maj": 0.0, "mob": 0.0}
 var _perf_win: float = 0.0
+## Temps de calcul du jeu (script + scène, hors rendu GPU) : max sur la fenêtre, en ms.
+var _perf_proc_max: float = 0.0
 
 func _perf_t(key: String, t0_usec: int) -> void:
 	if _perf_lbl == null:
@@ -504,6 +506,7 @@ func _dio_filter_sync() -> void:
 
 
 func _perf_tick(dt: float) -> void:
+	_perf_proc_max = maxf(_perf_proc_max, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0)
 	_perf_acc.append(dt)
 	_perf_clock += dt
 	if _perf_clock < 0.5:
@@ -524,11 +527,17 @@ func _perf_tick(dt: float) -> void:
 	manager.last_persist_ms = 0.0
 	_perf_win += 0.5
 	var detail: String = "tuile %.0f · pas %.0f · sauv %.0f · maj %.0f · mob %.0f ms (max)" % [_perf_max["tuile"], _perf_max["pas"], _perf_max["sauv"], _perf_max["maj"], _perf_max["mob"]]
+	var rend: String = "calcul max %.0f ms · dessins %d · objets %d · vram %d Mo · nœuds %d" % [
+		_perf_proc_max, int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)),
+		int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)),
+		int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0),
+		int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))]
 	if _perf_win >= 4.0:
 		_perf_win = 0.0
+		_perf_proc_max = 0.0
 		for k: String in _perf_max.keys():
 			_perf_max[k] = 0.0
-	_perf_lbl.text = "%d i/s · %.0f ms · pire %.0f ms · saccades %d\n%s" % [roundi(1.0 / maxf(avg, 0.0001)), avg * 1000.0, worst * 1000.0, slow, detail]
+	_perf_lbl.text = "%d i/s · %.0f ms · pire %.0f ms · saccades %d\n%s\n%s" % [roundi(1.0 / maxf(avg, 0.0001)), avg * 1000.0, worst * 1000.0, slow, detail, rend]
 
 
 ## V115 : diorama — charge les tuiles / pages d'occultants proches de la vue (fil de chargement), libère les autres.
