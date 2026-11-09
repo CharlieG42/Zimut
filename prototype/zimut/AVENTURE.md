@@ -307,6 +307,17 @@ une **scène 3D pré-rendue** (Kenney + Quaternius, CC0) posée sur un plateau i
   anneau rouge en pointillés, cadenas vectoriel (plus d'émoji) ; **terminé** = vert. Une pastille
   OUVERT / VERROUILLÉ / TERMINÉ reste affichée sous le nom de chaque donjon.
 
+### Position des donjons dans une Nation (V122)
+
+Règle pour **toutes** les Nations (Sylve, Brasier et les suivantes) : un donjon dans chacun des quatre
+coins du monde (pointes du losange à l'écran : haut, droite, bas, gauche) et le **donjon de la Nation au
+centre**, sur la place du bourg. Le bâtiment de donjon regarde la caméra (+x +z) : rien de haut ne doit
+se dresser devant. Les boucles de donjons de `wild96.py` / `layout_brasier.py` posent donc trois cercles
+d'`occupied` (à 4,8 / 7,4 / 10 unités, rayon 3) en diagonale devant chaque entrée ; il faut aussi
+dégager à la main les gros décors (bois, hameaux). Les routes des plans partent du pourtour du donjon central
+(`ROADS` des plans) et un chemin mène à chaque coin. `tests/test_brasier_diorama.gd` vérifie le centre et
+les quatre coins pour chaque Nation.
+
 ### Lumière, atmosphère et détails peints (V114)
 
 - `BoardLight` (z=5, statique, un seul redraw) au-dessus de toute carte 2D : teinte

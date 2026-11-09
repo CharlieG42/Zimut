@@ -44,6 +44,8 @@ for gi, (dname, dkind, dx, dz) in enumerate(W.DUNGEONS):
         o_["gc"] = [dx, dz]
         objs.append(o_)
     occupied.append((dx - OFF, dz - OFF, W.DUNGEON_RAD[dkind] + 0.8))
+    for k_ in (4.8, 7.4, 10.0):                      # V122 : cône de vue dégagé devant l'entrée (rien ne cache le donjon)
+        occupied.append((dx - OFF + 0.7071 * k_, dz - OFF + 0.7071 * k_, 3.0))
 
 
 # ── ruines du fort (nord-ouest) : enceinte éboulée, tours, engins de siège démolis

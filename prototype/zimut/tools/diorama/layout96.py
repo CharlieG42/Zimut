@@ -182,15 +182,13 @@ def free(x, z, r):
     return all(math.hypot(x - a_, z - b_) > r + k for a_, b_, k in occupied)
 
 # ── place
-add(KT + "fantasy-town/fountain-round.glb", C, C, 0, 2.6, "fountain", keep=3.2)
+# V122 : le donjon de la Nation occupe le centre de la place (posé par wild96.py) ; plus de fontaine
 for k in range(8):
     an = k * math.pi / 4 + 0.39
     add(KT + "fantasy-town/lantern.glb", C + 5.0 * math.cos(an), C + 5.0 * math.sin(an), 0, 1.3, "lantern", keep=0.4)
 for f, x, z, r in (("stall-red", 27.6, 19.6, 200), ("stall-green", 19.4, 21.0, 110), ("stall", 28.4, 27.4, 300), ("stall-red", 20.2, 28.0, 20)):
     add(KT + "fantasy-town/%s.glb" % f, x, z, r, 2.2, "stall", keep=1.4)
 add(KT + "fantasy-town/cart.glb", 26.5, 30.0, 35, 1.8, "cart", keep=1.2)
-add(KT + "fantasy-town/stall-bench.glb", 21.0, 25.6, 90, 1.9, "bench", keep=0.8)
-add(KT + "fantasy-town/stall-bench.glb", 27.2, 23.0, 270, 1.9, "bench", keep=0.8)
 add(KT + "fantasy-town/banner-red.glb", 22.6, 9.8, 0, 2.3, "banner", keep=0.5)
 add(KT + "fantasy-town/banner-green.glb", 25.4, 9.8, 0, 2.3, "banner", keep=0.5)
 SV = KT + "survival/"

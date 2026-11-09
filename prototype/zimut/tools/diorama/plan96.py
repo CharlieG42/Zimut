@@ -28,6 +28,7 @@ ROADS = [(sh(p), a, b) for p, a, b in V_ROADS] + [
     ([(39.0, 72.5), (38, 80), (44, 88), (42, 96.5)], 1.5, 1.4),             # sud
     ([(31.0, 32.5), (26, 26), (21, 20), (15.5, 15.5)], 1.1, 1.0),           # vers les ruines (nord-ouest)
     ([(80.5, 41.0), (82, 34), (83.5, 25.5)], 1.2, 1.0),                     # vers le lac
+    ([(70.5, 80.5), (76, 84), (82, 87), (86.5, 90.0)], 1.2, 1.1),            # du hameau à l'Antre de la Patte (coin sud)
     ([(38.6, 82.0), (50, 85.5), (62, 84), (70.5, 80.5)], 1.2, 1.1),          # vers le hameau (sud-est)
     ([(66.4, 38.2), (70, 30), (68, 18), (62, 10)], 1.0, 0.9),               # sentier du nord-est (moulin -> collines)
 ]
@@ -38,7 +39,7 @@ MEADOWS = [(k, x + OFF, z + OFF, w, h, a) for k, x, z, w, h, a in V_MEADOWS] + [
     ("pre", 22.0, 82.0, 12.0, 10.0, 15), ("pre", 60.0, 78.0, 8.0, 6.0, 0)]
 ORCHARD = (V_ORCHARD[0] + OFF, V_ORCHARD[1] + OFF, V_ORCHARD[2], V_ORCHARD[3])
 LAKE = (84.0, 15.0, 8.5, 5.8, 15.0)          # centre x, z, demi-axes, angle
-WOODS = [(10.0, 10.0, 8.5), (11.0, 88.0, 8.0), (89.0, 90.0, 7.5), (5.0, 66.0, 5.0), (64.0, 4.0, 5.5), (92.0, 52.0, 4.5), (30.0, 92.0, 4.0)]
+WOODS = [(10.0, 10.0, 8.5), (11.0, 88.0, 8.0), (5.0, 66.0, 5.0), (64.0, 4.0, 5.5), (92.0, 52.0, 4.5), (30.0, 92.0, 4.0), (93.0, 72.0, 4.0)]
 RUINS = (16.0, 15.0)                         # ruines du fort (nord-ouest)
 STONES = (90.0, 30.0)                        # cercle de pierres levées (plaine de l est)
 HAMLET = [("chaumiere", 72.0, 77.5, 180, 1.0), ("grange", 81.0, 80.5, 270, 1.0), ("maison_bois2", 66.0, 75.0, 90, 1.0)]
@@ -47,9 +48,12 @@ HAMLET = [("chaumiere", 72.0, 77.5, 180, 1.0), ("grange", 81.0, 80.5, 270, 1.0),
 NATION = "sylve"
 BOARD_STEM = "foret_sylve_diorama"
 ASSET_DIR = "sylve_diorama"
-DUNGEONS = [("Grotte de la Feuille", "grotte", 17.0, 83.0), ("Antre de la Patte", "antre", 79.5, 89.0),
-            ("Sanctuaire de Cristal", "sanctuaire", 74.5, 21.5), ("Crypte du Chêne Noir", "crypte", 7.0, 63.0),
-            ("Donjon de la Nation Sylvestre", "donjon_sylve", 16.0, 14.0)]
+# V122 — règle de placement (valable pour toutes les Nations) : un donjon dans chacun des 4 coins du monde (pointes du
+# losange à l'écran : haut, droite, bas, gauche), le donjon de la Nation au centre ; rien de haut ne se dresse devant
+# l'entrée (cône de vue dégagé dans wild96.py / layout_brasier.py).
+DUNGEONS = [("Grotte de la Feuille", "grotte", 17.0, 83.0), ("Antre de la Patte", "antre", 85.0, 87.5),
+            ("Sanctuaire de Cristal", "sanctuaire", 74.5, 21.5), ("Crypte du Chêne Noir", "crypte", 16.0, 14.0),
+            ("Donjon de la Nation Sylvestre", "donjon_sylve", 48.0, 48.0)]
 DUNGEON_RAD = {"grotte": 3.2, "mine": 3.2, "antre": 3.0, "sanctuaire": 3.8, "crypte": 3.0, "donjon_sylve": 2.6, "fosse": 3.6, "forteresse": 4.2}
 
 START_W = (48.0, 54.2)
