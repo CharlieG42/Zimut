@@ -307,6 +307,15 @@ une **scène 3D pré-rendue** (Kenney + Quaternius, CC0) posée sur un plateau i
   anneau rouge en pointillés, cadenas vectoriel (plus d'émoji) ; **terminé** = vert. Une pastille
   OUVERT / VERROUILLÉ / TERMINÉ reste affichée sous le nom de chaque donjon.
 
+### Cause des saccades en marchant (V123)
+
+Le compteur à 3 lignes (V121) a montré que le temps de **scène** (jusqu'à 170 ms) et non le rendu (≤ 35 ms)
+causait les saccades. Un profil par catégories de nœuds a désigné `AdventureBoard._draw` : l'aperçu du
+trajet appelle `cell_center` → `BoardArt.iso_pos` → `iso_origin` → `iso_max_height`, qui parcourait les
+20 000 hauteurs, et `file_stem` testait des fichiers, **à chaque appel**. `BoardArt` mémorise désormais le
+choix de planche (`_stem_cache`), la hauteur maximale et l'origine (`_maxh_cache`, `_origin_cache`, clé = planche + `rev`).
+Règle : rien qui parcourt toute la carte ou le disque dans une fonction appelée par case ou par image.
+
 ### Position des donjons dans une Nation (V122)
 
 Règle pour **toutes** les Nations (Sylve, Brasier et les suivantes) : un donjon dans chacun des quatre

@@ -50,8 +50,22 @@ static func _variant() -> String:
 const DIORAMA_BOARDS := {"foret_sylve": "foret_sylve_diorama", "brasier_cendres": "brasier_cendres_diorama"}
 
 
+## V123 : le choix de planche ne change pas en cours de partie sans changer le réglage : on le mémorise
+## (avant, chaque appel testait des fichiers sur le disque — et cell_center l'appelle des dizaines de fois par image).
+static var _stem_cache: Dictionary = {}
+
+
 static func file_stem(zone_id: String) -> String:
 	var variant: String = _variant()
+	var ck: String = variant + "|" + zone_id
+	if _stem_cache.has(ck):
+		return _stem_cache[ck]
+	var st: String = _file_stem_uncached(zone_id, variant)
+	_stem_cache[ck] = st
+	return st
+
+
+static func _file_stem_uncached(zone_id: String, variant: String) -> String:
 	if variant == "diorama" and DIORAMA_BOARDS.has(zone_id) and FileAccess.file_exists(DIR + String(DIORAMA_BOARDS[zone_id]) + ".json"):
 		return String(DIORAMA_BOARDS[zone_id])
 	if not ALT_BOARDS.has(zone_id):
@@ -259,15 +273,33 @@ static func heights(zone_id: String) -> Dictionary:
 	return out
 
 
+static var _maxh_cache: Dictionary = {}
+static var _origin_cache: Dictionary = {}
+
+
 static func iso_max_height(zone_id: String) -> int:
+	# V123 : mis en cache (avant : parcours des 20 000 cases à chaque cell_center -> saccades de ~100 ms en marchant)
+	var key: String = "%s:%d" % [file_stem(zone_id), rev]
+	if _maxh_cache.has(key):
+		return _maxh_cache[key]
 	var m: int = 0
 	for v: Variant in heights(zone_id).values():
 		m = maxi(m, int(v))
+	_maxh_cache[key] = m
 	return m
 
 
 ## Origine du monde 2D de la case (0,0) : tout reste en coordonnées positives.
 static func iso_origin(zone_id: String) -> Vector2:
+	var key: String = "%s:%d" % [file_stem(zone_id), rev]
+	if _origin_cache.has(key):
+		return _origin_cache[key]
+	var o: Vector2 = _iso_origin_uncached(zone_id)
+	_origin_cache[key] = o
+	return o
+
+
+static func _iso_origin_uncached(zone_id: String) -> Vector2:
 	var cs: float = iso_cs(zone_id)
 	var rows: int = int(raw(zone_id).get("rows", 0))
 	return Vector2(float(rows) * ISO_TW * cs * 0.5 + 100.0, 220.0 + float(iso_max_height(zone_id)) * iso_unit_px(zone_id))

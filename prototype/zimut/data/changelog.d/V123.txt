@@ -1,0 +1,3 @@
+V123|Les saccades en marchant sont corrigées : le calcul de la position d'une case sur la carte Diorama reparcourait toute la carte (20 000 cases) et testait des fichiers à chaque appel, des dizaines de fois par pas. Il est maintenant mémorisé.
+V123|Mesuré sur ordinateur : image la plus lente 84 ms → 20 ms, temps moyen par image 14 ms → 4 ms. Sur téléphone, le gain doit être encore plus net.
+V123|Un nouveau test (test_boardart_cache) vérifie que ce calcul reste instantané et que le changement de réglage de carte fonctionne toujours.
