@@ -45,6 +45,7 @@ func load_state(data: Dictionary, slot_no: int) -> void:
 ## un héros ou un groupe d'une ancienne sauvegarde ne doit pas se retrouver coincé sur l'une d'elles.
 func _repair_after_resize() -> void:
 	var zid: String = zone_id()
+	_prune_board_fog(zid)
 	if not AdventureTerrain.walkable(zid, hero_pos()):
 		var st: Vector2i = AdventureTerrain.zone_terrain(zid)["start"]
 		state["hero_pos"] = [st.x, st.y]
@@ -52,6 +53,25 @@ func _repair_after_resize() -> void:
 	for i: int in range(list.size() - 1, -1, -1):
 		if not AdventureTerrain.walkable(zid, AdventureMobs.pos_of(list[i])):
 			list.remove_at(i)
+
+## V117 : la Sylve n'a que des planches (toujours révélées) : les cases « découvertes » qu'une ancienne
+## sauvegarde y a accumulées ne servent plus et alourdissaient chaque sauvegarde (écrite à chaque pas).
+## On en garde une seule (une liste vide relancerait la « première visite »).
+func _prune_board_fog(zid: String) -> void:
+	if zid != "foret_sylve" or BoardArt.def(zid).is_empty():
+		return
+	var arr: Array = state.get("discovered", [])
+	var prefix: String = zid + ","
+	var kept: Array = []
+	for k: Variant in arr:
+		if not String(k).begins_with(prefix):
+			kept.append(k)
+	if kept.size() == arr.size():
+		return
+	if kept.is_empty():
+		var h: Vector2i = hero_pos()
+		kept.append("%s,%d,%d" % [zid, h.x, h.y])
+	state["discovered"] = kept
 
 ## Zone courante du héros.
 func zone_id() -> String:
@@ -145,11 +165,13 @@ func path_to(target: Vector2i) -> Array[Vector2i]:
 		return []
 	var blocked: Dictionary = {}
 	var size := zone_size()
-	for y: int in range(size.y):
-		for x: int in range(size.x):
-			var c := Vector2i(x, y)
-			if not cell_discovered(c):
-				blocked[c] = true
+	# V117 : une planche n'a pas de brouillard — inutile de passer ses 20 000 cases en revue
+	if BoardArt.def(zone_id()).is_empty():
+		for y: int in range(size.y):
+			for x: int in range(size.x):
+				var c := Vector2i(x, y)
+				if not cell_discovered(c):
+					blocked[c] = true
 	for k: String in ProgressionManager.adventure_zone_pois(zone_id()).keys():
 		var pos := AdventureTerrain.parse(k)
 		var poi: Dictionary = ProgressionManager.adventure_zone_pois(zone_id())[k]
@@ -235,6 +257,8 @@ func zone_progress() -> Dictionary:
 		elif poi_done(AdventureTerrain.parse(k)):
 			done += 1
 	var size := zone_size()
+	if not BoardArt.def(zone_id()).is_empty():
+		return {"done": done, "total": total, "fog": 1.0}     # V117 : planche toujours révélée (pas de boucle sur 20 000 cases)
 	var seen: int = 0
 	for y: int in range(size.y):
 		for x: int in range(size.x):

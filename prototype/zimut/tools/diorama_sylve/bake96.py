@@ -172,6 +172,9 @@ final = np.zeros((IMG_H, IMG_W, 3), np.uint8)
 for ty in range(NT):
     for tx in range(NT):
         final[ty * TILE_H:(ty + 1) * TILE_H, tx * TILE_W:(tx + 1) * TILE_W] = np.array(Image.open("fin_%d_%d.png" % (tx, ty)).convert("RGB"))
+# fond basse définition (1/4) toujours chargé sous les tuiles : jamais de trou pendant un chargement
+Image.open("apercu.png").convert("RGB").save(OUT_DIR + "fond_bas.webp", "WEBP", quality=90, method=6)
+
 # ── occultants : découpes (couverture de la passe d'identifiants, 2x plus fine) rangées en atlas
 idf = np.zeros((IMG_H * 2, IMG_W * 2), np.int16)
 RT_W, RT_H = TILE_W * 2, TILE_H * 2
@@ -244,6 +247,7 @@ board = {
     "pois": pois,
     "image_size": [IMG_W, IMG_H], "image_scale": SCALE, "image_offset": [round(offset[0], 2), round(offset[1], 2)],
     "image_tiles": tiles,
+    "image_low": {"path": RES_DIR + "fond_bas.webp", "factor": 4},
     "occluder_pages": page_paths,
     "occluders": occl,
 }

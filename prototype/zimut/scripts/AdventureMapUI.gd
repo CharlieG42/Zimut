@@ -87,6 +87,7 @@ var _backdrop: Node2D
 var _dio_chunks: Array = []
 var _dio_clock: float = 0.0
 var _dio_sync: bool = true
+var _dio_low: Sprite2D = null
 var _bg_grad: Gradient
 var _board: AdventureBoard
 var _entities: Node2D
@@ -459,7 +460,11 @@ func _diorama_stream() -> void:
 	if _world == null or _map_view == null:
 		return
 	var sc: float = maxf(_world.scale.x, 0.01)
-	var view := Rect2(-_world.position / sc, _map_view.size / sc).grow(900.0 / sc + 400.0)
+	var vis := Rect2(-_world.position / sc, _map_view.size / sc)
+	# V117 : hystérésis — on charge un peu au-delà de la vue, on ne libère que bien plus loin
+	# (évite de décharger / recharger en boucle un morceau au bord de l'écran).
+	var view := vis.grow(700.0 / sc + 300.0)
+	var keep := vis.grow(2200.0 / sc + 900.0)
 	var sync: bool = _dio_sync
 	_dio_sync = false
 	for ch: Dictionary in _dio_chunks:
@@ -479,7 +484,7 @@ func _diorama_stream() -> void:
 			if tex != null:
 				for s2: Sprite2D in ch["sprites"]:
 					s2.texture = tex
-		elif not want and spr.texture != null:
+		elif spr.texture != null and not keep.intersects(ch["rect"]):
 			for s2: Sprite2D in ch["sprites"]:
 				s2.texture = null
 
@@ -661,6 +666,16 @@ func _rebuild_board(biome: String) -> void:
 		holder.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		_world.add_child(holder)
 		_dio_sync = true
+		# V117 : fond basse définition toujours présent sous les tuiles (aucun trou pendant un chargement)
+		var lo: Dictionary = BoardArt.diorama_low(zid)
+		_dio_low = null
+		if not lo.is_empty():
+			_dio_low = Sprite2D.new()
+			_dio_low.texture = load(String(lo["path"])) as Texture2D
+			_dio_low.centered = false
+			_dio_low.position = lo["pos"]
+			_dio_low.scale = Vector2.ONE * float(lo["scale"])
+			holder.add_child(_dio_low)
 		for t: Dictionary in BoardArt.diorama_tiles(zid):
 			var tile := Sprite2D.new()
 			tile.centered = false
