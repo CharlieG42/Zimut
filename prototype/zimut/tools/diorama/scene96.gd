@@ -240,6 +240,8 @@ func _water(o: Dictionary) -> MeshInstance3D:
 	cm.radial_segments = 96
 	var wm := StandardMaterial3D.new()
 	wm.albedo_color = Color(0.13, 0.28, 0.34)
+	if OS.get_environment("DIORAMA_MOOD") == "cimes":   # Cimes : lac gelé
+		wm.albedo_color = Color(0.26, 0.50, 0.72)
 	wm.roughness = 0.12
 	wm.metallic_specular = 0.9
 	wm.rim_enabled = true
@@ -417,10 +419,14 @@ func _boot() -> void:
 	e.background_color = Color(0, 0, 0, 0)
 	var brasier: bool = OS.get_environment("DIORAMA_MOOD") == "brasier"
 	var brumes: bool = OS.get_environment("DIORAMA_MOOD") == "brumes"
+	var cimes: bool = OS.get_environment("DIORAMA_MOOD") == "cimes"
 	if mode == "beauty":
 		e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 		e.ambient_light_color = Color(0.70, 0.62, 0.66) if brasier else (Color(0.62, 0.76, 0.72) if brumes else Color(0.66, 0.76, 0.95))
 		e.ambient_light_energy = 0.55 if brasier else 0.62
+		if cimes:      # Cimes : lumière froide et vive, la neige renvoie beaucoup de ciel
+			e.ambient_light_color = Color(0.70, 0.80, 1.0)
+			e.ambient_light_energy = 0.46
 		e.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 		e.tonemap_exposure = 1.05
 	var env := WorldEnvironment.new()
@@ -431,6 +437,9 @@ func _boot() -> void:
 		var sun := DirectionalLight3D.new()
 		sun.light_energy = 1.3 if brasier else (1.35 if brumes else 1.55)
 		sun.light_color = Color(1.0, 0.88, 0.74) if brasier else (Color(0.90, 0.97, 0.88) if brumes else Color(1.0, 0.93, 0.80))
+		if cimes:
+			sun.light_energy = 0.95
+			sun.light_color = Color(1.0, 0.95, 0.86)
 		sun.shadow_enabled = true
 		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 		sun.directional_shadow_max_distance = 200.0
@@ -442,6 +451,8 @@ func _boot() -> void:
 		var fill := DirectionalLight3D.new()
 		fill.light_energy = 0.28
 		fill.light_color = Color(1.0, 0.45, 0.25) if brasier else (Color(0.45, 0.85, 0.75) if brumes else Color(0.62, 0.74, 1.0))
+		if cimes:
+			fill.light_color = Color(0.55, 0.70, 1.0)
 		holder.add_child(fill)
 		fill.look_at_from_position(center + Vector3(0.7, 0.4, -0.5) * 50.0, center, Vector3.UP)
 	var cam := Camera3D.new()

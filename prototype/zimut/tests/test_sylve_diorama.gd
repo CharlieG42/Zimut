@@ -25,7 +25,7 @@ func _boot() -> void:
 	check(BA.file_stem(z) == "foret_sylve_v2" and not BA.is_diorama(z), "variante v2 inchangée")
 	gs.set_sylvestre_board("diorama")
 	check(BA.file_stem(z) == "foret_sylve_diorama" and BA.is_diorama(z) and BA.is_iso(z), "Sylve : planche diorama (plateau iso)")
-	check(BA.file_stem("montagne_pics") == "montagne_pics_v2", "les Cimes gardent leur planche v2")
+	check(BA.file_stem("montagne_pics") == "montagne_pics_diorama", "V141 : les Cimes ont aussi leur planche Diorama")
 
 	# --- données de la planche
 	var d: Dictionary = BA.raw(z)

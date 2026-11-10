@@ -46,6 +46,12 @@ BRUMES = dict(
     cloud=(0.90, 0.95, 0.92), cloud_sh=(0.56, 0.66, 0.66), sea=(0.80, 0.88, 0.84),
     rock_lit=(0.46, 0.46, 0.38), rock_dark=(0.20, 0.22, 0.18), rock_band=(0.36, 0.36, 0.28), lip=(0.22, 0.34, 0.20),
     fall=(0.78, 0.92, 0.88), fall_core=(0.95, 1.0, 0.98), fall_glow=0.0, crack=None)
+CIMES = dict(
+    sky_top=(0.18, 0.36, 0.72), sky_mid=(0.50, 0.70, 0.94), sky_hor=(0.92, 0.95, 1.0), hor=0.50,
+    mount=[((0.74, 0.82, 0.94), 0.36, 0.16), ((0.52, 0.62, 0.80), 0.45, 0.10)],
+    cloud=(1.0, 1.0, 1.0), cloud_sh=(0.68, 0.76, 0.92), sea=(0.94, 0.96, 1.0),
+    rock_lit=(0.60, 0.62, 0.70), rock_dark=(0.26, 0.28, 0.36), rock_band=(0.46, 0.48, 0.56), lip=(0.86, 0.90, 0.97),
+    fall=(0.80, 0.92, 1.0), fall_core=(1.0, 1.0, 1.0), fall_glow=0.0, crack=None)
 BRASIER = dict(
     sky_top=(0.10, 0.04, 0.07), sky_mid=(0.34, 0.10, 0.08), sky_hor=(0.86, 0.42, 0.18), hor=0.52,
     mount=[((0.36, 0.14, 0.12), 0.40, 0.11), ((0.22, 0.08, 0.08), 0.47, 0.08)],
@@ -58,7 +64,7 @@ def build(alpha, col, brasier, seed=7, pal=None):
     """alpha, col : vue globale de l'île (H, W) / (H, W, 3) à l'échelle Q2.
     Renvoie (fond RGB, masque « devant l'île » RGBA) : le fond passe derrière l'île,
     la mer de nuages basse passe devant la falaise mais derrière l'île elle-même."""
-    S = BRUMES if pal == "brumes" else (BRASIER if brasier else SYLVE)
+    S = BRUMES if pal == "brumes" else (CIMES if pal == "cimes" else (BRASIER if brasier else SYLVE))
     H, W = alpha.shape
     rng = np.random.default_rng(seed)
     yy = np.linspace(0, 1, H, dtype=np.float32)[:, None]
