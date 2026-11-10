@@ -651,6 +651,8 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	var is_nation: bool = Nations.is_new(biome)
 	var ncell: Dictionary = Nations.cell_palette(biome) if is_nation else {}
 	var tuft_col: Color = ncell.get("tuft", Color.WHITE)
+	# V138 : herbe givrée sur la neige (les touffes vert vif juraient avec le sol des Cimes)
+	var frost: Color = Color(0.95, 0.82, 2.0) if biome == "Montagne" else Color.WHITE
 	if is_nation and not (ncell.get("flowers", []) as Array).is_empty():
 		flower_cols = ncell["flowers"]
 	var nat_xf: Dictionary = {}
@@ -674,7 +676,7 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 					var s0: float = near_rng.randf_range(0.55, 1.0)
 					near_xf.append(_xf(p0, near_rng.randf() * TAU, Vector3(s0 * 1.3, s0 * near_rng.randf_range(0.7, 1.1), s0 * 1.3)))
 					var v0: float = near_rng.randf_range(0.70, 1.04)
-					near_cl.append(Color(1.0, 0.95, 0.65) * v0 if dry else (tuft_col * v0 if is_nation else Color(v0, v0, v0)))
+					near_cl.append(Color(1.0, 0.95, 0.65) * v0 if dry else (tuft_col * v0 if is_nation else frost * v0))
 			var n_tufts: int = (0 if on_path else int((2.0 + dens * 5.0) * grass_k))
 			if on_path and rng.randf() < 0.35:
 				n_tufts = 1                              # brins sur le bord du sentier
@@ -683,7 +685,7 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 				var sc: float = rng.randf_range(0.8, 1.5)
 				tuft_xf.append(_xf(p, rng.randf() * TAU, Vector3(sc, sc * rng.randf_range(0.8, 1.3), sc)))
 				var v: float = rng.randf_range(0.82, 1.0)
-				tuft_cl.append(Color(1.0, 0.95, 0.65) * v if dry else (tuft_col * v if is_nation else Color(v, v, v)))
+				tuft_cl.append(Color(1.0, 0.95, 0.65) * v if dry else (tuft_col * v if is_nation else frost * v))
 			var kind: String = String(decor.get(c, "")).to_lower()
 			if Adv3DNationMeshes.has(kind):
 				# décor de sol propre à la Nation (éclats de cristal, coquillages, os, braises…)
@@ -722,7 +724,7 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 			var pe := _rand_in_cell(rng, ce)
 			var se: float = rng.randf_range(1.0, 1.7)
 			tuft_xf.append(_xf(pe, rng.randf() * TAU, Vector3(se, se, se)))
-			tuft_cl.append(tuft_col * 0.95 if is_nation else Color(0.95, 0.95, 0.95))
+			tuft_cl.append(tuft_col * 0.95 if is_nation else frost * 0.95)
 	var foliage: ShaderMaterial = Adv3DMeshes.foliage_material(0.5, 0.8)      # herbe : éclairée comme le sol
 	var kit: bool = Adv3DKit.available()
 	if kit and biome == "Forêt":

@@ -67,6 +67,8 @@ static func _label(text: String, y: float, size_px: int = 40, col: Color = Color
 	l.no_depth_test = true
 	l.render_priority = 5
 	# V73 : les étiquettes lointaines s'effacent (moins de texte superposé, moins à dessiner)
+	l.render_priority = 4               # V138 : devant les nappes de brume (sinon les noms pâlissent aux Brumes)
+	l.outline_render_priority = 3
 	l.visibility_range_end = 26.0       # V134 : 34 → 26 m, moins de noms superposés au loin
 	l.visibility_range_end_margin = 6.0
 	l.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF

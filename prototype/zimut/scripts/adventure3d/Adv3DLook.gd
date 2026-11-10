@@ -13,8 +13,8 @@ extends RefCounted
 ## Réglages par Nation (facultatifs) : sat, contrast, haze (opacité max de la brume), haze_begin / haze_end (m).
 const NATION := {
 	"Brasier": {"sat": 1.0, "contrast": 1.08, "haze": 0.80, "haze_begin": 16.0, "haze_end": 95.0, "amb": 0.72, "cool": 0.10, "expo": 1.14, "sun": 1.25, "cloud": Color(0.36, 0.20, 0.16), "cloud_amt": 0.75},
-	"Brumes": {"sat": 0.88, "contrast": 1.06, "haze": 0.90, "haze_begin": 9.0, "haze_end": 64.0, "cloud": Color(0.80, 0.90, 0.88), "cloud_amt": 0.85,
-		"amb": 0.56, "cool": 0.30, "ground_mist": 0.30, "mist_col": Color(0.80, 0.92, 0.90)},
+	"Brumes": {"sat": 1.0, "contrast": 1.10, "haze": 0.82, "haze_begin": 12.0, "haze_end": 78.0, "expo": 0.90, "sun": 1.0, "cloud": Color(0.80, 0.90, 0.88), "cloud_amt": 0.85,
+		"amb": 0.50, "cool": 0.30, "ground_mist": 0.24, "mist_col": Color(0.80, 0.92, 0.90)},
 	"Ombres": {"amb": 0.62, "cool": 0.20, "expo": 1.08, "sat": 1.0, "contrast": 1.08, "haze": 0.85, "haze_begin": 12.0, "haze_end": 85.0, "cloud": Color(0.40, 0.36, 0.52), "cloud_amt": 0.7},
 	"Donjon": {"amb": 0.62, "cool": 0.20, "expo": 1.08, "sat": 1.0, "contrast": 1.08, "haze": 0.85, "haze_begin": 12.0, "haze_end": 85.0, "cloud": Color(0.38, 0.34, 0.46), "cloud_amt": 0.7},
 	"Désert": {"sat": 1.0, "contrast": 1.10, "haze": 0.62, "haze_begin": 26.0, "haze_end": 140.0, "cloud_amt": 0.35},
@@ -22,7 +22,7 @@ const NATION := {
 }
 ## V134 : amb = énergie de la lumière ambiante, cool = part de bleu dans l'ambiance, expo = exposition, sun = énergie du
 ## soleil. Les Nations sombres (Brasier, Ombres) gardent plus d'ambiance : sinon tout ce qui est à l'ombre devient noir.
-const DEFAULT := {"amb": 0.44, "cool": 0.45, "expo": 1.0, "sun": 1.12, "sat": 0.98, "contrast": 1.10, "haze": 0.66, "haze_begin": 26.0, "haze_end": 135.0, "cloud": Color(1.0, 1.0, 1.0), "cloud_amt": 0.9}
+const DEFAULT := {"amb": 0.44, "cool": 0.45, "expo": 1.0, "sun": 1.02, "sat": 0.98, "contrast": 1.10, "haze": 0.66, "haze_begin": 26.0, "haze_end": 135.0, "cloud": Color(1.0, 1.0, 1.0), "cloud_amt": 0.9}
 
 static var _covers: Dictionary = {}
 
@@ -216,6 +216,7 @@ static func make_ground_mist(size: Vector2i, biome: String, base_y: float) -> No
 		mat.set_shader_parameter("col", lk.get("mist_col", Color(0.8, 0.9, 0.9)))
 		mat.set_shader_parameter("amt", amt * (1.0 if layer == 0 else 0.7))
 		mat.set_shader_parameter("drift", 1.0 if layer == 0 else -0.7)
+		mat.render_priority = -2            # sous les étiquettes et les particules
 		var mi := MeshInstance3D.new()
 		mi.name = "Nappe%d" % layer
 		mi.mesh = pm

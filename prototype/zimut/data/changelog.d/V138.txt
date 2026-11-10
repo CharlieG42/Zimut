@@ -1,0 +1,3 @@
+V138|Monde 3D : correction d'un défaut d'éclairage qui assombrissait tout le sol (bleu-violet aux Cimes, vert sombre en Sylve, presque noir au Brasier) dès qu'un feu de camp ou une lanterne était à proximité.
+V138|Les quatre Nations retrouvent leurs vraies couleurs en 3D : neige blanche aux Cimes avec herbe givrée, Brumes moins délavées, Sylve et Brasier réglés en conséquence.
+V138|Aux Brumes, les noms de lieux et de monstres restent lisibles à travers la brume.
