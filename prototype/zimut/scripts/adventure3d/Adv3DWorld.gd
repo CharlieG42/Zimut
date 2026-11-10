@@ -59,7 +59,7 @@ const PALETTES := {
 		"sun": Color(1.0, 1.0, 0.95), "ambient": Color(0.74, 0.84, 1.0), "fog_density": 0.003, "fx": "wind", "grass": 1.2,
 	},
 	"Brasier": {
-		"ground": [Color(0.28, 0.20, 0.19), Color(0.36, 0.25, 0.21), Color(0.22, 0.15, 0.15)],
+		"ground": [Color(0.35, 0.24, 0.21), Color(0.45, 0.30, 0.23), Color(0.29, 0.19, 0.17)],      # V134 : éclairci (le sol virait au noir)
 		"path": Color(0.46, 0.30, 0.20), "cliff_top": Color(0.36, 0.24, 0.22), "cliff_bot": Color(0.10, 0.06, 0.06),
 		"sky_top": Color(0.24, 0.10, 0.10), "sky_hor": Color(0.86, 0.46, 0.26), "fog": Color(0.52, 0.27, 0.19),
 		"sun": Color(1.0, 0.74, 0.50), "ambient": Color(0.90, 0.60, 0.48), "fog_density": 0.0045, "fx": "ember", "grass": 0.35, "sat": 1.05,
@@ -376,7 +376,7 @@ static func _build_ground(zone_id: String, t: Dictionary, pal: Dictionary) -> Me
 	# V128 : plaques plus sombres et plus froides (mousse, herbe dense) qui cassent l'aplat du sol
 	var g0: Color = (pal["ground"] as Array)[0]
 	var grassy: bool = g0.g > g0.r * 1.2 and g0.g > g0.b * 1.2
-	var mc: Color = pal.get("macro", Color(0.56, 0.78, 0.66) if grassy else Color(0.80, 0.83, 0.87))
+	var mc: Color = pal.get("macro", Color(0.56, 0.78, 0.66) if grassy else Color(0.92, 0.92, 0.94))
 	gmat.set_shader_parameter("macro_col", Vector3(mc.r, mc.g, mc.b))
 	gmat.set_shader_parameter("macro_amt", 0.9)
 	mi.material_override = gmat

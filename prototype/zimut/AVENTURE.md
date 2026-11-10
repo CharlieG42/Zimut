@@ -355,6 +355,14 @@ vue 3D par cases après `Adv3DMeshes.setup_sun` :
 Réglé avec le rendu « mobile » (Vulkan), celui du téléphone : le rendu « compatibilité » des captures
 habituelles donne des couleurs très différentes. Capture : `xvfb-run -a godot --rendering-method mobile
 --path . -s tests/shot_openworld.gd -- <dossier> foret_sylve`. Test : `tests/test_adv3d_look.gd`.
+### Nations sombres lisibles en 3D (V134)
+
+Constat sur vidéo du S23+ : en 3D, le sol du Brasier était presque noir. `Adv3DLook` a quatre réglages de plus
+par Nation (`amb` énergie d'ambiance, `cool` part de bleu, `expo` exposition, `sun`) : Brasier 0,72 / 0,10 /
+1,14 / 1,25, Ombres et Donjon 0,62 / 0,20 / 1,08. Le sol du Brasier est éclairci dans `Adv3DWorld.PALETTES`
+et les plaques de teinte (`macro`) passent de ×0,80 à ×0,92 hors sols herbeux. Les étiquettes 3D
+(`Adv3DActors._label`) s'effacent à 26 m au lieu de 34.
+
 ### Herbe rase autour du joueur, vues 3D (V132)
 
 Lot 5 du plan d'amélioration graphique (première partie). `Adv3DWorld._build_decor` ajoute un calque

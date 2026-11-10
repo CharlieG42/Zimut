@@ -32,7 +32,10 @@ func _run() -> void:
 		ck(env.fog_enabled and env.fog_mode == Environment.FOG_MODE_DEPTH and env.fog_depth_begin >= 9.0 and env.fog_depth_end > env.fog_depth_begin + 40.0 and env.fog_depth_end <= 160.0,
 			"%s : brume de distance (nette de près, %d → %d m)" % [biome, int(env.fog_depth_begin), int(env.fog_depth_end)])
 		ck(env.fog_density <= 0.9 and env.fog_sky_affect == 0.0, "%s : la brume ne bouche ni le lointain ni le ciel" % biome)
-		ck(sun.light_energy > 1.0 and env.ambient_light_energy < 0.5, "%s : soleil franc, ambiance basse (ombres lisibles)" % biome)
+		if biome == "Brasier":
+			ck(sun.light_energy > 1.0 and env.ambient_light_energy > 0.6 and env.tonemap_exposure > 1.0, "Brasier : Nation sombre, ambiance et exposition relevées (V134)")
+		else:
+			ck(sun.light_energy > 1.0 and env.ambient_light_energy < 0.5, "%s : soleil franc, ambiance basse (ombres lisibles)" % biome)
 		ck(env.reflected_light_source == Environment.REFLECTION_SOURCE_DISABLED, "%s : pas de carte de reflets" % biome)
 		ck(sky.sky_cover != null and (sky.sky_cover as Texture2D).get_width() == 512, "%s : nuages peints dans le ciel" % biome)
 		sun.free()
