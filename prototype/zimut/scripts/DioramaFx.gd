@@ -6,7 +6,7 @@ extends RefCounted
 ## dit où sont l'eau (R), la lave et les lumières (V) et la terre ferme (B). Deux calques animés :
 ##   • sol  (sous les personnages) : reflets, creux et écume sur l'eau, croûte et lueurs de la lave ;
 ##   • ciel (au-dessus de tout)    : ombres de nuages qui dérivent, rayons de lumière ; hors de l'île,
-##     une mer de nuages (V131).
+##     une mer de nuages (V131) ; aux Brumes, des nappes de brume au sol (V137).
 ## Absents en qualité « Économie ». Coût : un quad par calque, 3 à 4 lectures de texture par pixel.
 
 const GROUND := """
@@ -64,6 +64,8 @@ uniform vec3 ray_col : source_color = vec3(1.0, 0.93, 0.70);
 uniform float ray_amt = 0.07;
 uniform vec3 sea_col : source_color = vec3(1.0, 1.0, 1.0);
 uniform float sea_amt = 0.30;
+uniform vec3 mist_col : source_color = vec3(0.82, 0.93, 0.90);
+uniform float mist_amt = 0.0;
 void fragment() {
 	float land = texture(TEXTURE, UV).b;
 	vec2 p = UV * msize;
@@ -82,7 +84,17 @@ void fragment() {
 	// rayons : bandes obliques lentes, seulement hors de l'ombre des nuages
 	float band = sin((p.x * 0.9 + p.y * 1.6) * 0.020 + t * 0.045 + c2 * 2.5);
 	float ray = smoothstep(0.55, 1.0, band) * (1.0 - cloud) * ray_amt * land;
-	COLOR = vec4(shadow_col * a + ray_col * ray, a);
+	vec3 rgb = shadow_col * a + ray_col * ray;
+	if (mist_amt > 0.0) {
+		// V137 : nappes de brume qui dérivent sur le sol (Brumes) ; plus denses au-dessus de l'eau
+		float m1 = texture(noise, p * vec2(0.0100, 0.0220) + vec2(t * 0.0100, t * 0.0020)).r;
+		float m2 = texture(noise, p * vec2(0.0230, 0.0500) - vec2(t * 0.0070, -t * 0.0030)).r;
+		float water = texture(TEXTURE, UV).r;
+		float mist = clamp(smoothstep(0.40, 0.78, m1 * 0.6 + m2 * 0.4) + water * 0.35, 0.0, 1.0) * mist_amt * land;
+		rgb = rgb * (1.0 - mist) + mist_col * mist;
+		a = a + mist * (1.0 - a);
+	}
+	COLOR = vec4(rgb, a);
 	}
 }
 """
@@ -91,8 +103,9 @@ void fragment() {
 const MOODS := {
 	"Brasier": {"shadow_col": Color(0.10, 0.03, 0.02), "shadow_amt": 0.22, "ray_col": Color(1.0, 0.55, 0.25), "ray_amt": 0.035,
 		"glint_col": Color(1.0, 0.85, 0.6), "sea_col": Color(0.95, 0.55, 0.40), "sea_amt": 0.22},
-	"Brumes": {"shadow_col": Color(0.03, 0.08, 0.09), "shadow_amt": 0.20, "ray_col": Color(0.75, 1.0, 0.90), "ray_amt": 0.04,
-		"glint_col": Color(0.70, 1.0, 0.90), "deep_col": Color(0.02, 0.10, 0.09), "sea_col": Color(0.80, 0.95, 0.90), "sea_amt": 0.34},
+	"Brumes": {"shadow_col": Color(0.03, 0.08, 0.09), "shadow_amt": 0.07, "ray_col": Color(0.75, 1.0, 0.90), "ray_amt": 0.04,
+		"glint_col": Color(0.70, 1.0, 0.90), "deep_col": Color(0.02, 0.10, 0.09), "sea_col": Color(0.80, 0.95, 0.90), "sea_amt": 0.46,
+		"mist_col": Color(0.84, 0.94, 0.91), "mist_amt": 0.40},
 }
 
 static var _noise: Texture2D = null

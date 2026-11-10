@@ -62,7 +62,8 @@ func configure_board(world_size: Vector2, biome: String, seed_value: int = 1) ->
 	var density: float = clampf(GfxQuality.density(), 0.35, 1.0)
 	var count: int = maxi(40, roundi(150.0 * density))
 	for i: int in range(count):
-		var is_firefly: bool = _effect_kind == "leaves" and rng.randf() < _firefly_ratio
+		# V137 : sur la planche des Brumes, une part des particules sont des feux follets (lueurs bleu-vert)
+		var is_firefly: bool = (_effect_kind == "leaves" or _biome == "Brumes") and rng.randf() < _firefly_ratio
 		_parts.append({
 			"kind": "firefly" if is_firefly else "leaf",
 			"x": rng.randf_range(-_span.x, _span.x), "y": rng.randf_range(-_span.y, _span.y),
@@ -156,11 +157,12 @@ func _draw() -> void:
 		var r: float = float(pt["r"]) * float(pt.get("depth", 1.0)) * _px
 		var tw: float = 0.5 + 0.5 * sin(_t * 2.2 + float(pt["ph"]))
 		var st2: String = _effect_kind
-		if st2 == "leaves" and String(pt.get("kind", "leaf")) == "firefly":
+		if String(pt.get("kind", "leaf")) == "firefly":
 			var boost: float = 1.0 if _px <= 1.0 else 1.7    # sur la planche (image claire) : plus lumineuses
-			draw_circle(c, r * 4.2, Color(1.0, 0.94, 0.52, minf(0.06 + 0.10 * tw, 1.0) * boost))
-			draw_circle(c, r * 2.4, Color(1.0, 0.95, 0.5, minf((0.10 + 0.14 * tw) * boost, 1.0)))
-			draw_circle(c, r * 1.1, Color(1.0, 0.98, 0.78, minf(0.55 + 0.45 * tw, 1.0)))
+			var glow := Color(0.45, 1.0, 0.85) if _biome == "Brumes" else Color(1.0, 0.94, 0.52)      # feu follet / luciole
+			draw_circle(c, r * 4.2, Color(glow.r, glow.g, glow.b, minf(0.06 + 0.10 * tw, 1.0) * boost))
+			draw_circle(c, r * 2.4, Color(glow.r, glow.g, glow.b, minf((0.10 + 0.14 * tw) * boost, 1.0)))
+			draw_circle(c, r * 1.1, Color(lerpf(glow.r, 1.0, 0.6), lerpf(glow.g, 1.0, 0.6), lerpf(glow.b, 1.0, 0.6), minf(0.55 + 0.45 * tw, 1.0)))
 			continue
 		match st2:
 			"leaves":

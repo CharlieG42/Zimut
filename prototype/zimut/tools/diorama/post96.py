@@ -24,7 +24,7 @@ if BR:   # Brasier : ombres pourpres, lumières orangées, brume de cendre chaud
                 bloom_thr=(0.70, 0.55), bloom_k=(0.8, 0.9, 0.6), top=(0.12, 0.06, 0.09), bot=(0.36, 0.14, 0.10))
 BM = os.environ.get("DIORAMA_MOOD") == "brumes"
 if BM:   # Marais des Brumes : verts gris, ombres bleu-vert, brume épaisse, lueurs de feux follets
-    MOOD.update(sat=(0.84, 0.94, -3, 1.0), tone=(0.22, (0.98, 1.04, 0.96), (0.02, 0.05, 0.07)), fog=(0.66, 0.78, 0.74),
+    MOOD.update(sat=(0.74, 0.88, -8, 0.94), tone=(0.22, (0.96, 1.03, 0.99), (0.02, 0.05, 0.07)), fog=(0.70, 0.80, 0.78), fog_k=1.7,
                 bloom_thr=(0.78, 0.66), bloom_k=(0.55, 0.75, 0.65), top=(0.10, 0.16, 0.16), bot=(0.24, 0.30, 0.28))
 M = 200
 
@@ -65,7 +65,7 @@ if "phase2" not in sys.argv:
             img = P.tone(img, *MOOD["tone"])
             ys = (np.arange(y0, y1, dtype=np.float32) / Hf)[:, None, None]
             depth_n = np.clip((D - 95) / 110.0, 0, 1)[..., None]
-            fog = np.clip(0.30 * np.clip(1 - ys, 0, 1) ** 2.8 + 0.12 * depth_n, 0, 0.28) * 0.6
+            fog = np.clip(0.30 * np.clip(1 - ys, 0, 1) ** 2.8 + 0.12 * depth_n, 0, 0.28) * 0.6 * MOOD.get("fog_k", 1.0)      # V137 : brume plus dense aux Brumes
             img = img * (1 - fog) + np.array(MOOD["fog"], np.float32) * fog
             img = img[M:M + TH, M:M + TW]
             a = a[M:M + TH, M:M + TW]

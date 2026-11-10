@@ -69,6 +69,16 @@ func _run() -> void:
 		far_ok = far_ok and maxf(absf(aabb.position.x), absf(aabb.end.x)) < 158.0 and aabb.end.y > 10.0 and aabb.end.y < 60.0
 	ck(far_ok, "lointain : deux chaînes de crêtes, dans le champ de la caméra")
 	bd.free()
+	# V137 : brume au ras du sol, seulement aux Brumes et hors « Économie »
+	var gm: Node3D = L.make_ground_mist(Vector2i(54, 36), "Brumes", 0.0)
+	ck(gm != null and gm.get_child_count() == 2 and (gm.get_child(0) as MeshInstance3D).material_override is ShaderMaterial, "Brumes : deux nappes de brume au sol")
+	if gm != null:
+		gm.free()
+	ck(L.make_ground_mist(Vector2i(54, 36), "Forêt", 0.0) == null, "pas de brume au sol hors des Brumes")
+	gs.graphics_quality = 1
+	ck(L.make_ground_mist(Vector2i(54, 36), "Brumes", 0.0) == null, "Économie : pas de brume au sol")
+	gs.graphics_quality = 2
+	ck(float(L.look("Brumes")["haze_begin"]) < float(L.look("Forêt")["haze_begin"]), "Brumes : brume de distance plus proche")
 	# sol : plaques de teinte actives
 	var world: Node3D = W.build("foret_sylve", true)
 	var ground: MeshInstance3D = world.find_child("Ground", true, false) as MeshInstance3D

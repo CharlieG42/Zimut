@@ -13,7 +13,8 @@ extends RefCounted
 ## Réglages par Nation (facultatifs) : sat, contrast, haze (opacité max de la brume), haze_begin / haze_end (m).
 const NATION := {
 	"Brasier": {"sat": 1.0, "contrast": 1.08, "haze": 0.80, "haze_begin": 16.0, "haze_end": 95.0, "amb": 0.72, "cool": 0.10, "expo": 1.14, "sun": 1.25, "cloud": Color(0.36, 0.20, 0.16), "cloud_amt": 0.75},
-	"Brumes": {"sat": 0.96, "contrast": 1.06, "haze": 0.90, "haze_begin": 9.0, "haze_end": 70.0, "cloud": Color(0.80, 0.90, 0.88), "cloud_amt": 0.85},
+	"Brumes": {"sat": 0.88, "contrast": 1.06, "haze": 0.90, "haze_begin": 9.0, "haze_end": 64.0, "cloud": Color(0.80, 0.90, 0.88), "cloud_amt": 0.85,
+		"amb": 0.56, "cool": 0.30, "ground_mist": 0.30, "mist_col": Color(0.80, 0.92, 0.90)},
 	"Ombres": {"amb": 0.62, "cool": 0.20, "expo": 1.08, "sat": 1.0, "contrast": 1.08, "haze": 0.85, "haze_begin": 12.0, "haze_end": 85.0, "cloud": Color(0.40, 0.36, 0.52), "cloud_amt": 0.7},
 	"Donjon": {"amb": 0.62, "cool": 0.20, "expo": 1.08, "sat": 1.0, "contrast": 1.08, "haze": 0.85, "haze_begin": 12.0, "haze_end": 85.0, "cloud": Color(0.38, 0.34, 0.46), "cloud_amt": 0.7},
 	"Désert": {"sat": 1.0, "contrast": 1.10, "haze": 0.62, "haze_begin": 26.0, "haze_end": 140.0, "cloud_amt": 0.35},
@@ -162,5 +163,64 @@ static func make_backdrop(size: Vector2i, pal: Dictionary, seed_v: int) -> Node3
 		mi.material_override = mat
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mi.extra_cull_margin = 4000.0
+		root.add_child(mi)
+	return root
+
+
+const GROUND_MIST := """
+shader_type spatial;
+render_mode unshaded, blend_mix, depth_draw_never, cull_disabled, shadows_disabled;
+uniform sampler2D noise : repeat_enable, filter_linear;
+uniform vec3 col : source_color = vec3(0.80, 0.92, 0.90);
+uniform float amt = 0.5;
+uniform float drift = 1.0;
+varying vec3 wp;
+void vertex() {
+	wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+void fragment() {
+	float t = TIME * drift;
+	float n = texture(noise, wp.xz * 0.030 + vec2(t * 0.012, t * 0.004)).r * 0.6
+		+ texture(noise, wp.xz * 0.085 - vec2(t * 0.008, -t * 0.006)).r * 0.4;
+	float d = length(wp - CAMERA_POSITION_WORLD);
+	// pas de voile collé à la caméra ; s'efface au loin, où la brume de distance prend le relais
+	// vue de dessus (caméra haute) : la nappe s'efface, sinon elle blanchit tout l'écran
+	float above = 1.0 - smoothstep(9.0, 26.0, CAMERA_POSITION_WORLD.y - wp.y);
+	float a = smoothstep(0.40, 0.80, n) * amt * above * smoothstep(3.5, 12.0, d) * (1.0 - smoothstep(48.0, 70.0, d));
+	ALBEDO = col;
+	ALPHA = a;
+}
+"""
+
+
+## V137 : nappes de brume au ras du sol (Nations qui ont `ground_mist`, donc les Brumes). Deux plans
+## horizontaux à deux hauteurs, texture de bruit qui dérive : la brume enveloppe le pied des arbres et des
+## personnages. Retourne null si la Nation n'en a pas ou en qualité « Économie ».
+static func make_ground_mist(size: Vector2i, biome: String, base_y: float) -> Node3D:
+	var lk: Dictionary = look(biome)
+	var amt: float = float(lk.get("ground_mist", 0.0))
+	if amt <= 0.0 or GfxQuality.low():
+		return null
+	var root := Node3D.new()
+	root.name = "BrumeAuSol"
+	var w: float = float(size.x) * Adv3DWorld.CELL
+	var d: float = float(size.y) * Adv3DWorld.CELL
+	var sh := Shader.new()
+	sh.code = GROUND_MIST
+	for layer: int in range(2):
+		var pm := PlaneMesh.new()
+		pm.size = Vector2(w + 30.0, d + 30.0)
+		var mat := ShaderMaterial.new()
+		mat.shader = sh
+		mat.set_shader_parameter("noise", DioramaFx.noise_texture())
+		mat.set_shader_parameter("col", lk.get("mist_col", Color(0.8, 0.9, 0.9)))
+		mat.set_shader_parameter("amt", amt * (1.0 if layer == 0 else 0.7))
+		mat.set_shader_parameter("drift", 1.0 if layer == 0 else -0.7)
+		var mi := MeshInstance3D.new()
+		mi.name = "Nappe%d" % layer
+		mi.mesh = pm
+		mi.material_override = mat
+		mi.position = Vector3(w * 0.5, base_y + 0.45 + 0.85 * float(layer), d * 0.5)
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		root.add_child(mi)
 	return root

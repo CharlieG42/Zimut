@@ -115,7 +115,7 @@ def build(kind, ax, az, gy, KT, NAT, seed=0):
         light(0, -3.0, 3.0, [1.0, 0.35, 0.1], 2.8, 8.0)
     elif kind == "tour_brume":
         # V124 : tour hexagonale à demi noyée, lumières de feux follets (donjon de la Nation des Brumes)
-        stone = [0.52, 0.60, 0.56]
+        stone = [0.36, 0.46, 0.47]      # V137 : pierre sombre et humide
         put(CA + "tower-hexagon-base.glb", 0, 0, 2.4, mul=stone)
         put(CA + "tower-hexagon-mid.glb", 0, 0, 2.4, yoff=2.4, mul=stone)
         put(CA + "tower-hexagon-mid.glb", 0, 0, 2.4, yoff=4.8, mul=stone)
@@ -143,18 +143,20 @@ def build(kind, ax, az, gy, KT, NAT, seed=0):
         light(-2.0, 1.6, 0.8, [0.55, 0.9, 1.0], 1.4, 4.0)
     elif kind == "pilotis":
         # V124 : cabane sur pilotis, ponton et barque (Cabane des Noyés)
-        put(PI + "structure-platform-dock.glb", 0, 0, 2.0)
-        put(PI + "structure.glb", 0, -0.8, 1.7, yoff=0.5)
-        put(PI + "structure-roof.glb", 0, -0.8, 1.7, yoff=2.6)
-        put(PI + "boat-row-small.glb", 3.0, 1.8, 1.6, 30.0)
-        put(PI + "barrel.glb", -1.8, 1.4, 1.5)
-        put(PI + "crate.glb", -2.3, 0.6, 1.5)
+        wet = [0.50, 0.50, 0.42]        # V137 : bois détrempé, toit de mousse
+        put(PI + "structure-platform-dock.glb", 0, 0, 2.0, mul=wet)
+        put(PI + "structure.glb", 0, -0.8, 1.7, yoff=0.5, mul=wet)
+        put(PI + "structure-roof.glb", 0, -0.8, 1.7, yoff=2.6, mul=[0.34, 0.46, 0.34])
+        put(PI + "boat-row-small.glb", 3.0, 1.8, 1.6, 30.0, mul=wet)
+        put(PI + "barrel.glb", -1.8, 1.4, 1.5, mul=wet)
+        put(PI + "crate.glb", -2.3, 0.6, 1.5, mul=wet)
+        put(NAT + "DeadTree_2.gltf", -3.6, -1.6, 0.9, tag="tree", mul=[0.62, 0.74, 0.62])
         put(GY + "lightpost-single.glb", 1.6, 2.6, 1.6)
         put(GY + "lightpost-single.glb", -1.6, 2.6, 1.6)
         light(0, 2.4, 1.6, [0.55, 0.95, 0.8], 2.2, 6.0)
     elif kind == "ruine":
         # V124 : ruines englouties (arche, murs éboulés, colonnes)
-        stone = [0.55, 0.60, 0.56]
+        stone = [0.36, 0.47, 0.41]      # V137 : pierre moussue
         put(CA + "wall-doorway.glb", 0, 0, 2.4, 90.0, mul=stone)
         put(CA + "wall-half.glb", -2.4, -0.1, 2.4, mul=stone)
         put(CA + "wall-half.glb", 2.4, -0.1, 2.4, 180.0, mul=stone)
@@ -164,7 +166,11 @@ def build(kind, ax, az, gy, KT, NAT, seed=0):
         for k, (lx, lz) in enumerate([(-1.8, 2.3), (1.8, 2.4), (-3.0, 1.4), (3.2, 1.2)]):
             put(GY + "column-large.glb", lx, lz, 1.8, k * 23.0, mul=stone)
         put(CA + "rocks-small.glb", 0.8, 3.0, 1.7, 40.0, mul=[0.38, 0.42, 0.38])
+        put(CA + "rocks-small.glb", -3.4, 2.6, 1.9, 130.0, mul=[0.34, 0.42, 0.36])
+        put(NAT + "DeadTree_4.gltf", 5.4, -2.6, 0.9, tag="tree", mul=[0.62, 0.74, 0.62])
+        put(TD + "detail-crystal-large.glb", -5.0, 0.6, 1.4, 20.0, mul=[0.55, 1.0, 0.85], emit=[0.25, 0.9, 0.6], emit_e=1.0)
         light(0, 2.2, 1.6, [0.5, 0.95, 0.85], 2.4, 6.5)
+        light(-5.0, 0.6, 1.0, [0.35, 0.95, 0.65], 1.6, 4.0)
     elif kind == "portail":
         # V131 : portail entre Nations — arche de pierre dressée face à la caméra, obélisques et cristaux lumineux.
         # Le tourbillon lui-même est dessiné par le jeu dans l'ouverture (ouvert / scellé).

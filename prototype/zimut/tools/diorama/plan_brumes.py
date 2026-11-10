@@ -34,7 +34,7 @@ TOWN = [("chaumiere", 35.5, 44.0, 0, 1.0), ("maison_bois", 60.5, 42.5, 270, 1.0)
         ("chaumiere2", 59.0, 57.5, 180, 1.0), ("maison_bois2", 46.0, 32.5, 0, 1.0), ("chaumiere", 31.0, 58.5, 90, 1.0)]
 ROOF = {"chaumiere": (0.34, 0.38, 0.22), "chaumiere2": (0.32, 0.36, 0.24), "maison_bois": (0.26, 0.30, 0.24), "maison_bois2": (0.28, 0.26, 0.20),
         "longere": (0.30, 0.34, 0.22)}
-WALL_MUL = (0.70, 0.76, 0.72)
+WALL_MUL = (0.50, 0.57, 0.54)      # V137 : murs ternis par l'humidité
 
 DUNGEONS = [("Crypte du Marais Noir", "crypte", 18.0, 16.0), ("Souche du Vieux Saule", "souche", 80.0, 28.0),
             ("Cabane des Noyés", "pilotis", 80.0, 84.0), ("Ruines englouties", "ruine", 16.0, 80.0),
