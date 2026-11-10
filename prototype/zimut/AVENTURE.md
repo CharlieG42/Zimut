@@ -355,6 +355,18 @@ vue 3D par cases après `Adv3DMeshes.setup_sun` :
 Réglé avec le rendu « mobile » (Vulkan), celui du téléphone : le rendu « compatibilité » des captures
 habituelles donne des couleurs très différentes. Capture : `xvfb-run -a godot --rendering-method mobile
 --path . -s tests/shot_openworld.gd -- <dossier> foret_sylve`. Test : `tests/test_adv3d_look.gd`.
+### Quitter la carte 2D proprement, compteur en 3D (V135)
+
+Signalé sur S23+ : après un déplacement sur la carte 2D, « Mes Parties » figeait le jeu. Non reproduit sur
+ma machine ; seul défaut démontré : quitter pendant une marche laissait la coroutine de marche tourner sur
+une scène retirée de l'arbre (erreurs de script). `AdventureMapUI._leave_scene` remplace les changements de
+scène directs (Mes Parties, combats) : drapeau `_leaving`, tween de marche tué, plus aucune tuile demandée, puis
+attente (3 s au plus) de la fin des chargements de tuiles en arrière-plan (`_drain_tile_loads`) avant
+`change_scene_to_file`. Test : `tests/test_quitter_carte.gd`.
+
+`scripts/PerfCounter.gd` : compteur autonome (i/s, pire image, saccades, scène / rendu max, dessins, objets,
+triangles, vram, nœuds), ajouté à l'interface des deux vues 3D quand `GameSettings.show_perf` est actif.
+
 ### Nations sombres lisibles en 3D (V134)
 
 Constat sur vidéo du S23+ : en 3D, le sol du Brasier était presque noir. `Adv3DLook` a quatre réglages de plus

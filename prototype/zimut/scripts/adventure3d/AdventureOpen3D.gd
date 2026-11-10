@@ -828,6 +828,11 @@ func _build_hud() -> void:
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hud.add_child(root)
+	if GameSettings.show_perf:          # V135 : compteur de fluidité (même réglage que la carte 2D)
+		var perf := PerfCounter.new()
+		perf.name = "PerfCounter"
+		perf.position = Vector2(26, 122)
+		root.add_child(perf)
 	var look := Control.new()
 	look.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	look.mouse_filter = Control.MOUSE_FILTER_STOP
