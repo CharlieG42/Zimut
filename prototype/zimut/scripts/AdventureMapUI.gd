@@ -90,6 +90,10 @@ var _dio_chunks: Array = []
 var _dio_clock: float = 0.0
 var _dio_sync: bool = true
 var _dio_low: Sprite2D = null
+## V130 : carte de lumière du diorama (couleur ambiante sous les personnages) ; null hors diorama.
+var _dio_light: Image = null
+var _dio_light_pos: Vector2 = Vector2.ZERO
+var _dio_light_scale: float = 1.0
 var _dio_pending: bool = false
 ## V120 : netteté — sans mipmaps tant que l'image n'est pas trop réduite à l'écran (le filtrage
 ## trilinéaire mélangeait le niveau ½ et floutait le décor dès qu'on n'était pas au zoom maximal).
@@ -777,7 +781,15 @@ func _rebuild_board(biome: String) -> void:
 	_dio_chunks.clear()
 	_dio_holder = null
 	_dio_occ.clear()
+	_dio_light = null
 	if BoardArt.is_diorama(zid):
+		var li: Dictionary = BoardArt.diorama_light(zid)
+		if not li.is_empty():
+			var lt: Texture2D = load(String(li["path"])) as Texture2D
+			if lt != null:
+				_dio_light = lt.get_image()
+				_dio_light_pos = li["pos"]
+				_dio_light_scale = float(li["scale"])
 		# V115 : « Diorama » — scène 3D pré-rendue (tuiles) posée sur le plateau iso ; héros, lieux et monstres par-dessus.
 		var holder := Node2D.new()
 		holder.z_index = 0
@@ -1024,6 +1036,10 @@ func _refresh_world() -> void:
 		mn.danger = mn.level - team_lvl
 		if board_depth:
 			mn.z_index = _depth(mn.cell) + 2
+			var mlt: Color = light_tint(mn.cell)
+			mn.modulate = Color(mlt.r, mlt.g, mlt.b, mn.modulate.a)     # l'alpha reste celui du fondu d'apparition
+			if _dio_light != null:
+				mn.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR     # V130 : sprites lissés sur le décor peint
 	_board.queue_redraw()
 
 
@@ -1274,10 +1290,29 @@ func _hero_depth_scale(p: Vector2i) -> Vector2:
 	return Vector2.ONE * factor
 
 
+## V130 : teinte de lumière locale d'un personnage posé sur cette case du diorama (blanc ailleurs).
+## Lue dans la carte de lumière : sous-bois → plus sombre et vert ; près de la lave → orangé ; plein soleil → neutre.
+func light_tint(p: Vector2i) -> Color:
+	if _dio_light == null:
+		return Color.WHITE
+	var q: Vector2 = (cell_center(p) - _dio_light_pos) / _dio_light_scale
+	var x: int = clampi(int(q.x), 0, _dio_light.get_width() - 1)
+	var y: int = clampi(int(q.y), 0, _dio_light.get_height() - 1)
+	var c: Color = _dio_light.get_pixel(x, y)
+	var m: float = maxf(maxf(c.r, c.g), maxf(c.b, 0.001))
+	var lum: float = c.r * 0.299 + c.g * 0.587 + c.b * 0.114
+	var k: float = lerpf(0.78, 1.05, smoothstep(0.18, 0.62, lum))
+	var hue: Color = Color.WHITE.lerp(Color(c.r / m, c.g / m, c.b / m), 0.28)
+	return Color(hue.r * k, hue.g * k, hue.b * k, 1.0)
+
+
 func _apply_hero_depth(p: Vector2i) -> void:
 	if _hero == null:
 		return
 	_hero.scale = _hero_depth_scale(p)
+	if _dio_light != null:
+		_hero.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR         # V130 : sprite lissé sur le décor peint
+	_hero.light_target = light_tint(p)
 	_hero.z_index = _depth(p) + 2 if is_board() else 0
 
 
@@ -3854,6 +3889,8 @@ class HeroView extends Node2D:
 	var idle_poses: Array[Texture2D] = []
 	var back_idle_poses: Array[Texture2D] = []
 	var hop: float = 0.0
+	## V130 : teinte de lumière du lieu, rejointe en douceur (pas de saut de couleur d'une case à l'autre).
+	var light_target: Color = Color.WHITE
 	var _flip: bool = false
 	var walking: bool = false
 	var running: bool = false
@@ -3924,6 +3961,7 @@ class HeroView extends Node2D:
 		return result
 
 	func _process(delta: float) -> void:
+		modulate = modulate.lerp(light_target, clampf(delta * 6.0, 0.0, 1.0))
 		_t += delta
 		_motion_blend = move_toward(_motion_blend, 1.0 if walking else 0.0, delta * (6.5 if walking else 4.0))
 		_turn_t = maxf(0.0, _turn_t - delta)

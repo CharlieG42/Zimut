@@ -362,6 +362,14 @@ de case + 3) : on ne voyait que l'étiquette. Le nœud du portail est désormais
 tous les occultants, sous l'interface), agrandi ×1,3, et dessine un ovale de portail (`PoiNode._draw_portal`) :
 cyan et animé quand il est ouvert, gris quand il est scellé. `portal_cell()` donne sa case ; le panneau des
 objectifs a un bouton `PortalShow` qui centre la carte dessus.
+### Personnages intégrés au décor du Diorama (V130)
+
+Lot 2 du plan d'amélioration graphique. `tools/diorama/light_map.py` réduit l'image finie à 320 × 180 et
+l'adoucit (`assets/boards/lumieres/<dossier des tuiles>.png`, import sans perte, trouvée par convention :
+`BoardArt.diorama_light`). `AdventureMapUI.light_tint(case)` y lit la couleur ambiante et en tire une teinte
+bornée (teinte ×0,28, luminosité 0,78 à 1,05). Le héros la rejoint en douceur (`HeroView.light_target`), les
+monstres la reçoivent dans `_refresh_world` (alpha de fondu conservé). Héros et monstres passent en filtrage
+linéaire sur le Diorama. Ombres de contact et liseré existaient déjà (V119) ; la poussière de pas n'est pas faite.
 
 ### Position des donjons dans une Nation (V122)
 
