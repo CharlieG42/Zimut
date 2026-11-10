@@ -376,6 +376,20 @@ Monde 3D : `Adv3DLook.NATION["Brumes"]` (brume de distance dès 9 m, ambiance re
 `make_ground_mist` = deux plans de brume au ras du sol (shader à bruit qui dérive, effacé près de la caméra,
 au loin et en vue de dessus), absents en « Économie ».
 
+### Marche en lignes droites sur la carte 2D (V139)
+
+La grille reste à 4 voisins (règles, pas, rencontres inchangés). Deux changements :
+
+- `AdventureTerrain.straighten_path` (appelé par `AdventureManager.path_to`) remplace chaque tronçon du plus
+  court chemin par la ligne droite de grille (`grid_line`, escalier régulier) entre deux de ses points quand
+  toutes ses cases sont libres : même nombre de pas, mais le trajet colle à la ligne de visée.
+- `AdventureMapUI.straight_points` donne un point d'écran par case, aligné sur le segment de son tronçon
+  (écart ≤ 0,75 case) : le héros glisse en ligne droite, garde la direction du tronçon (`locomotion`), et
+  l'aperçu du trajet suit la même ligne. Les déclenchements restent par case.
+
+Réglage `GameSettings.show_grid` (« Grille des cases ») : losanges des cases praticables dans un rayon de
+14 cases autour du héros, dessinés par `AdventureBoard._draw_iso_overlay`. Test : `tests/test_marche_droite.gd`.
+
 ### Éclairage 3D : teinte d'ombre limitée au soleil (V138)
 
 Défaut trouvé dans `Adv3DMeshes.TOON_LIGHT` : `DIFFUSE_LIGHT *= shade` s'exécutait pour CHAQUE lumière. Près

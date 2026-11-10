@@ -189,7 +189,8 @@ func path_to(target: Vector2i) -> Array[Vector2i]:
 	# Les groupes de monstres barrent le passage (on les affronte en les touchant).
 	for mp: Vector2i in AdventureMobs.occupied(state, zone_id()).keys():
 		blocked[mp] = true
-	return AdventureTerrain.find_path(zone_id(), hero_pos(), target, blocked)
+	# V139 : chemin redressé — des lignes droites plutôt qu'un zigzag irrégulier
+	return AdventureTerrain.straighten_path(zone_id(), hero_pos(), AdventureTerrain.find_path(zone_id(), hero_pos(), target, blocked), blocked)
 
 
 ## ── Portes vers les cartes voisines (monde en grille façon Dofus Touch) ──

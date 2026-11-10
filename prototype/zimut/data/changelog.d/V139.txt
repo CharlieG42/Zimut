@@ -1,0 +1,3 @@
+V139|Carte d'aventure 2D : le héros marche en lignes droites vers sa destination au lieu de zigzaguer case par case. Le nombre de pas et les rencontres en chemin ne changent pas.
+V139|Il garde la même orientation sur tout un tronçon (plus de demi-tours à chaque case) et le tracé du trajet suit la ligne qu'il va prendre.
+V139|Nouveau réglage « Grille des cases (carte d'aventure 2D) » : affiche ou masque le quadrillage des cases autour du héros (masqué par défaut).
