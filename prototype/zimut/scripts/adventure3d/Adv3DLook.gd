@@ -12,6 +12,8 @@ extends RefCounted
 
 ## Réglages par Nation (facultatifs) : sat, contrast, haze (opacité max de la brume), haze_begin / haze_end (m).
 const NATION := {
+	# V143 : Forêt — soleil un peu plus franc, saturation retenue (le sol n'est plus fluo)
+	"Forêt": {"sat": 0.93, "sun": 1.08, "amb": 0.46},
 	"Brasier": {"sat": 1.0, "contrast": 1.08, "haze": 0.80, "haze_begin": 16.0, "haze_end": 95.0, "amb": 0.72, "cool": 0.10, "expo": 1.14, "sun": 1.25, "cloud": Color(0.36, 0.20, 0.16), "cloud_amt": 0.75},
 	"Brumes": {"sat": 1.0, "contrast": 1.10, "haze": 0.82, "haze_begin": 12.0, "haze_end": 78.0, "expo": 0.90, "sun": 1.0, "cloud": Color(0.80, 0.90, 0.88), "cloud_amt": 0.85,
 		"amb": 0.50, "cool": 0.30, "ground_mist": 0.24, "mist_col": Color(0.80, 0.92, 0.90)},

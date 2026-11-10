@@ -160,6 +160,7 @@ gain côté 3D), pour que tu voies vite un résultat dans chaque vue, puis de d�
 | Nation des Brumes en Diorama | faite | V136 |
 | Nation des Cimes en Diorama | faite | V141 |
 | Cimes en 3D : neige sur le décor, sol, herbe givrée, lumière | fait | V142 |
+| Sylve, Brasier, Brumes en 3D : sol, herbe, pied des arbres, lumière | fait | V143 |
 
 Mesures sur Galaxy S23+ (vidéos du 10 novembre) : carte Diorama 53 à 58 images par seconde ; monde 3D du
 Brasier 49 à 58 images par seconde, environ 300 000 triangles et 400 à 500 dessins par image.
