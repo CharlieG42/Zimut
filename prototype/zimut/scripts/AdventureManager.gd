@@ -140,8 +140,11 @@ func poi_key(pos: Vector2i) -> String:
 ## Le POI à cette position est-il déjà complété ?
 func poi_done(pos: Vector2i) -> bool:
 	# V43 : un donjon de Nation se refait autant de fois qu'on veut : jamais « terminé »
-	if Dungeons.is_dungeon(poi_at(pos)) or is_portal(poi_at(pos)):
-		return false      # un portail se reprend à volonté
+	var here: Dictionary = poi_at(pos)
+	# V133 : toute sortie (portail, sentier de retour) se reprend à volonté. Avant, un sentier de retour
+	# devenait « terminé » après un premier passage et ne répondait plus.
+	if Dungeons.is_dungeon(here) or is_portal(here) or String(here.get("kind", "")) == KIND_EXIT:
+		return false
 	return ProgressionManager.adventure_poi_completed(state, poi_key(pos))
 
 ## Déplacement possible : case adjacente (4 directions), dans la grille, sans obstacle.

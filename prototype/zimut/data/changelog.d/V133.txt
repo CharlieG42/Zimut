@@ -1,0 +1,3 @@
+V133|Correction : le sentier de retour (par exemple du Brasier vers la Sylve) ne répondait plus après un premier passage. Il se reprend maintenant à volonté, comme un portail.
+V133|Cela vaut pour toutes les sorties de carte, en carte 2D comme dans les vues 3D.
+V133|Les autres lieux (coffres, camps, combats) gardent leur état « terminé » une fois faits.
