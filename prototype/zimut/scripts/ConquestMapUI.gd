@@ -147,6 +147,9 @@ func _ready() -> void:
 		_conquest = {"owned": ["capitale"], "pending_city": ""}
 	_save["conquest"] = _conquest
 	_save["campaign_mode"] = "conquest"
+	# V146 : impôts accumulés et offensives manquées pendant l'absence
+	var absence: Dictionary = ProgressionManager.conquest_process_absence(_save)
+	_conquest = _save.get("conquest", _conquest)
 	# V145 : revenir sur la carte avec un combat de défense non résolu = abandon (tentative consommée).
 	if ConquestSystem.is_defense_battle(_conquest):
 		ConquestSystem.settle_unresolved_defense(_save, _conquest)
@@ -175,6 +178,10 @@ func _ready() -> void:
 	_conquest["last_counterattack"] = ""
 	_save["conquest"] = _conquest
 	_persist()
+	if not absence.is_empty():
+		_show_popup("PENDANT VOTRE ABSENCE", String(absence.get("text", "")))
+	# V146 : rappel avant la première offensive d'absence (sans effet tant que le module natif n'est pas installé)
+	(preload("res://scripts/Notifier.gd") as GDScript).schedule_absence_warning(ConquestSystem.seconds_before_absence(_conquest, ProgressionManager.conquest_now()))
 	# V59 : Gultur présente les nouveautés de la Conquête (une seule fois chacune)
 	# V60 : puis la carte vivante (routes, territoire, brouillard, offensives)
 	# V64 : puis comment sortir du brouillard (s'il en reste) et les nouveautés de la carte.

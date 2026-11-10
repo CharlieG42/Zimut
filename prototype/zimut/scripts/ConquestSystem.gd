@@ -1316,6 +1316,189 @@ static func _tick_threat(data: Dictionary, conq: Dictionary, rng: RandomNumberGe
 	conq.erase("threat")
 	resolve_assault(data, conq, id, int(th.get("power", 10)))
 
+# ── Empire vivant (V146) ────────────────────────────────────────────────
+# Jouer la Conquête fait progresser, la délaisser fait perdre des villes peu à peu.
+#   • Absence : après ABSENCE_GRACE_DAYS jours sans bataille de Conquête, une offensive est simulée, puis
+#     une de plus par tranche de ABSENCE_STEP_DAYS jours, contre la ville la moins défendue. La dernière
+#     reste EN ATTENTE pour être défendue en personne. Au plus ABSENCE_MAX_LOST villes perdues entre
+#     deux batailles, jamais la capitale ; une ville bien gardée tient toute seule.
+#   • Présence : les impôts s'accumulent (ABSENCE_TAX_DAYS_MAX jours au plus) et s'encaissent en ouvrant
+#     la carte ; la première victoire de Conquête du jour double les revenus.
+#   • Autres modes : toutes les OUTSIDE_WINS_PER_TICK victoires hors Conquête, l'empire avance d'un cran
+#     (une offensive peut être annoncée, celle en cours approche).
+# L'heure vient de l'horloge du téléphone : la reculer ne rapporte rien (le compteur repart de zéro).
+
+const DAY_SECONDS := 86400
+const ABSENCE_GRACE_DAYS := 3
+const ABSENCE_STEP_DAYS := 2
+const ABSENCE_MAX_OFFENSIVES := 5
+const ABSENCE_MAX_LOST := 2
+const ABSENCE_TAX_DAYS_MAX := 3
+const OUTSIDE_WINS_PER_TICK := 3
+const OUTSIDE_THREAT_CHANCE := 0.5
+const EMPIRE_MIN_CITIES := 3       ## comme les offensives : pas avant 3 villes
+
+## Une bataille de Conquête vient d'être jouée : l'absence repart de zéro.
+static func touch_activity(conq: Dictionary, now: int) -> void:
+	conq["last_active"] = now
+	conq["absence_done"] = 0
+	conq["absence_lost"] = 0
+
+static func absence_days(conq: Dictionary, now: int) -> float:
+	var last: int = int(conq.get("last_active", 0))
+	return maxf(0.0, float(now - last) / float(DAY_SECONDS)) if last > 0 else 0.0
+
+## Offensives dues après `days` jours sans bataille (0 pendant le délai de grâce).
+static func absence_offensives_due(days: float) -> int:
+	if days < float(ABSENCE_GRACE_DAYS):
+		return 0
+	return mini(ABSENCE_MAX_OFFENSIVES, 1 + int((days - float(ABSENCE_GRACE_DAYS)) / float(ABSENCE_STEP_DAYS)))
+
+## Secondes avant la première offensive d'absence (0 si elle est déjà due ou sans empire à attaquer).
+static func seconds_before_absence(conq: Dictionary, now: int) -> int:
+	if owned_count(conq) < EMPIRE_MIN_CITIES or int(conq.get("last_active", 0)) <= 0:
+		return 0
+	return maxi(0, int(conq["last_active"]) + ABSENCE_GRACE_DAYS * DAY_SECONDS - now)
+
+## Ville de l'empire la moins défendue (hors capitale et hors `exclude`), "" s'il n'y en a pas.
+static func weakest_city(data: Dictionary, conq: Dictionary, exclude: Array = []) -> String:
+	var best: String = ""
+	var best_d: int = 1 << 30
+	var ids: Array = (conq.get("owned", []) as Array).duplicate()
+	ids.sort()
+	for id: String in ids:
+		if id == "capitale" or id == "donjon_roi" or exclude.has(id):
+			continue
+		var d: int = defense(data, id)
+		if d < best_d:
+			best_d = d
+			best = id
+	return best
+
+static func _offensive_power(conq: Dictionary, rng: RandomNumberGenerator) -> int:
+	return roundi((8.0 + 2.0 * float(owned_count(conq)) + float(int(conq.get("battle_count", 0))) / 3.0) * rng.randf_range(0.85, 1.15))
+
+## À l'ouverture de la carte : impôts accumulés et offensives manquées. Renvoie le bilan
+## {days, taxes, results:[{city, outcome, power, defense}], pending:{city, power}} ({} s'il ne s'est rien passé).
+static func process_absence(data: Dictionary, conq: Dictionary, now: int, rng: RandomNumberGenerator) -> Dictionary:
+	var last: int = int(conq.get("last_active", 0))
+	if last <= 0 or now < last:
+		# première visite, ou horloge reculée : on repart de maintenant, sans rien simuler
+		touch_activity(conq, now)
+		conq["last_tax"] = now
+		data["conquest"] = conq
+		return {}
+	var report: Dictionary = {"days": int(absence_days(conq, now)), "taxes": 0, "results": [], "pending": {}}
+	# ── impôts : un jour de revenus par jour écoulé depuis le dernier encaissement, plafonné
+	var last_tax: int = int(conq.get("last_tax", last))
+	if now < last_tax:
+		last_tax = now
+	var tax_days: int = int(float(now - last_tax) / float(DAY_SECONDS))
+	if tax_days >= 1:
+		var paid_days: int = mini(tax_days, ABSENCE_TAX_DAYS_MAX)
+		var gold: int = total_income(data) * paid_days
+		data["gold"] = int(data.get("gold", 0)) + gold
+		report["taxes"] = gold
+		report["tax_days"] = paid_days
+		conq["last_tax"] = last_tax + tax_days * DAY_SECONDS
+	else:
+		conq["last_tax"] = last_tax
+	# ── offensives manquées
+	var due: int = absence_offensives_due(absence_days(conq, now))
+	var todo: int = due - int(conq.get("absence_done", 0))
+	if todo > 0 and owned_count(conq) >= EMPIRE_MIN_CITIES:
+		var kept_news: Array = (conq.get("news", []) as Array).duplicate()
+		var hit: Array = []
+		for i: int in range(todo):
+			var th: Dictionary = threat(conq)
+			var id: String = String(th.get("city", "")) if not th.is_empty() else weakest_city(data, conq, hit)
+			if id == "" or not (conq.get("owned", []) as Array).has(id):
+				conq.erase("threat")
+				id = weakest_city(data, conq, hit)
+				th = {}
+			if id == "":
+				id = weakest_city(data, conq)      # toutes déjà visées : la plus faible l'est de nouveau
+			if id == "":
+				break
+			var power: int = int(th.get("power", 0)) if not th.is_empty() else _offensive_power(conq, rng)
+			hit.append(id)
+			if i == todo - 1:
+				# la dernière offensive attend le joueur : il peut la défendre en personne
+				conq["threat"] = {"city": id, "power": power, "eta": THREAT_ETA}
+				conq["threat_cd"] = 0
+				report["pending"] = {"city": id, "power": power, "defense": defense(data, id)}
+				break
+			conq.erase("threat")
+			var d: int = defense(data, id)
+			var can_lose: bool = int(conq.get("absence_lost", 0)) < ABSENCE_MAX_LOST
+			var outcome: String = resolve_assault(data, conq, id, power, can_lose)
+			if outcome == "lost":
+				conq["absence_lost"] = int(conq.get("absence_lost", 0)) + 1
+			(report["results"] as Array).append({"city": id, "outcome": outcome, "power": power, "defense": d})
+		conq["absence_done"] = due
+		conq["news"] = kept_news      # le bilan d'absence remplace les nouvelles une à une
+	data["conquest"] = conq
+	if int(report["taxes"]) == 0 and (report["results"] as Array).is_empty() and (report["pending"] as Dictionary).is_empty():
+		return {}
+	return report
+
+## Texte du bilan « Pendant votre absence ».
+static func absence_report_text(report: Dictionary, names: Dictionary) -> String:
+	var lines: PackedStringArray = []
+	var days: int = int(report.get("days", 0))
+	if not (report.get("results", []) as Array).is_empty() or not (report.get("pending", {}) as Dictionary).is_empty():
+		lines.append("%d jours sans bataille de Conquête : le Roi Squelette en a profité." % days)
+	for r: Dictionary in report.get("results", []):
+		var nm: String = String(names.get(String(r["city"]), String(r["city"])))
+		match String(r["outcome"]):
+			"repelled":
+				lines.append("★ %s a repoussé une offensive seule (défense %d contre force %d)." % [nm, int(r["defense"]), int(r["power"])])
+			"breach":
+				lines.append("⚔ Brèche à %s (défense %d contre force %d) : la ville est pillée." % [nm, int(r["defense"]), int(r["power"])])
+			_:
+				lines.append("☠ %s est tombée (défense %d contre force %d). Une seule bataille suffit à la reprendre." % [nm, int(r["defense"]), int(r["power"])])
+	var pend: Dictionary = report.get("pending", {})
+	if not pend.is_empty():
+		lines.append("⚠ Une offensive (force %d) marche sur %s (défense %d) : renforcez la ville ou défendez-la en personne." % [
+			int(pend["power"]), String(names.get(String(pend["city"]), String(pend["city"]))), int(pend["defense"])])
+	if int(report.get("taxes", 0)) > 0:
+		lines.append("● Impôts encaissés : +%d or (%d jour(s) de revenus)." % [int(report["taxes"]), int(report.get("tax_days", 1))])
+	return "\n\n".join(lines)
+
+## Première victoire de Conquête du jour : revenus doublés. Renvoie l'or ajouté (0 si déjà pris).
+static func daily_bonus(data: Dictionary, conq: Dictionary, day: int) -> int:
+	if int(conq.get("bonus_day", -1)) == day:
+		return 0
+	conq["bonus_day"] = day
+	var gold: int = total_income(data)
+	data["gold"] = int(data.get("gold", 0)) + gold
+	return gold
+
+## Victoire dans un AUTRE mode (Aventure, Tactique) : l'empire vit quand même. Renvoie une alerte à
+## afficher ("" s'il ne se passe rien).
+static func outside_victory(data: Dictionary, conq: Dictionary, rng: RandomNumberGenerator, routes: Array) -> String:
+	if owned_count(conq) < EMPIRE_MIN_CITIES:
+		return ""
+	conq["outside_wins"] = int(conq.get("outside_wins", 0)) + 1
+	if int(conq["outside_wins"]) < OUTSIDE_WINS_PER_TICK:
+		return ""
+	conq["outside_wins"] = 0
+	var before: int = (conq.get("news", []) as Array).size()
+	if not threat(conq).is_empty():
+		_tick_threat(data, conq, rng)
+	elif int(conq.get("truce", 0)) <= 0 and rng.randf() <= OUTSIDE_THREAT_CHANCE:
+		var pool: Array = _target_pool(conq, routes, "", true)
+		if not pool.is_empty():
+			var id: String = String(pool[rng.randi_range(0, pool.size() - 1)])
+			var power: int = _offensive_power(conq, rng)
+			conq["threat"] = {"city": id, "power": power, "eta": THREAT_ETA}
+			conq["threat_cd"] = 0
+			note(conq, "⚠ Pendant que vos héros sont au loin, une offensive (force %d) marche sur %s : %d batailles pour réagir." % [power, _name(conq, id), THREAT_ETA])
+	data["conquest"] = conq
+	var news: Array = conq.get("news", [])
+	return String(news[news.size() - 1]) if news.size() > before else ""
+
+
 # ── Défendre en personne (V145) ─────────────────────────────────────────
 # Une offensive annoncée peut être jouée en combat Tactique au lieu d'attendre la comparaison de
 # chiffres. La préparation compte toujours : plus la défense de la ville est haute face à la force
@@ -1406,7 +1589,8 @@ static func defense_lost(data: Dictionary, conq: Dictionary) -> void:
 
 
 ## Résolution d'une offensive : repoussée, brèche, ou ville perdue.
-static func resolve_assault(data: Dictionary, conq: Dictionary, id: String, power: int) -> String:
+## `allow_loss` = false : au pire une brèche (plafond de pertes pendant une absence, V146).
+static func resolve_assault(data: Dictionary, conq: Dictionary, id: String, power: int, allow_loss: bool = true) -> String:
 	var d: int = defense(data, id)
 	var nm: String = _name(conq, id)
 	var t: int = troops(conq, id)
@@ -1417,7 +1601,7 @@ static func resolve_assault(data: Dictionary, conq: Dictionary, id: String, powe
 		data["gold"] = int(data.get("gold", 0)) + loot
 		note(conq, "★ OFFENSIVE REPOUSSÉE à %s (défense %d contre force %d) ! Butin : +%d or." % [nm, d, power, loot])
 		return "repelled"
-	if float(d) >= float(power) * 0.6:
+	if float(d) >= float(power) * 0.6 or not allow_loss:
 		_set_garrison(conq, id, int(float(t) * 0.5), h)
 		var r: Dictionary = conq.get("ravage", {})
 		r[id] = RAVAGE_BATTLES + 1

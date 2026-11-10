@@ -45,21 +45,16 @@ systèmes d'économie. Production par ville et défense chiffrée existent déj�
       des assaillants dépend de la défense de la ville ; le gouverneur peut se battre.
 - [ ] **Défense en personne, suite**. Soldats de la garnison présents sur le plateau comme alliés, muraille
       en cases d'obstacle, général en personne (boss) quand il mène l'offensive.
-- [ ] **Empire vivant en l'absence du joueur** *(à valider avant de coder)*. Objectif : jouer la Conquête
-      fait progresser, la délaisser fait perdre des villes peu à peu.
-      - *Absence* : au retour après plus de X jours sans bataille de Conquête, le jeu simule les
-        offensives manquées, une par tranche de Y jours, contre les villes les moins défendues.
-      - *Garde-fous proposés* : délai de grâce (X = 3 jours ?) ; au plus une ville perdue par tranche et un
-        plafond par retour (2 villes ?) ; jamais la capitale ; une ville bien gardée tient toute seule ;
-        ville perdue = « perdue » au sens actuel (reprise en une bataille, ruinée).
-      - *Retour* : écran « Pendant votre absence » qui raconte ce qui s'est passé, et la dernière offensive
-        laissée en attente pour être défendue en personne.
-      - *Récompenser la présence* : impôts qui s'accumulent dans les villes (plafonnés à quelques jours),
-        à encaisser en revenant ; première bataille de Conquête du jour avec butin doublé.
-      - *Sans se connecter* : offensives aléatoires aussi pendant qu'on joue aux autres modes (compteur en
-        victoires d'Aventure ou de Tactique), pour que l'empire vive même sans ouvrir la Conquête.
-      - *Points à trancher* : valeurs de X et Y ; plafond de pertes ; notification Android avant une
-        offensive ; que faire si l'horloge du téléphone est modifiée.
+- [x] **Empire vivant** (V146). Offensives pendant l'absence (3 jours de grâce, 2 villes perdues au plus),
+      bilan « Pendant votre absence », impôts accumulés, première victoire du jour doublée, offensives
+      pendant les autres modes.
+- [ ] **Notification Android avant une offensive**. Le jeu sait quand prévenir (`Notifier.gd`) mais il
+      manque le module natif. À faire dans une PR à part, à tester sur téléphone : passer l'export Android
+      en Gradle (`use_gradle_build`, modèle de build Android dans le dépôt et dans le workflow), ajouter un
+      petit module « ZimutNotify » (programmer / annuler une notification), demander la permission
+      `POST_NOTIFICATIONS`, et une option pour couper les rappels dans les réglages.
+- [ ] **Empire vivant, réglages**. Ajuster les valeurs après quelques semaines de jeu réel (délai de
+      grâce, rythme, plafond de pertes, fréquence des alertes hors Conquête).
 - [ ] **Nation complète**. Tenir toutes les villes d'une Nation donne un bonus permanent valable dans les
       trois modes (par exemple résistance à l'élément de la Nation, ou remise à la forge). Donne un but
       intermédiaire sur une carte de 46 villes.
