@@ -5,7 +5,8 @@ extends RefCounted
 ## Un masque basse définition (assets/boards/<nation>/fx.png, produit par tools/diorama/fx_masks.py)
 ## dit où sont l'eau (R), la lave et les lumières (V) et la terre ferme (B). Deux calques animés :
 ##   • sol  (sous les personnages) : reflets, creux et écume sur l'eau, croûte et lueurs de la lave ;
-##   • ciel (au-dessus de tout)    : ombres de nuages qui dérivent, rayons de lumière.
+##   • ciel (au-dessus de tout)    : ombres de nuages qui dérivent, rayons de lumière ; hors de l'île,
+##     une mer de nuages (V131).
 ## Absents en qualité « Économie ». Coût : un quad par calque, 3 à 4 lectures de texture par pixel.
 
 const GROUND := """
@@ -61,11 +62,19 @@ uniform vec3 shadow_col : source_color = vec3(0.04, 0.07, 0.16);
 uniform float shadow_amt = 0.17;
 uniform vec3 ray_col : source_color = vec3(1.0, 0.93, 0.70);
 uniform float ray_amt = 0.07;
+uniform vec3 sea_col : source_color = vec3(1.0, 1.0, 1.0);
+uniform float sea_amt = 0.30;
 void fragment() {
 	float land = texture(TEXTURE, UV).b;
-	if (land < 0.04) { discard; }
 	vec2 p = UV * msize;
 	float t = TIME;
+	if (land < 0.04) {
+		// V131 : hors de l'île, une mer de nuages dérive lentement autour du monde
+		float s1 = texture(noise, p * vec2(0.0060, 0.0130) + vec2(t * 0.0060, 0.0)).r;
+		float s2 = texture(noise, p * vec2(0.0150, 0.0320) + vec2(-t * 0.0045, t * 0.0012)).r;
+		float sea = smoothstep(0.50, 0.78, s1 * 0.65 + s2 * 0.35) * sea_amt;
+		COLOR = vec4(sea_col * sea, sea);
+	} else {
 	float c1 = texture(noise, p * vec2(0.0042, 0.0080) + vec2(t * 0.0075, t * 0.0026)).r;
 	float c2 = texture(noise, p * vec2(0.0095, 0.0180) - vec2(t * 0.0030, -t * 0.0021)).r;
 	float cloud = smoothstep(0.46, 0.70, c1 * 0.72 + c2 * 0.28);
@@ -74,15 +83,16 @@ void fragment() {
 	float band = sin((p.x * 0.9 + p.y * 1.6) * 0.020 + t * 0.045 + c2 * 2.5);
 	float ray = smoothstep(0.55, 1.0, band) * (1.0 - cloud) * ray_amt * land;
 	COLOR = vec4(shadow_col * a + ray_col * ray, a);
+	}
 }
 """
 
 ## Réglages d'ambiance par Nation : couleur / force des ombres de nuages et des rayons.
 const MOODS := {
 	"Brasier": {"shadow_col": Color(0.10, 0.03, 0.02), "shadow_amt": 0.22, "ray_col": Color(1.0, 0.55, 0.25), "ray_amt": 0.035,
-		"glint_col": Color(1.0, 0.85, 0.6)},
+		"glint_col": Color(1.0, 0.85, 0.6), "sea_col": Color(0.95, 0.55, 0.40), "sea_amt": 0.22},
 	"Brumes": {"shadow_col": Color(0.03, 0.08, 0.09), "shadow_amt": 0.20, "ray_col": Color(0.75, 1.0, 0.90), "ray_amt": 0.04,
-		"glint_col": Color(0.70, 1.0, 0.90), "deep_col": Color(0.02, 0.10, 0.09)},
+		"glint_col": Color(0.70, 1.0, 0.90), "deep_col": Color(0.02, 0.10, 0.09), "sea_col": Color(0.80, 0.95, 0.90), "sea_amt": 0.34},
 }
 
 static var _noise: Texture2D = null

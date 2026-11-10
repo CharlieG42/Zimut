@@ -47,6 +47,17 @@ for gi, (dname, dkind, dx, dz) in enumerate(W.DUNGEONS):
     for k_ in (4.8, 7.4, 10.0):                      # V122 : cône de vue dégagé devant l'entrée (rien ne cache le donjon)
         occupied.append((dx - OFF + 0.7071 * k_, dz - OFF + 0.7071 * k_, 3.0))
 
+# ── portail vers la Nation suivante (V131) : arche dans le décor, vue dégagée devant (comme les donjons)
+for pi_, (pn_, ppx, ppz) in enumerate([q for q in W.PLACES if q[0].startswith("Portail")]):
+    pax, paz = ppx - 0.7071 * 0.6, ppz - 0.7071 * 0.6
+    for o_ in DG.build("portail", pax, paz, wgy, KT, NAT):
+        o_["group"] = "portail%d" % pi_
+        o_["gc"] = [pax, paz]
+        objs.append(o_)
+    occupied.append((pax - OFF, paz - OFF, 3.4))
+    for k_ in (2.6, 4.8, 7.0):
+        occupied.append((pax - OFF + 0.7071 * k_, paz - OFF + 0.7071 * k_, 2.6))
+
 
 # ── ruines du fort (nord-ouest) : enceinte éboulée, tours, engins de siège démolis
 CA = KT + "castle/"

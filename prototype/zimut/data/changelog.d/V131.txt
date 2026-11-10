@@ -1,0 +1,3 @@
+V131|Carte Diorama : le portail vers la Nation suivante est maintenant une vraie construction du décor (arche de pierre, obélisques, cristaux lumineux), en Sylve comme au Brasier.
+V131|Le tourbillon du portail apparaît dans l'ouverture de l'arche ; la vue est dégagée devant, comme pour les donjons.
+V131|Une mer de nuages dérive lentement autour de l'île (coupée en qualité « Économie »). Les deux cartes sont régénérées.

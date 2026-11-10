@@ -917,6 +917,8 @@ func _rebuild_board(biome: String) -> void:
 		node.prop = ""                      # les bâtiments / entrées sont dessinés dans la planche
 		if BoardArt.is_iso(zid):
 			node.prop = String(POI_PROP.get(node.kind, {}).get(biome, ""))
+			if BoardArt.is_diorama(zid) and manager.is_portal(poi):
+				node.prop = ""              # V131 : l'arche du portail est dans le décor du Diorama
 			if node.kind == "combat":
 				var etypes: Array[String] = ProgressionManager.biome_enemy_types(biome)
 				node.enemy_tex = Portraits.get_texture({"classe": etypes[absi(k.hash()) % etypes.size()], "team": "enemy", "entity_type": "Enemy"})

@@ -71,24 +71,21 @@ Sans retoucher les tuiles (aucun nouveau rendu des cartes) :
 - **Fluidité** : non mesurée sur téléphone. À vérifier avec le compteur (3 lignes) : si le rendu perd plus
   de 1 ms, le calque « ciel » est le premier à alléger.
 
-### Lot 2 — Diorama : personnages intégrés au décor (à numéroter)
+### Lot 2 — Diorama : personnages intégrés au décor (V130) — FAIT
 
-- **Ombre de contact** douce sous le héros, Gligli et chaque groupe de monstres.
-- **Teinte de lumière locale** : les personnages prennent la couleur ambiante du lieu (sous-bois plus
-  sombre et vert, lueur orangée près de la lave), lue dans une petite carte de lumière exportée par
-  l'outil.
-- **Filtrage adapté** des sprites pour qu'ils ne jurent plus avec le décor peint (contour léger,
-  lissage quand la carte est dézoomée).
-- **Poussière de pas** et petite animation d'arrivée sur un lieu.
+- **Teinte de lumière locale** : héros et monstres prennent la couleur ambiante de leur case (carte de
+  lumière 320 × 180 par Nation).
+- **Sprites lissés** sur la carte Diorama.
+- Les ombres de contact existaient déjà. La poussière de pas n'est pas faite.
 
-### Lot 3 — Diorama : lieux, portail et bord du monde (à numéroter)
+### Lot 3 — Diorama : portail et bord du monde (V129, V131) — FAIT
 
-- **Portail** : vraie structure dans le décor (arche + vortex animé), dégagée comme les entrées de
-  donjon. Nécessite de régénérer les tuiles concernées.
-- **Repères de lieux** redessinés : médaillons avec relief, états plus lisibles (ouvert, verrouillé,
-  terminé), halo au sol plutôt que colonne plate.
-- **Ciel et lointain** : nuages en couches derrière l'île, cascade ou brume au bord du monde.
-- **Moment de la journée** (optionnel, à valider) : teinte globale matin / jour / soir.
+- **Portail toujours visible** (V129) : dessiné devant le décor, tourbillon animé, bouton pour le montrer.
+- **Portail en vraie structure** (V131) : arche de pierre, obélisques et cristaux dans le décor des deux
+  Nations (cartes régénérées), vue dégagée devant.
+- **Mer de nuages** qui dérive autour de l'île.
+- Non fait : les repères de lieux (déjà travaillés en V114 / V119, je ne les ai pas refaits), la cascade au
+  bord du monde, le moment de la journée (non tranché).
 
 ### Lot 4 — Monde 3D : sol, lumière et ciel (V128)
 
