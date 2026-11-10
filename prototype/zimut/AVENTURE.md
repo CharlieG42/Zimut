@@ -355,6 +355,27 @@ vue 3D par cases après `Adv3DMeshes.setup_sun` :
 Réglé avec le rendu « mobile » (Vulkan), celui du téléphone : le rendu « compatibilité » des captures
 habituelles donne des couleurs très différentes. Capture : `xvfb-run -a godot --rendering-method mobile
 --path . -s tests/shot_openworld.gd -- <dossier> foret_sylve`. Test : `tests/test_adv3d_look.gd`.
+### Carte Diorama du Marais des Brumes (V136)
+
+Troisième Nation en Diorama : `plan_brumes.py` + `layout_brumes.py` (ambiance `DIORAMA_MOOD=brumes`),
+`BoardArt.DIORAMA_BOARDS["brumes_marais"]`. Cinq mares (`LAKES`, pris en charge par `terrain96.py` et
+`bake96.py`), feuillus sombres et arbres morts, roseaux, champignons, six cabanes. Donjons : `crypte`,
+`ruine`, `pilotis`, `souche` aux quatre coins et `tour_brume` au centre (types ajoutés à `dungeons3d.py`),
+vue dégagée jusqu'à 12,8 unités devant chaque entrée. Gardiens `Brumes#1` à `Brumes#4` puis `Brumes` (niveau 31).
+Sorties : « Sentier des Cendres » (retour) et « Portail vers les Cimes ». Test : `tests/test_brumes_diorama.gd`.
+Les Nations suivantes (Cimes…) gardent leur carte générée.
+
+### Brumes : l'aspect brumeux, en Diorama et en 3D (V137)
+
+Diorama : `post96.py` ambiance `brumes` désaturée (verts gris) avec `fog_k` 1,7 ; murs et pierres des donjons
+assombris, cabane sur pilotis en bois détrempé, ruines complétées (rochers, arbre mort, cristal). En jeu,
+`DioramaFx` ajoute des nappes de brume qui dérivent sur le sol (`mist_col` / `mist_amt`, plus denses sur l'eau),
+une mer de nuages plus marquée, et `SceneryAmbient` change une part des particules en feux follets bleu-vert.
+
+Monde 3D : `Adv3DLook.NATION["Brumes"]` (brume de distance dès 9 m, ambiance relevée) et
+`make_ground_mist` = deux plans de brume au ras du sol (shader à bruit qui dérive, effacé près de la caméra,
+au loin et en vue de dessus), absents en « Économie ».
+
 ### Quitter la carte 2D proprement, compteur en 3D (V135)
 
 Signalé sur S23+ : après un déplacement sur la carte 2D, « Mes Parties » figeait le jeu. Non reproduit sur

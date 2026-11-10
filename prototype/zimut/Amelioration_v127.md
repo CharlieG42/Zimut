@@ -146,3 +146,18 @@ gain côté 3D), pour que tu voies vite un résultat dans chaque vue, puis de d�
 3. **Monde 3D** : les deux vues 3D existent (« 3D » par cases et « monde ouvert »). Je prévois de
    traiter le **monde ouvert** et de faire profiter l'autre des éléments communs (ciel, lumière, sol).
    À confirmer.
+
+## État d'avancement (V136)
+
+| Lot | État | Versions |
+|---|---|---|
+| 1 — Diorama vivant | fait | V127 |
+| 2 — Personnages intégrés | fait | V130 |
+| 3 — Portail, bord du monde | fait (sauf cascade et moment de la journée) | V129, V131 |
+| 4 — 3D : sol, lumière, ciel | fait (sauf texture de sol détaillée et nuages animés) | V128, V134 |
+| 5 — 3D : végétation, eau | herbe rase faite ; eau, lave et arbres non retouchés | V132 |
+| 6 — 3D : lieux, monstres, interface | non fait : à l'examen, les lieux sont déjà de petites constructions et les monstres ont leurs modèles ; seules les étiquettes ont été allégées | V134 |
+| Nation des Brumes en Diorama | faite | V136 |
+
+Mesures sur Galaxy S23+ (vidéos du 10 novembre) : carte Diorama 53 à 58 images par seconde ; monde 3D du
+Brasier 49 à 58 images par seconde, environ 300 000 triangles et 400 à 500 dessins par image.

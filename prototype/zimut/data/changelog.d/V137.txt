@@ -1,0 +1,3 @@
+V137|Marais des Brumes (carte Diorama) : de vraies nappes de brume dérivent sur le sol et sur les mares, les couleurs sont plus grises et voilées, et des feux follets bleu-vert flottent dans l'air.
+V137|Donjons des Brumes retravaillés : pierre sombre et moussue, cabane sur pilotis en bois détrempé, ruines complétées d'éboulis et d'un cristal lumineux.
+V137|Monde 3D des Brumes : brume au ras du sol qui enveloppe le pied des arbres, et brume de distance plus proche (coupée en qualité « Économie »).

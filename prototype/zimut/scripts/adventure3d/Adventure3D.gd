@@ -90,6 +90,9 @@ func _ready() -> void:
 	_islets = Adv3DWorld.make_islets(terrain["size"], String(terrain["biome"]), absi(zone_id.hash()))
 	if not GfxQuality.low():      # V128 : crêtes lointaines, pour un horizon au lieu d'un bord coupé net
 		add_child(Adv3DLook.make_backdrop(terrain["size"], wpal, absi(zone_id.hash())))
+	var ground_mist: Node3D = Adv3DLook.make_ground_mist(terrain["size"], String(terrain["biome"]), 0.0)      # V137 : brume au ras du sol (Brumes)
+	if ground_mist != null:
+		add_child(ground_mist)
 	add_child(_islets)
 	_build_explorer()
 	_build_hud()

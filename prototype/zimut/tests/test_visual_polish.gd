@@ -13,7 +13,7 @@ func _init() -> void:
 	check(ambient.contains('"depth": rng.randf_range(0.62, 1.18)'), "les particules d'ambiance possèdent une profondeur visuelle déterministe")
 	check(ambient.contains('float(pt.get("depth", 1.0))'), "la profondeur module la taille des particules")
 	check(ambient.contains('"kind": "firefly" if is_firefly else "leaf"'), "la forêt mélange feuilles dérivantes et lucioles discrètes")
-	check(ambient.contains('draw_circle(c, r * 4.2, Color(1.0, 0.94, 0.52'), "les lucioles ont un halo doux et localisé")
+	check(ambient.contains('draw_circle(c, r * 4.2, Color(glow.r, glow.g, glow.b') and ambient.contains('Color(1.0, 0.94, 0.52)'), "les lucioles ont un halo doux et localisé")
 	check(ambient.contains('_effect_kind = Nations.ambient(_biome)'), "le type d’ambiance est résolu à la configuration")
 	check(ambient.contains('var st: String = _effect_kind'), "la boucle d’animation réutilise le type d’ambiance mis en cache")
 	check(ambient.contains('if st == "leaves" and String(pt.get("kind", "leaf")) == "firefly"'), "les lucioles ont une trajectoire dédiée")
