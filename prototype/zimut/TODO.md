@@ -10,8 +10,8 @@ peaufinées avant d'en créer d'autres.
       de Quaternius n'est pas dans le dépôt et doit être fourni (ou versionné).
 - [ ] **Cimes 3D** : neige sur les constructions des lieux et des donjons (`Adv3DActors`), stalactites de
       glace sous le bord de l'île, cabanes du kit Kenney *Holiday* (déjà dans `atelier_3d/kenney/holiday`).
-- [ ] **Sylve, Brasier, Brumes en 3D** : même passe que les Cimes (sol, herbe, pied des arbres, lumière).
-- [ ] Mesure de fluidité des Cimes sur téléphone après V142.
+- [x] **Sylve, Brasier, Brumes en 3D** : même passe que les Cimes (V143).
+- [ ] Mesure de fluidité des quatre Nations sur téléphone après V142 et V143.
 
 ## Mode Tactique
 

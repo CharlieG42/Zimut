@@ -229,12 +229,12 @@ static func shadow_material() -> StandardMaterial3D:
 
 
 ## V142 : rond de terre dégagée au pied des arbres, dans la neige.
-static func dirt_ring_material() -> StandardMaterial3D:
+static func dirt_ring_material(col: Color = Color(0.50, 0.40, 0.31, 0.62)) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	m.albedo_color = Color(0.50, 0.40, 0.31, 0.62)
+	m.albedo_color = col
 	m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	return m
 

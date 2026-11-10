@@ -22,10 +22,13 @@ const SUN_SHADOW_OFFSET := Vector3(0.28, 0.0, 0.22)   # les ombres tombent du c�
 ## d'ambiance), grass (densité d'herbe), sea (océan sous l'île).
 const PALETTES := {
 	"Forêt": {
-		"ground": [Color(0.38, 0.66, 0.27), Color(0.45, 0.72, 0.31), Color(0.33, 0.58, 0.25)],
-		"path": Color(0.74, 0.60, 0.40), "cliff_top": Color(0.50, 0.37, 0.25), "cliff_bot": Color(0.20, 0.15, 0.13),
+		# V143 : verts moins fluo et plus variés (du vert mousse au vert tendre), soleil doré, litière de
+		# feuilles au pied des arbres.
+		"ground": [Color(0.31, 0.52, 0.25), Color(0.44, 0.64, 0.30), Color(0.36, 0.57, 0.24)],
+		"path": Color(0.72, 0.58, 0.40), "cliff_top": Color(0.50, 0.37, 0.25), "cliff_bot": Color(0.20, 0.15, 0.13),
 		"sky_top": Color(0.24, 0.50, 0.84), "sky_hor": Color(0.74, 0.88, 0.96), "fog": Color(0.74, 0.86, 0.92),
-		"sun": Color(1.0, 0.94, 0.80), "ambient": Color(0.62, 0.74, 0.92),
+		"sun": Color(1.0, 0.91, 0.72), "ambient": Color(0.62, 0.74, 0.92),
+		"macro": Color(0.50, 0.70, 0.56), "ring": Color(0.34, 0.27, 0.15, 0.50), "tuft_mul": Color(0.90, 0.92, 0.82),
 	},
 	# V142 : neige franche (blanc à peine bleuté), sentiers de terre battue claire, soleil plus chaud pour
 	# des ombres bleues nettes, herbe rare : on se rapproche d'un diorama de montagne enneigée.
@@ -34,6 +37,7 @@ const PALETTES := {
 		"path": Color(0.63, 0.55, 0.47), "cliff_top": Color(0.52, 0.52, 0.57), "cliff_bot": Color(0.20, 0.20, 0.26),
 		"sky_top": Color(0.28, 0.52, 0.86), "sky_hor": Color(0.82, 0.90, 0.97), "fog": Color(0.84, 0.90, 0.97),
 		"sun": Color(1.0, 0.95, 0.84), "ambient": Color(0.62, 0.72, 0.96), "grass": 0.32, "macro": Color(0.86, 0.90, 0.98),
+		"ring": Color(0.50, 0.40, 0.31, 0.62),
 	},
 	"Désert": {
 		"ground": [Color(0.90, 0.74, 0.46), Color(0.94, 0.80, 0.52), Color(0.84, 0.68, 0.40)],
@@ -61,16 +65,24 @@ const PALETTES := {
 		"sun": Color(1.0, 1.0, 0.95), "ambient": Color(0.74, 0.84, 1.0), "fog_density": 0.003, "fx": "wind", "grass": 1.2,
 	},
 	"Brasier": {
-		"ground": [Color(0.35, 0.24, 0.21), Color(0.45, 0.30, 0.23), Color(0.29, 0.19, 0.17)],      # V134 : éclairci (le sol virait au noir)
-		"path": Color(0.46, 0.30, 0.20), "cliff_top": Color(0.36, 0.24, 0.22), "cliff_bot": Color(0.10, 0.06, 0.06),
-		"sky_top": Color(0.24, 0.10, 0.10), "sky_hor": Color(0.86, 0.46, 0.26), "fog": Color(0.52, 0.27, 0.19),
-		"sun": Color(1.0, 0.74, 0.50), "ambient": Color(0.90, 0.60, 0.48), "fog_density": 0.0045, "fx": "ember", "grass": 0.35, "sat": 1.05,
+		# V143 : terre de CENDRE (gris-brun) et non plus aplat rouge : le rouge reste à la lave, aux braises et
+		# au ciel. Herbe sèche rare couleur paille brûlée, cendre noire au pied des arbres calcinés.
+		"ground": [Color(0.38, 0.32, 0.30), Color(0.49, 0.41, 0.36), Color(0.31, 0.25, 0.24)],
+		"path": Color(0.52, 0.40, 0.32), "cliff_top": Color(0.36, 0.27, 0.25), "cliff_bot": Color(0.10, 0.06, 0.06),
+		"sky_top": Color(0.24, 0.10, 0.10), "sky_hor": Color(0.86, 0.46, 0.26), "fog": Color(0.50, 0.30, 0.23),
+		"sun": Color(1.0, 0.80, 0.60), "ambient": Color(0.80, 0.64, 0.58), "fog_density": 0.0045, "fx": "ember", "grass": 0.24, "sat": 0.92,
+		"macro": Color(0.62, 0.52, 0.50), "ring": Color(0.07, 0.05, 0.05, 0.55), "tuft3d": Color(1.0, 0.66, 0.26),
+		"flowers3d": [Color(1.0, 0.62, 0.20), Color(1.0, 0.84, 0.36)],
 	},
 	"Brumes": {
-		"ground": [Color(0.40, 0.55, 0.47), Color(0.48, 0.62, 0.53), Color(0.33, 0.47, 0.41)],
-		"path": Color(0.46, 0.42, 0.34), "cliff_top": Color(0.40, 0.50, 0.46), "cliff_bot": Color(0.16, 0.22, 0.22),
+		# V143 : sol plus profond avec des plaques de tourbe sombre, joncs vert olive, fleurs pâles et froides
+		# (plus de jaune ni de rose vifs), tourbe détrempée au pied des arbres morts.
+		"ground": [Color(0.31, 0.45, 0.40), Color(0.43, 0.57, 0.49), Color(0.36, 0.50, 0.43)],
+		"path": Color(0.44, 0.41, 0.33), "cliff_top": Color(0.40, 0.50, 0.46), "cliff_bot": Color(0.16, 0.22, 0.22),
 		"sky_top": Color(0.34, 0.46, 0.50), "sky_hor": Color(0.78, 0.88, 0.86), "fog": Color(0.74, 0.85, 0.83),
-		"sun": Color(0.90, 0.96, 0.92), "ambient": Color(0.66, 0.80, 0.82), "fog_density": 0.0075, "fx": "mist", "grass": 1.1,
+		"sun": Color(0.90, 0.96, 0.92), "ambient": Color(0.66, 0.80, 0.82), "fog_density": 0.0075, "fx": "mist", "grass": 0.85,
+		"macro": Color(0.60, 0.72, 0.70), "ring": Color(0.10, 0.15, 0.14, 0.50), "tuft3d": Color(0.56, 0.74, 0.50),
+		"flowers3d": [Color(0.78, 0.95, 1.0), Color(0.93, 0.98, 1.0), Color(0.80, 0.86, 1.0)],
 	},
 	"Ombres": {
 		"ground": [Color(0.30, 0.28, 0.38), Color(0.36, 0.33, 0.44), Color(0.25, 0.23, 0.32)],
@@ -502,6 +514,10 @@ const SHADOW_R := {"birch": 0.95, "pine": 1.15, "round": 1.25, "rock": 1.1, "bus
 	"stump": 0.6, "crystal": 0.7, "pillar": 0.7}
 
 
+## Décors de Nation qui sont des arbres (ils reçoivent le rond de sol au pied).
+const RING_NATION_KINDS := ["charred_tree", "dead_tree"]
+
+
 static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: String) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = absi(zone_id.hash()) + 913
@@ -558,16 +574,28 @@ static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	var foliage: ShaderMaterial = Adv3DMeshes.foliage_material(0.16)
 	var solid: ShaderMaterial = Adv3DMeshes.solid_material(true, true)
 	if snow:
-		# V142 : neige sur le dessus des buissons, rochers, souches et piliers ; rond de terre au pied des pins
+		# V142 : neige sur le dessus des buissons, rochers, souches et piliers
 		Adv3DMeshes.snowy(foliage, 0.85)
 		Adv3DMeshes.snowy(solid)
+	# V143 : rond de sol dégagé au pied de chaque arbre (terre dans la neige, litière de feuilles en forêt,
+	# cendre au Brasier, tourbe aux Brumes) — clé « ring » de la palette, un seul dessin par zone.
+	var ring_col: Color = palette(biome).get("ring", Color(0, 0, 0, 0))
+	if ring_col.a > 0.01:
 		var ring_xf: Array = []
 		var ring_cl: Array = []
-		for txf: Transform3D in buckets["pine"]["xf"]:
+		var trunks: Array = []
+		for bk: String in ["pine", "round", "birch"]:
+			trunks.append_array(buckets[bk]["xf"])
+		for tk: String in RING_NATION_KINDS:
+			if nation.has(tk):
+				trunks.append_array(nation[tk]["xf"])
+			if nation_kit.has(tk):
+				trunks.append_array(nation_kit[tk]["xf"])
+		for txf: Transform3D in trunks:
 			var rs: float = txf.basis.get_scale().x * rng.randf_range(0.85, 1.05)
 			ring_xf.append(_xf(txf.origin + Vector3(0, 0.05, 0), 0.0, Vector3(rs, 1.0, rs)))
 			ring_cl.append(Color.WHITE)
-		_multi(root, "TerreArbres", Adv3DMeshes.shadow_mesh(), ring_xf, ring_cl, Adv3DMeshes.dirt_ring_material())
+		_multi(root, "TerreArbres", Adv3DMeshes.shadow_mesh(), ring_xf, ring_cl, Adv3DMeshes.dirt_ring_material(ring_col))
 	var kit: bool = Adv3DKit.available()
 	if kit and not snow:
 		_multi_kit(root, "Pins", Adv3DKit.variants("Pine", 5), buckets["pine"]["xf"], buckets["pine"]["cl"], 0.62)
@@ -664,15 +692,17 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	var grass_k: float = float(pal.get("grass", 1.0))
 	var is_nation: bool = Nations.is_new(biome)
 	var ncell: Dictionary = Nations.cell_palette(biome) if is_nation else {}
-	var tuft_col: Color = ncell.get("tuft", Color.WHITE)
+	var tuft_col: Color = pal.get("tuft3d", ncell.get("tuft", Color.WHITE))      # V143 : teinte d'herbe propre à la 3D
 	# V138 : herbe givrée sur la neige (les touffes vert vif juraient avec le sol des Cimes)
 	# V142 : brins pâles (mesh neutre teinté) et rares — les touffes sombres faisaient un tapis sur la neige.
 	var snowy: bool = Adv3DMeshes.is_snow_biome(biome)
-	var frost: Color = Color(1.18, 1.34, 1.40) if snowy else Color.WHITE
+	var frost: Color = Color(1.18, 1.34, 1.40) if snowy else pal.get("tuft_mul", Color.WHITE)
 	if snowy:
 		flower_cols = [Color(0.97, 0.98, 1.0), Color(0.66, 0.86, 0.99), Color(0.86, 0.92, 1.0)]   # perce-neige et fleurs de glace
 	if is_nation and not (ncell.get("flowers", []) as Array).is_empty():
 		flower_cols = ncell["flowers"]
+	if pal.has("flowers3d"):
+		flower_cols = pal["flowers3d"]
 	var nat_xf: Dictionary = {}
 	var nat_cl: Dictionary = {}
 	# V132 : tapis d'herbe rase, dense, visible seulement près du joueur (tirage séparé : le reste du décor ne bouge pas)
@@ -778,7 +808,7 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 				var dv: float = rng.randf_range(0.55, 0.72)
 				dl_cl.append(Color(dv, dv, dv) * dl_tint)
 		_multi_kit(root, "Dalles", [Adv3DKit.mesh("RockPath_Round_Small_1"), Adv3DKit.mesh("RockPath_Round_Small_2"), Adv3DKit.mesh("RockPath_Square_Small_1"), Adv3DKit.mesh("RockPath_Square_Small_2")], dl_xf, dl_cl, 1.0)
-		if biome in ["Forêt", "Vents", "Marées", "Brumes"]:
+		if biome in ["Forêt", "Vents", "Marées"]:       # V143 : les Brumes gardent des fleurs pâles (plus les bouquets jaunes et roses du kit)
 			var fk_xf: Array = []
 			var fk_cl: Array = []
 			for i4: int in range(0, flower_xf.size(), 4):
