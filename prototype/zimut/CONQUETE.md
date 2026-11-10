@@ -23,6 +23,12 @@ Toute la logique est dans `scripts/ConquestSystem.gd` (statique, testable sans i
 - **Grandes offensives** annoncées 3 batailles à l'avance (force affichée) : défense ≥ force → repoussée + butin ; ≥ 60 % → brèche (pillage 4 batailles, garnison /2) ; sinon **ville perdue** (reprise en une bataille, sans second butin).
 - La capitale et le Donjon ne sont jamais ciblés.
 
+## Défendre en personne (V145)
+Une offensive annoncée peut être jouée en combat Tactique (bouton sous la bannière du Conseil de guerre) :
+niveau des assaillants = niveau moyen de l'équipe + (force − défense) / 5, borné de −3 à +4 ; victoire =
+offensive brisée, garnison intacte, butin ×1,5 ; défaite ou abandon = une seule tentative, l'offensive suit
+son cours. Le gouverneur de la ville peut se battre. Voir `AMELIORATIONS_V145.md`.
+
 ## Événements (45 % par victoire, au plus un en attente)
 Interactifs : Caravane marchande, Réfugiés, Mercenaires, Agitation (villes sans garnison), Espion capturé, Émissaire (trêve payante).
 Automatiques : Bonne récolte, Cache découverte, Épidémie, Rapport du gouverneur.

@@ -68,6 +68,7 @@ var _conquest: Dictionary = {}
 var _selected_id: String = "clairiere"
 var _message: Label
 var _threat_banner: Label
+var _defend_button: Button
 var _attack: Button
 var _city_buttons: Dictionary = {}
 var _city_labels: Dictionary = {}
@@ -146,6 +147,10 @@ func _ready() -> void:
 		_conquest = {"owned": ["capitale"], "pending_city": ""}
 	_save["conquest"] = _conquest
 	_save["campaign_mode"] = "conquest"
+	# V145 : revenir sur la carte avec un combat de défense non résolu = abandon (tentative consommée).
+	if ConquestSystem.is_defense_battle(_conquest):
+		ConquestSystem.settle_unresolved_defense(_save, _conquest)
+		_conquest = _save.get("conquest", _conquest)
 	# Un héros pas encore débloqué ne peut pas être en mission (anciennes sauvegardes) : rappel.
 	for locked: String in ConquestSystem.cancel_locked_missions(_save):
 		_conquest = _save.get("conquest", _conquest)
@@ -392,6 +397,16 @@ func _build() -> void:
 	_threat_banner.add_theme_color_override("font_color", Color(1.0, 0.88, 0.80))
 	_threat_banner.add_theme_stylebox_override("normal", _style(Color(0.34, 0.10, 0.08, 0.96), Color(1.0, 0.45, 0.30)))
 	box.add_child(_threat_banner)
+
+	# V145 : jouer l'offensive en combat Tactique au lieu d'attendre la comparaison de chiffres.
+	_defend_button = Button.new()
+	_defend_button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_defend_button.custom_minimum_size.y = 64
+	_defend_button.add_theme_font_size_override("font_size", 20)
+	_defend_button.pressed.connect(_ask_defend)
+	_style_button(_defend_button, Color(0.16, 0.34, 0.52), Color(0.60, 0.86, 1.0))
+	_defend_button.visible = false
+	box.add_child(_defend_button)
 
 	# V59 : le conseil est en deux onglets pour tenir à l'écran sans défiler :
 	# « Ville » (illustration, situation, actions) et « Chronique » (nouvelles de l'empire).
@@ -2088,6 +2103,53 @@ func _refresh_threat_banner() -> void:
 		lines.append("☮ Trêve : %d bataille(s) sans raid" % int(_conquest["truce"]))
 	_threat_banner.visible = not lines.is_empty()
 	_threat_banner.text = Typo.fr("\n".join(lines))
+	if _defend_button != null:
+		_defend_button.visible = ConquestSystem.can_defend(_conquest)
+		if _defend_button.visible:
+			_defend_button.text = Typo.fr("⚔ DÉFENDRE EN PERSONNE — assaillants niv. %d" % ConquestSystem.defense_battle_level(_save, _conquest))
+		elif not th.is_empty() and bool(th.get("fought", false)):
+			_threat_banner.text += Typo.fr("\nSortie déjà tentée : renforcez la ville.")
+
+
+## V145 : confirmation puis lancement du combat de défense.
+func _ask_defend() -> void:
+	var th: Dictionary = ConquestSystem.threat(_conquest)
+	if not ConquestSystem.can_defend(_conquest):
+		return
+	var tid: String = String(th.get("city", ""))
+	var lvl: int = ConquestSystem.defense_battle_level(_save, _conquest)
+	var gov: String = ConquestSystem.hero_of(_conquest, tid)
+	var dlg := ConfirmationDialog.new()
+	dlg.title = Typo.fr("Défendre %s" % ProgressionManager.conquest_city_name(tid))
+	dlg.dialog_autowrap = true
+	dlg.dialog_text = Typo.fr("Vos héros sortent affronter l'offensive (force %d) devant %s.\n\nAssaillants de niveau %d — votre équipe : niveau moyen %d. Plus la défense de la ville est haute, plus ils sont faibles.%s\n\nVictoire : offensive brisée, garnison intacte, butin ×1,5.\nDéfaite ou abandon : une seule tentative ; l'offensive continue et se réglera aux chiffres à l'échéance." % [
+		int(th.get("power", 0)), ProgressionManager.conquest_city_name(tid), lvl, ConquestSystem.team_avg_level(_save),
+		("\n%s, gouverneur de la ville, peut rejoindre l'équipe." % gov) if gov != "" else ""])
+	dlg.ok_button_text = Typo.fr("Défendre")
+	dlg.cancel_button_text = Typo.fr("Plus tard")
+	dlg.min_size = Vector2i(980, 0)
+	# lisible au doigt sur téléphone (le thème par défaut des dialogues est minuscule)
+	dlg.get_label().add_theme_font_size_override("font_size", 24)
+	for b: Button in [dlg.get_ok_button(), dlg.get_cancel_button()]:
+		b.add_theme_font_size_override("font_size", 24)
+		b.custom_minimum_size = Vector2(240, 68)
+	dlg.confirmed.connect(_start_defense)
+	add_child(dlg)
+	dlg.popup_centered()
+
+
+func _start_defense() -> void:
+	var err: String = ConquestSystem.start_defense(_save, _conquest)
+	if err != "":
+		_message.text = Typo.fr(err)
+		return
+	_conquest = _save.get("conquest", _conquest)
+	_save["campaign_mode"] = "conquest"
+	_persist()
+	GameManager.active_save = _save
+	GameManager.active_slot = _slot
+	GameManager.fight_biome = ProgressionManager.conquest_city_biome(String(_conquest.get("pending_city", "")))
+	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
 
 func _refresh_nameplates() -> void:
 	_refresh_threat_banner()
