@@ -49,10 +49,16 @@ void light() {
 	float lit = mix(soft, band, toon);
 	float sh = ATTENUATION;
 	vec3 shade = mix(shade_tint, vec3(1.0), sh);
-	DIFFUSE_LIGHT += LIGHT_COLOR * lit * sh / PI;
-	DIFFUSE_LIGHT *= shade;
-	float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
-	DIFFUSE_LIGHT += rim_color * fres * rim * clamp(ndl + 0.6, 0.0, 1.0) * sh * 0.5;
+	// V138 : la teinte d'ombre ne s'applique qu'à la contribution du SOLEIL. Avant, elle multipliait toute la
+	// lumière déjà accumulée à chaque lumière : près d'un feu de camp ou d'une lanterne (lumière ponctuelle en
+	// bord de portée), le sol entier virait au bleu-violet sombre.
+	if (LIGHT_IS_DIRECTIONAL) {
+		DIFFUSE_LIGHT += LIGHT_COLOR * lit * sh / PI * shade;
+		float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
+		DIFFUSE_LIGHT += rim_color * fres * rim * clamp(ndl + 0.6, 0.0, 1.0) * sh * 0.5;
+	} else {
+		DIFFUSE_LIGHT += LIGHT_COLOR * lit * sh / PI;
+	}
 }
 """
 

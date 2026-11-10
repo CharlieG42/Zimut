@@ -79,6 +79,9 @@ func _run() -> void:
 	ck(L.make_ground_mist(Vector2i(54, 36), "Brumes", 0.0) == null, "Économie : pas de brume au sol")
 	gs.graphics_quality = 2
 	ck(float(L.look("Brumes")["haze_begin"]) < float(L.look("Forêt")["haze_begin"]), "Brumes : brume de distance plus proche")
+	# V138 : la teinte d'ombre ne touche que la lumière du soleil
+	var MS: GDScript = load("res://scripts/adventure3d/Adv3DMeshes.gd")
+	ck(String(MS.TOON_LIGHT).contains("if (LIGHT_IS_DIRECTIONAL)") and not String(MS.TOON_LIGHT).contains("DIFFUSE_LIGHT *= shade"), "teinte d'ombre limitée au soleil (plus de sol assombri près des lumières)")
 	# sol : plaques de teinte actives
 	var world: Node3D = W.build("foret_sylve", true)
 	var ground: MeshInstance3D = world.find_child("Ground", true, false) as MeshInstance3D

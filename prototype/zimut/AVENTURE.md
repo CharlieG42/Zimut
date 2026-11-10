@@ -376,6 +376,16 @@ Monde 3D : `Adv3DLook.NATION["Brumes"]` (brume de distance dès 9 m, ambiance re
 `make_ground_mist` = deux plans de brume au ras du sol (shader à bruit qui dérive, effacé près de la caméra,
 au loin et en vue de dessus), absents en « Économie ».
 
+### Éclairage 3D : teinte d'ombre limitée au soleil (V138)
+
+Défaut trouvé dans `Adv3DMeshes.TOON_LIGHT` : `DIFFUSE_LIGHT *= shade` s'exécutait pour CHAQUE lumière. Près
+d'une lumière ponctuelle (feu de camp, lanterne, cristal) en bord de portée, toute la lumière déjà accumulée
+était multipliée par la teinte d'ombre (0,62 / 0,66 / 0,95) : sol bleu-violet aux Cimes, sombre ailleurs.
+C'est ce qui rendait le Brasier « presque noir » sur téléphone. La teinte et le liseré ne s'appliquent plus
+qu'à la lumière directionnelle (`LIGHT_IS_DIRECTIONAL`). Réglages revus ensuite : soleil par défaut 1,02,
+Brumes (exposition 0,90, brume 12 → 78 m, nappes 0,24), herbe givrée aux Cimes (`frost`), étiquettes 3D en
+priorité de rendu 4 (devant les nappes de brume).
+
 ### Quitter la carte 2D proprement, compteur en 3D (V135)
 
 Signalé sur S23+ : après un déplacement sur la carte 2D, « Mes Parties » figeait le jeu. Non reproduit sur
