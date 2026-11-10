@@ -12,14 +12,16 @@ extends RefCounted
 
 ## Réglages par Nation (facultatifs) : sat, contrast, haze (opacité max de la brume), haze_begin / haze_end (m).
 const NATION := {
-	"Brasier": {"sat": 1.0, "contrast": 1.14, "haze": 0.80, "haze_begin": 16.0, "haze_end": 95.0, "cloud": Color(0.36, 0.20, 0.16), "cloud_amt": 0.75},
+	"Brasier": {"sat": 1.0, "contrast": 1.08, "haze": 0.80, "haze_begin": 16.0, "haze_end": 95.0, "amb": 0.72, "cool": 0.10, "expo": 1.14, "sun": 1.25, "cloud": Color(0.36, 0.20, 0.16), "cloud_amt": 0.75},
 	"Brumes": {"sat": 0.96, "contrast": 1.06, "haze": 0.90, "haze_begin": 9.0, "haze_end": 70.0, "cloud": Color(0.80, 0.90, 0.88), "cloud_amt": 0.85},
-	"Ombres": {"sat": 1.0, "contrast": 1.12, "haze": 0.85, "haze_begin": 12.0, "haze_end": 85.0, "cloud": Color(0.40, 0.36, 0.52), "cloud_amt": 0.7},
-	"Donjon": {"sat": 1.0, "contrast": 1.12, "haze": 0.85, "haze_begin": 12.0, "haze_end": 85.0, "cloud": Color(0.38, 0.34, 0.46), "cloud_amt": 0.7},
+	"Ombres": {"amb": 0.62, "cool": 0.20, "expo": 1.08, "sat": 1.0, "contrast": 1.08, "haze": 0.85, "haze_begin": 12.0, "haze_end": 85.0, "cloud": Color(0.40, 0.36, 0.52), "cloud_amt": 0.7},
+	"Donjon": {"amb": 0.62, "cool": 0.20, "expo": 1.08, "sat": 1.0, "contrast": 1.08, "haze": 0.85, "haze_begin": 12.0, "haze_end": 85.0, "cloud": Color(0.38, 0.34, 0.46), "cloud_amt": 0.7},
 	"Désert": {"sat": 1.0, "contrast": 1.10, "haze": 0.62, "haze_begin": 26.0, "haze_end": 140.0, "cloud_amt": 0.35},
 	"Montagne": {"sat": 0.98, "contrast": 1.10, "haze": 0.70, "haze_begin": 22.0, "haze_end": 130.0, "cloud_amt": 0.7},
 }
-const DEFAULT := {"sat": 0.98, "contrast": 1.10, "haze": 0.66, "haze_begin": 26.0, "haze_end": 135.0, "cloud": Color(1.0, 1.0, 1.0), "cloud_amt": 0.9}
+## V134 : amb = énergie de la lumière ambiante, cool = part de bleu dans l'ambiance, expo = exposition, sun = énergie du
+## soleil. Les Nations sombres (Brasier, Ombres) gardent plus d'ambiance : sinon tout ce qui est à l'ombre devient noir.
+const DEFAULT := {"amb": 0.44, "cool": 0.45, "expo": 1.0, "sun": 1.12, "sat": 0.98, "contrast": 1.10, "haze": 0.66, "haze_begin": 26.0, "haze_end": 135.0, "cloud": Color(1.0, 1.0, 1.0), "cloud_amt": 0.9}
 
 static var _covers: Dictionary = {}
 
@@ -79,13 +81,13 @@ static func apply(env: Environment, sun: DirectionalLight3D, sky_mat: Procedural
 	env.fog_aerial_perspective = 0.0
 	env.fog_sun_scatter = 0.12
 	# ── lumière
-	sun.light_energy = 1.12 if tod == "jour" else 1.08
-	env.ambient_light_color = env.ambient_light_color.lerp(Color(0.56, 0.66, 0.92), 0.45)
-	env.ambient_light_energy = 0.44
+	sun.light_energy = float(lk["sun"]) * (1.0 if tod == "jour" else 0.96)
+	env.ambient_light_color = env.ambient_light_color.lerp(Color(0.56, 0.66, 0.92), float(lk["cool"]))
+	env.ambient_light_energy = float(lk["amb"])
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED     # pas de carte de reflets à calculer
 	# ── image
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.tonemap_exposure = 1.0
+	env.tonemap_exposure = float(lk["expo"])
 	env.tonemap_white = 1.8
 	env.adjustment_enabled = true
 	env.adjustment_saturation = float(pal.get("sat", 1.0)) * float(lk["sat"])

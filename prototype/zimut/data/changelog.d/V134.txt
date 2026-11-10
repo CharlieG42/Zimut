@@ -1,0 +1,3 @@
+V134|Monde 3D du Brasier plus lisible : le sol de cendre, qui virait au noir sur téléphone, est éclairci ; la lumière ambiante et l'exposition sont relevées dans les Nations sombres (Brasier, Ombres).
+V134|Les plaques de teinte du sol sont plus légères hors des Nations herbeuses.
+V134|Noms de lieux et de monstres en 3D : affichés jusqu'à 26 m au lieu de 34, pour moins de textes superposés au loin.
