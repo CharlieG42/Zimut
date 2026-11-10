@@ -15,6 +15,12 @@ peaufinées avant d'en créer d'autres.
 
 ## Mode Tactique
 
+- [x] Fond de scène par nation et cases variées pour Sylve, Brasier, Brumes, Cimes (V144).
+- [ ] Sylve : redessiner les tuiles (calmes / détail / accident) comme les trois autres nations.
+- [ ] Décor non bloquant au milieu du plateau, flancs de falaise plus travaillés.
+- [ ] Teinte d'ambiance par nation sur les personnages, ombres au sol plus marquées.
+- [ ] Fond de scène des six autres nations.
+
 - [ ] Aperçu des dégâts sur la cible avant de valider un sort.
 - [ ] Frise de l'ordre des tours.
 - [ ] IA par type d'ennemi (fonceur, tireur, soigneur).
@@ -46,3 +52,4 @@ peaufinées avant d'en créer d'autres.
       fenêtre est ouverte.
 - [ ] `tests/test_adventure_world.gd` : 16 villes de Conquête ne sont révélées par aucune zone d'Aventure
       (échec antérieur à V142).
+- [ ] `tests/test_bomb_chain.gd` échoue par intermittence (environ 1 lancement sur 3, déjà avant V144).
