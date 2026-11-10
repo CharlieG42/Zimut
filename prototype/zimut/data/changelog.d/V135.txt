@@ -1,0 +1,3 @@
+V135|Carte 2D : quitter vers « Mes Parties » ou vers un combat arrête proprement la marche en cours et attend la fin des chargements de tuiles en arrière-plan, pour éviter le blocage du jeu après un déplacement.
+V135|Un second appui sur « Mes Parties » pendant le départ est ignoré.
+V135|Le compteur de fluidité s'affiche aussi dans les vues 3D (même réglage que sur la carte 2D), avec en plus le nombre de triangles dessinés.

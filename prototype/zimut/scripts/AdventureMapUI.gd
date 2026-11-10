@@ -144,6 +144,9 @@ var _side_box: VBoxContainer
 var _modal_root: Control = null
 var _modal_canvas: CanvasLayer = null
 var _walking: bool = false
+## V135 : la carte est en train d'être quittée (plus de marche, plus de chargement de tuiles).
+var _leaving: bool = false
+var _walk_tw: Tween = null
 var _walk_s: float = 0.0        # V114 : position (longueur d'arc) courante sur le trajet continu
 var _walk_stop_s: float = 0.0   # V114 : point d'arrêt si blocage en route
 var _pending: Vector2i = Vector2i(-1, -1)      # destination en attente de confirmation (appui tactile)
@@ -499,7 +502,7 @@ func _on_action_pressed() -> void:
 func _process(_delta: float) -> void:
 	if _perf_lbl != null:
 		_perf_tick(_delta)
-	if not _dio_chunks.is_empty():
+	if not _dio_chunks.is_empty() and not _leaving:
 		_dio_clock += _delta
 		if _dio_sync or _dio_pending or _dio_clock >= 0.15:
 			_dio_clock = 0.0
@@ -1597,6 +1600,7 @@ func _walk(path: Array[Vector2i]) -> void:
 	_walk_s = 0.0
 	_walk_stop_s = total_len
 	var tw := create_tween()
+	_walk_tw = tw
 	tw.tween_method(func(f: float) -> void:
 		var s: float = clampf(f, 0.0, 1.0) * total_len
 		if s > _walk_stop_s:
@@ -1638,6 +1642,8 @@ func _walk(path: Array[Vector2i]) -> void:
 		if not _pan_moved:
 			_focus_cell(step, true, step_time)
 		await _walk_until(tw, float(cum[j + 1]))   # arrivée sur la case
+		if _leaving or not is_inside_tree():
+			return                                # V135 : la carte est quittée, on ne touche plus à rien
 		if not tw.is_running():
 			break
 		if not fresh.is_empty():
@@ -1740,7 +1746,7 @@ func _smooth_path(pts: Array[Vector2]) -> Array[Vector2]:
 
 ## V114 : attend que le trajet continu atteigne la longueur d'arc target_s (ou que la tween meure).
 func _walk_until(tw: Tween, target_s: float) -> void:
-	while tw.is_valid() and tw.is_running() and _walk_s < target_s:
+	while not _leaving and is_inside_tree() and tw.is_valid() and tw.is_running() and _walk_s < target_s:
 		await get_tree().process_frame
 
 
@@ -2191,7 +2197,7 @@ func _start_combat(poi: Dictionary) -> void:
 		manager.state["pending_level"] = manager.challenge_level(poi)
 	manager.persist()
 	GameManager.fight_biome = manager.zone_biome()
-	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
+	_leave_scene("res://scenes/TeamSelection.tscn")
 
 
 ## V104 : portail scellé tant que le donjon final de la Nation n'est pas vaincu.
@@ -2343,7 +2349,7 @@ func _confirm_mob(g: Dictionary) -> void:
 		_close_modal()
 		manager.start_mob_combat(g)
 		GameManager.fight_biome = manager.zone_biome()
-		get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
+		_leave_scene("res://scenes/TeamSelection.tscn"))
 	row.add_child(go)
 	var later := U.btn("PLUS TARD", U.C_BORDER, 20, Vector2(200, 60))
 	later.pressed.connect(_close_modal)
@@ -2491,7 +2497,7 @@ func _show_event(ev: Dictionary) -> void:
 			_close_modal()
 			manager.start_event_combat(ev)
 			GameManager.fight_biome = manager.zone_biome()
-			get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn"))
+			_leave_scene("res://scenes/TeamSelection.tscn"))
 		row.add_child(fight)
 		var flee := U.btn("CONTOURNER", U.C_BORDER, 19, Vector2(200, 58))
 		flee.pressed.connect(func() -> void:
@@ -2839,9 +2845,43 @@ func _on_cities_revealed(city_ids: Array) -> void:
 
 
 func _back_to_save() -> void:
+	if _leaving:
+		return
 	PlayTimer.flush()
 	manager.persist()
-	get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
+	_leave_scene("res://scenes/SaveSlots.tscn")
+
+
+## V135 : quitte la carte proprement. La marche en cours est arrêtée, plus aucune tuile n'est demandée, et l'on
+## attend (3 s au plus) que les tuiles déjà demandées en arrière-plan aient fini de charger avant de changer de
+## scène : changer de scène pendant ces chargements pouvait figer le jeu sur téléphone.
+func _leave_scene(scene_path: String) -> void:
+	if _leaving:
+		return
+	_leaving = true
+	_walking = false
+	if _walk_tw != null and _walk_tw.is_valid():
+		_walk_tw.kill()
+	var t0: int = Time.get_ticks_msec()
+	while is_inside_tree() and Time.get_ticks_msec() - t0 < 3000 and _drain_tile_loads() > 0:
+		await get_tree().process_frame
+	if is_inside_tree():
+		get_tree().change_scene_to_file(scene_path)
+
+
+## Récupère les tuiles dont le chargement en arrière-plan est terminé ; retourne le nombre encore en cours.
+func _drain_tile_loads() -> int:
+	var busy: int = 0
+	for ch: Dictionary in _dio_chunks:
+		if not bool(ch["req"]):
+			continue
+		var path: String = ch["path"]
+		if ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			busy += 1
+		else:
+			ResourceLoader.load_threaded_get(path)      # terminé (ou en échec) : on libère la demande
+			ch["req"] = false
+	return busy
 
 
 # ══════════════════════════════════════════════════════════════════════
