@@ -371,6 +371,16 @@ bornée (teinte ×0,28, luminosité 0,78 à 1,05). Le héros la rejoint en douce
 monstres la reçoivent dans `_refresh_world` (alpha de fondu conservé). Héros et monstres passent en filtrage
 linéaire sur le Diorama. Ombres de contact et liseré existaient déjà (V119) ; la poussière de pas n'est pas faite.
 
+### Portail dans le décor et mer de nuages (V131)
+
+Lot 3 du plan d'amélioration graphique. `dungeons3d.py` a un type `portail` (arche de pierre, obélisques, cristaux
+lumineux) posé par `wild96.py` / `layout_brasier.py` pour chaque lieu de `PLACES` dont le nom commence par
+« Portail », 0,6 unité derrière la case du lieu, avec la vue dégagée devant comme pour les donjons. Le
+tourbillon (ouvert / scellé) reste dessiné par le jeu dans l'ouverture ; l'ancienne arche dessinée par-dessus
+est retirée sur le Diorama. Les deux Nations sont régénérées (rendu, `bake96.py`, `fx_masks.py`,
+`light_map.py`). Le calque « ciel » de `DioramaFx` dessine aussi une mer de nuages hors de l'île
+(`sea_col` / `sea_amt` par Nation). Les médaillons de lieux, déjà travaillés (V114 / V119), ne sont pas refaits.
+
 ### Position des donjons dans une Nation (V122)
 
 Règle pour **toutes** les Nations (Sylve, Brasier et les suivantes) : un donjon dans chacun des quatre

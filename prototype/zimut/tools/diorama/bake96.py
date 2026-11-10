@@ -95,10 +95,10 @@ for o in objs:
 for kind, cx, cz, w, h, ang in FIELDS:
     block_rect(cx, cz, w, h, ang, 0.1)
 # lac
-if LAKE:
-    _a = math.radians(LAKE[4])
-    _u = (X - LAKE[0]) * math.cos(_a) + (Z - LAKE[1]) * math.sin(_a); _v = -(X - LAKE[0]) * math.sin(_a) + (Z - LAKE[1]) * math.cos(_a)
-    block[np.sqrt((_u / (LAKE[2] + 0.3)) ** 2 + (_v / (LAKE[3] + 0.3)) ** 2) < 1.0] = True
+for LK in getattr(W, "LAKES", [LAKE] if LAKE else []):      # plusieurs plans d'eau possibles (marais)
+    _a = math.radians(LK[4])
+    _u = (X - LK[0]) * math.cos(_a) + (Z - LK[1]) * math.sin(_a); _v = -(X - LK[0]) * math.sin(_a) + (Z - LK[1]) * math.cos(_a)
+    block[np.sqrt((_u / (LK[2] + 0.3)) ** 2 + (_v / (LK[3] + 0.3)) ** 2) < 1.0] = True
 if ORCHARD:
     block_rect(ORCHARD[0], ORCHARD[1], ORCHARD[2], ORCHARD[3], 0, 0.0)
 # rivières / lacs de lave (masque en coordonnées monde, 1 = lave), zones interdites (volcan…)

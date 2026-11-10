@@ -43,6 +43,14 @@ func _run() -> void:
 		if n.get("portal") == true:
 			node = n
 	ck(node != null, "nœud du portail présent")
+	ck(node != null and String(node.prop) == "", "V131 : pas d'arche dessinée par-dessus (elle est dans le décor)")
+	# V131 : l'arche est un occultant du décor, posé juste derrière la case du portail
+	var near_occ: bool = false
+	for oc: Dictionary in BA.diorama_occluders("foret_sylve"):
+		var oc_cell: Vector2i = oc["cell"]
+		if absi(oc_cell.x - pc.x) <= 2 and absi(oc_cell.y - pc.y) <= 2:
+			near_occ = true
+	ck(near_occ, "V131 : structure du portail présente dans le décor (occultant voisin)")
 	# plus haut que tous les occultants du décor (arbres, bâtiments découpés)
 	var max_occ: int = 0
 	for oc: Dictionary in BA.diorama_occluders("foret_sylve"):

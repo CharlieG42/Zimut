@@ -139,6 +139,17 @@ for gi, (dname, dkind, dx, dz) in enumerate(W.DUNGEONS):
     occupied.append((dx, dz, W.DUNGEON_RAD[dkind] + 0.8))
     for k_ in (4.8, 7.4, 10.0):                      # V122 : cône de vue dégagé devant l'entrée (rien ne cache le donjon)
         occupied.append((dx + 0.7071 * k_, dz + 0.7071 * k_, 3.0))
+
+# ── portail vers la Nation suivante (V131) : arche dans le décor, vue dégagée devant (comme les donjons)
+for pi_, (pn_, ppx, ppz) in enumerate([q for q in W.PLACES if q[0].startswith("Portail")]):
+    pax, paz = ppx - 0.7071 * 0.6, ppz - 0.7071 * 0.6
+    for o_ in DG.build("portail", pax, paz, gy, KT, NAT):
+        o_["group"] = "portail%d" % pi_
+        o_["gc"] = [pax, paz]
+        objs.append(o_)
+    occupied.append((pax, paz, 3.4))
+    for k_ in (2.6, 4.8, 7.0):
+        occupied.append((pax + 0.7071 * k_, paz + 0.7071 * k_, 2.6))
 # volcan : lueur du cratère
 vx, vz, vr, vh, cr = W.VOLCANO
 objs.append({"type": "light", "p": [vx, gy(vx, vz) + 1.0, vz], "c": [1.0, 0.45, 0.12], "e": 6.0, "range": 10.0})
