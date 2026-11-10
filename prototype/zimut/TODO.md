@@ -41,10 +41,25 @@ systèmes d'économie. Production par ville et défense chiffrée existent déj�
 
 ### Jeu
 
-- [ ] **Défendre en personne** *(priorité 1)*. Une offensive se règle aujourd'hui par une comparaison de
-      chiffres (défense contre force). Proposer de la jouer en combat Tactique : la garnison fournit des
-      soldats alliés, la muraille des cases d'obstacle, le gouverneur se bat. Victoire = offensive
-      repoussée avec butin ; refuser = résolution chiffrée actuelle.
+- [x] **Défendre en personne** (V145). Une offensive annoncée peut se jouer en combat Tactique ; le niveau
+      des assaillants dépend de la défense de la ville ; le gouverneur peut se battre.
+- [ ] **Défense en personne, suite**. Soldats de la garnison présents sur le plateau comme alliés, muraille
+      en cases d'obstacle, général en personne (boss) quand il mène l'offensive.
+- [ ] **Empire vivant en l'absence du joueur** *(à valider avant de coder)*. Objectif : jouer la Conquête
+      fait progresser, la délaisser fait perdre des villes peu à peu.
+      - *Absence* : au retour après plus de X jours sans bataille de Conquête, le jeu simule les
+        offensives manquées, une par tranche de Y jours, contre les villes les moins défendues.
+      - *Garde-fous proposés* : délai de grâce (X = 3 jours ?) ; au plus une ville perdue par tranche et un
+        plafond par retour (2 villes ?) ; jamais la capitale ; une ville bien gardée tient toute seule ;
+        ville perdue = « perdue » au sens actuel (reprise en une bataille, ruinée).
+      - *Retour* : écran « Pendant votre absence » qui raconte ce qui s'est passé, et la dernière offensive
+        laissée en attente pour être défendue en personne.
+      - *Récompenser la présence* : impôts qui s'accumulent dans les villes (plafonnés à quelques jours),
+        à encaisser en revenant ; première bataille de Conquête du jour avec butin doublé.
+      - *Sans se connecter* : offensives aléatoires aussi pendant qu'on joue aux autres modes (compteur en
+        victoires d'Aventure ou de Tactique), pour que l'empire vive même sans ouvrir la Conquête.
+      - *Points à trancher* : valeurs de X et Y ; plafond de pertes ; notification Android avant une
+        offensive ; que faire si l'horloge du téléphone est modifiée.
 - [ ] **Nation complète**. Tenir toutes les villes d'une Nation donne un bonus permanent valable dans les
       trois modes (par exemple résistance à l'élément de la Nation, ou remise à la forge). Donne un but
       intermédiaire sur une carte de 46 villes.

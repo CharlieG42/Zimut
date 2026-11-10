@@ -1316,6 +1316,95 @@ static func _tick_threat(data: Dictionary, conq: Dictionary, rng: RandomNumberGe
 	conq.erase("threat")
 	resolve_assault(data, conq, id, int(th.get("power", 10)))
 
+# ── Défendre en personne (V145) ─────────────────────────────────────────
+# Une offensive annoncée peut être jouée en combat Tactique au lieu d'attendre la comparaison de
+# chiffres. La préparation compte toujours : plus la défense de la ville est haute face à la force
+# ennemie, plus les assaillants sont faibles. Une seule tentative par offensive ; perdre (ou quitter)
+# ne coûte rien de plus : l'offensive suit son cours et se règle aux chiffres à l'échéance.
+
+const DEFEND_LEVEL_STEP := 5.0     ## points d'écart force / défense pour 1 niveau d'assaillants
+const DEFEND_LEVEL_MIN := -3       ## ville bien préparée : assaillants jusqu'à 3 niveaux sous l'équipe
+const DEFEND_LEVEL_MAX := 4        ## ville négligée : jusqu'à 4 niveaux au-dessus
+const DEFEND_LOOT_BONUS := 1.5     ## butin d'une offensive repoussée en personne (×1,5)
+
+## L'offensive en cours peut-elle être jouée ? (une tentative par offensive)
+static func can_defend(conq: Dictionary) -> bool:
+	var th: Dictionary = threat(conq)
+	return not th.is_empty() and not bool(th.get("fought", false)) \
+		and (conq.get("owned", []) as Array).has(String(th.get("city", "")))
+
+## Niveau des assaillants si l'on défend en personne (0 sans offensive).
+static func defense_battle_level(data: Dictionary, conq: Dictionary) -> int:
+	var th: Dictionary = threat(conq)
+	if th.is_empty():
+		return 0
+	var gap: int = int(th.get("power", 0)) - defense(data, String(th.get("city", "")))
+	return maxi(1, team_avg_level(data) + clampi(int(ceil(float(gap) / DEFEND_LEVEL_STEP)), DEFEND_LEVEL_MIN, DEFEND_LEVEL_MAX))
+
+## Prépare le combat de défense (la ville menacée devient le lieu du combat). "" si tout va bien.
+static func start_defense(data: Dictionary, conq: Dictionary) -> String:
+	if not can_defend(conq):
+		return "Aucune offensive à repousser en personne."
+	var th: Dictionary = threat(conq)
+	conq["pending_city"] = String(th["city"])
+	conq["pending_level"] = defense_battle_level(data, conq)
+	conq["pending_defense"] = true
+	conq.erase("pending_tactic")
+	data["conquest"] = conq
+	return ""
+
+static func is_defense_battle(conq: Dictionary) -> bool:
+	return bool(conq.get("pending_defense", false))
+
+## Le combat de défense a réellement commencé (le plateau est posé) : la tentative est engagée.
+static func mark_defense_started(conq: Dictionary) -> void:
+	if is_defense_battle(conq):
+		conq["defense_started"] = true
+
+## Retour sur la carte avec une défense non résolue : abandon si le combat avait commencé (tentative
+## consommée), simple annulation sinon (retour depuis le choix de l'équipe).
+static func settle_unresolved_defense(data: Dictionary, conq: Dictionary) -> void:
+	if not is_defense_battle(conq):
+		return
+	if bool(conq.get("defense_started", false)):
+		defense_lost(data, conq)
+	else:
+		_clear_defense(conq)
+		data["conquest"] = conq
+
+static func _clear_defense(conq: Dictionary) -> void:
+	conq.erase("pending_defense")
+	conq.erase("defense_started")
+	conq.erase("pending_level")
+	conq["pending_city"] = ""
+
+## Victoire en défense : l'offensive est brisée, la garnison intacte. Renvoie {city, power, loot, general}.
+static func defense_won(data: Dictionary, conq: Dictionary) -> Dictionary:
+	var th: Dictionary = threat(conq)
+	_clear_defense(conq)
+	if th.is_empty():
+		return {}
+	var power: int = int(th.get("power", 10))
+	var loot: int = int(round(float(20 + power * 3) * DEFEND_LOOT_BONUS))
+	data["gold"] = int(data.get("gold", 0)) + loot
+	conq.erase("threat")
+	conq["threat_cd"] = 0
+	conq["defended_in_person"] = int(conq.get("defended_in_person", 0)) + 1
+	data["conquest"] = conq
+	return {"city": String(th.get("city", "")), "power": power, "loot": loot, "general": String(th.get("general", ""))}
+
+## Défaite ou abandon en défense : la tentative est consommée, l'offensive suit son cours.
+static func defense_lost(data: Dictionary, conq: Dictionary) -> void:
+	var th: Dictionary = threat(conq)
+	_clear_defense(conq)
+	if not th.is_empty():
+		th["fought"] = true
+		conq["threat"] = th
+		note(conq, "⚔ La sortie a échoué à %s : l'offensive (force %d) continue. Renforcez la ville avant l'échéance." % [
+			_name(conq, String(th.get("city", ""))), int(th.get("power", 0))])
+	data["conquest"] = conq
+
+
 ## Résolution d'une offensive : repoussée, brèche, ou ville perdue.
 static func resolve_assault(data: Dictionary, conq: Dictionary, id: String, power: int) -> String:
 	var d: int = defense(data, id)

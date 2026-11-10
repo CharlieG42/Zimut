@@ -2333,6 +2333,12 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 	if mode == "conquest":
 		var conquest: Dictionary = data.get("conquest", {})
 		var pending: String = String(conquest.get("pending_city", ""))
+		# V145 : combat de DÉFENSE gagné — l'offensive est brisée ; ce n'est pas un siège.
+		var defended: Dictionary = {}
+		if ConquestSystem.is_defense_battle(conquest):
+			defended = ConquestSystem.defense_won(data, conquest)
+			conquest = data.get("conquest", conquest)
+			pending = ""
 		var just_conquered: String = pending
 		if pending != "":
 			var sieges: Dictionary = conquest.get("sieges", {})
@@ -2414,6 +2420,17 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 				unrevealed.append(cid)
 		ConquestSystem.after_victory(data, conquest, _rng, CONQUEST_ROUTES, names, just_conquered, unrevealed)
 		conquest = data.get("conquest", conquest)
+		if not defended.is_empty():
+			var who: String = String(defended.get("general", ""))
+			var txt: String = "★ OFFENSIVE BRISÉE EN PERSONNE à %s%s ! Garnison intacte. Butin : +%d or." % [
+				conquest_city_name(String(defended["city"])), (" — %s bat en retraite" % who) if who != "" else "", int(defended["loot"])]
+			var news: Array = conquest.get("news", [])
+			news.push_front(txt)
+			conquest["news"] = news
+			ConquestSystem.log_event(conquest, txt)
+			conquest_add_event(conquest, "Offensive brisée en personne : %s" % conquest_city_name(String(defended["city"])))
+			conquest["last_defense"] = defended
+			data["conquest"] = conquest
 		var newly_revealed: Array = conquest.get("missions_revealed", [])
 		if not newly_revealed.is_empty():
 			var adv2: Dictionary = data.get("adventure", {})
@@ -3766,6 +3783,15 @@ func _apply_campaign_defeat(data: Dictionary) -> void:
 		# progression) : le joueur peut retenter la bataille perdue.
 		var conquest: Dictionary = data.get("conquest", {})
 		conquest.erase("pending_tactic")
+		# V145 : défense en personne perdue — la tentative est consommée, l'offensive suit son cours.
+		if ConquestSystem.is_defense_battle(conquest):
+			var names: Dictionary = {}
+			for cid: String in CONQUEST_CITIES.keys():
+				names[cid] = String(CONQUEST_CITIES[cid].get("name", cid))
+			conquest["_names"] = names
+			ConquestSystem.defense_lost(data, conquest)
+			conquest = data.get("conquest", conquest)
+			conquest.erase("_names")
 		data["conquest"] = conquest
 	elif mode == "adventure":
 		var adventure: Dictionary = data.get("adventure", {})

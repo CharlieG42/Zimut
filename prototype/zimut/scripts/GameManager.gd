@@ -500,10 +500,13 @@ func init_entities() -> void:
 			if String(conquest.get("pending_city", "")) == "donjon_roi" \
 					and ConquestSystem.living_generals_count(conquest) == 0:
 				lvl = maxi(1, lvl - 3)
-			# Un général vivant durcit le siège de sa forteresse (+3 niveaux).
-			lvl = maxi(1, lvl + ConquestSystem.general_defense_bonus(conquest, String(conquest.get("pending_city", ""))))
-			# Reconquête ennemie : la garnison adverse durcit les batailles.
-			lvl = maxi(1, lvl + ConquestSystem.enemy_garrison_bonus(conquest, String(conquest.get("pending_city", ""))))
+			# V145 : en défense de sa propre ville, le niveau vient de l'écart force / défense, sans bonus de siège.
+			ConquestSystem.mark_defense_started(conquest)
+			if not ConquestSystem.is_defense_battle(conquest):
+				# Un général vivant durcit le siège de sa forteresse (+3 niveaux).
+				lvl = maxi(1, lvl + ConquestSystem.general_defense_bonus(conquest, String(conquest.get("pending_city", ""))))
+				# Reconquête ennemie : la garnison adverse durcit les batailles.
+				lvl = maxi(1, lvl + ConquestSystem.enemy_garrison_bonus(conquest, String(conquest.get("pending_city", ""))))
 	# En Aventure, le défi en cours (POI) fixe le niveau du combat : le
 	# brouillard, les POI et les zones sont dans ProgressionManager/AdventureManager.
 	if not active_save.is_empty() and String(active_save.get("campaign_mode", "")) == "adventure":
@@ -536,7 +539,7 @@ func init_entities() -> void:
 	if campaign_mode == "conquest" and not active_save.is_empty():
 		var cqst: Dictionary = active_save.get("conquest", {})
 		var target: String = String(cqst.get("pending_city", ""))
-		if target != "" and ProgressionManager.conquest_siege_is_boss(cqst, target):
+		if target != "" and not ConquestSystem.is_defense_battle(cqst) and ProgressionManager.conquest_siege_is_boss(cqst, target):
 			conquest_siege_boss = true
 			boss_fight = true
 			fight_is_boss = true

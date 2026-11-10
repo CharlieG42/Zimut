@@ -92,6 +92,11 @@ func _is_locked(classe: String) -> bool:
 func _is_stationed(classe: String) -> bool:
 	if GameManager.active_save.is_empty():
 		return false
+	# V145 : en défense de sa propre ville, le gouverneur se bat avec l'équipe.
+	var cq: Dictionary = GameManager.active_save.get("conquest", {})
+	if ConquestSystem.is_defense_battle(cq) and ConquestSystem.hero_city(cq, classe) == String(cq.get("pending_city", "")) \
+			and String(cq.get("pending_city", "")) != "":
+		return false
 	return ProgressionManager.conquest_busy_heroes(GameManager.active_save).has(classe)
 
 func _load_classes() -> void:
@@ -690,7 +695,8 @@ func refresh() -> void:
 		if pending != "":
 			biome = ProgressionManager.conquest_city_biome(pending)
 			city_name = ProgressionManager.conquest_city_name(pending)
-			boss_fight = ProgressionManager.conquest_siege_is_boss(GameManager.active_save.get("conquest", {}), pending)
+			boss_fight = ProgressionManager.conquest_siege_is_boss(GameManager.active_save.get("conquest", {}), pending) \
+				and not ConquestSystem.is_defense_battle(GameManager.active_save.get("conquest", {}))
 	# Aventure : le défi se joue dans le biome de la zone explorée, au niveau du POI.
 	var challenge_name: String = ""
 	if not GameManager.active_save.is_empty() \
