@@ -363,7 +363,19 @@ Troisième Nation en Diorama : `plan_brumes.py` + `layout_brumes.py` (ambiance `
 `ruine`, `pilotis`, `souche` aux quatre coins et `tour_brume` au centre (types ajoutés à `dungeons3d.py`),
 vue dégagée jusqu'à 12,8 unités devant chaque entrée. Gardiens `Brumes#1` à `Brumes#4` puis `Brumes` (niveau 31).
 Sorties : « Sentier des Cendres » (retour) et « Portail vers les Cimes ». Test : `tests/test_brumes_diorama.gd`.
-Les Nations suivantes (Cimes…) gardent leur carte générée.
+Les Nations suivantes (Vents…) gardent leur carte.
+
+### Carte Diorama des Hauts Pics du Givre (V141)
+
+Quatrième Nation en Diorama : `plan_cimes.py` + `layout_cimes.py` (ambiance `DIORAMA_MOOD=cimes`, relief
+`DIORAMA_AMP=3.0`), `BoardArt.DIORAMA_BOARDS["montagne_pics"]`. Sol enneigé, lac gelé (infranchissable),
+pinèdes sombres, blocs de roche, cristaux de glace lumineux, hameau aux toits blancs. Donjons : `sanctuaire`
+(Forge Givrée), `grotte` (Caverne du Givre), `tour_brume` (Tour des Runes Violettes), `mine` (Mine d'Or Gelée)
+aux quatre coins et `forteresse` au centre, tous reteintés « givre » par `layout_cimes.py`. Gardiens
+`Montagne#1` à `Montagne#4` puis `Montagne` (niveau 45), comme sur la planche illustrée. Sorties : « Sentier
+des Brumes » (retour) et « Portail vers les Vents ». Ambiance en jeu : `DioramaFx.MOODS["Montagne"]`, neige
+de `SceneryAmbient`. Hors réglage « Diorama », les Cimes gardent leur planche illustrée
+(`montagne_pics_v2`). Test : `tests/test_cimes_diorama.gd`.
 
 ### Brumes : l'aspect brumeux, en Diorama et en 3D (V137)
 

@@ -1,0 +1,4 @@
+V141|Carte Diorama : la Nation des Cimes (Hauts Pics du Givre) a maintenant sa carte en relief, comme la Sylve, le Brasier et les Brumes.
+V141|Paysage enneigé : lac gelé, forêts de pins, rochers, cristaux de glace qui luisent, hameau de montagne ; la neige tombe et des ombres de nuages glissent sur l'île.
+V141|Cinq donjons : Forge Givrée, Caverne du Givre, Tour des Runes Violettes et Mine d'Or Gelée aux quatre coins, Donjon de la Nation Cimes au centre.
+V141|Deux sorties : le Sentier des Brumes (retour, toujours ouvert) et le Portail vers les Vents, scellé tant que le Gardien des Cimes règne.
