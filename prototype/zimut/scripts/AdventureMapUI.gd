@@ -1145,6 +1145,28 @@ func _focus_cell(c: Vector2i, animated: bool, dur: float = 0.25) -> void:
 		_world.position = target
 
 
+## V140 : part de l'écran (de chaque côté) où le héros se déplace sans que la caméra bouge.
+const CAM_FREE_ZONE := 0.30
+
+## V140 : suivi du héros avec zone libre. Tant que le héros reste dans le rectangle central de la vue (30 % de
+## marge de chaque côté), la caméra ne bouge pas ; dès qu'il en sort, elle glisse juste assez pour le garder au
+## bord de ce rectangle. Appelé à chaque image de la marche : mouvement continu, sans à-coup par case.
+func _follow_hero() -> void:
+	if not _scroll_mode or _map_view == null or _hero == null:
+		return
+	if _cam_tween != null and _cam_tween.is_valid():
+		_cam_tween.kill()
+	var view: Vector2 = _map_view.size
+	var hp: Vector2 = _world.position + _hero.position * _world.scale.x
+	var lo: Vector2 = view * CAM_FREE_ZONE
+	var hi: Vector2 = view * (1.0 - CAM_FREE_ZONE)
+	var shift := Vector2(
+		(lo.x - hp.x) if hp.x < lo.x else ((hi.x - hp.x) if hp.x > hi.x else 0.0),
+		(lo.y - hp.y) if hp.y < lo.y else ((hi.y - hp.y) if hp.y > hi.y else 0.0))
+	if shift != Vector2.ZERO:
+		_world.position = _clamp_cam(_world.position + shift * 0.2)      # rattrapage adouci (pas de saut si la vue était ailleurs)
+
+
 func _recenter(animated: bool) -> void:
 	_focus_cell(manager.hero_pos(), animated, 0.3)
 
@@ -1616,6 +1638,8 @@ func _walk(path: Array[Vector2i]) -> void:
 			var c0: Vector2i = path[maxi(0, k - 1)]
 			var c1: Vector2i = path[mini(path.size() - 1, k)]
 			_hero.scale = _hero_depth_scale(c0).lerp(_hero_depth_scale(c1), lt)
+		if not _pan_moved:
+			_follow_hero()                    # V140 : la caméra ne bouge que si le héros approche d'un bord
 	, 0.0, 1.0, dur).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	for j: int in range(path.size()):
 		var step: Vector2i = path[j]
@@ -1638,8 +1662,6 @@ func _walk(path: Array[Vector2i]) -> void:
 			_hero.z_index = _depth(step) + 2
 		_after_step()
 		_perf_t("pas", t_step)
-		if not _pan_moved:
-			_focus_cell(step, true, step_time)
 		await _walk_until(tw, float(cum[j + 1]))   # arrivée sur la case
 		if _leaving or not is_inside_tree():
 			return                                # V135 : la carte est quittée, on ne touche plus à rien
