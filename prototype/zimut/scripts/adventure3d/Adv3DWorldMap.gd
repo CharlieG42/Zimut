@@ -49,23 +49,25 @@ func _draw() -> void:
 	for z: String in zones.keys():
 		var np: Vector2 = NATION_POS.get(z, Vector2(0.5, 0.5))
 		pos[z] = r_map.position + np * r_map.size
-	# Portails entre nations : vert ouvert, rouge fermé (pointillés)
-	for z2: String in zones.keys():
-		for dir: String in ["E", "S"]:
-			var nb: String = AdventureTerrain.neighbor(z2, dir)
-			if nb == "" or not pos.has(nb):
-				continue
-			var open: bool = ProgressionManager.adventure_gate_open(_state, z2, nb)
-			var col: Color = Color(0.30, 0.95, 0.55, 0.95) if open else Color(0.95, 0.35, 0.30, 0.9)
-			var a: Vector2 = pos[z2]
-			var b: Vector2 = pos[nb]
-			if open:
-				draw_line(a, b, Color(0, 0, 0, 0.45), 5.0)
-				draw_line(a, b, col, 2.5)
-			else:
-				var steps: int = int(a.distance_to(b) / 16.0)
-				for i: int in range(0, steps, 2):
-					draw_line(a.lerp(b, float(i) / float(maxi(1, steps))), a.lerp(b, float(i + 1) / float(maxi(1, steps))), col, 4.0)
+	# Portails entre nations, le long de l'ordre de progression : vert = ouvert, rouge pointillé = scellé.
+	# V142 : un portail n'est ouvert que si la Nation d'arrivée est accessible (tous les donjons de la
+	# précédente terminés) ; le tracé se courbe pour ne pas passer sous le médaillon d'une autre Nation.
+	var chain: Array[String] = ProgressionManager.adventure_chain()
+	for ci: int in range(chain.size() - 1):
+		var z2: String = chain[ci]
+		var nb: String = chain[ci + 1]
+		if not pos.has(z2) or not pos.has(nb):
+			continue
+		var open: bool = unlocked.has(z2) and unlocked.has(nb)
+		var col: Color = Color(0.30, 0.95, 0.55, 0.95) if open else Color(0.95, 0.35, 0.30, 0.9)
+		var pts: PackedVector2Array = _link_curve(pos[z2], pos[nb], pos, z2, nb)
+		if open:
+			draw_polyline(pts, Color(0, 0, 0, 0.45), 5.0, true)
+			draw_polyline(pts, col, 2.5, true)
+		else:
+			for i: int in range(0, pts.size() - 1, 2):
+				draw_line(pts[i], pts[i + 1], Color(0, 0, 0, 0.5), 7.0)
+				draw_line(pts[i], pts[i + 1], col, 4.0)
 	# Nations : médaillon de la couleur du biome, nom + niveau
 	var fs: int = int(clampf(r_map.size.x * 0.017, 13.0, 24.0))
 	for z3: String in zones.keys():
@@ -103,3 +105,29 @@ func _draw() -> void:
 	draw_arc(Vector2(380, ly), 8, 0.0, TAU, 20, Color(1.0, 0.85, 0.30), 4.0)
 	draw_string(f, Vector2(394, ly + 6), "nation courante", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.9, 0.9, 0.9))
 	draw_string(f, Vector2(564, ly + 6), "🔒 nation verrouillée", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.9, 0.9, 0.9))
+
+
+## Courbe (Bézier quadratique) entre deux Nations, bombée du côté qui s'éloigne le plus des autres médaillons.
+func _link_curve(a: Vector2, b: Vector2, pos: Dictionary, za: String, zb: String) -> PackedVector2Array:
+	var mid: Vector2 = (a + b) * 0.5
+	var normal: Vector2 = (b - a).orthogonal().normalized()
+	var bow: float = a.distance_to(b) * 0.16
+	var best := PackedVector2Array()
+	var best_clear: float = -1.0
+	for sgn: float in [0.0, 1.0, -1.0]:
+		var ctrl: Vector2 = mid + normal * bow * sgn
+		var pts := PackedVector2Array()
+		var clear: float = INF
+		for i: int in range(41):
+			var t: float = float(i) / 40.0
+			var p: Vector2 = a.lerp(ctrl, t).lerp(ctrl.lerp(b, t), t)
+			pts.append(p)
+			for z: String in pos.keys():
+				if z != za and z != zb:
+					clear = minf(clear, p.distance_to(pos[z]))
+		if sgn == 0.0 and clear > a.distance_to(b) * 0.12:
+			return pts          # la ligne droite est déjà dégagée
+		if clear > best_clear:
+			best_clear = clear
+			best = pts
+	return best

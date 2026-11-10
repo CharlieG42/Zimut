@@ -211,3 +211,11 @@ bucket « openworld »), mini-carte. Test : `tests/test_adventure_open3d.gd`.
 - `Adv3DHeroModel.make_player(classe)` : KayKit si disponible, sinon héros procédural (`make_hero`, toujours utilisé par les tests de la V90).
 - Non fait : armes en main (assets `Assets/` du pack : épée, arc, bâton…), animations de combat/sort (absentes de la version gratuite), Universal Animation Library (squelette différent).
 - Outil : `tests/shot_kaykit.gd <dossier>` (10 classes : repos, marche, course).
+
+## V142 — 5 donjons, portails par les donjons, sentiers, neige des Cimes
+
+Voir `AMELIORATIONS_V142.md`. En bref : le monde généré pose les paliers 1 à 4 et le Gardien (5 donjons par
+Nation, comme en 2D) ; un portail ne s'ouvre que lorsque tous les donjons de la Nation sont terminés, sans
+condition de niveau (`ProgressionManager.adventure_gate_open`) ; les sentiers forment un réseau qui ondule
+(`AdventureTerrain._trail_network`) ; les Cimes reçoivent de la neige sur le décor (paramètre global de
+shader `zimut_snow`). Chantiers suivants : `TODO.md`.

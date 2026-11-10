@@ -38,13 +38,17 @@ func _boot() -> void:
 	check(AT.walkable(z, p) and not AT.find_path(z, BA.start(z), p).is_empty(), "portail jouable et accessible")
 	# scellé
 	mgr.state["hero_pos"] = [p.x, p.y]
-	check(not mgr.portal_lock(poi).is_empty() and String(mgr.portal_lock(poi).get("name", "")) == "Donjon de la Nation Sylvestre", "scellé : attend le donjon final")
+	check(not mgr.portal_lock(poi).is_empty() and (mgr.portal_lock(poi).get("left", []) as Array).size() == 5, "scellé : attend les 5 donjons de la Nation")
 	var cmd: Dictionary = mgr.interact()
 	check(String(cmd.get("action", "")) == "portal_locked", "interaction : portail scellé")
 	check(not (mgr.state.get("zones_unlocked", []) as Array).has(String(poi["to"])), "zone suivante pas encore ouverte")
 	# un palier inférieur terminé ne suffit pas
 	mgr.state["dungeons"] = {"Forêt#4": {"clears": 1, "boss_kills": 1}}
 	check(not mgr.portal_lock(poi).is_empty(), "palier 4 terminé : portail toujours scellé")
+	# V142 : le donjon final seul ne suffit pas, il faut les cinq
+	mgr.state["dungeons"] = {"Forêt": {"clears": 1, "boss_kills": 1}}
+	check(not mgr.portal_lock(poi).is_empty() and String(mgr.portal_lock(poi).get("name", "")) == "Grotte de la Feuille", "donjon final seul : portail scellé, il manque les paliers")
+	mgr.state["dungeons"] = {"Forêt#1": {"clears": 1, "boss_kills": 1}, "Forêt#2": {"clears": 1, "boss_kills": 1}, "Forêt#3": {"clears": 1, "boss_kills": 1}, "Forêt#4": {"clears": 1, "boss_kills": 1}}
 	# victoire du donjon final : la Nation suivante s'ouvre
 	var res_adv: Dictionary = mgr.state
 	res_adv["zone"] = z
@@ -73,8 +77,6 @@ func _boot() -> void:
 			continue
 		expected += 1
 	check(int(prog["total"]) == expected, "le portail et les camps ne comptent pas dans les lieux à explorer (%d attendu %d)" % [int(prog["total"]), expected])
-	# une fois débloqué, le portail reste ouvert même si le compteur de donjon est perdu
-	mgr.state["dungeons"] = {}
-	check(mgr.portal_lock(poi).is_empty(), "portail toujours ouvert une fois la zone débloquée")
+	check(mgr.portal_lock(poi).is_empty(), "portail toujours ouvert une fois la Nation terminée")
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)

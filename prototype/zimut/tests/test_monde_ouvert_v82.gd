@@ -31,7 +31,7 @@ func _boot() -> void:
 			if g != "":
 				tiers[D.tier(g)] = g
 		check(inside, "%s : tous les lieux dans la zone" % z)
-		check(tiers.size() == 3 and tiers.has(2) and tiers.has(4) and tiers.has(5), "%s : 3 donjons (paliers 2, 4 et Gardien)" % z)
+		check(tiers.size() == 5 and tiers.has(1) and tiers.has(2) and tiers.has(3) and tiers.has(4) and tiers.has(5), "%s : 5 donjons (paliers 1 à 4 et Gardien), comme en 2D" % z)
 		var t: Dictionary = AT.zone_terrain(z)
 		var bad := 0
 		for k2: String in pois.keys():

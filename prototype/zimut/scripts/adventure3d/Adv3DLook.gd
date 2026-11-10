@@ -18,7 +18,9 @@ const NATION := {
 	"Ombres": {"amb": 0.62, "cool": 0.20, "expo": 1.08, "sat": 1.0, "contrast": 1.08, "haze": 0.85, "haze_begin": 12.0, "haze_end": 85.0, "cloud": Color(0.40, 0.36, 0.52), "cloud_amt": 0.7},
 	"Donjon": {"amb": 0.62, "cool": 0.20, "expo": 1.08, "sat": 1.0, "contrast": 1.08, "haze": 0.85, "haze_begin": 12.0, "haze_end": 85.0, "cloud": Color(0.38, 0.34, 0.46), "cloud_amt": 0.7},
 	"Désert": {"sat": 1.0, "contrast": 1.10, "haze": 0.62, "haze_begin": 26.0, "haze_end": 140.0, "cloud_amt": 0.35},
-	"Montagne": {"sat": 0.98, "contrast": 1.10, "haze": 0.70, "haze_begin": 22.0, "haze_end": 130.0, "cloud_amt": 0.7},
+	# V142 : soleil plus franc et ambiance bleutée → ombres bleues nettes sur la neige ; exposition retenue (pas de blanc brûlé)
+	"Montagne": {"sat": 1.04, "contrast": 1.08, "haze": 0.62, "haze_begin": 26.0, "haze_end": 135.0, "cloud_amt": 0.6,
+		"amb": 0.48, "cool": 0.62, "sun": 1.14, "expo": 0.94},
 }
 ## V134 : amb = énergie de la lumière ambiante, cool = part de bleu dans l'ambiance, expo = exposition, sun = énergie du
 ## soleil. Les Nations sombres (Brasier, Ombres) gardent plus d'ambiance : sinon tout ce qui est à l'ombre devient noir.

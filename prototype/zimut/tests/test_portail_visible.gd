@@ -62,7 +62,7 @@ func _run() -> void:
 	var btn: Button = _find(sc, "PortalShow") as Button
 	ck(btn != null and btn.text.contains("scellé"), "panneau : bouton « Portail scellé · le voir »")
 	# donjon final vaincu : ouvert
-	sc.manager.state["dungeons"] = {"Forêt": {"clears": 1, "boss_kills": 1}}
+	sc.manager.state["dungeons"] = {"Forêt#1": {"clears": 1, "boss_kills": 1}, "Forêt#2": {"clears": 1, "boss_kills": 1}, "Forêt#3": {"clears": 1, "boss_kills": 1}, "Forêt#4": {"clears": 1, "boss_kills": 1}, "Forêt": {"clears": 1, "boss_kills": 1}}
 	sc._refresh_world()
 	sc._refresh_side()
 	await create_timer(0.2).timeout

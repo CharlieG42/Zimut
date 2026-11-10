@@ -2501,8 +2501,9 @@ func _dungeon_victory(data: Dictionary, adventure: Dictionary, key: String, biom
 		if not drops.is_empty():
 			data["inventory"].append(drops[0])
 			res["item"] = drops[0]
-		# V104 : le donjon final (palier 5) ouvre la Nation suivante (portail de la carte)
-		if Dungeons.tier(biome) >= Dungeons.TIERS:
+		# V142 : la Nation suivante s'ouvre quand TOUS les donjons de celle-ci sont terminés (portail de la carte)
+		if adventure_nation_cleared(adventure, String(adventure.get("zone", ""))) \
+				and String(ADVENTURE_ZONES.get(String(adventure.get("zone", "")), {}).get("biome", "")) == nation:
 			var from_zone: String = String(adventure.get("zone", ""))
 			var known: Array = adventure.get("zones_unlocked", [])
 			for next_id: String in ADVENTURE_ZONES.keys():
@@ -2602,6 +2603,18 @@ func adventure_state(data: Dictionary) -> Dictionary:
 		adv["zone"] = "foret_sylve"
 		adv.erase("pos3d")
 		adv.erase("pos3d_zone")
+	# V142 : les zones débloquées suivent la règle des donjons (une ancienne règle ouvrait des Nations
+	# de haut niveau trop tôt). On ne garde que les zones réellement accessibles.
+	var zl3: Array = []
+	for zc: String in adventure_chain():
+		if adventure_zone_accessible(adv, zc):
+			zl3.append(zc)
+	for zo: Variant in zl2:
+		if not adventure_chain().has(String(zo)) and not zl3.has(zo):
+			zl3.append(zo)
+	if zl3.is_empty():
+		zl3 = ["foret_sylve"]
+	adv["zones_unlocked"] = zl3
 	var zone: Dictionary = ADVENTURE_ZONES[String(adv["zone"])]
 	var pos: Array = adv.get("hero_pos", [])
 	# V117 : en carte 2D, la planche peut être bien plus grande que l'île du catalogue (54×36) :
@@ -2719,16 +2732,25 @@ static func pois_of(zone_id: String) -> Dictionary:
 	_pois_cache[zone_id] = out
 	return out
 
-## V82 : donjons de paliers 1 et 2 d'une zone de Nation (le palier 3 est le donjon principal, déjà
-## dans ADVENTURE_POIS). Placés loin du départ, de plus en plus profond dans la zone.
+## Donjons de paliers 1 à 4 d'une zone de Nation du monde généré (vues 3D) ; le palier 5 est le donjon
+## principal, déjà dans ADVENTURE_POIS. V142 : QUATRE donjons de palier, soit 5 donjons par Nation comme
+## sur les planches de la carte 2D (avant : seulement les paliers 2 et 4). Mêmes noms que les planches.
 const DUNGEON_TIER_NAMES := {
-	"Forêt": ["Terrier des Ronces", "Crypte des Racines"], "Brasier": ["Mine de Braise", "Fosse Ardente"],
-	"Brumes": ["Grotte Moussue", "Crypte Spectrale"], "Montagne": ["Mine Gelée", "Caverne du Givre"],
-	"Vents": ["Grotte Venteuse", "Aire des Tempêtes"], "Ombres": ["Caveau Funèbre", "Ossuaire Profond"],
-	"Désert": ["Tombe Ensablée", "Hypogée des Sables"], "Marées": ["Grotte Marine", "Épave Maudite"],
-	"Cristaux": ["Galerie Cristalline", "Géode Profonde"], "Rouages": ["Fonderie Oubliée", "Cœur des Rouages"],
+	"Forêt": ["Grotte de la Feuille", "Antre de la Patte", "Sanctuaire de Cristal", "Crypte du Chêne Noir"],
+	"Brasier": ["Galerie des Scories", "Mine de Braise", "Antre de la Salamandre", "Fosse Ardente"],
+	"Brumes": ["Crypte du Marais Noir", "Ruines englouties", "Cabane des Noyés", "Souche du Vieux Saule"],
+	"Montagne": ["Forge Givrée", "Caverne du Givre", "Tour des Runes Violettes", "Mine d'Or Gelée"],
+	"Vents": ["Nid des Bourrasques", "Grotte Venteuse", "Pont des Rafales", "Aire des Tempêtes"],
+	"Ombres": ["Chapelle Éteinte", "Caveau Funèbre", "Galerie des Murmures", "Ossuaire Profond"],
+	"Désert": ["Puits Asséché", "Tombe Ensablée", "Temple du Scarabée", "Hypogée des Sables"],
+	"Marées": ["Anse aux Coquillages", "Grotte Marine", "Phare Englouti", "Épave Maudite"],
+	"Cristaux": ["Filon Scintillant", "Galerie Cristalline", "Salle des Prismes", "Géode Profonde"],
+	"Rouages": ["Dépôt de Ferraille", "Fonderie Oubliée", "Chaîne de Montage", "Cœur des Rouages"],
 }
-const DUNGEON_TIER_ANCHORS := [Vector2i(21, 25), Vector2i(43, 8)]
+## Ancre de chaque palier (grille 54 × 36), de plus en plus loin du départ. Les paliers 2 et 4 gardent
+## leur place d'avant V142 : ils sont posés en premier (voir DUNGEON_TIER_ORDER).
+const DUNGEON_TIER_ANCHORS := {1: Vector2i(13, 15), 2: Vector2i(21, 25), 3: Vector2i(30, 9), 4: Vector2i(43, 8)}
+const DUNGEON_TIER_ORDER: Array[int] = [2, 4, 1, 3]
 
 
 static func _add_dungeon_tiers(out: Dictionary, meta: Dictionary, w: int, h: int) -> void:
@@ -2739,8 +2761,8 @@ static func _add_dungeon_tiers(out: Dictionary, meta: Dictionary, w: int, h: int
 	if nation == "" or not DUNGEON_TIER_NAMES.has(nation):
 		return
 	var names: Array = DUNGEON_TIER_NAMES[nation]
-	for i: int in range(2):
-		var anchor: Vector2i = DUNGEON_TIER_ANCHORS[i]
+	for tier: int in DUNGEON_TIER_ORDER:
+		var anchor: Vector2i = DUNGEON_TIER_ANCHORS[tier]
 		anchor = Vector2i(clampi(anchor.x * w / 54, 4, w - 5), clampi(anchor.y * h / 36, 4, h - 5))
 		var best := Vector2i(-1, -1)
 		var best_d: float = INF
@@ -2763,9 +2785,8 @@ static func _add_dungeon_tiers(out: Dictionary, meta: Dictionary, w: int, h: int
 					best = c
 		if best.x < 0:
 			continue
-		var tier: int = 2 + i * 2      # monde ouvert : paliers 2 et 4 (le Gardien = 5 ; la planche 2D utilise 1 à 4)
 		var key: String = Dungeons.tier_key(nation, tier)
-		out["%d,%d" % [best.x, best.y]] = {"kind": "combat", "guardian": key, "name": String(names[i]),
+		out["%d,%d" % [best.x, best.y]] = {"kind": "combat", "guardian": key, "name": String(names[tier - 1]),
 			"level": Dungeons.room_level(key, Dungeons.ROOMS),
 			"desc": "Quatre salles, palier %d sur %d : plus bas dans la Nation, la Pierre n'est pas ici." % [tier, Dungeons.TIERS]}
 
@@ -2843,7 +2864,7 @@ func adventure_complete_poi(adv: Dictionary, poi_key: String, kind: String = "")
 	var poi_def: Dictionary = pois_of(zone_id).get(poi_key.substr(zone_id.length() + 1), {})
 	if poi_kind == "exit" and bool(poi_def.get("back", false)):
 		return revealed
-	if poi_kind == "exit":
+	if poi_kind == "exit" and adventure_nation_cleared(adv, zone_id):
 		for next_id: String in ADVENTURE_ZONES.keys():
 			if String(ADVENTURE_ZONES[next_id].get("unlock", "")) == zone_id:
 				var unlocked: Array = adv.get("zones_unlocked", [])
@@ -2944,24 +2965,107 @@ func adventure_gate_cell(zone_id: String, dir: String) -> Vector2i:
 func adventure_gates(zone_id: String) -> Dictionary:
 	return AdventureTerrain.gates_of(zone_id)
 
-## La route vers une carte voisine est-elle ouverte ? Oui si la carte a déjà été
-## visitée, si elle n'est pas plus difficile, ou si le combat clé de la carte de
-## départ (`key_poi`) est remporté.
+## ── Ordre des Nations et accès (V142) ───────────────────────────────────────────────────────────
+## Règle unique, pour toutes les vues (carte 2D, 3D iso, monde ouvert, carte du monde) : une Nation
+## s'ouvre quand TOUS les donjons de la Nation précédente ont été terminés au moins une fois.
+## Aucune condition de niveau. Revenir vers une Nation déjà traversée est toujours permis.
+
+static var _chain_cache: Array[String] = []
+
+## Zones d'Aventure dans l'ordre de progression (chaîne des « unlock »).
+static func adventure_chain() -> Array[String]:
+	if not _chain_cache.is_empty():
+		return _chain_cache
+	var out: Array[String] = []
+	var cur: String = ""
+	for _i: int in range(ADVENTURE_ZONES.size()):
+		var nxt: String = ""
+		for z: String in ADVENTURE_ZONES.keys():
+			if String(ADVENTURE_ZONES[z].get("unlock", "")) == cur and not out.has(z):
+				nxt = z
+				break
+		if nxt == "":
+			break
+		out.append(nxt)
+		cur = nxt
+	_chain_cache = out
+	return out
+
+
+## Clés des donjons d'une zone de Nation (paliers 1 à 5) ; vide si la zone n'a pas de donjon.
+static func adventure_dungeon_keys(zone_id: String) -> Array[String]:
+	var out: Array[String] = []
+	var nation: String = String(ADVENTURE_ZONES.get(zone_id, {}).get("biome", ""))
+	if not DUNGEON_TIER_NAMES.has(nation):
+		return out
+	for t: int in range(1, Dungeons.TIERS + 1):
+		out.append(Dungeons.tier_key(nation, t))
+	return out
+
+
+## Nom affiché d'un donjon (d'après sa clé « Forêt#2 » ou « Forêt »).
+static func adventure_dungeon_name(zone_id: String, dungeon_key: String) -> String:
+	var pois: Dictionary = pois_of(zone_id)
+	for k: String in pois.keys():
+		if String((pois[k] as Dictionary).get("guardian", "")) == dungeon_key:
+			return String(pois[k].get("name", dungeon_key))
+	var nation: String = Dungeons.base(dungeon_key)
+	var t: int = Dungeons.tier(dungeon_key)
+	if t < Dungeons.TIERS and DUNGEON_TIER_NAMES.has(nation):
+		return String((DUNGEON_TIER_NAMES[nation] as Array)[t - 1])
+	return "Donjon de la Nation"
+
+
+## Donjons de la zone jamais terminés (noms, du palier le plus bas au plus haut).
+func adventure_dungeons_left(adv: Dictionary, zone_id: String) -> Array[String]:
+	var out: Array[String] = []
+	for k: String in adventure_dungeon_keys(zone_id):
+		if Dungeons.clears(adv, k) <= 0:
+			out.append(adventure_dungeon_name(zone_id, k))
+	return out
+
+
+## Tous les donjons de la Nation de cette zone ont-ils été terminés au moins une fois ?
+func adventure_nation_cleared(adv: Dictionary, zone_id: String) -> bool:
+	return adventure_dungeons_left(adv, zone_id).is_empty()
+
+
+## Une zone est accessible si c'est la première, si le joueur s'y trouve déjà ou l'a dépassée, ou si
+## la zone précédente est accessible et entièrement terminée.
+func adventure_zone_accessible(adv: Dictionary, zone_id: String) -> bool:
+	var chain: Array[String] = adventure_chain()
+	var idx: int = chain.find(zone_id)
+	if idx < 0:
+		return ADVENTURE_ZONES.has(zone_id)
+	if idx <= chain.find(String(adv.get("zone", ""))):
+		return true
+	for i: int in range(idx):
+		if i >= chain.find(String(adv.get("zone", ""))) and not adventure_nation_cleared(adv, chain[i]):
+			return false
+	return true
+
+
+## La route vers une carte voisine est-elle ouverte ? Retour en arrière : toujours. Vers la Nation
+## suivante : seulement une fois tous les donjons de la Nation de départ terminés (V142).
 func adventure_gate_open(adv: Dictionary, from_zone: String, to_zone: String) -> bool:
-	if (adv.get("zones_unlocked", []) as Array).has(to_zone):
+	var chain: Array[String] = adventure_chain()
+	var fi: int = chain.find(from_zone)
+	var ti: int = chain.find(to_zone)
+	if fi < 0 or ti < 0 or ti <= fi:
 		return true
-	if adventure_zone_level(to_zone) <= adventure_zone_level(from_zone):
-		return true
-	var key_poi: String = String(ADVENTURE_ZONES.get(from_zone, {}).get("key_poi", ""))
-	return key_poi == "" or adventure_poi_completed(adv, "%s,%s" % [from_zone, key_poi])
+	for i: int in range(fi, ti):
+		if not adventure_nation_cleared(adv, chain[i]):
+			return false
+	return true
 
 ## Explication affichée quand une route est fermée ("" si ouverte).
 func adventure_gate_lock_reason(adv: Dictionary, from_zone: String, to_zone: String) -> String:
 	if adventure_gate_open(adv, from_zone, to_zone):
 		return ""
-	var key_poi: String = String(ADVENTURE_ZONES.get(from_zone, {}).get("key_poi", ""))
-	var poi_name: String = String(pois_of(from_zone).get(key_poi, {}).get("name", "le gardien"))
-	return "La route vers %s est gardée : remportez « %s » pour l'ouvrir." % [adventure_zone_name(to_zone), poi_name]
+	var left: Array[String] = adventure_dungeons_left(adv, from_zone)
+	var total: int = adventure_dungeon_keys(from_zone).size()
+	return "Le portail vers %s est scellé : terminez les %d donjons de %s (reste : %s)." % [
+		adventure_zone_name(to_zone), total, adventure_zone_name(from_zone), ", ".join(PackedStringArray(left))]
 
 ## Franchit la porte `dir` de la carte courante : le héros arrive sur la carte
 ## voisine, une case à l'intérieur de la porte opposée. Retourne false si fermée.

@@ -2254,12 +2254,14 @@ func _start_combat(poi: Dictionary) -> void:
 	_leave_scene("res://scenes/TeamSelection.tscn")
 
 
-## V104 : portail scellé tant que le donjon final de la Nation n'est pas vaincu.
+## Portail scellé tant que tous les donjons de la Nation ne sont pas terminés (V142).
 func _show_portal_locked(cmd: Dictionary) -> void:
 	var poi: Dictionary = cmd.get("poi", {})
 	var box: VBoxContainer = _modal("🔒  " + String(poi.get("name", "Portail")), POI_COLOR["exit"])
-	var t: Label = U.lbl("%s\n\nLe portail est scellé. Vainquez « %s » pour l'ouvrir et gagner la Nation suivante." % [
-		String(poi.get("desc", "")), String((cmd.get("lock", {}) as Dictionary).get("name", "le donjon final"))], 18, U.C_TXT)
+	var lock: Dictionary = cmd.get("lock", {})
+	var left: Array = lock.get("left", [String(lock.get("name", "le donjon final"))])
+	var t: Label = U.lbl("%s\n\nLe portail est scellé. Terminez tous les donjons de cette Nation pour l'ouvrir.\nReste à vaincre : %s." % [
+		String(poi.get("desc", "")), ", ".join(PackedStringArray(left))], 18, U.C_TXT)
 	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(t)
 	var ok := U.btn("COMPRIS", U.C_BORDER, 22, Vector2(240, 60))

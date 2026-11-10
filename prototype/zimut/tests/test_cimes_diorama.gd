@@ -106,6 +106,10 @@ func _boot() -> void:
 	var revealed: Array = pm.adventure_complete_poi(adv, "%s,%s" % [z, back_key], "exit")
 	check(revealed.is_empty() and not (adv["zones_unlocked"] as Array).has("vents_plateau"), "prendre le sentier de retour ne débloque pas les Vents")
 	check((adv["zones_unlocked"] as Array).has("brumes_marais"), "les Brumes restent accessibles")
+	# V142 : le portail ne débloque la suite que si les 5 donjons de la Nation sont terminés
+	pm.adventure_complete_poi(adv, "%s,%s" % [z, portal_key], "exit")
+	check(not (adv["zones_unlocked"] as Array).has("vents_plateau"), "V142 : donjons non terminés, le portail ne débloque rien")
+	adv["dungeons"] = {"Montagne#1": {"clears": 1, "boss_kills": 1}, "Montagne#2": {"clears": 1, "boss_kills": 1}, "Montagne#3": {"clears": 1, "boss_kills": 1}, "Montagne#4": {"clears": 1, "boss_kills": 1}, "Montagne": {"clears": 1, "boss_kills": 1}}
 	pm.adventure_complete_poi(adv, "%s,%s" % [z, portal_key], "exit")
 	check((adv["zones_unlocked"] as Array).has("vents_plateau"), "le portail (une fois ouvert) débloque bien les Vents")
 	mgr.queue_free()
