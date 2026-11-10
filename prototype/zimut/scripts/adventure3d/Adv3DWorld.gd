@@ -11,6 +11,8 @@ extends RefCounted
 ## [cy·CELL, (cy+1)·CELL] sur Z. L'axe Y est la hauteur.
 
 const CELL := 3.0
+## V132 : distance (m) jusqu'à laquelle le tapis d'herbe rase est dessiné.
+const NEAR_GRASS_RANGE := 26.0
 const SKIRT := 3.4                 # profondeur de la falaise sous l'île
 const OBSTACLE_RADIUS := 0.95      # rayon bloquant d'un arbre / rocher (< demi-case : les cases restent reliées)
 const HEIGHT_AMPLITUDE := 0.6
@@ -653,6 +655,12 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 		flower_cols = ncell["flowers"]
 	var nat_xf: Dictionary = {}
 	var nat_cl: Dictionary = {}
+	# V132 : tapis d'herbe rase, dense, visible seulement près du joueur (tirage séparé : le reste du décor ne bouge pas)
+	var near_xf: Array = []
+	var near_cl: Array = []
+	var near_rng := RandomNumberGenerator.new()
+	near_rng.seed = absi(zone_id.hash()) + 4127
+	var near_on: bool = not GfxQuality.low() and grass_k >= 0.3
 	for cy: int in range(size.y):
 		for cx: int in range(size.x):
 			var c := Vector2i(cx, cy)
@@ -660,6 +668,13 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 				continue
 			var on_path: bool = (t["paths"] as Dictionary).has(c)
 			var dens: float = _patch(float(cx) * 2.3 + 40.0, float(cy) * 2.3 + 40.0)
+			if near_on and not on_path:
+				for i0: int in range(int((14.0 + dens * 18.0) * minf(grass_k, 1.2))):
+					var p0 := _rand_in_cell(near_rng, c)
+					var s0: float = near_rng.randf_range(0.55, 1.0)
+					near_xf.append(_xf(p0, near_rng.randf() * TAU, Vector3(s0 * 1.3, s0 * near_rng.randf_range(0.7, 1.1), s0 * 1.3)))
+					var v0: float = near_rng.randf_range(0.70, 1.04)
+					near_cl.append(Color(1.0, 0.95, 0.65) * v0 if dry else (tuft_col * v0 if is_nation else Color(v0, v0, v0)))
 			var n_tufts: int = (0 if on_path else int((2.0 + dens * 5.0) * grass_k))
 			if on_path and rng.randf() < 0.35:
 				n_tufts = 1                              # brins sur le bord du sentier
@@ -727,6 +742,7 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 		tuft_xf = keep_xf
 		tuft_cl = keep_cl
 	_multi(root, "Herbes", Adv3DNationMeshes.tuft_neutral() if is_nation else Adv3DMeshes.tuft(), tuft_xf, tuft_cl, foliage)
+	_multi(root, "HerbesProches", Adv3DNationMeshes.tuft_neutral() if is_nation else Adv3DMeshes.tuft(), near_xf, near_cl, foliage)
 	var glow: ShaderMaterial = Adv3DNationMeshes.glow_material()
 	for nk: String in nat_xf.keys():
 		_multi(root, "SolNation_" + nk, Adv3DNationMeshes.mesh_for(nk), nat_xf[nk], nat_cl[nk], glow)
@@ -941,7 +957,7 @@ static func _xf(pos: Vector3, yaw: float, scl: Vector3) -> Transform3D:
 ## Décors de sol nombreux et petits : découpés en carrés de CHUNK mètres (MultiMesh par carré) pour que
 ## le moteur ne dessine que ceux qui sont dans le champ de la caméra et pas trop loin.
 const CHUNK := 15.0
-const CHUNKED := ["Dalles", "Herbes", "HerbesKit", "Fleurs", "Champignons", "Cailloux", "Roseaux", "Buissons", "Nenuphars", "Feuillus", "Pins"]
+const CHUNKED := ["Dalles", "Herbes", "HerbesProches", "HerbesKit", "Fleurs", "Champignons", "Cailloux", "Roseaux", "Buissons", "Nenuphars", "Feuillus", "Pins"]
 
 
 static func _multi(parent: Node3D, node_name: String, mesh: Mesh, xforms: Array, colors: Array, mat: Material) -> void:
@@ -960,6 +976,8 @@ static func _multi(parent: Node3D, node_name: String, mesh: Mesh, xforms: Array,
 			(groups[key][0] as Array).append(xforms[i])
 			(groups[key][1] as Array).append(colors[i])
 		var vis_end: float = 42.0 if GfxQuality.low() else 60.0
+		if node_name == "HerbesProches":
+			vis_end = NEAR_GRASS_RANGE          # V132 : herbe rase, seulement autour du joueur
 		for k: Vector2i in groups.keys():
 			var mmi: MultiMeshInstance3D = _multi_one(parent, "%s_%d_%d" % [node_name, k.x, k.y], mesh, groups[k][0], groups[k][1], mat)
 			mmi.visibility_range_end = vis_end

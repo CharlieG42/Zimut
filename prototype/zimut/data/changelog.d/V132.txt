@@ -1,0 +1,3 @@
+V132|Monde 3D : un tapis d'herbe rase couvre le sol autour du joueur, à la place des touffes isolées sur un sol nu.
+V132|Cette herbe n'est dessinée que dans un rayon de 26 m et ne projette pas d'ombre, pour préserver la fluidité.
+V132|Elle est coupée en qualité « Économie » ; l'herbe haute, les fleurs et le reste du décor ne changent pas de place.

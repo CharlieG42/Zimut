@@ -355,6 +355,15 @@ vue 3D par cases après `Adv3DMeshes.setup_sun` :
 Réglé avec le rendu « mobile » (Vulkan), celui du téléphone : le rendu « compatibilité » des captures
 habituelles donne des couleurs très différentes. Capture : `xvfb-run -a godot --rendering-method mobile
 --path . -s tests/shot_openworld.gd -- <dossier> foret_sylve`. Test : `tests/test_adv3d_look.gd`.
+### Herbe rase autour du joueur, vues 3D (V132)
+
+Lot 5 du plan d'amélioration graphique (première partie). `Adv3DWorld._build_decor` ajoute un calque
+`HerbesProches` : 14 à 32 petites touffes par case hors sentier (tirage séparé, donc le reste du décor ne
+bouge pas), découpées en blocs de 15 m comme l'herbe haute mais visibles jusqu'à `NEAR_GRASS_RANGE` (26 m)
+seulement, sans ombre portée. Rien en qualité « Économie » ni dans les Nations presque sans herbe
+(`grass` < 0,3). Environ 28 000 touffes en Sylve, dont quelques milliers dessinées à la fois.
+Test : `tests/test_adv3d_herbe_proche.gd`. Eau, lave et arbres ne sont pas retouchés dans ce lot.
+
 ### Portail toujours visible (V129)
 
 Sur la carte Diorama, le médaillon du portail passait derrière un arbre découpé du décor (occultant, profondeur
