@@ -36,7 +36,7 @@ func _boot() -> void:
 	check(not BA.is_diorama(z), "hors réglage Diorama : le Brasier garde sa carte générée")
 	gs.set_sylvestre_board("diorama")
 	check(BA.file_stem(z) == "brasier_cendres_diorama" and BA.is_diorama(z), "réglage Diorama : planche du Brasier")
-	check(not BA.is_diorama("montagne_pics"), "les Nations sans planche gardent leur carte")
+	check(not BA.is_diorama("vents_plateau"), "les Nations sans planche gardent leur carte")
 	var d: Dictionary = BA.raw(z)
 	check(BA.size(z) == Vector2i(144, 144), "monde 144x144 cases")
 	var tiles: Array = BA.diorama_tiles(z)

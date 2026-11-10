@@ -47,7 +47,8 @@ static func _variant() -> String:
 
 
 ## V118 : Nations qui ont une carte « Diorama » (scène 3D pré-rendue) : zone -> planche.
-const DIORAMA_BOARDS := {"foret_sylve": "foret_sylve_diorama", "brasier_cendres": "brasier_cendres_diorama", "brumes_marais": "brumes_marais_diorama"}
+const DIORAMA_BOARDS := {"foret_sylve": "foret_sylve_diorama", "brasier_cendres": "brasier_cendres_diorama", "brumes_marais": "brumes_marais_diorama",
+	"montagne_pics": "montagne_pics_diorama"}
 
 
 ## V123 : le choix de planche ne change pas en cours de partie sans changer le réglage : on le mémorise

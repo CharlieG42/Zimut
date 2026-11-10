@@ -9,6 +9,7 @@ posée sur le plateau iso du jeu — la case (x, y) au sol tombe exactement sur 
 | Sylve | `plan96.py` | `layout96.py` (+ `wild96.py`) | `data/boards/foret_sylve_diorama.json`, `assets/boards/sylve_diorama/` |
 | Brasier | `plan_brasier.py` | `layout_brasier.py` | `data/boards/brasier_cendres_diorama.json`, `assets/boards/brasier_diorama/` |
 | Brumes | `plan_brumes.py` | `layout_brumes.py` | `data/boards/brumes_marais_diorama.json`, `assets/boards/brumes_diorama/` |
+| Cimes | `plan_cimes.py` | `layout_cimes.py` | `data/boards/montagne_pics_diorama.json`, `assets/boards/cimes_diorama/` |
 
 Partagés : `terrain96.py` (sol + relief, palette `PAL`, lave `LAVA`, volcan `VOLCANO`),
 `batiments.py` (maisons assemblées depuis Fantasy Town), `dungeons3d.py` (**bâtiments de donjon** :
@@ -23,11 +24,11 @@ Quaternius (non versionné : chemin dans `QUATERNIUS_NATURE`).
 1. `python3 make_colormap.py` — palette Fantasy Town réchauffée (`colormap_warm.png`).
 2. `python3 terrain96.py` — relief (`height.npy`, lac / volcan, `lava.npy`, `forbid.npy`) puis sol en
    2×2 morceaux de 4096 px (`ground_i_j.png`, `ground_emit_i_j.png` pour la lave).
-3. `python3 layout96.py` (Sylve), `python3 layout_brasier.py` (Brasier) ou `python3 layout_brumes.py` (Brumes) → `objects.json`, `plan.json`,
+3. `python3 layout96.py` (Sylve), `python3 layout_brasier.py` (Brasier) `python3 layout_brumes.py` (Brumes) ou `python3 layout_cimes.py` (Cimes) → `objects.json`, `plan.json`,
    `height2.npy/png` ; puis `python3 assign_oid.py` (un occultant par bâtiment / donjon / arbre ;
    les petits décors ne sont plus découpés).
 4. `./render96.sh` — rendu Godot 4×4 tuiles de 5120×2880 (passes beauty / depth / normal / id).
-   Brasier : `DIORAMA_AMP=12 DIORAMA_MOOD=brasier`. Brumes : `DIORAMA_MOOD=brumes`.
+   Brasier : `DIORAMA_AMP=12 DIORAMA_MOOD=brasier`. Brumes : `DIORAMA_MOOD=brumes`. Cimes : `DIORAMA_AMP=3.0 DIORAMA_MOOD=cimes`.
 5. `python3 post96.py 4` — finition B (ombres de contact, contours fins, étalonnage, brume, halo,
    vignette ; Brasier : ombres pourpres, lave rayonnante) → `fin_tx_ty.webp`.
    Phase 2 (V119, `python3 post96.py 4 phase2` pour la relancer seule) : décor peint de `scene_bg.py`

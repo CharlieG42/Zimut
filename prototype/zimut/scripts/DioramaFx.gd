@@ -106,6 +106,10 @@ const MOODS := {
 	"Brumes": {"shadow_col": Color(0.03, 0.08, 0.09), "shadow_amt": 0.07, "ray_col": Color(0.75, 1.0, 0.90), "ray_amt": 0.04,
 		"glint_col": Color(0.70, 1.0, 0.90), "deep_col": Color(0.02, 0.10, 0.09), "sea_col": Color(0.80, 0.95, 0.90), "sea_amt": 0.46,
 		"mist_col": Color(0.84, 0.94, 0.91), "mist_amt": 0.40},
+	# V141 — Cimes : ombres de nuages bleutées sur la neige, rayons blancs, glace qui scintille, mer de nuages blanche
+	"Montagne": {"shadow_col": Color(0.05, 0.09, 0.20), "shadow_amt": 0.16, "ray_col": Color(1.0, 0.98, 0.92), "ray_amt": 0.03,
+		"glint_col": Color(0.90, 0.97, 1.0), "deep_col": Color(0.10, 0.24, 0.40), "sea_col": Color(0.95, 0.97, 1.0), "sea_amt": 0.34,
+		"mist_col": Color(0.92, 0.95, 1.0), "mist_amt": 0.10},
 }
 
 static var _noise: Texture2D = null
