@@ -312,12 +312,8 @@ static func zone_terrain(zone_id: String) -> Dictionary:
 				if t + rng.randf_range(-0.16, 0.16) > 0.58:
 					cell_biome[Vector2i(x, y)] = other
 
-	# 1) Sentiers : chemin le plus court départ → chaque lieu, sur grille vide.
-	var paths: Dictionary = {}
-	for p: Vector2i in pois + gates:
-		for c: Vector2i in _bfs_path(size, voids, start, p):
-			paths[c] = true
-	paths[start] = true
+	# 1) Sentiers : réseau en arbre qui serpente de lieu en lieu (V142, voir _trail_network).
+	var paths: Dictionary = _trail_network(size, voids, start, pois, gates, absi(zone_id.hash()) + 14200)
 
 	# 2) Obstacles : bosquets aléatoires hors sentiers / lieux / départ / abords des portes.
 	var obstacles: Dictionary = {}
@@ -370,6 +366,90 @@ static func zone_terrain(zone_id: String) -> Dictionary:
 		"paths": paths, "decor": decor, "pois": pois, "gates": gates, "cell_biome": cell_biome, "voids": voids}
 	_cache[zone_id] = out
 	return out
+
+
+## V142 : réseau de sentiers « naturel ». Avant, chaque lieu recevait son plus court chemin depuis le
+## départ : tous longeaient le même axe puis partaient à angle droit (un peigne de couloirs parallèles).
+## Ici chaque lieu, du plus proche au plus lointain, se raccorde au point de sentier DÉJÀ tracé le plus
+## proche ; le tracé suit un relief de coûts (bruit lissé) qui le fait serpenter, évite le bord des
+## vides et réutilise volontiers un sentier voisin. Déterministe (même zone = mêmes sentiers).
+static func _trail_network(size: Vector2i, voids: Dictionary, start: Vector2i, pois: Array[Vector2i],
+		gates: Array[Vector2i], trail_seed: int) -> Dictionary:
+	var paths: Dictionary = {start: true}
+	if size.x < 2 or size.y < 2:
+		return paths
+	var rng := RandomNumberGenerator.new()
+	rng.seed = trail_seed
+	# Relief de coûts : valeurs tirées sur un treillis grossier (une toutes les 3 cases), interpolées.
+	const STEP := 3
+	var gw: int = size.x / STEP + 2
+	var gh: int = size.y / STEP + 2
+	var lattice := PackedFloat32Array()
+	lattice.resize(gw * gh)
+	for i: int in range(gw * gh):
+		lattice[i] = rng.randf()
+	var grid := AStarGrid2D.new()
+	grid.region = Rect2i(Vector2i.ZERO, size)
+	grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
+	grid.default_compute_heuristic = AStarGrid2D.HEURISTIC_MANHATTAN
+	grid.default_estimate_heuristic = AStarGrid2D.HEURISTIC_MANHATTAN
+	grid.update()
+	var gate_set: Dictionary = {}
+	for g: Vector2i in gates:
+		gate_set[g] = true
+	for y: int in range(size.y):
+		for x: int in range(size.x):
+			var c := Vector2i(x, y)
+			if voids.has(c):
+				grid.set_point_solid(c, true)
+				continue
+			var fx: float = float(x) / float(STEP)
+			var fy: float = float(y) / float(STEP)
+			var ix: int = int(fx)
+			var iy: int = int(fy)
+			var tx: float = fx - float(ix)
+			var ty: float = fy - float(iy)
+			tx = tx * tx * (3.0 - 2.0 * tx)
+			ty = ty * ty * (3.0 - 2.0 * ty)
+			var n: float = lerpf(lerpf(lattice[iy * gw + ix], lattice[iy * gw + ix + 1], tx),
+				lerpf(lattice[(iy + 1) * gw + ix], lattice[(iy + 1) * gw + ix + 1], tx), ty)
+			var cost: float = 1.0 + 6.0 * n * n + 1.6 * rng.randf()      # relief + grain fin : le tracé ondule
+			for d: Vector2i in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)]:
+				if voids.has(c + d) or not _inside(size, c + d):
+					cost += 1.5          # un sentier ne longe pas le vide ni le bord de l'île
+					break
+			if gate_set.has(c):
+				cost += 40.0             # on ne traverse pas une porte pour aller ailleurs
+			grid.set_point_weight_scale(c, cost)
+	# Du plus proche au plus lointain : chaque lieu rejoint le sentier existant le plus proche.
+	var targets: Array[Vector2i] = []
+	targets.append_array(pois)
+	targets.append_array(gates)
+	targets.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		var da: int = absi(a.x - start.x) + absi(a.y - start.y)
+		var db: int = absi(b.x - start.x) + absi(b.y - start.y)
+		return da < db if da != db else (a.x < b.x if a.x != b.x else a.y < b.y))
+	for t: Vector2i in targets:
+		if paths.has(t) or voids.has(t) or not _inside(size, t):
+			continue
+		var best: Vector2i = start
+		var best_d: int = 1 << 30
+		for pc: Vector2i in paths.keys():
+			if gate_set.has(pc):
+				continue
+			var dd: int = absi(pc.x - t.x) + absi(pc.y - t.y)
+			if dd < best_d or (dd == best_d and (pc.x < best.x or (pc.x == best.x and pc.y < best.y))):
+				best_d = dd
+				best = pc
+		var route: Array[Vector2i] = grid.get_id_path(best, t)
+		if route.is_empty():
+			route = _bfs_path(size, voids, start, t)      # repli : plus court chemin depuis le départ
+		for rc: Vector2i in route:
+			if not paths.has(rc):
+				paths[rc] = true
+				if not gate_set.has(rc):
+					grid.set_point_weight_scale(rc, 0.45)     # un sentier tracé attire les suivants
+	return paths
 
 
 static func _merge(a: Dictionary, b: Dictionary) -> Dictionary:

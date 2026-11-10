@@ -54,10 +54,30 @@ func setup(terrain: Dictionary, pal: Dictionary) -> void:
 	var voids: Dictionary = terrain["voids"]
 	var obst: Dictionary = terrain["obstacles"]
 	var paths: Dictionary = terrain["paths"]
+	# V142 : un vide ENTOURÉ de terre (le ravin) n'est plus un trou noir sur la carte : on le dessine
+	# comme une faille rocheuse. Seuls les vides reliés au bord restent transparents (hors de l'île).
+	var outside: Dictionary = {}
+	var queue: Array[Vector2i] = []
+	for cy0: int in range(_size.y):
+		for cx0: int in range(_size.x):
+			if (cx0 == 0 or cy0 == 0 or cx0 == _size.x - 1 or cy0 == _size.y - 1) and voids.has(Vector2i(cx0, cy0)):
+				outside[Vector2i(cx0, cy0)] = true
+				queue.append(Vector2i(cx0, cy0))
+	var head: int = 0
+	while head < queue.size():
+		var cur: Vector2i = queue[head]
+		head += 1
+		for d: Vector2i in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)]:
+			var n: Vector2i = cur + d
+			if voids.has(n) and not outside.has(n):
+				outside[n] = true
+				queue.append(n)
 	for cy: int in range(_size.y):
 		for cx: int in range(_size.x):
 			var c := Vector2i(cx, cy)
 			if voids.has(c):
+				if not outside.has(c):
+					img.set_pixel(cx, cy, Color(0.23, 0.20, 0.19) if (cx + cy) % 2 == 0 else Color(0.19, 0.17, 0.17))
 				continue
 			var col: Color = (ground[1] as Color).darkened(0.12)
 			if paths.has(c):

@@ -75,13 +75,17 @@ func _boot() -> void:
 	await process_frame
 	var adv: Dictionary = mgr.state
 	check(not pm.adventure_gate_open(adv, "foret_sylve", "brasier_cendres"), "route vers les Terres de Cendre (niv 18) gardée au départ")
-	check(pm.adventure_gate_lock_reason(adv, "foret_sylve", "brasier_cendres").contains("Camp gobelin"), "le message nomme le gardien")
+	check(pm.adventure_gate_lock_reason(adv, "foret_sylve", "brasier_cendres").contains("Grotte de la Feuille"), "le message nomme les donjons à terminer")
 	var east: Vector2i = pm.adventure_gate_cell("foret_sylve", "E")
 	adv["hero_pos"] = [east.x, east.y]
 	check(not mgr.cross_gate(east), "porte fermée : on reste sur la carte")
 	check(mgr.zone_id() == "foret_sylve", "toujours dans la Sylve")
 	adv["completed"].append("foret_sylve,10,3")
-	check(mgr.gate_at(east)["open"], "Camp gobelin vaincu : la route s'ouvre")
+	check(not mgr.gate_at(east)["open"], "V142 : un simple combat ne suffit plus à ouvrir la route")
+	adv["dungeons"] = {"Forêt#1": {"clears": 1, "boss_kills": 1}, "Forêt#2": {"clears": 1, "boss_kills": 1}, "Forêt#3": {"clears": 1, "boss_kills": 1}, "Forêt#4": {"clears": 1, "boss_kills": 1}}
+	check(not mgr.gate_at(east)["open"], "V142 : quatre donjons sur cinq : la route reste fermée")
+	adv["dungeons"] = {"Forêt#1": {"clears": 1, "boss_kills": 1}, "Forêt#2": {"clears": 1, "boss_kills": 1}, "Forêt#3": {"clears": 1, "boss_kills": 1}, "Forêt#4": {"clears": 1, "boss_kills": 1}, "Forêt": {"clears": 1, "boss_kills": 1}}
+	check(mgr.gate_at(east)["open"], "V142 : les cinq donjons de la Sylve terminés : la route s'ouvre")
 	check(mgr.cross_gate(east), "passage de la frontière est")
 	check(mgr.zone_id() == "brasier_cendres", "arrivée dans les Terres de Cendre (nation Brasier)")
 	check(mgr.hero_pos() == pm.adventure_gate_cell("brasier_cendres", "W") + Vector2i(1, 0), "le héros entre par l'ouest, à côté de la porte")
@@ -103,8 +107,10 @@ func _boot() -> void:
 		"zones_unlocked": ["foret_sylve", "foret_ronces", "montagne_pics", "desert_dunes"]}
 	var od: Dictionary = {"adventure": old}
 	pm.adventure_state(od)
-	check(pm.adventure_gate_open(od["adventure"], "montagne_pics", "brumes_marais"), "ancienne partie : descente vers les Brumes ouverte (niv 26 ≤ 32)")
-	check(pm.adventure_available_zones(od["adventure"]).has("desert_dunes"), "ancienne partie : zones déjà débloquées conservées")
+	check(pm.adventure_gate_open(od["adventure"], "montagne_pics", "brumes_marais"), "ancienne partie : retour vers les Brumes toujours ouvert")
+	check(pm.adventure_available_zones(od["adventure"]).has("brumes_marais") and pm.adventure_available_zones(od["adventure"]).has("montagne_pics"), "ancienne partie : la zone où l'on se trouve et celles d'avant restent accessibles")
+	check(not pm.adventure_available_zones(od["adventure"]).has("desert_dunes"), "V142 : une Nation ouverte trop tôt par l'ancienne règle est refermée")
+	check(not pm.adventure_gate_open(od["adventure"], "montagne_pics", "vents_plateau"), "V142 : pas de condition de niveau, seulement les donjons (Vents fermé tant que les Cimes ne sont pas finies)")
 	check(not pm.adventure_available_zones(od["adventure"]).has("foret_ronces"), "ancienne partie : zone fondue retirée des débloquées")
 
 	pm.delete_save(3)

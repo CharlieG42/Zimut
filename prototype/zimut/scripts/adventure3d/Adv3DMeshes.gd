@@ -87,6 +87,10 @@ uniform float paint_scale = 0.11;
 // V128 : grandes plaques de teinte (sol) — couleur multipliée là où la peinture basse fréquence est forte.
 uniform vec3 macro_col = vec3(1.0);
 uniform float macro_amt = 0.0;
+// V142 : neige posée sur les faces tournées vers le ciel (Nations enneigées). `zimut_snow` est réglé une
+// fois par zone (Adv3DWorld.build) ; `snow_k` = 1 sur les décors qui en reçoivent (jamais le sol ni l'herbe).
+global uniform float zimut_snow;
+uniform float snow_k = 0.0;
 varying vec3 wpos;
 varying vec3 wnorm;
 float bayer4(vec2 p) {
@@ -138,6 +142,11 @@ void fragment() {
 	float pv = mix(pa, pb, 0.5);
 	vec3 col = COLOR.rgb * (1.0 + v * 0.06) * (1.0 + (pv - 0.5) * paint_amt * 2.0) * leaf_k;
 	col = mix(col, col * macro_col, macro_amt * smoothstep(0.40, 0.62, pb));
+	float sn = zimut_snow * snow_k;
+	if (sn > 0.001) {
+		float cap = smoothstep(0.28, 0.70, wnorm.y + (pa - 0.5) * 0.45);
+		col = mix(col, vec3(0.93, 0.96, 1.0) * (0.95 + pa * 0.07), cap * sn);
+	}
 	ALBEDO = pow(max(col, vec3(0.0)), vec3(2.2));
 	EMISSION = ALBEDO * emit + ALBEDO * (1.0 - clamp(COLOR.a, 0.0, 1.0)) * glow;
 	ROUGHNESS = 0.92;
@@ -186,6 +195,17 @@ static func solid_material(double_sided: bool = false, near_fade: bool = false) 
 	return m
 
 
+## V142 : ce matériau reçoit la neige des Nations enneigées (voir `zimut_snow` dans le shader).
+static func snowy(m: ShaderMaterial, amount: float = 1.0) -> ShaderMaterial:
+	m.set_shader_parameter("snow_k", amount)
+	return m
+
+
+## Nation enneigée ? (neige sur les décors, herbe givrée, terre au pied des arbres)
+static func is_snow_biome(biome: String) -> bool:
+	return biome == "Montagne"
+
+
 ## Matériau de feuillage qui ondule au vent.
 static func foliage_material(sway: float = 0.16, up: float = 0.35) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
@@ -205,6 +225,17 @@ static func shadow_material() -> StandardMaterial3D:
 	m.albedo_color = Color(0.04, 0.07, 0.03, 0.16 if real_shadows else 0.34)
 	m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	m.no_depth_test = false
+	return m
+
+
+## V142 : rond de terre dégagée au pied des arbres, dans la neige.
+static func dirt_ring_material() -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.albedo_color = Color(0.50, 0.40, 0.31, 0.62)
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	return m
 
 

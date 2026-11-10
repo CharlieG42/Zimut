@@ -113,19 +113,24 @@ func poi_at(pos: Vector2i) -> Dictionary:
 func is_portal(poi: Dictionary) -> bool:
 	return String(poi.get("kind", "")) == KIND_EXIT and bool(poi.get("portal", false))
 
-## Portail scellé ? Retourne le donjon final à vaincre d'abord ({} si ouvert ou si ce n'est pas un portail).
+## Portail scellé ? Retourne le premier donjon de la Nation encore à terminer ({} si ouvert ou si ce n'est
+## pas un portail). V142 : il faut avoir terminé TOUS les donjons de la Nation, pas seulement le final.
 func portal_lock(poi: Dictionary) -> Dictionary:
 	if not is_portal(poi):
 		return {}
 	var nation: String = String(poi.get("requires", ""))
-	# Une fois la Nation suivante débloquée (donjon final vaincu, sortie prise…), le portail reste ouvert pour de bon.
-	if nation == "" or Dungeons.clears(state, nation) > 0 or (state.get("zones_unlocked", []) as Array).has(String(poi.get("to", ""))):
+	if nation == "" or (state.get("zones_unlocked", []) as Array).has(String(poi.get("to", ""))):
+		return {}
+	var left: Array[String] = ProgressionManager.adventure_dungeons_left(state, zone_id())
+	if left.is_empty():
 		return {}
 	var pois: Dictionary = ProgressionManager.adventure_zone_pois(zone_id())
 	for k: String in pois.keys():
-		if String(pois[k].get("guardian", "")) == nation:
-			return pois[k]
-	return {"name": "le donjon final"}
+		if String(pois[k].get("name", "")) == left[0] and Dungeons.is_dungeon(pois[k]):
+			var out: Dictionary = (pois[k] as Dictionary).duplicate()
+			out["left"] = left
+			return out
+	return {"name": left[0], "left": left}
 
 ## V103 : donjon verrouillé ? Retourne le donjon à terminer d'abord ({} si ouvert ou si ce n'est pas un donjon).
 func dungeon_lock(poi: Dictionary) -> Dictionary:

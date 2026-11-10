@@ -27,11 +27,13 @@ const PALETTES := {
 		"sky_top": Color(0.24, 0.50, 0.84), "sky_hor": Color(0.74, 0.88, 0.96), "fog": Color(0.74, 0.86, 0.92),
 		"sun": Color(1.0, 0.94, 0.80), "ambient": Color(0.62, 0.74, 0.92),
 	},
+	# V142 : neige franche (blanc à peine bleuté), sentiers de terre battue claire, soleil plus chaud pour
+	# des ombres bleues nettes, herbe rare : on se rapproche d'un diorama de montagne enneigée.
 	"Montagne": {
-		"ground": [Color(0.50, 0.57, 0.62), Color(0.64, 0.71, 0.76), Color(0.84, 0.90, 0.95)],
-		"path": Color(0.50, 0.46, 0.42), "cliff_top": Color(0.44, 0.46, 0.52), "cliff_bot": Color(0.17, 0.18, 0.23),
-		"sky_top": Color(0.30, 0.52, 0.82), "sky_hor": Color(0.82, 0.90, 0.97), "fog": Color(0.82, 0.88, 0.95),
-		"sun": Color(0.96, 0.97, 1.0), "ambient": Color(0.66, 0.74, 0.92),
+		"ground": [Color(0.76, 0.83, 0.91), Color(0.87, 0.92, 0.97), Color(0.95, 0.97, 1.0)],
+		"path": Color(0.63, 0.55, 0.47), "cliff_top": Color(0.52, 0.52, 0.57), "cliff_bot": Color(0.20, 0.20, 0.26),
+		"sky_top": Color(0.28, 0.52, 0.86), "sky_hor": Color(0.82, 0.90, 0.97), "fog": Color(0.84, 0.90, 0.97),
+		"sun": Color(1.0, 0.95, 0.84), "ambient": Color(0.62, 0.72, 0.96), "grass": 0.32, "macro": Color(0.86, 0.90, 0.98),
 	},
 	"Désert": {
 		"ground": [Color(0.90, 0.74, 0.46), Color(0.94, 0.80, 0.52), Color(0.84, 0.68, 0.40)],
@@ -255,6 +257,7 @@ static func build(zone_id: String, open_world: bool = false) -> Node3D:
 	var pal: Dictionary = palette(biome)
 	var tod: String = time_of_day(zone_id, biome)
 	shadow_len = 2.2 if tod == "soir" else (1.5 if tod == "matin" else 1.0)
+	RenderingServer.global_shader_parameter_set(&"zimut_snow", 1.0 if Adv3DMeshes.is_snow_biome(biome) else 0.0)
 	var root := Node3D.new()
 	root.name = "ZoneWorld"
 	root.add_child(_build_ground(zone_id, t, pal))
@@ -554,6 +557,17 @@ static func _build_props(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	_multi(root, "OmbresDecors", Adv3DMeshes.shadow_mesh(), shadow_xf, shadow_cl, Adv3DMeshes.shadow_material())
 	var foliage: ShaderMaterial = Adv3DMeshes.foliage_material(0.16)
 	var solid: ShaderMaterial = Adv3DMeshes.solid_material(true, true)
+	if snow:
+		# V142 : neige sur le dessus des buissons, rochers, souches et piliers ; rond de terre au pied des pins
+		Adv3DMeshes.snowy(foliage, 0.85)
+		Adv3DMeshes.snowy(solid)
+		var ring_xf: Array = []
+		var ring_cl: Array = []
+		for txf: Transform3D in buckets["pine"]["xf"]:
+			var rs: float = txf.basis.get_scale().x * rng.randf_range(0.85, 1.05)
+			ring_xf.append(_xf(txf.origin + Vector3(0, 0.05, 0), 0.0, Vector3(rs, 1.0, rs)))
+			ring_cl.append(Color.WHITE)
+		_multi(root, "TerreArbres", Adv3DMeshes.shadow_mesh(), ring_xf, ring_cl, Adv3DMeshes.dirt_ring_material())
 	var kit: bool = Adv3DKit.available()
 	if kit and not snow:
 		_multi_kit(root, "Pins", Adv3DKit.variants("Pine", 5), buckets["pine"]["xf"], buckets["pine"]["cl"], 0.62)
@@ -652,7 +666,11 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 	var ncell: Dictionary = Nations.cell_palette(biome) if is_nation else {}
 	var tuft_col: Color = ncell.get("tuft", Color.WHITE)
 	# V138 : herbe givrée sur la neige (les touffes vert vif juraient avec le sol des Cimes)
-	var frost: Color = Color(0.95, 0.82, 2.0) if biome == "Montagne" else Color.WHITE
+	# V142 : brins pâles (mesh neutre teinté) et rares — les touffes sombres faisaient un tapis sur la neige.
+	var snowy: bool = Adv3DMeshes.is_snow_biome(biome)
+	var frost: Color = Color(1.18, 1.34, 1.40) if snowy else Color.WHITE
+	if snowy:
+		flower_cols = [Color(0.97, 0.98, 1.0), Color(0.66, 0.86, 0.99), Color(0.86, 0.92, 1.0)]   # perce-neige et fleurs de glace
 	if is_nation and not (ncell.get("flowers", []) as Array).is_empty():
 		flower_cols = ncell["flowers"]
 	var nat_xf: Dictionary = {}
@@ -699,7 +717,7 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 						sn *= 0.35
 					(nat_xf[kind] as Array).append(_xf(pn, rng.randf() * TAU, Vector3(sn, sn, sn)))
 					(nat_cl[kind] as Array).append(Color.WHITE)
-			elif kind.contains("flower") or (not on_path and not dry and rng.randf() < 0.07):
+			elif (kind.contains("flower") and (not snowy or rng.randf() < 0.45)) or (not on_path and not dry and rng.randf() < (0.025 if snowy else 0.07)):
 				for k: int in range(rng.randi_range(3, 6)):
 					var pf := _rand_in_cell(rng, c)
 					var sf: float = rng.randf_range(0.8, 1.3)
@@ -743,8 +761,8 @@ static func _build_decor(root: Node3D, zone_id: String, t: Dictionary, biome: St
 		_multi_kit(root, "HerbesKit", [Adv3DKit.mesh("Grass_Common_Short"), Adv3DKit.mesh("Grass_Common_Tall"), Adv3DKit.mesh("Grass_Wispy_Short")], kit_xf, kit_cl, 0.8)
 		tuft_xf = keep_xf
 		tuft_cl = keep_cl
-	_multi(root, "Herbes", Adv3DNationMeshes.tuft_neutral() if is_nation else Adv3DMeshes.tuft(), tuft_xf, tuft_cl, foliage)
-	_multi(root, "HerbesProches", Adv3DNationMeshes.tuft_neutral() if is_nation else Adv3DMeshes.tuft(), near_xf, near_cl, foliage)
+	_multi(root, "Herbes", Adv3DNationMeshes.tuft_neutral() if (is_nation or snowy) else Adv3DMeshes.tuft(), tuft_xf, tuft_cl, foliage)
+	_multi(root, "HerbesProches", Adv3DNationMeshes.tuft_neutral() if (is_nation or snowy) else Adv3DMeshes.tuft(), near_xf, near_cl, foliage)
 	var glow: ShaderMaterial = Adv3DNationMeshes.glow_material()
 	for nk: String in nat_xf.keys():
 		_multi(root, "SolNation_" + nk, Adv3DNationMeshes.mesh_for(nk), nat_xf[nk], nat_cl[nk], glow)

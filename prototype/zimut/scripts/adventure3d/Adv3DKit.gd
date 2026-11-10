@@ -24,6 +24,10 @@ uniform float emit = 0.10;
 uniform float swap_rg = 0.0;       // 1 : feuilles rouges → vertes (buissons)
 uniform float fade_near = 1.0;
 uniform float fade_far = 2.6;
+// V142 : neige sur les faces tournées vers le ciel (Nations enneigées), voir Adv3DMeshes.
+global uniform float zimut_snow;
+uniform float snow_k = 1.0;
+varying vec3 wnorm;
 float bayer4(vec2 p) {
 	ivec2 q = ivec2(mod(p, 4.0));
 	int i = q.x + q.y * 4;
@@ -37,6 +41,7 @@ void vertex() {
 	float w = sin(TIME * speed + ph) * 0.6 + sin(TIME * speed * 1.7 + ph * 1.3) * 0.25;
 	VERTEX.x += w * sway * h * h * 0.05;
 	VERTEX.z += cos(TIME * speed * 0.8 + ph) * sway * h * h * 0.03;
+	wnorm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 }
 void fragment() {
 	float dist = length(VERTEX);
@@ -57,6 +62,10 @@ void fragment() {
 	NORMAL = normalize(mix(NORMAL, up_v, normal_up));
 	vec3 tc = mix(t.rgb, t.grb, swap_rg);
 	ALBEDO = tc * COLOR.rgb;
+	float sn = zimut_snow * snow_k;
+	if (sn > 0.001) {
+		ALBEDO = mix(ALBEDO, vec3(0.84, 0.90, 1.0), smoothstep(0.30, 0.72, wnorm.y) * sn);
+	}
 	EMISSION = ALBEDO * emit;
 	ROUGHNESS = 0.9;
 }

@@ -67,6 +67,8 @@ func _run() -> void:
 	sc._refresh_world()
 	ck(absf(any.modulate.a - 0.25) < 0.001, "monstres : l'alpha du fondu est conservé")
 	# Brasier : dominante chaude
+	adv["dungeons"] = {"Forêt#1": {"clears": 1, "boss_kills": 1}, "Forêt#2": {"clears": 1, "boss_kills": 1}, "Forêt#3": {"clears": 1, "boss_kills": 1}, "Forêt#4": {"clears": 1, "boss_kills": 1}, "Forêt": {"clears": 1, "boss_kills": 1}}      # V142 : les Cendres ne s'ouvrent qu'une fois la Sylve terminée
+	pm.adventure_state(data)
 	pm.adventure_enter_zone(adv, "brasier_cendres")
 	sc._rebuild_world()
 	await create_timer(0.5).timeout
