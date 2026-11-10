@@ -32,7 +32,8 @@ static func pal(biome: String) -> Dictionary:
 		return Nations.pal(biome)
 	match biome:
 		"Montagne":
-			return {"top_a": Color(0.62, 0.69, 0.62), "top_b": Color(0.55, 0.62, 0.56), "lip": Color(0.88, 0.93, 0.97),
+			# V144 : dessus enneigé (les cases des Cimes sont en neige), roche des falaises inchangée
+			return {"top_a": Color(0.90, 0.94, 0.98), "top_b": Color(0.80, 0.87, 0.95), "lip": Color(0.96, 0.98, 1.0),
 				"l_t": Color(0.56, 0.54, 0.54), "l_b": Color(0.38, 0.36, 0.40), "r_t": Color(0.44, 0.42, 0.44), "r_b": Color(0.28, 0.27, 0.31),
 				"leaf": Color(0.26, 0.45, 0.36), "leaf_hi": Color(0.42, 0.62, 0.48), "mist": Color(0.80, 0.88, 0.96)}
 		"Désert":
@@ -50,6 +51,24 @@ static func pal(biome: String) -> Dictionary:
 
 
 static var _tile_cache: Dictionary = {}
+
+## V144 : variante de sol (0..5) d'une case. Les variantes 0-2 sont calmes, 3-4 portent un détail, 5 est la
+## case « accident » de la nation (fissure de lave, flaque, plaque de glace). Tirage par hachage des
+## coordonnées : stable d'une image à l'autre, sans la répétition en diagonales de l'ancien `x*3 + y*5`.
+static func tile_variant(gx: int, gy: int) -> int:
+	var h: int = absi((gx * 73856093) ^ (gy * 19349663) ^ ((gx + gy) * 83492791)) % 100
+	if h < 22:
+		return 0
+	if h < 43:
+		return 1
+	if h < 62:
+		return 2
+	if h < 76:
+		return 3
+	if h < 89:
+		return 4
+	return 5
+
 
 ## Texture de sol (identique à celle des cases de l'aire de combat) pour le biome, ou null.
 static func tile_tex(biome: String, idx: int) -> Texture2D:

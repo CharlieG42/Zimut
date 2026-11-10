@@ -75,7 +75,7 @@ func setup(gp: Vector2i) -> void:
 		"Désert":
 			tile_prefix = "desert_ground"
 	if tile_prefix != "":
-		var tile_index: int = posmod(gp.x * 3 + gp.y * 5, 6) + 1
+		var tile_index: int = BattleScenery.tile_variant(gp.x, gp.y) + 1
 		var tile_path: String = "res://assets/sprites/tiles/%s_%02d.svg" % [tile_prefix, tile_index]
 		_forest_tile_texture = load(tile_path) as Texture2D
 		if _forest_tile_texture == null:
@@ -225,7 +225,8 @@ func _draw() -> void:
 	# pour que unités et cases colorées ressortent (comme Dofus / Waven).
 	# V63 : la teinte du voile suit le biome (vert forêt, sable, pierre, cristal…).
 	var veil: Color = _veil_col()
-	draw_colored_polygon(_diamond(0.99), Color(veil.r, veil.g, veil.b, 0.26))
+	# V144 : voile allégé sur la neige des Cimes (à 0,26 il la rendait grise)
+	draw_colored_polygon(_diamond(0.99), Color(veil.r, veil.g, veil.b, 0.13 if biome == "Montagne" else 0.26))
 	_outline(top, Color(veil.r * 0.4, veil.g * 0.4, veil.b * 0.4, 0.66), 2.0)
 
 	# ── Surbrillances ─────────────────────────────────────────────────────

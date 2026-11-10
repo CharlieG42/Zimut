@@ -15,6 +15,12 @@ peaufinées avant d'en créer d'autres.
 
 ## Mode Tactique
 
+- [x] Fond de scène par nation et cases variées pour Sylve, Brasier, Brumes, Cimes (V144).
+- [ ] Sylve : redessiner les tuiles (calmes / détail / accident) comme les trois autres nations.
+- [ ] Décor non bloquant au milieu du plateau, flancs de falaise plus travaillés.
+- [ ] Teinte d'ambiance par nation sur les personnages, ombres au sol plus marquées.
+- [ ] Fond de scène des six autres nations.
+
 - [ ] Aperçu des dégâts sur la cible avant de valider un sort.
 - [ ] Frise de l'ordre des tours.
 - [ ] IA par type d'ennemi (fonceur, tireur, soigneur).
@@ -29,8 +35,50 @@ peaufinées avant d'en créer d'autres.
 
 ## Mode Conquête
 
-- [ ] Production de ressources par ville, qui alimente la forge.
-- [ ] Défense de ses villes (contre-attaques ennemies).
+Le mode est déjà riche (garnisons, gouverneurs, offensives, généraux, diplomatie, villes à 5 niveaux) :
+les idées ci-dessous visent le rythme, le lien avec les autres modes et le confort, pas de nouveaux
+systèmes d'économie. Production par ville et défense chiffrée existent déjà (lignes retirées de la liste).
+
+### Jeu
+
+- [ ] **Défendre en personne** *(priorité 1)*. Une offensive se règle aujourd'hui par une comparaison de
+      chiffres (défense contre force). Proposer de la jouer en combat Tactique : la garnison fournit des
+      soldats alliés, la muraille des cases d'obstacle, le gouverneur se bat. Victoire = offensive
+      repoussée avec butin ; refuser = résolution chiffrée actuelle.
+- [ ] **Nation complète**. Tenir toutes les villes d'une Nation donne un bonus permanent valable dans les
+      trois modes (par exemple résistance à l'élément de la Nation, ou remise à la forge). Donne un but
+      intermédiaire sur une carte de 46 villes.
+- [ ] **Chapitres de campagne**. Découper la conquête en étapes annoncées (« Libérer la Sylve », « Briser
+      Vorkann ») avec récompense à chaque étape, pour rythmer une partie longue.
+- [ ] **Routes commerciales**. Relier deux villes de spécialités différentes rapporte de l'or à chaque
+      victoire ; un raid coupe la route tant que la ville est pillée. Donne un enjeu à la géographie.
+- [ ] **Riposte du Roi Squelette**. Après la chute d'un général, une contre-offensive ciblée sur la
+      ville la moins défendue, annoncée à l'avance.
+
+### Lien avec les autres modes
+
+- [ ] **Bâtiments utiles ailleurs**. Une ville au niveau Cité ouvre un service dans les autres modes :
+      forge à prix réduit, point de voyage rapide en Aventure, entraînement d'un familier.
+- [ ] **Généraux croisés en Aventure**. Un général encore en vie patrouille dans la zone d'Aventure de
+      sa Nation ; le battre là-bas affaiblit sa forteresse en Conquête.
+
+### Confort
+
+- [ ] **Vue d'ensemble de l'empire** *(priorité 2)*. Un tableau de toutes les villes (niveau, garnison,
+      défense, production, alerte) avec « recruter partout » et « améliorer ce qui est payable », pour ne
+      plus entrer dans chaque ville une à une.
+- [ ] **Pastilles d'action sur la carte**. Marquer les villes où quelque chose est possible ou urgent :
+      amélioration payable, garnison vide, ville ruinée.
+- [ ] **Bilan après bataille**. Regrouper sur un seul écran ce qui s'est passé (revenus, raid, événement,
+      avancée d'une offensive) au lieu de nouvelles dispersées.
+
+### Rendu
+
+- [ ] **Écran de ville** *(priorité 3)*. Sol aux couleurs de la Nation (neige, cendre, tourbe) à la place
+      de l'aplat uni ; rues courbes à la place des rayons droits depuis l'hôtel de ville ; emplacements
+      vides dessinés comme des chantiers ; arbres enneigés aux Cimes.
+- [ ] **Carte**. Flèche d'attaque animée vers la cible choisie ; noms de villes masqués au dézoom pour
+      alléger.
 
 ## Personnages, sorts, forge
 
@@ -46,3 +94,4 @@ peaufinées avant d'en créer d'autres.
       fenêtre est ouverte.
 - [ ] `tests/test_adventure_world.gd` : 16 villes de Conquête ne sont révélées par aucune zone d'Aventure
       (échec antérieur à V142).
+- [ ] `tests/test_bomb_chain.gd` échoue par intermittence (environ 1 lancement sur 3, déjà avant V144).

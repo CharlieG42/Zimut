@@ -3068,7 +3068,7 @@ class AdventureBoard extends Node2D:
 				var c: Vector2 = ui.cell_center(cell)
 				if voids.has(cell) or not mgr.cell_discovered(cell):
 					continue
-				var tex: Texture2D = BattleScenery.tile_tex(AdventureTerrain.cell_biome(mgr.zone_id(), cell), posmod(x * 3 + y * 5, 6))
+				var tex: Texture2D = BattleScenery.tile_tex(AdventureTerrain.cell_biome(mgr.zone_id(), cell), BattleScenery.tile_variant(x, y))
 				if tex != null:
 					draw_texture_rect(tex, Rect2(c - Vector2(64, 32), Vector2(128, 64)), false)
 				else:

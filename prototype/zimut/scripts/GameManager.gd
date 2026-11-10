@@ -563,6 +563,10 @@ func init_entities() -> void:
 			fight_biome = donjon_room
 			boss_fight = true
 			fight_is_boss = true
+	# V144 : le fond de scène est créé avant que le biome du combat soit décidé : on le lui redonne ici
+	# (sinon il gardait celui du combat précédent).
+	if is_inside_tree():
+		get_tree().call_group("backdrop", "set_biome", fight_biome)
 	## Boss de fin de cycle : le boss est au niveau du combat, ses sbires 2 niveaux en dessous
 	var minion_lvl: int = maxi(1, lvl - 2) if boss_fight else lvl
 	var biome_types: Array[String] = ProgressionManager.biome_enemy_types(fight_biome)
