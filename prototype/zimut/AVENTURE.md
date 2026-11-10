@@ -376,6 +376,13 @@ Monde 3D : `Adv3DLook.NATION["Brumes"]` (brume de distance dès 9 m, ambiance re
 `make_ground_mist` = deux plans de brume au ras du sol (shader à bruit qui dérive, effacé près de la caméra,
 au loin et en vue de dessus), absents en « Économie ».
 
+### Caméra à zone libre sur la carte 2D (V140)
+
+Avant : `_focus_cell` recentrait la vue sur chaque case franchie (une tween par pas, d'où de petits sauts).
+`AdventureMapUI._follow_hero`, appelé à chaque image de la marche, ne déplace la vue que si le héros sort du
+rectangle central (`CAM_FREE_ZONE` = 30 % de marge de chaque côté), de 20 % du dépassement par image.
+Test : `tests/test_camera_zone_libre.gd`.
+
 ### Marche en lignes droites sur la carte 2D (V139)
 
 La grille reste à 4 voisins (règles, pas, rencontres inchangés). Deux changements :

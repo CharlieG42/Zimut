@@ -1,0 +1,3 @@
+V140|Carte d'aventure 2D : la caméra ne suit plus le héros à chaque case. Elle reste fixe tant qu'il se déplace au centre de l'écran et ne glisse que lorsqu'il approche d'un bord.
+V140|Le suivi est continu (plus de petit saut à chaque pas) et le rattrapage est adouci.
+V140|Le bouton « Centrer » ramène toujours la vue sur le héros.
