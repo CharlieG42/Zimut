@@ -417,6 +417,73 @@ static func find_path(zone_id: String, from: Vector2i, to: Vector2i, blocked: Di
 	return _bfs_path(t["size"], walls, from, to, t.get("heights", {}))
 
 
+## V139 : cases d'une ligne droite de `a` à `b` sur la grille (4 voisins, `a` exclu, `b` inclus) : l'escalier
+## le plus régulier possible, qui colle au segment a-b.
+static func grid_line(a: Vector2i, b: Vector2i) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	var dx: int = absi(b.x - a.x)
+	var dy: int = absi(b.y - a.y)
+	var sx: int = signi(b.x - a.x)
+	var sy: int = signi(b.y - a.y)
+	var ix: int = 0
+	var iy: int = 0
+	var c: Vector2i = a
+	while ix < dx or iy < dy:
+		# avance sur l'axe le plus « en retard » par rapport au segment
+		if iy >= dy or (ix < dx and (2 * ix + 1) * dy <= (2 * iy + 1) * dx):
+			c.x += sx
+			ix += 1
+		else:
+			c.y += sy
+			iy += 1
+		out.append(c)
+	return out
+
+
+## V139 : redresse un chemin. Un plus court chemin sur grille peut longer un axe puis l'autre, ou zigzaguer
+## sans régularité ; ici chaque tronçon est remplacé par la ligne droite de grille entre deux de ses points
+## quand toutes ses cases sont libres (même nombre de pas). Le héros marche alors en lignes droites.
+static func straighten_path(zone_id: String, from: Vector2i, path: Array[Vector2i], blocked: Dictionary = {}) -> Array[Vector2i]:
+	if path.size() < 3:
+		return path
+	var t: Dictionary = zone_terrain(zone_id)
+	if not t.has("_walls"):
+		t["_walls"] = _merge(t["obstacles"], t["voids"])
+	var walls: Dictionary = t["_walls"]
+	var heights: Dictionary = t.get("heights", {})
+	var size: Vector2i = t["size"]
+	var pts: Array[Vector2i] = [from]
+	pts.append_array(path)
+	var goal: Vector2i = path[path.size() - 1]
+	var out: Array[Vector2i] = []
+	var a: int = 0
+	while a < pts.size() - 1:
+		var hi: int = mini(pts.size() - 1, a + 64)
+		var done: bool = false
+		var span: int = hi - a
+		while span >= 2 and not done:
+			var b: int = a + span
+			var line: Array[Vector2i] = grid_line(pts[a], pts[b])
+			if line.size() <= span:
+				var ok: bool = true
+				var prev: Vector2i = pts[a]
+				for c: Vector2i in line:
+					if not _inside(size, c) or walls.has(c) or (blocked.has(c) and c != goal) \
+							or (not heights.is_empty() and absi(int(heights.get(c, 0)) - int(heights.get(prev, 0))) > 1):
+						ok = false
+						break
+					prev = c
+				if ok:
+					out.append_array(line)
+					a = b
+					done = true
+			span = span * 3 / 4 if span > 4 else span - 1
+		if not done:
+			a += 1
+			out.append(pts[a])
+	return out
+
+
 ## Une marche d'une case à sa voisine est-elle possible ? (V106 : pas de falaise : écart ≤ 1 quart d'étage)
 static func can_step(zone_id: String, a: Vector2i, b: Vector2i) -> bool:
 	var hs: Dictionary = zone_terrain(zone_id).get("heights", {})

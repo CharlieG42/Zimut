@@ -1588,9 +1588,8 @@ func _walk(path: Array[Vector2i]) -> void:
 	# arrondis (vitesse constante au milieu, accélération/décélération globales),
 	# au lieu d'un arrêt à chaque case. La logique par case (monstres, trouvailles,
 	# lieux, événements) est inchangée : elle se déclenche à chaque frontière de case.
-	var pts: Array[Vector2] = [_hero.position]
-	for s0: Vector2i in path:
-		pts.append(cell_center(s0))
+	var pts: Array[Vector2] = straight_points(manager.hero_pos(), path)     # V139 : lignes droites, plus d'escalier
+	pts[0] = _hero.position
 	var sp: Array = _smooth_path(pts)
 	var cum: Array[float] = [0.0]
 	for i: int in range(1, sp.size()):
@@ -1630,7 +1629,7 @@ func _walk(path: Array[Vector2i]) -> void:
 			_say("Un groupe de monstres vous barre la route.")
 			_walk_stop_s = float(cum[j])
 			break
-		_hero.locomotion(cell_center(step) - _hero.position, true, sprint)
+		_hero.locomotion(pts[j + 1] - pts[j], true, sprint)      # V139 : direction du tronçon, pas de la case (plus de demi-tours en escalier)
 		var t_step: int = Time.get_ticks_usec()
 		var fresh: Array = manager.move_hero(step)
 		if _board.preview.size() > 0:
@@ -1734,6 +1733,39 @@ func _walk(path: Array[Vector2i]) -> void:
 
 ## V114 : coins arrondis d'une polyligne — chaque sommet intérieur est tiré vers le
 ## milieu de ses deux voisins (extrémités inchangées).
+## V139 : points de passage À L'ÉCRAN d'un trajet de cases (départ compris, un point par case). Les cases
+## d'un même tronçon rectiligne sont alignées sur le segment qui relie ses deux extrémités : le héros marche
+## droit au lieu de suivre l'escalier des cases. La logique reste par case (même nombre de points).
+func straight_points(from: Vector2i, path: Array[Vector2i]) -> Array[Vector2]:
+	var cells: Array[Vector2i] = [from]
+	cells.append_array(path)
+	var out: Array[Vector2] = []
+	out.resize(cells.size())
+	var a: int = 0
+	out[0] = cell_center(cells[0])
+	while a < cells.size() - 1:
+		var b: int = a + 1
+		# étend le tronçon tant que toutes ses cases restent à moins de 0,75 case du segment a-b
+		while b + 1 < cells.size():
+			var pa := Vector2(cells[a])
+			var pb := Vector2(cells[b + 1])
+			var dir: Vector2 = (pb - pa).normalized()
+			var fits: bool = true
+			for k: int in range(a + 1, b + 1):
+				if absf((Vector2(cells[k]) - pa).cross(dir)) > 0.75:
+					fits = false
+					break
+			if not fits:
+				break
+			b += 1
+		var ca: Vector2 = cell_center(cells[a])
+		var cb: Vector2 = cell_center(cells[b])
+		for k: int in range(a + 1, b + 1):
+			out[k] = ca.lerp(cb, float(k - a) / float(b - a))
+		a = b
+	return out
+
+
 func _smooth_path(pts: Array[Vector2]) -> Array[Vector2]:
 	var out: Array[Vector2] = []
 	for i: int in range(pts.size()):
@@ -2908,7 +2940,7 @@ class AdventureBoard extends Node2D:
 		_since += delta
 		var mgr: Node = ui.manager if ui != null else null
 		var sig: String = "%s|%d|%s|%s|%d|%d" % [str(hover), preview.size(), str(preview[0]) if not preview.is_empty() else "",
-			str(ui._edit_on) if ui != null else "", int(mgr.moves()) if mgr != null else 0, BoardArt.rev]
+			str(ui._edit_on) if ui != null else "", int(mgr.moves()) if mgr != null else 0, BoardArt.rev] + ("|g" if GameSettings.show_grid else "")
 		var animated: bool = ui != null and not ui.is_board() and _since >= 0.25
 		if sig != _sig or animated:
 			_sig = sig
@@ -2951,8 +2983,23 @@ class AdventureBoard extends Node2D:
 	func _draw_iso_overlay() -> void:
 		var mgr: Node = ui.manager
 		var cs: float = BoardArt.iso_cs(mgr.zone_id())
+		if GameSettings.show_grid:          # V139 : quadrillage des cases praticables autour du héros
+			var hp: Vector2i = mgr.hero_pos()
+			var gcol := Color(1, 1, 1, 0.36)
+			for gy: int in range(hp.y - 14, hp.y + 15):
+				for gx: int in range(hp.x - 14, hp.x + 15):
+					var gc := Vector2i(gx, gy)
+					if not AdventureTerrain.walkable(mgr.zone_id(), gc):
+						continue
+					var gp: Vector2 = ui.cell_center(gc)
+					draw_polyline(PackedVector2Array([gp + Vector2(0, -32 * cs), gp + Vector2(64 * cs, 0), gp + Vector2(0, 32 * cs), gp + Vector2(-64 * cs, 0), gp + Vector2(0, -32 * cs)]), gcol, 1.5, true)
+		var pv: Array[Vector2] = []
+		if not preview.is_empty():          # V139 : le tracé suit la ligne droite que prendra le héros
+			var pcells: Array[Vector2i] = []
+			pcells.assign(preview)
+			pv = ui.straight_points(mgr.hero_pos(), pcells)
 		for i: int in range(preview.size()):
-			var pc: Vector2 = ui.cell_center(preview[i])
+			var pc: Vector2 = pv[i + 1] if i < preview.size() - 1 else ui.cell_center(preview[i])
 			var last: bool = i == preview.size() - 1
 			draw_set_transform(pc, 0.0, Vector2(1.0, 0.5))
 			draw_circle(Vector2.ZERO, (6.0 if not last else 10.0), Color(1.0, 0.95, 0.55, 0.85))
