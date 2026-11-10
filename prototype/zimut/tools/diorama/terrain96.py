@@ -8,6 +8,7 @@ import importlib
 W = importlib.import_module(os.environ.get("DIORAMA_PLAN", "plan96"))
 S, C, OFF, ROADS, FIELDS, MEADOWS, WOODS = W.S, W.C, W.OFF, W.ROADS, W.FIELDS, W.MEADOWS, W.WOODS
 LAKE = getattr(W, "LAKE", None)
+LAKES = getattr(W, "LAKES", [LAKE] if LAKE else [])      # V124 : plusieurs plans d'eau (marais)
 # palette du sol (Sylve par défaut ; une Nation peut la redéfinir : plan.PAL)
 PAL = dict(grass_lo=[0.215, 0.440, 0.150], grass_hi=[0.420, 0.640, 0.200], warm=[0.10, 0.045, -0.04], cool=[-0.04, 0.01, 0.05],
            blade_dark=((30, 20), (95, 50), (28, 14)), blade_light=((55, 35), (150, 70), (85, 60)),
@@ -107,11 +108,11 @@ def lava_mask(gx0, gy0, w, h, ppu):
     return out
 
 def lake_sdf(wx, wz):
-    if LAKE is None:
-        return np.full(np.shape(wx), 99.0, np.float32)
-    lx, lz, ra, rb, ang = LAKE
-    a = np.radians(ang); u = (wx - lx) * np.cos(a) + (wz - lz) * np.sin(a); v = -(wx - lx) * np.sin(a) + (wz - lz) * np.cos(a)
-    return (np.sqrt((u / ra) ** 2 + (v / rb) ** 2) - 1.0) * min(ra, rb)    # <0 dans le lac (≈ unités)
+    out = np.full(np.shape(wx), 99.0, np.float32)
+    for lx, lz, ra, rb, ang in LAKES:
+        a = np.radians(ang); u = (wx - lx) * np.cos(a) + (wz - lz) * np.sin(a); v = -(wx - lx) * np.sin(a) + (wz - lz) * np.cos(a)
+        out = np.minimum(out, ((np.sqrt((u / ra) ** 2 + (v / rb) ** 2) - 1.0) * min(ra, rb)).astype(np.float32))    # <0 dans l'eau (≈ unités)
+    return out
 
 def chunk(ci, cj):
     gx0, gy0 = ci * T - M, cj * T - M
@@ -177,10 +178,10 @@ def chunk(ci, cj):
     # lac : berge de sable puis vase
     sd = lake_sdf(wx, wz) + 0.25 * warp
     sand = np.clip(1 - np.abs(sd - 0.2) / 1.1, 0, 1)
-    sand_col = np.array([0.80, 0.72, 0.52], np.float32) * (0.9 + 0.1 * sn[..., None])
+    sand_col = np.array(PAL.get("shore", [0.80, 0.72, 0.52]), np.float32) * (0.9 + 0.1 * sn[..., None])
     out = lerp(out, sand_col, sand * 0.85)
     mud = np.clip(-sd / 0.8, 0, 1)
-    out = lerp(out, np.array([0.30, 0.30, 0.22], np.float32), mud)
+    out = lerp(out, np.array(PAL.get("mud", [0.30, 0.30, 0.22]), np.float32), mud)
     fine = field("fine", [6, 2], [0.6, 0.4], 77, gx0, gy0, w, h)
     def zone(cx, cz, zw, zh, ang, soft):
         a = np.radians(ang); ca, sa = np.cos(a), np.sin(a)
@@ -253,7 +254,7 @@ if __name__ == "__main__":
         H = H * (1 - flat) + Hs * flat
         H = H * np.clip((S / 2 - cheb) / 4.0 + 0.4, 0.2, 1)
         sd = lake_sdf(x2, y2)
-        lx, lz = (LAKE[0], LAKE[1]) if LAKE else (C, C)
+        lx, lz = (LAKES[0][0], LAKES[0][1]) if LAKES else (C, C)
         WL = float(Hs[int(lz / S * HR), int(lx / S * HR)]) - 0.05
         bowl = np.clip(-sd / 3.0, 0, 1)
         shore = np.clip(1 - np.abs(sd) / 2.5, 0, 1)

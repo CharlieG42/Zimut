@@ -127,7 +127,7 @@ def build(kind, ax, az, gy, KT, NAT, seed=0):
         put(GY + "lightpost-double.glb", -1.7, 3.0, 1.7)
         put(GY + "lightpost-double.glb", 1.7, 3.0, 1.7)
         put(NAT + "DeadTree_3.gltf", -3.4, -2.6, 1.3, tag="tree")
-        put(NAT + "TwistedTree_2.gltf", 3.6, -2.4, 1.1, tag="tree")
+        put(NAT + "DeadTree_3.gltf", 3.6, -2.4, 0.9, tag="tree", mul=[0.62, 0.74, 0.62])
         light(0, 2.8, 1.8, [0.45, 1.0, 0.78], 2.6, 7.0)
         light(0, 0.0, 5.5, [0.45, 0.95, 0.80], 2.0, 8.0)
     elif kind == "souche":

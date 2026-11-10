@@ -355,6 +355,16 @@ vue 3D par cases après `Adv3DMeshes.setup_sun` :
 Réglé avec le rendu « mobile » (Vulkan), celui du téléphone : le rendu « compatibilité » des captures
 habituelles donne des couleurs très différentes. Capture : `xvfb-run -a godot --rendering-method mobile
 --path . -s tests/shot_openworld.gd -- <dossier> foret_sylve`. Test : `tests/test_adv3d_look.gd`.
+### Carte Diorama du Marais des Brumes (V136)
+
+Troisième Nation en Diorama : `plan_brumes.py` + `layout_brumes.py` (ambiance `DIORAMA_MOOD=brumes`),
+`BoardArt.DIORAMA_BOARDS["brumes_marais"]`. Cinq mares (`LAKES`, pris en charge par `terrain96.py` et
+`bake96.py`), feuillus sombres et arbres morts, roseaux, champignons, six cabanes. Donjons : `crypte`,
+`ruine`, `pilotis`, `souche` aux quatre coins et `tour_brume` au centre (types ajoutés à `dungeons3d.py`),
+vue dégagée jusqu'à 12,8 unités devant chaque entrée. Gardiens `Brumes#1` à `Brumes#4` puis `Brumes` (niveau 31).
+Sorties : « Sentier des Cendres » (retour) et « Portail vers les Cimes ». Test : `tests/test_brumes_diorama.gd`.
+Les Nations suivantes (Cimes…) gardent leur carte générée.
+
 ### Quitter la carte 2D proprement, compteur en 3D (V135)
 
 Signalé sur S23+ : après un déplacement sur la carte 2D, « Mes Parties » figeait le jeu. Non reproduit sur
