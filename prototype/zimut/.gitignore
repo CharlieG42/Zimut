@@ -45,7 +45,7 @@ Thumbs.db
 !assets/**/*.jpg
 !addons/**/*.png
 # modèle de build Android (installé par le workflow, V147)
-android/
+/android/
 
 # Fichiers temporaires Godot
 *.tmp
