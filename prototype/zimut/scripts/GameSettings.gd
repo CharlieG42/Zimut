@@ -15,10 +15,11 @@ const SETTINGS_PATH := "user://settings.json"
 ## 1,65 × 1,2 = 1,98 avant, 2,145 × 1,38 = 2,96 maintenant). Les sauvegardes d'avant sont décalées
 ## d'un cran à l'ouverture (clé « diff_v ») pour conserver la difficulté réellement jouée.
 const DIFFICULTIES: Array[String] = ["Facile", "Normal", "Difficile", "Enfer"]
-const DIFFICULTY_HP_POWER := [1.0, 1.2, 1.65, 2.145]
-## V152 : l'attaque ennemie monte en Normal (1,2 → 1,32, menace × 1,1 = 1,58), en Difficile
-## (1,2 → 1,32, menace 2,18) et en Enfer (1,38 → 1,55, menace 3,32), en plus de la nouvelle IA tactique.
-const DIFFICULTY_ATK_POWER := [1.0, 1.32, 1.32, 1.55]
+## V152 : Normal × 1,1 réparti entre PV et attaque (× 1,05 chacun : 1,2 → 1,26).
+const DIFFICULTY_HP_POWER := [1.0, 1.26, 1.65, 2.145]
+## V152 : l'attaque ennemie monte à chaque niveau, toujours croissante : Normal 1,2 → 1,26
+## (menace × 1,1 = 1,59), Difficile 1,2 → 1,32 (menace 2,18), Enfer 1,38 → 1,55 (menace 3,32).
+const DIFFICULTY_ATK_POWER := [1.0, 1.26, 1.32, 1.55]
 ## Version de l'échelle de difficulté des sauvegardes (voir ProgressionManager.ensure_roster).
 const DIFFICULTY_VERSION := 2
 

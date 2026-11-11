@@ -20,16 +20,17 @@ Les ennemis en **Facile** gardent l'ancienne IA.
 
 ## 2. Équilibrage (`scripts/GameSettings.gd`)
 
-| Difficulté | PV ennemis | Attaque ennemie (avant → V152) | Menace PV × attaque |
+| Difficulté | PV ennemis (avant → V152) | Attaque ennemie (avant → V152) | Menace PV × attaque |
 |---|---|---|---|
 | Facile | ×1,0 | ×1,0 | 1,0 |
-| Normal | ×1,2 | ×1,2 → **×1,32** | 1,44 → 1,58 (×1,1) |
+| Normal | ×1,2 → **×1,26** | ×1,2 → **×1,26** | 1,44 → 1,59 (×1,1) |
 | Difficile | ×1,65 | ×1,2 → **×1,32** | 1,98 → 2,18 |
 | Enfer | ×2,145 | ×1,38 → **×1,55** | 2,96 → 3,32 |
 
 Mesure (`tests/sim_difficulte.gd`, héros pilotés par l'ancienne IA, niveau 10, Difficile, combats 1, 4, 7, 10) :
 ancienne IA ennemie 2 victoires sur 4 (39 % de PV restants en moyenne), nouvelle IA 1 sur 4 (16 %), avant même la
-hausse d'attaque. Normal est relevé de 10 % (attaque ×1,1) à la demande de Charlie. La simulation oppose une IA à une autre : elle compare des versions, elle ne remplace pas
+hausse d'attaque. Normal est relevé de 10 % (PV et attaque ×1,05 chacun) à la demande de Charlie ; PV et attaque augmentent
+désormais à chaque niveau. La simulation oppose une IA à une autre : elle compare des versions, elle ne remplace pas
 l'avis d'un joueur. À réajuster après tes parties.
 
 ## 3. Aperçu des dégâts en fourchette

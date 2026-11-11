@@ -27,9 +27,15 @@ func _boot() -> void:
 	check(gs.DIFFICULTIES == ["Facile", "Normal", "Difficile", "Enfer"], "quatre niveaux, mêmes noms")
 	check(absf(gs.enemy_hp_mult({"difficulty": 0}) - old_normal["hp"]) < 0.001 and absf(gs.enemy_attack_mult({"difficulty": 0}) - old_normal["atk"]) < 0.001,
 		"Facile = ancien Normal")
-	# V152 : Normal = ancien Difficile × 1,1 (attaque 1,2 → 1,32)
-	check(absf(gs.enemy_hp_mult({"difficulty": 1}) - old_hard["hp"]) < 0.001 and absf(gs.enemy_attack_mult({"difficulty": 1}) - old_hard["atk"] * 1.1) < 0.001,
+	# V152 : Normal = ancien Difficile × 1,1 (PV et attaque × 1,05 chacun)
+	check(absf(gs.enemy_hp_mult({"difficulty": 1}) - old_hard["hp"] * 1.05) < 0.001 and absf(gs.enemy_attack_mult({"difficulty": 1}) - old_hard["atk"] * 1.05) < 0.001,
 		"Normal = ancien Difficile × 1,1 (V152)")
+	var atk_up := true
+	var hp_up := true
+	for i: int in range(1, 4):
+		atk_up = atk_up and gs.enemy_attack_mult({"difficulty": i}) > gs.enemy_attack_mult({"difficulty": i - 1})
+		hp_up = hp_up and gs.enemy_hp_mult({"difficulty": i}) > gs.enemy_hp_mult({"difficulty": i - 1})
+	check(atk_up and hp_up, "PV et attaque augmentent à chaque niveau")
 	# V152 : Difficile = PV de l'ancien Enfer, attaque relevée (1,32) ; Enfer ≈ 1,68 × l'ancien Enfer
 	check(absf(gs.enemy_hp_mult({"difficulty": 2}) - old_hell["hp"]) < 0.001 and absf(gs.enemy_attack_mult({"difficulty": 2}) - 1.32) < 0.001,
 		"Difficile = PV de l'ancien Enfer, attaque 1,32 (V152)")
