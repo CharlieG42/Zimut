@@ -11,6 +11,9 @@ const SERVICE_SCRIPT := "res://scripts/NotifierService.gd"
 const SERVICE_NODE := "ZimutNotifier"
 const ID_ABSENCE := 4601
 const WARN_BEFORE_SECONDS := 86400      ## prévenir un jour avant la première offensive
+## Mode test (APK de vérification uniquement) : > 0 = rappel envoyé N secondes après l'ouverture de la carte de
+## Conquête, quel que soit l'empire. Toujours 0 dans le jeu normal.
+const TEST_DELAY_SECONDS := 0
 const TITLE := "Zimut — votre empire est menacé"
 const TEXT := "Sans bataille de Conquête d'ici demain, le Roi Squelette lancera une offensive sur vos villes."
 
@@ -54,6 +57,8 @@ static func absence_delay(seconds_before_offensive: int) -> int:
 ## Programme (ou annule) le rappel « votre empire est menacé ». Renvoie le délai retenu (0 = rien).
 static func schedule_absence_warning(seconds_before_offensive: int) -> int:
 	var delay: int = absence_delay(seconds_before_offensive) if _enabled() else 0
+	if TEST_DELAY_SECONDS > 0 and _enabled():
+		delay = TEST_DELAY_SECONDS
 	var svc: Node = _service()
 	if svc != null:
 		if delay > 0:

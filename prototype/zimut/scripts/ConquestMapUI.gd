@@ -181,7 +181,10 @@ func _ready() -> void:
 	if not absence.is_empty():
 		_show_popup("PENDANT VOTRE ABSENCE", String(absence.get("text", "")))
 	# V146-V147 : rappel Android un jour avant la première offensive d'absence (sans effet hors Android)
-	(preload("res://scripts/Notifier.gd") as GDScript).schedule_absence_warning(ConquestSystem.seconds_before_absence(_conquest, ProgressionManager.conquest_now()))
+	var notifier: GDScript = preload("res://scripts/Notifier.gd")
+	notifier.schedule_absence_warning(ConquestSystem.seconds_before_absence(_conquest, ProgressionManager.conquest_now()))
+	if int(notifier.get("TEST_DELAY_SECONDS")) > 0:
+		_show_popup("APK DE TEST — NOTIFICATION", "Une notification de test est programmée dans %d minute(s).\n\nAutorisez les notifications si Android le demande, puis quittez le jeu (bouton Accueil) et attendez." % maxi(1, int(notifier.get("TEST_DELAY_SECONDS")) / 60))
 	# V59 : Gultur présente les nouveautés de la Conquête (une seule fois chacune)
 	# V60 : puis la carte vivante (routes, territoire, brouillard, offensives)
 	# V64 : puis comment sortir du brouillard (s'il en reste) et les nouveautés de la carte.
