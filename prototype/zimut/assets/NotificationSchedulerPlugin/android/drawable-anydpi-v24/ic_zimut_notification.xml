@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Zimut : étoile-boussole du logo, silhouette blanche (règle Android des petites icônes de notification). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+		android:width="24dp"
+		android:height="24dp"
+		android:viewportWidth="24"
+		android:viewportHeight="24"
+		android:tint="#FFFFFF">
+	<path android:fillType="evenOdd" android:fillColor="#FFFFFFFF"
+			android:pathData="M12.000,0.600L14.546,9.454L21.400,12.000L14.546,14.546L12.000,23.400L9.454,14.546L2.600,12.000L9.454,9.454ZM12.000,8.700L15.300,12.000L12.000,15.300L8.700,12.000ZM12.000,10.300L13.700,12.000L12.000,13.700L10.300,12.000Z"/>
+</vector>

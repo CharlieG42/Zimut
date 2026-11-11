@@ -106,8 +106,9 @@ func _ready() -> void:
 		func(idx: int) -> void:
 			GameSettings.set_sfx(idx < 2)
 			GameSettings.set_haptics(idx == 0)))
-	g1.add_child(_setting_cell("Rappels de Conquête (Android)", ["Activés", "Désactivés"] as Array[String],
-		0 if GameSettings.notifications_on else 1, func(idx: int) -> void: GameSettings.set_notifications(idx == 0)))
+	if OS.get_name() == "Android":          # sans objet sur PC
+		g1.add_child(_setting_cell("Rappels de Conquête", ["Activés", "Désactivés"] as Array[String],
+			0 if GameSettings.notifications_on else 1, func(idx: int) -> void: GameSettings.set_notifications(idx == 0)))
 	var tuto := Button.new()
 	tuto.name = "TutoRestart"
 	tuto.text = "🎓  Relancer le tutoriel de Gultur"

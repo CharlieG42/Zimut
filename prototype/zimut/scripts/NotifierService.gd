@@ -5,6 +5,10 @@ extends Node
 ## avant la fin de l'initialisation sont gardées et envoyées ensuite (seule la dernière compte).
 
 const CHANNEL_ID := "zimut_conquete"
+## Icônes aux couleurs de Zimut (assets/NotificationSchedulerPlugin/android) : petite icône = étoile-boussole
+## du logo en silhouette blanche (règle Android), grande icône = le héros et son familier, en couleur.
+const SMALL_ICON := "ic_zimut_notification"
+const LARGE_ICON := "zimut_notification_large"
 
 var _scheduler: Node
 var _ready_done: bool = false
@@ -66,6 +70,8 @@ func _flush() -> void:
 	d.call("set_title", String(_pending["title"]))
 	d.call("set_content", String(_pending["text"]))
 	d.call("set_delay", int(_pending["delay"]))
+	d.call("set_small_icon_name", SMALL_ICON)
+	d.call("set_large_icon_name", LARGE_ICON)
 	_scheduler.call("cancel", int(_pending["id"]))
 	_scheduler.call("schedule", d)
 	_pending = {}

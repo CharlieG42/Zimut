@@ -49,8 +49,7 @@ systèmes d'économie. Production par ville et défense chiffrée existent déj�
       bilan « Pendant votre absence », impôts accumulés, première victoire du jour doublée, offensives
       pendant les autres modes.
 - [x] **Notification Android avant une offensive** (V147). Module Notification Scheduler, export Gradle,
-      permission demandée au premier rappel utile, réglage pour couper. À valider sur téléphone.
-- [ ] Icône de notification aux couleurs de Zimut (aujourd'hui : icône par défaut du module).
+      permission demandée au premier rappel utile, réglage pour couper, icônes Zimut. À valider sur téléphone.
 - [ ] **Empire vivant, réglages**. Ajuster les valeurs après quelques semaines de jeu réel (délai de
       grâce, rythme, plafond de pertes, fréquence des alertes hors Conquête).
 - [ ] **Nation complète**. Tenir toutes les villes d'une Nation donne un bonus permanent valable dans les

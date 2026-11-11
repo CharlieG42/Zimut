@@ -15,7 +15,13 @@ func _boot() -> void:
 	check(FileAccess.file_exists("res://addons/NotificationSchedulerPlugin/plugin.cfg"), "module présent dans addons/")
 	check(FileAccess.file_exists("res://addons/NotificationSchedulerPlugin/bin/release/NotificationSchedulerPlugin-release.aar")
 		and FileAccess.file_exists("res://addons/NotificationSchedulerPlugin/bin/debug/NotificationSchedulerPlugin-debug.aar"), "bibliothèques Android (.aar) debug et release présentes")
-	check(FileAccess.file_exists("res://assets/NotificationSchedulerPlugin/android/drawable-mdpi/ic_default_notification.png"), "icône de notification présente")
+	var icons_ok := FileAccess.file_exists("res://assets/NotificationSchedulerPlugin/android/drawable-anydpi-v24/ic_zimut_notification.xml") \
+		and FileAccess.file_exists("res://assets/NotificationSchedulerPlugin/android/drawable-xxhdpi/zimut_notification_large.png")
+	for dens: String in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
+		icons_ok = icons_ok and FileAccess.file_exists("res://assets/NotificationSchedulerPlugin/android/drawable-%s/ic_zimut_notification.png" % dens)
+	check(icons_ok, "icônes Zimut présentes (petite icône pour 5 densités + vectorielle, grande icône)")
+	var svc_src: String = FileAccess.get_file_as_string("res://scripts/NotifierService.gd")
+	check(svc_src.contains("ic_zimut_notification") and svc_src.contains("zimut_notification_large"), "la notification utilise les icônes Zimut")
 	var plugins: PackedStringArray = ProjectSettings.get_setting("editor_plugins/enabled", PackedStringArray())
 	check(plugins.has("res://addons/NotificationSchedulerPlugin/plugin.cfg"), "module activé dans project.godot")
 	var presets := ConfigFile.new()
