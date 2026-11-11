@@ -1691,6 +1691,31 @@ func estimate_damage(caster: Dictionary, spell: Dictionary, target: Dictionary) 
 	return int(r["dmg"])
 
 
+## V152 : fourchette de dégâts de l'aperçu — Vector2i(min, max). Min = coup normal au plus bas
+## de l'aléa (×0,93), max = coup critique au plus haut (×1,07) ; un critique assuré (Marque,
+## dos pour « back_crit ») relève le min. Tient compte du combo, de l'exécution et des immunités.
+func estimate_damage_range(caster: Dictionary, spell: Dictionary, target: Dictionary) -> Vector2i:
+	var p: Dictionary = Combat.parse(spell)
+	var base: float = float(p["dmg"])
+	if p["needs_summon"]:
+		base = float(p["summon_dmg_base"]) + float(caster["level"]) * 0.5 * float(p["summon_dmg_lvl"])
+	if base <= 0.0:
+		return Vector2i.ZERO
+	var dtype: String = String(p["dtype"])
+	if Combat.has_status(target, "immune") or (dtype == "phys" and Combat.has_status(target, "immune_phys")) \
+			or (dtype == "mag" and Combat.has_status(target, "immune_mag")):
+		return Vector2i.ZERO
+	if p["cond"] == "kill_20" and hp_ratio(target) < 0.2:
+		var hp: int = int(target["current_pv"])
+		return Vector2i(hp, hp)
+	base *= 1.0 + float(Combat.synergy_pct(p, target, caster.get("casts", {}))) / 100.0
+	var crit_dmg: float = float(Combat.calc_damage(caster, target, base, dtype, float(p["ignore_def"]), true, true)["dmg"])
+	var sure_crit: bool = Combat.has_status(caster, "mark") \
+		or (p["cond"] == "back_crit" and Combat.is_behind(pos_of(caster), pos_of(target), target.get("facing", Vector2i.ZERO)))
+	var low: float = crit_dmg if sure_crit else crit_dmg / 1.5
+	return Vector2i(maxi(1, roundi(low * 0.93)), maxi(1, roundi(crit_dmg * 1.07)))
+
+
 # ═══════════════════════════════════════════════════════════════════════════
 #  Sorts : résolution
 # ═══════════════════════════════════════════════════════════════════════════

@@ -464,9 +464,7 @@ func refresh_highlights() -> void:
 						continue
 					if p["kind"] == "attack" and t["team"] != e["team"]:
 						_preview_displacement(e, t, p)
-						var dmg: int = game_manager.estimate_damage(e, spell, t)
-						if dmg > 0:
-							_view(t).preview_text = ("-%d  KO" % dmg) if dmg >= int(t["current_pv"]) else ("-%d" % dmg)
+						_view(t).preview_text = damage_preview_text(game_manager.estimate_damage_range(e, spell, t), int(t["current_pv"]))
 					elif p["kind"] == "heal" and t["team"] == e["team"] and int(p["heal"]) > 0:
 						_view(t).preview_text = "+%d" % roundi(float(p["heal"]) * (1.0 + float(e.get("intelligence", 0)) / 300.0))
 	if not _threat_of.is_empty():
@@ -477,6 +475,18 @@ func refresh_highlights() -> void:
 			c.refresh()
 	for v: EntityView in views.values():
 		v.hovered = _valid(hover_cell) and game_manager.pos_of(v.entity) == hover_cell
+
+
+## V152 : texte d'aperçu des dégâts « -min~max » ; « KO » si le minimum tue, « KO ? » si seul le maximum tue.
+static func damage_preview_text(r: Vector2i, hp: int) -> String:
+	if r.y <= 0:
+		return ""
+	var t: String = ("-%d" % r.x) if r.x == r.y else ("-%d~%d" % [r.x, r.y])
+	if r.x >= hp:
+		return t + "  KO"
+	if r.y >= hp:
+		return t + "  KO ?"
+	return t
 
 
 ## V109 : trajet prévu d'une cible poussée / attirée par le sort visé (cases du trajet, arrivée, choc éventuel).

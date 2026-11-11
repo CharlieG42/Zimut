@@ -12,6 +12,14 @@ class_name TurnManager
 var game_manager: Node
 var _running_uid: int = -1
 
+## V152 : équipes forcées sur l'ancienne IA « gloutonne » (simulations d'équilibrage :
+## on garde les héros sur l'ancienne IA pour mesurer le gain de la nouvelle côté ennemi).
+static var legacy_teams: Array = []
+## V152 : cible de concentration par équipe (uid) — les alliés finissent la même proie.
+var _focus: Dictionary = {}
+## Planification en cours avec l'IA tactique (calculé au début de plan()).
+var _cur_smart: bool = false
+
 
 func init(manager: Node) -> void:
 	game_manager = manager
@@ -53,16 +61,22 @@ func _run(e: Dictionary) -> void:
 	await _idle()
 	await _sleep(0.35)
 	var guard: int = 0
+	var acted: bool = false
 	while guard < 14:
 		guard += 1
 		if not _still_active(e):
 			return
-		var act: Dictionary = plan(e)
+		var act: Dictionary = plan(e, acted)
 		if act.is_empty():
 			break
 		var ok: bool = false
 		if act["type"] == "cast":
+			var tgt: Dictionary = game_manager.entity_at(act["cell"])
 			ok = game_manager.cast_spell(e, act["spell"], act["cell"])
+			if ok:
+				acted = true
+				if not tgt.is_empty() and String(tgt.get("team", "")) != String(e["team"]):
+					_focus[String(e["team"])] = int(tgt["uid"])
 		else:
 			ok = game_manager.try_move(e, act["cell"])
 		if not ok:
@@ -79,7 +93,29 @@ func _run(e: Dictionary) -> void:
 #  Planification
 # ═══════════════════════════════════════════════════════════════════════════
 
-func plan(e: Dictionary) -> Dictionary:
+## Choisit la prochaine action. `acted` : l'entité a déjà lancé un sort ce tour
+## (l'IA tactique en profite pour se replier avec ses PM restants).
+func plan(e: Dictionary, acted: bool = false) -> Dictionary:
+	_cur_smart = _smart(e)
+	var now: Dictionary = _best_cast_here(e)
+	if not _cur_smart:
+		return now.get("act", _plan_move(e))
+	# IA tactique : se déplacer d'abord si une meilleure attaque (ou un soin) devient possible
+	if int(e["current_pm"]) > 0 and not Combat.has_status(e, "root"):
+		var mv: Dictionary = _best_move_then_cast(e)
+		if not mv.is_empty() and float(mv["eff"]) > float(now.get("eff", 0.0)) * 1.15 + 1.0:
+			return {"type": "move", "cell": mv["cell"]}
+	if now.has("act"):
+		return now["act"]
+	if acted:
+		var back: Dictionary = _plan_retreat(e)
+		if not back.is_empty():
+			return back
+	return _plan_move(e)
+
+
+## Meilleur sort lançable depuis la position actuelle : {"act", "eff"} (vide si aucun).
+func _best_cast_here(e: Dictionary) -> Dictionary:
 	var best: Dictionary = {}
 	var best_eff: float = 0.0
 	for spell: Dictionary in e["spells"]:
@@ -97,9 +133,9 @@ func plan(e: Dictionary) -> Dictionary:
 			if eff > best_eff:
 				best_eff = eff
 				best = {"type": "cast", "spell": spell, "cell": c}
-	if not best.is_empty():
-		return best
-	return _plan_move(e)
+	if best.is_empty():
+		return {}
+	return {"act": best, "eff": best_eff}
 
 
 func _score_cast(e: Dictionary, spell: Dictionary, p: Dictionary, c: Vector2i) -> float:
@@ -121,6 +157,8 @@ func _score_cast(e: Dictionary, spell: Dictionary, p: Dictionary, c: Vector2i) -
 				total += minf(dmg, hp)
 				if dmg >= hp:
 					total += 60.0
+				if _cur_smart and String(t.get("team", "")) != String(e["team"]):
+					total += _focus_bonus(e, t, minf(dmg, hp), dmg >= hp)
 				for dt: Dictionary in p["dots"]:
 					total += float(dt["value"]) * float(dt["turns"]) * 0.55
 				total += 12.0 * float(p["debuffs"].size())
@@ -320,6 +358,257 @@ func _score_jitter(e: Dictionary) -> float:
 		return 0.0
 	var h: int = (absi(int(e.get("uid", 0))) * 131 + int(game_manager.turn_count) * 17) % 100
 	return float(h - 50) / 250.0
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  V152 — IA tactique : se placer puis frapper, concentrer, se replier
+# ═══════════════════════════════════════════════════════════════════════════
+
+## IA tactique active pour cette entité ? Les ennemis en Facile gardent l'ancienne IA
+## (plus prévisible) ; les simulations peuvent forcer une équipe sur l'ancienne IA.
+func _smart(e: Dictionary) -> bool:
+	var team: String = String(e.get("team", ""))
+	if legacy_teams.has(team):
+		return false
+	if team == "enemy":
+		var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameSettings")
+		var d: int = int(gs.call("save_difficulty", game_manager.active_save)) if gs != null else 1
+		return d >= 1
+	return true
+
+
+## Bonus de « concentration » : finir les blessés, viser les soigneurs, suivre la cible
+## déjà entamée par l'équipe — ce que fait un joueur humain et que l'IA ignorait.
+func _focus_bonus(e: Dictionary, t: Dictionary, dealt: float, kills: bool) -> float:
+	var gm: Node = game_manager
+	var b: float = dealt * (1.0 - gm.hp_ratio(t)) * 0.5
+	var classe: String = String(t.get("classe", ""))
+	if classe in ["Heal", "Druide"]:
+		b += dealt * 0.25
+	if int(_focus.get(String(e["team"]), -1)) == int(t["uid"]):
+		b += dealt * 0.2 + 8.0
+	if kills:
+		b += 25.0
+	if bool(t.get("terrain", false)) or bool(t.get("beacon", false)):
+		b -= dealt * 0.5
+	return b
+
+
+## Plus longue portée offensive utile de l'entité.
+func _attack_range(e: Dictionary) -> int:
+	var r: int = 1
+	for s: Dictionary in e.get("spells", []):
+		var p: Dictionary = Combat.parse(s)
+		if p["kind"] == "attack" and p["aoe"] in ["single", "zone"] and int(s["cost_pa"]) <= int(e.get("max_pa", 6)):
+			r = maxi(r, int(s["range"]))
+	return r
+
+
+func _is_healer(e: Dictionary) -> bool:
+	if String(e.get("classe", "")) in ["Heal", "Druide"]:
+		return true
+	for s: Dictionary in e.get("spells", []):
+		if Combat.parse(s)["kind"] == "heal":
+			return true
+	return false
+
+
+## Fragile = doit éviter la mêlée : tireur, soigneur ou prudent (les agressifs et les
+## boss en forme assument le contact).
+func _fragile(e: Dictionary) -> bool:
+	match _trait(e):
+		"aggressive":
+			return false
+		"brawler":
+			return game_manager.hp_ratio(e) < 0.5
+		"cautious":
+			return true
+	return _attack_range(e) >= 3 or _is_healer(e)
+
+
+## Menaces adverses : position, portée totale (PM + portée d'attaque) et poids.
+func _foe_info(e: Dictionary) -> Array:
+	var gm: Node = game_manager
+	var out: Array = []
+	for f: Dictionary in gm.enemies_of(e):
+		if not gm.is_alive(f) or bool(f.get("terrain", false)) or bool(f.get("beacon", false)):
+			continue
+		if String(f.get("mech", "")) != "" and String(f.get("mech", "")) != "turret":
+			continue
+		var mv: int = 0 if String(f.get("mech", "")) == "turret" else int(f.get("max_pm", f.get("current_pm", 3)))
+		var w: float = 1.0
+		if bool(f.get("boss", false)):
+			w = 1.6
+		elif String(f.get("entity_type", "")) == "Summon":
+			w = 0.6
+		out.append({"pos": gm.pos_of(f), "reach": mv + _attack_range(f), "w": w})
+	return out
+
+
+func _threat_at(c: Vector2i, info: Array) -> float:
+	var t: float = 0.0
+	for fi: Dictionary in info:
+		var d: int = Combat.manhattan(c, fi["pos"])
+		if d <= int(fi["reach"]):
+			t += float(fi["w"])
+			if d <= 1:
+				t += 0.5 * float(fi["w"])
+	return t
+
+
+## Vérification rapide de la cible (le vrai contrôle est refait par cast_spell).
+func _quick_target_ok(e: Dictionary, p: Dictionary, from: Vector2i, tc: Vector2i) -> bool:
+	var gm: Node = game_manager
+	var t: Dictionary = gm.entity_at(tc)
+	match String(p["target"]):
+		"enemy":
+			if t.is_empty() or String(t["team"]) == String(e["team"]):
+				return false
+			if Combat.has_status(t, "invisible") and Combat.manhattan(from, tc) > 1:
+				return false
+		"ally":
+			if t.is_empty() or String(t["team"]) != String(e["team"]):
+				return false
+		"free_cell":
+			if not gm.is_free(tc):
+				return false
+		"any_entity":
+			if t.is_empty() or int(t["uid"]) == int(e["uid"]):
+				return false
+	if p["cond"] == "exec_30" and not t.is_empty() and gm.hp_ratio(t) >= 0.3:
+		return false
+	if (p["needs_summon"] or p["buff_summons"]) and gm.summons_of(e).is_empty():
+		return false
+	return true
+
+
+## Cases visables intéressantes depuis `from` (autour des cibles plutôt que toute la portée).
+func _candidate_cells(e: Dictionary, spell: Dictionary, p: Dictionary, from: Vector2i, foes: Array, friends: Array, blockers: Dictionary) -> Array[Vector2i]:
+	var gm: Node = game_manager
+	var out: Array[Vector2i] = []
+	if p["target"] == "self":
+		out.append(from)
+		return out
+	var pool: Array[Vector2i] = []
+	if p["kind"] == "attack":
+		for f: Dictionary in foes:
+			var fp: Vector2i = gm.pos_of(f)
+			pool.append(fp)
+			if p["aoe"] == "zone":
+				for d: Vector2i in Combat.DIRS:
+					pool.append(fp + d)
+	else:
+		for a: Dictionary in friends:
+			pool.append(gm.pos_of(a))
+	var rng: int = int(spell["range"])
+	for tc: Vector2i in pool:
+		if out.has(tc) or not gm._in_bounds(tc):
+			continue
+		var d2: int = Combat.manhattan(from, tc)
+		if d2 > rng or d2 < int(p["min_range"]):
+			continue
+		if p["needs_los"] and d2 > 1 and not Combat.has_los(from, tc, blockers):
+			continue
+		if _quick_target_ok(e, p, from, tc):
+			out.append(tc)
+	return out
+
+
+## Pour chaque case atteignable, meilleur sort (attaque / soin) lançable une fois arrivé.
+## Les fragiles pénalisent les cases exposées. Retourne {"cell", "eff"} ou {}.
+func _best_move_then_cast(e: Dictionary) -> Dictionary:
+	var gm: Node = game_manager
+	var spells: Array = []
+	for s: Dictionary in e["spells"]:
+		var k: String = String(Combat.parse(s)["kind"])
+		if (k == "attack" or k == "heal") and int(e["current_pa"]) >= int(s["cost_pa"]) and gm.casts_left(e, s) > 0:
+			spells.append(s)
+	if spells.is_empty():
+		return {}
+	var foes: Array = []
+	for f: Dictionary in gm.enemies_of(e):
+		if gm.is_alive(f) and not bool(f.get("beacon", false)):
+			foes.append(f)
+	var friends: Array = gm.entities_of_team(String(e["team"]))
+	var blockers: Dictionary = gm.los_blockers()
+	var fragile: bool = _fragile(e)
+	var info: Array = _foe_info(e) if fragile else []
+	var reach: Dictionary = gm.compute_reach(e)
+	var start: Vector2i = gm.pos_of(e)
+	var pm0: int = int(e["current_pm"])
+	var best: Dictionary = {}
+	var best_eff: float = 0.0
+	for c: Vector2i in reach["cost"].keys():
+		if c == start:
+			continue
+		var cost: int = int(reach["cost"][c])
+		# déplacement virtuel (restauré juste après)
+		gm.grid[start.y][start.x] = null
+		gm.grid[c.y][c.x] = e
+		e["x"] = c.x
+		e["y"] = c.y
+		e["current_pm"] = pm0 - cost
+		var cbest: float = 0.0
+		for spell: Dictionary in spells:
+			if not gm.can_afford(e, spell):
+				continue
+			var p: Dictionary = Combat.parse(spell)
+			for tc: Vector2i in _candidate_cells(e, spell, p, c, foes, friends, blockers):
+				var sc: float = _score_cast(e, spell, p, tc)
+				if sc > 0.0:
+					cbest = maxf(cbest, sc / (float(spell["cost_pa"]) + 1.0))
+		gm.grid[c.y][c.x] = null
+		gm.grid[start.y][start.x] = e
+		e["x"] = start.x
+		e["y"] = start.y
+		e["current_pm"] = pm0
+		if cbest <= 0.0:
+			continue
+		cbest -= float(cost) * 0.5
+		if fragile:
+			cbest *= clampf(1.0 - 0.12 * _threat_at(c, info), 0.4, 1.0)
+		if cbest > best_eff:
+			best_eff = cbest
+			best = {"cell": c, "eff": cbest}
+	return best
+
+
+## Après avoir frappé (ou pour un soigneur sans rien à faire) : se mettre à l'abri
+## en restant à portée utile — le « frapper puis reculer » des tireurs.
+func _plan_retreat(e: Dictionary) -> Dictionary:
+	var gm: Node = game_manager
+	if int(e["current_pm"]) <= 0 or not _fragile(e):
+		return {}
+	var info: Array = _foe_info(e)
+	var anchor: Vector2i = gm.pos_of(e)
+	var desired: int = mini(_attack_range(e), 4)
+	var target: Dictionary = _pick_target(e)
+	if not target.is_empty():
+		anchor = gm.pos_of(target)
+	if _is_healer(e):
+		# rester près de l'allié le plus blessé
+		var worst: float = 2.0
+		for a: Dictionary in gm.entities_of_team(String(e["team"])):
+			if int(a["uid"]) == int(e["uid"]) or not gm.is_alive(a) or bool(a.get("terrain", false)) or bool(a.get("beacon", false)):
+				continue
+			if gm.hp_ratio(a) < worst:
+				worst = gm.hp_ratio(a)
+				anchor = gm.pos_of(a)
+				desired = 2
+	var reach: Dictionary = gm.compute_reach(e)
+	var start: Vector2i = gm.pos_of(e)
+	var best_cell: Vector2i = start
+	var best_sc: float = -_threat_at(start, info) * 20.0 - absf(float(Combat.manhattan(start, anchor) - desired)) * 2.0
+	for c: Vector2i in reach["cost"].keys():
+		if c == start:
+			continue
+		var sc: float = -_threat_at(c, info) * 20.0 - absf(float(Combat.manhattan(c, anchor) - desired)) * 2.0 - float(reach["cost"][c]) * 0.3
+		if sc > best_sc + 2.0:
+			best_sc = sc
+			best_cell = c
+	if best_cell == start:
+		return {}
+	return {"type": "move", "cell": best_cell}
 
 
 # ═══════════════════════════════════════════════════════════════════════════

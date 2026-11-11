@@ -945,8 +945,10 @@ func _draw() -> void:
 	# Prévisualisation des dégâts (survol d'un sort)
 	if preview_text != "":
 		var pc := Color(1.0, 0.85, 0.3) if preview_text.begins_with("-") else Color(0.5, 1.0, 0.6)
-		draw_string_outline(font, Vector2(-45, by2 - 30.0), preview_text, HORIZONTAL_ALIGNMENT_CENTER, 90, 26, 7, Color(0, 0, 0, 0.95))
-		draw_string(font, Vector2(-45, by2 - 30.0), preview_text, HORIZONTAL_ALIGNMENT_CENTER, 90, 26, pc)
+		# V152 : fourchette « -min~max » → zone plus large, police réduite si le texte est long
+		var fs: int = 26 if preview_text.length() <= 6 else 22
+		draw_string_outline(font, Vector2(-100, by2 - 30.0), preview_text, HORIZONTAL_ALIGNMENT_CENTER, 200, fs, 7, Color(0, 0, 0, 0.95))
+		draw_string(font, Vector2(-100, by2 - 30.0), preview_text, HORIZONTAL_ALIGNMENT_CENTER, 200, fs, pc)
 
 
 func _draw_dragonnet() -> void:

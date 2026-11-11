@@ -172,3 +172,4 @@ Mesures sur Galaxy S23+ (vidéos du 10 novembre) : carte Diorama 53 à 58 images
 Brasier 49 à 58 images par seconde, environ 300 000 triangles et 400 à 500 dessins par image.
 | Tactique : tuiles de la Sylve en 3 niveaux de détail | fait | V150 |
 | Conquête : Nations unies (Bannières) et chapitres de campagne | fait | V151 |
+| Tactique : IA tactique, équilibrage Difficile/Enfer, fourchette de dégâts, 17 succès | fait | V152 |

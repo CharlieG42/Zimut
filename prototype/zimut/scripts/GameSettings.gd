@@ -16,7 +16,9 @@ const SETTINGS_PATH := "user://settings.json"
 ## d'un cran à l'ouverture (clé « diff_v ») pour conserver la difficulté réellement jouée.
 const DIFFICULTIES: Array[String] = ["Facile", "Normal", "Difficile", "Enfer"]
 const DIFFICULTY_HP_POWER := [1.0, 1.2, 1.65, 2.145]
-const DIFFICULTY_ATK_POWER := [1.0, 1.2, 1.2, 1.38]
+## V152 : l'attaque ennemie monte en Difficile (1,2 → 1,32) et en Enfer (1,38 → 1,55) en plus de
+## la nouvelle IA tactique — menace 2,18 en Difficile, 3,32 en Enfer (Facile et Normal inchangés).
+const DIFFICULTY_ATK_POWER := [1.0, 1.2, 1.32, 1.55]
 ## Version de l'échelle de difficulté des sauvegardes (voir ProgressionManager.ensure_roster).
 const DIFFICULTY_VERSION := 2
 
