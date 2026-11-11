@@ -69,6 +69,8 @@ var _selected_id: String = "clairiere"
 var _message: Label
 var _threat_banner: Label
 var _defend_button: Button
+var _empire_button: Button
+var _empire_dim: Control
 var _attack: Button
 var _city_buttons: Dictionary = {}
 var _city_labels: Dictionary = {}
@@ -418,6 +420,14 @@ func _build() -> void:
 	_defend_button.visible = false
 	box.add_child(_defend_button)
 
+	# V148 : vue d'ensemble de l'empire (toutes les villes, actions groupées)
+	_empire_button = Button.new()
+	_empire_button.custom_minimum_size.y = 58
+	_empire_button.add_theme_font_size_override("font_size", 20)
+	_empire_button.pressed.connect(_show_empire)
+	_style_button(_empire_button, Color(0.30, 0.24, 0.12), GOLD)
+	box.add_child(_empire_button)
+
 	# V59 : le conseil est en deux onglets pour tenir à l'écran sans défiler :
 	# « Ville » (illustration, situation, actions) et « Chronique » (nouvelles de l'empire).
 	var tabs := HBoxContainer.new()
@@ -538,6 +548,192 @@ func _build() -> void:
 	_refresh_header()
 	_select_city(_selected_id)
 	_layout_responsive()
+
+# ── V148 : vue d'ensemble de l'empire ─────────────────────────────────────
+
+func _show_empire(note: String = "") -> void:
+	if _empire_dim != null and is_instance_valid(_empire_dim):
+		_empire_dim.queue_free()
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	var dim := ColorRect.new()
+	dim.name = "EmpireOverview"
+	dim.color = Color(0.015, 0.035, 0.055, 0.86)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(dim)
+	_empire_dim = dim
+	var centre := CenterContainer.new()
+	centre.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	centre.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	dim.add_child(centre)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _style(Color(0.10, 0.15, 0.19, 0.99), GOLD))
+	var pw: float = minf(1240.0, vp.x - 40.0)
+	panel.custom_minimum_size = Vector2(pw, 0)
+	centre.add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 10)
+	panel.add_child(box)
+
+	var rows: Array = ConquestSystem.empire_rows(_save)
+	var gold: int = int(_save.get("gold", 0))
+	var title := Label.new()
+	title.text = Typo.fr("▦ MON EMPIRE — %d villes · revenus +%d or par victoire · trésor %d or" % [
+		rows.size(), ConquestSystem.total_income(_save), gold])
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title.add_theme_font_size_override("font_size", 24)
+	title.add_theme_color_override("font_color", GOLD)
+	box.add_child(title)
+	if note != "":
+		var nl := Label.new()
+		nl.text = Typo.fr(note)
+		nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		nl.add_theme_font_size_override("font_size", 19)
+		nl.add_theme_color_override("font_color", Color(0.70, 0.95, 0.70))
+		box.add_child(nl)
+
+	# Actions groupées
+	var actions := HBoxContainer.new()
+	actions.add_theme_constant_override("separation", 10)
+	box.add_child(actions)
+	var rc: int = ConquestSystem.recruit_all_cost(_save)
+	var b1 := _empire_action("♜ RECRUTER PARTOUT\n" + ("garnisons pleines" if rc == 0 else "%d or pour tout remplir" % rc),
+		rc > 0 and gold >= ConquestSystem.TROOP_COST, _empire_recruit_all)
+	actions.add_child(b1)
+	var up_n: int = 0
+	var ruined_n: int = 0
+	for r: Dictionary in rows:
+		if bool(r["can_upgrade"]):
+			up_n += 1
+		if bool(r["ruined"]):
+			ruined_n += 1
+	actions.add_child(_empire_action("▲ AMÉLIORER CE QUI EST PAYABLE\n" + ("rien de payable" if up_n == 0 else ("1 ville" if up_n == 1 else "jusqu'à %d villes, la moins chère d'abord" % up_n)),
+		up_n > 0, _empire_upgrade_all))
+	if ruined_n > 0:
+		actions.add_child(_empire_action("⚒ RÉPARER LES RUINES\n%d ville%s · %d or chacune" % [ruined_n, "s" if ruined_n > 1 else "", ConquestSystem.RUIN_REPAIR_GOLD],
+			gold >= ConquestSystem.RUIN_REPAIR_GOLD, _empire_repair_all))
+
+	# En-tête des colonnes
+	box.add_child(_empire_line(["VILLE", "SOLDATS", "DÉFENSE", "REVENUS", "ÉTAT"], true))
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0, minf(560.0, vp.y - 360.0))
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	box.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 6)
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(list)
+	var th_power: int = int(ConquestSystem.threat(_conquest).get("power", 0))
+	for r: Dictionary in rows:
+		var id: String = String(r["id"])
+		var state: PackedStringArray = []
+		if bool(r["threatened"]):
+			state.append("⚠ offensive (force %d)" % th_power)
+		if bool(r["ruined"]):
+			state.append("☠ ruinée")
+		if bool(r["ravaged"]):
+			state.append("⚔ pillée")
+		if bool(r["empty"]):
+			state.append("♜ sans soldats")
+		if bool(r["can_upgrade"]):
+			state.append("▲ amélioration payable")
+		if String(r["hero"]) != "":
+			state.append("♞ %s" % String(r["hero"]))
+		var name_txt: String = "%s\n%s niv. %d" % [ProgressionManager.conquest_city_name(id), ConquestSystem.level_name(int(r["level"])), int(r["level"])]
+		var line: Control = _empire_line([name_txt, "%d / %d" % [int(r["troops"]), int(r["cap"])], str(int(r["defense"])),
+			"+%d or" % int(r["income"]), " · ".join(state) if not state.is_empty() else "—"], false)
+		var row := Button.new()
+		row.custom_minimum_size.y = 70
+		row.add_theme_stylebox_override("normal", _style(Color(0.30, 0.12, 0.10, 0.95) if bool(r["threatened"]) else (Color(0.20, 0.16, 0.12, 0.95) if bool(r["alert"]) else Color(0.13, 0.19, 0.23, 0.95)), Color(0.40, 0.46, 0.44)))
+		row.add_theme_stylebox_override("hover", _style(Color(0.18, 0.26, 0.30, 0.97), GOLD))
+		row.add_theme_stylebox_override("pressed", _style(Color(0.18, 0.26, 0.30, 0.97), GOLD))
+		row.add_child(line)
+		line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		row.pressed.connect(func() -> void:
+			dim.queue_free()
+			_select_city(id))
+		list.add_child(row)
+	var hint := Label.new()
+	hint.text = Typo.fr("Touchez une ville pour l'ouvrir sur la carte.")
+	hint.add_theme_font_size_override("font_size", 17)
+	hint.add_theme_color_override("font_color", Color(0.72, 0.76, 0.74))
+	box.add_child(hint)
+	var close := Button.new()
+	close.text = Typo.fr("FERMER")
+	close.custom_minimum_size = Vector2(0, 60)
+	close.add_theme_font_size_override("font_size", 21)
+	_style_button(close, Color(0.13, 0.22, 0.27), Color(0.55, 0.66, 0.5))
+	close.pressed.connect(func() -> void: dim.queue_free())
+	box.add_child(close)
+
+
+## Ligne du tableau (5 colonnes, proportions fixes).
+func _empire_line(cells: Array, header: bool) -> Control:
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 10)
+	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var ratios: Array = [2.6, 1.1, 1.0, 1.1, 3.2]
+	for i: int in range(cells.size()):
+		var l := Label.new()
+		l.text = Typo.fr(String(cells[i]))
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		l.size_flags_stretch_ratio = float(ratios[i])
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		l.add_theme_font_size_override("font_size", 16 if header else 19)
+		l.add_theme_color_override("font_color", Color(0.72, 0.78, 0.74) if header else TEXT)
+		h.add_child(l)
+	var m := MarginContainer.new()
+	m.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for side: String in ["left", "right"]:
+		m.add_theme_constant_override("margin_" + side, 12)
+	m.add_child(h)
+	return m
+
+
+func _empire_action(text: String, enabled: bool, action: Callable) -> Button:
+	var b := Button.new()
+	b.text = Typo.fr(text)
+	b.disabled = not enabled
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.custom_minimum_size.y = 76
+	b.add_theme_font_size_override("font_size", 19)
+	_style_button(b, Color(0.22, 0.30, 0.20), GOLD)
+	b.pressed.connect(action)
+	return b
+
+
+func _empire_done(note: String) -> void:
+	ProgressionManager.write_save(_slot, _save)
+	ProgressionManager.progression_changed.emit()
+	_conquest = _save.get("conquest", {})
+	_refresh_header()
+	_select_city(_selected_id)
+	_show_empire(note)
+
+
+func _empire_recruit_all() -> void:
+	var r: Dictionary = ConquestSystem.recruit_all(_save)
+	_empire_done("♜ %d soldat%s recruté%s dans %d ville%s (−%d or)." % [int(r["soldiers"]), "s" if int(r["soldiers"]) > 1 else "",
+		"s" if int(r["soldiers"]) > 1 else "", int(r["cities"]), "s" if int(r["cities"]) > 1 else "", int(r["gold"])] if int(r["soldiers"]) > 0 else "Pas assez d'or pour recruter.")
+
+
+func _empire_upgrade_all() -> void:
+	var names: Dictionary = {}
+	for id: String in _conquest.get("owned", []):
+		names[id] = ProgressionManager.conquest_city_name(id)
+	var done: Array = ConquestSystem.upgrade_all_affordable(_save, names)
+	var shown: PackedStringArray = []
+	for id: String in done:
+		shown.append(String(names.get(id, id)))
+	_empire_done(("▲ Améliorée%s : %s." % ["s" if done.size() > 1 else "", ", ".join(shown)]) if not done.is_empty() else "Rien de payable pour l'instant.")
+
+
+func _empire_repair_all() -> void:
+	var done: Array = ConquestSystem.repair_all(_save)
+	_empire_done(("⚒ %d ville%s réparée%s : la production reprend." % [done.size(), "s" if done.size() > 1 else "", "s" if done.size() > 1 else ""]) if not done.is_empty() else "Pas assez d'or pour réparer.")
+
 
 ## Affiche l'onglet du conseil demandé (Ville / Chronique).
 func _show_tab(target: VBoxContainer) -> void:
@@ -854,6 +1050,9 @@ func _refresh_header() -> void:
 	elif ProgressionManager.conquest_empire_complete(_conquest):
 		line += "   ·   ⚔ Tout Zimut est à vous : assailliez le Donjon du Roi Squelette !"
 	_header.text = line
+	if _empire_button != null:
+		var n: int = ConquestSystem.empire_action_count(_save)
+		_empire_button.text = Typo.fr("▦ MON EMPIRE" + (("  —  %d ville%s à voir" % [n, "s" if n > 1 else ""]) if n > 0 else ""))
 
 func _select_city(id: String) -> void:
 	if _tab_city != null and not _tab_city.visible:
