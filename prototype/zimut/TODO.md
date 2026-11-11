@@ -48,11 +48,9 @@ systèmes d'économie. Production par ville et défense chiffrée existent déj�
 - [x] **Empire vivant** (V146). Offensives pendant l'absence (3 jours de grâce, 2 villes perdues au plus),
       bilan « Pendant votre absence », impôts accumulés, première victoire du jour doublée, offensives
       pendant les autres modes.
-- [ ] **Notification Android avant une offensive**. Le jeu sait quand prévenir (`Notifier.gd`) mais il
-      manque le module natif. À faire dans une PR à part, à tester sur téléphone : passer l'export Android
-      en Gradle (`use_gradle_build`, modèle de build Android dans le dépôt et dans le workflow), ajouter un
-      petit module « ZimutNotify » (programmer / annuler une notification), demander la permission
-      `POST_NOTIFICATIONS`, et une option pour couper les rappels dans les réglages.
+- [x] **Notification Android avant une offensive** (V147). Module Notification Scheduler, export Gradle,
+      permission demandée au premier rappel utile, réglage pour couper. À valider sur téléphone.
+- [ ] Icône de notification aux couleurs de Zimut (aujourd'hui : icône par défaut du module).
 - [ ] **Empire vivant, réglages**. Ajuster les valeurs après quelques semaines de jeu réel (délai de
       grâce, rythme, plafond de pertes, fréquence des alertes hors Conquête).
 - [ ] **Nation complète**. Tenir toutes les villes d'une Nation donne un bonus permanent valable dans les

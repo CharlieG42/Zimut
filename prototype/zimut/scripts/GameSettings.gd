@@ -67,6 +67,8 @@ var graphics_quality: int = 0
 var show_perf: bool = false
 ## V139 : quadrillage des cases sur la carte d'aventure 2D.
 var show_grid: bool = false
+## V147 : rappels Android avant une offensive de Conquête (notification locale).
+var notifications_on: bool = true
 var xp_speed: int = 1
 var text_size: int = 1
 ## Aide du premier combat déjà vue (ou passée).
@@ -117,6 +119,7 @@ func load_settings() -> void:
 	cloud_auto = bool(parsed.get("cloud_auto", cloud_auto))
 	show_perf = bool(parsed.get("show_perf", show_perf))
 	show_grid = bool(parsed.get("show_grid", show_grid))
+	notifications_on = bool(parsed.get("notifications_on", notifications_on))
 	_apply_sfx()
 
 func save_settings() -> void:
@@ -124,7 +127,7 @@ func save_settings() -> void:
 	if f == null:
 		push_error("Impossible d'écrire les réglages")
 		return
-	f.store_string(JSON.stringify({"difficulty": difficulty, "show_grid": show_grid, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "anim_speed": anim_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "adventure_3d": adventure_3d, "adventure_models_3d": adventure_models_3d, "adventure_walk_sprites": adventure_walk_sprites, "sylvestre_board": sylvestre_board, "graphics_quality": graphics_quality, "language": language, "turn_timer_mode": turn_timer_mode, "cloud_auto": cloud_auto, "show_perf": show_perf, "changelog_seen": changelog_seen}, "\t"))
+	f.store_string(JSON.stringify({"difficulty": difficulty, "show_grid": show_grid, "notifications_on": notifications_on, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "anim_speed": anim_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "adventure_3d": adventure_3d, "adventure_models_3d": adventure_models_3d, "adventure_walk_sprites": adventure_walk_sprites, "sylvestre_board": sylvestre_board, "graphics_quality": graphics_quality, "language": language, "turn_timer_mode": turn_timer_mode, "cloud_auto": cloud_auto, "show_perf": show_perf, "changelog_seen": changelog_seen}, "\t"))
 	f.close()
 
 func set_difficulty(idx: int) -> void:
@@ -206,6 +209,12 @@ func set_sylvestre_board(variant: String) -> void:
 	BoardArt.rev += 1          # invalide le cache du terrain
 	AdventureTerrain._cache.clear()
 	save_settings()
+
+func set_notifications(on: bool) -> void:
+	notifications_on = on
+	save_settings()
+	if not on:
+		(load("res://scripts/Notifier.gd") as GDScript).cancel_all()
 
 func set_show_grid(on: bool) -> void:
 	show_grid = on

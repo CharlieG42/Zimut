@@ -180,7 +180,7 @@ func _ready() -> void:
 	_persist()
 	if not absence.is_empty():
 		_show_popup("PENDANT VOTRE ABSENCE", String(absence.get("text", "")))
-	# V146 : rappel avant la première offensive d'absence (sans effet tant que le module natif n'est pas installé)
+	# V146-V147 : rappel Android un jour avant la première offensive d'absence (sans effet hors Android)
 	(preload("res://scripts/Notifier.gd") as GDScript).schedule_absence_warning(ConquestSystem.seconds_before_absence(_conquest, ProgressionManager.conquest_now()))
 	# V59 : Gultur présente les nouveautés de la Conquête (une seule fois chacune)
 	# V60 : puis la carte vivante (routes, territoire, brouillard, offensives)

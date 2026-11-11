@@ -31,7 +31,8 @@ jobs:
   build-apks:
     name: Build APK + EXE PC
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    # V147 : l'export Android passe par Gradle (module de notifications) : plus long.
+    timeout-minutes: 55
     outputs:
       pr_number: ${{ steps.version.outputs.pr_number }}
       game_version: ${{ steps.version.outputs.game_version }}
@@ -65,9 +66,11 @@ jobs:
           yes | sdkmanager "platform-tools" "build-tools;36.1.0" "platforms;android-36" "cmdline-tools;latest" > /dev/null
           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
 
-      - name: Setup Java
-        run: |
-          echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> "$GITHUB_ENV"
+      - name: Setup Java 17 (requis par l'export Gradle de Godot)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
 
       - name: Import project resources and generate Godot class cache
         run: |
@@ -145,6 +148,9 @@ jobs:
             printf 'export/android/keystore_release="%s/.local/share/godot/keystores/release.keystore"\n' "$HOME"
             printf 'export/android/keystore_release_user="%s"\n' "$ANDROID_KEYSTORE_USER"
             printf 'export/android/keystore_release_password="%s"\n' "$ANDROID_KEYSTORE_PASSWORD"
+            # V147 : chemins explicites pour l'export Gradle
+            printf 'export/android/java_sdk_path="%s"\n' "$JAVA_HOME"
+            printf 'export/android/android_sdk_path="%s"\n' "$ANDROID_HOME"
           } > "$cfg"
 
       - name: Afficher les empreintes du keystore de release (SHA-1 / SHA-256)
@@ -237,18 +243,24 @@ jobs:
           test -d .godot/imported
 
       - name: Export Zimut APK (Debug)
-        timeout-minutes: 10
+        timeout-minutes: 25
         run: |
           cd prototype/zimut
+          # V147 : export Gradle (module de notifications Android). Le modèle de build Android
+          # (dossier android/, ignoré par git) est installé ici à chaque build.
           # Godot peut planter a la fermeture (corruption heap connue en headless)
           # alors que l'APK est deja genere et signe : on valide le fichier produit.
-          godot --headless --export-debug "Android" export/Zimut-debug.apk \
+          godot --headless --install-android-build-template --export-debug "Android" export/Zimut-debug.apk \
             || godot --headless --export-debug "Android" export/Zimut-debug.apk \
             || true
           test -s export/Zimut-debug.apk
+          # le module de notifications doit être dans l'APK
+          unzip -l export/Zimut-debug.apk | grep -q "org/godotengine/plugin/notification" \
+            || unzip -p export/Zimut-debug.apk classes*.dex | grep -aq "org/godotengine/plugin/notification" \
+            || { echo "::error::Module de notifications absent de l'APK"; exit 1; }
 
       - name: Export Zimut APK (Release)
-        timeout-minutes: 10
+        timeout-minutes: 25
         # Release signée aussi sur les PR de ce dépôt (les secrets ne sont pas transmis aux forks)
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         env:
