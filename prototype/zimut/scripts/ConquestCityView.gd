@@ -37,12 +37,12 @@ const LABELS := {"hall": "Hôtel de ville", "barracks": "Caserne", "residence": 
 ## Matériaux de construction par Nation : murs, toits, ornements, sol.
 const STYLE := {
 	"Forêt": [Color(0.62, 0.46, 0.30), Color(0.24, 0.50, 0.27), Color(0.92, 0.80, 0.45), Color(0.27, 0.40, 0.20)],
-	"Montagne": [Color(0.72, 0.74, 0.78), Color(0.28, 0.40, 0.64), Color(0.92, 0.96, 1.0), Color(0.55, 0.60, 0.66)],
+	"Montagne": [Color(0.72, 0.74, 0.78), Color(0.28, 0.40, 0.64), Color(0.92, 0.96, 1.0), Color(0.84, 0.88, 0.94)],      # V149 : sol de neige
 	"Désert": [Color(0.90, 0.78, 0.55), Color(0.80, 0.45, 0.22), Color(0.98, 0.86, 0.45), Color(0.80, 0.66, 0.42)],
 	"Cristaux": [Color(0.56, 0.53, 0.74), Color(0.42, 0.60, 0.98), Color(0.82, 0.72, 1.0), Color(0.30, 0.28, 0.46)],
 	"Marées": [Color(0.90, 0.88, 0.80), Color(0.20, 0.52, 0.72), Color(0.96, 0.86, 0.55), Color(0.78, 0.72, 0.55)],
 	"Vents": [Color(0.86, 0.89, 0.92), Color(0.40, 0.68, 0.82), Color(0.96, 0.96, 0.99), Color(0.52, 0.66, 0.50)],
-	"Brasier": [Color(0.34, 0.27, 0.24), Color(0.74, 0.28, 0.12), Color(1.0, 0.62, 0.22), Color(0.24, 0.18, 0.16)],
+	"Brasier": [Color(0.34, 0.27, 0.24), Color(0.74, 0.28, 0.12), Color(1.0, 0.62, 0.22), Color(0.33, 0.27, 0.25)],      # V149 : cendre
 	"Brumes": [Color(0.52, 0.60, 0.52), Color(0.26, 0.50, 0.48), Color(0.72, 0.96, 0.86), Color(0.26, 0.38, 0.34)],
 	"Ombres": [Color(0.38, 0.32, 0.44), Color(0.44, 0.25, 0.58), Color(0.78, 0.58, 1.0), Color(0.22, 0.19, 0.27)],
 	"Rouages": [Color(0.64, 0.52, 0.40), Color(0.76, 0.48, 0.22), Color(0.96, 0.76, 0.36), Color(0.38, 0.32, 0.28)],
@@ -53,6 +53,15 @@ const RES_GLOW := {"Bois": Color(0.62, 0.85, 0.40), "Fer": Color(0.80, 0.86, 0.9
 
 ## V62 — illustrations par bâtiment (assets/ui/conquest/city/<biome>/…), fallback vectoriel.
 const ART_DIR := "res://assets/ui/conquest/city/"
+## V149 : sol de la ville par Nation — deux teintes de plaques (bruit) et un type de détail semé dessus.
+## Les Nations absentes gardent un sol uni légèrement marbré aux couleurs de STYLE.
+const GROUND_LOOK := {
+	"Forêt": {"a": Color(0.25, 0.40, 0.19), "b": Color(0.36, 0.52, 0.25), "accent": "fleurs"},
+	"Montagne": {"a": Color(0.78, 0.83, 0.91), "b": Color(0.95, 0.97, 1.0), "accent": "neige"},
+	"Brasier": {"a": Color(0.25, 0.20, 0.19), "b": Color(0.40, 0.33, 0.30), "accent": "braises"},
+	"Brumes": {"a": Color(0.20, 0.31, 0.27), "b": Color(0.31, 0.43, 0.37), "accent": "flaques"},
+}
+static var _ground_tex: Dictionary = {}       ## biome -> NoiseTexture2D (créée une fois)
 const BIOME_KEY := {"Forêt": "foret", "Montagne": "montagne", "Désert": "desert", "Cristaux": "cristaux",
 	"Marées": "marees", "Vents": "vents", "Brasier": "brasier", "Brumes": "brumes",
 	"Ombres": "ombres", "Rouages": "rouages", "Donjon": "donjon"}
@@ -381,7 +390,7 @@ func _draw() -> void:
 		ground_mod = Color(0.42, 0.46, 0.66)
 	elif time_of_day == "soir":
 		ground_mod = Color(0.90, 0.76, 0.62)
-	draw_rect(Rect2(0, size.y * 0.60, size.x, size.y * 0.40), ground * ground_mod)
+	_draw_ground(u, ground, ground_mod)
 	# voile nocturne global (les halos/fenêtres dessinés après restent visibles)
 	if night:
 		draw_rect(Rect2(Vector2.ZERO, size), Color(0.06, 0.08, 0.22, 0.18))
@@ -395,9 +404,7 @@ func _draw() -> void:
 	for key: String in PLOTS.keys():
 		if key == "hall":
 			continue
-		var p: Vector2 = (PLOTS[key] as Vector2) * size
-		draw_line(hall_p + Vector2(0, 8 * u), p, Color(0.20, 0.15, 0.10, 0.22), 14.0 * u, true)
-		draw_line(hall_p + Vector2(0, 8 * u), p, path_col, 9.0 * u, true)
+		_draw_street(hall_p, (PLOTS[key] as Vector2) * size, u, path_col)
 	_ellipse(hall_p + Vector2(0, 14 * u), Vector2(170, 52) * u, Color(0.80, 0.74, 0.60, 0.85) * ground_mod)
 	_ellipse(hall_p + Vector2(0, 14 * u), Vector2(150, 42) * u, Color(0.72, 0.66, 0.52, 0.85) * ground_mod)
 	# lanternes autour de la place (elles s'allument la nuit et vacillent)
@@ -469,6 +476,10 @@ func _draw_plot(key: String, g: Vector2, u: float) -> void:
 			tex = _building_art("wonder", 1) if wonder else _building_art("hall", 0)
 		_:
 			lv = int(levels.get(key, 0))
+			if lv <= 0:
+				_empty_plot(g, u, bool(locked.get(key, false)))      # V149 : emplacement vide = chantier
+				_plate(key, g, u, lv)
+				return
 			tex = _building_art(key, lv)
 			skl = clampi(lv, 0, ConquestSystem.BUILD_MAX_LEVEL)
 	# V61b — planche découpée prioritaire (soldats/gouverneur redessinés par-dessus),
@@ -619,15 +630,30 @@ func _smoke(p: Vector2, u: float, dark: bool = false) -> void:
 
 
 func _empty_plot(g: Vector2, u: float, is_locked: bool) -> void:
-	_ellipse(g, Vector2(52, 16) * u, Color(0.16, 0.12, 0.08, 0.35))
-	draw_set_transform(g, 0.0, Vector2(1.0, 0.31))
-	for i: int in range(16):
-		var a: float = float(i) / 16.0 * TAU
-		draw_arc(Vector2.ZERO, 52.0 * u, a, a + TAU / 32.0, 3, Color(0.95, 0.88, 0.65, 0.75), 2.0 * u, true)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	# piquets de chantier
-	for sx: float in [-1.0, 1.0]:
-		draw_line(g + Vector2(sx * 40.0 * u, 0), g + Vector2(sx * 40.0 * u, -18.0 * u), Color(0.45, 0.32, 0.18), 3.0 * u, true)
+	# V149 : emplacement vide dessiné comme un chantier — terre retournée, piquets et corde, pile de
+	# planches, tas de pierres (verrouillé : terrain nu, juste les piquets).
+	_ellipse(g + Vector2(0, 3 * u), Vector2(56, 18) * u, Color(0.10, 0.07, 0.04, 0.30))
+	_ellipse(g, Vector2(50, 15) * u, Color(0.47, 0.35, 0.22, 0.95))
+	_ellipse(g + Vector2(-8, -2) * u, Vector2(30, 8) * u, Color(0.56, 0.43, 0.28, 0.9))
+	var wood := Color(0.62, 0.44, 0.24)
+	var stakes: Array = [Vector2(-46, 0), Vector2(-22, -12), Vector2(22, -12), Vector2(46, 0), Vector2(0, 14)]
+	for i: int in range(stakes.size()):
+		var a: Vector2 = g + (stakes[i] as Vector2) * u
+		var b: Vector2 = g + (stakes[(i + 1) % stakes.size()] as Vector2) * u
+		draw_line(a + Vector2(0, -12 * u), b + Vector2(0, -12 * u), Color(0.95, 0.88, 0.62, 0.85), 1.5 * u, true)
+	for st: Vector2 in stakes:
+		var sp: Vector2 = g + st * u
+		draw_line(sp, sp + Vector2(0, -16 * u), Color(0.38, 0.26, 0.14), 3.0 * u, true)
+	if not is_locked:
+		# pile de planches
+		for k: int in range(3):
+			var pb: Vector2 = g + Vector2(-34, -4 - 4 * k) * u
+			draw_rect(Rect2(pb, Vector2(28 - 3 * k, 4) * u), wood.lightened(0.08 * float(k)))
+			draw_rect(Rect2(pb, Vector2(28 - 3 * k, 4) * u), Color(0.30, 0.20, 0.10), false, 1.0 * u)
+		# tas de pierres
+		for sp2: Vector3 in [Vector3(20, -2, 6), Vector3(29, -1, 5), Vector3(24, -8, 5), Vector3(14, 1, 4)]:
+			draw_circle(g + Vector2(sp2.x, sp2.y) * u, sp2.z * u, Color(0.62, 0.62, 0.64))
+			draw_circle(g + Vector2(sp2.x - 1.5, sp2.y - 1.5) * u, sp2.z * 0.45 * u, Color(0.78, 0.78, 0.80))
 	if is_locked:
 		var c: Vector2 = g + Vector2(0, -30.0 * u)
 		draw_arc(c + Vector2(0, -8 * u), 9.0 * u, PI, TAU, 12, Color(0.85, 0.85, 0.90), 3.5 * u, true)
@@ -1045,3 +1071,97 @@ func _draw_fx(g: Vector2, u: float) -> void:
 	draw_string_outline(font, tp, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 6, Color(0.1, 0.05, 0.0, a))
 	draw_string(font, tp, txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(1.0, 0.88, 0.40, a))
 
+
+# ── V149 : sol, rues ──────────────────────────────────────────────────────
+
+## Sol de la ville : plaques (bruit, aux couleurs de la Nation) et détails semés (fleurs, éclats de neige,
+## braises, flaques). Les positions sont fixes (graine = Nation) : rien ne bouge d'une image à l'autre.
+func _draw_ground(u: float, ground: Color, mod: Color) -> void:
+	var rect := Rect2(0, size.y * 0.60, size.x, size.y * 0.40)
+	draw_rect(rect, ground * mod)
+	var look: Dictionary = GROUND_LOOK.get(biome, {"a": ground.darkened(0.12), "b": ground.lightened(0.08), "accent": ""})
+	var tex: Texture2D = _ground_texture(look)
+	if tex != null:
+		# la texture remonte sous l'horizon et s'y efface par bandes (pas de ligne nette)
+		var top: float = size.y * 0.48
+		var fade_h: float = size.y * 0.14
+		var tsz: Vector2 = Vector2(512, 160)
+		var y_to_t: float = tsz.y / (size.y - top)
+		const STRIPS := 10
+		for i: int in range(STRIPS):
+			var y0: float = top + fade_h * float(i) / float(STRIPS)
+			var h: float = fade_h / float(STRIPS)
+			draw_texture_rect_region(tex, Rect2(0, y0, size.x, h + 0.5), Rect2(0, (y0 - top) * y_to_t, tsz.x, h * y_to_t),
+				Color(mod, mod.a * (float(i) + 0.5) / float(STRIPS)))
+		var rest: float = top + fade_h
+		draw_texture_rect_region(tex, Rect2(0, rest, size.x, size.y - rest), Rect2(0, (rest - top) * y_to_t, tsz.x, tsz.y - (rest - top) * y_to_t), mod)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(biome) + 149
+	var accent: String = String(look.get("accent", ""))
+	for i: int in range(70):
+		var fy: float = pow(rng.randf(), 0.8)                  # plus dense vers l'avant
+		var p := Vector2(rng.randf() * size.x, rect.position.y + 6.0 * u + fy * (rect.size.y - 8.0 * u))
+		var k: float = (0.55 + 0.6 * fy) * u                    # perspective : plus petit au fond
+		match accent:
+			"fleurs":
+				var fc: Color = [Color(1.0, 0.92, 0.45), Color(0.98, 0.98, 1.0), Color(0.95, 0.55, 0.62)][i % 3]
+				draw_line(p, p + Vector2(0, -6 * k), Color(0.20, 0.38, 0.16) * mod, 1.4 * k, true)
+				draw_circle(p + Vector2(0, -7 * k), 2.6 * k, fc * mod)
+			"neige":
+				if i % 3 == 0:
+					_ellipse(p, Vector2(16, 4) * k, Color(0.70, 0.78, 0.90, 0.55) * mod)    # ombre bleue de congère
+					_ellipse(p + Vector2(0, -2 * k), Vector2(14, 4) * k, Color(1, 1, 1, 0.9) * mod)
+				else:
+					draw_circle(p, 1.4 * k, Color(1, 1, 1, 0.85) * mod)
+			"braises":
+				if i % 4 == 0:
+					var c2: Vector2 = p + Vector2(rng.randf_range(-14, 14), rng.randf_range(-3, 3)) * k
+					draw_line(p, c2, Color(0.95, 0.40, 0.10, 0.85), 1.8 * k, true)     # fissure rougeoyante
+					draw_line(p, c2, Color(1.0, 0.75, 0.30, 0.9), 0.7 * k, true)
+				else:
+					draw_circle(p, 1.6 * k, Color(1.0, 0.55, 0.15, 0.55 + 0.35 * sin(_t * 3.0 + float(i))))
+			"flaques":
+				if i % 5 == 0:
+					_ellipse(p, Vector2(20, 5) * k, Color(0.16, 0.26, 0.25, 0.55) * mod)
+					_ellipse(p + Vector2(-4, -1) * k, Vector2(10, 2) * k, Color(0.55, 0.72, 0.70, 0.35) * mod)
+				elif i % 2 == 0:
+					for j: int in range(3):
+						draw_line(p + Vector2(j * 2 - 2, 0) * k, p + Vector2(j * 3 - 3, -9) * k, Color(0.38, 0.52, 0.30) * mod, 1.3 * k, true)
+
+
+func _ground_texture(look: Dictionary) -> Texture2D:
+	if _ground_tex.has(biome):
+		return _ground_tex[biome]
+	var noise := FastNoiseLite.new()
+	noise.seed = hash(biome)
+	noise.frequency = 0.012
+	noise.fractal_octaves = 3
+	var grad := Gradient.new()
+	var a: Color = look["a"]
+	var b: Color = look["b"]
+	grad.offsets = PackedFloat32Array([0.0, 0.45, 0.6, 1.0])
+	grad.colors = PackedColorArray([Color(a, 0.9), Color(a, 0.55), Color(b, 0.55), Color(b, 0.9)])
+	var nt := NoiseTexture2D.new()
+	nt.width = 512
+	nt.height = 160
+	nt.noise = noise
+	nt.color_ramp = grad
+	nt.changed.connect(queue_redraw)        # la texture se calcule en tâche de fond
+	_ground_tex[biome] = nt
+	return nt
+
+
+## Rue courbe de la place vers un bâtiment : pavés au bord sombre, qui s'incurve vers l'extérieur.
+func _draw_street(hall_p: Vector2, p: Vector2, u: float, col: Color) -> void:
+	var start: Vector2 = hall_p + Vector2(clampf(p.x - hall_p.x, -120.0 * u, 120.0 * u), 30.0 * u)
+	var mid: Vector2 = (start + p) * 0.5
+	var dx: float = p.x - hall_p.x
+	var ctrl: Vector2 = mid + Vector2(dx * 0.34, absf(dx) * 0.16 + 26.0 * u)
+	var pts := PackedVector2Array()
+	for i: int in range(19):
+		var t: float = float(i) / 18.0
+		pts.append(start.lerp(ctrl, t).lerp(ctrl.lerp(p, t), t))
+	draw_polyline(pts, Color(0.20, 0.15, 0.10, 0.25), 16.0 * u, true)
+	draw_polyline(pts, col, 11.0 * u, true)
+	for i2: int in range(1, pts.size() - 1, 2):
+		draw_circle(pts[i2], 2.2 * u, Color(col.r * 0.82, col.g * 0.80, col.b * 0.78, col.a))

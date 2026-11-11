@@ -80,9 +80,7 @@ systèmes d'économie. Production par ville et défense chiffrée existent déj�
 
 ### Rendu
 
-- [ ] **Écran de ville** *(priorité 3)*. Sol aux couleurs de la Nation (neige, cendre, tourbe) à la place
-      de l'aplat uni ; rues courbes à la place des rayons droits depuis l'hôtel de ville ; emplacements
-      vides dessinés comme des chantiers ; arbres enneigés aux Cimes.
+- [x] **Écran de ville** (V149). Sol par Nation, rues courbes, chantiers, arbres propres aux Nations.
 - [ ] **Carte**. Flèche d'attaque animée vers la cible choisie ; noms de villes masqués au dézoom pour
       alléger.
 
