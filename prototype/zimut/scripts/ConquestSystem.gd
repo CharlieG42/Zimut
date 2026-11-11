@@ -582,6 +582,8 @@ static func defense(data: Dictionary, id: String) -> int:
 	if h != "":
 		d += 6 + int(float(hero_level(data, h)) * 0.5) + int(GOVERNOR.get(h, {}).get("def", 0)) + governor_gear_defense(data, h)
 	d += int(spec_bonus(conq, id).get("def", 0))   # spécialisation Cité (V62)
+	if united_nations(conq).has(_biome_of(id)):
+		d += NATION_UNITED_DEF                         # V151 : Nation unie
 	return d
 
 ## Or versé par bataille gagnée par une ville (gelé si pillée).
@@ -1315,6 +1317,187 @@ static func _tick_threat(data: Dictionary, conq: Dictionary, rng: RandomNumberGe
 		return
 	conq.erase("threat")
 	resolve_assault(data, conq, id, int(th.get("power", 10)))
+
+# ── Nation unie (V151) ───────────────────────────────────────────────────
+# Tenir TOUTES les villes d'une Nation donne sa Bannière : un bonus pour tous les héros, valable dans les trois
+# modes (appliqué dans ProgressionManager.member_stats), et +NATION_UNITED_DEF de défense à ses villes. Perdre
+# une seule ville suspend la Bannière jusqu'à sa reprise.
+
+const NATION_UNITED_DEF := 5
+const NATION_BANNERS := {
+	"Forêt": {"name": "Bannière de la Sylve", "stats": {"vita": 20}, "fx": {"heal_pct": 5}},
+	"Montagne": {"name": "Bannière des Cimes", "stats": {"defense": 4}, "fx": {"mres": 5}},
+	"Brasier": {"name": "Bannière du Brasier", "stats": {"force": 4}, "fx": {"phys_pct": 5}},
+	"Brumes": {"name": "Bannière des Brumes", "stats": {"intelligence": 4}, "fx": {"mag_pct": 5}},
+	"Désert": {"name": "Bannière des Sables", "stats": {"agility": 4}, "fx": {"crit": 3}},
+	"Cristaux": {"name": "Bannière des Cristaux", "stats": {"wisdom": 4}, "fx": {"mag_pct": 3}},
+	"Marées": {"name": "Bannière des Marées", "stats": {"vita": 15}, "fx": {"lifesteal": 3}},
+	"Vents": {"name": "Bannière des Vents", "stats": {"agility": 5}, "fx": {"crit": 2}},
+	"Ombres": {"name": "Bannière des Ombres", "stats": {"force": 3}, "fx": {"crit": 4}},
+	"Rouages": {"name": "Bannière des Rouages", "stats": {"defense": 3}, "fx": {"phys_pct": 3}},
+}
+
+## Villes de chaque Nation (catalogue de ProgressionManager), hors Donjon du Roi.
+static func nation_cities(nation: String) -> Array:
+	var loop: MainLoop = Engine.get_main_loop()
+	if loop is SceneTree:
+		var pm: Node = (loop as SceneTree).root.get_node_or_null("ProgressionManager")
+		if pm != null:
+			return pm.call("conquest_nation_cities", nation)
+	return []
+
+## Nations dont toutes les villes sont à l'empire.
+static func united_nations(conq: Dictionary) -> Array:
+	var owned: Array = conq.get("owned", [])
+	var out: Array = []
+	for n: String in NATION_BANNERS.keys():
+		var cities: Array = nation_cities(n)
+		if cities.is_empty():
+			continue
+		var all_in := true
+		for c: String in cities:
+			if not owned.has(c):
+				all_in = false
+				break
+		if all_in:
+			out.append(n)
+	return out
+
+## Villes tenues / total pour une Nation.
+static func nation_progress(conq: Dictionary, nation: String) -> Vector2i:
+	var owned: Array = conq.get("owned", [])
+	var cities: Array = nation_cities(nation)
+	var n: int = 0
+	for c: String in cities:
+		if owned.has(c):
+			n += 1
+	return Vector2i(n, cities.size())
+
+## Bonus cumulé des Bannières actives, au format des Pierres ({stats, fx}).
+static func banners_bonus(conq: Dictionary) -> Dictionary:
+	var stats: Dictionary = {}
+	var fx: Dictionary = {}
+	for n: String in united_nations(conq):
+		var b: Dictionary = NATION_BANNERS[n]
+		for k: String in (b["stats"] as Dictionary).keys():
+			stats[k] = int(stats.get(k, 0)) + int(b["stats"][k])
+		for k2: String in (b["fx"] as Dictionary).keys():
+			fx[k2] = int(fx.get(k2, 0)) + int(b["fx"][k2])
+	return {"stats": stats, "fx": fx}
+
+## Texte du bonus d'une Bannière (« PV +20, Soins +5 % »).
+static func banner_text(nation: String) -> String:
+	var b: Dictionary = NATION_BANNERS.get(nation, {})
+	var parts: PackedStringArray = []
+	for k: String in (b.get("stats", {}) as Dictionary).keys():
+		parts.append("%s +%d" % [String(Stones.STAT_LABEL.get(k, k)), int(b["stats"][k])])
+	for k2: String in (b.get("fx", {}) as Dictionary).keys():
+		parts.append(String(Stones.FX_LABEL.get(k2, k2 + " +%d")) % int(b["fx"][k2]))
+	return ", ".join(parts)
+
+## Annonce les Nations nouvellement unies (une seule fois chacune) ; renvoie leurs noms.
+static func announce_united(conq: Dictionary) -> Array:
+	var done: Array = conq.get("nations_announced", [])
+	var fresh: Array = []
+	for n: String in united_nations(conq):
+		if not done.has(n):
+			done.append(n)
+			fresh.append(n)
+			note(conq, "★ NATION UNIE : toutes les villes %s sont à vous ! %s pour tous vos héros, dans les trois modes : %s. Ses villes gagnent +%d de défense." % [
+				_nation_de(n), String(NATION_BANNERS[n]["name"]), banner_text(n), NATION_UNITED_DEF])
+	conq["nations_announced"] = done
+	return fresh
+
+static func _nation_de(n: String) -> String:
+	return {"Forêt": "de la Sylve", "Montagne": "des Cimes", "Brasier": "du Brasier", "Brumes": "des Brumes",
+		"Désert": "des Sables", "Cristaux": "des Cristaux", "Marées": "des Marées", "Vents": "des Vents",
+		"Ombres": "des Ombres", "Rouages": "des Rouages"}.get(n, "de " + n)
+
+
+# ── Chapitres de campagne (V151) ──────────────────────────────────────────
+# La conquête est découpée en étapes annoncées, chacune récompensée. Un seul chapitre est actif à la fois :
+# le premier dont l'objectif n'est pas encore atteint. Vérifié après chaque victoire et à l'ouverture de la carte.
+
+const CHAPTERS := [
+	{"id": "premiers_pas", "title": "Les premiers pas", "goal": "Conquérir 3 villes", "type": "cities", "n": 3, "gold": 150},
+	{"id": "sylve", "title": "Libérer la Sylve", "goal": "Unir la Nation de la Sylve", "type": "nation", "nation": "Forêt", "gold": 300, "res": {"Bois": 15}},
+	{"id": "cite", "title": "Une vraie cité", "goal": "Élever une ville au rang de Cité", "type": "level", "n": 3, "gold": 250},
+	{"id": "general", "title": "Briser un général", "goal": "Vaincre un général du Roi Squelette", "type": "general", "n": 1, "gold": 400, "res": {"Magie": 10}},
+	{"id": "deuxieme", "title": "Au-delà des forêts", "goal": "Unir une deuxième Nation", "type": "nations", "n": 2, "gold": 500},
+	{"id": "quatre", "title": "Les quatre Nations", "goal": "Unir la Sylve, les Cimes, le Brasier et les Brumes", "type": "four", "gold": 800, "res": {"Fer": 30, "Magie": 20}},
+	{"id": "zimut", "title": "Tout Zimut", "goal": "Conquérir toutes les villes", "type": "all", "gold": 1500},
+	{"id": "roi", "title": "La chute du Roi Squelette", "goal": "Prendre le Donjon du Roi", "type": "king", "gold": 3000},
+]
+
+## Indice du chapitre actif (CHAPTERS.size() = campagne terminée).
+static func chapter_index(conq: Dictionary) -> int:
+	return clampi(int(conq.get("chapter", 0)), 0, CHAPTERS.size())
+
+## Avancement {cur, max, done} de l'objectif d'un chapitre.
+static func chapter_progress(data: Dictionary, ch: Dictionary) -> Dictionary:
+	var conq: Dictionary = data.get("conquest", {})
+	var cur: int = 0
+	var mx: int = 1
+	match String(ch["type"]):
+		"cities":
+			cur = owned_count(conq)
+			mx = int(ch["n"])
+		"nation":
+			var p: Vector2i = nation_progress(conq, String(ch["nation"]))
+			cur = p.x
+			mx = maxi(1, p.y)
+		"level":
+			for id: String in conq.get("owned", []):
+				cur = maxi(cur, city_level(conq, id))
+			mx = int(ch["n"])
+		"general":
+			cur = GENERALS.size() - living_generals_count(conq)
+			mx = int(ch["n"])
+		"nations":
+			cur = united_nations(conq).size()
+			mx = int(ch["n"])
+		"four":
+			var u: Array = united_nations(conq)
+			for n: String in ["Forêt", "Montagne", "Brasier", "Brumes"]:
+				if u.has(n):
+					cur += 1
+			mx = 4
+		"all":
+			var all_ids: Array = nation_cities("*")
+			mx = maxi(1, all_ids.size())
+			for c: String in all_ids:
+				if (conq.get("owned", []) as Array).has(c):
+					cur += 1
+		"king":
+			cur = 1 if (conq.get("owned", []) as Array).has("donjon_roi") else 0
+	return {"cur": mini(cur, mx), "max": mx, "done": cur >= mx}
+
+## Valide les chapitres atteints (plusieurs d'un coup si besoin) et verse leurs récompenses.
+## Renvoie les chapitres validés.
+static func advance_chapters(data: Dictionary, conq: Dictionary) -> Array:
+	var done: Array = []
+	data["conquest"] = conq
+	while chapter_index(conq) < CHAPTERS.size():
+		var ch: Dictionary = CHAPTERS[chapter_index(conq)]
+		if not bool(chapter_progress(data, ch)["done"]):
+			break
+		data["gold"] = int(data.get("gold", 0)) + int(ch.get("gold", 0))
+		var res: Dictionary = data.get("resources", {})
+		for k: String in (ch.get("res", {}) as Dictionary).keys():
+			res[k] = int(res.get(k, 0)) + int(ch["res"][k])
+		data["resources"] = res
+		conq["chapter"] = chapter_index(conq) + 1
+		done.append(ch)
+		note(conq, "📜 CHAPITRE %d ACCOMPLI — %s ! Récompense : %s." % [chapter_index(conq), String(ch["title"]), reward_text(ch)])
+	data["conquest"] = conq
+	return done
+
+static func reward_text(ch: Dictionary) -> String:
+	var parts: PackedStringArray = ["%d or" % int(ch.get("gold", 0))]
+	for k: String in (ch.get("res", {}) as Dictionary).keys():
+		parts.append("%d %s" % [int(ch["res"][k]), k])
+	return ", ".join(parts)
+
 
 # ── Vue d'ensemble de l'empire (V148) ───────────────────────────────────
 # Un tableau de toutes les villes et trois actions groupées, pour ne plus entrer dans chaque ville.

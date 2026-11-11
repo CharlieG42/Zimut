@@ -70,6 +70,7 @@ var _message: Label
 var _threat_banner: Label
 var _defend_button: Button
 var _empire_button: Button
+var _chapter_button: Button
 var _empire_dim: Control
 var _attack: Button
 var _city_buttons: Dictionary = {}
@@ -151,6 +152,10 @@ func _ready() -> void:
 	_save["campaign_mode"] = "conquest"
 	# V146 : impôts accumulés et offensives manquées pendant l'absence
 	var absence: Dictionary = ProgressionManager.conquest_process_absence(_save)
+	_conquest = _save.get("conquest", _conquest)
+	# V151 : Nations unies et chapitres atteints hors bataille (diplomatie, anciennes parties)
+	ConquestSystem.announce_united(_conquest)
+	ConquestSystem.advance_chapters(_save, _conquest)
 	_conquest = _save.get("conquest", _conquest)
 	# V145 : revenir sur la carte avec un combat de défense non résolu = abandon (tentative consommée).
 	if ConquestSystem.is_defense_battle(_conquest):
@@ -420,6 +425,15 @@ func _build() -> void:
 	_defend_button.visible = false
 	box.add_child(_defend_button)
 
+	# V151 : chapitre de campagne en cours (toucher = tous les chapitres et les Bannières)
+	_chapter_button = Button.new()
+	_chapter_button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_chapter_button.custom_minimum_size.y = 58
+	_chapter_button.add_theme_font_size_override("font_size", 18)
+	_chapter_button.pressed.connect(_show_chapters)
+	_style_button(_chapter_button, Color(0.20, 0.17, 0.30), Color(0.78, 0.66, 1.0))
+	box.add_child(_chapter_button)
+
 	# V148 : vue d'ensemble de l'empire (toutes les villes, actions groupées)
 	_empire_button = Button.new()
 	_empire_button.custom_minimum_size.y = 58
@@ -548,6 +562,31 @@ func _build() -> void:
 	_refresh_header()
 	_select_city(_selected_id)
 	_layout_responsive()
+
+# ── V151 : chapitres de campagne et Bannières des Nations ─────────────────
+
+func _show_chapters() -> void:
+	var lines: PackedStringArray = []
+	var ci: int = ConquestSystem.chapter_index(_conquest)
+	for i: int in range(ConquestSystem.CHAPTERS.size()):
+		var ch: Dictionary = ConquestSystem.CHAPTERS[i]
+		var mark: String = "✓" if i < ci else ("▶" if i == ci else "·")
+		var line: String = "%s  Chapitre %d — %s : %s" % [mark, i + 1, String(ch["title"]), String(ch["goal"])]
+		if i == ci:
+			var pr: Dictionary = ConquestSystem.chapter_progress(_save, ch)
+			line += " (%d / %d)" % [int(pr["cur"]), int(pr["max"])]
+		line += "  —  " + ConquestSystem.reward_text(ch)
+		lines.append(line)
+	lines.append("")
+	lines.append("BANNIÈRES DES NATIONS — tenir toutes les villes d'une Nation : bonus pour tous les héros, dans les trois modes, et +%d de défense à ses villes." % ConquestSystem.NATION_UNITED_DEF)
+	var united: Array = ConquestSystem.united_nations(_conquest)
+	for n: String in ["Forêt", "Montagne", "Brasier", "Brumes", "Désert", "Cristaux", "Marées", "Vents", "Ombres", "Rouages"]:
+		var p: Vector2i = ConquestSystem.nation_progress(_conquest, n)
+		if p.y == 0:
+			continue
+		lines.append("%s  %s (%d / %d villes) : %s" % ["★" if united.has(n) else "☆", String(ConquestSystem.NATION_BANNERS[n]["name"]), p.x, p.y, ConquestSystem.banner_text(n)])
+	_show_popup("CHAPITRES DE LA CAMPAGNE", Typo.fr("\n".join(lines)))
+
 
 # ── V148 : vue d'ensemble de l'empire ─────────────────────────────────────
 
@@ -1050,6 +1089,14 @@ func _refresh_header() -> void:
 	elif ProgressionManager.conquest_empire_complete(_conquest):
 		line += "   ·   ⚔ Tout Zimut est à vous : assailliez le Donjon du Roi Squelette !"
 	_header.text = line
+	if _chapter_button != null:
+		var ci: int = ConquestSystem.chapter_index(_conquest)
+		if ci >= ConquestSystem.CHAPTERS.size():
+			_chapter_button.text = Typo.fr("📜 CAMPAGNE ACHEVÉE — tous les chapitres accomplis")
+		else:
+			var ch: Dictionary = ConquestSystem.CHAPTERS[ci]
+			var pr: Dictionary = ConquestSystem.chapter_progress(_save, ch)
+			_chapter_button.text = Typo.fr("📜 CHAPITRE %d — %s\n%s : %d / %d" % [ci + 1, String(ch["title"]), String(ch["goal"]), int(pr["cur"]), int(pr["max"])])
 	if _empire_button != null:
 		var n: int = ConquestSystem.empire_action_count(_save)
 		_empire_button.text = Typo.fr("▦ MON EMPIRE" + (("  —  %d ville%s à voir" % [n, "s" if n > 1 else ""]) if n > 0 else ""))

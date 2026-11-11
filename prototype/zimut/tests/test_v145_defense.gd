@@ -42,6 +42,8 @@ func _boot() -> void:
 	check(not pm.conquest_siege_is_boss(cq, "clairiere") or CS.is_defense_battle(cq), "ce n'est pas une vague de boss de siège")
 	# ── victoire : offensive brisée, garnison intacte, butin, la ville reste à l'empire, pas de siège
 	cq["garrisons"] = {"clairiere": {"troops": 2, "hero": ""}}
+	cq["truce"] = 4          # pas de raid aléatoire pendant ce test (un raid repoussé retire un soldat)
+	cq["event_cd"] = -99     # ni d'événement de ville
 	var gold0: int = int(d.get("gold", 0))
 	pm.register_victory(d, {"enemies": [], "turns": 5})
 	cq = d["conquest"]
