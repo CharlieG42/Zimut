@@ -13,7 +13,7 @@ const ID_ABSENCE := 4601
 const WARN_BEFORE_SECONDS := 86400      ## prévenir un jour avant la première offensive
 ## Mode test (APK de vérification uniquement) : > 0 = rappel envoyé N secondes après l'ouverture de la carte de
 ## Conquête, quel que soit l'empire. Toujours 0 dans le jeu normal.
-const TEST_DELAY_SECONDS := 0
+const TEST_DELAY_SECONDS := 120
 const TITLE := "Zimut — votre empire est menacé"
 const TEXT := "Sans bataille de Conquête d'ici demain, le Roi Squelette lancera une offensive sur vos villes."
 
