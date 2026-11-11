@@ -16,7 +16,7 @@ peaufinées avant d'en créer d'autres.
 ## Mode Tactique
 
 - [x] Fond de scène par nation et cases variées pour Sylve, Brasier, Brumes, Cimes (V144).
-- [ ] Sylve : redessiner les tuiles (calmes / détail / accident) comme les trois autres nations.
+- [x] Sylve : tuiles redessinées en 3 niveaux (calme / détail / accident) (V150).
 - [ ] Décor non bloquant au milieu du plateau, flancs de falaise plus travaillés.
 - [ ] Teinte d'ambiance par nation sur les personnages, ombres au sol plus marquées.
 - [ ] Fond de scène des six autres nations.

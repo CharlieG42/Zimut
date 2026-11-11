@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """gen_nation_tiles.py — Tuiles de sol (SVG 128x64, losange isométrique) des nations.
 
-Sept biomes : cristaux, marees, vents, brasier, brumes, ombres, montagne (Cimes, V144) — 6 variantes chacun
-(déterministes). Brasier, Brumes et Cimes ont 3 niveaux de détail (voir `tier`).
+Huit biomes : cristaux, marees, vents, brasier, brumes, ombres, montagne (Cimes, V144), forêt (Sylve, V150) — 6 variantes chacun
+(déterministes). Brasier, Brumes, Cimes et Sylve ont 3 niveaux de détail (voir `tier`).
 Chaque nation a sa particularité visuelle : éclats lumineux, sable mouillé, traînées de vent,
 fissures de lave, mousse et brume, runes sombres. Les trois premiers biomes (forêt, montagne,
-désert) gardent leurs tuiles d'origine, sauf la montagne (V144).
+désert) gardent leurs tuiles d'origine, sauf la montagne (V144) et la forêt (V150).
 Usage : python3 tools/gen_nation_tiles.py [nation…]
 """
 import os, math, random
@@ -172,7 +172,44 @@ def ombres(i, r):
         b += f'<path d="M{x:.1f} {y:.1f} l{r.uniform(-12,12):.1f} {r.uniform(-4,4):.1f} l{r.uniform(-9,9):.1f} {r.uniform(-3,3):.1f}" stroke="#12081f" stroke-width="1.4" fill="none" opacity=".7"/>'
     return svg("#4d3d6b", "#2b2042", b, "#8c6cd0", "#9a6aff")
 
-GEN = {"cristaux": cristaux, "marees": marees, "vents": vents, "brasier": brasier, "brumes": brumes, "ombres": ombres, "mountain": montagne}
+def foret(i, r):
+    """Sylve (V150) : herbe en 3 niveaux comme les autres nations. Calme : herbe aux plaques douces et quelques
+    brins ; détail : fleurs des prés ou trèfles et un caillou ; accident : clairière de mousse et terre nue
+    avec une racine et un cercle de champignons."""
+    t = tier(i)
+    b = ""
+    for (x, y) in pts(r, 3):          # plaques d'herbe plus sombres
+        b += f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{r.uniform(9,18):.1f}" ry="{r.uniform(3,6):.1f}" fill="#3f6b32" opacity=".22"/>'
+    for (x, y) in pts(r, 2, 10):      # reflets clairs
+        b += f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{r.uniform(7,13):.1f}" ry="{r.uniform(2,4):.1f}" fill="#b6d47a" opacity=".38"/>'
+    for (x, y) in pts(r, 4 + t * 2, 8):   # brins d'herbe
+        b += f'<path d="M{x:.1f} {y:.1f} l-1.6 -4.2 M{x:.1f} {y:.1f} l.4 -5 M{x:.1f} {y:.1f} l2.2 -3.6" stroke="#36622f" stroke-width="1.1" fill="none" stroke-linecap="round" opacity=".85"/>'
+    if t == 1:
+        if i % 2:                     # fleurs des prés
+            for (x, y) in pts(r, 5, 14):
+                c = r.choice(["#fff4a8", "#ffffff", "#f3b2c4"])
+                b += f'<circle cx="{x:.1f}" cy="{y:.1f}" r="1.5" fill="{c}"/><circle cx="{x:.1f}" cy="{y:.1f}" r=".6" fill="#e0a83a"/>'
+        else:                         # trèfles et un caillou
+            for (x, y) in pts(r, 3, 14):
+                b += "".join(f'<circle cx="{x+dx:.1f}" cy="{y+dy:.1f}" r="1.6" fill="#4f8a3c"/>' for dx, dy in [(-1.4, 0), (1.4, 0), (0, -1.2)])
+            x, y = pts(r, 1, 18)[0]
+            b += (f'<ellipse cx="{x:.1f}" cy="{y+1:.1f}" rx="5" ry="2" fill="#000" opacity=".18"/>'
+                  f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="4.4" ry="2.6" fill="#9a9a8e"/><ellipse cx="{x-1:.1f}" cy="{y-.8:.1f}" rx="2.2" ry="1" fill="#c9c9bc"/>')
+    if t == 2:                        # case accident : clairière de mousse, terre nue, racine, champignons
+        x, y = 64 + r.uniform(-8, 8), 33 + r.uniform(-3, 3)
+        b += (f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="26" ry="10" fill="#6b5233" opacity=".85"/>'
+              f'<ellipse cx="{x+3:.1f}" cy="{y-1:.1f}" rx="17" ry="6" fill="#80653f" opacity=".85"/>'
+              f'<path d="M{x-20:.1f} {y+2:.1f} q10 -6 20 -2 t18 -3" stroke="#4a3420" stroke-width="2.6" fill="none" stroke-linecap="round"/>'
+              f'<path d="M{x-20:.1f} {y+2:.1f} q10 -6 20 -2 t18 -3" stroke="#8a6a44" stroke-width="1" fill="none" stroke-linecap="round" opacity=".8"/>')
+        for k in range(5):            # cercle de champignons
+            a = k / 5 * math.tau + .4
+            mx, my = x + math.cos(a) * 15, y + math.sin(a) * 5.5
+            b += (f'<rect x="{mx-.7:.1f}" y="{my-2.6:.1f}" width="1.4" height="2.8" fill="#efe6cf"/>'
+                  f'<ellipse cx="{mx:.1f}" cy="{my-2.8:.1f}" rx="2.6" ry="1.6" fill="#d8503a"/><circle cx="{mx-.7:.1f}" cy="{my-3.1:.1f}" r=".45" fill="#fff"/>')
+    base = [("#86b45a", "#6c9a47"), ("#8cb95f", "#71a04b"), ("#81ae56", "#679443")][i % 3]
+    return svg(base[0], base[1], b, "#3d6634", None, lit=.14)
+
+GEN = {"cristaux": cristaux, "marees": marees, "vents": vents, "brasier": brasier, "brumes": brumes, "ombres": ombres, "mountain": montagne, "forest": foret}
 
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
