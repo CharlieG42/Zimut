@@ -2278,6 +2278,18 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	if not bounty_done.is_empty():
 		data["last_result"]["bounties"] = bounty_done
 	_apply_campaign_victory(data)
+	# V146 : l'empire vit aussi pendant les victoires des autres modes
+	if String(data.get("campaign_mode", "")) != "conquest" and data.has("conquest"):
+		var cq_out: Dictionary = data.get("conquest", {})
+		var names_out: Dictionary = {}
+		for cid_out: String in CONQUEST_CITIES.keys():
+			names_out[cid_out] = String(CONQUEST_CITIES[cid_out].get("name", cid_out))
+		cq_out["_names"] = names_out
+		var alert: String = ConquestSystem.outside_victory(data, cq_out, _rng, CONQUEST_ROUTES)
+		cq_out.erase("_names")
+		data["conquest"] = cq_out
+		if alert != "" and data.has("last_result"):
+			data["last_result"]["conquest_alert"] = alert
 	# Succès (V18 + contre-la-montre V42 : les succès de vitesse sont des
 	# records par partie, débloqués dans l'écran Succès — plus de réglage global)
 	Achievements.bump(data, "wins")
@@ -2327,6 +2339,34 @@ func conquest_add_event(conquest: Dictionary, event_text: String) -> void:
 	while events.size() > 8:
 		events.pop_front()
 	conquest["events"] = events
+
+## V146 : horloge de la Conquête (secondes Unix) et jour local ; `conquest_clock_override` sert aux tests.
+var conquest_clock_override: int = 0
+
+func conquest_now() -> int:
+	return conquest_clock_override if conquest_clock_override > 0 else int(Time.get_unix_time_from_system())
+
+func conquest_today() -> int:
+	var bias: int = int(Time.get_time_zone_from_system().get("bias", 0)) if conquest_clock_override <= 0 else 0
+	return int(floor(float(conquest_now() + bias * 60) / float(ConquestSystem.DAY_SECONDS)))
+
+## À l'ouverture de la carte de Conquête : impôts accumulés et offensives manquées ({} s'il ne s'est rien passé).
+func conquest_process_absence(data: Dictionary) -> Dictionary:
+	var conquest: Dictionary = data.get("conquest", {})
+	if conquest.is_empty():
+		return {}
+	var names: Dictionary = {}
+	for cid: String in CONQUEST_CITIES.keys():
+		names[cid] = String(CONQUEST_CITIES[cid].get("name", cid))
+	conquest["_names"] = names
+	var report: Dictionary = ConquestSystem.process_absence(data, conquest, conquest_now(), _rng)
+	conquest = data.get("conquest", conquest)
+	conquest.erase("_names")
+	data["conquest"] = conquest
+	if not report.is_empty():
+		report["text"] = ConquestSystem.absence_report_text(report, names)
+	return report
+
 
 func _apply_campaign_victory(data: Dictionary) -> void:
 	var mode: String = String(data.get("campaign_mode", ""))
@@ -2420,6 +2460,14 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 				unrevealed.append(cid)
 		ConquestSystem.after_victory(data, conquest, _rng, CONQUEST_ROUTES, names, just_conquered, unrevealed)
 		conquest = data.get("conquest", conquest)
+		# V146 : une bataille de Conquête remet l'absence à zéro ; première victoire du jour = revenus doublés
+		ConquestSystem.touch_activity(conquest, conquest_now())
+		var day_gold: int = ConquestSystem.daily_bonus(data, conquest, conquest_today())
+		if day_gold > 0:
+			var day_news: Array = conquest.get("news", [])
+			day_news.push_front("☀ Première victoire du jour : revenus de l'empire doublés (+%d or)." % day_gold)
+			conquest["news"] = day_news
+		data["conquest"] = conquest
 		if not defended.is_empty():
 			var who: String = String(defended.get("general", ""))
 			var txt: String = "★ OFFENSIVE BRISÉE EN PERSONNE à %s%s ! Garnison intacte. Butin : +%d or." % [
@@ -3783,6 +3831,7 @@ func _apply_campaign_defeat(data: Dictionary) -> void:
 		# progression) : le joueur peut retenter la bataille perdue.
 		var conquest: Dictionary = data.get("conquest", {})
 		conquest.erase("pending_tactic")
+		ConquestSystem.touch_activity(conquest, conquest_now())      # V146 : même perdue, la bataille compte comme une présence
 		# V145 : défense en personne perdue — la tentative est consommée, l'offensive suit son cours.
 		if ConquestSystem.is_defense_battle(conquest):
 			var names: Dictionary = {}

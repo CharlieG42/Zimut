@@ -2201,6 +2201,11 @@ func _show_result_window(victory: bool) -> void:
 			20, Color(0.95, 0.85, 0.55), true)
 		bl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		box.add_child(bl)
+	# V146 : l'empire de Conquête vit pendant les autres modes — alerte d'offensive
+	if victory and String(res.get("conquest_alert", "")) != "":
+		var al := UK.lbl("🏰  Conquête — " + String(res["conquest_alert"]), 20, Color(1.0, 0.70, 0.62), true)
+		al.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(al)
 
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
