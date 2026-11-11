@@ -1,0 +1,4 @@
+V152|Ennemis plus malins : ils se placent avant de frapper, s'acharnent sur un héros blessé ou sur le soigneur, et les tireurs reculent après leur tir.
+V152|Normal, Difficile et Enfer : les ennemis frappent plus fort. Facile garde l'ancienne IA, plus prévisible.
+V152|Aperçu des dégâts en fourchette (ex. -42~63) ; « KO ? » quand seul un coup critique achève la cible.
+V152|17 nouveaux succès : victoires en Difficile et en Enfer, donjons terminés, Nations unies, chapitres, défenses en personne, 500 ennemis vaincus…

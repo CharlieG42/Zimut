@@ -2301,6 +2301,15 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	Achievements.bump(data, "wins")
 	if int(info.get("deaths", 1)) == 0 and info.has("deaths"):
 		Achievements.bump(data, "flawless")
+	# V152 : succès de difficulté
+	var gs_won: Node = get_node_or_null("/root/GameSettings")
+	var diff_won: int = int(gs_won.call("save_difficulty", data)) if gs_won != null else int(data.get("difficulty", 1))
+	if diff_won >= 2:
+		Achievements.bump(data, "wins_hard")
+		if int(info.get("deaths", 1)) == 0 and info.has("deaths"):
+			Achievements.bump(data, "flawless_hard")
+	if diff_won >= 3:
+		Achievements.bump(data, "wins_hell")
 	Achievements.record_speed(data, int(info.get("turns", 0)), was_boss)
 	if was_boss:
 		Achievements.bump(data, "bosses")

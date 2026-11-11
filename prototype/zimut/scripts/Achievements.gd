@@ -32,6 +32,24 @@ const LIST: Array = [
 	["gardien_pierres", "Gardien des Pierres", "Retrouver 5 Pierres Élémentaires", "stones", 5, {"Magie@3": 3}],
 	["equilibre", "L'Équilibre retrouvé", "Retrouver toutes les Pierres Élémentaires", "stones", 10, {"Magie@4": 3, "Fer@4": 3}],
 	["naturaliste", "Naturaliste", "Rencontrer 20 ennemis différents", "bestiary", 20, {"Venin@2": 3}],
+	# ── V152 : nouveaux succès (difficulté, donjons, Conquête, longévité) ──
+	["centurion", "Centurion", "Gagner 100 combats", "wins", 100, {"Magie@4": 2}],
+	["inarretable", "Inarrêtable", "Gagner 250 combats", "wins", 250, {"Fer@4": 2, "Magie@4": 2}],
+	["trempe_acier", "Trempé dans l'acier", "Gagner 10 combats en Difficile ou en Enfer", "wins_hard", 10, {"Fer@3": 3}],
+	["revenu_enfers", "Revenu des Enfers", "Gagner 10 combats en Enfer", "wins_hell", 10, {"Magie@4": 2, "Fer@4": 1}],
+	["sang_froid", "Sang-froid", "Gagner un combat en Difficile ou en Enfer sans aucun héros K.O.", "flawless_hard", 1, {"Cuir@3": 3}],
+	["explorateur", "Explorateur", "Terminer 5 donjons différents", "dungeons", 5, {"Bois@3": 3}],
+	["maitre_donjons", "Maître des donjons", "Terminer 20 donjons différents", "dungeons", 20, {"Magie@4": 2}],
+	["banniere_levee", "Bannière levée", "Unir une nation en Conquête (toutes ses villes)", "united", 1, {"gold": 500}],
+	["unificateur", "Unificateur", "Unir 4 nations en Conquête", "united", 4, {"Magie@4": 3}],
+	["chroniqueur", "Chroniqueur", "Terminer 3 chapitres de la campagne de Conquête", "chapters", 3, {"Fer@3": 2, "Cuir@3": 2}],
+	["rempart_vivant", "Rempart vivant", "Défendre 3 villes en personne", "defended", 3, {"Fer@3": 2}],
+	["encyclopediste", "Encyclopédiste", "Rencontrer 50 ennemis différents", "bestiary", 50, {"Venin@3": 3}],
+	["exterminateur", "Exterminateur", "Vaincre 500 ennemis", "kills", 500, {"Fer@3": 2, "Venin@3": 2}],
+	["grand_stratege", "Grand stratège", "Réussir 25 objectifs de combat", "objectives", 25, {"Magie@3": 2}],
+	["artisan", "Artisan", "Fabriquer 10 objets à la Forge", "crafted", 10, {"gold": 400}],
+	["fortune", "Fortune", "Posséder 5 000 pièces d'or", "gold_now", 5000, {"Magie@3": 2}],
+	["au_sommet", "Au sommet", "Monter un héros au niveau 100", "max_level", 100, {"Magie@4": 3, "Fer@4": 3}],
 ]
 
 
@@ -54,6 +72,27 @@ static func stat(data: Dictionary, key: String) -> int:
 			return (data.get("stones", {}) as Dictionary).size()
 		"best_turns":
 			return int(data.get("stats", {}).get("best_turns", 0))
+		# V152
+		"dungeons":
+			var n: int = 0
+			for dg in (data.get("adventure", {}).get("dungeons", {}) as Dictionary).values():
+				if dg is Dictionary and int(dg.get("clears", 0)) > 0:
+					n += 1
+			return n
+		"united":
+			return ConquestSystem.united_nations(data.get("conquest", {})).size() if data.has("conquest") else 0
+		"chapters":
+			return ConquestSystem.chapter_index(data.get("conquest", {})) if data.has("conquest") else 0
+		"defended":
+			return int(data.get("conquest", {}).get("defended_in_person", 0))
+		"kills":
+			var k: int = 0
+			for f in (data.get("bestiary", {}) as Dictionary).values():
+				if f is Dictionary:
+					k += int(f.get("killed", 0))
+			return k
+		"gold_now":
+			return int(data.get("gold", 0))
 		"boss_turns":
 			return int(data.get("stats", {}).get("boss_turns", 0))
 		"max_rank":

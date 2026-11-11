@@ -21,10 +21,12 @@ peaufinées avant d'en créer d'autres.
 - [ ] Teinte d'ambiance par nation sur les personnages, ombres au sol plus marquées.
 - [ ] Fond de scène des six autres nations.
 
-- [ ] Aperçu des dégâts sur la cible avant de valider un sort.
-- [ ] Frise de l'ordre des tours.
-- [ ] IA par type d'ennemi (fonceur, tireur, soigneur).
-- [ ] Objectifs variés : survivre X tours, protéger un allié, capturer une case.
+- [x] Aperçu des dégâts sur la cible : fourchette min~max, « KO » / « KO ? » (V152).
+- [x] Frise de l'ordre des tours : déjà assurée par la timeline.
+- [x] IA tactique : se placer puis frapper, concentrer les attaques, frapper puis reculer, soigneurs en retrait (V152).
+- [x] Équilibrage avec l'IA : attaque ennemie relevée en Difficile et en Enfer (V152). À réajuster après retours.
+- [ ] Objectifs variés : survivre X tours, protéger un allié, capturer une case. *Idée gardée, pas pour l'instant.*
+- [ ] Capture de familiers : prochaine version majeure.
 
 ## Mode Aventure
 
