@@ -165,6 +165,7 @@ gain côté 3D), pour que tu voies vite un résultat dans chaque vue, puis de d�
 | Conquête : défendre une ville en personne (combat Tactique) | fait | V145 |
 | Conquête : empire vivant (absence, impôts, bonus du jour, autres modes) | fait | V146 |
 | Conquête : notification Android avant une offensive (export Gradle) | fait | V147 |
+| Conquête : vue d'ensemble de l'empire (tableau, actions groupées) | fait | V148 |
 
 Mesures sur Galaxy S23+ (vidéos du 10 novembre) : carte Diorama 53 à 58 images par seconde ; monde 3D du
 Brasier 49 à 58 images par seconde, environ 300 000 triangles et 400 à 500 dessins par image.

@@ -71,9 +71,8 @@ systèmes d'économie. Production par ville et défense chiffrée existent déj�
 
 ### Confort
 
-- [ ] **Vue d'ensemble de l'empire** *(priorité 2)*. Un tableau de toutes les villes (niveau, garnison,
-      défense, production, alerte) avec « recruter partout » et « améliorer ce qui est payable », pour ne
-      plus entrer dans chaque ville une à une.
+- [x] **Vue d'ensemble de l'empire** (V148). Tableau de toutes les villes, « recruter partout »,
+      « améliorer ce qui est payable », « réparer les ruines ».
 - [ ] **Pastilles d'action sur la carte**. Marquer les villes où quelque chose est possible ou urgent :
       amélioration payable, garnison vide, ville ruinée.
 - [ ] **Bilan après bataille**. Regrouper sur un seul écran ce qui s'est passé (revenus, raid, événement,

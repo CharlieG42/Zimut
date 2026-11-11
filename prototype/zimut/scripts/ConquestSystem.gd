@@ -1316,6 +1316,120 @@ static func _tick_threat(data: Dictionary, conq: Dictionary, rng: RandomNumberGe
 	conq.erase("threat")
 	resolve_assault(data, conq, id, int(th.get("power", 10)))
 
+# ── Vue d'ensemble de l'empire (V148) ───────────────────────────────────
+# Un tableau de toutes les villes et trois actions groupées, pour ne plus entrer dans chaque ville.
+
+## Peut-on payer l'amélioration de cette ville maintenant ?
+static func can_afford_upgrade(data: Dictionary, id: String) -> bool:
+	var conq: Dictionary = data.get("conquest", {})
+	if city_level(conq, id) >= MAX_LEVEL or is_ravaged(conq, id):
+		return false
+	var cost: Dictionary = upgrade_cost(conq, id)
+	if int(data.get("gold", 0)) < int(cost.get("gold", 0)):
+		return false
+	var res: Dictionary = data.get("resources", {})
+	for k: String in cost.get("res", {}).keys():
+		if int(res.get(k, 0)) < int(cost["res"][k]):
+			return false
+	return true
+
+## Une ligne par ville de l'empire, triées : villes en alerte d'abord, puis défense croissante.
+## {id, level, troops, cap, defense, income, hero, threatened, ruined, ravaged, empty, can_upgrade, alert}
+static func empire_rows(data: Dictionary) -> Array:
+	var conq: Dictionary = data.get("conquest", {})
+	var th_city: String = String(threat(conq).get("city", ""))
+	var rows: Array = []
+	for id: String in conq.get("owned", []):
+		var r: Dictionary = {
+			"id": id, "level": city_level(conq, id), "troops": troops(conq, id), "cap": garrison_cap(conq, id),
+			"defense": defense(data, id), "income": city_income(data, id), "hero": hero_of(conq, id),
+			"threatened": id == th_city, "ruined": is_ruined(conq, id), "ravaged": is_ravaged(conq, id),
+			"can_upgrade": can_afford_upgrade(data, id)}
+		r["empty"] = int(r["troops"]) == 0
+		r["alert"] = bool(r["threatened"]) or bool(r["ruined"]) or bool(r["empty"])
+		rows.append(r)
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		if bool(a["threatened"]) != bool(b["threatened"]):
+			return bool(a["threatened"])
+		if bool(a["alert"]) != bool(b["alert"]):
+			return bool(a["alert"])
+		if int(a["defense"]) != int(b["defense"]):
+			return int(a["defense"]) < int(b["defense"])
+		return String(a["id"]) < String(b["id"]))
+	return rows
+
+## Nombre de villes où une action est possible ou urgente (pour la pastille du bouton).
+static func empire_action_count(data: Dictionary) -> int:
+	var n: int = 0
+	for r: Dictionary in empire_rows(data):
+		if bool(r["alert"]) or bool(r["can_upgrade"]) or (int(r["troops"]) < int(r["cap"]) and int(data.get("gold", 0)) >= TROOP_COST):
+			n += 1
+	return n
+
+## Coût pour remplir toutes les garnisons (sans tenir compte de l'or disponible).
+static func recruit_all_cost(data: Dictionary) -> int:
+	var conq: Dictionary = data.get("conquest", {})
+	var n: int = 0
+	for id: String in conq.get("owned", []):
+		n += garrison_cap(conq, id) - troops(conq, id)
+	return n * TROOP_COST
+
+## Recrute partout, un soldat à la fois, en servant d'abord la ville menacée puis la moins défendue,
+## jusqu'à ce que l'or manque. Renvoie {soldiers, gold, cities}.
+static func recruit_all(data: Dictionary) -> Dictionary:
+	var conq: Dictionary = data.get("conquest", {})
+	var out: Dictionary = {"soldiers": 0, "gold": 0, "cities": 0}
+	var touched: Dictionary = {}
+	var th_city: String = String(threat(conq).get("city", ""))
+	while int(data.get("gold", 0)) >= TROOP_COST:
+		var best: String = ""
+		var best_key: int = 1 << 30
+		for id: String in conq.get("owned", []):
+			if troops(conq, id) >= garrison_cap(conq, id):
+				continue
+			var key: int = (-100000 if id == th_city else 0) + defense(data, id) * 10 + troops(conq, id)
+			if key < best_key:
+				best_key = key
+				best = id
+		if best == "":
+			break
+		if recruit(data, best, 1) != "":
+			break
+		conq = data.get("conquest", conq)
+		out["soldiers"] = int(out["soldiers"]) + 1
+		out["gold"] = int(out["gold"]) + TROOP_COST
+		touched[best] = true
+	out["cities"] = touched.size()
+	return out
+
+## Améliore d'un niveau chaque ville dont l'amélioration est payable, la moins chère d'abord.
+## Renvoie la liste des villes améliorées.
+static func upgrade_all_affordable(data: Dictionary, names: Dictionary = {}) -> Array:
+	var conq: Dictionary = data.get("conquest", {})
+	var ids: Array = (conq.get("owned", []) as Array).duplicate()
+	ids.sort_custom(func(a: String, b: String) -> bool:
+		var ga: int = int(upgrade_cost(conq, a).get("gold", 1 << 30))
+		var gb: int = int(upgrade_cost(conq, b).get("gold", 1 << 30))
+		return ga < gb if ga != gb else a < b)
+	var done: Array = []
+	for id: String in ids:
+		if can_afford_upgrade(data, id) and upgrade_city(data, id, String(names.get(id, id))) == "":
+			done.append(id)
+	return done
+
+## Répare toutes les villes ruinées que l'or permet. Renvoie la liste des villes réparées.
+static func repair_all(data: Dictionary) -> Array:
+	var conq: Dictionary = data.get("conquest", {})
+	var done: Array = []
+	var ids: Array = (conq.get("owned", []) as Array).duplicate()
+	ids.sort()
+	for id: String in ids:
+		if is_ruined(conq, id) and repair_city(data, conq, id) == "":
+			done.append(id)
+	data["conquest"] = conq
+	return done
+
+
 # ── Empire vivant (V146) ────────────────────────────────────────────────
 # Jouer la Conquête fait progresser, la délaisser fait perdre des villes peu à peu.
 #   • Absence : après ABSENCE_GRACE_DAYS jours sans bataille de Conquête, une offensive est simulée, puis
