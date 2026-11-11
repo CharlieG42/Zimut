@@ -39,8 +39,12 @@ func _boot() -> void:
 	# hors Android : rien n'est programmé, rien ne casse, le délai reste juste
 	check(not N.available(), "PC / tests : module natif absent")
 	gs.set("notifications_on", true)
-	check(N.schedule_absence_warning(3 * 86400) == 2 * 86400, "rappel un jour avant l'offensive")
-	check(N.schedule_absence_warning(3600) == 0 and N.schedule_absence_warning(0) == 0, "offensive trop proche ou déjà due : pas de rappel")
+	if int(N.TEST_DELAY_SECONDS) > 0:
+		# APK de vérification : rappel forcé quelques minutes après l'ouverture de la carte
+		check(N.schedule_absence_warning(0) == int(N.TEST_DELAY_SECONDS), "mode test : rappel dans %d s" % int(N.TEST_DELAY_SECONDS))
+	else:
+		check(N.schedule_absence_warning(3 * 86400) == 2 * 86400, "rappel un jour avant l'offensive")
+		check(N.schedule_absence_warning(3600) == 0 and N.schedule_absence_warning(0) == 0, "offensive trop proche ou déjà due : pas de rappel")
 	gs.set("notifications_on", false)
 	check(N.schedule_absence_warning(3 * 86400) == 0, "réglage « Rappels de Conquête » désactivé : rien de programmé")
 	gs.set("notifications_on", true)
