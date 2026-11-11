@@ -29,6 +29,11 @@ niveau des assaillants = niveau moyen de l'équipe + (force − défense) / 5, b
 offensive brisée, garnison intacte, butin ×1,5 ; défaite ou abandon = une seule tentative, l'offensive suit
 son cours. Le gouverneur de la ville peut se battre. Voir `AMELIORATIONS_V145.md`.
 
+## Nations unies et chapitres (V151)
+Tenir toutes les villes d'une Nation donne sa Bannière (bonus pour tous les héros dans les trois modes, +5 de
+défense à ses villes), suspendue si une ville est perdue. Huit chapitres récompensés jalonnent la campagne.
+Voir `AMELIORATIONS_V151.md`.
+
 ## Empire vivant (V146)
 Après 3 jours sans bataille de Conquête, des offensives sont simulées (une, puis une tous les 2 jours, 5 au
 plus) contre la ville la moins défendue ; au plus 2 villes perdues, la dernière offensive reste en attente.

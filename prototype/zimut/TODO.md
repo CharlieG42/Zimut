@@ -52,11 +52,9 @@ systèmes d'économie. Production par ville et défense chiffrée existent déj�
       permission demandée au premier rappel utile, réglage pour couper, icônes Zimut. À valider sur téléphone.
 - [ ] **Empire vivant, réglages**. Ajuster les valeurs après quelques semaines de jeu réel (délai de
       grâce, rythme, plafond de pertes, fréquence des alertes hors Conquête).
-- [ ] **Nation complète**. Tenir toutes les villes d'une Nation donne un bonus permanent valable dans les
-      trois modes (par exemple résistance à l'élément de la Nation, ou remise à la forge). Donne un but
-      intermédiaire sur une carte de 46 villes.
-- [ ] **Chapitres de campagne**. Découper la conquête en étapes annoncées (« Libérer la Sylve », « Briser
-      Vorkann ») avec récompense à chaque étape, pour rythmer une partie longue.
+- [x] **Nation complète** (V151). Bannière par Nation (bonus pour tous les héros dans les trois modes, +5 de
+      défense à ses villes), suspendue si une ville est perdue.
+- [x] **Chapitres de campagne** (V151). Huit étapes récompensées, de « Les premiers pas » à la chute du Roi.
 - [ ] **Routes commerciales**. Relier deux villes de spécialités différentes rapporte de l'or à chaque
       victoire ; un raid coupe la route tant que la ville est pillée. Donne un enjeu à la géographie.
 - [ ] **Riposte du Roi Squelette**. Après la chute d'un général, une contre-offensive ciblée sur la

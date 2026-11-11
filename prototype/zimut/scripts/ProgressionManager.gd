@@ -1960,6 +1960,12 @@ func member_stats(data: Dictionary, member: Dictionary) -> Dictionary:
 	for sk: String in sb["stats"].keys():
 		eq[sk] = int(eq.get(sk, 0)) + int(sb["stats"][sk])
 	ItemRules.merge_fx(fx, sb["fx"])
+	# V151 : Bannières des Nations unies en Conquête — valables dans les trois modes
+	if data.has("conquest"):
+		var nb: Dictionary = ConquestSystem.banners_bonus(data.get("conquest", {}))
+		for nk: String in nb["stats"].keys():
+			eq[nk] = int(eq.get(nk, 0)) + int(nb["stats"][nk])
+		ItemRules.merge_fx(fx, nb["fx"])
 	# V42 : bonus de l'arbre de talents DU HÉROS (stocké dans le roster)
 	var tb: Dictionary = TalentTree.total_bonus(data, classe)
 	var pv_pct: float = 1.0 + float(tb.get("pv_pct", 0)) / 100.0
@@ -2460,6 +2466,17 @@ func _apply_campaign_victory(data: Dictionary) -> void:
 				unrevealed.append(cid)
 		ConquestSystem.after_victory(data, conquest, _rng, CONQUEST_ROUTES, names, just_conquered, unrevealed)
 		conquest = data.get("conquest", conquest)
+		# V151 : Nations unies et chapitres de campagne
+		var cq_names: Dictionary = {}
+		for cn: String in CONQUEST_CITIES.keys():
+			cq_names[cn] = String(CONQUEST_CITIES[cn].get("name", cn))
+		conquest["_names"] = cq_names
+		ConquestSystem.announce_united(conquest)
+		var chapters_done: Array = ConquestSystem.advance_chapters(data, conquest)
+		conquest = data.get("conquest", conquest)
+		conquest.erase("_names")
+		if not chapters_done.is_empty():
+			conquest["last_chapters"] = chapters_done.map(func(c: Dictionary) -> String: return String(c["id"]))
 		# V146 : une bataille de Conquête remet l'absence à zéro ; première victoire du jour = revenus doublés
 		ConquestSystem.touch_activity(conquest, conquest_now())
 		var day_gold: int = ConquestSystem.daily_bonus(data, conquest, conquest_today())
@@ -3278,6 +3295,24 @@ func conquest_city_kind(city_id: String) -> String:
 	return String(CONQUEST_CITIES.get(city_id, {}).get("kind", "neutral"))
 
 ## Biome d'une ville (décor et bestiaire de ses batailles).
+## V151 : villes d'une Nation ("*" = toutes les villes hors capitale et Donjon du Roi), triées.
+var _nation_cities_cache: Dictionary = {}
+func conquest_nation_cities(nation: String) -> Array:
+	if _nation_cities_cache.has(nation):
+		return _nation_cities_cache[nation]
+	var out: Array = []
+	for cid: String in CONQUEST_CITIES.keys():
+		if cid == "donjon_roi":
+			continue
+		if nation == "*":
+			if cid != "capitale":
+				out.append(cid)
+		elif String(CONQUEST_CITIES[cid].get("biome", "")) == nation:
+			out.append(cid)
+	out.sort()
+	_nation_cities_cache[nation] = out
+	return out
+
 func conquest_city_biome(city_id: String) -> String:
 	return String(CONQUEST_CITIES.get(city_id, {}).get("biome", "Forêt"))
 
