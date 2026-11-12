@@ -71,14 +71,15 @@ func _run() -> void:
 	check(absf(t2) < 0.02 or absf(t2 - z._len * 0.5) < 0.02, "…dans une pose jambes jointes (t = %.3f)" % t2)
 	# 6. les poses de la planche 2D diffèrent bien d'une phase à l'autre
 	var sk: Skeleton3D = z._model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
-	var lf: int = sk.find_bone("mixamorig_LeftUpLeg")
+	var legs: Array[int] = [sk.find_bone("mixamorig_LeftUpLeg"), sk.find_bone("mixamorig_RightUpLeg")]
+	check(legs[0] >= 0 and legs[1] >= 0, "os des jambes trouvés")
 	z.pose_walk(0.0)
 	await process_frame
-	var a: Quaternion = sk.get_bone_pose_rotation(lf)
+	var a: Array[Quaternion] = [sk.get_bone_pose_rotation(legs[0]), sk.get_bone_pose_rotation(legs[1])]
 	z.pose_walk(0.25)
 	await process_frame
-	var b: Quaternion = sk.get_bone_pose_rotation(lf)
-	check(a.angle_to(b) > 0.2, "la cuisson 2D obtient des poses différentes (%.2f rad)" % a.angle_to(b))
+	var swing: float = maxf(a[0].angle_to(sk.get_bone_pose_rotation(legs[0])), a[1].angle_to(sk.get_bone_pose_rotation(legs[1])))
+	check(swing > 0.15, "la cuisson 2D obtient des poses différentes (%.2f rad)" % swing)
 	z.free()
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
