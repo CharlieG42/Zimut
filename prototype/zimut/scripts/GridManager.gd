@@ -829,14 +829,18 @@ func _play_cast(d: Dictionary) -> void:
 			await _wait(0.12)
 			v.play_pose("attack", 0.6, String(d.get("spell", "")))
 			Sfx.play("magic" if not phys else "cast")
-			var start: Vector2 = v.position + Vector2(0, -50)
+			# V154 : avec une animation 3D, le projectile part du bout du bâton à l'image d'impact du geste
+			var t_hit: float = v.impact_delay("attack")
+			if t_hit > 0.0:
+				await _wait(t_hit)
+			var start: Vector2 = v.tip_position(v.position + Vector2(0, -50))
 			await _projectile_el(start, to_pos, elem, phys)
 		elif v != null:
 			if elem != "physical":
 				_charge(v, elem, false)
 			Sfx.play("slash")
 			v.lunge(grid_to_screen(to.x, to.y), String(d.get("spell", "")))
-			await get_tree().create_timer(0.1).timeout
+			await get_tree().create_timer(maxf(0.1, v.impact_delay("attack"))).timeout
 			_slash(to_pos, col)
 			await get_tree().create_timer(0.08).timeout
 		else:
@@ -853,8 +857,8 @@ func _play_cast(d: Dictionary) -> void:
 			v.tint_flash(col, 0.35, 0.4)
 			# V47 : étincelle de soutien qui rejoint un allié à distance
 			if (kind == "heal" or kind == "buff") and from != to and v.position.distance_to(to_pos) > 90.0:
-				await _wait(0.12)
-				await _support_wisp(v.position + Vector2(0, -50), to_pos, col, cols[1])
+				await _wait(maxf(0.12, v.impact_delay("cast")))
+				await _support_wisp(v.tip_position(v.position + Vector2(0, -50)), to_pos, col, cols[1])
 		if multi:
 			_aoe_ripple(d["cells"], to, col, elem)
 		await _wait(0.2)

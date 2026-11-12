@@ -68,6 +68,17 @@ var _idle_wait: float = 5.0
 var _cur_tex: Texture2D = null
 var _ghost: Sprite2D = null
 var _ghost_fade: float = 0.0
+## V154 : séquences 3D cuites (tools/bake_hero_seq.gd + tools/pack_hero_seq.py) : <sprite>_seq.txt (JSON, décrit les
+## animations) et <sprite>_seq_front.png / _seq_back.png (une ligne par animation). Quand elles existent, elles
+## remplacent les poses PNG : repos, marche, attaque, sort et coup reçu sont de vraies animations image par image.
+var _sq_ok: bool = false
+var _sq: Dictionary = {}           # animation → {"front": [Texture2D], "back": [...], "dur", "loop", "key", "tips"}
+var _sq_cell: int = 0
+var _sq_act: String = ""           # animation d'action en cours ("attack", "cast", "hit") ou ""
+var _sq_act_t: float = 0.0
+var _sq_act_dur: float = 0.4
+var _sq_tip: Vector2 = Vector2(-1.0, -1.0)   # bout du bâton dans l'image affichée (pixels de la cellule)
+var _ph: float = 96.0              # hauteur de l'image affichée (sert à poser les pieds sur la case)
 const POSES: Array[String] = ["back", "walk", "attack", "cast"]
 ## V34 : poses vues de dos (3/4 arrière) : <sprite>_back_idle_2, _back_walk, _back_attack_3, _back_cast…
 ## (<sprite>_back reste le repos de dos). Rangées sous les clés "back_idle", "back_walk"…
@@ -240,6 +251,8 @@ func _load_poses() -> void:
 	var base: String = _idle_tex.resource_path.get_basename()
 	if base == "":
 		return
+	if _load_seq(base):
+		return
 	# V32 : plusieurs variantes par pose (<sprite>_attack, _attack_2, _attack_3…, _idle_2, _idle_3)
 	for pz: String in POSES + ["idle"]:
 		var list: Array = _load_variants(base + "_" + pz, pz == "idle")
@@ -280,6 +293,121 @@ func _pool(pz: String, back: bool) -> Array:
 	return _poses.get(pz, [])
 
 
+## V154 : charge les séquences 3D de <base>_seq.txt (voir plus haut). Renvoie true si le sprite en a.
+func _load_seq(base: String) -> bool:
+	var jp: String = base + "_seq.txt"
+	if not FileAccess.file_exists(jp):
+		return false
+	var f := FileAccess.open(jp, FileAccess.READ)
+	if f == null:
+		return false
+	var meta: Variant = JSON.parse_string(f.get_as_text())
+	if not (meta is Dictionary):
+		push_warning("Séquences illisibles : " + jp)
+		return false
+	var sheets := {}
+	for view: String in ["front", "back"]:
+		var path: String = "%s_seq_%s.png" % [base, view]
+		if not ResourceLoader.exists(path):
+			push_warning("Planche de séquences absente : " + path)
+			return false
+		sheets[view] = load(path)
+	var cell: int = int(meta["cell"])
+	for an: String in (meta["anims"] as Dictionary).keys():
+		var info: Dictionary = (meta["anims"] as Dictionary)[an]
+		var entry := {"dur": float(info["dur"]), "loop": bool(info["loop"]), "key": int(info["key"]), "tips": info["tips"]}
+		for view2: String in ["front", "back"]:
+			var frames: Array = []
+			for i: int in range(int(info["n"])):
+				var at := AtlasTexture.new()
+				at.atlas = sheets[view2]
+				at.region = Rect2(i * cell, int(info["row"]) * cell, cell, cell)
+				frames.append(at)
+			entry[view2] = frames
+		_sq[an] = entry
+	if not _sq.has("idle"):
+		_sq.clear()
+		return false
+	_sq_ok = true
+	_sq_cell = cell
+	# le personnage occupe char_frac de la cellule : on l'affiche à la même hauteur que les autres sprites
+	var target_h: float = _target_height()
+	var sc: float = target_h / (float(cell) * float(meta["char_frac"]))
+	_base_sc = sc
+	sprite.scale = Vector2(sc, sc)
+	height = target_h
+	_ph = float(cell) * sc
+	sprite.position = Vector2(0, -_ph * 0.5 + 6.0)
+	var first: Texture2D = (_sq["idle"]["front"] as Array)[0]
+	sprite.texture = first
+	return true
+
+
+## Image à afficher : action en cours (attaque, sort, coup reçu), sinon marche ou repos en boucle.
+func _seq_tex() -> Texture2D:
+	var view: String = "back" if _facing_back() else "front"
+	if _sq_act != "":
+		var info: Dictionary = _sq[_sq_act]
+		var fr: Array = info[view]
+		var idx: int = int(_sq_act_t / _sq_act_dur * float(fr.size()))
+		if idx < fr.size():
+			_sq_tip = _sq_tip_of(info, view, idx)
+			return fr[idx]
+		_sq_act = ""
+	var an: String = "walk" if (_moving and _sq.has("walk")) else "idle"
+	var info2: Dictionary = _sq[an]
+	var fr2: Array = info2[view]
+	var step: float = float(info2["dur"]) / float(fr2.size())
+	var idx2: int = int(_t / step + _phase * 3.0) % fr2.size()
+	_sq_tip = _sq_tip_of(info2, view, idx2)
+	return fr2[idx2]
+
+
+func _sq_tip_of(info: Dictionary, view: String, idx: int) -> Vector2:
+	var arr: Array = (info["tips"] as Dictionary).get(view, [])
+	if idx < arr.size():
+		var p: Array = arr[idx]
+		return Vector2(float(p[0]), float(p[1]))
+	return Vector2(-1.0, -1.0)
+
+
+## Facteur de durée d'une action (même règle que les poses PNG : durée demandée / 0,6 s, réglage « vitesse des animations »).
+func _sq_mult(dur: float) -> float:
+	var m: float = clampf(dur / 0.6, 0.7, 1.4)
+	var gs: Node = get_node_or_null("/root/GameSettings")
+	if gs != null and gs.has_method("anim_duration_mult"):
+		m *= float(gs.call("anim_duration_mult"))
+	return m
+
+
+func _sq_start(pz: String, dur: float) -> void:
+	if not _sq.has(pz):
+		return
+	_sq_act = pz
+	_sq_act_t = 0.0
+	_sq_act_dur = float(_sq[pz]["dur"]) * _sq_mult(dur)
+
+
+## Délai (s) entre le début de l'action [pz] et son image clé (impact du coup, sommet du geste du sort) : les effets
+## (projectile, éclat, onde) partent à ce moment-là. 0 sans séquences 3D.
+func impact_delay(pz: String) -> float:
+	if not _sq_ok or not _sq.has(pz):
+		return 0.0
+	var info: Dictionary = _sq[pz]
+	var n: int = (info["front"] as Array).size()
+	return float(info["key"]) / float(n) * float(info["dur"]) * _sq_mult(0.6)
+
+
+## Position (coordonnées du plateau) du bout du bâton dans l'image affichée ; [fallback] sans séquences 3D.
+func tip_position(fallback: Vector2) -> Vector2:
+	if not _sq_ok or _sq_tip.x < 0.0 or sprite == null:
+		return fallback
+	var half: float = float(_sq_cell) * 0.5
+	var fx: float = -1.0 if sprite.flip_h else 1.0
+	var local := Vector2((_sq_tip.x - half) * fx * sprite.scale.x, (_sq_tip.y - half) * sprite.scale.y)
+	return position + sprite.position + local
+
+
 func has_pose(pz: String) -> bool:
 	return _poses.has(pz)
 
@@ -288,6 +416,9 @@ func has_pose(pz: String) -> bool:
 ## élan éventuel (incantation, marche ou variante de repos) puis 1 à 2 frappes, enchaînées vite
 ## avec un fondu très court entre les poses. Sans clé : tirage au hasard.
 func play_pose(pz: String, dur: float = 0.5, key: String = "") -> void:
+	if _sq_ok:
+		_sq_start(pz, dur)
+		return
 	# V34 : de dos avec des poses d'action de dos, on ne joue que des poses de dos (jamais de mélange
 	# face/dos) ; sans poses d'action de dos, on garde les poses de face comme avant.
 	var back: bool = _facing_back() and (_poses.has("back_attack") or _poses.has("back_cast"))
@@ -350,6 +481,8 @@ func _next_seq() -> void:
 ## Texture voulue : action en cours, marche (foulée : marche / repos en alternance),
 ## dos (orientation vers le haut de l'écran), petite variante de repos de temps en temps.
 func _wanted_tex() -> Texture2D:
+	if _sq_ok:
+		return _seq_tex()
 	if _act_tex != null:
 		return _act_tex
 	var back: bool = _facing_back() and _poses.has("back")
@@ -373,8 +506,8 @@ func _wanted_tex() -> Texture2D:
 func _apply_tex(t: Texture2D) -> void:
 	if t == null or t == _cur_tex or _idle_tex == null:
 		return
-	# fondu court : l'ancienne pose s'efface pendant que la nouvelle apparaît
-	if _ghost != null and _cur_tex != null:
+	# fondu court : l'ancienne pose s'efface pendant que la nouvelle apparaît (pas pour les séquences image par image)
+	if _ghost != null and _cur_tex != null and not _sq_ok:
 		_ghost.texture = _cur_tex
 		_ghost.modulate.a = 0.85
 		_ghost_fade = 0.85
@@ -385,7 +518,9 @@ func _apply_tex(t: Texture2D) -> void:
 	_shadow.texture = t
 	_shadow.offset = Vector2(0, -float(t.get_height()) * 0.5)
 	# même échelle que la pose de repos : la taille du personnage ne change pas
-	height = float(t.get_height()) * _base_sc
+	if not _sq_ok:
+		height = float(t.get_height()) * _base_sc
+		_ph = height
 
 
 ## Entités posées (terrain, mécanismes, balises) : pas de respiration ni de touffes.
@@ -550,6 +685,7 @@ func _load_texture() -> void:
 	sprite.scale = Vector2(sc, sc)
 	_base_sc = sc
 	height = float(tex.get_height()) * sc
+	_ph = height
 	sprite.position = Vector2(0, -height * 0.5 + 6.0)
 	# Le shader de contour/flash peut échouer sur certains pilotes Android
 	# et rendre le Sprite2D entièrement invisible. Sur mobile, privilégier la
@@ -588,6 +724,8 @@ func _process(delta: float) -> void:
 		_kb = _kb.move_toward(Vector2.ZERO, delta * 70.0)
 	_stretch = move_toward(_stretch, 0.0, delta * 2.5)
 	_lean = lerpf(_lean, clampf(_move_dx, -1.0, 1.0) * _a("penche_marche") if _moving else 0.0, minf(1.0, delta * 10.0))
+	if _sq_act != "":
+		_sq_act_t += delta
 	if _act_tex != null:
 		_pose_t -= delta
 		if _pose_t <= 0.0:
@@ -603,7 +741,7 @@ func _process(delta: float) -> void:
 			else:
 				_idle_alt = null
 				_idle_wait = randf_range(4.0, 8.0)
-	if _has_tex and sprite != null and not _poses.is_empty():
+	if _has_tex and sprite != null and (not _poses.is_empty() or _sq_ok):
 		_apply_tex(_wanted_tex())
 	if _has_tex and sprite != null:
 		var still: bool = _is_static()
@@ -620,7 +758,7 @@ func _process(delta: float) -> void:
 		var etir: float = _stretch * _a("etirement_attaque")
 		var sx: float = sc * (1.0 + etir * 0.10 + squash * 0.6)
 		var sy: float = sc * (1.0 + breathe - etir * 0.07 - squash)
-		var base_pos := Vector2(randf_range(-1.0, 1.0) * _shake * 6.0, -height * 0.5 + 6.0 - bob - hop) + _kb
+		var base_pos := Vector2(randf_range(-1.0, 1.0) * _shake * 6.0, -_ph * 0.5 + 6.0 - bob - hop) + _kb
 		sprite.scale = Vector2(sx, sy)
 		sprite.position = base_pos
 		sprite.rotation = _tilt + (0.0 if still else sin(_t * 1.3 + _phase) * _a("balancement"))
@@ -727,9 +865,11 @@ func lunge(toward: Vector2, key: String = "") -> Tween:
 	play_pose("attack", 0.6, key)
 	var tw: Tween = create_tween()
 	tw.tween_callback(func() -> void: _stretch = 1.0)
-	tw.tween_property(self, "position", origin - dir * _a("recul_attaque"), 0.07)
-	tw.tween_property(self, "position", origin + dir * _a("elan_attaque"), 0.07).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tw.tween_property(self, "position", origin, 0.14)
+	# séquence 3D : l'élan culmine sur l'image d'impact de l'animation
+	var tk: float = maxf(impact_delay("attack"), 0.14)
+	tw.tween_property(self, "position", origin - dir * _a("recul_attaque"), tk * 0.5)
+	tw.tween_property(self, "position", origin + dir * _a("elan_attaque"), tk * 0.5).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(self, "position", origin, 0.14 if not _sq_ok else _sq_act_dur - tk + 0.04)
 	return tw
 
 
@@ -743,6 +883,8 @@ func cast_pose(key: String = "") -> Tween:
 
 
 func hit_react(strength: float = 1.0, from: Vector2 = Vector2.INF) -> void:
+	if _sq_ok and not dying:
+		_sq_start("hit", 0.4)
 	_flash = 1.0
 	_shake = 0.35 * strength
 	# recul et bascule à l'opposé de l'attaquant
