@@ -1,0 +1,3 @@
+V157|Les planches d'animation de Sylvain prennent trois fois moins de mémoire graphique (3,8 Mo au lieu de 11,8), sans changement visible.
+V157|Chaque image est rognée à sa partie utile et les images identiques ne sont stockées qu'une fois.
+V157|L'outil d'assemblage (tools/pack_hero_seq.py) produit ce format pour les prochains héros animés.

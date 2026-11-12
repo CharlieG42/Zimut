@@ -9,8 +9,8 @@ Premier héros : **Sylvain**. Les autres classes gardent leurs poses PNG.
 
 | Fichier | Rôle |
 |---|---|
-| `<classe>_seq_front.png`, `<classe>_seq_back.png` | planches 1536 × 960 : une ligne par animation (idle, walk, attack, cast, hit), une colonne par image, cellule 192 × 192 |
-| `<classe>_seq.txt` | JSON : durée, boucle, image clé (impact) et position du bout du bâton pour chaque image |
+| `<classe>_seq_front.png`, `<classe>_seq_back.png` | planches compactes (V157) : chaque image est rognée à sa partie visible, les images identiques ne sont stockées qu'une fois |
+| `<classe>_seq.txt` | JSON : durée, boucle, image clé (impact), position du bout du bâton, et pour chaque image son rectangle dans la planche + son décalage dans la cellule 192 × 192 |
 | `<classe>_anim.txt` | réglages existants ; on y met à 0 les mouvements procéduraux (respiration, rebond…) que l'animation 3D fait déjà |
 
 `EntityView` charge ces fichiers s'ils existent (sinon : poses PNG comme avant). Il expose :
@@ -34,8 +34,8 @@ sommets du côté du bâton (`STAFF_X`, `STAFF_Z_MAX` : au-dessus, ce sont des m
 d'autres seuils, ou des poids de peau corrigés dans Blender.
 
 ## Poids mémoire et limites
-- Deux planches de 1536 × 960 en RVBA non compressé ≈ 11,8 Mo de mémoire graphique par héros animé. À surveiller si les
-  dix classes passent en 3D (≈ 118 Mo) ; l'import en compression VRAM (ASTC/ETC2) diviserait cela par 4 à 6, à tester.
+- Planches compactes (V157) : ≈ 3,8 Mo de mémoire graphique par héros animé (11,8 Mo avec des cellules pleines), sans perte de qualité.
+  Dix héros ≈ 38 Mo. Pistes s'il faut descendre encore : ne charger la planche de dos qu'au premier besoin, ou la compression VRAM (avec perte, à juger sur téléphone).
 - Le sprite est cuit en 3/4 (tourné de 28° vers la droite) ; le jeu le retourne (`flip_h`) pour la gauche.
 - L'animation « mort » n'est pas cuite : la dissolution en lumière (V70) reste.
 - Rien n'a été testé sur téléphone.
