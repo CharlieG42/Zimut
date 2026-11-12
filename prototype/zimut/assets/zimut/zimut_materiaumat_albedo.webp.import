@@ -2,16 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://du3504o32ue87"
-path="res://.godot/imported/geomancien.png-f68b35a5ad4a9c1baa51055c2a7269a7.ctex"
+uid="uid://yr7hopu3d3pa"
+path="res://.godot/imported/zimut_materiaumat_albedo.webp-d8b11f17674f8b9aa9439a58064aea79.ctex"
 metadata={
 "vram_texture": false
+}
+generator_parameters={
+"md5": "72cb3e26bd8a14e6270276a936e8a59f"
 }
 
 [deps]
 
-source_file="res://assets/sprites/walk3d/geomancien.png"
-dest_files=["res://.godot/imported/geomancien.png-f68b35a5ad4a9c1baa51055c2a7269a7.ctex"]
+source_file="res://assets/zimut/zimut_materiaumat_albedo.webp"
+dest_files=["res://.godot/imported/zimut_materiaumat_albedo.webp-d8b11f17674f8b9aa9439a58064aea79.ctex"]
 
 [params]
 
@@ -23,7 +26,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

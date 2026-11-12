@@ -219,3 +219,26 @@ Nation, comme en 2D) ; un portail ne s'ouvre que lorsque tous les donjons de la 
 condition de niveau (`ProgressionManager.adventure_gate_open`) ; les sentiers forment un réseau qui ondule
 (`AdventureTerrain._trail_network`) ; les Cimes reçoivent de la neige sur le décor (paramètre global de
 shader `zimut_snow`). Chantiers suivants : `TODO.md`.
+
+## V153 — Zimut, personnage unique du joueur
+
+L'explorateur est le joueur lui-même : un seul modèle, **Zimut**, quelle que soit la classe du héros (les
+tenues KayKit par classe ne sont plus utilisées tant que `assets/zimut/zimut.glb` existe ; elles restent en
+repli, puis le héros procédural).
+
+- `assets/zimut/zimut.glb` : modèle skinné (rig Mixamo, 33 os) avec l'animation `Walk` (0,97 s, en place).
+  Produit par `tools/import_mixamo.gd` à partir du FBX : texture 2048 → 1024 (WebP), maillage 25 000 →
+  6 250 triangles (niveaux de détail de Godot, sans poids d'os : avec eux la simplification troue le modèle).
+  Les FBX bruts (5 à 17 Mo) ne sont pas versionnés.
+- `Adv3DZimut` (hérite de `Adv3DHeroRig`, même interface) : matériau toon (`TOON_LIGHT` + contour réglé
+  pour un modèle à l'échelle du centimètre), cadence = vitesse / 1,7 m/s (0,6× à 2,6×), course = marche
+  rapide penchée de 6° ; à l'arrêt le pas se termine puis se fige jambes jointes (phases 0 et 0,5 du cycle)
+  avec une respiration légère. `Adv3DHeroModel.make_player(classe)` renvoie toujours Zimut.
+- Carte Diorama 2D : `tools/bake_walk_sprites.gd` cuit `assets/sprites/walk3d/zimut.png` (8 directions ×
+  4 repos + 8 marche, cellule 128 × 160) ; `HeroView` l'utilise pour toutes les classes (les 10 planches par
+  classe sont supprimées). Réglage « Illustrés » inchangé.
+- Coût : ≈ 25 000 primitives par image pour le héros (passe principale, contour, ombre), contre ≈ 100 000
+  avec le maillage d'origine.
+- Tests : `tests/test_zimut_3d.gd`, `tests/test_sprites_marche_2d.gd`. Pas de mesure sur téléphone.
+- Pas encore d'animation de repos ni de course dédiées (une seule animation fournie) ; Gligli à venir.
+
