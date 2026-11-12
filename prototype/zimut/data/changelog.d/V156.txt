@@ -1,0 +1,3 @@
+V156|Tactique : les personnages se déplacent plus posément (0,24 s par case au lieu de 0,15 ; 0,19 au lieu de 0,11 sur les longs trajets).
+V156|La marche animée de Sylvain suit cette cadence : un cycle complet toutes les deux cases, en partant toujours du même pied.
+V156|Les héros aux poses dessinées alternent aussi leurs poses de marche au rythme du déplacement.

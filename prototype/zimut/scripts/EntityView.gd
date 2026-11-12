@@ -79,6 +79,8 @@ var _sq_act_t: float = 0.0
 var _sq_act_dur: float = 0.4
 var _sq_tip: Vector2 = Vector2(-1.0, -1.0)   # bout du bâton dans l'image affichée (pixels de la cellule)
 var _ph: float = 96.0              # hauteur de l'image affichée (sert à poser les pieds sur la case)
+var _walk_step: float = 0.16       # V156 : durée d'une case du déplacement en cours (cadence des pas)
+var _walk_t0: float = 0.0          # instant de départ du déplacement (la marche commence sur sa première image)
 const POSES: Array[String] = ["back", "walk", "attack", "cast"]
 ## V34 : poses vues de dos (3/4 arrière) : <sprite>_back_idle_2, _back_walk, _back_attack_3, _back_cast…
 ## (<sprite>_back reste le repos de dos). Rangées sous les clés "back_idle", "back_walk"…
@@ -357,8 +359,12 @@ func _seq_tex() -> Texture2D:
 	var an: String = "walk" if (_moving and _sq.has("walk")) else "idle"
 	var info2: Dictionary = _sq[an]
 	var fr2: Array = info2[view]
-	var step: float = float(info2["dur"]) / float(fr2.size())
-	var idx2: int = int(_t / step + _phase * 3.0) % fr2.size()
+	var idx2: int = 0
+	if an == "walk":
+		# V156 : un cycle de marche (deux pas) couvre deux cases, quelle que soit la vitesse du déplacement
+		idx2 = int((_t - _walk_t0) / (_walk_step * 2.0) * float(fr2.size())) % fr2.size()
+	else:
+		idx2 = int(_t / (float(info2["dur"]) / float(fr2.size())) + _phase * 3.0) % fr2.size()
 	_sq_tip = _sq_tip_of(info2, view, idx2)
 	return fr2[idx2]
 
@@ -490,7 +496,7 @@ func _wanted_tex() -> Texture2D:
 	# V34 : foulée sur toutes les poses de marche (walk, walk_2…), de face ou de dos, entre deux repos
 	var walk: Array = _pool("walk", back) if (not back or _poses.has("back_walk")) else []
 	if _moving and not walk.is_empty():
-		var step: int = int(_t / 0.16)
+		var step: int = int(_t / clampf(_walk_step, 0.14, 0.2))
 		if step % 2 == 1:
 			return rest
 		return walk[(step >> 1) % walk.size()]
@@ -839,7 +845,10 @@ func next_float_offset() -> float:
 
 func move_along(points: Array[Vector2], step_time: float = 0.16) -> Tween:
 	var tw: Tween = create_tween()
-	tw.tween_callback(func() -> void: _moving = true)
+	_walk_step = step_time
+	tw.tween_callback(func() -> void:
+		_moving = true
+		_walk_t0 = _t)
 	var prev: Vector2 = position
 	for p: Vector2 in points:
 		var dx: float = p.x - prev.x
