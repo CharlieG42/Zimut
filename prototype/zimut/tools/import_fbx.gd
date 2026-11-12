@@ -1,10 +1,10 @@
 extends SceneTree
-## Convertit un personnage Mixamo (.fbx, rig mixamorig_*) en .glb léger pour le jeu :
+## Convertit un personnage animé (.fbx exporté par Meshy, squelette humanoïde) en .glb léger pour le jeu :
 ## texture réduite (WebP avec perte), maillage simplifié (meshoptimizer, via les niveaux de détail de Godot),
 ## animation renommée. Les FBX bruts ne sont pas versionnés.
-##   godot --headless --path . -s tools/import_mixamo.gd -- <entrée.fbx> <sortie.glb> <nom_animation> [taille_texture=1024] [triangles_max=7000]
+##   godot --headless --path . -s tools/import_fbx.gd -- <entrée.fbx> <sortie.glb> <nom_animation> [taille_texture=1024] [triangles_max=7000]
 ## Pas d'écran nécessaire. Exemple (V153) :
-##   godot --headless --path . -s tools/import_mixamo.gd -- Walking.fbx assets/zimut/zimut.glb Walk 1024 7000
+##   godot --headless --path . -s tools/import_fbx.gd -- walking_meshy.fbx assets/zimut/zimut.glb Walk 1024 7000
 
 func _init() -> void:
 	var a: PackedStringArray = OS.get_cmdline_user_args()

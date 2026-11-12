@@ -1,0 +1,3 @@
+V154|Zimut utilise désormais uniquement le modèle 3D et l'animation de marche générés avec Meshy ; le premier modèle (animation Mixamo) est retiré du dépôt.
+V154|La planche de sprites de la carte Diorama est recuite à partir du modèle Meshy ; l'outil de conversion FBX devient `tools/import_fbx.gd`.
+V154|Aucun fichier Mixamo n'est plus versionné : les licences du dépôt public ne dépendent plus que de Meshy et des packs CC0.

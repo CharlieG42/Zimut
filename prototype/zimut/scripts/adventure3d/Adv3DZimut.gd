@@ -3,8 +3,8 @@ extends Adv3DHeroRig
 ## Adv3DZimut.gd — Zimut, le personnage du joueur dans le monde 3D (V153).
 ##
 ## Un seul modèle pour toutes les classes : l'explorateur est le joueur lui-même, pas un héros de
-## l'équipe. Modèle skinné (33 os, rig Mixamo) avec une seule animation, « Walk » (assets/zimut/zimut.glb,
-## produit par tools/import_mixamo.gd). La marche est accélérée avec la vitesse (la course n'est que la
+## l'équipe. Modèle skinné (44 os, export Meshy) avec une seule animation, « Walk » (assets/zimut/zimut.glb,
+## produit par tools/import_fbx.gd). La marche est accélérée avec la vitesse (la course n'est que la
 ## marche à cadence élevée, légèrement penchée en avant). À l'arrêt, le personnage termine son pas puis se
 ## fige dans la pose « jambes jointes », avec une respiration légère.
 ##
