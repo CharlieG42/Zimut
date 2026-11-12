@@ -38,6 +38,13 @@ func _init() -> void:
 				var k: float = float(tex_size) / float(longest)
 				img.resize(maxi(1, roundi(img.get_width() * k)), maxi(1, roundi(img.get_height() * k)), Image.INTERPOLATE_LANCZOS)
 			mat.albedo_texture = ImageTexture.create_from_image(img)
+			# le matériau toon du jeu n'utilise que la couleur : on n'exporte ni normales ni autres cartes
+			mat.normal_enabled = false
+			mat.normal_texture = null
+			mat.roughness_texture = null
+			mat.metallic_texture = null
+			mat.emission_texture = null
+			mat.ao_texture = null
 			print("texture ", img.get_width(), "x", img.get_height())
 	for mi2: Node in scene.find_children("*", "MeshInstance3D", true, false):
 		_simplify(mi2 as MeshInstance3D, max_tris)
@@ -76,9 +83,64 @@ func _simplify(mi: MeshInstance3D, max_tris: int) -> void:
 	if pick.is_empty():
 		print("simplification : aucun niveau sous ", max_tris, " triangles, maillage gardé (", best_n, ")")
 		return
-	arrays[Mesh.ARRAY_INDEX] = pick
+	arrays = _compact(arrays, pick)
 	var am := ArrayMesh.new()
 	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	am.surface_set_material(0, m.surface_get_material(0))
 	mi.mesh = am
-	print("maillage : ", best_n, " -> ", pick.size() / 3, " triangles")
+	print("maillage : ", best_n, " -> ", pick.size() / 3, " triangles, ", (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size(), " sommets")
+
+
+## Ne garde que les sommets utilisés par les triangles retenus (sinon le fichier garde tous les sommets d'origine).
+func _compact(arrays: Array, indices: PackedInt32Array) -> Array:
+	var remap := {}
+	var order := PackedInt32Array()
+	var new_idx := PackedInt32Array()
+	new_idx.resize(indices.size())
+	for i: int in range(indices.size()):
+		var v: int = indices[i]
+		if not remap.has(v):
+			remap[v] = order.size()
+			order.append(v)
+		new_idx[i] = remap[v]
+	var out: Array = []
+	out.resize(Mesh.ARRAY_MAX)
+	var n_old: int = (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+	for k: int in range(Mesh.ARRAY_MAX):
+		var src: Variant = arrays[k]
+		if k == Mesh.ARRAY_INDEX or src == null:
+			continue
+		match typeof(src):
+			TYPE_PACKED_VECTOR3_ARRAY:
+				var d := PackedVector3Array()
+				for v: int in order:
+					d.append(src[v])
+				out[k] = d
+			TYPE_PACKED_VECTOR2_ARRAY:
+				var d2 := PackedVector2Array()
+				for v: int in order:
+					d2.append(src[v])
+				out[k] = d2
+			TYPE_PACKED_COLOR_ARRAY:
+				var d3 := PackedColorArray()
+				for v: int in order:
+					d3.append(src[v])
+				out[k] = d3
+			TYPE_PACKED_FLOAT32_ARRAY:
+				var per: int = src.size() / n_old     # valeurs par sommet (tangentes : 4 ; poids : 4 ou 8)
+				var d4 := PackedFloat32Array()
+				for v: int in order:
+					for j: int in range(per):
+						d4.append(src[v * per + j])
+				out[k] = d4
+			TYPE_PACKED_INT32_ARRAY:
+				var per2: int = src.size() / n_old
+				var d5 := PackedInt32Array()
+				for v: int in order:
+					for j: int in range(per2):
+						d5.append(src[v * per2 + j])
+				out[k] = d5
+			_:
+				out[k] = src
+	out[Mesh.ARRAY_INDEX] = new_idx
+	return out
