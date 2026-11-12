@@ -1,0 +1,1 @@
+{"respiration": 0.0, "flottement": 0.0, "vitesse_repos": 2.2, "balancement": 0.0, "rebond_marche": 0.0, "ecrasement_marche": 0.0, "penche_marche": 0.0, "elan_attaque": 18.0, "recul_attaque": 4.0, "etirement_attaque": 0.0, "saut_sort": 0.0}

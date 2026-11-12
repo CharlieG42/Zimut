@@ -1,0 +1,3 @@
+V155|Tactique : Sylvain est maintenant animé image par image (repos, marche, attaque, sort, coup reçu), de face et de dos, à partir de son modèle 3D.
+V155|Les projectiles et les éclats de Sylvain partent du cristal de son bâton, au moment exact où le geste culmine.
+V155|Nouveaux outils pour animer les autres héros : cuisson 3D → planches de sprites (tools/bake_hero_seq.gd, tools/pack_hero_seq.py).
