@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://yr7hopu3d3pa"
-path="res://.godot/imported/zimut_materiaumat_albedo.webp-d8b11f17674f8b9aa9439a58064aea79.ctex"
+uid="uid://b41j03kabplmg"
+path="res://.godot/imported/zimut_Material_0_albedo.webp-5b8ab5832bcee8a55d81844eec10882d.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "72cb3e26bd8a14e6270276a936e8a59f"
+"md5": "dd435980e3c952ab1f350d79b005ccc9"
 }
 
 [deps]
 
-source_file="res://assets/zimut/zimut_materiaumat_albedo.webp"
-dest_files=["res://.godot/imported/zimut_materiaumat_albedo.webp-d8b11f17674f8b9aa9439a58064aea79.ctex"]
+source_file="res://assets/zimut/zimut_Material_0_albedo.webp"
+dest_files=["res://.godot/imported/zimut_Material_0_albedo.webp-5b8ab5832bcee8a55d81844eec10882d.ctex"]
 
 [params]
 

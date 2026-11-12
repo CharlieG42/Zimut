@@ -226,10 +226,11 @@ L'explorateur est le joueur lui-même : un seul modèle, **Zimut**, quelle que s
 tenues KayKit par classe ne sont plus utilisées tant que `assets/zimut/zimut.glb` existe ; elles restent en
 repli, puis le héros procédural).
 
-- `assets/zimut/zimut.glb` : modèle skinné (rig Mixamo, 33 os) avec l'animation `Walk` (0,97 s, en place).
-  Produit par `tools/import_mixamo.gd` à partir du FBX : texture 2048 → 1024 (WebP), maillage 25 000 →
-  6 250 triangles (niveaux de détail de Godot, sans poids d'os : avec eux la simplification troue le modèle).
-  Les FBX bruts (5 à 17 Mo) ne sont pas versionnés.
+- `assets/zimut/zimut.glb` : modèle skinné (44 os, modèle et animation générés avec Meshy ; les os portent le préfixe `mixamorig_`, simple convention de nommage du squelette humanoïde de l'export Meshy) avec l'animation `Walk`
+  (1,03 s, en place). Produit par `tools/import_fbx.gd` à partir du FBX : texture 2048 → 1024 (WebP,
+  couleur seule), maillage 186 000 → 5 800 triangles (niveaux de détail de Godot, sans poids d'os : avec eux la
+  simplification troue le modèle), sommets inutilisés retirés. Fichier final ≈ 0,65 Mo + 0,19 Mo de texture.
+  Les FBX bruts (5 à 17 Mo) ne sont pas versionnés. Un premier modèle (animation Mixamo) a été remplacé et retiré du dépôt : plus aucun fichier Mixamo n'est versionné.
 - `Adv3DZimut` (hérite de `Adv3DHeroRig`, même interface) : matériau toon (`TOON_LIGHT` + contour réglé
   pour un modèle à l'échelle du centimètre), cadence = vitesse / 1,7 m/s (0,6× à 2,6×), course = marche
   rapide penchée de 6° ; à l'arrêt le pas se termine puis se fige jambes jointes (phases 0 et 0,5 du cycle)
