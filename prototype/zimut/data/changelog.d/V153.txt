@@ -1,0 +1,3 @@
+V153|Zimut est maintenant le personnage du joueur dans les deux modes Aventure : même modèle 3D animé pour toutes les classes, avec une vraie animation de marche.
+V153|Monde 3D : Zimut marche à la cadence de sa vitesse, termine son pas à l'arrêt puis respire, et se penche en avant quand il court.
+V153|Carte Diorama 2D : Zimut est cuit en planche de sprites (8 directions, repos et marche), identique pour toutes les classes ; le réglage « Illustrés » garde les anciens portraits.

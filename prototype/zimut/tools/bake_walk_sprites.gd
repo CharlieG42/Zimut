@@ -1,7 +1,7 @@
 extends SceneTree
-## Cuit les héros KayKit (mode 3D) en planches de sprites pour la carte 2D d'aventure.
-##   xvfb-run -a -s "-screen 0 1280x720x24" godot --rendering-method gl_compatibility --path . -s tools/bake_walk_sprites.gd -- <dossier> [Classe ...]
-## Une planche par classe : 8 lignes (directions : bas, bas-droite, droite, haut-droite, haut,
+## Cuit Zimut (le personnage du joueur, modèle 3D animé du mode 3D) en planche de sprites pour la carte 2D d'aventure.
+##   xvfb-run -a -s "-screen 0 1280x720x24" godot --rendering-method gl_compatibility --path . -s tools/bake_walk_sprites.gd -- <dossier>
+## Une seule planche (zimut.png), la même pour toutes les classes (V153) : 8 lignes (directions : bas, bas-droite, droite, haut-droite, haut,
 ## haut-gauche, gauche, bas-gauche) × 12 colonnes (4 images de repos, puis 8 images de marche).
 ## Cellule 128 × 160 px, personnage ≈ 89 % de la hauteur, pieds à 5 % du bas.
 
@@ -18,9 +18,6 @@ func _init() -> void:
 func _run() -> void:
 	var args: PackedStringArray = OS.get_cmdline_user_args()
 	var out: String = args[0]
-	var classes: Array = ["Tank", "Assassin", "Chasseur", "Mage", "Sylvain", "Druide", "Heal", "Invocateur", "Géomancien", "Artificier"]
-	if args.size() > 1:
-		classes = Array(args.slice(1))
 	DirAccess.make_dir_recursive_absolute(out)
 	var vp := SubViewport.new()
 	vp.size = CELL * SS
@@ -50,33 +47,26 @@ func _run() -> void:
 	var target := Vector3(0, ORTHO_H * 0.5 - 0.10, 0)
 	cam.position = target + Vector3(0, sin(pitch) * dist, cos(pitch) * dist)
 	cam.look_at(target)
-	for classe: String in classes:
-		var rig: Adv3DKayKit = Adv3DKayKit.make(classe) as Adv3DKayKit
-		vp.add_child(rig)
-		for ch: Node in rig.get_children():
-			if ch is MeshInstance3D:
-				ch.visible = false         # ombre au sol : le 2D dessine la sienne
-		var sheet := Image.create(CELL.x * (IDLE_N + WALK_N), CELL.y * 8, false, Image.FORMAT_RGBA8)
-		var ap: AnimationPlayer = rig._player
-		for dir: int in range(8):
-			rig.rotation.y = float(dir) * PI / 4.0
-			for col: int in range(IDLE_N + WALK_N):
-				var anim: String = "Idle_A" if col < IDLE_N else "Walking_A"
-				var n: int = IDLE_N if col < IDLE_N else WALK_N
-				var i: int = col if col < IDLE_N else col - IDLE_N
-				var len: float = ap.get_animation(anim).length
-				ap.play(anim)
-				ap.seek(len * float(i) / float(n), true)
-				ap.pause()
-				await process_frame
-				await process_frame
-				await RenderingServer.frame_post_draw
-				var img: Image = vp.get_texture().get_image()
-				img.convert(Image.FORMAT_RGBA8)
-				img.resize(CELL.x, CELL.y, Image.INTERPOLATE_LANCZOS)
-				sheet.blit_rect(img, Rect2i(Vector2i.ZERO, CELL), Vector2i(col * CELL.x, dir * CELL.y))
-		sheet.save_png(out + "/%s.png" % EntityView.sprite_key(classe))
-		print("OK ", classe)
-		rig.queue_free()
-		await process_frame
+	var rig: Adv3DZimut = Adv3DZimut.make() as Adv3DZimut
+	vp.add_child(rig)
+	for ch: Node in rig.get_children():
+		if ch is MeshInstance3D:
+			ch.visible = false         # ombre au sol : le 2D dessine la sienne
+	var sheet := Image.create(CELL.x * (IDLE_N + WALK_N), CELL.y * 8, false, Image.FORMAT_RGBA8)
+	for dir: int in range(8):
+		rig.rotation.y = float(dir) * PI / 4.0
+		for col: int in range(IDLE_N + WALK_N):
+			if col < IDLE_N:
+				rig.pose_idle(float(col) / float(IDLE_N))
+			else:
+				rig.pose_walk(float(col - IDLE_N) / float(WALK_N))
+			await process_frame
+			await process_frame
+			await RenderingServer.frame_post_draw
+			var img: Image = vp.get_texture().get_image()
+			img.convert(Image.FORMAT_RGBA8)
+			img.resize(CELL.x, CELL.y, Image.INTERPOLATE_LANCZOS)
+			sheet.blit_rect(img, Rect2i(Vector2i.ZERO, CELL), Vector2i(col * CELL.x, dir * CELL.y))
+	sheet.save_png(out + "/zimut.png")
+	print("OK zimut")
 	quit()

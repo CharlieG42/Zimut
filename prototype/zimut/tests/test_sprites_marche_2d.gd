@@ -1,5 +1,5 @@
 extends SceneTree
-## V100 : héros de la carte 2D = modèles 3D cuits en planches de sprites (8 directions, repos + marche).
+## V100 / V153 : héros de la carte 2D = Zimut (modèle 3D) cuit en planche de sprites (8 directions, repos + marche), le même pour toutes les classes.
 var fails := 0
 func ck(c: bool, m: String) -> void:
 	print(("  ok  " if c else "  ÉCHEC  ") + m)
@@ -11,11 +11,12 @@ func _init() -> void:
 func _run() -> void:
 	var HV: Variant = load("res://scripts/AdventureMapUI.gd").HeroView
 	# 1. planches présentes et de bonne taille
+	var p: String = "res://assets/sprites/walk3d/zimut.png"
+	var ok: bool = ResourceLoader.exists(p)
+	var sz: Vector2i = (load(p) as Texture2D).get_size() if ok else Vector2i.ZERO
+	ck(ok and sz == Vector2i(1536, 1280), "planche Zimut : 12 colonnes × 8 directions (%s)" % str(sz))
 	for k: String in ["artificier", "assassin", "chasseur", "druide", "geomancien", "heal", "invocateur", "mage", "sylvain", "tank"]:
-		var p: String = "res://assets/sprites/walk3d/%s.png" % k
-		var ok: bool = ResourceLoader.exists(p)
-		var sz: Vector2i = (load(p) as Texture2D).get_size() if ok else Vector2i.ZERO
-		ck(ok and sz == Vector2i(1536, 1280), "planche %s : 12 colonnes × 8 directions (%s)" % [k, str(sz)])
+		ck(not ResourceLoader.exists("res://assets/sprites/walk3d/%s.png" % k), "plus de planche propre à la classe %s" % k)
 	# 2. direction : bas, droite, haut, gauche, diagonales
 	ck(HV.sheet_dir(Vector2(0, 1)) == 0, "direction bas = 0")
 	ck(HV.sheet_dir(Vector2(1, 1)) == 1, "direction bas-droite = 1")
@@ -35,11 +36,20 @@ func _run() -> void:
 	# 4. HeroView : planche chargée et dessin sans erreur
 	var gs: Node = root.get_node("GameSettings")
 	ck(bool(gs.get("adventure_walk_sprites")), "réglage actif par défaut")
+	var sheets: Dictionary = {}
+	for cls: String in ["mage", "tank", "chasseur", "sylvain", "artificier"]:
+		var hc: Node2D = HV.new()
+		hc.tex = load("res://assets/sprites/players/%s.png" % cls)
+		root.add_child(hc)
+		await process_frame
+		ck(hc.sheet != null, "classe %s : le héros charge une planche" % cls)
+		sheets[hc.sheet.resource_path] = true
+		hc.queue_free()
+	ck(sheets.size() == 1 and sheets.has(p), "toutes les classes partagent la planche de Zimut")
 	var hv: Node2D = HV.new()
 	hv.tex = load("res://assets/sprites/players/mage.png")
 	root.add_child(hv)
 	await process_frame
-	ck(hv.sheet != null, "le héros charge la planche du Mage")
 	hv.locomotion(Vector2(1, 0.2), true)
 	await process_frame
 	await process_frame

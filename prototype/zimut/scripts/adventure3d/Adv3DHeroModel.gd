@@ -254,8 +254,11 @@ static func _chest_accessory(st: SurfaceTool, r: RandomNumberGenerator) -> void:
 #  Joueur
 # ══════════════════════════════════════════════════════════════════════
 
-## V91 : héros du joueur — modèle KayKit animé si les assets sont présents, sinon héros procédural.
+## V91 : héros du joueur — Zimut (V153), à défaut modèle KayKit animé, à défaut héros procédural.
 static func make_player(classe: String = "") -> Node3D:
+	# V153 : Zimut, modèle unique du joueur — la classe du héros n'y change rien
+	if Adv3DZimut.available():
+		return Adv3DZimut.make()
 	if Adv3DKayKit.available():
 		return Adv3DKayKit.make(classe)
 	return make_hero(classe)

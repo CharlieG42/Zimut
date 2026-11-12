@@ -3988,13 +3988,14 @@ class FindNode extends Node2D:
 
 ## Héros : sprite de la classe de l'explorateur, ombre, anneau doré, petit rebond.
 class HeroView extends Node2D:
-	const WALK_SHEET_DIR := "res://assets/sprites/walk3d/"
+	## V153 : une seule planche pour toutes les classes — le personnage du joueur est Zimut (cuit par tools/bake_walk_sprites.gd).
+	const WALK_SHEET_PATH := "res://assets/sprites/walk3d/zimut.png"
 	const SHEET_IDLE := 4
 	const SHEET_WALK := 8
 	var tex: Texture2D = null
 	var sprite_height: float = 104.0
 	var forest_style: bool = false
-	## Planche « modèle 3D cuit » (8 directions × [4 repos + 8 marche]) ; null = illustrations seules.
+	## Planche « Zimut 3D cuit » (8 directions × [4 repos + 8 marche]) ; null = illustrations seules.
 	var sheet: Texture2D = null
 	var walk_poses: Array[Texture2D] = []
 	var back_tex: Texture2D = null
@@ -4024,9 +4025,8 @@ class HeroView extends Node2D:
 			var sprite_key: String = tex.resource_path.get_file().get_basename()
 			var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameSettings")
 			if gs == null or bool(gs.get("adventure_walk_sprites")):
-				var sheet_path: String = WALK_SHEET_DIR + sprite_key + ".png"
-				if ResourceLoader.exists(sheet_path):
-					sheet = load(sheet_path) as Texture2D
+				if ResourceLoader.exists(WALK_SHEET_PATH):
+					sheet = load(WALK_SHEET_PATH) as Texture2D
 			var pose_root: String = "res://assets/sprites/nations/heros/poses/"
 			var back_path: String = pose_root + sprite_key + "_back.png"
 			if ResourceLoader.exists(back_path):
