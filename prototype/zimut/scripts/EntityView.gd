@@ -69,7 +69,7 @@ var _cur_tex: Texture2D = null
 var _ghost: Sprite2D = null
 var _ghost_fade: float = 0.0
 ## V154 : séquences 3D cuites (tools/bake_hero_seq.gd + tools/pack_hero_seq.py) : <sprite>_seq.txt (JSON, décrit les
-## animations) et <sprite>_seq_front.png / _seq_back.png (une ligne par animation). Quand elles existent, elles
+## animations) et <sprite>_seq_front.png / _seq_back.png (planches compactes, V157). Quand elles existent, elles
 ## remplacent les poses PNG : repos, marche, attaque, sort et coup reçu sont de vraies animations image par image.
 var _sq_ok: bool = false
 var _sq: Dictionary = {}           # animation → {"front": [Texture2D], "back": [...], "dur", "loop", "key", "tips"}
@@ -315,16 +315,25 @@ func _load_seq(base: String) -> bool:
 			return false
 		sheets[view] = load(path)
 	var cell: int = int(meta["cell"])
+	var shared_by_view := {"front": {}, "back": {}}
 	for an: String in (meta["anims"] as Dictionary).keys():
 		var info: Dictionary = (meta["anims"] as Dictionary)[an]
 		var entry := {"dur": float(info["dur"]), "loop": bool(info["loop"]), "key": int(info["key"]), "tips": info["tips"]}
 		for view2: String in ["front", "back"]:
+			# V157 : planches compactes. Chaque image est rognée (x, y, l, h dans la planche) et replacée dans sa
+			# cellule par les marges de l'AtlasTexture (dx, dy) ; deux images identiques partagent la même texture.
 			var frames: Array = []
-			for i: int in range(int(info["n"])):
-				var at := AtlasTexture.new()
-				at.atlas = sheets[view2]
-				at.region = Rect2(i * cell, int(info["row"]) * cell, cell, cell)
-				frames.append(at)
+			var shared: Dictionary = shared_by_view[view2]
+			for r: Array in ((info["frames"] as Dictionary)[view2] as Array):
+				var rect := Rect2(float(r[0]), float(r[1]), float(r[2]), float(r[3]))
+				var key: String = "%d,%d" % [int(r[0]), int(r[1])]
+				if not shared.has(key):
+					var at := AtlasTexture.new()
+					at.atlas = sheets[view2]
+					at.region = rect
+					at.margin = Rect2(float(r[4]), float(r[5]), float(cell) - rect.size.x, float(cell) - rect.size.y)
+					shared[key] = at
+				frames.append(shared[key])
 			entry[view2] = frames
 		_sq[an] = entry
 	if not _sq.has("idle"):

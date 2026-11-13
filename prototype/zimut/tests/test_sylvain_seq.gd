@@ -1,5 +1,5 @@
 extends SceneTree
-## V154 : animations 3D de Sylvain cuites en séquences de sprites (repos, marche, attaque, sort, coup reçu), face et dos,
+## V155 : animations 3D de Sylvain cuites en séquences de sprites (repos, marche, attaque, sort, coup reçu), face et dos,
 ## lues par EntityView ; les autres classes gardent leurs poses PNG.
 ## Lancement : godot --headless --path . -s tests/test_sylvain_seq.gd
 var fails: int = 0
@@ -25,6 +25,20 @@ func _boot() -> void:
 			ok_n = false
 	check(ok_n, "5 animations, face et dos, avec le bon nombre d'images")
 	check(v._poses.is_empty(), "les anciennes poses PNG ne sont plus chargées")
+	# V157 : planches compactes, chaque image garde la taille de la cellule grâce aux marges
+	var ok_sz: bool = true
+	var px: int = 0
+	for an3: String in v._sq.keys():
+		for view3: String in ["front", "back"]:
+			for t3: AtlasTexture in v._sq[an3][view3]:
+				if t3.get_width() != v._sq_cell or t3.get_height() != v._sq_cell or t3.region.size.x > float(v._sq_cell):
+					ok_sz = false
+	for view4: String in ["front", "back"]:
+		var sh: Texture2D = (v._sq["idle"][view4][0] as AtlasTexture).atlas
+		px += sh.get_width() * sh.get_height()
+	check(ok_sz, "chaque image fait la taille de la cellule (rognée + marges)")
+	check(px * 4 < 5_000_000, "planches compactes : %.1f Mo de mémoire graphique (11,8 avant)" % (float(px) * 4.0 / 1e6))
+	check((v._sq["attack"]["front"] as Array)[0] == (v._sq["idle"]["front"] as Array)[0], "images identiques partagées (début de l'attaque = pose de repos)")
 	check(absf(v.height - 104.0) < 0.5 and v._ph > v.height, "taille d'affichage : personnage 104 px, cellule plus haute (%.0f / %.0f)" % [v.height, v._ph])
 	# bout du bâton : dans la cellule pour chaque image
 	var ok_tip: bool = true
@@ -46,7 +60,7 @@ func _boot() -> void:
 	for k: int in range(40):
 		v._t = float(k) * 0.07
 		seen[v._seq_tex()] = true
-	check(seen.size() >= 4, "le repos boucle sur plusieurs images (%d)" % seen.size())
+	check(seen.size() >= 3, "le repos boucle sur plusieurs images distinctes (%d)" % seen.size())
 	v._moving = true
 	var seen_w := {}
 	for k2: int in range(40):
