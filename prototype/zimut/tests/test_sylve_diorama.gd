@@ -127,7 +127,7 @@ func _boot() -> void:
 	await create_timer(0.3).timeout
 	var tabs: Node = opt.find_child("Tabs", true, false)
 	var pages: Node = opt.find_child("Pages", true, false)
-	check(tabs != null and tabs.get_child_count() == 4 and pages.get_child_count() == 4, "Options : 4 onglets / 4 pages")
+	check(tabs != null and tabs.get_child_count() == 5 and pages.get_child_count() == 5, "Options : 5 onglets / 5 pages (dont À propos)")
 	var one_visible := true
 	for i in range(4):
 		(tabs.get_child(i) as Button).pressed.emit()
