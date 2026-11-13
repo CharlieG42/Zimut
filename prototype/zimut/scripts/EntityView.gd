@@ -764,18 +764,27 @@ func _find_texture() -> Texture2D:
 ## Hauteur d'affichage selon le type : héros > ennemis, invocations plus petites,
 ## Troll/Dragonnet imposants, boss géant.
 func _target_height() -> float:
-	if bool(entity.get("boss", false)):
-		return 150.0
-	match String(entity.get("classe", "")):
+	return height_for(entity)
+
+
+## Hauteur d'un boss à l'écran (V359 : 150 → 195 px, +30 %, pour qu'il pèse davantage face aux héros de 104 px).
+const BOSS_HEIGHT := 195.0
+const BOSS_HEIGHT_BASE := 150.0
+
+
+static func height_for(ent: Dictionary) -> float:
+	if bool(ent.get("boss", false)):
+		return BOSS_HEIGHT
+	match String(ent.get("classe", "")):
 		"Troll":
 			return 118.0
 		"Dragonnet":
 			return 100.0
 		"Arbre":
 			return 150.0
-	if entity["entity_type"] == "Summon":
+	if ent.get("entity_type", "") == "Summon":
 		return 76.0
-	return 104.0 if entity["entity_type"] == "Player" else 92.0
+	return 104.0 if ent.get("entity_type", "") == "Player" else 92.0
 
 
 func _load_texture() -> void:
@@ -1097,7 +1106,8 @@ func _draw() -> void:
 	if bool(entity.get("boss", false)):
 		var pulse: float = 0.5 + 0.5 * sin(_t * 3.0)
 		draw_set_transform(Vector2(0, 5), 0.0, Vector2(1.0, 0.42))
-		draw_arc(Vector2.ZERO, 46.0 + pulse * 6.0, 0.0, TAU, 48, Color(1.0, 0.25, 0.1, 0.35 + 0.3 * pulse), 6.0, true)
+		var k: float = BOSS_HEIGHT / BOSS_HEIGHT_BASE      # l'aura suit la taille du boss
+		draw_arc(Vector2.ZERO, (46.0 + pulse * 6.0) * k, 0.0, TAU, 48, Color(1.0, 0.25, 0.1, 0.35 + 0.3 * pulse), 6.0 * k, true)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 	# Indicateur d'orientation (utile pour les attaques dans le dos)
