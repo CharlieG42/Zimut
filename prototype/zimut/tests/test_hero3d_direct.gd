@@ -119,5 +119,11 @@ func _boot() -> void:
 	gs.set("hero_3d_direct", false)
 	# HeroAnim est livré avec le jeu (scripts/), pas avec les outils
 	check(FileAccess.file_exists("res://scripts/HeroAnim.gd"), "HeroAnim dans scripts/ (exporté avec le jeu)")
+	# V164 : garde-fou du cadrage (sur téléphone, les héros étaient zoomés ×2 : taille de caméra ~1,3 au lieu de ~3)
+	check(not Hero3D.size_plausible(1.3), "cadrage : une caméra à 1,3 (zoom ×2) est rejetée")
+	check(not Hero3D.size_plausible(8.0), "cadrage : une caméra à 8 (modèle minuscule) est rejetée")
+	for sz: float in [2.72, 3.15, 3.17, 3.62, 3.74, 4.42]:
+		check(Hero3D.size_plausible(sz), "cadrage : %.2f (taille mesurée des 6 modèles) est acceptée" % sz)
+	check(Hero3D.size_plausible(Hero3D.expected_cam_size()), "cadrage : la taille de repli est elle-même plausible")
 	print("FIN : ", fails, " échec(s)")
 	quit(1 if fails > 0 else 0)

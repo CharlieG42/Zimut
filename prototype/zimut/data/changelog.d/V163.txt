@@ -2,3 +2,5 @@ V163|Prototype 3D : Tharok (boss de la Forêt), l'Ingénieur, le Chasseur, l'Inv
 V163|Tharok et l'Ingénieur attaquent avec leurs vraies animations (massue en tourbillon, marteau levé puis abattu) ; l'Invocateur lève son livre avant de lancer son sort.
 V163|Le Chasseur n'a pas encore de vrai tir à l'arc tendu : son attaque est un grand geste d'arc levé puis abaissé, en attendant une animation dédiée.
 V163|Tank : la hache est maintenant d'un seul bloc (le manche ne s'étire plus pendant les coups).
+V163|Correction du cadrage des personnages 3D sur téléphone : ils pouvaient apparaître zoomés (tête seule, corps coupé). Le cadrage se vérifie maintenant et retombe sur une valeur sûre si la mesure est aberrante.
+V163|Nouvel onglet « À propos » dans les Réglages : provenance des modèles 3D (Meshy) et des autres ressources.

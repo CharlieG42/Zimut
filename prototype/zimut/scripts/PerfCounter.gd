@@ -60,6 +60,8 @@ func _process(delta: float) -> void:
 	while _acc.size() > 240:
 		_acc.remove_at(0)
 	text = summary(_acc, _scene_max, _draw_max)
+	for k: String in Hero3D.diag.keys():      # V164 : cadrage des personnages 3D (aide au diagnostic sur téléphone)
+		text += "\n3D %s : %s" % [k, Hero3D.diag[k]]
 	_win += 0.5
 	if _win >= 4.0:
 		_win = 0.0

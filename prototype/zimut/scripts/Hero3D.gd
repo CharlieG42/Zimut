@@ -12,6 +12,8 @@ const CELL := 192
 const CHAR_FRAC := 0.74            # hauteur du personnage au repos dans la cellule (comme la cuisson)
 const FEET_ROW := 0.965            # ligne des pieds
 const HERO_H := 1.8
+const FRAME_MAX_PASSES := 8        # passes de cadrage au plus
+const FRAME_TOL := 0.04            # écart toléré (4 %) entre la hauteur mesurée et la hauteur voulue
 const OUTLINE_FRAC := 0.0113       # contour de 1,6 px dans la cellule, en fraction de la hauteur du personnage (comme la cuisson)
 ## Deux familles de modèles :
 ##  - « procédural » (Sylvain) : pose calculée à l'exécution par HeroAnim, bâton rigide, pointe du bâton ;
@@ -101,6 +103,9 @@ void fragment() {
 """
 
 signal framed
+
+## Diagnostic du dernier cadrage de chaque modèle (affiché sous le compteur d'images).
+static var diag: Dictionary = {}
 var _bone_cache := {}                      # le cadrage est calculé : la texture est utilisable
 
 var vp: SubViewport
@@ -115,6 +120,7 @@ var _sk: Skeleton3D
 var _mi: MeshInstance3D
 var _skin: Skin
 var _prof: Dictionary
+var _key: String = ""
 var _rest_q: Array = []
 var _rest_p: Array = []
 var _tip_local := Vector3.ZERO
@@ -150,6 +156,7 @@ func setup(classe: String) -> bool:
 	if not supported(classe):
 		return false
 	_prof = MODELS[classe]
+	_key = classe
 	vp = SubViewport.new()
 	vp.size = Vector2i(CELL, CELL)
 	vp.transparent_bg = true
@@ -306,23 +313,38 @@ func _frame() -> void:
 	if not is_inside_tree():
 		await tree_entered
 	_set_pose("idle", 0.0, false)
-	# plusieurs passes : large d'abord (taille réelle du modèle inconnue, il ne doit pas être coupé), puis affinée
+	# plusieurs passes : large d'abord (taille réelle du modèle inconnue, il ne doit pas être coupé), puis affinée jusqu'à
+	# ce que la mesure soit stable (V164 : une image rendue en retard ou d'une autre taille ne fausse plus le cadrage)
 	_cam.size = 8.0
 	_cam.position = Vector3(0, 1.0, 10)
+	var passes: int = 0
 	var vp_h: float = float(CELL)
-	for pass_i: int in range(3):
+	for pass_i: int in range(FRAME_MAX_PASSES):
 		await _render_wait()
 		var img: Image = vp.get_texture().get_image()
+		vp_h = float(img.get_height())      # la taille réelle de l'image fait foi, pas la constante CELL
 		var bb: Rect2i = _alpha_bbox(img)
 		if bb.size.y < 10:
 			push_warning("Hero3D : personnage introuvable dans l'image (cadrage)")
+			diag[_key] = "introuvable"
 			return
+		passes += 1
 		var wpp_old: float = _cam.size / vp_h
 		var feet_world: float = _cam.position.y + (0.5 * vp_h - float(bb.end.y)) * wpp_old
 		var f: float = (CHAR_FRAC * vp_h) / float(bb.size.y)
+		if pass_i >= 2 and absf(f - 1.0) < FRAME_TOL:
+			break      # stable : l'image mesurée correspond à la caméra et au cadrage voulu
 		_cam.size = _cam.size / f
 		var wpp: float = _cam.size / vp_h
 		_cam.position = Vector3(0, feet_world - (0.5 * vp_h - FEET_ROW * vp_h) * wpp, 10)
+	# garde-fou : le personnage est normalisé à HERO_H, la taille de caméra attendue en découle. Hors plage, la mesure est
+	# fausse (c'est ce qui coupait les héros sur téléphone) : on retombe sur le cadrage calculé.
+	var guarded: bool = false
+	if not size_plausible(_cam.size):
+		guarded = true
+		_cam.size = expected_cam_size()
+		_cam.position = Vector3(0, (FEET_ROW - 0.5) * _cam.size, 10)
+	diag[_key] = "cam %.2f img %d passes %d%s" % [_cam.size, int(vp_h), passes, " GARDE-FOU" if guarded else ""]
 	if tip_ok:
 		var hand: int = _bone(String(_prof["tip_bone"]))
 		var g: Transform3D = _sk.global_transform * _sk.get_bone_global_pose(hand)
@@ -330,6 +352,17 @@ func _frame() -> void:
 	ready_ok = true
 	_last_key = ""
 	framed.emit()
+
+
+## Taille de caméra attendue (hauteur visible en unités) pour un personnage de HERO_H occupant CHAR_FRAC de la cellule.
+static func expected_cam_size() -> float:
+	return HERO_H / CHAR_FRAC * 1.15
+
+
+## La taille mesurée est-elle crédible ? (les modèles testés vont de 1,1 à 1,8 fois HERO_H / CHAR_FRAC)
+static func size_plausible(size: float) -> bool:
+	var base: float = HERO_H / CHAR_FRAC
+	return size >= base * 0.85 and size <= base * 2.3
 
 
 func _render_wait() -> void:
