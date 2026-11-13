@@ -66,6 +66,12 @@ const RAVAGE_BATTLES := 3
 const THREAT_ETA := 3
 const THREAT_MIN_GAP := 5
 const THREAT_CHANCE := 0.35
+## V158 : force de base d'une offensive = OFFENSIVE_BASE + OFFENSIVE_PER_CITY × villes + batailles/OFFENSIVE_BATTLE_DIV
+## (terme « batailles » plafonné à OFFENSIVE_BATTLE_CAP : il ne doit plus dépasser toute défense possible).
+const OFFENSIVE_BASE := 6.0
+const OFFENSIVE_PER_CITY := 0.9
+const OFFENSIVE_BATTLE_DIV := 10.0
+const OFFENSIVE_BATTLE_CAP := 6.0
 const EVENT_MIN_GAP := 2
 const EVENT_CHANCE := 0.45
 const RES_KEYS: Array[String] = ["Bois", "Fer", "Cuir", "Magie", "Venin"]
@@ -897,13 +903,15 @@ static func _maybe_general_threat(data: Dictionary, conq: Dictionary, rng: Rando
 	if not threat(conq).is_empty():
 		return
 	var alive: Array = living_generals(conq)
-	if alive.is_empty() or rng.randf() > GENERAL_THREAT_CHANCE:
+	# V158 : mêmes règles que les offensives anonymes (≥ 3 villes, délai minimal entre deux offensives)
+	if alive.is_empty() or owned_count(conq) < 3 or int(conq.get("threat_cd", 0)) < THREAT_MIN_GAP \
+			or rng.randf() > GENERAL_THREAT_CHANCE:
 		return
-	var pool: Array = _target_pool(conq, routes, just_conquered, true)
+	var pool: Array = _target_pool(conq, routes, just_conquered, true, true)
 	if pool.is_empty():
 		return
 	var id: String = String(pool[rng.randi_range(0, pool.size() - 1)])
-	var power: int = roundi((8.0 + 2.0 * float(owned_count(conq)) + float(int(conq.get("battle_count", 0))) / 3.0) * rng.randf_range(0.95, 1.25)) + GENERAL_THREAT_BONUS
+	var power: int = roundi(offensive_base(conq) * rng.randf_range(0.95, 1.25)) + GENERAL_THREAT_BONUS
 	var gid: String = String(alive[rng.randi_range(0, alive.size() - 1)])
 	var gname: String = String(GENERALS.get(gid, {}).get("name", ""))
 	conq["threat"] = {"city": id, "power": power, "eta": THREAT_ETA, "general": gname}
@@ -1225,13 +1233,15 @@ static func _regen_garrisons(data: Dictionary, conq: Dictionary) -> void:
 
 ## Villes possédées pouvant être visées (ni la capitale, ni le Donjon, ni la
 ## ville fraîchement conquise), les villes frontalières comptant triple.
-static func _target_pool(conq: Dictionary, routes: Array, just_conquered: String, skip_ravaged: bool) -> Array:
+static func _target_pool(conq: Dictionary, routes: Array, just_conquered: String, skip_ravaged: bool, skip_ruined: bool = false) -> Array:
 	var owned: Array = conq.get("owned", [])
 	var pool: Array = []
 	for id: String in owned:
 		if id == "capitale" or id == "donjon_roi" or id == just_conquered:
 			continue
 		if skip_ravaged and is_ravaged(conq, id):
+			continue
+		if skip_ruined and is_ruined(conq, id):   # V158 : une ville tout juste reprise n'est pas re-visée
 			continue
 		var weight: int = 1
 		for pair: Array in routes:
@@ -1286,11 +1296,11 @@ static func _maybe_spawn_threat(data: Dictionary, conq: Dictionary, rng: RandomN
 	conq["threat_cd"] = int(conq.get("threat_cd", 0)) + 1
 	if owned_count(conq) < 3 or int(conq["threat_cd"]) < THREAT_MIN_GAP or rng.randf() > THREAT_CHANCE:
 		return
-	var pool: Array = _target_pool(conq, routes, just_conquered, true)
+	var pool: Array = _target_pool(conq, routes, just_conquered, true, true)
 	if pool.is_empty():
 		return
 	var id: String = String(pool[rng.randi_range(0, pool.size() - 1)])
-	var power: int = roundi((8.0 + 2.0 * float(owned_count(conq)) + float(int(conq.get("battle_count", 0))) / 3.0) * rng.randf_range(0.85, 1.15))
+	var power: int = roundi(offensive_base(conq) * rng.randf_range(0.85, 1.15))
 	conq["threat"] = {"city": id, "power": power, "eta": THREAT_ETA}
 	conq["threat_cd"] = 0
 	note(conq, "⚠ GRANDE OFFENSIVE ennemie (force %d) : %s sera attaquée dans %d batailles !" % [power, _name(conq, id), THREAT_ETA])
@@ -1672,8 +1682,22 @@ static func weakest_city(data: Dictionary, conq: Dictionary, exclude: Array = []
 			best = id
 	return best
 
+## Force de base d'une offensive avant le tirage aléatoire (V158).
+static func offensive_base(conq: Dictionary) -> float:
+	return OFFENSIVE_BASE + OFFENSIVE_PER_CITY * float(owned_count(conq)) \
+		+ minf(float(int(conq.get("battle_count", 0))) / OFFENSIVE_BATTLE_DIV, OFFENSIVE_BATTLE_CAP)
+
+## Défense qu'on peut atteindre en remplissant la garnison, et or que cela coûte (V158).
+static func reachable_defense(data: Dictionary, id: String) -> int:
+	var conq: Dictionary = data.get("conquest", {})
+	return defense(data, id) + (garrison_cap(conq, id) - troops(conq, id)) * 2
+
+static func reachable_cost(data: Dictionary, id: String) -> int:
+	var conq: Dictionary = data.get("conquest", {})
+	return (garrison_cap(conq, id) - troops(conq, id)) * TROOP_COST
+
 static func _offensive_power(conq: Dictionary, rng: RandomNumberGenerator) -> int:
-	return roundi((8.0 + 2.0 * float(owned_count(conq)) + float(int(conq.get("battle_count", 0))) / 3.0) * rng.randf_range(0.85, 1.15))
+	return roundi(offensive_base(conq) * rng.randf_range(0.85, 1.15))
 
 ## À l'ouverture de la carte : impôts accumulés et offensives manquées. Renvoie le bilan
 ## {days, taxes, results:[{city, outcome, power, defense}], pending:{city, power}} ({} s'il ne s'est rien passé).
