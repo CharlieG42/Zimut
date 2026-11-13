@@ -1,12 +1,13 @@
 extends SceneTree
 ## Cuit les animations d'un héros 3D (FBX avec squelette) en images brutes pour le mode Tactique.
 ##   xvfb-run -a -s "-screen 0 1280x720x24" godot --rendering-method gl_compatibility --path . \
-##       -s tools/bake_hero_seq.gd -- <hero.fbx> <dossier_sortie> [anim:image ...]
+##       -s tools/bake_hero_seq.gd -- <hero.fbx> <dossier_sortie> [profile=sylvain|geomancien] [anim:image ...]
 ## Écrit <dossier>/raw/<vue>/<anim>_<NN>.png (images brutes, fond transparent, 2× la taille finale),
 ## <dossier>/meta.json (cellule, images clés, position du bout du bâton dans chaque image).
 ## Le script tools/pack_hero_seq.py réduit, ajoute le contour et assemble les deux planches.
 ## Sans « anim:image » : tout est cuit. Avec : seulement ces images (réglage des poses).
-## Les animations viennent de tools/hero_anim.gd (os nommés comme dans le modèle de Sylvain).
+## Les animations viennent de tools/hero_anim.gd (os nommés comme dans le modèle de Sylvain ; les noms du Géomancien,
+## « torse », « avantbras »…, sont reconnus par _bone_idx). Le « profil » règle la zone du bâton (et de l'orbe) du modèle.
 
 const HeroAnimS := preload("res://tools/hero_anim.gd")
 const CELL := 192                 # cellule finale (carrée)
@@ -15,14 +16,32 @@ const CHAR_FRAC := 0.74           # hauteur du personnage au repos dans la cellu
 const FEET_ROW := 0.965           # ligne des pieds dans la cellule
 const VIEWS := ["front", "back"]  # vue 3/4 de face / 3/4 de dos (la rotation vient de HeroAnim)
 const TIP_BONE := "main.r"        # la main qui tient le bâton
-const STAFF_X := -0.0035          # espace du maillage de Sylvain : le bâton est à gauche de cette abscisse…
-const STAFF_Z_MAX := 0.0045       # …et sous cette hauteur (au-dessus, ce sont des mèches de cheveux)
+## Profils (espace du maillage) : le bâton est à gauche de staff_x et sous staff_z_max (Sylvain : au-dessus, ce sont des
+## mèches de cheveux). Le Géomancien porte aussi une orbe dans la main gauche : sommets à droite de orb_x et au-dessus de
+## orb_z_min, rendus rigides (100 % main gauche).
+## « base » : rotations (degrés, repère de l'os) ajoutées à la pose de repos AVANT l'animation, pour les modèles livrés en
+## pose en T (le Géomancien : bras écartés) ; « staff_idle » : direction du bâton quand l'animation n'en impose pas.
+const PROFILES := {
+	"sylvain": {"staff_x": -0.0035, "staff_z_max": 0.0045, "orb_x": 1.0, "orb_z_min": 1.0, "base": {}, "staff_idle": Vector3.ZERO},
+	"geomancien": {"staff_x": -0.0071, "staff_z_max": 1.0, "orb_x": 0.0053, "orb_z_min": 0.0007,
+		"base": {"bras.r": Vector3(0, 0, 38), "bras.l": Vector3(0, 0, -68), "avantbras.l": Vector3(62, 0, 0), "avantbras.r": Vector3(55, 0, 0)},
+		"staff_idle": Vector3(-0.08, 1.0, 0.02), "gain": 0.78},
+}
+const ALIAS := {"torax": "torse", "avantBras.l": "avantbras.l", "avantBras.r": "avantbras.r"}
+var STAFF_X: float = -0.0035
+var STAFF_Z_MAX: float = 0.0045
+var ORB_X: float = 1.0
+var ORB_Z_MIN: float = 1.0
+var _gain: float = 1.0
+var _base: Dictionary = {}
+var _staff_idle := Vector3.ZERO
 const SHADER := """
 shader_type spatial;
 render_mode cull_back, specular_disabled;
 uniform sampler2D albedo_tex : source_color, filter_linear_mipmap, repeat_enable, hint_default_white;
+uniform float gain = 1.0;
 void fragment() {
-	vec3 c = texture(albedo_tex, UV).rgb;
+	vec3 c = texture(albedo_tex, UV).rgb * gain;
 	ALBEDO = c;
 	EMISSION = c * 0.16;
 	ROUGHNESS = 0.9;
@@ -57,8 +76,33 @@ func _run() -> void:
 	var fbx: String = args[0]
 	var out: String = args[1]
 	var only: Array = []
+	var profile: String = "sylvain"
 	for k: int in range(2, args.size()):
-		only.append(args[k])
+		if args[k].begins_with("profile="):
+			profile = args[k].substr(8)
+		else:
+			only.append(args[k])
+	var pr: Dictionary = PROFILES[profile]
+	STAFF_X = float(pr["staff_x"])
+	STAFF_Z_MAX = float(pr["staff_z_max"])
+	ORB_X = float(pr["orb_x"])
+	ORB_Z_MIN = float(pr["orb_z_min"])
+	_base = pr["base"]
+	_staff_idle = pr["staff_idle"]
+	_gain = float(pr.get("gain", 1.0))
+	var dbg: String = OS.get_environment("HERO_BASE_DEBUG")   # réglage des poses : JSON {"base": {...}, "staff_idle": [x,y,z]}
+	if dbg != "":
+		var j: Dictionary = JSON.parse_string(dbg)
+		if j.has("base"):
+			_base = {}
+			for k3: String in (j["base"] as Dictionary).keys():
+				var a3: Array = j["base"][k3]
+				_base[k3] = Vector3(a3[0], a3[1], a3[2])
+		if j.has("staff_idle"):
+			var a4: Array = j["staff_idle"]
+			_staff_idle = Vector3(a4[0], a4[1], a4[2])
+		if j.has("gain"):
+			_gain = float(j["gain"])
 	DirAccess.make_dir_recursive_absolute(out + "/raw/front")
 	DirAccess.make_dir_recursive_absolute(out + "/raw/back")
 	_vp = SubViewport.new()
@@ -160,6 +204,7 @@ func _load_model(path: String) -> bool:
 	var mat := ShaderMaterial.new()
 	mat.shader = sh
 	mat.set_shader_parameter("albedo_tex", tex)
+	mat.set_shader_parameter("gain", _gain)
 	mi.set_surface_override_material(0, mat)
 	for i: int in range(_sk.get_bone_count()):
 		_rest_q.append(_sk.get_bone_rest(i).basis.get_rotation_quaternion())
@@ -192,6 +237,24 @@ func _rig_staff(mi: MeshInstance3D) -> void:
 	var bones: PackedInt32Array = arr[Mesh.ARRAY_BONES]
 	var weights: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
 	var per: int = bones.size() / verts.size()
+	if per > 4:
+		# Godot en compatibilité ne gère que 4 influences : on garde les 4 plus fortes, renormalisées
+		var b4 := PackedInt32Array()
+		var w4 := PackedFloat32Array()
+		b4.resize(verts.size() * 4)
+		w4.resize(verts.size() * 4)
+		for v: int in range(verts.size()):
+			var order: Array = range(per)
+			order.sort_custom(func(a: int, b: int) -> bool: return weights[v * per + a] > weights[v * per + b])
+			var tot: float = 0.0
+			for k: int in range(4):
+				tot += weights[v * per + int(order[k])]
+			for k: int in range(4):
+				b4[v * 4 + k] = bones[v * per + int(order[k])]
+				w4[v * 4 + k] = weights[v * per + int(order[k])] / maxf(tot, 0.0001)
+		bones = b4
+		weights = w4
+		per = 4
 	var hand: int = _sk.find_bone(TIP_BONE)
 	var hand_bind: int = -1
 	for b: int in range(_skin.get_bind_count()):
@@ -213,6 +276,20 @@ func _rig_staff(mi: MeshInstance3D) -> void:
 	if best < 0:
 		push_warning("bâton introuvable (STAFF_X)")
 		return
+	# orbe tenue dans la main gauche (Géomancien) : rigide aussi
+	var hand_l: int = _sk.find_bone("main.l")
+	var hl_bind: int = -1
+	for b2: int in range(_skin.get_bind_count()):
+		if _bind_bone(b2) == hand_l:
+			hl_bind = b2
+	var orb_n: int = 0
+	if hl_bind >= 0:
+		for v2: int in range(verts.size()):
+			if verts[v2].x > ORB_X and verts[v2].z > ORB_Z_MIN:
+				for k2: int in range(per):
+					bones[v2 * per + k2] = hl_bind if k2 == 0 else 0
+					weights[v2 * per + k2] = 1.0 if k2 == 0 else 0.0
+				orb_n += 1
 	arr[Mesh.ARRAY_BONES] = bones
 	arr[Mesh.ARRAY_WEIGHTS] = weights
 	# maillage du seul bâton (triangles dont les 3 sommets sont du côté du bâton) : sert à mesurer son bout
@@ -231,7 +308,17 @@ func _rig_staff(mi: MeshInstance3D) -> void:
 	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 	am.surface_set_material(0, mi.mesh.surface_get_material(0))
 	mi.mesh = am
-	print("bâton rigidifié : ", fixed, " sommets")
+	print("bâton rigidifié : ", fixed, " sommets, orbe : ", orb_n)
+
+
+## Indice d'un os par son nom, en acceptant les variantes du Géomancien (« torse », « avantbras »).
+func _bone_idx(name: String) -> int:
+	var i: int = _sk.find_bone(name)
+	if i < 0 and ALIAS.has(name):
+		i = _sk.find_bone(String(ALIAS[name]))
+	if i < 0:
+		i = _sk.find_bone(name.to_lower())
+	return i
 
 
 func _is_staff(p: Vector3) -> bool:
@@ -341,18 +428,29 @@ func _set_pose(an: String, ph: float, view: String) -> void:
 		_sk.set_bone_pose_position(i, _rest_p[i])
 	var p: Dictionary = HeroAnimS.pose(an, ph)
 	var bones: Dictionary = p["bones"]
+	# pose de base du profil (bras baissés, avant-bras plié…), puis l'animation par-dessus
+	for bb: String in _base.keys():
+		var ib: int = _bone_idx(bb)
+		if ib >= 0:
+			var eb: Vector3 = (_base[bb] as Vector3) * (PI / 180.0)
+			_sk.set_bone_pose_rotation(ib, _rest_q[ib] * Quaternion.from_euler(eb))
 	for bn: String in bones.keys():
-		var i2: int = _sk.find_bone(bn)
+		var i2: int = _bone_idx(bn)
 		if i2 < 0:
 			push_warning("os inconnu : " + bn)
 			continue
 		var e: Vector3 = (bones[bn] as Vector3) * (PI / 180.0)
-		_sk.set_bone_pose_rotation(i2, _rest_q[i2] * Quaternion.from_euler(e))
+		var bq := Quaternion.IDENTITY
+		if _base.has(bn.replace("avantBras", "avantbras")):
+			bq = Quaternion.from_euler((_base[bn.replace("avantBras", "avantbras")] as Vector3) * (PI / 180.0))
+		_sk.set_bone_pose_rotation(i2, _rest_q[i2] * bq * Quaternion.from_euler(e))
 	_holder.position = Vector3(float(p["dx"]) * _hero_h, float(p["dy"]) * _hero_h, 0)
 	var yaw: float = float(HeroAnimS.ANIMS[an]["yaw"]) + float(p["yaw"])
 	_holder.rotation_degrees = Vector3(float(p["pitch"]), yaw if view == "front" else 180.0 - yaw, 0)
 	if p.has("staff") and _tip_ok:
 		_aim_staff(p["staff"] as Vector3, float(p["staff_w"]))
+	elif _staff_idle != Vector3.ZERO and _tip_ok:
+		_aim_staff(_staff_idle, 1.0)   # bras baissés : le bâton reste debout dans la main
 
 
 func _render() -> void:
