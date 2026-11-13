@@ -13,10 +13,35 @@ const CHAR_FRAC := 0.74            # hauteur du personnage au repos dans la cell
 const FEET_ROW := 0.965            # ligne des pieds
 const HERO_H := 1.8
 const OUTLINE_FRAC := 0.0113       # contour de 1,6 px dans la cellule, en fraction de la hauteur du personnage (comme la cuisson)
+## Deux familles de modèles :
+##  - « procédural » (Sylvain) : pose calculée à l'exécution par HeroAnim, bâton rigide, pointe du bâton ;
+##  - « clips » (modèles Meshy rigifiés, V163) : animations intégrées au .glb (AnimationPlayer). Chaque action du jeu
+##    (idle, walk, attack, cast, hit) renvoie à un morceau de clip [t0, t1] (secondes) joué sur la durée [dur] du jeu ;
+##    « key » = instant d'impact (fraction de l'action). Sans clip pour une action : pose tenue + mouvement du corps (« motion »).
 const MODELS := {
 	"Sylvain": {"path": "res://assets/heroes3d/sylvain.glb", "tip_bone": "main.r",
 		"staff_x": -0.0035, "staff_z_max": 0.0045, "gain": 1.0},
+	"Tharok": {"path": "res://assets/heroes3d/tharok.glb", "root_bone": "spine", "gain": 1.0,
+		"clips": {
+			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walking", "t0": 0.0, "t1": 1.0333, "dur": 1.0, "loop": true, "key": 0.0},
+			"attack": {"clip": "Axe_Spin_Attack", "t0": 0.2, "t1": 1.8, "dur": 1.0, "loop": false, "key": 0.5},
+			"cast":   {"clip": "Double_Combo_Attack", "t0": 0.1, "t1": 1.5, "dur": 1.0, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
+		}},
+	"Ingénieur": {"path": "res://assets/heroes3d/ingenieur.glb", "root_bone": "spine", "gain": 1.0,
+		"clips": {
+			"idle":   {"clip": "Stand_and_Drink", "t0": 0.0, "t1": 8.8667, "dur": 8.8667, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Stand_and_Drink", "t0": 0.4, "t1": 0.4, "dur": 0.6, "loop": true, "key": 0.0, "motion": "walk"},
+			"attack": {"clip": "Stand_and_Drink", "t0": 0.4, "t1": 0.4, "dur": 0.7, "loop": false, "key": 0.45, "motion": "attack"},
+			"cast":   {"clip": "Stand_and_Drink", "t0": 0.4, "t1": 0.4, "dur": 0.8, "loop": false, "key": 0.5, "motion": "cast"},
+			"hit":    {"clip": "Stand_and_Drink", "t0": 0.4, "t1": 0.4, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
+		}},
 }
+## Classe du joueur (nom interne) ou nom de boss -> modèle.
+const CLASS_MODEL := {"Sylvain": "Sylvain", "Artificier": "Ingénieur"}
+const BOSS_MODEL := {"Gobelin Roi": "Tharok", "Tharok le Végétal": "Tharok"}
+const CLIP_FRAMES := 24             # nombre d'images fictives d'une action (EntityView raisonne en images pour les temps d'impact)
 const SHADER := """
 shader_type spatial;
 render_mode cull_back, specular_disabled;
@@ -68,10 +93,28 @@ var _tip_local := Vector3.ZERO
 var _rest_dir := Vector3.UP
 var _last_key: String = ""
 var _cell_px: float = float(CELL)
+var _ap: AnimationPlayer = null
+var _clips: Dictionary = {}
 
 
 static func supported(classe: String) -> bool:
 	return MODELS.has(classe) and ResourceLoader.exists(String((MODELS[classe] as Dictionary)["path"]))
+
+
+## Modèle 3D d'une entité ("" si aucun) : boss nommé, sinon classe de héros.
+static func model_key(ent: Dictionary) -> String:
+	var classe: String = String(ent.get("classe", ""))
+	var key: String = ""
+	if bool(ent.get("boss", false)):
+		key = String(BOSS_MODEL.get(classe, ""))
+	elif String(ent.get("team", "")) == "player":
+		key = String(CLASS_MODEL.get(classe, ""))
+	return key if supported(key) else ""
+
+
+## Modèle à clips (sans planches cuites pour fournir les durées) ?
+static func is_clip_model(key: String) -> bool:
+	return MODELS.has(key) and (MODELS[key] as Dictionary).has("clips")
 
 
 ## Charge le modèle et prépare le rendu. Asynchrone (quelques images pour mesurer le cadrage) : attendre [signal framed].
@@ -160,10 +203,19 @@ func _load_model(path: String) -> bool:
 		hi = hi.max(p)
 	var s: float = HERO_H / maxf(hi.y - lo.y, 0.0001)
 	_model.scale = Vector3.ONE * s
-	var bas: int = _bone("bassin")
+	var bas: int = _bone(String(_prof.get("root_bone", "bassin")))
 	var bx: float = (_sk.global_transform * _sk.get_bone_global_pose(bas)).origin.x
 	_model.position = Vector3(-bx * s, -lo.y * s, 0)
-	_rig_staff()
+	if _prof.has("clips"):
+		_clips = _prof["clips"]
+		var aps: Array = n.find_children("*", "AnimationPlayer", true, false)
+		if aps.is_empty():
+			push_warning("Hero3D : aucune animation dans " + path)
+			return false
+		_ap = aps[0] as AnimationPlayer
+		_ap.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	else:
+		_rig_staff()
 	_mi.set_surface_override_material(0, mat)
 	return true
 
@@ -243,9 +295,10 @@ func _frame() -> void:
 		_cam.size = _cam.size / f
 		var wpp: float = _cam.size / vp_h
 		_cam.position = Vector3(0, feet_world - (0.5 * vp_h - FEET_ROW * vp_h) * wpp, 10)
-	var hand: int = _bone(String(_prof["tip_bone"]))
-	var g: Transform3D = _sk.global_transform * _sk.get_bone_global_pose(hand)
-	_rest_dir = (g.basis * _tip_local).normalized()
+	if tip_ok:
+		var hand: int = _bone(String(_prof["tip_bone"]))
+		var g: Transform3D = _sk.global_transform * _sk.get_bone_global_pose(hand)
+		_rest_dir = (g.basis * _tip_local).normalized()
 	ready_ok = true
 	_last_key = ""
 	framed.emit()
@@ -329,7 +382,40 @@ func _bone(name: String) -> int:
 	return found
 
 
+## Pose d'un modèle à clips : temps dans le clip de l'action, puis éventuel mouvement du corps (actions sans clip propre).
+func _set_pose_clip(anim: String, ph: float, back: bool) -> void:
+	var c: Dictionary = _clips.get(anim, _clips["idle"])
+	var name: String = String(c["clip"])
+	if _ap.has_animation(name):
+		var len: float = _ap.get_animation(name).length
+		var t: float = clampf(lerpf(float(c["t0"]), float(c["t1"]), clampf(ph, 0.0, 1.0)), 0.0, len)
+		if _ap.current_animation != name:
+			_ap.play(name)
+		_ap.seek(t, true)
+		_ap.pause()
+		_ap.advance(0.0)
+	var dy: float = 0.0
+	var pitch: float = 0.0
+	var s1: float = sin(clampf(ph, 0.0, 1.0) * PI)
+	match String(c.get("motion", "")):
+		"walk":
+			dy = 0.025 * absf(sin(ph * TAU * 2.0))
+		"attack":
+			pitch = 14.0 * s1
+			dy = 0.03 * s1
+		"cast":
+			dy = 0.07 * s1
+			pitch = -6.0 * s1
+		"hit":
+			pitch = -12.0 * s1
+	_holder.position = Vector3(0, dy * HERO_H, 0)
+	_holder.rotation_degrees = Vector3(pitch, 180.0 if back else 0.0, 0)
+
+
 func _set_pose(anim: String, ph: float, back: bool) -> void:
+	if _ap != null:
+		_set_pose_clip(anim, ph, back)
+		return
 	for i: int in range(_sk.get_bone_count()):
 		_sk.set_bone_pose_rotation(i, _rest_q[i])
 		_sk.set_bone_pose_position(i, _rest_p[i])

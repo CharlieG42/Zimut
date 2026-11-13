@@ -267,6 +267,7 @@ func _load_poses() -> void:
 		if not blist.is_empty():
 			_poses["back_" + pz] = blist
 	_idle_wait = randf_range(3.0, 7.0)
+	_try_clip_model()
 
 
 ## <stem>.png puis <stem>_2.png … <stem>_9.png (sans le premier si skip_first : repos de base).
@@ -365,17 +366,58 @@ func _try_hero_3d() -> void:
 	var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameSettings")
 	if gs == null or not bool(gs.get("hero_3d_direct")):
 		return
-	var classe: String = String(entity.get("classe", ""))
-	if not Hero3D.supported(classe):
+	var key: String = Hero3D.model_key(entity)
+	if key == "" or Hero3D.is_clip_model(key):
 		return
 	if not is_inside_tree():
 		await tree_entered     # le squelette 3D a besoin de transformations globales
 	var h := Hero3D.new()
 	add_child(h)
-	if not h.setup(classe):
+	if not h.setup(key):
 		h.queue_free()
 		return
 	_h3d = h
+
+
+## V163 : personnages à animations intégrées (Tharok, Ingénieur) : pas de planches cuites, donc ni durées ni images clés à
+## lire dans un _seq.txt. Le modèle 3D les fournit (Hero3D.MODELS[..]["clips"]) : on fabrique les mêmes tables que _load_seq,
+## dès que le rendu 3D est prêt. D'ici là (ou en cas d'échec), l'ancien sprite 2D reste affiché.
+func _try_clip_model() -> void:
+	var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameSettings")
+	if gs == null or not bool(gs.get("hero_3d_direct")):
+		return
+	var key: String = Hero3D.model_key(entity)
+	if key == "" or not Hero3D.is_clip_model(key):
+		return
+	if not is_inside_tree():
+		await tree_entered
+	var h := Hero3D.new()
+	add_child(h)
+	if not h.setup(key):
+		h.queue_free()
+		return
+	await h.framed
+	if not is_instance_valid(self) or not h.ready_ok:
+		return
+	_h3d = h
+	var n: int = Hero3D.CLIP_FRAMES
+	var clips: Dictionary = (Hero3D.MODELS[key] as Dictionary)["clips"]
+	for an: String in clips.keys():
+		var m: Dictionary = clips[an]
+		var fr: Array = []
+		fr.resize(n)
+		fr.fill(h.texture())
+		_sq[an] = {"dur": float(m["dur"]), "loop": bool(m["loop"]), "key": roundi(float(m["key"]) * float(n)),
+			"tips": {}, "front": fr, "back": fr}
+	_sq_ok = true
+	_sq_cell = Hero3D.CELL
+	var target_h: float = _target_height()
+	var sc: float = target_h / (float(Hero3D.CELL) * Hero3D.CHAR_FRAC)
+	_base_sc = sc
+	sprite.scale = Vector2(sc, sc)
+	height = target_h
+	_ph = float(Hero3D.CELL) * sc
+	sprite.position = Vector2(0, -_ph * 0.5 + 6.0)
 
 
 ## Texture 3D en direct : mêmes règles de temps que les planches (action en cours, marche, repos), mais avec une phase continue.

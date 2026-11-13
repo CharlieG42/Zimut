@@ -14,6 +14,11 @@ func _view(classe: String) -> EntityView:
 	root.add_child(v)
 	v.setup({"uid": 5, "classe": classe, "team": "player", "entity_type": "Player", "current_pv": 10, "max_pv": 10, "x": 2, "y": 3})
 	return v
+func _view_ent(e: Dictionary) -> EntityView:
+	var v := EntityView.new()
+	root.add_child(v)
+	v.setup(e)
+	return v
 func _boot() -> void:
 	await process_frame
 	var gs: Node = root.get_node("GameSettings")
@@ -46,6 +51,46 @@ func _boot() -> void:
 	var v2: EntityView = _view("Géomancien")
 	await process_frame
 	check(v2._h3d == null and v2._sq_ok, "Géomancien : toujours des sprites cuits")
+	gs.set("hero_3d_direct", false)
+	# V163 : modèles à animations intégrées (Tharok = boss de la Forêt, Ingénieur = classe interne « Artificier »)
+	check(Hero3D.model_key({"classe": "Gobelin Roi", "boss": true, "team": "enemy"}) == "Tharok", "boss de la Forêt -> modèle Tharok")
+	check(Hero3D.model_key({"classe": "Tharok le Végétal", "boss": true, "team": "enemy"}) == "Tharok", "général Tharok -> modèle Tharok")
+	check(Hero3D.model_key({"classe": "Gobelin Roi", "boss": false, "team": "enemy"}) == "", "un Gobelin Roi non-boss n'a pas de modèle 3D")
+	check(Hero3D.model_key({"classe": "Artificier", "team": "player"}) == "Ingénieur", "classe Artificier -> modèle Ingénieur")
+	check(Hero3D.model_key({"classe": "Artificier", "team": "enemy"}) == "", "un ennemi ne prend pas le modèle d'un héros")
+	for k: String in ["Tharok", "Ingénieur"]:
+		var packed: PackedScene = load(String(Hero3D.MODELS[k]["path"])) as PackedScene
+		var inst: Node = packed.instantiate()
+		var aps: Array = inst.find_children("*", "AnimationPlayer", true, false)
+		check(not aps.is_empty(), k + " : animations dans le .glb")
+		var clips: Dictionary = Hero3D.MODELS[k]["clips"]
+		var clips_ok: bool = not aps.is_empty()
+		for an: String in ["idle", "walk", "attack", "cast", "hit"]:
+			if not clips.has(an):
+				clips_ok = false
+				print("   action sans clip : ", k, " ", an)
+				continue
+			var c: Dictionary = clips[an]
+			if not aps.is_empty():
+				var ap: AnimationPlayer = aps[0] as AnimationPlayer
+				if not ap.has_animation(String(c["clip"])):
+					clips_ok = false
+					print("   clip introuvable : ", c["clip"])
+				elif float(c["t1"]) > ap.get_animation(String(c["clip"])).length + 0.001 or float(c["t0"]) > float(c["t1"]):
+					clips_ok = false
+					print("   plage de clip invalide : ", k, " ", an)
+		check(clips_ok, k + " : chaque action pointe sur un clip existant et une plage valide")
+		inst.free()
+	gs.set("hero_3d_direct", true)
+	var v3: EntityView = _view_ent({"uid": 9, "classe": "Gobelin Roi", "team": "enemy", "entity_type": "Enemy", "boss": true, "current_pv": 10, "max_pv": 10, "x": 3, "y": 3})
+	await process_frame
+	await process_frame
+	# sans GPU (headless) le cadrage ne se termine pas : on vérifie seulement que le héros 3D est créé et son modèle chargé
+	var made: bool = false
+	for c: Node in v3.get_children():
+		if c is Hero3D and (c as Hero3D)._ap != null:
+			made = true
+	check(made, "Tharok : rendu 3D créé pour le boss (réglage allumé), animations chargées")
 	gs.set("hero_3d_direct", false)
 	# HeroAnim est livré avec le jeu (scripts/), pas avec les outils
 	check(FileAccess.file_exists("res://scripts/HeroAnim.gd"), "HeroAnim dans scripts/ (exporté avec le jeu)")

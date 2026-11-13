@@ -68,3 +68,16 @@ Alternative aux planches cuites, derrière le réglage « Sylvain en combat (pro
 - **Non mesuré sur téléphone** : coût du rendu (un viewport par héros), contour (fissures possibles aux arêtes vives), mémoire. À comparer avec le compteur.
   Le code de cadrage et de bâton duplique celui de `tools/bake_hero_seq.gd` : à fusionner si le prototype est gardé.
 - Les tests de rendu sont impossibles en headless : `tests/test_hero3d_direct.gd` ne couvre que la logique.
+
+## Personnages à animations intégrées (V163)
+`Hero3D` gère maintenant deux familles de modèles (voir `Hero3D.MODELS`) :
+- **procédural** (Sylvain) : pose calculée par `HeroAnim`, bâton rigide ;
+- **clips** (Tharok, Ingénieur — modèles Meshy « rigify » avec animations) : les animations vivent dans le `.glb`. Chaque action du jeu
+  (`idle`, `walk`, `attack`, `cast`, `hit`) renvoie à une plage `[t0, t1]` d'un clip, jouée sur `dur` secondes (≥ 1 s de clip → ~1 s de jeu),
+  avec `key` = fraction de l'action où tombe l'impact (les effets partent à ce moment). Une action sans clip (`motion`) garde une pose tenue
+  et ajoute un mouvement du corps (penché, saut, recul). `EntityView._try_clip_model` fabrique les mêmes tables que les planches cuites.
+- Choix du modèle : `Hero3D.model_key` (boss `Gobelin Roi` / général `Tharok le Végétal` → Tharok ; classe interne `Artificier` → Ingénieur).
+  Ajouter un personnage = un `.glb` (`tools/import_fbx.gd -- x.fbx assets/heroes3d/x.glb none 1024 12000`) + une entrée dans `MODELS`.
+- Le maillage Meshy (~10 400 triangles) est gardé tel quel ; chaque `.glb` pèse ≈ 1,8-2 Mo (texture 1024 px).
+- Ingénieur : un seul clip fourni (« Stand_and_Drink », 8,9 s : il boit de la main gauche, marteau sur l'épaule) → pas de marche ni d'attaque propres.
+- Pas de pointe d'arme calculée pour ces modèles : les projectiles partent du point de repli habituel.

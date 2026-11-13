@@ -156,7 +156,7 @@ func _ready() -> void:
 		func(idx: int) -> void: GameSettings.set_sylvestre_board(BOARD_VARIANTS[idx])))
 	gfx.add_child(_setting_cell("Grille des cases (carte d'aventure 2D)", ["Masquée", "Affichée"] as Array[String],
 		1 if GameSettings.show_grid else 0, func(idx: int) -> void: GameSettings.set_show_grid(idx == 1)))
-	gfx.add_child(_setting_cell("Sylvain en combat (prototype)", ["Sprites animés", "3D en direct"] as Array[String],
+	gfx.add_child(_setting_cell("Personnages en 3D (prototype)", ["Sprites animés", "3D en direct"] as Array[String],
 		1 if GameSettings.hero_3d_direct else 0, func(idx: int) -> void: GameSettings.set_hero_3d_direct(idx == 1)))
 	gfx.add_child(_setting_cell("Compteur d'images (carte d'aventure et combat)", ["Masqué", "Affiché"] as Array[String],
 		1 if GameSettings.show_perf else 0, func(idx: int) -> void: GameSettings.set_show_perf(idx == 1)))

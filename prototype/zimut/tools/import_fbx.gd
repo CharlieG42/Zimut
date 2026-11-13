@@ -1,7 +1,7 @@
 extends SceneTree
 ## Convertit un personnage animé (.fbx exporté par Meshy, squelette humanoïde) en .glb léger pour le jeu :
 ## texture réduite (WebP avec perte), maillage simplifié (meshoptimizer, via les niveaux de détail de Godot),
-## animation renommée (si le FBX en contient : sinon, rien à renommer), 4 influences de peau par sommet au plus.
+## première animation renommée (nom « none » : toutes les animations gardent leur nom ; sans animation : rien à renommer), 4 influences de peau par sommet au plus.
 ## Les FBX bruts ne sont pas versionnés.
 ##   godot --headless --path . -s tools/import_fbx.gd -- <entrée.fbx> <sortie.glb> <nom_animation> [taille_texture=1024] [triangles_max=7000]
 ## Pas d'écran nécessaire. Exemple (V153) :
@@ -54,7 +54,7 @@ func _init() -> void:
 	if ap != null:
 		var lib: AnimationLibrary = ap.get_animation_library(&"")
 		var names: PackedStringArray = lib.get_animation_list()
-		if names.size() >= 1 and String(names[0]) != a[2]:
+		if a[2] != "none" and names.size() >= 1 and String(names[0]) != a[2]:     # « none » : garder tous les noms d'animation
 			lib.rename_animation(StringName(names[0]), StringName(a[2]))
 	var gd := GLTFDocument.new()
 	gd.image_format = "Lossy WebP"
@@ -78,6 +78,15 @@ func _simplify(mi: MeshInstance3D, max_tris: int) -> void:
 	im.generate_lods(25.0, 60.0, [])
 	var best: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
 	var best_n: int = best.size() / 3
+	if best_n <= max_tris:
+		# déjà assez léger (ex. Meshy, ~10 000 triangles) : on garde le maillage tel quel, seules les influences sont limitées
+		arrays = _limit_influences(arrays, 4)
+		var am0 := ArrayMesh.new()
+		am0.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		am0.surface_set_material(0, m.surface_get_material(0))
+		mi.mesh = am0
+		print("maillage gardé : ", best_n, " triangles")
+		return
 	var pick: PackedInt32Array = PackedInt32Array()
 	for l: int in range(im.get_surface_lod_count(0)):
 		var idx: PackedInt32Array = im.get_surface_lod_indices(0, l)
