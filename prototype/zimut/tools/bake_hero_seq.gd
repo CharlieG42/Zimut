@@ -6,10 +6,10 @@ extends SceneTree
 ## <dossier>/meta.json (cellule, images clés, position du bout du bâton dans chaque image).
 ## Le script tools/pack_hero_seq.py réduit, ajoute le contour et assemble les deux planches.
 ## Sans « anim:image » : tout est cuit. Avec : seulement ces images (réglage des poses).
-## Les animations viennent de tools/hero_anim.gd (os nommés comme dans le modèle de Sylvain ; les noms du Géomancien,
+## Les animations viennent de scripts/HeroAnim.gd (os nommés comme dans le modèle de Sylvain ; les noms du Géomancien,
 ## « torse », « avantbras »…, sont reconnus par _bone_idx). Le « profil » règle la zone du bâton (et de l'orbe) du modèle.
 
-const HeroAnimS := preload("res://tools/hero_anim.gd")
+const HeroAnimS := preload("res://scripts/HeroAnim.gd")
 const CELL := 192                 # cellule finale (carrée)
 const SS := 2                     # sur-échantillonnage avant réduction
 const CHAR_FRAC := 0.74           # hauteur du personnage au repos dans la cellule

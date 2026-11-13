@@ -25,7 +25,7 @@ Héros animés : **Sylvain** (V155) et le **Géomancien** (V160). Les autres cla
 3. Assembler : `python3 tools/pack_hero_seq.py /tmp/brut assets/sprites/players/<classe>.png`
 4. `godot --headless --import`, puis le test `tests/test_sylvain_seq.gd` (à dupliquer pour la nouvelle classe).
 
-Les animations sont **écrites en code** (`tools/hero_anim.gd`), os par os, avec les noms d'os du modèle de Sylvain
+Les animations sont **écrites en code** (`scripts/HeroAnim.gd`), os par os, avec les noms d'os du modèle de Sylvain
 (`bassin`, `torax`, `tete`, `bras.r`, `avantBras.r`, `main.r`, `cuisse.l`, `tibia.l`…). Un héros avec les mêmes noms les
 réutilise tel quel. Le bâton est orienté directement (`staff` : direction voulue, la main pivote en conséquence).
 
@@ -39,7 +39,7 @@ d'autres seuils, ou des poids de peau corrigés dans Blender.
 - `staff_x`, `staff_z_max` : zone du maillage rendue rigide (100 % main droite) pour le bâton ; `orb_x`, `orb_z_min` : même chose pour
   l'orbe du Géomancien (main gauche). La pointe du bâton (départ des projectiles) est mesurée sur le rendu du seul bâton.
 - `base` : rotations ajoutées à la pose de repos avant l'animation. Le Géomancien est livré en **pose en T** : bras baissés, avant-bras plié
-  (bâton tenu à hauteur de poitrine, orbe en avant), puis les animations de `hero_anim.gd` jouent par-dessus.
+  (bâton tenu à hauteur de poitrine, orbe en avant), puis les animations de `HeroAnim.gd` jouent par-dessus.
 - `staff_idle` : direction du bâton quand l'animation n'en impose pas (debout dans la main, légèrement écarté) ; `gain` : exposition
   (la peau du Géomancien brûlait avec l'éclairage de Sylvain).
 - Les noms d'os `torse`, `avantbras.*` sont reconnus comme `torax`, `avantBras.*` (`_bone_idx`). Le maillage du Géomancien compte 792 000
@@ -53,3 +53,18 @@ d'autres seuils, ou des poids de peau corrigés dans Blender.
 - Le sprite est cuit en 3/4 (tourné de 28° vers la droite) ; le jeu le retourne (`flip_h`) pour la gauche.
 - L'animation « mort » n'est pas cuite : la dissolution en lumière (V70) reste.
 - Rien n'a été testé sur téléphone.
+
+## Prototype : 3D en direct (V161)
+Alternative aux planches cuites, derrière le réglage « Sylvain en combat (prototype) » (`hero_3d_direct`, éteint par défaut ; seul Sylvain).
+- `scripts/Hero3D.gd` : un `SubViewport` par héros (monde 3D propre, fond transparent, caméra orthographique cadrée comme la cuisson :
+  `CHAR_FRAC`, `FEET_ROW`), matériau toon + contour par coque inversée, pose évaluée à l'exécution par `HeroAnim.pose` (phase continue).
+  Le rendu n'est refait que si la pose change (`UPDATE_ONCE`). La pointe du bâton (origine des projectiles) est calculée sur le maillage.
+- `EntityView` lit la texture du viewport à la place de la planche (`_seq_tex_3d`) ; les temps d'action restent ceux des planches
+  (image clé au même instant, `impact_delay`). Sans le réglage, ou pour les autres classes, rien ne change.
+- Modèle : `assets/heroes3d/sylvain.glb` (≈ 600 Ko, 5 500 triangles, 4 influences de peau), produit avec
+  `godot --headless --path . -s tools/import_fbx.gd -- sylvain.fbx assets/heroes3d/sylvain.glb none 1024 7000`.
+- `HeroAnim.gd` a été déplacé de `tools/` vers `scripts/` (il est maintenant utilisé par le jeu).
+- Le compteur d'images (Réglages) s'affiche aussi en combat.
+- **Non mesuré sur téléphone** : coût du rendu (un viewport par héros), contour (fissures possibles aux arêtes vives), mémoire. À comparer avec le compteur.
+  Le code de cadrage et de bâton duplique celui de `tools/bake_hero_seq.gd` : à fusionner si le prototype est gardé.
+- Les tests de rendu sont impossibles en headless : `tests/test_hero3d_direct.gd` ne couvre que la logique.

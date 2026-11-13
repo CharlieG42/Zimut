@@ -1,0 +1,3 @@
+V161|Prototype : Sylvain peut être affiché en vraie 3D animée en combat (au lieu des sprites préparés), réglage « Sylvain en combat (prototype) » dans les Réglages.
+V161|Le compteur d'images (Réglages) s'affiche aussi en combat, pour comparer la fluidité des deux modes sur téléphone.
+V161|Par défaut rien ne change : les sprites animés restent utilisés tant que le réglage n'est pas activé.

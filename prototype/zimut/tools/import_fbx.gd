@@ -1,7 +1,8 @@
 extends SceneTree
 ## Convertit un personnage animé (.fbx exporté par Meshy, squelette humanoïde) en .glb léger pour le jeu :
 ## texture réduite (WebP avec perte), maillage simplifié (meshoptimizer, via les niveaux de détail de Godot),
-## animation renommée. Les FBX bruts ne sont pas versionnés.
+## animation renommée (si le FBX en contient : sinon, rien à renommer), 4 influences de peau par sommet au plus.
+## Les FBX bruts ne sont pas versionnés.
 ##   godot --headless --path . -s tools/import_fbx.gd -- <entrée.fbx> <sortie.glb> <nom_animation> [taille_texture=1024] [triangles_max=7000]
 ## Pas d'écran nécessaire. Exemple (V153) :
 ##   godot --headless --path . -s tools/import_fbx.gd -- walking_meshy.fbx assets/zimut/zimut.glb Walk 1024 7000
@@ -48,11 +49,13 @@ func _init() -> void:
 			print("texture ", img.get_width(), "x", img.get_height())
 	for mi2: Node in scene.find_children("*", "MeshInstance3D", true, false):
 		_simplify(mi2 as MeshInstance3D, max_tris)
-	var ap: AnimationPlayer = scene.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
-	var lib: AnimationLibrary = ap.get_animation_library(&"")
-	var names: PackedStringArray = lib.get_animation_list()
-	if names.size() >= 1 and String(names[0]) != a[2]:
-		lib.rename_animation(StringName(names[0]), StringName(a[2]))
+	var aps: Array = scene.find_children("*", "AnimationPlayer", true, false)
+	var ap: AnimationPlayer = aps[0] as AnimationPlayer if not aps.is_empty() else null
+	if ap != null:
+		var lib: AnimationLibrary = ap.get_animation_library(&"")
+		var names: PackedStringArray = lib.get_animation_list()
+		if names.size() >= 1 and String(names[0]) != a[2]:
+			lib.rename_animation(StringName(names[0]), StringName(a[2]))
 	var gd := GLTFDocument.new()
 	gd.image_format = "Lossy WebP"
 	gd.lossy_quality = 0.88
@@ -61,7 +64,7 @@ func _init() -> void:
 		push_error("export glb impossible")
 		quit(1)
 		return
-	print("OK ", a[1], " animations : ", ap.get_animation_list())
+	print("OK ", a[1], " animations : ", ap.get_animation_list() if ap != null else "aucune")
 	quit()
 
 
@@ -84,11 +87,40 @@ func _simplify(mi: MeshInstance3D, max_tris: int) -> void:
 		print("simplification : aucun niveau sous ", max_tris, " triangles, maillage gardé (", best_n, ")")
 		return
 	arrays = _compact(arrays, pick)
+	arrays = _limit_influences(arrays, 4)
 	var am := ArrayMesh.new()
 	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	am.surface_set_material(0, m.surface_get_material(0))
 	mi.mesh = am
 	print("maillage : ", best_n, " -> ", pick.size() / 3, " triangles, ", (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size(), " sommets")
+
+
+## Ne garde que les [n] influences de peau les plus fortes de chaque sommet (renormalisées) : le rendu mobile n'en lit que 4.
+func _limit_influences(arrays: Array, n: int) -> Array:
+	var bones: Variant = arrays[Mesh.ARRAY_BONES]
+	var weights: Variant = arrays[Mesh.ARRAY_WEIGHTS]
+	if bones == null or weights == null:
+		return arrays
+	var count: int = (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+	var per: int = (bones as PackedInt32Array).size() / count
+	if per <= n:
+		return arrays
+	var b2 := PackedInt32Array()
+	var w2 := PackedFloat32Array()
+	b2.resize(count * n)
+	w2.resize(count * n)
+	for v: int in range(count):
+		var order: Array = range(per)
+		order.sort_custom(func(x: int, y: int) -> bool: return weights[v * per + x] > weights[v * per + y])
+		var tot: float = 0.0
+		for k: int in range(n):
+			tot += weights[v * per + int(order[k])]
+		for k2: int in range(n):
+			b2[v * n + k2] = bones[v * per + int(order[k2])]
+			w2[v * n + k2] = weights[v * per + int(order[k2])] / maxf(tot, 0.0001)
+	arrays[Mesh.ARRAY_BONES] = b2
+	arrays[Mesh.ARRAY_WEIGHTS] = w2
+	return arrays
 
 
 ## Ne garde que les sommets utilisés par les triangles retenus (sinon le fichier garde tous les sommets d'origine).

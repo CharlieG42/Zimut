@@ -20,6 +20,14 @@ func _exit_tree() -> void:
 func _ready() -> void:
 	game_manager = GameManager
 	_build_background()
+	if GameSettings.show_perf:          # V161 : même compteur de fluidité qu'en Aventure, pour mesurer le combat (sprites vs 3D en direct)
+		var perf_layer := CanvasLayer.new()
+		perf_layer.layer = 90
+		add_child(perf_layer)
+		var perf := PerfCounter.new()
+		perf.name = "PerfCounter"
+		perf.position = Vector2(16, 150)
+		perf_layer.add_child(perf)
 
 	# IMPORTANT : initialiser tous les managers AVANT reset_game().
 	# reset_game() déclenche en interne _refresh_grid(), qui appelle
