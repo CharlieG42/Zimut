@@ -1,0 +1,4 @@
+V158|Conquête : les offensives ennemies ne grossissent plus sans limite — une ville bien tenue (améliorée, garnison pleine, gouverneur) peut enfin les repousser, une ville négligée tombe toujours.
+V158|Les généraux du Roi Squelette respectent le même délai et le même minimum de villes que les offensives ordinaires : fini les offensives en chaîne.
+V158|Une ville tout juste reprise n'est plus visée par une nouvelle offensive pendant sa reconstruction.
+V158|L'alerte d'offensive indique ce qui est atteignable : défense avec garnison complète et son coût, ou « la garnison seule ne suffit pas » avec les pistes (améliorer, gouverneur, défendre en personne).

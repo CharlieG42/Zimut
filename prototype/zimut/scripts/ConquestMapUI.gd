@@ -2352,9 +2352,18 @@ func _refresh_threat_banner() -> void:
 		var tid: String = String(th.get("city", ""))
 		var who: String = String(th.get("general", ""))
 		var lead: String = "☠ %s, général du Roi Squelette, mène l'offensive !\n" % who if who != "" else ""
+		var tpow: int = int(th.get("power", 0))
+		var tdef: int = ConquestSystem.defense(_save, tid)
+		var verdict: String = " — elle tiendra."
+		if tdef < tpow:
+			# V158 : on ne conseille un renfort que s'il peut suffire ; sinon on le dit
+			var reach: int = ConquestSystem.reachable_defense(_save, tid)
+			if reach >= tpow:
+				verdict = " — garnison complète : défense %d (%d or)." % [reach, ConquestSystem.reachable_cost(_save, tid)]
+			else:
+				verdict = " — la garnison seule ne suffit pas (max %d) : améliorez la ville, nommez un gouverneur ou défendez en personne." % reach
 		lines.append("%s⚠ OFFENSIVE sur %s dans %d bataille(s)\nForce ennemie %d · défense %d%s" % [
-			lead, ProgressionManager.conquest_city_name(tid), int(th.get("eta", 0)), int(th.get("power", 0)),
-			ConquestSystem.defense(_save, tid), " — RENFORCEZ-LA !" if ConquestSystem.defense(_save, tid) < int(th.get("power", 0)) else " — elle tiendra."])
+			lead, ProgressionManager.conquest_city_name(tid), int(th.get("eta", 0)), tpow, tdef, verdict])
 	if int(_conquest.get("truce", 0)) > 0:
 		lines.append("☮ Trêve : %d bataille(s) sans raid" % int(_conquest["truce"]))
 	_threat_banner.visible = not lines.is_empty()
