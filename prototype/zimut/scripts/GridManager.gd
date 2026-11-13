@@ -741,6 +741,12 @@ func _update_outlines() -> void:
 		v.queue_redraw()
 
 
+## V156 : durée d'une case de déplacement (s). Ralentie (0,15 → 0,24 ; 0,11 → 0,19 pour les longs trajets) pour
+## laisser voir les animations de marche ; un cycle de marche couvre deux cases (EntityView).
+const MOVE_STEP := 0.24
+const MOVE_STEP_LONG := 0.19
+
+
 func _play_move(d: Dictionary) -> void:
 	var v: EntityView = _view(d["entity"])
 	if v == null:
@@ -748,7 +754,7 @@ func _play_move(d: Dictionary) -> void:
 	var pts: Array[Vector2] = []
 	for c: Vector2i in d["path"]:
 		pts.append(grid_to_screen(c.x, c.y))
-	var step: float = 0.15 if pts.size() <= 4 else 0.11
+	var step: float = MOVE_STEP if pts.size() <= 4 else MOVE_STEP_LONG
 	var tw: Tween = v.move_along(pts, step)
 	for i: int in range(pts.size()):
 		get_tree().create_timer(step * float(i) + step * 0.8).timeout.connect(func() -> void: Sfx.play("step", -6.0))
