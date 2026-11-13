@@ -68,3 +68,26 @@ Alternative aux planches cuites, derrière le réglage « Sylvain en combat (pro
 - **Non mesuré sur téléphone** : coût du rendu (un viewport par héros), contour (fissures possibles aux arêtes vives), mémoire. À comparer avec le compteur.
   Le code de cadrage et de bâton duplique celui de `tools/bake_hero_seq.gd` : à fusionner si le prototype est gardé.
 - Les tests de rendu sont impossibles en headless : `tests/test_hero3d_direct.gd` ne couvre que la logique.
+
+## Personnages à animations intégrées (V163)
+`Hero3D` gère maintenant deux familles de modèles (voir `Hero3D.MODELS`) :
+- **procédural** (Sylvain) : pose calculée par `HeroAnim`, bâton rigide ;
+- **clips** (Tharok, Ingénieur — modèles Meshy « rigify » avec animations) : les animations vivent dans le `.glb`. Chaque action du jeu
+  (`idle`, `walk`, `attack`, `cast`, `hit`) renvoie à une plage `[t0, t1]` d'un clip, jouée sur `dur` secondes (≥ 1 s de clip → ~1 s de jeu),
+  avec `key` = fraction de l'action où tombe l'impact (les effets partent à ce moment). Une action sans clip (`motion`) garde une pose tenue
+  et ajoute un mouvement du corps (penché, saut, recul). `EntityView._try_clip_model` fabrique les mêmes tables que les planches cuites.
+- Choix du modèle : `Hero3D.model_key` (boss `Gobelin Roi` / général `Tharok le Végétal` → Tharok ; classe interne `Artificier` → Ingénieur).
+  Ajouter un personnage = un `.glb` (`tools/import_fbx.gd -- x.fbx assets/heroes3d/x.glb none 1024 12000`) + une entrée dans `MODELS`.
+- Le maillage Meshy est gardé tel quel (Tharok et Ingénieur ≈ 10 400 triangles, Chasseur et Invocateur ≈ 3 100) ; les `.glb` pèsent 0,9 à 2,4 Mo (texture 1024 px).
+- Clips fournis par Meshy : Tharok (marche, course, Axe_Spin_Attack, Double_Combo_Attack) ; Ingénieur (Attack, Axe_Spin_Attack, Triple_Combo_Attack,
+  Basic_Jump, Dead, marche, course, Stand_and_Drink) ; Chasseur (Attack, Dead, marche, course, Stand_and_Drink) ; Invocateur (Charged_Spell_Cast_1, Dead,
+  marche, course, Stand_and_Drink). Le repos de chacun est la première pose de « Walking » (immobile : rendu une seule fois, donc gratuit).
+- Limites : le Chasseur n'a pas de tir à l'arc tendu (son « Attack » est un geste d'arc levé puis abaissé, repris pour le sort) ; l'Invocateur n'a que son sort
+  chargé (l'attaque en reprend la poussée du livre). Les clips « Dead » ne sont pas utilisés : la mort du jeu est une dissolution en faisceau de lumière.
+  Pistes : surcharger des os à l'exécution (bras qui bande l'arc, livre qui s'ouvre) si Meshy ne fournit pas mieux.
+- Pas de pointe d'arme calculée pour ces modèles : les projectiles partent du point de repli habituel.
+- **Tank** (V163) : un seul clip d'attaque (« Double_Combo_Attack ») + marche. Meshy lie la hache à trois os qui s'écartent pendant l'animation (tête et haut du manche
+  sur `thumb.01.R`, bas du manche sur `Bone_053` et `Bone_052`, deux os racine) : le manche s'étirait comme du caoutchouc. `tools/import_fbx.gd` accepte un 6e argument
+  « cible:os1,os2 » qui rend rigides les sommets dont l'os dominant est dans la liste ; commande utilisée :
+  `… -- tank.fbx assets/heroes3d/tank.glb none 1024 12000 "thumb.01.R:thumb.01.R,Bone_053,Bone_052"`. (Cible `hand.R` : la hache rétrécit, la main portant une autre échelle d'animation.)
+  À surveiller sur les autres modèles Meshy : un accessoire réparti sur plusieurs os (repérable en listant l'os dominant de chaque sommet) s'étire de la même façon.
