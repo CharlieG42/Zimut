@@ -1,0 +1,4 @@
+V159|Conquête : les villes d'une Nation ne peuvent être conquises que si sa zone a été débloquée en mode Aventure (la Sylve, nation de départ, est toujours ouverte).
+V159|Sur la carte, les villes des Nations fermées portent un cadenas et indiquent la zone d'Aventure à débloquer ; la négociation y est aussi refusée.
+V159|Le chapitre « Tout Zimut » et l'accès au Donjon du Roi tiennent compte des Nations ouvertes ; le Donjon exige la zone « Portes du Donjon ».
+V159|Les parties existantes gardent leurs villes déjà conquises, et une ville perdue peut toujours être reprise.
