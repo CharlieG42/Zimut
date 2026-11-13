@@ -254,6 +254,7 @@ func _load_poses() -> void:
 	if base == "":
 		return
 	if _load_seq(base):
+		_try_hero_3d()
 		return
 	# V32 : plusieurs variantes par pose (<sprite>_attack, _attack_2, _attack_3…, _idle_2, _idle_3)
 	for pz: String in POSES + ["idle"]:
@@ -355,7 +356,58 @@ func _load_seq(base: String) -> bool:
 
 
 ## Image à afficher : action en cours (attaque, sort, coup reçu), sinon marche ou repos en boucle.
+## V161 (prototype) : héros rendu en 3D direct à la place des planches cuites (option « 3D en direct »). Les planches restent
+## chargées : elles fournissent les durées, images clés et le repli tant que le modèle n'est pas prêt.
+var _h3d: Hero3D = null
+
+func _try_hero_3d() -> void:
+	# autoload lu via l'arbre (pas par son identifiant) : les scripts d'outils compilés avant les autoloads restent chargeables
+	var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameSettings")
+	if gs == null or not bool(gs.get("hero_3d_direct")):
+		return
+	var classe: String = String(entity.get("classe", ""))
+	if not Hero3D.supported(classe):
+		return
+	if not is_inside_tree():
+		await tree_entered     # le squelette 3D a besoin de transformations globales
+	var h := Hero3D.new()
+	add_child(h)
+	if not h.setup(classe):
+		h.queue_free()
+		return
+	_h3d = h
+
+
+## Texture 3D en direct : mêmes règles de temps que les planches (action en cours, marche, repos), mais avec une phase continue.
+func _seq_tex_3d() -> Texture2D:
+	var back: bool = _facing_back()
+	var view: String = "back" if back else "front"
+	if _sq_act != "":
+		var info: Dictionary = _sq[_sq_act]
+		var n: int = (info[view] as Array).size()
+		var ph: float = _sq_act_t / _sq_act_dur
+		if ph < 1.0:
+			# la planche cuite montre l'image i à la phase i/(n-1) pendant [i/n, (i+1)/n[ : on garde l'image clé au même instant
+			_h3d.show_pose(_sq_act, minf(ph * float(n) / float(n - 1), 1.0), back)
+			_sq_tip = _h3d.tip_px()
+			return _h3d.texture()
+		_sq_act = ""
+	var an: String = "walk" if (_moving and _sq.has("walk")) else "idle"
+	var info2: Dictionary = _sq[an]
+	var n2: int = (info2[view] as Array).size()
+	var ph2: float
+	if an == "walk":
+		ph2 = fposmod((_t - _walk_t0) / (_walk_step * 2.0), 1.0)
+	else:
+		ph2 = fposmod(_t / float(info2["dur"]) + _phase * 3.0 / float(n2), 1.0)
+	_h3d.show_pose(an, ph2, back)
+	_sq_tip = _h3d.tip_px()
+	return _h3d.texture()
+
+
 func _seq_tex() -> Texture2D:
+	if _h3d != null and _h3d.ready_ok:
+		return _seq_tex_3d()
 	var view: String = "back" if _facing_back() else "front"
 	if _sq_act != "":
 		var info: Dictionary = _sq[_sq_act]
