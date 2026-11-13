@@ -1,3 +1,3 @@
-V163|Prototype 3D : Tharok (boss de la Forêt) et l'Ingénieur peuvent maintenant s'afficher en 3D animée en combat, avec le réglage « Personnages en 3D (prototype) ».
-V163|Tharok marche, attaque (tourbillon de massue) et lance ses sorts (combo) avec ses animations d'origine, accélérées pour le tour par tour.
-V163|L'Ingénieur n'a pour l'instant qu'une animation de repos (il boit) : ses actions sont de simples mouvements du corps, en attendant de vraies animations.
+V163|Prototype 3D : Tharok (boss de la Forêt), l'Ingénieur, le Chasseur et l'Invocateur peuvent s'afficher en 3D animée en combat, avec le réglage « Personnages en 3D (prototype) ».
+V163|Tharok et l'Ingénieur attaquent avec leurs vraies animations (massue en tourbillon, marteau levé puis abattu) ; l'Invocateur lève son livre avant de lancer son sort.
+V163|Le Chasseur n'a pas encore de vrai tir à l'arc tendu : son attaque est un grand geste d'arc levé puis abaissé, en attendant une animation dédiée.

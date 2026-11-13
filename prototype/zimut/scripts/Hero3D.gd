@@ -31,15 +31,33 @@ const MODELS := {
 		}},
 	"Ingénieur": {"path": "res://assets/heroes3d/ingenieur.glb", "root_bone": "spine", "gain": 1.0,
 		"clips": {
-			"idle":   {"clip": "Stand_and_Drink", "t0": 0.0, "t1": 8.8667, "dur": 8.8667, "loop": true, "key": 0.0},
-			"walk":   {"clip": "Stand_and_Drink", "t0": 0.4, "t1": 0.4, "dur": 0.6, "loop": true, "key": 0.0, "motion": "walk"},
-			"attack": {"clip": "Stand_and_Drink", "t0": 0.4, "t1": 0.4, "dur": 0.7, "loop": false, "key": 0.45, "motion": "attack"},
-			"cast":   {"clip": "Stand_and_Drink", "t0": 0.4, "t1": 0.4, "dur": 0.8, "loop": false, "key": 0.5, "motion": "cast"},
-			"hit":    {"clip": "Stand_and_Drink", "t0": 0.4, "t1": 0.4, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
+			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walking", "t0": 0.0, "t1": 1.0333, "dur": 1.0, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.2, "t1": 1.8, "dur": 1.0, "loop": false, "key": 0.56},
+			"cast":   {"clip": "Axe_Spin_Attack", "t0": 0.2, "t1": 1.8, "dur": 1.0, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
+		}},
+	## Chasseur : « Attack » est un grand geste d'arc levé puis abaissé (pas de tir à l'arc tendu) ; le sort réutilise le même clip.
+	"Chasseur": {"path": "res://assets/heroes3d/chasseur.glb", "root_bone": "spine", "gain": 1.0,
+		"clips": {
+			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walking", "t0": 0.0, "t1": 1.0333, "dur": 1.0, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.3, "t1": 1.7, "dur": 0.9, "loop": false, "key": 0.54},
+			"cast":   {"clip": "Attack", "t0": 0.3, "t1": 1.7, "dur": 1.1, "loop": false, "key": 0.54},
+			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
+		}},
+	## Invocateur : « Charged_Spell_Cast_1 » = livre levé, tenu à hauteur du visage (≈ 2,1-2,9 s), puis relâché. L'attaque en reprend la poussée en avant.
+	"Invocateur": {"path": "res://assets/heroes3d/invocateur.glb", "root_bone": "spine", "gain": 1.0,
+		"clips": {
+			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walking", "t0": 0.0, "t1": 1.0333, "dur": 1.0, "loop": true, "key": 0.0},
+			"attack": {"clip": "Charged_Spell_Cast_1", "t0": 1.3, "t1": 2.4, "dur": 0.7, "loop": false, "key": 0.77},
+			"cast":   {"clip": "Charged_Spell_Cast_1", "t0": 0.3, "t1": 3.4, "dur": 1.4, "loop": false, "key": 0.6},
+			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
 		}},
 }
 ## Classe du joueur (nom interne) ou nom de boss -> modèle.
-const CLASS_MODEL := {"Sylvain": "Sylvain", "Artificier": "Ingénieur"}
+const CLASS_MODEL := {"Sylvain": "Sylvain", "Artificier": "Ingénieur", "Chasseur": "Chasseur", "Invocateur": "Invocateur"}
 const BOSS_MODEL := {"Gobelin Roi": "Tharok", "Tharok le Végétal": "Tharok"}
 const CLIP_FRAMES := 24             # nombre d'images fictives d'une action (EntityView raisonne en images pour les temps d'impact)
 const SHADER := """

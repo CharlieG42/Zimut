@@ -78,6 +78,11 @@ Alternative aux planches cuites, derrière le réglage « Sylvain en combat (pro
   et ajoute un mouvement du corps (penché, saut, recul). `EntityView._try_clip_model` fabrique les mêmes tables que les planches cuites.
 - Choix du modèle : `Hero3D.model_key` (boss `Gobelin Roi` / général `Tharok le Végétal` → Tharok ; classe interne `Artificier` → Ingénieur).
   Ajouter un personnage = un `.glb` (`tools/import_fbx.gd -- x.fbx assets/heroes3d/x.glb none 1024 12000`) + une entrée dans `MODELS`.
-- Le maillage Meshy (~10 400 triangles) est gardé tel quel ; chaque `.glb` pèse ≈ 1,8-2 Mo (texture 1024 px).
-- Ingénieur : un seul clip fourni (« Stand_and_Drink », 8,9 s : il boit de la main gauche, marteau sur l'épaule) → pas de marche ni d'attaque propres.
+- Le maillage Meshy est gardé tel quel (Tharok et Ingénieur ≈ 10 400 triangles, Chasseur et Invocateur ≈ 3 100) ; les `.glb` pèsent 0,9 à 2,4 Mo (texture 1024 px).
+- Clips fournis par Meshy : Tharok (marche, course, Axe_Spin_Attack, Double_Combo_Attack) ; Ingénieur (Attack, Axe_Spin_Attack, Triple_Combo_Attack,
+  Basic_Jump, Dead, marche, course, Stand_and_Drink) ; Chasseur (Attack, Dead, marche, course, Stand_and_Drink) ; Invocateur (Charged_Spell_Cast_1, Dead,
+  marche, course, Stand_and_Drink). Le repos de chacun est la première pose de « Walking » (immobile : rendu une seule fois, donc gratuit).
+- Limites : le Chasseur n'a pas de tir à l'arc tendu (son « Attack » est un geste d'arc levé puis abaissé, repris pour le sort) ; l'Invocateur n'a que son sort
+  chargé (l'attaque en reprend la poussée du livre). Les clips « Dead » ne sont pas utilisés : la mort du jeu est une dissolution en faisceau de lumière.
+  Pistes : surcharger des os à l'exécution (bras qui bande l'arc, livre qui s'ouvre) si Meshy ne fournit pas mieux.
 - Pas de pointe d'arme calculée pour ces modèles : les projectiles partent du point de repli habituel.
