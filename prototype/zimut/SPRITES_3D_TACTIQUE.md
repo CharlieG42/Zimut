@@ -91,3 +91,12 @@ Alternative aux planches cuites, derrière le réglage « Sylvain en combat (pro
   « cible:os1,os2 » qui rend rigides les sommets dont l'os dominant est dans la liste ; commande utilisée :
   `… -- tank.fbx assets/heroes3d/tank.glb none 1024 12000 "thumb.01.R:thumb.01.R,Bone_053,Bone_052"`. (Cible `hand.R` : la hache rétrécit, la main portant une autre échelle d'animation.)
   À surveiller sur les autres modèles Meshy : un accessoire réparti sur plusieurs os (repérable en listant l'os dominant de chaque sommet) s'étire de la même façon.
+
+### Cadrage des modèles 3D (correctif V356)
+
+Sur téléphone, les héros à clips apparaissaient zoomés ×2 (tête et écharpe du Chasseur seules, Ingénieur coupé à la taille), alors que le même code cadrait bien sur ordinateur. Le cadrage mesure l'image rendue ; la cause exacte sur téléphone n'est pas établie (image arrivée en retard, taille d'image différente de `CELL`, ou autre). Trois protections, sans dépendre de la cause :
+- la taille réelle de l'image fait foi (plus la constante `CELL`) ;
+- la boucle de cadrage continue (8 passes au plus) jusqu'à ce que la hauteur mesurée soit à moins de 4 % de la cible ;
+- garde-fou `Hero3D.size_plausible` : le personnage est normalisé à `HERO_H`, donc la taille de caméra doit rester entre 0,85 et 2,3 fois `HERO_H / CHAR_FRAC` (mesurée sur ordinateur : 2,7 à 4,4). Hors plage, on prend `expected_cam_size()`.
+
+Avec « Compteur d'images » allumé, une ligne par modèle indique `cam`, taille d'image, nombre de passes et `GARDE-FOU` si le repli a servi : c'est ce qu'il faut relever sur téléphone si le défaut persiste.
