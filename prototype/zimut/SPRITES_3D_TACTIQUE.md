@@ -2,7 +2,7 @@
 
 Un héros modélisé en 3D (Blender, squelette) est cuit en **planches de sprites** : le mode Tactique reste en 2D, mais le
 héros joue de vraies animations image par image (repos, marche, attaque, sort, coup reçu), de face et de dos.
-Premier héros : **Sylvain**. Les autres classes gardent leurs poses PNG.
+Héros animés : **Sylvain** (V155) et le **Géomancien** (V160). Les autres classes gardent leurs poses PNG.
 
 ## Ce que lit le jeu
 À côté du sprite `assets/sprites/players/<classe>.png` :
@@ -20,7 +20,8 @@ Premier héros : **Sylvain**. Les autres classes gardent leurs poses PNG.
 ## Refaire ou ajouter un héros
 1. Sous Blender, exporter le FBX avec **les textures intégrées** (Mode de chemin : Copier + icône boîte). Une seule racine d'os.
 2. Cuire les images brutes (écran virtuel, pas de GPU nécessaire) :
-   `xvfb-run -a -s "-screen 0 1280x720x24" godot --rendering-method gl_compatibility --path . -s tools/bake_hero_seq.gd -- hero.fbx /tmp/brut`
+   `xvfb-run -a -s "-screen 0 1280x720x24" godot --rendering-method gl_compatibility --path . -s tools/bake_hero_seq.gd -- hero.fbx /tmp/brut profile=geomancien`
+   (`profile=` : `sylvain` par défaut ; voir les profils ci-dessous)
 3. Assembler : `python3 tools/pack_hero_seq.py /tmp/brut assets/sprites/players/<classe>.png`
 4. `godot --headless --import`, puis le test `tests/test_sylvain_seq.gd` (à dupliquer pour la nouvelle classe).
 
@@ -33,9 +34,22 @@ dans les poids de peau (le cristal s'étirait dès que le bras bougeait) ; le sc
 sommets du côté du bâton (`STAFF_X`, `STAFF_Z_MAX` : au-dessus, ce sont des mèches de cheveux). Un autre modèle demandera
 d'autres seuils, ou des poids de peau corrigés dans Blender.
 
+## Profils de cuisson (V160)
+`PROFILES` en tête de `tools/bake_hero_seq.gd` règle ce qui change d'un modèle à l'autre :
+- `staff_x`, `staff_z_max` : zone du maillage rendue rigide (100 % main droite) pour le bâton ; `orb_x`, `orb_z_min` : même chose pour
+  l'orbe du Géomancien (main gauche). La pointe du bâton (départ des projectiles) est mesurée sur le rendu du seul bâton.
+- `base` : rotations ajoutées à la pose de repos avant l'animation. Le Géomancien est livré en **pose en T** : bras baissés, avant-bras plié
+  (bâton tenu à hauteur de poitrine, orbe en avant), puis les animations de `hero_anim.gd` jouent par-dessus.
+- `staff_idle` : direction du bâton quand l'animation n'en impose pas (debout dans la main, légèrement écarté) ; `gain` : exposition
+  (la peau du Géomancien brûlait avec l'éclairage de Sylvain).
+- Les noms d'os `torse`, `avantbras.*` sont reconnus comme `torax`, `avantBras.*` (`_bone_idx`). Le maillage du Géomancien compte 792 000
+  triangles et 8 influences par sommet : sans importance ici (seules les planches sont versionnées), le script garde les 4 plus fortes.
+- Réglage des poses : la variable d'environnement `HERO_BASE_DEBUG` (JSON `{"base": {...}, "staff_idle": [x,y,z], "gain": g}`) remplace
+  le profil le temps d'un essai, avec une cuisson partielle (`idle:0 walk:2`).
+
 ## Poids mémoire et limites
-- Planches compactes (V157) : ≈ 3,8 Mo de mémoire graphique par héros animé (11,8 Mo avec des cellules pleines), sans perte de qualité.
-  Dix héros ≈ 38 Mo. Pistes s'il faut descendre encore : ne charger la planche de dos qu'au premier besoin, ou la compression VRAM (avec perte, à juger sur téléphone).
+- Planches compactes (V157) : ≈ 3,8 Mo de mémoire graphique pour Sylvain, 6,7 Mo pour le Géomancien (bâton vertical et orbe : images plus grandes),
+  sans perte de qualité. Dix héros ≈ 40 à 70 Mo. Pistes s'il faut descendre encore : ne charger la planche de dos qu'au premier besoin, ou la compression VRAM (avec perte, à juger sur téléphone).
 - Le sprite est cuit en 3/4 (tourné de 28° vers la droite) ; le jeu le retourne (`flip_h`) pour la gauche.
 - L'animation « mort » n'est pas cuite : la dissolution en lumière (V70) reste.
 - Rien n'a été testé sur téléphone.
