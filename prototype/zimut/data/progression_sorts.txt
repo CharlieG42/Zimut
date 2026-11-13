@@ -1,7 +1,9 @@
 Classe,Niveau,"Sorts débloqués (séparés par "";"")"
 Tank,1,Coup de bouclier;Protection;Soin de combat
+Tank,2,Lancer de bouclier
 Tank,3,Garde haute
 Tank,5,Charge
+Tank,7,Javelot lourd
 Tank,8,Revers de bouclier
 Tank,10,Frappe puissante
 Tank,12,Cri de guerre

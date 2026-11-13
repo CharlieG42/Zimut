@@ -2,14 +2,16 @@ Classe,Nom,Cout_PA,Cout_PM,Portee,Effet,Niveau_requis,Type,Degats_physiques,Dega
 Tank,Coup de bouclier,1,0,1,17 dégâts + étourdit 1 tour (50%),1,Attaque,17,0,0,0,0,0,0,0,0
 Tank,Protection,2,0,1,+15% défense pour l'équipe (2 tours),1,Buff,0,0,0,15,0,0,0,0,0
 Tank,Soin de combat,2,0,1,Restaure 24 PV,1,Soin,0,0,24,0,0,0,0,0,0
+Tank,Lancer de bouclier,2,0,3,19 dégâts,2,Attaque,19,0,0,0,0,0,0,0,0
 Tank,Garde haute,1,0,0,+12% défense (2 tours),3,Buff,0,0,0,0,0,0,0,0,0
 Tank,Charge,2,1,3,27 dégâts + ralentit 1 pm (1 tour),5,Attaque,27,0,0,0,0,0,0,0,0
+Tank,Javelot lourd,3,0,4,36 dégâts,7,Attaque,36,0,0,0,0,0,0,0,0
 Tank,Revers de bouclier,2,0,1,29 dégâts [Combo étourdissement : bonus 50%],8,Attaque,29,0,0,0,0,0,0,0,0
 Tank,Frappe puissante,3,0,1,41 dégâts,10,Attaque,41,0,0,0,0,0,0,0,0
 Tank,Cri de guerre,2,0,0,+15% dégâts pour l'équipe (2 tours),12,Buff,0,0,0,0,0,0,0,0,0
 Tank,Entaille lourde,3,0,1,45 dégâts + saignement (13 dégâts/tour; 2 tours),15,Attaque,45,0,0,0,0,0,0,0,0
 Tank,Rempart,2,0,1,+20% défense (2 tours; allié),18,Buff,0,0,0,0,0,0,0,0,0
-Tank,Provocation,3,0,1,Force l'ennemi à attaquer ce perso (1 tour),20,Debuff,0,0,0,0,0,0,0,0,0
+Tank,Provocation,3,0,3,Force l'ennemi à attaquer ce perso (1 tour),20,Debuff,0,0,0,0,0,0,0,0,0
 Tank,Second souffle,3,0,1,Restaure 46 PV,24,Soin,0,0,46,0,0,0,0,0,0
 Tank,Balayage,3,0,2,43 dégâts à tous les ennemis adjacents,28,Attaque,43,0,0,0,0,0,0,0,0
 Tank,Coup de tête,3,0,1,57 dégâts + étourdit 1 tour (40%) [Enchaînement après Provocation : bonus 40%],32,Attaque,57,0,0,0,0,0,0,0,0
