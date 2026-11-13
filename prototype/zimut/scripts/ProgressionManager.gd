@@ -3340,13 +3340,17 @@ func conquest_city_reward(city_id: String) -> Dictionary:
 ## les villes révélées sont attaquables ; sans révélation (parties où
 ## l'Aventure n'a pas été jouée), toutes les villes reliées restent
 ## attaquables — rétrocompatible avec les sauvegardes existantes.
-func conquest_city_attackable(conquest: Dictionary, city_id: String, adventure: Dictionary = {}) -> bool:
+func conquest_city_attackable(conquest: Dictionary, city_id: String, adventure: Variant = null) -> bool:
 	var kind: String = conquest_city_kind(city_id)
 	if kind == "capital" or kind == "":
 		return false
 	if conquest.get("owned", []).has(city_id):
 		return false
-	if city_id == "donjon_roi" and not conquest_empire_complete(conquest):
+	if city_id == "donjon_roi" and not conquest_empire_complete(conquest, adventure):
+		return false
+	# V159 : la Nation d'une ville doit être ouverte en Aventure (une ville déjà perdue peut toujours être reprise)
+	if adventure is Dictionary and not (conquest.get("lost", []) as Array).has(city_id) \
+			and not conquest_city_open(adventure, city_id):
 		return false
 	# Une voie ouverte depuis l'empire suffit : le brouillard (villes révélées par
 	# l'Aventure) ne cache que ce qui est au-delà de la frontière, jamais le
@@ -3364,14 +3368,42 @@ func conquest_city_adjacent_to_empire(conquest: Dictionary, city_id: String) -> 
 	return false
 
 ## Toutes les villes (hors capitale et Donjon) sont-elles conquises ?
-func conquest_empire_complete(conquest: Dictionary) -> bool:
+func conquest_empire_complete(conquest: Dictionary, adventure: Variant = null) -> bool:
 	var owned: Array = conquest.get("owned", [])
 	for city_id: String in CONQUEST_CITIES.keys():
 		if city_id == "capitale" or city_id == "donjon_roi":
 			continue
+		# V159 : seules les villes des Nations ouvertes en Aventure comptent
+		if adventure is Dictionary and not conquest_city_open(adventure, city_id) and not owned.has(city_id):
+			continue
 		if not owned.has(city_id):
 			return false
 	return true
+
+## V159 : lien Aventure → Conquête. Une Nation est ouverte en Conquête quand sa zone est débloquée en Aventure
+## (la Sylve, nation de départ, l'est toujours ; le Donjon du Roi exige la zone « Portes du Donjon »).
+func adventure_zone_of_biome(biome: String) -> String:
+	for z: String in ADVENTURE_ZONES.keys():
+		if String(ADVENTURE_ZONES[z].get("biome", "")) == biome:
+			return z
+	return ""
+
+func conquest_nation_open(adventure: Dictionary, biome: String) -> bool:
+	if biome == "Forêt":
+		return true
+	var zone: String = adventure_zone_of_biome(biome)
+	if zone == "":
+		return true
+	return (adventure.get("zones_unlocked", ["foret_sylve"]) as Array).has(zone)
+
+func conquest_city_open(adventure: Dictionary, city_id: String) -> bool:
+	return conquest_nation_open(adventure, conquest_city_biome(city_id))
+
+## Zone d'Aventure à débloquer pour ouvrir cette ville (nom lisible), "" si elle est ouverte ou sans zone.
+func conquest_city_unlock_hint(adventure: Dictionary, city_id: String) -> String:
+	if conquest_city_open(adventure, city_id):
+		return ""
+	return String(ADVENTURE_ZONES.get(adventure_zone_of_biome(conquest_city_biome(city_id)), {}).get("name", ""))
 
 ## Victoire de campagne : le Donjon du Roi Squelette est tombé.
 func conquest_campaign_won(conquest: Dictionary) -> bool:
@@ -3614,6 +3646,9 @@ func conquest_negotiate_city(data: Dictionary, city_id: String) -> String:
 	# Garde-fou : seules les villes NEUTRES négocient (jamais une forteresse ennemie, un général ou le Donjon)
 	if String(CONQUEST_CITIES.get(city_id, {}).get("kind", "")) != "neutral":
 		return "Cette ville ne négocie pas : seules les villes neutres acceptent un traité."
+	var hint: String = conquest_city_unlock_hint(data.get("adventure", {}), city_id)
+	if hint != "" and not (conquest.get("lost", []) as Array).has(city_id):
+		return "Nation fermée : débloquez « %s » en mode Aventure." % hint
 	var err: String = ConquestSystem.negotiate_city(data, conquest, city_id, CONQUEST_ROUTES, names, int(CONQUEST_CITIES[city_id].get("level", 0)))
 	if err == "":
 		data["conquest"] = conquest

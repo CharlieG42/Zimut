@@ -1086,7 +1086,7 @@ func _refresh_header() -> void:
 		line += "   ·   ☠ %d %s du Roi Squelette en vie" % [generals_alive, "généraux" if generals_alive > 1 else "général"]
 	if ProgressionManager.conquest_campaign_won(_conquest):
 		line += "   ·   ★ EMPIRE VICTORIEUX"
-	elif ProgressionManager.conquest_empire_complete(_conquest):
+	elif ProgressionManager.conquest_empire_complete(_conquest, _save.get("adventure", {})):
 		line += "   ·   ⚔ Tout Zimut est à vous : assailliez le Donjon du Roi Squelette !"
 	_header.text = line
 	if _chapter_button != null:
@@ -1205,8 +1205,11 @@ func _select_city(id: String) -> void:
 					dip_txt += " Émissaires indisponibles encore %d victoire(s)." % dcd
 			_message.text = "%s · %s · Niveau conseillé %d%s\n\n%s\n\n● VILLE NEUTRE — 1 bataille contre des mobs de champs suffit à la conquérir.%s" % [
 				city["name"], ProgressionManager.biome_label(String(city["biome"])), int(city["level"]), advice, city["desc"], dip_txt]
-		if id == "donjon_roi" and not ProgressionManager.conquest_empire_complete(_conquest):
+		if id == "donjon_roi" and not ProgressionManager.conquest_empire_complete(_conquest, _save.get("adventure", {})):
 			_message.text += "\n\n★ Objectif final : verrouillé tant que tout Zimut n'est pas sous votre contrôle."
+		var unlock_hint: String = ProgressionManager.conquest_city_unlock_hint(_save.get("adventure", {}), id)
+		if unlock_hint != "" and not _conquest.get("owned", []).has(id):
+			_message.text += "\n\n🔒 Nation fermée : débloquez « %s » en mode Aventure pour pouvoir conquérir cette ville." % unlock_hint
 		# Reconquête ennemie : la garnison adverse grossit avec le temps.
 		var eg: int = ProgressionManager.conquest_enemy_garrison(_conquest, id)
 		if eg > 0:
@@ -1222,7 +1225,9 @@ func _select_city(id: String) -> void:
 			_attack.disabled = true
 			_attack.text = "HORS DE PORTÉE — CONQUÉREZ UNE VILLE RELIÉE"
 			var way: Array = ConquestSystem.path_to(owned, ProgressionManager.CONQUEST_ROUTES, id)
-			if way.size() > 1:
+			if ProgressionManager.conquest_city_unlock_hint(_save.get("adventure", {}), id) != "":
+				_attack.text = "🔒 NATION FERMÉE — DÉBLOQUEZ-LA EN AVENTURE"
+			elif way.size() > 1:
 				var names: Array = []
 				for w: Variant in way:
 					names.append(ProgressionManager.conquest_city_name(String(w)))
@@ -2298,7 +2303,8 @@ func _refresh_map_state() -> void:
 		pin.general = ConquestSystem.general_of(_conquest, id) != "" and st != "unknown"
 		pin.threatened = id == threat_city
 		pin.smoke = st == "lost" or (owned.has(id) and (ProgressionManager._is_city_ravaged(_conquest, id) or ConquestSystem.is_ruined(_conquest, id)))
-		pin.locked = id == "donjon_roi" and not ProgressionManager.conquest_empire_complete(_conquest)
+		pin.locked = (id == "donjon_roi" and not ProgressionManager.conquest_empire_complete(_conquest, _save.get("adventure", {}))) \
+			or (not owned.has(id) and not ProgressionManager.conquest_city_open(_save.get("adventure", {}), id))
 		pin.siege = 0 if owned.has(id) else ProgressionManager.conquest_siege_progress(_conquest, id)
 		pin.siege_max = ProgressionManager.CONQUEST_SIEGE_BATTLES
 		pin.level = ConquestSystem.city_level(_conquest, id) if owned.has(id) else 0

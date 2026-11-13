@@ -1373,6 +1373,23 @@ static func united_nations(conq: Dictionary) -> Array:
 			out.append(n)
 	return out
 
+## V159 : villes (hors capitale et Donjon) des Nations ouvertes en Aventure, ou déjà conquises.
+static func open_cities(data: Dictionary) -> Array:
+	var loop: MainLoop = Engine.get_main_loop()
+	var pm: Node = null
+	if loop is SceneTree:
+		pm = (loop as SceneTree).root.get_node_or_null("ProgressionManager")
+	var all_ids: Array = nation_cities("*")
+	if pm == null:
+		return all_ids
+	var adv: Dictionary = data.get("adventure", {})
+	var owned: Array = (data.get("conquest", {}) as Dictionary).get("owned", [])
+	var out: Array = []
+	for c: String in all_ids:
+		if owned.has(c) or bool(pm.call("conquest_city_open", adv, c)):
+			out.append(c)
+	return out
+
 ## Villes tenues / total pour une Nation.
 static func nation_progress(conq: Dictionary, nation: String) -> Vector2i:
 	var owned: Array = conq.get("owned", [])
@@ -1473,7 +1490,7 @@ static func chapter_progress(data: Dictionary, ch: Dictionary) -> Dictionary:
 					cur += 1
 			mx = 4
 		"all":
-			var all_ids: Array = nation_cities("*")
+			var all_ids: Array = open_cities(data)   # V159 : seules les Nations ouvertes en Aventure comptent
 			mx = maxi(1, all_ids.size())
 			for c: String in all_ids:
 				if (conq.get("owned", []) as Array).has(c):
