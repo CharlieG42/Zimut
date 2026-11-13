@@ -86,3 +86,8 @@ Alternative aux planches cuites, derrière le réglage « Sylvain en combat (pro
   chargé (l'attaque en reprend la poussée du livre). Les clips « Dead » ne sont pas utilisés : la mort du jeu est une dissolution en faisceau de lumière.
   Pistes : surcharger des os à l'exécution (bras qui bande l'arc, livre qui s'ouvre) si Meshy ne fournit pas mieux.
 - Pas de pointe d'arme calculée pour ces modèles : les projectiles partent du point de repli habituel.
+- **Tank** (V163) : un seul clip d'attaque (« Double_Combo_Attack ») + marche. Meshy lie la hache à trois os qui s'écartent pendant l'animation (tête et haut du manche
+  sur `thumb.01.R`, bas du manche sur `Bone_053` et `Bone_052`, deux os racine) : le manche s'étirait comme du caoutchouc. `tools/import_fbx.gd` accepte un 6e argument
+  « cible:os1,os2 » qui rend rigides les sommets dont l'os dominant est dans la liste ; commande utilisée :
+  `… -- tank.fbx assets/heroes3d/tank.glb none 1024 12000 "thumb.01.R:thumb.01.R,Bone_053,Bone_052"`. (Cible `hand.R` : la hache rétrécit, la main portant une autre échelle d'animation.)
+  À surveiller sur les autres modèles Meshy : un accessoire réparti sur plusieurs os (repérable en listant l'os dominant de chaque sommet) s'étire de la même façon.

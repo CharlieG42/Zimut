@@ -37,6 +37,16 @@ const MODELS := {
 			"cast":   {"clip": "Axe_Spin_Attack", "t0": 0.2, "t1": 1.8, "dur": 1.0, "loop": false, "key": 0.5},
 			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
 		}},
+	## Tank : un seul clip d'attaque (« Double_Combo_Attack » : deux coups de hache). La hache, que Meshy lie à trois os qui s'écartent
+	## (tête sur le pouce, bas du manche sur deux os racine), est rendue rigide au pouce à l'import (tools/import_fbx.gd, option « rigide »).
+	"Tank": {"path": "res://assets/heroes3d/tank.glb", "root_bone": "spine", "gain": 1.0,
+		"clips": {
+			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walking", "t0": 0.0, "t1": 1.0333, "dur": 1.0, "loop": true, "key": 0.0},
+			"attack": {"clip": "Double_Combo_Attack", "t0": 0.1, "t1": 1.2, "dur": 0.9, "loop": false, "key": 0.56},
+			"cast":   {"clip": "Double_Combo_Attack", "t0": 0.1, "t1": 2.2, "dur": 1.5, "loop": false, "key": 0.85},
+			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
+		}},
 	## Chasseur : « Attack » est un grand geste d'arc levé puis abaissé (pas de tir à l'arc tendu) ; le sort réutilise le même clip.
 	"Chasseur": {"path": "res://assets/heroes3d/chasseur.glb", "root_bone": "spine", "gain": 1.0,
 		"clips": {
@@ -57,7 +67,7 @@ const MODELS := {
 		}},
 }
 ## Classe du joueur (nom interne) ou nom de boss -> modèle.
-const CLASS_MODEL := {"Sylvain": "Sylvain", "Artificier": "Ingénieur", "Chasseur": "Chasseur", "Invocateur": "Invocateur"}
+const CLASS_MODEL := {"Sylvain": "Sylvain", "Artificier": "Ingénieur", "Chasseur": "Chasseur", "Invocateur": "Invocateur", "Tank": "Tank"}
 const BOSS_MODEL := {"Gobelin Roi": "Tharok", "Tharok le Végétal": "Tharok"}
 const CLIP_FRAMES := 24             # nombre d'images fictives d'une action (EntityView raisonne en images pour les temps d'impact)
 const SHADER := """

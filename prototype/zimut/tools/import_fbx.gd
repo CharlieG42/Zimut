@@ -3,7 +3,9 @@ extends SceneTree
 ## texture réduite (WebP avec perte), maillage simplifié (meshoptimizer, via les niveaux de détail de Godot),
 ## première animation renommée (nom « none » : toutes les animations gardent leur nom ; sans animation : rien à renommer), 4 influences de peau par sommet au plus.
 ## Les FBX bruts ne sont pas versionnés.
-##   godot --headless --path . -s tools/import_fbx.gd -- <entrée.fbx> <sortie.glb> <nom_animation> [taille_texture=1024] [triangles_max=7000]
+##   godot --headless --path . -s tools/import_fbx.gd -- <entrée.fbx> <sortie.glb> <nom_animation> [taille_texture=1024] [triangles_max=7000] [rigide]
+## « rigide » = cible:os1,os2,… (ex. hand.R:thumb.01.R,Bone_053) : les sommets dont l'os dominant est dans la liste deviennent 100 % liés à la cible.
+## Sert aux accessoires que Meshy répartit sur plusieurs os (hache du Tank : tête sur le pouce, bas du manche sur deux os racine → manche étiré).
 ## Pas d'écran nécessaire. Exemple (V153) :
 ##   godot --headless --path . -s tools/import_fbx.gd -- walking_meshy.fbx assets/zimut/zimut.glb Walk 1024 7000
 
@@ -15,6 +17,7 @@ func _init() -> void:
 		return
 	var tex_size: int = int(a[3]) if a.size() > 3 else 1024
 	var max_tris: int = int(a[4]) if a.size() > 4 else 7000
+	var rigid: String = a[5] if a.size() > 5 else ""
 	var doc := FBXDocument.new()
 	var st := FBXState.new()
 	if doc.append_from_file(a[0], st) != OK:
@@ -49,6 +52,8 @@ func _init() -> void:
 			print("texture ", img.get_width(), "x", img.get_height())
 	for mi2: Node in scene.find_children("*", "MeshInstance3D", true, false):
 		_simplify(mi2 as MeshInstance3D, max_tris)
+		if rigid != "":
+			_make_rigid(mi2 as MeshInstance3D, rigid)
 	var aps: Array = scene.find_children("*", "AnimationPlayer", true, false)
 	var ap: AnimationPlayer = aps[0] as AnimationPlayer if not aps.is_empty() else null
 	if ap != null:
@@ -185,3 +190,50 @@ func _compact(arrays: Array, indices: PackedInt32Array) -> Array:
 				out[k] = src
 	out[Mesh.ARRAY_INDEX] = new_idx
 	return out
+
+
+## Rend rigides les sommets dont l'os dominant est l'un des os sources ("cible:src1,src2") : 100 % sur l'os cible.
+func _make_rigid(mi: MeshInstance3D, spec: String) -> void:
+	var parts: PackedStringArray = spec.split(":")
+	if parts.size() != 2 or mi.skin == null:
+		push_error("rigide : format cible:os1,os2 attendu (et maillage avec peau)")
+		return
+	var skel: Skeleton3D = mi.get_node_or_null(mi.skeleton) as Skeleton3D
+	var skin: Skin = mi.skin
+	var names := {}
+	for b: int in range(skin.get_bind_count()):
+		var idx: int = skin.get_bind_bone(b)
+		names[skel.get_bone_name(idx) if (idx >= 0 and skel != null) else skin.get_bind_name(b)] = b
+	if not names.has(parts[0]):
+		push_error("rigide : os cible introuvable : " + parts[0])
+		return
+	var srcs := {}
+	for nm: String in parts[1].split(","):
+		if not names.has(nm):
+			push_error("rigide : os source introuvable : " + nm)
+			return
+		srcs[names[nm]] = true
+	var target: int = names[parts[0]]
+	var arrays: Array = mi.mesh.surface_get_arrays(0)
+	var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+	var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+	var count: int = (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
+	var per: int = bones.size() / count
+	var changed: int = 0
+	for v: int in range(count):
+		var best: int = 0
+		for k: int in range(1, per):
+			if weights[v * per + k] > weights[v * per + best]:
+				best = k
+		if srcs.has(bones[v * per + best]):
+			for k2: int in range(per):
+				bones[v * per + k2] = target if k2 == 0 else 0
+				weights[v * per + k2] = 1.0 if k2 == 0 else 0.0
+			changed += 1
+	arrays[Mesh.ARRAY_BONES] = bones
+	arrays[Mesh.ARRAY_WEIGHTS] = weights
+	var am := ArrayMesh.new()
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	am.surface_set_material(0, mi.mesh.surface_get_material(0))
+	mi.mesh = am
+	print("rigide : ", changed, " sommets liés à 100 % à ", parts[0])
