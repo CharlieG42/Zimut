@@ -7,7 +7,7 @@ const COL_PANEL := Color(0.94, 0.89, 0.78, 0.97)
 const COL_BORDER := Color(0.72, 0.58, 0.28, 1.0)
 const COL_TXT := Color(0.22, 0.15, 0.05)
 
-const TABS := [["general", "⚙  Général"], ["combat", "⚔  Combat"], ["graphismes", "🎨  Graphismes"], ["sauvegarde", "☁  Sauvegarde"]]
+const TABS := [["general", "⚙  Général"], ["combat", "⚔  Combat"], ["graphismes", "🎨  Graphismes"], ["sauvegarde", "☁  Sauvegarde"], ["apropos", "ℹ  À propos"]]
 const BOARD_VARIANTS: Array[String] = ["v2", "classic", "iso", "diorama"]
 ## Onglet ouvert (conservé pendant la session).
 static var _tab: int = 0
@@ -169,6 +169,7 @@ func _ready() -> void:
 
 	# — Sauvegarde (Cloud)
 	_build_cloud(page_list[3].get_child(0) as VBoxContainer)
+	_build_about(page_list[4].get_child(0) as VBoxContainer)
 
 	show_tab.call(clampi(_tab, 0, TABS.size() - 1))
 
@@ -196,6 +197,27 @@ func _ready() -> void:
 		PlayTimer.flush()
 		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn"))
 	box.add_child(back)
+
+## V164 : onglet « À propos » : provenance des ressources du jeu.
+const CREDITS: Array[String] = [
+	"Zimut — jeu tactique en développement.",
+	"Personnages 3D et leurs animations (Ingénieur, Chasseur, Invocateur, Tank, Sylvain, Tharok…) : modèles générés avec Meshy (meshy.ai).",
+	"Arène 3D : « Mini Arena » de Kenney (kenney.nl), licence CC0.",
+	"Aventuriers 3D : « Adventurers Character Pack » de Kay Lousberg (kaylousberg.com), licence CC0.",
+	"Décors de la nature : « Stylized Nature MegaKit » de Quaternius (quaternius.com), licence CC0.",
+	"Moteur : Godot Engine (godotengine.org), licence MIT.",
+]
+
+
+func _build_about(page: VBoxContainer) -> void:
+	for line: String in CREDITS:
+		var l := Label.new()
+		l.text = "•  " + line
+		l.add_theme_font_size_override("font_size", 20)
+		l.add_theme_color_override("font_color", COL_TXT)
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		page.add_child(l)
+
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  V49 : sauvegarde Cloud (Google Drive)
