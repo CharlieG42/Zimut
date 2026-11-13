@@ -92,7 +92,7 @@ Alternative aux planches cuites, derrière le réglage « Sylvain en combat (pro
   `… -- tank.fbx assets/heroes3d/tank.glb none 1024 12000 "thumb.01.R:thumb.01.R,Bone_053,Bone_052"`. (Cible `hand.R` : la hache rétrécit, la main portant une autre échelle d'animation.)
   À surveiller sur les autres modèles Meshy : un accessoire réparti sur plusieurs os (repérable en listant l'os dominant de chaque sommet) s'étire de la même façon.
 
-### Cadrage des modèles 3D (correctif V163)
+### Cadrage des modèles 3D (correctif V356)
 
 Sur téléphone, les héros à clips apparaissaient zoomés ×2 (tête et écharpe du Chasseur seules, Ingénieur coupé à la taille), alors que le même code cadrait bien sur ordinateur. Le cadrage mesure l'image rendue ; la cause exacte sur téléphone n'est pas établie (image arrivée en retard, taille d'image différente de `CELL`, ou autre). Trois protections, sans dépendre de la cause :
 - la taille réelle de l'image fait foi (plus la constante `CELL`) ;

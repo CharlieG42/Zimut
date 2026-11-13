@@ -1,0 +1,3 @@
+V356|Correction du cadrage des personnages 3D sur téléphone : ils pouvaient apparaître zoomés (tête seule, corps coupé). Le cadrage se vérifie maintenant et retombe sur une valeur sûre si la mesure est aberrante.
+V356|Nouvel onglet « À propos » dans les Réglages : provenance des modèles 3D (Meshy) et des autres ressources.
+V356|Le compteur d'images affiche, pour chaque personnage 3D, le détail de son cadrage (aide au diagnostic sur téléphone).
