@@ -1,0 +1,3 @@
+V162|Combat plus fluide : pendant votre tour, le chrono ne redessine plus tout l'écran à chaque image (cases, sorts, frise des tours), seulement sa jauge.
+V162|Mesuré sur un plateau de test : le temps de traitement par image passe d'environ 24 ms à 13 ms, sans changement visible.
+V162|Le décompte du chrono et ses alertes restent identiques.

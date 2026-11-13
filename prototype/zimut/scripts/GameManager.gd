@@ -23,6 +23,8 @@ signal turn_started(entity)
 signal ai_turn_requested(entity)
 signal fx(kind: String, data: Dictionary)
 signal state_changed()
+## V162 : le chrono de tour avance à chaque image ; seul l'affichage du chrono a besoin de le savoir (pas un rafraîchissement complet).
+signal turn_timer_ticked()
 
 const GRID_SIZE        := 10         # V73 : plateaux 10 × 10 (8 × 8 auparavant)
 const CELL_SIZE        := Vector2i(140, 140)   # conservé pour compatibilité
@@ -104,6 +106,7 @@ var _last_banner_round: int = 0
 var fight_biome: String          = "Forêt"  # biome du combat en cours
 ## V42 : timer de tour — temps restant en secondes (0 = pas de timer actif).
 var turn_timer_remaining: float  = 0.0
+var _was_busy: bool = false
 ## V42 : timer de tour — durée totale configurée (0 = désactivé).
 var turn_timer_duration: float   = 0.0
 var _turn_timer_epoch: int       = -1
@@ -1387,11 +1390,18 @@ func _process(delta: float) -> void:
 	if turn_timer_duration <= 0.0 or active_entity.is_empty() or game_over:
 		return
 	# Pause pendant les animations de sort / déplacement ; temps réel même si time_scale != 1
-	if not _grid_busy():
+	var busy: bool = _grid_busy()
+	if not busy:
 		if tick_turn_timer(delta / maxf(0.01, Engine.time_scale)):
 			_on_turn_timer_expired()
 			return
-	state_changed.emit()
+	# V162 : avant, « state_changed » partait à CHAQUE image pendant le chrono : recalcul de la portée, redessin des ~100 cases,
+	# des cartes de sorts, de la frise et du panneau. On ne le relance plus que lorsque les animations se terminent ;
+	# le chrono, lui, ne redessine que son panneau (turn_timer_ticked).
+	if _was_busy and not busy:
+		state_changed.emit()
+	_was_busy = busy
+	turn_timer_ticked.emit()
 
 
 func set_auto(value: bool) -> void:

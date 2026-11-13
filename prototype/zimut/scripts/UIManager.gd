@@ -1079,6 +1079,8 @@ func _connect_signals() -> void:
 		game_manager.turn_started.connect(_on_turn_started)
 	if not game_manager.state_changed.is_connected(_refresh):
 		game_manager.state_changed.connect(_refresh)
+	if not game_manager.turn_timer_ticked.is_connected(_on_timer_tick):
+		game_manager.turn_timer_ticked.connect(_on_timer_tick)
 	if not game_manager.spell_selected.is_connected(_on_spell_state):
 		game_manager.spell_selected.connect(_on_spell_state)
 	if not game_manager.message_requested.is_connected(_on_message):
@@ -1937,6 +1939,12 @@ func _refresh() -> void:
 		_stats.visible = true
 		_stats.queue_redraw()
 	_spell_scroll.modulate = Color(1, 1, 1, 1.0)
+
+
+## V162 : le chrono n'anime que la jauge du panneau du héros (plus de rafraîchissement complet à chaque image).
+func _on_timer_tick() -> void:
+	if is_instance_valid(_stats):
+		_stats.queue_redraw()
 
 
 func _on_spell_state(spell) -> void:
