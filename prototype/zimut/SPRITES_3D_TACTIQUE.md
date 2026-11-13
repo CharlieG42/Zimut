@@ -100,3 +100,11 @@ Sur téléphone, les héros à clips apparaissaient zoomés ×2 (tête et échar
 - garde-fou `Hero3D.size_plausible` : le personnage est normalisé à `HERO_H`, donc la taille de caméra doit rester entre 0,85 et 2,3 fois `HERO_H / CHAR_FRAC` (mesurée sur ordinateur : 2,7 à 4,4). Hors plage, on prend `expected_cam_size()`.
 
 Avec « Compteur d'images » allumé, une ligne par modèle indique `cam`, taille d'image, nombre de passes et `GARDE-FOU` si le repli a servi : c'est ce qu'il faut relever sur téléphone si le défaut persiste.
+
+### Cadrage de référence et recalage des couleurs (V357)
+
+Le test sur téléphone (V356) a montré que la mesure du cadrage sur l'image ne se stabilise jamais (8 passes pour chaque héros, caméra de l'Ingénieur à 2,47 au lieu de 3,15) et que l'Ingénieur sortait délavé (visage presque blanc, armure beige) alors qu'il est chaud sur ordinateur, sur les trois moteurs (Forward+, Mobile, Compatibilité). La cause n'est pas établie.
+- **Cadrage** : `ref_cam` (taille, hauteur de caméra) est mesuré une fois sur ordinateur et imposé. Le personnage est normalisé à `HERO_H` par ses os : le cadrage ne dépend pas de l'appareil. La mesure sur image (`_measure_frame`) ne sert plus que pour un modèle sans `ref_cam`.
+- **Couleurs** : `ref_lum` est la luminosité moyenne de l'image de référence. Si la luminosité rendue s'en écarte de plus de 8 %, `_calibrate_color` ajuste le gamma de l'albédo (jusqu'à 5 rendus) pour y revenir. Ne corrige que la luminosité : si le défaut vient d'ailleurs, la ligne de diagnostic le montre.
+- **Diagnostic** : `3D <modèle> : cam … réf … lum … α … bord … (réf …) → recalé g …`. `α` = opacité moyenne, `bord` = part de pixels semi-transparents.
+- Pour un nouveau modèle ou un réglage de lumière modifié, retirer `ref_cam` / `ref_lum`, lancer un rendu et relever les valeurs.
