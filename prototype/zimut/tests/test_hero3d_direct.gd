@@ -125,5 +125,25 @@ func _boot() -> void:
 	for sz: float in [2.72, 3.15, 3.17, 3.62, 3.74, 4.42]:
 		check(Hero3D.size_plausible(sz), "cadrage : %.2f (taille mesurée des 6 modèles) est acceptée" % sz)
 	check(Hero3D.size_plausible(Hero3D.expected_cam_size()), "cadrage : la taille de repli est elle-même plausible")
+	# V357 : cadrage de référence et recalage des couleurs
+	for k: String in ["Sylvain", "Tharok", "Ingénieur", "Chasseur", "Invocateur", "Tank"]:
+		var prof: Dictionary = Hero3D.MODELS[k]
+		var rc: Vector2 = prof.get("ref_cam", Vector2.ZERO)
+		check(rc.x > 0.0 and rc.y > 0.0 and Hero3D.size_plausible(rc.x) and float(prof.get("ref_lum", 0.0)) > 0.0,
+			"%s : cadrage et luminosité de référence présents et plausibles" % k)
+	var g1: float = Hero3D.gamma_for(1.0, 0.57, 0.80)       # image trop claire : gamma > 1 (assombrit)
+	var g2: float = Hero3D.gamma_for(1.0, 0.30, 0.15)       # image trop sombre : gamma < 1
+	check(g1 > 1.0 and g2 < 1.0, "recalage : trop clair → gamma > 1, trop sombre → gamma < 1 (%.2f / %.2f)" % [g1, g2])
+	check(absf(pow(0.80, g1) - 0.57) < 0.01, "recalage : 0,80^gamma retombe sur la cible 0,57 (%.3f)" % pow(0.80, g1))
+	check(Hero3D.gamma_for(1.0, 0.5, 0.9999) <= 3.0 and Hero3D.gamma_for(1.0, 0.5, 0.0001) >= 0.5, "recalage : gamma borné")
+	var im := Image.create(8, 8, false, Image.FORMAT_RGBA8)
+	im.fill(Color(0, 0, 0, 0))
+	for yy: int in range(4):
+		for xx: int in range(4):
+			im.set_pixel(xx, yy, Color(1, 1, 1, 1.0))
+	im.set_pixel(4, 0, Color(1, 1, 1, 0.5))
+	var st: Dictionary = Hero3D.image_stats(im)
+	check(int(st["n"]) == 17 and absf(float(st["lum"]) - 1.0) < 0.01 and absf(float(st["semi"]) - 1.0 / 17.0) < 0.01,
+		"image_stats : 17 pixels visibles, luminosité 1, un pixel de bord")
 	print("FIN : ", fails, " échec(s)")
 	quit(1 if fails > 0 else 0)

@@ -1,0 +1,3 @@
+V357|Personnages 3D : le cadrage utilise des valeurs de référence (plus de mesure sur l'image, qui ne se stabilisait pas sur téléphone) et les couleurs se recalent automatiquement si l'appareil rend l'image plus claire (Ingénieur délavé).
+V357|Le compteur d'images affiche, pour chaque personnage 3D, la luminosité et l'opacité mesurées avec leur référence.
+V357|Plus de passes de mesure au lancement d'un combat : les personnages 3D apparaissent plus vite.

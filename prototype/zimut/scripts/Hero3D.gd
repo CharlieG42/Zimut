@@ -13,6 +13,8 @@ const CHAR_FRAC := 0.74            # hauteur du personnage au repos dans la cell
 const FEET_ROW := 0.965            # ligne des pieds
 const HERO_H := 1.8
 const FRAME_MAX_PASSES := 8        # passes de cadrage au plus
+const LUM_START := 0.08           # écart de luminosité (8 %) à partir duquel les couleurs sont recalées
+const LUM_TOL := 0.04              # écart toléré après recalage
 const FRAME_TOL := 0.04            # écart toléré (4 %) entre la hauteur mesurée et la hauteur voulue
 const OUTLINE_FRAC := 0.0113       # contour de 1,6 px dans la cellule, en fraction de la hauteur du personnage (comme la cuisson)
 ## Deux familles de modèles :
@@ -20,10 +22,13 @@ const OUTLINE_FRAC := 0.0113       # contour de 1,6 px dans la cellule, en fract
 ##  - « clips » (modèles Meshy rigifiés, V163) : animations intégrées au .glb (AnimationPlayer). Chaque action du jeu
 ##    (idle, walk, attack, cast, hit) renvoie à un morceau de clip [t0, t1] (secondes) joué sur la durée [dur] du jeu ;
 ##    « key » = instant d'impact (fraction de l'action). Sans clip pour une action : pose tenue + mouvement du corps (« motion »).
+## ref_cam = (taille, hauteur) de caméra et ref_lum = luminosité moyenne, mesurées sur ordinateur (V357) : le cadrage est
+## imposé, et les couleurs sont recalées si l'appareil rend plus clair ou plus sombre. Pour les recalculer (nouveau modèle,
+## ou réglage de lumière modifié), retirer ces deux clés, lancer un rendu et relever `Hero3D.diag` / `image_stats`.
 const MODELS := {
 	"Sylvain": {"path": "res://assets/heroes3d/sylvain.glb", "tip_bone": "main.r",
-		"staff_x": -0.0035, "staff_z_max": 0.0045, "gain": 1.0},
-	"Tharok": {"path": "res://assets/heroes3d/tharok.glb", "root_bone": "spine", "gain": 1.0,
+		"staff_x": -0.0035, "staff_z_max": 0.0045, "gain": 1.0, "ref_cam": Vector2(4.42, 1.956), "ref_lum": 0.853},
+	"Tharok": {"path": "res://assets/heroes3d/tharok.glb", "root_bone": "spine", "gain": 1.0, "ref_cam": Vector2(3.62, 1.545), "ref_lum": 0.425,
 		"clips": {
 			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
 			"walk":   {"clip": "Walking", "t0": 0.0, "t1": 1.0333, "dur": 1.0, "loop": true, "key": 0.0},
@@ -31,7 +36,7 @@ const MODELS := {
 			"cast":   {"clip": "Double_Combo_Attack", "t0": 0.1, "t1": 1.5, "dur": 1.0, "loop": false, "key": 0.5},
 			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
 		}},
-	"Ingénieur": {"path": "res://assets/heroes3d/ingenieur.glb", "root_bone": "spine", "gain": 1.0,
+	"Ingénieur": {"path": "res://assets/heroes3d/ingenieur.glb", "root_bone": "spine", "gain": 1.0, "ref_cam": Vector2(3.151, 1.361), "ref_lum": 0.57,
 		"clips": {
 			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
 			"walk":   {"clip": "Walking", "t0": 0.0, "t1": 1.0333, "dur": 1.0, "loop": true, "key": 0.0},
@@ -41,7 +46,7 @@ const MODELS := {
 		}},
 	## Tank : un seul clip d'attaque (« Double_Combo_Attack » : deux coups de hache). La hache, que Meshy lie à trois os qui s'écartent
 	## (tête sur le pouce, bas du manche sur deux os racine), est rendue rigide au pouce à l'import (tools/import_fbx.gd, option « rigide »).
-	"Tank": {"path": "res://assets/heroes3d/tank.glb", "root_bone": "spine", "gain": 1.0,
+	"Tank": {"path": "res://assets/heroes3d/tank.glb", "root_bone": "spine", "gain": 1.0, "ref_cam": Vector2(3.174, 1.297), "ref_lum": 0.605,
 		"clips": {
 			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
 			"walk":   {"clip": "Walking", "t0": 0.0, "t1": 1.0333, "dur": 1.0, "loop": true, "key": 0.0},
@@ -50,7 +55,7 @@ const MODELS := {
 			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
 		}},
 	## Chasseur : « Attack » est un grand geste d'arc levé puis abaissé (pas de tir à l'arc tendu) ; le sort réutilise le même clip.
-	"Chasseur": {"path": "res://assets/heroes3d/chasseur.glb", "root_bone": "spine", "gain": 1.0,
+	"Chasseur": {"path": "res://assets/heroes3d/chasseur.glb", "root_bone": "spine", "gain": 1.0, "ref_cam": Vector2(2.72, 1.213), "ref_lum": 0.448,
 		"clips": {
 			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
 			"walk":   {"clip": "Walking", "t0": 0.0, "t1": 1.0333, "dur": 1.0, "loop": true, "key": 0.0},
@@ -59,7 +64,7 @@ const MODELS := {
 			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
 		}},
 	## Invocateur : « Charged_Spell_Cast_1 » = livre levé, tenu à hauteur du visage (≈ 2,1-2,9 s), puis relâché. L'attaque en reprend la poussée en avant.
-	"Invocateur": {"path": "res://assets/heroes3d/invocateur.glb", "root_bone": "spine", "gain": 1.0,
+	"Invocateur": {"path": "res://assets/heroes3d/invocateur.glb", "root_bone": "spine", "gain": 1.0, "ref_cam": Vector2(3.74, 1.684), "ref_lum": 0.297,
 		"clips": {
 			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
 			"walk":   {"clip": "Walking", "t0": 0.0, "t1": 1.0333, "dur": 1.0, "loop": true, "key": 0.0},
@@ -77,8 +82,9 @@ shader_type spatial;
 render_mode cull_back, specular_disabled;
 uniform sampler2D albedo_tex : source_color, filter_linear_mipmap, repeat_enable, hint_default_white;
 uniform float gain = 1.0;
+uniform float gamma = 1.0;     // V357 : correction automatique des couleurs (voir _calibrate_color)
 void fragment() {
-	vec3 c = texture(albedo_tex, UV).rgb * gain;
+	vec3 c = pow(texture(albedo_tex, UV).rgb, vec3(gamma)) * gain;
 	ALBEDO = c;
 	EMISSION = c * 0.16;
 	ROUGHNESS = 0.9;
@@ -121,6 +127,7 @@ var _mi: MeshInstance3D
 var _skin: Skin
 var _prof: Dictionary
 var _key: String = ""
+var _mat: ShaderMaterial = null
 var _rest_q: Array = []
 var _rest_p: Array = []
 var _tip_local := Vector3.ZERO
@@ -217,6 +224,7 @@ func _load_model(path: String) -> bool:
 	mat.shader = sh
 	mat.set_shader_parameter("albedo_tex", tex)
 	mat.set_shader_parameter("gain", float(_prof.get("gain", 1.0)))
+	_mat = mat
 	# contour : coque inversée (rendu des faces arrière, gonflée le long des normales)
 	var osh := Shader.new()
 	osh.code = OUTLINE_SHADER
@@ -313,38 +321,31 @@ func _frame() -> void:
 	if not is_inside_tree():
 		await tree_entered
 	_set_pose("idle", 0.0, false)
-	# plusieurs passes : large d'abord (taille réelle du modèle inconnue, il ne doit pas être coupé), puis affinée jusqu'à
-	# ce que la mesure soit stable (V164 : une image rendue en retard ou d'une autre taille ne fausse plus le cadrage)
-	_cam.size = 8.0
-	_cam.position = Vector3(0, 1.0, 10)
 	var passes: int = 0
 	var vp_h: float = float(CELL)
-	for pass_i: int in range(FRAME_MAX_PASSES):
-		await _render_wait()
-		var img: Image = vp.get_texture().get_image()
-		vp_h = float(img.get_height())      # la taille réelle de l'image fait foi, pas la constante CELL
-		var bb: Rect2i = _alpha_bbox(img)
-		if bb.size.y < 10:
-			push_warning("Hero3D : personnage introuvable dans l'image (cadrage)")
-			diag[_key] = "introuvable"
-			return
-		passes += 1
-		var wpp_old: float = _cam.size / vp_h
-		var feet_world: float = _cam.position.y + (0.5 * vp_h - float(bb.end.y)) * wpp_old
-		var f: float = (CHAR_FRAC * vp_h) / float(bb.size.y)
-		if pass_i >= 2 and absf(f - 1.0) < FRAME_TOL:
-			break      # stable : l'image mesurée correspond à la caméra et au cadrage voulu
-		_cam.size = _cam.size / f
-		var wpp: float = _cam.size / vp_h
-		_cam.position = Vector3(0, feet_world - (0.5 * vp_h - FEET_ROW * vp_h) * wpp, 10)
-	# garde-fou : le personnage est normalisé à HERO_H, la taille de caméra attendue en découle. Hors plage, la mesure est
-	# fausse (c'est ce qui coupait les héros sur téléphone) : on retombe sur le cadrage calculé.
+	var how: String = "mesuré"
 	var guarded: bool = false
-	if not size_plausible(_cam.size):
-		guarded = true
-		_cam.size = expected_cam_size()
-		_cam.position = Vector3(0, (FEET_ROW - 0.5) * _cam.size, 10)
-	diag[_key] = "cam %.2f img %d passes %d%s" % [_cam.size, int(vp_h), passes, " GARDE-FOU" if guarded else ""]
+	var ref_cam: Vector2 = _prof.get("ref_cam", Vector2.ZERO)
+	if ref_cam != Vector2.ZERO:
+		# V357 : cadrage de référence (mesuré une fois sur ordinateur). Le personnage est normalisé à HERO_H par ses os :
+		# le cadrage ne dépend donc pas de l'appareil, alors que la mesure sur l'image ne se stabilisait pas sur téléphone.
+		_cam.size = ref_cam.x
+		_cam.position = Vector3(0, ref_cam.y, 10)
+		how = "réf"
+	else:
+		passes = await _measure_frame()
+		if passes < 0:
+			return
+		if not size_plausible(_cam.size):
+			guarded = true
+			_cam.size = expected_cam_size()
+			_cam.position = Vector3(0, (FEET_ROW - 0.5) * _cam.size, 10)
+	await _render_wait()
+	var img: Image = vp.get_texture().get_image()
+	vp_h = float(img.get_height())
+	var st: Dictionary = image_stats(img)
+	var color_txt: String = await _calibrate_color(st)
+	diag[_key] = "cam %.2f %s%s img %d %s" % [_cam.size, how, " GARDE-FOU" if guarded else "", int(vp_h), color_txt]
 	if tip_ok:
 		var hand: int = _bone(String(_prof["tip_bone"]))
 		var g: Transform3D = _sk.global_transform * _sk.get_bone_global_pose(hand)
@@ -352,6 +353,88 @@ func _frame() -> void:
 	ready_ok = true
 	_last_key = ""
 	framed.emit()
+
+
+## Cadrage mesuré sur l'image rendue (outil de calibrage, et repli pour un modèle sans cadrage de référence).
+## Renvoie le nombre de passes, ou -1 si le personnage est introuvable.
+func _measure_frame() -> int:
+	_cam.size = 8.0
+	_cam.position = Vector3(0, 1.0, 10)
+	var passes: int = 0
+	for pass_i: int in range(FRAME_MAX_PASSES):
+		await _render_wait()
+		var img: Image = vp.get_texture().get_image()
+		var vp_h: float = float(img.get_height())
+		var bb: Rect2i = _alpha_bbox(img)
+		if bb.size.y < 10:
+			push_warning("Hero3D : personnage introuvable dans l'image (cadrage)")
+			diag[_key] = "introuvable"
+			return -1
+		passes += 1
+		var wpp_old: float = _cam.size / vp_h
+		var feet_world: float = _cam.position.y + (0.5 * vp_h - float(bb.end.y)) * wpp_old
+		var f: float = (CHAR_FRAC * vp_h) / float(bb.size.y)
+		if pass_i >= 2 and absf(f - 1.0) < FRAME_TOL:
+			break
+		_cam.size = _cam.size / f
+		var wpp: float = _cam.size / vp_h
+		_cam.position = Vector3(0, feet_world - (0.5 * vp_h - FEET_ROW * vp_h) * wpp, 10)
+	return passes
+
+
+## Recale les couleurs si la luminosité rendue s'écarte de la référence mesurée sur ordinateur (V357 : sur téléphone,
+## l'Ingénieur sortait délavé). Renvoie le texte de diagnostic.
+func _calibrate_color(st: Dictionary) -> String:
+	var l0: float = float(_prof.get("ref_lum", 0.0))
+	var lum: float = float(st["lum"])
+	var txt: String = "lum %.3f α %.2f bord %.2f" % [lum, float(st["alpha"]), float(st["semi"])]
+	if l0 <= 0.0 or _mat == null:
+		return txt
+	txt += " (réf %.3f)" % l0
+	if absf(lum / l0 - 1.0) <= LUM_START:
+		return txt
+	var g: float = 1.0
+	for i: int in range(5):
+		g = gamma_for(g, l0, lum)
+		_mat.set_shader_parameter("gamma", g)
+		await _render_wait()
+		st = image_stats(vp.get_texture().get_image())
+		lum = float(st["lum"])
+		if absf(lum / l0 - 1.0) <= LUM_TOL:
+			break
+	return txt + " → recalé g %.2f lum %.3f" % [g, lum]
+
+
+## Prochain gamma pour ramener la luminosité [lum] vers [cible] (la luminosité varie comme albédo^gamma).
+static func gamma_for(g: float, cible: float, lum: float) -> float:
+	var l: float = clampf(lum, 0.02, 0.98)
+	var c: float = clampf(cible, 0.02, 0.98)
+	return clampf(g * log(c) / log(l), 0.5, 3.0)
+
+
+## Statistiques de l'image rendue : luminosité moyenne des pixels opaques, opacité moyenne et part de pixels de bord
+## (semi-transparents). Sert au recalage des couleurs et au diagnostic.
+static func image_stats(img: Image) -> Dictionary:
+	var w: int = img.get_width()
+	var h: int = img.get_height()
+	var n_opaque: int = 0
+	var lum_sum: float = 0.0
+	var n_vis: int = 0
+	var a_sum: float = 0.0
+	var n_semi: int = 0
+	for y: int in range(h):
+		for x: int in range(w):
+			var c: Color = img.get_pixel(x, y)
+			if c.a > 0.05:
+				n_vis += 1
+				a_sum += c.a
+				if c.a < 0.95:
+					n_semi += 1
+			if c.a > 0.9:
+				n_opaque += 1
+				lum_sum += 0.299 * c.r + 0.587 * c.g + 0.114 * c.b
+	return {"lum": lum_sum / maxf(1.0, float(n_opaque)), "alpha": a_sum / maxf(1.0, float(n_vis)),
+		"semi": float(n_semi) / maxf(1.0, float(n_vis)), "n": n_vis}
 
 
 ## Taille de caméra attendue (hauteur visible en unités) pour un personnage de HERO_H occupant CHAR_FRAC de la cellule.
