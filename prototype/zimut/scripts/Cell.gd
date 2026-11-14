@@ -37,6 +37,9 @@ var flash: float = 0.0
 var team_mark: int = 0
 var mark_a: float = 0.0
 
+## V360 : la partie statique est figée dans la texture du plateau (BoardBake) ; la case ne dessine plus que ses surbrillances.
+var baked: bool = false
+
 var _base: Color = Color(0.43, 0.68, 0.27)
 var _forest_tile_texture: Texture2D = null
 var _tufts: Array = []
@@ -121,21 +124,24 @@ func _diamond(s: float = 1.0, y_off: float = 0.0) -> PackedVector2Array:
 	])
 
 
-func _outline(pts: PackedVector2Array, col: Color, width: float) -> void:
+func _outline(pts: PackedVector2Array, col: Color, width: float, ci: CanvasItem = null) -> void:
 	var closed: PackedVector2Array = pts.duplicate()
 	closed.append(pts[0])
-	draw_polyline(closed, col, width, true)
+	if ci == null:
+		draw_polyline(closed, col, width, true)
+	else:
+		ci.draw_polyline(closed, col, width, true)
 
 
 ## V49 : décor d'une paroi de gouffre (de a vers b = arête haute de la face) selon le biome :
 ## ombre qui s'épaissit vers le bas, strates, et racines / glaçons / coulées de sable.
-func _pit_wall_decor(a: Vector2, b: Vector2) -> void:
+func _pit_wall_decor(ci: CanvasItem, a: Vector2, b: Vector2) -> void:
 	# fondu vers le noir en bas de paroi
-	draw_polygon(PackedVector2Array([a + Vector2(0, DEPTH * 0.45), b + Vector2(0, DEPTH * 0.45), b + Vector2(0, DEPTH), a + Vector2(0, DEPTH)]),
+	ci.draw_polygon(PackedVector2Array([a + Vector2(0, DEPTH * 0.45), b + Vector2(0, DEPTH * 0.45), b + Vector2(0, DEPTH), a + Vector2(0, DEPTH)]),
 		PackedColorArray([Color(0, 0, 0, 0.0), Color(0, 0, 0, 0.0), Color(0, 0, 0, 0.55), Color(0, 0, 0, 0.55)]))
 	for k: int in range(2):
 		var d: float = 18.0 + 20.0 * float(k)
-		draw_line(a + Vector2(0, d), b + Vector2(0, d), Color(0, 0, 0, 0.16), 2.0)
+		ci.draw_line(a + Vector2(0, d), b + Vector2(0, d), Color(0, 0, 0, 0.16), 2.0)
 	var seedv: int = grid_position.x * 13 + grid_position.y * 7
 	for i: int in range(5):
 		var f: float = (float(i) + 0.5) / 5.0 + sin(float(seedv + i)) * 0.06
@@ -144,16 +150,16 @@ func _pit_wall_decor(a: Vector2, b: Vector2) -> void:
 		match biome:
 			"Forêt":   # racines et lianes qui pendent dans le vide
 				var root_col := Color(0.30, 0.21, 0.12, 0.9) if i % 2 == 0 else Color(0.22, 0.42, 0.18, 0.9)
-				draw_polyline(PackedVector2Array([p, p + Vector2(2.0, h * 0.5), p + Vector2(-1.5, h)]), root_col, 1.8, true)
+				ci.draw_polyline(PackedVector2Array([p, p + Vector2(2.0, h * 0.5), p + Vector2(-1.5, h)]), root_col, 1.8, true)
 				if i % 2 == 1:
-					draw_circle(p + Vector2(-1.5, h), 2.2, Color(0.35, 0.62, 0.25))
+					ci.draw_circle(p + Vector2(-1.5, h), 2.2, Color(0.35, 0.62, 0.25))
 			"Montagne":   # glaçons
-				draw_colored_polygon(PackedVector2Array([p + Vector2(-3, 0), p + Vector2(3, 0), p + Vector2(0, h)]), Color(0.86, 0.94, 1.0, 0.9))
-				draw_line(p + Vector2(-1, 1), p + Vector2(0, h * 0.7), Color(1, 1, 1, 0.8), 1.0)
+				ci.draw_colored_polygon(PackedVector2Array([p + Vector2(-3, 0), p + Vector2(3, 0), p + Vector2(0, h)]), Color(0.86, 0.94, 1.0, 0.9))
+				ci.draw_line(p + Vector2(-1, 1), p + Vector2(0, h * 0.7), Color(1, 1, 1, 0.8), 1.0)
 			"Désert":   # coulées de sable
-				draw_line(p, p + Vector2(0, h + 8.0), Color(0.93, 0.80, 0.52, 0.75), 2.2)
+				ci.draw_line(p, p + Vector2(0, h + 8.0), Color(0.93, 0.80, 0.52, 0.75), 2.2)
 			_:
-				draw_polyline(PackedVector2Array([p, p + Vector2(1.5, h * 0.6), p + Vector2(-1.0, h)]), Color(0, 0, 0, 0.35), 1.6, true)
+				ci.draw_polyline(PackedVector2Array([p, p + Vector2(1.5, h * 0.6), p + Vector2(-1.0, h)]), Color(0, 0, 0, 0.35), 1.6, true)
 
 
 var _veil_cache: Color = Color(0, 0, 0, 0)
@@ -166,43 +172,47 @@ func _veil_col() -> Color:
 	return _veil_cache
 
 
-func _draw() -> void:
+## V360 : partie STATIQUE de la case (falaises, sol, voile, contour) — dessinée sur le CanvasItem `ci`,
+## décalée de `off`. Le plateau la fige en une seule texture (BoardBake) : 100 cases ≈ 750 appels de dessin
+## par image en moins. Tant que `baked` est faux, la case se dessine elle-même (même rendu).
+func paint_static(ci: CanvasItem, off: Vector2) -> void:
+	ci.draw_set_transform(off, 0.0, Vector2.ONE)
 	# ── Falaises latérales (bord de l'île) ────────────────────────────────
 	var face_pal: Dictionary = BattleScenery.pal(biome)
 	if edge_left or pit_left:
 		var lt: Color = face_pal["l_t"]
 		var lb: Color = (face_pal["l_b"] as Color).darkened(0.35) if pit_left and not edge_left else face_pal["l_b"]
-		draw_polygon(PackedVector2Array([Vector2(-HW, 0), Vector2(0, HH), Vector2(0, HH + DEPTH), Vector2(-HW, DEPTH)]),
+		ci.draw_polygon(PackedVector2Array([Vector2(-HW, 0), Vector2(0, HH), Vector2(0, HH + DEPTH), Vector2(-HW, DEPTH)]),
 			PackedColorArray([lt, lt, lb, lb]))
-		draw_polygon(PackedVector2Array([Vector2(-HW, 0), Vector2(0, HH), Vector2(0, HH + 7), Vector2(-HW, 7)]),
+		ci.draw_polygon(PackedVector2Array([Vector2(-HW, 0), Vector2(0, HH), Vector2(0, HH + 7), Vector2(-HW, 7)]),
 			PackedColorArray([_base.darkened(0.15), _base.darkened(0.15), _base.darkened(0.3), _base.darkened(0.3)]))
-		draw_line(Vector2(-HW * 0.5, HH * 0.5 + 16), Vector2(-HW * 0.2, HH * 0.8 + 14), Color(0, 0, 0, 0.18), 2.0)
-		draw_line(Vector2(-HW * 0.9, 24), Vector2(-HW * 0.65, 30), Color(0, 0, 0, 0.15), 2.0)
+		ci.draw_line(Vector2(-HW * 0.5, HH * 0.5 + 16), Vector2(-HW * 0.2, HH * 0.8 + 14), Color(0, 0, 0, 0.18), 2.0)
+		ci.draw_line(Vector2(-HW * 0.9, 24), Vector2(-HW * 0.65, 30), Color(0, 0, 0, 0.15), 2.0)
 	if edge_right or pit_right:
 		var rt: Color = face_pal["r_t"]
 		var rb: Color = (face_pal["r_b"] as Color).darkened(0.35) if pit_right and not edge_right else face_pal["r_b"]
-		draw_polygon(PackedVector2Array([Vector2(0, HH), Vector2(HW, 0), Vector2(HW, DEPTH), Vector2(0, HH + DEPTH)]),
+		ci.draw_polygon(PackedVector2Array([Vector2(0, HH), Vector2(HW, 0), Vector2(HW, DEPTH), Vector2(0, HH + DEPTH)]),
 			PackedColorArray([rt, rt, rb, rb]))
-		draw_polygon(PackedVector2Array([Vector2(0, HH), Vector2(HW, 0), Vector2(HW, 7), Vector2(0, HH + 7)]),
+		ci.draw_polygon(PackedVector2Array([Vector2(0, HH), Vector2(HW, 0), Vector2(HW, 7), Vector2(0, HH + 7)]),
 			PackedColorArray([_base.darkened(0.3), _base.darkened(0.3), _base.darkened(0.42), _base.darkened(0.42)]))
-		draw_line(Vector2(HW * 0.3, HH * 0.7 + 18), Vector2(HW * 0.6, HH * 0.4 + 18), Color(0, 0, 0, 0.2), 2.0)
+		ci.draw_line(Vector2(HW * 0.3, HH * 0.7 + 18), Vector2(HW * 0.6, HH * 0.4 + 18), Color(0, 0, 0, 0.2), 2.0)
 
 	if pit_left and not edge_left:
-		_pit_wall_decor(Vector2(-HW, 0), Vector2(0, HH))
+		_pit_wall_decor(ci, Vector2(-HW, 0), Vector2(0, HH))
 	if pit_right and not edge_right:
-		_pit_wall_decor(Vector2(0, HH), Vector2(HW, 0))
+		_pit_wall_decor(ci, Vector2(0, HH), Vector2(HW, 0))
 
 	# ── Dessus de la case ─────────────────────────────────────────────────
 	var top: PackedVector2Array = _diamond()
 	if _forest_tile_texture != null:
 		# La texture est un losange transparent 128×64, aligné sur la géométrie de Cell.
-		draw_texture_rect(_forest_tile_texture, Rect2(-HW, -HH, HW * 2.0, HH * 2.0), false)
+		ci.draw_texture_rect(_forest_tile_texture, Rect2(-HW, -HH, HW * 2.0, HH * 2.0), false)
 	else:
-		draw_colored_polygon(top, _base)
-		draw_colored_polygon(_diamond(0.62), Color(1, 0.96, 0.78, 0.025))
+		ci.draw_colored_polygon(top, _base)
+		ci.draw_colored_polygon(_diamond(0.62), Color(1, 0.96, 0.78, 0.025))
 		# Fond de case plus clair au centre (bump lumineux)
-		draw_colored_polygon(_diamond(0.80), Color(1, 0.96, 0.78, 0.035))
-		draw_colored_polygon(_diamond(0.45), Color(1, 0.96, 0.78, 0.025))
+		ci.draw_colored_polygon(_diamond(0.80), Color(1, 0.96, 0.78, 0.035))
+		ci.draw_colored_polygon(_diamond(0.45), Color(1, 0.96, 0.78, 0.025))
 	# Les motifs du sol forestier intègrent déjà mousse et brins d’herbe :
 	# ne pas les doubler par les détails procéduraux, afin de garder les unités lisibles.
 	if biome != "Forêt" or _forest_tile_texture == null:
@@ -211,24 +221,29 @@ func _draw() -> void:
 			var h: float = t[1]
 			var sway: float = t[2]
 			var tc: Color = t[3] if t.size() > 3 else _base.darkened(0.22)
-			draw_line(p, p + Vector2(sway, -h), tc, 1.6)
-			draw_line(p + Vector2(2, 0), p + Vector2(2 + sway * 0.6, -h * 0.7), tc.lightened(0.25), 1.4)
+			ci.draw_line(p, p + Vector2(sway, -h), tc, 1.6)
+			ci.draw_line(p + Vector2(2, 0), p + Vector2(2 + sway * 0.6, -h * 0.7), tc.lightened(0.25), 1.4)
 	if biome != "Forêt" or _forest_tile_texture == null:
 		for f: Array in _flowers:
 			var fp: Vector2 = f[0]
-			draw_circle(fp, 2.6, f[1])
-			draw_circle(fp, 1.0, Color(0.95, 0.7, 0.1))
+			ci.draw_circle(fp, 2.6, f[1])
+			ci.draw_circle(fp, 1.0, Color(0.95, 0.7, 0.1))
 	# Reflets/ombres sur les arêtes pour donner du volume
 	# V58 : les 4 arêtes en une seule commande de dessin (64 cases × 4 appels économisés par image)
-	draw_multiline_colors(EDGE_PTS, EDGE_COLS, 2.0)
+	ci.draw_multiline_colors(EDGE_PTS, EDGE_COLS, 2.0)
 	# V61 lisibilité : le sol est calmé (texture moins contrastée) et la grille bien visible,
 	# pour que unités et cases colorées ressortent (comme Dofus / Waven).
 	# V63 : la teinte du voile suit le biome (vert forêt, sable, pierre, cristal…).
 	var veil: Color = _veil_col()
 	# V144 : voile allégé sur la neige des Cimes (à 0,26 il la rendait grise)
-	draw_colored_polygon(_diamond(0.99), Color(veil.r, veil.g, veil.b, 0.13 if biome == "Montagne" else 0.26))
-	_outline(top, Color(veil.r * 0.4, veil.g * 0.4, veil.b * 0.4, 0.66), 2.0)
+	ci.draw_colored_polygon(_diamond(0.99), Color(veil.r, veil.g, veil.b, 0.13 if biome == "Montagne" else 0.26))
+	_outline(top, Color(veil.r * 0.4, veil.g * 0.4, veil.b * 0.4, 0.66), 2.0, ci)
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
+
+func _draw() -> void:
+	if not baked:
+		paint_static(self, Vector2.ZERO)
 	# ── Surbrillances ─────────────────────────────────────────────────────
 	var t_ms: float = float(Time.get_ticks_msec()) / 1000.0
 	var pulse: float = 0.5 + 0.5 * sin(t_ms * 5.0 + _pulse_phase)

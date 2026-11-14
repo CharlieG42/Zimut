@@ -18,6 +18,14 @@ var views: Dictionary = {}          # uid -> EntityView
 var hover_cell: Vector2i = Vector2i(-1, -1)
 
 var _cells_layer: Node2D
+## V360 : partie statique des cases figée en une texture (voir CanvasBake / Cell.paint_static).
+const BAKE_BOARD := true
+## Résolution de cuisson mini / maxi (pixels de texture par unité de scène) ; la valeur réelle suit le zoom de la caméra
+## et l'échelle d'affichage, pour que 1 texel = 1 pixel d'écran (pas de flou).
+const BOARD_BAKE_MIN := 1.0
+const BOARD_BAKE_MAX := 1.6
+var _board_bake: CanvasBake
+var _board_bake_pending: bool = false
 var _biome: String = ""
 var _entity_layer: Node2D
 var _fx_layer: Node2D
@@ -117,6 +125,10 @@ func _build_layers() -> void:
 	_cells_layer = Node2D.new()
 	_cells_layer.name = "Cells"
 	add_child(_cells_layer)
+	if BAKE_BOARD:
+		_board_bake = CanvasBake.new()
+		_board_bake.name = "BoardBake"
+		_cells_layer.add_child(_board_bake)
 	# Lèvre de l'île et lianes devant les falaises (devant les cases, derrière les unités)
 	_scenery_over = SceneryOver.new()
 	_scenery_over.name = "SceneryOver"
@@ -183,6 +195,7 @@ func apply_biome(biome: String) -> void:
 			c.biome = biome
 			c.setup(c.grid_position)
 	_obstacle_sig = -1
+	_request_board_bake()
 
 func _build_cells() -> void:
 	cell_nodes = []
@@ -200,6 +213,67 @@ func _build_cells() -> void:
 			_cells_layer.add_child(cell)
 			row.append(cell)
 		cell_nodes.append(row)
+	_request_board_bake()
+
+
+## V360 : (re)fige le sol des cases. Regroupé en fin d'image : biome, gouffres et construction peuvent se suivre.
+func _request_board_bake() -> void:
+	if _board_bake == null:
+		return
+	# Tout de suite : la texture périmée est cachée et les cases se dessinent elles-mêmes (pas d'image avec l'ancien sol).
+	_board_bake.release()
+	for row: Array in cell_nodes:
+		for c: Cell in row:
+			if c.baked:
+				c.baked = false
+				c.queue_redraw()
+	if _board_bake_pending:
+		return
+	_board_bake_pending = true
+	_rebake_board.call_deferred()
+
+
+func _rebake_board() -> void:
+	_board_bake_pending = false
+	if _board_bake == null or not is_instance_valid(_board_bake) or cell_nodes.is_empty() or not _board_bake.is_inside_tree():
+		return
+	var n: int = cell_nodes.size()
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
+	for row: Array in cell_nodes:
+		for c: Cell in row:
+			lo = lo.min(c.position)
+			hi = hi.max(c.position)
+	# Marge : demi-losange (64×32), falaises (68) + lèvre, décor de paroi des gouffres, contour (2 px).
+	var area := Rect2(lo - Vector2(Cell.HW + 6.0, Cell.HH + 6.0), (hi - lo) + Vector2(Cell.HW * 2.0 + 12.0, Cell.HH * 2.0 + Cell.DEPTH + 18.0))
+	var ok: bool = await _board_bake.bake(area, _board_bake_scale(), _paint_board)
+	if not ok or cell_nodes.size() != n:
+		return
+	for row: Array in cell_nodes:
+		for c: Cell in row:
+			if is_instance_valid(c):
+				c.baked = true
+				c.queue_redraw()
+
+
+## Texels par unité de scène : zoom de la caméra × échelle d'affichage (étirement de la fenêtre).
+func _board_bake_scale() -> float:
+	var vp: Viewport = get_viewport()
+	if vp == null:
+		return BOARD_BAKE_MIN
+	var z: float = vp.get_final_transform().get_scale().x
+	var cam: Camera2D = vp.get_camera_2d()
+	if cam != null:
+		z *= cam.zoom.x
+	return clampf(z, BOARD_BAKE_MIN, BOARD_BAKE_MAX)
+
+
+## Dessine, dans l'ordre d'empilement des cases, la partie statique de chacune (cases de gouffre exclues).
+func _paint_board(ci: CanvasItem) -> void:
+	for row: Array in cell_nodes:
+		for c: Cell in row:
+			if is_instance_valid(c) and c.visible:
+				c.paint_static(ci, c.position)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -345,6 +419,7 @@ func _sync_void_pits() -> void:
 				pit.position = grid_to_screen(x, y)
 				pit.setup(Vector2i(x, y), game_manager.fight_biome, n, outer.has(Vector2i(x, y)))
 				_void_layer.add_child(pit)
+	_request_board_bake()
 
 
 func _sync_traps() -> void:
