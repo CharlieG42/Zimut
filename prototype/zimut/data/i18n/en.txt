@@ -638,6 +638,8 @@ Chaîne de foudre	Chain Lightning
 Colère	Wrath
 Coup bas	Low Blow
 Coup de bouclier	Shield Bash
+Lancer de bouclier	Shield Throw
+Javelot lourd	Heavy Javelin
 Coup final	Final Blow
 Coup écrasant	Crushing Blow
 Désintégration	Disintegration

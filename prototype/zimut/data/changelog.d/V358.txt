@@ -1,0 +1,3 @@
+V358|Tank : nouveau sort « Lancer de bouclier » (niveau 2, portée 3, 2 PA, 19 dégâts) : il peut enfin frapper sans se coller à l'ennemi.
+V358|Tank : nouveau sort « Javelot lourd » (niveau 7, portée 4, 3 PA, 36 dégâts).
+V358|Tank : « Provocation » passe à portée 3 (au lieu de 1).

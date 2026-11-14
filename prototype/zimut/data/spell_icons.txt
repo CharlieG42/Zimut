@@ -2,8 +2,10 @@ Nom,Icone
 Coup de bouclier,shield_bash
 Protection,shield_group
 Soin de combat,tank_heal
+Lancer de bouclier,shield_bash_v3
 Garde haute,shield
 Charge,power_strike
+Javelot lourd,arrow_pierce
 Revers de bouclier,shield_bash_v2
 Frappe puissante,power_strike_t1
 Cri de guerre,roar
