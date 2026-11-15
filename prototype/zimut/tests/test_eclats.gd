@@ -69,34 +69,46 @@ func _boot() -> void:
 	check(Shards.count(data, "Vents") == 0, "20 éclats dépensés au total")
 	check(Shards.shatter_yield(data, "Vents") < 20, "briser un niveau 5 rend moins que ce qui a été investi (%d < 20)" % Shards.shatter_yield(data, "Vents"))
 	Shards.shatter(data, "Vents")
-	# ── fortification ──
+	# ── fortification par éclats de Pierre (cumulable) ──
 	var item: Dictionary = {"type": "Épée (1 main)", "name": "Épée test", "level": 10, "rarity": "commun", "force": 5, "defense": 2}
 	check(Shards.can_fortify(data, item, "Rouages") != "", "sans éclats : fortification refusée")
 	Shards.add(data, "Rouages", 8)
 	data["gold"] = 1000
 	check(Shards.fortify(data, item, "Rouages") == "", "fortification Rouages (+1 PA)")
 	check(Shards.count(data, "Rouages") == 0 and int(data["gold"]) == 1000 - Shards.gold_cost(item), "coût payé (éclats + or)")
-	check(item["fort"]["fx"]["pa"] == 1, "l'objet porte +1 PA")
-	check(ItemRules.stat_line(item).contains("❖ +1 PA"), "caractéristiques : ❖ +1 PA marqué (%s)" % ItemRules.stat_line(item))
-	check(Shards.fortify(data, item, "Rouages") != "", "même bonus deux fois refusé")
+	check(Shards.pierre_fx(item).get("pa", 0) == 1, "l'objet porte +1 PA")
+	check(ItemRules.stat_line(item).contains("❖") and ItemRules.stat_line(item).contains("+1 PA"), "caractéristiques : ❖ +1 PA marqué (%s)" % ItemRules.stat_line(item))
+	check(Shards.fortify(data, item, "Rouages") != "", "2e pose du même éclat : coût doublé, éclats manquants")
 	Shards.add(data, "Vents", 6)
-	check(Shards.fortify(data, item, "Vents") == "" and not item["fort"]["fx"].has("pa") and item["fort"]["fx"]["pm"] == 1, "refortifier remplace l'ancien bonus")
+	check(Shards.fortify(data, item, "Vents") == "" and Shards.pierre_fx(item).get("pa", 0) == 1 and Shards.pierre_fx(item).get("pm", 0) == 1, "une autre Nation S'AJOUTE (PA et PM)")
+	Shards.add(data, "Désert", 100)
+	data["gold"] = 10000
+	for _i in range(Shards.PIERRE_MAX_STACK):
+		Shards.fortify(data, item, "Désert")
+	check(int(Shards.pierre_of(item)["Désert"]) == Shards.PIERRE_MAX_STACK, "même éclat posé %d fois : cumulable" % Shards.PIERRE_MAX_STACK)
+	check(Shards.pierre_fx(item).get("crit", 0) == 9, "critique cumulé : 3 × 3 = 9")
+	check(Shards.fortify(data, item, "Désert") != "", "au-delà du maximum de poses : refusé")
 	check(Shards.can_fortify(data, {"type": "Potion", "name": "x"}, "Vents") != "", "un non-équipement ne se fortifie pas")
+	# ancien format « fort » lu comme une pose
+	var legacy: Dictionary = {"type": "Casque", "name": "Ancien", "level": 1, "fort": {"biome": "Rouages", "fx": {"pa": 1}}}
+	check(Shards.pierre_fx(legacy).get("pa", 0) == 1 and ItemRules.stat_line(legacy).contains("+1 PA"), "ancien format « fort » toujours lu")
+	check(Shards.fortify(data, legacy, "Vents") == "" and legacy.has("pfort") and not legacy.has("fort") and Shards.pierre_of(legacy).size() == 2, "ancien format converti à la prochaine pose")
 	# ── effet réel sur les statistiques + plafond ──
 	var eq: Dictionary = {}
 	for i in range(4):
-		eq["slot%d" % i] = {"type": "Casque", "name": "c%d" % i, "level": 1, "fort": {"biome": "Rouages", "fx": {"pa": 1}}}
+		eq["slot%d" % i] = {"type": "Casque", "name": "c%d" % i, "level": 1, "pfort": {"Rouages": 1}}
 	var agg: Dictionary = ItemRules.aggregate(eq)
-	check(int(agg["fx"].get("pa", 0)) == Shards.FORT_CAP["pa"], "4 fortifications PA : plafonnées à +%d" % Shards.FORT_CAP["pa"])
+	check(int(agg["fx"].get("pa", 0)) == Shards.FORT_CAP["pa"], "4 fortifications PA : plafonnées à +%d par héros" % Shards.FORT_CAP["pa"])
 	var member: Dictionary = data["team"][0]
 	var base_pa: int = int(pm.member_stats(data, member)["pa"])
 	member["equipment"] = {"arme": item.duplicate(true)}
-	member["equipment"]["arme"]["fort"] = {"biome": "Rouages", "fx": {"pa": 1}}
+	member["equipment"]["arme"].erase("pfort")
+	member["equipment"]["arme"]["pfort"] = {"Rouages": 1}
 	var with_pa: int = int(pm.member_stats(data, member)["pa"])
 	check(with_pa == base_pa + 1, "member_stats : +1 PA grâce à la fortification (%d → %d)" % [base_pa, with_pa])
 	# ── sauvegarde : l'objet fortifié survit à une sérialisation ──
 	var back: Variant = JSON.parse_string(JSON.stringify(item))
-	check(back is Dictionary and (back as Dictionary).has("fort") and ItemRules.stat_line(back).contains("❖"), "l'objet fortifié survit à la sauvegarde JSON")
+	check(back is Dictionary and (back as Dictionary).has("pfort") and ItemRules.stat_line(back).contains("❖"), "l'objet fortifié survit à la sauvegarde JSON")
 	# ── 10 Nations couvertes, effets valides ──
 	var all_ok: bool = true
 	for b: String in Stones.ORDER:

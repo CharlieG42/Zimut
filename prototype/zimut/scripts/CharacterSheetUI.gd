@@ -1418,12 +1418,17 @@ func _build_gear_detail(slot: String) -> void:
 		stat_rows.add_child(row)
 	if not any:
 		stat_rows.add_child(_lbl("Aucune caractéristique de base.", 18, C_DIM))
-	var fort: String = Shards.fort_line(cur)
-	if fort != "":
-		var fl := _lbl("%s   (%s)" % [fort, Shards.shard_name(String(Shards.fort_of(cur).get("biome", "")))], 19, Color(0.78, 0.68, 1.0))
-		fl.name = "GearDetailFort"
-		fl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		v.add_child(fl)
+	var fort_lines: Array[String] = Shards.fort_lines(cur)
+	if not fort_lines.is_empty():
+		v.add_child(_lbl("FORTIFICATIONS", 14, C_DIM))
+		var fbox := VBoxContainer.new()
+		fbox.name = "GearDetailFort"
+		fbox.add_theme_constant_override("separation", 2)
+		v.add_child(fbox)
+		for fl_txt: String in fort_lines:
+			var fl := _lbl("❖ " + fl_txt, 19, Color(0.78, 0.68, 1.0))
+			fl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			fbox.add_child(fl)
 	for f: String in ItemRules.fx_lines(ItemRules.parse_effect(String(cur.get("effect", "")))):
 		var el := _lbl("✦ " + f, 19, C_TXT)
 		el.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

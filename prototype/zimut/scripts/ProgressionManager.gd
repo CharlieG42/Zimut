@@ -2254,6 +2254,13 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	for sb: String in shard_drop.keys():
 		Shards.add(data, sb, int(shard_drop[sb]))
 	data["last_shards"] = shard_drop
+	# V362 : éclat de caractéristique (Force, Défense…) avec un rang qui dépend du niveau du combat
+	var stat_drop: Dictionary = Shards.roll_stat_fight(_rng, fight_level, was_boss)
+	var stat_got: Dictionary = {}
+	if not stat_drop.is_empty():
+		Shards.stat_add(data, String(stat_drop["stat"]), int(stat_drop["rank"]), 1)
+		stat_got["%s|%d" % [String(stat_drop["stat"]), int(stat_drop["rank"])]] = 1
+	data["last_stat_shards"] = stat_got
 	data["level"] = frontier_level(data)
 	data["last_result"] = {"victory": true, "xp": report, "boss": was_boss, "fight_level": fight_level,
 		"turns": int(info.get("turns", 0)), "fight_no": fight_no, "replay": not frontier and not campaign}
@@ -2334,6 +2341,7 @@ func register_defeat(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	data["last_loots"] = []
 	data["last_resources"] = {}
 	data["last_shards"] = {}
+	data["last_stat_shards"] = {}
 	data["level"] = frontier_level(data)
 	data["last_result"] = {"victory": false, "xp": report, "boss": bool(info.get("boss", false)),
 		"fight_level": fight_level, "turns": int(info.get("turns", 0))}
@@ -2581,6 +2589,14 @@ func _dungeon_victory(data: Dictionary, adventure: Dictionary, key: String, biom
 			data["last_shards"] = ls
 			res["shards"] = sh
 		var lvl: int = Dungeons.room_level(biome, Dungeons.ROOMS)
+		var sdrop: Dictionary = Shards.roll_stat_dungeon(_rng, lvl)   # V362 : éclat de caractéristique
+		if not sdrop.is_empty():
+			Shards.stat_add(data, String(sdrop["stat"]), int(sdrop["rank"]), 1)
+			var lss: Dictionary = data.get("last_stat_shards", {})
+			var sk: String = "%s|%d" % [String(sdrop["stat"]), int(sdrop["rank"])]
+			lss[sk] = int(lss.get(sk, 0)) + 1
+			data["last_stat_shards"] = lss
+			res["stat_shard"] = sdrop
 		var gold: int = 100 + 15 * lvl
 		data["gold"] = int(data.get("gold", 0)) + gold
 		var res_name: String = String(CONQUEST_BIOME_RESOURCE.get(nation, Nations.resource_of(nation)))
