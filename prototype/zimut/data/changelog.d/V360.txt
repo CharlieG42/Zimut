@@ -1,0 +1,3 @@
+V360|Combat plus fluide : le sol des 100 cases, les gouffres et le fond de ciel sont dessinés une seule fois puis affichés en textures ; environ 2 000 appels de dessin par image tombent à environ 820 (mesure sur ordinateur, rendu logiciel).
+V360|Les surbrillances (portée, aperçu, survol) et la brume des gouffres restent dessinées par-dessus ; le plateau se refige tout seul quand le biome ou un gouffre change. Les 34 reflets de l'eau du fond tiennent en un seul dessin.
+V360|Coût : environ 35 Mo de mémoire vidéo en plus ; rendu quasi identique (arêtes très légèrement plus douces). À confirmer sur le téléphone avec le compteur d'images.
