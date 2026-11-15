@@ -1,0 +1,3 @@
+V362|Fiche Personnage › Équipement : toucher un objet porté affiche ses caractéristiques, effets et fortification (avec Changer / Retirer) ; un emplacement vide ouvre directement la liste.
+V362|Nouveau bouton « Équiper le meilleur » dans l'onglet Équipement : équipe le héros affiché avec les meilleurs objets de l'inventaire (niveau requis respecté).
+V362|Le même calcul sert maintenant au bouton « Équiper le meilleur » de l'équipe et à celui d'un héros seul, y compris hors équipe.
