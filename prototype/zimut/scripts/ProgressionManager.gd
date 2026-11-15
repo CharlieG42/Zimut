@@ -4185,19 +4185,30 @@ func rebuild_team(data: Dictionary, classes: Array) -> Array:
 ## Équipe automatiquement les meilleurs objets (valeur ItemRules.power) en respectant le
 ## niveau requis et la règle arme à 2 mains / bouclier. Retourne le nombre de changements.
 func auto_equip(data: Dictionary) -> int:
+	var classes: Array = []
+	for member: Dictionary in data.get("team", []):
+		classes.append(String(member.get("classe", "")))
+	return _auto_equip_classes(data, classes)
+
+
+## Même chose pour un seul héros, qu'il soit dans l'équipe ou non (fiche Personnage › Équipement).
+func auto_equip_hero(data: Dictionary, classe: String) -> int:
+	return _auto_equip_classes(data, [classe])
+
+
+func _auto_equip_classes(data: Dictionary, classes: Array) -> int:
 	var changes: int = 0
-	var team: Array = data.get("team", [])
 	var guard: int = 0
 	while guard < 80:
 		guard += 1
 		var inv: Array = data.get("inventory", [])
 		var best_gain: int = 0
-		var best_m: int = -1
+		var best_class: String = ""
 		var best_i: int = -1
-		for mi: int in range(team.size()):
-			var member: Dictionary = team[mi]
-			var lvl: int = member_level(data, String(member.get("classe", "")))
-			var eq: Dictionary = member.get("equipment", {})
+		for classe: Variant in classes:
+			var cl: String = String(classe)
+			var lvl: int = member_level(data, cl)
+			var eq: Dictionary = hero_equipment(data, cl)
 			for ii: int in range(inv.size()):
 				var it: Dictionary = inv[ii]
 				var slot: String = slot_for_type(String(it.get("type", "")))
@@ -4211,11 +4222,11 @@ func auto_equip(data: Dictionary) -> int:
 					gain -= ItemRules.power(eq["bouclier"])
 				if gain > best_gain:
 					best_gain = gain
-					best_m = mi
+					best_class = cl
 					best_i = ii
-		if best_m < 0:
+		if best_class == "":
 			break
-		if equip_item(data, best_m, best_i) != "":
+		if equip_hero_item(data, best_class, best_i) != "":
 			break
 		changes += 1
 	return changes

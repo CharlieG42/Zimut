@@ -43,6 +43,8 @@ var _content: VBoxContainer
 var _res_label: Label
 var _gear_pick: String = ""     # emplacement dont on choisit l'objet ("" = vue d'ensemble)
 var _gear_msg: String = ""
+var _gear_msg_good: bool = false  # message de succès (vert) plutôt que d'erreur (rouge)
+var _gear_detail: String = ""    # emplacement dont on consulte l'objet porté ("" = aucun)
 var _talent_sel: String = ""       # talent sélectionné dans l'arbre
 var _stone_pick: int = -1       # emplacement Pierre (0 ou 1) dont on choisit la Pierre (-1 = aucun)
 
@@ -347,6 +349,7 @@ func refresh() -> void:
 	_refresh_head()
 	_refresh_tabs()
 	for c in _content.get_children():
+		_content.remove_child(c)   # retrait immédiat : les nouveaux nœuds gardent leurs noms (tests, tutoriel)
 		c.queue_free()
 	if _tab == "stats":
 		_build_stats()
@@ -385,6 +388,7 @@ func _refresh_list() -> void:
 			_talent_sel = ""
 			_stone_pick = -1
 			_gear_pick = ""
+			_gear_detail = ""
 			refresh())
 		_list_box.add_child(btn)
 		var row := HBoxContainer.new()
@@ -519,6 +523,7 @@ func _refresh_tabs() -> void:
 			_tab = tab_id
 			if tab_id == "gear":
 				_gear_pick = ""
+				_gear_detail = ""
 				_stone_pick = -1
 				_gear_msg = ""
 			refresh())
@@ -1063,6 +1068,9 @@ func _build_gear() -> void:
 	if _gear_pick != "":
 		_build_gear_picker(_gear_pick)
 		return
+	if _gear_detail != "":
+		_build_gear_detail(_gear_detail)
+		return
 	var eq: Dictionary = ProgressionManager.hero_equipment(_save, _classe)
 	var agg: Dictionary = ItemRules.aggregate(eq)
 	var notes: PackedStringArray = []
@@ -1073,8 +1081,12 @@ func _build_gear() -> void:
 		notes.append(gov)
 	elif not _team_classes().has(_classe):
 		notes.append("Ce héros n'est pas dans l'équipe : son équipement est conservé et compte s'il devient gouverneur.")
+	_content.add_child(_gear_best_button())
 	if _gear_msg != "":
-		_content.add_child(_lbl(_gear_msg, 18, C_BAD))
+		var ml := _lbl(_gear_msg, 18, C_GOOD if _gear_msg_good else C_BAD)
+		ml.name = "GearMsg"
+		ml.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_content.add_child(ml)
 	var doll := HBoxContainer.new()
 	doll.name = "Paperdoll"
 	doll.add_theme_constant_override("separation", 18)
@@ -1164,8 +1176,13 @@ func _gear_tile(slot: String, eq: Dictionary) -> Control:
 	b.size = Vector2(RING_TILE, RING_TILE + 20.0)
 	b.tooltip_text = ItemRules.describe(it) if not it.is_empty() else "%s (vide)" % GearUi.slot_label(slot)
 	b.pressed.connect(func() -> void:
-		_gear_pick = slot
+		# Objet porté : on consulte d'abord ses caractéristiques ; emplacement vide : on choisit directement.
+		if it.is_empty():
+			_gear_pick = slot
+		else:
+			_gear_detail = slot
 		_gear_msg = ""
+		_gear_msg_good = false
 		refresh())
 	holder.add_child(b)
 	return holder
@@ -1261,6 +1278,129 @@ func _stone_socket(index: int, biome: String) -> Control:
 		refresh())
 	card.add_child(btn)
 	return card
+
+
+## Bouton « ÉQUIPER LE MEILLEUR » : équipe ce héros avec les meilleurs objets libres de l'inventaire
+## (niveau requis et règle arme 2 mains / bouclier respectés).
+func _gear_best_button() -> Button:
+	var n: int = _gear_total_rec()
+	var b := _btn("★  ÉQUIPER LE MEILLEUR" + ("  (%d)" % n if n > 0 else ""), C_GOOD if n > 0 else C_BORDER, 21, Vector2(0, 56))
+	b.name = "GearBest"
+	b.tooltip_text = "Équipe %s avec les meilleurs objets de l'inventaire (niveau requis respecté)." % _classe
+	b.pressed.connect(func() -> void:
+		var changes: int = ProgressionManager.auto_equip_hero(_save, _classe)
+		if changes > 0:
+			_persist()
+			_gear_msg = "%d objet%s équipé%s." % [changes, "s" if changes > 1 else "", "s" if changes > 1 else ""]
+			_gear_msg_good = true
+		else:
+			_gear_msg = "Rien de mieux à équiper pour %s." % _classe
+			_gear_msg_good = false
+		refresh())
+	return b
+
+
+## Fiche détaillée de l'objet porté dans un emplacement : caractéristiques, effets, fortification, panoplie.
+func _build_gear_detail(slot: String) -> void:
+	var cur: Dictionary = ProgressionManager.hero_equipment(_save, _classe).get(slot, {})
+	if cur.is_empty():
+		_gear_detail = ""
+		_build_gear_picker(slot)
+		return
+	var back := _btn("←  RETOUR À L'ÉQUIPEMENT", C_BORDER, 19, Vector2(0, 48))
+	back.name = "GearDetailBack"
+	back.pressed.connect(func() -> void:
+		_gear_detail = ""
+		refresh())
+	_content.add_child(back)
+	var edge: Color = ItemRules.rarity_color(cur)
+	var card := PanelContainer.new()
+	card.name = "GearDetail"
+	card.add_theme_stylebox_override("panel", _box(C_CARD, edge, 16, 4, 16))
+	_content.add_child(card)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 8)
+	card.add_child(v)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 14)
+	v.add_child(head)
+	var icon: TextureRect = GearUi.tile(slot, 84.0)
+	icon.custom_minimum_size = Vector2(84, 84)
+	head.add_child(icon)
+	var titles := VBoxContainer.new()
+	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(titles)
+	var nm := _lbl(ItemRules.display_name(cur), 28, edge.lightened(0.3), true)
+	nm.name = "GearDetailName"
+	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	titles.add_child(nm)
+	titles.add_child(_lbl("%s · %s · niveau %d" % [GearUi.slot_label(slot), ItemRules.rarity_label(cur), int(cur.get("level", 1))], 18, C_DIM))
+	var type_txt: String = String(cur.get("type", ""))
+	if type_txt != "":
+		titles.add_child(_lbl(type_txt, 16, C_DIM))
+	v.add_child(HSeparator.new())
+	var stat_rows := VBoxContainer.new()
+	stat_rows.name = "GearDetailStats"
+	stat_rows.add_theme_constant_override("separation", 4)
+	v.add_child(stat_rows)
+	var any: bool = false
+	for k: String in ItemRules.STAT_KEYS:
+		var val: int = int(cur.get(k, 0))
+		if val == 0:
+			continue
+		any = true
+		var row := HBoxContainer.new()
+		var l := _lbl(String(ClassRules.STAT_LABEL.get(k, k)), 22, C_TXT)
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(l)
+		row.add_child(_lbl("%+d" % val, 24, C_GOOD if val > 0 else C_BAD, true))
+		stat_rows.add_child(row)
+	if not any:
+		stat_rows.add_child(_lbl("Aucune caractéristique de base.", 18, C_DIM))
+	var fort: String = Shards.fort_line(cur)
+	if fort != "":
+		var fl := _lbl("%s   (%s)" % [fort, Shards.shard_name(String(Shards.fort_of(cur).get("biome", "")))], 19, Color(0.78, 0.68, 1.0))
+		fl.name = "GearDetailFort"
+		fl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(fl)
+	for f: String in ItemRules.fx_lines(ItemRules.parse_effect(String(cur.get("effect", "")))):
+		var el := _lbl("✦ " + f, 19, C_TXT)
+		el.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(el)
+	var sk: String = String(cur.get("set", ""))
+	if sk == "":
+		sk = ItemRules.set_key(String(cur.get("name", "")))
+	if sk != "" and ItemRules.SETS.has(sk):
+		var pl := _lbl("◈ " + String(ItemRules.SETS[sk]["label"]), 18, C_GOLD)
+		pl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(pl)
+	if _gear_msg != "":
+		_content.add_child(_lbl(_gear_msg, 18, C_BAD))
+	var change := _btn("CHANGER  (%d disponible%s)" % [_slot_free_count(slot), "s" if _slot_free_count(slot) > 1 else ""], C_GOLD, 20, Vector2(0, 56))
+	change.name = "GearDetailChange"
+	change.pressed.connect(func() -> void:
+		_gear_detail = ""
+		_gear_pick = slot
+		_gear_msg = ""
+		refresh())
+	_content.add_child(change)
+	var rm := _btn("RETIRER", C_BAD, 19, Vector2(0, 48))
+	rm.name = "GearDetailRemove"
+	rm.pressed.connect(func() -> void:
+		_gear_msg = ProgressionManager.unequip_hero_item(_save, _classe, slot)
+		_gear_msg_good = false
+		_persist()
+		_gear_detail = ""
+		refresh())
+	_content.add_child(rm)
+
+
+func _slot_free_count(slot: String) -> int:
+	var n: int = 0
+	for it: Variant in _save.get("inventory", []):
+		if it is Dictionary and GearUi.slot_of(it) == slot:
+			n += 1
+	return n
 
 
 ## Objets libres de l'inventaire pour un emplacement : "rec" = conseillés (niveau
