@@ -1,0 +1,3 @@
+V364|Fiche Personnage › Caractéristiques : nouvelle section « Résultats en combat » (PV, dégâts physiques et magiques, critique, résistances, soins, initiative, précision, altérations).
+V364|Les résultats affichés utilisent les mêmes formules que le combat (nouveau module StatEffects partagé par Combat et GameManager).
+V364|Fiche Personnage › Caractéristiques : les règles de calcul sont rappelées tout en bas de l onglet.
