@@ -216,14 +216,14 @@ static func zone_cells(center: Vector2i, r: int, shape: String, grid_size: int) 
 static func calc_damage(att: Dictionary, tgt: Dictionary, base: float, dtype: String,
 		ignore_def: float, force_crit: bool, simulate: bool) -> Dictionary:
 	var stat: float = float(att.get("force", 0)) if dtype == "phys" else float(att.get("intelligence", 0))
-	var mult: float = 1.0 + stat / 200.0
+	var mult: float = StatEffects.damage_stat_mult(stat)
 	mult *= 1.0 + status_value(att, "dmg_up") / 100.0
 	mult *= maxf(0.1, 1.0 - status_value(att, "weaken") / 100.0)
 
 	var back: bool = is_behind(Vector2i(int(att["x"]), int(att["y"])),
 		Vector2i(int(tgt["x"]), int(tgt["y"])), tgt.get("facing", Vector2i.ZERO))
 	if back:
-		mult *= 1.25
+		mult *= StatEffects.BACK_MULT
 
 	# Effets d'objets : dégâts magiques +%, critique +%
 	var afx: Dictionary = att.get("fx", {})
@@ -233,7 +233,7 @@ static func calc_damage(att: Dictionary, tgt: Dictionary, base: float, dtype: St
 		mult *= 1.0 + float(afx.get("phys_pct", 0)) / 100.0
 	# V42 : bonus de l'arbre de talents du héros (via fx)
 	mult *= float(afx.get("talent_dmg_pct", 1.0))
-	var crit_chance: float = clampf(0.05 + float(att.get("agility", 0)) / 400.0 + float(afx.get("crit", 0)) / 100.0 + float(afx.get("talent_crit_pct", 0.0)) / 100.0, 0.05, 0.6)
+	var crit_chance: float = StatEffects.crit_chance(float(att.get("agility", 0)), float(afx.get("crit", 0)), float(afx.get("talent_crit_pct", 0.0)))
 	var crit: bool = force_crit or has_status(att, "mark")
 	if simulate:
 		if not crit:
@@ -241,20 +241,19 @@ static func calc_damage(att: Dictionary, tgt: Dictionary, base: float, dtype: St
 	elif not crit:
 		crit = randf() < crit_chance
 	if crit:
-		mult *= 1.5
+		mult *= StatEffects.CRIT_MULT
 
 	var res: float
 	if dtype == "phys":
 		var d: float = float(tgt.get("defense", 0)) * (1.0 - ignore_def / 100.0)
-		res = d / (d + 100.0) + status_value(tgt, "def_up") / 100.0
+		res = StatEffects.phys_resistance(d, status_value(tgt, "def_up"))
 	else:
-		var d2: float = float(tgt.get("defense", 0)) * 0.5
-		res = d2 / (d2 + 100.0) + status_value(tgt, "mres_up") / 100.0 + float(tgt.get("fx", {}).get("mres", 0)) / 100.0
+		res = StatEffects.mag_resistance(float(tgt.get("defense", 0)), float(tgt.get("fx", {}).get("mres", 0)), status_value(tgt, "mres_up"))
 	res = clampf(res, 0.0, 0.85)
 
 	var dmg: float = base * mult * (1.0 - res)
 	if not simulate:
-		dmg *= randf_range(0.93, 1.07)
+		dmg *= randf_range(1.0 - StatEffects.DMG_VARIANCE, 1.0 + StatEffects.DMG_VARIANCE)
 	return {"dmg": maxi(1, roundi(dmg)), "crit": crit, "back": back}
 
 

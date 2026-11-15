@@ -657,6 +657,67 @@ func _build_stats() -> void:
 		for e in extras:
 			fl.add_child(_chip(e, Color(0.65, 0.55, 0.95), 16))
 		_content.add_child(fl)
+	_build_stat_results(st)
+	_build_stat_rules()
+
+
+## Ce que valent concrètement les caractéristiques (dégâts, résistances, critique, soins…).
+func _build_stat_results(st: Dictionary) -> void:
+	_content.add_child(_lbl("RÉSULTATS EN COMBAT", 15, C_DIM))
+	var grid := GridContainer.new()
+	grid.name = "StatResults"
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 8)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_content.add_child(grid)
+	var cols: Dictionary = {"pv": STAT_COLOR["vita"], "phys": STAT_COLOR["force"], "mag": STAT_COLOR["intelligence"],
+		"crit": STAT_COLOR["agility"], "phys_res": STAT_COLOR["defense"], "mag_res": STAT_COLOR["defense"],
+		"heal": STAT_COLOR["wisdom"], "init": STAT_COLOR["agility"], "anti_dodge": STAT_COLOR["wisdom"],
+		"alter": STAT_COLOR["wisdom"]}
+	for r: Dictionary in StatEffects.results(st):
+		var col: Color = cols.get(String(r["id"]), Color(0.65, 0.55, 0.95))
+		var card := PanelContainer.new()
+		card.name = "Result_" + String(r["id"])
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.tooltip_text = String(r["detail"])
+		card.add_theme_stylebox_override("panel", _box(C_CARD, col.darkened(0.35), 12, 2, 8))
+		var v := VBoxContainer.new()
+		v.add_theme_constant_override("separation", 0)
+		card.add_child(v)
+		var h := HBoxContainer.new()
+		v.add_child(h)
+		var t := _lbl(String(r["title"]), 17, col.lightened(0.2))
+		t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		t.clip_text = true
+		h.add_child(t)
+		var val := _lbl(String(r["value"]), 24, C_GOLD, true)
+		val.name = "ResultValue"
+		h.add_child(val)
+		var d := _lbl(String(r["detail"]), 13, C_DIM)
+		d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		d.custom_minimum_size = Vector2(60, 0)
+		v.add_child(d)
+		grid.add_child(card)
+
+
+## Règles de calcul, tout en bas de l'onglet.
+func _build_stat_rules() -> void:
+	_content.add_child(_lbl("RÈGLES DE CALCUL", 15, C_DIM))
+	var card := PanelContainer.new()
+	card.name = "StatRules"
+	card.add_theme_stylebox_override("panel", _box(C_CARD, C_BORDER, 12, 2, 12))
+	var rt := RichTextLabel.new()
+	rt.bbcode_enabled = true
+	rt.fit_content = true
+	rt.scroll_active = false
+	rt.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rt.add_theme_font_size_override("normal_font_size", 16)
+	rt.add_theme_font_size_override("bold_font_size", 16)
+	rt.add_theme_color_override("default_color", C_TXT)
+	rt.text = StatEffects.rules_bbcode()
+	card.add_child(rt)
+	_content.add_child(card)
 
 
 ## Carte compacte d'une caractéristique : titre + total, jauge, détail coloré, boutons − / +.

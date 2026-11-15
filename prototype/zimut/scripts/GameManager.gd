@@ -1160,7 +1160,7 @@ func start_battle() -> void:
 	active_entity = {}
 	turn_order = all_entities()
 	for e: Dictionary in turn_order:
-		e["init"] = float(e.get("agility", 0)) + _rng.randf_range(-25.0, 25.0)
+		e["init"] = float(e.get("agility", 0)) + _rng.randf_range(-StatEffects.INIT_RANDOM, StatEffects.INIT_RANDOM)
 	# Bestiaire (V18) : chaque ennemi présent est inscrit
 	if not active_save.is_empty():
 		for en: Dictionary in enemies:
@@ -1923,7 +1923,7 @@ func _apply_damage(attacker: Dictionary, tgt: Dictionary, dmg: int, dtype: Strin
 		return 0
 	if not ignore_dodge and dtype == "phys" and Combat.has_status(tgt, "dodge"):
 		# La Sagesse (précision) de l'attaquant réduit l'esquive de la cible
-		var dodge_chance: float = Combat.status_value(tgt, "dodge") - float(attacker.get("wisdom", 0)) * 0.25
+		var dodge_chance: float = StatEffects.dodge_chance(Combat.status_value(tgt, "dodge"), float(attacker.get("wisdom", 0)))
 		if _rng.randf() * 100.0 < dodge_chance:
 			fx.emit("status", {"target": tgt, "text": "Esquive !", "color": Color(0.7, 0.95, 0.5)})
 			return 0
@@ -1977,7 +1977,7 @@ func _apply_status(src: Dictionary, tgt: Dictionary, id: String, turns: int, val
 			return
 		# Altérations de contrôle : la Sagesse de la cible (vs celle du lanceur) peut les faire échouer
 		if not src.is_empty() and id in ["stun", "root", "slow", "curse", "weaken"]:
-			var land: float = clampf(0.9 + (float(src.get("wisdom", 0)) - float(tgt.get("wisdom", 0))) / 250.0, 0.5, 1.0)
+			var land: float = StatEffects.alteration_land(float(src.get("wisdom", 0)), float(tgt.get("wisdom", 0)))
 			if _rng.randf() > land:
 				fx.emit("status", {"target": tgt, "text": "Résiste", "color": Color(0.8, 1.0, 0.8)})
 				return
@@ -2040,10 +2040,8 @@ func _heal_amount(caster: Dictionary, p: Dictionary, t: Dictionary) -> int:
 	# V42 : bonus de soins de l'arbre de talents du héros
 	var talent_heal: float = float(caster.get("fx", {}).get("talent_heal_pct", 1.0))
 	if int(p["heal"]) > 0:
-		amt = roundi(float(p["heal"]) * (1.0 + float(caster.get("intelligence", 0)) / 300.0)
-			* (1.0 + float(caster.get("wisdom", 0)) / 300.0)
-			* (1.0 + float(caster.get("fx", {}).get("heal_pct", 0)) / 100.0)
-			* talent_heal)
+		amt = roundi(float(p["heal"]) * StatEffects.heal_mult(float(caster.get("intelligence", 0)), float(caster.get("wisdom", 0)),
+			float(caster.get("fx", {}).get("heal_pct", 0)), talent_heal))
 	if int(p["heal_pct"]) > 0:
 		amt = roundi(float(t["max_pv"]) * float(p["heal_pct"]) / 100.0 * talent_heal)
 	return amt
