@@ -47,6 +47,14 @@ var _phase: float = 0.0
 # V30 : profondeur (ombre portée, contre-jour, lumière du biome, touffes devant les pieds)
 var _shadow: Sprite2D = null
 var _rim: Sprite2D = null
+## V361 : contour sombre par 4 copies de la silhouette décalées en diagonale, derrière le sprite. Le contour du shader
+## (FLASH_SHADER) est coupé sur mobile : sans ces copies, les unités n'avaient aucun contour sur téléphone.
+const OUTLINE_PX := 2.6          # décalage des copies (≈ 1,8 px de contour sur les bords droits)
+const OUTLINE_PX_ACTIVE := 3.4   # unité active ou survolée
+const OUTLINE_DIRS: Array[Vector2] = [Vector2(-0.7071, -0.7071), Vector2(0.7071, -0.7071), Vector2(-0.7071, 0.7071), Vector2(0.7071, 0.7071)]
+var _outl: Array[Sprite2D] = []
+## Contour / flash par shader : coupé sur mobile (voir _load_texture). Modifiable pour reproduire le rendu du téléphone.
+static var shader_outline: bool = not OS.has_feature("mobile")
 var _front: FrontTufts = null
 var _base_sc: float = 1.0
 var _light: Dictionary = {}
@@ -203,6 +211,11 @@ func setup(e: Dictionary) -> void:
 	_shadow = Sprite2D.new()
 	_shadow.centered = true
 	add_child(_shadow)
+	for i: int in OUTLINE_DIRS.size():
+		var o := Sprite2D.new()
+		o.visible = false
+		add_child(o)
+		_outl.append(o)
 	_rim = Sprite2D.new()
 	add_child(_rim)
 	sprite = Sprite2D.new()
@@ -632,6 +645,32 @@ func _apply_tex(t: Texture2D) -> void:
 		_ph = height
 
 
+## Couleur du contour : bleu nuit pour les alliés, rouge sombre pour les ennemis (multipliée à la silhouette).
+static func outline_color(ent: Dictionary) -> Color:
+	return Color(0.04, 0.10, 0.24) if String(ent.get("team", "")) == "player" else Color(0.26, 0.05, 0.05)
+
+
+## Les copies de contour suivent le sprite (texture, pose, échelle). Pas de contour pour les entités posées.
+func _sync_outline() -> void:
+	var show: bool = _has_tex and sprite.visible and not _falling and not _is_static()
+	var d: float = OUTLINE_PX_ACTIVE if (bool(entity.get("is_active", false)) or hovered) else OUTLINE_PX
+	var oc: Color = outline_color(entity)
+	for i: int in _outl.size():
+		var o: Sprite2D = _outl[i]
+		o.visible = show
+		if not show:
+			continue
+		o.texture = sprite.texture
+		o.offset = sprite.offset
+		o.centered = sprite.centered
+		o.flip_h = sprite.flip_h
+		o.scale = sprite.scale
+		o.rotation = sprite.rotation
+		o.skew = sprite.skew
+		o.position = sprite.position + OUTLINE_DIRS[i] * d
+		o.self_modulate = Color(oc.r, oc.g, oc.b, sprite.self_modulate.a * sprite.modulate.a)
+
+
 ## Entités posées (terrain, mécanismes, balises) : pas de respiration ni de touffes.
 func _is_static() -> bool:
 	return bool(entity.get("static", false)) or bool(entity.get("terrain", false)) or bool(entity.get("beacon", false))
@@ -769,6 +808,9 @@ func _target_height() -> float:
 
 ## Hauteur d'un boss à l'écran (V359 : 150 → 195 px, +30 %, pour qu'il pèse davantage face aux héros de 104 px).
 const BOSS_HEIGHT := 195.0
+## V361 : héros, ennemis et invocations agrandis de 10 % pour être mieux distingués sur un écran de téléphone
+## (les cases ne changent pas ; le boss, déjà à 195 px, et l'Arbre non plus).
+const UNIT_SCALE := 1.10
 const BOSS_HEIGHT_BASE := 150.0
 
 
@@ -777,14 +819,14 @@ static func height_for(ent: Dictionary) -> float:
 		return BOSS_HEIGHT
 	match String(ent.get("classe", "")):
 		"Troll":
-			return 118.0
+			return 118.0 * UNIT_SCALE
 		"Dragonnet":
-			return 100.0
+			return 100.0 * UNIT_SCALE
 		"Arbre":
 			return 150.0
 	if ent.get("entity_type", "") == "Summon":
-		return 76.0
-	return 104.0 if ent.get("entity_type", "") == "Player" else 92.0
+		return 76.0 * UNIT_SCALE
+	return (104.0 if ent.get("entity_type", "") == "Player" else 92.0) * UNIT_SCALE
 
 
 func _load_texture() -> void:
@@ -808,7 +850,7 @@ func _load_texture() -> void:
 	# Le shader de contour/flash peut échouer sur certains pilotes Android
 	# et rendre le Sprite2D entièrement invisible. Sur mobile, privilégier la
 	# texture native : le personnage reste visible même sans contour animé.
-	if not OS.has_feature("mobile"):
+	if shader_outline:
 		if _shader == null:
 			_shader = Shader.new()
 			_shader.code = FLASH_SHADER
@@ -893,6 +935,7 @@ func _process(delta: float) -> void:
 		_rim.flip_h = sprite.flip_h
 		_rim.position = sprite.position + ld * 4.0
 		_rim.visible = not _falling
+		_sync_outline()
 		# ombre portée au sol (ne suit pas le saut, se resserre quand il est en l'air)
 		var air: float = clampf((bob + hop) / 14.0, 0.0, 1.0)
 		_shadow.flip_h = sprite.flip_h
