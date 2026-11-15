@@ -2239,26 +2239,20 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 
 ## Balises du Chasseur : toute zone d'attaque lancée par le Chasseur est répliquée (même zone,
 ## mêmes dégâts) autour de TOUTES ses balises (sauf celle qui est au centre du lancer).
-## Un ennemi déjà touché par la zone d'origine ou par une autre réplique n'est pas touché deux fois.
+## Un ennemi est touché autant de fois que de zones qui le couvrent (zone d'origine + une par balise).
 func _beacon_replicas(caster: Dictionary, spell: Dictionary, p: Dictionary, cell: Vector2i, base: float) -> Dictionary:
-	var hit_cells: Array[Vector2i] = Combat.zone_cells(cell, int(p["zone_r"]), String(p["zone_shape"]), GRID_SIZE)
 	var beacons: Array = beacons_of(caster)
 	if beacons.is_empty():
 		return {}
-	var already: Array = []
-	for e0: Dictionary in enemies_of(caster):
-		if hit_cells.has(pos_of(e0)):
-			already.append(int(e0["uid"]))
 	var total: int = 0
 	for b2: Dictionary in beacons:
 		var bpos: Vector2i = pos_of(b2)
 		if bpos == cell:
-			continue
+			continue   # la zone d'origine est déjà centrée sur cette balise
 		var rep_cells: Array[Vector2i] = Combat.zone_cells(bpos, int(p["zone_r"]), String(p["zone_shape"]), GRID_SIZE)
 		for e: Dictionary in enemies_of(caster):
-			if rep_cells.has(pos_of(e)) and is_alive(e) and not bool(e.get("beacon", false)) \
-					and not already.has(int(e["uid"])):
-				already.append(int(e["uid"]))
+			# Un ennemi est touché autant de fois que de zones qui le couvrent (origine + une par balise).
+			if rep_cells.has(pos_of(e)) and is_alive(e) and not bool(e.get("beacon", false)):
 				total += _hit_target(caster, spell, p, e, base)
 		fx.emit("beacon", {"from": bpos, "cells": rep_cells})
 	if total <= 0:

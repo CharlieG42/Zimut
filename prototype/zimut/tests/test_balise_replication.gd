@@ -68,6 +68,29 @@ func _run() -> void:
 		var pv0: int = int(en["current_pv"])
 		ck(gm.cast_spell(ch, ex, cast_cell), "Tir explosif lancé")
 		ck(int(en["current_pv"]) < pv0, "l'ennemi près d'une balise est touché par la réplique (%d → %d)" % [pv0, int(en["current_pv"])])
+	# Un ennemi couvert par plusieurs zones répliquées est touché une fois par zone
+	var bsx: Array = gm.beacons_of(ch)
+	if bsx.size() == 2:
+		var e2: Dictionary = gm.enemies[1]
+		var spot := Vector2i(-1, -1)
+		for y2: int in range(1, gm.GRID_SIZE - 1):
+			for x2: int in range(1, gm.GRID_SIZE - 1):
+				var q := Vector2i(x2, y2)
+				if spot == Vector2i(-1, -1) and gm.is_free(q) and Combat.manhattan(q, cp) > 6:
+					spot = q
+		_move(gm, bsx[0], spot + Vector2i(1, 0) if gm.is_free(spot + Vector2i(1, 0)) else spot + Vector2i(-1, 0))
+		_move(gm, bsx[1], spot + Vector2i(0, 1) if gm.is_free(spot + Vector2i(0, 1)) else spot + Vector2i(0, -1))
+		_move(gm, e2, spot)
+		var far_cell := cp
+		var pv_a: int = int(e2["current_pv"])
+		gm._beacon_replicas(ch, ex, p, far_cell, 40.0)
+		var two: int = pv_a - int(e2["current_pv"])
+		var keep: Dictionary = bsx[1]
+		keep["current_pv"] = 0
+		var pv_b: int = int(e2["current_pv"])
+		gm._beacon_replicas(ch, ex, p, far_cell, 40.0)
+		var one: int = pv_b - int(e2["current_pv"])
+		ck(one > 0 and two >= one * 1.6, "touché une fois par zone : 2 balises = environ 2 fois 1 balise (%d vs %d)" % [two, one])
 	# Sans balise : aucune réplique
 	for b3: Dictionary in gm.beacons_of(ch):
 		b3["current_pv"] = 0
