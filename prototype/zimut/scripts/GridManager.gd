@@ -26,6 +26,8 @@ const BOARD_BAKE_MIN := 1.0
 const BOARD_BAKE_MAX := 1.6
 var _board_bake: CanvasBake
 var _board_bake_pending: bool = false
+var _pit_bake: CanvasBake
+var _pit_bake_pending: bool = false
 var _biome: String = ""
 var _entity_layer: Node2D
 var _fx_layer: Node2D
@@ -119,6 +121,10 @@ func _build_layers() -> void:
 	_scenery.name = "Scenery"
 	add_child(_scenery)
 	# V49 : gouffres des cases hors plateau (sous les cases, dont les faces forment les parois)
+	if BAKE_BOARD:
+		_pit_bake = CanvasBake.new()
+		_pit_bake.name = "PitBake"
+		add_child(_pit_bake)
 	_void_layer = Node2D.new()
 	_void_layer.name = "VoidPits"
 	add_child(_void_layer)
@@ -420,6 +426,58 @@ func _sync_void_pits() -> void:
 				pit.setup(Vector2i(x, y), game_manager.fight_biome, n, outer.has(Vector2i(x, y)))
 				_void_layer.add_child(pit)
 	_request_board_bake()
+	_request_pit_bake()
+
+
+## V360 : même principe pour les gouffres / replats (parois, fond, anneaux) ; la brume reste animée par-dessus.
+func _request_pit_bake() -> void:
+	if _pit_bake == null or _void_layer == null:
+		return
+	_pit_bake.release()
+	for pit: VoidPit in _pits():
+		if pit.baked:
+			pit.baked = false
+			pit.queue_redraw()
+	if _pit_bake_pending:
+		return
+	_pit_bake_pending = true
+	_rebake_pits.call_deferred()
+
+
+func _pits() -> Array:
+	var out: Array = []
+	if _void_layer != null:
+		for c: Node in _void_layer.get_children():
+			if c is VoidPit and not c.is_queued_for_deletion():
+				out.append(c)
+	return out
+
+
+func _rebake_pits() -> void:
+	_pit_bake_pending = false
+	if _pit_bake == null or not is_instance_valid(_pit_bake) or not _pit_bake.is_inside_tree():
+		return
+	var pits: Array = _pits()
+	if pits.is_empty():
+		return
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
+	for pit: VoidPit in pits:
+		lo = lo.min(pit.position)
+		hi = hi.max(pit.position)
+	# Marge : demi-losange, parois extérieures (68), replat décalé d'un étage (68 + 32 + 0,6 × 68) et son contour.
+	var area := Rect2(lo - Vector2(VoidPit.HW + 6.0, VoidPit.HH + 6.0), (hi - lo) + Vector2(VoidPit.HW * 2.0 + 12.0, VoidPit.HH + VoidPit.DEPTH * 2.0 + VoidPit.HH + 24.0))
+	var ok: bool = await _pit_bake.bake(area, _board_bake_scale(), _paint_pits)
+	if not ok:
+		return
+	for pit: VoidPit in _pits():
+		pit.baked = true
+		pit.queue_redraw()
+
+
+func _paint_pits(ci: CanvasItem) -> void:
+	for pit: VoidPit in _pits():
+		pit.paint_static(ci, pit.position)
 
 
 func _sync_traps() -> void:

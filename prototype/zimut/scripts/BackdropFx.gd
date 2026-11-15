@@ -384,12 +384,18 @@ func _draw_nation(sky: Dictionary, p: Dictionary, mist: Color) -> void:
 	else:
 		var gl: Color = Color(1.0, 0.86, 0.42) if kind == "volcano" else Color(1, 1, 1)
 		draw_rect(Rect2(-3200, SEA_Y, 6400, 8), Color(gl.r, gl.g, gl.b, 0.30))
+		# V360 : les 34 reflets en UN appel de dessin (même largeur de trait, couleur propre à chaque segment).
+		var glint_pts := PackedVector2Array()
+		var glint_cols := PackedColorArray()
 		for i: int in range(34):
 			var gx: float = rng.randf_range(-1700.0, 1700.0)
 			var gy: float = SEA_Y + 24.0 + rng.randf_range(0.0, 520.0)
 			var w: float = rng.randf_range(24.0, 90.0) * (0.6 + (gy - SEA_Y) / 700.0)
 			var a2: float = (0.10 + 0.16 * (0.5 + 0.5 * sin(_t * 0.9 + float(i)))) * (0.5 if gy > SEA_Y + 300.0 else 1.0)
-			draw_line(Vector2(gx - w, gy), Vector2(gx + w, gy), Color(gl.r, gl.g, gl.b, a2 * (0.6 if kind == "swamp" else 1.0)), 2.0, true)
+			glint_pts.append(Vector2(gx - w, gy))
+			glint_pts.append(Vector2(gx + w, gy))
+			glint_cols.append(Color(gl.r, gl.g, gl.b, a2 * (0.6 if kind == "swamp" else 1.0)))
+		draw_multiline_colors(glint_pts, glint_cols, 2.0, true)
 	# particules : lucioles, flocons, braises, feux follets
 	var sc: Color = sky["speck"]
 	var fall: bool = bool(sky["fall"])

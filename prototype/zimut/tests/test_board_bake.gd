@@ -71,6 +71,10 @@ func _boot() -> void:
 	else:
 		check(bd._bake != null and not bd._bake.is_ready(), "biome sans plan fixe : rien de cuit (%s)" % gm.fight_biome)
 
+	var pit_total: int = grid._pits().size()
+	var pit_baked: int = grid._pits().filter(func(pt): return pt.baked).size()
+	check(pit_baked == pit_total, "tous les gouffres / replats sont cuits (%d / %d)" % [pit_baked, pit_total])
+
 	# 3) un gouffre apparaît : les cases voisines changent de paroi → re-cuisson
 	var target := Vector2i(4, 4)
 	gm.obstacles[target] = "void"
@@ -79,7 +83,8 @@ func _boot() -> void:
 	for c in cells:
 		if c.baked:
 			mid_baked += 1
-	check(mid_baked == 0, "dès le changement, les cases se redessinent elles-mêmes en attendant la re-cuisson (%d cuites)" % mid_baked)
+	var pits_mid: int = grid._pits().filter(func(pt): return pt.baked).size()
+	check(mid_baked == 0 and pits_mid == 0, "dès le changement, les cases se redessinent elles-mêmes en attendant la re-cuisson (%d cases, %d gouffres cuits)" % [mid_baked, pits_mid])
 	for i: int in 8:
 		await process_frame
 	var after: int = 0
@@ -88,6 +93,8 @@ func _boot() -> void:
 			after += 1
 	check(after == cells.size(), "re-cuisson terminée : toutes les cases cuites (%d / %d)" % [after, cells.size()])
 	var pit_cell = grid.cell_nodes[target.y][target.x]
+	var pits_after: Array = grid._pits()
+	check(pits_after.size() > 0 and pits_after.all(func(pt): return pt.baked), "gouffres re-cuits après le changement (%d)" % pits_after.size())
 	check(not pit_cell.visible, "la case de gouffre n'est plus dessinée")
 	var nb = grid.cell_nodes[target.y - 1][target.x]
 	check(nb.pit_left, "la case voisine montre sa paroi (pit_left)")

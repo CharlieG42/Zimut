@@ -17,6 +17,8 @@ var outer_right: bool = false   # dernière colonne : face extérieure droite
 ## Case vide reliée au bord de l'île : rendue comme un replat en contrebas (la falaise
 ## descend d'un étage) plutôt qu'un gouffre noir au milieu du vide.
 var ledge: bool = false
+## V360 : vrai quand la partie statique est dans la texture du plateau (voir paint_static).
+var baked: bool = false
 var _t: float = 0.0
 var _seed: float = 0.0
 
@@ -50,30 +52,43 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
-func _draw() -> void:
+## V360 : partie STATIQUE du gouffre (parois extérieures, fond, anneaux d'obscurité) ou du replat (sol, ombre, brins).
+## Le plateau la fige en une texture (GridManager._rebake_pits) ; seule la brume / les particules restent animées.
+func paint_static(ci: CanvasItem, off: Vector2) -> void:
+	ci.draw_set_transform(off, 0.0, Vector2.ONE)
 	var col: Array = abyss(biome)
 	var rim: Color = col[0]
 	var deep: Color = col[1]
-	var mist: Color = col[2]
 	var p: Dictionary = BattleScenery.pal(biome)
 	if ledge:
-		_draw_ledge(p, mist)
+		_paint_ledge_static(ci, p)
+	else:
+		# Faces extérieures (bord de l'île) : la paroi reste continue sous le gouffre.
+		if outer_left:
+			ci.draw_polygon(PackedVector2Array([Vector2(-HW, 0), Vector2(0, HH), Vector2(0, HH + DEPTH), Vector2(-HW, DEPTH)]),
+				PackedColorArray([p["l_t"], p["l_t"], p["l_b"], p["l_b"]]))
+		if outer_right:
+			ci.draw_polygon(PackedVector2Array([Vector2(0, HH), Vector2(HW, 0), Vector2(HW, DEPTH), Vector2(0, HH + DEPTH)]),
+				PackedColorArray([p["r_t"], p["r_t"], p["r_b"], p["r_b"]]))
+		# Fond du gouffre : clair près des bords arrière (lumière rasante), noir vers l'avant.
+		var top := PackedVector2Array([Vector2(0, -HH), Vector2(HW, 0), Vector2(0, HH), Vector2(-HW, 0)])
+		ci.draw_polygon(top, PackedColorArray([rim, rim.lerp(deep, 0.55), deep, rim.lerp(deep, 0.55)]))
+		# Anneaux d'obscurité : impression de profondeur
+		for i: int in range(3):
+			var k: float = 0.75 - 0.2 * float(i)
+			var pts := PackedVector2Array([Vector2(0, -HH * k + 8.0), Vector2(HW * k, 8.0), Vector2(0, HH * k + 8.0), Vector2(-HW * k, 8.0)])
+			ci.draw_colored_polygon(pts, Color(deep.r, deep.g, deep.b, 0.35))
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+func _draw() -> void:
+	if not baked:
+		paint_static(self, Vector2.ZERO)
+	var col: Array = abyss(biome)
+	var mist: Color = col[2]
+	if ledge:
+		_draw_ledge_mist(mist)
 		return
-	# Faces extérieures (bord de l'île) : la paroi reste continue sous le gouffre.
-	if outer_left:
-		draw_polygon(PackedVector2Array([Vector2(-HW, 0), Vector2(0, HH), Vector2(0, HH + DEPTH), Vector2(-HW, DEPTH)]),
-			PackedColorArray([p["l_t"], p["l_t"], p["l_b"], p["l_b"]]))
-	if outer_right:
-		draw_polygon(PackedVector2Array([Vector2(0, HH), Vector2(HW, 0), Vector2(HW, DEPTH), Vector2(0, HH + DEPTH)]),
-			PackedColorArray([p["r_t"], p["r_t"], p["r_b"], p["r_b"]]))
-	# Fond du gouffre : clair près des bords arrière (lumière rasante), noir vers l'avant.
-	var top := PackedVector2Array([Vector2(0, -HH), Vector2(HW, 0), Vector2(0, HH), Vector2(-HW, 0)])
-	draw_polygon(top, PackedColorArray([rim, rim.lerp(deep, 0.55), deep, rim.lerp(deep, 0.55)]))
-	# Anneaux d'obscurité : impression de profondeur
-	for i: int in range(3):
-		var k: float = 0.75 - 0.2 * float(i)
-		var pts := PackedVector2Array([Vector2(0, -HH * k + 8.0), Vector2(HW * k, 8.0), Vector2(0, HH * k + 8.0), Vector2(-HW * k, 8.0)])
-		draw_colored_polygon(pts, Color(deep.r, deep.g, deep.b, 0.35))
 	# Brume qui respire au fond du gouffre
 	for i: int in range(3):
 		var ph: float = _t * 0.6 + _seed + float(i) * 2.1
@@ -97,25 +112,29 @@ func _draw() -> void:
 
 
 ## Replat en contrebas (case vide au bord de l'île) : sol du biome un étage plus bas.
-func _draw_ledge(p: Dictionary, mist: Color) -> void:
+func _paint_ledge_static(ci: CanvasItem, p: Dictionary) -> void:
 	var o := Vector2(0, DEPTH)
 	if outer_left:
-		draw_polygon(PackedVector2Array([o + Vector2(-HW, 0), o + Vector2(0, HH), o + Vector2(0, HH + DEPTH * 0.6), o + Vector2(-HW, DEPTH * 0.6)]),
+		ci.draw_polygon(PackedVector2Array([o + Vector2(-HW, 0), o + Vector2(0, HH), o + Vector2(0, HH + DEPTH * 0.6), o + Vector2(-HW, DEPTH * 0.6)]),
 			PackedColorArray([p["l_t"], p["l_t"], p["l_b"], p["l_b"]]))
 	if outer_right:
-		draw_polygon(PackedVector2Array([o + Vector2(0, HH), o + Vector2(HW, 0), o + Vector2(HW, DEPTH * 0.6), o + Vector2(0, HH + DEPTH * 0.6)]),
+		ci.draw_polygon(PackedVector2Array([o + Vector2(0, HH), o + Vector2(HW, 0), o + Vector2(HW, DEPTH * 0.6), o + Vector2(0, HH + DEPTH * 0.6)]),
 			PackedColorArray([p["r_t"], p["r_t"], p["r_b"], p["r_b"]]))
 	var g: Color = (p["top_a"] as Color).darkened(0.28)
 	var floor_pts := PackedVector2Array([o + Vector2(0, -HH), o + Vector2(HW, 0), o + Vector2(0, HH), o + Vector2(-HW, 0)])
-	draw_polygon(floor_pts, PackedColorArray([g.darkened(0.25), g, g.lightened(0.05), g]))
-	draw_polyline(PackedVector2Array([o + Vector2(-HW, 0), o + Vector2(0, HH), o + Vector2(HW, 0)]), (p["lip"] as Color).darkened(0.2), 2.0, true)
+	ci.draw_polygon(floor_pts, PackedColorArray([g.darkened(0.25), g, g.lightened(0.05), g]))
+	ci.draw_polyline(PackedVector2Array([o + Vector2(-HW, 0), o + Vector2(0, HH), o + Vector2(HW, 0)]), (p["lip"] as Color).darkened(0.2), 2.0, true)
 	# ombre portée par la marche (haut du replat)
-	draw_colored_polygon(PackedVector2Array([o + Vector2(0, -HH), o + Vector2(HW, 0), o + Vector2(HW * 0.6, 6.0), o + Vector2(0, -HH + 14.0), o + Vector2(-HW * 0.6, 6.0), o + Vector2(-HW, 0)]),
+	ci.draw_colored_polygon(PackedVector2Array([o + Vector2(0, -HH), o + Vector2(HW, 0), o + Vector2(HW * 0.6, 6.0), o + Vector2(0, -HH + 14.0), o + Vector2(-HW * 0.6, 6.0), o + Vector2(-HW, 0)]),
 		Color(0, 0, 0, 0.28))
 	for i: int in range(5):
 		var a: float = float(i) * 1.7 + _seed
 		var tp: Vector2 = o + Vector2(sin(a) * HW * 0.5, cos(a * 1.3) * HH * 0.45)
-		draw_line(tp, tp + Vector2(1.5, -5.0), (p["leaf"] as Color), 1.4)
+		ci.draw_line(tp, tp + Vector2(1.5, -5.0), (p["leaf"] as Color), 1.4)
+
+
+func _draw_ledge_mist(mist: Color) -> void:
+	var o := Vector2(0, DEPTH)
 	draw_set_transform(o + Vector2(sin(_t * 0.5 + _seed) * 10.0, 4.0), 0.0, Vector2(1.0, 0.4))
 	draw_circle(Vector2.ZERO, 30.0, Color(mist.r, mist.g, mist.b, 0.10))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
