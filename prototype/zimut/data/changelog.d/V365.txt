@@ -1,0 +1,3 @@
+V365|Chasseur : toute attaque de zone est maintenant répliquée autour de toutes les balises, même si la zone ne touche aucune balise.
+V365|Description du sort « Balise de chasse » mise à jour (FR/EN).
+V365|Test d intégration des balises (réplication par lancer réel) et test du plateau rendu déterministe (CI instable).

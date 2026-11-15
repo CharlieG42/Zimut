@@ -76,7 +76,20 @@ func _boot() -> void:
 	check(pit_baked == pit_total, "tous les gouffres / replats sont cuits (%d / %d)" % [pit_baked, pit_total])
 
 	# 3) un gouffre apparaît : les cases voisines changent de paroi → re-cuisson
+	# Le plateau est tiré au hasard : on choisit une case libre dont la voisine du haut n'a pas déjà sa paroi
+	# (sinon rien ne change et il n'y a pas de re-cuisson → test instable).
 	var target := Vector2i(4, 4)
+	for ty: int in range(2, gm.GRID_SIZE - 1):
+		for tx: int in range(2, gm.GRID_SIZE - 1):
+			var tc := Vector2i(tx, ty)
+			if gm.obstacles.has(tc) or gm.obstacles.has(tc + Vector2i(0, -1)) or gm.obstacles.has(tc + Vector2i(0, 1)):
+				continue
+			if grid.cell_nodes[ty - 1][tx].pit_left:
+				continue
+			target = tc
+			break
+		if not gm.obstacles.has(target) and not grid.cell_nodes[target.y - 1][target.x].pit_left and target != Vector2i(4, 4):
+			break
 	gm.obstacles[target] = "void"
 	grid._sync_props()   # direct : update_entity_display() attend la fin des animations en cours
 	var mid_baked: int = 0
