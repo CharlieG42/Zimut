@@ -39,7 +39,7 @@ func _boot() -> void:
 	check(ok_sz, "chaque image fait la taille de la cellule (rognée + marges)")
 	check(px * 4 < 5_000_000, "planches compactes : %.1f Mo de mémoire graphique (11,8 avant)" % (float(px) * 4.0 / 1e6))
 	check((v._sq["attack"]["front"] as Array)[0] == (v._sq["idle"]["front"] as Array)[0], "images identiques partagées (début de l'attaque = pose de repos)")
-	check(absf(v.height - 104.0) < 0.5 and v._ph > v.height, "taille d'affichage : personnage 104 px, cellule plus haute (%.0f / %.0f)" % [v.height, v._ph])
+	check(absf(v.height - 104.0 * EntityView.UNIT_SCALE) < 0.5 and v._ph > v.height, "taille d'affichage : personnage 114 px (104 + 10 %%), cellule plus haute (%.0f / %.0f)" % [v.height, v._ph])
 	# bout du bâton : dans la cellule pour chaque image
 	var ok_tip: bool = true
 	var cell: float = float(v._sq_cell)

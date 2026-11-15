@@ -1,0 +1,3 @@
+V361|Héros, ennemis et invocations agrandis de 10 % (héros 104 → 114 px) pour mieux les distinguer sur téléphone ; les cases et le boss ne changent pas.
+V361|Contour sombre autour de chaque unité (bleu nuit pour les alliés, rouge sombre pour les ennemis), plus épais pour l'unité active ou survolée.
+V361|Ce contour fonctionne aussi sur téléphone : l'ancien passait par un shader désactivé sur mobile, les unités n'y avaient donc aucun contour.
