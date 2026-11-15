@@ -84,10 +84,12 @@ static func apply_rarity(base: Dictionary, rarity: String, rng: RandomNumberGene
 ## Valeur indicative d'un objet (tri / meilleur équipement).
 static func power(item: Dictionary) -> int:
 	var p: float = 0.0
+	var fs: Dictionary = Shards.item_fort_stats(item)   # V362 : les fortifications comptent dans la valeur
 	for k: String in STAT_KEYS:
-		p += float(item.get(k, 0)) * (0.34 if k == "vita" else 1.0)
+		p += float(int(item.get(k, 0)) + int(fs.get(k, 0))) * (0.34 if k == "vita" else 1.0)
 	var fx: Dictionary = parse_effect(String(item.get("effect", "")))
 	p += float(fx.size()) * 4.0
+	p += float(Shards.item_fort_fx(item).size()) * 4.0
 	return roundi(p)
 
 
@@ -256,7 +258,10 @@ static func aggregate(equipment: Dictionary) -> Dictionary:
 		for k: String in STAT_KEYS:
 			stats[k] = int(stats[k]) + int(it.get(k, 0))
 		merge_fx(fx, parse_effect(String(it.get("effect", ""))))
-	merge_fx(fx, Shards.equipment_fx(equipment))   # V113 : fortifications (PA/PM/PO plafonnés)
+	var fort: Dictionary = Shards.equipment_fort(equipment)   # V362 : fortifications (stats + effets), plafonnées par héros
+	for k: String in fort["stats"].keys():
+		stats[k] = int(stats.get(k, 0)) + int(fort["stats"][k])
+	merge_fx(fx, fort["fx"])
 	var sb: Dictionary = set_bonuses(equipment)
 	for k: String in sb["stats"].keys():
 		stats[k] = int(stats.get(k, 0)) + int(sb["stats"][k])

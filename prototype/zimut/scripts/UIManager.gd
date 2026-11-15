@@ -2192,6 +2192,9 @@ func _show_result_window(victory: bool) -> void:
 					dtxt += "   ·   la Pierre n'est pas tombée (%d %%) — le donjon se refait à volonté." % roundi(float(dg.get("chance", 0.0)) * 100.0)
 				"owned":
 					dtxt += "   ·   Pierre déjà en ta possession."
+			var dss: Dictionary = dg.get("stat_shard", {})
+			if not dss.is_empty():
+				dtxt += "\n❖  Éclat obtenu : %s" % Shards.stat_shard_name(String(dss["stat"]), int(dss["rank"]))
 			var dsh: Dictionary = dg.get("shards", {})
 			for dsb: String in dsh.keys():
 				dtxt += "\n💠  Le Gardien laisse des éclats : %s +%d" % [Shards.shard_name(dsb), int(dsh[dsb])]
@@ -2285,6 +2288,11 @@ func _show_result_window(victory: bool) -> void:
 		var shard_got: Dictionary = save.get("last_shards", {})
 		for sbk: String in shard_got.keys():
 			chips.add_child(UK.chip("💠 %s +%d" % [Shards.shard_name(sbk), int(shard_got[sbk])], Shards.color_of(sbk), 19))
+		var stat_got: Dictionary = save.get("last_stat_shards", {})
+		for stk: String in stat_got.keys():
+			var sp: PackedStringArray = stk.split("|")
+			if sp.size() == 2:
+				chips.add_child(UK.chip("❖ %s +%d" % [Shards.stat_shard_name(sp[0], int(sp[1])), int(stat_got[stk])], Shards.stat_color(sp[0]), 19))
 		chips.add_child(UK.chip("🪙 %d or" % ProgressionManager.gold(save), UK.C_GOLD, 19))
 	# Conquête : production de l'empire et défi facultatif
 	if victory and String(save.get("campaign_mode", "")) == "conquest":
