@@ -971,6 +971,8 @@ func _process(delta: float) -> void:
 			elif hovered:
 				outline_w = 2.25
 				oc = Color(1, 1, 1, 0.98) if entity["team"] == "player" else Color(1.0, 0.38, 0.28, 1.0)
+			if _h3d != null and _h3d.ready_ok:
+				outline_w *= float(Hero3D.RES_K)     # la texture 3D est suréchantillonnée : contour compté en pixels de texture
 			_mat.set_shader_parameter("outline", outline_w)
 			_mat.set_shader_parameter("outline_color", oc)
 	else:

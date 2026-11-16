@@ -1,0 +1,4 @@
+V373|Héros en 3D directe : fin des éclats noirs sur le visage et l armure (la coque de contour 3D est retirée, le contour net vient du sprite).
+V373|Héros en 3D directe : couleurs fidèles à la texture, identiques sur PC et téléphone (ombrage calculé dans le shader, plus de recalage qui délavait).
+V373|Textures des héros 3D au fond comblé (tools/pad_hero_textures.py) et filtrage anisotrope.
+V373|Journal de combat : le nombre de répliques des balises est affiché (ex. « balises : 2 répliques, 58 »).
