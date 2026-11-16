@@ -1,0 +1,2 @@
+V376|Butin : chance d éclat de caractéristique relevée — 25 % par combat gagné (12 % avant), 50 % sur un boss (40 % avant), 35 % en fin de donjon (inchangé).
+V376|Les éclats trouvés peuvent être de tous les types (les six caractéristiques, PA, PM, Portée) ; test ajouté.
