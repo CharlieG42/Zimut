@@ -2237,12 +2237,20 @@ func _resolve_summon(caster: Dictionary, _spell: Dictionary, p: Dictionary, cell
 	return "%s invoque %s !" % [caster["name"], sname]
 
 
-## Balises du Chasseur : toute zone d'attaque lancée par le Chasseur est répliquée (même zone,
-## mêmes dégâts) autour de TOUTES ses balises (sauf celle qui est au centre du lancer).
+## Balises du Chasseur : si une zone d'attaque touche une balise, elle est répliquée (même zone,
+## mêmes dégâts) autour de TOUTES les balises (sauf celle qui est au centre du lancer).
 ## Un ennemi est touché autant de fois que de zones qui le couvrent (zone d'origine + une par balise).
 func _beacon_replicas(caster: Dictionary, spell: Dictionary, p: Dictionary, cell: Vector2i, base: float) -> Dictionary:
 	var beacons: Array = beacons_of(caster)
 	if beacons.is_empty():
+		return {}
+	# Déclenchement : la zone d'origine doit toucher au moins une balise.
+	var hit_cells: Array[Vector2i] = Combat.zone_cells(cell, int(p["zone_r"]), String(p["zone_shape"]), GRID_SIZE)
+	var triggered: bool = false
+	for b: Dictionary in beacons:
+		if hit_cells.has(pos_of(b)):
+			triggered = true
+	if not triggered:
 		return {}
 	var total: int = 0
 	for b2: Dictionary in beacons:
