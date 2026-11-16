@@ -46,6 +46,7 @@ var _fs_stat: String = "force"      # caractéristique choisie (Fortifier et Ate
 var _fs_rank: int = 1               # rang d'éclat choisi
 var _fs_confirm: String = ""        # pose en attente de confirmation d'écrasement ("stat|rang|objet")
 var _rng := RandomNumberGenerator.new()
+var _gultur_fort_shown: bool = false
 var _tabs_row: HBoxContainer
 var _selected: String = ""
 var _member: int = 0
@@ -76,6 +77,33 @@ func show_mode(mode: String) -> void:
 		return
 	_mode = mode
 	_message = ""
+	refresh()
+
+
+## Ouvre la Forge sur l'Atelier d'éclats (onglet Fortifier).
+func show_atelier() -> void:
+	_mode = "fortify"
+	_fort_kind = "stat"
+	_up_key = "atelier|"
+	_message = ""
+	refresh()
+
+
+## Ouvre la Forge sur l'onglet Fortifier avec l'objet porté par `classe` dans `slot` sélectionné.
+func show_item(classe: String, slot: String) -> void:
+	_mode = "fortify"
+	_fort_kind = "stat"
+	_message = ""
+	_fs_confirm = ""
+	for e: Dictionary in ProgressionManager.upgradable_items(_save):
+		if String(e["slot"]) != slot:
+			continue
+		var owner_class: String = String(e.get("classe", ""))
+		if String(e["src"]) == "team":
+			owner_class = String((_save.get("team", []) as Array)[int(e["member"])].get("classe", ""))
+		if owner_class == classe:
+			_up_key = _entry_key(e)
+			break
 	refresh()
 
 
@@ -290,6 +318,9 @@ func refresh() -> void:
 	_refresh_filters()
 	_refresh_list()
 	_refresh_detail()
+	if _mode == "fortify" and not _gultur_fort_shown:
+		_gultur_fort_shown = true
+		Gultur.say.call_deferred(self, "forge_fortifier", Gultur.FORGE_FORTIFIER, null)
 
 
 func _refresh_tabs() -> void:
@@ -316,6 +347,7 @@ func _refresh_tabs() -> void:
 # ── Stock ───────────────────────────────────────────────────────────────────
 func _refresh_stock() -> void:
 	for c in _res_row.get_children():
+		_res_row.remove_child(c)   # sinon les nouveaux nœuds de même nom sont renommés (queue_free garde l'ancien nom)
 		c.queue_free()
 	var res: Dictionary = ProgressionManager.resources(_save)
 	for k: String in ["Fer", "Bois", "Cuir", "Magie", "Venin"]:
@@ -342,6 +374,21 @@ func _refresh_stock() -> void:
 				tip.append("%s : %d" % [Shards.shard_name(b), Shards.count(_save, b)])
 		sh_chip.tooltip_text = "\n".join(tip)
 		_res_row.add_child(sh_chip)
+	var n_st: int = Shards.stat_total(_save)
+	var st_btn := U.btn("❖  %d" % n_st, Color(0.72, 0.60, 1.0), 24, Vector2(0, 46))
+	st_btn.name = "StatShardStock"
+	var st_tip: PackedStringArray = []
+	for stn: String in Shards.STAT_SHARDS:
+		var tot: int = _stat_total_of(stn)
+		if tot > 0:
+			st_tip.append("%s : %d" % [Shards.stat_name(stn), tot])
+	st_btn.tooltip_text = "Éclats de caractéristique (touche pour ouvrir l'Atelier d'éclats)" + ("\n" + "\n".join(st_tip) if not st_tip.is_empty() else "")
+	st_btn.pressed.connect(func() -> void:
+		_mode = "fortify"
+		_up_key = "atelier|"
+		_message = ""
+		refresh())
+	_res_row.add_child(st_btn)
 	_res_row.add_child(U.chip("🪙  %d" % ProgressionManager.gold(_save), U.C_GOLD, 24))
 
 
@@ -1003,7 +1050,7 @@ func _refresh_detail() -> void:
 
 # ── Mode AMÉLIORER ───────────────────────────────────────────────────────────
 func _entry_key(e: Dictionary) -> String:
-	return "%s|%d|%s|%d" % [e["src"], int(e["member"]), String(e["slot"]), int(e["index"])]
+	return "%s|%d|%s|%d|%s" % [e["src"], int(e["member"]), String(e["slot"]), int(e["index"]), String(e.get("classe", ""))]
 
 
 func _find_entry(key: String) -> Dictionary:

@@ -65,6 +65,30 @@ const EQUIP := [
 	"Tu as trouvé de l'équipement ! Le bouton [b]ÉQUIPEMENT[/b] permet de le donner à tes héros : chaque pièce les rend plus solides.",
 	"Dans la fiche d'un héros, un [b]▲ vert[/b] t'indique les objets conseillés (plus puissants que ceux portés).",
 ]
+## V366 — Équipement, forge et fortification : nouveautés présentées une seule fois chacune.
+const EQUIP_DETAIL := [
+	"Touche un objet [b]porté[/b] pour voir ses caractéristiques, ses effets et sa fortification.",
+	"Le bouton [b]★ ÉQUIPER LE MEILLEUR[/b] remplit tous les emplacements libres avec les objets les plus puissants de ton inventaire.",
+	"Depuis le détail d'un objet, [b]❖ FORTIFIER[/b] t'emmène directement à la Forge sur cette pièce.",
+]
+const FORGE_FORTIFIER := [
+	"Voici la [b]fortification[/b] : tu ajoutes des bonus à un objet grâce à des [b]éclats de caractéristique[/b] (Force, Défense, Vitalité…).",
+	"Chaque éclat a un [b]rang[/b] : plus il est haut, plus la valeur obtenue peut être élevée. Le résultat reste [b]aléatoire[/b], dans la plage du rang.",
+	"Un objet peut recevoir [b]plusieurs[/b] bonus, mais une seule ligne par caractéristique : en poser un second [b]remplace[/b] le premier, même s'il est plus faible. Le [b]cadenas 🔒[/b] protège une ligne.",
+	"Les éclats se gagnent en [b]combat[/b], en [b]donjon[/b] ou se fabriquent à l'[b]❖ Atelier d'éclats[/b], en haut de la liste : tu peux aussi y fusionner et briser tes éclats.",
+	"Les [b]éclats de Pierre[/b] (onglet à côté) sont plus puissants et leurs valeurs s'[b]additionnent[/b]. Tous les bonus de fortification sont [b]plafonnés[/b].",
+]
+const ECLATS_BUTIN := [
+	"Un [b]éclat de caractéristique[/b] est tombé ! Il est rangé dans ton stock : retrouve-le dans la Forge, onglet [b]Fortifier[/b].",
+]
+const DONJON_ECLATS := [
+	"Les donjons peuvent aussi livrer des [b]éclats de caractéristique[/b] pour fortifier ton équipement, en plus de la Pierre.",
+]
+const STATS_RESULTATS := [
+	"Cet onglet affiche maintenant les [b]résultats en combat[/b] : ce que tes caractéristiques et ton équipement donnent vraiment (dégâts, résistances, soins…).",
+	"Les [b]règles de calcul[/b] sont rappelées tout en bas de la page.",
+]
+
 const LVL3 := [
 	"Bravo, [b]{pseudo}[/b] ! [b]Toi[/b] qui viens d'atteindre le [b]niveau 3[/b] de joueur : les modes [b]Aventure[/b] et [b]Monde Ouvert 3D[/b] s'ouvrent à toi.",
 	"Explore la carte : touche une case pour y marcher, le brouillard se lève. Des [b]groupes de monstres[/b] rôdent (vert = facile, rouge = dangereux).",

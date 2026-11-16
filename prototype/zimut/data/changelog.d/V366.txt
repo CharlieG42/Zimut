@@ -1,0 +1,3 @@
+V366|Gultur : nouveaux conseils sur le détail des objets, la fortification et les éclats, les donjons, les éclats gagnés en victoire et l onglet Caractéristiques (une seule fois chacun).
+V366|Forge : le stock d éclats de caractéristique s affiche dans la barre du haut et ouvre l Atelier d éclats.
+V366|Fiche Équipement : stock d éclats avec raccourci vers l Atelier, et bouton Fortifier dans le détail d un objet porté (ouvre la Forge sur cet objet).
