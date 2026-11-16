@@ -1,1 +1,3 @@
 V375|Combat : lumière propre à chaque biome (teinte des hautes lumières et des ombres, saturation, vignette) — froide en Montagne, chaude au Brasier, sombre au Donjon…
+V375|Un biome sans réglage prend la lumière de la Forêt ; l étalonnage reste coupé en qualité Économie.
+V375|Test test_combat_look complété (un étalonnage par biome).
