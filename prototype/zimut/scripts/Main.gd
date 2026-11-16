@@ -39,7 +39,9 @@ func _ready() -> void:
 	_setup_camera()
 	_build_vignette()
 	if CombatLook.wanted():
-		add_child(CombatLook.new())   # V371 : étalonnage couleurs + lueur
+		var look := CombatLook.new()   # V371 : étalonnage couleurs + lueur
+		add_child(look)
+		look.apply_biome(String(game_manager.fight_biome))   # V375 : lumière propre au biome
 	ui_manager.init(game_manager)
 	turn_manager.init(game_manager)
 
