@@ -9,6 +9,9 @@ extends Node
 ## à fusionner si le prototype est retenu.
 
 const CELL := 192
+## V370 : le rendu 3D est fait à RES_K fois la résolution logique de la cellule (suréchantillonnage) puis réduit à l'écran :
+## contours et détails nets sur grand écran (PC, tablette). EntityView divise l'échelle du sprite par RES_K.
+const RES_K := 2
 const CHAR_FRAC := 0.74            # hauteur du personnage au repos dans la cellule (comme la cuisson)
 const FEET_ROW := 0.965            # ligne des pieds
 const HERO_H := 1.8
@@ -165,10 +168,10 @@ func setup(classe: String) -> bool:
 	_prof = MODELS[classe]
 	_key = classe
 	vp = SubViewport.new()
-	vp.size = Vector2i(CELL, CELL)
+	vp.size = Vector2i(CELL * RES_K, CELL * RES_K)
 	vp.transparent_bg = true
 	vp.own_world_3d = true
-	vp.msaa_3d = Viewport.MSAA_2X
+	vp.msaa_3d = Viewport.MSAA_4X
 	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 	add_child(vp)
 	var env := Environment.new()
@@ -322,7 +325,7 @@ func _frame() -> void:
 		await tree_entered
 	_set_pose("idle", 0.0, false)
 	var passes: int = 0
-	var vp_h: float = float(CELL)
+	var vp_h: float = float(CELL * RES_K)
 	var how: String = "mesuré"
 	var guarded: bool = false
 	var ref_cam: Vector2 = _prof.get("ref_cam", Vector2.ZERO)
@@ -486,7 +489,7 @@ func show_pose(anim: String, phase: float, back: bool) -> void:
 	rendered += 1
 
 
-## Position (pixels de la cellule 192 × 192) du bout du bâton dans la pose affichée.
+## Position (pixels de la texture, cellule × RES_K) du bout du bâton dans la pose affichée.
 func tip_px() -> Vector2:
 	if not tip_ok or not ready_ok:
 		return Vector2(-1.0, -1.0)

@@ -1,0 +1,3 @@
+V370|Personnages en 3D en direct : rendu suréchantillonné (2x, antialiasing 4x) puis réduit à l écran, pour des contours et des détails plus nets sur PC et tablette.
+V370|Le cadrage, les animations et la position du bâton restent identiques (le sprite est simplement rendu avec plus de pixels).
+V370|Aucun changement pour les sprites 2D animés.
