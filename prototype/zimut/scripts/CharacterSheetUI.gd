@@ -71,6 +71,10 @@ class StatBar extends Control:
 		draw_rect(Rect2(0, 0, w, h), C_BORDER, false, 2.0)
 
 
+var _gultur_gear_shown: bool = false
+var _gultur_stats_shown: bool = false
+
+
 func open(save_data: Dictionary, slot: int, start_class: String = "") -> void:
 	_save = save_data
 	_slot = slot
@@ -659,6 +663,9 @@ func _build_stats() -> void:
 		_content.add_child(fl)
 	_build_stat_results(st)
 	_build_stat_rules()
+	if not _gultur_stats_shown:
+		_gultur_stats_shown = true
+		Gultur.say.call_deferred(self, "stats_resultats", Gultur.STATS_RESULTATS, null)
 
 
 ## Ce que valent concrètement les caractéristiques (dégâts, résistances, critique, soins…).
@@ -1143,11 +1150,15 @@ func _build_gear() -> void:
 	elif not _team_classes().has(_classe):
 		notes.append("Ce héros n'est pas dans l'équipe : son équipement est conservé et compte s'il devient gouverneur.")
 	_content.add_child(_gear_best_button())
+	_content.add_child(_gear_shards_button())
 	if _gear_msg != "":
 		var ml := _lbl(_gear_msg, 18, C_GOOD if _gear_msg_good else C_BAD)
 		ml.name = "GearMsg"
 		ml.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_content.add_child(ml)
+	if not _gultur_gear_shown:
+		_gultur_gear_shown = true
+		Gultur.say.call_deferred(self, "equip_detail", Gultur.EQUIP_DETAIL, null)
 	var doll := HBoxContainer.new()
 	doll.name = "Paperdoll"
 	doll.add_theme_constant_override("separation", 18)
@@ -1341,6 +1352,31 @@ func _stone_socket(index: int, biome: String) -> Control:
 	return card
 
 
+## Ouvre la Forge (par-dessus la fiche) : sur l'Atelier d'éclats, ou sur l'objet porté `slot` pour le fortifier.
+func _open_forge(slot: String = "") -> void:
+	var ui: CanvasLayer = (load("res://scripts/ForgeUI.gd") as GDScript).new()
+	ui.layer = 20
+	add_child(ui)
+	ui.closed.connect(func() -> void:
+		ui.queue_free()
+		refresh())
+	ui.open(_save, _slot, 0)
+	if slot != "":
+		ui.call("show_item", _classe, slot)
+	else:
+		ui.call("show_atelier")
+
+
+## Stock d'éclats de caractéristique + raccourci vers l'Atelier d'éclats.
+func _gear_shards_button() -> Button:
+	var n: int = Shards.stat_total(_save)
+	var b := _btn("❖  ÉCLATS : %d  ·  ATELIER" % n, Color(0.72, 0.60, 1.0), 19, Vector2(0, 50))
+	b.name = "GearShards"
+	b.tooltip_text = "Éclats de caractéristique pour fortifier l'équipement. Touche pour ouvrir l'Atelier d'éclats (fabriquer, fusionner, briser)."
+	b.pressed.connect(func() -> void: _open_forge())
+	return b
+
+
 ## Bouton « ÉQUIPER LE MEILLEUR » : équipe ce héros avec les meilleurs objets libres de l'inventaire
 ## (niveau requis et règle arme 2 mains / bouclier respectés).
 func _gear_best_button() -> Button:
@@ -1442,6 +1478,10 @@ func _build_gear_detail(slot: String) -> void:
 		v.add_child(pl)
 	if _gear_msg != "":
 		_content.add_child(_lbl(_gear_msg, 18, C_BAD))
+	var fortify := _btn("❖  FORTIFIER  (éclats : %d)" % Shards.stat_total(_save), Color(0.72, 0.60, 1.0), 20, Vector2(0, 52))
+	fortify.name = "GearDetailFortify"
+	fortify.pressed.connect(func() -> void: _open_forge(slot))
+	_content.add_child(fortify)
 	var change := _btn("CHANGER  (%d disponible%s)" % [_slot_free_count(slot), "s" if _slot_free_count(slot) > 1 else ""], C_GOLD, 20, Vector2(0, 56))
 	change.name = "GearDetailChange"
 	change.pressed.connect(func() -> void:

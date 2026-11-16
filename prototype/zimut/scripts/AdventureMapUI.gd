@@ -2215,7 +2215,7 @@ func _confirm_dungeon(poi: Dictionary) -> void:
 	var later := U.btn("PLUS TARD", U.C_BORDER, 20, Vector2(200, 60))
 	later.pressed.connect(_close_modal)
 	row.add_child(later)
-	Gultur.say(self, "donjon", Gultur.DONJON, null)
+	Gultur.say(self, "donjon", Gultur.DONJON, null, func() -> void: Gultur.say(self, "donjon_eclats", Gultur.DONJON_ECLATS, null))
 
 
 func _confirm_combat(poi: Dictionary) -> void:

@@ -2294,6 +2294,8 @@ func _show_result_window(victory: bool) -> void:
 			if sp.size() == 2:
 				chips.add_child(UK.chip("❖ %s +%d" % [Shards.stat_shard_name(sp[0], int(sp[1])), int(stat_got[stk])], Shards.stat_color(sp[0]), 19))
 		chips.add_child(UK.chip("🪙 %d or" % ProgressionManager.gold(save), UK.C_GOLD, 19))
+		if not stat_got.is_empty():
+			Gultur.say.call_deferred(self, "eclats_butin", Gultur.ECLATS_BUTIN, null)
 	# Conquête : production de l'empire et défi facultatif
 	if victory and String(save.get("campaign_mode", "")) == "conquest":
 		var cqst: Dictionary = save.get("conquest", {})
