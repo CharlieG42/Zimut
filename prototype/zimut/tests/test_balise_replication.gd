@@ -1,6 +1,6 @@
 extends SceneTree
-## Balises du Chasseur : toute attaque de zone est répliquée autour de TOUTES les balises,
-## même quand la zone d'origine ne touche aucune balise ; un ennemi n'est jamais touché deux fois.
+## Balises du Chasseur : une zone qui touche une balise est répliquée autour des balises ;
+## une zone qui ne touche aucune balise n'est PAS répliquée ; un ennemi est touché une fois par zone.
 var fails: int = 0
 func ck(c: bool, m: String) -> void:
 	print(("  ok  " if c else "  ÉCHEC  ") + m)
@@ -67,7 +67,12 @@ func _run() -> void:
 	if cast_cell != Vector2i(-1, -1):
 		var pv0: int = int(en["current_pv"])
 		ck(gm.cast_spell(ch, ex, cast_cell), "Tir explosif lancé")
-		ck(int(en["current_pv"]) < pv0, "l'ennemi près d'une balise est touché par la réplique (%d → %d)" % [pv0, int(en["current_pv"])])
+		ck(int(en["current_pv"]) == pv0, "zone qui ne touche aucune balise : pas de réplique (%d → %d)" % [pv0, int(en["current_pv"])])
+		ch["casts"] = {}
+		ch["current_pa"] = 40
+		# Zone lancée sur la 1re balise : elle touche une balise → réplique autour de la 2e
+		ck(gm.cast_spell(ch, ex, gm.pos_of(bs[0])), "Tir explosif lancé sur une balise")
+		ck(int(en["current_pv"]) < pv0, "zone qui touche une balise : l'ennemi près de l'autre balise est touché (%d → %d)" % [pv0, int(en["current_pv"])])
 	# Un ennemi couvert par plusieurs zones répliquées est touché une fois par zone
 	var bsx: Array = gm.beacons_of(ch)
 	if bsx.size() == 2:
@@ -81,7 +86,7 @@ func _run() -> void:
 		_move(gm, bsx[0], spot + Vector2i(1, 0) if gm.is_free(spot + Vector2i(1, 0)) else spot + Vector2i(-1, 0))
 		_move(gm, bsx[1], spot + Vector2i(0, 1) if gm.is_free(spot + Vector2i(0, 1)) else spot + Vector2i(0, -1))
 		_move(gm, e2, spot)
-		var far_cell := cp
+		var far_cell: Vector2i = spot
 		var pv_a: int = int(e2["current_pv"])
 		gm._beacon_replicas(ch, ex, p, far_cell, 40.0)
 		var two: int = pv_a - int(e2["current_pv"])

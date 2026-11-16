@@ -1,0 +1,3 @@
+V369|Chasseur : un sort de zone n est répliqué sur les balises que si sa zone touche au moins une balise.
+V369|Un ennemi reste touché autant de fois que de zones qui le couvrent (origine + une par balise).
+V369|Description du sort Balise de chasse et test de réplication adaptés.
