@@ -87,6 +87,31 @@ var changelog_seen: String = ""
 
 func _ready() -> void:
 	load_settings()
+	apply_render_scale()
+	get_window().size_changed.connect(apply_render_scale)
+
+
+## V377 : rendu à la résolution réelle de l'écran. Le jeu est conçu en 1920 × 1080 ; en mode « viewport » il est calculé
+## à cette taille puis étiré (flou au-delà du 1080p). En « canvas_items », textes, interface et sprites sont dessinés
+## directement à la taille de la fenêtre : la mise en page ne change pas, seule la finesse augmente.
+## Coupé en qualité « Économie ». Sur mobile, les scènes 3D restent calculées en 1080p (coût maîtrisé sur tablette).
+static func native_wanted() -> bool:
+	return not GfxQuality.low()
+
+
+func apply_render_scale() -> void:
+	var w: Window = get_window()
+	if w == null:
+		return
+	var native: bool = native_wanted()
+	var mode: int = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS if native else Window.CONTENT_SCALE_MODE_VIEWPORT
+	if w.content_scale_mode != mode:
+		w.content_scale_mode = mode
+	var k: float = 1.0
+	if native and OS.has_feature("mobile"):
+		k = clampf(1080.0 / float(maxi(1, w.size.y)), 0.5, 1.0)
+	if not is_equal_approx(w.scaling_3d_scale, k):
+		w.scaling_3d_scale = k
 
 func load_settings() -> void:
 	if not FileAccess.file_exists(SETTINGS_PATH):
@@ -200,6 +225,7 @@ func set_adventure_3d(on: bool) -> void:
 func set_graphics_quality(idx: int) -> void:
 	graphics_quality = clampi(idx, 0, 2)
 	save_settings()
+	apply_render_scale()
 
 func set_adventure_walk_sprites(on: bool) -> void:
 	adventure_walk_sprites = on
