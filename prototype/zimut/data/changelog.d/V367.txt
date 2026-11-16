@@ -1,0 +1,3 @@
+V367|Nettoyage du dépôt : suppression du script inutilisé TeamSelectionManager et des fichiers Python compilés (__pycache__).
+V367|Ajout d un .gitignore (__pycache__, *.pyc, *.tmp) pour éviter qu ils reviennent.
+V367|Suppression de la capture d écran isolée à la racine du dépôt.
