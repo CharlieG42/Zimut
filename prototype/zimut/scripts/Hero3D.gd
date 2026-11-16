@@ -17,9 +17,9 @@ const FEET_ROW := 0.965            # ligne des pieds
 const HERO_H := 1.8
 const FRAME_MAX_PASSES := 8        # passes de cadrage au plus
 const LUM_START := 0.08           # écart de luminosité (8 %) à partir duquel les couleurs sont recalées
+const RECALE := false            # V373 : recalage des couleurs coupé (rendu identique sur tous les appareils)
 const LUM_TOL := 0.04              # écart toléré après recalage
 const FRAME_TOL := 0.04            # écart toléré (4 %) entre la hauteur mesurée et la hauteur voulue
-const OUTLINE_FRAC := 0.0113       # contour de 1,6 px dans la cellule, en fraction de la hauteur du personnage (comme la cuisson)
 ## Deux familles de modèles :
 ##  - « procédural » (Sylvain) : pose calculée à l'exécution par HeroAnim, bâton rigide, pointe du bâton ;
 ##  - « clips » (modèles Meshy rigifiés, V163) : animations intégrées au .glb (AnimationPlayer). Chaque action du jeu
@@ -80,37 +80,23 @@ const MODELS := {
 const CLASS_MODEL := {"Sylvain": "Sylvain", "Artificier": "Ingénieur", "Chasseur": "Chasseur", "Invocateur": "Invocateur", "Tank": "Tank"}
 const BOSS_MODEL := {"Gobelin Roi": "Tharok", "Tharok le Végétal": "Tharok"}
 const CLIP_FRAMES := 24             # nombre d'images fictives d'une action (EntityView raisonne en images pour les temps d'impact)
+## V373 : ombrage calculé dans le shader (sans lumière de scène) : le rendu ne dépend plus de l'appareil — sur PC les
+## lumières délavaient les couleurs de la texture, sur téléphone elles sortaient plus sombres puis étaient recalées.
 const SHADER := """
 shader_type spatial;
-render_mode cull_back, specular_disabled;
-uniform sampler2D albedo_tex : source_color, filter_linear_mipmap, repeat_enable, hint_default_white;
+render_mode cull_back, unshaded;
+uniform sampler2D albedo_tex : source_color, filter_linear_mipmap_anisotropic, repeat_enable, hint_default_white;
 uniform float gain = 1.0;
 uniform float gamma = 1.0;     // V357 : correction automatique des couleurs (voir _calibrate_color)
+const vec3 LDIR = vec3(-0.36, 0.62, 0.70);   // lumière fixe, dans le repère de la caméra (haut gauche, vers le spectateur)
 void fragment() {
-	vec3 c = pow(texture(albedo_tex, UV).rgb, vec3(gamma)) * gain;
-	ALBEDO = c;
-	EMISSION = c * 0.16;
-	ROUGHNESS = 0.9;
-}
-void light() {
-	float h = dot(NORMAL, LIGHT) * 0.5 + 0.5;
-	float band = smoothstep(0.38, 0.58, h) * 0.5 + smoothstep(0.66, 0.84, h) * 0.5;
-	vec3 shade = mix(vec3(0.70, 0.74, 0.96), vec3(1.0), band);
-	DIFFUSE_LIGHT += LIGHT_COLOR * ATTENUATION * (0.35 + 0.65 * band) * shade * 0.9;
+	vec3 c = pow(texture(albedo_tex, UV, -0.5).rgb, vec3(gamma)) * gain;
+	float h = dot(normalize(NORMAL), normalize(LDIR)) * 0.5 + 0.5;
+	float band = smoothstep(0.34, 0.50, h) * 0.6 + smoothstep(0.66, 0.80, h) * 0.4;
+	vec3 shade = mix(vec3(0.60, 0.64, 0.86), vec3(1.06, 1.04, 1.0), band);
+	ALBEDO = c * shade;
 }
 """
-const OUTLINE_SHADER := """
-shader_type spatial;
-render_mode cull_front, unshaded;
-uniform float width = 0.0002;
-void vertex() {
-	VERTEX += NORMAL * width;
-}
-void fragment() {
-	ALBEDO = vec3(0.06, 0.08, 0.15);
-}
-"""
-
 signal framed
 
 ## Diagnostic du dernier cadrage de chaque modèle (affiché sous le compteur d'images).
@@ -219,6 +205,10 @@ func _load_model(path: String) -> bool:
 	_mi = mis[0] as MeshInstance3D
 	var src: Material = _mi.mesh.surface_get_material(0)
 	var tex: Texture2D = (src as BaseMaterial3D).albedo_texture if src is BaseMaterial3D else null
+	# V373 : texture au fond comblé (tools/pad_hero_textures.py) — sans elle, le noir du fond de l'atlas bave sur les coutures
+	var pad_path: String = path.get_basename() + "_albedo_pad.webp"
+	if ResourceLoader.exists(pad_path):
+		tex = load(pad_path) as Texture2D
 	if tex == null:
 		return false
 	var sh := Shader.new()
@@ -228,14 +218,8 @@ func _load_model(path: String) -> bool:
 	mat.set_shader_parameter("albedo_tex", tex)
 	mat.set_shader_parameter("gain", float(_prof.get("gain", 1.0)))
 	_mat = mat
-	# contour : coque inversée (rendu des faces arrière, gonflée le long des normales)
-	var osh := Shader.new()
-	osh.code = OUTLINE_SHADER
-	var omat := ShaderMaterial.new()
-	omat.shader = osh
-	var aabb: AABB = _mi.mesh.get_aabb()
-	omat.set_shader_parameter("width", maxf(aabb.size.x, maxf(aabb.size.y, aabb.size.z)) * OUTLINE_FRAC)
-	mat.next_pass = omat
+	# V373 : plus de coque inversée — sur ces maillages (faces disjointes) elle semait des éclats noirs sur le visage et
+	# l'armure. Le contour vient du sprite 2D (EntityView), net et régulier.
 	_skin = _mi.skin
 	for i: int in range(_sk.get_bone_count()):
 		_rest_q.append(_sk.get_bone_rest(i).basis.get_rotation_quaternion())
@@ -394,7 +378,8 @@ func _calibrate_color(st: Dictionary) -> String:
 	if l0 <= 0.0 or _mat == null:
 		return txt
 	txt += " (réf %.3f)" % l0
-	if absf(lum / l0 - 1.0) <= LUM_START:
+	# V373 : l'ombrage ne dépend plus des lumières de la scène, donc plus de l'appareil — pas de recalage.
+	if not RECALE or absf(lum / l0 - 1.0) <= LUM_START:
 		return txt
 	var g: float = 1.0
 	for i: int in range(5):

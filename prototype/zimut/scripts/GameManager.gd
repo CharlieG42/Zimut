@@ -1866,7 +1866,7 @@ func _resolve_attack(caster: Dictionary, spell: Dictionary, p: Dictionary, cell:
 		var rep: Dictionary = _beacon_replicas(caster, spell, p, cell, base)
 		if rep.size() > 0:
 			total += int(rep["dmg"])
-			names.append("balise (%d)" % int(rep["dmg"]))
+			names.append("balises : %d réplique%s, %d" % [int(rep["hits"]), "s" if int(rep["hits"]) > 1 else "", int(rep["dmg"])])
 	for b: Dictionary in p["self_buffs"]:
 		_apply_status(caster, caster, String(b["id"]), int(b["turns"]), float(b["value"]))
 	if names.is_empty():
@@ -2253,6 +2253,7 @@ func _beacon_replicas(caster: Dictionary, spell: Dictionary, p: Dictionary, cell
 	if not triggered:
 		return {}
 	var total: int = 0
+	var hits: int = 0
 	for b2: Dictionary in beacons:
 		var bpos: Vector2i = pos_of(b2)
 		if bpos == cell:
@@ -2262,10 +2263,11 @@ func _beacon_replicas(caster: Dictionary, spell: Dictionary, p: Dictionary, cell
 			# Un ennemi est touché autant de fois que de zones qui le couvrent (origine + une par balise).
 			if rep_cells.has(pos_of(e)) and is_alive(e) and not bool(e.get("beacon", false)):
 				total += _hit_target(caster, spell, p, e, base)
+				hits += 1
 		fx.emit("beacon", {"from": bpos, "cells": rep_cells})
 	if total <= 0:
 		return {}
-	return {"dmg": total}
+	return {"dmg": total, "hits": hits}
 
 
 ## Pilier du Géomancien : attaque l'ennemi le plus proche dans un rayon de 4 cases.
