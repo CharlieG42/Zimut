@@ -1,0 +1,3 @@
+V371|Combat : étalonnage de l image (contraste, saturation, tons chauds/froids) et lueur douce sur les zones claires, pour fondre personnages et décor dans une même lumière.
+V371|Actif en qualité Auto sur appareils puissants et en Haute ; désactivé en Économie pour préserver les téléphones modestes.
+V371|Nouveau test test_combat_look.

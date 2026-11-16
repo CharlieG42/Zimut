@@ -38,6 +38,8 @@ func _ready() -> void:
 	Music.play_combat(String(game_manager.fight_biome))
 	_setup_camera()
 	_build_vignette()
+	if CombatLook.wanted():
+		add_child(CombatLook.new())   # V371 : étalonnage couleurs + lueur
 	ui_manager.init(game_manager)
 	turn_manager.init(game_manager)
 
