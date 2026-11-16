@@ -423,11 +423,11 @@ func _try_clip_model() -> void:
 		_sq[an] = {"dur": float(m["dur"]), "loop": bool(m["loop"]), "key": roundi(float(m["key"]) * float(n)),
 			"tips": {}, "front": fr, "back": fr}
 	_sq_ok = true
-	_sq_cell = Hero3D.CELL
+	_sq_cell = Hero3D.CELL * Hero3D.RES_K     # la texture 3D est suréchantillonnée (V370)
 	var target_h: float = _target_height()
 	var sc: float = target_h / (float(Hero3D.CELL) * Hero3D.CHAR_FRAC)
-	_base_sc = sc
-	sprite.scale = Vector2(sc, sc)
+	_base_sc = sc / float(Hero3D.RES_K)
+	sprite.scale = Vector2(_base_sc, _base_sc)
 	height = target_h
 	_ph = float(Hero3D.CELL) * sc
 	sprite.position = Vector2(0, -_ph * 0.5 + 6.0)
