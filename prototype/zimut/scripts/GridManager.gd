@@ -1276,35 +1276,32 @@ func _play_damage(d: Dictionary) -> void:
 	if att_v != null and att_v != v:
 		src = att_v.position
 	v.hit_react(1.6 if crit else 1.0, src)
-	var col: Color
-	match dtype:
-		"mag":
-			col = Color(0.55, 0.75, 1.0)
-		"dot":
-			col = Color(0.8, 0.45, 0.95)
-		"fall":
-			col = Color(1.0, 0.75, 0.35)
-		_:
-			col = Color(1.0, 0.45, 0.25)
+	var elem: String = "poison" if dtype == "dot" else ("earth" if dtype == "fall" else _cur_element)
+	# V374 : le nombre prend la couleur de l'élément et grossit avec le poids du coup (part des PV max retirée)
+	var w: float = SpellFx.hit_weight(amount, int(t.get("max_pv", 0)))
+	var kill: bool = int(d["pv_after"]) <= 0
+	var combo: int = v.next_combo()
 	var txt: String = "-%d" % amount
 	if crit:
 		txt += " !"
-		col = Color(1.0, 0.9, 0.2)
-	_float_text(v, txt, col, 40 if crit else 30)
+	if combo > 1:
+		txt += "  ×%d" % combo
+	_float_text(v, txt, SpellFx.dmg_color(elem, dtype), SpellFx.dmg_size(w, crit), Color(0.45, 0.25, 0.0, 0.98) if crit else Color(0, 0, 0, 0.95))
 	if bool(d.get("back", false)):
 		_float_text(v, "Dans le dos !", Color(1.0, 0.7, 0.3), 20)
-	var elem: String = "poison" if dtype == "dot" else ("earth" if dtype == "fall" else _cur_element)
 	_impact(v.position + Vector2(0, -44), elem, crit)
 	_decal(game_manager.pos_of(t), elem)
 	_ring(v.position, SpellFx.colors(elem)[0], 6.0, 46.0 if crit else 34.0, 0.4, 4.0)   # onde au sol sous la cible
 	if crit:
 		_hit_stop(0.07)
+	elif kill or w >= SpellFx.HEAVY_HIT:
+		_hit_stop(0.05)          # V374 : coup lourd ou coup fatal — bref arrêt sur image
 	v.tint_flash(SpellFx.colors(elem)[0], 0.28, 0.75 if crit else 0.55)   # V47 : le sprite touché prend la teinte de l'élément
 	Sfx.play("crit" if crit else "hit")
 	if crit:
 		Sfx.buzz(25)
-	_shake(7.0 if crit else 3.0)
-	await _wait(0.2)
+	_shake(maxf(7.0 if crit else 3.0, minf(9.0, 3.0 + w * 14.0)))
+	await _wait(0.3 if combo > 1 else 0.2)      # V374 : coups en série (répliques de balises…) espacés pour se lire un à un
 
 
 func _play_heal(d: Dictionary) -> void:
@@ -1373,19 +1370,19 @@ func _play_summon(d: Dictionary) -> void:
 #  Effets visuels
 # ═══════════════════════════════════════════════════════════════════════════
 
-func _float_text(v: EntityView, text: String, col: Color, size: int) -> void:
+func _float_text(v: EntityView, text: String, col: Color, size: int, outline: Color = Color(0, 0, 0, 0.95), dx: float = 0.0) -> void:
 	var off: float = v.next_float_offset()
 	var label := Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", size)
 	label.add_theme_color_override("font_color", col)
-	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.95))
+	label.add_theme_color_override("font_outline_color", outline)
 	label.add_theme_constant_override("outline_size", 8)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.custom_minimum_size = Vector2(240, 0)
 	label.size = Vector2(240, 0)
 	label.pivot_offset = Vector2(120, 20)
-	label.position = v.position + Vector2(-120, -v.height - 36.0 - off)
+	label.position = v.position + Vector2(-120 + dx, -v.height - 36.0 - off)
 	label.scale = Vector2(0.4, 0.4)
 	_fx_layer.add_child(label)
 	var tw: Tween = create_tween()
