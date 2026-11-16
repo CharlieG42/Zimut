@@ -3,23 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d1sr03ukcbvk2"
-path.s3tc="res://.godot/imported/occ_0_2.webp-751589be03a2ea99101fde432d4e16a1.s3tc.ctex"
-path.etc2="res://.godot/imported/occ_0_2.webp-751589be03a2ea99101fde432d4e16a1.etc2.ctex"
+path="res://.godot/imported/occ_0_2.webp-751589be03a2ea99101fde432d4e16a1.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://assets/boards/sylve_diorama/occ_0_2.webp"
-dest_files=["res://.godot/imported/occ_0_2.webp-751589be03a2ea99101fde432d4e16a1.s3tc.ctex", "res://.godot/imported/occ_0_2.webp-751589be03a2ea99101fde432d4e16a1.etc2.ctex"]
+dest_files=["res://.godot/imported/occ_0_2.webp-751589be03a2ea99101fde432d4e16a1.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.9
+compress/lossy_quality=0.8
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1

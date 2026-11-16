@@ -3,23 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dain2jjjjutka"
-path.s3tc="res://.godot/imported/sol_0_1.webp-d2af5994f6fb866affe58d12e74b4b14.s3tc.ctex"
-path.etc2="res://.godot/imported/sol_0_1.webp-d2af5994f6fb866affe58d12e74b4b14.etc2.ctex"
+path="res://.godot/imported/sol_0_1.webp-d2af5994f6fb866affe58d12e74b4b14.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://assets/boards/cimes_diorama/sol_0_1.webp"
-dest_files=["res://.godot/imported/sol_0_1.webp-d2af5994f6fb866affe58d12e74b4b14.s3tc.ctex", "res://.godot/imported/sol_0_1.webp-d2af5994f6fb866affe58d12e74b4b14.etc2.ctex"]
+dest_files=["res://.godot/imported/sol_0_1.webp-d2af5994f6fb866affe58d12e74b4b14.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.7
+compress/lossy_quality=0.8
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1

@@ -3,23 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c5us1b6x4qxjq"
-path.s3tc="res://.godot/imported/occ_1_3.webp-1e7eb1c7ac1bb3e31441e6e8aa9acf5c.s3tc.ctex"
-path.etc2="res://.godot/imported/occ_1_3.webp-1e7eb1c7ac1bb3e31441e6e8aa9acf5c.etc2.ctex"
+path="res://.godot/imported/occ_1_3.webp-1e7eb1c7ac1bb3e31441e6e8aa9acf5c.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://assets/boards/brasier_diorama/occ_1_3.webp"
-dest_files=["res://.godot/imported/occ_1_3.webp-1e7eb1c7ac1bb3e31441e6e8aa9acf5c.s3tc.ctex", "res://.godot/imported/occ_1_3.webp-1e7eb1c7ac1bb3e31441e6e8aa9acf5c.etc2.ctex"]
+dest_files=["res://.godot/imported/occ_1_3.webp-1e7eb1c7ac1bb3e31441e6e8aa9acf5c.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.7
+compress/lossy_quality=0.8
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
