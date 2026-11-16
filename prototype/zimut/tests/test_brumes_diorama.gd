@@ -51,8 +51,8 @@ func _boot() -> void:
 	for f: String in DirAccess.get_files_at("res://assets/boards/brumes_diorama/"):
 		if f.ends_with(".import") and f != "fx.png.import":      # V127 : le masque d'effets reste sans perte (1280 × 720)
 			var txt: String = FileAccess.get_file_as_string("res://assets/boards/brumes_diorama/" + f)
-			vram = vram and txt.contains("compress/mode=2") and txt.contains("mipmaps/generate=true")
-	check(vram, "textures compressées pour le GPU, avec mipmaps")
+			vram = vram and txt.contains("compress/mode=1") and txt.contains("mipmaps/generate=true")
+	check(vram, "textures WebP avec perte (APK allégé), avec mipmaps")
 	# lieux : 5 donjons (paliers 1..4 + Nation), portail vers les Brumes, tous atteignables
 	var pois: Dictionary = BA.pois(z)
 	var guardians: Array = []

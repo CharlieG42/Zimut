@@ -93,7 +93,7 @@ func _boot() -> void:
 	var vram := true
 	for path: String in ["res://assets/boards/sylve_diorama/sol_0_0.webp.import", "res://assets/boards/sylve_diorama/occ_1_1.webp.import", "res://assets/boards/sylve_diorama/fond_bas.webp.import"]:
 		var txt: String = FileAccess.get_file_as_string(path)
-		vram = vram and txt.contains("compress/mode=2") and txt.contains("mipmaps/generate=true")
+		vram = vram and txt.contains("compress/mode=1") and txt.contains("mipmaps/generate=true")
 	check(vram, "textures du diorama compressées pour le GPU (ETC2 / S3TC) avec mipmaps")
 	check(not BA.diorama_low(z).is_empty() and load(String(BA.diorama_low(z)["path"])) is Texture2D, "fond basse définition sous les tuiles")
 	gm.active_save = {"adventure_view": "map"}

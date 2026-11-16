@@ -3,23 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://w4ke3v4aejjo"
-path.s3tc="res://.godot/imported/sol_0_0.webp-a31411f112f7503a80e5b81546f2d237.s3tc.ctex"
-path.etc2="res://.godot/imported/sol_0_0.webp-a31411f112f7503a80e5b81546f2d237.etc2.ctex"
+path="res://.godot/imported/sol_0_0.webp-a31411f112f7503a80e5b81546f2d237.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://assets/boards/brasier_diorama/sol_0_0.webp"
-dest_files=["res://.godot/imported/sol_0_0.webp-a31411f112f7503a80e5b81546f2d237.s3tc.ctex", "res://.godot/imported/sol_0_0.webp-a31411f112f7503a80e5b81546f2d237.etc2.ctex"]
+dest_files=["res://.godot/imported/sol_0_0.webp-a31411f112f7503a80e5b81546f2d237.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=1
 compress/high_quality=false
-compress/lossy_quality=0.7
+compress/lossy_quality=0.8
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
