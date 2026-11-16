@@ -11,15 +11,20 @@ const SHADER := """
 shader_type canvas_item;
 render_mode unshaded;
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
-uniform float contrast : hint_range(0.0, 1.0) = 0.16;
-uniform float saturation : hint_range(0.5, 1.5) = 1.10;
+uniform float contrast : hint_range(0.0, 1.0) = 0.30;
+uniform float saturation : hint_range(0.5, 1.5) = 1.25;
 uniform vec3 warm : source_color = vec3(1.0, 0.93, 0.80);
 uniform vec3 cool : source_color = vec3(0.80, 0.90, 1.0);
-uniform float split : hint_range(0.0, 1.0) = 0.22;
-uniform float bloom : hint_range(0.0, 1.0) = 0.22;
-uniform float bloom_threshold : hint_range(0.0, 1.0) = 0.72;
+uniform float split : hint_range(0.0, 1.0) = 0.38;
+uniform float bloom : hint_range(0.0, 1.0) = 0.40;
+uniform float bloom_threshold : hint_range(0.0, 1.0) = 0.62;
+uniform float sharpen : hint_range(0.0, 2.0) = 0.9;
+uniform float vignette : hint_range(0.0, 1.0) = 0.30;
 void fragment() {
 	vec3 c = texture(screen_tex, SCREEN_UV).rgb;
+	// netteté (masque flou) : renforce les contours des personnages
+	vec3 bz = textureLod(screen_tex, SCREEN_UV, 1.0).rgb;
+	c = clamp(c + (c - bz) * sharpen, 0.0, 1.0);
 	// lueur : moyenne floue des zones claires (mip 2 et 4)
 	vec3 b1 = textureLod(screen_tex, SCREEN_UV, 2.0).rgb;
 	vec3 b2 = textureLod(screen_tex, SCREEN_UV, 4.0).rgb;
@@ -35,6 +40,8 @@ void fragment() {
 	c = mix(vec3(l), c, saturation);
 	// split-toning
 	c = mix(c, c * mix(cool, warm, smoothstep(0.25, 0.8, l)), split);
+	vec2 q = SCREEN_UV - 0.5;
+	c *= 1.0 - vignette * smoothstep(0.25, 0.75, dot(q, q) * 2.0);
 	COLOR = vec4(clamp(c, 0.0, 1.0), 1.0);
 }
 """
