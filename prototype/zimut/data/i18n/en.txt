@@ -796,7 +796,7 @@ Force l'ennemi à attaquer ce perso (1 tour)	Forces the enemy to attack this cha
 Téléportation derrière l'ennemi	Teleports behind the enemy
 Téléporte à une case allié/ennemi	Teleports next to an ally/enemy
 Rappelle une de vos balises (elle disparaît du terrain)	Recalls one of your beacons (it leaves the field)
-Plante une balise (3 max; la plus ancienne disparaît) : un sort de zone du Chasseur qui touche une balise se réplique autour de toutes les autres	Plants a beacon (3 max; the oldest disappears): a Hunter area spell hitting a beacon is replicated around all the others
+Plante une balise (3 max; la plus ancienne disparaît) : chaque sort de zone du Chasseur se réplique autour de toutes ses balises	Plants a beacon (3 max; the oldest disappears): every Hunter area spell is replicated around all of its beacons
 Plante un arbre immobile : bloque la vue et relaie les soins du Sylvain aux alliés autour de lui (1 arbre max)	Plants a static tree: blocks line of sight and relays the Sylvan's heals to nearby allies (1 tree max)
 Ouvre une faille de 3 cases : infranchissable mais la vue reste dégagée (3 tours)	Opens a 3-cell rift: impassable but line of sight stays clear (3 turns)
 Érige une muraille de 3 cases : bloque le passage et la vue (3 tours)	Raises a 3-cell wall: blocks movement and line of sight (3 turns)
