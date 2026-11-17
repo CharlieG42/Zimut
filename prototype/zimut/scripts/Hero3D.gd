@@ -200,7 +200,8 @@ static func model_key(ent: Dictionary) -> String:
 	var classe: String = String(ent.get("classe", ""))
 	var key: String = ""
 	if bool(ent.get("boss", false)):
-		key = String(BOSS_MODEL.get(classe, ""))
+		# boss de nation : reconnu par son titre (le type de base, ex. « Dragonnet », est partagé entre plusieurs nations)
+		key = String(BOSS_MODEL.get(String(ent.get("title", "")), BOSS_MODEL.get(classe, "")))
 	elif String(ent.get("team", "")) == "player":
 		key = String(CLASS_MODEL.get(classe, ""))
 	return key if supported(key) else ""

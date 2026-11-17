@@ -59,6 +59,7 @@ func _boot() -> void:
 	check(Hero3D.model_key({"classe": "Gobelin Roi", "boss": false, "team": "enemy"}) == "", "un Gobelin Roi non-boss n'a pas de modèle 3D")
 	check(Hero3D.model_key({"classe": "Artificier", "team": "player"}) == "Ingénieur", "classe Artificier -> modèle Ingénieur")
 	check(Hero3D.model_key({"classe": "Artificier", "team": "enemy"}) == "", "un ennemi ne prend pas le modèle d'un héros")
+	check(Hero3D.model_key({"classe": "Dragonnet", "boss": true, "title": "Kharaz le Flamboyant", "team": "enemy"}) == "Kharaz" and Hero3D.model_key({"classe": "Dragonnet", "boss": true, "team": "enemy"}) == "", "boss du Brasier reconnu par son titre, pas par son type de base")
 	check(Hero3D.model_key({"classe": "Chasseur", "team": "player"}) == "Chasseur" and Hero3D.model_key({"classe": "Invocateur", "team": "player"}) == "Invocateur", "Chasseur et Invocateur ont leur modèle")
 	check(Hero3D.model_key({"classe": "Tank", "team": "player"}) == "Tank", "classe Tank -> modèle Tank")
 	for k: String in ["Tharok", "Ingénieur", "Chasseur", "Invocateur", "Tank", "Sylvain", "Assassin", "Mage", "Géomancien", "Druide", "Heal", "Kharaz"]:
