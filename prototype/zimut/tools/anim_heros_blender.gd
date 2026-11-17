@@ -86,6 +86,27 @@ static func _curve(keys: Array, t: float) -> float:
 	return lerpf(float(keys[i]), float(keys[i + 1]), f)
 
 
+## V386 : repos vivant (remplace l'ancienne respiration de ±1,5° qui laissait les héros raides). Toutes les composantes sont
+## périodiques (1 ou 2 périodes sur le clip) : transfert d'appui d'une jambe à l'autre, respiration du thorax, buste qui se
+## tord à peine, regard qui dérive, bras libre qui balance et se fléchit. [free] = os du bras libre ("" si aucun),
+## [lg] = amplitude des jambes (robe longue : moins).
+static func _idle_extra(t: float, free: String, lg: float) -> Dictionary:
+	var sh: float = sin(t * TAU)            # transfert d'appui
+	var br: float = sin(t * TAU * 2.0)      # respiration
+	var gl: float = sin(t * TAU + 1.3)      # regard
+	var d: Dictionary = {
+		"thorax": Vector3(-3.5 * br, 4.5 * sh, 2.2 * sh),
+		"tete": Vector3(2.8 * br, -4.0 * sh + 5.5 * gl, 2.2 * gl),
+		"cuisse.l": Vector3(6.0 * sh * lg, 0, 0), "tibia.l": Vector3(-9.0 * maxf(sh, 0.0) * lg, 0, 0),
+		"cuisse.r": Vector3(-6.0 * sh * lg, 0, 0), "tibia.r": Vector3(-9.0 * maxf(-sh, 0.0) * lg, 0, 0)}
+	if free != "":
+		var av: String = "avantbras." + free.get_slice(".", 1)
+		var side: float = -1.0 if free.ends_with(".l") else 1.0
+		d[free] = Vector3(5.0 * sh, 0, side * 3.0 * br)
+		d[av] = Vector3(-10.0 - 5.0 * br, 0, 0)
+	return d
+
+
 func _preset(name: String) -> Dictionary:
 	match name:
 		# Assassin (V380) : deux dagues. Garde basse, genoux fléchis ; attaque = coup d'estoc de la dague droite avec fente ;
@@ -100,9 +121,8 @@ func _preset(name: String) -> Dictionary:
 					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (extra[k] as Vector3)
 				return d
 			return {
-				"Idle": {"dur": 2.0, "loop": true, "fn": func(t: float) -> Dictionary:
-					var br: float = sin(t * TAU)
-					return low.call({"thorax": Vector3(-1.5 * br, 0, 0), "bras.l": Vector3(0, 0, 2.0 * br), "bras.r": Vector3(0, 0, -2.0 * br)})},
+				"Idle": {"dur": 3.0, "loop": true, "fn": func(t: float) -> Dictionary:
+					return low.call(_idle_extra(t, "", 1.0))},
 				"Walk": {"dur": 0.7, "loop": true, "fn": func(t: float) -> Dictionary:
 					var p: float = sin(t * TAU)
 					var q: float = cos(t * TAU)
@@ -144,9 +164,8 @@ func _preset(name: String) -> Dictionary:
 					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (extra[k] as Vector3)
 				return d
 			return {
-				"Idle": {"dur": 2.4, "loop": true, "fn": func(t: float) -> Dictionary:
-					var br: float = sin(t * TAU)
-					return rest.call({"thorax": Vector3(-1.5 * br, 0, 0), "tete": Vector3(1.2 * br, 0, 0), "bras.r": Vector3(0, 0, -2.0 * br)})},
+				"Idle": {"dur": 3.0, "loop": true, "fn": func(t: float) -> Dictionary:
+					return rest.call(_idle_extra(t, "bras.r", 1.0))},
 				"Walk": {"dur": 0.8, "loop": true, "fn": func(t: float) -> Dictionary:
 					var p: float = sin(t * TAU)
 					var q: float = cos(t * TAU)
@@ -183,9 +202,8 @@ func _preset(name: String) -> Dictionary:
 					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (extra[k] as Vector3)
 				return d
 			return {
-				"Idle": {"dur": 2.4, "loop": true, "fn": func(t: float) -> Dictionary:
-					var br: float = sin(t * TAU)
-					return rest.call({"thorax": Vector3(-1.5 * br, 0, 0), "tete": Vector3(1.2 * br, 0, 0), "bras.r": Vector3(0, 0, -2.0 * br)})},
+				"Idle": {"dur": 3.0, "loop": true, "fn": func(t: float) -> Dictionary:
+					return rest.call(_idle_extra(t, "bras.r", 1.0))},
 				"Walk": {"dur": 0.8, "loop": true, "fn": func(t: float) -> Dictionary:
 					var p: float = sin(t * TAU)
 					var q: float = cos(t * TAU)
@@ -227,9 +245,8 @@ func _preset(name: String) -> Dictionary:
 					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (extra[k] as Vector3)
 				return d
 			return {
-				"Idle": {"dur": 2.4, "loop": true, "fn": func(t: float) -> Dictionary:
-					var br: float = sin(t * TAU)
-					return rest.call({"thorax": Vector3(-1.5 * br, 0, 0), "tete": Vector3(1.2 * br, 0, 0), "bras.l": Vector3(0, 0, 2.0 * br)})},
+				"Idle": {"dur": 3.0, "loop": true, "fn": func(t: float) -> Dictionary:
+					return rest.call(_idle_extra(t, "bras.l", lg))},
 				"Walk": {"dur": 0.8, "loop": true, "fn": func(t: float) -> Dictionary:
 					var p: float = sin(t * TAU)
 					var q: float = cos(t * TAU)
