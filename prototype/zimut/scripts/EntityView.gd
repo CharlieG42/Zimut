@@ -1019,10 +1019,10 @@ func _process(delta: float) -> void:
 			sm.set_shader_parameter("radius", 9.0 * _h3d.res_k)
 			_shadow.material = sm
 		# contre-jour : la lumière vient de l'arrière, l'ombre s'étire vers l'avant (vers le bas de l'écran)
-		_shadow.scale = Vector2(sc * (1.0 - air * 0.15), -sc * 0.46 * (1.0 - air * 0.2))
+		_shadow.scale = Vector2(sc * (1.0 - air * 0.15), -sc * (0.34 if _is3d() else 0.46) * (1.0 - air * 0.2))
 		_shadow.self_modulate.a = minf(0.60, float(_light.get("shadow", 0.35)) * 1.5) * (1.0 - air * 0.35)
 		if _shadow.material != null:
-			(_shadow.material as ShaderMaterial).set_shader_parameter("opacity", _shadow.self_modulate.a * 0.8)
+			(_shadow.material as ShaderMaterial).set_shader_parameter("opacity", _shadow.self_modulate.a * 0.5)
 			_shadow.self_modulate.a = 1.0
 		_shadow.visible = not _falling
 		if _ghost != null:
