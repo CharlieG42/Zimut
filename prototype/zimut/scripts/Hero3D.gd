@@ -29,8 +29,52 @@ const FRAME_TOL := 0.04            # écart toléré (4 %) entre la hauteur mesu
 ## imposé, et les couleurs sont recalées si l'appareil rend plus clair ou plus sombre. Pour les recalculer (nouveau modèle,
 ## ou réglage de lumière modifié), retirer ces deux clés, lancer un rendu et relever `Hero3D.diag` / `image_stats`.
 const MODELS := {
-	"Sylvain": {"path": "res://assets/heroes3d/sylvain.glb", "tip_bone": "main.r",
-		"staff_x": -0.0035, "staff_z_max": 0.0045, "gain": 1.0, "ref_cam": Vector2(4.42, 1.956), "ref_lum": 0.853},
+	## Sylvain (V380) : nouveau modèle et rig de Charlie sous Blender (bâton dans la main gauche), clips cuits par
+	## tools/anim_heros_blender.gd (préréglage « sylvain ») — remplace l'ancien modèle animé par HeroAnim.
+	"Sylvain": {"path": "res://assets/heroes3d/sylvain.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.45, 1.97), "ref_lum": 0.649,
+		"clips": {
+			"idle":   {"clip": "Idle", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walk", "t0": 0.0, "t1": 0.8, "dur": 0.8, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
+			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+		}},
+	## Mage (V381) : modèle et rig de Charlie sous Blender (bâton dans la main droite, grimoire dans la gauche), clips cuits (préréglage « mage »).
+	"Mage": {"path": "res://assets/heroes3d/mage.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.45, 1.97), "ref_lum": 0.649,
+		"clips": {
+			"idle":   {"clip": "Idle", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walk", "t0": 0.0, "t1": 0.8, "dur": 0.8, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
+			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+		}},
+	## Géomancien (V382) : modèle et rig de Charlie sous Blender (bâton à torche dans la main droite, sphère de lumière flottant au-dessus de la gauche), clips cuits (préréglage « geomancien »).
+	"Géomancien": {"path": "res://assets/heroes3d/geomancien.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.29, 1.90), "ref_lum": 0.55,
+		"clips": {
+			"idle":   {"clip": "Idle", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walk", "t0": 0.0, "t1": 0.8, "dur": 0.8, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
+			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+		}},
+	## Kharaz le Flamboyant (V384) : boss de la nation du Brasier, modèle et rig de Charlie sous Blender (arc enflammé dans la main gauche, poing de feu à droite), clips cuits (préréglage « kharaz »).
+	"Kharaz": {"path": "res://assets/heroes3d/kharaz.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.45, 1.97), "ref_lum": 0.55,
+		"clips": {
+			"idle":   {"clip": "Idle", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walk", "t0": 0.0, "t1": 0.8, "dur": 0.8, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
+			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+		}},
+	## Assassin (V380) : modèle et rig de Charlie sous Blender (deux dagues), clips cuits (préréglage « assassin »).
+	"Assassin": {"path": "res://assets/heroes3d/assassin.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.626, 1.991), "ref_lum": 0.25,
+		"clips": {
+			"idle":   {"clip": "Idle", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walk", "t0": 0.0, "t1": 0.7, "dur": 0.7, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.0, "t1": 0.9, "dur": 0.7, "loop": false, "key": 0.55},
+			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.2, "dur": 1.0, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+		}},
 	"Tharok": {"path": "res://assets/heroes3d/tharok.glb", "root_bone": "spine", "gain": 1.0, "ref_cam": Vector2(3.62, 1.545), "ref_lum": 0.425,
 		"clips": {
 			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
@@ -67,28 +111,48 @@ const MODELS := {
 			"cast":   {"clip": "Triple_Combo_Attack", "t0": 0.2, "t1": 3.0, "dur": 1.5, "loop": false, "key": 0.55},
 			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
 		}},
-	## Chasseur : « Attack » est un grand geste d'arc levé puis abaissé (pas de tir à l'arc tendu) ; le sort réutilise le même clip.
-	"Chasseur": {"path": "res://assets/heroes3d/chasseur.glb", "root_bone": "spine", "gain": 1.0, "ref_cam": Vector2(2.72, 1.213), "ref_lum": 0.448,
+	## Chasseur (V383) : modèle et rig de Charlie sous Blender (arc dans la main gauche), clips cuits (préréglage « chasseur ») : tir = arc tendu puis corde relâchée.
+	"Chasseur": {"path": "res://assets/heroes3d/chasseur.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.45, 1.97), "ref_lum": 0.55,
 		"clips": {
-			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
-			"walk":   {"clip": "Walking", "t0": 0.0, "t1": 1.0333, "dur": 1.0, "loop": true, "key": 0.0},
-			"attack": {"clip": "Attack", "t0": 0.3, "t1": 1.7, "dur": 0.9, "loop": false, "key": 0.54},
-			"cast":   {"clip": "Attack", "t0": 0.3, "t1": 1.7, "dur": 1.1, "loop": false, "key": 0.54},
-			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
+			"idle":   {"clip": "Idle", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walk", "t0": 0.0, "t1": 0.8, "dur": 0.8, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
+			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
 		}},
-	## Invocateur : « Charged_Spell_Cast_1 » = livre levé, tenu à hauteur du visage (≈ 2,1-2,9 s), puis relâché. L'attaque en reprend la poussée en avant.
-	"Invocateur": {"path": "res://assets/heroes3d/invocateur.glb", "root_bone": "spine", "gain": 1.0, "ref_cam": Vector2(3.74, 1.684), "ref_lum": 0.297,
+	## Druide (V383) : modèle et rig de Charlie (bâton à cristal dans la main droite), clips cuits (préréglage « druide »).
+	"Druide": {"path": "res://assets/heroes3d/druide.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.54, 2.0), "ref_lum": 0.55,
 		"clips": {
-			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
-			"walk":   {"clip": "Walking", "t0": 0.0, "t1": 1.0333, "dur": 1.0, "loop": true, "key": 0.0},
-			"attack": {"clip": "Charged_Spell_Cast_1", "t0": 1.3, "t1": 2.4, "dur": 0.7, "loop": false, "key": 0.77},
-			"cast":   {"clip": "Charged_Spell_Cast_1", "t0": 0.3, "t1": 3.4, "dur": 1.4, "loop": false, "key": 0.6},
-			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
+			"idle":   {"clip": "Idle", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walk", "t0": 0.0, "t1": 0.8, "dur": 0.8, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
+			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+		}},
+	## Heal (V383) : modèle et rig de Charlie (bâton à sphère dans la main droite, robe longue : jambes peu ouvertes), clips cuits (préréglage « heal »).
+	"Heal": {"path": "res://assets/heroes3d/heal.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.45, 1.97), "ref_lum": 0.55,
+		"clips": {
+			"idle":   {"clip": "Idle", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walk", "t0": 0.0, "t1": 0.8, "dur": 0.8, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
+			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+		}},
+	## Invocateur (V379) : modèle et rig de Charlie sous Blender (16 os nommés en français), sans animation d'origine ;
+	## les clips sont cuits par tools/anim_heros_blender.gd (préréglage « invocateur »). Lanterne dans la main gauche,
+	## livre dans la droite. Attaque = livre poussé vers l'ennemi ; sort = lanterne levée.
+	"Invocateur": {"path": "res://assets/heroes3d/invocateur.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(3.827, 1.702), "ref_lum": 0.191,
+		"clips": {
+			"idle":   {"clip": "Idle", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walk", "t0": 0.0, "t1": 0.8, "dur": 0.8, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.6},
+			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
 		}},
 }
 ## Classe du joueur (nom interne) ou nom de boss -> modèle.
-const CLASS_MODEL := {"Sylvain": "Sylvain", "Artificier": "Ingénieur", "Chasseur": "Chasseur", "Invocateur": "Invocateur", "Tank": "Tank"}
-const BOSS_MODEL := {"Gobelin Roi": "Tharok", "Tharok le Végétal": "Tharok", "Troll Géant": "Vorkann", "Vorkann le Givre": "Vorkann"}
+const CLASS_MODEL := {"Sylvain": "Sylvain", "Mage": "Mage", "Géomancien": "Géomancien", "Assassin": "Assassin", "Artificier": "Ingénieur", "Chasseur": "Chasseur", "Druide": "Druide", "Heal": "Heal", "Invocateur": "Invocateur", "Tank": "Tank"}
+const BOSS_MODEL := {"Gobelin Roi": "Tharok", "Tharok le Végétal": "Tharok", "Troll Géant": "Vorkann", "Vorkann le Givre": "Vorkann", "Kharaz le Flamboyant": "Kharaz"}
 const CLIP_FRAMES := 24             # nombre d'images fictives d'une action (EntityView raisonne en images pour les temps d'impact)
 ## V373 : ombrage calculé dans le shader (sans lumière de scène) : le rendu ne dépend plus de l'appareil — sur PC les
 ## lumières délavaient les couleurs de la texture, sur téléphone elles sortaient plus sombres puis étaient recalées.
@@ -146,7 +210,8 @@ static func model_key(ent: Dictionary) -> String:
 	var classe: String = String(ent.get("classe", ""))
 	var key: String = ""
 	if bool(ent.get("boss", false)):
-		key = String(BOSS_MODEL.get(classe, ""))
+		# boss de nation : reconnu par son titre (le type de base, ex. « Dragonnet », est partagé entre plusieurs nations)
+		key = String(BOSS_MODEL.get(String(ent.get("title", "")), BOSS_MODEL.get(classe, "")))
 	elif String(ent.get("team", "")) == "player":
 		key = String(CLASS_MODEL.get(classe, ""))
 	return key if supported(key) else ""

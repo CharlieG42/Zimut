@@ -1,0 +1,3 @@
+V381|Mage en 3D directe : modèle et rig de Charlie sous Blender, allégé à 12 000 triangles, mêmes os que le Sylvain.
+V381|Animations cuites (garde, marche, attaque, sort, touché) : bâton dans la main droite pointé vers l ennemi ou levé haut, grimoire dans la main gauche.
+V381|Nouveau préréglage « mage » dans tools/anim_heros_blender.gd ; la classe Mage utilise ce modèle quand la 3D directe est active.

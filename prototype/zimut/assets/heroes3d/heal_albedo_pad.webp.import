@@ -2,19 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c7n1bxtl2jxlh"
-path="res://.godot/imported/invocateur_BakedMaterial_albedo.webp-ba83b2244feee32cc45a02cc095671d4.ctex"
+uid="uid://ce3o2hcbfkdcn"
+path="res://.godot/imported/heal_albedo_pad.webp-78a1690f843829462f92e4e9586fdea4.ctex"
 metadata={
 "vram_texture": false
-}
-generator_parameters={
-"md5": "d6e86b3fdaaea7159933465ae9199cbb"
 }
 
 [deps]
 
-source_file="res://assets/heroes3d/invocateur_BakedMaterial_albedo.webp"
-dest_files=["res://.godot/imported/invocateur_BakedMaterial_albedo.webp-ba83b2244feee32cc45a02cc095671d4.ctex"]
+source_file="res://assets/heroes3d/heal_albedo_pad.webp"
+dest_files=["res://.godot/imported/heal_albedo_pad.webp-78a1690f843829462f92e4e9586fdea4.ctex"]
 
 [params]
 
@@ -26,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
