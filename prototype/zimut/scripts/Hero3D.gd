@@ -208,6 +208,9 @@ var _tip_local := Vector3.ZERO
 var _rest_dir := Vector3.UP
 var _last_key: String = ""
 var _cell_px: float = float(CELL)
+## V386 : facteur de résolution effectif (texels du rendu par pixel logique de cellule). RES_K par défaut ; EntityView le règle
+## sur la taille réelle d'affichage (1 texel = 1 pixel écran) pour ne jamais réduire l'image : c'est ce qui la rend nette.
+var res_k: float = float(RES_K)
 var _ap: AnimationPlayer = null
 var _clips: Dictionary = {}
 
@@ -234,13 +237,18 @@ static func is_clip_model(key: String) -> bool:
 
 
 ## Charge le modèle et prépare le rendu. Asynchrone (quelques images pour mesurer le cadrage) : attendre [signal framed].
-func setup(classe: String) -> bool:
+## [px_scale] > 0 : nombre de pixels écran occupés par un pixel logique de cellule (taille d'affichage ÷ CELL × zoom × étirement).
+func setup(classe: String, px_scale: float = 0.0) -> bool:
 	if not supported(classe):
 		return false
 	_prof = MODELS[classe]
 	_key = classe
+	if px_scale > 0.0:
+		res_k = clampf(px_scale, 1.0, float(RES_K))
+	var side: int = roundi(float(CELL) * res_k)
+	res_k = float(side) / float(CELL)
 	vp = SubViewport.new()
-	vp.size = Vector2i(CELL * RES_K, CELL * RES_K)
+	vp.size = Vector2i(side, side)
 	vp.transparent_bg = true
 	vp.own_world_3d = true
 	vp.msaa_3d = Viewport.MSAA_4X
@@ -395,7 +403,7 @@ func _frame() -> void:
 		await tree_entered
 	_set_pose("idle", 0.0, false)
 	var passes: int = 0
-	var vp_h: float = float(CELL * RES_K)
+	var vp_h: float = float(vp.size.y)
 	var how: String = "mesuré"
 	var guarded: bool = false
 	var ref_cam: Vector2 = _prof.get("ref_cam", Vector2.ZERO)

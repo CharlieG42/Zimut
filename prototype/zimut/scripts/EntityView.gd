@@ -431,7 +431,7 @@ func _try_clip_model() -> void:
 		await tree_entered
 	var h := Hero3D.new()
 	add_child(h)
-	if not h.setup(key):
+	if not h.setup(key, _target_height() / (float(Hero3D.CELL) * Hero3D.CHAR_FRAC) * _screen_px_scale()):
 		h.queue_free()
 		return
 	await h.framed
@@ -448,14 +448,45 @@ func _try_clip_model() -> void:
 		_sq[an] = {"dur": float(m["dur"]), "loop": bool(m["loop"]), "key": roundi(float(m["key"]) * float(n)),
 			"tips": {}, "front": fr, "back": fr}
 	_sq_ok = true
-	_sq_cell = Hero3D.CELL * Hero3D.RES_K     # la texture 3D est suréchantillonnée (V370)
+	_sq_cell = h.vp.size.x     # V386 : résolution réglée sur la taille d'affichage (1 texel ≈ 1 pixel écran)
 	var target_h: float = _target_height()
 	var sc: float = target_h / (float(Hero3D.CELL) * Hero3D.CHAR_FRAC)
-	_base_sc = sc / float(Hero3D.RES_K)
+	_base_sc = sc / h.res_k
+	_set_filter_3d()
 	sprite.scale = Vector2(_base_sc, _base_sc)
 	height = target_h
 	_ph = float(Hero3D.CELL) * sc
 	sprite.position = Vector2(0, -_ph * 0.5 + 6.0)
+
+
+## V386 : pixels écran par pixel logique (étirement de la fenêtre × zoom de la caméra du plateau).
+func _screen_px_scale() -> float:
+	var vp: Viewport = get_viewport()
+	if vp == null:
+		return 1.0
+	var z: float = vp.get_final_transform().get_scale().x
+	var cam: Camera2D = vp.get_camera_2d()
+	if cam != null:
+		z *= cam.zoom.x
+	return z
+
+
+## V386 : arrondit la position d'affichage au pixel (un sprite posé entre deux pixels est rééchantillonné, donc flou).
+func _snap_px(local_pos: Vector2) -> Vector2:
+	var t: Transform2D = get_global_transform_with_canvas()
+	var scr: Vector2 = t * local_pos
+	return local_pos + t.affine_inverse().basis_xform(scr.round() - scr)
+
+
+## V386 : le projet affiche les sprites en « nearest » ; un rendu 3D réduit ainsi crénelle. Le rendu étant à la taille écran,
+## le filtrage linéaire donne un trait propre pour le sprite et ses copies (contour, liseré, ombre).
+func _set_filter_3d() -> void:
+	var f: int = CanvasItem.TEXTURE_FILTER_LINEAR
+	sprite.texture_filter = f
+	_rim.texture_filter = f
+	_shadow.texture_filter = f
+	for o: Sprite2D in _outl:
+		o.texture_filter = f
 
 
 ## Texture 3D en direct : mêmes règles de temps que les planches (action en cours, marche, repos), mais avec une phase continue.
@@ -680,6 +711,12 @@ func _sync_outline() -> void:
 	var show: bool = _has_tex and sprite.visible and not _falling and not _is_static()
 	var d: float = OUTLINE_PX_ACTIVE if (bool(entity.get("is_active", false)) or hovered) else OUTLINE_PX
 	var oc: Color = outline_color(entity)
+	var a_mul: float = 1.0
+	if _is3d():
+		# V386 : trait net façon Dofus — environ 1 pixel écran (1,5 si actif), sombre et presque opaque, quelle que soit l'échelle
+		var inv: float = 1.0 / maxf(_screen_px_scale(), 0.25)
+		d = (2.1 if d == OUTLINE_PX_ACTIVE else 1.5) * inv
+		a_mul = 0.92
 	for i: int in _outl.size():
 		var o: Sprite2D = _outl[i]
 		o.visible = show
@@ -693,7 +730,7 @@ func _sync_outline() -> void:
 		o.rotation = sprite.rotation
 		o.skew = sprite.skew
 		o.position = sprite.position + OUTLINE_DIRS[i] * d
-		o.self_modulate = Color(oc.r, oc.g, oc.b, sprite.self_modulate.a * sprite.modulate.a * (0.30 if _is3d() else 1.0))
+		o.self_modulate = Color(oc.r, oc.g, oc.b, sprite.self_modulate.a * sprite.modulate.a * a_mul)
 
 
 ## V385 : personnage rendu en 3D direct (contours, ombre, anneau et touffes sont adoucis : il se fond dans le plateau).
@@ -951,7 +988,7 @@ func _process(delta: float) -> void:
 		var sy: float = sc * (1.0 + breathe - etir * 0.07 - squash)
 		var base_pos := Vector2(randf_range(-1.0, 1.0) * _shake * 6.0, -_ph * 0.5 + 6.0 - bob - hop) + _kb
 		sprite.scale = Vector2(sx, sy)
-		sprite.position = base_pos
+		sprite.position = _snap_px(base_pos) if _is3d() else base_pos
 		sprite.rotation = _tilt + (0.0 if still else sin(_t * 1.3 + _phase) * _a("balancement"))
 		sprite.skew = _lean
 		var haze: Color = Color(0.86, 0.90, 1.0).lerp(Color(1, 1, 1), df)
@@ -979,7 +1016,7 @@ func _process(delta: float) -> void:
 				_soft_shadow_shader.code = SOFT_SHADOW_SHADER
 			var sm := ShaderMaterial.new()
 			sm.shader = _soft_shadow_shader
-			sm.set_shader_parameter("radius", 9.0 * float(Hero3D.RES_K))
+			sm.set_shader_parameter("radius", 9.0 * _h3d.res_k)
 			_shadow.material = sm
 		# contre-jour : la lumière vient de l'arrière, l'ombre s'étire vers l'avant (vers le bas de l'écran)
 		_shadow.scale = Vector2(sc * (1.0 - air * 0.15), -sc * 0.46 * (1.0 - air * 0.2))
@@ -1019,7 +1056,7 @@ func _process(delta: float) -> void:
 				oc = Color(1, 1, 1, 0.98) if entity["team"] == "player" else Color(1.0, 0.38, 0.28, 1.0)
 			if _is3d():
 				# V385 : contour fin et translucide (liseré, plus de « sticker »), l'unité active reste repérable
-				outline_w *= float(Hero3D.RES_K) * (0.62 if entity.get("is_active", false) else 0.5)
+				outline_w *= _h3d.res_k * (0.62 if entity.get("is_active", false) else 0.5)
 				oc.a *= 0.55 if entity.get("is_active", false) else 0.42
 			_mat.set_shader_parameter("outline", outline_w)
 			_mat.set_shader_parameter("outline_color", oc)
