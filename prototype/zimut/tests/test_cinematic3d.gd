@@ -34,7 +34,7 @@ func _boot() -> void:
 		if not ResourceLoader.exists(p):
 			models_ok = false
 			print("   modèle introuvable : ", p)
-	check(models_ok and keys.size() == 6, "les 6 modèles de la distribution (5 héros + boss) existent")
+	check(models_ok and keys.size() == Cin.LINEUP.size() + Cin.BOSSES.size(), "les modèles de la distribution existent (%d acteurs : 5 héros + 2 boss)" % keys.size())
 	# construction de la scène en headless
 	var ps: PackedScene = load(Cin.SCENE)
 	check(ps != null, "la scène se charge")
