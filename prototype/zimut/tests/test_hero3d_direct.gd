@@ -62,7 +62,8 @@ func _boot() -> void:
 	check(Hero3D.model_key({"classe": "Dragonnet", "boss": true, "title": "Kharaz le Flamboyant", "team": "enemy"}) == "Kharaz" and Hero3D.model_key({"classe": "Dragonnet", "boss": true, "team": "enemy"}) == "", "boss du Brasier reconnu par son titre, pas par son type de base")
 	check(Hero3D.model_key({"classe": "Chasseur", "team": "player"}) == "Chasseur" and Hero3D.model_key({"classe": "Invocateur", "team": "player"}) == "Invocateur", "Chasseur et Invocateur ont leur modèle")
 	check(Hero3D.model_key({"classe": "Tank", "team": "player"}) == "Tank", "classe Tank -> modèle Tank")
-	for k: String in ["Tharok", "Ingénieur", "Chasseur", "Invocateur", "Tank", "Sylvain", "Assassin", "Mage", "Géomancien", "Druide", "Heal", "Kharaz"]:
+	check(Hero3D.model_key({"classe": "Vorkann le Givre", "team": "enemy", "boss": true}) == "Vorkann", "boss Vorkann le Givre -> modèle Vorkann (V378)")
+	for k: String in ["Tharok", "Ingénieur", "Chasseur", "Invocateur", "Tank", "Vorkann", "Sylvain", "Assassin", "Mage", "Géomancien", "Druide", "Heal", "Kharaz"]:
 		var packed: PackedScene = load(String(Hero3D.MODELS[k]["path"])) as PackedScene
 		var inst: Node = packed.instantiate()
 		var aps: Array = inst.find_children("*", "AnimationPlayer", true, false)
@@ -85,29 +86,33 @@ func _boot() -> void:
 					print("   plage de clip invalide : ", k, " ", an)
 		check(clips_ok, k + " : chaque action pointe sur un clip existant et une plage valide")
 		inst.free()
-	# V163 : hache du Tank rigide (tête et manche liés au même os) : plus aucun sommet n'a pour os dominant les deux os racine du bas du manche
-	var tank: Node = (load("res://assets/heroes3d/tank.glb") as PackedScene).instantiate()
-	var tmi: MeshInstance3D = tank.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
-	var tsk: Skeleton3D = tank.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
-	var tar: Array = tmi.mesh.surface_get_arrays(0)
-	var tb: PackedInt32Array = tar[Mesh.ARRAY_BONES]
-	var tw: PackedFloat32Array = tar[Mesh.ARRAY_WEIGHTS]
-	var tper: int = tb.size() / (tar[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
-	var on_thumb: int = 0
-	var on_roots: int = 0
-	for vtx: int in range((tar[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()):
-		var best: int = 0
-		for k: int in range(1, tper):
-			if tw[vtx * tper + k] > tw[vtx * tper + best]:
-				best = k
-		var bi: int = tmi.skin.get_bind_bone(tb[vtx * tper + best])
-		var bn: String = tsk.get_bone_name(bi) if bi >= 0 else tmi.skin.get_bind_name(tb[vtx * tper + best])
-		if bn.to_lower() == "thumb_01_r":
-			on_thumb += 1
-		if bn.to_lower() in ["bone_053", "bone_052"]:
-			on_roots += 1
-	check(on_roots == 0 and on_thumb > 600, "Tank : hache rigide (%d sommets au pouce, %d aux os racine)" % [on_thumb, on_roots])
-	tank.free()
+	# V378 : bouclier de Vorkann rigide (boîte x < -0,75 en pose de repos liée à 100 % à Bone_019) — il se pliait à chaque pas
+	var vk: Node = (load("res://assets/heroes3d/vorkann.glb") as PackedScene).instantiate()
+	var vmi: MeshInstance3D = vk.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
+	var vsk: Skeleton3D = vk.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	var var_: Array = vmi.mesh.surface_get_arrays(0)
+	var vv: PackedVector3Array = var_[Mesh.ARRAY_VERTEX]
+	var vb: PackedInt32Array = var_[Mesh.ARRAY_BONES]
+	var vw: PackedFloat32Array = var_[Mesh.ARRAY_WEIGHTS]
+	var vper: int = vb.size() / vv.size()
+	var lo := Vector3(INF, INF, INF)
+	var hi := -lo
+	for q: Vector3 in vv:
+		lo = lo.min(q)
+		hi = hi.max(q)
+	var cut: float = lo.x + (hi.x - lo.x) * 0.13     # ≈ -0,75 sur un modèle de 2,03 de large (repère de l'import)
+	var in_box: int = 0
+	var rigid_ok: int = 0
+	for vtx: int in range(vv.size()):
+		if vv[vtx].x >= cut:
+			continue
+		in_box += 1
+		var bi: int = vmi.skin.get_bind_bone(vb[vtx * vper])
+		var bn: String = vsk.get_bone_name(bi) if bi >= 0 else String(vmi.skin.get_bind_name(vb[vtx * vper]))
+		if bn == "Bone_019" and vw[vtx * vper] > 0.999:
+			rigid_ok += 1
+	check(in_box > 1000 and rigid_ok == in_box, "Vorkann : bouclier rigide (%d / %d sommets à 100 %% sur Bone_019)" % [rigid_ok, in_box])
+	vk.free()
 	gs.set("hero_3d_direct", true)
 	var v3: EntityView = _view_ent({"uid": 9, "classe": "Gobelin Roi", "team": "enemy", "entity_type": "Enemy", "boss": true, "current_pv": 10, "max_pv": 10, "x": 3, "y": 3})
 	await process_frame
@@ -128,7 +133,7 @@ func _boot() -> void:
 		check(Hero3D.size_plausible(sz), "cadrage : %.2f (taille mesurée des 6 modèles) est acceptée" % sz)
 	check(Hero3D.size_plausible(Hero3D.expected_cam_size()), "cadrage : la taille de repli est elle-même plausible")
 	# V357 : cadrage de référence et recalage des couleurs
-	for k: String in ["Sylvain", "Tharok", "Ingénieur", "Chasseur", "Invocateur", "Tank"]:
+	for k: String in ["Sylvain", "Tharok", "Ingénieur", "Chasseur", "Invocateur", "Tank", "Vorkann"]:
 		var prof: Dictionary = Hero3D.MODELS[k]
 		var rc: Vector2 = prof.get("ref_cam", Vector2.ZERO)
 		check(rc.x > 0.0 and rc.y > 0.0 and Hero3D.size_plausible(rc.x) and float(prof.get("ref_lum", 0.0)) > 0.0,

@@ -41,6 +41,7 @@ var _hop: float = 0.0
 var _moving: bool = false
 var _float_count: int = 0
 var _float_decay: float = 0.0
+var _combo: int = 0
 var _has_tex: bool = false
 var _mat: ShaderMaterial = null
 var _phase: float = 0.0
@@ -881,6 +882,7 @@ func _process(delta: float) -> void:
 		_float_decay -= delta
 		if _float_decay <= 0.0:
 			_float_count = 0
+			_combo = 0
 	ghost_pv = move_toward(ghost_pv, shown_pv, maxf(0.0, delta * float(entity.get("max_pv", 100)) * 0.35))
 	if ghost_pv < shown_pv:
 		ghost_pv = shown_pv
@@ -996,8 +998,14 @@ func set_hp(pv: float) -> void:
 	shown_pv = pv
 
 
+## V374 : rang du coup dans une série rapprochée (1 = coup isolé) — la série retombe avec les nombres flottants.
+func next_combo() -> int:
+	_combo = _combo + 1 if _float_decay > 0.0 else 1
+	return _combo
+
+
 func next_float_offset() -> float:
-	var off: float = float(_float_count) * 24.0
+	var off: float = float(_float_count) * 50.0    # V374 : 50 px — un nombre monte pendant que le suivant apparaît
 	_float_count += 1
 	_float_decay = 0.9
 	return off

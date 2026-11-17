@@ -91,14 +91,24 @@ const MODELS := {
 			"cast":   {"clip": "Axe_Spin_Attack", "t0": 0.2, "t1": 1.8, "dur": 1.0, "loop": false, "key": 0.5},
 			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
 		}},
-	## Tank : un seul clip d'attaque (« Double_Combo_Attack » : deux coups de hache). La hache, que Meshy lie à trois os qui s'écartent
-	## (tête sur le pouce, bas du manche sur deux os racine), est rendue rigide au pouce à l'import (tools/import_fbx.gd, option « rigide »).
-	"Tank": {"path": "res://assets/heroes3d/tank.glb", "root_bone": "spine", "gain": 1.0, "ref_cam": Vector2(3.174, 1.297), "ref_lum": 0.605,
+	## Tank (V378, « Frostbeard Guardian » Meshy, 9 clips) : garde = « Axe_Stance » à 5,6 s (debout, hache basse, bouclier levé) ;
+	## attaque = premier coup du « Double_Combo_Attack » ; sort = « Axe_Spin_Attack » (tour complet, impact ≈ 1 s).
+	"Tank": {"path": "res://assets/heroes3d/tank.glb", "root_bone": "spine", "gain": 1.0, "ref_cam": Vector2(3.264, 1.502), "ref_lum": 0.452,
+		"clips": {
+			"idle":   {"clip": "Axe_Stance", "t0": 5.6, "t1": 5.6, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walking", "t0": 0.0, "t1": 1.0333, "dur": 1.0, "loop": true, "key": 0.0},
+			"attack": {"clip": "Double_Combo_Attack", "t0": 0.1, "t1": 1.3, "dur": 0.9, "loop": false, "key": 0.52},
+			"cast":   {"clip": "Axe_Spin_Attack", "t0": 0.1, "t1": 2.2, "dur": 1.4, "loop": false, "key": 0.45},
+			"hit":    {"clip": "Axe_Stance", "t0": 5.6, "t1": 5.6, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
+		}},
+	## Vorkann le Givre (V378, boss des Cimes, Meshy) : bouclier rendu rigide à l'import (tools/import_fbx.gd, boîte
+	## « Bone_019@-9,-0.75,-9,9,-9,9 ») — sinon il se pliait à chaque pas. 30 900 triangles (pas de niveau de détail généré).
+	"Vorkann": {"path": "res://assets/heroes3d/vorkann.glb", "root_bone": "spine", "gain": 1.0, "ref_cam": Vector2(3.304, 1.449), "ref_lum": 0.370,
 		"clips": {
 			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
 			"walk":   {"clip": "Walking", "t0": 0.0, "t1": 1.0333, "dur": 1.0, "loop": true, "key": 0.0},
-			"attack": {"clip": "Double_Combo_Attack", "t0": 0.1, "t1": 1.2, "dur": 0.9, "loop": false, "key": 0.56},
-			"cast":   {"clip": "Double_Combo_Attack", "t0": 0.1, "t1": 2.2, "dur": 1.5, "loop": false, "key": 0.85},
+			"attack": {"clip": "Triple_Combo_Attack", "t0": 0.2, "t1": 1.9, "dur": 1.0, "loop": false, "key": 0.6},
+			"cast":   {"clip": "Triple_Combo_Attack", "t0": 0.2, "t1": 3.0, "dur": 1.5, "loop": false, "key": 0.55},
 			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
 		}},
 	## Chasseur (V383) : modèle et rig de Charlie sous Blender (arc dans la main gauche), clips cuits (préréglage « chasseur ») : tir = arc tendu puis corde relâchée.
@@ -142,7 +152,7 @@ const MODELS := {
 }
 ## Classe du joueur (nom interne) ou nom de boss -> modèle.
 const CLASS_MODEL := {"Sylvain": "Sylvain", "Mage": "Mage", "Géomancien": "Géomancien", "Assassin": "Assassin", "Artificier": "Ingénieur", "Chasseur": "Chasseur", "Druide": "Druide", "Heal": "Heal", "Invocateur": "Invocateur", "Tank": "Tank"}
-const BOSS_MODEL := {"Gobelin Roi": "Tharok", "Tharok le Végétal": "Tharok", "Kharaz le Flamboyant": "Kharaz"}
+const BOSS_MODEL := {"Gobelin Roi": "Tharok", "Tharok le Végétal": "Tharok", "Troll Géant": "Vorkann", "Vorkann le Givre": "Vorkann", "Kharaz le Flamboyant": "Kharaz"}
 const CLIP_FRAMES := 24             # nombre d'images fictives d'une action (EntityView raisonne en images pour les temps d'impact)
 ## V373 : ombrage calculé dans le shader (sans lumière de scène) : le rendu ne dépend plus de l'appareil — sur PC les
 ## lumières délavaient les couleurs de la texture, sur téléphone elles sortaient plus sombres puis étaient recalées.

@@ -1,0 +1,4 @@
+V374|Combat : les nombres de dégâts prennent la couleur de l élément et grossissent avec le poids du coup ; critiques cerclés d or.
+V374|Combat : bref arrêt sur image et secousse plus forte sur les coups lourds (25 % des PV max ou plus) et les coups fatals.
+V374|Combat : coups en série sur une même cible (répliques de balises…) décalés, espacés et comptés (×2, ×3).
+V374|Nouveau test test_impact_feel.

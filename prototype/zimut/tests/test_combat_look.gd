@@ -20,5 +20,18 @@ func _run() -> void:
 	ck(g != null and g.material is ShaderMaterial, "rectangle plein écran avec shader")
 	ck(l.layer == 0 and g.mouse_filter == Control.MOUSE_FILTER_IGNORE, "sous l'interface, ne bloque pas les clics")
 	ck((g.material as ShaderMaterial).shader.code.contains("hint_screen_texture"), "le shader lit l'écran")
+	# V375 : lumière par biome
+	var m: ShaderMaterial = g.material as ShaderMaterial
+	l.apply_biome("Brasier")
+	var wb: Vector3 = m.get_shader_parameter("warm")
+	l.apply_biome("Montagne")
+	var cm: Vector3 = m.get_shader_parameter("cool")
+	ck(wb.x > wb.z + 0.25, "Brasier : hautes lumières chaudes")
+	ck(cm.z > cm.x + 0.2, "Montagne : ombres bleutées")
+	ck(CombatLook.look_of("Inconnu") == CombatLook.LOOKS["Forêt"], "biome inconnu : réglage de la Forêt")
+	var ok_all: bool = true
+	for b: String in EntityView.LIGHT.keys():
+		ok_all = ok_all and CombatLook.LOOKS.has(b)
+	ck(ok_all, "chaque biome éclairé a son étalonnage")
 	print("ÉCHECS : %d" % fails)
 	quit(1 if fails > 0 else 0)
