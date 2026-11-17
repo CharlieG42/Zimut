@@ -1,0 +1,3 @@
+V379|Invocateur en 3D directe : nouveau modèle riggé sous Blender (livre et lanterne), allégé à 7 800 triangles.
+V379|Ses animations sont cuites par un nouvel outil (tools/anim_heros_blender.gd) : garde lanterne baissée, marche, livre poussé en attaque, lanterne levée pour les sorts, recul quand il est touché.
+V379|Les gestes sont décrits os par os dans l outil : faciles à retoucher sans Blender.

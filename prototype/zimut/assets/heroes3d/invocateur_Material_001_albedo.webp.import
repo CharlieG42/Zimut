@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c7n1bxtl2jxlh"
-path="res://.godot/imported/invocateur_BakedMaterial_albedo.webp-ba83b2244feee32cc45a02cc095671d4.ctex"
+uid="uid://coggdkexyrvor"
+path="res://.godot/imported/invocateur_Material_001_albedo.webp-41bb8cbb84844c492492e29b5e8269cf.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "d6e86b3fdaaea7159933465ae9199cbb"
+"md5": "be3724dbd3104329b68de04e2596dfe7"
 }
 
 [deps]
 
-source_file="res://assets/heroes3d/invocateur_BakedMaterial_albedo.webp"
-dest_files=["res://.godot/imported/invocateur_BakedMaterial_albedo.webp-ba83b2244feee32cc45a02cc095671d4.ctex"]
+source_file="res://assets/heroes3d/invocateur_Material_001_albedo.webp"
+dest_files=["res://.godot/imported/invocateur_Material_001_albedo.webp-41bb8cbb84844c492492e29b5e8269cf.ctex"]
 
 [params]
 

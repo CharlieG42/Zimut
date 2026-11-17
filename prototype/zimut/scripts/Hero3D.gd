@@ -66,14 +66,16 @@ const MODELS := {
 			"cast":   {"clip": "Attack", "t0": 0.3, "t1": 1.7, "dur": 1.1, "loop": false, "key": 0.54},
 			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
 		}},
-	## Invocateur : « Charged_Spell_Cast_1 » = livre levé, tenu à hauteur du visage (≈ 2,1-2,9 s), puis relâché. L'attaque en reprend la poussée en avant.
-	"Invocateur": {"path": "res://assets/heroes3d/invocateur.glb", "root_bone": "spine", "gain": 1.0, "ref_cam": Vector2(3.74, 1.684), "ref_lum": 0.297,
+	## Invocateur (V379) : modèle et rig de Charlie sous Blender (16 os nommés en français), sans animation d'origine ;
+	## les clips sont cuits par tools/anim_heros_blender.gd (préréglage « invocateur »). Lanterne dans la main gauche,
+	## livre dans la droite. Attaque = livre poussé vers l'ennemi ; sort = lanterne levée.
+	"Invocateur": {"path": "res://assets/heroes3d/invocateur.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(3.827, 1.702), "ref_lum": 0.191,
 		"clips": {
-			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
-			"walk":   {"clip": "Walking", "t0": 0.0, "t1": 1.0333, "dur": 1.0, "loop": true, "key": 0.0},
-			"attack": {"clip": "Charged_Spell_Cast_1", "t0": 1.3, "t1": 2.4, "dur": 0.7, "loop": false, "key": 0.77},
-			"cast":   {"clip": "Charged_Spell_Cast_1", "t0": 0.3, "t1": 3.4, "dur": 1.4, "loop": false, "key": 0.6},
-			"hit":    {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
+			"idle":   {"clip": "Idle", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walk", "t0": 0.0, "t1": 0.8, "dur": 0.8, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.6},
+			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
 		}},
 }
 ## Classe du joueur (nom interne) ou nom de boss -> modèle.
