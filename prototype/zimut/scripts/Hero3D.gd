@@ -57,6 +57,15 @@ const MODELS := {
 			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
 			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
 		}},
+	## Kharaz le Flamboyant (V384) : boss de la nation du Brasier, modèle et rig de Charlie sous Blender (arc enflammé dans la main gauche, poing de feu à droite), clips cuits (préréglage « kharaz »).
+	"Kharaz": {"path": "res://assets/heroes3d/kharaz.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.45, 1.97), "ref_lum": 0.55,
+		"clips": {
+			"idle":   {"clip": "Idle", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walk", "t0": 0.0, "t1": 0.8, "dur": 0.8, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
+			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+		}},
 	## Assassin (V380) : modèle et rig de Charlie sous Blender (deux dagues), clips cuits (préréglage « assassin »).
 	"Assassin": {"path": "res://assets/heroes3d/assassin.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.626, 1.991), "ref_lum": 0.25,
 		"clips": {
@@ -133,7 +142,7 @@ const MODELS := {
 }
 ## Classe du joueur (nom interne) ou nom de boss -> modèle.
 const CLASS_MODEL := {"Sylvain": "Sylvain", "Mage": "Mage", "Géomancien": "Géomancien", "Assassin": "Assassin", "Artificier": "Ingénieur", "Chasseur": "Chasseur", "Druide": "Druide", "Heal": "Heal", "Invocateur": "Invocateur", "Tank": "Tank"}
-const BOSS_MODEL := {"Gobelin Roi": "Tharok", "Tharok le Végétal": "Tharok"}
+const BOSS_MODEL := {"Gobelin Roi": "Tharok", "Tharok le Végétal": "Tharok", "Kharaz le Flamboyant": "Kharaz"}
 const CLIP_FRAMES := 24             # nombre d'images fictives d'une action (EntityView raisonne en images pour les temps d'impact)
 ## V373 : ombrage calculé dans le shader (sans lumière de scène) : le rendu ne dépend plus de l'appareil — sur PC les
 ## lumières délavaient les couleurs de la texture, sur téléphone elles sortaient plus sombres puis étaient recalées.

@@ -3,7 +3,7 @@ extends SceneTree
 ## Les gestes sont décrits ici, os par os, en rotations locales (degrés) par rapport à la pose de repos — même principe
 ## que HeroAnim (Sylvain), mais cuits dans le modèle : le jeu le traite ensuite comme les modèles « à clips » (Hero3D).
 ##   godot --headless --path . -s tools/anim_heros_blender.gd -- <entrée.glb> <sortie.glb> <préréglage>
-## Préréglages : « assassin », « sylvain », « mage », « geomancien », « druide », « heal » (même rig que le mage : bâton à droite, main gauche libre ou objet flottant), « chasseur » (arc dans la main gauche) (squelettes Blender de Charlie, os « .l / .r », exportés en glb depuis le .blend),
+## Préréglages : « assassin », « sylvain », « mage », « geomancien », « druide », « heal » (même rig que le mage : bâton à droite, main gauche libre ou objet flottant), « chasseur » et « kharaz » (arc dans la main gauche ; Kharaz, boss du Brasier, tend la corde de son poing enflammé) (squelettes Blender de Charlie, os « .l / .r », exportés en glb depuis le .blend),
 ## « invocateur » (squelette de 16 os nommés en français : base, Thorax, cou, tete, bras_l/r, avantbras_l/r,
 ## main_l/r, cuisse_l/r, tibia_l/r, pied_l/r ; livre dans la main droite, lanterne dans la gauche).
 ## Axes relevés sur ce squelette (V379) : bras_l z− = bras abaissé le long du corps, bras_r x+ = bras levé vers l'avant,
@@ -175,7 +175,7 @@ func _preset(name: String) -> Dictionary:
 						"cuisse.r": Vector3(8.0 * h, 0, 0), "cuisse.l": Vector3(-6.0 * h, 0, 0)})},
 			}
 		# Chasseur (V383) : arc dans la main gauche (comme le bâton du Sylvain), attaque = bandage et tir de l'arc.
-		"chasseur":
+		"chasseur", "kharaz":
 			var rest := func(extra: Dictionary) -> Dictionary:
 				var d: Dictionary = {"bras.l": Vector3(0, 0, -62), "main.l": Vector3(0, 0, 62), "bras.r": Vector3(0, 0, 62),
 					"avantbras.r": Vector3(-20, 0, 0)}

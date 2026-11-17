@@ -61,7 +61,7 @@ func _boot() -> void:
 	check(Hero3D.model_key({"classe": "Artificier", "team": "enemy"}) == "", "un ennemi ne prend pas le modèle d'un héros")
 	check(Hero3D.model_key({"classe": "Chasseur", "team": "player"}) == "Chasseur" and Hero3D.model_key({"classe": "Invocateur", "team": "player"}) == "Invocateur", "Chasseur et Invocateur ont leur modèle")
 	check(Hero3D.model_key({"classe": "Tank", "team": "player"}) == "Tank", "classe Tank -> modèle Tank")
-	for k: String in ["Tharok", "Ingénieur", "Chasseur", "Invocateur", "Tank", "Sylvain", "Assassin", "Mage", "Géomancien", "Druide", "Heal"]:
+	for k: String in ["Tharok", "Ingénieur", "Chasseur", "Invocateur", "Tank", "Sylvain", "Assassin", "Mage", "Géomancien", "Druide", "Heal", "Kharaz"]:
 		var packed: PackedScene = load(String(Hero3D.MODELS[k]["path"])) as PackedScene
 		var inst: Node = packed.instantiate()
 		var aps: Array = inst.find_children("*", "AnimationPlayer", true, false)
