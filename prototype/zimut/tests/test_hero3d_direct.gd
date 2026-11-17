@@ -23,7 +23,7 @@ func _boot() -> void:
 	await process_frame
 	var gs: Node = root.get_node("GameSettings")
 	check(not bool(gs.get("hero_3d_direct")), "réglage « 3D en direct » désactivé par défaut")
-	check(Hero3D.supported("Sylvain") and not Hero3D.supported("Druide"), "Sylvain a un modèle 3D direct, pas le Druide")
+	check(Hero3D.supported("Sylvain") and not Hero3D.supported("Artificier2"), "Sylvain a un modèle 3D direct, pas une classe inconnue")
 	check(FileAccess.file_exists("res://assets/heroes3d/sylvain.glb"), "modèle sylvain.glb présent")
 	check(FileAccess.get_file_as_bytes("res://assets/heroes3d/sylvain.glb").size() < 1_500_000, "modèle léger (< 1,5 Mo)")
 	# réglage par défaut : sprites cuits, pas de 3D
@@ -49,9 +49,9 @@ func _boot() -> void:
 	if v._h3d != null:
 		check(v._h3d.texture() != null, "texture disponible une fois cadré")
 	# le héros 3D ne touche pas aux autres classes
-	var v2: EntityView = _view("Druide")
+	var v2: EntityView = _view("Paladin")
 	await process_frame
-	check(v2._h3d == null, "Druide : pas de rendu 3D (aucun modèle)")
+	check(v2._h3d == null, "Classe sans modèle : pas de rendu 3D (aucun modèle)")
 	gs.set("hero_3d_direct", false)
 	# V163 : modèles à animations intégrées (Tharok = boss de la Forêt, Ingénieur = classe interne « Artificier »)
 	check(Hero3D.model_key({"classe": "Gobelin Roi", "boss": true, "team": "enemy"}) == "Tharok", "boss de la Forêt -> modèle Tharok")
@@ -61,7 +61,7 @@ func _boot() -> void:
 	check(Hero3D.model_key({"classe": "Artificier", "team": "enemy"}) == "", "un ennemi ne prend pas le modèle d'un héros")
 	check(Hero3D.model_key({"classe": "Chasseur", "team": "player"}) == "Chasseur" and Hero3D.model_key({"classe": "Invocateur", "team": "player"}) == "Invocateur", "Chasseur et Invocateur ont leur modèle")
 	check(Hero3D.model_key({"classe": "Tank", "team": "player"}) == "Tank", "classe Tank -> modèle Tank")
-	for k: String in ["Tharok", "Ingénieur", "Chasseur", "Invocateur", "Tank", "Sylvain", "Assassin", "Mage", "Géomancien"]:
+	for k: String in ["Tharok", "Ingénieur", "Chasseur", "Invocateur", "Tank", "Sylvain", "Assassin", "Mage", "Géomancien", "Druide", "Heal"]:
 		var packed: PackedScene = load(String(Hero3D.MODELS[k]["path"])) as PackedScene
 		var inst: Node = packed.instantiate()
 		var aps: Array = inst.find_children("*", "AnimationPlayer", true, false)

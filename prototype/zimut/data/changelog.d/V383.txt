@@ -1,0 +1,3 @@
+V383|Chasseur, Druide et Heal en 3D directe : modèles et rigs de Charlie sous Blender, allégés à 12 000 triangles, animations cuites (garde, marche, attaque, sort, touché).
+V383|Chasseur : arc dans la main gauche, tir en deux temps (arc tendu, corde ramenée à la joue puis relâchée) ; Druide et Heal : bâton dans la main droite, Heal garde les jambes peu ouvertes à cause de sa robe longue.
+V383|Le Chasseur Meshy est remplacé par le modèle Blender ; nouveaux préréglages « chasseur », « druide » et « heal » dans tools/anim_heros_blender.gd.
