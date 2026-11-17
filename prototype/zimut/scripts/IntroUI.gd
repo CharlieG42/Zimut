@@ -1,10 +1,13 @@
 extends Control
 ## IntroUI.gd — Petite animation d'ouverture (V52), à la place de l'écran de démarrage Godot.
 ## Les dix Pierres Élémentaires (couleurs des Nations) tournoient, convergent vers le centre,
-## un éclat révèle le logo Zimut, puis fondu vers l'Accueil. Un appui passe l'animation.
-## Pendant ce temps, l'écran d'accueil est chargé en tâche de fond.
+## un éclat révèle le logo Zimut, puis fondu vers la suite : la cinématique 3D (héros contre
+## boss, Cinematic3D.tscn) si le réglage « Cinématique 3D » est actif, sinon directement
+## l'Accueil. Un appui passe l'animation. Pendant ce temps, la scène suivante est chargée
+## en tâche de fond.
 
-const NEXT_SCENE := "res://scenes/MainMenu.tscn"
+const Cin := preload("res://scripts/Cinematic3D.gd")
+const MENU_SCENE := "res://scenes/MainMenu.tscn"
 const DURATION := 3.2
 const STONES: Array[Color] = [
 	Color(0.40, 0.75, 0.35), Color(0.55, 0.72, 0.95), Color(0.95, 0.75, 0.35), Color(0.62, 0.55, 1.0),
@@ -23,7 +26,7 @@ func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_logo = load("res://assets/ui/logo_intro.png") as Texture2D
-	ResourceLoader.load_threaded_request(NEXT_SCENE)
+	ResourceLoader.load_threaded_request(next_scene())
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 42
 	for i: int in range(40):
@@ -55,11 +58,17 @@ func _leave() -> void:
 	var tw := create_tween()
 	tw.tween_property(self, "modulate", Color(0, 0, 0, 1), 0.35)
 	tw.tween_callback(func() -> void:
-		var packed: PackedScene = ResourceLoader.load_threaded_get(NEXT_SCENE) as PackedScene
+		var path: String = next_scene()
+		var packed: PackedScene = ResourceLoader.load_threaded_get(path) as PackedScene
 		if packed != null:
 			get_tree().change_scene_to_packed(packed)
 		else:
-			get_tree().change_scene_to_file(NEXT_SCENE))
+			get_tree().change_scene_to_file(path))
+
+
+## Scène suivante après l'intro : la cinématique 3D si elle est activée, sinon l'accueil.
+static func next_scene() -> String:
+	return Cin.SCENE if Cin.enabled() else MENU_SCENE
 
 
 static func _ease_out(x: float) -> float:

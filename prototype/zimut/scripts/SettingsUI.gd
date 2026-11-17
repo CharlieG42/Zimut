@@ -158,6 +158,8 @@ func _ready() -> void:
 		1 if GameSettings.show_grid else 0, func(idx: int) -> void: GameSettings.set_show_grid(idx == 1)))
 	gfx.add_child(_setting_cell("Personnages en 3D (prototype)", ["Sprites animés", "3D en direct"] as Array[String],
 		1 if GameSettings.hero_3d_direct else 0, func(idx: int) -> void: GameSettings.set_hero_3d_direct(idx == 1)))
+	gfx.add_child(_setting_cell("Cinématique 3D d'ouverture", ["Activée", "Désactivée"] as Array[String],
+		1 if GameSettings.cinematic_3d else 0, func(idx: int) -> void: GameSettings.set_cinematic_3d(idx == 1)))
 	gfx.add_child(_setting_cell("Compteur d'images (carte d'aventure et combat)", ["Masqué", "Affiché"] as Array[String],
 		1 if GameSettings.show_perf else 0, func(idx: int) -> void: GameSettings.set_show_perf(idx == 1)))
 	var gfx_hint := Label.new()
