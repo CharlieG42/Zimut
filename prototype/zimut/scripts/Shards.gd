@@ -255,8 +255,8 @@ const HERO_CAP := {"force": 60, "defense": 60, "agility": 60, "intelligence": 60
 	"pa": 2, "pm": 2, "po": 2, "crit": 40, "lifesteal": 20, "mres": 40, "heal_pct": 40, "phys_pct": 30, "mag_pct": 30}
 
 ## Butin : chance d'éclat de caractéristique (un tirage par victoire / par donjon terminé).
-const STAT_DROP_FIGHT := 0.12
-const STAT_DROP_BOSS := 0.40
+const STAT_DROP_FIGHT := 0.25      # V376 : 12 % → 25 %
+const STAT_DROP_BOSS := 0.50       # V376 : 40 % → 50 %
 const STAT_DROP_DUNGEON := 0.35
 
 ## Fabrication (rangs 1 à 3 seulement ; PA/PM/Portée uniquement en butin ou par fusion).

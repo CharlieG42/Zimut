@@ -108,18 +108,27 @@ func _boot() -> void:
 	var n_boss: int = 0
 	var rmax_low: int = 0
 	var rmax_high: int = 0
+	var kinds: Dictionary = {}
+	var n_dj: int = 0
 	for _i in range(3000):
+		var dj: Dictionary = Shards.roll_stat_dungeon(rng, 30)
+		if not dj.is_empty():
+			n_dj += 1
+			kinds[String(dj["stat"])] = true
 		if not Shards.roll_stat_fight(rng, 5, false).is_empty():
 			n_fight += 1
 		var b1: Dictionary = Shards.roll_stat_fight(rng, 5, true)
 		if not b1.is_empty():
 			n_boss += 1
+			kinds[String(b1["stat"])] = true
 			rmax_low = maxi(rmax_low, int(b1["rank"]))
 		var b2: Dictionary = Shards.roll_stat_fight(rng, 60, true)
 		if not b2.is_empty():
 			rmax_high = maxi(rmax_high, int(b2["rank"]))
-	check(n_fight > 250 and n_fight < 480, "combat normal ~12 %% (%d / 3000)" % n_fight)
-	check(n_boss > n_fight * 2, "boss : bien plus de chances (%d)" % n_boss)
+	check(n_fight > 650 and n_fight < 850, "combat normal ~25 %% (%d / 3000)" % n_fight)
+	check(n_boss > 1380 and n_boss < 1620, "boss ~50 %% (%d / 3000)" % n_boss)
+	check(n_dj > 930 and n_dj < 1170, "donjon ~35 %% (%d / 3000)" % n_dj)
+	check(kinds.size() == Shards.STAT_SHARDS.size(), "tous les types d'éclats tombent (%d / %d)" % [kinds.size(), Shards.STAT_SHARDS.size()])
 	check(rmax_low <= 2 and rmax_high == 5, "le rang suit le niveau (niv 5 boss : R%d max, niv 60 : R%d)" % [rmax_low, rmax_high])
 	var got_any: bool = false
 	for _i in range(60):
