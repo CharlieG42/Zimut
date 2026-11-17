@@ -10,6 +10,7 @@ extends SceneTree
 ## avantbras x− = avant-bras replié, cuisse x+ = jambe vers l'avant, tibia x− = genou plié, Thorax / tete x+ = penché en arrière.
 
 const FPS := 15.0
+const SPREAD := 5.0     # écartement des pieds de la posture de repos (degrés, rotation z des cuisses)
 
 
 func _init() -> void:
@@ -86,6 +87,16 @@ static func _curve(keys: Array, t: float) -> float:
 	return lerpf(float(keys[i]), float(keys[i + 1]), f)
 
 
+## V386 : posture de base naturelle, ajoutée au repos de chaque clip (donc sans à-coup d'un clip à l'autre) : jambe d'appui
+## droite, l'autre légèrement avancée et fléchie, pieds écartés, bras libre un peu fléchi, buste et tête tournés de quelques degrés.
+static func _stance(free: String, lg: float) -> Dictionary:
+	var d: Dictionary = {
+		"cuisse.l": Vector3(7.0 * lg, 0, SPREAD * lg), "tibia.l": Vector3(-10.0 * lg, 0, 0),
+		"cuisse.r": Vector3(-3.0 * lg, 0, -SPREAD * lg), "tibia.r": Vector3(-4.0 * lg, 0, 0),
+		"thorax": Vector3(0, 4.0, 0), "tete": Vector3(0, -6.0, 2.0)}
+	return d
+
+
 ## V386 : repos vivant (remplace l'ancienne respiration de ±1,5° qui laissait les héros raides). Toutes les composantes sont
 ## périodiques (1 ou 2 périodes sur le clip) : transfert d'appui d'une jambe à l'autre, respiration du thorax, buste qui se
 ## tord à peine, regard qui dérive, bras libre qui balance et se fléchit. [free] = os du bras libre ("" si aucun),
@@ -103,7 +114,7 @@ static func _idle_extra(t: float, free: String, lg: float) -> Dictionary:
 		var av: String = "avantbras." + free.get_slice(".", 1)
 		var side: float = -1.0 if free.ends_with(".l") else 1.0
 		d[free] = Vector3(5.0 * sh, 0, side * 3.0 * br)
-		d[av] = Vector3(-10.0 - 5.0 * br, 0, 0)
+		d[av] = Vector3(-5.0 * br, 0, 0)
 	return d
 
 
@@ -160,6 +171,9 @@ func _preset(name: String) -> Dictionary:
 			var rest := func(extra: Dictionary) -> Dictionary:
 				var d: Dictionary = {"bras.l": Vector3(0, 0, -62), "main.l": Vector3(0, 0, 62), "bras.r": Vector3(0, 0, 62),
 					"avantbras.r": Vector3(-20, 0, 0)}
+				var st: Dictionary = _stance("bras.r", 1.0)
+				for k: String in st.keys():
+					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (st[k] as Vector3)
 				for k: String in extra.keys():
 					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (extra[k] as Vector3)
 				return d
@@ -198,6 +212,9 @@ func _preset(name: String) -> Dictionary:
 			var rest := func(extra: Dictionary) -> Dictionary:
 				var d: Dictionary = {"bras.l": Vector3(0, 0, -62), "main.l": Vector3(0, 0, 62), "bras.r": Vector3(0, 0, 62),
 					"avantbras.r": Vector3(-20, 0, 0)}
+				var st: Dictionary = _stance("bras.r", 1.0)
+				for k: String in st.keys():
+					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (st[k] as Vector3)
 				for k: String in extra.keys():
 					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (extra[k] as Vector3)
 				return d
@@ -241,6 +258,9 @@ func _preset(name: String) -> Dictionary:
 			var rest := func(extra: Dictionary) -> Dictionary:
 				var d: Dictionary = {"bras.r": Vector3(0, 0, 62), "main.r": Vector3(0, 0, -62), "bras.l": Vector3(0, 0, -62),
 					"avantbras.l": Vector3(-20, 0, 0)}
+				var st: Dictionary = _stance("bras.l", lg)
+				for k: String in st.keys():
+					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (st[k] as Vector3)
 				for k: String in extra.keys():
 					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (extra[k] as Vector3)
 				return d
@@ -277,11 +297,15 @@ func _preset(name: String) -> Dictionary:
 		"invocateur":
 			return {
 				# repos : lanterne tenue le long du corps (bras abaissé, main compensée : la lanterne reste droite), livre levé
-				"Idle": {"dur": 2.4, "loop": true, "fn": func(t: float) -> Dictionary:
-					var br: float = sin(t * TAU)
+				# V386 : même repos vivant que les autres héros (appui, respiration, regard), noms d'os de ce squelette
+				"Idle": {"dur": 3.0, "loop": true, "fn": func(t: float) -> Dictionary:
+					var br: float = sin(t * TAU * 2.0)
+					var e: Dictionary = _idle_extra(t, "", 1.0)
 					return {
 						"bras_l": Vector3(0, 0, -38.0 + 2.5 * br), "main_l": Vector3(0, 0, 38.0 - 2.5 * br),
-						"bras_r": Vector3(3.0 * br, 0, 0), "Thorax": Vector3(-1.5 * br, 0, 0), "tete": Vector3(1.2 * br, 0, 0)}},
+						"bras_r": Vector3(3.0 * br, 0, 0), "Thorax": e["thorax"], "tete": e["tete"],
+						"cuisse_l": (e["cuisse.l"] as Vector3) + Vector3(5.0, 0, 3.0), "tibia_l": (e["tibia.l"] as Vector3) + Vector3(-7.0, 0, 0),
+						"cuisse_r": (e["cuisse.r"] as Vector3) + Vector3(-2.0, 0, -3.0), "tibia_r": e["tibia.r"]}},
 				"Walk": {"dur": 0.8, "loop": true, "fn": func(t: float) -> Dictionary:
 					var p: float = sin(t * TAU)
 					var q: float = cos(t * TAU)
