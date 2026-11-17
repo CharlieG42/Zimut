@@ -1,0 +1,3 @@
+V388|Repos des héros nettement plus vivant : cycle de 5 s (au lieu de 3), balancement latéral du buste, transfert d'appui sur les jambes, hochement et regard à des cadences différentes, bras libre qui balance. Amplitudes presque doublées (la tête balance d'environ 10 px à l'écran).
+V388|Concerne Sylvain, Mage, Géomancien, Druide, Heal, Chasseur, Assassin, Invocateur et le boss Kharaz ; Tank, Ingénieur et les boss Tharok et Vorkann gardent leur pose figée en attendant leurs modèles Blender.
+V388|Le réglage d'amplitude est une constante (IDLE_GAIN) de tools/anim_heros_blender.gd ; durée du repos portée à 5 s dans Hero3D.MODELS.

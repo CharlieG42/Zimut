@@ -10,6 +10,7 @@ extends SceneTree
 ## avantbras x− = avant-bras replié, cuisse x+ = jambe vers l'avant, tibia x− = genou plié, Thorax / tete x+ = penché en arrière.
 
 const FPS := 15.0
+const IDLE_GAIN := 1.7   # amplitude globale du repos vivant
 const SPREAD := 5.0     # écartement des pieds de la posture de repos (degrés, rotation z des cuisses)
 
 
@@ -102,19 +103,23 @@ static func _stance(free: String, lg: float) -> Dictionary:
 ## tord à peine, regard qui dérive, bras libre qui balance et se fléchit. [free] = os du bras libre ("" si aucun),
 ## [lg] = amplitude des jambes (robe longue : moins).
 static func _idle_extra(t: float, free: String, lg: float) -> Dictionary:
-	var sh: float = sin(t * TAU)            # transfert d'appui
-	var br: float = sin(t * TAU * 2.0)      # respiration
-	var gl: float = sin(t * TAU + 1.3)      # regard
+	# Clip de 5 s : l'appui change une fois, la respiration revient 3 fois, le regard dérive à une autre cadence (pas de
+	# battement mécanique). Amplitudes réglées pour qu'elles se voient à ~170 px de haut à l'écran.
+	var g: float = IDLE_GAIN
+	var sh: float = sin(t * TAU)                   # transfert d'appui
+	var br: float = sin(t * TAU * 3.0)             # respiration
+	var gl: float = sin(t * TAU * 2.0 + 1.3)       # regard
+	var nod: float = sin(t * TAU * 3.0 + 0.8)      # hochement léger, en retard sur la respiration
 	var d: Dictionary = {
-		"thorax": Vector3(-3.5 * br, 4.5 * sh, 2.2 * sh),
-		"tete": Vector3(2.8 * br, -4.0 * sh + 5.5 * gl, 2.2 * gl),
-		"cuisse.l": Vector3(6.0 * sh * lg, 0, 0), "tibia.l": Vector3(-9.0 * maxf(sh, 0.0) * lg, 0, 0),
-		"cuisse.r": Vector3(-6.0 * sh * lg, 0, 0), "tibia.r": Vector3(-9.0 * maxf(-sh, 0.0) * lg, 0, 0)}
+		"thorax": Vector3(-3.0 * g * br, 5.0 * g * sh, 5.0 * g * sh),
+		"tete": Vector3(3.0 * g * nod, -4.0 * g * sh + 8.0 * g * gl, 4.0 * g * gl - 2.0 * g * sh),
+		"cuisse.l": Vector3(9.0 * g * sh * lg, 0, 0), "tibia.l": Vector3(-12.0 * g * maxf(sh, 0.0) * lg, 0, 0),
+		"cuisse.r": Vector3(-9.0 * g * sh * lg, 0, 0), "tibia.r": Vector3(-12.0 * g * maxf(-sh, 0.0) * lg, 0, 0)}
 	if free != "":
 		var av: String = "avantbras." + free.get_slice(".", 1)
 		var side: float = -1.0 if free.ends_with(".l") else 1.0
-		d[free] = Vector3(5.0 * sh, 0, side * 3.0 * br)
-		d[av] = Vector3(-5.0 * br, 0, 0)
+		d[free] = Vector3(8.0 * g * sh, 0, side * (4.0 * g * br - 3.0 * g * sh))
+		d[av] = Vector3(-8.0 * g * (0.5 + 0.5 * br), 0, 0)
 	return d
 
 
@@ -132,7 +137,7 @@ func _preset(name: String) -> Dictionary:
 					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (extra[k] as Vector3)
 				return d
 			return {
-				"Idle": {"dur": 3.0, "loop": true, "fn": func(t: float) -> Dictionary:
+				"Idle": {"dur": 5.0, "loop": true, "fn": func(t: float) -> Dictionary:
 					return low.call(_idle_extra(t, "", 1.0))},
 				"Walk": {"dur": 0.7, "loop": true, "fn": func(t: float) -> Dictionary:
 					var p: float = sin(t * TAU)
@@ -178,7 +183,7 @@ func _preset(name: String) -> Dictionary:
 					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (extra[k] as Vector3)
 				return d
 			return {
-				"Idle": {"dur": 3.0, "loop": true, "fn": func(t: float) -> Dictionary:
+				"Idle": {"dur": 5.0, "loop": true, "fn": func(t: float) -> Dictionary:
 					return rest.call(_idle_extra(t, "bras.r", 1.0))},
 				"Walk": {"dur": 0.8, "loop": true, "fn": func(t: float) -> Dictionary:
 					var p: float = sin(t * TAU)
@@ -219,7 +224,7 @@ func _preset(name: String) -> Dictionary:
 					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (extra[k] as Vector3)
 				return d
 			return {
-				"Idle": {"dur": 3.0, "loop": true, "fn": func(t: float) -> Dictionary:
+				"Idle": {"dur": 5.0, "loop": true, "fn": func(t: float) -> Dictionary:
 					return rest.call(_idle_extra(t, "bras.r", 1.0))},
 				"Walk": {"dur": 0.8, "loop": true, "fn": func(t: float) -> Dictionary:
 					var p: float = sin(t * TAU)
@@ -265,7 +270,7 @@ func _preset(name: String) -> Dictionary:
 					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (extra[k] as Vector3)
 				return d
 			return {
-				"Idle": {"dur": 3.0, "loop": true, "fn": func(t: float) -> Dictionary:
+				"Idle": {"dur": 5.0, "loop": true, "fn": func(t: float) -> Dictionary:
 					return rest.call(_idle_extra(t, "bras.l", lg))},
 				"Walk": {"dur": 0.8, "loop": true, "fn": func(t: float) -> Dictionary:
 					var p: float = sin(t * TAU)
@@ -298,7 +303,7 @@ func _preset(name: String) -> Dictionary:
 			return {
 				# repos : lanterne tenue le long du corps (bras abaissé, main compensée : la lanterne reste droite), livre levé
 				# V386 : même repos vivant que les autres héros (appui, respiration, regard), noms d'os de ce squelette
-				"Idle": {"dur": 3.0, "loop": true, "fn": func(t: float) -> Dictionary:
+				"Idle": {"dur": 5.0, "loop": true, "fn": func(t: float) -> Dictionary:
 					var br: float = sin(t * TAU * 2.0)
 					var e: Dictionary = _idle_extra(t, "", 1.0)
 					return {
