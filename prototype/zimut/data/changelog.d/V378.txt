@@ -1,0 +1,4 @@
+V378|Nouveau Tank en 3D directe (modèle Meshy « Frostbeard Guardian ») : hache et bouclier nets, vraie posture de garde au repos, attaque en deux coups et sort en tourbillon.
+V378|Vorkann le Givre, boss des Cimes (Montagne), passe en 3D directe ; son bouclier est rendu rigide à l import (il se pliait à chaque pas).
+V378|Outil d import : une pièce peut être rendue rigide par sa place dans la pose de repos (« os@x0,x1,y0,y1,z0,z1 »), Meshy soudant les accessoires au corps.
+V378|Test test_hero3d_direct complété (Vorkann : modèle, clips, bouclier rigide, cadrage).

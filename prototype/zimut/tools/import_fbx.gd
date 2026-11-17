@@ -4,7 +4,7 @@ extends SceneTree
 ## première animation renommée (nom « none » : toutes les animations gardent leur nom ; sans animation : rien à renommer), 4 influences de peau par sommet au plus.
 ## Les FBX bruts ne sont pas versionnés.
 ##   godot --headless --path . -s tools/import_fbx.gd -- <entrée.fbx> <sortie.glb> <nom_animation> [taille_texture=1024] [triangles_max=7000] [rigide]
-## « rigide » = cible:os1,os2,… (ex. hand.R:thumb.01.R,Bone_053) : les sommets dont l'os dominant est dans la liste deviennent 100 % liés à la cible.
+## « rigide » = cible:os1,os2,… (ex. hand.R:thumb.01.R,Bone_053), ou cible@x0,x1,y0,y1,z0,z1 (boîte en pose de repos), règles séparées par « ; » : les sommets dont l'os dominant est dans la liste deviennent 100 % liés à la cible.
 ## Sert aux accessoires que Meshy répartit sur plusieurs os (hache du Tank : tête sur le pouce, bas du manche sur deux os racine → manche étiré).
 ## Pas d'écran nécessaire. Exemple (V153) :
 ##   godot --headless --path . -s tools/import_fbx.gd -- walking_meshy.fbx assets/zimut/zimut.glb Walk 1024 7000
@@ -193,7 +193,16 @@ func _compact(arrays: Array, indices: PackedInt32Array) -> Array:
 
 
 ## Rend rigides les sommets dont l'os dominant est l'un des os sources ("cible:src1,src2") : 100 % sur l'os cible.
+## V378 : ou ceux d'une boîte de la pose de repos ("cible@x0,x1,y0,y1,z0,z1") — Meshy soude l'accessoire au corps (un seul
+## îlot), on le repère donc par sa place (bouclier de Vorkann). Plusieurs règles séparées par « ; ».
 func _make_rigid(mi: MeshInstance3D, spec: String) -> void:
+	if spec.contains(";"):
+		for one: String in spec.split(";", false):
+			_make_rigid(mi, one)
+		return
+	if spec.contains("@"):
+		_make_rigid_box(mi, spec)
+		return
 	var parts: PackedStringArray = spec.split(":")
 	if parts.size() != 2 or mi.skin == null:
 		push_error("rigide : format cible:os1,os2 attendu (et maillage avec peau)")
@@ -237,3 +246,40 @@ func _make_rigid(mi: MeshInstance3D, spec: String) -> void:
 	am.surface_set_material(0, mi.mesh.surface_get_material(0))
 	mi.mesh = am
 	print("rigide : ", changed, " sommets liés à 100 % à ", parts[0])
+
+
+func _make_rigid_box(mi: MeshInstance3D, spec: String) -> void:
+	var bone: String = spec.split("@")[0]
+	var bx: PackedFloat64Array = PackedFloat64Array(Array(spec.split("@")[1].split(",")).map(func(x: String) -> float: return float(x)))
+	var skel: Skeleton3D = mi.get_node_or_null(mi.skeleton) as Skeleton3D
+	var skin: Skin = mi.skin
+	var target: int = -1
+	for b: int in range(skin.get_bind_count()):
+		var idx: int = skin.get_bind_bone(b)
+		var nm: String = skel.get_bone_name(idx) if (idx >= 0 and skel != null) else String(skin.get_bind_name(b))
+		if nm == bone:
+			target = b
+	if target < 0 or bx.size() != 6:
+		push_error("rigide : format cible@x0,x1,y0,y1,z0,z1 attendu (os : " + bone + ")")
+		return
+	var arrays: Array = mi.mesh.surface_get_arrays(0)
+	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+	var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+	var per: int = bones.size() / verts.size()
+	var changed: int = 0
+	for v: int in range(verts.size()):
+		var q: Vector3 = verts[v]
+		if q.x < bx[0] or q.x > bx[1] or q.y < bx[2] or q.y > bx[3] or q.z < bx[4] or q.z > bx[5]:
+			continue
+		for k: int in range(per):
+			bones[v * per + k] = target if k == 0 else 0
+			weights[v * per + k] = 1.0 if k == 0 else 0.0
+		changed += 1
+	arrays[Mesh.ARRAY_BONES] = bones
+	arrays[Mesh.ARRAY_WEIGHTS] = weights
+	var am := ArrayMesh.new()
+	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	am.surface_set_material(0, mi.mesh.surface_get_material(0))
+	mi.mesh = am
+	print("rigide (boîte) : ", changed, " sommets liés à 100 % à ", bone)
