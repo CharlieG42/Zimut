@@ -239,7 +239,7 @@ func _mk_rect(cl: CanvasLayer, col: Color) -> ColorRect:
 func _fit_ui() -> void:
 	if _logo == null or _logo.texture == null:
 		return
-	var vs: Vector2 = get_viewport_rect().size
+	var vs: Vector2 = get_viewport().get_visible_rect().size
 	var h: float = vs.y * 0.30
 	var w: float = h * float(_logo.texture.get_width()) / float(_logo.texture.get_height())
 	_logo.anchor_left = 0.5
@@ -362,7 +362,7 @@ func _ease(x: float) -> float:
 func _update_bars() -> void:
 	if _bar_top == null:
 		return
-	var vs: Vector2 = get_viewport_rect().size
+	var vs: Vector2 = get_viewport().get_visible_rect().size
 	var h: float = vs.y * BAR_FRAC * _seg(0.15, 0.9) * (1.0 - _seg(10.3, DURATION))
 	_bar_top.offset_bottom = h
 	_bar_bot.offset_top = -h
