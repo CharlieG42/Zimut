@@ -33,14 +33,19 @@ func _boot() -> void:
 	v0.queue_free()
 	# réglage allumé : le héros 3D est créé (V380 : Sylvain est un modèle « à clips », cuit par tools/anim_heros_blender.gd)
 	gs.set("hero_3d_direct", true)
-	check(Hero3D.is_clip_model("Sylvain") and Hero3D.is_clip_model("Assassin"), "Sylvain et Assassin : modèles à clips (V380)")
+	check(Hero3D.is_clip_model("Sylvain") and Hero3D.is_clip_model("Assassin") and Hero3D.is_clip_model("Mage"), "Sylvain et Assassin : modèles à clips (V380)")
 	check(Hero3D.model_key({"classe": "Assassin", "team": "player"}) == "Assassin", "classe Assassin -> modèle Assassin")
 	var v: EntityView = _view("Sylvain")
 	for _i in range(50):
 		if v._h3d != null:
 			break
 		await create_timer(0.1).timeout
-	check(v._h3d != null, "réglage allumé : héros 3D créé")
+	# sans GPU (CI headless) le cadrage ne se termine pas, donc _h3d reste nul : on vérifie alors que le rendu 3D est créé
+	var made_sy: bool = v._h3d != null
+	for c: Node in v.get_children():
+		if c is Hero3D and (c as Hero3D)._ap != null:
+			made_sy = true
+	check(made_sy, "réglage allumé : héros 3D créé")
 	if v._h3d != null:
 		check(v._h3d.texture() != null, "texture disponible une fois cadré")
 	# le héros 3D ne touche pas aux autres classes
@@ -56,7 +61,7 @@ func _boot() -> void:
 	check(Hero3D.model_key({"classe": "Artificier", "team": "enemy"}) == "", "un ennemi ne prend pas le modèle d'un héros")
 	check(Hero3D.model_key({"classe": "Chasseur", "team": "player"}) == "Chasseur" and Hero3D.model_key({"classe": "Invocateur", "team": "player"}) == "Invocateur", "Chasseur et Invocateur ont leur modèle")
 	check(Hero3D.model_key({"classe": "Tank", "team": "player"}) == "Tank", "classe Tank -> modèle Tank")
-	for k: String in ["Tharok", "Ingénieur", "Chasseur", "Invocateur", "Tank", "Sylvain", "Assassin"]:
+	for k: String in ["Tharok", "Ingénieur", "Chasseur", "Invocateur", "Tank", "Sylvain", "Assassin", "Mage"]:
 		var packed: PackedScene = load(String(Hero3D.MODELS[k]["path"])) as PackedScene
 		var inst: Node = packed.instantiate()
 		var aps: Array = inst.find_children("*", "AnimationPlayer", true, false)

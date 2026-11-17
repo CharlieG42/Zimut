@@ -39,6 +39,15 @@ const MODELS := {
 			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
 			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
 		}},
+	## Mage (V381) : modèle et rig de Charlie sous Blender (bâton dans la main droite, grimoire dans la gauche), clips cuits (préréglage « mage »).
+	"Mage": {"path": "res://assets/heroes3d/mage.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.45, 1.97), "ref_lum": 0.649,
+		"clips": {
+			"idle":   {"clip": "Idle", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walk", "t0": 0.0, "t1": 0.8, "dur": 0.8, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
+			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+		}},
 	## Assassin (V380) : modèle et rig de Charlie sous Blender (deux dagues), clips cuits (préréglage « assassin »).
 	"Assassin": {"path": "res://assets/heroes3d/assassin.glb", "root_bone": "Base", "gain": 1.0, "ref_cam": Vector2(4.626, 1.991), "ref_lum": 0.25,
 		"clips": {
@@ -96,7 +105,7 @@ const MODELS := {
 		}},
 }
 ## Classe du joueur (nom interne) ou nom de boss -> modèle.
-const CLASS_MODEL := {"Sylvain": "Sylvain", "Assassin": "Assassin", "Artificier": "Ingénieur", "Chasseur": "Chasseur", "Invocateur": "Invocateur", "Tank": "Tank"}
+const CLASS_MODEL := {"Sylvain": "Sylvain", "Mage": "Mage", "Assassin": "Assassin", "Artificier": "Ingénieur", "Chasseur": "Chasseur", "Invocateur": "Invocateur", "Tank": "Tank"}
 const BOSS_MODEL := {"Gobelin Roi": "Tharok", "Tharok le Végétal": "Tharok"}
 const CLIP_FRAMES := 24             # nombre d'images fictives d'une action (EntityView raisonne en images pour les temps d'impact)
 ## V373 : ombrage calculé dans le shader (sans lumière de scène) : le rendu ne dépend plus de l'appareil — sur PC les

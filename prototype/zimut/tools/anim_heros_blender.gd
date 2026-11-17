@@ -3,7 +3,7 @@ extends SceneTree
 ## Les gestes sont décrits ici, os par os, en rotations locales (degrés) par rapport à la pose de repos — même principe
 ## que HeroAnim (Sylvain), mais cuits dans le modèle : le jeu le traite ensuite comme les modèles « à clips » (Hero3D).
 ##   godot --headless --path . -s tools/anim_heros_blender.gd -- <entrée.glb> <sortie.glb> <préréglage>
-## Préréglages : « assassin », « sylvain » (squelettes Blender de Charlie, os « .l / .r », exportés en glb depuis le .blend),
+## Préréglages : « assassin », « sylvain », « mage » (squelettes Blender de Charlie, os « .l / .r », exportés en glb depuis le .blend),
 ## « invocateur » (squelette de 16 os nommés en français : base, Thorax, cou, tete, bras_l/r, avantbras_l/r,
 ## main_l/r, cuisse_l/r, tibia_l/r, pied_l/r ; livre dans la main droite, lanterne dans la gauche).
 ## Axes relevés sur ce squelette (V379) : bras_l z− = bras abaissé le long du corps, bras_r x+ = bras levé vers l'avant,
@@ -173,6 +173,47 @@ func _preset(name: String) -> Dictionary:
 					return rest.call({"thorax": Vector3(18.0 * h, 0, 5.0 * h), "tete": Vector3(14.0 * h, 0, 0),
 						"bras.r": Vector3(-14.0 * h, 0, 0), "bras.l": Vector3(8.0 * h, 0, 10.0 * h), "main.l": Vector3(0, 0, -10.0 * h),
 						"cuisse.r": Vector3(8.0 * h, 0, 0), "cuisse.l": Vector3(-6.0 * h, 0, 0)})},
+			}
+		# Mage (V381) : même squelette que le Sylvain, mais bâton dans la main DROITE (main.r) et grimoire ouvert dans la gauche.
+		# Gestes = ceux du Sylvain en miroir (z et y inversés). Attaque = bâton pointé vers l'ennemi ; sort = bâton levé haut,
+		# grimoire présenté devant.
+		"mage":
+			var rest := func(extra: Dictionary) -> Dictionary:
+				var d: Dictionary = {"bras.r": Vector3(0, 0, 62), "main.r": Vector3(0, 0, -62), "bras.l": Vector3(0, 0, -62),
+					"avantbras.l": Vector3(-20, 0, 0)}
+				for k: String in extra.keys():
+					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (extra[k] as Vector3)
+				return d
+			return {
+				"Idle": {"dur": 2.4, "loop": true, "fn": func(t: float) -> Dictionary:
+					var br: float = sin(t * TAU)
+					return rest.call({"thorax": Vector3(-1.5 * br, 0, 0), "tete": Vector3(1.2 * br, 0, 0), "bras.l": Vector3(0, 0, 2.0 * br)})},
+				"Walk": {"dur": 0.8, "loop": true, "fn": func(t: float) -> Dictionary:
+					var p: float = sin(t * TAU)
+					var q: float = cos(t * TAU)
+					return rest.call({"cuisse.l": Vector3(30.0 * p, 0, 0), "cuisse.r": Vector3(-30.0 * p, 0, 0),
+						"tibia.l": Vector3(-38.0 * maxf(0.0, -q), 0, 0), "tibia.r": Vector3(-38.0 * maxf(0.0, q), 0, 0),
+						"bras.r": Vector3(-10.0 * p, 0, 0), "bras.l": Vector3(18.0 * p, 0, 0),
+						"thorax": Vector3(-3.0, -6.0 * p, 0)})},
+				"Attack": {"dur": 1.0, "loop": false, "fn": func(t: float) -> Dictionary:
+					var a: float = _curve([0, -0.3, -0.45, 0.8, 1.0, 0.85, 0.2, 0], t)
+					return rest.call({"bras.r": Vector3(55.0 * a, 0, 0), "avantbras.r": Vector3(-15.0 * maxf(a, 0.0), 0, 0),
+						"main.r": Vector3(-30.0 * maxf(a, 0.0), 0, 0),
+						"bras.l": Vector3(-12.0 * a, 0, 0),
+						"thorax": Vector3(-12.0 * a, 14.0 * a, 0), "tete": Vector3(-4.0 * a, -8.0 * a, 0),
+						"cuisse.r": Vector3(18.0 * maxf(a, 0.0), 0, 0), "tibia.r": Vector3(-12.0 * maxf(a, 0.0), 0, 0),
+						"cuisse.l": Vector3(-10.0 * maxf(a, 0.0), 0, 0)})},
+				"Cast": {"dur": 1.4, "loop": false, "fn": func(t: float) -> Dictionary:
+					var up: float = _curve([0, 0.35, 0.85, 1, 1, 0.9, 0.4, 0], t)
+					var z: float = 150.0 * up
+					return rest.call({"bras.r": Vector3(-8.0 * up, 0, -z), "main.r": Vector3(0, 0, z),
+						"bras.l": Vector3(50.0 * up, 0, 20.0 * up), "avantbras.l": Vector3(10.0 * up, 0, 0),
+						"thorax": Vector3(8.0 * up, 0, 0), "tete": Vector3(14.0 * up, 0, 0)})},
+				"Hit": {"dur": 0.5, "loop": false, "fn": func(t: float) -> Dictionary:
+					var h: float = _curve([0.0, 1.0, 0.55, 0.0], t)
+					return rest.call({"thorax": Vector3(18.0 * h, 0, -5.0 * h), "tete": Vector3(14.0 * h, 0, 0),
+						"bras.l": Vector3(-14.0 * h, 0, 0), "bras.r": Vector3(8.0 * h, 0, -10.0 * h), "main.r": Vector3(0, 0, 10.0 * h),
+						"cuisse.l": Vector3(8.0 * h, 0, 0), "cuisse.r": Vector3(-6.0 * h, 0, 0)})},
 			}
 		"invocateur":
 			return {
