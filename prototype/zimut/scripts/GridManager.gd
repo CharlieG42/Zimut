@@ -23,7 +23,7 @@ const BAKE_BOARD := true
 ## Résolution de cuisson mini / maxi (pixels de texture par unité de scène) ; la valeur réelle suit le zoom de la caméra
 ## et l'échelle d'affichage, pour que 1 texel = 1 pixel d'écran (pas de flou).
 const BOARD_BAKE_MIN := 1.0
-const BOARD_BAKE_MAX := 1.6
+const BOARD_BAKE_MAX := 2.2     # V377 : 1,6 → 2,2 pour suivre le rendu à la résolution de l'écran (1440p)
 var _board_bake: CanvasBake
 var _board_bake_pending: bool = false
 var _pit_bake: CanvasBake
