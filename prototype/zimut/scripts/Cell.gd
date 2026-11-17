@@ -237,7 +237,8 @@ func paint_static(ci: CanvasItem, off: Vector2) -> void:
 	var veil: Color = _veil_col()
 	# V144 : voile allégé sur la neige des Cimes (à 0,26 il la rendait grise)
 	ci.draw_colored_polygon(_diamond(0.99), Color(veil.r, veil.g, veil.b, 0.13 if biome == "Montagne" else 0.26))
-	_outline(top, Color(veil.r * 0.4, veil.g * 0.4, veil.b * 0.4, 0.66), 2.0, ci)
+	# V386 : grille plus fine et plus claire (façon Dofus), pour que les personnages dominent le plateau
+	_outline(top, Color(veil.r * 0.55, veil.g * 0.55, veil.b * 0.55, 0.42), 1.5, ci)
 	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
