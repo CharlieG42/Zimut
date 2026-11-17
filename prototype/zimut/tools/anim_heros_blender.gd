@@ -3,7 +3,7 @@ extends SceneTree
 ## Les gestes sont décrits ici, os par os, en rotations locales (degrés) par rapport à la pose de repos — même principe
 ## que HeroAnim (Sylvain), mais cuits dans le modèle : le jeu le traite ensuite comme les modèles « à clips » (Hero3D).
 ##   godot --headless --path . -s tools/anim_heros_blender.gd -- <entrée.glb> <sortie.glb> <préréglage>
-## Préréglages : « assassin », « sylvain », « mage » (squelettes Blender de Charlie, os « .l / .r », exportés en glb depuis le .blend),
+## Préréglages : « assassin », « sylvain », « mage », « geomancien » (même rig que le mage : bâton à droite, objet flottant à gauche) (squelettes Blender de Charlie, os « .l / .r », exportés en glb depuis le .blend),
 ## « invocateur » (squelette de 16 os nommés en français : base, Thorax, cou, tete, bras_l/r, avantbras_l/r,
 ## main_l/r, cuisse_l/r, tibia_l/r, pied_l/r ; livre dans la main droite, lanterne dans la gauche).
 ## Axes relevés sur ce squelette (V379) : bras_l z− = bras abaissé le long du corps, bras_r x+ = bras levé vers l'avant,
@@ -177,7 +177,7 @@ func _preset(name: String) -> Dictionary:
 		# Mage (V381) : même squelette que le Sylvain, mais bâton dans la main DROITE (main.r) et grimoire ouvert dans la gauche.
 		# Gestes = ceux du Sylvain en miroir (z et y inversés). Attaque = bâton pointé vers l'ennemi ; sort = bâton levé haut,
 		# grimoire présenté devant.
-		"mage":
+		"mage", "geomancien":
 			var rest := func(extra: Dictionary) -> Dictionary:
 				var d: Dictionary = {"bras.r": Vector3(0, 0, 62), "main.r": Vector3(0, 0, -62), "bras.l": Vector3(0, 0, -62),
 					"avantbras.l": Vector3(-20, 0, 0)}

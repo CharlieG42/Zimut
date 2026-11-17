@@ -1,0 +1,3 @@
+V382|Géomancien en 3D directe : modèle et rig de Charlie sous Blender, allégé à 12 000 triangles, animations cuites (garde, marche, attaque, sort, touché).
+V382|Bâton à torche dans la main droite (pointé ou levé haut), sphère de lumière flottant au-dessus de la main gauche ; préréglage « geomancien » dans tools/anim_heros_blender.gd.
+V382|Assassin : nouvelle version du modèle dont l os racine s appelle désormais base (comme les autres héros Blender) ; Hero3D mis à jour.
