@@ -3,7 +3,8 @@ extends SceneTree
 ## Les gestes sont décrits ici, os par os, en rotations locales (degrés) par rapport à la pose de repos — même principe
 ## que HeroAnim (Sylvain), mais cuits dans le modèle : le jeu le traite ensuite comme les modèles « à clips » (Hero3D).
 ##   godot --headless --path . -s tools/anim_heros_blender.gd -- <entrée.glb> <sortie.glb> <préréglage>
-## Préréglages : « invocateur » (squelette de 16 os nommés en français : base, Thorax, cou, tete, bras_l/r, avantbras_l/r,
+## Préréglages : « assassin », « sylvain » (squelettes Blender de Charlie, os « .l / .r », exportés en glb depuis le .blend),
+## « invocateur » (squelette de 16 os nommés en français : base, Thorax, cou, tete, bras_l/r, avantbras_l/r,
 ## main_l/r, cuisse_l/r, tibia_l/r, pied_l/r ; livre dans la main droite, lanterne dans la gauche).
 ## Axes relevés sur ce squelette (V379) : bras_l z− = bras abaissé le long du corps, bras_r x+ = bras levé vers l'avant,
 ## avantbras x− = avant-bras replié, cuisse x+ = jambe vers l'avant, tibia x− = genou plié, Thorax / tete x+ = penché en arrière.
@@ -87,6 +88,92 @@ static func _curve(keys: Array, t: float) -> float:
 
 func _preset(name: String) -> Dictionary:
 	match name:
+		# Assassin (V380) : deux dagues. Garde basse, genoux fléchis ; attaque = coup d'estoc de la dague droite avec fente ;
+		# sort = double taillade croisée.
+		"assassin":
+			var low := func(extra: Dictionary) -> Dictionary:
+				var d: Dictionary = {"bras.l": Vector3(0, 0, -62), "bras.r": Vector3(0, 0, 62),
+					"avantbras.l": Vector3(-35, 0, 0), "avantbras.r": Vector3(-35, 0, 0),
+					"cuisse.l": Vector3(10, 0, 0), "cuisse.r": Vector3(10, 0, 0), "tibia.l": Vector3(-18, 0, 0),
+					"tibia.r": Vector3(-18, 0, 0), "thorax": Vector3(-6, 0, 0)}
+				for k: String in extra.keys():
+					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (extra[k] as Vector3)
+				return d
+			return {
+				"Idle": {"dur": 2.0, "loop": true, "fn": func(t: float) -> Dictionary:
+					var br: float = sin(t * TAU)
+					return low.call({"thorax": Vector3(-1.5 * br, 0, 0), "bras.l": Vector3(0, 0, 2.0 * br), "bras.r": Vector3(0, 0, -2.0 * br)})},
+				"Walk": {"dur": 0.7, "loop": true, "fn": func(t: float) -> Dictionary:
+					var p: float = sin(t * TAU)
+					var q: float = cos(t * TAU)
+					return low.call({"cuisse.l": Vector3(28.0 * p, 0, 0), "cuisse.r": Vector3(-28.0 * p, 0, 0),
+						"tibia.l": Vector3(-30.0 * maxf(0.0, -q), 0, 0), "tibia.r": Vector3(-30.0 * maxf(0.0, q), 0, 0),
+						"bras.l": Vector3(-18.0 * p, 0, 0), "bras.r": Vector3(18.0 * p, 0, 0),
+						"thorax": Vector3(-4.0, 7.0 * p, 0)})},
+				"Attack": {"dur": 0.9, "loop": false, "fn": func(t: float) -> Dictionary:
+					return low.call({
+						"bras.r": Vector3(_curve([0, -25, -35, 60, 85, 70, 15, 0], t), 0, _curve([0, 0, 5, -20, -30, -24, -6, 0], t)),
+						"avantbras.r": Vector3(_curve([0, -25, -40, 25, 35, 28, 5, 0], t), 0, 0),
+						"bras.l": Vector3(_curve([0, 10, 18, -12, -20, -15, -4, 0], t), 0, 0),
+						"thorax": Vector3(_curve([0, 4, 6, -10, -16, -12, -3, 0], t), _curve([0, 14, 22, -10, -22, -16, -5, 0], t), 0),
+						"cuisse.r": Vector3(_curve([0, -5, -8, 22, 32, 26, 6, 0], t), 0, 0),
+						"tibia.r": Vector3(_curve([0, 0, 0, -12, -18, -14, -3, 0], t), 0, 0),
+						"cuisse.l": Vector3(_curve([0, 4, 6, -12, -18, -14, -3, 0], t), 0, 0)})},
+				"Cast": {"dur": 1.2, "loop": false, "fn": func(t: float) -> Dictionary:
+					var up: float = _curve([0, 0.6, 1.0, 0.2, -0.3, -0.2, 0.0], t)
+					var cross: float = _curve([0, 0.0, 0.2, 1.0, 1.0, 0.5, 0.0], t)
+					return low.call({
+						"bras.l": Vector3(70.0 * maxf(up, 0.0) + 40.0 * cross, 0, 40.0 * cross),
+						"bras.r": Vector3(70.0 * maxf(up, 0.0) + 40.0 * cross, 0, -40.0 * cross),
+						"avantbras.l": Vector3(-20.0 * up, 0, 0), "avantbras.r": Vector3(-20.0 * up, 0, 0),
+						"thorax": Vector3(6.0 * up - 10.0 * cross, 0, 0), "tete": Vector3(4.0 * up, 0, 0),
+						"cuisse.l": Vector3(-8.0 * cross, 0, 0), "cuisse.r": Vector3(16.0 * cross, 0, 0)})},
+				"Hit": {"dur": 0.5, "loop": false, "fn": func(t: float) -> Dictionary:
+					var h: float = _curve([0.0, 1.0, 0.55, 0.0], t)
+					return low.call({"thorax": Vector3(18.0 * h, 0, 5.0 * h), "tete": Vector3(14.0 * h, 0, 0),
+						"bras.l": Vector3(-12.0 * h, 0, 10.0 * h), "bras.r": Vector3(-12.0 * h, 0, -10.0 * h),
+						"cuisse.r": Vector3(8.0 * h, 0, 0), "cuisse.l": Vector3(-6.0 * h, 0, 0)})},
+			}
+		# Sylvain (V380) : bâton dans la main gauche (main compensée : le bâton reste droit). Attaque = bâton pointé vers
+		# l'ennemi ; sort = bâton levé haut, main droite ouverte devant.
+		"sylvain":
+			var rest := func(extra: Dictionary) -> Dictionary:
+				var d: Dictionary = {"bras.l": Vector3(0, 0, -62), "main.l": Vector3(0, 0, 62), "bras.r": Vector3(0, 0, 62),
+					"avantbras.r": Vector3(-20, 0, 0)}
+				for k: String in extra.keys():
+					d[k] = (d.get(k, Vector3.ZERO) as Vector3) + (extra[k] as Vector3)
+				return d
+			return {
+				"Idle": {"dur": 2.4, "loop": true, "fn": func(t: float) -> Dictionary:
+					var br: float = sin(t * TAU)
+					return rest.call({"thorax": Vector3(-1.5 * br, 0, 0), "tete": Vector3(1.2 * br, 0, 0), "bras.r": Vector3(0, 0, -2.0 * br)})},
+				"Walk": {"dur": 0.8, "loop": true, "fn": func(t: float) -> Dictionary:
+					var p: float = sin(t * TAU)
+					var q: float = cos(t * TAU)
+					return rest.call({"cuisse.l": Vector3(30.0 * p, 0, 0), "cuisse.r": Vector3(-30.0 * p, 0, 0),
+						"tibia.l": Vector3(-38.0 * maxf(0.0, -q), 0, 0), "tibia.r": Vector3(-38.0 * maxf(0.0, q), 0, 0),
+						"bras.l": Vector3(-10.0 * p, 0, 0), "bras.r": Vector3(18.0 * p, 0, 0),
+						"thorax": Vector3(-3.0, 6.0 * p, 0)})},
+				"Attack": {"dur": 1.0, "loop": false, "fn": func(t: float) -> Dictionary:
+					var a: float = _curve([0, -0.3, -0.45, 0.8, 1.0, 0.85, 0.2, 0], t)
+					return rest.call({"bras.l": Vector3(55.0 * a, 0, 0), "avantbras.l": Vector3(-15.0 * maxf(a, 0.0), 0, 0),
+						"main.l": Vector3(-30.0 * maxf(a, 0.0), 0, 0),
+						"bras.r": Vector3(-12.0 * a, 0, 0),
+						"thorax": Vector3(-12.0 * a, -14.0 * a, 0), "tete": Vector3(-4.0 * a, 8.0 * a, 0),
+						"cuisse.l": Vector3(18.0 * maxf(a, 0.0), 0, 0), "tibia.l": Vector3(-12.0 * maxf(a, 0.0), 0, 0),
+						"cuisse.r": Vector3(-10.0 * maxf(a, 0.0), 0, 0)})},
+				"Cast": {"dur": 1.4, "loop": false, "fn": func(t: float) -> Dictionary:
+					var up: float = _curve([0, 0.35, 0.85, 1, 1, 0.9, 0.4, 0], t)
+					var z: float = 150.0 * up
+					return rest.call({"bras.l": Vector3(-8.0 * up, 0, z), "main.l": Vector3(0, 0, -z),
+						"bras.r": Vector3(50.0 * up, 0, -20.0 * up), "avantbras.r": Vector3(10.0 * up, 0, 0),
+						"thorax": Vector3(8.0 * up, 0, 0), "tete": Vector3(14.0 * up, 0, 0)})},
+				"Hit": {"dur": 0.5, "loop": false, "fn": func(t: float) -> Dictionary:
+					var h: float = _curve([0.0, 1.0, 0.55, 0.0], t)
+					return rest.call({"thorax": Vector3(18.0 * h, 0, 5.0 * h), "tete": Vector3(14.0 * h, 0, 0),
+						"bras.r": Vector3(-14.0 * h, 0, 0), "bras.l": Vector3(8.0 * h, 0, 10.0 * h), "main.l": Vector3(0, 0, -10.0 * h),
+						"cuisse.r": Vector3(8.0 * h, 0, 0), "cuisse.l": Vector3(-6.0 * h, 0, 0)})},
+			}
 		"invocateur":
 			return {
 				# repos : lanterne tenue le long du corps (bras abaissé, main compensée : la lanterne reste droite), livre levé

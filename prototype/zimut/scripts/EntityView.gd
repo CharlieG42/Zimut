@@ -267,7 +267,12 @@ func _load_poses() -> void:
 	if base == "":
 		return
 	if _load_seq(base):
-		_try_hero_3d()
+		# V380 : un héros à planches cuites peut aussi avoir un modèle « à clips » (Sylvain refait sous Blender) : ses clips
+		# remplacent alors les tables des planches dès que le modèle est prêt (les planches restent le repli).
+		if Hero3D.is_clip_model(Hero3D.model_key(entity)):
+			_try_clip_model()
+		else:
+			_try_hero_3d()
 		return
 	# V32 : plusieurs variantes par pose (<sprite>_attack, _attack_2, _attack_3…, _idle_2, _idle_3)
 	for pz: String in POSES + ["idle"]:

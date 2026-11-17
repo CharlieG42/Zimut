@@ -29,8 +29,25 @@ const FRAME_TOL := 0.04            # écart toléré (4 %) entre la hauteur mesu
 ## imposé, et les couleurs sont recalées si l'appareil rend plus clair ou plus sombre. Pour les recalculer (nouveau modèle,
 ## ou réglage de lumière modifié), retirer ces deux clés, lancer un rendu et relever `Hero3D.diag` / `image_stats`.
 const MODELS := {
-	"Sylvain": {"path": "res://assets/heroes3d/sylvain.glb", "tip_bone": "main.r",
-		"staff_x": -0.0035, "staff_z_max": 0.0045, "gain": 1.0, "ref_cam": Vector2(4.42, 1.956), "ref_lum": 0.853},
+	## Sylvain (V380) : nouveau modèle et rig de Charlie sous Blender (bâton dans la main gauche), clips cuits par
+	## tools/anim_heros_blender.gd (préréglage « sylvain ») — remplace l'ancien modèle animé par HeroAnim.
+	"Sylvain": {"path": "res://assets/heroes3d/sylvain.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.45, 1.97), "ref_lum": 0.649,
+		"clips": {
+			"idle":   {"clip": "Idle", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walk", "t0": 0.0, "t1": 0.8, "dur": 0.8, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
+			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+		}},
+	## Assassin (V380) : modèle et rig de Charlie sous Blender (deux dagues), clips cuits (préréglage « assassin »).
+	"Assassin": {"path": "res://assets/heroes3d/assassin.glb", "root_bone": "Base", "gain": 1.0, "ref_cam": Vector2(4.626, 1.991), "ref_lum": 0.25,
+		"clips": {
+			"idle":   {"clip": "Idle", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
+			"walk":   {"clip": "Walk", "t0": 0.0, "t1": 0.7, "dur": 0.7, "loop": true, "key": 0.0},
+			"attack": {"clip": "Attack", "t0": 0.0, "t1": 0.9, "dur": 0.7, "loop": false, "key": 0.55},
+			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.2, "dur": 1.0, "loop": false, "key": 0.5},
+			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+		}},
 	"Tharok": {"path": "res://assets/heroes3d/tharok.glb", "root_bone": "spine", "gain": 1.0, "ref_cam": Vector2(3.62, 1.545), "ref_lum": 0.425,
 		"clips": {
 			"idle":   {"clip": "Walking", "t0": 0.0, "t1": 0.0, "dur": 3.0, "loop": true, "key": 0.0},
@@ -79,7 +96,7 @@ const MODELS := {
 		}},
 }
 ## Classe du joueur (nom interne) ou nom de boss -> modèle.
-const CLASS_MODEL := {"Sylvain": "Sylvain", "Artificier": "Ingénieur", "Chasseur": "Chasseur", "Invocateur": "Invocateur", "Tank": "Tank"}
+const CLASS_MODEL := {"Sylvain": "Sylvain", "Assassin": "Assassin", "Artificier": "Ingénieur", "Chasseur": "Chasseur", "Invocateur": "Invocateur", "Tank": "Tank"}
 const BOSS_MODEL := {"Gobelin Roi": "Tharok", "Tharok le Végétal": "Tharok"}
 const CLIP_FRAMES := 24             # nombre d'images fictives d'une action (EntityView raisonne en images pour les temps d'impact)
 ## V373 : ombrage calculé dans le shader (sans lumière de scène) : le rendu ne dépend plus de l'appareil — sur PC les

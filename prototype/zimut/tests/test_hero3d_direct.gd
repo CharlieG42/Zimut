@@ -23,30 +23,26 @@ func _boot() -> void:
 	await process_frame
 	var gs: Node = root.get_node("GameSettings")
 	check(not bool(gs.get("hero_3d_direct")), "réglage « 3D en direct » désactivé par défaut")
-	check(Hero3D.supported("Sylvain") and not Hero3D.supported("Géomancien"), "seul Sylvain a un modèle 3D direct")
+	check(Hero3D.supported("Sylvain") and not Hero3D.supported("Géomancien"), "Sylvain a un modèle 3D direct, pas le Géomancien")
 	check(FileAccess.file_exists("res://assets/heroes3d/sylvain.glb"), "modèle sylvain.glb présent")
-	check(FileAccess.get_file_as_bytes("res://assets/heroes3d/sylvain.glb").size() < 1_000_000, "modèle léger (< 1 Mo)")
+	check(FileAccess.get_file_as_bytes("res://assets/heroes3d/sylvain.glb").size() < 1_500_000, "modèle léger (< 1,5 Mo)")
 	# réglage par défaut : sprites cuits, pas de 3D
 	var v0: EntityView = _view("Sylvain")
 	await process_frame
 	check(v0._sq_ok and v0._h3d == null, "réglage éteint : sprites cuits, aucun rendu 3D")
 	v0.queue_free()
-	# réglage allumé : le héros 3D est créé, os et bâton trouvés
+	# réglage allumé : le héros 3D est créé (V380 : Sylvain est un modèle « à clips », cuit par tools/anim_heros_blender.gd)
 	gs.set("hero_3d_direct", true)
+	check(Hero3D.is_clip_model("Sylvain") and Hero3D.is_clip_model("Assassin"), "Sylvain et Assassin : modèles à clips (V380)")
+	check(Hero3D.model_key({"classe": "Assassin", "team": "player"}) == "Assassin", "classe Assassin -> modèle Assassin")
 	var v: EntityView = _view("Sylvain")
-	await process_frame
-	await process_frame
+	for _i in range(50):
+		if v._h3d != null:
+			break
+		await create_timer(0.1).timeout
 	check(v._h3d != null, "réglage allumé : héros 3D créé")
 	if v._h3d != null:
-		var h: Hero3D = v._h3d
-		check(h.tip_ok, "pointe du bâton calculée")
-		var names_ok: bool = true
-		for bn: String in ["bras.r", "bras.l", "avantbras.r", "cuisse.l", "tibia.r", "pied.l", "torse", "main.r"]:
-			if h._bone(bn) < 0:
-				names_ok = false
-				print("   os introuvable : ", bn)
-		check(names_ok, "les os des poses (HeroAnim) se retrouvent dans le .glb")
-		check(not h.ready_ok or h.texture() != null, "texture disponible une fois cadré")
+		check(v._h3d.texture() != null, "texture disponible une fois cadré")
 	# le héros 3D ne touche pas aux autres classes
 	var v2: EntityView = _view("Géomancien")
 	await process_frame
@@ -60,7 +56,7 @@ func _boot() -> void:
 	check(Hero3D.model_key({"classe": "Artificier", "team": "enemy"}) == "", "un ennemi ne prend pas le modèle d'un héros")
 	check(Hero3D.model_key({"classe": "Chasseur", "team": "player"}) == "Chasseur" and Hero3D.model_key({"classe": "Invocateur", "team": "player"}) == "Invocateur", "Chasseur et Invocateur ont leur modèle")
 	check(Hero3D.model_key({"classe": "Tank", "team": "player"}) == "Tank", "classe Tank -> modèle Tank")
-	for k: String in ["Tharok", "Ingénieur", "Chasseur", "Invocateur", "Tank"]:
+	for k: String in ["Tharok", "Ingénieur", "Chasseur", "Invocateur", "Tank", "Sylvain", "Assassin"]:
 		var packed: PackedScene = load(String(Hero3D.MODELS[k]["path"])) as PackedScene
 		var inst: Node = packed.instantiate()
 		var aps: Array = inst.find_children("*", "AnimationPlayer", true, false)
