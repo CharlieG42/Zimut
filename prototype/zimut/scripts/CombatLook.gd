@@ -11,14 +11,14 @@ const SHADER := """
 shader_type canvas_item;
 render_mode unshaded;
 uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
-uniform float contrast : hint_range(0.0, 1.0) = 0.30;
+uniform float contrast : hint_range(0.0, 1.0) = 0.24;
 uniform float saturation : hint_range(0.5, 1.5) = 1.25;
 uniform vec3 warm = vec3(1.0, 0.95, 0.78);
 uniform vec3 cool = vec3(0.78, 0.92, 0.90);
 uniform float split : hint_range(0.0, 1.0) = 0.38;
 uniform float bloom : hint_range(0.0, 1.0) = 0.40;
 uniform float bloom_threshold : hint_range(0.0, 1.0) = 0.62;
-uniform float sharpen : hint_range(0.0, 2.0) = 0.9;
+uniform float sharpen : hint_range(0.0, 2.0) = 0.5;
 uniform float vignette : hint_range(0.0, 1.0) = 0.30;
 void fragment() {
 	vec3 c = texture(screen_tex, SCREEN_UV).rgb;

@@ -1,0 +1,3 @@
+V385|Personnages 3D mieux intégrés au plateau : contour fin et translucide, ombre portée floue, ombre au sol en dégradé, anneau d équipe et touffes d herbe plus discrets.
+V385|Shading des héros 3D plus doux (dégradé ombre bleutée vers lumière chaude, assombrissement des pieds, liseré de lumière sur les bords) ; netteté et contraste du grade de combat réduits.
+V385|Héros et monstres agrandis de 30 % (au lieu de 10 %), boss à 230 px de haut, pour se rapprocher de la lisibilité de Waven.

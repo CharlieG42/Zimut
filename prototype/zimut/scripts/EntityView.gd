@@ -23,7 +23,26 @@ void fragment() {
 }
 """
 
+## V385 : ombre portée adoucie des personnages 3D (flou à 12 prises sur l'alpha de la silhouette, rayon en pixels de texture).
+## Le shader remplace la couleur de modulation : l'opacité est donc passée par le paramètre « opacity ».
+const SOFT_SHADOW_SHADER := """
+shader_type canvas_item;
+uniform float radius = 6.0;
+uniform float opacity = 0.35;
+void fragment() {
+	vec2 px = TEXTURE_PIXEL_SIZE * radius;
+	float a = texture(TEXTURE, UV).a * 0.20;
+	for (int i = 0; i < 12; i++) {
+		float ang = float(i) * 0.5236;
+		float r = (i % 2 == 0) ? 1.0 : 0.55;
+		a += texture(TEXTURE, UV + vec2(cos(ang), sin(ang)) * px * r).a * 0.0667;
+	}
+	COLOR = vec4(0.0, 0.0, 0.0, min(a, 1.0) * opacity);
+}
+"""
+
 static var _shader: Shader = null
+static var _soft_shadow_shader: Shader = null
 
 var entity: Dictionary = {}
 var sprite: Sprite2D = null
@@ -674,7 +693,12 @@ func _sync_outline() -> void:
 		o.rotation = sprite.rotation
 		o.skew = sprite.skew
 		o.position = sprite.position + OUTLINE_DIRS[i] * d
-		o.self_modulate = Color(oc.r, oc.g, oc.b, sprite.self_modulate.a * sprite.modulate.a)
+		o.self_modulate = Color(oc.r, oc.g, oc.b, sprite.self_modulate.a * sprite.modulate.a * (0.30 if _is3d() else 1.0))
+
+
+## V385 : personnage rendu en 3D direct (contours, ombre, anneau et touffes sont adoucis : il se fond dans le plateau).
+func _is3d() -> bool:
+	return _h3d != null and _h3d.ready_ok
 
 
 ## Entités posées (terrain, mécanismes, balises) : pas de respiration ni de touffes.
@@ -813,10 +837,10 @@ func _target_height() -> float:
 
 
 ## Hauteur d'un boss à l'écran (V359 : 150 → 195 px, +30 %, pour qu'il pèse davantage face aux héros de 104 px).
-const BOSS_HEIGHT := 195.0
+const BOSS_HEIGHT := 230.0
 ## V361 : héros, ennemis et invocations agrandis de 10 % pour être mieux distingués sur un écran de téléphone
 ## (les cases ne changent pas ; le boss, déjà à 195 px, et l'Arbre non plus).
-const UNIT_SCALE := 1.10
+const UNIT_SCALE := 1.30
 const BOSS_HEIGHT_BASE := 150.0
 
 
@@ -942,14 +966,27 @@ func _process(delta: float) -> void:
 		_rim.flip_h = sprite.flip_h
 		_rim.position = sprite.position + ld * 4.0
 		_rim.visible = not _falling
+		if _is3d():
+			_rim.self_modulate = Color(_light["rim"].r, _light["rim"].g, _light["rim"].b, _light["rim"].a * 0.35)
 		_sync_outline()
 		# ombre portée au sol (ne suit pas le saut, se resserre quand il est en l'air)
 		var air: float = clampf((bob + hop) / 14.0, 0.0, 1.0)
 		_shadow.flip_h = sprite.flip_h
 		_shadow.position = Vector2(_kb.x * 0.5, 6.0)
+		if _is3d() and _shadow.material == null:
+			if _soft_shadow_shader == null:
+				_soft_shadow_shader = Shader.new()
+				_soft_shadow_shader.code = SOFT_SHADOW_SHADER
+			var sm := ShaderMaterial.new()
+			sm.shader = _soft_shadow_shader
+			sm.set_shader_parameter("radius", 9.0 * float(Hero3D.RES_K))
+			_shadow.material = sm
 		# contre-jour : la lumière vient de l'arrière, l'ombre s'étire vers l'avant (vers le bas de l'écran)
 		_shadow.scale = Vector2(sc * (1.0 - air * 0.15), -sc * 0.46 * (1.0 - air * 0.2))
 		_shadow.self_modulate.a = minf(0.60, float(_light.get("shadow", 0.35)) * 1.5) * (1.0 - air * 0.35)
+		if _shadow.material != null:
+			(_shadow.material as ShaderMaterial).set_shader_parameter("opacity", _shadow.self_modulate.a * 0.8)
+			_shadow.self_modulate.a = 1.0
 		_shadow.visible = not _falling
 		if _ghost != null:
 			if _ghost_fade > 0.0:
@@ -964,6 +1001,8 @@ func _process(delta: float) -> void:
 			_ghost.flip_h = sprite.flip_h
 		if _front != null:
 			_front.t = _t
+			_front.modulate.a = 0.55 if _is3d() else 1.0
+			_front.scale = Vector2.ONE * (0.8 if _is3d() else 1.0)
 			_front.queue_redraw()
 		if _mat != null:
 			_mat.set_shader_parameter("flash", _flash)
@@ -978,8 +1017,10 @@ func _process(delta: float) -> void:
 			elif hovered:
 				outline_w = 2.25
 				oc = Color(1, 1, 1, 0.98) if entity["team"] == "player" else Color(1.0, 0.38, 0.28, 1.0)
-			if _h3d != null and _h3d.ready_ok:
-				outline_w *= float(Hero3D.RES_K)     # la texture 3D est suréchantillonnée : contour compté en pixels de texture
+			if _is3d():
+				# V385 : contour fin et translucide (liseré, plus de « sticker »), l'unité active reste repérable
+				outline_w *= float(Hero3D.RES_K) * (0.62 if entity.get("is_active", false) else 0.5)
+				oc.a *= 0.55 if entity.get("is_active", false) else 0.42
 			_mat.set_shader_parameter("outline", outline_w)
 			_mat.set_shader_parameter("outline_color", oc)
 	else:
@@ -1139,15 +1180,23 @@ func _draw() -> void:
 	var tc: Color = _team_color()
 	# Ombre
 	draw_set_transform(Vector2(0, 5), 0.0, Vector2(1.0, 0.42))
-	draw_circle(Vector2.ZERO, 30.0, Color(0, 0, 0, 0.26))
-	# contact au sol : petite zone très sombre juste sous les pieds
-	draw_circle(Vector2.ZERO, 17.0, Color(0, 0, 0, 0.30))
-	draw_circle(Vector2.ZERO, 9.0, Color(0, 0, 0, 0.22))
+	var soft3d: bool = _is3d()
+	if soft3d:
+		# V385 : ombre au sol en dégradé (huit disques empilés) au lieu de trois marches nettes
+		for k: int in range(8):
+			draw_circle(Vector2.ZERO, 32.0 - float(k) * 3.4, Color(0, 0, 0, 0.055))
+	else:
+		draw_circle(Vector2.ZERO, 30.0, Color(0, 0, 0, 0.26))
+		# contact au sol : petite zone très sombre juste sous les pieds
+		draw_circle(Vector2.ZERO, 17.0, Color(0, 0, 0, 0.30))
+		draw_circle(Vector2.ZERO, 9.0, Color(0, 0, 0, 0.22))
 	# Anneau d'équipe au sol
 	var active: bool = entity.get("is_active", false)
 	var ring_col: Color = Color(1.0, 0.85, 0.2) if active else tc
 	var ring_w: float = 4.0 + (sin(_t * 5.0) * 1.2 if active else 0.0)
-	draw_arc(Vector2.ZERO, 33.0, 0.0, TAU, 40, Color(ring_col.r, ring_col.g, ring_col.b, 0.9), ring_w, true)
+	if soft3d:
+		ring_w = 2.2 + (sin(_t * 5.0) * 0.6 if active else 0.0)
+	draw_arc(Vector2.ZERO, 33.0, 0.0, TAU, 40, Color(ring_col.r, ring_col.g, ring_col.b, 0.62 if soft3d else 0.9), ring_w, true)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 	# Arbre du Sylvain : zone de relais des soins (les 8 cases autour) en losange vert pulsant
