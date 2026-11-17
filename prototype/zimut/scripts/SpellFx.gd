@@ -90,6 +90,26 @@ static func colors(element: String) -> Array:
 	return [e["col"], e["col2"]]
 
 
+const HEAVY_HIT := 0.25       # V374 : un coup qui retire au moins 25 % des PV max est « lourd »
+
+## Poids d'un coup : part des PV max retirée (0 à 1).
+static func hit_weight(amount: int, max_pv: int) -> float:
+	return clampf(float(amount) / float(max_pv), 0.0, 1.0) if max_pv > 0 else 0.0
+
+
+## Couleur du nombre de dégâts : celle de l'élément, éclaircie pour rester lisible sur tous les décors.
+static func dmg_color(elem: String, dtype: String) -> Color:
+	if dtype == "dot":
+		return Color(0.8, 0.45, 0.95)
+	var c: Color = colors(elem)[0]
+	return c.lerp(Color.WHITE, 0.30)
+
+
+## Taille du nombre : de 28 (égratignure) à 44 (coup lourd), +10 en critique.
+static func dmg_size(weight: float, crit: bool) -> int:
+	return int(round(lerpf(28.0, 44.0, clampf(weight / 0.4, 0.0, 1.0)))) + (10 if crit else 0)
+
+
 # ═══════════════════════════════════════════════════════════════════════════
 #  Nœuds d'effets
 # ═══════════════════════════════════════════════════════════════════════════
