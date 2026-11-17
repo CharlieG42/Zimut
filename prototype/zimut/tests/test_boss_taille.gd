@@ -22,7 +22,7 @@ func _boot() -> void:
 	var k: float = EntityView.UNIT_SCALE
 	check(is_equal_approx(hero, 104.0 * k) and is_equal_approx(enemy, 92.0 * k) and is_equal_approx(summon, 76.0 * k) and is_equal_approx(troll, 118.0 * k),
 		"V361 : héros, ennemis, invocations et trolls agrandis de %d %% (héros %.0f px)" % [roundi((k - 1.0) * 100.0), hero])
-	check(is_equal_approx(k, 1.10), "agrandissement des unités : +10 %")
+	check(is_equal_approx(k, 1.30), "agrandissement des unités : +30 % (V385)")
 	var oc_p: Color = EntityView.outline_color({"team": "player"})
 	var oc_e: Color = EntityView.outline_color({"team": "enemy"})
 	check(oc_p.b > oc_p.r and oc_e.r > oc_e.b and oc_p.get_luminance() < 0.2 and oc_e.get_luminance() < 0.2, "contour sombre : bleu pour les alliés, rouge pour les ennemis")
