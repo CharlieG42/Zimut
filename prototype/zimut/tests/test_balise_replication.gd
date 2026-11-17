@@ -87,14 +87,21 @@ func _run() -> void:
 		_move(gm, bsx[1], spot + Vector2i(0, 1) if gm.is_free(spot + Vector2i(0, 1)) else spot + Vector2i(0, -1))
 		_move(gm, e2, spot)
 		var far_cell: Vector2i = spot
-		var pv_a: int = int(e2["current_pv"])
-		gm._beacon_replicas(ch, ex, p, far_cell, 40.0)
-		var two: int = pv_a - int(e2["current_pv"])
+		# les dégâts ont une part de hasard (variance, critiques) : on cumule plusieurs tirages pour ne pas dépendre d'un seul
+		var two: int = 0
+		for _t: int in range(12):
+			e2["current_pv"] = int(e2["max_pv"])
+			var pv_a: int = int(e2["current_pv"])
+			gm._beacon_replicas(ch, ex, p, far_cell, 40.0)
+			two += pv_a - int(e2["current_pv"])
 		var keep: Dictionary = bsx[1]
 		keep["current_pv"] = 0
-		var pv_b: int = int(e2["current_pv"])
-		gm._beacon_replicas(ch, ex, p, far_cell, 40.0)
-		var one: int = pv_b - int(e2["current_pv"])
+		var one: int = 0
+		for _t: int in range(12):
+			e2["current_pv"] = int(e2["max_pv"])
+			var pv_b: int = int(e2["current_pv"])
+			gm._beacon_replicas(ch, ex, p, far_cell, 40.0)
+			one += pv_b - int(e2["current_pv"])
 		ck(one > 0 and two >= one * 1.6, "touché une fois par zone : 2 balises = environ 2 fois 1 balise (%d vs %d)" % [two, one])
 	# Sans balise : aucune réplique
 	for b3: Dictionary in gm.beacons_of(ch):
