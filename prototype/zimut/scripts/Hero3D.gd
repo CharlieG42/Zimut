@@ -163,12 +163,23 @@ uniform sampler2D albedo_tex : source_color, filter_linear_mipmap_anisotropic, r
 uniform float gain = 1.0;
 uniform float gamma = 1.0;     // V357 : correction automatique des couleurs (voir _calibrate_color)
 const vec3 LDIR = vec3(-0.36, 0.62, 0.70);   // lumière fixe, dans le repère de la caméra (haut gauche, vers le spectateur)
+varying float wy;
+void vertex() {
+	wy = (MODEL_MATRIX * vec4(VERTEX, 1.0)).y;
+}
 void fragment() {
 	vec3 c = pow(texture(albedo_tex, UV, -0.5).rgb, vec3(gamma)) * gain;
-	float h = dot(normalize(NORMAL), normalize(LDIR)) * 0.5 + 0.5;
-	float band = smoothstep(0.34, 0.50, h) * 0.6 + smoothstep(0.66, 0.80, h) * 0.4;
-	vec3 shade = mix(vec3(0.60, 0.64, 0.86), vec3(1.06, 1.04, 1.0), band);
-	ALBEDO = c * shade;
+	vec3 n = normalize(NORMAL);
+	float h = dot(n, normalize(LDIR)) * 0.5 + 0.5;
+	// V385 : dégradé doux (ombre bleutée -> lumière chaude) au lieu de deux marches nettes, volumes plus lisibles
+	float band = smoothstep(0.22, 0.86, h);
+	vec3 shade = mix(vec3(0.66, 0.70, 0.90), vec3(1.07, 1.05, 1.0), band);
+	// occlusion ambiante factice : le bas du corps (pieds, bas des vêtements) s'assombrit légèrement
+	float ao = mix(0.84, 1.0, smoothstep(0.0, 0.55, wy));
+	// liseré de lumière sur les bords, côté lumière : détache la silhouette du fond
+	float fres = pow(1.0 - clamp(dot(n, normalize(VIEW)), 0.0, 1.0), 2.6);
+	float side = clamp(dot(n, normalize(vec3(LDIR.x, LDIR.y, 0.0))) * 0.5 + 0.5, 0.0, 1.0);
+	ALBEDO = c * shade * ao + vec3(1.0, 0.96, 0.88) * fres * side * 0.20;
 }
 """
 signal framed
