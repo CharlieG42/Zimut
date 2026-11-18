@@ -31,6 +31,7 @@ var _timeline_scroll: ScrollContainer
 var _stats: Control
 var _spell_scroll: ScrollContainer
 var _spell_box: Container
+var _hand: Control = null   # V401 : main de cartes du mode Cartes (remplace la colonne de sorts)
 var _tip_panel: PanelContainer
 var _tip_label: Label
 var _end_btn: Button
@@ -42,6 +43,8 @@ var _tuto_step: int = 0
 var _tuto_panel: PanelContainer
 var _tuto_label: Label
 const LOG_WIDTH := 660.0
+const LOG_WIDTH_CARDS := 500.0   # V401 : journal plus étroit en mode Cartes (la main occupe le bas du centre)
+var _log_width: float = LOG_WIDTH
 var _banner: Label
 var _banner_band: TextureRect = null
 var _info_panel: PanelContainer
@@ -1062,6 +1065,42 @@ func init(manager: Node) -> void:
 	call_deferred("_restore_hud_visibility")
 
 
+## Mode Cartes : crée la main et libère le bas du centre (bouton Quitter en haut, objectifs décalés à droite).
+func _build_card_hand() -> void:
+	_hand = (load("res://scripts/CardHand.gd") as GDScript).new()
+	_hand.name = "CardHand"
+	_hand.set("gm", game_manager)
+	_hand.connect("card_chosen", func(sp: Dictionary) -> void: spell_selected.emit(sp))
+	_hand.connect("pile_pressed", func(which: String) -> void:
+		if _root.get_node_or_null("PileView") == null:
+			(load("res://scripts/CardHand.gd") as GDScript).call("open_pile", _root, game_manager, which))
+	_root.add_child(_hand)
+	_quit_btn.anchor_top = 0.0
+	_quit_btn.anchor_bottom = 0.0
+	_quit_btn.offset_top = 14.0
+	_quit_btn.offset_bottom = 62.0
+	if _obj_panel != null:
+		# objectifs en haut à droite, à gauche de la timeline (le bas du centre appartient à la main)
+		_obj_panel.anchor_left = 1.0
+		_obj_panel.anchor_right = 1.0
+		_obj_panel.anchor_top = 0.0
+		_obj_panel.anchor_bottom = 0.0
+		_obj_panel.offset_left = -640.0
+		_obj_panel.offset_right = -182.0
+		_obj_panel.offset_top = 14.0
+		_obj_panel.offset_bottom = 62.0
+		_obj_panel.grow_vertical = Control.GROW_DIRECTION_END
+
+
+## Le combat en cours est-il un duel du mode Cartes ?
+func _cards_mode() -> bool:
+	if game_manager == null:
+		return false
+	if String(game_manager.battle_mode) == "cards":
+		return String(game_manager.active_save.get("campaign_mode", "")) == ""
+	return String(game_manager.active_save.get("battle_mode", "")) == "cards" and String(game_manager.active_save.get("campaign_mode", "")) == ""
+
+
 func _restore_hud_visibility() -> void:
 	if not is_instance_valid(_root):
 		return
@@ -1070,6 +1109,8 @@ func _restore_hud_visibility() -> void:
 	_root.visible = true
 	for control: Control in [_timeline, _stats, _spell_scroll, _end_btn, _quit_btn]:
 		if is_instance_valid(control):
+			if control == _spell_scroll and _hand != null:
+				continue   # mode Cartes : la colonne de sorts reste masquée
 			control.visible = true
 	_root.queue_redraw()
 
@@ -1149,7 +1190,7 @@ func ensure_hud_layout() -> bool:
 			c.offset_bottom = l[7]
 			fixed = true
 	# Barre de sorts vide alors qu'un héros a des sorts : on la reconstruit.
-	if _spell_box != null and _spell_box.get_child_count() == 0:
+	if _hand == null and _spell_box != null and _spell_box.get_child_count() == 0:
 		var owner_e: Dictionary = _get_spell_bar_owner(game_manager.active_entity)
 		if not owner_e.is_empty():
 			_rebuild_spell_bar(owner_e)
@@ -1158,6 +1199,8 @@ func ensure_hud_layout() -> bool:
 	visible = true
 	for ctl2: Control in [_timeline_scroll, _timeline, _stats, _spell_scroll]:
 		if is_instance_valid(ctl2):
+			if ctl2 == _spell_scroll and _hand != null:
+				continue   # mode Cartes : la colonne de sorts reste masquée
 			ctl2.visible = true
 			ctl2.modulate.a = 1.0
 	if fixed:
@@ -1177,6 +1220,8 @@ func _on_hud_resized() -> void:
 
 
 func _build_ui() -> void:
+	if _cards_mode():
+		_log_width = LOG_WIDTH_CARDS
 	_root = Control.new()
 	_root.name = "HUD"
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -1270,6 +1315,10 @@ func _build_ui() -> void:
 	_spell_box = VBoxContainer.new()
 	_spell_box.add_theme_constant_override("separation", int(6.0 * _spell_scale))
 	_spell_scroll.add_child(_spell_box)
+	# V401 — mode Cartes : la colonne de sorts laisse la place à une vraie main de cartes
+	if _cards_mode():
+		spell_panel.visible = false
+		_spell_scroll.visible = false
 
 	# Infobulle de sort
 	_tip_panel = PanelContainer.new()
@@ -1357,7 +1406,7 @@ func _build_ui() -> void:
 	_log_panel.anchor_top = 1.0
 	_log_panel.anchor_bottom = 1.0
 	_log_panel.offset_left = 150.0
-	_log_panel.offset_right = 150.0 + LOG_WIDTH
+	_log_panel.offset_right = 150.0 + _log_width
 	_log_panel.offset_top = -40.0
 	_log_panel.offset_bottom = -12.0
 	_log_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -1368,6 +1417,10 @@ func _build_ui() -> void:
 	_log_box.add_theme_constant_override("separation", 2)
 	_log_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_log_panel.add_child(_log_box)
+
+	# V401 — mode Cartes : la main (au-dessus des autres panneaux) et la mise en page adaptée
+	if _cards_mode():
+		_build_card_hand()
 
 	# Bannière
 	_banner = Label.new()
@@ -1672,7 +1725,9 @@ func _big_button(text: String) -> Button:
 
 func _on_turn_started(e: Dictionary) -> void:
 	var spell_owner: Dictionary = _get_spell_bar_owner(e)
-	if not spell_owner.is_empty() and int(spell_owner.get("uid", -1)) != _cards_owner:
+	if _hand != null:
+		_hand.call("refresh")
+	elif not spell_owner.is_empty() and int(spell_owner.get("uid", -1)) != _cards_owner:
 		_rebuild_spell_bar(spell_owner)
 	var txt: String
 	var col := Color(1, 0.93, 0.6)
@@ -1932,7 +1987,7 @@ func _refresh() -> void:
 	if is_instance_valid(_timeline):
 		_timeline.visible = true
 		_timeline.queue_redraw()
-	if is_instance_valid(_spell_scroll):
+	if is_instance_valid(_spell_scroll) and _hand == null:
 		_spell_scroll.visible = true
 		_spell_scroll.queue_redraw()
 	if is_instance_valid(_stats):
@@ -1999,13 +2054,13 @@ func _place_log(right: bool) -> void:
 	if right:
 		_log_panel.anchor_left = 1.0
 		_log_panel.anchor_right = 1.0
-		_log_panel.offset_left = -LOG_WIDTH - 180.0
+		_log_panel.offset_left = -_log_width - 180.0
 		_log_panel.offset_right = -180.0
 	else:
 		_log_panel.anchor_left = 0.0
 		_log_panel.anchor_right = 0.0
 		_log_panel.offset_left = 150.0
-		_log_panel.offset_right = 150.0 + LOG_WIDTH
+		_log_panel.offset_right = 150.0 + _log_width
 	call_deferred("_fit_log")
 
 
@@ -2019,7 +2074,7 @@ func _on_message(text: String) -> void:
 	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.95))
 	l.add_theme_constant_override("outline_size", 5)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.custom_minimum_size = Vector2(LOG_WIDTH - 24.0, 0)
+	l.custom_minimum_size = Vector2(_log_width - 24.0, 0)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_log_box.add_child(l)
 	_log_panel.visible = true

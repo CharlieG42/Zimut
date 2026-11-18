@@ -1,0 +1,4 @@
+V401|Mode Cartes refondu : vraie main de cartes en bas de l'écran, pioche et défausse visibles, cartes colorées par type.
+V401|Mana commun : 3 à la manche 1, +1 par manche (max 10) ; une carte coûte son mana, une pioche par manche.
+V401|Duel de champions : un héros par camp porte une couronne, et le premier champion à tomber fait perdre son camp.
+V401|Nouvel écran de choix de deck avant le duel, avec 4 decks thématiques : Équilibré, Assaut, Invocateurs, Magie et soutien.

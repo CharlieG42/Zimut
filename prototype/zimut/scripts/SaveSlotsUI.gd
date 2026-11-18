@@ -646,20 +646,11 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		"Conquérez les cités par les armes", "res://assets/ui/modes/mode_conquete.png",
 		Color(0.62, 0.25, 0.20), con_ok, func() -> void:
 			_launch_campaign_mode("conquest", "res://scenes/ConquestMap.tscn", slot)))
-	# Mode Cartes tactiques (Q5=B) : entrée dédiée, même parcours que Tactique
+	# Mode Cartes tactiques (Q5=B) : choix du deck (V401), puis même parcours que Tactique
 	# (TeamSelection -> Main) mais battle_mode = "cards" dans la sauvegarde
 	modes_row.add_child(_mode_button("Cartes",
-		"Duels en deck de 20 cartes sur la grille tactique (PA/PM = mana)", "res://assets/ui/modes/mode_cartes.png",
-		Color(0.55, 0.35, 0.75), true, func() -> void:
-			_current.erase("campaign_mode")
-			_current["battle_mode"] = "cards"
-			GameManager.battle_mode = "cards"   # drapeau en mémoire aussi (si l'écriture disque échoue)
-			ProgressionManager.write_save(slot, _current)
-			GameManager.active_save = ProgressionManager.load_save(slot)
-			GameManager.active_slot = slot
-			GameManager.fight_biome = "Forêt"
-			battle_requested.emit(slot)
-			get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")))
+		"Duels de cartes sur la grille tactique : deck partagé, mana croissant, champion à protéger", "res://assets/ui/modes/mode_cartes.png",
+		Color(0.55, 0.35, 0.75), true, func() -> void: _open_deck_pick(slot)))
 
 	# V46 : temps de jeu propre à chaque mode, sous les cartes de mode.
 	var times_row := HBoxContainer.new()
@@ -958,6 +949,32 @@ func _modal(title: String, text: String, buttons: Array, extra: Control = null, 
 			if last_cb.is_valid():
 				last_cb.call())
 	return overlay
+
+
+## V401 : fenêtre de choix du deck ; le duel démarre une fois le deck choisi.
+func _open_deck_pick(slot: int) -> void:
+	if find_child("DeckPickUI", true, false) != null:
+		return
+	var ui: CanvasLayer = (load("res://scripts/DeckPickUI.gd") as GDScript).new()
+	ui.name = "DeckPickUI"
+	add_child(ui)
+	ui.closed.connect(func() -> void: ui.queue_free())
+	ui.picked.connect(func(deck_name: String) -> void:
+		_launch_cards(slot, deck_name))
+	ui.open(String(_current.get("cards_deck", "")))
+
+
+func _launch_cards(slot: int, deck_name: String) -> void:
+	_current.erase("campaign_mode")
+	_current["battle_mode"] = "cards"
+	_current["cards_deck"] = deck_name
+	GameManager.battle_mode = "cards"   # drapeau en mémoire aussi (si l'écriture disque échoue)
+	ProgressionManager.write_save(slot, _current)
+	GameManager.active_save = ProgressionManager.load_save(slot)
+	GameManager.active_slot = slot
+	GameManager.fight_biome = "Forêt"
+	battle_requested.emit(slot)
+	get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")
 
 
 func _launch_campaign_mode(mode: String, scene_path: String, slot: int) -> void:

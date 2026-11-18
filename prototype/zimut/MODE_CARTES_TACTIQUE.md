@@ -168,3 +168,12 @@ Implémentation livrée (branche de la PR) :
 Écart assumé vs le prototype (Q4) : dans le moteur Godot, `_resolve_summon` insère déjà l'invocation **juste après le lanceur dans `turn_order`** (`GameManager.gd` `_resolve_summon`), avec ses propres PA/PM — l'invocation agit donc immédiatement après le héros, sans dépenser le pool du héros. C'est plus simple et cohérent avec le système d'initiative existant ; le « pool du héros » du prototype reste une option d'équilibrage v2.
 
 Retour de test utilisateur (tuile « Cartes » lançait un combat normal) — correctif : la tuile pose **à la fois** la clé `battle_mode = "cards"` dans la sauvegarde **et** le drapeau en mémoire `GameManager.battle_mode` ; `start_battle()` donne la priorité à la clé de sauvegarde quand elle est non vide, sinon conserve le drapeau (cas où l'écriture disque échoue, ex. renommage atomique indisponible). Garde-fou : `campaign_mode != ""` (combats d'Aventure/Conquête) force `battle_mode = ""`, et `_launch_campaign_mode` efface la clé. Test de régression ajouté dans `tests/test_card_deck.gd` (`_test_battle_mode_flag`).
+
+## 11. V401 — refonte du mode Cartes
+
+- **Deck partagé par camp** (`GameManager._init_card_decks`) : une pioche, une main et une défausse par côté, plus de main par entité. Le deck du joueur vient de `cards_deck` dans la sauvegarde ; les ennemis jouent « Deck de test ennemis ».
+- **Mana commun** (`CardDeck.mana_for_round`) : 3 à la manche 1, +1 par manche, plafonné à 10. Les PA du héros actif sont le mana ; `cast_spell` recopie les PA restants dans `deck.mana`. Une pioche par manche et par camp.
+- **Champions** (`_pick_champions`, `champion_down`) : un héros par camp est couronné ; si un champion tombe, le duel s'arrête (`check_game_over`). Couronne dessinée par `EntityView._draw`.
+- **Interface** : `scripts/CardHand.gd` (main en éventail, carte sélectionnée surélevée, cristaux de mana, piles cliquables, compteur de cartes ennemies). Elle remplace la barre de sorts quand `battle_mode == "cards"` (`UIManager._build_card_hand`) ; le journal est rétréci et les objectifs passent en haut à droite.
+- **Choix du deck** : `scripts/DeckPickUI.gd`, ouvert par la tuile « Cartes » (`SaveSlotsUI._open_deck_pick` puis `_launch_cards`). Decks ajoutés dans `data/decks.txt` : Assaut, Invocateurs, Magie et soutien.
+- Tests : `tests/test_card_hand.gd` (CI) ; `tests/test_card_deck.gd` toujours vert. **Non testé sur téléphone** (Galaxy S23+) : seuls des rendus xvfb ont été vérifiés.
