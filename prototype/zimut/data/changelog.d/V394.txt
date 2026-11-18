@@ -1,0 +1,2 @@
+V394|Plateau de combat : les angles découpés du plateau n'affichent plus de petits groupes de cases en demi-hauteur ; ces zones sont vides et la falaise des cases voisines tombe directement.
+V394|Les gouffres à l'intérieur du plateau gardent leur fond sombre, leur paroi décorée et leur brume.
