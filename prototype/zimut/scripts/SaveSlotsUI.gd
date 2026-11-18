@@ -621,6 +621,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		"Combats stratégiques au tour par tour", "res://assets/ui/modes/mode_tactique.png",
 		Color(0.22, 0.43, 0.69), true, func() -> void:
 			_current.erase("campaign_mode")
+			_current["battle_mode"] = ""
 			ProgressionManager.write_save(slot, _current)
 			GameManager.active_save = ProgressionManager.load_save(slot)
 			GameManager.active_slot = slot
@@ -644,13 +645,26 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		"Conquérez les cités par les armes", "res://assets/ui/modes/mode_conquete.png",
 		Color(0.62, 0.25, 0.20), con_ok, func() -> void:
 			_launch_campaign_mode("conquest", "res://scenes/ConquestMap.tscn", slot)))
+	# Mode Cartes tactiques (Q5=B) : entrée dédiée, même parcours que Tactique
+	# (TeamSelection -> Main) mais battle_mode = "cards" dans la sauvegarde
+	modes_row.add_child(_mode_button("Cartes",
+		"Duels en deck de 20 cartes sur la grille tactique (PA/PM = mana)", "res://assets/ui/modes/mode_tactique.png",
+		Color(0.55, 0.35, 0.75), true, func() -> void:
+			_current.erase("campaign_mode")
+			_current["battle_mode"] = "cards"
+			ProgressionManager.write_save(slot, _current)
+			GameManager.active_save = ProgressionManager.load_save(slot)
+			GameManager.active_slot = slot
+			GameManager.fight_biome = "Forêt"
+			battle_requested.emit(slot)
+			get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")))
 
 	# V46 : temps de jeu propre à chaque mode, sous les cartes de mode.
 	var times_row := HBoxContainer.new()
 	times_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	times_row.add_theme_constant_override("separation", 10)
 	_detail_box.add_child(times_row)
-	for entry: Array in [["tactique", "Tactique"], ["adventure", "2D"], ["openworld", "3D"], ["conquest", "Conquête"]]:
+	for entry: Array in [["tactique", "Tactique"], ["adventure", "2D"], ["openworld", "3D"], ["conquest", "Conquête"], ["cards", "Cartes"]]:
 		var mode: String = String(entry[0])
 		var t := Label.new()
 		t.name = "Playtime_%s" % mode
