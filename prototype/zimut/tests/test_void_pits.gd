@@ -31,12 +31,15 @@ func _boot() -> void:
 	grid._sync_props()
 	await process_frame
 	var pits: Array = grid._void_layer.get_children().filter(func(c: Node) -> bool: return not c.is_queued_for_deletion())
-	check(pits.size() == obs.size(), "un gouffre par case vide (%d/%d)" % [pits.size(), obs.size()])
+	# V394 : le coin relié au bord n'est plus dessiné (plus de replat en demi-hauteur) : un gouffre par case vide intérieure
+	check(pits.size() == obs.size() - 1, "un gouffre par case vide intérieure (%d/%d)" % [pits.size(), obs.size() - 1])
 	var ledges: int = 0
 	for p in pits:
 		if p.ledge:
 			ledges += 1
-	check(ledges == 1, "seule la case du coin est un replat (%d)" % ledges)
+	check(ledges == 0, "plus aucun replat en demi-hauteur (%d)" % ledges)
+	var corner = grid.cell_nodes[gm.GRID_SIZE - 1][gm.GRID_SIZE - 2]
+	check(corner.edge_right, "la case voisine du coin retiré montre sa falaise")
 	var c = grid.cell_nodes[2][3]   # (3,2) juste derrière le trou central (3,3) — plateau 10 × 10
 	check(c.pit_left and c.visible, "la case derrière le gouffre affiche sa paroi")
 	check(not grid.cell_nodes[3][3].visible, "la case vide n'est plus dessinée comme une tuile")
