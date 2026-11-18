@@ -297,7 +297,7 @@ func _build_duel_ui() -> void:
 	# barre d'actions (créature sélectionnée)
 	_action_bar = HBoxContainer.new()
 	_action_bar.position = Vector2(420, 700)
-	_action_bar.size = Vector2(1100, 64)
+	_action_bar.size = Vector2(1480, 64)
 	_action_bar.alignment = BoxContainer.ALIGNMENT_CENTER
 	_action_bar.add_theme_constant_override("separation", 14)
 	_root.add_child(_action_bar)
@@ -305,9 +305,10 @@ func _build_duel_ui() -> void:
 	var logp := PanelContainer.new()
 	logp.position = Vector2(1560, 126)
 	logp.size = Vector2(330, 250)
+	logp.clip_contents = true
 	logp.add_theme_stylebox_override("panel", UiKit.box(Color(0, 0, 0, 0.35), UiKit.C_BORDER, 12, 2, 10))
 	_root.add_child(logp)
-	_log_lbl = UiKit.lbl("", 18, UiKit.C_TXT)
+	_log_lbl = UiKit.lbl("", 22, UiKit.C_TXT)
 	_log_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_log_lbl.custom_minimum_size = Vector2(300, 0)
 	_log_lbl.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
@@ -602,23 +603,23 @@ func _refresh_action_bar() -> void:
 	if _sel_cell >= 0 and _duel.creature_at(0, _sel_cell) != null:
 		var cr: Dictionary = _duel.creature_at(0, _sel_cell)
 		var cell: int = _sel_cell
-		var atk: Button = UiKit.btn("⚔ Attaquer (1 PA · portée PO %d)" % int(cr.get("po", 1)), Color(0.95, 0.5, 0.3), 20, Vector2(380, 60))
+		var atk: Button = UiKit.btn("⚔ Attaquer · 1 PA", Color(0.95, 0.5, 0.3), 24, Vector2(300, 64))
 		atk.disabled = not _duel.can_attack(0, cell)
 		atk.pressed.connect(func() -> void: _begin_attack(cell))
 		_action_bar.add_child(atk)
 		var why_a: String = _duel.attack_block_reason(0, cell)
 		if atk.disabled and why_a != "":
-			_action_bar.add_child(UiKit.lbl(why_a, 20, UiKit.C_BAD))
+			_action_bar.add_child(UiKit.lbl(why_a, 24, UiKit.C_BAD))
 		if String(cr["sort"]) != "":
-			var sb: Button = UiKit.btn("✦ %s (%d mana · 1 PA)" % [String(cr["sort"]), int(cr["sort_cost"])], Color(0.7, 0.45, 1.0), 20, Vector2(380, 60))
+			var sb: Button = UiKit.btn("✦ %s (%d mana · 1 PA)" % [String(cr["sort"]), int(cr["sort_cost"])], Color(0.7, 0.45, 1.0), 24, Vector2(400, 64))
 			sb.disabled = not _duel.can_use_sort(0, cell)
 			sb.pressed.connect(func() -> void: _begin_sort(cell))
 			_action_bar.add_child(sb)
 			var why_s: String = _duel.sort_block_reason(0, cell)
 			if sb.disabled and why_s != "":
-				_action_bar.add_child(UiKit.lbl(why_s, 20, UiKit.C_BAD))
+				_action_bar.add_child(UiKit.lbl(why_s, 24, UiKit.C_BAD))
 		var mv: Array = _duel.move_targets(0, cell)
-		var hint: Label = UiKit.lbl("PM %d — cliquez une case dorée pour vous déplacer" % int(cr.get("pm", 0)), 22, Color(0.6, 0.85, 1.0) if not mv.is_empty() else UiKit.C_DIM)
+		var hint: Label = UiKit.lbl("PM %d — touchez une case dorée pour vous déplacer" % int(cr.get("pm", 0)), 24, Color(0.6, 0.85, 1.0) if not mv.is_empty() else UiKit.C_DIM)
 		_action_bar.add_child(hint)
 
 

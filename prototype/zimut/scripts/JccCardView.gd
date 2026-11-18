@@ -139,7 +139,7 @@ func _draw() -> void:
 			# type / rareté
 			var kind: String = "Sort" if is_spell else ("Boss" if rarity == "L" else "Créature")
 			var sub: String = "%s · %s" % [kind, JccCards.rarity_label(rarity)]
-			draw_string(font, Vector2(0, y + 11), sub, HORIZONTAL_ALIGNMENT_CENTER, w, 12, rcol.lightened(0.15))
+			draw_string(font, Vector2(0, y + 11), sub, HORIZONTAL_ALIGNMENT_CENTER, w, 14, rcol.lightened(0.15))
 			y += 18.0
 			var body: String = ""
 			if is_spell:
@@ -149,7 +149,7 @@ func _draw() -> void:
 			else:
 				body = "Jeton"
 			var avail: float = h - 50.0 - y
-			var bfs: int = 15 if w >= 170.0 else 12
+			var bfs: int = 17 if w >= 170.0 else 13
 			while bfs > 9 and font.get_multiline_string_size(body, HORIZONTAL_ALIGNMENT_CENTER, w - 16, bfs).y > avail:
 				bfs -= 1
 			draw_multiline_string(font, Vector2(8, y + bfs), body, HORIZONTAL_ALIGNMENT_CENTER, w - 16, bfs, -1, Color(0.92, 0.90, 0.84))
@@ -187,7 +187,7 @@ func _draw() -> void:
 					bx += 30.0
 			else:
 				var stxt: String = "PA %d · PM %d · PO %d" % [int(card.get("pa", 1)), int(card.get("pm", 2)), int(card.get("po", 1))]
-				draw_string(font, Vector2(0, h - 44.0), stxt, HORIZONTAL_ALIGNMENT_CENTER, w, 14, Color(0.85, 0.9, 1.0))
+				draw_string(font, Vector2(0, h - 44.0), stxt, HORIZONTAL_ALIGNMENT_CENTER, w, 16, Color(0.85, 0.9, 1.0))
 		# statuts
 		if board_mode:
 			var sx: float = 8.0
@@ -233,8 +233,8 @@ func _draw_board_body(w: float, h: float, font: Font, rcol: Color, is_spell: boo
 	# nom
 	var name_txt: String = String(card.get("name", ""))
 	var nw: float = w - x0 - (40.0 if has_sort else 8.0)
-	var fs: int = 20
-	while fs > 11 and font.get_string_size(name_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > nw:
+	var fs: int = 23
+	while fs > 12 and font.get_string_size(name_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > nw:
 		fs -= 1
 	draw_string(font, Vector2(x0, 10.0 + fs), name_txt, HORIZONTAL_ALIGNMENT_LEFT, nw, fs, Color(1, 0.97, 0.88))
 	if has_sort:
@@ -264,7 +264,7 @@ func _draw_board_body(w: float, h: float, font: Font, rcol: Color, is_spell: boo
 		sbx.set_border_width_all(2)
 		sbx.set_corner_radius_all(8)
 		draw_style_box(sbx, r)
-		draw_string(font, Vector2(px, 40.0 + 17.0), "%s %d" % [st[0], st[1]], HORIZONTAL_ALIGNMENT_CENTER, pw, 15, Color(0.5, 0.5, 0.55) if empty else Color.WHITE)
+		draw_string(font, Vector2(px, 40.0 + 17.0), "%s %d" % [st[0], st[1]], HORIZONTAL_ALIGNMENT_CENTER, pw, 18, Color(0.5, 0.5, 0.55) if empty else Color.WHITE)
 		px += pw + 3.0
 	# ATQ / PV
 	var hp: int = int(card.get("hp", 0))
@@ -279,7 +279,7 @@ func _draw_board_body(w: float, h: float, font: Font, rcol: Color, is_spell: boo
 		cb.bg_color = (ch[2] as Color).darkened(0.25)
 		cb.set_corner_radius_all(8)
 		draw_style_box(cb, rr)
-		draw_string(font, Vector2(cx, 68.0 + 16.0), "%s %d" % [ch[0], ch[1]], HORIZONTAL_ALIGNMENT_CENTER, 82.0, 16, Color.WHITE)
+		draw_string(font, Vector2(cx, 68.0 + 16.0), "%s %d" % [ch[0], ch[1]], HORIZONTAL_ALIGNMENT_CENTER, 82.0, 18, Color.WHITE)
 		cx += 86.0
 	# statuts : étourdi / poison / mal d'invocation (au-dessus de l'illustration)
 	var sx: float = art.position.x + 4.0
