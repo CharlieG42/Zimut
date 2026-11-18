@@ -19,6 +19,7 @@ func _start() -> void:
 	_test_draw_hand_max()
 	_test_play_uid()
 	_test_data_files()
+	_test_battle_mode_flag()
 	print("")
 	if failures > 0:
 		print("ÉCHEC : %d test(s) en erreur." % failures)
@@ -112,3 +113,31 @@ func _test_data_files() -> void:
 		if dl.get_card_by_name(String(nm)).is_empty():
 			all_known = false
 	_check(all_known, "toutes les cartes du deck existent dans cartes.txt")
+
+
+func _test_battle_mode_flag() -> void:
+	print("GameManager — battle_mode (tuile « Cartes » -> start_battle) :")
+	var gm: Node = (Engine.get_main_loop() as SceneTree).root.get_node("GameManager")
+	# Chemin nominal : la sauvegarde contient battle_mode="cards"
+	gm.active_save = {"battle_mode": "cards", "team": [{"classe": "Tank", "equipment": {}}], "roster": {}}
+	gm.active_slot = 0
+	gm.reset_game()
+	_check(gm.battle_mode == "cards", "start_battle lit battle_mode depuis la sauvegarde")
+	_check(not gm.players.is_empty() and gm.players[0].has("card_deck"), "le héros a un card_deck")
+	if not gm.players.is_empty():
+		var spells: Array = gm.players[0]["spells"]
+		_check(spells.size() == 5 and spells[0].has("card_uid"), "la barre de sorts = la main (5 cartes avec card_uid)")
+	# Repli : drapeau en mémoire posé par la tuile, clé absente de la sauvegarde
+	gm.active_save = {"team": [{"classe": "Tank", "equipment": {}}], "roster": {}}
+	gm.battle_mode = "cards"
+	gm.start_battle()
+	_check(gm.battle_mode == "cards", "sans clé de sauvegarde, le drapeau mémoire de la tuile est conservé")
+	# Garde-fou : un combat de campagne ne garde jamais le mode cartes
+	gm.active_save = {"battle_mode": "cards", "campaign_mode": "adventure", "team": [{"classe": "Tank", "equipment": {}}], "roster": {}}
+	gm.battle_mode = "cards"
+	gm.start_battle()
+	_check(gm.battle_mode == "", "campaign_mode != \"\" -> mode cartes ignoré")
+	# Nettoyage
+	gm.battle_mode = ""
+	gm.active_save = {}
+	gm.active_slot = -1

@@ -1213,7 +1213,14 @@ func objectives_status() -> Array:
 
 func start_battle() -> void:
 	_epoch += 1
-	battle_mode = String(active_save.get("battle_mode", ""))
+	# Source de vérité : la clé "battle_mode" de la sauvegarde ; à défaut, le drapeau
+	# posé en mémoire par la tuile « Cartes » de Mes Parties (si l'écriture disque a échoué).
+	var bm: String = String(active_save.get("battle_mode", ""))
+	if bm != "":
+		battle_mode = bm
+	# Le mode cartes ne s'applique jamais à un combat de campagne (Aventure/Conquête)
+	if battle_mode == "cards" and String(active_save.get("campaign_mode", "")) != "":
+		battle_mode = ""
 	if battle_mode == "cards":
 		_init_card_decks()
 	combat_stats = {}
