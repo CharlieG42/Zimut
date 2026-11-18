@@ -1,0 +1,4 @@
+V403|Mode Cartes : le plateau devient une grille 4×6 avec déplacements façon Krosmaga (PM, 1 par case) et portée d'attaque PO ; les cartes affichent PA / PM / PO / mana en clair.
+V403|Fond du plateau en biome 2D stylisé (forêt, plaine, désert, montagne, marais) dessiné procéduralement.
+V403|Gultur explique le gameplay et la lecture des cartes (PA / PM / PO / mana) à la première partie.
+V403|Constructeur de deck : toute la zone des cartes capte la molette, plus seulement la scrollbar.

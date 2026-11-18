@@ -14,6 +14,8 @@ var _deck: Array = []
 var _filter: String = "all"
 var _selected: String = ""
 var _grid: GridContainer
+var _scroll: ScrollContainer       # zone de la collection (toute la zone doit scroller)
+var _dscroll: ScrollContainer      # zone du deck courant
 var _deck_box: VBoxContainer
 var _detail_holder: Control
 var _detail_btns: HBoxContainer
@@ -68,6 +70,7 @@ func _build() -> void:
 	scroll.size = Vector2(950, 960)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	add_child(scroll)
+	_scroll = scroll
 	_grid = GridContainer.new()
 	_grid.columns = 5
 	_grid.add_theme_constant_override("h_separation", 10)
@@ -94,6 +97,7 @@ func _build() -> void:
 	dscroll.custom_minimum_size = Vector2(490, 640)
 	dscroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	rbox.add_child(dscroll)
+	_dscroll = dscroll
 	_deck_box = VBoxContainer.new()
 	_deck_box.custom_minimum_size = Vector2(480, 0)
 	_deck_box.add_theme_constant_override("separation", 4)
@@ -112,6 +116,21 @@ func _build() -> void:
 	_save_btn = UiKit.btn("Enregistrer", Color(0.35, 0.8, 0.45), 22, Vector2(0, 62))
 	_save_btn.pressed.connect(_save_deck)
 	rbox.add_child(_save_btn)
+
+
+## Molette : toute la zone des cartes (pas seulement la scrollbar) fait défiler
+## la liste sous la souris. _input n'est appelé que si le GUI n'a pas consommé
+## l'événement, donc pas de double défilement.
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed \
+			and (event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN):
+		var mp: Vector2 = get_viewport().get_mouse_position()
+		var delta: int = -110 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 110
+		for sc: ScrollContainer in [_scroll, _dscroll]:
+			if sc != null and is_instance_valid(sc) and Rect2(sc.global_position, sc.size).has_point(mp):
+				var bar: VScrollBar = sc.get_v_scroll_bar()
+				sc.scroll_vertical = clampi(sc.scroll_vertical + delta, 0, int(bar.max_value))
+				get_viewport().set_input_as_handled()
 
 
 func _save_deck() -> void:

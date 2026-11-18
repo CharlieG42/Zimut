@@ -142,7 +142,8 @@ func _draw() -> void:
 	# pastilles de valeurs
 	var is_creature: bool = String(card.get("type", "")) != "Sort"
 	if String(card.get("type", "")) != "Jeton":
-		_gem(Vector2(20, 20) if not board_mode else Vector2(-100, -100), 17.0, str(int(card.get("cost", 0))), Color(0.25, 0.50, 0.95))
+		# gemme bleue = coût en mana (visible aussi sur le plateau)
+		_gem(Vector2(20, 20), 13.0 if board_mode else 17.0, str(int(card.get("cost", 0))), Color(0.25, 0.50, 0.95))
 	if is_creature:
 		var gr: float = 18.0 if board_mode else 20.0
 		_gem(Vector2(gr + 4, h - gr - 4), gr, str(int(card.get("atk", 0))), Color(0.92, 0.55, 0.15))
@@ -152,6 +153,19 @@ func _draw() -> void:
 		if board_mode and hp < mx:
 			hcol = Color(0.55, 0.12, 0.14)
 		_gem(Vector2(w - gr - 4, h - gr - 4), gr, str(hp), hcol)
+		# PA / PM / PO lisibles sur chaque créature (plateau et main)
+		var stats := [["PA", int(card.get("pa", 1)), Color(0.75, 0.45, 1.0)], ["PM", int(card.get("pm", 2)), Color(0.4, 0.8, 0.9)], ["PO", int(card.get("po", 1)), Color(0.5, 0.9, 0.5)]]
+		if board_mode:
+			var bx: float = w * 0.5 - 43.0
+			for st in stats:
+				var bc := Vector2(bx + 13.0, h - 16.0)
+				draw_circle(bc, 13.0, Color(0.05, 0.05, 0.08))
+				draw_arc(bc, 13.0, 0, TAU, 20, st[2], 2.0)
+				draw_string(font, bc + Vector2(-12, 4), "%s%d" % [st[0], st[1]], HORIZONTAL_ALIGNMENT_LEFT, 26, 11, Color.WHITE)
+				bx += 30.0
+		else:
+			var stxt: String = "PA %d · PM %d · PO %d" % [int(card.get("pa", 1)), int(card.get("pm", 2)), int(card.get("po", 1))]
+			draw_string(font, Vector2(0, h - 44.0), stxt, HORIZONTAL_ALIGNMENT_CENTER, w, 14, Color(0.85, 0.9, 1.0))
 	# statuts
 	if board_mode:
 		var sx: float = 8.0
