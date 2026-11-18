@@ -65,6 +65,15 @@ func _boot() -> void:
 	cin._t = 9.0
 	await process_frame
 	await process_frame
+	# Les deux boss sont de vrais modèles de boss (aucun modèle de héros jouable côté ennemi)
+	var boss_models: Array = Hero3D.BOSS_MODEL.values()
+	var hero_models: Array = Hero3D.CLASS_MODEL.values()
+	var bosses_ok: bool = true
+	for bb in Cin.BOSSES:
+		if not boss_models.has(String(bb["model"])) or hero_models.has(String(bb["model"])):
+			bosses_ok = false
+	check(bosses_ok, "les deux boss de l'opening sont de vrais modèles de boss (pas un héros)")
+	check(cin._fx.size() > 0, "effets visuels créés (entrées / combat) : %d en cours" % cin._fx.size())
 	check(cin._did.has("roar") and cin._did.has("atk0") and cin._did.has("atk4") and cin._did.has("imp4"), "roar + assauts des héros + impacts déclenchés (%d événements)" % cin._did.size())
 	var once: bool = false
 	for a in cin._actors:

@@ -4,7 +4,8 @@ extends Node3D
 ## « Cinématique 3D » est actif (GameSettings.cinematic_3d ; éteint par défaut sur mobile).
 ##
 ## Les vrais modèles .glb des héros (assets/heroes3d/, clés de Hero3D.MODELS) affrontent DEUX
-## BOSS DIFFÉRENTS (Tharok = Gobelin Roi, Tank = Tharok le Végétal) dans une arène Kenney, avec
+## BOSS DIFFÉRENTS (Tharok = Gobelin Roi, Vorkann = Troll de givre : deux vrais modèles de boss, plus
+## de héros côté ennemi) dans une arène Kenney, avec
 ## le même rendu toon que le combat (Hero3D.SHADER + texture « pad » + teinte). La timeline est
 ## entièrement pilotée par _t (déterministe) : travelling caméra, entrée des héros, apparition
 ## des boss, combat (assauts des héros avec impacts/flash/recul, barres de PV des boss, chute du
@@ -20,12 +21,22 @@ const LOGO_PATH := "res://assets/ui/logo_intro.png"
 
 ## Héros montrés (clés de Hero3D.MODELS), de gauche à droite.
 const LINEUP: Array[String] = ["Tank", "Chasseur", "Sylvain", "Ingénieur", "Invocateur"]
-## Les deux boss 3D du jeu, avec des modèles DIFFÉRENTS (Hero3D.BOSS_MODEL en combat n'en a qu'un) :
-## modèle, teinte, échelle, position x.
+## Les deux boss 3D du jeu (deux VRAIS modèles de boss, plus de héros côté ennemi) :
+## modèle, teinte, échelle, position x, couleur des effets.
 const BOSSES: Array = [
-	{"model": "Tharok", "tint": Color(0.70, 1.0, 0.70), "k": 1.35, "x": -2.6},   # Gobelin Roi
-	{"model": "Tank", "tint": Color(1.0, 0.85, 0.60), "k": 1.55, "x": 2.6},      # Tharok le Végétal
+	{"model": "Tharok", "tint": Color(0.70, 1.0, 0.70), "k": 1.35, "x": -2.6, "fx": Color(0.55, 1.0, 0.40)},    # Gobelin Roi
+	{"model": "Vorkann", "tint": Color(0.88, 0.96, 1.0), "k": 1.55, "x": 2.6, "fx": Color(0.50, 0.80, 1.0)},    # Troll de givre
 ]
+
+## Effets visuels des héros (couleur, forme du projectile, taille) — clés de LINEUP.
+const HERO_FX: Dictionary = {
+	"Tank": {"col": Color(1.0, 0.82, 0.40), "bolt": false, "size": 0.17},
+	"Chasseur": {"col": Color(0.65, 1.0, 0.55), "bolt": true, "size": 0.07},
+	"Sylvain": {"col": Color(0.45, 1.0, 0.60), "bolt": false, "size": 0.20},
+	"Ingénieur": {"col": Color(1.0, 0.60, 0.25), "bolt": false, "size": 0.18},
+	"Invocateur": {"col": Color(0.78, 0.52, 1.0), "bolt": false, "size": 0.20},
+}
+const ENTER_DUR := 2.2          # durée de la marche d'entrée d'un acteur
 
 ## Chorégraphie du combat.
 const BOSS_HP := 100
@@ -82,6 +93,9 @@ var _flash_t: float = -1.0
 var _logo: TextureRect
 var _hint: Label
 var _fade: ColorRect
+var _fx: Array = []             # effets visuels en cours : {node, t0, dur, kind, ...}
+var _shake_amp: float = 0.0
+var _shake_t: float = -10.0
 
 
 ## La cinématique est-elle activée ? (réglage GameSettings.cinematic_3d, lu via l'arbre).
@@ -125,6 +139,7 @@ func _process(delta: float) -> void:
 	_update_actors()
 	_update_overlay()
 	_update_hp_bars()
+	_update_fx()
 	if _t >= DURATION:
 		_skip()
 
@@ -289,6 +304,7 @@ func _spawn_actors() -> void:
 		a["from"] = from
 		a["enter_t"] = 1.2 + float(i) * 0.25
 		a["boss"] = false
+		a["fx"] = (HERO_FX.get(key, {}) as Dictionary).get("col", Color(0.8, 0.9, 1.0))
 		_actors.append(a)
 	for b: Dictionary in BOSSES:
 		# entrée par l'arrière, de part et d'autre de la statue
@@ -300,6 +316,7 @@ func _spawn_actors() -> void:
 		a["from"] = from
 		a["enter_t"] = 4.2
 		a["boss"] = true
+		a["fx"] = b.get("fx", Color(1.0, 0.5, 0.3))
 		a["hp"] = BOSS_HP
 		a["jolt_t"] = -1.0
 		a["dead"] = false
@@ -425,17 +442,21 @@ func _trigger(t: float, key: String, cb: Callable) -> void:
 func _roar() -> void:
 	for bi: int in range(LINEUP.size(), _actors.size()):
 		_play_once(_actors[bi], "attack")
+		_shockwave(bi)
 	_flash_amp = 0.4
 	_flash_t = _t
+	_shake(0.16)
 
 
-func _hero_strike(i: int) -> void:
+func _hero_strike(i: int, target_bi: int = -1) -> void:
 	if i >= _actors.size():
 		return
 	var a: Dictionary = _actors[i]
 	if a["holder"] == null or bool(a.get("dead", false)):
 		return
 	_play_once(a, "cast" if i == 2 else "attack")
+	var tbi: int = target_bi if target_bi >= 0 else LINEUP.size() + (i % 2)
+	_fire_projectile(i, tbi)
 
 
 ## Impact d'un assaut de héros sur le boss ciblé (alternance gauche/droite).
@@ -448,13 +469,15 @@ func _counter() -> void:
 		var b: Dictionary = _actors[bi]
 		if b["holder"] != null and not bool(b.get("dead", false)):
 			_play_once(b, "attack")
+			_shockwave(bi)
 	_flash_amp = 0.35
 	_flash_t = _t
+	_shake(0.12)
 
 
 func _volley() -> void:
 	for i: int in range(LINEUP.size()):
-		_hero_strike(i)
+		_hero_strike(i, LINEUP.size())   # toute la volée converge sur le premier boss
 
 
 func _impact_final() -> void:
@@ -472,11 +495,13 @@ func _boss_hit(bi: int, dmg: int) -> void:
 	b["jolt_t"] = _t
 	_flash_amp = 0.5
 	_flash_t = _t
+	_impact_fx(b, dmg)
 	if int(b["hp"]) <= 0:
 		b["dead"] = true
 		b["fall_t"] = _t
 		_flash_amp = 0.9
 		_flash_t = _t
+		_death_fx(b)
 		var ap: AnimationPlayer = b["ap"]
 		if ap != null and ap.has_animation("Dead"):
 			b["dead_clip"] = true
@@ -516,6 +541,9 @@ func _update_camera() -> void:
 			pos = (k0[1] as Vector3).lerp(k1[1] as Vector3, f)
 			tgt = (k0[2] as Vector3).lerp(k1[2] as Vector3, f)
 			break
+	var sh: float = _shake_amp * maxf(0.0, 1.0 - (_t - _shake_t) / 0.55)
+	if sh > 0.0:
+		pos += Vector3(sin(_t * 71.0), cos(_t * 53.0), sin(_t * 37.0)) * sh
 	_cam.position = pos
 	_cam.look_at(tgt)
 
@@ -544,6 +572,16 @@ func _update_actors() -> void:
 			var ap: AnimationPlayer = a["ap"]
 			if ap != null and ap.has_animation(String(a["walk"])):
 				ap.play(a["walk"])
+	# effets d'entrée : rune au sol avant l'apparition, colonne de lumière au départ, onde à l'arrivée
+	for i: int in range(_actors.size()):
+		var ea: Dictionary = _actors[i]
+		if ea["holder"] == null:
+			continue
+		var et: float = float(ea["enter_t"])
+		var boss: bool = bool(ea.get("boss", false))
+		_trigger(et - (0.9 if boss else 0.4), "rune%d" % i, _fx_rune.bind(i))
+		_trigger(et, "emerge%d" % i, _fx_emerge.bind(i))
+		_trigger(et + ENTER_DUR, "arrive%d" % i, _fx_arrive.bind(i))
 	# événements du combat
 	_trigger(ROAR_T, "roar", _roar)
 	for i: int in range(LINEUP.size()):
@@ -561,6 +599,301 @@ func _update_overlay() -> void:
 		_logo.modulate.a = _seg(11.6, 12.6)
 	if _fade != null:
 		_fade.modulate.a = _seg(12.9, DURATION)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Effets visuels (entrées et combat) — tous pilotés par _t, auto-libérés
+# ═══════════════════════════════════════════════════════════════════════════
+
+## Matériau lumineux additif (couleur de sommet = couleur des particules).
+func _glow_mat(col: Color) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	m.vertex_color_use_as_albedo = true
+	m.albedo_color = col
+	return m
+
+
+func _shake(amp: float) -> void:
+	_shake_amp = maxf(amp, _shake_amp * maxf(0.0, 1.0 - (_t - _shake_t) / 0.55))
+	_shake_t = _t
+
+
+func _add_fx(node: Node3D, dur: float, kind: String, extra: Dictionary = {}) -> Dictionary:
+	add_child(node)
+	var e: Dictionary = {"node": node, "t0": _t, "dur": dur, "kind": kind}
+	e.merge(extra, true)
+	_fx.append(e)
+	return e
+
+
+## Anneau plat qui s'étend au sol puis s'estompe (onde de choc).
+func _ring(pos: Vector3, col: Color, r0: float, r1: float, dur: float, alpha: float = 0.9) -> void:
+	var tm := TorusMesh.new()
+	tm.inner_radius = 0.90
+	tm.outer_radius = 1.0
+	tm.rings = 40
+	tm.ring_segments = 6
+	var mi := MeshInstance3D.new()
+	mi.mesh = tm
+	mi.material_override = _glow_mat(Color(col.r, col.g, col.b, alpha))
+	mi.position = pos + Vector3(0, 0.05, 0)
+	mi.scale = Vector3(r0, 0.3, r0)
+	_add_fx(mi, dur, "ring", {"r0": r0, "r1": r1, "a": alpha, "col": col})
+
+
+## Colonne de lumière qui jaillit du sol puis s'amincit.
+func _pillar(pos: Vector3, col: Color, h: float, w: float, dur: float) -> void:
+	var cm := CylinderMesh.new()
+	cm.top_radius = 1.0
+	cm.bottom_radius = 1.0
+	cm.height = 1.0
+	cm.radial_segments = 14
+	cm.rings = 1
+	var mi := MeshInstance3D.new()
+	mi.mesh = cm
+	mi.material_override = _glow_mat(Color(col.r, col.g, col.b, 0.28))
+	mi.position = pos
+	mi.scale = Vector3(w, 0.01, w)
+	_add_fx(mi, dur, "pillar", {"h": h, "w": w, "col": col, "base": pos})
+
+
+## Disque de rune qui s'allume au sol avant une apparition.
+func _rune(pos: Vector3, col: Color, r: float, dur: float) -> void:
+	var cm := CylinderMesh.new()
+	cm.top_radius = 1.0
+	cm.bottom_radius = 1.0
+	cm.height = 0.02
+	cm.radial_segments = 24
+	cm.rings = 1
+	var mi := MeshInstance3D.new()
+	mi.mesh = cm
+	mi.material_override = _glow_mat(Color(col.r, col.g, col.b, 0.5))
+	mi.position = pos + Vector3(0, 0.04, 0)
+	mi.scale = Vector3(r, 1.0, r)
+	_add_fx(mi, dur, "rune", {"col": col, "r": r})
+	_ring(pos, col, r * 1.3, r * 0.5, dur, 0.7)   # anneau qui se resserre sur la rune
+
+
+## Gerbe de particules (étincelles, poussière, éclats). Se libère toute seule.
+func _burst(pos: Vector3, col: Color, count: int, speed: float, life: float, size: float, grav: float = -6.0, up: float = 0.0) -> void:
+	var p := CPUParticles3D.new()
+	var sm := SphereMesh.new()
+	sm.radius = size
+	sm.height = size * 2.0
+	sm.radial_segments = 6
+	sm.rings = 3
+	p.mesh = sm
+	p.material_override = _glow_mat(Color(1, 1, 1, 1))
+	p.amount = count
+	p.lifetime = life
+	p.one_shot = true
+	p.explosiveness = 0.96
+	p.direction = Vector3(0, 1, 0)
+	p.spread = 180.0 if up <= 0.0 else 35.0
+	p.initial_velocity_min = speed * 0.4
+	p.initial_velocity_max = speed
+	p.gravity = Vector3(0, grav, 0)
+	p.scale_amount_min = 0.5
+	p.scale_amount_max = 1.4
+	var g := Gradient.new()
+	g.set_color(0, Color(col.r, col.g, col.b, 0.85))
+	g.set_color(1, Color(col.r, col.g, col.b, 0.0))
+	p.color_ramp = g
+	p.position = pos
+	p.emitting = true
+	_add_fx(p, life + 0.2, "parts")
+
+
+## Projectile (orbe ou trait) du héros i vers le boss bi pendant IMPACT_DELAY ; laisse une traînée.
+func _fire_projectile(i: int, bi: int) -> void:
+	if bi >= _actors.size() or i >= LINEUP.size():
+		return
+	var src: Node3D = _actors[i]["holder"]
+	var dst: Node3D = _actors[bi]["holder"]
+	if src == null or dst == null:
+		return
+	var prof: Dictionary = HERO_FX.get(LINEUP[i], {"col": Color(1, 1, 1), "bolt": false, "size": 0.15})
+	var col: Color = prof["col"]
+	var from: Vector3 = src.position + Vector3(0, HERO_H * 0.62, -0.5)
+	var to: Vector3 = dst.position + Vector3(0, HERO_H * float(_actors[bi].get("k", 1.0)) * 0.55, 0)
+	_burst(from, col, 10, 2.4, 0.35, 0.05, -2.0)   # éclat au départ
+	var sm := SphereMesh.new()
+	var sz: float = float(prof["size"])
+	sm.radius = sz
+	sm.height = sz * 2.0
+	sm.radial_segments = 10
+	sm.rings = 5
+	var mi := MeshInstance3D.new()
+	mi.mesh = sm
+	mi.material_override = _glow_mat(Color(col.r, col.g, col.b, 0.9))
+	mi.position = from
+	if bool(prof["bolt"]):
+		mi.scale = Vector3(1, 1, 7)
+	# traînée continue (particules non liées au projectile)
+	var tr := CPUParticles3D.new()
+	var tm := SphereMesh.new()
+	tm.radius = sz * 0.55
+	tm.height = sz * 1.1
+	tm.radial_segments = 6
+	tm.rings = 3
+	tr.mesh = tm
+	tr.material_override = _glow_mat(Color(1, 1, 1, 1))
+	tr.amount = 22
+	tr.lifetime = 0.32
+	tr.local_coords = false
+	tr.direction = Vector3(0, 0, 0)
+	tr.spread = 180.0
+	tr.initial_velocity_min = 0.1
+	tr.initial_velocity_max = 0.5
+	tr.gravity = Vector3.ZERO
+	var g := Gradient.new()
+	g.set_color(0, Color(col.r, col.g, col.b, 0.9))
+	g.set_color(1, Color(col.r, col.g, col.b, 0.0))
+	tr.color_ramp = g
+	tr.emitting = true
+	mi.add_child(tr)
+	_add_fx(mi, IMPACT_DELAY, "proj", {"from": from, "to": to, "arc": 0.5 if not bool(prof["bolt"]) else 0.1})
+	if bool(prof["bolt"]):
+		mi.look_at_from_position(from, to)
+
+
+## Onde de choc d'un boss : anneau au sol + poussière.
+func _shockwave(bi: int) -> void:
+	if bi >= _actors.size() or _actors[bi]["holder"] == null:
+		return
+	var b: Dictionary = _actors[bi]
+	var pos: Vector3 = (b["holder"] as Node3D).position
+	var col: Color = b.get("fx", Color(1, 0.5, 0.3))
+	_ring(pos, col, 0.6, 7.0, 0.9, 0.85)
+	_ring(pos, col.lightened(0.4), 0.4, 4.5, 0.7, 0.6)
+	_burst(pos + Vector3(0, 0.2, 0), col, 26, 3.6, 0.8, 0.07, -3.0, 1.0)
+
+
+## Impact sur un boss : étincelles, anneau, chiffre de dégâts flottant, léger tremblement.
+func _impact_fx(b: Dictionary, dmg: int) -> void:
+	var holder: Node3D = b["holder"]
+	var k: float = float(b.get("k", 1.0))
+	var pos: Vector3 = holder.position + Vector3(0, HERO_H * k * 0.55, 0.3)
+	_burst(pos, Color(1.0, 0.85, 0.45), 20, 4.5, 0.55, 0.035, -7.0)
+	_burst(pos, b.get("fx", Color(1, 0.6, 0.3)), 12, 2.5, 0.7, 0.07, -3.0)
+	_ring(holder.position, Color(1.0, 0.95, 0.75), 0.4, 2.2, 0.45, 0.7)
+	_shake(0.06)
+	var lb := Label3D.new()
+	lb.text = "-%d" % dmg
+	lb.font_size = 72
+	lb.pixel_size = 0.012
+	lb.outline_size = 14
+	lb.outline_modulate = Color(0.1, 0.05, 0.0, 1.0)
+	lb.modulate = Color(1.0, 0.88, 0.45)
+	lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	lb.no_depth_test = true
+	lb.position = pos + Vector3(randf_range(-0.4, 0.4), 0.4, 0.2)
+	_add_fx(lb, 1.0, "label", {"base": lb.position})
+
+
+## Chute du boss : explosion, grande onde, colonne de lumière, forte secousse.
+func _death_fx(b: Dictionary) -> void:
+	var holder: Node3D = b["holder"]
+	var k: float = float(b.get("k", 1.0))
+	var col: Color = b.get("fx", Color(1, 0.6, 0.3))
+	var pos: Vector3 = holder.position
+	_burst(pos + Vector3(0, HERO_H * k * 0.5, 0), Color(1.0, 0.75, 0.35), 56, 7.0, 1.1, 0.06, -5.0)
+	_burst(pos + Vector3(0, HERO_H * k * 0.5, 0), col, 36, 4.0, 1.4, 0.08, -1.5)
+	_ring(pos, Color(1.0, 0.9, 0.6), 0.5, 11.0, 1.1, 0.9)
+	_ring(pos, col, 0.3, 8.0, 0.9, 0.8)
+	_pillar(pos, col, 7.0, 0.9, 1.2)
+	_shake(0.32)
+
+
+## Entrée — rune au sol (les boss : large et sombre ; les héros : petit cercle clair).
+func _fx_rune(i: int) -> void:
+	var a: Dictionary = _actors[i]
+	if a["holder"] == null:
+		return
+	var boss: bool = bool(a.get("boss", false))
+	_rune(a["home"] as Vector3, a.get("fx", Color(0.8, 0.9, 1.0)), 1.9 if boss else 0.8, 1.1 if boss else 0.8)
+
+
+## Entrée — le personnage apparaît : colonne de lumière (boss : plus haute) et brume.
+func _fx_emerge(i: int) -> void:
+	var a: Dictionary = _actors[i]
+	if a["holder"] == null:
+		return
+	var boss: bool = bool(a.get("boss", false))
+	var col: Color = a.get("fx", Color(0.8, 0.9, 1.0))
+	var pos: Vector3 = (a["from"] as Vector3)
+	_pillar(pos, col, 6.0 if boss else 3.2, 1.0 if boss else 0.5, 1.0)
+	_burst(pos + Vector3(0, 0.2, 0), col, 30 if boss else 14, 2.2, 1.0, 0.09, 0.6, 1.0)
+	if boss:
+		_shake(0.10)
+
+
+## Entrée — arrivée à la position finale : anneau + poussière (boss : secousse).
+func _fx_arrive(i: int) -> void:
+	var a: Dictionary = _actors[i]
+	if a["holder"] == null:
+		return
+	var boss: bool = bool(a.get("boss", false))
+	var col: Color = a.get("fx", Color(0.8, 0.9, 1.0))
+	var pos: Vector3 = (a["home"] as Vector3)
+	_ring(pos, col, 0.3, 5.0 if boss else 1.8, 0.8 if boss else 0.55, 0.9)
+	_burst(pos + Vector3(0, 0.1, 0), col.lightened(0.3), 24 if boss else 10, 3.0 if boss else 1.8, 0.7, 0.06, -2.5, 1.0)
+	if boss:
+		_shake(0.2)
+
+
+## Fait vivre les effets (échelle, transparence, trajectoires) et libère les terminés.
+func _update_fx() -> void:
+	var i: int = _fx.size() - 1
+	while i >= 0:
+		var e: Dictionary = _fx[i]
+		var node: Node3D = e["node"] as Node3D
+		if node == null or not is_instance_valid(node):
+			_fx.remove_at(i)
+			i -= 1
+			continue
+		var p: float = (_t - float(e["t0"])) / maxf(float(e["dur"]), 0.001)
+		if p >= 1.0:
+			node.queue_free()
+			_fx.remove_at(i)
+			i -= 1
+			continue
+		p = maxf(p, 0.0)
+		var kind: String = String(e["kind"])
+		if kind == "ring":
+			var r: float = lerpf(float(e["r0"]), float(e["r1"]), 1.0 - pow(1.0 - p, 3.0))
+			node.scale = Vector3(r, 0.3, r)
+			_fx_alpha(node, float(e["a"]) * pow(1.0 - p, 1.5), e["col"])
+		elif kind == "pillar":
+			var grow: float = 1.0 - pow(1.0 - minf(p * 3.0, 1.0), 2.0)
+			var h: float = float(e["h"]) * grow
+			var w: float = float(e["w"]) * (1.0 - 0.7 * p)
+			node.scale = Vector3(w, maxf(h, 0.01), w)
+			node.position = (e["base"] as Vector3) + Vector3(0, h * 0.5, 0)
+			_fx_alpha(node, 0.28 * (1.0 - p), e["col"])
+		elif kind == "rune":
+			var glow: float = sin(p * PI)
+			node.rotation.y = _t * 1.6
+			_fx_alpha(node, 0.55 * glow, e["col"])
+		elif kind == "proj":
+			var f: float = p
+			var pos: Vector3 = (e["from"] as Vector3).lerp(e["to"] as Vector3, f)
+			pos.y += sin(f * PI) * float(e["arc"])
+			node.position = pos
+		elif kind == "label":
+			node.position = (e["base"] as Vector3) + Vector3(0, 0.9 * p, 0)
+			(node as Label3D).modulate.a = 1.0 - smoothstep(0.55, 1.0, p)
+		i -= 1
+
+
+func _fx_alpha(node: Node3D, a: float, col: Color) -> void:
+	var m: Material = (node as MeshInstance3D).material_override
+	if m is StandardMaterial3D:
+		(m as StandardMaterial3D).albedo_color = Color(col.r, col.g, col.b, clampf(a, 0.0, 1.0))
 
 
 func _skip() -> void:
