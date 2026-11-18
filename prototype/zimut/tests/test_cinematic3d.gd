@@ -16,8 +16,12 @@ func _boot() -> void:
 	var gs: Node = root.get_node("GameSettings")
 	var Cin = preload("res://scripts/Cinematic3D.gd")
 	var IntroUI = preload("res://scripts/IntroUI.gd")
-	check(bool(gs.get("cinematic_3d")), "réglage « cinematic_3d » activé par défaut (PC)")
-	check(Cin.enabled(), "Cinematic3D.enabled() vrai par défaut")
+	# valeur par défaut du CODE (instance fraîche, sans load_settings) : activée hors mobile
+	var fresh = (load("res://scripts/GameSettings.gd") as GDScript).new()
+	check(bool(fresh.get("cinematic_3d")) == (not OS.has_feature("mobile")), "cinematic_3d : activé par défaut hors mobile, éteint sur mobile")
+	fresh.free()
+	gs.set("cinematic_3d", true)
+	check(Cin.enabled(), "Cinematic3D.enabled() vrai quand le réglage est actif")
 	check(Cin.SCENE == "res://scenes/Cinematic3D.tscn" and ResourceLoader.exists(Cin.SCENE), "scène Cinematic3D.tscn présente")
 	check(IntroUI.next_scene() == Cin.SCENE, "IntroUI mène à la cinématique quand elle est activée")
 	# routage : réglage éteint -> directement l'accueil
@@ -78,5 +82,41 @@ func _boot() -> void:
 	cin._skip()
 	check(cin._leaving, "_skip() arrête la cinématique")
 	cin.queue_free()
+	# la bascule des Réglages pilote bien le réglage (options [Désactivée, Activée] : off = 0, on = 1)
+	# (chargée à l'exécution : elle référence l'autoload GameSettings, indisponible à la compilation en -s)
+	gs.set("cinematic_3d", false)
+	var sui = (load("res://scripts/SettingsUI.gd") as GDScript).new()
+	root.add_child(sui)
+	await process_frame
+	await process_frame
+	var cell: Control = _find_cell(sui, "Cinématique 3D d'ouverture")
+	check(cell != null, "bascule « Cinématique 3D d'ouverture » présente dans Réglages")
+	if cell != null:
+		var btns: Array = []
+		for c in cell.get_children():
+			if c is HBoxContainer:
+				for b in c.get_children():
+					if b is Button:
+						btns.append(b)
+		check(btns.size() == 2 and (btns[0] as Button).text == "Désactivée" and (btns[1] as Button).text == "Activée",
+			"options [Désactivée, Activée] (off = 0, on = 1)")
+		(btns[1] as Button).pressed.emit()
+		check(bool(gs.get("cinematic_3d")) and Cin.enabled() and IntroUI.next_scene() == Cin.SCENE,
+			"clic « Activée » -> cinématique lancée après l'intro")
+		(btns[0] as Button).pressed.emit()
+		check(not bool(gs.get("cinematic_3d")) and IntroUI.next_scene() == IntroUI.MENU_SCENE,
+			"clic « Désactivée » -> intro vers l'accueil directement")
+	sui.queue_free()
+	gs.call("set_cinematic_3d", true)   # restaure le réglage (et le fichier) pour les tests suivants
 	print("FIN : ", fails, " échec(s)")
 	quit(1 if fails > 0 else 0)
+func _find_cell(n: Node, label: String) -> Control:
+	if n is VBoxContainer:
+		for c in n.get_children():
+			if c is Label and (c as Label).text == label:
+				return n as Control
+	for c in n.get_children():
+		var r := _find_cell(c, label)
+		if r != null:
+			return r
+	return null
