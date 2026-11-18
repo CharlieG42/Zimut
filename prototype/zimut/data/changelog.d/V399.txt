@@ -1,0 +1,3 @@
+V399|Opening : les deux boss ennemis sont maintenant de vrais boss (Tharok le Gobelin Roi et Vorkann le Troll de givre) ; le Tank, un héros, ne joue plus le rôle de boss.
+V399|Effets visuels d'entrée : rune lumineuse au sol, colonne de lumière, brume et onde de choc à l'arrivée de chaque personnage (plus larges et plus sombres pour les boss, avec secousse de caméra).
+V399|Effets visuels de combat : projectiles colorés par héros avec traînée, étincelles et anneau à l'impact, chiffres de dégâts flottants, ondes de choc des boss, explosion et grande colonne de lumière à la chute du boss vaincu.
