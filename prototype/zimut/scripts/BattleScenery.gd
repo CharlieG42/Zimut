@@ -104,6 +104,22 @@ static func gts(gx: float, gy: float) -> Vector2:
 #  Construction
 # ═══════════════════════════════════════════════════════════════════════════
 
+## V395 : cases réellement présentes sur les deux faces avant (rangée y = n-1, colonne x = n-1) ; [] = toutes.
+## Les falaises prolongées, pierres et racines ne sont dessinées que sous les cases qui existent.
+var edge_row: Array = []
+var edge_col: Array = []
+
+
+func set_edge_mask(row: Array, col: Array) -> void:
+	edge_row = row
+	edge_col = col
+	queue_redraw()
+
+
+func _edge_ok(mask: Array, idx: int) -> bool:
+	return mask.is_empty() or idx < 0 or idx >= mask.size() or bool(mask[idx])
+
+
 func configure(grid_size: int, biome: String, seed_value: int = 1) -> void:
 	_n = grid_size
 	_biome = biome
@@ -282,8 +298,8 @@ func _draw() -> void:
 		draw_circle(Vector2.ZERO, 640.0 - k * 150.0, Color(0.04, 0.07, 0.12, 0.07 + 0.05 * k))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	# Prolongement de la falaise (strates, bas déchiqueté) : face gauche puis face droite
-	_lower_cliff(left_v + Vector2(0, CLIFF), bottom_v + Vector2(0, CLIFF), p["l_t"], p["l_b"], 11, true)
-	_lower_cliff(bottom_v + Vector2(0, CLIFF), right_v + Vector2(0, CLIFF), p["r_t"], p["r_b"], 29, false)
+	_lower_cliff(left_v + Vector2(0, CLIFF), bottom_v + Vector2(0, CLIFF), p["l_t"], p["l_b"], 11, true, edge_row, false)
+	_lower_cliff(bottom_v + Vector2(0, CLIFF), right_v + Vector2(0, CLIFF), p["r_t"], p["r_b"], 29, false, edge_col, true)
 	# Brume qui monte autour du pied de l'île
 	var mist: Color = p["mist"]
 	for i: int in range(7):
@@ -295,7 +311,7 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
-func _lower_cliff(a: Vector2, b: Vector2, c_top: Color, c_bot: Color, salt: int, left_face: bool) -> void:
+func _lower_cliff(a: Vector2, b: Vector2, c_top: Color, c_bot: Color, salt: int, left_face: bool, mask: Array = [], reversed_idx: bool = false) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = _seed * 31 + salt
 	var steps: int = 14
@@ -308,22 +324,36 @@ func _lower_cliff(a: Vector2, b: Vector2, c_top: Color, c_bot: Color, salt: int,
 		var drop: float = 34.0 + rng.randf_range(0.0, 46.0) + sin(f * PI) * 14.0
 		bot_pts.append(pt + Vector2(0, drop))
 	# Polygone par quadrilatères (dégradé vertical, strates)
+	# V395 : un tronçon n'est dessiné que s'il y a une case au-dessus (pas de falaise sous un angle retiré)
+	var n_cells: int = _n
+	var ok := PackedByteArray()
+	ok.resize(steps)
 	for i: int in range(steps):
+		var ci: int = clampi(int((float(i) + 0.5) / float(steps) * float(n_cells)), 0, n_cells - 1)
+		if reversed_idx:
+			ci = n_cells - 1 - ci
+		ok[i] = 1 if _edge_ok(mask, ci) else 0
+	for i: int in range(steps):
+		if ok[i] == 0:
+			continue
 		var q := PackedVector2Array([top_pts[i], top_pts[i + 1], bot_pts[i + 1], bot_pts[i]])
 		draw_polygon(q, PackedColorArray([c_top, c_top, c_bot.darkened(0.15), c_bot.darkened(0.15)]))
 	for k: int in range(3):
 		var f2: float = 0.28 + 0.25 * float(k)
 		var strat_col: Color = Color(0, 0, 0, 0.16)
-		var line := PackedVector2Array()
-		for i: int in range(steps + 1):
-			var d: float = (bot_pts[i].y - top_pts[i].y) * f2 + sin(float(i) * 1.7 + float(k)) * 3.0
-			line.append(top_pts[i] + Vector2(0, d))
-		draw_polyline(line, strat_col, 2.2, true)
+		for i: int in range(steps):
+			if ok[i] == 0:
+				continue
+			var d0: float = (bot_pts[i].y - top_pts[i].y) * f2 + sin(float(i) * 1.7 + float(k)) * 3.0
+			var d1: float = (bot_pts[i + 1].y - top_pts[i + 1].y) * f2 + sin(float(i + 1) * 1.7 + float(k)) * 3.0
+			draw_line(top_pts[i] + Vector2(0, d0), top_pts[i + 1] + Vector2(0, d1), strat_col, 2.2, true)
 	# Pierres encastrées + racines pendantes
 	for i: int in range(5):
 		var f3: float = rng.randf_range(0.08, 0.92)
 		var pos: Vector2 = a.lerp(b, f3) + Vector2(0, rng.randf_range(10.0, 44.0))
 		var r: float = rng.randf_range(4.0, 9.0)
+		if ok[clampi(int(f3 * float(steps)), 0, steps - 1)] == 0:
+			continue
 		draw_set_transform(pos, 0.0, Vector2(1.0, 0.75))
 		draw_circle(Vector2.ZERO, r, c_bot.lightened(0.18))
 		draw_circle(Vector2(-r * 0.25, -r * 0.25), r * 0.45, c_top.lightened(0.15))
@@ -332,10 +362,14 @@ func _lower_cliff(a: Vector2, b: Vector2, c_top: Color, c_bot: Color, salt: int,
 		var f4: float = rng.randf_range(0.05, 0.95)
 		var rt: Vector2 = bot_pts[int(f4 * float(steps))]
 		var len_: float = rng.randf_range(16.0, 34.0)
+		if ok[clampi(int(f4 * float(steps)), 0, steps - 1)] == 0:
+			continue
 		var rp := PackedVector2Array([rt + Vector2(0, -10), rt + Vector2(3, 0), rt + Vector2(-2, len_ * 0.6), rt + Vector2(1, len_)])
 		draw_polyline(rp, Color(0.30, 0.20, 0.12, 0.85), 3.0, true)
 	# Ligne d'ombre au bas de la falaise
-	draw_polyline(bot_pts, Color(0, 0, 0, 0.18), 3.0, true)
+	for i: int in range(steps):
+		if ok[i] != 0:
+			draw_line(bot_pts[i], bot_pts[i + 1], Color(0, 0, 0, 0.18), 3.0, true)
 
 
 # ═══════════════════════════════════════════════════════════════════════════

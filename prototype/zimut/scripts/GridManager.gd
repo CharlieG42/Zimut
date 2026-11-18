@@ -433,6 +433,16 @@ func _sync_void_pits() -> void:
 				pit.position = grid_to_screen(x, y)
 				pit.setup(Vector2i(x, y), game_manager.fight_biome, n, outer.has(Vector2i(x, y)))
 				_void_layer.add_child(pit)
+	# V395 : décor des faces avant (falaise prolongée, touffes, lianes) seulement sous les cases qui existent
+	var row_mask: Array = []
+	var col_mask: Array = []
+	for i: int in range(n):
+		row_mask.append(String(obs.get(Vector2i(i, n - 1), "")) != "void")
+		col_mask.append(String(obs.get(Vector2i(n - 1, i), "")) != "void")
+	if _scenery != null:
+		_scenery.set_edge_mask(row_mask, col_mask)
+	if _scenery_over != null:
+		_scenery_over.set_edge_mask(row_mask, col_mask)
 	_request_board_bake()
 	_request_pit_bake()
 

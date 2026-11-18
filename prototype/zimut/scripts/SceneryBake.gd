@@ -40,3 +40,9 @@ func configure(grid_size: int, biome: String, seed_value: int = 1) -> void:
 	_inner.configure(grid_size, biome, seed_value)
 	_inner.set_process(false)
 	_vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+
+## V395 : cases présentes sur les faces avant (voir BattleScenery.set_edge_mask) ; redessine le décor figé.
+func set_edge_mask(row: Array, col: Array) -> void:
+	_inner.set_edge_mask(row, col)
+	_vp.render_target_update_mode = SubViewport.UPDATE_ONCE
