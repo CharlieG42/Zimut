@@ -39,6 +39,7 @@ func _boot() -> void:
 			models_ok = false
 			print("   modèle introuvable : ", p)
 	check(models_ok and keys.size() == Cin.LINEUP.size() + Cin.BOSSES.size(), "les modèles de la distribution existent (%d acteurs : 5 héros + 2 boss)" % keys.size())
+	check(String((Cin.BOSSES[0] as Dictionary)["model"]) != String((Cin.BOSSES[1] as Dictionary)["model"]), "les deux boss ont des modèles différents (%s / %s)" % [String((Cin.BOSSES[0] as Dictionary)["model"]), String((Cin.BOSSES[1] as Dictionary)["model"])])
 	# construction de la scène en headless
 	var ps: PackedScene = load(Cin.SCENE)
 	check(ps != null, "la scène se charge")
@@ -58,26 +59,38 @@ func _boot() -> void:
 	check(aps_ok, "chaque acteur a son AnimationPlayer jouant le clip de marche")
 	check(cin._cam != null and cin._cam.current, "caméra active")
 	check(cin._bar_top != null and cin._bar_bot != null and cin._fade != null, "letterbox + fondu présents")
+	check(cin._bars.size() == Cin.BOSSES.size(), "une barre de PV par boss (%d)" % cin._bars.size())
 	check(cin._t >= 0.0 and not cin._leaving, "timeline lancée")
-	# on avance la timeline : entrées, assauts et flash se déclenchent sans erreur
-	cin._t = 7.5
+	# combat : roar + 5 assauts de héros + 5 impacts déclenchés à t = 9, PV des boss à jour
+	cin._t = 9.0
 	await process_frame
 	await process_frame
-	check(cin._did.size() >= 6, "les assauts des héros et des boss se sont déclenchés (%d)" % cin._did.size())
+	check(cin._did.has("roar") and cin._did.has("atk0") and cin._did.has("atk4") and cin._did.has("imp4"), "roar + assauts des héros + impacts déclenchés (%d événements)" % cin._did.size())
 	var once: bool = false
 	for a in cin._actors:
 		if a["mode"] == "once":
 			once = true
 	check(once, "au moins un acteur joue un clip d'attaque one-shot")
-	# retour à la marche après le one-shot
-	cin._t = 9.5
+	var n: int = Cin.LINEUP.size()
+	check(int(cin._actors[n]["hp"]) == Cin.BOSS_HP - 3 * Cin.DMG, "boss de gauche : 3 impacts -> PV %d" % int(cin._actors[n]["hp"]))
+	check(int(cin._actors[n + 1]["hp"]) == Cin.BOSS_HP - 2 * Cin.DMG, "boss de droite : 2 impacts -> PV %d" % int(cin._actors[n + 1]["hp"]))
+	check(not bool(cin._actors[n]["dead"]) and not bool(cin._actors[n + 1]["dead"]), "aucun boss abattu à t = 9")
+	# impact final à t = 10,3 : le premier boss chute
+	cin._t = 10.5
+	await process_frame
+	await process_frame
+	check(cin._did.has("imp_final") and bool(cin._actors[n]["dead"]), "impact final : le premier boss est abattu")
+	check(not bool(cin._actors[n + 1]["dead"]), "le second boss tient encore")
+	# retour à la marche après les one-shots (boss vivant compris ; la volée a pu être
+	# déclenchée tard si le test saute _t par paliers : on laisse 1,4 s de marge)
+	cin._t = 12.2
 	await process_frame
 	await process_frame
 	var back: bool = true
 	for a in cin._actors:
-		if a["mode"] != "walk":
+		if not bool(a.get("dead", false)) and a["mode"] != "walk":
 			back = false
-	check(back, "les acteurs reviennent en marche après leur assaut")
+	check(back, "les acteurs vivants reviennent en marche après leurs assauts")
 	# un appui passe la cinématique
 	cin._skip()
 	check(cin._leaving, "_skip() arrête la cinématique")
