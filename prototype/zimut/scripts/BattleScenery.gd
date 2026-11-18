@@ -70,6 +70,14 @@ static func tile_variant(gx: int, gy: int) -> int:
 	return 5
 
 
+## V393 : chemin de la tuile de sol (idx 0..5) — PNG peint 256×128 s'il existe, sinon l'ancien SVG 128×64.
+static func tile_path(prefix: String, idx: int) -> String:
+	var base: String = "res://assets/sprites/tiles/%s_%02d" % [prefix, posmod(idx, 6) + 1]
+	if ResourceLoader.exists(base + ".png"):
+		return base + ".png"
+	return base + ".svg"
+
+
 ## Texture de sol (identique à celle des cases de l'aire de combat) pour le biome, ou null.
 static func tile_tex(biome: String, idx: int) -> Texture2D:
 	var prefix: String = Nations.tile_prefix(biome) if Nations.is_new(biome) else ""
@@ -82,7 +90,7 @@ static func tile_tex(biome: String, idx: int) -> Texture2D:
 			prefix = "desert_ground"
 	if prefix == "":
 		return null
-	var path: String = "res://assets/sprites/tiles/%s_%02d.svg" % [prefix, posmod(idx, 6) + 1]
+	var path: String = tile_path(prefix, idx)
 	if not _tile_cache.has(path):
 		_tile_cache[path] = load(path) as Texture2D
 	return _tile_cache[path]

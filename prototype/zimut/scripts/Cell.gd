@@ -79,7 +79,7 @@ func setup(gp: Vector2i) -> void:
 			tile_prefix = "desert_ground"
 	if tile_prefix != "":
 		var tile_index: int = BattleScenery.tile_variant(gp.x, gp.y) + 1
-		var tile_path: String = "res://assets/sprites/tiles/%s_%02d.svg" % [tile_prefix, tile_index]
+		var tile_path: String = BattleScenery.tile_path(tile_prefix, tile_index - 1)
 		_forest_tile_texture = load(tile_path) as Texture2D
 		if _forest_tile_texture == null:
 			push_warning("Texture de sol %s introuvable : %s" % [biome, tile_path])
