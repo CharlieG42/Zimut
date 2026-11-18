@@ -1,0 +1,3 @@
+Deck,Cartes
+Deck de test,Invoquer Golem de Pierre;Invoquer Loup Spectral;Invoquer Archer Sylvestre;Coup de bouclier;Frappe puissante;Charge;Javelot lourd;Boule de feu;Éclair;Explosion;Trait de glace;Tir précis;Volée de flèches;Soin;Soin de combat;Toucher guérisseur;Régénération;Protection;Bénédiction;Attaque sacrée
+Deck de test ennemis,Invoquer Loup Spectral;Invoquer Golem de Pierre;Boule de feu;Éclair;Étincelle;Explosion;Tir précis;Flèche empoisonnée;Toucher guérisseur;Soin;Régénération;Coup de bouclier;Frappe puissante;Charge;Protection;Bénédiction;Attaque sacrée;Éclair sacré;Trait de glace;Volée de flèches

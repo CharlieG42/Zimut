@@ -154,3 +154,15 @@ Retours d'expérience du prototype :
 - **Pioche vide** : prévoir des dégâts de fatigue (style MTG) — le prototype se contente d'un message.
 - **Q4 est puissant** : jusqu'à `max_pa` frappes d'invocation par tour en dépensant le pool du héros — point d'équilibrage à surveiller.
 - L'IA greedy du prototype peut rester bloquée derrière ses propres invocations — limite connue du prototype pygame, pas du moteur Godot (`TurnManager` gère déjà le déplacement tactique).
+
+## 10. Phase 1 — intégration Godot
+
+Implémentation livrée (branche de la PR) :
+
+- `data/cartes.txt` (23 cartes, colonnes identiques à `sorts.txt`) + `data/decks.txt` (`Deck,Cartes`, séparateur `;`) : « Deck de test » (joueur) et « Deck de test ennemis », 20 cartes chacun.
+- `scripts/CardDeck.gd` : pioche/main/défausse, `from_names` (mélange Fisher-Yates avec rng fourni, `card_uid` par instance), `draw` (main max 7 → défausse), `play_uid`. Testé par `tests/test_card_deck.gd` (inscrit en CI via `tests/ci/test_card_deck.ci`).
+- `DataLoader.gd` : chargement `cartes.txt`/`decks.txt` (non bloquant), accesseurs `get_cards_data` / `get_card_by_name` / `get_deck_names` / `get_deck_cards`.
+- `GameManager.gd` : `battle_mode` lu depuis la sauvegarde dans `start_battle()` ; `_init_card_decks()` ; au `_begin_turn` pioche 1 carte (sauf 1re manche) ; **`e["spells"] = main de l'entité`** (Q2 : la barre de sorts devient la main — l'UI `UIManager._rebuild_spell_bar`, les raccourcis 1-9 et le ciblage sont réutilisés tels quels) ; dans `cast_spell`, la carte jouée (`card_uid`) quitte la main → défausse. Les ennemis gardent une attaque de base en plus de leur main, donc `TurnManager` joue des cartes sans modification.
+- `SaveSlotsUI.gd` (« Mes Parties ») : 5e bouton « Cartes » qui pose `battle_mode = "cards"` dans la sauvegarde puis lance `TeamSelection.tscn` comme le mode Tactique (qui remet `battle_mode = ""`) ; entrée « Cartes » ajoutée à la rangée des temps de jeu.
+
+Écart assumé vs le prototype (Q4) : dans le moteur Godot, `_resolve_summon` insère déjà l'invocation **juste après le lanceur dans `turn_order`** (`GameManager.gd` `_resolve_summon`), avec ses propres PA/PM — l'invocation agit donc immédiatement après le héros, sans dépenser le pool du héros. C'est plus simple et cohérent avec le système d'initiative existant ; le « pool du héros » du prototype reste une option d'équilibrage v2.
