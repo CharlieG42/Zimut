@@ -98,7 +98,6 @@ var custom_team: Array           = []
 var active_save: Dictionary      = {}   # sauvegarde ProgressionManager en cours
 var active_slot: int             = -1
 var menu_intent: String           = ""   # intention transmise à l’écran Parties (ex. nouvelle partie)
-var battle_mode: String           = ""   # "cards" = mode Cartes tactiques (lu depuis la sauvegarde)
 var fight_enemies: Array         = []   # [{type, level, boss}] du combat en cours (pour l'XP)
 var fight_is_boss: bool          = false
 var fight_nation_boss: String     = ""  # V27 : biome du boss de Nation présent dans ce combat
@@ -864,67 +863,6 @@ func summons_of(owner: Dictionary) -> Array:
 	return out
 
 
-# ══════════════════════════════════════════════════════════════
-#  Mode « Cartes tactiques » (battle_mode == "cards")
-#  Q1 : les cartes coûtent les PA/PM du lanceur (cast_spell classique).
-#  Q2 : la barre de sorts du héros = sa main de cartes.
-#  Q3 : deck 20 / main 5 / pioche 1 par tour / main max 7 (CardDeck).
-# ══════════════════════════════════════════════════════════════
-
-func _init_card_decks() -> void:
-	var player_deck: String = String(active_save.get("cards_deck", "Deck de test"))
-	for e: Dictionary in players + enemies:
-		var deck_name: String = player_deck if String(e["team"]) == "player" else "Deck de test ennemis"
-		e["card_deck"] = CardDeck.from_names(DataLoader.get_deck_cards(deck_name), DataLoader.get_cards_data(), _rng)
-		_refresh_card_spells(e)
-
-
-## En mode cartes, la liste "spells" de l'entité = sa main (Q2) ;
-## les ennemis conservent une attaque de base quand leur main est vide.
-func _refresh_card_spells(e: Dictionary) -> void:
-	if not e.has("card_deck"):
-		return
-	var spells: Array = []
-	for card: Dictionary in e["card_deck"].hand:
-		spells.append(card_to_spell(card))
-	if String(e["team"]) == "enemy":
-		spells.append(_basic_attack_spell(e))
-	e["spells"] = spells
-
-
-## Convertit une carte (ligne de cartes.txt) en sort lançable par cast_spell.
-func card_to_spell(card: Dictionary) -> Dictionary:
-	return {
-		"name": card.get("Nom", "Carte"),
-		"classe": card.get("Classe", ""),
-		"cost_pa": int(card.get("Cout_PA", card.get("Coût PA", "1"))),
-		"cost_pm": int(card.get("Cout_PM", card.get("Coût PM", "0"))),
-		"range": int(card.get("Portee", card.get("Portée", "1"))),
-		"effect": card.get("Effet", ""),
-		"level_required": int(card.get("Niveau_requis", card.get("Niveau requis", "1"))),
-		"spell_type": card.get("Type", "Attaque"),
-		"Degats_physiques": int(card.get("Degats_physiques", "0")),
-		"Degats_magiques": int(card.get("Degats_magiques", "0")),
-		"Soins": int(card.get("Soins", "0")),
-		"Resistance_physique": int(card.get("Resistance_physique", "0")),
-		"Resistance_magique": int(card.get("Resistance_magique", "0")),
-		"Debuff_physique": int(card.get("Debuff_physique", "0")),
-		"Debuff_magique": int(card.get("Debuff_magique", "0")),
-		"Buff_physique": int(card.get("Buff_physique", "0")),
-		"Buff_magique": int(card.get("Buff_magique", "0")),
-		"card_uid": int(card.get("card_uid", -1)),
-	}
-
-
-func _basic_attack_spell(e: Dictionary) -> Dictionary:
-	var force: int = int(e.get("force", 10))
-	return {
-		"name": "Attaque", "classe": "Ennemi", "cost_pa": 1, "cost_pm": 0, "range": 1,
-		"effect": "%d dégâts" % force, "level_required": 1, "spell_type": "Attaque",
-		"Degats_physiques": force, "Degats_magiques": 0, "Soins": 0,
-	}
-
-
 # ═══════════════════════════════════════════════════════════════════════════
 #  Glyphes (V19) : zones posées au sol qui agissent 2 à 4 tours
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1213,16 +1151,6 @@ func objectives_status() -> Array:
 
 func start_battle() -> void:
 	_epoch += 1
-	# Source de vérité : la clé "battle_mode" de la sauvegarde ; à défaut, le drapeau
-	# posé en mémoire par la tuile « Cartes » de Mes Parties (si l'écriture disque a échoué).
-	var bm: String = String(active_save.get("battle_mode", ""))
-	if bm != "":
-		battle_mode = bm
-	# Le mode cartes ne s'applique jamais à un combat de campagne (Aventure/Conquête)
-	if battle_mode == "cards" and String(active_save.get("campaign_mode", "")) != "":
-		battle_mode = ""
-	if battle_mode == "cards":
-		_init_card_decks()
 	combat_stats = {}
 	_first_kill_uid = -1
 	_chief_uid = -1
@@ -1289,15 +1217,6 @@ func _begin_turn(e: Dictionary) -> void:
 		pm = 0
 	e["current_pa"] = maxi(0, pa)
 	e["current_pm"] = maxi(0, pm)
-
-	# Mode Cartes tactiques : pioche 1 carte par tour (sauf la 1re manche) et
-	# la barre de sorts de l'entité devient sa main (Q2/Q3)
-	if battle_mode == "cards" and e.has("card_deck"):
-		if turn_count > 1:
-			var drawn: Dictionary = e["card_deck"].draw()
-			if not drawn.is_empty() and String(e["entity_type"]) == "Player":
-				message_requested.emit("%s pioche : %s." % [e["name"], drawn.get("Nom", "carte")])
-		_refresh_card_spells(e)
 
 	# Effets de début de tour : dégâts sur la durée, régénération
 	for s: Dictionary in e["statuses"].duplicate():
@@ -1887,11 +1806,6 @@ func cast_spell(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> bool:
 
 	message_requested.emit(summary)
 	spell_casted.emit(caster, spell, target, summary)
-	# Mode Cartes tactiques : la carte jouée quitte la main et part en défausse
-	if battle_mode == "cards" and spell.has("card_uid") and caster.has("card_deck"):
-		caster["card_deck"].play_uid(int(spell["card_uid"]))
-		_refresh_card_spells(caster)
-		state_changed.emit()
 	_after_action()
 	return true
 

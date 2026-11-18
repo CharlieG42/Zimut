@@ -10,7 +10,7 @@ extends Node
 ## Le mode suivi est déduit de la scène courante (pas besoin de le régler à la
 ## main) : Main.tscn + TeamSelection.tscn → "tactique", AdventureMap.tscn +
 ## Adventure3D.tscn → "adventure", AdventureOpen3D.tscn → "openworld",
-## ConquestMap.tscn → "conquest".
+## ConquestMap.tscn → "conquest", CardDuel.tscn → "cards".
 
 signal playtime_updated(mode: String, seconds: float)
 
@@ -88,6 +88,8 @@ func _check_scene() -> void:
 		_start("openworld")
 	elif path.ends_with("/ConquestMap.tscn"):
 		_start("conquest")
+	elif path.ends_with("/CardDuel.tscn"):
+		_start("cards")
 	else:
 		_pause()
 

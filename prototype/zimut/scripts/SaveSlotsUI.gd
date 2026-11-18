@@ -621,8 +621,6 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		"Combats stratégiques au tour par tour", "res://assets/ui/modes/mode_tactique.png",
 		Color(0.22, 0.43, 0.69), true, func() -> void:
 			_current.erase("campaign_mode")
-			_current["battle_mode"] = ""
-			GameManager.battle_mode = ""
 			ProgressionManager.write_save(slot, _current)
 			GameManager.active_save = ProgressionManager.load_save(slot)
 			GameManager.active_slot = slot
@@ -646,20 +644,10 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		"Conquérez les cités par les armes", "res://assets/ui/modes/mode_conquete.png",
 		Color(0.62, 0.25, 0.20), con_ok, func() -> void:
 			_launch_campaign_mode("conquest", "res://scenes/ConquestMap.tscn", slot)))
-	# Mode Cartes tactiques (Q5=B) : entrée dédiée, même parcours que Tactique
-	# (TeamSelection -> Main) mais battle_mode = "cards" dans la sauvegarde
+	# Mode Cartes : JCC à quatre voies (CardDuel.tscn), indépendant du combat tactique
 	modes_row.add_child(_mode_button("Cartes",
-		"Duels en deck de 20 cartes sur la grille tactique (PA/PM = mana)", "res://assets/ui/modes/mode_cartes.png",
-		Color(0.55, 0.35, 0.75), true, func() -> void:
-			_current.erase("campaign_mode")
-			_current["battle_mode"] = "cards"
-			GameManager.battle_mode = "cards"   # drapeau en mémoire aussi (si l'écriture disque échoue)
-			ProgressionManager.write_save(slot, _current)
-			GameManager.active_save = ProgressionManager.load_save(slot)
-			GameManager.active_slot = slot
-			GameManager.fight_biome = "Forêt"
-			battle_requested.emit(slot)
-			get_tree().change_scene_to_file("res://scenes/TeamSelection.tscn")))
+		"Duels de cartes à quatre voies : deck de 20 cartes, mana croissant, boss en cartes rares", "res://assets/ui/modes/mode_cartes.png",
+		Color(0.55, 0.35, 0.75), true, func() -> void: _launch_cards(slot)))
 
 	# V46 : temps de jeu propre à chaque mode, sous les cartes de mode.
 	var times_row := HBoxContainer.new()
@@ -960,14 +948,22 @@ func _modal(title: String, text: String, buttons: Array, extra: Control = null, 
 	return overlay
 
 
+func _launch_cards(slot: int) -> void:
+	if _current.is_empty() or slot < 0:
+		return
+	_current.erase("campaign_mode")
+	ProgressionManager.write_save(slot, _current)
+	GameManager.active_save = ProgressionManager.load_save(slot)
+	GameManager.active_slot = slot
+	get_tree().change_scene_to_file("res://scenes/CardDuel.tscn")
+
+
 func _launch_campaign_mode(mode: String, scene_path: String, slot: int) -> void:
 	if _current.is_empty() or slot < 0:
 		return
 	if not ProgressionManager.mode_unlocked(_current, mode):
 		return
 	_current["campaign_mode"] = mode
-	_current["battle_mode"] = ""   # un combat d'Aventure/Conquête ne garde jamais le mode cartes
-	GameManager.battle_mode = ""
 	if mode == "adventure" and not _current.has("adventure"):
 		_current["adventure"] = ProgressionManager.adventure_state(_current)
 	if mode == "conquest" and not _current.has("conquest"):
