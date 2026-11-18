@@ -1,0 +1,4 @@
+V391|Mort des héros en 3D : le personnage bascule en arrière et s'allonge au sol, puis le faisceau lumineux tombe sur le corps (Mage, Géomancien, Assassin, Kharaz, Heal, Chasseur, Druide, Sylvain, Invocateur).
+V391|Fondu court (0,12 s) entre les animations (repos, marche, attaque, sort, coup reçu) : plus de saut brusque d'une pose à l'autre.
+V391|Orientation 3D réelle : les héros se tournent de ±34° vers la gauche ou la droite au lieu d'être inversés comme dans un miroir (bâton, arc et ombre restent cohérents).
+V391|Qualité graphique « Économie » : héros rendus à environ 256 px au lieu de 384 px pour alléger les téléphones modestes ; « Haute » reste à 384 px.

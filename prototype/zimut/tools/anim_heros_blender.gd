@@ -144,6 +144,28 @@ static func _staff_attack(t: float, lg: float, hand: String) -> Dictionary:
 		"tibia." + leg_b: Vector3(_curve([0, 0, 6, -4, -10, -6, 0, 0], t) * lg, 0, 0)}
 
 
+## V390 : mort — vacille, genoux qui plient, bras jetés en arrière, tête qui part en arrière, puis corps relâché. Le basculement
+## du corps entier (chute en arrière) est fait par Hero3D (motion "dead"). [lg] : amplitude des jambes (robe longue : moins).
+static func _dead_pose(t: float, lg: float) -> Dictionary:
+	return {
+		"thorax": Vector3(_curve([0, 14, 26, 24, 14, 8, 6, 6], t), 0, 0),
+		"tete": Vector3(_curve([0, 10, 22, 26, 20, 14, 10, 10], t), 0, _curve([0, 0, 4, 8, 12, 14, 14, 14], t)),
+		"cuisse.l": Vector3(_curve([0, 8, 18, 6, 0, -2, -2, -2], t) * lg, 0, 0),
+		"tibia.l": Vector3(_curve([0, -10, -30, -10, 0, 0, 0, 0], t) * lg, 0, 0),
+		"cuisse.r": Vector3(_curve([0, -4, 6, 14, 6, 2, 2, 2], t) * lg, 0, 0),
+		"tibia.r": Vector3(_curve([0, -8, -20, -22, -6, 0, 0, 0], t) * lg, 0, 0),
+		"bras.r": Vector3(_curve([0, 20, 30, 10, -5, -10, -10, -10], t), 0, _curve([0, -25, -45, -30, -20, -15, -15, -15], t)),
+		"bras.l": Vector3(_curve([0, 20, 30, 10, -5, -10, -10, -10], t), 0, _curve([0, 25, 45, 30, 20, 15, 15, 15], t))}
+
+
+## Noms d'os du squelette de l'Invocateur (« Thorax », « bras_l »…) à partir des noms des autres héros.
+static func _to_fr(d: Dictionary) -> Dictionary:
+	var out: Dictionary = {}
+	for k: String in d.keys():
+		out[("Thorax" if k == "thorax" else k.replace(".", "_"))] = d[k]
+	return out
+
+
 func _preset(name: String) -> Dictionary:
 	match name:
 		# Assassin (V380) : deux dagues. Garde basse, genoux fléchis ; attaque = coup d'estoc de la dague droite avec fente ;
@@ -185,6 +207,8 @@ func _preset(name: String) -> Dictionary:
 						"avantbras.l": Vector3(-20.0 * up, 0, 0), "avantbras.r": Vector3(-20.0 * up, 0, 0),
 						"thorax": Vector3(6.0 * up - 10.0 * cross, 0, 0), "tete": Vector3(4.0 * up, 0, 0),
 						"cuisse.l": Vector3(-8.0 * cross, 0, 0), "cuisse.r": Vector3(16.0 * cross, 0, 0)})},
+				"Dead": {"dur": 1.0, "loop": false, "fn": func(t: float) -> Dictionary:
+					return low.call(_dead_pose(t, 1.0))},
 				"Hit": {"dur": 0.5, "loop": false, "fn": func(t: float) -> Dictionary:
 					var h: float = _curve([0.0, 1.0, 0.55, 0.0], t)
 					return low.call({"thorax": Vector3(18.0 * h, 0, 5.0 * h), "tete": Vector3(14.0 * h, 0, 0),
@@ -221,6 +245,8 @@ func _preset(name: String) -> Dictionary:
 					return rest.call({"bras.l": Vector3(-8.0 * up, 0, z), "main.l": Vector3(0, 0, -z),
 						"bras.r": Vector3(50.0 * up, 0, -20.0 * up), "avantbras.r": Vector3(10.0 * up, 0, 0),
 						"thorax": Vector3(8.0 * up, 0, 0), "tete": Vector3(14.0 * up, 0, 0)})},
+				"Dead": {"dur": 1.0, "loop": false, "fn": func(t: float) -> Dictionary:
+					return rest.call(_dead_pose(t, 1.0))},
 				"Hit": {"dur": 0.5, "loop": false, "fn": func(t: float) -> Dictionary:
 					var h: float = _curve([0.0, 1.0, 0.55, 0.0], t)
 					return rest.call({"thorax": Vector3(18.0 * h, 0, 5.0 * h), "tete": Vector3(14.0 * h, 0, 0),
@@ -264,6 +290,8 @@ func _preset(name: String) -> Dictionary:
 					return rest.call({"bras.l": Vector3(-8.0 * up, 0, z), "main.l": Vector3(0, 0, -z),
 						"bras.r": Vector3(50.0 * up, 0, -20.0 * up), "avantbras.r": Vector3(10.0 * up, 0, 0),
 						"thorax": Vector3(8.0 * up, 0, 0), "tete": Vector3(14.0 * up, 0, 0)})},
+				"Dead": {"dur": 1.0, "loop": false, "fn": func(t: float) -> Dictionary:
+					return rest.call(_dead_pose(t, 1.0))},
 				"Hit": {"dur": 0.5, "loop": false, "fn": func(t: float) -> Dictionary:
 					var h: float = _curve([0.0, 1.0, 0.55, 0.0], t)
 					return rest.call({"thorax": Vector3(18.0 * h, 0, 5.0 * h), "tete": Vector3(14.0 * h, 0, 0),
@@ -302,6 +330,8 @@ func _preset(name: String) -> Dictionary:
 					return rest.call({"bras.r": Vector3(-8.0 * up, 0, -z), "main.r": Vector3(0, 0, z),
 						"bras.l": Vector3(50.0 * up, 0, 20.0 * up), "avantbras.l": Vector3(10.0 * up, 0, 0),
 						"thorax": Vector3(8.0 * up, 0, 0), "tete": Vector3(14.0 * up, 0, 0)})},
+				"Dead": {"dur": 1.0, "loop": false, "fn": func(t: float) -> Dictionary:
+					return rest.call(_dead_pose(t, lg))},
 				"Hit": {"dur": 0.5, "loop": false, "fn": func(t: float) -> Dictionary:
 					var h: float = _curve([0.0, 1.0, 0.55, 0.0], t)
 					return rest.call({"thorax": Vector3(18.0 * h, 0, -5.0 * h), "tete": Vector3(14.0 * h, 0, 0),
@@ -350,6 +380,8 @@ func _preset(name: String) -> Dictionary:
 						"bras_r": Vector3(30.0 * up, 0, 0), "avantbras_r": Vector3(-15.0 * up, 0, 0),
 						"Thorax": Vector3(8.0 * up, 0, 0), "tete": Vector3(14.0 * up, 0, 0),
 						"cuisse_l": Vector3(-4.0 * up, 0, 0), "cuisse_r": Vector3(5.0 * up, 0, 0)}},
+				"Dead": {"dur": 1.0, "loop": false, "fn": func(t: float) -> Dictionary:
+					return _to_fr(_dead_pose(t, 1.0))},
 				"Hit": {"dur": 0.5, "loop": false, "fn": func(t: float) -> Dictionary:
 					var h: float = _curve([0.0, 1.0, 0.55, 0.0], t)
 					return {

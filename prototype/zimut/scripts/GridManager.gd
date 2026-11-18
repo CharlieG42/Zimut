@@ -1339,6 +1339,12 @@ func _play_death(d: Dictionary) -> void:
 	Sfx.play("death")
 	Sfx.buzz(45 if String(e.get("team", "")) == "enemy" else 90)
 	v.set_hp(0.0)
+	# V391 : un modèle 3D s'effondre d'abord (chute en arrière) ; le faisceau tombe ensuite sur le corps
+	var fall: float = v.start_dead_anim()
+	if fall > 0.0:
+		await get_tree().create_timer(fall + 0.1).timeout
+		if not is_instance_valid(v):
+			return
 	# V70 : faisceau de lumière qui tombe sur le personnage vaincu et le dissout
 	var beam := SpellFx.DeathBeam.new()
 	beam.position = v.position + Vector2(0, 6)
