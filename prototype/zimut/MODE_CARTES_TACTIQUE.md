@@ -134,3 +134,23 @@ Note (Q4) : après une carte `Invocation`, l'unité posée est jouable immédiat
 | Q3 — Tailles | **A : deck 20 / main 5 / pioche 1** | Main de départ 5, pioche 1 carte au début de chaque tour du héros, main max 7. Chiffres de départ, ajustables en équilibrage. |
 | Q4 — Invocation invoquée | **B : agit immédiatement** | L'unité posée dépense les PA/PM restants du héros dans la foulée (attaques, sorts, déplacement) ; elle rejoint `turn_order` au round suivant, sans tour propre à la manche en cours. |
 | Q5 — Nom et intégration | **B : entrée dédiée « Mes Parties »** | Entrée « Cartes tactiques » à part dans « Mes Parties », qui lance `start_battle()` avec `battle_mode = "cards"` et le deck choisi. |
+
+## 9. Phase 0 — prototype pygame et résultats
+
+Implémenté dans `prototype/main.py` : `python3 main.py --cards` (duel interactif) et `python3 main.py --simulate 30` (duel automatique headless, avec assertions d'invariants).
+
+Mécaniques validées (décisions Q1–Q4) :
+
+- Deck 20 / main 5 / pioche 1 par tour / main max 7 (au-delà, la carte piochée est défaussée) — invariants vérifiés par assertion : 20 cartes conservées, main ≤ 7.
+- Q1 : les cartes coûtent les PA/PM du héros (`Card.can_play` + `play_card`).
+- Q2 : en mode cartes, `hero.spells = []` — seule la main est jouable.
+- Q4 : `play_card` sur une `Invocation` pose l'unité et la rend contrôlable immédiatement (`summon_control`) ; `summon_attack`/`summon_move` dépensent les PA/PM **restants du héros**.
+- IA adverse : pioche + joue ses cartes (dégâts/soin/invocation) puis se rapproche.
+- Victoire : PV du héros adverse à 0 (`check_game_over`).
+
+Retours d'expérience du prototype :
+
+- `data/invocations.csv` a un **encodage mixte** (en-tête UTF-8, corps latin-1) : `load_csv` lit les octets et repli sur `utf-8` avec `errors="replace"`.
+- **Pioche vide** : prévoir des dégâts de fatigue (style MTG) — le prototype se contente d'un message.
+- **Q4 est puissant** : jusqu'à `max_pa` frappes d'invocation par tour en dépensant le pool du héros — point d'équilibrage à surveiller.
+- L'IA greedy du prototype peut rester bloquée derrière ses propres invocations — limite connue du prototype pygame, pas du moteur Godot (`TurnManager` gère déjà le déplacement tactique).
