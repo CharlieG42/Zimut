@@ -208,8 +208,8 @@ var _tip_local := Vector3.ZERO
 var _rest_dir := Vector3.UP
 var _last_key: String = ""
 var _cell_px: float = float(CELL)
-## V386 : facteur de résolution effectif (texels du rendu par pixel logique de cellule). RES_K par défaut ; EntityView le règle
-## sur la taille réelle d'affichage (1 texel = 1 pixel écran) pour ne jamais réduire l'image : c'est ce qui la rend nette.
+## V386 : facteur de résolution effectif (texels du rendu par pixel logique de cellule), au moins RES_K (384 px) ; EntityView le règle
+## pour que la réduction à l'écran soit de 2 pour 1 (filtre de boîte exact avec le filtrage linéaire).
 var res_k: float = float(RES_K)
 var _ap: AnimationPlayer = null
 var _clips: Dictionary = {}
@@ -244,7 +244,9 @@ func setup(classe: String, px_scale: float = 0.0) -> bool:
 	_prof = MODELS[classe]
 	_key = classe
 	if px_scale > 0.0:
-		res_k = clampf(px_scale, 1.0, float(RES_K))
+		# Suréchantillonnage 2×2 (RES_K = 2, soit 384 px) : réduit exactement de moitié à l'écran, le filtrage linéaire donne
+		# alors un vrai filtre de boîte (arêtes lissées sans flou). Plus grand si l'écran agrandit le plateau (tablette, PC).
+		res_k = clampf(px_scale * float(RES_K), float(RES_K), float(RES_K) * 1.5)
 	var side: int = roundi(float(CELL) * res_k)
 	res_k = float(side) / float(CELL)
 	vp = SubViewport.new()
