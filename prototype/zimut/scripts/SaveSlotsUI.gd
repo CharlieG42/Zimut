@@ -617,7 +617,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	modes_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	modes_row.add_theme_constant_override("separation", 10)
 	_detail_box.add_child(modes_row)
-	var tac_btn: Button = _mode_button("Combats Tactiques",
+	var tac_btn: Button = _mode_button("Tactique",
 		"Combats stratégiques au tour par tour", "res://assets/ui/modes/mode_tactique.png",
 		Color(0.22, 0.43, 0.69), true, func() -> void:
 			_current.erase("campaign_mode")
@@ -638,7 +638,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 			_current["adventure_view"] = "map"
 			_launch_campaign_mode("adventure", "res://scenes/AdventureMap.tscn", slot), "adventure"))
 	modes_row.add_child(_mode_button("3D",
-		"Explorez Zimut en monde 3D libre, façon RPG", "res://assets/ui/modes/mode_aventure.png",
+		"Explorez Zimut en monde 3D libre, façon RPG", "res://assets/ui/modes/mode_monde3d.png",
 		Color(0.20, 0.52, 0.58), adv_ok, func() -> void:
 			_current["adventure_view"] = "open3d"
 			_launch_campaign_mode("adventure", "res://scenes/AdventureOpen3D.tscn", slot), "adventure"))
@@ -649,7 +649,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	# Mode Cartes tactiques (Q5=B) : entrée dédiée, même parcours que Tactique
 	# (TeamSelection -> Main) mais battle_mode = "cards" dans la sauvegarde
 	modes_row.add_child(_mode_button("Cartes",
-		"Duels en deck de 20 cartes sur la grille tactique (PA/PM = mana)", "res://assets/ui/modes/mode_tactique.png",
+		"Duels en deck de 20 cartes sur la grille tactique (PA/PM = mana)", "res://assets/ui/modes/mode_cartes.png",
 		Color(0.55, 0.35, 0.75), true, func() -> void:
 			_current.erase("campaign_mode")
 			_current["battle_mode"] = "cards"
@@ -1095,6 +1095,31 @@ func _mode_button(title_txt: String, desc: String, art_path: String, accent: Col
 	if not enabled:
 		art.modulate = Color(0.30, 0.30, 0.36)
 	b.add_child(art)
+	# V400 : ruban de titre aux couleurs du mode, pour distinguer d'un coup d'œil 2D / 3D / Cartes…
+	var ribbon := Label.new()
+	ribbon.name = "ModeRibbon"
+	ribbon.text = title_txt.to_upper()
+	ribbon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ribbon.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	ribbon.anchor_left = 0.0
+	ribbon.anchor_right = 1.0
+	ribbon.anchor_top = 1.0
+	ribbon.anchor_bottom = 1.0
+	ribbon.offset_top = -(_ui_font(14) + 12)
+	ribbon.offset_bottom = 0.0
+	ribbon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ribbon.add_theme_font_size_override("font_size", _ui_font(14))
+	ribbon.add_theme_color_override("font_color", Color(1, 1, 1) if enabled else Color(0.7, 0.72, 0.78))
+	ribbon.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	ribbon.add_theme_constant_override("outline_size", 4)
+	var rb := StyleBoxFlat.new()
+	rb.bg_color = Color(accent.r * 0.55, accent.g * 0.55, accent.b * 0.55, 0.92) if enabled else Color(0.16, 0.18, 0.24, 0.92)
+	rb.border_color = accent if enabled else COL_DISABLED_BORDER
+	rb.border_width_top = 2
+	rb.corner_radius_bottom_left = 8
+	rb.corner_radius_bottom_right = 8
+	ribbon.add_theme_stylebox_override("normal", rb)
+	b.add_child(ribbon)
 	if not enabled:
 		var umode: String = unlock_mode if unlock_mode != "" else ("adventure" if title_txt == "Aventure" else "conquest")
 		var need: int = int(ProgressionManager.MODE_MIN_LEVEL.get(umode, 1))

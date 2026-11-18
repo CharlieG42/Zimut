@@ -1,0 +1,3 @@
+V400|Mes Parties : chaque mode a maintenant sa vignette et son ruban de titre (TACTIQUE, 2D, 3D, CONQUÊTE, CARTES) aux couleurs du mode, au lieu de réutiliser les mêmes illustrations.
+V400|Nouvelles illustrations originales : un îlot de cubes en perspective pour le monde 3D (le 2D garde la carte illustrée) et un éventail de cartes sur un tapis de grille pour le mode Cartes.
+V400|Le générateur des illustrations est versionné dans tools/gen_mode_art.py (SVG vectoriel + PNG), pour les retoucher ou les remplacer facilement.
