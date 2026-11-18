@@ -8,7 +8,11 @@ extends RefCounted
 ## Mana : 1 au premier tour, +1 par tour, max 10. Une pioche par tour. Pioche vide = fatigue croissante.
 ## Une carte jouée (sort) ou perdue (créature morte) rejoint la fosse ; les jetons disparaissent.
 
-const LANES: int = 4
+const COLS: int = 4
+const ROWS: int = 6
+## Plateau 4 x 6. « lane » (hérité) = index de case = y * COLS + x.
+## Camp 1 en haut (ligne arrière y = 0), camp 0 en bas (ligne arrière y = ROWS - 1).
+const LANES: int = COLS * ROWS
 const HERO_HP: int = 30
 const HAND_MAX: int = 7
 const MANA_MAX: int = 10
@@ -36,7 +40,7 @@ func setup(deck0: Array, deck1: Array, seed_value: int = 0) -> void:
 				d.append(inst)
 		_shuffle(d)
 		sides.append({"hero_hp": HERO_HP, "mana": 0, "mana_max": 0, "deck": d, "hand": [], "fosse": [],
-			"lanes": [null, null, null, null], "fatigue": 0})
+			"units": [], "fatigue": 0})
 	for s: int in 2:
 		for i: int in START_HAND:
 			if not (sides[s]["deck"] as Array).is_empty():
@@ -65,6 +69,13 @@ func _make_instance(id: String) -> Dictionary:
 	_uid += 1
 	c["uid"] = _uid
 	c["max_hp"] = int(row["hp"])
+	c["max_pa"] = int(row.get("pa", 1))
+	c["pa"] = c["max_pa"]
+	c["max_pm"] = int(row.get("pm", 2))
+	c["pm"] = c["max_pm"]
+	c["po"] = int(row.get("po", 1))
+	c["x"] = -1
+	c["y"] = -1
 	c["sick"] = false
 	c["attacked"] = false
 	c["used"] = false
@@ -81,26 +92,83 @@ func other(s: int) -> int:
 	return 1 - s
 
 
+# ── Grille 4 x 6 ──
+
+func cell_xy(cell: int) -> Vector2i:
+	return Vector2i(cell % COLS, cell / COLS)
+
+
+func xy_cell(x: int, y: int) -> int:
+	return y * COLS + x
+
+
+func manhattan_cell(a: int, b: int) -> int:
+	var pa := cell_xy(a)
+	var pb := cell_xy(b)
+	return absi(pa.x - pb.x) + absi(pa.y - pb.y)
+
+
+## Ligne arrière d'un camp (dépôt des créatures) : y = ROWS-1 pour le joueur, 0 pour l'IA.
+func back_row_y(s: int) -> int:
+	return ROWS - 1 if s == 0 else 0
+
+
+## Distance d'une case à la ligne du héros adverse (le héros est hors plateau, derrière sa ligne arrière).
+func hero_dist_to(s: int, cell: int) -> int:
+	var p := cell_xy(cell)
+	var foe: int = other(s)
+	return (ROWS - p.y) if foe == 0 else (p.y + 1)
+
+
+func unit_at(gx: int, gy: int) -> Variant:
+	for s in 2:
+		for u: Variant in sides[s]["units"]:
+			var c: Dictionary = u
+			if int(c["x"]) == gx and int(c["y"]) == gy:
+				return c
+	return null
+
+
+func is_free_xy(gx: int, gy: int) -> bool:
+	return gx >= 0 and gx < COLS and gy >= 0 and gy < ROWS and unit_at(gx, gy) == null
+
+
+## Occupant d'une case : {"side": s, "unit": c} ou {}.
+func occupant(cell: int) -> Dictionary:
+	var p := cell_xy(cell)
+	for s in 2:
+		var u: Variant = unit_at(p.x, p.y)
+		if u != null:
+			return {"side": s, "unit": u}
+	return {}
+
+
 func creature_at(s: int, lane: int) -> Variant:
 	if lane < 0 or lane >= LANES:
 		return null
-	return (sides[s]["lanes"] as Array)[lane]
+	var p := cell_xy(lane)
+	for u: Variant in sides[s]["units"]:
+		var c: Dictionary = u
+		if int(c["x"]) == p.x and int(c["y"]) == p.y:
+			return c
+	return null
 
 
 func creatures(s: int) -> Array:
-	var out: Array = []
-	for c: Variant in sides[s]["lanes"]:
-		if c != null:
-			out.append(c)
-	return out
+	return sides[s]["units"]
 
 
 func lane_of(s: int, c: Dictionary) -> int:
-	var lanes: Array = sides[s]["lanes"]
-	for i: int in LANES:
-		if lanes[i] != null and int((lanes[i] as Dictionary)["uid"]) == int(c["uid"]):
-			return i
-	return -1
+	return xy_cell(int(c["x"]), int(c["y"]))
+
+
+## Pose une unité directement sur la grille (tests / debug).
+func place_unit(s: int, id: String, x: int, y: int) -> Dictionary:
+	var c: Dictionary = _make_instance(id)
+	c["x"] = x
+	c["y"] = y
+	(sides[s]["units"] as Array).append(c)
+	return c
 
 
 func is_over() -> bool:
@@ -135,6 +203,8 @@ func start_turn(s: int) -> void:
 		cr["sick"] = false
 		cr["attacked"] = false
 		cr["used"] = false
+		cr["pa"] = int(cr.get("max_pa", 1))
+		cr["pm"] = int(cr.get("max_pm", 2))
 		if int(cr["stun"]) > 0:
 			cr["attacked"] = true
 			cr["used"] = true
@@ -194,21 +264,21 @@ func targets_for(s: int, cible: String) -> Array:
 	var foe: int = other(s)
 	match cible:
 		"ennemi", "ennemi_ou_heros":
-			for i: int in LANES:
-				if creature_at(foe, i) != null:
-					out.append({"side": foe, "lane": i})
+			for c: Variant in creatures(foe):
+				out.append({"side": foe, "lane": lane_of(foe, c as Dictionary)})
 			if cible == "ennemi_ou_heros":
 				out.append({"side": foe, "lane": -1})
 		"allie", "allie_ou_heros":
-			for i: int in LANES:
-				if creature_at(s, i) != null:
-					out.append({"side": s, "lane": i})
+			for c: Variant in creatures(s):
+				out.append({"side": s, "lane": lane_of(s, c as Dictionary)})
 			if cible == "allie_ou_heros":
 				out.append({"side": s, "lane": -1})
 		"voie":
-			for i: int in LANES:
-				if creature_at(s, i) == null:
-					out.append({"side": s, "lane": i})
+			# dépôt : cases libres de la ligne arrière du camp
+			var by: int = back_row_y(s)
+			for x in COLS:
+				if unit_at(x, by) == null:
+					out.append({"side": s, "lane": xy_cell(x, by)})
 		_:
 			out.append({})
 	return out
@@ -255,7 +325,10 @@ func play_card(s: int, hand_idx: int, target: Dictionary = {}) -> bool:
 		(sd["hand"] as Array).remove_at(hand_idx)
 		sd["mana"] = int(sd["mana"]) - int(c["cost"])
 		c["sick"] = true
-		(sd["lanes"] as Array)[int(target["lane"])] = c
+		var tp := cell_xy(int(target["lane"]))
+		c["x"] = tp.x
+		c["y"] = tp.y
+		(sd["units"] as Array).append(c)
 		_ev("summon", s, int(target["lane"]), 0, {"name": c["name"]})
 		log.append("%s pose %s" % [_nm(s), c["name"]])
 		return true
@@ -279,6 +352,8 @@ func can_use_sort(s: int, lane: int) -> bool:
 	var cr: Dictionary = c
 	if String(cr["sort"]) == "" or bool(cr["used"]) or bool(cr["sick"]):
 		return false
+	if int(cr.get("pa", 1)) < 1:
+		return false
 	if int(cr["sort_cost"]) > int(sides[s]["mana"]):
 		return false
 	return not targets_for(s, String(cr["cible"])).is_empty()
@@ -292,10 +367,30 @@ func use_sort(s: int, lane: int, target: Dictionary = {}) -> bool:
 		return false
 	sides[s]["mana"] = int(sides[s]["mana"]) - int(cr["sort_cost"])
 	cr["used"] = true
+	cr["pa"] = int(cr["pa"]) - 1
 	_ev("cast", s, lane, 0, {"name": cr["sort"]})
 	log.append("%s : %s utilise %s" % [_nm(s), cr["name"], cr["sort"]])
 	_apply(s, String(cr["effet"]), String(cr["valeur"]), int(cr["duree"]), target)
 	return true
+
+
+## Cibles d'attaque d'une unité : créatures ennemies à portée PO (distance de Manhattan)
+## + le héros adverse si sa ligne est à portée PO. lane -1 = héros.
+func attack_targets(s: int, cell: int) -> Array:
+	var out: Array = []
+	var cr: Variant = creature_at(s, cell)
+	if cr == null:
+		return out
+	var po: int = int((cr as Dictionary).get("po", 1))
+	var foe: int = other(s)
+	for u: Variant in sides[foe]["units"]:
+		var c: Dictionary = u
+		var d: int = manhattan_cell(cell, xy_cell(int(c["x"]), int(c["y"])))
+		if d >= 1 and d <= po:
+			out.append({"side": foe, "lane": xy_cell(int(c["x"]), int(c["y"]))})
+	if hero_dist_to(s, cell) <= po:
+		out.append({"side": foe, "lane": -1})
+	return out
 
 
 func can_attack(s: int, lane: int) -> bool:
@@ -305,49 +400,122 @@ func can_attack(s: int, lane: int) -> bool:
 	if c == null:
 		return false
 	var cr: Dictionary = c
-	return not bool(cr["sick"]) and not bool(cr["attacked"]) and int(cr["atk"]) > 0
+	return not bool(cr["sick"]) and not bool(cr["attacked"]) and int(cr["atk"]) > 0 and int(cr.get("pa", 1)) >= 1
 
 
-func attack(s: int, lane: int) -> bool:
+## Attaque : 1 PA, portée PO. Sans cible explicite, attaque l'ennemi le plus faible à
+## portée, sinon le héros adverse si à portée.
+func attack(s: int, lane: int, target: Dictionary = {}) -> bool:
 	if not can_attack(s, lane):
 		return false
+	var tg: Array = attack_targets(s, lane)
+	if tg.is_empty():
+		return false
+	var t: Dictionary = target
+	var valid := false
+	for e: Variant in tg:
+		var ed: Dictionary = e
+		if int(ed["side"]) == int(t.get("side", -99)) and int(ed["lane"]) == int(t.get("lane", -99)):
+			valid = true
+			break
+	if not valid:
+		t = {"side": other(s), "lane": -1}
+		var best_hp := 9999
+		for e: Variant in tg:
+			var ed: Dictionary = e
+			if int(ed["lane"]) == -1:
+				continue
+			var uc: Variant = creature_at(other(s), int(ed["lane"]))
+			if uc != null and int((uc as Dictionary)["hp"]) < best_hp:
+				best_hp = int((uc as Dictionary)["hp"])
+				t = ed
 	var cr: Dictionary = creature_at(s, lane)
 	cr["attacked"] = true
+	cr["pa"] = int(cr["pa"]) - 1
 	var foe: int = other(s)
-	var blocker: Variant = creature_at(foe, lane)
-	_ev("attack", s, lane, 0, {"hero": blocker == null})
-	if blocker == null:
+	_ev("attack", s, lane, 0, {"hero": int(t["lane"]) == -1})
+	if int(t["lane"]) == -1:
 		_hit(foe, -1, int(cr["atk"]), "attack")
 		log.append("%s frappe le héros de %s (%d)" % [cr["name"], _nm(foe), int(cr["atk"])])
 	else:
-		var b: Dictionary = blocker
-		var back: int = int(b["atk"])
-		_hit(foe, lane, int(cr["atk"]), "attack")
-		if not is_over():
-			_hit(s, lane, back, "attack")
+		var b: Dictionary = creature_at(foe, int(t["lane"]))
+		_hit(foe, int(t["lane"]), int(cr["atk"]), "attack")
+		if not is_over() and creature_at(s, lane) != null:
+			_hit(s, lane, int(b["atk"]), "attack")
 		log.append("%s attaque %s" % [cr["name"], b["name"]])
 	return true
 
 
-func can_move(s: int, lane: int, to: int) -> bool:
-	if is_over() or s != current or abs(lane - to) != 1 or to < 0 or to >= LANES:
-		return false
-	var c: Variant = creature_at(s, lane)
-	if c == null or creature_at(s, to) != null:
-		return false
-	var cr: Dictionary = c
-	return not bool(cr["sick"]) and not bool(cr["attacked"])
+## Coût (en PM) du chemin le plus court entre deux cases libres, -1 si inaccessible.
+func _path_cost(from: int, to: int) -> int:
+	if from == to:
+		return 0
+	var dist: Dictionary = {from: 0}
+	var queue: Array = [from]
+	while not queue.is_empty():
+		var cur: int = queue.pop_front()
+		var cp := cell_xy(cur)
+		for d: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var np := cp + d
+			if np.x < 0 or np.x >= COLS or np.y < 0 or np.y >= ROWS:
+				continue
+			var ncell := xy_cell(np.x, np.y)
+			if dist.has(ncell):
+				continue
+			if ncell != from and unit_at(np.x, np.y) != null:
+				continue
+			dist[ncell] = int(dist[cur]) + 1
+			queue.append(ncell)
+	return int(dist.get(to, -1))
 
 
-func move(s: int, lane: int, to: int) -> bool:
-	if not can_move(s, lane, to):
+## Cases atteignables en dépensant au plus les PM restants de l'unité.
+func move_targets(s: int, cell: int) -> Array:
+	var out: Array = []
+	var cr: Variant = creature_at(s, cell)
+	if cr == null:
+		return out
+	var pm: int = int((cr as Dictionary).get("pm", 0))
+	if pm <= 0:
+		return out
+	var p := cell_xy(cell)
+	for y in ROWS:
+		for x in COLS:
+			if x == p.x and y == p.y:
+				continue
+			if unit_at(x, y) != null:
+				continue
+			var cost: int = _path_cost(cell, xy_cell(x, y))
+			if cost >= 1 and cost <= pm:
+				out.append({"side": s, "lane": xy_cell(x, y)})
+	return out
+
+
+func can_move(s: int, from: int, to: int) -> bool:
+	if is_over() or s != current:
 		return false
-	var lanes: Array = sides[s]["lanes"]
-	var cr: Dictionary = lanes[lane]
-	lanes[lane] = null
-	lanes[to] = cr
-	cr["attacked"] = true
-	_ev("move", s, to, 0, {"from": lane})
+	if from < 0 or from >= LANES or to < 0 or to >= LANES or from == to:
+		return false
+	if creature_at(s, from) == null or creature_at(s, to) != null:
+		return false
+	var cr: Dictionary = creature_at(s, from)
+	if int(cr.get("pm", 0)) < 1:
+		return false
+	var cost: int = _path_cost(from, to)
+	return cost >= 1 and cost <= int(cr["pm"])
+
+
+## Déplacement : chaque case parcourue coûte 1 PM (chemin 4 directions, cases libres).
+func move(s: int, from: int, to: int) -> bool:
+	if not can_move(s, from, to):
+		return false
+	var cost: int = _path_cost(from, to)
+	var cr: Dictionary = creature_at(s, from)
+	cr["pm"] = int(cr["pm"]) - cost
+	var tp := cell_xy(to)
+	cr["x"] = tp.x
+	cr["y"] = tp.y
+	_ev("move", s, to, cost, {"from": from})
 	return true
 
 
@@ -398,17 +566,21 @@ func _apply(s: int, effet: String, valeur: String, duree: int, target: Dictionar
 				_ev("poison", tside, tlane, v)
 		"invoquer":
 			var lane: int = int(target.get("lane", -1))
-			if lane < 0 or creature_at(s, lane) != null:
+			var by: int = back_row_y(s)
+			if lane < 0 or lane >= LANES or creature_at(s, lane) != null or cell_xy(lane).y != by:
 				lane = -1
-				for i: int in LANES:
-					if creature_at(s, i) == null:
-						lane = i
+				for x in COLS:
+					if unit_at(x, by) == null:
+						lane = xy_cell(x, by)
 						break
 			if lane >= 0:
 				var tok: Dictionary = _make_instance(valeur)
 				if not tok.is_empty():
 					tok["sick"] = true
-					(sides[s]["lanes"] as Array)[lane] = tok
+					var tp := cell_xy(lane)
+					tok["x"] = tp.x
+					tok["y"] = tp.y
+					(sides[s]["units"] as Array).append(tok)
 					_ev("summon", s, lane, 0, {"name": tok["name"]})
 		"pioche":
 			draw(s, v)
@@ -470,7 +642,7 @@ func _hit(s: int, lane: int, n: int, source: String = "") -> void:
 	cr["hp"] = int(cr["hp"]) - n
 	_ev("dmg", s, lane, n, {"src": source})
 	if int(cr["hp"]) <= 0:
-		(sides[s]["lanes"] as Array)[lane] = null
+		(sides[s]["units"] as Array).erase(cr)
 		_ev("die", s, lane, 0, {"name": cr["name"]})
 		if String(cr["type"]) != "Jeton":
 			(sides[s]["fosse"] as Array).append(cr)
@@ -513,45 +685,73 @@ func ai_step(s: int) -> Dictionary:
 			continue
 		var c: Dictionary = (sides[s]["hand"] as Array)[idx]
 		if String(c["type"]) == "Creature":
-			var lane: int = _ai_lane(s)
+			var lane: int = _ai_cell(s)
 			if lane >= 0 and play_card(s, idx, {"side": s, "lane": lane}):
 				return {"type": "play", "card": c["name"]}
 		else:
 			var tg2: Variant = _ai_target(s, String(c["effet"]), int(c["valeur"]) if String(c["effet"]) != "invoquer" else 0, String(c["cible"]), -1)
 			if tg2 != null and play_card(s, idx, tg2):
 				return {"type": "play", "card": c["name"]}
-	# 2) attaques
-	for i: int in LANES:
-		if can_attack(s, i):
-			var me: Dictionary = creature_at(s, i)
-			var bl: Variant = creature_at(foe, i)
-			var go: bool = true
-			if bl != null:
-				var b: Dictionary = bl
-				var kills: bool = int(me["atk"]) >= int(b["hp"])
-				var survives: bool = int(b["atk"]) < int(me["hp"])
-				go = kills or survives or (int(me["atk"]) >= int(b["atk"]) and int(sides[s]["hero_hp"]) > 12)
-			if go and attack(s, i):
-				return {"type": "attack", "lane": i}
+	# 2) attaques : pour chaque unité, la meilleure cible à portée PO
+	#    (kill > cible faible), sinon le héros adverse si à portée
+	for c: Variant in creatures(s):
+		var cr: Dictionary = c
+		var cell: int = lane_of(s, cr)
+		if not can_attack(s, cell):
+			continue
+		var tg: Array = attack_targets(s, cell)
+		if tg.is_empty():
+			continue
+		var best: Dictionary = {}
+		var best_score: float = -1.0
+		for e: Variant in tg:
+			var ed: Dictionary = e
+			var sc: float = 0.0
+			if int(ed["lane"]) == -1:
+				sc = 2.0 + (6.0 if int(sides[foe]["hero_hp"]) <= int(cr["atk"]) else 0.0)
+			else:
+				var b: Dictionary = creature_at(foe, int(ed["lane"]))
+				sc = float(int(b["atk"])) * 0.5 + (3.0 if int(cr["atk"]) >= int(b["hp"]) else 0.0)
+				if int(b["atk"]) >= int(cr["hp"]):
+					sc -= 2.0   # la riposte tuerait notre unité
+			if sc > best_score:
+				best_score = sc
+				best = ed
+		if not best.is_empty() and attack(s, cell, best):
+			return {"type": "attack", "lane": cell}
+	# 3) déplacement : rapprocher une unité du héros adverse si elle n'a rien à attaquer
+	for c: Variant in creatures(s):
+		var cr: Dictionary = c
+		var cell: int = lane_of(s, cr)
+		if int(cr.get("pm", 0)) < 1 or bool(cr["sick"]):
+			continue
+		if not attack_targets(s, cell).is_empty():
+			continue
+		var cur_d: int = hero_dist_to(s, cell)
+		var best_cell := -1
+		var best_d := cur_d
+		for t: Variant in move_targets(s, cell):
+			var td: int = hero_dist_to(s, int((t as Dictionary)["lane"]))
+			if td < best_d:
+				best_d = td
+				best_cell = int((t as Dictionary)["lane"])
+		if best_cell >= 0 and move(s, cell, best_cell):
+			return {"type": "move", "lane": best_cell, "from": cell}
 	return {"type": "end"}
 
 
-func _ai_lane(s: int) -> int:
-	var foe: int = other(s)
+## Case de dépôt préférée par l'IA : ligne arrière, plutôt au centre.
+func _ai_cell(s: int) -> int:
 	var best: int = -1
 	var best_score: float = -999.0
 	for t: Variant in targets_for(s, "voie"):
-		var i: int = int((t as Dictionary)["lane"])
-		var score: float = 0.0
-		var b: Variant = creature_at(foe, i)
-		if b == null:
-			score = 3.0   # voie ouverte : menace directe sur le héros
-		else:
-			score = 1.0 - float(int((b as Dictionary)["atk"])) * 0.3
+		var cell: int = int((t as Dictionary)["lane"])
+		var p := cell_xy(cell)
+		var score: float = 2.0 - absf(float(p.x) - (COLS - 1) * 0.5) * 0.4
 		score += _rng.randf() * 0.5
 		if score > best_score:
 			best_score = score
-			best = i
+			best = cell
 	return best
 
 
@@ -635,7 +835,7 @@ func _ai_target(s: int, effet: String, v: int, cible: String, source_lane: int) 
 		"etourdir_zone":
 			return {} if creatures(foe).size() >= 2 else null
 		"invoquer":
-			var lane: int = _ai_lane(s)
+			var lane: int = _ai_cell(s)
 			return {"side": s, "lane": lane} if lane >= 0 else null
 		"pioche":
 			return {} if (sides[s]["hand"] as Array).size() <= 5 else null

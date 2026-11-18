@@ -191,3 +191,21 @@ Le mode « Cartes tactiques » (sorts du combat tactique piochés dans un deck) 
 **Interface** : `CardDuelUI.gd` (accueil, adversaires, duel, résultat, fosse), `JccCardView.gd` (carte dessinée en vectoriel : emblèmes par effet, sprites des héros et monstres). Toucher une carte la sélectionne ; créature → toucher une voie libre ; sort ciblé → toucher la cible (liseré doré) ; sort sans cible → toucher à nouveau. Créature du plateau : barre « Attaquer / sort / ◀ ▶ ».
 
 Tests : `tests/test_jcc.gd` (catalogue, règles, IA, collection, butin) et `tests/test_jcc_ui.gd` (duel complet par l'interface). **Non testé sur téléphone** : seuls des rendus xvfb ont été vérifiés.
+
+## 12. V403 — plateau 4×6, déplacements (PM) et portée (PO), biome 2D, Gultur
+
+Retour de test utilisateur après V402 : le plateau à 4 voies est remplacé par une **grille 4×6** (24 cases, `JccDuel.COLS/ROWS`), avec la gestion des déplacements façon Krosmaga.
+
+**Règles** (`scripts/JccDuel.gd`) :
+- Chaque camp a une liste d'unités positionnées (`x`, `y`). Le déploiement (« voie ») se fait sur une **case libre de sa ligne arrière** (y=5 pour le joueur, y=0 pour l'adversaire). Le héros reste hors plateau.
+- **PM** (points de mouvement) : déplacement case par case en 4 directions sur les cases libres (BFS), **1 PM par case franchie**. **PO** (portée) : l'attaque touche toute unité ennemie à distance de Manhattan 1..PO, et le héros adverse si sa ligne est à portée PO (`hero_dist_to`). **PA** (points d'action) : 1 attaque **ou** 1 sort par PA.
+- PA et PM sont rechargés à chaque début de tour depuis `max_pa`/`max_pm` de la carte. Une créature invoquée ce tour (`sick`) peut se déplacer mais ni attaquer ni lancer de sort.
+- L'IA se déplace vers le héros adverse quand aucune cible n'est à portée.
+
+**Cartes** (`data/cartes_jcc.txt`) : trois colonnes `PA|PM|PO` ajoutées après `PV` (PA 2 pour les légendaires sinon 1 ; PM 1 pour Tank/Géomancien/Golem sinon 2 ; PO 3 Chasseur/Sylvain/Invocateur, 2 Mage/Soigneur/Druide, 1 sinon, 2 pour les jetons). `JccCards.gd` les lit (`pa`/`pm`/`po`, défauts 1/2/1). Sur chaque carte (`JccCardView.gd`) : gemme de mana toujours visible, et badges **PA / PM / PO** lisibles (3 pastilles en mode plateau, ligne texte en mode fiche).
+
+**Interface** (`CardDuelUI.gd`) : plateau 4×6 dessiné sur un **biome 2D stylisé** procédural (5 biomes — Forêt, Plaine, Désert, Montagne, Marais — dégradé + arbres/rochers/buissons seedés autour du plateau, grille et cadre). Cases cliquables ; barre d'actions « Attaquer (1 PA, portée PO) » puis ciblage des cases/ennemis à portée, « Sort » (1 PA + mana), déplacement en touchant une case atteignable (PM). Dans le constructeur de deck, **toute la zone des cartes capte la molette**, plus seulement la scrollbar (`CardDeckBuilder.gd`).
+
+**Tutoriel** : Gultur explique le mode en début de duel (3 bulles enchaînées, affichées une seule fois) : règles du plateau 4×6, mana/pioche, et lecture d'une carte (PA / PM / PO / mana) — `Gultur.JCC_INTRO/JCC_BOARD/JCC_STATS` + `CardDuelUI._tutorial()`.
+
+Tests : `tests/test_jcc.gd` (règles réécrites pour la grille : déploiement ligne arrière, PM en BFS, PO, PA attaque/sort, héros à portée, fosse) et `tests/test_jcc_ui.gd` (duel par l'interface, cases 21/22).

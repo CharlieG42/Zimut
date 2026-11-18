@@ -1,7 +1,8 @@
 class_name JccCards
 extends RefCounted
 ## JccCards.gd — Catalogue des cartes du mode Cartes (JCC à voies) : data/cartes_jcc.txt.
-## Colonnes (séparateur « | ») : Id|Nom|Type|Cout|Atq|PV|Rarete|Classe|Sort|SortCout|Effet|Valeur|Duree|Cible|Sprite
+## Colonnes (séparateur « | ») : Id|Nom|Type|Cout|Atq|PV|PA|PM|PO|Rarete|Classe|Sort|SortCout|Effet|Valeur|Duree|Cible|Sprite
+## Cout = mana ; PA = actions (attaque/sort) ; PM = déplacement ; PO = portée d'attaque.
 ## Types : Creature (porte UN sort distinctif), Sort (carte jouée une fois), Jeton (invocation, jamais dans un deck).
 
 const PATH := "res://data/cartes_jcc.txt"
@@ -33,6 +34,9 @@ static func _load() -> void:
 		var card: Dictionary = {
 			"id": String(row["Id"]), "name": String(row["Nom"]), "type": String(row["Type"]),
 			"cost": int(row["Cout"]), "atk": int(row["Atq"]), "hp": int(row["PV"]),
+			"pa": int(row.get("PA", "1")) if row.has("PA") else 1,
+			"pm": int(row.get("PM", "2")) if row.has("PM") else 2,
+			"po": int(row.get("PO", "1")) if row.has("PO") else 1,
 			"rarity": String(row["Rarete"]) if String(row["Rarete"]) != "" else "C",
 			"classe": String(row["Classe"]), "sort": String(row["Sort"]), "sort_cost": int(row["SortCout"]),
 			"effet": String(row["Effet"]), "valeur": String(row["Valeur"]), "duree": int(row["Duree"]),

@@ -1,15 +1,16 @@
 extends CanvasLayer
 ## CardDuelUI.gd — Mode Cartes (JCC à voies) : accueil, choix de l'adversaire, duel, résultat.
 ## Les règles sont dans JccDuel ; les cartes dans JccCards ; la collection / le deck dans JccCollection.
-## Plateau : 4 voies verticales. Adversaire en haut, vous en bas ; chaque camp a un emplacement par voie.
+## Plateau : grille 2D de 4 x 6 cases (style Krosmaga). Adversaire en haut, vous en bas.
+## Chaque camp déploie sur sa ligne arrière ; PM = déplacement, PA = attaque/sort, PO = portée.
 
 const W: float = 1920.0
 const H: float = 1080.0
-const LANE_X: Array = [570.0, 830.0, 1090.0, 1350.0]
-const SLOT := Vector2(200, 210)
-const ENEMY_Y: float = 126.0
-const PLAYER_Y: float = 386.0
+const BOARD := Rect2(560.0, 116.0, 800.0, 576.0)   # 4 colonnes x 6 lignes
+const CELL := Vector2(200.0, 96.0)
+const SLOT := Vector2(200.0, 96.0)   # carte sur le plateau (= CELL)
 const HAND_Y: float = 792.0
+const BIOMES: Array = ["Forêt", "Plaine", "Désert", "Montagne", "Marais"]
 const HAND_CARD := Vector2(190, 275)
 const HAND_X0: float = 410.0
 const HAND_X1: float = 1520.0
@@ -25,8 +26,10 @@ var _over: bool = false
 # duel — nœuds
 var _cards_layer: Control
 var _fx_layer: Control
-var _slots: Dictionary = {}          # "side:lane" -> Control (emplacement vide cliquable)
-var _board_views: Dictionary = {}    # "side:lane" -> JccCardView
+var _slots: Dictionary = {}          # "cell" -> Panel (case vide cliquable)
+var _board_views: Dictionary = {}    # "side:cell" -> JccCardView
+var _board_anchor: Control = null    # ancre du tutoriel sur le plateau
+var _biome: String = "Forêt"
 var _hand_views: Array = []
 var _hero_nodes: Array = [null, null]
 var _info_holder: Control
@@ -38,7 +41,7 @@ var _mana_node: Control
 var _pile_lbl: Label
 # duel — sélection
 var _sel_hand: int = -1
-var _sel_lane: int = -1
+var _sel_cell: int = -1   # case de l'unité sélectionnée (index y * COLS + x)
 var _pending: Dictionary = {}        # ciblage en cours : {kind, idx|lane, cible}
 var _targets: Array = []
 var _inspect: Dictionary = {}
@@ -230,8 +233,9 @@ func _start_duel(idx: int) -> void:
 	var j: Dictionary = JccCollection.ensure(_save)
 	_duel = JccDuel.new()
 	_duel.setup((j["deck"] as Array).duplicate(), JccCollection.parse_deck(String(_opp["deck"])))
+	_biome = BIOMES[_opp_idx % BIOMES.size()]
 	_sel_hand = -1
-	_sel_lane = -1
+	_sel_cell = -1
 	_pending = {}
 	_busy = false
 	_clear()
@@ -239,6 +243,7 @@ func _start_duel(idx: int) -> void:
 	_build_duel_ui()
 	_refresh()
 	_toast_msg("Le duel commence ! Votre tour.")
+	_tutorial()
 
 
 func _build_duel_ui() -> void:
@@ -250,35 +255,33 @@ func _build_duel_ui() -> void:
 		if ev is InputEventMouseButton and ev.pressed and not _busy:
 			_cancel_selection())
 	_root.add_child(catcher)
-	# voies
-	for i: int in 4:
-		var lane := ColorRect.new()
-		lane.color = Color(1, 1, 1, 0.045 if i % 2 == 0 else 0.075)
-		lane.position = Vector2(float(LANE_X[i]) - 116.0, ENEMY_Y - 8.0)
-		lane.size = Vector2(232, PLAYER_Y + SLOT.y - ENEMY_Y + 16.0)
-		lane.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_root.add_child(lane)
-		var mid: Label = UiKit.lbl("⚔", 34, Color(1, 1, 1, 0.28))
-		mid.position = Vector2(float(LANE_X[i]) - 14.0, ENEMY_Y + SLOT.y + 3.0)
-		mid.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_root.add_child(mid)
-	# emplacements
-	for side: int in 2:
-		for i: int in 4:
-			var p := Panel.new()
-			p.position = _slot_pos(side, i)
-			p.size = SLOT
-			var sb := StyleBoxFlat.new()
-			sb.bg_color = Color(0, 0, 0, 0.28)
-			sb.border_color = Color(1, 1, 1, 0.18)
-			sb.set_border_width_all(2)
-			sb.set_corner_radius_all(12)
-			p.add_theme_stylebox_override("panel", sb)
-			p.gui_input.connect(func(ev: InputEvent) -> void:
-				if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
-					_on_slot(side, i))
-			_root.add_child(p)
-			_slots["%d:%d" % [side, i]] = p
+	# fond de biome 2D stylisé derrière le plateau + ancre du tutoriel
+	var biome_bg := _BiomeBG.new()
+	biome_bg.biome = _biome
+	biome_bg.seedv = _opp_idx * 7919 + 13
+	biome_bg.board = BOARD
+	_root.add_child(biome_bg)
+	_board_anchor = Control.new()
+	_board_anchor.position = BOARD.position
+	_board_anchor.size = BOARD.size
+	_board_anchor.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(_board_anchor)
+	# emplacements : une case cliquable par cellule de la grille 4 x 6
+	for cell in JccDuel.LANES:
+		var p := Panel.new()
+		p.position = _cell_pos(cell)
+		p.size = CELL
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0, 0, 0, 0.20)
+		sb.border_color = Color(1, 1, 1, 0.14)
+		sb.set_border_width_all(2)
+		sb.set_corner_radius_all(10)
+		p.add_theme_stylebox_override("panel", sb)
+		p.gui_input.connect(func(ev: InputEvent) -> void:
+			if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+				_on_slot(cell))
+		_root.add_child(p)
+		_slots["%d" % cell] = p
 	_cards_layer = Control.new()
 	_cards_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_cards_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -293,7 +296,7 @@ func _build_duel_ui() -> void:
 	_root.add_child(_info_holder)
 	# barre d'actions (créature sélectionnée)
 	_action_bar = HBoxContainer.new()
-	_action_bar.position = Vector2(420, 640)
+	_action_bar.position = Vector2(420, 700)
 	_action_bar.size = Vector2(1100, 64)
 	_action_bar.alignment = BoxContainer.ALIGNMENT_CENTER
 	_action_bar.add_theme_constant_override("separation", 14)
@@ -333,7 +336,7 @@ func _build_duel_ui() -> void:
 	_fx_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_fx_layer)
 	_toast = UiKit.lbl("", 28, UiKit.C_GOLD, true)
-	_toast.position = Vector2(420, ENEMY_Y + SLOT.y + 2.0)
+	_toast.position = Vector2(420, BOARD.end.y + 6.0)
 	_toast.size = Vector2(1100, 46)
 	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_toast.modulate.a = 0.0
@@ -341,8 +344,8 @@ func _build_duel_ui() -> void:
 	_fx_layer.add_child(_toast)
 
 
-func _slot_pos(side: int, lane: int) -> Vector2:
-	return Vector2(float(LANE_X[lane]) - SLOT.x * 0.5, ENEMY_Y if side == 1 else PLAYER_Y)
+func _cell_pos(cell: int) -> Vector2:
+	return BOARD.position + Vector2(float(cell % JccDuel.COLS) * CELL.x, float(cell / JccDuel.COLS) * CELL.y)
 
 
 func _hero_sprite(side: int) -> String:
@@ -482,28 +485,29 @@ func _refresh() -> void:
 	_board_views = {}
 	_hand_views = []
 	_targets = _compute_targets()
-	for side: int in 2:
-		for i: int in 4:
-			var cr: Variant = _duel.creature_at(side, i)
-			var slot: Panel = _slots["%d:%d" % [side, i]]
-			var empty_ok: bool = cr == null and _is_target(side, i)
-			var sbx: StyleBoxFlat = slot.get_theme_stylebox("panel") as StyleBoxFlat
-			sbx.border_color = Color(1.0, 0.85, 0.2, 0.9) if empty_ok else Color(1, 1, 1, 0.18)
-			sbx.set_border_width_all(5 if empty_ok else 2)
-			if cr == null:
-				continue
-			var v := JccCardView.new()
-			v.board_mode = true
-			v.position = _slot_pos(side, i)
-			v.size = SLOT
-			v.set_card(cr as Dictionary)
-			v.target_ok = _is_target(side, i)
-			v.selected = side == 0 and _sel_lane == i
-			if side == 0 and not _over:
-				v.ready_glow = _duel.can_attack(0, i) or _duel.can_use_sort(0, i) or _duel.can_move(0, i, i - 1) or _duel.can_move(0, i, i + 1)
-			v.tapped.connect(func(_vw: JccCardView) -> void: _on_board_card(side, i))
-			_cards_layer.add_child(v)
-			_board_views["%d:%d" % [side, i]] = v
+	for cell in JccDuel.LANES:
+		var slot: Panel = _slots["%d" % cell]
+		var occ: Dictionary = _duel.occupant(cell)
+		var empty_ok: bool = occ.is_empty() and _is_target_any(cell)
+		var sbx: StyleBoxFlat = slot.get_theme_stylebox("panel") as StyleBoxFlat
+		sbx.border_color = Color(1.0, 0.85, 0.2, 0.9) if empty_ok else Color(1, 1, 1, 0.14)
+		sbx.set_border_width_all(5 if empty_ok else 2)
+		if occ.is_empty():
+			continue
+		var side: int = int(occ["side"])
+		var cr: Dictionary = occ["unit"]
+		var v := JccCardView.new()
+		v.board_mode = true
+		v.position = _cell_pos(cell)
+		v.size = CELL
+		v.set_card(cr)
+		v.target_ok = _is_target(side, cell)
+		v.selected = side == 0 and _sel_cell == cell
+		if side == 0 and not _over:
+			v.ready_glow = _duel.can_attack(0, cell) or _duel.can_use_sort(0, cell) or not _duel.move_targets(0, cell).is_empty()
+		v.tapped.connect(func(_vw: JccCardView) -> void: _on_board_card(side, cell))
+		_cards_layer.add_child(v)
+		_board_views["%d:%d" % [side, cell]] = v
 	_refresh_hand()
 	_refresh_hero(0)
 	_refresh_hero(1)
@@ -549,12 +553,12 @@ func _refresh_info() -> void:
 	var card: Dictionary = {}
 	if _sel_hand >= 0 and _sel_hand < (_duel.side(0)["hand"] as Array).size():
 		card = (_duel.side(0)["hand"] as Array)[_sel_hand]
-	elif _sel_lane >= 0 and _duel.creature_at(0, _sel_lane) != null:
-		card = _duel.creature_at(0, _sel_lane)
+	elif _sel_cell >= 0 and _duel.creature_at(0, _sel_cell) != null:
+		card = _duel.creature_at(0, _sel_cell)
 	elif not _inspect.is_empty():
 		card = _inspect
 	if card.is_empty():
-		var hint: Label = UiKit.lbl("Touchez une carte pour la voir en grand.\n\nUne créature attaque la créature de sa voie, ou le héros si la voie est vide.", 20, UiKit.C_DIM)
+		var hint: Label = UiKit.lbl("Touchez une carte pour la voir en grand.\n\nUne créature attaque à portée PO (1 PA) et se déplace case par case (1 PM par case).", 20, UiKit.C_DIM)
 		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		hint.custom_minimum_size = Vector2(290, 0)
 		_info_holder.add_child(hint)
@@ -595,40 +599,39 @@ func _refresh_action_bar() -> void:
 				why = "Ce n'est pas votre tour"
 			_action_bar.add_child(UiKit.lbl(why, 24, UiKit.C_BAD, true))
 		return
-	if _sel_lane >= 0 and _duel.creature_at(0, _sel_lane) != null:
-		var cr: Dictionary = _duel.creature_at(0, _sel_lane)
-		var lane: int = _sel_lane
-		var atk: Button = UiKit.btn("⚔ Attaquer", Color(0.95, 0.5, 0.3), 24, Vector2(200, 60))
-		atk.disabled = not _duel.can_attack(0, lane)
-		atk.pressed.connect(func() -> void: _do_attack(lane))
+	if _sel_cell >= 0 and _duel.creature_at(0, _sel_cell) != null:
+		var cr: Dictionary = _duel.creature_at(0, _sel_cell)
+		var cell: int = _sel_cell
+		var atk: Button = UiKit.btn("⚔ Attaquer (1 PA · portée PO %d)" % int(cr.get("po", 1)), Color(0.95, 0.5, 0.3), 20, Vector2(380, 60))
+		atk.disabled = not _duel.can_attack(0, cell)
+		atk.pressed.connect(func() -> void: _begin_attack(cell))
 		_action_bar.add_child(atk)
 		if String(cr["sort"]) != "":
-			var sb: Button = UiKit.btn("✦ %s (%d)" % [String(cr["sort"]), int(cr["sort_cost"])], Color(0.7, 0.45, 1.0), 22, Vector2(300, 60))
-			sb.disabled = not _duel.can_use_sort(0, lane)
-			sb.pressed.connect(func() -> void: _begin_sort(lane))
+			var sb: Button = UiKit.btn("✦ %s (%d mana · 1 PA)" % [String(cr["sort"]), int(cr["sort_cost"])], Color(0.7, 0.45, 1.0), 20, Vector2(380, 60))
+			sb.disabled = not _duel.can_use_sort(0, cell)
+			sb.pressed.connect(func() -> void: _begin_sort(cell))
 			_action_bar.add_child(sb)
-		var ml: Button = UiKit.btn("◀", Color(0.5, 0.6, 0.8), 26, Vector2(70, 60))
-		ml.disabled = not _duel.can_move(0, lane, lane - 1)
-		ml.pressed.connect(func() -> void: _do_move(lane, lane - 1))
-		_action_bar.add_child(ml)
-		var mr: Button = UiKit.btn("▶", Color(0.5, 0.6, 0.8), 26, Vector2(70, 60))
-		mr.disabled = not _duel.can_move(0, lane, lane + 1)
-		mr.pressed.connect(func() -> void: _do_move(lane, lane + 1))
-		_action_bar.add_child(mr)
+		var mv: Array = _duel.move_targets(0, cell)
+		var hint: Label = UiKit.lbl("PM %d — cliquez une case dorée pour vous déplacer" % int(cr.get("pm", 0)), 22, Color(0.6, 0.85, 1.0) if not mv.is_empty() else UiKit.C_DIM)
+		_action_bar.add_child(hint)
 
 
 # ─── Cibles ──────────────────────────────────────────────────────────────────
 
 func _compute_targets() -> Array:
-	if _pending.is_empty():
-		if _sel_hand >= 0 and _sel_hand < (_duel.side(0)["hand"] as Array).size():
-			var c: Dictionary = (_duel.side(0)["hand"] as Array)[_sel_hand]
-			if _duel.can_play(0, _sel_hand):
-				var cible: String = "voie" if String(c["type"]) == "Creature" else String(c["cible"])
-				if _duel.needs_target(cible):
-					return _duel.targets_for(0, cible)
-		return []
-	return _duel.targets_for(0, String(_pending["cible"]))
+	if not _pending.is_empty():
+		if String(_pending["kind"]) == "attack":
+			return _duel.attack_targets(0, int(_pending["lane"]))
+		return _duel.targets_for(0, String(_pending["cible"]))
+	if _sel_hand >= 0 and _sel_hand < (_duel.side(0)["hand"] as Array).size():
+		var c: Dictionary = (_duel.side(0)["hand"] as Array)[_sel_hand]
+		if _duel.can_play(0, _sel_hand):
+			var cible: String = "voie" if String(c["type"]) == "Creature" else String(c["cible"])
+			if _duel.needs_target(cible):
+				return _duel.targets_for(0, cible)
+	elif _sel_cell >= 0 and _duel.creature_at(0, _sel_cell) != null:
+		return _duel.move_targets(0, _sel_cell)
+	return []
 
 
 func _is_target(side: int, lane: int) -> bool:
@@ -639,9 +642,26 @@ func _is_target(side: int, lane: int) -> bool:
 	return false
 
 
+func _is_target_any(cell: int) -> bool:
+	for t: Variant in _targets:
+		var td: Dictionary = t
+		if not td.is_empty() and int(td["lane"]) == cell:
+			return true
+	return false
+
+
+func _is_move_target(cell: int) -> bool:
+	if _sel_cell < 0 or _duel.creature_at(0, _sel_cell) == null:
+		return false
+	for t: Variant in _duel.move_targets(0, _sel_cell):
+		if int((t as Dictionary)["lane"]) == cell:
+			return true
+	return false
+
+
 func _cancel_selection() -> void:
 	_sel_hand = -1
-	_sel_lane = -1
+	_sel_cell = -1
 	_pending = {}
 	_inspect = {}
 	if _duel != null and not _over:
@@ -662,39 +682,48 @@ func _on_hand_card(i: int) -> void:
 		_cancel_selection()
 		return
 	_sel_hand = i
-	_sel_lane = -1
+	_sel_cell = -1
 	_pending = {}
 	_refresh()
 
 
-func _on_board_card(side: int, lane: int) -> void:
+func _on_board_card(side: int, cell: int) -> void:
 	if _busy or _over:
 		return
-	if _is_target(side, lane):
-		_apply_target({"side": side, "lane": lane})
+	if _is_target(side, cell):
+		_apply_target({"side": side, "lane": cell})
 		return
 	if side == 0:
-		if _sel_lane == lane:
+		if _sel_cell == cell:
 			_cancel_selection()
 			return
-		_sel_lane = lane
+		_sel_cell = cell
 		_sel_hand = -1
 		_pending = {}
 		_inspect = {}
 		_refresh()
 	else:
-		_inspect = _duel.creature_at(1, lane)
+		_inspect = _duel.creature_at(1, cell)
 		_sel_hand = -1
-		_sel_lane = -1
+		_sel_cell = -1
 		_pending = {}
 		_refresh()
 
 
-func _on_slot(side: int, lane: int) -> void:
+func _on_slot(cell: int) -> void:
 	if _busy or _over:
 		return
-	if _is_target(side, lane):
-		_apply_target({"side": side, "lane": lane})
+	if not _pending.is_empty():
+		# la cible cliquée peut être un camp ou l'autre selon l'occupant de la case
+		var occ: Dictionary = _duel.occupant(cell)
+		var side: int = int(occ["side"]) if not occ.is_empty() else int(_pending.get("side", 0))
+		_apply_target({"side": side, "lane": cell})
+		return
+	if _sel_hand >= 0 and _is_target(0, cell):
+		_play_hand(_sel_hand, {"side": 0, "lane": cell})
+		return
+	if _sel_cell >= 0 and _is_move_target(cell):
+		_do_move(_sel_cell, cell)
 
 
 func _on_hero(side: int) -> void:
@@ -704,12 +733,16 @@ func _on_hero(side: int) -> void:
 		_apply_target({"side": side, "lane": -1})
 
 
-## Une cible a été touchée : joue la carte / le sort en attente.
+## Une cible a été touchée : joue la carte / le sort / l'attaque en attente.
 func _apply_target(t: Dictionary) -> void:
 	if not _pending.is_empty():
 		var lane: int = int(_pending["lane"])
+		var kind: String = String(_pending["kind"])
 		_pending = {}
-		_use_sort(lane, t)
+		if kind == "attack":
+			_do_attack_target(lane, t)
+		else:
+			_use_sort(lane, t)
 	elif _sel_hand >= 0:
 		_play_hand(_sel_hand, t)
 
@@ -733,7 +766,7 @@ func _on_end_turn() -> void:
 
 func _cancel_selection_silent() -> void:
 	_sel_hand = -1
-	_sel_lane = -1
+	_sel_cell = -1
 	_pending = {}
 	_inspect = {}
 
@@ -766,31 +799,39 @@ func _use_sort(lane: int, target: Dictionary) -> void:
 	_busy = true
 	var ok: bool = _duel.use_sort(0, lane, target)
 	if ok:
-		_sel_lane = lane
+		_sel_cell = lane
 		await _after_action("")
 	_busy = false
 	_finish_if_over()
 	_refresh()
 
 
-func _do_attack(lane: int) -> void:
-	if _busy or not _duel.can_attack(0, lane):
+## Attaque : passe en mode ciblage (les cibles à portée PO s'illuminent).
+func _begin_attack(cell: int) -> void:
+	if _busy or not _duel.can_attack(0, cell):
+		return
+	_pending = {"kind": "attack", "lane": cell, "cible": "_atk", "side": 1}
+	_refresh()
+
+
+func _do_attack_target(cell: int, t: Dictionary) -> void:
+	if _busy or not _duel.can_attack(0, cell):
 		return
 	_busy = true
-	await _lunge(0, lane)
-	if _duel.attack(0, lane):
-		_sel_lane = -1
+	await _lunge(0, cell)
+	if _duel.attack(0, cell, t):
+		_sel_cell = -1
 		await _after_action("")
 	_busy = false
 	_finish_if_over()
 	_refresh()
 
 
-func _do_move(lane: int, to: int) -> void:
+func _do_move(from: int, to: int) -> void:
 	if _busy:
 		return
-	if _duel.move(0, lane, to):
-		_sel_lane = to
+	if _duel.move(0, from, to):
+		_sel_cell = to
 		_duel.take_events()
 		_refresh()
 
@@ -803,7 +844,7 @@ func _lunge(side: int, lane: int) -> void:
 	var p0: Vector2 = v.position
 	_cards_layer.move_child(v, -1)
 	var tw: Tween = create_tween()
-	tw.tween_property(v, "position", p0 + Vector2(0, dir * 120.0), 0.12).set_ease(Tween.EASE_IN)
+	tw.tween_property(v, "position", p0 + Vector2(0, dir * 60.0), 0.12).set_ease(Tween.EASE_IN)
 	await tw.finished
 
 
@@ -818,11 +859,11 @@ func _after_action(msg: String) -> void:
 	await get_tree().create_timer(0.55).timeout
 
 
-func _node_center(side: int, lane: int) -> Vector2:
-	if lane < 0:
+func _node_center(side: int, cell: int) -> Vector2:
+	if cell < 0:
 		var p: Control = _hero_nodes[side]
 		return p.position + p.size * 0.5
-	return _slot_pos(side, lane) + SLOT * 0.5
+	return _cell_pos(cell) + CELL * 0.5
 
 
 func _show_event(e: Dictionary) -> void:
@@ -1056,3 +1097,67 @@ func _confirm(msg: String, yes: Callable) -> void:
 	var no: Button = UiKit.btn("Non", Color(0.6, 0.62, 0.72), 26, Vector2(200, 60))
 	no.pressed.connect(func() -> void: ov.queue_free())
 	row.add_child(no)
+
+
+# ── Fond de biome 2D stylisé derrière le plateau 4 x 6 ──
+
+class _BiomeBG extends Control:
+	var biome: String = "Forêt"
+	var seedv: int = 1
+	var board: Rect2 = Rect2(560, 116, 800, 576)
+	const PALETTES := {
+		"Forêt": [Color(0.10, 0.22, 0.14), Color(0.05, 0.12, 0.08), Color(0.16, 0.34, 0.18), Color(0.45, 0.30, 0.18)],
+		"Plaine": [Color(0.32, 0.36, 0.16), Color(0.20, 0.24, 0.10), Color(0.42, 0.48, 0.22), Color(0.50, 0.42, 0.25)],
+		"Désert": [Color(0.55, 0.44, 0.24), Color(0.40, 0.31, 0.17), Color(0.65, 0.54, 0.30), Color(0.55, 0.45, 0.28)],
+		"Montagne": [Color(0.25, 0.27, 0.32), Color(0.16, 0.18, 0.23), Color(0.35, 0.37, 0.44), Color(0.50, 0.48, 0.45)],
+		"Marais": [Color(0.12, 0.20, 0.18), Color(0.07, 0.12, 0.11), Color(0.18, 0.30, 0.26), Color(0.35, 0.30, 0.20)],
+	}
+
+	func _ready() -> void:
+		set_anchors_preset(Control.PRESET_FULL_RECT)
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _draw() -> void:
+		var pal: Array = PALETTES.get(biome, PALETTES["Forêt"])
+		var w: float = size.x
+		var h: float = size.y
+		var steps := 48
+		for i in steps:
+			var col: Color = (pal[0] as Color).lightened(0.22).lerp(pal[1] as Color, float(i) / float(steps))
+			draw_rect(Rect2(0, h * float(i) / float(steps), w, h / float(steps) + 1.0), col)
+		# décor procédural seedé autour du plateau (arbres, rochers, buissons)
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seedv
+		var zone := Rect2(board.position + Vector2(-50, -40), board.size + Vector2(100, 80))
+		for i in 70:
+			var pt := Vector2(rng.randf_range(zone.position.x, zone.end.x), rng.randf_range(zone.position.y, zone.end.y))
+			var s: float = rng.randf_range(0.6, 1.6)
+			match rng.randi_range(0, 2):
+				0:
+					draw_colored_polygon(PackedVector2Array([pt + Vector2(0, -22) * s, pt + Vector2(12, 0) * s, pt + Vector2(-12, 0) * s]), (pal[2] as Color).darkened(rng.randf_range(0.0, 0.25)))
+					draw_rect(Rect2(pt + Vector2(-2.5, -4) * s, Vector2(5, 8) * s), pal[3] as Color)
+				1:
+					draw_colored_polygon(PackedVector2Array([pt + Vector2(-10, 4) * s, pt + Vector2(-4, -6) * s, pt + Vector2(5, -8) * s, pt + Vector2(11, 2) * s]), Color(0.5, 0.5, 0.55, 0.8))
+				_:
+					draw_circle(pt, 5.0 * s, (pal[2] as Color).lightened(0.3))
+		# grille du plateau
+		draw_rect(board, Color(1, 1, 1, 0.05))
+		for gx in JccDuel.COLS + 1:
+			var x: float = board.position.x + float(gx) * (board.size.x / float(JccDuel.COLS))
+			draw_line(Vector2(x, board.position.y), Vector2(x, board.end.y), Color(1, 1, 1, 0.07), 2.0)
+		for gy in JccDuel.ROWS + 1:
+			var y: float = board.position.y + float(gy) * (board.size.y / float(JccDuel.ROWS))
+			draw_line(Vector2(board.position.x, y), Vector2(board.end.x, y), Color(1, 1, 1, 0.07), 2.0)
+		draw_rect(board, Color(1, 0.9, 0.6, 0.25), false, 3.0)
+
+
+## Tutoriel Gultur du mode Cartes (affiché une seule fois).
+func _tutorial() -> void:
+	if not Gultur.should_show("jcc_intro"):
+		return
+	Gultur.say(self, "jcc_intro", Gultur.JCC_INTRO, _root, func() -> void:
+		if not Gultur.should_show("jcc_board"):
+			return
+		Gultur.say(self, "jcc_board", Gultur.JCC_BOARD, _board_anchor, func() -> void:
+			if Gultur.should_show("jcc_stats"):
+				Gultur.say(self, "jcc_stats", Gultur.JCC_STATS, _info_holder)))

@@ -1,66 +1,66 @@
-Id|Nom|Type|Cout|Atq|PV|Rarete|Classe|Sort|SortCout|Effet|Valeur|Duree|Cible|Sprite
-c_tank|Tank|Creature|3|2|7|R|Tank|Coup de bouclier|1|etourdir|1|1|ennemi|players/tank
-c_mage|Mage|Creature|3|3|3|R|Mage|Boule de feu|2|degats|3|0|ennemi_ou_heros|players/mage
-c_chasseur|Chasseur|Creature|3|3|3|R|Chasseur|Flèche empoisonnée|1|poison|2|3|ennemi|players/chasseur
-c_druide|Druide|Creature|3|2|4|R|Druide|Soin|1|soin|3|0|allie_ou_heros|players/druide
-c_heal|Soigneur|Creature|3|1|5|R|Heal|Toucher guérisseur|2|soin_zone|2|0|aucune|players/heal
-c_assassin|Assassin|Creature|2|3|2|R|Assassin|Frappe sournoise|2|degats_heros|3|0|aucune|players/assassin
-c_invocateur|Invocateur|Creature|4|2|4|R|Invocateur|Invoquer un Golem|2|invoquer|j_golem|0|voie|players/invocateur
-c_sylvain|Sylvain|Creature|3|2|4|R|Sylvain|Invoquer un Loup spectral|2|invoquer|j_loup|0|voie|players/sylvain
-c_geomancien|Géomancien|Creature|4|2|6|R|Géomancien|Séisme|3|degats_zone|2|0|aucune|players/geomancien
-c_artificier|Artificier|Creature|3|2|3|R|Artificier|Bombe incendiaire|2|degats|4|0|ennemi|players/artificier
-m_gobelin|Gobelin|Creature|1|2|1|C||Rage|1|atq|1|0|allie|enemies/gobelin
-m_loup|Loup|Creature|2|3|2|C||Morsure|1|degats|1|0|ennemi|enemies/loup
-m_squelette|Squelette|Creature|2|2|3|C||Os brisés|1|bouclier|2|0|allie|enemies/squelette
-m_troll|Troll|Creature|4|4|6|C||Régénération|1|soin|3|0|allie|enemies/troll
-m_dragonnet|Dragonnet|Creature|3|3|3|C||Souffle brûlant|2|degats_zone|1|0|aucune|enemies/dragonnet
-e_golem|Golem de Pierre|Creature|5|4|8|E||Fracas|2|degats|4|0|ennemi|summons/golem_de_pierre
-e_ent|Ent de combat|Creature|4|3|6|E||Racines|1|etourdir|1|1|ennemi|summons/ent_de_combat
-e_cristal|Élémentaire de cristal|Creature|4|3|4|E||Éclat|1|degats|2|0|ennemi_ou_heros|summons/elementaire_de_cristal
-e_archer|Archer sylvestre|Creature|2|2|2|E||Tir précis|2|degats|2|0|ennemi_ou_heros|summons/archer_sylvestre
-b_gobelin_roi|Gobelin Roi|Creature|6|5|8|L||Cri de ralliement|2|atq_zone|1|0|aucune|enemies/gobelin_boss
-b_loup_alpha|Loup Alpha|Creature|5|5|5|L||Meute|2|invoquer|j_loup|0|voie|enemies/loup_boss
-b_roi_squelette|Roi Squelette|Creature|6|4|8|L||Légion|1|invoquer|j_squelette|0|voie|enemies/squelette_boss
-b_troll_geant|Troll Géant|Creature|7|6|10|L||Écrasement|2|degats|6|0|ennemi|enemies/troll_boss
-b_dragon|Dragon|Creature|8|7|9|L||Souffle de feu|3|degats_zone|3|0|aucune|enemies/dragonnet_boss
-b_seigneur_lave|Seigneur de Lave|Creature|7|6|8|L||Coulée de lave|2|degats_heros|4|0|aucune|
-b_liche_brumes|Liche des Brumes|Creature|6|3|7|L||Linceul de brume|3|etourdir_zone|1|1|aucune|
-b_liche_eternelle|Liche Éternelle|Creature|6|3|8|L||Savoir interdit|2|pioche|2|0|aucune|
-b_crabe_titan|Crabe Titan|Creature|6|4|10|L||Carapace|1|bouclier|4|0|allie|
-b_colosse|Colosse d'Engrenages|Creature|7|5|9|L||Surcharge|2|atq|3|0|allie|
-b_golem_prisme|Golem Prismatique|Creature|6|4|9|L||Prisme de soin|2|soin_zone|3|0|aucune|
-b_seigneur_tempetes|Seigneur des Tempêtes|Creature|7|5|7|L||Foudre|2|degats_zone|2|0|aucune|
-b_tharok|Tharok le Végétal|Creature|6|4|9|L||Écorce ancestrale|2|bouclier_zone|2|0|aucune|
-b_vorkann|Vorkann le Givre|Creature|7|5|8|L||Souffle glacial|3|etourdir_zone|1|1|aucune|
-j_golem|Golem de pierre|Jeton|0|3|4|C||||||||summons/golem_de_pierre
-j_loup|Loup spectral|Jeton|0|3|2|C||||||||summons/loup_spectral
-j_archer|Archer sylvestre|Jeton|0|2|2|C||||||||summons/archer_sylvestre
-j_squelette|Squelette|Jeton|0|1|1|C||||||||enemies/squelette
-s_coup_bouclier|Coup de bouclier|Sort|1|||C|Tank|||etourdir|1|1|ennemi|
-s_protection|Protection|Sort|2|||C|Tank|||bouclier|4|0|allie|
-s_soin_combat|Soin de combat|Sort|2|||C|Tank|||soin|5|0|allie_ou_heros|
-s_charge|Charge|Sort|1|||C|Tank|||atq|2|0|allie|
-s_javelot|Javelot lourd|Sort|3|||C|Tank|||degats|6|0|ennemi|
-s_frappe|Frappe puissante|Sort|3|||C|Tank|||degats|5|0|ennemi_ou_heros|
-s_boule_feu|Boule de feu|Sort|4|||R|Mage|||degats|7|0|ennemi_ou_heros|
-s_eclair|Éclair|Sort|3|||C|Mage|||degats|5|0|ennemi|
-s_etincelle|Étincelle|Sort|1|||C|Mage|||degats|2|0|ennemi_ou_heros|
-s_trait_glace|Trait de glace|Sort|2|||C|Mage|||degats|3|0|ennemi|
-s_explosion|Explosion|Sort|4|||R|Mage|||degats_zone|4|0|aucune|
-s_tir_precis|Tir précis|Sort|2|||C|Chasseur|||degats_heros|4|0|aucune|
-s_volee|Volée de flèches|Sort|2|||C|Chasseur|||degats_zone|2|0|aucune|
-s_fleche_poison|Flèche empoisonnée|Sort|2|||C|Chasseur|||poison|2|3|ennemi|
-s_soin|Soin|Sort|3|||C|Druide|||soin|6|0|allie_ou_heros|
-s_benediction|Bénédiction|Sort|2|||C|Druide|||atq|2|0|allie|
-s_attaque_sacree|Attaque sacrée|Sort|4|||R|Druide|||degats|6|0|ennemi_ou_heros|
-s_regeneration|Régénération|Sort|2|||C|Géomancien|||soin_zone|2|0|aucune|
-s_toucher|Toucher guérisseur|Sort|3|||C|Heal|||soin|8|0|allie_ou_heros|
-s_eclair_sacre|Éclair sacré|Sort|3|||C|Heal|||degats|4|0|ennemi_ou_heros|
-s_golem|Invoquer Golem de Pierre|Sort|3|||C|Invocateur|||invoquer|j_golem|0|voie|
-s_archer|Invoquer Archer Sylvestre|Sort|2|||C|Sylvain|||invoquer|j_archer|0|voie|
-s_loup|Invoquer Loup Spectral|Sort|2|||C|Sylvain|||invoquer|j_loup|0|voie|
-s_inspiration|Inspiration|Sort|2|||C|Mage|||pioche|2|0|aucune|
-s_cristal_mana|Cristal de mana|Sort|1|||R|Géomancien|||mana|3|0|aucune|
-s_cri_guerre|Cri de guerre|Sort|3|||R|Tank|||atq_zone|1|0|aucune|
-s_mur_pierre|Mur de pierre|Sort|2|||C|Géomancien|||bouclier_zone|2|0|aucune|
-s_blizzard|Blizzard|Sort|4|||R|Mage|||etourdir_zone|1|1|aucune|
+Id|Nom|Type|Cout|Atq|PV|PA|PM|PO|Rarete|Classe|Sort|SortCout|Effet|Valeur|Duree|Cible|Sprite
+c_tank|Tank|Creature|3|2|7|1|1|1|R|Tank|Coup de bouclier|1|etourdir|1|1|ennemi|players/tank
+c_mage|Mage|Creature|3|3|3|1|2|2|R|Mage|Boule de feu|2|degats|3|0|ennemi_ou_heros|players/mage
+c_chasseur|Chasseur|Creature|3|3|3|1|2|3|R|Chasseur|Flèche empoisonnée|1|poison|2|3|ennemi|players/chasseur
+c_druide|Druide|Creature|3|2|4|1|2|2|R|Druide|Soin|1|soin|3|0|allie_ou_heros|players/druide
+c_heal|Soigneur|Creature|3|1|5|1|2|2|R|Heal|Toucher guérisseur|2|soin_zone|2|0|aucune|players/heal
+c_assassin|Assassin|Creature|2|3|2|1|2|1|R|Assassin|Frappe sournoise|2|degats_heros|3|0|aucune|players/assassin
+c_invocateur|Invocateur|Creature|4|2|4|1|2|3|R|Invocateur|Invoquer un Golem|2|invoquer|j_golem|0|voie|players/invocateur
+c_sylvain|Sylvain|Creature|3|2|4|1|2|3|R|Sylvain|Invoquer un Loup spectral|2|invoquer|j_loup|0|voie|players/sylvain
+c_geomancien|Géomancien|Creature|4|2|6|1|1|1|R|Géomancien|Séisme|3|degats_zone|2|0|aucune|players/geomancien
+c_artificier|Artificier|Creature|3|2|3|1|2|1|R|Artificier|Bombe incendiaire|2|degats|4|0|ennemi|players/artificier
+m_gobelin|Gobelin|Creature|1|2|1|1|2|1|C||Rage|1|atq|1|0|allie|enemies/gobelin
+m_loup|Loup|Creature|2|3|2|1|2|1|C||Morsure|1|degats|1|0|ennemi|enemies/loup
+m_squelette|Squelette|Creature|2|2|3|1|2|1|C||Os brisés|1|bouclier|2|0|allie|enemies/squelette
+m_troll|Troll|Creature|4|4|6|1|2|1|C||Régénération|1|soin|3|0|allie|enemies/troll
+m_dragonnet|Dragonnet|Creature|3|3|3|1|2|1|C||Souffle brûlant|2|degats_zone|1|0|aucune|enemies/dragonnet
+e_golem|Golem de Pierre|Creature|5|4|8|1|1|1|E||Fracas|2|degats|4|0|ennemi|summons/golem_de_pierre
+e_ent|Ent de combat|Creature|4|3|6|1|2|1|E||Racines|1|etourdir|1|1|ennemi|summons/ent_de_combat
+e_cristal|Élémentaire de cristal|Creature|4|3|4|1|2|1|E||Éclat|1|degats|2|0|ennemi_ou_heros|summons/elementaire_de_cristal
+e_archer|Archer sylvestre|Creature|2|2|2|1|2|1|E||Tir précis|2|degats|2|0|ennemi_ou_heros|summons/archer_sylvestre
+b_gobelin_roi|Gobelin Roi|Creature|6|5|8|2|2|1|L||Cri de ralliement|2|atq_zone|1|0|aucune|enemies/gobelin_boss
+b_loup_alpha|Loup Alpha|Creature|5|5|5|2|2|1|L||Meute|2|invoquer|j_loup|0|voie|enemies/loup_boss
+b_roi_squelette|Roi Squelette|Creature|6|4|8|2|2|1|L||Légion|1|invoquer|j_squelette|0|voie|enemies/squelette_boss
+b_troll_geant|Troll Géant|Creature|7|6|10|2|2|1|L||Écrasement|2|degats|6|0|ennemi|enemies/troll_boss
+b_dragon|Dragon|Creature|8|7|9|2|2|1|L||Souffle de feu|3|degats_zone|3|0|aucune|enemies/dragonnet_boss
+b_seigneur_lave|Seigneur de Lave|Creature|7|6|8|2|2|1|L||Coulée de lave|2|degats_heros|4|0|aucune|
+b_liche_brumes|Liche des Brumes|Creature|6|3|7|2|2|1|L||Linceul de brume|3|etourdir_zone|1|1|aucune|
+b_liche_eternelle|Liche Éternelle|Creature|6|3|8|2|2|1|L||Savoir interdit|2|pioche|2|0|aucune|
+b_crabe_titan|Crabe Titan|Creature|6|4|10|2|2|1|L||Carapace|1|bouclier|4|0|allie|
+b_colosse|Colosse d'Engrenages|Creature|7|5|9|2|2|1|L||Surcharge|2|atq|3|0|allie|
+b_golem_prisme|Golem Prismatique|Creature|6|4|9|2|1|1|L||Prisme de soin|2|soin_zone|3|0|aucune|
+b_seigneur_tempetes|Seigneur des Tempêtes|Creature|7|5|7|2|2|1|L||Foudre|2|degats_zone|2|0|aucune|
+b_tharok|Tharok le Végétal|Creature|6|4|9|2|2|1|L||Écorce ancestrale|2|bouclier_zone|2|0|aucune|
+b_vorkann|Vorkann le Givre|Creature|7|5|8|2|2|1|L||Souffle glacial|3|etourdir_zone|1|1|aucune|
+j_golem|Golem de pierre|Jeton|0|3|4|1|1|1|C||||||||summons/golem_de_pierre
+j_loup|Loup spectral|Jeton|0|3|2|1|2|2|C||||||||summons/loup_spectral
+j_archer|Archer sylvestre|Jeton|0|2|2|1|2|1|C||||||||summons/archer_sylvestre
+j_squelette|Squelette|Jeton|0|1|1|1|2|1|C||||||||enemies/squelette
+s_coup_bouclier|Coup de bouclier|Sort|1|||1|1|1|C|Tank|||etourdir|1|1|ennemi|
+s_protection|Protection|Sort|2|||1|1|1|C|Tank|||bouclier|4|0|allie|
+s_soin_combat|Soin de combat|Sort|2|||1|1|1|C|Tank|||soin|5|0|allie_ou_heros|
+s_charge|Charge|Sort|1|||1|1|1|C|Tank|||atq|2|0|allie|
+s_javelot|Javelot lourd|Sort|3|||1|1|1|C|Tank|||degats|6|0|ennemi|
+s_frappe|Frappe puissante|Sort|3|||1|1|1|C|Tank|||degats|5|0|ennemi_ou_heros|
+s_boule_feu|Boule de feu|Sort|4|||1|2|2|R|Mage|||degats|7|0|ennemi_ou_heros|
+s_eclair|Éclair|Sort|3|||1|2|2|C|Mage|||degats|5|0|ennemi|
+s_etincelle|Étincelle|Sort|1|||1|2|2|C|Mage|||degats|2|0|ennemi_ou_heros|
+s_trait_glace|Trait de glace|Sort|2|||1|2|2|C|Mage|||degats|3|0|ennemi|
+s_explosion|Explosion|Sort|4|||1|2|2|R|Mage|||degats_zone|4|0|aucune|
+s_tir_precis|Tir précis|Sort|2|||1|2|3|C|Chasseur|||degats_heros|4|0|aucune|
+s_volee|Volée de flèches|Sort|2|||1|2|3|C|Chasseur|||degats_zone|2|0|aucune|
+s_fleche_poison|Flèche empoisonnée|Sort|2|||1|2|3|C|Chasseur|||poison|2|3|ennemi|
+s_soin|Soin|Sort|3|||1|2|2|C|Druide|||soin|6|0|allie_ou_heros|
+s_benediction|Bénédiction|Sort|2|||1|2|2|C|Druide|||atq|2|0|allie|
+s_attaque_sacree|Attaque sacrée|Sort|4|||1|2|2|R|Druide|||degats|6|0|ennemi_ou_heros|
+s_regeneration|Régénération|Sort|2|||1|1|1|C|Géomancien|||soin_zone|2|0|aucune|
+s_toucher|Toucher guérisseur|Sort|3|||1|2|2|C|Heal|||soin|8|0|allie_ou_heros|
+s_eclair_sacre|Éclair sacré|Sort|3|||1|2|2|C|Heal|||degats|4|0|ennemi_ou_heros|
+s_golem|Invoquer Golem de Pierre|Sort|3|||1|1|3|C|Invocateur|||invoquer|j_golem|0|voie|
+s_archer|Invoquer Archer Sylvestre|Sort|2|||1|2|3|C|Sylvain|||invoquer|j_archer|0|voie|
+s_loup|Invoquer Loup Spectral|Sort|2|||1|2|3|C|Sylvain|||invoquer|j_loup|0|voie|
+s_inspiration|Inspiration|Sort|2|||1|2|2|C|Mage|||pioche|2|0|aucune|
+s_cristal_mana|Cristal de mana|Sort|1|||1|1|1|R|Géomancien|||mana|3|0|aucune|
+s_cri_guerre|Cri de guerre|Sort|3|||1|1|1|R|Tank|||atq_zone|1|0|aucune|
+s_mur_pierre|Mur de pierre|Sort|2|||1|1|1|C|Géomancien|||bouclier_zone|2|0|aucune|
+s_blizzard|Blizzard|Sort|4|||1|2|2|R|Mage|||etourdir_zone|1|1|aucune|

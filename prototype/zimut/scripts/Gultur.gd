@@ -185,6 +185,22 @@ var _hl: Control
 
 
 ## Affiche une séquence de répliques. Retourne l'instance (ou null si rien à montrer).
+const JCC_INTRO := [
+	"Bienvenue dans le mode Cartes, {pseudo} !",
+	"Un duel de cartes sur un petit plateau 4 × 6 : votre héros et celui de l'adversaire ont 30 PV.",
+	"À chaque tour : +1 mana (max 10) et vous piochez 1 carte. Jouez vos cartes en payant leur coût en mana (gemme bleue).",
+]
+const JCC_BOARD := [
+	"Le plateau fait 4 colonnes × 6 lignes : vous déployez en bas, l'adversaire en haut.",
+	"Une créature posée ce tour a le mal d'invocation : elle ne peut ni attaquer ni lancer son sort.",
+	"Sélectionnez une de vos créatures : cliquez une case dorée pour la déplacer (1 PM par case), ou « Attaquer » puis une cible à portée PO (1 PA).",
+]
+const JCC_STATS := [
+	"Sur une carte : gemme bleue = coût en mana, gemme orange = attaque (⚔), gemme rouge = PV.",
+	"PA = points d'action (attaque ou sort de la créature, 1 chacun) · PM = points de mouvement · PO = portée d'attaque en cases.",
+	"Le sort ✦ de la créature coûte son mana + 1 PA. Ramenez les 30 PV du héros adverse à 0 pour gagner !",
+]
+
 static func say(parent: Node, id: String, lines: Array, target: Control = null, on_done: Callable = Callable()) -> Gultur:
 	if parent == null or not should_show(id):
 		if on_done.is_valid():
