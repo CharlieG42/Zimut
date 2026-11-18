@@ -129,13 +129,18 @@ static func _idle_extra(t: float, free: String, lg: float) -> Dictionary:
 static func _staff_attack(t: float, lg: float, hand: String) -> Dictionary:
 	var o: String = "l" if hand == "r" else "r"
 	var tw: float = 1.0 if hand == "r" else -1.0
+	var os_: float = 1.0 if o == "l" else -1.0   # sens « écarter le bras » de l'autre bras (z positif pour le gauche)
 	var leg_f: String = hand   # jambe qui avance : celle du côté du bâton
 	var leg_b: String = o
 	return {
 		"bras." + hand: Vector3(_curve([0, -25, -60, 25, 100, 80, 30, 0], t), 0, 0),
 		"avantbras." + hand: Vector3(_curve([0, -15, -40, -20, -5, -15, -12, 0], t), 0, 0),
 		"main." + hand: Vector3(_curve([0, 15, 35, -15, -50, -35, -10, 0], t), 0, 0),
-		"bras." + o: Vector3(_curve([0, 10, 25, -10, -30, -22, -6, 0], t), 0, 0),
+		# V395 : l'autre bras travaille aussi (contrepoids) — il s'avance et s'écarte pendant l'armement du bâton, puis
+		# se rabat en arrière et vers le corps sur la frappe, l'avant-bras plié.
+		"bras." + o: Vector3(_curve([0, 22, 50, -18, -55, -40, -12, 0], t), 0, os_ * _curve([0, 8, 18, 4, -10, -8, -2, 0], t)),
+		"avantbras." + o: Vector3(_curve([0, -12, -34, -14, -28, -20, -8, 0], t), 0, 0),
+		"main." + o: Vector3(_curve([0, 8, 18, -6, -22, -14, -4, 0], t), 0, 0),
 		"thorax": Vector3(_curve([0, 6, 12, -8, -24, -18, -6, 0], t), tw * _curve([0, -10, -22, 6, 30, 22, 8, 0], t), 0),
 		"tete": Vector3(_curve([0, 2, 4, -3, -10, -7, -2, 0], t), tw * _curve([0, 6, 12, -4, -16, -12, -4, 0], t), 0),
 		"cuisse." + leg_f: Vector3(_curve([0, -6, -12, 14, 30, 24, 8, 0], t) * lg, 0, 0),

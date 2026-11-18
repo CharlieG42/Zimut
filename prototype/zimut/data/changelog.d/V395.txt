@@ -1,0 +1,3 @@
+V395|Plateau de combat : plus de falaise prolongée, de touffes d'herbe ni de lianes qui pendent dans le vide là où il n'y a pas de case (angles découpés du plateau).
+V395|Attaque au bâton (Druide, Mage, Géomancien, Heal, Sylvain) : le deuxième bras joue aussi, en contrepoids : il s'avance et s'écarte pendant l'armement, puis se rabat vers le corps sur la frappe, avant-bras plié.
+V395|Les modèles à bâton sont recuits avec ces animations ; les clips de mort et le reste sont inchangés.

@@ -9,6 +9,24 @@ var _biome: String = "Forêt"
 var _seed: int = 1
 var _t: float = 0.0
 var _vines: Array[Dictionary] = []
+## V395 : cases présentes sur les faces avant (rangée y = n-1, colonne x = n-1) ; [] = toutes.
+var _edge_row: Array = []
+var _edge_col: Array = []
+
+
+func set_edge_mask(row: Array, col: Array) -> void:
+	_edge_row = row
+	_edge_col = col
+	queue_redraw()
+
+
+## Une case existe-t-elle sous la fraction `f` du tronçon (0 : gauche→bas, 1 : bas→droite) ?
+func _cell_below(seg: int, f: float) -> bool:
+	var idx: int = clampi(int(f * float(_n)), 0, _n - 1)
+	if seg == 1:
+		idx = _n - 1 - idx
+	var mask: Array = _edge_row if seg == 0 else _edge_col
+	return mask.is_empty() or idx >= mask.size() or bool(mask[idx])
 
 
 func configure(grid_size: int, biome: String, seed_value: int = 1) -> void:
@@ -26,7 +44,7 @@ func configure(grid_size: int, biome: String, seed_value: int = 1) -> void:
 		var f: float = rng.randf_range(0.08, 0.92)
 		var base: Vector2 = left_v.lerp(bottom_v, f) if on_left else bottom_v.lerp(right_v, f)
 		_vines.append({"p": base + Vector2(0, 5), "len": rng.randf_range(34.0, 100.0), "ph": rng.randf() * TAU,
-			"left": on_left, "leaves": rng.randi_range(2, 5)})
+			"left": on_left, "leaves": rng.randi_range(2, 5), "seg": 0 if on_left else 1, "f": f})
 	set_process(true)
 	queue_redraw()
 
@@ -55,6 +73,8 @@ func _draw() -> void:
 			var f: float = (float(i) + rng.randf_range(0.1, 0.9)) / float(count)
 			var pt: Vector2 = a.lerp(b, f) + Vector2(0, rng.randf_range(-1.0, 5.0))
 			var kind: float = rng.randf()
+			if not _cell_below(seg, f):
+				continue   # V395 : pas de touffes dans le vide
 			var ov: String = Nations.over(_biome)
 			if ov == "":
 				ov = _biome
@@ -99,6 +119,8 @@ func _draw() -> void:
 						draw_circle(pt + Vector2(sway, -h - 1.0), 2.6, Color(1.0, 0.92, 0.5) if kind > 0.95 else Color(1, 1, 1))
 	# Lianes / racines / glaçons qui pendent
 	for v: Dictionary in _vines:
+		if not _cell_below(int(v["seg"]), float(v["f"])):
+			continue   # V395 : pas de lianes qui pendent dans le vide
 		var base: Vector2 = v["p"]
 		var length: float = float(v["len"])
 		var sway2: float = sin(_t * 1.1 + float(v["ph"])) * 3.0
