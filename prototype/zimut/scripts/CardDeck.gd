@@ -5,15 +5,37 @@ extends RefCounted
 ## deck de 20 cartes, main de départ 5, pioche 1 carte par tour, main max 7
 ## (au-delà, la carte piochée part directement en défausse).
 ## Q1 : une carte jouée coûte les PA/PM du héros — géré par GameManager.cast_spell.
+## V401 (refonte Krosmaga) : le deck et la main sont PARTAGÉS par tout un camp (les héros jouent
+## les cartes d'une même main) et le mana est commun : il repart de MANA_START à la manche 1,
+## gagne +1 par manche jusqu'à MANA_MAX, et se dépense carte après carte quel que soit le héros.
 
 const DECK_SIZE := 20
 const HAND_START := 5
 const HAND_MAX := 7
+const MANA_START := 3
+const MANA_MAX := 10
 
 var deck: Array = []      # pioche (on pioche à la fin du tableau)
 var hand: Array = []      # main
 var discard: Array = []   # défausse
+var mana: int = 0         # mana restant du camp pour la manche en cours
+var mana_round: int = 0   # manche pour laquelle le mana et la pioche ont été renouvelés
 var _uid_seq: int = 0
+
+
+## Mana disponible au début d'une manche : 3 à la manche 1, +1 par manche, plafonné à 10.
+static func mana_for_round(round_no: int) -> int:
+	return clampi(MANA_START + maxi(round_no, 1) - 1, MANA_START, MANA_MAX)
+
+
+## Début d'une manche pour ce camp : renouvelle le mana et pioche 1 carte (sauf manche 1).
+## Sans effet si la manche est déjà lancée. Retourne la carte piochée ({} si aucune).
+func start_round(round_no: int) -> Dictionary:
+	if round_no == mana_round:
+		return {}
+	mana_round = round_no
+	mana = mana_for_round(round_no)
+	return draw() if round_no > 1 else {}
 
 
 ## Construit un deck à partir d'une liste de noms de cartes (data/cartes.txt).

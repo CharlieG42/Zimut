@@ -99,6 +99,7 @@ var active_save: Dictionary      = {}   # sauvegarde ProgressionManager en cours
 var active_slot: int             = -1
 var menu_intent: String           = ""   # intention transmise à l’écran Parties (ex. nouvelle partie)
 var battle_mode: String           = ""   # "cards" = mode Cartes tactiques (lu depuis la sauvegarde)
+var champions: Dictionary         = {}   # mode Cartes : {"player": entité, "enemy": entité} — la chute d'un champion met fin au duel
 var fight_enemies: Array         = []   # [{type, level, boss}] du combat en cours (pour l'XP)
 var fight_is_boss: bool          = false
 var fight_nation_boss: String     = ""  # V27 : biome du boss de Nation présent dans ce combat
@@ -872,11 +873,58 @@ func summons_of(owner: Dictionary) -> Array:
 # ══════════════════════════════════════════════════════════════
 
 func _init_card_decks() -> void:
+	# V401 : un deck et une main PAR CAMP, partagés par tous les héros (ou tous les ennemis).
 	var player_deck: String = String(active_save.get("cards_deck", "Deck de test"))
+	var decks: Dictionary = {}
+	for side: String in ["player", "enemy"]:
+		var deck_name: String = player_deck if side == "player" else "Deck de test ennemis"
+		decks[side] = CardDeck.from_names(DataLoader.get_deck_cards(deck_name), DataLoader.get_cards_data(), _rng)
+		decks[side].start_round(1)   # mana de départ dès l'ouverture (même si l'autre camp joue en premier)
 	for e: Dictionary in players + enemies:
-		var deck_name: String = player_deck if String(e["team"]) == "player" else "Deck de test ennemis"
-		e["card_deck"] = CardDeck.from_names(DataLoader.get_deck_cards(deck_name), DataLoader.get_cards_data(), _rng)
+		e["card_deck"] = decks[String(e["team"])]
 		_refresh_card_spells(e)
+	_pick_champions()
+
+
+## Champion de chaque camp : le héros mis en avant (ou le premier), et l'ennemi le plus coriace (le boss).
+func _pick_champions() -> void:
+	champions = {}
+	if not players.is_empty():
+		var lead_cls: String = String(ProgressionManager.adventure_state(active_save).get("hero_class", "")) if not active_save.is_empty() else ""
+		var lead: Dictionary = players[0]
+		for p: Dictionary in players:
+			if lead_cls != "" and String(p.get("classe", "")) == lead_cls:
+				lead = p
+				break
+		champions["player"] = lead
+	var best: Dictionary = {}
+	for en: Dictionary in enemies:
+		if best.is_empty() or int(en["max_pv"]) > int(best["max_pv"]):
+			best = en
+	if not best.is_empty():
+		champions["enemy"] = best
+	for side: String in champions:
+		(champions[side] as Dictionary)["champion"] = true
+
+
+## Un champion est tombé ? (mode Cartes uniquement)
+func champion_down(side: String) -> bool:
+	if battle_mode != "cards" or not champions.has(side):
+		return false
+	return not is_alive(champions[side])
+
+
+## État d'un camp pour l'interface : main, pioche, défausse, mana, manche.
+func card_state(side: String = "player") -> Dictionary:
+	var deck = null
+	for e: Dictionary in (players if side == "player" else enemies):
+		if e.has("card_deck"):
+			deck = e["card_deck"]
+			break
+	if deck == null:
+		return {}
+	return {"hand": deck.hand, "deck": deck.deck, "discard": deck.discard, "mana": deck.mana,
+			"mana_max": CardDeck.mana_for_round(deck.mana_round)}
 
 
 ## En mode cartes, la liste "spells" de l'entité = sa main (Q2) ;
@@ -1241,6 +1289,9 @@ func start_battle() -> void:
 	message_requested.emit("Le combat commence !")
 	_setup_objective_and_synergies()
 	fx.emit("banner", {"text": "Combat !"})
+	if battle_mode == "cards" and champions.has("player") and champions.has("enemy"):
+		message_requested.emit("♛ Duel de champions : %s (vous) contre %s — le premier à tomber perd le duel. Mana : %d, +1 par manche." % [
+			champions["player"]["name"], champions["enemy"]["name"], CardDeck.mana_for_round(1)])
 	BiomeEffects.setup(fight_biome, turn_order)
 	var biome_txt: String = BiomeEffects.describe(fight_biome)
 	if biome_txt != "":
@@ -1293,10 +1344,12 @@ func _begin_turn(e: Dictionary) -> void:
 	# Mode Cartes tactiques : pioche 1 carte par tour (sauf la 1re manche) et
 	# la barre de sorts de l'entité devient sa main (Q2/Q3)
 	if battle_mode == "cards" and e.has("card_deck"):
-		if turn_count > 1:
-			var drawn: Dictionary = e["card_deck"].draw()
-			if not drawn.is_empty() and String(e["entity_type"]) == "Player":
-				message_requested.emit("%s pioche : %s." % [e["name"], drawn.get("Nom", "carte")])
+		var cdeck = e["card_deck"]
+		var drawn: Dictionary = cdeck.start_round(turn_count)   # mana +1 et 1 pioche, une seule fois par manche et par camp
+		if not drawn.is_empty() and String(e["team"]) == "player":
+			message_requested.emit("Vous piochez : %s." % drawn.get("Nom", "carte"))
+		# Le mana est commun au camp : chaque héros joue avec ce qu'il en reste
+		e["current_pa"] = maxi(0, int(cdeck.mana) + int(Combat.status_value(e, "pa_up")) - int(Combat.status_value(e, "curse")))
 		_refresh_card_spells(e)
 
 	# Effets de début de tour : dégâts sur la durée, régénération
@@ -1887,7 +1940,9 @@ func cast_spell(caster: Dictionary, spell: Dictionary, cell: Vector2i) -> bool:
 
 	message_requested.emit(summary)
 	spell_casted.emit(caster, spell, target, summary)
-	# Mode Cartes tactiques : la carte jouée quitte la main et part en défausse
+	# Mode Cartes tactiques : le mana restant est celui du camp ; la carte jouée part en défausse
+	if battle_mode == "cards" and caster.has("card_deck"):
+		caster["card_deck"].mana = maxi(0, int(caster["current_pa"]))
 	if battle_mode == "cards" and spell.has("card_uid") and caster.has("card_deck"):
 		caster["card_deck"].play_uid(int(spell["card_uid"]))
 		_refresh_card_spells(caster)
@@ -3036,7 +3091,9 @@ func check_game_over() -> void:
 	var info: Dictionary = {"enemies": fight_enemies, "turns": turn_count, "boss": fight_is_boss, "deaths": deaths,
 		"objective": fight_objective.duplicate(), "chief_first": _first_kill_uid >= 0 and _first_kill_uid == _chief_uid,
 		"heal_total": heal_total, "all_hit": all_hit, "nation_boss": fight_nation_boss, "biome": fight_biome}
-	if alive_p == 0:
+	var champ_p_down: bool = champion_down("player")
+	var champ_e_down: bool = champion_down("enemy")
+	if alive_p == 0 or champ_p_down:
 		game_over = true
 		victory = false
 		if not active_save.is_empty() and active_slot >= 0:
@@ -3044,8 +3101,8 @@ func check_game_over() -> void:
 			ProgressionManager.write_save(active_slot, active_save)
 		Engine.time_scale = 1.0
 		game_ended.emit(false)
-		message_requested.emit("Tous vos personnages sont tombés. DÉFAITE !")
-	elif alive_e == 0:
+		message_requested.emit("Votre champion est tombé. DÉFAITE !" if champ_p_down and alive_p > 0 else "Tous vos personnages sont tombés. DÉFAITE !")
+	elif alive_e == 0 or champ_e_down:
 		game_over = true
 		victory = true
 		if not active_save.is_empty() and active_slot >= 0:
@@ -3053,7 +3110,7 @@ func check_game_over() -> void:
 			ProgressionManager.write_save(active_slot, active_save)
 		Engine.time_scale = 1.0
 		game_ended.emit(true)
-		message_requested.emit("Tous les ennemis sont vaincus ! VICTOIRE !")
+		message_requested.emit("Le champion ennemi est tombé ! VICTOIRE !" if champ_e_down and alive_e > 0 else "Tous les ennemis sont vaincus ! VICTOIRE !")
 
 
 func _after_action() -> void:
