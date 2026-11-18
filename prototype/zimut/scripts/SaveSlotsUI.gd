@@ -622,6 +622,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		Color(0.22, 0.43, 0.69), true, func() -> void:
 			_current.erase("campaign_mode")
 			_current["battle_mode"] = ""
+			GameManager.battle_mode = ""
 			ProgressionManager.write_save(slot, _current)
 			GameManager.active_save = ProgressionManager.load_save(slot)
 			GameManager.active_slot = slot
@@ -652,6 +653,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 		Color(0.55, 0.35, 0.75), true, func() -> void:
 			_current.erase("campaign_mode")
 			_current["battle_mode"] = "cards"
+			GameManager.battle_mode = "cards"   # drapeau en mémoire aussi (si l'écriture disque échoue)
 			ProgressionManager.write_save(slot, _current)
 			GameManager.active_save = ProgressionManager.load_save(slot)
 			GameManager.active_slot = slot
@@ -964,6 +966,8 @@ func _launch_campaign_mode(mode: String, scene_path: String, slot: int) -> void:
 	if not ProgressionManager.mode_unlocked(_current, mode):
 		return
 	_current["campaign_mode"] = mode
+	_current["battle_mode"] = ""   # un combat d'Aventure/Conquête ne garde jamais le mode cartes
+	GameManager.battle_mode = ""
 	if mode == "adventure" and not _current.has("adventure"):
 		_current["adventure"] = ProgressionManager.adventure_state(_current)
 	if mode == "conquest" and not _current.has("conquest"):
