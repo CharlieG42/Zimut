@@ -1,0 +1,4 @@
+V402|Mode Cartes refondu en vrai jeu de cartes : plateau à 4 voies (attaque manuelle), sans grille tactique, héros à 30 PV.
+V402|Deck de 20 cartes avec constructeur : créatures de classe, monstres, boss en cartes légendaires (Tharok, Vorkann…) et sorts, chaque créature porte un seul sort distinctif.
+V402|Cartes jouées ou tombées dans la fosse, mana +1 par tour (max 10), pioche d'une carte par tour, fatigue si la pioche est vide.
+V402|Six adversaires (dont trois boss) et butin : une victoire donne une carte, avec une chance d'obtenir la carte du boss vaincu.

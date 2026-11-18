@@ -169,7 +169,7 @@ Implémentation livrée (branche de la PR) :
 
 Retour de test utilisateur (tuile « Cartes » lançait un combat normal) — correctif : la tuile pose **à la fois** la clé `battle_mode = "cards"` dans la sauvegarde **et** le drapeau en mémoire `GameManager.battle_mode` ; `start_battle()` donne la priorité à la clé de sauvegarde quand elle est non vide, sinon conserve le drapeau (cas où l'écriture disque échoue, ex. renommage atomique indisponible). Garde-fou : `campaign_mode != ""` (combats d'Aventure/Conquête) force `battle_mode = ""`, et `_launch_campaign_mode` efface la clé. Test de régression ajouté dans `tests/test_card_deck.gd` (`_test_battle_mode_flag`).
 
-## 11. V401 — refonte : le mode Cartes devient un vrai JCC à voies
+## 11. V402 — refonte : le mode Cartes devient un vrai JCC à voies
 
 Le mode « Cartes tactiques » (sorts du combat tactique piochés dans un deck) est **remplacé** : il ne passe plus du tout par la grille tactique. La tuile « Cartes » de Mes Parties ouvre `scenes/CardDuel.tscn`.
 
