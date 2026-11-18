@@ -216,6 +216,106 @@ class Rune extends Node2D:
 			pts.append(Vector2(cos(ang), sin(ang)) * r * 0.78)
 		pts.append(pts[0])
 		draw_polyline(pts, c, 2.0, true)
+		# V391 : graduations extérieures qui tournent à l'envers + pastilles aux sommets
+		for i: int in range(16):
+			var ag: float = -rot * 0.6 + float(i) * TAU / 16.0
+			var d0 := Vector2(cos(ag), sin(ag))
+			draw_line(d0 * r * 1.0, d0 * r * 1.14, c, 2.0, true)
+		for i: int in range(5):
+			draw_circle(Vector2(cos(rot + float(i) * TAU / 5.0), sin(rot + float(i) * TAU / 5.0)) * r * 0.78, 3.0, Color(1, 1, 1, a))
+
+
+## V391 : lueur additive (halo qui s'épanouit puis s'éteint) — départ du sort au bout du bâton, flash d'impact.
+class Glow extends Node2D:
+	var col: Color = Color.WHITE
+	var r0: float = 6.0
+	var r1: float = 46.0
+	var life: float = 0.28
+	var t: float = 0.0
+	func _init() -> void:
+		var m := CanvasItemMaterial.new()
+		m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		material = m
+	func _process(d: float) -> void:
+		t += d
+		if t >= life:
+			queue_free()
+			return
+		queue_redraw()
+	func _draw() -> void:
+		var k: float = clampf(t / life, 0.0, 1.0)
+		var e: float = 1.0 - pow(1.0 - k, 3.0)
+		var r: float = lerpf(r0, r1, e)
+		var a: float = (1.0 - k) * (1.0 - k)
+		for i: int in range(5):
+			var f: float = 1.0 - float(i) / 5.0
+			draw_circle(Vector2.ZERO, r * (0.35 + 0.65 * f), Color(col.r, col.g, col.b, a * 0.16))
+		draw_circle(Vector2.ZERO, r * 0.28, Color(1, 1, 1, a * 0.85))
+
+
+## V391 : étoile de rayons éclair à l'impact (rayons longs et courts alternés, s'allongent vite puis s'estompent).
+class Starburst extends Node2D:
+	var col: Color = Color.WHITE
+	var n: int = 10
+	var length: float = 70.0
+	var life: float = 0.3
+	var rot: float = 0.0
+	var t: float = 0.0
+	func _init() -> void:
+		var m := CanvasItemMaterial.new()
+		m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		material = m
+	func _process(d: float) -> void:
+		t += d
+		if t >= life:
+			queue_free()
+			return
+		queue_redraw()
+	func _draw() -> void:
+		var k: float = clampf(t / life, 0.0, 1.0)
+		var grow: float = 1.0 - pow(1.0 - minf(1.0, k * 3.0), 3.0)
+		var a: float = 1.0 - k
+		for i: int in range(n):
+			var ang: float = rot + float(i) * TAU / float(n)
+			var l: float = length * (1.0 if i % 2 == 0 else 0.55) * grow
+			var dir := Vector2(cos(ang), sin(ang) * 0.8)
+			draw_line(dir * 6.0, dir * (6.0 + l), Color(col.r, col.g, col.b, a * 0.85), 3.0 * (1.0 - k * 0.6), true)
+			draw_line(dir * 6.0, dir * (6.0 + l * 0.6), Color(1, 1, 1, a), 1.5, true)
+
+
+## V391 : traînées lumineuses qui montent du sceau d'incantation (colonne de lumière autour du lanceur).
+class Rise extends Node2D:
+	var col: Color = Color.WHITE
+	var n: int = 9
+	var height: float = 110.0
+	var life: float = 0.7
+	var t: float = 0.0
+	var _seed: Array = []
+	func _init() -> void:
+		var m := CanvasItemMaterial.new()
+		m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		material = m
+		for i: int in range(9):
+			_seed.append([randf_range(-1.0, 1.0), randf_range(0.0, 0.35), randf_range(0.6, 1.0)])
+	func _process(d: float) -> void:
+		t += d
+		if t >= life:
+			queue_free()
+			return
+		queue_redraw()
+	func _draw() -> void:
+		var k: float = clampf(t / life, 0.0, 1.0)
+		for i: int in range(mini(n, _seed.size())):
+			var sd: Array = _seed[i]
+			var kk: float = clampf((k - float(sd[1])) / (1.0 - float(sd[1])), 0.0, 1.0)
+			if kk <= 0.0:
+				continue
+			var x: float = float(sd[0]) * 30.0
+			var y1: float = -height * float(sd[2]) * kk
+			var y0: float = y1 + 34.0 * (1.0 - kk * 0.5)
+			var a: float = sin(kk * PI)
+			draw_line(Vector2(x, minf(y0, 0.0)), Vector2(x, y1), Color(col.r, col.g, col.b, a * 0.8), 2.5, true)
+			draw_circle(Vector2(x, y1), 2.4, Color(1, 1, 1, a))
 
 
 ## Éclair en zigzag (de start à end).
