@@ -417,10 +417,18 @@ func _sync_void_pits() -> void:
 			var cell: Cell = cell_nodes[y][x]
 			var is_void: bool = String(obs.get(Vector2i(x, y), "")) == "void"
 			cell.visible = not is_void
-			cell.pit_left = not is_void and String(obs.get(Vector2i(x, y + 1), "")) == "void"
-			cell.pit_right = not is_void and String(obs.get(Vector2i(x + 1, y), "")) == "void"
+			# V394 : un vide relié au bord de l'île n'est plus dessiné (plus de « replat » en demi-hauteur) :
+			# la case voisine montre simplement sa falaise ; seuls les gouffres intérieurs gardent leur paroi.
+			var below := Vector2i(x, y + 1)
+			var right := Vector2i(x + 1, y)
+			var void_l: bool = not is_void and String(obs.get(below, "")) == "void"
+			var void_r: bool = not is_void and String(obs.get(right, "")) == "void"
+			cell.pit_left = void_l and not outer.has(below)
+			cell.pit_right = void_r and not outer.has(right)
+			cell.edge_left = (y == n - 1) or (void_l and outer.has(below))
+			cell.edge_right = (x == n - 1) or (void_r and outer.has(right))
 			cell.queue_redraw()
-			if is_void and _void_layer != null:
+			if is_void and _void_layer != null and not outer.has(Vector2i(x, y)):
 				var pit := VoidPit.new()
 				pit.position = grid_to_screen(x, y)
 				pit.setup(Vector2i(x, y), game_manager.fight_biome, n, outer.has(Vector2i(x, y)))
