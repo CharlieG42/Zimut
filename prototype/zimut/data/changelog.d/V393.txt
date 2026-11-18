@@ -1,0 +1,3 @@
+V393|Plateau de la Forêt : nouvelles tuiles de sol peintes (PNG 256×128, 6 variantes) à la place des aplats SVG : herbe avec grain et variations douces, trèfles, fleurs, pierres moussues, champignons et terre.
+V393|Les tuiles se raccordent sans couture d'une case à l'autre ; la lumière vient du haut gauche (liseré clair en haut, ombre fine en bas).
+V393|Les autres biomes gardent leurs tuiles actuelles ; le jeu bascule automatiquement sur un SVG si un PNG manque. Générateur ajouté dans tools/gen_tuiles_foret.py.
