@@ -964,6 +964,7 @@ func _play_cast(d: Dictionary) -> void:
 			_charge(v, elem, phys)   # V47 : charge d'incantation / élan côté lanceur
 			if not phys:
 				_rune(v.position, col)   # V73 : sceau de l'élément sous le lanceur
+				_rise(v.position, col)   # V391
 			v.tint_flash(col, 0.3, 0.35)
 			await _wait(0.12)
 			v.play_pose("attack", 0.6, String(d.get("spell", "")))
@@ -973,6 +974,9 @@ func _play_cast(d: Dictionary) -> void:
 			if t_hit > 0.0:
 				await _wait(t_hit)
 			var start: Vector2 = v.tip_position(v.position + Vector2(0, -50))
+			_glow(start, cols[1] if not phys else col, 5.0, 38.0, 0.26)   # V391 : éclat au départ du sort
+			if not phys:
+				_burst(start, col, 8, 90.0, 0.3, 3.0)
 			await _projectile_el(start, to_pos, elem, phys)
 		elif v != null:
 			if elem != "physical":
@@ -991,6 +995,8 @@ func _play_cast(d: Dictionary) -> void:
 		if v != null:
 			_charge(v, elem, false)
 			_rune(v.position, col)
+			_rise(v.position, col)   # V391 : colonne de traînées lumineuses
+			_glow(v.position + Vector2(0, -40), col, 10.0, 60.0, 0.4)
 			_burst(v.position + Vector2(0, -40), col, 18, 120.0, 0.7, 5.0, 180.0, Vector2.UP, Vector2(0, -60))
 			v.cast_pose(String(d.get("spell", "")))
 			v.tint_flash(col, 0.35, 0.4)
@@ -1021,6 +1027,43 @@ func _charge(v: EntityView, elem: String, phys: bool) -> void:
 	c.physical = phys
 	c.position = v.position + Vector2(0, -48)
 	_fx_layer.add_child(c)
+
+
+## V391 : lueur additive (départ du sort, flash d'impact).
+func _glow(pos: Vector2, col: Color, r0: float, r1: float, life: float) -> void:
+	if not _fx_ok(90):
+		return
+	var g := SpellFx.Glow.new()
+	g.col = col
+	g.r0 = r0
+	g.r1 = r1
+	g.life = life
+	g.position = pos
+	_fx_layer.add_child(g)
+
+
+## V391 : étoile de rayons à l'impact.
+func _starburst(pos: Vector2, col: Color, length: float, n: int = 10) -> void:
+	if not _fx_ok(90):
+		return
+	var sb := SpellFx.Starburst.new()
+	sb.col = col
+	sb.length = length
+	sb.n = n
+	sb.rot = randf() * TAU
+	sb.position = pos
+	_fx_layer.add_child(sb)
+
+
+## V391 : colonne de traînées lumineuses sous le lanceur.
+func _rise(pos: Vector2, col: Color) -> void:
+	if not _fx_ok(90):
+		return
+	var r := SpellFx.Rise.new()
+	r.col = col
+	r.n = 6 if GfxQuality.low() else 9
+	r.position = pos
+	_fx_layer.add_child(r)
 
 
 ## V47 : onde de choc d'une zone d'effet — un anneau par case, retardé selon la distance au centre.
@@ -1221,6 +1264,9 @@ func _impact(pos: Vector2, elem: String, crit: bool) -> void:
 	var col: Color = cols[0]
 	var col2: Color = cols[1]
 	var n: float = 1.6 if crit else 1.0
+	# V391 : flash lumineux + étoile de rayons communs à tous les éléments (plus marqués sur un critique)
+	_glow(pos, col2, 8.0, 74.0 if crit else 52.0, 0.3)
+	_starburst(pos, col, 96.0 if crit else 66.0, 12 if crit else 8)
 	match elem:
 		"fire":
 			_burst(pos, col, int(22.0 * n), 170.0, 0.6, 5.0, 180.0, Vector2.UP, Vector2(0, -140))

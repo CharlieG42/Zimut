@@ -1,0 +1,3 @@
+V392|Lancement des sorts : éclat lumineux au bout du bâton au départ du projectile, colonne de traînées lumineuses qui monte du sceau d'incantation, sceau plus détaillé (graduations tournantes et pastilles).
+V392|Impact : flash lumineux additif et étoile de rayons sur tous les éléments, plus grands sur un coup critique, en plus des effets propres à chaque élément.
+V392|Les nouveaux effets respectent la limite d'effets simultanés et sont allégés en qualité Économie.
