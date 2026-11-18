@@ -103,6 +103,9 @@ var _sq: Dictionary = {}           # animation → {"front": [Texture2D], "back"
 var _sq_cell: int = 0
 var _sq_act: String = ""           # animation d'action en cours ("attack", "cast", "hit") ou ""
 var _sq_act_t: float = 0.0
+var _dead_anim: bool = false      # V391 : animation de mort 3D en cours (puis maintenue couchée)
+var _dead_t: float = 0.0
+var _dead_dur: float = 1.0
 var _sq_act_dur: float = 0.4
 var _sq_tip: Vector2 = Vector2(-1.0, -1.0)   # bout du bâton dans l'image affichée (pixels de la cellule)
 var _ph: float = 96.0              # hauteur de l'image affichée (sert à poser les pieds sur la case)
@@ -470,13 +473,18 @@ func _set_filter_3d() -> void:
 func _seq_tex_3d() -> Texture2D:
 	var back: bool = _facing_back()
 	var view: String = "back" if back else "front"
+	sprite.flip_h = false   # V391 : le modèle se tourne (±34°) au lieu d'être inversé : l'arme reste dans la bonne main
+	var side: float = _side_3d()
+	if _dead_anim:
+		_h3d.show_pose("dead", clampf(_dead_t / _dead_dur, 0.0, 1.0), back, side)
+		return _h3d.texture()
 	if _sq_act != "":
 		var info: Dictionary = _sq[_sq_act]
 		var n: int = (info[view] as Array).size()
 		var ph: float = _sq_act_t / _sq_act_dur
 		if ph < 1.0:
 			# la planche cuite montre l'image i à la phase i/(n-1) pendant [i/n, (i+1)/n[ : on garde l'image clé au même instant
-			_h3d.show_pose(_sq_act, minf(ph * float(n) / float(n - 1), 1.0), back)
+			_h3d.show_pose(_sq_act, minf(ph * float(n) / float(n - 1), 1.0), back, side)
 			_sq_tip = _h3d.tip_px()
 			return _h3d.texture()
 		_sq_act = ""
@@ -488,7 +496,7 @@ func _seq_tex_3d() -> Texture2D:
 		ph2 = fposmod((_t - _walk_t0) / (_walk_step * 2.0), 1.0)
 	else:
 		ph2 = fposmod(_t / float(info2["dur"]) + _phase * 3.0 / float(n2), 1.0)
-	_h3d.show_pose(an, ph2, back)
+	_h3d.show_pose(an, ph2, back, side)
 	_sq_tip = _h3d.tip_px()
 	return _h3d.texture()
 
@@ -922,6 +930,8 @@ func _process(delta: float) -> void:
 	_lean = lerpf(_lean, clampf(_move_dx, -1.0, 1.0) * _a("penche_marche") if _moving else 0.0, minf(1.0, delta * 10.0))
 	if _sq_act != "":
 		_sq_act_t += delta
+	if _dead_anim:
+		_dead_t += delta
 	if _act_tex != null:
 		_pose_t -= delta
 		if _pose_t <= 0.0:
@@ -1028,10 +1038,29 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
+## V391 : côté vers lequel le modèle 3D est tourné (+1 droite de l'écran, −1 gauche) ; les ennemis regardent à gauche au départ.
+func _side_3d() -> float:
+	if _move_dx != 0.0:
+		return signf(_move_dx)
+	return -1.0 if String(entity.get("team", "")) == "enemy" else 1.0
+
+
+## V391 : lance l'animation de mort du modèle 3D (chute en arrière) ; renvoie sa durée, 0 sans clip « dead » (l'ancienne
+## mort — le faisceau tombe sur un personnage debout — reste alors en vigueur).
+func start_dead_anim() -> float:
+	if not _is3d() or not _sq.has("dead"):
+		return 0.0
+	_dead_anim = true
+	_dead_t = 0.0
+	_dead_dur = float(_sq["dead"]["dur"]) * _sq_mult(0.6)
+	_sq_act = ""
+	return _dead_dur
+
+
 func face_screen_dx(dx: float) -> void:
 	if absf(dx) > 0.1:
 		_move_dx = signf(dx)
-	if _has_tex and absf(dx) > 0.1:
+	if _has_tex and absf(dx) > 0.1 and not _is3d():
 		sprite.flip_h = dx < 0.0
 
 
@@ -1108,7 +1137,7 @@ func hit_react(strength: float = 1.0, from: Vector2 = Vector2.INF) -> void:
 	_flash = 1.0
 	_shake = 0.35 * strength
 	# recul et bascule à l'opposé de l'attaquant
-	var dir := Vector2(1.0 if (sprite != null and sprite.flip_h) else -1.0, 0.0)
+	var dir := Vector2(-_side_3d() if _is3d() else (1.0 if (sprite != null and sprite.flip_h) else -1.0), 0.0)
 	if from != Vector2.INF and (position - from).length() > 1.0:
 		dir = (position - from).normalized()
 	_kb = Vector2(dir.x * 10.0, dir.y * 4.0) * strength

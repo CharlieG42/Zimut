@@ -38,6 +38,7 @@ const MODELS := {
 			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
 			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
 			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+			"dead":   {"clip": "Dead", "t0": 0.0, "t1": 1.0, "dur": 1.0, "loop": false, "key": 0.0, "motion": "dead"},
 		}},
 	## Mage (V381) : modèle et rig de Charlie sous Blender (bâton dans la main droite, grimoire dans la gauche), clips cuits (préréglage « mage »).
 	"Mage": {"path": "res://assets/heroes3d/mage.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.45, 1.97), "ref_lum": 0.649,
@@ -47,6 +48,7 @@ const MODELS := {
 			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
 			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
 			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+			"dead":   {"clip": "Dead", "t0": 0.0, "t1": 1.0, "dur": 1.0, "loop": false, "key": 0.0, "motion": "dead"},
 		}},
 	## Géomancien (V382) : modèle et rig de Charlie sous Blender (bâton à torche dans la main droite, sphère de lumière flottant au-dessus de la gauche), clips cuits (préréglage « geomancien »).
 	"Géomancien": {"path": "res://assets/heroes3d/geomancien.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.29, 1.90), "ref_lum": 0.55,
@@ -56,6 +58,7 @@ const MODELS := {
 			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
 			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
 			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+			"dead":   {"clip": "Dead", "t0": 0.0, "t1": 1.0, "dur": 1.0, "loop": false, "key": 0.0, "motion": "dead"},
 		}},
 	## Kharaz le Flamboyant (V384) : boss de la nation du Brasier, modèle et rig de Charlie sous Blender (arc enflammé dans la main gauche, poing de feu à droite), clips cuits (préréglage « kharaz »).
 	"Kharaz": {"path": "res://assets/heroes3d/kharaz.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.45, 1.97), "ref_lum": 0.55,
@@ -65,6 +68,7 @@ const MODELS := {
 			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
 			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
 			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+			"dead":   {"clip": "Dead", "t0": 0.0, "t1": 1.0, "dur": 1.0, "loop": false, "key": 0.0, "motion": "dead"},
 		}},
 	## Assassin (V380) : modèle et rig de Charlie sous Blender (deux dagues), clips cuits (préréglage « assassin »).
 	"Assassin": {"path": "res://assets/heroes3d/assassin.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.626, 1.991), "ref_lum": 0.25,
@@ -74,6 +78,7 @@ const MODELS := {
 			"attack": {"clip": "Attack", "t0": 0.0, "t1": 0.9, "dur": 0.7, "loop": false, "key": 0.55},
 			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.2, "dur": 1.0, "loop": false, "key": 0.5},
 			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+			"dead":   {"clip": "Dead", "t0": 0.0, "t1": 1.0, "dur": 1.0, "loop": false, "key": 0.0, "motion": "dead"},
 		}},
 	"Tharok": {"path": "res://assets/heroes3d/tharok.glb", "root_bone": "spine", "gain": 1.0, "ref_cam": Vector2(3.62, 1.545), "ref_lum": 0.425,
 		"clips": {
@@ -119,6 +124,7 @@ const MODELS := {
 			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
 			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
 			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+			"dead":   {"clip": "Dead", "t0": 0.0, "t1": 1.0, "dur": 1.0, "loop": false, "key": 0.0, "motion": "dead"},
 		}},
 	## Druide (V383) : modèle et rig de Charlie (bâton à cristal dans la main droite), clips cuits (préréglage « druide »).
 	"Druide": {"path": "res://assets/heroes3d/druide.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.54, 2.0), "ref_lum": 0.55,
@@ -128,6 +134,7 @@ const MODELS := {
 			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
 			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
 			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+			"dead":   {"clip": "Dead", "t0": 0.0, "t1": 1.0, "dur": 1.0, "loop": false, "key": 0.0, "motion": "dead"},
 		}},
 	## Heal (V383) : modèle et rig de Charlie (bâton à sphère dans la main droite, robe longue : jambes peu ouvertes), clips cuits (préréglage « heal »).
 	"Heal": {"path": "res://assets/heroes3d/heal.glb", "root_bone": "base", "gain": 1.0, "ref_cam": Vector2(4.45, 1.97), "ref_lum": 0.55,
@@ -137,6 +144,7 @@ const MODELS := {
 			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.55},
 			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
 			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+			"dead":   {"clip": "Dead", "t0": 0.0, "t1": 1.0, "dur": 1.0, "loop": false, "key": 0.0, "motion": "dead"},
 		}},
 	## Invocateur (V379) : modèle et rig de Charlie sous Blender (16 os nommés en français), sans animation d'origine ;
 	## les clips sont cuits par tools/anim_heros_blender.gd (préréglage « invocateur »). Lanterne dans la main gauche,
@@ -148,6 +156,7 @@ const MODELS := {
 			"attack": {"clip": "Attack", "t0": 0.0, "t1": 1.0, "dur": 0.8, "loop": false, "key": 0.6},
 			"cast":   {"clip": "Cast", "t0": 0.0, "t1": 1.4, "dur": 1.2, "loop": false, "key": 0.5},
 			"hit":    {"clip": "Hit", "t0": 0.0, "t1": 0.5, "dur": 0.4, "loop": false, "key": 0.2},
+			"dead":   {"clip": "Dead", "t0": 0.0, "t1": 1.0, "dur": 1.0, "loop": false, "key": 0.0, "motion": "dead"},
 		}},
 }
 ## Classe du joueur (nom interne) ou nom de boss -> modèle.
@@ -211,6 +220,14 @@ var _cell_px: float = float(CELL)
 ## V386 : facteur de résolution effectif (texels du rendu par pixel logique de cellule), au moins RES_K (384 px) ; EntityView le règle
 ## pour que la réduction à l'écran soit de 2 pour 1 (filtre de boîte exact avec le filtrage linéaire).
 var res_k: float = float(RES_K)
+const BLEND_T := 0.12        # V391 : durée du fondu entre deux actions (s)
+const BLEND_STEPS := 6       # pas de fondu rendus (chaque pas = un rendu du modèle)
+const SIDE_YAW := 34.0       # V391 : le héros se tourne de ±34° vers la droite ou la gauche de l'écran (plus de miroir)
+var _cur_anim: String = ""
+var _blend_from: Array = []
+var _blend_t0: int = 0
+var _blend_w: float = 1.0
+var _side: float = 0.0
 var _ap: AnimationPlayer = null
 var _clips: Dictionary = {}
 
@@ -246,7 +263,9 @@ func setup(classe: String, px_scale: float = 0.0) -> bool:
 	if px_scale > 0.0:
 		# Suréchantillonnage 2×2 (RES_K = 2, soit 384 px) : réduit exactement de moitié à l'écran, le filtrage linéaire donne
 		# alors un vrai filtre de boîte (arêtes lissées sans flou). Plus grand si l'écran agrandit le plateau (tablette, PC).
-		res_k = clampf(px_scale * float(RES_K), float(RES_K), float(RES_K) * 1.5)
+		# V391 : réglage « Qualité graphique » Économie : 256 px au lieu de 384 (réduction ≈ 1,5 pour 1), moins de pixels par héros
+		var floor_k: float = 1.35 if GfxQuality.low() else float(RES_K)
+		res_k = clampf(px_scale * floor_k, floor_k, floor_k * 1.5)
 	var side: int = roundi(float(CELL) * res_k)
 	res_k = float(side) / float(CELL)
 	vp = SubViewport.new()
@@ -558,16 +577,42 @@ func _alpha_bbox(img: Image) -> Rect2i:
 
 ## Pose + rendu demandé. Phase ∈ [0, 1] de l'animation [anim] (voir HeroAnim). Rien n'est refait si la pose ne change pas
 ## (phase arrondie au 1/72).
-func show_pose(anim: String, phase: float, back: bool) -> void:
+func show_pose(anim: String, phase: float, back: bool, side: float = 0.0) -> void:
 	if not ready_ok:
 		return
-	var key: String = "%s|%d|%d" % [anim, roundi(phase * 72.0), 1 if back else 0]
+	# V391 : fondu entre deux actions (0,12 s) : la pose affichée juste avant le changement sert de point de départ
+	var wq: int = BLEND_STEPS
+	if _ap != null:
+		if anim != _cur_anim:
+			if _cur_anim != "":
+				_blend_from = _snapshot()
+				_blend_t0 = Time.get_ticks_msec()
+			_cur_anim = anim
+		if not _blend_from.is_empty():
+			var w: float = clampf(float(Time.get_ticks_msec() - _blend_t0) / 1000.0 / BLEND_T, 0.0, 1.0)
+			wq = roundi(w * float(BLEND_STEPS))
+			if wq >= BLEND_STEPS:
+				_blend_from = []
+				wq = BLEND_STEPS
+	_blend_w = float(wq) / float(BLEND_STEPS)
+	_side = side
+	var key: String = "%s|%d|%d|%d|%d" % [anim, roundi(phase * 72.0), 1 if back else 0, wq, roundi(side)]
 	if key == _last_key:
 		return
 	_last_key = key
 	_set_pose(anim, phase, back)
 	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 	rendered += 1
+
+
+## Rotation et position locale de chaque os dans la pose actuelle (point de départ d'un fondu).
+func _snapshot() -> Array:
+	var out: Array = []
+	if _sk == null:
+		return out
+	for i: int in range(_sk.get_bone_count()):
+		out.append([_sk.get_bone_pose_rotation(i), _sk.get_bone_pose_position(i)])
+	return out
 
 
 ## Position (pixels de la texture, cellule × RES_K) du bout du bâton dans la pose affichée.
@@ -622,6 +667,11 @@ func _set_pose_clip(anim: String, ph: float, back: bool) -> void:
 		_ap.seek(t, true)
 		_ap.pause()
 		_ap.advance(0.0)
+		if _blend_w < 1.0 and not _blend_from.is_empty():
+			for i: int in range(mini(_blend_from.size(), _sk.get_bone_count())):
+				var f: Array = _blend_from[i]
+				_sk.set_bone_pose_rotation(i, (f[0] as Quaternion).slerp(_sk.get_bone_pose_rotation(i), _blend_w))
+				_sk.set_bone_pose_position(i, (f[1] as Vector3).lerp(_sk.get_bone_pose_position(i), _blend_w))
 	var dy: float = 0.0
 	var pitch: float = 0.0
 	var s1: float = sin(clampf(ph, 0.0, 1.0) * PI)
@@ -636,8 +686,15 @@ func _set_pose_clip(anim: String, ph: float, back: bool) -> void:
 			pitch = -6.0 * s1
 		"hit":
 			pitch = -12.0 * s1
+		"dead":
+			# V391 : le corps entier bascule en arrière à partir de 30 % du clip et finit couché ; on relève un peu le modèle
+			# (le pivot est aux pieds, le dos passerait sous le sol)
+			var f2: float = smoothstep(0.30, 1.0, clampf(ph, 0.0, 1.0))
+			pitch = -86.0 * f2 * f2
+			dy = 0.07 * f2
 	_holder.position = Vector3(0, dy * HERO_H, 0)
-	_holder.rotation_degrees = Vector3(pitch, 180.0 if back else 0.0, 0)
+	var yaw: float = (180.0 if back else 0.0) + _side * SIDE_YAW * (-1.0 if back else 1.0)
+	_holder.rotation_degrees = Vector3(pitch, yaw, 0)
 
 
 func _set_pose(anim: String, ph: float, back: bool) -> void:
