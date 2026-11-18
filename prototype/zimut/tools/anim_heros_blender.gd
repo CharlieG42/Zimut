@@ -123,6 +123,27 @@ static func _idle_extra(t: float, free: String, lg: float) -> Dictionary:
 	return d
 
 
+## V390 : attaque au bâton engagée en trois temps (armement ≈ 0,3 s, impact ≈ 0,57, retour) : le bras repart en arrière, le
+## buste se tord et se penche en arrière, puis fente vers l'avant, torsion inverse et bras balayé. [hand] = "r" ou "l" (main
+## du bâton ; la torsion du buste est inversée pour la main gauche), [lg] = amplitude des jambes (robe longue : moins).
+static func _staff_attack(t: float, lg: float, hand: String) -> Dictionary:
+	var o: String = "l" if hand == "r" else "r"
+	var tw: float = 1.0 if hand == "r" else -1.0
+	var leg_f: String = hand   # jambe qui avance : celle du côté du bâton
+	var leg_b: String = o
+	return {
+		"bras." + hand: Vector3(_curve([0, -25, -60, 25, 100, 80, 30, 0], t), 0, 0),
+		"avantbras." + hand: Vector3(_curve([0, -15, -40, -20, -5, -15, -12, 0], t), 0, 0),
+		"main." + hand: Vector3(_curve([0, 15, 35, -15, -50, -35, -10, 0], t), 0, 0),
+		"bras." + o: Vector3(_curve([0, 10, 25, -10, -30, -22, -6, 0], t), 0, 0),
+		"thorax": Vector3(_curve([0, 6, 12, -8, -24, -18, -6, 0], t), tw * _curve([0, -10, -22, 6, 30, 22, 8, 0], t), 0),
+		"tete": Vector3(_curve([0, 2, 4, -3, -10, -7, -2, 0], t), tw * _curve([0, 6, 12, -4, -16, -12, -4, 0], t), 0),
+		"cuisse." + leg_f: Vector3(_curve([0, -6, -12, 14, 30, 24, 8, 0], t) * lg, 0, 0),
+		"tibia." + leg_f: Vector3(_curve([0, 4, 10, -8, -20, -14, -4, 0], t) * lg, 0, 0),
+		"cuisse." + leg_b: Vector3(_curve([0, 4, 8, -8, -20, -15, -4, 0], t) * lg, 0, 0),
+		"tibia." + leg_b: Vector3(_curve([0, 0, 6, -4, -10, -6, 0, 0], t) * lg, 0, 0)}
+
+
 func _preset(name: String) -> Dictionary:
 	match name:
 		# Assassin (V380) : deux dagues. Garde basse, genoux fléchis ; attaque = coup d'estoc de la dague droite avec fente ;
@@ -193,13 +214,7 @@ func _preset(name: String) -> Dictionary:
 						"bras.l": Vector3(-10.0 * p, 0, 0), "bras.r": Vector3(18.0 * p, 0, 0),
 						"thorax": Vector3(-3.0, 6.0 * p, 0)})},
 				"Attack": {"dur": 1.0, "loop": false, "fn": func(t: float) -> Dictionary:
-					var a: float = _curve([0, -0.3, -0.45, 0.8, 1.0, 0.85, 0.2, 0], t)
-					return rest.call({"bras.l": Vector3(55.0 * a, 0, 0), "avantbras.l": Vector3(-15.0 * maxf(a, 0.0), 0, 0),
-						"main.l": Vector3(-30.0 * maxf(a, 0.0), 0, 0),
-						"bras.r": Vector3(-12.0 * a, 0, 0),
-						"thorax": Vector3(-12.0 * a, -14.0 * a, 0), "tete": Vector3(-4.0 * a, 8.0 * a, 0),
-						"cuisse.l": Vector3(18.0 * maxf(a, 0.0), 0, 0), "tibia.l": Vector3(-12.0 * maxf(a, 0.0), 0, 0),
-						"cuisse.r": Vector3(-10.0 * maxf(a, 0.0), 0, 0)})},
+					return rest.call(_staff_attack(t, 1.0, "l"))},
 				"Cast": {"dur": 1.4, "loop": false, "fn": func(t: float) -> Dictionary:
 					var up: float = _curve([0, 0.35, 0.85, 1, 1, 0.9, 0.4, 0], t)
 					var z: float = 150.0 * up
@@ -280,13 +295,7 @@ func _preset(name: String) -> Dictionary:
 						"bras.r": Vector3(-10.0 * p, 0, 0), "bras.l": Vector3(18.0 * p, 0, 0),
 						"thorax": Vector3(-3.0, -6.0 * p, 0)})},
 				"Attack": {"dur": 1.0, "loop": false, "fn": func(t: float) -> Dictionary:
-					var a: float = _curve([0, -0.3, -0.45, 0.8, 1.0, 0.85, 0.2, 0], t)
-					return rest.call({"bras.r": Vector3(55.0 * a, 0, 0), "avantbras.r": Vector3(-15.0 * maxf(a, 0.0), 0, 0),
-						"main.r": Vector3(-30.0 * maxf(a, 0.0), 0, 0),
-						"bras.l": Vector3(-12.0 * a, 0, 0),
-						"thorax": Vector3(-12.0 * a, 14.0 * a, 0), "tete": Vector3(-4.0 * a, -8.0 * a, 0),
-						"cuisse.r": Vector3(18.0 * lg * maxf(a, 0.0), 0, 0), "tibia.r": Vector3(-12.0 * lg * maxf(a, 0.0), 0, 0),
-						"cuisse.l": Vector3(-10.0 * lg * maxf(a, 0.0), 0, 0)})},
+					return rest.call(_staff_attack(t, lg, "r"))},
 				"Cast": {"dur": 1.4, "loop": false, "fn": func(t: float) -> Dictionary:
 					var up: float = _curve([0, 0.35, 0.85, 1, 1, 0.9, 0.4, 0], t)
 					var z: float = 150.0 * up

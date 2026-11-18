@@ -1,0 +1,3 @@
+V390|Plus de touffes d'herbe ni de cailloux au pied des personnages (héros, ennemis, invocations).
+V390|Personnages 3D moins « flottants » : le modèle ne monte et ne descend plus à l'écran (le repos animé suffit), et l'ombre de contact sous les pieds est plus large et plus sombre.
+V390|Attaques au bâton plus engagées (Druide, Mage, Géomancien, Heal, Sylvain) : armement du bras vers l'arrière, buste qui se tord et se penche, fente vers l'avant, bras balayé et torsion inverse à l'impact.

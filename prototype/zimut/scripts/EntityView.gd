@@ -75,7 +75,6 @@ const OUTLINE_DIRS: Array[Vector2] = [Vector2(-0.7071, -0.7071), Vector2(0.7071,
 var _outl: Array[Sprite2D] = []
 ## Contour / flash par shader : coupé sur mobile (voir _load_texture). Modifiable pour reproduire le rendu du téléphone.
 static var shader_outline: bool = not OS.has_feature("mobile")
-var _front: FrontTufts = null
 var _base_sc: float = 1.0
 var _light: Dictionary = {}
 var _tilt: float = 0.0          # inclinaison (coup reçu), revient à 0
@@ -161,33 +160,6 @@ static func light_of(biome: String) -> Dictionary:
 	return LIGHT.get(biome, LIGHT["Forêt"])
 
 
-## Touffes d'herbe / cailloux devant les pieds : le personnage « entre » dans la case.
-class FrontTufts extends Node2D:
-	var col: Color = Color(0.32, 0.60, 0.22)
-	var pebbles: bool = false
-	var seed_v: int = 0
-	var t: float = 0.0
-	func _draw() -> void:
-		var rng := RandomNumberGenerator.new()
-		rng.seed = seed_v
-		var n: int = 5
-		for i: int in range(n):
-			var x: float = -26.0 + float(i) * 13.0 + rng.randf_range(-3.0, 3.0)
-			var y: float = 8.0 + rng.randf_range(-1.5, 2.5)
-			if pebbles:
-				var r: float = rng.randf_range(2.2, 3.6)
-				draw_circle(Vector2(x, y), r, col.darkened(0.35))
-				draw_circle(Vector2(x - r * 0.3, y - r * 0.35), r * 0.45, col.lightened(0.25))
-			else:
-				var hgt: float = rng.randf_range(7.0, 12.0)
-				var sway: float = sin(t * 1.8 + float(i) * 1.3 + float(seed_v % 5)) * 1.8
-				for k: int in range(3):
-					var bx: float = x + float(k - 1) * 2.4
-					var tip := Vector2(bx + float(k - 1) * 2.2 + sway, y - hgt + float(absi(k - 1)) * 2.5)
-					draw_colored_polygon(PackedVector2Array([Vector2(bx - 1.6, y), tip, Vector2(bx + 1.6, y)]),
-						col.lightened(0.10 * float(k)) if k != 1 else col.darkened(0.05))
-
-
 ## Couleur de la pastille de numéro d'ordre : héros bleu, ennemi or, invocation verte.
 static func ord_color(e: Dictionary) -> Color:
 	if String(e.get("entity_type", "")) == "Summon":
@@ -197,6 +169,7 @@ static func ord_color(e: Dictionary) -> Color:
 	return Color(0.45, 0.70, 1.0)
 
 
+var _contact: Sprite2D = null   # ombre de contact sous les pieds (V390 : plus marquée pour les modèles 3D)
 var _base_mod: Color = Color.WHITE   # V68 : teinte permanente (variantes de mécanismes)
 static var _contact_tex: GradientTexture2D = null
 static func _contact_texture() -> GradientTexture2D:
@@ -222,6 +195,7 @@ func setup(e: Dictionary) -> void:
 	_light = light_of(_current_biome())
 	# V62 : ombre de contact (ellipse douce sous les pieds) → l'unité se détache du sol
 	var contact := Sprite2D.new()
+	_contact = contact
 	contact.texture = _contact_texture()
 	contact.position = Vector2(0, -4)
 	contact.scale = Vector2(1.5, 0.62)
@@ -481,6 +455,9 @@ func _snap_px(local_pos: Vector2) -> Vector2:
 ## V386 : le projet affiche les sprites en « nearest » ; un rendu 3D réduit ainsi crénelle. Le rendu étant à la taille écran,
 ## le filtrage linéaire donne un trait propre pour le sprite et ses copies (contour, liseré, ombre).
 func _set_filter_3d() -> void:
+	if _contact != null:   # V390 : ancrage au sol — ellipse de contact plus large et plus sombre
+		_contact.scale = Vector2(1.8, 0.74)
+		_contact.self_modulate = Color(0, 0, 0, 0.82)
 	var f: int = CanvasItem.TEXTURE_FILTER_LINEAR
 	sprite.texture_filter = f
 	_rim.texture_filter = f
@@ -759,15 +736,6 @@ func _setup_depth() -> void:
 	_rim.texture = tex
 	_rim.self_modulate = _light["rim"]
 	sprite.self_modulate = _light["tint"]
-	if not _is_static() and not bool(entity.get("fly", false)):
-		_front = FrontTufts.new()
-		_front.seed_v = int(entity.get("uid", 0)) * 31 + 7
-		var b: String = _current_biome()
-		# (couleurs des biomes historiques recopiées de Cell.gd : ne pas dépendre de Cell ici)
-		var legacy := {"Forêt": Color(0.32, 0.60, 0.22), "Montagne": Color(0.38, 0.48, 0.30), "Désert": Color(0.60, 0.55, 0.25), "Donjon": Color(0.30, 0.30, 0.38)}
-		_front.col = Nations.cell_palette(b).get("tuft", Color(0.32, 0.6, 0.22)) if Nations.is_new(b) else legacy.get(b, legacy["Forêt"])
-		_front.pebbles = b in ["Rouages", "Donjon", "Brasier", "Cristaux", "Ombres", "Désert"]
-		add_child(_front)
 
 
 ## Profondeur du plateau : 0 au fond (haut de l'écran), 1 au premier plan.
@@ -974,14 +942,14 @@ func _process(delta: float) -> void:
 	if _has_tex and sprite != null:
 		var still: bool = _is_static()
 		var vr: float = _a("vitesse_repos")
-		var bob: float = 0.0 if still else sin(_t * vr + _phase) * _a("flottement")
+		var bob: float = 0.0 if (still or _is3d()) else sin(_t * vr + _phase) * _a("flottement")   # V390 : un modèle 3D porte son propre repos ; plus de flottement
 		var hop_n: float = absf(sin(_t * 13.0)) if _moving else 0.0
 		var hop: float = hop_n * _a("rebond_marche")
 		# profondeur : un peu plus petit et voilé au fond du plateau
 		var df: float = _depth_factor()
 		var dsc: float = lerpf(0.94, 1.04, df)
 		var sc: float = _base_sc * dsc
-		var breathe: float = 0.0 if still else sin(_t * vr + _phase) * _a("respiration")
+		var breathe: float = 0.0 if (still or _is3d()) else sin(_t * vr + _phase) * _a("respiration")
 		var squash: float = (1.0 - hop_n) * _a("ecrasement_marche") if _moving else 0.0
 		var etir: float = _stretch * _a("etirement_attaque")
 		var sx: float = sc * (1.0 + etir * 0.10 + squash * 0.6)
@@ -989,7 +957,7 @@ func _process(delta: float) -> void:
 		var base_pos := Vector2(randf_range(-1.0, 1.0) * _shake * 6.0, -_ph * 0.5 + 6.0 - bob - hop) + _kb
 		sprite.scale = Vector2(sx, sy)
 		sprite.position = _snap_px(base_pos) if _is3d() else base_pos
-		sprite.rotation = _tilt + (0.0 if still else sin(_t * 1.3 + _phase) * _a("balancement"))
+		sprite.rotation = _tilt + (0.0 if (still or _is3d()) else sin(_t * 1.3 + _phase) * _a("balancement"))
 		sprite.skew = _lean
 		var haze: Color = Color(0.86, 0.90, 1.0).lerp(Color(1, 1, 1), df)
 		var tint: Color = _light.get("tint", Color.WHITE)
@@ -1036,11 +1004,6 @@ func _process(delta: float) -> void:
 			_ghost.rotation = sprite.rotation
 			_ghost.skew = sprite.skew
 			_ghost.flip_h = sprite.flip_h
-		if _front != null:
-			_front.t = _t
-			_front.modulate.a = 0.55 if _is3d() else 1.0
-			_front.scale = Vector2.ONE * (0.8 if _is3d() else 1.0)
-			_front.queue_redraw()
 		if _mat != null:
 			_mat.set_shader_parameter("flash", _flash)
 			# Contour sombre permanent pour détacher les sprites du feuillage et du sol.
