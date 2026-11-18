@@ -191,7 +191,7 @@ const JCC_INTRO := [
 	"À chaque tour : +1 mana (max 10) et vous piochez 1 carte. Jouez vos cartes en payant leur coût en mana (gemme bleue).",
 ]
 const JCC_BOARD := [
-	"Le plateau fait 4 colonnes × 6 lignes : vous déployez en bas, l'adversaire en haut.",
+	"Le plateau fait 4 colonnes × 6 lignes : vous déployez sur vos 2 lignes du bas (côté héros), l'adversaire sur celles du haut.",
 	"Une créature posée ce tour a le mal d'invocation : elle ne peut ni attaquer ni lancer son sort.",
 	"Sélectionnez une de vos créatures : cliquez une case dorée pour la déplacer (1 PM par case), ou « Attaquer » puis une cible à portée PO (1 PA).",
 ]

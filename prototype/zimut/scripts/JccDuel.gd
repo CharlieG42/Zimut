@@ -113,6 +113,12 @@ func back_row_y(s: int) -> int:
 	return ROWS - 1 if s == 0 else 0
 
 
+## Zone de déploiement : les 2 lignes les plus proches de son héros.
+func deploy_rows(s: int) -> Array:
+	var by: int = back_row_y(s)
+	return [by, by - 1] if s == 0 else [by, by + 1]
+
+
 ## Distance d'une case à la ligne du héros adverse (le héros est hors plateau, derrière sa ligne arrière).
 func hero_dist_to(s: int, cell: int) -> int:
 	var p := cell_xy(cell)
@@ -203,11 +209,15 @@ func start_turn(s: int) -> void:
 		cr["sick"] = false
 		cr["attacked"] = false
 		cr["used"] = false
+		cr["frozen"] = false
 		cr["pa"] = int(cr.get("max_pa", 1))
 		cr["pm"] = int(cr.get("max_pm", 2))
 		if int(cr["stun"]) > 0:
 			cr["attacked"] = true
 			cr["used"] = true
+			cr["pa"] = 0
+			cr["pm"] = 0
+			cr["frozen"] = true
 			cr["stun"] = int(cr["stun"]) - 1
 	# poison
 	for c: Variant in creatures(s):
@@ -274,11 +284,11 @@ func targets_for(s: int, cible: String) -> Array:
 			if cible == "allie_ou_heros":
 				out.append({"side": s, "lane": -1})
 		"voie":
-			# dépôt : cases libres de la ligne arrière du camp
-			var by: int = back_row_y(s)
-			for x in COLS:
-				if unit_at(x, by) == null:
-					out.append({"side": s, "lane": xy_cell(x, by)})
+			# dépôt : cases libres des 2 lignes proches du héros
+			for by: Variant in deploy_rows(s):
+				for x in COLS:
+					if unit_at(x, int(by)) == null:
+						out.append({"side": s, "lane": xy_cell(x, int(by))})
 		_:
 			out.append({})
 	return out
@@ -357,6 +367,62 @@ func can_use_sort(s: int, lane: int) -> bool:
 	if int(cr["sort_cost"]) > int(sides[s]["mana"]):
 		return false
 	return not targets_for(s, String(cr["cible"])).is_empty()
+
+
+## Raison lisible pour laquelle le sort d'une unité n'est pas utilisable ("" si utilisable).
+func sort_block_reason(s: int, lane: int) -> String:
+	var c: Variant = creature_at(s, lane)
+	if c == null or is_over() or s != current:
+		return ""
+	var cr: Dictionary = c
+	if String(cr["sort"]) == "":
+		return "Cette unité n'a pas de sort."
+	if bool(cr.get("frozen", false)):
+		return "Étourdie : ne peut rien faire ce tour."
+	if bool(cr["sick"]):
+		return "Vient d'être invoquée : sort utilisable au prochain tour."
+	if bool(cr["used"]) or int(cr.get("pa", 1)) < 1:
+		return "Plus de PA ce tour."
+	if int(cr["sort_cost"]) > int(sides[s]["mana"]):
+		return "Mana insuffisant (%d requis)." % int(cr["sort_cost"])
+	if targets_for(s, String(cr["cible"])).is_empty():
+		return "Aucune cible valide."
+	return ""
+
+
+func attack_block_reason(s: int, lane: int) -> String:
+	var c: Variant = creature_at(s, lane)
+	if c == null or is_over() or s != current:
+		return ""
+	var cr: Dictionary = c
+	if int(cr["atk"]) <= 0:
+		return "Cette unité n'attaque pas (ATK 0)."
+	if bool(cr.get("frozen", false)):
+		return "Étourdie : ne peut rien faire ce tour."
+	if bool(cr["sick"]):
+		return "Vient d'être invoquée : attaque au prochain tour."
+	if bool(cr["attacked"]) or int(cr.get("pa", 1)) < 1:
+		return "Plus de PA ce tour."
+	if attack_targets(s, lane).is_empty():
+		return "Aucune cible à portée (PO %d) : avancez avec les PM." % int(cr.get("po", 1))
+	return ""
+
+
+func play_block_reason(s: int, hand_idx: int) -> String:
+	if is_over() or s != current:
+		return ""
+	var hand: Array = sides[s]["hand"]
+	if hand_idx < 0 or hand_idx >= hand.size():
+		return ""
+	var c: Dictionary = hand[hand_idx]
+	if int(c["cost"]) > int(sides[s]["mana"]):
+		return "Mana insuffisant (%d requis)." % int(c["cost"])
+	if String(c["type"]) == "Creature":
+		if targets_for(s, "voie").is_empty():
+			return "Zone de déploiement pleine."
+	elif targets_for(s, String(c["cible"])).is_empty():
+		return "Aucune cible valide."
+	return ""
 
 
 func use_sort(s: int, lane: int, target: Dictionary = {}) -> bool:
@@ -566,13 +632,12 @@ func _apply(s: int, effet: String, valeur: String, duree: int, target: Dictionar
 				_ev("poison", tside, tlane, v)
 		"invoquer":
 			var lane: int = int(target.get("lane", -1))
-			var by: int = back_row_y(s)
-			if lane < 0 or lane >= LANES or creature_at(s, lane) != null or cell_xy(lane).y != by:
+			if lane < 0 or lane >= LANES or creature_at(s, lane) != null or not (cell_xy(lane).y in deploy_rows(s)):
 				lane = -1
-				for x in COLS:
-					if unit_at(x, by) == null:
-						lane = xy_cell(x, by)
-						break
+				for by: Variant in deploy_rows(s):
+					for x in COLS:
+						if lane < 0 and unit_at(x, int(by)) == null:
+							lane = xy_cell(x, int(by))
 			if lane >= 0:
 				var tok: Dictionary = _make_instance(valeur)
 				if not tok.is_empty():
@@ -608,6 +673,9 @@ func _stun(s: int, lane: int, n: int) -> void:
 	# une créature déjà étourdie ce tour-ci perd aussi ses actions restantes
 	cr["attacked"] = true
 	cr["used"] = true
+	cr["pa"] = 0
+	cr["pm"] = 0
+	cr["frozen"] = true
 	_ev("stun", s, lane, n)
 
 

@@ -45,7 +45,7 @@ func _boot() -> void:
 	d.side(0)["hand"] = [d._make_instance("m_gobelin"), d._make_instance("s_etincelle")]
 	m._refresh()
 	m._on_hand_card(0)
-	check(m._sel_hand == 0 and m._targets.size() == 4, "carte créature sélectionnée : 4 cases arrière libres ciblables")
+	check(m._sel_hand == 0 and m._targets.size() == 8, "carte créature sélectionnée : 8 cases de déploiement (2 lignes) ciblables")
 	m._on_slot(21)
 	await create_timer(1.0).timeout
 	check(d.creature_at(0, 21) != null and not m._busy, "le Gobelin est posé en (1,5) par un toucher")

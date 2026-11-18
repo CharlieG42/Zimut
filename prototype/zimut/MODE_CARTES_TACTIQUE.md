@@ -209,3 +209,17 @@ Retour de test utilisateur après V402 : le plateau à 4 voies est remplacé par
 **Tutoriel** : Gultur explique le mode en début de duel (3 bulles enchaînées, affichées une seule fois) : règles du plateau 4×6, mana/pioche, et lecture d'une carte (PA / PM / PO / mana) — `Gultur.JCC_INTRO/JCC_BOARD/JCC_STATS` + `CardDuelUI._tutorial()`.
 
 Tests : `tests/test_jcc.gd` (règles réécrites pour la grille : déploiement ligne arrière, PM en BFS, PO, PA attaque/sort, héros à portée, fosse) et `tests/test_jcc_ui.gd` (duel par l'interface, cases 21/22).
+
+## 13. Audit des sorts, lisibilité du plateau, défilement tactile
+
+Retour de test : « des sorts ne fonctionnaient pas alors que leur descriptif laissait penser qu'ils le devraient ».
+
+**Audit** : `tests/test_jcc_sorts.gd` joue au niveau moteur chacun des 28 sorts-cartes et 33 sorts de créatures et vérifie l'effet annoncé ; `tests/test_jcc_ui_sorts.gd` joue les 61 sorts par l'interface (touchers simulés). Bug réel trouvé : une unité **étourdie pouvait encore se déplacer** (PM non remis à 0) — corrigé (`pa = pm = 0`, drapeau `frozen`).
+
+**Causes de « sort qui ne marche pas »** : indisponibilités jamais expliquées (créature invoquée ce tour, plus de PA, mana insuffisant, unité étourdie, aucune cible) et déploiement limité à une seule ligne. Désormais :
+- `JccDuel.play_block_reason / sort_block_reason / attack_block_reason` donnent la raison, affichée en rouge dans la barre d'actions quand un bouton est grisé ;
+- zone de déploiement = **2 lignes proches du héros** (`deploy_rows`) ; l'invocation de jetons l'utilise aussi.
+
+**Lisibilité** : plateau élargi (cases 280×96, `CardDuelUI.BOARD/CELL`) ; en mode plateau (`JccCardView._draw_board_body`) : illustration à gauche, nom jamais masqué, pastilles **PA / PM / PO** étiquetées (valeurs courantes, grisées à 0), puces **ATQ / PV**, gemme de mana, pastille de sort, statuts (ZZ étourdi, poison, zZ invocation).
+
+**Constructeur de deck** : glisser n'importe où dans la zone des cartes ou du deck fait défiler (`CardDeckBuilder._drag_scroll`) ; le tap se déclenche au relâchement (`JccCardView.release_tap`) et un glissement ne sélectionne pas de carte (`tests/test_jcc_deck_scroll.gd`). **Non testé sur téléphone.**
