@@ -169,11 +169,25 @@ Implémentation livrée (branche de la PR) :
 
 Retour de test utilisateur (tuile « Cartes » lançait un combat normal) — correctif : la tuile pose **à la fois** la clé `battle_mode = "cards"` dans la sauvegarde **et** le drapeau en mémoire `GameManager.battle_mode` ; `start_battle()` donne la priorité à la clé de sauvegarde quand elle est non vide, sinon conserve le drapeau (cas où l'écriture disque échoue, ex. renommage atomique indisponible). Garde-fou : `campaign_mode != ""` (combats d'Aventure/Conquête) force `battle_mode = ""`, et `_launch_campaign_mode` efface la clé. Test de régression ajouté dans `tests/test_card_deck.gd` (`_test_battle_mode_flag`).
 
-## 11. V401 — refonte du mode Cartes
+## 11. V401 — refonte : le mode Cartes devient un vrai JCC à voies
 
-- **Deck partagé par camp** (`GameManager._init_card_decks`) : une pioche, une main et une défausse par côté, plus de main par entité. Le deck du joueur vient de `cards_deck` dans la sauvegarde ; les ennemis jouent « Deck de test ennemis ».
-- **Mana commun** (`CardDeck.mana_for_round`) : 3 à la manche 1, +1 par manche, plafonné à 10. Les PA du héros actif sont le mana ; `cast_spell` recopie les PA restants dans `deck.mana`. Une pioche par manche et par camp.
-- **Champions** (`_pick_champions`, `champion_down`) : un héros par camp est couronné ; si un champion tombe, le duel s'arrête (`check_game_over`). Couronne dessinée par `EntityView._draw`.
-- **Interface** : `scripts/CardHand.gd` (main en éventail, carte sélectionnée surélevée, cristaux de mana, piles cliquables, compteur de cartes ennemies). Elle remplace la barre de sorts quand `battle_mode == "cards"` (`UIManager._build_card_hand`) ; le journal est rétréci et les objectifs passent en haut à droite.
-- **Choix du deck** : `scripts/DeckPickUI.gd`, ouvert par la tuile « Cartes » (`SaveSlotsUI._open_deck_pick` puis `_launch_cards`). Decks ajoutés dans `data/decks.txt` : Assaut, Invocateurs, Magie et soutien.
-- Tests : `tests/test_card_hand.gd` (CI) ; `tests/test_card_deck.gd` toujours vert. **Non testé sur téléphone** (Galaxy S23+) : seuls des rendus xvfb ont été vérifiés.
+Le mode « Cartes tactiques » (sorts du combat tactique piochés dans un deck) est **remplacé** : il ne passe plus du tout par la grille tactique. La tuile « Cartes » de Mes Parties ouvre `scenes/CardDuel.tscn`.
+
+**Règles** (`scripts/JccDuel.gd`, sans UI, testé en headless) :
+- 4 voies ; un emplacement par voie et par camp. Une créature attaque la créature de sa voie (riposte), ou le héros si la voie est vide. Attaque manuelle, une fois par tour ; la créature posée ne peut ni attaquer ni lancer son sort ce tour-là. Déplacement d'une voie vers une voie libre voisine (compte comme l'action d'attaque).
+- Héros à 30 PV, victoire quand le héros adverse tombe. Mana : 1 au premier tour, +1 par tour, max 10. Une pioche par tour (pas pour le premier joueur au 1er tour), main max 7, **fatigue** croissante si la pioche est vide.
+- Chaque créature porte **un seul sort distinctif** (coût en mana, une fois par tour). Les cartes-sorts sont à usage unique. Une carte jouée (sort) ou perdue (créature morte) rejoint la **fosse** ; les jetons invoqués disparaissent.
+- Effets : dégâts (cible / zone / héros), soin, bonus d'attaque, bouclier, étourdissement, poison, invocation, pioche, mana.
+- IA adverse (`ai_step`) : sorts utiles, carte la plus chère jouable, attaques rentables. 24 parties IA contre IA vont toutes au bout (test).
+
+**Cartes** (`data/cartes_jcc.txt`, 65 cartes, séparateur `|`) :
+- 10 créatures de classe (Tank, Mage, Chasseur, Druide, Soigneur, Assassin, Invocateur, Sylvain, Géomancien, Artificier) : chacune a le sort de sa classe ;
+- monstres communs, épiques et **14 boss légendaires** (Gobelin Roi, Troll Géant, Dragon, Tharok le Végétal, Vorkann le Givre…) ;
+- 28 cartes-sorts issues des sorts des personnages ; 4 jetons d'invocation.
+- Rareté : C commune, R rare, E épique, L légendaire. Un deck : 20 cartes, 2 exemplaires max (1 pour épique/légendaire), uniquement des cartes possédées.
+
+**Collection, deck et butin** (`scripts/JccCollection.gd`, stocké dans `save["jcc"]`) : collection de départ généreuse, deck de départ valide, constructeur de deck (`CardDeckBuilder.gd`). Une victoire donne une carte ; un adversaire boss laisse sa carte légendaire 4 fois sur 10.
+
+**Interface** : `CardDuelUI.gd` (accueil, adversaires, duel, résultat, fosse), `JccCardView.gd` (carte dessinée en vectoriel : emblèmes par effet, sprites des héros et monstres). Toucher une carte la sélectionne ; créature → toucher une voie libre ; sort ciblé → toucher la cible (liseré doré) ; sort sans cible → toucher à nouveau. Créature du plateau : barre « Attaquer / sort / ◀ ▶ ».
+
+Tests : `tests/test_jcc.gd` (catalogue, règles, IA, collection, butin) et `tests/test_jcc_ui.gd` (duel complet par l'interface). **Non testé sur téléphone** : seuls des rendus xvfb ont été vérifiés.

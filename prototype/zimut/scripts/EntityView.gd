@@ -1290,12 +1290,6 @@ func _draw() -> void:
 	draw_rect(Rect2(-bw * 0.5, by2, bw * ratio, bh), hp_col)
 	draw_rect(Rect2(-bw * 0.5, by2, bw * ratio, bh * 0.4), Color(1, 1, 1, 0.22))
 	draw_rect(back, tc, false, 1.5)
-	if bool(entity.get("champion", false)) and GameManager.battle_mode == "cards":
-		# V401 : couronne du champion (mode Cartes) — sa chute met fin au duel
-		var kc0 := Vector2(0.0, by2 - 16.0 + 1.5 * sin(_t * 3.0))
-		var crown := PackedVector2Array([kc0 + Vector2(-13, 7), kc0 + Vector2(-13, -6), kc0 + Vector2(-6, 0), kc0 + Vector2(0, -9), kc0 + Vector2(6, 0), kc0 + Vector2(13, -6), kc0 + Vector2(13, 7)])
-		draw_colored_polygon(crown, Color(1.0, 0.82, 0.25))
-		draw_polyline(crown + PackedVector2Array([crown[0]]), Color(0.25, 0.15, 0.0), 2.0, true)
 	var ord_no: int = int(entity.get("ord", 0))
 	if ord_no > 0:
 		var oc := Vector2(-bw * 0.5 - 16.0, by2 + bh * 0.5)

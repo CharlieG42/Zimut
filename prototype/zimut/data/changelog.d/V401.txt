@@ -1,4 +1,4 @@
-V401|Mode Cartes refondu : vraie main de cartes en bas de l'écran, pioche et défausse visibles, cartes colorées par type.
-V401|Mana commun : 3 à la manche 1, +1 par manche (max 10) ; une carte coûte son mana, une pioche par manche.
-V401|Duel de champions : un héros par camp porte une couronne, et le premier champion à tomber fait perdre son camp.
-V401|Nouvel écran de choix de deck avant le duel, avec 4 decks thématiques : Équilibré, Assaut, Invocateurs, Magie et soutien.
+V401|Mode Cartes refondu en vrai jeu de cartes : plateau à 4 voies (attaque manuelle), sans grille tactique, héros à 30 PV.
+V401|Deck de 20 cartes avec constructeur : créatures de classe, monstres, boss en cartes légendaires (Tharok, Vorkann…) et sorts, chaque créature porte un seul sort distinctif.
+V401|Cartes jouées ou tombées dans la fosse, mana +1 par tour (max 10), pioche d'une carte par tour, fatigue si la pioche est vide.
+V401|Six adversaires (dont trois boss) et butin : une victoire donne une carte, avec une chance d'obtenir la carte du boss vaincu.

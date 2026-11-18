@@ -9,9 +9,6 @@ const CLASS_DATA_PATHS = ["res://data/classes.txt", "user://data/classes.txt", "
 const SPELL_DATA_PATHS = ["res://data/sorts.txt", "user://data/sorts.txt", "res://prototype/Godot_iso/data/sorts.txt"]
 const ENEMY_DATA_PATHS = ["res://data/ennemis.txt", "user://data/ennemis.txt", "res://prototype/Godot_iso/data/ennemis.txt"]
 const ITEM_DATA_PATHS = ["res://data/stuff.txt", "user://data/stuff.txt", "res://prototype/Godot_iso/data/stuff.txt"]
-# Mode Cartes tactiques : cartes (data/cartes.txt) et decks (data/decks.txt)
-const CARD_DATA_PATHS = ["res://data/cartes.txt", "user://data/cartes.txt", "res://prototype/Godot_iso/data/cartes.txt"]
-const DECK_DATA_PATHS = ["res://data/decks.txt", "user://data/decks.txt", "res://prototype/Godot_iso/data/decks.txt"]
 
 ## Colonnes numériques à nettoyer (espaces dans les nombres) par fichier CSV
 const NUMERIC_COLS: Dictionary = {
@@ -22,7 +19,6 @@ const NUMERIC_COLS: Dictionary = {
 	"enemies": ["Niveau", "PV", "Attaque", "Défense", "PA", "PM", "XP"],
 	"items": ["Niveau requis", "Bonus Force", "Bonus Intelligence", "Bonus Agilité",
 		"Bonus Sagesse", "Bonus Vita", "Bonus Défense"],
-	"cards": ["Cout_PA", "Cout_PM", "Portee", "Niveau_requis"],
 }
 
 ## Données chargées
@@ -30,8 +26,6 @@ var classes_data: Array = []
 var spells_data: Array = []
 var enemies_data: Array = []
 var items_data: Array = []
-var cards_data: Array = []    # mode Cartes tactiques : data/cartes.txt
-var decks_data: Array = []    # mode Cartes tactiques : data/decks.txt
 
 ## État de chargement
 var data_loaded: bool = false
@@ -67,14 +61,6 @@ func load_all_data() -> bool:
 	if items_data.is_empty():
 		push_error("Failed to load items data")
 		success = false
-
-	# Mode Cartes tactiques : non bloquant (le mode classique n'en a pas besoin)
-	cards_data = _load_csv(CARD_DATA_PATHS, "cards", "cartes.txt")
-	if cards_data.is_empty():
-		push_warning("Failed to load cards data (mode Cartes tactiques indisponible)")
-	decks_data = _load_csv(DECK_DATA_PATHS, "decks", "decks.txt")
-	if decks_data.is_empty():
-		push_warning("Failed to load decks data (mode Cartes tactiques indisponible)")
 
 	data_loaded = success
 	data_loaded_successfully.emit()
@@ -165,12 +151,6 @@ func _load_defaults(kind: String) -> Array:
 		"items":
 			load_default_items_data()
 			return items_data
-		"cards":
-			load_default_cards_data()
-			return cards_data
-		"decks":
-			load_default_decks_data()
-			return decks_data
 	return []
 
 
@@ -227,45 +207,6 @@ func get_unique_class_names():
 	return names
 
 
-# ─────────────────────────────────────────────────────────────
-#  Mode Cartes tactiques : cartes et decks
-# ─────────────────────────────────────────────────────────────
-
-func get_cards_data() -> Array:
-	return cards_data
-
-
-func get_card_by_name(card_name: String) -> Dictionary:
-	for row in cards_data:
-		if String(row.get("Nom", "")) == card_name:
-			return row
-	return {}
-
-
-func get_deck_names() -> Array:
-	var out: Array = []
-	for row in decks_data:
-		out.append(String(row.get("Deck", "")))
-	return out
-
-
-## Noms de cartes d'un deck (decks.txt : colonne "Cartes", séparateur ";")
-func get_deck_cards(deck_name: String) -> Array:
-	for row in decks_data:
-		if String(row.get("Deck", "")) == deck_name:
-			var out: Array = []
-			for part in String(row.get("Cartes", "")).split(";"):
-				var nm: String = part.strip_edges()
-				if nm != "":
-					out.append(nm)
-			return out
-	return []
-
-
-# ─────────────────────────────────────────────
-#  Données par défaut si les fichiers CSV ne sont pas trouvés
-# ─────────────────────────────────────────────
-
 func load_default_classes_data():
 	classes_data = [
 		{"Classe": "Tank", "Niveau": "1", "PA": "5", "PM": "3", "Vita (PV)": "120", "Force (CAC)": "15", "Intelligence (Magie)": "5", "Agilité (Vit. Atk)": "10", "Sagesse (Précision)": "8", "Défense": "20", "XP pour atteindre ce niveau": "100"},
@@ -299,19 +240,3 @@ func load_default_enemies_data():
 func load_default_items_data():
 	items_data = []
 	push_warning("Loaded default items data - CSV files not found")
-
-
-func load_default_cards_data():
-	cards_data = [
-		{"Classe": "Tank", "Nom": "Coup de bouclier", "Cout_PA": "1", "Cout_PM": "0", "Portee": "1", "Effet": "10 dégâts", "Niveau_requis": "1", "Type": "Attaque"},
-		{"Classe": "Invocateur", "Nom": "Invoquer Loup Spectral", "Cout_PA": "2", "Cout_PM": "0", "Portee": "1", "Effet": "Invoque un Loup Spectral", "Niveau_requis": "1", "Type": "Invocation"},
-	]
-	push_warning("Loaded default cards data - CSV files not found")
-
-
-func load_default_decks_data():
-	decks_data = [
-		{"Deck": "Deck de test", "Cartes": "Coup de bouclier;Invoquer Loup Spectral;Coup de bouclier;Invoquer Loup Spectral"},
-		{"Deck": "Deck de test ennemis", "Cartes": "Coup de bouclier;Invoquer Loup Spectral;Coup de bouclier;Invoquer Loup Spectral"},
-	]
-	push_warning("Loaded default decks data - CSV files not found")
