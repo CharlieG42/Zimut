@@ -284,7 +284,21 @@ Trois mécaniques ajoutées au duel (moteur `JccDuel.gd`, UI `CardDuelUI.gd`) :
 
 Tests : `test_jcc.gd` (terrain déterministe, boue 2 PM, hauteur +1 PO, buisson camouflage, pouvoir 1×, mulligan 1× et 20 cartes conservées, 24 parties IA/IA) et `test_jcc_ui.gd` (6 cases de terrain affichées, boutons visibles puis cachés, pouvoir lancé par l'UI). 0 échec.
 
-## 17. V412 — méta : plusieurs decks, défi du jour, adversaires à débloquer
+## 17. V411 — mots-clés des cartes (vol, perforation, provocation, régénération, initiative)
+
+Nouvelle colonne `MotsCles` dans `data/cartes_jcc.txt` (séparateur `;`, ex. `vol;provocation`), parsée en `keywords` dans `JccCards.gd` et copiée sur chaque instance (`JccDuel._make_instance`). Moteur (`JccDuel.gd`) :
+
+- **vol** : l'attaquant se soigne des dégâts réellement infligés (`attack`, cible unité ou héros).
+- **perforation** : si l'attaque tue une unité, l'excédent de dégâts passe au héros adverse.
+- **provocation** : si une unité ennemie à portée a provocation, `attack_targets` ne renvoie que les provocation (l'attaque y est redirigée automatiquement).
+- **regeneration** : +2 PV au début du tour de son camp (`start_turn`).
+- **initiative** : jamais de riposte. Correctif au passage : une cible morte ne riposte plus (pour tout le monde).
+
+5 nouvelles cartes les utilisent : Vampire (vol, R), Bélier (perforation, C), Chevalier (provocation, R), Moine (regeneration, C), Samouraï (initiative, E). Elles entrent automatiquement dans la collection de départ et le butin (`collectible_ids`). Affichage : ligne dorée sous le type en mode fiche, pastilles colorées sur l'illustration en mode plateau (`JccCardView.gd`).
+
+Tests : `test_jcc.gd` (bloc mots-clés : parsing, vol, mort sans riposte, perforation 30→28, provocation redirige, régénération 2→4, initiative sans riposte, riposte normale sinon) — 0 échec ; `test_jcc_ui.gd` 0 échec.
+
+## 18. V412 — méta : plusieurs decks, défi du jour, adversaires à débloquer
 
 Trois ajouts de progression autour du duel (`JccCollection.gd`, `CardDuelUI.gd`, `CardDeckBuilder.gd`) :
 
