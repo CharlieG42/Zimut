@@ -1,0 +1,3 @@
+V409|Mode Cartes : le fond du duel redevient uni et peint (dégradé du biome + touches douces), sans tuiles répétées, pour que le plateau ressorte nettement.
+V409|Le plateau a un damier franc à fort contraste, des dalles biseautées et un cadre épais : les 24 cases sont bien lisibles.
+V409|La falaise sous le plateau, les décors sur les côtés, la brume animée et les camps (tour, héros, feu de camp) sont conservés.

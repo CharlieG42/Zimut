@@ -1480,28 +1480,23 @@ class _BiomeBG extends Control:
 		for i in steps:
 			var col: Color = mist.lightened(0.30).lerp(Color(0.03, 0.05, 0.04), float(i) / float(steps))
 			draw_rect(Rect2(0, h * float(i) / float(steps), w, h / float(steps) + 1.0), col)
-		# sol pavé de tuiles du biome (mêmes textures que l'aire tactique), assombri en profondeur
-		var tw: float = 256.0
-		var th: float = 128.0
-		var t0: Texture2D = BattleScenery.tile_tex(nation, 0)
-		if t0 != null:
-			tw = float(t0.get_width())
-			th = float(t0.get_height())
-		var ty: float = hor
-		var row: int = 0
-		while ty < h:
-			var tx: float = 0.0
-			var ci: int = 0
-			while tx < w:
-				var tile: Texture2D = BattleScenery.tile_tex(nation, BattleScenery.tile_variant(ci, row))
-				if tile != null:
-					var depth: float = clampf((ty - hor) / maxf(1.0, h - hor), 0.0, 1.0)
-					var shade: float = 1.0 - 0.28 * depth
-					draw_texture_rect(tile, Rect2(tx, ty, tw, th), false, Color(shade, shade, shade))
-				tx += tw
-				ci += 1
-			ty += th
-			row += 1
+		# sol uni peint : dégradé du biome + grandes touches douces (PAS de tuiles répétées,
+		# pour que le damier du plateau ressorte nettement du fond)
+		var g0: Color = (p["top_a"] as Color).darkened(0.45)
+		var g1: Color = (p["top_a"] as Color).darkened(0.74)
+		var gsteps := 36
+		for i in gsteps:
+			var gc: Color = g0.lerp(g1, float(i) / float(gsteps))
+			var gy0: float = hor + (h - hor) * float(i) / float(gsteps)
+			draw_rect(Rect2(0, gy0, w, (h - hor) / float(gsteps) + 1.0), gc)
+		var rng0 := RandomNumberGenerator.new()
+		rng0.seed = seedv * 17 + 5
+		for i in 46:
+			var bp := Vector2(rng0.randf_range(0, w), rng0.randf_range(hor, h))
+			var br: float = rng0.randf_range(30.0, 110.0)
+			var bc: Color = (p["leaf"] as Color) if rng0.randf() < 0.6 else (p["top_b"] as Color)
+			_ellipse(bp, Vector2(br, br * 0.45), Color(bc.r, bc.g, bc.b, rng0.randf_range(0.05, 0.11)))
+		draw_rect(Rect2(0, hor - 2, w, 4), Color(mist.r, mist.g, mist.b, 0.12))
 		# voile de couleur du biome
 		var accent: Color = Nations.info(nation).get("accent", Color(0.5, 0.7, 0.4))
 		draw_rect(Rect2(0, hor, w, h - hor), Color(accent.r, accent.g, accent.b, 0.05))
@@ -1555,7 +1550,6 @@ class _BiomeBG extends Control:
 			_sprite(path, sp, float(t.get_height()) * sc, tint)
 
 	func _draw_board(p: Dictionary) -> void:
-		var edge: Color = Color(1.0, 0.95, 0.75, 0.5)
 		var th: float = 30.0
 		var tl := board.position
 		var tr := Vector2(board.end.x, board.position.y)
@@ -1585,13 +1579,16 @@ class _BiomeBG extends Control:
 		draw_colored_polygon(PackedVector2Array([tr, br, br + Vector2(0, th), tr + Vector2(8, th - 8)]), (p["r_t"] as Color).darkened(0.22))
 		for cp in [tl, tr, bl, br]:
 			draw_colored_polygon(PackedVector2Array([cp + Vector2(-4, -4), cp + Vector2(4, -4), cp + Vector2(4, th + 4), cp + Vector2(-4, th + 4)]), (p["l_t"] as Color).darkened(0.3))
-		# dalles des cases : texture du biome (déformée sur le trapèze en iso) + voile damier + lèvre + ombre + bord
+		# dalles des cases : damier franc à fort contraste + biseautage (la texture de
+		# matière n'est qu'un voile léger pour ne pas tuer le damier)
 		for cell in polys.size():
 			var pl: PackedVector2Array = polys[cell]
 			var gx: int = cell % JccDuel.COLS
 			var gy: int = cell / JccDuel.COLS
-			var base: Color = (p["top_a"] as Color) if (gx + gy) % 2 == 0 else (p["top_b"] as Color)
-			var shade: float = clampf(1.0 - 0.22 * float(gy) / 5.0, 0.72, 1.0) if iso else 1.0
+			var chk: bool = (gx + gy) % 2 == 0
+			var base: Color = (p["top_a"] as Color).lightened(0.10) if chk else (p["top_b"] as Color).darkened(0.22)
+			var shade: float = clampf(1.0 - 0.20 * float(gy) / 5.0, 0.74, 1.0) if iso else 1.0
+			draw_colored_polygon(pl, Color(base.r * shade, base.g * shade, base.b * shade))
 			var tile: Texture2D = BattleScenery.tile_tex(nation, BattleScenery.tile_variant(gx, gy))
 			if tile != null:
 				var p0: Vector2 = pl[0]
@@ -1600,15 +1597,19 @@ class _BiomeBG extends Control:
 				var tw2: float = float(tile.get_width())
 				var th2: float = float(tile.get_height())
 				draw_set_transform_matrix(Transform2D((p1 - p0) / tw2, (p3 - p0) / th2, p0))
-				draw_texture_rect(tile, Rect2(0, 0, tw2, th2), false, Color(shade, shade, shade))
+				draw_texture_rect(tile, Rect2(0, 0, tw2, th2), false, Color(1, 1, 1, 0.16))
 				draw_set_transform_matrix(Transform2D.IDENTITY)
-			draw_colored_polygon(pl, Color(base.r, base.g, base.b, 0.34))
-			draw_line(pl[0], pl[1], p.get("lip", Color(1, 1, 1)), 2.0, true)
-			draw_line(pl[3], pl[2], Color(0, 0, 0, 0.22), 3.0, true)
+			# biseautage : lumière en haut/gauche, ombre en bas/droite
+			draw_line(pl[0], pl[1], (p["lip"] as Color).lightened(0.25), 2.5, true)
+			draw_line(pl[0], pl[3], (p["lip"] as Color).lightened(0.15), 2.0, true)
+			draw_line(pl[3], pl[2], Color(0, 0, 0, 0.35), 3.0, true)
+			draw_line(pl[1], pl[2], Color(0, 0, 0, 0.25), 2.0, true)
 			var closed := pl.duplicate()
 			closed.append(pl[0])
-			draw_polyline(closed, Color(0, 0, 0, 0.30), 2.0, true)
-		draw_polyline(PackedVector2Array([tl, tr, br, bl, tl]), edge, 3.0, true)
+			draw_polyline(closed, Color(0, 0, 0, 0.45), 2.0, true)
+		# cadre épais du plateau pour bien le détacher du fond
+		draw_polyline(PackedVector2Array([tl, tr, br, bl, tl]), Color(0, 0, 0, 0.5), 7.0, true)
+		draw_polyline(PackedVector2Array([tl, tr, br, bl, tl]), p.get("lip", Color(1, 1, 1)), 4.0, true)
 		if polys.size() >= 24:
 			var m0: Vector2 = (polys[8] as PackedVector2Array)[3]
 			var m1: Vector2 = (polys[11] as PackedVector2Array)[2]

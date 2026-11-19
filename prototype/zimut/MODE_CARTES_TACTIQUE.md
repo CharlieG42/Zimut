@@ -259,3 +259,13 @@ Retour de test après V407 : le plateau « plat » manquait de profondeur.
 **Camps aux 2 extrémités** (`_draw_camps`/`_draw_camp`) : clairière, palissade (murs) et piliers d'entrée, **tour en vrai sprite** (`decor/kenney/batiments/tour.png`) avec **girouette aux couleurs du camp** (bleu/rouge), **héros du camp en vrai sprite** (`players/<classe>.png` / sprite de l'adversaire) avec lueur d'équipe sous les pieds, et **feu de camp animé** (torche + flamme qui vacille + halo chaud). Camp ennemi en haut du plateau, vôtre en bas (positions plat + iso).
 
 Tests : `test_jcc.gd` / `test_jcc_ui.gd` → 0 échec en headless. Maquette PIL avec les vrais sprites du dépôt pour valider la composition (sol, plateau, décors, camps).
+
+## 15. V409 — fond uni peint et damier net du plateau
+
+Retour de test après V408 : le pavage de tuiles identique au sol et aux cases faisait perdre le plateau.
+
+- **Fond uni peint** : plus de tuiles répétées sous le plateau — dégradé du biome (top_a assombri) + ~46 grandes taches douces (leaf/top_b, alpha 0.05-0.11) + ligne d'horizon ; les décors sprite restent sur les côtés.
+- **Damier du plateau** : cases en plein contraste (`top_a.lightened(0.10)` vs `top_b.darkened(0.22)`), texture de matière en voile très léger (alpha 0.16) uniquement, biseautage par dalle (lèvre claire haut/gauche, ombre bas/droite), bord de case marqué, et **cadre épais** autour du plateau (ombre 7 px + lèvre du biome 4 px).
+- La falaise (30 px, strates, cailloux), les camps et la brume de V408 sont conservés.
+
+Tests : `test_jcc.gd` / `test_jcc_ui.gd` → 0 échec. Maquette PIL (fond peint + damier + camps) validée.
