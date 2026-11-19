@@ -1,0 +1,3 @@
+V406|Mode Cartes : les sorts et les attaques peuvent enfin viser les unités ennemies au toucher (elles étaient prises pour des unités alliées).
+V406|Les unités ennemies n'affichent plus le halo vert « prête à agir » réservé à tes unités.
+V406|Nouveau test de non-régression qui joue un sort et une attaque en touchant les vraies cartes du plateau.
