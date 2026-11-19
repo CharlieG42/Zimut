@@ -1,0 +1,3 @@
+V418|Cartes : 8 boss de chapitre, un par chapitre de la Conquête, débloqués quand le chapitre est accompli.
+V418|Cartes : première victoire sur un boss de chapitre = sa carte légendaire et de l or.
+V418|Cartes : liste d adversaires défilante, decks et couleurs propres à chaque boss.
