@@ -38,6 +38,7 @@ var sides: Array = []
 var current: int = 0
 var turn: int = 0              # numéro de tour global (1, 2, 3…)
 var winner: int = -1           # -1 en cours, 0 joueur, 1 adversaire, 2 égalité
+var puzzle: Dictionary = {}   # non vide : mode puzzle (voir setup_puzzle)
 var events: Array = []         # événements pour l'interface : {k, side, lane, n, ...}
 var log: Array = []
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -230,6 +231,29 @@ func has_kw(cr: Dictionary, kw: String) -> bool:
 
 
 ## Pose une unité directement sur la grille (tests / debug).
+## Puzzle : plateau et main prédéfinis, l'adversaire ne joue pas ; il faut abattre son héros en `turns` tours.
+## def : {mana, turns, my_hp, foe_hp, hand: [ids], mine: [[id, x, y]], foe: [[id, x, y]]}
+func setup_puzzle(def: Dictionary) -> void:
+	setup([], [], 7)
+	puzzle = def
+	for s: int in 2:
+		sides[s]["mulligan"] = false
+		sides[s]["power_used"] = true
+	sides[0]["hero_hp"] = int(def.get("my_hp", HERO_HP))
+	sides[1]["hero_hp"] = int(def.get("foe_hp", 10))
+	for id: Variant in def.get("hand", []):
+		(sides[0]["hand"] as Array).append(_make_instance(String(id)))
+	for u: Variant in def.get("mine", []):
+		var a: Array = u
+		place_unit(0, String(a[0]), int(a[1]), int(a[2]))
+	for u: Variant in def.get("foe", []):
+		var b: Array = u
+		place_unit(1, String(b[0]), int(b[1]), int(b[2]))
+	_turns_started = [0, 0]
+	turn = 0
+	start_turn(0)
+
+
 func place_unit(s: int, id: String, x: int, y: int) -> Dictionary:
 	var c: Dictionary = _make_instance(id)
 	c["x"] = x
@@ -261,7 +285,7 @@ func start_turn(s: int) -> void:
 	turn += 1
 	_turns_started[s] += 1
 	var sd: Dictionary = sides[s]
-	sd["mana_max"] = mini(MANA_MAX, int(sd["mana_max"]) + 1)
+	sd["mana_max"] = int(puzzle.get("mana", 1)) if not puzzle.is_empty() else mini(MANA_MAX, int(sd["mana_max"]) + 1)
 	sd["mana"] = sd["mana_max"]
 	if int(_turns_started[s]) > 1 or s == 1:
 		_draw_card(s, true)
@@ -303,6 +327,9 @@ func start_turn(s: int) -> void:
 func end_turn(s: int) -> bool:
 	if is_over() or s != current:
 		return false
+	if not puzzle.is_empty() and s == 0 and int(_turns_started[0]) >= int(puzzle.get("turns", 1)):
+		winner = 1   # puzzle : plus de tours, c'est perdu
+		return true
 	start_turn(other(s))
 	return true
 
@@ -310,6 +337,8 @@ func end_turn(s: int) -> bool:
 func _draw_card(s: int, with_event: bool) -> void:
 	var sd: Dictionary = sides[s]
 	var deck: Array = sd["deck"]
+	if deck.is_empty() and not puzzle.is_empty():
+		return   # puzzle : pas de pioche ni de fatigue
 	if deck.is_empty():
 		sd["fatigue"] = int(sd["fatigue"]) + 1
 		_hit(s, -1, int(sd["fatigue"]), "fatigue")

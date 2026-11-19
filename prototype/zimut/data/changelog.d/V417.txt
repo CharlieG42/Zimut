@@ -1,0 +1,3 @@
+V417|Cartes : nouveau Puzzle de la semaine dans le hub, avec une carte de butin à la première réussite.
+V417|Cartes : le puzzle impose plateau, main et mana, l adversaire ne joue pas, et le nombre de tours est limité.
+V417|Cartes : 3 puzzles en rotation, chacun vérifié par une solution scriptée en test.

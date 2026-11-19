@@ -141,6 +141,46 @@ static func deck_of(save: Dictionary, name: String) -> Array:
 	return d
 
 
+## --- Puzzle de la semaine : plateau prédéfini, l'adversaire ne joue pas, il faut abattre son héros en `turns` tours ---
+## `solution` (utilisée par les tests) : liste d'étapes {k: play|move|attack|end, ...}.
+const PUZZLES: Array = [
+	{"id": "compte_exact", "title": "Le compte exact", "text": "Abattez le héros adverse (9 PV) ce tour-ci. Une carte est inutile.",
+		"mana": 5, "turns": 1, "my_hp": 20, "foe_hp": 9, "hand": ["s_boule_feu", "s_etincelle", "m_gobelin"], "mine": [], "foe": [["m_troll", 1, 0]],
+		"solution": [{"k": "play", "hand": 0, "hero": true}, {"k": "play", "hand": 0, "hero": true}]},
+	{"id": "passe_muraille", "title": "Passe-muraille", "text": "Atteignez le héros adverse (5 PV) en 2 tours : avancez, renforcez, frappez.",
+		"mana": 4, "turns": 2, "my_hp": 20, "foe_hp": 5, "hand": ["s_charge"], "mine": [["m_loup", 0, 2]], "foe": [["m_troll", 0, 0], ["m_gobelin", 3, 3]],
+		"solution": [{"k": "move", "from": [0, 2], "to": [1, 1]}, {"k": "play", "hand": 0, "ally": [1, 1]}, {"k": "end"}, {"k": "move", "from": [1, 1], "to": [1, 0]}, {"k": "attack", "from": [1, 0], "hero": true}]},
+	{"id": "budget_mana", "title": "Budget de mana", "text": "7 mana, 12 PV à retirer au héros adverse : choisissez bien vos sorts.",
+		"mana": 7, "turns": 1, "my_hp": 20, "foe_hp": 12, "hand": ["s_etincelle", "s_boule_feu", "s_eclair", "s_frappe"], "mine": [], "foe": [["m_loup", 2, 1]],
+		"solution": [{"k": "play", "hand": 1, "hero": true}, {"k": "play", "hand": 2, "hero": true}]},
+]
+
+
+## Puzzle de la semaine (même puzzle toute la semaine) + état dans la sauvegarde.
+static func weekly_puzzle(save: Dictionary) -> Dictionary:
+	var j: Dictionary = ensure(save)
+	var week: int = int(Time.get_unix_time_from_system() / 86400.0 / 7.0)
+	var def: Dictionary = (PUZZLES[week % PUZZLES.size()] as Dictionary).duplicate(true)
+	var st: Variant = j.get("puzzle", {})
+	def["week"] = week
+	def["done"] = typeof(st) == TYPE_DICTIONARY and int((st as Dictionary).get("week", -1)) == week and bool((st as Dictionary).get("done", false))
+	return def
+
+
+## Puzzle réussi : une carte de butin la première fois de la semaine. Retourne l'id de la carte ou "".
+static func puzzle_won(save: Dictionary) -> String:
+	var j: Dictionary = ensure(save)
+	var def: Dictionary = weekly_puzzle(save)
+	if bool(def["done"]):
+		return ""
+	j["puzzle"] = {"week": int(def["week"]), "done": true}
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var rew: String = roll_loot(rng, "")
+	add_card(save, rew)
+	return rew
+
+
 ## --- Défi du jour ---
 
 static func daily_challenge(save: Dictionary) -> Dictionary:

@@ -335,3 +335,9 @@ Mesures par simulations IA/IA (80 parties par adversaire, deux côtés) :
 - **Toucher une unité ennemie** montre ses déplacements possibles (orange) et les cases qu'elle peut menacer (rose).
 - Bouton **❓ Aide** en haut : légende PA/PM/PO/mana, mots-clés et couleurs du plateau.
 - Test : `tests/test_jcc_visuel.gd`.
+
+## 22. Puzzle de la semaine
+- Un puzzle par semaine (3 puzzles en rotation, `JccCollection.PUZZLES`) depuis le hub : plateau, main et mana par tour imposés, l'adversaire ne joue pas, il faut abattre son héros en un nombre de tours limité (sinon défaite).
+- Pas de pioche ni de fatigue ; ne compte ni dans les victoires/défaites ni dans le défi du jour. Une carte de butin est offerte à la **première** réussite de la semaine.
+- Moteur : `JccDuel.setup_puzzle(def)` (`puzzle` non vide). Chaque puzzle porte sa solution scriptée, rejouée par `tests/test_jcc_puzzle.gd`.
+- Pour ajouter un puzzle : une entrée dans `PUZZLES` avec sa `solution` (le test échoue si elle ne gagne pas).
