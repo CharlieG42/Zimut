@@ -57,7 +57,8 @@ func setup(deck0: Array, deck1: Array, seed_value: int = 0, powers: Array = []) 
 				d.append(inst)
 		_shuffle(d)
 		sides.append({"hero_hp": HERO_HP, "mana": 0, "mana_max": 0, "deck": d, "hand": [], "fosse": [],
-			"units": [], "fatigue": 0, "power": {}, "power_used": false, "mulligan": true})
+			"units": [], "fatigue": 0, "power": {}, "power_used": false, "mulligan": true,
+			"stats": {"creatures": 0, "spells": 0, "hero_dmg": 0}})
 	for s: int in 2:
 		sides[s]["power"] = power_for(String(powers[s]) if s < powers.size() else "")
 		for i: int in START_HAND:
@@ -394,6 +395,7 @@ func play_card(s: int, hand_idx: int, target: Dictionary = {}) -> bool:
 	if String(c["type"]) == "Creature":
 		if not _target_ok(s, "voie", target):
 			return false
+		sd["stats"]["creatures"] = int(sd["stats"]["creatures"]) + 1
 		(sd["hand"] as Array).remove_at(hand_idx)
 		sd["mana"] = int(sd["mana"]) - int(c["cost"])
 		c["sick"] = true
@@ -406,6 +408,7 @@ func play_card(s: int, hand_idx: int, target: Dictionary = {}) -> bool:
 		return true
 	if not _target_ok(s, String(c["cible"]), target):
 		return false
+	sd["stats"]["spells"] = int(sd["stats"]["spells"]) + 1
 	(sd["hand"] as Array).remove_at(hand_idx)
 	sd["mana"] = int(sd["mana"]) - int(c["cost"])
 	_ev("cast", s, -1, 0, {"name": c["name"]})
@@ -789,6 +792,8 @@ func _hit(s: int, lane: int, n: int, source: String = "") -> void:
 		return
 	if lane == -1:
 		sides[s]["hero_hp"] = int(sides[s]["hero_hp"]) - n
+		var atk: int = other(s)
+		sides[atk]["stats"]["hero_dmg"] = int(sides[atk]["stats"]["hero_dmg"]) + n
 		_ev("dmg", s, -1, n, {"src": source})
 		_check_winner()
 		return

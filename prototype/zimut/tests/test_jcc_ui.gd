@@ -94,8 +94,13 @@ func _boot() -> void:
 	var col_after: int = 0
 	for k in m._save["jcc"]["collection"]:
 		col_after += int(m._save["jcc"]["collection"][k])
-	check(m._over and col_after == col_before + 1 and int(m._save["jcc"]["wins"]) == 1, "victoire : +1 carte de butin, 1 victoire")
+	check(m._over and col_after >= col_before + 1 and int(m._save["jcc"]["wins"]) == 1, "victoire : +1 carte de butin (et +1 si défi réussi), 1 victoire")
+	var CO2 = load("res://scripts/JccCollection.gd")
+	check(CO2.is_unlocked(m._save, 1), "victoire vs adversaire 0 : adversaire 1 débloqué")
+	var ch3: Dictionary = CO2.daily_challenge(m._save)
+	check(String(ch3.get("id", "")) != "", "défi du jour présent après le duel")
 	var saved = pm.load_save(3)
 	check(saved.has("jcc") and int(saved["jcc"]["wins"]) == 1, "la partie est enregistrée")
+	check((saved["jcc"]["decks"] as Dictionary).has("Deck 1") and String(saved["jcc"]["active_deck"]) == "Deck 1", "multi-decks enregistrés (Deck 1 actif)")
 	print("FIN : %d échec(s)" % fails)
 	quit(fails)

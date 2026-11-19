@@ -1,0 +1,3 @@
+V412|Mode Cartes : plusieurs decks — jusqu'à 3 decks dans le constructeur (onglets + bouton « + »), le duel se lance avec le deck actif.
+V412|Nouveau « Défi du jour » affiché à l'accueil : gagner un duel, poser 4 créatures, lancer 3 sorts ou infliger 12 dégâts au héros adverse en un duel — réussi, il offre une carte.
+V412|Les adversaires se débloquent progressivement : battre un adversaire débloque le suivant (cases verrouillées grisées avec cadenas), annoncé à l'écran de victoire.
