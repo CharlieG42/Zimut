@@ -191,21 +191,24 @@ func _show_hub() -> void:
 		v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_root.add_child(v)
 	var col := VBoxContainer.new()
-	col.position = Vector2(W * 0.5 - 260, 625)
-	col.size = Vector2(520, 360)
-	col.add_theme_constant_override("separation", 18)
+	col.position = Vector2(W * 0.5 - 260, 606)
+	col.size = Vector2(520, 390)
+	col.add_theme_constant_override("separation", 14)
 	_root.add_child(col)
-	var duel: Button = UiKit.btn("⚔  Duel", Color(0.95, 0.65, 0.25), 34, Vector2(0, 86))
+	var duel: Button = UiKit.btn("⚔  Duel", Color(0.95, 0.65, 0.25), 34, Vector2(0, 76))
 	duel.pressed.connect(_on_duel_pressed)
 	col.add_child(duel)
 	var pz: Dictionary = JccCollection.weekly_puzzle(_save)
-	var pzb: Button = UiKit.btn("🧩  Puzzle de la semaine%s" % (" ✓" if bool(pz["done"]) else ""), Color(0.55, 0.8, 0.5), 26, Vector2(0, 66))
+	var pzb: Button = UiKit.btn("🧩  Puzzle de la semaine%s" % (" ✓" if bool(pz["done"]) else ""), Color(0.55, 0.8, 0.5), 26, Vector2(0, 60))
 	pzb.pressed.connect(_start_puzzle)
 	col.add_child(pzb)
-	var deck: Button = UiKit.btn("🃏  Mon deck", Color(0.45, 0.65, 0.95), 30, Vector2(0, 72))
+	var deck: Button = UiKit.btn("🃏  Mon deck", Color(0.45, 0.65, 0.95), 30, Vector2(0, 64))
 	deck.pressed.connect(_show_builder)
 	col.add_child(deck)
-	var back: Button = UiKit.btn("←  Mes Parties", Color(0.6, 0.62, 0.72), 26, Vector2(0, 62))
+	var fuse: Button = UiKit.btn("⚗  Atelier de fusion", Color(0.75, 0.5, 0.95), 28, Vector2(0, 60))
+	fuse.pressed.connect(_show_fusion)
+	col.add_child(fuse)
+	var back: Button = UiKit.btn("←  Mes Parties", Color(0.6, 0.62, 0.72), 26, Vector2(0, 56))
 	back.pressed.connect(_leave)
 	col.add_child(back)
 	var n_owned: int = 0
@@ -242,6 +245,17 @@ func _show_builder() -> void:
 			_save_now()
 		_show_hub())
 	b.open(_save)
+
+
+func _show_fusion() -> void:
+	_clear()
+	var f := CardFusionUI.new()
+	_root.add_child(f)
+	f.closed.connect(func(changed: bool) -> void:
+		if changed:
+			_save_now()
+		_show_hub())
+	f.open(_save)
 
 
 func _show_opponents() -> void:

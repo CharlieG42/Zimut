@@ -80,6 +80,55 @@ static func max_copies(id: String) -> int:
 	return 1 if String(JccCards.get_card(id).get("rarity", "C")) in ["L", "E"] else MAX_COPIES
 
 
+## --- Atelier de fusion : 2 exemplaires de niveau n -> 1 exemplaire de niveau n+1 (max niveau 5) ---
+
+const FUSE_COST: int = 2
+
+
+static func can_fuse(save: Dictionary, key: String) -> bool:
+	return not JccCards.get_card(key).is_empty() and JccCards.level_of(key) < JccCards.MAX_LEVEL and owned(save, key) >= FUSE_COST
+
+
+## Fusionne 2 exemplaires de `key`. Retourne la clé obtenue, ou "" si impossible.
+## Les decks qui utilisaient plus d'exemplaires que possédés sont réparés (la carte fusionnée remplace l'une des cartes retirées).
+static func fuse(save: Dictionary, key: String) -> String:
+	if not can_fuse(save, key):
+		return ""
+	var j: Dictionary = ensure(save)
+	var col: Dictionary = j["collection"]
+	var out_key: String = JccCards.key_of(JccCards.base_of(key), JccCards.level_of(key) + 1)
+	col[key] = int(col[key]) - FUSE_COST
+	if int(col[key]) <= 0:
+		col.erase(key)
+	col[out_key] = int(col.get(out_key, 0)) + 1
+	var swapped: bool = false
+	for nm: Variant in (j["decks"] as Dictionary).keys():
+		var d: Array = (j["decks"] as Dictionary)[nm]
+		var seen: int = 0
+		var i: int = 0
+		while i < d.size():
+			if String(d[i]) == key:
+				seen += 1
+				if seen > int(col.get(key, 0)):
+					if not swapped and _count(d, out_key) < mini(max_copies(out_key), int(col.get(out_key, 0))):
+						d[i] = out_key
+						swapped = true
+					else:
+						d.remove_at(i)
+						continue
+			i += 1
+	j["deck"] = deck_of(save, active_deck_name(save)).duplicate()
+	return out_key
+
+
+static func _count(d: Array, key: String) -> int:
+	var n: int = 0
+	for x: Variant in d:
+		if String(x) == key:
+			n += 1
+	return n
+
+
 ## Possédées (collection) ; nombre d'exemplaires d'une carte.
 static func owned(save: Dictionary, id: String) -> int:
 	var j: Dictionary = ensure(save)

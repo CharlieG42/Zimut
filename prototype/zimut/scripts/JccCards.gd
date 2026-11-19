@@ -56,7 +56,58 @@ static func _load() -> void:
 
 static func get_card(id: String) -> Dictionary:
 	_load()
-	return _cards.get(id, {})
+	if id.contains("@"):
+		return _leveled(id)
+	var c: Dictionary = _cards.get(id, {})
+	if c.is_empty():
+		return c
+	var out: Dictionary = c.duplicate()
+	out["lvl"] = 1
+	out["base_id"] = id
+	return out
+
+
+const MAX_LEVEL := 5
+
+
+static func base_of(key: String) -> String:
+	return key.get_slice("@", 0)
+
+
+static func level_of(key: String) -> int:
+	if not key.contains("@"):
+		return 1
+	return clampi(int(key.get_slice("@", 1)), 1, MAX_LEVEL)
+
+
+## Clé de collection pour un niveau (niveau 1 = id nu).
+static func key_of(id: String, lvl: int) -> String:
+	return id if lvl <= 1 else "%s@%d" % [id, lvl]
+
+
+## Carte fusionnée « id@n » : créatures +1 ATQ/+1 PV par niveau, sorts +1 à l'effet par niveau,
+## coût en mana −1 au niveau 3 puis −1 au niveau 5 (plancher 1, sauf coût de base 0).
+static func _leveled(key: String) -> Dictionary:
+	var base: String = base_of(key)
+	var lvl: int = level_of(key)
+	if not _cards.has(base):
+		return {}
+	var c: Dictionary = (_cards[base] as Dictionary).duplicate()
+	c["lvl"] = lvl
+	c["base_id"] = base
+	if lvl <= 1:
+		return c
+	if String(c["type"]) == "Creature":
+		c["atk"] = int(c["atk"]) + (lvl - 1)
+		c["hp"] = int(c["hp"]) + (lvl - 1)
+	elif String(c["effet"]) not in ["invoquer", ""] and String(c["valeur"]).is_valid_int():
+		c["valeur"] = str(int(c["valeur"]) + (lvl - 1))
+	var base_cost: int = int(c["cost"])
+	if base_cost > 0:
+		var red: int = (1 if lvl >= 3 else 0) + (1 if lvl >= 5 else 0)
+		c["cost"] = maxi(1, base_cost - red)
+	c["id"] = key
+	return c
 
 
 static func all_ids() -> Array:

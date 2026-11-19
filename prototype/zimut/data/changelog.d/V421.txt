@@ -1,0 +1,3 @@
+V421|Atelier de fusion : 2 cartes identiques de même niveau donnent 1 carte de niveau supérieur (jusqu au niveau 5).
+V421|Bonus par niveau : créatures +1 ATQ/+1 PV, sorts +1 à l effet, coût en mana -1 aux niveaux 3 et 5.
+V421|Les cartes fusionnées affichent des étoiles et se jouent dans les decks et en duel.
