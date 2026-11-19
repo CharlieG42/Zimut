@@ -40,6 +40,7 @@ var _biome: String = "Forêt"
 var _foe_accent: Color = Color(1.0, 0.42, 0.38)
 var _hand_views: Array = []
 var _hero_nodes: Array = [null, null]
+var _foe_info: Control = null       # pastille d'infos de l'adversaire (haut gauche, non cliquable)
 var _info_holder: Control
 var _action_bar: HBoxContainer
 var _toast: Label
@@ -128,6 +129,7 @@ func _clear() -> void:
 	_board_views = {}
 	_hand_views = []
 	_hero_nodes = [null, null]
+	_foe_info = null
 	_over = false
 
 
@@ -442,7 +444,13 @@ func _build_duel_ui() -> void:
 	_cards_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_cards_layer)
 	# héros
-	_hero_nodes[1] = _make_hero_panel(1, Rect2(30, 8, 370, 104))
+	_foe_info = Control.new()
+	_foe_info.position = Vector2(30, 8)
+	_foe_info.size = Vector2(370, 104)
+	_foe_info.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(_foe_info)
+	# le héros adverse est un vrai personnage dans son camp, au centre du bord haut : c'est lui qu'on touche
+	_hero_nodes[1] = _make_hero_panel(1, Rect2(800, -8, 320, 134))
 	_hero_nodes[0] = _make_hero_panel(0, Rect2(30, 690, 340, 360))
 	# colonne gauche : fiche de carte (grande vignette)
 	_info_holder = Control.new()
@@ -814,10 +822,85 @@ func _make_hero_panel(side: int, r: Rect2) -> Control:
 	return p
 
 
+## Héros adverse : grand sprite dans son camp (touchable), pastille de PV à son côté, pastille d'infos à gauche.
+func _refresh_foe(p: Control) -> void:
+	var sd: Dictionary = _duel.side(1)
+	var hot: bool = _is_target(1, -1)
+	var sprite: String = _hero_sprite(1)
+	var tex: Texture2D = JccCardView.art_texture(sprite)
+	var ring := _HeroRing.new()
+	ring.position = Vector2(160, 118)
+	ring.col = Color(1.0, 0.85, 0.2) if hot else _foe_accent
+	ring.hot = hot
+	ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	p.add_child(ring)
+	if tex != null:
+		var tr := TextureRect.new()
+		var at := AtlasTexture.new()
+		at.atlas = tex
+		at.region = JccCardView.art_region(tex, sprite)
+		tr.texture = at
+		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		tr.size = Vector2(130, 130)
+		tr.position = Vector2(95, -2)
+		tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		p.add_child(tr)
+	_hp_gem(p, Vector2(52, 74), 30, int(sd["hero_hp"]))
+	if _foe_info == null:
+		return
+	for c: Node in _foe_info.get_children():
+		c.queue_free()
+	var panel := Panel.new()
+	panel.size = _foe_info.size
+	panel.add_theme_stylebox_override("panel", _panel_sb(Color(0.07, 0.09, 0.14, 0.92), _foe_accent, 16, 3, 10))
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_foe_info.add_child(panel)
+	var nm: Label = UiKit.lbl(_hero_name(1), 28, UiKit.C_TXT, true)
+	nm.position = Vector2(16, 6)
+	nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_foe_info.add_child(nm)
+	var info: Label = UiKit.lbl("Héros à abattre" if _puzzle else "Main %d · Pioche %d\nMana %d/%d" % [(sd["hand"] as Array).size(), (sd["deck"] as Array).size(), int(sd["mana"]), int(sd["mana_max"])], 20, UiKit.C_DIM)
+	info.position = Vector2(16, 42)
+	info.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_foe_info.add_child(info)
+	if String(_opp.get("boss", "")) != "":
+		var bd: Label = UiKit.lbl("👑 BOSS", 20, UiKit.C_GOLD, true)
+		bd.position = Vector2(270, 70)
+		bd.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_foe_info.add_child(bd)
+
+
+class _HeroRing extends Control:
+	var col: Color = Color(1, 0.4, 0.4)
+	var hot: bool = false
+	var _t: float = 0.0
+
+	func _ready() -> void:
+		set_process(hot)
+
+	func _process(dt: float) -> void:
+		_t += dt
+		queue_redraw()
+
+	func _draw() -> void:
+		var pulse: float = 0.5 + 0.5 * sin(_t * 6.0) if hot else 0.0
+		var pts := PackedVector2Array()
+		for i in 40:
+			var a: float = TAU * float(i) / 40.0
+			pts.append(Vector2(cos(a) * 78.0, sin(a) * 14.0))
+		draw_colored_polygon(pts, Color(col.r, col.g, col.b, 0.28 + 0.2 * pulse))
+		pts.append(pts[0])
+		draw_polyline(pts, Color(col.r, col.g, col.b, 0.95), 3.0 + 2.0 * pulse, true)
+
+
 func _refresh_hero(side: int) -> void:
 	var p: Control = _hero_nodes[side]
 	for c: Node in p.get_children():
 		c.queue_free()
+	if side == 1:
+		_refresh_foe(p)
+		return
 	var sd: Dictionary = _duel.side(side)
 	var hot: bool = _is_target(side, -1)
 	var panel := Panel.new()
@@ -849,22 +932,7 @@ func _refresh_hero(side: int) -> void:
 		tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		portrait.add_child(tr)
 	var hp: int = int(sd["hero_hp"])
-	if side == 1:
-		var nm: Label = UiKit.lbl(_hero_name(side), 26, UiKit.C_TXT, true)
-		nm.position = Vector2(110, 4)
-		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		p.add_child(nm)
-		var info: Label = UiKit.lbl("Héros à abattre" if _puzzle else "Main %d · Pioche %d\nMana %d/%d" % [(sd["hand"] as Array).size(), (sd["deck"] as Array).size(), int(sd["mana"]), int(sd["mana_max"])], 19, UiKit.C_DIM)
-		info.position = Vector2(110, 40)
-		info.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		p.add_child(info)
-		_hp_gem(p, Vector2(p.size.x - 50, 56), 32, hp)
-		if String(_opp.get("boss", "")) != "":
-			var bd: Label = UiKit.lbl("👑 BOSS", 16, UiKit.C_GOLD, true)
-			bd.position = Vector2(10, 80)
-			bd.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			p.add_child(bd)
-	else:
+	if true:
 		var nm2: Label = UiKit.lbl("Vous", 34, UiKit.C_TXT, true)
 		nm2.position = Vector2(170, 100)
 		nm2.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1049,7 +1117,13 @@ func _draw_previews() -> void:
 	var valeur: String = ""
 	var atk: int = 0
 	if not _pending.is_empty():
-		var src: Dictionary = _duel.creature_at(0, int(_pending["lane"])) if _pending.has("lane") else {}
+		var src: Dictionary = {}
+		if String(_pending["kind"]) == "power":
+			src = _duel.side(0)["power"]   # pouvoir du héros : pas de créature source (lane = -1)
+		elif _pending.has("lane") and int(_pending["lane"]) >= 0:
+			var cr: Variant = _duel.creature_at(0, int(_pending["lane"]))
+			if cr != null:
+				src = cr
 		if src.is_empty():
 			return
 		if String(_pending["kind"]) == "attack":
@@ -2074,8 +2148,59 @@ class _BiomeBG extends Control:
 			var br: Vector2 = (polys[23] as PackedVector2Array)[2]
 			top_base = (tl + tr) * 0.5 + Vector2(-340.0, 2.0)
 			bot_base = (bl + br) * 0.5 + Vector2(150.0, 30.0 + 150.0)
-		_draw_camp(top_base, 1)   # camp ennemi en haut
+		var gy: float = board.position.y + 4.0
+		if iso:
+			gy = minf((polys[0] as PackedVector2Array)[0].y, (polys[3] as PackedVector2Array)[1].y) + 2.0
+		_draw_foe_camp(gy)        # camp ennemi : rempart sur toute la largeur, héros au centre
 		_draw_camp(bot_base, 0)   # votre camp en bas
+
+	## Camp adverse sur toute la largeur : chemin de ronde, rempart de palissade, bannières du camp,
+	## torches et porte centrale devant laquelle se tient le héros (vrai sprite posé par l'interface).
+	func _draw_foe_camp(gy: float) -> void:
+		var p: Dictionary = _pal()
+		var team: Color = foe_accent
+		var tint: Color = (DECOR_TINT.get(biome, Color(1, 1, 1)) as Color) * Color(1.0, 0.86, 0.82)
+		var w: float = 1920.0
+		var stone: Color = (p["top_a"] as Color).darkened(0.55)
+		# talus et chemin de ronde
+		draw_rect(Rect2(0, gy - 66.0, w, 70.0), Color(stone.r, stone.g, stone.b, 0.55))
+		draw_rect(Rect2(0, gy - 8.0, w, 12.0), Color(0, 0, 0, 0.30))
+		for i in 48:
+			var cx: float = float(i) * 41.0
+			draw_rect(Rect2(cx + 4.0, gy - 78.0, 28.0, 14.0), Color(stone.r, stone.g, stone.b, 0.75))
+		# palissade (sprites répétés) de part et d'autre de la porte
+		var wtex: Texture2D = _tex(CAMP["wall"])
+		var step: float = 78.0
+		if wtex != null:
+			step = 82.0 * float(wtex.get_width()) / float(wtex.get_height()) * 0.92
+		var x: float = 6.0
+		var n: int = 0
+		while x < w:
+			if absf(x - 960.0) > 175.0:
+				_sprite(CAMP["wall"], Vector2(x + step * 0.5, gy), 82.0, tint)
+				n += 1
+				if n % 5 == 0:
+					_banner(Vector2(x + step, gy), team)
+			x += step
+		# porte centrale : deux piliers, arche et lueur du camp
+		_sprite(CAMP["pillar"], Vector2(960.0 - 170.0, gy + 2.0), 104.0, tint)
+		_sprite(CAMP["pillar"], Vector2(960.0 + 170.0, gy + 2.0), 104.0, tint)
+		_banner(Vector2(960.0 - 170.0, gy - 90.0), team)
+		_banner(Vector2(960.0 + 170.0, gy - 90.0), team)
+		_ellipse(Vector2(960.0, gy + 2.0), Vector2(150.0, 17.0), Color(0, 0, 0, 0.30))
+		# torches animées aux deux bouts de la porte
+		for tx: float in [960.0 - 230.0, 960.0 + 230.0]:
+			var flick: float = 0.5 + 0.5 * sin(_t * 6.0 + tx * 0.01)
+			draw_circle(Vector2(tx, gy - 34.0), 34.0 + 8.0 * flick, Color(1.0, 0.65, 0.25, 0.10 + 0.05 * flick))
+			_sprite(CAMP["torch"], Vector2(tx, gy), 70.0, tint)
+			draw_circle(Vector2(tx, gy - 62.0 - 3.0 * flick), 7.0 + 2.0 * flick, Color(1.0, 0.78, 0.3, 0.9))
+
+	func _banner(top: Vector2, col: Color) -> void:
+		var wave: float = sin(_t * 2.0 + top.x * 0.02) * 4.0
+		draw_line(top, top + Vector2(0, -52.0), Color(0.25, 0.20, 0.15), 4.0)
+		var fl := PackedVector2Array([top + Vector2(0, -52.0), top + Vector2(34.0, -44.0 + wave), top + Vector2(26.0, -34.0 + wave * 0.6), top + Vector2(34.0, -24.0 + wave), top + Vector2(0, -20.0)])
+		draw_colored_polygon(fl, col.darkened(0.1))
+		draw_polyline(fl + PackedVector2Array([fl[0]]), col.darkened(0.45), 2.0)
 
 	## Camp d'un camp : clairière, palissade, piliers, tour avec girouette, héros du camp
 	## (vrai sprite), feu de camp animé.
