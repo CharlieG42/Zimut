@@ -29,7 +29,7 @@ var _over: bool = false
 var _cards_layer: Control
 var _fx_layer: Control
 var _slots: Dictionary = {}          # "cell" -> Panel (case vide cliquable)
-var _board_views: Dictionary = {}    # "side:cell" -> JccCardView
+var _board_views: Dictionary = {}    # "side:cell" -> _UnitView
 var _iso: bool = false                # plateau en perspective (réglage Options > Cartes)
 var _cell_polys: Array = []           # PackedVector2Array (écran) par case
 var _cell_ctr: Array = []             # centre de chaque case
@@ -540,6 +540,154 @@ class _CellNode extends Control:
 				draw_circle(c + Vector2(0, -6), 9, Color(0.22, 0.58, 0.26, 0.6))
 
 
+## Unité posée sur une case : son sprite en pied (à la place d'une carte compacte) + gemmes ATQ/PV, pastilles PA/PM/PO, étoile de sort et mots-clés.
+class _UnitView extends Control:
+	signal tapped(view)
+
+	const KW_STYLE := {
+		"vol": ["V", Color(0.85, 0.25, 0.30)],
+		"perforation": ["F", Color(0.95, 0.60, 0.20)],
+		"provocation": ["T", Color(0.60, 0.65, 0.90)],
+		"regeneration": ["R", Color(0.35, 0.85, 0.40)],
+		"initiative": ["I", Color(0.45, 0.85, 0.95)],
+	}
+
+	var card: Dictionary = {}
+	var selected: bool = false
+	var target_ok: bool = false
+	var ready_glow: bool = false
+	var _t: float = 0.0
+
+	func _ready() -> void:
+		mouse_filter = Control.MOUSE_FILTER_STOP
+		set_process(true)
+
+	func _process(dt: float) -> void:
+		_t += dt
+		if target_ok or ready_glow or selected:
+			queue_redraw()
+
+	func _gui_input(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			tapped.emit(self)
+			accept_event()
+
+	func set_card(c: Dictionary) -> void:
+		card = c
+		queue_redraw()
+
+	func _gem(c: Vector2, r: float, val: String, col: Color) -> void:
+		var font: Font = ThemeDB.fallback_font
+		draw_circle(c, r + 2.0, Color(0.05, 0.05, 0.08))
+		draw_circle(c, r, col)
+		draw_circle(c + Vector2(-r * 0.25, -r * 0.3), r * 0.45, Color(1, 1, 1, 0.18))
+		draw_arc(c, r, 0, TAU, 24, col.lightened(0.45), 2.0)
+		var fs: int = int(r * 1.15)
+		draw_string(font, c + Vector2(-r, fs * 0.36), val, HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, fs, Color(1, 1, 1))
+
+	func _star(c: Vector2, r: float, col: Color) -> void:
+		var pts := PackedVector2Array()
+		for i in 10:
+			var an: float = -PI * 0.5 + TAU * float(i) / 10.0
+			var rr: float = r if i % 2 == 0 else r * 0.45
+			pts.append(c + Vector2(cos(an), sin(an)) * rr)
+		draw_colored_polygon(pts, col)
+
+	func _pulse_ellipse(c: Vector2, rx: float, ry: float, col: Color, wd: float) -> void:
+		var a: float = 0.55 + 0.45 * sin(_t * 6.0)
+		var pts := PackedVector2Array()
+		for i in 40:
+			var an: float = TAU * float(i) / 40.0
+			pts.append(c + Vector2(cos(an) * rx, sin(an) * ry))
+		pts.append(pts[0])
+		draw_polyline(pts, Color(col.r, col.g, col.b, col.a * a), wd, true)
+
+	func _draw() -> void:
+		var w: float = size.x
+		var h: float = size.y
+		if w < 10.0 or card.is_empty():
+			return
+		var font: Font = ThemeDB.fallback_font
+		var spr: float = minf(w * 0.72, h * 2.05)
+		var art := Rect2((w - spr) * 0.5, h - spr, spr, spr)
+		var feet := Vector2(w * 0.5, h - 5.0)
+		var sh := PackedVector2Array()
+		for i in 24:
+			var a0: float = TAU * float(i) / 24.0
+			sh.append(feet + Vector2(cos(a0) * spr * 0.32, sin(a0) * spr * 0.09))
+		draw_colored_polygon(sh, Color(0, 0, 0, 0.35))
+		if target_ok:
+			_pulse_ellipse(feet, spr * 0.40, spr * 0.12, Color(1.0, 0.35, 0.3, 0.95), 4.0)
+		elif ready_glow:
+			_pulse_ellipse(feet, spr * 0.40, spr * 0.12, Color(0.4, 1.0, 0.5, 0.85), 3.0)
+		if selected:
+			_pulse_ellipse(feet, spr * 0.45, spr * 0.14, Color(1.0, 0.85, 0.25, 1.0), 5.0)
+		var tex: Texture2D = JccCardView.art_texture(String(card.get("sprite", "")))
+		if tex != null:
+			var ts: Vector2 = tex.get_size()
+			var sc: float = minf(art.size.x / ts.x, art.size.y / ts.y)
+			draw_texture_rect(tex, Rect2(art.position + (art.size - ts * sc) * 0.5, ts * sc), false)
+		else:
+			draw_rect(art, Color(0.20, 0.26, 0.38))
+			draw_rect(art, Color(0.5, 0.6, 0.8), false, 2.0)
+		if bool(card.get("used", false)) or bool(card.get("sick", false)) or int(card.get("stun", 0)) > 0 or bool(card.get("frozen", false)):
+			draw_rect(art, Color(0, 0, 0, 0.35))
+		var name_txt: String = String(card.get("name", ""))
+		if name_txt != "":
+			var fs: int = 16
+			var nw: float = font.get_string_size(name_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+			var cap: float = w - 30.0
+			while nw > cap and fs > 10:
+				fs -= 1
+				nw = font.get_string_size(name_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+			var pb := StyleBoxFlat.new()
+			pb.bg_color = Color(0.05, 0.06, 0.10, 0.78)
+			pb.set_corner_radius_all(9)
+			draw_style_box(pb, Rect2(w * 0.5 - nw * 0.5 - 7.0, art.position.y - 24.0, nw + 14.0, 20.0))
+			draw_string(font, Vector2(w * 0.5 - nw * 0.5, art.position.y - 9.0), name_txt, HORIZONTAL_ALIGNMENT_LEFT, nw + 2.0, fs, Color(1, 0.97, 0.88))
+		var sx: float = art.position.x + 4.0
+		var sy: float = art.position.y + 16.0
+		if int(card.get("stun", 0)) > 0 or bool(card.get("frozen", false)):
+			draw_string(font, Vector2(sx, sy), "ZZ", HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(0.55, 0.85, 1.0))
+			sx += 34.0
+		var pn: int = 0
+		for pe: Variant in card.get("poison", []):
+			pn += int((pe as Dictionary)["n"])
+		if pn > 0:
+			var dc := Vector2(sx + 8.0, sy - 8.0)
+			draw_colored_polygon(PackedVector2Array([dc + Vector2(0, -9), dc + Vector2(6, 3), dc + Vector2(0, 8), dc + Vector2(-6, 3)]), Color(0.45, 0.9, 0.3))
+			draw_string(font, dc + Vector2(10, 5), str(pn), HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color(0.7, 1.0, 0.5))
+		var rx: float = art.end.x - 6.0
+		if String(card.get("sort", "")) != "":
+			var usable: bool = ready_glow and not bool(card.get("used", false)) and not bool(card.get("sick", false))
+			_star(Vector2(rx - 12.0, art.position.y + 14.0), 9.0, Color(0.95, 0.8, 1.0) if usable else Color(0.5, 0.5, 0.6))
+			rx -= 26.0
+		var kws: Array = card.get("keywords", [])
+		for i in kws.size():
+			var kw: String = String(kws[i])
+			var st: Array = KW_STYLE.get(kw, [kw.left(1).to_upper(), Color(0.7, 0.7, 0.8)])
+			var kc := Vector2(rx - 12.0 - float(i) * 24.0, art.position.y + 14.0)
+			draw_circle(kc, 11.0, Color(0.05, 0.05, 0.08))
+			draw_circle(kc, 9.0, (st[1] as Color).darkened(0.35))
+			draw_arc(kc, 9.0, 0, TAU, 16, st[1] as Color, 1.6)
+			draw_string(font, kc + Vector2(-5, 5), String(st[0]), HORIZONTAL_ALIGNMENT_LEFT, 10.0, 13, Color(1, 1, 1))
+		_gem(Vector2(26.0, h - 22.0), 16.0, str(int(card.get("atk", 0))), Color(0.92, 0.55, 0.15))
+		var hp: int = int(card.get("hp", 0))
+		var mx: int = int(card.get("max_hp", hp))
+		_gem(Vector2(w - 26.0, h - 22.0), 16.0, str(maxi(hp, 0)), Color(0.85, 0.20, 0.22) if hp >= mx else Color(0.60, 0.14, 0.16))
+		var pips := [["PA", int(card.get("pa", 1)), Color(0.75, 0.45, 1.0)], ["PM", int(card.get("pm", 2)), Color(0.4, 0.8, 0.9)], ["PO", int(card.get("po", 1)), Color(0.5, 0.9, 0.5)]]
+		var px: float = w * 0.5 - 39.0
+		for pip in pips:
+			var empty: bool = int(pip[1]) <= 0
+			var col: Color = pip[2] as Color
+			var pc := Vector2(px + 13.0, h - 13.0)
+			draw_circle(pc, 11.0, Color(0.05, 0.05, 0.08))
+			draw_circle(pc, 9.0, col.darkened(0.45) if empty else col.darkened(0.15))
+			draw_arc(pc, 9.0, 0, TAU, 14, col if not empty else Color(0.4, 0.4, 0.45), 1.5)
+			draw_string(font, pc + Vector2(-8, 4), String(pip[0]), HORIZONTAL_ALIGNMENT_LEFT, 16.0, 11, Color(0.55, 0.55, 0.6) if empty else Color(1, 1, 1))
+			px += 26.0
+
+
 func _cell_pos(cell: int) -> Vector2:
 	return BOARD.position + Vector2(float(cell % JccDuel.COLS) * CELL.x, float(cell / JccDuel.COLS) * CELL.y)
 
@@ -717,8 +865,7 @@ func _refresh() -> void:
 			continue
 		var side: int = int(occ["side"])
 		var cr: Dictionary = occ["unit"]
-		var v := JccCardView.new()
-		v.board_mode = true
+		var v := _UnitView.new()
 		var us: float = float(_cell_scale[cell])
 		v.size = CELL
 		v.scale = Vector2(us, us)
@@ -728,7 +875,7 @@ func _refresh() -> void:
 		v.selected = side == 0 and _sel_cell == cell
 		if side == 0 and not _over:
 			v.ready_glow = _duel.can_attack(0, cell) or _duel.can_use_sort(0, cell) or not _duel.move_targets(0, cell).is_empty()
-		v.tapped.connect(func(_vw: JccCardView) -> void: _on_board_card(side, cell))
+		v.tapped.connect(func(_vw) -> void: _on_board_card(side, cell))
 		_cards_layer.add_child(v)
 		_board_views["%d:%d" % [side, cell]] = v
 	_draw_previews()
@@ -1200,7 +1347,7 @@ func _do_move(from: int, to: int) -> void:
 
 
 func _lunge(side: int, lane: int) -> void:
-	var v: JccCardView = _board_views.get("%d:%d" % [side, lane])
+	var v: Control = _board_views.get("%d:%d" % [side, lane])
 	if v == null:
 		return
 	var dir: float = -1.0 if side == 0 else 1.0
@@ -1262,12 +1409,12 @@ func _show_event(e: Dictionary) -> void:
 			_fx_burst(c, Color(0.8, 0.8, 0.85), 30.0)
 		"summon":
 			_fx_burst(c, Color(0.6, 1.0, 0.6), 24.0)
-			var v: JccCardView = _board_views.get("%d:%d" % [side, lane])
+			var v: Control = _board_views.get("%d:%d" % [side, lane])
 			if v != null:
 				var tsc: Vector2 = v.scale
 				v.scale = tsc * 0.4
-				v.position += CELL * (tsc - tsc * 0.4) * 0.5
-				var tp: Vector2 = v.position - CELL * (tsc - tsc * 0.4) * 0.5
+				v.position += v.size * (tsc - tsc * 0.4) * 0.5
+				var tp: Vector2 = v.position - v.size * (tsc - tsc * 0.4) * 0.5
 				create_tween().tween_property(v, "position", tp, 0.25)
 				create_tween().tween_property(v, "scale", tsc, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		"mana":
@@ -1306,7 +1453,7 @@ func _float(txt: String, c: Vector2, col: Color) -> void:
 
 
 func _shake(key: String) -> void:
-	var v: JccCardView = _board_views.get(key)
+	var v: Control = _board_views.get(key)
 	if v == null:
 		return
 	var p0: Vector2 = v.position

@@ -307,3 +307,16 @@ Trois ajouts de progression autour du duel (`JccCollection.gd`, `CardDuelUI.gd`,
 - **Adversaires verrouillés** : seul le premier adversaire est disponible au départ ; battre l'adversaire *i* débloque le *i+1* (`unlocked`), les cases verrouillées apparaissent grisées avec « 🔒 Battre « … » pour débloquer », et l'écran de victoire annonce « 🔓 Adversaire débloqué : … ».
 
 Tests : `test_jcc.gd` (migration multi-decks, `deck_of`/`set_active_deck`, défi du jour stable et complétable avec récompense, `is_unlocked`/`unlock_next`) et `test_jcc_ui.gd` (victoire : butin + déblocage de l'adversaire 1 + défi du jour présent, sauvegarde relue). 0 échec.
+
+## 19. V413 — unités en sprites sur le plateau
+
+Les créatures posées sur la grille ne sont plus des cartes compactes mais des **sprites en pied** (nouvelle classe interne `_UnitView` dans `CardDuelUI.gd`, à la place du `JccCardView` en `board_mode`) :
+
+- le **sprite complet de la carte** (`card["sprite"]`, image entière) est dessiné dans un carré au-dessus de la case, pieds sur le bas de la case, mis à l'échelle de la rangée (iso) ; ombre portée elliptique au sol ;
+- **nom** en pastille au-dessus du sprite, **gemmes ATQ (orange) / PV (rouge)** en bas à gauche/droite de la case, **pastilles PA / PM / PO** centrées en bas (grisées si 0) ;
+- **étoile de sort** (violet, vive si le sort est lançable) et **pastilles de mots-clés** en haut à droite du sprite, statuts (ZZ / poison) en haut à gauche ; voile assombrissant si l'unité a déjà agi ;
+- liserés pulsants au sol : **or = sélectionnée**, **rouge = cible valide**, **vert = peut agir** ; le tap sur le sprite émet `tapped` (sélection / ciblage, comme avant).
+
+La carte complète reste affichée en vignette à la sélection, et dans la main / la fosse. Les animations existantes (lunge d'attaque, secousse, apparition en `summon`) fonctionnent sur la nouvelle vue via `position`/`scale`.
+
+Tests : `test_jcc_ui.gd` (l'unité posée est un `_UnitView` avec le bon sprite, le tap sur le sprite sélectionne la case). 0 échec. Maquette PIL avec les vrais sprites validée.
