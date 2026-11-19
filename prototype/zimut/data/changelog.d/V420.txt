@@ -1,0 +1,3 @@
+V420|Cartes : le héros adverse est un personnage au centre du bord haut, devant un rempart en pleine largeur aux couleurs de son camp.
+V420|Cartes : on touche le héros adverse lui-même pour le cibler ; il pulse quand il est une cible valide.
+V420|Cartes : le haut gauche devient une pastille d infos (nom, main, pioche, mana, badge boss).

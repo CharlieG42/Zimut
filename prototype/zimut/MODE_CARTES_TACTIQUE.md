@@ -347,3 +347,8 @@ Mesures par simulations IA/IA (80 parties par adversaire, deux côtés) :
 - 1re victoire sur chacun : sa carte légendaire + de l'or (100 × n° du chapitre) ; ensuite c'est un boss ordinaire (40 % de sa carte).
 - Decks de 20 cartes, boss en tête, biome et couleur propres ; sprites ajoutés aux boss qui n'en avaient pas. Force mesurée en simulation de ~33 % à ~66 %.
 - Test : `tests/test_jcc_chapitres.gd`.
+
+## 24. Camp adverse en pleine largeur
+- Le héros adverse est désormais un **personnage posé au centre du bord haut**, devant la porte d'un **rempart sur toute la largeur** (palissade teintée par biome, bannières et torches à la couleur du camp). C'est lui qu'on touche pour le cibler ; il brille et pulse quand il est une cible valide. Sa pastille de PV est à sa gauche.
+- Le haut-gauche ne garde qu'une **pastille d'infos non cliquable** (nom, main, pioche, mana, badge BOSS).
+- Correctif : un pouvoir de héros à cible ne fait plus planter l'aperçu des cibles (#419).
