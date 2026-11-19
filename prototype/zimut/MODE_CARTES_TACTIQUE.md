@@ -243,3 +243,19 @@ Retour de test avec 2 screenshots (`Examples/Screenshot_2026111*`) : rendre le m
 - **Effets de combat** : nouvelle classe interne `_FxDraw` (couche vectorielle animée) — **projectile lumineux** en arc de l'attaquant vers la victime à chaque attaque (événement `attack` + `dmg`, joueur et IA), **gerbe d'impact** (anneau + 8 particules + flash) sur dégâts/mort/invocation/sort, soin vert, secousse du panneau héros quand il est touché (`_shake_node`), chiffres flottants existants conservés.
 
 Tests : `test_jcc.gd` et `test_jcc_ui.gd` toujours à 0 échec en headless. Maquettes de mise en page (plat + iso) vérifiées hors moteur.
+
+## 14. V408 — plateau façon biome tactique + camps détaillés aux extrémités
+
+Retour de test après V407 : le plateau « plat » manquait de profondeur.
+
+**Plateau biome tactique** (`_BiomeBG` réécrit) :
+- Mapping biome Cartes → nation du mode tactique (`BIOME_NATION` : Forêt→Forêt, Plaine→Vents, Désert→Désert, Montagne→Montagne, Marais→Marées) : on réutilise **les vraies tuiles de sol** (`BattleScenery.tile_tex`/`tile_variant`) et **la palette de falaise** (`BattleScenery.pal` : top_a/top_b/lip/l_*/r_*/mist).
+- Sol pavé de tuiles du biome sur toute la zone sous l'horizon, assombri avec la profondeur + voile de teinte (accent de la nation).
+- Cases = dalles texturées (texture déformée sur le trapèze en mode iso via `draw_set_transform_matrix`), voile damier top_a/top_b, lèvre lumineuse en haut, ombre interne en bas, bord de case marqué.
+- Falaise sous le plateau (30 px) : face avant en dégradé l_b→r_b avec strates et cailloux, 2 côtés, poteaux aux 4 coins.
+- **Décors sur les côtés** : vrais sprites (`assets/sprites/decor/sylve/…`, liste par biome) semés dans les bandes gauche/droite/haut/bas, triés par profondeur, échelle selon la profondeur, teintés par biome.
+- Effets : brume animée (3 bandes dérivantes, ~20 ips), rayons de lumière, vignette.
+
+**Camps aux 2 extrémités** (`_draw_camps`/`_draw_camp`) : clairière, palissade (murs) et piliers d'entrée, **tour en vrai sprite** (`decor/kenney/batiments/tour.png`) avec **girouette aux couleurs du camp** (bleu/rouge), **héros du camp en vrai sprite** (`players/<classe>.png` / sprite de l'adversaire) avec lueur d'équipe sous les pieds, et **feu de camp animé** (torche + flamme qui vacille + halo chaud). Camp ennemi en haut du plateau, vôtre en bas (positions plat + iso).
+
+Tests : `test_jcc.gd` / `test_jcc_ui.gd` → 0 échec en headless. Maquette PIL avec les vrais sprites du dépôt pour valider la composition (sol, plateau, décors, camps).

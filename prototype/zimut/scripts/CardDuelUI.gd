@@ -11,6 +11,8 @@ const CELL := Vector2(280.0, 96.0)
 const SLOT := Vector2(280.0, 96.0)   # carte sur le plateau (= CELL)
 const HAND_Y: float = 792.0
 const BIOMES: Array = ["Forêt", "Plaine", "Désert", "Montagne", "Marais"]
+## Biome Cartes -> nation du mode tactique (mêmes tuiles de sol et palette de falaise).
+const BIOME_NATION := {"Forêt": "Forêt", "Plaine": "Vents", "Désert": "Désert", "Montagne": "Montagne", "Marais": "Marées"}
 const HAND_CARD := Vector2(190, 275)
 const HAND_X0: float = 410.0
 const HAND_X1: float = 1520.0
@@ -313,7 +315,8 @@ func _build_duel_ui() -> void:
 	biome_bg.biome = _biome
 	biome_bg.seedv = _opp_idx * 7919 + 13
 	biome_bg.board = BOARD
-	biome_bg.towers = [_tower_art(0), _tower_art(1)]
+	biome_bg.nation = String(BIOME_NATION.get(_biome, _biome))
+	biome_bg.camps = [_camp_art(0), _camp_art(1)]
 	_root.add_child(biome_bg)
 	_board_anchor = Control.new()
 	_board_anchor.position = BOARD.position
@@ -508,13 +511,13 @@ func _hero_name(side: int) -> String:
 	return String(_opp.get("name", "Adversaire")) if side == 1 else "Vous"
 
 
-## Portrait du héros pour la fenêtre de sa tour (dictionnaire {tex, reg} ou vide).
-func _tower_art(side: int) -> Dictionary:
+## Sprite du héros pour son camp (image entière, pas le portrait) : {tex, reg} ou vide.
+func _camp_art(side: int) -> Dictionary:
 	var sprite: String = _hero_sprite(side)
 	var tex: Texture2D = JccCardView.art_texture(sprite)
 	if tex == null:
 		return {}
-	return {"tex": tex, "reg": JccCardView.art_region(tex, sprite)}
+	return {"tex": tex, "reg": Rect2(Vector2.ZERO, tex.get_size())}
 
 
 func _make_hero_panel(side: int, r: Rect2) -> Control:
@@ -1397,58 +1400,125 @@ func _confirm(msg: String, yes: Callable) -> void:
 # ── Fond de biome 2D stylisé derrière le plateau 4 x 6 ──
 
 class _BiomeBG extends Control:
+	## Sol pavé de vraies tuiles du biome (comme l'aire tactique), cases texturées en damier,
+	## falaise sous le plateau, décors sprite sur les côtés, brume animée, et camps
+	## (tour + héros + feu de camp) aux 2 extrémités du plateau.
 	var biome: String = "Forêt"
+	var nation: String = "Forêt"
 	var seedv: int = 1
 	var board: Rect2 = Rect2(400, 116, 1120, 576)
 	var iso: bool = false
 	var polys: Array = []
-	var towers: Array = []   # [{tex, reg}] pour side 0 (vous) et side 1 (ennemi)
-	# [ciel haut, ciel bas / sol sombre, végétation, tronc/roche, sol clair]
-	const PALETTES := {
-		"Forêt": [Color(0.10, 0.22, 0.14), Color(0.05, 0.12, 0.08), Color(0.16, 0.34, 0.18), Color(0.45, 0.30, 0.18), Color(0.20, 0.36, 0.20)],
-		"Plaine": [Color(0.32, 0.36, 0.16), Color(0.20, 0.24, 0.10), Color(0.42, 0.48, 0.22), Color(0.50, 0.42, 0.25), Color(0.46, 0.50, 0.24)],
-		"Désert": [Color(0.55, 0.44, 0.24), Color(0.40, 0.31, 0.17), Color(0.65, 0.54, 0.30), Color(0.55, 0.45, 0.28), Color(0.72, 0.60, 0.36)],
-		"Montagne": [Color(0.25, 0.27, 0.32), Color(0.16, 0.18, 0.23), Color(0.35, 0.37, 0.44), Color(0.50, 0.48, 0.45), Color(0.42, 0.44, 0.50)],
-		"Marais": [Color(0.12, 0.20, 0.18), Color(0.07, 0.12, 0.11), Color(0.18, 0.30, 0.26), Color(0.35, 0.30, 0.20), Color(0.16, 0.28, 0.24)],
+	var camps: Array = []     # [{tex, reg}] sprite du héros : side 0 (vous) puis side 1 (ennemi)
+	var _t: float = 0.0
+	var _last: float = -1.0
+	static var _tex_cache: Dictionary = {}
+
+	const DECOR := {
+		"Forêt": ["decor/sylve/pine1.png", "decor/sylve/pine2.png", "decor/sylve/pine3.png", "decor/sylve/oak1.png", "decor/sylve/oak2.png", "decor/sylve/rock1.png", "decor/sylve/rock2.png", "decor/sylve/bush1.png", "decor/sylve/mushroom1.png", "decor/sylve/flower_red.png", "decor/sylve/grass1.png"],
+		"Plaine": ["decor/sylve/oak1.png", "decor/sylve/bush1.png", "decor/sylve/bush_flowers.png", "decor/sylve/flower_red.png", "decor/sylve/flower_blue.png", "decor/sylve/flower_yellow.png", "decor/sylve/grass1.png", "decor/sylve/grass3.png", "decor/sylve/grass5.png"],
+		"Désert": ["decor/sylve/rock2.png", "decor/sylve/rock3.png", "decor/sylve/rock4.png", "decor/sylve/stump.png", "decor/sylve/bush1.png"],
+		"Montagne": ["decor/sylve/rock1.png", "decor/sylve/rock2.png", "decor/sylve/rock3.png", "decor/sylve/rock4.png", "decor/sylve/rock5.png", "decor/sylve/pine1.png", "decor/sylve/crystal.png"],
+		"Marais": ["decor/sylve/mushroom1.png", "decor/sylve/mushroom2.png", "decor/sylve/mushroom_big.png", "decor/sylve/bush1.png", "decor/sylve/log.png", "decor/sylve/flower_blue.png"],
+	}
+	const DECOR_TINT := {
+		"Forêt": Color(1, 1, 1), "Plaine": Color(1.02, 1.04, 0.95), "Désert": Color(1.06, 0.98, 0.82),
+		"Montagne": Color(1.04, 1.05, 1.08), "Marais": Color(0.92, 1.0, 0.96),
+	}
+	const CAMP := {
+		"tower": "res://assets/sprites/decor/kenney/batiments/tour.png",
+		"wall": "res://assets/sprites/decor/sylve/wall1.png",
+		"pillar": "res://assets/sprites/decor/sylve/pillar1.png",
+		"torch": "res://assets/sprites/decor/sylve/torch.png",
 	}
 
 	func _ready() -> void:
 		set_anchors_preset(Control.PRESET_FULL_RECT)
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		set_process(true)
 
-	func _inside_board(pt: Vector2) -> bool:
-		return board.grow(26.0).has_point(pt)
+	func _process(dt: float) -> void:
+		_t += dt
+		if _t - _last >= 0.05:   # brume et feu de camp animés à ~20 ips
+			_last = _t
+			queue_redraw()
+
+	func _tex(path: String) -> Texture2D:
+		if _tex_cache.has(path):
+			return _tex_cache[path]
+		var t: Texture2D = null
+		if ResourceLoader.exists(path):
+			t = load(path) as Texture2D
+		_tex_cache[path] = t
+		return t
+
+	func _pal() -> Dictionary:
+		return BattleScenery.pal(nation)
+
+	## Sprite ancré par son pied (bottom_center), mis à l'échelle h_px, teinté.
+	func _sprite(path: String, bottom_center: Vector2, h_px: float, tint: Color = Color(1, 1, 1)) -> void:
+		var t: Texture2D = _tex(path)
+		if t == null:
+			return
+		var w: float = h_px * float(t.get_width()) / float(t.get_height())
+		draw_texture_rect(t, Rect2(bottom_center - Vector2(w * 0.5, h_px), Vector2(w, h_px)), false, tint)
+
+	func _ellipse(c: Vector2, r: Vector2, col: Color) -> void:
+		var pts := PackedVector2Array()
+		for i in 20:
+			var a: float = float(i) / 20.0 * TAU
+			pts.append(c + Vector2(cos(a) * r.x, sin(a) * r.y))
+		draw_colored_polygon(pts, col)
 
 	func _draw() -> void:
-		var pal: Array = PALETTES.get(biome, PALETTES["Forêt"])
+		var p: Dictionary = _pal()
 		var w: float = 1920.0
 		var h: float = 1080.0
-		var steps := 48
-		# ciel / fond : dégradé
-		for i in steps:
-			var col: Color = (pal[0] as Color).lightened(0.22).lerp(pal[1] as Color, float(i) / float(steps))
-			draw_rect(Rect2(0, h * float(i) / float(steps), w, h / float(steps) + 1.0), col)
-		var rng := RandomNumberGenerator.new()
-		rng.seed = seedv
-		# sol : bande plus claire sous l'horizon, avec plaques de texture
 		var hor: float = board.position.y - 8.0
-		draw_rect(Rect2(0, hor, w, h - hor), (pal[4] as Color).darkened(0.35))
-		for i in 90:
-			var gp := Vector2(rng.randf_range(0, w), rng.randf_range(hor, h))
-			draw_circle(gp, rng.randf_range(18.0, 60.0), Color(pal[4].r, pal[4].g, pal[4].b, rng.randf_range(0.05, 0.12)))
-		_silhouettes(pal, hor, rng)
-		# décor autour du plateau
-		var zone := Rect2(0.0, hor - 6.0, 1920.0, 1080.0 - hor + 6.0)
-		for i in 260:
-			var pt := Vector2(rng.randf_range(zone.position.x, zone.end.x), rng.randf_range(zone.position.y, zone.end.y))
-			var s: float = rng.randf_range(0.7, 1.7) * (0.7 + 0.5 * (pt.y - hor) / maxf(1.0, h - hor))
-			var kind: int = rng.randi_range(0, 3)
-			var dark: float = rng.randf_range(0.0, 0.25)
-			if _inside_board(pt):
-				continue
-			_prop(pal, pt, s, kind, dark)
-		_draw_board(pal)
-		_draw_towers()
+		var mist: Color = p.get("mist", Color(0.8, 0.88, 0.96))
+		var steps := 40
+		for i in steps:
+			var col: Color = mist.lightened(0.30).lerp(Color(0.03, 0.05, 0.04), float(i) / float(steps))
+			draw_rect(Rect2(0, h * float(i) / float(steps), w, h / float(steps) + 1.0), col)
+		# sol pavé de tuiles du biome (mêmes textures que l'aire tactique), assombri en profondeur
+		var tw: float = 256.0
+		var th: float = 128.0
+		var t0: Texture2D = BattleScenery.tile_tex(nation, 0)
+		if t0 != null:
+			tw = float(t0.get_width())
+			th = float(t0.get_height())
+		var ty: float = hor
+		var row: int = 0
+		while ty < h:
+			var tx: float = 0.0
+			var ci: int = 0
+			while tx < w:
+				var tile: Texture2D = BattleScenery.tile_tex(nation, BattleScenery.tile_variant(ci, row))
+				if tile != null:
+					var depth: float = clampf((ty - hor) / maxf(1.0, h - hor), 0.0, 1.0)
+					var shade: float = 1.0 - 0.28 * depth
+					draw_texture_rect(tile, Rect2(tx, ty, tw, th), false, Color(shade, shade, shade))
+				tx += tw
+				ci += 1
+			ty += th
+			row += 1
+		# voile de couleur du biome
+		var accent: Color = Nations.info(nation).get("accent", Color(0.5, 0.7, 0.4))
+		draw_rect(Rect2(0, hor, w, h - hor), Color(accent.r, accent.g, accent.b, 0.05))
+		# décors sprite sur les côtés du plateau
+		_draw_decors(p, hor, w, h)
+		# plateau : ombre de contact, falaise, dalles texturées
+		_draw_board(p)
+		# camps aux 2 extrémités
+		_draw_camps()
+		# brume animée
+		for i in 3:
+			var byy: float = hor + 40.0 + float(i) * 150.0 + sin(_t * 0.10 + float(i) * 2.1) * 14.0
+			draw_rect(Rect2(0, byy, w, 54.0), Color(mist.r, mist.g, mist.b, 0.05 + 0.015 * sin(_t * 0.23 + float(i))))
+		# rayons de lumière
+		for i in 3:
+			var lx: float = 300.0 + float(i) * 550.0 + sin(_t * 0.07 + float(i)) * 30.0
+			draw_colored_polygon(PackedVector2Array([Vector2(lx, 0), Vector2(lx + 190, 0), Vector2(lx + 60, hor), Vector2(lx - 130, hor)]), Color(1, 1, 0.92, 0.045))
 		# vignette
 		for i in 14:
 			var a: float = 0.30 * (1.0 - float(i) / 14.0)
@@ -1456,217 +1526,157 @@ class _BiomeBG extends Control:
 			draw_rect(Rect2(w - (i + 1) * 14.0, 0, 14.0, h), Color(0, 0, 0, a * 0.5))
 			draw_rect(Rect2(0, h - (i + 1) * 12.0, w, 12.0), Color(0, 0, 0, a * 0.7))
 
-	func _silhouettes(pal: Array, hor: float, rng: RandomNumberGenerator) -> void:
-		var w: float = 1920.0
-		var far: Color = (pal[1] as Color).lightened(0.12)
-		var pts := PackedVector2Array([Vector2(0, hor + 4.0)])
-		match biome:
-			"Montagne":
-				var x: float = 0.0
-				while x < w:
-					var pk: float = rng.randf_range(40.0, 105.0)
-					pts.append(Vector2(x, hor - pk))
-					pts.append(Vector2(x + rng.randf_range(30.0, 70.0), hor - rng.randf_range(5.0, 30.0)))
-					x += rng.randf_range(80.0, 150.0)
-			"Désert":
-				for xi in range(0, int(w) + 40, 40):
-					pts.append(Vector2(xi, hor - 28.0 - 22.0 * sin(float(xi) * 0.011) - 12.0 * sin(float(xi) * 0.031)))
-			"Plaine":
-				for xi in range(0, int(w) + 40, 40):
-					pts.append(Vector2(xi, hor - 22.0 - 16.0 * sin(float(xi) * 0.007 + 1.0)))
-			_:
-				var x2: float = 0.0
-				while x2 < w:
-					var th: float = rng.randf_range(34.0, 70.0) if biome == "Forêt" else rng.randf_range(10.0, 26.0)
-					pts.append(Vector2(x2, hor - th))
-					pts.append(Vector2(x2 + 13.0, hor + 2.0))
-					x2 += 26.0
-		pts.append(Vector2(w, hor + 4.0))
-		draw_colored_polygon(pts, far)
-		if biome == "Montagne":
-			# neiges
-			for i in range(1, pts.size() - 1, 2):
-				var pk2: Vector2 = pts[i]
-				draw_colored_polygon(PackedVector2Array([pk2, pk2 + Vector2(14, 20), pk2 + Vector2(-14, 20)]), Color(0.92, 0.95, 1.0, 0.7))
-		if biome == "Marais":
-			for i in 4:
-				draw_rect(Rect2(0, hor - 10.0 + float(i) * 22.0, 1920.0, 14.0), Color(0.75, 0.9, 0.85, 0.05))
+	func _draw_decors(p: Dictionary, hor: float, w: float, h: float) -> void:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seedv * 31 + 7
+		var list: Array = DECOR.get(biome, DECOR["Forêt"])
+		var tint: Color = DECOR_TINT.get(biome, Color(1, 1, 1))
+		var spots: Array = []
+		for i in 13:
+			spots.append(Vector2(board.position.x - 34.0 - rng.randf_range(12.0, 150.0), board.position.y + rng.randf_range(0.0, board.size.y)))
+		for i in 13:
+			spots.append(Vector2(board.end.x + 34.0 + rng.randf_range(12.0, 150.0), board.position.y + rng.randf_range(0.0, board.size.y)))
+		for i in 12:
+			spots.append(Vector2(rng.randf_range(240.0, w - 60.0), hor - rng.randf_range(4.0, 42.0)))
+		for i in 5:
+			spots.append(Vector2(rng.randf_range(board.position.x - 60.0, board.end.x + 60.0), board.end.y + 40.0 + rng.randf_range(0.0, 34.0)))
+		spots.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.y < b.y)
+		for sp: Vector2 in spots:
+			if board.grow(26.0).has_point(sp):
+				continue
+			if sp.y < 118.0 and sp.x > 690.0 and sp.x < 1230.0:
+				continue   # panneau héros adverse en haut
+			var path: String = "res://assets/sprites/" + String(list[rng.randi_range(0, list.size() - 1)])
+			var t: Texture2D = _tex(path)
+			if t == null:
+				continue
+			var depth: float = clampf((sp.y - hor) / maxf(1.0, h - hor), 0.0, 1.0)
+			var sc: float = (0.34 + 0.60 * depth) * rng.randf_range(0.85, 1.15)
+			_sprite(path, sp, float(t.get_height()) * sc, tint)
 
-	func _prop(pal: Array, pt: Vector2, s: float, kind: int, dark: float) -> void:
-		var veg: Color = (pal[2] as Color).darkened(dark)
-		var trunk: Color = pal[3] as Color
-		match biome:
-			"Forêt":
-				if kind <= 1:
-					draw_rect(Rect2(pt + Vector2(-2.5, -4) * s, Vector2(5, 9) * s), trunk)
-					for tier in 3:
-						var ty: float = -6.0 - float(tier) * 11.0
-						var tw: float = 15.0 - float(tier) * 3.5
-						draw_colored_polygon(PackedVector2Array([pt + Vector2(0, ty - 14.0) * s, pt + Vector2(tw, ty) * s, pt + Vector2(-tw, ty) * s]), veg.lightened(float(tier) * 0.06))
-				elif kind == 2:
-					draw_colored_polygon(PackedVector2Array([pt + Vector2(-10, 4) * s, pt + Vector2(-4, -6) * s, pt + Vector2(5, -8) * s, pt + Vector2(11, 2) * s]), Color(0.5, 0.5, 0.55, 0.8))
-				else:
-					draw_circle(pt, 6.0 * s, veg.lightened(0.15))
-					draw_circle(pt + Vector2(6, 2) * s, 4.5 * s, veg)
-			"Plaine":
-				if kind <= 1:
-					for k in 5:
-						draw_line(pt + Vector2(float(k) * 3.0 - 6.0, 0) * s, pt + Vector2(float(k) * 3.0 - 7.0, -12.0 - float(k % 2) * 4.0) * s, veg.lightened(0.2), 2.0)
-				elif kind == 2:
-					draw_circle(pt, 3.0 * s, Color(1.0, 0.85, 0.3))
-					draw_circle(pt + Vector2(7, 2) * s, 3.0 * s, Color(0.95, 0.5, 0.5))
-				else:
-					draw_colored_polygon(PackedVector2Array([pt + Vector2(-10, 4) * s, pt + Vector2(-3, -7) * s, pt + Vector2(8, -5) * s, pt + Vector2(11, 3) * s]), Color(0.55, 0.52, 0.48, 0.85))
-			"Désert":
-				if kind <= 1:
-					draw_rect(Rect2(pt + Vector2(-3, -18) * s, Vector2(6, 20) * s), Color(0.30, 0.50, 0.28))
-					draw_rect(Rect2(pt + Vector2(-11, -12) * s, Vector2(8, 4) * s), Color(0.30, 0.50, 0.28))
-					draw_rect(Rect2(pt + Vector2(-11, -18) * s, Vector2(4, 10) * s), Color(0.30, 0.50, 0.28))
-				elif kind == 2:
-					draw_colored_polygon(PackedVector2Array([pt + Vector2(-11, 4) * s, pt + Vector2(-3, -9) * s, pt + Vector2(9, -6) * s, pt + Vector2(13, 4) * s]), Color(0.58, 0.46, 0.30, 0.9))
-				else:
-					draw_arc(pt, 14.0 * s, PI, TAU, 14, Color(1, 0.92, 0.7, 0.25), 3.0)
-			"Montagne":
-				if kind <= 1:
-					draw_colored_polygon(PackedVector2Array([pt + Vector2(-13, 5) * s, pt + Vector2(-5, -14) * s, pt + Vector2(3, -9) * s, pt + Vector2(14, 5) * s]), Color(0.46, 0.47, 0.52).darkened(dark))
-					draw_colored_polygon(PackedVector2Array([pt + Vector2(-5, -14) * s, pt + Vector2(-1, -6) * s, pt + Vector2(-9, -6) * s]), Color(0.95, 0.97, 1.0, 0.85))
-				elif kind == 2:
-					draw_colored_polygon(PackedVector2Array([pt + Vector2(0, -14) * s, pt + Vector2(7, 0) * s, pt + Vector2(-7, 0) * s]), Color(0.18, 0.32, 0.24))
-				else:
-					draw_circle(pt, 5.0 * s, Color(0.9, 0.93, 1.0, 0.5))
-			_:
-				if kind <= 1:
-					for k in 4:
-						draw_line(pt + Vector2(float(k) * 3.0 - 5.0, 0) * s, pt + Vector2(float(k) * 3.0 - 6.0, -16.0) * s, Color(0.40, 0.50, 0.28), 2.0)
-						draw_circle(pt + Vector2(float(k) * 3.0 - 6.0, -17.0) * s, 2.6 * s, Color(0.40, 0.28, 0.16))
-				elif kind == 2:
-					draw_circle(pt, 11.0 * s, Color(0.10, 0.30, 0.32, 0.55))
-					draw_circle(pt + Vector2(3, 1) * s, 4.0 * s, Color(0.30, 0.55, 0.30))
-				else:
-					draw_circle(pt, 6.0 * s, veg.lightened(0.2))
-
-	func _draw_board(pal: Array) -> void:
-		var edge: Color = Color(1.0, 0.9, 0.6, 0.30)
+	func _draw_board(p: Dictionary) -> void:
+		var edge: Color = Color(1.0, 0.95, 0.75, 0.5)
+		var th: float = 30.0
+		var tl := board.position
+		var tr := Vector2(board.end.x, board.position.y)
+		var bl := Vector2(board.position.x, board.end.y)
+		var br := board.end
+		if polys.size() >= 24:
+			tl = (polys[0] as PackedVector2Array)[0]
+			tr = (polys[3] as PackedVector2Array)[1]
+			br = (polys[23] as PackedVector2Array)[2]
+			bl = (polys[20] as PackedVector2Array)[3]
+		# ombre de contact
 		if not iso:
-			# dalle épaisse : ombre portée, face avant et côtés en relief
-			var tl := board.position
-			var tr := Vector2(board.end.x, board.position.y)
-			var bl := Vector2(board.position.x, board.end.y)
-			var br := board.end
-			var th: float = 18.0
-			draw_rect(Rect2(tl + Vector2(12, th + 8), board.size), Color(0, 0, 0, 0.28))
-			draw_colored_polygon(PackedVector2Array([bl, br, br + Vector2(0, th), bl + Vector2(0, th)]), (pal[3] as Color).darkened(0.50))
-			draw_colored_polygon(PackedVector2Array([tl, bl, bl + Vector2(0, th), tl + Vector2(-6, th - 6)]), (pal[3] as Color).darkened(0.62))
-			draw_colored_polygon(PackedVector2Array([tr, br, br + Vector2(0, th), tr + Vector2(6, th - 6)]), (pal[3] as Color).darkened(0.72))
-			for cp in [tl, tr, bl, br]:
-				draw_rect(Rect2(cp + Vector2(-4, -2), Vector2(8, th + 10)), (pal[3] as Color).darkened(0.35))
-			draw_rect(board, Color(0, 0, 0, 0.10))
-			for gi in polys.size():
-				var pl: PackedVector2Array = polys[gi]
-				var chk: bool = ((gi % JccDuel.COLS) + (gi / JccDuel.COLS)) % 2 == 0
-				draw_colored_polygon(pl, Color(1, 1, 1, 0.045) if chk else Color(0, 0, 0, 0.05))
-			for gx in JccDuel.COLS + 1:
-				var x: float = board.position.x + float(gx) * (board.size.x / float(JccDuel.COLS))
-				draw_line(Vector2(x, board.position.y), Vector2(x, board.end.y), Color(1, 1, 1, 0.07), 2.0)
-			for gy in JccDuel.ROWS + 1:
-				var y: float = board.position.y + float(gy) * (board.size.y / float(JccDuel.ROWS))
-				draw_line(Vector2(board.position.x, y), Vector2(board.end.x, y), Color(1, 1, 1, 0.07), 2.0)
-			draw_rect(board, edge, false, 3.0)
-			return
-		# perspective : dalle épaisse sous le plateau, cases en trapèze damier
-		if polys.size() < 24:
-			return
-		var tl: Vector2 = (polys[0] as PackedVector2Array)[0]
-		var tr: Vector2 = (polys[3] as PackedVector2Array)[1]
-		var br: Vector2 = (polys[23] as PackedVector2Array)[2]
-		var bl: Vector2 = (polys[20] as PackedVector2Array)[3]
-		var th: float = 26.0
-		draw_colored_polygon(PackedVector2Array([bl + Vector2(12, th + 10), br + Vector2(12, th + 10), br, bl]), Color(0, 0, 0, 0.30))
-		draw_colored_polygon(PackedVector2Array([bl, br, br + Vector2(0, th), bl + Vector2(0, th)]), (pal[3] as Color).darkened(0.50))
-		draw_colored_polygon(PackedVector2Array([tl, bl, bl + Vector2(0, th), tl + Vector2(-7, th - 7)]), (pal[3] as Color).darkened(0.62))
-		draw_colored_polygon(PackedVector2Array([tr, br, br + Vector2(0, th), tr + Vector2(7, th - 7)]), (pal[3] as Color).darkened(0.72))
-		# poteaux aux 4 coins
+			draw_rect(Rect2(tl + Vector2(14, th + 10), board.size), Color(0, 0, 0, 0.30))
+		else:
+			draw_colored_polygon(PackedVector2Array([bl + Vector2(14, th + 10), br + Vector2(14, th + 10), br, bl]), Color(0, 0, 0, 0.30))
+		# falaise : face avant (dégradé + strates + cailloux) et 2 côtés, palette du biome
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seedv + 3
+		var face: Color = (p["l_b"] as Color).lerp(p["r_b"] as Color, 0.5).darkened(0.12)
+		draw_colored_polygon(PackedVector2Array([bl, br, br + Vector2(0, th), bl + Vector2(0, th)]), face)
+		for sy in [0.35, 0.7]:
+			draw_line(bl + Vector2(0, sy * th), br + Vector2(0, sy * th), Color(0, 0, 0, 0.16), 2.0)
+		for i in 22:
+			var rp := Vector2(lerpf(bl.x, br.x, rng.randf()), bl.y + rng.randf_range(2.0, th - 2.0))
+			draw_circle(rp, rng.randf_range(2.5, 6.0), (p["l_b"] as Color).lightened(0.25))
+		draw_colored_polygon(PackedVector2Array([tl, bl, bl + Vector2(0, th), tl + Vector2(-8, th - 8)]), (p["l_t"] as Color).darkened(0.18))
+		draw_colored_polygon(PackedVector2Array([tr, br, br + Vector2(0, th), tr + Vector2(8, th - 8)]), (p["r_t"] as Color).darkened(0.22))
 		for cp in [tl, tr, bl, br]:
-			draw_colored_polygon(PackedVector2Array([cp + Vector2(-4, -4), cp + Vector2(4, -4), cp + Vector2(4, th + 4), cp + Vector2(-4, th + 4)]), (pal[3] as Color).darkened(0.30))
-		for gi in polys.size():
-			var pl2: PackedVector2Array = polys[gi]
-			var gy: int = gi / JccDuel.COLS
-			var chk2: bool = ((gi % JccDuel.COLS) + gy) % 2 == 0
-			var base: Color = (pal[4] as Color).lerp(pal[2] as Color, 0.35)
-			var shade: float = 0.28 - 0.30 * float(gy) / 5.0
-			draw_colored_polygon(pl2, base.lightened(0.06 if chk2 else -0.04).darkened(maxf(shade, 0.0)))
+			draw_colored_polygon(PackedVector2Array([cp + Vector2(-4, -4), cp + Vector2(4, -4), cp + Vector2(4, th + 4), cp + Vector2(-4, th + 4)]), (p["l_t"] as Color).darkened(0.3))
+		# dalles des cases : texture du biome (déformée sur le trapèze en iso) + voile damier + lèvre + ombre + bord
+		for cell in polys.size():
+			var pl: PackedVector2Array = polys[cell]
+			var gx: int = cell % JccDuel.COLS
+			var gy: int = cell / JccDuel.COLS
+			var base: Color = (p["top_a"] as Color) if (gx + gy) % 2 == 0 else (p["top_b"] as Color)
+			var shade: float = clampf(1.0 - 0.22 * float(gy) / 5.0, 0.72, 1.0) if iso else 1.0
+			var tile: Texture2D = BattleScenery.tile_tex(nation, BattleScenery.tile_variant(gx, gy))
+			if tile != null:
+				var p0: Vector2 = pl[0]
+				var p1: Vector2 = pl[1]
+				var p3: Vector2 = pl[3]
+				var tw2: float = float(tile.get_width())
+				var th2: float = float(tile.get_height())
+				draw_set_transform_matrix(Transform2D((p1 - p0) / tw2, (p3 - p0) / th2, p0))
+				draw_texture_rect(tile, Rect2(0, 0, tw2, th2), false, Color(shade, shade, shade))
+				draw_set_transform_matrix(Transform2D.IDENTITY)
+			draw_colored_polygon(pl, Color(base.r, base.g, base.b, 0.34))
+			draw_line(pl[0], pl[1], p.get("lip", Color(1, 1, 1)), 2.0, true)
+			draw_line(pl[3], pl[2], Color(0, 0, 0, 0.22), 3.0, true)
+			var closed := pl.duplicate()
+			closed.append(pl[0])
+			draw_polyline(closed, Color(0, 0, 0, 0.30), 2.0, true)
 		draw_polyline(PackedVector2Array([tl, tr, br, bl, tl]), edge, 3.0, true)
-		# repère : ligne médiane entre les camps
-		var m0: Vector2 = (polys[8] as PackedVector2Array)[3]
-		var m1: Vector2 = (polys[11] as PackedVector2Array)[2]
-		draw_line(m0, m1, Color(1, 1, 1, 0.12), 3.0)
+		if polys.size() >= 24:
+			var m0: Vector2 = (polys[8] as PackedVector2Array)[3]
+			var m1: Vector2 = (polys[11] as PackedVector2Array)[2]
+			draw_line(m0, m1, Color(1, 1, 1, 0.10), 3.0)
 
-	## Deux tours symbolisent les héros : ennemi derrière le haut du plateau, vous en bas.
-	func _draw_towers() -> void:
-		if towers.size() < 2 or polys.size() < 24:
+	func _draw_camps() -> void:
+		if polys.size() < 24 or camps.size() < 2:
 			return
 		var top_base: Vector2
 		var bot_base: Vector2
 		if not iso:
-			top_base = Vector2(board.position.x + 96.0, board.position.y)
-			bot_base = Vector2(board.end.x - 110.0, board.end.y + 18.0 + 100.0)
+			top_base = Vector2(board.position.x + 110.0, board.position.y + 2.0)
+			bot_base = Vector2(board.end.x - 110.0, board.end.y + 30.0 + 150.0)
 		else:
 			var tl: Vector2 = (polys[0] as PackedVector2Array)[0]
 			var tr: Vector2 = (polys[3] as PackedVector2Array)[1]
 			var bl: Vector2 = (polys[20] as PackedVector2Array)[3]
 			var br: Vector2 = (polys[23] as PackedVector2Array)[2]
-			top_base = (tl + tr) * 0.5 + Vector2(-340.0, -2.0)
-			bot_base = (bl + br) * 0.5 + Vector2(150.0, 26.0 + 100.0)
-		_draw_tower(top_base, 1, towers[1] as Dictionary, 76.0)
-		_draw_tower(bot_base, 0, towers[0] as Dictionary, 100.0)
+			top_base = (tl + tr) * 0.5 + Vector2(-340.0, 2.0)
+			bot_base = (bl + br) * 0.5 + Vector2(150.0, 30.0 + 150.0)
+		_draw_camp(top_base, 1)   # camp ennemi en haut
+		_draw_camp(bot_base, 0)   # votre camp en bas
 
-	## Tour crénelée avec girouette du camp et portrait du héros dans la fenêtre ronde.
-	func _draw_tower(base: Vector2, side: int, art: Dictionary, th: float = 100.0) -> void:
-		var w: float = 84.0
-		var h: float = th
-		var x: float = base.x - w * 0.5
-		var y: float = base.y - h
-		var stone: Color = Color(0.52, 0.50, 0.48) if side == 0 else Color(0.56, 0.42, 0.40)
-		var stone_d: Color = stone.darkened(0.35)
-		# ombre au sol
-		var pts := PackedVector2Array()
-		for i in 16:
-			var a: float = float(i) / 16.0 * TAU
-			pts.append(Vector2(base.x, base.y + 6.0) + Vector2(cos(a) * w * 0.62, sin(a) * 9.0))
-		draw_colored_polygon(pts, Color(0, 0, 0, 0.30))
-		# corps + pierres
-		draw_rect(Rect2(x, y, w, h), stone_d)
-		draw_rect(Rect2(x + 4, y + 4, w - 8, h - 4), stone)
-		for ly in range(1, 6):
-			draw_line(Vector2(x + 4, y + float(ly) * h / 6.0), Vector2(x + w - 4, y + float(ly) * h / 6.0), stone_d.darkened(0.15), 2.0)
-			var off: float = 14.0 if ly % 2 == 0 else 34.0
-			draw_line(Vector2(x + off, y + float(ly - 1) * h / 6.0), Vector2(x + off, y + float(ly) * h / 6.0), stone_d.darkened(0.15), 2.0)
-		# créneaux
-		for i in 4:
-			draw_rect(Rect2(x + float(i) * w / 4.0 + 3.0, y - 12.0, w / 4.0 - 10.0, 16.0), stone_d)
-		# girouette aux couleurs du camp
-		var flag_col: Color = Color(0.40, 0.70, 1.0) if side == 0 else Color(1.0, 0.40, 0.35)
-		var pole_top := Vector2(base.x, y - 38.0)
-		draw_line(Vector2(base.x, y - 12.0), pole_top, Color(0.25, 0.20, 0.15), 4.0)
-		var flag := PackedVector2Array([pole_top, pole_top + Vector2(30.0, 8.0), pole_top + Vector2(0, 17.0)])
-		draw_colored_polygon(flag, flag_col)
-		draw_polyline(flag + PackedVector2Array([pole_top]), flag_col.darkened(0.3), 2.0)
-		# fenêtre ronde avec le portrait du héros
-		var wc := Vector2(base.x, y + 36.0)
-		var wr: float = 26.0
-		draw_circle(wc, wr + 4.0, Color(0.85, 0.70, 0.30))
-		draw_circle(wc, wr, Color(0.05, 0.06, 0.09))
+	## Camp d'un camp : clairière, palissade, piliers, tour avec girouette, héros du camp
+	## (vrai sprite), feu de camp animé.
+	func _draw_camp(base: Vector2, side: int) -> void:
+		var p: Dictionary = _pal()
+		var team: Color = Color(0.45, 0.72, 1.0) if side == 0 else Color(1.0, 0.42, 0.38)
+		var tint: Color = Color(1, 1, 1) if side == 0 else Color(1.0, 0.80, 0.76)
+		var th: float = 88.0 if side == 1 else 150.0   # le camp ennemi tient dans la bande du haut
+		# clairière
+		_ellipse(base + Vector2(0, 8), Vector2(150, 20), Color(0, 0, 0, 0.28))
+		_ellipse(base + Vector2(0, 4), Vector2(135, 17), (p["top_a"] as Color).darkened(0.42))
+		# palissade et piliers d'entrée
+		_sprite(CAMP["wall"], base + Vector2(-95, 0), 86.0, tint)
+		_sprite(CAMP["wall"], base + Vector2(62, 0), 86.0, tint)
+		_sprite(CAMP["pillar"], base + Vector2(-128, 0), 66.0, tint)
+		_sprite(CAMP["pillar"], base + Vector2(110, 0), 66.0, tint)
+		# tour (vrai sprite) + girouette aux couleurs du camp
+		var tw: float = 0.0
+		var ttex: Texture2D = _tex(CAMP["tower"])
+		if ttex != null:
+			tw = th * float(ttex.get_width()) / float(ttex.get_height())
+			_sprite(CAMP["tower"], base, th, tint)
+		var px: float = base.x
+		var py: float = base.y - th
+		draw_line(Vector2(px, py), Vector2(px, py - 26.0), Color(0.25, 0.20, 0.15), 4.0)
+		var fl := PackedVector2Array([Vector2(px, py - 26.0), Vector2(px + 26.0, py - 19.0), Vector2(px, py - 11.0)])
+		draw_colored_polygon(fl, team)
+		draw_polyline(fl + PackedVector2Array([Vector2(px, py - 26.0)]), team.darkened(0.3), 2.0)
+		# héros du camp à côté de la tour, avec lueur d'équipe sous les pieds
+		var art: Dictionary = camps[side]
 		if not art.is_empty():
+			var hh: float = 84.0 if side == 1 else 120.0
 			var tex: Texture2D = art["tex"]
-			var reg: Rect2 = art["reg"]
-			var k: float = minf((wr * 2.0 - 6.0) / reg.size.x, (wr * 2.0 - 6.0) / reg.size.y)
-			var dsz: Vector2 = reg.size * k
-			draw_texture_rect_region(tex, Rect2(wc - dsz * 0.5, dsz), reg)
-		else:
-			draw_circle(wc, wr * 0.5, flag_col)
-		# porte arquée
-		var door := PackedVector2Array([Vector2(base.x - 12, base.y), Vector2(base.x - 12, base.y - 26), Vector2(base.x, base.y - 36), Vector2(base.x + 12, base.y - 26), Vector2(base.x + 12, base.y)])
-		draw_colored_polygon(door, Color(0.10, 0.08, 0.06))
+			var hw: float = hh * float(tex.get_width()) / float(tex.get_height())
+			var hx: float = base.x - tw * 0.5 - hw - 10.0 if side == 0 else base.x + tw * 0.5 + 10.0
+			_ellipse(Vector2(hx + hw * 0.5, base.y + 2.0), Vector2(hw * 0.62, 10.0), Color(team.r, team.g, team.b, 0.35))
+			draw_texture_rect(tex, Rect2(Vector2(hx, base.y - hh), Vector2(hw, hh)), false, tint)
+			draw_arc(Vector2(hx + hw * 0.5, base.y - 4.0), hw * 0.55, 0, TAU, 24, Color(team.r, team.g, team.b, 0.55), 2.0)
+		# feu de camp animé
+		var fx: float = base.x + (tw * 0.5 + 36.0 if side == 0 else -(tw * 0.5 + 36.0))
+		var fy: float = base.y - 2.0
+		var flick: float = 0.5 + 0.5 * sin(_t * 6.0 + float(side) * 3.0)
+		draw_circle(Vector2(fx, fy - 8.0), 40.0 + 8.0 * flick, Color(1.0, 0.65, 0.25, 0.10 + 0.05 * flick))
+		_sprite(CAMP["torch"], Vector2(fx, fy), 74.0, tint)
+		draw_circle(Vector2(fx, fy - 20.0 - 3.0 * flick), 8.0 + 2.0 * flick, Color(1.0, 0.78, 0.3, 0.9))
+		draw_circle(Vector2(fx, fy - 16.0), 4.5, Color(1.0, 0.94, 0.6, 0.95))
 
 
 ## Couche d'effets animés en vectoriel : projectiles d'attaque et gerbes d'impact.

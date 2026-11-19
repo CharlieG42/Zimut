@@ -1,0 +1,2 @@
+V408|Mode Cartes : le plateau reprend les biomes du mode tactique — sol pavé de vraies tuiles, dalles texturées en damier, falaise avec strates et cailloux, décors (arbres, rochers, fleurs) sur les côtés, brume et rayons de lumière animés.
+V408|Camps détaillés aux deux extrémités du plateau : tour, girouette bleue ou rouge, héros en vrai sprite, palissade, piliers et feu de camp animé.
