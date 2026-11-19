@@ -1,4 +1,4 @@
-Id|Nom|Type|Cout|Atq|PV|PA|PM|PO|Rarete|Classe|Sort|SortCout|Effet|Valeur|Duree|Cible|Sprite
+Id|Nom|Type|Cout|Atq|PV|PA|PM|PO|Rarete|Classe|Sort|SortCout|Effet|Valeur|Duree|Cible|Sprite|MotsCles
 c_tank|Tank|Creature|3|2|7|1|1|1|R|Tank|Coup de bouclier|1|etourdir|1|1|ennemi|players/tank
 c_mage|Mage|Creature|3|3|3|1|2|2|R|Mage|Boule de feu|2|degats|3|0|ennemi_ou_heros|players/mage
 c_chasseur|Chasseur|Creature|3|3|3|1|2|3|R|Chasseur|Flèche empoisonnée|1|poison|2|3|ennemi|players/chasseur
@@ -64,3 +64,8 @@ s_cristal_mana|Cristal de mana|Sort|1|||1|1|1|R|Géomancien|||mana|3|0|aucune|
 s_cri_guerre|Cri de guerre|Sort|3|||1|1|1|R|Tank|||atq_zone|1|0|aucune|
 s_mur_pierre|Mur de pierre|Sort|2|||1|1|1|C|Géomancien|||bouclier_zone|2|0|aucune|
 s_blizzard|Blizzard|Sort|4|||1|2|2|R|Mage|||etourdir_zone|1|1|aucune|
+m_vampire|Vampire|Creature|4|3|4|1|2|1|R|Assassin|Boire le sang|1|soin|2|0|allie|enemies/squelette|vol
+m_belier|Bélier|Creature|3|4|5|1|1|1|C||Charge|1|atq|2|0|allie_ou_heros|enemies/troll|perforation
+c_chevalier|Chevalier|Creature|4|2|8|1|1|1|R|Tank|Gardefou|1|etourdir|1|1|ennemi|players/tank|provocation
+m_moine|Moine|Creature|3|1|5|1|2|1|C|Heal|Prière|1|soin|2|0|allie|players/heal|regeneration
+c_samourai|Samouraï|Creature|4|3|5|2|2|1|E|Chasseur|Iaijutsu|1|degats|2|0|ennemi|players/chasseur|initiative
