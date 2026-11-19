@@ -22,7 +22,7 @@ func _scene() -> RefCounted:
 		d.side(s)["units"] = []
 		d.side(s)["hand"] = []
 	d.side(0)["mana"] = 10
-	d.side(0)["hero_hp"] = 20
+	d.side(0)["hero_hp"] = 10
 	d.side(1)["hero_hp"] = 20
 	d.place_unit(1, "m_troll", 2, 2)
 	d.place_unit(1, "m_troll", 1, 3)
@@ -113,7 +113,7 @@ func _verify(label: String, card: Dictionary, via_creature: bool) -> void:
 				check(int(d.side(1)["hero_hp"]) == foe_hero - v, "%s : le héros ennemi ne perd pas %d" % [tag, v])
 			"soin":
 				if tcell == -1:
-					check(int(d.side(0)["hero_hp"]) == mini(30, my_hero + v), "%s : le héros n'est pas soigné de %d" % [tag, v])
+					check(int(d.side(0)["hero_hp"]) == mini(JccDuel.HERO_HP, my_hero + v), "%s : le héros n'est pas soigné de %d" % [tag, v])
 				else:
 					check(int(d.creature_at(tside, tcell)["hp"]) == mini(int(d.creature_at(tside, tcell)["max_hp"]), t_hp0 + v), "%s : la cible n'est pas soignée de %d" % [tag, v])
 			"soin_zone":
