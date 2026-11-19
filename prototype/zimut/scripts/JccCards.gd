@@ -102,7 +102,7 @@ static func effect_text(card: Dictionary, creature_sort: bool = false) -> String
 			t = "Poison : %s dégâts par tour pendant %d tours" % [v, d] + _target_suffix(card)
 		"invoquer":
 			var tok: Dictionary = get_card(v)
-			t = "Invoque %s (%d/%d)" % [tok.get("name", "une créature"), int(tok.get("atk", 0)), int(tok.get("hp", 0))]
+			t = "Invoque %s (%d/%d) sur une case libre de votre zone de déploiement" % [tok.get("name", "une créature"), int(tok.get("atk", 0)), int(tok.get("hp", 0))]
 		"pioche":
 			t = "Pioche %s cartes" % v
 		"mana":

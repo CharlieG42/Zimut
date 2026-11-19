@@ -75,8 +75,8 @@ func _boot() -> void:
 	t.side(0)["hand"] = [t._make_instance("m_gobelin"), t._make_instance("m_troll"), t._make_instance("s_etincelle")]
 	t.side(1)["hand"] = []
 	t.side(0)["mana"] = 5
-	# dépôt : uniquement la ligne arrière du camp (y=5 pour le joueur -> cases 20..23)
-	check(not t.play_card(0, 0, {"side": 0, "lane": 0}), "hors ligne arrière : dépôt refusé (case 0 = y 0)")
+	# dépôt : 2 lignes proches du héros (y=4..5 pour le joueur -> cases 16..23)
+	check(not t.play_card(0, 0, {"side": 0, "lane": 0}), "hors zone de déploiement : dépôt refusé (case 0 = y 0)")
 	check(t.play_card(0, 0, {"side": 0, "lane": 21}), "poser un Gobelin en case 21 (x1, y5)")
 	check(t.creature_at(0, 21) != null and t.side(0)["mana"] == 4, "Gobelin en (1,5), mana 5 -> 4")
 	check(not t.can_attack(0, 21), "mal d'invocation : ne peut pas attaquer")

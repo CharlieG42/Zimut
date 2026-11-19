@@ -2,13 +2,13 @@ extends CanvasLayer
 ## CardDuelUI.gd — Mode Cartes (JCC à voies) : accueil, choix de l'adversaire, duel, résultat.
 ## Les règles sont dans JccDuel ; les cartes dans JccCards ; la collection / le deck dans JccCollection.
 ## Plateau : grille 2D de 4 x 6 cases (style Krosmaga). Adversaire en haut, vous en bas.
-## Chaque camp déploie sur sa ligne arrière ; PM = déplacement, PA = attaque/sort, PO = portée.
+## Chaque camp déploie sur ses 2 lignes proches du héros ; PM = déplacement, PA = attaque/sort, PO = portée.
 
 const W: float = 1920.0
 const H: float = 1080.0
-const BOARD := Rect2(560.0, 116.0, 800.0, 576.0)   # 4 colonnes x 6 lignes
-const CELL := Vector2(200.0, 96.0)
-const SLOT := Vector2(200.0, 96.0)   # carte sur le plateau (= CELL)
+const BOARD := Rect2(400.0, 116.0, 1120.0, 576.0)   # 4 colonnes x 6 lignes
+const CELL := Vector2(280.0, 96.0)
+const SLOT := Vector2(280.0, 96.0)   # carte sur le plateau (= CELL)
 const HAND_Y: float = 792.0
 const BIOMES: Array = ["Forêt", "Plaine", "Désert", "Montagne", "Marais"]
 const HAND_CARD := Vector2(190, 275)
@@ -297,7 +297,7 @@ func _build_duel_ui() -> void:
 	# barre d'actions (créature sélectionnée)
 	_action_bar = HBoxContainer.new()
 	_action_bar.position = Vector2(420, 700)
-	_action_bar.size = Vector2(1100, 64)
+	_action_bar.size = Vector2(1480, 64)
 	_action_bar.alignment = BoxContainer.ALIGNMENT_CENTER
 	_action_bar.add_theme_constant_override("separation", 14)
 	_root.add_child(_action_bar)
@@ -305,9 +305,10 @@ func _build_duel_ui() -> void:
 	var logp := PanelContainer.new()
 	logp.position = Vector2(1560, 126)
 	logp.size = Vector2(330, 250)
+	logp.clip_contents = true
 	logp.add_theme_stylebox_override("panel", UiKit.box(Color(0, 0, 0, 0.35), UiKit.C_BORDER, 12, 2, 10))
 	_root.add_child(logp)
-	_log_lbl = UiKit.lbl("", 18, UiKit.C_TXT)
+	_log_lbl = UiKit.lbl("", 22, UiKit.C_TXT)
 	_log_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_log_lbl.custom_minimum_size = Vector2(300, 0)
 	_log_lbl.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
@@ -586,7 +587,7 @@ func _refresh_action_bar() -> void:
 		var c: Dictionary = (_duel.side(0)["hand"] as Array)[_sel_hand]
 		if _duel.can_play(0, _sel_hand):
 			var needs: bool = String(c["type"]) == "Creature" or _duel.needs_target(String(c["cible"]))
-			var txt: String = "Choisissez un emplacement libre" if String(c["type"]) == "Creature" else ("Choisissez une cible" if needs else "")
+			var txt: String = "Posez-la sur une case libre de vos 2 lignes (côté héros)" if String(c["type"]) == "Creature" else ("Choisissez une cible" if needs else "")
 			if needs:
 				_action_bar.add_child(UiKit.lbl(txt, 26, UiKit.C_GOLD, true))
 			else:
@@ -594,7 +595,7 @@ func _refresh_action_bar() -> void:
 				play.pressed.connect(func() -> void: _play_hand(_sel_hand, {}))
 				_action_bar.add_child(play)
 		else:
-			var why: String = "Pas assez de mana" if int(c["cost"]) > int(_duel.side(0)["mana"]) else "Aucune cible / aucun emplacement"
+			var why: String = _duel.play_block_reason(0, _sel_hand)
 			if _duel.current != 0:
 				why = "Ce n'est pas votre tour"
 			_action_bar.add_child(UiKit.lbl(why, 24, UiKit.C_BAD, true))
@@ -602,17 +603,23 @@ func _refresh_action_bar() -> void:
 	if _sel_cell >= 0 and _duel.creature_at(0, _sel_cell) != null:
 		var cr: Dictionary = _duel.creature_at(0, _sel_cell)
 		var cell: int = _sel_cell
-		var atk: Button = UiKit.btn("⚔ Attaquer (1 PA · portée PO %d)" % int(cr.get("po", 1)), Color(0.95, 0.5, 0.3), 20, Vector2(380, 60))
+		var atk: Button = UiKit.btn("⚔ Attaquer · 1 PA", Color(0.95, 0.5, 0.3), 24, Vector2(300, 64))
 		atk.disabled = not _duel.can_attack(0, cell)
 		atk.pressed.connect(func() -> void: _begin_attack(cell))
 		_action_bar.add_child(atk)
+		var why_a: String = _duel.attack_block_reason(0, cell)
+		if atk.disabled and why_a != "":
+			_action_bar.add_child(UiKit.lbl(why_a, 24, UiKit.C_BAD))
 		if String(cr["sort"]) != "":
-			var sb: Button = UiKit.btn("✦ %s (%d mana · 1 PA)" % [String(cr["sort"]), int(cr["sort_cost"])], Color(0.7, 0.45, 1.0), 20, Vector2(380, 60))
+			var sb: Button = UiKit.btn("✦ %s (%d mana · 1 PA)" % [String(cr["sort"]), int(cr["sort_cost"])], Color(0.7, 0.45, 1.0), 24, Vector2(400, 64))
 			sb.disabled = not _duel.can_use_sort(0, cell)
 			sb.pressed.connect(func() -> void: _begin_sort(cell))
 			_action_bar.add_child(sb)
+			var why_s: String = _duel.sort_block_reason(0, cell)
+			if sb.disabled and why_s != "":
+				_action_bar.add_child(UiKit.lbl(why_s, 24, UiKit.C_BAD))
 		var mv: Array = _duel.move_targets(0, cell)
-		var hint: Label = UiKit.lbl("PM %d — cliquez une case dorée pour vous déplacer" % int(cr.get("pm", 0)), 22, Color(0.6, 0.85, 1.0) if not mv.is_empty() else UiKit.C_DIM)
+		var hint: Label = UiKit.lbl("PM %d — touchez une case dorée pour vous déplacer" % int(cr.get("pm", 0)), 24, Color(0.6, 0.85, 1.0) if not mv.is_empty() else UiKit.C_DIM)
 		_action_bar.add_child(hint)
 
 
@@ -1104,7 +1111,7 @@ func _confirm(msg: String, yes: Callable) -> void:
 class _BiomeBG extends Control:
 	var biome: String = "Forêt"
 	var seedv: int = 1
-	var board: Rect2 = Rect2(560, 116, 800, 576)
+	var board: Rect2 = Rect2(400, 116, 1120, 576)
 	const PALETTES := {
 		"Forêt": [Color(0.10, 0.22, 0.14), Color(0.05, 0.12, 0.08), Color(0.16, 0.34, 0.18), Color(0.45, 0.30, 0.18)],
 		"Plaine": [Color(0.32, 0.36, 0.16), Color(0.20, 0.24, 0.10), Color(0.42, 0.48, 0.22), Color(0.50, 0.42, 0.25)],

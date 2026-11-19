@@ -121,7 +121,48 @@ func _build() -> void:
 ## Molette : toute la zone des cartes (pas seulement la scrollbar) fait défiler
 ## la liste sous la souris. _input n'est appelé que si le GUI n'a pas consommé
 ## l'événement, donc pas de double défilement.
+var _drag_sc: ScrollContainer = null
+var _drag_start: Vector2 = Vector2.ZERO
+var _drag_moved: bool = false
+
+
+## Glisser le doigt / la souris n'importe où dans la zone des cartes (ou du deck) fait défiler.
+func _drag_scroll(event: InputEvent) -> void:
+	if event is InputEventScreenDrag:
+		# le défilement tactile est géré ici (les souris émulées arrivent en InputEventMouse*)
+		for sc: ScrollContainer in [_scroll, _dscroll]:
+			if sc != null and is_instance_valid(sc) and Rect2(sc.global_position, sc.size).has_point((event as InputEventScreenDrag).position):
+				get_viewport().set_input_as_handled()
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_drag_sc = null
+			_drag_moved = false
+			var mp: Vector2 = (event as InputEventMouseButton).global_position
+			for sc: ScrollContainer in [_scroll, _dscroll]:
+				if sc != null and is_instance_valid(sc) and Rect2(sc.global_position, sc.size).has_point(mp):
+					_drag_sc = sc
+					_drag_start = mp
+		else:
+			_drag_sc = null
+			if _drag_moved:
+				# laisse passer le relâchement avant de ré-autoriser les taps
+				get_tree().create_timer(0.05).timeout.connect(func() -> void: JccCardView.drag_active = false)
+			_drag_moved = false
+	elif event is InputEventMouseMotion and _drag_sc != null and is_instance_valid(_drag_sc) \
+			and ((event as InputEventMouseMotion).button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
+		var mm: InputEventMouseMotion = event
+		if not _drag_moved and (mm.global_position - _drag_start).length() > 14.0:
+			_drag_moved = true
+			JccCardView.drag_active = true
+		if _drag_moved:
+			var bar: VScrollBar = _drag_sc.get_v_scroll_bar()
+			_drag_sc.scroll_vertical = clampi(_drag_sc.scroll_vertical - int(mm.relative.y), 0, int(bar.max_value))
+			get_viewport().set_input_as_handled()
+
+
 func _input(event: InputEvent) -> void:
+	_drag_scroll(event)
 	if event is InputEventMouseButton and event.pressed \
 			and (event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN):
 		var mp: Vector2 = get_viewport().get_mouse_position()
@@ -207,6 +248,7 @@ func _refresh_grid() -> void:
 		v.owned_dim = own <= 0
 		v.count_badge = own
 		v.selected = id == _selected
+		v.release_tap = true
 		v.tapped.connect(func(_vw: JccCardView) -> void:
 			_selected = id
 			_refresh_grid()
@@ -240,6 +282,8 @@ func _refresh_deck() -> void:
 		var b: Button = UiKit.btn("%d  %s %s%s" % [int(c["cost"]), kind, String(c["name"]), ("  ×%d" % int(counts[id])) if int(counts[id]) > 1 else ""], col, 20, Vector2(0, 44))
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.pressed.connect(func() -> void:
+			if JccCardView.drag_active:
+				return
 			_selected = id
 			_refresh_grid()
 			_refresh_detail())
