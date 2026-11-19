@@ -18,17 +18,17 @@ const CHALLENGES: Array = [
 
 ## Adversaires : nom, camp d'héros (sprite du portrait), deck de 20 cartes, éventuel boss (carte à gagner).
 const OPPONENTS: Array = [
-	{"name": "Meute de gobelins", "sprite": "enemies/gobelin", "boss": "",
+	{"name": "Meute de gobelins", "biome": "Forêt", "accent": "#6fcf5a", "sprite": "enemies/gobelin", "boss": "",
 		"deck": "m_gobelin m_gobelin m_gobelin m_gobelin m_loup m_loup m_loup e_archer e_archer m_troll s_etincelle s_etincelle s_charge s_charge s_javelot s_loup s_loup s_volee s_volee s_frappe"},
-	{"name": "Armée de squelettes", "sprite": "enemies/squelette", "boss": "",
+	{"name": "Armée de squelettes", "biome": "Marais", "accent": "#b8a6e8", "sprite": "enemies/squelette", "boss": "",
 		"deck": "m_squelette m_squelette m_squelette m_squelette c_assassin c_assassin m_troll e_ent s_protection s_protection s_eclair s_eclair s_fleche_poison s_fleche_poison c_chasseur s_javelot s_trait_glace s_benediction m_loup m_gobelin"},
-	{"name": "Gobelin Roi", "sprite": "enemies/gobelin_boss", "boss": "b_gobelin_roi",
+	{"name": "Gobelin Roi", "biome": "Plaine", "accent": "#e8c040", "sprite": "enemies/gobelin_boss", "boss": "b_gobelin_roi",
 		"deck": "b_gobelin_roi m_gobelin m_gobelin m_gobelin m_gobelin m_loup m_loup m_loup m_troll m_troll s_charge s_charge s_cri_guerre s_frappe s_frappe s_javelot e_archer e_archer s_volee s_boule_feu"},
-	{"name": "Couvée de feu", "sprite": "enemies/dragonnet", "boss": "",
+	{"name": "Couvée de feu", "biome": "Désert", "accent": "#ff7a30", "sprite": "enemies/dragonnet", "boss": "",
 		"deck": "m_dragonnet m_dragonnet m_dragonnet c_mage m_gobelin s_boule_feu m_loup s_eclair m_gobelin s_explosion s_etincelle m_loup c_artificier e_archer e_cristal e_cristal s_frappe s_inspiration s_javelot s_attaque_sacree"},
-	{"name": "Troll Géant", "sprite": "enemies/troll_boss", "boss": "b_troll_geant",
+	{"name": "Troll Géant", "biome": "Montagne", "accent": "#c07a50", "sprite": "enemies/troll_boss", "boss": "b_troll_geant",
 		"deck": "b_troll_geant m_troll m_troll m_gobelin e_golem m_loup m_gobelin c_tank s_protection m_loup s_soin_combat s_charge s_javelot s_javelot s_frappe s_frappe s_mur_pierre s_cri_guerre c_druide s_volee"},
-	{"name": "Dragon", "sprite": "enemies/dragonnet_boss", "boss": "b_dragon",
+	{"name": "Dragon", "biome": "Montagne", "accent": "#ff3b3b", "sprite": "enemies/dragonnet_boss", "boss": "b_dragon",
 		"deck": "b_dragon m_dragonnet m_dragonnet m_dragonnet c_mage c_mage c_artificier e_cristal e_cristal s_boule_feu s_boule_feu s_explosion s_explosion s_eclair s_etincelle s_etincelle s_attaque_sacree s_inspiration s_cristal_mana s_trait_glace"},
 ]
 
