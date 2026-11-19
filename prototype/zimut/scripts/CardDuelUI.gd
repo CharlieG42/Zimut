@@ -1035,7 +1035,13 @@ func _draw_previews() -> void:
 	var valeur: String = ""
 	var atk: int = 0
 	if not _pending.is_empty():
-		var src: Dictionary = _duel.creature_at(0, int(_pending["lane"])) if _pending.has("lane") else {}
+		var src: Dictionary = {}
+		if String(_pending["kind"]) == "power":
+			src = _duel.side(0)["power"]   # pouvoir du héros : pas de créature source (lane = -1)
+		elif _pending.has("lane") and int(_pending["lane"]) >= 0:
+			var cr: Variant = _duel.creature_at(0, int(_pending["lane"]))
+			if cr != null:
+				src = cr
 		if src.is_empty():
 			return
 		if String(_pending["kind"]) == "attack":
