@@ -1,0 +1,3 @@
+V415|Cartes : héros à 20 PV pour des duels plus courts (environ 27 tours au lieu de 33).
+V415|Cartes : le second joueur démarre avec une carte de plus pour compenser l'avantage du premier.
+V415|Cartes : adversaires rééquilibrés et ordonnés par difficulté croissante (Couvée de feu après le Gobelin Roi).
