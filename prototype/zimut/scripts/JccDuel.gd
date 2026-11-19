@@ -582,6 +582,7 @@ func move(s: int, from: int, to: int) -> bool:
 	cr["x"] = tp.x
 	cr["y"] = tp.y
 	_ev("move", s, to, cost, {"from": from})
+	log.append("%s : %s se déplace" % [_nm(s), cr["name"]])
 	return true
 
 

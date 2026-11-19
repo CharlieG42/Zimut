@@ -28,6 +28,11 @@ var _cards_layer: Control
 var _fx_layer: Control
 var _slots: Dictionary = {}          # "cell" -> Panel (case vide cliquable)
 var _board_views: Dictionary = {}    # "side:cell" -> JccCardView
+var _iso: bool = false                # plateau en perspective (réglage Options > Cartes)
+var _cell_polys: Array = []           # PackedVector2Array (écran) par case
+var _cell_ctr: Array = []             # centre de chaque case
+var _cell_scale: Array = []           # échelle de l'unité posée sur la case
+var _range_cells: Array = []          # cases à portée PO de l'unité sélectionnée
 var _board_anchor: Control = null    # ancre du tutoriel sur le plateau
 var _biome: String = "Forêt"
 var _hand_views: Array = []
@@ -256,7 +261,11 @@ func _build_duel_ui() -> void:
 			_cancel_selection())
 	_root.add_child(catcher)
 	# fond de biome 2D stylisé derrière le plateau + ancre du tutoriel
+	_iso = GameSettings.cards_iso
+	_build_geometry()
 	var biome_bg := _BiomeBG.new()
+	biome_bg.iso = _iso
+	biome_bg.polys = _cell_polys
 	biome_bg.biome = _biome
 	biome_bg.seedv = _opp_idx * 7919 + 13
 	biome_bg.board = BOARD
@@ -268,15 +277,19 @@ func _build_duel_ui() -> void:
 	_root.add_child(_board_anchor)
 	# emplacements : une case cliquable par cellule de la grille 4 x 6
 	for cell in JccDuel.LANES:
-		var p := Panel.new()
-		p.position = _cell_pos(cell)
-		p.size = CELL
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = Color(0, 0, 0, 0.20)
-		sb.border_color = Color(1, 1, 1, 0.14)
-		sb.set_border_width_all(2)
-		sb.set_corner_radius_all(10)
-		p.add_theme_stylebox_override("panel", sb)
+		var poly: PackedVector2Array = _cell_polys[cell]
+		var mn := Vector2(1e9, 1e9)
+		var mx := Vector2(-1e9, -1e9)
+		for q in poly:
+			mn = Vector2(minf(mn.x, q.x), minf(mn.y, q.y))
+			mx = Vector2(maxf(mx.x, q.x), maxf(mx.y, q.y))
+		var p := _CellNode.new()
+		p.position = mn
+		p.size = mx - mn
+		var loc := PackedVector2Array()
+		for q in poly:
+			loc.append(q - mn)
+		p.poly = loc
 		p.gui_input.connect(func(ev: InputEvent) -> void:
 			if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
 				_on_slot(cell))
@@ -343,6 +356,75 @@ func _build_duel_ui() -> void:
 	_toast.modulate.a = 0.0
 	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_fx_layer.add_child(_toast)
+
+
+const ISO_TOP: float = 126.0
+const ISO_BOTTOM: float = 690.0
+const ISO_TOP_F: float = 0.80
+const ISO_W: Array = [0.80, 0.88, 0.96, 1.04, 1.12, 1.20]
+
+
+func _iso_y(i: int) -> float:
+	var acc: float = 0.0
+	for k in i:
+		acc += float(ISO_W[k])
+	return ISO_TOP + acc / 6.0 * (ISO_BOTTOM - ISO_TOP)
+
+
+func _iso_hw(y: float) -> float:
+	return BOARD.size.x * 0.5 * lerpf(ISO_TOP_F, 1.0, (y - ISO_TOP) / (ISO_BOTTOM - ISO_TOP))
+
+
+## Calcule le polygone, le centre et l'échelle d'unité de chaque case (plat ou perspective).
+func _build_geometry() -> void:
+	_cell_polys = []
+	_cell_ctr = []
+	_cell_scale = []
+	var cx: float = BOARD.position.x + BOARD.size.x * 0.5
+	for cell in JccDuel.LANES:
+		var gx: int = cell % JccDuel.COLS
+		var gy: int = cell / JccDuel.COLS
+		var pts := PackedVector2Array()
+		var sc: float = 1.0
+		if not _iso:
+			var r := Rect2(_cell_pos(cell), CELL)
+			pts = PackedVector2Array([r.position, Vector2(r.end.x, r.position.y), r.end, Vector2(r.position.x, r.end.y)])
+		else:
+			var yt: float = _iso_y(gy)
+			var yb: float = _iso_y(gy + 1)
+			var ht: float = _iso_hw(yt)
+			var hb: float = _iso_hw(yb)
+			var n: float = float(JccDuel.COLS)
+			pts = PackedVector2Array([
+				Vector2(cx - ht + float(gx) * 2.0 * ht / n, yt), Vector2(cx - ht + float(gx + 1) * 2.0 * ht / n, yt),
+				Vector2(cx - hb + float(gx + 1) * 2.0 * hb / n, yb), Vector2(cx - hb + float(gx) * 2.0 * hb / n, yb)])
+			var cw: float = (ht + hb) / n
+			sc = minf(cw / CELL.x, (yb - yt) / CELL.y) * 0.97
+		var ctr := Vector2.ZERO
+		for q in pts:
+			ctr += q
+		_cell_polys.append(pts)
+		_cell_ctr.append(ctr / 4.0)
+		_cell_scale.append(sc)
+
+
+## Case cliquable de forme quelconque (rectangle ou trapèze), teintée selon son rôle.
+class _CellNode extends Control:
+	var poly := PackedVector2Array()   # coordonnées locales
+	var fill := Color(0, 0, 0, 0.20)
+	var border := Color(1, 1, 1, 0.14)
+	var bw: float = 2.0
+
+	func _has_point(p: Vector2) -> bool:
+		return Geometry2D.is_point_in_polygon(p, poly)
+
+	func _draw() -> void:
+		if poly.size() < 3:
+			return
+		draw_colored_polygon(poly, fill)
+		var closed := poly.duplicate()
+		closed.append(poly[0])
+		draw_polyline(closed, border, bw, true)
 
 
 func _cell_pos(cell: int) -> Vector2:
@@ -486,21 +568,42 @@ func _refresh() -> void:
 	_board_views = {}
 	_hand_views = []
 	_targets = _compute_targets()
+	_range_cells = []
+	var rsrc: int = -1
+	if not _pending.is_empty():
+		if String(_pending.get("kind", "")) == "attack":
+			rsrc = int(_pending["lane"])
+	elif _sel_hand < 0 and _sel_cell >= 0:
+		rsrc = _sel_cell
+	if rsrc >= 0 and _duel.creature_at(0, rsrc) != null:
+		var rpo: int = int((_duel.creature_at(0, rsrc) as Dictionary).get("po", 1))
+		for rc in JccDuel.LANES:
+			var dd: int = _duel.manhattan_cell(rsrc, rc)
+			if dd >= 1 and dd <= rpo:
+				_range_cells.append(rc)
 	for cell in JccDuel.LANES:
-		var slot: Panel = _slots["%d" % cell]
+		var slot: _CellNode = _slots["%d" % cell]
 		var occ: Dictionary = _duel.occupant(cell)
 		var empty_ok: bool = occ.is_empty() and _is_target_any(cell)
-		var sbx: StyleBoxFlat = slot.get_theme_stylebox("panel") as StyleBoxFlat
-		sbx.border_color = Color(1.0, 0.85, 0.2, 0.9) if empty_ok else Color(1, 1, 1, 0.14)
-		sbx.set_border_width_all(5 if empty_ok else 2)
+		slot.border = Color(1.0, 0.85, 0.2, 0.9) if empty_ok else Color(1, 1, 1, 0.14)
+		slot.bw = 5.0 if empty_ok else 2.0
+		if _is_move_target(cell):
+			slot.fill = Color(0.30, 0.60, 1.0, 0.22)
+		elif cell in _range_cells:
+			slot.fill = Color(1.0, 0.30, 0.25, 0.20)
+		else:
+			slot.fill = Color(0, 0, 0, 0.20)
+		slot.queue_redraw()
 		if occ.is_empty():
 			continue
 		var side: int = int(occ["side"])
 		var cr: Dictionary = occ["unit"]
 		var v := JccCardView.new()
 		v.board_mode = true
-		v.position = _cell_pos(cell)
+		var us: float = float(_cell_scale[cell])
 		v.size = CELL
+		v.scale = Vector2(us, us)
+		v.position = (_cell_ctr[cell] as Vector2) - CELL * us * 0.5
 		v.set_card(cr)
 		v.target_ok = _is_target(side, cell)
 		v.selected = side == 0 and _sel_cell == cell
@@ -509,6 +612,7 @@ func _refresh() -> void:
 		v.tapped.connect(func(_vw: JccCardView) -> void: _on_board_card(side, cell))
 		_cards_layer.add_child(v)
 		_board_views["%d:%d" % [side, cell]] = v
+	_draw_previews()
 	_refresh_hand()
 	_refresh_hero(0)
 	_refresh_hero(1)
@@ -520,6 +624,86 @@ func _refresh() -> void:
 	_end_btn.text = "Fin du tour" if _duel.current == 0 else "Tour adverse…"
 	var lines: Array = _duel.log.slice(maxi(0, _duel.log.size() - 7))
 	_log_lbl.text = "\n".join(PackedStringArray(lines))
+
+
+## Aperçu de l'effet annoncé : texte court d'un effet de sort.
+func _effect_preview(effet: String, valeur: String) -> String:
+	var v: int = int(valeur) if valeur.is_valid_int() else 0
+	match effet:
+		"degats", "degats_zone", "degats_heros":
+			return "-%d" % v
+		"soin", "soin_zone":
+			return "+%d PV" % v
+		"bouclier", "bouclier_zone":
+			return "+%d PV max" % v
+		"atq", "atq_zone":
+			return "+%d ATQ" % v
+		"etourdir", "etourdir_zone":
+			return "ZZ"
+		"poison":
+			return "poison %d" % v
+	return ""
+
+
+## Aperçu sur chaque cible valide (attaque : dégâts et riposte ; sort : valeur de l'effet).
+func _draw_previews() -> void:
+	if _busy or _over or _targets.is_empty():
+		return
+	var kind: String = ""
+	var effet: String = ""
+	var valeur: String = ""
+	var atk: int = 0
+	if not _pending.is_empty():
+		var src: Dictionary = _duel.creature_at(0, int(_pending["lane"])) if _pending.has("lane") else {}
+		if src.is_empty():
+			return
+		if String(_pending["kind"]) == "attack":
+			kind = "attack"
+			atk = int(src["atk"])
+		else:
+			kind = "sort"
+			effet = String(src["effet"])
+			valeur = String(src["valeur"])
+	elif _sel_hand >= 0 and _sel_hand < (_duel.side(0)["hand"] as Array).size():
+		var c: Dictionary = (_duel.side(0)["hand"] as Array)[_sel_hand]
+		if String(c["type"]) != "Sort":
+			return
+		kind = "sort"
+		effet = String(c["effet"])
+		valeur = String(c["valeur"])
+	else:
+		return
+	for t: Variant in _targets:
+		var td: Dictionary = t
+		if td.is_empty():
+			continue
+		var side: int = int(td["side"])
+		var lane: int = int(td["lane"])
+		var txt: String = ""
+		var col := Color(1.0, 0.85, 0.3)
+		if kind == "attack":
+			txt = "-%d" % atk
+			if lane >= 0:
+				var tgt: Variant = _duel.creature_at(side, lane)
+				if tgt != null:
+					txt += "  riposte -%d" % int((tgt as Dictionary)["atk"])
+			col = Color(1.0, 0.55, 0.45)
+		else:
+			txt = _effect_preview(effet, valeur)
+			if txt.begins_with("+"):
+				col = Color(0.5, 1.0, 0.6)
+		if txt == "":
+			continue
+		var c0: Vector2 = _node_center(side, lane)
+		var off: float = 62.0 * (float(_cell_scale[lane]) if lane >= 0 else 1.0)
+		var lb: Label = UiKit.lbl(txt, 26, col, true)
+		lb.size = Vector2(240, 36)
+		lb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lb.position = c0 - Vector2(120, off)
+		lb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		lb.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.95))
+		lb.add_theme_constant_override("outline_size", 8)
+		_cards_layer.add_child(lb)
 
 
 func _refresh_hand() -> void:
@@ -870,7 +1054,7 @@ func _node_center(side: int, cell: int) -> Vector2:
 	if cell < 0:
 		var p: Control = _hero_nodes[side]
 		return p.position + p.size * 0.5
-	return _cell_pos(cell) + CELL * 0.5
+	return _cell_ctr[cell]
 
 
 func _show_event(e: Dictionary) -> void:
@@ -896,9 +1080,12 @@ func _show_event(e: Dictionary) -> void:
 		"summon":
 			var v: JccCardView = _board_views.get("%d:%d" % [side, lane])
 			if v != null:
-				v.pivot_offset = SLOT * 0.5
-				v.scale = Vector2(0.4, 0.4)
-				create_tween().tween_property(v, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+				var tsc: Vector2 = v.scale
+				v.scale = tsc * 0.4
+				v.position += CELL * (tsc - tsc * 0.4) * 0.5
+				var tp: Vector2 = v.position - CELL * (tsc - tsc * 0.4) * 0.5
+				create_tween().tween_property(v, "position", tp, 0.25)
+				create_tween().tween_property(v, "scale", tsc, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		"mana":
 			_float("+%d mana" % n, c, Color(0.5, 0.8, 1.0))
 		"draw":
@@ -1112,50 +1299,187 @@ class _BiomeBG extends Control:
 	var biome: String = "Forêt"
 	var seedv: int = 1
 	var board: Rect2 = Rect2(400, 116, 1120, 576)
+	var iso: bool = false
+	var polys: Array = []
+	# [ciel haut, ciel bas / sol sombre, végétation, tronc/roche, sol clair]
 	const PALETTES := {
-		"Forêt": [Color(0.10, 0.22, 0.14), Color(0.05, 0.12, 0.08), Color(0.16, 0.34, 0.18), Color(0.45, 0.30, 0.18)],
-		"Plaine": [Color(0.32, 0.36, 0.16), Color(0.20, 0.24, 0.10), Color(0.42, 0.48, 0.22), Color(0.50, 0.42, 0.25)],
-		"Désert": [Color(0.55, 0.44, 0.24), Color(0.40, 0.31, 0.17), Color(0.65, 0.54, 0.30), Color(0.55, 0.45, 0.28)],
-		"Montagne": [Color(0.25, 0.27, 0.32), Color(0.16, 0.18, 0.23), Color(0.35, 0.37, 0.44), Color(0.50, 0.48, 0.45)],
-		"Marais": [Color(0.12, 0.20, 0.18), Color(0.07, 0.12, 0.11), Color(0.18, 0.30, 0.26), Color(0.35, 0.30, 0.20)],
+		"Forêt": [Color(0.10, 0.22, 0.14), Color(0.05, 0.12, 0.08), Color(0.16, 0.34, 0.18), Color(0.45, 0.30, 0.18), Color(0.20, 0.36, 0.20)],
+		"Plaine": [Color(0.32, 0.36, 0.16), Color(0.20, 0.24, 0.10), Color(0.42, 0.48, 0.22), Color(0.50, 0.42, 0.25), Color(0.46, 0.50, 0.24)],
+		"Désert": [Color(0.55, 0.44, 0.24), Color(0.40, 0.31, 0.17), Color(0.65, 0.54, 0.30), Color(0.55, 0.45, 0.28), Color(0.72, 0.60, 0.36)],
+		"Montagne": [Color(0.25, 0.27, 0.32), Color(0.16, 0.18, 0.23), Color(0.35, 0.37, 0.44), Color(0.50, 0.48, 0.45), Color(0.42, 0.44, 0.50)],
+		"Marais": [Color(0.12, 0.20, 0.18), Color(0.07, 0.12, 0.11), Color(0.18, 0.30, 0.26), Color(0.35, 0.30, 0.20), Color(0.16, 0.28, 0.24)],
 	}
 
 	func _ready() -> void:
 		set_anchors_preset(Control.PRESET_FULL_RECT)
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
+	func _inside_board(pt: Vector2) -> bool:
+		return board.grow(26.0).has_point(pt)
+
 	func _draw() -> void:
 		var pal: Array = PALETTES.get(biome, PALETTES["Forêt"])
-		var w: float = size.x
-		var h: float = size.y
+		var w: float = 1920.0
+		var h: float = 1080.0
 		var steps := 48
+		# ciel / fond : dégradé
 		for i in steps:
 			var col: Color = (pal[0] as Color).lightened(0.22).lerp(pal[1] as Color, float(i) / float(steps))
 			draw_rect(Rect2(0, h * float(i) / float(steps), w, h / float(steps) + 1.0), col)
-		# décor procédural seedé autour du plateau (arbres, rochers, buissons)
 		var rng := RandomNumberGenerator.new()
 		rng.seed = seedv
-		var zone := Rect2(board.position + Vector2(-50, -40), board.size + Vector2(100, 80))
-		for i in 70:
+		# sol : bande plus claire sous l'horizon, avec plaques de texture
+		var hor: float = board.position.y - 8.0
+		draw_rect(Rect2(0, hor, w, h - hor), (pal[4] as Color).darkened(0.35))
+		for i in 90:
+			var gp := Vector2(rng.randf_range(0, w), rng.randf_range(hor, h))
+			draw_circle(gp, rng.randf_range(18.0, 60.0), Color(pal[4].r, pal[4].g, pal[4].b, rng.randf_range(0.05, 0.12)))
+		_silhouettes(pal, hor, rng)
+		# décor autour du plateau
+		var zone := Rect2(0.0, hor - 6.0, 1920.0, 1080.0 - hor + 6.0)
+		for i in 260:
 			var pt := Vector2(rng.randf_range(zone.position.x, zone.end.x), rng.randf_range(zone.position.y, zone.end.y))
-			var s: float = rng.randf_range(0.6, 1.6)
-			match rng.randi_range(0, 2):
-				0:
-					draw_colored_polygon(PackedVector2Array([pt + Vector2(0, -22) * s, pt + Vector2(12, 0) * s, pt + Vector2(-12, 0) * s]), (pal[2] as Color).darkened(rng.randf_range(0.0, 0.25)))
-					draw_rect(Rect2(pt + Vector2(-2.5, -4) * s, Vector2(5, 8) * s), pal[3] as Color)
-				1:
+			var s: float = rng.randf_range(0.7, 1.7) * (0.7 + 0.5 * (pt.y - hor) / maxf(1.0, h - hor))
+			var kind: int = rng.randi_range(0, 3)
+			var dark: float = rng.randf_range(0.0, 0.25)
+			if _inside_board(pt):
+				continue
+			_prop(pal, pt, s, kind, dark)
+		_draw_board(pal)
+		# vignette
+		for i in 14:
+			var a: float = 0.30 * (1.0 - float(i) / 14.0)
+			draw_rect(Rect2(i * 14.0, 0, 14.0, h), Color(0, 0, 0, a * 0.5))
+			draw_rect(Rect2(w - (i + 1) * 14.0, 0, 14.0, h), Color(0, 0, 0, a * 0.5))
+			draw_rect(Rect2(0, h - (i + 1) * 12.0, w, 12.0), Color(0, 0, 0, a * 0.7))
+
+	func _silhouettes(pal: Array, hor: float, rng: RandomNumberGenerator) -> void:
+		var w: float = 1920.0
+		var far: Color = (pal[1] as Color).lightened(0.12)
+		var pts := PackedVector2Array([Vector2(0, hor + 4.0)])
+		match biome:
+			"Montagne":
+				var x: float = 0.0
+				while x < w:
+					var pk: float = rng.randf_range(40.0, 105.0)
+					pts.append(Vector2(x, hor - pk))
+					pts.append(Vector2(x + rng.randf_range(30.0, 70.0), hor - rng.randf_range(5.0, 30.0)))
+					x += rng.randf_range(80.0, 150.0)
+			"Désert":
+				for xi in range(0, int(w) + 40, 40):
+					pts.append(Vector2(xi, hor - 28.0 - 22.0 * sin(float(xi) * 0.011) - 12.0 * sin(float(xi) * 0.031)))
+			"Plaine":
+				for xi in range(0, int(w) + 40, 40):
+					pts.append(Vector2(xi, hor - 22.0 - 16.0 * sin(float(xi) * 0.007 + 1.0)))
+			_:
+				var x2: float = 0.0
+				while x2 < w:
+					var th: float = rng.randf_range(34.0, 70.0) if biome == "Forêt" else rng.randf_range(10.0, 26.0)
+					pts.append(Vector2(x2, hor - th))
+					pts.append(Vector2(x2 + 13.0, hor + 2.0))
+					x2 += 26.0
+		pts.append(Vector2(w, hor + 4.0))
+		draw_colored_polygon(pts, far)
+		if biome == "Montagne":
+			# neiges
+			for i in range(1, pts.size() - 1, 2):
+				var pk2: Vector2 = pts[i]
+				draw_colored_polygon(PackedVector2Array([pk2, pk2 + Vector2(14, 20), pk2 + Vector2(-14, 20)]), Color(0.92, 0.95, 1.0, 0.7))
+		if biome == "Marais":
+			for i in 4:
+				draw_rect(Rect2(0, hor - 10.0 + float(i) * 22.0, 1920.0, 14.0), Color(0.75, 0.9, 0.85, 0.05))
+
+	func _prop(pal: Array, pt: Vector2, s: float, kind: int, dark: float) -> void:
+		var veg: Color = (pal[2] as Color).darkened(dark)
+		var trunk: Color = pal[3] as Color
+		match biome:
+			"Forêt":
+				if kind <= 1:
+					draw_rect(Rect2(pt + Vector2(-2.5, -4) * s, Vector2(5, 9) * s), trunk)
+					for tier in 3:
+						var ty: float = -6.0 - float(tier) * 11.0
+						var tw: float = 15.0 - float(tier) * 3.5
+						draw_colored_polygon(PackedVector2Array([pt + Vector2(0, ty - 14.0) * s, pt + Vector2(tw, ty) * s, pt + Vector2(-tw, ty) * s]), veg.lightened(float(tier) * 0.06))
+				elif kind == 2:
 					draw_colored_polygon(PackedVector2Array([pt + Vector2(-10, 4) * s, pt + Vector2(-4, -6) * s, pt + Vector2(5, -8) * s, pt + Vector2(11, 2) * s]), Color(0.5, 0.5, 0.55, 0.8))
-				_:
-					draw_circle(pt, 5.0 * s, (pal[2] as Color).lightened(0.3))
-		# grille du plateau
-		draw_rect(board, Color(1, 1, 1, 0.05))
-		for gx in JccDuel.COLS + 1:
-			var x: float = board.position.x + float(gx) * (board.size.x / float(JccDuel.COLS))
-			draw_line(Vector2(x, board.position.y), Vector2(x, board.end.y), Color(1, 1, 1, 0.07), 2.0)
-		for gy in JccDuel.ROWS + 1:
-			var y: float = board.position.y + float(gy) * (board.size.y / float(JccDuel.ROWS))
-			draw_line(Vector2(board.position.x, y), Vector2(board.end.x, y), Color(1, 1, 1, 0.07), 2.0)
-		draw_rect(board, Color(1, 0.9, 0.6, 0.25), false, 3.0)
+				else:
+					draw_circle(pt, 6.0 * s, veg.lightened(0.15))
+					draw_circle(pt + Vector2(6, 2) * s, 4.5 * s, veg)
+			"Plaine":
+				if kind <= 1:
+					for k in 5:
+						draw_line(pt + Vector2(float(k) * 3.0 - 6.0, 0) * s, pt + Vector2(float(k) * 3.0 - 7.0, -12.0 - float(k % 2) * 4.0) * s, veg.lightened(0.2), 2.0)
+				elif kind == 2:
+					draw_circle(pt, 3.0 * s, Color(1.0, 0.85, 0.3))
+					draw_circle(pt + Vector2(7, 2) * s, 3.0 * s, Color(0.95, 0.5, 0.5))
+				else:
+					draw_colored_polygon(PackedVector2Array([pt + Vector2(-10, 4) * s, pt + Vector2(-3, -7) * s, pt + Vector2(8, -5) * s, pt + Vector2(11, 3) * s]), Color(0.55, 0.52, 0.48, 0.85))
+			"Désert":
+				if kind <= 1:
+					draw_rect(Rect2(pt + Vector2(-3, -18) * s, Vector2(6, 20) * s), Color(0.30, 0.50, 0.28))
+					draw_rect(Rect2(pt + Vector2(-11, -12) * s, Vector2(8, 4) * s), Color(0.30, 0.50, 0.28))
+					draw_rect(Rect2(pt + Vector2(-11, -18) * s, Vector2(4, 10) * s), Color(0.30, 0.50, 0.28))
+				elif kind == 2:
+					draw_colored_polygon(PackedVector2Array([pt + Vector2(-11, 4) * s, pt + Vector2(-3, -9) * s, pt + Vector2(9, -6) * s, pt + Vector2(13, 4) * s]), Color(0.58, 0.46, 0.30, 0.9))
+				else:
+					draw_arc(pt, 14.0 * s, PI, TAU, 14, Color(1, 0.92, 0.7, 0.25), 3.0)
+			"Montagne":
+				if kind <= 1:
+					draw_colored_polygon(PackedVector2Array([pt + Vector2(-13, 5) * s, pt + Vector2(-5, -14) * s, pt + Vector2(3, -9) * s, pt + Vector2(14, 5) * s]), Color(0.46, 0.47, 0.52).darkened(dark))
+					draw_colored_polygon(PackedVector2Array([pt + Vector2(-5, -14) * s, pt + Vector2(-1, -6) * s, pt + Vector2(-9, -6) * s]), Color(0.95, 0.97, 1.0, 0.85))
+				elif kind == 2:
+					draw_colored_polygon(PackedVector2Array([pt + Vector2(0, -14) * s, pt + Vector2(7, 0) * s, pt + Vector2(-7, 0) * s]), Color(0.18, 0.32, 0.24))
+				else:
+					draw_circle(pt, 5.0 * s, Color(0.9, 0.93, 1.0, 0.5))
+			_:
+				if kind <= 1:
+					for k in 4:
+						draw_line(pt + Vector2(float(k) * 3.0 - 5.0, 0) * s, pt + Vector2(float(k) * 3.0 - 6.0, -16.0) * s, Color(0.40, 0.50, 0.28), 2.0)
+						draw_circle(pt + Vector2(float(k) * 3.0 - 6.0, -17.0) * s, 2.6 * s, Color(0.40, 0.28, 0.16))
+				elif kind == 2:
+					draw_circle(pt, 11.0 * s, Color(0.10, 0.30, 0.32, 0.55))
+					draw_circle(pt + Vector2(3, 1) * s, 4.0 * s, Color(0.30, 0.55, 0.30))
+				else:
+					draw_circle(pt, 6.0 * s, veg.lightened(0.2))
+
+	func _draw_board(pal: Array) -> void:
+		var edge: Color = Color(1.0, 0.9, 0.6, 0.30)
+		if not iso:
+			draw_rect(board, Color(0, 0, 0, 0.10))
+			for gi in polys.size():
+				var pl: PackedVector2Array = polys[gi]
+				var chk: bool = ((gi % JccDuel.COLS) + (gi / JccDuel.COLS)) % 2 == 0
+				draw_colored_polygon(pl, Color(1, 1, 1, 0.045) if chk else Color(0, 0, 0, 0.05))
+			for gx in JccDuel.COLS + 1:
+				var x: float = board.position.x + float(gx) * (board.size.x / float(JccDuel.COLS))
+				draw_line(Vector2(x, board.position.y), Vector2(x, board.end.y), Color(1, 1, 1, 0.07), 2.0)
+			for gy in JccDuel.ROWS + 1:
+				var y: float = board.position.y + float(gy) * (board.size.y / float(JccDuel.ROWS))
+				draw_line(Vector2(board.position.x, y), Vector2(board.end.x, y), Color(1, 1, 1, 0.07), 2.0)
+			draw_rect(board, edge, false, 3.0)
+			return
+		# perspective : dalle épaisse sous le plateau, cases en trapèze damier
+		if polys.size() < 24:
+			return
+		var tl: Vector2 = (polys[0] as PackedVector2Array)[0]
+		var tr: Vector2 = (polys[3] as PackedVector2Array)[1]
+		var br: Vector2 = (polys[23] as PackedVector2Array)[2]
+		var bl: Vector2 = (polys[20] as PackedVector2Array)[3]
+		var slab := PackedVector2Array([bl, br, br + Vector2(0, 22), bl + Vector2(0, 22)])
+		draw_colored_polygon(slab, (pal[3] as Color).darkened(0.45))
+		draw_colored_polygon(PackedVector2Array([tl + Vector2(-8, -6), tr + Vector2(8, -6), br + Vector2(10, 4), bl + Vector2(-10, 4)]), Color(0, 0, 0, 0.28))
+		for gi in polys.size():
+			var pl2: PackedVector2Array = polys[gi]
+			var gy: int = gi / JccDuel.COLS
+			var chk2: bool = ((gi % JccDuel.COLS) + gy) % 2 == 0
+			var base: Color = (pal[4] as Color).lerp(pal[2] as Color, 0.35)
+			var shade: float = 0.28 - 0.30 * float(gy) / 5.0
+			draw_colored_polygon(pl2, base.lightened(0.06 if chk2 else -0.04).darkened(maxf(shade, 0.0)))
+		draw_polyline(PackedVector2Array([tl, tr, br, bl, tl]), edge, 3.0, true)
+		# repère : ligne médiane entre les camps
+		var m0: Vector2 = (polys[8] as PackedVector2Array)[3]
+		var m1: Vector2 = (polys[11] as PackedVector2Array)[2]
+		draw_line(m0, m1, Color(1, 1, 1, 0.12), 3.0)
 
 
 ## Tutoriel Gultur du mode Cartes (affiché une seule fois).

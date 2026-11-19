@@ -1,0 +1,3 @@
+V405|Mode Cartes : nouvelle option Options > Cartes pour jouer sur un plateau en perspective iso 2.5D (ou à plat, par défaut).
+V405|Biomes plus riches (forêt, plaine, désert, montagne, marais) : ciel, sol texturé, horizon et décors propres à chacun.
+V405|Aides de lecture : portée PO en rouge, déplacements en bleu, aperçu des dégâts, ripostes et soins sur les cibles, déplacements dans le journal.

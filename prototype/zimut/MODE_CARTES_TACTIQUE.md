@@ -223,3 +223,11 @@ Retour de test : « des sorts ne fonctionnaient pas alors que leur descriptif la
 **Lisibilité** : plateau élargi (cases 280×96, `CardDuelUI.BOARD/CELL`) ; en mode plateau (`JccCardView._draw_board_body`) : illustration à gauche, nom jamais masqué, pastilles **PA / PM / PO** étiquetées (valeurs courantes, grisées à 0), puces **ATQ / PV**, gemme de mana, pastille de sort, statuts (ZZ étourdi, poison, zZ invocation).
 
 **Constructeur de deck** : glisser n'importe où dans la zone des cartes ou du deck fait défiler (`CardDeckBuilder._drag_scroll`) ; le tap se déclenche au relâchement (`JccCardView.release_tap`) et un glissement ne sélectionne pas de carte (`tests/test_jcc_deck_scroll.gd`). **Non testé sur téléphone.**
+
+## 14. Plateau iso (option), biomes enrichis, aides visuelles
+
+- **Option** : Options > onglet « 🃏 Cartes » > « Plateau du mode Cartes » : *Plat* (défaut) ou *Iso (perspective 2.5D)* (`GameSettings.cards_iso`, pris en compte au duel suivant).
+- **Géométrie** (`CardDuelUI._build_geometry`) : chaque case a un polygone, un centre et une échelle d'unité. En iso, plateau en trapèze (rangée lointaine à 80 % de la largeur, rangées plus hautes vers le joueur) ; les unités sont des vues `JccCardView` mises à l'échelle de leur rangée. Les cases sont des `_CellNode` (clic limité au polygone via `_has_point`).
+- **Biomes** (`_BiomeBG`) : ciel dégradé, sol texturé, silhouettes d'horizon (pins, collines, dunes, pics enneigés, roseaux) et accessoires propres à chaque biome (arbres à étages, herbes et fleurs, cactus, rochers/neige, roseaux et mares) sur tout l'écran ; en iso, dalle épaisse, damier ombré en profondeur.
+- **Aides** : cases à portée PO en rouge et cases de déplacement (PM) en bleu quand une unité est sélectionnée ; aperçu au-dessus des cibles (attaque : `-ATQ` et `riposte -n` ; sorts : `-n`, `+n PV`, `+n ATQ`, `ZZ`, `poison n`) ; le journal indique aussi les déplacements ; polices agrandies.
+- Tests : `tests/test_jcc_iso.gd`.

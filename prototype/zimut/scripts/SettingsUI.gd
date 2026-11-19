@@ -7,7 +7,7 @@ const COL_PANEL := Color(0.94, 0.89, 0.78, 0.97)
 const COL_BORDER := Color(0.72, 0.58, 0.28, 1.0)
 const COL_TXT := Color(0.22, 0.15, 0.05)
 
-const TABS := [["general", "⚙  Général"], ["combat", "⚔  Combat"], ["graphismes", "🎨  Graphismes"], ["sauvegarde", "☁  Sauvegarde"], ["apropos", "ℹ  À propos"]]
+const TABS := [["general", "⚙  Général"], ["combat", "⚔  Combat"], ["graphismes", "🎨  Graphismes"], ["cartes", "🃏  Cartes"], ["sauvegarde", "☁  Sauvegarde"], ["apropos", "ℹ  À propos"]]
 const BOARD_VARIANTS: Array[String] = ["v2", "classic", "iso", "diorama"]
 ## Onglet ouvert (conservé pendant la session).
 static var _tab: int = 0
@@ -170,8 +170,20 @@ func _ready() -> void:
 	gfx.add_child(gfx_hint)
 
 	# — Sauvegarde (Cloud)
-	_build_cloud(page_list[3].get_child(0) as VBoxContainer)
-	_build_about(page_list[4].get_child(0) as VBoxContainer)
+	# — Cartes
+	var crd: VBoxContainer = page_list[3].get_child(0)
+	crd.add_child(_setting_cell("Plateau du mode Cartes", ["Plat", "Iso (perspective 2.5D)"] as Array[String],
+		1 if GameSettings.cards_iso else 0, func(idx: int) -> void: GameSettings.set_cards_iso(idx == 1)))
+	var crd_hint := Label.new()
+	crd_hint.text = "« Plat » : grille de face, lecture maximale des unités. « Iso » : plateau en perspective, rangées lointaines plus petites. Pris en compte au prochain duel."
+	crd_hint.add_theme_font_size_override("font_size", 19)
+	crd_hint.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12))
+	crd_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	crd.add_child(crd_hint)
+
+	# — Sauvegarde (Cloud)
+	_build_cloud(page_list[4].get_child(0) as VBoxContainer)
+	_build_about(page_list[5].get_child(0) as VBoxContainer)
 
 	show_tab.call(clampi(_tab, 0, TABS.size() - 1))
 
