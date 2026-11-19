@@ -37,6 +37,7 @@ var _cell_scale: Array = []           # échelle de l'unité posée sur la case
 var _range_cells: Array = []          # cases à portée PO de l'unité sélectionnée
 var _board_anchor: Control = null    # ancre du tutoriel sur le plateau
 var _biome: String = "Forêt"
+var _foe_accent: Color = Color(1.0, 0.42, 0.38)
 var _hand_views: Array = []
 var _hero_nodes: Array = [null, null]
 var _info_holder: Control
@@ -57,6 +58,9 @@ var _sel_cell: int = -1   # case de l'unité sélectionnée (index y * COLS + x)
 var _pending: Dictionary = {}        # ciblage en cours : {kind, idx|lane, cible}
 var _targets: Array = []
 var _inspect: Dictionary = {}
+var _inspect_cell: int = -1          # case de l'unité ennemie inspectée (aperçu de ses déplacements / menace)
+var _foe_moves: Array = []
+var _foe_threat: Array = []
 
 
 ## StyleBox avec ombre portee (encarts du duel).
@@ -303,7 +307,9 @@ func _start_duel(idx: int) -> void:
 	var opp_pow: String = "boss" if String(_opp.get("boss", "")) != "" else ""
 	var deck_now: Array = JccCollection.deck_of(_save, JccCollection.active_deck_name(_save))
 	_duel.setup(deck_now.duplicate(), JccCollection.parse_deck(String(_opp["deck"])), 0, [cls, opp_pow])
-	_biome = BIOMES[_opp_idx % BIOMES.size()]
+	_biome = String(_opp.get("biome", BIOMES[_opp_idx % BIOMES.size()]))
+	_foe_accent = Color(String(_opp.get("accent", "#ff6b61")))
+	_inspect_cell = -1
 	_sel_hand = -1
 	_sel_cell = -1
 	_pending = {}
@@ -336,6 +342,7 @@ func _build_duel_ui() -> void:
 	biome_bg.board = BOARD
 	biome_bg.nation = String(BIOME_NATION.get(_biome, _biome))
 	biome_bg.camps = [_camp_art(0), _camp_art(1)]
+	biome_bg.foe_accent = _foe_accent
 	_root.add_child(biome_bg)
 	_board_anchor = Control.new()
 	_board_anchor.position = BOARD.position
@@ -417,6 +424,11 @@ func _build_duel_ui() -> void:
 	_fancy_btn(quit, Color(0.8, 0.45, 0.4))
 	quit.pressed.connect(_on_quit_duel)
 	_root.add_child(quit)
+	var hb: Button = UiKit.btn("❓ Aide", Color(0.45, 0.65, 0.85), 20, Vector2(150, 48))
+	hb.position = Vector2(250, 14)
+	_fancy_btn(hb, Color(0.45, 0.65, 0.85))
+	hb.pressed.connect(_show_help)
+	_root.add_child(hb)
 	var fo: Button = UiKit.btn("Fosse adverse", Color(0.55, 0.5, 0.7), 18, Vector2(190, 44))
 	fo.position = Vector2(1560, 384)
 	_fancy_btn(fo, Color(0.55, 0.5, 0.7))
@@ -556,6 +568,8 @@ class _UnitView extends Control:
 	var selected: bool = false
 	var target_ok: bool = false
 	var ready_glow: bool = false
+	var side: int = 0
+	var team_col: Color = Color(0.45, 0.72, 1.0)
 	var _t: float = 0.0
 
 	func _ready() -> void:
@@ -616,6 +630,13 @@ class _UnitView extends Control:
 			var a0: float = TAU * float(i) / 24.0
 			sh.append(feet + Vector2(cos(a0) * spr * 0.32, sin(a0) * spr * 0.09))
 		draw_colored_polygon(sh, Color(0, 0, 0, 0.35))
+		var ring := PackedVector2Array()
+		for i in 32:
+			var a1: float = TAU * float(i) / 32.0
+			ring.append(feet + Vector2(cos(a1) * spr * 0.36, sin(a1) * spr * 0.105))
+		ring.append(ring[0])
+		draw_colored_polygon(ring.slice(0, 32), Color(team_col.r, team_col.g, team_col.b, 0.22))
+		draw_polyline(ring, Color(team_col.r, team_col.g, team_col.b, 0.9), 3.0, true)
 		if target_ok:
 			_pulse_ellipse(feet, spr * 0.40, spr * 0.12, Color(1.0, 0.35, 0.3, 0.95), 4.0)
 		elif ready_glow:
@@ -732,7 +753,7 @@ func _refresh_hero(side: int) -> void:
 	var hot: bool = _is_target(side, -1)
 	var panel := Panel.new()
 	panel.size = p.size
-	var bcol: Color = Color(1.0, 0.85, 0.2) if hot else (Color(0.95, 0.45, 0.4) if side == 1 else Color(0.45, 0.75, 1.0))
+	var bcol: Color = Color(1.0, 0.85, 0.2) if hot else (_foe_accent if side == 1 else Color(0.45, 0.75, 1.0))
 	panel.add_theme_stylebox_override("panel", _panel_sb(Color(0.07, 0.09, 0.14, 0.95), bcol, 16, 5 if hot else 3, 10))
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	p.add_child(panel)
@@ -769,6 +790,11 @@ func _refresh_hero(side: int) -> void:
 		info.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		p.add_child(info)
 		_hp_gem(p, Vector2(p.size.x - 56, 52), 36, hp)
+		if String(_opp.get("boss", "")) != "":
+			var bd: Label = UiKit.lbl("👑 BOSS", 20, UiKit.C_GOLD, true)
+			bd.position = Vector2(p.size.x - 200, 8)
+			bd.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			p.add_child(bd)
 	else:
 		var nm2: Label = UiKit.lbl("Vous", 34, UiKit.C_TXT, true)
 		nm2.position = Vector2(170, 100)
@@ -847,6 +873,21 @@ func _refresh() -> void:
 			var dd: int = _duel.manhattan_cell(rsrc, rc)
 			if dd >= 1 and dd <= rpo:
 				_range_cells.append(rc)
+	_foe_moves = []
+	_foe_threat = []
+	if _inspect.is_empty() or _duel.creature_at(1, _inspect_cell) == null:
+		_inspect_cell = -1
+	if _inspect_cell >= 0:
+		var fpo: int = int((_duel.creature_at(1, _inspect_cell) as Dictionary).get("po", 1))
+		for mt: Variant in _duel.move_targets(1, _inspect_cell):
+			_foe_moves.append(int((mt as Dictionary)["lane"]))
+		var reach: Array = [_inspect_cell] + _foe_moves
+		for rc2 in JccDuel.LANES:
+			for src2 in reach:
+				var d2: int = _duel.manhattan_cell(int(src2), rc2)
+				if d2 >= 1 and d2 <= fpo:
+					_foe_threat.append(rc2)
+					break
 	for cell in JccDuel.LANES:
 		var slot: _CellNode = _slots["%d" % cell]
 		var occ: Dictionary = _duel.occupant(cell)
@@ -858,6 +899,14 @@ func _refresh() -> void:
 			slot.fill = Color(0.30, 0.60, 1.0, 0.22)
 		elif cell in _range_cells:
 			slot.fill = Color(1.0, 0.30, 0.25, 0.20)
+		elif _inspect_cell >= 0 and cell in _foe_moves:
+			slot.fill = Color(1.0, 0.55, 0.15, 0.30)
+		elif _inspect_cell >= 0 and cell in _foe_threat:
+			slot.fill = Color(0.85, 0.15, 0.45, 0.22)
+		elif _duel.deploy_rows(0).has(_duel.cell_xy(cell).y):
+			slot.fill = Color(0.30, 0.60, 1.0, 0.11)
+		elif _duel.deploy_rows(1).has(_duel.cell_xy(cell).y):
+			slot.fill = Color(_foe_accent.r, _foe_accent.g, _foe_accent.b, 0.13)
 		else:
 			slot.fill = Color(0, 0, 0, 0.20)
 		slot.queue_redraw()
@@ -870,6 +919,8 @@ func _refresh() -> void:
 		v.size = CELL
 		v.scale = Vector2(us, us)
 		v.position = (_cell_ctr[cell] as Vector2) - CELL * us * 0.5
+		v.side = side
+		v.team_col = _foe_accent.lightened(0.15) if side == 1 else Color(0.45, 0.72, 1.0)
 		v.set_card(cr)
 		v.target_ok = _is_target(side, cell)
 		v.selected = side == 0 and _sel_cell == cell
@@ -1176,6 +1227,7 @@ func _on_board_card(side: int, cell: int) -> void:
 		_refresh()
 	else:
 		_inspect = _duel.creature_at(1, cell)
+		_inspect_cell = cell
 		_sel_hand = -1
 		_sel_cell = -1
 		_pending = {}
@@ -1637,6 +1689,30 @@ func _show_fosse(side: int) -> void:
 	ov.add_child(close)
 
 
+## Légende : PA / PM / PO / mana, mots-clés, couleurs du plateau.
+func _show_help() -> void:
+	if _root.get_node_or_null("HelpView") != null:
+		return
+	var ov := ColorRect.new()
+	ov.name = "HelpView"
+	ov.color = Color(0, 0, 0, 0.82)
+	ov.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_root.add_child(ov)
+	var t: Label = UiKit.lbl("Aide du duel", 44, UiKit.C_GOLD, true)
+	t.position = Vector2(80, 30)
+	ov.add_child(t)
+	var txt := "PA — points d'action : chaque attaque ou sort de créature coûte des PA, rendus à chaque tour.\nPM — points de mouvement : nombre de cases dont la créature peut se déplacer par tour.\nPO — portée : distance maximale (en cases) d'une attaque ou d'un sort.\nMana — coût d'une carte ; +1 par tour (max 10). Un sort de créature coûte son mana + 1 PA.\n\nMots-clés :  V Vol (ignore les cases occupées)   F Perforation (l'excès touche le héros)\nT Provocation (à attaquer en premier)   R Régénération (soigne chaque tour)   I Initiative (frappe d'abord)\n\nPlateau :  bleu = votre zone de déploiement, couleur du camp ennemi = la sienne.\nCases rouges = portée de votre unité ; orange = déplacements possibles d'une unité ennemie touchée, rose = ce qu'elle peut menacer.\nAnneau bleu sous l'unité = à vous, anneau de la couleur adverse = ennemi."
+	var l: Label = UiKit.lbl(txt, 28, UiKit.C_TXT)
+	l.position = Vector2(80, 120)
+	l.size = Vector2(1760, 760)
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	ov.add_child(l)
+	var close: Button = UiKit.btn("Fermer", Color(0.6, 0.62, 0.72), 26, Vector2(260, 64))
+	close.position = Vector2(W * 0.5 - 130, 960)
+	close.pressed.connect(func() -> void: ov.queue_free())
+	ov.add_child(close)
+
+
 func _confirm(msg: String, yes: Callable) -> void:
 	var ov := ColorRect.new()
 	ov.color = Color(0, 0, 0, 0.7)
@@ -1679,6 +1755,7 @@ class _BiomeBG extends Control:
 	var board: Rect2 = Rect2(400, 116, 1120, 576)
 	var iso: bool = false
 	var polys: Array = []
+	var foe_accent: Color = Color(1.0, 0.42, 0.38)
 	var camps: Array = []     # [{tex, reg}] sprite du héros : side 0 (vous) puis side 1 (ennemi)
 	var _t: float = 0.0
 	var _last: float = -1.0
@@ -1907,7 +1984,7 @@ class _BiomeBG extends Control:
 	## (vrai sprite), feu de camp animé.
 	func _draw_camp(base: Vector2, side: int) -> void:
 		var p: Dictionary = _pal()
-		var team: Color = Color(0.45, 0.72, 1.0) if side == 0 else Color(1.0, 0.42, 0.38)
+		var team: Color = Color(0.45, 0.72, 1.0) if side == 0 else foe_accent
 		var tint: Color = Color(1, 1, 1) if side == 0 else Color(1.0, 0.80, 0.76)
 		var th: float = 88.0 if side == 1 else 150.0   # le camp ennemi tient dans la bande du haut
 		# clairière

@@ -328,3 +328,10 @@ Mesures par simulations IA/IA (80 parties par adversaire, deux côtés) :
 - **Après** : P0 ≈ 51–54 %, ~26–28 tours, force croissante Meute < Squelettes ≈ Gobelin Roi < Couvée < Troll < Dragon.
 - Test de non-régression : `tests/test_jcc_balance.gd` (seuils sur l'avantage du 1er joueur, la durée moyenne et la difficulté croissante, ~8 s).
 - Limite : l'IA joue les deux camps ; le ressenti humain (mobile) reste à valider.
+
+## 21. Lot visuel : camps, biomes, aperçu de menace, aide
+- Chaque adversaire a un **biome** (`biome`) et une **couleur de camp** (`accent`) dans `OPPONENTS` : Meute → Forêt, Squelettes → Marais, Gobelin Roi → Plaine, Couvée → Désert, Troll → Montagne, Dragon → Montagne.
+- Chaque unité a un **anneau d'équipe** (bleu pour vous, couleur du camp pour l'ennemi) ; les 2 rangées de déploiement de chaque camp sont **teintées** ; panneau et girouette de l'adversaire à sa couleur, badge 👑 BOSS.
+- **Toucher une unité ennemie** montre ses déplacements possibles (orange) et les cases qu'elle peut menacer (rose).
+- Bouton **❓ Aide** en haut : légende PA/PM/PO/mana, mots-clés et couleurs du plateau.
+- Test : `tests/test_jcc_visuel.gd`.
