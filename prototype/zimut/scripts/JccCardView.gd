@@ -208,6 +208,13 @@ func _draw() -> void:
 				draw_string(font, dc + Vector2(11, 6), str(pn), HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color(0.7, 1.0, 0.5))
 			if bool(card.get("sick", false)):
 				draw_string(font, Vector2(0, art.end.y - 6), "zZ", HORIZONTAL_ALIGNMENT_CENTER, w, 16, Color(1, 1, 1, 0.65))
+	# niveau de fusion (étoiles)
+	var lvl: int = int(card.get("lvl", 1))
+	if lvl > 1:
+		var sy: float = 18.0 if not board_mode else h - 10.0
+		var sx0: float = w * 0.5 - float(lvl - 1) * 9.0
+		for si in lvl:
+			_star(Vector2(sx0 + float(si) * 18.0, sy), 7.0, Color(1.0, 0.85, 0.2))
 	# exemplaires
 	if count_badge > 0:
 		var bc := Vector2(w - 22, 20)

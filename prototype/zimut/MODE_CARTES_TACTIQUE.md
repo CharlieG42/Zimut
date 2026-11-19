@@ -347,3 +347,11 @@ Mesures par simulations IA/IA (80 parties par adversaire, deux côtés) :
 - 1re victoire sur chacun : sa carte légendaire + de l'or (100 × n° du chapitre) ; ensuite c'est un boss ordinaire (40 % de sa carte).
 - Decks de 20 cartes, boss en tête, biome et couleur propres ; sprites ajoutés aux boss qui n'en avaient pas. Force mesurée en simulation de ~33 % à ~66 %.
 - Test : `tests/test_jcc_chapitres.gd`.
+
+## 25. Atelier de fusion (niveaux de cartes)
+- Une carte possédée a un niveau 1 à 5 (★). Clé de collection : `id` (niveau 1) ou `id@n` (niveau n) ; les decks peuvent contenir ces clés.
+- **Fusion** : 2 exemplaires du même niveau → 1 exemplaire de niveau +1 (`JccCollection.fuse`). Les decks sont réparés (la carte fusionnée remplace une carte retirée, une seule fois).
+- **Bonus** (`JccCards._leveled`) : créatures +1 ATQ / +1 PV par niveau ; sorts +1 à l'effet par niveau ; coût −1 au niveau 3, −1 de plus au niveau 5 (plancher 1).
+- UI : bouton « ⚗ Atelier de fusion » dans le hub (`CardFusionUI`), aperçu avant → après ; étoiles sur les cartes, ★n dans la liste du deck.
+- Prévu ensuite : fortification (autres caractéristiques), butin de cartes, choix du héros.
+- Test : `tests/test_jcc_fusion.gd`.
