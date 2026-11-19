@@ -44,6 +44,8 @@ var _action_bar: HBoxContainer
 var _toast: Label
 var _log_lbl: Label
 var _end_btn: Button
+var _power_btn: Button
+var _mull_btn: Button
 var _mana_node: Control
 var _pile_lbl: Label
 var _fx_draw: Control = null
@@ -283,7 +285,9 @@ func _start_duel(idx: int) -> void:
 	_opp = JccCollection.opponent(idx)
 	var j: Dictionary = JccCollection.ensure(_save)
 	_duel = JccDuel.new()
-	_duel.setup((j["deck"] as Array).duplicate(), JccCollection.parse_deck(String(_opp["deck"])))
+	var cls: String = String(ProgressionManager.adventure_state(_save).get("hero_class", "Mage"))
+	var opp_pow: String = "boss" if String(_opp.get("boss", "")) != "" else ""
+	_duel.setup((j["deck"] as Array).duplicate(), JccCollection.parse_deck(String(_opp["deck"])), 0, [cls, opp_pow])
 	_biome = BIOMES[_opp_idx % BIOMES.size()]
 	_sel_hand = -1
 	_sel_cell = -1
@@ -408,6 +412,16 @@ func _build_duel_ui() -> void:
 	_fancy_btn(fp, Color(0.55, 0.5, 0.7))
 	fp.pressed.connect(func() -> void: _show_fosse(0))
 	_root.add_child(fp)
+	_power_btn = UiKit.btn("", Color(0.85, 0.65, 1.0), 22, Vector2(330, 60))
+	_power_btn.position = Vector2(1560, 556)
+	_fancy_btn(_power_btn, Color(0.85, 0.65, 1.0))
+	_power_btn.pressed.connect(_on_power_pressed)
+	_root.add_child(_power_btn)
+	_mull_btn = UiKit.btn("↺ Nouvelle main (1×)", Color(0.45, 0.75, 0.9), 20, Vector2(330, 52))
+	_mull_btn.position = Vector2(1560, 624)
+	_fancy_btn(_mull_btn, Color(0.45, 0.75, 0.9))
+	_mull_btn.pressed.connect(_on_mulligan)
+	_root.add_child(_mull_btn)
 	_pile_lbl = UiKit.lbl("", 24, UiKit.C_TXT, true)
 	_pile_lbl.position = Vector2(1560, 930)
 	_root.add_child(_pile_lbl)
@@ -482,6 +496,7 @@ class _CellNode extends Control:
 	var fill := Color(0, 0, 0, 0.20)
 	var border := Color(1, 1, 1, 0.14)
 	var bw: float = 2.0
+	var terrain: String = ""           # "", "boue", "hauteur", "buisson"
 
 	func _has_point(p: Vector2) -> bool:
 		return Geometry2D.is_point_in_polygon(p, poly)
@@ -493,6 +508,21 @@ class _CellNode extends Control:
 		var closed := poly.duplicate()
 		closed.append(poly[0])
 		draw_polyline(closed, border, bw, true)
+		# glyphe de terrain au centre de la case
+		var c := Vector2(size.x * 0.5, size.y * 0.62)
+		match terrain:
+			"boue":
+				draw_circle(c + Vector2(-14, 0), 9, Color(0.25, 0.35, 0.55, 0.55))
+				draw_circle(c + Vector2(10, 6), 12, Color(0.25, 0.35, 0.55, 0.55))
+				draw_circle(c + Vector2(2, -8), 8, Color(0.25, 0.35, 0.55, 0.55))
+				draw_arc(c + Vector2(0, 2), 20, PI * 0.15, PI * 0.85, 8, Color(0.55, 0.7, 0.9, 0.6), 2.0)
+			"hauteur":
+				draw_colored_polygon(PackedVector2Array([c + Vector2(-26, 12), c + Vector2(0, -18), c + Vector2(26, 12)]), Color(0.75, 0.75, 0.80, 0.75))
+				draw_colored_polygon(PackedVector2Array([c + Vector2(-8, -4), c + Vector2(0, -18), c + Vector2(8, -4), c + Vector2(0, -10)]), Color(0.95, 0.97, 1.0, 0.9))
+			"buisson":
+				draw_circle(c + Vector2(-10, 2), 10, Color(0.15, 0.45, 0.18, 0.6))
+				draw_circle(c + Vector2(8, 4), 12, Color(0.18, 0.52, 0.22, 0.6))
+				draw_circle(c + Vector2(0, -6), 9, Color(0.22, 0.58, 0.26, 0.6))
 
 
 func _cell_pos(cell: int) -> Vector2:
@@ -658,6 +688,7 @@ func _refresh() -> void:
 		var slot: _CellNode = _slots["%d" % cell]
 		var occ: Dictionary = _duel.occupant(cell)
 		var empty_ok: bool = occ.is_empty() and _is_target_any(cell)
+		slot.terrain = _duel.terrain_at(cell)
 		slot.border = Color(1.0, 0.85, 0.2, 0.9) if empty_ok else Color(1, 1, 1, 0.14)
 		slot.bw = 5.0 if empty_ok else 2.0
 		if _is_move_target(cell):
@@ -694,6 +725,12 @@ func _refresh() -> void:
 	var sd: Dictionary = _duel.side(0)
 	_pile_lbl.text = "Pioche : %d" % (sd["deck"] as Array).size()
 	_end_btn.disabled = _busy or _duel.current != 0 or _over
+	_power_btn.visible = not _over and not _busy and _duel.can_use_hero_power(0)
+	if not ( _duel.side(0)["power"] as Dictionary).is_empty():
+		_power_btn.text = "⚡ %s" % String(_duel.side(0)["power"].get("name", "Pouvoir"))
+	_power_btn.disabled = not _power_btn.visible
+	_mull_btn.visible = not _over and not _busy and _duel.can_mulligan(0)
+	_mull_btn.disabled = not _mull_btn.visible
 	_end_btn.text = "Fin du tour" if _duel.current == 0 else "Tour adverse…"
 	var lines: Array = _duel.log.slice(maxi(0, _duel.log.size() - 7))
 	_log_lbl.text = "\n".join(PackedStringArray(lines))
@@ -893,6 +930,8 @@ func _compute_targets() -> Array:
 	if not _pending.is_empty():
 		if String(_pending["kind"]) == "attack":
 			return _duel.attack_targets(0, int(_pending["lane"]))
+		if String(_pending["kind"]) == "power":
+			return _duel.hero_power_targets(0)
 		return _duel.targets_for(0, String(_pending["cible"]))
 	if _sel_hand >= 0 and _sel_hand < (_duel.side(0)["hand"] as Array).size():
 		var c: Dictionary = (_duel.side(0)["hand"] as Array)[_sel_hand]
@@ -1010,12 +1049,49 @@ func _apply_target(t: Dictionary) -> void:
 		var lane: int = int(_pending["lane"])
 		var kind: String = String(_pending["kind"])
 		_pending = {}
-		if kind == "attack":
+		if kind == "power":
+			_do_power(t)
+		elif kind == "attack":
 			_do_attack_target(lane, t)
 		else:
 			_use_sort(lane, t)
 	elif _sel_hand >= 0:
 		_play_hand(_sel_hand, t)
+
+
+func _on_power_pressed() -> void:
+	if _busy or _duel == null or not _duel.can_use_hero_power(0):
+		return
+	var pw: Dictionary = _duel.side(0)["power"]
+	if _duel.needs_target(String(pw["cible"])):
+		_pending = {"kind": "power", "lane": -1, "cible": String(pw["cible"])}
+		_refresh()
+	else:
+		_do_power({})
+
+
+func _do_power(t: Dictionary) -> void:
+	if _busy or _duel == null:
+		return
+	_busy = true
+	var pname: String = String(_duel.side(0)["power"].get("name", "Pouvoir"))
+	if _duel.use_hero_power(0, t):
+		_sel_hand = -1
+		_sel_cell = -1
+		await _after_action("⚡ %s" % pname)
+	_busy = false
+	_finish_if_over()
+	_refresh()
+
+
+func _on_mulligan() -> void:
+	if _busy or _duel == null or not _duel.can_mulligan(0):
+		return
+	_busy = true
+	if _duel.mulligan(0):
+		await _after_action("Nouvelle main")
+	_busy = false
+	_refresh()
 
 
 func _begin_sort(lane: int) -> void:
@@ -1186,6 +1262,11 @@ func _show_event(e: Dictionary) -> void:
 				_float("Pioche : %s" % String(e.get("name", "")), Vector2(960, 700), Color(0.8, 0.9, 1.0))
 		"burn":
 			_float("Main pleine : %s brûlée" % String(e.get("name", "")), Vector2(960, 700), Color(1.0, 0.6, 0.4))
+		"power":
+			_fx_burst(_node_center(side, -1), Color(1.0, 0.85, 0.3), 40.0)
+			_shake_node(_hero_nodes[side])
+			if side == 1:
+				_toast_msg("L'adversaire : ⚡ %s" % String(e.get("name", "pouvoir")))
 		"cast":
 			var cc: Vector2 = c
 			if lane < 0:

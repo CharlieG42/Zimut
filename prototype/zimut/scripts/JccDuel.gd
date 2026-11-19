@@ -17,6 +17,22 @@ const HERO_HP: int = 30
 const HAND_MAX: int = 7
 const MANA_MAX: int = 10
 const START_HAND: int = 4
+const TERRAIN_TYPES: Array = ["boue", "hauteur", "buisson"]
+const TERRAIN_COUNT: int = 6
+const HERO_POWER_DEFAULT := {"name": "Frappe du héros", "effet": "degats_heros", "valeur": "3", "duree": 0, "cible": ""}
+const HERO_POWERS := {
+	"mage": {"name": "Éclair céleste", "effet": "degats_heros", "valeur": "4", "duree": 0, "cible": ""},
+	"tank": {"name": "Mur de pierre", "effet": "bouclier_zone", "valeur": "4", "duree": 0, "cible": ""},
+	"chasseur": {"name": "Tir précis", "effet": "degats", "valeur": "3", "duree": 0, "cible": "ennemi"},
+	"druide": {"name": "Épines sauvages", "effet": "degats_zone", "valeur": "3", "duree": 0, "cible": ""},
+	"heal": {"name": "Vague de soin", "effet": "soin_zone", "valeur": "5", "duree": 0, "cible": ""},
+	"assassin": {"name": "Frappe sournoise", "effet": "degats", "valeur": "5", "duree": 0, "cible": "ennemi"},
+	"invocateur": {"name": "Appel de la meute", "effet": "invoquer", "valeur": "j_loup", "duree": 0, "cible": "voie"},
+	"sylvain": {"name": "Ouragan", "effet": "degats_zone", "valeur": "3", "duree": 0, "cible": ""},
+	"geomancien": {"name": "Séisme", "effet": "degats_zone", "valeur": "3", "duree": 0, "cible": ""},
+	"artificier": {"name": "Bombe", "effet": "degats", "valeur": "4", "duree": 0, "cible": "ennemi"},
+	"boss": {"name": "Frappe du boss", "effet": "degats_heros", "valeur": "5", "duree": 0, "cible": ""},
+}
 
 var sides: Array = []
 var current: int = 0
@@ -27,9 +43,10 @@ var log: Array = []
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _uid: int = 0
 var _turns_started: Array = [0, 0]
+var terrain: Array = []        # 24 cases : "", "boue", "hauteur", "buisson"
 
 
-func setup(deck0: Array, deck1: Array, seed_value: int = 0) -> void:
+func setup(deck0: Array, deck1: Array, seed_value: int = 0, powers: Array = []) -> void:
 	_rng.seed = seed_value if seed_value != 0 else int(Time.get_ticks_usec())
 	sides = []
 	for deck_ids: Array in [deck0, deck1]:
@@ -40,8 +57,9 @@ func setup(deck0: Array, deck1: Array, seed_value: int = 0) -> void:
 				d.append(inst)
 		_shuffle(d)
 		sides.append({"hero_hp": HERO_HP, "mana": 0, "mana_max": 0, "deck": d, "hand": [], "fosse": [],
-			"units": [], "fatigue": 0})
+			"units": [], "fatigue": 0, "power": {}, "power_used": false, "mulligan": true})
 	for s: int in 2:
+		sides[s]["power"] = power_for(String(powers[s]) if s < powers.size() else "")
 		for i: int in START_HAND:
 			if not (sides[s]["deck"] as Array).is_empty():
 				_draw_card(s, false)
@@ -50,7 +68,42 @@ func setup(deck0: Array, deck1: Array, seed_value: int = 0) -> void:
 	events = []
 	log = []
 	_turns_started = [0, 0]
+	terrain = _gen_terrain()
+	var tnames: Array = []
+	for i in LANES:
+		if terrain_at(i) != "":
+			tnames.append("%s en (%d,%d)" % [terrain_at(i), i % COLS, i / COLS])
+	if not tnames.is_empty():
+		log.append("Terrain : " + ", ".join(PackedStringArray(tnames)))
 	start_turn(0)
+
+
+## Pouvoir de héros associé à une classe (ou "boss") ; défaut si inconnu.
+static func power_for(key: String) -> Dictionary:
+	var k: String = key.to_lower().replace("é", "e").replace("è", "e").replace(" ", "")
+	if HERO_POWERS.has(k):
+		return (HERO_POWERS[k] as Dictionary).duplicate()
+	return HERO_POWER_DEFAULT.duplicate()
+
+
+## Terrain du duel : 6 cases (2 boue, 2 hauteur, 2 buisson), tirage seedé.
+func _gen_terrain() -> Array:
+	var t: Array = []
+	for i in LANES:
+		t.append("")
+	var cells: Array = range(LANES)
+	_shuffle(cells)
+	var kinds: Array = TERRAIN_TYPES.duplicate()
+	kinds.append_array(TERRAIN_TYPES)
+	for i in mini(TERRAIN_COUNT, cells.size()):
+		t[int(cells[i])] = String(kinds[i % kinds.size()])
+	return t
+
+
+func terrain_at(cell: int) -> String:
+	if cell < 0 or cell >= terrain.size():
+		return ""
+	return String(terrain[cell])
 
 
 func _shuffle(a: Array) -> void:
@@ -449,12 +502,17 @@ func attack_targets(s: int, cell: int) -> Array:
 	if cr == null:
 		return out
 	var po: int = int((cr as Dictionary).get("po", 1))
+	if terrain_at(cell) == "hauteur":
+		po += 1   # la hauteur donne +1 PO
 	var foe: int = other(s)
 	for u: Variant in sides[foe]["units"]:
 		var c: Dictionary = u
-		var d: int = manhattan_cell(cell, xy_cell(int(c["x"]), int(c["y"])))
+		var fl: int = xy_cell(int(c["x"]), int(c["y"]))
+		var d: int = manhattan_cell(cell, fl)
 		if d >= 1 and d <= po:
-			out.append({"side": foe, "lane": xy_cell(int(c["x"]), int(c["y"]))})
+			if d > 1 and terrain_at(fl) == "buisson":
+				continue   # camouflage : le buisson protège des tirs à distance
+			out.append({"side": foe, "lane": fl})
 	if hero_dist_to(s, cell) <= po:
 		out.append({"side": foe, "lane": -1})
 	return out
@@ -531,7 +589,8 @@ func _path_cost(from: int, to: int) -> int:
 				continue
 			if ncell != from and unit_at(np.x, np.y) != null:
 				continue
-			dist[ncell] = int(dist[cur]) + 1
+			var step: int = 2 if terrain_at(ncell) == "boue" else 1   # la boue ralentit
+			dist[ncell] = int(dist[cur]) + step
 			queue.append(ncell)
 	return int(dist.get(to, -1))
 
@@ -733,6 +792,68 @@ func _nm(s: int) -> String:
 	return "Vous" if s == 0 else "L'adversaire"
 
 
+
+# ─── Pouvoir du héros (1 fois par duel) et mulligan ───
+
+func can_use_hero_power(s: int) -> bool:
+	if is_over() or s != current:
+		return false
+	var sd: Dictionary = sides[s]
+	if bool(sd["power_used"]) or (sd["power"] as Dictionary).is_empty():
+		return false
+	var cible: String = String(sd["power"]["cible"])
+	if needs_target(cible):
+		return not targets_for(s, cible).is_empty()
+	return true
+
+
+func hero_power_targets(s: int) -> Array:
+	var cible: String = String(sides[s]["power"]["cible"])
+	if needs_target(cible):
+		return targets_for(s, cible)
+	return [{}]
+
+
+func use_hero_power(s: int, target: Dictionary = {}) -> bool:
+	if not can_use_hero_power(s):
+		return false
+	var sd: Dictionary = sides[s]
+	var pw: Dictionary = sd["power"]
+	var cible: String = String(pw["cible"])
+	if needs_target(cible) and not _target_ok(s, cible, target):
+		return false
+	sd["power_used"] = true
+	_ev("power", s, -1, 0, {"name": String(pw["name"])})
+	log.append("%s lance son pouvoir : %s" % [_nm(s), String(pw["name"])])
+	_apply(s, String(pw["effet"]), String(pw["valeur"]), int(pw["duree"]), target)
+	return true
+
+
+func can_mulligan(s: int) -> bool:
+	if is_over() or s != current:
+		return false
+	var sd: Dictionary = sides[s]
+	return bool(sd.get("mulligan", false)) and not (sd["hand"] as Array).is_empty()
+
+
+## Nouvelle main (1 fois par duel) : la main retourne sous la pioche, on repioché START_HAND.
+func mulligan(s: int) -> bool:
+	if not can_mulligan(s):
+		return false
+	var sd: Dictionary = sides[s]
+	var deck: Array = sd["deck"]
+	for c: Variant in sd["hand"]:
+		deck.append(c)
+	sd["hand"] = []
+	_shuffle(deck)
+	for i in START_HAND:
+		if not deck.is_empty():
+			_draw_card(s, true)
+	sd["mulligan"] = false
+	_ev("mulligan", s, -1, 0, {})
+	log.append("%s reprend une nouvelle main" % _nm(s))
+	return true
+
 # ─── IA ──────────────────────────────────────────────────────────────────────
 
 ## Joue UNE action pour le camp `s` et la décrit ({type, ...}). {"type": "end"} quand il n'y a plus rien d'utile.
@@ -762,6 +883,13 @@ func ai_step(s: int) -> Dictionary:
 			var tg2: Variant = _ai_target(s, String(c["effet"]), int(c["valeur"]) if String(c["effet"]) != "invoquer" else 0, String(c["cible"]), -1)
 			if tg2 != null and play_card(s, idx, tg2):
 				return {"type": "play", "card": c["name"]}
+	# 1.5) pouvoir du héros (une fois par duel)
+	if can_use_hero_power(s):
+		var pw: Dictionary = sides[s]["power"]
+		var pcible: String = String(pw["cible"])
+		var ptg: Variant = _ai_target(s, String(pw["effet"]), int(pw["valeur"]) if String(pw["valeur"]).is_valid_int() else 0, pcible, -1) if needs_target(pcible) else {}
+		if ptg != null and use_hero_power(s, ptg if ptg is Dictionary else {}):
+			return {"type": "power", "name": String(pw["name"])}
 	# 2) attaques : pour chaque unité, la meilleure cible à portée PO
 	#    (kill > cible faible), sinon le héros adverse si à portée
 	for c: Variant in creatures(s):

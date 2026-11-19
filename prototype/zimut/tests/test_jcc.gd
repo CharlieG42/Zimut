@@ -159,6 +159,67 @@ func _boot() -> void:
 	t.creature_at(0, 22)["hp"] = 1
 	t._hit(0, 22, 5)
 	check(t.creature_at(0, 22) == null and t.side(0)["fosse"].size() == fo, "un jeton mort disparaît (pas de fosse)")
+	print("Terrain / pouvoir de héros / mulligan :")
+	var tg = DD.new()
+	tg.setup(["m_gobelin"], ["m_gobelin"], 42, ["Mage", "boss"])
+	var nt: int = 0
+	var has_boue := false
+	var has_haut := false
+	var has_buis := false
+	for i in JccDuel.LANES:
+		var tt: String = tg.terrain_at(i)
+		if tt != "":
+			nt += 1
+			if tt == "boue": has_boue = true
+			if tt == "hauteur": has_haut = true
+			if tt == "buisson": has_buis = true
+	check(nt == JccDuel.TERRAIN_COUNT and has_boue and has_haut and has_buis, "terrain : 6 cases, 2 de chaque type (seed 42)")
+	var tg2 = DD.new()
+	tg2.setup(["m_gobelin"], ["m_gobelin"], 42)
+	var same := true
+	for i in JccDuel.LANES:
+		if tg2.terrain_at(i) != tg.terrain_at(i):
+			same = false
+	check(same, "terrain déterministe pour une même seed")
+	# terrain contrôlé : boue en 17 (1,4), hauteur en 9 (1,2), buisson en 12 (0,3) et 10 (2,2)
+	tg.terrain = []
+	for i in JccDuel.LANES:
+		tg.terrain.append("")
+	tg.terrain[17] = "boue"
+	tg.terrain[9] = "hauteur"
+	tg.terrain[12] = "buisson"
+	tg.terrain[10] = "buisson"
+	tg.place_unit(0, "m_gobelin", 1, 5)   # case 21
+	check(tg._path_cost(21, 17) == 2, "boue : entrer coûte 2 PM (au lieu de 1)")
+	check(tg._path_cost(21, 22) == 1, "case normale voisine : 1 PM")
+	tg.place_unit(0, "m_gobelin", 0, 2)    # case 8, PO 1, terrain normal
+	tg.place_unit(1, "m_troll", 2, 2)      # case 10 = buisson, distance 2
+	tg.place_unit(1, "m_loup", 0, 3)       # case 12 = buisson, distance 1
+	var at8: Array = tg.attack_targets(0, 8)
+	var hasb10 := false
+	var hasb12 := false
+	for e in at8:
+		if int((e as Dictionary)["lane"]) == 10: hasb10 = true
+		if int((e as Dictionary)["lane"]) == 12: hasb12 = true
+	check(not hasb10 and hasb12, "buisson : camouflage à distance 2, mais corps à corps (distance 1) OK")
+	tg.place_unit(0, "m_gobelin", 1, 2)    # case 9 = hauteur, PO 1 -> 2
+	tg.place_unit(1, "m_loup", 3, 2)       # case 11, distance 2 de la case 9
+	var at9: Array = tg.attack_targets(0, 9)
+	var hash11 := false
+	for e in at9:
+		if int((e as Dictionary)["lane"]) == 11: hash11 = true
+	check(hash11, "hauteur : +1 PO, une cible à distance 2 est à portée")
+	# pouvoir du héros : Mage = 4 dégâts au héros adverse, 1 fois par duel
+	check(tg.can_use_hero_power(0), "pouvoir dispo au début")
+	check(tg.use_hero_power(0) and tg.side(1)["hero_hp"] == 26, "pouvoir Mage : héros adverse 30 -> 26")
+	check(not tg.can_use_hero_power(0) and not tg.use_hero_power(0), "pouvoir utilisé 1 seule fois")
+	check(String(DD.power_for("Géomancien")["effet"]) == "degats_zone" and String(DD.power_for("boss")["valeur"]) == "5", "power_for : classe et boss")
+	# mulligan : main repiochee, 1 fois, 20 cartes conservées
+	var mg = DD.new()
+	mg.setup(["m_gobelin", "m_loup", "m_troll", "s_etincelle", "s_soin", "s_eclair", "m_gobelin", "m_loup", "m_troll", "s_javelot"], ["m_loup", "m_gobelin", "m_troll", "s_javelot", "s_etincelle", "s_soin", "m_loup", "m_gobelin", "m_troll", "s_eclair"], 5)
+	check(mg.can_mulligan(0) and mg.side(0)["hand"].size() == 4, "mulligan dispo, main de 4")
+	check(mg.mulligan(0) and mg.side(0)["hand"].size() == 4 and (mg.side(0)["deck"] as Array).size() == 6, "mulligan : nouvelle main de 4, pioche 10 -> 6")
+	check(not mg.can_mulligan(0) and not mg.mulligan(0), "mulligan utilisé 1 seule fois")
 	print("Fin de partie et fatigue :")
 	var f = DD.new()
 	f.setup(["m_gobelin"], ["m_gobelin"], 5)

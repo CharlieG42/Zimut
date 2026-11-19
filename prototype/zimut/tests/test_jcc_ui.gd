@@ -42,6 +42,19 @@ func _boot() -> void:
 	await create_timer(0.3).timeout
 	var d = m._duel
 	check(d != null and m._hand_views.size() == 4, "duel lancé, 4 cartes en main")
+	var nterr: int = 0
+	for k in m._slots.keys():
+		if m._slots[k].terrain != "":
+			nterr += 1
+	check(nterr == 6, "6 cases de terrain affichées sur le plateau")
+	check(m._power_btn != null and m._power_btn.visible, "bouton pouvoir du héros visible au tour 1")
+	check(m._mull_btn != null and m._mull_btn.visible, "bouton nouvelle main visible au tour 1")
+	m._on_mulligan()
+	await create_timer(0.9).timeout
+	check((d.side(0)["hand"] as Array).size() == 4 and not d.can_mulligan(0) and not m._mull_btn.visible, "mulligan : main repiochee, bouton caché")
+	m._on_power_pressed()
+	await create_timer(1.0).timeout
+	check(d.side(1)["hero_hp"] == 26 and not m._power_btn.visible, "pouvoir du héros lancé par l'UI (30 -> 26), bouton caché")
 	d.side(0)["hand"] = [d._make_instance("m_gobelin"), d._make_instance("s_etincelle")]
 	m._refresh()
 	m._on_hand_card(0)
@@ -53,9 +66,10 @@ func _boot() -> void:
 	m._refresh()
 	m._on_hand_card(0)
 	check(m._targets.size() >= 1 and m._is_target(1, -1), "Étincelle : le héros adverse est ciblable")
+	var hp_avant: int = d.side(1)["hero_hp"]
 	m._on_hero(1)
 	await create_timer(1.0).timeout
-	check(d.side(1)["hero_hp"] == 28, "Étincelle touche le héros adverse (30 -> 28)")
+	check(d.side(1)["hero_hp"] == hp_avant - 2, "Étincelle touche le héros adverse (%d -> %d)" % [hp_avant, d.side(1)["hero_hp"]])
 	m._on_end_turn()
 	var guard: int = 0
 	while (m._busy or d.current != 0) and guard < 200 and not d.is_over():
