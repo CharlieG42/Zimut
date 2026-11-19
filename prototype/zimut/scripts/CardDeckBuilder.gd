@@ -11,6 +11,7 @@ const FILTERS: Array = [["all", "Toutes"], ["Creature", "Créatures"], ["Sort", 
 
 var save: Dictionary = {}
 var _deck: Array = []
+var _active_name: String = "Deck 1"
 var _filter: String = "all"
 var _selected: String = ""
 var _grid: GridContainer
@@ -23,12 +24,14 @@ var _count_lbl: Label
 var _err_lbl: Label
 var _save_btn: Button
 var _tabs: HBoxContainer
+var _deck_tabs: HBoxContainer
 
 
 func open(save_ref: Dictionary) -> void:
 	save = save_ref
-	var j: Dictionary = JccCollection.ensure(save)
-	_deck = (j["deck"] as Array).duplicate()
+	JccCollection.ensure(save)
+	_active_name = JccCollection.active_deck_name(save)
+	_deck = JccCollection.deck_of(save, _active_name).duplicate()
 	_build()
 	_refresh_all()
 
@@ -87,6 +90,9 @@ func _build() -> void:
 	rbox.size = Vector2(490, 940)
 	rbox.add_theme_constant_override("separation", 6)
 	add_child(rbox)
+	_deck_tabs = HBoxContainer.new()
+	_deck_tabs.add_theme_constant_override("separation", 8)
+	rbox.add_child(_deck_tabs)
 	_count_lbl = UiKit.lbl("", 30, UiKit.C_TXT, true)
 	rbox.add_child(_count_lbl)
 	_err_lbl = UiKit.lbl("", 18, UiKit.C_BAD)
@@ -178,15 +184,56 @@ func _save_deck() -> void:
 	if JccCollection.deck_error(save, _deck) != "":
 		return
 	var j: Dictionary = JccCollection.ensure(save)
+	(j["decks"] as Dictionary)[_active_name] = _deck.duplicate()
 	j["deck"] = _deck.duplicate()
+	j["active_deck"] = _active_name
 	closed.emit(true)
 
 
 func _refresh_all() -> void:
 	_refresh_tabs()
+	_refresh_deck_tabs()
 	_refresh_grid()
 	_refresh_deck()
 	_refresh_detail()
+
+
+## Onglets des decks (jusqu'à DECK_SLOTS) + bouton « + » pour en créer un nouveau.
+func _refresh_deck_tabs() -> void:
+	for c: Node in _deck_tabs.get_children():
+		c.queue_free()
+	var j: Dictionary = JccCollection.ensure(save)
+	var names: Array = (j["decks"] as Dictionary).keys()
+	for n: Variant in names:
+		var nm: String = String(n)
+		var d: Array = (j["decks"] as Dictionary)[nm]
+		var b: Button = UiKit.btn("%s (%d)" % [nm, d.size()], UiKit.C_GOLD if nm == _active_name else Color(0.5, 0.55, 0.7), 20, Vector2(148, 48))
+		b.pressed.connect(func() -> void: _select_deck(nm))
+		_deck_tabs.add_child(b)
+	if names.size() < JccCollection.DECK_SLOTS:
+		var plus: Button = UiKit.btn("+", Color(0.4, 0.7, 0.5), 22, Vector2(56, 48))
+		plus.pressed.connect(_add_deck)
+		_deck_tabs.add_child(plus)
+
+
+func _select_deck(nm: String) -> void:
+	_active_name = nm
+	_deck = JccCollection.deck_of(save, nm).duplicate()
+	_refresh_all()
+
+
+func _add_deck() -> void:
+	var j: Dictionary = JccCollection.ensure(save)
+	var names: Array = (j["decks"] as Dictionary).keys()
+	if names.size() >= JccCollection.DECK_SLOTS:
+		return
+	var base: Array = _deck.duplicate() if _deck.size() == JccCollection.DECK_SIZE else JccCollection.starter_deck()
+	var k: int = 2
+	while (j["decks"] as Dictionary).has("Deck %d" % k):
+		k += 1
+	var nm: String = "Deck %d" % k
+	(j["decks"] as Dictionary)[nm] = base
+	_select_deck(nm)
 
 
 func _refresh_tabs() -> void:
