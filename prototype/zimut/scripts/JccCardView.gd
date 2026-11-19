@@ -118,7 +118,7 @@ func _draw() -> void:
 		_draw_board_body(w, h, font, rcol, is_spell, rad)
 	else:
 		# zone d'illustration
-		var art_h: float = h * (0.50 if board_mode else 0.36)
+		var art_h: float = h * (0.50 if board_mode else (0.40 if w >= 300.0 else 0.36))
 		var art := Rect2(7, 7, w - 14, art_h)
 		if not board_mode:
 			art = Rect2(7, 32, w - 14, art_h)
@@ -129,7 +129,7 @@ func _draw() -> void:
 		# nom
 		var name_txt: String = String(card.get("name", ""))
 		var ny: float = art.end.y + (6.0 if board_mode else 4.0)
-		var fs: int = int(clampf(w * (0.105 if board_mode else 0.095), 13.0, 22.0))
+		var fs: int = int(clampf(w * 0.105, 14.0, 30.0))
 		while fs > 10 and font.get_string_size(name_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > w - 14.0:
 			fs -= 1
 		draw_rect(Rect2(5, ny, w - 10, fs + 8), Color(0, 0, 0, 0.45))
@@ -139,7 +139,8 @@ func _draw() -> void:
 			# type / rareté
 			var kind: String = "Sort" if is_spell else ("Boss" if rarity == "L" else "Créature")
 			var sub: String = "%s · %s" % [kind, JccCards.rarity_label(rarity)]
-			draw_string(font, Vector2(0, y + 11), sub, HORIZONTAL_ALIGNMENT_CENTER, w, 14, rcol.lightened(0.15))
+			var sfs: int = int(clampf(w * 0.055, 14.0, 19.0))
+			draw_string(font, Vector2(0, y + sfs), sub, HORIZONTAL_ALIGNMENT_CENTER, w, sfs, rcol.lightened(0.15))
 			y += 18.0
 			var body: String = ""
 			if is_spell:
@@ -149,7 +150,7 @@ func _draw() -> void:
 			else:
 				body = "Jeton"
 			var avail: float = h - 50.0 - y
-			var bfs: int = 17 if w >= 170.0 else 13
+			var bfs: int = 21 if w >= 300.0 else (18 if w >= 180.0 else 13)
 			while bfs > 9 and font.get_multiline_string_size(body, HORIZONTAL_ALIGNMENT_CENTER, w - 16, bfs).y > avail:
 				bfs -= 1
 			draw_multiline_string(font, Vector2(8, y + bfs), body, HORIZONTAL_ALIGNMENT_CENTER, w - 16, bfs, -1, Color(0.92, 0.90, 0.84))
@@ -165,9 +166,9 @@ func _draw() -> void:
 		var is_creature: bool = String(card.get("type", "")) != "Sort"
 		if String(card.get("type", "")) != "Jeton":
 			# gemme bleue = coût en mana (visible aussi sur le plateau)
-			_gem(Vector2(20, 20), 13.0 if board_mode else 17.0, str(int(card.get("cost", 0))), Color(0.25, 0.50, 0.95))
+			_gem(Vector2(20, 20), 13.0 if board_mode else minf(17.0 + (w - 190.0) * 0.02, 24.0), str(int(card.get("cost", 0))), Color(0.25, 0.50, 0.95))
 		if is_creature:
-			var gr: float = 18.0 if board_mode else 20.0
+			var gr: float = 18.0 if board_mode else minf(20.0 + (w - 190.0) * 0.02, 26.0)
 			_gem(Vector2(gr + 4, h - gr - 4), gr, str(int(card.get("atk", 0))), Color(0.92, 0.55, 0.15))
 			var hp: int = int(card.get("hp", 0))
 			var mx: int = int(card.get("max_hp", hp))
@@ -187,7 +188,7 @@ func _draw() -> void:
 					bx += 30.0
 			else:
 				var stxt: String = "PA %d · PM %d · PO %d" % [int(card.get("pa", 1)), int(card.get("pm", 2)), int(card.get("po", 1))]
-				draw_string(font, Vector2(0, h - 44.0), stxt, HORIZONTAL_ALIGNMENT_CENTER, w, 16, Color(0.85, 0.9, 1.0))
+				draw_string(font, Vector2(0, h - 44.0), stxt, HORIZONTAL_ALIGNMENT_CENTER, w, int(clampf(w * 0.05, 16.0, 22.0)), Color(0.85, 0.9, 1.0))
 		# statuts
 		if board_mode:
 			var sx: float = 8.0
