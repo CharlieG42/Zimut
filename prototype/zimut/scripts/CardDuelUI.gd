@@ -58,6 +58,8 @@ var _sel_cell: int = -1   # case de l'unité sélectionnée (index y * COLS + x)
 var _pending: Dictionary = {}        # ciblage en cours : {kind, idx|lane, cible}
 var _targets: Array = []
 var _inspect: Dictionary = {}
+var _puzzle: bool = false
+var _puzzle_lbl: Label = null
 var _inspect_cell: int = -1          # case de l'unité ennemie inspectée (aperçu de ses déplacements / menace)
 var _foe_moves: Array = []
 var _foe_threat: Array = []
@@ -194,6 +196,10 @@ func _show_hub() -> void:
 	var duel: Button = UiKit.btn("⚔  Duel", Color(0.95, 0.65, 0.25), 34, Vector2(0, 86))
 	duel.pressed.connect(_on_duel_pressed)
 	col.add_child(duel)
+	var pz: Dictionary = JccCollection.weekly_puzzle(_save)
+	var pzb: Button = UiKit.btn("🧩  Puzzle de la semaine%s" % (" ✓" if bool(pz["done"]) else ""), Color(0.55, 0.8, 0.5), 26, Vector2(0, 66))
+	pzb.pressed.connect(_start_puzzle)
+	col.add_child(pzb)
 	var deck: Button = UiKit.btn("🃏  Mon deck", Color(0.45, 0.65, 0.95), 30, Vector2(0, 72))
 	deck.pressed.connect(_show_builder)
 	col.add_child(deck)
@@ -299,6 +305,8 @@ func _show_opponents() -> void:
 # ═══════════════════════════════════════════════════════════════════════════
 
 func _start_duel(idx: int) -> void:
+	_puzzle = false
+	_puzzle_lbl = null
 	_opp_idx = idx
 	_opp = JccCollection.opponent(idx)
 	JccCollection.ensure(_save)
@@ -320,6 +328,34 @@ func _start_duel(idx: int) -> void:
 	_refresh()
 	_toast_msg("Le duel commence ! Votre tour.")
 	_tutorial()
+
+
+## Puzzle de la semaine : plateau et main imposés, l'adversaire ne joue pas.
+func _start_puzzle() -> void:
+	var def: Dictionary = JccCollection.weekly_puzzle(_save)
+	JccCollection.ensure(_save)
+	_puzzle = true
+	_opp_idx = -1
+	_opp = {"name": "Puzzle : %s" % String(def["title"]), "sprite": "enemies/gobelin", "boss": "", "deck": "", "biome": "Plaine", "accent": "#e8c040"}
+	_duel = JccDuel.new()
+	_duel.setup_puzzle(def)
+	_biome = "Plaine"
+	_foe_accent = Color("#e8c040")
+	_inspect_cell = -1
+	_sel_hand = -1
+	_sel_cell = -1
+	_pending = {}
+	_busy = false
+	_clear()
+	_build_duel_ui()
+	_puzzle_lbl = UiKit.lbl("", 24, UiKit.C_GOLD, true)
+	_puzzle_lbl.position = Vector2(1560, 700)
+	_puzzle_lbl.size = Vector2(330, 230)
+	_puzzle_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_puzzle_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(_puzzle_lbl)
+	_refresh()
+	_toast_msg(String(def["text"]))
 
 
 func _build_duel_ui() -> void:
@@ -785,7 +821,7 @@ func _refresh_hero(side: int) -> void:
 		nm.position = Vector2(110, 4)
 		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		p.add_child(nm)
-		var info: Label = UiKit.lbl("Main : %d   Pioche : %d   Mana : %d/%d" % [(sd["hand"] as Array).size(), (sd["deck"] as Array).size(), int(sd["mana"]), int(sd["mana_max"])], 21, UiKit.C_DIM)
+		var info: Label = UiKit.lbl("Héros à abattre" if _puzzle else "Main : %d   Pioche : %d   Mana : %d/%d" % [(sd["hand"] as Array).size(), (sd["deck"] as Array).size(), int(sd["mana"]), int(sd["mana_max"])], 21, UiKit.C_DIM)
 		info.position = Vector2(110, 52)
 		info.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		p.add_child(info)
@@ -934,6 +970,9 @@ func _refresh() -> void:
 	_refresh_hero(0)
 	_refresh_hero(1)
 	_refresh_action_bar()
+	if _puzzle and _puzzle_lbl != null and is_instance_valid(_puzzle_lbl):
+		var pdef: Dictionary = _duel.puzzle
+		_puzzle_lbl.text = "Puzzle : abattez le héros adverse.\nTour %d / %d\nMana par tour : %d" % [mini(int(_duel._turns_started[0]), int(pdef["turns"])), int(pdef["turns"]), int(pdef["mana"])]
 	_refresh_info()
 	var sd: Dictionary = _duel.side(0)
 	_pile_lbl.text = "Pioche : %d" % (sd["deck"] as Array).size()
@@ -1529,6 +1568,14 @@ func _toast_msg(t: String) -> void:
 
 func _run_enemy_turn() -> void:
 	_busy = true
+	if _puzzle:
+		_duel.end_turn(0)
+		if not _duel.is_over():
+			_duel.end_turn(1)
+		await _after_action("Tour suivant" if not _duel.is_over() else "")
+		_busy = false
+		_finish_if_over()
+		return
 	_duel.end_turn(0)
 	await _after_action("Tour de l'adversaire")
 	var guard: int = 0
@@ -1566,6 +1613,13 @@ func _finish_if_over() -> void:
 	var win: bool = _duel.winner == 0
 	var loot: String = ""
 	var extra: Dictionary = {}
+	if _puzzle:
+		if win:
+			loot = JccCollection.puzzle_won(_save)
+		_save_now()
+		_refresh()
+		_show_result(win, false, loot, {})
+		return
 	if win:
 		j["wins"] = int(j["wins"]) + 1
 		var rng := RandomNumberGenerator.new()
