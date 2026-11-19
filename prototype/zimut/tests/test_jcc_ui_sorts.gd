@@ -50,6 +50,7 @@ func _wait(m) -> void:
 		g += 1
 
 func _boot() -> void:
+	Engine.time_scale = 4.0   # 61 sorts x 0.55 s d'animation : sinon proche des 60 s max du CI
 	await create_timer(0.5).timeout
 	var pm = root.get_node("ProgressionManager")
 	var gm = root.get_node("GameManager")
