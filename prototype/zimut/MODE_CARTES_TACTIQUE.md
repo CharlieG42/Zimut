@@ -175,7 +175,7 @@ Le mode « Cartes tactiques » (sorts du combat tactique piochés dans un deck) 
 
 **Règles** (`scripts/JccDuel.gd`, sans UI, testé en headless) :
 - 4 voies ; un emplacement par voie et par camp. Une créature attaque la créature de sa voie (riposte), ou le héros si la voie est vide. Attaque manuelle, une fois par tour ; la créature posée ne peut ni attaquer ni lancer son sort ce tour-là. Déplacement d'une voie vers une voie libre voisine (compte comme l'action d'attaque).
-- Héros à 30 PV, victoire quand le héros adverse tombe. Mana : 1 au premier tour, +1 par tour, max 10. Une pioche par tour (pas pour le premier joueur au 1er tour), main max 7, **fatigue** croissante si la pioche est vide.
+- Héros à 20 PV, victoire quand le héros adverse tombe. Mana : 1 au premier tour, +1 par tour, max 10. Une pioche par tour (pas pour le premier joueur au 1er tour), main max 7, **fatigue** croissante si la pioche est vide.
 - Chaque créature porte **un seul sort distinctif** (coût en mana, une fois par tour). Les cartes-sorts sont à usage unique. Une carte jouée (sort) ou perdue (créature morte) rejoint la **fosse** ; les jetons invoqués disparaissent.
 - Effets : dégâts (cible / zone / héros), soin, bonus d'attaque, bouclier, étourdissement, poison, invocation, pioche, mana.
 - IA adverse (`ai_step`) : sorts utiles, carte la plus chère jouable, attaques rentables. 24 parties IA contre IA vont toutes au bout (test).
@@ -320,3 +320,11 @@ Les créatures posées sur la grille ne sont plus des cartes compactes mais des 
 La carte complète reste affichée en vignette à la sélection, et dans la main / la fosse. Les animations existantes (lunge d'attaque, secousse, apparition en `summon`) fonctionnent sur la nouvelle vue via `position`/`scale`.
 
 Tests : `test_jcc_ui.gd` (l'unité posée est un `_UnitView` avec le bon sprite, le tap sur le sprite sélectionne la case). 0 échec. Maquette PIL avec les vrais sprites validée.
+
+## 20. Équilibrage (duels plus courts, 2ᵉ joueur compensé, difficulté croissante)
+Mesures par simulations IA/IA (80 parties par adversaire, deux côtés) :
+- **Avant** : le 1er joueur gagnait 59 % des miroirs, ~33 tours en moyenne (58 % des parties > 30 tours, 45 tours contre le Troll Géant). Les adversaires n'étaient pas ordonnés par force (Troll Géant 90 % vs Gobelin Roi 21 %).
+- **Changements** : héros à **20 PV** (au lieu de 30) pour des duels plus courts ; le **2ᵉ joueur pioche une carte de plus** au départ (5 au lieu de 4) ; decks de la Couvée de feu, du Gobelin Roi et du Troll Géant retouchés ; la Couvée de feu passe **après** le Gobelin Roi.
+- **Après** : P0 ≈ 51–54 %, ~26–28 tours, force croissante Meute < Squelettes ≈ Gobelin Roi < Couvée < Troll < Dragon.
+- Test de non-régression : `tests/test_jcc_balance.gd` (seuils sur l'avantage du 1er joueur, la durée moyenne et la difficulté croissante, ~8 s).
+- Limite : l'IA joue les deux camps ; le ressenti humain (mobile) reste à valider.

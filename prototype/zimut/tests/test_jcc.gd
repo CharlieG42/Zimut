@@ -161,7 +161,7 @@ func _boot() -> void:
 	lp["sick"] = false
 	check(t.hero_dist_to(0, 2) == 1, "case (2,0) : distance 1 du héros adverse")
 	check(t.attack(0, 2), "le Loup frappe le héros adverse")
-	check(t.side(1)["hero_hp"] == 27, "héros adverse 30 -> 27")
+	check(t.side(1)["hero_hp"] == DD.HERO_HP - 3, "héros adverse -3 PV")
 	# sort jeté sur le héros, puis fosse
 	t.side(0)["mana"] = 3
 	var ets: int = t.side(0)["hand"].size()
@@ -171,7 +171,7 @@ func _boot() -> void:
 			idx = i
 	t.current = 0
 	check(idx >= 0 and t.play_card(0, idx, {"side": 1, "lane": -1}), "Étincelle sur le héros")
-	check(t.side(1)["hero_hp"] == 25 and t.side(0)["hand"].size() == ets - 1, "héros 25, carte retirée de la main")
+	check(t.side(1)["hero_hp"] == DD.HERO_HP - 5 and t.side(0)["hand"].size() == ets - 1, "héros 25, carte retirée de la main")
 	var fosse_ids: Array = []
 	for cc in t.side(0)["fosse"]:
 		fosse_ids.append(cc["id"])
@@ -205,7 +205,7 @@ func _boot() -> void:
 	var dl2: Dictionary = kw.place_unit(1, "m_loup", 0, 4)      # case 16, hp 2
 	dl2["hp"] = 2
 	check(kw.attack(0, 20, {"side": 1, "lane": 16}), "le Bélier attaque le Loup")
-	check(kw.side(1)["hero_hp"] == 28, "perforation : 4 - 2 = 2 dégâts excédentaires au héros (30 -> 28)")
+	check(kw.side(1)["hero_hp"] == DD.HERO_HP - 2, "perforation : 4 - 2 = 2 dégâts excédentaires au héros")
 	# provocation : seule la case avec provocation est ciblable, l'attaque est redirigée
 	var gb: Dictionary = kw.place_unit(0, "m_gobelin", 2, 5)    # case 22, PO 1
 	var ch2: Dictionary = kw.place_unit(1, "c_chevalier", 2, 4) # case 18, provocation, hp 8
@@ -287,7 +287,7 @@ func _boot() -> void:
 	check(hash11, "hauteur : +1 PO, une cible à distance 2 est à portée")
 	# pouvoir du héros : Mage = 4 dégâts au héros adverse, 1 fois par duel
 	check(tg.can_use_hero_power(0), "pouvoir dispo au début")
-	check(tg.use_hero_power(0) and tg.side(1)["hero_hp"] == 26, "pouvoir Mage : héros adverse 30 -> 26")
+	check(tg.use_hero_power(0) and tg.side(1)["hero_hp"] == DD.HERO_HP - 4, "pouvoir Mage : héros adverse -4 PV")
 	check(not tg.can_use_hero_power(0) and not tg.use_hero_power(0), "pouvoir utilisé 1 seule fois")
 	check(String(DD.power_for("Géomancien")["effet"]) == "degats_zone" and String(DD.power_for("boss")["valeur"]) == "5", "power_for : classe et boss")
 	# mulligan : main repiochee, 1 fois, 20 cartes conservées
@@ -303,7 +303,7 @@ func _boot() -> void:
 	f.side(0)["hand"] = []
 	f._draw_card(0, true)
 	f._draw_card(0, true)
-	check(f.side(0)["hero_hp"] == 27, "fatigue : 1 puis 2 dégâts (30 -> 27)")
+	check(f.side(0)["hero_hp"] == DD.HERO_HP - 3, "fatigue : 1 puis 2 dégâts (-3 PV)")
 	f._hit(1, -1, 99)
 	check(f.is_over() and f.winner == 0, "héros adverse à 0 : victoire du joueur")
 	var hmax = DD.new()

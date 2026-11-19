@@ -166,7 +166,7 @@ func _show_hub() -> void:
 	title.size = Vector2(W, 100)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_root.add_child(title)
-	var sub: Label = UiKit.lbl("Duels de cartes à quatre voies — deck de 20 cartes, mana croissant, héros à 30 PV", 26, UiKit.C_DIM)
+	var sub: Label = UiKit.lbl("Duels de cartes à quatre voies — deck de 20 cartes, mana croissant, héros à 20 PV", 26, UiKit.C_DIM)
 	sub.position = Vector2(0, 200)
 	sub.size = Vector2(W, 40)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

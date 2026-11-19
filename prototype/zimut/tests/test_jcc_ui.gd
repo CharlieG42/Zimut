@@ -54,7 +54,7 @@ func _boot() -> void:
 	check((d.side(0)["hand"] as Array).size() == 4 and not d.can_mulligan(0) and not m._mull_btn.visible, "mulligan : main repiochee, bouton caché")
 	m._on_power_pressed()
 	await create_timer(1.0).timeout
-	check(d.side(1)["hero_hp"] == 26 and not m._power_btn.visible, "pouvoir du héros lancé par l'UI (30 -> 26), bouton caché")
+	check(d.side(1)["hero_hp"] == JccDuel.HERO_HP - 4 and not m._power_btn.visible, "pouvoir du héros lancé par l'UI (-4 PV), bouton caché")
 	d.side(0)["hand"] = [d._make_instance("m_gobelin"), d._make_instance("s_etincelle")]
 	m._refresh()
 	m._on_hand_card(0)

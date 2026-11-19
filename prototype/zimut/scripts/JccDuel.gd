@@ -13,7 +13,7 @@ const ROWS: int = 6
 ## Plateau 4 x 6. « lane » (hérité) = index de case = y * COLS + x.
 ## Camp 1 en haut (ligne arrière y = 0), camp 0 en bas (ligne arrière y = ROWS - 1).
 const LANES: int = COLS * ROWS
-const HERO_HP: int = 30
+const HERO_HP: int = 20
 const HAND_MAX: int = 7
 const MANA_MAX: int = 10
 const START_HAND: int = 4
@@ -61,7 +61,7 @@ func setup(deck0: Array, deck1: Array, seed_value: int = 0, powers: Array = []) 
 			"stats": {"creatures": 0, "spells": 0, "hero_dmg": 0}})
 	for s: int in 2:
 		sides[s]["power"] = power_for(String(powers[s]) if s < powers.size() else "")
-		for i: int in START_HAND:
+		for i: int in START_HAND + (1 if s == 1 else 0):
 			if not (sides[s]["deck"] as Array).is_empty():
 				_draw_card(s, false)
 	winner = -1
