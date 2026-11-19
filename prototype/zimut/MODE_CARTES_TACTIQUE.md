@@ -341,3 +341,9 @@ Mesures par simulations IA/IA (80 parties par adversaire, deux côtés) :
 - Pas de pioche ni de fatigue ; ne compte ni dans les victoires/défaites ni dans le défi du jour. Une carte de butin est offerte à la **première** réussite de la semaine.
 - Moteur : `JccDuel.setup_puzzle(def)` (`puzzle` non vide). Chaque puzzle porte sa solution scriptée, rejouée par `tests/test_jcc_puzzle.gd`.
 - Pour ajouter un puzzle : une entrée dans `PUZZLES` avec sa `solution` (le test échoue si elle ne gagne pas).
+
+## 23. Boss de chapitre
+- 8 boss (`JccCollection.CHAPTER_BOSSES`), un par chapitre de la campagne de Conquête (`ConquestSystem.CHAPTERS`, même ordre), listés après les 6 adversaires (liste défilante). Débloqué quand le chapitre est accompli.
+- 1re victoire sur chacun : sa carte légendaire + de l'or (100 × n° du chapitre) ; ensuite c'est un boss ordinaire (40 % de sa carte).
+- Decks de 20 cartes, boss en tête, biome et couleur propres ; sprites ajoutés aux boss qui n'en avaient pas. Force mesurée en simulation de ~33 % à ~66 %.
+- Test : `tests/test_jcc_chapitres.gd`.

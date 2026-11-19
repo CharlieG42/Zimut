@@ -23,14 +23,14 @@ b_loup_alpha|Loup Alpha|Creature|5|5|5|2|2|1|L||Meute|2|invoquer|j_loup|0|voie|e
 b_roi_squelette|Roi Squelette|Creature|6|4|8|2|2|1|L||Légion|1|invoquer|j_squelette|0|voie|enemies/squelette_boss
 b_troll_geant|Troll Géant|Creature|7|6|10|2|2|1|L||Écrasement|2|degats|6|0|ennemi|enemies/troll_boss
 b_dragon|Dragon|Creature|8|7|9|2|2|1|L||Souffle de feu|3|degats_zone|3|0|aucune|enemies/dragonnet_boss
-b_seigneur_lave|Seigneur de Lave|Creature|7|6|8|2|2|1|L||Coulée de lave|2|degats_heros|4|0|aucune|
+b_seigneur_lave|Seigneur de Lave|Creature|7|6|8|2|2|1|L||Coulée de lave|2|degats_heros|4|0|aucune|enemies/dragonnet_desert
 b_liche_brumes|Liche des Brumes|Creature|6|3|7|2|2|1|L||Linceul de brume|3|etourdir_zone|1|1|aucune|
-b_liche_eternelle|Liche Éternelle|Creature|6|3|8|2|2|1|L||Savoir interdit|2|pioche|2|0|aucune|
-b_crabe_titan|Crabe Titan|Creature|6|4|10|2|2|1|L||Carapace|1|bouclier|4|0|allie|
-b_colosse|Colosse d'Engrenages|Creature|7|5|9|2|2|1|L||Surcharge|2|atq|3|0|allie|
+b_liche_eternelle|Liche Éternelle|Creature|6|3|8|2|2|1|L||Savoir interdit|2|pioche|2|0|aucune|summons/ombre
+b_crabe_titan|Crabe Titan|Creature|6|4|10|2|2|1|L||Carapace|1|bouclier|4|0|allie|summons/requin_des_marees
+b_colosse|Colosse d'Engrenages|Creature|7|5|9|2|2|1|L||Surcharge|2|atq|3|0|allie|summons/golem_de_pierre
 b_golem_prisme|Golem Prismatique|Creature|6|4|9|2|1|1|L||Prisme de soin|2|soin_zone|3|0|aucune|
-b_seigneur_tempetes|Seigneur des Tempêtes|Creature|7|5|7|2|2|1|L||Foudre|2|degats_zone|2|0|aucune|
-b_tharok|Tharok le Végétal|Creature|6|4|9|2|2|1|L||Écorce ancestrale|2|bouclier_zone|2|0|aucune|
+b_seigneur_tempetes|Seigneur des Tempêtes|Creature|7|5|7|2|2|1|L||Foudre|2|degats_zone|2|0|aucune|summons/elementaire_de_cristal
+b_tharok|Tharok le Végétal|Creature|6|4|9|2|2|1|L||Écorce ancestrale|2|bouclier_zone|2|0|aucune|summons/ent_de_combat
 b_vorkann|Vorkann le Givre|Creature|7|5|8|2|2|1|L||Souffle glacial|3|etourdir_zone|1|1|aucune|
 j_golem|Golem de pierre|Jeton|0|3|4|1|1|1|C||||||||summons/golem_de_pierre
 j_loup|Loup spectral|Jeton|0|3|2|1|2|2|C||||||||summons/loup_spectral
