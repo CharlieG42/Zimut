@@ -137,9 +137,10 @@ func is_free_xy(gx: int, gy: int) -> bool:
 func occupant(cell: int) -> Dictionary:
 	var p := cell_xy(cell)
 	for s in 2:
-		var u: Variant = unit_at(p.x, p.y)
-		if u != null:
-			return {"side": s, "unit": u}
+		for u: Variant in sides[s]["units"]:
+			var c: Dictionary = u
+			if int(c["x"]) == p.x and int(c["y"]) == p.y:
+				return {"side": s, "unit": c}
 	return {}
 
 
