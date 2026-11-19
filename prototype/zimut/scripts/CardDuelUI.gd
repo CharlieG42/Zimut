@@ -425,7 +425,7 @@ func _build_duel_ui() -> void:
 	quit.pressed.connect(_on_quit_duel)
 	_root.add_child(quit)
 	var hb: Button = UiKit.btn("❓ Aide", Color(0.45, 0.65, 0.85), 20, Vector2(150, 48))
-	hb.position = Vector2(250, 14)
+	hb.position = Vector2(1520, 14)
 	_fancy_btn(hb, Color(0.45, 0.65, 0.85))
 	hb.pressed.connect(_show_help)
 	_root.add_child(hb)
