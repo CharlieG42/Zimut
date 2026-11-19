@@ -283,3 +283,16 @@ Trois mécaniques ajoutées au duel (moteur `JccDuel.gd`, UI `CardDuelUI.gd`) :
 - **Mulligan** : bouton « ↺ Nouvelle main (1×) » pendant son tour : la main retourne sous la pioche et on repioché 4 cartes, une seule fois par duel.
 
 Tests : `test_jcc.gd` (terrain déterministe, boue 2 PM, hauteur +1 PO, buisson camouflage, pouvoir 1×, mulligan 1× et 20 cartes conservées, 24 parties IA/IA) et `test_jcc_ui.gd` (6 cases de terrain affichées, boutons visibles puis cachés, pouvoir lancé par l'UI). 0 échec.
+
+## 17. V413 — unités en sprites sur le plateau
+
+Les créatures posées sur la grille ne sont plus des cartes compactes mais des **sprites en pied** (nouvelle classe interne `_UnitView` dans `CardDuelUI.gd`, à la place du `JccCardView` en `board_mode`) :
+
+- le **sprite complet de la carte** (`card["sprite"]`, image entière) est dessiné dans un carré au-dessus de la case, pieds sur le bas de la case, mis à l'échelle de la rangée (iso) ; ombre portée elliptique au sol ;
+- **nom** en pastille au-dessus du sprite, **gemmes ATQ (orange) / PV (rouge)** en bas à gauche/droite de la case, **pastilles PA / PM / PO** centrées en bas (grisées si 0) ;
+- **étoile de sort** (violet, vive si le sort est lançable) et **pastilles de mots-clés** en haut à droite du sprite, statuts (ZZ / poison) en haut à gauche ; voile assombrissant si l'unité a déjà agi ;
+- liserés pulsants au sol : **or = sélectionnée**, **rouge = cible valide**, **vert = peut agir** ; le tap sur le sprite émet `tapped` (sélection / ciblage, comme avant).
+
+La carte complète reste affichée en vignette à la sélection, et dans la main / la fosse. Les animations existantes (lunge d'attaque, secousse, apparition en `summon`) fonctionnent sur la nouvelle vue via `position`/`scale`.
+
+Tests : `test_jcc_ui.gd` (l'unité posée est un `_UnitView` avec le bon sprite, le tap sur le sprite sélectionne la case). 0 échec. Maquette PIL avec les vrais sprites validée.

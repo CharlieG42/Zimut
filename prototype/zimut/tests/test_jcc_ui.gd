@@ -62,6 +62,13 @@ func _boot() -> void:
 	m._on_slot(21)
 	await create_timer(1.0).timeout
 	check(d.creature_at(0, 21) != null and not m._busy, "le Gobelin est posé en (1,5) par un toucher")
+	var uv: Variant = m._board_views.get("0:21")
+	check(uv != null and not (uv is JccCardView) and String(uv.card.get("sprite", "")) == "enemies/gobelin", "unité du plateau rendue en sprite (_UnitView), pas en carte compacte")
+	var ev_tap := InputEventMouseButton.new()
+	ev_tap.button_index = MOUSE_BUTTON_LEFT
+	ev_tap.pressed = true
+	uv._gui_input(ev_tap)
+	check(m._sel_cell == 21, "tap sur le sprite de l'unité : signal tapped -> case sélectionnée")
 	d.side(0)["mana"] = 3
 	m._refresh()
 	m._on_hand_card(0)

@@ -1,0 +1,3 @@
+V413|Mode Cartes : les unités sur le plateau s'affichent désormais en grands sprites (image entière de la carte) au lieu de petites cartes.
+V413|Chaque unité montre son nom, ses gemmes ATQ/PV, ses pastilles PA/PM/PO, son étoile de sort et ses mots-clés directement sur le plateau.
+V413|Liserés pulsants au sol : or = sélection, rouge = cible valide, vert = peut agir ; l'attaque, la secousse et l'apparition fonctionnent comme avant.
