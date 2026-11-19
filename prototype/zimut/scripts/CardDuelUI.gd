@@ -200,15 +200,22 @@ func _show_hub() -> void:
 	for k: Variant in (j["collection"] as Dictionary):
 		n_owned += int((j["collection"] as Dictionary)[k])
 	var st: Label = UiKit.lbl("Victoires : %d · Défaites : %d · Cartes possédées : %d" % [int(j["wins"]), int(j["losses"]), n_owned], 22, UiKit.C_DIM)
-	st.position = Vector2(0, 1010)
-	st.size = Vector2(W, 36)
+	st.position = Vector2(0, 1006)
+	st.size = Vector2(W, 34)
 	st.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_root.add_child(st)
+	var ch: Dictionary = JccCollection.daily_challenge(_save)
+	var ch_done: bool = bool(ch.get("done", false))
+	var ch_lbl: Label = UiKit.lbl("Défi du jour : %s  (%d/%d)%s" % [String(ch.get("text", "")), int(ch.get("progress", 0)), int(ch.get("target", 0)), " — réussi ✓" if ch_done else ""], 22, UiKit.C_GOLD if ch_done else UiKit.C_TXT)
+	ch_lbl.position = Vector2(0, 1046)
+	ch_lbl.size = Vector2(W, 30)
+	ch_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_root.add_child(ch_lbl)
 
 
 func _on_duel_pressed() -> void:
-	var j: Dictionary = JccCollection.ensure(_save)
-	if JccCollection.deck_error(_save, j["deck"] as Array) != "":
+	var deck_now: Array = JccCollection.deck_of(_save, JccCollection.active_deck_name(_save))
+	if JccCollection.deck_error(_save, deck_now) != "":
 		_show_builder()
 		return
 	_show_opponents()
@@ -242,8 +249,12 @@ func _show_opponents() -> void:
 	for i: int in JccCollection.OPPONENTS.size():
 		var op: Dictionary = JccCollection.opponent(i)
 		var boss: String = String(op["boss"])
-		var b: Button = UiKit.btn("", Color(0.95, 0.65, 0.25) if boss != "" else Color(0.45, 0.65, 0.95), 24, Vector2(520, 320))
-		b.pressed.connect(func() -> void: _start_duel(i))
+		var unlocked: bool = JccCollection.is_unlocked(_save, i)
+		var b: Button = UiKit.btn("", Color(0.95, 0.65, 0.25) if boss != "" and unlocked else (Color(0.45, 0.65, 0.95) if unlocked else Color(0.24, 0.26, 0.31)), 24, Vector2(520, 320))
+		if unlocked:
+			b.pressed.connect(func() -> void: _start_duel(i))
+		else:
+			b.disabled = true
 		grid.add_child(b)
 		var tex: Texture2D = JccCardView.art_texture(String(op["sprite"]))
 		if tex != null:
@@ -253,20 +264,23 @@ func _show_opponents() -> void:
 			tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			tr.position = Vector2(20, 20)
 			tr.size = Vector2(190, 200)
+			tr.modulate = Color(1, 1, 1) if unlocked else Color(0.4, 0.4, 0.45)
 			tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			b.add_child(tr)
-		var nm: Label = UiKit.lbl(String(op["name"]), 32, UiKit.C_TXT, true)
+		var nm: Label = UiKit.lbl(String(op["name"]), 32, UiKit.C_TXT if unlocked else UiKit.C_DIM, true)
 		nm.position = Vector2(225, 30)
 		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.add_child(nm)
 		var desc: String = "Duel classique" if boss == "" else "Boss — peut laisser sa carte légendaire"
-		var dl: Label = UiKit.lbl(desc, 20, UiKit.C_GOLD if boss != "" else UiKit.C_DIM)
+		if not unlocked:
+			desc = "🔒 Battre « %s » pour débloquer" % String(JccCollection.opponent(i - 1)["name"])
+		var dl: Label = UiKit.lbl(desc, 20, UiKit.C_GOLD if boss != "" and unlocked else UiKit.C_DIM)
 		dl.position = Vector2(225, 86)
 		dl.size = Vector2(280, 100)
 		dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		dl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.add_child(dl)
-		var rw: Label = UiKit.lbl("Butin : 1 carte", 20, UiKit.C_GOOD)
+		var rw: Label = UiKit.lbl("Butin : 1 carte" if unlocked else "", 20, UiKit.C_GOOD)
 		rw.position = Vector2(225, 240)
 		rw.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.add_child(rw)
@@ -283,11 +297,12 @@ func _show_opponents() -> void:
 func _start_duel(idx: int) -> void:
 	_opp_idx = idx
 	_opp = JccCollection.opponent(idx)
-	var j: Dictionary = JccCollection.ensure(_save)
+	JccCollection.ensure(_save)
 	_duel = JccDuel.new()
 	var cls: String = String(ProgressionManager.adventure_state(_save).get("hero_class", "Mage"))
 	var opp_pow: String = "boss" if String(_opp.get("boss", "")) != "" else ""
-	_duel.setup((j["deck"] as Array).duplicate(), JccCollection.parse_deck(String(_opp["deck"])), 0, [cls, opp_pow])
+	var deck_now: Array = JccCollection.deck_of(_save, JccCollection.active_deck_name(_save))
+	_duel.setup(deck_now.duplicate(), JccCollection.parse_deck(String(_opp["deck"])), 0, [cls, opp_pow])
 	_biome = BIOMES[_opp_idx % BIOMES.size()]
 	_sel_hand = -1
 	_sel_cell = -1
@@ -1351,20 +1366,25 @@ func _finish_if_over() -> void:
 	var j: Dictionary = JccCollection.ensure(_save)
 	var win: bool = _duel.winner == 0
 	var loot: String = ""
+	var extra: Dictionary = {}
 	if win:
 		j["wins"] = int(j["wins"]) + 1
 		var rng := RandomNumberGenerator.new()
 		rng.randomize()
 		loot = JccCollection.roll_loot(rng, String(_opp.get("boss", "")))
 		JccCollection.add_card(_save, loot)
+		var nu: int = JccCollection.unlock_next(_save, _opp_idx)
+		if nu >= 0:
+			extra["unlock"] = String(JccCollection.opponent(nu)["name"])
 	elif _duel.winner == 1:
 		j["losses"] = int(j["losses"]) + 1
+	extra["challenge"] = JccCollection.challenge_report(_save, _duel.side(0)["stats"], win)
 	_save_now()
 	_refresh()
-	_show_result(win, _duel.winner == 2, loot)
+	_show_result(win, _duel.winner == 2, loot, extra)
 
 
-func _show_result(win: bool, draw_game: bool, loot: String) -> void:
+func _show_result(win: bool, draw_game: bool, loot: String, extra: Dictionary = {}) -> void:
 	var ov := ColorRect.new()
 	ov.color = Color(0, 0, 0, 0.72)
 	ov.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -1389,6 +1409,28 @@ func _show_result(win: bool, draw_game: bool, loot: String) -> void:
 		v.scale = Vector2(0.3, 0.3)
 		ov.add_child(v)
 		create_tween().tween_property(v, "scale", Vector2.ONE, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	var info := VBoxContainer.new()
+	info.position = Vector2(0, 754)
+	info.size = Vector2(W, 62)
+	info.add_theme_constant_override("separation", 2)
+	ov.add_child(info)
+	if String(extra.get("unlock", "")) != "":
+		var ul: Label = UiKit.lbl("🔓 Adversaire débloqué : %s" % String(extra["unlock"]), 26, UiKit.C_GOOD, true)
+		ul.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		ul.custom_minimum_size = Vector2(0, 30)
+		info.add_child(ul)
+	var chr: Dictionary = extra.get("challenge", {})
+	if not chr.is_empty():
+		var ct: String = "Défi du jour : %s  (%d/%d)" % [String(chr.get("text", "")), int(chr.get("progress", 0)), int(chr.get("target", 0))]
+		if bool(chr.get("done", false)):
+			ct += " — réussi !"
+			var rw: String = String(chr.get("reward", ""))
+			if rw != "":
+				ct += "  + %s" % String(JccCards.get_card(rw).get("name", rw))
+		var cl: Label = UiKit.lbl(ct, 24, UiKit.C_GOLD if bool(chr.get("done", false)) else UiKit.C_TXT)
+		cl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cl.custom_minimum_size = Vector2(0, 28)
+		info.add_child(cl)
 	var row := HBoxContainer.new()
 	row.position = Vector2(W * 0.5 - 420, 820)
 	row.size = Vector2(840, 80)

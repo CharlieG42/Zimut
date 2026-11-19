@@ -68,6 +68,32 @@ func _boot() -> void:
 		if CO.roll_loot(rng, "b_dragon") == "b_dragon":
 			boss_drop += 1
 	check(got_l and boss_drop > 80 and boss_drop < 240, "butin : légendaires rares, carte du boss ~40 %% (%d/400)" % boss_drop)
+	print("Méta (multi-decks, défi du jour, déblocages) :")
+	var save2: Dictionary = {}
+	var j2: Dictionary = CO.ensure(save2)
+	check((j2["decks"] as Dictionary).has("Deck 1") and String(j2["active_deck"]) == "Deck 1", "migration : decks['Deck 1'] créé, active_deck = Deck 1")
+	check(CO.deck_of(save2, "Deck 1").size() == 20 and CO.deck_of(save2, "Inconnu").size() == 20, "deck_of : deck nommé, repli sur le deck actif si inconnu")
+	(j2["decks"] as Dictionary)["Deck 2"] = CO.starter_deck()
+	CO.set_active_deck(save2, "Deck 2")
+	check(CO.active_deck_name(save2) == "Deck 2" and (j2["deck"] as Array).size() == 20, "set_active_deck : nom actif + miroir j['deck']")
+	CO.set_active_deck(save2, "Deck 1")
+	check(CO.active_deck_name(save2) == "Deck 1", "retour au Deck 1")
+	var chall: Dictionary = CO.daily_challenge(save2)
+	check(String(chall.get("id", "")) != "" and String(chall.get("date", "")) == Time.get_date_string_from_system() and int(chall.get("target", 0)) > 0, "défi du jour créé pour aujourd'hui")
+	var chall_bis: Dictionary = CO.daily_challenge(save2)
+	check(String(chall_bis["id"]) == String(chall["id"]) and int(chall_bis["progress"]) == int(chall["progress"]), "défi du jour stable dans la journée")
+	var stats_full: Dictionary = {"creatures": 99, "spells": 99, "hero_dmg": 99}
+	var rep: Dictionary = CO.challenge_report(save2, stats_full, String(chall["id"]) == "win")
+	if not bool(rep.get("done", false)):
+		rep = CO.challenge_report(save2, stats_full, true)
+	check(bool(rep.get("done", false)) and String(rep.get("reward", "")) != "", "défi complété en un duel : récompense carte attribuée")
+	check(CO.owned(save2, String(rep["reward"])) >= 1, "la récompense du défi est bien possédée")
+	var rep2: Dictionary = CO.challenge_report(save2, stats_full, true)
+	check(bool(rep2.get("done", false)) and String(rep2.get("reward", "")) == "", "défi déjà réussi : plus de récompense")
+	check(CO.is_unlocked(save2, 0) and not CO.is_unlocked(save2, 1) and not CO.is_unlocked(save2, 5), "déblocage : adversaire 0 oui, 1 et 5 non")
+	var nu: int = CO.unlock_next(save2, 0)
+	check(nu == 1 and CO.is_unlocked(save2, 1), "unlock_next après victoire vs 0 débloque l'adversaire 1")
+	check(CO.unlock_next(save2, 5) == -1 and CO.unlock_next(save2, 0) == -1, "unlock_next sans nouveau déblocage renvoie -1")
 	print("Règles (grille 4x6, PA/PM/PO) :")
 	var DD = load("res://scripts/JccDuel.gd")
 	var t = DD.new()

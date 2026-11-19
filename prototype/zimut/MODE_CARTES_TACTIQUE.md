@@ -297,3 +297,13 @@ Nouvelle colonne `MotsCles` dans `data/cartes_jcc.txt` (séparateur `;`, ex. `vo
 5 nouvelles cartes les utilisent : Vampire (vol, R), Bélier (perforation, C), Chevalier (provocation, R), Moine (regeneration, C), Samouraï (initiative, E). Elles entrent automatiquement dans la collection de départ et le butin (`collectible_ids`). Affichage : ligne dorée sous le type en mode fiche, pastilles colorées sur l'illustration en mode plateau (`JccCardView.gd`).
 
 Tests : `test_jcc.gd` (bloc mots-clés : parsing, vol, mort sans riposte, perforation 30→28, provocation redirige, régénération 2→4, initiative sans riposte, riposte normale sinon) — 0 échec ; `test_jcc_ui.gd` 0 échec.
+
+## 18. V412 — méta : plusieurs decks, défi du jour, adversaires à débloquer
+
+Trois ajouts de progression autour du duel (`JccCollection.gd`, `CardDuelUI.gd`, `CardDeckBuilder.gd`) :
+
+- **Plusieurs decks** (3 slots, `decks` + `active_deck` dans la sauvegarde, `j["deck"]` reste le miroir du deck actif) : onglets en haut de la colonne de droite dans le constructeur de deck, bouton « + » pour copier le deck courant dans un nouveau slot ; le duel se lance avec le deck actif.
+- **Défi du jour** : un défi tiré du hash de la date (`CHALLENGES` : gagner un duel, poser 4 créatures, lancer 3 sorts, infliger 12 dégâts au héros adverse — les trois derniers en un seul duel, suivis via les stats du duel `JccDuel.side(s)["stats"]`). Affiché sur l'accueil (« Défi du jour : … (x/y) », doré si réussi) et rappelé à l'écran de résultat ; la réussite offre une carte de butin.
+- **Adversaires verrouillés** : seul le premier adversaire est disponible au départ ; battre l'adversaire *i* débloque le *i+1* (`unlocked`), les cases verrouillées apparaissent grisées avec « 🔒 Battre « … » pour débloquer », et l'écran de victoire annonce « 🔓 Adversaire débloqué : … ».
+
+Tests : `test_jcc.gd` (migration multi-decks, `deck_of`/`set_active_deck`, défi du jour stable et complétable avec récompense, `is_unlocked`/`unlock_next`) et `test_jcc_ui.gd` (victoire : butin + déblocage de l'adversaire 1 + défi du jour présent, sauvegarde relue). 0 échec.

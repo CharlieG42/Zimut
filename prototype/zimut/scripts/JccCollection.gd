@@ -1,10 +1,20 @@
 class_name JccCollection
 extends RefCounted
-## JccCollection.gd — Collection de cartes du joueur, deck de 20 cartes, adversaires et butin (mode Cartes).
-## Tout vit dans save["jcc"] = {"collection": {id: n}, "deck": [ids], "wins": n, "losses": n}.
+## JccCollection.gd — Collection de cartes du joueur, decks de 20 cartes, défis du jour, adversaires et butin (mode Cartes).
+## Tout vit dans save["jcc"] = {"collection": {id: n}, "deck": [ids] (miroir du deck actif), "decks": {nom: [ids]},
+##   "active_deck": nom, "wins": n, "losses": n, "unlocked": [idx], "challenge": {date, id, text, target, progress, done}}.
 
 const DECK_SIZE: int = 20
 const MAX_COPIES: int = 2
+const DECK_SLOTS: int = 3
+
+## Défis quotidiens : un par jour (hash de la date). "wins" se gagne sur n'importe quel duel, les autres en un seul duel.
+const CHALLENGES: Array = [
+	{"id": "win", "text": "Gagner un duel", "stat": "wins", "target": 1},
+	{"id": "creatures", "text": "Poser 4 créatures en un duel", "stat": "creatures", "target": 4},
+	{"id": "spells", "text": "Lancer 3 sorts en un duel", "stat": "spells", "target": 3},
+	{"id": "hero_dmg", "text": "Infliger 12 dégâts au héros adverse en un duel", "stat": "hero_dmg", "target": 12},
+]
 
 ## Adversaires : nom, camp d'héros (sprite du portrait), deck de 20 cartes, éventuel boss (carte à gagner).
 const OPPONENTS: Array = [
@@ -31,6 +41,13 @@ static func ensure(save: Dictionary) -> Dictionary:
 		j["collection"] = starter_collection()
 	if not j.has("deck") or (j["deck"] as Array).is_empty():
 		j["deck"] = starter_deck()
+	# migration multi-decks : j["decks"] = {nom: [ids]} ; j["deck"] reste le miroir du deck actif
+	if not j.has("decks") or typeof(j["decks"]) != TYPE_DICTIONARY or (j["decks"] as Dictionary).is_empty():
+		j["decks"] = {"Deck 1": (j["deck"] as Array).duplicate()}
+	if not j.has("active_deck") or not (j["decks"] as Dictionary).has(String(j["active_deck"])):
+		j["active_deck"] = String((j["decks"] as Dictionary).keys()[0])
+	if not j.has("unlocked") or typeof(j["unlocked"]) != TYPE_ARRAY:
+		j["unlocked"] = [0]
 	j["wins"] = int(j.get("wins", 0))
 	j["losses"] = int(j.get("losses", 0))
 	return j
@@ -89,6 +106,101 @@ static func add_card(save: Dictionary, id: String) -> void:
 	var j: Dictionary = ensure(save)
 	var col: Dictionary = j["collection"]
 	col[id] = int(col.get(id, 0)) + 1
+
+
+## --- Multi-decks (jusqu'à DECK_SLOTS decks nommés) ---
+
+static func decks(save: Dictionary) -> Dictionary:
+	return ensure(save)["decks"]
+
+
+static func active_deck_name(save: Dictionary) -> String:
+	var j: Dictionary = ensure(save)
+	var n: String = String(j.get("active_deck", ""))
+	if n == "" or not (j["decks"] as Dictionary).has(n):
+		var keys: Array = (j["decks"] as Dictionary).keys()
+		n = String(keys[0]) if not keys.is_empty() else "Deck 1"
+	return n
+
+
+static func set_active_deck(save: Dictionary, name: String) -> void:
+	var j: Dictionary = ensure(save)
+	if (j["decks"] as Dictionary).has(name):
+		j["active_deck"] = name
+		j["deck"] = deck_of(save, name).duplicate()
+
+
+## Deck nommé ; retombe sur le deck actif puis le deck de départ si le nom est inconnu ou vide.
+static func deck_of(save: Dictionary, name: String) -> Array:
+	var j: Dictionary = ensure(save)
+	var d: Array = (j["decks"] as Dictionary).get(name, [])
+	if d.is_empty():
+		d = j.get("deck", [])
+	if d.is_empty():
+		d = starter_deck()
+	return d
+
+
+## --- Défi du jour ---
+
+static func daily_challenge(save: Dictionary) -> Dictionary:
+	var j: Dictionary = ensure(save)
+	var today: String = Time.get_date_string_from_system()
+	var ch: Variant = j.get("challenge", {})
+	if typeof(ch) != TYPE_DICTIONARY or String((ch as Dictionary).get("date", "")) != today or String((ch as Dictionary).get("id", "")) == "":
+		var base: Dictionary = CHALLENGES[absi(today.hash()) % CHALLENGES.size()]
+		ch = {"date": today, "id": base["id"], "text": base["text"], "target": int(base["target"]), "progress": 0, "done": false}
+		j["challenge"] = ch
+	return ch
+
+
+## Rapporte le résultat d'un duel au défi du jour. Complété -> une carte de butin offerte.
+## Retourne {id, text, target, progress, done, reward}.
+static func challenge_report(save: Dictionary, stats: Dictionary, won: bool) -> Dictionary:
+	var j: Dictionary = ensure(save)
+	var ch: Dictionary = daily_challenge(save)
+	var res: Dictionary = {"id": String(ch["id"]), "text": String(ch.get("text", "")), "target": int(ch.get("target", 0)),
+		"progress": int(ch["progress"]), "done": bool(ch["done"]), "reward": ""}
+	if res["done"]:
+		return res
+	var stat: String = ""
+	for c: Variant in CHALLENGES:
+		if String(c["id"]) == String(ch["id"]):
+			stat = String(c["stat"])
+	if stat == "":
+		return res
+	var gain: int = int(stats.get(stat, 0)) if stat != "wins" else (1 if won else 0)
+	var prog: int = mini(int(ch["progress"]) + gain, int(res["target"]))
+	ch["progress"] = prog
+	res["progress"] = prog
+	if prog >= int(res["target"]):
+		ch["done"] = true
+		res["done"] = true
+		var rng := RandomNumberGenerator.new()
+		rng.randomize()
+		var rew: String = roll_loot(rng, "")
+		add_card(save, rew)
+		res["reward"] = rew
+	j["challenge"] = ch
+	return res
+
+
+## --- Adversaires verrouillés : battre l'adversaire i débloque le i+1 ---
+
+static func is_unlocked(save: Dictionary, idx: int) -> bool:
+	if idx <= 0:
+		return true
+	return (ensure(save)["unlocked"] as Array).has(idx)
+
+
+## Renvoie l'index du nouvel adversaire débloqué, ou -1 s'il n'y en a pas.
+static func unlock_next(save: Dictionary, beaten_idx: int) -> int:
+	var j: Dictionary = ensure(save)
+	var nxt: int = beaten_idx + 1
+	if nxt < OPPONENTS.size() and not (j["unlocked"] as Array).has(nxt):
+		(j["unlocked"] as Array).append(nxt)
+		return nxt
+	return -1
 
 
 ## Tire une carte de butin après une victoire. Un adversaire boss peut laisser sa propre carte.
