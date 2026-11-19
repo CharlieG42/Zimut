@@ -1,7 +1,9 @@
 class_name JccCards
 extends RefCounted
 ## JccCards.gd — Catalogue des cartes du mode Cartes (JCC à voies) : data/cartes_jcc.txt.
-## Colonnes (séparateur « | ») : Id|Nom|Type|Cout|Atq|PV|PA|PM|PO|Rarete|Classe|Sort|SortCout|Effet|Valeur|Duree|Cible|Sprite
+## Colonnes (séparateur « | ») : Id|Nom|Type|Cout|Atq|PV|PA|PM|PO|Rarete|Classe|Sort|SortCout|Effet|Valeur|Duree|Cible|Sprite|MotsCles
+## MotsCles (séparés par « ; ») : vol (soigne l'attaquant), perforation (excédent au héros),
+## provocation (cible forcée), regeneration (+2 PV/tour), initiative (pas de riposte).
 ## Cout = mana ; PA = actions (attaque/sort) ; PM = déplacement ; PO = portée d'attaque.
 ## Types : Creature (porte UN sort distinctif), Sort (carte jouée une fois), Jeton (invocation, jamais dans un deck).
 
@@ -42,6 +44,12 @@ static func _load() -> void:
 			"effet": String(row["Effet"]), "valeur": String(row["Valeur"]), "duree": int(row["Duree"]),
 			"cible": String(row["Cible"]), "sprite": String(row["Sprite"]),
 		}
+		var kws: Array = []
+		for k in String(row.get("MotsCles", "")).split(";"):
+			var kk: String = k.strip_edges()
+			if kk != "":
+				kws.append(kk)
+		card["keywords"] = kws
 		_cards[card["id"]] = card
 		_order.append(card["id"])
 

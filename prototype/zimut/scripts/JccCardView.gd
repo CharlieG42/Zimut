@@ -142,6 +142,10 @@ func _draw() -> void:
 			var sfs: int = int(clampf(w * 0.055, 14.0, 19.0))
 			draw_string(font, Vector2(0, y + sfs), sub, HORIZONTAL_ALIGNMENT_CENTER, w, sfs, rcol.lightened(0.15))
 			y += 18.0
+			var kwt: String = " · ".join(PackedStringArray(card.get("keywords", [])))
+			if kwt != "":
+				draw_string(font, Vector2(0, y + 14), kwt, HORIZONTAL_ALIGNMENT_CENTER, w, 15, Color(1.0, 0.85, 0.4))
+				y += 18.0
 			var body: String = ""
 			if is_spell:
 				body = JccCards.effect_text(card)
@@ -231,6 +235,15 @@ func _draw_board_body(w: float, h: float, font: Font, rcol: Color, is_spell: boo
 	draw_rect(art, rcol.darkened(0.35), false, 2.0)
 	var x0: float = art.end.x + 8.0
 	var has_sort: bool = String(card.get("sort", "")) != ""
+	# pastilles de mots-clés sur l'illustration
+	var kwc := {"vol": Color(0.90, 0.30, 0.30), "perforation": Color(1.0, 0.60, 0.20), "provocation": Color(0.50, 0.60, 0.90), "regeneration": Color(0.40, 0.90, 0.50), "initiative": Color(1.0, 0.85, 0.30)}
+	var kws: Array = card.get("keywords", [])
+	for i in kws.size():
+		var kw: String = String(kws[i])
+		var cc := Vector2(art.end.x - 10.0 - float(i) * 17.0, art.position.y + 10.0)
+		draw_circle(cc, 7.5, Color(0.05, 0.05, 0.08))
+		draw_arc(cc, 7.5, 0, TAU, 16, kwc.get(kw, Color(1, 1, 1)), 2.0)
+		draw_string(font, cc + Vector2(-4, 3), kw.substr(0, 1).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(1, 1, 1))
 	# nom
 	var name_txt: String = String(card.get("name", ""))
 	var nw: float = w - x0 - (40.0 if has_sort else 8.0)

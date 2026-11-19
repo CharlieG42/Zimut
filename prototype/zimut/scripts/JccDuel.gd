@@ -134,6 +134,7 @@ func _make_instance(id: String) -> Dictionary:
 	c["used"] = false
 	c["stun"] = 0
 	c["poison"] = []
+	c["keywords"] = (row.get("keywords", []) as Array).duplicate()
 	return c
 
 
@@ -222,6 +223,11 @@ func lane_of(s: int, c: Dictionary) -> int:
 	return xy_cell(int(c["x"]), int(c["y"]))
 
 
+## Vrai si la carte/unité porte le mot-clé (colonne MotsCles : "vol;provocation;...").
+func has_kw(cr: Dictionary, kw: String) -> bool:
+	return (cr.get("keywords", []) as Array).has(kw)
+
+
 ## Pose une unité directement sur la grille (tests / debug).
 func place_unit(s: int, id: String, x: int, y: int) -> Dictionary:
 	var c: Dictionary = _make_instance(id)
@@ -273,6 +279,8 @@ func start_turn(s: int) -> void:
 			cr["pm"] = 0
 			cr["frozen"] = true
 			cr["stun"] = int(cr["stun"]) - 1
+		if has_kw(cr, "regeneration") and int(cr["hp"]) < int(cr["max_hp"]):
+			_heal(s, lane_of(s, cr), 2)
 	# poison
 	for c: Variant in creatures(s):
 		var cr2: Dictionary = c
@@ -515,6 +523,16 @@ func attack_targets(s: int, cell: int) -> Array:
 			out.append({"side": foe, "lane": fl})
 	if hero_dist_to(s, cell) <= po:
 		out.append({"side": foe, "lane": -1})
+	# provocation : si une unité ennemie à portée a provocation, seules les provocation sont ciblables
+	var provs: Array = []
+	for e: Variant in out:
+		var ed: Dictionary = e
+		if int(ed["lane"]) >= 0:
+			var uc: Variant = creature_at(foe, int(ed["lane"]))
+			if uc != null and has_kw(uc as Dictionary, "provocation"):
+				provs.append(ed)
+	if not provs.is_empty():
+		return provs
 	return out
 
 
@@ -560,12 +578,22 @@ func attack(s: int, lane: int, target: Dictionary = {}) -> bool:
 	var foe: int = other(s)
 	_ev("attack", s, lane, 0, {"hero": int(t["lane"]) == -1})
 	if int(t["lane"]) == -1:
+		var hhp: int = int(sides[foe]["hero_hp"])
 		_hit(foe, -1, int(cr["atk"]), "attack")
+		if has_kw(cr, "vol"):
+			_heal(s, lane, mini(int(cr["atk"]), hhp))
 		log.append("%s frappe le héros de %s (%d)" % [cr["name"], _nm(foe), int(cr["atk"])])
 	else:
 		var b: Dictionary = creature_at(foe, int(t["lane"]))
+		var hp_b: int = int(b["hp"])
 		_hit(foe, int(t["lane"]), int(cr["atk"]), "attack")
-		if not is_over() and creature_at(s, lane) != null:
+		var dealt: int = mini(int(cr["atk"]), hp_b)
+		if has_kw(cr, "vol") and dealt > 0:
+			_heal(s, lane, dealt)   # vol : l'attaquant se soigne des dégâts infligés
+		if has_kw(cr, "perforation") and int(cr["atk"]) > hp_b:
+			_hit(foe, -1, int(cr["atk"]) - hp_b, "attack")   # perforation : l'excédent touche le héros
+		# riposte seulement si la cible survit ; initiative = jamais de riposte
+		if not is_over() and creature_at(s, lane) != null and creature_at(foe, int(t["lane"])) != null and not has_kw(cr, "initiative"):
 			_hit(s, lane, int(b["atk"]), "attack")
 		log.append("%s attaque %s" % [cr["name"], b["name"]])
 	return true

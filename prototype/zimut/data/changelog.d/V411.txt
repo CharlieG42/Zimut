@@ -1,0 +1,3 @@
+V411|Mode Cartes : 5 nouveaux mots-clés sur les cartes — vol (se soigne des dégâts infligés), perforation (l'excédent touche le héros), provocation (cible forcée), régénération (+2 PV par tour), initiative (pas de riposte).
+V411|5 nouvelles cartes les utilisent : Vampire (vol), Bélier (perforation), Chevalier (provocation), Moine (régénération), Samouraï (initiative). Les mots-clés sont lisibles sur chaque carte (ligne dorée / pastilles colorées).
+V411|Correctif : une créature tuée par une attaque ne riposte plus.

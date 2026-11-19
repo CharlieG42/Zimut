@@ -159,6 +159,56 @@ func _boot() -> void:
 	t.creature_at(0, 22)["hp"] = 1
 	t._hit(0, 22, 5)
 	check(t.creature_at(0, 22) == null and t.side(0)["fosse"].size() == fo, "un jeton mort disparaît (pas de fosse)")
+	print("Mots-clés (vol, perforation, provocation, régénération, initiative) :")
+	check("vol" in CC.get_card("m_vampire")["keywords"] and "perforation" in CC.get_card("m_belier")["keywords"], "mots-clés parsés depuis cartes_jcc.txt")
+	var kw = DD.new()
+	kw.setup(["m_gobelin"], ["m_gobelin"], 77, ["Mage", "boss"])
+	kw.terrain = []
+	for i in JccDuel.LANES:
+		kw.terrain.append("")
+	# vol : le vampire se soigne des dégâts infligés ; une cible morte ne riposte pas
+	var va: Dictionary = kw.place_unit(0, "m_vampire", 1, 5)   # case 21, atq 3
+	va["hp"] = 1
+	var dl: Dictionary = kw.place_unit(1, "m_loup", 1, 4)       # case 17, hp 2
+	dl["hp"] = 2
+	check(kw.attack(0, 21, {"side": 1, "lane": 17}), "le Vampire attaque le Loup")
+	check(int(va["hp"]) == 3, "vol : le Vampire se soigne (1 -> 3)")
+	check(kw.creature_at(1, 17) == null, "le Loup (2 PV) meurt : pas de riposte sur un mort")
+	# perforation : l'excédent passe au héros adverse
+	var be: Dictionary = kw.place_unit(0, "m_belier", 0, 5)     # case 20, atq 4
+	var dl2: Dictionary = kw.place_unit(1, "m_loup", 0, 4)      # case 16, hp 2
+	dl2["hp"] = 2
+	check(kw.attack(0, 20, {"side": 1, "lane": 16}), "le Bélier attaque le Loup")
+	check(kw.side(1)["hero_hp"] == 28, "perforation : 4 - 2 = 2 dégâts excédentaires au héros (30 -> 28)")
+	# provocation : seule la case avec provocation est ciblable, l'attaque est redirigée
+	var gb: Dictionary = kw.place_unit(0, "m_gobelin", 2, 5)    # case 22, PO 1
+	var ch2: Dictionary = kw.place_unit(1, "c_chevalier", 2, 4) # case 18, provocation, hp 8
+	kw.place_unit(1, "m_gobelin", 3, 4)                          # case 19, sans provocation
+	var atp: Array = kw.attack_targets(0, 22)
+	check(atp.size() == 1 and int((atp[0] as Dictionary)["lane"]) == 18, "provocation : seule la case 18 est ciblable")
+	kw.attack(0, 22, {"side": 1, "lane": 19})
+	check(int(ch2["hp"]) == 6 and kw.creature_at(1, 19) != null, "provocation : l'attaque est redirigée sur le Chevalier")
+	# régénération : +2 PV au début du tour de son camp
+	var mo: Dictionary = kw.place_unit(0, "m_moine", 0, 3)      # case 12, hp 5 max
+	mo["hp"] = 2
+	kw.end_turn(0)
+	kw.end_turn(1)
+	check(int(mo["hp"]) == 4, "régénération : +2 PV au début du tour (2 -> 4)")
+	# initiative : jamais de riposte
+	var iw = DD.new()
+	iw.setup(["m_gobelin"], ["m_gobelin"], 78)
+	iw.terrain = []
+	for i in JccDuel.LANES:
+		iw.terrain.append("")
+	var sa2: Dictionary = iw.place_unit(0, "c_samourai", 1, 5)  # case 21, atq 3, initiative
+	sa2["hp"] = 2
+	var tr2: Dictionary = iw.place_unit(1, "m_troll", 1, 4)     # case 17, atq 4 hp 6
+	check(iw.attack(0, 21, {"side": 1, "lane": 17}), "le Samouraï attaque le Troll")
+	check(iw.creature_at(0, 21) != null and int(sa2["hp"]) == 2 and int(tr2["hp"]) == 3, "initiative : aucune riposte (PV attaquant inchangés, Troll 6 -> 3)")
+	var gb2: Dictionary = iw.place_unit(0, "m_gobelin", 0, 5)   # case 20, atq 2 hp 1
+	iw.place_unit(1, "m_troll", 0, 4)                           # case 16, atk 4 hp 6
+	check(iw.attack(0, 20, {"side": 1, "lane": 16}), "le Gobelin attaque le Troll")
+	check(iw.creature_at(0, 20) == null, "sans initiative : la riposte tue le Gobelin (1 PV)")
 	print("Terrain / pouvoir de héros / mulligan :")
 	var tg = DD.new()
 	tg.setup(["m_gobelin"], ["m_gobelin"], 42, ["Mage", "boss"])
