@@ -1,0 +1,3 @@
+V419|Cartes : correction du plantage au toucher d un pouvoir de héros qui demande une cible (Tir précis, Frappe sournoise, Bombe, Appel de la meute).
+V419|Cartes : l aperçu des cibles d un pouvoir de héros lit désormais le pouvoir au lieu d une créature inexistante.
+V419|Cartes : nouveau test automatique qui joue chaque pouvoir à cible via l interface.
