@@ -44,12 +44,56 @@ var _log_lbl: Label
 var _end_btn: Button
 var _mana_node: Control
 var _pile_lbl: Label
+var _fx_draw: Control = null
+var _atk_from: Vector2 = Vector2.ZERO
+var _atk_pending: bool = false
 # duel — sélection
 var _sel_hand: int = -1
 var _sel_cell: int = -1   # case de l'unité sélectionnée (index y * COLS + x)
 var _pending: Dictionary = {}        # ciblage en cours : {kind, idx|lane, cible}
 var _targets: Array = []
 var _inspect: Dictionary = {}
+
+
+## StyleBox avec ombre portee (encarts du duel).
+func _panel_sb(bg: Color, border: Color, radius: int = 14, bw: int = 2, shadow: int = 8) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = bg
+	sb.border_color = border
+	sb.set_border_width_all(bw)
+	sb.set_corner_radius_all(radius)
+	sb.shadow_color = Color(0, 0, 0, 0.5)
+	sb.shadow_size = shadow
+	sb.shadow_offset = Vector2(0, 4)
+	return sb
+
+
+## Bouton avec ombre et etats en relief (fin de tour, fosses, abandon).
+func _fancy_btn(b: Button, col: Color, radius: int = 14) -> void:
+	b.add_theme_stylebox_override("normal", _panel_sb(col.darkened(0.35), col.lightened(0.15), radius, 3, 8))
+	b.add_theme_stylebox_override("hover", _panel_sb(col.darkened(0.12), col.lightened(0.45), radius, 3, 10))
+	b.add_theme_stylebox_override("pressed", _panel_sb(col.darkened(0.55), col.lightened(0.3), radius, 3, 3))
+	b.add_theme_stylebox_override("disabled", _panel_sb(Color(0.13, 0.15, 0.2), Color(0.25, 0.28, 0.36), radius, 2, 0))
+
+
+func _fx_orb(a: Vector2, b: Vector2, col: Color) -> void:
+	if _fx_draw != null and is_instance_valid(_fx_draw):
+		_fx_draw.orb(a, b, col)
+
+
+func _fx_burst(c: Vector2, col: Color, r0: float = 22.0) -> void:
+	if _fx_draw != null and is_instance_valid(_fx_draw):
+		_fx_draw.burst(c, col, r0)
+
+
+func _shake_node(n: Node) -> void:
+	if n == null or not is_instance_valid(n):
+		return
+	var p0: Vector2 = (n as Control).position
+	var tw: Tween = create_tween()
+	tw.tween_property(n, "position", p0 + Vector2(8, 0), 0.04)
+	tw.tween_property(n, "position", p0 - Vector2(8, 0), 0.07)
+	tw.tween_property(n, "position", p0, 0.04)
 
 
 func _ready() -> void:
@@ -269,6 +313,7 @@ func _build_duel_ui() -> void:
 	biome_bg.biome = _biome
 	biome_bg.seedv = _opp_idx * 7919 + 13
 	biome_bg.board = BOARD
+	biome_bg.towers = [_tower_art(0), _tower_art(1)]
 	_root.add_child(biome_bg)
 	_board_anchor = Control.new()
 	_board_anchor.position = BOARD.position
@@ -295,6 +340,13 @@ func _build_duel_ui() -> void:
 				_on_slot(cell))
 		_root.add_child(p)
 		_slots["%d" % cell] = p
+	# socle de la main
+	var tray := Panel.new()
+	tray.position = Vector2(HAND_X0 - 36.0, HAND_Y - 20.0)
+	tray.size = Vector2(HAND_X1 - HAND_X0 + 72.0, HAND_CARD.y + 44.0)
+	tray.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tray.add_theme_stylebox_override("panel", _panel_sb(Color(0.05, 0.07, 0.11, 0.85), Color(0.35, 0.42, 0.58), 18, 2, 10))
+	_root.add_child(tray)
 	_cards_layer = Control.new()
 	_cards_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_cards_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -302,10 +354,10 @@ func _build_duel_ui() -> void:
 	# héros
 	_hero_nodes[1] = _make_hero_panel(1, Rect2(700, 8, 520, 104))
 	_hero_nodes[0] = _make_hero_panel(0, Rect2(30, 690, 340, 360))
-	# colonne gauche : fiche de carte
+	# colonne gauche : fiche de carte (grande vignette)
 	_info_holder = Control.new()
-	_info_holder.position = Vector2(60, 128)
-	_info_holder.size = Vector2(300, 430)
+	_info_holder.position = Vector2(28, 118)
+	_info_holder.size = Vector2(360, 520)
 	_root.add_child(_info_holder)
 	# barre d'actions (créature sélectionnée)
 	_action_bar = HBoxContainer.new()
@@ -315,31 +367,42 @@ func _build_duel_ui() -> void:
 	_action_bar.add_theme_constant_override("separation", 14)
 	_root.add_child(_action_bar)
 	# colonne droite : journal, pioche, fin de tour
+	var logt: Label = UiKit.lbl("Journal", 24, UiKit.C_GOLD, true)
+	logt.position = Vector2(1562, 96)
+	_root.add_child(logt)
 	var logp := PanelContainer.new()
 	logp.position = Vector2(1560, 126)
 	logp.size = Vector2(330, 250)
 	logp.clip_contents = true
-	logp.add_theme_stylebox_override("panel", UiKit.box(Color(0, 0, 0, 0.35), UiKit.C_BORDER, 12, 2, 10))
+	logp.add_theme_stylebox_override("panel", _panel_sb(Color(0, 0, 0, 0.38), Color(0.42, 0.48, 0.62), 14, 2, 10))
 	_root.add_child(logp)
 	_log_lbl = UiKit.lbl("", 22, UiKit.C_TXT)
 	_log_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_log_lbl.custom_minimum_size = Vector2(300, 0)
 	_log_lbl.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 	logp.add_child(_log_lbl)
-	_end_btn = UiKit.btn("Fin du tour", Color(0.95, 0.75, 0.25), 30, Vector2(330, 96))
+	_end_btn = UiKit.btn("Fin du tour", Color(0.98, 0.80, 0.30), 32, Vector2(330, 104))
 	_end_btn.position = Vector2(1560, 440)
+	_fancy_btn(_end_btn, Color(0.98, 0.80, 0.30), 16)
+	_end_btn.add_theme_color_override("font_color", Color(0.16, 0.11, 0.04))
+	_end_btn.add_theme_color_override("font_hover_color", Color(0.10, 0.07, 0.02))
+	_end_btn.add_theme_color_override("font_pressed_color", Color(0.28, 0.20, 0.07))
+	_end_btn.add_theme_color_override("font_disabled_color", Color(0.45, 0.44, 0.42))
 	_end_btn.pressed.connect(_on_end_turn)
 	_root.add_child(_end_btn)
 	var quit: Button = UiKit.btn("Abandonner", Color(0.8, 0.45, 0.4), 20, Vector2(200, 48))
 	quit.position = Vector2(30, 14)
+	_fancy_btn(quit, Color(0.8, 0.45, 0.4))
 	quit.pressed.connect(_on_quit_duel)
 	_root.add_child(quit)
 	var fo: Button = UiKit.btn("Fosse adverse", Color(0.55, 0.5, 0.7), 18, Vector2(190, 44))
-	fo.position = Vector2(1560, 392)
+	fo.position = Vector2(1560, 384)
+	_fancy_btn(fo, Color(0.55, 0.5, 0.7))
 	fo.pressed.connect(func() -> void: _show_fosse(1))
 	_root.add_child(fo)
 	var fp: Button = UiKit.btn("Votre fosse", Color(0.55, 0.5, 0.7), 20, Vector2(190, 52))
 	fp.position = Vector2(1560, 990)
+	_fancy_btn(fp, Color(0.55, 0.5, 0.7))
 	fp.pressed.connect(func() -> void: _show_fosse(0))
 	_root.add_child(fp)
 	_pile_lbl = UiKit.lbl("", 24, UiKit.C_TXT, true)
@@ -349,7 +412,9 @@ func _build_duel_ui() -> void:
 	_fx_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_fx_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_fx_layer)
-	_toast = UiKit.lbl("", 28, UiKit.C_GOLD, true)
+	_fx_draw = _FxDraw.new()
+	_fx_layer.add_child(_fx_draw)
+	_toast = UiKit.lbl("", 32, UiKit.C_GOLD, true)
 	_toast.position = Vector2(420, BOARD.end.y + 6.0)
 	_toast.size = Vector2(1100, 46)
 	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -443,6 +508,15 @@ func _hero_name(side: int) -> String:
 	return String(_opp.get("name", "Adversaire")) if side == 1 else "Vous"
 
 
+## Portrait du héros pour la fenêtre de sa tour (dictionnaire {tex, reg} ou vide).
+func _tower_art(side: int) -> Dictionary:
+	var sprite: String = _hero_sprite(side)
+	var tex: Texture2D = JccCardView.art_texture(sprite)
+	if tex == null:
+		return {}
+	return {"tex": tex, "reg": JccCardView.art_region(tex, sprite)}
+
+
 func _make_hero_panel(side: int, r: Rect2) -> Control:
 	var p := Control.new()
 	p.position = r.position
@@ -462,12 +536,8 @@ func _refresh_hero(side: int) -> void:
 	var hot: bool = _is_target(side, -1)
 	var panel := Panel.new()
 	panel.size = p.size
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.07, 0.09, 0.14, 0.92)
-	sb.border_color = Color(1.0, 0.85, 0.2) if hot else (Color(0.95, 0.45, 0.4) if side == 1 else Color(0.45, 0.75, 1.0))
-	sb.set_border_width_all(5 if hot else 3)
-	sb.set_corner_radius_all(16)
-	panel.add_theme_stylebox_override("panel", sb)
+	var bcol: Color = Color(1.0, 0.85, 0.2) if hot else (Color(0.95, 0.45, 0.4) if side == 1 else Color(0.45, 0.75, 1.0))
+	panel.add_theme_stylebox_override("panel", _panel_sb(Color(0.07, 0.09, 0.14, 0.95), bcol, 16, 5 if hot else 3, 10))
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	p.add_child(panel)
 	var tex: Texture2D = JccCardView.art_texture(_hero_sprite(side))
@@ -494,22 +564,22 @@ func _refresh_hero(side: int) -> void:
 		portrait.add_child(tr)
 	var hp: int = int(sd["hero_hp"])
 	if side == 1:
-		var nm: Label = UiKit.lbl(_hero_name(side), 26, UiKit.C_TXT, true)
-		nm.position = Vector2(110, 6)
+		var nm: Label = UiKit.lbl(_hero_name(side), 30, UiKit.C_TXT, true)
+		nm.position = Vector2(110, 4)
 		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		p.add_child(nm)
-		var info: Label = UiKit.lbl("Main : %d   Pioche : %d   Mana : %d/%d" % [(sd["hand"] as Array).size(), (sd["deck"] as Array).size(), int(sd["mana"]), int(sd["mana_max"])], 19, UiKit.C_DIM)
-		info.position = Vector2(110, 50)
+		var info: Label = UiKit.lbl("Main : %d   Pioche : %d   Mana : %d/%d" % [(sd["hand"] as Array).size(), (sd["deck"] as Array).size(), int(sd["mana"]), int(sd["mana_max"])], 21, UiKit.C_DIM)
+		info.position = Vector2(110, 52)
 		info.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		p.add_child(info)
 		_hp_gem(p, Vector2(p.size.x - 56, 52), 36, hp)
 	else:
-		var nm2: Label = UiKit.lbl("Vous", 30, UiKit.C_TXT, true)
-		nm2.position = Vector2(170, 104)
+		var nm2: Label = UiKit.lbl("Vous", 34, UiKit.C_TXT, true)
+		nm2.position = Vector2(170, 100)
 		nm2.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		p.add_child(nm2)
 		_hp_gem(p, Vector2(p.size.x - 62, 62), 44, hp)
-		var ml: Label = UiKit.lbl("MANA  %d / %d" % [int(sd["mana"]), int(sd["mana_max"])], 28, Color(0.6, 0.85, 1.0), true)
+		var ml: Label = UiKit.lbl("MANA  %d / %d" % [int(sd["mana"]), int(sd["mana_max"])], 30, Color(0.6, 0.85, 1.0), true)
 		ml.position = Vector2(24, 170)
 		ml.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		p.add_child(ml)
@@ -735,6 +805,11 @@ func _refresh_hand() -> void:
 func _refresh_info() -> void:
 	for c: Node in _info_holder.get_children():
 		c.queue_free()
+	var bg := Panel.new()
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bg.add_theme_stylebox_override("panel", _panel_sb(Color(0.06, 0.08, 0.13, 0.92), Color(0.42, 0.50, 0.66), 18, 3, 10))
+	_info_holder.add_child(bg)
 	var card: Dictionary = {}
 	if _sel_hand >= 0 and _sel_hand < (_duel.side(0)["hand"] as Array).size():
 		card = (_duel.side(0)["hand"] as Array)[_sel_hand]
@@ -743,13 +818,15 @@ func _refresh_info() -> void:
 	elif not _inspect.is_empty():
 		card = _inspect
 	if card.is_empty():
-		var hint: Label = UiKit.lbl("Touchez une carte pour la voir en grand.\n\nUne créature attaque à portée PO (1 PA) et se déplace case par case (1 PM par case).", 20, UiKit.C_DIM)
+		var hint: Label = UiKit.lbl("Touchez une carte pour la voir en grand.\n\nUne créature attaque à portée PO (1 PA) et se déplace case par case (1 PM par case).", 22, UiKit.C_DIM)
 		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		hint.custom_minimum_size = Vector2(290, 0)
+		hint.custom_minimum_size = Vector2(330, 0)
+		hint.position = Vector2(10, 12)
 		_info_holder.add_child(hint)
 		return
 	var v := JccCardView.new()
-	v.size = Vector2(300, 430)
+	v.size = Vector2(_info_holder.size.x - 16.0, _info_holder.size.y - 16.0)
+	v.position = Vector2(8, 8)
 	v.set_card(card)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_info_holder.add_child(v)
@@ -1010,6 +1087,7 @@ func _do_attack_target(cell: int, t: Dictionary) -> void:
 		return
 	_busy = true
 	await _lunge(0, cell)
+	await get_tree().create_timer(0.18).timeout
 	if _duel.attack(0, cell, t):
 		_sel_cell = -1
 		await _after_action("")
@@ -1063,12 +1141,22 @@ func _show_event(e: Dictionary) -> void:
 	var n: int = int(e["n"])
 	var c: Vector2 = _node_center(side, lane)
 	match String(e["k"]):
+		"attack":
+			_atk_from = c
+			_atk_pending = true
 		"dmg":
 			_float("-%d" % n, c, Color(1.0, 0.35, 0.3))
 			_shake("%d:%d" % [side, lane])
+			_fx_burst(c, Color(1.0, 0.45, 0.3), 26.0)
+			if _atk_pending:
+				_fx_orb(_atk_from, c, Color(1.0, 0.8, 0.35))
+				_atk_pending = false
+			if lane < 0:
+				_shake_node(_hero_nodes[side])
 		"heal":
 			if n > 0:
 				_float("+%d" % n, c, Color(0.4, 1.0, 0.5))
+				_fx_burst(c, Color(0.45, 1.0, 0.55), 20.0)
 		"buff":
 			_float("+%d" % n, c, Color(1.0, 0.85, 0.3))
 		"stun":
@@ -1077,7 +1165,9 @@ func _show_event(e: Dictionary) -> void:
 			_float("poison", c, Color(0.6, 1.0, 0.4))
 		"die":
 			_float("✖", c, Color(0.9, 0.9, 0.9))
+			_fx_burst(c, Color(0.8, 0.8, 0.85), 30.0)
 		"summon":
+			_fx_burst(c, Color(0.6, 1.0, 0.6), 24.0)
 			var v: JccCardView = _board_views.get("%d:%d" % [side, lane])
 			if v != null:
 				var tsc: Vector2 = v.scale
@@ -1094,6 +1184,10 @@ func _show_event(e: Dictionary) -> void:
 		"burn":
 			_float("Main pleine : %s brûlée" % String(e.get("name", "")), Vector2(960, 700), Color(1.0, 0.6, 0.4))
 		"cast":
+			var cc: Vector2 = c
+			if lane < 0:
+				cc = Vector2(960, HAND_Y + 120.0) if side == 0 else _node_center(side, -1)
+			_fx_burst(cc, Color(0.75, 0.5, 1.0), 30.0)
 			if side == 1:
 				_toast_msg("L'adversaire : %s" % String(e["name"]))
 
@@ -1142,11 +1236,18 @@ func _run_enemy_turn() -> void:
 	var guard: int = 0
 	while not _duel.is_over() and _duel.current == 1 and guard < 40:
 		guard += 1
+		var ev0: int = (_duel.events as Array).size()
 		var act: Dictionary = _duel.ai_step(1)
 		if String(act["type"]) == "end":
 			break
 		if String(act["type"]) == "attack":
 			await _lunge(1, int(act["lane"]))
+			var from: Vector2 = _node_center(1, int(act["lane"]))
+			for e2: Variant in (_duel.events as Array).slice(ev0):
+				var ed: Dictionary = e2
+				if String(ed["k"]) == "dmg":
+					_fx_orb(from, _node_center(int(ed["side"]), int(ed["lane"])), Color(1.0, 0.6, 0.3))
+					break
 		await _after_action("")
 		await get_tree().create_timer(0.25).timeout
 	if not _duel.is_over():
@@ -1231,7 +1332,7 @@ func _show_fosse(side: int) -> void:
 	ov.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.add_child(ov)
 	var fosse: Array = _duel.side(side)["fosse"]
-	var t: Label = UiKit.lbl("%s — %d carte%s" % ["Votre fosse" if side == 0 else "Fosse adverse", fosse.size(), "s" if fosse.size() > 1 else ""], 40, UiKit.C_GOLD, true)
+	var t: Label = UiKit.lbl("%s — %d carte%s" % ["Votre fosse" if side == 0 else "Fosse adverse", fosse.size(), "s" if fosse.size() > 1 else ""], 44, UiKit.C_GOLD, true)
 	t.position = Vector2(60, 30)
 	ov.add_child(t)
 	var sc := ScrollContainer.new()
@@ -1271,7 +1372,7 @@ func _confirm(msg: String, yes: Callable) -> void:
 	var panel := PanelContainer.new()
 	panel.position = Vector2(W * 0.5 - 380, 380)
 	panel.size = Vector2(760, 260)
-	panel.add_theme_stylebox_override("panel", UiKit.box(UiKit.C_PANEL, UiKit.C_BORDER, 16, 3, 24))
+	panel.add_theme_stylebox_override("panel", _panel_sb(UiKit.C_PANEL, Color(0.85, 0.70, 0.30), 16, 3, 12))
 	ov.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 24)
@@ -1301,6 +1402,7 @@ class _BiomeBG extends Control:
 	var board: Rect2 = Rect2(400, 116, 1120, 576)
 	var iso: bool = false
 	var polys: Array = []
+	var towers: Array = []   # [{tex, reg}] pour side 0 (vous) et side 1 (ennemi)
 	# [ciel haut, ciel bas / sol sombre, végétation, tronc/roche, sol clair]
 	const PALETTES := {
 		"Forêt": [Color(0.10, 0.22, 0.14), Color(0.05, 0.12, 0.08), Color(0.16, 0.34, 0.18), Color(0.45, 0.30, 0.18), Color(0.20, 0.36, 0.20)],
@@ -1346,6 +1448,7 @@ class _BiomeBG extends Control:
 				continue
 			_prop(pal, pt, s, kind, dark)
 		_draw_board(pal)
+		_draw_towers()
 		# vignette
 		for i in 14:
 			var a: float = 0.30 * (1.0 - float(i) / 14.0)
@@ -1445,6 +1548,18 @@ class _BiomeBG extends Control:
 	func _draw_board(pal: Array) -> void:
 		var edge: Color = Color(1.0, 0.9, 0.6, 0.30)
 		if not iso:
+			# dalle épaisse : ombre portée, face avant et côtés en relief
+			var tl := board.position
+			var tr := Vector2(board.end.x, board.position.y)
+			var bl := Vector2(board.position.x, board.end.y)
+			var br := board.end
+			var th: float = 18.0
+			draw_rect(Rect2(tl + Vector2(12, th + 8), board.size), Color(0, 0, 0, 0.28))
+			draw_colored_polygon(PackedVector2Array([bl, br, br + Vector2(0, th), bl + Vector2(0, th)]), (pal[3] as Color).darkened(0.50))
+			draw_colored_polygon(PackedVector2Array([tl, bl, bl + Vector2(0, th), tl + Vector2(-6, th - 6)]), (pal[3] as Color).darkened(0.62))
+			draw_colored_polygon(PackedVector2Array([tr, br, br + Vector2(0, th), tr + Vector2(6, th - 6)]), (pal[3] as Color).darkened(0.72))
+			for cp in [tl, tr, bl, br]:
+				draw_rect(Rect2(cp + Vector2(-4, -2), Vector2(8, th + 10)), (pal[3] as Color).darkened(0.35))
 			draw_rect(board, Color(0, 0, 0, 0.10))
 			for gi in polys.size():
 				var pl: PackedVector2Array = polys[gi]
@@ -1465,9 +1580,14 @@ class _BiomeBG extends Control:
 		var tr: Vector2 = (polys[3] as PackedVector2Array)[1]
 		var br: Vector2 = (polys[23] as PackedVector2Array)[2]
 		var bl: Vector2 = (polys[20] as PackedVector2Array)[3]
-		var slab := PackedVector2Array([bl, br, br + Vector2(0, 22), bl + Vector2(0, 22)])
-		draw_colored_polygon(slab, (pal[3] as Color).darkened(0.45))
-		draw_colored_polygon(PackedVector2Array([tl + Vector2(-8, -6), tr + Vector2(8, -6), br + Vector2(10, 4), bl + Vector2(-10, 4)]), Color(0, 0, 0, 0.28))
+		var th: float = 26.0
+		draw_colored_polygon(PackedVector2Array([bl + Vector2(12, th + 10), br + Vector2(12, th + 10), br, bl]), Color(0, 0, 0, 0.30))
+		draw_colored_polygon(PackedVector2Array([bl, br, br + Vector2(0, th), bl + Vector2(0, th)]), (pal[3] as Color).darkened(0.50))
+		draw_colored_polygon(PackedVector2Array([tl, bl, bl + Vector2(0, th), tl + Vector2(-7, th - 7)]), (pal[3] as Color).darkened(0.62))
+		draw_colored_polygon(PackedVector2Array([tr, br, br + Vector2(0, th), tr + Vector2(7, th - 7)]), (pal[3] as Color).darkened(0.72))
+		# poteaux aux 4 coins
+		for cp in [tl, tr, bl, br]:
+			draw_colored_polygon(PackedVector2Array([cp + Vector2(-4, -4), cp + Vector2(4, -4), cp + Vector2(4, th + 4), cp + Vector2(-4, th + 4)]), (pal[3] as Color).darkened(0.30))
 		for gi in polys.size():
 			var pl2: PackedVector2Array = polys[gi]
 			var gy: int = gi / JccDuel.COLS
@@ -1480,6 +1600,128 @@ class _BiomeBG extends Control:
 		var m0: Vector2 = (polys[8] as PackedVector2Array)[3]
 		var m1: Vector2 = (polys[11] as PackedVector2Array)[2]
 		draw_line(m0, m1, Color(1, 1, 1, 0.12), 3.0)
+
+	## Deux tours symbolisent les héros : ennemi derrière le haut du plateau, vous en bas.
+	func _draw_towers() -> void:
+		if towers.size() < 2 or polys.size() < 24:
+			return
+		var top_base: Vector2
+		var bot_base: Vector2
+		if not iso:
+			top_base = Vector2(board.position.x + 96.0, board.position.y)
+			bot_base = Vector2(board.end.x - 110.0, board.end.y + 18.0 + 100.0)
+		else:
+			var tl: Vector2 = (polys[0] as PackedVector2Array)[0]
+			var tr: Vector2 = (polys[3] as PackedVector2Array)[1]
+			var bl: Vector2 = (polys[20] as PackedVector2Array)[3]
+			var br: Vector2 = (polys[23] as PackedVector2Array)[2]
+			top_base = (tl + tr) * 0.5 + Vector2(-340.0, -2.0)
+			bot_base = (bl + br) * 0.5 + Vector2(150.0, 26.0 + 100.0)
+		_draw_tower(top_base, 1, towers[1] as Dictionary, 76.0)
+		_draw_tower(bot_base, 0, towers[0] as Dictionary, 100.0)
+
+	## Tour crénelée avec girouette du camp et portrait du héros dans la fenêtre ronde.
+	func _draw_tower(base: Vector2, side: int, art: Dictionary, th: float = 100.0) -> void:
+		var w: float = 84.0
+		var h: float = th
+		var x: float = base.x - w * 0.5
+		var y: float = base.y - h
+		var stone: Color = Color(0.52, 0.50, 0.48) if side == 0 else Color(0.56, 0.42, 0.40)
+		var stone_d: Color = stone.darkened(0.35)
+		# ombre au sol
+		var pts := PackedVector2Array()
+		for i in 16:
+			var a: float = float(i) / 16.0 * TAU
+			pts.append(Vector2(base.x, base.y + 6.0) + Vector2(cos(a) * w * 0.62, sin(a) * 9.0))
+		draw_colored_polygon(pts, Color(0, 0, 0, 0.30))
+		# corps + pierres
+		draw_rect(Rect2(x, y, w, h), stone_d)
+		draw_rect(Rect2(x + 4, y + 4, w - 8, h - 4), stone)
+		for ly in range(1, 6):
+			draw_line(Vector2(x + 4, y + float(ly) * h / 6.0), Vector2(x + w - 4, y + float(ly) * h / 6.0), stone_d.darkened(0.15), 2.0)
+			var off: float = 14.0 if ly % 2 == 0 else 34.0
+			draw_line(Vector2(x + off, y + float(ly - 1) * h / 6.0), Vector2(x + off, y + float(ly) * h / 6.0), stone_d.darkened(0.15), 2.0)
+		# créneaux
+		for i in 4:
+			draw_rect(Rect2(x + float(i) * w / 4.0 + 3.0, y - 12.0, w / 4.0 - 10.0, 16.0), stone_d)
+		# girouette aux couleurs du camp
+		var flag_col: Color = Color(0.40, 0.70, 1.0) if side == 0 else Color(1.0, 0.40, 0.35)
+		var pole_top := Vector2(base.x, y - 38.0)
+		draw_line(Vector2(base.x, y - 12.0), pole_top, Color(0.25, 0.20, 0.15), 4.0)
+		var flag := PackedVector2Array([pole_top, pole_top + Vector2(30.0, 8.0), pole_top + Vector2(0, 17.0)])
+		draw_colored_polygon(flag, flag_col)
+		draw_polyline(flag + PackedVector2Array([pole_top]), flag_col.darkened(0.3), 2.0)
+		# fenêtre ronde avec le portrait du héros
+		var wc := Vector2(base.x, y + 36.0)
+		var wr: float = 26.0
+		draw_circle(wc, wr + 4.0, Color(0.85, 0.70, 0.30))
+		draw_circle(wc, wr, Color(0.05, 0.06, 0.09))
+		if not art.is_empty():
+			var tex: Texture2D = art["tex"]
+			var reg: Rect2 = art["reg"]
+			var k: float = minf((wr * 2.0 - 6.0) / reg.size.x, (wr * 2.0 - 6.0) / reg.size.y)
+			var dsz: Vector2 = reg.size * k
+			draw_texture_rect_region(tex, Rect2(wc - dsz * 0.5, dsz), reg)
+		else:
+			draw_circle(wc, wr * 0.5, flag_col)
+		# porte arquée
+		var door := PackedVector2Array([Vector2(base.x - 12, base.y), Vector2(base.x - 12, base.y - 26), Vector2(base.x, base.y - 36), Vector2(base.x + 12, base.y - 26), Vector2(base.x + 12, base.y)])
+		draw_colored_polygon(door, Color(0.10, 0.08, 0.06))
+
+
+## Couche d'effets animés en vectoriel : projectiles d'attaque et gerbes d'impact.
+class _FxDraw extends Control:
+	var items: Array = []
+
+	func _ready() -> void:
+		set_anchors_preset(Control.PRESET_FULL_RECT)
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		set_process(true)
+
+	func orb(a: Vector2, b: Vector2, col: Color, dur: float = 0.22) -> void:
+		items.append({"kind": "orb", "t": 0.0, "dur": dur, "a": a, "b": b, "col": col})
+
+	func burst(c: Vector2, col: Color, r0: float = 22.0, dur: float = 0.38) -> void:
+		items.append({"kind": "burst", "t": 0.0, "dur": dur, "c": c, "col": col, "r0": r0})
+
+	func _process(dt: float) -> void:
+		var alive: Array = []
+		for it: Variant in items:
+			var d: Dictionary = it
+			d["t"] = float(d["t"]) + dt
+			if float(d["t"]) < float(d["dur"]):
+				alive.append(it)
+		items = alive
+		queue_redraw()
+
+	func _pos(it: Dictionary, k: float) -> Vector2:
+		var a: Vector2 = it["a"]
+		var b: Vector2 = it["b"]
+		return a.lerp(b, k) + Vector2(0, -sin(k * PI) * 46.0)
+
+	func _draw() -> void:
+		for it: Variant in items:
+			var d: Dictionary = it
+			var k: float = float(d["t"]) / float(d["dur"])
+			if String(d["kind"]) == "orb":
+				var col: Color = d["col"]
+				var p: Vector2 = _pos(d, k)
+				var p2: Vector2 = _pos(d, maxf(0.0, k - 0.14))
+				draw_line(p2, p, Color(col.r, col.g, col.b, 0.45), 7.0, true)
+				draw_circle(p, 15.0 * (1.0 - k * 0.3), Color(col.r, col.g, col.b, 0.25))
+				draw_circle(p, 9.5 * (1.0 - k * 0.3), Color(col.r, col.g, col.b, 0.55))
+				draw_circle(p, 5.0, Color(1, 1, 1, 0.95))
+			else:
+				var c: Vector2 = d["c"]
+				var col2: Color = d["col"]
+				var r0: float = d["r0"]
+				var rr: float = r0 * (0.4 + 2.6 * k)
+				draw_arc(c, rr, 0, TAU, 32, Color(col2.r, col2.g, col2.b, 0.75 * (1.0 - k)), 5.0)
+				draw_circle(c, r0 * 0.9 * (1.0 - k), Color(1, 1, 1, 0.5 * (1.0 - k)))
+				for i in 8:
+					var an: float = float(i) * TAU / 8.0 + 0.4
+					var pd: Vector2 = c + Vector2(cos(an), sin(an)) * r0 * (0.5 + 2.4 * k)
+					draw_circle(pd, 4.5 * (1.0 - k) + 1.0, Color(col2.r, col2.g, col2.b, 0.85 * (1.0 - k)))
 
 
 ## Tutoriel Gultur du mode Cartes (affiché une seule fois).

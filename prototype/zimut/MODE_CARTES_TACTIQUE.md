@@ -231,3 +231,15 @@ Retour de test : « des sorts ne fonctionnaient pas alors que leur descriptif la
 - **Biomes** (`_BiomeBG`) : ciel dégradé, sol texturé, silhouettes d'horizon (pins, collines, dunes, pics enneigés, roseaux) et accessoires propres à chaque biome (arbres à étages, herbes et fleurs, cactus, rochers/neige, roseaux et mares) sur tout l'écran ; en iso, dalle épaisse, damier ombré en profondeur.
 - **Aides** : cases à portée PO en rouge et cases de déplacement (PM) en bleu quand une unité est sélectionnée ; aperçu au-dessus des cibles (attaque : `-ATQ` et `riposte -n` ; sorts : `-n`, `+n PV`, `+n ATQ`, `ZZ`, `poison n`) ; le journal indique aussi les déplacements ; polices agrandies.
 - Tests : `tests/test_jcc_iso.gd`.
+
+## 13. V407 — habillage visuel du duel (vignette, relief du plateau, tours, effets)
+
+Retour de test avec 2 screenshots (`Examples/Screenshot_2026111*`) : rendre le mode plus attrayant.
+
+- **Vignette carte** (`_info_holder` 360×520 + carte 344×504 encadrée) : polices du mode « full » relevées selon la largeur (`JccCardView.gd` : nom cap 30, corps 21 px si w≥300, sous-titre, ligne PA/PM/PO, gemmes mana/ATQ/PV proportionnelles).
+- **Plateau en relief** (`_BiomeBG._draw_board`) : dalle épaisse sous le plateau — mode plat : ombre + face avant + 2 côtés + poteaux aux 4 coins ; mode iso : ombre + 3 faces (épaisseur 26) + poteaux.
+- **Tours des héros** (`_BiomeBG._draw_towers/_draw_tower`) : une tour crénelée par camp (ennemi derrière le haut du plateau, vous en bas), girouette aux couleurs du camp (bleu/rouge) et **portrait du héros dans la fenêtre ronde**, porte arquée, ombre au sol. Positions calculées pour les 2 modes (plat et iso).
+- **Encarts et boutons** : helper `_panel_sb` (ombre portée + bordure) appliqué au journal (avec titre « Journal »), aux panneaux héros, à la fosse et à la confirmation ; `_fancy_btn` (4 états + ombre) pour **Fin du tour** (doré 32 px, 330×104), Abandonner, fosses ; socle (« tray ») sous la main ; toast en 32 px.
+- **Effets de combat** : nouvelle classe interne `_FxDraw` (couche vectorielle animée) — **projectile lumineux** en arc de l'attaquant vers la victime à chaque attaque (événement `attack` + `dmg`, joueur et IA), **gerbe d'impact** (anneau + 8 particules + flash) sur dégâts/mort/invocation/sort, soin vert, secousse du panneau héros quand il est touché (`_shake_node`), chiffres flottants existants conservés.
+
+Tests : `test_jcc.gd` et `test_jcc_ui.gd` toujours à 0 échec en headless. Maquettes de mise en page (plat + iso) vérifiées hors moteur.

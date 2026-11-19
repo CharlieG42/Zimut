@@ -1,0 +1,3 @@
+V407|Mode Cartes plus joli : vignette de la carte sélectionnée agrandie avec polices plus grosses, encarts et boutons en relief (Fin du tour doré avec ombre), socle sous la main.
+V407|Plateau en dalle épaisse avec relief sur les côtés et deux tours crénelées (une par camp) au portrait du héros et à la girouette bleue ou rouge.
+V407|Effets de combat : projectile lumineux à chaque attaque, gerbe d'impact sur les dégâts, secousse du héros touché.
