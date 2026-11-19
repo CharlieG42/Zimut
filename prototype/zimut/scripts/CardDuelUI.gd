@@ -428,7 +428,7 @@ func _build_duel_ui() -> void:
 	_cards_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_cards_layer)
 	# héros
-	_hero_nodes[1] = _make_hero_panel(1, Rect2(700, 8, 520, 104))
+	_hero_nodes[1] = _make_hero_panel(1, Rect2(30, 8, 370, 104))
 	_hero_nodes[0] = _make_hero_panel(0, Rect2(30, 690, 340, 360))
 	# colonne gauche : fiche de carte (grande vignette)
 	_info_holder = Control.new()
@@ -444,7 +444,7 @@ func _build_duel_ui() -> void:
 	_root.add_child(_action_bar)
 	# colonne droite : journal, pioche, fin de tour
 	var logt: Label = UiKit.lbl("Journal", 24, UiKit.C_GOLD, true)
-	logt.position = Vector2(1562, 96)
+	logt.position = Vector2(1562, 86)
 	_root.add_child(logt)
 	var logp := PanelContainer.new()
 	logp.position = Vector2(1560, 126)
@@ -452,7 +452,7 @@ func _build_duel_ui() -> void:
 	logp.clip_contents = true
 	logp.add_theme_stylebox_override("panel", _panel_sb(Color(0, 0, 0, 0.38), Color(0.42, 0.48, 0.62), 14, 2, 10))
 	_root.add_child(logp)
-	_log_lbl = UiKit.lbl("", 22, UiKit.C_TXT)
+	_log_lbl = UiKit.lbl("", 20, UiKit.C_TXT)
 	_log_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_log_lbl.custom_minimum_size = Vector2(300, 0)
 	_log_lbl.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
@@ -466,13 +466,13 @@ func _build_duel_ui() -> void:
 	_end_btn.add_theme_color_override("font_disabled_color", Color(0.45, 0.44, 0.42))
 	_end_btn.pressed.connect(_on_end_turn)
 	_root.add_child(_end_btn)
-	var quit: Button = UiKit.btn("Abandonner", Color(0.8, 0.45, 0.4), 20, Vector2(200, 48))
-	quit.position = Vector2(30, 14)
+	var quit: Button = UiKit.btn("Abandonner", Color(0.8, 0.45, 0.4), 22, Vector2(200, 52))
+	quit.position = Vector2(1690, 14)
 	_fancy_btn(quit, Color(0.8, 0.45, 0.4))
 	quit.pressed.connect(_on_quit_duel)
 	_root.add_child(quit)
 	var hb: Button = UiKit.btn("❓ Aide", Color(0.45, 0.65, 0.85), 20, Vector2(150, 48))
-	hb.position = Vector2(250, 14)
+	hb.position = Vector2(1520, 14)
 	_fancy_btn(hb, Color(0.45, 0.65, 0.85))
 	hb.pressed.connect(_show_help)
 	_root.add_child(hb)
@@ -670,6 +670,9 @@ class _UnitView extends Control:
 			return
 		var font: Font = ThemeDB.fallback_font
 		var spr: float = minf(w * 0.72, h * 2.05)
+		# ne dépasse pas le haut de l'écran (rangée du fond) : place pour la pastille de nom
+		var feet_y: float = global_position.y + (h - 5.0) * scale.y
+		spr = minf(spr, maxf(60.0, (feet_y - 34.0) / scale.y))
 		var art := Rect2((w - spr) * 0.5, h - spr, spr, spr)
 		var feet := Vector2(w * 0.5, h - 5.0)
 		var sh := PackedVector2Array()
@@ -702,7 +705,7 @@ class _UnitView extends Control:
 			draw_rect(art, Color(0, 0, 0, 0.35))
 		var name_txt: String = String(card.get("name", ""))
 		if name_txt != "":
-			var fs: int = 16
+			var fs: int = 20
 			var nw: float = font.get_string_size(name_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 			var cap: float = w - 30.0
 			while nw > cap and fs > 10:
@@ -711,7 +714,7 @@ class _UnitView extends Control:
 			var pb := StyleBoxFlat.new()
 			pb.bg_color = Color(0.05, 0.06, 0.10, 0.78)
 			pb.set_corner_radius_all(9)
-			draw_style_box(pb, Rect2(w * 0.5 - nw * 0.5 - 7.0, art.position.y - 24.0, nw + 14.0, 20.0))
+			draw_style_box(pb, Rect2(w * 0.5 - nw * 0.5 - 8.0, art.position.y - 28.0, nw + 16.0, 25.0))
 			draw_string(font, Vector2(w * 0.5 - nw * 0.5, art.position.y - 9.0), name_txt, HORIZONTAL_ALIGNMENT_LEFT, nw + 2.0, fs, Color(1, 0.97, 0.88))
 		var sx: float = art.position.x + 4.0
 		var sy: float = art.position.y + 16.0
@@ -734,26 +737,31 @@ class _UnitView extends Control:
 		for i in kws.size():
 			var kw: String = String(kws[i])
 			var st: Array = KW_STYLE.get(kw, [kw.left(1).to_upper(), Color(0.7, 0.7, 0.8)])
-			var kc := Vector2(rx - 12.0 - float(i) * 24.0, art.position.y + 14.0)
-			draw_circle(kc, 11.0, Color(0.05, 0.05, 0.08))
-			draw_circle(kc, 9.0, (st[1] as Color).darkened(0.35))
-			draw_arc(kc, 9.0, 0, TAU, 16, st[1] as Color, 1.6)
-			draw_string(font, kc + Vector2(-5, 5), String(st[0]), HORIZONTAL_ALIGNMENT_LEFT, 10.0, 13, Color(1, 1, 1))
-		_gem(Vector2(26.0, h - 22.0), 16.0, str(int(card.get("atk", 0))), Color(0.92, 0.55, 0.15))
+			var kc := Vector2(rx - 14.0 - float(i) * 28.0, art.position.y + 16.0)
+			draw_circle(kc, 13.0, Color(0.05, 0.05, 0.08))
+			draw_circle(kc, 11.0, (st[1] as Color).darkened(0.35))
+			draw_arc(kc, 11.0, 0, TAU, 16, st[1] as Color, 1.8)
+			draw_string(font, kc + Vector2(-6, 6), String(st[0]), HORIZONTAL_ALIGNMENT_LEFT, 12.0, 16, Color(1, 1, 1))
+		_gem(Vector2(27.0, h - 24.0), 20.0, str(int(card.get("atk", 0))), Color(0.92, 0.55, 0.15))
 		var hp: int = int(card.get("hp", 0))
 		var mx: int = int(card.get("max_hp", hp))
-		_gem(Vector2(w - 26.0, h - 22.0), 16.0, str(maxi(hp, 0)), Color(0.85, 0.20, 0.22) if hp >= mx else Color(0.60, 0.14, 0.16))
+		_gem(Vector2(w - 27.0, h - 24.0), 20.0, str(maxi(hp, 0)), Color(0.85, 0.20, 0.22) if hp >= mx else Color(0.60, 0.14, 0.16))
+		# pastilles PA / PM / PO : étiquette + valeur, lisibles ; grisées quand elles sont épuisées
 		var pips := [["PA", int(card.get("pa", 1)), Color(0.75, 0.45, 1.0)], ["PM", int(card.get("pm", 2)), Color(0.4, 0.8, 0.9)], ["PO", int(card.get("po", 1)), Color(0.5, 0.9, 0.5)]]
-		var px: float = w * 0.5 - 39.0
+		var pw: float = 56.0
+		var px: float = w * 0.5 - (pw * 3.0 + 6.0) * 0.5
 		for pip in pips:
 			var empty: bool = int(pip[1]) <= 0
 			var col: Color = pip[2] as Color
-			var pc := Vector2(px + 13.0, h - 13.0)
-			draw_circle(pc, 11.0, Color(0.05, 0.05, 0.08))
-			draw_circle(pc, 9.0, col.darkened(0.45) if empty else col.darkened(0.15))
-			draw_arc(pc, 9.0, 0, TAU, 14, col if not empty else Color(0.4, 0.4, 0.45), 1.5)
-			draw_string(font, pc + Vector2(-8, 4), String(pip[0]), HORIZONTAL_ALIGNMENT_LEFT, 16.0, 11, Color(0.55, 0.55, 0.6) if empty else Color(1, 1, 1))
-			px += 26.0
+			var pr := Rect2(px, h - 30.0, pw, 26.0)
+			var sbp := StyleBoxFlat.new()
+			sbp.bg_color = Color(0.04, 0.05, 0.08, 0.92)
+			sbp.border_color = col.darkened(0.55) if empty else col
+			sbp.set_border_width_all(2)
+			sbp.set_corner_radius_all(9)
+			draw_style_box(sbp, pr)
+			draw_string(font, Vector2(px, h - 30.0 + 19.0), "%s %d" % [pip[0], pip[1]], HORIZONTAL_ALIGNMENT_CENTER, pw, 18, Color(0.5, 0.5, 0.55) if empty else Color.WHITE)
+			px += pw + 3.0
 
 
 func _cell_pos(cell: int) -> Vector2:
@@ -828,18 +836,18 @@ func _refresh_hero(side: int) -> void:
 		portrait.add_child(tr)
 	var hp: int = int(sd["hero_hp"])
 	if side == 1:
-		var nm: Label = UiKit.lbl(_hero_name(side), 30, UiKit.C_TXT, true)
+		var nm: Label = UiKit.lbl(_hero_name(side), 26, UiKit.C_TXT, true)
 		nm.position = Vector2(110, 4)
 		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		p.add_child(nm)
-		var info: Label = UiKit.lbl("Héros à abattre" if _puzzle else "Main : %d   Pioche : %d   Mana : %d/%d" % [(sd["hand"] as Array).size(), (sd["deck"] as Array).size(), int(sd["mana"]), int(sd["mana_max"])], 21, UiKit.C_DIM)
-		info.position = Vector2(110, 52)
+		var info: Label = UiKit.lbl("Héros à abattre" if _puzzle else "Main %d · Pioche %d\nMana %d/%d" % [(sd["hand"] as Array).size(), (sd["deck"] as Array).size(), int(sd["mana"]), int(sd["mana_max"])], 19, UiKit.C_DIM)
+		info.position = Vector2(110, 40)
 		info.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		p.add_child(info)
-		_hp_gem(p, Vector2(p.size.x - 56, 52), 36, hp)
+		_hp_gem(p, Vector2(p.size.x - 50, 56), 32, hp)
 		if String(_opp.get("boss", "")) != "":
-			var bd: Label = UiKit.lbl("👑 BOSS", 20, UiKit.C_GOLD, true)
-			bd.position = Vector2(p.size.x - 200, 8)
+			var bd: Label = UiKit.lbl("👑 BOSS", 16, UiKit.C_GOLD, true)
+			bd.position = Vector2(10, 80)
 			bd.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			p.add_child(bd)
 	else:
@@ -995,7 +1003,7 @@ func _refresh() -> void:
 	_mull_btn.visible = not _over and not _busy and _duel.can_mulligan(0)
 	_mull_btn.disabled = not _mull_btn.visible
 	_end_btn.text = "Fin du tour" if _duel.current == 0 else "Tour adverse…"
-	var lines: Array = _duel.log.slice(maxi(0, _duel.log.size() - 7))
+	var lines: Array = _duel.log.slice(maxi(0, _duel.log.size() - 6))
 	_log_lbl.text = "\n".join(PackedStringArray(lines))
 
 

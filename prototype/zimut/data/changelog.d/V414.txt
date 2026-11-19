@@ -1,0 +1,3 @@
+V414|Mode Cartes : les pastilles PA / PM / PO des unités sont plus grandes et lisibles, avec leur étiquette et leur valeur.
+V414|Le panneau du héros adverse passe en haut à gauche : les unités de la rangée du fond ne sont plus cachées derrière lui.
+V414|Le sort « Charge » du Bélier ne peut plus viser un héros (il n'avait aucun effet) ; le journal est plus lisible.
