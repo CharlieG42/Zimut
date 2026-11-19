@@ -252,15 +252,20 @@ func _show_opponents() -> void:
 	_root.add_child(title)
 	var grid := GridContainer.new()
 	grid.columns = 3
-	grid.position = Vector2(150, 150)
 	grid.add_theme_constant_override("h_separation", 40)
 	grid.add_theme_constant_override("v_separation", 40)
-	_root.add_child(grid)
-	for i: int in JccCollection.OPPONENTS.size():
+	var sc := ScrollContainer.new()
+	sc.position = Vector2(150, 130)
+	sc.size = Vector2(1700, 830)
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_root.add_child(sc)
+	sc.add_child(grid)
+	for i: int in JccCollection.total_opponents():
 		var op: Dictionary = JccCollection.opponent(i)
 		var boss: String = String(op["boss"])
 		var unlocked: bool = JccCollection.is_unlocked(_save, i)
-		var b: Button = UiKit.btn("", Color(0.95, 0.65, 0.25) if boss != "" and unlocked else (Color(0.45, 0.65, 0.95) if unlocked else Color(0.24, 0.26, 0.31)), 24, Vector2(520, 320))
+		var chap: bool = op.has("chapter")
+		var b: Button = UiKit.btn("", Color(0.75, 0.5, 0.95) if chap and unlocked else Color(0.95, 0.65, 0.25) if boss != "" and unlocked else (Color(0.45, 0.65, 0.95) if unlocked else Color(0.24, 0.26, 0.31)), 24, Vector2(520, 320))
 		if unlocked:
 			b.pressed.connect(func() -> void: _start_duel(i))
 		else:
@@ -277,16 +282,22 @@ func _show_opponents() -> void:
 			tr.modulate = Color(1, 1, 1) if unlocked else Color(0.4, 0.4, 0.45)
 			tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			b.add_child(tr)
-		var nm: Label = UiKit.lbl(String(op["name"]), 32, UiKit.C_TXT if unlocked else UiKit.C_DIM, true)
+		var nm: Label = UiKit.lbl(String(op["name"]), 32 if String(op["name"]).length() <= 18 else 25, UiKit.C_TXT if unlocked else UiKit.C_DIM, true)
 		nm.position = Vector2(225, 30)
 		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.add_child(nm)
 		var desc: String = "Duel classique" if boss == "" else "Boss — peut laisser sa carte légendaire"
-		if not unlocked:
+		if chap:
+			var k: int = int(op["chapter"])
+			var first: bool = not (JccCollection.ensure(_save).get("chapter_bosses", []) as Array).has(k)
+			desc = "📜 Boss du chapitre %d\n%s" % [k + 1, "1re victoire : sa carte + de l'or" if first else "Peut laisser sa carte"]
+			if not unlocked:
+				desc = "🔒 Chapitre %d de la Conquête\n« %s »" % [k + 1, String((ConquestSystem.CHAPTERS[k] as Dictionary)["title"])]
+		elif not unlocked:
 			desc = "🔒 Battre « %s » pour débloquer" % String(JccCollection.opponent(i - 1)["name"])
-		var dl: Label = UiKit.lbl(desc, 20, UiKit.C_GOLD if boss != "" and unlocked else UiKit.C_DIM)
+		var dl: Label = UiKit.lbl(desc, 20 if not chap else 18, UiKit.C_GOLD if boss != "" and unlocked else UiKit.C_DIM)
 		dl.position = Vector2(225, 86)
-		dl.size = Vector2(280, 100)
+		dl.size = Vector2(270, 100)
 		dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		dl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.add_child(dl)
@@ -1624,8 +1635,13 @@ func _finish_if_over() -> void:
 		j["wins"] = int(j["wins"]) + 1
 		var rng := RandomNumberGenerator.new()
 		rng.randomize()
-		loot = JccCollection.roll_loot(rng, String(_opp.get("boss", "")))
-		JccCollection.add_card(_save, loot)
+		var cbw: Dictionary = JccCollection.chapter_boss_won(_save, _opp_idx)
+		if cbw.is_empty():
+			loot = JccCollection.roll_loot(rng, String(_opp.get("boss", "")))
+			JccCollection.add_card(_save, loot)
+		else:
+			loot = String(cbw["card"])
+			extra["chapter_gold"] = int(cbw["gold"])
 		var nu: int = JccCollection.unlock_next(_save, _opp_idx)
 		if nu >= 0:
 			extra["unlock"] = String(JccCollection.opponent(nu)["name"])
@@ -1667,6 +1683,11 @@ func _show_result(win: bool, draw_game: bool, loot: String, extra: Dictionary = 
 	info.size = Vector2(W, 62)
 	info.add_theme_constant_override("separation", 2)
 	ov.add_child(info)
+	if int(extra.get("chapter_gold", 0)) > 0:
+		var cg: Label = UiKit.lbl("📜 Boss de chapitre vaincu ! Carte légendaire + %d or" % int(extra["chapter_gold"]), 26, UiKit.C_GOLD, true)
+		cg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cg.custom_minimum_size = Vector2(0, 30)
+		info.add_child(cg)
 	if String(extra.get("unlock", "")) != "":
 		var ul: Label = UiKit.lbl("🔓 Adversaire débloqué : %s" % String(extra["unlock"]), 26, UiKit.C_GOOD, true)
 		ul.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

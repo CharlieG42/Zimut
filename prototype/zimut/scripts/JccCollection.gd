@@ -141,6 +141,29 @@ static func deck_of(save: Dictionary, name: String) -> Array:
 	return d
 
 
+## Boss de chapitre : un par chapitre de la campagne de Conquête (`ConquestSystem.CHAPTERS`, même ordre).
+## Débloqué quand le chapitre `chapter` est accompli ; indices d'adversaire = OPPONENTS.size() + chapter.
+## 1re victoire : la carte du boss + de l'or ; ensuite il redevient un boss ordinaire (40 % de sa carte).
+const CHAPTER_BOSSES: Array = [
+	{"name": "Loup Alpha", "chapter": 0, "biome": "Forêt", "accent": "#6fcf5a", "sprite": "enemies/loup_boss", "boss": "b_loup_alpha",
+		"deck": "b_loup_alpha m_loup m_loup m_loup m_loup s_loup s_loup e_archer e_archer c_chasseur c_sylvain s_volee s_volee s_tir_precis s_charge m_gobelin m_gobelin m_gobelin s_fleche_poison s_javelot"},
+	{"name": "Tharok le Végétal", "chapter": 1, "biome": "Forêt", "accent": "#4fbf6a", "sprite": "summons/ent_de_combat", "boss": "b_tharok",
+		"deck": "b_tharok e_ent e_ent c_druide c_druide c_sylvain s_regeneration s_benediction s_benediction s_soin s_mur_pierre m_troll m_troll s_archer s_archer s_protection s_attaque_sacree m_loup m_loup s_javelot"},
+	{"name": "Colosse d'Engrenages", "chapter": 2, "biome": "Plaine", "accent": "#c8c8d8", "sprite": "summons/golem_de_pierre", "boss": "b_colosse",
+		"deck": "b_colosse c_chevalier c_chevalier c_tank c_tank e_golem e_golem m_belier m_belier s_cri_guerre s_charge s_charge s_frappe s_frappe s_javelot s_protection m_troll m_vampire m_vampire c_mage"},
+	{"name": "Roi Squelette", "chapter": 3, "biome": "Marais", "accent": "#b8a6e8", "sprite": "enemies/squelette_boss", "boss": "b_roi_squelette",
+		"deck": "b_roi_squelette m_squelette m_squelette m_squelette m_squelette c_assassin c_assassin m_vampire m_vampire s_fleche_poison s_fleche_poison s_trait_glace s_eclair s_javelot c_invocateur s_golem m_troll m_vampire s_boule_feu m_troll"},
+	{"name": "Crabe Titan", "chapter": 4, "biome": "Marais", "accent": "#40b8c8", "sprite": "summons/requin_des_marees", "boss": "b_crabe_titan",
+		"deck": "b_crabe_titan c_geomancien c_geomancien e_golem m_belier s_mur_pierre s_mur_pierre s_charge s_etincelle m_gobelin m_loup c_heal m_gobelin m_loup s_etincelle m_troll m_troll s_javelot s_frappe s_blizzard"},
+	{"name": "Seigneur des Tempêtes", "chapter": 5, "biome": "Montagne", "accent": "#6fa8ff", "sprite": "summons/elementaire_de_cristal", "boss": "b_seigneur_tempetes",
+		"deck": "b_seigneur_tempetes c_mage c_mage e_cristal e_cristal s_eclair s_eclair s_boule_feu s_boule_feu s_explosion s_blizzard s_trait_glace s_etincelle s_etincelle c_artificier c_artificier s_inspiration c_chasseur s_volee m_dragonnet"},
+	{"name": "Seigneur de Lave", "chapter": 6, "biome": "Désert", "accent": "#ff5a20", "sprite": "enemies/dragonnet_desert", "boss": "b_seigneur_lave",
+		"deck": "b_seigneur_lave m_dragonnet m_dragonnet m_dragonnet m_dragonnet c_mage c_mage s_boule_feu s_boule_feu s_explosion s_explosion s_eclair s_etincelle s_etincelle c_artificier c_artificier e_cristal s_attaque_sacree s_cri_guerre m_troll"},
+	{"name": "Liche Éternelle", "chapter": 7, "biome": "Marais", "accent": "#a050d0", "sprite": "summons/ombre", "boss": "b_liche_eternelle",
+		"deck": "b_liche_eternelle e_golem e_golem m_vampire m_vampire m_vampire c_chevalier c_tank m_troll m_troll m_troll c_assassin c_assassin s_boule_feu s_boule_feu s_explosion s_frappe s_javelot c_mage s_cri_guerre"},
+]
+
+
 ## --- Puzzle de la semaine : plateau prédéfini, l'adversaire ne joue pas, il faut abattre son héros en `turns` tours ---
 ## `solution` (utilisée par les tests) : liste d'étapes {k: play|move|attack|end, ...}.
 const PUZZLES: Array = [
@@ -228,6 +251,8 @@ static func challenge_report(save: Dictionary, stats: Dictionary, won: bool) -> 
 ## --- Adversaires verrouillés : battre l'adversaire i débloque le i+1 ---
 
 static func is_unlocked(save: Dictionary, idx: int) -> bool:
+	if idx >= OPPONENTS.size():
+		return chapter_done(save, int(opponent(idx).get("chapter", 99)))
 	if idx <= 0:
 		return true
 	return (ensure(save)["unlocked"] as Array).has(idx)
@@ -265,4 +290,32 @@ static func roll_loot(rng: RandomNumberGenerator, boss_id: String = "") -> Strin
 
 
 static func opponent(index: int) -> Dictionary:
+	if index >= OPPONENTS.size():
+		return CHAPTER_BOSSES[clampi(index - OPPONENTS.size(), 0, CHAPTER_BOSSES.size() - 1)]
 	return OPPONENTS[clampi(index, 0, OPPONENTS.size() - 1)]
+
+
+static func total_opponents() -> int:
+	return OPPONENTS.size() + CHAPTER_BOSSES.size()
+
+
+## Chapitre de campagne accompli (ConquestSystem.chapter_index > chapitre du boss) ?
+static func chapter_done(save: Dictionary, chapter: int) -> bool:
+	return ConquestSystem.chapter_index(save.get("conquest", {})) > chapter
+
+
+## Récompense de la 1re victoire sur un boss de chapitre : {card, gold}, ou {} si déjà obtenue / pas un boss de chapitre.
+static func chapter_boss_won(save: Dictionary, idx: int) -> Dictionary:
+	var op: Dictionary = opponent(idx)
+	if idx < OPPONENTS.size() or not op.has("chapter"):
+		return {}
+	var j: Dictionary = ensure(save)
+	var done: Array = j.get("chapter_bosses", [])
+	if done.has(int(op["chapter"])):
+		return {}
+	done.append(int(op["chapter"]))
+	j["chapter_bosses"] = done
+	var gold: int = 100 * (int(op["chapter"]) + 1)
+	save["gold"] = int(save.get("gold", 0)) + gold
+	add_card(save, String(op["boss"]))
+	return {"card": String(op["boss"]), "gold": gold}
