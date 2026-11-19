@@ -269,3 +269,17 @@ Retour de test après V408 : le pavage de tuiles identique au sol et aux cases f
 - La falaise (30 px, strates, cailloux), les camps et la brume de V408 sont conservés.
 
 Tests : `test_jcc.gd` / `test_jcc_ui.gd` → 0 échec. Maquette PIL (fond peint + damier + camps) validée.
+
+## 16. V410 — gameplay : cases de terrain, pouvoir du héros, mulligan
+
+Trois mécaniques ajoutées au duel (moteur `JccDuel.gd`, UI `CardDuelUI.gd`) :
+
+- **Terrain** (`terrain[24]`, tirage seedé : 6 cases = 2 boue / 2 hauteur / 2 buisson, annoncé dans le journal) :
+  - *boue* : entrer coûte **2 PM** au lieu de 1 (BFS `_path_cost`) ;
+  - *hauteur* : l'unité dessus a **+1 PO** (`attack_targets`) ;
+  - *buisson* : **camouflage**, l'unité dessus n'est ciblable qu'au corps à corps (distance 1).
+  - Glyphes dessinés sur chaque case (`_CellNode.terrain`) ; l'IA en tient compte via `move_targets`/`attack_targets`.
+- **Pouvoir du héros** : 1 fois par duel, par camp (`HERO_POWERS` : chaque classe a le sien — Mage = 4 dégâts au héros, Tank = bouclier de zone, Chasseur/Assassin/Artificier = dégâts ciblés, Heal = soin de zone, Druide/Sylvain/Géomancien = dégâts de zone, Invocateur = invocation, boss = 5 dégâts au héros). Bouton « ⚡ » à droite (colonne droite), ciblage au toucher si le pouvoir en a besoin ; l'IA l'utilise dans `ai_step` ; effet visuel : grosse gerbe dorée + secousse du panneau héros (événement `power`).
+- **Mulligan** : bouton « ↺ Nouvelle main (1×) » pendant son tour : la main retourne sous la pioche et on repioché 4 cartes, une seule fois par duel.
+
+Tests : `test_jcc.gd` (terrain déterministe, boue 2 PM, hauteur +1 PO, buisson camouflage, pouvoir 1×, mulligan 1× et 20 cartes conservées, 24 parties IA/IA) et `test_jcc_ui.gd` (6 cases de terrain affichées, boutons visibles puis cachés, pouvoir lancé par l'UI). 0 échec.

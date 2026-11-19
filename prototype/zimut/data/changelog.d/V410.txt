@@ -1,0 +1,3 @@
+V410|Mode Cartes : le plateau a désormais un terrain — boue (2 PM pour entrer), hauteur (+1 PO), buisson (camouflage contre les tirs à distance) — 6 cases tirées à chaque duel et affichées sur la grille.
+V410|Nouveau pouvoir de héros, une fois par duel : chaque classe en a un (éclair, mur de pierre, tir précis, soin de zone, séisme, invocation…) et les boss frappent plus fort.
+V410|Nouveau bouton « Nouvelle main » : une fois par duel, vous repiochez votre main de départ.
