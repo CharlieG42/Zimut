@@ -337,5 +337,10 @@ func _boot() -> void:
 			wins[2] += 1
 	check(wins[2] == 0, "24 parties IA/IA toutes terminées (max %d tours)" % maxturns)
 	check(wins[0] >= 4 and wins[1] >= 4, "pas de camp écrasant : %d / %d" % [wins[0], wins[1]])
+	# cohérence des données : une cible « … ou héros » doit avoir un effet qui agit réellement sur un héros
+	for cid: String in JccCards.all_ids():
+		var cd: Dictionary = JccCards.get_card(cid)
+		if String(cd.get("cible", "")).ends_with("_ou_heros"):
+			check(String(cd["effet"]) in ["degats", "soin"], "%s : cible héros inutile pour l'effet %s" % [cid, cd["effet"]])
 	print("FIN : %d échec(s)" % fails)
 	quit(fails)
