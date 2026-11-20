@@ -274,7 +274,7 @@ func _refresh_grid() -> void:
 		c.queue_free()
 	var ids: Array = JccCards.collectible_ids()
 	for k: Variant in (JccCollection.ensure(save)["collection"] as Dictionary):
-		if String(k).contains("@") and JccCollection.owned(save, String(k)) > 0 and not JccCards.get_card(String(k)).is_empty():
+		if (String(k).contains("@") or String(k).contains("~")) and JccCollection.owned(save, String(k)) > 0 and not JccCards.get_card(String(k)).is_empty():
 			ids.append(String(k))
 	ids.sort_custom(func(a: String, b: String) -> bool:
 		var ca: Dictionary = JccCards.get_card(a)
@@ -331,7 +331,7 @@ func _refresh_deck() -> void:
 		var c: Dictionary = JccCards.get_card(id)
 		var col: Color = JccCardView.RARITY_COL.get(String(c["rarity"]), Color.WHITE)
 		var kind: String = "✦" if String(c["type"]) == "Sort" else "▲"
-		var b: Button = UiKit.btn("%d  %s %s%s" % [int(c["cost"]), kind, String(c["name"]) + (" ★%d" % int(c["lvl"]) if int(c["lvl"]) > 1 else ""), ("  ×%d" % int(counts[id])) if int(counts[id]) > 1 else ""], col, 20, Vector2(0, 44))
+		var b: Button = UiKit.btn("%d  %s %s%s" % [int(c["cost"]), kind, String(c["name"]) + (" ★%d" % int(c["lvl"]) if int(c["lvl"]) > 1 else "") + (" ✚" if String(c.get("forts", "")) != "" else ""), ("  ×%d" % int(counts[id])) if int(counts[id]) > 1 else ""], col, 20, Vector2(0, 44))
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.pressed.connect(func() -> void:
 			if JccCardView.drag_active:

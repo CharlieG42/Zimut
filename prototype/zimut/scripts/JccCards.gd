@@ -56,7 +56,7 @@ static func _load() -> void:
 
 static func get_card(id: String) -> Dictionary:
 	_load()
-	if id.contains("@"):
+	if id.contains("@") or id.contains("~"):
 		return _leveled(id)
 	var c: Dictionary = _cards.get(id, {})
 	if c.is_empty():
@@ -71,18 +71,39 @@ const MAX_LEVEL := 5
 
 
 static func base_of(key: String) -> String:
-	return key.get_slice("@", 0)
+	return key.get_slice("~", 0).get_slice("@", 0)
 
 
 static func level_of(key: String) -> int:
-	if not key.contains("@"):
+	var head: String = key.get_slice("~", 0)
+	if not head.contains("@"):
 		return 1
-	return clampi(int(key.get_slice("@", 1)), 1, MAX_LEVEL)
+	return clampi(int(head.get_slice("@", 1)), 1, MAX_LEVEL)
+
+
+## Fortifications d'une clé (« id@3~AM » -> « AM »).
+static func forts_of(key: String) -> String:
+	return key.get_slice("~", 1) if key.contains("~") else ""
+
+
+## Fortifications possibles sur une créature : code -> {label, kw (mot-clé) ou stat}.
+const FORTS := {
+	"A": {"label": "+1 PA", "stat": "pa"},
+	"M": {"label": "+1 PM", "stat": "pm"},
+	"O": {"label": "+1 PO", "stat": "po"},
+	"P": {"label": "Provocation", "kw": "provocation"},
+	"I": {"label": "Initiative", "kw": "initiative"},
+	"R": {"label": "Régénération", "kw": "regeneration"},
+	"F": {"label": "Perforation", "kw": "perforation"},
+	"V": {"label": "Vol", "kw": "vol"},
+}
+const MAX_FORTS := 2
 
 
 ## Clé de collection pour un niveau (niveau 1 = id nu).
-static func key_of(id: String, lvl: int) -> String:
-	return id if lvl <= 1 else "%s@%d" % [id, lvl]
+static func key_of(id: String, lvl: int, forts: String = "") -> String:
+	var k: String = id if lvl <= 1 else "%s@%d" % [id, lvl]
+	return k if forts == "" else "%s~%s" % [k, forts]
 
 
 ## Carte fusionnée « id@n » : créatures +1 ATQ/+1 PV par niveau, sorts +1 à l'effet par niveau,
@@ -95,7 +116,19 @@ static func _leveled(key: String) -> Dictionary:
 	var c: Dictionary = (_cards[base] as Dictionary).duplicate()
 	c["lvl"] = lvl
 	c["base_id"] = base
+	c["forts"] = forts_of(key)
+	if String(c["type"]) == "Creature":
+		for ch in forts_of(key):
+			var f: Dictionary = FORTS.get(String(ch), {})
+			if f.has("stat"):
+				c[String(f["stat"])] = int(c[String(f["stat"])]) + 1
+			elif f.has("kw"):
+				var kws: Array = (c["keywords"] as Array).duplicate()
+				if not kws.has(String(f["kw"])):
+					kws.append(String(f["kw"]))
+				c["keywords"] = kws
 	if lvl <= 1:
+		c["id"] = key
 		return c
 	if String(c["type"]) == "Creature":
 		c["atk"] = int(c["atk"]) + (lvl - 1)

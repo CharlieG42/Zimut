@@ -370,3 +370,9 @@ Mesures par simulations IA/IA (80 parties par adversaire, deux côtés) :
 - Après une victoire en combat tactique, Aventure ou Conquête (`ProgressionManager.register_victory`), `JccCollection.combat_loot` peut ajouter une carte à la collection : 30 % (40 % en Aventure), 100 % sur un boss.
 - Le niveau du combat améliore les raretés ; un boss a 20 % de laisser une carte de boss. Les cartes en double servent à la fusion (§25).
 - La carte obtenue s'affiche dans la fenêtre de résultat (puce « 🃏 Carte : … »). Test : `tests/test_jcc_butin.gd`.
+
+## 29. Fortification
+- Dans l'atelier (« Fusion & fortification »), une **créature** possédée (quel que soit son niveau) peut être fortifiée contre de l'or : +1 PA, +1 PM, +1 PO, ou un mot-clé (Provocation, Initiative, Régénération, Perforation, Vol). 2 fortifications maximum par carte, jamais deux fois la même, ni un mot-clé que la carte a déjà.
+- Coût : 150 × (fortifications déjà posées + 1) + 50 × (niveau − 1) or ; consomme un exemplaire de la carte, qui devient une version fortifiée.
+- Clé de collection : `id[@niveau][~codes]` (ex. `c_tank@3~AM`, codes triés : A=PA, M=PM, O=PO, P=provocation, I=initiative, R=régénération, F=perforation, V=vol). Une carte fortifiée ne peut plus être fusionnée.
+- Les decks qui perdent l'exemplaire reçoivent la version fortifiée (une fois). Les sorts ne sont pas fortifiables. Test : `tests/test_jcc_fusion.gd`.
