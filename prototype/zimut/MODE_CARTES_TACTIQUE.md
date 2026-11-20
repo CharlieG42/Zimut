@@ -390,3 +390,8 @@ Simulation IA (même deck, 14 adversaires × 12 graines) : avant, les héros all
 - Les 10 héros de classe, les monstres, les épiques et les boss existants reçoivent aussi une nation (quand elle est claire) et une punchline.
 - **Punchline** (style Magic) : colonnes `FlavorFr` / `FlavorEn`, affichée en italique sous la description (cartes d'au moins 180 px de large). `NomEn` : nom anglais. La langue suit `TranslationServer` (réglage FR/EN) ; sans texte anglais, repli sur le français.
 - Données : `cartes_jcc.txt` (colonnes ajoutées à la fin : `Nation|NomEn|FlavorFr|FlavorEn`). Test : `tests/test_jcc_nations.gd`.
+
+## 31. Déblocage du mode Cartes
+- Le mode **Cartes** est verrouillé tant que **tous les héros ne sont pas débloqués** (`HeroUnlock.all_unlocked`). Avec 10 classes : 3 héros de départ, puis un au niveau 4 et tous les 3 niveaux → le dernier arrive au **niveau joueur 22** (`HeroUnlock.all_unlocked_level()`).
+- `ProgressionManager.mode_unlocked(data, "cartes")` applique cette règle ; le bouton du menu affiche « 🔒 Tous les héros (niveau 22) » et `_launch_cards` refuse le lancement si verrouillé.
+- Les anciennes sauvegardes (tous héros déjà débloqués) accèdent au mode immédiatement. Test : `tests/test_jcc_deblocage.gd`.

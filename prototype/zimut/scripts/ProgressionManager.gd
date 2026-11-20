@@ -1811,6 +1811,9 @@ func max_hero_level(data: Dictionary) -> int:
 
 ## V60 : le niveau du JOUEUR (affiché en tête de la partie) compte autant que celui du meilleur héros.
 func mode_unlocked(data: Dictionary, mode: String) -> bool:
+	# Mode Cartes : débloqué quand tous les héros le sont (niveau joueur 22 avec 10 classes).
+	if mode == "cartes":
+		return HeroUnlock.all_unlocked(data)
 	var lvl: int = maxi(max_hero_level(data), HeroUnlock.player_level(data))
 	return lvl >= int(MODE_MIN_LEVEL.get(mode, 1))
 
