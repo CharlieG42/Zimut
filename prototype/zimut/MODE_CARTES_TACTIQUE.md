@@ -359,3 +359,9 @@ Mesures par simulations IA/IA (80 parties par adversaire, deux côtés) :
 - Le héros adverse est désormais un **personnage posé au centre du bord haut**, devant la porte d'un **rempart sur toute la largeur** (palissade teintée par biome, bannières et torches à la couleur du camp). C'est lui qu'on touche pour le cibler ; il brille et pulse quand il est une cible valide. Sa pastille de PV est à sa gauche.
 - Le haut-gauche ne garde qu'une **pastille d'infos non cliquable** (nom, main, pioche, mana, badge BOSS).
 - Correctif : un pouvoir de héros à cible ne fait plus planter l'aperçu des cibles (#419).
+
+## 27. Choix du héros
+- Toute carte de héros possédée (cartes de classe `c_*`, Samouraï, cartes de boss `b_*`) peut être choisie comme héros (bouton « 🦸 Héros » du hub, `CardHeroUI`). Par défaut : la carte de la classe d'Aventure.
+- Pouvoir de héros : celui de la classe de la carte ; « Frappe du boss » pour un boss. Sprite du camp : celui de la carte.
+- Bonus selon la rareté (`JccDuel.HERO_BONUS`) : Commun/Rare = début de duel (+3/+4 PV, +1 mana au 1er tour, ou +1 carte de départ) ; Épique/Légendaire = par tour (soin 2 chaque tour, 1 dégât au héros adverse 1 tour sur 2, +1 mana 1 tour sur 2, pioche 1 carte 1 tour sur 3).
+- Seul le joueur bénéficie du bonus pour l'instant. Test : `tests/test_jcc_heros.gd`.
