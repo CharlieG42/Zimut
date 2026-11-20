@@ -160,8 +160,33 @@ const MODELS := {
 		}},
 }
 ## Classe du joueur (nom interne) ou nom de boss -> modèle.
+## Harpie (Meshy, sans squelette) : modèle « statique ». Pas d'AnimationPlayer : le corps bouge (vol, élan, recul) et les ailes
+## battent par déformation des sommets dans le shader (uniform « flap »). Version allégée sur téléphone (12 k triangles, 1024²).
+const HARPIE_MODEL := {"path": "res://assets/monstres3d/harpie.glb", "path_mobile": "res://assets/monstres3d/harpie_mobile.glb",
+	"static": true, "gain": 1.0,
+	"clips": {
+		"idle":   {"dur": 2.4, "loop": true, "key": 0.0, "motion": "idle"},
+		"walk":   {"dur": 1.0, "loop": true, "key": 0.0, "motion": "walk"},
+		"attack": {"dur": 0.9, "loop": false, "key": 0.5, "motion": "attack"},
+		"cast":   {"dur": 1.1, "loop": false, "key": 0.6, "motion": "cast"},
+		"hit":    {"dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
+	}}
 const CLASS_MODEL := {"Sylvain": "Sylvain", "Mage": "Mage", "Géomancien": "Géomancien", "Assassin": "Assassin", "Artificier": "Ingénieur", "Chasseur": "Chasseur", "Druide": "Druide", "Heal": "Heal", "Invocateur": "Invocateur", "Tank": "Tank"}
 const BOSS_MODEL := {"Gobelin Roi": "Tharok", "Tharok le Végétal": "Tharok", "Troll Géant": "Vorkann", "Vorkann le Givre": "Vorkann", "Kharaz le Flamboyant": "Kharaz"}
+## Ennemis ordinaires rendus en 3D : biome -> type -> modèle. ESSAI : la harpie remplace les squelettes/dragonnets des Vents
+## et les loups de la Forêt (biome de bas niveau). Vider la table pour revenir aux sprites 2D.
+const ENEMY_MODEL := {"Vents": {"Squelette": "Harpie", "Dragonnet": "Harpie"}, "Forêt": {"Loup": "Harpie"}}
+## Battement d'ailes d'un modèle sans squelette : déplacement vertical des sommets, nul près de l'axe et sous la taille.
+## span_info = (demi-envergure, centre x, hauteur à partir de laquelle les ailes commencent).
+const FLAP_UNIFORMS := """
+uniform float flap = 0.0;
+uniform vec3 span_info = vec3(0.95, 0.0, 1.1);
+float flap_offset(vec3 v, float f, vec3 info) {
+	float w = smoothstep(0.18, 1.0, clamp(abs(v.x - info.y) / max(info.x, 0.0001), 0.0, 1.0));
+	float up = smoothstep(info.z - 0.25, info.z + 0.2, v.y);
+	return f * w * w * up * info.x * 0.32;
+}
+"""
 const CLIP_FRAMES := 24             # nombre d'images fictives d'une action (EntityView raisonne en images pour les temps d'impact)
 ## V373 : ombrage calculé dans le shader (sans lumière de scène) : le rendu ne dépend plus de l'appareil — sur PC les
 ## lumières délavaient les couleurs de la texture, sur téléphone elles sortaient plus sombres puis étaient recalées.
@@ -230,14 +255,22 @@ var _blend_w: float = 1.0
 var _side: float = 0.0
 var _ap: AnimationPlayer = null
 var _clips: Dictionary = {}
+var _flap_mat: ShaderMaterial = null
+
+
+static func profile(key: String) -> Dictionary:
+	if key == "Harpie":
+		return HARPIE_MODEL
+	return MODELS.get(key, {})
 
 
 static func supported(classe: String) -> bool:
-	return MODELS.has(classe) and ResourceLoader.exists(String((MODELS[classe] as Dictionary)["path"]))
+	var p: Dictionary = profile(classe)
+	return not p.is_empty() and ResourceLoader.exists(String(p["path"]))
 
 
 ## Modèle 3D d'une entité ("" si aucun) : boss nommé, sinon classe de héros.
-static func model_key(ent: Dictionary) -> String:
+static func model_key(ent: Dictionary, biome: String = "") -> String:
 	var classe: String = String(ent.get("classe", ""))
 	var key: String = ""
 	if bool(ent.get("boss", false)):
@@ -245,12 +278,14 @@ static func model_key(ent: Dictionary) -> String:
 		key = String(BOSS_MODEL.get(String(ent.get("title", "")), BOSS_MODEL.get(classe, "")))
 	elif String(ent.get("team", "")) == "player":
 		key = String(CLASS_MODEL.get(classe, ""))
+	elif String(ent.get("team", "")) == "enemy":
+		key = String((ENEMY_MODEL.get(biome, {}) as Dictionary).get(classe, ""))
 	return key if supported(key) else ""
 
 
 ## Modèle à clips (sans planches cuites pour fournir les durées) ?
 static func is_clip_model(key: String) -> bool:
-	return MODELS.has(key) and (MODELS[key] as Dictionary).has("clips")
+	return profile(key).has("clips")
 
 
 ## Charge le modèle et prépare le rendu. Asynchrone (quelques images pour mesurer le cadrage) : attendre [signal framed].
@@ -258,7 +293,7 @@ static func is_clip_model(key: String) -> bool:
 func setup(classe: String, px_scale: float = 0.0) -> bool:
 	if not supported(classe):
 		return false
-	_prof = MODELS[classe]
+	_prof = profile(classe)
 	_key = classe
 	if px_scale > 0.0:
 		# Suréchantillonnage 2×2 (RES_K = 2, soit 384 px) : réduit exactement de moitié à l'écran, le filtrage linéaire donne
@@ -292,7 +327,10 @@ func setup(classe: String, px_scale: float = 0.0) -> bool:
 	_cam.size = 3.0
 	vp.add_child(_cam)
 	_cam.current = true
-	if not _load_model(String(_prof["path"])):
+	var mpath: String = String(_prof["path"])
+	if OS.has_feature("mobile") and _prof.has("path_mobile") and ResourceLoader.exists(String(_prof["path_mobile"])):
+		mpath = String(_prof["path_mobile"])
+	if not _load_model(mpath):
 		return false
 	_frame.call_deferred()
 	return true
@@ -314,6 +352,8 @@ func _load_model(path: String) -> bool:
 	_model.add_child(n)
 	var sks: Array = n.find_children("*", "Skeleton3D", true, false)
 	var mis: Array = n.find_children("*", "MeshInstance3D", true, false)
+	if bool(_prof.get("static", false)):
+		return _load_static(mis)
 	if sks.is_empty() or mis.is_empty():
 		return false
 	_sk = sks[0] as Skeleton3D
@@ -363,6 +403,67 @@ func _load_model(path: String) -> bool:
 		_rig_staff()
 	_mi.set_surface_override_material(0, mat)
 	return true
+
+
+## Modèle sans squelette (harpie) : normalisé à HERO_H par sa boîte englobante, pieds à y = 0, centré. Les ailes battent par
+## déformation des sommets (FLAP_UNIFORMS) : seuls les sommets hauts et éloignés de l'axe bougent (jambes et jupe fixes).
+func _load_static(mis: Array) -> bool:
+	if mis.is_empty():
+		return false
+	_mi = mis[0] as MeshInstance3D
+	var src: Material = _mi.mesh.surface_get_material(0)
+	var tex: Texture2D = (src as BaseMaterial3D).albedo_texture if src is BaseMaterial3D else null
+	if tex == null:
+		return false
+	var ab: AABB = _mi.get_aabb()
+	var sh := Shader.new()
+	sh.code = SHADER.replace("varying float wy;", "varying float wy;\n" + FLAP_UNIFORMS).replace("void vertex() {", "void vertex() {\n\tVERTEX.y += flap_offset(VERTEX, flap, span_info);")
+	var mat := ShaderMaterial.new()
+	mat.shader = sh
+	mat.set_shader_parameter("albedo_tex", tex)
+	mat.set_shader_parameter("gain", float(_prof.get("gain", 1.0)))
+	mat.set_shader_parameter("span_info", Vector3(ab.size.x * 0.5, ab.get_center().x, ab.position.y + ab.size.y * 0.58))
+	_mat = mat
+	_flap_mat = mat
+	_mi.set_surface_override_material(0, mat)
+	var wab: AABB = _mi.global_transform * ab
+	var k: float = HERO_H / maxf(wab.size.y, 0.0001)
+	_model.scale = Vector3.ONE * k
+	_model.position = Vector3(-(wab.position.x + wab.size.x * 0.5) * k, -wab.position.y * k, -(wab.position.z + wab.size.z * 0.5) * k)
+	_clips = _prof["clips"]
+	return true
+
+
+## Pose d'un modèle statique : mouvement du corps + battement d'ailes selon l'action (phase ph de 0 à 1).
+func _set_pose_static(anim: String, ph: float, back: bool) -> void:
+	var c: Dictionary = _clips.get(anim, _clips["idle"])
+	var p: float = clampf(ph, 0.0, 1.0)
+	var s1: float = sin(p * PI)
+	var dy: float = 0.0
+	var pitch: float = 0.0
+	var flap: float = 0.0
+	match String(c.get("motion", "")):
+		"idle":
+			dy = 0.03 * sin(p * TAU)
+			flap = 0.55 * sin(p * TAU * 2.0)
+		"walk":
+			dy = 0.045 * sin(p * TAU * 2.0)
+			flap = 0.9 * sin(p * TAU * 2.0)
+		"attack":
+			pitch = 16.0 * s1
+			dy = 0.05 * s1
+			flap = sin(p * TAU * 1.5)
+		"cast":
+			dy = 0.08 * s1
+			pitch = -8.0 * s1
+			flap = -0.9 * s1
+		"hit":
+			pitch = -14.0 * s1
+			flap = -0.6 * s1
+	_flap_mat.set_shader_parameter("flap", flap)
+	_holder.position = Vector3(0, dy * HERO_H, 0)
+	var yaw: float = (180.0 if back else 0.0) + _side * SIDE_YAW * (-1.0 if back else 1.0)
+	_holder.rotation_degrees = Vector3(pitch, yaw, 0)
 
 
 func _bind_bone(b: int) -> int:
@@ -698,6 +799,9 @@ func _set_pose_clip(anim: String, ph: float, back: bool) -> void:
 
 
 func _set_pose(anim: String, ph: float, back: bool) -> void:
+	if _flap_mat != null:
+		_set_pose_static(anim, ph, back)
+		return
 	if _ap != null:
 		_set_pose_clip(anim, ph, back)
 		return

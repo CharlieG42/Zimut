@@ -266,7 +266,7 @@ func _load_poses() -> void:
 	if _load_seq(base):
 		# V380 : un héros à planches cuites peut aussi avoir un modèle « à clips » (Sylvain refait sous Blender) : ses clips
 		# remplacent alors les tables des planches dès que le modèle est prêt (les planches restent le repli).
-		if Hero3D.is_clip_model(Hero3D.model_key(entity)):
+		if Hero3D.is_clip_model(Hero3D.model_key(entity, _current_biome())):
 			_try_clip_model()
 		else:
 			_try_hero_3d()
@@ -381,7 +381,7 @@ func _try_hero_3d() -> void:
 	var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameSettings")
 	if gs == null or not bool(gs.get("hero_3d_direct")):
 		return
-	var key: String = Hero3D.model_key(entity)
+	var key: String = Hero3D.model_key(entity, _current_biome())
 	if key == "" or Hero3D.is_clip_model(key):
 		return
 	if not is_inside_tree():
@@ -401,7 +401,7 @@ func _try_clip_model() -> void:
 	var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameSettings")
 	if gs == null or not bool(gs.get("hero_3d_direct")):
 		return
-	var key: String = Hero3D.model_key(entity)
+	var key: String = Hero3D.model_key(entity, _current_biome())
 	if key == "" or not Hero3D.is_clip_model(key):
 		return
 	if not is_inside_tree():
@@ -416,7 +416,7 @@ func _try_clip_model() -> void:
 		return
 	_h3d = h
 	var n: int = Hero3D.CLIP_FRAMES
-	var clips: Dictionary = (Hero3D.MODELS[key] as Dictionary)["clips"]
+	var clips: Dictionary = Hero3D.profile(key)["clips"]
 	for an: String in clips.keys():
 		var m: Dictionary = clips[an]
 		var fr: Array = []
