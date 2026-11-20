@@ -359,3 +359,8 @@ Mesures par simulations IA/IA (80 parties par adversaire, deux côtés) :
 - Le héros adverse est désormais un **personnage posé au centre du bord haut**, devant la porte d'un **rempart sur toute la largeur** (palissade teintée par biome, bannières et torches à la couleur du camp). C'est lui qu'on touche pour le cibler ; il brille et pulse quand il est une cible valide. Sa pastille de PV est à sa gauche.
 - Le haut-gauche ne garde qu'une **pastille d'infos non cliquable** (nom, main, pioche, mana, badge BOSS).
 - Correctif : un pouvoir de héros à cible ne fait plus planter l'aperçu des cibles (#419).
+
+## 26. Butin de cartes hors mode Cartes
+- Après une victoire en combat tactique, Aventure ou Conquête (`ProgressionManager.register_victory`), `JccCollection.combat_loot` peut ajouter une carte à la collection : 30 % (40 % en Aventure), 100 % sur un boss.
+- Le niveau du combat améliore les raretés ; un boss a 20 % de laisser une carte de boss. Les cartes en double servent à la fusion (§25).
+- La carte obtenue s'affiche dans la fenêtre de résultat (puce « 🃏 Carte : … »). Test : `tests/test_jcc_butin.gd`.

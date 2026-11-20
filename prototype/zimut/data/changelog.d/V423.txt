@@ -1,0 +1,3 @@
+V423|Butin de cartes : les victoires en combat tactique, Aventure et Conquête peuvent donner une carte du mode Cartes.
+V423|Un boss donne toujours une carte, avec de meilleures raretés et une chance d obtenir une carte de boss.
+V423|La carte obtenue apparaît dans la fenêtre de résultat ; les doublons servent à l Atelier de fusion.
