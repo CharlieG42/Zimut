@@ -318,10 +318,10 @@ static func unlock_next(save: Dictionary, beaten_idx: int) -> int:
 
 
 ## Tire une carte de butin après une victoire. Un adversaire boss peut laisser sa propre carte.
-static func roll_loot(rng: RandomNumberGenerator, boss_id: String = "") -> String:
+static func roll_loot(rng: RandomNumberGenerator, boss_id: String = "", bonus: float = 0.0) -> String:
 	if boss_id != "" and rng.randf() < 0.4:
 		return boss_id
-	var r: float = rng.randf()
+	var r: float = maxf(0.0, rng.randf() - bonus)
 	var rar: String = "C"
 	if r < 0.08:
 		rar = "L"
@@ -336,6 +336,37 @@ static func roll_loot(rng: RandomNumberGenerator, boss_id: String = "") -> Strin
 	if pool.is_empty():
 		return "m_gobelin"
 	return String(pool[rng.randi_range(0, pool.size() - 1)])
+
+
+## Cartes de boss (collectibles uniquement) pouvant tomber sur un boss de combat tactique.
+static func boss_card_ids() -> Array:
+	var out: Array = []
+	for lst: Array in [OPPONENTS, CHAPTER_BOSSES]:
+		for o: Variant in lst:
+			var b: String = String((o as Dictionary).get("boss", ""))
+			if b != "" and not JccCards.get_card(b).is_empty() and not out.has(b):
+				out.append(b)
+	return out
+
+
+## Butin de cartes après une victoire hors mode Cartes (combat tactique, Aventure, Conquête).
+## Chance : 30 % (40 % en Aventure), 100 % sur un boss. Niveau du combat -> meilleures raretés ;
+## un boss a 20 % de laisser une carte de boss. Ajoute la carte et retourne son id ("" si rien).
+static func combat_loot(save: Dictionary, level: int, boss: bool, adventure: bool = false, rng: RandomNumberGenerator = null) -> String:
+	if rng == null:
+		rng = RandomNumberGenerator.new()
+		rng.randomize()
+	var chance: float = 1.0 if boss else (0.40 if adventure else 0.30)
+	if rng.randf() >= chance:
+		return ""
+	var id: String
+	var bosses: Array = boss_card_ids()
+	if boss and not bosses.is_empty() and rng.randf() < 0.2:
+		id = String(bosses[rng.randi_range(0, bosses.size() - 1)])
+	else:
+		id = roll_loot(rng, "", minf(0.004 * float(level), 0.2) + (0.12 if boss else 0.0))
+	add_card(save, id)
+	return id
 
 
 static func opponent(index: int) -> Dictionary:
