@@ -370,3 +370,10 @@ Mesures par simulations IA/IA (80 parties par adversaire, deux côtés) :
 - Après une victoire en combat tactique, Aventure ou Conquête (`ProgressionManager.register_victory`), `JccCollection.combat_loot` peut ajouter une carte à la collection : 30 % (40 % en Aventure), 100 % sur un boss.
 - Le niveau du combat améliore les raretés ; un boss a 20 % de laisser une carte de boss. Les cartes en double servent à la fusion (§25).
 - La carte obtenue s'affiche dans la fenêtre de résultat (puce « 🃏 Carte : … »). Test : `tests/test_jcc_butin.gd`.
+
+## 28. Équilibrage des héros et des classes
+Simulation IA (même deck, 14 adversaires × 12 graines) : avant, les héros allaient de 52 % à 78 % de victoires. Après réglage : classes 61–69 %, boss/légendaires ≈ 70 % (légèrement au-dessus, comme leur rareté).
+- Pouvoirs : Frappe sournoise (assassin) 5 → 4 ; Bombe (artificier) 4 → 3 ; Appel de la meute (invocateur) → « Appel des morts » (Squelette au lieu du Loup spectral).
+- Héros boss joueur : pouvoir `boss_hero` (4 dégâts au héros adverse) ; les boss adverses gardent `boss` (5).
+- Bonus de classe : PV de départ 1 à 4 (plus de mana de départ, qui était trop fort sur chasseur/assassin/artificier).
+- Bonus par tour : dégât 1 tour sur 3 (Samouraï 1 sur 4), soin 2 un tour sur 2, mana 1 un tour sur 2 (Liche éternelle 1 sur 3), Liche des brumes soin 1 par tour. La pioche supplémentaire est retirée (elle provoquait la fatigue : 35 % de victoires).
