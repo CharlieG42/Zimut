@@ -43,6 +43,8 @@ static func _load() -> void:
 			"classe": String(row["Classe"]), "sort": String(row["Sort"]), "sort_cost": int(row["SortCout"]),
 			"effet": String(row["Effet"]), "valeur": String(row["Valeur"]), "duree": int(row["Duree"]),
 			"cible": String(row["Cible"]), "sprite": String(row["Sprite"]),
+			"nation": String(row.get("Nation", "")), "name_en": String(row.get("NomEn", "")),
+			"flavor_fr": String(row.get("FlavorFr", "")), "flavor_en": String(row.get("FlavorEn", "")),
 		}
 		var kws: Array = []
 		for k in String(row.get("MotsCles", "")).split(";"):
@@ -68,6 +70,27 @@ static func get_card(id: String) -> Dictionary:
 
 
 const MAX_LEVEL := 5
+
+
+## Langue de l'interface : « en » si l'anglais est actif, sinon « fr ».
+static func lang() -> String:
+	return "en" if TranslationServer.get_locale().begins_with("en") else "fr"
+
+
+## Nom affiché de la carte (anglais si disponible et si la langue est l'anglais).
+static func display_name(card: Dictionary) -> String:
+	if lang() == "en" and String(card.get("name_en", "")) != "":
+		return String(card["name_en"])
+	return String(card.get("name", ""))
+
+
+## Petite phrase d'ambiance (punchline) dans la langue active ; "" s'il n'y en a pas.
+static func flavor(card: Dictionary) -> String:
+	var key: String = "flavor_en" if lang() == "en" else "flavor_fr"
+	var t: String = String(card.get(key, ""))
+	if t == "":
+		t = String(card.get("flavor_fr", ""))
+	return t
 
 
 static func base_of(key: String) -> String:

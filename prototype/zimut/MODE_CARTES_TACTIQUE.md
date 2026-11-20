@@ -382,3 +382,11 @@ Simulation IA (même deck, 14 adversaires × 12 graines) : avant, les héros all
 - Héros boss joueur : pouvoir `boss_hero` (4 dégâts au héros adverse) ; les boss adverses gardent `boss` (5).
 - Bonus de classe : PV de départ 1 à 4 (plus de mana de départ, qui était trop fort sur chasseur/assassin/artificier).
 - Bonus par tour : dégât 1 tour sur 3 (Samouraï 1 sur 4), soin 2 un tour sur 2, mana 1 un tour sur 2 (Liche éternelle 1 sur 3), Liche des brumes soin 1 par tour. La pioche supplémentaire est retirée (elle provoquait la fatigue : 35 % de victoires).
+
+## 30. Cartes de nations et punchlines
+- **40 nouvelles créatures** (`n_*`, sprites `assets/sprites/cartes/`), issues des planches `planche_invocations_nations*.png` : 28 communes, 8 rares, 4 épiques, 3 à 5 par nation. Elles tombent dans le butin et se fusionnent/fortifient comme les autres cartes.
+- **Identité par nation** (colonne `Nation`, affichée dans la ligne « Créature · Rare · Brasier » sur les cartes assez larges) :
+  Sylvestre = soins, régénération, provocation · Brasier = dégâts directs et de zone, dégâts au héros · Cristaux = boucliers, pioche, initiative · Marées = soin de zone, étourdissement, défense · Brumes = poison, étourdissement, vol · Cimes = gros PV, régénération, perforation · Sables = poison, boucliers, vol · Vents = vol, initiative, dégâts de zone · Ombres = dégâts au héros, initiative, poison · Rouages = boucliers, pioche, perforation.
+- Les 10 héros de classe, les monstres, les épiques et les boss existants reçoivent aussi une nation (quand elle est claire) et une punchline.
+- **Punchline** (style Magic) : colonnes `FlavorFr` / `FlavorEn`, affichée en italique sous la description (cartes d'au moins 180 px de large). `NomEn` : nom anglais. La langue suit `TranslationServer` (réglage FR/EN) ; sans texte anglais, repli sur le français.
+- Données : `cartes_jcc.txt` (colonnes ajoutées à la fin : `Nation|NomEn|FlavorFr|FlavorEn`). Test : `tests/test_jcc_nations.gd`.
