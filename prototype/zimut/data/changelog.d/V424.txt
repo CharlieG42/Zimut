@@ -1,0 +1,3 @@
+V424|Choix du héros : toute carte de héros possédée (classes et boss) est jouable depuis le bouton Héros du mode Cartes.
+V424|Commun/Rare : bonus de début de duel (PV, mana ou carte) ; Épique/Légendaire : bonus à chaque tour (soin, dégât, mana, pioche).
+V424|Le pouvoir de héros et le sprite du camp suivent la carte choisie.
