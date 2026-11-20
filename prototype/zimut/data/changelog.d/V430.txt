@@ -1,0 +1,1 @@
+V430|Le mode Cartes se débloque quand tous les héros le sont (niveau 22) ; le bouton affiche la condition tant qu'il est verrouillé.
