@@ -119,7 +119,7 @@ func _draw() -> void:
 	else:
 		# zone d'illustration
 		var art_h: float = h * (0.50 if board_mode else (0.40 if w >= 300.0 else 0.36))
-		if not board_mode and w >= 180.0 and JccCards.flavor(card) != "":
+		if not board_mode and w >= 240.0 and JccCards.flavor(card) != "":
 			art_h = h * (0.34 if w >= 300.0 else 0.30)
 		var art := Rect2(7, 7, w - 14, art_h)
 		if not board_mode:
@@ -158,8 +158,8 @@ func _draw() -> void:
 			else:
 				body = "Jeton"
 			# punchline (style Magic) : sous la description, en italique, cartes assez larges seulement
-			var flav: String = JccCards.flavor(card) if w >= 180.0 else ""
-			var ffs: int = int(clampf(w * 0.056, 12.0, 17.0))
+			var flav: String = JccCards.flavor(card) if w >= 240.0 else ""
+			var ffs: int = int(clampf(w * 0.056, 12.0, 26.0))
 			var flav_h: float = 0.0
 			if flav != "":
 				flav_h = font.get_multiline_string_size(flav, HORIZONTAL_ALIGNMENT_CENTER, w - 22, ffs).y + 12.0

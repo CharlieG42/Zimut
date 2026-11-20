@@ -395,3 +395,7 @@ Simulation IA (même deck, 14 adversaires × 12 graines) : avant, les héros all
 - Le mode **Cartes** est verrouillé tant que **tous les héros ne sont pas débloqués** (`HeroUnlock.all_unlocked`). Avec 10 classes : 3 héros de départ, puis un au niveau 4 et tous les 3 niveaux → le dernier arrive au **niveau joueur 22** (`HeroUnlock.all_unlocked_level()`).
 - `ProgressionManager.mode_unlocked(data, "cartes")` applique cette règle ; le bouton du menu affiche « 🔒 Tous les héros (niveau 22) » et `_launch_cards` refuse le lancement si verrouillé.
 - Les anciennes sauvegardes (tous héros déjà débloqués) accèdent au mode immédiatement. Test : `tests/test_jcc_deblocage.gd`.
+
+## 32. Constructeur de deck et terrains plus lisibles
+- **Deck** : la collection passe de 5 à 3 colonnes (cartes de 190×272 px) ; la colonne de gauche (détail de la carte, 490×703 px) et la liste du deck (650 px) gagnent la place libérée, ce qui rend la carte et sa punchline lisibles. La punchline n'apparaît plus que sur les grandes cartes (≥ 240 px) pour ne pas chevaucher le texte des petites. Les trois zones à défilement (collection, liste du deck) capturent la molette et le glisser du doigt sur toute leur surface.
+- **Terrains** (boue, hauteur, buisson) : case teintée et liseré de la couleur du terrain, gros pictogramme opaque et étiquette « Boue / Hauteur / Buisson » en coin, visibles même sous une unité. Une légende sous le plateau rappelle les effets : boue = déplacement ×2, hauteur = +1 PO, buisson = abri contre les tirs à distance. Aucun terrain ne bloque le passage.
