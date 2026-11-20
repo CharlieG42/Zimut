@@ -331,7 +331,7 @@ func _refresh_deck() -> void:
 		var c: Dictionary = JccCards.get_card(id)
 		var col: Color = JccCardView.RARITY_COL.get(String(c["rarity"]), Color.WHITE)
 		var kind: String = "✦" if String(c["type"]) == "Sort" else "▲"
-		var b: Button = UiKit.btn("%d  %s %s%s" % [int(c["cost"]), kind, String(c["name"]) + (" ★%d" % int(c["lvl"]) if int(c["lvl"]) > 1 else "") + (" ✚" if String(c.get("forts", "")) != "" else ""), ("  ×%d" % int(counts[id])) if int(counts[id]) > 1 else ""], col, 20, Vector2(0, 44))
+		var b: Button = UiKit.btn("%d  %s %s%s" % [int(c["cost"]), kind, JccCards.display_name(c) + (" ★%d" % int(c["lvl"]) if int(c["lvl"]) > 1 else "") + (" ✚" if String(c.get("forts", "")) != "" else ""), ("  ×%d" % int(counts[id])) if int(counts[id]) > 1 else ""], col, 20, Vector2(0, 44))
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.pressed.connect(func() -> void:
 			if JccCardView.drag_active:

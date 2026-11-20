@@ -1,71 +1,111 @@
-Id|Nom|Type|Cout|Atq|PV|PA|PM|PO|Rarete|Classe|Sort|SortCout|Effet|Valeur|Duree|Cible|Sprite|MotsCles
-c_tank|Tank|Creature|3|2|7|1|1|1|R|Tank|Coup de bouclier|1|etourdir|1|1|ennemi|players/tank
-c_mage|Mage|Creature|3|3|3|1|2|2|R|Mage|Boule de feu|2|degats|3|0|ennemi_ou_heros|players/mage
-c_chasseur|Chasseur|Creature|3|3|3|1|2|3|R|Chasseur|Flèche empoisonnée|1|poison|2|3|ennemi|players/chasseur
-c_druide|Druide|Creature|3|2|4|1|2|2|R|Druide|Soin|1|soin|3|0|allie_ou_heros|players/druide
-c_heal|Soigneur|Creature|3|1|5|1|2|2|R|Heal|Toucher guérisseur|2|soin_zone|2|0|aucune|players/heal
-c_assassin|Assassin|Creature|2|3|2|1|2|1|R|Assassin|Frappe sournoise|2|degats_heros|3|0|aucune|players/assassin
-c_invocateur|Invocateur|Creature|4|2|4|1|2|3|R|Invocateur|Invoquer un Golem|2|invoquer|j_golem|0|voie|players/invocateur
-c_sylvain|Sylvain|Creature|3|2|4|1|2|3|R|Sylvain|Invoquer un Loup spectral|2|invoquer|j_loup|0|voie|players/sylvain
-c_geomancien|Géomancien|Creature|4|2|6|1|1|1|R|Géomancien|Séisme|3|degats_zone|2|0|aucune|players/geomancien
-c_artificier|Artificier|Creature|3|2|3|1|2|1|R|Artificier|Bombe incendiaire|2|degats|4|0|ennemi|players/artificier
-m_gobelin|Gobelin|Creature|1|2|1|1|2|1|C||Rage|1|atq|1|0|allie|enemies/gobelin
-m_loup|Loup|Creature|2|3|2|1|2|1|C||Morsure|1|degats|1|0|ennemi|enemies/loup
-m_squelette|Squelette|Creature|2|2|3|1|2|1|C||Os brisés|1|bouclier|2|0|allie|enemies/squelette
-m_troll|Troll|Creature|4|4|6|1|2|1|C||Régénération|1|soin|3|0|allie|enemies/troll
-m_dragonnet|Dragonnet|Creature|3|3|3|1|2|1|C||Souffle brûlant|2|degats_zone|1|0|aucune|enemies/dragonnet
-e_golem|Golem de Pierre|Creature|5|4|8|1|1|1|E||Fracas|2|degats|4|0|ennemi|summons/golem_de_pierre
-e_ent|Ent de combat|Creature|4|3|6|1|2|1|E||Racines|1|etourdir|1|1|ennemi|summons/ent_de_combat
-e_cristal|Élémentaire de cristal|Creature|4|3|4|1|2|1|E||Éclat|1|degats|2|0|ennemi_ou_heros|summons/elementaire_de_cristal
-e_archer|Archer sylvestre|Creature|2|2|2|1|2|1|E||Tir précis|2|degats|2|0|ennemi_ou_heros|summons/archer_sylvestre
-b_gobelin_roi|Gobelin Roi|Creature|6|5|8|2|2|1|L||Cri de ralliement|2|atq_zone|1|0|aucune|enemies/gobelin_boss
-b_loup_alpha|Loup Alpha|Creature|5|5|5|2|2|1|L||Meute|2|invoquer|j_loup|0|voie|enemies/loup_boss
-b_roi_squelette|Roi Squelette|Creature|6|4|8|2|2|1|L||Légion|1|invoquer|j_squelette|0|voie|enemies/squelette_boss
-b_troll_geant|Troll Géant|Creature|7|6|10|2|2|1|L||Écrasement|2|degats|6|0|ennemi|enemies/troll_boss
-b_dragon|Dragon|Creature|8|7|9|2|2|1|L||Souffle de feu|3|degats_zone|3|0|aucune|enemies/dragonnet_boss
-b_seigneur_lave|Seigneur de Lave|Creature|7|6|8|2|2|1|L||Coulée de lave|2|degats_heros|4|0|aucune|enemies/dragonnet_desert
-b_liche_brumes|Liche des Brumes|Creature|6|3|7|2|2|1|L||Linceul de brume|3|etourdir_zone|1|1|aucune|
-b_liche_eternelle|Liche Éternelle|Creature|6|3|8|2|2|1|L||Savoir interdit|2|pioche|2|0|aucune|summons/ombre
-b_crabe_titan|Crabe Titan|Creature|6|4|10|2|2|1|L||Carapace|1|bouclier|4|0|allie|summons/requin_des_marees
-b_colosse|Colosse d'Engrenages|Creature|7|5|9|2|2|1|L||Surcharge|2|atq|3|0|allie|summons/golem_de_pierre
-b_golem_prisme|Golem Prismatique|Creature|6|4|9|2|1|1|L||Prisme de soin|2|soin_zone|3|0|aucune|
-b_seigneur_tempetes|Seigneur des Tempêtes|Creature|7|5|7|2|2|1|L||Foudre|2|degats_zone|2|0|aucune|summons/elementaire_de_cristal
-b_tharok|Tharok le Végétal|Creature|6|4|9|2|2|1|L||Écorce ancestrale|2|bouclier_zone|2|0|aucune|summons/ent_de_combat
-b_vorkann|Vorkann le Givre|Creature|7|5|8|2|2|1|L||Souffle glacial|3|etourdir_zone|1|1|aucune|
-j_golem|Golem de pierre|Jeton|0|3|4|1|1|1|C||||||||summons/golem_de_pierre
-j_loup|Loup spectral|Jeton|0|3|2|1|2|2|C||||||||summons/loup_spectral
-j_archer|Archer sylvestre|Jeton|0|2|2|1|2|1|C||||||||summons/archer_sylvestre
-j_squelette|Squelette|Jeton|0|1|1|1|2|1|C||||||||enemies/squelette
-s_coup_bouclier|Coup de bouclier|Sort|1|||1|1|1|C|Tank|||etourdir|1|1|ennemi|
-s_protection|Protection|Sort|2|||1|1|1|C|Tank|||bouclier|4|0|allie|
-s_soin_combat|Soin de combat|Sort|2|||1|1|1|C|Tank|||soin|5|0|allie_ou_heros|
-s_charge|Charge|Sort|1|||1|1|1|C|Tank|||atq|2|0|allie|
-s_javelot|Javelot lourd|Sort|3|||1|1|1|C|Tank|||degats|6|0|ennemi|
-s_frappe|Frappe puissante|Sort|3|||1|1|1|C|Tank|||degats|5|0|ennemi_ou_heros|
-s_boule_feu|Boule de feu|Sort|4|||1|2|2|R|Mage|||degats|7|0|ennemi_ou_heros|
-s_eclair|Éclair|Sort|3|||1|2|2|C|Mage|||degats|5|0|ennemi|
-s_etincelle|Étincelle|Sort|1|||1|2|2|C|Mage|||degats|2|0|ennemi_ou_heros|
-s_trait_glace|Trait de glace|Sort|2|||1|2|2|C|Mage|||degats|3|0|ennemi|
-s_explosion|Explosion|Sort|4|||1|2|2|R|Mage|||degats_zone|4|0|aucune|
-s_tir_precis|Tir précis|Sort|2|||1|2|3|C|Chasseur|||degats_heros|4|0|aucune|
-s_volee|Volée de flèches|Sort|2|||1|2|3|C|Chasseur|||degats_zone|2|0|aucune|
-s_fleche_poison|Flèche empoisonnée|Sort|2|||1|2|3|C|Chasseur|||poison|2|3|ennemi|
-s_soin|Soin|Sort|3|||1|2|2|C|Druide|||soin|6|0|allie_ou_heros|
-s_benediction|Bénédiction|Sort|2|||1|2|2|C|Druide|||atq|2|0|allie|
-s_attaque_sacree|Attaque sacrée|Sort|4|||1|2|2|R|Druide|||degats|6|0|ennemi_ou_heros|
-s_regeneration|Régénération|Sort|2|||1|1|1|C|Géomancien|||soin_zone|2|0|aucune|
-s_toucher|Toucher guérisseur|Sort|3|||1|2|2|C|Heal|||soin|8|0|allie_ou_heros|
-s_eclair_sacre|Éclair sacré|Sort|3|||1|2|2|C|Heal|||degats|4|0|ennemi_ou_heros|
-s_golem|Invoquer Golem de Pierre|Sort|3|||1|1|3|C|Invocateur|||invoquer|j_golem|0|voie|
-s_archer|Invoquer Archer Sylvestre|Sort|2|||1|2|3|C|Sylvain|||invoquer|j_archer|0|voie|
-s_loup|Invoquer Loup Spectral|Sort|2|||1|2|3|C|Sylvain|||invoquer|j_loup|0|voie|
-s_inspiration|Inspiration|Sort|2|||1|2|2|C|Mage|||pioche|2|0|aucune|
-s_cristal_mana|Cristal de mana|Sort|1|||1|1|1|R|Géomancien|||mana|3|0|aucune|
-s_cri_guerre|Cri de guerre|Sort|3|||1|1|1|R|Tank|||atq_zone|1|0|aucune|
-s_mur_pierre|Mur de pierre|Sort|2|||1|1|1|C|Géomancien|||bouclier_zone|2|0|aucune|
-s_blizzard|Blizzard|Sort|4|||1|2|2|R|Mage|||etourdir_zone|1|1|aucune|
-m_vampire|Vampire|Creature|4|3|4|1|2|1|R|Assassin|Boire le sang|1|soin|2|0|allie|enemies/squelette|vol
-m_belier|Bélier|Creature|3|4|5|1|1|1|C||Charge|1|atq|2|0|allie|enemies/troll|perforation
-c_chevalier|Chevalier|Creature|4|2|8|1|1|1|R|Tank|Gardefou|1|etourdir|1|1|ennemi|players/tank|provocation
-m_moine|Moine|Creature|3|1|5|1|2|1|C|Heal|Prière|1|soin|2|0|allie|players/heal|regeneration
-c_samourai|Samouraï|Creature|4|3|5|2|2|1|E|Chasseur|Iaijutsu|1|degats|2|0|ennemi|players/chasseur|initiative
+Id|Nom|Type|Cout|Atq|PV|PA|PM|PO|Rarete|Classe|Sort|SortCout|Effet|Valeur|Duree|Cible|Sprite|MotsCles|Nation|NomEn|FlavorFr|FlavorEn
+c_tank|Tank|Creature|3|2|7|1|1|1|R|Tank|Coup de bouclier|1|etourdir|1|1|ennemi|players/tank||Cimes|Tank|Un mur qui avance, c'est encore un mur.|A wall that advances is still a wall.
+c_mage|Mage|Creature|3|3|3|1|2|2|R|Mage|Boule de feu|2|degats|3|0|ennemi_ou_heros|players/mage||Cristaux|Mage|Il a lu tous les livres. Il a brûlé la moitié.|He has read every book. He burned half of them.
+c_chasseur|Chasseur|Creature|3|3|3|1|2|3|R|Chasseur|Flèche empoisonnée|1|poison|2|3|ennemi|players/chasseur||Brasier|Hunter|Une flèche, un nom, aucun regret.|One arrow, one name, no regrets.
+c_druide|Druide|Creature|3|2|4|1|2|2|R|Druide|Soin|1|soin|3|0|allie_ou_heros|players/druide||Sylvestre|Druid|La forêt lui doit des services. Elle les rend.|The forest owes him favors. It repays them.
+c_heal|Soigneur|Creature|3|1|5|1|2|2|R|Heal|Toucher guérisseur|2|soin_zone|2|0|aucune|players/heal||Marées|Healer|Elle soigne tout, sauf l'orgueil.|She heals everything but pride.
+c_assassin|Assassin|Creature|2|3|2|1|2|1|R|Assassin|Frappe sournoise|2|degats_heros|3|0|aucune|players/assassin||Ombres|Assassin|Vous ne le verrez pas. C'est le principe.|You won't see him. That's the point.
+c_invocateur|Invocateur|Creature|4|2|4|1|2|3|R|Invocateur|Invoquer un Golem|2|invoquer|j_golem|0|voie|players/invocateur||Brumes|Summoner|Ses amis sont toujours de passage.|His friends are always just passing through.
+c_sylvain|Sylvain|Creature|3|2|4|1|2|3|R|Sylvain|Invoquer un Loup spectral|2|invoquer|j_loup|0|voie|players/sylvain||Vents|Sylvan|Le vent l'a élevé. Il en a gardé le caractère.|The wind raised him. He kept its temper.
+c_geomancien|Géomancien|Creature|4|2|6|1|1|1|R|Géomancien|Séisme|3|degats_zone|2|0|aucune|players/geomancien||Sables|Geomancer|Il parle à la pierre. La pierre répond, parfois.|He talks to stone. Stone answers, sometimes.
+c_artificier|Artificier|Creature|3|2|3|1|2|1|R|Artificier|Bombe incendiaire|2|degats|4|0|ennemi|players/artificier||Rouages|Engineer|Tout se règle avec la bonne quantité de poudre.|Everything is solved with the right amount of powder.
+m_gobelin|Gobelin|Creature|1|2|1|1|2|1|C||Rage|1|atq|1|0|allie|enemies/gobelin|||Goblin|Petit, vert, et convaincu d'être le héros.|Small, green, and convinced he is the hero.
+m_loup|Loup|Creature|2|3|2|1|2|1|C||Morsure|1|degats|1|0|ennemi|enemies/loup|||Wolf|La meute écoute. Le troupeau tremble.|The pack listens. The flock trembles.
+m_squelette|Squelette|Creature|2|2|3|1|2|1|C||Os brisés|1|bouclier|2|0|allie|enemies/squelette||Ombres|Skeleton|Il a perdu sa chair, pas ses manies.|He lost his flesh, not his habits.
+m_troll|Troll|Creature|4|4|6|1|2|1|C||Régénération|1|soin|3|0|allie|enemies/troll|||Troll|Ce qu'il ne comprend pas, il l'écrase.|What he doesn't understand, he crushes.
+m_dragonnet|Dragonnet|Creature|3|3|3|1|2|1|C||Souffle brûlant|2|degats_zone|1|0|aucune|enemies/dragonnet||Brasier|Dragonling|Petit dragon, grand appétit.|Small dragon, big appetite.
+e_golem|Golem de Pierre|Creature|5|4|8|1|1|1|E||Fracas|2|degats|4|0|ennemi|summons/golem_de_pierre||Sables|Stone Golem|Il porte la montagne sur son dos et ne s'en plaint pas.|He carries the mountain on his back and never complains.
+e_ent|Ent de combat|Creature|4|3|6|1|2|1|E||Racines|1|etourdir|1|1|ennemi|summons/ent_de_combat||Sylvestre|Battle Ent|Lent à la colère, interminable une fois lancé.|Slow to anger, endless once started.
+e_cristal|Élémentaire de cristal|Creature|4|3|4|1|2|1|E||Éclat|1|degats|2|0|ennemi_ou_heros|summons/elementaire_de_cristal||Cristaux|Crystal Elemental|Un reflet qui a décidé de frapper.|A reflection that decided to strike.
+e_archer|Archer sylvestre|Creature|2|2|2|1|2|1|E||Tir précis|2|degats|2|0|ennemi_ou_heros|summons/archer_sylvestre||Sylvestre|Sylvan Archer|Il ne rate jamais. Il laisse juste vivre parfois.|He never misses. He just lets some live.
+b_gobelin_roi|Gobelin Roi|Creature|6|5|8|2|2|1|L||Cri de ralliement|2|atq_zone|1|0|aucune|enemies/gobelin_boss|||Goblin King|Sa couronne est un seau. Personne ne le lui dit.|His crown is a bucket. Nobody tells him.
+b_loup_alpha|Loup Alpha|Creature|5|5|5|2|2|1|L||Meute|2|invoquer|j_loup|0|voie|enemies/loup_boss|||Alpha Wolf|Quand il hurle, la forêt éteint ses lumières.|When he howls, the forest turns off its lights.
+b_roi_squelette|Roi Squelette|Creature|6|4|8|2|2|1|L||Légion|1|invoquer|j_squelette|0|voie|enemies/squelette_boss||Ombres|Skeleton King|Son règne dure depuis mille ans. Les sujets sont fidèles.|His reign has lasted a thousand years. His subjects are loyal.
+b_troll_geant|Troll Géant|Creature|7|6|10|2|2|1|L||Écrasement|2|degats|6|0|ennemi|enemies/troll_boss|||Giant Troll|Les montagnes lui servent de tabourets.|Mountains serve him as stools.
+b_dragon|Dragon|Creature|8|7|9|2|2|1|L||Souffle de feu|3|degats_zone|3|0|aucune|enemies/dragonnet_boss||Brasier|Dragon|Le trésor est secondaire. Le feu, non.|The treasure is secondary. The fire is not.
+b_seigneur_lave|Seigneur de Lave|Creature|7|6|8|2|2|1|L||Coulée de lave|2|degats_heros|4|0|aucune|enemies/dragonnet_desert||Brasier|Lava Lord|Il ne marche pas : il coule, et le sol suit.|He doesn't walk: he flows, and the ground follows.
+b_liche_brumes|Liche des Brumes|Creature|6|3|7|2|2|1|L||Linceul de brume|3|etourdir_zone|1|1|aucune|||Brumes|Mist Lich|Sa voix est un brouillard. Son sourire, un piège.|His voice is a fog. His smile, a trap.
+b_liche_eternelle|Liche Éternelle|Creature|6|3|8|2|2|1|L||Savoir interdit|2|pioche|2|0|aucune|summons/ombre||Ombres|Eternal Lich|Elle sait comment tout finit. Elle l'a déjà lu.|She knows how everything ends. She has already read it.
+b_crabe_titan|Crabe Titan|Creature|6|4|10|2|2|1|L||Carapace|1|bouclier|4|0|allie|summons/requin_des_marees||Marées|Titan Crab|Il a mis mille ans à faire sa coquille. Essayez.|It took him a thousand years to build his shell. Try.
+b_colosse|Colosse d'Engrenages|Creature|7|5|9|2|2|1|L||Surcharge|2|atq|3|0|allie|summons/golem_de_pierre||Rouages|Gear Colossus|Chaque dent de ses engrenages a un nom.|Every tooth of his gears has a name.
+b_golem_prisme|Golem Prismatique|Creature|6|4|9|2|1|1|L||Prisme de soin|2|soin_zone|3|0|aucune|||Cristaux|Prism Golem|Il décompose la lumière. Puis il vous décompose.|He splits light. Then he splits you.
+b_seigneur_tempetes|Seigneur des Tempêtes|Creature|7|5|7|2|2|1|L||Foudre|2|degats_zone|2|0|aucune|summons/elementaire_de_cristal||Vents|Storm Lord|L'orage n'est que son soupir du matin.|Thunder is only his morning sigh.
+b_tharok|Tharok le Végétal|Creature|6|4|9|2|2|1|L||Écorce ancestrale|2|bouclier_zone|2|0|aucune|summons/ent_de_combat||Sylvestre|Tharok the Verdant|Il a vu naître la forêt. Il l'a vexée.|He saw the forest born. He annoyed it.
+b_vorkann|Vorkann le Givre|Creature|7|5|8|2|2|1|L||Souffle glacial|3|etourdir_zone|1|1|aucune|||Cimes|Vorkann the Frost|Le froid n'est pas son arme, c'est son caractère.|Cold is not his weapon, it's his temper.
+j_golem|Golem de pierre|Jeton|0|3|4|1|1|1|C||||||||summons/golem_de_pierre|||||
+j_loup|Loup spectral|Jeton|0|3|2|1|2|2|C||||||||summons/loup_spectral|||||
+j_archer|Archer sylvestre|Jeton|0|2|2|1|2|1|C||||||||summons/archer_sylvestre|||||
+j_squelette|Squelette|Jeton|0|1|1|1|2|1|C||||||||enemies/squelette|||||
+s_coup_bouclier|Coup de bouclier|Sort|1|||1|1|1|C|Tank|||etourdir|1|1|ennemi||||||
+s_protection|Protection|Sort|2|||1|1|1|C|Tank|||bouclier|4|0|allie||||||
+s_soin_combat|Soin de combat|Sort|2|||1|1|1|C|Tank|||soin|5|0|allie_ou_heros||||||
+s_charge|Charge|Sort|1|||1|1|1|C|Tank|||atq|2|0|allie||||||
+s_javelot|Javelot lourd|Sort|3|||1|1|1|C|Tank|||degats|6|0|ennemi||||||
+s_frappe|Frappe puissante|Sort|3|||1|1|1|C|Tank|||degats|5|0|ennemi_ou_heros||||||
+s_boule_feu|Boule de feu|Sort|4|||1|2|2|R|Mage|||degats|7|0|ennemi_ou_heros||||||
+s_eclair|Éclair|Sort|3|||1|2|2|C|Mage|||degats|5|0|ennemi||||||
+s_etincelle|Étincelle|Sort|1|||1|2|2|C|Mage|||degats|2|0|ennemi_ou_heros||||||
+s_trait_glace|Trait de glace|Sort|2|||1|2|2|C|Mage|||degats|3|0|ennemi||||||
+s_explosion|Explosion|Sort|4|||1|2|2|R|Mage|||degats_zone|4|0|aucune||||||
+s_tir_precis|Tir précis|Sort|2|||1|2|3|C|Chasseur|||degats_heros|4|0|aucune||||||
+s_volee|Volée de flèches|Sort|2|||1|2|3|C|Chasseur|||degats_zone|2|0|aucune||||||
+s_fleche_poison|Flèche empoisonnée|Sort|2|||1|2|3|C|Chasseur|||poison|2|3|ennemi||||||
+s_soin|Soin|Sort|3|||1|2|2|C|Druide|||soin|6|0|allie_ou_heros||||||
+s_benediction|Bénédiction|Sort|2|||1|2|2|C|Druide|||atq|2|0|allie||||||
+s_attaque_sacree|Attaque sacrée|Sort|4|||1|2|2|R|Druide|||degats|6|0|ennemi_ou_heros||||||
+s_regeneration|Régénération|Sort|2|||1|1|1|C|Géomancien|||soin_zone|2|0|aucune||||||
+s_toucher|Toucher guérisseur|Sort|3|||1|2|2|C|Heal|||soin|8|0|allie_ou_heros||||||
+s_eclair_sacre|Éclair sacré|Sort|3|||1|2|2|C|Heal|||degats|4|0|ennemi_ou_heros||||||
+s_golem|Invoquer Golem de Pierre|Sort|3|||1|1|3|C|Invocateur|||invoquer|j_golem|0|voie||||||
+s_archer|Invoquer Archer Sylvestre|Sort|2|||1|2|3|C|Sylvain|||invoquer|j_archer|0|voie||||||
+s_loup|Invoquer Loup Spectral|Sort|2|||1|2|3|C|Sylvain|||invoquer|j_loup|0|voie||||||
+s_inspiration|Inspiration|Sort|2|||1|2|2|C|Mage|||pioche|2|0|aucune||||||
+s_cristal_mana|Cristal de mana|Sort|1|||1|1|1|R|Géomancien|||mana|3|0|aucune||||||
+s_cri_guerre|Cri de guerre|Sort|3|||1|1|1|R|Tank|||atq_zone|1|0|aucune||||||
+s_mur_pierre|Mur de pierre|Sort|2|||1|1|1|C|Géomancien|||bouclier_zone|2|0|aucune||||||
+s_blizzard|Blizzard|Sort|4|||1|2|2|R|Mage|||etourdir_zone|1|1|aucune||||||
+m_vampire|Vampire|Creature|4|3|4|1|2|1|R|Assassin|Boire le sang|1|soin|2|0|allie|enemies/squelette|vol|Ombres|Vampire|Il invite toujours poliment. Une seule fois.|He always asks politely. Only once.
+m_belier|Bélier|Creature|3|4|5|1|1|1|C||Charge|1|atq|2|0|allie|enemies/troll|perforation|Cimes|Ram|Il n'a qu'une idée, et elle est devant lui.|He has one idea, and it's right in front of him.
+c_chevalier|Chevalier|Creature|4|2|8|1|1|1|R|Tank|Gardefou|1|etourdir|1|1|ennemi|players/tank|provocation|Cimes|Knight|Un serment, une armure, un très long chemin.|One oath, one suit of armor, one very long road.
+m_moine|Moine|Creature|3|1|5|1|2|1|C|Heal|Prière|1|soin|2|0|allie|players/heal|regeneration|Marées|Monk|Prier, c'est bien. Guérir, c'est mieux.|Praying is good. Healing is better.
+c_samourai|Samouraï|Creature|4|3|5|2|2|1|E|Chasseur|Iaijutsu|1|degats|2|0|ennemi|players/chasseur|initiative|Brasier|Samurai|Sa lame sort une fois. Le reste est silence.|His blade leaves once. The rest is silence.
+n_lutin_spores|Lutin des spores|Creature|1|1|2|1|2|1|C||Spores curatives|1|soin|2|0|allie|cartes/n_lutin_spores||Sylvestre|Spore Sprite|Il sème des champignons et des amis.|He plants mushrooms and friendships.
+n_sylvin|Sylvin|Creature|2|2|3|1|2|1|C||Gland protecteur|1|bouclier|2|0|allie|cartes/n_sylvin||Sylvestre|Sylvan Scout|Son bouclier est un gland. Il en est très fier.|His shield is an acorn. He is very proud of it.
+n_dryade|Dryade|Creature|4|2|6|1|1|1|R||Floraison|2|soin_zone|2|0|aucune|cartes/n_dryade|regeneration|Sylvestre|Dryad|Là où elle passe, même les ronces fleurissent.|Where she walks, even brambles bloom.
+n_sanglier_mousse|Sanglier des clairières|Creature|3|3|4|1|2|1|C||Grognement|1|atq|1|0|allie|cartes/n_sanglier_mousse|provocation|Sylvestre|Glade Boar|Il garde la clairière. Et le déjeuner.|He guards the glade. And lunch.
+n_salamandre_feu|Salamandre de feu|Creature|2|3|2|1|2|1|C||Braise|1|degats|1|0|ennemi|cartes/n_salamandre_feu||Brasier|Fire Salamander|Elle ne brûle pas ses ponts : elle les allume.|She doesn't burn her bridges: she lights them.
+n_demon_flamme|Démon de flamme|Creature|5|5|4|1|2|1|R||Embrasement|3|degats_zone|2|0|aucune|cartes/n_demon_flamme||Brasier|Flame Fiend|Il rit quand tout brûle. Il rit tout le temps.|He laughs when everything burns. He laughs all the time.
+n_sanglier_lave|Sanglier de lave|Creature|4|5|5|1|1|1|C||Éruption|2|degats|2|0|ennemi_ou_heros|cartes/n_sanglier_lave||Brasier|Lava Boar|Son cœur est un volcan. Son humeur aussi.|His heart is a volcano. So is his mood.
+n_salamandre_rouge|Salamandre rouge|Creature|3|3|3|1|2|1|C||Crachat de feu|2|degats_heros|2|0|aucune|cartes/n_salamandre_rouge||Brasier|Red Salamander|Elle vise toujours le plus haut. Surtout le chef.|She always aims high. Especially at the boss.
+n_cristal_vivant|Cristal vivant|Creature|2|1|4|1|1|1|C||Facette|1|bouclier|2|0|allie|cartes/n_cristal_vivant||Cristaux|Living Crystal|Il pense en facettes. Et il pense beaucoup.|He thinks in facets. And he thinks a lot.
+n_fee_cristaux|Fée des cristaux|Creature|3|2|3|1|3|1|R||Poussière de savoir|2|pioche|1|0|aucune|cartes/n_fee_cristaux||Cristaux|Crystal Fairy|Un grain de sa poussière, et tout devient clair.|One grain of her dust and everything becomes clear.
+n_loup_quartz|Loup de quartz|Creature|3|4|3|1|2|1|C||Éclat|1|degats|1|0|ennemi|cartes/n_loup_quartz|initiative|Cristaux|Quartz Wolf|Il mord avant que l'écho de son hurlement ne revienne.|He bites before the echo of his howl returns.
+n_requin_marees|Requin des marées|Creature|3|4|3|1|2|1|C||Morsure|1|degats|1|0|ennemi|cartes/n_requin_marees|initiative|Marées|Tide Shark|Sourire large, dents plus larges encore.|A wide smile, even wider teeth.
+n_sirene|Sirène|Creature|4|2|5|1|2|1|R||Chant des flots|3|etourdir_zone|1|1|aucune|cartes/n_sirene||Marées|Mermaid|Son chant a fait naufrager plus d'équipages que les tempêtes.|Her song has wrecked more crews than any storm.
+n_crabe_cuirasse|Crabe cuirassé|Creature|3|2|6|1|1|1|C||Carapace|1|bouclier|1|0|allie|cartes/n_crabe_cuirasse|provocation|Marées|Armored Crab|Il a des lunettes de plongée. Il n'a jamais plongé.|He wears diving goggles. He has never dived.
+n_nymphe_meduse|Nymphe-méduse|Creature|2|2|3|1|2|1|C||Piqûre|1|etourdir|1|1|ennemi|cartes/n_nymphe_meduse||Marées|Jellyfish Nymph|Un baiser, et c'est la sieste pour tout le monde.|One kiss and everybody takes a nap.
+n_sirene_corail|Sirène de corail|Creature|5|3|7|1|2|1|E||Marée de vie|2|soin_zone|3|0|aucune|cartes/n_sirene_corail||Marées|Coral Siren|La mer donne, la mer reprend, la mer soigne.|The sea gives, the sea takes, the sea heals.
+n_serpent_brumes|Serpent des brumes|Creature|2|2|2|1|2|1|C||Venin|1|poison|1|3|ennemi|cartes/n_serpent_brumes||Brumes|Mist Serpent|On l'entend quand il est déjà trop tard.|You only hear it when it is already too late.
+n_crapaud_brumes|Crapaud des brumes|Creature|3|2|5|1|1|1|C||Brouillard|3|etourdir_zone|1|1|aucune|cartes/n_crapaud_brumes||Brumes|Mist Toad|Il avale la lumière et recrache le brouillard.|He swallows the light and spits out fog.
+n_spectre|Spectre|Creature|4|3|4|1|2|1|R||Étreinte glacée|2|degats|3|0|ennemi|cartes/n_spectre|vol|Brumes|Specter|Il cherche sa lune. Elle, elle l'a oublié.|He is looking for his moon. She has forgotten him.
+n_fee_brumes|Fée des brumes|Creature|2|1|3|1|2|1|C||Poudre d'ailes|1|etourdir|1|1|ennemi|cartes/n_fee_brumes|vol|Brumes|Mist Fairy|Ses ailes laissent un sommeil dans leur sillage.|Her wings leave a trail of sleep.
+n_yeti_cimes|Yéti des cimes|Creature|5|5|7|1|1|1|E||Hurlement|2|atq_zone|1|0|aucune|cartes/n_yeti_cimes||Cimes|Summit Yeti|Légende ? Non. Voisin.|A legend? No. A neighbor.
+n_ourson_neiges|Ourson des neiges|Creature|1|1|3|1|2|1|C||Câlin glacé|1|bouclier|1|0|allie|cartes/n_ourson_neiges||Cimes|Snow Cub|Le câlin dure jusqu'au dégel.|The hug lasts until the thaw.
+n_troll_pics|Troll des pics|Creature|4|4|5|1|1|1|C||Rocher|2|degats|3|0|ennemi|cartes/n_troll_pics|regeneration|Cimes|Peak Troll|Sa barbe est un glacier. Sa patience, un caillou.|His beard is a glacier. His patience, a pebble.
+n_belier_givre|Bélier de givre|Creature|3|3|4|1|2|1|C||Givre|1|etourdir|1|1|ennemi|cartes/n_belier_givre|perforation|Cimes|Frost Ram|Têtu comme une montagne. Doux comme un nuage.|Stubborn as a mountain. Soft as a cloud.
+n_scorpion_dunes|Scorpion des dunes|Creature|3|3|2|1|3|1|C||Dard|1|poison|2|2|ennemi|cartes/n_scorpion_dunes||Sables|Dune Scorpion|Il ne se cache pas : il attend le soleil.|He doesn't hide: he waits for the sun.
+n_sphinx|Sphinx|Creature|4|3|5|1|2|1|R||Énigme|2|etourdir|1|1|ennemi|cartes/n_sphinx||Sables|Sphinx|Il pose une question. Personne n'a jamais fini la réponse.|He asks one question. Nobody ever finished the answer.
+n_homme_faucon|Homme-faucon|Creature|3|3|3|1|2|1|C||Marteau d'or|2|degats|2|0|ennemi|cartes/n_homme_faucon|vol|Sables|Hawkman|Il frappe du ciel, avec un marteau qui pèse plus que lui.|He strikes from the sky with a hammer heavier than himself.
+n_scarabee_royal|Scarabée royal|Creature|2|1|5|1|1|1|C||Carapace dorée|2|bouclier|2|0|allie|cartes/n_scarabee_royal|provocation|Sables|Royal Scarab|Les pharaons l'ont enterré avec leur trésor. Il s'en est sorti.|Pharaohs buried him with their treasure. He got out.
+n_harpie|Harpie|Creature|3|3|2|1|2|1|C||Rafale|1|degats|1|0|ennemi_ou_heros|cartes/n_harpie|vol|Vents|Harpy|Elle chante faux. Volontairement.|She sings off-key. On purpose.
+n_dragon_blanc|Dragon blanc|Creature|6|5|6|1|2|1|E||Tempête|3|degats_zone|2|0|aucune|cartes/n_dragon_blanc|vol|Vents|White Dragon|Quand il bat des ailes, les nuages se rangent.|When he flaps his wings, the clouds step aside.
+n_fee_vents|Fée des vents|Creature|2|2|2|1|2|1|C||Brise|1|atq|1|0|allie|cartes/n_fee_vents|initiative|Vents|Wind Fairy|Elle arrive avant le bruit de son arrivée.|She arrives before the sound of her arrival.
+n_aigle_celeste|Aigle céleste|Creature|3|3|3|1|2|1|C||Piqué|2|degats_heros|2|0|aucune|cartes/n_aigle_celeste|vol|Vents|Sky Eagle|Il ne chasse que des couronnes.|He only hunts crowns.
+n_corbeau_ombres|Corbeau des ombres|Creature|2|2|2|1|2|1|C||Présage|1|degats_heros|1|0|aucune|cartes/n_corbeau_ombres|vol|Ombres|Shadow Raven|Il croasse ton nom. Il le connaît déjà.|He croaks your name. He already knows it.
+n_centaure_archer|Centaure archer|Creature|4|3|4|1|3|3|R||Flèche d'ombre|2|degats|3|0|ennemi_ou_heros|cartes/n_centaure_archer|initiative|Ombres|Centaur Archer|On ne l'entend pas galoper. On entend la corde.|You don't hear him gallop. You hear the string.
+n_sorcier_corbeau|Sorcier corbeau|Creature|5|4|5|1|2|2|E||Malédiction|2|poison|2|3|ennemi|cartes/n_sorcier_corbeau||Ombres|Raven Sorcerer|Il collectionne les noms. Les vrais.|He collects names. The real ones.
+n_panthere_ombres|Panthère des ombres|Creature|3|4|3|1|2|1|C||Griffes|2|degats_heros|2|0|aucune|cartes/n_panthere_ombres|initiative|Ombres|Shadow Panther|Son ombre arrive en retard à ses propres attaques.|Her shadow arrives late to her own attacks.
+n_araignee_mecanique|Araignée mécanique|Creature|3|3|4|1|2|1|C||Fil d'acier|1|etourdir|1|1|ennemi|cartes/n_araignee_mecanique|perforation|Rouages|Clockwork Spider|Elle tisse à la vapeur. La toile sent l'huile chaude.|She spins by steam. The web smells of hot oil.
+n_automate|Automate|Creature|3|3|5|1|2|1|C||Blindage|2|bouclier_zone|1|0|aucune|cartes/n_automate||Rouages|Automaton|Remontez-le : il fera exactement ce que vous espérez. Presque.|Wind him up and he'll do exactly what you hoped. Almost.
+n_horloge_vivante|Horloge vivante|Creature|3|1|4|1|2|1|R||Carillon|2|pioche|1|0|aucune|cartes/n_horloge_vivante||Rouages|Living Clock|Elle est toujours à l'heure. Ce n'est jamais la vôtre.|She is always on time. Never yours.
+n_scarabee_mecanique|Scarabée mécanique|Creature|2|2|3|1|2|1|C||Surcharge|1|atq|1|0|allie|cartes/n_scarabee_mecanique||Rouages|Clockwork Beetle|Un petit bruit de tic-tac, puis un grand bruit.|A little tick-tock, then a big noise.

@@ -119,6 +119,8 @@ func _draw() -> void:
 	else:
 		# zone d'illustration
 		var art_h: float = h * (0.50 if board_mode else (0.40 if w >= 300.0 else 0.36))
+		if not board_mode and w >= 180.0 and JccCards.flavor(card) != "":
+			art_h = h * (0.34 if w >= 300.0 else 0.30)
 		var art := Rect2(7, 7, w - 14, art_h)
 		if not board_mode:
 			art = Rect2(7, 32, w - 14, art_h)
@@ -127,7 +129,7 @@ func _draw() -> void:
 		_draw_art(art, is_spell, rcol)
 		draw_rect(art, rcol.darkened(0.35), false, 2.0)
 		# nom
-		var name_txt: String = String(card.get("name", ""))
+		var name_txt: String = JccCards.display_name(card)
 		var ny: float = art.end.y + (6.0 if board_mode else 4.0)
 		var fs: int = int(clampf(w * 0.105, 14.0, 30.0))
 		while fs > 10 and font.get_string_size(name_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > w - 14.0:
@@ -139,6 +141,8 @@ func _draw() -> void:
 			# type / rareté
 			var kind: String = "Sort" if is_spell else ("Boss" if rarity == "L" else "Créature")
 			var sub: String = "%s · %s" % [kind, JccCards.rarity_label(rarity)]
+			if String(card.get("nation", "")) != "" and w >= 230.0:
+				sub += " · " + String(card["nation"])
 			var sfs: int = int(clampf(w * 0.055, 14.0, 19.0))
 			draw_string(font, Vector2(0, y + sfs), sub, HORIZONTAL_ALIGNMENT_CENTER, w, sfs, rcol.lightened(0.15))
 			y += 18.0
@@ -153,11 +157,24 @@ func _draw() -> void:
 				body = "✦ %s (%d) : %s" % [card["sort"], int(card["sort_cost"]), JccCards.effect_text(card, true)]
 			else:
 				body = "Jeton"
-			var avail: float = h - 50.0 - y
+			# punchline (style Magic) : sous la description, en italique, cartes assez larges seulement
+			var flav: String = JccCards.flavor(card) if w >= 180.0 else ""
+			var ffs: int = int(clampf(w * 0.056, 12.0, 17.0))
+			var flav_h: float = 0.0
+			if flav != "":
+				flav_h = font.get_multiline_string_size(flav, HORIZONTAL_ALIGNMENT_CENTER, w - 22, ffs).y + 12.0
+			var avail: float = h - 62.0 - y - flav_h
 			var bfs: int = 21 if w >= 300.0 else (18 if w >= 180.0 else 13)
 			while bfs > 9 and font.get_multiline_string_size(body, HORIZONTAL_ALIGNMENT_CENTER, w - 16, bfs).y > avail:
 				bfs -= 1
 			draw_multiline_string(font, Vector2(8, y + bfs), body, HORIZONTAL_ALIGNMENT_CENTER, w - 16, bfs, -1, Color(0.92, 0.90, 0.84))
+			if flav != "":
+				var fy: float = h - 62.0 - flav_h + 10.0
+				draw_line(Vector2(w * 0.25, fy - 8.0), Vector2(w * 0.75, fy - 8.0), rcol.darkened(0.2), 1.0)
+				var ox: float = 0.22 * (fy + flav_h * 0.5)
+				draw_set_transform_matrix(Transform2D(Vector2(1, 0), Vector2(-0.22, 1), Vector2(ox, 0)))
+				draw_multiline_string(font, Vector2(11, fy + float(ffs)), flav, HORIZONTAL_ALIGNMENT_CENTER, w - 22, ffs, -1, Color(0.78, 0.74, 0.62))
+				draw_set_transform_matrix(Transform2D.IDENTITY)
 		else:
 			# pastille de sort disponible
 			if String(card.get("sort", "")) != "":
