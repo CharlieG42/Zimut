@@ -1,0 +1,3 @@
+V426|Équilibrage des héros : classes entre 61 et 69 % de victoires en simulation, légendaires autour de 70 %.
+V426|Pouvoirs ajustés : Frappe sournoise 4, Bombe 3, Appel des morts (Squelette) ; boss joués par le joueur : Frappe du boss 4.
+V426|Bonus de héros espacés ; plus de pioche supplémentaire (elle provoquait la fatigue).

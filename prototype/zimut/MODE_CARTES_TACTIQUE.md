@@ -376,3 +376,9 @@ Mesures par simulations IA/IA (80 parties par adversaire, deux côtés) :
 - Coût : 150 × (fortifications déjà posées + 1) + 50 × (niveau − 1) or ; consomme un exemplaire de la carte, qui devient une version fortifiée.
 - Clé de collection : `id[@niveau][~codes]` (ex. `c_tank@3~AM`, codes triés : A=PA, M=PM, O=PO, P=provocation, I=initiative, R=régénération, F=perforation, V=vol). Une carte fortifiée ne peut plus être fusionnée.
 - Les decks qui perdent l'exemplaire reçoivent la version fortifiée (une fois). Les sorts ne sont pas fortifiables. Test : `tests/test_jcc_fusion.gd`.
+## 28. Équilibrage des héros et des classes
+Simulation IA (même deck, 14 adversaires × 12 graines) : avant, les héros allaient de 52 % à 78 % de victoires. Après réglage : classes 61–69 %, boss/légendaires ≈ 70 % (légèrement au-dessus, comme leur rareté).
+- Pouvoirs : Frappe sournoise (assassin) 5 → 4 ; Bombe (artificier) 4 → 3 ; Appel de la meute (invocateur) → « Appel des morts » (Squelette au lieu du Loup spectral).
+- Héros boss joueur : pouvoir `boss_hero` (4 dégâts au héros adverse) ; les boss adverses gardent `boss` (5).
+- Bonus de classe : PV de départ 1 à 4 (plus de mana de départ, qui était trop fort sur chasseur/assassin/artificier).
+- Bonus par tour : dégât 1 tour sur 3 (Samouraï 1 sur 4), soin 2 un tour sur 2, mana 1 un tour sur 2 (Liche éternelle 1 sur 3), Liche des brumes soin 1 par tour. La pioche supplémentaire est retirée (elle provoquait la fatigue : 35 % de victoires).

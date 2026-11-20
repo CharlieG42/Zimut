@@ -448,7 +448,7 @@ static func set_hero(save: Dictionary, id: String) -> bool:
 ## Clé de pouvoir de héros (JccDuel.power_for) : classe de la carte, ou « boss ».
 static func hero_power_key(id: String) -> String:
 	if id.begins_with("b_"):
-		return "boss"
+		return "boss_hero"
 	var c: Dictionary = JccCards.get_card(id)
 	var cl: String = String(c.get("classe", ""))
 	return cl if cl != "" else "mage"
