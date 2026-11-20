@@ -1,0 +1,3 @@
+V431|La harpie Meshy (30 000 triangles, texture 2048 ; 12 000 / 1024 sur téléphone) est jouable en 3D : modèle sans squelette, les ailes battent par déformation des sommets, le corps plane, s'élance et recule selon l'action.
+V431|Combat Tactique : dans les Vents, squelettes et dragonnets prennent la harpie 3D ; en Forêt (bas niveau), les loups ennemis aussi. Essai, table Hero3D.ENEMY_MODEL à vider pour revenir aux sprites 2D.
+V431|Mode Cartes : l'illustration de la carte Harpie est cuite depuis le modèle 3D (tools/bake_carte_3d.gd) et le deck du premier adversaire (Meute de gobelins) contient deux harpies.

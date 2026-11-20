@@ -19,7 +19,7 @@ const CHALLENGES: Array = [
 ## Adversaires : nom, camp d'héros (sprite du portrait), deck de 20 cartes, éventuel boss (carte à gagner).
 const OPPONENTS: Array = [
 	{"name": "Meute de gobelins", "biome": "Forêt", "accent": "#6fcf5a", "sprite": "enemies/gobelin", "boss": "",
-		"deck": "m_gobelin m_gobelin m_gobelin m_gobelin m_loup m_loup m_loup e_archer e_archer m_troll s_etincelle s_etincelle s_charge s_charge s_javelot s_loup s_loup s_volee s_volee s_frappe"},
+		"deck": "m_gobelin m_gobelin m_gobelin m_gobelin m_loup n_harpie n_harpie e_archer e_archer m_troll s_etincelle s_etincelle s_charge s_charge s_javelot s_loup s_loup s_volee s_volee s_frappe"},
 	{"name": "Armée de squelettes", "biome": "Marais", "accent": "#b8a6e8", "sprite": "enemies/squelette", "boss": "",
 		"deck": "m_squelette m_squelette m_squelette m_squelette c_assassin c_assassin m_troll e_ent s_protection s_protection s_eclair s_eclair s_fleche_poison s_fleche_poison c_chasseur s_javelot s_trait_glace s_benediction m_loup m_gobelin"},
 	{"name": "Gobelin Roi", "biome": "Plaine", "accent": "#e8c040", "sprite": "enemies/gobelin_boss", "boss": "b_gobelin_roi",
