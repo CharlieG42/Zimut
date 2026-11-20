@@ -1,6 +1,7 @@
 class_name CardFusionUI
 extends Control
 ## CardFusionUI.gd — Atelier de fusion du mode Cartes : 2 exemplaires du même niveau -> 1 exemplaire de niveau +1 (max 5).
+## Fortification : une créature gagne +1 PA/PM/PO ou un mot-clé (2 maximum) contre de l'or.
 ## Niveau 2+ : créatures +1 ATQ/+1 PV par niveau, sorts +1 à l'effet par niveau, coût en mana −1 au niveau 3 puis au niveau 5.
 
 signal closed(changed: bool)
@@ -35,11 +36,11 @@ func _build() -> void:
 	bg.size = size
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
-	var title: Label = UiKit.lbl("⚗  Atelier de fusion", 40, UiKit.C_GOLD, true)
+	var title: Label = UiKit.lbl("⚗  Fusion & fortification", 40, UiKit.C_GOLD, true)
 	title.position = Vector2(40, 18)
 	add_child(title)
-	var sub: Label = UiKit.lbl("2 cartes identiques de même niveau → 1 carte de niveau supérieur (max 5 ★).", 22, UiKit.C_DIM)
-	sub.position = Vector2(480, 30)
+	var sub: Label = UiKit.lbl("2 cartes identiques → niveau +1 (max 5 ★) · Fortification : une créature gagne PA/PM/PO ou un mot-clé (or).", 22, UiKit.C_DIM)
+	sub.position = Vector2(560, 34)
 	add_child(sub)
 	var left := PanelContainer.new()
 	left.position = Vector2(1250, 90)
@@ -120,7 +121,7 @@ func _refresh_detail() -> void:
 	cur.set_card(JccCards.get_card(_selected))
 	cur.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_detail.add_child(cur)
-	if lvl < JccCards.MAX_LEVEL:
+	if lvl < JccCards.MAX_LEVEL and JccCards.forts_of(_selected) == "":
 		var arrow: Label = UiKit.lbl("→", 60, UiKit.C_GOLD, true)
 		arrow.position = Vector2(290, 160)
 		_detail.add_child(arrow)
@@ -132,25 +133,51 @@ func _refresh_detail() -> void:
 		_detail.add_child(nxt)
 	var own: int = JccCollection.owned(save, _selected)
 	var info: Label = UiKit.lbl("Possédées : %d · Niveau %d/%d" % [own, lvl, JccCards.MAX_LEVEL], 24, UiKit.C_TXT)
-	info.position = Vector2(10, 420)
+	info.position = Vector2(10, 410)
 	_detail.add_child(info)
-	var rule: Label = UiKit.lbl(_bonus_text(lvl), 20, UiKit.C_DIM)
-	rule.position = Vector2(10, 460)
+	var rule: Label = UiKit.lbl(_bonus_text(lvl), 18, UiKit.C_DIM)
+	rule.position = Vector2(10, 452)
 	rule.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	rule.custom_minimum_size = Vector2(590, 0)
 	_detail.add_child(rule)
+	var fort_y: float = 520.0
+	var is_creature: bool = String(JccCards.get_card(_selected)["type"]) == "Creature"
+	var forts: String = JccCards.forts_of(_selected)
+	var gold: int = int(save.get("gold", 0))
+	if is_creature:
+		var fl: Label = UiKit.lbl("✚ Fortification %d/%d — %d or (vous : %d)" % [forts.length(), JccCards.MAX_FORTS, JccCollection.fort_cost(_selected), gold], 22, UiKit.C_GOLD)
+		fl.position = Vector2(10, fort_y)
+		_detail.add_child(fl)
+		if forts != "":
+			var names: Array = []
+			for ch in forts:
+				names.append(String(JccCards.FORTS[String(ch)]["label"]))
+			var dj: Label = UiKit.lbl("Déjà : " + ", ".join(PackedStringArray(names)), 20, UiKit.C_DIM)
+			dj.position = Vector2(10, fort_y + 30)
+			_detail.add_child(dj)
+		var gx: int = 0
+		for code: String in JccCards.FORTS.keys():
+			var fb: Button = UiKit.btn(String(JccCards.FORTS[code]["label"]), Color(0.95, 0.75, 0.3), 20, Vector2(144, 48))
+			fb.position = Vector2(10.0 + float(gx % 4) * 150.0, fort_y + 62.0 + float(gx / 4) * 56.0)
+			fb.disabled = JccCollection.fort_error(save, _selected, code) != ""
+			fb.pressed.connect(func() -> void: _do_fortify(code))
+			_detail.add_child(fb)
+			gx += 1
 	var b: Button = UiKit.btn("⚗  Fusionner (2 → 1)", Color(0.75, 0.5, 0.95), 30, Vector2(590, 80))
-	b.position = Vector2(10, 640)
+	b.position = Vector2(10, 690)
 	b.disabled = not JccCollection.can_fuse(save, _selected)
 	b.pressed.connect(_do_fuse)
 	_detail.add_child(b)
 	_msg = UiKit.lbl("", 22, UiKit.C_GOOD)
-	_msg.position = Vector2(10, 735)
+	_msg.position = Vector2(10, 780)
 	_msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_msg.custom_minimum_size = Vector2(590, 0)
 	_detail.add_child(_msg)
 	if lvl >= JccCards.MAX_LEVEL:
 		_msg.text = "Niveau maximum atteint."
+	elif forts != "":
+		_msg.text = "Une carte fortifiée ne peut plus être fusionnée."
+		_msg.add_theme_color_override("font_color", UiKit.C_DIM)
 	elif own < JccCollection.FUSE_COST:
 		_msg.text = "Il faut 2 exemplaires du même niveau."
 		_msg.add_theme_color_override("font_color", UiKit.C_DIM)
@@ -167,9 +194,20 @@ func _bonus_text(lvl: int) -> String:
 
 func _add_close() -> void:
 	var back: Button = UiKit.btn("Retour", Color(0.7, 0.45, 0.4), 26, Vector2(590, 70))
-	back.position = Vector2(10, 840)
+	back.position = Vector2(10, 870)
 	back.pressed.connect(func() -> void: closed.emit(_changed))
 	_detail.add_child(back)
+
+
+func _do_fortify(code: String) -> void:
+	var res: String = JccCollection.fortify(save, _selected, code)
+	if res == "":
+		return
+	_changed = true
+	_selected = res
+	_refresh()
+	if _msg != null and is_instance_valid(_msg):
+		_msg.text = "Fortification : %s !" % String(JccCards.FORTS[code]["label"])
 
 
 func _do_fuse() -> void:

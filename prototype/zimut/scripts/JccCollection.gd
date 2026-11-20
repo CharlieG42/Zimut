@@ -86,7 +86,7 @@ const FUSE_COST: int = 2
 
 
 static func can_fuse(save: Dictionary, key: String) -> bool:
-	return not JccCards.get_card(key).is_empty() and JccCards.level_of(key) < JccCards.MAX_LEVEL and owned(save, key) >= FUSE_COST
+	return not JccCards.get_card(key).is_empty() and JccCards.forts_of(key) == "" and JccCards.level_of(key) < JccCards.MAX_LEVEL and owned(save, key) >= FUSE_COST
 
 
 ## Fusionne 2 exemplaires de `key`. Retourne la clé obtenue, ou "" si impossible.
@@ -111,6 +111,69 @@ static func fuse(save: Dictionary, key: String) -> String:
 				seen += 1
 				if seen > int(col.get(key, 0)):
 					if not swapped and _count(d, out_key) < mini(max_copies(out_key), int(col.get(out_key, 0))):
+						d[i] = out_key
+						swapped = true
+					else:
+						d.remove_at(i)
+						continue
+			i += 1
+	j["deck"] = deck_of(save, active_deck_name(save)).duplicate()
+	return out_key
+
+
+## --- Fortification : une créature gagne une caractéristique (PA/PM/PO ou mot-clé), 2 fois maximum ---
+
+static func fort_cost(key: String) -> int:
+	return 150 * (JccCards.forts_of(key).length() + 1) + 50 * (JccCards.level_of(key) - 1)
+
+
+## Code de fortification possible ? "" si oui, sinon la raison.
+static func fort_error(save: Dictionary, key: String, code: String) -> String:
+	var c: Dictionary = JccCards.get_card(key)
+	if c.is_empty() or String(c["type"]) != "Creature":
+		return "Seules les créatures peuvent être fortifiées."
+	if not JccCards.FORTS.has(code):
+		return "Fortification inconnue."
+	var cur: String = JccCards.forts_of(key)
+	if cur.length() >= JccCards.MAX_FORTS:
+		return "Cette carte est déjà fortifiée au maximum."
+	if cur.contains(code):
+		return "Déjà appliquée."
+	var f: Dictionary = JccCards.FORTS[code]
+	if f.has("kw") and ((JccCards.get_card(JccCards.base_of(key))["keywords"] as Array).has(String(f["kw"]))):
+		return "La carte a déjà ce mot-clé."
+	if owned(save, key) < 1:
+		return "Carte non possédée."
+	if int(save.get("gold", 0)) < fort_cost(key):
+		return "Or insuffisant (%d)." % fort_cost(key)
+	return ""
+
+
+## Fortifie un exemplaire de `key` contre de l'or. Retourne la nouvelle clé ("" si impossible).
+## Les decks qui perdent cet exemplaire reçoivent la version fortifiée (une seule fois).
+static func fortify(save: Dictionary, key: String, code: String) -> String:
+	if fort_error(save, key, code) != "":
+		return ""
+	var j: Dictionary = ensure(save)
+	var col: Dictionary = j["collection"]
+	var letters: Array = (JccCards.forts_of(key) + code).split("")
+	letters.sort()
+	var out_key: String = JccCards.key_of(JccCards.base_of(key), JccCards.level_of(key), "".join(PackedStringArray(letters)))
+	save["gold"] = int(save.get("gold", 0)) - fort_cost(key)
+	col[key] = int(col[key]) - 1
+	if int(col[key]) <= 0:
+		col.erase(key)
+	col[out_key] = int(col.get(out_key, 0)) + 1
+	var swapped: bool = false
+	for nm: Variant in (j["decks"] as Dictionary).keys():
+		var d: Array = (j["decks"] as Dictionary)[nm]
+		var seen: int = 0
+		var i: int = 0
+		while i < d.size():
+			if String(d[i]) == key:
+				seen += 1
+				if seen > int(col.get(key, 0)):
+					if not swapped:
 						d[i] = out_key
 						swapped = true
 					else:
