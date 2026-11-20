@@ -2293,6 +2293,11 @@ func _show_result_window(victory: bool) -> void:
 			var sp: PackedStringArray = stk.split("|")
 			if sp.size() == 2:
 				chips.add_child(UK.chip("❖ %s +%d" % [Shards.stat_shard_name(sp[0], int(sp[1])), int(stat_got[stk])], Shards.stat_color(sp[0]), 19))
+		var card_loot: String = String(save.get("last_card_loot", ""))
+		if card_loot != "":
+			var cl: Dictionary = JccCards.get_card(card_loot)
+			if not cl.is_empty():
+				chips.add_child(UK.chip("🃏 Carte : %s" % String(cl["name"]), Color(0.75, 0.5, 0.95), 19))
 		chips.add_child(UK.chip("🪙 %d or" % ProgressionManager.gold(save), UK.C_GOLD, 19))
 		if not stat_got.is_empty():
 			Gultur.say.call_deferred(self, "eclats_butin", Gultur.ECLATS_BUTIN, null)

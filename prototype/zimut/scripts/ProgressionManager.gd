@@ -2243,6 +2243,8 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	for l: Dictionary in loots:
 		data["inventory"].append(l)
 	data["last_loots"] = loots
+	# Butin de cartes du mode Cartes (TCG) : tombe aussi en Tactique, Aventure et Conquête
+	data["last_card_loot"] = JccCollection.combat_loot(data, fight_level, was_boss, String(data.get("campaign_mode", "")) == "adventure")
 	# Butin de craft : ressources selon le nombre d'ennemis vaincus, un peu d'or.
 	var drops: Dictionary = _roll_resource_drops(enemies.size(), was_boss)
 	add_resources(data, drops)
@@ -2339,6 +2341,7 @@ func register_defeat(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 		report = award_xp(data, fight_xp(enemies, fight_level), ClassRules.DEFEAT_XP_RATIO, fight_level)
 	data["defeats"] = int(data.get("defeats", 0)) + 1
 	data["last_loots"] = []
+	data["last_card_loot"] = ""
 	data["last_resources"] = {}
 	data["last_shards"] = {}
 	data["last_stat_shards"] = {}

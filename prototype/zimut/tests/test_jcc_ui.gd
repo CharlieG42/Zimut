@@ -41,7 +41,8 @@ func _boot() -> void:
 	m._start_duel(0)
 	await create_timer(0.3).timeout
 	var d = m._duel
-	check(d != null and m._hand_views.size() == 4, "duel lancé, 4 cartes en main")
+	var start_hand: int = 4 + int(((JccDuel.hero_bonus(JccCollection.active_hero(m._save)).get("start", {}) as Dictionary).get("draw", 0)))
+	check(d != null and m._hand_views.size() == start_hand, "duel lancé, %d cartes en main (4 + bonus du héros)" % start_hand)
 	var nterr: int = 0
 	for k in m._slots.keys():
 		if m._slots[k].terrain != "":
