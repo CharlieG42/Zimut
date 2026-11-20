@@ -99,6 +99,16 @@ static func level_for_unlock(n: int) -> int:
 	return FIRST_UNLOCK_LEVEL + (n - 1) * UNLOCK_EVERY
 
 
+## Niveau du joueur auquel TOUS les héros sont débloqués (22 avec 10 classes).
+static func all_unlocked_level() -> int:
+	return level_for_unlock(maxi(1, _all_classes().size() - START_PICKS))
+
+
+## Tous les héros sont-ils débloqués ? (condition du mode Cartes)
+static func all_unlocked(data: Dictionary) -> bool:
+	return locked(data).is_empty()
+
+
 ## Nombre de héros bonus gagnés au niveau `level`.
 static func earned_unlocks(level: int) -> int:
 	if level < FIRST_UNLOCK_LEVEL:

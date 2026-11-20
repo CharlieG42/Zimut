@@ -647,7 +647,7 @@ func _show_detail(data: Dictionary, slot: int) -> void:
 	# Mode Cartes : JCC à quatre voies (CardDuel.tscn), indépendant du combat tactique
 	modes_row.add_child(_mode_button("Cartes",
 		"Duels de cartes à quatre voies : deck de 20 cartes, mana croissant, boss en cartes rares", "res://assets/ui/modes/mode_cartes.png",
-		Color(0.55, 0.35, 0.75), true, func() -> void: _launch_cards(slot)))
+		Color(0.55, 0.35, 0.75), ProgressionManager.mode_unlocked(data, "cartes"), func() -> void: _launch_cards(slot), "cartes"))
 
 	# V46 : temps de jeu propre à chaque mode, sous les cartes de mode.
 	var times_row := HBoxContainer.new()
@@ -951,6 +951,8 @@ func _modal(title: String, text: String, buttons: Array, extra: Control = null, 
 func _launch_cards(slot: int) -> void:
 	if _current.is_empty() or slot < 0:
 		return
+	if not ProgressionManager.mode_unlocked(_current, "cartes"):
+		return
 	_current.erase("campaign_mode")
 	ProgressionManager.write_save(slot, _current)
 	GameManager.active_save = ProgressionManager.load_save(slot)
@@ -1119,10 +1121,15 @@ func _mode_button(title_txt: String, desc: String, art_path: String, accent: Col
 	if not enabled:
 		var umode: String = unlock_mode if unlock_mode != "" else ("adventure" if title_txt == "Aventure" else "conquest")
 		var need: int = int(ProgressionManager.MODE_MIN_LEVEL.get(umode, 1))
+		var lock_txt: String = "🔒\nNiveau %d requis" % need
 		b.tooltip_text = "%s — verrouillé : atteignez le niveau %d (niveau du joueur ou d'un de vos héros)." % [title_txt, need]
+		if umode == "cartes":
+			need = HeroUnlock.all_unlocked_level()
+			lock_txt = "🔒\nTous les héros\n(niveau %d)" % need
+			b.tooltip_text = "Cartes — verrouillé : débloquez tous les héros (niveau joueur %d)." % need
 		var lock := Label.new()
 		lock.name = "LockLabel"
-		lock.text = "🔒\nNiveau %d requis" % need
+		lock.text = lock_txt
 		lock.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lock.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		lock.set_anchors_preset(Control.PRESET_FULL_RECT)
