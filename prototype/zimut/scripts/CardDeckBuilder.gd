@@ -5,8 +5,11 @@ extends Control
 
 signal closed(saved: bool)
 
-const CARD_W: float = 170.0
-const CARD_H: float = 245.0
+const CARD_W: float = 190.0
+const CARD_H: float = 272.0
+## Carte de détail (colonne de gauche) : grande, pour lire description et punchline.
+const DETAIL_W: float = 490.0
+const DETAIL_H: float = 703.0
 const FILTERS: Array = [["all", "Toutes"], ["Creature", "Créatures"], ["Sort", "Sorts"], ["boss", "Boss"]]
 
 var save: Dictionary = {}
@@ -50,44 +53,44 @@ func _build() -> void:
 	# colonne gauche : détail
 	var left := PanelContainer.new()
 	left.position = Vector2(30, 90)
-	left.size = Vector2(350, 960)
+	left.size = Vector2(530, 960)
 	left.add_theme_stylebox_override("panel", UiKit.box(UiKit.C_PANEL, UiKit.C_BORDER, 14, 2, 14))
 	add_child(left)
 	_detail_holder = Control.new()
-	_detail_holder.position = Vector2(30 + 25, 90 + 20)
-	_detail_holder.size = Vector2(300, 430)
+	_detail_holder.position = Vector2(30 + 20, 90 + 20)
+	_detail_holder.size = Vector2(DETAIL_W, DETAIL_H)
 	add_child(_detail_holder)
 	_detail_btns = HBoxContainer.new()
-	_detail_btns.position = Vector2(45, 630)
-	_detail_btns.size = Vector2(320, 60)
+	_detail_btns.position = Vector2(50, 90 + 20 + DETAIL_H + 78)
+	_detail_btns.size = Vector2(DETAIL_W, 60)
 	_detail_btns.add_theme_constant_override("separation", 12)
 	add_child(_detail_btns)
 	# onglets de filtre
 	_tabs = HBoxContainer.new()
-	_tabs.position = Vector2(410, 28)
+	_tabs.position = Vector2(590, 28)
 	_tabs.add_theme_constant_override("separation", 10)
 	add_child(_tabs)
 	# grille de la collection
 	var scroll := ScrollContainer.new()
-	scroll.position = Vector2(400, 90)
-	scroll.size = Vector2(950, 960)
+	scroll.position = Vector2(580, 90)
+	scroll.size = Vector2(640, 960)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	add_child(scroll)
 	_scroll = scroll
 	_grid = GridContainer.new()
-	_grid.columns = 5
+	_grid.columns = 3
 	_grid.add_theme_constant_override("h_separation", 10)
 	_grid.add_theme_constant_override("v_separation", 14)
 	scroll.add_child(_grid)
 	# colonne droite : deck
 	var right := PanelContainer.new()
-	right.position = Vector2(1370, 90)
-	right.size = Vector2(520, 960)
+	right.position = Vector2(1240, 90)
+	right.size = Vector2(650, 960)
 	right.add_theme_stylebox_override("panel", UiKit.box(UiKit.C_PANEL, UiKit.C_BORDER, 14, 2, 14))
 	add_child(right)
 	var rbox := VBoxContainer.new()
-	rbox.position = Vector2(1385, 100)
-	rbox.size = Vector2(490, 940)
+	rbox.position = Vector2(1255, 100)
+	rbox.size = Vector2(620, 940)
 	rbox.add_theme_constant_override("separation", 6)
 	add_child(rbox)
 	_deck_tabs = HBoxContainer.new()
@@ -97,15 +100,15 @@ func _build() -> void:
 	rbox.add_child(_count_lbl)
 	_err_lbl = UiKit.lbl("", 18, UiKit.C_BAD)
 	_err_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_err_lbl.custom_minimum_size = Vector2(480, 26)
+	_err_lbl.custom_minimum_size = Vector2(610, 26)
 	rbox.add_child(_err_lbl)
 	var dscroll := ScrollContainer.new()
-	dscroll.custom_minimum_size = Vector2(490, 640)
+	dscroll.custom_minimum_size = Vector2(620, 640)
 	dscroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	rbox.add_child(dscroll)
 	_dscroll = dscroll
 	_deck_box = VBoxContainer.new()
-	_deck_box.custom_minimum_size = Vector2(480, 0)
+	_deck_box.custom_minimum_size = Vector2(600, 0)
 	_deck_box.add_theme_constant_override("separation", 4)
 	dscroll.add_child(_deck_box)
 	var row := HBoxContainer.new()
@@ -331,7 +334,7 @@ func _refresh_deck() -> void:
 		var c: Dictionary = JccCards.get_card(id)
 		var col: Color = JccCardView.RARITY_COL.get(String(c["rarity"]), Color.WHITE)
 		var kind: String = "✦" if String(c["type"]) == "Sort" else "▲"
-		var b: Button = UiKit.btn("%d  %s %s%s" % [int(c["cost"]), kind, JccCards.display_name(c) + (" ★%d" % int(c["lvl"]) if int(c["lvl"]) > 1 else "") + (" ✚" if String(c.get("forts", "")) != "" else ""), ("  ×%d" % int(counts[id])) if int(counts[id]) > 1 else ""], col, 20, Vector2(0, 44))
+		var b: Button = UiKit.btn("%d  %s %s%s" % [int(c["cost"]), kind, JccCards.display_name(c) + (" ★%d" % int(c["lvl"]) if int(c["lvl"]) > 1 else "") + (" ✚" if String(c.get("forts", "")) != "" else ""), ("  ×%d" % int(counts[id])) if int(counts[id]) > 1 else ""], col, 24, Vector2(0, 52))
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.pressed.connect(func() -> void:
 			if JccCardView.drag_active:
@@ -355,11 +358,11 @@ func _refresh_detail() -> void:
 	if _selected == "":
 		var hint: Label = UiKit.lbl("Touchez une carte pour la voir en grand.", 22, UiKit.C_DIM)
 		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		hint.custom_minimum_size = Vector2(280, 0)
+		hint.custom_minimum_size = Vector2(DETAIL_W - 20, 0)
 		_detail_holder.add_child(hint)
 		return
 	var v := JccCardView.new()
-	v.size = Vector2(300, 430)
+	v.size = Vector2(DETAIL_W, DETAIL_H)
 	v.set_card(JccCards.get_card(_selected))
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_detail_holder.add_child(v)
@@ -367,17 +370,17 @@ func _refresh_detail() -> void:
 	var inn: int = _count_in_deck(_selected)
 	var lim: int = mini(JccCollection.max_copies(_selected), own)
 	var info: Label = UiKit.lbl("Possédée : %d · Dans le deck : %d (max %d)" % [own, inn, JccCollection.max_copies(_selected)], 18, UiKit.C_DIM)
-	info.position = Vector2(0, 440)
+	info.position = Vector2(0, DETAIL_H + 10)
 	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	info.custom_minimum_size = Vector2(300, 0)
+	info.custom_minimum_size = Vector2(DETAIL_W, 0)
 	_detail_holder.add_child(info)
-	var add: Button = UiKit.btn("Ajouter", Color(0.35, 0.8, 0.45), 22, Vector2(150, 60))
+	var add: Button = UiKit.btn("Ajouter", Color(0.35, 0.8, 0.45), 22, Vector2(235, 64))
 	add.disabled = inn >= lim or _deck.size() >= JccCollection.DECK_SIZE + 5
 	add.pressed.connect(func() -> void:
 		_deck.append(_selected)
 		_refresh_all())
 	_detail_btns.add_child(add)
-	var rem: Button = UiKit.btn("Retirer", Color(0.85, 0.45, 0.4), 22, Vector2(150, 60))
+	var rem: Button = UiKit.btn("Retirer", Color(0.85, 0.45, 0.4), 22, Vector2(235, 64))
 	rem.disabled = inn <= 0
 	rem.pressed.connect(func() -> void:
 		_deck.erase(_selected)

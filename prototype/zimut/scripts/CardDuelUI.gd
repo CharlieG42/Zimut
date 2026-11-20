@@ -617,6 +617,8 @@ class _CellNode extends Control:
 	var border := Color(1, 1, 1, 0.14)
 	var bw: float = 2.0
 	var terrain: String = ""           # "", "boue", "hauteur", "buisson"
+	const TERRAIN_COL := {"boue": Color(0.35, 0.55, 1.0), "hauteur": Color(0.85, 0.85, 0.95), "buisson": Color(0.35, 0.85, 0.40)}
+	const TERRAIN_NAME := {"boue": "Boue", "hauteur": "Hauteur", "buisson": "Buisson"}
 
 	func _has_point(p: Vector2) -> bool:
 		return Geometry2D.is_point_in_polygon(p, poly)
@@ -628,21 +630,38 @@ class _CellNode extends Control:
 		var closed := poly.duplicate()
 		closed.append(poly[0])
 		draw_polyline(closed, border, bw, true)
-		# glyphe de terrain au centre de la case
-		var c := Vector2(size.x * 0.5, size.y * 0.62)
+		if terrain == "":
+			return
+		var tcol: Color = TERRAIN_COL.get(terrain, Color(1, 1, 1))
+		# teinte de la case entière + liseré de la couleur du terrain : lisible même sous une unité
+		draw_colored_polygon(poly, Color(tcol.r, tcol.g, tcol.b, 0.26))
+		draw_polyline(closed, Color(tcol.r, tcol.g, tcol.b, 0.95), 3.0, true)
+		# gros glyphe au centre (opaque)
+		var c := Vector2(size.x * 0.5, size.y * 0.58)
 		match terrain:
 			"boue":
-				draw_circle(c + Vector2(-14, 0), 9, Color(0.25, 0.35, 0.55, 0.55))
-				draw_circle(c + Vector2(10, 6), 12, Color(0.25, 0.35, 0.55, 0.55))
-				draw_circle(c + Vector2(2, -8), 8, Color(0.25, 0.35, 0.55, 0.55))
-				draw_arc(c + Vector2(0, 2), 20, PI * 0.15, PI * 0.85, 8, Color(0.55, 0.7, 0.9, 0.6), 2.0)
+				for o: Vector3 in [Vector3(-18, 4, 13), Vector3(14, 8, 16), Vector3(0, -10, 11)]:
+					draw_circle(c + Vector2(o.x, o.y), o.z, Color(0.20, 0.32, 0.62, 0.85))
+				draw_arc(c + Vector2(0, 2), 26, PI * 0.15, PI * 0.85, 8, Color(0.70, 0.84, 1.0, 0.95), 3.0)
 			"hauteur":
-				draw_colored_polygon(PackedVector2Array([c + Vector2(-26, 12), c + Vector2(0, -18), c + Vector2(26, 12)]), Color(0.75, 0.75, 0.80, 0.75))
-				draw_colored_polygon(PackedVector2Array([c + Vector2(-8, -4), c + Vector2(0, -18), c + Vector2(8, -4), c + Vector2(0, -10)]), Color(0.95, 0.97, 1.0, 0.9))
+				draw_colored_polygon(PackedVector2Array([c + Vector2(-34, 16), c + Vector2(0, -24), c + Vector2(34, 16)]), Color(0.82, 0.82, 0.88, 0.95))
+				draw_colored_polygon(PackedVector2Array([c + Vector2(-11, -6), c + Vector2(0, -24), c + Vector2(11, -6), c + Vector2(0, -13)]), Color(1, 1, 1, 1))
 			"buisson":
-				draw_circle(c + Vector2(-10, 2), 10, Color(0.15, 0.45, 0.18, 0.6))
-				draw_circle(c + Vector2(8, 4), 12, Color(0.18, 0.52, 0.22, 0.6))
-				draw_circle(c + Vector2(0, -6), 9, Color(0.22, 0.58, 0.26, 0.6))
+				for o2: Vector3 in [Vector3(-14, 4, 13), Vector3(12, 6, 16), Vector3(0, -8, 12)]:
+					draw_circle(c + Vector2(o2.x, o2.y), o2.z, Color(0.12, 0.50, 0.18, 0.92))
+				draw_circle(c + Vector2(-4, -12), 5, Color(0.55, 0.85, 0.45, 0.9))
+		# pastille + nom du terrain en haut à gauche de la case (toujours visible, même si occupée)
+		var mn := Vector2(1e9, 1e9)
+		for q in poly:
+			mn = Vector2(minf(mn.x, q.x), minf(mn.y, q.y))
+		var font: Font = ThemeDB.fallback_font
+		var label: String = String(TERRAIN_NAME.get(terrain, ""))
+		var fs: int = 19
+		var tw: float = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		var r := Rect2(mn + Vector2(6, 6), Vector2(tw + 14, 26))
+		draw_rect(r, Color(tcol.r * 0.35, tcol.g * 0.35, tcol.b * 0.35, 0.92))
+		draw_rect(r, tcol, false, 2.0)
+		draw_string(font, r.position + Vector2(7, 19), label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(1, 1, 1))
 
 
 ## Unité posée sur une case : son sprite en pied (à la place d'une carte compacte) + gemmes ATQ/PV, pastilles PA/PM/PO, étoile de sort et mots-clés.
@@ -1287,6 +1306,8 @@ func _refresh_action_bar() -> void:
 				why = "Ce n'est pas votre tour"
 			_action_bar.add_child(UiKit.lbl(why, 24, UiKit.C_BAD, true))
 		return
+	if _sel_cell < 0 or _duel.creature_at(0, _sel_cell) == null:
+		_action_bar.add_child(UiKit.lbl("Terrains : Boue = déplacement ×2 · Hauteur = +1 PO · Buisson = abri contre les tirs (rien ne bloque)", 22, Color(0.75, 0.88, 1.0)))
 	if _sel_cell >= 0 and _duel.creature_at(0, _sel_cell) != null:
 		var cr: Dictionary = _duel.creature_at(0, _sel_cell)
 		var cell: int = _sel_cell
