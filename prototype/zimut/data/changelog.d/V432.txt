@@ -1,0 +1,3 @@
+V432|Constructeur de deck : collection sur 3 colonnes, grande carte de détail avec sa punchline bien lisible, liste du deck élargie.
+V432|Plateau Cartes : les terrains (boue, hauteur, buisson) sont teintés, étiquetés et expliqués par une légende ; aucun ne bloque le passage.
+V432|Le défilement au doigt ou à la molette fonctionne sur toute la zone des cartes et du deck.
