@@ -338,6 +338,59 @@ static func roll_loot(rng: RandomNumberGenerator, boss_id: String = "", bonus: f
 	return String(pool[rng.randi_range(0, pool.size() - 1)])
 
 
+## --- Choix du héros : toute carte de héros (classe ou boss) possédée est jouable ---
+
+## Possession d'une carte quel que soit son niveau de fusion.
+static func owns_any_level(save: Dictionary, id: String) -> bool:
+	var col: Dictionary = ensure(save)["collection"]
+	for k: Variant in col.keys():
+		if JccCards.base_of(String(k)) == id and int(col[k]) > 0:
+			return true
+	return false
+
+
+## Cartes de héros possédées (celles qui ont un bonus défini), triées : classes puis boss.
+static func hero_candidates(save: Dictionary) -> Array:
+	var out: Array = []
+	for id: Variant in JccDuel.HERO_BONUS.keys():
+		if owns_any_level(save, String(id)):
+			out.append(String(id))
+	out.sort_custom(func(a: String, b: String) -> bool:
+		if a.begins_with("c_") != b.begins_with("c_"):
+			return a.begins_with("c_")
+		return String(JccCards.get_card(a).get("name", a)) < String(JccCards.get_card(b).get("name", b)))
+	return out
+
+
+## Héros actif : le choix du joueur s'il est encore possédé, sinon la carte de sa classe d'Aventure, sinon le Mage.
+static func active_hero(save: Dictionary) -> String:
+	var j: Dictionary = ensure(save)
+	var pick: String = String(j.get("hero", ""))
+	if pick != "" and JccDuel.HERO_BONUS.has(pick) and owns_any_level(save, pick):
+		return pick
+	var cls: String = String((save.get("adventure", {}) as Dictionary).get("hero_class", "Mage"))
+	var by_class: String = "c_" + cls.to_lower().replace("é", "e").replace("è", "e").replace(" ", "")
+	if JccDuel.HERO_BONUS.has(by_class) and owns_any_level(save, by_class):
+		return by_class
+	return "c_mage"
+
+
+static func set_hero(save: Dictionary, id: String) -> bool:
+	if not JccDuel.HERO_BONUS.has(id) or not owns_any_level(save, id):
+		return false
+	ensure(save)["hero"] = id
+	return true
+
+
+## Clé de pouvoir de héros (JccDuel.power_for) : classe de la carte, ou « boss ».
+static func hero_power_key(id: String) -> String:
+	if id.begins_with("b_"):
+		return "boss"
+	var c: Dictionary = JccCards.get_card(id)
+	var cl: String = String(c.get("classe", ""))
+	return cl if cl != "" else "mage"
+
+
 ## Cartes de boss (collectibles uniquement) pouvant tomber sur un boss de combat tactique.
 static func boss_card_ids() -> Array:
 	var out: Array = []

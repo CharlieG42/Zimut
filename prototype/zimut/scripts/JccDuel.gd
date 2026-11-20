@@ -34,6 +34,40 @@ const HERO_POWERS := {
 	"boss": {"name": "Frappe du boss", "effet": "degats_heros", "valeur": "5", "duree": 0, "cible": ""},
 }
 
+## Bonus de héros (cartes possédées jouables comme héros). Rareté Commun/Rare : bonus de début de duel
+## {"start": {"hp"|"draw"|"mana": n}} ; Épique/Légendaire : bonus par tour {"turn": {"kind": "heal"|"dmg"|"mana"|"draw", "n": n, "every": k}}
+## (appliqué au début de chacun de ses tours, un tour sur `every`).
+const HERO_BONUS := {
+	"c_tank": {"name": "Rempart", "start": {"hp": 4}},
+	"c_chevalier": {"name": "Armure d'acier", "start": {"hp": 4}},
+	"c_mage": {"name": "Étude arcanique", "start": {"draw": 1}},
+	"c_chasseur": {"name": "Œil de lynx", "start": {"mana": 1}},
+	"c_druide": {"name": "Sève vivace", "start": {"hp": 3}},
+	"c_heal": {"name": "Bénédiction", "start": {"hp": 3}},
+	"c_assassin": {"name": "Initiative", "start": {"mana": 1}},
+	"c_invocateur": {"name": "Grimoire", "start": {"draw": 1}},
+	"c_sylvain": {"name": "Cartes du vent", "start": {"draw": 1}},
+	"c_geomancien": {"name": "Peau de roche", "start": {"hp": 4}},
+	"c_artificier": {"name": "Étincelle", "start": {"mana": 1}},
+	"c_samourai": {"name": "Lame du samouraï", "turn": {"kind": "dmg", "n": 1, "every": 2}},
+	"b_gobelin_roi": {"name": "Tribut du roi", "turn": {"kind": "mana", "n": 1, "every": 2}},
+	"b_loup_alpha": {"name": "Morsure d'alpha", "turn": {"kind": "dmg", "n": 1, "every": 2}},
+	"b_roi_squelette": {"name": "Malédiction", "turn": {"kind": "dmg", "n": 1, "every": 2}},
+	"b_troll_geant": {"name": "Régénération", "turn": {"kind": "heal", "n": 2, "every": 1}},
+	"b_dragon": {"name": "Souffle ardent", "turn": {"kind": "dmg", "n": 1, "every": 2}},
+	"b_seigneur_lave": {"name": "Brasier", "turn": {"kind": "dmg", "n": 1, "every": 2}},
+	"b_liche_brumes": {"name": "Savoir des brumes", "turn": {"kind": "draw", "n": 1, "every": 3}},
+	"b_liche_eternelle": {"name": "Savoir éternel", "turn": {"kind": "draw", "n": 1, "every": 3}},
+	"b_crabe_titan": {"name": "Carapace", "turn": {"kind": "heal", "n": 2, "every": 1}},
+	"b_colosse": {"name": "Moteur à vapeur", "turn": {"kind": "mana", "n": 1, "every": 2}},
+	"b_golem_prisme": {"name": "Éclat prismatique", "turn": {"kind": "heal", "n": 2, "every": 1}},
+	"b_seigneur_tempetes": {"name": "Foudre captive", "turn": {"kind": "mana", "n": 1, "every": 2}},
+	"b_tharok": {"name": "Racines vives", "turn": {"kind": "heal", "n": 2, "every": 1}},
+	"b_vorkann": {"name": "Givre mordant", "turn": {"kind": "dmg", "n": 1, "every": 2}},
+}
+
+var hero_ids: Array = ["", ""]   # carte-héros choisie par camp (bonus)
+
 var sides: Array = []
 var current: int = 0
 var turn: int = 0              # numéro de tour global (1, 2, 3…)
@@ -47,7 +81,10 @@ var _turns_started: Array = [0, 0]
 var terrain: Array = []        # 24 cases : "", "boue", "hauteur", "buisson"
 
 
-func setup(deck0: Array, deck1: Array, seed_value: int = 0, powers: Array = []) -> void:
+func setup(deck0: Array, deck1: Array, seed_value: int = 0, powers: Array = [], heroes: Array = []) -> void:
+	hero_ids = ["", ""]
+	for hi: int in mini(2, heroes.size()):
+		hero_ids[hi] = String(heroes[hi])
 	_rng.seed = seed_value if seed_value != 0 else int(Time.get_ticks_usec())
 	sides = []
 	for deck_ids: Array in [deck0, deck1]:
@@ -70,6 +107,8 @@ func setup(deck0: Array, deck1: Array, seed_value: int = 0, powers: Array = []) 
 	events = []
 	log = []
 	_turns_started = [0, 0]
+	for hs: int in 2:
+		_apply_hero_start(hs)
 	terrain = _gen_terrain()
 	var tnames: Array = []
 	for i in LANES:
@@ -78,6 +117,76 @@ func setup(deck0: Array, deck1: Array, seed_value: int = 0, powers: Array = []) 
 	if not tnames.is_empty():
 		log.append("Terrain : " + ", ".join(PackedStringArray(tnames)))
 	start_turn(0)
+
+
+## Bonus de début de duel du héros (Commun/Rare).
+func _apply_hero_start(s: int) -> void:
+	var b: Dictionary = hero_bonus(String(hero_ids[s]))
+	if not b.has("start"):
+		return
+	var st: Dictionary = b["start"]
+	if st.has("hp"):
+		sides[s]["hero_hp"] = int(sides[s]["hero_hp"]) + int(st["hp"])
+	if st.has("mana"):
+		sides[s]["mana_max"] = int(sides[s]["mana_max"]) + int(st["mana"])
+	for i: int in int(st.get("draw", 0)):
+		_draw_card(s, false)
+	log.append("Héros %s : %s" % [("allié" if s == 0 else "adverse"), hero_bonus_text(String(hero_ids[s]))])
+
+
+static func hero_bonus(card_id: String) -> Dictionary:
+	return HERO_BONUS.get(card_id, {})
+
+
+## Texte court du bonus (« +4 PV au héros », « 1 dégât au héros adverse (1 tour sur 2) »…).
+static func hero_bonus_text(card_id: String) -> String:
+	var b: Dictionary = hero_bonus(card_id)
+	if b.is_empty():
+		return "Aucun bonus"
+	var parts: Array = []
+	if b.has("start"):
+		var st: Dictionary = b["start"]
+		if st.has("hp"):
+			parts.append("+%d PV au héros" % int(st["hp"]))
+		if st.has("mana"):
+			parts.append("+%d mana dès le 1er tour" % int(st["mana"]))
+		if st.has("draw"):
+			parts.append("+%d carte en main au départ" % int(st["draw"]))
+		return "Début de duel : " + ", ".join(PackedStringArray(parts))
+	var t: Dictionary = b["turn"]
+	var what: String = ""
+	match String(t["kind"]):
+		"heal":
+			what = "soigne le héros de %d" % int(t["n"])
+		"dmg":
+			what = "%d dégât au héros adverse" % int(t["n"])
+		"mana":
+			what = "+%d mana" % int(t["n"])
+		"draw":
+			what = "pioche %d carte" % int(t["n"])
+	var ev: int = int(t.get("every", 1))
+	return "Chaque tour : " + what if ev <= 1 else "Un tour sur %d : %s" % [ev, what]
+
+
+## Bonus par tour du héros (Épique/Légendaire), appliqué au début du tour de `s`.
+func _apply_hero_turn(s: int) -> void:
+	var b: Dictionary = hero_bonus(String(hero_ids[s]))
+	if not b.has("turn"):
+		return
+	var t: Dictionary = b["turn"]
+	if int(_turns_started[s]) % maxi(1, int(t.get("every", 1))) != 0:
+		return
+	var n: int = int(t["n"])
+	match String(t["kind"]):
+		"heal":
+			_heal(s, -1, n)
+		"dmg":
+			_hit(other(s), -1, n, "hero_bonus")
+		"mana":
+			sides[s]["mana"] = int(sides[s]["mana"]) + n
+			_ev("mana", s, -1, n)
+		"draw":
+			_draw_card(s, true)
 
 
 ## Pouvoir de héros associé à une classe (ou "boss") ; défaut si inconnu.
@@ -289,6 +398,9 @@ func start_turn(s: int) -> void:
 	sd["mana"] = sd["mana_max"]
 	if int(_turns_started[s]) > 1 or s == 1:
 		_draw_card(s, true)
+	_apply_hero_turn(s)
+	if is_over():
+		return
 	for c: Variant in creatures(s):
 		var cr: Dictionary = c
 		cr["sick"] = false
@@ -803,7 +915,7 @@ func _stun(s: int, lane: int, n: int) -> void:
 func _heal(s: int, lane: int, n: int) -> void:
 	if lane == -1:
 		var before: int = int(sides[s]["hero_hp"])
-		sides[s]["hero_hp"] = mini(HERO_HP, before + n)
+		sides[s]["hero_hp"] = mini(maxi(HERO_HP, before), before + n)
 		_ev("heal", s, -1, int(sides[s]["hero_hp"]) - before)
 		return
 	var c: Variant = creature_at(s, lane)

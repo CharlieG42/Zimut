@@ -191,8 +191,8 @@ func _show_hub() -> void:
 		v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_root.add_child(v)
 	var col := VBoxContainer.new()
-	col.position = Vector2(W * 0.5 - 260, 606)
-	col.size = Vector2(520, 390)
+	col.position = Vector2(W * 0.5 - 360, 606)
+	col.size = Vector2(720, 390)
 	col.add_theme_constant_override("separation", 14)
 	_root.add_child(col)
 	var duel: Button = UiKit.btn("⚔  Duel", Color(0.95, 0.65, 0.25), 34, Vector2(0, 76))
@@ -202,12 +202,24 @@ func _show_hub() -> void:
 	var pzb: Button = UiKit.btn("🧩  Puzzle de la semaine%s" % (" ✓" if bool(pz["done"]) else ""), Color(0.55, 0.8, 0.5), 26, Vector2(0, 60))
 	pzb.pressed.connect(_start_puzzle)
 	col.add_child(pzb)
-	var deck: Button = UiKit.btn("🃏  Mon deck", Color(0.45, 0.65, 0.95), 30, Vector2(0, 64))
+	var trio := HBoxContainer.new()
+	trio.add_theme_constant_override("separation", 12)
+	col.add_child(trio)
+	var deck: Button = UiKit.btn("🃏  Deck", Color(0.45, 0.65, 0.95), 28, Vector2(0, 64))
+	deck.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	deck.pressed.connect(_show_builder)
-	col.add_child(deck)
-	var fuse: Button = UiKit.btn("⚗  Atelier de fusion", Color(0.75, 0.5, 0.95), 28, Vector2(0, 60))
+	trio.add_child(deck)
+	var fuse: Button = UiKit.btn("⚗  Fusion", Color(0.75, 0.5, 0.95), 28, Vector2(0, 64))
+	fuse.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	fuse.pressed.connect(_show_fusion)
-	col.add_child(fuse)
+	trio.add_child(fuse)
+	var hero_b: Button = UiKit.btn("🦸  Héros", Color(0.95, 0.55, 0.4), 28, Vector2(0, 64))
+	hero_b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hero_b.pressed.connect(_show_heroes)
+	trio.add_child(hero_b)
+	var hero_lbl: Label = UiKit.lbl("Héros actif : %s — %s" % [String(JccCards.get_card(JccCollection.active_hero(_save)).get("name", "")), JccDuel.hero_bonus_text(JccCollection.active_hero(_save))], 20, UiKit.C_DIM)
+	hero_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(hero_lbl)
 	var back: Button = UiKit.btn("←  Mes Parties", Color(0.6, 0.62, 0.72), 26, Vector2(0, 56))
 	back.pressed.connect(_leave)
 	col.add_child(back)
@@ -245,6 +257,17 @@ func _show_builder() -> void:
 			_save_now()
 		_show_hub())
 	b.open(_save)
+
+
+func _show_heroes() -> void:
+	_clear()
+	var h := CardHeroUI.new()
+	_root.add_child(h)
+	h.closed.connect(func(changed: bool) -> void:
+		if changed:
+			_save_now()
+		_show_hub())
+	h.open(_save)
 
 
 func _show_fusion() -> void:
@@ -338,10 +361,11 @@ func _start_duel(idx: int) -> void:
 	_opp = JccCollection.opponent(idx)
 	JccCollection.ensure(_save)
 	_duel = JccDuel.new()
-	var cls: String = String(ProgressionManager.adventure_state(_save).get("hero_class", "Mage"))
+	var hero_id: String = JccCollection.active_hero(_save)
+	var cls: String = JccCollection.hero_power_key(hero_id)
 	var opp_pow: String = "boss" if String(_opp.get("boss", "")) != "" else ""
 	var deck_now: Array = JccCollection.deck_of(_save, JccCollection.active_deck_name(_save))
-	_duel.setup(deck_now.duplicate(), JccCollection.parse_deck(String(_opp["deck"])), 0, [cls, opp_pow])
+	_duel.setup(deck_now.duplicate(), JccCollection.parse_deck(String(_opp["deck"])), 0, [cls, opp_pow], [hero_id, ""])
 	_biome = String(_opp.get("biome", BIOMES[_opp_idx % BIOMES.size()]))
 	_foe_accent = Color(String(_opp.get("accent", "#ff6b61")))
 	_inspect_cell = -1
@@ -793,6 +817,9 @@ func _cell_pos(cell: int) -> Vector2:
 func _hero_sprite(side: int) -> String:
 	if side == 1:
 		return String(_opp.get("sprite", ""))
+	var spr: String = String(JccCards.get_card(JccCollection.active_hero(_save)).get("sprite", ""))
+	if spr != "":
+		return spr
 	var cls: String = String(ProgressionManager.adventure_state(_save).get("hero_class", "Mage"))
 	var key: String = cls.to_lower().replace("é", "e").replace("è", "e").replace(" ", "")
 	return "players/" + key
