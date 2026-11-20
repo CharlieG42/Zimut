@@ -1,0 +1,3 @@
+V427|Fortification : une créature gagne +1 PA, PM ou PO, ou un mot-clé (provocation, vol…), 2 fois maximum, contre de l or.
+V427|L atelier devient « Fusion & fortification » ; une carte fortifiée ne peut plus être fusionnée.
+V427|Les cartes fortifiées se jouent dans les decks et en duel.
