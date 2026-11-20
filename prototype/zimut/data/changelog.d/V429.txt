@@ -1,0 +1,3 @@
+V429|40 nouvelles cartes de nations (3 à 5 par nation) avec leurs sprites, utilisables dans les decks, le butin, la fusion et la fortification.
+V429|Punchline en italique sous la description des cartes, en français ou en anglais selon la langue du jeu.
+V429|Chaque carte affiche sa nation ; les héros, monstres et boss existants ont eux aussi une nation et une punchline.
