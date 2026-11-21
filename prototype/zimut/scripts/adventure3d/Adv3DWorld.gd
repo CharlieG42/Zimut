@@ -277,6 +277,7 @@ static func build(zone_id: String, open_world: bool = false) -> Node3D:
 	_build_props(root, zone_id, t, biome)
 	_build_decor(root, zone_id, t, biome)
 	_build_water(root, zone_id, t, biome)
+	Adv3DRuins.build(root, zone_id, t, biome)   # V437 : ruines à facettes autour des lieux (Sylve)
 	return root
 
 
@@ -1076,7 +1077,7 @@ static func _multi_kit(parent: Node3D, node_name: String, models: Array, xforms:
 
 ## V85 : seuls les gros décors projettent l'ombre du soleil (pas l'herbe, les fleurs, les cailloux).
 static func _casts_shadow(node_name: String) -> bool:
-	for pre: String in ["Pins", "Feuillus", "Bouleaux", "Palmiers", "Rochers", "Cactus", "Souches", "Cristaux", "Piliers", "Buissons", "Nation_"]:
+	for pre: String in ["Pins", "Feuillus", "Bouleaux", "Palmiers", "Rochers", "Cactus", "Souches", "Cristaux", "Piliers", "Buissons", "Nation_", "Ruines_arch", "Ruines_col", "Ruines_wall", "Ruines_slabs"]:
 		if node_name.begins_with(pre):
 			return true
 	return false
