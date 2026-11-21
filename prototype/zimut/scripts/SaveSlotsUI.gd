@@ -310,7 +310,7 @@ func _on_slot_pressed(slot: int) -> void:
 var _gultur_busy: bool = false
 
 ## Tutoriel de Gultur sur « Mes Parties » : accueil, puis déblocage de l'Aventure (niv 3)
-## et de la Conquête (niv 5). Chaque étape ne s'affiche qu'une fois.
+## et de la Conquête (niv 12). Chaque étape ne s'affiche qu'une fois.
 func _start_tutorial(data: Dictionary, tac_btn: Button) -> void:
 	if _gultur_busy:
 		return
@@ -325,8 +325,8 @@ func _start_tutorial(data: Dictionary, tac_btn: Button) -> void:
 			steps.append(["pick", Gultur.PICK, null])
 		if Gultur.should_show("lvl3") and ProgressionManager.mode_unlocked(data, "adventure"):
 			steps.append(["lvl3", Gultur.LVL3, null])
-		if Gultur.should_show("lvl5") and ProgressionManager.mode_unlocked(data, "conquest"):
-			steps.append(["lvl5", Gultur.LVL5, null])
+		if Gultur.should_show("lvl12") and ProgressionManager.mode_unlocked(data, "conquest"):
+			steps.append(["lvl12", Gultur.LVL12, null])
 	_gultur_busy = true
 	_run_tutorial_steps.call_deferred(steps)
 

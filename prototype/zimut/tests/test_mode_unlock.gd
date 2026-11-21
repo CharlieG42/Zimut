@@ -17,8 +17,10 @@ func _boot() -> void:
 	check(pm.max_hero_level(data) == 2, "héros niveau 2")
 	check(pm.mode_unlocked(data, "adventure"), "joueur niveau 3 → Aventure débloquée")
 	check(not pm.mode_unlocked(data, "conquest"), "joueur niveau 3 → Conquête encore verrouillée")
-	data["player"] = {"level": 5, "xp": pm.xp_for_level(5)}
-	check(pm.mode_unlocked(data, "conquest"), "joueur niveau 5 → Conquête débloquée")
+	data["player"] = {"level": 11, "xp": pm.xp_for_level(11)}
+	check(not pm.mode_unlocked(data, "conquest"), "joueur niveau 11 → Conquête encore verrouillée")
+	data["player"] = {"level": 12, "xp": pm.xp_for_level(12)}
+	check(pm.mode_unlocked(data, "conquest"), "joueur niveau 12 → Conquête débloquée")
 	data["player"] = {"level": 2, "xp": 0}
 	check(not pm.mode_unlocked(data, "adventure"), "joueur 2 et héros 2 → Aventure verrouillée")
 	pm.delete_save(4)

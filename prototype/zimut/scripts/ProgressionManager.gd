@@ -1798,7 +1798,7 @@ func member_level(data: Dictionary, classe: String) -> int:
 	return int(e.get("level", START_LEVEL)) if not e.is_empty() else START_LEVEL
 
 ## Niveau minimum (au moins un héros de ce niveau) pour jouer chaque mode.
-const MODE_MIN_LEVEL := {"tactique": 1, "adventure": 3, "conquest": 5}
+const MODE_MIN_LEVEL := {"tactique": 1, "adventure": 3, "conquest": 12}
 
 ## Plus haut niveau parmi tous les héros de la partie.
 func max_hero_level(data: Dictionary) -> int:

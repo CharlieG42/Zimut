@@ -20,8 +20,10 @@ func _run() -> void:
 	_ok(pm.mode_unlocked(data, "tactique"), "Tactique toujours ouvert")
 	data["roster"]["Tank"]["level"] = 3
 	_ok(pm.mode_unlocked(data, "adventure") and not pm.mode_unlocked(data, "conquest"), "niv 3 : Aventure ouverte, Conquête non")
-	data["roster"]["Mage"]["level"] = 5
-	_ok(pm.mode_unlocked(data, "conquest"), "un seul héros niv 5 suffit pour la Conquête")
+	data["roster"]["Mage"]["level"] = 11
+	_ok(not pm.mode_unlocked(data, "conquest"), "héros niv 11 : Conquête encore verrouillée")
+	data["roster"]["Mage"]["level"] = 12
+	_ok(pm.mode_unlocked(data, "conquest"), "un seul héros niv 12 suffit pour la Conquête")
 	# Pseudo : doublons autorisés
 	var d1: Dictionary = pm.new_game(3, "Charlie")
 	var d2: Dictionary = pm.new_game(2, "Charlie")

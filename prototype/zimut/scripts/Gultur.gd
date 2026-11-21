@@ -94,8 +94,8 @@ const LVL3 := [
 	"Explore la carte : touche une case pour y marcher, le brouillard se lève. Des [b]groupes de monstres[/b] rôdent (vert = facile, rouge = dangereux).",
 	"Au [b]camp[/b], prends un contrat. Les énigmes et les coffres cachent de précieuses récompenses… et peut-être la trace d'une Pierre.",
 ]
-const LVL5 := [
-	"Impressionnant, [b]{pseudo}[/b] ! Te voilà [b]niveau 5[/b] de joueur : le mode [b]Conquête[/b] est débloqué.",
+const LVL12 := [
+	"Impressionnant, [b]{pseudo}[/b] ! Te voilà [b]niveau 12[/b] de joueur : le mode [b]Conquête[/b] est débloqué.",
 	"Prends les cités une à une, nomme des [b]gouverneurs[/b], recrute des soldats et défends tes villes contre les raids.",
 	"Les Nations gardent jalousement leurs Pierres dans leurs cités. Plus ton empire grandit, plus tu t'en approches !",
 	"Chaque ville a sa [b]spécialité[/b], certaines s'obtiennent par [b]traité[/b], et quatre [b]généraux[/b] du Roi Squelette t'attendent. Je t'expliquerai tout sur la carte de Conquête.",
