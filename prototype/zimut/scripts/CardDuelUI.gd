@@ -122,7 +122,58 @@ func _ready() -> void:
 	_show_hub()
 
 
+## Zones à défilement de l'écran courant (liste des adversaires, fosse) : le doigt/la souris
+## fait défiler même quand on appuie sur un bouton ou une carte de la liste.
+var _scrolls: Array = []
+var _drag_sc: ScrollContainer = null
+var _drag_start: Vector2 = Vector2.ZERO
+var _drag_moved: bool = false
+
+
+func _input(event: InputEvent) -> void:
+	if _scrolls.is_empty():
+		return
+	if event is InputEventScreenDrag:
+		for sc: ScrollContainer in _scrolls:
+			if is_instance_valid(sc) and Rect2(sc.global_position, sc.size).has_point((event as InputEventScreenDrag).position):
+				get_viewport().set_input_as_handled()
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_drag_sc = null
+			_drag_moved = false
+			var mp: Vector2 = (event as InputEventMouseButton).global_position
+			for sc: ScrollContainer in _scrolls:
+				if is_instance_valid(sc) and sc.is_visible_in_tree() and Rect2(sc.global_position, sc.size).has_point(mp):
+					_drag_sc = sc
+					_drag_start = mp
+		else:
+			_drag_sc = null
+			if _drag_moved:
+				get_tree().create_timer(0.08).timeout.connect(func() -> void: JccCardView.drag_active = false)
+			_drag_moved = false
+	elif event is InputEventMouseMotion and _drag_sc != null and is_instance_valid(_drag_sc) \
+			and ((event as InputEventMouseMotion).button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
+		var mm: InputEventMouseMotion = event
+		if not _drag_moved and (mm.global_position - _drag_start).length() > 10.0:
+			_drag_moved = true
+			JccCardView.drag_active = true
+		if _drag_moved:
+			var bar: VScrollBar = _drag_sc.get_v_scroll_bar()
+			_drag_sc.scroll_vertical = clampi(_drag_sc.scroll_vertical - int(mm.relative.y), 0, int(bar.max_value))
+			get_viewport().set_input_as_handled()
+	elif event is InputEventMouseButton and event.pressed \
+			and (event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN):
+		var wp: Vector2 = get_viewport().get_mouse_position()
+		for sc2: ScrollContainer in _scrolls:
+			if is_instance_valid(sc2) and Rect2(sc2.global_position, sc2.size).has_point(wp):
+				var bar2: VScrollBar = sc2.get_v_scroll_bar()
+				sc2.scroll_vertical = clampi(sc2.scroll_vertical + (-120 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 120), 0, int(bar2.max_value))
+				get_viewport().set_input_as_handled()
+
+
 func _clear() -> void:
+	_scrolls = []
 	for c: Node in _root.get_children():
 		c.queue_free()
 	_slots = {}
@@ -298,6 +349,7 @@ func _show_opponents() -> void:
 	sc.size = Vector2(1700, 830)
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_root.add_child(sc)
+	_scrolls.append(sc)
 	sc.add_child(grid)
 	for i: int in JccCollection.total_opponents():
 		var op: Dictionary = JccCollection.opponent(i)
@@ -306,7 +358,9 @@ func _show_opponents() -> void:
 		var chap: bool = op.has("chapter")
 		var b: Button = UiKit.btn("", Color(0.75, 0.5, 0.95) if chap and unlocked else Color(0.95, 0.65, 0.25) if boss != "" and unlocked else (Color(0.45, 0.65, 0.95) if unlocked else Color(0.24, 0.26, 0.31)), 24, Vector2(520, 320))
 		if unlocked:
-			b.pressed.connect(func() -> void: _start_duel(i))
+			b.pressed.connect(func() -> void:
+				if not JccCardView.drag_active:
+					_start_duel(i))
 		else:
 			b.disabled = true
 		grid.add_child(b)
@@ -424,6 +478,7 @@ func _build_duel_ui() -> void:
 	var biome_bg := _BiomeBG.new()
 	biome_bg.iso = _iso
 	biome_bg.polys = _cell_polys
+	biome_bg.lifts = _lifts()
 	biome_bg.biome = _biome
 	biome_bg.seedv = _opp_idx * 7919 + 13
 	biome_bg.board = BOARD
@@ -578,6 +633,26 @@ func _iso_hw(y: float) -> float:
 
 
 ## Calcule le polygone, le centre et l'échelle d'unité de chaque case (plat ou perspective).
+## Hauteur (px) dont une case « hauteur » est surélevée : plateau en perspective plus marqué.
+func _lift_of(cell: int) -> float:
+	if _duel == null or _duel.terrain_at(cell) != "hauteur":
+		return 0.0
+	return 30.0 if _iso else 22.0
+
+
+func _lifts() -> Dictionary:
+	var d: Dictionary = {}
+	for cell in JccDuel.LANES:
+		if _lift_of(cell) > 0.0:
+			d[cell] = _lift_of(cell)
+	return d
+
+
+## Centre d'une case, relevé si la case est surélevée (les unités y sont posées).
+func _ctr(cell: int) -> Vector2:
+	return (_cell_ctr[cell] as Vector2) - Vector2(0, _lift_of(cell))
+
+
 func _build_geometry() -> void:
 	_cell_polys = []
 	_cell_ctr = []
@@ -617,6 +692,7 @@ class _CellNode extends Control:
 	var border := Color(1, 1, 1, 0.14)
 	var bw: float = 2.0
 	var terrain: String = ""           # "", "boue", "hauteur", "buisson"
+	var lift: float = 0.0              # case surélevée : tout le dessin remonte avec le bloc
 	const TERRAIN_COL := {"boue": Color(0.35, 0.55, 1.0), "hauteur": Color(0.85, 0.85, 0.95), "buisson": Color(0.35, 0.85, 0.40)}
 	const TERRAIN_NAME := {"boue": "Boue", "hauteur": "Hauteur", "buisson": "Buisson"}
 
@@ -626,6 +702,8 @@ class _CellNode extends Control:
 	func _draw() -> void:
 		if poly.size() < 3:
 			return
+		if lift > 0.0:
+			draw_set_transform(Vector2(0, -lift))   # surbrillance posée sur le dessus du bloc
 		draw_colored_polygon(poly, fill)
 		var closed := poly.duplicate()
 		closed.append(poly[0])
@@ -1076,6 +1154,7 @@ func _refresh() -> void:
 		var occ: Dictionary = _duel.occupant(cell)
 		var empty_ok: bool = occ.is_empty() and _is_target_any(cell)
 		slot.terrain = _duel.terrain_at(cell)
+		slot.lift = _lift_of(cell)
 		slot.border = Color(1.0, 0.85, 0.2, 0.9) if empty_ok else Color(1, 1, 1, 0.14)
 		slot.bw = 5.0 if empty_ok else 2.0
 		if _is_move_target(cell):
@@ -1101,7 +1180,7 @@ func _refresh() -> void:
 		var us: float = float(_cell_scale[cell])
 		v.size = CELL
 		v.scale = Vector2(us, us)
-		v.position = (_cell_ctr[cell] as Vector2) - CELL * us * 0.5
+		v.position = _ctr(cell) - CELL * us * 0.5
 		v.side = side
 		v.team_col = _foe_accent.lightened(0.15) if side == 1 else Color(0.45, 0.72, 1.0)
 		v.set_card(cr)
@@ -1619,7 +1698,7 @@ func _node_center(side: int, cell: int) -> Vector2:
 	if cell < 0:
 		var p: Control = _hero_nodes[side]
 		return p.position + p.size * 0.5
-	return _cell_ctr[cell]
+	return _ctr(cell)
 
 
 func _show_event(e: Dictionary) -> void:
@@ -1884,6 +1963,7 @@ func _show_fosse(side: int) -> void:
 	sc.size = Vector2(1800, 800)
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	ov.add_child(sc)
+	_scrolls.append(sc)
 	var grid := GridContainer.new()
 	grid.columns = 8
 	grid.add_theme_constant_override("h_separation", 12)
@@ -1974,6 +2054,7 @@ class _BiomeBG extends Control:
 	var board: Rect2 = Rect2(400, 116, 1120, 576)
 	var iso: bool = false
 	var polys: Array = []
+	var lifts: Dictionary = {}   # cellule -> hauteur (px) des cases surélevées
 	var foe_accent: Color = Color(1.0, 0.42, 0.38)
 	var camps: Array = []     # [{tex, reg}] sprite du héros : side 0 (vous) puis side 1 (ennemi)
 	var _t: float = 0.0
@@ -2148,31 +2229,29 @@ class _BiomeBG extends Control:
 		# dalles des cases : damier franc à fort contraste + biseautage (la texture de
 		# matière n'est qu'un voile léger pour ne pas tuer le damier)
 		for cell in polys.size():
+			_tile(polys[cell], cell, p, 0.0)
+		# cases en hauteur : vrais blocs surélevés (face avant en roche, dessus texturé, ombre portée),
+		# dessinés après le sol et de haut en bas pour que le bloc recouvre la rangée derrière lui
+		for cell in polys.size():
+			if not lifts.has(cell):
+				continue
+			var lh: float = float(lifts[cell])
 			var pl: PackedVector2Array = polys[cell]
-			var gx: int = cell % JccDuel.COLS
-			var gy: int = cell / JccDuel.COLS
-			var chk: bool = (gx + gy) % 2 == 0
-			var base: Color = (p["top_a"] as Color).lightened(0.10) if chk else (p["top_b"] as Color).darkened(0.22)
-			var shade: float = clampf(1.0 - 0.20 * float(gy) / 5.0, 0.74, 1.0) if iso else 1.0
-			draw_colored_polygon(pl, Color(base.r * shade, base.g * shade, base.b * shade))
-			var tile: Texture2D = BattleScenery.tile_tex(nation, BattleScenery.tile_variant(gx, gy))
-			if tile != null:
-				var p0: Vector2 = pl[0]
-				var p1: Vector2 = pl[1]
-				var p3: Vector2 = pl[3]
-				var tw2: float = float(tile.get_width())
-				var th2: float = float(tile.get_height())
-				draw_set_transform_matrix(Transform2D((p1 - p0) / tw2, (p3 - p0) / th2, p0))
-				draw_texture_rect(tile, Rect2(0, 0, tw2, th2), false, Color(1, 1, 1, 0.16))
-				draw_set_transform_matrix(Transform2D.IDENTITY)
-			# biseautage : lumière en haut/gauche, ombre en bas/droite
-			draw_line(pl[0], pl[1], (p["lip"] as Color).lightened(0.25), 2.5, true)
-			draw_line(pl[0], pl[3], (p["lip"] as Color).lightened(0.15), 2.0, true)
-			draw_line(pl[3], pl[2], Color(0, 0, 0, 0.35), 3.0, true)
-			draw_line(pl[1], pl[2], Color(0, 0, 0, 0.25), 2.0, true)
-			var closed := pl.duplicate()
-			closed.append(pl[0])
-			draw_polyline(closed, Color(0, 0, 0, 0.45), 2.0, true)
+			var up := Vector2(0, -lh)
+			var lt: Color = p["l_t"]
+			var lb: Color = p["l_b"]
+			var rt: Color = p["r_t"]
+			# ombre portée au pied du bloc
+			draw_colored_polygon(PackedVector2Array([pl[3], pl[2], pl[2] + Vector2(10, 14), pl[3] + Vector2(-10, 14)]), Color(0, 0, 0, 0.30))
+			# flancs puis face avant (dégradé de roche + strates)
+			draw_polygon(PackedVector2Array([pl[0] + up, pl[3] + up, pl[3], pl[0]]), PackedColorArray([rt, rt, rt.darkened(0.35), rt.darkened(0.35)]))
+			draw_polygon(PackedVector2Array([pl[1] + up, pl[2] + up, pl[2], pl[1]]), PackedColorArray([rt, rt, rt.darkened(0.35), rt.darkened(0.35)]))
+			draw_polygon(PackedVector2Array([pl[3] + up, pl[2] + up, pl[2], pl[3]]), PackedColorArray([lt, lt, lb, lb]))
+			for sy: float in [0.34, 0.68]:
+				draw_line(pl[3] + up * (1.0 - sy), pl[2] + up * (1.0 - sy), Color(0, 0, 0, 0.18), 2.0)
+			draw_line(pl[3], pl[2], Color(0, 0, 0, 0.5), 3.0, true)
+			_tile(pl, cell, p, lh)
+			draw_polyline(PackedVector2Array([pl[3] + up, pl[2] + up]), (p["lip"] as Color).lightened(0.35), 3.0, true)
 		# cadre épais du plateau pour bien le détacher du fond
 		draw_polyline(PackedVector2Array([tl, tr, br, bl, tl]), Color(0, 0, 0, 0.5), 7.0, true)
 		draw_polyline(PackedVector2Array([tl, tr, br, bl, tl]), p.get("lip", Color(1, 1, 1)), 4.0, true)
@@ -2180,6 +2259,39 @@ class _BiomeBG extends Control:
 			var m0: Vector2 = (polys[8] as PackedVector2Array)[3]
 			var m1: Vector2 = (polys[11] as PackedVector2Array)[2]
 			draw_line(m0, m1, Color(1, 1, 1, 0.10), 3.0)
+
+	## Une dalle de sol (texture de la nation en pleine opacité comme sur l'aire tactique + damier
+	## léger + biseautage). `lift` > 0 la remonte (case en hauteur).
+	func _tile(pl0: PackedVector2Array, cell: int, p: Dictionary, lift: float) -> void:
+		var pl := PackedVector2Array()
+		for q in pl0:
+			pl.append(q + Vector2(0, -lift))
+		var gx: int = cell % JccDuel.COLS
+		var gy: int = cell / JccDuel.COLS
+		var chk: bool = (gx + gy) % 2 == 0
+		var base: Color = (p["top_a"] as Color).lightened(0.10) if chk else (p["top_b"] as Color).darkened(0.12)
+		var shade: float = clampf(1.0 - 0.20 * float(gy) / 5.0, 0.74, 1.0) if iso else 1.0
+		if lift > 0.0:
+			shade = minf(1.12, shade * 1.14)
+		draw_colored_polygon(pl, Color(base.r * shade, base.g * shade, base.b * shade))
+		var tile: Texture2D = BattleScenery.tile_tex(nation, BattleScenery.tile_variant(gx, gy))
+		if tile != null:
+			var p0: Vector2 = pl[0]
+			var p1: Vector2 = pl[1]
+			var p3: Vector2 = pl[3]
+			var tw2: float = float(tile.get_width())
+			var th2: float = float(tile.get_height())
+			draw_set_transform_matrix(Transform2D((p1 - p0) / tw2, (p3 - p0) / th2, p0))
+			var ta: float = 0.88 if lift <= 0.0 else 0.95
+			draw_texture_rect(tile, Rect2(0, 0, tw2, th2), false, Color(shade, shade, shade, ta))
+			draw_set_transform_matrix(Transform2D.IDENTITY)
+		draw_line(pl[0], pl[1], (p["lip"] as Color).lightened(0.25), 2.5, true)
+		draw_line(pl[0], pl[3], (p["lip"] as Color).lightened(0.15), 2.0, true)
+		draw_line(pl[3], pl[2], Color(0, 0, 0, 0.35), 3.0, true)
+		draw_line(pl[1], pl[2], Color(0, 0, 0, 0.25), 2.0, true)
+		var closed := pl.duplicate()
+		closed.append(pl[0])
+		draw_polyline(closed, Color(0, 0, 0, 0.40), 2.0, true)
 
 	func _draw_camps() -> void:
 		if polys.size() < 24 or camps.size() < 2:

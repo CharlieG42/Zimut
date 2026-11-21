@@ -1,0 +1,4 @@
+V433|Constructeur de deck : la carte s'affiche immédiatement au toucher (la grille n'est plus reconstruite à chaque sélection).
+V433|Choix de l'adversaire : le défilement répond tout de suite, même en partant d'un bouton.
+V433|Plateau Cartes : tuiles du biome plus riches, comme en mode tactique.
+V433|Les cases en hauteur sont dessinées en vrais blocs surélevés, avec les unités posées dessus.
