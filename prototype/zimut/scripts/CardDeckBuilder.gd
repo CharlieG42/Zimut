@@ -193,6 +193,14 @@ func _save_deck() -> void:
 	closed.emit(true)
 
 
+## Ajout/retrait d'une carte : seuls la liste du deck, les pastilles et le détail changent.
+func _after_deck_change() -> void:
+	_refresh_deck_tabs()
+	_refresh_deck()
+	_sync_marks()
+	_refresh_detail()
+
+
 func _refresh_all() -> void:
 	_refresh_tabs()
 	_refresh_deck_tabs()
@@ -272,7 +280,11 @@ func _count_in_deck(id: String) -> int:
 	return n
 
 
+var _marks: Dictionary = {}
+
+
 func _refresh_grid() -> void:
+	_marks = {}
 	for c: Node in _grid.get_children():
 		c.queue_free()
 	var ids: Array = JccCards.collectible_ids()
@@ -304,17 +316,38 @@ func _refresh_grid() -> void:
 		v.count_badge = own
 		v.selected = id == _selected
 		v.release_tap = true
-		v.tapped.connect(func(_vw: JccCardView) -> void:
-			_selected = id
-			_refresh_grid()
-			_refresh_detail())
+		v.tapped.connect(func(_vw: JccCardView) -> void: _pick(id))
 		holder.add_child(v)
-		var inn: int = _count_in_deck(id)
-		if inn > 0:
-			var lb: Label = UiKit.lbl("Deck ×%d" % inn, 17, UiKit.C_GOOD, true)
-			lb.position = Vector2(CARD_W * 0.5 - 38.0, 3)
-			lb.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			holder.add_child(lb)
+		var lb: Label = UiKit.lbl("", 17, UiKit.C_GOOD, true)
+		lb.position = Vector2(CARD_W * 0.5 - 38.0, 3)
+		lb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		holder.add_child(lb)
+		_marks[id] = {"view": v, "label": lb}
+	_sync_marks()
+
+
+## Sélection d'une carte : on ne reconstruit PAS la grille (110+ cartes dessinées), on met
+## seulement à jour le liseré de sélection et la carte de détail.
+func _pick(id: String) -> void:
+	_selected = id
+	_sync_marks()
+	_refresh_detail()
+
+
+## Met à jour, sans rien recréer, la sélection et le « Deck ×n » de chaque carte de la grille.
+func _sync_marks() -> void:
+	for id: Variant in _marks:
+		var m: Dictionary = _marks[id]
+		var v: JccCardView = m["view"]
+		if not is_instance_valid(v):
+			continue
+		var sel: bool = String(id) == _selected
+		if v.selected != sel:
+			v.selected = sel
+			v.queue_redraw()
+		var inn: int = _count_in_deck(String(id))
+		var lb: Label = m["label"]
+		lb.text = "Deck ×%d" % inn if inn > 0 else ""
 
 
 func _refresh_deck() -> void:
@@ -339,9 +372,7 @@ func _refresh_deck() -> void:
 		b.pressed.connect(func() -> void:
 			if JccCardView.drag_active:
 				return
-			_selected = id
-			_refresh_grid()
-			_refresh_detail())
+			_pick(id))
 		_deck_box.add_child(b)
 	var err: String = JccCollection.deck_error(save, _deck)
 	_count_lbl.text = "Deck : %d / %d" % [_deck.size(), JccCollection.DECK_SIZE]
@@ -378,11 +409,11 @@ func _refresh_detail() -> void:
 	add.disabled = inn >= lim or _deck.size() >= JccCollection.DECK_SIZE + 5
 	add.pressed.connect(func() -> void:
 		_deck.append(_selected)
-		_refresh_all())
+		_after_deck_change())
 	_detail_btns.add_child(add)
 	var rem: Button = UiKit.btn("Retirer", Color(0.85, 0.45, 0.4), 22, Vector2(235, 64))
 	rem.disabled = inn <= 0
 	rem.pressed.connect(func() -> void:
 		_deck.erase(_selected)
-		_refresh_all())
+		_after_deck_change())
 	_detail_btns.add_child(rem)

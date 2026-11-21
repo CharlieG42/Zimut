@@ -28,6 +28,15 @@ func _boot() -> void:
 	await create_timer(0.3).timeout
 	var b = m._root.get_child(0)
 	check(b != null and b.get("_deck") != null and b._deck.size() == 20, "le constructeur s'ouvre avec le deck")
+	var first_card: Node = b._grid.get_child(0) if b._grid.get_child_count() > 0 else null
+	b._pick("c_mage")
+	check(b._grid.get_child_count() > 0 and b._grid.get_child(0) == first_card, "sélectionner une carte ne reconstruit pas la grille (réactivité)")
+	var tap_before: int = b._grid.get_child_count()
+	b._deck.append("c_mage")
+	b._after_deck_change()
+	check(b._grid.get_child_count() == tap_before and b._grid.get_child(0) == first_card, "ajouter une carte ne reconstruit pas la grille")
+	b._deck.erase("c_mage")
+	b._after_deck_change()
 	b._selected = "c_mage"
 	b._refresh_detail()
 	var before: int = b._deck.size()
