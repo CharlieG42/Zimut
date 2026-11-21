@@ -1,0 +1,4 @@
+V434|Plateau Cartes : le sol des cases est maintenant uni, sans motif en losange.
+V434|Les créatures fatiguées ou assoupies sont assombries, sans carré gris translucide derrière elles.
+V434|Les boutons de sort et de pouvoir de héros affichent leur effet, leur coût en mana et PA et leur fréquence d'usage.
+V434|Nouveau bouton Aide sur l'accueil du mode Cartes : règles générales et actions à mana.

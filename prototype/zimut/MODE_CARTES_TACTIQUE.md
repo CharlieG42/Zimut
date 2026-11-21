@@ -404,3 +404,9 @@ Simulation IA (même deck, 14 adversaires × 12 graines) : avant, les héros all
 - **Deck** : toucher une carte (collection ou liste du deck) ne reconstruit plus la grille des ~110 cartes dessinées ; seuls le liseré de sélection, la pastille « Deck ×n » et la carte de détail sont mis à jour (`_pick`, `_sync_marks`). Idem pour Ajouter/Retirer (`_after_deck_change`).
 - **Choix de l'adversaire** (et fosse) : le glisser du doigt fait défiler même en partant d'un bouton ; le tap n'est ignoré que si le doigt a bougé (`_scrolls`, `drag_active`).
 - **Plateau** : tuiles de sol de la nation quasi opaques (comme l'aire tactique, au lieu d'un voile à 16 %). Les cases **hauteur** sont de vrais blocs surélevés : face avant en roche du biome, flancs, ombre portée, dessus éclairci ; les unités et la surbrillance y sont posées en haut du bloc (`_lift_of`, `_ctr`).
+
+## 34. Sol uni, unités, actions à mana et aide
+- **Sol** : la tuile de la nation est un losange ; on n'en prend plus que le carré central, étiré sur toute la case (matière continue, plus de motifs en diamant), damier quasi imperceptible.
+- **Unités** : une créature fatiguée, étourdie ou assoupie voit son *sprite* assombri, au lieu d'un carré gris translucide derrière elle.
+- **Actions à mana** : le bouton violet d'un sort de créature affiche l'effet, le coût (mana + 1 PA), « 1 fois par tour » et « touchez ensuite la cible » si besoin ; le pouvoir de héros affiche son effet, « gratuit, 1 fois par duel ».
+- **Aide** : bouton « ❓ Aide » sur l'accueil du mode Cartes (`_show_rules`, texte `RULES_TEXT`) : but, tour, PA/PM/PO, actions à mana, terrains, mots-clés, butin.

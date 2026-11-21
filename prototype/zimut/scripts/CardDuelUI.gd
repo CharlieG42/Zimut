@@ -241,6 +241,10 @@ func _show_hub() -> void:
 		v.set_card(JccCards.get_card(String(fan[i])))
 		v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_root.add_child(v)
+	var rules_b: Button = UiKit.btn("❓  Aide", Color(0.45, 0.65, 0.85), 28, Vector2(230, 64))
+	rules_b.position = Vector2(W - 270, 40)
+	rules_b.pressed.connect(_show_rules)
+	_root.add_child(rules_b)
 	var col := VBoxContainer.new()
 	col.position = Vector2(W * 0.5 - 360, 606)
 	col.size = Vector2(720, 390)
@@ -539,7 +543,7 @@ func _build_duel_ui() -> void:
 	# barre d'actions (créature sélectionnée)
 	_action_bar = HBoxContainer.new()
 	_action_bar.position = Vector2(420, 700)
-	_action_bar.size = Vector2(1480, 64)
+	_action_bar.size = Vector2(1480, 72)
 	_action_bar.alignment = BoxContainer.ALIGNMENT_CENTER
 	_action_bar.add_theme_constant_override("separation", 14)
 	_root.add_child(_action_bar)
@@ -587,13 +591,15 @@ func _build_duel_ui() -> void:
 	_fancy_btn(fp, Color(0.55, 0.5, 0.7))
 	fp.pressed.connect(func() -> void: _show_fosse(0))
 	_root.add_child(fp)
-	_power_btn = UiKit.btn("", Color(0.85, 0.65, 1.0), 22, Vector2(330, 60))
-	_power_btn.position = Vector2(1560, 556)
+	_power_btn = UiKit.btn("", Color(0.85, 0.65, 1.0), 18, Vector2(330, 100))
+	_power_btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_power_btn.clip_text = true
+	_power_btn.position = Vector2(1560, 546)
 	_fancy_btn(_power_btn, Color(0.85, 0.65, 1.0))
 	_power_btn.pressed.connect(_on_power_pressed)
 	_root.add_child(_power_btn)
 	_mull_btn = UiKit.btn("↺ Nouvelle main (1×)", Color(0.45, 0.75, 0.9), 20, Vector2(330, 52))
-	_mull_btn.position = Vector2(1560, 624)
+	_mull_btn.position = Vector2(1560, 656)
 	_fancy_btn(_mull_btn, Color(0.45, 0.75, 0.9))
 	_mull_btn.pressed.connect(_on_mulligan)
 	_root.add_child(_mull_btn)
@@ -840,12 +846,12 @@ class _UnitView extends Control:
 		if tex != null:
 			var ts: Vector2 = tex.get_size()
 			var sc: float = minf(art.size.x / ts.x, art.size.y / ts.y)
-			draw_texture_rect(tex, Rect2(art.position + (art.size - ts * sc) * 0.5, ts * sc), false)
+			# unité fatiguée / étourdie : le SPRITE est assombri (pas de carré gris derrière lui)
+			var dim: bool = bool(card.get("used", false)) or bool(card.get("sick", false)) or int(card.get("stun", 0)) > 0 or bool(card.get("frozen", false))
+			draw_texture_rect(tex, Rect2(art.position + (art.size - ts * sc) * 0.5, ts * sc), false, Color(0.62, 0.62, 0.70) if dim else Color(1, 1, 1))
 		else:
 			draw_rect(art, Color(0.20, 0.26, 0.38))
 			draw_rect(art, Color(0.5, 0.6, 0.8), false, 2.0)
-		if bool(card.get("used", false)) or bool(card.get("sick", false)) or int(card.get("stun", 0)) > 0 or bool(card.get("frozen", false)):
-			draw_rect(art, Color(0, 0, 0, 0.35))
 		var name_txt: String = String(card.get("name", ""))
 		if name_txt != "":
 			var fs: int = 20
@@ -1205,7 +1211,8 @@ func _refresh() -> void:
 	_end_btn.disabled = _busy or _duel.current != 0 or _over
 	_power_btn.visible = not _over and not _busy and _duel.can_use_hero_power(0)
 	if not ( _duel.side(0)["power"] as Dictionary).is_empty():
-		_power_btn.text = "⚡ %s" % String(_duel.side(0)["power"].get("name", "Pouvoir"))
+		var pw: Dictionary = _duel.side(0)["power"]
+		_power_btn.text = "⚡ %s\n%s · gratuit, 1 fois par duel" % [String(pw.get("name", "Pouvoir")), JccCards.effect_text(pw, true)]
 	_power_btn.disabled = not _power_btn.visible
 	_mull_btn.visible = not _over and not _busy and _duel.can_mulligan(0)
 	_mull_btn.disabled = not _mull_btn.visible
@@ -1398,7 +1405,10 @@ func _refresh_action_bar() -> void:
 		if atk.disabled and why_a != "":
 			_action_bar.add_child(UiKit.lbl(why_a, 24, UiKit.C_BAD))
 		if String(cr["sort"]) != "":
-			var sb: Button = UiKit.btn("✦ %s (%d mana · 1 PA)" % [String(cr["sort"]), int(cr["sort_cost"])], Color(0.7, 0.45, 1.0), 24, Vector2(400, 64))
+			var eff: String = JccCards.effect_text(cr, true)
+			var tgt: String = " — touchez ensuite la cible" if _duel.needs_target(String(cr["cible"])) else ""
+			var sb: Button = UiKit.btn("✦ %s : %s\nCoûte %d mana + 1 PA · 1 fois par tour%s" % [String(cr["sort"]), eff, int(cr["sort_cost"]), tgt], Color(0.7, 0.45, 1.0), 19, Vector2(640, 72))
+			sb.tooltip_text = "Sort de la créature : %s (%d mana, 1 PA)" % [eff, int(cr["sort_cost"])]
 			sb.disabled = not _duel.can_use_sort(0, cell)
 			sb.pressed.connect(func() -> void: _begin_sort(cell))
 			_action_bar.add_child(sb)
@@ -1406,7 +1416,7 @@ func _refresh_action_bar() -> void:
 			if sb.disabled and why_s != "":
 				_action_bar.add_child(UiKit.lbl(why_s, 24, UiKit.C_BAD))
 		var mv: Array = _duel.move_targets(0, cell)
-		var hint: Label = UiKit.lbl("PM %d — touchez une case dorée pour vous déplacer" % int(cr.get("pm", 0)), 24, Color(0.6, 0.85, 1.0) if not mv.is_empty() else UiKit.C_DIM)
+		var hint: Label = UiKit.lbl("PM %d : case dorée = déplacement" % int(cr.get("pm", 0)), 20, Color(0.6, 0.85, 1.0) if not mv.is_empty() else UiKit.C_DIM)
 		_action_bar.add_child(hint)
 
 
@@ -1989,6 +1999,41 @@ func _show_fosse(side: int) -> void:
 
 
 ## Légende : PA / PM / PO / mana, mots-clés, couleurs du plateau.
+## Règles générales du mode Cartes (bouton « Aide » de l'accueil).
+func _show_rules() -> void:
+	if _root.get_node_or_null("RulesView") != null:
+		return
+	var ov := ColorRect.new()
+	ov.name = "RulesView"
+	ov.color = Color(0.02, 0.03, 0.06, 0.985)
+	ov.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_root.add_child(ov)
+	var t: Label = UiKit.lbl("Règles du mode Cartes", 48, UiKit.C_GOLD, true)
+	t.position = Vector2(80, 24)
+	ov.add_child(t)
+	var sc := ScrollContainer.new()
+	sc.position = Vector2(80, 100)
+	sc.size = Vector2(1760, 790)
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	ov.add_child(sc)
+	_scrolls.append(sc)
+	var txt: String = RULES_TEXT
+	var l: Label = UiKit.lbl(txt, 28, UiKit.C_TXT)
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.custom_minimum_size = Vector2(1720, 0)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	sc.add_child(l)
+	var close: Button = UiKit.btn("Fermer", Color(0.6, 0.62, 0.72), 28, Vector2(280, 66))
+	close.position = Vector2(W * 0.5 - 140, 930)
+	close.pressed.connect(func() -> void:
+		_scrolls.erase(sc)
+		ov.queue_free())
+	ov.add_child(close)
+
+
+const RULES_TEXT := "BUT DU JEU\nRéduire à 0 les PV du héros adverse (20 PV chacun). Le plateau compte 4 colonnes × 6 lignes : vous posez vos créatures dans votre zone (bas), l'adversaire dans la sienne (haut).\n\nVOTRE TOUR\n• Vous gagnez 1 mana de plus (maximum 10) et piochez une carte.\n• Jouez des cartes depuis la main : glissez-les ou touchez la carte puis la case. Une carte coûte son mana.\n• Touchez une de vos créatures pour la déplacer (PM), l'attaquer (PA) ou lancer son sort.\n• « Fin du tour » passe la main à l'adversaire.\n\nCARACTÉRISTIQUES D'UNE CRÉATURE\n• PA (points d'action) : une attaque ou un sort coûte 1 PA ; les PA sont rendus à chaque tour.\n• PM (points de mouvement) : nombre de cases dont elle peut se déplacer par tour.\n• PO (portée) : distance maximale, en cases, d'une attaque ou d'un sort.\n• Une créature qui vient d'être posée est assoupie : elle ne peut pas agir ce tour-là (sprite assombri).\n\nACTIONS QUI COÛTENT DU MANA (boutons violets)\n• Sort de créature (✦) : chaque créature à sort affiche son effet dans le bouton. Il coûte le mana indiqué ET 1 PA, utilisable une fois par tour. Si l'effet vise une cible, touchez ensuite la cible (créature ou héros).\n• Pouvoir de héros (⚡) : propre à votre héros actif, il est gratuit mais utilisable une seule fois par duel, quand vous voulez pendant votre tour.\n• Les cartes Sort de la main coûtent leur mana puis sont défaussées après leur effet.\n\nTERRAINS\nBoue : déplacement ×2. Hauteur (case surélevée) : +1 PO. Buisson : abri contre les tirs à distance. Aucun terrain ne bloque le passage.\n\nMOTS-CLÉS\nV Vol (survole les créatures) · F Perforation (l'excès de dégâts touche le héros) · T Provocation (à attaquer en premier) · R Régénération (soigne chaque tour) · I Initiative (frappe en premier).\n\nAPRÈS LE DUEL\nUne victoire peut donner une carte de butin et de l'or. Vous pouvez fusionner des cartes identiques (Fusion), renforcer vos créatures avec de l'or (fortification) et choisir votre héros parmi vos cartes.\n\nDÉBLOCAGE\nLe mode Cartes s'ouvre quand tous les héros de l'aventure sont débloqués."
+
+
 func _show_help() -> void:
 	if _root.get_node_or_null("HelpView") != null:
 		return
@@ -2271,19 +2316,22 @@ class _BiomeBG extends Control:
 		var chk: bool = (gx + gy) % 2 == 0
 		var base: Color = (p["top_a"] as Color).lightened(0.10) if chk else (p["top_b"] as Color).darkened(0.12)
 		var shade: float = clampf(1.0 - 0.20 * float(gy) / 5.0, 0.74, 1.0) if iso else 1.0
+		shade *= 0.97 if chk else 1.0   # damier très discret : la case reste lisible sans casser l'uni
 		if lift > 0.0:
 			shade = minf(1.12, shade * 1.14)
 		draw_colored_polygon(pl, Color(base.r * shade, base.g * shade, base.b * shade))
 		var tile: Texture2D = BattleScenery.tile_tex(nation, BattleScenery.tile_variant(gx, gy))
 		if tile != null:
+			# la tuile est un losange : on n'en prend que le carré central (matière continue,
+			# sans bords en diamant) étiré sur toute la case → sol uni et sans coutures
 			var p0: Vector2 = pl[0]
 			var p1: Vector2 = pl[1]
 			var p3: Vector2 = pl[3]
 			var tw2: float = float(tile.get_width())
 			var th2: float = float(tile.get_height())
-			draw_set_transform_matrix(Transform2D((p1 - p0) / tw2, (p3 - p0) / th2, p0))
-			var ta: float = 0.88 if lift <= 0.0 else 0.95
-			draw_texture_rect(tile, Rect2(0, 0, tw2, th2), false, Color(shade, shade, shade, ta))
+			var src := Rect2(tw2 * 0.27, th2 * 0.27, tw2 * 0.46, th2 * 0.46)
+			draw_set_transform_matrix(Transform2D((p1 - p0) / src.size.x, (p3 - p0) / src.size.y, p0))
+			draw_texture_rect_region(tile, Rect2(0, 0, src.size.x, src.size.y), src, Color(shade, shade, shade, 1.0))
 			draw_set_transform_matrix(Transform2D.IDENTITY)
 		draw_line(pl[0], pl[1], (p["lip"] as Color).lightened(0.25), 2.5, true)
 		draw_line(pl[0], pl[3], (p["lip"] as Color).lightened(0.15), 2.0, true)
