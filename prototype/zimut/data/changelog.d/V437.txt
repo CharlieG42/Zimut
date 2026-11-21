@@ -1,0 +1,4 @@
+V437|Monde 3D, Sylve : ruines à facettes autour des lieux (arches brisées, colonnes cassées, murs écroulés, dalles dressées, braseros) pour donner de la matière et des points d'intérêt, dans l'esprit de tes captures de référence.
+V437|Lumière chaude locale : les braseros ont une flamme émissive, et les quatre plus proches du départ éclairent vraiment le sol (qualité Haute uniquement).
+V437|Pièces construites en code, un seul appel de rendu par type (environ 27 000 triangles pour toute la zone) ; allégé en Économie, sans collision, hors des sentiers. Réservé à la Sylve pour ce prototype.
+V437|Le mode Conquête se débloque désormais au niveau 12 (niveau du joueur ou d'un de ses héros) au lieu du niveau 5 ; le message de Gultur et l'indication « Niveau requis » suivent.

@@ -1732,3 +1732,4 @@ Onde de choc	Shockwave
 30 dégâts + attire de 3 cases	30 damage + pulls 3 tiles
 62 dégâts en zone (3x3) + repousse de 2 cases	62 damage in area (3x3) + pushes 2 tiles
 Attire de %d case(s)	Pulls %d cell(s)
+Impressionnant, [b]{pseudo}[/b] ! Te voilà [b]niveau 12[/b] de joueur : le mode [b]Conquête[/b] est débloqué.	Impressive, [b]{pseudo}[/b]! You are now player [b]level 12[/b]: [b]Conquest[/b] mode is unlocked.
