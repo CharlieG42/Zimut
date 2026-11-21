@@ -1,1 +1,3 @@
-V435|Yéti et lutin des spores en 3D (Meshy texturé par projection du dessin, 30 000 triangles/2048 ; 12 000/1024 sur téléphone) : en Montagne les trolls ennemis prennent le yéti, en Forêt les gobelins prennent le lutin. Modèles sans squelette, le corps se balance et s'élance (pas d'ailes). Essai, table Hero3D.ENEMY_MODEL.
+V435|Le yéti et le lutin des spores sont jouables en 3D : modèles Meshy texturés par projection du dessin 2D, 30 000 triangles et texture 2048 sur PC, 12 000 et 1024 sur téléphone.
+V435|Combat Tactique : en Montagne les trolls ennemis ordinaires prennent le yéti, en Forêt les gobelins ordinaires prennent le lutin des spores. Essai, table Hero3D.ENEMY_MODEL.
+V435|Ces modèles n'ont ni squelette ni ailes : le corps se balance en marchant, s'élance à l'attaque et recule quand il est touché.
