@@ -171,11 +171,24 @@ const HARPIE_MODEL := {"path": "res://assets/monstres3d/harpie.glb", "path_mobil
 		"cast":   {"dur": 1.1, "loop": false, "key": 0.6, "motion": "cast"},
 		"hit":    {"dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
 	}}
+## Modèles « marcheurs » sans squelette (Meshy texturé par projection, voir tools/ et le doc du projet) : pas de battement d'ailes,
+## le corps se balance (tangage, roulis, rebond). Version allégée sur téléphone (12 k triangles, 1024²).
+const WALKER_CLIPS := {
+	"idle":   {"dur": 2.6, "loop": true, "key": 0.0, "motion": "idle"},
+	"walk":   {"dur": 0.9, "loop": true, "key": 0.0, "motion": "walk"},
+	"attack": {"dur": 0.9, "loop": false, "key": 0.5, "motion": "attack"},
+	"cast":   {"dur": 1.1, "loop": false, "key": 0.6, "motion": "cast"},
+	"hit":    {"dur": 0.4, "loop": false, "key": 0.0, "motion": "hit"},
+}
+const YETI_MODEL := {"path": "res://assets/monstres3d/yeti.glb", "path_mobile": "res://assets/monstres3d/yeti_mobile.glb",
+	"static": true, "gain": 1.0, "flap_gain": 0.0, "roll": 3.0, "clips": WALKER_CLIPS}
+const LUTIN_MODEL := {"path": "res://assets/monstres3d/lutin.glb", "path_mobile": "res://assets/monstres3d/lutin_mobile.glb",
+	"static": true, "gain": 1.0, "flap_gain": 0.0, "roll": 5.0, "clips": WALKER_CLIPS}
 const CLASS_MODEL := {"Sylvain": "Sylvain", "Mage": "Mage", "Géomancien": "Géomancien", "Assassin": "Assassin", "Artificier": "Ingénieur", "Chasseur": "Chasseur", "Druide": "Druide", "Heal": "Heal", "Invocateur": "Invocateur", "Tank": "Tank"}
 const BOSS_MODEL := {"Gobelin Roi": "Tharok", "Tharok le Végétal": "Tharok", "Troll Géant": "Vorkann", "Vorkann le Givre": "Vorkann", "Kharaz le Flamboyant": "Kharaz"}
 ## Ennemis ordinaires rendus en 3D : biome -> type -> modèle. ESSAI : la harpie remplace les squelettes/dragonnets des Vents
 ## et les loups de la Forêt (biome de bas niveau). Vider la table pour revenir aux sprites 2D.
-const ENEMY_MODEL := {"Vents": {"Squelette": "Harpie", "Dragonnet": "Harpie"}, "Forêt": {"Loup": "Harpie"}}
+const ENEMY_MODEL := {"Vents": {"Squelette": "Harpie", "Dragonnet": "Harpie"}, "Forêt": {"Loup": "Harpie", "Gobelin": "Lutin"}, "Montagne": {"Troll": "Yeti"}}
 ## Battement d'ailes d'un modèle sans squelette : déplacement vertical des sommets, nul près de l'axe et sous la taille.
 ## span_info = (demi-envergure, centre x, hauteur à partir de laquelle les ailes commencent).
 const FLAP_UNIFORMS := """
@@ -261,6 +274,10 @@ var _flap_mat: ShaderMaterial = null
 static func profile(key: String) -> Dictionary:
 	if key == "Harpie":
 		return HARPIE_MODEL
+	if key == "Yeti":
+		return YETI_MODEL
+	if key == "Lutin":
+		return LUTIN_MODEL
 	return MODELS.get(key, {})
 
 
@@ -442,6 +459,8 @@ func _set_pose_static(anim: String, ph: float, back: bool) -> void:
 	var dy: float = 0.0
 	var pitch: float = 0.0
 	var flap: float = 0.0
+	var roll: float = 0.0
+	var rk: float = float(_prof.get("roll", 0.0))
 	match String(c.get("motion", "")):
 		"idle":
 			dy = 0.03 * sin(p * TAU)
@@ -449,6 +468,7 @@ func _set_pose_static(anim: String, ph: float, back: bool) -> void:
 		"walk":
 			dy = 0.045 * sin(p * TAU * 2.0)
 			flap = 0.9 * sin(p * TAU * 2.0)
+			roll = rk * sin(p * TAU)
 		"attack":
 			pitch = 16.0 * s1
 			dy = 0.05 * s1
@@ -460,10 +480,10 @@ func _set_pose_static(anim: String, ph: float, back: bool) -> void:
 		"hit":
 			pitch = -14.0 * s1
 			flap = -0.6 * s1
-	_flap_mat.set_shader_parameter("flap", flap)
+	_flap_mat.set_shader_parameter("flap", flap * float(_prof.get("flap_gain", 1.0)))
 	_holder.position = Vector3(0, dy * HERO_H, 0)
 	var yaw: float = (180.0 if back else 0.0) + _side * SIDE_YAW * (-1.0 if back else 1.0)
-	_holder.rotation_degrees = Vector3(pitch, yaw, 0)
+	_holder.rotation_degrees = Vector3(pitch, yaw, roll)
 
 
 func _bind_bone(b: int) -> int:
