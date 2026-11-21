@@ -20,7 +20,7 @@ func _go() -> void:
 	check(Hero3D.model_key(sq, "Vents") == "Harpie", "Vents : un squelette ennemi est rendu par la harpie 3D")
 	check(Hero3D.model_key({"classe": "Dragonnet", "team": "enemy"}, "Vents") == "Harpie", "Vents : le dragonnet aussi")
 	check(Hero3D.model_key({"classe": "Loup", "team": "enemy"}, "Forêt") == "Harpie", "Forêt (bas niveau) : un loup ennemi est rendu par la harpie 3D")
-	check(Hero3D.model_key({"classe": "Gobelin", "team": "enemy"}, "Forêt") == "", "Forêt : les gobelins gardent leur sprite")
+	check(Hero3D.model_key({"classe": "Squelette", "team": "enemy"}, "Forêt") == "", "Forêt : les squelettes gardent leur sprite")
 	check(Hero3D.model_key(sq, "Désert") == "" and Hero3D.model_key(sq) == "", "autres biomes et appel sans biome : aucun modèle")
 	check(Hero3D.model_key({"classe": "Squelette", "team": "player"}, "Vents") == "", "un allié ne prend pas le modèle d'un ennemi")
 	check(Hero3D.is_clip_model("Harpie"), "la harpie est un modèle à clips (durées fournies par le profil)")
