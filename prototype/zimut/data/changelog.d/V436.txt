@@ -1,0 +1,3 @@
+V436|Attaques des héros 3D plus engagées : le bras libre s'ouvre franchement sur le côté puis balaie le corps (druide, heal, mage, géomancien), le buste se tord davantage et les jambes accompagnent la fente.
+V436|Assassin : la seconde dague contre-balance l'estoc, avec la jambe gauche et la tête qui suivent. Invocateur : la lanterne se balance plus largement pendant que le livre est poussé.
+V436|L'outil d'animation (tools/anim_heros_blender.gd) peut maintenant recuire un héros déjà animé : il remplace les anciens clips et reconnaît les os « bras_l » comme « bras.l ».
