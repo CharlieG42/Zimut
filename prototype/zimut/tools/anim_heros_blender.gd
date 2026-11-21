@@ -29,6 +29,9 @@ func _init() -> void:
 	var scene: Node = doc.generate_scene(st)
 	root.add_child(scene)
 	var sk: Skeleton3D = scene.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	for old: Node in scene.find_children("*", "AnimationPlayer", true, false):
+		old.get_parent().remove_child(old)
+		old.free()
 	var ap := AnimationPlayer.new()
 	ap.name = "AnimationPlayer"
 	scene.add_child(ap)
@@ -40,6 +43,7 @@ func _init() -> void:
 		quit(1)
 		return
 	var sk_path: String = str(scene.get_path_to(sk))
+	var missing := {}
 	for clip: String in clips.keys():
 		var c: Dictionary = clips[clip]
 		var dur: float = float(c["dur"])
@@ -54,11 +58,15 @@ func _init() -> void:
 			for bn: String in pose.keys():
 				var bi: int = sk.find_bone(bn)
 				if bi < 0:
-					push_warning("os introuvable : " + bn)
+					bi = sk.find_bone(bn.replace(".", "_"))   # glb déjà passé par Godot (« bras.l » devient « bras_l »)
+				if bi < 0:
+					if not missing.has(bn):
+						missing[bn] = true
+						push_warning("os introuvable : " + bn)
 					continue
 				if not tracks.has(bn):
 					var tr: int = anim.add_track(Animation.TYPE_ROTATION_3D)
-					anim.track_set_path(tr, NodePath(sk_path + ":" + bn))
+					anim.track_set_path(tr, NodePath(sk_path + ":" + sk.get_bone_name(bi)))
 					tracks[bn] = tr
 				var e: Vector3 = (pose[bn] as Vector3) * (PI / 180.0)
 				var q: Quaternion = sk.get_bone_rest(bi).basis.get_rotation_quaternion() * Quaternion.from_euler(e)
@@ -67,7 +75,7 @@ func _init() -> void:
 	ap.add_animation_library(&"", lib)
 	var gd := GLTFDocument.new()
 	gd.image_format = "Lossy WebP"
-	gd.lossy_quality = 0.88
+	gd.lossy_quality = 0.95
 	var out := GLTFState.new()
 	if gd.append_from_scene(scene, out) != OK or gd.write_to_filesystem(out, a[1]) != OK:
 		push_error("export glb impossible")
@@ -133,20 +141,20 @@ static func _staff_attack(t: float, lg: float, hand: String) -> Dictionary:
 	var leg_f: String = hand   # jambe qui avance : celle du côté du bâton
 	var leg_b: String = o
 	return {
-		"bras." + hand: Vector3(_curve([0, -25, -60, 25, 100, 80, 30, 0], t), 0, 0),
+		"bras." + hand: Vector3(_curve([0, -30, -75, 30, 115, 90, 32, 0], t), 0, _curve([0, 0, 6, -4, -12, -8, -2, 0], t) * -tw),
 		"avantbras." + hand: Vector3(_curve([0, -15, -40, -20, -5, -15, -12, 0], t), 0, 0),
 		"main." + hand: Vector3(_curve([0, 15, 35, -15, -50, -35, -10, 0], t), 0, 0),
 		# V395 : l'autre bras travaille aussi (contrepoids) — il s'avance et s'écarte pendant l'armement du bâton, puis
 		# se rabat en arrière et vers le corps sur la frappe, l'avant-bras plié.
-		"bras." + o: Vector3(_curve([0, 22, 50, -18, -55, -40, -12, 0], t), 0, os_ * _curve([0, 8, 18, 4, -10, -8, -2, 0], t)),
-		"avantbras." + o: Vector3(_curve([0, -12, -34, -14, -28, -20, -8, 0], t), 0, 0),
-		"main." + o: Vector3(_curve([0, 8, 18, -6, -22, -14, -4, 0], t), 0, 0),
-		"thorax": Vector3(_curve([0, 6, 12, -8, -24, -18, -6, 0], t), tw * _curve([0, -10, -22, 6, 30, 22, 8, 0], t), 0),
+		"bras." + o: Vector3(_curve([0, 38, 85, -30, -95, -68, -20, 0], t), 0, os_ * _curve([0, 24, 58, 16, -26, -19, -5, 0], t)),
+		"avantbras." + o: Vector3(_curve([0, -22, -60, -28, -55, -38, -14, 0], t), 0, 0),
+		"main." + o: Vector3(_curve([0, 14, 30, -10, -40, -26, -8, 0], t), 0, os_ * _curve([0, 0, 8, 0, -14, -10, -2, 0], t)),
+		"thorax": Vector3(_curve([0, 8, 16, -10, -30, -22, -8, 0], t), tw * _curve([0, -14, -30, 8, 40, 28, 10, 0], t), tw * _curve([0, 3, 6, -2, -8, -6, -2, 0], t)),
 		"tete": Vector3(_curve([0, 2, 4, -3, -10, -7, -2, 0], t), tw * _curve([0, 6, 12, -4, -16, -12, -4, 0], t), 0),
-		"cuisse." + leg_f: Vector3(_curve([0, -6, -12, 14, 30, 24, 8, 0], t) * lg, 0, 0),
-		"tibia." + leg_f: Vector3(_curve([0, 4, 10, -8, -20, -14, -4, 0], t) * lg, 0, 0),
-		"cuisse." + leg_b: Vector3(_curve([0, 4, 8, -8, -20, -15, -4, 0], t) * lg, 0, 0),
-		"tibia." + leg_b: Vector3(_curve([0, 0, 6, -4, -10, -6, 0, 0], t) * lg, 0, 0)}
+		"cuisse." + leg_f: Vector3(_curve([0, -8, -16, 18, 40, 32, 10, 0], t) * lg, 0, 0),
+		"tibia." + leg_f: Vector3(_curve([0, 5, 12, -10, -26, -18, -5, 0], t) * lg, 0, 0),
+		"cuisse." + leg_b: Vector3(_curve([0, 5, 10, -12, -28, -20, -6, 0], t) * lg, 0, 0),
+		"tibia." + leg_b: Vector3(_curve([0, 0, 8, -6, -16, -10, 0, 0], t) * lg, 0, 0)}
 
 
 ## V390 : mort — vacille, genoux qui plient, bras jetés en arrière, tête qui part en arrière, puis corps relâché. Le basculement
@@ -198,11 +206,14 @@ func _preset(name: String) -> Dictionary:
 					return low.call({
 						"bras.r": Vector3(_curve([0, -25, -35, 60, 85, 70, 15, 0], t), 0, _curve([0, 0, 5, -20, -30, -24, -6, 0], t)),
 						"avantbras.r": Vector3(_curve([0, -25, -40, 25, 35, 28, 5, 0], t), 0, 0),
-						"bras.l": Vector3(_curve([0, 10, 18, -12, -20, -15, -4, 0], t), 0, 0),
+						"bras.l": Vector3(_curve([0, -20, -45, 25, 55, 42, 12, 0], t), 0, _curve([0, 0, 6, 10, 20, 15, 4, 0], t)),
+						"avantbras.l": Vector3(_curve([0, -15, -35, 12, 28, 20, 6, 0], t), 0, 0),
+						"tete": Vector3(_curve([0, 2, 4, -3, -6, -5, -1, 0], t), _curve([0, 8, 14, -6, -14, -10, -3, 0], t), 0),
 						"thorax": Vector3(_curve([0, 4, 6, -10, -16, -12, -3, 0], t), _curve([0, 14, 22, -10, -22, -16, -5, 0], t), 0),
 						"cuisse.r": Vector3(_curve([0, -5, -8, 22, 32, 26, 6, 0], t), 0, 0),
 						"tibia.r": Vector3(_curve([0, 0, 0, -12, -18, -14, -3, 0], t), 0, 0),
-						"cuisse.l": Vector3(_curve([0, 4, 6, -12, -18, -14, -3, 0], t), 0, 0)})},
+						"cuisse.l": Vector3(_curve([0, 6, 10, -16, -26, -20, -5, 0], t), 0, 0),
+						"tibia.l": Vector3(_curve([0, 0, 4, -6, -14, -10, -2, 0], t), 0, 0)})},
 				"Cast": {"dur": 1.2, "loop": false, "fn": func(t: float) -> Dictionary:
 					var up: float = _curve([0, 0.6, 1.0, 0.2, -0.3, -0.2, 0.0], t)
 					var cross: float = _curve([0, 0.0, 0.2, 1.0, 1.0, 0.5, 0.0], t)
@@ -370,12 +381,15 @@ func _preset(name: String) -> Dictionary:
 					return {
 						"bras_r": Vector3(_curve([0, -18, -30, 55, 85, 70, 15, 0], t), _curve([0, 0, 0, -14, -26, -20, -6, 0], t), 0),
 						"avantbras_r": Vector3(_curve([0, 20, 35, -15, -40, -30, -6, 0], t), 0, 0),
-						"bras_l": Vector3(_curve([0, 6, 10, -8, -14, -10, -2, 0], t), 0, -38.0), "main_l": Vector3(0, 0, 38.0),
+						"bras_l": Vector3(_curve([0, 16, 30, -22, -42, -30, -8, 0], t), 0, -38.0 + _curve([0, 6, 14, 4, -12, -9, -2, 0], t)),
+						"main_l": Vector3(0, 0, 38.0 - _curve([0, 6, 14, 4, -12, -9, -2, 0], t)),
+						"avantbras_l": Vector3(_curve([0, -8, -20, -10, -22, -14, -4, 0], t), 0, 0),
 						"Thorax": Vector3(_curve([0, 4, 8, -9, -16, -12, -4, 0], t), _curve([0, 14, 24, -8, -22, -16, -5, 0], t), 0),
 						"tete": Vector3(_curve([0, 1, 2, -2, -5, -4, -1, 0], t), _curve([0, -6, -10, 4, 10, 8, 2, 0], t), 0),
 						"cuisse_r": Vector3(_curve([0, -4, -8, 10, 20, 16, 4, 0], t), 0, 0),
 						"tibia_r": Vector3(_curve([0, 0, 0, -8, -14, -10, -2, 0], t), 0, 0),
-						"cuisse_l": Vector3(_curve([0, 3, 6, -6, -12, -9, -2, 0], t), 0, 0)}},
+						"cuisse_l": Vector3(_curve([0, 4, 9, -9, -18, -13, -3, 0], t), 0, 0),
+						"tibia_l": Vector3(_curve([0, 0, 4, -4, -9, -6, -1, 0], t), 0, 0)}},
 				# sort : la lanterne est levée haut (sommet tenu ≈ 0,4-0,7), le livre ouvert devant, regard vers le ciel
 				"Cast": {"dur": 1.4, "loop": false, "fn": func(t: float) -> Dictionary:
 					var up: float = _curve([0, 0.35, 0.85, 1, 1, 0.9, 0.4, 0], t)
