@@ -22,6 +22,8 @@ func _grid(parent: Control) -> GridContainer:
 	return grid
 
 
+const PAGES_HEIGHT := 540.0   ## hauteur fixe de la zone des onglets (design 1300×980)
+
 func _ready() -> void:
 	var root := Control.new()
 	add_child(root)
@@ -64,8 +66,17 @@ func _ready() -> void:
 	var pages := PanelContainer.new()
 	pages.name = "Pages"
 	pages.custom_minimum_size = Vector2(0, 380)
+	pages.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	pages.add_theme_stylebox_override("panel", _flat(Color(0.97, 0.93, 0.84, 0.9), Color(0.80, 0.68, 0.40), 14, 2))
-	box.add_child(pages)
+	# V445 : la page Graphismes est devenue plus haute que l'écran et repoussait « ← MENU » hors de vue.
+	# Les pages défilent dans une zone de hauteur fixe ; titre, onglets, infos et bouton restent toujours visibles.
+	var pages_scroll := ScrollContainer.new()
+	pages_scroll.name = "PagesScroll"
+	pages_scroll.custom_minimum_size = Vector2(0, PAGES_HEIGHT)
+	pages_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	pages_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	box.add_child(pages_scroll)
+	pages_scroll.add_child(pages)
 	var page_list: Array[Control] = []
 	for t: Array in TABS:
 		var pg := MarginContainer.new()
