@@ -434,3 +434,9 @@ Après correction : Fée −7, Horloge −7,5, Sirène +8, Crapaud +3.
 - Les boss de chapitre existaient déjà dans le mode Cartes (1re victoire : carte légendaire + or) ; ils comptent pour le succès « Chasseur de boss ».
 - UI : bouton « 🏆 Succès » sur l'accueil (liste avec progression, défilable) ; les succès gagnés s'affichent sur l'écran de résultat et dans le message de fusion.
 - Test : `test_jcc_succes.gd`. Seuils réglés sur la collection de départ (85 cartes différentes, 36 cartes de nations).
+
+## 39. Saison mensuelle
+- `JccCollection.season_info/season_win` : la saison est le mois civil (`AAAA-MM`) ; elle repart à zéro au changement de mois (`j["season"] = {id, wins, claimed}`).
+- Paliers (`SEASON_TIERS`) : 3 victoires → 100 or ; 8 → 250 or ; 15 → 400 or + une carte rare de butin (tirage avec bonus). Chaque palier n'est payé qu'une fois par saison.
+- `season_win` est appelée à chaque duel gagné ; les paliers atteints s'affichent sur l'écran de résultat (🍂) et la progression figure en tête de l'écran Succès.
+- Test : `test_jcc_saison.gd` ; `test_jcc_ui` vérifie l'ouverture de l'écran Succès.

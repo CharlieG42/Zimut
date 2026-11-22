@@ -580,3 +580,50 @@ static func check_achievements(save: Dictionary) -> Array:
 			out.append({"id": ad["id"], "name": ad["name"], "gold": ad["gold"]})
 	j["ach"] = done
 	return out
+
+
+## --- Saison mensuelle : victoires du mois → paliers de récompenses (or, puis carte rare de butin) ---
+
+const SEASON_TIERS: Array = [
+	{"wins": 3, "gold": 100, "card": false},
+	{"wins": 8, "gold": 250, "card": false},
+	{"wins": 15, "gold": 400, "card": true},
+]
+
+
+static func season_id(date: String = "") -> String:
+	if date == "":
+		date = Time.get_date_string_from_system()
+	return date.substr(0, 7)   # AAAA-MM
+
+
+## État de la saison courante ({id, wins, claimed}) ; repart à zéro quand le mois change.
+static func season_info(save: Dictionary, date: String = "") -> Dictionary:
+	var j: Dictionary = ensure(save)
+	var sid: String = season_id(date)
+	var s: Variant = j.get("season", {})
+	if typeof(s) != TYPE_DICTIONARY or String((s as Dictionary).get("id", "")) != sid:
+		s = {"id": sid, "wins": 0, "claimed": []}
+		j["season"] = s
+	return s
+
+
+## Compte une victoire dans la saison ; retourne les paliers atteints [{wins, gold, card}] (récompenses déjà créditées).
+static func season_win(save: Dictionary, date: String = "", rng: RandomNumberGenerator = null) -> Array:
+	var s: Dictionary = season_info(save, date)
+	s["wins"] = int(s["wins"]) + 1
+	if rng == null:
+		rng = RandomNumberGenerator.new()
+		rng.randomize()
+	var out: Array = []
+	for t: Variant in SEASON_TIERS:
+		var td: Dictionary = t
+		if int(s["wins"]) >= int(td["wins"]) and not (s["claimed"] as Array).has(int(td["wins"])):
+			(s["claimed"] as Array).append(int(td["wins"]))
+			save["gold"] = int(save.get("gold", 0)) + int(td["gold"])
+			var card: String = ""
+			if bool(td["card"]):
+				card = roll_loot(rng, "", 0.3)
+				add_card(save, card)
+			out.append({"wins": td["wins"], "gold": td["gold"], "card": card})
+	return out
