@@ -44,6 +44,9 @@ func _boot() -> void:
 	for s in 2:
 		d.side(s)["units"] = []
 		d.side(s)["hand"] = []
+	# le terrain est aléatoire (rochers, boue…) : on le vide pour que le test soit déterministe
+	for ci in d.terrain.size():
+		d.terrain[ci] = ""
 	d.place_unit(0, "m_troll", 1, 4)
 	d.current = 0
 	m._cancel_selection_silent()
