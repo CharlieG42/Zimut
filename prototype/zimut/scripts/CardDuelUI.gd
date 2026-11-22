@@ -1652,6 +1652,7 @@ func _on_quit_duel() -> void:
 		var j: Dictionary = JccCollection.ensure(_save)
 		j["losses"] = int(j["losses"]) + 1
 		_save_now()
+		CloudSave.auto_backup(get_tree())   # silencieux (sans effet si l'option Cloud est désactivée)
 		_show_hub())
 
 
@@ -1998,6 +1999,55 @@ func _show_result(win: bool, draw_game: bool, loot: String, extra: Dictionary = 
 	var back: Button = UiKit.btn("Retour", Color(0.6, 0.62, 0.72), 28, Vector2(260, 72))
 	back.pressed.connect(_show_hub)
 	row.add_child(back)
+	_result_cloud_line(ov)
+
+
+# ─── Sauvegarde Cloud automatique (V447) ─────────────────────────────────────
+# Même règle que le combat tactique : seulement si l'option « Auto » est active et le compte Google relié ;
+# silencieux, jamais de demande de code, jamais d'écrasement d'une sauvegarde plus récente d'un autre appareil.
+var _cloud_busy: bool = false
+var _cloud_again: bool = false
+
+func _result_cloud_line(ov: Control) -> void:
+	if not CloudSave.auto_enabled(get_tree()):
+		return
+	var lbl: Label = UiKit.lbl("", 22, UiKit.C_DIM, true)
+	lbl.name = "CloudStatus"
+	lbl.position = Vector2(0, 912)
+	lbl.size = Vector2(W, 36)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ov.add_child(lbl)
+	_cloud_send(lbl)
+
+
+func _cloud_send(lbl: Label) -> void:
+	if _cloud_busy:
+		_cloud_again = true          # un envoi est en cours : on renverra juste après, avec l'état à jour
+		return
+	_cloud_busy = true
+	lbl.text = "☁  Sauvegarde sur Google Drive…"
+	lbl.add_theme_color_override("font_color", UiKit.C_DIM)
+	var r: String = await CloudSave.auto_backup(get_tree())
+	_cloud_busy = false
+	if _cloud_again and is_instance_valid(lbl) and lbl.is_inside_tree():
+		_cloud_again = false
+		_cloud_send(lbl)
+		return
+	_cloud_again = false
+	if not is_instance_valid(lbl):
+		return
+	match r:
+		"ok":
+			lbl.text = "☁  ✓ Partie sauvegardée sur Google Drive"
+			lbl.add_theme_color_override("font_color", UiKit.C_GOOD)
+		"conflict":
+			lbl.text = "⚠  Drive contient une sauvegarde plus récente (autre appareil) : rien n'a été envoyé."
+			lbl.add_theme_color_override("font_color", Color(1.0, 0.72, 0.30))
+		"":
+			lbl.text = ""
+		_:
+			lbl.text = "⚠  Sauvegarde Drive impossible (réseau ou connexion Google) : elle sera retentée au prochain duel."
+			lbl.add_theme_color_override("font_color", Color(1.0, 0.72, 0.30))
 
 
 # ─── Fenêtres ────────────────────────────────────────────────────────────────

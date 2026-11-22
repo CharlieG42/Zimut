@@ -1,0 +1,3 @@
+V447|Mode Cartes : après chaque duel (victoire, défaite ou égalité), la partie est envoyée automatiquement sur Google Drive si l'option « Auto » du Cloud est active et le compte relié.
+V447|Une ligne d'état s'affiche sous les boutons de l'écran de résultat : envoi en cours, réussi, conflit avec une sauvegarde plus récente d'un autre appareil, ou échec réseau.
+V447|Abandonner un duel envoie aussi la partie, sans message ; sans l'option Cloud, rien ne change.
