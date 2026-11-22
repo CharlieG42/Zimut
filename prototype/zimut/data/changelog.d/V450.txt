@@ -1,0 +1,3 @@
+V450|Cloud automatique : quand Google expire la connexion, le compte n'est plus débranché en silence (l'envoi automatique s'arrêtait alors définitivement, sans message).
+V450|Un message explique maintenant quoi faire (« reconnecte-toi dans Réglages → Sauvegarde ») et la cause réelle de l'échec s'affiche sous l'écran de résultat des duels de Cartes.
+V450|La ligne d'état du Cloud est plus lisible sur l'écran de résultat du mode Cartes.
