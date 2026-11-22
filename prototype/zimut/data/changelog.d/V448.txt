@@ -1,0 +1,3 @@
+V448|Mode Cartes : un halo de couleur entoure les créatures pour distinguer les camps.
+V448|Bleu pour vos unités, rouge pour celles de l'adversaire, aussi sur l'anneau et le nom.
+V448|Le halo est toujours le même, quelle que soit la couleur de l'adversaire.
