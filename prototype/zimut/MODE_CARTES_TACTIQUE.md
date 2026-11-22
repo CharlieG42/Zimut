@@ -415,3 +415,9 @@ Simulation IA (même deck, 14 adversaires × 12 graines) : avant, les héros all
 - **Perf** : le fond du plateau (ciel, sol, falaise, décors, camps) est peint une seule fois dans un `SubViewport` (`UPDATE_ONCE`) affiché par un `TextureRect`. Seule une couche légère (`_BiomeBG.layer == 1` : brume, rayons de lumière, flammes) est redessinée, à ~12 ips au lieu de 20 ips pour toute la scène.
 - **Anglais** : `JccCards.effect_text` est traduit (`_effect_text_en`) ; test : plus aucun effet français en `en`.
 - L'aide du duel rappelle le pouvoir de héros gratuit (1 fois par duel). Les écrans Fusion et Héros avaient déjà le défilement au doigt.
+
+## 36. Équilibrage des cartes de nations (simulation)
+Méthode : deck de référence où 2 créatures de base sont remplacées par 2 exemplaires de la carte testée, 40 parties × 5 adversaires, IA contre IA ; l'écart de victoires est comparé au deck de référence (69 %). Résultats : la plupart des cartes sont à −10/+4 points. Trois anomalies corrigées :
+- **Fée des cristaux / Horloge vivante** (−35 / −40) : leur sort « pioche 1 » était relancé chaque tour par l'IA et épuisait le deck (fatigue). Fée des cristaux soigne 3 PV (cible alliée ou héros), Horloge vivante donne +1 PV à toutes les créatures ; Horloge passe à 2 d'attaque.
+- **Sirène / Crapaud des brumes** (+11,5 / +12) : l'étourdissement de zone était trop rentable. Sirène : sort à 4 mana ; Crapaud : 4 PV et sort à 5 mana.
+Après correction : Fée −7, Horloge −7,5, Sirène +8, Crapaud +3.
