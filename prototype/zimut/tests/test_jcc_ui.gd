@@ -56,7 +56,7 @@ func _boot() -> void:
 	for k in m._slots.keys():
 		if m._slots[k].terrain != "":
 			nterr += 1
-	check(nterr == 6, "6 cases de terrain affichées sur le plateau")
+	check(nterr == JccDuel.TERRAIN_COUNT + JccDuel.ROCK_COUNT, "8 cases de terrain (dont 2 rochers) affichées sur le plateau")
 	check(m._power_btn != null and m._power_btn.visible, "bouton pouvoir du héros visible au tour 1")
 	check(m._mull_btn != null and m._mull_btn.visible, "bouton nouvelle main visible au tour 1")
 	m._on_mulligan()
