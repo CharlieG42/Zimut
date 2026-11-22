@@ -440,3 +440,6 @@ Après correction : Fée −7, Horloge −7,5, Sirène +8, Crapaud +3.
 - Paliers (`SEASON_TIERS`) : 3 victoires → 100 or ; 8 → 250 or ; 15 → 400 or + une carte rare de butin (tirage avec bonus). Chaque palier n'est payé qu'une fois par saison.
 - `season_win` est appelée à chaque duel gagné ; les paliers atteints s'affichent sur l'écran de résultat (🍂) et la progression figure en tête de l'écran Succès.
 - Test : `test_jcc_saison.gd` ; `test_jcc_ui` vérifie l'ouverture de l'écran Succès.
+
+## 40. Halo de camp
+- `_UnitView` : lueur douce derrière chaque créature (7 ellipses translucides) + anneau au sol plus épais, et liseré du nom, dans la couleur du camp : **bleu = vos unités, rouge = adversaire** (couleurs fixes, indépendantes de la couleur d'accent de l'adversaire pour rester toujours distinguables).

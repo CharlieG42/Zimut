@@ -864,8 +864,17 @@ class _UnitView extends Control:
 			var a1: float = TAU * float(i) / 32.0
 			ring.append(feet + Vector2(cos(a1) * spr * 0.36, sin(a1) * spr * 0.105))
 		ring.append(ring[0])
-		draw_colored_polygon(ring.slice(0, 32), Color(team_col.r, team_col.g, team_col.b, 0.22))
-		draw_polyline(ring, Color(team_col.r, team_col.g, team_col.b, 0.9), 3.0, true)
+		# halo de camp : lueur douce derrière le sprite (bleu = à vous, rouge = adversaire) + anneau au sol
+		var hc: Vector2 = art.position + art.size * 0.5
+		for hi in 7:
+			var k: float = 1.0 - float(hi) / 7.0
+			var hp := PackedVector2Array()
+			for hj in 28:
+				var a2: float = TAU * float(hj) / 28.0
+				hp.append(hc + Vector2(cos(a2) * spr * (0.30 + 0.16 * k), sin(a2) * spr * (0.38 + 0.14 * k)))
+			draw_colored_polygon(hp, Color(team_col.r, team_col.g, team_col.b, 0.07 + 0.03 * (1.0 - k)))
+		draw_colored_polygon(ring.slice(0, 32), Color(team_col.r, team_col.g, team_col.b, 0.35))
+		draw_polyline(ring, Color(team_col.r, team_col.g, team_col.b, 1.0), 4.5, true)
 		if target_ok:
 			_pulse_ellipse(feet, spr * 0.40, spr * 0.12, Color(1.0, 0.35, 0.3, 0.95), 4.0)
 		elif ready_glow:
@@ -893,6 +902,8 @@ class _UnitView extends Control:
 			var pb := StyleBoxFlat.new()
 			pb.bg_color = Color(0.05, 0.06, 0.10, 0.78)
 			pb.set_corner_radius_all(9)
+			pb.border_color = team_col
+			pb.set_border_width_all(2)
 			draw_style_box(pb, Rect2(w * 0.5 - nw * 0.5 - 8.0, art.position.y - 28.0, nw + 16.0, 25.0))
 			draw_string(font, Vector2(w * 0.5 - nw * 0.5, art.position.y - 9.0), name_txt, HORIZONTAL_ALIGNMENT_LEFT, nw + 2.0, fs, Color(1, 0.97, 0.88))
 		var sx: float = art.position.x + 4.0
@@ -1218,7 +1229,7 @@ func _refresh() -> void:
 		v.scale = Vector2(us, us)
 		v.position = _ctr(cell) - CELL * us * 0.5
 		v.side = side
-		v.team_col = _foe_accent.lightened(0.15) if side == 1 else Color(0.45, 0.72, 1.0)
+		v.team_col = Color(1.0, 0.36, 0.30) if side == 1 else Color(0.35, 0.72, 1.0)   # rouge = adversaire, bleu = à vous
 		v.set_card(cr)
 		v.target_ok = _is_target(side, cell)
 		v.selected = side == 0 and _sel_cell == cell
@@ -1652,6 +1663,7 @@ func _on_quit_duel() -> void:
 		var j: Dictionary = JccCollection.ensure(_save)
 		j["losses"] = int(j["losses"]) + 1
 		_save_now()
+		CloudSave.auto_backup(get_tree())   # silencieux (sans effet si l'option Cloud est désactivée)
 		_show_hub())
 
 
@@ -1998,6 +2010,55 @@ func _show_result(win: bool, draw_game: bool, loot: String, extra: Dictionary = 
 	var back: Button = UiKit.btn("Retour", Color(0.6, 0.62, 0.72), 28, Vector2(260, 72))
 	back.pressed.connect(_show_hub)
 	row.add_child(back)
+	_result_cloud_line(ov)
+
+
+# ─── Sauvegarde Cloud automatique (V447) ─────────────────────────────────────
+# Même règle que le combat tactique : seulement si l'option « Auto » est active et le compte Google relié ;
+# silencieux, jamais de demande de code, jamais d'écrasement d'une sauvegarde plus récente d'un autre appareil.
+var _cloud_busy: bool = false
+var _cloud_again: bool = false
+
+func _result_cloud_line(ov: Control) -> void:
+	if not CloudSave.auto_enabled(get_tree()):
+		return
+	var lbl: Label = UiKit.lbl("", 22, UiKit.C_DIM, true)
+	lbl.name = "CloudStatus"
+	lbl.position = Vector2(0, 912)
+	lbl.size = Vector2(W, 36)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ov.add_child(lbl)
+	_cloud_send(lbl)
+
+
+func _cloud_send(lbl: Label) -> void:
+	if _cloud_busy:
+		_cloud_again = true          # un envoi est en cours : on renverra juste après, avec l'état à jour
+		return
+	_cloud_busy = true
+	lbl.text = "☁  Sauvegarde sur Google Drive…"
+	lbl.add_theme_color_override("font_color", UiKit.C_DIM)
+	var r: String = await CloudSave.auto_backup(get_tree())
+	_cloud_busy = false
+	if _cloud_again and is_instance_valid(lbl) and lbl.is_inside_tree():
+		_cloud_again = false
+		_cloud_send(lbl)
+		return
+	_cloud_again = false
+	if not is_instance_valid(lbl):
+		return
+	match r:
+		"ok":
+			lbl.text = "☁  ✓ Partie sauvegardée sur Google Drive"
+			lbl.add_theme_color_override("font_color", UiKit.C_GOOD)
+		"conflict":
+			lbl.text = "⚠  Drive contient une sauvegarde plus récente (autre appareil) : rien n'a été envoyé."
+			lbl.add_theme_color_override("font_color", Color(1.0, 0.72, 0.30))
+		"":
+			lbl.text = ""
+		_:
+			lbl.text = "⚠  Sauvegarde Drive impossible (réseau ou connexion Google) : elle sera retentée au prochain duel."
+			lbl.add_theme_color_override("font_color", Color(1.0, 0.72, 0.30))
 
 
 # ─── Fenêtres ────────────────────────────────────────────────────────────────
