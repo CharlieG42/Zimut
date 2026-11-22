@@ -183,7 +183,7 @@ jobs:
             echo "::notice::Secrets ZIMUT_GDRIVE_CLIENT_ID absents : les boutons Cloud indiqueront « non configuré »."
           fi
 
-      - name: Generate automatic build version (0.0.01.<dernière PR mergée>.<n° de push>)
+      - name: Generate automatic build version (0.1.001.<dernière PR mergée>.<n° de push>)
         id: version
         env:
           GH_TOKEN: ${{ github.token }}
@@ -203,7 +203,7 @@ jobs:
             pr=$(git log -1 --format=%s | sed -n 's/.*pull request #\([0-9]*\).*/\1/p')
           fi
           pr=${pr:-0}
-          version="0.0.01.${pr}.${PUSH_NUMBER}"
+          version="0.1.001.${pr}.${PUSH_NUMBER}"
           echo "Version de compilation : ${version}"
           echo "GAME_VERSION=${version}" >> "$GITHUB_ENV"
           # Sorties transmises au job de publication
@@ -213,7 +213,7 @@ jobs:
           python3 - <<'PY'
           import os, re
           from pathlib import Path
-          version = os.environ.get("GAME_VERSION") or "0.0.01.0.0"
+          version = os.environ.get("GAME_VERSION") or "0.1.001.0.0"
           push = os.environ["PUSH_NUMBER"]
           project = Path("prototype/zimut/project.godot")
           text = project.read_text(encoding="utf-8")
