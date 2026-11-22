@@ -873,10 +873,26 @@ func import_save(slot: int, text: String) -> String:
 	return "" if write_save(slot, d) else "Écriture impossible."
 
 
+## Nom lisible de l'écran / mode qui écrit la sauvegarde (d'après la scène courante).
+func _source_label() -> String:
+	var loop := Engine.get_main_loop()
+	var sc: Node = (loop as SceneTree).current_scene if loop is SceneTree else null
+	if sc == null:
+		return "Jeu"
+	var f: String = sc.scene_file_path.get_file().get_basename()
+	var names: Dictionary = {"CardDuel": "Mode Cartes", "Settings": "Réglages", "SaveSlots": "Menu des parties", "Main": "Combat tactique",
+		"TeamSelection": "Équipe", "Forge": "Forge", "Stones": "Pierres", "Inventory": "Inventaire", "CharacterSheet": "Fiche héros",
+		"ConquestMap": "Conquête", "AdventureOpen3D": "Aventure 3D", "Adventure3D": "Aventure 3D", "Adventure": "Aventure 2D",
+		"CityScreen": "Cité", "TeamEquipment": "Équipement"}
+	return String(names.get(f, f if f != "" else "Jeu"))
+
+
 func write_save(slot: int, data: Dictionary) -> bool:
 	if slot < 0 or slot >= MAX_SAVES:
 		return false
 	data["timestamp"] = Time.get_datetime_string_from_system()
+	data["saved_unix"] = int(Time.get_unix_time_from_system())
+	data["saved_from"] = _source_label()   # V451 : d'où vient cette écriture (affiché dans Réglages > Sauvegarde)
 	var path := _path(slot)
 	var payload := JSON.stringify(data, "\t")
 	# Backup de la version précédente (limité aux 2 backups utiles)

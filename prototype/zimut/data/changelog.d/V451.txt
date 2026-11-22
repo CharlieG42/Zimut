@@ -1,0 +1,3 @@
+V451|Mode Cartes : correction du bug de sauvegarde locale. Les adversaires débloqués redevenaient bloqués après avoir quitté le jeu (le fichier de sauvegarde relisait les numéros en décimaux et le jeu ne les reconnaissait plus).
+V451|Même correction pour les boss de chapitre déjà battus et les paliers de saison : leurs récompenses ne peuvent plus être recréditées après un rechargement.
+V451|Réglages > Sauvegarde : affichage de la date, de l'heure et de la source de la dernière sauvegarde sur l'appareil, et du dernier envoi Cloud (résultat, origine, motif en cas d'échec).

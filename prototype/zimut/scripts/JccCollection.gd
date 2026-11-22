@@ -50,7 +50,26 @@ static func ensure(save: Dictionary) -> Dictionary:
 		j["unlocked"] = [0]
 	j["wins"] = int(j.get("wins", 0))
 	j["losses"] = int(j.get("losses", 0))
+	# V451 : le JSON relit tous les nombres en float, et Array.has(1) est FAUX sur [1.0] : les adversaires
+	# débloqués (et les boss de chapitre, paliers de saison) étaient « perdus » après chaque rechargement.
+	j["unlocked"] = _ints(j["unlocked"])
+	if j.has("chapter_bosses"):
+		j["chapter_bosses"] = _ints(j["chapter_bosses"])
+	if j.has("season") and typeof(j["season"]) == TYPE_DICTIONARY and (j["season"] as Dictionary).has("claimed"):
+		(j["season"] as Dictionary)["claimed"] = _ints((j["season"] as Dictionary)["claimed"])
 	return j
+
+
+## Tableau d'entiers sans doublon (relecture JSON : floats -> int).
+static func _ints(a: Variant) -> Array:
+	var out: Array = []
+	if typeof(a) != TYPE_ARRAY:
+		return out
+	for v: Variant in a:
+		var n: int = int(v)
+		if not out.has(n):
+			out.append(n)
+	return out
 
 
 static func starter_collection() -> Dictionary:
@@ -611,6 +630,7 @@ static func season_info(save: Dictionary, date: String = "") -> Dictionary:
 ## Compte une victoire dans la saison ; retourne les paliers atteints [{wins, gold, card}] (récompenses déjà créditées).
 static func season_win(save: Dictionary, date: String = "", rng: RandomNumberGenerator = null) -> Array:
 	var s: Dictionary = season_info(save, date)
+	s["claimed"] = _ints(s.get("claimed", []))
 	s["wins"] = int(s["wins"]) + 1
 	if rng == null:
 		rng = RandomNumberGenerator.new()

@@ -78,11 +78,12 @@ static func auto_enabled(tree: SceneTree) -> bool:
 ## Retourne "" (option désactivée ou pas reliée), "ok", "conflict" ou "fail".
 static var last_status: String = ""   ## dernier message d'état du Cloud (pour afficher la vraie cause d'un échec)
 
-static func auto_backup(tree: SceneTree) -> String:
+static func auto_backup(tree: SceneTree, from: String = "fin de combat") -> String:
 	if not auto_enabled(tree):
 		return ""
 	var node := CloudSave.new()
 	node.name = "CloudAutoBackup"
+	node.source = from
 	tree.root.add_child(node)
 	last_status = ""
 	node.status.connect(func(t: String) -> void: last_status = t)
@@ -343,7 +344,33 @@ func _find_file(token: String) -> Dictionary:
 
 ## Envoie toutes les parties sur Drive. Retourne "ok", "conflict" (une sauvegarde plus récente
 ## faite sur un autre appareil existe : voir last_conflict, relancer avec force = true) ou "fail".
+## V451 : dernier envoi Cloud (date, résultat, d'où il est parti, motif), relu dans Réglages > Sauvegarde.
+const LAST_PATH := "user://cloud_last.json"
+var _last_msg: String = ""
+var source: String = "manuel"   ## origine de l'envoi : « manuel », « fin de combat », « fin de duel de Cartes »…
+
+static func last_attempt() -> Dictionary:
+	if not FileAccess.file_exists(LAST_PATH):
+		return {}
+	var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(LAST_PATH))
+	return d if d is Dictionary else {}
+
+
 func backup(force: bool = false, interactive: bool = true) -> String:
+	_last_msg = ""
+	var keep := func(t: String) -> void: _last_msg = t
+	status.connect(keep)
+	var r: String = await _backup_run(force, interactive)
+	if status.is_connected(keep):
+		status.disconnect(keep)
+	var f := FileAccess.open(LAST_PATH, FileAccess.WRITE)
+	if f != null:
+		f.store_string(JSON.stringify({"unix": int(Time.get_unix_time_from_system()), "result": r, "source": source, "message": _last_msg}))
+		f.close()
+	return r
+
+
+func _backup_run(force: bool, interactive: bool) -> String:
 	var token: String = await access_token(interactive)
 	if token == "":
 		return "fail"
