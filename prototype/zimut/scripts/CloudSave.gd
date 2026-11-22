@@ -76,12 +76,16 @@ static func auto_enabled(tree: SceneTree) -> bool:
 
 
 ## Retourne "" (option désactivée ou pas reliée), "ok", "conflict" ou "fail".
+static var last_status: String = ""   ## dernier message d'état du Cloud (pour afficher la vraie cause d'un échec)
+
 static func auto_backup(tree: SceneTree) -> String:
 	if not auto_enabled(tree):
 		return ""
 	var node := CloudSave.new()
 	node.name = "CloudAutoBackup"
 	tree.root.add_child(node)
+	last_status = ""
+	node.status.connect(func(t: String) -> void: last_status = t)
 	var r: String = await node.backup(false, false)
 	node.queue_free()
 	return r
@@ -191,7 +195,12 @@ func access_token(interactive: bool = true) -> String:
 		if int(r["code"]) >= 500:
 			status.emit("Google Drive ne répond pas (erreur %d) : réessaie plus tard." % int(r["code"]))
 			return ""
-		# Jeton révoqué ou expiré (400 invalid_grant / 401) : on refait le branchement
+		# Jeton révoqué ou expiré (400 invalid_grant / 401)
+		if not interactive:
+			# V448 : en mode silencieux on NE débranche PAS le compte (avant, l'envoi automatique se coupait
+			# définitivement et sans message dès que Google expirait le jeton) : on explique quoi faire.
+			status.emit("Connexion Google expirée : reconnecte-toi dans Réglages → Sauvegarde.")
+			return ""
 		unlink()
 		_token = {}
 	if not interactive:

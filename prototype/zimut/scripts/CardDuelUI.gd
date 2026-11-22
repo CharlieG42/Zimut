@@ -2024,8 +2024,9 @@ func _result_cloud_line(ov: Control) -> void:
 		return
 	var lbl: Label = UiKit.lbl("", 22, UiKit.C_DIM, true)
 	lbl.name = "CloudStatus"
-	lbl.position = Vector2(0, 912)
-	lbl.size = Vector2(W, 36)
+	lbl.position = Vector2(0, 908)
+	lbl.size = Vector2(W, 70)
+	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ov.add_child(lbl)
 	_cloud_send(lbl)
@@ -2057,7 +2058,9 @@ func _cloud_send(lbl: Label) -> void:
 		"":
 			lbl.text = ""
 		_:
-			lbl.text = "⚠  Sauvegarde Drive impossible (réseau ou connexion Google) : elle sera retentée au prochain duel."
+			lbl.text = "⚠  Sauvegarde Drive impossible : elle sera retentée au prochain duel."
+			if CloudSave.last_status != "":
+				lbl.text += "\n" + CloudSave.last_status
 			lbl.add_theme_color_override("font_color", Color(1.0, 0.72, 0.30))
 
 
