@@ -256,7 +256,56 @@ var _code_label: Label
 var _code_url: String = ""
 
 
+## V451 : date, heure et source de la dernière sauvegarde (appareil + Cloud).
+var _info_local: Label
+var _info_cloud: Label
+
+static func _source_of_last_local() -> Dictionary:
+	var best: Dictionary = {}
+	var best_t: int = -1
+	for slot: int in range(ProgressionManager.MAX_SAVES):
+		if not ProgressionManager.save_exists(slot):
+			continue
+		var d: Dictionary = ProgressionManager.load_save(slot)
+		if d.is_empty():
+			continue
+		var t: int = int(d.get("saved_unix", 0))
+		if t <= 0:
+			t = int(FileAccess.get_modified_time("%s/partie_%d.json" % [ProgressionManager.SAVE_DIR, slot]))
+		if t > best_t:
+			best_t = t
+			best = {"unix": t, "from": String(d.get("saved_from", "")), "name": String(d.get("name", "Partie %d" % (slot + 1)))}
+	return best
+
+
+func _refresh_save_info() -> void:
+	if _info_local == null:
+		return
+	var l: Dictionary = _source_of_last_local()
+	if l.is_empty():
+		_info_local.text = "📱 Sur cet appareil : aucune sauvegarde pour l'instant."
+	else:
+		_info_local.text = "📱 Dernière sauvegarde sur cet appareil : %s — %s%s" % [CloudSave.fmt_unix(int(l["unix"])),
+			String(l["name"]), (" · source : " + String(l["from"])) if String(l["from"]) != "" else ""]
+	var c: Dictionary = CloudSave.last_attempt()
+	if c.is_empty():
+		_info_cloud.text = "☁ Cloud : aucun envoi depuis cet appareil pour l'instant."
+	else:
+		var res: String = {"ok": "réussi ✓", "conflict": "refusé (une sauvegarde plus récente existe sur Drive)", "fail": "ÉCHEC", "": "non effectué"}.get(String(c.get("result", "")), "?")
+		_info_cloud.text = "☁ Dernier envoi Cloud : %s — %s · source : %s%s" % [CloudSave.fmt_unix(int(c.get("unix", 0))), res, String(c.get("source", "?")),
+			("\n    " + String(c["message"])) if String(c.get("result", "")) != "ok" and String(c.get("message", "")) != "" else ""]
+
+
 func _build_cloud(box: VBoxContainer) -> void:
+	for pair: Array in [["_info_local", "InfoLocal"], ["_info_cloud", "InfoCloud"]]:
+		var lb := Label.new()
+		lb.name = String(pair[1])
+		lb.add_theme_font_size_override("font_size", 19)
+		lb.add_theme_color_override("font_color", COL_TXT)
+		lb.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(lb)
+		set(String(pair[0]), lb)
+	_refresh_save_info()
 	_cloud = CloudSave.new()
 	_cloud.name = "CloudSave"
 	add_child(_cloud)
@@ -337,6 +386,7 @@ func _on_cloud_backup(force: bool = false) -> void:
 	var res: String = await _cloud.backup(force)
 	_hide_code()
 	_cloud_busy(false)
+	_refresh_save_info()
 	if res == "conflict":
 		var c: Dictionary = _cloud.last_conflict
 		_confirm("⚠ Sauvegarde Cloud plus récente",

@@ -1663,7 +1663,7 @@ func _on_quit_duel() -> void:
 		var j: Dictionary = JccCollection.ensure(_save)
 		j["losses"] = int(j["losses"]) + 1
 		_save_now()
-		CloudSave.auto_backup(get_tree())   # silencieux (sans effet si l'option Cloud est désactivée)
+		CloudSave.auto_backup(get_tree(), "abandon d'un duel de Cartes")   # silencieux (sans effet si l'option Cloud est désactivée)
 		_show_hub())
 
 
@@ -2039,7 +2039,7 @@ func _cloud_send(lbl: Label) -> void:
 	_cloud_busy = true
 	lbl.text = "☁  Sauvegarde sur Google Drive…"
 	lbl.add_theme_color_override("font_color", UiKit.C_DIM)
-	var r: String = await CloudSave.auto_backup(get_tree())
+	var r: String = await CloudSave.auto_backup(get_tree(), "fin de duel de Cartes")
 	_cloud_busy = false
 	if _cloud_again and is_instance_valid(lbl) and lbl.is_inside_tree():
 		_cloud_again = false
