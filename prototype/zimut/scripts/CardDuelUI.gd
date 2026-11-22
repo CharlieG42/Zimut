@@ -479,17 +479,23 @@ func _build_duel_ui() -> void:
 	# fond de biome 2D stylisé derrière le plateau + ancre du tutoriel
 	_iso = GameSettings.cards_iso
 	_build_geometry()
-	var biome_bg := _BiomeBG.new()
-	biome_bg.iso = _iso
-	biome_bg.polys = _cell_polys
-	biome_bg.lifts = _lifts()
-	biome_bg.biome = _biome
-	biome_bg.seedv = _opp_idx * 7919 + 13
-	biome_bg.board = BOARD
-	biome_bg.nation = String(BIOME_NATION.get(_biome, _biome))
-	biome_bg.camps = [_camp_art(0), _camp_art(1)]
-	biome_bg.foe_accent = _foe_accent
-	_root.add_child(biome_bg)
+	# Le fond (sol, falaise, décors, camps) est peint UNE fois dans une texture ; seules la brume,
+	# les rayons et les flammes restent animés, dans une couche légère à ~12 ips.
+	var vp := SubViewport.new()
+	vp.size = Vector2i(1920, 1080)
+	vp.disable_3d = true
+	vp.transparent_bg = false
+	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+	vp.add_child(_make_bg(0))
+	_root.add_child(vp)
+	var baked := TextureRect.new()
+	baked.texture = vp.get_texture()
+	baked.position = Vector2.ZERO
+	baked.size = Vector2(1920, 1080)
+	baked.stretch_mode = TextureRect.STRETCH_SCALE
+	baked.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(baked)
+	_root.add_child(_make_bg(1))
 	_board_anchor = Control.new()
 	_board_anchor.position = BOARD.position
 	_board_anchor.size = BOARD.size
@@ -639,6 +645,22 @@ func _iso_hw(y: float) -> float:
 
 
 ## Calcule le polygone, le centre et l'échelle d'unité de chaque case (plat ou perspective).
+## Fond du plateau : couche 0 = tout le statique (peint une fois), couche 1 = animations seules.
+func _make_bg(layer: int) -> Control:
+	var bg := _BiomeBG.new()
+	bg.layer = layer
+	bg.iso = _iso
+	bg.polys = _cell_polys
+	bg.lifts = _lifts()
+	bg.biome = _biome
+	bg.seedv = _opp_idx * 7919 + 13
+	bg.board = BOARD
+	bg.nation = String(BIOME_NATION.get(_biome, _biome))
+	bg.camps = [_camp_art(0), _camp_art(1)]
+	bg.foe_accent = _foe_accent
+	return bg
+
+
 ## Hauteur (px) dont une case « hauteur » est surélevée : plateau en perspective plus marqué.
 func _lift_of(cell: int) -> float:
 	if _duel == null or _duel.terrain_at(cell) != "hauteur":
@@ -2045,7 +2067,7 @@ func _show_help() -> void:
 	var t: Label = UiKit.lbl("Aide du duel", 44, UiKit.C_GOLD, true)
 	t.position = Vector2(80, 30)
 	ov.add_child(t)
-	var txt := "PA — points d'action : chaque attaque ou sort de créature coûte des PA, rendus à chaque tour.\nPM — points de mouvement : nombre de cases dont la créature peut se déplacer par tour.\nPO — portée : distance maximale (en cases) d'une attaque ou d'un sort.\nMana — coût d'une carte ; +1 par tour (max 10). Un sort de créature coûte son mana + 1 PA.\n\nMots-clés :  V Vol (ignore les cases occupées)   F Perforation (l'excès touche le héros)\nT Provocation (à attaquer en premier)   R Régénération (soigne chaque tour)   I Initiative (frappe d'abord)\n\nPlateau :  bleu = votre zone de déploiement, couleur du camp ennemi = la sienne.\nCases rouges = portée de votre unité ; orange = déplacements possibles d'une unité ennemie touchée, rose = ce qu'elle peut menacer.\nAnneau bleu sous l'unité = à vous, anneau de la couleur adverse = ennemi."
+	var txt := "PA — points d'action : chaque attaque ou sort de créature coûte des PA, rendus à chaque tour.\nPM — points de mouvement : nombre de cases dont la créature peut se déplacer par tour.\nPO — portée : distance maximale (en cases) d'une attaque ou d'un sort.\nMana — coût d'une carte ; +1 par tour (max 10). Un sort de créature coûte son mana + 1 PA (une fois par tour) ; le pouvoir de héros ⚡ est gratuit, une fois par duel.\n\nMots-clés :  V Vol (ignore les cases occupées)   F Perforation (l'excès touche le héros)\nT Provocation (à attaquer en premier)   R Régénération (soigne chaque tour)   I Initiative (frappe d'abord)\n\nPlateau :  bleu = votre zone de déploiement, couleur du camp ennemi = la sienne.\nCases rouges = portée de votre unité ; orange = déplacements possibles d'une unité ennemie touchée, rose = ce qu'elle peut menacer.\nAnneau bleu sous l'unité = à vous, anneau de la couleur adverse = ennemi."
 	var l: Label = UiKit.lbl(txt, 28, UiKit.C_TXT)
 	l.position = Vector2(80, 120)
 	l.size = Vector2(1760, 760)
@@ -2100,6 +2122,7 @@ class _BiomeBG extends Control:
 	var iso: bool = false
 	var polys: Array = []
 	var lifts: Dictionary = {}   # cellule -> hauteur (px) des cases surélevées
+	var layer: int = 0           # 0 = statique (peint une fois), 1 = brume / rayons / flammes animés
 	var foe_accent: Color = Color(1.0, 0.42, 0.38)
 	var camps: Array = []     # [{tex, reg}] sprite du héros : side 0 (vous) puis side 1 (ennemi)
 	var _t: float = 0.0
@@ -2127,11 +2150,11 @@ class _BiomeBG extends Control:
 	func _ready() -> void:
 		set_anchors_preset(Control.PRESET_FULL_RECT)
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
-		set_process(true)
+		set_process(layer == 1)
 
 	func _process(dt: float) -> void:
 		_t += dt
-		if _t - _last >= 0.05:   # brume et feu de camp animés à ~20 ips
+		if _t - _last >= 0.08:   # brume et flammes animées à ~12 ips (la couche statique ne bouge plus)
 			_last = _t
 			queue_redraw()
 
@@ -2168,6 +2191,9 @@ class _BiomeBG extends Control:
 		var h: float = 1080.0
 		var hor: float = board.position.y - 8.0
 		var mist: Color = p.get("mist", Color(0.8, 0.88, 0.96))
+		if layer == 1:
+			_draw_anim(hor, w, mist)
+			return
 		var steps := 40
 		for i in steps:
 			var col: Color = mist.lightened(0.30).lerp(Color(0.03, 0.05, 0.04), float(i) / float(steps))
@@ -2198,20 +2224,22 @@ class _BiomeBG extends Control:
 		_draw_board(p)
 		# camps aux 2 extrémités
 		_draw_camps()
-		# brume animée
-		for i in 3:
-			var byy: float = hor + 40.0 + float(i) * 150.0 + sin(_t * 0.10 + float(i) * 2.1) * 14.0
-			draw_rect(Rect2(0, byy, w, 54.0), Color(mist.r, mist.g, mist.b, 0.05 + 0.015 * sin(_t * 0.23 + float(i))))
-		# rayons de lumière
-		for i in 3:
-			var lx: float = 300.0 + float(i) * 550.0 + sin(_t * 0.07 + float(i)) * 30.0
-			draw_colored_polygon(PackedVector2Array([Vector2(lx, 0), Vector2(lx + 190, 0), Vector2(lx + 60, hor), Vector2(lx - 130, hor)]), Color(1, 1, 0.92, 0.045))
 		# vignette
 		for i in 14:
 			var a: float = 0.30 * (1.0 - float(i) / 14.0)
 			draw_rect(Rect2(i * 14.0, 0, 14.0, h), Color(0, 0, 0, a * 0.5))
 			draw_rect(Rect2(w - (i + 1) * 14.0, 0, 14.0, h), Color(0, 0, 0, a * 0.5))
 			draw_rect(Rect2(0, h - (i + 1) * 12.0, w, 12.0), Color(0, 0, 0, a * 0.7))
+
+	## Couche animée : brume, rayons de lumière, flammes des torches et feux de camp.
+	func _draw_anim(hor: float, w: float, mist: Color) -> void:
+		for i in 3:
+			var byy: float = hor + 40.0 + float(i) * 150.0 + sin(_t * 0.10 + float(i) * 2.1) * 14.0
+			draw_rect(Rect2(0, byy, w, 54.0), Color(mist.r, mist.g, mist.b, 0.05 + 0.015 * sin(_t * 0.23 + float(i))))
+		for i in 3:
+			var lx: float = 300.0 + float(i) * 550.0 + sin(_t * 0.07 + float(i)) * 30.0
+			draw_colored_polygon(PackedVector2Array([Vector2(lx, 0), Vector2(lx + 190, 0), Vector2(lx + 60, hor), Vector2(lx - 130, hor)]), Color(1, 1, 0.92, 0.045))
+		_draw_camps()
 
 	func _draw_decors(p: Dictionary, hor: float, w: float, h: float) -> void:
 		var rng := RandomNumberGenerator.new()
@@ -2365,6 +2393,12 @@ class _BiomeBG extends Control:
 	## Camp adverse sur toute la largeur : chemin de ronde, rempart de palissade, bannières du camp,
 	## torches et porte centrale devant laquelle se tient le héros (vrai sprite posé par l'interface).
 	func _draw_foe_camp(gy: float) -> void:
+		if layer == 1:
+			for tx: float in [960.0 - 230.0, 960.0 + 230.0]:
+				var fk: float = 0.5 + 0.5 * sin(_t * 6.0 + tx * 0.01)
+				draw_circle(Vector2(tx, gy - 34.0), 34.0 + 8.0 * fk, Color(1.0, 0.65, 0.25, 0.10 + 0.05 * fk))
+				draw_circle(Vector2(tx, gy - 62.0 - 3.0 * fk), 7.0 + 2.0 * fk, Color(1.0, 0.78, 0.3, 0.9))
+			return
 		var p: Dictionary = _pal()
 		var team: Color = foe_accent
 		var tint: Color = (DECOR_TINT.get(biome, Color(1, 1, 1)) as Color) * Color(1.0, 0.86, 0.82)
@@ -2398,10 +2432,7 @@ class _BiomeBG extends Control:
 		_ellipse(Vector2(960.0, gy + 2.0), Vector2(150.0, 17.0), Color(0, 0, 0, 0.30))
 		# torches animées aux deux bouts de la porte
 		for tx: float in [960.0 - 230.0, 960.0 + 230.0]:
-			var flick: float = 0.5 + 0.5 * sin(_t * 6.0 + tx * 0.01)
-			draw_circle(Vector2(tx, gy - 34.0), 34.0 + 8.0 * flick, Color(1.0, 0.65, 0.25, 0.10 + 0.05 * flick))
 			_sprite(CAMP["torch"], Vector2(tx, gy), 70.0, tint)
-			draw_circle(Vector2(tx, gy - 62.0 - 3.0 * flick), 7.0 + 2.0 * flick, Color(1.0, 0.78, 0.3, 0.9))
 
 	func _banner(top: Vector2, col: Color) -> void:
 		var wave: float = sin(_t * 2.0 + top.x * 0.02) * 4.0
@@ -2413,6 +2444,17 @@ class _BiomeBG extends Control:
 	## Camp d'un camp : clairière, palissade, piliers, tour avec girouette, héros du camp
 	## (vrai sprite), feu de camp animé.
 	func _draw_camp(base: Vector2, side: int) -> void:
+		if layer == 1:
+			var ttx: Texture2D = _tex(CAMP["tower"])
+			var th1: float = 88.0 if side == 1 else 150.0
+			var tw1: float = th1 * float(ttx.get_width()) / float(ttx.get_height()) if ttx != null else 0.0
+			var fx1: float = base.x + (tw1 * 0.5 + 36.0 if side == 0 else -(tw1 * 0.5 + 36.0))
+			var fy1: float = base.y - 2.0
+			var fl1: float = 0.5 + 0.5 * sin(_t * 6.0 + float(side) * 3.0)
+			draw_circle(Vector2(fx1, fy1 - 8.0), 40.0 + 8.0 * fl1, Color(1.0, 0.65, 0.25, 0.10 + 0.05 * fl1))
+			draw_circle(Vector2(fx1, fy1 - 20.0 - 3.0 * fl1), 8.0 + 2.0 * fl1, Color(1.0, 0.78, 0.3, 0.9))
+			draw_circle(Vector2(fx1, fy1 - 16.0), 4.5, Color(1.0, 0.94, 0.6, 0.95))
+			return
 		var p: Dictionary = _pal()
 		var team: Color = Color(0.45, 0.72, 1.0) if side == 0 else foe_accent
 		var tint: Color = Color(1, 1, 1) if side == 0 else Color(1.0, 0.80, 0.76)
@@ -2450,11 +2492,7 @@ class _BiomeBG extends Control:
 		# feu de camp animé
 		var fx: float = base.x + (tw * 0.5 + 36.0 if side == 0 else -(tw * 0.5 + 36.0))
 		var fy: float = base.y - 2.0
-		var flick: float = 0.5 + 0.5 * sin(_t * 6.0 + float(side) * 3.0)
-		draw_circle(Vector2(fx, fy - 8.0), 40.0 + 8.0 * flick, Color(1.0, 0.65, 0.25, 0.10 + 0.05 * flick))
 		_sprite(CAMP["torch"], Vector2(fx, fy), 74.0, tint)
-		draw_circle(Vector2(fx, fy - 20.0 - 3.0 * flick), 8.0 + 2.0 * flick, Color(1.0, 0.78, 0.3, 0.9))
-		draw_circle(Vector2(fx, fy - 16.0), 4.5, Color(1.0, 0.94, 0.6, 0.95))
 
 
 ## Couche d'effets animés en vectoriel : projectiles d'attaque et gerbes d'impact.

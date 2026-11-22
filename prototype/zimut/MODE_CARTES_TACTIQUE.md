@@ -410,3 +410,8 @@ Simulation IA (même deck, 14 adversaires × 12 graines) : avant, les héros all
 - **Unités** : une créature fatiguée, étourdie ou assoupie voit son *sprite* assombri, au lieu d'un carré gris translucide derrière elle.
 - **Actions à mana** : le bouton violet d'un sort de créature affiche l'effet, le coût (mana + 1 PA), « 1 fois par tour » et « touchez ensuite la cible » si besoin ; le pouvoir de héros affiche son effet, « gratuit, 1 fois par duel ».
 - **Aide** : bouton « ❓ Aide » sur l'accueil du mode Cartes (`_show_rules`, texte `RULES_TEXT`) : but, tour, PA/PM/PO, actions à mana, terrains, mots-clés, butin.
+
+## 35. Fond figé, effets en anglais
+- **Perf** : le fond du plateau (ciel, sol, falaise, décors, camps) est peint une seule fois dans un `SubViewport` (`UPDATE_ONCE`) affiché par un `TextureRect`. Seule une couche légère (`_BiomeBG.layer == 1` : brume, rayons de lumière, flammes) est redessinée, à ~12 ips au lieu de 20 ips pour toute la scène.
+- **Anglais** : `JccCards.effect_text` est traduit (`_effect_text_en`) ; test : plus aucun effet français en `en`.
+- L'aide du duel rappelle le pouvoir de héros gratuit (1 fois par duel). Les écrans Fusion et Héros avaient déjà le défilement au doigt.

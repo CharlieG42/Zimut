@@ -190,6 +190,8 @@ static func effect_text(card: Dictionary, creature_sort: bool = false) -> String
 	var v: String = String(card["valeur"])
 	var d: int = int(card["duree"])
 	var t: String = ""
+	if lang() == "en":
+		return _effect_text_en(card, v, d)
 	match String(card["effet"]):
 		"degats":
 			t = "Inflige %s dégâts" % v + _target_suffix(card)
@@ -223,6 +225,56 @@ static func effect_text(card: Dictionary, creature_sort: bool = false) -> String
 		"mana":
 			t = "+%s mana ce tour" % v
 	return t
+
+
+static func _effect_text_en(card: Dictionary, v: String, d: int) -> String:
+	var tg: String = _target_suffix_en(card)
+	match String(card["effet"]):
+		"degats":
+			return "Deals %s damage" % v + tg
+		"degats_zone":
+			return "Deals %s damage to all enemy creatures" % v
+		"degats_heros":
+			return "Deals %s damage to the enemy hero" % v
+		"soin":
+			return "Restores %s HP" % v + tg
+		"soin_zone":
+			return "Restores %s HP to all your creatures" % v
+		"atq":
+			return "+%s attack" % v + tg
+		"atq_zone":
+			return "+%s attack to all your creatures" % v
+		"bouclier":
+			return "+%s HP" % v + tg
+		"bouclier_zone":
+			return "+%s HP to all your creatures" % v
+		"etourdir":
+			return "Stuns for %d turn" % maxi(d, 1) + tg
+		"etourdir_zone":
+			return "Stuns all enemy creatures for %d turn" % maxi(d, 1)
+		"poison":
+			return "Poison: %s damage per turn for %d turns" % [v, d] + tg
+		"invoquer":
+			var tok: Dictionary = get_card(v)
+			return "Summons %s (%d/%d) on a free tile of your deployment zone" % [display_name(tok) if not tok.is_empty() else "a creature", int(tok.get("atk", 0)), int(tok.get("hp", 0))]
+		"pioche":
+			return "Draw %s cards" % v
+		"mana":
+			return "+%s mana this turn" % v
+	return ""
+
+
+static func _target_suffix_en(card: Dictionary) -> String:
+	match String(card["cible"]):
+		"ennemi":
+			return " to an enemy creature"
+		"ennemi_ou_heros":
+			return " to an enemy target"
+		"allie":
+			return " to one of your creatures"
+		"allie_ou_heros":
+			return " to an allied target"
+	return ""
 
 
 static func _target_suffix(card: Dictionary) -> String:
