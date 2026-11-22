@@ -36,6 +36,16 @@ func _initialize() -> void:
 	check(JccCards.display_name(d) == "Dryad" and JccCards.flavor(d).begins_with("Where she walks"), "anglais")
 	check(JccCards.display_name(JccCards.get_card("s_eclair")) == String(JccCards.get_card("s_eclair")["name"]), "sort sans nom anglais : repli français")
 	check(JccCards.flavor(JccCards.get_card("s_eclair")) == "", "sort sans punchline")
+	# effets en anglais : aucun texte français résiduel
+	var fr_left: int = 0
+	for cid: String in JccCards.all_ids():
+		var cc: Dictionary = JccCards.get_card(cid)
+		if String(cc.get("effet", "")) == "":
+			continue
+		var et: String = JccCards.effect_text(cc)
+		if et == "" or et.contains("Inflige") or et.contains("Rend ") or et.contains("Invoque ") or et.contains(" créature") or et.contains("Pioche"):
+			fr_left += 1
+	check(fr_left == 0, "effets des cartes traduits en anglais (%d restants)" % fr_left)
 	var lv: Dictionary = JccCards.get_card("n_dryade@3~P")
 	check(String(lv["flavor_fr"]) == String(d["flavor_fr"]) and String(lv["nation"]) == "Sylvestre", "niveau/fortification gardent identité")
 	# cartes de nations jouables en duel

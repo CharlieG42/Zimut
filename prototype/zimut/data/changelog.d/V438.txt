@@ -1,0 +1,3 @@
+V438|Plateau Cartes : le fond est figé en une image, seules la brume et les flammes restent animées (duels plus fluides).
+V438|Les effets des cartes et des sorts s'affichent en anglais quand le jeu est en anglais.
+V438|L'aide du duel rappelle le fonctionnement du pouvoir de héros.
