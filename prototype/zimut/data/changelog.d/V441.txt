@@ -1,0 +1,3 @@
+V441|Mode Cartes : des rochers infranchissables apparaissent au centre du plateau.
+V441|Ils bloquent le déplacement et le dépôt de créatures ; les tirs passent au-dessus.
+V441|L'IA contourne les rochers ; la légende et l'aide du mode expliquent ce terrain.
