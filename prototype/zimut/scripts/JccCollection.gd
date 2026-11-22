@@ -101,6 +101,7 @@ static func fuse(save: Dictionary, key: String) -> String:
 	if int(col[key]) <= 0:
 		col.erase(key)
 	col[out_key] = int(col.get(out_key, 0)) + 1
+	j["fusions"] = int(j.get("fusions", 0)) + 1
 	var swapped: bool = false
 	for nm: Variant in (j["decks"] as Dictionary).keys():
 		var d: Array = (j["decks"] as Dictionary)[nm]
@@ -515,3 +516,67 @@ static func chapter_boss_won(save: Dictionary, idx: int) -> Dictionary:
 	save["gold"] = int(save.get("gold", 0)) + gold
 	add_card(save, String(op["boss"]))
 	return {"card": String(op["boss"]), "gold": gold}
+
+
+## --- Succès de collection : paliers calculés depuis la sauvegarde, récompense en or (une seule fois) ---
+
+const ACHIEVEMENTS: Array = [
+	{"id": "win1", "name": "Première victoire", "metric": "wins", "target": 1, "gold": 50},
+	{"id": "win10", "name": "Duelliste", "metric": "wins", "target": 10, "gold": 150},
+	{"id": "win30", "name": "Maître des cartes", "metric": "wins", "target": 30, "gold": 400},
+	{"id": "col90", "name": "Collectionneur I : 90 cartes différentes", "metric": "distinct", "target": 90, "gold": 100},
+	{"id": "col98", "name": "Collectionneur II : 98 cartes différentes", "metric": "distinct", "target": 98, "gold": 250},
+	{"id": "col106", "name": "Collectionneur III : toutes les cartes (106)", "metric": "distinct", "target": 106, "gold": 500},
+	{"id": "fus1", "name": "Alchimiste : 1 fusion", "metric": "fusions", "target": 1, "gold": 60},
+	{"id": "fus8", "name": "Grand alchimiste : 8 fusions", "metric": "fusions", "target": 8, "gold": 300},
+	{"id": "leg1", "name": "Légende : 1 carte légendaire", "metric": "legend", "target": 1, "gold": 150},
+	{"id": "leg5", "name": "Panthéon : 5 cartes légendaires", "metric": "legend", "target": 5, "gold": 450},
+	{"id": "leg10", "name": "Légende vivante : 10 cartes légendaires", "metric": "legend", "target": 10, "gold": 700},
+	{"id": "chap3", "name": "Chasseur de boss : 3 boss de chapitre", "metric": "chapters", "target": 3, "gold": 300},
+]
+
+
+static func achievement_value(save: Dictionary, metric: String) -> int:
+	var j: Dictionary = ensure(save)
+	match metric:
+		"wins":
+			return int(j["wins"])
+		"fusions":
+			return int(j.get("fusions", 0))
+		"chapters":
+			return (j.get("chapter_bosses", []) as Array).size()
+	var bases: Dictionary = {}
+	for k: Variant in (j["collection"] as Dictionary):
+		if int((j["collection"] as Dictionary)[k]) > 0:
+			bases[JccCards.base_of(String(k))] = true
+	if metric == "distinct":
+		return bases.size()
+	var n: int = 0
+	for b: Variant in bases:
+		var c: Dictionary = JccCards.get_card(String(b))
+		if metric == "legend" and String(c.get("rarity", "")) == "L":
+			n += 1
+		elif metric == "nations" and String(b).begins_with("n_"):
+			n += 1
+	return n
+
+
+static func achievement_done(save: Dictionary, id: String) -> bool:
+	return (ensure(save).get("ach", []) as Array).has(id)
+
+
+## Valide les succès atteints (récompense en or) ; retourne [{id, name, gold}] des nouveaux.
+static func check_achievements(save: Dictionary) -> Array:
+	var j: Dictionary = ensure(save)
+	var done: Array = j.get("ach", [])
+	var out: Array = []
+	for a: Variant in ACHIEVEMENTS:
+		var ad: Dictionary = a
+		if done.has(String(ad["id"])):
+			continue
+		if achievement_value(save, String(ad["metric"])) >= int(ad["target"]):
+			done.append(String(ad["id"]))
+			save["gold"] = int(save.get("gold", 0)) + int(ad["gold"])
+			out.append({"id": ad["id"], "name": ad["name"], "gold": ad["gold"]})
+	j["ach"] = done
+	return out
