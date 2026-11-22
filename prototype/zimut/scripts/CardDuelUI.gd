@@ -1896,6 +1896,7 @@ func _finish_if_over() -> void:
 		return
 	if win:
 		j["wins"] = int(j["wins"]) + 1
+		extra["season"] = JccCollection.season_win(_save)
 		var rng := RandomNumberGenerator.new()
 		rng.randomize()
 		var cbw: Dictionary = JccCollection.chapter_boss_won(_save, _opp_idx)
@@ -1957,6 +1958,15 @@ func _show_result(win: bool, draw_game: bool, loot: String, extra: Dictionary = 
 		ul.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		ul.custom_minimum_size = Vector2(0, 30)
 		info.add_child(ul)
+	for sr: Variant in extra.get("season", []):
+		var sd: Dictionary = sr
+		var stx: String = "🍂 Saison : palier %d victoires  (+%d or)" % [int(sd["wins"]), int(sd["gold"])]
+		if String(sd["card"]) != "":
+			stx += "  + carte %s" % String(JccCards.get_card(String(sd["card"])).get("name", ""))
+		var sl: Label = UiKit.lbl(stx, 24, UiKit.C_GOLD, true)
+		sl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		sl.custom_minimum_size = Vector2(0, 28)
+		info.add_child(sl)
 	for a: Variant in extra.get("ach", []):
 		var al: Label = UiKit.lbl("🏆 Succès : %s  (+%d or)" % [String((a as Dictionary)["name"]), int((a as Dictionary)["gold"])], 24, UiKit.C_GOLD, true)
 		al.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -2061,6 +2071,15 @@ func _show_achievements() -> void:
 	box.custom_minimum_size = Vector2(1720, 0)
 	box.add_theme_constant_override("separation", 10)
 	sc.add_child(box)
+	var se: Dictionary = JccCollection.season_info(_save)
+	var sparts: Array = []
+	for st: Variant in JccCollection.SEASON_TIERS:
+		var td: Dictionary = st
+		sparts.append("%s%d vict. → %d or%s" % ["✅ " if (se["claimed"] as Array).has(int(td["wins"])) else "", int(td["wins"]), int(td["gold"]), " + carte rare" if bool(td["card"]) else ""])
+	var sl: Label = UiKit.lbl("🍂 Saison %s — %d victoires ce mois-ci\n%s\n(la saison repart à zéro chaque mois)" % [String(se["id"]), int(se["wins"]), "  ·  ".join(PackedStringArray(sparts))], 26, UiKit.C_GOLD)
+	sl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	sl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(sl)
 	for a: Variant in JccCollection.ACHIEVEMENTS:
 		var ad: Dictionary = a
 		var done: bool = JccCollection.achievement_done(_save, String(ad["id"]))

@@ -1,0 +1,3 @@
+V443|Mode Cartes : saisons mensuelles avec récompenses selon vos victoires du mois.
+V443|Paliers à 3, 8 et 15 victoires : de l'or, puis une carte rare au dernier palier.
+V443|La progression de la saison est visible dans l'écran Succès et la saison repart à zéro chaque mois.

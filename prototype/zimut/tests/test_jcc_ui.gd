@@ -52,6 +52,9 @@ func _boot() -> void:
 	var d = m._duel
 	var start_hand: int = 4 + int(((JccDuel.hero_bonus(JccCollection.active_hero(m._save)).get("start", {}) as Dictionary).get("draw", 0)))
 	check(d != null and m._hand_views.size() == start_hand, "duel lancé, %d cartes en main (4 + bonus du héros)" % start_hand)
+	m._show_achievements()
+	check(m._root.get_node_or_null("AchView") != null, "écran Succès (avec saison) s'ouvre")
+	m._root.get_node("AchView").queue_free()
 	var nterr: int = 0
 	for k in m._slots.keys():
 		if m._slots[k].terrain != "":
