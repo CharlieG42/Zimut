@@ -98,6 +98,7 @@ func _boot() -> void:
 	var DD = load("res://scripts/JccDuel.gd")
 	var t = DD.new()
 	t.setup(["m_gobelin", "m_loup", "m_troll", "s_etincelle", "s_soin", "s_eclair", "m_gobelin", "m_gobelin", "s_javelot", "s_loup"], ["m_loup", "m_troll", "m_gobelin", "s_javelot", "m_gobelin", "m_gobelin", "m_gobelin", "m_gobelin", "m_gobelin", "m_gobelin"], 11)
+	t.terrain = []   # terrain neutre : ces règles ne dépendent pas du tirage (rochers compris)
 	t.side(0)["hand"] = [t._make_instance("m_gobelin"), t._make_instance("m_troll"), t._make_instance("s_etincelle")]
 	t.side(1)["hand"] = []
 	t.side(0)["mana"] = 5
@@ -249,7 +250,7 @@ func _boot() -> void:
 			if tt == "boue": has_boue = true
 			if tt == "hauteur": has_haut = true
 			if tt == "buisson": has_buis = true
-	check(nt == JccDuel.TERRAIN_COUNT and has_boue and has_haut and has_buis, "terrain : 6 cases, 2 de chaque type (seed 42)")
+	check(nt == JccDuel.TERRAIN_COUNT + JccDuel.ROCK_COUNT and has_boue and has_haut and has_buis, "terrain : 6 cases + 2 rochers (seed 42)")
 	var tg2 = DD.new()
 	tg2.setup(["m_gobelin"], ["m_gobelin"], 42)
 	var same := true

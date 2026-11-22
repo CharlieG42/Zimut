@@ -719,10 +719,10 @@ class _CellNode extends Control:
 	var fill := Color(0, 0, 0, 0.20)
 	var border := Color(1, 1, 1, 0.14)
 	var bw: float = 2.0
-	var terrain: String = ""           # "", "boue", "hauteur", "buisson"
+	var terrain: String = ""           # "", "boue", "hauteur", "buisson", "rocher"
 	var lift: float = 0.0              # case surélevée : tout le dessin remonte avec le bloc
-	const TERRAIN_COL := {"boue": Color(0.35, 0.55, 1.0), "hauteur": Color(0.85, 0.85, 0.95), "buisson": Color(0.35, 0.85, 0.40)}
-	const TERRAIN_NAME := {"boue": "Boue", "hauteur": "Hauteur", "buisson": "Buisson"}
+	const TERRAIN_COL := {"boue": Color(0.35, 0.55, 1.0), "hauteur": Color(0.85, 0.85, 0.95), "buisson": Color(0.35, 0.85, 0.40), "rocher": Color(0.80, 0.62, 0.40)}
+	const TERRAIN_NAME := {"boue": "Boue", "hauteur": "Hauteur", "buisson": "Buisson", "rocher": "Rocher"}
 
 	func _has_point(p: Vector2) -> bool:
 		return Geometry2D.is_point_in_polygon(p, poly)
@@ -752,6 +752,10 @@ class _CellNode extends Control:
 			"hauteur":
 				draw_colored_polygon(PackedVector2Array([c + Vector2(-34, 16), c + Vector2(0, -24), c + Vector2(34, 16)]), Color(0.82, 0.82, 0.88, 0.95))
 				draw_colored_polygon(PackedVector2Array([c + Vector2(-11, -6), c + Vector2(0, -24), c + Vector2(11, -6), c + Vector2(0, -13)]), Color(1, 1, 1, 1))
+			"rocher":
+				draw_colored_polygon(PackedVector2Array([c + Vector2(-38, 22), c + Vector2(-30, -8), c + Vector2(-8, -28), c + Vector2(20, -22), c + Vector2(38, 4), c + Vector2(32, 22)]), Color(0.36, 0.33, 0.31, 0.98))
+				draw_colored_polygon(PackedVector2Array([c + Vector2(-30, -8), c + Vector2(-8, -28), c + Vector2(20, -22), c + Vector2(4, -6)]), Color(0.62, 0.58, 0.54, 1.0))
+				draw_polyline(PackedVector2Array([c + Vector2(-38, 22), c + Vector2(-30, -8), c + Vector2(-8, -28), c + Vector2(20, -22), c + Vector2(38, 4), c + Vector2(32, 22), c + Vector2(-38, 22)]), Color(0.12, 0.10, 0.09), 3.0, true)
 			"buisson":
 				for o2: Vector3 in [Vector3(-14, 4, 13), Vector3(12, 6, 16), Vector3(0, -8, 12)]:
 					draw_circle(c + Vector2(o2.x, o2.y), o2.z, Color(0.12, 0.50, 0.18, 0.92))
@@ -1415,7 +1419,7 @@ func _refresh_action_bar() -> void:
 			_action_bar.add_child(UiKit.lbl(why, 24, UiKit.C_BAD, true))
 		return
 	if _sel_cell < 0 or _duel.creature_at(0, _sel_cell) == null:
-		_action_bar.add_child(UiKit.lbl("Terrains : Boue = déplacement ×2 · Hauteur = +1 PO · Buisson = abri contre les tirs (rien ne bloque)", 22, Color(0.75, 0.88, 1.0)))
+		_action_bar.add_child(UiKit.lbl("Terrains : Boue = déplacement ×2 · Hauteur = +1 PO · Buisson = abri contre les tirs · Rocher = infranchissable", 22, Color(0.75, 0.88, 1.0)))
 	if _sel_cell >= 0 and _duel.creature_at(0, _sel_cell) != null:
 		var cr: Dictionary = _duel.creature_at(0, _sel_cell)
 		var cell: int = _sel_cell
@@ -2053,7 +2057,7 @@ func _show_rules() -> void:
 	ov.add_child(close)
 
 
-const RULES_TEXT := "BUT DU JEU\nRéduire à 0 les PV du héros adverse (20 PV chacun). Le plateau compte 4 colonnes × 6 lignes : vous posez vos créatures dans votre zone (bas), l'adversaire dans la sienne (haut).\n\nVOTRE TOUR\n• Vous gagnez 1 mana de plus (maximum 10) et piochez une carte.\n• Jouez des cartes depuis la main : glissez-les ou touchez la carte puis la case. Une carte coûte son mana.\n• Touchez une de vos créatures pour la déplacer (PM), l'attaquer (PA) ou lancer son sort.\n• « Fin du tour » passe la main à l'adversaire.\n\nCARACTÉRISTIQUES D'UNE CRÉATURE\n• PA (points d'action) : une attaque ou un sort coûte 1 PA ; les PA sont rendus à chaque tour.\n• PM (points de mouvement) : nombre de cases dont elle peut se déplacer par tour.\n• PO (portée) : distance maximale, en cases, d'une attaque ou d'un sort.\n• Une créature qui vient d'être posée est assoupie : elle ne peut pas agir ce tour-là (sprite assombri).\n\nACTIONS QUI COÛTENT DU MANA (boutons violets)\n• Sort de créature (✦) : chaque créature à sort affiche son effet dans le bouton. Il coûte le mana indiqué ET 1 PA, utilisable une fois par tour. Si l'effet vise une cible, touchez ensuite la cible (créature ou héros).\n• Pouvoir de héros (⚡) : propre à votre héros actif, il est gratuit mais utilisable une seule fois par duel, quand vous voulez pendant votre tour.\n• Les cartes Sort de la main coûtent leur mana puis sont défaussées après leur effet.\n\nTERRAINS\nBoue : déplacement ×2. Hauteur (case surélevée) : +1 PO. Buisson : abri contre les tirs à distance. Aucun terrain ne bloque le passage.\n\nMOTS-CLÉS\nV Vol (survole les créatures) · F Perforation (l'excès de dégâts touche le héros) · T Provocation (à attaquer en premier) · R Régénération (soigne chaque tour) · I Initiative (frappe en premier).\n\nAPRÈS LE DUEL\nUne victoire peut donner une carte de butin et de l'or. Vous pouvez fusionner des cartes identiques (Fusion), renforcer vos créatures avec de l'or (fortification) et choisir votre héros parmi vos cartes.\n\nDÉBLOCAGE\nLe mode Cartes s'ouvre quand tous les héros de l'aventure sont débloqués."
+const RULES_TEXT := "BUT DU JEU\nRéduire à 0 les PV du héros adverse (20 PV chacun). Le plateau compte 4 colonnes × 6 lignes : vous posez vos créatures dans votre zone (bas), l'adversaire dans la sienne (haut).\n\nVOTRE TOUR\n• Vous gagnez 1 mana de plus (maximum 10) et piochez une carte.\n• Jouez des cartes depuis la main : glissez-les ou touchez la carte puis la case. Une carte coûte son mana.\n• Touchez une de vos créatures pour la déplacer (PM), l'attaquer (PA) ou lancer son sort.\n• « Fin du tour » passe la main à l'adversaire.\n\nCARACTÉRISTIQUES D'UNE CRÉATURE\n• PA (points d'action) : une attaque ou un sort coûte 1 PA ; les PA sont rendus à chaque tour.\n• PM (points de mouvement) : nombre de cases dont elle peut se déplacer par tour.\n• PO (portée) : distance maximale, en cases, d'une attaque ou d'un sort.\n• Une créature qui vient d'être posée est assoupie : elle ne peut pas agir ce tour-là (sprite assombri).\n\nACTIONS QUI COÛTENT DU MANA (boutons violets)\n• Sort de créature (✦) : chaque créature à sort affiche son effet dans le bouton. Il coûte le mana indiqué ET 1 PA, utilisable une fois par tour. Si l'effet vise une cible, touchez ensuite la cible (créature ou héros).\n• Pouvoir de héros (⚡) : propre à votre héros actif, il est gratuit mais utilisable une seule fois par duel, quand vous voulez pendant votre tour.\n• Les cartes Sort de la main coûtent leur mana puis sont défaussées après leur effet.\n\nTERRAINS\nBoue : déplacement ×2. Hauteur (case surélevée) : +1 PO. Buisson : abri contre les tirs à distance. Rocher : obstacle infranchissable (on ne peut ni y passer ni y poser de créature ; les tirs passent au-dessus).\n\nMOTS-CLÉS\nV Vol (survole les créatures) · F Perforation (l'excès de dégâts touche le héros) · T Provocation (à attaquer en premier) · R Régénération (soigne chaque tour) · I Initiative (frappe en premier).\n\nAPRÈS LE DUEL\nUne victoire peut donner une carte de butin et de l'or. Vous pouvez fusionner des cartes identiques (Fusion), renforcer vos créatures avec de l'or (fortification) et choisir votre héros parmi vos cartes.\n\nDÉBLOCAGE\nLe mode Cartes s'ouvre quand tous les héros de l'aventure sont débloqués."
 
 
 func _show_help() -> void:

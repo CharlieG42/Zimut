@@ -421,3 +421,10 @@ Méthode : deck de référence où 2 créatures de base sont remplacées par 2 e
 - **Fée des cristaux / Horloge vivante** (−35 / −40) : leur sort « pioche 1 » était relancé chaque tour par l'IA et épuisait le deck (fatigue). Fée des cristaux soigne 3 PV (cible alliée ou héros), Horloge vivante donne +1 PV à toutes les créatures ; Horloge passe à 2 d'attaque.
 - **Sirène / Crapaud des brumes** (+11,5 / +12) : l'étourdissement de zone était trop rentable. Sirène : sort à 4 mana ; Crapaud : 4 PV et sort à 5 mana.
 Après correction : Fée −7, Horloge −7,5, Sirène +8, Crapaud +3.
+
+## 37. Obstacles infranchissables (rochers)
+- Nouveau terrain **rocher** (`JccDuel.ROCK`, `ROCK_COUNT = 2`) : 2 cases tirées parmi les 2 lignes centrales uniquement, donc jamais dans une zone de déploiement. Les 6 terrains habituels sont tirés sur les autres cases.
+- Un rocher bloque tout : `_path_cost` (BFS) ne le traverse pas, `move_targets`/`can_move` ne le proposent pas, `is_free_xy` et les cibles de dépôt (« voie », invocation) l'excluent. L'IA le contourne via le même BFS. Les tirs et sorts passent au-dessus (pas de ligne de vue).
+- Avec 4 colonnes et 2 rochers, une ligne n'est jamais entièrement bouchée : le passage reste toujours possible.
+- UI : rocher gris sombre avec facette claire, étiquette « Rocher », ajouté à la légende et à l'aide (`RULES_TEXT`).
+- Tests : `test_jcc_obstacles.gd` (40 graines : 2 rochers en lignes centrales, chemins) ; `test_jcc`/`test_jcc_ui` mis à jour (8 cases de terrain).

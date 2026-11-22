@@ -19,6 +19,9 @@ const MANA_MAX: int = 10
 const START_HAND: int = 4
 const TERRAIN_TYPES: Array = ["boue", "hauteur", "buisson"]
 const TERRAIN_COUNT: int = 6
+## Obstacles infranchissables (rochers) : 2 cases, toujours dans les lignes centrales (jamais en zone de déploiement).
+const ROCK: String = "rocher"
+const ROCK_COUNT: int = 2
 const HERO_POWER_DEFAULT := {"name": "Frappe du héros", "effet": "degats_heros", "valeur": "3", "duree": 0, "cible": ""}
 const HERO_POWERS := {
 	"mage": {"name": "Éclair céleste", "effet": "degats_heros", "valeur": "4", "duree": 0, "cible": ""},
@@ -203,7 +206,18 @@ func _gen_terrain() -> Array:
 	var t: Array = []
 	for i in LANES:
 		t.append("")
-	var cells: Array = range(LANES)
+	var mid: Array = []
+	for i in LANES:
+		var cy: int = cell_xy(i).y
+		if not deploy_rows(0).has(cy) and not deploy_rows(1).has(cy):
+			mid.append(i)
+	_shuffle(mid)
+	for i in mini(ROCK_COUNT, mid.size()):
+		t[int(mid[i])] = ROCK
+	var cells: Array = []
+	for i in LANES:
+		if String(t[i]) == "":
+			cells.append(i)
 	_shuffle(cells)
 	var kinds: Array = TERRAIN_TYPES.duplicate()
 	kinds.append_array(TERRAIN_TYPES)
@@ -302,7 +316,7 @@ func unit_at(gx: int, gy: int) -> Variant:
 
 
 func is_free_xy(gx: int, gy: int) -> bool:
-	return gx >= 0 and gx < COLS and gy >= 0 and gy < ROWS and unit_at(gx, gy) == null
+	return gx >= 0 and gx < COLS and gy >= 0 and gy < ROWS and unit_at(gx, gy) == null and terrain_at(xy_cell(gx, gy)) != ROCK
 
 
 ## Occupant d'une case : {"side": s, "unit": c} ou {}.
@@ -492,7 +506,7 @@ func targets_for(s: int, cible: String) -> Array:
 			# dépôt : cases libres des 2 lignes proches du héros
 			for by: Variant in deploy_rows(s):
 				for x in COLS:
-					if unit_at(x, int(by)) == null:
+					if unit_at(x, int(by)) == null and terrain_at(xy_cell(x, int(by))) != ROCK:
 						out.append({"side": s, "lane": xy_cell(x, int(by))})
 		_:
 			out.append({})
@@ -762,6 +776,8 @@ func _path_cost(from: int, to: int) -> int:
 				continue
 			if ncell != from and unit_at(np.x, np.y) != null:
 				continue
+			if terrain_at(ncell) == ROCK:   # rocher : infranchissable
+				continue
 			var step: int = 2 if terrain_at(ncell) == "boue" else 1   # la boue ralentit
 			dist[ncell] = int(dist[cur]) + step
 			queue.append(ncell)
@@ -870,7 +886,7 @@ func _apply(s: int, effet: String, valeur: String, duree: int, target: Dictionar
 				lane = -1
 				for by: Variant in deploy_rows(s):
 					for x in COLS:
-						if lane < 0 and unit_at(x, int(by)) == null:
+						if lane < 0 and is_free_xy(x, int(by)):
 							lane = xy_cell(x, int(by))
 			if lane >= 0:
 				var tok: Dictionary = _make_instance(valeur)
