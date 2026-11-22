@@ -1,0 +1,3 @@
+V442|Mode Cartes : nouveaux succès de collection avec récompenses en or.
+V442|Un bouton Succès sur l'accueil montre la progression de chaque palier.
+V442|Les succès se débloquent en gagnant des duels, en fusionnant et en complétant la collection.

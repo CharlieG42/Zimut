@@ -245,6 +245,10 @@ func _show_hub() -> void:
 	rules_b.position = Vector2(W - 270, 40)
 	rules_b.pressed.connect(_show_rules)
 	_root.add_child(rules_b)
+	var ach_b: Button = UiKit.btn("🏆  Succès", Color(0.95, 0.75, 0.3), 28, Vector2(230, 64))
+	ach_b.position = Vector2(W - 270, 116)
+	ach_b.pressed.connect(_show_achievements)
+	_root.add_child(ach_b)
 	var col := VBoxContainer.new()
 	col.position = Vector2(W * 0.5 - 360, 606)
 	col.size = Vector2(720, 390)
@@ -1907,6 +1911,7 @@ func _finish_if_over() -> void:
 	elif _duel.winner == 1:
 		j["losses"] = int(j["losses"]) + 1
 	extra["challenge"] = JccCollection.challenge_report(_save, _duel.side(0)["stats"], win)
+	extra["ach"] = JccCollection.check_achievements(_save)
 	_save_now()
 	_refresh()
 	_show_result(win, _duel.winner == 2, loot, extra)
@@ -1952,6 +1957,11 @@ func _show_result(win: bool, draw_game: bool, loot: String, extra: Dictionary = 
 		ul.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		ul.custom_minimum_size = Vector2(0, 30)
 		info.add_child(ul)
+	for a: Variant in extra.get("ach", []):
+		var al: Label = UiKit.lbl("🏆 Succès : %s  (+%d or)" % [String((a as Dictionary)["name"]), int((a as Dictionary)["gold"])], 24, UiKit.C_GOLD, true)
+		al.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		al.custom_minimum_size = Vector2(0, 28)
+		info.add_child(al)
 	var chr: Dictionary = extra.get("challenge", {})
 	if not chr.is_empty():
 		var ct: String = "Défi du jour : %s  (%d/%d)" % [String(chr.get("text", "")), int(chr.get("progress", 0)), int(chr.get("target", 0))]
@@ -2025,6 +2035,47 @@ func _show_fosse(side: int) -> void:
 
 
 ## Légende : PA / PM / PO / mana, mots-clés, couleurs du plateau.
+## Succès de collection (bouton « Succès » de l'accueil) : progression et récompenses en or.
+func _show_achievements() -> void:
+	if _root.get_node_or_null("AchView") != null:
+		return
+	var ov := ColorRect.new()
+	ov.name = "AchView"
+	ov.color = Color(0.02, 0.03, 0.06, 0.985)
+	ov.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_root.add_child(ov)
+	var nd: int = 0
+	for a0: Variant in JccCollection.ACHIEVEMENTS:
+		if JccCollection.achievement_done(_save, String((a0 as Dictionary)["id"])):
+			nd += 1
+	var t: Label = UiKit.lbl("Succès  %d/%d" % [nd, JccCollection.ACHIEVEMENTS.size()], 48, UiKit.C_GOLD, true)
+	t.position = Vector2(80, 24)
+	ov.add_child(t)
+	var sc := ScrollContainer.new()
+	sc.position = Vector2(80, 100)
+	sc.size = Vector2(1760, 790)
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	ov.add_child(sc)
+	_scrolls.append(sc)
+	var box := VBoxContainer.new()
+	box.custom_minimum_size = Vector2(1720, 0)
+	box.add_theme_constant_override("separation", 10)
+	sc.add_child(box)
+	for a: Variant in JccCollection.ACHIEVEMENTS:
+		var ad: Dictionary = a
+		var done: bool = JccCollection.achievement_done(_save, String(ad["id"]))
+		var val: int = mini(JccCollection.achievement_value(_save, String(ad["metric"])), int(ad["target"]))
+		var l: Label = UiKit.lbl("%s %s   —   %d/%d   ·   récompense : %d or" % ["✅" if done else "⬜", String(ad["name"]), val, int(ad["target"]), int(ad["gold"])], 28, UiKit.C_GOLD if done else UiKit.C_TXT)
+		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		box.add_child(l)
+	var close: Button = UiKit.btn("Fermer", Color(0.6, 0.62, 0.72), 28, Vector2(280, 66))
+	close.position = Vector2(W * 0.5 - 140, 930)
+	close.pressed.connect(func() -> void:
+		_scrolls.erase(sc)
+		ov.queue_free())
+	ov.add_child(close)
+
+
 ## Règles générales du mode Cartes (bouton « Aide » de l'accueil).
 func _show_rules() -> void:
 	if _root.get_node_or_null("RulesView") != null:

@@ -428,3 +428,9 @@ Après correction : Fée −7, Horloge −7,5, Sirène +8, Crapaud +3.
 - Avec 4 colonnes et 2 rochers, une ligne n'est jamais entièrement bouchée : le passage reste toujours possible.
 - UI : rocher gris sombre avec facette claire, étiquette « Rocher », ajouté à la légende et à l'aide (`RULES_TEXT`).
 - Tests : `test_jcc_obstacles.gd` (40 graines : 2 rochers en lignes centrales, chemins) ; `test_jcc`/`test_jcc_ui` mis à jour (8 cases de terrain).
+
+## 38. Succès de collection
+- `JccCollection.ACHIEVEMENTS` : 12 paliers calculés depuis la sauvegarde (victoires, cartes différentes, fusions, légendaires, boss de chapitre). Chacun donne de l'or une seule fois (`j["ach"]`) via `check_achievements`, appelée après un duel gagné et après une fusion (compteur `j["fusions"]`).
+- Les boss de chapitre existaient déjà dans le mode Cartes (1re victoire : carte légendaire + or) ; ils comptent pour le succès « Chasseur de boss ».
+- UI : bouton « 🏆 Succès » sur l'accueil (liste avec progression, défilable) ; les succès gagnés s'affichent sur l'écran de résultat et dans le message de fusion.
+- Test : `test_jcc_succes.gd`. Seuils réglés sur la collection de départ (85 cartes différentes, 36 cartes de nations).

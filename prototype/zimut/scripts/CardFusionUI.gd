@@ -216,9 +216,12 @@ func _do_fuse() -> void:
 		return
 	_changed = true
 	_selected = res
+	var ach: Array = JccCollection.check_achievements(save)
 	_refresh()
 	if _msg != null and is_instance_valid(_msg):
 		_msg.text = "Fusion réussie : niveau %d !" % JccCards.level_of(res)
+		for a: Variant in ach:
+			_msg.text += "  🏆 %s (+%d or)" % [String((a as Dictionary)["name"]), int((a as Dictionary)["gold"])]
 
 
 func _input(event: InputEvent) -> void:
