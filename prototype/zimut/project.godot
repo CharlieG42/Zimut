@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Zimut"
-config/version="0.0.01.94.0"
+config/version="0.1.001.0.0"
 run/main_scene="res://scenes/Intro.tscn"
 boot_splash/show_image=false
 boot_splash/bg_color=Color(0.05, 0.06, 0.1, 1)
