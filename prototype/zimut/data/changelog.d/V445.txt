@@ -1,0 +1,3 @@
+V445|Réglages : le bouton « ← MENU » est de nouveau visible sur toutes les pages (la page Graphismes, devenue trop haute, le repoussait hors de l'écran).
+V445|Les pages d'onglets défilent maintenant dans une zone de hauteur fixe ; le titre, les onglets, la ligne d'infos et le bouton Menu restent toujours affichés.
+V445|Faites glisser le doigt dans la zone des réglages pour voir les options du bas (cinématique d'ouverture, compteur d'images).
