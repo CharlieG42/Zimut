@@ -66,6 +66,13 @@ const BENCH_XP_RATIO := 0.05
 ## Une défaite rapporte quand même un peu d'XP
 const DEFEAT_XP_RATIO := 0.15
 
+## V453 : équipe de 1 à 3 héros, ennemis inchangés. Un héros seul ou un duo gagne un bonus d'XP et d'or
+## (victoire seulement). Valeurs à ajuster après essais.
+const SMALL_TEAM_BONUS := {1: 1.5, 2: 1.2}
+
+static func small_team_bonus(team_size: int) -> float:
+	return float(SMALL_TEAM_BONUS.get(team_size, 1.0))
+
 ## Caractéristiques bonus achetables avec du capital : PA, PM, PO (Portée).
 ## Maximum 3 niveaux chacune, 4 points de capital par niveau.
 const BONUS_STATS: Array[String] = ["pa", "pm", "po"]

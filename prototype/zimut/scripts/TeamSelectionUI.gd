@@ -7,6 +7,7 @@ signal combat_requested(team_data: Array)
 signal back_requested
 
 const MAX_TEAM_SIZE := 3
+const MIN_TEAM_SIZE := 1   ## V453 : équipe de 1, 2 ou 3 héros
 const COL_PANEL := Color(0.94, 0.89, 0.78, 0.97)
 const COL_BORDER := Color(0.72, 0.58, 0.28, 1.0)
 const COL_TXT := Color(0.22, 0.15, 0.05)
@@ -552,7 +553,7 @@ func _on_unlock_hero() -> void:
 		refresh())
 
 func _on_combat() -> void:
-	if team.size() != MAX_TEAM_SIZE:
+	if team.size() < MIN_TEAM_SIZE or team.size() > MAX_TEAM_SIZE:
 		return
 	# Construire team_data comme l'ancien format (classe + stats)
 	var team_data: Array = []
@@ -784,7 +785,7 @@ func refresh() -> void:
 			slot.add_theme_stylebox_override("pressed", st_s)
 		else:
 			slot.icon = null
-			slot.text = "  ＋ Héros %d\n  (à choisir)" % (i + 1)
+			slot.text = "  ＋ Héros %d\n  (%s)" % [i + 1, "à choisir" if i < MIN_TEAM_SIZE else "facultatif"]
 			var st_e: StyleBoxFlat = U.box(Color(0.08, 0.10, 0.15, 0.9), Color(0.28, 0.32, 0.42), 14, 2, 8)
 			slot.add_theme_stylebox_override("normal", st_e)
 			slot.add_theme_stylebox_override("hover", st_e)
@@ -794,12 +795,16 @@ func refresh() -> void:
 		_lead_btn.disabled = GameManager.active_save.is_empty() or not team.has(cc) or cc == lead_class()
 		_lead_btn.text = "★  EXPLORATEUR : %s" % lead_class() if lead_class() != "" else "★  EXPLORATEUR"
 	if _team_title:
-		if team.size() < MAX_TEAM_SIZE:
-			_team_title.text = "★ TON ÉQUIPE : %d / %d — choisis %d héros dans la liste, puis touche AJOUTER" % [team.size(), MAX_TEAM_SIZE, MAX_TEAM_SIZE - team.size()]
+		if team.is_empty():
+			_team_title.text = "★ TON ÉQUIPE : 0 / %d — choisis 1 à %d héros, puis touche AJOUTER" % [MAX_TEAM_SIZE, MAX_TEAM_SIZE]
+		elif team.size() < MAX_TEAM_SIZE:
+			var bonus: float = ClassRules.small_team_bonus(team.size())
+			_team_title.text = "★ TON ÉQUIPE : %d / %d — prête au combat ! Bonus d'XP et d'or ×%s (ajoute un héros pour plus de force)" % [
+				team.size(), MAX_TEAM_SIZE, ("%.1f" % bonus).replace(".", ",")]
 		else:
 			_team_title.text = "★ TON ÉQUIPE : %d / %d — prête au combat !" % [team.size(), MAX_TEAM_SIZE]
 	if _fight_btn:
-		_fight_btn.disabled = team.size() != MAX_TEAM_SIZE
+		_fight_btn.disabled = team.size() < MIN_TEAM_SIZE or team.size() > MAX_TEAM_SIZE
 	if _goal_label:
 		var parts: PackedStringArray = []
 		if not GameManager.active_save.is_empty():

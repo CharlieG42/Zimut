@@ -386,7 +386,7 @@ func init_entities() -> void:
 	glyphs = []
 
 	var player_classes: Array = []
-	if custom_team.size() == 3:
+	if custom_team.size() >= 1 and custom_team.size() <= 3:   # V453 : équipe de 1 à 3 héros
 		for m: Dictionary in custom_team:
 			player_classes.append(m["classe"])
 	else:
