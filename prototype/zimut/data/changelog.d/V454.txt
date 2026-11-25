@@ -1,0 +1,3 @@
+V454|Écran d'équipe : avec une équipe de 1 ou 2 héros, la ligne du titre n'élargit plus l'écran ; le panneau de droite et le bouton COMBATTRE ne sont plus coupés.
+V454|Titre de l'équipe raccourci (« ÉQUIPE : 1 / 3 — prête ! Bonus XP et or ×1,5 ») et passage à la ligne automatique si besoin.
+V454|Aucun changement de règle de jeu.

@@ -416,6 +416,10 @@ func _build() -> void:
 	team_frame.add_child(team_box)
 	_team_title = U.lbl("", 22, Color(1.0, 0.86, 0.4), true)
 	_team_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# V454 : le titre ne doit jamais élargir l'écran (il repoussait le panneau de droite et COMBATTRE hors de vue)
+	_team_title.custom_minimum_size = Vector2(0, 0)
+	_team_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_team_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	team_box.add_child(_team_title)
 	var team_row := HBoxContainer.new()
 	team_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -811,13 +815,13 @@ func refresh() -> void:
 		_lead_btn.text = "★  EXPLORATEUR : %s" % lead_class() if lead_class() != "" else "★  EXPLORATEUR"
 	if _team_title:
 		if team.is_empty():
-			_team_title.text = "★ TON ÉQUIPE : 0 / %d — choisis 1 à %d héros, puis touche AJOUTER" % [MAX_TEAM_SIZE, MAX_TEAM_SIZE]
+			_team_title.text = "★ ÉQUIPE : 0 / %d — choisis 1 à %d héros" % [MAX_TEAM_SIZE, MAX_TEAM_SIZE]
 		elif team.size() < MAX_TEAM_SIZE:
 			var bonus: float = ClassRules.small_team_bonus(team.size())
-			_team_title.text = "★ TON ÉQUIPE : %d / %d — prête au combat ! Bonus d'XP et d'or ×%s (ajoute un héros pour plus de force)" % [
+			_team_title.text = "★ ÉQUIPE : %d / %d — prête ! Bonus XP et or ×%s" % [
 				team.size(), MAX_TEAM_SIZE, ("%.1f" % bonus).replace(".", ",")]
 		else:
-			_team_title.text = "★ TON ÉQUIPE : %d / %d — prête au combat !" % [team.size(), MAX_TEAM_SIZE]
+			_team_title.text = "★ ÉQUIPE : %d / %d — prête au combat !" % [team.size(), MAX_TEAM_SIZE]
 	if _fight_btn:
 		_fight_btn.disabled = team.size() < MIN_TEAM_SIZE or team.size() > MAX_TEAM_SIZE
 	if _goal_label:
