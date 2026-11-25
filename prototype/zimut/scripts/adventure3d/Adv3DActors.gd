@@ -250,8 +250,10 @@ static func _stone_ring(st: SurfaceTool, r: float, h: float, count: int) -> void
 
 
 ## Marqueur de lieu. Nœuds animés par Adventure3D : « Gem » (flotte/tourne), « Pulse » (anneau).
-static func make_poi_marker(kind: String, title: String, done: bool) -> Node3D:
+static func make_poi_marker(kind: String, title: String, done: bool, sub: String = "", locked: bool = false) -> Node3D:
 	var col: Color = POI_COLORS.get(kind, Color(0.9, 0.9, 0.9))
+	if locked:
+		col = Color(0.55, 0.56, 0.62)      # V452 : donjon verrouillé = marqueur gris
 	var shown: Color = col.darkened(0.5) if done else col
 	var n := Node3D.new()
 	_shadow(n, 1.0)
@@ -323,7 +325,9 @@ static func make_poi_marker(kind: String, title: String, done: bool) -> Node3D:
 	if bld != null:
 		var bi: MeshInstance3D = _part(n, bld, Vector3(0.0, -0.05, -1.35))
 		bi.material_override = Adv3DNationMeshes.glow_material(1.6)
-	n.add_child(_label(title, 2.4 if kind != "reveal" else 3.4, 34, Color(0.78, 0.78, 0.78) if done else Color(1, 1, 1)))
+	var lab_text: String = title if sub == "" else "%s\n%s" % [title, sub]   # V452 : 2e ligne = avancement du donjon
+	var lab: Label3D = _label(lab_text, (2.4 if kind != "reveal" else 3.4) + (0.35 if sub != "" else 0.0), 34, Color(0.78, 0.78, 0.78) if (done or locked) else Color(1, 1, 1))
+	n.add_child(lab)
 	return n
 
 

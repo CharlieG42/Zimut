@@ -254,7 +254,7 @@ func _build() -> void:
 	var top := HBoxContainer.new()
 	top.add_theme_constant_override("separation", 16)
 	page.add_child(top)
-	var back := U.btn("←  MENU", Color(0.45, 0.52, 0.70), 22, Vector2(170, 58))
+	var back := U.btn("←  MONDE" if _adventure_world_back() else "←  MENU", Color(0.45, 0.52, 0.70), 22, Vector2(170, 58))
 	back.pressed.connect(_on_back)
 	top.add_child(back)
 	_title = U.lbl("", 30, Color(1.0, 0.86, 0.4), true)
@@ -459,9 +459,24 @@ func _class_texture(classe: String) -> Texture2D:
 func _on_back() -> void:
 	back_requested.emit()
 	PlayTimer.flush()
+	var to_world: bool = _adventure_world_back()
+	if to_world:
+		var adv: Dictionary = GameManager.active_save.get("adventure", {})
+		adv["pending_challenge"] = ""     # défi abandonné : le groupe / le donjon reste en place
+		GameManager.active_save["adventure"] = adv
 	if GameManager.active_slot >= 0 and not GameManager.active_save.is_empty():
 		ProgressionManager.write_save(GameManager.active_slot, GameManager.active_save)
-	get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
+	get_tree().change_scene_to_file(GameSettings.adventure_scene() if to_world else "res://scenes/SaveSlots.tscn")
+
+
+## V452 : défi d'Aventure 3D (monstres ou donjon) refusé à l'écran d'équipe → retour direct au monde, sans repasser par « Mes Parties ».
+func _adventure_world_back() -> bool:
+	var sv: Dictionary = GameManager.active_save
+	if sv.is_empty() or String(sv.get("campaign_mode", "")) != "adventure":
+		return false
+	if String(sv.get("adventure_view", "")) not in ["open3d", "3d"]:
+		return false
+	return String((sv.get("adventure", {}) as Dictionary).get("pending_challenge", "")) != ""
 
 
 ## Sélecteur de combat : rejouer un combat déjà gagné (XP réduite si plus bas que le niveau

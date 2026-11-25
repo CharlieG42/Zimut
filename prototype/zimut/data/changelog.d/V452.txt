@@ -1,0 +1,5 @@
+V452|Aventure 3D : chaque donjon affiche son avancement au-dessus de son entrée (« Nouveau · 4 salles », « Salle 2/4 », « ✓ Terminé ×2 », « 🔒 Verrouillé »).
+V452|Au contact d'un donjon, une fenêtre propose « Entrer » ou « Plus tard » (avant, le combat se lançait d'office), avec la salle à jouer, le niveau des ennemis et « Recommencer » si une expédition est en cours.
+V452|Les donjons d'une Nation s'ouvrent maintenant dans l'ordre, comme en Aventure 2D : le palier supérieur reste verrouillé tant que le précédent n'est pas terminé.
+V452|À l'écran d'équipe d'un défi (donjon ou monstres), le bouton « ← MONDE » ramène directement dans le monde 3D, sans repasser par « Mes Parties ».
+V452|Mini-carte : le triangle jaune du personnage est plus gros.
