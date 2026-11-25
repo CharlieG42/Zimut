@@ -2249,7 +2249,10 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 			{"type": "Squelette", "level": fight_level, "boss": false},
 			{"type": "Loup", "level": fight_level, "boss": false},
 			{"type": "Dragonnet", "level": fight_level, "boss": was_boss}]
-	var report: Dictionary = award_xp(data, fight_xp(enemies, fight_level), 1.0, fight_level)
+	# V453 : bonus d'une équipe réduite (1 héros ×1,5 ; 2 héros ×1,2) sur l'XP et l'or
+	var team_bonus: float = ClassRules.small_team_bonus((data.get("team", []) as Array).size())
+	data["last_team_bonus"] = team_bonus
+	var report: Dictionary = award_xp(data, fight_xp(enemies, fight_level), team_bonus, fight_level)
 	if frontier:
 		data["victories"] = int(data.get("victories", 0)) + 1
 		var hist: Array = data.get("fight_levels", [])
@@ -2267,7 +2270,7 @@ func register_victory(data: Dictionary, info: Dictionary = {}) -> Dictionary:
 	# Butin de craft : ressources selon le nombre d'ennemis vaincus, un peu d'or.
 	var drops: Dictionary = _roll_resource_drops(enemies.size(), was_boss)
 	add_resources(data, drops)
-	var gold_gain: int = (50 + 10 * fight_level) * (3 if was_boss else 1)
+	var gold_gain: int = roundi(float((50 + 10 * fight_level) * (3 if was_boss else 1)) * team_bonus)
 	data["gold"] = int(data.get("gold", 0)) + (gold_gain if (frontier or campaign) else int(gold_gain * 0.6))
 	data["last_resources"] = drops
 	# V113 : éclat de Pierre Élémentaire (rare), même si la Pierre de la Nation est déjà possédée

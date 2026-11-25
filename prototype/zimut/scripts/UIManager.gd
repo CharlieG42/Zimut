@@ -2285,6 +2285,9 @@ func _show_result_window(victory: bool) -> void:
 		content.add_child(chips)
 		for kk: String in drops.keys():
 			chips.add_child(UK.chip("%s +%d" % [kk, int(drops[kk])], UK.RES_COLOR.get(kk.split("@")[0], UK.C_TXT), 19))
+		var tb: float = float(save.get("last_team_bonus", 1.0))
+		if victory and tb > 1.0:
+			chips.add_child(UK.chip("🛡 Petite équipe ×%s (XP et or)" % ("%.1f" % tb).replace(".", ","), Color(0.55, 0.85, 0.65), 19))
 		var shard_got: Dictionary = save.get("last_shards", {})
 		for sbk: String in shard_got.keys():
 			chips.add_child(UK.chip("💠 %s +%d" % [Shards.shard_name(sbk), int(shard_got[sbk])], Shards.color_of(sbk), 19))
