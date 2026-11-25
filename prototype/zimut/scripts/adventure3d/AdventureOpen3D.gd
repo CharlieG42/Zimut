@@ -374,7 +374,13 @@ func _make_poi_node(key: String, poi: Dictionary) -> void:
 	var cell: Vector2i = AdventureTerrain.parse(key)
 	var done: bool = ProgressionManager.adventure_poi_completed(manager.state, key)
 	var mk_kind: String = "dungeon" if Dungeons.is_dungeon(poi) else String(poi.get("kind", ""))
-	var node: Node3D = Adv3DActors.make_poi_marker(mk_kind, String(poi.get("name", "Lieu")), done and mk_kind != "dungeon")
+	var sub: String = ""
+	var locked: bool = false
+	if mk_kind == "dungeon":
+		var info: Dictionary = _dungeon_info(poi)
+		sub = String(info["short"])
+		locked = bool(info["locked"])
+	var node: Node3D = Adv3DActors.make_poi_marker(mk_kind, String(poi.get("name", "Lieu")), done and mk_kind != "dungeon", sub, locked)
 	node.position = Adv3DWorld.cell_center(cell)
 	world_root.add_child(node)
 	_poi_nodes[key] = node
@@ -534,8 +540,10 @@ func _process(delta: float) -> void:
 			continue
 		var ctr: Vector3 = Adv3DWorld.cell_center(AdventureTerrain.parse(key))
 		if Vector2(ctr.x, ctr.z).distance_to(pos2) <= POI_TOUCH_DIST:
+			if _modal_root != null:
+				return
 			_declined_pois[key] = true
-			_enter_dungeon(key, poi)
+			_ask_dungeon(key, poi)
 			return
 	# Portes : franchissement automatique si la route est ouverte.
 	var gcell: Vector2i = Vector2i(-99, -99)
@@ -594,6 +602,75 @@ func _start_mob_combat(g: Dictionary) -> void:
 	manager.start_mob_combat(g)
 	GameManager.fight_biome = manager.zone_biome()
 	_leave_to("res://scenes/TeamSelection.tscn")
+
+
+## V452 : état d'un donjon → {short (2e ligne du marqueur), long (fenêtre), locked, lock (donjon à finir d'abord)}.
+func _dungeon_info(poi: Dictionary) -> Dictionary:
+	var g: String = String(poi.get("guardian", ""))
+	var adv: Dictionary = manager.state
+	var lock: Dictionary = manager.dungeon_lock(poi)
+	var room: int = Dungeons.current_room(adv, g)
+	var clears: int = Dungeons.clears(adv, g)
+	var short: String
+	var long_txt: String
+	if not lock.is_empty():
+		short = "🔒 Verrouillé"
+		long_txt = "🔒 Verrouillé : terminez d'abord « %s »." % String(lock.get("name", "le donjon précédent"))
+	elif Dungeons.in_progress(adv, g):
+		short = "Salle %d/%d" % [room, Dungeons.ROOMS]
+		long_txt = "Expédition en cours : salle %d/%d (%s)." % [room, Dungeons.ROOMS, Dungeons.room_name(room)]
+	elif clears > 0:
+		short = "✓ Terminé ×%d" % clears
+		long_txt = "Donjon terminé %d fois : vous pouvez le refaire." % clears
+	else:
+		short = "Nouveau · %d salles" % Dungeons.ROOMS
+		long_txt = "Donjon à explorer : %d salles, le Gardien vous attend à la dernière." % Dungeons.ROOMS
+	return {"short": short, "long": long_txt, "locked": not lock.is_empty(), "lock": lock, "room": room, "guardian": g}
+
+
+## V452 : au contact d'un donjon, une fenêtre propose d'entrer ou non (avant, le combat se lançait d'office
+## et seul « Mes Parties » permettait de revenir).
+func _ask_dungeon(key: String, poi: Dictionary) -> void:
+	var info: Dictionary = _dungeon_info(poi)
+	var g: String = String(info["guardian"])
+	var title: String = "🏰  " + String(poi.get("name", "Donjon"))
+	if bool(info["locked"]):
+		_emote("surpris")
+		var bl: VBoxContainer = _modal(title, Color(0.62, 0.64, 0.72))
+		var tl: Label = U.lbl(String(info["long"]) + "\n\nLes donjons d'une Nation s'ouvrent dans l'ordre, du plus facile au plus difficile.", 22, U.C_TXT)
+		tl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		bl.add_child(tl)
+		var ok: Button = _btn("COMPRIS", U.C_BORDER, 22, Vector2(260, 84))
+		ok.pressed.connect(_close_modal)
+		bl.add_child(ok)
+		return
+	var room: int = int(info["room"])
+	var box: VBoxContainer = _modal(title, Color(0.90, 0.60, 0.20))
+	var t: Label = U.lbl("%s\n\nProchaine salle : %s — ennemis niveau %d.\nCombat au tour par tour (mode Tactique). Une victoire fait avancer l'expédition ; une défaite la conserve.\n\nEntrer dans le donjon ?" % [
+		String(info["long"]), Dungeons.room_name(room), Dungeons.room_level(g, room)], 22, U.C_TXT)
+	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(t)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	box.add_child(row)
+	var go: Button = _btn("🏰  ENTRER", Color(0.90, 0.60, 0.20), 24, Vector2(260, 84))
+	go.pressed.connect(func() -> void:
+		_close_modal()
+		_enter_dungeon(key, poi))
+	row.add_child(go)
+	if Dungeons.in_progress(manager.state, g):
+		var rs: Button = _btn("↺ RECOMMENCER", Color(0.60, 0.50, 0.40), 20, Vector2(250, 84))
+		rs.pressed.connect(func() -> void:
+			Dungeons.restart(manager.state, g)
+			_make_poi_node(key, poi)
+			_dirty = true
+			_persist()
+			_close_modal()
+			_show_toast("↺ %s : expédition recommencée" % String(poi.get("name", "Donjon"))))
+		row.add_child(rs)
+	var later: Button = _btn("PLUS TARD", U.C_BORDER, 22, Vector2(220, 84))
+	later.pressed.connect(_close_modal)
+	row.add_child(later)
 
 
 ## Entrée dans un donjon de Nation → salles du donjon en combat Tactique (4 salles, Gardien final).

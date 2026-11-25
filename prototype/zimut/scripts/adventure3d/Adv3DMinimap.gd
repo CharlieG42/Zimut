@@ -176,7 +176,7 @@ func _draw() -> void:
 	var pl: Vector2 = origin + _player * cell
 	var fwd := Vector2(-sin(_yaw), -cos(_yaw))
 	var side := Vector2(-fwd.y, fwd.x)
-	var r: float = maxf(cell * 1.1, 7.0) if not full else clampf(cell * 0.9, 12.0, 34.0)
+	var r: float = maxf(cell * 1.7, 11.0) if not full else clampf(cell * 1.4, 18.0, 48.0)   # V452 : triangle du joueur plus gros
 	var tri: PackedVector2Array = [pl + fwd * r, pl - fwd * r * 0.7 + side * r * 0.65, pl - fwd * r * 0.7 - side * r * 0.65]
 	draw_colored_polygon(tri, Color(1.0, 0.92, 0.25))
 	var outline: PackedVector2Array = tri.duplicate()
@@ -217,7 +217,7 @@ func _draw_round(pad: Vector2) -> void:
 	var pl: Vector2 = map_origin + _player * cell
 	var fwd := Vector2(-sin(_yaw), -cos(_yaw))
 	var side_v := Vector2(-fwd.y, fwd.x)
-	var r: float = maxf(cell * 1.1, 7.0)
+	var r: float = maxf(cell * 1.7, 11.0)
 	var tri: PackedVector2Array = [pl + fwd * r, pl - fwd * r * 0.7 + side_v * r * 0.65, pl - fwd * r * 0.7 - side_v * r * 0.65]
 	draw_colored_polygon(tri, Color(1.0, 0.92, 0.25))
 	var outline: PackedVector2Array = tri.duplicate()
@@ -290,7 +290,7 @@ func _draw_legend(top_left: Vector2) -> void:
 			"mob":
 				_icon_mob(c, 22.0)
 			"player":
-				draw_colored_polygon(PackedVector2Array([c + Vector2(0, -14), c + Vector2(11, 10), c + Vector2(-11, 10)]), Color(1.0, 0.92, 0.25))
+				draw_colored_polygon(PackedVector2Array([c + Vector2(0, -18), c + Vector2(14, 13), c + Vector2(-14, 13)]), Color(1.0, 0.92, 0.25))
 			_:
 				_icon_poi(String(it[0]), c, 22.0, false)
 		draw_string(f, Vector2(x + 38.0, y + 7.0), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(0.92, 0.92, 0.92))
