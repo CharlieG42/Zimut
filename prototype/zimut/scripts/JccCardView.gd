@@ -17,6 +17,7 @@ var selected: bool = false
 var target_ok: bool = false       # cible valide (liseré doré qui pulse)
 var playable: bool = true         # carte jouable maintenant (sinon assombrie)
 var ready_glow: bool = false      # créature qui peut agir (liseré vert)
+var in_deck: int = 0              # V456 : exemplaires dans le deck en cours → liseré vert (le niveau reste lisible)
 var count_badge: int = 0          # exemplaires (collection) ; 0 = pas de pastille
 var owned_dim: bool = false       # carte non possédée / indisponible
 var _t: float = 0.0
@@ -245,8 +246,10 @@ func _draw() -> void:
 		draw_style_box(_outline(Color(0.4, 1.0, 0.45, 0.55 + 0.25 * sin(_t * 4.0)), rad, 4), Rect2(-2, -2, w + 4, h + 4))
 	if target_ok:
 		draw_style_box(_outline(Color(1.0, 0.85, 0.2, 0.65 + 0.35 * sin(_t * 7.0)), rad, 5), Rect2(-4, -4, w + 8, h + 8))
+	if in_deck > 0:
+		draw_style_box(_outline(Color(0.30, 1.0, 0.40, 0.95), rad, 6), Rect2(-3, -3, w + 6, h + 6))
 	if selected:
-		draw_style_box(_outline(Color(1.0, 1.0, 1.0, 0.95), rad, 4), Rect2(-3, -3, w + 6, h + 6))
+		draw_style_box(_outline(Color(1.0, 1.0, 1.0, 0.95), rad, 3), Rect2(-6, -6, w + 12, h + 12))
 
 
 

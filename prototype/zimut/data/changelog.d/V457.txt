@@ -1,0 +1,3 @@
+V457|Cartes : l'écran de fin de duel est réagencé en colonne centrée — la carte gagnée est réduite et toutes les lignes (déblocage, saison, succès, défi du jour, sauvegarde Drive) passent à la ligne sans jamais recouvrir les boutons Rejouer / Mon deck / Retour.
+V457|Constructeur de deck : les cartes déjà présentes dans le deck sont entourées d'un liseré vert au lieu du texte « Deck ×n », qui masquait le niveau de la carte.
+V457|Constructeur de deck : le coût moyen en mana du deck est affiché à côté du nombre de cartes (par exemple « Deck : 20 / 20 · coût moyen 2,3 mana »).

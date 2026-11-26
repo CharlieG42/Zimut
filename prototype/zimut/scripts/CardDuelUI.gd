@@ -1932,58 +1932,58 @@ func _finish_if_over() -> void:
 
 func _show_result(win: bool, draw_game: bool, loot: String, extra: Dictionary = {}) -> void:
 	var ov := ColorRect.new()
-	ov.color = Color(0, 0, 0, 0.72)
+	ov.color = Color(0, 0, 0, 0.86)
 	ov.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.add_child(ov)
-	var t: Label = UiKit.lbl("ÉGALITÉ" if draw_game else ("VICTOIRE !" if win else "DÉFAITE"), 96, UiKit.C_GOLD if win else (UiKit.C_DIM if draw_game else UiKit.C_BAD), true)
-	t.position = Vector2(0, 90)
-	t.size = Vector2(W, 120)
+	# V456 : mise en page en colonne centrée (plus de positions fixes) → rien ne se chevauche,
+	# quel que soit le nombre de lignes de récompenses.
+	var col := VBoxContainer.new()
+	col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	col.offset_left = 80.0
+	col.offset_right = -80.0
+	col.offset_top = 16.0
+	col.offset_bottom = -16.0
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_theme_constant_override("separation", 8)
+	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ov.add_child(col)
+	var t: Label = UiKit.lbl("ÉGALITÉ" if draw_game else ("VICTOIRE !" if win else "DÉFAITE"), 88, UiKit.C_GOLD if win else (UiKit.C_DIM if draw_game else UiKit.C_BAD), true)
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ov.add_child(t)
+	col.add_child(t)
 	if loot != "":
-		var lt: Label = UiKit.lbl("Nouvelle carte gagnée !", 34, UiKit.C_GOOD, true)
-		lt.position = Vector2(0, 240)
-		lt.size = Vector2(W, 50)
+		var lt: Label = UiKit.lbl("Nouvelle carte gagnée !", 32, UiKit.C_GOOD, true)
 		lt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		ov.add_child(lt)
+		col.add_child(lt)
+		var holder := Control.new()
+		holder.custom_minimum_size = Vector2(204, 292)
+		holder.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		col.add_child(holder)
 		var v := JccCardView.new()
 		v.size = Vector2(300, 430)
-		v.position = Vector2(W * 0.5 - 150, 310)
+		v.position = Vector2(102.0 - 150.0, 146.0 - 215.0)
 		v.set_card(JccCards.get_card(loot))
 		v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		v.pivot_offset = Vector2(150, 215)
-		v.scale = Vector2(0.3, 0.3)
-		ov.add_child(v)
-		create_tween().tween_property(v, "scale", Vector2.ONE, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		v.scale = Vector2(0.2, 0.2)
+		holder.add_child(v)
+		create_tween().tween_property(v, "scale", Vector2(0.68, 0.68), 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	var info := VBoxContainer.new()
-	info.position = Vector2(0, 754)
-	info.size = Vector2(W, 62)
 	info.add_theme_constant_override("separation", 2)
-	ov.add_child(info)
+	info.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	col.add_child(info)
 	if int(extra.get("chapter_gold", 0)) > 0:
-		var cg: Label = UiKit.lbl("📜 Boss de chapitre vaincu ! Carte légendaire + %d or" % int(extra["chapter_gold"]), 26, UiKit.C_GOLD, true)
-		cg.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		cg.custom_minimum_size = Vector2(0, 30)
-		info.add_child(cg)
+		_result_line(info, "📜 Boss de chapitre vaincu ! Carte légendaire + %d or" % int(extra["chapter_gold"]), 26, UiKit.C_GOLD)
 	if String(extra.get("unlock", "")) != "":
-		var ul: Label = UiKit.lbl("🔓 Adversaire débloqué : %s" % String(extra["unlock"]), 26, UiKit.C_GOOD, true)
-		ul.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		ul.custom_minimum_size = Vector2(0, 30)
-		info.add_child(ul)
+		_result_line(info, "🔓 Adversaire débloqué : %s" % String(extra["unlock"]), 26, UiKit.C_GOOD)
 	for sr: Variant in extra.get("season", []):
 		var sd: Dictionary = sr
 		var stx: String = "🍂 Saison : palier %d victoires  (+%d or)" % [int(sd["wins"]), int(sd["gold"])]
 		if String(sd["card"]) != "":
 			stx += "  + carte %s" % String(JccCards.get_card(String(sd["card"])).get("name", ""))
-		var sl: Label = UiKit.lbl(stx, 24, UiKit.C_GOLD, true)
-		sl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		sl.custom_minimum_size = Vector2(0, 28)
-		info.add_child(sl)
+		_result_line(info, stx, 24, UiKit.C_GOLD)
 	for a: Variant in extra.get("ach", []):
-		var al: Label = UiKit.lbl("🏆 Succès : %s  (+%d or)" % [String((a as Dictionary)["name"]), int((a as Dictionary)["gold"])], 24, UiKit.C_GOLD, true)
-		al.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		al.custom_minimum_size = Vector2(0, 28)
-		info.add_child(al)
+		_result_line(info, "🏆 Succès : %s  (+%d or)" % [String((a as Dictionary)["name"]), int((a as Dictionary)["gold"])], 24, UiKit.C_GOLD)
 	var chr: Dictionary = extra.get("challenge", {})
 	if not chr.is_empty():
 		var ct: String = "Défi du jour : %s  (%d/%d)" % [String(chr.get("text", "")), int(chr.get("progress", 0)), int(chr.get("target", 0))]
@@ -1992,15 +1992,11 @@ func _show_result(win: bool, draw_game: bool, loot: String, extra: Dictionary = 
 			var rw: String = String(chr.get("reward", ""))
 			if rw != "":
 				ct += "  + %s" % String(JccCards.get_card(rw).get("name", rw))
-		var cl: Label = UiKit.lbl(ct, 24, UiKit.C_GOLD if bool(chr.get("done", false)) else UiKit.C_TXT)
-		cl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		cl.custom_minimum_size = Vector2(0, 28)
-		info.add_child(cl)
+		_result_line(info, ct, 24, UiKit.C_GOLD if bool(chr.get("done", false)) else UiKit.C_TXT)
 	var row := HBoxContainer.new()
-	row.position = Vector2(W * 0.5 - 420, 820)
-	row.size = Vector2(840, 80)
+	row.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	row.add_theme_constant_override("separation", 20)
-	ov.add_child(row)
+	col.add_child(row)
 	var again: Button = UiKit.btn("Rejouer", Color(0.95, 0.65, 0.25), 28, Vector2(260, 72))
 	again.pressed.connect(func() -> void: _start_duel(_opp_idx))
 	row.add_child(again)
@@ -2010,7 +2006,16 @@ func _show_result(win: bool, draw_game: bool, loot: String, extra: Dictionary = 
 	var back: Button = UiKit.btn("Retour", Color(0.6, 0.62, 0.72), 28, Vector2(260, 72))
 	back.pressed.connect(_show_hub)
 	row.add_child(back)
-	_result_cloud_line(ov)
+	_result_cloud_line(col)
+
+
+## Ligne centrée, à retour automatique, de l'écran de fin de duel.
+func _result_line(parent: Control, text: String, fs: int, color: Color) -> void:
+	var l: Label = UiKit.lbl(text, fs, color, true)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.custom_minimum_size = Vector2(W - 200.0, 0)
+	parent.add_child(l)
 
 
 # ─── Sauvegarde Cloud automatique (V447) ─────────────────────────────────────
@@ -2019,16 +2024,15 @@ func _show_result(win: bool, draw_game: bool, loot: String, extra: Dictionary = 
 var _cloud_busy: bool = false
 var _cloud_again: bool = false
 
-func _result_cloud_line(ov: Control) -> void:
+func _result_cloud_line(parent: Control) -> void:
 	if not CloudSave.auto_enabled(get_tree()):
 		return
 	var lbl: Label = UiKit.lbl("", 22, UiKit.C_DIM, true)
 	lbl.name = "CloudStatus"
-	lbl.position = Vector2(0, 908)
-	lbl.size = Vector2(W, 70)
+	lbl.custom_minimum_size = Vector2(W - 200.0, 30)
 	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ov.add_child(lbl)
+	parent.add_child(lbl)
 	_cloud_send(lbl)
 
 
