@@ -346,8 +346,11 @@ func _sync_marks() -> void:
 			v.selected = sel
 			v.queue_redraw()
 		var inn: int = _count_in_deck(String(id))
+		if v.in_deck != inn:
+			v.in_deck = inn
+			v.queue_redraw()
 		var lb: Label = m["label"]
-		lb.text = "Deck ×%d" % inn if inn > 0 else ""
+		lb.text = ""     # V456 : le « Deck ×n » masquait le niveau de la carte → liseré vert à la place
 
 
 func _refresh_deck() -> void:
@@ -375,7 +378,11 @@ func _refresh_deck() -> void:
 			_pick(id))
 		_deck_box.add_child(b)
 	var err: String = JccCollection.deck_error(save, _deck)
-	_count_lbl.text = "Deck : %d / %d" % [_deck.size(), JccCollection.DECK_SIZE]
+	var cost_sum: int = 0
+	for d2: Variant in _deck:
+		cost_sum += int(JccCards.get_card(String(d2)).get("cost", 0))
+	var avg: String = ("%.1f" % (float(cost_sum) / float(_deck.size()))).replace(".", ",") if _deck.size() > 0 else "–"
+	_count_lbl.text = "Deck : %d / %d  ·  coût moyen %s mana" % [_deck.size(), JccCollection.DECK_SIZE, avg]
 	_count_lbl.add_theme_color_override("font_color", UiKit.C_GOOD if err == "" else UiKit.C_BAD)
 	_err_lbl.text = err
 	_save_btn.disabled = err != ""
