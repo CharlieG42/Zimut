@@ -40,6 +40,13 @@ func _ready() -> void:
 	var news: Dictionary = Changelog.pending()
 	if not news.is_empty():
 		root.add_child(Changelog.build_popup(news))
+	# V455 : popup de mise à jour si le contrôle GitHub (lancé au démarrage par
+	# l'autoload UpdateChecker) a déjà trouvé une version plus récente.
+	if not UpdateChecker.latest_update.is_empty():
+		root.add_child(UpdateChecker.build_popup())
+	UpdateChecker.checked.connect(func(res: Dictionary) -> void:
+		if bool(res.get("update", false)) and not UpdateChecker.latest_update.is_empty():
+			root.add_child(UpdateChecker.build_popup()))
 
 
 func _start_new_game() -> void:

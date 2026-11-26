@@ -1,0 +1,3 @@
+V455|Mise à jour automatique : au lancement, le jeu interroge GitHub (release « build-latest ») pour savoir si une version plus récente existe.
+V455|Si oui : téléchargement de l'APK (Android, release signé) ou de l'EXE (Windows) avec vérification de l'empreinte SHA-256, puis installation automatique — PC : l'ancien exécutable est remplacé et relancé ; Android : l'installateur système s'ouvre sur l'APK téléchargé.
+V455|Réglages : « Mise à jour automatique » (onglet Général) et bouton « Vérifier les mises à jour » (onglet À propos).
