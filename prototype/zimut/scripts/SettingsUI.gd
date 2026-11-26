@@ -120,6 +120,9 @@ func _ready() -> void:
 	if OS.get_name() == "Android":          # sans objet sur PC
 		g1.add_child(_setting_cell("Rappels de Conquête", ["Activés", "Désactivés"] as Array[String],
 			0 if GameSettings.notifications_on else 1, func(idx: int) -> void: GameSettings.set_notifications(idx == 0)))
+	# V455 : mise à jour automatique depuis GitHub, vérifiée au lancement du jeu.
+	g1.add_child(_setting_cell("Mise à jour automatique", ["Activée", "Désactivée"] as Array[String],
+		0 if GameSettings.auto_update else 1, func(idx: int) -> void: GameSettings.set_auto_update(idx == 0)))
 	var tuto := Button.new()
 	tuto.name = "TutoRestart"
 	tuto.text = "🎓  Relancer le tutoriel de Gultur"
@@ -246,6 +249,33 @@ func _build_about(page: VBoxContainer) -> void:
 		l.add_theme_color_override("font_color", COL_TXT)
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		page.add_child(l)
+	# V455 : vérification manuelle des mises à jour GitHub (contrôle auto au lancement).
+	var upd := Button.new()
+	upd.text = "⬇  Vérifier les mises à jour (GitHub)"
+	upd.custom_minimum_size = Vector2(0, 62)
+	upd.add_theme_font_size_override("font_size", 21)
+	upd.add_theme_color_override("font_color", COL_TXT)
+	upd.add_theme_stylebox_override("normal", _flat(Color(0.86, 0.80, 0.64), COL_BORDER, 12, 2))
+	upd.add_theme_stylebox_override("hover", _flat(Color(0.99, 0.95, 0.83), COL_BORDER, 12, 3))
+	page.add_child(upd)
+	var upd_status := Label.new()
+	upd_status.text = ""
+	upd_status.add_theme_font_size_override("font_size", 19)
+	upd_status.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12))
+	upd_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	page.add_child(upd_status)
+	if not UpdateChecker.latest_update.is_empty():
+		upd_status.text = "Nouvelle version %s disponible (à installer depuis l'accueil)." % String(UpdateChecker.latest_update.get("version", "?"))
+	UpdateChecker.checked.connect(func(res: Dictionary) -> void:
+		if bool(res.get("update", false)):
+			upd_status.text = "Nouvelle version %s disponible (à installer depuis l'accueil)." % String(res.get("remote", "?"))
+		elif bool(res.get("ok", false)):
+			upd_status.text = "Le jeu est à jour (version %s)." % String(res.get("local", "?"))
+		else:
+			upd_status.text = String(res.get("error", "Vérification impossible.")))
+	upd.pressed.connect(func() -> void:
+		upd_status.text = "Vérification en cours…"
+		UpdateChecker.check_now())
 
 
 # ═══════════════════════════════════════════════════════════════════════════
