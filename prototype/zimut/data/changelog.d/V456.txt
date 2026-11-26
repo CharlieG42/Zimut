@@ -1,0 +1,3 @@
+V456|Aventure 3D : les donjons encore verrouillés ont désormais un aspect à part — porte scellée avec grand cadenas et chaînes en croix, anneau rouge fixe, sans gemme ni pulsation — et un pictogramme dédié (tour grise + cadenas rouge) sur les cartes, avec une entrée « Donjon verrouillé » dans la légende.
+V456|Progression de découverte : un badge « 🧭 % · lieux » sous la mini-carte, un bandeau avec barre d'exploration sur la carte plein écran (lieux accomplis et donjons terminés pour la nation, puis total du monde et nations découvertes sur l'onglet Monde).
+V456|Sur la carte du monde, chaque nation débloquée est entourée d'un anneau vert qui se remplit avec ses lieux accomplis, et son pourcentage d'exploration est affiché sous son nom.

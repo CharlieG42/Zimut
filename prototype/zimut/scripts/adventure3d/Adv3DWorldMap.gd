@@ -86,7 +86,16 @@ func _draw() -> void:
 		var label: String = String(meta.get("name", z3))
 		if not is_unlocked:
 			label = "🔒 " + label
+		var prog: Dictionary = ProgressionManager.adventure_zone_progress(_state, z3)
+		if is_unlocked and int(prog["total"]) > 0:
+			# V456 : anneau de progression (vert = part des lieux accomplis)
+			var frac: float = float(prog["done"]) / float(prog["total"])
+			draw_arc(c, rad + 8.0, 0.0, TAU, 32, Color(0, 0, 0, 0.5), 6.0)
+			if frac > 0.0:
+				draw_arc(c, rad + 8.0, -PI * 0.5, -PI * 0.5 + TAU * frac, 32, Color(0.30, 0.95, 0.55) if frac < 1.0 else Color(1.0, 0.85, 0.30), 6.0)
 		var lvl_txt: String = "niv %d" % ProgressionManager.adventure_zone_level(z3)
+		if is_unlocked and int(prog["total"]) > 0:
+			lvl_txt += " · %d %%" % int(prog["pct"])
 		var wl: float = f.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		var plate := Rect2(c + Vector2(-wl * 0.5 - 8.0, rad + 4.0), Vector2(wl + 16.0, fs * 2.3))
 		draw_rect(plate, Color(0.05, 0.07, 0.12, 0.78))
@@ -104,6 +113,7 @@ func _draw() -> void:
 	draw_string(f, Vector2(238, ly + 6), "portail fermé", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.9, 0.9, 0.9))
 	draw_arc(Vector2(380, ly), 8, 0.0, TAU, 20, Color(1.0, 0.85, 0.30), 4.0)
 	draw_string(f, Vector2(394, ly + 6), "nation courante", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.9, 0.9, 0.9))
+	draw_string(f, Vector2(780, ly + 6), "anneau vert = lieux accomplis", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.9, 0.9, 0.9))
 	draw_string(f, Vector2(564, ly + 6), "🔒 nation verrouillée", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color(0.9, 0.9, 0.9))
 
 

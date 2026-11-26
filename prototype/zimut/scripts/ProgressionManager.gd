@@ -2972,6 +2972,28 @@ func adventure_cell_discovered(adv: Dictionary, pos: Vector2i) -> bool:
 func adventure_poi_completed(adv: Dictionary, key: String) -> bool:
 	return (adv.get("completed", []) as Array).has(key)
 
+## V456 : avancement d'une zone = lieux accomplis / lieux total (un donjon compte dès qu'il a été terminé une fois).
+## → {done, total, dungeons_done, dungeons_total, pct}
+func adventure_zone_progress(adv: Dictionary, zone_id: String) -> Dictionary:
+	var defs: Dictionary = pois_of(zone_id)
+	var done: int = 0
+	var dd: int = 0
+	var dt: int = 0
+	for key: String in defs.keys():
+		var poi: Dictionary = defs[key]
+		var ok: bool = adventure_poi_completed(adv, key)
+		if Dungeons.is_dungeon(poi):
+			dt += 1
+			ok = ok or Dungeons.clears(adv, String(poi.get("guardian", ""))) > 0
+			if ok:
+				dd += 1
+		if ok:
+			done += 1
+	var total: int = defs.size()
+	return {"done": done, "total": total, "dungeons_done": dd, "dungeons_total": dt,
+		"pct": int(round(100.0 * float(done) / float(total))) if total > 0 else 0}
+
+
 ## Marque un POI complété. Si c'est une sortie (exit), débloque la zone
 ## suivante du catalogue. Si c'est un belvédère (reveal), révèle les villes
 ## de la zone côté Conquête (pont inter-modes). Retourne la liste des

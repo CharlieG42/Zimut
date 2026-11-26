@@ -284,6 +284,15 @@ static func make_poi_marker(kind: String, title: String, done: bool, sub: String
 					Adv3DMeshes.add_cone(st, Vector3(0.55 * sgn, 0.14, 0), 0.1, 0.08, 1.2, 5, Color(0.30, 0.26, 0.24), Color(0.48, 0.42, 0.38), _rng(37), 0.01)
 		return st.commit())
 	_part(n, base)
+	if locked and kind == "dungeon":
+		_add_seal(n)
+		var bld0: Mesh = _poi_building(kind)
+		if bld0 != null:
+			var bi0: MeshInstance3D = _part(n, bld0, Vector3(0.0, -0.05, -1.35))
+			bi0.material_override = Adv3DNationMeshes.glow_material(0.5)   # bâtiment éteint
+		var lab0: Label3D = _label("%s\n%s" % [title, sub] if sub != "" else title, 3.45, 34, Color(0.72, 0.74, 0.82))
+		n.add_child(lab0)
+		return n
 	# Cœur lumineux (flamme de camp, gemme…).
 	var gem := MeshInstance3D.new()
 	gem.name = "Gem"
@@ -329,6 +338,58 @@ static func make_poi_marker(kind: String, title: String, done: bool, sub: String
 	var lab: Label3D = _label(lab_text, (2.4 if kind != "reveal" else 3.4) + (0.35 if sub != "" else 0.0), 34, Color(0.78, 0.78, 0.78) if (done or locked) else Color(1, 1, 1))
 	n.add_child(lab)
 	return n
+
+
+## V456 : donjon verrouillé = porte scellée (grand cadenas, chaînes en croix, anneau rouge fixe),
+## sans gemme flottante, sans pulsation, sans lumière ni particules.
+static func _add_seal(n: Node3D) -> void:
+	var steel: Color = Color(0.70, 0.73, 0.82)
+	var red: Color = Color(0.95, 0.32, 0.28)
+	var body := MeshInstance3D.new()
+	var bm := BoxMesh.new()
+	bm.size = Vector3(0.95, 0.75, 0.38)
+	body.mesh = bm
+	body.material_override = _glow(steel, 0.9)
+	body.position.y = 2.2
+	n.add_child(body)
+	var hole := MeshInstance3D.new()
+	var hm := BoxMesh.new()
+	hm.size = Vector3(0.14, 0.26, 0.4)
+	hole.mesh = hm
+	hole.material_override = _glow(Color(0.12, 0.12, 0.16), 0.2)
+	hole.position.y = 2.18
+	n.add_child(hole)
+	var sh := MeshInstance3D.new()
+	var tm := TorusMesh.new()
+	tm.inner_radius = 0.24
+	tm.outer_radius = 0.38
+	tm.rings = 16
+	tm.ring_segments = 6
+	sh.mesh = tm
+	sh.material_override = _glow(steel.lightened(0.15), 0.9)
+	sh.rotation_degrees = Vector3(90, 0, 0)
+	sh.position.y = 2.65
+	n.add_child(sh)
+	# anneau rouge posé au sol (fixe) + chaînes en croix devant le cadenas
+	var ring := MeshInstance3D.new()
+	var rm := TorusMesh.new()
+	rm.inner_radius = 0.9
+	rm.outer_radius = 1.0
+	rm.rings = 24
+	rm.ring_segments = 4
+	ring.mesh = rm
+	ring.material_override = _glow(red, 1.0)
+	ring.position.y = 0.12
+	n.add_child(ring)
+	for sgn: float in [-1.0, 1.0]:
+		var ch := MeshInstance3D.new()
+		var cm := BoxMesh.new()
+		cm.size = Vector3(2.4, 0.12, 0.1)
+		ch.mesh = cm
+		ch.material_override = _glow(Color(0.55, 0.57, 0.64), 0.8)
+		ch.position = Vector3(0, 2.2, 0.26)
+		ch.rotation_degrees = Vector3(0, 0, 30.0 * sgn)
+		n.add_child(ch)
 
 
 static func _tent(st: SurfaceTool, c: Vector3, r: float, h: float, cb: Color, ct: Color, rot: float) -> void:
