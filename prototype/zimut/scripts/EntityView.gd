@@ -201,7 +201,8 @@ func setup(e: Dictionary) -> void:
 	_contact = contact
 	contact.texture = _contact_texture()
 	contact.position = Vector2(0, -4)
-	contact.scale = Vector2(1.5, 0.62)
+	var k: float = _size_mult()
+	contact.scale = Vector2(1.5 * k, 0.62 * k)
 	contact.self_modulate = Color(0, 0, 0, 0.55)
 	contact.z_index = -1
 	add_child(contact)
@@ -459,7 +460,8 @@ func _snap_px(local_pos: Vector2) -> Vector2:
 ## le filtrage linéaire donne un trait propre pour le sprite et ses copies (contour, liseré, ombre).
 func _set_filter_3d() -> void:
 	if _contact != null:   # V390 : ancrage au sol — ellipse de contact plus large et plus sombre
-		_contact.scale = Vector2(1.8, 0.74)
+		var k: float = _size_mult()
+		_contact.scale = Vector2(1.8 * k, 0.74 * k)
 		_contact.self_modulate = Color(0, 0, 0, 0.82)
 	var f: int = CanvasItem.TEXTURE_FILTER_LINEAR
 	sprite.texture_filter = f
@@ -843,10 +845,19 @@ func _find_texture() -> Texture2D:
 	return null
 
 
+## Échelle de taille choisie dans les réglages Graphismes (75 % à 125 %, défaut 100 %).
+## EntityView n'existe que sur le plateau du mode Tactique : les autres modes ne changent pas.
+func _size_mult() -> float:
+	var gs: Node = (Engine.get_main_loop() as SceneTree).root.get_node_or_null("GameSettings")
+	if gs == null:
+		return 1.0
+	return float(gs.call("char_scale_mult", String(entity.get("team", ""))))
+
+
 ## Hauteur d'affichage selon le type : héros > ennemis, invocations plus petites,
-## Troll/Dragonnet imposants, boss géant.
+## Troll/Dragonnet imposants, boss géant — fois l'échelle choisie dans les réglages.
 func _target_height() -> float:
-	return height_for(entity)
+	return height_for(entity) * _size_mult()
 
 
 ## Hauteur d'un boss à l'écran (V359 : 150 → 195 px, +30 %, pour qu'il pèse davantage face aux héros de 104 px).

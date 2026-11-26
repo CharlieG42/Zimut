@@ -158,6 +158,10 @@ func _ready() -> void:
 	var g3 := _grid(gfx)
 	g3.add_child(_setting_cell("Qualité graphique", GfxQuality.LABELS,
 		GameSettings.graphics_quality, func(idx: int) -> void: GameSettings.set_graphics_quality(idx)))
+	gfx.add_child(_setting_cell("Taille des personnages (mode Tactique)", GameSettings.CHAR_SIZES,
+		GameSettings.hero_size, func(idx: int) -> void: GameSettings.set_hero_size(idx)))
+	gfx.add_child(_setting_cell("Taille des adversaires (mode Tactique)", GameSettings.CHAR_SIZES,
+		GameSettings.enemy_size, func(idx: int) -> void: GameSettings.set_enemy_size(idx)))
 	g3.add_child(_setting_cell("Personnages du monde 3D", ["Illustrés", "Modèles 3D"] as Array[String],
 		1 if GameSettings.adventure_models_3d else 0, func(idx: int) -> void: GameSettings.set_adventure_models_3d(idx == 1)))
 	g3.add_child(_setting_cell("Héros de la carte 2D", ["Modèles 3D animés", "Illustrés"] as Array[String],
