@@ -1,0 +1,3 @@
+V458|Réglages : les options « Taille des personnages » et « Taille des adversaires » passent de l'onglet Graphismes à l'onglet Combat, rangées dans la grille avec les autres réglages de combat.
+V458|L'onglet Graphismes est plus court : il ne garde que les options d'affichage (qualité, cartes, modèles 3D, compteur d'images).
+V458|Aucun réglage n'est perdu : les valeurs déjà choisies pour les tailles sont conservées.
