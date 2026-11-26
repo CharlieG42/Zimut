@@ -166,7 +166,7 @@ func _draw() -> void:
 		var pc: Vector2i = p["cell"]
 		var pp: Vector2 = origin + (Vector2(pc) + Vector2(0.5, 0.5)) * cell
 		var kind: String = "dungeon" if bool(p.get("dungeon", false)) else String(p.get("kind", ""))
-		_icon_poi(kind, pp, sz, bool(p["done"]))
+		_icon_poi(kind, pp, sz, bool(p["done"]), bool(p.get("locked", false)))
 	for m: Vector2i in _mobs:
 		var mp: Vector2 = origin + (Vector2(m) + Vector2(0.5, 0.5)) * cell
 		_icon_mob(mp, sz)
@@ -209,7 +209,7 @@ func _draw_round(pad: Vector2) -> void:
 		var pc: Vector2i = p["cell"]
 		var pp: Vector2 = map_origin + (Vector2(pc) + Vector2(0.5, 0.5)) * cell
 		var kind: String = "dungeon" if bool(p.get("dungeon", false)) else String(p.get("kind", ""))
-		_icon_poi(kind, pp, sz, bool(p["done"]))
+		_icon_poi(kind, pp, sz, bool(p["done"]), bool(p.get("locked", false)))
 	for m: Vector2i in _mobs:
 		var mp: Vector2 = map_origin + (Vector2(m) + Vector2(0.5, 0.5)) * cell
 		_icon_mob(mp, sz)
@@ -273,7 +273,7 @@ func _draw_gate_labels(origin: Vector2, cell: float) -> void:
 ## Légende (plein écran) : un pictogramme par type d'élément.
 func _draw_legend(top_left: Vector2) -> void:
 	var f: Font = ThemeDB.fallback_font
-	var items: Array = [["dungeon", "Donjon"], ["combat", "Combat"], ["puzzle", "Énigme"], ["chest", "Coffre"], ["camp", "Camp"],
+	var items: Array = [["dungeon", "Donjon"], ["dungeon_locked", "Donjon verrouillé"], ["combat", "Combat"], ["puzzle", "Énigme"], ["chest", "Coffre"], ["camp", "Camp"],
 		["reveal", "Belvédère"], ["exit", "Sentier"], ["gate", "Accès autre carte"], ["mob", "Monstres"], ["player", "Vous"]]
 	var x: float = top_left.x
 	var y: float = top_left.y + 20.0
@@ -292,7 +292,10 @@ func _draw_legend(top_left: Vector2) -> void:
 			"player":
 				draw_colored_polygon(PackedVector2Array([c + Vector2(0, -18), c + Vector2(14, 13), c + Vector2(-14, 13)]), Color(1.0, 0.92, 0.25))
 			_:
-				_icon_poi(String(it[0]), c, 22.0, false)
+				if String(it[0]) == "dungeon_locked":
+					_icon_poi("dungeon", c, 22.0, false, true)
+				else:
+					_icon_poi(String(it[0]), c, 22.0, false)
 		draw_string(f, Vector2(x + 38.0, y + 7.0), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color(0.92, 0.92, 0.92))
 		x += 38.0 + w + 26.0
 
@@ -335,9 +338,26 @@ func _icon_gate(c: Vector2, sz: float, dir: Vector2, open: bool) -> void:
 	_poly(pts, col)
 
 
-func _icon_poi(kind: String, c: Vector2, sz: float, done: bool) -> void:
+## V456 : donjon verrouillé = tour grise barrée + cadenas rouge (forme et couleur distinctes du donjon ouvert).
+func _icon_locked_dungeon(c: Vector2, r: float) -> void:
+	var w: float = r * 1.25
+	var grey := Color(0.50, 0.52, 0.58, 0.9)
+	var pts: PackedVector2Array = [c + Vector2(-w, w), c + Vector2(-w, -w * 0.55), c + Vector2(-w, -w), c + Vector2(-w * 0.45, -w), c + Vector2(-w * 0.45, -w * 0.6),
+		c + Vector2(w * 0.45, -w * 0.6), c + Vector2(w * 0.45, -w), c + Vector2(w, -w), c + Vector2(w, w)]
+	_poly(pts, grey)
+	var rr: float = w * 0.62
+	draw_circle(c + Vector2(0, w * 0.1), rr * 1.25, OUTLINE)
+	draw_arc(c + Vector2(0, -rr * 0.35), rr * 0.55, PI, TAU, 12, Color(0.95, 0.35, 0.30), 3.0)
+	draw_rect(Rect2(c + Vector2(-rr * 0.8, -rr * 0.2), Vector2(rr * 1.6, rr * 1.25)), Color(0.95, 0.35, 0.30))
+	draw_circle(c + Vector2(0, rr * 0.35), rr * 0.17, Color(0.2, 0.05, 0.05))
+
+
+func _icon_poi(kind: String, c: Vector2, sz: float, done: bool, locked: bool = false) -> void:
 	var r: float = sz * 0.62
 	var a: float = 0.55 if done else 1.0
+	if locked and kind == "dungeon":
+		_icon_locked_dungeon(c, r)
+		return
 	match kind:
 		"dungeon":
 			# donjon : tour crénelée violette, plus grande que le reste

@@ -76,6 +76,9 @@ var _left: bool = false
 var _full_map_big: Adv3DMinimap = null      # onglet « Instance » de la carte plein écran
 var _full_map_world: Adv3DWorldMap = null   # onglet « Monde » (toutes les nations)
 var _full_map_title: Label = null
+var _full_map_prog_lbl: Label = null
+var _full_map_prog_bar: ProgressBar = null
+var _minimap_badge: Label = null
 var _full_map_tab_btn: Button = null
 var _full_map_tab: int = 0                  # 0 = instance (nation courante), 1 = monde
 
@@ -989,6 +992,11 @@ func _build_hud() -> void:
 	_minimap.size_flags_horizontal = Control.SIZE_SHRINK_END
 	map_box.add_child(_minimap)
 	_minimap.tapped.connect(_open_full_map)
+	_minimap_badge = U.lbl("", 20, Color(0.75, 0.95, 0.80), true)
+	_minimap_badge.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_minimap_badge.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	_minimap_badge.add_theme_constant_override("outline_size", 6)
+	map_box.add_child(_minimap_badge)
 	_minimap.setup(terrain, Adv3DWorld.palette(String(terrain["biome"])))
 	_minimap.set_mode(Adv3DMinimap.mode)
 	_update_map_button()
@@ -1193,12 +1201,32 @@ func _open_full_map() -> void:
 	var close: Button = _btn("✕  Fermer", U.C_BORDER, 26, Vector2(240, 80))
 	close.pressed.connect(_close_modal)
 	head.add_child(close)
+	# V456 : bandeau de progression de la découverte (nation courante / monde)
+	var prow := HBoxContainer.new()
+	prow.add_theme_constant_override("separation", 14)
+	box.add_child(prow)
+	_full_map_prog_lbl = U.lbl("", 24, Color(0.75, 0.95, 0.80), true)
+	prow.add_child(_full_map_prog_lbl)
+	_full_map_prog_bar = ProgressBar.new()
+	_full_map_prog_bar.show_percentage = false
+	_full_map_prog_bar.custom_minimum_size = Vector2(0, 26)
+	_full_map_prog_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_full_map_prog_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var bgs := StyleBoxFlat.new()
+	bgs.bg_color = Color(0.10, 0.13, 0.18)
+	bgs.set_corner_radius_all(8)
+	_full_map_prog_bar.add_theme_stylebox_override("background", bgs)
+	var fgs := StyleBoxFlat.new()
+	fgs.bg_color = Color(0.30, 0.90, 0.55)
+	fgs.set_corner_radius_all(8)
+	_full_map_prog_bar.add_theme_stylebox_override("fill", fgs)
+	prow.add_child(_full_map_prog_bar)
 	# Onglet 0 : la carte de l'instance courante (la nation), plein écran, avec légende.
 	_full_map_big = Adv3DMinimap.new()
 	_full_map_big.full = true
 	_full_map_big.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_full_map_big.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_full_map_big.custom_minimum_size = Vector2(vs.x - 60.0, vs.y - 170.0)
+	_full_map_big.custom_minimum_size = Vector2(vs.x - 60.0, vs.y - 215.0)
 	box.add_child(_full_map_big)
 	_full_map_big.setup(terrain, Adv3DWorld.palette(String(terrain["biome"])))
 	_refresh_minimap_markers()
@@ -1208,11 +1236,36 @@ func _open_full_map() -> void:
 	_full_map_world = Adv3DWorldMap.new()
 	_full_map_world.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_full_map_world.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_full_map_world.custom_minimum_size = Vector2(vs.x - 60.0, vs.y - 170.0)
+	_full_map_world.custom_minimum_size = Vector2(vs.x - 60.0, vs.y - 215.0)
 	_full_map_world.visible = false
 	box.add_child(_full_map_world)
 	_full_map_world.setup(GameManager.active_save, manager.state, zone_id)
 	_full_map_tab = 0
+	_update_full_map_progress()
+
+
+## V456 : texte + barre de progression de l'onglet affiché.
+func _update_full_map_progress() -> void:
+	if _full_map_prog_lbl == null or _full_map_prog_bar == null:
+		return
+	var adv: Dictionary = manager.state
+	if _full_map_tab == 0:
+		var p: Dictionary = ProgressionManager.adventure_zone_progress(adv, zone_id)
+		_full_map_prog_lbl.text = "🧭 Exploration : %d/%d lieux (%d %%) · donjons %d/%d" % [p["done"], p["total"], p["pct"], p["dungeons_done"], p["dungeons_total"]]
+		_full_map_prog_bar.max_value = maxf(1.0, float(p["total"]))
+		_full_map_prog_bar.value = float(p["done"])
+	else:
+		var d: int = 0
+		var t: int = 0
+		var zs: Array = ProgressionManager.ADVENTURE_ZONES.keys()
+		var unlocked: Array = adv.get("zones_unlocked", ["foret_sylve"])
+		for z: String in zs:
+			var pz: Dictionary = ProgressionManager.adventure_zone_progress(adv, z)
+			d += int(pz["done"])
+			t += int(pz["total"])
+		_full_map_prog_lbl.text = "🌍 Monde : %d/%d lieux · nations découvertes %d/%d" % [d, t, unlocked.size(), zs.size()]
+		_full_map_prog_bar.max_value = maxf(1.0, float(t))
+		_full_map_prog_bar.value = float(d)
 
 
 ## Bascule la carte plein écran entre l'instance courante et le monde total.
@@ -1226,6 +1279,7 @@ func _toggle_full_map_tab() -> void:
 		_full_map_title.text = ("Carte — " + manager.zone_name()) if _full_map_tab == 0 else "Carte du monde — Zimut"
 	if _full_map_tab_btn != null:
 		_full_map_tab_btn.text = "🌍 Monde" if _full_map_tab == 0 else "🗺  Instance"
+	_update_full_map_progress()
 
 
 func _cycle_map_mode() -> void:
@@ -1244,11 +1298,16 @@ func _update_map_button() -> void:
 func _refresh_minimap_markers() -> void:
 	if _minimap == null:
 		return
+	if _minimap_badge != null:
+		var pg: Dictionary = ProgressionManager.adventure_zone_progress(manager.state, zone_id)
+		_minimap_badge.text = "🧭 %d %% · %d/%d lieux" % [pg["pct"], pg["done"], pg["total"]]
 	var pois: Array = []
 	var defs: Dictionary = ProgressionManager.pois_of(zone_id)
 	for key: String in defs.keys():
 		var poi: Dictionary = defs[key]
-		pois.append({"cell": AdventureTerrain.parse(key), "kind": String(poi.get("kind", "")), "dungeon": Dungeons.is_dungeon(poi),
+		var is_d: bool = Dungeons.is_dungeon(poi)
+		pois.append({"cell": AdventureTerrain.parse(key), "kind": String(poi.get("kind", "")), "dungeon": is_d,
+			"locked": is_d and not manager.dungeon_lock(poi).is_empty(),
 			"done": ProgressionManager.adventure_poi_completed(manager.state, key)})
 	var gates: Array = []
 	for c: Vector2i in manager.gates().keys():
@@ -1336,4 +1395,6 @@ func _close_modal() -> void:
 	_full_map_big = null
 	_full_map_world = null
 	_full_map_title = null
+	_full_map_prog_lbl = null
+	_full_map_prog_bar = null
 	_full_map_tab_btn = null
