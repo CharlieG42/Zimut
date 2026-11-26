@@ -31,6 +31,11 @@ const XP_SPEED_MULT := [0.6, 1.0, 1.6]
 const TEXT_SIZES: Array[String] = ["Normal", "Grand", "Très grand"]
 const TEXT_SIZE_MULT := [1.0, 1.15, 1.3]
 
+## Taille des combattants du mode Tactique, en % de la taille de base (plage 75 % à 125 %).
+## Deux réglages séparés : les personnages du joueur et les adversaires.
+const CHAR_SIZES: Array[String] = ["75 %", "90 %", "100 %", "110 %", "125 %"]
+const CHAR_SIZE_MULT := [0.75, 0.9, 1.0, 1.1, 1.25]
+
 ## V42 : Timer de tour — limite de temps pour jouer son tour (tous personnages).
 ## 0 = désactivé, 1 = 10s, 2 = 20s, 3 = 30s, 4 = 60s.
 ## À l'expiration, le tour se termine automatiquement.
@@ -80,6 +85,9 @@ var show_grid: bool = false
 var notifications_on: bool = true
 var xp_speed: int = 1
 var text_size: int = 1
+## Index dans CHAR_SIZES : taille des personnages / des adversaires en mode Tactique (100 % par défaut).
+var hero_size: int = 2
+var enemy_size: int = 2
 ## Aide du premier combat déjà vue (ou passée).
 var tutorial_done: bool = false
 ## Tutoriel guidé par Gultur : actif ? + étapes déjà vues { id: true }.
@@ -133,6 +141,8 @@ func load_settings() -> void:
 	difficulty = clampi(int(parsed.get("difficulty", difficulty)), 0, DIFFICULTIES.size() - 1)
 	xp_speed = clampi(int(parsed.get("xp_speed", xp_speed)), 0, XP_SPEEDS.size() - 1)
 	text_size = clampi(int(parsed.get("text_size", text_size)), 0, TEXT_SIZES.size() - 1)
+	hero_size = clampi(int(parsed.get("hero_size", hero_size)), 0, CHAR_SIZES.size() - 1)
+	enemy_size = clampi(int(parsed.get("enemy_size", enemy_size)), 0, CHAR_SIZES.size() - 1)
 	tutorial_done = bool(parsed.get("tutorial_done", tutorial_done))
 	tutorial_enabled = bool(parsed.get("tutorial_enabled", tutorial_enabled))
 	changelog_seen = String(parsed.get("changelog_seen", changelog_seen))
@@ -167,7 +177,7 @@ func save_settings() -> void:
 	if f == null:
 		push_error("Impossible d'écrire les réglages")
 		return
-	f.store_string(JSON.stringify({"difficulty": difficulty, "show_grid": show_grid, "notifications_on": notifications_on, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "anim_speed": anim_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "adventure_3d": adventure_3d, "adventure_models_3d": adventure_models_3d, "adventure_walk_sprites": adventure_walk_sprites, "sylvestre_board": sylvestre_board, "graphics_quality": graphics_quality, "language": language, "turn_timer_mode": turn_timer_mode, "cloud_auto": cloud_auto, "show_perf": show_perf, "hero_3d_direct": hero_3d_direct, "cinematic_3d": cinematic_3d, "cards_iso": cards_iso, "changelog_seen": changelog_seen, "auto_update": auto_update}, "\t"))
+	f.store_string(JSON.stringify({"difficulty": difficulty, "hero_size": hero_size, "enemy_size": enemy_size, "show_grid": show_grid, "notifications_on": notifications_on, "xp_speed": xp_speed, "text_size": text_size, "tutorial_done": tutorial_done, "tutorial_enabled": tutorial_enabled, "tuto_seen": tuto_seen, "combat_speed": combat_speed, "anim_speed": anim_speed, "sfx_on": sfx_on, "haptics_on": haptics_on, "adventure_3d": adventure_3d, "adventure_models_3d": adventure_models_3d, "adventure_walk_sprites": adventure_walk_sprites, "sylvestre_board": sylvestre_board, "graphics_quality": graphics_quality, "language": language, "turn_timer_mode": turn_timer_mode, "cloud_auto": cloud_auto, "show_perf": show_perf, "hero_3d_direct": hero_3d_direct, "cinematic_3d": cinematic_3d, "cards_iso": cards_iso, "changelog_seen": changelog_seen, "auto_update": auto_update}, "\t"))
 	f.close()
 
 func set_difficulty(idx: int) -> void:
@@ -182,6 +192,16 @@ func set_xp_speed(idx: int) -> void:
 
 func set_text_size(idx: int) -> void:
 	text_size = clampi(idx, 0, TEXT_SIZES.size() - 1)
+	save_settings()
+	settings_changed.emit()
+
+func set_hero_size(idx: int) -> void:
+	hero_size = clampi(idx, 0, CHAR_SIZES.size() - 1)
+	save_settings()
+	settings_changed.emit()
+
+func set_enemy_size(idx: int) -> void:
+	enemy_size = clampi(idx, 0, CHAR_SIZES.size() - 1)
 	save_settings()
 	settings_changed.emit()
 
@@ -356,6 +376,12 @@ func set_tutorial_done(v: bool) -> void:
 ## Facteur d'agrandissement choisi par le joueur (1.0 = taille de base).
 func text_mult() -> float:
 	return float(TEXT_SIZE_MULT[clampi(text_size, 0, TEXT_SIZE_MULT.size() - 1)])
+
+## Multiplicateur de taille d'un combattant du mode Tactique (1.0 = taille de base) :
+## réglage « personnages » pour l'équipe du joueur, « adversaires » pour les autres.
+func char_scale_mult(team: String) -> float:
+	var idx: int = hero_size if team == "player" else enemy_size
+	return float(CHAR_SIZE_MULT[clampi(idx, 0, CHAR_SIZE_MULT.size() - 1)])
 
 func difficulty_label() -> String:
 	return DIFFICULTIES[clampi(difficulty, 0, DIFFICULTIES.size() - 1)]

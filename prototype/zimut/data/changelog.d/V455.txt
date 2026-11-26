@@ -1,3 +1,6 @@
+V455|Réglages > Graphismes : deux nouveaux réglages « Taille des personnages » et « Taille des adversaires » (75 %, 90 %, 100 %, 110 %, 125 %), valables uniquement en mode Tactique.
+V455|Les combattants du plateau de combat peuvent ainsi être agrandis ou rétrécis pour plus de lisibilité.
+V455|Aucun changement de règle de jeu : la taille d'affichage ne modifie ni les portées, ni les dégâts, ni les déplacements.
 V455|Mise à jour automatique : au lancement, le jeu interroge GitHub (release « build-latest ») pour savoir si une version plus récente existe.
 V455|Si oui : téléchargement de l'APK (Android, release signé) ou de l'EXE (Windows) avec vérification de l'empreinte SHA-256, puis installation automatique — PC : l'ancien exécutable est remplacé et relancé ; Android : l'installateur système s'ouvre sur l'APK téléchargé.
 V455|Réglages : « Mise à jour automatique » (onglet Général) et bouton « Vérifier les mises à jour » (onglet À propos).
