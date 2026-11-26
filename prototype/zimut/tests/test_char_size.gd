@@ -35,14 +35,14 @@ func _boot() -> void:
 	var hero: Dictionary = {"entity_type": "Player", "team": "player", "classe": "Tank"}
 	ev.entity = hero
 	var h_hero: float = ev._target_height()
-	check(is_equal_approx(h_hero, EntityView.height_for(hero) * 0.75), "EntityView : personnage affiché à 75 % (%.1f px)" % h_hero)
+	check(is_equal_approx(h_hero, EntityView.height_for(hero) * 0.75), "EntityView : personnage affiché à 75 %% (%.1f px)" % h_hero)
 	gs.set_hero_size(4)
 	h_hero = ev._target_height()
-	check(is_equal_approx(h_hero, EntityView.height_for(hero) * 1.25), "EntityView : personnage affiché à 125 % (%.1f px)" % h_hero)
+	check(is_equal_approx(h_hero, EntityView.height_for(hero) * 1.25), "EntityView : personnage affiché à 125 %% (%.1f px)" % h_hero)
 	var boss: Dictionary = {"entity_type": "Enemy", "team": "enemy", "boss": true, "classe": "Tharok le Végétal"}
 	ev.entity = boss
 	var h_boss: float = ev._target_height()
-	check(is_equal_approx(h_boss, EntityView.BOSS_HEIGHT * 1.25), "EntityView : boss (adversaire) à 125 % (%.1f px)" % h_boss)
+	check(is_equal_approx(h_boss, EntityView.BOSS_HEIGHT * 1.25), "EntityView : boss (adversaire) à 125 %% (%.1f px)" % h_boss)
 	var summon: Dictionary = {"entity_type": "Summon", "team": "player", "classe": "Golem"}
 	ev.entity = summon
 	var h_sum: float = ev._target_height()

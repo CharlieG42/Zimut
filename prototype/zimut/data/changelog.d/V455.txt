@@ -1,2 +1,3 @@
 V455|Réglages > Graphismes : deux nouveaux réglages « Taille des personnages » et « Taille des adversaires » (75 %, 90 %, 100 %, 110 %, 125 %), valables uniquement en mode Tactique.
 V455|Les combattants du plateau de combat peuvent ainsi être agrandis ou rétrécis pour plus de lisibilité.
+V455|Aucun changement de règle de jeu : la taille d'affichage ne modifie ni les portées, ni les dégâts, ni les déplacements.
