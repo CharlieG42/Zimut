@@ -1,0 +1,5 @@
+V458|Réglages : les options « Taille des personnages » et « Taille des adversaires » passent de l'onglet Graphismes à l'onglet Combat, rangées dans la grille avec les autres réglages de combat.
+V458|L'onglet Graphismes est plus court : il ne garde que les options d'affichage (qualité, cartes, modèles 3D, compteur d'images).
+V458|Aucun réglage n'est perdu : les valeurs déjà choisies pour les tailles sont conservées.
+V458|Réglages > Général : nouveau bouton « Mode Debug » (désactivé/activé) qui affiche en surcouche les images par seconde, saccades, durées de rendu et mémoire. Il remplace l'ancien « Compteur d'images » de l'onglet Graphismes et garde la valeur déjà choisie.
+V458|Le mode Debug est maintenant aussi disponible dans le mode Cartes, en plus de l'Aventure 2D/3D et du combat tactique.
