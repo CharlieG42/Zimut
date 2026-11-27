@@ -52,6 +52,11 @@ func _on_post_draw() -> void:
 
 
 func _process(delta: float) -> void:
+	# V460 : le compteur disparaît dès que le mode Debug est désactivé (même sans quitter l'écran).
+	var gs: Node = get_node_or_null("/root/GameSettings")
+	if gs != null and not bool(gs.get("show_perf")):
+		queue_free()
+		return
 	_acc.append(delta)
 	_clock += delta
 	if _clock < 0.5:

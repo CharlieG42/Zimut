@@ -500,6 +500,9 @@ func _on_action_pressed() -> void:
 
 
 func _process(_delta: float) -> void:
+	if _perf_lbl != null and not GameSettings.show_perf:     # V460 : mode Debug coupé → plus d'infos à l'écran
+		_perf_lbl.queue_free()
+		_perf_lbl = null
 	if _perf_lbl != null:
 		_perf_tick(_delta)
 	if not _dio_chunks.is_empty() and not _leaving:

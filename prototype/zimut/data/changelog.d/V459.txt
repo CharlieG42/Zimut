@@ -1,0 +1,3 @@
+V459|Mode Debug : quand il est désactivé, plus aucune information de performance ne reste à l'écran — le compteur disparaît même si on change le réglage sans quitter l'écran (carte d'aventure 2D, Aventure 3D, combat tactique, mode Cartes).
+V459|Réglages > Graphismes : les options sont rangées sur deux colonnes, la page tient maintenant sans défiler. Tous les onglets des Réglages sont vérifiés par un test pour rester dans la fenêtre, bouton « ← MENU » toujours visible.
+V459|Nouveau test automatique qui contrôle le masquage du mode Debug et la hauteur de chaque onglet des Réglages.

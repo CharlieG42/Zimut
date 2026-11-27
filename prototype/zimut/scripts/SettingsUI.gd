@@ -179,14 +179,14 @@ func _ready() -> void:
 		1 if GameSettings.adventure_models_3d else 0, func(idx: int) -> void: GameSettings.set_adventure_models_3d(idx == 1)))
 	g3.add_child(_setting_cell("Héros de la carte 2D", ["Modèles 3D animés", "Illustrés"] as Array[String],
 		0 if GameSettings.adventure_walk_sprites else 1, func(idx: int) -> void: GameSettings.set_adventure_walk_sprites(idx == 0)))
-	gfx.add_child(_setting_cell("Cartes 2D (Sylve et Cimes)", ["Nouvelle", "Ancienne", "Iso (test)", "Diorama"] as Array[String],
+	g3.add_child(_setting_cell("Cartes 2D (Sylve et Cimes)", ["Nouvelle", "Ancienne", "Iso (test)", "Diorama"] as Array[String],
 		BOARD_VARIANTS.find(GameSettings.sylvestre_board) if BOARD_VARIANTS.has(GameSettings.sylvestre_board) else 0,
 		func(idx: int) -> void: GameSettings.set_sylvestre_board(BOARD_VARIANTS[idx])))
-	gfx.add_child(_setting_cell("Grille des cases (carte d'aventure 2D)", ["Masquée", "Affichée"] as Array[String],
+	g3.add_child(_setting_cell("Grille des cases (carte d'aventure 2D)", ["Masquée", "Affichée"] as Array[String],
 		1 if GameSettings.show_grid else 0, func(idx: int) -> void: GameSettings.set_show_grid(idx == 1)))
-	gfx.add_child(_setting_cell("Personnages en 3D (prototype)", ["Sprites animés", "3D en direct"] as Array[String],
+	g3.add_child(_setting_cell("Personnages en 3D (prototype)", ["Sprites animés", "3D en direct"] as Array[String],
 		1 if GameSettings.hero_3d_direct else 0, func(idx: int) -> void: GameSettings.set_hero_3d_direct(idx == 1)))
-	gfx.add_child(_setting_cell("Cinématique 3D d'ouverture", ["Désactivée", "Activée"] as Array[String],
+	g3.add_child(_setting_cell("Cinématique 3D d'ouverture", ["Désactivée", "Activée"] as Array[String],
 		1 if GameSettings.cinematic_3d else 0, func(idx: int) -> void: GameSettings.set_cinematic_3d(idx == 1)))
 	var gfx_hint := Label.new()
 	gfx_hint.text = "« Diorama » : la Sylve et le Brasier en scènes 3D pré-rendues (lumière, brume, maisons et arbres qui masquent le héros). Les autres Nations gardent leur carte."
