@@ -136,6 +136,16 @@ func _ready() -> void:
 		tuto.text = "✓  Tutoriel relancé")
 	gen.add_child(tuto)
 
+	# V459 : mode Debug (images/s, saccades, durées, mémoire…) dans tous les modes de jeu — pris en compte à l'ouverture de l'écran suivant.
+	gen.add_child(_setting_cell("Mode Debug (images/s, vitesse, saccades)", ["Désactivé", "Activé"] as Array[String],
+		1 if GameSettings.show_perf else 0, func(idx: int) -> void: GameSettings.set_show_perf(idx == 1)))
+	var dbg_hint := Label.new()
+	dbg_hint.text = "Affiche en surcouche les images par seconde, saccades, durées de rendu et mémoire : Aventure 2D et 3D, combat tactique et mode Cartes."
+	dbg_hint.add_theme_font_size_override("font_size", 17)
+	dbg_hint.add_theme_color_override("font_color", Color(0.35, 0.28, 0.12))
+	dbg_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	gen.add_child(dbg_hint)
+
 	# — Combat & progression
 	var cmb: VBoxContainer = page_list[1].get_child(0)
 	var g2 := _grid(cmb)
@@ -178,8 +188,6 @@ func _ready() -> void:
 		1 if GameSettings.hero_3d_direct else 0, func(idx: int) -> void: GameSettings.set_hero_3d_direct(idx == 1)))
 	gfx.add_child(_setting_cell("Cinématique 3D d'ouverture", ["Désactivée", "Activée"] as Array[String],
 		1 if GameSettings.cinematic_3d else 0, func(idx: int) -> void: GameSettings.set_cinematic_3d(idx == 1)))
-	gfx.add_child(_setting_cell("Compteur d'images (carte d'aventure et combat)", ["Masqué", "Affiché"] as Array[String],
-		1 if GameSettings.show_perf else 0, func(idx: int) -> void: GameSettings.set_show_perf(idx == 1)))
 	var gfx_hint := Label.new()
 	gfx_hint.text = "« Diorama » : la Sylve et le Brasier en scènes 3D pré-rendues (lumière, brume, maisons et arbres qui masquent le héros). Les autres Nations gardent leur carte."
 	gfx_hint.add_theme_font_size_override("font_size", 17)

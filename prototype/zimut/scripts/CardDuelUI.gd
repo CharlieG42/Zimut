@@ -111,6 +111,12 @@ func _ready() -> void:
 	layer = 10
 	_save = GameManager.active_save
 	_slot = GameManager.active_slot
+	if GameSettings.show_perf:          # V459 : mode Debug aussi dans le mode Cartes
+		var perf := PerfCounter.new()
+		perf.name = "PerfCounter"
+		perf.position = Vector2(640, 6)
+		perf.z_index = 1000
+		add_child(perf)
 	if _save.is_empty() or _slot < 0:
 		get_tree().change_scene_to_file("res://scenes/SaveSlots.tscn")
 		return
