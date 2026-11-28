@@ -164,7 +164,7 @@ func _stat_line(classe: String) -> String:
 		st = ProgressionManager.member_stats(save, member)
 		var ent: Dictionary = ProgressionManager.roster_entry(save, classe)
 		level = int(st.get("level", level))
-		var nxt: int = ProgressionManager.xp_for_level(mini(ClassRules.MAX_LEVEL, level + 1))
+		var nxt: int = ProgressionManager.xp_for_level(mini(Edition.max_level(), level + 1))
 		extra = "Niv %d  ·  XP %d / %d" % [level, int(ent.get("xp", 0)), nxt]
 		if int(ent.get("unspent", 0)) > 0:
 			extra += "\n✦ %d points de caractéristiques à répartir" % int(ent["unspent"])

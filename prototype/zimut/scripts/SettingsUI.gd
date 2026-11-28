@@ -257,6 +257,12 @@ func _build_about(page: VBoxContainer) -> void:
 		l.add_theme_color_override("font_color", COL_TXT)
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		page.add_child(l)
+	if Edition.is_demo():
+		page.add_child(_about_button("⭐  " + Edition.demo_banner_text() + " · Version complète", Edition.open_full_version))
+	# V460 : politique de confidentialité (exigée par Google Play).
+	page.add_child(_about_button("🔒  Politique de confidentialité", func() -> void: OS.shell_open(Edition.PRIVACY_URL)))
+	if Edition.is_store_build():
+		return   # V460 : Google Play gère les mises à jour (pas de contrôle GitHub)
 	# V455 : vérification manuelle des mises à jour GitHub (contrôle auto au lancement).
 	var upd := Button.new()
 	upd.text = "⬇  Vérifier les mises à jour (GitHub)"
@@ -284,6 +290,18 @@ func _build_about(page: VBoxContainer) -> void:
 	upd.pressed.connect(func() -> void:
 		upd_status.text = "Vérification en cours…"
 		UpdateChecker.check_now())
+
+
+func _about_button(text: String, action: Callable) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.custom_minimum_size = Vector2(0, 62)
+	b.add_theme_font_size_override("font_size", 21)
+	b.add_theme_color_override("font_color", COL_TXT)
+	b.add_theme_stylebox_override("normal", _flat(Color(0.86, 0.80, 0.64), COL_BORDER, 12, 2))
+	b.add_theme_stylebox_override("hover", _flat(Color(0.99, 0.95, 0.83), COL_BORDER, 12, 3))
+	b.pressed.connect(action)
+	return b
 
 
 # ═══════════════════════════════════════════════════════════════════════════

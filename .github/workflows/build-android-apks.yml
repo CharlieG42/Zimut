@@ -272,6 +272,30 @@ jobs:
           godot --headless --verbose --export-release "Android" export/Zimut-release.apk || true
           test -s export/Zimut-release.apk
 
+      - name: Export Zimut Démo (AAB Google Play, signé)
+        # V460 : app bundle de la démo (package com.zimut.iso.demo, plafond niveau 16), à déposer dans la
+        # Play Console. Signé avec la clé de release (= clé d'import Play App Signing).
+        timeout-minutes: 25
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: /home/runner/.local/share/godot/keystores/release.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_KEY_ALIAS }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cd prototype/zimut
+          godot --headless --verbose --export-release "Android Demo AAB" export/Zimut-demo.aab || true
+          test -s export/Zimut-demo.aab
+          # Signature présente (jarsigner échoue si le bundle n'est pas signé)
+          jarsigner -verify export/Zimut-demo.aab | head -3
+          # Google Play interdit l'installation d'APK hors Play Store : la permission doit être absente
+          if unzip -p export/Zimut-demo.aab base/manifest/AndroidManifest.xml | grep -aq REQUEST_INSTALL_PACKAGES; then
+            echo "::error::REQUEST_INSTALL_PACKAGES présent dans le bundle Play Store"; exit 1
+          fi
+          echo "Permissions déclarées dans le bundle :"
+          unzip -p export/Zimut-demo.aab base/manifest/AndroidManifest.xml | strings | grep -oE "android\.permission\.[A-Z_]+|com\.android\.alarm[A-Za-z_.]*" | sort -u
+          unzip -l export/Zimut-demo.aab | grep -E "base/manifest|base/lib/arm64-v8a" | head -5
+          ls -la export/Zimut-demo.aab
+
       - name: Export Zimut EXE (Windows Desktop, Release)
         # Exécutable PC autonome (pck embarqué, voir export_presets.cfg) produit en même
         # temps que l'APK release ; aucun secret requis, donc aussi sur les PR (forks inclus).
@@ -296,6 +320,9 @@ jobs:
               mv "Zimut-${kind}.apk" "Zimut-${kind}-v${GAME_VERSION}-${sha_short}.apk"
             fi
           done
+          if [ -f "Zimut-demo.aab" ]; then
+            mv "Zimut-demo.aab" "Zimut-demo-v${GAME_VERSION}-${sha_short}.aab"
+          fi
           if [ -f "Zimut-release-pc.exe" ]; then
             mv "Zimut-release-pc.exe" "Zimut-release-pc-v${GAME_VERSION}-${sha_short}.exe"
           fi
@@ -311,6 +338,16 @@ jobs:
             prototype/zimut/export/Zimut-debug-*.apk
             prototype/zimut/export/SHA256SUMS.txt
           retention-days: 2
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Upload Zimut Démo (AAB Google Play)
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zimut-demo-aab
+          path: prototype/zimut/export/Zimut-demo-*.aab
+          retention-days: 14
           if-no-files-found: error
           compression-level: 0
 
@@ -357,6 +394,8 @@ jobs:
       - name: Renommer ${{ env.PROJECT_NAME }}-<type>_v<version>-<dernière PR> (.apk + .exe)
         run: |
           cd apks
+          # V460 : le bundle Play Store (.aab) n'est pas publié sur la release publique
+          rm -f ./*.aab
           if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "0" ]; then
             label="${PR_NUMBER}"
           else

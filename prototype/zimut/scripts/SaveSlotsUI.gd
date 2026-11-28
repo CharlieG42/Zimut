@@ -525,8 +525,8 @@ func _level_progress(data: Dictionary, compact: bool) -> Control:
 	fill.set_corner_radius_all(7)
 	bar.add_theme_stylebox_override("background", bg)
 	bar.add_theme_stylebox_override("fill", fill)
-	if lvl >= ClassRules.MAX_LEVEL:
-		lbl.text = "NIVEAU MAXIMUM ATTEINT"
+	if lvl >= Edition.max_level():
+		lbl.text = "NIVEAU MAXIMUM DE LA DÉMO ATTEINT" if Edition.is_demo() else "NIVEAU MAXIMUM ATTEINT"
 		bar.max_value = 1.0
 		bar.value = 1.0
 	else:
