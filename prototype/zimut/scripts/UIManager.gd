@@ -2441,6 +2441,12 @@ func _result_player_card(content: VBoxContainer, save: Dictionary) -> void:
 	UK.style_bar(bar, Color(0.55, 0.78, 1.0))
 	v.add_child(bar)
 	bar.create_tween().tween_property(bar, "value", target, 1.1).set_delay(0.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	if bool(rep.get("demo_capped", false)):
+		v.add_child(UK.lbl("Niveau maximum de la démo atteint. Merci d'avoir joué !", 17, Color(1.0, 0.86, 0.45), true))
+		var full_btn := UK.btn("⭐  VERSION COMPLÈTE SUR GOOGLE PLAY", Color(0.95, 0.78, 0.30), 20, Vector2(0, 54))
+		full_btn.name = "FullVersionBtn"
+		full_btn.pressed.connect(Edition.open_full_version)
+		v.add_child(full_btn)
 	var pend: int = HeroUnlock.pending_unlocks(save)
 	if pend > 0:
 		var b := UK.btn("🔓  CHOISIR UN NOUVEAU HÉROS  (%d)" % pend, Color(0.95, 0.78, 0.30), 22, Vector2(0, 58))

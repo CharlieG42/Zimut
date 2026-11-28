@@ -2093,8 +2093,10 @@ func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0, fight_level: in
 		var g: int = roundi(gain)
 		var from_lvl: int = int(e["level"])
 		e["xp"] = int(e["xp"]) + g
-		var to_lvl: int = mini(mini(ClassRules.MAX_LEVEL, player_cap), level_for_xp(int(e["xp"])))
+		var to_lvl: int = mini(mini(Edition.max_level(), player_cap), level_for_xp(int(e["xp"])))
 		to_lvl = maxi(to_lvl, from_lvl)
+		if Edition.is_demo() and to_lvl >= Edition.max_level():
+			e["xp"] = mini(int(e["xp"]), xp_for_level(Edition.max_level()))   # V460 : pas d'XP au-delà du plafond de démo
 		var pts: int = 0
 		if to_lvl > from_lvl:
 			pts = (to_lvl - from_lvl) * ClassRules.POINTS_PER_LEVEL
@@ -2110,7 +2112,7 @@ func award_xp(data: Dictionary, raw_xp: int, ratio: float = 1.0, fight_level: in
 				auto_spells(data, classe)
 		report[classe] = {"gain": g, "from_level": from_lvl, "to_level": to_lvl, "points": pts,
 			"spells": spells_unlocked_between(classe, from_lvl, to_lvl), "in_team": in_team,
-			"xp": int(e["xp"]), "xp_next": xp_for_level(mini(ClassRules.MAX_LEVEL, to_lvl + 1)),
+			"xp": int(e["xp"]), "xp_next": xp_for_level(mini(Edition.max_level(), to_lvl + 1)),
 			"xp_cur": xp_for_level(to_lvl)}
 	return report
 

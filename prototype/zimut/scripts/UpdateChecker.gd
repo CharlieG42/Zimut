@@ -130,6 +130,8 @@ func _ready() -> void:
 			return
 	if OS.has_feature("editor") or DisplayServer.get_name() == "headless":
 		return
+	if Edition.is_store_build():
+		return   # V460 : Google Play gère les mises à jour (pas d'installation d'APK hors Play Store)
 	if not OS.has_feature("android"):
 		DirAccess.remove_absolute(OS.get_executable_path() + ".old")
 	var gs: Node = get_node_or_null("/root/GameSettings")
@@ -151,6 +153,9 @@ func check_now() -> Dictionary:
 	var local := current_version()
 	var res: Dictionary = {"ok": false, "update": false, "local": local, "remote": "", "asset": {}, "error": ""}
 	last_check = res
+	if Edition.is_store_build():
+		res["error"] = "Les mises à jour passent par Google Play."
+		return res
 	var r: Dictionary = await _http_get(API_URL)
 	if not r["ok"]:
 		if int(r["code"]) == 403:

@@ -37,6 +37,8 @@ func _ready() -> void:
 		get_tree().change_scene_to_file("res://scenes/Settings.tscn"))
 	_add_menu_hitbox(root, "Quitter", 0.646, 0.839, 0.828, 0.911, func() -> void:
 		get_tree().quit())
+	if Edition.is_demo():
+		_add_demo_banner(root)
 	var news: Dictionary = Changelog.pending()
 	if not news.is_empty():
 		root.add_child(Changelog.build_popup(news))
@@ -47,6 +49,33 @@ func _ready() -> void:
 	UpdateChecker.checked.connect(func(res: Dictionary) -> void:
 		if bool(res.get("update", false)) and not UpdateChecker.latest_update.is_empty():
 			root.add_child(UpdateChecker.build_popup()))
+
+
+## V460 : bandeau « VERSION DÉMO » en haut de l'accueil + bouton vers la version complète.
+func _add_demo_banner(root: Control) -> void:
+	var btn := Button.new()
+	btn.name = "DemoBanner"
+	btn.text = "%s   ·   ⭐ Version complète" % Edition.demo_banner_text()
+	btn.anchor_left = 0.5
+	btn.anchor_right = 0.5
+	btn.anchor_top = 0.0
+	btn.anchor_bottom = 0.0
+	btn.offset_left = -330.0
+	btn.offset_right = 330.0
+	btn.offset_top = 18.0
+	btn.offset_bottom = 78.0
+	btn.add_theme_font_size_override("font_size", 22)
+	btn.add_theme_color_override("font_color", Color(0.20, 0.12, 0.02))
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.97, 0.80, 0.30, 0.94)
+	sb.set_corner_radius_all(18)
+	sb.set_border_width_all(2)
+	sb.border_color = Color(0.45, 0.28, 0.05)
+	btn.add_theme_stylebox_override("normal", sb)
+	btn.add_theme_stylebox_override("hover", sb)
+	btn.add_theme_stylebox_override("pressed", sb)
+	btn.pressed.connect(Edition.open_full_version)
+	root.add_child(btn)
 
 
 func _start_new_game() -> void:

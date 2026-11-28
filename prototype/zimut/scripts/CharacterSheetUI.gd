@@ -416,12 +416,12 @@ func _refresh_list() -> void:
 		name_l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		col.add_child(name_l)
 		var cur: int = ProgressionManager.xp_for_level(level)
-		var nxt: int = ProgressionManager.xp_for_level(mini(ClassRules.MAX_LEVEL, level + 1))
+		var nxt: int = ProgressionManager.xp_for_level(mini(Edition.max_level(), level + 1))
 		var xb := ProgressBar.new()
 		xb.custom_minimum_size = Vector2(0, 10)
 		xb.show_percentage = false
 		xb.max_value = float(maxi(1, nxt - cur))
-		xb.value = float(int(ent.get("xp", 0)) - cur) if level < ClassRules.MAX_LEVEL else xb.max_value
+		xb.value = float(int(ent.get("xp", 0)) - cur) if level < Edition.max_level() else xb.max_value
 		xb.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_style_bar(xb, accent)
 		col.add_child(xb)
@@ -476,15 +476,15 @@ func _refresh_head() -> void:
 		title.add_child(_chip("★ DANS L'ÉQUIPE", C_GOLD, 16))
 	mid.add_child(_lbl(String(ClassRules.rules(_classe).get("role", "")), 18, C_DIM))
 	var cur: int = ProgressionManager.xp_for_level(level)
-	var nxt: int = ProgressionManager.xp_for_level(mini(ClassRules.MAX_LEVEL, level + 1))
+	var nxt: int = ProgressionManager.xp_for_level(mini(Edition.max_level(), level + 1))
 	var bar := ProgressBar.new()
 	bar.custom_minimum_size = Vector2(0, 22)
 	bar.show_percentage = false
 	bar.max_value = float(maxi(1, nxt - cur))
-	bar.value = float(int(ent["xp"]) - cur) if level < ClassRules.MAX_LEVEL else bar.max_value
+	bar.value = float(int(ent["xp"]) - cur) if level < Edition.max_level() else bar.max_value
 	_style_bar(bar, accent.lightened(0.15))
 	mid.add_child(bar)
-	var xp_txt: String = "XP %d / %d" % [int(ent["xp"]), nxt] if level < ClassRules.MAX_LEVEL else "Niveau maximum"
+	var xp_txt: String = "XP %d / %d" % [int(ent["xp"]), nxt] if level < Edition.max_level() else ("Niveau maximum de la démo" if Edition.is_demo() else "Niveau maximum")
 	var ns: Dictionary = ProgressionManager.next_spell(_classe, level)
 	if not ns.is_empty():
 		xp_txt += "   ·   prochain sort : %s (niv. %d)" % [ns["name"], int(ns["level"])]

@@ -159,12 +159,16 @@ static func add_xp(data: Dictionary, gain: int, xp_for_level: Callable, level_fo
 	var p: Dictionary = data.get("player", {"level": 1, "xp": 0})
 	var from_lvl: int = int(p.get("level", 1))
 	p["xp"] = int(p.get("xp", 0)) + maxi(0, gain)
-	var to_lvl: int = mini(ClassRules.MAX_LEVEL, int(level_for_xp.call(int(p["xp"]))))
+	var to_lvl: int = mini(Edition.max_level(), int(level_for_xp.call(int(p["xp"]))))
 	p["level"] = maxi(from_lvl, to_lvl)
+	if Edition.is_demo() and int(p["level"]) >= Edition.max_level():
+		# V460 : démo — au plafond, l'XP excédentaire n'est pas conservée (barre pleine).
+		p["xp"] = mini(int(p["xp"]), int(xp_for_level.call(Edition.max_level())))
 	data["player"] = p
 	var new_unlocks: int = maxi(0, earned_unlocks(int(p["level"])) - earned_unlocks(from_lvl))
 	var lvl: int = int(p["level"])
 	return {"from": from_lvl, "to": lvl, "gain": gain, "xp": int(p["xp"]),
 		"xp_cur": int(xp_for_level.call(lvl)),
-		"xp_next": int(xp_for_level.call(mini(ClassRules.MAX_LEVEL, lvl + 1))),
+		"xp_next": int(xp_for_level.call(mini(Edition.max_level(), lvl + 1))),
+		"demo_capped": Edition.is_demo() and lvl >= Edition.max_level(),
 		"new_unlocks": new_unlocks if not locked(data).is_empty() else 0}
